@@ -46,6 +46,8 @@
 #define SCHED_FIFO                1  /* FIFO priority scheduling policy */
 #define SCHED_RR                  2  /* Round robin scheduling policy */
 #define SCHED_SPORADIC            3  /* Sporadic scheduling policy */
+#define SCHED_BATCH               4  /* Batch scheduling policy */
+#define SCHED_IDLE                5  /* Idle scheduling policy */
 
 /* Maximum number of SCHED_SPORADIC replenishments */
 
