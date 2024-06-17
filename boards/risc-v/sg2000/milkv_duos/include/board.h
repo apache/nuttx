@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/sg2000/sg2000_timerisr.c
+ * boards/risc-v/sg2000/milkv_duos/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,52 +18,61 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_SG2000_MILKV_DUOS_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_SG2000_MILKV_DUOS_INCLUDE_BOARD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <stdint.h>
-#include <time.h>
-#include <debug.h>
-
-#include <nuttx/timers/arch_alarm.h>
-
-#include "riscv_internal.h"
-#include "riscv_mtimer.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MTIMER_FREQ 25000000ul
+#define LED_STARTED       0  /* N/A */
+#define LED_HEAPALLOCATE  1  /* N/A */
+#define LED_IRQSENABLED   2  /* N/A */
+#define LED_STACKCREATED  3  /* N/A */
+#define LED_INIRQ         4  /* N/A */
+#define LED_SIGNAL        5  /* N/A */
+#define LED_ASSERTION     6  /* N/A */
+#define LED_PANIC         7  /* N/A */
+#define LED_CPU           8  /* LED */
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: up_timer_initialize
- *
- * Description:
- *   This function is called during start-up to initialize
- *   the timer interrupt.
- *
+ * Public Data
  ****************************************************************************/
 
-void up_timer_initialize(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  struct oneshot_lowerhalf_s *lower;
+#else
+#define EXTERN extern
+#endif
 
-  /* Initialize the OpenSBI Timer. mtime and mtimecmp are unused for
-   * OpenSBI.
-   */
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-  lower = riscv_mtimer_initialize(0, 0, RISCV_IRQ_STIMER, MTIMER_FREQ);
+/****************************************************************************
+ * Name: sg2000_boardinitialize
+ ****************************************************************************/
 
-  DEBUGASSERT(lower != NULL);
+void sg2000_boardinitialize(void);
 
-  up_alarm_set_lowerhalf(lower);
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_SG2000_MILKV_DUOS_INCLUDE_BOARD_H */
