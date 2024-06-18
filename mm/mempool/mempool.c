@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <assert.h>
+#include <execinfo.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <syslog.h>
@@ -32,12 +33,6 @@
 #include <nuttx/sched.h>
 
 #include "kasan/kasan.h"
-
-#if UINTPTR_MAX <= UINT32_MAX
-#  define MM_PTR_FMT_WIDTH 11
-#elif UINTPTR_MAX <= UINT64_MAX
-#  define MM_PTR_FMT_WIDTH 19
-#endif
 
 #undef  ALIGN_UP
 #define ALIGN_UP(x, a) (((x) + ((a) - 1)) & (~((a) - 1)))
@@ -484,13 +479,13 @@ void mempool_memdump(FAR struct mempool_s *pool,
       sq_for_every(&pool->queue, entry)
         {
           syslog(LOG_INFO, "%12zu%*p\n",
-                 blocksize, MM_PTR_FMT_WIDTH, (FAR char *)entry);
+                 blocksize, BACKTRACE_PTR_FMT_WIDTH, (FAR char *)entry);
         }
 
       sq_for_every(&pool->iqueue, entry)
         {
           syslog(LOG_INFO, "%12zu%*p\n",
-                 blocksize, MM_PTR_FMT_WIDTH, (FAR char *)entry);
+                 blocksize, BACKTRACE_PTR_FMT_WIDTH, (FAR char *)entry);
         }
     }
 #if CONFIG_MM_BACKTRACE >= 0
@@ -506,23 +501,19 @@ void mempool_memdump(FAR struct mempool_s *pool,
                MM_DUMP_LEAK(dump->pid, buf->pid)) &&
               buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
             {
-              char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
-
 #  if CONFIG_MM_BACKTRACE > 0
-              FAR const char *format = " %0*p";
-              int i;
+              char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
 
-              for (i = 0; i < CONFIG_MM_BACKTRACE && buf->backtrace[i]; i++)
-                {
-                  snprintf(tmp + i * MM_PTR_FMT_WIDTH,
-                           sizeof(tmp) - i * MM_PTR_FMT_WIDTH,
-                           format, MM_PTR_FMT_WIDTH - 1, buf->backtrace[i]);
-                }
+              backtrace_format(tmp, sizeof(tmp), buf->backtrace,
+                               CONFIG_MM_BACKTRACE);
+#  else
+              char *tmp = "";
 #  endif
 
-              syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
+              syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
                      buf->pid, blocksize, buf->seqno,
-                     MM_PTR_FMT_WIDTH, ((FAR char *)buf - blocksize), tmp);
+                     BACKTRACE_PTR_FMT_WIDTH, ((FAR char *)buf - blocksize),
+                     tmp);
             }
         }
     }
