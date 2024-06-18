@@ -121,7 +121,7 @@ void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
 }
 #endif
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
 void mm_mempool_dump_handle(FAR struct mempool_s *pool, FAR void *arg)
 {
   struct mempoolinfo_s info;
@@ -160,11 +160,14 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   free_delaylist(heap, false);
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ret = mempool_multiple_alloc(heap->mm_mpool, size);
-  if (ret != NULL)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return ret;
+      ret = mempool_multiple_alloc(heap->mm_mpool, size);
+      if (ret != NULL)
+        {
+          return ret;
+        }
     }
 #endif
 
@@ -344,7 +347,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       nxsched_foreach(mm_dump_handler, heap);
       mm_dump_handler(NULL, heap);
 #  endif
-#  if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#  ifdef CONFIG_MM_HEAP_MEMPOOL
       mwarn("%11s%9s%9s%9s%9s%9s\n",
             "bsize", "total", "nused",
             "nfree", "nifree", "nwaiter");

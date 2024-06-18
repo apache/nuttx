@@ -206,17 +206,20 @@ config MM_KMAP
 		for user.
 
 config MM_HEAP_MEMPOOL_THRESHOLD
-	int "The size of threshold to avoid using multiple mempool in heap"
-	default 0
+	int "The default size of threshold to avoid using multiple mempool in heap"
+	default -1
 	---help---
 		If the size of the memory requested by the user is less
 		than the threshold, the memory will be requested from the
 		multiple mempool by default.
+		 > 0 Enable pool feature, and set umm/kmm pool threshold size.
+		== 0 Enable pool feature, but disable the umm/kmm pool function.
+		 < 0 Disable pool feature.
 
 config MM_HEAP_MEMPOOL_EXPAND_SIZE
 	int "The expand size for each mempool in multiple mempool"
 	default 4096
-	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
+	depends on MM_HEAP_MEMPOOL_THRESHOLD > 0
 	---help---
 		This size describes the size of each expansion of each memory
 		pool with insufficient memory in the multi-level memory pool.
@@ -224,14 +227,14 @@ config MM_HEAP_MEMPOOL_EXPAND_SIZE
 config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
 	int "The expand size for multiple mempool's dictionary"
 	default MM_HEAP_MEMPOOL_EXPAND_SIZE
-	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
+	depends on MM_HEAP_MEMPOOL_THRESHOLD > 0
 	---help---
 		This size describes the multiple mempool dictionary expand.
 
 config MM_HEAP_MEMPOOL_CHUNK_SIZE
 	int "The multiples pool chunk size"
 	default 0
-	depends on MM_HEAP_MEMPOOL_THRESHOLD != 0
+	depends on MM_HEAP_MEMPOOL_THRESHOLD > 0
 	---help---
 		This size describes the multiple mempool chunk size.
 
