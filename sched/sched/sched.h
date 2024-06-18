@@ -340,7 +340,7 @@ int  nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 /* Support for tickless operation */
 
 #ifdef CONFIG_SCHED_TICKLESS
-unsigned int nxsched_cancel_timer(void);
+clock_t nxsched_cancel_timer(void);
 void nxsched_resume_timer(void);
 void nxsched_reassess_timer(void);
 #else

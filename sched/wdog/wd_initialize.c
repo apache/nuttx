@@ -39,14 +39,6 @@
 
 struct list_node g_wdactivelist = LIST_INITIAL_VALUE(g_wdactivelist);
 
-/* This is wdog tickbase, for wd_gettime() may called many times
- * between 2 times of wd_timer(), we use it to update wd_gettime().
- */
-
-#ifdef CONFIG_SCHED_TICKLESS
-clock_t g_wdtickbase;
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

@@ -391,6 +391,47 @@ void clock_timespec_subtract(FAR const struct timespec *ts1,
                              FAR struct timespec *ts3);
 
 /****************************************************************************
+ * Name: clock_compare
+ *
+ * Description:
+ *   This function is used for check whether the expired time is reached.
+ *   It take the ticks wrap-around into consideration.
+ *
+ * Input Parameters:
+ *   tick1 - Expected time in clock ticks
+ *   tick2 - Current time in clock ticks
+ *
+ * Returned Value:
+ *   true          - Expected ticks is timeout.
+ *   false         - Otherwise.
+ *
+ * Assumptions:
+ *   The type of delay value should be sclock_t.
+ *
+ ****************************************************************************/
+
+/* clock_compare considers tick wraparound, discussed as follows:
+ * Assuming clock_t is a 64-bit data type.
+ *
+ * Case 1: If tick2 - tick1 > 2^63, it is considered expired
+ *         or expired after tick2 wraparound.
+ *
+ * Case 2: If tick2 - tick1 <= 2^63,
+ *         it is considered not expired.
+ *
+ * For bit-63 as the sign bit, we can simplify this to:
+ * (sclock_t)(tick2 - tick1) >= 0.
+ *
+ * However, this function requires an assumption to work correctly:
+ * Assumes the timer delay time does not exceed SCLOCK_MAX (2^63 - 1).
+ *
+ * The range of the delay data type sclock_t being
+ * [- (SCLOCK_MAX + 1), SCLOCK_MAX] ensures this assumption holds.
+ */
+
+#define clock_compare(tick1, tick2) ((sclock_t)((tick2) - (tick1)) >= 0)
+
+/****************************************************************************
  * Name:  clock_isleapyear
  *
  * Description:

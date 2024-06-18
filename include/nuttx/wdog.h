@@ -83,7 +83,7 @@ struct wdog_s
 #ifdef CONFIG_PIC
   FAR void          *picbase;    /* PIC base address */
 #endif
-  sclock_t           lag;        /* Timer associated with the delay */
+  clock_t            expired;    /* Timer associated with the absoulute time */
 };
 
 /****************************************************************************
@@ -136,6 +136,45 @@ extern "C"
 
 int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
              wdentry_t wdentry, wdparm_t arg);
+
+/****************************************************************************
+ * Name: wd_start_absolute
+ *
+ * Description:
+ *   This function adds a watchdog timer to the active timer queue.  The
+ *   specified watchdog function at 'wdentry' will be called from the
+ *   interrupt level after the specified number of ticks has reached.
+ *   Watchdog timers may be started from the interrupt level.
+ *
+ *   Watchdog timers execute in the address environment that was in effect
+ *   when wd_start() is called.
+ *
+ *   Watchdog timers execute only once.
+ *
+ *   To replace either the timeout delay or the function to be executed,
+ *   call wd_start again with the same wdog; only the most recent wdStart()
+ *   on a given watchdog ID has any effect.
+ *
+ * Input Parameters:
+ *   wdog     - Watchdog ID
+ *   ticks    - Absoulute time in clock ticks
+ *   wdentry  - Function to call on timeout
+ *   arg      - Parameter to pass to wdentry.
+ *
+ *   NOTE:  The parameter must be of type wdparm_t.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
+ *
+ * Assumptions:
+ *   The watchdog routine runs in the context of the timer interrupt handler
+ *   and is subject to all ISR restrictions.
+ *
+ ****************************************************************************/
+
+int wd_start_absolute(FAR struct wdog_s *wdog, clock_t ticks,
+                      wdentry_t wdentry, wdparm_t arg);
 
 /****************************************************************************
  * Name: wd_cancel

@@ -52,32 +52,14 @@
 
 sclock_t wd_gettime(FAR struct wdog_s *wdog)
 {
-  irqstate_t flags;
+  sclock_t delay;
 
-  /* Verify the wdog */
-
-  flags = enter_critical_section();
-  if (wdog != NULL && WDOG_ISACTIVE(wdog))
+  if (wdog == NULL || !WDOG_ISACTIVE(wdog))
     {
-      /* Traverse the watchdog list accumulating lag times until we find the
-       * wdog that we are looking for
-       */
-
-      FAR struct wdog_s *curr;
-      sclock_t delay = 0;
-
-      list_for_every_entry(&g_wdactivelist, curr, struct wdog_s, node)
-        {
-          delay += curr->lag;
-          if (curr == wdog)
-            {
-              delay -= wd_elapse();
-              leave_critical_section(flags);
-              return delay < 0 ? 0 : delay;
-            }
-        }
+      return 0;
     }
 
-  leave_critical_section(flags);
-  return 0;
+  delay = wdog->expired - clock_systime_ticks();
+
+  return delay < 0 ? 0 : delay;
 }
