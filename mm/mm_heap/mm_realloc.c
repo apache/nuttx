@@ -83,23 +83,27 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   DEBUGASSERT(mm_heapmember(heap, oldmem));
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
-  if (newmem != NULL)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return newmem;
-    }
-  else if (size <= CONFIG_MM_HEAP_MEMPOOL_THRESHOLD ||
-           mempool_multiple_alloc_size(heap->mm_mpool, oldmem) >= 0)
-    {
-      newmem = mm_malloc(heap, size);
+      newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
       if (newmem != NULL)
         {
-          memcpy(newmem, oldmem, MIN(size, mm_malloc_size(heap, oldmem)));
-          mm_free(heap, oldmem);
+          return newmem;
         }
+      else if (size <= heap->mm_threshold ||
+               mempool_multiple_alloc_size(heap->mm_mpool, oldmem) >= 0)
+        {
+          newmem = mm_malloc(heap, size);
+          if (newmem != NULL)
+            {
+              memcpy(newmem, oldmem,
+                     MIN(size, mm_malloc_size(heap, oldmem)));
+              mm_free(heap, oldmem);
+            }
 
-      return newmem;
+          return newmem;
+        }
     }
 #endif
 

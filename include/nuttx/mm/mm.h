@@ -39,6 +39,10 @@
 
 /* Configuration ************************************************************/
 
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD >= 0
+#  define CONFIG_MM_HEAP_MEMPOOL
+#endif
+
 /* If the MCU has a small (16-bit) address capability, then we will use
  * a smaller chunk header that contains 16-bit size/offset information.
  * We will also use the smaller header on MCUs with wider addresses if

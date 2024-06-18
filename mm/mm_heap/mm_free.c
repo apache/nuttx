@@ -225,10 +225,13 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   DEBUGASSERT(mm_heapmember(heap, mem));
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return;
+      if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
+        {
+          return;
+        }
     }
 #endif
 
