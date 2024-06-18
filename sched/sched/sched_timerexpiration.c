@@ -528,7 +528,9 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 
   /* Process the timer ticks and set up the next interval (or not) */
 
+  g_wdtimernested++;
   nexttime = nxsched_timer_process(ticks, elapsed, false);
+  g_wdtimernested--;
 
   nxsched_timer_start(nexttime);
 #ifdef CONFIG_SMP
