@@ -81,11 +81,11 @@
 #define DECLARE_BITMAP(name, bits) \
         unsigned long name[BITS_TO_LONGS(bits)]
 
-#define __set_bit(nr, addr) \
+#define set_bit(nr, addr) \
         (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) |= \
         BIT_WORD_MASK(nr))
 
-#define __clear_bit(nr, addr) \
+#define clear_bit(nr, addr) \
         (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) &= \
         ~BIT_WORD_MASK(nr))
 
