@@ -49,6 +49,9 @@ struct mutex_s
 {
   sem_t sem;
   pid_t holder;
+#if CONFIG_LIBC_MUTEX_BACKTRACE > 0
+  FAR void *backtrace[CONFIG_LIBC_MUTEX_BACKTRACE];
+#endif
 };
 
 typedef struct mutex_s mutex_t;

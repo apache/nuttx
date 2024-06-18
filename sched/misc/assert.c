@@ -49,6 +49,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <execinfo.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -170,11 +171,11 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 }
 
 /****************************************************************************
- * Name: dump_stack
+ * Name: dump_stackinfo
  ****************************************************************************/
 
-static void dump_stack(FAR const char *tag, uintptr_t sp,
-                       uintptr_t base, size_t size, size_t used)
+static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
+                           uintptr_t base, size_t size, size_t used)
 {
   uintptr_t top = base + size;
 
@@ -272,16 +273,16 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
   if (intstack_sp != 0 || force)
     {
-      dump_stack("IRQ",
-                 intstack_sp,
-                 intstack_base,
-                 intstack_size,
+      dump_stackinfo("IRQ",
+                     intstack_sp,
+                     intstack_base,
+                     intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack(cpu)
+                     up_check_intstack(cpu)
 #else
-                 0
+                     0
 #endif
-                 );
+                     );
 
       /* Try to restore SP from current_regs if assert from interrupt. */
 
@@ -298,27 +299,26 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 #ifdef CONFIG_ARCH_KERNEL_STACK
   if (kernelstack_sp != 0 || force)
     {
-      dump_stack("Kernel",
-                 kernelstack_sp,
-                 kernelstack_base,
-                 kernelstack_size,
-                 0
-                );
+      dump_stackinfo("Kernel",
+                     kernelstack_sp,
+                     kernelstack_base,
+                     kernelstack_size,
+                     0);
     }
 #endif
 
   if (tcbstack_sp != 0 || force)
     {
-      dump_stack("User",
-                 tcbstack_sp,
-                 tcbstack_base,
-                 tcbstack_size,
+      dump_stackinfo("User",
+                     tcbstack_sp,
+                     tcbstack_base,
+                     tcbstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_tcbstack(rtcb)
+                     up_check_tcbstack(rtcb)
 #else
-                 0
+                     0
 #endif
-                 );
+                     );
     }
 }
 
@@ -532,6 +532,27 @@ static void dump_tasks(void)
 }
 
 /****************************************************************************
+ * Name: dump_lockholder
+ ****************************************************************************/
+
+#if CONFIG_LIBC_MUTEX_BACKTRACE > 0
+static void dump_lockholder(pid_t tid)
+{
+  char buf[CONFIG_LIBC_MUTEX_BACKTRACE * BACKTRACE_PTR_FMT_WIDTH + 1] = "";
+  FAR mutex_t *mutex;
+
+  mutex = (FAR mutex_t *)nxsched_get_tcb(tid)->waitobj;
+
+  backtrace_format(buf, sizeof(buf), mutex->backtrace,
+                   CONFIG_LIBC_MUTEX_BACKTRACE);
+
+  _alert("Mutex holder(%d) backtrace:%s\n", mutex->holder, buf);
+}
+#else
+#  define dump_lockholder(tid)
+#endif
+
+/****************************************************************************
  * Name: dump_deadlock
  ****************************************************************************/
 
@@ -546,11 +567,12 @@ static void dump_deadlock(void)
       _alert("Deadlock detected\n");
       while (i-- > 0)
         {
-#ifdef CONFIG_SCHED_BACKTRACE
+#  ifdef CONFIG_SCHED_BACKTRACE
           sched_dumpstack(deadlock[i]);
-#else
+          dump_lockholder(deadlock[i]);
+#  else
           _alert("deadlock pid: %d\n", deadlock[i]);
-#endif
+#  endif
         }
     }
 }
