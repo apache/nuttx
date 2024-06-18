@@ -101,15 +101,15 @@ extern "C"
  *   netmask  - Network mask defining the external network (required)
  *   router   - Router address that on our network that can forward to the
  *              external network.
+ *   len      - The address struct length.
  *
  * Returned Value:
  *   OK on success; -1 on failure with the errno variable set appropriately.
  *
  ****************************************************************************/
 
-int addroute(int sockfd, FAR struct sockaddr_storage *target,
-             FAR struct sockaddr_storage *netmask,
-             FAR struct sockaddr_storage *router);
+int addroute(int sockfd, FAR void *target, FAR void *netmask,
+             FAR void *router, socklen_t len);
 
 /****************************************************************************
  * Name: net_delroute
@@ -122,14 +122,14 @@ int addroute(int sockfd, FAR struct sockaddr_storage *target,
  *   sockfd   - Any socket descriptor
  *   target   - Target address on the remote network (required)
  *   netmask  - Network mask defining the external network (required)
+ *   len      - The address struct length.
  *
  * Returned Value:
  *   OK on success; -1 on failure with the errno variable set appropriately.
  *
  ****************************************************************************/
 
-int delroute(int sockfd, FAR struct sockaddr_storage *target,
-             FAR struct sockaddr_storage *netmask);
+int delroute(int sockfd, FAR void *target, FAR void *netmask, socklen_t len);
 
 #undef EXTERN
 #ifdef __cplusplus
