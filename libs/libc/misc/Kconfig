@@ -132,3 +132,10 @@ config LIBC_PATHBUFFER_MALLOC
 	default y
 	---help---
 		Enable malloc path buffer from the heap when pathbuffer is insufficient.
+
+config LIBC_MUTEX_BACKTRACE
+	int "The depth of mutex backtrace"
+	default 0
+	---help---
+		Config the depth of backtrace, dumping the backtrace of thread which
+		last acquired the mutex. Disable mutex backtrace by 0.
