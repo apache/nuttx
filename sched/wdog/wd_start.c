@@ -252,7 +252,7 @@ int wd_start_absolute(FAR struct wdog_s *wdog, clock_t ticks,
   wd_insert(wdog, ticks, wdentry, arg);
 
   reassess |= list_is_head(&g_wdactivelist, &wdog->node);
-  if (reassess)
+  if (!g_wdtimernested && reassess)
     {
       /* Resume the interval timer that will generate the next
        * interval event. If the timer at the head of the list changed,

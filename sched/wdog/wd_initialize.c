@@ -39,6 +39,10 @@
 
 struct list_node g_wdactivelist = LIST_INITIAL_VALUE(g_wdactivelist);
 
+#ifdef CONFIG_SCHED_TICKLESS
+unsigned int g_wdtimernested;
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

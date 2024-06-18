@@ -63,6 +63,10 @@ extern "C"
 
 extern struct list_node g_wdactivelist;
 
+#ifdef CONFIG_SCHED_TICKLESS
+extern unsigned int g_wdtimernested;
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
