@@ -153,6 +153,16 @@
 
 struct mm_heap_s; /* Forward reference */
 
+struct mempool_init_s
+{
+  FAR const size_t *poolsize;
+  size_t            npools;
+  size_t            threshold;
+  size_t            chunksize;
+  size_t            expandsize;
+  size_t            dict_expendsize;
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -213,6 +223,18 @@ EXTERN FAR struct mm_heap_s *g_kmmheap;
 
 FAR struct mm_heap_s *mm_initialize(FAR const char *name,
                                     FAR void *heap_start, size_t heap_size);
+
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+FAR struct mm_heap_s *
+mm_initialize_pool(FAR const char *name,
+                   FAR void *heap_start, size_t heap_size,
+                   FAR const struct mempool_init_s *init);
+
+#else
+#  define mm_initialize_pool(name, heap_start, heap_size, init) \
+          mm_initialize(name, heap_start, heap_size)
+#endif
+
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize);
 void mm_uninitialize(FAR struct mm_heap_s *heap);
