@@ -250,6 +250,14 @@
 #define GPIO_USART6_RX   GPIO_USART6_RX_1    /* PC7 */
 #define GPIO_USART6_TX   GPIO_USART6_TX_1    /* PC6 */
 
+/* PWM
+ *
+ * The STM32F4 Discovery has no real on-board PWM devices, but the board
+ * can be configured to output a pulse train using TIM4 CH2 on PD13.
+ */
+
+#define GPIO_TIM3_CH3OUT  GPIO_TIM3_CH3OUT_1
+
 /* UART RX DMA configurations */
 
 #define DMAMAP_USART1_RX DMAMAP_USART1_RX_2

@@ -68,6 +68,11 @@
 #define GPIO_BTN_EXTERNAL \
   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTA | GPIO_PIN1)
 
+/* PWM Configuration */
+
+#define STM32F411MINIMUM_PWMTIMER   3
+#define STM32F411MINIMUM_PWMCHANNEL 3
+
 /* SPI chip selects */
 
 #define FLASH_SPI1_CS \
@@ -201,6 +206,18 @@ int stm32_usbhost_initialize(void);
 
 #ifdef CONFIG_STM32F411MINIMUM_GPIO
 int stm32_gpio_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************
