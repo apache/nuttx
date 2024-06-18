@@ -169,7 +169,7 @@ void k230_hart_big_stop(void)
 
   putreg32(RESET_RQST_BIT | RESET_RQST_ENW, K230_CPU1_RESET);
   up_udelay(RESET_WAIT_USEC);
-  sinfo("reg: %x\n", getreg32(K230_CPU1_RESET));
+  sinfo("reg: %" PRIx32 "\n", getreg32(K230_CPU1_RESET));
 }
 
 /****************************************************************************
@@ -184,7 +184,7 @@ void k230_hart_big_boot(uintptr_t addr)
   /* learned from U-Boot baremetal and RTT sysctl_reset_cpu */
 
   if (addr) putreg32(addr, K230_CPU1_BOOTA);
-  sinfo("addr=%lx\n", addr);
+  sinfo("addr=%"PRIxPTR"\n", addr);
 
   /* 0x10001000 clear DONE bit */
 
