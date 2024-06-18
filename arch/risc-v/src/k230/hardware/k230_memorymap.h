@@ -27,7 +27,7 @@
 
 /* Devices Base Address */
 
-#define K230_PLIC_BASE    0xF00000000UL
+#define K230_PLIC_BASE    UINT64_C(0xF00000000)
 #define K230_CLINT_BASE   (K230_PLIC_BASE + 0x04000000)
 #define K230_CPU1_BOOTA   0x91102104UL
 #define K230_CPU1_RESET   0x9110100cUL
@@ -46,5 +46,5 @@
 
 /* Enable RV PBMT */
 
-#define MENVCFG_PBMT     (1ul << 62)
+#define MENVCFG_PBMT     (UINT64_C(1) << 62)
 #endif /* __ARCH_RISCV_SRC_K230_HARDWARE_K230_MEMORYMAP_H */
