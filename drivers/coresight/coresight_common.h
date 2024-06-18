@@ -48,6 +48,8 @@
 #define CORESIGHT_DEVID                0xfc8
 #define CORESIGHT_DEVTYPE              0xfcc
 
+#define CORESIGHT_CLAIM_SELF_HOSTED    BIT(1)
+
 /* Register operations */
 
 #define coresight_put8(val, addr) \
