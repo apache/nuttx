@@ -159,7 +159,7 @@ rpmsg_router_edge_get_tx_payload_buffer(FAR struct rpmsg_device *rdev,
     }
 
   buf = hubdev->ops.get_tx_payload_buffer(hubdev, len, wait);
-  *len = edge->tx_len - (rpmsg_get_tx_buffer_size(rdev) - *len);
+  *len = edge->tx_len;
   return buf;
 }
 
