@@ -73,7 +73,18 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   filep = &list->fl_files[l1][l2];
   if (filep->f_inode != NULL)
     {
-      filep->f_refs++;
+      /* When the reference count is zero but the inode has not yet been
+       * released, At this point we should return a null pointer
+       */
+
+      if (filep->f_refs == 0)
+        {
+          filep = NULL;
+        }
+      else
+        {
+          filep->f_refs++;
+        }
     }
   else if (new == NULL)
     {
