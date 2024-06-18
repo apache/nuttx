@@ -42,8 +42,8 @@
 struct riscv_mtimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
-  uintptr_t                  mtime;
-  uintptr_t                  mtimecmp;
+  uintreg_t                  mtime;
+  uintreg_t                  mtimecmp;
   uint64_t                   freq;
   uint64_t                   alarm;
   oneshot_callback_t         callback;
@@ -347,7 +347,7 @@ static int riscv_mtimer_interrupt(int irq, void *context, void *arg)
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *
-riscv_mtimer_initialize(uintptr_t mtime, uintptr_t mtimecmp,
+riscv_mtimer_initialize(uintreg_t mtime, uintreg_t mtimecmp,
                         int irq, uint64_t freq)
 {
   struct riscv_mtimer_lowerhalf_s *priv;

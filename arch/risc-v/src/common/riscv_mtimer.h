@@ -40,7 +40,7 @@ extern "C"
 #endif
 
 struct oneshot_lowerhalf_s *
-riscv_mtimer_initialize(uintptr_t mtime, uintptr_t mtimecmp,
+riscv_mtimer_initialize(uintreg_t mtime, uintreg_t mtimecmp,
                         int irq, uint64_t freq);
 
 #undef EXTERN
