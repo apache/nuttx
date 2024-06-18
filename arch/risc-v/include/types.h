@@ -81,8 +81,10 @@ typedef int                _wchar_t;
 /* Use uintreg_t for register-width integers */
 
 #ifdef CONFIG_ARCH_RV32
+typedef _int32_t           intreg_t;
 typedef _uint32_t          uintreg_t;
 #else
+typedef _int64_t           intreg_t;
 typedef _uint64_t          uintreg_t;
 #endif
 
