@@ -37,19 +37,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VIRTIO_GPU_BPP        32
-#define VIRTIO_GPU_FB_FMT     FB_FMT_RGB32
-#define VIRTIO_GPU_FMT        VIRTIO_GPU_FORMAT_B8G8R8X8_UNORM
+#define VIRTIO_GPU_BPP          32
+#define VIRTIO_GPU_FB_FMT       FB_FMT_RGB32
+#define VIRTIO_GPU_FMT          VIRTIO_GPU_FORMAT_B8G8R8X8_UNORM
 
-#define VIRTIO_GPU_CTL        0
-#define VIRTIO_GPU_NUM        1
+#define VIRTIO_GPU_CTL          0
+#define VIRTIO_GPU_NUM          1
 
-#define VIRTIO_GPU_MAX_DISP   4
-#define VIRTIO_GPU_MAX_PLANE  1
-#define VIRTIO_GPU_MAX_NENTS  4
+#define VIRTIO_GPU_MAX_DISP     4
+#define VIRTIO_GPU_MAX_PLANE    1
+#define VIRTIO_GPU_MAX_NENTS    4
 
-#define VIRTIO_GPU_MAP_ERR(e) ((e) == VIRTIO_GPU_RESP_ERR_OUT_OF_MEMORY ? \
-                               -ENOMEM : -EINVAL)
+#define VIRTIO_GPU_FB_NUMS      2
+#define VIRTIO_GPU_VSYNC_PERIOD 16
+
+#define VIRTIO_GPU_MAP_ERR(e)   ((e) == VIRTIO_GPU_RESP_ERR_OUT_OF_MEMORY ? \
+                                -ENOMEM : -EINVAL)
 
 /****************************************************************************
  * Private Types
@@ -66,6 +69,7 @@ struct virtio_gpu_priv_s
   fb_coord_t stride;                /* Width of a row in bytes */
   uint8_t display;                  /* Display number */
   spinlock_t lock;                  /* Lock */
+  struct work_s work;               /* Work structure for vsync loop */
 };
 
 struct virtio_gpu_cookie_s
@@ -113,8 +117,15 @@ static int virtio_gpu_getvideoinfo(FAR struct fb_vtable_s *vtable,
 static int virtio_gpu_getplaneinfo(FAR struct fb_vtable_s *vtable,
                                    int planeno,
                                    FAR struct fb_planeinfo_s *pinfo);
+#ifdef CONFIG_FB_UPDATE
 static int virtio_gpu_updatearea(FAR struct fb_vtable_s *vtable,
                                  FAR const struct fb_area_s *area);
+#endif
+static int virtio_gpu_init_fbmem(FAR struct virtio_device *vdev,
+                                 FAR struct virtio_gpu_priv_s *priv,
+                                 int fb_count);
+static int virtio_gpu_flush_output(FAR struct fb_vtable_s *vtable,
+                                   int resource_id);
 
 /****************************************************************************
  * Private Data
@@ -493,13 +504,124 @@ static int virtio_gpu_flush_resource(FAR struct virtio_gpu_priv_s *priv,
 }
 
 /****************************************************************************
+ * Name: virtio_gpu_flush_output
+ ****************************************************************************/
+
+static int virtio_gpu_flush_output(FAR struct fb_vtable_s *vtable,
+                                   int resource_id)
+{
+  FAR struct virtio_gpu_priv_s *priv =
+    (FAR struct virtio_gpu_priv_s *)vtable;
+  int ret;
+
+  ret = virtio_gpu_set_scanout(priv, 0, resource_id, priv->xres, priv->yres);
+  if (ret < 0)
+    {
+      vrterr("virtio_gpu_set_scanout failed: %d", ret);
+      return ret;
+    }
+
+  return virtio_gpu_flush_resource(priv, resource_id, 0, 0,
+                                   priv->xres, priv->yres);
+}
+
+/****************************************************************************
+ * Name: virtio_gpu_vsync_loop
+ ****************************************************************************/
+
+static void virtio_gpu_vsync_loop(FAR void *arg)
+{
+  FAR struct virtio_gpu_priv_s *priv = (FAR struct virtio_gpu_priv_s *)arg;
+  union fb_paninfo_u info;
+
+  fb_notify_vsync(&priv->vtable);
+
+  if (fb_peek_paninfo(&priv->vtable, &info, FB_NO_OVERLAY) == OK)
+    {
+      virtio_gpu_flush_output(&priv->vtable,
+                              info.planeinfo.yoffset == 0 ? 1 : 2);
+      fb_remove_paninfo(&priv->vtable, FB_NO_OVERLAY);
+    }
+}
+
+/****************************************************************************
+ * Name: virtio_gpu_vsync_interrupt
+ ****************************************************************************/
+
+static void virtio_gpu_vsync_interrupt(FAR void *arg)
+{
+  FAR struct virtio_gpu_priv_s *priv = (FAR struct virtio_gpu_priv_s *)arg;
+  virtio_gpu_vsync_loop(arg);
+  work_queue(HPWORK, &priv->work, virtio_gpu_vsync_interrupt,
+             arg, VIRTIO_GPU_VSYNC_PERIOD);
+}
+
+/****************************************************************************
+ * Name: virtio_gpu_init_fbmem
+ ****************************************************************************/
+
+static int virtio_gpu_init_fbmem(FAR struct virtio_device *vdev,
+                                 FAR struct virtio_gpu_priv_s *priv,
+                                 int fb_count)
+{
+  struct virtio_gpu_mem_entry ent;
+  size_t fblen;
+  int ret;
+  int i;
+
+  priv->stride = priv->xres * VIRTIO_GPU_BPP >> 3;
+  fblen = priv->stride * priv->yres;
+
+  priv->fbmem = (FAR uint8_t *)virtio_zalloc_buf(vdev, fblen * fb_count, 16);
+  if (priv->fbmem == NULL)
+    {
+      vrterr("ERROR: Failed to allocate frame buffer memory");
+      return -ENOMEM;
+    }
+
+  for (i = 1; i <= fb_count; i++)
+    {
+      ret = virtio_gpu_create_2d(priv, i, priv->xres, priv->yres);
+      if (ret < 0)
+        {
+          vrterr("virtio_gpu_create_2d error");
+          goto error;
+        }
+
+      ent.addr = up_addrenv_va_to_pa(priv->fbmem + fblen * (i - 1));
+      ent.length = fblen;
+
+      ret = virtio_gpu_attach_backing(priv, i, &ent, 1);
+      if (ret < 0)
+        {
+          vrterr("virtio_gpu_attach_backing error");
+          goto error;
+        }
+
+      ret = virtio_gpu_transfer_to_host_2d(priv, i, 0, 0,
+                                           priv->xres, priv->yres);
+      if (ret < 0)
+        {
+          vrterr("virtio_gpu_transfer_to_host_2d failed: %d", ret);
+          goto error;
+        }
+    }
+
+  priv->fblen = fblen * fb_count;
+  return ret;
+
+error:
+  virtio_free_buf(vdev, priv->fbmem);
+  return ret;
+}
+
+/****************************************************************************
  * Name: virtio_gpu_probe
  ****************************************************************************/
 
 static int virtio_gpu_probe(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_gpu_priv_s *priv;
-  struct virtio_gpu_mem_entry ent;
   int disp;
   int ret;
 
@@ -538,56 +660,24 @@ static int virtio_gpu_probe(FAR struct virtio_device *vdev)
 
   priv->vtable.getvideoinfo = virtio_gpu_getvideoinfo,
   priv->vtable.getplaneinfo = virtio_gpu_getplaneinfo,
+#ifdef CONFIG_FB_UPDATE
   priv->vtable.updatearea   = virtio_gpu_updatearea,
+#endif
 
   /* Allocate (and clear) the framebuffer */
 
-  priv->stride = priv->xres * VIRTIO_GPU_BPP >> 3;
-  priv->fblen  = priv->stride * priv->yres;
-
-  priv->fbmem  = (FAR uint8_t *)virtio_zalloc_buf(vdev, priv->fblen, 16);
-  if (priv->fbmem == NULL)
-    {
-      vrterr("ERROR: Failed to allocate frame buffer memory");
-      ret = -ENOMEM;
-      goto err_init_fb;
-    }
-
-  ret = virtio_gpu_create_2d(priv, 1, priv->xres, priv->yres);
+  ret = virtio_gpu_init_fbmem(vdev, priv, VIRTIO_GPU_FB_NUMS);
   if (ret < 0)
     {
-      vrterr("virtio_gpu_create_2d error");
-      goto err_init_fb;
+      vrterr("virtio_gpu_init_fbmem error");
+      goto err_init;
     }
 
-  ent.addr = up_addrenv_va_to_pa(priv->fbmem);
-  ent.length = priv->fblen;
-  ret = virtio_gpu_attach_backing(priv, 1, &ent, 1);
-  if (ret < 0)
-    {
-      vrterr("virtio_gpu_attach_backing error");
-      goto err_init_fb;
-    }
+  ret = virtio_gpu_flush_output(&priv->vtable, 1);
 
-  ret = virtio_gpu_set_scanout(priv, 0, 1, priv->xres, priv->yres);
   if (ret < 0)
     {
-      vrterr("virtio_gpu_set_scanout error");
-      goto err_init_fb;
-    }
-
-  ret = virtio_gpu_transfer_to_host_2d(priv, 1, 0, 0, priv->xres,
-                                       priv->yres);
-  if (ret < 0)
-    {
-      vrterr("virtio_gpu_transfer_to_host_2d error");
-      goto err_init_fb;
-    }
-
-  ret = virtio_gpu_flush_resource(priv, 1, 0, 0, priv->xres, priv->yres);
-  if (ret < 0)
-    {
-      vrterr("virtio_gpu_flush_resource error");
+      vrterr("virtio_gpu_flush_output error");
       goto err_init_fb;
     }
 
@@ -602,6 +692,9 @@ static int virtio_gpu_probe(FAR struct virtio_device *vdev)
       g_virtio_gpu[disp] = NULL;
       goto err_init_fb;
     }
+
+  work_queue(HPWORK, &priv->work, virtio_gpu_vsync_interrupt,
+             priv, VIRTIO_GPU_VSYNC_PERIOD);
 
   return ret;
 
@@ -671,9 +764,12 @@ static int virtio_gpu_getplaneinfo(FAR struct fb_vtable_s *vtable,
   pinfo->fblen = priv->fblen;
   pinfo->fbmem = priv->fbmem;
   pinfo->stride = priv->stride;
+  pinfo->xres_virtual = priv->xres;
+  pinfo->yres_virtual = priv->yres * VIRTIO_GPU_FB_NUMS;
   return OK;
 }
 
+#ifdef CONFIG_FB_UPDATE
 /****************************************************************************
  * Name: virtio_gpu_updatearea
  ****************************************************************************/
@@ -683,22 +779,27 @@ static int virtio_gpu_updatearea(FAR struct fb_vtable_s *vtable,
 {
   FAR struct virtio_gpu_priv_s *priv =
     (FAR struct virtio_gpu_priv_s *)vtable;
+  int resource_id = 1;
   int ret = OK;
 
   vrtinfo("update disp %d:(%d %d)[%d %d]", priv->display,
           area->x, area->y, area->w, area->h);
-  ret = virtio_gpu_transfer_to_host_2d(priv, 1, area->x, area->y,
-                                       area->w, area->h);
+
+  if (area->y >= priv->yres)
+    {
+      resource_id = 2;
+    }
+
+  ret = virtio_gpu_transfer_to_host_2d(priv, resource_id, 0, 0,
+                                       priv->xres, priv->yres);
   if (ret < 0)
     {
       vrterr("virtio_gpu_transfer_to_host_2d failed: %d", ret);
-      return ret;
     }
 
-  ret = virtio_gpu_flush_resource(priv, 1, area->x, area->y,
-                                  area->w, area->h);
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
