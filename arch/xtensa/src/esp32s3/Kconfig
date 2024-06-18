@@ -1544,6 +1544,10 @@ config ESP32S3_WIFI_RXBA_AMPDU_WZ
 	int "Wi-Fi RX BA AMPDU windown size"
 	default 6
 
+config ESP32S3_WLAN_PKTBUF_NUM
+	int "WLAN netcard packet buffer number per netcard"
+	default 16
+
 config ESP_WIFI_GCMP_SUPPORT
 	bool "WiFi GCMP Support(GCMP128 and GCMP256)"
 	default n
@@ -2398,7 +2402,7 @@ config ESP32S3_KERNEL_IMAGE_SIZE
 
 config ESP32S3_KERNEL_RAM_SIZE
 	hex "Kernel Allocated RAM"
-	default 0x29000
+	default 0x30000
 	range 0x10000 0x54700
 	depends on ESP32S3_APP_FORMAT_LEGACY
 	---help---
