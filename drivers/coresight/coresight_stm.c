@@ -355,11 +355,11 @@ int stm_set_channel_options(FAR struct coresight_stm_dev_s *stmdev,
   switch (options)
     {
       case STM_OPTION_GUARANTEED:
-        __set_bit(channel, stmdev->guaranteed);
+        set_bit(channel, stmdev->guaranteed);
         break;
 
       case STM_OPTION_INVARIANT:
-        __clear_bit(channel, stmdev->guaranteed);
+        clear_bit(channel, stmdev->guaranteed);
         break;
 
       default:
