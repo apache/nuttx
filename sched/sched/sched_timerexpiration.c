@@ -71,28 +71,28 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
-                                      bool noswitches);
+static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
+                                     bool noswitches);
 #endif
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches);
+static clock_t nxsched_process_scheduler(clock_t elapsed, bool noswitches);
 #endif
-static unsigned int nxsched_timer_process(unsigned int ticks,
-                                          bool noswitches);
-static void nxsched_timer_start(unsigned int ticks);
+static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
+                                     bool noswitches);
+static void nxsched_timer_start(clock_t interval);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-/* This is the time that the timer was stopped.  All future times are
+/* This is the tick that the timer was stopped.  All future times are
  * calculated against this time.  It must be valid at all times when
  * the timer is not running.
  */
 
-static clock_t g_stop_time;
-#else
+static clock_t g_timer_tick;
+
+#ifndef CONFIG_SCHED_TICKLESS_ALARM
 /* This is the duration of the currently active timer or, when
  * nxsched_timer_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
@@ -167,7 +167,7 @@ int up_timer_tick_cancel(FAR clock_t *ticks)
  *
  * Input Parameters:
  *   cpu - The CPU that we are performing the scheduler operations on.
- *   ticks - The number of ticks that have elapsed on the interval timer.
+ *   elapsed - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
  * Returned Value:
@@ -184,12 +184,12 @@ int up_timer_tick_cancel(FAR clock_t *ticks)
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
-                                      bool noswitches)
+static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
+                                     bool noswitches)
 {
   FAR struct tcb_s *rtcb = current_task(cpu);
   FAR struct tcb_s *ntcb = current_task(cpu);
-  uint32_t ret = 0;
+  clock_t ret = 0;
 
 #if CONFIG_RR_INTERVAL > 0
   /* Check if the currently executing task uses round robin scheduling. */
@@ -200,7 +200,7 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
        * timeslice.
        */
 
-      ret = nxsched_process_roundrobin(rtcb, ticks, noswitches);
+      ret = nxsched_process_roundrobin(rtcb, elapsed, noswitches);
     }
 #endif
 
@@ -226,7 +226,7 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
        * budget.
        */
 
-      ret = nxsched_process_sporadic(rtcb, ticks, noswitches);
+      ret = nxsched_process_sporadic(rtcb, elapsed, noswitches);
     }
 #endif
 
@@ -259,7 +259,7 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
  *   active task on a single CPU.
  *
  * Input Parameters:
- *   ticks - The number of ticks that have elapsed on the interval timer.
+ *   elapsed - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
  * Returned Value:
@@ -276,11 +276,11 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches)
+static clock_t nxsched_process_scheduler(clock_t elapsed, bool noswitches)
 {
 #ifdef CONFIG_SMP
-  uint32_t minslice = UINT32_MAX;
-  uint32_t timeslice;
+  clock_t minslice = CLOCK_MAX;
+  clock_t timeslice;
   irqstate_t flags;
   int i;
 
@@ -298,7 +298,7 @@ static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches)
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      timeslice = nxsched_cpu_scheduler(i, ticks, noswitches);
+      timeslice = nxsched_cpu_scheduler(i, elapsed, noswitches);
       if (timeslice > 0 && timeslice < minslice)
         {
           minslice = timeslice;
@@ -306,12 +306,12 @@ static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches)
     }
 
   leave_critical_section(flags);
-  return minslice < UINT32_MAX ? minslice : 0;
+  return minslice < CLOCK_MAX ? minslice : 0;
 
 #else
   /* Perform scheduler operations on the single CPUs */
 
-  return nxsched_cpu_scheduler(0, ticks, noswitches);
+  return nxsched_cpu_scheduler(0, elapsed, noswitches);
 #endif
 }
 #else
@@ -334,10 +334,10 @@ static uint32_t nxsched_process_scheduler(uint32_t ticks, bool noswitches)
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-static inline unsigned int nxsched_process_wdtimer(uint32_t ticks,
-                                                   bool noswitches)
+static inline_function clock_t nxsched_process_wdtimer(clock_t ticks,
+                                                       bool noswitches)
 {
-  unsigned int ret;
+  clock_t ret;
   irqstate_t flags;
 
   /* We are in an interrupt handler and, as a consequence, interrupts are
@@ -356,7 +356,7 @@ static inline unsigned int nxsched_process_wdtimer(uint32_t ticks,
   return ret;
 }
 #else
-#  define nxsched_process_wdtimer(t,n) wd_timer(t,n)
+#  define nxsched_process_wdtimer(t, n) wd_timer(t, n)
 #endif
 
 /****************************************************************************
@@ -375,11 +375,11 @@ static inline unsigned int nxsched_process_wdtimer(uint32_t ticks,
  *
  ****************************************************************************/
 
-static unsigned int nxsched_timer_process(unsigned int ticks,
-                                          bool noswitches)
+static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
+                                     bool noswitches)
 {
-  unsigned int rettime = 0;
-  unsigned int tmp;
+  clock_t rettime = 0;
+  clock_t tmp;
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   /* Process wall time */
@@ -392,7 +392,7 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
    * switches can occur)
    */
 
-  nxsched_process_cpuload_ticks(ticks);
+  nxsched_process_cpuload_ticks(elapsed);
 #endif
 
   /* Process watchdogs */
@@ -407,7 +407,7 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
    * active task.
    */
 
-  tmp = nxsched_process_scheduler(ticks, noswitches);
+  tmp = nxsched_process_scheduler(elapsed, noswitches);
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   if (tmp > 0 && tmp < rettime)
@@ -433,16 +433,16 @@ static unsigned int nxsched_timer_process(unsigned int ticks,
  *
  ****************************************************************************/
 
-static void nxsched_timer_start(unsigned int ticks)
+static void nxsched_timer_start(clock_t interval)
 {
   int ret;
 
-  if (ticks > 0)
+  if (interval > 0)
     {
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
-      if (ticks > g_oneshot_maxticks)
+      if (interval > g_oneshot_maxticks)
         {
-          ticks = g_oneshot_maxticks;
+          interval = g_oneshot_maxticks;
         }
 #endif
 
@@ -451,15 +451,15 @@ static void nxsched_timer_start(unsigned int ticks)
        * to the time when last stopped the timer).
        */
 
-      ret = up_alarm_tick_start(g_stop_time + ticks);
+      ret = up_alarm_tick_start(g_timer_tick + interval);
 #else
       /* Save new timer interval */
 
-      g_timer_interval = ticks;
+      g_timer_interval = interval;
 
       /* [Re-]start the interval timer */
 
-      ret = up_timer_tick_start(ticks);
+      ret = up_timer_tick_start(interval);
 #endif
 
       if (ret < 0)
@@ -497,8 +497,8 @@ static void nxsched_timer_start(unsigned int ticks)
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
 void nxsched_alarm_tick_expiration(clock_t ticks)
 {
-  unsigned int elapsed;
-  unsigned int nexttime;
+  clock_t elapsed;
+  clock_t nexttime;
 #ifdef CONFIG_SMP
   irqstate_t flags;
 
@@ -514,11 +514,11 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 
   /* Calculate elapsed */
 
-  elapsed = ticks - g_stop_time;
+  elapsed = ticks - g_timer_tick;
 
   /* Save the time that the alarm occurred */
 
-  g_stop_time = ticks;
+  g_timer_tick = ticks;
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Save the last time that the scheduler ran */
@@ -528,7 +528,8 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 
   /* Process the timer ticks and set up the next interval (or not) */
 
-  nexttime = nxsched_timer_process(elapsed, false);
+  nexttime = nxsched_timer_process(ticks, elapsed, false);
+
   nxsched_timer_start(nexttime);
 #ifdef CONFIG_SMP
   leave_critical_section(flags);
@@ -565,8 +566,8 @@ void nxsched_alarm_expiration(FAR const struct timespec *ts)
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
 void nxsched_timer_expiration(void)
 {
-  unsigned int elapsed;
-  unsigned int nexttime;
+  clock_t elapsed;
+  clock_t nexttime;
   irqstate_t flags;
 
   /* If we are running on a single CPU architecture, then we know interrupts
@@ -577,6 +578,8 @@ void nxsched_timer_expiration(void)
    */
 
   flags = enter_critical_section();
+
+  up_timer_gettick(&g_timer_tick);
 
   /* Get the interval associated with last expiration */
 
@@ -591,7 +594,7 @@ void nxsched_timer_expiration(void)
 
   /* Process the timer ticks and set up the next interval (or not) */
 
-  nexttime = nxsched_timer_process(elapsed, false);
+  nexttime = nxsched_timer_process(g_timer_tick, elapsed, false);
   nxsched_timer_start(nexttime);
   leave_critical_section(flags);
 }
@@ -621,10 +624,10 @@ void nxsched_timer_expiration(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
-unsigned int nxsched_cancel_timer(void)
+clock_t nxsched_cancel_timer(void)
 {
   clock_t ticks;
-  unsigned int elapsed;
+  clock_t elapsed;
 
   /* Cancel the alarm and and get the time that the alarm was cancelled.
    * If the alarm was not enabled (or, perhaps, just expired since
@@ -632,39 +635,33 @@ unsigned int nxsched_cancel_timer(void)
    * current time.
    */
 
-  ticks = g_stop_time;
+  ticks = g_timer_tick;
 
-  up_alarm_tick_cancel(&g_stop_time);
+  up_alarm_tick_cancel(&g_timer_tick);
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Save the last time that the scheduler ran */
 
-  g_sched_time = g_stop_time;
+  g_sched_time = g_timer_tick;
 #endif
 
-  /* Convert this to the elapsed time */
+  /* Convert this to the elapsed time and update clock tickbase */
 
-  elapsed = g_stop_time - ticks;
+  elapsed      = g_timer_tick - ticks;
 
   /* Process the timer ticks and return the next interval */
 
-  return nxsched_timer_process(elapsed, true);
+  return nxsched_timer_process(g_timer_tick, elapsed, true);
 }
 #else
-unsigned int nxsched_cancel_timer(void)
+clock_t nxsched_cancel_timer(void)
 {
   clock_t ticks;
-  unsigned int elapsed;
+  clock_t elapsed;
 
   /* Get the time remaining on the interval timer and cancel the timer. */
 
   up_timer_tick_cancel(&ticks);
-
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Save the last time that the scheduler ran */
-
-  g_sched_time = ticks;
-#endif
 
   DEBUGASSERT(ticks <= g_timer_interval);
 
@@ -676,10 +673,17 @@ unsigned int nxsched_cancel_timer(void)
 
   elapsed          = g_timer_interval - ticks;
   g_timer_interval = 0;
+  g_timer_tick    += elapsed;
+
+#ifdef CONFIG_SCHED_SPORADIC
+  /* Save the last time that the scheduler ran */
+
+  g_sched_time      = g_timer_tick;
+#endif
 
   /* Process the timer ticks and return the next interval */
 
-  return nxsched_timer_process(elapsed, true);
+  return nxsched_timer_process(g_timer_tick, elapsed, true);
 }
 #endif
 
@@ -699,14 +703,14 @@ unsigned int nxsched_cancel_timer(void)
  *
  * Assumptions:
  *   This function is called right after nxsched_cancel_timer().  If
- *   CONFIG_SCHED_TICKLESS_ALARM=y, then g_stop_time must be the value time
- *   when the timer was cancelled.
+ *   CONFIG_SCHED_TICKLESS_ALARM=y, then g_timer_tick must be the
+ *   value time when the timer was cancelled.
  *
  ****************************************************************************/
 
 void nxsched_resume_timer(void)
 {
-  unsigned int nexttime;
+  clock_t nexttime;
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Save the last time that the scheduler ran */
@@ -718,7 +722,7 @@ void nxsched_resume_timer(void)
    * and set up the next interval (or not).
    */
 
-  nexttime = nxsched_timer_process(0, true);
+  nexttime = nxsched_timer_process(g_timer_tick, 0, true);
   nxsched_timer_start(nexttime);
 }
 
@@ -758,7 +762,11 @@ void nxsched_resume_timer(void)
 
 void nxsched_reassess_timer(void)
 {
-  unsigned int nexttime;
+  clock_t nexttime;
+
+#ifndef CONFIG_SCHED_TICKLESS_ALARM
+  up_timer_gettick(&g_timer_tick);
+#endif
 
   /* Cancel and restart the timer */
 

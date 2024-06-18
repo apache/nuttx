@@ -58,7 +58,11 @@
 int wd_cancel(FAR struct wdog_s *wdog)
 {
   irqstate_t flags;
-  int ret = -EINVAL;
+
+  if (wdog == NULL)
+    {
+      return -EINVAL;
+    }
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete
@@ -66,23 +70,11 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
   flags = enter_critical_section();
 
-  /* Make sure that the watchdog is initialized (non-NULL) and is still
-   * active.
-   */
+  /* Make sure that the watchdog is still active. */
 
-  if (wdog != NULL && WDOG_ISACTIVE(wdog))
+  if (WDOG_ISACTIVE(wdog))
     {
       bool head = list_is_head(&g_wdactivelist, &wdog->node);
-      FAR struct wdog_s *next = list_next_entry(wdog, struct wdog_s, node);
-
-      /* If there is a watchdog in the timer queue after the one that
-       * is being canceled, then it inherits the remaining ticks.
-       */
-
-      if (next)
-        {
-          next->lag += wdog->lag;
-        }
 
       /* Now, remove the watchdog from the timer queue */
 
@@ -101,12 +93,8 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
           nxsched_reassess_timer();
         }
-
-      /* Return success */
-
-      ret = OK;
     }
 
   leave_critical_section(flags);
-  return ret;
+  return OK;
 }
