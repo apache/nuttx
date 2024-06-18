@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <malloc.h>
+#include <execinfo.h>
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 #  include <time.h>
