@@ -316,6 +316,39 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* CAPIOC_ALL - Get the pwm duty, pulse frequence, pwm edges, from
+       * the capture.
+       * Argument: A reference to struct cap_all_s.
+       */
+
+      case CAPIOC_ALL:
+        {
+          FAR struct cap_all_s *ptr =
+                     (FAR struct cap_all_s *)((uintptr_t)arg);
+          DEBUGASSERT(lower->ops->getduty != NULL && ptr);
+          DEBUGASSERT(lower->ops->getedges != NULL && ptr);
+          DEBUGASSERT(lower->ops->getfreq != NULL && ptr);
+
+          ret = lower->ops->getduty(lower, &ptr->duty);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          ret = lower->ops->getfreq(lower, &ptr->freq);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          ret = lower->ops->getedges(lower, &ptr->edges);
+          if (ret < 0)
+            {
+              break;
+            }
+        }
+        break;
+
       /* Any unrecognized IOCTL commands might be platform-specific ioctl
        * commands
        */
