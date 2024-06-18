@@ -20,8 +20,7 @@
 set(SRCS qemu_boardinit.c qemu_bringup.c)
 
 if(CONFIG_BOARDCTL)
-  list(APPEND SRCS qemu_appinit.c)
-
+  list(APPEND SRCS qemu_appinit.c qemu_power.c)
 endif()
 
 if(CONFIG_LIBC_FDT)
