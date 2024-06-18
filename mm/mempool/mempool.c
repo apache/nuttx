@@ -202,7 +202,7 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
        MM_DUMP_LEAK(dump->pid, buf->pid)) &&
       buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
     {
-      char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
+      char tmp[CONFIG_MM_BACKTRACE * BACKTRACE_PTR_FMT_WIDTH + 1] = "";
 
 #  if CONFIG_MM_BACKTRACE > 0
       FAR const char *format = " %0*p";
@@ -211,16 +211,16 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
       for (i = 0; i < CONFIG_MM_BACKTRACE &&
                       buf->backtrace[i]; i++)
         {
-          snprintf(tmp + i * MM_PTR_FMT_WIDTH,
-                   sizeof(tmp) - i * MM_PTR_FMT_WIDTH,
-                   format, MM_PTR_FMT_WIDTH - 1,
+          snprintf(tmp + i * BACKTRACE_PTR_FMT_WIDTH,
+                   sizeof(tmp) - i * BACKTRACE_PTR_FMT_WIDTH,
+                   format, BACKTRACE_PTR_FMT_WIDTH - 1,
                    buf->backtrace[i]);
         }
 #  endif
 
       syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
              buf->pid, blocksize, buf->seqno,
-             MM_PTR_FMT_WIDTH,
+             BACKTRACE_PTR_FMT_WIDTH,
              ((FAR char *)buf - pool->blocksize), tmp);
     }
 }
@@ -235,7 +235,7 @@ mempool_memdump_free_callback(FAR struct mempool_s *pool,
   if (buf->magic == MEMPOOL_MAGIC_FREE)
     {
       syslog(LOG_INFO, "%12zu%*p\n",
-             blocksize, MM_PTR_FMT_WIDTH,
+             blocksize, BACKTRACE_PTR_FMT_WIDTH,
              ((FAR char *)buf - pool->blocksize));
     }
 }
@@ -601,7 +601,7 @@ void mempool_memdump(FAR struct mempool_s *pool,
   /* Avoid race condition */
 
   syslog(LOG_INFO, "%12zu%*p skip block dump\n",
-         blocksize, MM_PTR_FMT_WIDTH, pool);
+         blocksize, BACKTRACE_PTR_FMT_WIDTH, pool);
 #endif
 }
 
