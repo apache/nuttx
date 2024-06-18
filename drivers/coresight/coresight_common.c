@@ -38,8 +38,6 @@
 #define CORESIGHT_UNLOCK               0xc5acce55
 #define CORESIGHT_LOCK                 0x0
 
-#define CORESIGHT_CLAIM_SELF_HOSTED    BIT(1)
-
 #define CORESIGHT_SOURCE_BITMAP_SIZE   32
 
 #define CORESIGHT_ETM_PMU_SEED         0x10
