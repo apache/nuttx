@@ -93,6 +93,9 @@
         (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) & \
         BIT_WORD_MASK(nr))
 
+#define find_first_zero_bit(addr, size) \
+         find_next_zero_bit((addr), (size), 0)
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -112,6 +115,11 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+#ifndef __ASSEMBLER__
+unsigned long find_next_zero_bit(FAR const unsigned long *addr,
+                                 unsigned long size,
+                                 unsigned long offset);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
