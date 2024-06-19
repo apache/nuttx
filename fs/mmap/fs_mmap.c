@@ -286,7 +286,11 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
   ret = file_mmap_(filep, start, length,
                    prot, flags, offset, MAP_USER, &mapped);
-  fs_putfilep(filep);
+  if (filep)
+    {
+      fs_putfilep(filep);
+    }
+
   if (ret < 0)
     {
       goto errout;
