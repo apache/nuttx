@@ -1288,7 +1288,8 @@ MCAN1 Loopback Test
 
     Device Drivers -> CAN Driver support
        CONFIG_CAN=y                            # Enable the upper-half CAN driver
-       CONFIG_CAN_FIFOSIZE=8
+       CONFIG_CAN_TXFIFOSIZE=8
+       CONFIG_CAN_RXFIFOSIZE=8
        CONFIG_CAN_NPENDINGRTR=4
 
     System Type -> SAMV7 Peripheral Selections

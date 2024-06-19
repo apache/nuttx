@@ -385,7 +385,11 @@ Cloudctrl-specific Configuration Options
 
    CONFIG_CAN - Enables CAN support (one or both of CONFIG_STM32_CAN1 or
    CONFIG_STM32_CAN2 must also be defined)
-   CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
+   CONFIG_CAN_TXFIFOSIZE - The size of the circular tx buffer
+   of CAN messages.
+   Default: 8
+   CONFIG_CAN_RXFIFOSIZE - The size of the circular rx buffer
+   of CAN messages.
    Default: 8
    CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
    Default: 4
