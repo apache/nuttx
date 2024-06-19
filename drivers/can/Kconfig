@@ -39,11 +39,19 @@ config CAN_FD
 	---help---
 		Enables support for the CAN_FD mode.
 
-config CAN_FIFOSIZE
-	int "CAN driver I/O buffer size"
+config CAN_TXFIFOSIZE
+	int "CAN driver I/O tx buffer size"
 	default 8
+	range 1 255
 	---help---
-		The size of the circular buffer of CAN messages. Default: 8
+		The size of the circular tx buffer of CAN messages. Default: 8
+
+config CAN_RXFIFOSIZE
+	int "CAN driver I/O rx buffer size"
+	default 8
+	range 1 255
+	---help---
+		The size of the circular rx buffer of CAN messages. Default: 8
 
 config CAN_NPENDINGRTR
 	int "Number of pending RTRs"

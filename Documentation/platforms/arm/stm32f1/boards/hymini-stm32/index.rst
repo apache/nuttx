@@ -282,7 +282,11 @@ HY-Mini specific Configuration Options
          CONFIG_STM32_CAN2 must also be defined)
        CONFIG_CAN_EXTID - Enables support for the 29-bit extended ID.  Default
          Standard 11-bit IDs.
-       CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
+       CONFIG_CAN_TXFIFOSIZE - The size of the circular tx buffer
+         of CAN messages.
+         Default: 8
+       CONFIG_CAN_RXFIFOSIZE - The size of the circular rx buffer
+         of CAN messages.
          Default: 8
        CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
          Default: 4
