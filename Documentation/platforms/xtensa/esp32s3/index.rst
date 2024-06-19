@@ -102,9 +102,9 @@ Building and flashing NuttX
 Bootloader and partitions
 -------------------------
 
-Nuttx can boot the ESP32-S3 directly using the so-called "Simple Boot". An externally-built
+NuttX can boot the ESP32-S3 directly using the so-called "Simple Boot". An externally-built
 2nd stage bootloader is not required in this case as all functions required to boot the device
-are built within Nuttx. Simple boot does not require any specific configuration (it is selectable
+are built within NuttX. Simple boot does not require any specific configuration (it is selectable
 by default if no other 2nd stage bootloader is used).
 
 If other features are required, an externally-built 2nd stage bootloader is needed. The bootloader
@@ -140,7 +140,23 @@ possible to build and flash the NuttX firmware simply by running::
 where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. ``ESPTOOL_BINDIR=./`` is the path of the
 externally-built 2nd stage bootloader and the partition table (if applicable): when built using the
 ``make bootloader``, these files are placed into ``nuttx`` folder. ``ESPTOOL_BAUD`` is able to
-change the flash baudrate if desired.
+change the flash baud rate if desired.
+
+Debugging with OpenOCD
+======================
+
+Please check `Building OpenOCD from Sources <https://docs.espressif.com/projects/esp-idf/en/release-v5.1/esp32s3/api-guides/jtag-debugging/index.html#jtag-debugging-building-openocd>`_
+for more information on how to build OpenOCD for ESP32-S3.
+
+The quickest and most convenient way to start with JTAG debugging is through a USB cable
+connected to the D+/D- USB pins of ESP32-S3. No need for an external JTAG adapter and
+extra wiring/cable to connect JTAG to ESP32-S3. Most of the ESP32-S3 boards have a
+USB connector that can be used for JTAG debugging.
+This is the case for the :ref:`ESP32-S3-DevKit <platforms/xtensa/esp32s3/boards/esp32s3-devkit/index:ESP32S3-DevKit>` board.
+
+OpenOCD can then be used::
+
+  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32s3-builtin.cfg
 
 Peripheral Support
 ==================

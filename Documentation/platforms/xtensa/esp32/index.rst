@@ -17,7 +17,7 @@ On dual-core SoCs, the two CPUs are typically named "PRO_CPU" and "APP_CPU"
 two CPUs are interchangeable.
 
 ESP32 Toolchain
-==================
+===============
 
 The toolchain used to build ESP32 firmware can be either downloaded or built from the sources.
 It is **highly** recommended to use (download or build) the same toolchain version that is being
@@ -96,8 +96,8 @@ build the toolchain with crosstool-NG on Linux are as follows
 These steps are given in the setup guide in
 `ESP-IDF documentation <https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html>`_.
 
-Flashing
-========
+Building and flashing NuttX
+===========================
 
 Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool.
 It's a two step process where the first converts the ELF file into a ESP32-compatible binary
@@ -107,6 +107,33 @@ flash your NuttX firmware simply by running::
     $ make flash ESPTOOL_PORT=<port>
 
 where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. You can change the baudrate by passing ``ESPTOOL_BAUD``.
+
+Debugging with OpenOCD
+======================
+
+Please check `Building OpenOCD from Sources <https://docs.espressif.com/projects/esp-idf/en/release-v5.1/esp32/api-guides/jtag-debugging/index.html#jtag-debugging-building-openocd>`_
+for more information on how to build OpenOCD for ESP32.
+
+ESP32 has dedicated pins for JTAG debugging. The following pins are used for JTAG debugging:
+
+============= ===========
+ESP32 Pin     JTAG Signal
+============= ===========
+MTDO / GPIO15 TDO
+MTDI / GPIO12 TDI
+MTCK / GPIO13 TCK
+MTMS / GPIO14 TMS
+============= ===========
+
+Some boards, like :ref:`ESP32-Ethernet-Kit V1.2 <platforms/xtensa/esp32/boards/esp32-ethernet-kit/index:ESP32-Ethernet-Kit V1.2>` and
+:ref:`ESP-WROVER-KIT <platforms/xtensa/esp32/boards/esp32-wrover-kit/index:ESP-WROVER-KIT>`, have a built-in JTAG debugger.
+
+Other boards that don't have any built-in JTAG debugger can be debugged using an external JTAG debugger, like the one
+described for the :ref:`ESP32-DevKitC <platforms/xtensa/esp32/boards/esp32-devkitc/index:Debugging with OpenOCD>`.
+
+OpenOCD can then be used::
+
+  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32-wrover-kit-1.8v.cfg
 
 Bootloader and partitions
 -------------------------
@@ -546,7 +573,7 @@ Now you can design an update and confirm agent to your application. Check the `M
 `MCUboot Espressif port documentation <https://docs.mcuboot.com/readme-espressif.html>`_ for
 more information on how to apply MCUboot. Also check some `notes about the NuttX MCUboot port <https://github.com/mcu-tools/mcuboot/blob/main/docs/readme-nuttx.md>`_,
 the `MCUboot porting guide <https://github.com/mcu-tools/mcuboot/blob/main/docs/PORTING.md>`_ and some
-`examples of MCUboot applied in Nuttx applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
+`examples of MCUboot applied in NuttX applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
 
 After you developed an application which implements all desired functions, you need to flash it into the primary image slot
 of the device (it will automatically be in the confirmed state, you can learn more about image
