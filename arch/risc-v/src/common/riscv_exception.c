@@ -64,7 +64,22 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
   "Instruction page fault",
   "Load page fault",
   "Reserved",
-  "Store/AMO page fault"
+  "Store/AMO page fault",
+#if RISCV_MAX_EXCEPTION > 15
+  "Reserved",
+#endif
+#if RISCV_MAX_EXCEPTION > 16
+  "Reserved",
+#endif
+#if RISCV_MAX_EXCEPTION > 17
+  "Software check",
+#endif
+#if RISCV_MAX_EXCEPTION > 18
+  "Hardware error"
+#endif
+#ifdef RISCV_CUSTOM_EXCEPTION_REASONS
+  RISCV_CUSTOM_EXCEPTION_REASONS
+#endif
 };
 
 /****************************************************************************
@@ -289,7 +304,7 @@ void riscv_exception_attach(void)
   irq_attach(RISCV_IRQ_STOREPF, riscv_exception, NULL);
 #endif
 
-  irq_attach(RISCV_IRQ_RESERVED, riscv_exception, NULL);
+  irq_attach(RISCV_IRQ_RESERVED14, riscv_exception, NULL);
 
 #ifdef CONFIG_SMP
   irq_attach(RISCV_IRQ_SOFT, riscv_pause_handler, NULL);

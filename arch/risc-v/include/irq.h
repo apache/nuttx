@@ -50,9 +50,31 @@
 #endif
 #define __XSTR(s)   __STR(s)
 
-/* Map RISC-V exception code to NuttX IRQ */
+/****************************************************************************
+ * Map RISC-V exception code to NuttX IRQ,
+ * the exception that code > 19 is reserved or custom exception.
+ *
+ * The content of vector table:
+ *
+ * |            IRQ            |              Comments              |
+ * |:-------------------------:|:----------------------------------:|
+ * |             0             |   Instruction Address Misaligned   |
+ * |             1             |      Instruction Access Fault      |
+ * |             2             |         Illegal Instruction        |
+ * |            ...            |          Other exceptions          |
+ * |    RISCV_MAX_EXCEPTION    |  The IRQ number of last exception  |
+ * |  RISCV_MAX_EXCEPTION + 1  |  The IRQ number of first interrupt |
+ * |  RISCV_MAX_EXCEPTION + 2  | The IRQ number of second interrupt |
+ * | RISCV_MAX_EXCEPTION + xxx |   The IRQ number of xxx interrupt  |
+ *
+ * And please provide the definition of custom exception if exists:
+ * #define RISCV_CUSTOM_EXCEPTION_REASONS  \
+ *    "Custom exception1", \
+ *    "Custom exception2",
+ *
+ ****************************************************************************/
 
-/* IRQ 0-15 : (exception:interrupt=0) */
+/* IRQ 0-RISCV_MAX_EXCEPTION : (exception:interrupt=0) */
 
 #define RISCV_IRQ_IAMISALIGNED  (0)   /* Instruction Address Misaligned */
 #define RISCV_IRQ_IAFAULT       (1)   /* Instruction Access Fault */
@@ -68,14 +90,22 @@
 #define RISCV_IRQ_ECALLM        (11)  /* Environment Call from M-mode */
 #define RISCV_IRQ_INSTRUCTIONPF (12)  /* Instruction page fault */
 #define RISCV_IRQ_LOADPF        (13)  /* Load page fault */
-#define RISCV_IRQ_RESERVED      (14)  /* Reserved */
+#define RISCV_IRQ_RESERVED14    (14)  /* Reserved */
 #define RISCV_IRQ_STOREPF       (15)  /* Store/AMO page fault */
+#define RISCV_IRQ_RESERVED16    (16)  /* Reserved */
+#define RISCV_IRQ_RESERVED17    (17)  /* Reserved */
+#define RISCV_IRQ_SOFTWARE      (18)  /* Software check */
+#define RISCV_IRQ_HARDWARE      (19)  /* Hardware error */
 
-#define RISCV_MAX_EXCEPTION     (15)
+/* Keep origin definition here for compatibility */
 
-/* IRQ 16- : (async event:interrupt=1) */
+#ifndef RISCV_MAX_EXCEPTION
+#  define RISCV_MAX_EXCEPTION   (15)
+#endif
 
-#define RISCV_IRQ_ASYNC         (16)
+/* IRQ (RISCV_MAX_EXCEPTION + 1)- : (async event:interrupt=1) */
+
+#define RISCV_IRQ_ASYNC         (RISCV_MAX_EXCEPTION + 1)
 #define RISCV_IRQ_SSOFT         (RISCV_IRQ_ASYNC + 1)  /* Supervisor Software Int */
 #define RISCV_IRQ_MSOFT         (RISCV_IRQ_ASYNC + 3)  /* Machine Software Int */
 #define RISCV_IRQ_STIMER        (RISCV_IRQ_ASYNC + 5)  /* Supervisor Timer Int */
