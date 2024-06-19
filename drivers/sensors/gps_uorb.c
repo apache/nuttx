@@ -44,7 +44,6 @@
 #define GPS_SATELLITE_IDX     1
 #define GPS_MAX_IDX           2
 
-#define GPS_RECV_BUFFERSIZE   2048
 #define GPS_PARSE_BUFFERSIZE  256
 
 #define GPS_KNOT_TO_KMH       1.852f
@@ -685,7 +684,8 @@ int gps_register(FAR struct gps_lowerhalf_s *lower, int devno,
       goto satellite_err;
     }
 
-  ret = circbuf_init(&upper->buffer, NULL, GPS_RECV_BUFFERSIZE);
+  ret = circbuf_init(&upper->buffer, NULL,
+                     CONFIG_SENSORS_GPS_RECV_BUFFERSIZE);
   if (ret < 0)
     {
       goto circ_err;
