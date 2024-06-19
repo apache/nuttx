@@ -202,7 +202,7 @@ int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
  *        only file system that meets this requirement.
  *     b. The underlying block driver supports the BIOC_XIPBASE ioctl
  *        command that maps the underlying media to a randomly accessible
- *        address. At  present, only the RAM/ROM disk driver does this.
+ *        address. At present, only the RAM/ROM disk driver does this.
  *
  *   2. If CONFIG_FS_RAMMAP is defined in the configuration, then mmap() will
  *      support simulation of memory mapped files by copying files whole
