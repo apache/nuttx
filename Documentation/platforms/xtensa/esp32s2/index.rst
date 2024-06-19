@@ -89,48 +89,77 @@ build the toolchain with crosstool-NG on Linux are as follows
 These steps are given in the setup guide in
 `ESP-IDF documentation <https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html>`_.
 
-Flashing
-========
-
-Firmware for ESP32-S2 is flashed via the USB/UART or internal USB DEVICE JTAG interface using the
-``esptool.py`` tool.
-It's a two-step process where the first converts the ELF file into a ESP32-S2 compatible binary
-and the second flashes it to the board.  These steps are included in the build system and you can
-flash your NuttX firmware simply by running::
-
-    $ make flash ESPTOOL_PORT=<port>
-
-where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. You can change the baudrate by passing ``ESPTOOL_BAUD``.
+Building and flashing NuttX
+===========================
 
 Bootloader and partitions
 -------------------------
 
-ESP32-S2 requires a bootloader to be flashed as well as a set of FLASH partitions. This is only needed the first time
-(or any time you which to modify either of these).
-An easy way is to use prebuilt binaries for NuttX `from here <https://github.com/espressif/esp-nuttx-bootloader>`__.
-In there you will find instructions to rebuild these if necessary.
-Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BINDIR`` parameter, pointing to the directory where these binaries were downloaded:
+NuttX can boot the ESP32-S2 directly using the so-called "Simple Boot". An externally-built
+2nd stage bootloader is not required in this case as all functions required to boot the device
+are built within NuttX. Simple boot does not require any specific configuration (it is selectable
+by default if no other 2nd stage bootloader is used).
 
-.. code-block:: console
+If other features are required, an externally-built 2nd stage bootloader is needed. The bootloader
+is built using the ``make bootloader`` command. This command generates the firmware in the
+``nuttx`` folder. The ``ESPTOOL_BINDIR`` is used in the ``make flash`` command to specify the path
+to the bootloader. For compatibility among other SoCs and future options of 2nd stage bootloaders,
+the commands ``make bootloader`` and the ``ESPTOOL_BINDIR`` option (for the ``make flash``) can be
+used even if no externally-built 2nd stage bootloader is being built (they will be ignored if
+Simple Boot is used, for instance)::
 
-   $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=<dir>
+  $ make bootloader
 
-.. note:: It is recommended that if this is the first time you are using the board with NuttX that you perform a complete
-   SPI FLASH erase.
+.. note:: It is recommended that if this is the first time you are using the board with NuttX to
+   perform a complete SPI FLASH erase.
 
-   .. code-block:: console
+    .. code-block:: console
 
       $ esptool.py erase_flash
 
-.. note:: Alternatively, you can automatically download the bootloader/partitions from the NuttX build system
-   by using the following command:
+Building and Flashing
+---------------------
 
-   .. code-block:: console
+First, make sure that ``esptool.py`` is installed.  This tool is used to convert the ELF to a
+compatible ESP32-S2 image and to flash the image into the board.
+It can be installed with: ``pip install esptool==4.8.dev4``.
 
-      $ make bootloader
+It's a two-step process where the first converts the ELF file into an ESP32-S2 compatible binary
+and the second flashes it to the board. These steps are included in the build system and it is
+possible to build and flash the NuttX firmware simply by running::
 
-      The binaries will be downloaded to the project's main folder and ``ESPTOOL_BINDIR`` may be set as ``.``
+    $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=./
 
+where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. ``ESPTOOL_BINDIR=./`` is the path of the
+externally-built 2nd stage bootloader and the partition table (if applicable): when built using the
+``make bootloader``, these files are placed into ``nuttx`` folder. ``ESPTOOL_BAUD`` is able to
+change the flash baud rate if desired.
+
+Debugging with OpenOCD
+======================
+
+Please check `Building OpenOCD from Sources <https://docs.espressif.com/projects/esp-idf/en/release-v5.1/esp32s2/api-guides/jtag-debugging/index.html#jtag-debugging-building-openocd>`_
+for more information on how to build OpenOCD for ESP32-S2.
+
+ESP32-S2 has dedicated pins for JTAG debugging. The following pins are used for JTAG debugging:
+
+============= ===========
+ESP32-S2 Pin  JTAG Signal
+============= ===========
+MTDO / GPIO40 TDO
+MTDI / GPIO41 TDI
+MTCK / GPIO39 TCK
+MTMS / GPIO42 TMS
+============= ===========
+
+Some boards, like :ref:`ESP32-S2-Kaluga-1 Kit v1.3 <platforms/xtensa/esp32s2/boards/esp32s2-kaluga-1/index:ESP32-S2-Kaluga-1 Kit v1.3>` have a built-in JTAG debugger.
+
+Other boards that don't have any built-in JTAG debugger can be debugged using an external JTAG debugger being connected
+directly to the ESP32-S2 JTAG pins.
+
+OpenOCD can then be used::
+
+  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32s2-kaluga-1.cfg
 
 Peripheral Support
 ==================
@@ -400,7 +429,7 @@ Now you can design an update and confirm agent to your application. Check the `M
 `MCUboot Espressif port documentation <https://docs.mcuboot.com/readme-espressif.html>`_ for
 more information on how to apply MCUboot. Also check some `notes about the NuttX MCUboot port <https://github.com/mcu-tools/mcuboot/blob/main/docs/readme-nuttx.md>`_,
 the `MCUboot porting guide <https://github.com/mcu-tools/mcuboot/blob/main/docs/PORTING.md>`_ and some
-`examples of MCUboot applied in Nuttx applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
+`examples of MCUboot applied in NuttX applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
 
 After you developed an application which implements all desired functions, you need to flash it into the primary image slot
 of the device (it will automatically be in the confirmed state, you can learn more about image

@@ -28,7 +28,7 @@ ESP32-H2 Toolchain
 
 A generic RISC-V toolchain can be used to build ESP32-H2 projects. It's recommended to use the same
 toolchain used by NuttX CI. Please refer to the Docker
-`container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_ and 
+`container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_ and
 check for the current compiler version being used. For instance:
 
 .. code-block::
@@ -68,19 +68,22 @@ Add the toolchain to your `PATH`:
 
 You can edit your shell's rc files if you don't use bash.
 
-Second stage bootloader
-=======================
+Building and flashing NuttX
+===========================
 
-Nuttx can boot the ESP32-H2 directly using the so-called "Simple Boot". 
+Bootloader and partitions
+-------------------------
+
+NuttX can boot the ESP32-H2 directly using the so-called "Simple Boot".
 An externally-built 2nd stage bootloader is not required in this case as all
-functions required to boot the device are built within Nuttx. Simple boot does not
+functions required to boot the device are built within NuttX. Simple boot does not
 require any specific configuration (it is selectable by default if no other
 2nd stage bootloader is used). For compatibility among other SoCs and future options
 of 2nd stage bootloaders, the commands ``make bootloader`` and the ``ESPTOOL_BINDIR``
 option (for the ``make flash``) are kept (and ignored if Simple Boot is used).
 
 Building and flashing
-=====================
+---------------------
 
 First, make sure that ``esptool.py`` is installed.  This tool is used to convert
 the ELF to a compatible ESP32-H2 image and to flash the image into the board.
@@ -109,7 +112,7 @@ USB-to-JTAG adapter.
 
 OpenOCD can then be used::
 
-  openocd -c 'set ESP_RTOS none' -f board/esp32h2-builtin.cfg
+  openocd -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32h2-builtin.cfg
 
 If you want to debug with an external JTAG adapter it can
 be connected as follows::
@@ -125,7 +128,7 @@ Furthermore, an efuse needs to be burnt to be able to debug::
 
 OpenOCD can then be used::
 
-  openocd  -c 'set ESP_RTOS none' -f board/esp32h2-ftdi.cfg
+  openocd  -c 'set ESP_RTOS hwthread; set ESP_FLASH_SIZE 0' -f board/esp32h2-ftdi.cfg
 
 Peripheral Support
 ==================
