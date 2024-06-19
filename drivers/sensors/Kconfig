@@ -31,6 +31,15 @@ config SENSORS_GPS
 	---help---
 		Allow application to use gps by /dev/uorb/gps or /dev/ttyGPS
 
+config SENSORS_GPS_RECV_BUFFERSIZE
+	int "The size of recvive buffer for nmea message in gps driver"
+	default 2048
+	depends on SENSORS_GPS
+	---help---
+		The size of recvive buffer for nmea message in gps driver, if
+		the nmea message happen overwrite when driver push, you can increase
+		the size.
+
 config SENSORS_WTGAHRS2
 	bool "Wtgahrs2 Sensor Support"
 	default n
