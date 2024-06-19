@@ -465,7 +465,7 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
           /* Increment the head of the circular message buffer */
 
-          if (++fifo->rx_head >= CONFIG_CAN_FIFOSIZE)
+          if (++fifo->rx_head >= CONFIG_CAN_RXFIFOSIZE)
             {
               fifo->rx_head = 0;
             }
@@ -549,7 +549,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
        */
 
       tmpndx = dev->cd_xmit.tx_queue;
-      if (++dev->cd_xmit.tx_queue >= CONFIG_CAN_FIFOSIZE)
+      if (++dev->cd_xmit.tx_queue >= CONFIG_CAN_TXFIFOSIZE)
         {
           dev->cd_xmit.tx_queue = 0;
         }
@@ -615,7 +615,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
        */
 
       nexttail = fifo->tx_tail + 1;
-      if (nexttail >= CONFIG_CAN_FIFOSIZE)
+      if (nexttail >= CONFIG_CAN_TXFIFOSIZE)
         {
           nexttail = 0;
         }
@@ -885,7 +885,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case FIONWRITE:
         {
-          *(FAR uint8_t *)arg = CONFIG_CAN_FIFOSIZE - 1 -
+          *(FAR uint8_t *)arg = CONFIG_CAN_TXFIFOSIZE - 1 -
                             (dev->cd_xmit.tx_tail - dev->cd_xmit.tx_head);
         }
         break;
@@ -997,7 +997,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
        */
 
       ndx = dev->cd_xmit.tx_tail + 1;
-      if (ndx >= CONFIG_CAN_FIFOSIZE)
+      if (ndx >= CONFIG_CAN_TXFIFOSIZE)
         {
           ndx = 0;
         }
@@ -1188,7 +1188,7 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
       fifo = &reader->fifo;
 
       nexttail = fifo->rx_tail + 1;
-      if (nexttail >= CONFIG_CAN_FIFOSIZE)
+      if (nexttail >= CONFIG_CAN_RXFIFOSIZE)
         {
           nexttail = 0;
         }
@@ -1358,7 +1358,7 @@ int can_txdone(FAR struct can_dev_s *dev)
 
       /* Remove the message at the head of the xmit FIFO */
 
-      if (++dev->cd_xmit.tx_head >= CONFIG_CAN_FIFOSIZE)
+      if (++dev->cd_xmit.tx_head >= CONFIG_CAN_TXFIFOSIZE)
         {
           dev->cd_xmit.tx_head = 0;
         }

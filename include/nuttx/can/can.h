@@ -59,7 +59,11 @@
  * CONFIG_CAN_FD - Enable support for CAN FD mode.
  *   For the upper half driver, this just means handling encoded DLC values
  *   (for values of DLC > 9).
- * CONFIG_CAN_FIFOSIZE - The size of the circular buffer of CAN messages.
+ * CONFIG_CAN_TXFIFOSIZE - The size of the circular tx buffer
+ *   of CAN messages.
+ *   Default: 8
+ * CONFIG_CAN_RXFIFOSIZE - The size of the circular rx buffer
+ *   of CAN messages.
  *   Default: 8
  * CONFIG_CAN_NPENDINGRTR - The size of the list of pending RTR requests.
  *   Default: 4
@@ -81,11 +85,18 @@
  * The configured size is limited to 255 to fit into a uint8_t.
  */
 
-#if !defined(CONFIG_CAN_FIFOSIZE)
-#  define CONFIG_CAN_FIFOSIZE 8
-#elif CONFIG_CAN_FIFOSIZE > 255
-#  undef  CONFIG_CAN_FIFOSIZE
-#  define CONFIG_CAN_FIFOSIZE 255
+#if !defined(CONFIG_CAN_TXFIFOSIZE)
+#  define CONFIG_CAN_TXFIFOSIZE 8
+#elif CONFIG_CAN_TXFIFOSIZE > 255
+#  undef  CONFIG_CAN_TXFIFOSIZE
+#  define CONFIG_CAN_TXFIFOSIZE 255
+#endif
+
+#if !defined(CONFIG_CAN_RXFIFOSIZE)
+#  define CONFIG_CAN_RXFIFOSIZE 8
+#elif CONFIG_CAN_RXFIFOSIZE > 255
+#  undef  CONFIG_CAN_RXFIFOSIZE
+#  define CONFIG_CAN_RXFIFOSIZE 255
 #endif
 
 #if !defined(CONFIG_CAN_NPENDINGRTR)
@@ -554,7 +565,7 @@ struct can_rxfifo_s
   uint8_t       rx_head;                 /* Index to the head [IN] in the circular buffer */
   uint8_t       rx_tail;                 /* Index to the tail [OUT] in the circular buffer */
                                          /* Circular buffer of CAN messages */
-  struct can_msg_s rx_buffer[CONFIG_CAN_FIFOSIZE];
+  struct can_msg_s rx_buffer[CONFIG_CAN_RXFIFOSIZE];
 };
 
 struct can_txfifo_s
@@ -564,7 +575,7 @@ struct can_txfifo_s
   uint8_t       tx_queue;                /* Index to next message to send */
   uint8_t       tx_tail;                 /* Index to the tail [OUT] in the circular buffer */
                                          /* Circular buffer of CAN messages */
-  struct can_msg_s tx_buffer[CONFIG_CAN_FIFOSIZE];
+  struct can_msg_s tx_buffer[CONFIG_CAN_TXFIFOSIZE];
 };
 
 /* The following structure define the logic to handle
