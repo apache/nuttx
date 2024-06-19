@@ -44,6 +44,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static FAR const char *
+rpmsg_port_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rpmsg_port_get_cpuname(FAR struct rpmsg_s *rpmsg);
 static int rpmsg_port_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
 static int rpmsg_port_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
@@ -59,6 +61,7 @@ static const struct rpmsg_ops_s g_rpmsg_port_ops =
   NULL,
   NULL,
   NULL,
+  rpmsg_port_get_local_cpuname,
   rpmsg_port_get_cpuname,
   rpmsg_port_get_tx_buffer_size,
   rpmsg_port_get_rx_buffer_size,
@@ -513,6 +516,18 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_get_local_cpuname
+ ****************************************************************************/
+
+static FAR const char *
+rpmsg_port_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
+{
+  FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
+
+  return port->local_cpuname;
+}
+
+/****************************************************************************
  * Name: rpmsg_port_get_cpuname
  ****************************************************************************/
 
@@ -709,10 +724,16 @@ void rpmsg_port_queue_add_buffer(FAR struct rpmsg_port_queue_s *queue,
  * Name: rpmsg_port_register
  ****************************************************************************/
 
-int rpmsg_port_register(FAR struct rpmsg_port_s *port)
+int rpmsg_port_register(FAR struct rpmsg_port_s *port,
+                        FAR const char *local_cpuname)
 {
   char name[64];
   int ret;
+
+  if (local_cpuname)
+    {
+      strlcpy(port->local_cpuname, local_cpuname, RPMSG_NAME_SIZE);
+    }
 
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->cpuname);
   ret = rpmsg_register(name, &port->rpmsg, &g_rpmsg_port_ops);

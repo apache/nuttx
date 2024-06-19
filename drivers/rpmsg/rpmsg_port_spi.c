@@ -324,7 +324,7 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         else
           {
             rpspi->txavail = rxhdr->avail;
-            rpmsg_port_register(&rpspi->port);
+            rpmsg_port_register(&rpspi->port, NULL);
           }
 
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);

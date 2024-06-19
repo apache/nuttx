@@ -115,6 +115,8 @@ struct rpmsg_port_s
   struct rpmsg_port_queue_s         txq;    /* Port tx queue */
   struct rpmsg_port_queue_s         rxq;    /* Port rx queue */
 
+  char                              local_cpuname[RPMSG_NAME_SIZE];
+
   /* Remote cpu name of this port connected to */
 
   char                              cpuname[RPMSG_NAME_SIZE];
@@ -301,14 +303,16 @@ void rpmsg_port_uninitialize(FAR struct rpmsg_port_s *port);
  *   two cpus has established.
  *
  * Input Parameters:
- *   port - The port has established a connection.
+ *   port          - The port has established a connection.
+ *   local_cpuname - The local cpuname
  *
  * Returned Value:
  *   Zero on success or an negative value on failure.
  *
  ****************************************************************************/
 
-int rpmsg_port_register(FAR struct rpmsg_port_s *port);
+int rpmsg_port_register(FAR struct rpmsg_port_s *port,
+                        FAR const char *local_cpuname);
 
 /****************************************************************************
  * Name: rpmsg_port_unregister

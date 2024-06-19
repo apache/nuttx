@@ -125,6 +125,7 @@ static int rptun_ioctl(FAR struct rpmsg_s *rpmsg, int cmd,
                        unsigned long arg);
 static void rptun_panic_(FAR struct rpmsg_s *rpmsg);
 static void rptun_dump(FAR struct rpmsg_s *rpmsg);
+static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg);
 static int rptun_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
 static int rptun_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
@@ -162,6 +163,7 @@ static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
   rptun_ioctl,
   rptun_panic_,
   rptun_dump,
+  rptun_get_local_cpuname,
   rptun_get_cpuname,
   rptun_get_tx_buffer_size,
   rptun_get_rx_buffer_size,
@@ -614,6 +616,13 @@ static void rptun_dump(FAR struct rpmsg_s *rpmsg)
 #ifdef CONFIG_RPTUN_PM
   metal_log(METAL_LOG_EMERGENCY, "rptun headrx %d\n", priv->headrx);
 #endif
+}
+
+static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
+{
+  FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
+
+  return RPTUN_GET_LOCAL_CPUNAME(priv->dev);
 }
 
 static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg)

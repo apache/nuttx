@@ -80,6 +80,8 @@ struct rpmsg_router_edge_s
  ****************************************************************************/
 
 static FAR const char *
+rpmsg_router_edge_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
+static FAR const char *
 rpmsg_router_edge_get_cpuname(FAR struct rpmsg_s *rpmsg);
 static int rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
 static int rpmsg_router_edge_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
@@ -95,6 +97,7 @@ static const struct rpmsg_ops_s g_rpmsg_router_edge_ops =
   NULL,
   NULL,
   NULL,
+  rpmsg_router_edge_get_local_cpuname,
   rpmsg_router_edge_get_cpuname,
   rpmsg_router_edge_get_tx_buffer_size,
   rpmsg_router_edge_get_rx_buffer_size,
@@ -103,6 +106,16 @@ static const struct rpmsg_ops_s g_rpmsg_router_edge_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rpmsg_router_edge_get_local_cpuname
+ ****************************************************************************/
+
+static FAR const char *
+rpmsg_router_edge_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
+{
+  return NULL;
+}
 
 /****************************************************************************
  * Name: rpmsg_router_edge_get_cpuname
