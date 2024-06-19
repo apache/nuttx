@@ -41,6 +41,23 @@
 /* Access macros ************************************************************/
 
 /****************************************************************************
+ * Name: RPMSG_VIRTIO_GET_LOCAL_CPUNAME
+ *
+ * Description:
+ *   Get remote cpu name
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *
+ * Returned Value:
+ *   Cpu name on success, NULL on failure.
+ *
+ ****************************************************************************/
+
+#define RPMSG_VIRTIO_GET_LOCAL_CPUNAME(d) \
+  ((d)->ops->get_local_cpuname ? (d)->ops->get_local_cpuname(d) : "")
+
+/****************************************************************************
  * Name: RPMSG_VIRTIO_GET_CPUNAME
  *
  * Description:
@@ -148,6 +165,7 @@ struct aligned_data(8) rpmsg_virtio_rsc_s
 struct rpmsg_virtio_s;
 struct rpmsg_virtio_ops_s
 {
+  CODE FAR const char *(*get_local_cpuname)(FAR struct rpmsg_virtio_s *dev);
   CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_virtio_s *dev);
   CODE FAR struct rpmsg_virtio_rsc_s *
   (*get_resource)(FAR struct rpmsg_virtio_s *dev);

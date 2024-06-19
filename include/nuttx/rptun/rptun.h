@@ -49,6 +49,23 @@
 /* Access macros ************************************************************/
 
 /****************************************************************************
+ * Name: RPTUN_GET_LOCAL_CPUNAME
+ *
+ * Description:
+ *   Get local cpu name
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *
+ * Returned Value:
+ *   Cpu name on success, NULL on failure.
+ *
+ ****************************************************************************/
+
+#define RPTUN_GET_LOCAL_CPUNAME(d) ((d)->ops->get_local_cpuname ? \
+                                    (d)->ops->get_local_cpuname(d) : "")
+
+/****************************************************************************
  * Name: RPTUN_GET_CPUNAME
  *
  * Description:
@@ -317,6 +334,7 @@ struct aligned_data(8) rptun_rsc_s
 struct rptun_dev_s;
 struct rptun_ops_s
 {
+  CODE FAR const char *(*get_local_cpuname)(FAR struct rptun_dev_s *dev);
   CODE FAR const char *(*get_cpuname)(FAR struct rptun_dev_s *dev);
   CODE FAR const char *(*get_firmware)(FAR struct rptun_dev_s *dev);
 

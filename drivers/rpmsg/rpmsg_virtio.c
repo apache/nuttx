@@ -70,6 +70,8 @@ struct rpmsg_virtio_priv_s
 static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg);
+static FAR const char *
+rpmsg_virtio_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rpmsg_virtio_get_cpuname(FAR struct rpmsg_s *rpmsg);
 static int rpmsg_virtio_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
 static int rpmsg_virtio_get_rx_buffer_size_(FAR struct rpmsg_s *rpmsg);
@@ -96,6 +98,7 @@ static const struct rpmsg_ops_s g_rpmsg_virtio_ops =
   .wait               = rpmsg_virtio_wait,
   .post               = rpmsg_virtio_post,
   .dump               = rpmsg_virtio_dump,
+  .get_local_cpuname  = rpmsg_virtio_get_local_cpuname,
   .get_cpuname        = rpmsg_virtio_get_cpuname,
   .get_tx_buffer_size = rpmsg_virtio_get_tx_buffer_size,
   .get_rx_buffer_size = rpmsg_virtio_get_rx_buffer_size_,
@@ -388,6 +391,15 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg)
   /* Nothing */
 }
 #endif
+
+static FAR const char *
+rpmsg_virtio_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
+{
+  FAR struct rpmsg_virtio_priv_s *priv =
+    (FAR struct rpmsg_virtio_priv_s *)rpmsg;
+
+  return RPMSG_VIRTIO_GET_LOCAL_CPUNAME(priv->dev);
+}
 
 static FAR const char *rpmsg_virtio_get_cpuname(FAR struct rpmsg_s *rpmsg)
 {

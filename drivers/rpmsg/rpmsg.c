@@ -183,6 +183,24 @@ int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
   return rpmsg->ops->post(rpmsg, sem);
 }
 
+FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+  FAR const char *cpuname = NULL;
+
+  if (rpmsg == NULL)
+    {
+      return NULL;
+    }
+
+  if (rpmsg->ops->get_local_cpuname)
+    {
+      cpuname = rpmsg->ops->get_local_cpuname(rpmsg);
+    }
+
+  return cpuname && cpuname[0] ? cpuname : CONFIG_RPMSG_LOCAL_CPUNAME;
+}
+
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
