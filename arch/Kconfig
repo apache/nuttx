@@ -286,6 +286,10 @@ config ARCH_TOOLCHAIN_TASKING
 	bool
 	default n
 
+config ARCH_TOOLCHAIN_GHS
+	bool
+	default n
+
 config ARCH_GNU_NO_WEAKFUNCTIONS
 	bool
 	depends on ARCH_TOOLCHAIN_GNU
