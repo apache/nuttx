@@ -9,17 +9,17 @@ comment "ESP32-S3 Configuration Options"
 
 choice
 	prompt "ESP32-S3 Chip Selection"
-	default ARCH_CHIP_ESP32S3WROOM1
+	default ARCH_CHIP_ESP32S3WROOM1N4
 
-config ARCH_CHIP_ESP32S3WROOM1
-	bool "ESP32-S3-WROOM-1"
+config ARCH_CHIP_ESP32S3WROOM1N4
+	bool "ESP32-S3-WROOM-1-N4"
 	select ESP32S3_FLASH_4M
 	select ARCH_HAVE_I2CRESET
 	---help---
-		Generic module with an embedded ESP32-S3.
+		Generic module with an embedded ESP32-S3. This chip comes with 4MB SPI Flash
 
-config ARCH_CHIP_ESP32S3WROOM2
-	bool "ESP32-S3-WROOM-2 with 16MB Flash"
+config ARCH_CHIP_ESP32S3WROOM2N16R8V
+	bool "ESP32-S3-WROOM-2-N16R8V"
 	select ESP32S3_FLASH_16M
 	select ESP32S3_PSRAM_8M
 	select ARCH_HAVE_I2CRESET
@@ -29,8 +29,8 @@ config ARCH_CHIP_ESP32S3WROOM2
 		Note: depending on the modules, WROOM2 has 16MB flash
 		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
 
-config ARCH_CHIP_ESP32S3WROOM2_32M
-	bool "ESP32-S3-WROOM-2 with 32MB Flash"
+config ARCH_CHIP_ESP32S3WROOM2N32R8V
+	bool "ESP32-S3-WROOM-2-N32R8V"
 	select ESP32S3_FLASH_32M
 	select ESP32S3_PSRAM_8M
 	select ARCH_HAVE_I2CRESET
@@ -40,12 +40,20 @@ config ARCH_CHIP_ESP32S3WROOM2_32M
 		Note: depending on the modules, WROOM2 has 16MB flash
 		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
 
-config ARCH_CHIP_ESP32S3MINI1
-	bool "ESP32-S3-MINI-1"
+config ARCH_CHIP_ESP32S3MINI1N8
+	bool "ESP32-S3-MINI-1-N8"
 	select ESP32S3_FLASH_8M
 	select ARCH_HAVE_I2CRESET
 	---help---
-		Generic module with an embedded ESP32-S3.
+		Generic ESP32S3-Mini Module with 8MB of Flash
+
+config ARCH_CHIP_ESP32S3CUSTOM
+	bool "ESP32-S3-Custom-Module"
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3. Chip Flash Size should be selected
+		under SPI FLash Menu. 
+
 
 endchoice # ESP32-S3 Chip Selection
 
@@ -274,7 +282,7 @@ config ESP32S3_FLASH_DETECT
 		Auto detect flash size when flashing.
 
 config ESP32S3_PSRAM_8M
-	bool
+	bool "ESP32S3 PSRAM 8M"
 	default n
 
 config ESP32S3_RUN_IRAM
@@ -1880,6 +1888,29 @@ config ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 		if select the option, it will force to use source code instead
 		of functions in ROM, so that SPI flash driver can access full
 		32-bit address.
+		
+choice ESP32S3_FLASH_SIZE
+	prompt "ESP32S3 Custom Module Flash Size"
+	depends on ARCH_CHIP_ESP32S3CUSTOM
+	default ESP32S3CUSTOM_FLASH_4M
+
+	config ESP32S3CUSTOM_FLASH_4M
+		bool "ESP32S3 Flash 4MB"
+		select ESP32S3_FLASH_4M
+
+	config ESP32S3CUSTOM_FLASH_8M
+		bool "ESP32S3 Flash 8MB"
+		select ESP32S3_FLASH_8M
+
+	config ESP32S3CUSTOM_FLASH_16M
+		bool "ESP32S3 Flash 16MB"
+		select ESP32S3_FLASH_16M
+
+	config ESP32S3CUSTOM_FLASH_32M
+		bool "ESP32S3 Flash 32MB"
+		select ESP32S3_FLASH_32M
+		select ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
+endchoice # ESP32S3_FLASH_SIZE
 
 config ESP32S3_HAVE_OTA_PARTITION
 	bool
