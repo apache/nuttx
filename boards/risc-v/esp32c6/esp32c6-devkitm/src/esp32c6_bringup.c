@@ -37,6 +37,7 @@
 #include "esp_board_ledc.h"
 #include "esp_board_spiflash.h"
 #include "esp_board_i2c.h"
+#include "esp_board_bmp180.h"
 
 #ifdef CONFIG_WATCHDOG
 #  include "espressif/esp_wdt.h"
@@ -235,6 +236,18 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+  /* Try to register BMP180 device in I2C0 */
+
+  ret = board_bmp180_initialize(0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180 "
+             "Driver for I2C0: %d\n", ret);
     }
 #endif
 

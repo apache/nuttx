@@ -88,6 +88,17 @@ All of the configurations presented below can be tested by running the following
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
 
+bmp180
+------
+
+This configuration enables the use of the BMP180 pressure sensor over I2C.
+You can check that the sensor is working by using the ``bmp180`` application::
+
+    nsh> bmp180
+    Pressure value = 91531
+    Pressure value = 91526
+    Pressure value = 91525
+
 coremark
 --------
 
