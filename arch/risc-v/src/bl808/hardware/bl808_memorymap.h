@@ -28,6 +28,10 @@
 /* Register Base Address ****************************************************/
 
 #define BL808_UART3_BASE   0x30002000ul
-#define BL808_PLIC_BASE    0xe0000000ul
+
+#define IPC0_BASE          0x2000a800ul
+#define IPC2_BASE          0x30005000ul          
+
+#define BL808_PLIC_BASE    0xe0000000ul 
 
 #endif /* __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_MEMORYMAP_H */

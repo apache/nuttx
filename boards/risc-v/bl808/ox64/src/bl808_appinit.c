@@ -34,6 +34,7 @@
 #include <sys/mount.h>
 #include <sys/boardctl.h>
 #include <arch/board/board_memorymap.h>
+#include "bl808_courier.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -156,6 +157,10 @@ void board_late_initialize(void)
   /* Mount the RAM Disk */
 
   mount_ramdisk();
+
+  /* Initialize courier to get IRQs from M0 */
+
+  bl808_courier_init();
 
   /* Perform board-specific initialization */
 
