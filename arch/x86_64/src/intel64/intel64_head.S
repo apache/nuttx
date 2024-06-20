@@ -276,7 +276,7 @@ start64_init:
 	 * This creates maps the lower 1GB to 4GB~5GB
 	 */
 	lea     g_pdpt_low, %edi
-	mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
+	mov     $(X86_PDPT_KERNEL_MAP), %eax
 
 	mov     $0x4,   %ecx
 	mov     %eax,   0(%edi, %ecx, X86_PAGE_ENTRY_SIZE)
