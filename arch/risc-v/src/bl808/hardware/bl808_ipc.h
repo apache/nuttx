@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/include/bl808/irq.h
+ * arch/risc-v/src/bl808/hardware/bl808_ipc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,23 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_INCLUDE_BL808_IRQ_H
-#define __ARCH_RISCV_INCLUDE_BL808_IRQ_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#ifndef __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_IPC_H
+#define __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_IPC_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Map RISC-V exception code to NuttX IRQ */
+#define IPC_MSG_SEND_OFFSET 0x0
+#define IPC0_MSG_SEND       (IPC0_BASE + IPC_MSG_SEND_OFFSET)
 
-#define NR_IRQS (RISCV_IRQ_SEXT + 114)
+#define IPC_MSG_READ_OFFSET 0x24
+#define IPC2_MSG_READ       (IPC2_BASE + IPC_MSG_READ_OFFSET)
 
-#define BL808_IRQ_NUM_BASE (16)
-#define BL808_M0_IRQ_OFFSET (64) // IRQs tied to M0 core are given a virtual IRQ number
+#define IPC_MSG_ACK_OFFSET  0x28
+#define IPC2_MSG_ACK        (IPC2_BASE + IPC_MSG_ACK_OFFSET)
 
-/* D0 IRQs ******************************************************************/
-#define BL808_IRQ_UART3 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + 4)
-#define BL808_IRQ_D0_IPC (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + 38)
+#define IPC_INT_UNMASK_OFFSET 0x2c
+#define IPC2_INT_UNMASK       (IPC2_BASE + IPC_INT_UNMASK_OFFSET)
 
-/* M0 IRQs ******************************************************************/
-#define BL808_IRQ_UART0 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 28)
-#define BL808_IRQ_UART1 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 29)
-#define BL808_IRQ_UART2 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 30)
-
-#endif /* __ARCH_RISCV_INCLUDE_BL808_IRQ_H */
+#endif /* __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_IPC_H */

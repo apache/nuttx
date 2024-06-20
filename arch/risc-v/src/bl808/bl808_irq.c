@@ -36,6 +36,8 @@
 #include "riscv_ipi.h"
 #include "chip.h"
 
+#include "bl808_courier.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -137,6 +139,11 @@ void up_disable_irq(int irq)
           modifyreg32(BL808_PLIC_ENABLE1 + (4 * (extirq / 32)),
                       1 << (extirq % 32), 0);
         }
+      else if (64 <= extirq && extirq <= 127)
+        {
+          int m0_extirq = extirq - BL808_M0_IRQ_OFFSET;
+          bl808_courier_req_irq_disable(m0_extirq);
+        }
       else
         {
           PANIC();
@@ -178,6 +185,11 @@ void up_enable_irq(int irq)
         {
           modifyreg32(BL808_PLIC_ENABLE1 + (4 * (extirq / 32)),
                       0, 1 << (extirq % 32));
+        }
+      else if (64 <= extirq && extirq <= 127)
+        {
+          int m0_extirq = extirq - BL808_M0_IRQ_OFFSET;
+          bl808_courier_req_irq_enable(m0_extirq);
         }
       else
         {
