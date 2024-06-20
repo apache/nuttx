@@ -47,6 +47,10 @@ config ARM_TOOLCHAIN_ARMCLANG
 	bool "ARM Compiler Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
 
+config ARM_TOOLCHAIN_GHS
+	bool "ARM Compiler Green Hills Software toolchain"
+	select ARCH_TOOLCHAIN_GHS
+
 endchoice # ARM Toolchain Selection
 
 choice
