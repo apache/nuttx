@@ -32,9 +32,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Only UART3 is supported */
+#define BL808_UART_CLK 40000000
 
-#define BL808_UART_BASE(n) (UNUSED(n), BL808_UART3_BASE)
+#define BL808_UART_BASE(n) ((n == 0) ? BL808_UART0_BASE \
+                            : (n == 1) ? BL808_UART1_BASE \
+                            : (n == 2) ? BL808_UART2_BASE \
+                            : BL808_UART3_BASE)
 
 /* Register offsets *********************************************************/
 
@@ -80,7 +83,7 @@
 
 #define UART_UTX_CONFIG_CR_LEN_SHIFT                 (16)
 #define UART_UTX_CONFIG_CR_LEN_MASK                  (0xffff << UART_UTX_CONFIG_CR_LEN_SHIFT)
-#define UART_UTX_CONFIG_CR_BIT_CNT_P_SHIFT           (12)
+#define UART_UTX_CONFIG_CR_BIT_CNT_P_SHIFT           (11)
 #define UART_UTX_CONFIG_CR_BIT_CNT_P_MASK            (0x03 << UART_UTX_CONFIG_CR_BIT_CNT_P_SHIFT)
 #define UART_UTX_CONFIG_CR_BIT_CNT_D_SHIFT           (8)
 #define UART_UTX_CONFIG_CR_BIT_CNT_D_MASK            (0x07 << UART_UTX_CONFIG_CR_BIT_CNT_D_SHIFT)
