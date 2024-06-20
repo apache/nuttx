@@ -246,6 +246,26 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
  *   Dependencies:   None
+ *
+ * CANIOC_SET_STATE
+ *   Description:    Set specfic can controller state
+ *
+ *   Argument:       A pointer to an enumeration type that describes the CAN
+ *                   state
+ *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_GET_STATE
+ *   Description:    Get specfic can controller state
+ *
+ *   Argument:       A pointer to an enumeration type that describes the CAN
+ *                   state
+ *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
@@ -263,6 +283,8 @@
 #define CANIOC_IFLUSH             _CANIOC(13)
 #define CANIOC_OFLUSH             _CANIOC(14)
 #define CANIOC_IOFLUSH            _CANIOC(15)
+#define CANIOC_SET_STATE          _CANIOC(16)
+#define CANIOC_GET_STATE          _CANIOC(17)
 
 #define CAN_FIRST                 0x0001         /* First common command */
 #define CAN_NCMDS                 15             /* 16 common commands   */
@@ -437,6 +459,14 @@
 #define CAN_FILTER_MASK           0  /* Address match under a mask */
 #define CAN_FILTER_DUAL           1  /* Dual address match */
 #define CAN_FILTER_RANGE          2  /* Match a range of addresses */
+
+/* the state is default state. Indicates that the can controller is closed */
+
+#define CAN_STATE_STOP            0
+
+/* Indicates that the can controller is in the awake state */
+
+#define CAN_STATE_START           1
 
 /* CAN bit timing support ***************************************************/
 
