@@ -748,7 +748,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
                              union stm32_desc_u *rxtable, uint8_t *rxbuffer);
 
 /* PHY Initialization */
-
+#ifndef CONFIG_STM32H7_NO_PHY
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int  stm32_phyintenable(struct stm32_ethmac_s *priv);
 #endif
@@ -762,6 +762,7 @@ static inline int stm32_dm9161(struct stm32_ethmac_s *priv);
 static int  stm32_phyinit(struct stm32_ethmac_s *priv);
 #ifdef CONFIG_STM32H7_ETHMAC_REGDEBUG
 static void  stm32_phyregdump(void);
+#endif
 #endif
 
 /* MAC/DMA Initialization */
@@ -2942,6 +2943,7 @@ static void stm32_rxdescinit(struct stm32_ethmac_s *priv,
 #ifdef CONFIG_NETDEV_PHY_IOCTL
 static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
+#ifndef CONFIG_STM32H7_NO_PHY
 #ifdef CONFIG_ARCH_PHY_INTERRUPT
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)dev->d_private;
 #endif
@@ -2999,9 +3001,13 @@ static int stm32_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
     }
 
   return ret;
+#else
+  return -EIO;
+#endif
 }
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
 
+#ifndef CONFIG_STM32H7_NO_PHY
 /****************************************************************************
  * Function: stm32_phyintenable
  *
@@ -3521,6 +3527,8 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 
   return OK;
 }
+
+#endif
 
 /****************************************************************************
  * Name: stm32_selectmii
@@ -4091,6 +4099,19 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
 
   /* Initialize the PHY */
 
+#ifdef CONFIG_STM32H7_NO_PHY
+  ninfo("MAC without PHY\n");
+#ifdef CONFIG_STM32H7_ETHFD
+  priv->fduplex = 1;
+#else
+  priv->fduplex = 0;
+#endif
+#ifdef CONFIG_STM32H7_ETH100MBPS
+  priv->mbps100 = 1;
+#else
+  priv->mbps100 = 0;
+#endif
+#else
   ninfo("Initialize the PHY\n");
   ret = stm32_phyinit(priv);
   if (ret < 0)
@@ -4098,6 +4119,7 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
       return ret;
     }
 
+#endif
   /* Initialize the MAC and DMA */
 
   ninfo("Initialize the MAC and DMA\n");
