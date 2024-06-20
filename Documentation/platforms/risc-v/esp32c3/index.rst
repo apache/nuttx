@@ -165,7 +165,7 @@ CDC Console  Yes    Rev.3
 DMA          No
 eFuse        No
 GPIO         Yes
-I2C          No
+I2C          Yes
 LED_PWM      Yes
 RNG          No
 RSA          No
