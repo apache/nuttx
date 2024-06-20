@@ -305,9 +305,17 @@
 
 #define SENSOR_TYPE_GNSS_SATELLITE                  34
 
+/* GNSS Measurement */
+
+#define SENSOR_TYPE_GNSS_MEASUREMENT                35
+
+/* GNSS Clock */
+
+#define SENSOR_TYPE_GNSS_CLOCK                      36
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           35
+#define SENSOR_TYPE_COUNT                           37
 
 /* The additional sensor open flags */
 
@@ -325,6 +333,48 @@
 /* Sensor event flags */
 
 #define SENSOR_EVENT_FLUSH_COMPLETE                 0x01
+
+/* GNSS Clock Flags, see `flags` of `struct sensor_gnss_clock`
+ * Refs: https://android.googlesource.com/platform/hardware/libhardware/+/
+ *       refs/heads/android14-release/include/hardware/gps.h#140
+ */
+
+#define SENSOR_GNSS_CLOCK_HAS_LEAP_SECOND                     (1 << 0)
+#define SENSOR_GNSS_CLOCK_HAS_TIME_UNCERTAINTY                (1 << 1)
+#define SENSOR_GNSS_CLOCK_HAS_FULL_BIAS                       (1 << 2)
+#define SENSOR_GNSS_CLOCK_HAS_BIAS                            (1 << 3)
+#define SENSOR_GNSS_CLOCK_HAS_BIAS_UNCERTAINTY                (1 << 4)
+#define SENSOR_GNSS_CLOCK_HAS_DRIFT                           (1 << 5)
+#define SENSOR_GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY               (1 << 6)
+
+/* GNSS Measurement Flags */
+
+#define SENSOR_GNSS_MEASUREMENT_HAS_SNR                       (1 << 0)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY         (1 << 9)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_CYCLES            (1 << 10)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE             (1 << 11)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY (1 << 12)
+#define SENSOR_GNSS_MEASUREMENT_HAS_AUTOMATIC_GAIN_CONTROL    (1 << 13)
+
+/* GNSS Measurement States */
+
+#define SENSOR_GNSS_MEASUREMENT_STATE_UNKNOWN                 (0)
+#define SENSOR_GNSS_MEASUREMENT_STATE_CODE_LOCK               (1 << 0)
+#define SENSOR_GNSS_MEASUREMENT_STATE_BIT_SYNC                (1 << 1)
+#define SENSOR_GNSS_MEASUREMENT_STATE_SUBFRAME_SYNC           (1 << 2)
+#define SENSOR_GNSS_MEASUREMENT_STATE_TOW_DECODED             (1 << 3)
+#define SENSOR_GNSS_MEASUREMENT_STATE_MSEC_AMBIGUOUS          (1 << 4)
+#define SENSOR_GNSS_MEASUREMENT_STATE_SYMBOL_SYNC             (1 << 5)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GLO_STRING_SYNC         (1 << 6)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GLO_TOD_DECODED         (1 << 7)
+#define SENSOR_GNSS_MEASUREMENT_STATE_BDS_D2_BIT_SYNC         (1 << 8)
+#define SENSOR_GNSS_MEASUREMENT_STATE_BDS_D2_SUBFRAME_SYNC    (1 << 9)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GAL_E1BC_CODE_LOCK      (1 << 10)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GAL_E1C_2ND_CODE_LOCK   (1 << 11)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GAL_E1B_PAGE_SYNC       (1 << 12)
+#define SENSOR_GNSS_MEASUREMENT_STATE_SBAS_SYNC               (1 << 13)
+#define SENSOR_GNSS_MEASUREMENT_STATE_TOW_KNOWN               (1 << 14)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GLO_TOD_KNOWN           (1 << 15)
 
 /****************************************************************************
  * Public Types
@@ -752,6 +802,127 @@ struct sensor_device_info_s
   /* Vendor of the hardware part. */
 
   char          vendor[SENSOR_INFO_NAME_SIZE];
+};
+
+struct sensor_gnss_clock
+{
+  /* Indicating what fields are valid.
+   * See SENSOR_GNSS_CLOCK_HAS_*.
+   */
+
+  uint32_t flags;
+
+  /* Leap second data.
+   * flags: SENSOR_GNSS_CLOCK_HAS_LEAP_SECOND
+   */
+
+  int32_t  leap_second;
+
+  /* The GNSS receiver internal local hardware clock value.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_TIME_UNCERTAINTY
+   */
+
+  int64_t  time_ns;
+  float    time_uncertainty_ns;
+
+  /* Discontinuities in the HW clock. */
+
+  uint32_t hw_clock_discontinuity_count;
+
+  /* The difference between hardware clock ('time' field) inside
+   * GPS receiver and the true GPS time since 0000Z, January 6, 1980, in
+   * nanoseconds.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_FULL_BIAS
+   *   SENSOR_GNSS_CLOCK_HAS_BIAS
+   *   SENSOR_GNSS_CLOCK_HAS_BIAS_UNCERTAINTY
+   */
+
+  int64_t  full_bias_ns;
+  float    bias_ns;             /* Sub-nanosecond bias */
+  float    bias_uncertainty_ns;
+
+  /* The clock's drift in nanoseconds (per second).
+   * A positive value means that the frequency is higher than
+   * the nominal frequency.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_DRIFT
+   *   SENSOR_GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY
+   */
+
+  float    drift_nsps;
+  float    drift_uncertainty_nsps;
+};
+
+struct sensor_gnss_measurement
+{
+  /* Indicating what fields are valid.
+   * See SENSOR_GNSS_MEASUREMENT_HAS_*.
+   */
+
+  uint32_t flags;
+
+  /* Space vehicle ID. */
+
+  int32_t  svid;
+
+  /* Constellation of the given SV, see GNSS_CONSTELLATION_*. */
+
+  uint32_t constellation;
+
+  /* Offset between clock and time at which the measurement was taken in
+   * nanoseconds.
+   */
+
+  float    time_offset_ns;
+
+  /* The received GNSS Time-of-Week at the measurement time, in
+   * nanoseconds.
+   */
+
+  int64_t  received_sv_time_in_ns;
+  int64_t  received_sv_time_uncertainty_in_ns;
+
+  /* GNSS measurement state, see SENSOR_GNSS_MEASUREMENT_STATE_*. */
+
+  uint32_t state;
+
+  /* dBHz, Carrier-to-noise density. */
+
+  float    c_n0_dbhz;
+
+  /* Pseudorange rate(m/s) at the timestamp. */
+
+  float    pseudorange_rate_mps;
+  float    pseudorange_rate_uncertainty_mps;
+
+  /* Accumulated delta range. */
+
+  uint32_t accumulated_delta_range_state;
+  float    accumulated_delta_range_m;
+  float    accumulated_delta_range_uncertainty_m;
+
+  /* Carrier related between the satellite and the receiver.
+   * flags:
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_CYCLES
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY
+   */
+
+  float    carrier_frequency_hz;
+  int64_t  carrier_cycles;
+  float    carrier_phase;
+  float    carrier_phase_uncertainty;
+
+  uint32_t multipath_indicator;
+
+  /* dBHz, Signal to noise ratio of satellite C/N0.
+   * flags: SENSOR_GNSS_MEASUREMENT_HAS_SNR
+   */
+
+  uint32_t snr;
 };
 
 #endif /* __INCLUDE_NUTTX_SENSORS_SENSOR_H */
