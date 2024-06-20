@@ -32,6 +32,10 @@ ARCHCPUFLAGS = -fPIC -fno-stack-protector -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 
+ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_CET),y)
+  ARCHOPTIMIZATION += -fcf-protection=none
+endif
+
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.
 
