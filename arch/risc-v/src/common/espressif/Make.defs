@@ -84,6 +84,10 @@ ifeq ($(CONFIG_ESP_RMT),y)
 	endif
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_I2C),y)
+	CHIP_CSRCS += esp_i2c.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_SPI),y)
 	CHIP_CSRCS += esp_spi.c
 	ifeq ($(CONFIG_SPI_SLAVE),y)

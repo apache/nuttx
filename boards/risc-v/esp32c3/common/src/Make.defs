@@ -40,6 +40,10 @@ ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
   CSRCS += esp_board_spislavedev.c
 endif
 
+ifeq ($(CONFIG_I2C_DRIVER),y)
+  CSRCS += esp_board_i2c.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
   CSRCS += esp_board_spiflash.c
 endif

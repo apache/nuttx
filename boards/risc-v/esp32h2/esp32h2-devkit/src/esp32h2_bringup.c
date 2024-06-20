@@ -36,6 +36,7 @@
 
 #include "esp_board_ledc.h"
 #include "esp_board_spiflash.h"
+#include "esp_board_i2c.h"
 
 #ifdef CONFIG_WATCHDOG
 #  include "espressif/esp_wdt.h"
@@ -215,6 +216,17 @@ int esp_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
+#endif
+
+#if defined(CONFIG_I2C_DRIVER)
+  /* Configure I2C peripheral interfaces */
+
+  ret = board_i2c_init();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
     }
 #endif
 
