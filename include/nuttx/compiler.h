@@ -82,6 +82,7 @@
 #if defined(__ghs__)
 
 #  define __extension__
+#  define register
 
 #endif
 
