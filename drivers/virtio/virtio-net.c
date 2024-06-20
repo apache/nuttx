@@ -579,10 +579,10 @@ static int virtio_net_init(FAR struct virtio_net_priv_s *priv,
 
   priv->bufnum = CONFIG_IOB_NBUFFERS / VIRTIO_NET_MAX_NIOB / 4;
 #endif
-  priv->bufnum = MIN(vdev->vrings_info[VIRTIO_NET_RX].info.num_descs,
-                     priv->bufnum);
-  priv->bufnum = MIN(vdev->vrings_info[VIRTIO_NET_TX].info.num_descs,
-                     priv->bufnum);
+  priv->bufnum = MIN(vdev->vrings_info[VIRTIO_NET_RX].info.num_descs /
+                     (VIRTIO_NET_MAX_NIOB + 1), priv->bufnum);
+  priv->bufnum = MIN(vdev->vrings_info[VIRTIO_NET_TX].info.num_descs /
+                     (VIRTIO_NET_MAX_NIOB + 1), priv->bufnum);
   return OK;
 }
 
