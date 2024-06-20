@@ -50,12 +50,12 @@
 
 static inline void clk_write(uint32_t reg, uint32_t value)
 {
-  *((volatile uint32_t *) (reg)) = value;
+  *((volatile uint32_t *)(uintptr_t)reg) = value;
 }
 
 static inline uint32_t clk_read(uint32_t reg)
 {
-  return *((volatile uint32_t *) (reg));
+  return *((volatile uint32_t *)(uintptr_t)reg);
 }
 
 static inline uint32_t gcd(uint32_t a, uint32_t b)
