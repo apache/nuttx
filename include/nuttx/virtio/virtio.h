@@ -31,6 +31,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/list.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_DRIVERS_VIRTIO
 
@@ -68,6 +69,132 @@ struct virtio_driver
   CODE int         (*probe)(FAR struct virtio_device *vdev);
   CODE void        (*remove)(FAR struct virtio_device *vdev);
 };
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: virtqueue_add_buffer_lock
+ ****************************************************************************/
+
+static inline_function int
+virtqueue_add_buffer_lock(FAR struct virtqueue *vq,
+                          FAR struct virtqueue_buf *buf_list,
+                          int readable, int writable,
+                          FAR void *cookie,
+                          FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  int ret;
+
+  flags = spin_lock_irqsave(lock);
+  ret = virtqueue_add_buffer(vq, buf_list, readable, writable, cookie);
+  spin_unlock_irqrestore(lock, flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: virtqueue_get_buffer_lock
+ ****************************************************************************/
+
+static inline_function FAR void *
+virtqueue_get_buffer_lock(FAR struct virtqueue *vq, FAR uint32_t *len,
+                          FAR uint16_t *idx, FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  FAR void *ret;
+
+  flags = spin_lock_irqsave(lock);
+  ret = virtqueue_get_buffer(vq, len, idx);
+  spin_unlock_irqrestore(lock, flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: virtqueue_get_available_buffer_lock
+ ****************************************************************************/
+
+static inline_function FAR void *
+virtqueue_get_available_buffer_lock(FAR struct virtqueue *vq,
+                                    FAR uint16_t *avail_idx,
+                                    FAR uint32_t *len, FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  FAR void *ret;
+
+  flags = spin_lock_irqsave(lock);
+  ret = virtqueue_get_available_buffer(vq, avail_idx, len);
+  spin_unlock_irqrestore(lock, flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: virtqueue_add_consumed_buffer_lock
+ ****************************************************************************/
+
+static inline_function int
+virtqueue_add_consumed_buffer_lock(FAR struct virtqueue *vq,
+                                   uint16_t head_idx, uint32_t len,
+                                   FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  int ret;
+
+  flags = spin_lock_irqsave(lock);
+  ret = virtqueue_add_consumed_buffer(vq, head_idx, len);
+  spin_unlock_irqrestore(lock, flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: virtqueue_disable_cb_lock
+ ****************************************************************************/
+
+static inline_function void
+virtqueue_disable_cb_lock(FAR struct virtqueue *vq, FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(lock);
+  virtqueue_disable_cb(vq);
+  spin_unlock_irqrestore(lock, flags);
+}
+
+/****************************************************************************
+ * Name: virtqueue_enable_cb_lock
+ ****************************************************************************/
+
+static inline_function int virtqueue_enable_cb_lock(FAR struct virtqueue *vq,
+                                                    FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  int ret;
+
+  flags = spin_lock_irqsave(lock);
+  ret = virtqueue_enable_cb(vq);
+  spin_unlock_irqrestore(lock, flags);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: virtqueue_kick_lock
+ ****************************************************************************/
+
+static inline_function void virtqueue_kick_lock(FAR struct virtqueue *vq,
+                                                FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(lock);
+  virtqueue_kick(vq);
+  spin_unlock_irqrestore(lock, flags);
+}
 
 /****************************************************************************
  * Public Function Prototypes
