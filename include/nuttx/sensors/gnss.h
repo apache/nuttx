@@ -163,6 +163,7 @@ struct gnss_lowerhalf_s
    * It is provided by upper half driver to lower half driver.
    * lower half can use type to description the data type, eg:
    * SENSOR_TYPE_GNSS, SENSOR_TYPE_GNSS_SATELLITE
+   * SENSOR_TYPE_GNSS_MEASUREMENT, SENSOR_TYPE_GNSS_CLOCK
    */
 
   gnss_push_event_t push_event;
