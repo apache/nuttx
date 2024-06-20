@@ -56,7 +56,7 @@
 static int msync_rammap(FAR struct mm_map_entry_s *entry, FAR void *start,
                         size_t length, int flags)
 {
-  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~1);
+  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~3);
   FAR uint8_t *wrbuffer = start;
   ssize_t nwrite = 0;
   off_t offset;
@@ -123,8 +123,8 @@ static int unmap_rammap(FAR struct task_group_s *group,
                         FAR void *start,
                         size_t length)
 {
-  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~1);
-  enum mm_map_type_e type = (uintptr_t)entry->priv.p & 1;
+  FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~3);
+  enum mm_map_type_e type = (uintptr_t)entry->priv.p & 3;
   FAR void *newaddr = NULL;
   off_t offset;
   int ret = OK;
