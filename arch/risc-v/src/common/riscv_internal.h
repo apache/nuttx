@@ -85,14 +85,6 @@
 /* Interrupt Stack macros */
 #define INT_STACK_SIZE  (STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
 
-/* Format output with register width and hex */
-
-#ifdef CONFIG_ARCH_RV32
-#  define PRIxREG "08"  PRIx32
-#else
-#  define PRIxREG "016" PRIx64
-#endif
-
 /* In the RISC-V model, the state is saved in stack,
  * only a reference stored in TCB.
  */

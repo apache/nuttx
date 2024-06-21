@@ -136,4 +136,12 @@
 #define UINT8_C(x)  x
 #define UINT16_C(x) x
 
+/* Format output with register width and hex */
+
+#ifdef CONFIG_ARCH_RV32
+#  define PRIxREG "08"  PRIx32
+#else
+#  define PRIxREG "016" PRIx64
+#endif
+
 #endif /* __ARCH_RISCV_INCLUDE_INTTYPES_H */
