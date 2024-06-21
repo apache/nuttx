@@ -311,6 +311,7 @@ static void rpmsg_router_bound(FAR struct rpmsg_endpoint *ept)
   FAR struct rpmsg_router_hub_s *hub = ept->priv;
   struct rpmsg_router_s msg;
   int ret;
+  int i;
 
   if (!is_rpmsg_ept_ready(&hub->ept[0]) ||
       !is_rpmsg_ept_ready(&hub->ept[1]))
@@ -318,15 +319,15 @@ static void rpmsg_router_bound(FAR struct rpmsg_endpoint *ept)
       return;
     }
 
-  msg.tx_len = MIN(rpmsg_get_tx_buffer_size(hub->ept[0].rdev),
-                   rpmsg_get_tx_buffer_size(hub->ept[1].rdev));
-  msg.rx_len = MIN(rpmsg_get_rx_buffer_size(hub->ept[0].rdev),
-                   rpmsg_get_rx_buffer_size(hub->ept[1].rdev));
-
-  ret = rpmsg_send(&hub->ept[0], &msg, sizeof(msg));
-  DEBUGASSERT(ret >= 0);
-  ret = rpmsg_send(&hub->ept[1], &msg, sizeof(msg));
-  DEBUGASSERT(ret >= 0);
+  for (i = 0; i < 2; i++)
+    {
+      msg.tx_len = MIN(rpmsg_get_rx_buffer_size(hub->ept[i].rdev),
+                       rpmsg_get_tx_buffer_size(hub->ept[1 - i].rdev));
+      msg.rx_len = MIN(rpmsg_get_tx_buffer_size(hub->ept[i].rdev),
+                       rpmsg_get_rx_buffer_size(hub->ept[1 - i].rdev));
+      ret = rpmsg_send(&hub->ept[i], &msg, sizeof(msg));
+      DEBUGASSERT(ret >= 0);
+    }
 }
 
 /****************************************************************************
