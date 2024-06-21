@@ -57,8 +57,8 @@
 
 bool up_fpucmp(const void *saveregs1, const void *saveregs2)
 {
-  const uintptr_t *regs1 = saveregs1;
-  const uintptr_t *regs2 = saveregs2;
+  const uintreg_t *regs1 = saveregs1;
+  const uintreg_t *regs2 = saveregs2;
 
   return memcmp(&regs1[INT_XCPT_REGS], &regs2[INT_XCPT_REGS],
                 INT_REG_SIZE * FPU_XCPT_REGS) == 0;
