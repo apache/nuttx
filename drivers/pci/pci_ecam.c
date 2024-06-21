@@ -25,6 +25,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/math32.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/pci/pci_ecam.h>
 #include <nuttx/nuttx.h>
@@ -40,8 +41,7 @@
 #define readl(a)     (*(FAR volatile uint32_t *)(a))
 #define writel(v,a)  (*(FAR volatile uint32_t *)(a) = (v))
 
-#define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
-#define IS_ALIGNED(x, a)  (((x) & ((a) - 1)) == 0)
+#define IS_ALIGNED(x, a) (((x) & ((a) - 1)) == 0)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -145,7 +145,7 @@ static bool pci_ecam_addr_valid(FAR const struct pci_bus_s *bus,
                                 uint32_t devfn)
 {
   FAR struct pci_ecam_s *ecam = pci_ecam_from_controller(bus->ctrl);
-  int num_buses = DIV_ROUND_UP(pci_resource_size(&ecam->cfg), 1 << 20);
+  int num_buses = div_round_up(pci_resource_size(&ecam->cfg), 1 << 20);
 
   return bus->number < num_buses;
 }
