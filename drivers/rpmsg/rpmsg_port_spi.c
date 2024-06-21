@@ -182,12 +182,6 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
         {
           rpmsgerr("crc check fail received: %u calculated: %u\n",
                    rpspi->rxhdr->crc, crc);
-
-          /* Length may have been destroyed by a wrong data packet. we
-           * should reassign it, since it is used by SPI_EXCHANGE.
-           */
-
-          rpspi->rxhdr->len = rpspi->cmdhdr->len;
           return;
         }
     }
@@ -199,7 +193,6 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
   if (rpspi->txavail == RPMSG_SPI_PORT_UNCONNECTED &&
       rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
     {
-      rpspi->rxhdr->len = rpspi->cmdhdr->len;
       return;
     }
 
@@ -218,13 +211,7 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
       return;
     }
 
-  /* Drop invaild avail value in case of a wrong data packet received. */
-
-  if (avail != RPMSG_SPI_PORT_UNCONNECTED)
-    {
-      rpspi->txavail = avail;
-    }
-
+  rpspi->txavail = avail;
   if (rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
     {
       IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
@@ -265,13 +252,14 @@ static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
       txhdr->cmd = RPMSG_PORT_SPI_CMD_AVAIL;
     }
 
-  txhdr->avail = rpmsg_port_queue_navail(&rpspi->port.rxq) - 1;
+  txhdr->avail = rpmsg_port_queue_navail(&rpspi->port.rxq);
+  txhdr->avail = txhdr->avail > 1 ? txhdr->avail - 1 : 0;
   txhdr->crc = rpmsg_port_spi_crc16(txhdr);
 
   rpmsginfo("irq send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
 
   SPI_SELECT(rpspi->spi, rpspi->devid, true);
-  SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr, rpspi->rxhdr->len);
+  SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr, rpspi->cmdhdr->len);
 
   rpspi->rxavail = txhdr->avail;
   return 0;
