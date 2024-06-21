@@ -33,6 +33,7 @@
 #include <poll.h>
 #include <debug.h>
 #include <minmea/minmea.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -89,6 +90,12 @@ struct gnss_upperhalf_s
   struct sensor_gnss           gnss;
 };
 
+struct gnss_constellation_s
+{
+  FAR const char *prefix;
+  int             id;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -134,6 +141,16 @@ static const struct file_operations g_gnss_fops =
   NULL,        /* mmap */
   NULL,        /* truncate */
   gnss_poll    /* poll  */
+};
+
+static const struct gnss_constellation_s g_gnss_constellation[] =
+{
+  { "GP", SENSOR_GNSS_CONSTELLATION_GPS},
+  { "GL", SENSOR_GNSS_CONSTELLATION_GLONASS},
+  { "GQ", SENSOR_GNSS_CONSTELLATION_QZSS},
+  { "GB", SENSOR_GNSS_CONSTELLATION_BEIDOU},
+  { "BD", SENSOR_GNSS_CONSTELLATION_BEIDOU},
+  { "GA", SENSOR_GNSS_CONSTELLATION_GALILEO},
 };
 
 /****************************************************************************
@@ -498,6 +515,7 @@ static void gnss_parse_nmea(FAR struct gnss_upperhalf_s *upper,
         {
           struct minmea_sentence_gsv frame;
           struct sensor_gnss_satellite satellite;
+          size_t i;
 
           memset(&satellite, 0, sizeof(satellite));
           if (minmea_parse_gsv(&frame, nmea))
@@ -508,6 +526,26 @@ static void gnss_parse_nmea(FAR struct gnss_upperhalf_s *upper,
               memcpy(satellite.info, frame.sats,
                      sizeof(satellite.info[0]) * 4);
               lower = &upper->dev[GNSS_SATELLITE_IDX].lower;
+
+              for (i = 0; i < nitems(g_gnss_constellation); i++)
+                {
+                  if (!strncmp(g_gnss_constellation[i].prefix, nmea,
+                               strlen(g_gnss_constellation[i].prefix)))
+                    {
+                      satellite.constellation = g_gnss_constellation[i].id;
+
+                      if ((satellite.constellation ==
+                           SENSOR_GNSS_CONSTELLATION_GPS) &&
+                          (frame.msg_nr > 32))
+                        {
+                          satellite.constellation =
+                           SENSOR_GNSS_CONSTELLATION_SBAS;
+                        }
+
+                      break;
+                    }
+                }
+
               lower->push_event(lower->priv, &satellite,
                                 sizeof(satellite));
             }
