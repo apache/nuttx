@@ -558,11 +558,30 @@ struct sensor_gnss          /* Type: GNSS */
   uint32_t satellites_used; /* Number of satellites used */
 };
 
+/* Ref: android14-release/hardware/libhardware/include_all/hardware/\
+ *      gnss-base.h
+ */
+
+enum sensor_gnss_constellation
+{
+  SENSOR_GNSS_CONSTELLATION_UNKNOWN = 0,
+  SENSOR_GNSS_CONSTELLATION_GPS     = 1,
+  SENSOR_GNSS_CONSTELLATION_SBAS    = 2,
+  SENSOR_GNSS_CONSTELLATION_GLONASS = 3,
+  SENSOR_GNSS_CONSTELLATION_QZSS    = 4,
+  SENSOR_GNSS_CONSTELLATION_BEIDOU  = 5,
+  SENSOR_GNSS_CONSTELLATION_GALILEO = 6,
+};
+
 struct sensor_gnss_satellite
 {
   uint64_t timestamp;       /* Time since system start, Units is microseconds */
   uint32_t count;           /* Total number of messages of satellites visible */
   uint32_t satellites;      /* Total number of satellites in view */
+
+  /* Constellation of the given svid, see SENSOR_GNSS_CONSTELLATION_*. */
+
+  uint32_t constellation;
 
   struct satellite
   {
