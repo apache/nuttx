@@ -31,16 +31,31 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-#define NR_IRQS (RISCV_IRQ_SEXT + 114)
-
 #define BL808_IRQ_NUM_BASE (16)
-#define BL808_M0_IRQ_OFFSET (64) // IRQs tied to M0 core are given a virtual IRQ number
+
+/* IRQs tied to M0 core are given a virtual IRQ number.
+ * Offset of 67 chosen to avoid overlap with highest D0
+ * IRQ, the PDS interrupt.
+ */
+
+#define BL808_M0_IRQ_OFFSET (67)
+
+#define BL808_D0_MAX_EXTIRQ (BL808_IRQ_NUM_BASE + 66)
+#define BL808_M0_MAX_EXTIRQ (BL808_IRQ_NUM_BASE + 63)
+
+/* NR_IRQs corresponds to highest possible
+ * interrupt number, WIFI IPC IRQ on M0.
+ */
+
+#define NR_IRQS (RISCV_IRQ_SEXT + BL808_M0_IRQ_OFFSET + BL808_M0_MAX_EXTIRQ)
 
 /* D0 IRQs ******************************************************************/
+
 #define BL808_IRQ_UART3 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + 4)
 #define BL808_IRQ_D0_IPC (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + 38)
 
 /* M0 IRQs ******************************************************************/
+
 #define BL808_IRQ_UART0 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 28)
 #define BL808_IRQ_UART1 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 29)
 #define BL808_IRQ_UART2 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 30)
