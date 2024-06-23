@@ -127,6 +127,7 @@ machine_trap:
 
   csrr        a0, CSR_MCAUSE     /* Interrupt cause [arg0] */
   csrr        a1, CSR_MEPC       /* Interrupt PC (instruction) [arg1] */
+  csrr        a2, CSR_MTVAL      /* The MTVAL value [arg2] */
   jal         x1, sbi_mexception
   j           __start
 
