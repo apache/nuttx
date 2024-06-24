@@ -89,6 +89,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_DEBUG
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -118,6 +119,7 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
+	select ARCH_HAVE_DEBUG
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -237,6 +239,7 @@ config ARCH_CHIP_QEMU_RV
 	select ARCH_HAVE_ELF_EXECUTABLE
 	select ONESHOT
 	select ALARM_ARCH
+	select ARCH_HAVE_DEBUG
 	---help---
 		QEMU Generic RV32/RV64 processor
 
