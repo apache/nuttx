@@ -351,15 +351,8 @@ void up_consoleinit(void)
   /* Enable selected clocks (and disable unselected clocks) */
 
   regval = getreg32(AVR32_PM_PBAMASK);
-#ifdef CONFIG_ARCH_CHIP_AT32UC3B
   regval &= ~(PM_PBAMASK_USART0 | PM_PBAMASK_USART1 | PM_PBAMASK_USART2);
   regval |= pbamask;
-#else
-
-  /* In the case of Mizar32, enable all USART clocks. */
-
-  regval |= PM_PBAMASK_USART0 | PM_PBAMASK_USART1 | PM_PBAMASK_USART2;
-#endif
   putreg32(regval, AVR32_PM_PBAMASK);
 
   /* Then configure the console here (if it is not going to be configured
