@@ -67,6 +67,7 @@ struct rpmsg_router_edge_s
   struct rpmsg_s      rpmsg;
   struct rpmsg_device rdev;
   struct rpmsg_device *hubdev;
+  char                localcpu[RPMSG_ROUTER_CPUNAME_LEN];
   char                remotecpu[RPMSG_ROUTER_CPUNAME_LEN];
 
   /* Tx/Rx buffer size */
@@ -114,7 +115,10 @@ static const struct rpmsg_ops_s g_rpmsg_router_edge_ops =
 static FAR const char *
 rpmsg_router_edge_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
 {
-  return NULL;
+  FAR struct rpmsg_router_edge_s *edge =
+      (FAR struct rpmsg_router_edge_s *)rpmsg;
+
+  return edge->localcpu;
 }
 
 /****************************************************************************
@@ -570,6 +574,7 @@ static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
 
   strlcpy(edge->remotecpu, ept->name + RPMSG_ROUTER_NAME_LEN,
           sizeof(edge->remotecpu));
+  strlcpy(edge->localcpu, msg->cpuname, sizeof(edge->localcpu));
   edge->rx_len = msg->rx_len;
   edge->tx_len = msg->tx_len;
   edge->hubdev = ept->rdev;

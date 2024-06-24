@@ -47,6 +47,7 @@ begin_packed_struct struct rpmsg_router_s
 {
   uint32_t tx_len;
   uint32_t rx_len;
+  char     cpuname[RPMSG_ROUTER_CPUNAME_LEN];
 } end_packed_struct;
 
 #endif /* CONFIG_RPMSG_ROUTER */
