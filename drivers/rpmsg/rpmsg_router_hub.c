@@ -325,6 +325,7 @@ static void rpmsg_router_bound(FAR struct rpmsg_endpoint *ept)
                        rpmsg_get_tx_buffer_size(hub->ept[1 - i].rdev));
       msg.rx_len = MIN(rpmsg_get_tx_buffer_size(hub->ept[i].rdev),
                        rpmsg_get_rx_buffer_size(hub->ept[1 - i].rdev));
+      strlcpy(msg.cpuname, hub->cpuname[i], sizeof(msg.cpuname));
       ret = rpmsg_send(&hub->ept[i], &msg, sizeof(msg));
       DEBUGASSERT(ret >= 0);
     }
