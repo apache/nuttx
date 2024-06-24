@@ -1046,12 +1046,6 @@ config ARCH_STACKDUMP_MAX_LENGTH
 	depends on ARCH_STACKDUMP
 	default 0
 
-config DUMP_ON_EXIT
-	bool "Dump all tasks state on exit"
-	default n
-	---help---
-		Dump all tasks state on exit()
-
 config ARCH_USBDUMP
 	bool "Dump USB trace data"
 	default n

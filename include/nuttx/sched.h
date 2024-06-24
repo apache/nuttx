@@ -1642,11 +1642,11 @@ size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_ON_EXIT
 void nxsched_dumponexit(void);
 #else
 #  define nxsched_dumponexit()
-#endif /* CONFIG_DUMP_ON_EXIT */
+#endif /* CONFIG_SCHED_DUMP_ON_EXIT */
 
 #ifdef CONFIG_SMP
 /****************************************************************************
