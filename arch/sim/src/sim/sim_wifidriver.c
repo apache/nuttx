@@ -1549,12 +1549,15 @@ static int wifidriver_set_mode(struct sim_netdev_s *wifidev,
 {
   int ret;
 
-  /* IW_MODE_INFRA indicates station */
-
-  wifidev->mode = pwrq->u.mode;
-  switch (wifidev->mode)
+  switch (pwrq->u.mode)
     {
     case IW_MODE_INFRA:
+      if (wifidev->mode == IW_MODE_INFRA)
+        {
+          return OK;
+        }
+
+      wifidev->mode = pwrq->u.mode;
 
       /* Start the sta config, including wpa_supplicant and udhcpc. */
 
@@ -1584,6 +1587,12 @@ static int wifidriver_set_mode(struct sim_netdev_s *wifidev,
         }
       break;
     case IW_MODE_MASTER:
+      if (wifidev->mode == IW_MODE_MASTER)
+        {
+          return OK;
+        }
+
+      wifidev->mode = pwrq->u.mode;
 
       /* Start the hostapd. */
 
