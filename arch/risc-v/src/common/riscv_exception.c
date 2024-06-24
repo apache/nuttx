@@ -311,4 +311,13 @@ void riscv_exception_attach(void)
 #else
   irq_attach(RISCV_IRQ_MSOFT, riscv_exception, NULL);
 #endif
+
+  /* Attach the breakpoint interrupt handler,
+   * only if the LIB_GDBSTUB is enabled the
+   * debug infrastructure is used acutally.
+   */
+
+#if defined(CONFIG_ARCH_HAVE_DEBUG) && defined(CONFIG_LIB_GDBSTUB)
+  riscv_debug_init();
+#endif
 }
