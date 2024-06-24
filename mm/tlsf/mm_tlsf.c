@@ -947,7 +947,7 @@ mm_initialize_pool(FAR const char *name,
 
   if (init != NULL && init->poolsize != NULL && init->npools != 0)
     {
-      heap->mm_threshold = CONFIG_MM_HEAP_MEMPOOL_THRESHOLD;
+      heap->mm_threshold = init->threshold;
       heap->mm_mpool     = mempool_multiple_init(name, init->poolsize,
                                init->npools,
                                (mempool_multiple_alloc_t)mempool_memalign,
