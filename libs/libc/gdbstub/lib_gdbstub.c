@@ -1532,7 +1532,7 @@ static void gdb_debugpoint_callback(int type, FAR void *addr,
         break;
       case DEBUGPOINT_STEPPOINT:
         stopreason = GDB_STOPREASON_STEPPOINT;
-        up_debugpoint_remove(DEBUGPOINT_STEPPOINT, NULL, 0);
+        gdb_debugpoint_remove(GDB_STOPREASON_STEPPOINT, NULL, 0);
         break;
       default:
         return;
@@ -1628,12 +1628,12 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
 
   if (enable)
     {
-      ret = gdbstub_debugpoint_add(type, (FAR void *)addr, size,
-                                   gdbstub_debugpoint_callback, state);
+      ret = gdb_debugpoint_add(type, (FAR void *)addr, size,
+                                   gdb_debugpoint_callback, state);
     }
   else
     {
-      ret = gdbstub_debugpoint_remove(type, (FAR void *)addr, size);
+      ret = gdb_debugpoint_remove(type, (FAR void *)addr, size);
     }
 
   if (ret < 0)
@@ -1664,8 +1664,8 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
 
 static int gdb_step(FAR struct gdb_state_s *state)
 {
-  int ret = up_debugpoint_add(DEBUGPOINT_STEPPOINT, NULL, 0,
-                              gdbstub_debugpoint_callback, state);
+  int ret = gdb_debugpoint_add(GDB_STOPREASON_STEPPOINT, NULL, 0,
+                              gdb_debugpoint_callback, state);
 
   if (ret < 0)
     {
