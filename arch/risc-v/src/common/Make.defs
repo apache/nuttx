@@ -50,6 +50,10 @@ ifeq ($(CONFIG_RISCV_MISALIGNED_HANDLER),y)
 CMN_CSRCS += riscv_misaligned.c
 endif
 
+ifeq ($(CONFIG_ARCH_HAVE_DEBUG),y)
+CMN_CSRCS += riscv_debug.c
+endif
+
 ifneq ($(CONFIG_BUILD_FLAT),y)
 CMN_CSRCS  += riscv_task_start.c
 CMN_CSRCS  += riscv_pthread_start.c

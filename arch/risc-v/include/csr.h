@@ -311,6 +311,11 @@
 #define CSR_SCONTEXT        0x5a8 /* Supervisor Context */
 #define CSR_HCONTEXT        0x5aa /* Hypervisor Context */
 
+/* In tcontrol register */
+
+#define CSR_TCONTROL_MTE   (0x1 << 3) /* M-mode trigger enable */
+#define CSR_TCONTROL_MPTE  (0x1 << 7) /* M-mode previous trigger enable */
+
 /* Debug interface CSRs */
 
 #define CSR_DCSR            0x7b0 /* Debug Control and Status */

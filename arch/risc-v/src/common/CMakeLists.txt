@@ -48,6 +48,10 @@ if(CONFIG_RISCV_MISALIGNED_HANDLER)
   list(APPEND SRCS riscv_misaligned.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_DEBUG)
+  list(APPEND SRCS riscv_debug.c)
+endif()
+
 if(NOT CONFIG_BUILD_FLAT)
   list(APPEND SRCS riscv_task_start.c riscv_pthread_start.c
        riscv_signal_dispatch.c)
