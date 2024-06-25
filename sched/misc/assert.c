@@ -27,6 +27,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/coredump.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
 #include <nuttx/signal.h>
@@ -415,6 +416,18 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 #endif
 
 /****************************************************************************
+ * Name: dump_filelist
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_DUMP_ON_EXIT
+static void dump_filelist(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  FAR struct filelist *filelist = &tcb->group->tg_filelist;
+  files_dumplist(filelist);
+}
+#endif
+
+/****************************************************************************
  * Name: dump_tasks
  ****************************************************************************/
 
@@ -494,6 +507,10 @@ static void dump_tasks(void)
 
 #ifdef CONFIG_SCHED_BACKTRACE
   nxsched_foreach(dump_backtrace, NULL);
+#endif
+
+#ifdef CONFIG_SCHED_DUMP_ON_EXIT
+  nxsched_foreach(dump_filelist, NULL);
 #endif
 }
 
