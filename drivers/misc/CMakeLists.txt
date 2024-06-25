@@ -71,4 +71,12 @@ if(CONFIG_BLK_RPMSG_SERVER)
   list(APPEND SRCS rpmsgblk_server.c)
 endif()
 
+if(NOT CONFIG_DEV_OPTEE_NONE)
+  list(APPEND SRCS optee.c)
+endif()
+
+if(CONFIG_GOLDFISH_PIPE)
+  list(APPEND SRCS goldfish_pipe.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
