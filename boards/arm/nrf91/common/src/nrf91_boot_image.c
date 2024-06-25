@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NRF91_NONSECURE_BOOT
-typedef void cmse_nonsecure_call nsfunc(void);
+typedef void tz_nonsecure_call nsfunc(void);
 #endif
 
 /* This structure represents the first two entries on NVIC vector table */
