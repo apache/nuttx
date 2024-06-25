@@ -120,6 +120,13 @@ if(CONFIG_CXD56_CHARGER)
   list(APPEND SRCS cxd56_charger.c)
 endif()
 
+if(CONFIG_AUDIO_CXD56)
+  list(APPEND SRCS cxd56_nxaudio.c)
+  if(CONFIG_AUDIO_CXD56_SRC)
+    list(APPEND SRCS cxd56_nxaudio_src.c)
+  endif()
+endif()
+
 if(CONFIG_CXD56_GE2D)
   list(APPEND SRCS cxd56_ge2d.c)
 endif()
