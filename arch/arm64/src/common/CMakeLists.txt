@@ -63,6 +63,10 @@ endif()
 
 if(CONFIG_ARCH_HAVE_MPU)
   list(APPEND SRCS arm64_mpu.c)
+  set_source_files_properties(
+    arm64_mpu.c TARGET_DIRECTORY arch
+    PROPERTIES COMPILE_FLAGS -fno-sanitize=kernel-hwaddress
+               -fno-sanitize=kernel-address)
 endif()
 
 if(CONFIG_ARM64_PSCI)
