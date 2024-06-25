@@ -2647,4 +2647,8 @@ config ESP32_TICKLESS
 	select ARCH_HAVE_TICKLESS
 	select SCHED_TICKLESS
 
+config ESP32_IGNORE_CHIP_REVISION_CHECK
+	bool "Ignore chip revision"
+	default n
+
 endif # ARCH_CHIP_ESP32
