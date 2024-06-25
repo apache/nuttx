@@ -422,4 +422,35 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
   return buflen;
 }
 
+/****************************************************************************
+ * Name: tcp_callback_cleanup
+ *
+ * Description:
+ *   Cleanup data and cb when thread is canceled.
+ *
+ * Input Parameters:
+ *   arg - A pointer with conn and callback struct.
+ *
+ ****************************************************************************/
+
+void tcp_callback_cleanup(FAR void *arg)
+{
+  FAR struct tcp_callback_s *cb = (FAR struct tcp_callback_s *)arg;
+
+  nerr("ERROR: pthread is being canceled, need to cleanup cb\n");
+
+  tcp_callback_free(cb->tc_conn, cb->tc_cb);
+  if (cb->tc_sem)
+    {
+      nxsem_destroy(cb->tc_sem);
+    }
+
+  /* Only connect canceled need to tcp_free */
+
+  if (cb->tc_free)
+    {
+      tcp_free(cb->tc_conn);
+    }
+}
+
 #endif /* NET_TCP_HAVE_STACK */

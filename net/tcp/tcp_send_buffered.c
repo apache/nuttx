@@ -49,6 +49,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/tls.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
@@ -1431,14 +1432,27 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       while (tcp_wrbuffer_inqueue_size(conn) >= conn->snd_bufs)
         {
+          struct tcp_callback_s info;
+
           if (nonblock)
             {
               ret = -EAGAIN;
               goto errout_with_lock;
             }
 
+          /* Push a cancellation point onto the stack.  This will be
+           * called if the thread is canceled.
+           */
+
+          info.tc_conn = conn;
+          info.tc_cb   = conn->sndcb;
+          info.tc_sem  = &conn->snd_sem;
+          info.tc_free = false;
+          tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
           ret = net_sem_timedwait_uninterruptible(&conn->snd_sem,
             tcp_send_gettimeout(start, timeout));
+          tls_cleanup_pop(tls_get_info(), 0);
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)
