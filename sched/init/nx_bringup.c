@@ -529,9 +529,11 @@ int nx_bringup(void)
 
 #if !defined(CONFIG_DISABLE_ENVIRON) && (defined(CONFIG_PATH_INITIAL) || \
      defined(CONFIG_LDPATH_INITIAL))
-  /* We an save a few bytes by discarding the IDLE thread's environment. */
+  /* We would save a few bytes by discarding the IDLE thread's environment.
+   * But when kthreads share the same group, this is no longer proper, so
+   * we can't do clearenv() now.
+   */
 
-  clearenv();
 #endif
 
   sched_trace_end();
