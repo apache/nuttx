@@ -443,6 +443,14 @@ struct tcp_backlog_s
 };
 #endif
 
+struct tcp_callback_s
+{
+  FAR struct tcp_conn_s *tc_conn;
+  FAR struct devif_callback_s *tc_cb;
+  sem_t *tc_sem;
+  bool tc_free;
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -1392,6 +1400,19 @@ uint16_t tcp_datahandler(FAR struct net_driver_s *dev,
  *   Called from network socket logic.  The network may or may not be locked.
  *
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_callback_cleanup
+ *
+ * Description:
+ *   Cleanup data and cb when thread is canceled.
+ *
+ * Input Parameters:
+ *   arg - A pointer with conn and callback struct.
+ *
+ ****************************************************************************/
+
+void tcp_callback_cleanup(FAR void *arg);
 
 #ifdef CONFIG_NET_TCPBACKLOG
 int tcp_backlogcreate(FAR struct tcp_conn_s *conn, int nblg);
