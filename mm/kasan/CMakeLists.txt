@@ -22,11 +22,21 @@
 set(SRCS hook.c)
 
 if(CONFIG_MM_KASAN)
-  list(APPEND SRCS generic.c)
-  set_source_files_properties(generic.c PROPERTIES COMPILE_FLAGS
-                                                   -fno-sanitize=kernel-address)
-  set_source_files_properties(generic.c PROPERTIES COMPILE_FLAGS -fno-builtin)
-  set_source_files_properties(generic.c PROPERTIES COMPILE_FLAGS -fno-lto)
+  list(APPEND FLAGS -fno-builtin)
+  if(CONFIG_MM_KASAN_GENERIC)
+    list(APPEND SRCS generic.c)
+    list(APPEND FLAGS -fno-sanitize=kernel-address)
+  endif()
+
+  if(CONFIG_MM_KASAN_SW_TAGS)
+    list(APPEND SRCS sw_tags.c)
+    list(APPEND FLAGS -fno-sanitize=kernel-hwaddress)
+  endif()
+
+  if(CONFIG_LTO_NONE)
+    list(APPEND FLAGS -fno-lto)
+  endif()
 endif()
 
 target_sources(mm PRIVATE ${SRCS})
+target_compile_options(mm PRIVATE ${FLAGS})
