@@ -61,7 +61,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (up_current_regs())
+  if (up_interrupt_context())
     {
       /* Update scheduler parameters */
 
