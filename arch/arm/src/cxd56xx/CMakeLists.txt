@@ -163,4 +163,8 @@ if(CONFIG_CXD56_HOSTIF)
   list(APPEND SRCS cxd56_hostif.c)
 endif()
 
+if(CONFIG_CXD56_GNSS_HEAP)
+  list(APPEND SRCS cxd56_gnssheap.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
