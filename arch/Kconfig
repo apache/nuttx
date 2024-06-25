@@ -1041,7 +1041,6 @@ config ARCH_STACKDUMP_MAX_LENGTH
 config DUMP_ON_EXIT
 	bool "Dump all tasks state on exit"
 	default n
-	depends on DEBUG_SCHED_INFO
 	---help---
 		Dump all tasks state on exit()
 
