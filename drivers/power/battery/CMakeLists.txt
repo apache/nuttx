@@ -86,4 +86,8 @@ if(CONFIG_BATTERY_MONITOR)
   endif()
 endif()
 
+if(CONFIG_GOLDFISH_BATTERY)
+  list(APPEND SRCS goldfish_battery.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
