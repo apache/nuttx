@@ -472,6 +472,15 @@ config NET_KSZ9477_PORT_VLAN_SGMII
 	depends on NET_KSZ9477_PORT_VLAN
 	default 0x1f
 
+config NET_KSZ9477_PORT_SNIFF
+	bool "Enable support for the port mirroring and snooping"
+	depends on NET_KSZ9477
+	default n
+	---help---
+		Enables possibility to set rx/tx mirroring and sniffer port.
+		All the packets received on port A and/or transmitted on port B
+		can be mirrored on the sniffer port.
+
 menuconfig NET_LAN9250
 	bool "Microchip LAN9250 support"
 	default n
