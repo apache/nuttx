@@ -1536,6 +1536,7 @@ config STM32_STM32F33XX
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_HRTIM1
+	select STM32_HAVE_HRTIM1_PLLCLK
 	select STM32_HAVE_COMP2
 	select STM32_HAVE_COMP4
 	select STM32_HAVE_COMP6
@@ -8104,9 +8105,14 @@ config STM32_HRTIM_FAULT4
 
 endif # STM32_HRTIM_FAULTS
 
+config STM32_HAVE_HRTIM1_PLLCLK
+	bool
+	default n
+
 config STM32_HRTIM_CLK_FROM_PLL
 	bool "HRTIM Clock from PLL"
 	default n
+	depends on STM32_HAVE_HRTIM1_PLLCLK
 	---help---
 		Set PLL as the clock source for HRTIM.
 		This configuration requires the following conditions:
