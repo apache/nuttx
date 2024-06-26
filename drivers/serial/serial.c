@@ -2102,7 +2102,7 @@ int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
 #ifdef CONFIG_TTY_FORCE_PANIC
       if (buf[i] == CONFIG_TTY_FORCE_PANIC_CHAR)
         {
-          PANIC();
+          PANIC_WITH_REGS("Force panic by user.", NULL);
           return 0;
         }
 #endif
