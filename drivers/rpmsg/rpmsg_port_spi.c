@@ -442,6 +442,7 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
   SPI_SETMODE(spi, spicfg->mode);
   SPI_SETFREQUENCY(spi, spicfg->freq);
   SPI_REGISTERCALLBACK(spi, rpmsg_port_spi_complete_handler, rpspi);
+  SPI_SELECT(spi, spicfg->devid, false);
 
   rpspi->spi = spi;
   rpspi->ioe = ioe;
