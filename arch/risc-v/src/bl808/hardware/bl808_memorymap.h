@@ -28,7 +28,7 @@
 /* Register Base Address ****************************************************/
 
 #define BL808_GLB_BASE     0x20000000ul
-
+#define BL808_GPIO_BASE    0x200008c4ul
 #define BL808_UART0_BASE   0x2000a000ul
 #define BL808_UART1_BASE   0x2000a100ul
 #define BL808_UART2_BASE   0x2000aa00ul
