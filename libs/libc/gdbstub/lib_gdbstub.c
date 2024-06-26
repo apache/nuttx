@@ -1629,7 +1629,7 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
   if (enable)
     {
       ret = gdb_debugpoint_add(type, (FAR void *)addr, size,
-                                   gdb_debugpoint_callback, state);
+                               gdb_debugpoint_callback, state);
     }
   else
     {
@@ -1665,7 +1665,7 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
 static int gdb_step(FAR struct gdb_state_s *state)
 {
   int ret = gdb_debugpoint_add(GDB_STOPREASON_STEPPOINT, NULL, 0,
-                              gdb_debugpoint_callback, state);
+                               gdb_debugpoint_callback, state);
 
   if (ret < 0)
     {
