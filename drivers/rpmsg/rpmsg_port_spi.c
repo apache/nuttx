@@ -236,6 +236,7 @@ static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
     {
       txhdr = rpspi->cmdhdr;
       txhdr->cmd = RPMSG_PORT_SPI_CMD_CONNECT;
+      strlcpy((FAR char *)(txhdr + 1), rpspi->port.cpuname, RPMSG_NAME_SIZE);
     }
   else if (rpspi->txavail > 0 &&
            rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
@@ -312,7 +313,7 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         else
           {
             rpspi->txavail = rxhdr->avail;
-            rpmsg_port_register(&rpspi->port, NULL);
+            rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
           }
 
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
