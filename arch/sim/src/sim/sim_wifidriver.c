@@ -31,6 +31,7 @@
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <netpacket/netlink.h>
 #include <nuttx/net/netlink.h>
+#include <sys/time.h>
 
 #include "sim_internal.h"
 
@@ -176,6 +177,7 @@ struct sim_netdev_s
   bool psk_flag;                /* for psk, 0: unset, 1: set */
   char host_ifname[IFNAMSIZ];   /* The wlan interface name on the host */
   uint8_t network_id;           /* for sta, default is 0 */
+  hrtime_t scantime;
 };
 
 /* for wireless event */
@@ -1075,6 +1077,7 @@ static int wifidriver_start_scan(struct sim_netdev_s *wifidev,
 {
   int ret;
   uint8_t  mode = wifidev->mode;
+  hrtime_t curtime;
 
   if (mode == IW_MODE_MASTER)
     {
@@ -1082,6 +1085,13 @@ static int wifidriver_start_scan(struct sim_netdev_s *wifidev,
     }
   else if (mode == IW_MODE_INFRA)
     {
+      curtime = gethrtime();
+      if (wifidev->scantime && wifidev->scantime - curtime >= 5000000000)
+        {
+          return OK;
+        }
+
+      wifidev->scantime = curtime;
       ret = set_cmd(wifidev, "scan");
       if (ret == -EINVAL)
         {
@@ -1109,6 +1119,11 @@ static int wifidriver_scan_result(struct sim_netdev_s *wifidev,
     }
   else if (wifidev->mode == IW_MODE_INFRA)
     {
+      if (wifidev->scantime && wifidev->scantime - gethrtime() < 5000000000)
+        {
+          return -EAGAIN;
+        }
+
       scan_req.buf = pwrq->u.data.pointer;
       scan_req.total_len = pwrq->u.data.length;
       scan_req.cur_len = 0;
