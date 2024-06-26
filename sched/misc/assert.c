@@ -540,7 +540,7 @@ static void dump_tasks(void)
 #if CONFIG_LIBC_MUTEX_BACKTRACE > 0
 static void dump_lockholder(pid_t tid)
 {
-  char buf[CONFIG_LIBC_MUTEX_BACKTRACE * BACKTRACE_PTR_FMT_WIDTH + 1] = "";
+  char buf[BACKTRACE_BUFFER_SIZE(CONFIG_LIBC_MUTEX_BACKTRACE)];
   FAR mutex_t *mutex;
 
   mutex = (FAR mutex_t *)nxsched_get_tcb(tid)->waitobj;
