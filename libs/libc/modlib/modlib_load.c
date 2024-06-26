@@ -140,7 +140,7 @@ static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
    * (and zero) memory for the each section.
    */
 
-  if (loadinfo->ehdr.e_phnum > 0)
+  if (loadinfo->ehdr.e_type == ET_DYN)
     {
       for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
         {
@@ -251,7 +251,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
   binfo("Loading sections - text: %p.%zx data: %p.%zx\n",
         text, loadinfo->textsize, data, loadinfo->datasize);
 
-  if (loadinfo->ehdr.e_phnum > 0)
+  if (loadinfo->ehdr.e_type == ET_DYN)
     {
       for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
         {
