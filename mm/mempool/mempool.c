@@ -197,7 +197,7 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
   if ((MM_DUMP_ASSIGN(dump, buf) || MM_DUMP_ALLOC(dump, buf) ||
        MM_DUMP_LEAK(dump, buf)) && MM_DUMP_SEQNO(dump, buf))
     {
-      char tmp[CONFIG_MM_BACKTRACE * BACKTRACE_PTR_FMT_WIDTH + 1] = "";
+      char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
 
 #  if CONFIG_MM_BACKTRACE > 0
       FAR const char *format = " %0*p";
