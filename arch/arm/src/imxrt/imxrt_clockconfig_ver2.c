@@ -670,15 +670,7 @@ void imxrt_clockconfig()
 
   /* Set Soc VDD and wait for it to stablise */
 
-  if ((getreg32(IMXRT_OCOTP_FUSE(16)) == 0x57ac5969)
-      && ((getreg32(IMXRT_OCOTP_FUSE(17)) & 0xffu) == 0x0b))
-    {
-      imxrt_pmu_vdd1p0_buckmode_targetvoltage(dcdc_1p0bucktarget1p15v);
-    }
-  else
-    {
-      imxrt_pmu_vdd1p0_buckmode_targetvoltage(dcdc_1p0bucktarget1p125v);
-    }
+  imxrt_pmu_vdd1p0_buckmode_targetvoltage(dcdc_1p0bucktarget1p15v);
 
   /* FUSE FBB bit so that FBB has to be enabled */
 
