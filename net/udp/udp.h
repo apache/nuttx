@@ -179,6 +179,14 @@ struct udp_wrbuffer_s
 };
 #endif
 
+struct udp_callback_s
+{
+  FAR struct net_driver_s *dev;
+  FAR struct udp_conn_s *conn;
+  FAR struct devif_callback_s *udp_cb;
+  FAR sem_t *sem;
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -726,6 +734,19 @@ udp_find_raddr_device(FAR struct udp_conn_s *conn,
 
 uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
+
+/****************************************************************************
+ * Name: udp_callback_cleanup
+ *
+ * Description:
+ *   Cleanup data and cb when thread is canceled.
+ *
+ * Input Parameters:
+ *   arg - A pointer with conn and callback struct.
+ *
+ ****************************************************************************/
+
+void udp_callback_cleanup(FAR void *arg);
 
 /****************************************************************************
  * Name: psock_udp_recvfrom

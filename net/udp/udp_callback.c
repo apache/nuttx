@@ -326,4 +326,28 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
   return flags;
 }
 
+/****************************************************************************
+ * Name: udp_callback_cleanup
+ *
+ * Description:
+ *   Cleanup data and cb when thread is canceled.
+ *
+ * Input Parameters:
+ *   arg - A pointer with conn and callback struct.
+ *
+ ****************************************************************************/
+
+void udp_callback_cleanup(FAR void *arg)
+{
+  FAR struct udp_callback_s *cb = (FAR struct udp_callback_s *)arg;
+
+  nerr("ERROR: pthread is being canceled, need to cleanup cb\n");
+
+  udp_callback_free(cb->dev, cb->conn, cb->udp_cb);
+  if (cb->sem)
+    {
+      nxsem_destroy(cb->sem);
+    }
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_UDP */
