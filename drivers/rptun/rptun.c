@@ -129,8 +129,6 @@ static void rptun_panic(FAR struct rpmsg_s *rpmsg);
 static void rptun_dump(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg);
-static int rptun_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
-static int rptun_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
 
 /****************************************************************************
  * Private Data
@@ -167,8 +165,6 @@ static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
   rptun_dump,
   rptun_get_local_cpuname,
   rptun_get_cpuname,
-  rptun_get_tx_buffer_size,
-  rptun_get_rx_buffer_size,
 };
 
 /****************************************************************************
@@ -767,16 +763,6 @@ static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg)
   FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
 
   return RPTUN_GET_CPUNAME(priv->dev);
-}
-
-static int rptun_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg)
-{
-  return rpmsg_virtio_get_buffer_size(rpmsg->rdev);
-}
-
-static int rptun_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg)
-{
-  return rpmsg_virtio_get_rx_buffer_size(rpmsg->rdev);
 }
 
 static int rptun_dev_start(FAR struct remoteproc *rproc)

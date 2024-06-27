@@ -48,8 +48,6 @@
 static FAR const char *
 rpmsg_port_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rpmsg_port_get_cpuname(FAR struct rpmsg_s *rpmsg);
-static int rpmsg_port_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
-static int rpmsg_port_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
 static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg);
 
 /****************************************************************************
@@ -65,8 +63,6 @@ static const struct rpmsg_ops_s g_rpmsg_port_ops =
   rpmsg_port_dump,
   rpmsg_port_get_local_cpuname,
   rpmsg_port_get_cpuname,
-  rpmsg_port_get_tx_buffer_size,
-  rpmsg_port_get_rx_buffer_size,
 };
 
 /****************************************************************************
@@ -373,6 +369,32 @@ static int rpmsg_port_release_tx_buffer(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_get_tx_buffer_size
+ ****************************************************************************/
+
+static int rpmsg_port_get_tx_buffer_size(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_port_s *port =
+    metal_container_of(rdev, struct rpmsg_port_s, rdev);
+
+  return port->txq.len - sizeof(struct rpmsg_port_header_s) -
+         sizeof(struct rpmsg_hdr);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_get_rx_buffer_size
+ ****************************************************************************/
+
+static int rpmsg_port_get_rx_buffer_size(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_port_s *port =
+    metal_container_of(rdev, struct rpmsg_port_s, rdev);
+
+  return port->rxq.len - sizeof(struct rpmsg_port_header_s) -
+         sizeof(struct rpmsg_hdr);
+}
+
+/****************************************************************************
  * Name: rpmsg_port_rx_callback
  ****************************************************************************/
 
@@ -541,30 +563,6 @@ static FAR const char *rpmsg_port_get_cpuname(FAR struct rpmsg_s *rpmsg)
 }
 
 /****************************************************************************
- * Name: rpmsg_port_get_tx_buffer_size
- ****************************************************************************/
-
-static int rpmsg_port_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
-
-  return port->txq.len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr);
-}
-
-/****************************************************************************
- * Name: rpmsg_port_get_rx_buffer_size
- ****************************************************************************/
-
-static int rpmsg_port_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
-
-  return port->rxq.len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -604,6 +602,8 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
   rdev->ops.get_tx_payload_buffer = rpmsg_port_get_tx_payload_buffer;
   rdev->ops.send_offchannel_nocopy = rpmsg_port_send_offchannel_nocopy;
   rdev->ops.release_tx_buffer = rpmsg_port_release_tx_buffer;
+  rdev->ops.get_rx_buffer_size = rpmsg_port_get_rx_buffer_size;
+  rdev->ops.get_tx_buffer_size = rpmsg_port_get_tx_buffer_size;
 
   metal_list_init(&rdev->endpoints);
 
@@ -611,7 +611,8 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
   rdev->support_ns = true;
 
   rpmsg_register_endpoint(rdev, &rdev->ns_ept, "NS", RPMSG_NS_EPT_ADDR,
-                          RPMSG_NS_EPT_ADDR, rpmsg_port_ns_callback, NULL);
+                          RPMSG_NS_EPT_ADDR, rpmsg_port_ns_callback, NULL,
+                          port);
   port->ops->register_callback(port, rpmsg_port_rx_callback);
 
   return 0;
