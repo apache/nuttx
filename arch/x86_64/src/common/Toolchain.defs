@@ -43,6 +43,10 @@ ifeq ($(CONFIG_HOST_MACOS),y)
 CROSSDEV = x86_64-elf-
 endif
 
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
+endif
+
 CC = $(CROSSDEV)gcc
 CPP = $(CROSSDEV)gcc -E -x c
 LD = $(CROSSDEV)ld

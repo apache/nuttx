@@ -116,6 +116,10 @@ if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
   add_compile_options(-ffunction-sections -fdata-sections)
 endif()
 
+if(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE)
+  add_link_options(-Wl,--whole-archive)
+endif()
+
 if(CONFIG_ARCH_INTEL64_HAVE_RDRAND)
   add_compile_options(-mrdrnd)
 endif()
