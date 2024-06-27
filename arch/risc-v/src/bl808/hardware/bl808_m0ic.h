@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/include/bl808/irq.h
+ * arch/risc-v/src/bl808/hardware/bl808_m0ic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,47 +18,30 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_INCLUDE_BL808_IRQ_H
-#define __ARCH_RISCV_INCLUDE_BL808_IRQ_H
+#ifndef __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_M0IC_H
+#define __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_M0IC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include "hardware/bl808_memorymap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Map RISC-V exception code to NuttX IRQ */
+/* Register offsets */
 
-#define BL808_IRQ_NUM_BASE (16)
+#define BL808_M0IC_STATUS_OFFSET(n)		(0x00 + 4 * (n))
+#define BL808_M0IC_MASK_OFFSET(n)		(0x08 + 4 * (n))
+#define BL808_M0IC_CLEAR_OFFSET(n)		(0x10 + 4 * (n))
 
-/* IRQs tied to M0 core are given a virtual IRQ number.
- * Offset of 67 chosen to avoid overlap with highest D0
- * IRQ, the PDS interrupt.
- */
+/* Register locations */
 
-#define BL808_M0_IRQ_OFFSET (67)
+#define BL808_M0IC_STATUS(n) BL808_M0IC_BASE + BL808_M0IC_STATUS_OFFSET(n)
+#define BL808_M0IC_MASK(n)   BL808_M0IC_BASE + BL808_M0IC_MASK_OFFSET(n)
+#define BL808_M0IC_CLEAR(n)  BL808_M0IC_BASE + BL808_M0IC_CLEAR_OFFSET(n)
 
-#define BL808_D0_MAX_EXTIRQ (BL808_IRQ_NUM_BASE + 66)
-#define BL808_M0_MAX_EXTIRQ (BL808_IRQ_NUM_BASE + 63)
-
-/* NR_IRQs corresponds to highest possible
- * interrupt number, WIFI IPC IRQ on M0.
- */
-
-#define NR_IRQS (RISCV_IRQ_SEXT + BL808_M0_IRQ_OFFSET + BL808_M0_MAX_EXTIRQ)
-
-/* D0 IRQs ******************************************************************/
-
-#define BL808_IRQ_UART3 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + 4)
-#define BL808_IRQ_D0_IPC (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + 38)
-#define BL808_IRQ_M0IC (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + 65)
-
-/* M0 IRQs ******************************************************************/
-
-#define BL808_IRQ_UART0 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 28)
-#define BL808_IRQ_UART1 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 29)
-#define BL808_IRQ_UART2 (RISCV_IRQ_SEXT + BL808_IRQ_NUM_BASE + BL808_M0_IRQ_OFFSET + 30)
-
-#endif /* __ARCH_RISCV_INCLUDE_BL808_IRQ_H */
+#endif /* __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_M0IC_H */
