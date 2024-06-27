@@ -616,8 +616,8 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
       entry = readdir(dir);
       if (entry)
         {
-          size = MIN(rpmsg_get_tx_buffer_size(ept->rdev),
-                     rpmsg_get_rx_buffer_size(ept->rdev));
+          size = MIN(rpmsg_get_tx_buffer_size(ept),
+                     rpmsg_get_rx_buffer_size(ept));
           size = MIN(size - len, strlen(entry->d_name) + 1);
           msg->type = entry->d_type;
           strlcpy(msg->name, entry->d_name, size);

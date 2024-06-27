@@ -85,8 +85,11 @@ static FAR const char *
 rpmsg_router_edge_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *
 rpmsg_router_edge_get_cpuname(FAR struct rpmsg_s *rpmsg);
-static int rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
-static int rpmsg_router_edge_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
+
+static int
+rpmsg_router_edge_get_rx_buffer_size(FAR struct rpmsg_device *rdev);
+static int
+rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_device *rdev);
 
 /****************************************************************************
  * Private Data
@@ -101,8 +104,6 @@ static const struct rpmsg_ops_s g_rpmsg_router_edge_ops =
   NULL,
   rpmsg_router_edge_get_local_cpuname,
   rpmsg_router_edge_get_cpuname,
-  rpmsg_router_edge_get_tx_buffer_size,
-  rpmsg_router_edge_get_rx_buffer_size,
 };
 
 /****************************************************************************
@@ -133,30 +134,6 @@ rpmsg_router_edge_get_cpuname(FAR struct rpmsg_s *rpmsg)
       (FAR struct rpmsg_router_edge_s *)rpmsg;
 
   return edge->remotecpu;
-}
-
-/****************************************************************************
- * Name: rpmsg_router_edge_get_tx_buffer_size
- ****************************************************************************/
-
-static int rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_router_edge_s *edge =
-      (FAR struct rpmsg_router_edge_s *)rpmsg;
-
-  return edge->tx_len;
-}
-
-/****************************************************************************
- * Name: rpmsg_router_edge_get_rx_buffer_size
- ****************************************************************************/
-
-static int rpmsg_router_edge_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_router_edge_s *edge =
-      (FAR struct rpmsg_router_edge_s *)rpmsg;
-
-  return edge->rx_len;
 }
 
 /****************************************************************************
@@ -253,6 +230,30 @@ static int rpmsg_router_edge_send_nocopy(FAR struct rpmsg_device *rdev,
     }
 
   return hubdev->ops.send_offchannel_nocopy(hubdev, src, dst, data, len);
+}
+
+/****************************************************************************
+ * Name: rpmsg_router_edge_get_rx_buffer_size
+ ****************************************************************************/
+
+static int
+rpmsg_router_edge_get_rx_buffer_size(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
+
+  return edge->rx_len;
+}
+
+/****************************************************************************
+ * Name: rpmsg_router_edge_get_tx_buffer_size
+ ****************************************************************************/
+
+static int
+rpmsg_router_edge_get_tx_buffer_size(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_router_edge_s *edge = rpmsg_router_edge_from_rdev(rdev);
+
+  return edge->tx_len;
 }
 
 /****************************************************************************
@@ -608,6 +609,8 @@ rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
   rdev->ops.send_offchannel_nocopy = rpmsg_router_edge_send_nocopy;
   rdev->ops.send_offchannel_raw = rpmsg_router_edge_send_offchannel_raw;
   rdev->ops.get_tx_payload_buffer = rpmsg_router_edge_get_tx_payload_buffer;
+  rdev->ops.get_rx_buffer_size = rpmsg_router_edge_get_rx_buffer_size;
+  rdev->ops.get_tx_buffer_size = rpmsg_router_edge_get_tx_buffer_size;
 
   metal_list_init(&rdev->endpoints);
   rdev->support_ack = true;
