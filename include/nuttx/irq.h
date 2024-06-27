@@ -47,6 +47,9 @@
  */
 
 #  define irq_detach(irq) irq_attach(irq, NULL, NULL)
+#  define irq_detach_wqueue(irq) irq_attach_wqueue(irq, NULL, NULL, NULL, 0)
+#  define irq_detach_thread(irq) \
+     irq_attach_thread(irq, NULL, NULL, NULL, 0, 0)
 
 /* Maximum/minimum values of IRQ integer types */
 
@@ -193,6 +196,31 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg);
 
 int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
                       int priority, int stack_size);
+
+/****************************************************************************
+ * Name: irq_attach_wqueue
+ *
+ * Description:
+ *   Configure the IRQ subsystem so that IRQ number 'irq' is dispatched to
+ *   'wqueue'
+ *
+ * Input Parameters:
+ *   irq - Irq num
+ *   isr - Function to be called when the IRQ occurs, called in interrupt
+ *   context.
+ *   If isr is NULL the default handler is installed(irq_default_handler).
+ *   isrwork - called in thread context, If the isrwork is NULL,
+ *   then the ISR is being detached.
+ *   arg - privdate data
+ *   priority - isrwork pri
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
+                      FAR void *arg, int priority);
 
 #ifdef CONFIG_IRQCHAIN
 int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);

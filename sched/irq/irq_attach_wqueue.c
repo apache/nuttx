@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/irq/irq_attach_thread.c
+ * sched/irq/irq_attach_wqueue.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,8 +28,8 @@
 #include <stdio.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/kthread.h>
+#include <nuttx/wqueue.h>
+#include <debug.h>
 
 #include "irq/irq.h"
 #include "sched/sched.h"
@@ -44,76 +44,91 @@
  * interrupt.
  */
 
-struct irq_thread_info_s
+struct irq_work_info_s
 {
   xcpt_t handler;     /* Address of the interrupt handler */
+  xcpt_t isrwork;     /* Address of the interrupt worked handler */
   FAR void *arg;      /* The argument provided to the interrupt handler. */
-  FAR sem_t *sem;     /* irq sem used to notify irq thread */
+  int irq;            /* Irq id */
+  struct work_s work; /* Interrupt work to the wq */
+
+  FAR struct kwork_wqueue_s *wqueue;   /* Work queue. */
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static pid_t g_irq_thread_pid[NR_IRQS];
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+static struct irq_work_info_s
+g_irq_work_vector[CONFIG_ARCH_NUSER_INTERRUPTS];
+#else
+static struct irq_work_info_s g_irq_work_vector[NR_IRQS];
+#endif
+
+static mutex_t g_irq_wqueue_lock = NXMUTEX_INITIALIZER;
+static FAR struct kwork_wqueue_s *g_irq_wqueue[CONFIG_IRQ_NWORKS];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-/* Default interrupt handler for threaded interrupts.
+static
+inline_function FAR struct kwork_wqueue_s *irq_get_wqueue(int priority)
+{
+  FAR struct kwork_wqueue_s *queue;
+  int wqueue_priority;
+  int i;
+
+  nxmutex_lock(&g_irq_wqueue_lock);
+  for (i = 0; g_irq_wqueue[i] != NULL && i < CONFIG_IRQ_NWORKS; i++)
+    {
+      wqueue_priority = work_queue_priority_wq(g_irq_wqueue[i]);
+      DEBUGASSERT(wqueue_priority >= SCHED_PRIORITY_MIN &&
+                  wqueue_priority <= SCHED_PRIORITY_MAX);
+
+      if (wqueue_priority == priority)
+        {
+          nxmutex_unlock(&g_irq_wqueue_lock);
+          return g_irq_wqueue[i];
+        }
+    }
+
+  DEBUGASSERT(i < CONFIG_IRQ_NWORKS);
+
+  queue = work_queue_create("isrwork", priority,
+                            CONFIG_IRQ_WORK_STACKSIZE, 1);
+
+  g_irq_wqueue[i] = queue;
+  nxmutex_unlock(&g_irq_wqueue_lock);
+  return queue;
+}
+
+/* Default interrupt handler for worked interrupts.
  * Useful for oneshot interrupts.
  */
 
+static void irq_work_handler(FAR void *arg)
+{
+  FAR struct irq_work_info_s *info = arg;
+
+  info->isrwork(info->irq, NULL, info->arg);
+}
+
 static int irq_default_handler(int irq, FAR void *regs, FAR void *arg)
 {
-  FAR struct irq_thread_info_s *info = arg;
-  int ret = IRQ_WAKE_THREAD;
+  FAR struct irq_work_info_s *info = arg;
+  int ret;
 
-  DEBUGASSERT(info->handler != NULL);
-  ret = info->handler(irq, regs, info->arg);
+  ret = info->handler(irq, regs, arg);
 
   if (ret == IRQ_WAKE_THREAD)
     {
-      nxsem_post(info->sem);
+      work_queue_wq(info->wqueue, &info->work, irq_work_handler, info, 0);
       ret = OK;
     }
 
   return ret;
-}
-
-static int isr_thread_main(int argc, FAR char *argv[])
-{
-  int irq = atoi(argv[1]);
-  xcpt_t isr = (xcpt_t)((uintptr_t)strtoul(argv[2], NULL, 16));
-  xcpt_t isrthread = (xcpt_t)((uintptr_t)strtoul(argv[3], NULL, 16));
-  FAR void *arg = (FAR void *)((uintptr_t)strtoul(argv[4], NULL, 16));
-  struct irq_thread_info_s info;
-  sem_t sem;
-
-  info.sem = &sem;
-  info.arg = arg;
-  info.handler = isr;
-
-  nxsem_init(&sem, 0, 0);
-
-  irq_attach(irq, irq_default_handler, &info);
-
-#if !defined(CONFIG_ARCH_NOINTC)
-  up_enable_irq(irq);
-#endif
-
-  for (; ; )
-    {
-      if (nxsem_wait_uninterruptible(&sem) < 0)
-        {
-          continue;
-        }
-
-      isrthread(irq, NULL, arg);
-    }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -121,38 +136,33 @@ static int isr_thread_main(int argc, FAR char *argv[])
  ****************************************************************************/
 
 /****************************************************************************
- * Name: irq_attach_thread
+ * Name: irq_attach_wqueue
  *
  * Description:
  *   Configure the IRQ subsystem so that IRQ number 'irq' is dispatched to
- *   'isrthread' and up_enable_irq will be invoked after isrthread started.
+ *   'wqueue'
  *
  * Input Parameters:
  *   irq - Irq num
  *   isr - Function to be called when the IRQ occurs, called in interrupt
  *   context.
  *   If isr is NULL the default handler is installed(irq_default_handler).
- *   isrthread - called in thread context, If the isrthread is NULL,
+ *   isrwork - called in thread context, If the isrwork is NULL,
  *   then the ISR is being detached.
  *   arg - privdate data
- *   priority   - Priority of the new task
- *   stack_size - size (in bytes) of the stack needed
+ *   priority - isrwork pri
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
-                      int priority, int stack_size)
+int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
+                      FAR void *arg, int priority)
 {
+  FAR struct irq_work_info_s *info;
+
 #if NR_IRQS > 0
-  FAR char *argv[5];
-  char arg1[32];  /* irq */
-  char arg2[32];  /* isr */
-  char arg3[32];  /* isrthread */
-  char arg4[32];  /* arg */
-  pid_t pid;
   int ndx;
 
   if ((unsigned)irq >= NR_IRQS)
@@ -166,43 +176,32 @@ int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
       return ndx;
     }
 
-  /* If the isrthread is NULL, then the ISR is being detached. */
+  /* If the isrwork is NULL, then the ISR is being detached. */
 
-  if (isrthread == NULL)
+  info = &g_irq_work_vector[ndx];
+
+  if (isrwork == NULL)
     {
       irq_detach(irq);
-      DEBUGASSERT(g_irq_thread_pid[ndx] != 0);
-      kthread_delete(g_irq_thread_pid[ndx]);
-      g_irq_thread_pid[ndx] = 0;
-
+      info->isrwork = NULL;
+      info->handler = NULL;
+      info->arg     = NULL;
+      info->wqueue  = NULL;
       return OK;
     }
 
-  if (g_irq_thread_pid[ndx] != 0)
+  info->isrwork = isrwork;
+  info->handler = isr;
+  info->arg     = arg;
+  info->irq     = irq;
+  if (info->wqueue == NULL)
     {
-      return -EINVAL;
+      info->wqueue = irq_get_wqueue(priority);
     }
 
-  snprintf(arg1, sizeof(arg1), "%d", irq);
-  snprintf(arg2, sizeof(arg2), "%p", isr);
-  snprintf(arg3, sizeof(arg3), "%p", isrthread);
-  snprintf(arg4, sizeof(arg4), "%p", arg);
-  argv[0] = arg1;
-  argv[1] = arg2;
-  argv[2] = arg3;
-  argv[3] = arg4;
-  argv[4] = NULL;
-
-  pid = kthread_create("isr_thread", priority, stack_size,
-                        isr_thread_main, argv);
-  if (pid < 0)
-    {
-      return pid;
-    }
-
-  g_irq_thread_pid[ndx] = pid;
-
+  irq_attach(irq, irq_default_handler, info);
 #endif /* NR_IRQS */
 
   return OK;
 }
+
