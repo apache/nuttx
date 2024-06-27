@@ -314,7 +314,7 @@ int drv8825_register(FAR const char *devpath, FAR struct drv8825_ops_s *ops)
   priv->ops = ops;
 
   lower = kmm_malloc(sizeof(struct stepper_lowerhalf_s));
-  if (priv == NULL)
+  if (lower == NULL)
     {
       stperr("Failed to allocate instance\n");
       kmm_free(priv);
