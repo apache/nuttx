@@ -30,14 +30,25 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m7
-  TOOLCHAIN_MARCH    := -march=armv7e-m
-  LLVM_CPUTYPE       := cortex-m7
-  ifeq ($(CONFIG_ARCH_FPU),y)
-    ifeq ($(CONFIG_ARCH_DPFPU),y)
-      TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
-    else
-      TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    TOOLCHAIN_MTUNE  := -cpu=cortexm7
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARCH_DPFPU),y)
+        TOOLCHAIN_MFLOAT := -fpu=vfpv3
+      else
+        TOOLCHAIN_MFLOAT := -fpu=vfpv3_d16
+      endif
+    endif
+  else
+    TOOLCHAIN_MTUNE  := -mtune=cortex-m7
+    TOOLCHAIN_MARCH  := -march=armv7e-m
+    LLVM_CPUTYPE     := cortex-m7
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARCH_DPFPU),y)
+        TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
+      else
+        TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
+      endif
     endif
   endif
 else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
@@ -50,14 +61,26 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
   LLVM_ABITYPE := eabihf
-  ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
-    TOOLCHAIN_MFLOAT += -mfloat-abi=softfp
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+      TOOLCHAIN_MFLOAT += -fsoft
+    else
+      TOOLCHAIN_MFLOAT += -fhard
+    endif
   else
-    TOOLCHAIN_MFLOAT += -mfloat-abi=hard
+    ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+      TOOLCHAIN_MFLOAT += -mfloat-abi=softfp
+    else
+      TOOLCHAIN_MFLOAT += -mfloat-abi=hard
+    endif
   endif
 else
-  LLVM_ABITYPE 		 := eabi
-  TOOLCHAIN_MFLOAT += -mfloat-abi=soft
+  LLVM_ABITYPE := eabi
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),)
+    TOOLCHAIN_MFLOAT += -mfloat-abi=soft
+  else
+    TOOLCHAIN_MFLOAT += -fsoft
+  endif
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM3),y)
