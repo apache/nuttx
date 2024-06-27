@@ -247,6 +247,18 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 
   LDFLAGS      += --diag_suppress=6329
 
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  CC       = ccarm
+  CXX      = cxarm
+  CPP      = ccarm -E
+  LD       = cxarm
+  STRIP    = gstrip
+  AR       = cxarm
+  NM       = gnm
+  OBJCOPY  = objcopy
+  GMEMFILE = gmemfile
+  OBJDUMP  = gdump
+
 # Default toolchain
 
 else
@@ -360,7 +372,9 @@ endif
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    LDFLAGS += -map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+  else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
     LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
   else
     LDFLAGS += --strict --map --xref --symbols --info=unused --info=veneers
@@ -369,9 +383,13 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
-    LDFLAGS += --debug
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),)
+    ARCHOPTIMIZATION += -g
+    ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+      LDFLAGS += --debug
+    endif
+  else
+    ARCHOPTIMIZATION += -G -gdwarf-2
   endif
 endif
 
@@ -383,6 +401,18 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
     # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
     # then go ahead and try "--print-file-name"
     COMPILER_RT_LIB := $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
+  endif
+else ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+  GHS_ROOT_PATH = $(shell which $(CC) | awk -F '/[^/]*$$' '{print $$1}')
+  COMPILER_RT_LIB := -l$(GHS_ROOT_PATH)/lib/thumb2/libarch
+  ifeq ($(CONFIG_ARCH_FPU),y)
+    ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+        COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sf
+    else
+        COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_fp
+    endif
+  else
+    COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sf
   endif
 endif
 

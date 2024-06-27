@@ -133,7 +133,7 @@ else
 endif
 
 ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
-LDFLAGS += $(addprefix $(SCRIPT_OPT),$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
+LDFLAGS += $(SCRIPT_OPT) $(addsuffix .tmp,$(ARCHSCRIPT)) $(EXTRALINKCMDS)
 LIBPATHS += $(LIBPATH_OPT) $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
@@ -199,7 +199,7 @@ define LINK_ALLSYMS_KASAN
 	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp
 	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
 	$(Q) $(call DELFILE, kasan_globals.tmp))
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 endef
@@ -210,7 +210,7 @@ $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(addsuffix .tmp,$(ARCHSCRIPT))
 	$(Q) echo "LD: nuttx"
 ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 else
