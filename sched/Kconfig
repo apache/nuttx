@@ -340,6 +340,18 @@ config PREALLOC_IRQCHAIN
 
 endif # IRQCHAIN
 
+config IRQ_NWORKS
+	int "Max num of active irq wqueue"
+	default 8
+	---help---
+		The max num of active irq wqueue.
+
+config IRQ_WORK_STACKSIZE
+	int "The default stack size for isr wqueue"
+	default DEFAULT_TASK_STACKSIZE
+	---help---
+		The default stack size for isr wqueue.
+
 config IRQCOUNT
 	bool
 	default n
