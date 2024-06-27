@@ -39,13 +39,24 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_SIMPLE_ADDRENV
-/* Map 1:1 with 0x100000000 offset */
 
-struct simple_addrenv_s g_addrenv =
+static const struct simple_addrenv_s g_addrenv[] =
 {
-  .va   = X86_64_LOAD_OFFSET,
-  .pa   = 0,
-  .size = 0xffffffffffffffff
+  /* Map 1:1 with 0x100000000 offset for RAM */
+
+  {
+    .va   = X86_64_LOAD_OFFSET,
+    .pa   = 0,
+    .size = CONFIG_RAM_SIZE
+  },
+
+  /* Map the rest of memory as 1:1 */
+
+  {
+    .va   = 0,
+    .pa   = 0,
+    .size = 0
+  }
 };
 #endif
 
@@ -64,7 +75,7 @@ struct simple_addrenv_s g_addrenv =
 static void x86_64_addrenv_init(void)
 {
 #ifdef CONFIG_DEV_SIMPLE_ADDRENV
-  simple_addrenv_initialize(&g_addrenv);
+  simple_addrenv_initialize(g_addrenv);
 #endif
 }
 
