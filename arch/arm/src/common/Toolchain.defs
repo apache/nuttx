@@ -351,6 +351,12 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   endif
 endif
 
+# Debug --whole-archive
+
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
+endif
+
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
