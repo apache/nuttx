@@ -730,6 +730,15 @@ static void coredump_dump_blkdev(pid_t pid)
       return;
     }
 
+  /* Close block device directly, make sure all data write to block device */
+
+  ret = g_blockstream.inode->u.i_bops->close(g_blockstream.inode);
+  if (ret < 0)
+    {
+      _alert("Coredump information close fail\n");
+      return;
+    }
+
   _alert("Finish coredump, write %d bytes to %s\n",
          info->size, CONFIG_BOARD_COREDUMP_BLKDEV_PATH);
 }
