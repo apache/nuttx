@@ -137,6 +137,12 @@ endif
 LDFLAGS          += -nostdlib
 ARCHOPTIMIZATION += -nostdlib
 
+# Debug --whole-archive
+
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
+endif
+
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
