@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
-#include <stdatomic.h>
+#include <poll.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -42,6 +42,7 @@
  ****************************************************************************/
 
 #define PERF_GET_COUNT(event) ((event)->count + (event)->child_count)
+#define PERF_DEFAULT_PERIOD 1000
 
 /****************************************************************************
  * Private Types
@@ -59,6 +60,8 @@ static ssize_t perf_read(FAR struct file *filep, FAR char *buffer,
 static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int perf_poll(FAR struct file *filep, FAR struct pollfd *fds,
                      bool setup);
+static int perf_mmap(FAR struct file *filep,
+                     FAR struct mm_map_entry_s *map);
 
 static int perf_cpuclock_event_init(FAR struct perf_event_s *event);
 static int perf_cpuclock_event_add(FAR struct perf_event_s *event,
@@ -70,6 +73,7 @@ static int perf_cpuclock_event_start(FAR struct perf_event_s *event,
 static int perf_cpuclock_event_stop(FAR struct perf_event_s *event,
                                     int flags);
 static int perf_cpuclock_event_read(FAR struct perf_event_s *event);
+static int perf_cpuclock_event_match(FAR struct perf_event_s *event);
 
 /****************************************************************************
  * Private Data
@@ -85,7 +89,8 @@ static const struct file_operations g_perf_fops =
   .close = perf_close, /* close */
   .read  = perf_read,  /* read */
   .ioctl = perf_ioctl, /* ioctl */
-  .poll  = perf_poll   /* poll */
+  .poll  = perf_poll,  /* poll */
+  .mmap  = perf_mmap   /* mmap */
 };
 
 static struct inode g_perf_inode =
@@ -108,6 +113,7 @@ static struct pmu_ops_s g_perf_cpu_clock_ops =
   .event_start = perf_cpuclock_event_start,
   .event_stop  = perf_cpuclock_event_stop,
   .event_read  = perf_cpuclock_event_read,
+  .event_match = perf_cpuclock_event_match,
 };
 
 static struct pmu_s g_perf_cpu_clock =
@@ -118,6 +124,147 @@ static struct pmu_s g_perf_cpu_clock =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void perf_sample_data_init(FAR struct perf_sample_data_s *data,
+                                  uint64_t period)
+{
+  data->sample_flags = PERF_SAMPLE_PERIOD;
+  data->period = period;
+}
+
+static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
+                                    FAR struct perf_event_s *event,
+                                    uintptr_t ip)
+{
+  uint64_t sample_type = event->attr.sample_type;
+  uint16_t size = sizeof(struct perf_event_header_s);
+
+  if (sample_type & PERF_SAMPLE_IP)
+    {
+      data->ip = ip;
+      data->sample_flags |= PERF_SAMPLE_IP;
+      size += sizeof(ip);
+    }
+
+  if (sample_type & PERF_SAMPLE_ID)
+    {
+      data->id = event->id;
+      data->sample_flags |= PERF_SAMPLE_ID;
+      size += sizeof(event->id);
+    }
+
+  if (sample_type & PERF_SAMPLE_TID)
+    {
+      pid_t pid, tid;
+
+      if (event->ctx && event->ctx->tcb)
+        {
+          pid = event->ctx->tcb->group->tg_pid;
+          tid = event->ctx->tcb->pid;
+        }
+      else
+        {
+          pid = nxsched_getpid();
+          tid = nxsched_gettid();
+        }
+
+      data->tid_entry.pid = pid;
+      data->tid_entry.tid = tid;
+      data->sample_flags |= PERF_SAMPLE_TID;
+      size += sizeof(data->tid_entry);
+    }
+
+  return size;
+}
+
+static void perf_output_sample(FAR struct perf_event_header_s *header,
+                               FAR struct perf_sample_data_s *data,
+                               FAR struct perf_event_s *event)
+{
+  uint64_t sample_type = data->sample_flags;
+
+  circbuf_overwrite(&(event->buf->rb), header,
+                    sizeof(struct perf_event_header_s));
+
+  if (sample_type & PERF_SAMPLE_IP)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->ip, sizeof(data->ip));
+    }
+
+  if (sample_type & PERF_SAMPLE_TID)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->tid_entry,
+                        sizeof(data->tid_entry));
+    }
+
+  if (sample_type & PERF_SAMPLE_ID)
+    {
+      circbuf_overwrite(&(event->buf->rb), &data->id, sizeof(data->id));
+    }
+}
+
+static int perf_event_data_overflow(FAR struct perf_event_s *event,
+                                    FAR struct perf_sample_data_s *data,
+                                    uintptr_t ip)
+{
+  struct perf_event_header_s header;
+  size_t space;
+
+  if (!event->buf)
+    {
+      return -ENOMEM;
+    }
+
+  space = circbuf_space(&(event->buf->rb));
+  event->count++;
+  header.size = perf_prepare_sample(data, event, ip);
+  header.type = PERF_RECORD_SAMPLE;
+
+  if (space < circbuf_size(&(event->buf->rb)) / 5 && event->pfd)
+    {
+      poll_notify(&event->pfd, 1, POLLIN);
+    }
+
+  while (space < header.size)
+    {
+      struct perf_event_header_s remove_header;
+
+      circbuf_peek(&(event->buf->rb), &remove_header,
+                    sizeof(struct perf_event_header_s));
+      circbuf_readcommit(&(event->buf->rb), remove_header.size);
+      space = circbuf_space(&(event->buf->rb));
+    }
+
+  perf_output_sample(&header, data, event);
+
+  return 0;
+}
+
+static int perf_buffer_set_output(FAR struct perf_event_s *event,
+                                  FAR struct perf_event_s *output)
+{
+  if (output->buf)
+    {
+      event->buf = output->buf;
+      event->buf->ref_count++;
+      return 0;
+    }
+
+  return -1;
+}
+
+static void perf_buffer_release(FAR struct perf_event_s *event)
+{
+  if (event->buf)
+    {
+      event->buf->ref_count--;
+      if (event->buf->ref_count == 0)
+        {
+          kmm_free(event->buf);
+          event->buf = NULL;
+        }
+    }
+}
 
 /****************************************************************************
  * Name: perf_assign_eventid
@@ -229,10 +376,18 @@ static FAR struct pmu_s *perf_get_pmu(FAR struct perf_event_s *event)
 
   list_for_every_entry(&g_perf_pmus, pmu, struct pmu_s, node)
     {
-      event->pmu = pmu;
-      if (pmu->ops->event_init(event) == 0)
+      if (event->attr.type == pmu->type)
         {
-          return pmu;
+          if (pmu->ops->event_match && pmu->ops->event_match(event) != 0)
+            {
+              continue;
+            }
+
+          event->pmu = pmu;
+          if (pmu->ops->event_init(event) == 0)
+            {
+              return pmu;
+            }
         }
     }
 
@@ -583,12 +738,8 @@ static void perf_free_event(FAR struct perf_event_s *event)
       perf_free_pmu_context(event->pmuctx);
     }
 
-  if (event->ctx != NULL)
-    {
-      perf_free_context(event->ctx);
-    }
-
   nxmutex_destroy(&event->child_mutex);
+  perf_buffer_release(event);
   kmm_free(event);
 }
 
@@ -680,6 +831,7 @@ perf_inherit_event(FAR struct perf_event_s *parent_event,
   parent_event->child_num++;
   event->attach_state |= PERF_ATTACH_CHILD;
   event->ctx = child->perf_event_ctx;
+  perf_buffer_set_output(event, parent_event);
 
   nxmutex_unlock(&parent_event->child_mutex);
 
@@ -1902,6 +2054,40 @@ static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PERF_EVENT_IOC_RESET:
         func = perf_event_reset;
         break;
+      case PERF_EVENT_IOC_SET_OUTPUT:
+        {
+          FAR struct file *out_filep;
+          FAR struct perf_event_s *out_event;
+          int fd = (int) arg;
+
+          ret = fs_getfilep(fd, &out_filep);
+          if (ret < 0)
+            {
+              return -EINVAL;
+            }
+
+          out_event = out_filep->f_priv;
+
+          if (!out_event->buf)
+            {
+              return -EINVAL;
+            }
+
+          perf_buffer_set_output(event, out_event);
+          return OK;
+        }
+
+      case PERF_EVENT_IOC_ID:
+        {
+          if (!arg)
+            {
+              return -EINVAL;
+            }
+
+          *(uint64_t *)arg = event->id;
+        }
+
+        return OK;
       default:
         return -EINVAL;
     }
@@ -1937,7 +2123,97 @@ static int perf_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int perf_poll(FAR struct file *filep, FAR struct pollfd *fds,
                      bool setup)
 {
+  FAR struct perf_event_s *event = filep->f_priv;
+  irqstate_t flags;
+
+  if ((fds->events & POLLIN) == 0)
+    {
+      return -EDEADLK;
+    }
+
+  if (!event && !event->buf)
+    {
+      return -EINVAL;
+    }
+
+  flags = spin_lock_irqsave(&event->buf->lock);
+
+  if (event->state == PERF_EVENT_STATE_EXIT)
+    {
+      spin_unlock_irqrestore(&event->buf->lock, flags);
+      return -ESRCH;
+    }
+
+  if (setup)
+    {
+      if (event->pfd)
+        {
+          spin_unlock_irqrestore(&event->buf->lock, flags);
+          return -EBUSY;
+        }
+
+      event->pfd = fds;
+
+      if (circbuf_used(&(event->buf->rb)) > 0)
+        {
+          spin_unlock_irqrestore(&event->buf->lock, flags);
+          poll_notify(&event->pfd, 1, POLLIN);
+          return 0;
+        }
+    }
+  else
+    {
+      event->pfd = NULL;
+    }
+
+  spin_unlock_irqrestore(&event->buf->lock, flags);
   return 0;
+}
+
+static int perf_mmap(FAR struct file *filep,
+                     FAR struct mm_map_entry_s *map)
+{
+  FAR struct perf_event_s *event = filep->f_priv;
+
+  if (!event->buf)
+    {
+      size_t buf_size = map->length;
+      FAR void *buf;
+
+      buf = kmm_zalloc(sizeof(struct perf_buffer_s) + buf_size);
+      if (buf == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      event->buf = buf;
+      event->buf->ref_count = 1;
+      circbuf_init(&event->buf->rb, buf + sizeof(struct perf_buffer_s),
+                   buf_size);
+    }
+
+  map->vaddr = event->buf;
+  return 0;
+}
+
+static void perf_swevent_timer_handle(wdparm_t arg)
+{
+  FAR struct perf_event_s *event = (FAR struct perf_event_s *)arg;
+  struct perf_sample_data_s data;
+
+  /* TODO: ISR thread cannot get pc */
+
+  uintptr_t pc = up_getusrpc(NULL);
+  sclock_t period = NSEC2TICK(event->attr.sample_period);
+  irqstate_t flags;
+
+  perf_sample_data_init(&data, event->attr.sample_period);
+
+  flags = spin_lock_irqsave(&event->buf->lock);
+  perf_event_data_overflow(event, &data, pc);
+  spin_unlock_irqrestore(&event->buf->lock, flags);
+
+  wd_start(&event->hw.waitdog, period, perf_swevent_timer_handle, arg);
 }
 
 /****************************************************************************
@@ -1956,7 +2232,12 @@ static int perf_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static int perf_cpuclock_event_init(FAR struct perf_event_s *event)
 {
-  return -1;
+  if (event->attr.config != PERF_COUNT_SW_CPU_CLOCK)
+    {
+      return -ENOENT;
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -1996,6 +2277,7 @@ static int perf_cpuclock_event_add(FAR struct perf_event_s *event,
 static void perf_cpuclock_event_del(FAR struct perf_event_s *event,
                                     int flags)
 {
+  wd_cancel_within_critical(&event->hw.waitdog);
 }
 
 /****************************************************************************
@@ -2016,6 +2298,13 @@ static void perf_cpuclock_event_del(FAR struct perf_event_s *event,
 static int perf_cpuclock_event_start(FAR struct perf_event_s *event,
                                      int flags)
 {
+  sclock_t period = event->attr.sample_period;
+
+  period = (PERF_DEFAULT_PERIOD > event->attr.sample_period) ?
+           PERF_DEFAULT_PERIOD : event->attr.sample_period;
+
+  wd_start(&event->hw.waitdog, NSEC2TICK(period),
+           perf_swevent_timer_handle, (wdparm_t)event);
   return 0;
 }
 
@@ -2037,6 +2326,7 @@ static int perf_cpuclock_event_start(FAR struct perf_event_s *event,
 static int perf_cpuclock_event_stop(FAR struct perf_event_s *event,
                                     int flags)
 {
+  wd_cancel_within_critical(&event->hw.waitdog);
   return 0;
 }
 
@@ -2057,6 +2347,16 @@ static int perf_cpuclock_event_stop(FAR struct perf_event_s *event,
 static int perf_cpuclock_event_read(FAR struct perf_event_s *event)
 {
   return 0;
+}
+
+static int perf_cpuclock_event_match(FAR struct perf_event_s *event)
+{
+  if (event->attr.config == PERF_COUNT_SW_CPU_CLOCK)
+    {
+      return 0;
+    }
+
+  return -ENOENT;
 }
 
 /****************************************************************************
@@ -2095,7 +2395,7 @@ int perf_event_init(void)
 
   /* Register clock event */
 
-  perf_pmu_register(&g_perf_cpu_clock, "cpu_clock", -1);
+  perf_pmu_register(&g_perf_cpu_clock, "cpu_clock", PERF_TYPE_SOFTWARE);
 
   return OK;
 }
@@ -2341,9 +2641,27 @@ void perf_event_task_exit(FAR struct tcb_s *tcb)
                                 struct perf_event_s, event_node)
         {
           perf_context_detach(event, ctx);
-          perf_free_event(event);
+
+          if (event->buf->ref_count > 1)
+            {
+              perf_free_event(event);
+            }
+          else
+            {
+              /* wait for perf_close free */
+
+              event->state = PERF_EVENT_STATE_EXIT;
+              event->ctx = NULL;
+
+              if (event->pmuctx != NULL)
+                {
+                  perf_free_pmu_context(event->pmuctx);
+                  event->pmuctx = NULL;
+                }
+            }
         }
 
+      perf_free_context(ctx);
       nxmutex_destroy(&tcb->perf_event_mutex);
     }
 }
