@@ -36,6 +36,14 @@
 #include "intel64_hpet.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define X86_64_MAR_DEST        0xfee00000
+#define X86_64_MDR_TYPE        0x4000
+#define X86_64_MDR_CPUID_SHIFT 12
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -341,6 +349,11 @@ static int intel64_hpet_setisr(struct intel64_tim_dev_s *dev, uint8_t timer,
       regval &= ~HPET_TCONF_PERCAP;
     }
 
+#ifdef CONFIG_INTEL64_HPET_FSB
+  /* FSB works only with edge triggered mode */
+
+  regval &= ~HPET_TCONF_INTTYPE;
+#else
   /* Route interrupts */
 
   regval |= HPET_TCONF_INTROUTE(irq - IRQ0);
@@ -352,10 +365,15 @@ static int intel64_hpet_setisr(struct intel64_tim_dev_s *dev, uint8_t timer,
    */
 
   regval |= HPET_TCONF_INTTYPE;
+#endif
 
   /* Set 64-bit mode */
 
+#ifdef CONFIG_INTEL64_HPET_32BIT
+  regval |= HPET_TCONF_32MODE;
+#else
   regval &= ~HPET_TCONF_32MODE;
+#endif
 
   /* Write Timer configuration */
 
@@ -419,6 +437,72 @@ static void intel64_hpet_disint(struct intel64_tim_dev_s *dev, uint8_t tim)
   intel64_hpet_putreg(hpet, HPET_TCONF_OFFSET(tim), regval);
 }
 
+#ifdef CONFIG_INTEL64_HPET_FSB
+/****************************************************************************
+ * Name: intel64_hpet_fsb
+ *
+ * Description:
+ *   Configure HPET with FSB interrupts.
+ *
+ ****************************************************************************/
+
+static void intel64_hpet_fsb(struct intel64_hpet_s *hpet)
+{
+  uint64_t regval;
+  uint64_t fsb_val;
+  uint64_t fsb_addr;
+  int      vect;
+  int      irq;
+  int      i;
+
+  /* Disable legacy routing */
+
+  intel64_hpet_putreg(hpet, HPET_GCONF_OFFSET, 0);
+
+  /* Configure timers */
+
+  for (i = 0; i < hpet->timers; i++)
+    {
+      /* Allocate MSI vector */
+
+      vect = 1;
+      irq = up_alloc_irq_msi(&vect);
+      if (irq < 0 && vect != 1)
+        {
+          tmrerr("failed to allocate MSI for timer %d\n", i);
+          ASSERT(0);
+        }
+
+      /* Configure FSB */
+
+      fsb_addr = X86_64_MAR_DEST |
+                 (up_apic_cpu_id() << X86_64_MDR_CPUID_SHIFT);
+      fsb_val  = X86_64_MDR_TYPE | irq;
+
+      regval =  fsb_addr << HPET_TFSB_INT_ADDR_SHIFT;
+      regval |= fsb_val << HPET_TFSB_INT_VAL_SHIFT;
+
+      intel64_hpet_putreg(hpet, HPET_TFSB_OFFSET(i), regval);
+
+      /* Enable FSB */
+
+      regval = intel64_hpet_getreg(hpet, HPET_TCONF_OFFSET(i));
+      if (!(regval & HPET_TCONF_FSBCAP))
+        {
+          tmrerr("FSB not supported for timer %d\n", i);
+          ASSERT(0);
+        }
+
+      intel64_hpet_putreg(hpet, HPET_TCONF_OFFSET(i),
+                          regval | HPET_TCONF_FSBEN);
+
+      /* Store irq number */
+
+      hpet->chans[i].irq = irq;
+    }
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -462,6 +546,11 @@ struct intel64_tim_dev_s *intel64_hpet_init(uint64_t base)
 
       hpet->ops = &g_intel64_hpet_ops;
 
+#ifdef CONFIG_INTEL64_HPET_FSB
+      /* Allocate and configure FSB for timers */
+
+      intel64_hpet_fsb(hpet);
+#else
       if (regval & HPET_GCAPID_LEGROUTE)
         {
           /* Configure legacy mode.
@@ -479,6 +568,7 @@ struct intel64_tim_dev_s *intel64_hpet_init(uint64_t base)
 
           ASSERT(0);
         }
+#endif
 
       /* Enable HPET */
 
