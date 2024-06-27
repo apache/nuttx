@@ -407,25 +407,6 @@ int work_cancel(int qid, FAR struct work_s *work);
 int work_cancel_sync(int qid, FAR struct work_s *work);
 
 /****************************************************************************
- * Name: work_foreach
- *
- * Description:
- *   Enumerate over each work thread and provide the tid of each task to a
- *   user callback functions.
- *
- * Input Parameters:
- *   qid     - The work queue ID
- *   handler - The function to be called with the pid of each task
- *   arg     - The function callback
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void work_foreach(int qid, work_foreach_t handler, FAR void *arg);
-
-/****************************************************************************
  * Name: work_available
  *
  * Description:
