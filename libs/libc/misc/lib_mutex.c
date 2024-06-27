@@ -303,7 +303,14 @@ int nxmutex_clocklock(FAR mutex_t *mutex, clockid_t clockid,
 
   do
     {
-      ret = nxsem_clockwait(&mutex->sem, clockid, abstime);
+      if (abstime)
+        {
+          ret = nxsem_clockwait(&mutex->sem, clockid, abstime);
+        }
+      else
+        {
+          ret = nxsem_wait(&mutex->sem);
+        }
     }
   while (ret == -EINTR || ret == -ECANCELED);
 
