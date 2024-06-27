@@ -164,9 +164,6 @@
 #define CH_STAT_ATIME      (1 << 3)
 #define CH_STAT_MTIME      (1 << 4)
 
-#define FS_BACKTRACE_WIDTH      (sizeof(uintptr_t) * 2 + 3) /* 3: ' 0x' prefix */
-#define FS_BACKTRACE_BUFFER_LEN (CONFIG_FS_BACKTRACE * FS_BACKTRACE_WIDTH + 1)
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -962,20 +959,6 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
 
 int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
                   FAR void *priv, int minfd, bool addref);
-
-/****************************************************************************
- * Name: file_dump_backtrace
- *
- * Description:
- *   Dump the backtrace of the file open to given buffer.
- *
- * Returned Value:
- *     Returns the backtrace string, it could be empty.
- *
- ****************************************************************************/
-
-FAR char *file_dump_backtrace(FAR struct file *filep, FAR char *buffer,
-                              size_t len);
 
 /****************************************************************************
  * Name: file_dup

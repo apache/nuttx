@@ -554,17 +554,6 @@ int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
                                 pos, priv, minfd, addref);
 }
 
-FAR char *file_dump_backtrace(FAR struct file *filep, FAR char *buffer,
-                              size_t len)
-{
-#if CONFIG_FS_BACKTRACE > 0
-  backtrace_format(buffer, len, filep->f_backtrace, CONFIG_FS_BACKTRACE);
-#else
-  buffer[0] = '\0';
-#endif
-  return buffer;
-}
-
 /****************************************************************************
  * Name: files_duplist
  *
