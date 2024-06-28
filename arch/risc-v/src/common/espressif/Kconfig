@@ -164,7 +164,6 @@ config ESPRESSIF_SIMPLE_BOOT
 config ESPRESSIF_BOOTLOADER_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	select ESPRESSIF_HAVE_OTA_PARTITION
-	depends on !ESPRESSIF_ESP32H2
 	---help---
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 

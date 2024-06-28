@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32h2/common/scripts/esp32h2_simple_boot_sections.ld
+ * boards/risc-v/esp32h2/common/scripts/esp32h2_sections.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,12 +18,47 @@
  *
  ****************************************************************************/
 
+#include "common.ld"
+
 /* Default entry point: */
 
 ENTRY(__start);
 
 SECTIONS
 {
+#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+  .metadata :
+  {
+    /* Magic for load header */
+
+    LONG(0xace637d3)
+
+    /* Application entry point address */
+
+    KEEP(*(.entry_addr))
+
+    /* IRAM metadata:
+     * - Destination address (VMA) for IRAM region
+     * - Flash offset (LMA) for start of IRAM region
+     * - Size of IRAM region
+     */
+
+    LONG(ADDR(.iram0.text))
+    LONG(LOADADDR(.iram0.text))
+    LONG(SIZEOF(.iram0.text))
+
+    /* DRAM metadata:
+     * - Destination address (VMA) for DRAM region
+     * - Flash offset (LMA) for start of DRAM region
+     * - Size of DRAM region
+     */
+
+    LONG(ADDR(.dram0.data))
+    LONG(LOADADDR(.dram0.data))
+    LONG(SIZEOF(.dram0.data))
+  } >metadata
+#endif
+
   .iram0.text :
   {
     _iram_start = ABSOLUTE(.);
@@ -35,6 +70,7 @@ SECTIONS
 
     *(.iram1)
     *(.iram1.*)
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
 
     *libarch.a:*brownout.*(.text .text.* .literal .literal.*)
@@ -98,6 +134,12 @@ SECTIONS
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
     *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
+#else
+    *libarch.a:*cache_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
+#endif
 
     esp_head.*(.literal .text .literal.* .text.*)
     esp_start.*(.literal .text .literal.* .text.*)
@@ -166,6 +208,7 @@ SECTIONS
     *(.jcr)
     *(.dram1)
     *(.dram1.*)
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
     *libsched.a:irq_dispatch.*(.rodata .rodata.*)
 
     *libarch.a:*brownout.*(.rodata .rodata.*)
@@ -229,6 +272,12 @@ SECTIONS
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:esp_spiflash.*(.rodata .rodata.*)
+#else
+    *libarch.a:*cache_hal.*(.rodata .rodata.*)
+    *libarch.a:*mpu_hal.*(.rodata .rodata.*)
+    *libarch.a:*mmu_hal.*(.rodata .rodata.*)
+    *libarch.a:esp_spiflash.*(.rodata .rodata.*)
+#endif
 
     esp_head.*(.rodata .rodata.*)
     esp_start.*(.rodata .rodata.*)
@@ -274,7 +323,7 @@ SECTIONS
     . = ALIGN(0x10000);
     } > ROM
 
-  .flash.text :
+  .flash.text : ALIGN(0xFFFF)
   {
     _stext = .;
 
@@ -303,7 +352,18 @@ SECTIONS
   _image_drom_lma = LOADADDR(.flash.rodata);
   _image_drom_size = SIZEOF(.flash.rodata);
 
-  .flash.rodata :
+  .flash.appdesc : ALIGN(0x10)
+  {
+    _rodata_reserved_start = ABSOLUTE(.);  /* This is a symbol marking the flash.rodata start, this can be used for mmu driver to maintain virtual address */
+    _rodata_start = ABSOLUTE(.);
+
+    /* Create an empty gap within this section. Thanks to this, the end of this
+     * section will match .flash.rodata's begin address. Thus, both sections
+     * will be merged when creating the final bin image. */
+    . = ALIGN(ALIGNOF(.flash.rodata));
+  } >default_rodata_seg
+
+  .flash.rodata : ALIGN(0xFFFF)
   {
     _srodata = ABSOLUTE(.);
 
@@ -359,6 +419,16 @@ SECTIONS
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
   } >default_rodata_seg AT > ROM
+
+  .flash.rodata_noload (NOLOAD) :
+  {
+    /*
+      This is a symbol marking the flash.rodata end, this can be used for mmu driver to maintain virtual address
+      We don't need to include the noload rodata in this section
+    */
+    _rodata_reserved_end = ABSOLUTE(.);
+    . = ALIGN (4);
+  } > default_rodata_seg AT > ROM
 
   /* RTC fast memory holds RTC wake stub code !*/
 
