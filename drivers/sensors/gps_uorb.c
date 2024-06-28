@@ -97,7 +97,7 @@ static int gps_activate(FAR struct sensor_lowerhalf_s *lower,
                         FAR struct file *filep, bool enable);
 static int gps_set_interval(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep,
-                            FAR unsigned long *interval);
+                            FAR uint32_t *interval);
 static int gps_control(FAR struct sensor_lowerhalf_s *lower,
                        FAR struct file *filep, int cmd, unsigned long arg);
 
@@ -163,7 +163,7 @@ static int gps_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int gps_set_interval(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep,
-                            FAR unsigned long *interval)
+                            FAR uint32_t *interval)
 {
   FAR struct gps_sensor_s *dev = (FAR struct gps_sensor_s *)lower;
   FAR struct gps_upperhalf_s *upper = dev->upper;
@@ -350,7 +350,7 @@ static int gps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       if (upper->lower->ops->set_interval != NULL)
         {
           ret = upper->lower->ops->set_interval(upper->lower, filep,
-                               (FAR unsigned long *)(uintptr_t)arg);
+                               (FAR uint32_t *)(uintptr_t)arg);
         }
     }
   else if (upper->lower->ops->control != NULL)

@@ -270,7 +270,7 @@ struct sensor_ops_s
 
   CODE int (*set_interval)(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep,
-                           FAR unsigned long *period_us);
+                           FAR uint32_t *period_us);
 
   /**************************************************************************
    * Name: batch
@@ -316,7 +316,7 @@ struct sensor_ops_s
 
   CODE int (*batch)(FAR struct sensor_lowerhalf_s *lower,
                     FAR struct file *filep,
-                    FAR unsigned long *latency_us);
+                    FAR uint32_t *latency_us);
 
   /**************************************************************************
    * Name: fetch
@@ -528,7 +528,7 @@ struct sensor_lowerhalf_s
    * struct sensor_xxx.
    */
 
-  unsigned long nbuffer;
+  uint32_t nbuffer;
 
   /* The uncalibrated use to describe whether the sensor event is
    * uncalibrated. True is uncalibrated data, false is calibrated data,
@@ -691,7 +691,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
  ****************************************************************************/
 
 int sensor_custom_register(FAR struct sensor_lowerhalf_s *dev,
-                           FAR const char *path, unsigned long esize);
+                           FAR const char *path, size_t esize);
 
 /****************************************************************************
  * Name: sensor_unregister

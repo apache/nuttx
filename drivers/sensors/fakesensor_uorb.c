@@ -54,8 +54,8 @@ struct fakesensor_s
 
   int type;
   struct file data;
-  unsigned long interval;
-  unsigned long batch;
+  uint32_t interval;
+  uint32_t batch;
   int raw_start;
   FAR const char *file_path;
   sem_t wakeup;
@@ -70,15 +70,15 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep, bool enable);
 static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                    FAR struct file *filep,
-                                   FAR unsigned long *period_us);
+                                   FAR uint32_t *period_us);
 static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep,
-                            FAR unsigned long *latency_us);
+                            FAR uint32_t *latency_us);
 static int fakegps_activate(FAR struct gps_lowerhalf_s *lower,
                             FAR struct file *filep, bool sw);
 static int fakegps_set_interval(FAR struct gps_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us);
+                                FAR uint32_t *period_us);
 static void fakesensor_push_event(FAR struct fakesensor_s *sensor,
                                   uint64_t event_timestamp);
 static int fakesensor_thread(int argc, char** argv);
@@ -141,7 +141,7 @@ static int fakesensor_read_csv_header(FAR struct fakesensor_s *sensor)
       fakesensor_read_csv_line(&sensor->data, buffer, sizeof(buffer), 0);
   if (sensor->interval == 0)
     {
-      sscanf(buffer, "interval:%lu\n", &sensor->interval);
+      sscanf(buffer, "interval:%"PRIu32"\n", &sensor->interval);
       sensor->interval *= 1000;
     }
 
@@ -240,7 +240,7 @@ static int fakegps_activate(FAR struct gps_lowerhalf_s *lower,
 
 static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                    FAR struct file *filep,
-                                   FAR unsigned long *period_us)
+                                   FAR uint32_t *period_us)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
@@ -250,18 +250,18 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
 static int fakegps_set_interval(FAR struct gps_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us)
+                                FAR uint32_t *period_us)
 {
   return fakesensor_set_interval((FAR void *)lower, filep, period_us);
 }
 
 static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep,
-                            FAR unsigned long *latency_us)
+                            FAR uint32_t *latency_us)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
-  unsigned long max_latency = sensor->lower.nbuffer * sensor->interval;
+  uint32_t max_latency = sensor->lower.nbuffer * sensor->interval;
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;

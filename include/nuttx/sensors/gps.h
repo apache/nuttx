@@ -88,7 +88,7 @@ struct gps_ops_s
 
   CODE int (*set_interval)(FAR struct gps_lowerhalf_s *lower,
                            FAR struct file *filep,
-                           FAR unsigned long *period_us);
+                           FAR uint32_t *period_us);
 
   /**************************************************************************
    * Name: control
