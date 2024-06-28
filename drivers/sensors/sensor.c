@@ -49,7 +49,7 @@
 #define ROUND_DOWN(x, y)    (((x) / (y)) * (y))
 #define DEVNAME_FMT         "/dev/uorb/sensor_%s%s%d"
 #define DEVNAME_UNCAL       "_uncal"
-#define TIMING_BUF_ESIZE    (sizeof(unsigned long))
+#define TIMING_BUF_ESIZE    (sizeof(uint32_t))
 
 /****************************************************************************
  * Private Types
@@ -70,7 +70,7 @@ struct sensor_axis_map_s
 
 struct sensor_meta_s
 {
-  unsigned long esize;
+  size_t esize;
   FAR char *name;
 };
 
@@ -227,13 +227,13 @@ static void sensor_unlock(FAR void *priv)
 static int sensor_update_interval(FAR struct file *filep,
                                   FAR struct sensor_upperhalf_s *upper,
                                   FAR struct sensor_user_s *user,
-                                  unsigned long interval)
+                                  uint32_t interval)
 {
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *tmp;
-  unsigned long min_interval = interval;
-  unsigned long min_latency = interval != ULONG_MAX ?
-                              user->state.latency : ULONG_MAX;
+  uint32_t min_interval = interval;
+  uint32_t min_latency = interval != UINT32_MAX ?
+                         user->state.latency : UINT32_MAX;
   int ret = 0;
 
   if (interval == user->state.interval)
@@ -243,7 +243,7 @@ static int sensor_update_interval(FAR struct file *filep,
 
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
-      if (tmp == user || tmp->state.interval == ULONG_MAX)
+      if (tmp == user || tmp->state.interval == UINT32_MAX)
         {
           continue;
         }
@@ -261,10 +261,10 @@ static int sensor_update_interval(FAR struct file *filep,
 
   if (lower->ops->set_interval)
     {
-      if (min_interval != ULONG_MAX &&
+      if (min_interval != UINT32_MAX &&
           min_interval != upper->state.min_interval)
         {
-          unsigned long expected_interval = min_interval;
+          uint32_t expected_interval = min_interval;
           ret = lower->ops->set_interval(lower, filep, &min_interval);
           if (ret < 0)
             {
@@ -276,7 +276,7 @@ static int sensor_update_interval(FAR struct file *filep,
             }
         }
 
-      if (min_latency == ULONG_MAX)
+      if (min_latency == UINT32_MAX)
         {
           min_latency = 0;
         }
@@ -302,11 +302,11 @@ static int sensor_update_interval(FAR struct file *filep,
 static int sensor_update_latency(FAR struct file *filep,
                                  FAR struct sensor_upperhalf_s *upper,
                                  FAR struct sensor_user_s *user,
-                                 unsigned long latency)
+                                 uint32_t latency)
 {
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *tmp;
-  unsigned long min_latency = latency;
+  uint32_t min_latency = latency;
   int ret = 0;
 
   if (latency == user->state.latency)
@@ -314,7 +314,7 @@ static int sensor_update_latency(FAR struct file *filep,
       return 0;
     }
 
-  if (user->state.interval == ULONG_MAX)
+  if (user->state.interval == UINT32_MAX)
     {
       user->state.latency = latency;
       return 0;
@@ -327,7 +327,7 @@ static int sensor_update_latency(FAR struct file *filep,
 
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
-      if (tmp == user || tmp->state.interval == ULONG_MAX)
+      if (tmp == user || tmp->state.interval == UINT32_MAX)
         {
           continue;
         }
@@ -339,7 +339,7 @@ static int sensor_update_latency(FAR struct file *filep,
     }
 
 update:
-  if (min_latency == ULONG_MAX)
+  if (min_latency == UINT32_MAX)
     {
       min_latency = 0;
     }
@@ -368,8 +368,8 @@ update:
 static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
                                    unsigned long nums)
 {
-  unsigned long interval = upper->state.min_interval != ULONG_MAX ?
-                           upper->state.min_interval : 1;
+  uint32_t interval = upper->state.min_interval != UINT32_MAX ?
+                      upper->state.min_interval : 1;
   while (nums-- > 0)
     {
       upper->state.generation += interval;
@@ -387,7 +387,7 @@ static bool sensor_is_updated(FAR struct sensor_upperhalf_s *upper,
     {
       return false;
     }
-  else if (user->state.interval == ULONG_MAX)
+  else if (user->state.interval == UINT32_MAX)
     {
       return true;
     }
@@ -409,7 +409,7 @@ static bool sensor_is_updated(FAR struct sensor_upperhalf_s *upper,
 static void sensor_catch_up(FAR struct sensor_upperhalf_s *upper,
                             FAR struct sensor_user_s *user)
 {
-  unsigned long generation;
+  uint32_t generation;
   long delta;
 
   circbuf_peek(&upper->timing, &generation, TIMING_BUF_ESIZE);
@@ -417,7 +417,7 @@ static void sensor_catch_up(FAR struct sensor_upperhalf_s *upper,
   if (delta > 0)
     {
       user->bufferpos = upper->timing.tail / TIMING_BUF_ESIZE;
-      if (user->state.interval == ULONG_MAX)
+      if (user->state.interval == UINT32_MAX)
         {
           user->state.generation = generation - 1;
         }
@@ -434,7 +434,7 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
                                  FAR struct sensor_user_s *user,
                                  FAR char *buffer, size_t len)
 {
-  unsigned long generation;
+  uint32_t generation;
   ssize_t ret = 0;
   size_t nums;
   size_t pos;
@@ -451,7 +451,7 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
 
   /* Take samples continuously */
 
-  if (user->state.interval == ULONG_MAX)
+  if (user->state.interval == UINT32_MAX)
     {
       ret = circbuf_peekat(&upper->buffer,
                            user->bufferpos * upper->state.esize,
@@ -485,7 +485,7 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
                  &generation, TIMING_BUF_ESIZE);
   while (pos++ != end)
     {
-      unsigned long next_generation;
+      uint32_t next_generation;
       long delta;
 
       if (pos * TIMING_BUF_ESIZE == upper->timing.head)
@@ -617,7 +617,7 @@ static int sensor_open(FAR struct file *filep)
       user->bufferpos = upper->timing.head / TIMING_BUF_ESIZE;
     }
 
-  user->state.interval = ULONG_MAX;
+  user->state.interval = UINT32_MAX;
   user->state.esize = upper->state.esize;
   nxsem_init(&user->buffersem, 0, 0);
   list_add_tail(&upper->userlist, &user->node);
@@ -676,8 +676,8 @@ static int sensor_close(FAR struct file *filep)
     }
 
   list_delete(&user->node);
-  sensor_update_latency(filep, upper, user, ULONG_MAX);
-  sensor_update_interval(filep, upper, user, ULONG_MAX);
+  sensor_update_latency(filep, upper, user, UINT32_MAX);
+  sensor_update_interval(filep, upper, user, UINT32_MAX);
   nxsem_destroy(&user->buffersem);
 
   /* The user is closed, notify to other users */
@@ -767,6 +767,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user = filep->f_priv;
+  uint32_t arg1 = (uint32_t)arg;
   int ret = 0;
 
   sninfo("cmd=%x arg=%08lx\n", cmd, arg);
@@ -796,7 +797,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           nxrmutex_lock(&upper->lock);
           ret = sensor_update_interval(filep, upper, user,
-                                       arg ? arg : ULONG_MAX);
+                                       arg1 ? arg1 : UINT32_MAX);
           nxrmutex_unlock(&upper->lock);
         }
         break;
@@ -804,7 +805,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_BATCH:
         {
           nxrmutex_lock(&upper->lock);
-          ret = sensor_update_latency(filep, upper, user, arg);
+          ret = sensor_update_latency(filep, upper, user, arg1);
           nxrmutex_unlock(&upper->lock);
         }
         break;
@@ -848,7 +849,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case SNIOC_SET_USERPRIV:
         {
           nxrmutex_lock(&upper->lock);
-          upper->state.priv = (FAR void *)(uintptr_t)arg;
+          upper->state.priv = (uint64_t)arg;
           nxrmutex_unlock(&upper->lock);
         }
         break;
@@ -858,10 +859,10 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           nxrmutex_lock(&upper->lock);
           if (!circbuf_is_init(&upper->buffer))
             {
-              if (arg >= lower->nbuffer)
+              if (arg1 >= lower->nbuffer)
                 {
-                  lower->nbuffer = arg;
-                  upper->state.nbuffer = arg;
+                  lower->nbuffer = arg1;
+                  upper->state.nbuffer = arg1;
                 }
               else
                 {
@@ -1222,7 +1223,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
  ****************************************************************************/
 
 int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
-                           FAR const char *path, unsigned long esize)
+                           FAR const char *path, size_t esize)
 {
   FAR struct sensor_upperhalf_s *upper;
   int ret = -EINVAL;
@@ -1248,7 +1249,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
 
   list_initialize(&upper->userlist);
   upper->state.esize = esize;
-  upper->state.min_interval = ULONG_MAX;
+  upper->state.min_interval = UINT32_MAX;
   if (lower->ops->activate)
     {
       upper->state.nadvertisers = 1;

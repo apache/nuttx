@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #include <nuttx/sensors/ioctl.h>
 
@@ -621,24 +622,24 @@ struct sensor_force         /* Type: Force */
 
 struct sensor_state_s
 {
-  unsigned long esize;         /* The element size of circular buffer */
-  unsigned long nbuffer;       /* The number of events that the circular buffer can hold */
-  unsigned long min_latency;   /* The minimum batch latency for sensor, in us */
-  unsigned long min_interval;  /* The minimum subscription interval for sensor, in us */
-  unsigned long nsubscribers;  /* The number of subcribers */
-  unsigned long nadvertisers;  /* The number of advertisers */
-  unsigned long generation;    /* The recent generation of circular buffer */
-  FAR void     *priv;          /* The pointer to private data of userspace user */
+  uint32_t esize;              /* The element size of circular buffer */
+  uint32_t nbuffer;            /* The number of events that the circular buffer can hold */
+  uint32_t min_latency;        /* The minimum batch latency for sensor, in us */
+  uint32_t min_interval;       /* The minimum subscription interval for sensor, in us */
+  uint32_t nsubscribers;       /* The number of subcribers */
+  uint32_t nadvertisers;       /* The number of advertisers */
+  uint32_t generation;         /* The recent generation of circular buffer */
+  uint64_t priv;               /* The pointer to private data of userspace user */
 };
 
 /* This structure describes the state for the sensor user */
 
 struct sensor_ustate_s
 {
-  unsigned long esize;         /* The element size of circular buffer */
-  unsigned long latency;       /* The batch latency for user, in us */
-  unsigned long interval;      /* The subscription interval for user, in us */
-  unsigned long generation;    /* The recent generation of circular buffer */
+  uint32_t esize;              /* The element size of circular buffer */
+  uint32_t latency;            /* The batch latency for user, in us */
+  uint32_t interval;           /* The subscription interval for user, in us */
+  uint64_t generation;         /* The recent generation of circular buffer */
 };
 
 /* This structure describes the register info for the user sensor */
@@ -646,15 +647,15 @@ struct sensor_ustate_s
 #ifdef CONFIG_USENSOR
 struct sensor_reginfo_s
 {
-  FAR const char *path;        /* The path of user sensor */
-  unsigned long   esize;       /* The element size of user sensor */
-  unsigned long   nbuffer;     /* The number of queue buffered elements */
+  char     path[NAME_MAX];     /* The path of user sensor */
+  uint32_t esize;              /* The element size of user sensor */
+  uint32_t nbuffer;            /* The number of queue buffered elements */
 
   /* The flag is used to indicate that the validity of sensor data
    * is persistent.
    */
 
-  bool            persist;
+  int persist;
 };
 #endif
 
@@ -662,7 +663,7 @@ struct sensor_reginfo_s
 
 struct sensor_ioctl_s
 {
-  size_t len;                  /* The length of argument of ioctl */
+  uint32_t len;                /* The length of argument of ioctl */
   char data[1];                /* The argument buf of ioctl */
 };
 

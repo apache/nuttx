@@ -74,7 +74,7 @@
 struct wtgahrs2_sensor_s
 {
   struct sensor_lowerhalf_s lower;
-  unsigned long             interval;
+  uint32_t                  interval;
   uint64_t                  last_update;
   bool                      enable;
 };
@@ -100,7 +100,7 @@ static int wtgahrs2_activate(FAR struct sensor_lowerhalf_s *lower,
                              FAR struct file *filep, bool sw);
 static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
-                                 FAR unsigned long *interval);
+                                 FAR uint32_t *interval);
 
 /****************************************************************************
  * Private Data
@@ -108,7 +108,7 @@ static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
 /* in microseconds */
 
-static const unsigned long g_wtgahrs2_interval[] =
+static const uint32_t g_wtgahrs2_interval[] =
 {
   10000000,  /* 0.1 hz */
   2000000,   /* 0.5 hz */
@@ -166,7 +166,7 @@ static int wtgahrs2_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int wtgahrs2_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
-                                 FAR unsigned long *interval)
+                                 FAR uint32_t *interval)
 {
   FAR struct wtgahrs2_sensor_s *dev = (FAR struct wtgahrs2_sensor_s *)lower;
   int idx = 0;

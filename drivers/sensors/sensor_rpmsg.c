@@ -49,10 +49,10 @@
 #define SENSOR_RPMSG_IOCTL         7
 #define SENSOR_RPMSG_IOCTL_ACK     8
 
-#define SENSOR_RPMSG_FUNCTION(name, cmd, arg1, arg2, size, wait) \
+#define SENSOR_RPMSG_FUNCTION(name, cmd, arg1, arg2, size, wait, type) \
 static int sensor_rpmsg_##name(FAR struct sensor_lowerhalf_s *lower, \
                                FAR struct file *filep, \
-                               unsigned long arg1) \
+                               type arg1) \
 { \
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv; \
   FAR struct sensor_lowerhalf_s *drv = dev->drv; \
@@ -203,10 +203,10 @@ static int sensor_rpmsg_activate(FAR struct sensor_lowerhalf_s *lower,
                                  bool enable);
 static int sensor_rpmsg_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                      FAR struct file *filep,
-                                     FAR unsigned long *period_us);
+                                     FAR uint32_t *period_us);
 static int sensor_rpmsg_batch(FAR struct sensor_lowerhalf_s *lower,
                               FAR struct file *filep,
-                              FAR unsigned long *latency_us);
+                              FAR uint32_t *latency_us);
 static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
                               FAR struct file *filep);
 static int sensor_rpmsg_selftest(FAR struct sensor_lowerhalf_s *lower,
@@ -501,13 +501,13 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
 
   /* sync interval and latency */
 
-  if (state.min_interval != ULONG_MAX)
+  if (state.min_interval != UINT32_MAX)
     {
       sensor_rpmsg_ioctl(dev, SNIOC_SET_INTERVAL, state.min_interval,
                          0, false);
     }
 
-  if (state.min_latency != ULONG_MAX)
+  if (state.min_latency != UINT32_MAX)
     {
       sensor_rpmsg_ioctl(dev, SNIOC_BATCH, state.min_latency, 0, false);
     }
@@ -694,12 +694,15 @@ static int sensor_rpmsg_activate(FAR struct sensor_lowerhalf_s *lower,
 }
 
 SENSOR_RPMSG_FUNCTION(set_interval, SNIOC_SET_INTERVAL,
-                      *interval, interval, 0, false)
-SENSOR_RPMSG_FUNCTION(batch, SNIOC_BATCH, *latency, latency, 0, false)
-SENSOR_RPMSG_FUNCTION(selftest, SNIOC_SELFTEST, arg, arg, 0, true)
+                      *interval, interval, 0, false, uint32_t)
+SENSOR_RPMSG_FUNCTION(batch, SNIOC_BATCH, *latency, latency, 0,
+                      false, uint32_t)
+SENSOR_RPMSG_FUNCTION(selftest, SNIOC_SELFTEST, arg, arg, 0,
+                      true, unsigned long)
 SENSOR_RPMSG_FUNCTION(set_calibvalue, SNIOC_SET_CALIBVALUE,
-                      arg, arg, 256, true)
-SENSOR_RPMSG_FUNCTION(calibrate, SNIOC_CALIBRATE, arg, arg, 256, true)
+                      arg, arg, 256, true, unsigned long)
+SENSOR_RPMSG_FUNCTION(calibrate, SNIOC_CALIBRATE, arg, arg, 256,
+                      true, unsigned long)
 
 static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
                               FAR struct file *filep)
@@ -797,7 +800,7 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
       return;
     }
 
-  if (state.interval == ULONG_MAX)
+  if (state.interval == UINT32_MAX)
     {
       state.interval = 0;
     }
