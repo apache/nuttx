@@ -82,6 +82,24 @@ require any specific configuration (it is selectable by default if no other
 of 2nd stage bootloaders, the commands ``make bootloader`` and the ``ESPTOOL_BINDIR``
 option (for the ``make flash``) are kept (and ignored if Simple Boot is used).
 
+If other features are required, an externally-built 2nd stage bootloader is needed.
+The bootloader is built using the ``make bootloader`` command. This command generates
+the firmware in the ``nuttx`` folder. The ``ESPTOOL_BINDIR`` is used in the
+``make flash`` command to specify the path to the bootloader. For compatibility
+among other SoCs and future options of 2nd stage bootloaders, the commands
+``make bootloader`` and the ``ESPTOOL_BINDIR`` option (for the ``make flash``)
+can be used even if no externally-built 2nd stage bootloader
+is being built (they will be ignored if Simple Boot is used, for instance)::
+
+  $ make bootloader
+
+.. note:: It is recommended that if this is the first time you are using the board with NuttX to
+   perform a complete SPI FLASH erase.
+
+    .. code-block:: console
+
+      $ esptool.py erase_flash
+
 Building and flashing
 ---------------------
 
