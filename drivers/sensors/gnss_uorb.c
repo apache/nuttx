@@ -45,7 +45,8 @@
 #define GNSS_SATELLITE_IDX     1
 #define GNSS_MEASUREMENT_IDX   2
 #define GNSS_CLOCK_IDX         3
-#define GNSS_MAX_IDX           4
+#define GNSS_GEOFENCE          4
+#define GNSS_MAX_IDX           5
 
 #define GNSS_PARSE_BUFFERSIZE  256
 
@@ -655,6 +656,11 @@ static void gnss_push_event(FAR void *priv, FAR const void *data,
       lower = &upper->dev[GNSS_CLOCK_IDX].lower;
       lower->push_event(lower->priv, data, bytes);
     }
+  else if (type == SENSOR_TYPE_GNSS_GEOFENCE)
+    {
+      lower = &upper->dev[GNSS_GEOFENCE].lower;
+      lower->push_event(lower->priv, data, bytes);
+    }
 
   nxmutex_unlock(&upper->lock);
 }
@@ -760,6 +766,19 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
       goto gnss_clock_err;
     }
 
+  /* GNSS Geofence */
+
+  dev = &upper->dev[GNSS_GEOFENCE];
+  dev->lower.ops = &g_gnss_sensor_ops;
+  dev->lower.type = SENSOR_TYPE_GNSS_GEOFENCE;
+  dev->lower.nbuffer = nbuffer;
+  dev->upper = upper;
+  ret = sensor_register(&dev->lower, devno);
+  if (ret < 0)
+    {
+      goto gnss_geofence_err;
+    }
+
   ret = circbuf_init(&upper->buffer, NULL,
                      CONFIG_SENSORS_GNSS_RECV_BUFFERSIZE);
   if (ret < 0)
@@ -779,6 +798,8 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
 driver_err:
   circbuf_uninit(&upper->buffer);
 circ_err:
+  sensor_unregister(&upper->dev[GNSS_GEOFENCE].lower, devno);
+gnss_geofence_err:
   sensor_unregister(&upper->dev[GNSS_CLOCK_IDX].lower, devno);
 gnss_clock_err:
   sensor_unregister(&upper->dev[GNSS_MEASUREMENT_IDX].lower, devno);
@@ -816,6 +837,7 @@ void gnss_unregister(FAR struct gnss_lowerhalf_s *lower, int devno)
   sensor_unregister(&upper->dev[GNSS_SATELLITE_IDX].lower, devno);
   sensor_unregister(&upper->dev[GNSS_MEASUREMENT_IDX].lower, devno);
   sensor_unregister(&upper->dev[GNSS_CLOCK_IDX].lower, devno);
+  sensor_unregister(&upper->dev[GNSS_GEOFENCE].lower, devno);
   snprintf(path, PATH_MAX, GNSS_PATH_FMT, devno);
   unregister_driver(path);
   nxsem_destroy(&upper->buffersem);

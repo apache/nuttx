@@ -313,9 +313,13 @@
 
 #define SENSOR_TYPE_GNSS_CLOCK                      36
 
+/* GNSS Geofence */
+
+#define SENSOR_TYPE_GNSS_GEOFENCE                   37
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           37
+#define SENSOR_TYPE_COUNT                           38
 
 /* The additional sensor open flags */
 
@@ -375,6 +379,40 @@
 #define SENSOR_GNSS_MEASUREMENT_STATE_SBAS_SYNC               (1 << 13)
 #define SENSOR_GNSS_MEASUREMENT_STATE_TOW_KNOWN               (1 << 14)
 #define SENSOR_GNSS_MEASUREMENT_STATE_GLO_TOD_KNOWN           (1 << 15)
+
+/* SENSOR_GNSS_GEOFENCE_TRANS_*:
+ * struct sensor_gnss_geofence_event -> transition
+ * Ref: android-14-release/hardware/libhardware/include/hardware/gnss-base.h
+ */
+
+#define SENSOR_GNSS_GEOFENCE_TRANS_ENTERED                    (1 << 0)
+#define SENSOR_GNSS_GEOFENCE_TRANS_EXITED                     (1 << 1)
+#define SENSOR_GNSS_GEOFENCE_TRANS_UNCERTAIN                  (1 << 2)
+
+/* SENSOR_GNSS_GEOFENCE_STATUS_*:
+ * struct sensor_gnss_geofence_event -> status
+ * Ref: android-14-release/hardware/libhardware/include/hardware/gnss-base.h
+ */
+
+#define SENSOR_GNSS_GEOFENCE_STATUS_UNAVAILABLE               (1 << 0)
+#define SENSOR_GNSS_GEOFENCE_STATUS_AVAILABLE                 (1 << 1)
+#define SENSOR_GNSS_GEOFENCE_STATUS_OPERATION_SUCCESS         (0)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_TOO_MANY_GEOFENCES  (-100)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_ID_EXISTS           (-101)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_ID_UNKNOWN          (-102)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_INVALID_TRANSITION  (-103)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_GENERIC             (-149)
+
+/* SENSOR_GNSS_GEOFENCE_TYPE_*:
+ * `type` of `struct sensor_gnss_geofence_param` and
+ *           `struct sensor_gnss_geofence_event`
+ */
+#define SENSOR_GNSS_GEOFENCE_TYPE_TRANSITION                  (1 << 0)
+#define SENSOR_GNSS_GEOFENCE_TYPE_STATUS                      (1 << 1)
+#define SENSOR_GNSS_GEOFENCE_TYPE_ADD                         (1 << 2)
+#define SENSOR_GNSS_GEOFENCE_TYPE_REMOVE                      (1 << 3)
+#define SENSOR_GNSS_GEOFENCE_TYPE_PAUSE                       (1 << 4)
+#define SENSOR_GNSS_GEOFENCE_TYPE_RESUME                      (1 << 5)
 
 /****************************************************************************
  * Public Types
@@ -923,6 +961,67 @@ struct sensor_gnss_measurement
    */
 
   uint32_t snr;
+};
+
+/* GNSS Geofence parameters */
+
+struct sensor_gnss_geofence_param
+{
+  /* Type of events
+   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_PARAM.
+   *
+   * Mandatory:
+   *   |Fields \ Type |ADD |REMOVE |PAUSE |RESUME |
+   *   |--------------|:--:|:-----:|:----:|:-----:|
+   *   |geofence_id   | v  |   v   |  v   |   v   |
+   *   |transition    | v  |       |      |   v   |
+   *   |latitude      | v  |       |      |       |
+   *   |longitude     | v  |       |      |       |
+   *   |radius_meters | v  |       |      |       |
+   */
+
+  int32_t            type;
+
+  int32_t            geofence_id;
+  float              latitude;
+  float              longitude;
+  float              radius_meters;
+
+  /* Which transitions to monitor.
+   * Available: see SENSOR_GNSS_GEOFENCE_TRANS_*.
+   */
+
+  int32_t            transition;
+};
+
+/* GNSS Geofence events */
+
+struct sensor_gnss_geofence_event
+{
+  /* Type of events
+   * Fields below are optional according to this `type`,
+   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_EVENT.
+   *
+   * Mandatory:
+   *   |Fields \ Type |TRANSITION |STATUS |ADD |REMOVE |PAUSE |RESUME |
+   *   |--------------|:---------:|:-----:|:--:|:-----:|:----:|:-----:|
+   *   |geofence_id   |     v     |       | v  |    v  |   v  |   v   |
+   *   |transition    |     v     |       |    |       |      |       |
+   *   |location      |     v     |   v   |    |       |      |       |
+   *   |timestamp     |     v     |       |    |       |      |       |
+   *   |status        |           |   v   | v  |    v  |   v  |   v   |
+   */
+
+  int32_t            type;
+
+  int32_t            geofence_id; /* Id of the geofence. */
+  struct sensor_gnss location;    /* Location. */
+
+  /* Milliseconds when the transition was detected since January 1, 1970 */
+
+  int64_t            timestamp;
+  int32_t            status;      /* Status of Geofence operation/event. */
+  int32_t            transition;  /* See SENSOR_GNSS_GEOFENCE_TRANS_*. */
 };
 
 #endif /* __INCLUDE_NUTTX_SENSORS_SENSOR_H */
