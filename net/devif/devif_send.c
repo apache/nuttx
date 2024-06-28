@@ -67,7 +67,7 @@
  ****************************************************************************/
 
 int devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
-               int len, unsigned int offset)
+               int len, int offset)
 {
   int ret;
 
@@ -102,7 +102,7 @@ int devif_send(FAR struct net_driver_s *dev, FAR const void *buf,
 
   /* Prepare device buffer before poll callback */
 
-  iob_update_pktlen(dev->d_iob, offset, false);
+  iob_update_pktlen(dev->d_iob, offset < 0 ? 0 : offset, false);
 
   ret = iob_trycopyin(dev->d_iob, buf, len, offset, false);
   if (ret != len)
