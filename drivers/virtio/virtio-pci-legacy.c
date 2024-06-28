@@ -169,8 +169,10 @@ virtio_pci_legacy_get_queue_len(FAR struct virtio_pci_device_s *vpdev,
 {
   uint16_t num;
 
-  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL, idx);
-  pci_read_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_NUM, &num);
+  pci_write_io_word(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL), idx);
+  pci_read_io_word(vpdev->dev,
+                   (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_NUM), &num);
   if (num == 0)
     {
       pcierr("Queue is not available num=%d\n", num);
@@ -193,24 +195,29 @@ virtio_pci_legacy_create_virtqueue(FAR struct virtio_pci_device_s *vpdev,
 
   /* Set the pci virtqueue register, active vq, enable vq */
 
-  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL,
+  pci_write_io_word(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL),
                     vq->vq_queue_index);
 
   /* activate the queue */
 
-  pci_write_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN,
+  pci_write_io_dword(vpdev->dev,
+                     (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN),
                      up_addrenv_va_to_pa(vq->vq_ring.desc) >>
                      VIRTIO_PCI_QUEUE_ADDR_SHIFT);
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR,
+  pci_write_io_word(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
                     VIRTIO_PCI_INT_VQ);
-  pci_read_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR,
+  pci_read_io_word(vpdev->dev,
+                   (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
                    &msix_vector);
   if (msix_vector == VIRTIO_PCI_MSI_NO_VECTOR)
     {
       pci_write_io_dword(vpdev->dev,
-                         vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN, 0);
+                         (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN),
+                         0);
       vrterr("Msix vector is 0\n");
       return -EBUSY;
     }
@@ -230,9 +237,11 @@ virtio_pci_legacy_config_vector(FAR struct virtio_pci_device_s *vpdev,
   uint16_t vector = enable ? 0 : VIRTIO_PCI_MSI_NO_VECTOR;
   uint16_t rvector;
 
-  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR,
+  pci_write_io_word(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR),
                     vector);
-  pci_read_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR,
+  pci_read_io_word(vpdev->dev,
+                   (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_CONFIG_VECTOR),
                    &rvector);
 
   if (rvector != vector)
@@ -256,20 +265,25 @@ void virtio_pci_legacy_delete_virtqueue(FAR struct virtio_device *vdev,
   uint8_t isr;
 #endif
 
-  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL, index);
+  pci_write_io_word(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_SEL),
+                    index);
 
 #if CONFIG_DRIVERS_VIRTIO_PCI_POLLING_PERIOD <= 0
-  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR,
+  pci_write_io_word(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_MSI_QUEUE_VECTOR),
                     VIRTIO_PCI_MSI_NO_VECTOR);
 
   /* Flush the write out to device */
 
-  pci_read_io_byte(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_ISR, &isr);
+  pci_read_io_byte(vpdev->dev,
+                   (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_ISR), &isr);
 #endif
 
   /* Select and deactivate the queue */
 
-  pci_write_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN, 0);
+  pci_write_io_dword(vpdev->dev,
+                     (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_PFN), 0);
 }
 
 /****************************************************************************
@@ -282,7 +296,8 @@ static void virtio_pci_legacy_set_status(FAR struct virtio_device *vdev,
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
 
-  pci_write_io_byte(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_STATUS, status);
+  pci_write_io_byte(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_STATUS), status);
 }
 
 /****************************************************************************
@@ -295,7 +310,8 @@ static uint8_t virtio_pci_legacy_get_status(FAR struct virtio_device *vdev)
     (FAR struct virtio_pci_device_s *)vdev;
   uint8_t status;
 
-  pci_read_io_byte(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_STATUS, &status);
+  pci_read_io_byte(vpdev->dev,
+                   (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_STATUS), &status);
   return status;
 }
 
@@ -319,7 +335,7 @@ static void virtio_pci_legacy_write_config(FAR struct virtio_device *vdev,
 
   for (i = 0; i < length; i++)
     {
-      pci_write_io_byte(vpdev->dev, config + i, s[i]);
+      pci_write_io_byte(vpdev->dev, (uintptr_t)(config + i), s[i]);
     }
 }
 
@@ -343,7 +359,7 @@ static void virtio_pci_legacy_read_config(FAR struct virtio_device *vdev,
 
   for (i = 0; i < length; i++)
     {
-      pci_read_io_byte(vpdev->dev, config + i, &d[i]);
+      pci_read_io_byte(vpdev->dev, (uintptr_t)(config + i), &d[i]);
     }
 }
 
@@ -358,7 +374,8 @@ virtio_pci_legacy_get_features(FAR struct virtio_device *vdev)
     (FAR struct virtio_pci_device_s *)vdev;
   uint32_t feature;
 
-  pci_read_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_HOST_FEATURES,
+  pci_read_io_dword(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_HOST_FEATURES),
                     &feature);
   return feature;
 }
@@ -373,7 +390,8 @@ static void virtio_pci_legacy_set_features(FAR struct virtio_device *vdev,
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
 
-  pci_write_io_dword(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_GUEST_FEATURES,
+  pci_write_io_dword(vpdev->dev,
+                     (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_GUEST_FEATURES),
                      vdev->features);
   vdev->features = features;
 }
@@ -387,7 +405,8 @@ static void virtio_pci_legacy_notify(FAR struct virtqueue *vq)
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vq->vq_dev;
 
-  pci_write_io_word(vpdev->dev, vpdev->ioaddr + VIRTIO_PCI_QUEUE_NOTIFY,
+  pci_write_io_word(vpdev->dev,
+                    (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_QUEUE_NOTIFY),
                     vq->vq_queue_index);
 }
 
