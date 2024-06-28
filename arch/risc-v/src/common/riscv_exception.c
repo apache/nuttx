@@ -75,7 +75,7 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
   "Software check",
 #endif
 #if RISCV_MAX_EXCEPTION > 18
-  "Hardware error"
+  "Hardware error",
 #endif
 #ifdef RISCV_CUSTOM_EXCEPTION_REASONS
   RISCV_CUSTOM_EXCEPTION_REASONS
