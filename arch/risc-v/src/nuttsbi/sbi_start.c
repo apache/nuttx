@@ -33,6 +33,12 @@
 #include "sbi_internal.h"
 
 /****************************************************************************
+ * Preprocecssor definitions
+ ****************************************************************************/
+
+#define NAPOT_OPENALL   (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -119,7 +125,7 @@ void sbi_start(void)
 
   /* Open everything for PMP */
 
-  riscv_append_pmp_region(PMPCFG_A_NAPOT | PMPCFG_RWX_MASK, 0, -1);
+  DEBUGASSERT(riscv_append_pmp_region(NAPOT_OPENALL, 0, 0) == 0);
 
   /* Then jump to the S-mode start function */
 
