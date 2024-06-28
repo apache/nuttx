@@ -303,6 +303,8 @@ int up_timer_start(const struct timespec *ts)
 
   up_tmr_sync_up();
 
+  up_unmask_tmr();
+
   ticks = up_ts2tick(ts) + rdtscp();
 
   g_timer_active = 1;
@@ -310,8 +312,6 @@ int up_timer_start(const struct timespec *ts)
   write_msr(MSR_IA32_TSC_DEADLINE, ticks);
 
   g_goal_time = ticks;
-
-  up_unmask_tmr();
 
   up_tmr_sync_down();
   return OK;
