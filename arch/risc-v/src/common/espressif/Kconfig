@@ -164,14 +164,14 @@ config ESPRESSIF_SIMPLE_BOOT
 config ESPRESSIF_BOOTLOADER_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	select ESPRESSIF_HAVE_OTA_PARTITION
-	depends on ESPRESSIF_ESP32C3
+	depends on !ESPRESSIF_ESP32H2
 	---help---
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
 config ESPRESSIF_MCUBOOT_VERSION
 	string "MCUboot version"
 	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
-	default "aa7e2b1faae623dbe01bbc6094e71ab44ec9d80a"
+	default "9c99326b9756dbcc35b524636d99ed5f3e6cb29b"
 
 choice ESPRESSIF_ESPTOOL_TARGET_SLOT
 	prompt "Target slot for image flashing"

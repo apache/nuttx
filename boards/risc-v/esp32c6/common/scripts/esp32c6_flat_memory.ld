@@ -50,9 +50,32 @@
 
 #define DRAM0_0_SEG_LEN       I_D_SRAM_SIZE
 
+#ifdef CONFIG_ESPRESSIF_FLASH_2M
+#  define FLASH_SIZE        0x200000
+#elif defined (CONFIG_ESPRESSIF_FLASH_4M)
+#  define FLASH_SIZE        0x400000
+#elif defined (CONFIG_ESPRESSIF_FLASH_8M)
+#  define FLASH_SIZE        0x800000
+#elif defined (CONFIG_ESPRESSIF_FLASH_16M)
+#  define FLASH_SIZE        0x1000000
+#endif
+
 MEMORY
 {
-#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+  /* The origin values for "metadata" and "ROM" memory regions are the actual
+   * load addresses.
+   *
+   * NOTE: The memory region starting from 0x0 with length represented by
+   * CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE is reserved for the MCUboot header,
+   * which will be prepended to the binary file by the "imgtool" during the
+   * signing of firmware image.
+   */
+
+  metadata (RX) :        org = CONFIG_ESPRESSIF_APP_MCUBOOT_HEADER_SIZE, len = 0x20
+  ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
+                         len = FLASH_SIZE - ORIGIN(ROM)
+#elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
   ROM (R) :              org = ORIGIN(ROM),
                          len = IDRAM0_2_SEG_SIZE
 #endif
@@ -65,9 +88,12 @@ MEMORY
 
   iram0_0_seg (RX) :      org = SRAM_IRAM_ORG, len = I_D_SRAM_SIZE
 
-  /* Flash mapped instruction data.
-   *
-   * The 0x20 offset is a convenience for the app binary image generation.
+  /* Flash mapped instruction data. */
+
+#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+  irom_seg    (RX) :      org = 0x42000000, len = FLASH_SIZE /* IDRAM0_2_SEG_SIZE */
+#else
+  /* The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
    * has a 0x18 byte file header, and each segment has a 0x08 byte segment
    * header. Setting this offset makes it simple to meet the flash cache MMU's
@@ -75,6 +101,7 @@ MEMORY
    */
 
   irom_seg    (RX) :      org = 0x42000000, len = IDRAM0_2_SEG_SIZE
+#endif
 
   /* Shared data RAM, excluding memory reserved for ROM bss/data/stack.
    * Enabling Bluetooth & Trace Memory features in menuconfig will decrease
@@ -83,9 +110,26 @@ MEMORY
 
   dram0_0_seg (RW) :      org = SRAM_DRAM_ORG, len = DRAM0_0_SEG_LEN
 
-  /* Flash mapped constant data.
-   *
-   * The 0x20 offset is a convenience for the app binary image generation.
+  /* Flash mapped constant data. */
+
+#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+  /* The DROM segment origin is offset by 0x40 for mirroring the actual ROM
+   * image layout:
+   *    0x0  - 0x1F : MCUboot header
+   *    0x20 - 0x3F : Application image metadata section
+   *    0x40 onwards: ROM code and data
+   * This is required to meet the following constraint from the external
+   * flash MMU:
+   *    VMA % 64KB == LMA % 64KB
+   * i.e. the lower 16 bits of both the virtual address (address seen by the
+   * CPU) and the load address (physical address of the external flash) must
+   * be equal.
+   */
+
+  drom_seg    (R) :      org = 0x42000000 + ORIGIN(ROM),
+                         len = FLASH_SIZE - ORIGIN(ROM)
+#else
+  /* The 0x20 offset is a convenience for the app binary image generation.
    * Flash cache has 64KB pages. The .bin file which is flashed to the chip
    * has a 0x18 byte file header, and each segment has a 0x08 byte segment
    * header. Setting this offset makes it simple to meet the flash cache MMU's
@@ -93,6 +137,7 @@ MEMORY
    */
 
   drom_seg    (R) :       org = 0x42000000, len = IDRAM0_2_SEG_SIZE
+#endif
 
   /* RTC fast memory (executable). Persists over deep sleep. */
 
