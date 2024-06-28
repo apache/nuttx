@@ -432,6 +432,8 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
       return;
     }
 
+  nxsched_dumponexit();
+
   /* If the task was terminated by another task, it may be in an unknown
    * state.  Make some feeble effort to recover the state.
    */
