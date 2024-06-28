@@ -492,6 +492,9 @@ void __esp_start(void)
 
   wdt_hal_context_t rwdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
   wdt_hal_write_protect_disable(&rwdt_ctx);
+#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) && defined(CONFIG_ESPRESSIF_ESP32H2)
+  wdt_hal_set_flashboot_en(&rwdt_ctx, false);
+#endif
   wdt_hal_disable(&rwdt_ctx);
   wdt_hal_write_protect_enable(&rwdt_ctx);
 
