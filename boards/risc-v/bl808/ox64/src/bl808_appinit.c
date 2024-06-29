@@ -38,6 +38,7 @@
 #ifdef CONFIG_USERLED
 #include <nuttx/leds/userled.h>
 #endif
+#include "bl808_gpadc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -162,6 +163,12 @@ void board_late_initialize(void)
   mount_ramdisk();
 
   /* Perform board-specific initialization */
+
+#ifdef CONFIG_BL808_GPADC
+
+  bl808_gpadc_init();
+
+#endif
 
 #ifdef CONFIG_NSH_ARCHINIT
 
