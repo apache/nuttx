@@ -66,27 +66,6 @@ set(MACHINE ${CONFIG_ARCH})
 set(CMAKE_SYSTEM_NAME NuttX)
 set(WITH_DOC OFF)
 
-# cmake-format: off
-set(ATOMIC_TEST_CODE
-  [-[
-    #include <stdatomic.h>
-    int main() {
-        _Atomic long long x = 0;
-        return x;
-    }
-  ]-]
-)
-# cmake-format: on
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_atomic.c ${ATOMIC_TEST_CODE})
-
-try_compile(HAS_64BIT_ATOMIC_SUPPORT ${CMAKE_CURRENT_BINARY_DIR}
-            ${CMAKE_CURRENT_BINARY_DIR}/test_atomic.c)
-
-if(NOT HAS_64BIT_ATOMIC_SUPPORT)
-  add_compile_options(-DNO_ATOMIC_64_SUPPORT)
-endif()
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libmetal
                  ${CMAKE_CURRENT_BINARY_DIR}/libmetal EXCLUDE_FROM_ALL)
 
