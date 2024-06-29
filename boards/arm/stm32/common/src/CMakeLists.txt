@@ -132,4 +132,8 @@ if(CONFIG_BOARD_STM32_IHM16M1)
   list(APPEND SRCS stm32_ihm16m1.c)
 endif()
 
+if(CONFIG_STEPPER_DRV8825)
+  list(APPEND SRCS stm32_drv8825.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
