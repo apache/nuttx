@@ -63,6 +63,10 @@
 #include "stm32_hcsr04.h"
 #endif
 
+#ifdef CONFIG_STEPPER_DRV8825
+#include "stm32_drv8266.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -254,6 +258,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_hcsr04_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STEPPER_DRV8825
+  /* Configure and initialize the drv8825 driver */
+
+  ret = board_drv8825_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_drv8825_initialize failed: %d\n", ret);
     }
 #endif
 

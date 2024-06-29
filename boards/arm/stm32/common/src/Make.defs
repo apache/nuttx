@@ -140,6 +140,10 @@ ifeq ($(CONFIG_BOARD_STM32_IHM16M1),y)
   CSRCS += stm32_ihm16m1.c
 endif
 
+ifeq ($(CONFIG_STEPPER_DRV8825),y)
+  CSRCS += stm32_drv8825.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
