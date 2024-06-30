@@ -621,25 +621,9 @@ void restore_critical_section(void)
    */
 
   tcb = current_task(me);
-  if (tcb->irqcount > 0)
+  DEBUGASSERT(g_cpu_nestcount[me] <= 0);
+  if (tcb->irqcount <= 0)
     {
-      /* Do notihing here
-       * NOTE: spin_setbit() is done in nxsched_add_readytorun()
-       * and nxsched_remove_readytorun()
-       */
-    }
-
-  /* No.. This CPU will be relinquishing the lock.  But this works
-   * differently if we are performing a context switch from an
-   * interrupt handler and the interrupt handler has established
-   * a critical section.  We can detect this case when
-   * g_cpu_nestcount[me] > 0.
-   */
-
-  else if (g_cpu_nestcount[me] <= 0)
-    {
-      /* Release our hold on the IRQ lock. */
-
       if ((g_cpu_irqset & (1 << me)) != 0)
         {
           cpu_irqlock_clear();
