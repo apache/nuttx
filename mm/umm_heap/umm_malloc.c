@@ -68,7 +68,8 @@ FAR void *malloc(size_t size)
     }
   else
     {
-      mm_notify_pressure(mm_heapfree(USR_HEAP));
+      mm_notify_pressure(mm_heapfree(USR_HEAP),
+                         mm_heapfree_largest(USR_HEAP));
     }
 
   return ret;

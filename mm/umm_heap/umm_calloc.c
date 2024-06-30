@@ -78,7 +78,8 @@ FAR void *calloc(size_t n, size_t elem_size)
     }
   else
     {
-      mm_notify_pressure(mm_heapfree(USR_HEAP));
+      mm_notify_pressure(mm_heapfree(USR_HEAP),
+                         mm_heapfree_largest(USR_HEAP));
     }
 
   return mem;

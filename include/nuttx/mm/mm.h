@@ -437,9 +437,9 @@ FAR void kmm_checkcorruption(void);
 /* Functions contained in fs_procfspressure.c *******************************/
 
 #ifdef CONFIG_FS_PROCFS_INCLUDE_PRESSURE
-void mm_notify_pressure(size_t remaining);
+void mm_notify_pressure(size_t remaining, size_t largest);
 #else
-#  define mm_notify_pressure(remaining)
+#  define mm_notify_pressure(remaining, largest)
 #endif
 
 #undef EXTERN
