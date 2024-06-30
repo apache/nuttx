@@ -57,6 +57,7 @@ struct pressure_file_s
 static dq_queue_t g_pressure_memory_queue;
 static spinlock_t g_pressure_lock;
 static size_t g_remaining;
+static size_t g_largest;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -160,14 +161,17 @@ static ssize_t pressure_read(FAR struct file *filep, FAR char *buffer,
   char buf[128];
   uint32_t flags;
   size_t remain;
+  size_t largest;
   off_t offset;
   ssize_t ret;
 
-  flags  = spin_lock_irqsave(&g_pressure_lock);
-  remain = g_remaining;
+  flags   = spin_lock_irqsave(&g_pressure_lock);
+  remain  = g_remaining;
+  largest = g_largest;
   spin_unlock_irqrestore(&g_pressure_lock, flags);
 
-  ret = procfs_snprintf(buf, sizeof(buf), "remaining %zu\n", remain);
+  ret = procfs_snprintf(buf, sizeof(buf), "remaining %zu, largest:%zu\n",
+                        remain, largest);
 
   if (ret > buflen)
     {
@@ -410,7 +414,7 @@ static int pressure_stat(const char *relpath, struct stat *buf)
  * mm_notify_pressure
  ****************************************************************************/
 
-void mm_notify_pressure(size_t remaining)
+void mm_notify_pressure(size_t remaining, size_t largest)
 {
   clock_t current = clock_systime_ticks();
   FAR dq_entry_t *entry;
@@ -419,12 +423,18 @@ void mm_notify_pressure(size_t remaining)
 
   flags       = spin_lock_irqsave(&g_pressure_lock);
   g_remaining = remaining;
+  g_largest   = largest;
+
   dq_for_every_safe(&g_pressure_memory_queue, entry, tmp)
     {
       FAR struct pressure_file_s *pressure =
           container_of(entry, struct pressure_file_s, entry);
 
-      if (remaining > pressure->threshold)
+      /* If the largest available block is less than the threshold,
+       * send a notification
+       */
+
+      if (largest > pressure->threshold)
         {
           continue;
         }
