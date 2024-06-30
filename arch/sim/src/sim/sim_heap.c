@@ -623,6 +623,20 @@ size_t mm_heapfree(struct mm_heap_s *heap)
 {
   return SIZE_MAX;
 }
+
+/****************************************************************************
+ * Name: mm_heapfree_largest
+ *
+ * Description:
+ *   Return the largest chunk of contiguous memory in the heap
+ *
+ ****************************************************************************/
+
+size_t mm_heapfree_largest(FAR struct mm_heap_s *heap)
+{
+  return SIZE_MAX;
+}
+
 #else /* CONFIG_MM_CUSTOMIZE_MANAGER */
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)

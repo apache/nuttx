@@ -200,3 +200,27 @@ size_t mm_heapfree(FAR struct mm_heap_s *heap)
 {
   return heap->mm_heapsize - heap->mm_curused;
 }
+
+/****************************************************************************
+ * Name: mm_heapfree_largest
+ *
+ * Description:
+ *   Return the largest chunk of contiguous memory in the heap
+ *
+ ****************************************************************************/
+
+size_t mm_heapfree_largest(FAR struct mm_heap_s *heap)
+{
+  FAR struct mm_freenode_s *node;
+  for (node = heap->mm_nodelist[MM_NNODES - 1].blink; node;
+       node = node->blink)
+    {
+      size_t nodesize = MM_SIZEOF_NODE(node);
+      if (nodesize != 0)
+        {
+          return nodesize;
+        }
+    }
+
+  return 0;
+}
