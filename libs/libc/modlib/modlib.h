@@ -27,6 +27,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/addrenv.h>
 #include <nuttx/lib/modlib.h>
 
 /****************************************************************************
@@ -237,4 +238,87 @@ int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
 
 int modlib_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
+#ifdef CONFIG_ARCH_ADDRENV
+
+/****************************************************************************
+ * Name: modlib_addrenv_alloc
+ *
+ * Description:
+ *   Allocate memory for the ELF image (textalloc and datastart). If
+ *   CONFIG_ARCH_ADDRENV=n, textalloc will be allocated using kmm_zalloc()
+ *   and datastart will be a offset from textalloc.  If
+ *   CONFIG_ARCH_ADDRENV=y, then textalloc and datastart will be allocated
+ *   using up_addrenv_create().  In either case, there will be a unique
+ *   instance of textalloc and datastart (and stack) for each instance of a
+ *   process.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *   textsize - The size (in bytes) of the .text address environment needed
+ *     for the ELF image (read/execute).
+ *   datasize - The size (in bytes) of the .bss/.data address environment
+ *     needed for the ELF image (read/write).
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int modlib_addrenv_alloc(FAR struct mod_loadinfo_s *loadinfo,
+                         size_t textsize, size_t datasize);
+
+/****************************************************************************
+ * Name: modlib_addrenv_select
+ *
+ * Description:
+ *   Temporarily select the task's address environment.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int modlib_addrenv_select(FAR struct mod_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: modlib_addrenv_restore
+ *
+ * Description:
+ *   Restore the address environment before modlib_addrenv_select() was
+ *   called.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int modlib_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: modlib_addrenv_free
+ *
+ * Description:
+ *   Release the address environment previously created by
+ *   modlib_addrenv_alloc().  This function is called only under certain
+ *   error conditions after the module has been loaded but not yet started.
+ *   After the module has been started, the address environment will
+ *   automatically be freed when the module exits.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void modlib_addrenv_free(FAR struct mod_loadinfo_s *loadinfo);
+
+#endif /* CONFIG_ARCH_ADDRENV */
 #endif /* __LIBS_LIBC_MODLIB_MODLIB_H */

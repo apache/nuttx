@@ -32,6 +32,8 @@
 #include <sys/types.h>
 #include <elf.h>
 
+#include <nuttx/addrenv.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -227,6 +229,17 @@ struct mod_loadinfo_s
   uint16_t      buflen;      /* size of iobuffer[] */
   int           filfd;       /* Descriptor for the file being loaded */
   int           nexports;    /* ET_DYN - Number of symbols exported */
+
+  /* Address environment.
+   *
+   * addrenv - This is the handle created by addrenv_allocate() that can be
+   *   used to manage the tasks address space.
+   */
+
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR addrenv_t     *addrenv;    /* Address environment */
+  FAR addrenv_t     *oldenv;     /* Saved address environment */
+#endif
 };
 
 /****************************************************************************
@@ -317,6 +330,25 @@ void modlib_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
  ****************************************************************************/
 
 int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: modlib_load_with_addrenv
+ *
+ * Description:
+ *   Loads the binary into memory, use the address environment to load the
+ *   binary.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo);
+#else
+#  define modlib_load_with_addrenv(l) modlib_load(l)
+#endif
 
 /****************************************************************************
  * Name: modlib_bind

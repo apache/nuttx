@@ -851,6 +851,23 @@ int modlib_bind(FAR struct module_s *modp,
   int ret;
   int i;
 
+#ifdef CONFIG_ARCH_ADDRENV
+  /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
+   * space that may not be in place now.  modlib_addrenv_select() will
+   * temporarily instantiate that address space.
+   */
+
+  if (loadinfo->addrenv != NULL)
+    {
+      ret = modlib_addrenv_select(loadinfo);
+      if (ret < 0)
+        {
+          berr("ERROR: modlib_addrenv_select() failed: %d\n", ret);
+          return ret;
+        }
+    }
+#endif
+
   /* Find the symbol and string tables */
 
   ret = modlib_findsymtab(loadinfo);
@@ -1004,6 +1021,21 @@ int modlib_bind(FAR struct module_s *modp,
         }
 
       up_coherent_dcache(loadinfo->sectalloc[i], loadinfo->shdr[i].sh_size);
+    }
+#endif
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (loadinfo->addrenv != NULL)
+    {
+      int status = modlib_addrenv_restore(loadinfo);
+      if (status < 0)
+        {
+          berr("ERROR: modlib_addrenv_restore() failed: %d\n", status);
+          if (ret == OK)
+            {
+              ret = status;
+            }
+        }
     }
 #endif
 

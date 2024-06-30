@@ -129,7 +129,7 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
  *
  ****************************************************************************/
 
-static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
+static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
 {
   size_t textsize = 0;
   size_t datasize = 0;
@@ -187,7 +187,7 @@ static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
                   )
                 {
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-                  if (modlib_section_alloc(loadinfo, shdr, i) >= 0)
+                  if (alloc && modlib_section_alloc(loadinfo, shdr, i) >= 0)
                     {
                       continue;
                     }
@@ -203,7 +203,7 @@ static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
               else
                 {
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-                  if (modlib_section_alloc(loadinfo, shdr, i) >= 0)
+                  if (alloc && modlib_section_alloc(loadinfo, shdr, i) >= 0)
                     {
                       continue;
                     }
@@ -456,7 +456,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Determine total size to allocate */
 
-  modlib_elfsize(loadinfo);
+  modlib_elfsize(loadinfo, true);
 
   /* Allocate (and zero) memory for the ELF file. */
 
@@ -545,3 +545,84 @@ errout_with_buffers:
   modlib_unload(loadinfo);
   return ret;
 }
+
+/****************************************************************************
+ * Name: modlib_load_with_addrenv
+ *
+ * Description:
+ *   Loads the binary into memory, use the address environment to load the
+ *   binary.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
+{
+  int ret;
+
+  binfo("loadinfo: %p\n", loadinfo);
+  DEBUGASSERT(loadinfo && loadinfo->filfd >= 0);
+
+  /* Load section and program headers into memory */
+
+  ret = modlib_loadhdrs(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: modlib_loadhdrs failed: %d\n", ret);
+      goto errout_with_buffers;
+    }
+
+  /* Determine total size to allocate */
+
+  modlib_elfsize(loadinfo, false);
+
+  ret = modlib_addrenv_alloc(loadinfo, loadinfo->textsize,
+                             loadinfo->datasize);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to create address environment: %d\n", ret);
+      goto errout_with_buffers;
+    }
+
+  /* If CONFIG_ARCH_ADDRENV=y, then the loaded ELF lies in a virtual address
+   * space that may not be in place now.  elf_addrenv_select() will
+   * temporarily instantiate that address space.
+   */
+
+  ret = modlib_addrenv_select(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: elf_addrenv_select() failed: %d\n", ret);
+      goto errout_with_buffers;
+    }
+
+  ret = modlib_loadfile(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: modlib_loadfile failed: %d\n", ret);
+      goto errout_with_addrenv;
+    }
+
+  /* Restore the original address environment */
+
+  ret = modlib_addrenv_restore(loadinfo);
+  if (ret < 0)
+    {
+      berr("ERROR: modlib_addrenv_restore() failed: %d\n", ret);
+      goto errout_with_buffers;
+    }
+
+  return OK;
+
+errout_with_addrenv:
+  modlib_addrenv_restore(loadinfo);
+
+errout_with_buffers:
+  modlib_unload(loadinfo);
+  return ret;
+}
+#endif
