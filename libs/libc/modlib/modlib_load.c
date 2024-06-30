@@ -226,6 +226,43 @@ static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
   loadinfo->datasize = datasize;
 }
 
+#ifdef CONFIG_MODLIB_LOADTO_LMA
+/****************************************************************************
+ * Name: modlib_vma2lma
+ *
+ * Description:
+ *   Convert section`s VMA to LMA according to PhysAddr(p_paddr) of
+ *   Program Header.
+ *
+ * Returned Value:
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+static int modlib_vma2lma(FAR struct mod_loadinfo_s *loadinfo,
+                          FAR Elf_Shdr *shdr, FAR Elf_Addr *lma)
+{
+  int i;
+
+  for (i = 0; i < loadinfo->ehdr.e_phnum; i++)
+    {
+      FAR Elf_Phdr *phdr = &loadinfo->phdr[i];
+
+      if (shdr->sh_addr >= phdr->p_vaddr &&
+          shdr->sh_addr + shdr->sh_size <= phdr->p_vaddr + phdr->p_memsz &&
+          shdr->sh_offset >= phdr->p_offset &&
+          shdr->sh_offset <= phdr->p_offset + phdr->p_filesz)
+        {
+          *lma = phdr->p_paddr + shdr->sh_addr - phdr->p_vaddr;
+          return 0;
+        }
+    }
+
+  return -ENOENT;
+}
+#endif
+
 /****************************************************************************
  * Name: modlib_loadfile
  *
@@ -332,6 +369,15 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
           if (shdr->sh_type != SHT_NOBITS)
             {
+#ifdef CONFIG_MODLIB_LOADTO_LMA
+              ret = modlib_vma2lma(loadinfo, shdr, *pptr);
+              if (ret < 0)
+                {
+                  berr("ERROR: Failed to convert addr %d: %d\n", i, ret);
+                  return ret;
+                }
+#endif
+
               /* Read the section data from sh_offset to the memory region */
 
               ret = modlib_read(loadinfo, *pptr, shdr->sh_size,

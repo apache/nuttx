@@ -98,4 +98,12 @@ config MODLIB_SYSTEM_SYMTAB
 
 endif # MODLIB_HAVE_SYMTAB
 
+config MODLIB_LOADTO_LMA
+	bool "modlib load sections to LMA"
+	default n
+	---help---
+		Load all section to LMA not VMA, so the startup code(e.g. start.S) need
+		relocate .data section to the final address(VMA) and zero .bss section
+		by self.
+
 endmenu # Module library configuration
