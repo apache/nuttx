@@ -106,20 +106,23 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   uintptr_t heapbase;
   uintptr_t heapend;
 #if CONFIG_MM_REGIONS > 1
-  int IDX;
+  int idx;
 
-  IDX = heap->mm_nregions;
+  DEBUGVERIFY(mm_lock(heap));
+  idx = heap->mm_nregions;
 
   /* Writing past CONFIG_MM_REGIONS would have catastrophic consequences */
 
-  DEBUGASSERT(IDX < CONFIG_MM_REGIONS);
-  if (IDX >= CONFIG_MM_REGIONS)
+  DEBUGASSERT(idx < CONFIG_MM_REGIONS);
+  if (idx >= CONFIG_MM_REGIONS)
     {
+      mm_unlock(heap);
       return;
     }
 
 #else
-#  define IDX 0
+#  define idx 0
+  DEBUGVERIFY(mm_lock(heap));
 #endif
 
 #if defined(CONFIG_MM_SMALL) && !defined(CONFIG_SMALL_MEMORY)
@@ -141,8 +144,6 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   kasan_register(heapstart, &heapsize);
 
-  DEBUGVERIFY(mm_lock(heap));
-
   /* Adjust the provided heap start and size.
    *
    * Note: (uintptr_t)node + MM_SIZEOF_ALLOCNODE is what's actually
@@ -159,9 +160,9 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
     !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO) && \
     (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
   minfo("[%s] Region %d: base=%p size=%zu\n",
-        heap->mm_procfs.name, IDX + 1, heapstart, heapsize);
+        heap->mm_procfs.name, idx + 1, heapstart, heapsize);
 #else
-  minfo("Region %d: base=%p size=%zu\n", IDX + 1, heapstart, heapsize);
+  minfo("Region %d: base=%p size=%zu\n", idx + 1, heapstart, heapsize);
 #endif
 
   /* Add the size of this region to the total size of the heap */
@@ -176,21 +177,21 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
    * all available memory.
    */
 
-  heap->mm_heapstart[IDX]          = (FAR struct mm_allocnode_s *)heapbase;
-  MM_ADD_BACKTRACE(heap, heap->mm_heapstart[IDX]);
-  heap->mm_heapstart[IDX]->size    = MM_SIZEOF_ALLOCNODE | MM_ALLOC_BIT;
+  heap->mm_heapstart[idx]          = (FAR struct mm_allocnode_s *)heapbase;
+  MM_ADD_BACKTRACE(heap, heap->mm_heapstart[idx]);
+  heap->mm_heapstart[idx]->size    = MM_SIZEOF_ALLOCNODE | MM_ALLOC_BIT;
   node                             = (FAR struct mm_freenode_s *)
                                      (heapbase + MM_SIZEOF_ALLOCNODE);
   DEBUGASSERT((((uintptr_t)node + MM_SIZEOF_ALLOCNODE) % MM_ALIGN) == 0);
   node->size                       = heapsize - 2 * MM_SIZEOF_ALLOCNODE;
-  heap->mm_heapend[IDX]            = (FAR struct mm_allocnode_s *)
+  heap->mm_heapend[idx]            = (FAR struct mm_allocnode_s *)
                                      (heapend - MM_SIZEOF_ALLOCNODE);
-  heap->mm_heapend[IDX]->size      = MM_SIZEOF_ALLOCNODE | MM_ALLOC_BIT |
+  heap->mm_heapend[idx]->size      = MM_SIZEOF_ALLOCNODE | MM_ALLOC_BIT |
                                      MM_PREVFREE_BIT;
-  heap->mm_heapend[IDX]->preceding = node->size;
-  MM_ADD_BACKTRACE(heap, heap->mm_heapend[IDX]);
+  heap->mm_heapend[idx]->preceding = node->size;
+  MM_ADD_BACKTRACE(heap, heap->mm_heapend[idx]);
 
-#undef IDX
+#undef idx
 
 #if CONFIG_MM_REGIONS > 1
   heap->mm_nregions++;
