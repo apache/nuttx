@@ -82,7 +82,7 @@ static unsigned long rtc_last;
 
 static unsigned long rtc_read(void)
 {
-  uint64_t  tmr = rdtsc();
+  uint64_t  tmr = rdtscp();
 
   if (tmr < rtc_last)
     {

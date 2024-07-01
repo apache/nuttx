@@ -530,7 +530,7 @@ static inline void setidt(void *idt, int size)
   asm volatile ("lidt %0"::"m"(idt_ptr):"memory");
 }
 
-static inline uint64_t rdtsc(void)
+static inline uint64_t rdtscp(void)
 {
   uint32_t lo;
   uint32_t hi;
@@ -539,7 +539,7 @@ static inline uint64_t rdtsc(void)
   return (uint64_t)lo | (((uint64_t)hi) << 32);
 }
 
-static inline uint64_t _rdtsc(void)
+static inline uint64_t rdtsc(void)
 {
   uint32_t lo;
   uint32_t hi;
