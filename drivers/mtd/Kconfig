@@ -1323,6 +1323,10 @@ config W25_SLOWREAD
 	bool "Enable slow read mode"
 	default n
 
+config W25_DEBUG
+	bool "Enable syslog W25 specific syslog traces"
+	default n
+
 endif # MTD_W25
 
 config MTD_GD25
