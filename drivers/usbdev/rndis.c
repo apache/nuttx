@@ -2426,8 +2426,9 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_RNDIS_COMPOSITE
                 case USB_DESC_TYPE_DEVICE:
                   {
-                    ret = USB_SIZEOF_DEVDESC;
-                    memcpy(ctrlreq->buf, &g_devdesc, ret);
+                    ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                              &g_devdesc,
+                                              dev->speed);
                   }
                   break;
 #endif
@@ -2851,7 +2852,9 @@ static int usbclass_classobject(int minor,
 
   /* Initialize the USB class driver structure */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  drvr->drvr.speed         = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
   drvr->drvr.speed         = USB_SPEED_HIGH;
 #else
   drvr->drvr.speed         = USB_SPEED_FULL;

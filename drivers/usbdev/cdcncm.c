@@ -37,6 +37,7 @@
 #include <sys/poll.h>
 
 #include <nuttx/net/netdev_lowerhalf.h>
+#include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/cdc.h>
 #include <nuttx/usb/cdcncm.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -2320,8 +2321,9 @@ static int cdcncm_getdescriptor(FAR struct cdcncm_driver_s *self,
     case USB_DESC_TYPE_DEVICE:
       if (self->isncm)
         {
-          memcpy(desc, &g_ncmdevdesc, sizeof(g_ncmdevdesc));
-          return sizeof(g_ncmdevdesc);
+          return usbdev_copy_devdesc(desc,
+                                     &g_ncmdevdesc,
+                                     self->usbdev.speed);
         }
 #  ifdef CONFIG_NET_CDCMBIM
       else
@@ -2582,6 +2584,7 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
               uint8_t descindex = ctrl->value[0];
               uint8_t desctype  = ctrl->value[1];
 
+              self->usbdev.speed = dev->speed;
               ret = cdcncm_getdescriptor(self, desctype, descindex,
                                          self->ctrlreq->buf);
             }
@@ -2791,7 +2794,9 @@ static int cdcncm_classobject(int minor,
 
   /* USB device initialization */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  self->usbdev.speed = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
   self->usbdev.speed = USB_SPEED_HIGH;
 #else
   self->usbdev.speed = USB_SPEED_FULL;
@@ -2866,7 +2871,9 @@ static int cdcmbim_classobject(int minor,
 
   /* USB device initialization */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  ncm->usbdev.speed = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
   ncm->usbdev.speed = USB_SPEED_HIGH;
 #else
   ncm->usbdev.speed = USB_SPEED_FULL;
