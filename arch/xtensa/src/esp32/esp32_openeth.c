@@ -38,6 +38,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/ip.h>
@@ -791,7 +792,7 @@ int esp32_openeth_initialize(void)
 
   for (int i = 0; i < RX_BUF_COUNT; i++)
     {
-      priv->rx_buf[i] = calloc(1, DMA_BUF_SIZE);
+      priv->rx_buf[i] = kmm_calloc(1, DMA_BUF_SIZE);
       if (!(priv->rx_buf[i]))
         {
           nerr("ERROR: Failed allocate RX descriptors\n");
@@ -807,7 +808,7 @@ int esp32_openeth_initialize(void)
 
   for (int i = 0; i < TX_BUF_COUNT; i++)
     {
-      priv->tx_buf[i] = calloc(1, DMA_BUF_SIZE);
+      priv->tx_buf[i] = kmm_calloc(1, DMA_BUF_SIZE);
       if (!(priv->tx_buf[i]))
         {
           nerr("ERROR: Failed allocate TX descriptors\n");
