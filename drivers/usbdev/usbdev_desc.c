@@ -33,6 +33,39 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: usbdev_copy_devdesc
+ *
+ * Description:
+ *   Copies the requested device Description into the dest buffer given.
+ *   Returns the number of Bytes filled in (USB_SIZEOF_DEVDESC).
+ *   This function is provided by various classes.
+ *
+ ****************************************************************************/
+
+int usbdev_copy_devdesc(FAR void *dest,
+                        FAR const struct usb_devdesc_s *src,
+                        uint8_t speed)
+{
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  FAR struct usb_devdesc_s *p_desc =
+                (struct usb_devdesc_s *)dest;
+#endif
+
+  memcpy(dest, src, USB_SIZEOF_DEVDESC);
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed >= USB_SPEED_SUPER)
+    {
+      p_desc->usb[0] = LSBYTE(0x0320),
+      p_desc->usb[1] = MSBYTE(0x0320);
+      p_desc->mxpacketsize = 9;
+    }
+#endif
+
+  return USB_SIZEOF_DEVDESC;
+}
+
+/****************************************************************************
  * Name: usbdev_copy_epdesc
  *
  * Description:

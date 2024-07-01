@@ -513,8 +513,9 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_USBMSC_COMPOSITE
               case USB_DESC_TYPE_DEVICE:
                 {
-                  ret = USB_SIZEOF_DEVDESC;
-                  memcpy(ctrlreq->buf, usbmsc_getdevdesc(), ret);
+                  ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                            usbmsc_getdevdesc(),
+                                            dev->speed);
                 }
                 break;
 #endif
@@ -1296,7 +1297,9 @@ int usbmsc_configure(unsigned int nluns, FAR void **handle)
   /* Initialize the USB class driver structure */
 
   drvr             = &alloc->drvr;
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  drvr->drvr.speed = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
   drvr->drvr.speed = USB_SPEED_HIGH;
 #else
   drvr->drvr.speed = USB_SPEED_FULL;
