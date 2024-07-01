@@ -87,12 +87,16 @@ endif()
 
 add_compile_definitions(elf_load=remoteproc_elf_load)
 
-if(CONFIG_OPENAMP_VIRTIO_DEVICE_ONLY)
-  add_compile_definitions(VIRTIO_DEVICE_ONLY)
+if(CONFIG_OPENAMP_VIRTIO_DEVICE_SUPPORT)
+  add_compile_definitions(VIRTIO_DEVICE_SUPPORT=1)
+else()
+  add_compile_definitions(VIRTIO_DEVICE_SUPPORT=0)
 endif()
 
-if(CONFIG_OPENAMP_VIRTIO_DRIVER_ONLY)
-  add_compile_definitions(VIRTIO_DRIVER_ONLY)
+if(CONFIG_OPENAMP_VIRTIO_DRIVER_SUPPORT)
+  add_compile_definitions(VIRTIO_DRIVER_SUPPORT=1)
+else()
+  add_compile_definitions(VIRTIO_DRIVER_SUPPORT=0)
 endif()
 
 set(WITH_LIBMETAL_FIND OFF)
