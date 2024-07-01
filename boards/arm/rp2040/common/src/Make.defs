@@ -103,6 +103,10 @@ ifeq ($(CONFIG_NET_W5500),y)
 CSRCS += rp2040_w5500.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
+  CSRCS += rp2040_max6675.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
