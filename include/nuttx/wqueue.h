@@ -414,6 +414,24 @@ int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
                   FAR void *arg, clock_t delay);
 
 /****************************************************************************
+ * Name: work_queue_pri
+ *
+ * Description: Get priority of the wqueue. We believe that all worker
+ *   threads have the same priority.
+ *
+ * Input Parameters:
+ *  wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   SCHED_PRIORITY_MIN ~ SCHED_PRIORITY_MAX  on success,
+ *   a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int work_queue_priority(int qid);
+int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue);
+
+/****************************************************************************
  * Name: work_cancel/work_cancel_wq
  *
  * Description:
