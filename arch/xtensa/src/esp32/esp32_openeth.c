@@ -24,30 +24,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <time.h>
-#include <string.h>
-#include <errno.h>
-#include <assert.h>
-#include <syslog.h>
 #include <debug.h>
 
-#include <arpa/inet.h>
-#include <net/if.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/wqueue.h>
-#include <nuttx/net/netconfig.h>
-#include <nuttx/net/ip.h>
-#include <nuttx/net/netdev.h>
 #include <netinet/if_ether.h>
-
-#ifdef CONFIG_NET_PKT
-#include <nuttx/net/pkt.h>
-#endif
+#include <nuttx/net/netdev_lowerhalf.h>
 
 #include "hardware/esp32_soc.h"
 #include "esp32_irq.h"
@@ -58,18 +39,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* We need to have the work queue to handle interrupts */
-
-#if !defined(CONFIG_SCHED_WORKQUEUE)
-#error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
-#endif
-
 /* These are the register definitions for the OpenCores Ethernet MAC. */
 
 /* DMA buffers configuration */
 #define DMA_BUF_SIZE 1600
 #define RX_BUF_COUNT CONFIG_ESP32_OPENETH_DMA_RX_BUFFER_NUM
-#define TX_BUF_COUNT CONFIG_ESP32_OPENETH_DMA_TX_BUFFER_NUM
+/* Only need 1 TX buf because packets are transmitted immediately */
+#define TX_BUF_COUNT 1
 
 /* This driver uses the interrupt source number of the internal EMAC
  * of the ESP32 chip, and uses the same register address base. This of
@@ -102,58 +78,12 @@
 #define OPENETH_INT_BUSY BIT(4)
 /*  OPENETH_INT_RXB: Frame received */
 #define OPENETH_INT_RXB BIT(2)
-/*  OPENETH_INT_TXB: Frame transmitted */
-#define OPENETH_INT_TXB BIT(0)
-
-/*  IPGT, IPGR1, IPGR2 registers are not implemented in QEMU,
- * hence not used here
- */
-#define OPENETH_PACKETLEN_REG (OPENETH_BASE + 0x18)
-/*  OPENETH_MINFL: minimum frame length */
-#define OPENETH_MINFL_S 16
-#define OPENETH_MINFL_V 0xffff
-#define OPENETH_MINFL_M (OPENETH_MINFL_V << OPENETH_MINFL_S)
-/*  OPENETH_MAXFL: maximum frame length */
-#define OPENETH_MAXFL_S 0
-#define OPENETH_MAXFL_V 0xffff
-#define OPENETH_MAXFL_M (OPENETH_MAXFL_V << OPENETH_MAXFL_S)
-
 /*  COLLCONF is not implemented in QEMU */
 #define OPENETH_TX_BD_NUM_REG (OPENETH_BASE + 0x20)
-/*  CTRLMODER, MIIMODER are not implemented in QEMU */
-#define OPENETH_MIICOMMAND_REG (OPENETH_BASE + 0x2c)
-/*  OPENETH_WCTRLDATA: write control data */
-#define OPENETH_WCTRLDATA BIT(2)
-/*  OPENETH_RSTAT: read status */
-#define OPENETH_RSTAT BIT(1)
-/*  OPENETH_SCANSTAT: scan status */
-#define OPENETH_SCANSTAT BIT(0)
-
-#define OPENETH_MIIADDRESS_REG (OPENETH_BASE + 0x30)
-/*  OPENETH_RGAD: register address */
-#define OPENETH_RGAD_S 8
-#define OPENETH_RGAD_V 0x1f
-#define OPENETH_RGAD_M (OPENETH_RGAD_V << OPENETH_RGAD_S)
-/*  OPENETH_FIAD: PHY address */
-#define OPENETH_FIAD_S 0
-#define OPENETH_FIAD_V 0x1f
-#define OPENETH_FIAD_N (OPENETH_FIAD_V << OPENETH_FIAD_S)
-
-#define OPENETH_MIITX_DATA_REG (OPENETH_BASE + 0x34)
-#define OPENETH_MIIRX_DATA_REG (OPENETH_BASE + 0x38)
-#define OPENETH_MII_DATA_MASK 0xffff
-
-#define OPENETH_MIISTATUS_REG (OPENETH_BASE + 0x3c)
-/*  OPENETH_LINKFAIL: link is down */
-#define OPENETH_LINKFAIL BIT(0)
-
 /*  OPENETH_MAC_ADDR0_REG: bytes 2-5 of the MAC address (byte 5 in LSB) */
 #define OPENETH_MAC_ADDR0_REG (OPENETH_BASE + 0x40)
 /*  OPENETH_MAC_ADDR1_REG: bytes 0-1 of the MAC address (byte 1 in LSB) */
 #define OPENETH_MAC_ADDR1_REG (OPENETH_BASE + 0x44)
-
-#define OPENETH_HASH0_ADR_REG (OPENETH_BASE + 0x48)
-#define OPENETH_HASH1_ADR_REG (OPENETH_BASE + 0x4c)
 
 /*  Location of the DMA descriptors */
 #define OPENETH_DESC_BASE (OPENETH_BASE + 0x400)
@@ -164,27 +94,16 @@
  * Private Types
  ****************************************************************************/
 
-/* The lo_driver_s encapsulates all state information for a single hardware
- * interface
- */
-
-struct openeth_driver_s
+struct openeth_priv_s
 {
-  struct work_s openeth_work; /* For deferring poll work to the work queue */
+  struct netdev_lowerhalf_s dev;
 
   int cpuint; /* EMAC interrupt ID */
 
   int cur_rx_desc;
   int cur_tx_desc;
-  uint8_t addr[6];
   uint8_t *rx_buf[RX_BUF_COUNT];
   uint8_t *tx_buf[TX_BUF_COUNT];
-
-  struct work_s rxwork; /* For deferring RX work to the work queue */
-
-  /* This holds the information visible to the NuttX network */
-
-  struct net_driver_s dev; /* Interface understood by the network */
 };
 
 /*  Structures describing TX and RX descriptors. */
@@ -236,27 +155,29 @@ static_assert(sizeof(openeth_rx_desc_t) == 8,
   "incorrect size of openeth_rx_desc_t");
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static struct openeth_driver_s g_openeth;
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 /* NuttX callback functions */
 
-static int openeth_ifup(FAR struct net_driver_s *dev);
-static int openeth_ifdown(FAR struct net_driver_s *dev);
-static int openeth_txavail(FAR struct net_driver_s *dev);
-#ifdef CONFIG_NET_MCASTGROUP
-static int openeth_addmac(FAR struct net_driver_s *dev,
-  FAR const uint8_t *mac);
-static int openeth_rmmac(FAR struct net_driver_s *dev,
-  FAR const uint8_t *mac);
-#endif
-static int openeth_transmit(FAR struct net_driver_s *dev);
+static int openeth_ifup(struct netdev_lowerhalf_s *dev);
+static int openeth_ifdown(struct netdev_lowerhalf_s *dev);
+static int openeth_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
+static netpkt_t *openeth_receive(struct netdev_lowerhalf_s *dev);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct openeth_priv_s g_openeth;
+
+static const struct netdev_ops_s g_ops =
+{
+  .ifup     = openeth_ifup,
+  .ifdown   = openeth_ifdown,
+  .transmit = openeth_transmit,
+  .receive  = openeth_receive,
+};
 
 /****************************************************************************
  * Private Functions
@@ -317,151 +238,15 @@ static inline void openeth_set_tx_desc_cnt(int tx_desc_cnt)
   REG_WRITE(OPENETH_TX_BD_NUM_REG, tx_desc_cnt);
 }
 
-/****************************************************************************
- * Function: openeth_rx_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   0 on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void openeth_rx_interrupt_work(void *arg)
-{
-  struct openeth_driver_s *priv = (struct openeth_driver_s *)arg;
-  struct net_driver_s *dev = &priv->dev;
-
-  net_lock();
-
-  uint8_t *buffer = NULL;
-  uint32_t length = 0;
-
-  while (1)
-    {
-      openeth_rx_desc_t *desc_ptr = openeth_rx_desc(priv->cur_rx_desc);
-      openeth_rx_desc_t desc_val = *desc_ptr;
-
-      if (!desc_val.len)
-        break;
-      ninfo("desc %d (%p) e=%d len=%d wr=%d",
-        priv->cur_rx_desc, desc_ptr, desc_val.e, desc_val.len, desc_val.wr);
-      if (desc_val.e)
-        {
-          nerr("ERROR %d", desc_val.e);
-          goto err;
-        }
-
-      /* We don't need to copy this anywere. We can just feed it
-       * to the stack from where it is
-       */
-
-      priv->dev.d_buf = desc_val.rxpnt;
-      priv->dev.d_len = desc_val.len;
-      struct eth_hdr_s *eth_hdr = (struct eth_hdr_s *)desc_val.rxpnt;
-
-  #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap
-       */
-
-      pkt_input(&priv->dev);
-  #endif
-
-      /* We only accept IP packets of the configured type and ARP packets
-       */
-
-  #ifdef CONFIG_NET_IPv4
-      if (eth_hdr->type == HTONS(ETHTYPE_IP))
-        {
-          /* Receive an IPv4 packet from the network device */
-
-          ipv4_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              /* And send the packet */
-
-              openeth_transmit(&priv->dev);
-            }
-        }
-      else
-  #endif
-  #ifdef CONFIG_NET_IPv6
-          if (eth_hdr->type == HTONS(ETHTYPE_IP6))
-        {
-          /* Give the IPv6 packet to the network layer */
-
-          ipv6_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              /* And send the packet */
-
-              openeth_transmit(&priv->dev);
-            }
-        }
-      else
-  #endif
-  #ifdef CONFIG_NET_ARP
-          if (eth_hdr->type == HTONS(ETHTYPE_ARP))
-        {
-          /* Handle ARP packet */
-
-          arp_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              /* And send the packet */
-
-              openeth_transmit(&priv->dev);
-            }
-        }
-      else
-  #endif
-        {
-          nerr("ERROR: Dropped, Unknown type: %04x\n", eth_hdr->type);
-        }
-
-      desc_val.e = 1;
-      desc_val.len = 0;
-      *desc_ptr = desc_val;
-
-      priv->cur_rx_desc = (priv->cur_rx_desc + 1) % RX_BUF_COUNT;
-    }
-
-err:
-
-  net_unlock();
-}
-
 static IRAM_ATTR int openeth_isr_handler(int irq, void *context, void *arg)
 {
-  struct openeth_driver_s *priv = (struct openeth_driver_s *)arg;
+  FAR struct netdev_lowerhalf_s *dev = &g_openeth.dev;
 
   uint32_t status = REG_READ(OPENETH_INT_SOURCE_REG);
 
   if (status & OPENETH_INT_RXB)
     {
-      work_queue(LPWORK, &priv->rxwork, openeth_rx_interrupt_work, priv, 0);
+      netdev_lower_rxready(dev);
     }
 
   if (status & OPENETH_INT_BUSY)
@@ -474,6 +259,50 @@ static IRAM_ATTR int openeth_isr_handler(int irq, void *context, void *arg)
   REG_WRITE(OPENETH_INT_SOURCE_REG, status);
 
   return 0;
+}
+
+static FAR netpkt_t *openeth_receive(FAR struct netdev_lowerhalf_s *dev)
+{
+  FAR netpkt_t *pkt = netpkt_alloc(dev, NETPKT_RX);
+
+  struct openeth_priv_s *priv = &g_openeth;
+
+  if (pkt)
+    {
+      openeth_rx_desc_t *desc_ptr = openeth_rx_desc(priv->cur_rx_desc);
+      openeth_rx_desc_t desc_val = *desc_ptr;
+
+      ninfo("desc %d (%p) e=%d len=%d wr=%d",
+        priv->cur_rx_desc, desc_ptr, desc_val.e, desc_val.len, desc_val.wr);
+
+      if (desc_val.e)
+        {
+          ninfo("descriptor is not owned by HW (e=%d)", desc_val.e);
+          goto err;
+        }
+
+      if (!desc_val.len)
+        {
+          nerr("ERROR desc_val.len is zero");
+          goto err;
+        }
+
+      netpkt_copyin(dev, pkt, desc_val.rxpnt, desc_val.len, 0);
+
+      /* Free up the descriptor */
+
+      desc_val.e = 1;
+      desc_val.len = 0;
+      *desc_ptr = desc_val;
+
+      priv->cur_rx_desc = (priv->cur_rx_desc + 1) % RX_BUF_COUNT;
+    }
+
+  return pkt;
+
+err:
+  netpkt_free(dev, pkt, NETPKT_RX);
+  return NULL;
 }
 
 /****************************************************************************
@@ -493,11 +322,9 @@ static IRAM_ATTR int openeth_isr_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int openeth_ifup(FAR struct net_driver_s *dev)
+static int openeth_ifup(FAR struct netdev_lowerhalf_s *dev)
 {
   irqstate_t flags;
-  FAR struct openeth_driver_s *priv =
-    (FAR struct openeth_driver_s *)dev->d_private;
 
   /* Disable the Ethernet interrupt */
 
@@ -509,7 +336,7 @@ static int openeth_ifup(FAR struct net_driver_s *dev)
 
   leave_critical_section(flags);
 
-  netdev_carrier_on(dev);
+  netdev_lower_carrier_on(dev);
 
   return OK;
 }
@@ -530,11 +357,9 @@ static int openeth_ifup(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int openeth_ifdown(FAR struct net_driver_s *dev)
+static int openeth_ifdown(FAR struct netdev_lowerhalf_s *dev)
 {
   irqstate_t flags;
-  FAR struct openeth_driver_s *priv =
-    (FAR struct openeth_driver_s *)dev->d_private;
 
   /* Disable the Ethernet interrupt */
 
@@ -546,171 +371,40 @@ static int openeth_ifdown(FAR struct net_driver_s *dev)
 
   leave_critical_section(flags);
 
-  netdev_carrier_off(dev);
+  netdev_lower_carrier_off(dev);
 
   return OK;
 }
 
-static int openeth_transmit(FAR struct net_driver_s *dev)
+static int openeth_transmit(FAR struct netdev_lowerhalf_s *dev,
+                           FAR netpkt_t *pkt)
 {
-  FAR struct openeth_driver_s *priv =
-    (FAR struct openeth_driver_s *)dev->d_private;
+  FAR struct openeth_priv_s *priv = (FAR struct openeth_priv_s *)dev;
+  unsigned int len = netpkt_getdatalen(dev, pkt);
 
-  int ret = 0;
-  uint8_t *buf = priv->dev.d_buf;
-  uint16_t length = priv->dev.d_len;
+  /*  In QEMU, there never is a TX operation in progress */
 
-  if (!buf)
-    {
-      nerr("can't set buf to null");
-      goto err;
-    }
+  /* Copyout the L2 data and transmit. */
 
-  if (!length)
-    {
-      nerr("buf length can't be zero");
-      goto err;
-    }
+  netpkt_copyout(dev, priv->tx_buf[priv->cur_tx_desc], pkt, len, 0);
 
-  if (length >= DMA_BUF_SIZE * TX_BUF_COUNT)
-    {
-      nerr("insufficient TX buffer size");
-      goto err;
-    }
+  /* Do Transmit */
 
-  uint32_t bytes_remaining = length;
+  openeth_tx_desc_t *desc_ptr = openeth_tx_desc(priv->cur_tx_desc);
+  openeth_tx_desc_t desc_val = *desc_ptr;
 
-  /*  In QEMU, there never is a TX operation in progress,
-   * so start with descriptor 0.
-   */
+  desc_val.wr = (priv->cur_tx_desc == TX_BUF_COUNT - 1);
+  desc_val.len = len;
+  desc_val.rd = 1;
+  *desc_ptr = desc_val;
 
-  while (bytes_remaining > 0)
-    {
-      uint32_t will_write = MIN(bytes_remaining, DMA_BUF_SIZE);
+  /* Free the buffer and notify the upper layer */
 
-      memcpy(priv->tx_buf[priv->cur_tx_desc], buf, will_write);
-      openeth_tx_desc_t *desc_ptr = openeth_tx_desc(priv->cur_tx_desc);
-      openeth_tx_desc_t desc_val = *desc_ptr;
-      desc_val.wr = (priv->cur_tx_desc == TX_BUF_COUNT - 1);
-      desc_val.len = will_write;
-      desc_val.rd = 1;
+  netpkt_free(dev, pkt, NETPKT_TX);
+  netdev_lower_txdone(dev);
 
-      /*  TXEN is already set, and this triggers a TX operation
-       * for the descriptor
-       */
-
-      ninfo("desc %d (%p) len=%d wr=%d",
-        priv->cur_tx_desc, desc_ptr, will_write, desc_val.wr);
-      *desc_ptr = desc_val;
-      bytes_remaining -= will_write;
-      buf += will_write;
-      priv->cur_tx_desc = (priv->cur_tx_desc + 1) % TX_BUF_COUNT;
-    }
-
-  priv->dev.d_buf = NULL;
-  priv->dev.d_len = 0;
   return OK;
-
-err:
-  return ERROR;
 }
-
-/****************************************************************************
- * Name: openeth_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static int openeth_txavail(FAR struct net_driver_s *dev)
-{
-  if (IFF_IS_UP(dev->d_flags))
-    {
-      /* In QEMU, the MAC is always available */
-
-      net_lock();
-
-      /* poll the network for new XMIT data */
-
-      devif_poll(dev, openeth_transmit);
-
-      net_unlock();
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: openeth_addmac
- *
- * Description:
- *   NuttX Callback: Add the specified MAC address to the hardware multicast
- *   address filtering
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The default option can allow EMAC receive all multicast frame.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_MCASTGROUP
-static int openeth_addmac(FAR struct net_driver_s *dev,
-  FAR const uint8_t *mac)
-{
-  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  return 0;
-}
-#endif
-
-/****************************************************************************
- * Name: openeth_rmmac
- *
- * Description:
- *   NuttX Callback: Remove the specified MAC address from the hardware
- *   multicast address filtering
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The default option can allow EMAC receive all multicast frame.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_MCASTGROUP
-static int openeth_rmmac(FAR struct net_driver_s *dev,
-  FAR const uint8_t *mac)
-{
-  ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-  return 0;
-}
-#endif
 
 static int openeth_set_addr(uint8_t *addr)
 {
@@ -745,7 +439,7 @@ err:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: openeth_initialize
+ * Name: esp32_openeth_initialize
  *
  * Description:
  *   Initialize the openeth driver
@@ -761,7 +455,8 @@ err:
 int esp32_openeth_initialize(void)
 {
   int ret;
-  FAR struct openeth_driver_s *priv;
+  FAR struct openeth_priv_s *priv = &g_openeth;
+  FAR struct netdev_lowerhalf_s *dev = &priv->dev;
 
   /* Sanity check */
 
@@ -772,21 +467,14 @@ int esp32_openeth_initialize(void)
       abort();
     }
 
-  /* Get the interface structure associated with this interface number. */
-
-  priv = &g_openeth;
-
   /* Initialize the driver structure */
 
-  memset(priv, 0, sizeof(struct openeth_driver_s));
-  priv->dev.d_ifup = openeth_ifup;       /* I/F up (new IP address) callback */
-  priv->dev.d_ifdown = openeth_ifdown;   /* I/F down callback */
-  priv->dev.d_txavail = openeth_txavail; /* New TX data callback */
-#ifdef CONFIG_NET_MCASTGROUP
-  priv->dev.d_addmac = openeth_addmac; /* Add multicast MAC address */
-  priv->dev.d_rmmac = openeth_rmmac;   /* Remove multicast MAC address */
-#endif
-  priv->dev.d_private = priv; /* Used to recover private state from dev */
+  memset(priv, 0, sizeof(struct openeth_priv_s));
+
+  dev->ops = &g_ops;
+
+  dev->quota[NETPKT_TX] = TX_BUF_COUNT;
+  dev->quota[NETPKT_RX] = RX_BUF_COUNT;
 
   /* Allocate DMA buffers */
 
@@ -837,9 +525,9 @@ int esp32_openeth_initialize(void)
 
   openeth_reset();
   openeth_set_tx_desc_cnt(TX_BUF_COUNT);
-  memcpy(priv->dev.d_mac.ether.ether_addr_octet,
+  memcpy(priv->dev.netdev.d_mac.ether.ether_addr_octet,
     "\x00\x02\x03\x04\x05\x06\x07\x08", ETH_ALEN);
-  openeth_set_addr(priv->dev.d_mac.ether.ether_addr_octet);
+  openeth_set_addr(priv->dev.netdev.d_mac.ether.ether_addr_octet);
 
   /* Attach the interrupt */
 
@@ -849,12 +537,16 @@ int esp32_openeth_initialize(void)
    * performed.
    */
 
-  netdev_register(&priv->dev, NET_LL_ETHERNET);
+  ret = netdev_lower_register(dev, NET_LL_ETHERNET);
+  if (ret)
+    {
+      nerr("ERROR: netdev_lower_register\n");
+      goto err;
+    }
 
   /* Put the network in the UP state */
 
-  IFF_SET_UP(priv->dev.d_flags);
-  return openeth_ifup(&priv->dev);
+  return openeth_ifup(dev);
 
 err:
   nerr("Failed initializing ret = %d", ret);
