@@ -643,8 +643,10 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
               {
               case USB_DESC_TYPE_DEVICE:
                 {
-                  ret = USB_SIZEOF_DEVDESC;
-                  memcpy(ctrlreq->buf, priv->descs->devdesc, ret);
+                  ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                            priv->descs->devdesc,
+                                            dev->speed);
+
 #ifdef CONFIG_BOARD_USBDEV_PIDVID
                   {
                     uint16_t pid = board_usbdev_pid();
@@ -1098,14 +1100,15 @@ FAR void *composite_initialize(FAR const struct usbdev_devdescs_s *devdescs,
   priv->ndevices = ndevices;
 
   /* Initialize the USB class driver structure */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  drvr->drvr.speed         = USB_SPEED_HIGH;
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  drvr->drvr.speed = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
+  drvr->drvr.speed = USB_SPEED_HIGH;
 #else
-  drvr->drvr.speed         = USB_SPEED_FULL;
+  drvr->drvr.speed = USB_SPEED_FULL;
 #endif
-  drvr->drvr.ops           = &g_driverops;
-  drvr->dev                = priv;
+  drvr->drvr.ops   = &g_driverops;
+  drvr->dev        = priv;
 
   /* Register the USB composite class driver */
 

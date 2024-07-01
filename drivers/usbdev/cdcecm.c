@@ -1463,8 +1463,7 @@ static int cdcecm_getdescriptor(FAR struct cdcecm_driver_s *self,
 #ifndef CONFIG_CDCECM_COMPOSITE
     case USB_DESC_TYPE_DEVICE:
       {
-        memcpy(desc, &g_devdesc, sizeof(g_devdesc));
-        return (int)sizeof(g_devdesc);
+        return usbdev_copy_devdesc(desc, &g_devdesc, self->usbdev.speed);
       }
       break;
 #endif
@@ -1718,6 +1717,7 @@ static int cdcecm_setup(FAR struct usbdevclass_driver_s *driver,
               uint8_t descindex = ctrl->value[0];
               uint8_t desctype  = ctrl->value[1];
 
+              self->usbdev.speed = dev->speed;
               ret = cdcecm_getdescriptor(self, desctype, descindex,
                                          self->ctrlreq->buf);
             }
@@ -1835,7 +1835,9 @@ static int cdcecm_classobject(int minor,
 
   /* USB device initialization */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  self->usbdev.speed  = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
   self->usbdev.speed  = USB_SPEED_HIGH;
 #else
   self->usbdev.speed  = USB_SPEED_FULL;
