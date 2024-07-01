@@ -43,6 +43,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ALIGN_UP(x, a) (((x) + (a) - 1) & ~((a) - 1))
+
 /* Configuration ************************************************************/
 
 /* Terminology.
@@ -76,21 +78,12 @@
  */
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-/* _sbss is the start of the BSS region (see the linker script) _ebss is the
- * end of the BSS regions (see the linker script). The idle task stack starts
- * at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE
- * thread is the thread that the system boots on and, eventually, becomes the
- * idle, do nothing task that runs only when there is nothing else to run.
- * The heap continues from there until the configured end of memory.
- * g_idle_topstack is the beginning of this heap region (not necessarily
- * aligned).
- */
-
-const uintptr_t g_idle_topstack = (uintptr_t)_ebss +
-                                  CONFIG_IDLETHREAD_STACKSIZE;
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP) || defined(CONFIG_ARCH_USE_DATA_HEAP)
+static uintptr_t g_alloc_count;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -169,8 +162,13 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
   /* Allow user-mode access to the user heap memory */
 
   mpu_user_intsram(ubase, usize);
-#else
+#elif defined(CONFIG_BUILD_PIC)
 
+  /* Use different heap useful to debug */
+
+  *heap_start = (void *)MPS_SRAM1_START;
+  *heap_size  = MPS_SRAM1_SIZE;
+#else
   /* Return the heap settings */
 
   *heap_start = (void *)g_idle_topstack;
@@ -271,3 +269,111 @@ void arm_addregion(void)
 #endif /* CONFIG_MM_REGIONS > 2 */
 }
 #endif /* CONFIG_MM_REGIONS > 1 */
+
+/****************************************************************************
+ * Name: up_textheap_memalign
+ *
+ * Description:
+ *   Allocate memory for text with the specified alignment and sectname.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#  if defined(CONFIG_ARCH_USE_SEPARATED_SECTION)
+void *up_textheap_memalign(const char *sectname,
+                           size_t align, size_t size)
+#  else
+void *up_textheap_memalign(size_t align, size_t size)
+#  endif
+{
+  uintptr_t base = (uintptr_t)MPS_SRAM2_START + g_alloc_count;
+  uintptr_t ret = ALIGN_UP(base, align);
+
+  g_alloc_count += ret - base + size;
+  return (void *)ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_textheap_free
+ *
+ * Description:
+ *   Free memory allocated for text sections.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+void up_textheap_free(void *p)
+{
+}
+#endif
+
+/****************************************************************************
+ * Name: up_textheap_heapmember
+ *
+ * Description:
+ *   Test if memory is from text heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+bool up_textheap_heapmember(void *p)
+{
+  return (uintptr_t)p >= MPS_SRAM2_START &&
+         (uintptr_t)p < MPS_SRAM2_START + MPS_SRAM2_SIZE;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_dataheap_memalign
+ *
+ * Description:
+ *   Allocate memory for data with the specified alignment and sectname.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+#  if defined(CONFIG_ARCH_USE_SEPARATED_SECTION)
+void *up_dataheap_memalign(const char *sectname,
+                           size_t align, size_t size)
+#  else
+void *up_dataheap_memalign(size_t align, size_t size)
+#  endif
+{
+  uintptr_t base = (uintptr_t)MPS_SRAM2_START + g_alloc_count;
+  uintptr_t ret = ALIGN_UP(base, align);
+
+  g_alloc_count += ret - base + size;
+  return (void *)ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_dataheap_free
+ *
+ * Description:
+ *   Free memory allocated for data sections.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+void up_dataheap_free(void *p)
+{
+}
+#endif
+
+/****************************************************************************
+ * Name: up_dataheap_heapmember
+ *
+ * Description:
+ *   Test if memory is from data heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_DATA_HEAP)
+bool up_dataheap_heapmember(void *p)
+{
+  return (uintptr_t)p >= MPS_SRAM2_START &&
+         (uintptr_t)p < MPS_SRAM2_START + MPS_SRAM2_SIZE;
+}
+#endif

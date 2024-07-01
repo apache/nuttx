@@ -37,6 +37,28 @@
 #include "mpu.h"
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+#define HEAP_BASE ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
+ * linker script. _ebss lies at the end of the BSS region. The idle task
+ * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
+ * The IDLE thread is the thread that the system boots on and, eventually,
+ * becomes the IDLE, do nothing task that runs only when there is nothing
+ * else to run.  The heap continues from there until the end of memory.
+ * g_idle_topstack is a read-only variable the provides this computed
+ * address.
+ */
+
+const uintptr_t g_idle_topstack = HEAP_BASE;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -94,8 +116,10 @@ static inline void mps_tcmenable(void)
 
 void __start(void)
 {
+#ifndef CONFIG_BUILD_PIC
   const uint32_t *src;
   uint32_t *dest;
+#endif
 
   /* If enabled reset the MPU */
 
@@ -104,6 +128,10 @@ void __start(void)
   mpu_showtype();
 #endif
   arm_fpuconfig();
+
+  /* If used the PIC, then the PIC will have already been configured */
+
+#ifndef CONFIG_BUILD_PIC
 
   /* Set bss to zero */
 
@@ -120,6 +148,7 @@ void __start(void)
     {
       *dest++ = *src++;
     }
+#endif
 
   /* Perform early serial initialization */
 
