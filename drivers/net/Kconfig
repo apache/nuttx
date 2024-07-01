@@ -38,6 +38,14 @@ config NETDEV_WORK_THREAD
 
 endchoice # Netdev poll worker
 
+config NETDEV_WORK_THREAD_POLLING_PERIOD
+	int "Polling period, the units are microseconds"
+	default 0
+	depends on NETDEV_WORK_THREAD
+	---help---
+		Disable the txdone and rxready interrupt and use polling
+		period to receive packets when the value is not 0.
+
 config NETDEV_WORK_THREAD_PRIORITY
 	int "Priority of work poll thread"
 	default 100

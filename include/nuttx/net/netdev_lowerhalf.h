@@ -47,6 +47,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD
+#  define CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD 0
+#endif
+
 /* Layout for net packet:
  *
  * | <-------------- NETPKT_BUFLEN ---------------> |
