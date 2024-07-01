@@ -1627,8 +1627,9 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_CDCACM_COMPOSITE
               case USB_DESC_TYPE_DEVICE:
                 {
-                  ret = USB_SIZEOF_DEVDESC;
-                  memcpy(ctrlreq->buf, cdcacm_getdevdesc(), ret);
+                  ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                            cdcacm_getdevdesc(),
+                                            dev->speed);
                 }
                 break;
 #endif

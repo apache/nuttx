@@ -414,6 +414,20 @@ void usbdev_freereq(FAR struct usbdev_ep_s *ep,
                     FAR struct usbdev_req_s *req);
 
 /****************************************************************************
+ * Name: usbdev_copy_devdesc
+ *
+ * Description:
+ *   Copies the requested device Description into the dest buffer given.
+ *   Returns the number of Bytes filled in (USB_SIZEOF_DEVDESC).
+ *   This function is provided by various classes.
+ *
+ ****************************************************************************/
+
+int usbdev_copy_devdesc(FAR void *dest,
+                        FAR const struct usb_devdesc_s *src,
+                        uint8_t speed);
+
+/****************************************************************************
  * Name: usbdev_copy_epdesc
  *
  * Description:
