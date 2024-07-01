@@ -66,7 +66,7 @@ int mkstemp(FAR char *path_template)
 
   if (path)
     {
-      ret = open(path, O_RDWR | O_CREAT | O_EXCL, 0666);
+      ret = open(path, O_RDWR | O_CREAT | O_EXCL, 0600);
     }
 
   return ret;
