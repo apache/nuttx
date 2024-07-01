@@ -28,8 +28,12 @@
 #include <sys/mount.h>
 #include <syslog.h>
 
+#include <nuttx/lib/modlib.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/ramdisk.h>
+
+#include "nvic.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -96,6 +100,82 @@ static int mps3_bringup(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_BOOT_IMAGE
+
+int board_boot_image(FAR const char *path, uint32_t hdr_size)
+{
+  struct mod_loadinfo_s loadinfo;
+  struct module_s mod;
+  uintptr_t bss;
+  uintptr_t got;
+  uintptr_t msp;
+  int ret;
+
+  /* Initialize the ELF library to load the program binary. */
+
+  syslog(LOG_INFO, "modlib_init...\n");
+
+  ret = modlib_initialize(path, &loadinfo);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to modlib_init: %d\n", ret);
+      return ret;
+    }
+
+  /* Load the program binary */
+
+  syslog(LOG_INFO, "modlib_load...\n");
+
+  ret = modlib_load(&loadinfo);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to modlib_load: %d\n", ret);
+      goto errout_with_init;
+    }
+
+  syslog(LOG_INFO, "modlib_bind...\n");
+
+  memset(&mod, 0, sizeof(struct module_s));
+  ret = modlib_bind(&mod, &loadinfo, NULL, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to modlib_bind: %d\n", ret);
+      goto errout_with_load;
+    }
+
+  bss = modlib_findsection(&loadinfo, ".bss");
+  got = loadinfo.shdr[loadinfo.gotindex].sh_addr;
+  msp = loadinfo.shdr[bss].sh_addr + loadinfo.shdr[bss].sh_size +
+        CONFIG_IDLETHREAD_STACKSIZE;
+
+  syslog(LOG_INFO, "add-symbol-file ap.elf -s .text 0x%x -s .data"
+         " 0x%x\n", loadinfo.textalloc, loadinfo.datastart);
+  up_irq_disable();
+
+  /* Disable systick */
+
+  putreg32(0, NVIC_SYSTICK_CTRL);
+  putreg32(NVIC_SYSTICK_RELOAD_MASK, NVIC_SYSTICK_RELOAD);
+  putreg32(0, NVIC_SYSTICK_CURRENT);
+
+  /* Set got address to r9 */
+
+  __asm__ __volatile__("mov r9, %0"::"r"(got));
+
+  /* set msp to the top of idle stack */
+
+  __asm__ __volatile__("msr msp, %0" : : "r" (msp));
+
+  ((void (*)(void))loadinfo.ehdr.e_entry + loadinfo.textalloc)();
+
+errout_with_load:
+  modlib_unload(&loadinfo);
+errout_with_init:
+  modlib_uninitialize(&loadinfo);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: board_late_initialize

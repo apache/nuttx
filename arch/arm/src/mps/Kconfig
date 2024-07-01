@@ -42,6 +42,8 @@ config ARCH_CHIP_MPS3_AN547
 	select ARCH_CORTEXM55
 	select ARCH_HAVE_FPU
 	select ARM_HAVE_MVE
+	select ARCH_HAVE_TEXT_HEAP
+	select ARCH_HAVE_DATA_HEAP
 
 endchoice
 
