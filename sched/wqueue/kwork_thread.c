@@ -394,6 +394,46 @@ int work_queue_free(FAR struct kwork_wqueue_s *wqueue)
 }
 
 /****************************************************************************
+ * Name: work_queue_priority_wq
+ *
+ * Description: Get priority of the wqueue. We believe that all worker
+ *   threads have the same priority.
+ *
+ * Input Parameters:
+ *  wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   SCHED_PRIORITY_MIN ~ SCHED_PRIORITY_MAX  on success,
+ *   a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue)
+{
+  FAR struct tcb_s *tcb;
+
+  if (wqueue == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Find for the TCB associated with matching PID */
+
+  tcb = nxsched_get_tcb(wqueue->worker[0].pid);
+  if (!tcb)
+    {
+      return -ESRCH;
+    }
+
+  return tcb->sched_priority;
+}
+
+int work_queue_priority(int qid)
+{
+  return work_queue_priority_wq(work_qid2wq(qid));
+}
+
+/****************************************************************************
  * Name: work_start_highpri
  *
  * Description:
