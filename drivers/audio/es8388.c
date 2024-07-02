@@ -91,7 +91,7 @@ static int  es8388_configure(FAR struct audio_lowerhalf_s *dev,
 static int  es8388_configure(FAR struct audio_lowerhalf_s *dev,
                              FAR const struct audio_caps_s *caps);
 #endif
-static int  es8388_shutdown(FAR struct audio_lowerhalf_s *dev);
+static int  es8388_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt);
 static void es8388_processdone(FAR struct i2s_dev_s *i2s,
                                   FAR struct ap_buffer_s *apb,
                                   FAR void *arg,
@@ -153,6 +153,7 @@ static void es8388_reset(FAR struct es8388_dev_s *priv);
 
 static const struct audio_ops_s g_audioops =
 {
+  NULL,                 /* setup          */
   es8388_getcaps,       /* getcaps        */
   es8388_configure,     /* configure      */
   es8388_shutdown,      /* shutdown       */
@@ -1123,7 +1124,7 @@ static int es8388_configure(FAR struct audio_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int es8388_shutdown(FAR struct audio_lowerhalf_s *dev)
+static int es8388_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt)
 {
   FAR struct es8388_dev_s *priv = (FAR struct es8388_dev_s *)dev;
 
