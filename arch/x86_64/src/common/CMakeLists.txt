@@ -41,4 +41,12 @@ if(CONFIG_ARCH_X86_64_ACPI)
   list(APPEND SRCS x86_64_acpi.c)
 endif()
 
+if(CONFIG_ARCH_USE_MMU)
+  list(APPEND SRCS x86_64_mmu.c)
+endif()
+
+if(CONFIG_ARCH_ADDRENV)
+  list(APPEND SRCS x86_64_addrenv.c x86_64_addrenv_perms.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

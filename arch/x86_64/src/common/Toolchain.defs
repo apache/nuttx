@@ -129,3 +129,23 @@ AFLAGS += -Wa,--divide
 endif
 
 EXEEXT = .elf
+
+# Loadable module definitions
+
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden
+LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
+
+# ELF module definitions
+
+CELFFLAGS = $(CFLAGS) -fvisibility=hidden
+CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+
+LDELFFLAGS = -r -e main --gc-sections
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
+
+# -fno-pic to avoid GOT relocations
+# -mcmodel=large to avoid out-of-range 32-bit relocations
+
+CMODULEFLAGS += -fno-pic -mcmodel=large
+CELFFLAGS += -fno-pic -mcmodel=large
+CXXELFFLAGS += -fno-pic -mcmodel=large

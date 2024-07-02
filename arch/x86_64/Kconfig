@@ -16,8 +16,10 @@ choice
 
 config ARCH_INTEL64
 	bool "Intel x86_64"
-	select ARCH_HAVE_MPU
-	select ARCH_USE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_RNG

@@ -34,6 +34,7 @@
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
 #  include <stdint.h>
+#  include <stddef.h>
 #endif
 
 /****************************************************************************
@@ -41,6 +42,19 @@
  ****************************************************************************/
 
 #define X86_64_LOAD_OFFSET 0x100000000
+
+/* Page pool configuration for CONFIG_ARCH_PGPOOL_MAPPING=n */
+
+#ifndef CONFIG_ARCH_X86_64_PGPOOL_SIZE
+#  define X86_64_PGPOOL_SIZE      (0)
+#else
+#  if CONFIG_ARCH_X86_64_PGPOOL_SIZE % CONFIG_MM_PGSIZE != 0
+#    error CONFIG_ARCH_X86_64_PGPOOL_SIZE must be multiple of page size
+#  endif
+#  define X86_64_PGPOOL_SIZE      (CONFIG_ARCH_X86_64_PGPOOL_SIZE)
+#endif
+
+#define X86_64_PGPOOL_BASE        (CONFIG_RAM_SIZE - X86_64_PGPOOL_SIZE)
 
 /* RFLAGS bits */
 
@@ -71,13 +85,13 @@
 
 /* Starting from third selector to confirm the syscall interface */
 
-#define X86_GDT_ENTRY_SIZE      0x8
+#define X86_GDT_ENTRY_SIZE        0x8
 
-#define X86_GDT_CODE_SEL_NUM    1
-#  define X86_GDT_CODE_SEL      (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_CODE_SEL_NUM      1
+#  define X86_GDT_CODE_SEL        (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
-#define X86_GDT_DATA_SEL_NUM    2
-#  define X86_GDT_DATA_SEL      (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_DATA_SEL_NUM      2
+#  define X86_GDT_DATA_SEL        (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
 /* The first TSS entry */
 
@@ -158,6 +172,11 @@
 
 #define HUGE_PAGE_SIZE   (0x200000)
 #  define HUGE_PAGE_MASK (~(HUGE_PAGE_SIZE - 1))
+
+/* Kernel mapping - lower 1GB maps to 4GB-5GB */
+
+#define X86_PDPT_KERNEL_MAP (X86_PAGE_GLOBAL | X86_PAGE_WR | \
+                             X86_PAGE_PRESENT | X86_PAGE_HUGE)
 
 /* CPUID Leaf Definitions */
 
@@ -481,7 +500,7 @@ extern volatile struct gdt_entry_s *g_gdt64;
  * Public Function Prototypes
  ****************************************************************************/
 
-int up_map_region(void *base, int size, int flags);
+int up_map_region(void *base, size_t size, int flags);
 void x86_64_check_and_enable_capability(void);
 
 extern void __enable_sse_avx(void);

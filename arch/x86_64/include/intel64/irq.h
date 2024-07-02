@@ -558,6 +558,25 @@ static inline void set_pcid(uint64_t pcid)
       }
 }
 
+static inline void set_cr3(uint64_t cr3)
+{
+  asm volatile("mov %0, %%cr3" : "=rm"(cr3) : : "memory");
+}
+
+static inline uint64_t get_cr3(void)
+{
+  uint64_t cr3;
+  asm volatile("mov %%cr3, %0" : "=rm"(cr3) : : "memory");
+  return cr3;
+}
+
+static inline uint64_t get_pml4(void)
+{
+  /* Aligned to a 4-KByte boundary */
+
+  return get_cr3() & 0xfffffffffffff000;
+}
+
 static inline unsigned long read_msr(unsigned int msr)
 {
   uint32_t low;

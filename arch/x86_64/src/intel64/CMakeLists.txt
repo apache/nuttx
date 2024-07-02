@@ -48,6 +48,10 @@ set(SRCS
     intel64_check_capability.c
     intel64_cpu.c)
 
+if(CONFIG_MM_PGALLOC)
+  list(APPEND SRCS intel64_pgalloc.c)
+endif()
+
 if(CONFIG_ARCH_HAVE_TESTSET)
   list(APPEND SRCS intel64_testset.S)
 endif()

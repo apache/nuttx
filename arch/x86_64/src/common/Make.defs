@@ -32,3 +32,11 @@ endif
 ifeq ($(CONFIG_ARCH_X86_64_ACPI),y)
 CMN_CSRCS += x86_64_acpi.c
 endif
+
+ifeq ($(CONFIG_ARCH_USE_MMU),y)
+CMN_CSRCS += x86_64_mmu.c
+endif
+
+ifeq ($(CONFIG_ARCH_ADDRENV),y)
+CMN_CSRCS += x86_64_addrenv.c x86_64_addrenv_perms.c
+endif
