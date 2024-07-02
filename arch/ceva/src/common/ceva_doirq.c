@@ -85,6 +85,7 @@ uint32_t *ceva_doirq(int irq, uint32_t *regs)
 
           g_running_tasks[this_cpu()] = this_task();
 
+          restore_critical_section();
           regs = CURRENT_REGS;
         }
 
