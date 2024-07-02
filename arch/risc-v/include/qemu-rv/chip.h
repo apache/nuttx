@@ -21,4 +21,14 @@
 #ifndef __ARCH_RISCV_INCLUDE_QEMU_RV_CHIP_H
 #define __ARCH_RISCV_INCLUDE_QEMU_RV_CHIP_H
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Refer to https://github.com/qemu/qemu/blob/master/target/riscv/debug.c
+ * for the definition of the following macros.
+ */
+
+#define RISCV_DEBUG_NR_TRIGGER 2
+
 #endif /* __ARCH_RISCV_INCLUDE_QEMU_RV_CHIP_H */

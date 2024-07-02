@@ -29,4 +29,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define RISCV_DEBUG_NR_TRIGGER 8
+
 #endif /* __ARCH_RISCV_INCLUDE_ESP32C3_CHIP_H */

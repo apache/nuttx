@@ -390,6 +390,10 @@ void riscv_cpu_boot(int cpu);
 int riscv_pause_handler(int irq, void *c, void *arg);
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+void riscv_debug_init(void);
+#endif
+
 /****************************************************************************
  * Name: riscv_mhartid
  *
