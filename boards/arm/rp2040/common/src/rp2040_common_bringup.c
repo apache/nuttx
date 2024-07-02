@@ -68,6 +68,11 @@
 #include "rp2040_bmp280.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MAX6675
+#include <nuttx/sensors/max6675.h>
+#include "rp2040_max6675.h"
+#endif
+
 #ifdef CONFIG_RP2040_PWM
 #include "rp2040_pwm.h"
 #include "rp2040_pwmdev.h"
@@ -463,6 +468,16 @@ int rp2040_common_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP280 driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MAX6675
+  /* Try to register MAX6675 device as /dev/temp0 at SPI0 */
+
+  ret = board_max6675_initialize(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MAX6675 driver: %d\n", ret);
     }
 #endif
 
