@@ -251,9 +251,8 @@ ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
 endif
 
 ifeq ($(CONFIG_SIM_VIDEO_DECODER),y)
-  HOSTSRCS += sim_hostdecoder.c
   CSRCS += sim_decoder.c
-  STDLIBS += -lopenh264
+  CSRCS += sim_openh264dec.c
 endif
 
 ifeq ($(CONFIG_SIM_VIDEO_ENCODER),y)

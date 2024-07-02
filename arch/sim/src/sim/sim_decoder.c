@@ -28,7 +28,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/video/v4l2_m2m.h>
 
-#include "sim_hostdecoder.h"
+#include "sim_openh264dec.h"
 #include "sim_internal.h"
 
 /****************************************************************************
@@ -43,13 +43,13 @@
 
 struct sim_decoder_s
 {
-  struct host_decoder_s *decoder;
-  struct v4l2_format    output_fmt;
-  struct v4l2_format    capture_fmt;
-  struct work_s         work;
-  void                  *cookie;
-  bool                  capture_on;
-  bool                  flushing;
+  struct openh264_decoder_s *decoder;
+  struct v4l2_format        output_fmt;
+  struct v4l2_format        capture_fmt;
+  struct work_s             work;
+  void                      *cookie;
+  bool                      capture_on;
+  bool                      flushing;
 };
 
 typedef struct sim_decoder_s sim_decoder_t;
@@ -133,7 +133,7 @@ static struct codec_s g_sim_codec_decoder =
 static int sim_decoder_open(void *cookie, void **priv)
 {
   sim_decoder_t *sim_decoder;
-  struct host_decoder_s *decoder;
+  struct openh264_decoder_s *decoder;
 
   sim_decoder = kmm_zalloc(sizeof(sim_decoder_t));
   if (sim_decoder == NULL)
@@ -141,7 +141,7 @@ static int sim_decoder_open(void *cookie, void **priv)
       return -ENOMEM;
     }
 
-  decoder = host_decoder_open();
+  decoder = openh264_decoder_open();
   if (decoder == NULL)
     {
       kmm_free(sim_decoder);
@@ -159,7 +159,7 @@ static int sim_decoder_close(void *priv)
 {
   sim_decoder_t *sim_decoder = priv;
 
-  host_decoder_close(sim_decoder->decoder);
+  openh264_decoder_close(sim_decoder->decoder);
   kmm_free(sim_decoder);
 
   return 0;
@@ -180,7 +180,7 @@ static int sim_decoder_output_streamon(void *priv)
 {
   sim_decoder_t *sim_decoder = priv;
 
-  return host_decoder_streamon(sim_decoder->decoder);
+  return openh264_decoder_streamon(sim_decoder->decoder);
 }
 
 static int sim_decoder_capture_streamoff(void *priv)
@@ -188,7 +188,7 @@ static int sim_decoder_capture_streamoff(void *priv)
   sim_decoder_t *sim_decoder = priv;
 
   sim_decoder->capture_on = false;
-  return host_decoder_streamoff(sim_decoder->decoder);
+  return openh264_decoder_streamoff(sim_decoder->decoder);
 }
 
 static int sim_decoder_output_streamoff(void *priv)
@@ -407,8 +407,8 @@ static int sim_decoder_process(sim_decoder_t *sim_decoder,
                  src_buf->timestamp.tv_usec;
     }
 
-  ret = host_decoder_enqueue(sim_decoder->decoder,
-                             src_data, src_pts, src_size);
+  ret = openh264_decoder_enqueue(sim_decoder->decoder,
+                                 src_data, src_pts, src_size);
   if (ret >= 0 && src_buf != NULL)
     {
       codec_output_put_buf(sim_decoder->cookie, src_buf);
@@ -419,10 +419,10 @@ static int sim_decoder_process(sim_decoder_t *sim_decoder,
       return ret;
     }
 
-  ret = host_decoder_dequeue(sim_decoder->decoder,
-                             (uint8_t *)dst_buf->m.userptr,
-                             &dst_pts,
-                             &dst_buf->bytesused);
+  ret = openh264_decoder_dequeue(sim_decoder->decoder,
+                                 (uint8_t *)dst_buf->m.userptr,
+                                 &dst_pts,
+                                 &dst_buf->bytesused);
   if (ret == 0 && src_buf == NULL)
     {
       sim_decoder->flushing = false;
