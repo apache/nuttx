@@ -495,6 +495,7 @@ struct file
 struct filelist
 {
   uint8_t           fl_rows;    /* The number of rows of fl_files array */
+  uint8_t           fl_crefs;   /* The references to filelist */
   FAR struct file **fl_files;   /* The pointer of two layer file descriptors array */
 
   /* Pre-allocated files to avoid allocator access during thread creation
@@ -875,14 +876,24 @@ void files_initlist(FAR struct filelist *list);
 void files_dumplist(FAR struct filelist *list);
 
 /****************************************************************************
- * Name: files_releaselist
+ * Name: files_getlist
  *
  * Description:
- *   Release a reference to the file list
+ *   Get the list of files by tcb.
  *
  ****************************************************************************/
 
-void files_releaselist(FAR struct filelist *list);
+FAR struct filelist *files_getlist(FAR struct tcb_s *tcb);
+
+/****************************************************************************
+ * Name: files_putlist
+ *
+ * Description:
+ *   Release the list of files.
+ *
+ ****************************************************************************/
+
+void files_putlist(FAR struct filelist * list);
 
 /****************************************************************************
  * Name: files_countlist

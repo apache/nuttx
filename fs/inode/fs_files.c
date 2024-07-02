@@ -173,8 +173,7 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
   int i;
   int j;
 
-  list = &tcb->group->tg_filelist;
-
+  list = files_getlist(tcb);
   for (i = 0; i < list->fl_rows; i++)
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
@@ -188,6 +187,8 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
             }
         }
     }
+
+  files_putlist(list);
 }
 
 /****************************************************************************
@@ -308,6 +309,7 @@ void files_initlist(FAR struct filelist *list)
    */
 
   list->fl_rows = 1;
+  list->fl_crefs = 1;
   list->fl_files = &list->fl_prefile;
   list->fl_prefile = list->fl_prefiles;
 }
@@ -374,19 +376,47 @@ void files_dumplist(FAR struct filelist *list)
 }
 
 /****************************************************************************
- * Name: files_releaselist
+ * Name: files_getlist
  *
  * Description:
- *   Release a reference to the file list
+ *   Get the list of files by tcb.
+ *
+ * Assumptions:
+ *   Called during task deletion in a safe context.
  *
  ****************************************************************************/
 
-void files_releaselist(FAR struct filelist *list)
+FAR struct filelist *files_getlist(FAR struct tcb_s *tcb)
+{
+  FAR struct filelist *list = &tcb->group->tg_filelist;
+
+  DEBUGASSERT(list->fl_crefs >= 1);
+  list->fl_crefs++;
+
+  return list;
+}
+
+/****************************************************************************
+ * Name: files_putlist
+ *
+ * Description:
+ *   Release the list of files.
+ *
+ * Assumptions:
+ *   Called during task deletion in a safe context.
+ *
+ ****************************************************************************/
+
+void files_putlist(FAR struct filelist *list)
 {
   int i;
   int j;
 
-  DEBUGASSERT(list);
+  DEBUGASSERT(list->fl_crefs >= 1);
+  if (--list->fl_crefs > 0)
+    {
+      return;
+    }
 
   /* Close each file descriptor .. Normally, you would need take the list
    * mutex, but it is safe to ignore the mutex in this context
