@@ -18,38 +18,35 @@
 #
 # ##############################################################################
 
-if(CONFIG_SEGGER_RTT)
+if(CONFIG_SEGGER_RTT OR CONFIG_SEGGER_SYSVIEW)
+  if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/SystemView)
 
-  if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/RTT)
-
-    set(RTT_VERSION 7.54)
+    set(SYSVIEW_VERSION 354)
 
     FetchContent_Declare(
-      rtt
-      DOWNLOAD_NAME "RTT.zip"
+      systemview
+      DOWNLOAD_NAME "SystemView.zip"
       DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-      URL "https://github.com/SEGGERMicro/RTT/archive/refs/tags/V${RTT_VERSION}.zip"
+      URL "https://www.segger.com/downloads/systemview/SystemView_Src_V${SYSVIEW_VERSION}.zip"
           SOURCE_DIR
-          ${CMAKE_CURRENT_LIST_DIR}/RTT
+          ${CMAKE_CURRENT_LIST_DIR}/SystemView
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/RTT
-      PATCH_COMMAND
-        patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/0001-segger-RTT-include-the-SEGGER_RTT_Conf.h-from-custom.patch
+          ${CMAKE_BINARY_DIR}/SystemView
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 
-    FetchContent_GetProperties(rtt)
+    FetchContent_GetProperties(systemview)
 
-    if(NOT rtt_POPULATED)
-      FetchContent_Populate(rtt)
+    if(NOT systemview_POPULATED)
+      FetchContent_Populate(systemview)
     endif()
-
   endif()
+endif()
 
+if(CONFIG_SEGGER_RTT)
   nuttx_add_kernel_library(RTT)
 
-  set(RTT_SRCS RTT/RTT/SEGGER_RTT.c)
+  set(RTT_SRCS SystemView/SEGGER/SEGGER_RTT.c)
 
   if(CONFIG_SEGGER_RTT_SECTION)
     target_compile_options(
@@ -63,7 +60,7 @@ if(CONFIG_SEGGER_RTT)
   endif()
 
   if(CONFIG_ARCH_ARMV7M)
-    list(APPEND RTT_SRCS RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S)
+    list(APPEND RTT_SRCS SystemView/SEGGER/SEGGER_RTT_ASM_ARMv7M.S)
   endif()
 
   if(CONFIG_STREAM_RTT)
@@ -82,46 +79,20 @@ if(CONFIG_SEGGER_RTT)
     list(APPEND RTT_SRCS serial_rtt.c)
   endif()
 
-  target_compile_options(RTT PRIVATE -Wno-shadow -Wno-array-bounds)
+  target_compile_options(RTT PRIVATE -Wno-shadow -Wno-pointer-to-int-cast)
   target_sources(RTT PRIVATE ${RTT_SRCS})
-  target_include_directories(RTT PRIVATE config RTT/RTT)
-
+  target_include_directories(RTT PRIVATE config SystemView/SEGGER)
 endif()
 
 if(CONFIG_SEGGER_SYSVIEW)
-
-  if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/SystemView)
-
-    set(SYSVIEW_VERSION 3.30)
-
-    FetchContent_Declare(
-      systemview
-      DOWNLOAD_NAME "SystemView.zip"
-      DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-      URL "https://github.com/SEGGERMicro/SystemView/archive/refs/tags/V${SYSVIEW_VERSION}.zip"
-          SOURCE_DIR
-          ${CMAKE_CURRENT_LIST_DIR}/SystemView
-          BINARY_DIR
-          ${CMAKE_BINARY_DIR}/SystemView
-      DOWNLOAD_NO_PROGRESS true
-      TIMEOUT 30)
-
-    FetchContent_GetProperties(systemview)
-
-    if(NOT systemview_POPULATED)
-      FetchContent_Populate(systemview)
-    endif()
-  endif()
-
   nuttx_add_kernel_library(SystemView)
 
-  target_compile_options(SystemView PRIVATE -Wno-shadow)
-
+  target_compile_options(SystemView PRIVATE -Wno-shadow
+                                            -Wno-pointer-to-int-cast)
   target_sources(SystemView PRIVATE note_sysview.c
-                                    SystemView/SYSVIEW/SEGGER_SYSVIEW.c)
+                                    SystemView/SEGGER/SEGGER_SYSVIEW.c)
 
-  target_include_directories(
-    SystemView PRIVATE ../../sched config RTT/RTT SystemView/SEGGER
-                       SystemView/SYSVIEW)
+  target_include_directories(SystemView PRIVATE ${NUTTX_DIR}/sched config
+                                                RTT/RTT SystemView/SEGGER)
 
 endif()
