@@ -205,6 +205,9 @@ struct mod_loadinfo_s
   size_t        textalign;   /* Necessary alignment of .text */
   size_t        dataalign;   /* Necessary alignment of .bss/.text */
   off_t         filelen;     /* Length of the entire module file */
+  uid_t         fileuid;     /* Uid of the file system */
+  gid_t         filegid;     /* Gid of the file system */
+  int           filemode;    /* Mode of the file system */
   Elf_Ehdr      ehdr;        /* Buffered module file header */
   FAR Elf_Phdr *phdr;        /* Buffered module program headers */
   FAR Elf_Shdr *shdr;        /* Buffered module section headers */
