@@ -31,8 +31,50 @@
 #include "irq/irq.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+static int g_irqmap_count = 1;
+#endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+
+/* This is the interrupt vector mapping table.  This must be provided by
+ * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
+ * in the configuration.
+ *
+ * REVISIT: This should be declared in include/nuttx/irq.h.  The declaration
+ * at that location, however, introduces a circular include dependency so the
+ * declaration is here for the time being.
+ */
+
+irq_mapped_t g_irqmap[NR_IRQS];
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+int irq_to_ndx(int irq)
+{
+  DEBUGASSERT(g_irqmap_count < CONFIG_ARCH_NUSER_INTERRUPTS);
+
+  irqstate_t flags = spin_lock_irqsave(NULL);
+  if (g_irqmap[irq] == 0)
+    {
+      g_irqmap[irq] = g_irqmap_count++;
+    }
+
+  spin_unlock_irqrestore(NULL, flags);
+  return g_irqmap[irq];
+}
+#endif
 
 /****************************************************************************
  * Name: irq_attach
