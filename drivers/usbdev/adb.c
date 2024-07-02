@@ -117,9 +117,9 @@
 #ifndef CONFIG_USBADB_COMPOSITE
 static const struct usb_devdesc_s g_adb_devdesc =
 {
-  .len = USB_SIZEOF_DEVDESC,         /* Descriptor length */
-  .type = USB_DESC_TYPE_DEVICE,      /* Descriptor type */
-  .usb =                             /* USB version */
+  .len = USB_SIZEOF_DEVDESC,                  /* Descriptor length */
+  .type = USB_DESC_TYPE_DEVICE,               /* Descriptor type */
+  .usb =                                      /* USB version */
   {
     LSBYTE(0x0200),
     MSBYTE(0x0200)
@@ -133,37 +133,37 @@ static const struct usb_devdesc_s g_adb_devdesc =
     LSBYTE(CONFIG_USBADB_VENDORID),
     MSBYTE(CONFIG_USBADB_VENDORID)
   },
-  .product =                         /* Product ID */
+  .product =                                  /* Product ID */
   {
     LSBYTE(CONFIG_USBADB_PRODUCTID),
     MSBYTE(CONFIG_USBADB_PRODUCTID)
   },
-  .device =                          /* Device ID */
+  .device =                                   /* Device ID */
   {
     LSBYTE(USBADB_VERSIONNO),
     MSBYTE(USBADB_VERSIONNO)
   },
-  .imfgr = USBADB_MANUFACTURERSTRID, /* Manufacturer */
-  .iproduct = USBADB_PRODUCTSTRID,   /* Product */
-  .serno = USBADB_SERIALSTRID,       /* Serial number */
-  .nconfigs = USBADB_NCONFIGS,       /* Number of configurations */
+  .imfgr = USBADB_MANUFACTURERSTRID,          /* Manufacturer */
+  .iproduct = USBADB_PRODUCTSTRID,            /* Product */
+  .serno = USBADB_SERIALSTRID,                /* Serial number */
+  .nconfigs = USBADB_NCONFIGS,                /* Number of configurations */
 };
 
 #  ifdef CONFIG_USBDEV_DUALSPEED
 static const struct usb_qualdesc_s g_adb_qualdesc =
 {
-  USB_SIZEOF_QUALDESC,               /* len */
-  USB_DESC_TYPE_DEVICEQUALIFIER,     /* type */
-  {                                  /* usb */
+  USB_SIZEOF_QUALDESC,                        /* len */
+  USB_DESC_TYPE_DEVICEQUALIFIER,              /* type */
+  {                                           /* usb */
     LSBYTE(0x0200),
     MSBYTE(0x0200)
   },
-  0,                                 /* classid */
-  0,                                 /* subclass */
-  0,                                 /* protocol */
-  CONFIG_USBADB_EP0MAXPACKET,        /* mxpacketsize */
-  USBADB_NCONFIGS,                   /* nconfigs */
-  0,                                 /* reserved */
+  0,                                          /* classid */
+  0,                                          /* subclass */
+  0,                                          /* protocol */
+  CONFIG_USBADB_EP0MAXPACKET,                 /* mxpacketsize */
+  USBADB_NCONFIGS,                            /* nconfigs */
+  0,                                          /* reserved */
 };
 #  endif
 
@@ -239,6 +239,9 @@ static const struct usbdev_epinfo_s g_adb_epbulkin =
 #ifdef CONFIG_USBDEV_DUALSPEED
   .hssize = CONFIG_USBADB_EPBULKIN_HSSIZE,
 #endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize = CONFIG_USBADB_EPBULKIN_SSSIZE,
+#endif
   .reqnum = CONFIG_USBADB_NWRREQS,
 };
 
@@ -257,6 +260,9 @@ static const struct usbdev_epinfo_s g_adb_epbulkout =
   .fssize = CONFIG_USBADB_EPBULKOUT_FSSIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
   .hssize = CONFIG_USBADB_EPBULKOUT_HSSIZE,
+#endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize = CONFIG_USBADB_EPBULKOUT_SSSIZE,
 #endif
   .reqnum = CONFIG_USBADB_NRDREQS,
 };
@@ -279,7 +285,7 @@ static const FAR struct usbdev_epinfo_s *g_adb_epinfos[USBADB_NUM_EPS] =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo,
                                   uint8_t speed, uint8_t type)
@@ -288,19 +294,18 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo)
 #endif
 {
-  bool hispeed = false;
   FAR struct usb_epdesc_s *epdesc;
   FAR struct usb_ifdesc_s *dest;
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (speed == USB_SPEED_HIGH);
-
   /* Check for switches between high and full speed */
 
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
+  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
-      hispeed = !hispeed;
+      speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
+#else
+  uint8_t speed = USB_SPEED_FULL;
 #endif
 
   dest = (FAR struct usb_ifdesc_s *)buf;
@@ -309,9 +314,9 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
   memcpy(dest, &g_adb_ifdesc, sizeof(g_adb_ifdesc));
 
   usbdev_copy_epdesc(&epdesc[0], devinfo->epno[USBADB_EP_BULKIN_IDX],
-                     hispeed, &g_adb_epbulkin);
+                     speed, &g_adb_epbulkin);
   usbdev_copy_epdesc(&epdesc[1], devinfo->epno[USBADB_EP_BULKOUT_IDX],
-                     hispeed, &g_adb_epbulkout);
+                     speed, &g_adb_epbulkout);
 
 #ifdef CONFIG_USBADB_COMPOSITE
   /* For composite device, apply possible offset to the interface numbers */
