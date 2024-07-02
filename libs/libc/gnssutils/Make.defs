@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/gpsutils/Make.defs
+# libs/libc/gnssutils/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,12 +18,12 @@
 #
 ############################################################################
 
-ifneq ($(CONFIG_GPSUTILS_MINMEA_LIB),)
+ifneq ($(CONFIG_GNSSUTILS_MINMEA_LIB),)
 
 MINMEA_URL ?= "https://github.com/kosma/minmea/archive"
 MINMEA_VERSION ?= db46128e73cee26d6a6eb0482dcba544ee1ea9f5
 
-MINMEA_UNPACKNAME = gpsutils/minmea
+MINMEA_UNPACKNAME = gnssutils/minmea
 
 $(MINMEA_UNPACKNAME):
 	@echo "Downloading: $(MINMEA_UNPACKNAME)"
@@ -32,7 +32,7 @@ $(MINMEA_UNPACKNAME):
 	$(Q) unzip -o -j $(MINMEA_VERSION).zip -d $(MINMEA_UNPACKNAME)
 	$(call DELFILE, $(MINMEA_VERSION).zip)
 	$(Q) mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
-	$(Q) cp gpsutils/minmea/minmea.h $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+	$(Q) cp gnssutils/minmea/minmea.h $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
 
 # Files
 
@@ -52,12 +52,12 @@ distclean::
 else
 context::
 	$(Q) mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
-	$(Q) cp gpsutils/minmea/minmea.h $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
+	$(Q) cp gnssutils/minmea/minmea.h $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM)
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)minmea$(DELIM))
 endif
 
-DEPPATH += --dep-path gpsutils/minmea
-VPATH += :gpsutils/minmea
+DEPPATH += --dep-path gnssutils/minmea
+VPATH += :gnssutils/minmea
 endif

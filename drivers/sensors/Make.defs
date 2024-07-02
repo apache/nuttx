@@ -32,8 +32,8 @@ ifeq ($(CONFIG_SENSORS_RPMSG),y)
   CSRCS += sensor_rpmsg.c
 endif
 
-ifeq ($(CONFIG_SENSORS_GPS),y)
-  CSRCS += gps_uorb.c
+ifeq ($(CONFIG_SENSORS_GNSS),y)
+  CSRCS += gnss_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_WTGAHRS2),y)
@@ -44,8 +44,8 @@ ifeq ($(CONFIG_SENSORS_FAKESENSOR),y)
   CSRCS += fakesensor_uorb.c
 endif
 
-ifeq ($(CONFIG_SENSORS_GOLDFISH_GPS),y)
-  CSRCS += goldfish_gps_uorb.c
+ifeq ($(CONFIG_SENSORS_GOLDFISH_GNSS),y)
+  CSRCS += goldfish_gnss_uorb.c
 endif
 
 ifeq ($(CONFIG_SENSORS_GOLDFISH_SENSOR),y)

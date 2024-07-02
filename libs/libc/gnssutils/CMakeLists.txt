@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libc/gpsutils/CMakeLists.txt
+# libs/libc/gnssutils/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,7 +17,7 @@
 # the License.
 #
 # ##############################################################################
-if(CONFIG_GPSUTILS_MINMEA_LIB)
+if(CONFIG_GNSSUTILS_MINMEA_LIB)
 
   if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/minmea)
 
@@ -30,7 +30,7 @@ if(CONFIG_GPSUTILS_MINMEA_LIB)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/minmea
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libc/gpsutils/minmea
+          ${CMAKE_BINARY_DIR}/libs/libc/gnssutils/minmea
           CONFIGURE_COMMAND
           ""
           BUILD_COMMAND

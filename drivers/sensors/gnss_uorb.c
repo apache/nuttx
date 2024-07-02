@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/gps_uorb.c
+ * drivers/sensors/gnss_uorb.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,7 +27,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/circbuf.h>
 #include <nuttx/sensors/sensor.h>
-#include <nuttx/sensors/gps.h>
+#include <nuttx/sensors/gnss.h>
 
 #include <fcntl.h>
 #include <poll.h>
@@ -38,36 +38,36 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define GPS_PATH_FMT          "/dev/ttyGPS%d"
+#define GNSS_PATH_FMT          "/dev/ttyGNSS%d"
 
-#define GPS_IDX               0
-#define GPS_SATELLITE_IDX     1
-#define GPS_MAX_IDX           2
+#define GNSS_IDX               0
+#define GNSS_SATELLITE_IDX     1
+#define GNSS_MAX_IDX           2
 
-#define GPS_PARSE_BUFFERSIZE  256
+#define GNSS_PARSE_BUFFERSIZE  256
 
-#define GPS_KNOT_TO_KMH       1.852f
-#define GPS_KMH_TO_MPS        3.6f
+#define GNSS_KNOT_TO_KMH       1.852f
+#define GNSS_KMH_TO_MPS        3.6f
 
-#define GPS_FLAG_GGA          (1 << 0)
-#define GPS_FLAG_RMC          (1 << 1)
-#define GPS_FLAG_MARK         (GPS_FLAG_GGA | GPS_FLAG_RMC)
+#define GNSS_FLAG_GGA          (1 << 0)
+#define GNSS_FLAG_RMC          (1 << 1)
+#define GNSS_FLAG_MARK         (GNSS_FLAG_GGA | GNSS_FLAG_RMC)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This structure describes gps sensor info */
+/* This structure describes GNSS sensor info */
 
-struct gps_sensor_s
+struct gnss_sensor_s
 {
   struct sensor_lowerhalf_s lower;
   FAR void                 *upper;
 };
 
-/* This structure describes user info of gps */
+/* This structure describes user info of GNSS */
 
-struct gps_user_s
+struct gnss_user_s
 {
   FAR struct pollfd *fds;
   size_t pos;
@@ -75,76 +75,76 @@ struct gps_user_s
 
 /* This structure describes the state of the upper half driver */
 
-struct gps_upperhalf_s
+struct gnss_upperhalf_s
 {
-  struct gps_sensor_s         dev[GPS_MAX_IDX];
-  FAR struct gps_lowerhalf_s *lower;
-  uint8_t                     crefs;
-  uint8_t                     flags;
-  mutex_t                     lock;
-  sem_t                       buffersem;
-  size_t                      parsenext;
-  char                        parsebuffer[GPS_PARSE_BUFFERSIZE];
-  struct circbuf_s            buffer;
-  struct sensor_gps           gps;
+  struct gnss_sensor_s         dev[GNSS_MAX_IDX];
+  FAR struct gnss_lowerhalf_s *lower;
+  uint8_t                      crefs;
+  uint8_t                      flags;
+  mutex_t                      lock;
+  sem_t                        buffersem;
+  size_t                       parsenext;
+  char                         parsebuffer[GNSS_PARSE_BUFFERSIZE];
+  struct circbuf_s             buffer;
+  struct sensor_gnss           gnss;
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int gps_activate(FAR struct sensor_lowerhalf_s *lower,
-                        FAR struct file *filep, bool enable);
-static int gps_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                            FAR struct file *filep,
-                            FAR uint32_t *interval);
-static int gps_control(FAR struct sensor_lowerhalf_s *lower,
-                       FAR struct file *filep, int cmd, unsigned long arg);
+static int gnss_activate(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep, bool enable);
+static int gnss_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
+                             FAR uint32_t *interval);
+static int gnss_control(FAR struct sensor_lowerhalf_s *lower,
+                        FAR struct file *filep, int cmd, unsigned long arg);
 
-static int     gps_open(FAR struct file *filep);
-static int     gps_close(FAR struct file *filep);
-static ssize_t gps_read(FAR struct file *filep, FAR char *buffer,
-                        size_t buflen);
-static ssize_t gps_write(FAR struct file *filep,
-                         FAR const char *buffer, size_t buflen);
-static int     gps_ioctl(FAR struct file *filep, int cmd,
-                         unsigned long arg);
-static int     gps_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup);
+static int     gnss_open(FAR struct file *filep);
+static int     gnss_close(FAR struct file *filep);
+static ssize_t gnss_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen);
+static ssize_t gnss_write(FAR struct file *filep,
+                          FAR const char *buffer, size_t buflen);
+static int     gnss_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
+static int     gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                         bool setup);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct sensor_ops_s g_gps_sensor_ops =
+static const struct sensor_ops_s g_gnss_sensor_ops =
 {
-  .activate     = gps_activate,
-  .set_interval = gps_set_interval,
-  .control      = gps_control,
+  .activate     = gnss_activate,
+  .set_interval = gnss_set_interval,
+  .control      = gnss_control,
 };
 
-static const struct file_operations g_gps_fops =
+static const struct file_operations g_gnss_fops =
 {
-  gps_open,   /* open  */
-  gps_close,  /* close */
-  gps_read,   /* read  */
-  gps_write,  /* write */
-  NULL,       /* seek  */
-  gps_ioctl,  /* ioctl */
-  NULL,       /* mmap */
-  NULL,       /* truncate */
-  gps_poll    /* poll  */
+  gnss_open,   /* open  */
+  gnss_close,  /* close */
+  gnss_read,   /* read  */
+  gnss_write,  /* write */
+  NULL,        /* seek  */
+  gnss_ioctl,  /* ioctl */
+  NULL,        /* mmap */
+  NULL,        /* truncate */
+  gnss_poll    /* poll  */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int gps_activate(FAR struct sensor_lowerhalf_s *lower,
-                        FAR struct file *filep, bool enable)
+static int gnss_activate(FAR struct sensor_lowerhalf_s *lower,
+                         FAR struct file *filep, bool enable)
 {
-  FAR struct gps_sensor_s *dev = (FAR struct gps_sensor_s *)lower;
-  FAR struct gps_upperhalf_s *upper = dev->upper;
+  FAR struct gnss_sensor_s *dev = (FAR struct gnss_sensor_s *)lower;
+  FAR struct gnss_upperhalf_s *upper = dev->upper;
   int ret = OK;
 
   nxmutex_lock(&upper->lock);
@@ -161,12 +161,12 @@ static int gps_activate(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 }
 
-static int gps_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                            FAR struct file *filep,
-                            FAR uint32_t *interval)
+static int gnss_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
+                             FAR uint32_t *interval)
 {
-  FAR struct gps_sensor_s *dev = (FAR struct gps_sensor_s *)lower;
-  FAR struct gps_upperhalf_s *upper = dev->upper;
+  FAR struct gnss_sensor_s *dev = (FAR struct gnss_sensor_s *)lower;
+  FAR struct gnss_upperhalf_s *upper = dev->upper;
 
   if (upper->lower->ops->set_interval == NULL)
     {
@@ -176,11 +176,11 @@ static int gps_set_interval(FAR struct sensor_lowerhalf_s *lower,
   return upper->lower->ops->set_interval(upper->lower, filep, interval);
 }
 
-static int gps_control(FAR struct sensor_lowerhalf_s *lower,
-                       FAR struct file *filep, int cmd, unsigned long arg)
+static int gnss_control(FAR struct sensor_lowerhalf_s *lower,
+                        FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct gps_sensor_s *dev = (FAR struct gps_sensor_s *)lower;
-  FAR struct gps_upperhalf_s *upper = dev->upper;
+  FAR struct gnss_sensor_s *dev = (FAR struct gnss_sensor_s *)lower;
+  FAR struct gnss_upperhalf_s *upper = dev->upper;
 
   if (upper->lower->ops->control == NULL)
     {
@@ -190,15 +190,15 @@ static int gps_control(FAR struct sensor_lowerhalf_s *lower,
   return upper->lower->ops->control(upper->lower, filep, cmd, arg);
 }
 
-static int gps_open(FAR struct file *filep)
+static int gnss_open(FAR struct file *filep)
 {
-  FAR struct gps_upperhalf_s *upper;
-  FAR struct gps_user_s *user;
+  FAR struct gnss_upperhalf_s *upper;
+  FAR struct gnss_user_s *user;
   int ret = OK;
 
   upper = filep->f_inode->i_private;
 
-  user = kmm_zalloc(sizeof(struct gps_user_s));
+  user = kmm_zalloc(sizeof(struct gnss_user_s));
   if (user == NULL)
     {
       return -ENOMEM;
@@ -234,10 +234,10 @@ out:
   return ret;
 }
 
-static int gps_close(FAR struct file *filep)
+static int gnss_close(FAR struct file *filep)
 {
-  FAR struct gps_upperhalf_s *upper;
-  FAR struct gps_user_s *user;
+  FAR struct gnss_upperhalf_s *upper;
+  FAR struct gnss_user_s *user;
   int ret = OK;
 
   DEBUGASSERT(filep->f_priv);
@@ -266,11 +266,11 @@ out:
   return ret;
 }
 
-static ssize_t gps_read(FAR struct file *filep, FAR char *buffer,
-                        size_t buflen)
+static ssize_t gnss_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen)
 {
-  FAR struct gps_upperhalf_s *upper;
-  FAR struct gps_user_s *user;
+  FAR struct gnss_upperhalf_s *upper;
+  FAR struct gnss_user_s *user;
   ssize_t ret;
 
   if (buffer == NULL || buflen == 0)
@@ -318,10 +318,10 @@ out:
   return ret;
 }
 
-static ssize_t gps_write(FAR struct file *filep, FAR const char *buffer,
-                         size_t buflen)
+static ssize_t gnss_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen)
 {
-  FAR struct gps_upperhalf_s *upper;
+  FAR struct gnss_upperhalf_s *upper;
   int ret = -ENOTSUP;
 
   upper = filep->f_inode->i_private;
@@ -337,9 +337,9 @@ static ssize_t gps_write(FAR struct file *filep, FAR const char *buffer,
   return ret;
 }
 
-static int gps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int gnss_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct gps_upperhalf_s *upper;
+  FAR struct gnss_upperhalf_s *upper;
   int ret = -ENOTTY;
 
   upper = filep->f_inode->i_private;
@@ -362,11 +362,11 @@ static int gps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-static int gps_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                    bool setup)
+static int gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                     bool setup)
 {
-  FAR struct gps_upperhalf_s *upper;
-  FAR struct gps_user_s *user;
+  FAR struct gnss_upperhalf_s *upper;
+  FAR struct gnss_user_s *user;
   ssize_t ret = OK;
 
   upper = filep->f_inode->i_private;
@@ -399,26 +399,26 @@ out:
   return ret;
 }
 
-static void gps_init_data(FAR struct sensor_gps *gps)
+static void gnss_init_data(FAR struct sensor_gnss *gnss)
 {
-  gps->timestamp = ULONG_MAX;
-  gps->time_utc = ULONG_MAX;
-  gps->latitude = NAN;
-  gps->longitude = NAN;
-  gps->altitude = NAN;
-  gps->altitude_ellipsoid = NAN;
-  gps->eph = NAN;
-  gps->epv = NAN;
-  gps->hdop = NAN;
-  gps->pdop = NAN;
-  gps->vdop = NAN;
-  gps->ground_speed = NAN;
-  gps->course = NAN;
-  gps->satellites_used = UINT_MAX;
+  gnss->timestamp = ULONG_MAX;
+  gnss->time_utc = ULONG_MAX;
+  gnss->latitude = NAN;
+  gnss->longitude = NAN;
+  gnss->altitude = NAN;
+  gnss->altitude_ellipsoid = NAN;
+  gnss->eph = NAN;
+  gnss->epv = NAN;
+  gnss->hdop = NAN;
+  gnss->pdop = NAN;
+  gnss->vdop = NAN;
+  gnss->ground_speed = NAN;
+  gnss->course = NAN;
+  gnss->satellites_used = UINT_MAX;
 }
 
-static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
-                           FAR const char *nmea)
+static void gnss_parse_nmea(FAR struct gnss_upperhalf_s *upper,
+                            FAR const char *nmea)
 {
   FAR struct sensor_lowerhalf_s *lower;
 
@@ -430,12 +430,12 @@ static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
 
           if (minmea_parse_gga(&frame, nmea))
             {
-              upper->gps.altitude = minmea_tofloat(&frame.altitude);
-              upper->gps.altitude_ellipsoid =
+              upper->gnss.altitude = minmea_tofloat(&frame.altitude);
+              upper->gnss.altitude_ellipsoid =
                              minmea_tofloat(&frame.height);
-              upper->gps.hdop = minmea_tofloat(&frame.hdop);
-              upper->gps.satellites_used = frame.satellites_tracked;
-              upper->flags |= GPS_FLAG_GGA;
+              upper->gnss.hdop = minmea_tofloat(&frame.hdop);
+              upper->gnss.satellites_used = frame.satellites_tracked;
+              upper->flags |= GNSS_FLAG_GGA;
             }
 
           break;
@@ -448,7 +448,7 @@ static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
 
           if (minmea_parse_rmc(&frame, nmea))
             {
-              upper->gps.timestamp = sensor_get_timestamp();
+              upper->gnss.timestamp = sensor_get_timestamp();
               memset(&t, 0, sizeof(t));
               t.tm_sec = frame.time.seconds;
               t.tm_min = frame.time.minutes;
@@ -457,15 +457,15 @@ static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
               t.tm_mon = frame.date.month - 1;
               t.tm_year = frame.date.year + 2000 - 1900;
               t.tm_isdst = 0;
-              upper->gps.time_utc = mktime(&t);
-              upper->gps.latitude = minmea_tocoord(&frame.latitude);
-              upper->gps.longitude = minmea_tocoord(&frame.longitude);
-              upper->gps.ground_speed = minmea_tofloat(&frame.speed) *
-                            GPS_KNOT_TO_KMH / GPS_KMH_TO_MPS;
-              upper->gps.course = minmea_tofloat(&frame.course);
+              upper->gnss.time_utc = mktime(&t);
+              upper->gnss.latitude = minmea_tocoord(&frame.latitude);
+              upper->gnss.longitude = minmea_tocoord(&frame.longitude);
+              upper->gnss.ground_speed = minmea_tofloat(&frame.speed) *
+                            GNSS_KNOT_TO_KMH / GNSS_KMH_TO_MPS;
+              upper->gnss.course = minmea_tofloat(&frame.course);
               if (frame.valid)
                 {
-                  upper->flags |= GPS_FLAG_RMC;
+                  upper->flags |= GNSS_FLAG_RMC;
                 }
             }
 
@@ -486,8 +486,8 @@ static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
               lon_err = minmea_tofloat(
                         &frame.longitude_error_deviation);
               lon_err *= lon_err;
-              upper->gps.eph = sqrtf(lat_err + lon_err);
-              upper->gps.epv = minmea_tofloat(
+              upper->gnss.eph = sqrtf(lat_err + lon_err);
+              upper->gnss.epv = minmea_tofloat(
                         &frame.altitude_error_deviation);
             }
 
@@ -497,7 +497,7 @@ static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
       case MINMEA_SENTENCE_GSV:
         {
           struct minmea_sentence_gsv frame;
-          struct sensor_gps_satellite satellite;
+          struct sensor_gnss_satellite satellite;
 
           memset(&satellite, 0, sizeof(satellite));
           if (minmea_parse_gsv(&frame, nmea))
@@ -507,7 +507,7 @@ static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
               satellite.satellites = frame.total_sats;
               memcpy(satellite.info, frame.sats,
                      sizeof(satellite.info[0]) * 4);
-              lower = &upper->dev[GPS_SATELLITE_IDX].lower;
+              lower = &upper->dev[GNSS_SATELLITE_IDX].lower;
               lower->push_event(lower->priv, &satellite,
                                 sizeof(satellite));
             }
@@ -519,17 +519,17 @@ static void gps_parse_nmea(FAR struct gps_upperhalf_s *upper,
          break;
     }
 
-  if (GPS_FLAG_MARK == upper->flags)
+  if (GNSS_FLAG_MARK == upper->flags)
     {
-      upper->flags &= ~GPS_FLAG_MARK;
-      lower = &upper->dev[GPS_IDX].lower;
-      lower->push_event(lower->priv, &upper->gps, sizeof(upper->gps));
-      gps_init_data(&upper->gps);
+      upper->flags &= ~GNSS_FLAG_MARK;
+      lower = &upper->dev[GNSS_IDX].lower;
+      lower->push_event(lower->priv, &upper->gnss, sizeof(upper->gnss));
+      gnss_init_data(&upper->gnss);
     }
 }
 
-static void gps_parse(FAR struct gps_upperhalf_s *upper,
-                      FAR const char *buffer, size_t bytes)
+static void gnss_parse(FAR struct gnss_upperhalf_s *upper,
+                       FAR const char *buffer, size_t bytes)
 {
   bool newline = upper->parsenext != 0;
 
@@ -549,17 +549,17 @@ static void gps_parse(FAR struct gps_upperhalf_s *upper,
             }
 
           upper->parsebuffer[upper->parsenext] = '\0';
-          gps_parse_nmea(upper, upper->parsebuffer);
+          gnss_parse_nmea(upper, upper->parsebuffer);
           upper->parsenext = 0;
           newline = false;
         }
     }
 }
 
-static void gps_push_data(FAR void *priv, FAR const void *data,
+static void gnss_push_data(FAR void *priv, FAR const void *data,
                            size_t bytes, bool is_nmea)
 {
-  FAR struct gps_upperhalf_s *upper = priv;
+  FAR struct gnss_upperhalf_s *upper = priv;
   int semcount;
 
   if (data == NULL || bytes == 0)
@@ -570,7 +570,7 @@ static void gps_push_data(FAR void *priv, FAR const void *data,
   nxmutex_lock(&upper->lock);
   if (is_nmea)
     {
-      gps_parse(upper, data, bytes);
+      gnss_parse(upper, data, bytes);
     }
 
   circbuf_overwrite(&upper->buffer, data, bytes);
@@ -583,10 +583,10 @@ static void gps_push_data(FAR void *priv, FAR const void *data,
     }
 }
 
-static void gps_push_event(FAR void *priv, FAR const void *data,
+static void gnss_push_event(FAR void *priv, FAR const void *data,
                             size_t bytes, int type)
 {
-  FAR struct gps_upperhalf_s *upper = priv;
+  FAR struct gnss_upperhalf_s *upper = priv;
   FAR struct sensor_lowerhalf_s *lower;
 
   if (data == NULL || bytes == 0)
@@ -595,14 +595,14 @@ static void gps_push_event(FAR void *priv, FAR const void *data,
     }
 
   nxmutex_lock(&upper->lock);
-  if (type == SENSOR_TYPE_GPS)
+  if (type == SENSOR_TYPE_GNSS)
     {
-      lower = &upper->dev[GPS_IDX].lower;
+      lower = &upper->dev[GNSS_IDX].lower;
       lower->push_event(lower->priv, data, bytes);
     }
-  else if (type == SENSOR_TYPE_GPS_SATELLITE)
+  else if (type == SENSOR_TYPE_GNSS_SATELLITE)
     {
-      lower = &upper->dev[GPS_SATELLITE_IDX].lower;
+      lower = &upper->dev[GNSS_SATELLITE_IDX].lower;
       lower->push_event(lower->priv, data, bytes);
     }
 
@@ -614,16 +614,16 @@ static void gps_push_event(FAR void *priv, FAR const void *data,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gps_register
+ * Name: gnss_register
  *
  * Description:
- *   This function binds an instance of a "lower half" gps driver with the
- *   "upper half" gps device and registers that device so that can be used
+ *   This function binds an instance of a "lower half" GNSS driver with the
+ *   "upper half" GNSS device and registers that device so that can be used
  *   by application code.
  *
  * Input Parameters:
- *   dev     - A pointer to an instance of lower half gps driver. This
- *             instance is bound to the gps driver and must persist as long
+ *   dev     - A pointer to an instance of lower half GNSS driver. This
+ *             instance is bound to the GNSS driver and must persist as long
  *             as the driver persists.
  *   devno   - The user specifies which device of this type, from 0. If the
  *             devno alerady exists, -EEXIST will be returned.
@@ -635,47 +635,47 @@ static void gps_push_event(FAR void *priv, FAR const void *data,
  *
  ****************************************************************************/
 
-int gps_register(FAR struct gps_lowerhalf_s *lower, int devno,
-                 uint32_t nbuffer)
+int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
+                  uint32_t nbuffer)
 {
-  FAR struct gps_upperhalf_s *upper;
-  FAR struct gps_sensor_s *dev;
+  FAR struct gnss_upperhalf_s *upper;
+  FAR struct gnss_sensor_s *dev;
   char path[PATH_MAX];
   int ret;
 
-  upper = kmm_zalloc(sizeof(struct gps_upperhalf_s));
+  upper = kmm_zalloc(sizeof(struct gnss_upperhalf_s));
   if (upper == NULL)
     {
       return -ENOMEM;
     }
 
-  lower->push_data = gps_push_data;
-  lower->push_event = gps_push_event;
+  lower->push_data = gnss_push_data;
+  lower->push_event = gnss_push_event;
   lower->priv = upper;
   upper->lower = lower;
 
   nxmutex_init(&upper->lock);
   nxsem_init(&upper->buffersem, 0, 0);
-  gps_init_data(&upper->gps);
+  gnss_init_data(&upper->gnss);
 
-  /* GPS register */
+  /* GNSS register */
 
-  dev = &upper->dev[GPS_IDX];
-  dev->lower.ops = &g_gps_sensor_ops;
-  dev->lower.type = SENSOR_TYPE_GPS;
+  dev = &upper->dev[GNSS_IDX];
+  dev->lower.ops = &g_gnss_sensor_ops;
+  dev->lower.type = SENSOR_TYPE_GNSS;
   dev->lower.nbuffer = nbuffer;
   dev->upper = upper;
   ret = sensor_register(&dev->lower, devno);
   if (ret < 0)
     {
-      goto gps_err;
+      goto gnss_err;
     }
 
   /* Satellite register */
 
-  dev = &upper->dev[GPS_SATELLITE_IDX];
-  dev->lower.ops = &g_gps_sensor_ops;
-  dev->lower.type = SENSOR_TYPE_GPS_SATELLITE;
+  dev = &upper->dev[GNSS_SATELLITE_IDX];
+  dev->lower.ops = &g_gnss_sensor_ops;
+  dev->lower.type = SENSOR_TYPE_GNSS_SATELLITE;
   dev->lower.nbuffer = nbuffer;
   dev->upper = upper;
   ret = sensor_register(&dev->lower, devno);
@@ -685,14 +685,14 @@ int gps_register(FAR struct gps_lowerhalf_s *lower, int devno,
     }
 
   ret = circbuf_init(&upper->buffer, NULL,
-                     CONFIG_SENSORS_GPS_RECV_BUFFERSIZE);
+                     CONFIG_SENSORS_GNSS_RECV_BUFFERSIZE);
   if (ret < 0)
     {
       goto circ_err;
     }
 
-  snprintf(path, PATH_MAX, GPS_PATH_FMT, devno);
-  ret = register_driver(path, &g_gps_fops, 0666, upper);
+  snprintf(path, PATH_MAX, GNSS_PATH_FMT, devno);
+  ret = register_driver(path, &g_gnss_fops, 0666, upper);
   if (ret < 0)
     {
       goto driver_err;
@@ -703,10 +703,10 @@ int gps_register(FAR struct gps_lowerhalf_s *lower, int devno,
 driver_err:
   circbuf_uninit(&upper->buffer);
 circ_err:
-  sensor_unregister(&upper->dev[GPS_SATELLITE_IDX].lower, devno);
+  sensor_unregister(&upper->dev[GNSS_SATELLITE_IDX].lower, devno);
 satellite_err:
-  sensor_unregister(&upper->dev[GPS_IDX].lower, devno);
-gps_err:
+  sensor_unregister(&upper->dev[GNSS_IDX].lower, devno);
+gnss_err:
   nxmutex_destroy(&upper->lock);
   nxsem_destroy(&upper->buffersem);
   kmm_free(upper);
@@ -714,27 +714,27 @@ gps_err:
 }
 
 /****************************************************************************
- * Name: gps_unregister
+ * Name: gnss_unregister
  *
  * Description:
  *   This function unregisters character node and releases all resource from
- *   upper half driver. This API corresponds to the gps_register.
+ *   upper half driver. This API corresponds to the gnss_register.
  *
  * Input Parameters:
- *   dev   - A pointer to an instance of lower half gps driver. This
- *           instance is bound to the gps driver and must persists as long
+ *   dev   - A pointer to an instance of lower half GNSS driver. This
+ *           instance is bound to the GNSS driver and must persists as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0.
  ****************************************************************************/
 
-void gps_unregister(FAR struct gps_lowerhalf_s *lower, int devno)
+void gnss_unregister(FAR struct gnss_lowerhalf_s *lower, int devno)
 {
-  FAR struct gps_upperhalf_s *upper = lower->priv;
+  FAR struct gnss_upperhalf_s *upper = lower->priv;
   char path[PATH_MAX];
 
-  sensor_unregister(&upper->dev[GPS_IDX].lower, devno);
-  sensor_unregister(&upper->dev[GPS_SATELLITE_IDX].lower, devno);
-  snprintf(path, PATH_MAX, GPS_PATH_FMT, devno);
+  sensor_unregister(&upper->dev[GNSS_IDX].lower, devno);
+  sensor_unregister(&upper->dev[GNSS_SATELLITE_IDX].lower, devno);
+  snprintf(path, PATH_MAX, GNSS_PATH_FMT, devno);
   unregister_driver(path);
   nxsem_destroy(&upper->buffersem);
   circbuf_uninit(&upper->buffer);
