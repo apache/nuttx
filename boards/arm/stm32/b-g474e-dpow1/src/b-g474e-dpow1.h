@@ -74,4 +74,16 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: stm32_smps_setup
+ *
+ * Description:
+ *  Initialize SMPS peripheral for the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_SMPS
+int stm32_smps_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32_B_G474E_DPOW1_SRC_B_G474E_DPOW1_H */

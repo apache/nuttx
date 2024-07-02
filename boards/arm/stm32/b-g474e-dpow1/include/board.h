@@ -185,6 +185,63 @@
 #define GPIO_USART3_TX     GPIO_USART3_TX_3 /* PC10 */
 #define GPIO_USART3_RX     GPIO_USART3_RX_3 /* PC11 */
 
-/* Pin Multiplexing Disambiguation ******************************************/
+/* Board configuration for SMPS example:
+ *   PB12 - HRTIM1_CHC1
+ *   PB13 - HRTIM1_CHC2
+ *   PB14 - HRTIM1_CHD1
+ *   PB15 - HRTIM1_CHD2
+ *   VIN  - ADC Channel 2 (PA1)
+ *   VOUT - ADC Channel 4 (PA3)
+ */
+
+#if defined(CONFIG_EXAMPLES_SMPS)
+
+/* HRTIM configuration ******************************************************/
+
+/* Timer C configuration - Buck operations */
+
+#define HRTIM_TIMC_PRESCALER HRTIM_PRESCALER_1
+#define HRTIM_TIMC_MODE      HRTIM_MODE_CONT
+#define HRTIM_TIMC_UPDATE    0
+#define HRTIM_TIMC_RESET     0
+
+#define HRTIM_TIMC_CH1_SET   HRTIM_OUT_SET_NONE
+#define HRTIM_TIMC_CH1_RST   HRTIM_OUT_RST_NONE
+#define HRTIM_TIMC_CH2_SET   HRTIM_OUT_SET_NONE
+#define HRTIM_TIMC_CH2_RST   HRTIM_OUT_RST_NONE
+
+#define HRTIM_TIMC_DT_FSLOCK HRTIM_DT_LOCK
+#define HRTIM_TIMC_DT_RSLOCK HRTIM_DT_LOCK
+#define HRTIM_TIMC_DT_FVLOCK HRTIM_DT_RW
+#define HRTIM_TIMC_DT_RVLOCK HRTIM_DT_RW
+#define HRTIM_TIMC_DT_FSIGN  HRTIM_DT_SIGN_POSITIVE
+#define HRTIM_TIMC_DT_RSIGN  HRTIM_DT_SIGN_POSITIVE
+#define HRTIM_TIMC_DT_PRESCALER HRTIM_DEADTIME_PRESCALER_1
+
+/* Timer D configuration - Boost operations */
+
+#define HRTIM_TIMD_PRESCALER HRTIM_PRESCALER_1
+#define HRTIM_TIMD_MODE      HRTIM_MODE_CONT
+#define HRTIM_TIMD_UPDATE    0
+#define HRTIM_TIMD_RESET     0
+
+#define HRTIM_TIMD_CH1_SET   HRTIM_OUT_SET_NONE
+#define HRTIM_TIMD_CH1_RST   HRTIM_OUT_RST_NONE
+#define HRTIM_TIMD_CH2_SET   HRTIM_OUT_SET_NONE
+#define HRTIM_TIMD_CH2_RST   HRTIM_OUT_RST_NONE
+
+#define HRTIM_TIMD_DT_FSLOCK HRTIM_DT_LOCK
+#define HRTIM_TIMD_DT_RSLOCK HRTIM_DT_LOCK
+#define HRTIM_TIMD_DT_FVLOCK HRTIM_DT_RW
+#define HRTIM_TIMD_DT_RVLOCK HRTIM_DT_RW
+#define HRTIM_TIMD_DT_FSIGN  HRTIM_DT_SIGN_POSITIVE
+#define HRTIM_TIMD_DT_RSIGN  HRTIM_DT_SIGN_POSITIVE
+#define HRTIM_TIMD_DT_PRESCALER HRTIM_DEADTIME_PRESCALER_1
+
+#define HRTIM_ADC_TRG2       HRTIM_ADCTRG24_CC4
+
+/* DMA channels *************************************************************/
+
+#endif /* CONFIG_EXAMPLES_SMPS */
 
 #endif /* __BOARDS_ARM_STM32_B_G474E_DPOW1_INCLUDE_BOARD_H */
