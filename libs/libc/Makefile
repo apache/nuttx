@@ -46,7 +46,6 @@ include netdb/Make.defs
 include obstack/Make.defs
 include pthread/Make.defs
 include pwd/Make.defs
-include queue/Make.defs
 include regex/Make.defs
 include sched/Make.defs
 include search/Make.defs
