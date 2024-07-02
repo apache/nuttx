@@ -119,7 +119,7 @@ static inline int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
 
       /* Read that number of bytes into the array */
 
-      ret = modlib_read(loadinfo, buffer, readlen, offset);
+      ret = modlib_read(loadinfo, buffer, readlen, offset + bytesread);
       if (ret < 0)
         {
           berr("ERROR: Failed to read section name: %d\n", ret);
