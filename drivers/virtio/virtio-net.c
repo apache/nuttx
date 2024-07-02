@@ -569,7 +569,7 @@ static int virtio_net_init(FAR struct virtio_net_priv_s *priv,
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
   virtio_negotiate_features(vdev, (1UL << VIRTIO_NET_F_MAC) |
-                                  (1UL << VIRTIO_F_ANY_LAYOUT));
+                                  (1UL << VIRTIO_F_ANY_LAYOUT), NULL);
   virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
 
   vqnames[VIRTIO_NET_RX]   = "virtio_net_rx";
@@ -577,7 +577,7 @@ static int virtio_net_init(FAR struct virtio_net_priv_s *priv,
   callbacks[VIRTIO_NET_RX] = virtio_net_rxready;
   callbacks[VIRTIO_NET_TX] = virtio_net_txdone;
   ret = virtio_create_virtqueues(vdev, 0, VIRTIO_NET_NUM, vqnames,
-                                 callbacks);
+                                 callbacks, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);

@@ -391,7 +391,7 @@ static int virtio_input_probe(FAR struct virtio_device *vdev)
   vqnames[VIRTIO_INPUT_EVENT] = "virtio_input_event";
   callbacks[VIRTIO_INPUT_EVENT] = virtio_input_recv_events;
   ret = virtio_create_virtqueues(vdev, 0, VIRTIO_INPUT_NUM, vqnames,
-                                 callbacks);
+                                 callbacks, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);

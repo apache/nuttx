@@ -79,7 +79,8 @@ static int rpmsg_virtio_create_virtqueues_(FAR struct virtio_device *vdev,
                                            unsigned int flags,
                                            unsigned int nvqs,
                                            FAR const char *names[],
-                                           vq_callback callbacks[]);
+                                           vq_callback callbacks[],
+                                           FAR void *callback_args[]);
 static uint8_t rpmsg_virtio_get_status_(FAR struct virtio_device *dev);
 static void rpmsg_virtio_set_status_(FAR struct virtio_device *dev,
                                      uint8_t status);
@@ -128,7 +129,8 @@ static int rpmsg_virtio_create_virtqueues_(FAR struct virtio_device *vdev,
                                            unsigned int flags,
                                            unsigned int nvqs,
                                            FAR const char *names[],
-                                           vq_callback callbacks[])
+                                           vq_callback callbacks[],
+                                           FAR void *callback_args[])
 {
   int ret;
   int i;

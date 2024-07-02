@@ -256,7 +256,7 @@ static int virtio_gpu_init(FAR struct virtio_gpu_priv_s *priv,
   vqnames[VIRTIO_GPU_CTL]   = "virtio_gpu_ctl";
   callbacks[VIRTIO_GPU_CTL] = virtio_gpu_done;
   ret = virtio_create_virtqueues(vdev, 0, VIRTIO_GPU_NUM, vqnames,
-                                 callbacks);
+                                 callbacks, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d", ret);

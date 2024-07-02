@@ -215,7 +215,7 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
 
   vqnames[0]  = "virtio_rng_rx";
   callback[0] = virtio_rng_done;
-  ret = virtio_create_virtqueues(vdev, 0, 1, vqnames, callback);
+  ret = virtio_create_virtqueues(vdev, 0, 1, vqnames, callback, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);
