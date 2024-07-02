@@ -52,27 +52,28 @@
 
 int file_dup(FAR struct file *filep, int minfd, int flags)
 {
-  struct file filep2;
+  FAR struct file *filep2;
   int fd2;
   int ret;
 
-  /* Let file_dup3() do the real work */
-
-  memset(&filep2, 0, sizeof(filep2));
-  ret = file_dup3(filep, &filep2, flags);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  fd2 = file_allocate(filep2.f_inode, filep2.f_oflags,
-                      filep2.f_pos, filep2.f_priv, minfd, false);
+  fd2 = file_allocate(g_root_inode, 0, 0, NULL, minfd, true);
   if (fd2 < 0)
     {
-      file_close(&filep2);
+      return fd2;
     }
 
-  return fd2;
+  ret = fs_getfilep(fd2, &filep2);
+  DEBUGASSERT(ret >= 0);
+
+  ret = file_dup3(filep, filep2, flags);
+  fs_putfilep(filep2);
+  if (ret >= 0)
+    {
+      return fd2;
+    }
+
+  fs_putfilep(filep2);
+  return ret;
 }
 
 /****************************************************************************
