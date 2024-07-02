@@ -277,7 +277,7 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
                                    FAR uint8_t *buf,
                                    uint8_t speed, uint8_t type)
@@ -313,7 +313,7 @@ static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
     {
       FAR struct composite_devobj_s *devobj = &priv->device[i];
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
       len = devobj->compdesc.mkconfdesc(buf,
                                         &devobj->compdesc.devinfo,
                                         speed, type);
@@ -677,7 +677,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
               case USB_DESC_TYPE_CONFIG:
                 {
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
                     ret = composite_mkcfgdesc(driver, ctrlreq->buf,
                                               dev->speed, ctrl->value[1]);
 #else

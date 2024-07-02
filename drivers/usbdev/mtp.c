@@ -227,6 +227,9 @@ static const struct usbdev_epinfo_s g_mtp_epbulkin =
 #ifdef CONFIG_USBDEV_DUALSPEED
   .hssize = CONFIG_USBMTP_EPBULKIN_HSSIZE,
 #endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize = CONFIG_USBMTP_EPBULKIN_SSSIZE,
+#endif
   .reqnum = CONFIG_USBMTP_NWRREQS,
 };
 
@@ -246,6 +249,9 @@ static const struct usbdev_epinfo_s g_mtp_epbulkout =
 #ifdef CONFIG_USBDEV_DUALSPEED
   .hssize = CONFIG_USBMTP_EPBULKOUT_HSSIZE,
 #endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize = CONFIG_USBMTP_EPBULKOUT_SSSIZE,
+#endif
   .reqnum = CONFIG_USBMTP_NRDREQS,
 };
 
@@ -264,6 +270,9 @@ static const struct usbdev_epinfo_s g_mtp_epbulkintin =
   .fssize = CONFIG_USBMTP_EPINTIN_SIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
   .hssize = CONFIG_USBMTP_EPINTIN_SIZE,
+#endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize = CONFIG_USBMTP_EPINTIN_SIZE,
 #endif
   .reqnum = CONFIG_USBMTP_NWRREQS,
 };
@@ -287,7 +296,7 @@ static const FAR struct usbdev_epinfo_s *g_mtp_epinfos[USBMTP_NUM_EPS] =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo,
                                   uint8_t speed, uint8_t type)
@@ -296,19 +305,18 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo)
 #endif
 {
-  bool hispeed = false;
   FAR struct usb_epdesc_s *epdesc;
   FAR struct usb_ifdesc_s *dest;
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (speed == USB_SPEED_HIGH);
-
   /* Check for switches between high and full speed */
 
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
+  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
-      hispeed = !hispeed;
+      speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
+#else
+  uint8_t speed = USB_SPEED_FULL;
 #endif
 
   dest = (FAR struct usb_ifdesc_s *)buf;
@@ -317,11 +325,11 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
   memcpy(dest, &g_mtp_ifdesc, sizeof(g_mtp_ifdesc));
 
   usbdev_copy_epdesc(&epdesc[0], devinfo->epno[USBMTP_EP_BULKIN_IDX],
-                     hispeed, &g_mtp_epbulkin);
+                     speed, &g_mtp_epbulkin);
   usbdev_copy_epdesc(&epdesc[1], devinfo->epno[USBMTP_EP_BULKOUT_IDX],
-                     hispeed, &g_mtp_epbulkout);
+                     speed, &g_mtp_epbulkout);
   usbdev_copy_epdesc(&epdesc[2], devinfo->epno[USBMTP_EP_INTIN_IDX],
-                     hispeed, &g_mtp_epbulkintin);
+                     speed, &g_mtp_epbulkintin);
 
 #ifdef CONFIG_USBMTP_COMPOSITE
   /* For composite device, apply possible offset to the interface numbers */

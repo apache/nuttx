@@ -207,7 +207,9 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
    * const, canned descriptors.
    */
 
+#if !defined(CONFIG_USBDEV_SUPERSPEED) && !defined(CONFIG_USBMSC_COMPOSITE)
   DEBUGASSERT(CONFIG_USBMSC_EP0MAXPACKET == dev->ep0->maxpacket);
+#endif
 
   /* Preallocate control request */
 
@@ -544,7 +546,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_USBMSC_COMPOSITE
               case USB_DESC_TYPE_CONFIG:
                 {
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
                   ret = usbmsc_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
                                          dev->speed, ctrl->value[1]);
 #else
@@ -872,7 +874,6 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   FAR struct usbmsc_req_s *privreq;
   FAR struct usbdev_req_s *req;
   struct usb_epdesc_s epdesc;
-  bool hispeed = false;
   int i;
   int ret = 0;
 
@@ -891,10 +892,6 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALREADYCONFIGURED), 0);
       return OK;
     }
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (priv->usbdev->speed == USB_SPEED_HIGH);
-#endif
 
   /* Discard the previous configuration data */
 
@@ -919,7 +916,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   /* Configure the IN bulk endpoint */
 
   usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->devinfo,
-                     hispeed);
+                     priv->usbdev->speed);
   ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
   if (ret < 0)
     {
@@ -932,7 +929,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   /* Configure the OUT bulk endpoint */
 
   usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->devinfo,
-                     hispeed);
+                     priv->usbdev->speed);
   ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
   if (ret < 0)
     {
