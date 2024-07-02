@@ -123,10 +123,6 @@
 #  undef CONFIG_ESP32S3_I2S_DUMPBUFFERS
 #endif
 
-#ifndef CONFIG_ESP32S3_I2S_MAXINFLIGHT
-#  define CONFIG_ESP32S3_I2S_MAXINFLIGHT 4
-#endif
-
 #define I2S_GPIO_UNUSED -1      /* For signals which are not used */
 
 /****************************************************************************

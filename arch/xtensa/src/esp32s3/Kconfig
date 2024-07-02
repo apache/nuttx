@@ -52,7 +52,7 @@ config ARCH_CHIP_ESP32S3CUSTOM
 	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3. Chip Flash Size should be selected
-		under SPI FLash Menu. 
+		under SPI Flash Menu.
 
 
 endchoice # ESP32-S3 Chip Selection
@@ -321,6 +321,15 @@ config ESP32S3_I2S
 		See the Board Selection menu to configure the pins used by I2S.
 
 if ESP32S3_I2S
+
+config ESP32S3_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 4
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueued before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
 
 config ESP32S3_I2S0
 	bool "I2S 0"
@@ -1892,7 +1901,7 @@ config ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 		if select the option, it will force to use source code instead
 		of functions in ROM, so that SPI flash driver can access full
 		32-bit address.
-		
+
 choice ESP32S3_FLASH_SIZE
 	prompt "ESP32S3 Custom Module Flash Size"
 	depends on ARCH_CHIP_ESP32S3CUSTOM
