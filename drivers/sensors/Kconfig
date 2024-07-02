@@ -24,19 +24,19 @@ config SENSORS_RPMSG
 	---help---
 		Allow application to read or control remote sensor device by RPMSG.
 
-config SENSORS_GPS
-	bool "GPS Support"
+config SENSORS_GNSS
+	bool "GNSS Support"
 	default n
-	depends on GPSUTILS_MINMEA_LIB
+	depends on GNSSUTILS_MINMEA_LIB
 	---help---
-		Allow application to use gps by /dev/uorb/gps or /dev/ttyGPS
+		Allow application to use GNSS by /dev/uorb/gnss or /dev/ttyGNSS
 
-config SENSORS_GPS_RECV_BUFFERSIZE
-	int "The size of recvive buffer for nmea message in gps driver"
+config SENSORS_GNSS_RECV_BUFFERSIZE
+	int "The size of recvive buffer for nmea message in GNSS driver"
 	default 2048
-	depends on SENSORS_GPS
+	depends on SENSORS_GNSS
 	---help---
-		The size of recvive buffer for nmea message in gps driver, if
+		The size of recvive buffer for nmea message in GNSS driver, if
 		the nmea message happen overwrite when driver push, you can increase
 		the size.
 
@@ -46,11 +46,11 @@ config SENSORS_WTGAHRS2
 	---help---
 		We can read sensor data by serial interface. It need the hardware sensor
 		wtgashrs2(JY901) as data source. This sensor can generate accelerometer,
-		gyroscope, magnetic, barometer and gps data.
+		gyroscope, magnetic, barometer and GNSS data.
 
 config SENSORS_FAKESENSOR
 	bool "Fake Sensor Support"
-	depends on SENSORS_GPS
+	depends on SENSORS_GNSS
 	default n
 	---help---
 		Simulate physical sensor by reading data from csv file.
@@ -65,9 +65,9 @@ config SENSORS_FAKESENSOR
 		2.1234,3.23443,2.23456
 		...
 
-config SENSORS_GOLDFISH_GPS
-	bool "Goldfish GPS Support"
-	depends on SENSORS_GPS
+config SENSORS_GOLDFISH_GNSS
+	bool "Goldfish GNSS Support"
+	depends on SENSORS_GNSS
 	default n
 
 config SENSORS_GOLDFISH_SENSOR

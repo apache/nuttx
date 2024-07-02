@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/goldfish_gps_uorb.c
+ * drivers/sensors/goldfish_gnss_uorb.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,16 +34,16 @@
 #include <nuttx/kthread.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/sensors/goldfish_gps.h>
-#include <nuttx/sensors/gps.h>
+#include <nuttx/sensors/goldfish_gnss.h>
+#include <nuttx/sensors/gnss.h>
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct goldfish_gps_s
+struct goldfish_gnss_s
 {
-  struct gps_lowerhalf_s gps;
+  struct gnss_lowerhalf_s gnss;
   struct file pipe;
   volatile bool running;
 };
@@ -52,26 +52,26 @@ struct goldfish_gps_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int goldfish_gps_activate(FAR struct gps_lowerhalf_s *lower,
-                                 FAR struct file *filep, bool enabled);
-static int goldfish_gps_thread(int argc, FAR char** argv);
+static int goldfish_gnss_activate(FAR struct gnss_lowerhalf_s *lower,
+                                  FAR struct file *filep, bool enabled);
+static int goldfish_gnss_thread(int argc, FAR char** argv);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct gps_ops_s g_goldfish_gps_ops =
+static struct gnss_ops_s g_goldfish_gnss_ops =
 {
-  .activate = goldfish_gps_activate,
+  .activate = goldfish_gnss_activate,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static inline int goldfish_gps_write_pipe(FAR struct file *pipe,
-                                          FAR const void *buffer,
-                                          size_t size)
+static inline int goldfish_gnss_write_pipe(FAR struct file *pipe,
+                                           FAR const void *buffer,
+                                           size_t size)
 {
   FAR const char *p = (FAR const char *)buffer;
 
@@ -90,10 +90,10 @@ static inline int goldfish_gps_write_pipe(FAR struct file *pipe,
   return 0;
 }
 
-static inline int goldfish_gps_open_pipe(FAR struct file *filep,
-                                         FAR const char *ns,
-                                         FAR const char *pipe_name,
-                                         int flags)
+static inline int goldfish_gnss_open_pipe(FAR struct file *filep,
+                                          FAR const char *ns,
+                                          FAR const char *pipe_name,
+                                          int flags)
 {
   char buf[256];
   int buf_len;
@@ -116,7 +116,7 @@ static inline int goldfish_gps_open_pipe(FAR struct file *filep,
       buf_len = snprintf(buf, sizeof(buf), "pipe:%s", pipe_name);
     }
 
-  ret = goldfish_gps_write_pipe(filep, buf, buf_len + 1);
+  ret = goldfish_gnss_write_pipe(filep, buf, buf_len + 1);
   if (ret < 0)
     {
       snerr("Could not connect to the '%s' service: %s",
@@ -128,20 +128,20 @@ static inline int goldfish_gps_open_pipe(FAR struct file *filep,
   return OK;
 }
 
-static int goldfish_gps_activate(FAR struct gps_lowerhalf_s *gps,
-                                 FAR struct file *filep,
-                                 bool enabled)
+static int goldfish_gnss_activate(FAR struct gnss_lowerhalf_s *gnss,
+                                  FAR struct file *filep,
+                                  bool enabled)
 {
-  FAR struct goldfish_gps_s *priv =
-    container_of(gps, struct goldfish_gps_s, gps);
+  FAR struct goldfish_gnss_s *priv =
+    container_of(gnss, struct goldfish_gnss_s, gnss);
   priv->running = enabled;
 
   return OK;
 }
 
-static int goldfish_gps_thread(int argc, FAR char** argv)
+static int goldfish_gnss_thread(int argc, FAR char** argv)
 {
-  FAR struct goldfish_gps_s *priv = (FAR struct goldfish_gps_s *)
+  FAR struct goldfish_gnss_s *priv = (FAR struct goldfish_gnss_s *)
                                 ((uintptr_t)strtoul(argv[1], NULL, 16));
   ssize_t len;
   char buf[256];
@@ -151,7 +151,7 @@ static int goldfish_gps_thread(int argc, FAR char** argv)
       len = file_read(&priv->pipe, buf, sizeof(buf));
       if (priv->running && len > 0)
         {
-          priv->gps.push_data(priv->gps.priv, buf, len, true);
+          priv->gnss.push_data(priv->gnss.priv, buf, len, true);
         }
     }
 
@@ -163,10 +163,10 @@ static int goldfish_gps_thread(int argc, FAR char** argv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: goldfish_gps_init
+ * Name: goldfish_gnss_init
  *
  * Description:
- *   Goldfish GPS driver entrypoint.
+ *   Goldfish GNSS driver entrypoint.
  *
  * Input Parameters:
  *   devno       - The user specifies which device of this type, from 0.
@@ -177,47 +177,47 @@ static int goldfish_gps_thread(int argc, FAR char** argv)
  *
  ****************************************************************************/
 
-int goldfish_gps_init(int devno, uint32_t batch_number)
+int goldfish_gnss_init(int devno, uint32_t batch_number)
 {
-  FAR struct goldfish_gps_s *gps;
+  FAR struct goldfish_gnss_s *gnss;
   FAR char *argv[2];
   char arg1[32];
   int ret;
 
   /* Alloc memory for sensor */
 
-  gps = kmm_zalloc(sizeof(struct goldfish_gps_s));
-  if (!gps)
+  gnss = kmm_zalloc(sizeof(struct goldfish_gnss_s));
+  if (!gnss)
     {
       return -ENOMEM;
     }
 
-  ret = goldfish_gps_open_pipe(&gps->pipe, "qemud", "gps",
-                               O_RDWR | O_CLOEXEC);
+  ret = goldfish_gnss_open_pipe(&gnss->pipe, "qemud", "gps",
+                                O_RDWR | O_CLOEXEC);
   if (ret < 0)
     {
-      kmm_free(gps);
+      kmm_free(gnss);
       return ret;
     }
 
   /* Create thread for sensor */
 
-  snprintf(arg1, 32, "%p", gps);
+  snprintf(arg1, 32, "%p", gnss);
   argv[0] = arg1;
   argv[1] = NULL;
-  ret = kthread_create("goldfish_gps_thread", SCHED_PRIORITY_DEFAULT,
+  ret = kthread_create("goldfish_gnss_thread", SCHED_PRIORITY_DEFAULT,
                        CONFIG_DEFAULT_TASK_STACKSIZE,
-                       goldfish_gps_thread, argv);
+                       goldfish_gnss_thread, argv);
   if (ret < 0)
     {
-      file_close(&gps->pipe);
-      kmm_free(gps);
+      file_close(&gnss->pipe);
+      kmm_free(gnss);
       return ret;
     }
 
   /*  Register sensor */
 
-  gps->gps.ops = &g_goldfish_gps_ops;
+  gnss->gnss.ops = &g_goldfish_gnss_ops;
 
-  return gps_register(&gps->gps, devno, batch_number);
+  return gnss_register(&gnss->gnss, devno, batch_number);
 }

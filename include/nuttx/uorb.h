@@ -124,68 +124,60 @@
 
 #define SENSOR_TYPE_IR                              11
 
-/* GPS
- * A sensor of this type returns gps data. Include latitude, longitude,
- * altitude, horizontal position accuracy, vertical position accuracy,
- * horizontal dilution of precision, vertical dilution of precision...
- */
-
-#define SENSOR_TYPE_GPS                             12
-
 /* Ultraviolet light sensor
  * This sensor can identify the UV index in ambient light help people
  * to effectively protect themselves from sunburns, cancer or eye damage.
  * This value range is 0 - 15.
  */
-#define SENSOR_TYPE_ULTRAVIOLET                     13
+#define SENSOR_TYPE_ULTRAVIOLET                     12
 
 /* Noise Loudness
  * A sensor of this type returns the loudness of noise in SI units (db)
  */
 
-#define SENSOR_TYPE_NOISE                           14
+#define SENSOR_TYPE_NOISE                           13
 
 /* PM25
  * A sensor of this type returns the content of pm2.5 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM25                            15
+#define SENSOR_TYPE_PM25                            14
 
 /* PM1P0
  * A sensor of this type returns the content of pm1.0 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM1P0                           16
+#define SENSOR_TYPE_PM1P0                           15
 
 /* PM10
  * A sensor of this type returns the content of pm10 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM10                            17
+#define SENSOR_TYPE_PM10                            16
 
 /* CO2
  * A sensor of this type returns the content of CO2 in the air
  * This value is in units (ppm-part per million).
  */
 
-#define SENSOR_TYPE_CO2                             18
+#define SENSOR_TYPE_CO2                             17
 
 /* HCHO
  * The HCHO pollution is an important indicator of household air
  * pollution. This value is in units (ppm-part per million).
  */
 
-#define SENSOR_TYPE_HCHO                            19
+#define SENSOR_TYPE_HCHO                            18
 
 /* TVOC (total volatile organic compounds)
  * The indoor TVOC is cause indoor air pollution is one of the
  * main reasons why. This value is in units (ppb-part per billion).
  */
 
-#define SENSOR_TYPE_TVOC                            20
+#define SENSOR_TYPE_TVOC                            19
 
 /* PH
  * The acid-base degree describes the strength of the aqueous
@@ -194,21 +186,21 @@
  * pH<7 is acidic, and pH>7 is alkaline.
  */
 
-#define SENSOR_TYPE_PH                              21
+#define SENSOR_TYPE_PH                              20
 
 /* Dust
  * A sensor of this type returns the content of dust in the air
  * values is in ug/m^3.
  */
 
-#define SENSOR_TYPE_DUST                            22
+#define SENSOR_TYPE_DUST                            21
 
 /* Heart Rate
  * A sensor of this type returns the current heart rate.
  * Current heart rate is in beats per minute (BPM).
  */
 
-#define SENSOR_TYPE_HEART_RATE                      23
+#define SENSOR_TYPE_HEART_RATE                      22
 
 /* Heart Beat
  * A sensor of this type returns an event evetytime
@@ -216,7 +208,7 @@
  * to the positive peak in the QRS complex of and ECG signal.
  */
 
-#define SENSOR_TYPE_HEART_BEAT                      24
+#define SENSOR_TYPE_HEART_BEAT                      23
 
 /* ECG (Electrocardiogram)
  * A sensor of this type returns the ECG voltage in μV. Sensors may amplify
@@ -224,7 +216,7 @@
  * voltage.
  */
 
-#define SENSOR_TYPE_ECG                             25
+#define SENSOR_TYPE_ECG                             24
 
 /* PPG Dual (2-channel photoplethysmography)
  * A sensor of this type returns the 2 channels PPG measurements in ADC
@@ -235,7 +227,7 @@
  * measurements. The ADC gains are multipled on the output and affect SNR.
  */
 
-#define SENSOR_TYPE_PPGD                            26
+#define SENSOR_TYPE_PPGD                            25
 
 /* PPG Quad (4-channel photoplethysmography)
  * A sensor of this type returns the 4 channels PPG measurements in ADC
@@ -246,7 +238,7 @@
  * measurements. The ADC gains are multipled on the output and affect SNR.
  */
 
-#define SENSOR_TYPE_PPGQ                            27
+#define SENSOR_TYPE_PPGQ                            26
 
 /* Imdepance
  * A sensor of this type returns the impedance measurements. An impedance
@@ -254,7 +246,7 @@
  * imaginary part(reactance). Both of them are in uint Ohm(Ω).
  */
 
-#define SENSOR_TYPE_IMPEDANCE                       28
+#define SENSOR_TYPE_IMPEDANCE                       27
 
 /* OTS (Optical tracking sensor)
  * A sensor of this type returns the OTS measurements in counts. It
@@ -263,13 +255,7 @@
  * design flexibility into a compact device.
  */
 
-#define SENSOR_TYPE_OTS                             29
-
-/* Sensor of gps satellite
- * A sensor of this type returns the gps satellite information.
- */
-
-#define SENSOR_TYPE_GPS_SATELLITE                   30
+#define SENSOR_TYPE_OTS                             28
 
 /* Wake gesture
  * A sensor enabling waking up the device based on a device specific
@@ -278,7 +264,7 @@
  * uncalibrated topics.
  */
 
-#define SENSOR_TYPE_WAKE_GESTURE                    31
+#define SENSOR_TYPE_WAKE_GESTURE                    29
 
 /* CAP (Capacitive proximity sensor)
  * The purpose of the proximity sensing interface is to detect when a
@@ -286,14 +272,14 @@
  * is in the proximity of the system.
  */
 
-#define SENSOR_TYPE_CAP                             32
+#define SENSOR_TYPE_CAP                             30
 
 /* Gas sensor
  * This sensor measures the gas resistance, indicating the presence
  * of volatile organic compounds in the air.
  */
 
-#define SENSOR_TYPE_GAS                             33
+#define SENSOR_TYPE_GAS                             31
 
 /* Force
  * A sensor of this type measures the force on it, and additionally
@@ -303,7 +289,21 @@
  * some given threshold, a corresponding event is reported.
  */
 
-#define SENSOR_TYPE_FORCE                           34
+#define SENSOR_TYPE_FORCE                           32
+
+/* GNSS
+ * A sensor of this type returns GNSS data. Include latitude, longitude,
+ * altitude, horizontal position accuracy, vertical position accuracy,
+ * horizontal dilution of precision, vertical dilution of precision...
+ */
+
+#define SENSOR_TYPE_GNSS                            33
+
+/* Sensor of GNSS satellite
+ * A sensor of this type returns the GNSS satellite information.
+ */
+
+#define SENSOR_TYPE_GNSS_SATELLITE                  34
 
 /* The total number of sensor */
 
@@ -314,9 +314,9 @@
 #define SENSOR_REMOTE                               (1u << 31)
 #define SENSOR_PERSIST                              (1u << 30)
 
-/* GPS satellite info slots */
+/* GNSS satellite info slots */
 
-#define SENSOR_GPS_SAT_INFO_MAX                     4
+#define SENSOR_GNSS_SAT_INFO_MAX                    4
 
 /* Maximum length of sensor device information name and path name. */
 
@@ -413,40 +413,6 @@ struct sensor_ir            /* Type: Infrared Ray */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float ir;                 /* in SI units lux */
-};
-
-struct sensor_gps           /* Type: Gps */
-{
-  uint64_t timestamp;       /* Time since system start, Units is microseconds */
-
-  /* This is the timestamp which comes from the gps module. It might be
-   * unavailable right after cold start, indicated by a value of 0,
-   * Units is microseconds
-   */
-
-  uint64_t time_utc;
-
-  float latitude;           /* Unit is degrees */
-  float longitude;          /* Unit is degrees */
-  float altitude;           /* Altitude above MSL(mean seal level), Unit is SI m */
-  float altitude_ellipsoid; /* Altitude bove Ellipsoid, Unit is SI m */
-
-  float eph;                /* GPS horizontal position accuracy (metres) */
-  float epv;                /* GPS vertical position accuracy (metres) */
-
-  float hdop;               /* Horizontal dilution of precision */
-  float pdop;               /* Position dilution of precision */
-  float vdop;               /* Vertical dilution of precision */
-
-  float ground_speed;       /* GPS ground speed, Unit is m/s */
-
-  /* Course over ground (NOT heading, but direction of movement),
-   * Unit is Si degrees
-   */
-
-  float course;
-
-  uint32_t satellites_used; /* Number of satellites used */
 };
 
 struct sensor_uv            /* Type: Ultraviolet Light */
@@ -558,7 +524,41 @@ struct sensor_ots           /* Type: OTS */
   int32_t y;                /* Axis Y in counts */
 };
 
-struct sensor_gps_satellite
+struct sensor_gnss          /* Type: GNSS */
+{
+  uint64_t timestamp;       /* Time since system start, Units is microseconds */
+
+  /* This is the timestamp which comes from the GNSS module. It might be
+   * unavailable right after cold start, indicated by a value of 0,
+   * Units is microseconds
+   */
+
+  uint64_t time_utc;
+
+  float latitude;           /* Unit is degrees */
+  float longitude;          /* Unit is degrees */
+  float altitude;           /* Altitude above MSL(mean seal level), Unit is SI m */
+  float altitude_ellipsoid; /* Altitude bove Ellipsoid, Unit is SI m */
+
+  float eph;                /* GNSS horizontal position accuracy (metres) */
+  float epv;                /* GNSS vertical position accuracy (metres) */
+
+  float hdop;               /* Horizontal dilution of precision */
+  float pdop;               /* Position dilution of precision */
+  float vdop;               /* Vertical dilution of precision */
+
+  float ground_speed;       /* GNSS ground speed, Unit is m/s */
+
+  /* Course over ground (NOT heading, but direction of movement),
+   * Unit is Si degrees
+   */
+
+  float course;
+
+  uint32_t satellites_used; /* Number of satellites used */
+};
+
+struct sensor_gnss_satellite
 {
   uint64_t timestamp;       /* Time since system start, Units is microseconds */
   uint32_t count;           /* Total number of messages of satellites visible */
@@ -584,7 +584,7 @@ struct sensor_gps_satellite
 
     uint32_t snr;
   }
-  info[SENSOR_GPS_SAT_INFO_MAX];
+  info[SENSOR_GNSS_SAT_INFO_MAX];
 };
 
 struct sensor_wake_gesture  /* Type: Wake gesture */

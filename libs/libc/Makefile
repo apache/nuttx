@@ -32,7 +32,7 @@ include eventfd/Make.defs
 include fixedmath/Make.defs
 include gdbstub/Make.defs
 include grp/Make.defs
-include gpsutils/Make.defs
+include gnssutils/Make.defs
 include hex2bin/Make.defs
 include inttypes/Make.defs
 include libgen/Make.defs

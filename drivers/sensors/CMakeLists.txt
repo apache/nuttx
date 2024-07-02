@@ -29,11 +29,11 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS sensor_rpmsg.c)
   endif()
 
-  if(CONFIG_SENSORS_GPS)
+  if(CONFIG_SENSORS_GNSS)
     set_source_files_properties(
-      gps_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
-      PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/libs/libc/gpsutils)
-    list(APPEND SRCS gps_uorb.c)
+      gnss_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
+      PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/libs/libc/gnssutils)
+    list(APPEND SRCS gnss_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_WTGAHRS2)
@@ -44,8 +44,8 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS fakesensor_uorb.c)
   endif()
 
-  if(CONFIG_SENSORS_GOLDFISH_GPS)
-    list(APPEND SRCS goldfish_gps_uorb.c)
+  if(CONFIG_SENSORS_GOLDFISH_GNSS)
+    list(APPEND SRCS goldfish_gnss_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_GOLDFISH_SENSOR)

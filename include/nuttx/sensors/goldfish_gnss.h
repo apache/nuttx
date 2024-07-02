@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/sensors/goldfish_gps.h
+ * include/nuttx/sensors/goldfish_gnss.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_GOLDFISH_GPS_H
-#define __INCLUDE_NUTTX_SENSORS_GOLDFISH_GPS_H
+#ifndef __INCLUDE_NUTTX_SENSORS_GOLDFISH_GNSS_H
+#define __INCLUDE_NUTTX_SENSORS_GOLDFISH_GNSS_H
 
 /****************************************************************************
  * Included Files
@@ -37,10 +37,10 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: goldfish_gps_init
+ * Name: goldfish_gnss_init
  *
  * Description:
- *   Goldfish GPS driver entrypoint.
+ *   Goldfish GNSS driver entrypoint.
  *
  * Input Parameters:
  *   devno       - The user specifies which device of this type, from 0.
@@ -51,7 +51,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int goldfish_gps_init(int devno, uint32_t batch_number);
+int goldfish_gnss_init(int devno, uint32_t batch_number);
 
 #ifdef __cplusplus
 }

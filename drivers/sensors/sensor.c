@@ -170,7 +170,6 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {sizeof(struct sensor_rgb),             "rgb"},
   {sizeof(struct sensor_hall),            "hall"},
   {sizeof(struct sensor_ir),              "ir"},
-  {sizeof(struct sensor_gps),             "gps"},
   {sizeof(struct sensor_uv),              "uv"},
   {sizeof(struct sensor_noise),           "noise"},
   {sizeof(struct sensor_pm25),            "pm25"},
@@ -188,11 +187,12 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {sizeof(struct sensor_ppgq),            "ppgq"},
   {sizeof(struct sensor_impd),            "impd"},
   {sizeof(struct sensor_ots),             "ots"},
-  {sizeof(struct sensor_gps_satellite),   "gps_satellite"},
   {sizeof(struct sensor_wake_gesture),    "wake_gesture"},
   {sizeof(struct sensor_cap),             "cap"},
   {sizeof(struct sensor_gas),             "gas"},
   {sizeof(struct sensor_force),           "force"},
+  {sizeof(struct sensor_gnss),            "gnss"},
+  {sizeof(struct sensor_gnss_satellite),  "gnss_satellite"},
 };
 
 static const struct file_operations g_sensor_fops =
