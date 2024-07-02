@@ -348,7 +348,7 @@ void up_consoleinit(void)
 
 #endif
 
-  /* Enable selected clocks (and disabled unselected clocks) */
+  /* Enable selected clocks (and disable unselected clocks) */
 
   regval = getreg32(AVR32_PM_PBAMASK);
   regval &= ~(PM_PBAMASK_USART0 | PM_PBAMASK_USART1 | PM_PBAMASK_USART2);
