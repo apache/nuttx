@@ -505,7 +505,7 @@ static int virtio_serial_init(FAR struct virtio_serial_priv_s *priv,
   callbacks[VIRTIO_SERIAL_RX] = virtio_serial_rxready;
   callbacks[VIRTIO_SERIAL_TX] = virtio_serial_txdone;
   ret = virtio_create_virtqueues(vdev, 0, VIRTIO_SERIAL_NUM, vqnames,
-                                 callbacks);
+                                 callbacks, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);

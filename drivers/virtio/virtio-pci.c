@@ -343,7 +343,8 @@ int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
                                  unsigned int flags,
                                  unsigned int nvqs,
                                  FAR const char *names[],
-                                 vq_callback callbacks[])
+                                 vq_callback callbacks[],
+                                 FAR void *callback_args[])
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;

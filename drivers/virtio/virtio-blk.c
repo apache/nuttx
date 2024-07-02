@@ -517,12 +517,12 @@ static int virtio_blk_init(FAR struct virtio_blk_priv_s *priv,
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
   virtio_negotiate_features(vdev, (1UL << VIRTIO_BLK_F_RO) |
                                   (1UL << VIRTIO_BLK_F_BLK_SIZE) |
-                                  (1UL << VIRTIO_BLK_F_FLUSH));
+                                  (1UL << VIRTIO_BLK_F_FLUSH), NULL);
   virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
 
   vqname[0]   = "virtio_blk_vq";
   callback[0] = virtio_blk_done;
-  ret = virtio_create_virtqueues(vdev, 0, 1, vqname, callback);
+  ret = virtio_create_virtqueues(vdev, 0, 1, vqname, callback, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);
