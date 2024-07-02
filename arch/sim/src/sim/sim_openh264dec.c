@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_hostdecoder.c
+ * arch/sim/src/sim/sim_openh264dec.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,13 +30,13 @@
 #include <wels/codec_api.h>
 #include <wels/codec_app_def.h>
 
-#include "sim_hostdecoder.h"
+#include "sim_openh264dec.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct host_decoder_s
+struct openh264_decoder_s
 {
   ISVCDecoder *dec;
   SBufferInfo bufinfo;
@@ -52,11 +52,11 @@ struct host_decoder_s
  * Public Functions
  ****************************************************************************/
 
-struct host_decoder_s *host_decoder_open(void)
+struct openh264_decoder_s *openh264_decoder_open(void)
 {
-  struct host_decoder_s *decoder;
+  struct openh264_decoder_s *decoder;
 
-  decoder = calloc(1, sizeof(struct host_decoder_s));
+  decoder = calloc(1, sizeof(struct openh264_decoder_s));
   if (decoder == NULL)
     {
       syslog(LOG_ERR, "Init host decoder failed\n");
@@ -65,13 +65,13 @@ struct host_decoder_s *host_decoder_open(void)
   return decoder;
 }
 
-int host_decoder_close(struct host_decoder_s *decoder)
+int openh264_decoder_close(struct openh264_decoder_s *decoder)
 {
   free(decoder);
   return 0;
 }
 
-int host_decoder_streamon(struct host_decoder_s *decoder)
+int openh264_decoder_streamon(struct openh264_decoder_s *decoder)
 {
   SDecodingParam param;
   int level = WELS_LOG_RESV;
@@ -102,7 +102,7 @@ int host_decoder_streamon(struct host_decoder_s *decoder)
   return ret;
 }
 
-int host_decoder_streamoff(struct host_decoder_s *decoder)
+int openh264_decoder_streamoff(struct openh264_decoder_s *decoder)
 {
   (*decoder->dec)->Uninitialize(decoder->dec);
   WelsDestroyDecoder(decoder->dec);
@@ -111,8 +111,8 @@ int host_decoder_streamoff(struct host_decoder_s *decoder)
   return 0;
 }
 
-int host_decoder_enqueue(struct host_decoder_s *decoder,
-                         void *data, int64_t pts, int size)
+int openh264_decoder_enqueue(struct openh264_decoder_s *decoder,
+                             void *data, int64_t pts, int size)
 {
   DECODING_STATE state;
 
@@ -166,8 +166,8 @@ int host_decoder_enqueue(struct host_decoder_s *decoder,
   return decoder->bufinfo.iBufferStatus;
 }
 
-int host_decoder_dequeue(struct host_decoder_s *decoder,
-                         void *data, int64_t *pts, uint32_t *size)
+int openh264_decoder_dequeue(struct openh264_decoder_s *decoder,
+                             void *data, int64_t *pts, uint32_t *size)
 {
   uint8_t *dst_addr = data;
   int plane;
@@ -203,3 +203,4 @@ int host_decoder_dequeue(struct host_decoder_s *decoder,
 
   return decoder->remaining_frames;
 }
+
