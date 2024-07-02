@@ -2003,6 +2003,7 @@ config ARCH_BOARD_K230_CANMV
 config ARCH_BOARD_BL808_OX64
 	bool "PINE64 Ox64"
 	depends on ARCH_CHIP_BL808
+	select ARCH_HAVE_LEDS
 	---help---
 		This options selects support for NuttX on PINE64 Ox64 based
 		on Bouffalo Lab BL808 SoC.
