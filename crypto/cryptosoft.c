@@ -835,6 +835,10 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             axf = &auth_hash_poly1305;
             goto auth4common;
 
+          case CRYPTO_CRC32:
+            axf = &auth_hash_crc32;
+            goto auth4common;
+
           case CRYPTO_CHACHA20_POLY1305_MAC:
             axf = &auth_hash_chacha20_poly1305;
 
@@ -956,6 +960,7 @@ int swcr_freesession(uint64_t tid)
           case CRYPTO_SHA2_256:
           case CRYPTO_SHA2_384:
           case CRYPTO_SHA2_512:
+          case CRYPTO_CRC32:
             axf = swd->sw_axf;
 
             if (swd->sw_ictx)
@@ -1090,6 +1095,7 @@ int swcr_process(struct cryptop *crp)
           case CRYPTO_SHA2_256:
           case CRYPTO_SHA2_384:
           case CRYPTO_SHA2_512:
+          case CRYPTO_CRC32:
             if ((crp->crp_etype = swcr_hash(crp, crd, sw,
                 crp->crp_buf)) != 0)
               {
@@ -1230,6 +1236,7 @@ void swcr_init(void)
   algs[CRYPTO_SHA2_256] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_384] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_SHA2_512] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_CRC32] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_ESN] = CRYPTO_ALG_FLAG_SUPPORTED;
 
   crypto_register(swcr_id, algs, swcr_newsession,
