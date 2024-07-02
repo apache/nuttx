@@ -39,12 +39,16 @@
 #define RPMSG_ROUTER_NAME_PREFIX_LEN 2
 #define RPMSG_ROUTER_CPUNAME_LEN     8
 
+#define RPMSG_ROUTER_CREATE          1
+#define RPMSG_ROUTER_DESTROY         2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 begin_packed_struct struct rpmsg_router_s
 {
+  uint32_t cmd;
   uint32_t tx_len;
   uint32_t rx_len;
   char     cpuname[RPMSG_ROUTER_CPUNAME_LEN];
