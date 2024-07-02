@@ -3162,10 +3162,6 @@ struct i2s_dev_s *esp32s3_i2sbus_initialize(int port)
         return NULL;
     }
 
-  flags = spin_lock_irqsave(&priv->slock);
-
-  i2s_configure(priv);
-
   /* Allocate buffer containers */
 
   ret = i2s_buf_initialize(priv);
@@ -3173,6 +3169,10 @@ struct i2s_dev_s *esp32s3_i2sbus_initialize(int port)
     {
       goto err;
     }
+
+  flags = spin_lock_irqsave(&priv->slock);
+
+  i2s_configure(priv);
 
   ret = i2s_dma_setup(priv);
   if (ret < 0)
