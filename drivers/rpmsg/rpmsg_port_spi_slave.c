@@ -46,8 +46,6 @@
 #  define rpmsg_port_spi_crc16(hdr) 0
 #endif
 
-#define RPMSG_SPI_PORT_UNCONNECTED  UINT16_MAX
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -81,6 +79,7 @@ struct rpmsg_port_spi_s
   FAR struct rpmsg_port_header_s *rxhdr;
 
   rpmsg_port_rx_cb_t             rxcb;
+  bool                           connected;
 
   /* Used for flow control */
 
@@ -136,6 +135,25 @@ static const struct spi_slave_devops_s g_rpmsg_port_spi_slave_ops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: rpmsg_port_spi_drop_packets
+ ****************************************************************************/
+
+static void rpmsg_port_spi_drop_packets(FAR struct rpmsg_port_spi_s *rpspi)
+{
+  FAR struct rpmsg_port_header_s *hdr;
+
+  while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false)))
+    {
+      rpmsg_port_queue_return_buffer(&rpspi->port.txq, hdr);
+    }
+
+  while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.rxq, false)))
+    {
+      rpmsg_port_queue_return_buffer(&rpspi->port.rxq, hdr);
+    }
+}
+
+/****************************************************************************
  * Name: rpmsg_port_spi_exchange
  ****************************************************************************/
 
@@ -148,7 +166,7 @@ void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
       return;
     }
 
-  if (rpspi->txavail == RPMSG_SPI_PORT_UNCONNECTED)
+  if (!rpspi->connected)
     {
       txhdr = rpspi->cmdhdr;
       txhdr->cmd = RPMSG_PORT_SPI_CMD_CONNECT;
@@ -190,7 +208,14 @@ static void rpmsg_port_spi_notify_tx_ready(FAR struct rpmsg_port_s *port)
   FAR struct rpmsg_port_spi_s *rpspi =
     container_of(port, struct rpmsg_port_spi_s, port);
 
-  rpmsg_port_spi_exchange(rpspi);
+  if (rpspi->connected)
+    {
+      rpmsg_port_spi_exchange(rpspi);
+    }
+  else
+    {
+      rpmsg_port_spi_drop_packets(rpspi);
+    }
 }
 
 /****************************************************************************
@@ -275,13 +300,12 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 {
   FAR struct rpmsg_port_spi_s *rpspi =
     container_of(dev, struct rpmsg_port_spi_s, spislv);
-  uint16_t avail;
 
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 0);
   SPIS_CTRLR_QPOLL(rpspi->spictrlr);
 
-  avail = rpspi->rxhdr->avail;
-  rpmsginfo("received cmd:%u avail:%u\n", rpspi->rxhdr->cmd, avail);
+  rpmsginfo("received cmd:%u avail:%u\n",
+            rpspi->rxhdr->cmd, rpspi->rxhdr->avail);
 
   if (rpspi->txhdr != NULL)
     {
@@ -305,10 +329,24 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
    * connect req data packet has been received.
    */
 
-  if (rpspi->txavail == RPMSG_SPI_PORT_UNCONNECTED &&
-      rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
+  if (!rpspi->connected)
     {
-      return;
+      if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
+        {
+          return;
+        }
+
+      rpspi->txavail = rpspi->rxhdr->avail;
+      rpspi->connected = true;
+    }
+  else
+    {
+      rpspi->txavail = rpspi->rxhdr->avail;
+      if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
+        {
+          rpspi->connected = false;
+          rpmsg_port_spi_drop_packets(rpspi);
+        }
     }
 
   if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
@@ -319,58 +357,11 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       DEBUGASSERT(rpspi->rxhdr != NULL);
     }
 
-  /* Do nothing when two sides are not connected. */
-
-  if (rpspi->txavail == RPMSG_SPI_PORT_UNCONNECTED)
-    {
-      return;
-    }
-
-  rpspi->txavail = avail;
-
 out:
   if (atomic_exchange(&rpspi->transferring, 0) > 1 ||
       (rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0))
     {
       rpmsg_port_spi_exchange(rpspi);
-    }
-}
-
-/****************************************************************************
- * Name: rpmsg_port_spi_process_packet
- ****************************************************************************/
-
-static void
-rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
-                              FAR struct rpmsg_port_header_s *rxhdr)
-{
-  rpmsginfo("received cmd: %u avail: %u", rxhdr->cmd, rxhdr->avail);
-
-  switch (rxhdr->cmd)
-    {
-      case RPMSG_PORT_SPI_CMD_CONNECT:
-        if (rpspi->txavail != RPMSG_SPI_PORT_UNCONNECTED)
-          {
-            rpmsg_port_unregister(&rpspi->port);
-            rpspi->txavail = RPMSG_SPI_PORT_UNCONNECTED;
-          }
-        else
-          {
-            rpspi->txavail = rxhdr->avail;
-            rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
-          }
-
-        rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
-        break;
-
-      case RPMSG_PORT_SPI_CMD_DATA:
-        rpspi->rxcb(&rpspi->port, rxhdr);
-        break;
-
-      default:
-        rpmsgerr("received a unexpected frame, dropped\n");
-        rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
-        break;
     }
 }
 
@@ -392,18 +383,45 @@ static int rpmsg_port_spi_mreq_handler(FAR struct ioexpander_dev_s *dev,
  * Name: rpmsg_port_spi_connect
  ****************************************************************************/
 
-static void rpmsg_port_spi_connect(FAR struct rpmsg_port_spi_s *rpspi)
+static inline void rpmsg_port_spi_connect(FAR struct rpmsg_port_spi_s *rpspi)
 {
-  bool val;
+  rpmsg_port_spi_mreq_handler(NULL, 0, rpspi);
+}
 
-  IOEXP_READPIN(rpspi->ioe, rpspi->mreq, &val);
-  if (val)
+/****************************************************************************
+ * Name: rpmsg_port_spi_process_packet
+ ****************************************************************************/
+
+static void
+rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
+                              FAR struct rpmsg_port_header_s *rxhdr)
+{
+  rpmsginfo("received cmd: %u avail: %u", rxhdr->cmd, rxhdr->avail);
+
+  switch (rxhdr->cmd)
     {
-      rpmsg_port_spi_mreq_handler(NULL, 0, rpspi);
-    }
-  else
-    {
-      IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 1);
+      case RPMSG_PORT_SPI_CMD_CONNECT:
+        if (!rpspi->connected)
+          {
+            rpmsg_port_unregister(&rpspi->port);
+            rpmsg_port_spi_connect(rpspi);
+          }
+        else
+          {
+            rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
+          }
+
+        rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
+        break;
+
+      case RPMSG_PORT_SPI_CMD_DATA:
+        rpspi->rxcb(&rpspi->port, rxhdr);
+        break;
+
+      default:
+        rpmsgerr("received a unexpected frame, dropped\n");
+        rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
+        break;
     }
 }
 
@@ -578,7 +596,6 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
     &rpspi->port.rxq, true);
   DEBUGASSERT(rpspi->cmdhdr != NULL && rpspi->rxhdr != NULL);
 
-  rpspi->txavail = RPMSG_SPI_PORT_UNCONNECTED;
   rpspi->rxthres = rpmsg_port_queue_navail(&rpspi->port.rxq) *
                    CONFIG_RPMSG_PORT_SPI_RX_THRESHOLD / 100;
 
