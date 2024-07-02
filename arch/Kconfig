@@ -1158,6 +1158,13 @@ config ARCH_MINIMAL_VECTORTABLE
 		IRQMAPPED_MAX, then hardware interrupt vector 42 is not used and
 		if it occurs will result in an unexpected interrupt crash.
 
+config ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+	bool "Dynaminc Minimal RAM usage for vector table"
+	default n
+	depends on ARCH_MINIMAL_VECTORTABLE
+	---help---
+		Use a minimum amount of RAM for the vector table.
+
 config ARCH_NUSER_INTERRUPTS
 	int "Number of interrupts"
 	default 0
