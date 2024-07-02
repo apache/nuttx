@@ -40,6 +40,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 

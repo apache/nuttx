@@ -38,6 +38,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>

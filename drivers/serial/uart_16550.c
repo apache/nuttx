@@ -42,6 +42,7 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/uart_16550.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 
