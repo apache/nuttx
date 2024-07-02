@@ -225,10 +225,10 @@ FAR const struct usb_devdesc_s *usbmsc_getdevdesc(void)
 int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
                        FAR struct usb_epdesc_s *epdesc,
                        FAR struct usbdev_devinfo_s *devinfo,
-                       bool hispeed)
+                       uint8_t speed)
 {
-#ifndef CONFIG_USBDEV_DUALSPEED
-    UNUSED(hispeed);
+#if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_USBDEV_SUPERSPEED)
+    UNUSED(speed);
 #endif
 
     switch (epid)
@@ -240,8 +240,18 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
         epdesc->addr = USBMSC_MKEPBULKOUT(devinfo); /* Endpoint address */
         epdesc->attr = USBMSC_EPOUTBULK_ATTR;       /* Endpoint attributes */
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+        if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+          {
+            /* Maximum packet size (super speed) */
+
+            epdesc->mxpacketsize[0] = LSBYTE(USBMSC_SSBULKMAXPACKET);
+            epdesc->mxpacketsize[1] = MSBYTE(USBMSC_SSBULKMAXPACKET);
+          }
+        else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
-        if (hispeed)
+        if (speed == USB_SPEED_HIGH)
           {
             /* Maximum packet size (high speed) */
 
@@ -268,8 +278,18 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
         epdesc->addr = USBMSC_MKEPBULKIN(devinfo);  /* Endpoint address */
         epdesc->attr = USBMSC_EPINBULK_ATTR;        /* Endpoint attributes */
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+        if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+          {
+            /* Maximum packet size (super speed) */
+
+            epdesc->mxpacketsize[0] = LSBYTE(USBMSC_SSBULKMAXPACKET);
+            epdesc->mxpacketsize[1] = MSBYTE(USBMSC_SSBULKMAXPACKET);
+          }
+        else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
-        if (hispeed)
+        if (speed == USB_SPEED_HIGH)
           {
             /* Maximum packet size (high speed) */
 
@@ -304,7 +324,7 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 int16_t usbmsc_mkcfgdesc(uint8_t *buf,
                          FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type)
@@ -313,17 +333,15 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
                         FAR struct usbdev_devinfo_s *devinfo)
 #endif
 {
-  bool hispeed = false;
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (speed == USB_SPEED_HIGH);
-
   /* Check for switches between high and full speed */
 
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
+  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed != USB_SPEED_HIGH)
     {
-      hispeed = !hispeed;
+      speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
+#else
+  uint8_t speed = USB_SPEED_FULL;
 #endif
 
   /* Fill in all descriptors directly to the buf */
@@ -389,7 +407,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
     {
       int len = usbmsc_copy_epdesc(USBMSC_EPBULKIN,
                                   (FAR struct usb_epdesc_s *)buf,
-                                   devinfo, hispeed);
+                                   devinfo, speed);
 
       buf += len;
     }
@@ -399,7 +417,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
     {
       int len = usbmsc_copy_epdesc(USBMSC_EPBULKOUT,
                                   (FAR struct usb_epdesc_s *)buf, devinfo,
-                                   hispeed);
+                                   speed);
 
       buf += len;
     }

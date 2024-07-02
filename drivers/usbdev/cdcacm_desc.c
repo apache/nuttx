@@ -227,10 +227,10 @@ FAR const struct usb_devdesc_s *cdcacm_getdevdesc(void)
 int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
                        FAR struct usb_epdesc_s *epdesc,
                        FAR struct usbdev_devinfo_s *devinfo,
-                       bool hispeed)
+                       uint8_t speed)
 {
-#ifndef CONFIG_USBDEV_DUALSPEED
-    UNUSED(hispeed);
+#if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_USBDEV_SUPERSPEED)
+    UNUSED(speed);
 #endif
 
     switch (epid)
@@ -242,8 +242,18 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
           epdesc->addr = CDCACM_MKEPINTIN(devinfo);    /* Endpoint address */
           epdesc->attr = CDCACM_EPINTIN_ATTR;          /* Endpoint attributes */
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+          if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+            {
+              /* Maximum packet size (super speed) */
+
+              epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPINTIN_SSSIZE);
+              epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPINTIN_SSSIZE);
+            }
+          else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
-          if (hispeed)
+          if (speed == USB_SPEED_HIGH)
             {
               /* Maximum packet size (high speed) */
 
@@ -269,8 +279,19 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
         epdesc->type = USB_DESC_TYPE_ENDPOINT;       /* Descriptor type */
         epdesc->addr = CDCACM_MKEPBULKOUT(devinfo);  /* Endpoint address */
         epdesc->attr = CDCACM_EPOUTBULK_ATTR;        /* Endpoint attributes */
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+        if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+          {
+            /* Maximum packet size (super speed) */
+
+            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKOUT_SSSIZE);
+            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKOUT_SSSIZE);
+          }
+        else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
-        if (hispeed)
+        if (speed == USB_SPEED_HIGH)
           {
             /* Maximum packet size (high speed) */
 
@@ -297,8 +318,18 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
         epdesc->addr = CDCACM_MKEPBULKIN(devinfo);   /* Endpoint address */
         epdesc->attr = CDCACM_EPINBULK_ATTR;         /* Endpoint attributes */
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+        if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+          {
+            /* Maximum packet size (super speed) */
+
+            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_CDCACM_EPBULKIN_SSSIZE);
+            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_CDCACM_EPBULKIN_SSSIZE);
+          }
+        else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
-        if (hispeed)
+        if (speed == USB_SPEED_HIGH)
           {
             /* Maximum packet size (high speed) */
 
@@ -333,7 +364,7 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
                          FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type)
@@ -343,17 +374,14 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 #endif
 {
   int length = 0;
-  bool hispeed = false;
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (speed == USB_SPEED_HIGH);
-
-  /* Check for switches between high and full speed */
-
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
+  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
-      hispeed = !hispeed;
+      speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
+#else
+  uint8_t speed = USB_SPEED_FULL;
 #endif
 
   /* Fill in all descriptors directly to the buf */
@@ -376,7 +404,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
       /* Let's calculate the size... */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
       int16_t size = cdcacm_mkcfgdesc(NULL, NULL, speed, type);
 #else
       int16_t size = cdcacm_mkcfgdesc(NULL, NULL);
@@ -537,7 +565,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
     {
       cdcacm_copy_epdesc(CDCACM_EPINTIN, (struct usb_epdesc_s *)buf,
                          devinfo,
-                         hispeed);
+                         speed);
 
       buf += USB_SIZEOF_EPDESC;
     }
@@ -575,7 +603,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
     {
       cdcacm_copy_epdesc(CDCACM_EPBULKOUT, (struct usb_epdesc_s *)buf,
                          devinfo,
-                         hispeed);
+                         speed);
       buf += USB_SIZEOF_EPDESC;
     }
 
@@ -587,7 +615,7 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
     {
       cdcacm_copy_epdesc(CDCACM_EPBULKIN, (struct usb_epdesc_s *)buf,
                          devinfo,
-                         hispeed);
+                         speed);
       buf += USB_SIZEOF_EPDESC;
     }
 

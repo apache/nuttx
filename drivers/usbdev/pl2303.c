@@ -293,9 +293,9 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
 /* Configuration ************************************************************/
 
 static int     usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
-#ifdef CONFIG_USBDEV_DUALSPEED
 static void    usbclass_mkepbulkdesc(const struct usb_epdesc_s *indesc,
                  uint16_t mxpacket, struct usb_epdesc_s *outdesc);
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
 #else
 static int16_t usbclass_mkcfgdesc(uint8_t *buf);
@@ -835,7 +835,6 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
 static inline void usbclass_mkepbulkdesc(
                              FAR const struct usb_epdesc_s *indesc,
                              uint16_t mxpacket,
@@ -850,7 +849,6 @@ static inline void usbclass_mkepbulkdesc(
   outdesc->mxpacketsize[0] = LSBYTE(mxpacket);
   outdesc->mxpacketsize[1] = MSBYTE(mxpacket);
 }
-#endif
 
 /****************************************************************************
  * Name: usbclass_mkcfgdesc
@@ -860,18 +858,24 @@ static inline void usbclass_mkepbulkdesc(
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
 #else
 static int16_t usbclass_mkcfgdesc(uint8_t *buf)
 #endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
-#ifdef CONFIG_USBDEV_DUALSPEED
-  bool hispeed = (speed == USB_SPEED_HIGH);
-  uint16_t bulkmxpacket;
-#endif
+  uint16_t bulkmxpacket = CONFIG_PL2303_EPBULK_FSSIZE;
   uint16_t totallen;
+
+  /* Check for switches between high and full speed */
+
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
+  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
+    {
+      speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
+    }
+#endif
 
   /* This is the total length of the configuration (not necessarily the
    * size that we will be sending now.
@@ -892,40 +896,28 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf)
   memcpy(buf, &g_ifdesc, USB_SIZEOF_IFDESC);
   buf += USB_SIZEOF_IFDESC;
 
-  /* Make the three endpoint configurations.  First, check for switches
-   * between high and full speed
-   */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
-    {
-      hispeed = !hispeed;
-    }
-#endif
-
   memcpy(buf, &g_epintindesc, USB_SIZEOF_EPDESC);
   buf += USB_SIZEOF_EPDESC;
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  if (hispeed)
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
     {
-      bulkmxpacket = 512;
+      bulkmxpacket = CONFIG_PL2303_EPBULK_SSSIZE;
     }
   else
+#endif
+#ifdef CONFIG_USBDEV_DUALSPEED
+  if (speed == USB_SPEED_HIGH)
     {
-      bulkmxpacket = 64;
+      bulkmxpacket = CONFIG_PL2303_EPBULK_HSSIZE;
     }
+#endif
 
   usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket,
                         (FAR struct usb_epdesc_s *)buf);
   buf += USB_SIZEOF_EPDESC;
   usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket,
                         (FAR struct usb_epdesc_s *)buf);
-#else
-  memcpy(buf, &g_epbulkoutdesc, USB_SIZEOF_EPDESC);
-  buf += USB_SIZEOF_EPDESC;
-  memcpy(buf, &g_epbulkindesc, USB_SIZEOF_EPDESC);
-#endif
 
   /* Finally, fill in the total size of the configuration descriptor */
 
@@ -982,10 +974,8 @@ static void usbclass_resetconfig(FAR struct pl2303_dev_s *priv)
 static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 {
   FAR struct usbdev_req_s *req;
-#ifdef CONFIG_USBDEV_DUALSPEED
   struct usb_epdesc_s epdesc;
-  uint16_t bulkmxpacket;
-#endif
+  uint16_t bulkmxpacket = CONFIG_PL2303_EPBULK_FSSIZE;
   int i;
   int ret = 0;
 
@@ -1038,21 +1028,23 @@ static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (priv->usbdev->speed == USB_SPEED_SUPER ||
+      priv->usbdev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      bulkmxpacket = CONFIG_PL2303_EPBULK_SSSIZE;
+    }
+  else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
   if (priv->usbdev->speed == USB_SPEED_HIGH)
     {
-      bulkmxpacket = 512;
+      bulkmxpacket = CONFIG_PL2303_EPBULK_HSSIZE;
     }
-  else
-    {
-      bulkmxpacket = 64;
-    }
+#endif
 
   usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, &epdesc);
   ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
-#else
-  ret = EP_CONFIGURE(priv->epbulkin, &g_epbulkindesc, false);
-#endif
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINCONFIGFAIL), 0);
@@ -1063,12 +1055,8 @@ static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
   usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, &epdesc);
   ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
-#else
-  ret = EP_CONFIGURE(priv->epbulkout, &g_epbulkoutdesc, true);
-#endif
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
@@ -1273,7 +1261,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
                          ((FAR struct pl2303_driver_s *)driver)->dev;
   FAR struct pl2303_req_s *reqcontainer;
   irqstate_t flags;
-  uint16_t reqlen;
+  uint16_t reqlen = CONFIG_PL2303_EPBULK_FSSIZE;
   int ret;
   int i;
 
@@ -1351,10 +1339,19 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate read requests.  The buffer size is one full packet. */
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      reqlen = CONFIG_PL2303_EPBULK_SSSIZE;
+    }
+  else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
-  reqlen = 512;
-#else
-  reqlen = 64;
+  if (dev->speed == USB_SPEED_HIGH)
+    {
+      reqlen = CONFIG_PL2303_EPBULK_HSSIZE;
+    }
 #endif
 
   for (i = 0; i < CONFIG_PL2303_NRDREQS; i++)
@@ -1379,12 +1376,6 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
    * Pick the larger of the max packet size and the configured request
    * size.
    */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  reqlen = 512;
-#else
-  reqlen = 64;
-#endif
 
   if (CONFIG_PL2303_BULKIN_REQLEN > reqlen)
     {
@@ -1643,7 +1634,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
                 case USB_DESC_TYPE_CONFIG:
                   {
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
                     ret = usbclass_mkcfgdesc(ctrlreq->buf,
                                              dev->speed, ctrl->req);
 #else
