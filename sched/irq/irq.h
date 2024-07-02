@@ -44,7 +44,9 @@
 #  error CONFIG_ARCH_NUSER_INTERRUPTS is not defined
 #endif
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC)
+#  define IRQ_TO_NDX(irq) (g_irqmap[irq] ? g_irqmap[irq] : irq_to_ndx(irq))
+#elif defined(CONFIG_ARCH_MINIMAL_VECTORTABLE)
 #  define IRQ_TO_NDX(irq) \
   (g_irqmap[(irq)] < CONFIG_ARCH_NUSER_INTERRUPTS ? g_irqmap[(irq)] : -EINVAL)
 #else
@@ -94,7 +96,6 @@ extern struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
 extern struct irq_info_s g_irqvector[NR_IRQS];
 #endif
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
 /* This is the interrupt vector mapping table.  This must be provided by
  * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
  * in the configuration.
@@ -104,6 +105,10 @@ extern struct irq_info_s g_irqvector[NR_IRQS];
  * declaration is here for the time being.
  */
 
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC)
+extern irq_mapped_t g_irqmap[NR_IRQS];
+int irq_to_ndx(int irq);
+#elif defined(CONFIG_ARCH_MINIMAL_VECTORTABLE)
 extern const irq_mapped_t g_irqmap[NR_IRQS];
 #endif
 
