@@ -76,18 +76,28 @@ int usbdev_copy_devdesc(FAR void *dest,
  ****************************************************************************/
 
 void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
-                        uint8_t epno, bool hispeed,
+                        uint8_t epno, uint8_t speed,
                         FAR const struct usbdev_epinfo_s *epinfo)
 {
-#ifndef CONFIG_USBDEV_DUALSPEED
-  UNUSED(hispeed);
+#if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_USBDEV_SUPERSPEED)
+  UNUSED(speed);
 #endif
 
   memcpy(epdesc, &epinfo->desc, sizeof(struct usb_epdesc_s));
   epdesc->addr |= epno;
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+    {
+      /* Maximum packet size (super speed) */
+
+      epdesc->mxpacketsize[0] = LSBYTE(epinfo->sssize);
+      epdesc->mxpacketsize[1] = MSBYTE(epinfo->sssize);
+    }
+  else
+#endif
 #ifdef CONFIG_USBDEV_DUALSPEED
-  if (hispeed)
+  if (speed == USB_SPEED_HIGH)
     {
       /* Maximum packet size (high speed) */
 
