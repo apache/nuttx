@@ -51,6 +51,9 @@ function(nuttx_add_library_internal target)
   target_include_directories(
     ${target}
     PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_INCLUDE_DIRECTORIES>>)
+
+  # Set install config for all library
+  install(TARGETS ${target})
 endfunction()
 
 # Auxiliary libraries
@@ -101,9 +104,6 @@ function(nuttx_add_system_library target)
 
   # add to list of libraries to link to final nuttx binary
   set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
-
-  # install to library dir
-  install(TARGETS ${target} DESTINATION lib)
 endfunction()
 
 # Kernel Libraries
@@ -182,11 +182,6 @@ function(nuttx_add_library target)
   add_library(${target} ${ARGN})
 
   set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
-
-  get_target_property(target_type ${target} TYPE)
-  if(${target_type} STREQUAL "STATIC_LIBRARY")
-    install(TARGETS ${target} ARCHIVE DESTINATION ${CMAKE_BINARY_DIR}/staging)
-  endif()
 
   nuttx_add_library_internal(${target})
 endfunction()
