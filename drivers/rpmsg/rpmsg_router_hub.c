@@ -321,6 +321,7 @@ static void rpmsg_router_bound(FAR struct rpmsg_endpoint *ept)
 
   for (i = 0; i < 2; i++)
     {
+      msg.cmd = RPMSG_ROUTER_CREATE;
       msg.tx_len = MIN(rpmsg_get_rx_buffer_size(hub->ept[i].rdev),
                        rpmsg_get_tx_buffer_size(hub->ept[1 - i].rdev));
       msg.rx_len = MIN(rpmsg_get_tx_buffer_size(hub->ept[i].rdev),
@@ -397,6 +398,7 @@ static void rpmsg_router_destroy(FAR struct rpmsg_device *rdev,
                                  FAR void *priv)
 {
   FAR struct rpmsg_router_hub_s *hub = priv;
+  struct rpmsg_router_s msg;
   int i;
 
   for (i = 0; i < 2; i++)
@@ -407,6 +409,11 @@ static void rpmsg_router_destroy(FAR struct rpmsg_device *rdev,
         }
 
       rpmsg_destroy_ept(&hub->ept[i]);
+
+      /* Notify the other edge core to destroy router device */
+
+      msg.cmd = RPMSG_ROUTER_DESTROY;
+      rpmsg_send(&hub->ept[1 - i], &msg, sizeof(msg));
       break;
     }
 }

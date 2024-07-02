@@ -67,6 +67,7 @@ struct rpmsg_router_edge_s
   struct rpmsg_s      rpmsg;
   struct rpmsg_device rdev;
   struct rpmsg_device *hubdev;
+  char                name[RPMSG_NAME_SIZE];
   char                localcpu[RPMSG_ROUTER_CPUNAME_LEN];
   char                remotecpu[RPMSG_ROUTER_CPUNAME_LEN];
 
@@ -536,49 +537,64 @@ static void rpmsg_router_edge_bind(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
- * Name: rpmsg_router_cb
+ * Name: rpmsg_router_edge_destroy
  *
  * Description:
- *   This function is used to receive sync message from router core,
- *   and initialize the router rpmsg device.
+ *   This function is used to destroy the edge core device.
  *
  * Parameters:
- *   ept - endpoint for synchronizing ready messages
- *   data - received data
- *   len - received data length
- *   src - source address
- *   priv - private data
- *
- * Returned Values:
- *   0 on success; A negated errno value is returned on any failure.
+ *   edge - rpmsg router edge device
  *
  ****************************************************************************/
 
-static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
-                           FAR void *data, size_t len,
-                           uint32_t src, FAR void *priv)
+static void rpmsg_router_edge_destroy(FAR struct rpmsg_router_edge_s *edge)
 {
-  FAR struct rpmsg_router_s *msg = data;
+  rpmsg_unregister_callback(edge, NULL, NULL,
+                            rpmsg_router_edge_match,
+                            rpmsg_router_edge_bind);
+  rpmsg_unregister(edge->name, &edge->rpmsg);
+  rpmsg_device_destory(&edge->rpmsg);
+  kmm_free(edge);
+}
+
+/****************************************************************************
+ * Name: rpmsg_router_edge_create
+ *
+ * Description:
+ *   This function is used to create the edge core device.
+ *
+ * Parameters:
+ *   hubdev - rpmsg device for router hub
+ *   msg - sync message from router hub
+ *   remotecpu - remote edge cpu name
+ *
+ * Returned Values:
+ *   edge device on success; NULL on failure.
+ *
+ ****************************************************************************/
+
+static FAR struct rpmsg_router_edge_s *
+rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
+                         FAR struct rpmsg_router_s *msg,
+                         FAR const char *remotecpu)
+{
   FAR struct rpmsg_router_edge_s *edge;
   FAR struct rpmsg_device *rdev;
-  char name[32];
   int ret;
+
+  /* Create the router edge device */
 
   edge = kmm_zalloc(sizeof(*edge));
   if (!edge)
     {
-      return -ENOMEM;
+      return NULL;
     }
 
-  /* Initialize router device */
-
-  strlcpy(edge->remotecpu, ept->name + RPMSG_ROUTER_NAME_LEN,
-          sizeof(edge->remotecpu));
+  strlcpy(edge->remotecpu, remotecpu, sizeof(edge->remotecpu));
   strlcpy(edge->localcpu, msg->cpuname, sizeof(edge->localcpu));
   edge->rx_len = msg->rx_len;
   edge->tx_len = msg->tx_len;
-  edge->hubdev = ept->rdev;
-  ept->priv = edge;
+  edge->hubdev = hubdev;
 
   /* Initialize router rpmsg device */
 
@@ -599,8 +615,8 @@ static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
 
   /* Register rpmsg for edge core */
 
-  snprintf(name, sizeof(name), "/dev/rpmsg/%s", edge->remotecpu);
-  ret = rpmsg_register(name, &edge->rpmsg, &g_rpmsg_router_edge_ops);
+  snprintf(edge->name, sizeof(edge->name), "/dev/rpmsg/%s", edge->remotecpu);
+  ret = rpmsg_register(edge->name, &edge->rpmsg, &g_rpmsg_router_edge_ops);
   if (ret < 0)
     {
       rpmsgerr("rpmsg_register failed: %d\n", ret);
@@ -622,14 +638,68 @@ static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
   /* Broadcast device_created to all registers */
 
   rpmsg_device_created(&edge->rpmsg);
-  return 0;
+  return edge;
 
 unregister:
-  rpmsg_unregister(name, &edge->rpmsg);
+  rpmsg_unregister(edge->name, &edge->rpmsg);
 free:
   kmm_free(edge);
-  ept->priv = NULL;
-  return ret;
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: rpmsg_router_cb
+ *
+ * Description:
+ *   This function is used to receive sync message from router core,
+ *   and create or destroy the edge core device.
+ *
+ * Parameters:
+ *   ept - endpoint for synchronizing ready messages
+ *   data - received data
+ *   len - received data length
+ *   src - source address
+ *   priv - private data
+ *
+ * Returned Values:
+ *   0 on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept,
+                           FAR void *data, size_t len,
+                           uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsg_router_s *msg = data;
+  FAR struct rpmsg_router_edge_s *edge;
+
+  /* Destroy the router edge device */
+
+  if (msg->cmd == RPMSG_ROUTER_DESTROY)
+    {
+      edge = ept->priv;
+
+      if (edge)
+        {
+          rpmsg_router_edge_destroy(edge);
+          ept->priv = NULL;
+          return 0;
+        }
+
+      return -EINVAL;
+    }
+
+  /* Create the router edge device */
+
+  edge = rpmsg_router_edge_create(ept->rdev, msg,
+                                  ept->name + RPMSG_ROUTER_NAME_LEN);
+  if (!edge)
+    {
+      return -ENODEV;
+    }
+
+  ept->priv = edge;
+  return 0;
 }
 
 /****************************************************************************
@@ -650,7 +720,7 @@ static void rpmsg_router_unbind(FAR struct rpmsg_endpoint *ept)
 
   if (edge)
     {
-      kmm_free(edge);
+      rpmsg_router_edge_destroy(edge);
       ept->priv = NULL;
     }
 
