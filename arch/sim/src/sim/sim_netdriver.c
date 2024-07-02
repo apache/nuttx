@@ -68,6 +68,11 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/net/pkt.h>
+#include <nuttx/mm/iob.h>
+
+#ifdef CONFIG_NET_SEG_OFFLOAD
+#include <nuttx/net/offload.h>
+#endif
 
 #include "sim_internal.h"
 
@@ -132,7 +137,40 @@ static const struct netdev_ops_s g_ops =
 static int netdriver_send(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 {
   unsigned int len  = netpkt_getdatalen(dev, pkt);
+#ifdef CONFIG_NET_SEG_OFFLOAD
+  netpkt_t *segs;
+  uint32_t features = dev->netdev.d_features;
+#endif
 
+#ifdef CONFIG_NET_GSO
+  if (devif_needs_gso((struct iob_s *)pkt, features))
+    {
+      /* 1. devif_gso_segment */
+
+      segs = devif_gso_segment((struct iob_s *)pkt, features);
+      if (segs == NULL)
+        {
+          devif_gso_list_free(pkt);
+          netpkt_free(dev, pkt, NETPKT_TX);
+          return -EMSGSIZE;
+        }
+
+      /* 2. loop send */
+
+      pkt = segs;
+      while (segs)
+        {
+          sim_netdev_send(DEVIDX(dev), netpkt_getdata(dev, segs),
+                          netpkt_getdatalen(dev, segs));
+          segs = PKT_GSOINFO(segs)->seg_list;
+        }
+
+      /* 3. free all segs */
+
+      devif_gso_list_free(pkt);
+    }
+  else
+#endif
   if (netpkt_is_fragmented(pkt))
     {
       netpkt_copyout(dev, DEVBUF(dev), pkt, len, 0);
@@ -262,6 +300,14 @@ int sim_netdriver_init(void)
         }
 #endif
 
+#ifdef CONFIG_NET_SEG_OFFLOAD
+#ifdef CONFIG_NET_GSO
+      netdev_enable_gso(&dev->netdev);
+#endif
+#ifdef CONFIG_NET_GRO
+      netdev_enable_lro(&dev->netdev);
+#endif
+#endif
       /* Register the device with the OS so that socket IOCTLs can be
        * performed
        */

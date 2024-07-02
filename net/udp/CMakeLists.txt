@@ -27,6 +27,7 @@ if(CONFIG_NET_UDP AND NOT CONFIG_NET_UDP_NO_STACK)
 
   if(CONFIG_NET_UDPPROTO_OPTIONS)
     list(APPEND SRCS udp_setsockopt.c)
+    list(APPEND SRCS udp_getsockopt.c)
   endif()
 
   if(CONFIG_NET_UDP_WRITE_BUFFERS)
@@ -41,6 +42,10 @@ if(CONFIG_NET_UDP AND NOT CONFIG_NET_UDP_NO_STACK)
     if(CONFIG_NET_UDP_WRITE_BUFFERS)
       list(APPEND SRCS udp_txdrain.c)
     endif()
+  endif()
+
+  if(CONFIG_NET_UDP_OFFLOAD)
+    list(APPEND SRCS udp_offload.c)
   endif()
 
   # Transport layer

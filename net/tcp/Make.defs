@@ -55,6 +55,10 @@ NET_CSRCS += tcp_send.c tcp_input.c tcp_appsend.c tcp_listen.c tcp_close.c
 NET_CSRCS += tcp_monitor.c tcp_callback.c tcp_backlog.c tcp_ipselect.c
 NET_CSRCS += tcp_recvwindow.c tcp_netpoll.c tcp_ioctl.c tcp_shutdown.c
 
+ifeq ($(CONFIG_NET_TCP_OFFLOAD),y)
+SOCK_CSRCS += tcp_offload.c
+endif
+
 # TCP write buffering
 
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)

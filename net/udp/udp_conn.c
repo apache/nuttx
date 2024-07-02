@@ -654,6 +654,15 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 
       sq_init(&conn->write_q);
 #endif
+
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      /* Initialize the variables of GSO. */
+
+      conn->gso_max_segs = GSO_MAX_SEGS;
+      conn->gso_max_size = GSO_MAX_SIZE;
+      conn->gso_size = 0;
+      conn->gro_enable = false;
+#endif
       /* Enqueue the connection into the active list */
 
       dq_addlast(&conn->sconn.node, &g_active_udp_connections);

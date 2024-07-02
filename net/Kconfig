@@ -435,6 +435,31 @@ config NET_STARHUB
 endchoice # Node role
 endmenu # Network Topologies
 
+menu "Net Segment Offload"
+
+config NET_SEG_OFFLOAD
+	bool "Enable net segment offload"
+    depends on IOB_ALLOC
+	default n
+	---help---
+		Enable the net segment offload, including the GSO and LRO function.
+
+config NET_GSO
+	bool "Enable GSO function"
+	default n
+	select  NET_TCP_OFFLOAD
+	---help---
+		The function includes the UDP GSO and TCP GSO. And the TCP GSO is to
+		to be enabled by default.
+
+config NET_GRO
+	bool "Enable GRO function"
+	default n
+	---help---
+		The function just refers to the LRO feature, supporting the UDP
+		and TCP.
+
+endmenu # Net Segment Offload
 source "net/route/Kconfig"
 
 endif # NET

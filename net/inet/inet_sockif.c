@@ -823,6 +823,11 @@ static int inet_getsockopt(FAR struct socket *psock, int level, int option,
         return tcp_getsockopt(psock, option, value, value_len);
 #endif
 
+#ifdef CONFIG_NET_UDPPROTO_OPTIONS
+      case IPPROTO_UDP:
+        return udp_getsockopt(psock, option, value, value_len);
+#endif
+
 #ifdef CONFIG_NET_IPv4
       case IPPROTO_IP:/* IPv4 protocol socket options (see include/netinet/in.h) */
         return ipv4_getsockopt(psock, option, value, value_len);

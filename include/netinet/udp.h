@@ -31,6 +31,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_NET_SEG_OFFLOAD
+#define UDP_SEGMENT    103      /* Set GSO segmentation size */
+#define UDP_GRO        104      /* This socket can receive UDP GRO packets */
+#endif
+
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
 /* UDP header as specified by RFC 768, August 1980. */
 
 struct udphdr

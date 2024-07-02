@@ -181,6 +181,20 @@
      (netdev_ipv6_lookup(dev, addr, true) != NULL)
 #endif
 
+#ifdef CONFIG_NET_SEG_OFFLOAD
+/* Interface feature bits */
+
+#define NETIF_F_GSO_UDP    (1 << 0)  /* Interface supports the GSO UDP */
+#define NETIF_F_GSO_TCP    (1 << 1)  /* Interface supports the GSO TCP */
+#define NETIF_F_GRO_UDP    (1 << 2)  /* Interface supports the GRO UDP */
+#define NETIF_F_GRO_TCP    (1 << 3)  /* Interface supports the GRO TCP */
+#define NETIF_F_GRO_HW     (1 << 4)  /* Interface supports the GRO */
+#define NETIF_F_LRO        (1 << 5)  /* Interface supports the LRO */
+
+#define NETIF_F_GSO        (NETIF_F_GSO_UDP | NETIF_F_GSO_TCP)
+#define NETIF_F_GRO        (NETIF_F_GRO_UDP | NETIF_F_GRO_TCP)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -279,6 +293,24 @@ struct net_driver_s
   /* Drivers interface flags.  See IFF_* definitions in include/net/if.h */
 
   uint32_t d_flags;
+
+#ifdef CONFIG_NET_SEG_OFFLOAD
+  /* Drivers interface features.
+   * See NETIF_F_* definitions in include/net/if.h
+   */
+
+  uint32_t d_features;
+
+  #define GSO_MAX_SEGS           65535u
+  #define GSO_MAX_SIZE           65535u
+  uint32_t d_gso_max_size;
+  uint32_t d_gso_max_segs;
+
+  #define GRO_MAX_SEGS           65535u
+  #define GRO_MAX_SIZE           65535u
+  uint32_t d_gro_max_size;
+  uint32_t d_gro_max_segs;
+#endif
 
   /* Multi network devices using multiple link layer protocols are
    * supported
@@ -848,8 +880,7 @@ uint16_t net_chksum_iob(uint16_t sum, FAR struct iob_s *iob,
  *   data payload as necessary.
  *
  * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
+ *   pkt   - The packet data is in the d_iob of the device.
  *   proto - The protocol being supported
  *
  * Returned Value:
@@ -858,7 +889,7 @@ uint16_t net_chksum_iob(uint16_t sum, FAR struct iob_s *iob,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
+uint16_t ipv4_upperlayer_chksum(FAR struct iob_s *pkt, uint8_t proto);
 #endif /* CONFIG_NET_IPv4 */
 
 /****************************************************************************
@@ -869,8 +900,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
  *   data payload as necessary.
  *
  * Input Parameters:
- *   dev   - The network driver instance.  The packet data is in the d_buf
- *           of the device.
+ *   iob   - The packet data is in the d_iob of the device.
  *   proto - The protocol being supported
  *   iplen - The size of the IPv6 header.  This may be larger than
  *           IPv6_HDRLEN the IPv6 header if IPv6 extension headers are
@@ -882,7 +912,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
+uint16_t ipv6_upperlayer_chksum(FAR struct iob_s *iob,
                                 uint8_t proto, unsigned int iplen);
 #endif /* CONFIG_NET_IPv6 */
 

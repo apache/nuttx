@@ -140,4 +140,15 @@ config NET_UDP_NOTIFIER
 		wait for read-ahead data to become available.
 
 endif # NET_UDP && !NET_UDP_NO_STACK
+
+if NET_SEG_OFFLOAD
+
+config NET_UDP_OFFLOAD
+	bool "Enable udp segment offload"
+	default n
+	depends on NET_GSO && NET_GRO
+	---help---
+		Enable the UDP segment offload.
+
+endif # NET_SEG_OFFLOAD
 endmenu # UDP Networking

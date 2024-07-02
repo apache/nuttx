@@ -150,6 +150,47 @@ static bool quota_is_valid(FAR struct netdev_lowerhalf_s *lower)
 }
 
 /****************************************************************************
+ * Name: netpkt_alloc_internal
+ *
+ * Description:
+ *   Allocate a netpkt structure.
+ *
+ ****************************************************************************/
+
+static FAR netpkt_t *
+netpkt_alloc_internal(FAR struct netdev_lowerhalf_s *dev,
+                      enum netpkt_type_e type, uint16_t size)
+{
+  FAR netpkt_t *pkt;
+
+  if (quota_fetch_dec(dev, type) <= 0)
+    {
+      quota_fetch_inc(dev, type);
+      return NULL;
+    }
+
+#ifdef CONFIG_IOB_ALLOC
+  if (size > 0)
+    {
+      pkt = iob_alloc_dynamic(size);
+    }
+  else
+#endif
+    {
+      pkt = iob_tryalloc(false);
+    }
+
+  if (pkt == NULL)
+    {
+      quota_fetch_inc(dev, type);
+      return NULL;
+    }
+
+  iob_reserve(pkt, CONFIG_NET_LL_GUARDSIZE);
+  return pkt;
+}
+
+/****************************************************************************
  * Name: netpkt_get
  *
  * Description:
@@ -305,7 +346,13 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 
   pkt = netpkt_get(dev, NETPKT_TX);
 
-  if (netpkt_getdatalen(lower, pkt) > NETDEV_PKTSIZE(dev))
+  if (netpkt_getdatalen(lower, pkt) >
+#ifdef CONFIG_NET_GSO
+      devif_get_max_pktsize(dev)
+#else
+      NETDEV_PKTSIZE(dev)
+#endif
+      )
     {
       nerr("ERROR: Packet too long to send!\n");
       ret = -EMSGSIZE;
@@ -1265,23 +1312,14 @@ int netdev_lower_quota_load(FAR struct netdev_lowerhalf_s *dev,
 FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
                            enum netpkt_type_e type)
 {
-  FAR netpkt_t *pkt;
-
-  if (quota_fetch_dec(dev, type) <= 0)
-    {
-      quota_fetch_inc(dev, type);
-      return NULL;
-    }
-
-  pkt = iob_tryalloc(false);
-  if (pkt == NULL)
-    {
-      quota_fetch_inc(dev, type);
-      return NULL;
-    }
-
-  iob_reserve(pkt, CONFIG_NET_LL_GUARDSIZE);
-  return pkt;
+  return netpkt_alloc_internal(dev, type,
+#ifdef CONFIG_NET_GRO
+                               NETDEV_PKTSIZE(&dev->netdev) +
+                               CONFIG_NET_LL_GUARDSIZE
+#else
+                               0
+#endif
+                              );
 }
 
 /****************************************************************************

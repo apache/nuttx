@@ -1248,6 +1248,17 @@ int32_t ip_fragout(FAR struct net_driver_s *dev)
       return OK;
     }
 
+#ifdef CONFIG_NET_GSO
+  if ((dev->d_features & NETIF_F_GSO)
+      && (dev->d_iob->gso_info.gso_size != 0))
+    {
+      if (dev->d_iob->io_pktlen <= devif_get_max_pktsize(dev))
+        {
+          return OK;
+        }
+    }
+#endif
+
 #ifdef CONFIG_NET_6LOWPAN
   if (dev->d_lltype == NET_LL_IEEE802154 ||
       dev->d_lltype == NET_LL_PKTRADIO)

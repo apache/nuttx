@@ -83,6 +83,8 @@
 #  define UDP_WBDUMP(msg,wrb,len,offset)
 #endif
 
+#define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -288,10 +290,25 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
       return -EHOSTUNREACH;
     }
 
+#ifdef CONFIG_NET_UDP_OFFLOAD
+  if ((udpip_hdrsize(conn) + conn->gso_size) >  devif_get_mtu(dev))
+    {
+      nerr("ERROR: GSO size is out of range!\n");
+      return -E2BIG;
+    }
+#endif
+
 #ifndef CONFIG_NET_IPFRAG
   /* Sanity check if the packet len (with IP hdr) is greater than the MTU */
 
-  if (wrb->wb_iob->io_pktlen > devif_get_mtu(dev))
+  if (wrb->wb_iob->io_pktlen >
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      PKT_GSOINFO(wrb->wb_iob)->gso_size ? devif_get_max_pktsize(dev) :
+      devif_get_mtu(dev)
+#else
+      devif_get_mtu(dev)
+#endif
+      )
     {
       nerr("ERROR: Packet too long to send!\n");
       return -EMSGSIZE;
@@ -756,6 +773,25 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           goto errout_with_lock;
         }
 
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      if (conn->gso_size > 0 && len > conn->gso_size)
+        {
+          /* free wrb->wb_iob */
+
+          iob_free_chain(wrb->wb_iob);
+
+          /* alloc iob of gso pkt for udp data */
+
+          wrb->wb_iob = udp_prepare_gso_pkt(conn, len);
+
+          if (wrb->wb_iob == NULL)
+            {
+              ret = -ENOMEM;
+              goto errout_with_lock;
+            }
+        }
+#endif
+
       /* Initialize the write buffer
        *
        * Check if the socket is connected
@@ -808,41 +844,71 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       udpiplen = udpip_hdrsize(conn);
 
-      iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
-      iob_update_pktlen(wrb->wb_iob, udpiplen, false);
-
-      /* Copy the user data into the write buffer.  We cannot wait for
-       * buffer space if the socket was opened non-blocking.
-       */
-
-      if (nonblock)
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      if (conn->gso_size > 0 && len > conn->gso_size)
         {
-          ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                              len, udpiplen, false);
+          /* copy into the write buffer */
+
+          ret = udp_copy_gso_pkt(wrb->wb_iob, buf, len,
+                                 udpiplen, conn->gso_size);
         }
       else
+#endif
         {
-          unsigned int count;
-          int blresult;
+          iob_reserve(wrb->wb_iob, CONFIG_NET_LL_GUARDSIZE);
+          iob_update_pktlen(wrb->wb_iob, udpiplen, false);
 
-          /* iob_copyin might wait for buffers to be freed, but if
-           * network is locked this might never happen, since network
-           * driver is also locked, therefore we need to break the lock
+          /* Copy the user data into the write buffer.  We cannot wait for
+           * buffer space if the socket was opened non-blocking.
            */
 
-          blresult = net_breaklock(&count);
-          ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf,
-                           len, udpiplen, false);
-          if (blresult >= 0)
+          if (nonblock)
             {
-              net_restorelock(count);
+              ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf,
+                                  len, udpiplen, false);
+            }
+          else
+            {
+              unsigned int count;
+              int blresult;
+
+              /* iob_copyin might wait for buffers to be freed, but if
+               * network is locked this might never happen, since network
+               * driver is also locked, therefore we need to break the lock
+               */
+
+              blresult = net_breaklock(&count);
+              ret = iob_copyin(wrb->wb_iob, (FAR uint8_t *)buf,
+                               len, udpiplen, false);
+              if (blresult >= 0)
+                {
+                  net_restorelock(count);
+                }
+            }
+
+          if (ret < 0)
+            {
+              goto errout_with_wrb;
             }
         }
 
-      if (ret < 0)
+#ifdef CONFIG_NET_UDP_OFFLOAD
+      if (conn->gso_size > 0 && ret > conn->gso_size)
         {
-          goto errout_with_wrb;
+          if (psock->s_domain == PF_INET)
+            {
+              PKT_GSOINFO(wrb->wb_iob)->gso_type = PKT_GSO_UDPV4;
+            }
+          else if (psock->s_domain == PF_INET6)
+            {
+              PKT_GSOINFO(wrb->wb_iob)->gso_type = PKT_GSO_UDPV6;
+            }
+
+          PKT_GSOINFO(wrb->wb_iob)->gso_size = conn->gso_size;
+          PKT_GSOINFO(wrb->wb_iob)->gso_segs = DIV_ROUND_UP(ret,
+                                                            conn->gso_size);
         }
+#endif
 
       /* Dump I/O buffer chain */
 

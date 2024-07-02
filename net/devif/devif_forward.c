@@ -68,6 +68,10 @@ void devif_forward(FAR struct forward_s *fwd)
 
   fwd->f_dev->d_sndlen = 0;
   fwd->f_iob = NULL;
+
+#ifdef CONFIG_NET_GRO
+  devif_forward_gro_pkt(fwd->f_dev, fwd->f_dev->d_iob);
+#endif
 }
 
 #endif /* CONFIG_NET_IPFORWARD */

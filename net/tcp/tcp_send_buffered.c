@@ -721,10 +721,17 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           sndlen = TCP_WBPKTLEN(wrb);
 
+#ifdef CONFIG_NET_TCP_OFFLOAD
+          if (sndlen > conn->gso_max_size)
+            {
+              sndlen = conn->gso_max_size;
+            }
+#else
           if (sndlen > conn->mss)
             {
               sndlen = conn->mss;
             }
+#endif
 
           /* As we are retransmitting, the sequence number is expected
            * already set for this write buffer.
@@ -747,21 +754,39 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
           tcp_setsequence(conn->sndseq, TCP_WBSEQNO(wrb));
 
-#ifdef CONFIG_NET_JUMBO_FRAME
-          if (sndlen <= conn->mss)
+#ifdef CONFIG_NET_TCP_OFFLOAD
+          if (sndlen > conn->mss)
             {
-              /* alloc iob */
-
-              netdev_iob_prepare_dynamic(dev, sndlen + tcpip_hdrsize(conn));
+              ret = tcp_send_gso_pkt(conn, dev, TCP_WBIOB(wrb),
+                                     sndlen, 0);
             }
+          else
+#endif
+            {
+#ifdef CONFIG_NET_JUMBO_FRAME
+#ifndef CONFIG_NET_TCP_OFFLOAD
+              if (sndlen <= conn->mss)
+#endif
+                {
+                  /* alloc iob */
+
+                  netdev_iob_prepare_dynamic(dev,
+                                             sndlen + tcpip_hdrsize(conn));
+                }
 #endif
 
-          ret = devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
-                               0, tcpip_hdrsize(conn));
+              ret = devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
+                                   0, tcpip_hdrsize(conn));
+            }
+
           if (ret <= 0)
             {
               return flags;
             }
+
+#ifdef CONFIG_NET_TCP_OFFLOAD
+          tcp_set_gso(conn, dev->d_iob, sndlen);
+#endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
           /* After Fast retransmitted, set ssthresh to the maximum of
@@ -1026,10 +1051,17 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           int ret;
 
           sndlen = TCP_WBPKTLEN(wrb) - TCP_WBSENT(wrb);
+#ifdef CONFIG_NET_TCP_OFFLOAD
+          if (sndlen > conn->gso_max_size)
+            {
+              sndlen = conn->gso_max_size;
+            }
+#else
           if (sndlen > conn->mss)
             {
               sndlen = conn->mss;
             }
+#endif
 
           remaining_snd_wnd = TCP_SEQ_SUB(snd_wnd_edge, seq);
           if (sndlen > remaining_snd_wnd)
@@ -1083,21 +1115,39 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
            * won't actually happen until the polling cycle completes).
            */
 
-#ifdef CONFIG_NET_JUMBO_FRAME
-          if (sndlen <= conn->mss)
+#ifdef CONFIG_NET_TCP_OFFLOAD
+          if (sndlen > conn->mss)
             {
-              /* alloc iob */
-
-              netdev_iob_prepare_dynamic(dev, sndlen + tcpip_hdrsize(conn));
+              ret = tcp_send_gso_pkt(conn, dev, TCP_WBIOB(wrb),
+                                     sndlen, TCP_WBSENT(wrb));
             }
+          else
+#endif
+            {
+#ifdef CONFIG_NET_JUMBO_FRAME
+#ifndef CONFIG_NET_TCP_OFFLOAD
+              if (sndlen <= conn->mss)
+#endif
+                {
+                  /* alloc iob */
+
+                  netdev_iob_prepare_dynamic(dev,
+                                             sndlen + tcpip_hdrsize(conn));
+                }
 #endif
 
-          ret = devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
-                               TCP_WBSENT(wrb), tcpip_hdrsize(conn));
+              ret = devif_iob_send(dev, TCP_WBIOB(wrb), sndlen,
+                                   TCP_WBSENT(wrb), tcpip_hdrsize(conn));
+            }
+
           if (ret <= 0)
             {
               return flags;
             }
+
+#ifdef CONFIG_NET_TCP_OFFLOAD
+          tcp_set_gso(conn, dev->d_iob, sndlen);
+#endif
 
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  Just increment
@@ -1456,7 +1506,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            * from the the wrb yet.
            */
 
+#ifdef CONFIG_NET_TCP_OFFLOAD
+          conn->gso_max_size = tcp_gso_size_goal(conn);
+          max_wrb_size = conn->gso_max_size;
+#else
           max_wrb_size = tcp_max_wrb_size(conn);
+#endif
           wrb = (FAR struct tcp_wrbuffer_s *)sq_tail(&conn->write_q);
           if (wrb != NULL && TCP_WBSENT(wrb) == 0 && TCP_WBNRTX(wrb) == 0 &&
               TCP_WBPKTLEN(wrb) < max_wrb_size &&

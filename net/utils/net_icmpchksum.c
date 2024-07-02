@@ -88,7 +88,7 @@ uint16_t icmp_chksum_iob(FAR struct iob_s *iob)
 #ifdef CONFIG_NET_ICMPv6
 uint16_t icmpv6_chksum(FAR struct net_driver_s *dev, unsigned int iplen)
 {
-  return ipv6_upperlayer_chksum(dev, IP_PROTO_ICMP6, iplen);
+  return ipv6_upperlayer_chksum(dev->d_iob, IP_PROTO_ICMP6, iplen);
 }
 #endif
 

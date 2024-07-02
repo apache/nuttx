@@ -45,6 +45,12 @@
 
 #if defined(CONFIG_NET_IPFORWARD) && defined(CONFIG_NET_IPv4)
 
+#ifdef CONFIG_NET_GSO
+ #define NETDEV_MAXPKTSIZE(fwdev)     devif_get_max_pktsize(fwdev)
+#else
+ #define NETDEV_MAXPKTSIZE(fwdev)     NETDEV_PKTSIZE(fwddev)
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -240,7 +246,7 @@ static int ipv4_dev_forward(FAR struct net_driver_s *dev,
    * if DF is set.
    */
 
-  if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_PKTSIZE(fwddev)
+  if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_MAXPKTSIZE(fwdev)
 #ifdef CONFIG_NET_IPFRAG
       && (ipv4->ipoffset[0] & (IP_FLAG_DONTFRAG >> 8))
 #endif

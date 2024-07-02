@@ -34,6 +34,9 @@
 #  include <nuttx/wqueue.h>
 #endif
 
+#ifdef CONFIG_NET_SEG_OFFLOAD
+#  include <nuttx/net/offload.h>
+#endif
 #ifdef CONFIG_MM_IOB
 
 /****************************************************************************
@@ -124,6 +127,10 @@ struct iob_s
 #  endif
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
+#ifdef CONFIG_NET_SEG_OFFLOAD
+  struct gso_cb gso_info;
+  struct gro_cb gro_info;
+#endif
 
 #ifdef CONFIG_IOB_ALLOC
   iob_free_cb_t io_free;  /* Custom free callback */

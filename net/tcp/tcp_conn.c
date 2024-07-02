@@ -820,6 +820,14 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
           conn->mss = MIN_IPv6_TCP_INITIAL_MSS;
         }
 #endif /* CONFIG_NET_IPv6 */
+
+#ifdef CONFIG_NET_TCP_OFFLOAD
+
+      /* Initialize the variables of GSO. */
+
+      conn->gso_max_segs = GSO_MAX_SIZE;
+      conn->gso_max_size = GSO_MAX_SIZE;
+#endif
     }
 
   return conn;
