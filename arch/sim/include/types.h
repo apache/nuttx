@@ -119,6 +119,9 @@ typedef __SIZE_TYPE__      _size_t;
 #elif defined(CONFIG_ARCH_SIZET_LONG)
 typedef signed long        _ssize_t;
 typedef unsigned long      _size_t;
+#elif defined(_WIN64)
+typedef signed long long   _ssize_t;
+typedef unsigned long long _size_t;
 #else
 typedef signed int         _ssize_t;
 typedef unsigned int       _size_t;
