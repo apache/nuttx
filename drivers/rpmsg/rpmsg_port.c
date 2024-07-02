@@ -752,20 +752,10 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port,
 
 void rpmsg_port_unregister(FAR struct rpmsg_port_s *port)
 {
-  FAR struct rpmsg_port_header_s *hdr;
   char name[64];
 
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->cpuname);
   rpmsg_unregister(name, &port->rpmsg);
 
   rpmsg_device_destory(&port->rpmsg);
-  while ((hdr = rpmsg_port_queue_get_buffer(&port->txq, false)) != NULL)
-    {
-      rpmsg_port_queue_return_buffer(&port->txq, hdr);
-    }
-
-  while ((hdr = rpmsg_port_queue_get_buffer(&port->rxq, false)) != NULL)
-    {
-      rpmsg_port_queue_return_buffer(&port->rxq, hdr);
-    }
 }
