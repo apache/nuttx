@@ -134,6 +134,9 @@ extern "C"
 int cap_register(FAR const char *devpath,
                  FAR struct cap_lowerhalf_s *lower);
 
+int cap_register_multiple(FAR const char *devpath,
+                          FAR struct cap_lowerhalf_s **lower, int n);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
