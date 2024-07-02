@@ -197,6 +197,9 @@ struct usbdev_epinfo_s
 #ifdef CONFIG_USBDEV_DUALSPEED
   uint16_t            hssize;
 #endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  uint16_t            sssize;
+#endif
   uint16_t            reqnum;
 };
 
@@ -219,7 +222,7 @@ struct usbdev_devinfo_s
 struct usbdevclass_driver_s;
 struct composite_devdesc_s
 {
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
                              FAR struct usbdev_devinfo_s *devinfo,
                              uint8_t speed, uint8_t type);
@@ -438,7 +441,7 @@ int usbdev_copy_devdesc(FAR void *dest,
  ****************************************************************************/
 
 void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
-                        uint8_t epno, bool hispeed,
+                        uint8_t epno, uint8_t speed,
                         FAR const struct usbdev_epinfo_s *epinfo);
 
 /****************************************************************************
