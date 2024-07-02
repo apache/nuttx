@@ -42,7 +42,7 @@
  * Public Functions
  ****************************************************************************/
 
-IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
+static inline void tricore_doirq(void)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -108,3 +108,13 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
   board_autoled_off(LED_INIRQ);
 #endif
 }
+
+#define DEFINE_IFX_INTERRUPT_INTERNAL(core) \
+IFX_INTERRUPT_INTERNAL(tricore_doirq##core, core, 255) { tricore_doirq(); }
+
+DEFINE_IFX_INTERRUPT_INTERNAL(0)
+DEFINE_IFX_INTERRUPT_INTERNAL(1)
+DEFINE_IFX_INTERRUPT_INTERNAL(2)
+DEFINE_IFX_INTERRUPT_INTERNAL(3)
+DEFINE_IFX_INTERRUPT_INTERNAL(4)
+DEFINE_IFX_INTERRUPT_INTERNAL(5)

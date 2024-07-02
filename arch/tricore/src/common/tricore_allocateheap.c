@@ -28,6 +28,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
@@ -66,6 +67,8 @@
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = _edata;
-  *heap_size = (size_t)((uintptr_t)_eheap - (uintptr_t)_edata);
+  uintptr_t edata = _edata_align + (g_cpu_data_size * CONFIG_BMP_NCPUS - 1);
+
+  *heap_size = ((size_t)((uintptr_t)_eheap - edata)) / CONFIG_NR_CPUS;
+  *heap_start = (void *)(edata + (*heap_size * up_cpu_index()));
 }
