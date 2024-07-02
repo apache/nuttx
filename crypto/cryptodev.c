@@ -255,6 +255,7 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_SHA2_256:
             case CRYPTO_SHA2_384:
             case CRYPTO_SHA2_512:
+            case CRYPTO_CRC32:
               thash = true;
               break;
             default:
