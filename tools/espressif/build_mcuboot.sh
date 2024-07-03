@@ -11,6 +11,7 @@ usage() {
   echo "  -f <config> Path to file containing configuration options"
   echo "  -p <path> Path to execute the script"
   echo "  -e <hal> Path to HAL directory"
+  echo "  -d <path> Path to toolchain file"
   echo "  -h Show usage and terminate"
   echo ""
 }
@@ -22,7 +23,7 @@ build_mcuboot() {
   local build_dir=".build-${target}"
   local source_dir="boot/espressif"
   local output_dir="${exec_path}/out"
-  local toolchain_file="tools/toolchain-${target}.cmake"
+  local toolchain_file="tools/nuttx-toolchain-${target}.cmake"
   local mcuboot_config
   local mcuboot_flashsize
   local mcuboot_flashmode
@@ -47,6 +48,12 @@ build_mcuboot() {
   mcuboot_flashfreq=$(sed -n 's/^CONFIG_ESPTOOLPY_FLASHFREQ_\(.*\)M=1/\1m/p' "${mcuboot_config}")
   if [ -z "${mcuboot_flashfreq}" ]; then
     mcuboot_flashfreq="40m"
+  fi
+
+  if ! [ -z "${nuttx_toolchain}" ]; then
+    cp "${nuttx_toolchain}" "${mcuboot_dir}/${source_dir}/${toolchain_file}"
+  else
+    toolchain_file="tools/toolchain-${target}.cmake"
   fi
 
   pushd "${exec_path}" &>/dev/null
@@ -84,7 +91,7 @@ build_mcuboot() {
   popd &>/dev/null
 }
 
-while getopts ":hc:f:p:e:" arg; do
+while getopts ":hc:f:p:e:d:" arg; do
   case "${arg}" in
     c)
       chip=${OPTARG}
@@ -97,6 +104,9 @@ while getopts ":hc:f:p:e:" arg; do
       ;;
     e)
       esp_hal=${OPTARG}
+      ;;
+    d)
+      nuttx_toolchain=${OPTARG}
       ;;
     h)
       usage

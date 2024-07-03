@@ -34,6 +34,7 @@ BOOTLOADER_CONFIG    = $(BOOTLOADER_SRCDIR)/bootloader.conf
 MCUBOOT_SRCDIR     = $(BOOTLOADER_SRCDIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
 MCUBOOT_URL        = https://github.com/mcu-tools/mcuboot
+MCUBOOT_TOOLCHAIN  = $(TOOLSDIR)/mcuboot_toolchain_espressif.cmake
 
 # Helpers for creating the configuration file
 
@@ -95,7 +96,8 @@ $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_
 		-c $(CHIP_SERIES) \
 		-f $(BOOTLOADER_CONFIG) \
 		-p $(BOOTLOADER_SRCDIR) \
-		-e $(HALDIR)
+		-e $(HALDIR) \
+		-d $(MCUBOOT_TOOLCHAIN)
 	$(call COPYFILE, $(BOOTLOADER_OUTDIR)/mcuboot-$(CHIP_SERIES).bin, $(TOPDIR))
 
 bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)
