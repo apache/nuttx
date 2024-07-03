@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "xtensa.h"
 #include "esp32s2_clockconfig.h"

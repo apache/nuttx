@@ -64,6 +64,7 @@
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
