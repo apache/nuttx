@@ -230,6 +230,10 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 CFLAGS += -Wno-undef -Wno-unused-variable
 CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
 
+# Enable strict volatile bitfield access
+
+CFLAGS += -fstrict-volatile-bitfields
+
 AFLAGS += $(CFLAGS)
 
 # Files that require the HAL recipe
