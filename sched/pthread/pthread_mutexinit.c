@@ -55,7 +55,6 @@
 int pthread_mutex_init(FAR pthread_mutex_t *mutex,
                        FAR const pthread_mutexattr_t *attr)
 {
-  int pshared = 0;
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type = PTHREAD_MUTEX_DEFAULT;
 #endif
@@ -88,7 +87,6 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 
       if (attr)
         {
-          pshared = attr->pshared;
 #ifdef CONFIG_PRIORITY_INHERITANCE
           proto   = attr->proto;
 #endif
@@ -107,7 +105,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 
       /* Initialize the mutex like a semaphore with initial count = 1 */
 
-      status = nxsem_init(&mutex->sem, pshared, 1);
+      status = nxsem_init(&mutex->sem, 0, 1);
       if (status < 0)
         {
           ret = -ret;
