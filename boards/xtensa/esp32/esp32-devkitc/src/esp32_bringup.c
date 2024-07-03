@@ -295,6 +295,14 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP_MCPWM_MOTOR_BDC
+  ret = board_motor_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_motor_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_MAX6675
   ret = board_max6675_initialize(0, 2);
   if (ret < 0)
