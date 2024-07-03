@@ -227,44 +227,62 @@ static const struct usbdev_epinfo_s g_adb_epbulkin =
 {
   .desc =
     {
-      .len      = USB_SIZEOF_EPDESC,
-      .type     = USB_DESC_TYPE_ENDPOINT,
-      .addr     = USB_DIR_IN,
-      .attr     = USB_EP_ATTR_XFER_BULK |
-                  USB_EP_ATTR_NO_SYNC   |
-                  USB_EP_ATTR_USAGE_DATA,
-      .interval = 0,
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
+      .addr      = USB_DIR_IN,
+      .attr      = USB_EP_ATTR_XFER_BULK |
+                   USB_EP_ATTR_NO_SYNC   |
+                   USB_EP_ATTR_USAGE_DATA,
+      .interval  = 0,
     },
-  .fssize = CONFIG_USBADB_EPBULKIN_FSSIZE,
+  .reqnum        = CONFIG_USBADB_NWRREQS,
+  .fssize        = CONFIG_USBADB_EPBULKIN_FSSIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
-  .hssize = CONFIG_USBADB_EPBULKIN_HSSIZE,
+  .hssize        = CONFIG_USBADB_EPBULKIN_HSSIZE,
 #endif
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  .sssize = CONFIG_USBADB_EPBULKIN_SSSIZE,
+  .sssize        = CONFIG_USBADB_EPBULKIN_SSSIZE,
+  .compdesc      =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_USBADB_EPBULKIN_MAXBURST,
+      .attr      = CONFIG_USBADB_EPBULKIN_MAXSTREAM,
+      .wbytes[0] = 0,
+      .wbytes[1] = 0,
+    },
 #endif
-  .reqnum = CONFIG_USBADB_NWRREQS,
 };
 
 static const struct usbdev_epinfo_s g_adb_epbulkout =
 {
   .desc =
     {
-      .len      = USB_SIZEOF_EPDESC,
-      .type     = USB_DESC_TYPE_ENDPOINT,
-      .addr     = USB_DIR_OUT,
-      .attr     = USB_EP_ATTR_XFER_BULK |
-                  USB_EP_ATTR_NO_SYNC   |
-                  USB_EP_ATTR_USAGE_DATA,
-      .interval = 0,
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
+      .addr      = USB_DIR_OUT,
+      .attr      = USB_EP_ATTR_XFER_BULK |
+                   USB_EP_ATTR_NO_SYNC   |
+                   USB_EP_ATTR_USAGE_DATA,
+      .interval  = 0,
     },
-  .fssize = CONFIG_USBADB_EPBULKOUT_FSSIZE,
+  .reqnum        = CONFIG_USBADB_NRDREQS,
+  .fssize        = CONFIG_USBADB_EPBULKOUT_FSSIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
-  .hssize = CONFIG_USBADB_EPBULKOUT_HSSIZE,
+  .hssize        = CONFIG_USBADB_EPBULKOUT_HSSIZE,
 #endif
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  .sssize = CONFIG_USBADB_EPBULKOUT_SSSIZE,
+  .sssize        = CONFIG_USBADB_EPBULKOUT_SSSIZE,
+  .compdesc =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_USBADB_EPBULKOUT_MAXBURST,
+      .attr      = CONFIG_USBADB_EPBULKOUT_MAXSTREAM,
+      .wbytes[0] = 0,
+      .wbytes[1] = 0,
+    },
 #endif
-  .reqnum = CONFIG_USBADB_NRDREQS,
 };
 
 static const FAR struct usbdev_epinfo_s *g_adb_epinfos[USBADB_NUM_EPS] =
@@ -289,8 +307,10 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo,
                                   uint8_t speed, uint8_t type)
 {
-  FAR struct usb_epdesc_s *epdesc;
+  FAR uint8_t *epdesc;
   FAR struct usb_ifdesc_s *dest;
+  uint32_t totallen = 0;
+  int ret;
 
   /* Check for switches between high and full speed */
 
@@ -300,14 +320,24 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
     }
 
   dest = (FAR struct usb_ifdesc_s *)buf;
-  epdesc = (FAR struct usb_epdesc_s *)(buf + sizeof(g_adb_ifdesc));
+  epdesc = (FAR uint8_t *)(buf + sizeof(g_adb_ifdesc));
 
   memcpy(dest, &g_adb_ifdesc, sizeof(g_adb_ifdesc));
+  totallen += sizeof(g_adb_ifdesc);
 
-  usbdev_copy_epdesc(&epdesc[0], devinfo->epno[USBADB_EP_BULKIN_IDX],
-                     speed, &g_adb_epbulkin);
-  usbdev_copy_epdesc(&epdesc[1], devinfo->epno[USBADB_EP_BULKOUT_IDX],
-                     speed, &g_adb_epbulkout);
+  ret = usbdev_copy_epdesc((FAR struct usb_epdesc_s *)epdesc,
+                           devinfo->epno[USBADB_EP_BULKIN_IDX],
+                           speed,
+                           &g_adb_epbulkin);
+  totallen += ret;
+  epdesc += ret;
+
+  ret = usbdev_copy_epdesc((FAR struct usb_epdesc_s *)epdesc,
+                           devinfo->epno[USBADB_EP_BULKOUT_IDX],
+                           speed,
+                           &g_adb_epbulkout);
+  totallen += ret;
+  epdesc += ret;
 
 #ifdef CONFIG_USBADB_COMPOSITE
   /* For composite device, apply possible offset to the interface numbers */
@@ -316,7 +346,7 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
   dest->iif  = devinfo->strbase + USBADB_INTERFACESTRID;
 #endif
 
-  return sizeof(g_adb_ifdesc) + 2 * USB_SIZEOF_EPDESC;
+  return totallen;
 }
 
 /****************************************************************************
@@ -430,7 +460,13 @@ void usbdev_adb_get_composite_devdesc(FAR struct composite_devdesc_s *dev)
   dev->mkstrdesc           = usbclass_mkstrdesc,
   dev->nconfigs            = USBADB_NCONFIGS;
   dev->configid            = 1;
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  dev->cfgdescsize         = sizeof(g_adb_ifdesc) +
+                             USB_SIZEOF_EPDESC * 2 +
+                             USB_SIZEOF_SS_EPCOMPDESC * 2;
+#else
   dev->cfgdescsize         = sizeof(g_adb_ifdesc) + 2 * USB_SIZEOF_EPDESC;
+#endif
   dev->devinfo.ninterfaces = 1;
   dev->devinfo.nstrings    = USBADB_NSTRIDS;
   dev->devinfo.nendpoints  = USBADB_NUM_EPS;

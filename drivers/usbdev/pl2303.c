@@ -165,6 +165,7 @@
 #define PL2303_EPINTIN_ADDR        (USB_DIR_IN|CONFIG_PL2303_EPINTIN)
 #define PL2303_EPINTIN_ATTR        (USB_EP_ATTR_XFER_INT)
 #define PL2303_EPINTIN_MXPACKET    (10)
+#define PL2303_EPINTIN_MXBURST     (0)
 
 #define PL2303_EPOUTBULK_ADDR      (CONFIG_PL2303_EPBULKOUT)
 #define PL2303_EPOUTBULK_ATTR      (USB_EP_ATTR_XFER_BULK)
@@ -293,8 +294,13 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
 /* Configuration ************************************************************/
 
 static int     usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
-static void    usbclass_mkepbulkdesc(const struct usb_epdesc_s *indesc,
-                 uint16_t mxpacket, struct usb_epdesc_s *outdesc);
+static int usbclass_mkepbulkdesc(
+                          FAR const struct usb_epdesc_s *indesc,
+#ifdef CONFIG_USBDEV_SUPERSPEED
+                          FAR const struct usb_ss_epcompdesc_s *incompdesc,
+#endif
+                          uint8_t speed,
+                          FAR struct usb_epdesc_s *outdesc);
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
 static void    usbclass_resetconfig(FAR struct pl2303_dev_s *priv);
 static int     usbclass_setconfig(FAR struct pl2303_dev_s *priv,
@@ -441,6 +447,18 @@ static const struct usb_epdesc_s g_epintindesc =
   1                                             /* interval */
 };
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+static const struct usb_ss_epcompdesc_s g_epintincompdesc =
+{
+  USB_SIZEOF_SS_EPCOMPDESC,
+  USB_DESC_TYPE_ENDPOINT_COMPANION,
+  PL2303_EPINTIN_MXBURST,
+  0,
+  { LSBYTE((PL2303_EPINTIN_MXBURST + 1) * PL2303_EPINTIN_MXPACKET),
+  MSBYTE((PL2303_EPINTIN_MXBURST + 1) * PL2303_EPINTIN_MXPACKET) },
+};
+#endif
+
 static const struct usb_epdesc_s g_epbulkoutdesc =
 {
   USB_SIZEOF_EPDESC,                            /* len */
@@ -451,6 +469,17 @@ static const struct usb_epdesc_s g_epbulkoutdesc =
   0                                             /* interval */
 };
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+static const struct usb_ss_epcompdesc_s g_epbulkoutcompdesc =
+{
+  USB_SIZEOF_SS_EPCOMPDESC,
+  USB_DESC_TYPE_ENDPOINT_COMPANION,
+  CONFIG_PL2303_EPBULK_MAXBURST,
+  CONFIG_PL2303_EPBULK_MAXSTREAM,
+  { 0, 0 },
+};
+#endif
+
 static const struct usb_epdesc_s g_epbulkindesc =
 {
   USB_SIZEOF_EPDESC,                            /* len */
@@ -460,6 +489,17 @@ static const struct usb_epdesc_s g_epbulkindesc =
   { LSBYTE(64), MSBYTE(64) },                   /* maxpacket -- might change to 512 */
   0                                             /* interval */
 };
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+static const struct usb_ss_epcompdesc_s g_epbulkincompdesc =
+{
+  USB_SIZEOF_SS_EPCOMPDESC,
+  USB_DESC_TYPE_ENDPOINT_COMPANION,
+  CONFIG_PL2303_EPBULK_MAXBURST,
+  CONFIG_PL2303_EPBULK_MAXSTREAM,
+  { 0, 0 },
+};
+#endif
 
 #ifdef CONFIG_USBDEV_DUALSPEED
 static const struct usb_qualdesc_s g_qualdesc =
@@ -824,6 +864,41 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 }
 
 /****************************************************************************
+ * Name: usbclass_mkepintdesc
+ *
+ * Description:
+ *   Construct the interrupt endpoint descriptor
+ *
+ ****************************************************************************/
+
+static int usbclass_mkepintdesc(
+                          FAR const struct usb_epdesc_s *indesc,
+#ifdef CONFIG_USBDEV_SUPERSPEED
+                          FAR const struct usb_ss_epcompdesc_s *incompdesc,
+#endif
+                          uint8_t speed,
+                          FAR struct usb_epdesc_s *outdesc)
+{
+  int len = sizeof(struct usb_epdesc_s);
+
+  memcpy(outdesc, indesc, USB_SIZEOF_EPDESC);
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed >= USB_SPEED_SUPER)
+    {
+      FAR struct usb_ss_epcompdesc_s *outcompdesc =
+                (FAR struct usb_ss_epcompdesc_s *)(outdesc++);
+      memcpy(outcompdesc, incompdesc, USB_SIZEOF_SS_EPCOMPDESC);
+      len += sizeof(struct usb_ss_epcompdesc_s);
+    }
+#else
+  UNUSED(speed);
+#endif
+
+  return len;
+}
+
+/****************************************************************************
  * Name: usbclass_mkepbulkdesc
  *
  * Description:
@@ -831,11 +906,33 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
  *
  ****************************************************************************/
 
-static inline void usbclass_mkepbulkdesc(
-                             FAR const struct usb_epdesc_s *indesc,
-                             uint16_t mxpacket,
-                             FAR struct usb_epdesc_s *outdesc)
+static int usbclass_mkepbulkdesc(
+                          FAR const struct usb_epdesc_s *indesc,
+#ifdef CONFIG_USBDEV_SUPERSPEED
+                          FAR const struct usb_ss_epcompdesc_s *incompdesc,
+#endif
+                          uint8_t speed,
+                          FAR struct usb_epdesc_s *outdesc)
 {
+  int len = sizeof(struct usb_epdesc_s);
+  uint16_t mxpacket = CONFIG_PL2303_EPBULK_FSSIZE;
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed >= USB_SPEED_SUPER)
+    {
+      mxpacket = CONFIG_PL2303_EPBULK_SSSIZE;
+    }
+  else
+#endif
+#ifdef CONFIG_USBDEV_DUALSPEED
+  if (speed == USB_SPEED_HIGH)
+    {
+      mxpacket = CONFIG_PL2303_EPBULK_HSSIZE;
+    }
+#else
+  UNUSED(speed);
+#endif
+
   /* Copy the canned descriptor */
 
   memcpy(outdesc, indesc, USB_SIZEOF_EPDESC);
@@ -844,6 +941,34 @@ static inline void usbclass_mkepbulkdesc(
 
   outdesc->mxpacketsize[0] = LSBYTE(mxpacket);
   outdesc->mxpacketsize[1] = MSBYTE(mxpacket);
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed >= USB_SPEED_SUPER)
+    {
+      /* Copy the descriptor */
+
+      FAR struct usb_ss_epcompdesc_s *outcompdesc =
+                  (FAR struct usb_ss_epcompdesc_s *)(outdesc++);
+      memcpy(outcompdesc, incompdesc, USB_SIZEOF_SS_EPCOMPDESC);
+
+      if (outcompdesc->mxburst >= USB_SS_BULK_EP_MAXBURST)
+        {
+          outcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
+        }
+
+      if (outcompdesc->attr > USB_SS_BULK_EP_MAXSTREAM)
+        {
+          outcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
+        }
+
+      outcompdesc->wbytes[0] = 0;
+      outcompdesc->wbytes[1] = 0;
+
+      len += sizeof(struct usb_ss_epcompdesc_s);
+    }
+#endif
+
+  return len;
 }
 
 /****************************************************************************
@@ -857,8 +982,8 @@ static inline void usbclass_mkepbulkdesc(
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
 {
   FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
-  uint16_t bulkmxpacket = CONFIG_PL2303_EPBULK_FSSIZE;
-  uint16_t totallen;
+  uint16_t totallen = 0;
+  int ret;
 
   /* Check for switches between high and full speed */
 
@@ -867,13 +992,6 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
       speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
 
-  /* This is the total length of the configuration (not necessarily the
-   * size that we will be sending now.
-   */
-
-  totallen = USB_SIZEOF_CFGDESC + USB_SIZEOF_IFDESC +
-      PL2303_NENDPOINTS * USB_SIZEOF_EPDESC;
-
   /* Configuration descriptor -- Copy the canned descriptor and fill in the
    * type (we'll also need to update the size below
    */
@@ -881,34 +999,41 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
   memcpy(cfgdesc, &g_cfgdesc, USB_SIZEOF_CFGDESC);
   cfgdesc->type = type;
   buf += USB_SIZEOF_CFGDESC;
+  totallen += USB_SIZEOF_CFGDESC;
 
   /* Copy the canned interface descriptor */
 
   memcpy(buf, &g_ifdesc, USB_SIZEOF_IFDESC);
   buf += USB_SIZEOF_IFDESC;
+  totallen += USB_SIZEOF_IFDESC;
 
-  memcpy(buf, &g_epintindesc, USB_SIZEOF_EPDESC);
-  buf += USB_SIZEOF_EPDESC;
-
+  ret = usbclass_mkepintdesc(&g_epintindesc,
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
-    {
-      bulkmxpacket = CONFIG_PL2303_EPBULK_SSSIZE;
-    }
-  else
+                             &g_epintincompdesc,
 #endif
-#ifdef CONFIG_USBDEV_DUALSPEED
-  if (speed == USB_SPEED_HIGH)
-    {
-      bulkmxpacket = CONFIG_PL2303_EPBULK_HSSIZE;
-    }
-#endif
+                             speed,
+                             (FAR struct usb_epdesc_s *)buf);
 
-  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket,
-                        (FAR struct usb_epdesc_s *)buf);
-  buf += USB_SIZEOF_EPDESC;
-  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket,
-                        (FAR struct usb_epdesc_s *)buf);
+  buf += ret;
+  totallen += ret;
+
+  ret = usbclass_mkepbulkdesc(&g_epbulkoutdesc,
+#ifdef CONFIG_USBDEV_SUPERSPEED
+                              &g_epbulkoutcompdesc,
+#endif
+                              speed,
+                              (FAR struct usb_epdesc_s *)buf);
+  buf += ret;
+  totallen += ret;
+
+  ret = usbclass_mkepbulkdesc(&g_epbulkindesc,
+#ifdef CONFIG_USBDEV_SUPERSPEED
+                              &g_epbulkincompdesc,
+#endif
+                              speed,
+                              (FAR struct usb_epdesc_s *)buf);
+  buf += ret;
+  totallen += ret;
 
   /* Finally, fill in the total size of the configuration descriptor */
 
@@ -965,8 +1090,7 @@ static void usbclass_resetconfig(FAR struct pl2303_dev_s *priv)
 static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 {
   FAR struct usbdev_req_s *req;
-  struct usb_epdesc_s epdesc;
-  uint16_t bulkmxpacket = CONFIG_PL2303_EPBULK_FSSIZE;
+  struct usb_ss_epdesc_s epdesc;
   int i;
   int ret = 0;
 
@@ -1008,7 +1132,13 @@ static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 
   /* Configure the IN interrupt endpoint */
 
-  ret = EP_CONFIGURE(priv->epintin, &g_epintindesc, false);
+  usbclass_mkepintdesc(&g_epintindesc,
+#ifdef CONFIG_USBDEV_SUPERSPEED
+                       &g_epintincompdesc,
+#endif
+                       priv->usbdev->speed,
+                       &epdesc.epdesc);
+  ret = EP_CONFIGURE(priv->epintin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
@@ -1019,23 +1149,14 @@ static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
+  usbclass_mkepbulkdesc(&g_epbulkindesc,
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  if (priv->usbdev->speed == USB_SPEED_SUPER ||
-      priv->usbdev->speed == USB_SPEED_SUPER_PLUS)
-    {
-      bulkmxpacket = CONFIG_PL2303_EPBULK_SSSIZE;
-    }
-  else
+                        &g_epbulkincompdesc,
 #endif
-#ifdef CONFIG_USBDEV_DUALSPEED
-  if (priv->usbdev->speed == USB_SPEED_HIGH)
-    {
-      bulkmxpacket = CONFIG_PL2303_EPBULK_HSSIZE;
-    }
-#endif
+                        priv->usbdev->speed,
+                        &epdesc.epdesc);
 
-  usbclass_mkepbulkdesc(&g_epbulkindesc, bulkmxpacket, &epdesc);
-  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
+  ret = EP_CONFIGURE(priv->epbulkin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINCONFIGFAIL), 0);
@@ -1046,8 +1167,13 @@ static int usbclass_setconfig(FAR struct pl2303_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-  usbclass_mkepbulkdesc(&g_epbulkoutdesc, bulkmxpacket, &epdesc);
-  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
+  usbclass_mkepbulkdesc(&g_epbulkoutdesc,
+#ifdef CONFIG_USBDEV_SUPERSPEED
+                        &g_epbulkoutcompdesc,
+#endif
+                        priv->usbdev->speed,
+                        &epdesc.epdesc);
+  ret = EP_CONFIGURE(priv->epbulkout, &epdesc.epdesc, true);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
@@ -1330,20 +1456,32 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate read requests.  The buffer size is one full packet. */
 
-#ifdef CONFIG_USBDEV_SUPERSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
   if (dev->speed == USB_SPEED_SUPER ||
       dev->speed == USB_SPEED_SUPER_PLUS)
     {
-      reqlen = CONFIG_PL2303_EPBULK_SSSIZE;
+      if (CONFIG_PL2303_EPBULK_MAXBURST < USB_SS_BULK_EP_MAXBURST)
+        {
+          reqlen = CONFIG_PL2303_EPBULK_SSSIZE *
+                   (CONFIG_PL2303_EPBULK_MAXBURST + 1);
+        }
+      else
+        {
+          reqlen = CONFIG_PL2303_EPBULK_SSSIZE * USB_SS_BULK_EP_MAXBURST;
+        }
     }
   else
 #endif
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED)
   if (dev->speed == USB_SPEED_HIGH)
     {
       reqlen = CONFIG_PL2303_EPBULK_HSSIZE;
     }
+  else
 #endif
+    {
+      reqlen = CONFIG_PL2303_EPBULK_FSSIZE;
+    }
 
   for (i = 0; i < CONFIG_PL2303_NRDREQS; i++)
     {
