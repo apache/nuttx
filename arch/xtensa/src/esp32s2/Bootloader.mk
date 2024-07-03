@@ -36,6 +36,7 @@ BOOTLOADER_CONFIG  = $(BOOTLOADER_DIR)/bootloader.conf
 MCUBOOT_SRCDIR     = $(BOOTLOADER_DIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
 MCUBOOT_URL        = https://github.com/mcu-tools/mcuboot
+MCUBOOT_TOOLCHAIN  = $(TOPDIR)/tools/esp32s2/mcuboot_toolchain_esp32s2.cmake
 
 $(BOOTLOADER_DIR):
 	$(Q) mkdir -p $(BOOTLOADER_DIR) &>/dev/null
@@ -128,7 +129,8 @@ $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_
 		-c esp32s2 \
 		-f $(BOOTLOADER_CONFIG) \
 		-p $(BOOTLOADER_DIR) \
-		-e $(HALDIR)
+		-e $(HALDIR) \
+		-d $(MCUBOOT_TOOLCHAIN)
 	$(call COPYFILE, $(BOOTLOADER_DIR)/$(BOOTLOADER_OUTDIR)/mcuboot-esp32s2.bin, $(TOPDIR))
 
 bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)
