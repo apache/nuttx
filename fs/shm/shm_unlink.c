@@ -117,8 +117,8 @@ static int file_shm_unlink(FAR const char *name)
 #endif
 
   /* Remove the old inode from the tree. If we hold a reference count
-   * on the inode, it will not be deleted now.  This will set the
-   * FSNODEFLAG_DELETED bit in the inode flags.
+   * on the inode, it will not be deleted now. This will put reference of
+   * inode.
    */
 
   ret = inode_remove(fullpath);

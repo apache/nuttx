@@ -85,6 +85,7 @@ static FAR struct inode *inode_alloc(FAR const char *name, mode_t mode)
   if (node)
     {
       node->i_ino   = g_ino++;
+      node->i_crefs = 1;
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
       node->i_mode  = mode;
       clock_gettime(CLOCK_REALTIME, &node->i_atime);
