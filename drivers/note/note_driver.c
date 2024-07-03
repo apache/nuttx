@@ -1216,8 +1216,9 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   FAR struct note_driver_s **driver;
   bool formatted = false;
   FAR struct tcb_s *tcb = this_task();
-  unsigned int length;
+  unsigned int length = 0;
   uintptr_t arg;
+  va_list ap;
   int argc_bak = argc;
   int i;
 
@@ -1232,7 +1233,8 @@ void sched_note_syscall_enter(int nr, int argc, ...)
         }
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
-      if (!(*driver->filter.mode.flag & NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS))
+      if (!((*driver)->filter.mode.flag
+          & NOTE_FILTER_MODE_FLAG_SYSCALL_ARGS))
         {
           if (formatted && argc != 0)
             {
