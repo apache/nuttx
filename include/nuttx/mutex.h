@@ -393,6 +393,22 @@ int nxrmutex_destroy(FAR rmutex_t *rmutex);
 bool nxrmutex_is_hold(FAR rmutex_t *rmutex);
 
 /****************************************************************************
+ * Name: nxrmutex_is_recursive
+ *
+ * Description:
+ *   This function check whether the recursive mutex is recursive
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *  If rmutex has returned to True recursively, otherwise returns false.
+ *
+ ****************************************************************************/
+
+bool nxrmutex_is_recursive(FAR rmutex_t *rmutex);
+
+/****************************************************************************
  * Name: nxrmutex_get_holder
  *
  * Description:
