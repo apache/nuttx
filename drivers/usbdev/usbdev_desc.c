@@ -66,6 +66,57 @@ int usbdev_copy_devdesc(FAR void *dest,
 }
 
 /****************************************************************************
+ * Name: usbdev_copy_epcompdesc
+ *
+ * Description:
+ *   Copies the Endpoint Companion Description into the buffer given.
+ *   Returns the number of Bytes filled in.
+ *   This function is provided by various classes.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+static void
+usbdev_copy_epcompdesc(FAR struct usb_ss_epcompdesc_s *epcompdesc,
+                       FAR const struct usbdev_epinfo_s *epinfo)
+{
+  uint8_t transtpye;
+
+  memcpy(epcompdesc, &epinfo->compdesc, sizeof(struct usb_ss_epcompdesc_s));
+
+  transtpye = epinfo->desc.attr & USB_EP_ATTR_XFERTYPE_MASK;
+  if (transtpye == USB_EP_ATTR_XFER_BULK)
+    {
+      if (epcompdesc->mxburst >= USB_SS_BULK_EP_MAXBURST)
+        {
+          epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
+        }
+
+      if (epcompdesc->attr > USB_SS_BULK_EP_MAXSTREAM)
+        {
+          epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
+        }
+
+      epcompdesc->wbytes[0] = 0;
+      epcompdesc->wbytes[1] = 0;
+    }
+  else if(transtpye == USB_EP_ATTR_XFER_INT)
+    {
+      if (epcompdesc->mxburst >= USB_SS_INT_EP_MAXBURST)
+        {
+          epcompdesc->mxburst   = USB_SS_INT_EP_MAXBURST - 1;
+          epcompdesc->wbytes[0] = LSBYTE((epcompdesc->mxburst + 1) *
+                                          epinfo->sssize);
+          epcompdesc->wbytes[1] = MSBYTE((epcompdesc->mxburst + 1) *
+                                          epinfo->sssize);
+        }
+
+      epcompdesc->attr = 0;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: usbdev_copy_epdesc
  *
  * Description:
@@ -75,13 +126,27 @@ int usbdev_copy_devdesc(FAR void *dest,
  *
  ****************************************************************************/
 
-void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
-                        uint8_t epno, uint8_t speed,
-                        FAR const struct usbdev_epinfo_s *epinfo)
+int usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
+                       uint8_t epno, uint8_t speed,
+                       FAR const struct usbdev_epinfo_s *epinfo)
 {
 #if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_USBDEV_SUPERSPEED)
   UNUSED(speed);
 #endif
+
+  int len = sizeof(struct usb_epdesc_s);
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+    {
+      len += sizeof(struct usb_ss_epcompdesc_s);
+    }
+#endif
+
+  if (epdesc == NULL)
+    {
+      return len;
+    }
 
   memcpy(epdesc, &epinfo->desc, sizeof(struct usb_epdesc_s));
   epdesc->addr |= epno;
@@ -93,6 +158,12 @@ void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
 
       epdesc->mxpacketsize[0] = LSBYTE(epinfo->sssize);
       epdesc->mxpacketsize[1] = MSBYTE(epinfo->sssize);
+
+      /* Copy endpoint companion description */
+
+      epdesc++;
+      usbdev_copy_epcompdesc((FAR struct usb_ss_epcompdesc_s *)epdesc,
+                             epinfo);
     }
   else
 #endif
@@ -112,4 +183,6 @@ void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
       epdesc->mxpacketsize[0] = LSBYTE(epinfo->fssize);
       epdesc->mxpacketsize[1] = MSBYTE(epinfo->fssize);
     }
+
+  return len;
 }

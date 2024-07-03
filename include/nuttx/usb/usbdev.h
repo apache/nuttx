@@ -193,14 +193,15 @@ struct usbdev_devdescs_s
 struct usbdev_epinfo_s
 {
   struct usb_epdesc_s desc;
+  uint16_t            reqnum;
   uint16_t            fssize;
 #ifdef CONFIG_USBDEV_DUALSPEED
   uint16_t            hssize;
 #endif
 #ifdef CONFIG_USBDEV_SUPERSPEED
   uint16_t            sssize;
+  struct usb_ss_epcompdesc_s compdesc;
 #endif
-  uint16_t            reqnum;
 };
 
 /* usbdev_devinfo_s - describes the low level bindings of an usb device */
@@ -434,9 +435,9 @@ int usbdev_copy_devdesc(FAR void *dest,
  *
  ****************************************************************************/
 
-void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
-                        uint8_t epno, uint8_t speed,
-                        FAR const struct usbdev_epinfo_s *epinfo);
+int usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
+                       uint8_t epno, uint8_t speed,
+                       FAR const struct usbdev_epinfo_s *epinfo);
 
 /****************************************************************************
  * Name: usbdevclass_register
