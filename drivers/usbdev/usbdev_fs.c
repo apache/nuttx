@@ -961,6 +961,38 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
       return -ENODEV;
     }
 
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      uint8_t transtpye;
+
+      transtpye = epinfo->desc.attr & USB_EP_ATTR_XFERTYPE_MASK;
+      if (transtpye == USB_EP_ATTR_XFER_BULK)
+        {
+          if (epinfo->compdesc.mxburst >= USB_SS_BULK_EP_MAXBURST)
+            {
+              reqsize = reqsize * USB_SS_BULK_EP_MAXBURST;
+            }
+          else
+            {
+              reqsize = reqsize * (epinfo->compdesc.mxburst + 1);
+            }
+        }
+      else if (transtpye == USB_EP_ATTR_XFER_INT)
+        {
+          if (epinfo->compdesc.mxburst >= USB_SS_INT_EP_MAXBURST)
+            {
+              reqsize = reqsize * USB_SS_INT_EP_MAXBURST;
+            }
+          else
+            {
+              reqsize = reqsize * (epinfo->compdesc.mxburst + 1);
+            }
+        }
+    }
+#endif
+
   fs_ep->ep->fs = fs_ep;
 
   /* Initialize request buffer */
@@ -1144,7 +1176,7 @@ static int usbdev_fs_classsetconfig(FAR struct usbdev_fs_dev_s *fs,
                                     uint8_t config)
 {
   FAR struct usbdev_devinfo_s *devinfo = &fs->devinfo;
-  struct usb_epdesc_s epdesc;
+  struct usb_ss_epdesc_s epdesc;
   uint16_t i;
   uint16_t j;
   int ret;
@@ -1165,9 +1197,9 @@ static int usbdev_fs_classsetconfig(FAR struct usbdev_fs_dev_s *fs,
     {
       FAR struct usbdev_fs_ep_s *fs_ep = &fs->eps[i];
 
-      usbdev_copy_epdesc(&epdesc, devinfo->epno[i],
+      usbdev_copy_epdesc(&epdesc.epdesc, devinfo->epno[i],
                          fs->cdev->usbdev->speed, devinfo->epinfos[i]);
-      ret = EP_CONFIGURE(fs_ep->ep, &epdesc,
+      ret = EP_CONFIGURE(fs_ep->ep, &epdesc.epdesc,
                          (i == (devinfo->nendpoints - 1)));
       if (ret < 0)
         {

@@ -197,12 +197,6 @@
 #  define CONFIG_USBMSC_SCSI_STACKSIZE 2048
 #endif
 
-/* Packet and request buffer sizes */
-
-#ifndef CONFIG_USBMSC_EP0MAXPACKET
-#  define CONFIG_USBMSC_EP0MAXPACKET 64
-#endif
-
 /* USB Controller */
 
 #ifdef CONFIG_USBDEV_SELFPOWERED
@@ -301,6 +295,8 @@
 #define USBMSC_MKEPBULKIN(devDesc)    (USB_DIR_IN | (devDesc)->epno[USBMSC_EP_BULKIN_IDX])
 #define USBMSC_EPINBULK_ATTR          (USB_EP_ATTR_XFER_BULK)
 
+#define USBMSC_SSBULKMAXSTREAM        (0)
+#define USBMSC_SSBULKMAXBURST         (0)
 #define USBMSC_SSBULKMAXPACKET        (1024)
 #define USBMSC_SSBULKMXPKTSHIFT       (10)
 #define USBMSC_SSBULKMXPKTMASK        (0x000003ff)

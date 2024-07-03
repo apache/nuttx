@@ -260,9 +260,22 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   for (i = 0; i < CONFIG_USBMSC_NRDREQS; i++)
     {
-      reqcontainer      = &priv->rdreqs[i];
-      reqcontainer->req = usbdev_allocreq(priv->epbulkout,
-                                          CONFIG_USBMSC_BULKOUTREQLEN);
+      reqcontainer = &priv->rdreqs[i];
+#ifdef CONFIG_USBDEV_SUPERSPEED
+      if (dev->speed == USB_SPEED_SUPER ||
+          dev->speed == USB_SPEED_SUPER_PLUS)
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkout,
+                                              USBMSC_SSBULKMAXPACKET *
+                                              (USBMSC_SSBULKMAXBURST + 1));
+        }
+      else
+#endif
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkout,
+                                              CONFIG_USBMSC_BULKOUTREQLEN);
+        }
+
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDALLOCREQ),
@@ -279,9 +292,22 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
 
   for (i = 0; i < CONFIG_USBMSC_NWRREQS; i++)
     {
-      reqcontainer      = &priv->wrreqs[i];
-      reqcontainer->req = usbdev_allocreq(priv->epbulkin,
-                                          CONFIG_USBMSC_BULKINREQLEN);
+      reqcontainer = &priv->wrreqs[i];
+#ifdef CONFIG_USBDEV_SUPERSPEED
+      if (dev->speed == USB_SPEED_SUPER ||
+          dev->speed == USB_SPEED_SUPER_PLUS)
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkin,
+                                              USBMSC_SSBULKMAXPACKET *
+                                              (USBMSC_SSBULKMAXBURST + 1));
+        }
+      else
+#endif
+        {
+          reqcontainer->req = usbdev_allocreq(priv->epbulkin,
+                                              CONFIG_USBMSC_BULKINREQLEN);
+        }
+
       if (reqcontainer->req == NULL)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRALLOCREQ),
@@ -869,7 +895,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 {
   FAR struct usbmsc_req_s *privreq;
   FAR struct usbdev_req_s *req;
-  struct usb_epdesc_s epdesc;
+  struct usb_ss_epdesc_s epdesc;
   int i;
   int ret = 0;
 
@@ -911,9 +937,9 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc, &priv->devinfo,
+  usbmsc_copy_epdesc(USBMSC_EPBULKIN, &epdesc.epdesc, &priv->devinfo,
                      priv->usbdev->speed);
-  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
+  ret = EP_CONFIGURE(priv->epbulkin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKINCONFIGFAIL), 0);
@@ -924,9 +950,9 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc, &priv->devinfo,
+  usbmsc_copy_epdesc(USBMSC_EPBULKOUT, &epdesc.epdesc, &priv->devinfo,
                      priv->usbdev->speed);
-  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
+  ret = EP_CONFIGURE(priv->epbulkout, &epdesc.epdesc, true);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_EPBULKOUTCONFIGFAIL), 0);

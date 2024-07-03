@@ -917,9 +917,9 @@ static int cdcacm_epconfigure(FAR struct usbdev_ep_s *ep,
                               FAR struct usbdev_devinfo_s *devinfo,
                               uint8_t speed)
 {
-  struct usb_epdesc_s epdesc;
-  cdcacm_copy_epdesc(epid, &epdesc, devinfo, speed);
-  return EP_CONFIGURE(ep, &epdesc, last);
+  struct usb_ss_epdesc_s epdesc;
+  cdcacm_copy_epdesc(epid, &epdesc.epdesc, devinfo, speed);
+  return EP_CONFIGURE(ep, &epdesc.epdesc, last);
 }
 
 /****************************************************************************
@@ -1307,12 +1307,32 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate read requests.  The buffer size is one full packet. */
 #if defined(CONFIG_USBDEV_SUPERSPEED)
-  reqlen = CONFIG_CDCACM_EPBULKOUT_SSSIZE;
-#elif defined(CONFIG_USBDEV_DUALSPEED)
-  reqlen = CONFIG_CDCACM_EPBULKOUT_HSSIZE;
-#else
-  reqlen = CONFIG_CDCACM_EPBULKOUT_FSSIZE;
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      if (CONFIG_CDCACM_EPBULKOUT_MAXBURST < USB_SS_BULK_EP_MAXBURST)
+        {
+          reqlen = CONFIG_CDCACM_EPBULKOUT_SSSIZE *
+                   (CONFIG_CDCACM_EPBULKOUT_MAXBURST + 1);
+        }
+      else
+        {
+          reqlen = CONFIG_CDCACM_EPBULKOUT_SSSIZE *
+                   USB_SS_BULK_EP_MAXBURST;
+        }
+    }
+  else
 #endif
+#if defined(CONFIG_USBDEV_DUALSPEED)
+  if (dev->speed == USB_SPEED_HIGH)
+    {
+      reqlen = CONFIG_CDCACM_EPBULKOUT_HSSIZE;
+    }
+  else
+#endif
+    {
+      reqlen = CONFIG_CDCACM_EPBULKOUT_FSSIZE;
+    }
 
   for (i = 0; i < CONFIG_CDCACM_NRDREQS; i++)
     {
@@ -1341,12 +1361,32 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
    */
 
 #if defined(CONFIG_USBDEV_SUPERSPEED)
-  reqlen = CONFIG_CDCACM_EPBULKIN_SSSIZE;
-#elif defined(CONFIG_USBDEV_DUALSPEED)
-  reqlen = CONFIG_CDCACM_EPBULKIN_HSSIZE;
-#else
-  reqlen = CONFIG_CDCACM_EPBULKIN_FSSIZE;
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      if (CONFIG_CDCACM_EPBULKIN_MAXBURST < USB_SS_BULK_EP_MAXBURST)
+        {
+          reqlen = CONFIG_CDCACM_EPBULKOUT_SSSIZE *
+                   (CONFIG_CDCACM_EPBULKIN_MAXBURST + 1);
+        }
+      else
+        {
+          reqlen = CONFIG_CDCACM_EPBULKOUT_SSSIZE *
+                   USB_SS_BULK_EP_MAXBURST;
+        }
+    }
+  else
 #endif
+#if defined(CONFIG_USBDEV_DUALSPEED)
+  if  (dev->speed == USB_SPEED_HIGH)
+    {
+      reqlen = CONFIG_CDCACM_EPBULKIN_HSSIZE;
+    }
+  else
+#endif
+    {
+      reqlen = CONFIG_CDCACM_EPBULKIN_FSSIZE;
+    }
 
   if (CONFIG_CDCACM_BULKIN_REQLEN > reqlen)
     {
