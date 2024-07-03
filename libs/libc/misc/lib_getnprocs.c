@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/sysinfo.h
+ * libs/libc/misc/lib_getnprocs.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,69 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_SYSINFO_H
-#define __INCLUDE_SYS_SYSINFO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
+#include <nuttx/config.h>
+#include <sys/sysinfo.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
-
-#define SI_LOAD_SHIFT 16
 
 /****************************************************************************
- * Type Definitions
+ * Name: get_nprocs_conf
+ *
+ * Description:
+ *   Retrieve the number of configured processors in the system.
+ *   The get_nprocs_conf() function returns the number of processors (CPUs)
+ *   configured in the system, regardless of whether they are currently
+ *   enabled or available. This function is useful for determining the
+ *   processor configuration in multiprocessor systems.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, the number of configured processors is returned.
+ *   If the system does not define a processor configuration, it returns 1.
+ *
  ****************************************************************************/
 
-struct sysinfo
+int get_nprocs_conf(void)
 {
-  unsigned long uptime;    /* Seconds since boot */
-  unsigned long loads[3];  /* 1, 5, and 15 minute load averages */
-  unsigned long totalram;  /* Total usable main memory size */
-  unsigned long freeram;   /* Available memory size */
-  unsigned long sharedram; /* Amount of shared memory */
-  unsigned long bufferram; /* Memory used by buffers */
-  unsigned long totalswap; /* Total swap space size */
-  unsigned long freeswap;  /* Swap space still available */
-  unsigned short procs;    /* Number of current processes */
-  unsigned short pad;      /* Padding for alignment */
-  unsigned long totalhigh; /* Total high memory size */
-  unsigned long freehigh;  /* Available high memory size */
-  unsigned mem_unit;       /* Memory unit size in bytes */
-};
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
+#ifdef CONFIG_SMP_NCPUS
+  return CONFIG_SMP_NCPUS;
 #else
-#define EXTERN extern
+  return 1;
 #endif
-
-int sysinfo(FAR struct sysinfo *info);
-int get_nprocs_conf(void);
-int get_nprocs(void);
-
-#undef EXTERN
-#if defined(__cplusplus)
 }
-#endif
 
-#endif /* __INCLUDE_SYS_SYSINFO_H */
+/****************************************************************************
+ * Name: get_nprocs
+ *
+ * Description:
+ *   Retrieve the number of online processors in the system.
+ *   The get_nprocs() function returns the number of processors (CPUs) that
+ *   are currently online and available for use in the system. This function
+ *   can be useful for determining the number of processors that can be used
+ *   by applications or the operating system for parallel processing.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, the number of online processors is returned.
+ *   If the system does not define a processor configuration, it returns 1.
+ *
+ ****************************************************************************/
+
+int get_nprocs(void)
+{
+#ifdef CONFIG_SMP_NCPUS
+  return CONFIG_SMP_NCPUS;
+#else
+  return 1;
+#endif
+}
