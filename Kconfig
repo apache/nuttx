@@ -410,6 +410,12 @@ config RAW_BINARY
 		different loaders using the GNU objcopy program.  This option
 		should not be selected if you are not using the GNU toolchain.
 
+config RAW_DISASSEMBLY
+	bool "Create a disassembly file"
+	default n
+	---help---
+		Create the nuttx.asm in the disassembly format using the objdump program.
+
 menuconfig UBOOT_UIMAGE
 	bool "U-Boot uImage"
 	select RAW_BINARY
