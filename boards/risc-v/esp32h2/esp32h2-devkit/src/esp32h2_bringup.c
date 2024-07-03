@@ -77,6 +77,10 @@
 #  include "esp_board_spislavedev.h"
 #endif
 
+#ifdef CONFIG_ESP_MCPWM
+#  include "esp_board_mcpwm.h"
+#endif
+
 #include "esp32h2-devkit.h"
 
 /****************************************************************************
@@ -288,6 +292,14 @@ int esp_bringup(void)
       syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
+
+#ifdef CONFIG_ESP_MCPWM_CAPTURE
+  ret = board_capture_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_capture_initialize failed: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

@@ -114,6 +114,10 @@ ifeq ($(CONFIG_ESP_WIRELESS),y)
 	endif
 endif
 
+ifeq ($(CONFIG_ESP_MCPWM),y)
+	CHIP_CSRCS += esp_mcpwm.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################

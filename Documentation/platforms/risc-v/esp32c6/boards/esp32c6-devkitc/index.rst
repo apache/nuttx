@@ -99,6 +99,22 @@ You can check that the sensor is working by using the ``bmp180`` application::
     Pressure value = 91526
     Pressure value = 91525
 
+capture
+--------
+
+The capture configuration enables the capture driver and the capture example, allowing
+the user to measure duty cycle and frequency of a signal. Default pin is GPIO 18 with
+an internal pull-up resistor enabled. When connecting a 50 Hz pulse with 50% duty cycle,
+the following output is expected:
+
+nsh> cap
+cap_main: Hardware initialized. Opening the capture device: /dev/capture0
+cap_main: Number of samples: 0
+pwm duty cycle: 50 % 
+pwm frequence: 50 Hz 
+pwm duty cycle: 50 % 
+pwm frequence: 50 Hz 
+
 coremark
 --------
 
