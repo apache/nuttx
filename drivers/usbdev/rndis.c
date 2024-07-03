@@ -343,22 +343,33 @@ static const struct usbdev_epinfo_s g_rndis_epintindesc =
 {
   .desc =
     {
-      .len      = USB_SIZEOF_EPDESC,
-      .type     = USB_DESC_TYPE_ENDPOINT,
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
 #ifndef CONFIG_RNDIS_COMPOSITE
-      .addr     = RNDIS_EPINTIN_ADDR,
+      .addr      = RNDIS_EPINTIN_ADDR,
 #endif
-      .attr     = USB_EP_ATTR_XFER_INT,
-      .interval = 1
+      .attr      = USB_EP_ATTR_XFER_INT,
+      .interval  = 1
     },
-  .fssize       = CONFIG_RNDIS_EPINTIN_FSSIZE,
+  .reqnum        = 1,
+  .fssize        = CONFIG_RNDIS_EPINTIN_FSSIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
-  .hssize       = CONFIG_RNDIS_EPINTIN_HSSIZE,
+  .hssize        = CONFIG_RNDIS_EPINTIN_HSSIZE,
 #endif
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  .sssize       = CONFIG_RNDIS_EPINTIN_HSSIZE,
+  .sssize        = CONFIG_RNDIS_EPINTIN_HSSIZE,
+  .compdesc      =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_RNDIS_EPINTIN_MAXBURST,
+      .attr      = 0,
+      .wbytes[0] = LSBYTE((CONFIG_RNDIS_EPINTIN_MAXBURST + 1) *
+                           CONFIG_RNDIS_EPINTIN_HSSIZE),
+      .wbytes[1] = MSBYTE((CONFIG_RNDIS_EPINTIN_MAXBURST + 1) *
+                           CONFIG_RNDIS_EPINTIN_HSSIZE),
+    },
 #endif
-  .reqnum       = 1,
 };
 
   /* Data interface descriptor */
@@ -382,26 +393,35 @@ static const struct usbdev_epinfo_s g_rndis_epbulkindesc =
 {
   .desc =
     {
-      .len      = USB_SIZEOF_EPDESC,
-      .type     = USB_DESC_TYPE_ENDPOINT,
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
 #ifndef CONFIG_RNDIS_COMPOSITE
-      .addr     = RNDIS_EPBULKIN_ADDR,
+      .addr      = RNDIS_EPBULKIN_ADDR,
 #endif
-      .attr     = USB_EP_ATTR_XFER_BULK,
+      .attr      = USB_EP_ATTR_XFER_BULK,
 #ifdef CONFIG_USBDEV_DUALSPEED
-      .interval = 0
+      .interval  = 0
 #else
-      .interval = 1
+      .interval  = 1
 #endif
     },
-  .fssize       = CONFIG_RNDIS_EPBULKIN_FSSIZE,
+  .reqnum        = 1,
+  .fssize        = CONFIG_RNDIS_EPBULKIN_FSSIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
-  .hssize       = CONFIG_RNDIS_EPBULKIN_HSSIZE,
+  .hssize        = CONFIG_RNDIS_EPBULKIN_HSSIZE,
 #endif
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  .sssize       = CONFIG_RNDIS_EPBULKIN_SSSIZE,
+  .sssize        = CONFIG_RNDIS_EPBULKIN_SSSIZE,
+  .compdesc      =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_RNDIS_EPBULKIN_MAXBURST,
+      .attr      = CONFIG_RNDIS_EPBULKIN_MAXSTREAM,
+      .wbytes[0] = 0,
+      .wbytes[1] = 0,
+    },
 #endif
-  .reqnum       = 1,
 };
 
   /* Bulk out interface descriptor */
@@ -410,26 +430,35 @@ static const struct usbdev_epinfo_s g_rndis_epbulkoutdesc =
 {
   .desc =
     {
-      .len      = USB_SIZEOF_EPDESC,
-      .type     = USB_DESC_TYPE_ENDPOINT,
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
 #ifndef CONFIG_RNDIS_COMPOSITE
-      .addr     = RNDIS_EPBULKOUT_ADDR,
+      .addr      = RNDIS_EPBULKOUT_ADDR,
 #endif
-      .attr     = USB_EP_ATTR_XFER_BULK,
+      .attr      = USB_EP_ATTR_XFER_BULK,
 #ifdef CONFIG_USBDEV_DUALSPEED
-      .interval = 0
+      .interval  = 0
 #else
-      .interval = 1
+      .interval  = 1
 #endif
     },
-  .fssize       = CONFIG_RNDIS_EPBULKOUT_FSSIZE,
+  .reqnum        = 1,
+  .fssize        = CONFIG_RNDIS_EPBULKOUT_FSSIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
-  .hssize       = CONFIG_RNDIS_EPBULKOUT_HSSIZE,
+  .hssize        = CONFIG_RNDIS_EPBULKOUT_HSSIZE,
 #endif
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  .sssize       = CONFIG_RNDIS_EPBULKOUT_SSSIZE,
+  .sssize        = CONFIG_RNDIS_EPBULKOUT_SSSIZE,
+  .compdesc      =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_RNDIS_EPBULKOUT_MAXBURST,
+      .attr      = CONFIG_RNDIS_EPBULKOUT_MAXSTREAM,
+      .wbytes[0] = 0,
+      .wbytes[1] = 0,
+    },
 #endif
-  .reqnum       = 1,
 };
 
 /* Default MAC address given to the host side of the interface. */
@@ -1915,6 +1944,7 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   uint8_t speed, uint8_t type)
 {
   uint16_t totallen = 0;
+  int ret;
 
   /* Check for switches between high and full speed */
 
@@ -1977,18 +2007,17 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
 
   totallen += sizeof(struct usb_ifdesc_s);
 
+  ret = usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
+                           devinfo->epno[RNDIS_EP_INTIN_IDX],
+                           speed,
+                           &g_rndis_epintindesc);
+
   if (buf != NULL)
     {
-      usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
-                         devinfo->epno[RNDIS_EP_INTIN_IDX],
-                         speed,
-                         &g_rndis_epintindesc
-      );
-
-      buf += USB_SIZEOF_EPDESC;
+      buf += ret;
     }
 
-  totallen += USB_SIZEOF_EPDESC;
+  totallen += ret;
 
   if (buf != NULL)
     {
@@ -2003,31 +2032,27 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
 
   totallen += sizeof(struct usb_ifdesc_s);
 
+  ret = usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
+                           devinfo->epno[RNDIS_EP_BULKIN_IDX],
+                           speed,
+                           &g_rndis_epbulkindesc);
   if (buf != NULL)
     {
-      usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
-                         devinfo->epno[RNDIS_EP_BULKIN_IDX],
-                         speed,
-                         &g_rndis_epbulkindesc
-      );
-
-      buf += USB_SIZEOF_EPDESC;
+      buf += ret;
     }
 
-  totallen += USB_SIZEOF_EPDESC;
+  totallen += ret;
 
+  ret = usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
+                           devinfo->epno[RNDIS_EP_BULKOUT_IDX],
+                           speed,
+                           &g_rndis_epbulkoutdesc);
   if (buf != NULL)
     {
-      usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
-                         devinfo->epno[RNDIS_EP_BULKOUT_IDX],
-                         speed,
-                         &g_rndis_epbulkoutdesc
-      );
-
-      buf += USB_SIZEOF_EPDESC;
+      buf += ret;
     }
 
-  totallen += USB_SIZEOF_EPDESC;
+  totallen += ret;
 
   return totallen;
 }
@@ -2140,7 +2165,32 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate read requests.  The buffer size is one full packet. */
 
-  reqlen = 64;
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      if (CONFIG_RNDIS_EPBULKOUT_MAXBURST < USB_SS_BULK_EP_MAXBURST)
+        {
+          reqlen = CONFIG_RNDIS_EPBULKOUT_SSSIZE *
+                   (CONFIG_RNDIS_EPBULKOUT_MAXBURST + 1);
+        }
+      else
+        {
+          reqlen = CONFIG_RNDIS_EPBULKOUT_SSSIZE * USB_SS_BULK_EP_MAXBURST;
+        }
+    }
+  else
+#endif
+#if defined(CONFIG_USBDEV_DUALSPEED)
+  if (dev->speed == USB_SPEED_HIGH)
+    {
+      reqlen = CONFIG_RNDIS_EPBULKOUT_HSSIZE;
+    }
+  else
+#endif
+    {
+      reqlen = CONFIG_RNDIS_EPBULKOUT_FSSIZE;
+    }
 
   if (CONFIG_RNDIS_BULKOUT_REQLEN > reqlen)
     {
@@ -2170,6 +2220,37 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
       reqlen = 0;
     }
   else
+    {
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+      if (dev->speed == USB_SPEED_SUPER ||
+          dev->speed == USB_SPEED_SUPER_PLUS)
+        {
+          if (CONFIG_RNDIS_EPBULKIN_MAXBURST < USB_SS_BULK_EP_MAXBURST)
+            {
+              reqlen = CONFIG_RNDIS_EPBULKIN_SSSIZE *
+                       (CONFIG_RNDIS_EPBULKIN_MAXBURST + 1);
+            }
+          else
+            {
+              reqlen = CONFIG_RNDIS_EPBULKIN_SSSIZE *
+                       USB_SS_BULK_EP_MAXBURST;
+            }
+        }
+      else
+    #endif
+    #if defined(CONFIG_USBDEV_DUALSPEED)
+      if (dev->speed == USB_SPEED_HIGH)
+        {
+          reqlen = CONFIG_RNDIS_EPBULKIN_HSSIZE;
+        }
+      else
+    #endif
+        {
+          reqlen = CONFIG_RNDIS_EPBULKIN_FSSIZE;
+        }
+    }
+
+  if (CONFIG_RNDIS_BULKIN_REQLEN > reqlen)
     {
       reqlen = CONFIG_RNDIS_BULKIN_REQLEN;
     }
@@ -2665,7 +2746,7 @@ static void usbclass_resetconfig(FAR struct rndis_dev_s *priv)
 
 static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 {
-  struct usb_epdesc_s epdesc;
+  struct usb_ss_epdesc_s epdesc;
   int ret = 0;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2706,11 +2787,11 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 
   /* Configure the IN interrupt endpoint */
 
-  usbdev_copy_epdesc(&epdesc,
+  usbdev_copy_epdesc(&epdesc.epdesc,
                      priv->devinfo.epno[RNDIS_EP_INTIN_IDX],
                      priv->usbdev->speed,
                      &g_rndis_epintindesc);
-  ret = EP_CONFIGURE(priv->epintin, &epdesc, false);
+  ret = EP_CONFIGURE(priv->epintin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
@@ -2721,12 +2802,11 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
-  usbdev_copy_epdesc(&epdesc,
+  usbdev_copy_epdesc(&epdesc.epdesc,
                      priv->devinfo.epno[RNDIS_EP_BULKIN_IDX],
                      priv->usbdev->speed,
                      &g_rndis_epbulkindesc);
-  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
-
+  ret = EP_CONFIGURE(priv->epbulkin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINCONFIGFAIL), 0);
@@ -2737,12 +2817,11 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-  usbdev_copy_epdesc(&epdesc,
+  usbdev_copy_epdesc(&epdesc.epdesc,
                      priv->devinfo.epno[RNDIS_EP_BULKOUT_IDX],
                      priv->usbdev->speed,
                      &g_rndis_epbulkoutdesc);
-  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
-
+  ret = EP_CONFIGURE(priv->epbulkout, &epdesc.epdesc, true);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTCONFIGFAIL), 0);

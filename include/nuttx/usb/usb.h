@@ -198,6 +198,8 @@
 #define USB_DESC_TYPE_CSSTRING                  (0x23)
 #define USB_DESC_TYPE_CSINTERFACE               (0x24)
 #define USB_DESC_TYPE_CSENDPOINT                (0x25)
+#define USB_DESC_TYPE_ENDPOINT_COMPANION        (0x30)
+#define USB_DESC_TYPE_ISO_ENDPOINT_COMPANION    (0x31)
 
 /* Device and interface descriptor class codes */
 
@@ -273,6 +275,12 @@
 /* Maximum number of devices per controller */
 
 #define USB_MAX_DEVICES                         (127)
+
+/* Maximum burst number of super speed devices */
+
+#define USB_SS_INT_EP_MAXBURST                  (3)
+#define USB_SS_BULK_EP_MAXBURST                 (16)
+#define USB_SS_BULK_EP_MAXSTREAM                (16)
 
 /* Microsoft OS Descriptor specific values */
 
@@ -406,6 +414,35 @@ struct usb_audioepdesc_s
 };
 
 #define USB_SIZEOF_AUDIOEPDESC 9
+
+/* Super speed endpoint companion descriptor */
+
+struct usb_ss_epcompdesc_s
+{
+  uint8_t  len;
+  uint8_t  type;
+  uint8_t  mxburst;
+  uint8_t  attr;
+  uint8_t  wbytes[2];
+};
+
+#define USB_SIZEOF_SS_EPCOMPDESC 6
+
+/* Super speed endpoint descriptor */
+
+struct usb_ss_epdesc_s
+{
+  struct usb_epdesc_s epdesc;
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  struct usb_ss_epcompdesc_s epcompdesc;
+#endif
+};
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  #define USB_SIZEOF_SS_EPDESC 13
+#else
+  #define USB_SIZEOF_SS_EPDESC 7
+#endif
 
 /* Device qualifier descriptor */
 
