@@ -57,6 +57,31 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp_motor_bdc_initialize
+ *
+ * Description:
+ *   This function initializes the MCPWM peripheral and configures the
+ *   motor control driver.
+ *
+ * Input Parameters:
+ *   channel   - Channel to be initialized (only 0 available for now).
+ *   frequency - PWM output frequency in Hertz.
+ *   pwm_a_pin - GPIO pin number for PWM0_A output.
+ *   pwm_b_pin - GPIO pin number for PWM0_B output.
+ *   fault_pin - GPIO pin number for fault signal input.
+ *
+ * Returned Value:
+ *   On success, this function returns a valid pointer to the Capture device
+ *   structure. If the initialization fails, it returns NULL.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP_MCPWM_MOTOR_BDC
+struct motor_lowerhalf_s *esp_motor_bdc_initialize(int channel,
+  uint32_t frequency, int pwm_a_pin, int pwm_b_pin, int fault_pin);
+#endif
+
+/****************************************************************************
  * Name: esp_mcpwm_capture_initialize
  *
  * Description:
