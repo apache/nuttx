@@ -99,7 +99,7 @@ int modlib_unload(FAR struct mod_loadinfo_s *loadinfo)
 
       lib_free(loadinfo->sectalloc);
 #else
-      if (loadinfo->textalloc != 0)
+      if (loadinfo->textalloc != 0 && loadinfo->xipbase == 0)
         {
 #  if defined(CONFIG_ARCH_USE_TEXT_HEAP)
           up_textheap_free((FAR void *)loadinfo->textalloc);

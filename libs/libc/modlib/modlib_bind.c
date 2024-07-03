@@ -1045,6 +1045,8 @@ int modlib_bind(FAR struct module_s *modp,
         }
     }
 
+  modp->xipbase = loadinfo->xipbase;
+
   /* Ensure that the I and D caches are coherent before starting the newly
    * loaded module by cleaning the D cache (i.e., flushing the D cache
    * contents to memory and invalidating the I cache).

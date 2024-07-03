@@ -32,12 +32,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/lib/modlib.h>
+#include <nuttx/fs/ioctl.h>
 
 #include "libc.h"
 #include "modlib/modlib.h"
@@ -62,7 +64,7 @@
 static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
                                 FAR Elf_Shdr *shdr, uint8_t idx)
 {
-  if (loadinfo->ehdr.e_type != ET_DYN)
+  if (loadinfo->ehdr.e_type == ET_DYN)
     {
       return -EINVAL;
     }
@@ -98,6 +100,14 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
           loadinfo->datastart = loadinfo->sectalloc[idx];
         }
     }
+  else if (loadinfo->xipbase != 0)
+    {
+      loadinfo->sectalloc[idx] = loadinfo->xipbase + shdr->sh_offset;
+      if (loadinfo->textalloc == 0)
+        {
+          loadinfo->textalloc = loadinfo->sectalloc[idx];
+        }
+    }
   else
     {
 #  ifdef CONFIG_ARCH_USE_TEXT_HEAP
@@ -107,8 +117,9 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
                                                      shdr->sh_addralign,
                                                      shdr->sh_size);
 #  else
-      loadinfo->sectalloc[idx] = (uintptr_t)lib_memalign(shdr->sh_addralign,
-                                                         shdr->sh_size);
+      loadinfo->sectalloc[idx] = (uintptr_t)
+                                  lib_memalign(shdr->sh_addralign,
+                                               shdr->sh_size);
 #  endif
 
       if (loadinfo->textalloc == 0)
@@ -365,8 +376,20 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
                   pptr = &text;
                 }
 
-              *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr,
-                                               shdr->sh_addralign);
+              if (loadinfo->xipbase == 0)
+                {
+                  /* If xipbase is not set, align the address
+                   * xipbase is set, the address can't be aligned
+                   */
+
+                  *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr,
+                                                   shdr->sh_addralign);
+                }
+            }
+
+          if ((shdr->sh_flags & SHF_WRITE) == 0 && loadinfo->xipbase != 0)
+            {
+              goto skipload;
             }
 
           /* SHT_NOBITS indicates that there is no data in the file for the
@@ -405,6 +428,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
               memset(*pptr, 0, shdr->sh_size);
             }
 #endif
+
+skipload:
 
           /* Update sh_addr to point to copy in memory */
 
@@ -497,6 +522,11 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
   if (loadinfo->gotindex >= 0)
     {
       binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      if (ioctl(loadinfo->filfd, FIOC_XIPBASE,
+                (unsigned long)&loadinfo->xipbase) >= 0)
+        {
+          binfo("can use xipbase %zu\n", loadinfo->xipbase);
+        }
     }
 
   /* Determine total size to allocate */
@@ -517,7 +547,12 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
   if (loadinfo->ehdr.e_type == ET_REL || loadinfo->ehdr.e_type == ET_EXEC)
     {
 #  ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
-      if (loadinfo->textsize > 0)
+      if (loadinfo->xipbase != 0)
+        {
+          loadinfo->textalloc = loadinfo->xipbase +
+                                loadinfo->shdr[1].sh_offset;
+        }
+      else if (loadinfo->textsize > 0)
         {
 #    ifdef CONFIG_ARCH_USE_TEXT_HEAP
           loadinfo->textalloc = (uintptr_t)
@@ -643,6 +678,11 @@ int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
   if (loadinfo->gotindex >= 0)
     {
       binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      if (ioctl(loadinfo->filfd, FIOC_XIPBASE,
+                (unsigned long)&loadinfo->xipbase) >= 0)
+        {
+          binfo("can use xipbase %zu\n", loadinfo->xipbase);
+        }
     }
 
   /* Determine total size to allocate */
