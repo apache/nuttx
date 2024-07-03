@@ -214,6 +214,56 @@ FAR const struct usb_devdesc_s *usbmsc_getdevdesc(void)
 #endif
 
 /****************************************************************************
+ * Name: usbmsc_copy_epcompdesc
+ *
+ * Description:
+ *   Construct the endpoint companion descriptor
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+static void
+usbmsc_copy_epcompdesc(enum usbmsc_epdesc_e epid,
+                       FAR struct usb_ss_epcompdesc_s *epcompdesc)
+{
+    switch (epid)
+    {
+    case USBMSC_EPBULKOUT:  /* Bulk OUT endpoint */
+    case USBMSC_EPBULKIN:   /* Bulk IN endpoint */
+      {
+        epcompdesc->len  = USB_SIZEOF_SS_EPCOMPDESC;           /* Descriptor length */
+        epcompdesc->type = USB_DESC_TYPE_ENDPOINT_COMPANION;   /* Descriptor type */
+
+        if (USBMSC_SSBULKMAXBURST >= USB_SS_BULK_EP_MAXBURST)
+          {
+            epcompdesc->mxburst = USB_SS_BULK_EP_MAXBURST - 1;
+          }
+        else
+          {
+            epcompdesc->mxburst = USBMSC_SSBULKMAXBURST;
+          }
+
+        if (USBMSC_SSBULKMAXSTREAM > USB_SS_BULK_EP_MAXSTREAM)
+          {
+            epcompdesc->attr = USB_SS_BULK_EP_MAXSTREAM;
+          }
+        else
+          {
+            epcompdesc->attr = USBMSC_SSBULKMAXSTREAM;
+          }
+
+        epcompdesc->wbytes[0] = 0;
+        epcompdesc->wbytes[1] = 0;
+      }
+      break;
+
+    default:
+      break;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: usbmsc_copy_epdesc
  *
  * Description:
@@ -227,9 +277,23 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
                        FAR struct usbdev_devinfo_s *devinfo,
                        uint8_t speed)
 {
+  int len = sizeof(struct usb_epdesc_s);
+
 #if !defined(CONFIG_USBDEV_DUALSPEED) && !defined(CONFIG_USBDEV_SUPERSPEED)
     UNUSED(speed);
 #endif
+
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+    {
+      len += sizeof(struct usb_ss_epcompdesc_s);
+    }
+#endif
+
+  if (epdesc == NULL)
+    {
+      return len;
+    }
 
     switch (epid)
     {
@@ -247,6 +311,12 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
 
             epdesc->mxpacketsize[0] = LSBYTE(USBMSC_SSBULKMAXPACKET);
             epdesc->mxpacketsize[1] = MSBYTE(USBMSC_SSBULKMAXPACKET);
+
+            /* Copy endpoint companion description */
+
+            epdesc++;
+            usbmsc_copy_epcompdesc(epid,
+                                   (FAR struct usb_ss_epcompdesc_s *)epdesc);
           }
         else
 #endif
@@ -285,6 +355,12 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
 
             epdesc->mxpacketsize[0] = LSBYTE(USBMSC_SSBULKMAXPACKET);
             epdesc->mxpacketsize[1] = MSBYTE(USBMSC_SSBULKMAXPACKET);
+
+            /* Copy endpoint companion description */
+
+            epdesc++;
+            usbmsc_copy_epcompdesc(epid,
+                                   (FAR struct usb_ss_epcompdesc_s *)epdesc);
           }
         else
 #endif
@@ -313,7 +389,7 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
         return 0;
     }
 
-  return sizeof(struct usb_epdesc_s);
+  return len;
 }
 
 /****************************************************************************
@@ -328,6 +404,9 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
                          FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type)
 {
+  int16_t totallen = 0;
+  int ret;
+
   /* Check for switches between high and full speed */
 
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed != USB_SPEED_HIGH)
@@ -359,11 +438,12 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
       dest->cfgvalue    = USBMSC_CONFIGID;                  /* Configuration value */
       dest->icfg        = USBMSC_CONFIGSTRID;               /* Configuration */
       dest->attr        = USB_CONFIG_ATTR_ONE |             /* Attributes */
-                        USBMSC_SELFPOWERED |
-                        USBMSC_REMOTEWAKEUP;
+                          USBMSC_SELFPOWERED |
+                          USBMSC_REMOTEWAKEUP;
       dest->mxpower     = (CONFIG_USBDEV_MAXPOWER + 1) / 2; /* Max power (mA/2) */
 
       buf += sizeof(struct usb_cfgdesc_s);
+      totallen += sizeof(struct usb_cfgdesc_s);
     }
 #endif
 
@@ -385,6 +465,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
       dest->iif      = devinfo->strbase + USBMSC_INTERFACESTRID; /* iInterface */
 
       buf += sizeof(struct usb_ifdesc_s);
+      totallen += sizeof(struct usb_ifdesc_s);
     }
 
   /* Make the two endpoint configurations */
@@ -392,24 +473,26 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
   /* Bulk IN endpoint descriptor */
 
     {
-      int len = usbmsc_copy_epdesc(USBMSC_EPBULKIN,
-                                  (FAR struct usb_epdesc_s *)buf,
-                                   devinfo, speed);
+      ret = usbmsc_copy_epdesc(USBMSC_EPBULKIN,
+                               (FAR struct usb_epdesc_s *)buf,
+                               devinfo, speed);
 
-      buf += len;
+      buf += ret;
+      totallen += ret;
     }
 
   /* Bulk OUT endpoint descriptor */
 
     {
-      int len = usbmsc_copy_epdesc(USBMSC_EPBULKOUT,
-                                  (FAR struct usb_epdesc_s *)buf, devinfo,
-                                   speed);
+      ret = usbmsc_copy_epdesc(USBMSC_EPBULKOUT,
+                               (FAR struct usb_epdesc_s *)buf, devinfo,
+                               speed);
 
-      buf += len;
+      buf += ret;
+      totallen += ret;
     }
 
-  return SIZEOF_USBMSC_CFGDESC;
+  return totallen;
 }
 
 /****************************************************************************
