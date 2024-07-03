@@ -170,7 +170,7 @@ I2S              No
 Int. Temp.       No
 LED              No
 LED_PWM          Yes
-MCPWM            Yes (Capture)
+MCPWM            Yes
 Pulse Counter    No
 RMT              No
 RNG              No
