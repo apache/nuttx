@@ -71,3 +71,7 @@ endif
 ifeq ($(CONFIG_IMX9_FLEXSPI), y)
   CHIP_CSRCS += imx9_flexspi.c
 endif
+
+ifeq ($(CONFIG_IMX9_FLEXSPI_NOR), y)
+  CHIP_CSRCS += imx9_flexspi_nor.c
+endif
