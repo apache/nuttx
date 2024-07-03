@@ -118,7 +118,6 @@
 #define   FSNODEFLAG_TYPE_SOFTLINK  0x00000008 /*   Soft link              */
 #define   FSNODEFLAG_TYPE_SOCKET    0x00000009 /*   Socket                 */
 #define   FSNODEFLAG_TYPE_PIPE      0x0000000a /*   Pipe                   */
-#define FSNODEFLAG_DELETED          0x00000010 /* Unlinked                 */
 
 #define INODE_IS_TYPE(i,t) \
   (((i)->i_flags & FSNODEFLAG_TYPE_MASK) == (t))

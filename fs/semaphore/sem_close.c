@@ -105,7 +105,7 @@ int nxsem_close(FAR sem_t *sem)
    * now.
    */
 
-  if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
+  if (inode->i_crefs <= 0)
     {
       /* Destroy the semaphore and free the container */
 

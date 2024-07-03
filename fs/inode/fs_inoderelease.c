@@ -76,7 +76,7 @@ void inode_release(FAR struct inode *inode)
        * now.
        */
 
-      if (inode->i_crefs <= 0 && (inode->i_flags & FSNODEFLAG_DELETED) != 0)
+      if (inode->i_crefs <= 0)
         {
           /* If the inode has been properly unlinked, then the peer pointer
            * should be NULL.
