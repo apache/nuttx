@@ -168,6 +168,10 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 
 CFLAGS += -Wno-undef -Wno-unused-variable
 
+# Enable strict volatile bitfield access
+
+CFLAGS += -fstrict-volatile-bitfields
+
 CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 include chip/hal.mk
