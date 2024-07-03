@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/list.h>
 #include <nuttx/mm/circbuf.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/gnss.h>
@@ -73,6 +74,7 @@ struct gnss_sensor_s
 
 struct gnss_user_s
 {
+  struct list_node node;
   FAR struct pollfd *fds;
   size_t pos;
 };
@@ -82,6 +84,7 @@ struct gnss_user_s
 struct gnss_upperhalf_s
 {
   struct gnss_sensor_s         dev[GNSS_MAX_IDX];
+  struct list_node             userlist;
   FAR struct gnss_lowerhalf_s *lower;
   uint8_t                      crefs;
   uint8_t                      flags;
@@ -247,6 +250,7 @@ static int gnss_open(FAR struct file *filep)
     }
 
   filep->f_priv = user;
+  list_add_tail(&upper->userlist, &user->node);
   user->pos = upper->buffer.head;
 
 out:
@@ -279,6 +283,7 @@ static int gnss_close(FAR struct file *filep)
       upper->crefs--;
     }
 
+  list_delete(&user->node);
   kmm_free(user);
 
 out:
@@ -601,6 +606,7 @@ static void gnss_push_data(FAR void *priv, FAR const void *data,
                            size_t bytes, bool is_nmea)
 {
   FAR struct gnss_upperhalf_s *upper = priv;
+  FAR struct gnss_user_s *user;
   int semcount;
 
   if (data == NULL || bytes == 0)
@@ -615,6 +621,12 @@ static void gnss_push_data(FAR void *priv, FAR const void *data,
     }
 
   circbuf_overwrite(&upper->buffer, data, bytes);
+
+  list_for_every_entry(&upper->userlist, user, struct gnss_user_s, node)
+    {
+      poll_notify(&user->fds, 1, POLLIN);
+    }
+
   nxmutex_unlock(&upper->lock);
 
   nxsem_get_value(&upper->buffersem, &semcount);
@@ -713,6 +725,7 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
   nxmutex_init(&upper->lock);
   nxsem_init(&upper->buffersem, 0, 0);
   gnss_init_data(&upper->gnss);
+  list_initialize(&upper->userlist);
 
   /* GNSS register */
 
