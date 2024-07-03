@@ -62,7 +62,7 @@
 static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
                                 FAR Elf_Shdr *shdr, uint8_t idx)
 {
-  if (loadinfo->ehdr.e_type != ET_REL)
+  if (loadinfo->ehdr.e_type != ET_DYN)
     {
       return -EINVAL;
     }
@@ -339,7 +339,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
             }
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-          if (loadinfo->ehdr.e_type == ET_REL)
+          if (loadinfo->ehdr.e_type == ET_REL ||
+              loadinfo->ehdr.e_type == ET_EXEC)
             {
               pptr = (FAR uint8_t **)&loadinfo->sectalloc[i];
             }
@@ -410,6 +411,9 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
           binfo("%d. %08lx->%08lx\n", i,
                 (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
 
+          /* Use offset to remember the original file address */
+
+          shdr->sh_offset = (uintptr_t)shdr->sh_addr;
           shdr->sh_addr = (uintptr_t)*pptr;
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
@@ -422,6 +426,34 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
           *pptr += ELF_ALIGNUP(shdr->sh_size);
 #endif
+        }
+    }
+
+  /* Update GOT table */
+
+  if (loadinfo->gotindex >= 0)
+    {
+      FAR Elf_Shdr *gotshdr = &loadinfo->shdr[loadinfo->gotindex];
+      FAR uintptr_t *got = (FAR uintptr_t *)gotshdr->sh_addr;
+      FAR uintptr_t *end = got + gotshdr->sh_size / sizeof(uintptr_t);
+
+      for (; got < end; got++)
+        {
+          for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
+            {
+              FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
+              if ((shdr->sh_flags & SHF_ALLOC) == 0)
+                {
+                  continue;
+                }
+
+              if (*got >= shdr->sh_offset &&
+                  *got < shdr->sh_offset + shdr->sh_size)
+                {
+                  *got += shdr->sh_addr - shdr->sh_offset;
+                }
+            }
         }
     }
 
@@ -461,6 +493,12 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
+  loadinfo->gotindex = modlib_findsection(loadinfo, ".got");
+  if (loadinfo->gotindex >= 0)
+    {
+      binfo("GOT section found! index %d\n", loadinfo->gotindex);
+    }
+
   /* Determine total size to allocate */
 
   modlib_elfsize(loadinfo, true);
@@ -474,21 +512,23 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
    * GOT. Therefore we cannot do two different allocations.
    */
 
-  if (loadinfo->ehdr.e_type == ET_REL)
+#ifndef CONFIG_MODLIB_LOADTO_LMA
+
+  if (loadinfo->ehdr.e_type == ET_REL || loadinfo->ehdr.e_type == ET_EXEC)
     {
-#ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
+#  ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
       if (loadinfo->textsize > 0)
         {
-#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
+#    ifdef CONFIG_ARCH_USE_TEXT_HEAP
           loadinfo->textalloc = (uintptr_t)
                                 up_textheap_memalign(loadinfo->textalign,
                                                      loadinfo->textsize +
                                                      loadinfo->segpad);
-#  else
+#    else
           loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
                                                         loadinfo->textsize +
                                                         loadinfo->segpad);
-#  endif
+#    endif
           if (!loadinfo->textalloc)
             {
               berr("ERROR: Failed to allocate memory for the module text\n");
@@ -499,14 +539,14 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
       if (loadinfo->datasize > 0)
         {
-#  ifdef CONFIG_ARCH_USE_DATA_HEAP
+#    ifdef CONFIG_ARCH_USE_DATA_HEAP
           loadinfo->datastart = (uintptr_t)
                                  up_dataheap_memalign(loadinfo->dataalign,
                                                       loadinfo->datasize);
-#  else
+#    else
           loadinfo->datastart = (uintptr_t)lib_memalign(loadinfo->dataalign,
                                                         loadinfo->datasize);
-#  endif
+#    endif
           if (!loadinfo->datastart)
             {
               berr("ERROR: Failed to allocate memory for the module data\n");
@@ -514,7 +554,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
               goto errout_with_buffers;
             }
         }
-#endif
+#  endif
     }
   else if (loadinfo->ehdr.e_type == ET_DYN)
     {
@@ -534,6 +574,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
                             loadinfo->textsize +
                             loadinfo->segpad;
     }
+
+#endif /* CONFIG_MODLIB_LOADTO_LMA */
 
   /* Load ELF section data into memory */
 
@@ -595,6 +637,12 @@ int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
     {
       berr("ERROR: modlib_loadhdrs failed: %d\n", ret);
       goto errout_with_buffers;
+    }
+
+  loadinfo->gotindex = modlib_findsection(loadinfo, ".got");
+  if (loadinfo->gotindex >= 0)
+    {
+      binfo("GOT section found! index %d\n", loadinfo->gotindex);
     }
 
   /* Determine total size to allocate */

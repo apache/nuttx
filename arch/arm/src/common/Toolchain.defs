@@ -502,11 +502,21 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
-CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
+ifeq ($(CONFIG_PIC),y)
+  CFLAGS += --fixed-r10
+  PICFLAGS = -fpic -fPIE -mno-pic-data-is-text-relative \
+             -msingle-pic-base -mpic-register=r10
 
-LDELFFLAGS = -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)
+  # Generate an executable elf, need to ignore undefined symbols
+  LDELFFLAGS += --unresolved-symbols=ignore-in-object-files --emit-relocs
+else
+  LDELFFLAGS += -r
+endif
+
+CELFFLAGS = $(CFLAGS) $(PICFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
+CXXELFFLAGS = $(CXXFLAGS) $(PICFLAGS) -fvisibility=hidden
+
+LDELFFLAGS +=  -e main -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)
 
 # Zig toolchain
 

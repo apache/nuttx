@@ -28,7 +28,7 @@ config BINFMT_LOADABLE
 		Automatically selected if a loadable binary format is selected.
 
 config PIC
-	bool
+	bool "Executable elf position-independent support"
 	default n
 	---help---
 		Automatically selected if the binary format requires position

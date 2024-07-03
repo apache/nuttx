@@ -231,6 +231,7 @@ struct mod_loadinfo_s
   uint16_t      buflen;      /* size of iobuffer[] */
   int           filfd;       /* Descriptor for the file being loaded */
   int           nexports;    /* ET_DYN - Number of symbols exported */
+  int           gotindex;    /* Index to the GOT section */
 
   /* Address environment.
    *
