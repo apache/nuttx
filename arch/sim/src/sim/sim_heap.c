@@ -230,6 +230,7 @@ struct mm_heap_s *mm_initialize(const char *name,
   procfs_register_meminfo(&heap->mm_procfs);
 #endif
 
+  sched_note_heap(NOTE_HEAP_ADD, heap, heap_start, heap_size);
   return heap;
 }
 
@@ -251,6 +252,10 @@ struct mm_heap_s *mm_initialize(const char *name,
 
 void mm_uninitialize(struct mm_heap_s *heap)
 {
+  sched_note_heap(NOTE_HEAP_REMOVE, heap, heap_start,
+                  (uintptr_t)heap->mm_heapend[0] -
+                  (uintptr_t)heap->mm_heapstart[0]);
+
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   procfs_unregister_meminfo(&heap->mm_procfs);
 #endif

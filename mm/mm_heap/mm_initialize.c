@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/sched_note.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
 
@@ -201,6 +202,8 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   mm_addfreechunk(heap, node);
   heap->mm_curused += 2 * MM_SIZEOF_ALLOCNODE;
   mm_unlock(heap);
+
+  sched_note_heap(NOTE_HEAP_ADD, heap, heapstart, heapsize);
 }
 
 /****************************************************************************
@@ -366,6 +369,9 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
   for (i = 0; i < CONFIG_MM_REGIONS; i++)
     {
       kasan_unregister(heap->mm_heapstart[i]);
+      sched_note_heap(NOTE_HEAP_REMOVE, heap, heap->mm_heapstart[i],
+                      (uintptr_t)heap->mm_heapend[i] -
+                      (uintptr_t)heap->mm_heapstart[i]);
     }
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
