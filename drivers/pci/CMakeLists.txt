@@ -46,6 +46,10 @@ if(CONFIG_PCI_ENDPOINT)
 
   set(SRCS pci_epc.c pci_epc_mem.c pci_epf.c)
 
+  if(CONFIG_PCI_QEMU_EPC)
+    list(APPEND SRCS pci_qemu_epc.c)
+  endif() # CONFIG_PCI_QEMU_EPC
+
   target_sources(drivers PRIVATE ${SRCS})
 
 endif() # CONFIG_PCI_ENDPOINT

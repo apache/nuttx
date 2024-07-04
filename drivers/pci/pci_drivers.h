@@ -55,4 +55,16 @@ int pci_ivshmem_register(void);
 int pci_register_uio_ivshmem_driver(void);
 #endif
 
+#ifdef CONFIG_PCI_QEMU_EPC
+/****************************************************************************
+ * Name: pci_register_qemu_epc_driver
+ *
+ * Description:
+ *   Register a pci epc driver
+ *
+ ****************************************************************************/
+
+int pci_register_qemu_epc_driver(void);
+#endif
+
 #endif /* __DRIVERS_PCI_PCI_DRIVERS_H */
