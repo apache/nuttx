@@ -182,6 +182,81 @@ int coredump_set_memory_region(FAR const struct memory_region_s *region)
 }
 
 /****************************************************************************
+ * Name: coredump_add_memory_region
+ *
+ * Description:
+ *   Use coredump to dump the memory of the specified area.
+ *
+ ****************************************************************************/
+
+int coredump_add_memory_region(FAR const void *ptr, size_t size)
+{
+  FAR struct memory_region_s *region;
+  size_t count = 1; /* 1 for end flag */
+
+  if (g_regions != NULL)
+    {
+      region = (FAR struct memory_region_s *)g_regions;
+
+      while (region->start != 0)
+        {
+          if ((uintptr_t)ptr >= region->start &&
+              (uintptr_t)ptr + size < region->end)
+            {
+              /* Already watched */
+
+              return 0;
+            }
+          else if ((uintptr_t)ptr < region->end &&
+                   (uintptr_t)ptr + size >= region->end)
+            {
+              /* start in region, end out of region */
+
+              region->end = (uintptr_t)ptr + size;
+              return 0;
+            }
+          else if ((uintptr_t)ptr < region->start &&
+                   (uintptr_t)ptr + size >= region->start)
+            {
+              /* start out of region, end in region */
+
+              region->start = (uintptr_t)ptr;
+              return 0;
+            }
+          else if ((uintptr_t)ptr < region->start &&
+                   (uintptr_t)ptr + size >= region->end)
+            {
+              /* start out of region, end out of region */
+
+              region->start = (uintptr_t)ptr;
+              region->end = (uintptr_t)ptr + size;
+              return 0;
+            }
+
+          count++;
+          region++;
+        }
+
+      /* Need a new region */
+    }
+
+  region = lib_realloc((FAR void *)g_regions,
+                       sizeof(struct memory_region_s) * (count + 1));
+  if (region == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  region[count - 1].start = (uintptr_t)ptr;
+  region[count - 1].end = (uintptr_t)ptr + size;
+  region[count - 1].flags = 0;
+  region[count].start = 0;
+
+  g_regions = region;
+  return 0;
+}
+
+/****************************************************************************
  * Name: coredump_initialize
  *
  * Description:
