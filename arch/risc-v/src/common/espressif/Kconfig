@@ -442,6 +442,12 @@ config ESP_RMT
 		format, RMT can be extended to a versatile and general-purpose
 		transceiver, transmitting or receiving many other types of signals.
 
+config ESPRESSIF_TEMP
+	bool "Internal Temperature Sensor"
+	default n
+	---help---
+		A built-in sensor used to measure the chip's internal temperature.
+
 config ESP_WIRELESS
 	bool
 	default n
@@ -1406,5 +1412,14 @@ config ESPRESSIF_BROWNOUT_DET_LVL
 	default 7 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
 
 endmenu # ESPRESSIF_BROWNOUT_DET
+
+menu "Internal Temperature Sensor Configuration"
+	depends on ESPRESSIF_TEMP
+
+config ESPRESSIF_TEMP_PATH
+	string "Internal Temperature Sensor Path"
+	default "dev/temp"
+
+endmenu # ESPRESSIF_TEMP
 
 endif # ARCH_CHIP_ESPRESSIF
