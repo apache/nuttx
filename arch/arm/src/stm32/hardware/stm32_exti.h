@@ -165,16 +165,16 @@
 #  define EXTI_COMP3             (1 << 29) /* EXTI line 29 is connected to the Comparator 3 wakeup event */
 #  define EXTI_COMP4             (1 << 30) /* EXTI line 30 is connected to the Comparator 4 wakeup event */
 #  define EXTI_COMP5             (1 << 31) /* EXTI line 31 is connected to the Comparator 5 wakeup event */
-#  define EXTI_COMP6             (1 << 32) /* EXTI line 32 is connected to the Comparator 6 wakeup event */
-#  define EXTI_COMP7             (1 << 33) /* EXTI line 33 is connected to the Comparator 7 wakeup event */
-#  define EXTI_USART4            (1 << 34) /* EXTI line 34 is connected to the USART4 wakeup event */
-#  define EXTI_USART5            (1 << 35) /* EXTI line 35 is connected to the USART5 wakeup event */
-#  define EXTI_LPUART1           (1 << 36) /* EXTI line 36 is connected to the LPUART1 wakeup event */
-#  define EXTI_LPTIM1            (1 << 37) /* EXTI line 37 is connected to the LPTIM1 wakeup event */
-#  define EXTI_PVM1              (1 << 40) /* EXTI line 40 is connected to the PVM1 wakeup event */
-#  define EXTI_PVM2              (1 << 41) /* EXTI line 41 is connected to the PVM2 wakeup event */
-#  define EXTI_I2C4              (1 << 42) /* EXTI line 42 is connected to the I2C4 wakeup event */
-#  define EXTI_UCPD1             (1 << 43) /* EXTI line 43 is connected to the UCPD1 wakeup event */
+#  define EXTI_COMP6             (1 << 0)  /* EXTI line 32 is connected to the Comparator 6 wakeup event */
+#  define EXTI_COMP7             (1 << 1)  /* EXTI line 33 is connected to the Comparator 7 wakeup event */
+#  define EXTI_USART4            (1 << 2)  /* EXTI line 34 is connected to the USART4 wakeup event */
+#  define EXTI_USART5            (1 << 3)  /* EXTI line 35 is connected to the USART5 wakeup event */
+#  define EXTI_LPUART1           (1 << 4)  /* EXTI line 36 is connected to the LPUART1 wakeup event */
+#  define EXTI_LPTIM1            (1 << 5)  /* EXTI line 37 is connected to the LPTIM1 wakeup event */
+#  define EXTI_PVM1              (1 << 8)  /* EXTI line 40 is connected to the PVM1 wakeup event */
+#  define EXTI_PVM2              (1 << 9)  /* EXTI line 41 is connected to the PVM2 wakeup event */
+#  define EXTI_I2C4              (1 << 10) /* EXTI line 42 is connected to the I2C4 wakeup event */
+#  define EXTI_UCPD1             (1 << 11) /* EXTI line 43 is connected to the UCPD1 wakeup event */
 #endif
 
 /* Interrupt mask register */
