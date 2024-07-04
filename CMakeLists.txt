@@ -695,7 +695,9 @@ else()
       COMMAND
         echo ARGS
         '__init_array_start = .\; __init_array_end = .\; __fini_array_start = .\; __fini_array_end = .\;'
-        >> nuttx.ld)
+        >> nuttx.ld
+      COMMAND sed -i '/\\.data *:/i " ${CONFIG_SIM_CUSTOM_DATA_SECTION} " '
+              nuttx.ld)
   endif()
 
   # conflicting symbols to rename
