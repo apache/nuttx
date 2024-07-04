@@ -45,7 +45,7 @@
  *
  ****************************************************************************/
 
-int core_dump(FAR struct memory_region_s *regions,
+int core_dump(FAR const struct memory_region_s *regions,
               FAR struct lib_outstream_s *stream,
               pid_t pid)
 {

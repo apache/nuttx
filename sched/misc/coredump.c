@@ -47,7 +47,7 @@ static struct lib_blkoutstream_s  g_blockstream;
 static unsigned char *g_blockinfo;
 #endif
 
-static struct memory_region_s *g_regions;
+static const struct memory_region_s *g_regions;
 
 /****************************************************************************
  * Private Functions
@@ -173,7 +173,7 @@ static void coredump_dump_blkdev(pid_t pid)
  *
  ****************************************************************************/
 
-int coredump_set_memory_region(FAR struct memory_region_s *region)
+int coredump_set_memory_region(FAR const struct memory_region_s *region)
 {
   /* Not free g_regions, because allow call this fun when crash */
 

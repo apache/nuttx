@@ -70,7 +70,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           FAR const struct symtab_s *exports,
                           int nexports);
 #ifdef CONFIG_ELF_COREDUMP
-static int elf_dumpbinary(FAR struct memory_region_s *regions,
+static int elf_dumpbinary(FAR const struct memory_region_s *regions,
                           FAR struct lib_outstream_s *stream,
                           pid_t pid);
 #endif
@@ -382,7 +382,7 @@ errout_with_init:
  ****************************************************************************/
 
 #ifdef CONFIG_ELF_COREDUMP
-static int elf_dumpbinary(FAR struct memory_region_s *regions,
+static int elf_dumpbinary(FAR const struct memory_region_s *regions,
                           FAR struct lib_outstream_s *stream,
                           pid_t pid)
 {

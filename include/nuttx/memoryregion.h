@@ -39,7 +39,6 @@ struct memory_region_s
   uintptr_t end;     /* End address of this region */
   uint32_t  flags;   /* Figure 5-3: Segment Flag Bits: PF_[X|W|R] */
 };
-
 /****************************************************************************
  * Public Function
  ****************************************************************************/
@@ -91,6 +90,6 @@ alloc_memory_region(FAR const char *format);
  *
  ****************************************************************************/
 
-void free_memory_region(FAR struct memory_region_s *region);
+void free_memory_region(FAR const struct memory_region_s *region);
 
 #endif /* __INCLUDE_MEMORYREGION_H */
