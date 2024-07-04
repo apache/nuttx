@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_hostencoder.c
+ * arch/sim/src/sim/sim_x264encoder.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,14 +30,13 @@
 #include <linux/videodev2.h>
 #include <x264.h>
 
-#include "sim_hostencoder.h"
-#include "sim_internal.h"
+#include "sim_x264encoder.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct host_encoder_s
+struct x264_wrapper_s
 {
   x264_t *enc_ctx;
   x264_picture_t pic_in;
@@ -52,28 +51,27 @@ struct host_encoder_s
  * Public Functions
  ****************************************************************************/
 
-struct host_encoder_s *host_encoder_open(void)
+struct x264_wrapper_s *x264_wrapper_open(void)
 {
-  return calloc(1, sizeof(struct host_encoder_s));
+  return calloc(1, sizeof(struct x264_wrapper_s));
 }
 
-int host_encoder_close(struct host_encoder_s *encoder)
+int x264_wrapper_close(struct x264_wrapper_s *encoder)
 {
   free(encoder);
   return 0;
 }
 
-int host_encoder_streamon(struct host_encoder_s *encoder,
+int x264_wrapper_streamon(struct x264_wrapper_s *encoder,
                           int width, int height, int fps, int bframe)
 {
   int ret;
 
   memset(&encoder->param, 0, sizeof(x264_param_t));
 
-  ret = host_uninterruptible(x264_param_default_preset,
-                             &encoder->param,
-                             "fast",
-                             "zerolatency");
+  ret = x264_param_default_preset(&encoder->param,
+                                  "fast",
+                                  "zerolatency");
   if (ret < 0)
     {
       return ret;
@@ -89,37 +87,35 @@ int host_encoder_streamon(struct host_encoder_s *encoder,
   encoder->param.i_keyint_min = 25;
   encoder->param.i_bframe     = bframe;
 
-  ret = host_uninterruptible(x264_picture_alloc,
-                             &encoder->pic_in,
-                             X264_CSP_I420,
-                             width,
-                             height);
+  ret = x264_picture_alloc(&encoder->pic_in,
+                           X264_CSP_I420,
+                           width,
+                           height);
   if (ret < 0)
     {
       return ret;
     }
 
-  encoder->enc_ctx = host_uninterruptible(x264_encoder_open,
-                                          &encoder->param);
+  encoder->enc_ctx = x264_encoder_open(&encoder->param);
   if (!encoder->enc_ctx)
     {
-      host_uninterruptible_no_return(x264_picture_clean, &encoder->pic_in);
+      x264_picture_clean(&encoder->pic_in);
       return -EINVAL;
     }
 
   return 0;
 }
 
-int host_encoder_streamoff(struct host_encoder_s *encoder)
+int x264_wrapper_streamoff(struct x264_wrapper_s *encoder)
 {
-  host_uninterruptible_no_return(x264_encoder_close, encoder->enc_ctx);
-  host_uninterruptible_no_return(x264_picture_clean, &encoder->pic_in);
+  x264_encoder_close(encoder->enc_ctx);
+  x264_picture_clean(&encoder->pic_in);
   encoder->remaining_frames = 0;
 
   return 0;
 }
 
-int host_encoder_enqueue(struct host_encoder_s *encoder,
+int x264_wrapper_enqueue(struct x264_wrapper_s *encoder,
                          uint8_t *data, uint32_t size, int64_t pts)
 {
   int ret;
@@ -137,18 +133,16 @@ int host_encoder_enqueue(struct host_encoder_s *encoder,
                                            width * height / 4);
     }
 
-  ret = host_uninterruptible(x264_encoder_encode,
-                             encoder->enc_ctx,
-                             &encoder->nal,
-                             &encoder->i_nal,
-                             (data != NULL ? &encoder->pic_in : NULL),
-                             &encoder->pic_out);
+  ret = x264_encoder_encode(encoder->enc_ctx,
+                            &encoder->nal,
+                            &encoder->i_nal,
+                            (data != NULL ? &encoder->pic_in : NULL),
+                            &encoder->pic_out);
 
   if (data == NULL)
     {
       encoder->remaining_frames =
-        host_uninterruptible(x264_encoder_delayed_frames,
-                             encoder->enc_ctx);
+        x264_encoder_delayed_frames(encoder->enc_ctx);
     }
 
   if (ret >= 0)
@@ -159,7 +153,7 @@ int host_encoder_enqueue(struct host_encoder_s *encoder,
   return ret;
 }
 
-int host_encoder_dequeue(struct host_encoder_s *encoder,
+int x264_wrapper_dequeue(struct x264_wrapper_s *encoder,
                          uint8_t *data, uint32_t *size,
                          int64_t *pts, uint32_t *flags)
 {

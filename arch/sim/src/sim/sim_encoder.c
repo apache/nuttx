@@ -27,7 +27,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/video/v4l2_m2m.h>
 
-#include "sim_hostencoder.h"
+#include "sim_x264encoder.h"
 #include "sim_internal.h"
 
 /****************************************************************************
@@ -42,7 +42,7 @@
 
 struct sim_encoder_s
 {
-  struct host_encoder_s *encoder;
+  struct x264_wrapper_s *encoder;
   struct v4l2_format    output_fmt;
   struct v4l2_format    capture_fmt;
   struct work_s         work;
@@ -140,7 +140,7 @@ static struct codec_s g_sim_codec_encoder =
 static int sim_encoder_open(void *cookie, void **priv)
 {
   sim_encoder_t *sim_encoder;
-  struct host_encoder_s *encoder;
+  struct x264_wrapper_s *encoder;
 
   sim_encoder = kmm_zalloc(sizeof(struct sim_encoder_s));
   if (sim_encoder == NULL)
@@ -148,7 +148,7 @@ static int sim_encoder_open(void *cookie, void **priv)
       return -ENOMEM;
     }
 
-  encoder = host_encoder_open();
+  encoder = x264_wrapper_open();
   if (encoder == NULL)
     {
       kmm_free(sim_encoder);
@@ -166,7 +166,7 @@ static int sim_encoder_close(void *priv)
 {
   sim_encoder_t *sim_encoder = priv;
 
-  host_encoder_close(sim_encoder->encoder);
+  x264_wrapper_close(sim_encoder->encoder);
   kmm_free(sim_encoder);
 
   return 0;
@@ -187,7 +187,7 @@ static int sim_encoder_output_streamon(void *priv)
 {
   sim_encoder_t *sim_encoder = priv;
 
-  return host_encoder_streamon(sim_encoder->encoder,
+  return x264_wrapper_streamon(sim_encoder->encoder,
                                sim_encoder->output_fmt.fmt.pix.width,
                                sim_encoder->output_fmt.fmt.pix.height,
                                sim_encoder->fps ? sim_encoder->fps : 30,
@@ -227,7 +227,7 @@ static int sim_encoder_capture_streamoff(void *priv)
   sim_encoder_t *sim_encoder = priv;
 
   sim_encoder->capture_on = false;
-  return host_encoder_streamoff(sim_encoder->encoder);
+  return x264_wrapper_streamoff(sim_encoder->encoder);
 }
 
 static int sim_encoder_output_streamoff(void *priv)
@@ -475,7 +475,7 @@ static int sim_encoder_process(sim_encoder_t *sim_encoder,
                  src_buf->timestamp.tv_usec;
     }
 
-  ret = host_encoder_enqueue(sim_encoder->encoder,
+  ret = x264_wrapper_enqueue(sim_encoder->encoder,
                              src_data, src_size, src_pts);
   if (ret >= 0 && src_buf != NULL)
     {
@@ -487,7 +487,7 @@ static int sim_encoder_process(sim_encoder_t *sim_encoder,
       return ret;
     }
 
-  ret = host_encoder_dequeue(sim_encoder->encoder,
+  ret = x264_wrapper_dequeue(sim_encoder->encoder,
                              (uint8_t *)dst_buf->m.userptr,
                              &dst_buf->bytesused,
                              &dst_pts,

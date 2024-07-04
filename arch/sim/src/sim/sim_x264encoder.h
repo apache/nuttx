@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_hostencoder.h
+ * arch/sim/src/sim/sim_x264encoder.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_SIM_SIM_HOSTENCODER_H
-#define __ARCH_SIM_SRC_SIM_SIM_HOSTENCODER_H
+#ifndef __ARCH_SIM_SRC_SIM_SIM_X264ENCODER_H
+#define __ARCH_SIM_SRC_SIM_SIM_X264ENCODER_H
 
 /****************************************************************************
  * Included Files
@@ -31,21 +31,21 @@
  * Public Types
  ****************************************************************************/
 
-struct host_encoder_s;
+struct x264_wrapper_s;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-struct host_encoder_s *host_encoder_open(void);
-int host_encoder_close(struct host_encoder_s *encoder);
-int host_encoder_streamon(struct host_encoder_s *encoder,
+struct x264_wrapper_s *x264_wrapper_open(void);
+int x264_wrapper_close(struct x264_wrapper_s *encoder);
+int x264_wrapper_streamon(struct x264_wrapper_s *encoder,
                           int width, int height, int fps, int bframe);
-int host_encoder_streamoff(struct host_encoder_s *encoder);
-int host_encoder_enqueue(struct host_encoder_s *encoder,
+int x264_wrapper_streamoff(struct x264_wrapper_s *encoder);
+int x264_wrapper_enqueue(struct x264_wrapper_s *encoder,
                          uint8_t *data, uint32_t size, int64_t pts);
-int host_encoder_dequeue(struct host_encoder_s *encoder,
+int x264_wrapper_dequeue(struct x264_wrapper_s *encoder,
                          uint8_t *data, uint32_t *size,
                          int64_t *pts, uint32_t *flags);
 
-#endif /* __ARCH_SIM_SRC_SIM_SIM_HOSTENCODER_H */
+#endif /* __ARCH_SIM_SRC_SIM_SIM_X264ENCODER_H */
