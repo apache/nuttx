@@ -72,6 +72,10 @@
 #  include "esp_board_spidev.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_TEMP
+#  include "espressif/esp_temperature_sensor.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
 #  include "esp_coexist_internal.h"
 #endif
@@ -201,6 +205,16 @@ int esp_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TEMP
+  struct esp_temp_sensor_config_t cfg = TEMPERATURE_SENSOR_CONFIG(10, 50);
+  ret = esp_temperature_sensor_initialize(cfg);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize temperature sensor driver: %d\n",
+             ret);
     }
 #endif
 
