@@ -412,22 +412,22 @@ static void imxrt_pll2_pfd(void)
 
   if (g_initial_clkconfig.sys_pll2.pfd0 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD0_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD0_UPDATE;
     }
 
   if (g_initial_clkconfig.sys_pll2.pfd1 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD1_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD1_UPDATE;
     }
 
   if (g_initial_clkconfig.sys_pll2.pfd2 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD2_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD2_UPDATE;
     }
 
   if (g_initial_clkconfig.sys_pll2.pfd3 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD3_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD3_UPDATE;
     }
 
   putreg32(reg, IMXRT_ANADIG_PLL_SYS_PLL2_UPDATE);
