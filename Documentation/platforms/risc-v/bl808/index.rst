@@ -35,6 +35,28 @@ Bouffalo Lab BL808
 - **Video Input:** Dual-lane MIPI CSI
 - **Peripherals:** UART, SPI, I2C, PWM, SDH, EMAC, USB
 
+Peripheral Support
+==================
+
+The following list indicates the state of peripherals' support in NuttX:
+
+=========== ======= ====================
+Peripheral  Support NOTES
+=========== ======= ====================
+GPDAC        No
+DMA          No
+EMAC         No
+GPADC        Yes
+GPIO         Yes
+I2C          No
+I2S          No
+PWM          No
+SPI          No
+Timers       No
+UART         Yes
+USB          No
+=========== ======= ====================
+
 Supported Boards
 ================
 
