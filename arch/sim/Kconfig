@@ -794,4 +794,11 @@ config SIM_USB_PRIO
 
 endif
 
+config SIM_CUSTOM_DATA_SECTION
+	string "Custom data section name for Simulator"
+	default ""
+	---help---
+		Custom data section name for Simulator to allow
+		developer to define special data sections.
+
 endif # ARCH_SIM

@@ -414,6 +414,9 @@ ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
 	            .kasan.global : {KEEP(*(.data..LASAN0)) KEEP (*(.data.rel.local..LASAN0)) }\n  \
 	            .interp : {*(.interp)}/g' nuttx.ld
 endif
+ifneq ($(CONFIG_SIM_CUSTOM_DATA_SECTION),"")
+	$(Q) sed -i '/\.data *:/i $(subst ",, $(CONFIG_SIM_CUSTOM_DATA_SECTION))' nuttx.ld
+endif
 ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
 	$(if $(CONFIG_HAVE_CXX),\
 	$(Q) "$(CXX)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
