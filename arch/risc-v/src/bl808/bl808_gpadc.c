@@ -43,6 +43,7 @@
 #include "riscv_internal.h"
 #include "chip.h"
 #include "bl808_gpadc.h"
+#include "bl808_gpio.h"
 
 #ifdef CONFIG_BL808_GPADC
 
@@ -159,6 +160,22 @@ static struct adc_ops_s gpadc_ops =
     .ao_shutdown = bl808_gpadc_shutdown,
     .ao_rxint = bl808_gpadc_rxint,
     .ao_ioctl = bl808_gpadc_ioctl
+  };
+
+static uint8_t ch_to_gpio_map[12] =
+  {
+    [0] = 17,
+    [1] = 5,
+    [2] = 4,
+    [3] = 11,
+    [4] = 6,
+    [5] = 40,
+    [6] = 12,
+    [7] = 13,
+    [8] = 16,
+    [9] = 18,
+    [10] = 19,
+    [11] = 34
   };
 
 /****************************************************************************
@@ -339,17 +356,27 @@ static int bl808_gpadc_setup(struct adc_dev_s *dev)
        channel_idx < priv->nchannels;
        channel_idx++)
     {
+      uint8_t channel = priv->enabled_channels[channel_idx];
+
+      /* If enabling an external channel, configure GPIO */
+
+      if (channel < 12)
+        {
+          int pin = ch_to_gpio_map[channel];
+          bl808_configgpio(pin, GPIO_INPUT
+                           | GPIO_FLOAT
+                           | GPIO_FUNC_ANA);
+        }
+
       if (channel_idx < 6)
         {
           modifyreg32(BL808_GPADC_SCAN_POS1, 0,
-                      (priv->enabled_channels[channel_idx]
-                       << GPADC_SCAN_SHIFT(channel_idx)));
+                      (channel << GPADC_SCAN_SHIFT(channel_idx)));
         }
       else
         {
           modifyreg32(BL808_GPADC_SCAN_POS2, 0,
-                      (priv->enabled_channels[channel_idx]
-                       << GPADC_SCAN_SHIFT(channel_idx)));
+                      (channel << GPADC_SCAN_SHIFT(channel_idx)));
         }
     }
 

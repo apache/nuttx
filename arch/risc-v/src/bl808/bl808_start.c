@@ -37,7 +37,6 @@
 #include "bl808_mm_init.h"
 #include "bl808_memorymap.h"
 #include "bl808_serial.h"
-#include "bl808_gpadc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
