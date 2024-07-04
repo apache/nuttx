@@ -35,7 +35,7 @@ endif
 
 # Common assembly language files
 CMN_ASRCS  = arm64_vector_table.S arm64_vectors.S arm64_smccc.S
-CMN_ASRCS += arm64_cpu_idle.S arm64_fork_func.S
+CMN_ASRCS += arm64_fork_func.S
 
 ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
 CMN_ASRCS += arm64_testset.S
