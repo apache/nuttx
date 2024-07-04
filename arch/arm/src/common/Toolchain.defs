@@ -205,6 +205,8 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
     ARCHCPUFLAGS := $(TOOLCHAIN_CLANG_OPTION) $(TOOLCHAIN_CLANG_CONFIG).cfg $(ARCHCPUFLAGS)
   endif
 
+  LDFLAGS += --entry=__start
+
 # ARM Compiler Clang toolchain
 
 else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
@@ -247,6 +249,8 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 
   LDFLAGS      += --diag_suppress=6329
 
+  LDFLAGS      += --entry=__start
+
 else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
   CC       = ccarm
   CXX      = cxarm
@@ -258,6 +262,8 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
   OBJCOPY  = objcopy
   GMEMFILE = gmemfile
   OBJDUMP  = gdump
+
+  LDFLAGS += -entry=__start
 
 # Default toolchain
 
@@ -295,6 +301,8 @@ else
       LDFLAGS += --no-warn-rwx-segments
     endif
   endif
+
+  LDFLAGS += --entry=__start
 
 endif
 
