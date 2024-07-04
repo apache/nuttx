@@ -292,7 +292,7 @@ static int cdcecm_transmit(FAR struct cdcecm_driver_s *self)
 
   /* Increment statistics */
 
-  NETDEV_TXPACKETS(self->dev);
+  NETDEV_TXPACKETS(&self->dev);
 
   /* Send the packet: address=priv->dev.d_buf, length=priv->dev.d_len */
 
@@ -492,7 +492,7 @@ static void cdcecm_txdone(FAR struct cdcecm_driver_s *priv)
 {
   /* Check for errors and update statistics */
 
-  NETDEV_TXDONE(priv->dev);
+  NETDEV_TXDONE(&priv->dev);
 
   /* In any event, poll the network for new TX data */
 
