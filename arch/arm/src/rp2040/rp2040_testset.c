@@ -70,7 +70,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 
   ret = *lock;
 
-  if (ret == SP_UNLOCKED)
+  if (!spin_is_locked(&ret))
     {
       *lock = SP_LOCKED;
       SP_DMB();
