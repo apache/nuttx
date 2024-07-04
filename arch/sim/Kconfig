@@ -83,6 +83,13 @@ config SIM_UBSAN
 		Compile-time instrumentation is used to detect various undefined behaviours
 		at runtime.
 
+config SIM_UBSAN_DUMMY
+	bool "Bypass Undefined Behaviour Sanitizer"
+	default n
+	depends on SIM_UBSAN
+	---help---
+		Keep SIM_UBSAN compile time but disable runtime actions.
+
 choice
 	prompt "X64_64 ABI"
 	default SIM_X8664_SYSTEMV if HOST_LINUX

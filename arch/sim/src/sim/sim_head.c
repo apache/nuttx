@@ -142,8 +142,12 @@ const char *__lsan_default_options(void)
 #ifdef CONFIG_SIM_UBSAN
 const char *__ubsan_default_options(void)
 {
+#ifdef CONFIG_SIM_UBSAN_DUMMY
+  return "";
+#else
   return "print_stacktrace=1"
          " fast_unwind_on_malloc=0";
+#endif
 }
 #endif
 
