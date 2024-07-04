@@ -256,15 +256,6 @@ int timer_settime(timer_t timerid, int flags,
 
   nxsig_cancel_notification(&timer->pt_work);
 
-  /* If the it_value member of value is zero, the timer will not be
-   * re-armed
-   */
-
-  if (value->it_value.tv_sec <= 0 && value->it_value.tv_nsec <= 0)
-    {
-      return OK;
-    }
-
   /* Setup up any repetitive timer */
 
   if (value->it_interval.tv_sec > 0 || value->it_interval.tv_nsec > 0)
@@ -288,42 +279,47 @@ int timer_settime(timer_t timerid, int flags,
 
   /* Check if abstime is selected */
 
-  if ((flags & TIMER_ABSTIME) != 0)
+  if (value->it_value.tv_sec <= 0 && value->it_value.tv_nsec <= 0)
     {
-      /* Calculate a delay corresponding to the absolute time in 'value' */
-
-      ret = clock_abstime2ticks(timer->pt_clock, &value->it_value, &delay);
+      delay = 0;
     }
   else
     {
-      /* Calculate a delay assuming that 'value' holds the relative time
-       * to wait.  We have internal knowledge that clock_time2ticks always
-       * returns success.
+      if ((flags & TIMER_ABSTIME) != 0)
+        {
+          /* Calculate a delay corresponding to absolute time in 'value' */
+
+          ret = clock_abstime2ticks(timer->pt_clock,
+                                    &value->it_value, &delay);
+        }
+      else
+        {
+          /* Calculate a delay assuming that 'value' holds the relative time
+           * to wait.  We have internal knowledge that clock_time2ticks
+           * always returns success.
+           */
+
+          ret = clock_time2ticks(&value->it_value, &delay);
+        }
+
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      /* If the specified time has already passed, the function shall succeed
+       * and the expiration notification shall be made.
        */
 
-      ret = clock_time2ticks(&value->it_value, &delay);
-    }
-
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
-  /* If the specified time has already passed, the function shall succeed
-   * and the expiration notification shall be made.
-   */
-
-  if (delay < 0)
-    {
-      delay = 0;
+      if (delay < 0)
+        {
+          delay = 0;
+        }
     }
 
   /* Then start the watchdog */
 
-  if (delay >= 0)
-    {
-      ret = wd_start(&timer->pt_wdog, delay, timer_timeout, (wdparm_t)timer);
-    }
+  ret = wd_start(&timer->pt_wdog, delay, timer_timeout, (wdparm_t)timer);
 
 errout:
   leave_critical_section(intflags);
