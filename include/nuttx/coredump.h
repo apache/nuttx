@@ -40,7 +40,7 @@
  *
  ****************************************************************************/
 
-int coredump_set_memory_region(FAR struct memory_region_s *region);
+int coredump_set_memory_region(FAR const struct memory_region_s *region);
 
 /****************************************************************************
  * Name: coredump_initialize

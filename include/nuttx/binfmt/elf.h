@@ -134,7 +134,7 @@ struct elf_loadinfo_s
 #ifdef CONFIG_ELF_COREDUMP
 struct elf_dumpinfo_s
 {
-  FAR struct memory_region_s *regions;
+  FAR const struct memory_region_s *regions;
   FAR struct lib_outstream_s *stream;
   pid_t                       pid;
 };

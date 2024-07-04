@@ -139,7 +139,7 @@ struct binfmt_s
 
   /* Coredump callback */
 
-  CODE int (*coredump)(FAR struct memory_region_s *regions,
+  CODE int (*coredump)(FAR const struct memory_region_s *regions,
                        FAR struct lib_outstream_s *stream,
                        pid_t pid);
 };
@@ -220,7 +220,7 @@ int unregister_binfmt(FAR struct binfmt_s *binfmt);
  *
  ****************************************************************************/
 
-int core_dump(FAR struct memory_region_s *regions,
+int core_dump(FAR const struct memory_region_s *regions,
               FAR struct lib_outstream_s *stream,
               pid_t pid);
 
