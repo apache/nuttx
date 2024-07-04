@@ -412,13 +412,13 @@
                         (float)CONFIG_SAMV7_MCAN1_BITRATE)) - 1))
 #  define MCAN1_SJW    (CONFIG_SAMV7_MCAN1_FSJW - 1)
 
-#  if MCAN1_NTSEG1 > 63
+#  if MCAN1_TSEG1 > 63
 #    error Invalid MCAN1 NTSEG1
 #  endif
-#  if MCAN1_NTSEG2 > 15
+#  if MCAN1_TSEG2 > 15
 #    error Invalid MCAN1 NTSEG2
 #  endif
-#  if MCAN1_NSJW > 15
+#  if MCAN1_SJW > 15
 #    error Invalid MCAN1 NSJW
 #  endif
 
