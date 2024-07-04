@@ -161,9 +161,8 @@ if(CONFIG_SIM_VIDEO_DECODER)
 endif()
 
 if(CONFIG_SIM_VIDEO_ENCODER)
-  list(APPEND HOSTSRCS sim_hostencoder.c)
   list(APPEND SRCS sim_encoder.c)
-  list(APPEND STDLIBS x264)
+  list(APPEND SRCS sim_x264encoder.c)
 endif()
 
 if(CONFIG_SPINLOCK)
