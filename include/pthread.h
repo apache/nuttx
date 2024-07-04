@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>    /* Default settings */
 #include <nuttx/compiler.h>  /* Compiler settings, noreturn_function */
+#include <nuttx/mutex.h>
 
 #include <sys/types.h>       /* Needed for general types */
 #include <stdint.h>          /* C99 fixed width integer types */
@@ -34,7 +35,6 @@
 #include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
 #include <time.h>            /* Needed for struct timespec */
-#include <semaphore.h>       /* For sem_t and SEM_PRIO_* defines */
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 /* The architecture specific spinlock.h header file must provide the
@@ -301,18 +301,16 @@ struct pthread_mutex_s
   /* Supports a singly linked list */
 
   FAR struct pthread_mutex_s *flink;
+  uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
 #endif
 
   /* Payload */
 
-  sem_t sem;        /* Semaphore underlying the implementation of the mutex */
-  pid_t pid;        /* ID of the holder of the mutex */
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
-#endif
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
-  int16_t nlocks;   /* The number of recursive locks held */
+  rmutex_t mutex;   /* Mutex underlying the implementation of the mutex */
+#else
+  mutex_t mutex;    /* Mutex underlying the implementation of the mutex */
 #endif
 };
 
@@ -330,24 +328,24 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 #endif
 
 #if defined(CONFIG_PTHREAD_MUTEX_TYPES) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-#  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1, \
-                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
-                                     PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_MUTEX_INITIALIZER {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_DEFAULT, \
+                                     NXRMUTEX_INITIALIZER}
 #  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
-                                     {NULL, SEM_INITIALIZER(1), -1, \
-                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
-                                     PTHREAD_MUTEX_RECURSIVE, 0}
+                                    {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_RECURSIVE, \
+                                     NXRMUTEX_INITIALIZER,}
 #elif defined(CONFIG_PTHREAD_MUTEX_TYPES)
-#  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1, \
-                                     PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_MUTEX_INITIALIZER {PTHREAD_MUTEX_DEFAULT, \
+                                     NXRMUTEX_INITIALIZER,}
 #  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
-                                     {SEM_INITIALIZER(1), -1, \
-                                     PTHREAD_MUTEX_RECURSIVE, 0}
+                                    {PTHREAD_MUTEX_RECURSIVE, \
+                                     NXRMUTEX_INITIALIZER}
 #elif !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-#  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1,\
-                                     __PTHREAD_MUTEX_DEFAULT_FLAGS}
+#  define PTHREAD_MUTEX_INITIALIZER {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS,\
+                                     NXMUTEX_INITIALIZER}
 #else
-#  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1}
+#  define PTHREAD_MUTEX_INITIALIZER {NXMUTEX_INITIALIZER}
 #endif
 
 struct pthread_barrierattr_s

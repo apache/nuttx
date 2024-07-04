@@ -158,13 +158,20 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
         {
           ret = EOWNERDEAD;
         }
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      else if (mutex_is_hold(&mutex->mutex) &&
+               mutex->type != PTHREAD_MUTEX_RECURSIVE)
+        {
+          ret = EDEADLK;
+        }
+#endif
       else
         {
-          /* Take semaphore underlying the mutex.  pthread_sem_take
-           * returns zero on success and a positive errno value on failure.
+          /* mutex_clocklock returns zero when successful, and the negative
+           * errno value is returned when failed.
            */
 
-          ret = pthread_sem_take(&mutex->sem, abs_timeout);
+          ret = -mutex_clocklock(&mutex->mutex, abs_timeout);
           if (ret == OK)
             {
               /* Check if the holder of the mutex has terminated without
@@ -174,12 +181,19 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
 
               if ((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0)
                 {
+                  /* If the holder thread has terminated, we need to reset
+                   * the mutex and return an error.
+                   */
+
+                  mutex_reset(&mutex->mutex);
                   ret = EOWNERDEAD;
                 }
 
-              /* Add the mutex to the list of mutexes held by this task */
+              /* If mutex is recursion, it is already in the linked list,
+               * and we should not add it to the link list again.
+               */
 
-              else
+              else if (!mutex_is_recursive(&mutex->mutex))
                 {
                   pthread_mutex_add(mutex);
                 }
@@ -228,18 +242,27 @@ int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex)
         {
           ret = EOWNERDEAD;
         }
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      else if (mutex_is_hold(&mutex->mutex) &&
+               mutex->type != PTHREAD_MUTEX_RECURSIVE)
+        {
+          ret = EBUSY;
+        }
+#endif
       else
         {
           /* Try to take the semaphore underlying the mutex */
 
-          ret = nxsem_trywait(&mutex->sem);
+          ret = mutex_trylock(&mutex->mutex);
           if (ret < 0)
             {
               ret = -ret;
             }
-          else
+          else if (!mutex_is_recursive(&mutex->mutex))
             {
-              /* Add the mutex to the list of mutexes held by this task */
+              /* If we successfully acquire the mutex, and we didn't get
+               * it before, add the mutex to the linked list.
+               */
 
               pthread_mutex_add(mutex);
             }
@@ -277,11 +300,58 @@ int pthread_mutex_give(FAR struct pthread_mutex_s *mutex)
     {
       /* Remove the mutex from the list of mutexes held by this task */
 
+      if (!mutex_is_recursive(&mutex->mutex))
+        {
+          pthread_mutex_remove(mutex);
+        }
+
+      /* Now release the underlying mutex */
+
+      ret = -mutex_unlock(&mutex->mutex);
+    }
+
+  return ret;
+}
+
+int pthread_mutex_breaklock(FAR struct pthread_mutex_s *mutex,
+                            FAR unsigned int *breakval)
+{
+  int ret = EINVAL;
+
+  /* Verify input parameters */
+
+  DEBUGASSERT(mutex != NULL);
+  if (mutex != NULL)
+    {
+      /* Remove the mutex from the list of mutexes held by this task */
+
       pthread_mutex_remove(mutex);
 
-      /* Now release the underlying semaphore */
+      /* Now release the underlying mutex */
 
-      ret = pthread_sem_give(&mutex->sem);
+      ret = -mutex_breaklock(&mutex->mutex, breakval);
+    }
+
+  return ret;
+}
+
+int pthread_mutex_restorelock(FAR struct pthread_mutex_s *mutex,
+                              unsigned int breakval)
+{
+  int ret = EINVAL;
+
+  /* Verify input parameters */
+
+  DEBUGASSERT(mutex != NULL);
+  if (mutex != NULL)
+    {
+      ret = -mutex_restorelock(&mutex->mutex, breakval);
+      if (ret == OK)
+        {
+          /* Add the mutex to the list of mutexes held by this task */
+
+          pthread_mutex_add(mutex);
+        }
     }
 
   return ret;

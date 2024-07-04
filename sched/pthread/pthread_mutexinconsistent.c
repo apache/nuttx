@@ -80,7 +80,7 @@ void pthread_mutex_inconsistent(FAR struct tcb_s *tcb)
       /* Mark the mutex as INCONSISTENT and wake up any waiting thread */
 
       mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
-      pthread_sem_give(&mutex->sem);
+      mutex_unlock(&mutex->mutex);
     }
 
   sched_unlock();
