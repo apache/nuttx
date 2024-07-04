@@ -615,28 +615,31 @@ static int sensor_open(FAR struct file *filep)
         }
     }
 
-  if (filep->f_oflags & O_RDOK)
+  if ((filep->f_oflags & O_DIRECT) == 0)
     {
-      if (upper->state.nsubscribers == 0 && lower->ops->activate)
+      if (filep->f_oflags & O_RDOK)
         {
-          ret = lower->ops->activate(lower, filep, true);
-          if (ret < 0)
+          if (upper->state.nsubscribers == 0 && lower->ops->activate)
             {
-              goto errout_with_open;
+              ret = lower->ops->activate(lower, filep, true);
+              if (ret < 0)
+                {
+                  goto errout_with_open;
+                }
             }
+
+          user->role |= SENSOR_ROLE_RD;
+          upper->state.nsubscribers++;
         }
 
-      user->role |= SENSOR_ROLE_RD;
-      upper->state.nsubscribers++;
-    }
-
-  if (filep->f_oflags & O_WROK)
-    {
-      user->role |= SENSOR_ROLE_WR;
-      upper->state.nadvertisers++;
-      if (filep->f_oflags & SENSOR_PERSIST)
+      if (filep->f_oflags & O_WROK)
         {
-          lower->persist = true;
+          user->role |= SENSOR_ROLE_WR;
+          upper->state.nadvertisers++;
+          if (filep->f_oflags & SENSOR_PERSIST)
+            {
+              lower->persist = true;
+            }
         }
     }
 
@@ -695,18 +698,21 @@ static int sensor_close(FAR struct file *filep)
         }
     }
 
-  if (filep->f_oflags & O_RDOK)
+  if ((filep->f_oflags & O_DIRECT) == 0)
     {
-      upper->state.nsubscribers--;
-      if (upper->state.nsubscribers == 0 && lower->ops->activate)
+      if (filep->f_oflags & O_RDOK)
         {
-          lower->ops->activate(lower, filep, false);
+          upper->state.nsubscribers--;
+          if (upper->state.nsubscribers == 0 && lower->ops->activate)
+            {
+              lower->ops->activate(lower, filep, false);
+            }
         }
-    }
 
-  if (filep->f_oflags & O_WROK)
-    {
-      upper->state.nadvertisers--;
+      if (filep->f_oflags & O_WROK)
+        {
+          upper->state.nadvertisers--;
+        }
     }
 
   list_delete(&user->node);
