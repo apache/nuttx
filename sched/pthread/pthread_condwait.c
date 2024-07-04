@@ -75,15 +75,13 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
   /* Make sure that the caller holds the mutex */
 
-  else if (mutex->pid != nxsched_gettid())
+  else if (!mutex_is_hold(&mutex->mutex))
     {
       ret = EPERM;
     }
   else
     {
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      int16_t nlocks;
-#endif
+      unsigned int nlocks;
 
       /* Give up the mutex */
 
@@ -91,11 +89,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       flags = enter_critical_section();
       sched_lock();
-      mutex->pid = INVALID_PROCESS_ID;
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      nlocks     = mutex->nlocks;
-#endif
-      ret        = pthread_mutex_give(mutex);
+      ret = pthread_mutex_breaklock(mutex, &nlocks);
 
       /* Take the semaphore.  This may be awakened only be a signal (EINTR)
        * or if the thread is canceled (ECANCELED)
@@ -121,24 +115,12 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sinfo("Reacquire mutex...\n");
 
-      status = pthread_mutex_take(mutex, NULL);
+      status = pthread_mutex_restorelock(mutex, nlocks);
       if (ret == OK)
         {
           /* Report the first failure that occurs */
 
           ret = status;
-        }
-
-      /* Did we get the mutex? */
-
-      if (status == OK)
-        {
-          /* Yes.. Then initialize it properly */
-
-          mutex->pid    = nxsched_gettid();
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-          mutex->nlocks = nlocks;
-#endif
         }
     }
 
