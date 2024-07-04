@@ -48,7 +48,7 @@
 #include <nuttx/net/ioctl.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/mii.h>
-#include <nuttx/net/netdev.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 
 #ifdef CONFIG_NET_PKT
 #  include <nuttx/net/pkt.h>
@@ -173,10 +173,6 @@
 #define TX_IS_BUSY(_priv)   \
   (((_priv)->txcur->ctrl & EMAC_TXDMA_OWN) != 0)
 
-/* Get EMAC private data from net_driver_s */
-
-#define NET2PRIV(_dev) ((struct esp32_emac_s *)(_dev)->d_private)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -185,7 +181,7 @@ struct esp32_emac_s
 {
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s   dev;         /* Interface understood by the network */
+  struct netdev_lowerhalf_s   dev;   /* Interface understood by the network */
 
   uint8_t               ifup    : 1; /* true:ifup false:ifdown */
   uint8_t               mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
@@ -238,9 +234,10 @@ static struct esp32_emac_s s_esp32_emac;
  * Private Function Prototypes
  ****************************************************************************/
 
-static int emac_ifdown(struct net_driver_s *dev);
-static int emac_ifup(struct net_driver_s *dev);
-static void emac_dopoll(struct esp32_emac_s *priv);
+static int emac_ifdown(struct netdev_lowerhalf_s *dev);
+static int emac_ifup(struct netdev_lowerhalf_s *dev);
+static netpkt_t *emac_receive(struct netdev_lowerhalf_s *dev);
+static int emac_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt);
 static void emac_txtimeout_expiry(wdparm_t arg);
 
 /****************************************************************************
@@ -742,7 +739,7 @@ static void emac_init_dma(struct esp32_emac_s *priv)
 
   for (i = 0 ; i < EMAC_TX_BUF_NUM; i++)
     {
-      txdesc[i].pbuf = NULL;
+      txdesc[i].pbuf = emac_alloc_buffer(priv);
       txdesc[i].next = &txdesc[i + 1];
     }
 
@@ -798,11 +795,11 @@ static void emac_deinit_dma(struct esp32_emac_s *priv)
  * Function: emac_transmit
  *
  * Description:
- *   Start hardware transmission.  Called either from the txdone interrupt
- *   handling or from watchdog based polling.
+ *   Start hardware transmission.
  *
  * Input Parameters:
- *   priv - Reference to the driver state structure
+ *   dev - Reference to the lower half device structure
+ *   pkt - Reference to net netpkt to be transmitted.
  *
  * Returned Value:
  *   0 is returned on success.  Otherwise, a negated errno value is
@@ -812,34 +809,30 @@ static void emac_deinit_dma(struct esp32_emac_s *priv)
  *
  ****************************************************************************/
 
-static int emac_transmit(struct esp32_emac_s *priv)
+static int emac_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 {
   int ret;
+  struct esp32_emac_s *priv = &s_esp32_emac;
   struct emac_txdesc_s *txcur = priv->txcur;
+
+  unsigned int len = netpkt_getdatalen(dev, pkt);
 
   if (txcur->ctrl & EMAC_TXDMA_OWN)
     {
       return -EBUSY;
     }
 
-  if (txcur->pbuf)
-    {
-      emac_free_buffer(priv, txcur->pbuf);
-    }
+  netpkt_copyout(dev, txcur->pbuf, pkt, len, 0);
 
-  txcur->pbuf = priv->dev.d_buf;
   txcur->ctrl = EMAC_TXDMA_OWN | EMAC_TXDMA_FS | EMAC_TXDMA_LS |
                 EMAC_TXDMA_CI | EMAC_TXDMA_TTSS | EMAC_TXDMA_TCH;
-  txcur->ext_ctrl = priv->dev.d_len;
+  txcur->ext_ctrl = len;
 
   priv->txcur = txcur->next;
 
   emac_set_reg(EMAC_DMA_STR_OFFSET, 0);
 
-  ninfo("d_buf=%p d_len=%d\n", priv->dev.d_buf, priv->dev.d_len);
-
-  priv->dev.d_buf = NULL;
-  priv->dev.d_len = 0;
+  ninfo("pkt=%p len=%d\n", pkt, len);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
@@ -855,40 +848,41 @@ static int emac_transmit(struct esp32_emac_s *priv)
 }
 
 /****************************************************************************
- * Function: emac_recvframe
+ * Function: emac_receive
  *
  * Description:
- *   An interrupt was received indicating the availability of a new RX packet
+ *   Poll for RX packets
  *
  * Input Parameters:
- *   priv  - Reference to the driver state structure
+ *   dev  - Reference to the lower half dev
  *
  * Returned Value:
- *   None
+ *   A pointer to a netpkt with the received frame or NULL
  *
  ****************************************************************************/
 
-static int emac_recvframe(struct esp32_emac_s *priv)
+static netpkt_t *emac_receive(struct netdev_lowerhalf_s *dev)
 {
   uint32_t len;
+  struct esp32_emac_s *priv = &s_esp32_emac;
   struct emac_rxdesc_s *rxcur = priv->rxcur;
 
   if (rxcur->status & EMAC_RXDMA_OWN)
     {
-      return -EBUSY;
+      return NULL;
     }
 
-  if (!rxcur->pbuf)
+  netpkt_t *pkt = netpkt_alloc(dev, NETPKT_RX);
+
+  if (pkt)
     {
-      return -EINVAL;
+      len = (rxcur->status >> EMAC_RXDMA_FL_S) & EMAC_RXDMA_FL_V;
+
+      len -= ETH_CRC_LEN;
+
+      netpkt_copyin(dev, pkt, rxcur->pbuf, len, 0);
     }
 
-  len = (rxcur->status >> EMAC_RXDMA_FL_S) & EMAC_RXDMA_FL_V;
-  priv->dev.d_buf = (uint8_t *)rxcur->pbuf;
-  priv->dev.d_len = len - ETH_CRC_LEN;
-
-  rxcur->pbuf = emac_alloc_buffer(priv);
-  DEBUGASSERT(rxcur->pbuf);
   rxcur->status = EMAC_RXDMA_OWN;
   rxcur->ctrl = EMAC_BUF_LEN | EMAC_RXDMA_RCH;
 
@@ -896,9 +890,9 @@ static int emac_recvframe(struct esp32_emac_s *priv)
 
   emac_set_reg(EMAC_DMA_SRR_OFFSET, 0);
 
-  ninfo("RX bytes %d\n", priv->dev.d_len);
+  ninfo("RX bytes %d\n", len);
 
-  return 0;
+  return pkt;
 }
 
 /****************************************************************************
@@ -1295,13 +1289,11 @@ static void emac_txtimeout_work(void *arg)
 
   /* Reset the hardware.  Just take the interface down, then back up again. */
 
+  nwarn("tx timeout!");
   net_lock();
   emac_ifdown(&priv->dev);
   emac_ifup(&priv->dev);
 
-  /* Then poll for new XMIT data */
-
-  emac_dopoll(priv);
   net_unlock();
 }
 
@@ -1343,158 +1335,6 @@ static void emac_txtimeout_expiry(wdparm_t arg)
 }
 
 /****************************************************************************
- * Function: emac_rx_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   0 on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void emac_rx_interrupt_work(void *arg)
-{
-  struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
-  struct net_driver_s *dev = &priv->dev;
-
-  net_lock();
-
-  /* Loop while while emac_recvframe() successfully retrieves valid
-   * Ethernet frames.
-   */
-
-  while (emac_recvframe(priv) == 0)
-    {
-      struct eth_hdr_s *eth_hdr = (struct eth_hdr_s *)dev->d_buf;
-
-#ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap
-       */
-
-     pkt_input(&priv->dev);
-#endif
-
-      /* We only accept IP packets of the configured type and ARP packets
-       */
-
-#ifdef CONFIG_NET_IPv4
-      if (eth_hdr->type == HTONS(ETHTYPE_IP))
-        {
-          ninfo("IPv4 frame\n");
-
-          /* Receive an IPv4 packet from the network device */
-
-          ipv4_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              /* And send the packet */
-
-              emac_transmit(priv);
-            }
-        }
-      else
-#endif
-#ifdef CONFIG_NET_IPv6
-      if (eth_hdr->type == HTONS(ETHTYPE_IP6))
-        {
-          ninfo("IPv6 frame\n");
-
-          /* Give the IPv6 packet to the network layer */
-
-          ipv6_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              /* And send the packet */
-
-              emac_transmit(priv);
-            }
-        }
-      else
-#endif
-#ifdef CONFIG_NET_ARP
-      if (eth_hdr->type == HTONS(ETHTYPE_ARP))
-        {
-          ninfo("ARP frame\n");
-
-          /* Handle ARP packet */
-
-          arp_input(&priv->dev);
-
-          /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0
-           */
-
-          if (priv->dev.d_len > 0)
-            {
-              emac_transmit(priv);
-            }
-        }
-      else
-#endif
-        {
-          nerr("ERROR: Dropped, Unknown type: %04x\n", eth_hdr->type);
-        }
-
-      if (dev->d_buf)
-        {
-          emac_free_buffer(priv, dev->d_buf);
-
-          dev->d_buf = NULL;
-          dev->d_len = 0;
-        }
-    }
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Function: emac_tx_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   0 on success
- *
- * Assumptions:
- *   Ethernet interrupts are disabled
- *
- ****************************************************************************/
-
-static void emac_tx_interrupt_work(void *arg)
-{
-  struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
-
-  net_lock();
-
-  wd_cancel(&priv->txtimeout);
-
-  emac_dopoll(priv);
-
-  net_unlock();
-}
-
-/****************************************************************************
  * Function: emac_interrupt
  *
  * Description:
@@ -1514,6 +1354,7 @@ static void emac_tx_interrupt_work(void *arg)
 static int emac_interrupt(int irq, void *context, void *arg)
 {
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
+  struct netdev_lowerhalf_s *dev = &priv->dev;
   uint32_t value = emac_get_reg(EMAC_DMA_SR_OFFSET);
 
   emac_set_reg(EMAC_DMA_SR_OFFSET, 0xffffffff);
@@ -1527,169 +1368,15 @@ static int emac_interrupt(int irq, void *context, void *arg)
 
   if (value & EMAC_RI)
     {
-      work_queue(EMACWORK, &priv->rxwork, emac_rx_interrupt_work, priv, 0);
+      netdev_lower_rxready(dev);
     }
 
   if (value & EMAC_TI)
     {
-      work_queue(EMACWORK, &priv->txwork, emac_tx_interrupt_work, priv, 0);
+      netdev_lower_txdone(dev);
     }
 
   return 0;
-}
-
-/****************************************************************************
- * Function: emac_txpoll
- *
- * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
- *   3. During normal TX polling
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   0 on success; a negated errno on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
- *
- ****************************************************************************/
-
-static int emac_txpoll(struct net_driver_s *dev)
-{
-  struct esp32_emac_s *priv = NET2PRIV(dev);
-
-  DEBUGASSERT(priv->dev.d_buf != NULL);
-
-  /* Send the packet */
-
-  emac_transmit(priv);
-  DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-
-  /* Check if the current TX descriptor is owned by the Ethernet DMA
-   * or CPU. We cannot perform the TX poll if we are unable to accept
-   * another packet for transmission.
-   */
-
-  if (TX_IS_BUSY(priv))
-    {
-      /* We have to terminate the poll if we have no more descriptors
-       * available for another transfer.
-       */
-
-      return -EBUSY;
-    }
-
-  dev->d_buf = (uint8_t *)emac_alloc_buffer(priv);
-  if (dev->d_buf == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  dev->d_len = EMAC_BUF_LEN;
-
-  /* If zero is returned, the polling will continue until all connections
-   * have been examined.
-   */
-
-  return 0;
-}
-
-/****************************************************************************
- * Function: emac_dopoll
- *
- * Description:
- *   The function is called in order to perform an out-of-sequence TX poll.
- *   This is done:
- *
- *   1. After completion of a transmission (esp32_txdone),
- *   2. When new TX data is available (emac_txavail_work), and
- *   3. After a TX timeout to restart the sending process
- *      (esp32_txtimeout_process).
- *
- * Input Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
- *
- ****************************************************************************/
-
-static void emac_dopoll(struct esp32_emac_s *priv)
-{
-  struct net_driver_s *dev = &priv->dev;
-
-  if (!TX_IS_BUSY(priv))
-    {
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-
-      dev->d_buf = (uint8_t *)emac_alloc_buffer(priv);
-      if (!dev->d_buf)
-        {
-          /* never reach */
-
-          return ;
-        }
-
-      dev->d_len = EMAC_BUF_LEN;
-
-      devif_poll(dev, emac_txpoll);
-
-      if (dev->d_buf)
-        {
-          emac_free_buffer(priv, dev->d_buf);
-
-          dev->d_buf = NULL;
-          dev->d_len = 0;
-        }
-    }
-}
-
-/****************************************************************************
- * Function: emac_txavail_work
- *
- * Description:
- *   Perform an out-of-cycle poll on the worker thread.
- *
- * Input Parameters:
- *   arg  - Reference to the NuttX driver state structure (cast to void*)
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called on the higher priority worker thread.
- *
- ****************************************************************************/
-
-static void emac_txavail_work(void *arg)
-{
-  struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
-
-  ninfo("ifup: %d\n", priv->ifup);
-
-  /* Ignore the notification if the interface is not yet up */
-
-  net_lock();
-  if (priv->ifup)
-    {
-      /* Poll the network for new XMIT data */
-
-      emac_dopoll(priv);
-    }
-
-  net_unlock();
 }
 
 /****************************************************************************
@@ -1711,11 +1398,11 @@ static void emac_txavail_work(void *arg)
  *
  ****************************************************************************/
 
-static int emac_ifup(struct net_driver_s *dev)
+static int emac_ifup(struct netdev_lowerhalf_s *dev)
 {
   int ret;
   irqstate_t flags;
-  struct esp32_emac_s *priv = NET2PRIV(dev);
+  struct esp32_emac_s *priv = &s_esp32_emac;
 
   flags = enter_critical_section();
 
@@ -1779,9 +1466,9 @@ static int emac_ifup(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int emac_ifdown(struct net_driver_s *dev)
+static int emac_ifdown(struct netdev_lowerhalf_s *dev)
 {
-  struct esp32_emac_s *priv = NET2PRIV(dev);
+  struct esp32_emac_s *priv = &s_esp32_emac;
   irqstate_t flags;
 
   ninfo("Taking the network down\n");
@@ -1821,44 +1508,6 @@ static int emac_ifdown(struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Function: emac_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev  - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static int emac_txavail(struct net_driver_s *dev)
-{
-  struct esp32_emac_s *priv = NET2PRIV(dev);
-
-  /* Is our single work structure available?  It may not be if there are
-   * pending interrupt actions and we will have to ignore the Tx
-   * availability action.
-   */
-
-  if (work_available(&priv->pollwork))
-    {
-      /* Schedule to serialize the poll on the worker thread. */
-
-      work_queue(EMACWORK, &priv->pollwork, emac_txavail_work, priv, 0);
-    }
-
-  return 0;
-}
-
-/****************************************************************************
  * Function: emac_addmac
  *
  * Description:
@@ -1878,7 +1527,7 @@ static int emac_txavail(struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int emac_addmac(struct net_driver_s *dev, const uint8_t *mac)
+static int emac_addmac(struct netdev_lowerhalf_s *dev, const uint8_t *mac)
 {
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -1907,7 +1556,7 @@ static int emac_addmac(struct net_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int emac_rmmac(struct net_driver_s *dev, const uint8_t *mac)
+static int emac_rmmac(struct netdev_lowerhalf_s *dev, const uint8_t *mac)
 {
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -1945,7 +1594,8 @@ static int emac_rmmac(struct net_driver_s *dev, const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int emac_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
+static int emac_ioctl(struct netdev_lowerhalf_s *dev,
+                      int cmd, unsigned long arg)
 {
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
   struct esp32_emacmac_s *priv = NET2PRIV(dev);
@@ -2055,28 +1705,33 @@ int esp32_emac_init(void)
       goto errout_with_attachirq;
     }
 
-  /* Initialize the driver structure */
+  /* Initialize the driver ops structure */
 
-  priv->dev.d_ifup    = emac_ifup;     /* I/F up (new IP address) callback */
-  priv->dev.d_ifdown  = emac_ifdown;   /* I/F down callback */
-  priv->dev.d_txavail = emac_txavail;  /* New TX data callback */
+  static const struct netdev_ops_s ops =
+  {
+    .ifup     = emac_ifup,     /* I/F up (new IP address) callback */
+    .ifdown   = emac_ifdown,   /* I/F down callback */
+    .transmit = emac_transmit, /* New TX data callback */
+    .receive  = emac_receive   /* Poll for RX data */
 #ifdef CONFIG_NET_MCASTGROUP
-  priv->dev.d_addmac  = emac_addmac;   /* Add multicast MAC address */
-  priv->dev.d_rmmac   = emac_rmmac;    /* Remove multicast MAC address */
+    .addmac   = emac_addmac,   /* Add multicast MAC address */
+    .rmmac    = emac_rmmac,    /* Remove multicast MAC address */
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  priv->dev.d_ioctl   = emac_ioctl;    /* Support PHY ioctl() calls */
+    .ioctl    = emac_ioctl,    /* Support PHY ioctl() calls */
 #endif
+  };
 
-  /* Used to recover private state from dev */
+  priv->dev.ops = &ops;
 
-  priv->dev.d_private = priv;
+  dev->quota[NETPKT_TX] = EMAC_TX_BUF_NUM;
+  dev->quota[NETPKT_RX] = EMAC_RX_BUF_NUM;
 
-  emac_read_mac(priv->dev.d_mac.ether.ether_addr_octet);
+  emac_read_mac(priv->dev.netdev.d_mac.ether.ether_addr_octet);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  ret = netdev_register(&priv->dev, NET_LL_ETHERNET);
+  ret = netdev_lower_register(&priv->dev, NET_LL_ETHERNET);
   if (ret != 0)
     {
       nerr("ERROR: Failed to register net device\n");
