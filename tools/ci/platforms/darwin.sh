@@ -211,7 +211,7 @@ python_tools() {
     cmake-format \
     cvt2utf \
     cxxfilt \
-    esptool==4.5.1 \
+    esptool==4.8.dev4 \
     imgtool==1.9.0 \
     kconfiglib \
     pexpect==4.8.0 \

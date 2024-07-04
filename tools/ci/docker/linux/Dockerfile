@@ -125,7 +125,7 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-avr32
 # Download the prebuilt AVR32 GCC toolchain
 RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
   git
-# Clone Main Repository 
+# Clone Main Repository
 RUN mkdir -p gcc-avr32-gnu && \
   git clone --depth 1 https://github.com/ramangopalan/avr32-gnu-toolchain-linux_x86 gcc-avr32-gnu
 
@@ -346,7 +346,7 @@ RUN pip3 install cmake-format
 RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
-RUN pip3 install esptool
+RUN pip3 install esptool==4.8.dev4
 RUN pip3 install imgtool
 RUN pip3 install kconfiglib
 RUN pip3 install pexpect==4.8.0
