@@ -137,13 +137,9 @@ This configuration is focused on low level, command-line driver testing.
 Built-in applications are supported, but none are enabled.
 Serial Console is enabled on UART3 at 2 Mbps.
 
-Peripheral Support
-==================
+adc
+---
 
-NuttX for Ox64 supports these peripherals:
-
-======================== ======= =====
-Peripheral               Support NOTES
-======================== ======= =====
-UART                     Yes
-======================== ======= =====
+This configuration enables support for the general purpose ADC and the adc example app.
+By default, the ADC will scan external channels 3, 4, 6, 7 and 9 (GPIO pins 11, 6, 12,
+13 and 18). Serial Console is enabled on UART3 at 2 Mbps.
