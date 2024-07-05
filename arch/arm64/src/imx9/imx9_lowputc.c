@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <fixedmath.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -105,8 +105,6 @@
 #  define IMX9_CONSOLE_PARITY   CONFIG_LPUART8_PARITY
 #  define IMX9_CONSOLE_2STOP    CONFIG_LPUART8_2STOP
 #endif
-
-#define ABS(n)     (((n) < 0) ? -(n) : (n))
 
 /* Clocking *****************************************************************/
 
@@ -309,6 +307,7 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
   uint32_t osr;
   uint32_t temp_osr;
   int temp_diff;
+  int configured_baud = config->baud;
   int calculated_baud;
   int baud_diff;
   uint32_t regval;
@@ -330,7 +329,7 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
    * baud_diff iterate through the rest of the supported values of OSR
    */
 
-  baud_diff = config->baud;
+  baud_diff = configured_baud;
   osr       = 0;
   sbr       = 0;
 
@@ -338,7 +337,7 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
     {
       /* Calculate the temporary sbr value   */
 
-      temp_sbr = (lpuart_freq / (config->baud * temp_osr));
+      temp_sbr = (lpuart_freq / (configured_baud * temp_osr));
 
       /* Set temp_sbr to 1 if the sourceClockInHz can not satisfy the
        * desired baud rate.
@@ -352,15 +351,15 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
       /* Calculate the baud rate based on the temporary OSR and SBR values */
 
       calculated_baud = (lpuart_freq / (temp_osr * temp_sbr));
-      temp_diff       = ABS(calculated_baud - config->baud);
+      temp_diff       = abs(calculated_baud - configured_baud);
 
       /* Select the better value between srb and (sbr + 1) */
 
       calculated_baud = (lpuart_freq / (temp_osr * (temp_sbr + 1)));
       if (temp_diff >
-          ABS(calculated_baud - config->baud))
+          abs(calculated_baud - configured_baud))
         {
-          temp_diff = ABS(calculated_baud - config->baud);
+          temp_diff = abs(calculated_baud - configured_baud);
           temp_sbr++;
         }
 
@@ -372,7 +371,7 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
         }
     }
 
-  if (baud_diff > ((config->baud * 3) / 100))
+  if (baud_diff > ((configured_baud * 3) / 100))
     {
       /* Unacceptable baud rate difference of more than 3% */
 
