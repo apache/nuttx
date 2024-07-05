@@ -246,6 +246,14 @@ pid_t riscv_fork(const struct fork_s *context)
   fregs[REG_FS11]               = context->fs11; /* Saved register fs11 */
 #endif
 
+#ifdef CONFIG_BUILD_PROTECTED
+  /* Forked task starts at `dispatch_syscall()`, which requires TP holding
+   * TCB pointer as per e6973c764c, so we please it here to support vfork.
+   */
+
+  child->cmn.xcp.regs[REG_TP]   = (uintptr_t)child;
+#endif
+
   /* And, finally, start the child task.  On a failure, nxtask_start_fork()
    * will discard the TCB by calling nxtask_abort_fork().
    */
