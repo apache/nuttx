@@ -21,6 +21,8 @@
 if(CONFIG_DRIVERS_BLUETOOTH)
   set(SRCS)
 
+  list(APPEND SRCS bt_driver.c)
+
   if(CONFIG_BLUETOOTH_UART)
     list(APPEND SRCS bt_uart.c)
 
