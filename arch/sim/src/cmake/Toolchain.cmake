@@ -94,6 +94,11 @@ else()
   endif()
 endif()
 
+if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
+  add_link_options(-Wl,--gc-sections)
+  add_compile_options(-ffunction-sections -fdata-sections)
+endif()
+
 if(CONFIG_CXX_STANDARD)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
 endif()
