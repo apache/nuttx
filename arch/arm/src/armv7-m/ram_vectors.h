@@ -84,7 +84,7 @@
  * appropriate mask.
  */
 
-#define VECTOR_ALIGN ((~NVIC_VECTAB_TBLOFF_MASK & 0xffff) + 1)
+#define VECTAB_ALIGN ((~NVIC_VECTAB_TBLOFF_MASK & 0xffff) + 1)
 
 #ifdef CONFIG_ARCH_RAMVECTORS
 
@@ -105,7 +105,7 @@
  */
 
 extern up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
-  locate_data(".ram_vectors") aligned_data(128);
+  locate_data(".ram_vectors") aligned_data(VECTAB_ALIGN);
 
 /****************************************************************************
  * Public Function Prototypes
