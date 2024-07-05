@@ -58,6 +58,8 @@
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -71,6 +73,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    */
 
   up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
 
   /* Acknowledge the interrupt */
 
@@ -79,6 +82,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+  tcb = this_task();
 
   /* Check for a context switch.  If a context switch occurred, then
    * current_regs will have a different value than it did on entry.  If an
@@ -87,7 +91,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * returning from the interrupt.
    */
 
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -104,9 +108,9 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
+      g_running_tasks[this_cpu()] = tcb;
 
-      regs = up_current_regs();
+      regs = tcb->xcp.regs;
     }
 
   /* Set current_regs to NULL to indicate that we are no longer in an

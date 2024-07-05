@@ -160,7 +160,7 @@ static void dispatch_syscall(void)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  struct tcb_s *tcb;
+  struct tcb_s *tcb = this_task();
   uint32_t cmd;
   int cpu;
 #ifdef CONFIG_BUILD_KERNEL
@@ -170,6 +170,8 @@ uint32_t *arm_syscall(uint32_t *regs)
   /* Nested interrupts are not supported */
 
   DEBUGASSERT(up_current_regs() == NULL);
+
+  tcb->xcp.regs = regs;
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * current_regs is also used to manage interrupt level context switches.
@@ -272,7 +274,7 @@ uint32_t *arm_syscall(uint32_t *regs)
            * set will determine the restored context.
            */
 
-          up_set_current_regs((uint32_t *)regs[REG_R1]);
+          tcb->xcp.regs = (uint32_t *)regs[REG_R1];
           DEBUGASSERT(up_current_regs());
         }
         break;
@@ -298,7 +300,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
           *(uint32_t **)regs[REG_R1] = regs;
-          up_set_current_regs((uint32_t *)regs[REG_R2]);
+          tcb->xcp.regs = (uint32_t *)regs[REG_R2];
         }
         break;
 
@@ -565,15 +567,9 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Check for a context switch.  If a context switch occurred, then
-   * current_regs will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then establish the correct
-   * address environment before returning from the interrupt.
-   */
-
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
+#ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
        * MMU flushed) and set up the address environment for the new
@@ -581,13 +577,8 @@ uint32_t *arm_syscall(uint32_t *regs)
        */
 
       addrenv_switch(NULL);
-    }
 #endif
 
-  /* Restore the cpu lock */
-
-  if (regs != up_current_regs())
-    {
       /* Record the new "running" task.  g_running_tasks[] is only used by
        * assertion logic for reporting crashes.
        */
@@ -599,7 +590,7 @@ uint32_t *arm_syscall(uint32_t *regs)
       /* Restore the cpu lock */
 
       restore_critical_section(tcb, cpu);
-      regs = up_current_regs();
+      regs = tcb->xcp.regs;
     }
 
   /* Report what happened */
