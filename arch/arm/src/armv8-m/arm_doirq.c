@@ -91,6 +91,8 @@ static inline bool arm_from_thread(uint32_t excret)
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -98,6 +100,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (arm_from_thread(regs[REG_EXC_RETURN]))
     {
+      tcb->xcp.regs = regs;
       up_set_current_regs(regs);
     }
 
@@ -117,17 +120,17 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (arm_from_thread(regs[REG_EXC_RETURN]))
     {
-      /* Restore the cpu lock */
+      tcb = this_task();
 
-      if (regs != up_current_regs())
+      if (regs != tcb->xcp.regs)
         {
           /* Record the new "running" task when context switch occurred.
            * g_running_tasks[] is only used by assertion logic for reporting
            * crashes.
            */
 
-          g_running_tasks[this_cpu()] = this_task();
-          regs = up_current_regs();
+          g_running_tasks[this_cpu()] = tcb;
+          regs = tcb->xcp.regs;
         }
 
       /* Update the current_regs to NULL. */
