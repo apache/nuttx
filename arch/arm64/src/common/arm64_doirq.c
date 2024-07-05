@@ -57,6 +57,8 @@
 
 uint64_t *arm64_doirq(int irq, uint64_t * regs)
 {
+  struct tcb_s *tcb = this_task();
+
   /* Nested interrupts are not supported */
 
   DEBUGASSERT(up_current_regs() == NULL);
@@ -66,10 +68,12 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
    */
 
   up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
 
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+  tcb = this_task();
 
   /* Check for a context switch.  If a context switch occurred, then
    * current_regs will have a different value than it did on entry.  If an
@@ -78,7 +82,7 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
    * returning from the interrupt.
    */
 
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
       /* need to do a context switch */
 
@@ -97,8 +101,8 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
-      regs = up_current_regs();
+      g_running_tasks[this_cpu()] = tcb;
+      regs = tcb->xcp.regs;
     }
 
   /* Set current_regs to NULL to indicate that we are no longer in an
