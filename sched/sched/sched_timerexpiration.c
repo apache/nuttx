@@ -71,11 +71,12 @@ uint32_t g_oneshot_maxticks = UINT32_MAX;
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
-                                     bool noswitches);
+static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
+                                     clock_t elapsed, bool noswitches);
 #endif
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static clock_t nxsched_process_scheduler(clock_t elapsed, bool noswitches);
+static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
+                                         bool noswitches);
 #endif
 static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
                                      bool noswitches);
@@ -99,12 +100,6 @@ static clock_t g_timer_tick;
  */
 
 static unsigned int g_timer_interval;
-#endif
-
-#ifdef CONFIG_SCHED_SPORADIC
-/* This is the time of the last scheduler assessment */
-
-static clock_t g_sched_time;
 #endif
 
 /****************************************************************************
@@ -184,8 +179,8 @@ int up_timer_tick_cancel(FAR clock_t *ticks)
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
-                                     bool noswitches)
+static clock_t nxsched_cpu_scheduler(int cpu, clock_t ticks,
+                                     clock_t elapsed, bool noswitches)
 {
   FAR struct tcb_s *rtcb = current_task(cpu);
   FAR struct tcb_s *ntcb = current_task(cpu);
@@ -220,7 +215,7 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
        * committed to updating the scheduler for this TCB.
        */
 
-      sporadic->eventtime = g_sched_time;
+      sporadic->eventtime = ticks;
 
       /* Yes, check if the currently executing task has exceeded its
        * budget.
@@ -242,7 +237,7 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
     {
       /* Recurse just to get the correct return value */
 
-      return nxsched_process_scheduler(0, true);
+      return nxsched_process_scheduler(ticks, 0, true);
     }
 
   /* Returning zero means that there is no interesting event to be timed */
@@ -259,6 +254,7 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
  *   active task on a single CPU.
  *
  * Input Parameters:
+ *   ticks - The number of ticks that represent current time.
  *   elapsed - The number of ticks that have elapsed on the interval timer.
  *   noswitches - True: Can't do context switches now.
  *
@@ -276,7 +272,8 @@ static clock_t nxsched_cpu_scheduler(int cpu, clock_t elapsed,
  ****************************************************************************/
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-static clock_t nxsched_process_scheduler(clock_t elapsed, bool noswitches)
+static clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
+                                         bool noswitches)
 {
 #ifdef CONFIG_SMP
   clock_t minslice = CLOCK_MAX;
@@ -298,7 +295,7 @@ static clock_t nxsched_process_scheduler(clock_t elapsed, bool noswitches)
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
-      timeslice = nxsched_cpu_scheduler(i, elapsed, noswitches);
+      timeslice = nxsched_cpu_scheduler(i, ticks, elapsed, noswitches);
       if (timeslice > 0 && timeslice < minslice)
         {
           minslice = timeslice;
@@ -311,11 +308,11 @@ static clock_t nxsched_process_scheduler(clock_t elapsed, bool noswitches)
 #else
   /* Perform scheduler operations on the single CPUs */
 
-  return nxsched_cpu_scheduler(0, elapsed, noswitches);
+  return nxsched_cpu_scheduler(0, ticks, elapsed, noswitches);
 #endif
 }
 #else
-#  define nxsched_process_scheduler(t,n) (0)
+#  define nxsched_process_scheduler(t, e, n) (0)
 #endif
 
 /****************************************************************************
@@ -407,7 +404,7 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
    * active task.
    */
 
-  tmp = nxsched_process_scheduler(elapsed, noswitches);
+  tmp = nxsched_process_scheduler(ticks, elapsed, noswitches);
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
   if (tmp > 0 && tmp < rettime)
@@ -520,12 +517,6 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 
   g_timer_tick = ticks;
 
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Save the last time that the scheduler ran */
-
-  g_sched_time = ticks;
-#endif
-
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
@@ -586,12 +577,6 @@ void nxsched_timer_expiration(void)
   elapsed          = g_timer_interval;
   g_timer_interval = 0;
 
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Save the last time that the scheduler ran */
-
-  up_timer_gettick(&g_sched_time);
-#endif
-
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(g_timer_tick, elapsed, false);
@@ -639,12 +624,6 @@ clock_t nxsched_cancel_timer(void)
 
   up_alarm_tick_cancel(&g_timer_tick);
 
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Save the last time that the scheduler ran */
-
-  g_sched_time = g_timer_tick;
-#endif
-
   /* Convert this to the elapsed time and update clock tickbase */
 
   elapsed      = g_timer_tick - ticks;
@@ -674,12 +653,6 @@ clock_t nxsched_cancel_timer(void)
   elapsed          = g_timer_interval - ticks;
   g_timer_interval = 0;
   g_timer_tick    += elapsed;
-
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Save the last time that the scheduler ran */
-
-  g_sched_time      = g_timer_tick;
-#endif
 
   /* Process the timer ticks and return the next interval */
 
@@ -711,12 +684,6 @@ clock_t nxsched_cancel_timer(void)
 void nxsched_resume_timer(void)
 {
   clock_t nexttime;
-
-#ifdef CONFIG_SCHED_SPORADIC
-  /* Save the last time that the scheduler ran */
-
-  up_timer_gettick(&g_sched_time);
-#endif
 
   /* Reassess the next deadline (by simply processing a zero ticks expired)
    * and set up the next interval (or not).
