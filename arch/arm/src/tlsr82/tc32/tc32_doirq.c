@@ -36,7 +36,7 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-
+#include "sched/sched.h"
 #include "hardware/tlsr82_irq.h"
 
 /****************************************************************************
@@ -57,6 +57,8 @@
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -78,6 +80,8 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
       regs         = NULL;
     }
 
+  tcb->xcp.regs = regs;
+
   /* Acknowledge the interrupt */
 
   arm_ack_irq(irq);
@@ -85,6 +89,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   /* Deliver the IRQ */
 
   irq_dispatch(irq, up_current_regs());
+  tcb = this_task();
 
   /* If a context switch occurred while processing the interrupt then
    * current_regs may have change value.  If we return any value different
@@ -94,11 +99,9 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (regs == NULL)
     {
-      /* Restore the cpu lock */
-
-      if (regs != up_current_regs())
+      if (regs != tcb->xcp.regs)
         {
-          regs = up_current_regs();
+          regs = tcb->xcp.regs;
         }
 
       /* Update the current_regs to NULL. */

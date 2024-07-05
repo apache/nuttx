@@ -79,18 +79,8 @@ int arm_start_handler(int irq, void *context, void *arg)
 
   nxsched_resume_scheduler(tcb);
 
-  /* Dump registers so that we can see what is going to happen on return */
+  UNUSED(tcb);
 
-#if 0
-  up_dump_register(tcb->xcp.regs);
-#endif
-
-  /* Then switch contexts. This instantiates the exception context of the
-   * tcb at the head of the assigned task list.  In this case, this should
-   * be the CPUs NULL task.
-   */
-
-  arm_restorestate(tcb->xcp.regs);
   return OK;
 }
 
