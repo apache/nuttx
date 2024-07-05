@@ -28,7 +28,7 @@ CSRCS += pthread_mutexinit.c pthread_mutexdestroy.c
 CSRCS += pthread_mutextimedlock.c pthread_mutextrylock.c pthread_mutexunlock.c
 CSRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
 CSRCS += pthread_condclockwait.c pthread_sigmask.c pthread_cancel.c
-CSRCS += pthread_sem.c pthread_completejoin.c pthread_findjoininfo.c
+CSRCS += pthread_completejoin.c pthread_findjoininfo.c
 CSRCS += pthread_release.c pthread_setschedprio.c
 CSRCS += pthread_barrierwait.c
 

@@ -107,12 +107,6 @@ int pthread_findjoininfo(FAR struct task_group_s *group, pid_t pid,
                          FAR struct task_join_s **join, bool create);
 void pthread_release(FAR struct task_group_s *group);
 
-int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout);
-#ifdef CONFIG_PTHREAD_MUTEX_UNSAFE
-int pthread_sem_trytake(FAR sem_t *sem);
-#endif
-int pthread_sem_give(FAR sem_t *sem);
-
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
 int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
                        FAR const struct timespec *abs_timeout);
