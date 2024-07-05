@@ -88,7 +88,7 @@ extern void exception_direct(void);
  */
 
 const void * const _vectors[] locate_data(".vectors")
-  aligned_data(VECTOR_ALIGN) =
+                              aligned_data(VECTAB_ALIGN) =
 {
   /* Initial stack */
 

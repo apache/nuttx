@@ -31,11 +31,26 @@
 #include "arm_internal.h"
 #include "chip.h"
 
-#ifdef CONFIG_ARCH_RAMVECTORS
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Vector Table Offset Register (VECTAB).  This mask seems to vary among
+ * ARMv6-M implementations.  It may need to be redefined in some
+ * architecture-specific header file. By default, the base address of the
+ * new vector table must be aligned to the size of the vector table extended
+ * to the next larger power of 2.
+ */
+
+#ifndef NVIC_VECTAB_TBLOFF_MASK
+#  define NVIC_VECTAB_TBLOFF_MASK     (0xffffff00)
+#endif
+
+/* Alignment ****************************************************************/
+
+#define VECTAB_ALIGN ((~NVIC_VECTAB_TBLOFF_MASK & 0xffff) + 1)
+
+#ifdef CONFIG_ARCH_RAMVECTORS
 
 /* This is the size of the vector table (in 4-byte entries).  This size
  * includes the (1) the peripheral interrupts, (2) space for 15 Cortex-M
@@ -57,7 +72,7 @@
  */
 
 extern up_vector_t g_ram_vectors[ARMV6M_VECTAB_SIZE]
-  locate_data(".ram_vectors") aligned_data(128);
+  locate_data(".ram_vectors") aligned_data(VECTAB_ALIGN);
 
 /****************************************************************************
  * Public Function Prototypes

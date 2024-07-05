@@ -91,7 +91,8 @@ extern void exception_direct(void);
  * Note that the [ ... ] designated initializer is a GCC extension.
  */
 
-const void * const _vectors[] locate_data(".vectors") =
+const void * const _vectors[] locate_data(".vectors")
+                              aligned_data(VECTAB_ALIGN) =
 {
   /* Initial stack */
 
