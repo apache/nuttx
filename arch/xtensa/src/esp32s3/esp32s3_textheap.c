@@ -231,3 +231,23 @@ IRAM_ATTR void up_textheap_data_sync(void)
 
   leave_critical_section(flags);
 }
+
+/****************************************************************************
+ * Name: up_copy_section
+ *
+ * Description:
+ *   Copy section from general temporary buffer(src) to special addr(dest).
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_COPY_SECTION)
+int up_copy_section(FAR void *dest, FAR const void *src, size_t n)
+{
+  memcpy(up_textheap_data_address(dest), src, n);
+
+  return OK;
+}
+#endif

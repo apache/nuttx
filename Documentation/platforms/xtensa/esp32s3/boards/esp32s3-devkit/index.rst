@@ -174,7 +174,6 @@ disables the NuttShell to get the best possible score.
 
 cxx
 ---
-
 Development environment ready for C++ applications. You can check if the setup
 was successful by running ``cxxtest``::
 
@@ -196,6 +195,12 @@ was successful by running ``cxxtest``::
     File /proc/meminfo exists!
     Invalid file! /invalid
     File /proc/version exists!
+
+elf
+---
+
+This configuration uses apps/examples/elf in order to test the ELF loader.
+It can be tested by executing the ``elf`` application.
 
 gpio
 ----
