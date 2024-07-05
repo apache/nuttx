@@ -91,16 +91,16 @@
 static inline_function void wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
-  FAR struct wdog_s *next;
   wdentry_t func;
 
   /* Process the watchdog at the head of the list as well as any
    * other watchdogs that became ready to run at this time
    */
 
-  list_for_every_entry_safe(&g_wdactivelist, wdog,
-                            next, struct wdog_s, node)
+  while (!list_is_empty(&g_wdactivelist))
     {
+      wdog = list_first_entry(&g_wdactivelist, struct wdog_s, node);
+
       /* Check if expected time is expired */
 
       if (!clock_compare(wdog->expired, ticks))
