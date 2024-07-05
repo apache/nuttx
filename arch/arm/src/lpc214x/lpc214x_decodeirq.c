@@ -33,6 +33,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "lpc214x_vic.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Private Data
@@ -81,6 +82,8 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 static uint32_t *lpc214x_decodeirq(uint32_t *regs)
 #endif
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   up_set_current_regs(regs);
   err("ERROR: Unexpected IRQ\n");
@@ -125,6 +128,7 @@ static uint32_t *lpc214x_decodeirq(uint32_t *regs)
 
       savestate = up_current_regs();
       up_set_current_regs(regs);
+      tcb->xcp.regs = regs;
 
       /* Deliver the IRQ */
 

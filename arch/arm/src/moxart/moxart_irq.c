@@ -260,6 +260,7 @@ void arm_ack_irq(int irq)
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
   uint32_t num;
   uint32_t status;
 
@@ -278,6 +279,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
   DEBUGASSERT(up_current_regs() == NULL);
   up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
 
   irq_dispatch(num, regs);
   up_set_current_regs(NULL);
