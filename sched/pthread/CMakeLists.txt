@@ -40,7 +40,6 @@ if(NOT CONFIG_DISABLE_PTHREAD)
       pthread_condclockwait.c
       pthread_sigmask.c
       pthread_cancel.c
-      pthread_sem.c
       pthread_completejoin.c
       pthread_findjoininfo.c
       pthread_release.c
