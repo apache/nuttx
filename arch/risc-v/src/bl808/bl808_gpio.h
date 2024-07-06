@@ -43,7 +43,7 @@
  * 1111 1100 0000 0000
  * 5432 1098 7654 3210
  * ---- ---- ---- ----
- * .... ..MU UDDS FFFF
+ * .... .MUU DDSF FFFF
  */
 
 /* Mode:
@@ -51,10 +51,10 @@
  * 1111 1100 0000 0000
  * 5432 1098 7654 3210
  * ---- ---- ---- ----
- * .... ..M. .... ....
+ * .... .M.. .... ....
  */
 
-#define GPIO_MODE_SHIFT  (9)                     /* Bit 9: Port Mode */
+#define GPIO_MODE_SHIFT  (10)                     /* Bit 10: Port Mode */
 #define GPIO_MODE_MASK   (1 << GPIO_MODE_SHIFT)
 #  define GPIO_INPUT     (1 << GPIO_MODE_SHIFT)  /* Input Enable */
 #  define GPIO_OUTPUT    (0 << GPIO_MODE_SHIFT)  /* Output Enable */
@@ -64,10 +64,10 @@
  * 1111 1100 0000 0000
  * 5432 1098 7654 3210
  * ---- ---- ---- ----
- * .... ...U U... ....
+ * .... ..UU .... ....
  */
 
-#define GPIO_PUPD_SHIFT (7) /* Bits 7-8: Pull-up/down */
+#define GPIO_PUPD_SHIFT (8) /* Bits 8-9: Pull-up/down */
 #define GPIO_PUPD_MASK  (3 << GPIO_PUPD_SHIFT)
 #define GPIO_FLOAT      (0 << GPIO_PUPD_SHIFT) /* No pull-up, pull-down */
 #define GPIO_PULLUP     (1 << GPIO_PUPD_SHIFT) /* Pull-up */
@@ -78,10 +78,10 @@
  * 1111 1100 0000 0000
  * 5432 1098 7654 3210
  * ---- ---- ---- ----
- * .... .... .DD. ....
+ * .... .... DD.. ....
  */
 
-#define GPIO_DRV_SHIFT (5) /* Bits 5-6: Drive */
+#define GPIO_DRV_SHIFT (6) /* Bits 6-7: Drive */
 #define GPIO_DRV_MASK  (3 << GPIO_DRV_SHIFT)
 #define GPIO_DRV_0     (0 << GPIO_DRV_SHIFT)
 #define GPIO_DRV_1     (1 << GPIO_DRV_SHIFT)
@@ -93,10 +93,10 @@
  * 1111 1100 0000 0000
  * 5432 1098 7654 3210
  * ---- ---- ---- ----
- * .... .... ...S ....
+ * .... .... ..S. ....
  */
 
-#define GPIO_SMT_SHIFT (4) /* Bit 4: SMT Enable */
+#define GPIO_SMT_SHIFT (5) /* Bit 5: SMT Enable */
 #define GPIO_SMT_MASK  (3 << GPIO_SMT_SHIFT)
 #define GPIO_SMT_DIS   (0 << GPIO_SMT_SHIFT)
 #define GPIO_SMT_EN    (1 << GPIO_SMT_SHIFT)
@@ -106,21 +106,22 @@
  * 1111 1100 0000 0000
  * 5432 1098 7654 3210
  * ---- ---- ---- ----
- * .... .... .... FFFF
+ * .... .... ...F FFFF
  */
 
-#define GPIO_FUNC_SHIFT  (0) /* Bits 0-3: GPIO Type */
-#define GPIO_FUNC_MASK   (15 << GPIO_FUNC_SHIFT)
-#define GPIO_FUNC_SDIO   (1  << GPIO_FUNC_SHIFT)  /* SDIO */
+#define GPIO_FUNC_SHIFT  (0) /* Bits 0-4: GPIO Type */
+#define GPIO_FUNC_MASK   (0x1f << GPIO_FUNC_SHIFT)
+#define GPIO_FUNC_SDH    (0  << GPIO_FUNC_SHIFT)  /* SDH */
+#define GPIO_FUNC_SPI0   (1  << GPIO_FUNC_SHIFT)  /* SPI0 */
 #define GPIO_FUNC_FLASH  (2  << GPIO_FUNC_SHIFT)  /* Flash */
-#define GPIO_FUNC_SPI    (4  << GPIO_FUNC_SHIFT)  /* SPI */
-#define GPIO_FUNC_I2C    (6  << GPIO_FUNC_SHIFT)  /* I2C */
+#define GPIO_FUNC_I2C1   (6  << GPIO_FUNC_SHIFT)  /* I2C1 */
 #define GPIO_FUNC_UART   (7  << GPIO_FUNC_SHIFT)  /* UART */
-#define GPIO_FUNC_PWM    (8  << GPIO_FUNC_SHIFT)  /* PWM */
-#define GPIO_FUNC_EXT_PA (9  << GPIO_FUNC_SHIFT)  /* Analog */
+#define GPIO_FUNC_CAM    (9  << GPIO_FUNC_SHIFT)  /* CSI */
 #define GPIO_FUNC_ANA    (10 << GPIO_FUNC_SHIFT)  /* Analog */
 #define GPIO_FUNC_SWGPIO (11 << GPIO_FUNC_SHIFT)  /* Software GPIO */
-#define GPIO_FUNC_JTAG   (14 << GPIO_FUNC_SHIFT)  /* JTAG */
+#define GPIO_FUNC_PWM0   (16 << GPIO_FUNC_SHIFT)  /* PWM0 */
+#define GPIO_FUNC_SPI1   (18 << GPIO_FUNC_SHIFT)  /* SPI1 */
+#define GPIO_FUNC_JTAG_D0 (27 << GPIO_FUNC_SHIFT) /* JTAG */
 
 /****************************************************************************
  * Public Types
