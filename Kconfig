@@ -109,6 +109,22 @@ config EXPERIMENTAL
 		hidden in the Kconfig menus. Enabling "Show experimental options"
 		makes these options visible and makes it possible to enable them.
 
+config IGNORE_RULES_CHECK
+	bool "Ignore rules checks for drivers and subsystems"
+	depends on EXPERIMENTAL
+	---help---
+		Many features on NuttX normally have lazy depencies and we cannot
+		force it on menuconfig because otherwise we could remove some use
+		cases not so common. An example reported by a user was caused by
+		the fact that he enabled the DHCPC but forgot to enable DNS.
+		Although in theory it is possible to use DHCPC without DNS, it is
+		suppose that almost 99% of use cases will use DHCPC with DNS, so
+		we cannot put a rigid rule in the menuconfig, but we can create a
+		error checked in dhcpc.c file like this:
+		#if !defined(CONFIG_IGNORE_RULES_CHECK) && !defined(CONFIG_NETDB_DNSCLIENT)
+		#error "Enable CONFIG_NETDB_DNSCLIENT or enable CONFIG_IGNORE_RULES_CHECK"
+		#endif
+
 config DEFAULT_SMALL
 	bool "Default to smallest size"
 	default n

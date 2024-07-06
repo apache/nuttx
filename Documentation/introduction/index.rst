@@ -12,4 +12,5 @@ In the following sections you will find basic information introducing main NuttX
   licensing.rst
   trademarks.rst
   resources.rst
+  rules_check.rst
 
