@@ -130,4 +130,98 @@ config BL808_UART3
 	select UART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+menuconfig BL808_SPI0
+	bool "SPI 0"
+	default n
+	select SPI
+
+if BL808_SPI0
+
+config BL808_SPI0_DEG_ENABLE
+	bool "Deglitch enable"
+	default y
+
+config BL808_SPI0_CONT_ENABLE
+	bool "Continuous transfer mode"
+	default y
+
+config BL808_SPI0_BYTE_INV
+	bool "Invert byte transfer order"
+	default n
+
+config BL808_SPI0_BIT_INV
+	bool "Invert bit transfer order"
+	default n
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_SPI0_MISO
+	int "MISO Pin"
+	default 14
+	range 0 45
+
+config BL808_SPI0_MOSI
+	int "MOSI Pin"
+	default 13
+	range 0 45
+
+config BL808_SPI0_SCLK
+	int "SCLK Pin"
+	default 15
+	range 0 45
+
+config BL808_SPI0_SS
+	int "SS Pin"
+	default 12
+	range 0 45
+
+endif
+
+menuconfig BL808_SPI1
+	bool "SPI 1"
+	default n
+	select SPI
+
+if BL808_SPI1
+
+config BL808_SPI1_DEG_ENABLE
+	bool "Deglitch enable"
+	default y
+
+config BL808_SPI1_CONT_ENABLE
+	bool "Continuous transfer mode"
+	default y
+
+config BL808_SPI1_BYTE_INV
+	bool "Invert byte transfer order"
+	default n
+
+config BL808_SPI1_BIT_INV
+	bool "Invert bit transfer order"
+	default n
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_SPI1_MISO
+	int "MISO Pin"
+	default 14
+	range 0 45
+
+config BL808_SPI1_MOSI
+	int "MOSI Pin"
+	default 13
+	range 0 45
+
+config BL808_SPI1_SCLK
+	int "SCLK Pin"
+	default 15
+	range 0 45
+
+config BL808_SPI1_SS
+	int "SS Pin"
+	default 12
+	range 0 45
+
+endif
+
 endmenu

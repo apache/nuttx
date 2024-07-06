@@ -36,6 +36,8 @@
 
 #define BL808_GLB_UART_CFG1_OFFSET    0x154
 #define BL808_GLB_UART_CFG2_OFFSET    0x158
+#define BL808_GLB_SPI_CFG0_OFFSET     0x1b0
+#define BL808_GLB_PARM_CFG0_OFFSET    0x510
 
 #define BL808_GPIO_CFG_OFFSET              0x0008c4  /* gpio_cfg0 */
 
@@ -43,14 +45,31 @@
 
 #define BL808_GLB_UART_CFG1 (BL808_GLB_BASE + BL808_GLB_UART_CFG1_OFFSET)
 #define BL808_GLB_UART_CFG2 (BL808_GLB_BASE + BL808_GLB_UART_CFG2_OFFSET)
+#define BL808_GLB_SPI_CFG0 (BL808_GLB_BASE + BL808_GLB_SPI_CFG0_OFFSET)
+#define BL808_GLB_PARM_CFG0 (BL808_GLB_BASE + BL808_GLB_PARM_CFG0_OFFSET)
 
 #define BL808_GPIO_CFG(n)        (BL808_GLB_BASE + BL808_GPIO_CFG_OFFSET + 4*n)
 
 /* Register bit definitions *************************************************/
 
 /* UART_CFG registers *******************************************************/
+
 #define UART_CFG_SIG_SEL_SHIFT(n)  ((n % 8) * 4)
 #define UART_CFG_SIG_SEL_MASK(n)   (0x0f << UART_CFG_SIG_SEL_SHIFT(n))
+
+/* SPI_CFG0 *****************************************************************/
+
+#define SPI_CFG_CLK_DIV_SHIFT 0
+#define SPI_CFG_CLK_DIV_MASK (0x1f << SPI_CFG_CLK_DIV_SHIFT)
+#define SPI_CFG_CLK_EN_SHIFT 8
+#define SPI_CFG_CLK_SEL_SHIFT 9
+#define SPI_CFG_SWAP_SET_SHIFT 16
+#define SPI_CFG_SWAP_SET_MASK (0x0f << SPI_CFG_SWAP_SET_SHIFT);
+
+/* PARM_CFG0 ****************************************************************/
+
+#define PARM_SPI_0_MASTER_MODE_SHIFT 12
+#define PARM_MM_SPI_MASTER_MODE_SHIFT 27
 
 /* GPIO_CFG registers *******************************************************/
 
