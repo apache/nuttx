@@ -81,7 +81,6 @@ static struct binfmt_s g_nxflatbinfmt =
   NULL,                /* next */
   nxflat_loadbinary,   /* load */
   nxflat_unloadbinary, /* unload */
-  NULL,                /* coredump */
 };
 
 /****************************************************************************

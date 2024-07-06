@@ -27,8 +27,31 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/memoryregion.h>
+#include <sys/utsname.h>
 #include <unistd.h>
+
+#include <nuttx/streams.h>
+#include <nuttx/memoryregion.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define COREDUMP_MAGIC    0x434f5245
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Coredump information for block header */
+
+struct coredump_info_s
+{
+  uint32_t       magic;
+  struct utsname name;
+  time_t         time;
+  size_t         size;
+};
 
 /****************************************************************************
  * Public Function Prototypes
@@ -53,5 +76,17 @@ int coredump_set_memory_region(FAR const struct memory_region_s *region);
  ****************************************************************************/
 
 int coredump_add_memory_region(FAR const void *ptr, size_t size);
+
+/****************************************************************************
+ * Name: coredump
+ *
+ * Description:
+ *   This function for generating core dump stream.
+ *
+ ****************************************************************************/
+
+int coredump(FAR const struct memory_region_s *regions,
+             FAR struct lib_outstream_s *stream,
+             pid_t pid);
 
 #endif /* __INCLUDE_NUTTX_COREDUMP_H */
