@@ -26,7 +26,7 @@ ifeq ($(CONFIG_ARCH_DEADLOCKDUMP),y)
 CSRCS += deadlock.c
 endif
 
-ifneq ($(CONFIG_BOARD_COREDUMP_SYSLOG)$(CONFIG_BOARD_COREDUMP_BLKDEV),)
+ifeq ($(CONFIG_COREDUMP),y)
 CSRCS += coredump.c
 endif
 

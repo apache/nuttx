@@ -4634,14 +4634,14 @@ config BOARD_CRASHDUMP
 config BOARD_COREDUMP_SYSLOG
 	bool "Enable Core dump to syslog"
 	default n
-	depends on ELF_COREDUMP
+	depends on COREDUMP
 	---help---
 		Enable put coredump to syslog when crash.
 
 config BOARD_COREDUMP_BLKDEV
 	bool "Enable Core Dump to block device"
 	default n
-	depends on ELF_COREDUMP
+	depends on COREDUMP
 	---help---
 		Enable save coredump at block device when crash.
 

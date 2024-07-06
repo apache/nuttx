@@ -2047,3 +2047,15 @@ config ASSERT_PAUSE_CPU_TIMEOUT
 	---help---
 		Timeout in milisecond to pause another CPU when assert. Only available
 		when SMP is enabled.
+		Enable to support perf events.
+
+config COREDUMP
+	bool "Coredump support"
+	depends on ARCH_HAVE_TCBINFO
+	default n
+	---help---
+		Generate ELF core dump to provide information about the CPU state and the
+		memory state of program.
+		The memory state embeds a snapshot of all segments mapped in the
+		memory space of the program. The CPU state contains register values
+		when the core dump has been generated.

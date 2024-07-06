@@ -40,11 +40,6 @@ if(CONFIG_ELF)
     libelf_unload.c
     libelf_verify.c)
 
-  if(CONFIG_ELF_COREDUMP)
-    list(APPEND SRCS libelf_coredump.c)
-    target_include_directories(binfmt PRIVATE ${NUTTX_DIR}/sched)
-  endif()
-
   if(CONFIG_BINFMT_CONSTRUCTORS)
     list(APPEND SRCS libelf_ctors.c libelf_dtors.c)
   endif()

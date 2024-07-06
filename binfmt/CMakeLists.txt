@@ -39,8 +39,7 @@ list(
   binfmt_exec.c
   binfmt_copyargv.c
   binfmt_copyactions.c
-  binfmt_dumpmodule.c
-  binfmt_coredump.c)
+  binfmt_dumpmodule.c)
 
 if(CONFIG_BINFMT_LOADABLE)
   list(APPEND SRCS binfmt_exit.c)
