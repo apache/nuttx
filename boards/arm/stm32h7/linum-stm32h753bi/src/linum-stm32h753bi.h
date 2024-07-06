@@ -111,6 +111,13 @@
 #define GPIO_ETH_RESET    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_100MHz |\
                            GPIO_OUTPUT_CLEAR | GPIO_PORTI | GPIO_PIN4)  /* PI4 */
 
+/* Quadrature Encoder
+ *
+ * Use Timer 5 (TIM3) on channels 2 and 2 for QEncoder, using PB4 and PA7.
+ */
+
+#define LINUMSTM32H753BI_QETIMER 5
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -206,5 +213,15 @@ int stm32_pwm_setup(void);
 #ifdef CONFIG_MTD_W25QXXXJV
 int stm32_w25qxxx_setup(void);
 #endif
+
+/****************************************************************************
+ * Name: board_qencoder_initialize
+ *
+ * Description:
+ *   Initialize the quadrature encoder driver for the given timer
+ *
+ ****************************************************************************/
+
+int board_qencoder_initialize(int devno, int timerno);
 
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */

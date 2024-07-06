@@ -755,3 +755,17 @@ This configuration is focused on network testing using the ethernet periferal::
       56 bytes from 142.251.129.110: icmp_seq=9 time=0.0 ms
       10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
       rtt min/avg/max/mdev = 0.000/1.000/10.000/3.000 ms
+
+qencoder
+--------
+
+Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encoder:
+
+    nsh> qe
+    qe_main: Hardware initialized. Opening the encoder device: /dev/qe0
+    qe_main: Number of samples: 0
+    qe_main:   1. 1
+    qe_main:   2. 2
+    qe_main:   3. 3
+    qe_main:   4. 2
+    qe_main:   5. 1

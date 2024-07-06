@@ -266,5 +266,18 @@ int stm32_bringup(void)
   usbdev_rndis_initialize(mac);
 #endif
 
+#if defined(CONFIG_SENSORS_QENCODER)
+  /* Initialize and register the qencoder driver */
+
+  ret = board_qencoder_initialize(0, LINUMSTM32H753BI_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
   return OK;
 }
