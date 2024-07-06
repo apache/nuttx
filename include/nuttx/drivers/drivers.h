@@ -44,6 +44,17 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: drivers_early_initialize
+ *
+ * Description:
+ *   Performs one-time, early driver initialization that doesn't rely on OS
+ *   resources being ready.
+ *
+ ****************************************************************************/
+
+void drivers_early_initialize(void);
+
+/****************************************************************************
  * Name: drivers_initialize
  *
  * Description:

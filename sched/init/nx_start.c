@@ -518,10 +518,6 @@ void nx_start(void)
 
   g_nx_initstate = OSINIT_BOOT;
 
-  /* Initialize RTOS Data ***************************************************/
-
-  sched_trace_begin();
-
   /* Initialize task list table *********************************************/
 
   tasklist_initialize();
@@ -533,6 +529,12 @@ void nx_start(void)
   /* Task lists are initialized */
 
   g_nx_initstate = OSINIT_TASKLISTS;
+
+  /* Initialize RTOS Data ***************************************************/
+
+  drivers_early_initialize();
+
+  sched_trace_begin();
 
   /* Initialize RTOS facilities *********************************************/
 
