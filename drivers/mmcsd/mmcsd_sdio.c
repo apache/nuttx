@@ -4400,7 +4400,11 @@ static int mmcsd_removed(FAR struct mmcsd_state_s *priv)
   priv->buswidth     = MMCSD_SCR_BUSWIDTH_1BIT;
   SDIO_WIDEBUS(priv->dev, false);
   priv->widebus      = false;
-  mmcsd_widebus(priv);
+
+  if (mmcsd_widebus(priv) != OK)
+    {
+      ferr("ERROR: Failed to set wide bus operation\n");
+    }
 
   /* Disable clocking to the card */
 
