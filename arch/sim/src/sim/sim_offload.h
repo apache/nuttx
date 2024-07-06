@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/posix/sim_offload.h
+ * arch/sim/src/sim/sim_offload.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_POSIX_SIM_OFFLOAD_H
-#define __ARCH_SIM_SRC_POSIX_SIM_OFFLOAD_H
+#ifndef __ARCH_SIM_SRC_SIM_OFFLOAD_H
+#define __ARCH_SIM_SRC_SIM_OFFLOAD_H
 
 /****************************************************************************
  * Included Files
@@ -74,4 +74,4 @@ typedef struct sim_codec_ops_s
 
 extern const sim_codec_ops_s g_codec_ops[];
 
-#endif /* __ARCH_SIM_SRC_POSIX_SIM_OFFLOAD_H */
+#endif /* __ARCH_SIM_SRC_SIM_OFFLOAD_H */
