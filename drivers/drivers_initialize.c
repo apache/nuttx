@@ -54,6 +54,26 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: drivers_early_initialize
+ *
+ * Description:
+ *   drivers_early_initialize will be called once before OS initialization
+ *   when no system resource is ready to use.
+ *
+ *   drivers_early_initialize serves the purpose of bringing up drivers as
+ *   early as possible, so they can be used even during OS initialization.
+ *   It must not rely on any system resources, such as heap memory.
+ *
+ ****************************************************************************/
+
+void drivers_early_initialize(void)
+{
+#ifdef CONFIG_DRIVERS_NOTE
+  note_early_initialize();
+#endif
+}
+
+/****************************************************************************
  * Name: drivers_initialize
  *
  * Description:
