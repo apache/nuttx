@@ -439,6 +439,10 @@
 #define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_3|GPIO_SPEED_100MHz)    /* PG14 */
 #define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2|GPIO_SPEED_100MHz)   /* PG11 */
 
+/* QEncoder - TIM5: CH1 and CH2 */
+#define GPIO_TIM5_CH1IN  GPIO_TIM5_CH1IN_1 /* PA0 */
+#define GPIO_TIM5_CH2IN  GPIO_TIM5_CH2IN_2 /* PH11 */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
