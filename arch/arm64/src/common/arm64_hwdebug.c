@@ -982,43 +982,6 @@ static int arm64_clear_os_lock(unsigned int cpu)
   return 0;
 }
 
-/* CPU initialisation. */
-
-static int arm64_hw_breakpoint_reset(unsigned int cpu)
-{
-  struct arm64_breakpoint_context *bp_ctx;
-  struct arm64_breakpoint_context *wp_ctx;
-  int i;
-
-  bp_ctx    = &g_cpu_bp_ctx[cpu];
-  wp_ctx    = &g_cpu_wp_ctx[cpu];
-
-  /* When a CPU goes through cold-boot, it does not have any installed
-   * slot, so it is safe to share the same function for restoring and
-   * resetting breakpoints; when a CPU is hotplugged in, it goes
-   * through the slots, which are all empty, hence it just resets control
-   * and value for debug registers.
-   */
-
-  for (i = 0; i < bp_ctx->core_num; ++i)
-    {
-      write_wb_reg(AARCH64_DBG_REG_BCR, i, 0UL);
-      write_wb_reg(AARCH64_DBG_REG_BVR, i, 0UL);
-    }
-
-  for (i = 0; i < wp_ctx->core_num; ++i)
-    {
-      write_wb_reg(AARCH64_DBG_REG_WCR, i, 0UL);
-      write_wb_reg(AARCH64_DBG_REG_WVR, i, 0UL);
-    }
-
-  arm64_clear_os_lock(cpu);
-
-  sinfo("reset done");
-
-  return 0;
-}
-
 /****************************************************************************
  * Name: arm64_hw_breakpoint_enable
  *
@@ -1307,5 +1270,5 @@ void arm64_hwdebug_init(void)
   arm64_register_debug_hook(DBG_ESR_EVT_HWSS, arm64_single_step_handler);
   arm64_register_debug_hook(DBG_ESR_EVT_BRK, arm64_brk_handler);
 
-  arm64_hw_breakpoint_reset(cpu);
+  arm64_clear_os_lock(cpu);
 }
