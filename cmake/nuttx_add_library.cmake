@@ -37,9 +37,8 @@ function(nuttx_add_library_internal target)
 
   # add main include directories
   target_include_directories(
-    ${target} SYSTEM
-    PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
-            ${CMAKE_BINARY_DIR}/include_arch)
+    ${target} SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/include
+                             ${CMAKE_BINARY_DIR}/include)
 
   # Set global compile options & definitions We use the "nuttx" target to hold
   # these properties so that libraries added after this property is set can read
