@@ -1900,6 +1900,7 @@ config ARCH_BOARD_ADAFRUIT_FEATHER_RP2040
 config ARCH_BOARD_SEEED_XIAO_RP2040
 	bool "Seeed Studio XIAO RP2040 board"
 	depends on ARCH_CHIP_RP2040
+	select ARCH_HAVE_LEDS
 	---help---
 		This is a port to the Seeed Studio XIAO RP2040 board.
 		Support is derived from Raspberry Pi Pico support.
