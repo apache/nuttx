@@ -1910,27 +1910,18 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo,
                                   uint8_t speed, uint8_t type)
-#else
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
-                                  FAR struct usbdev_devinfo_s *devinfo)
-#endif
 {
   uint16_t totallen = 0;
 
   /* Check for switches between high and full speed */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
       speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
-#else
-  uint8_t speed = USB_SPEED_FULL;
-#endif
 
   /* This is the total length of the configuration (not necessarily the
    * size that we will be sending now).
@@ -1945,16 +1936,10 @@ static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
        */
 
       FAR struct usb_cfgdesc_s *dest = (FAR struct usb_cfgdesc_s *)buf;
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
       int16_t size = usbclass_mkcfgdesc(NULL, NULL, speed, type);
-#else
-      int16_t size = usbclass_mkcfgdesc(NULL, NULL);
-#endif
 
       memcpy(buf, &g_rndis_cfgdesc, sizeof(struct usb_cfgdesc_s));
-#ifdef CONFIG_USBDEV_DUALSPEED
       dest->type = type;                                     /* Descriptor type */
-#endif
       dest->totallen[0] = LSBYTE(size);                      /* LS Total length */
       dest->totallen[1] = MSBYTE(size);                      /* MS Total length */
 
@@ -2441,12 +2426,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 #  endif /* CONFIG_USBDEV_DUALSPEED */
                 case USB_DESC_TYPE_CONFIG:
                   {
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
                     ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
                                              dev->speed, ctrl->req);
-#  else
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
-#  endif
                   }
                   break;
 #endif
@@ -3016,11 +2997,8 @@ void usbdev_rndis_get_composite_devdesc(struct composite_devdesc_s *dev)
 
   /* Let the construction function calculate the size of config descriptor */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
-  dev->cfgdescsize  = usbclass_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
-#else
-  dev->cfgdescsize  = usbclass_mkcfgdesc(NULL, NULL);
-#endif
+  dev->cfgdescsize         = usbclass_mkcfgdesc(NULL, NULL,
+                                                USB_SPEED_UNKNOWN, 0);
 
   /* Board-specific logic must provide the device minor */
 

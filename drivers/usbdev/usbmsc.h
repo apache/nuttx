@@ -558,14 +558,9 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf,
                          FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type);
-#else
-int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf,
-                         FAR struct usbdev_devinfo_s *devinfo);
-#endif
 
 /****************************************************************************
  * Name: usbmsc_getqualdesc

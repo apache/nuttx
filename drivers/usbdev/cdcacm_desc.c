@@ -364,25 +364,16 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
                          FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type)
-#else
-int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
-                         FAR struct usbdev_devinfo_s *devinfo)
-#endif
 {
   int length = 0;
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
       speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
-#else
-  uint8_t speed = USB_SPEED_FULL;
-#endif
 
   /* Fill in all descriptors directly to the buf */
 
@@ -404,18 +395,10 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
       /* Let's calculate the size... */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
       int16_t size = cdcacm_mkcfgdesc(NULL, NULL, speed, type);
-#else
-      int16_t size = cdcacm_mkcfgdesc(NULL, NULL);
-#endif
 
       dest->len         = USB_SIZEOF_CFGDESC;                /* Descriptor length */
-#ifdef CONFIG_USBDEV_DUALSPEED
       dest->type        = type;                              /* Descriptor type */
-#else
-      dest->type        = USB_DESC_TYPE_CONFIG;              /* Descriptor type */
-#endif
       dest->totallen[0] = LSBYTE(size);                      /* LS Total length */
       dest->totallen[1] = MSBYTE(size);                      /* MS Total length */
       dest->ninterfaces = CDCACM_NINTERFACES;                /* Number of interfaces */

@@ -246,14 +246,9 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
                          FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type);
-#else
-int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
-                         FAR struct usbdev_devinfo_s *devinfo);
-#endif
 
 /****************************************************************************
  * Name: cdcacm_getqualdesc
