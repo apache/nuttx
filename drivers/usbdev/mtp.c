@@ -296,28 +296,19 @@ static const FAR struct usbdev_epinfo_s *g_mtp_epinfos[USBMTP_NUM_EPS] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo,
                                   uint8_t speed, uint8_t type)
-#else
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
-                                  FAR struct usbdev_devinfo_s *devinfo)
-#endif
 {
   FAR struct usb_epdesc_s *epdesc;
   FAR struct usb_ifdesc_s *dest;
 
   /* Check for switches between high and full speed */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
       speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
-#else
-  uint8_t speed = USB_SPEED_FULL;
-#endif
 
   dest = (FAR struct usb_ifdesc_s *)buf;
   epdesc = (FAR struct usb_epdesc_s *)(buf + sizeof(g_mtp_ifdesc));
