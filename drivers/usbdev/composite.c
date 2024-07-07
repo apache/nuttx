@@ -277,14 +277,9 @@ static int composite_msftdescriptor(FAR struct composite_dev_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
                                    FAR uint8_t *buf,
                                    uint8_t speed, uint8_t type)
-#else
-static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
-                                   FAR uint8_t *buf)
-#endif
 {
   FAR struct composite_dev_s *priv =
     ((FAR struct composite_driver_s *)driver)->dev;
@@ -299,6 +294,7 @@ static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
 
   cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
   cfgdesc->ninterfaces = priv->ninterfaces;
+  cfgdesc->type = type;
 
   /* Increment the size and buf to point right behind the information
    * filled in
@@ -313,18 +309,11 @@ static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
     {
       FAR struct composite_devobj_s *devobj = &priv->device[i];
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
       len = devobj->compdesc.mkconfdesc(buf,
                                         &devobj->compdesc.devinfo,
                                         speed, type);
       total += len;
       buf += len;
-#else
-      len = devobj->compdesc.mkconfdesc(buf,
-                                        &devobj->compdesc.devinfo);
-      total += len;
-      buf += len;
-#endif
     }
 
   cfgdesc->totallen[0] = LSBYTE(total);
@@ -677,12 +666,8 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
               case USB_DESC_TYPE_CONFIG:
                 {
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
                     ret = composite_mkcfgdesc(driver, ctrlreq->buf,
                                               dev->speed, ctrl->value[1]);
-#else
-                    ret = composite_mkcfgdesc(driver, ctrlreq->buf);
-#endif
                 }
                 break;
 

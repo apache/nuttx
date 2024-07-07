@@ -1992,36 +1992,26 @@ static void cdcncm_mkepdesc(int epidx, FAR struct usb_epdesc_s *epdesc,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t cdcnm_mkcfgdesc(FAR uint8_t *desc,
                                FAR struct usbdev_devinfo_s *devinfo,
                                uint8_t speed, uint8_t type, bool isncm)
-#else
-static int16_t cdcnm_mkcfgdesc(FAR uint8_t *desc,
-                               FAR struct usbdev_devinfo_s *devinfo,
-                               bool isncm)
-#endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = NULL;
   int16_t len = 0;
 
   /* Check for switches between high and full speed */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
       speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
-#else
-  uint8_t speed = USB_SPEED_FULL;
-#endif
 
 #ifndef CONFIG_CDCNCM_COMPOSITE
   if (desc)
     {
       cfgdesc = (FAR struct usb_cfgdesc_s *)desc;
       cfgdesc->len         = USB_SIZEOF_CFGDESC;
-      cfgdesc->type        = USB_DESC_TYPE_CONFIG;
+      cfgdesc->type        = type;
       cfgdesc->ninterfaces = CDCECM_NINTERFACES;
       cfgdesc->cfgvalue    = CDCECM_CONFIGID;
       cfgdesc->icfg        = devinfo->strbase + CDCECM_CONFIGSTRID;
@@ -2272,7 +2262,6 @@ static int16_t cdcnm_mkcfgdesc(FAR uint8_t *desc,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
                                 FAR struct usbdev_devinfo_s *devinfo,
                                 uint8_t speed, uint8_t type)
@@ -2288,21 +2277,6 @@ static int16_t cdcmbim_mkcfgdesc(FAR uint8_t *desc,
   return cdcnm_mkcfgdesc(desc, devinfo, speed, type, false);
 }
 #  endif
-#else
-static int16_t cdcncm_mkcfgdesc(FAR uint8_t *desc,
-                                FAR struct usbdev_devinfo_s *devinfo)
-{
-  return cdcnm_mkcfgdesc(desc, devinfo, true);
-}
-
-#  ifdef CONFIG_NET_CDCMBIM
-static int16_t cdcmbim_mkcfgdesc(FAR uint8_t *desc,
-                                 FAR struct usbdev_devinfo_s *devinfo)
-{
-  return cdcnm_mkcfgdesc(desc, devinfo, false);
-}
-#  endif
-#endif
 
 /****************************************************************************
  * Name: cdcncm_getdescriptor
@@ -2351,12 +2325,8 @@ static int cdcncm_getdescriptor(FAR struct cdcncm_driver_s *self,
     case USB_DESC_TYPE_OTHERSPEEDCONFIG:
 #endif /* CONFIG_USBDEV_DUALSPEED */
     case USB_DESC_TYPE_CONFIG:
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
       return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
                               self->usbdev.speed, type);
-#else
-      return cdcncm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo);
-#endif
 
     case USB_DESC_TYPE_STRING:
       return cdcncm_mkstrdesc(index, (FAR struct usb_strdesc_s *)desc);
@@ -3082,14 +3052,9 @@ static void cdcnm_get_composite_devdesc(FAR struct composite_devdesc_s *dev,
 
   /* Let the construction function calculate the size of config descriptor */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   dev->cfgdescsize  = isncm ?
                       cdcncm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0) :
                       cdcmbim_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
-#else
-  dev->cfgdescsize  = isncm ? cdcncm_mkcfgdesc(NULL, NULL) :
-                              cdcmbim_mkcfgdesc(NULL, NULL);
-#endif
 
   /* Board-specific logic must provide the device minor */
 

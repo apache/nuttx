@@ -222,15 +222,9 @@ struct usbdev_devinfo_s
 struct usbdevclass_driver_s;
 struct composite_devdesc_s
 {
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
                              FAR struct usbdev_devinfo_s *devinfo,
                              uint8_t speed, uint8_t type);
-#else
-  CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
-                             FAR struct usbdev_devinfo_s *devinfo);
-#endif
-
   CODE int (*mkstrdesc)(uint8_t id, FAR struct usb_strdesc_s *strdesc);
   CODE int (*classobject)(int minor,
                           FAR struct usbdev_devinfo_s *devinfo,

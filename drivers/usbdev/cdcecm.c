@@ -1221,35 +1221,26 @@ static void cdcecm_mkepdesc(int epidx,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
                                 FAR struct usbdev_devinfo_s *devinfo,
                                 uint8_t speed, uint8_t type)
-#else
-static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
-                                FAR struct usbdev_devinfo_s *devinfo)
-#endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = NULL;
   int16_t len = 0;
 
   /* Check for switches between high and full speed */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
       speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
-#else
-  uint8_t speed = USB_SPEED_FULL;
-#endif
 
 #ifndef CONFIG_CDCECM_COMPOSITE
   if (desc)
     {
       cfgdesc = (FAR struct usb_cfgdesc_s *)desc;
       cfgdesc->len         = USB_SIZEOF_CFGDESC;
-      cfgdesc->type        = USB_DESC_TYPE_CONFIG;
+      cfgdesc->type        = type;
       cfgdesc->ninterfaces = CDCECM_NINTERFACES;
       cfgdesc->cfgvalue    = CDCECM_CONFIGID;
       cfgdesc->icfg        = devinfo->strbase + CDCECM_CONFIGSTRID;
@@ -1484,12 +1475,8 @@ static int cdcecm_getdescriptor(FAR struct cdcecm_driver_s *self,
 #endif /* CONFIG_USBDEV_DUALSPEED */
     case USB_DESC_TYPE_CONFIG:
       {
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
         return cdcecm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo,
                                 self->usbdev.speed, type);
-#else
-        return cdcecm_mkcfgdesc((FAR uint8_t *)desc, &self->devinfo);
-#endif
       }
       break;
 
@@ -2018,11 +2005,7 @@ void cdcecm_get_composite_devdesc(struct composite_devdesc_s *dev)
 
   /* Let the construction function calculate the size of config descriptor */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   dev->cfgdescsize  = cdcecm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
-#else
-  dev->cfgdescsize  = cdcecm_mkcfgdesc(NULL, NULL);
-#endif
 
   /* Board-specific logic must provide the device minor */
 
