@@ -27,6 +27,12 @@
 
 #include <nuttx/config.h>
 
+/* LEDs connected on-board */
+
+#define GPIO_LED1       25 /* LED color is BLUE */
+#define GPIO_LED2       17 /* LED color is RED */
+#define GPIO_LED3       16 /* LED color is GREEN */
+
 int rp2040_bringup(void);
 
 #ifdef CONFIG_DEV_GPIO
