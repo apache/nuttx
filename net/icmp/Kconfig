@@ -7,7 +7,7 @@ menu "ICMP Networking Support"
 
 config NET_ICMP
 	bool "Enable ICMP networking"
-	default n
+	default NET_IPv4
 	---help---
 		Enable minimal ICMP support. Includes built-in support
 		for sending replies to received ECHO (ping) requests.
