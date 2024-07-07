@@ -1631,12 +1631,8 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_CDCACM_COMPOSITE
               case USB_DESC_TYPE_CONFIG:
                 {
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
                   ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
                                          dev->speed, ctrl->value[1]);
-#else
-                  ret = cdcacm_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
-#endif
                 }
                 break;
 #endif
@@ -3107,11 +3103,7 @@ void cdcacm_get_composite_devdesc(struct composite_devdesc_s *dev)
 
   /* Let the construction function calculate the size of config descriptor */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   dev->cfgdescsize  = cdcacm_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
-#else
-  dev->cfgdescsize  = cdcacm_mkcfgdesc(NULL, NULL);
-#endif
 
   /* Board-specific logic must provide the device minor */
 

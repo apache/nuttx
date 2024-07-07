@@ -295,11 +295,7 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
 static int     usbclass_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc);
 static void    usbclass_mkepbulkdesc(const struct usb_epdesc_s *indesc,
                  uint16_t mxpacket, struct usb_epdesc_s *outdesc);
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type);
-#else
-static int16_t usbclass_mkcfgdesc(uint8_t *buf);
-#endif
 static void    usbclass_resetconfig(FAR struct pl2303_dev_s *priv);
 static int     usbclass_setconfig(FAR struct pl2303_dev_s *priv,
                  uint8_t config);
@@ -858,11 +854,7 @@ static inline void usbclass_mkepbulkdesc(
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
 static int16_t usbclass_mkcfgdesc(uint8_t *buf, uint8_t speed, uint8_t type)
-#else
-static int16_t usbclass_mkcfgdesc(uint8_t *buf)
-#endif
 {
   FAR struct usb_cfgdesc_s *cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
   uint16_t bulkmxpacket = CONFIG_PL2303_EPBULK_FSSIZE;
@@ -870,12 +862,10 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf)
 
   /* Check for switches between high and full speed */
 
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
       speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
-#endif
 
   /* This is the total length of the configuration (not necessarily the
    * size that we will be sending now.
@@ -889,6 +879,7 @@ static int16_t usbclass_mkcfgdesc(uint8_t *buf)
    */
 
   memcpy(cfgdesc, &g_cfgdesc, USB_SIZEOF_CFGDESC);
+  cfgdesc->type = type;
   buf += USB_SIZEOF_CFGDESC;
 
   /* Copy the canned interface descriptor */
@@ -1634,12 +1625,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 
                 case USB_DESC_TYPE_CONFIG:
                   {
-#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
                     ret = usbclass_mkcfgdesc(ctrlreq->buf,
                                              dev->speed, ctrl->req);
-#else
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf);
-#endif
                   }
                   break;
 
