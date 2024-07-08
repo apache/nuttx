@@ -125,8 +125,10 @@
 #define CRYPTO_SHA2_384         32
 #define CRYPTO_SHA2_512         33
 #define CRYPTO_CRC32            34
-#define CRYPTO_ESN              35 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    35 /* Keep updated */
+#define CRYPTO_AES_CMAC         35
+#define CRYPTO_AES_128_CMAC     36
+#define CRYPTO_ESN              37 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX    37 /* Keep updated */
 
 /* Algorithm flags */
 
@@ -170,6 +172,7 @@ struct cryptodesc
   #define CRD_F_COMP 0x10          /* Set when doing compression */
   #define CRD_F_ESN 0x20           /* Set when ESN field is provided */
   #define CRD_F_UPDATE 0x40        /* Set just update source */
+  #define CRD_F_UPDATE_AAD 0x80    /* Set just update aad */
 
   struct cryptoini CRD_INI; /* Initialization/context data */
   #define crd_esn CRD_INI.cri_esn
@@ -200,6 +203,7 @@ struct cryptop
                       * value on future requests.
                       */
   int crp_flags;
+  int crp_aadlen;
 
 #define CRYPTO_F_IMBUF 0x0001   /* Input/output are mbuf chains, otherwise contig */
 #define CRYPTO_F_IOV 0x0002     /* Input/output are uio */
@@ -216,6 +220,7 @@ struct cryptop
   caddr_t crp_mac;
   caddr_t crp_dst;
   caddr_t crp_iv;
+  caddr_t crp_aad;
 };
 
 #define CRYPTO_BUF_IOV 0x1
@@ -330,12 +335,19 @@ struct crypt_op
                                    * be used, and the subsequent iv will be saved
                                    * in the driver.
                                    */
+#define COP_FLAG_UPDATE_AAD (1 << 1)
+/* Indicates that this operation processes aad
+ * (Additional Authenticated Data), which is only used
+ * in the authentication algorithm.
+ */
 
   uint16_t flags;
   unsigned len;
+  unsigned aadlen;
   caddr_t src, dst;   /* become iov[] inside kernel */
   caddr_t mac;        /* must be big enough for chosen MAC */
   caddr_t iv;
+  caddr_t aad;
 };
 
 /* hamc buffer, software & hardware need it */
