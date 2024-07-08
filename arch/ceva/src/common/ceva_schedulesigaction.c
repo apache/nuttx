@@ -130,12 +130,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   /* Pause the CPU */
 
                   up_cpu_pause(cpu);
-
-                  /* Wait while the pause request is pending */
-
-                  while (up_cpu_pausereq(cpu))
-                    {
-                    }
                 }
 
               /* Now tcb on the other CPU can be accessed safely */
