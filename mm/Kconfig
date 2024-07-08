@@ -338,6 +338,13 @@ config MM_UBSAN_TRAP_ON_ERROR
 		The undefined instruction trap should cause your program to crash,
 		save the code space significantly.
 
+config MM_UBSAN_DUMMY
+	bool "Bypass Undefined Behaviour Sanitizer Runtime Actions"
+	default n
+	depends on MM_UBSAN
+	---help---
+		Keep UBSAN compile time but disable runtime actions.
+
 config MM_FILL_ALLOCATIONS
 	bool "Fill allocations with debug value"
 	default n

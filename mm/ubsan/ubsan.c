@@ -29,6 +29,8 @@
 
 #include "ubsan.h"
 
+#ifndef CONFIG_MM_UBSAN_DUMMY
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -388,3 +390,79 @@ void __ubsan_handle_dynamic_type_cache_miss(FAR void *data,
 {
   ubsan_prologue_epilogue(data, "dynamic-type-cache-miss");
 }
+
+#else
+void __ubsan_handle_out_of_bounds(FAR void *data, FAR void *index)
+{
+}
+
+void __ubsan_handle_shift_out_of_bounds(FAR void *data,
+                                        FAR void *lhs, FAR void *rhs)
+{
+}
+
+void __ubsan_handle_divrem_overflow(FAR void *data,
+                                    FAR void *lhs, FAR void *rhs)
+{
+}
+
+void __ubsan_handle_alignment_assumption(FAR void *data, uintptr_t ptr,
+                                         uintptr_t align, uintptr_t offset)
+{
+}
+
+void __ubsan_handle_type_mismatch(FAR struct type_mismatch_data *data,
+                                  FAR void *ptr)
+{
+}
+
+void __ubsan_handle_type_mismatch_v1(FAR void *_data, FAR void *ptr)
+{
+}
+
+void __ubsan_handle_builtin_unreachable(FAR void *data)
+{
+  PANIC();
+}
+
+void __ubsan_handle_nonnull_arg(FAR void *data)
+{
+}
+
+void __ubsan_handle_add_overflow(FAR void *data,
+                                 FAR void *lhs, FAR void *rhs)
+{
+}
+
+void __ubsan_handle_sub_overflow(FAR void *data,
+                                 FAR void *lhs, FAR void *rhs)
+{
+}
+
+void __ubsan_handle_mul_overflow(FAR void *data,
+                                 FAR void *lhs, FAR void *rhs)
+{
+}
+
+void __ubsan_handle_load_invalid_value(FAR void *data, FAR void *ptr)
+{
+}
+
+void __ubsan_handle_negate_overflow(FAR void *data, FAR void *ptr)
+{
+}
+
+void __ubsan_handle_pointer_overflow(FAR void *data,
+                                     FAR void *ptr, FAR void *result)
+{
+}
+
+void __ubsan_handle_invalid_builtin(FAR void *data)
+{
+}
+
+void __ubsan_handle_dynamic_type_cache_miss(FAR void *data,
+                                            FAR void *ptr, FAR void *hash)
+{
+}
+#endif
