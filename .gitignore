@@ -46,6 +46,7 @@
 /nuttx
 /nuttx-*
 /nuttx.*
+/nuttx_user*
 /staging
 /tags
 /TAGS
