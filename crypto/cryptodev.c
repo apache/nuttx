@@ -224,6 +224,7 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_BLF_CBC:
             case CRYPTO_CAST_CBC:
             case CRYPTO_AES_CBC:
+            case CRYPTO_AES_CMAC:
             case CRYPTO_AES_CTR:
             case CRYPTO_AES_XTS:
             case CRYPTO_AES_OFB:
@@ -247,6 +248,7 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_SHA2_384_HMAC:
             case CRYPTO_SHA2_512_HMAC:
             case CRYPTO_AES_128_GMAC:
+            case CRYPTO_AES_128_CMAC:
             case CRYPTO_MD5:
             case CRYPTO_POLY1305:
             case CRYPTO_RIPEMD160:
@@ -383,14 +385,6 @@ int cryptodev_op(FAR struct csession *cse,
   FAR struct cryptodesc *crda = NULL;
   int error = OK;
   uint32_t hid;
-
-  if (cse->txform)
-    {
-      if (cop->len == 0)
-        {
-          return -EINVAL;
-        }
-    }
 
   /* number of requests, not logical and */
 

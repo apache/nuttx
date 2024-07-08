@@ -70,6 +70,7 @@
 #include <crypto/cryptodev.h>
 #include <crypto/xform.h>
 #include <crypto/gmac.h>
+#include <crypto/cmac.h>
 #include <crypto/chachapoly.h>
 #include <crypto/poly1305.h>
 #include <nuttx/crc32.h>
@@ -240,6 +241,16 @@ const struct enc_xform enc_xform_aes_gmac =
   NULL
 };
 
+const struct enc_xform enc_xform_aes_cmac =
+{
+  CRYPTO_AES_CMAC, "AES-CMAC",
+  1, 0, 16, 32, 0,
+  null_encrypt,
+  null_decrypt,
+  null_setkey,
+  NULL
+};
+
 const struct enc_xform enc_xform_aes_xts =
 {
   CRYPTO_AES_XTS, "AES-XTS",
@@ -393,6 +404,16 @@ const struct auth_hash auth_hash_chacha20_poly1305 =
   chacha20_poly1305_init, chacha20_poly1305_setkey,
   chacha20_poly1305_reinit, chacha20_poly1305_update,
   chacha20_poly1305_final
+};
+
+const struct auth_hash auth_hash_cmac_aes_128 =
+{
+  CRYPTO_AES_128_CMAC, "CMAC-AES-128",
+  16, AES_CMAC_KEY_LENGTH, AES_CMAC_DIGEST_LENGTH, sizeof(AES_CMAC_CTX),
+  AESCTR_BLOCKSIZE, (void (*)(FAR void *)) aes_cmac_init,
+  (void (*)(FAR void *, FAR const uint8_t *, uint16_t)) aes_cmac_setkey,
+  NULL, (int (*)(FAR void *, FAR const uint8_t *, size_t)) aes_cmac_update,
+  (void (*) (FAR uint8_t *, FAR void *)) aes_cmac_final
 };
 
 const struct auth_hash auth_hash_md5 =
