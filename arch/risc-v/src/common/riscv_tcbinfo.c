@@ -34,7 +34,7 @@
 
 static const uint16_t g_reg_offs[] =
 {
-  TCB_REG_OFF(REG_EPC_NDX),
+  TCB_REG_OFF(REG_EPC_NDX), /* X0, but it will be ommited by gdb client */
   TCB_REG_OFF(REG_X1_NDX),
   TCB_REG_OFF(REG_X2_NDX),
   TCB_REG_OFF(REG_X3_NDX),
@@ -66,6 +66,7 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(REG_X29_NDX),
   TCB_REG_OFF(REG_X30_NDX),
   TCB_REG_OFF(REG_X31_NDX),
+  TCB_REG_OFF(REG_EPC_NDX),
 
 #if 0
 #  ifdef CONFIG_ARCH_FPU
