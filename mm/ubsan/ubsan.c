@@ -382,3 +382,9 @@ void __ubsan_handle_invalid_builtin(FAR void *data)
 {
   ubsan_prologue_epilogue(data, "invalid-builtin");
 }
+
+void __ubsan_handle_dynamic_type_cache_miss(FAR void *data,
+                                            FAR void *ptr, FAR void *hash)
+{
+  ubsan_prologue_epilogue(data, "dynamic-type-cache-miss");
+}
