@@ -4,8 +4,9 @@ README.txt
 The kit i.MX93 Evaluation Kit has a pre-installed Linux image which contains
 u-boot and the i.MX93 reference Linux installation.
 
-u-boot is required to boot NuttX (for now) as it initializes the hardware for
-us, i.e. DDR, clocks, I/O muxes etc.
+NuttX may work as the bootloader, replacing u-boot completely. Currently it
+doesn't initialize the DDR memory yet. In other words, DDR training is still
+missing.
 
 ==========================================
 
@@ -13,7 +14,9 @@ How to run nuttx on i.MX93 Evaluation Kit.
 
 ==========================================
 
-Below is a set of instructions on how to run NuttX on the i.MX93 EVK
+Below is a set of instructions on how to run NuttX on the i.MX93 EVK, on top
+of the u-boot. Also, instructions on running NuttX as the bootloader will
+follow.
 
 ==========================================
 
@@ -76,11 +79,12 @@ Loading and running the NuttX image
 
 ==========================================
 
-You have three options:
+You have four options:
 
 1 - Load via u-boot from SD-card
 2 - Load via gdb
 3 - Load via JLink
+4 - Run from SD-card, without u-boot
 
 ==========================================
 
@@ -144,3 +148,22 @@ Option 3: load with JLink:
 3. Load nuttx. Note that JLink expects the .elf extension, the default build output of nuttx is just "nuttx" without the extension, so it must be added to the file...
 
     J-Link>LoadFile <path_to>/nuttx.elf
+
+==========================================
+
+Option 4: Run from SD-card, without u-boot
+
+==========================================
+
+1. Make sure CONFIG_IMX9_BOOTLOADER is set and system is configured properly for bootloader operation:
+
+  tools/configure.sh imx93-evk:bootloader
+
+2. The build outputs a file "imx9-sdimage.img". This image also contains the Ahab container. It's required to grant Trusted Resource Domain Controller (TRDC) permissions.
+   Flash it to an SD-card, where sdX may be sda or something else; verify the block device name properly (eg. /dev/sda, /dev/sdb etc):
+
+  sudo dd if=imx9-sdimage.img of=/dev/sdX bs=1k && sync
+
+3. Insert the SD-card into the imx93-evk, make sure BMODE switch is [1,2,3,4] = [Off, On, Off, Off] so that it boots from the SD-card.
+
+  This should boot into NuttShell in EL3 level.

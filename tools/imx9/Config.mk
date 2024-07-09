@@ -25,9 +25,50 @@
 # POSTBUILD -- Perform post build operations
 
 ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
+	MK_BASE_URL = https://raw.githubusercontent.com/nxp-imx/imx-mkimage/cbb99377cc2bb8f7cf213794c030e1c60423ef1f/src
+	BASE_PATH = $(TOPDIR)$(DELIM)tools$(DELIM)imx9$(DELIM)
+	FILE_1 = imx8qxb0.c
+	FILE_1_PATH = $(BASE_PATH)$(FILE_1)
+	FILE_2 = mkimage_common.h
+	FILE_2_PATH = $(BASE_PATH)$(FILE_2)
+	FILE_3 = mkimage_imx8.c
+	FILE_3_PATH = $(BASE_PATH)$(FILE_3)
+	FILE_EXE = $(BASE_PATH)mkimage_imx9
+	AHAB_BASE_URL = https://www.nxp.com/lgfiles/NMG/MAD/YOCTO
+	AHAB = firmware-ele-imx-0.1.1
+	AHAB_BINARY = $(AHAB).bin
+	AHAB_PATH = $(BASE_PATH)$(AHAB_BINARY)
+
+define DOWNLOAD_FILES
+	$(call DOWNLOAD,$(MK_BASE_URL),$(FILE_1),$(FILE_1_PATH))
+	$(call DOWNLOAD,$(MK_BASE_URL),$(FILE_2),$(FILE_2_PATH))
+	$(call DOWNLOAD,$(MK_BASE_URL),$(FILE_3),$(FILE_3_PATH))
+	$(call DOWNLOAD,$(AHAB_BASE_URL),$(AHAB_BINARY),$(AHAB_PATH))
+	$(Q) chmod a+x $(BASE_PATH)$(AHAB_BINARY)
+	$(Q) (cd $(BASE_PATH) && ./$(AHAB_BINARY) --auto-accept)
+endef
+
+ifeq ("$(wildcard $(FILE_EXE))","")
+	MKIMAGE_NOT_PRESENT = 1
+endif
+
 define POSTBUILD
 	$(Q) echo "Removing sections"
 	$(Q) $(OBJCOPY) -O binary -R .bss -R .initstack $(BIN) nuttx.bin
 	$(Q) ([ $$? -eq 0 ] && echo "Done.")
+
+	$(Q) echo "Constructing sd image"
+	$(Q) echo "#define MKIMAGE_COMMIT 0xcbb99377" > $(BASE_PATH)build_info.h
+
+	$(if $(MKIMAGE_NOT_PRESENT),$(call DOWNLOAD_FILES))
+
+	+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)imx9 -f Makefile.host
+	$(Q) tools$(DELIM)imx9$(DELIM)mkimage_imx9$(HOSTEXEEXT) -soc IMX9 -append $(BASE_PATH)$(AHAB)$(DELIM)mx93a1-ahab-container.img -c -ap nuttx.bin a55 0x2049a000 -out flash.bin 1>/dev/null 2>&1
+	$(Q) dd if=/dev/zero of=imx9-sdimage.img bs=1k count=32 1>/dev/null 2>&1
+	$(Q) cat flash.bin >> imx9-sdimage.img
+	$(Q) rm flash.bin
+	$(Q) echo "imx9-sdimage.img" >> nuttx.manifest
+	$(Q) echo "Created imx9-sdimage.img"
+	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)imx9 -f Makefile.host clean
 endef
 endif
