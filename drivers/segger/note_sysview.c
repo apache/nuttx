@@ -119,6 +119,9 @@ static const struct note_driver_ops_s g_note_sysview_ops =
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
   note_sysview_irqhandler,    /* irqhandler */
 #endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
+  NULL,                       /* wdog */
+#endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
   note_sysview_heap,          /* heap */
 #endif
