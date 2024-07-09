@@ -233,27 +233,14 @@ static void note_common(FAR struct tcb_s *tcb,
 
   /* Save all of the common fields */
 
-  note->nc_length = length;
-  note->nc_type   = type;
-
-  if (tcb == NULL)
-    {
-      note->nc_priority = CONFIG_INIT_PRIORITY;
+  note->nc_length       = length;
+  note->nc_type         = type;
+  note->nc_priority     = tcb->sched_priority;
 #ifdef CONFIG_SMP
-      note->nc_cpu = 0;
+  note->nc_cpu          = tcb->cpu;
 #endif
-      note->nc_pid = 0;
-    }
-  else
-    {
-      note->nc_priority = tcb->sched_priority;
-#ifdef CONFIG_SMP
-      note->nc_cpu      = tcb->cpu;
-#endif
-      note->nc_pid = tcb->pid;
-    }
-
-  note->nc_systime_sec = ts.tv_sec;
+  note->nc_pid          = tcb->pid;
+  note->nc_systime_sec  = ts.tv_sec;
   note->nc_systime_nsec = ts.tv_nsec;
 }
 
