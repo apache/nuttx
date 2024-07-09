@@ -27,153 +27,13 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_CAN_TXREADY
-#  include <nuttx/wqueue.h>
-#endif
-
-#include <nuttx/queue.h>
+#include <stdint.h>
 
 #ifdef CONFIG_NET_CAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Ioctl Commands ***********************************************************/
-
-/* Ioctl commands supported by the upper half CAN driver.
- *
- * CANIOC_RTR:
- *   Description:  Send the remote transmission request and wait for the
- *                 response.
- *   Argument:     A reference to struct canioc_rtr_s
- *
- * Ioctl commands that may or may not be supported by the lower half CAN
- * driver.
- *
- * CANIOC_ADD_STDFILTER:
- *   Description:    Add an address filter for a standard 11 bit address.
- *   Argument:       A reference to struct canioc_stdfilter_s
- *   Returned Value: A non-negative filter ID is returned on success.
- *                   Otherwise -1 (ERROR) is returned with the errno
- *                   variable set to indicate the nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_ADD_EXTFILTER:
- *   Description:    Add an address filter for a extended 29 bit address.
- *   Argument:       A reference to struct canioc_extfilter_s
- *   Returned Value: A non-negative filter ID is returned on success.
- *                   Otherwise -1 (ERROR) is returned with the errno
- *                   variable set to indicate the nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXTID=y
- *
- * CANIOC_DEL_STDFILTER:
- *   Description:    Remove an address filter for a standard 11 bit address.
- *   Argument:       The filter index previously returned by the
- *                   CANIOC_ADD_STDFILTER command
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_DEL_EXTFILTER:
- *   Description:    Remove an address filter for a standard 29 bit address.
- *   Argument:       The filter index previously returned by the
- *                   CANIOC_ADD_EXTFILTER command
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   Requires CONFIG_CAN_EXTID=y
- *
- * CANIOC_GET_BITTIMING:
- *   Description:    Return the current bit timing settings
- *   Argument:       A pointer to a write-able instance of struct
- *                   canioc_bittiming_s in which current bit timing values
- *                   will be returned.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_SET_BITTIMING:
- *   Description:    Set new current bit timing values
- *   Argument:       A pointer to a read-able instance of struct
- *                   canioc_bittiming_s in which the new bit timing values
- *                   are provided.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_GET_CONNMODES:
- *   Description:    Get the current bus connection modes
- *   Argument:       A pointer to a write-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes will be
- *                   returned.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_SET_CONNMODES:
- *   Description:    Set new bus connection modes values
- *   Argument:       A pointer to a read-able instance of struct
- *                   canioc_connmodes_s in which the new bus modes are
- *                   provided.
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- *
- * CANIOC_BUSOFF_RECOVERY:
- *   Description:    Initiates the BUS-OFF recovery sequence
- *   Argument:       None
- *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
- *                   is returned with the errno variable set to indicate the
- *                   nature of the error.
- *   Dependencies:   None
- */
-
-#define CANIOC_RTR                _CANIOC(1)
-#define CANIOC_GET_BITTIMING      _CANIOC(2)
-#define CANIOC_SET_BITTIMING      _CANIOC(3)
-#define CANIOC_ADD_STDFILTER      _CANIOC(4)
-#define CANIOC_ADD_EXTFILTER      _CANIOC(5)
-#define CANIOC_DEL_STDFILTER      _CANIOC(6)
-#define CANIOC_DEL_EXTFILTER      _CANIOC(7)
-#define CANIOC_GET_CONNMODES      _CANIOC(8)
-#define CANIOC_SET_CONNMODES      _CANIOC(9)
-#define CANIOC_BUSOFF_RECOVERY    _CANIOC(10)
-
-#define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 10             /* Ten common commands */
-
-/* User defined ioctl commands are also supported. These will be forwarded
- * by the upper-half CAN driver to the lower-half CAN driver via the
- * co_ioctl()  method fo the CAN lower-half interface.
- * However, the lower-half driver must reserve a block of commands as follows
- * in order prevent IOCTL command numbers from overlapping.
- *
- * This is generally done as follows.  The first reservation for CAN driver A
- * would look like:
- *
- *   CAN_A_FIRST                (CAN_FIRST + CAN_NCMDS) <- First command
- *   CAN_A_NCMDS                42                      <- Number of commands
- *
- * IOCTL commands for CAN driver A would then be defined in a CAN A header
- * file like:
- *
- *   CANIOC_A_CMD1       _CANIOC(CAN_A_FIRST+0)
- *   CANIOC_A_CMD2       _CANIOC(CAN_A_FIRST+1)
- *   CANIOC_A_CMD3       _CANIOC(CAN_A_FIRST+2)
- *   ...
- *   CANIOC_A_CMD42      _CANIOC(CAN_A_FIRST+41)
- *
- * The next reservation would look like:
- *
- *   CAN_B_FIRST           (CAN_A_FIRST + CAN_A_NCMDS) <- Next command
- *   CAN_B_NCMDS           77                          <- Number of commands
- */
 
 /* CAN payload length and DLC definitions according to ISO 11898-1 */
 
@@ -288,15 +148,6 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-typedef FAR void *CAN_HANDLE;
-
-struct can_response_s
-{
-  sq_entry_t flink;
-
-  /* Message-specific data may follow */
-}; /* FIXME remove */
 
 typedef uint32_t canid_t;
 
