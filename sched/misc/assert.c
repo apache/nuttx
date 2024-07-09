@@ -31,6 +31,7 @@
 #include <nuttx/cache.h>
 #include <nuttx/coredump.h>
 #include <nuttx/compiler.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/init.h>
 #include <nuttx/irq.h>
@@ -58,6 +59,7 @@
 #include "irq/irq.h"
 #include "sched/sched.h"
 #include "group/group.h"
+#include "coredump.h"
 
 /****************************************************************************
  * Pre-processor Definitions

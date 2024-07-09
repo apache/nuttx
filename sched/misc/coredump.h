@@ -1,7 +1,5 @@
 /****************************************************************************
- * include/nuttx/coredump.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * sched/misc/coredump.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,38 +18,41 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_COREDUMP_H
-#define __INCLUDE_NUTTX_COREDUMP_H
+#ifndef __SCHED_MISC_COREDUMP_H
+#define __SCHED_MISC_COREDUMP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/memoryregion.h>
-#include <unistd.h>
+#include <nuttx/coredump.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: coredump_set_memory_region
+ * Name: coredump_initialize
  *
  * Description:
- *   Set do coredump memory region.
+ *   Initialize the coredump facility.  Called once and only from
+ *   nx_start_application.
  *
  ****************************************************************************/
 
-int coredump_set_memory_region(FAR const struct memory_region_s *region);
+int coredump_initialize(void);
 
 /****************************************************************************
- * Name: coredump_add_memory_region
+ * Name: coredump_dump
  *
  * Description:
- *   Use coredump to dump the memory of the specified area.
+ *   Do coredump of the task specified by pid.
+ *
+ * Input Parameters:
+ *   pid - The task/thread ID of the thread to dump
  *
  ****************************************************************************/
 
-int coredump_add_memory_region(FAR const void *ptr, size_t size);
+void coredump_dump(pid_t pid);
 
-#endif /* __INCLUDE_NUTTX_COREDUMP_H */
+#endif /* __SCHED_MISC_COREDUMP_H */
