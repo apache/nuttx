@@ -33,6 +33,7 @@
 #include <sys/types.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/lib/modlib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,20 +68,8 @@ struct binary_s
 
   main_t entrypt;                      /* Entry point into a program module */
   FAR void *mapped;                    /* Memory-mapped, address space */
-#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-  FAR void **sectalloc;                /* All sections memory allocated */
-  uint16_t nsect;                      /* Number of sections */
-#endif
-  FAR void *alloc[BINFMT_NALLOC];      /* Allocated address spaces */
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-  /* Constructors/destructors */
-
-  FAR binfmt_ctor_t *ctors;            /* Pointer to a list of constructors */
-  FAR binfmt_dtor_t *dtors;            /* Pointer to a list of destructors */
-  uint16_t nctors;                     /* Number of constructors in the list */
-  uint16_t ndtors;                     /* Number of destructors in the list */
-#endif
+  struct module_s mod;                 /* Module context */
+  FAR void *picbase;                   /* Position-independent */
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Address environment.

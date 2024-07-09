@@ -57,7 +57,6 @@ endif
 # Add configured binary modules
 
 include libnxflat/Make.defs
-include libelf/Make.defs
 
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 

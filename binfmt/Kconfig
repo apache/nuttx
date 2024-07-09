@@ -51,12 +51,17 @@ config ELF
 	default n
 	select BINFMT_LOADABLE
 	select LIBC_ARCH_ELF
+	select LIBC_MODLIB
 	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 	---help---
 		Enable support for the ELF binary format.  Default: n
 
 if ELF
-source "binfmt/libelf/Kconfig"
+config ELF_STACKSIZE
+	int "ELF Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+	---help---
+		This is the default stack size that will be used when starting ELF binaries.
 endif
 endif
 

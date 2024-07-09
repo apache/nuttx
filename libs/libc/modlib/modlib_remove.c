@@ -107,8 +107,6 @@ int modlib_uninit(FAR struct module_s *modp)
       if (!modp->dynamic)
         {
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-          int i;
-
           for (i = 0; i < modp->nsect && modp->sectalloc[i] != NULL; i++)
             {
 #  ifdef CONFIG_ARCH_USE_TEXT_HEAP

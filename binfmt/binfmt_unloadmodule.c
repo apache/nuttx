@@ -45,61 +45,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: exec_dtors
- *
- * Description:
- *   Execute C++ static destructors.
- *
- * Input Parameters:
- *   binp - Load state information
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-static inline int exec_dtors(FAR struct binary_s *binp)
-{
-  binfmt_dtor_t *dtor = binp->dtors;
-#ifdef CONFIG_ARCH_ADDRENV
-  int ret;
-#endif
-  int i;
-
-  /* Instantiate the address environment containing the destructors */
-
-#ifdef CONFIG_ARCH_ADDRENV
-  ret = addrenv_select(binp->addrenv, &binp->oldenv);
-  if (ret < 0)
-    {
-      berr("ERROR: addrenv_select() failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  /* Execute each destructor */
-
-  for (i = 0; i < binp->ndtors; i++)
-    {
-      binfo("Calling dtor %d at %p\n", i, dtor);
-
-      (*dtor)();
-      dtor++;
-    }
-
-  /* Restore the address environment */
-
-#ifdef CONFIG_ARCH_ADDRENV
-  return addrenv_restore(binp->oldenv);
-#else
-  return OK;
-#endif
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -125,7 +70,6 @@ static inline int exec_dtors(FAR struct binary_s *binp)
 int unload_module(FAR struct binary_s *binp)
 {
   int ret;
-  int i;
 
   if (binp)
     {
@@ -141,17 +85,6 @@ int unload_module(FAR struct binary_s *binp)
             }
         }
 
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-      /* Execute C++ destructors */
-
-      ret = exec_dtors(binp);
-      if (ret < 0)
-        {
-          berr("exec_ctors() failed: %d\n", ret);
-          return ret;
-        }
-#endif
-
       /* Unmap mapped address spaces */
 
       if (binp->mapped)
@@ -159,60 +92,6 @@ int unload_module(FAR struct binary_s *binp)
           binfo("Unmapping address space: %p\n", binp->mapped);
 
           file_munmap(binp->mapped, binp->mapsize);
-        }
-
-#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-      for (i = 0; binp->sectalloc[i] != NULL && i < binp->nsect; i++)
-        {
-#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
-          if (up_textheap_heapmember(binp->sectalloc[i]))
-            {
-              up_textheap_free(binp->sectalloc[i]);
-            }
-          else
-#  endif
-
-#  ifdef CONFIG_ARCH_USE_DATA_HEAP
-          if (up_dataheap_heapmember(binp->sectalloc[i]))
-            {
-              up_dataheap_free(binp->sectalloc[i]);
-            }
-          else
-#  endif
-            {
-              kumm_free(binp->sectalloc[i]);
-            }
-        }
-
-      binp->alloc[0] = NULL;
-      binp->alloc[1] = NULL;
-#endif
-
-      /* Free allocated address spaces */
-
-      for (i = 0; i < BINFMT_NALLOC; i++)
-        {
-          if (binp->alloc[i])
-            {
-              binfo("Freeing alloc[%d]: %p\n", i, binp->alloc[i]);
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-              if (i == 0)
-                {
-                  up_textheap_free(binp->alloc[i]);
-                }
-              else
-#endif
-#if defined(CONFIG_ARCH_USE_DATA_HEAP)
-              if (i == 1)
-                {
-                  up_dataheap_free(binp->alloc[i]);
-                }
-              else
-#endif
-                {
-                  kumm_free(binp->alloc[i]);
-                }
-            }
         }
 
       /* Notice that the address environment is not destroyed.  This should
