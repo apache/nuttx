@@ -1086,8 +1086,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       break;
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
-    case NOTE_ALLOC:
-    case NOTE_FREE:
+    case NOTE_HEAP_ALLOC:
+    case NOTE_HEAP_FREE:
       {
         FAR struct note_heap_s *nmm = (FAR struct note_heap_s *)p;
         FAR struct noteram_dump_task_context_s *tctx;
@@ -1100,7 +1100,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         tctx = noteram_dump_find_task_context(ctx, pid);
         if (tctx != NULL)
           {
-            tctx->mm_used += note->nc_type == NOTE_FREE ?
+            tctx->mm_used += note->nc_type == NOTE_HEAP_FREE ?
                              -nmm->size : nmm->size;
             used = tctx->mm_used;
           }
@@ -1108,7 +1108,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         ret += noteram_dump_header(s, &nmm->nmm_cmn, ctx);
         ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%d|%s"
                            ": heap: %p size:%" PRIiPTR ", address: %p\n",
-                           pid, used, name[note->nc_type - NOTE_ALLOC],
+                           pid, used, name[note->nc_type - NOTE_HEAP_ALLOC],
                            nmm->heap, nmm->size, nmm->mem);
       }
       break;

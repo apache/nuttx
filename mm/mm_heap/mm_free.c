@@ -128,7 +128,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
   /* Update heap statistics */
 
   heap->mm_curused -= nodesize;
-  sched_note_heap(false, heap, mem, nodesize);
+  sched_note_heap(NOTE_HEAP_FREE, heap, mem, nodesize);
 
   /* Check if the following node is free and, if so, merge it */
 
