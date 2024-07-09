@@ -2068,18 +2068,39 @@ static int fdcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
 
           DEBUGASSERT(bt != NULL);
 
-          regval        = fdcan_getreg(priv, STM32_FDCAN_NBTP_OFFSET);
-          bt->bt_sjw   = ((regval & FDCAN_NBTP_NSJW_MASK) >>
-                          FDCAN_NBTP_NSJW_SHIFT) + 1;
-          bt->bt_tseg1 = ((regval & FDCAN_NBTP_NTSEG1_MASK) >>
-                          FDCAN_NBTP_NTSEG1_SHIFT) + 1;
-          bt->bt_tseg2 = ((regval & FDCAN_NBTP_NTSEG2_MASK) >>
-                          FDCAN_NBTP_NTSEG2_SHIFT) + 1;
+#ifdef CONFIG_CAN_FD
+          if (bt->type == CAN_BITTIMING_DATA)
+            {
+              regval        = fdcan_getreg(priv, STM32_FDCAN_DBTP_OFFSET);
+              bt->bt_sjw   = ((regval & FDCAN_DBTP_DSJW_MASK) >>
+                              FDCAN_DBTP_DSJW_SHIFT) + 1;
+              bt->bt_tseg1 = ((regval & FDCAN_DBTP_DTSEG1_MASK) >>
+                              FDCAN_DBTP_DTSEG1_SHIFT) + 1;
+              bt->bt_tseg2 = ((regval & FDCAN_DBTP_DTSEG2_MASK) >>
+                              FDCAN_DBTP_DTSEG2_SHIFT) + 1;
 
-          nbrp          = ((regval & FDCAN_NBTP_NBRP_MASK) >>
-                          FDCAN_NBTP_NBRP_SHIFT) + 1;
-          bt->bt_baud   = STM32_FDCANCLK_FREQUENCY / nbrp /
-                         (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+              nbrp          = ((regval & FDCAN_DBTP_DBRP_MASK) >>
+                              FDCAN_DBTP_DBRP_SHIFT) + 1;
+              bt->bt_baud   = STM32_FDCANCLK_FREQUENCY / nbrp /
+                            (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+            }
+          else
+#endif
+            {
+              regval        = fdcan_getreg(priv, STM32_FDCAN_NBTP_OFFSET);
+              bt->bt_sjw   = ((regval & FDCAN_NBTP_NSJW_MASK) >>
+                              FDCAN_NBTP_NSJW_SHIFT) + 1;
+              bt->bt_tseg1 = ((regval & FDCAN_NBTP_NTSEG1_MASK) >>
+                              FDCAN_NBTP_NTSEG1_SHIFT) + 1;
+              bt->bt_tseg2 = ((regval & FDCAN_NBTP_NTSEG2_MASK) >>
+                              FDCAN_NBTP_NTSEG2_SHIFT) + 1;
+
+              nbrp          = ((regval & FDCAN_NBTP_NBRP_MASK) >>
+                              FDCAN_NBTP_NBRP_SHIFT) + 1;
+              bt->bt_baud   = STM32_FDCANCLK_FREQUENCY / nbrp /
+                            (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+            }
+
           ret = OK;
         }
         break;
@@ -2130,8 +2151,22 @@ static int fdcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
 
           /* Save the value of the new bit timing register */
 
-          priv->nbtp = FDCAN_NBTP_NBRP(nbrp) | FDCAN_NBTP_NTSEG1(ntseg1) |
-                      FDCAN_NBTP_NTSEG2(ntseg2) | FDCAN_NBTP_NSJW(nsjw);
+#ifdef CONFIG_CAN_FD
+          if (bt->type == CAN_BITTIMING_DATA)
+            {
+              priv->dbtp = FDCAN_NBTP_DBRP(nbrp) |
+                           FDCAN_NBTP_DTSEG1(ntseg1) |
+                           FDCAN_DBTP_DTSEG2(ntseg2) |
+                           FDCAN_DBTP_DSJW(nsjw);
+            }
+          else
+#endif
+            {
+              priv->nbtp = FDCAN_NBTP_NBRP(nbrp) |
+                           FDCAN_NBTP_NTSEG1(ntseg1) |
+                           FDCAN_NBTP_NTSEG2(ntseg2) |
+                           FDCAN_NBTP_NSJW(nsjw);
+            }
 
           /* We need to reset to instantiate the new timing.  Save
            * current state information so that recover to this
