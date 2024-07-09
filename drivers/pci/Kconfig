@@ -90,5 +90,10 @@ config PCI_QEMU_EPC
 	---help---
 		Enable qemu ep controller
 
+config PCI_EPF_TEST
+	bool "PCI epf test"
+	---help---
+		pci epf test driver
+
 endif # PCI_ENDPOINT
 
