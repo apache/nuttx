@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/pci/pci_drivers.h
+ * include/nuttx/pci/pci_ep_test.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,65 +18,28 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_PCI_PCI_DRIVERS_H
-#define __DRIVERS_PCI_PCI_DRIVERS_H
+#ifndef __INCLUDE_NUTTX_PCI_EP_TEST_H
+#define __INCLUDE_NUTTX_PCI_EP_TEST_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pci_ivshmem_register
- *
- * Description:
- *   Register common pci ivshmem driver
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PCI_IVSHMEM
-int pci_ivshmem_register(void);
-#endif
-
-/****************************************************************************
- * Name: pci_register_uio_ivshmem_driver
- *
- * Description:
- *   Register uio ivshmem device pci driver
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PCI_UIO_IVSHMEM
-int pci_register_uio_ivshmem_driver(void);
-#endif
-
-#ifdef CONFIG_PCI_QEMU_EPC
-/****************************************************************************
- * Name: pci_register_qemu_epc_driver
- *
- * Description:
- *   Register a pci epc driver
- *
- ****************************************************************************/
-
-int pci_register_qemu_epc_driver(void);
-#endif
-
-/****************************************************************************
- * Name: pci_register_epf_test_driver
- *
- * Description:
- *  Init a epf test driver
- *
+ * Public Types
  ****************************************************************************/
 
 #ifdef CONFIG_PCI_EPF_TEST
-int pci_register_epf_test_driver(void);
+
+/****************************************************************************
+ * Name: pci_register_epf_test_device
+ *
+ * Description:
+ *  Init a epf device test
+ *
+ ****************************************************************************/
+
+int pci_register_epf_test_device(FAR const char *epc_name);
 #endif
 
-#endif /* __DRIVERS_PCI_PCI_DRIVERS_H */
+#endif /* __INCLUDE_NUTTX_PCI_EP_TEST_H */
