@@ -41,7 +41,7 @@
  *
  ****************************************************************************/
 
-void sim_copyfullstate(unsigned long *dest, unsigned long *src)
+void sim_copyfullstate(xcpt_reg_t *dest, xcpt_reg_t *src)
 {
   int i;
 

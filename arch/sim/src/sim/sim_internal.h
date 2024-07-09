@@ -180,6 +180,7 @@
  ****************************************************************************/
 
 typedef int pid_t;
+typedef size_t xcpt_reg_t;
 
 /****************************************************************************
  * Public Type Definitions
@@ -203,7 +204,7 @@ extern char **g_argv;
 
 /* Context switching */
 
-void sim_copyfullstate(unsigned long *dest, unsigned long *src);
+void sim_copyfullstate(xcpt_reg_t *dest, xcpt_reg_t *src);
 void *sim_doirq(int irq, void *regs);
 
 /* sim_hostmisc.c ***********************************************************/
