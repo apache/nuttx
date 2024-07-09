@@ -63,45 +63,45 @@
 
 #define SENSOR_TYPE_MAGNETIC_FIELD                  2
 
+/* Ultraviolet light sensor
+ * This sensor can identify the UV index in ambient light help people
+ * to effectively protect themselves from sunburns, cancer or eye damage.
+ * This value range is 0 - 15.
+ */
+#define SENSOR_TYPE_ULTRAVIOLET                     3
+
 /* Gyroscope
  * All values are in radians/second and measure the rate of rotation around
  * the X, Y and Z axis.
  */
 
-#define SENSOR_TYPE_GYROSCOPE                       3
+#define SENSOR_TYPE_GYROSCOPE                       4
 
 /* Ambient Light
  * The ambient light sensor value is returned in SI units lux.
  */
 
-#define SENSOR_TYPE_LIGHT                           4
+#define SENSOR_TYPE_LIGHT                           5
 
 /* Barometer
  * All values are in hectopascal (hPa) and measure the athmospheric pressure.
  * You can calculate altitude by perssure.
  */
 
-#define SENSOR_TYPE_BAROMETER                       5
+#define SENSOR_TYPE_BAROMETER                       6
+
+/* Noise Loudness
+ * A sensor of this type returns the loudness of noise in SI units (db)
+ */
+
+#define SENSOR_TYPE_NOISE                           7
 
 /* Proximity
  * The values correspond to the distance to the nearest
  * object in centimeters.
  */
 
-#define SENSOR_TYPE_PROXIMITY                       6
-
-/* Relative Humidity
- * A relative humidity sensor measure relative ambient air humidity and
- * return a value in percent.
- */
-
-#define SENSOR_TYPE_RELATIVE_HUMIDITY               7
-
-/* Ambient Temperature
- * The ambient (room) temperature in degree Celsius
- */
-
-#define SENSOR_TYPE_AMBIENT_TEMPERATURE             8
+#define SENSOR_TYPE_PROXIMITY                       8
 
 /* RGB
  * We use these values of RGB to weighted to obtain the color of LED.
@@ -124,18 +124,18 @@
 
 #define SENSOR_TYPE_IR                              11
 
-/* Ultraviolet light sensor
- * This sensor can identify the UV index in ambient light help people
- * to effectively protect themselves from sunburns, cancer or eye damage.
- * This value range is 0 - 15.
- */
-#define SENSOR_TYPE_ULTRAVIOLET                     12
-
-/* Noise Loudness
- * A sensor of this type returns the loudness of noise in SI units (db)
+/* Relative Humidity
+ * A relative humidity sensor measure relative ambient air humidity and
+ * return a value in percent.
  */
 
-#define SENSOR_TYPE_NOISE                           13
+#define SENSOR_TYPE_RELATIVE_HUMIDITY               12
+
+/* Ambient Temperature
+ * The ambient (room) temperature in degree Celsius
+ */
+
+#define SENSOR_TYPE_AMBIENT_TEMPERATURE             13
 
 /* PM25
  * A sensor of this type returns the content of pm2.5 in the air
@@ -188,27 +188,28 @@
 
 #define SENSOR_TYPE_PH                              20
 
-/* Dust
- * A sensor of this type returns the content of dust in the air
- * values is in ug/m^3.
- */
-
-#define SENSOR_TYPE_DUST                            21
-
 /* Heart Rate
  * A sensor of this type returns the current heart rate.
  * Current heart rate is in beats per minute (BPM).
  */
 
-#define SENSOR_TYPE_HEART_RATE                      22
+#define SENSOR_TYPE_HEART_RATE                      21
 
-/* Heart Beat
- * A sensor of this type returns an event evetytime
- * a hear beat peek is detected. Peak here ideally corresponds
- * to the positive peak in the QRS complex of and ECG signal.
+/* Dust
+ * A sensor of this type returns the content of dust in the air
+ * values is in ug/m^3.
  */
 
-#define SENSOR_TYPE_HEART_BEAT                      23
+#define SENSOR_TYPE_DUST                            22
+
+/* Wake gesture
+ * A sensor enabling waking up the device based on a device specific
+ * motion. 0: the device should sleep, 1: the device should wake up.
+ * Other values ​​are uncalibrated values ​​reported by the driver to
+ * uncalibrated topics.
+ */
+
+#define SENSOR_TYPE_WAKE_GESTURE                    23
 
 /* ECG (Electrocardiogram)
  * A sensor of this type returns the ECG voltage in μV. Sensors may amplify
@@ -257,14 +258,12 @@
 
 #define SENSOR_TYPE_OTS                             28
 
-/* Wake gesture
- * A sensor enabling waking up the device based on a device specific
- * motion. 0: the device should sleep, 1: the device should wake up.
- * Other values ​​are uncalibrated values ​​reported by the driver to
- * uncalibrated topics.
+/* Gas sensor
+ * This sensor measures the gas resistance, indicating the presence
+ * of volatile organic compounds in the air.
  */
 
-#define SENSOR_TYPE_WAKE_GESTURE                    29
+#define SENSOR_TYPE_GAS                             29
 
 /* CAP (Capacitive proximity sensor)
  * The purpose of the proximity sensing interface is to detect when a
@@ -274,12 +273,13 @@
 
 #define SENSOR_TYPE_CAP                             30
 
-/* Gas sensor
- * This sensor measures the gas resistance, indicating the presence
- * of volatile organic compounds in the air.
+/* Heart Beat
+ * A sensor of this type returns an event evetytime
+ * a hear beat peek is detected. Peak here ideally corresponds
+ * to the positive peak in the QRS complex of and ECG signal.
  */
 
-#define SENSOR_TYPE_GAS                             31
+#define SENSOR_TYPE_HEART_BEAT                      31
 
 /* Force
  * A sensor of this type measures the force on it, and additionally
