@@ -1290,7 +1290,7 @@ config SCHED_INSTRUMENTATION_HEAP
 	---help---
 		Enables additional hooks for heap allocation.
 
-			void sched_note_heap(bool alloc, FAR void* heap, FAR void *mem, size_t size)
+			void sched_note_heap(uint8_t event, FAR void* heap, FAR void *mem, size_t size);
 
 config SCHED_INSTRUMENTATION_DUMP
 	bool "Use note dump for instrumentation"
