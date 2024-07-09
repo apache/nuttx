@@ -24,10 +24,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/binfmt/binfmt.h>
-#include <nuttx/coredump.h>
 #include <syslog.h>
 #include <debug.h>
+
+#include "coredump.h"
 
 /****************************************************************************
  * Private Data
