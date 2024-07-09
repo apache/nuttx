@@ -118,24 +118,6 @@ class Nxsetregs(gdb.Command):
             i += 1
 
 
-def get_pc_value(tcb):
-    arch = gdb.selected_frame().architecture()
-    tcbinfo = gdb.parse_and_eval("g_tcbinfo")
-
-    i = 0
-    for reg in arch.registers():
-        if reg.name == "pc" or reg.name == "rip" or reg.name == "eip":
-            break
-        i += 1
-
-    regs = tcb["xcp"]["regs"].cast(gdb.lookup_type("char").pointer())
-    value = gdb.Value(regs + tcbinfo["reg_off"]["p"][i]).cast(
-        gdb.lookup_type("uintptr_t").pointer()
-    )[0]
-
-    return int(value)
-
-
 class Nxinfothreads(gdb.Command):
     def __init__(self):
         super(Nxinfothreads, self).__init__("info threads", gdb.COMMAND_USER)
@@ -162,10 +144,10 @@ class Nxinfothreads(gdb.Command):
 
             if pidhash[i]["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING"):
                 index = "*%s" % i
-                pc = int(gdb.parse_and_eval("$pc"))
+                pc = utils.get_register_byname(utils.get_arch_pc_name(), tcb=None)
             else:
                 index = " %s" % i
-                pc = get_pc_value(pidhash[i])
+                pc = utils.get_register_byname(utils.get_arch_pc_name(), tcb=pidhash[i])
 
             thread = "Thread 0x%x" % pidhash[i]
 
