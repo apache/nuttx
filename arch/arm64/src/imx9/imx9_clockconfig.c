@@ -67,6 +67,11 @@ static int pll_init(uintptr_t reg, bool frac, struct pll_parms_s *parm)
 {
   uint32_t val;
 
+  if (!frac)
+    {
+      modifyreg32(PLL_CLR(PLL_CTRL(reg)), 0, PLL_CTRL_HW_CTRL_SEL);
+    }
+
   /* Bypass and disable PLL */
 
   putreg32(PLL_CTRL_CLKMUX_BYPASS, PLL_SET(PLL_CTRL(reg)));
@@ -80,14 +85,15 @@ static int pll_init(uintptr_t reg, bool frac, struct pll_parms_s *parm)
 
   putreg32(val, PLL_DIV(reg));
 
-  /* Disable spread spectrum */
-
-  putreg32(PLL_SPREAD_SPECTRUM_ENABLE, PLL_CLR(PLL_SPREAD_SPECTRUM(reg)));
-
   /* Set the fractional parts */
 
   if (frac)
     {
+      /* Disable spread spectrum */
+
+      putreg32(PLL_SPREAD_SPECTRUM_ENABLE,
+               PLL_CLR(PLL_SPREAD_SPECTRUM(reg)));
+
       putreg32(PLL_NUMERATOR_MFN(parm->mfn), PLL_NUMERATOR(reg));
       putreg32(PLL_DENOMINATOR_MFD(parm->mfd), PLL_DENOMINATOR(reg));
     }
@@ -108,6 +114,7 @@ static int pll_init(uintptr_t reg, bool frac, struct pll_parms_s *parm)
   return OK;
 }
 
+#ifdef CONFIG_IMX9_CFG_PLLS
 static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms_s *pfdparm)
 {
   uint32_t ctrl;
@@ -175,6 +182,7 @@ static int pll_pfd_init(uintptr_t reg, int pfd, struct pfd_parms_s *pfdparm)
 
   return OK;
 }
+#endif /* CONFIG_IMX9_CFG_PLLS */
 #endif
 
 static uint32_t calculate_vco_freq(const struct pll_parms_s *parm, bool frac)
@@ -353,6 +361,34 @@ static uint32_t pll_pfd_freq_out(uintptr_t reg, int pfd, int div2)
 }
 
 /****************************************************************************
+ * Name: imx9_ccm_dram_disable_bypass
+ *
+ * Description:
+ *   Disable clock bypass
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *>
+ ****************************************************************************/
+
+#ifdef CONFIG_IMX9_BOOTLOADER
+static void imx9_dram_disable_bypass(void)
+{
+  /* Set DRAM APB to 133Mhz */
+
+  imx9_ccm_configure_root_clock(CCM_DRAM_APB_CLK_ROOT, SYS_PLL1PFD1DIV2, 3);
+
+  /* Switch from DRAM clock root from CCM to PLL */
+
+  imx9_ccm_shared_gpr_set(CCM_SHARED_GPR_DRAM_CLK,
+                          CCM_SHARED_GPR_DRAM_CLK_SEL_PLL);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -369,16 +405,26 @@ static uint32_t pll_pfd_freq_out(uintptr_t reg, int pfd, int div2)
 void imx9_clockconfig(void)
 {
 #ifdef CONFIG_IMX9_BOOTLOADER
+  struct imx9_pll_cfg_s pll_arm    = ARMPLL_CFG;
+  struct imx9_pll_cfg_s pll_ddr    = DRAMPLL_CFG;
+#ifdef CONFIG_IMX9_CFG_PLLS
   struct imx9_pll_cfg_s pll_cfgs[] = PLL_CFGS;
   struct imx9_pfd_cfg_s pfd_cfgs[] = PFD_CFGS;
-  struct imx9_pll_cfg_s pll_arm    = ARMPLL_CFG;
   int i;
+#endif
 
   /* Set the CPU clock */
 
   putreg32(CCM_GPR_A55_CLK_SEL_PLL, IMX9_CCM_GPR_SH_CLR(CCM_SHARED_A55_CLK));
   pll_init(pll_arm.reg, pll_arm.frac, &pll_arm.parms);
   putreg32(CCM_GPR_A55_CLK_SEL_PLL, IMX9_CCM_GPR_SH_SET(CCM_SHARED_A55_CLK));
+
+  /* DRAM clk to 933 MHz */
+
+  pll_init(pll_ddr.reg, pll_ddr.frac, &pll_ddr.parms);
+  imx9_dram_disable_bypass();
+
+#ifdef CONFIG_IMX9_CFG_PLLS
 
   /* Run the PLL configuration */
 
@@ -396,6 +442,7 @@ void imx9_clockconfig(void)
       pll_pfd_init(cfg->reg, cfg->pfd, &cfg->parms);
     }
 #endif
+#endif /* CONFIG_IMX9_BOOTLOADER */
 }
 
 /****************************************************************************
