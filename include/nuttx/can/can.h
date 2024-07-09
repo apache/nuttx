@@ -438,6 +438,11 @@
 #define CAN_FILTER_DUAL           1  /* Dual address match */
 #define CAN_FILTER_RANGE          2  /* Match a range of addresses */
 
+/* CAN bit timing support ***************************************************/
+
+#define CAN_BITTIMING_NOMINAL     0  /* Specifies nominal bittiming */
+#define CAN_BITTIMING_DATA        1  /* Specifies data bittiming */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -713,6 +718,13 @@ struct canioc_rtr_s
 
 struct canioc_bittiming_s
 {
+#ifdef CONFIG_CAN_FD
+  uint8_t               type;            /* Nominal/Data bit timing. This is
+                                          * used to specify which bit timing
+                                          * should be set/obtained. Applies
+                                          * only if CAN FD is configured.
+                                          */
+#endif
   uint32_t              bt_baud;         /* Bit rate = 1 / bit time */
   uint8_t               bt_tseg1;        /* TSEG1 in time quanta */
   uint8_t               bt_tseg2;        /* TSEG2 in time quanta */
