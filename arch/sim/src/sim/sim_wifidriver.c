@@ -1586,19 +1586,21 @@ static int wifidriver_set_mode(struct sim_netdev_s *wifidev,
           */
 
           int num;
-          int network_id = 0;
 
           num = wpa_get_network_num(wifidev);
           if (num < 1)
             {
-              network_id = wpa_add_network(wifidev);
+              ret = wpa_add_network(wifidev);
             }
           else
             {
-              network_id = wpa_get_last_network_id(wifidev, num);
+              ret = wpa_get_last_network_id(wifidev, num);
             }
 
-          wifidev->network_id = network_id;
+          if (ret >= 0)
+            {
+              wifidev->network_id = ret;
+            }
         }
       break;
     case IW_MODE_MASTER:
