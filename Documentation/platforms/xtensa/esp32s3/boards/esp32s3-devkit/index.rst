@@ -436,6 +436,13 @@ To test it, just execute the ``pwm`` application::
     pwm_main: starting output with frequency: 10000 duty: 00008000
     pwm_main: stopping output
 
+qemu_debug
+----------
+
+A configuration tailored for the `Espressif fork of QEMU`_.
+
+.. _Espressif fork of QEMU: https://github.com/espressif/qemu
+
 random
 ------
 
