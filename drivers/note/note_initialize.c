@@ -52,11 +52,11 @@
 
 int note_early_initialize(void)
 {
-  int ret = 0;
+  int ret = OK;
 
 #ifdef CONFIG_SEGGER_SYSVIEW
   ret = note_sysview_initialize();
-  if (ret < 0)
+  if (ret != OK)
     {
       serr("note_sysview_initialize failed %d\n", ret);
       return ret;
@@ -65,7 +65,7 @@ int note_early_initialize(void)
 
 #ifdef CONFIG_DRIVERS_NOTESNAP
   ret = notesnap_register();
-  if (ret < 0)
+  if (ret != OK)
     {
       serr("notesnap_register failed %d\n", ret);
       return ret;
@@ -92,11 +92,11 @@ int note_early_initialize(void)
 
 int note_initialize(void)
 {
-  int ret = 0;
+  int ret = OK;
 
 #ifdef CONFIG_DRIVERS_NOTERAM
   ret = noteram_register();
-  if (ret < 0)
+  if (ret != OK)
     {
       serr("noteram_register failed %d\n", ret);
       return ret;
@@ -105,7 +105,7 @@ int note_initialize(void)
 
 #ifdef CONFIG_NOTE_RTT
   ret = notertt_register();
-  if (ret < 0)
+  if (ret != OK)
     {
       serr("notertt_register failed %d\n", ret);
       return ret;
@@ -114,7 +114,7 @@ int note_initialize(void)
 
 #ifdef CONFIG_DRIVERS_NOTECTL
   ret = notectl_register();
-  if (ret < 0)
+  if (ret != OK)
     {
       serr("notectl_register failed %d\n", ret);
       return ret;
