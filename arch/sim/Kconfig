@@ -351,7 +351,10 @@ menu "Simulated v4l2m2m support"
 config SIM_VIDEO_DECODER
 	bool "Video decoder support on sim"
 	depends on VIDEO
+	depends on VIDEOUTILS_OPENH264
 	default n
+	---help---
+		v4l2m2m simlator decoder, dependent on videoutils_openh264.
 
 config SIM_VIDEO_DECODER_DEV_PATH
 	string "Video decoder device path"
@@ -361,7 +364,10 @@ config SIM_VIDEO_DECODER_DEV_PATH
 config SIM_VIDEO_ENCODER
 	bool "Video encoder support on sim"
 	depends on VIDEO
+	depends on VIDEOUTILS_LIBX264
 	default n
+	---help---
+		v4l2m2m simlator encoder, dependent on videoutils_libx264.
 
 config SIM_VIDEO_ENCODER_DEV_PATH
 	string "Video encoder device path"
