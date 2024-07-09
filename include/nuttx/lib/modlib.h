@@ -563,6 +563,40 @@ int modlib_registry_foreach(mod_callback_t callback, FAR void *arg);
 void modlib_freesymtab(FAR struct module_s *modp);
 
 /****************************************************************************
+ * Name: modlib_dumploadinfo
+ *
+ * Description:
+ *  Dump the load information to debug output.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_BINFMT_INFO
+void modlib_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo);
+#else
+#  define modlib_dumploadinfo(i)
+#endif
+
+/****************************************************************************
+ * Name: modlib_dumpmodule
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_BINFMT_INFO
+void modlib_dumpmodule(FAR struct module_s *modp);
+#else
+#  define modlib_dumpmodule(m)
+#endif
+
+/****************************************************************************
+ * Name: elf_dumpentrypt
+ ****************************************************************************/
+
+#ifdef CONFIG_MODLIB_DUMPBUFFER
+void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo);
+#else
+#  define modlib_dumpentrypt(l)
+#endif
+
+/****************************************************************************
  * Name: modlib_insert
  *
  * Description:
