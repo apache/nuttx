@@ -1355,7 +1355,8 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
-void sched_note_heap(bool alloc, FAR void *heap, FAR void *mem, size_t size)
+void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
+                     size_t size)
 {
   FAR struct note_driver_s **driver;
   struct note_heap_s note;
@@ -1371,7 +1372,7 @@ void sched_note_heap(bool alloc, FAR void *heap, FAR void *mem, size_t size)
 
   for (driver = g_note_drivers; *driver; driver++)
     {
-      if (note_heap(*driver, alloc, heap, mem, size))
+      if (note_heap(*driver, event, heap, mem, size))
         {
           continue;
         }
@@ -1383,9 +1384,8 @@ void sched_note_heap(bool alloc, FAR void *heap, FAR void *mem, size_t size)
 
       if (!formatted)
         {
-          enum note_type_e type = alloc ? NOTE_ALLOC : NOTE_FREE;
           formatted = true;
-          note_common(tcb, &note.nmm_cmn, sizeof(note), type);
+          note_common(tcb, &note.nmm_cmn, sizeof(note), event);
           note.heap = heap;
           note.mem = mem;
           note.size = size;
