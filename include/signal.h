@@ -264,8 +264,10 @@
 #define SIGEV_NONE      0 /* No asynchronous notification is delivered */
 #define SIGEV_SIGNAL    1 /* Notify via signal,with an application-defined value */
 #ifdef CONFIG_SIG_EVTHREAD
-#  define SIGEV_THREAD  3 /* A notification function is called */
+#  define SIGEV_THREAD  2 /* A notification function is called */
 #endif
+
+#define SIGEV_THREAD_ID 4 /* Notify a specific thread via signal. */
 
 /* sigaltstack stack size */
 
@@ -345,6 +347,8 @@ struct sigevent
   sigev_notify_function_t sigev_notify_function;      /* Notification function */
   FAR struct pthread_attr_s *sigev_notify_attributes; /* Notification attributes (not used) */
 #endif
+
+  pid_t        sigev_notify_thread_id; /* ID of thread to signal */
 };
 
 /* The following types is used to pass parameters to/from signal handlers */
