@@ -92,7 +92,7 @@ struct note_driver_ops_s
                           FAR void *handler, bool enter);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
-  CODE void (*heap)(FAR struct note_driver_s *drv, bool alloc,
+  CODE void (*heap)(FAR struct note_driver_s *drv, uint8_t event,
                     FAR void *heap, FAR void *mem, size_t size);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP

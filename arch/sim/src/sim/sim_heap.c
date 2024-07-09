@@ -186,7 +186,7 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
       int size = host_mallocsize(mem);
       atomic_fetch_sub(&heap->aordblks, 1);
       atomic_fetch_sub(&heap->uordblks, size);
-      sched_note_heap(false, heap, mem, size);
+      sched_note_heap(NOTE_HEAP_FREE, heap, mem, size);
       host_free(mem);
     }
 }
@@ -388,10 +388,10 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
     {
       if (oldmem != NULL)
         {
-          sched_note_heap(false, heap, oldmem, oldsize);
+          sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize);
         }
 
-      sched_note_heap(true, heap, mem, newsize);
+      sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, newsize);
     }
 
   do
@@ -483,7 +483,7 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
     }
 
   size = host_mallocsize(mem);
-  sched_note_heap(true, heap, mem, size);
+  sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, size);
   atomic_fetch_add(&heap->aordblks, 1);
   atomic_fetch_add(&heap->uordblks, size);
   usmblks = atomic_load(&heap->usmblks);
