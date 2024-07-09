@@ -3264,21 +3264,21 @@ config SAMV7_MCAN0_PROPSEG
 
 config SAMV7_MCAN0_PHASESEG1
 	int "MCAN0 PhaseSeg1"
-	default 11
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN0_PHASESEG2
 	int "MCAN0 PhaseSeg2"
-	default 11
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN0_FSJW
 	int "MCAN0 synchronization jump width"
-	default 4
+	default 2
 	range 1 5
 	---help---
 		The duration of a synchronization jump is Tcan_clk x FSJW.
@@ -3299,14 +3299,14 @@ config SAMV7_MCAN0_FPROPSEG
 
 config SAMV7_MCAN0_FPHASESEG1
 	int "MCAN0 fast PhaseSeg1"
-	default 4
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN0_FPHASESEG2
 	int "MCAN0 fast PhaseSeg2"
-	default 4
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
@@ -3342,31 +3342,31 @@ config SAMV7_MCAN0_RXFIFO0_8BYTES
 
 config SAMV7_MCAN0_RXFIFO0_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 RX buffer element size
 
@@ -3386,31 +3386,31 @@ config SAMV7_MCAN0_RXFIFO1_8BYTES
 
 config SAMV7_MCAN0_RXFIFO1_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 RX buffer element size
 
@@ -3430,31 +3430,31 @@ config SAMV7_MCAN0_RXBUFFER_8BYTES
 
 config SAMV7_MCAN0_RXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 RX buffer element size
 
@@ -3477,31 +3477,31 @@ config SAMV7_MCAN0_TXBUFFER_8BYTES
 
 config SAMV7_MCAN0_TXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 TX buffer element size
 
@@ -3580,21 +3580,21 @@ config SAMV7_MCAN1_PROPSEG
 
 config SAMV7_MCAN1_PHASESEG1
 	int "MCAN1 PhaseSeg1"
-	default 11
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN1_PHASESEG2
 	int "MCAN1 PhaseSeg2"
-	default 11
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN1_FSJW
 	int "MCAN1 synchronization jump width"
-	default 4
+	default 2
 	range 1 5
 	---help---
 		The duration of a synchronization jump is Tcan_clk x FSJW.
@@ -3615,14 +3615,14 @@ config SAMV7_MCAN1_FPROPSEG
 
 config SAMV7_MCAN1_FPHASESEG1
 	int "MCAN1 fast PhaseSeg1"
-	default 4
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN1_FPHASESEG2
 	int "MCAN1 fast PhaseSeg2"
-	default 4
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
@@ -3658,31 +3658,31 @@ config SAMV7_MCAN1_RXFIFO0_8BYTES
 
 config SAMV7_MCAN1_RXFIFO0_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 RX buffer element size
 
@@ -3702,31 +3702,31 @@ config SAMV7_MCAN1_RXFIFO1_8BYTES
 
 config SAMV7_MCAN1_RXFIFO1_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 RX buffer element size
 
@@ -3746,31 +3746,31 @@ config SAMV7_MCAN1_RXBUFFER_8BYTES
 
 config SAMV7_MCAN1_RXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 RX buffer element size
 
@@ -3793,31 +3793,31 @@ config SAMV7_MCAN1_TXBUFFER_8BYTES
 
 config SAMV7_MCAN1_TXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 TX buffer element size
 
