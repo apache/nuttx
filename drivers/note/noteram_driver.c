@@ -901,6 +901,27 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       break;
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
+    case NOTE_WDOG_START:
+    case NOTE_WDOG_CANCEL:
+    case NOTE_WDOG_ENTER:
+    case NOTE_WDOG_LEAVE:
+      {
+        FAR struct note_wdog_s *nw;
+        FAR const char *name[] =
+          {
+            "start", "cancel", "enter", "leave",
+          };
+
+        nw = (FAR struct note_wdog_s *)p;
+        ret += noteram_dump_header(s, note, ctx);
+        ret += lib_sprintf(s, "tracing_mark_write: I|%d|wdog: %s-%pS %p\n",
+                           pid, name[note->nc_type - NOTE_WDOG_START],
+                           (FAR void *)nw->handler, (FAR void *)nw->arg);
+      }
+      break;
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
     case NOTE_CSECTION_ENTER:
     case NOTE_CSECTION_LEAVE:
@@ -1031,7 +1052,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
             "add", "remove", "malloc", "free"
           };
 
-        ret += noteram_dump_header(s, &nmm->nmm_cmn, ctx);
+        ret += noteram_dump_header(s, &nmm->nhp_cmn, ctx);
         ret += lib_sprintf(s, "tracing_mark_write: C|%d|Heap Usage|%d|%s"
                            ": heap: %p size:%" PRIiPTR ", address: %p\n",
                            pid, nmm->used,

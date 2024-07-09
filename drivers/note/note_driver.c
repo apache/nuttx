@@ -94,6 +94,8 @@
   ((drv)->ops->irqhandler(drv, irq, handler, enter), true))
 #define note_heap(drv, event, data, mem, size, used)                         \
   ((drv)->ops->heap && ((drv)->ops->heap(drv, event, data, mem, size, used), true))
+#define note_wdog(drv, event, handler, arg)                                  \
+  ((drv)->ops->wdog && ((drv)->ops->wdog(drv, event, handler, arg), true))
 #define note_string(drv, ip, buf)                                            \
   ((drv)->ops->string && ((drv)->ops->string(drv, ip, buf), true))
 #define note_event(drv, ip, event, buf, len)                                 \
@@ -1354,6 +1356,41 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 }
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
+void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg)
+{
+  FAR struct note_driver_s **driver;
+  struct note_wdog_s note;
+  bool formatted = false;
+  FAR struct tcb_s *tcb = this_task();
+
+  for (driver = g_note_drivers; *driver; driver++)
+    {
+      if (note_wdog(*driver, event, handler, arg))
+        {
+          continue;
+        }
+
+      if ((*driver)->ops->add == NULL)
+        {
+          continue;
+        }
+
+      if (!formatted)
+        {
+          formatted = true;
+          note_common(tcb, &note.nwd_cmn, sizeof(note), event);
+          note.handler = (uintptr_t)handler;
+          note.arg = (uintptr_t)arg;
+        }
+
+      /* Add the note to circular buffer */
+
+      note_add(*driver, &note, sizeof(note));
+    }
+}
+#endif
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
 void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
                      size_t size, size_t used)
@@ -1385,7 +1422,7 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
       if (!formatted)
         {
           formatted = true;
-          note_common(tcb, &note.nmm_cmn, sizeof(note), event);
+          note_common(tcb, &note.nhp_cmn, sizeof(note), event);
           note.heap = heap;
           note.mem = mem;
           note.size = size;

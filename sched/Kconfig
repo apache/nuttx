@@ -1292,6 +1292,14 @@ config SCHED_INSTRUMENTATION_HEAP
 
 			void sched_note_heap(uint8_t event, FAR void* heap, FAR void *mem, size_t size, size_t curused);
 
+config SCHED_INSTRUMENTATION_WDOG
+	bool "Watchdog timer monitor hooks"
+	default n
+	---help---
+		Enables additional hooks for watchdog timer.
+
+			void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg);
+
 config SCHED_INSTRUMENTATION_DUMP
 	bool "Use note dump for instrumentation"
 	default n
