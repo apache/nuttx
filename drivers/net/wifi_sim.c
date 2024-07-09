@@ -1108,7 +1108,7 @@ static int wifidriver_get_freq(FAR struct wifi_sim_s *wifidev,
 int wifidriver_set_txpower(FAR struct wifi_sim_s *wifidev,
                            FAR struct iwreq *pwrq)
 {
-  int ret;
+  int ret = OK;
 
   switch (wifidev->mode)
     {
