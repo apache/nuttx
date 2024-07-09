@@ -322,6 +322,8 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *   loadinfo  - Load state information
  *   sym       - Symbol table entry (value might be undefined)
  *   sh_offset - Offset of strtab
+ *   exports   - Pointer to the symbol table
+ *   nexports  - Number of symbols in the symbol table*
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -337,12 +339,12 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
 int modlib_symvalue(FAR struct module_s *modp,
                     FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
-                    Elf_Off sh_offset)
+                    Elf_Off sh_offset,
+                    FAR const struct symtab_s *exports, int nexports)
 {
   FAR const struct symtab_s *symbol;
   struct mod_exportinfo_s exportinfo;
   uintptr_t secbase;
-  int nsymbols;
   int ret;
 
   switch (sym->st_shndx)
@@ -406,9 +408,8 @@ int modlib_symvalue(FAR struct module_s *modp,
 
         if (symbol == NULL)
           {
-            modlib_getsymtab(&symbol, &nsymbols);
-            symbol = symtab_findbyname(symbol, exportinfo.name,
-                                       nsymbols);
+            symbol = symtab_findbyname(exports, exportinfo.name,
+                                       nexports);
           }
 
         /* Was the symbol found from any exporter? */

@@ -360,6 +360,12 @@ int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo);
  *   'loadinfo' using the exported symbol values provided by
  *   modlib_setsymtab().
  *
+ * Input Parameters:
+ *   modp     - Module state information
+ *   loadinfo - Load state information
+ *   exports  - The table of exported symbols
+ *   nexports - The number of symbols in the exports table
+ *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
@@ -367,7 +373,8 @@ int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int modlib_bind(FAR struct module_s *modp,
-                FAR struct mod_loadinfo_s *loadinfo);
+                FAR struct mod_loadinfo_s *loadinfo,
+                FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
  * Name: modlib_unload

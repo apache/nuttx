@@ -231,9 +231,11 @@ void modlib_dumpentrypt(FAR struct mod_loadinfo_s *loadinfo)
 
 FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
 {
+  FAR const struct symtab_s *exports;
   struct mod_loadinfo_s loadinfo;
   FAR struct module_s *modp;
   FAR void (**array)(void);
+  int nexports;
   int ret;
   int i;
 
@@ -291,9 +293,13 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
       goto errout_with_registry_entry;
     }
 
+  /* Get the symbol table */
+
+  modlib_getsymtab(&exports, &nexports);
+
   /* Bind the program to the kernel symbol table */
 
-  ret = modlib_bind(modp, &loadinfo);
+  ret = modlib_bind(modp, &loadinfo, exports, nexports);
   if (ret != 0)
     {
       binfo("Failed to bind symbols program binary: %d\n", ret);
