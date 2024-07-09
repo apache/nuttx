@@ -537,6 +537,20 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
+#ifdef CONFIG_MODLIB_EXIDX_SECTNAME
+  ret = modlib_findsection(loadinfo, CONFIG_MODLIB_EXIDX_SECTNAME);
+  if (ret < 0)
+    {
+      binfo("modlib_findsection: Exception Index section not found: %d\n",
+            ret);
+    }
+  else
+    {
+      up_init_exidx(loadinfo->shdr[ret].sh_addr,
+                    loadinfo->shdr[ret].sh_size);
+    }
+#endif
+
   return OK;
 
   /* Error exits */
