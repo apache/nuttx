@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include "hardware/stm32f40xxx_uart.h"
 #include <nuttx/config.h>
 
 #include <sys/types.h>
@@ -1308,40 +1309,37 @@ static inline void up_serialout(struct up_dev_s *priv, int offset,
  * Name: up_setusartint
  ****************************************************************************/
 
-static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
+static inline void up_setusartint(struct up_dev_s *priv, struct ctrl_regs_s *cr)
 {
-  uint32_t cr;
+  uint32_t regval;
 
-  /* Save the interrupt mask */
 
-  priv->ie = ie;
-
-  /* And restore the interrupt state (see the interrupt enable/usage
+  /* Set interrupt state (see the interrupt enable/usage
    * table above)
    */
 
-  cr  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  cr &= ~(USART_CR1_USED_INTS);
-  cr |= (ie & (USART_CR1_USED_INTS));
-  up_serialout(priv, STM32_USART_CR1_OFFSET, cr);
+  regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  regval &= ~(USART_CR1_USED_INTS);
+  regval |= (cr->cr1 & (USART_CR1_USED_INTS));
+  up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
-  cr  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  cr &= ~USART_CR3_EIE;
-  cr |= (ie & USART_CR3_EIE);
-  up_serialout(priv, STM32_USART_CR3_OFFSET, cr);
+  regval = up_serialin(priv, STM32_USART_CR3_OFFSET);
+  regval &= ~USART_CR3_EIE;
+  regval |= (cr->cr3 & USART_CR3_EIE);
+  up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 }
 
 /****************************************************************************
  * Name: up_restoreusartint
  ****************************************************************************/
 
-static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
+static void up_restoreusartint(struct up_dev_s *priv, struct ctrl_regs_s *cr)
 {
   irqstate_t flags;
 
   flags = spin_lock_irqsave(NULL);
 
-  up_setusartint(priv, ie);
+  up_setusartint(priv, cr);
 
   spin_unlock_irqrestore(NULL, flags);
 }
@@ -1350,50 +1348,25 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
  * Name: up_disableusartint
  ****************************************************************************/
 
-static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
+static void up_disableusartint(struct up_dev_s *priv, struct ctrl_regs_s *cr)
 {
   irqstate_t flags;
 
   flags = spin_lock_irqsave(NULL);
 
-  if (ie)
-    {
-      uint32_t cr1;
-      uint32_t cr3;
+  /* Return the current interrupt mask value for the used interrupts.
+   * Notice that this depends on the fact that none of the used interrupt
+   * enable bits overlap.  This logic would fail if we needed the break
+   * interrupt!
+   */
 
-      /* USART interrupts:
-       *
-       * Enable             Status          Meaning                Usage
-       * ------------------ --------------- ---------------------- ----------
-       * USART_CR1_IDLEIE   USART_SR_IDLE   Idle Line Detected     (not used)
-       * USART_CR1_RXNEIE   USART_SR_RXNE   Rx Data Ready
-       * "              "   USART_SR_ORE    Overrun Error Detected
-       * USART_CR1_TCIE     USART_SR_TC     Transmission Complete  (RS-485)
-       * USART_CR1_TXEIE    USART_SR_TXE    Tx Data Register Empty
-       * USART_CR1_PEIE     USART_SR_PE     Parity Error
-       *
-       * USART_CR2_LBDIE    USART_SR_LBD    Break Flag             (not used)
-       * USART_CR3_EIE      USART_SR_FE     Framing Error
-       * "           "      USART_SR_NE     Noise Error
-       * "           "      USART_SR_ORE    Overrun Error Detected
-       * USART_CR3_CTSIE    USART_SR_CTS    CTS flag               (not used)
-       */
-
-      cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET);
-      cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET);
-
-      /* Return the current interrupt mask value for the used interrupts.
-       * Notice that this depends on the fact that none of the used interrupt
-       * enable bits overlap.  This logic would fail if we needed the break
-       * interrupt!
-       */
-
-      *ie = (cr1 & (USART_CR1_USED_INTS)) | (cr3 & USART_CR3_EIE);
-    }
+  cr->cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  cr->cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET);
 
   /* Disable all interrupts */
 
-  up_setusartint(priv, 0);
+  struct ctrl_regs_s tmp = { .cr1 = 0, .cr2 = 0, .cr3 = 0 };
+  up_setusartint(priv, &tmp);
 
   spin_unlock_irqrestore(NULL, flags);
 }
@@ -1937,7 +1910,8 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Disable all interrupts */
 
-  up_disableusartint(priv, NULL);
+  struct ctrl_regs_s tmp = { .cr1 = 0, .cr2 = 0, .cr3 = 0};
+  up_disableusartint(priv, &tmp);
 
   /* Disable USART APB1/2 clock */
 
@@ -2162,8 +2136,7 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       /* Handle incoming, receive bytes. */
 
-      if (((priv->sr & USART_SR_RXNE) != 0) &&
-          ((priv->ie & USART_CR1_RXNEIE) != 0))
+      if ((priv->sr & USART_SR_RXNE) != 0)
         {
           /* Received data ready... process incoming bytes.  NOTE the check
            * for RXNEIE:  We cannot call uart_recvchards of RX interrupts are
@@ -2203,8 +2176,7 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       /* Handle outgoing, transmit bytes */
 
-      if (((priv->sr & USART_SR_TXE) != 0) &&
-          ((priv->ie & USART_CR1_TXEIE) != 0))
+      if ((priv->sr & USART_SR_TXE) != 0)
         {
           /* Transmit data register empty ... process outgoing bytes */
 
@@ -2528,7 +2500,6 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
-  uint16_t ie;
 
   /* USART receive interrupts:
    *
@@ -2546,7 +2517,16 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
    */
 
   flags = enter_critical_section();
-  ie = priv->ie;
+  struct ctrl_regs_s cr =
+    {
+      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
+
+      /* Control Register 2 is does not contain used interrupts */
+      .cr2 = 0,
+
+      .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
+    };
+
   if (enable)
     {
       /* Receive an interrupt when their is anything in the Rx data register
@@ -2555,20 +2535,26 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
 #ifdef CONFIG_USART_ERRINTS
-      ie |= (USART_CR1_RXNEIE | USART_CR1_PEIE | USART_CR3_EIE);
+      cr.cr1 |= (USART_CR1_RXNEIE | USART_CR1_PEIE);
+      cr.cr3 |= (USART_CR3_EIE);
 #else
-      ie |= USART_CR1_RXNEIE;
+      cr.cr1 |= (USART_CR1_RXNEIE);
 #endif
 #endif
     }
   else
     {
-      ie &= ~(USART_CR1_RXNEIE | USART_CR1_PEIE | USART_CR3_EIE);
+#ifdef CONFIG_USART_ERRINTS
+      cr.cr1 &= ~(USART_CR1_RXNEIE | USART_CR1_PEIE);
+      cr.cr3 &= ~(USART_CR3_EIE);
+#else
+      cr.cr1 &= ~(USART_CR1_RXNEIE);
+#endif
     }
 
   /* Then set the new interrupt state */
 
-  up_restoreusartint(priv, ie);
+  up_restoreusartint(priv, &cr);
   leave_critical_section(flags);
 }
 #endif
@@ -2934,7 +2920,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
-
+  
   /* USART transmit interrupts:
    *
    * Enable             Status          Meaning                 Usage
@@ -2945,12 +2931,20 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
    */
 
   flags = enter_critical_section();
+  struct ctrl_regs_s cr = 
+    { 
+      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
+
+      /* Control Registers 2 & 3 are not used */
+      .cr2 = 0,
+      .cr3 = 0
+    };
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      uint16_t ie = priv->ie | USART_CR1_TXEIE;
+      cr.cr1 |= USART_CR1_TXEIE;
 
       /* If RS-485 is supported on this U[S]ART, then also enable the
        * transmission complete interrupt.
@@ -2959,19 +2953,18 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 #  ifdef HAVE_RS485
       if (priv->rs485_dir_gpio != 0)
         {
-          ie |= USART_CR1_TCIE;
+          cr.cr1 |= USART_CR1_TCIE;
         }
 #  endif
 
 #  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
-      if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
+      if (cr.cr1 & USART_CR1_IE_BREAK_INPROGRESS)
         {
           leave_critical_section(flags);
           return;
         }
 #  endif
 
-      up_restoreusartint(priv, ie);
 
 #else
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -2984,9 +2977,10 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   else
     {
       /* Disable the TX interrupt */
-
-      up_restoreusartint(priv, priv->ie & ~USART_CR1_TXEIE);
+      cr.cr1 &= ~USART_CR1_TXEIE;
     }
+
+  up_restoreusartint(priv, &cr);
 
   leave_critical_section(flags);
 }
@@ -3189,7 +3183,8 @@ void arm_earlyserialinit(void)
     {
       if (g_uart_devs[i])
         {
-          up_disableusartint(g_uart_devs[i], NULL);
+          struct ctrl_regs_s tmp = { .cr1 = 0, .cr2 = 0, .cr3 = 0};
+          up_disableusartint(g_uart_devs[i], &tmp);
         }
     }
 
@@ -3369,10 +3364,10 @@ void stm32_serial_dma_poll(void)
 int up_putc(int ch)
 {
 #if CONSOLE_UART > 0
-  struct up_dev_s *priv = g_uart_devs[CONSOLE_UART - 1];
-  uint16_t ie;
+  struct up_dev_s *priv = g_uart_devs[CONSOLE_UART - 1];;
+  struct ctrl_regs_s cr;
 
-  up_disableusartint(priv, &ie);
+  up_disableusartint(priv, &cr);
 
   /* Check for LF */
 
@@ -3384,7 +3379,7 @@ int up_putc(int ch)
     }
 
   arm_lowputc(ch);
-  up_restoreusartint(priv, ie);
+  up_restoreusartint(priv, &cr);
 #endif
   return ch;
 }

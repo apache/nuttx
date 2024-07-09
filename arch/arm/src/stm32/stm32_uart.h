@@ -544,10 +544,18 @@
 #  define USART_CR1_USED_INTS    (USART_CR1_RXNEIE | USART_CR1_TXEIE | USART_CR1_PEIE)
 #endif
 
+/* TODO: Handle DMA enabled case */
+#define USART_CR3_USED_INTS      (USART_CR3_EIE)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
+struct ctrl_regs_s 
+{
+  uint32_t cr1;
+  uint32_t cr2;
+  uint32_t cr3;
+};
 /****************************************************************************
  * Public Data
  ****************************************************************************/
