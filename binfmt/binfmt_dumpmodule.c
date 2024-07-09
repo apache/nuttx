@@ -61,13 +61,6 @@ int binfmt_dumpmodule(FAR const struct binary_s *bin)
       binfo("Module:\n");
       binfo("  entrypt:   %p\n", bin->entrypt);
       binfo("  mapped:    %p size=%zd\n", bin->mapped, bin->mapsize);
-      binfo("  alloc:     %p %p %p\n", bin->alloc[0],
-                                       bin->alloc[1],
-                                       bin->alloc[2]);
-#ifdef CONFIG_BINFMT_CONSTRUCTORS
-      binfo("  ctors:     %p nctors=%d\n", bin->ctors, bin->nctors);
-      binfo("  dtors:     %p ndtors=%d\n", bin->dtors, bin->ndtors);
-#endif
 #ifdef CONFIG_ARCH_ADDRENV
       binfo("  addrenv:   %p\n", bin->addrenv);
 #endif

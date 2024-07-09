@@ -304,6 +304,11 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
 
   modp->textalloc = (FAR void *)loadinfo.textalloc;
   modp->dataalloc = (FAR void *)loadinfo.datastart;
+#ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
+  modp->sectalloc = (FAR void **)loadinfo.sectalloc;
+  modp->nsect = loadinfo.ehdr.e_shnum;
+#endif
+
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   modp->textsize  = loadinfo.textsize;
   modp->datasize  = loadinfo.datasize;
