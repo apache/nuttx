@@ -158,7 +158,7 @@
 #define CCM_CR_AUTH_TZ_USER               (1 << 8)  /* Bit 8:      Clock root can be changed in user mode (TZ_USER) */
 #define CCM_CR_AUTH_TZ_NS                 (1 << 9)  /* Bit 9:      Clock root can be changed in non-secure mode (TZ_NS) */
                                                     /* Bit 10:     Reserved */
-#define CCM_CR_AUTH_LOCK_TZ               (1 << 11) /* Bit 1:      Lock TrustZone settings (LOCK_TZ) */
+#define CCM_CR_AUTH_LOCK_TZ               (1 << 11) /* Bit 11:     Lock TrustZone settings (LOCK_TZ) */
                                                     /* Bits 12-14: Reserved */
 #define CCM_CR_AUTH_LOCK_LIST             (1 << 12) /* Bit 15:     Lock whitelist settings (LOCK_LIST) */
 #define CCM_CR_AUTH_WHITE_LIST_SHIFT      (16)      /* Bits 16-31:  Allow domains to change clock (WHITE_LIST) */
@@ -336,6 +336,12 @@
 #define CCM_LPCG_AUTH_LOCK_LIST         (1 << 15) /* Bit 15:     Lock whitelist settings (LOCK_LIST) */
 #define CCM_LPCG_AUTH_WHITE_LIST_SHIFT  (16)      /* Bits 16-31: Allow domains to change clock (WHITE_LIST) */
 #define CCM_LPCG_AUTH_WHITE_LIST_MASK   (0xffff << CCM_LPCG_AUTH_WHITE_LIST_SHIFT)
+
+/* Auth access bits */
+
+#define CCM_AUTH_TZ_USER(n)             ((n) << 8)
+#define CCM_AUTH_TZ_NS(n)               ((n) << 9)
+#define CCM_AUTH_LOCK_TZ(n)             ((n) << 11)
 
 /* Clock roots */
 
@@ -570,12 +576,14 @@
 #define CCM_SHARED_EXT_CLK      0
 #define CCM_SHARED_A55_CLK      1
 #define CCM_SHARED_DRAM_CLK     2
+#define CCM_SHARED_GPR_COUNT    7
 
 /* Other parameters */
 
 #define ROOT_MUX_MAX            4       /* Count of root clock MUX options */
 #define CCM_CR_COUNT            94      /* Count of clock roots */
-#define CCM_LPCG_COUNT          126     /* Counte of clock gates */
+#define CCM_LPCG_COUNT          126     /* Count of clock gates */
+#define CCM_OSCPLL_COUNT        18      /* Count of osc plls */
 
 /****************************************************************************
  * Public Types
@@ -707,5 +715,31 @@ static const int g_ccm_root_mux[][ROOT_MUX_MAX] =
   {OSC_24M, SYS_PLL1PFD0DIV2, SYS_PLL1PFD1DIV2, VIDEO_PLL1OUT},    /* Usb Phy Burunin */
   {OSC_24M, AUDIO_PLL1OUT, VIDEO_PLL1OUT, SYS_PLL1PFD2},           /* Pal Came Scan */
 };
+
+#define CCM_ARM_A55_PERIPH_CLK_ROOT  0
+#define CCM_ARM_A55_MTR_BUS_CLK_ROOT 1
+#define CCM_ARM_A55_CLK_ROOT         2
+#define CCM_M33_CLK_ROOT             3
+#define CCM_ELE_CLK_ROOT             4
+#define CCM_BUS_WAKEUP_CLK_ROOT      5
+#define CCM_BUS_AON_CLK_ROOT         6
+#define CCM_WAKEUP_AXI_CLK_ROOT      7
+#define CCM_SWO_TRACE_CLK_ROOT       8
+#define CCM_M33_SYSTICK_CLK_ROOT     9
+#define CCM_NIC_CLK_ROOT             65
+#define CCM_NIC_APB_CLK_ROOT         66
+#define CCM_DRAM_ALT_CLK_ROOT        76
+#define CCM_DRAM_APB_CLK_ROOT        77
+#define CCM_CLK_ROOT_NUM             95
+
+#define CCM_OSCPLL_END               19
+#define CCM_CCGR_NUM                 127
+
+#define CCM_SHARED_GPR_DRAM_CLK         2
+#define CCM_SHARED_GPR_DRAM_CLK_SEL_PLL 0
+#define CCM_SHARED_GPR_DRAM_CLK_SEL_CCM BIT(0)
+#define CCM_SHARED_GPR_NUM              8
+
+#define MHZ(x) ((x) * 1000000UL)
 
 #endif /* __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX93_IMX93_CCM_H */

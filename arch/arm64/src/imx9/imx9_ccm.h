@@ -85,4 +85,38 @@ int imx9_ccm_root_clock_on(int root, bool enabled);
 
 int imx9_ccm_gate_on(int gate, bool enabled);
 
+/****************************************************************************
+ * Name: imx9_ccm_shared_gpr_set
+ *
+ * Description:
+ *   Set shared gpr clock register value
+ *
+ * Input Parameters:
+ *   gpr    -  General purpose clock index
+ *   val    -  Value
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int imx9_ccm_shared_gpr_set(uint32_t gpr, uint32_t val);
+
+/****************************************************************************
+ * Name: imx9_ccm_clock_init
+ *
+ * Description:
+ *   Initializes bus clocks for a known default state.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success, a negated error value otherwise
+ *
+ ****************************************************************************/
+
+int imx9_ccm_clock_init(void);
+
 #endif /* __ARCH_ARM64_SRC_IMX9_IMX9_CCM_H */
