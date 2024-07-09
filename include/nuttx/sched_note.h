@@ -188,6 +188,10 @@ enum note_type_e
   NOTE_SYSCALL_LEAVE,
   NOTE_IRQ_ENTER,
   NOTE_IRQ_LEAVE,
+  NOTE_WDOG_START,
+  NOTE_WDOG_CANCEL,
+  NOTE_WDOG_ENTER,
+  NOTE_WDOG_LEAVE,
   NOTE_HEAP_ADD,
   NOTE_HEAP_REMOVE,
   NOTE_HEAP_ALLOC,
@@ -386,9 +390,16 @@ struct note_irqhandler_s
   uint8_t nih_irq;              /* IRQ number */
 };
 
+struct note_wdog_s
+{
+  struct note_common_s nwd_cmn;      /* Common note parameters */
+  uintptr_t handler;
+  uintptr_t arg;
+};
+
 struct note_heap_s
 {
-  struct note_common_s nmm_cmn;      /* Common note parameters */
+  struct note_common_s nhp_cmn;      /* Common note parameters */
   FAR void *heap;
   FAR void *mem;
   size_t size;
@@ -555,6 +566,12 @@ void sched_note_syscall_leave(int nr, uintptr_t result);
 void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #else
 #  define sched_note_irqhandler(i,h,e)
+#endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
+void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg);
+#else
+#  define sched_note_wdog(e,h,a)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP

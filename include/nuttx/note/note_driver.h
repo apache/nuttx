@@ -91,6 +91,10 @@ struct note_driver_ops_s
   CODE void (*irqhandler)(FAR struct note_driver_s *drv, int irq,
                           FAR void *handler, bool enter);
 #endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
+  CODE void (*wdog)(FAR struct note_driver_s *drv, uint8_t event,
+                    FAR void *handler, FAR const void *arg);
+#endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
   CODE void (*heap)(FAR struct note_driver_s *drv, uint8_t event,
                     FAR void *heap, FAR void *mem, size_t size,
