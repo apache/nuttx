@@ -902,6 +902,53 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* Set specfic can transceiver state */
+
+      case CANIOC_SET_TRANSVSTATE:
+        {
+          /* if we don't use dev->cd_transv->cts_ops, please initlize
+           * this poniter to NULL in lower board code when Board reset.
+           */
+
+          if (dev->cd_transv && dev->cd_transv->ct_ops
+              && dev->cd_transv->ct_ops->ct_setstate)
+            {
+              FAR const struct can_transv_ops_s *ct_ops =
+                                                dev->cd_transv->ct_ops;
+              ret = ct_ops->ct_setstate(dev->cd_transv, arg);
+            }
+          else
+            {
+              canerr("dev->cd_transv->cts_ops is NULL!");
+              ret = -ENOTTY;
+            }
+        }
+        break;
+
+      /* Get specfic can transceiver state */
+
+      case CANIOC_GET_TRANSVSTATE:
+        {
+          /* if we don't use dev->cd_transv->cts_ops, please initlize
+           * this poniter to NULL in lower board code when Board reset.
+           */
+
+          if (dev->cd_transv && dev->cd_transv->ct_ops
+              && dev->cd_transv->ct_ops->ct_getstate)
+            {
+              int *state = (FAR int *)arg;
+              FAR const struct can_transv_ops_s *ct_ops =
+                                                dev->cd_transv->ct_ops;
+              ret = ct_ops->ct_getstate(dev->cd_transv, state);
+            }
+          else
+            {
+              canerr("dev->cd_transv->cts_ops is NULL!");
+              ret = -ENOTTY;
+            }
+        }
+        break;
+
       /* Not a "built-in" ioctl command.. perhaps it is unique to this
        * lower-half, device driver.
        */
