@@ -42,12 +42,14 @@ config CAN_FD
 config CAN_TXFIFOSIZE
 	int "CAN driver I/O tx buffer size"
 	default 8
+	range 1 255
 	---help---
 		The size of the circular tx buffer of CAN messages. Default: 8
 
 config CAN_RXFIFOSIZE
 	int "CAN driver I/O rx buffer size"
 	default 8
+	range 1 255
 	---help---
 		The size of the circular rx buffer of CAN messages. Default: 8
 

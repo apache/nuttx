@@ -261,8 +261,8 @@
  * CANIOC_SET_STATE
  *   Description:    Set specfic can controller state
  *
- *   Argument:       A pointer to an enumeration type that describes the CAN
- *                   state
+ *   Argument:       A variable to an int type that describes the CAN
+ *                   controller state.
  *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
@@ -271,8 +271,28 @@
  * CANIOC_GET_STATE
  *   Description:    Get specfic can controller state
  *
- *   Argument:       A pointer to an enumeration type that describes the CAN
- *                   state
+ *   Argument:       A pointer to an int type that describes the CAN
+ *                   controller state.
+ *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_SET_TRANSV_STATE
+ *   Description:    Set specfic can transceiver state
+ *
+ *   Argument:       A variable to an int type that describes the CAN
+ *                   transceiver state.
+ *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_GET_TRANSV_STATE
+ *   Description:    Get specfic can transceiver state
+ *
+ *   Argument:       A pointer to an int type that describes the CAN
+ *                   transceiver state.
  *   returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
@@ -296,9 +316,11 @@
 #define CANIOC_IOFLUSH            _CANIOC(15)
 #define CANIOC_SET_STATE          _CANIOC(16)
 #define CANIOC_GET_STATE          _CANIOC(17)
+#define CANIOC_SET_TRANSVSTATE    _CANIOC(18)
+#define CANIOC_GET_TRANSVSTATE    _CANIOC(19)
 
 #define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 15             /* 16 common commands   */
+#define CAN_NCMDS                 19             /* 20 common commands   */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the
@@ -479,6 +501,22 @@
 
 #define CAN_STATE_START           1
 
+/* Indicates that the can transceiver is in the sleep state */
+
+#define CAN_TRANSVSTATE_SLEEP     0
+
+/* Indicates that the can transceiver is in the standby state just called
+ * first-level power saving mode.
+ */
+
+#define CAN_TRANSVSTATE_STANDBY   1
+
+/* Indicates that the can transceiver is in the awake state
+ * the transceiver can transmit and receive data.
+ */
+
+#define CAN_TRANSVSTATE_NORMAL    2
+
 /* CAN bit timing support ***************************************************/
 
 #define CAN_BITTIMING_NOMINAL     0  /* Specifies nominal bittiming */
@@ -624,6 +662,21 @@ struct can_rtrwait_s
  */
 
 struct can_dev_s;
+
+/* This is the device structure as struct can_dev_s's subdevice
+ * used by the driver.
+ */
+
+struct can_transv_s;
+
+struct can_transv_ops_s
+{
+  CODE int (*ct_setstate)(FAR struct can_transv_s *transv, int state);
+
+  CODE int (*ct_getstate)(FAR struct can_transv_s *transv,
+                          FAR int *state);
+};
+
 struct can_ops_s
 {
   /* Reset the CAN device.  Called early to initialize the hardware. This
@@ -702,6 +755,11 @@ struct can_reader_s
   struct can_rxfifo_s  fifo;             /* Describes receive FIFO */
 };
 
+struct can_transv_s
+{
+  FAR const struct can_transv_ops_s *ct_ops;    /* Arch-specific operations */
+};
+
 struct can_dev_s
 {
   uint8_t              cd_crefs;         /* References counts on number of opens */
@@ -721,7 +779,7 @@ struct can_dev_s
   struct can_rtrwait_s cd_rtr[CONFIG_CAN_NPENDINGRTR];
   FAR const struct can_ops_s *cd_ops;    /* Arch-specific operations */
   FAR void            *cd_priv;          /* Used by the arch-specific logic */
-
+  FAR struct can_transv_s *cd_transv;    /* Describes CAN transceiver */
   FAR struct pollfd   *cd_fds[CONFIG_CAN_NPOLLWAITERS];
 };
 
@@ -1006,26 +1064,6 @@ int can_txready(FAR struct can_dev_s *dev);
  ****************************************************************************/
 
 uint8_t can_bytes2dlc(uint8_t nbytes);
-
-/****************************************************************************
- * Name: can_dlc2bytes
- *
- * Description:
- *   In the CAN FD format, the coding of the DLC differs from the standard
- *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
- *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
- *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
- *   in the range 12 to 64.
- *
- * Input Parameters:
- *   dlc    - the DLC value to convert to a byte count
- *
- * Returned Value:
- *   The number of bytes corresponding to the DLC value.
- *
- ****************************************************************************/
-
-uint8_t can_dlc2bytes(uint8_t dlc);
 
 #undef EXTERN
 #if defined(__cplusplus)
