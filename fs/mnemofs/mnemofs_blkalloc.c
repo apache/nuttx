@@ -91,6 +91,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define BMAP_GET(bmap, idx, off) ((bmap)[(idx)] & (1 << (off)))
+#define BMAP_SET(bmap, idx, off) ((bmap)[(idx)] |= (1 << (off)))
+#define DEL_ARR_BLK(sb, blk)     (MFS_BA((sb)).k_del[(blk) * sizeof(size_t)])
+#define DEL_ARR_PG(sb, pg)       (DEL_ARR_BLK(sb, MFS_PG2BLK((sb), (pg))))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -98,6 +103,12 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static inline void pg2bmap(mfs_t pg, FAR mfs_t *idx, FAR uint8_t *off);
+static int         is_pg_writeable(FAR struct mfs_sb_s * const sb, mfs_t pg,
+                                   FAR mfs_t *idx, FAR uint8_t *off);
+static int         is_blk_writeable(FAR struct mfs_sb_s * const sb,
+                                    const mfs_t blk);
 
 /****************************************************************************
  * Private Data
@@ -112,17 +123,420 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: pg2bmap
+ *
+ * Description:
+ *   Gets the bitmap location of a page. The page in the bitmap will be in
+ *   bmap[idx] byte at (1 << off) position in the byte.
+ *
+ * Input Parameters:
+ *   pg  - Page number to check.
+ *   idx - Populated later with the index of page in MFS_BA(sb).bmap_upgs
+ *   off - Populated later with the offset of page in MFS_BA(sb).bmap_upgs
+ *
+ * Returned Value:
+ *   MFS_BLK_BAD      - If the block of the page is a bad block.
+ *   MFS_PG_USED      - If the page is being used.
+ *   MFS_BLK_ERASABLE - If page can be allocated, but block needs erase.
+ *   MFS_PG_FREE      - If the page is free.
+ *
+ * Assumptions/Limitations:
+ *   Does not check validity of the page number.
+ *
+ ****************************************************************************/
+
+static inline void pg2bmap(mfs_t pg, FAR mfs_t *idx, FAR uint8_t *off)
+{
+  /* The compiler should automatically use shift operation for division. */
+
+  *idx = pg / 8;
+  *off = pg % 8;
+}
+
+/****************************************************************************
+ * Name: is_pg_writeable
+ *
+ * Description:
+ *   Checks if a page is writeable by checking if the page is either free, or
+ *   it's being used but the entire block is ready for erase.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   pg  - Page number to check.
+ *   idx - Populated later with the index of page in MFS_BA(sb).bmap_upgs
+ *   off - Populated later with the offset of page in MFS_BA(sb).bmap_upgs
+ *
+ * Returned Value:
+ *   MFS_BLK_BAD      - If the block of the page is a bad block.
+ *   MFS_PG_USED      - If the page is being used.
+ *   MFS_BLK_ERASABLE - If page can be allocated, but block needs erase.
+ *   MFS_PG_FREE      - If the page is free.
+ *   -ENOSYS          - Not supported.
+ *
+ * Assumptions/Limitations:
+ *   Assumes this is run in a locked environment.
+ *
+ ****************************************************************************/
+
+static int is_pg_writeable(FAR struct mfs_sb_s * const sb, mfs_t pg,
+                           FAR mfs_t *idx, FAR uint8_t *off)
+{
+  int blkbad_status;
+
+  /* Bad block check. */
+
+  blkbad_status = mfs_isbadblk(sb, MFS_PG2BLK(sb, pg));
+  if (predict_false(blkbad_status == -ENOSYS))
+    {
+      return blkbad_status;
+    }
+
+  if (predict_false(blkbad_status < 0) || blkbad_status == 1)
+    {
+      return MFS_BLK_BAD;
+    }
+
+  pg2bmap(MFS_BA(sb).c_pg, idx, off);
+
+  if (BMAP_GET(MFS_BA(sb).bmap_upgs, *idx, *off))
+    {
+      if (DEL_ARR_PG(sb, MFS_BA(sb).c_pg) == MFS_PGINBLK(sb))
+        {
+          return MFS_BLK_ERASABLE;
+        }
+      else
+        {
+          return MFS_PG_USED;
+        }
+    }
+  else
+    {
+      return MFS_PG_FREE;
+    }
+}
+
+/****************************************************************************
+ * Name: is_blk_writeable
+ *
+ * Description:
+ *   Checks if an entire block is allocatable, either because none of the
+ *   pages in it have been allocated, or because the entire block can be
+ *   erased.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   pg  - Page number to check.
+ *   idx - Populated later with the index of page in MFS_BA(sb).bmap_upgs
+ *   off - Populated later with the offset of page in MFS_BA(sb).bmap_upgs
+ *
+ * Returned Value:
+ *   MFS_BLK_BAD      - If the block is a bad block.
+ *   MFS_BLK_USED     - If the block is being used.
+ *   MFS_BLK_ERASABLE - If block can be allocated, but block needs erase.
+ *   MFS_BLK_FREE     - If the block is free.
+ *
+ * Assumptions/Limitations:
+ *   Assumes this is run in a locked environment.
+ *
+ ****************************************************************************/
+
+static int is_blk_writeable(FAR struct mfs_sb_s * const sb, const mfs_t blk)
+{
+  mfs_t idx;
+  uint8_t off;
+  mfs_t pg = MFS_BLK2PG(sb, blk);
+  mfs_t i;
+  int blkbad_status;
+
+  /* Bad block check. */
+
+  blkbad_status = mfs_isbadblk(sb, blk);
+  if (predict_false(blkbad_status == -ENOSYS))
+    {
+      return blkbad_status;
+    }
+
+  if (predict_false(blkbad_status < 0) || blkbad_status == 1)
+    {
+      return MFS_BLK_BAD;
+    }
+
+  for (i = 0; i < MFS_PGINBLK(sb); i++)
+    {
+      pg2bmap(pg + i, &idx, &off);
+
+      if (BMAP_GET(MFS_BA(sb).bmap_upgs, idx, off))
+        {
+          if (DEL_ARR_PG(sb, MFS_BA(sb).c_pg) == MFS_PGINBLK(sb))
+            {
+              return MFS_BLK_ERASABLE;
+            }
+          else
+            {
+              return MFS_BLK_USED;
+            }
+        }
+    }
+
+  return MFS_BLK_FREE;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 int mfs_ba_init(FAR struct mfs_sb_s * const sb)
 {
-  /* TODO */
+  int     ret  = OK;
+  uint8_t log;
 
-  return OK;
+/* We need at least 5 blocks, as one is occupied by superblock, at least
+ * one for the journal, 2 for journal's master blocks, and at least one for
+ * actual data.
+ */
+
+  if (MFS_NBLKS(sb) < 5)
+    {
+      ret = -ENOSPC;
+      goto errout;
+    }
+
+  memset(&MFS_BA(sb), 0, sizeof(MFS_BA(sb)));
+
+  MFS_BA(sb).s_blk = rand() % MFS_NBLKS(sb);
+  if (MFS_PG2BLK(sb, MFS_BA(sb).s_blk) == sb->sb_blk)
+    {
+      MFS_BA(sb).s_blk++;
+      MFS_BA(sb).s_blk %= MFS_NBLKS(sb);
+    }
+
+  MFS_BA(sb).c_pg = MFS_BLK2PG(sb, MFS_BA(sb).s_blk);
+
+  log = ceil(log2(MFS_NBLKS(sb)));
+
+  /* MFS_BA(sb).k_del_elemsz = ((log + 7) & (-8)) / 8; */
+
+  MFS_BA(sb).k_del = kmm_zalloc(sizeof(size_t) * MFS_NBLKS(sb));
+  if (!MFS_BA(sb).k_del)
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  MFS_BA(sb).n_bmap_upgs = MFS_UPPER8(MFS_NPGS(sb));
+
+  MFS_BA(sb).bmap_upgs = kmm_zalloc(MFS_BA(sb).n_bmap_upgs);
+  if (!MFS_BA(sb).bmap_upgs)
+    {
+      ret = -ENOMEM;
+      goto errout_with_k_del;
+    }
+
+  /* TODO: Fill MFS_BA(sb).bmap_upgs after tree traversal. */
+
+  finfo("mnemofs: Block Allocator initialized, starting at page %d.\n",
+        MFS_BLK2PG(sb, MFS_BA(sb).s_blk));
+  return ret;
+
+errout_with_k_del:
+  kmm_free(MFS_BA(sb).k_del);
+
+errout:
+  return ret;
 }
 
 void mfs_ba_free(FAR struct mfs_sb_s * const sb)
 {
+  kmm_free(MFS_BA(sb).k_del);
+  kmm_free(MFS_BA(sb).bmap_upgs);
+
+  finfo("Block Allocator Freed.");
+}
+
+mfs_t mfs_ba_getpg(FAR struct mfs_sb_s * const sb)
+{
+  bool    inc   = true;
+  bool    found = false;
+  mfs_t   i     = MFS_BA(sb).c_pg;
+  mfs_t   pg    = 0;
+  mfs_t   idx;
+  mfs_t   tpgs  = MFS_NBLKS(sb) * MFS_PGINBLK(sb);
+  uint8_t off;
+
+  for (; i != tpgs; i++)
+    {
+      switch (is_pg_writeable(sb, MFS_BA(sb).c_pg, &idx, &off))
+        {
+          case MFS_PG_USED:
+            finfo("Used %d\n", MFS_BA(sb).c_pg);
+            break;
+
+          case MFS_PG_FREE:
+            finfo("Free %d\n", MFS_BA(sb).c_pg);
+            pg = MFS_BA(sb).c_pg;
+            mfs_ba_markusedpg(sb, pg);
+            found = true;
+            break;
+
+          case MFS_BLK_BAD:
+            finfo("Bad %d\n", MFS_BA(sb).c_pg);
+
+            /* Skip pages to next block. */
+
+            MFS_BA(sb).c_pg = MFS_BLK2PG(sb,
+                                (MFS_PG2BLK(sb, MFS_BA(sb).c_pg) + 1) %
+                                MFS_NBLKS(sb));
+            inc = false;
+            break;
+
+          case MFS_BLK_ERASABLE:
+            finfo("Erasable %d\n", MFS_BA(sb).c_pg);
+            pg = MFS_BA(sb).c_pg;
+            mfs_erase_blk(sb, MFS_PG2BLK(sb, MFS_BA(sb).c_pg));
+            DEL_ARR_PG(sb, MFS_BA(sb).c_pg) = 0;
+            mfs_ba_markusedpg(sb, pg);
+            found = true;
+            break;
+
+          case -ENOSYS:
+
+            /* TODO: Manually check for bad blocks. */
+
+            return 0;
+        }
+
+      if (inc)
+        {
+          MFS_BA(sb).c_pg++;
+          MFS_BA(sb).c_pg %= tpgs;
+        }
+      else
+        {
+          i--;
+          inc = true;
+        }
+
+      if (found)
+        {
+          break;
+        }
+    }
+
+  if (!found)
+    {
+      DEBUGASSERT(pg == 0);
+      finfo("No more pages found. Page: %u.", pg);
+    }
+
+  return pg;
+}
+
+mfs_t mfs_ba_getblk(FAR struct mfs_sb_s * const sb)
+{
+  bool  found = false;
+  mfs_t i     = 0;
+  mfs_t blk;
+  mfs_t ret   = 0;
+
+  blk = MFS_PG2BLK(sb, MFS_BA(sb).c_pg);
+  if (MFS_BA(sb).c_pg % MFS_PGINBLK(sb))
+    {
+      /* Skipped pages are not updated in used. */
+
+      blk++;
+      blk %= MFS_NBLKS(sb);
+      i++;
+    }
+
+  for (; i < MFS_NBLKS(sb); i++)
+    {
+      switch (is_blk_writeable(sb, blk))
+        {
+          case MFS_BLK_BAD:
+            break;
+
+          case MFS_BLK_USED:
+            break;
+
+          case MFS_BLK_ERASABLE:
+            mfs_ba_blkmarkdel(sb, blk);
+            mfs_ba_markusedblk(sb, blk);
+            found = true;
+            break;
+
+          case MFS_BLK_FREE:
+            mfs_ba_markusedblk(sb, blk);
+            found = true;
+            break;
+
+          case -ENOSYS:
+
+            /* TODO: Manually check for bad blocks. */
+
+            return 0;
+        }
+
+      if (found)
+        {
+          break;
+        }
+
+      blk++;
+      blk %= MFS_NBLKS(sb);
+    }
+
+  if (found)
+    {
+      ret = blk;
+      MFS_BA(sb).c_pg = MFS_BLK2PG(sb, (++blk) % MFS_NBLKS(sb));
+    }
+
+  finfo("Block number: %u. Found: %d.", ret, found);
+
+  return ret;
+}
+
+void mfs_ba_pgmarkdel(FAR struct mfs_sb_s * const sb, mfs_t pg)
+{
+  DEL_ARR_PG(sb, MFS_BA(sb).c_pg)++;
+}
+
+void mfs_ba_blkmarkdel(FAR struct mfs_sb_s * const sb, mfs_t blk)
+{
+  mfs_erase_blk(sb, blk);
+  DEL_ARR_BLK(sb, blk) = 0;
+}
+
+void mfs_ba_delmarked(FAR struct mfs_sb_s * const sb)
+{
   /* TODO */
+}
+
+/* Mark a page as being used. Used by master node during initial format and
+ */
+
+void mfs_ba_markusedpg(FAR struct mfs_sb_s * const sb, mfs_t pg)
+{
+  mfs_t idx;
+  uint8_t off;
+  pg2bmap(pg, &idx, &off);
+  BMAP_SET(MFS_BA(sb).bmap_upgs, idx, off); /* Set as used */
+}
+
+void mfs_ba_markusedblk(FAR struct mfs_sb_s * const sb, mfs_t blk)
+{
+  mfs_t i = 0;
+  mfs_t pg = MFS_BLK2PG(sb, blk);
+
+  for (i = 0; i < MFS_PGINBLK(sb); i++)
+    {
+      mfs_ba_markusedpg(sb, pg + i);
+    }
+}
+
+mfs_t mfs_ba_getavailpgs(FAR const struct mfs_sb_s * const sb)
+{
+  /* TODO */
+
+  return 0;
 }

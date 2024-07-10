@@ -485,20 +485,128 @@ void mfs_jrnl_free(FAR struct mfs_sb_s * const sb);
 int mfs_ba_init(FAR struct mfs_sb_s * const sb);
 
 /****************************************************************************
- * Name: mfs_ba_free
+ * Name: mfs_ba_getpg
  *
  * Description:
- *   Free the block allocator
+ *   Returns an allocated page.
  *
  * Input Parameters:
  *   sb - Superblock instance of the device.
+ *
+ * Returned Value:
+ *   0    - No more space left
+ *   > 0  - Page number
  *
  * Assumptions/Limitations:
  *   This assumes a locked environment when called.
  *
  ****************************************************************************/
 
-void mfs_ba_free(FAR struct mfs_sb_s * const sb);
+mfs_t mfs_ba_getpg(FAR struct mfs_sb_s * const sb);
+
+/****************************************************************************
+ * Name: mfs_ba_getblk
+ *
+ * Description:
+ *   Returns an allocated block.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *
+ * Returned Value:
+ *   0    - No more space left
+ *   > 0  - Block number
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+mfs_t mfs_ba_getblk(FAR struct mfs_sb_s * const sb);
+
+/****************************************************************************
+ * Name: mfs_ba_pgmarkdel
+ *
+ * Description:
+ *   Mark a page as being ready for deletion.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *   pg - Page number.
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+void mfs_ba_pgmarkdel(FAR struct mfs_sb_s * const sb, mfs_t pg);
+
+/****************************************************************************
+ * Name: mfs_ba_blkmarkdel
+ *
+ * Description:
+ *   Mark a block as being ready for deletion.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   blk - Block number.
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+void mfs_ba_blkmarkdel(FAR struct mfs_sb_s * const sb, mfs_t blk);
+
+/****************************************************************************
+ * Name: mfs_ba_delmarked
+ *
+ * Description:
+ *   Delete all marked for deletion blocks.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+void mfs_ba_delmarked(FAR struct mfs_sb_s * const sb);
+
+/****************************************************************************
+ * Name: mfs_ba_markusedpg
+ *
+ * Description:
+ *   Marked page as being used.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *   pg - Page number
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+void mfs_ba_markusedpg(FAR struct mfs_sb_s * const sb, mfs_t pg);
+
+/****************************************************************************
+ * Name: mfs_ba_markusedblk
+ *
+ * Description:
+ *   Marked block as being used.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   blk - Block number
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+void mfs_ba_markusedblk(FAR struct mfs_sb_s * const sb, mfs_t blk);
 
 /****************************************************************************
  * Name: mfs_ba_getavailpgs
@@ -517,7 +625,57 @@ void mfs_ba_free(FAR struct mfs_sb_s * const sb);
 
 mfs_t mfs_ba_getavailpgs(FAR const struct mfs_sb_s * const sb);
 
+/****************************************************************************
+ * Name: mfs_ba_free
+ *
+ * Description:
+ *   Free the block allocator
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+void mfs_ba_free(FAR struct mfs_sb_s * const sb);
+
 /* mnemofs_rw.c */
+
+/****************************************************************************
+ * Name: mfs_isbadblk
+ *
+ * Description:
+ *   Is a block bad.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   blk - Block Number
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+int mfs_isbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk);
+
+/****************************************************************************
+ * Name: mfs_markbadblk
+ *
+ * Description:
+ *   Mark a block as bad.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   blk - Block Number
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+int mfs_markbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk);
 
 /****************************************************************************
  * Name: mfs_read_page
@@ -540,6 +698,41 @@ mfs_t mfs_ba_getavailpgs(FAR const struct mfs_sb_s * const sb);
 ssize_t mfs_read_page(FAR const struct mfs_sb_s * const sb,
                       FAR char *data, const mfs_t datalen, const off_t page,
                       const mfs_t pgoff);
+
+/****************************************************************************
+ * Name: mfs_erase_blk
+ *
+ * Description:
+ *   Erase a block.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   blk - Block Number
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+int mfs_erase_blk(FAR const struct mfs_sb_s * const sb, const off_t blk);
+
+/****************************************************************************
+ * Name: mfs_erase_nblks
+ *
+ * Description:
+ *   Erase consecutive blocks.
+ *
+ * Input Parameters:
+ *   sb  - Superblock instance of the device.
+ *   blk - Block Number
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+int mfs_erase_nblks(FAR const struct mfs_sb_s * const sb, const off_t blk,
+                    const size_t n);
 
 /* mnemofs_lru.c */
 

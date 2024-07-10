@@ -83,9 +83,30 @@
  * Public Functions
  ****************************************************************************/
 
+int mfs_isbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk)
+{
+  return MTD_ISBAD(MFS_MTD(sb), blk);
+}
+
+int mfs_markbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk)
+{
+  return MTD_ISBAD(MFS_MTD(sb), blk);
+}
+
 ssize_t mfs_read_page(FAR const struct mfs_sb_s * const sb,
                       FAR char *data, const mfs_t datalen, const off_t page,
                       const mfs_t pgoff)
 {
   return OK;
+}
+
+int mfs_erase_blk(FAR const struct mfs_sb_s * const sb, const off_t blk)
+{
+  return MTD_ERASE(MFS_MTD(sb), blk, 1);
+}
+
+int mfs_erase_nblks(FAR const struct mfs_sb_s * const sb, const off_t blk,
+                    const size_t n)
+{
+  return MTD_ERASE(MFS_MTD(sb), blk, n);
 }
