@@ -169,7 +169,11 @@ void sbi_set_mtimecmp(uint64_t value);
  * Description:
  *   Conduct any device specific initialization before entering S-mode from
  *   NUTTSBI as some chips need such preparations. This function still runs
- *   in M-mode.
+ *   in M-mode. Things like PMP setting up or device specific prepration
+ *   before entering S-mode can be done here.
+ *
+ *   If this is enabled, PMP setup logic in sbi_start.c is bypassed so that
+ *   PMP management is done at one place.
  *
  ****************************************************************************/
 
