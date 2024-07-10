@@ -950,6 +950,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           nxrmutex_lock(&upper->lock);
           *(FAR unsigned int *)(uintptr_t)arg = user->event;
           user->event = 0;
+          user->changed = false;
           nxrmutex_unlock(&upper->lock);
         }
         break;
