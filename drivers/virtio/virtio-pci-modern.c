@@ -176,10 +176,10 @@ static void virtio_pci_modern_write_config(FAR struct virtio_device *vdev,
 static void virtio_pci_modern_read_config(FAR struct virtio_device *vdev,
                                           uint32_t offset, FAR void *dst,
                                           int length);
-static uint32_t
+static uint64_t
 virtio_pci_modern_get_features(FAR struct virtio_device *vdev);
 static void virtio_pci_modern_set_features(FAR struct virtio_device *vdev,
-                                           uint32_t features);
+                                           uint64_t features);
 static void virtio_pci_modern_notify(FAR struct virtqueue *vq);
 
 /****************************************************************************
@@ -560,17 +560,22 @@ static void virtio_pci_modern_read_config(FAR struct virtio_device *vdev,
  * Name: virtio_pci_modern_get_features
  ****************************************************************************/
 
-static uint32_t
+static uint64_t
 virtio_pci_modern_get_features(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
   FAR struct virtio_pci_common_cfg_s *cfg = vpdev->common;
-  uint32_t feature;
+  uint32_t feature_lo;
+  uint32_t feature_hi;
 
   pci_write_io_dword(vpdev->dev, (uintptr_t)&cfg->device_feature_select, 0);
-  pci_read_io_dword(vpdev->dev, (uintptr_t)&cfg->device_feature, &feature);
-  return feature;
+  pci_read_io_dword(vpdev->dev, (uintptr_t)&cfg->device_feature,
+                    &feature_lo);
+  pci_write_io_dword(vpdev->dev, (uintptr_t)&cfg->device_feature_select, 1);
+  pci_read_io_dword(vpdev->dev, (uintptr_t)&cfg->device_feature,
+                    &feature_hi);
+  return ((uint64_t)feature_hi << 32) | (uint64_t)feature_lo;
 }
 
 /****************************************************************************
@@ -578,7 +583,7 @@ virtio_pci_modern_get_features(FAR struct virtio_device *vdev)
  ****************************************************************************/
 
 static void virtio_pci_modern_set_features(FAR struct virtio_device *vdev,
-                                           uint32_t features)
+                                           uint64_t features)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
@@ -587,7 +592,8 @@ static void virtio_pci_modern_set_features(FAR struct virtio_device *vdev,
   pci_write_io_dword(vpdev->dev, (uintptr_t)&cfg->driver_feature_select, 0);
   pci_write_io_dword(vpdev->dev, (uintptr_t)&cfg->driver_feature, features);
   pci_write_io_dword(vpdev->dev, (uintptr_t)&cfg->driver_feature_select, 1);
-  pci_write_io_dword(vpdev->dev, (uintptr_t)&cfg->driver_feature, 0);
+  pci_write_io_dword(vpdev->dev, (uintptr_t)&cfg->driver_feature,
+                     features >> 32);
   vdev->features = features;
 }
 
