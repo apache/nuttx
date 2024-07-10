@@ -42,4 +42,4 @@ LDNXFLATFLAGS = -e main -s 2048
 # ELF module definitions
 
 LDELFFLAGS = -r -e main
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)

@@ -1,5 +1,5 @@
 ############################################################################
-# arch/misoc/src/minerva/Toolchain.defs
+# arch/x86/src/common/Toolchain.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,42 +18,34 @@
 #
 ############################################################################
 
-CROSSDEV = riscv32-unknown-elf-
-ARCHCPUFLAGS = -march=rv32i
-
-ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
-else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
-  ARCHOPTIMIZATION += -Os
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g3
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -fno-strict-aliasing
+  ARCHOPTIMIZATION += -O2
 endif
 
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  ARCHOPTIMIZATION += -fomit-frame-pointer
+ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-stack-protector
+ARCHPICFLAGS = -fpic
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+
+# Check if building a 32-bit target with a 64-bit toolchain
+
+ifeq ($(CONFIG_ARCH_X86_M32),y)
+ARCHCPUFLAGS += -m32
+LDFLAGS += -m elf_i386
 endif
 
-LDFLAGS += -nostdlib
+# We have to use a cross-development toolchain under Cygwin because the native
+# Cygwin toolchains don't generate ELF binaries.
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
+ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
+CROSSDEV = i486-nuttx-elf-
 endif
-
-ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common
-
-ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
-ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
-
-# Default toolchain
 
 CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E -P -x c
+CPP = $(CROSSDEV)gcc -E -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
@@ -61,21 +53,9 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
-# Add the builtin library
-
-EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name))
-
-ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
-  ARCHCXXFLAGS += -nostdinc++
-endif
-
-ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
-  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
-endif
-
-ifeq ($(CONFIG_LIBSUPCXX),y)
-  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
-endif
+CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 # Loadable module definitions
 

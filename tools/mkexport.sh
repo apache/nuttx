@@ -188,7 +188,7 @@ APPLD=gnu-elf.ld
 if [ -f "${BOARDDIR}/scripts/${APPLD}" ]; then
   cp -f "${BOARDDIR}/scripts/${APPLD}" "${EXPORTDIR}/scripts/."
 else
-  cp -f "${TOPDIR}/binfmt/libelf/${APPLD}" "${EXPORTDIR}/scripts/."
+  cp -f "${TOPDIR}/libs/libc/modlib/${APPLD}" "${EXPORTDIR}/scripts/."
 fi
 
 if [ "${NUTTX_BUILD}" = "kernel" ]; then

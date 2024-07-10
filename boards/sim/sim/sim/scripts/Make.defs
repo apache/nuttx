@@ -280,7 +280,7 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
 endif
 
 LDELFFLAGS = -r -e main --gc-sections
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 ifeq ($(CONFIG_HOST_MACOS),y)
   LDFLAGS += -Wl,-dead_strip

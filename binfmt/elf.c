@@ -33,9 +33,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
-#include <nuttx/binfmt/elf.h>
-
-#include "libelf/libelf.h"
 
 #ifdef CONFIG_ELF
 
