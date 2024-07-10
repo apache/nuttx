@@ -99,7 +99,10 @@ static unsigned int g_wdtimernested;
 static inline_function void wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
+  irqstate_t flags;
   wdentry_t func;
+
+  flags = enter_critical_section();
 
 #ifdef CONFIG_SCHED_TICKLESS
   /* Increment the nested watchdog timer count to handle cases where wd_start
@@ -144,6 +147,8 @@ static inline_function void wd_expiration(clock_t ticks)
 
   g_wdtimernested--;
 #endif
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -380,6 +385,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
 clock_t wd_timer(clock_t ticks, bool noswitches)
 {
   FAR struct wdog_s *wdog;
+  irqstate_t flags;
   sclock_t ret;
 
   /* Check if the watchdog at the head of the list is ready to run */
@@ -389,10 +395,13 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
       wd_expiration(ticks);
     }
 
+  flags = enter_critical_section();
+
   /* Return the delay for the next watchdog to expire */
 
   if (list_is_empty(&g_wdactivelist))
     {
+      leave_critical_section(flags);
       return CLOCK_MAX;
     }
 
@@ -402,6 +411,8 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
 
   wdog = list_first_entry(&g_wdactivelist, struct wdog_s, node);
   ret = wdog->expired - ticks;
+
+  leave_critical_section(flags);
 
   /* Return the delay for the next watchdog to expire */
 

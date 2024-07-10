@@ -109,13 +109,15 @@ static inline void nxsched_cpu_scheduler(int cpu)
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static inline void nxsched_process_scheduler(void)
 {
-#ifdef CONFIG_SMP
   irqstate_t flags;
   int i;
 
-  /* If we are running on a single CPU architecture, then we know interrupts
-   * are disabled and there is no need to explicitly call
-   * enter_critical_section().  However, in the SMP case,
+  /* Single CPU case:
+   * For nested interrupts, higher IRQs may interrupt nxsched_cpu_scheduler()
+   * but nxsched_cpu_scheduler() requires that interrupts be disabled.
+   * We are in ISR context, no meaning we are disabled the interrupts.
+   *
+   * SMP case:
    * enter_critical_section() does much more than just disable interrupts on
    * the local CPU; it also manages spinlocks to assure the stability of the
    * TCB that we are manipulating.
@@ -131,51 +133,9 @@ static inline void nxsched_process_scheduler(void)
     }
 
   leave_critical_section(flags);
-
-#else
-  /* Perform scheduler operations on the single CPUs */
-
-  nxsched_cpu_scheduler(0);
-#endif
 }
 #else
 #  define nxsched_process_scheduler()
-#endif
-
-/****************************************************************************
- * Name: nxsched_process_wdtimer
- *
- * Description:
- *   Wdog timer process, should with critical_section when SMP mode.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-static inline void nxsched_process_wdtimer(clock_t ticks)
-{
-  irqstate_t flags;
-
-  /* We are in an interrupt handler and, as a consequence, interrupts are
-   * disabled.  But in the SMP case, interrupts MAY be disabled only on
-   * the local CPU since most architectures do not permit disabling
-   * interrupts on other CPUS.
-   *
-   * Hence, we must follow rules for critical sections even here in the
-   * SMP case.
-   */
-
-  flags = enter_critical_section();
-  wd_timer(ticks);
-  leave_critical_section(flags);
-}
-#else
-#  define nxsched_process_wdtimer(ticks) wd_timer(ticks)
 #endif
 
 /****************************************************************************
@@ -236,7 +196,7 @@ void nxsched_process_timer(void)
 
   /* Process watchdogs */
 
-  nxsched_process_wdtimer(clock_systime_ticks());
+  wd_timer(clock_systime_ticks());
 
 #ifdef CONFIG_SYSTEMTICK_HOOK
   /* Call out to a user-provided function in order to perform board-specific,
