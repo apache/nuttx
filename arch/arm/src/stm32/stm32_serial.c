@@ -403,10 +403,8 @@
 struct up_dev_s
 {
   struct uart_dev_s dev;       /* Generic UART device */
-  uint16_t          sr;        /* Saved status bits */
 
   /* Has been initialized and HW is setup. */
-
   bool              initialized;
 
   /* If termios are supported, then the following fields may vary at
@@ -2048,6 +2046,7 @@ static void up_detach(struct uart_dev_s *dev)
 static int up_interrupt(int irq, void *context, void *arg)
 {
   struct up_dev_s *priv = (struct up_dev_s *)arg;
+  uint32_t sr;
   int  passes;
   bool handled;
 
@@ -2069,8 +2068,7 @@ static int up_interrupt(int irq, void *context, void *arg)
       handled = false;
 
       /* Get the masked USART status word. */
-
-      priv->sr = up_serialin(priv, STM32_USART_SR_OFFSET);
+      sr = up_serialin(priv, STM32_USART_SR_OFFSET);
 
       /* USART interrupts:
        *
@@ -2101,9 +2099,7 @@ static int up_interrupt(int irq, void *context, void *arg)
        * will not know that...
        */
 
-      if (((priv->sr & USART_SR_TC) != 0) &&
-          ((priv->ie & USART_CR1_TCIE) != 0) &&
-          ((priv->ie & USART_CR1_TXEIE) == 0))
+      if ((sr & USART_SR_TC) != 0)
         {
           stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
           up_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
@@ -2112,7 +2108,7 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       /* Handle incoming, receive bytes. */
 
-      if ((priv->sr & USART_SR_RXNE) != 0)
+      if ((sr & USART_SR_RXNE) != 0)
         {
           /* Received data ready... process incoming bytes.
            * NOTE the check for RXNEIE:  
@@ -2127,7 +2123,7 @@ static int up_interrupt(int irq, void *context, void *arg)
        * error conditions.
        */
 
-      else if ((priv->sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE)) != 0)
+      else if ((sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE)) != 0)
         {
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
     defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
@@ -2152,7 +2148,7 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       /* Handle outgoing, transmit bytes */
 
-      if ((priv->sr & USART_SR_TXE) != 0)
+      if ((sr & USART_SR_TXE) != 0)
         {
           /* Transmit data register empty... process outgoing bytes */
 
@@ -2439,18 +2435,18 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint32_t rdr;
+  uint32_t sr;
 
   /* Get the Rx byte */
-
   rdr      = up_serialin(priv, STM32_USART_RDR_OFFSET);
 
-  /* Get the Rx byte plux error information.  Return those in status */
+  /* Read Status Register */
+  sr       = up_serialin(priv, STM32_USART_RDR_OFFSET);
 
-  *status  = priv->sr << 16 | rdr;
-  priv->sr = 0;
+  /* Get the Rx byte plux error information.  Return those in status */
+  *status  = sr << 16 | rdr;
 
   /* Then return the actual received byte */
-
   return rdr & 0xff;
 }
 #endif
