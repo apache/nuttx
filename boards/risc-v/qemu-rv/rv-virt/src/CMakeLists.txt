@@ -31,9 +31,11 @@ endif()
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_QEMU_RV)
-
   if(CONFIG_BUILD_KERNEL)
     set(LDFILE ld-kernel.script)
+    if(CONFIG_NUTTSBI)
+      set(LDFILE ld-nuttsbi.script)
+    endif()
   else()
     set(LDFILE ld.script)
   endif()
