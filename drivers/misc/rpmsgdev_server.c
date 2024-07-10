@@ -112,7 +112,6 @@ static bool rpmsgdev_ns_match(FAR struct rpmsg_device *rdev,
 static void rpmsgdev_ns_bind(FAR struct rpmsg_device *rdev,
                              FAR void *priv, FAR const char *name,
                              uint32_t dest);
-static void rpmsgdev_ns_unbind(FAR struct rpmsg_endpoint *ept);
 static int  rpmsgdev_ept_cb(FAR struct rpmsg_endpoint *ept,
                             FAR void *data, size_t len, uint32_t src,
                             FAR void *priv);
@@ -425,41 +424,10 @@ static bool rpmsgdev_ns_match(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
- * Name: rpmsgdev_ns_bind
+ * Name: rpmsgdev_ept_release
  ****************************************************************************/
 
-static void rpmsgdev_ns_bind(FAR struct rpmsg_device *rdev,
-                             FAR void *priv, FAR const char *name,
-                             uint32_t dest)
-{
-  FAR struct rpmsgdev_server_s *server;
-  int ret;
-
-  server = kmm_zalloc(sizeof(*server));
-  if (server == NULL)
-    {
-      return;
-    }
-
-  list_initialize(&server->head);
-  nxmutex_init(&server->lock);
-  server->ept.priv = server;
-
-  ret = rpmsg_create_ept(&server->ept, rdev, name,
-                         RPMSG_ADDR_ANY, dest,
-                         rpmsgdev_ept_cb, rpmsgdev_ns_unbind);
-  if (ret < 0)
-    {
-      nxmutex_destroy(&server->lock);
-      kmm_free(server);
-    }
-}
-
-/****************************************************************************
- * Name: rpmsgdev_ns_unbind
- ****************************************************************************/
-
-static void rpmsgdev_ns_unbind(FAR struct rpmsg_endpoint *ept)
+static void rpmsgdev_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsgdev_server_s *server = ept->priv;
   FAR struct rpmsgdev_device_s *dev;
@@ -486,8 +454,39 @@ static void rpmsgdev_ns_unbind(FAR struct rpmsg_endpoint *ept)
 
   nxmutex_unlock(&server->lock);
 
-  rpmsg_destroy_ept(&server->ept);
   kmm_free(server);
+}
+
+/****************************************************************************
+ * Name: rpmsgdev_ns_bind
+ ****************************************************************************/
+
+static void rpmsgdev_ns_bind(FAR struct rpmsg_device *rdev,
+                             FAR void *priv, FAR const char *name,
+                             uint32_t dest)
+{
+  FAR struct rpmsgdev_server_s *server;
+  int ret;
+
+  server = kmm_zalloc(sizeof(*server));
+  if (server == NULL)
+    {
+      return;
+    }
+
+  list_initialize(&server->head);
+  nxmutex_init(&server->lock);
+  server->ept.priv = server;
+  server->ept.release_cb = rpmsgdev_ept_release;
+
+  ret = rpmsg_create_ept(&server->ept, rdev, name,
+                         RPMSG_ADDR_ANY, dest,
+                         rpmsgdev_ept_cb, rpmsg_destroy_ept);
+  if (ret < 0)
+    {
+      nxmutex_destroy(&server->lock);
+      kmm_free(server);
+    }
 }
 
 /****************************************************************************

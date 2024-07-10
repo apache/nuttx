@@ -131,7 +131,6 @@ static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
 static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
                             FAR void *priv_, FAR const char *name,
                             uint32_t dest);
-static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept);
 static int  rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
                            FAR void *data, size_t len, uint32_t src,
                            FAR void *priv);
@@ -888,33 +887,7 @@ static bool rpmsgfs_ns_match(FAR struct rpmsg_device *rdev,
   return !strncmp(name, RPMSGFS_NAME_PREFIX, strlen(RPMSGFS_NAME_PREFIX));
 }
 
-static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
-                            FAR void *priv_, FAR const char *name,
-                            uint32_t dest)
-{
-  FAR struct rpmsgfs_server_s *priv;
-  int ret;
-
-  priv = fs_heap_zalloc(sizeof(*priv));
-  if (!priv)
-    {
-      return;
-    }
-
-  priv->ept.priv = priv;
-  nxmutex_init(&priv->lock);
-
-  ret = rpmsg_create_ept(&priv->ept, rdev, name,
-                         RPMSG_ADDR_ANY, dest,
-                         rpmsgfs_ept_cb, rpmsgfs_ns_unbind);
-  if (ret)
-    {
-      nxmutex_destroy(&priv->lock);
-      fs_heap_free(priv);
-    }
-}
-
-static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept)
+static void rpmsgfs_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsgfs_server_s *priv = ept->priv;
   int i;
@@ -941,12 +914,38 @@ static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept)
         }
     }
 
-  rpmsg_destroy_ept(&priv->ept);
   nxmutex_destroy(&priv->lock);
 
   fs_heap_free(priv->files);
   fs_heap_free(priv->dirs);
   fs_heap_free(priv);
+}
+
+static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
+                            FAR void *priv_, FAR const char *name,
+                            uint32_t dest)
+{
+  FAR struct rpmsgfs_server_s *priv;
+  int ret;
+
+  priv = fs_heap_zalloc(sizeof(*priv));
+  if (!priv)
+    {
+      return;
+    }
+
+  priv->ept.priv = priv;
+  priv->ept.release_cb = rpmsgfs_ept_release;
+  nxmutex_init(&priv->lock);
+
+  ret = rpmsg_create_ept(&priv->ept, rdev, name,
+                         RPMSG_ADDR_ANY, dest,
+                         rpmsgfs_ept_cb, rpmsg_destroy_ept);
+  if (ret)
+    {
+      nxmutex_destroy(&priv->lock);
+      fs_heap_free(priv);
+    }
 }
 
 static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
