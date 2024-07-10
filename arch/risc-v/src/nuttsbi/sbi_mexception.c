@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -32,7 +33,10 @@
 
 void sbi_mexception(uintreg_t mcause, uintreg_t *mepc, uintreg_t tval)
 {
-  UNUSED(mcause);
-  UNUSED(mepc);
-  UNUSED(tval);
+  sinfo("cauz=%"PRIxREG" epc=%p tval=0x%"PRIxREG"\n", mcause, mepc, tval);
+
+  while (1)
+    {
+      __asm__ __volatile__("wfi");
+    }
 }
