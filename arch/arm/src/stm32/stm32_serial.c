@@ -2689,32 +2689,7 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 #ifdef SERIAL_HAVE_RXDMA
 static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-  struct ctrl_regs_s cr =
-    {
-      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
-
-      /* Control Register 2 & 3 does not contain used interrupts */
-      .cr2 = 0,
-      .cr3 = 0
-    };
-
-  if (enable)
-    {
-      cr.cr1 |= USART_CR1_IDLEIE;
-    }
-  else
-    {
-      cr.cr1 &= ~USART_CR1_IDLEIE;
-    }
-
-  /* Then set the new interrupt state */
-
-  up_restoreusartint(priv, &cr);
-  leave_critical_section(flags);
+  /* struct up_dev_s *priv = (struct up_dev_s *)dev->priv; */
 }
 #endif
 

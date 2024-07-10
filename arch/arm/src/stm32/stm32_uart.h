@@ -539,20 +539,18 @@
 #endif
 
 #if defined(HAVE_RS485)
-#  define USART_CR1_USED_INTS    (USART_CR1_RXNEIE | USART_CR1_TXEIE | USART_CR1_PEIE | USART_CR1_TCIE)
+#  define USART_CR1_USED_INTS \
+         (USART_CR1_RXNEIE  | USART_CR1_TXEIE   | \
+          USART_CR1_PEIE    | USART_CR1_TCIE    | \
+          USART_CR1_IDLEIE)
 #else
-#  define USART_CR1_USED_INTS    (USART_CR1_RXNEIE | USART_CR1_TXEIE | USART_CR1_PEIE)
+#  define USART_CR1_USED_INTS \
+         (USART_CR1_RXNEIE  | USART_CR1_TXEIE   | \
+          USART_CR1_PEIE    | USART_CR1_IDLEIE)
 #endif
 
-#if defined(SERIAL_HAVE_RXTXDMA_OPS)
-#  define USART_CR3_USED_INTS    (USART_CR3_EIE | USART_CR3_DMAR | USART_CR3_DMAT)
-#elif defined(SERIAL_HAVE_RXDMA_OPS)
-#  define USART_CR3_USED_INTS    (USART_CR3_EIE | USART_CR3_DMAR)
-#elif defined(SERIAL_HAVE_TXDMA_OPS)
-#  define USART_CR3_USED_INTS    (USART_CR3_EIE | USART_CR3_DMAT)
-#else
-#  define USART_CR3_USED_INTS    (USART_CR3_EIE)
-#endif
+#define USART_CR3_USED_INTS \
+       (USART_CR3_EIE)
 
 /****************************************************************************
  * Public Types
