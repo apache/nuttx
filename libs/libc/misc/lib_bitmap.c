@@ -45,7 +45,7 @@
  *   offset - Offset of start to finding
  *
  * Returned Value:
- *   Return index position（0 ~ size-1）if finded, otherwise return size
+ *   Return index position (0 ~ size-1) if finded, otherwise return size
  ****************************************************************************/
 
 unsigned long find_next_bit(FAR const unsigned long *addr,
@@ -127,7 +127,7 @@ found_middle:
  *   offset - Offset of start to finding
  *
  * Returned Value:
- *   Return index position（0 ~ size-1）if Finded, otherwise return size
+ *   Return index position (0 ~ size-1) if Finded, otherwise return size
  ****************************************************************************/
 
 unsigned long find_next_zero_bit(FAR const unsigned long *addr,
