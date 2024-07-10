@@ -386,14 +386,6 @@
 #define INVALID_SERIAL_DMA_CHANNEL 0
 
 /* Keep track if a Break was set
- *
- * Note:
- *
- * 1) This value is set in the priv->ie but never written to the control
- *    register. It must not collide with USART_CR1_USED_INTS or USART_CR3_EIE
- * 2) USART_CR3_EIE is also carried in the up_dev_s ie member.
- *
- * See up_restoreusartint where the masking is done.
  */
 
 #ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
@@ -464,11 +456,11 @@ struct up_dev_s
   DMA_HANDLE        txdma;          /* currently-open trasnmit DMA stream */
 #endif
 
+  /* RX DMA state */
+
 #ifdef SERIAL_HAVE_RXDMA
   const unsigned int rxdma_channel; /* DMA channel assigned */
 #endif
-
-  /* RX DMA state */
 
 #ifdef SERIAL_HAVE_RXDMA
   DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
@@ -1322,8 +1314,8 @@ static inline void up_setusartint(struct up_dev_s *priv, struct ctrl_regs_s *cr)
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
   regval = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  regval &= ~USART_CR3_EIE;
-  regval |= (cr->cr3 & USART_CR3_EIE);
+  regval &= ~(USART_CR3_USED_INTS);
+  regval |= (cr->cr3 & (USART_CR3_USED_INTS));
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 }
 
@@ -1792,8 +1784,8 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Enable Rx, Tx, and the USART */
 
-  regval      = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
+  regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
+  regval |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
@@ -1841,7 +1833,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
 #endif
 
 #if defined(SERIAL_HAVE_RXDMA)
-  /* Acquire the DMA channel.  This should always succeed. */
+  /* Acquire the DMA channel. This should always succeed. */
 
   if (priv->rxdma_channel != INVALID_SERIAL_DMA_CHANNEL)
     {
@@ -1911,8 +1903,8 @@ static void up_shutdown(struct uart_dev_s *dev)
    * pin causes back-powering, potentially confusing the device to the point
    * of complete lock-up."
    *
-   * REVISIT:  Is unconfiguring the pins appropriate for all device?  If not,
-   * then this may need to be a configuration option.
+   * REVISIT:  Is unconfiguring the pins appropriate for all devices? 
+   * If not, then this may need to be a configuration option.
    */
 
   stm32_unconfiggpio(priv->tx_gpio);
@@ -2014,8 +2006,8 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt, priv);
   if (ret == OK)
     {
-      /* Enable the interrupt (RX and TX interrupts are still disabled
-       * in the USART
+      /* Enable the interrupt 
+       * (RX and TX interrupts are still disabled in the USART)
        */
 
       up_enable_irq(priv->irq);
@@ -2122,9 +2114,9 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       if ((priv->sr & USART_SR_RXNE) != 0)
         {
-          /* Received data ready... process incoming bytes.  NOTE the check
-           * for RXNEIE:  We cannot call uart_recvchards of RX interrupts are
-           * disabled.
+          /* Received data ready... process incoming bytes.
+           * NOTE the check for RXNEIE:  
+           * We cannot call uart_recvchards of RX interrupts are disabled.
            */
 
           uart_recvchars(&priv->dev);
@@ -2162,7 +2154,7 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       if ((priv->sr & USART_SR_TXE) != 0)
         {
-          /* Transmit data register empty ... process outgoing bytes */
+          /* Transmit data register empty... process outgoing bytes */
 
           uart_xmitchars(&priv->dev);
           handled = true;
@@ -2371,13 +2363,9 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         flags = enter_critical_section();
 
         /* Disable any further tx activity */
-
-        priv->ie |= USART_CR1_IE_BREAK_INPROGRESS;
-
         up_txint(dev, false);
 
         /* Configure TX as a GPIO output pin and Send a break signal */
-
         tx_break = GPIO_OUTPUT | (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) &
                                   priv->tx_gpio);
         stm32_configgpio(tx_break);
@@ -2393,13 +2381,9 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         flags = enter_critical_section();
 
         /* Configure TX back to U(S)ART */
-
         stm32_configgpio(priv->tx_gpio);
 
-        priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
-
         /* Enable further tx activity */
-
         up_txint(dev, true);
 
         leave_critical_section(flags);
@@ -2513,7 +2497,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register
+      /* Receive an interrupt when there is data in the Rx register
        * (or an Rx timeout occurs).
        */
 
@@ -2637,7 +2621,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
           return true;
         }
 
-      /* No.. The RX buffer is empty */
+      /* No... The RX buffer is empty */
 
       else
         {
@@ -2703,7 +2687,7 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   struct ctrl_regs_s cr =
     {
-      /* Control Register 2 is does not contain used interrupts */
+      /* Control Registers 1 & 2 is does not contain used interrupts */
       .cr1 = 0,
       .cr2 = 0,
 
@@ -2897,11 +2881,11 @@ static void up_dma_txint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   struct ctrl_regs_s cr = 
     { 
-      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
-
-      /* Control Registers 2 & 3 are not used */
+      /* Control Registers 1 & 2 are not used */
+      .cr1 = 0,
       .cr2 = 0,
-      .cr3 = 0
+
+      .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
     };
   if(enable)
     {
