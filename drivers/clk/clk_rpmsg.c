@@ -166,7 +166,6 @@ static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
                                   FAR void *priv_,
                                   FAR const char *name,
                                   uint32_t dest);
-static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept);
 
 static int clk_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                             FAR void *data, size_t len,
@@ -514,30 +513,7 @@ static bool clk_rpmsg_server_match(FAR struct rpmsg_device *rdev,
   return !strcmp(name, CLK_RPMSG_EPT_NAME);
 }
 
-static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
-                                  FAR void *priv_,
-                                  FAR const char *name,
-                                  uint32_t dest)
-{
-  FAR struct clk_rpmsg_server_s *priv;
-
-  priv = kmm_zalloc(sizeof(struct clk_rpmsg_server_s));
-  if (!priv)
-    {
-      return;
-    }
-
-  priv->ept.priv = priv;
-
-  list_initialize(&priv->clk_list);
-
-  rpmsg_create_ept(&priv->ept, rdev, name,
-                   RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                   clk_rpmsg_ept_cb,
-                   clk_rpmsg_server_unbind);
-}
-
-static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
+static void clk_rpmsg_server_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct clk_rpmsg_server_s *priv = ept->priv;
   FAR struct clk_rpmsg_s *clkrp_tmp;
@@ -555,9 +531,31 @@ static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
       kmm_free(clkrp);
     }
 
-  rpmsg_destroy_ept(ept);
-
   kmm_free(priv);
+}
+
+static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_,
+                                  FAR const char *name,
+                                  uint32_t dest)
+{
+  FAR struct clk_rpmsg_server_s *priv;
+
+  priv = kmm_zalloc(sizeof(struct clk_rpmsg_server_s));
+  if (!priv)
+    {
+      return;
+    }
+
+  priv->ept.priv = priv;
+  priv->ept.release_cb = clk_rpmsg_server_ept_release;
+
+  list_initialize(&priv->clk_list);
+
+  rpmsg_create_ept(&priv->ept, rdev, name,
+                   RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                   clk_rpmsg_ept_cb,
+                   rpmsg_destroy_ept);
 }
 
 static void clk_rpmsg_client_created(FAR struct rpmsg_device *rdev,

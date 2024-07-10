@@ -678,7 +678,16 @@ static int reset_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   return ret;
 }
 
-static void reset_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
+static bool reset_rpmsg_server_match(FAR struct rpmsg_device *rdev,
+                                     FAR void *priv,
+                                     FAR const char *name,
+                                     uint32_t dest)
+{
+  return strcmp(name, RESET_RPMSG_EPT_NAME) == 0;
+}
+
+static void reset_rpmsg_server_ept_release(FAR struct rpmsg_endpoint *ept,
+                                           FAR void *priv)
 {
   FAR struct reset_rpmsg_server_s *server = ept->priv;
   FAR struct reset_rpmsg_s *reset;
@@ -692,17 +701,8 @@ static void reset_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
       kmm_free(reset);
     }
 
-  rpmsg_destroy_ept(ept);
   nxmutex_destroy(&server->lock);
   kmm_free(server);
-}
-
-static bool reset_rpmsg_server_match(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv,
-                                     FAR const char *name,
-                                     uint32_t dest)
-{
-  return strcmp(name, RESET_RPMSG_EPT_NAME) == 0;
 }
 
 static void reset_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
@@ -719,13 +719,14 @@ static void reset_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
     }
 
   server->ept.priv = server;
+  server->ept.release_cb = reset_rpmsg_server_ept_release;
   list_initialize(&server->list);
   nxmutex_init(&server->lock);
 
   rpmsg_create_ept(&server->ept, rdev, name,
                    RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                    reset_rpmsg_ept_cb,
-                   reset_rpmsg_server_unbind);
+                   rpmsg_destroy_ept);
 }
 
 /****************************************************************************

@@ -85,7 +85,6 @@ static bool rpmsgmtd_ns_match(FAR struct rpmsg_device *rdev,
 static void rpmsgmtd_ns_bind(FAR struct rpmsg_device *rdev,
                              FAR void *priv, FAR const char *name,
                              uint32_t dest);
-static void rpmsgmtd_ns_unbind(FAR struct rpmsg_endpoint *ept);
 static int  rpmsgmtd_ept_cb(FAR struct rpmsg_endpoint *ept,
                             FAR void *data, size_t len, uint32_t src,
                             FAR void *priv);
@@ -353,6 +352,18 @@ static bool rpmsgmtd_ns_match(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
+ * Name: rpmsgmtd_ept_release
+ ****************************************************************************/
+
+static void rpmsgmtd_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsgmtd_server_s *server = ept->priv;
+
+  close_mtddriver(server->mtdnode);
+  kmm_free(server);
+}
+
+/****************************************************************************
  * Name: rpmsgmtd_ns_bind
  ****************************************************************************/
 
@@ -379,12 +390,13 @@ static void rpmsgmtd_ns_bind(FAR struct rpmsg_device *rdev,
     }
 
   server->ept.priv = server;
+  server->ept.release_cb = rpmsgmtd_ept_release;
   server->mtdnode  = mtdnode;
   server->dev      = mtdnode->u.i_mtd;
 
   ret = rpmsg_create_ept(&server->ept, rdev, name,
                          RPMSG_ADDR_ANY, dest,
-                         rpmsgmtd_ept_cb, rpmsgmtd_ns_unbind);
+                         rpmsgmtd_ept_cb, rpmsg_destroy_ept);
   if (ret < 0)
     {
       ferr("endpoint create failed, ret=%d\n", ret);
@@ -395,19 +407,6 @@ static void rpmsgmtd_ns_bind(FAR struct rpmsg_device *rdev,
   return;
 
 errout:
-  kmm_free(server);
-}
-
-/****************************************************************************
- * Name: rpmsgmtd_ns_unbind
- ****************************************************************************/
-
-static void rpmsgmtd_ns_unbind(FAR struct rpmsg_endpoint *ept)
-{
-  FAR struct rpmsgmtd_server_s *server = ept->priv;
-
-  rpmsg_destroy_ept(&server->ept);
-  close_mtddriver(server->mtdnode);
   kmm_free(server);
 }
 

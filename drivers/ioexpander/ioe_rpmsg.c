@@ -602,13 +602,6 @@ static int ioe_rpmsg_server_ept_cb(FAR struct rpmsg_endpoint *ept,
   return 0;
 }
 
-static void ioe_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
-{
-  rpmsg_destroy_ept(ept);
-
-  kmm_free(ept);
-}
-
 static bool ioe_rpmsg_server_match(FAR struct rpmsg_device *rdev,
                                    FAR void *priv_,
                                    FAR const char *name,
@@ -620,6 +613,11 @@ static bool ioe_rpmsg_server_match(FAR struct rpmsg_device *rdev,
   snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT, priv->name);
 
   return !strcmp(name, eptname);
+}
+
+static void ioe_rpmsg_server_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  kmm_free(ept);
 }
 
 static void ioe_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
@@ -637,9 +635,10 @@ static void ioe_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
     }
 
   ept->priv = priv;
+  ept->release_cb = ioe_rpmsg_server_ept_release;
 
   rpmsg_create_ept(ept, rdev, name, RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                   ioe_rpmsg_server_ept_cb, ioe_rpmsg_server_unbind);
+                   ioe_rpmsg_server_ept_cb, rpmsg_destroy_ept);
 }
 
 /****************************************************************************

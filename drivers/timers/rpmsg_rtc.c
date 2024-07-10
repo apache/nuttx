@@ -620,19 +620,6 @@ static int rpmsg_rtc_server_destroy(FAR struct rtc_lowerhalf_s *lower)
 }
 #endif
 
-static void rpmsg_rtc_server_ns_unbind(FAR struct rpmsg_endpoint *ept)
-{
-  FAR struct rpmsg_rtc_client_s *client = container_of(ept,
-                                            struct rpmsg_rtc_client_s, ept);
-  FAR struct rpmsg_rtc_server_s *server = ept->priv;
-
-  nxmutex_lock(&server->lock);
-  list_delete(&client->node);
-  nxmutex_unlock(&server->lock);
-  rpmsg_destroy_ept(&client->ept);
-  kmm_free(client);
-}
-
 #ifdef CONFIG_RTC_ALARM
 static void rpmsg_rtc_server_alarm_cb(FAR void *priv, int alarmid)
 {
@@ -720,6 +707,18 @@ static bool rpmsg_rtc_server_ns_match(FAR struct rpmsg_device *rdev,
   return !strcmp(name, RPMSG_RTC_EPT_NAME);
 }
 
+static void rpmsg_rtc_server_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsg_rtc_client_s *client = container_of(ept,
+                                            struct rpmsg_rtc_client_s, ept);
+  FAR struct rpmsg_rtc_server_s *server = ept->priv;
+
+  nxmutex_lock(&server->lock);
+  list_delete(&client->node);
+  nxmutex_unlock(&server->lock);
+  kmm_free(client);
+}
+
 static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
                                      FAR void *priv,
                                      FAR const char *name,
@@ -737,10 +736,12 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
     }
 
   client->ept.priv = server;
+  client->ept.release_cb = rpmsg_rtc_server_ept_release;
+
   if (rpmsg_create_ept(&client->ept, rdev, RPMSG_RTC_EPT_NAME,
                        RPMSG_ADDR_ANY, dest,
                        rpmsg_rtc_server_ept_cb,
-                       rpmsg_rtc_server_ns_unbind) < 0)
+                       rpmsg_destroy_ept) < 0)
     {
       kmm_free(client);
       return;

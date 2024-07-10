@@ -153,7 +153,6 @@ static bool usrsock_rpmsg_ns_match(FAR struct rpmsg_device *rdev,
 static void usrsock_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
                                   FAR void *priv_, FAR const char *name,
                                   uint32_t dest);
-static void usrsock_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept);
 static int usrsock_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                                 FAR void *data, size_t len, uint32_t src,
                                 FAR void *priv);
@@ -1019,42 +1018,7 @@ static bool usrsock_rpmsg_ns_match(FAR struct rpmsg_device *rdev,
   return !strcmp(name, USRSOCK_RPMSG_EPT_NAME);
 }
 
-static void usrsock_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
-                                  FAR void *priv_, FAR const char *name,
-                                  uint32_t dest)
-{
-  FAR struct usrsock_rpmsg_s *priv = priv_;
-  FAR struct usrsock_rpmsg_ept_s *uept;
-  int ret;
-  int i;
-
-  uept = kmm_zalloc(sizeof(*uept));
-  if (!uept)
-    {
-      return;
-    }
-
-  uept->ept.priv = priv;
-  for (i = 0; i < CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC; i++)
-    {
-      sq_addlast(&uept->reqs[i].flink, &uept->req_free);
-    }
-
-  ret = rpmsg_create_ept(&uept->ept, rdev, USRSOCK_RPMSG_EPT_NAME,
-                         RPMSG_ADDR_ANY, dest,
-                         usrsock_rpmsg_ept_cb, usrsock_rpmsg_ns_unbind);
-  if (ret < 0)
-    {
-      kmm_free(uept);
-      return;
-    }
-
-#ifdef CONFIG_NETDB_DNSCLIENT
-  dns_register_notify(usrsock_rpmsg_send_dns_event, &uept->ept);
-#endif
-}
-
-static void usrsock_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
+static void usrsock_rpmsg_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct usrsock_rpmsg_s *priv = ept->priv;
   int i;
@@ -1080,8 +1044,43 @@ static void usrsock_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
         }
     }
 
-  rpmsg_destroy_ept(ept);
   kmm_free(ept);
+}
+
+static void usrsock_rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_, FAR const char *name,
+                                  uint32_t dest)
+{
+  FAR struct usrsock_rpmsg_s *priv = priv_;
+  FAR struct usrsock_rpmsg_ept_s *uept;
+  int ret;
+  int i;
+
+  uept = kmm_zalloc(sizeof(*uept));
+  if (!uept)
+    {
+      return;
+    }
+
+  uept->ept.priv = priv;
+  uept->ept.release_cb = usrsock_rpmsg_ept_release;
+  for (i = 0; i < CONFIG_NET_USRSOCK_RPMSG_SERVER_NIOVEC; i++)
+    {
+      sq_addlast(&uept->reqs[i].flink, &uept->req_free);
+    }
+
+  ret = rpmsg_create_ept(&uept->ept, rdev, USRSOCK_RPMSG_EPT_NAME,
+                         RPMSG_ADDR_ANY, dest,
+                         usrsock_rpmsg_ept_cb, rpmsg_destroy_ept);
+  if (ret < 0)
+    {
+      kmm_free(uept);
+      return;
+    }
+
+#ifdef CONFIG_NETDB_DNSCLIENT
+  dns_register_notify(usrsock_rpmsg_send_dns_event, &uept->ept);
+#endif
 }
 
 static int usrsock_rpmsg_ept_do_cb(FAR struct usrsock_rpmsg_ept_s *uept,

@@ -1311,7 +1311,41 @@ static int sensor_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
   return -EINVAL;
 }
 
-static void sensor_rpmsg_ns_unbind_cb(FAR struct rpmsg_endpoint *ept)
+static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct sensor_rpmsg_ept_s *sre;
+  FAR struct sensor_rpmsg_dev_s *dev;
+
+  sre = container_of(ept, struct sensor_rpmsg_ept_s, ept);
+
+  nxrmutex_lock(&g_ept_lock);
+  list_add_tail(&g_eptlist, &sre->node);
+  nxrmutex_unlock(&g_ept_lock);
+
+  /* Broadcast all device to ready ept */
+
+  nxrmutex_lock(&g_dev_lock);
+  list_for_every_entry(&g_devlist, dev,
+                       struct sensor_rpmsg_dev_s, node)
+    {
+      sensor_rpmsg_lock(dev);
+      if (dev->nadvertisers > 0)
+        {
+          sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_ADVERTISE);
+        }
+
+      if (dev->nsubscribers > 0)
+        {
+          sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_SUBSCRIBE);
+        }
+
+      sensor_rpmsg_unlock(dev);
+    }
+
+  nxrmutex_unlock(&g_dev_lock);
+}
+
+static void sensor_rpmsg_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct sensor_rpmsg_ept_s *sre;
   FAR struct sensor_rpmsg_dev_s *dev;
@@ -1363,42 +1397,7 @@ static void sensor_rpmsg_ns_unbind_cb(FAR struct rpmsg_endpoint *ept)
   nxrmutex_unlock(&g_ept_lock);
 
   nxrmutex_destroy(&sre->lock);
-  rpmsg_destroy_ept(ept);
   kmm_free(sre);
-}
-
-static void sensor_rpmsg_device_ns_bound(FAR struct rpmsg_endpoint *ept)
-{
-  FAR struct sensor_rpmsg_ept_s *sre;
-  FAR struct sensor_rpmsg_dev_s *dev;
-
-  sre = container_of(ept, struct sensor_rpmsg_ept_s, ept);
-
-  nxrmutex_lock(&g_ept_lock);
-  list_add_tail(&g_eptlist, &sre->node);
-  nxrmutex_unlock(&g_ept_lock);
-
-  /* Broadcast all device to ready ept */
-
-  nxrmutex_lock(&g_dev_lock);
-  list_for_every_entry(&g_devlist, dev,
-                       struct sensor_rpmsg_dev_s, node)
-    {
-      sensor_rpmsg_lock(dev);
-      if (dev->nadvertisers > 0)
-        {
-          sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_ADVERTISE);
-        }
-
-      if (dev->nsubscribers > 0)
-        {
-          sensor_rpmsg_advsub_one(dev, ept, SENSOR_RPMSG_SUBSCRIBE);
-        }
-
-      sensor_rpmsg_unlock(dev);
-    }
-
-  nxrmutex_unlock(&g_dev_lock);
 }
 
 static void sensor_rpmsg_device_created(FAR struct rpmsg_device *rdev,
@@ -1416,10 +1415,12 @@ static void sensor_rpmsg_device_created(FAR struct rpmsg_device *rdev,
   sre->ept.priv = sre;
   nxrmutex_init(&sre->lock);
   sre->ept.ns_bound_cb = sensor_rpmsg_device_ns_bound;
+  sre->ept.release_cb = sensor_rpmsg_ept_release;
+
   if (rpmsg_create_ept(&sre->ept, rdev, SENSOR_RPMSG_EPT_NAME,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        sensor_rpmsg_ept_cb,
-                       sensor_rpmsg_ns_unbind_cb) < 0)
+                       rpmsg_destroy_ept) < 0)
     {
       nxrmutex_destroy(&sre->lock);
       kmm_free(sre);
