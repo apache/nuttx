@@ -700,6 +700,9 @@ static int tun_ifdown(FAR struct net_driver_s *dev)
 
   priv->bifup = false;
 
+  nxsem_post(&priv->read_wait_sem);
+  nxsem_post(&priv->write_wait_sem);
+
   leave_critical_section(flags);
   return OK;
 }
@@ -992,6 +995,12 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
           return ret;
         }
 
+      if (!priv->bifup)
+        {
+          ret = -ENETDOWN;
+          break;
+        }
+
       /* Check if there are free space to write */
 
       if (priv->write_d_len == 0)
@@ -1068,6 +1077,12 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
       if (ret < 0)
         {
           return ret;
+        }
+
+      if (!priv->bifup)
+        {
+          ret = -ENETDOWN;
+          break;
         }
 
       /* Check if there are data to read in write buffer */
