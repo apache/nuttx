@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_R_ARM_ARCH_TIMER_H
-#define __ARCH_ARM_SRC_ARMV7_R_ARM_ARCH_TIMER_H
+#ifndef __ARCH_ARM_SRC_ARMV8_R_ARM_ARCH_TIMER_H
+#define __ARCH_ARM_SRC_ARMV8_R_ARM_ARCH_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -55,4 +55,4 @@
 void arm_arch_timer_secondary_init(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_ARMV7_R_ARM_ARCH_TIMER_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_R_ARM_ARCH_TIMER_H */
