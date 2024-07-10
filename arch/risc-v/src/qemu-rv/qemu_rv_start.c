@@ -29,6 +29,7 @@
 #include <nuttx/serial/uart_16550.h>
 #include <arch/board/board.h>
 
+#include <debug.h>
 #include "riscv_internal.h"
 #include "chip.h"
 
@@ -43,6 +44,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_NUTTSBI_LATE_INIT
+#  define NAPOT_RWX     (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
+#  define NAPOT_RW      (PMPCFG_A_NAPOT | PMPCFG_R | PMPCFG_W)
+#  define SIZE_HALF     (UINT32_C(1) << 31)
+#endif
 
 #ifdef CONFIG_DEBUG_FEATURES
 #define showprogress(c) up_putc(c)
@@ -92,7 +99,11 @@ static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
           continue;
         }
 
+#ifndef CONFIG_NUTTSBI
       riscv_sbi_boot_secondary(i, (uintptr_t)&__start, dtb);
+#else
+      sinfo("TBD\n");
+#endif
     }
 }
 #endif
@@ -195,3 +206,13 @@ void riscv_serialinit(void)
   u16550_serialinit();
 #endif
 }
+
+#ifdef CONFIG_NUTTSBI_LATE_INIT
+void sbi_late_initialize(void)
+{
+  /* QEMU 6.2 doesn't support 0 size, so we do it explicitly here */
+
+  riscv_append_pmp_region(NAPOT_RW, 0, SIZE_HALF);
+  riscv_append_pmp_region(NAPOT_RWX, SIZE_HALF, SIZE_HALF);
+}
+#endif

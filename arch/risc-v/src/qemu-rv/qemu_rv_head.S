@@ -38,9 +38,15 @@
   /* Exported Symbols */
 
   .section .text
+#ifndef CONFIG_NUTTSBI
   .global __start
 
 __start:
+#else
+  .global __start_s
+
+__start_s:
+#endif
 
   /* Preserve a1 as it contains the pointer to DTB */
   /* Preserve a0 as it has mhartid */
