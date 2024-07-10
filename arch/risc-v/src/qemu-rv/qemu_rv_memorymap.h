@@ -39,12 +39,10 @@
 #define QEMU_RV_IDLESTACK_BASE  _ebss
 #endif
 
-#ifndef CONFIG_BUILD_KERNEL
 /* QEMU reset chocies */
 
 #define QEMU_RV_RESET_DONE         0x5555
 #define QEMU_RV_RESET_FAIL         0x3333
 #define QEMU_RV_RESET_REBOOT       0x7777
-#endif
 
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_QEMU_RV_MEMORYMAP_H */
