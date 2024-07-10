@@ -332,6 +332,8 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname)
               array[i]();
             }
 
+          modp->initarr = loadinfo.initarr;
+          modp->ninit = loadinfo.ninit;
           modp->finiarr = loadinfo.finiarr;
           modp->nfini = loadinfo.nfini;
           break;

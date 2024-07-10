@@ -179,6 +179,8 @@ struct module_s
 
   FAR struct module_s *dependencies[CONFIG_MODLIB_MAXDEPEND];
 #endif
+  uintptr_t initarr;                     /* .init_array */
+  uint16_t  ninit;                       /* Number of entries in .init_array */
   uintptr_t finiarr;                     /* .fini_array */
   uint16_t  nfini;                       /* Number of entries in .fini_array */
 };
