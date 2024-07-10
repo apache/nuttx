@@ -483,40 +483,38 @@ static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
-#if defined(SERIAL_HAVE_TXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS)
+
+#if !defined(SERIAL_HAVE_RXDMA)
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
+#else
+static int  up_dma_receive(struct uart_dev_s *dev, unsigned int *status);
+static void up_dma_rxint(struct uart_dev_s *dev, bool enable);
+static bool up_dma_rxavailable(struct uart_dev_s *dev);
+static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
+
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool up_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
                              bool upper);
 #endif
-static void up_send(struct uart_dev_s *dev, int ch);
-#if defined(SERIAL_HAVE_RXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS) || \
-    defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
-static void up_txint(struct uart_dev_s *dev, bool enable);
-#endif
-static bool up_txready(struct uart_dev_s *dev);
 
-#ifdef SERIAL_HAVE_TXDMA
+#if !defined(SERIAL_HAVE_TXDMA)
+static void up_txint(struct uart_dev_s *dev, bool enable);
+static void up_send(struct uart_dev_s *dev, int ch);
+#else
 static void up_dma_send(struct uart_dev_s *dev);
 static void up_dma_txint(struct uart_dev_s *dev, bool enable);
 static void up_dma_txavailable(struct uart_dev_s *dev);
 static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
 
+static bool up_txready(struct uart_dev_s *dev);
+
 #if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
 static int  up_dma_setup(struct uart_dev_s *dev);
 static void up_dma_shutdown(struct uart_dev_s *dev);
-#endif
-
-#ifdef SERIAL_HAVE_RXDMA
-static int  up_dma_receive(struct uart_dev_s *dev, unsigned int *status);
-static void up_dma_rxint(struct uart_dev_s *dev, bool enable);
-static bool up_dma_rxavailable(struct uart_dev_s *dev);
-
-static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
 
 #ifdef CONFIG_PM
@@ -1808,6 +1806,7 @@ static int up_setup(struct uart_dev_s *dev)
 static int up_dma_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  uint32_t regval;
   int result;
 
   /* Do the basic UART setup first, unless we are the console */
@@ -1828,6 +1827,13 @@ static int up_dma_setup(struct uart_dev_s *dev)
     {
       priv->txdma = stm32_dmachannel(priv->txdma_channel);
     }
+
+  /* Enable receive Tx DMA for the UART */
+
+  regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
+  regval |= USART_CR3_DMAT; 
+  up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
+
 #endif
 
 #if defined(SERIAL_HAVE_RXDMA)
@@ -1850,6 +1856,12 @@ static int up_dma_setup(struct uart_dev_s *dev)
        */
 
       priv->rxdmanext = 0;
+
+      /* Enable receive Rx DMA for the UART */
+
+      regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
+      regval |= USART_CR3_DMAR; 
+      up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
       /* Start the DMA channel, and arrange for callbacks at the half and
        * full points in the FIFO.  This ensures that we have half a FIFO
@@ -2459,7 +2471,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_TXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS)
+#if !defined(SERIAL_HAVE_RXDMA)
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -2683,20 +2695,23 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
   flags = enter_critical_section();
   struct ctrl_regs_s cr =
     {
-      /* Control Registers 1 & 2 is does not contain used interrupts */
-      .cr1 = 0,
-      .cr2 = 0,
+      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
 
-      .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
+      /* Control Register 2 & 3 does not contain used interrupts */
+      .cr2 = 0,
+      .cr3 = 0
     };
-  if(enable)
+
+  if (enable)
     {
-      cr.cr3 |= (USART_CR3_DMAR)
+      cr.cr1 |= USART_CR1_IDLEIE;
     }
-    else
+  else
     {
-      cr.cr3 &= ~(USART_CR3_DMAR)
+      cr.cr1 &= ~USART_CR1_IDLEIE;
     }
+
+  /* Then set the new interrupt state */
 
   up_restoreusartint(priv, &cr);
   leave_critical_section(flags);
@@ -2871,29 +2886,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  irqstate_t flags;
 
-  flags = enter_critical_section();
-  struct ctrl_regs_s cr = 
-    { 
-      /* Control Registers 1 & 2 are not used */
-      .cr1 = 0,
-      .cr2 = 0,
-
-      .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
-    };
-  if(enable)
-    {
-      cr.cr3 |= (USART_CR3_DMAT)
-    }
-    else
-    {
-      cr.cr3 &= ~(USART_CR3_DMAT)
-    }
-
-  up_restoreusartint(priv, &cr);
-  leave_critical_section(flags);
 }
 #endif
 
@@ -2905,8 +2898,7 @@ static void up_dma_txint(struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_RXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS) || \
-    defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
+#if !defined(SERIAL_HAVE_TXDMA) || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -3005,7 +2997,7 @@ static void up_dma_rxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 {
   struct up_dev_s *priv = (struct up_dev_s *)arg;
 
-  if (priv->rxenable && up_dma_rxavailable(&priv->dev))
+  if (up_dma_rxavailable(&priv->dev))
     {
       uart_recvchars(&priv->dev);
     }
