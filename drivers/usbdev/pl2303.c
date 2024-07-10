@@ -1378,7 +1378,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
                          ((FAR struct pl2303_driver_s *)driver)->dev;
   FAR struct pl2303_req_s *reqcontainer;
   irqstate_t flags;
-  uint16_t reqlen = CONFIG_PL2303_EPBULK_FSSIZE;
+  uint32_t reqlen = CONFIG_PL2303_EPBULK_FSSIZE;
   int ret;
   int i;
 

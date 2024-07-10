@@ -934,11 +934,11 @@ static int usbdev_fs_ep_bind(FAR struct usbdev_s *dev, uint8_t epno,
                              FAR struct usbdev_fs_ep_s *fs_ep)
 {
 #if defined(CONFIG_USBDEV_SUPERSPEED)
-  uint16_t reqsize = epinfo->sssize;
+  uint32_t reqsize = epinfo->sssize;
 #elif defined(CONFIG_USBDEV_DUALSPEED)
-  uint16_t reqsize = epinfo->hssize;
+  uint32_t reqsize = epinfo->hssize;
 #else
-  uint16_t reqsize = epinfo->fssize;
+  uint32_t reqsize = epinfo->fssize;
 #endif
   uint16_t i;
 
