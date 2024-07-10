@@ -36,4 +36,8 @@ ifeq ($(filter $(CONFIG_ESPRESSIF_SIMPLE_BOOT) \
 CHIP_CSRCS += esp_loader.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_TEMP),y)
+CHIP_CSRCS += esp_temperature_sensor.c
+endif
+
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include
