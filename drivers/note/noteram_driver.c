@@ -696,6 +696,7 @@ noteram_dump_find_task_context(FAR struct noteram_dump_context_s *ctx,
 
 static const char *get_taskname(pid_t pid)
 {
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
   FAR const char *taskname;
 
   taskname = note_get_taskname(pid);
@@ -703,6 +704,7 @@ static const char *get_taskname(pid_t pid)
     {
       return taskname;
     }
+#endif
 
   return "<noname>";
 }
