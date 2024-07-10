@@ -952,7 +952,7 @@ static int mpfs_req_write(struct mpfs_usbdev_s *priv,
           return -ENOENT;
         }
 
-      uinfo("epno=%d req=%p: len=%d xfrd=%d inflight=%d\n",
+      uinfo("epno=%d req=%p: len=%zu xfrd=%zu inflight=%d\n",
             epno, privreq, privreq->req.len, privreq->req.xfrd,
             privreq->inflight);
 
@@ -1131,7 +1131,7 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
           return OK;
         }
 
-      uinfo("EP%d: req.len=%d xfrd=%d recvsize=%d\n",
+      uinfo("EP%d: req.len=%zu xfrd=%zu recvsize=%d\n",
             epno, privreq->req.len, privreq->req.xfrd, recvsize);
 
       /* Ignore any attempt to receive a zero length packet */

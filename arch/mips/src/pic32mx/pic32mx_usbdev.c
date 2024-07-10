@@ -877,10 +877,10 @@ static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
   epno   = USB_EPNO(privep->ep.eplog);
 
 #ifdef CONFIG_USBDEV_NOWRITEAHEAD
-  uinfo("EP%d: len=%d xfrd=%d inflight=%d\n",
+  uinfo("EP%d: len=%zu xfrd=%zu inflight=%d\n",
         epno, privreq->req.len, privreq->req.xfrd, privreq->inflight[0]);
 #else
-  uinfo("EP%d: len=%d xfrd=%d inflight={%d, %d}\n",
+  uinfo("EP%d: len=%zu xfrd=%zu inflight={%d, %d}\n",
         epno, privreq->req.len, privreq->req.xfrd,
         privreq->inflight[0], privreq->inflight[1]);
 #endif
@@ -1199,7 +1199,7 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
       bytesleft = privreq->req.len;
     }
 
-  uinfo("epno=%d req=%p: len=%d xfrd=%d index=%d nullpkt=%d\n",
+  uinfo("epno=%d req=%p: len=%zu xfrd=%zu index=%d nullpkt=%d\n",
         epno, privreq, privreq->req.len, xfrd, index, privep->txnullpkt);
 
   /* Get the number of bytes left to be sent in the packet */
@@ -1314,7 +1314,7 @@ static int pic32mx_rdcomplete(struct pic32mx_usbdev_s *priv,
   bdtout = privep->bdtout;
   epno   = USB_EPNO(privep->ep.eplog);
 
-  uinfo("EP%d: len=%d xfrd=%d\n",
+  uinfo("EP%d: len=%zu xfrd=%zu\n",
         epno, privreq->req.len, privreq->req.xfrd);
   bdtinfo("EP%d BDT OUT [%p] {%08x, %08x}\n",
         epno, bdtout, bdtout->status, bdtout->addr);

@@ -1227,7 +1227,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
   FAR struct cdcacm_wrreq_s *wrcontainer;
   FAR struct cdcacm_rdreq_s *rdcontainer;
   irqstate_t flags;
-  uint16_t reqlen;
+  size_t reqlen;
   int ret;
   int i;
 
