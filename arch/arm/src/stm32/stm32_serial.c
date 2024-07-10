@@ -411,7 +411,6 @@
 struct up_dev_s
 {
   struct uart_dev_s dev;       /* Generic UART device */
-  uint16_t          ie;        /* Saved interrupt mask bits value */
   uint16_t          sr;        /* Saved status bits */
 
   /* Has been initialized and HW is setup. */
@@ -473,7 +472,6 @@ struct up_dev_s
 
 #ifdef SERIAL_HAVE_RXDMA
   DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
-  bool              rxenable;  /* DMA-based reception en/disable */
   uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
   char       *const rxfifo;    /* Receive DMA buffer */
 #endif
@@ -1800,10 +1798,6 @@ static int up_setup(struct uart_dev_s *dev)
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
-  /* Set up the cached interrupt enables value */
-
-  priv->ie    = 0;
-
   /* Mark device as initialized. */
 
   priv->initialized = true;
@@ -1843,11 +1837,6 @@ static int up_dma_setup(struct uart_dev_s *dev)
   if (priv->txdma_channel != INVALID_SERIAL_DMA_CHANNEL)
     {
       priv->txdma = stm32_dmachannel(priv->txdma_channel);
-
-      /* Enable receive Tx DMA for the UART */
-
-      modifyreg32(priv->usartbase + STM32_USART_CR3_OFFSET,
-                  0, USART_CR3_DMAT);
     }
 #endif
 
@@ -1871,11 +1860,6 @@ static int up_dma_setup(struct uart_dev_s *dev)
        */
 
       priv->rxdmanext = 0;
-
-      /* Enable receive Rx DMA for the UART */
-
-      modifyreg32(priv->usartbase + STM32_USART_CR3_OFFSET,
-                  0, USART_CR3_DMAR);
 
       /* Start the DMA channel, and arrange for callbacks at the half and
        * full points in the FIFO.  This ensures that we have half a FIFO
@@ -2714,16 +2698,28 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags;
 
-  /* En/disable DMA reception.
-   *
-   * Note that it is not safe to check for available bytes and immediately
-   * pass them to uart_recvchars as that could potentially recurse back
-   * to us again.  Instead, bytes must wait until the next up_dma_poll or
-   * DMA event.
-   */
+  flags = enter_critical_section();
+  struct ctrl_regs_s cr =
+    {
+      /* Control Register 2 is does not contain used interrupts */
+      .cr1 = 0,
+      .cr2 = 0,
 
-  priv->rxenable = enable;
+      .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
+    };
+  if(enable)
+    {
+      cr.cr3 |= (USART_CR3_DMAR)
+    }
+    else
+    {
+      cr.cr3 &= ~(USART_CR3_DMAR)
+    }
+
+  up_restoreusartint(priv, &cr);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -2895,14 +2891,29 @@ static void up_send(struct uart_dev_s *dev, int ch)
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_txint(struct uart_dev_s *dev, bool enable)
 {
-  /* Nothing to do. */
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags;
 
-  /* In case of DMA transfer we do not want to make use of UART interrupts.
-   * Instead, we use DMA interrupts that are activated once during boot
-   * sequence. Furthermore we can use up_dma_txcallback() to handle staff at
-   * half DMA transfer or after transfer completion (depending configuration,
-   * see stm32_dmastart(...) ).
-   */
+  flags = enter_critical_section();
+  struct ctrl_regs_s cr = 
+    { 
+      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
+
+      /* Control Registers 2 & 3 are not used */
+      .cr2 = 0,
+      .cr3 = 0
+    };
+  if(enable)
+    {
+      cr.cr3 |= (USART_CR3_DMAT)
+    }
+    else
+    {
+      cr.cr3 &= ~(USART_CR3_DMAT)
+    }
+
+  up_restoreusartint(priv, &cr);
+  leave_critical_section(flags);
 }
 #endif
 
@@ -2920,7 +2931,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
-  
+
   /* USART transmit interrupts:
    *
    * Enable             Status          Meaning                 Usage

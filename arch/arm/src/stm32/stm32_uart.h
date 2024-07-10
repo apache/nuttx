@@ -544,8 +544,15 @@
 #  define USART_CR1_USED_INTS    (USART_CR1_RXNEIE | USART_CR1_TXEIE | USART_CR1_PEIE)
 #endif
 
-/* TODO: Handle DMA enabled case */
-#define USART_CR3_USED_INTS      (USART_CR3_EIE)
+#ifdef SERIAL_HAVE_RXTXDMA_OPS
+#  define USART_CR3_USED_INTS    (USART_CR3_EIE | USART_CR3_DMAR | USART_CR3_DMAT)
+#elif SERIAL_HAVE_RXDMA_OPS
+#  define USART_CR3_USED_INTS    (USART_CR3_EIE | USART_CR3_DMAR)
+#elif SERIAL_HAVE_TXDMA_OPS
+#  define USART_CR3_USED_INTS    (USART_CR3_EIE | USART_CR3_DMAT)
+#else
+#  define USART_CR3_USED_INTS    (USART_CR3_EIE)
+#endif
 
 /****************************************************************************
  * Public Types
