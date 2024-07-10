@@ -253,8 +253,8 @@ struct usbdev_req_s
 {
   FAR uint8_t *buf; /* Call: Buffer used for data; Return: Unchanged */
   uint8_t  flags;   /* See USBDEV_REQFLAGS_* definitions */
-  uint16_t len;     /* Call: Total length of data in buf; Return: Unchanged */
-  uint16_t xfrd;    /* Call: zero; Return: Bytes transferred so far */
+  size_t len;       /* Call: Total length of data in buf; Return: Unchanged */
+  size_t xfrd;      /* Call: zero; Return: Bytes transferred so far */
   int16_t  result;  /* Call: zero; Return: Result of transfer (O or -errno) */
 
   /* Callback when the transfer completes */
@@ -398,7 +398,7 @@ extern "C"
  ****************************************************************************/
 
 FAR struct usbdev_req_s *usbdev_allocreq(FAR struct usbdev_ep_s *ep,
-                                         uint16_t len);
+                                         size_t len);
 
 /****************************************************************************
  * Name: usbdev_freereq

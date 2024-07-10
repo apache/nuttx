@@ -1019,7 +1019,7 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
 
   if (GETUINT32(tmp) != opts->nthsign)
     {
-      uerr("Wrong NTH SIGN, skblen %d\n", self->rdreq->xfrd);
+      uerr("Wrong NTH SIGN, skblen %zu\n", self->rdreq->xfrd);
       return;
     }
 
@@ -1423,7 +1423,7 @@ static void cdcncm_ep0incomplete(FAR struct usbdev_ep_s *ep,
 {
   if (req->result || req->xfrd != req->len)
     {
-      uerr("result: %hd, xfrd: %hu\n", req->result, req->xfrd);
+      uerr("result: %hd, xfrd: %zu\n", req->result, req->xfrd);
     }
 }
 
@@ -1443,7 +1443,7 @@ static void cdcncm_intcomplete(FAR struct usbdev_ep_s *ep,
 
   if (req->result || req->xfrd != req->len)
     {
-      uerr("result: %hd, xfrd: %hu\n", req->result, req->xfrd);
+      uerr("result: %hd, xfrd: %zu\n", req->result, req->xfrd);
     }
 
   if (self->notify != NCM_NOTIFY_NONE)
@@ -1473,7 +1473,7 @@ static void cdcncm_rdcomplete(FAR struct usbdev_ep_s *ep,
 {
   FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)ep->priv;
 
-  uinfo("buf: %p, flags 0x%hhx, len %hu, xfrd %hu, result %hd\n",
+  uinfo("buf: %p, flags 0x%hhx, len %zu, xfrd %zu, result %hd\n",
         req->buf, req->flags, req->len, req->xfrd, req->result);
 
   switch (req->result)
@@ -1514,7 +1514,7 @@ static void cdcncm_wrcomplete(FAR struct usbdev_ep_s *ep,
   FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)ep->priv;
   int rc;
 
-  uinfo("buf: %p, flags 0x%hhx, len %hu, xfrd %hu, result %hd\n",
+  uinfo("buf: %p, flags 0x%hhx, len %zu, xfrd %zu, result %hd\n",
         req->buf, req->flags, req->len, req->xfrd, req->result);
 
   /* The single USB device write request is available for upcoming

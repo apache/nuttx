@@ -1431,7 +1431,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           return -ENOENT;
         }
 
-      uinfo("epno=%d req=%p: len=%d xfrd=%d inflight=%d zlpneeded=%d\n",
+      uinfo("epno=%d req=%p: len=%zu xfrd=%zu inflight=%d zlpneeded=%d\n",
             epno, privreq, privreq->req.len, privreq->req.xfrd,
             privreq->inflight, privep->zlpneeded);
 
@@ -1671,7 +1671,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           return -ENOENT;
         }
 
-      uinfo("EP%d: len=%d xfrd=%d\n",
+      uinfo("EP%d: len=%zu xfrd=%zu\n",
             epno, privreq->req.len, privreq->req.xfrd);
 
       /* Ignore any attempt to receive a zero length packet */

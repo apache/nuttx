@@ -1255,7 +1255,7 @@ static void nrf53_epout_complete(struct nrf53_ep_s *privep)
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n", privep->epphy, privreq->req.len,
+  uinfo("EP%d: len=%zu xfrd=%zu\n", privep->epphy, privreq->req.len,
         privreq->req.xfrd);
 
   /* Return the completed read request to the class driver and mark the
@@ -1345,7 +1345,7 @@ static void nrf53_epout_receive(struct nrf53_ep_s *privep)
       return;
     }
 
-  uinfo("EP%d: len=%d xfrd=%d\n", privep->epphy,
+  uinfo("EP%d: len=%zu xfrd=%zu\n", privep->epphy,
         privreq->req.len, privreq->req.xfrd);
   usbtrace(TRACE_READ(privep->epphy), bcnt);
 
