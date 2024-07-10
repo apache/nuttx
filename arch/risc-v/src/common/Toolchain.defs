@@ -417,7 +417,7 @@ else
   LDELFFLAGS += --oformat elf64-littleriscv
 endif
 
-LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # Zig toolchain
 
