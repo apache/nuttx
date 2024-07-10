@@ -692,6 +692,16 @@ FAR void *modlib_insert(FAR const char *filename, FAR const char *modname);
 FAR const void *modlib_getsymbol(FAR void *handle, FAR const char *name);
 
 /****************************************************************************
+ * Name: modlib_uninit
+ *
+ * Description:
+ *   Uninitialize module resources.
+ *
+ ****************************************************************************/
+
+int modlib_uninit(FAR struct module_s *modp);
+
+/****************************************************************************
  * Name: modlib_remove
  *
  * Description:

@@ -36,41 +36,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: modlib_remove
+ * Name: modlib_uninit
  *
  * Description:
- *   Remove a previously installed module from memory.
- *
- * Input Parameters:
- *   handle - The module handler previously returned by modlib_insert().
- *
- * Returned Value:
- *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
- *   errno value is set appropriately.
+ *   Uninitialize module resources.
  *
  ****************************************************************************/
 
-int modlib_remove(FAR void *handle)
+int modlib_uninit(FAR struct module_s *modp)
 {
-  FAR struct module_s *modp = (FAR struct module_s *)handle;
   FAR void (**array)(void);
-  int ret;
+  int ret = OK;
   int i;
-
-  DEBUGASSERT(modp != NULL);
-
-  /* Get exclusive access to the module registry */
-
-  modlib_registry_lock();
-
-  /* Verify that the module is in the registry */
-
-  ret = modlib_registry_verify(modp);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to verify module: %d\n", ret);
-      goto errout_with_lock;
-    }
 
 #if CONFIG_MODLIB_MAXDEPEND > 0
   /* Refuse to remove any module that other modules may depend upon. */
@@ -78,8 +55,7 @@ int modlib_remove(FAR void *handle)
   if (modp->dependents > 0)
     {
       berr("ERROR: Module has dependents: %d\n", modp->dependents);
-      ret = -EBUSY;
-      goto errout_with_lock;
+      return -EBUSY;
     }
 #endif
 
@@ -102,7 +78,7 @@ int modlib_remove(FAR void *handle)
       if (ret < 0)
         {
           berr("ERROR: Failed to uninitialize the module: %d\n", ret);
-          goto errout_with_lock;
+          return ret;
         }
 
       modlib_freesymtab(modp);
@@ -183,6 +159,57 @@ int modlib_remove(FAR void *handle)
 #endif
     }
 
+#if CONFIG_MODLIB_MAXDEPEND > 0
+  /* Eliminate any dependencies that this module has on other modules */
+
+  modlib_undepend(modp);
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: modlib_remove
+ *
+ * Description:
+ *   Remove a previously installed module from memory.
+ *
+ * Input Parameters:
+ *   handle - The module handler previously returned by modlib_insert().
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  On any failure, -1 (ERROR) is returned the
+ *   errno value is set appropriately.
+ *
+ ****************************************************************************/
+
+int modlib_remove(FAR void *handle)
+{
+  FAR struct module_s *modp = (FAR struct module_s *)handle;
+  int ret;
+
+  DEBUGASSERT(modp != NULL);
+
+  /* Get exclusive access to the module registry */
+
+  modlib_registry_lock();
+
+  /* Verify that the module is in the registry */
+
+  ret = modlib_registry_verify(modp);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to verify module: %d\n", ret);
+      goto errout_with_lock;
+    }
+
+  ret = modlib_uninit(modp);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to uninitialize module %d\n", ret);
+      goto errout_with_lock;
+    }
+
   /* Remove the module from the registry */
 
   ret = modlib_registry_del(modp);
@@ -193,17 +220,11 @@ int modlib_remove(FAR void *handle)
       goto errout_with_lock;
     }
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
-  /* Eliminate any dependencies that this module has on other modules */
-
-  modlib_undepend(modp);
-#endif
   modlib_registry_unlock();
 
   /* And free the registry entry */
 
-  lib_free(modp);
-  return OK;
+  return ret;
 
 errout_with_lock:
   modlib_registry_unlock();
