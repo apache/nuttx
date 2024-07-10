@@ -221,11 +221,11 @@ static void virtio_mmio_write_config(FAR struct virtio_device *vdev,
 static void virtio_mmio_read_config(FAR struct virtio_device *vdev,
                                     uint32_t offset, FAR void *dst,
                                     int length);
-static uint32_t virtio_mmio_get_features(FAR struct virtio_device *vdev);
+static uint64_t virtio_mmio_get_features(FAR struct virtio_device *vdev);
 static void virtio_mmio_set_features(FAR struct virtio_device *vdev,
-                                     uint32_t features);
-static uint32_t virtio_mmio_negotiate_features(struct virtio_device *vdev,
-                                               uint32_t features);
+                                     uint64_t features);
+static uint64_t virtio_mmio_negotiate_features(struct virtio_device *vdev,
+                                               uint64_t features);
 static void virtio_mmio_reset_device(FAR struct virtio_device *vdev);
 static void virtio_mmio_notify(FAR struct virtqueue *vq);
 
@@ -652,13 +652,18 @@ byte_read:
  * Name: virtio_mmio_get_features
  ****************************************************************************/
 
-static uint32_t virtio_mmio_get_features(FAR struct virtio_device *vdev)
+static uint64_t virtio_mmio_get_features(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_mmio_device_s *vmdev =
     (FAR struct virtio_mmio_device_s *)vdev;
+  uint32_t feature_lo;
+  uint32_t feature_hi;
 
   metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_DRIVER_FEATURES_SEL, 0);
-  return metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_DEVICE_FEATURES);
+  feature_lo = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_DEVICE_FEATURES);
+  metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_DRIVER_FEATURES_SEL, 1);
+  feature_hi = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_DEVICE_FEATURES);
+  return ((uint64_t)feature_hi << 32) | (uint64_t)feature_lo;
 }
 
 /****************************************************************************
@@ -666,13 +671,16 @@ static uint32_t virtio_mmio_get_features(FAR struct virtio_device *vdev)
  ****************************************************************************/
 
 static void virtio_mmio_set_features(FAR struct virtio_device *vdev,
-                                     uint32_t features)
+                                     uint64_t features)
 {
   FAR struct virtio_mmio_device_s *vmdev =
     (FAR struct virtio_mmio_device_s *)vdev;
 
   metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_DRIVER_FEATURES_SEL, 0);
   metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_DRIVER_FEATURES, features);
+  metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_DRIVER_FEATURES_SEL, 1);
+  metal_io_write32(&vmdev->cfg_io, VIRTIO_MMIO_DRIVER_FEATURES,
+                   features >> 32);
   vdev->features = features;
 }
 
@@ -680,8 +688,8 @@ static void virtio_mmio_set_features(FAR struct virtio_device *vdev,
  * Name: virtio_mmio_negotiate_features
  ****************************************************************************/
 
-static uint32_t virtio_mmio_negotiate_features(struct virtio_device *vdev,
-                                               uint32_t features)
+static uint64_t virtio_mmio_negotiate_features(struct virtio_device *vdev,
+                                               uint64_t features)
 {
   features = features & virtio_mmio_get_features(vdev);
   virtio_mmio_set_features(vdev, features);

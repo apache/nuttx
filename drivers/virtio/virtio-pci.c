@@ -448,9 +448,9 @@ void virtio_pci_delete_virtqueues(FAR struct virtio_device *vdev)
  * Name: virtio_pci_negotiate_features
  ****************************************************************************/
 
-uint32_t
+uint64_t
 virtio_pci_negotiate_features(FAR struct virtio_device *vdev,
-                                     uint32_t features)
+                              uint64_t features)
 {
   features = features & vdev->func->get_features(vdev);
   vdev->func->set_features(vdev, features);

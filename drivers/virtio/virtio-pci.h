@@ -108,9 +108,9 @@ struct virtio_pci_device_s
  ****************************************************************************/
 
 void virtio_pci_reset_device(FAR struct virtio_device *vdev);
-uint32_t
+uint64_t
 virtio_pci_negotiate_features(FAR struct virtio_device *vdev,
-                              uint32_t features);
+                              uint64_t features);
 int virtio_pci_create_virtqueues(FAR struct virtio_device *vdev,
                                  unsigned int flags,
                                  unsigned int nvqs,

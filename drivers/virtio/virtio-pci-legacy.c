@@ -122,10 +122,10 @@ static void virtio_pci_legacy_write_config(FAR struct virtio_device *vdev,
 static void virtio_pci_legacy_read_config(FAR struct virtio_device *vdev,
                                           uint32_t offset, FAR void *dst,
                                           int length);
-static uint32_t
+static uint64_t
 virtio_pci_legacy_get_features(FAR struct virtio_device *vdev);
 static void virtio_pci_legacy_set_features(FAR struct virtio_device *vdev,
-                                           uint32_t features);
+                                           uint64_t features);
 static void virtio_pci_legacy_notify(FAR struct virtqueue *vq);
 
 /****************************************************************************
@@ -367,7 +367,7 @@ static void virtio_pci_legacy_read_config(FAR struct virtio_device *vdev,
  * Name: virtio_pci_legacy_get_features
  ****************************************************************************/
 
-static uint32_t
+static uint64_t
 virtio_pci_legacy_get_features(FAR struct virtio_device *vdev)
 {
   FAR struct virtio_pci_device_s *vpdev =
@@ -385,14 +385,20 @@ virtio_pci_legacy_get_features(FAR struct virtio_device *vdev)
  ****************************************************************************/
 
 static void virtio_pci_legacy_set_features(FAR struct virtio_device *vdev,
-                                           uint32_t features)
+                                           uint64_t features)
 {
   FAR struct virtio_pci_device_s *vpdev =
     (FAR struct virtio_pci_device_s *)vdev;
 
+  if ((features >> 32) != 0)
+    {
+      features = (uint64_t)((uint32_t)features);
+      vrtwarn("Virtio pci legacy not support feature bits larger than 32\n");
+    }
+
   pci_write_io_dword(vpdev->dev,
                      (uintptr_t)(vpdev->ioaddr + VIRTIO_PCI_GUEST_FEATURES),
-                     vdev->features);
+                     features);
   vdev->features = features;
 }
 
