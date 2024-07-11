@@ -147,18 +147,6 @@ static inline_function bool up_interrupt_context(void)
   return up_current_regs() != NULL;
 }
 
-/****************************************************************************
- * Name: up_alloc_irq_msi
- * Name: up_release_irq_msi
- *
- * Description:
- *   Reserve/release vector for MSI
- *
- ****************************************************************************/
-
-int up_alloc_irq_msi(int *num);
-void up_release_irq_msi(int *irq, int num);
-
 #undef EXTERN
 #ifdef __cplusplus
 }
