@@ -72,4 +72,15 @@ uint32_t xmc4_get_coreclock(void);
 
 uint32_t xmc4_get_periphclock(void);
 
+/****************************************************************************
+ * Name: xmc4_get_ccuclock
+ *
+ * Description:
+ *   The ccu clock is either fCPU or fCPU/2, depending on the state
+ *   of the peripheral divider.
+ *
+ ****************************************************************************/
+
+uint32_t xmc4_get_ccuclock(void);
+
 #endif /* __ARCH_ARM_SRC_XMC4_XMC4_CLOCKCONFIG_H */

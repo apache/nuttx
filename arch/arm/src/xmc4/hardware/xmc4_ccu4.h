@@ -783,9 +783,9 @@
 #define CCU4_GSTAT_S2I_SHIFT          (2)                            /* Bits 2: CC42 IDLE status */
 #define CCU4_GSTAT_S2I_MASK           (1 << CCU4_GSTAT_S2I_SHIFT)
 #define CCU4_GSTAT_S3I_SHIFT          (3)                            /* Bits 3: CC43 IDLE status */
-#define CCU4_GSTAT_S3I_MASK           (1 << CCU4_GSTAT_SI_SHIFT)
+#define CCU4_GSTAT_S3I_MASK           (1 << CCU4_GSTAT_S3I_SHIFT)
 #define CCU4_GSTAT_PRB_SHIFT          (8)                            /* Bits 8: Prescaler Run Bit */
-#define CCU4_GSTAT_PRB_MASK           (1 << CCU4_GSTAT_SI_SHIFT)
+#define CCU4_GSTAT_PRB_MASK           (1 << CCU4_GSTAT_PRB_SHIFT)
 
 /* Global Idle Set (GIDLS) */
 
@@ -934,7 +934,7 @@
 /* Input Selector Configuration (CC4yINS) */
 
 #define CCU4_CC4_INS_EV0IS_SHIFT                (0)                                     /* Bits 0-3: Event 0 signal selection */
-#define CCU4_CC4_INS_EV0IS_MASK                 (15 << CCU4_CC4_INS_EV0IS_SHIFT)        
+#define CCU4_CC4_INS_EV0IS_MASK                 (15 << CCU4_CC4_INS_EV0IS_SHIFT)
 #   define CCU4_CC4_INS_EV0IS_INA               (0 << CCU4_CC4_INS_EV0IS_SHIFT)         /* CCU4x.INyA */
 #   define CCU4_CC4_INS_EV0IS_INB               (1 << CCU4_CC4_INS_EV0IS_SHIFT)         /* CCU4x.INyB */
 #   define CCU4_CC4_INS_EV0IS_INC               (2 << CCU4_CC4_INS_EV0IS_SHIFT)         /* CCU4x.INyC */
@@ -952,7 +952,7 @@
 #   define CCU4_CC4_INS_EV0IS_INO               (14 << CCU4_CC4_INS_EV0IS_SHIFT)        /* CCU4x.INyO */
 #   define CCU4_CC4_INS_EV0IS_INP               (15 << CCU4_CC4_INS_EV0IS_SHIFT)        /* CCU4x.INyP */
 #define CCU4_CC4_INS_EV1IS_SHIFT                (4)                                     /* Bits 4-7: Event 1 signal selection */
-#define CCU4_CC4_INS_EV1IS_MASK                 (15 << CCU4_CC4_INS_EV1IS_SHIFT)        
+#define CCU4_CC4_INS_EV1IS_MASK                 (15 << CCU4_CC4_INS_EV1IS_SHIFT)
 #   define CCU4_CC4_INS_EV1IS_INA               (0 << CCU4_CC4_INS_EV1IS_SHIFT)         /* CCU4x.INyA */
 #   define CCU4_CC4_INS_EV1IS_INB               (1 << CCU4_CC4_INS_EV1IS_SHIFT)         /* CCU4x.INyB */
 #   define CCU4_CC4_INS_EV1IS_INC               (2 << CCU4_CC4_INS_EV1IS_SHIFT)         /* CCU4x.INyC */
@@ -970,7 +970,7 @@
 #   define CCU4_CC4_INS_EV1IS_INO               (14 << CCU4_CC4_INS_EV1IS_SHIFT)        /* CCU4x.INyO */
 #   define CCU4_CC4_INS_EV1IS_INP               (15 << CCU4_CC4_INS_EV1IS_SHIFT)        /* CCU4x.INyP */
 #define CCU4_CC4_INS_EV2IS_SHIFT                (8)                                     /* Bits 8-11: Event 2 signal selection */
-#define CCU4_CC4_INS_EV2IS_MASK                 (15 << CCU4_CC4_INS_EV2IS_SHIFT)        
+#define CCU4_CC4_INS_EV2IS_MASK                 (15 << CCU4_CC4_INS_EV2IS_SHIFT)
 #   define CCU4_CC4_INS_EV2IS_INA               (0 << CCU4_CC4_INS_EV2IS_SHIFT)         /* CCU4x.INyA */
 #   define CCU4_CC4_INS_EV2IS_INB               (1 << CCU4_CC4_INS_EV2IS_SHIFT)         /* CCU4x.INyB */
 #   define CCU4_CC4_INS_EV2IS_INC               (2 << CCU4_CC4_INS_EV2IS_SHIFT)         /* CCU4x.INyC */

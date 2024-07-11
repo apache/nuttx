@@ -55,3 +55,7 @@ endif
 ifeq ($(CONFIG_XMC4_ECAT),y)
 CHIP_CSRCS += xmc4_ecat.c
 endif
+
+ifeq ($(CONFIG_XMC4_PWM),y)
+CHIP_CSRCS += xmc4_pwm.c
+endif
