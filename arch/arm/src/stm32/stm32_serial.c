@@ -22,7 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/stm32f40xxx_uart.h"
 #include <nuttx/config.h>
 
 #include <sys/types.h>
@@ -484,7 +483,7 @@ static void up_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context, void *arg);
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 
-#if !defined(SERIAL_HAVE_RXDMA)
+#ifndef SERIAL_HAVE_RXDMA
 static int  up_receive(struct uart_dev_s *dev, unsigned int *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
 static bool up_rxavailable(struct uart_dev_s *dev);
@@ -500,7 +499,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
                              bool upper);
 #endif
 
-#if !defined(SERIAL_HAVE_TXDMA)
+#ifndef SERIAL_HAVE_TXDMA
 static void up_txint(struct uart_dev_s *dev, bool enable);
 static void up_send(struct uart_dev_s *dev, int ch);
 #else
@@ -1300,8 +1299,8 @@ static inline void up_setusartint(struct up_dev_s *priv, struct ctrl_regs_s *cr)
   uint32_t regval;
 
 
-  /* Set interrupt state (see the interrupt enable/usage
-   * table above)
+  /* Set interrupt state 
+   * (see the interrupt enable/usage table above)
    */
 
   regval = up_serialin(priv, STM32_USART_CR1_OFFSET);
@@ -1709,34 +1708,34 @@ static int up_setup(struct uart_dev_s *dev)
   stm32_configgpio(priv->tx_gpio);
   stm32_configgpio(priv->rx_gpio);
 
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
+#  ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
     {
       stm32_configgpio(priv->cts_gpio);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->rts_gpio != 0)
     {
       uint32_t config = priv->rts_gpio;
 
-#ifdef CONFIG_STM32_FLOWCONTROL_BROKEN
+#    ifdef CONFIG_STM32_FLOWCONTROL_BROKEN
       /* Instead of letting hw manage this pin, we will bitbang */
 
       config = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
-#endif
+#    endif
       stm32_configgpio(config);
     }
-#endif
+#  endif
 
-#ifdef HAVE_RS485
+#  ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
       stm32_configgpio(priv->rs485_dir_gpio);
       stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
-#endif
+#  endif
 
   /* Configure CR2
    * Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits
@@ -1827,6 +1826,11 @@ static int up_dma_setup(struct uart_dev_s *dev)
     {
       priv->txdma = stm32_dmachannel(priv->txdma_channel);
     }
+  else
+    {
+      /* Panic if we cannot acquire Tx DMA */
+      PANIC();
+    }
 
   /* Enable receive Tx DMA for the UART */
 
@@ -1869,6 +1873,11 @@ static int up_dma_setup(struct uart_dev_s *dev)
        */
 
       stm32_dmastart(priv->rxdma, up_dma_rxcallback, (void *)priv, true);
+    }
+  else
+    {
+      /* Panic if we cannot acquire Rx DMA */
+      PANIC();
     }
 #endif
 
@@ -2079,7 +2088,7 @@ static int up_interrupt(int irq, void *context, void *arg)
     {
       handled = false;
 
-      /* Get the masked USART status word. */
+      /* Read USART Status Register. */
       sr = up_serialin(priv, STM32_USART_SR_OFFSET);
 
       /* USART interrupts:
@@ -2222,7 +2231,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         uint32_t cr = up_serialin(priv, STM32_USART_CR3_OFFSET);
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#  if defined(CONFIG_STM32_STM32F10XX)
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
             stm32_configgpio((priv->tx_gpio & ~(GPIO_CNF_MASK)) |
@@ -2235,7 +2244,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
                              GPIO_CNF_AFPP);
             cr &= ~USART_CR3_HDSEL;
           }
-#else
+#  else
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
             uint32_t gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) ==
@@ -2259,7 +2268,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
                              GPIO_PUSHPULL);
             cr &= ~USART_CR3_HDSEL;
           }
-#endif
+#  endif
 
         up_serialout(priv, STM32_USART_CR3_OFFSET, cr);
       }
@@ -2285,12 +2294,12 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           ((priv->parity != 0) ? PARENB : 0) |
           ((priv->parity == 1) ? PARODD : 0) |
           ((priv->stopbits2) ? CSTOPB : 0) |
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
+#  ifdef CONFIG_SERIAL_OFLOWCONTROL
           ((priv->oflow) ? CCTS_OFLOW : 0) |
-#endif
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#  endif
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
           ((priv->iflow) ? CRTS_IFLOW : 0) |
-#endif
+#  endif
           CS8;
 
         cfsetispeed(termiosp, priv->baud);
@@ -2312,12 +2321,12 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         /* Perform some sanity checks before accepting any changes */
 
         if (((termiosp->c_cflag & CSIZE) != CS8)
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
+#  ifdef CONFIG_SERIAL_OFLOWCONTROL
             || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
-#endif
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#  endif
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
             || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
-#endif
+#  endif
            )
           {
             ret = -EINVAL;
@@ -2334,12 +2343,12 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
           }
 
         priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
-#ifdef CONFIG_SERIAL_OFLOWCONTROL
+#  ifdef CONFIG_SERIAL_OFLOWCONTROL
         priv->oflow = (termiosp->c_cflag & CCTS_OFLOW) != 0;
-#endif
-#ifdef CONFIG_SERIAL_IFLOWCONTROL
+#  endif
+#  ifdef CONFIG_SERIAL_IFLOWCONTROL
         priv->iflow = (termiosp->c_cflag & CRTS_IFLOW) != 0;
-#endif
+#  endif
 
         /* Note that since there is no way to request 9-bit mode
          * and no way to support 5/6/7-bit modes, we ignore them
@@ -2471,7 +2480,7 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
  *
  ****************************************************************************/
 
-#if !defined(SERIAL_HAVE_RXDMA)
+#ifndef SERIAL_HAVE_RXDMA
 static void up_rxint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -2494,14 +2503,14 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
   flags = enter_critical_section();
   struct ctrl_regs_s cr =
-    {
-      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
+  {
+    .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
 
-      /* Control Register 2 is does not contain used interrupts */
-      .cr2 = 0,
+    /* Control Register 2 is does not contain used interrupts */
+    .cr2 = 0,
 
-      .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
-    };
+    .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
+  };
 
   if (enable)
     {
@@ -2509,23 +2518,23 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
        * (or an Rx timeout occurs).
        */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
-#ifdef CONFIG_USART_ERRINTS
+#  ifndef CONFIG_SUPPRESS_SERIAL_INTS
+#    ifdef CONFIG_USART_ERRINTS
       cr.cr1 |= (USART_CR1_RXNEIE | USART_CR1_PEIE);
       cr.cr3 |= (USART_CR3_EIE);
-#else
+#    else
       cr.cr1 |= (USART_CR1_RXNEIE);
-#endif
-#endif
+#    endif
+#  endif
     }
   else
     {
-#ifdef CONFIG_USART_ERRINTS
+#  ifdef CONFIG_USART_ERRINTS
       cr.cr1 &= ~(USART_CR1_RXNEIE | USART_CR1_PEIE);
       cr.cr3 &= ~(USART_CR3_EIE);
-#else
+#  else
       cr.cr1 &= ~(USART_CR1_RXNEIE);
-#endif
+#  endif
     }
 
   /* Then set the new interrupt state */
@@ -2580,8 +2589,8 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
-    defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
+      defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       /* Assert/de-assert nRTS set it high resume/stop sending */
@@ -2606,7 +2615,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
       return upper;
     }
 
-#else
+#  else
   if (priv->iflow)
     {
       /* Is the RX buffer full? */
@@ -2641,7 +2650,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
           uart_enablerxint(dev);
         }
     }
-#endif
+#  endif
 
   return false;
 }
@@ -2689,7 +2698,7 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 #ifdef SERIAL_HAVE_RXDMA
 static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 {
-  /* struct up_dev_s *priv = (struct up_dev_s *)dev->priv; */
+  /* If we are using DMA, no interrupts configuration are required */
 }
 #endif
 
@@ -2861,7 +2870,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_txint(struct uart_dev_s *dev, bool enable)
 {
-
+/* If we are using DMA, no interrupts configuration are required */
 }
 #endif
 
@@ -2890,47 +2899,46 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
   flags = enter_critical_section();
   struct ctrl_regs_s cr = 
-    { 
-      .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
+  { 
+    .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
 
-      /* Control Registers 2 & 3 are not used */
-      .cr2 = 0,
-      .cr3 = 0
-    };
+    /* Control Registers 2 & 3 are not used */
+    .cr2 = 0,
+    .cr3 = 0
+  };
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
 
-#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+#  ifndef CONFIG_SUPPRESS_SERIAL_INTS
       cr.cr1 |= USART_CR1_TXEIE;
 
       /* If RS-485 is supported on this U[S]ART, then also enable the
        * transmission complete interrupt.
        */
 
-#  ifdef HAVE_RS485
+#    ifdef HAVE_RS485
       if (priv->rs485_dir_gpio != 0)
         {
           cr.cr1 |= USART_CR1_TCIE;
         }
-#  endif
+#    endif
 
-#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
+#    ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
       if (cr.cr1 & USART_CR1_IE_BREAK_INPROGRESS)
         {
           leave_critical_section(flags);
           return;
         }
-#  endif
+#    endif
 
-
-#else
+#  else
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */
 
       uart_xmitchars(dev);
-#endif
+#  endif
     }
   else
     {
@@ -3132,7 +3140,7 @@ uart_dev_t *stm32_serial_get_uart(int uart_num)
 #ifdef USE_EARLYSERIALINIT
 void arm_earlyserialinit(void)
 {
-#ifdef HAVE_SERIALDRIVER
+#  ifdef HAVE_SERIALDRIVER
   unsigned i;
 
   /* Disable all USART interrupts */
@@ -3148,10 +3156,10 @@ void arm_earlyserialinit(void)
 
   /* Configure whichever one is the console */
 
-#if CONSOLE_UART > 0
+#    if CONSOLE_UART > 0
   up_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
-#endif
-#endif /* HAVE UART */
+#    endif
+#  endif /* HAVE UART */
 }
 #endif
 
@@ -3170,38 +3178,38 @@ void arm_serialinit(void)
   char devname[16];
   unsigned i;
   unsigned minor = 0;
-#ifdef CONFIG_PM
+#  ifdef CONFIG_PM
   int ret;
-#endif
+#  endif
 
   /* Register to receive power management callbacks */
 
-#ifdef CONFIG_PM
+#  ifdef CONFIG_PM
   ret = pm_register(&g_serialcb);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
-#endif
+#  endif
 
   /* Register the console */
 
-#if CONSOLE_UART > 0
+#  if CONSOLE_UART > 0
   uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
 
-#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
+#    ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
 
   uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_UART - 1]->dev);
   minor = 1;
-#endif
+#    endif
 
-#if defined(SERIAL_HAVE_CONSOLE_RXDMA) || defined(SERIAL_HAVE_CONSOLE_TXDMA)
+#    if defined(SERIAL_HAVE_CONSOLE_RXDMA) || defined(SERIAL_HAVE_CONSOLE_TXDMA)
   /* If we need to re-initialise the console to enable DMA do that here. */
 
   up_dma_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
-#endif
-#endif /* CONSOLE_UART > 0 */
+#    endif
+#  endif /* CONSOLE_UART > 0 */
 
   /* Register all remaining USARTs */
 
@@ -3216,14 +3224,14 @@ void arm_serialinit(void)
           continue;
         }
 
-#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
+#  ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
       /* Don't create a device for the console - we did that above */
 
       if (g_uart_devs[i]->dev.isconsole)
         {
           continue;
         }
-#endif
+#  endif
 
       /* Register USARTs as devices in increasing order */
 
@@ -3251,61 +3259,61 @@ void stm32_serial_dma_poll(void)
 
     flags = enter_critical_section();
 
-#ifdef CONFIG_USART1_RXDMA
+#  ifdef CONFIG_USART1_RXDMA
   if (g_usart1priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_usart1priv.rxdma, 0, &g_usart1priv);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_USART2_RXDMA
+#  ifdef CONFIG_USART2_RXDMA
   if (g_usart2priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_usart2priv.rxdma, 0, &g_usart2priv);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_USART3_RXDMA
+#  ifdef CONFIG_USART3_RXDMA
   if (g_usart3priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_usart3priv.rxdma, 0, &g_usart3priv);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_UART4_RXDMA
+#  ifdef CONFIG_UART4_RXDMA
   if (g_uart4priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_uart4priv.rxdma, 0, &g_uart4priv);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_UART5_RXDMA
+#  ifdef CONFIG_UART5_RXDMA
   if (g_uart5priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_uart5priv.rxdma, 0, &g_uart5priv);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_USART6_RXDMA
+#  ifdef CONFIG_USART6_RXDMA
   if (g_usart6priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_usart6priv.rxdma, 0, &g_usart6priv);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_UART7_RXDMA
+#  ifdef CONFIG_UART7_RXDMA
   if (g_uart7priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_uart7priv.rxdma, 0, &g_uart7priv);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_UART8_RXDMA
+#  ifdef CONFIG_UART8_RXDMA
   if (g_uart8priv.rxdma != NULL)
     {
       up_dma_rxcallback(g_uart8priv.rxdma, 0, &g_uart8priv);
     }
-#endif
+#  endif
 
   leave_critical_section(flags);
 }
