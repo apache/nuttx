@@ -120,29 +120,6 @@
 #define TMC_DEVID_AXIAW_SHIFT   17
 #define TMC_DEVID_AXIAW_MASK    0x7f
 
-/* TMC ETR Capability bit definitions. These need to be set by software. */
-
-#define TMC_ETR_SG              (0x1U << 0)
-
-/* ETR has separate read/write cache encodings. */
-
-#define TMC_ETR_AXI_ARCACHE     (0x1U << 1)
-
-/* TMC_ETR_SAVE_RESTORE - Values of RRP/RWP/STS.Full are
- * retained when TMC leaves Disabled state, allowing us to continue
- * the tracing from a point where we stopped. This also implies that
- * the RRP/RWP/STS.Full should always be programmed to the correct
- * value. Unfortunately this is not advertised by the hardware,
- * so we have to rely on PID of the IP to detect the functionality.
- */
-
-#define TMC_ETR_SAVE_RESTORE    (0x1U << 2)
-
-/* Coresight SoC-600 TMC-ETR unadvertised capabilities */
-
-#define TMC_600_ETR_CAPS  \
-  (TMC_ETR_SAVE_RESTORE | TMC_ETR_AXI_ARCACHE)
-
 #define TMC_MAX_NAME_LEN        32
 
 /****************************************************************************

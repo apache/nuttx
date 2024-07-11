@@ -151,6 +151,7 @@ struct coresight_desc_s
 
   uint32_t buffer_size;
   uint32_t burst_size;
+  uint32_t caps;
 
   /* Description of outports of current device. */
 

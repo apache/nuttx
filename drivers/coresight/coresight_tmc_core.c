@@ -143,6 +143,7 @@ tmc_register(FAR const struct coresight_desc_s *desc)
     }
 
   tmc_init_arch_data(tmcdev, desc);
+  tmcdev->caps = desc->caps;
 
   switch (tmcdev->config_type)
     {
