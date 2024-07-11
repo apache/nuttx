@@ -586,6 +586,9 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
                            FAR const cpu_set_t *cpuset);
 int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize,
                            FAR cpu_set_t *cpuset);
+#else
+#define pthread_setaffinity_np(...) (-ENOSYS)
+#define pthread_getaffinity_np(...) (-ENOSYS)
 #endif
 
 /* Thread-specific Data Interfaces */
