@@ -414,7 +414,7 @@ config ESPRESSIF_XTWDT_TIMEOUT
 	depends on ESPRESSIF_XTWDT
 	range 1 255
 	default 200
-	help
+	---help---
 		Timeout period configuration for the XTAL32K watchdog timer based on RTC_CLK.
 
 config ESPRESSIF_XTWDT_BACKUP_CLK_ENABLE

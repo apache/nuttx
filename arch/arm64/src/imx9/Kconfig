@@ -233,7 +233,7 @@ config IMX9_SERIAL_RXDMA_BUFFER_SIZE
 	int "RX DMA buffer size"
 	default 64
 	depends on LPUART1_RXDMA || LPUART2_RXDMA || LPUART3_RXDMA || LPUART4_RXDMA || \
-	           LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || LPUART8_RXDMA
+               LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || LPUART8_RXDMA
 	---help---
 		The DMA buffer size when using RX DMA to emulate a FIFO.
 
