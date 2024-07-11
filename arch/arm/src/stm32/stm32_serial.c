@@ -22,7 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/stm32f40xxx_uart.h"
 #include <nuttx/config.h>
 
 #include <sys/types.h>
