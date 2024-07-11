@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include "hardware/stm32f40xxx_uart.h"
 #include <nuttx/config.h>
 
 #include <sys/types.h>
@@ -2138,12 +2139,23 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       if ((sr & USART_SR_TC) != 0)
         {
+          struct ctrl_regs_s cr =
+          {
+            .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
+
+            .cr2 = 0,
+            .cr3 = 0
+          };
+
           stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
-          up_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
+
+          up_restoreusartint(priv, &cr);
         }
 #endif
 
       /* Handle incoming, receive bytes. */
+
+#ifndef SERIAL_HAVE_RXDMA
 
       if ((sr & USART_SR_RXNE) != 0)
         {
@@ -2162,15 +2174,15 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       else if ((sr & (USART_SR_ORE | USART_SR_NE | USART_SR_FE)) != 0)
         {
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
-    defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
+#  if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+      defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
           /* These errors are cleared by writing the corresponding bit to the
            * interrupt clear register (ICR).
            */
 
           up_serialout(priv, STM32_USART_ICR_OFFSET,
                       (USART_ICR_NCF | USART_ICR_ORECF | USART_ICR_FECF));
-#else
+#  else
           /* If an error occurs, read from DR to clear the error (data has
            * been lost).  If ORE is set along with RXNE then it tells you
            * that the byte *after* the one in the data register has been
@@ -2180,8 +2192,16 @@ static int up_interrupt(int irq, void *context, void *arg)
            */
 
           up_serialin(priv, STM32_USART_RDR_OFFSET);
-#endif
+#  endif
         }
+#else
+
+  if ((sr & USART_SR_IDLE) != 0)
+    {
+      stm32_serial_dma_poll();
+    }
+
+#endif
 
       /* Handle outgoing, transmit bytes */
 
@@ -2192,6 +2212,7 @@ static int up_interrupt(int irq, void *context, void *arg)
           uart_xmitchars(&priv->dev);
           handled = true;
         }
+
     }
 
   return OK;
@@ -2530,8 +2551,6 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   {
     .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
 
-    /* Control Register 2 is does not contain used interrupts */
-
     .cr2 = 0,
 
     .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
@@ -2723,7 +2742,40 @@ static int up_dma_receive(struct uart_dev_s *dev, unsigned int *status)
 #ifdef SERIAL_HAVE_RXDMA
 static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 {
-  /* If we are using DMA, no interrupts configuration are required */
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags;
+
+  /* USART receive interrupts:
+   *
+   * Enable             Status          Meaning                   Usage
+   * ------------------ --------------- ------------------------- ----------
+   * USART_CR1_IDLEIE   USART_SR_IDLE   Idle Line Detected        
+   */
+
+  flags = enter_critical_section();
+  struct ctrl_regs_s cr =
+  {
+    .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
+
+    .cr2 = 0,
+    .cr3 = 0
+  };
+
+  if (enable)
+    {
+      cr.cr1 |= (USART_CR1_IDLEIE);
+      
+    }
+  else
+    {
+      cr.cr1 &= ~(USART_CR1_RXNEIE);
+    }
+
+  /* Then set the new interrupt state */
+
+  up_restoreusartint(priv, &cr);
+  leave_critical_section(flags);
+
 }
 #endif
 
@@ -2927,8 +2979,6 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct ctrl_regs_s cr =
   {
     .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
-
-    /* Control Registers 2 & 3 are not used */
 
     .cr2 = 0,
     .cr3 = 0
