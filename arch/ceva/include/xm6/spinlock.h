@@ -121,7 +121,7 @@ static inline spinlock_t up_testset(volatile spinlock_t *lock)
 
       /* Is it already locked by other? */
 
-      if (old == SP_LOCKED)
+      if (spin_is_locked(&old))
         {
           break; /* Yes, exit */
         }

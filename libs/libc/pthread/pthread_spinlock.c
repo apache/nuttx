@@ -186,7 +186,7 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
   do
     {
 #ifdef CONFIG_BUILD_FLAT
-      ret = up_testset(&lock->sp_lock) == SP_LOCKED ? 1 : 0;
+      ret = spin_is_locked(&up_testset(&lock->sp_lock)) ? 1 : 0;
 #else
       ret = boardctl(BOARDIOC_TESTSET, (uintptr_t)&lock->sp_lock);
 #endif

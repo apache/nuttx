@@ -81,7 +81,7 @@ void spin_lock(FAR volatile spinlock_t *lock)
     atomic_fetch_add((FAR atomic_ushort *)&lock->tickets.next, 1);
   while (atomic_load((FAR atomic_ushort *)&lock->tickets.owner) != ticket)
 #else /* CONFIG_SPINLOCK */
-  while (up_testset(lock) == SP_LOCKED)
+  while (spin_is_locked(&up_testset(lock)))
 #endif
     {
       SP_DSB();
@@ -125,7 +125,7 @@ void spin_lock_wo_note(FAR volatile spinlock_t *lock)
     atomic_fetch_add((FAR atomic_ushort *)&lock->tickets.next, 1);
   while (atomic_load((FAR atomic_ushort *)&lock->tickets.owner) != ticket)
 #else /* CONFIG_TICKET_SPINLOCK */
-  while (up_testset(lock) == SP_LOCKED)
+  while (spin_is_locked(&up_testset(lock)))
 #endif
     {
       SP_DSB();
@@ -183,7 +183,7 @@ bool spin_trylock(FAR volatile spinlock_t *lock)
   if (!atomic_compare_exchange_strong((FAR atomic_uint *)&lock->value,
                                       &old.value, new.value))
 #else /* CONFIG_TICKET_SPINLOCK */
-  if (up_testset(lock) == SP_LOCKED)
+  if (spin_is_locked(&up_testset(lock)))
 #endif /* CONFIG_TICKET_SPINLOCK */
     {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
@@ -249,7 +249,7 @@ bool spin_trylock_wo_note(FAR volatile spinlock_t *lock)
   if (!atomic_compare_exchange_strong((FAR atomic_uint *)&lock->value,
                                       &old.value, new.value))
 #else /* CONFIG_TICKET_SPINLOCK */
-  if (up_testset(lock) == SP_LOCKED)
+  if (spin_is_locked(&up_testset(lock)))
 #endif /* CONFIG_TICKET_SPINLOCK */
     {
       SP_DSB();

@@ -155,7 +155,7 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
 
   ret = *lock;
 
-  if (ret == SP_UNLOCKED)
+  if (!spin_is_locked(&ret))
     {
       *lock = SP_LOCKED;
     }
@@ -327,7 +327,7 @@ void spin_unlock_wo_note(FAR volatile spinlock_t *lock);
  * Name: spin_is_locked
  *
  * Description:
- *   Release one count on a non-reentrant spinlock.
+ *   Test whether a spinlock is locked.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to test.

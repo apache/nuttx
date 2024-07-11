@@ -809,7 +809,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
             }
           else
             {
-              ret = up_testset(lock) == SP_LOCKED ? 1 : 0;
+              ret = spin_is_locked(&up_testset(lock)) ? 1 : 0;
             }
         }
         break;
