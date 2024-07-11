@@ -264,6 +264,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS sht3x.c)
     endif()
 
+    if(CONFIG_SENSORS_SHT4X)
+      list(APPEND SRCS sht4x.c)
+    endif()
+
     if(CONFIG_SENSORS_SPS30)
       list(APPEND SRCS sps30.c)
     endif()

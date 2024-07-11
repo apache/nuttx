@@ -1499,6 +1499,54 @@ config SHT3X_DEBUG
 
 endif # SENSORS_SHT3X
 
+config SENSORS_SHT4X
+	bool "Sensirion SHT4x temperature and humidity sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Sensirion SHT4x temperature
+		and humidity sensors.
+
+if SENSORS_SHT4X
+
+config SHT4X_I2C_FREQUENCY
+	int "SHT4X I2C frequency"
+	default 400000
+	range 1 400000
+
+config SHT4X_I2C_ADDR
+	hex "SHT4X I2C address"
+	default 0x44
+    range 0x44 0x46
+	---help---
+		Enables debug features for the SHT4X
+
+config SHT4X_FAHRENHEIT
+	bool "SHT4X use Fahrenheit"
+	default n
+	---help---
+		Configures read outputs of the SHT4X to be in Fahrenheit. Default uses Celsius.
+
+config SHT4X_LIMIT_HUMIDITY
+	bool "SHT4X limit humidity between 0-100%"
+	default y
+	---help---
+		Limits humidity calculations to be between 0-100 percent. Uncropped boundaries may be beneficial in some cases, see datasheet section 4.6.
+
+config SHT4X_CRC_LOOKUP
+	bool "SHT4X use CRC lookup"
+	default n
+	---help---
+		Configures the SHT4X to do CRC checks with a lookup table. Default uses a bitwise CRC calculation.
+
+config SHT4X_DEBUG
+	bool "SHT4X debug support"
+	default n
+	---help---
+		Enables debug features for the SHT4X
+
+endif # SENSORS_SHT4X
+
 config SENSORS_SPS30
 	bool "Sensirion SPS30 particulate matter sensor"
 	default n
