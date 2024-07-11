@@ -125,11 +125,11 @@ static int tmc_etr_hw_enable(FAR struct coresight_tmc_dev_s *tmcdev)
 
   if (tmcdev->caps & TMC_ETR_SAVE_RESTORE)
     {
-      coresight_put32((uint32_t)tmcdev->buf, tmcdev->csdev.addr + TMC_RRP);
+      coresight_put32((uintptr_t)tmcdev->buf, tmcdev->csdev.addr + TMC_RRP);
       coresight_put32(((uint64_t)(uintptr_t)tmcdev->buf >> 32),
                       tmcdev->csdev.addr + TMC_RRPHI);
 
-      coresight_put32((uint32_t)tmcdev->buf, tmcdev->csdev.addr + TMC_RWP);
+      coresight_put32((uintptr_t)tmcdev->buf, tmcdev->csdev.addr + TMC_RWP);
       coresight_put32(((uint64_t)(uintptr_t)tmcdev->buf >> 32),
                       tmcdev->csdev.addr + TMC_RWPHI);
 
