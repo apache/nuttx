@@ -51,4 +51,8 @@ if(CONFIG_XMC4_USCI_SPI)
   list(APPEND SRCS xmc4_spi.c)
 endif()
 
+if(CONFIG_XMC4_PWM)
+  list(APPEND SRCS xmc4_pwm.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

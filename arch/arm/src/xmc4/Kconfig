@@ -194,6 +194,12 @@ config XMC4_ECAT_P1
 	default n
 	depends on XMC4_ECAT
 
+config XMC4_PWM
+	bool "Enable Capture Compare Units 4 (CCU4x) for PWM"
+	default n
+	---help---
+		Support CCU4x
+
 endmenu
 
 menu "XMC4xxx USIC Configuration"
@@ -255,7 +261,7 @@ config XMC4_USIC0_CHAN0_TX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 config XMC4_USIC0_CHAN0_RX_BUFFER_SIZE
@@ -264,7 +270,7 @@ config XMC4_USIC0_CHAN0_RX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 endmenu # USIC0 Channel 0 Configuration
@@ -318,7 +324,7 @@ config XMC4_USIC0_CHAN1_ISI2S
 	---help---
 		Configure USIC0 Channel 1 for I2S audio
 
-endchoice # USIC0 Channel 1 Protocol 
+endchoice # USIC0 Channel 1 Protocol
 
 config XMC4_USIC0_CHAN1_TX_BUFFER_SIZE
 	int "Tx Fifo Buffer Size"
@@ -326,7 +332,7 @@ config XMC4_USIC0_CHAN1_TX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 config XMC4_USIC0_CHAN1_RX_BUFFER_SIZE
@@ -335,7 +341,7 @@ config XMC4_USIC0_CHAN1_RX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 endmenu # USIC0 Channel 1 Configuration
@@ -388,7 +394,7 @@ config XMC4_USIC1_CHAN0_ISI2S
 	---help---
 		Configure USIC1 Channel 0 for I2S audio
 
-endchoice # USIC1 Channel 0 Protocol 
+endchoice # USIC1 Channel 0 Protocol
 
 config XMC4_USIC1_CHAN0_TX_BUFFER_SIZE
 	int "Tx Fifo Buffer Size"
@@ -396,7 +402,7 @@ config XMC4_USIC1_CHAN0_TX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 config XMC4_USIC1_CHAN0_RX_BUFFER_SIZE
@@ -405,10 +411,10 @@ config XMC4_USIC1_CHAN0_RX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
-endmenu # USIC1 Channel 0 Configuration 
+endmenu # USIC1 Channel 0 Configuration
 
 menu "USIC1 Channel 1 Configuration"
 	depends on XMC4_USIC
@@ -463,19 +469,19 @@ endchoice # USIC1 Channel 1 Protocol
 config XMC4_USIC1_CHAN1_TX_BUFFER_SIZE
 	int "Tx Fifo Buffer Size"
 	depends on XMC4_USIC1_CHAN1_ISUART
-	default 16 
+	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 config XMC4_USIC1_CHAN1_RX_BUFFER_SIZE
 	int "Rx Fifo Buffer Size"
 	depends on XMC4_USIC1_CHAN1_ISUART
-	default 16 
+	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 endmenu # USIC1 Channel 1 Configuration
@@ -533,19 +539,19 @@ endchoice # USIC2 Channel 0 Protocol
 config XMC4_USIC2_CHAN0_TX_BUFFER_SIZE
 	int "Tx Fifo Buffer Size"
 	depends on XMC4_USIC2_CHAN0_ISUART
-	default 16 
+	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 config XMC4_USIC2_CHAN0_RX_BUFFER_SIZE
 	int "Rx Fifo Buffer Size"
 	depends on XMC4_USIC2_CHAN0_ISUART
-	default 16 
+	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 endmenu # USIC2 Channel 0 Configuration
@@ -605,7 +611,7 @@ config XMC4_USIC2_CHAN1_TX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 config XMC4_USIC2_CHAN1_RX_BUFFER_SIZE
@@ -614,9 +620,150 @@ config XMC4_USIC2_CHAN1_RX_BUFFER_SIZE
 	default 16
 	---help---
 		Should be a power of 2 between 2 and 64
-		The sum of Rx and Tx buffers sizes of both 
+		The sum of Rx and Tx buffers sizes of both
 		channels should be inferior to 64
 
 endmenu # USIC2 Channel 1 Configuration
 
 endmenu # XMC4xxx USIC Configuration
+
+menu "XMC4xxx PWM Configuration"
+depends on XMC4_PWM
+
+	config XMC4_CCU40
+		bool "Enable CCU40"
+		default n
+		---help---
+			Support CCU40
+
+		config XMC4_CCU40_CC40
+			bool "Enable CCU40 Slice 0 (not compatible with tickless)"
+			default n
+			depends on XMC4_CCU40 && !CONFIG_SCHED_TICKLESS
+			---help---
+				Support CCU40 CC40, cannot be activated when tickless OS is enabled
+
+		config XMC4_CCU40_CC41
+			bool "Enable CCU40 Slice 1"
+			default n
+			depends on XMC4_CCU40
+			---help---
+				Support CCU40 CC41
+
+		config XMC4_CCU40_CC42
+			bool "Enable CCU40 Slice 2"
+			default n
+			depends on XMC4_CCU40
+			---help---
+				Support CCU40 CC42
+
+		config XMC4_CCU40_CC43
+			bool "Enable CCU40 Slice 3"
+			default n
+			depends on XMC4_CCU40
+			---help---
+				Support CCU40 CC43
+
+	config XMC4_CCU41
+		bool "Enable CCU41"
+		default n
+		---help---
+			Support CCU41
+
+		config XMC4_CCU41_CC40
+			bool "Enable CCU41 Slice 0 (not compatible with tickless)"
+			default n
+			depends on XMC4_CCU41 && !CONFIG_SCHED_TICKLESS
+			---help---
+				Support CCU41 CC40, cannot be activated when tickless OS is enabled
+
+		config XMC4_CCU41_CC41
+			bool "Enable CCU41 Slice 1"
+			default n
+			depends on XMC4_CCU41
+			---help---
+				Support CCU41 CC41
+
+		config XMC4_CCU41_CC42
+			bool "Enable CCU41 Slice 2"
+			default n
+			depends on XMC4_CCU41
+			---help---
+				Support CCU41 CC42
+
+		config XMC4_CCU41_CC43
+			bool "Enable CCU41 Slice 3"
+			default n
+			depends on XMC4_CCU41
+			---help---
+				Support CCU41 CC43
+
+	config XMC4_CCU42
+		bool "Enable CCU42"
+		default n
+		---help---
+			Support CCU42
+
+		config XMC4_CCU42_CC40
+			bool "Enable CCU42 Slice 0"
+			default n
+			depends on XMC4_CCU42
+			---help---
+				Support CCU42 CC40
+
+		config XMC4_CCU42_CC41
+			bool "Enable CCU42 Slice 1"
+			default n
+			depends on XMC4_CCU42
+			---help---
+				Support CCU42 CC41
+
+		config XMC4_CCU42_CC42
+			bool "Enable CCU42 Slice 2"
+			default n
+			depends on XMC4_CCU42
+			---help---
+				Support CCU42 CC42
+
+		config XMC4_CCU42_CC43
+			bool "Enable CCU42 Slice 3"
+			default n
+			depends on XMC4_CCU42
+			---help---
+				Support CCU42 CC43
+
+	config XMC4_CCU43
+		bool "Enable CCU43"
+		default n
+		---help---
+			Support CCU43
+
+		config XMC4_CCU43_CC40
+			bool "Enable CCU43 Slice 0"
+			default n
+			depends on XMC4_CCU43
+			---help---
+				Support CCU43 CC40
+
+		config XMC4_CCU43_CC41
+			bool "Enable CCU43 Slice 1"
+			default n
+			depends on XMC4_CCU43
+			---help---
+				Support CCU43 CC41
+
+		config XMC4_CCU43_CC42
+			bool "Enable CCU43 Slice 2"
+			default n
+			depends on XMC4_CCU43
+			---help---
+				Support CCU43 CC42
+
+		config XMC4_CCU43_CC43
+			bool "Enable CCU43 Slice 3"
+			default n
+			depends on XMC4_CCU43
+			---help---
+				Support CCU43 CC43
+
+endmenu # XMC4xxx PWM Configuration
