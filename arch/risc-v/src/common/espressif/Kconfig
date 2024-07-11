@@ -907,6 +907,29 @@ config ESPRESSIF_SPI_UDCS
 
 if ESPRESSIF_SPI2
 
+config ESPRESSIF_SPI2_DMA
+	bool "SPI2 use GDMA"
+	default n
+	depends on ESPRESSIF_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
+
+config ESPRESSIF_SPI2_DMADESC_NUM
+	int "SPI2 Master GDMA maximum number of descriptors"
+	default 2
+	depends on ESPRESSIF_SPI2_DMA
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a GDMA transfer.
+
+config ESPRESSIF_SPI2_DMATHRESHOLD
+	int "SPI2 GDMA threshold"
+	default 64
+	depends on ESPRESSIF_SPI2_DMA
+	---help---
+		When SPI GDMA is enabled, GDMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
 config ESPRESSIF_SPI2_SLAVE
 	bool "SPI2 Slave mode"
 	default n
