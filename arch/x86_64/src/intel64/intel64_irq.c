@@ -32,6 +32,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/pci/pci.h>
 #include <arch/arch.h>
 #include <arch/irq.h>
 #include <arch/io.h>
@@ -47,7 +48,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IRQ_MSI_START  IRQ32
+#define IRQ_MSI_START        IRQ32
+#define X86_64_MAR_DEST      0xfee00000
+#define X86_64_MDR_TYPE      0x4000
 
 /****************************************************************************
  * Private Types
@@ -623,6 +626,21 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 }
 
 /****************************************************************************
+ * Name: up_get_legacy_irq
+ *
+ * Description:
+ *   Reserve vector for legacy
+ *
+ ****************************************************************************/
+
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
+{
+  UNUSED(devfn);
+  UNUSED(pin);
+  return IRQ0 + line;
+}
+
+/****************************************************************************
  * Name: up_alloc_irq_msi
  *
  * Description:
@@ -690,3 +708,31 @@ void up_release_irq_msi(int *irq, int num)
 
   spin_unlock_irqrestore(&g_irq_spin, flags);
 }
+
+/****************************************************************************
+ * Name: up_connect_irq
+ *
+ * Description:
+ *   Connect MSI/MSI-X vector to irq
+ *
+ ****************************************************************************/
+
+int up_connect_irq(FAR int *irq, int num,
+                   FAR uintptr_t *mar, FAR uint32_t *mdr)
+{
+  UNUSED(num);
+
+  if (mar != NULL)
+    {
+      *mar = X86_64_MAR_DEST |
+        (up_apic_cpu_id() << PCI_MSI_DATA_CPUID_SHIFT);
+    }
+
+  if (mdr != NULL)
+    {
+      *mdr = X86_64_MDR_TYPE | irq[0];
+    }
+
+  return OK;
+}
+

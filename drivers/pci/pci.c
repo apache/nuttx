@@ -1740,9 +1740,17 @@ bool pci_stat_line(FAR struct pci_device_s *dev)
 int pci_get_irq(FAR struct pci_device_s *dev)
 {
   uint8_t line = 0;
+  uint8_t pin = 0;
 
   pci_read_config_byte(dev, PCI_INTERRUPT_LINE, &line);
-  return dev->bus->ctrl->ops->get_irq(dev->bus, line);
+  pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin);
+
+  if (dev->bus->ctrl->ops->get_irq)
+    {
+      return dev->bus->ctrl->ops->get_irq(dev->bus, dev->devfn, line, pin);
+    }
+
+  return -ENOTSUP;
 }
 
 /****************************************************************************

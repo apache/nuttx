@@ -308,7 +308,8 @@ struct pci_ops_s
 
   /* Get interrupt number associated with a given INTx line */
 
-  CODE int (*get_irq)(FAR struct pci_bus_s *bus, uint8_t line);
+  CODE int (*get_irq)(FAR struct pci_bus_s *bus, uint32_t devfn,
+                      uint8_t line, uint8_t pin);
 
   /* Allocate interrupt for MSI/MSI-X */
 
