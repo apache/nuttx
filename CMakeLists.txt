@@ -173,6 +173,7 @@ if(NOT EXISTS "${NUTTX_APPS_DIR}")
   message(FATAL_ERROR "Application directory ${NUTTX_APPS_DIR} is not found")
 endif()
 
+get_filename_component(NUTTX_APPS_DIR ${NUTTX_APPS_DIR} ABSOLUTE)
 get_filename_component(apps_dir ${NUTTX_APPS_DIR} NAME)
 set(NUTTX_APPS_BINDIR "${CMAKE_BINARY_DIR}/${apps_dir}")
 
@@ -511,6 +512,20 @@ endif()
 
 if(CONFIG_NDEBUG)
   add_compile_options(-DNDEBUG)
+endif()
+
+# Cmake build provide absolute paths to compile files. If __FILE__ macros are
+# used in the source code(ASSERT), the binary will contain many invalid paths.
+# This saves some memory, stops exposing build systems locations in binaries,
+# make failure logs more deterministic and most importantly makes builds more
+# failure logs more deterministic and most importantly makes builds more
+# deterministic. Debuggers usually have a path mapping feature to ensure the
+# files are still found.
+if(CONFIG_OUTPUT_STRIP_PATHS)
+  add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
+  add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
+  add_compile_options(-fmacro-prefix-map=${NUTTX_BOARD_ABS_DIR}=)
+  add_compile_options(-fmacro-prefix-map=${NUTTX_CHIP_ABS_DIR}=)
 endif()
 
 add_definitions(-D__NuttX__)
