@@ -21,7 +21,7 @@
 include common/Make.defs
 
 # Rockchip RK3399 specific C source files
-CHIP_CSRCS  = rk3399_boot.c rk3399_serial.c
+CHIP_CSRCS  = rk3399_boot.c rk3399_serial.c rk3399_timer.c
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = rk3399_lowputc.S

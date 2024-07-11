@@ -22,7 +22,7 @@ include common/Make.defs
 
 # i.MX8-specific C source files
 
-CHIP_CSRCS  = imx8_boot.c
+CHIP_CSRCS  = imx8_boot.c imx8_timer.c
 
 ifeq ($(CONFIG_ARCH_CHIP_IMX8_QUADMAX),y)
   CHIP_CSRCS += imx8qm_serial.c
