@@ -68,6 +68,11 @@
 #include "rp2040_bmp280.h"
 #endif
 
+#ifdef CONFIG_SENSORS_SHT4X
+#include <nuttx/sensors/sht4x.h>
+#include "rp2040_i2c.h"
+#endif
+
 #ifdef CONFIG_SENSORS_MAX6675
 #include <nuttx/sensors/max6675.h>
 #include "rp2040_max6675.h"
@@ -488,6 +493,18 @@ int rp2040_common_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: rp2040_ina219_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_SHT4X
+
+  /* Try to register SHT4X device as /dev/sht4x0 at I2C0. */
+
+  ret = sht4x_register("/dev/sht4x0", rp2040_i2cbus_initialize(0),
+                       CONFIG_SHT4X_I2C_ADDR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: couldn't initialize SHT4x: %d\n", ret);
     }
 #endif
 
