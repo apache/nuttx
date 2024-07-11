@@ -54,6 +54,7 @@ namespace std
   using ::cosf;
   using ::coshf;
   using ::expf;
+  using ::expm1f;
   using ::fabsf;
   using ::floorf;
   using ::fmodf;
@@ -64,6 +65,7 @@ namespace std
   using ::log10f;
   using ::log2f;
   using ::modff;
+  using ::rintf;
   using ::roundf;
   using ::powf;
   using ::sinf;
@@ -107,6 +109,7 @@ namespace std
   using ::cos;
   using ::cosh;
   using ::exp;
+  using ::expm1f;
   using ::fabs;
   using ::floor;
   using ::fmod;
@@ -117,6 +120,7 @@ namespace std
   using ::log10;
   using ::log2;
   using ::modf;
+  using ::rint;
   using ::round;
   using ::pow;
   using ::sin;
