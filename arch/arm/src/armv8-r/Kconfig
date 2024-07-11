@@ -13,7 +13,7 @@ config ARMV8R_HAVE_GICv3
 		Selected by the configuration tool if the architecture supports the
 		Generic Interrupt Controller (GIC)
 
-if ARMV8R_HAVE_GICv2
+if ARMV8R_HAVE_GICv3
 
 config ARMV8R_GIC_EOIMODE
 	bool
@@ -22,7 +22,13 @@ config ARMV8R_GIC_EOIMODE
 		Enable GICC_CTLR.EOImode, this will separates the priority drop and interrupt
 		deactivation operations.
 
-endif # ARMV8R_GIC_EOIMODE
+config ARMV8R_GIC_SPI_EDGE
+	bool "Configure all SPIs(Shared Peripheral Interrupts) as edge-triggered by default"
+	default n
+	---help---
+		Configure all SPIs(Shared Peripheral Interrupts) as edge-triggered by default.
+
+endif # ARMV8R_HAVE_GICv3
 
 config ARMV8R_MEMINIT
 	bool
