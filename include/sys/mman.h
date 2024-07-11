@@ -212,8 +212,13 @@ int posix_mem_offset(FAR const void *addr, size_t len, FAR off_t *off,
 int posix_typed_mem_get_info(int fildes,
                              FAR struct posix_typed_mem_info *info);
 int posix_typed_mem_open(FAR const char *name, int oflag, int tflag);
+#ifdef CONFIG_FS_SHMFS
 int shm_open(FAR const char *name, int oflag, mode_t mode);
 int shm_unlink(FAR const char *name);
+#else
+#define shm_open(...)   (-ENOSYS)
+#define shm_unlink(...) (-ENOSYS)
+#endif
 int memfd_create(FAR const char *name, unsigned int flags);
 
 #undef EXTERN
