@@ -125,7 +125,7 @@ $(MCUBOOT_SRCDIR):
 
 $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader"
-	$(Q) $(TOOLSDIR)/build_mcuboot.sh \
+	$(Q) $(TOOLSDIR)/build_mcuboot_esp32c3_legacy.sh \
 		-c esp32c3 \
 		-f $(BOOTLOADER_CONFIG) \
 		-p $(BOOTLOADER_DIR) \
