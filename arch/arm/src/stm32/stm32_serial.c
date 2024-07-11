@@ -404,6 +404,7 @@ struct up_dev_s
   struct uart_dev_s dev;       /* Generic UART device */
 
   /* Has been initialized and HW is setup. */
+
   bool              initialized;
 
   /* If termios are supported, then the following fields may vary at
@@ -501,7 +502,6 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
 
 #ifndef SERIAL_HAVE_TXDMA
 static void up_txint(struct uart_dev_s *dev, bool enable);
-static void up_send(struct uart_dev_s *dev, int ch);
 #else
 static void up_dma_send(struct uart_dev_s *dev);
 static void up_dma_txint(struct uart_dev_s *dev, bool enable);
@@ -509,6 +509,7 @@ static void up_dma_txavailable(struct uart_dev_s *dev);
 static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 #endif
 
+static void up_send(struct uart_dev_s *dev, int ch);
 static bool up_txready(struct uart_dev_s *dev);
 
 #if defined(SERIAL_HAVE_RXDMA) || defined(SERIAL_HAVE_TXDMA)
@@ -1294,12 +1295,12 @@ static inline void up_serialout(struct up_dev_s *priv, int offset,
  * Name: up_setusartint
  ****************************************************************************/
 
-static inline void up_setusartint(struct up_dev_s *priv, struct ctrl_regs_s *cr)
+static inline void up_setusartint(struct up_dev_s *priv,
+                                  struct ctrl_regs_s *cr)
 {
   uint32_t regval;
 
-
-  /* Set interrupt state 
+  /* Set interrupt state
    * (see the interrupt enable/usage table above)
    */
 
@@ -1350,7 +1351,12 @@ static void up_disableusartint(struct up_dev_s *priv, struct ctrl_regs_s *cr)
 
   /* Disable all interrupts */
 
-  struct ctrl_regs_s tmp = { .cr1 = 0, .cr2 = 0, .cr3 = 0 };
+  struct ctrl_regs_s tmp = {
+    .cr1 = 0,
+    .cr2 = 0,
+    .cr3 = 0
+  };
+
   up_setusartint(priv, &tmp);
 
   spin_unlock_irqrestore(NULL, flags);
@@ -1829,13 +1835,14 @@ static int up_dma_setup(struct uart_dev_s *dev)
   else
     {
       /* Panic if we cannot acquire Tx DMA */
+
       PANIC();
     }
 
   /* Enable receive Tx DMA for the UART */
 
   regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-  regval |= USART_CR3_DMAT; 
+  regval |= USART_CR3_DMAT;
   up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
 #endif
@@ -1864,7 +1871,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
       /* Enable receive Rx DMA for the UART */
 
       regval  = up_serialin(priv, STM32_USART_CR3_OFFSET);
-      regval |= USART_CR3_DMAR; 
+      regval |= USART_CR3_DMAR;
       up_serialout(priv, STM32_USART_CR3_OFFSET, regval);
 
       /* Start the DMA channel, and arrange for callbacks at the half and
@@ -1877,6 +1884,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
   else
     {
       /* Panic if we cannot acquire Rx DMA */
+
       PANIC();
     }
 #endif
@@ -1905,7 +1913,12 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Disable all interrupts */
 
-  struct ctrl_regs_s tmp = { .cr1 = 0, .cr2 = 0, .cr3 = 0};
+  struct ctrl_regs_s tmp = {
+    .cr1 = 0,
+    .cr2 = 0,
+    .cr3 = 0
+  };
+
   up_disableusartint(priv, &tmp);
 
   /* Disable USART APB1/2 clock */
@@ -1922,7 +1935,7 @@ static void up_shutdown(struct uart_dev_s *dev)
    * pin causes back-powering, potentially confusing the device to the point
    * of complete lock-up."
    *
-   * REVISIT:  Is unconfiguring the pins appropriate for all devices? 
+   * REVISIT:  Is unconfiguring the pins appropriate for all devices?
    * If not, then this may need to be a configuration option.
    */
 
@@ -2025,7 +2038,7 @@ static int up_attach(struct uart_dev_s *dev)
   ret = irq_attach(priv->irq, up_interrupt, priv);
   if (ret == OK)
     {
-      /* Enable the interrupt 
+      /* Enable the interrupt
        * (RX and TX interrupts are still disabled in the USART)
        */
 
@@ -2089,6 +2102,7 @@ static int up_interrupt(int irq, void *context, void *arg)
       handled = false;
 
       /* Read USART Status Register. */
+
       sr = up_serialin(priv, STM32_USART_SR_OFFSET);
 
       /* USART interrupts:
@@ -2132,7 +2146,7 @@ static int up_interrupt(int irq, void *context, void *arg)
       if ((sr & USART_SR_RXNE) != 0)
         {
           /* Received data ready... process incoming bytes.
-           * NOTE the check for RXNEIE:  
+           * NOTE the check for RXNEIE:
            * We cannot call uart_recvchards of RX interrupts are disabled.
            */
 
@@ -2380,9 +2394,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         flags = enter_critical_section();
 
         /* Disable any further tx activity */
+
         up_txint(dev, false);
 
         /* Configure TX as a GPIO output pin and Send a break signal */
+
         tx_break = GPIO_OUTPUT | (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) &
                                   priv->tx_gpio);
         stm32_configgpio(tx_break);
@@ -2398,9 +2414,11 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         flags = enter_critical_section();
 
         /* Configure TX back to U(S)ART */
+
         stm32_configgpio(priv->tx_gpio);
 
         /* Enable further tx activity */
+
         up_txint(dev, true);
 
         leave_critical_section(flags);
@@ -2459,15 +2477,19 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
   uint32_t sr;
 
   /* Get the Rx byte */
+
   rdr      = up_serialin(priv, STM32_USART_RDR_OFFSET);
 
   /* Read Status Register */
+
   sr       = up_serialin(priv, STM32_USART_RDR_OFFSET);
 
   /* Get the Rx byte plux error information.  Return those in status */
+
   *status  = sr << 16 | rdr;
 
   /* Then return the actual received byte */
+
   return rdr & 0xff;
 }
 #endif
@@ -2507,6 +2529,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
 
     /* Control Register 2 is does not contain used interrupts */
+
     .cr2 = 0,
 
     .cr3 = up_serialin(priv, STM32_USART_CR3_OFFSET)
@@ -2870,7 +2893,7 @@ static void up_send(struct uart_dev_s *dev, int ch)
 #ifdef SERIAL_HAVE_TXDMA
 static void up_dma_txint(struct uart_dev_s *dev, bool enable)
 {
-/* If we are using DMA, no interrupts configuration are required */
+  /* If we are using DMA, no interrupts configuration are required */
 }
 #endif
 
@@ -2898,14 +2921,17 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
    */
 
   flags = enter_critical_section();
-  struct ctrl_regs_s cr = 
-  { 
+
+  struct ctrl_regs_s cr =
+  {
     .cr1 = up_serialin(priv, STM32_USART_CR1_OFFSET),
 
     /* Control Registers 2 & 3 are not used */
+
     .cr2 = 0,
     .cr3 = 0
   };
+
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
@@ -2943,6 +2969,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   else
     {
       /* Disable the TX interrupt */
+
       cr.cr1 &= ~USART_CR1_TXEIE;
     }
 
@@ -3149,7 +3176,12 @@ void arm_earlyserialinit(void)
     {
       if (g_uart_devs[i])
         {
-          struct ctrl_regs_s tmp = { .cr1 = 0, .cr2 = 0, .cr3 = 0};
+          struct ctrl_regs_s tmp = {
+            .cr1 = 0,
+            .cr2 = 0,
+            .cr3 = 0
+          };
+
           up_disableusartint(g_uart_devs[i], &tmp);
         }
     }
@@ -3330,7 +3362,7 @@ void stm32_serial_dma_poll(void)
 int up_putc(int ch)
 {
 #if CONSOLE_UART > 0
-  struct up_dev_s *priv = g_uart_devs[CONSOLE_UART - 1];;
+  struct up_dev_s *priv = g_uart_devs[CONSOLE_UART - 1];
   struct ctrl_regs_s cr;
 
   up_disableusartint(priv, &cr);
