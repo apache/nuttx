@@ -22,6 +22,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/cancelpt.h>
+
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <stdlib.h>
@@ -98,6 +100,7 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt)
       return 0;
     }
 
+  enter_cancellation_point();
   buffer = malloc(total_size);
   if (buffer == NULL)
     {
@@ -108,6 +111,7 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt)
   if (nread == -1)
     {
       free(buffer);
+      leave_cancellation_point();
       return nread;
     }
 
@@ -128,5 +132,6 @@ ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt)
     }
 
   free(buffer);
+  leave_cancellation_point();
   return nread;
 }
