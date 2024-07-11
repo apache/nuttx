@@ -30,6 +30,9 @@ endif()
 
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinit.c)
+  if(CONFIG_BOARDCTL_RESET)
+    list(APPEND SRCS stm32_reset.c)
+  endif()
 endif()
 
 if(CONFIG_ARCH_BUTTONS)

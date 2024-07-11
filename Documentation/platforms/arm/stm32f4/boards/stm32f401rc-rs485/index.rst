@@ -501,6 +501,7 @@ rndis
 Configures the NuttShell (nsh), enables a serial console on USART6 and enables RNDIS over USB.
 NSH commands::
 
+       nsh> mount -t procfs /proc
        nsh> ping -h
 
        Usage: ping [-c <count>] [-i <interval>] [-W <timeout>] [-s <size>] <hostname>
@@ -598,3 +599,36 @@ The board profile configures the NSH over USB and you can use the fb command to 
          5: ( 55, 25) ( 18, 14)
         Test finished
         nsh>
+
+telnetd
+-------
+
+Configures the NuttShell (nsh), enables a serial console on USART6, enables RNDIS over USB and
+enables Device Configuration over Telnet.  
+NSH commands::
+
+       nsh> mount -t procfs /proc
+       nsh> ifcong
+
+Get the ip address assigned to eth0 and convert to hexadecimal, for example 192.168.1.2
+becomes 0xC0A80102, than configure CONFIG_NETINIT_IPADDR and CONFIG_EXAMPLES_TELNETD_IPADDR,
+also configure the router address, in this example it woukd be 0xC0A80101. After theses changes
+rebuild and load the new firmware on your board::
+
+       nsh> mount -t procfs /proc
+       nsh> telnetd
+
+At your host PC, telnet to IP address for the board::
+
+       $ telnet 192.168.01.02
+
+Now you will be able to access the Device Configuration over Telnet::
+
+       Device Configuration over Telnet
+       You can add functions to setup your device
+       Type '?' and press <enter> for help
+       cfg> ?
+       Available commands:
+       help, ?   - show help
+       reset     - reset the board
+       exit      - exit shell
