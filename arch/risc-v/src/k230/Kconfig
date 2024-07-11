@@ -14,13 +14,13 @@ config K230_RPTUN_SHM_ADDR
 	hex "RPTUN share memory address"
 	default 0x80200000
 	---help---
-		 RPTUN shared memory start address.
+		RPTUN shared memory start address.
 
 config K230_RPTUN_SHM_SIZE
 	int "RPTUN share memory size"
 	default 32768
 	---help---
-		 RPTUN shared memory size in bytes.
+		RPTUN shared memory size in bytes.
 
 config K230_RPTUN_IPI_DEV
 	int "IPI device num for RPTUN purpose"

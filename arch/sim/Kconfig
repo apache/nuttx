@@ -231,12 +231,12 @@ config SIM_NETDEV_VPNKIT
 endchoice
 
 config SIM_NETDEV_MTU
-    int "The MTU of Simulated Network Device"
-    default 1500
-    range 1280 65535 if NET_IPv6
-    range 576 65535 if !NET_IPv6
-    ---help---
-        The MTU of the network devices.
+	int "The MTU of Simulated Network Device"
+	default 1500
+	range 1280 65535 if NET_IPv6
+	range 576 65535 if !NET_IPv6
+	---help---
+		The MTU of the network devices.
 
 config SIM_NETDEV_NUMBER
 	int "Number of Simulated Network Device"

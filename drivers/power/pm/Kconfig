@@ -119,7 +119,7 @@ config PM_GOVERNOR_STABILITY_SLEEP_THRESH
 		only if remained for >=(ticks), allow goto sleep state.
 		set to 0 disable stability check for sleep state.
 
-endif #  PM_GOVERNOR_STABILITY
+endif # PM_GOVERNOR_STABILITY
 
 if PM_GOVERNOR_ACTIVITY
 

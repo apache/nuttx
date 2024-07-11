@@ -2500,12 +2500,12 @@ config DEBUG_OPT_UNUSED_SECTIONS
 		linking with " --gc-sections ".
 
 config DEBUG_LINK_WHOLE_ARCHIVE
-       bool "Force every object to be included in the resulting shared library."
-       default n
-       depends on DEBUG_OPT_UNUSED_SECTIONS
-       ---help---
-               Selecting this option will pass "--whole-archive" to ld
-               when linking NuttX ELF.
+	bool "Force every object to be included in the resulting shared library."
+	default n
+	depends on DEBUG_OPT_UNUSED_SECTIONS
+	---help---
+		Selecting this option will pass "--whole-archive" to ld
+		when linking NuttX ELF.
 
 config DEBUG_LINK_MAP
 	bool "Generate link map file"

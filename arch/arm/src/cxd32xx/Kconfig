@@ -6,7 +6,7 @@
 menu "Peripheral Support"
 
 config CXD32_UART0
-    bool "UART0"
+	bool "UART0"
 	default y
 	select UART0_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
