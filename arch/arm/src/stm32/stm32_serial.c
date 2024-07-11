@@ -500,9 +500,11 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
                              bool upper);
 #endif
 
-#ifndef SERIAL_HAVE_TXDMA
+#if !defined(SERIAL_HAVE_TXDMA) || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
 static void up_txint(struct uart_dev_s *dev, bool enable);
-#else
+#endif
+
+#ifdef SERIAL_HAVE_TXDMA
 static void up_dma_send(struct uart_dev_s *dev);
 static void up_dma_txint(struct uart_dev_s *dev, bool enable);
 static void up_dma_txavailable(struct uart_dev_s *dev);
@@ -2469,7 +2471,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_TXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS)
+#ifndef SERIAL_HAVE_RXDMA
 static int up_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -2575,7 +2577,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-#if defined(SERIAL_HAVE_TXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS)
+#ifndef SERIAL_HAVE_RXDMA
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
