@@ -48,6 +48,12 @@
 
 if(CONFIG_FS_MNEMOFS)
   target_sources(
-    fs PRIVATE mnemofs_blkalloc.c mnemofs_fsobj.c mnemofs_journal.c
-               mnemofs_lru.c mnemofs_rw.c mnemofs.c)
+    fs
+    PRIVATE mnemofs_blkalloc.c
+            mnemofs_fsobj.c
+            mnemofs_journal.c
+            mnemofs_lru.c
+            mnemofs_rw.c
+            mnemofs_util.c
+            mnemofs.c)
 endif()

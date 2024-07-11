@@ -734,6 +734,270 @@ int mfs_erase_blk(FAR const struct mfs_sb_s * const sb, const off_t blk);
 int mfs_erase_nblks(FAR const struct mfs_sb_s * const sb, const off_t blk,
                     const size_t n);
 
+/* mnemofs_util.c */
+
+/****************************************************************************
+ * Name: mfs_arrhash
+ *
+ * Description:
+ *   Returns an 8-bit hash of an entire array of data.
+ *
+ * Input Parameters:
+ *   arr - Data array.
+ *   len - Length of the array.
+ *
+ * Returned Value:
+ *   16-bit hash of the array.
+ *
+ ****************************************************************************/
+
+uint8_t mfs_arrhash(FAR const char *arr, ssize_t len);
+
+/****************************************************************************
+ * Name: mfs_ser_8
+ *
+ * Description:
+ *   Serialize a 8 bit type into output.
+ *
+ * Input Parameters:
+ *   n   - 8 bit to serialize
+ *   out - Output array where to serialize.
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR char *mfs_ser_8(const uint8_t n, FAR char * const out);
+
+/****************************************************************************
+ * Name: mfs_deser_8
+ *
+ * Description:
+ *   Deserialize a 8 bit type from input.
+ *
+ * Input Parameters:
+ *   in - Input array from where to deserialize.
+ *   n  - 8 bit to deserialize
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR const char *mfs_deser_8(FAR const char * const in, uint8_t *n);
+
+/****************************************************************************
+ * Name: mfs_ser_str
+ *
+ * Description:
+ *   Serialize a string into output.
+ *
+ * Input Parameters:
+ *   str - String to serialize
+ *   len - Length of string
+ *   out - Output array where to serialize.
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR char *mfs_ser_str(FAR const char * const str, const mfs_t len,
+                      FAR char * const out);
+
+/****************************************************************************
+ * Name: mfs_deser_str
+ *
+ * Description:
+ *   Deserialize a string from intput.
+ *
+ * Input Parameters:
+ *   in  - Intput array from where to deserialize.
+ *   str - String to deserialize
+ *   len - Length of string
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR const char *mfs_deser_str(FAR const char * const in,
+                              FAR char * const str, const mfs_t len);
+
+/****************************************************************************
+ * Name: mfs_ser_mfs
+ *
+ * Description:
+ *   Serialize a mfs_t type into output.
+ *
+ * Input Parameters:
+ *   n   - mfs_t to serialize
+ *   out - Output array where to serialize.
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR char *mfs_ser_mfs(const mfs_t n, FAR char * const out);
+
+/****************************************************************************
+ * Name: mfs_deser_mfs
+ *
+ * Description:
+ *   Deserialize a mfs_t type from input..
+ *
+ * Input Parameters:
+ *   in - Input array from where to deserialize.
+ *   n  - mfs_t to deserialize
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR const char *mfs_deser_mfs(FAR const char * const in,
+                              FAR mfs_t * const n);
+
+/****************************************************************************
+ * Name: mfs_ser_ctz
+ *
+ * Description:
+ *   Serialize a mfs_ctz_store_s type into output.
+ *
+ * Input Parameters:
+ *   x   - mfs_ctz_s to serialize
+ *   out - Output array where to serialize.
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR char *mfs_ser_ctz(FAR const struct mfs_ctz_s * const x,
+                      FAR char * const out);
+
+/****************************************************************************
+ * Name: mfs_deser_ctz
+ *
+ * Description:
+ *   Deserialize a mfs_ctz_store_s type into output.
+ *
+ * Input Parameters:
+ *   in - Input array from where to deserialize.
+ *   x  - mfs_ctz_s to deserialize
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR const char *mfs_deser_ctz(FAR const char * const in,
+                              FAR struct mfs_ctz_s * const x);
+
+/****************************************************************************
+ * Name: mfs_ser_timespec
+ *
+ * Description:
+ *   Serialize timespec.
+ *
+ * Input Parameters:
+ *   x   - Value to serialize
+ *   out - Output array where to serialize.
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR char *mfs_ser_timespec(FAR const struct timespec * const x,
+                          FAR char * const out);
+
+/****************************************************************************
+ * Name: mfs_deser_timespec
+ *
+ * Description:
+ *   Deserialize timespec.
+ *
+ * Input Parameters:
+ *   in - Input array from where to deserialize.
+ *   x  - Value to deserialize
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR const char *mfs_deser_timespec(FAR const char * const in,
+                                  FAR struct timespec * const x);
+
+/****************************************************************************
+ * Name: mfs_ser_16
+ *
+ * Description:
+ *   Serialize 16 bit values.
+ *
+ * Input Parameters:
+ *   x   - Value to serialize
+ *   out - Output array where to serialize.
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR char *mfs_ser_16(const uint16_t n, FAR char * const out);
+
+/****************************************************************************
+ * Name: mfs_deser_16
+ *
+ * Description:
+ *   Deserialize 16 bit value.
+ *
+ * Input Parameters:
+ *   in - Input array from where to deserialize.
+ *   x  - Value to deserialize
+ *
+ * Returned Value:
+ *   Pointer to byte after the end of serialized value.
+ *
+ ****************************************************************************/
+
+FAR const char *mfs_deser_16(FAR const char * const in, FAR uint16_t *n);
+
+/****************************************************************************
+ * Name: mfs_v2n
+ *
+ * Description:
+ *   v2n(n) math function.
+ *
+ * Input Parameters:
+ *   n   - Number.
+ *
+ * Returned Value:
+ *   v2n(n).
+ *
+ ****************************************************************************/
+
+mfs_t mfs_v2n(mfs_t n);
+
+/****************************************************************************
+ * Name: mfs_set_msb
+ *
+ * Description:
+ *   Set the least significant of the most significant unset bits.
+ *
+ * Input Parameters:
+ *   n   - Number.
+ *
+ * Returned Value:
+ *   Number after setting the bit.
+ *
+ ****************************************************************************/
+
+mfs_t mfs_set_msb(mfs_t n);
+
 /* mnemofs_lru.c */
 
 /****************************************************************************
