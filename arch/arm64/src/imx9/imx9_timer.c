@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/common/arm64_arch_timer.h
+ * arch/arm64/src/imx9/imx9_timer.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,33 +18,19 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_COMMON_ARM64_ARCH_TIMER_H
-#define __ARCH_ARM64_SRC_COMMON_ARM64_ARCH_TIMER_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/timers/oneshot.h>
+#include <nuttx/timers/arch_alarm.h>
+
+#include "arm64_arch_timer.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: arm64_oneshot_initialize
- *
- * Description:
- *   This function initialize generic timer hardware module
- *   and return an instance of a "lower half" timer interface.
- *
- * Returned Value:
- *   On success, a non-NULL oneshot_lowerhalf_s is returned to the caller.
- *   In the event of any failure, a NULL value is returned.
- *
- ****************************************************************************/
-
-struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void);
-
-#endif /* __ARCH_ARM64_SRC_COMMON_ARM64_ARCH_TIMER_H */
+void up_timer_initialize(void)
+{
+  up_alarm_set_lowerhalf(arm64_oneshot_initialize());
+}

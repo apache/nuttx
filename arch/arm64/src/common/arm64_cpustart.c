@@ -232,10 +232,7 @@ void arm64_boot_secondary_c_routine(void)
 
   arm64_gic_secondary_init();
 
-  arm64_arch_timer_secondary_init();
-
   up_perf_init(NULL);
 
   arm64_smp_init_top();
 }
-

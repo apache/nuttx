@@ -21,7 +21,7 @@
 include common/Make.defs
 
 # Rockchip zynq mpsoc specific C source files
-CHIP_CSRCS  = zynq_boot.c zynq_serial.c zynq_mio.c
+CHIP_CSRCS  = zynq_boot.c zynq_serial.c zynq_mio.c zynq_timer.c
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
 CHIP_ASRCS  = zynq_lowputc.S

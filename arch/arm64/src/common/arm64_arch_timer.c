@@ -39,6 +39,19 @@
 #include "arm64_arch_timer.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CONFIG_ARM_TIMER_SECURE_IRQ         (GIC_PPI_INT_BASE + 13)
+#define CONFIG_ARM_TIMER_NON_SECURE_IRQ     (GIC_PPI_INT_BASE + 14)
+#define CONFIG_ARM_TIMER_VIRTUAL_IRQ        (GIC_PPI_INT_BASE + 11)
+#define CONFIG_ARM_TIMER_HYP_IRQ            (GIC_PPI_INT_BASE + 10)
+
+#define ARM_ARCH_TIMER_IRQ                  CONFIG_ARM_TIMER_VIRTUAL_IRQ
+#define ARM_ARCH_TIMER_PRIO                 IRQ_DEFAULT_PRIORITY
+#define ARM_ARCH_TIMER_FLAGS                IRQ_TYPE_LEVEL
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -307,6 +320,10 @@ static const struct oneshot_operations_s g_oneshot_ops =
 };
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: oneshot_initialize
  *
  * Description:
@@ -319,7 +336,7 @@ static const struct oneshot_operations_s g_oneshot_ops =
  *
  ****************************************************************************/
 
-static struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
+struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
 {
   struct arm64_oneshot_lowerhalf_s *priv;
 
@@ -360,64 +377,3 @@ static struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
 
   return &priv->lh;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function:  up_timer_initialize
- *
- * Description:
- *   This function is called during start-up to initialize the system timer
- *   interrupt.
- *
- ****************************************************************************/
-
-void up_timer_initialize(void)
-{
-  uint64_t freq;
-
-  freq = arm64_arch_timer_get_cntfrq();
-  tmrinfo("%s: cp15 timer(s) running at %" PRIu64 ".%" PRIu64 "MHz\n",
-          __func__, freq / 1000000, (freq / 10000) % 100);
-
-  up_alarm_set_lowerhalf(arm64_oneshot_initialize());
-}
-
-#ifdef CONFIG_SMP
-/****************************************************************************
- * Function:  arm64_arch_timer_secondary_init
- *
- * Description:
- *   This function is called during start-up to initialize the system timer
- *   interrupt for smp.
- *
- * Notes:
- * The origin design for ARMv8-A timer is assigned private timer to
- * every PE(CPU core), the ARM_ARCH_TIMER_IRQ is a PPI so it's
- * should be enable at every core.
- *
- * But for NuttX, it's design only for primary core to handle timer
- * interrupt and call nxsched_process_timer at timer tick mode.
- * So we need only enable timer for primary core
- *
- * IMX6 use GPT which is a SPI rather than generic timer to handle
- * timer interrupt
- ****************************************************************************/
-
-void arm64_arch_timer_secondary_init()
-{
-#ifdef CONFIG_SCHED_TICKLESS
-  tmrinfo("arm64_arch_timer_secondary_init\n");
-
-  /* Enable int */
-
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm64_arch_timer_enable(true);
-#endif
-}
-#endif
