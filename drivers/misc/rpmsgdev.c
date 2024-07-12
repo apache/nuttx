@@ -404,20 +404,6 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   priv = filep->f_priv;
   DEBUGASSERT(dev != NULL && priv != NULL);
 
-  /* If the open flags is not nonblock, should poll the device for
-   * read ready first to avoid the server rptun thread blocked in
-   * device read operation.
-   */
-
-  if (priv->nonblock == false)
-    {
-      ret = rpmsgdev_wait(filep, POLLIN);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
   /* Call the host to perform the read */
 
   read.iov_base = buffer;
@@ -428,8 +414,27 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   command   = dev->flags & RPMSGDEV_NOFRAG_READ ?
               RPMSGDEV_READ_NOFRAG : RPMSGDEV_READ;
 
-  ret = rpmsgdev_send_recv(dev, command, true, &msg.header,
-                           sizeof(msg) - 1, &read);
+  for (; ; )
+    {
+      ret = rpmsgdev_send_recv(dev, command, true, &msg.header,
+                               sizeof(msg) - 1, &read);
+      if (ret != -EAGAIN || priv->nonblock)
+        {
+          break;
+        }
+
+      /* If open with block mode and return -EAGAIN, should wait the
+       * perr device ready and try again until read success or some
+       * other errors occur.
+       */
+
+      ret = rpmsgdev_wait(filep, POLLIN);
+      if (ret < 0)
+        {
+          rpmsgdeverr("read wait failed, ret=%d\n", ret);
+          break;
+        }
+    }
 
   return read.iov_len ? read.iov_len : ret;
 }
@@ -459,10 +464,9 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_write_s *msg;
-  struct rpmsgdev_cookie_s cookie;
   uint32_t space;
   size_t written = 0;
-  int ret;
+  int ret = 0;
 
   if (buffer == NULL)
     {
@@ -475,24 +479,7 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
   priv = filep->f_priv;
   DEBUGASSERT(dev != NULL && priv != NULL);
 
-  /* If the open flags is not nonblock, should poll the device for
-   * write ready first to avoid the server rptun thread blocked in
-   * device write operation.
-   */
-
-  if (priv->nonblock == false)
-    {
-      ret = rpmsgdev_wait(filep, POLLOUT);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
   /* Perform the rpmsg write */
-
-  memset(&cookie, 0, sizeof(cookie));
-  nxsem_init(&cookie.sem, 0, 0);
 
   while (written < buflen)
     {
@@ -500,56 +487,52 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, const char *buffer,
       if (msg == NULL)
         {
           ret = -ENOMEM;
-          goto out;
+          break;
         }
 
       space -= sizeof(*msg) - 1;
       if (space >= buflen - written)
         {
-          /* Send complete, set cookie is valid, need ack */
-
           space = buflen - written;
-          msg->header.cookie = (uintptr_t)&cookie;
         }
       else if ((dev->flags & RPMSGDEV_NOFRAG_WRITE) != 0)
         {
           rpmsg_release_tx_buffer(&dev->ept, msg);
           ret = -EMSGSIZE;
-          goto out;
-        }
-      else
-        {
-          /* Not send complete, set cookie invalid, do not need ack */
-
-          msg->header.cookie = 0;
+          break;
         }
 
-      msg->header.command = RPMSGDEV_WRITE;
-      msg->header.result  = -ENXIO;
-      msg->filep          = priv->filep;
-      msg->count          = space;
+      msg->filep = priv->filep;
+      msg->count = space;
       memcpy(msg->buf, buffer + written, space);
 
-      ret = rpmsg_send_nocopy(&dev->ept, msg, sizeof(*msg) - 1 + space);
-      if (ret < 0)
+      ret = rpmsgdev_send_recv(dev, RPMSGDEV_WRITE, false, &msg->header,
+                               sizeof(*msg) - 1 + space, NULL);
+      if (ret >= 0)
         {
-          goto out;
+          written += ret;
+          continue;
         }
 
-      written += space;
+      if (ret != -EAGAIN || priv->nonblock || written != 0)
+        {
+          break;
+        }
+
+      /* If open with block mode and return -EAGAIN and no data
+       * written to this device, should wait peer device ready and
+       * try again.
+       */
+
+      ret = rpmsgdev_wait(filep, POLLOUT);
+      if (ret < 0)
+        {
+          rpmsgerr("write wait failed, ret=%d\n", ret);
+          break;
+        }
     }
 
-  ret = rpmsg_wait(&dev->ept, &cookie.sem);
-  if (ret < 0)
-    {
-      goto out;
-    }
-
-  ret = cookie.result;
-
-out:
-  nxsem_destroy(&cookie.sem);
-  return ret < 0 ? ret : buflen;
+  return written != 0 ? written : ret;
 }
 
 /****************************************************************************
@@ -838,6 +821,11 @@ static int rpmsgdev_send_recv(FAR struct rpmsgdev_s *priv,
 
   if (ret < 0)
     {
+      if (copy == false)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+        }
+
       goto fail;
     }
 
