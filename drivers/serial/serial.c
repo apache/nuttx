@@ -160,6 +160,45 @@ static struct work_s g_serial_work;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: uart_is_termios_hw_change
+ *
+ * Description:
+ *   Return true if the termios hw change
+ *
+ ****************************************************************************/
+
+static bool uart_is_termios_hw_change(FAR struct file *filep,
+                                      FAR const struct termios *new)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR uart_dev_t *dev = inode->i_private;
+  struct termios old;
+  int ret;
+
+  if (new == NULL)
+    {
+      return false;
+    }
+
+  memset(&old, 0, sizeof(old));
+  ret = dev->ops->ioctl(filep, TCGETS, (unsigned long)(uintptr_t)&old);
+  if (ret >= 0)
+    {
+      if (old.c_speed != new->c_speed)
+        {
+          return true;
+        }
+
+      if ((old.c_cflag ^ new->c_cflag) & ~(HUPCL | CREAD | CLOCAL))
+        {
+          return true;
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
  * Name: uart_poll_notify
  ****************************************************************************/
 
@@ -1444,12 +1483,20 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR uart_dev_t   *dev   = inode->i_private;
+  FAR struct termios *termiosp = (FAR struct termios *)(uintptr_t)arg;
+  int ret = -ENOTTY;
 
   /* Handle TTY-level IOCTLs here */
 
-  /* Let low-level driver handle the call first */
+  /* Let low-level driver handle the call first,
+   * but skip TCSETS if no hardware change.
+   */
 
-  int ret = dev->ops->ioctl ? dev->ops->ioctl(filep, cmd, arg) : -ENOTTY;
+  if (dev->ops->ioctl && (cmd != TCSETS ||
+      uart_is_termios_hw_change(filep, termiosp)))
+    {
+      ret = dev->ops->ioctl(filep, cmd, arg);
+    }
 
   /* The device ioctl() handler returns -ENOTTY when it doesn't know
    * how to handle the command. Check if we can handle it here.
@@ -1629,9 +1676,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           case TCGETS:
             {
-              FAR struct termios *termiosp = (FAR struct termios *)
-                                                (uintptr_t)arg;
-
               if (!termiosp)
                 {
                   ret = -EINVAL;
@@ -1654,9 +1698,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCSETS:
             {
-              FAR struct termios *termiosp = (FAR struct termios *)
-                                                (uintptr_t)arg;
-
               if (!termiosp)
                 {
                   ret = -EINVAL;
