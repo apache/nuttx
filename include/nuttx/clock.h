@@ -416,24 +416,24 @@ EXTERN volatile clock_t g_system_ticks;
  ****************************************************************************/
 
 #define clock_timespec_subtract(ts1, ts2, ts3) \
-    do \
+  do \
+    { \
+      time_t _sec = (ts1)->tv_sec - (ts2)->tv_sec; \
+      long _nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
+      if (_nsec < 0) \
         { \
-        time_t _sec = (ts1)->tv_sec - (ts2)->tv_sec; \
-        long _nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
-        if (_nsec < 0) \
-            { \
-            _nsec += NSEC_PER_SEC; \
-            _sec--; \
-            } \
-        if (_sec < 0) \
-            { \
-            _sec = 0; \
-            _nsec = 0; \
-            } \
-        (ts3)->tv_sec = _sec; \
-        (ts3)->tv_nsec = _nsec; \
-        }\
-    while (0)
+          _nsec += NSEC_PER_SEC; \
+          _sec--; \
+        } \
+      if ((int64_t)_sec < 0) \
+        { \
+          _sec = 0; \
+          _nsec = 0; \
+        } \
+      (ts3)->tv_sec = _sec; \
+      (ts3)->tv_nsec = _nsec; \
+    }\
+  while (0)
 
 /****************************************************************************
  * Name: clock_timespec_compare
@@ -446,9 +446,9 @@ EXTERN volatile clock_t g_system_ticks;
  ****************************************************************************/
 
 #define clock_timespec_compare(ts1, ts2) \
-    (((ts1)->tv_sec < (ts2)->tv_sec) ? -1 : \
-     ((ts1)->tv_sec > (ts2)->tv_sec) ? 1 : \
-     (ts1)->tv_nsec - (ts2)->tv_nsec)
+  (((ts1)->tv_sec < (ts2)->tv_sec) ? -1 : \
+   ((ts1)->tv_sec > (ts2)->tv_sec) ? 1 : \
+   (ts1)->tv_nsec - (ts2)->tv_nsec)
 
 /****************************************************************************
  * Name: clock_abstime2ticks
