@@ -18,6 +18,17 @@
 #
 # ##############################################################################
 
+add_compile_options(
+  -U_AIX
+  -U_WIN32
+  -U__APPLE__
+  -U__FreeBSD__
+  -U__NetBSD__
+  -U__linux__
+  -U__sun__
+  -U__unix__
+  -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
+
 if(APPLE)
   find_program(CMAKE_C_ELF_COMPILER x86_64-elf-gcc)
   find_program(CMAKE_CXX_ELF_COMPILER x86_64-elf-g++)
@@ -27,26 +38,16 @@ if(WIN32)
   return()
 endif()
 
-add_compile_options(-fno-common)
-
 set(NO_LTO "-fno-lto")
 
 if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
 
-if(CONFIG_SIM_M32)
-  add_compile_options(-m32)
-endif()
-
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
 elseif(CONFIG_DEBUG_FULLOPT)
-  if(CONFIG_ARCH_TOOLCHAIN_CLANG)
-    add_compile_options(-Oz)
-  else()
-    add_compile_options(-Os)
-  endif()
+  add_compile_options(-O2)
 endif()
 
 if(NOT CONFIG_DEBUG_NOOPT)
@@ -75,6 +76,14 @@ if(CONFIG_ARCH_COVERAGE)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 
+if(CONFIG_SIM_GCOV_ALL)
+  add_compile_options(-fprofile-generate -ftest-coverage)
+endif()
+
+if(CONFIG_SCHED_GPROF_ALL OR CONFIG_SIM_GPROF)
+  add_compile_options(-pg)
+endif()
+
 if(CONFIG_SIM_ASAN)
   add_compile_options(-fsanitize=address)
   add_link_options(-fsanitize=address)
@@ -86,7 +95,12 @@ elseif(CONFIG_MM_KASAN_ALL)
   add_compile_options(-fsanitize=kernel-address)
 endif()
 
+if(CONFIG_MM_KASAN_GLOBAL)
+  add_compile_options(--param asan-globals=1)
+endif()
+
 if(CONFIG_SIM_UBSAN)
+  add_link_options(-fsanitize=undefined)
   add_compile_options(-fsanitize=undefined)
   add_link_options(-fsanitize=undefined)
 else()
@@ -108,14 +122,25 @@ if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
   add_compile_options(-ffunction-sections -fdata-sections)
 endif()
 
-if(CONFIG_CXX_STANDARD)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
+if(CONFIG_ARCH_INSTRUMENT_ALL)
+  add_compile_options(-finstrument-functions)
 endif()
 
-add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
+add_compile_options(
+  -fno-common
+  -fvisibility=hidden
+  -ffunction-sections
+  -fdata-sections
+  -Wall
+  -Wshadow
+  -Wundef
+  -Wno-attributes
+  -Wno-unknown-pragmas
+  $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
+  $<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
 
-if(NOT CONFIG_LIBCXXTOOLCHAIN)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
+if(CONFIG_CXX_STANDARD)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
 endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)
@@ -125,4 +150,23 @@ endif()
 
 if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
+endif()
+
+if(CONFIG_SIM_M32)
+  add_compile_options(-m32)
+  add_link_options(-m32)
+endif()
+
+if(CONFIG_LIBCXX)
+  if(APPLE)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-DLIBCXX_BUILDING_LIBCXXABI>)
+  endif()
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D__GLIBCXX__>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D_LIBCPP_DISABLE_AVAILABILITY>)
+endif()
+
+if(APPLE)
+  add_link_options(-Wl,-dead_strip)
+else()
+  add_link_options(-Wl,-Ttext-segment=0x40000000)
 endif()
