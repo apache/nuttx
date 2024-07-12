@@ -22,7 +22,11 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/tricore/src/tc3xx/Toolchain.defs
 
-ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Tasking_Tricore_Tc.lsl
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Tasking_Tricore_Tc.lsl
+else
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)Lcf_Gnuc_Tricore_Tc.lsl
+endif
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)

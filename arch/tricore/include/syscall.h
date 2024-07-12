@@ -130,6 +130,7 @@
 
 static inline uintptr_t sys_call0(unsigned int nbr)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   register long reg0;
 
   __asm volatile
@@ -146,6 +147,17 @@ static inline uintptr_t sys_call0(unsigned int nbr)
     : "i"(SYS_syscall), "d"(nbr)
     : "memory", "a11"
   );
+#else
+  register long reg0 __asm__("d8") = (long)(nbr);
+
+  __asm__ __volatile__
+  (
+    "syscall %1"
+    : "=d"(reg0)
+    : "i"(SYS_syscall), "d"(reg0)
+    : "memory", "a11"
+  );
+#endif
 
   return reg0;
 }
@@ -154,6 +166,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
 
 static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   register long reg0;
 
   __asm volatile
@@ -171,6 +184,18 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
     : "i"(SYS_syscall)
     : "memory", "a11"
   );
+#else
+  register long reg0 __asm__("d8") = (long)(nbr);
+  register long reg1 __asm__("d9") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "syscall %1"
+    : "=d"(reg0)
+    : "i"(SYS_syscall), "d"(reg0), "d"(reg1)
+    : "memory", "a11"
+  );
+#endif
 
   return reg0;
 }
@@ -180,6 +205,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   register long reg0;
 
   __asm volatile
@@ -198,6 +224,19 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
     : "i"(SYS_syscall)
     : "memory", "a11"
   );
+#else
+  register long reg0 __asm__("d8") = (long)(nbr);
+  register long reg2 __asm__("d10") = (long)(parm2);
+  register long reg1 __asm__("d9") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "syscall %1"
+    : "=d"(reg0)
+    : "i"(SYS_syscall), "d"(reg0), "d"(reg1), "d"(reg2)
+    : "memory", "a11"
+  );
+#endif
 
   return reg0;
 }
@@ -207,6 +246,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   register long reg0;
 
   __asm volatile
@@ -226,6 +266,20 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
     : "i"(SYS_syscall)
     : "memory", "a11"
   );
+#else
+  register long reg0 __asm__("d8") = (long)(nbr);
+  register long reg3 __asm__("d11") = (long)(parm3);
+  register long reg2 __asm__("d10") = (long)(parm2);
+  register long reg1 __asm__("d9") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "syscall %1"
+    : "=d"(reg0)
+    : "i"(SYS_syscall), "d"(reg0), "d"(reg1), "d"(reg2), "d"(reg3)
+    : "memory", "a11"
+  );
+#endif
 
   return reg0;
 }
@@ -236,6 +290,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3,
                                   uintptr_t parm4)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   register long reg0;
 
   __asm volatile
@@ -256,6 +311,22 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
     : "i"(SYS_syscall)
     : "memory", "a11"
   );
+#else
+  register long reg0 __asm__("d8") = (long)(nbr);
+  register long reg4 __asm__("d12") = (long)(parm4);
+  register long reg3 __asm__("d11") = (long)(parm3);
+  register long reg2 __asm__("d10") = (long)(parm2);
+  register long reg1 __asm__("d9") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "syscall %1"
+    : "=d"(reg0)
+    : "i"(SYS_syscall), "d"(reg0), "d"(reg1), "d"(reg2),
+      "d"(reg3), "d"(reg4)
+    : "memory", "a11"
+  );
+#endif
 
   return reg0;
 }
@@ -266,6 +337,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3,
                                   uintptr_t parm4, uintptr_t parm5)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   register long reg0;
 
   __asm volatile
@@ -287,6 +359,23 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
     : "i"(SYS_syscall)
     : "memory", "a11"
   );
+#else
+  register long reg0 __asm__("d8") = (long)(nbr);
+  register long reg5 __asm__("d13") = (long)(parm5);
+  register long reg4 __asm__("d12") = (long)(parm4);
+  register long reg3 __asm__("d11") = (long)(parm3);
+  register long reg2 __asm__("d10") = (long)(parm2);
+  register long reg1 __asm__("d9") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "syscall %1"
+    : "=d"(reg0)
+    : "i"(SYS_syscall), "d"(reg0), "d"(reg1), "d"(reg2),
+      "d"(reg3), "d"(reg4), "d"(reg5)
+    : "memory", "a11"
+  );
+#endif
 
   return reg0;
 }
@@ -298,6 +387,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm4, uintptr_t parm5,
                                   uintptr_t parm6)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   register long reg0;
 
   __asm volatile
@@ -321,6 +411,24 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
     : "i"(SYS_syscall)
     : "memory", "a11"
   );
+#else
+  register long reg0 __asm__("d8") = (long)(nbr);
+  register long reg6 __asm__("d14") = (long)(parm6);
+  register long reg5 __asm__("d13") = (long)(parm5);
+  register long reg4 __asm__("d12") = (long)(parm4);
+  register long reg3 __asm__("d11") = (long)(parm3);
+  register long reg2 __asm__("d10") = (long)(parm2);
+  register long reg1 __asm__("d9") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "syscall %1"
+    : "=d"(reg0)
+    : "i"(SYS_syscall), "d"(reg0), "d"(reg1), "d"(reg2),
+      "d"(reg3), "d"(reg4), "d"(reg5), "d"(reg6)
+    : "memory", "a11"
+  );
+#endif
 
   return reg0;
 }
