@@ -227,6 +227,10 @@ config S32K1XX_FLEXCAN2
 	default n
 	depends on S32K1XX_HAVE_FLEXCAN2
 
+config S32K1XX_FLEXIO_I2C
+	bool "FlexIO I2C (emulated I2C)"
+	default n
+
 config S32K1XX_FTM0
 	bool "FTM0"
 	default n
