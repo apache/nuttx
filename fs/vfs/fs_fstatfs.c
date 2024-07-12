@@ -57,7 +57,9 @@
 int fstatfs(int fd, FAR struct statfs *buf)
 {
   FAR struct file *filep;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode;
+#endif
   int ret;
 
   DEBUGASSERT(buf != NULL);
@@ -72,11 +74,11 @@ int fstatfs(int fd, FAR struct statfs *buf)
       goto errout;
     }
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Get the inode from the file structure */
 
   inode = filep->f_inode;
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
    */
