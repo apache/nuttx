@@ -678,6 +678,28 @@ int mfs_isbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk);
 int mfs_markbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk);
 
 /****************************************************************************
+ * Name: mfs_write_page
+ *
+ * Description:
+ *   Write a page.
+ *
+ * Input Parameters:
+ *   sb      - Superblock instance of the device.
+ *   data    - Buffer
+ *   datalen - Length of buffer.
+ *   pg      - Page number.
+ *   pgoff   - Offset into the page.
+ *
+ * Assumptions/Limitations:
+ *   This assumes a locked environment when called.
+ *
+ ****************************************************************************/
+
+ssize_t mfs_write_page(FAR const struct mfs_sb_s * const sb,
+                       FAR const char *data, const mfs_t datalen,
+                       const off_t page, const mfs_t pgoff);
+
+/****************************************************************************
  * Name: mfs_read_page
  *
  * Description:
@@ -997,6 +1019,103 @@ mfs_t mfs_v2n(mfs_t n);
  ****************************************************************************/
 
 mfs_t mfs_set_msb(mfs_t n);
+
+/* mnemofs_ctz.c */
+
+/****************************************************************************
+ * Name: mfs_ctz_rdfromoff
+ *
+ * Description:
+ *   Read data from data offset in a CTZ list. This includes updates from the
+ *   journal. The ctz list is taken as the last element in the path, got
+ *   using `path[depth - 1]`.
+ *
+ * Input Parameters:
+ *   sb       - Superblock instance of the device.
+ *   data_off - Data offset into the CTZ list.
+ *   path     - CTZ representation of the relpath.
+ *   depth    - Depth of the path.
+ *   buf      - Buffer will be populated with the contents.
+ *   buflen   - Length of `buf`.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   This updates the value of path to reflect the latest location.
+ *
+ ****************************************************************************/
+
+int mfs_ctz_rdfromoff(FAR struct mfs_sb_s * const sb, mfs_t data_off,
+                      FAR struct mfs_path_s * const path, const mfs_t depth,
+                      FAR char *buf, mfs_t buflen);
+
+/****************************************************************************
+ * Name: mfs_ctz_wrtooff
+ *
+ * Description:
+ *   Replace `o_bytes` of data from CTZ list with `n_bytes` of data from
+ *   `buf` at CTZ data offset `data_off`.
+ *
+ *   In mnemofs, the CTZ lists are all stored in a Copy On Write manner.
+ *   Hence to update a CTZ list, the common CTZ blocks will be kept as it is,
+ *   then in the CTZ block containing `data_off`, the bytes appearing before
+ *   `data_off` (which remain unchanged) will be copied to the new CTZ block
+ *   then `n_bytes` of content from `buf` will follow, and then the data from
+ *   `data_off + o_bytes` will follow (both these will be copied to new
+ *   CTZ blocks as well due to Copy On Write).
+ *
+ *   The new location will be written to the journal upon success as well.
+ *
+ * Input Parameters:
+ *   sb       - Superblock instance of the device.
+ *   data_off - Data offset into the CTZ list.
+ *   o_bytes  - Number of bytes in old CTZ list from `data_off` that will be
+ *              replaced.
+ *   n_bytes  - Number of bytes in new CTZ list from `data_off` that will be
+ *              replacing `o_bytes`.
+ *   o_ctz_sz - The size in bytes of the old CTZ list.
+ *   path     - CTZ representation of the relpath.
+ *   depth    - Depth of the path.
+ *   buf      - Buffer that contains the data to be replaced in CTZ list.
+ *   ctz      - CTZ list to be updated with the new position.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   This updates the value of path to reflect the latest location.s
+ *
+ ****************************************************************************/
+
+int mfs_ctz_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
+                    mfs_t o_bytes, const mfs_t n_bytes,
+                    mfs_t o_ctz_sz, FAR struct mfs_path_s * const path,
+                    const mfs_t depth, FAR const char *buf,
+                    FAR struct mfs_ctz_s *ctz);
+
+/****************************************************************************
+ * Name: mfs_ctz_nwrtooff
+ *
+ * Description:
+ *   Write deltas of an LRU node to flash.
+ *
+ * Input Parameters:
+ *   sb      - Superblock instance of the device.
+ *   node    - LRU Node.
+ *   path    - CTZ representation of the relpath.
+ *   depth   - Depth of path.
+ *   ctz_sz  - Number of bytes in the data of the CTZ list.
+ *   new_ctz - New CTZ location
+ *
+ ****************************************************************************/
+
+int mfs_ctz_nwrtooff(FAR struct mfs_sb_s * const sb,
+                     FAR struct mfs_node_s *node,
+                     FAR struct mfs_path_s * const path, const mfs_t depth,
+                     const mfs_t ctz_sz, FAR struct mfs_ctz_s *new_ctz);
 
 /* mnemofs_lru.c */
 

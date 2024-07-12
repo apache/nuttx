@@ -221,7 +221,7 @@ mfs_t mfs_v2n(mfs_t n)
   return (n & (~(n - 1)));
 }
 
-mfs_t set_msb(mfs_t n)
+mfs_t mfs_set_msb(mfs_t n)
 {
   return 31 - mfs_clz(n);
 }

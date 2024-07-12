@@ -50,6 +50,7 @@ if(CONFIG_FS_MNEMOFS)
   target_sources(
     fs
     PRIVATE mnemofs_blkalloc.c
+            mnemofs_ctz.c
             mnemofs_fsobj.c
             mnemofs_journal.c
             mnemofs_lru.c
