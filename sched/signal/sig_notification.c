@@ -124,6 +124,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
       info.si_pid    = rtcb->pid;
       info.si_status = OK;
 #endif
+      info.si_user   = NULL;
 
       /* Some compilers (e.g., SDCC), do not permit assignment of aggregates.
        * Use of memcpy() is overkill;  We could just copy the larger of the
