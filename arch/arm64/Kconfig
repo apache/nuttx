@@ -100,6 +100,17 @@ config ARCH_CHIP_IMX9
 	---help---
 		NXP i.MX9 (ARMv8.2a) applications processors
 
+config ARCH_CHIP_ZYNQ_MPSOC
+	bool "XilinX Zynq UltraScale+ MPSoC"
+	select ARCH_CORTEX_A53
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
+	---help---
+		XilinX ZYNQ MPSOC
+		
 config ARCH_CHIP_ARM64_CUSTOM
 	bool "Custom ARM64 chip"
 	select ARCH_CHIP_CUSTOM
@@ -245,6 +256,7 @@ config ARCH_CHIP
 	string
 	default "a64"       if ARCH_CHIP_A64
 	default "rk3399"    if ARCH_CHIP_RK3399
+	default "zynq-mpsoc" if ARCH_CHIP_ZYNQ_MPSOC
 	default "qemu"      if ARCH_CHIP_QEMU
 	default "goldfish"  if ARCH_CHIP_GOLDFISH
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
@@ -360,6 +372,10 @@ endif
 
 if ARCH_CHIP_GOLDFISH
 source "arch/arm64/src/goldfish/Kconfig"
+endif
+
+if ARCH_CHIP_ZYNQ_MPSOC
+source "arch/arm64/src/zynq-mpsoc/Kconfig"
 endif
 
 endif # ARCH_ARM64
