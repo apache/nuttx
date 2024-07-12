@@ -272,11 +272,16 @@ static int rpmsgdev_write_handler(FAR struct rpmsg_endpoint *ept,
       written += ret;
     }
 
-  if (msg->header.cookie != 0)
+  if (written != 0)
     {
-      msg->header.result = ret < 0 ? ret : written;
-      rpmsg_send(ept, msg, sizeof(*msg) - 1);
+      msg->header.result = written;
     }
+  else
+    {
+      msg->header.result = ret;
+    }
+
+  rpmsg_send(ept, msg, sizeof(*msg) - 1);
 
   return 0;
 }
