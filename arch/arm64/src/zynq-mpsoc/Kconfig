@@ -1,0 +1,46 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ZYNQ_MPSOC
+
+config XPAR_CPU_CORTEXA53_0_CPU_CLK_FREQ_HZ
+	int "Zynq Mpsoc cpu clock"
+	default 1199988037
+	---help---
+		Canonical definitions for cpu PSU_CORTEXA53_0.
+		
+config XPAR_CPU_CORTEXA53_0_TIMESTAMP_CLK_FREQ
+	int "Zynq Mpsoc peripheral clock"
+	default 99999001
+	---help---
+		Canonical definitions for peripheral PSU_CORTEXA53_0.
+
+config XPAR_PSU_UART_0_UART_CLK_FREQ_HZ
+	int "Zynq Mpsoc uart0 clock"
+	default 99999001
+	---help---
+		Clock definitions for uart0.
+			
+menu "XILINX ZYNQ_MPSOC Peripheral Selection"
+
+config ZYNQ_MPSOC_UART0
+	bool "UART 0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART0.
+
+config ZYNQ_MPSOC_UART1
+	bool "UART 1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART1.
+
+endmenu # XILINX ZYNQ_MPSOC Peripheral Selection
+
+endif # ARCH_CHIP_ZYNQ_MPSOC
