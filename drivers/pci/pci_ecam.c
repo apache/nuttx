@@ -24,6 +24,7 @@
 
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/lib/math32.h>
 #include <nuttx/pci/pci.h>
@@ -61,6 +62,21 @@ static int pci_ecam_read_io(FAR struct pci_bus_s *bus, uintptr_t addr,
 static int pci_ecam_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
                              int size, uint32_t val);
 
+static int pci_ecam_get_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
+                            uint8_t line, uint8_t pin);
+
+#ifdef CONFIG_PCI_MSIX
+static int pci_ecam_alloc_irq(FAR struct pci_bus_s *bus, FAR int *irq,
+                              int num);
+
+static void pci_ecam_release_irq(FAR struct pci_bus_s *bus, FAR int *irq,
+                                 int num);
+
+static int pci_ecam_connect_irq(FAR struct pci_bus_s *bus, FAR int *irq,
+                                int num, FAR uintptr_t *mar,
+                                FAR uint32_t *mdr);
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -77,10 +93,16 @@ struct pci_ecam_s
 
 static const struct pci_ops_s g_pci_ecam_ops =
 {
-  .read     = pci_ecam_read_config,
-  .write    = pci_ecam_write_config,
-  .read_io  = pci_ecam_read_io,
-  .write_io = pci_ecam_write_io,
+  .read        = pci_ecam_read_config,
+  .write       = pci_ecam_write_config,
+  .read_io     = pci_ecam_read_io,
+  .write_io    = pci_ecam_write_io,
+  .get_irq     = pci_ecam_get_irq,
+#ifdef CONFIG_PCI_MSIX
+  .alloc_irq   = pci_ecam_alloc_irq,
+  .release_irq = pci_ecam_release_irq,
+  .connect_irq = pci_ecam_connect_irq,
+#endif
 };
 
 /****************************************************************************
@@ -366,6 +388,53 @@ static int pci_ecam_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
     }
 
   return OK;
+}
+
+#ifdef CONFIG_PCI_MSIX
+static int pci_ecam_alloc_irq(FAR struct pci_bus_s *bus, FAR int *irq,
+                              int num)
+{
+  *irq = up_alloc_irq_msi(&num);
+  return num;
+}
+
+static void pci_ecam_release_irq(FAR struct pci_bus_s *bus, FAR int *irq,
+                                 int num)
+{
+  return up_release_irq_msi(irq, num);
+}
+
+static int pci_ecam_connect_irq(FAR struct pci_bus_s *bus, FAR int *irq,
+                                int num, FAR uintptr_t *mar,
+                                FAR uint32_t *mdr)
+{
+  return up_connect_irq(irq, num, mar, mdr);
+}
+#endif
+
+/****************************************************************************
+ * Name: pci_ecam_get_irq
+ *
+ * Description:
+ *  Get interrupt number associated with a given INTx line.
+ *
+ * Input Parameters:
+ *   bus   - Bus that PCI device resides
+ *   devfn - The pci device and function number
+ *   line  - Activated PCI legacy interrupt line
+ *   pin   - Intx pin number
+ *
+ * Returned Value:
+ *   Return interrupt number associated with a given INTx
+ *
+ ****************************************************************************/
+
+static int pci_ecam_get_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
+                            uint8_t line, uint8_t pin)
+{
+  UNUSED(bus);
+
+  return up_get_legacy_irq(devfn, line, pin);
 }
 
 /****************************************************************************
