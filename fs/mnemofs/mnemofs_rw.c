@@ -93,10 +93,21 @@ int mfs_markbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk)
   return MTD_ISBAD(MFS_MTD(sb), blk);
 }
 
+ssize_t mfs_write_page(FAR const struct mfs_sb_s * const sb,
+                       FAR const char *data, const mfs_t datalen,
+                       const off_t page, const mfs_t pgoff)
+{
+  /* TODO */
+
+  return OK;
+}
+
 ssize_t mfs_read_page(FAR const struct mfs_sb_s * const sb,
                       FAR char *data, const mfs_t datalen, const off_t page,
                       const mfs_t pgoff)
 {
+  /* TODO */
+
   return OK;
 }
 
