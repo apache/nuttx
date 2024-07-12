@@ -169,7 +169,17 @@ typedef void (*up_vector_t)(void);
 
 extern uintptr_t        __USTACK0_END[];
 extern uintptr_t        __USTACK0[];
-#define g_idle_topstack __USTACK0
+extern uintptr_t        __USTACK1[];
+extern uintptr_t        __USTACK2[];
+extern uintptr_t        __USTACK3[];
+extern uintptr_t        __USTACK4[];
+extern uintptr_t        __USTACK5[];
+#define g_idle_topstack  __USTACK0
+#define g_idle1_topstack __USTACK1
+#define g_idle2_topstack __USTACK2
+#define g_idle3_topstack __USTACK3
+#define g_idle4_topstack __USTACK4
+#define g_idle5_topstack __USTACK5
 
 /* Address of the saved user stack pointer */
 
@@ -182,10 +192,18 @@ extern uintptr_t        __ISTACK0[];
 
 /* These symbols are setup by the linker script. */
 
-extern uintptr_t        _lc_gb_data[]; /* Start of .data */
-extern uintptr_t        _lc_ge_data[]; /* End+1 of .data */
+#define DATA_ALIGN_UP(x, a) ((((size_t)x) + ((a) - 1)) & (~((a) - 1)))
+
+extern uintptr_t        _lc_gb_zdata[]; /* Start of .bss */
+extern uintptr_t        _lc_ge_zdata[]; /* End+1 of .bss */
+extern uintptr_t        _lc_gb_data[];  /* Start of .data */
+extern uintptr_t        _lc_ge_data[];  /* End+1 of .data */
+#define _sbss           _lc_gb_zdata
+#define _ebss           _lc_ge_zdata
 #define _sdata          _lc_gb_data
 #define _edata          _lc_ge_data
+#define _edata_align    ((uintptr_t)DATA_ALIGN_UP(_edata, 0x10))
+#define _data_size      (_edata_align - (uintptr_t)_sbss)
 #define _eheap          __USTACK0_END
 #endif
 

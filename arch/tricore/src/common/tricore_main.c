@@ -29,6 +29,8 @@
 #include "IfxScuWdt.h"
 #include "IfxCpu.h"
 
+unsigned long g_cpu_data_size;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -52,42 +54,53 @@ static void core_main(void)
   if (IfxCpu_getCoreIndex() == 0)
     {
       tricore_earlyserialinit();
+
+      /* Copy data/bss to each of CPUs */
+
+#ifdef CONFIG_BMP
+      int i;
+
+      g_cpu_data_size = _data_size;
+
+      for (i = 0; i < CONFIG_BMP_NCPUS - 1; i++)
+        {
+          memcpy((void *)(_edata_align + g_cpu_data_size * i),
+                 _sbss, g_cpu_data_size);
+        }
+#endif
+
       nx_start();
     }
+  else
+    {
+      while (g_nx_initstate != OSINIT_IDLELOOP);
 
-  while (1);
+      if (IfxCpu_getCoreIndex() < CONFIG_BMP_NCPUS)
+        {
+          nx_start();
+        }
+    }
+
+  /* This would be an appropriate place to put some MCU-specific logic to
+   * sleep in a reduced power mode until an interrupt occurs to save power
+   */
+
+  while (1)
+    {
+      Ifx_Ssw_infiniteLoop();
+    }
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void core0_main(void)
-{
-  core_main();
-}
+#define DEFINE_CPU_CORE_MAIN(cpu) \
+void core##cpu##_main(void) { core_main(); }
 
-void core1_main(void)
-{
-  core_main();
-}
-
-void core2_main(void)
-{
-  core_main();
-}
-
-void core3_main(void)
-{
-  core_main();
-}
-
-void core4_main(void)
-{
-  core_main();
-}
-
-void core5_main(void)
-{
-  core_main();
-}
+DEFINE_CPU_CORE_MAIN(0)
+DEFINE_CPU_CORE_MAIN(1)
+DEFINE_CPU_CORE_MAIN(2)
+DEFINE_CPU_CORE_MAIN(3)
+DEFINE_CPU_CORE_MAIN(4)
+DEFINE_CPU_CORE_MAIN(5)

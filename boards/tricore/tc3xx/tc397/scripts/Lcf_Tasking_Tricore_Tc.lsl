@@ -44,8 +44,6 @@
 #define LCF_USTACK5_SIZE CONFIG_IDLETHREAD_STACKSIZE
 #define LCF_ISTACK5_SIZE CONFIG_ARCH_INTERRUPTSTACK
 
-#define LCF_HEAP_SIZE  4k
-
 #define LCF_CPU0 0
 #define LCF_CPU1 1
 #define LCF_CPU2 2
@@ -103,13 +101,6 @@
 #define LCF_CSA0_OFFSET     (LCF_DSPR0_SIZE - 1k - LCF_CSA0_SIZE)
 #define LCF_ISTACK0_OFFSET  (LCF_CSA0_OFFSET - 256 - LCF_ISTACK0_SIZE)
 #define LCF_USTACK0_OFFSET  (LCF_ISTACK0_OFFSET - 256 - LCF_USTACK0_SIZE)
-
-#define LCF_HEAP0_OFFSET    (LCF_USTACK0_OFFSET - LCF_HEAP_SIZE)
-#define LCF_HEAP1_OFFSET    (LCF_USTACK1_OFFSET - LCF_HEAP_SIZE)
-#define LCF_HEAP2_OFFSET    (LCF_USTACK2_OFFSET - LCF_HEAP_SIZE)
-#define LCF_HEAP3_OFFSET    (LCF_USTACK3_OFFSET - LCF_HEAP_SIZE)
-#define LCF_HEAP4_OFFSET    (LCF_USTACK4_OFFSET - LCF_HEAP_SIZE)
-#define LCF_HEAP5_OFFSET    (LCF_USTACK5_OFFSET - LCF_HEAP_SIZE)
 
 #define LCF_INTVEC0_START 0x802FE000
 #define LCF_INTVEC1_START 0x805FE000
@@ -482,13 +473,6 @@ derivative tc39
         map (dest=bus:sri, dest_offset=0x99000000, size=4M);
         map (dest=bus:sri, dest_offset=0xb9000000, reserved, size=4M);
     }
-
-#if (__VERSION__ >= 6003)
-    section_setup :vtc:linear
-    {
-        heap "heap" (min_size = (1k), fixed, align = 8);
-    }
-#endif
 
     section_setup :vtc:linear
     {
@@ -1258,29 +1242,6 @@ derivative tc39
                 select "(.data|.data.*)";
                 select "(.bss|.bss.*)";
             }
-        }
-
-        /*Heap allocation*/
-#        if LCF_DEFAULT_HOST == LCF_CPU5
-        group (ordered, align = 4, run_addr = mem:dsram5[LCF_HEAP5_OFFSET])
-#        endif
-#        if LCF_DEFAULT_HOST == LCF_CPU4
-        group (ordered, align = 4, run_addr = mem:dsram4[LCF_HEAP4_OFFSET])
-#        endif
-#        if LCF_DEFAULT_HOST == LCF_CPU3
-        group (ordered, align = 4, run_addr = mem:dsram3[LCF_HEAP3_OFFSET])
-#        endif
-#        if LCF_DEFAULT_HOST == LCF_CPU2
-        group (ordered, align = 4, run_addr = mem:dsram2[LCF_HEAP2_OFFSET])
-#        endif
-#        if LCF_DEFAULT_HOST == LCF_CPU1
-        group (ordered, align = 4, run_addr = mem:dsram1[LCF_HEAP1_OFFSET])
-#        endif
-#        if LCF_DEFAULT_HOST == LCF_CPU0
-        group (ordered, align = 4, run_addr = mem:dsram0[LCF_HEAP0_OFFSET])
-#        endif
-        {
-            heap "heap" (size = LCF_HEAP_SIZE);
         }
 
         /*Far Const Sections, selectable with patterns and user defined sections*/

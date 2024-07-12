@@ -18,6 +18,7 @@ endchoice # Tricore Toolchain Selection
 
 config ARCH_TC3XX
 	bool
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TESTSET
 	default n
 

@@ -154,6 +154,8 @@ static const struct uart_ops_s g_uart_ops =
 #ifdef CONFIG_TC3XX_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+#define g_uart0rxbuffer this_cpu_var(g_uart0rxbuffer)
+#define g_uart0txbuffer this_cpu_var(g_uart0txbuffer)
 #endif
 
 #ifdef CONFIG_TC3XX_UART0
@@ -188,16 +190,15 @@ static uart_dev_t g_uart0port =
   .recv      =
   {
     .size    = CONFIG_UART0_RXBUFSIZE,
-    .buffer  = g_uart0rxbuffer,
   },
   .xmit      =
   {
     .size    = CONFIG_UART0_TXBUFSIZE,
-    .buffer  = g_uart0txbuffer,
   },
   .ops       = &g_uart_ops,
   .priv      = &g_uart0priv,
 };
+#define g_uart0port this_cpu_var(g_uart0port)
 #endif
 
 /****************************************************************************
@@ -439,7 +440,10 @@ static int up_attach(struct uart_dev_s *dev)
        * in the UART
        */
 
-      up_enable_irq(priv->irq);
+      if (up_cpu_index() == 0)
+        {
+          up_enable_irq(priv->irq);
+        }
     }
 
   return ret;
@@ -683,6 +687,11 @@ void tricore_lowputc(char ch)
 
 void tricore_earlyserialinit(void)
 {
+#ifdef CONFIG_TC3XX_UART0
+  g_uart0port.recv.buffer = g_uart0rxbuffer;
+  g_uart0port.xmit.buffer = g_uart0txbuffer;
+#endif
+
   /* Configuration whichever one is the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
@@ -706,6 +715,7 @@ void tricore_serialinit(void)
   /* Register the console */
 
 #ifdef HAVE_SERIAL_CONSOLE
+  CONSOLE_DEV.isconsole = true;
   uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
