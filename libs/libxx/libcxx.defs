@@ -69,3 +69,14 @@ CPPSRCS += $(wildcard libcxx/src/*.cpp)
 CPPSRCS += $(wildcard libcxx/src/experimental/*.cpp)
 CPPSRCS += $(wildcard libcxx/src/filesystem/*.cpp)
 CPPSRCS += $(wildcard libcxx/src/ryu/*.cpp)
+
+ifeq ($(CONFIG_CXX_LOCALIZATION),)
+  LOCALE_CPPSRCS := libcxx/src/ios.cpp
+  LOCALE_CPPSRCS += libcxx/src/ios.instantiations.cpp
+  LOCALE_CPPSRCS += libcxx/src/iostream.cpp
+  LOCALE_CPPSRCS += libcxx/src/locale.cpp
+  LOCALE_CPPSRCS += libcxx/src/regex.cpp
+  LOCALE_CPPSRCS += libcxx/src/strstream.cpp
+  CPPSRCS := $(filter-out $(LOCALE_CPPSRCS), $(CPPSRCS))
+endif
+
