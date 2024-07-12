@@ -133,9 +133,9 @@ extern "C"
 #    define __umul64_const(res, m, n, bias) \
       do \
         { \
-          uint32_t __m_lo = (m); \
+          uint32_t __m_lo = (m) & 0xffffffff; \
           uint32_t __m_hi = (m) >> 32; \
-          uint32_t __n_lo = (n); \
+          uint32_t __n_lo = (n) & 0xffffffff; \
           uint32_t __n_hi = (n) >> 32; \
           uint32_t __res_lo; \
           uint32_t __res_hi; \
