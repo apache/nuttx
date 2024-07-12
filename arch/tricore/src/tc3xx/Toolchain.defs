@@ -19,8 +19,17 @@
 ############################################################################
 
 ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
-  ARCHOPTIMIZATION += --cpu=tc39xb
-  LDFLAGS          += -Ctc39xb
+  ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+    ARCHCPUFLAGS += --cpu=tc39xb
+    LDFLAGS      += -Ctc39xb
+  else
+    ARCHCPUFLAGS += -mcpu=tc39xx
+    ARCHCPUFLAGS += -mtc162
+  endif
+
+  ARCHINCLUDES += ${INCDIR_PREFIX}$(CHIP_DIR)/tc397/Libraries/iLLD/TC39B/Tricore/Cpu/Std
+  ARCHINCLUDES += ${INCDIR_PREFIX}$(CHIP_DIR)/tc397/Libraries/Infra/Platform
+  ARCHINCLUDES += ${INCDIR_PREFIX}$(CHIP_DIR)/tc397/Configurations
 endif
 
 include $(TOPDIR)/arch/tricore/src/common/Toolchain.defs

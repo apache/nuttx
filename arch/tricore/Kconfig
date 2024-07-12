@@ -8,11 +8,17 @@ comment "Tricore Options"
 
 choice
 	prompt "Tricore Toolchain Selection"
-	default TRICORE_TOOLCHAIN_TASKING
+	default TRICORE_TOOLCHAIN_GNU
 
 config TRICORE_TOOLCHAIN_TASKING
 	bool "AURIX Tasking C/C++ toolchain"
 	select ARCH_TOOLCHAIN_TASKING
+
+config TRICORE_TOOLCHAIN_GNU
+	bool "Generic GNU toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 
 endchoice # Tricore Toolchain Selection
 
