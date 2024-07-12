@@ -249,16 +249,6 @@ void arm64_gic_irq_enable(unsigned int intid)
   uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
   uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
 
-  /* Affinity routing is enabled for Non-secure state (GICD_CTLR.ARE_NS
-   * is set to '1' when GIC distributor is initialized) ,so need to set
-   * SPI's affinity, now set it to be the PE on which it is enabled.
-   */
-
-  if (GIC_IS_SPI(intid))
-    {
-      arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
-    }
-
   putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
 }
 
@@ -538,6 +528,7 @@ static void gicv3_cpuif_init(void)
 
 static void gicv3_dist_init(void)
 {
+  uint64_t      mpid;
   unsigned int  num_ints;
   unsigned int  intid;
   unsigned int  idx;
@@ -608,6 +599,15 @@ static void gicv3_dist_init(void)
     {
       idx = intid / GIC_NUM_CFG_PER_REG;
       putreg32(0, ICFGR(base, idx));
+    }
+
+  /* Configure SPI interrupt affinity routing to CPU0 */
+
+  mpid = arm64_get_mpid(0);
+
+  for (intid = GIC_SPI_INT_BASE; intid < num_ints; intid++)
+    {
+      putreg64(mpid, IROUTER(GIC_DIST_BASE, intid));
     }
 
   /* TODO: Some arrch64 Cortex-A core maybe without security state
