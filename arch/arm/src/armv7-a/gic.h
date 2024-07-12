@@ -136,6 +136,11 @@
                                              /* 0x0020-0x003c: Implementation defined */
                                              /* 0x0040-0x007c: Reserved */
 
+/* V2M Registers */
+
+#define GIC_V2MTYPER_OFFSET        0x008
+#define GIC_V2MSETSPI_OFFSET       0x040
+
 /* Interrupt Security Registers: 0x0080-0x009c */
 
 #define GIC_ICDISR_OFFSET(n)       (0x0080 + GIC_OFFSET32(n))
@@ -276,6 +281,11 @@
 #define GIC_ICDSSPR(n)             (MPCORE_ICD_VBASE+GIC_ICDSSPR_OFFSET(n))
 #define GIC_ICDPIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDPIDR_OFFSET(n))
 #define GIC_ICDCIDR(n)             (MPCORE_ICD_VBASE+GIC_ICDCIDR_OFFSET(n))
+
+/* V2M Registers */
+
+#define GIC_V2MTYPER               (MPCORE_V2M_VBASE + GIC_V2MTYPER_OFFSET)
+#define GIC_V2MSETSPI              (MPCORE_V2M_VBASE + GIC_V2MSETSPI_OFFSET)
 
 /* GIC Register Bit Definitions *********************************************/
 
@@ -556,6 +566,14 @@
 #  define GIC_ICDSGIR_TGTFILTER_OTHER (1 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to all but requesting CPU */
 #  define GIC_ICDSGIR_TGTFILTER_THIS  (2 << GIC_ICDSGIR_TGTFILTER_SHIFT) /* Interrupt is sent to requesting CPU only */
                                                                          /* Bits 26-31: Reserved */
+
+/* V2M Registers */
+
+#define GIC_V2MTYPES_BASE_SHIFT       16
+#define GIC_V2MTYPES_BASE_MASK        0x3FF
+#define GIC_V2MTYPES_NUMBER_MASK      0x3FF
+#define GIC_V2MTYPES_BASE(x)          (((x) >> GIC_V2MTYPES_BASE_SHIFT) & GIC_V2MTYPES_BASE_MASK)
+#define GIC_V2MTYPES_NUMBER(x)        ((x) & GIC_V2MTYPES_NUMBER_MASK)
 
 /* Interrupt IDs ************************************************************/
 
@@ -859,6 +877,10 @@ int arm_pause_handler(int irq, void *context, void *arg);
 void arm_gic_dump(const char *msg, bool all, int irq);
 #else
 #  define arm_gic_dump(msg, all, irq)
+#endif
+
+#ifdef CONFIG_ARMV7A_GICv2M
+int gic_v2m_initialize(void);
 #endif
 
 #undef EXTERN

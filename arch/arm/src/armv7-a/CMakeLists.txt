@@ -52,6 +52,10 @@ if(CONFIG_ARCH_PERF_EVENTS)
   list(APPEND SRCS arm_perf.c)
 endif()
 
+if(CONFIG_ARMV7A_GICv2M)
+  list(APPEND SRCS arm_gicv2m.c)
+endif()
+
 if(CONFIG_ARMV7A_HAVE_PTM)
   list(APPEND SRCS arm_timer.c)
 endif()
