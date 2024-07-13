@@ -411,6 +411,55 @@ static inline mfs_t mfs_popcnt(mfs_t x)
 /* mnemofs_journal.c */
 
 /****************************************************************************
+ * Name: mfs_jrnl_newlog
+ *
+ * Description:
+ *   Add a new log to the journal.
+ *
+ * Input Parameters:
+ *   sb      - Superblock instance of the device.
+ *   path    - CTZ representation of the relpath.
+ *   depth   - Length of path.
+ *   new_ctz - The updated location.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   Assumes the CTZ list to be updated is `path[depth - 1].ctz`.
+ *
+ ****************************************************************************/
+
+int mfs_jrnl_newlog(FAR struct mfs_sb_s * const sb,
+                    FAR const struct mfs_path_s * const path,
+                    const mfs_t depth, const struct mfs_ctz_s new_ctz);
+
+/****************************************************************************
+ * Name: mfs_jrnl_updatepath
+ *
+ * Description:
+ *   Updates the path of a CTZ list by applies all changes from the journal.
+ *
+ * Input Parameters:
+ *   sb      - Superblock instance of the device.
+ *   path    - CTZ representation of the relpath.
+ *   depth   - Length of path.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   Assumes the CTZ list to be updated is `path[depth - 1].ctz`.
+ *
+ ****************************************************************************/
+
+int mfs_jrnl_updatepath(FAR const struct mfs_sb_s * const sb,
+                        FAR struct mfs_path_s * const path,
+                        const mfs_t depth);
+
+/****************************************************************************
  * Name: mfs_jrnl_init
  *
  * Description:
@@ -451,6 +500,29 @@ int mfs_jrnl_init(FAR struct mfs_sb_s * const sb, mfs_t blk);
  ****************************************************************************/
 
 int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t blk1, mfs_t blk2);
+
+/****************************************************************************
+ * Name: mfs_jrnl_blkidx2blk
+ *
+ * Description:
+ *   Gets the block number of a journal block at an index.
+ *
+ * Input Parameters:
+ *   sb      - Superblock instance of the device.
+ *   blk_idx - Index of the block who's block number to find.
+ *
+ * Returned Value:
+ *   Block number.
+ *
+ * Assumptions/Limitations:
+ *   Assumes valid index. This index can also include master blocks. Also
+ *   assumes, for now, that the entire journal array can fit in the first
+ *   block.
+ *
+ ****************************************************************************/
+
+mfs_t mfs_jrnl_blkidx2blk(FAR const struct mfs_sb_s * const sb,
+                          const mfs_t blk_idx);
 
 /****************************************************************************
  * Name: mfs_jrnl_free
@@ -1228,6 +1300,29 @@ void mfs_lru_init(FAR struct mfs_sb_s * const sb);
 void mfs_lru_updatedsz(FAR struct mfs_sb_s * const sb,
                       FAR const struct mfs_path_s * const path,
                       const mfs_t depth, mfs_t *n_sz);
+
+/* mnemofs_master.c */
+
+/****************************************************************************
+ * Name: mfs_mn_fmt
+ *
+ * Description:
+ *   Format a master node.
+ *
+ * Input Parameters:
+ *   sb       - Superblock instance of the device.
+ *   jrnl_blk - First block of the journal.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   The journal will have to be formatted before this.
+ *
+ ****************************************************************************/
+
+int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
 
 /* mnemofs_fsobj.c */
 
