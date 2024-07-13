@@ -250,6 +250,7 @@ static intptr_t sext(intptr_t v, uint32_t w)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_RV_ISA_C
 static bool decode_insn_compressed(uintptr_t *regs, riscv_insn_ctx_t *ctx)
 {
 #ifdef CONFIG_ARCH_RV_ISA_C
@@ -427,6 +428,7 @@ static bool decode_insn_compressed(uintptr_t *regs, riscv_insn_ctx_t *ctx)
   return false;
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: decode_insn
@@ -573,16 +575,18 @@ static bool decode_insn(uintptr_t *regs, riscv_insn_ctx_t *ctx)
 
 int riscv_misaligned(int irq, void *context, void *arg)
 {
-  bool ret;
+  bool ret = false;
 
   riscv_insn_ctx_t ctx =
     {
       NULL, NULL, 0, false
     };
 
+#ifdef CONFIG_ARCH_RV_ISA_C
   /* Try to decode compressed instruction if it is */
 
   ret = decode_insn_compressed(context, &ctx);
+#endif
 
   /* Decode instruction context */
 
