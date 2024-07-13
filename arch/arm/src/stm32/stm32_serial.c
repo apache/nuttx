@@ -2211,7 +2211,6 @@ static int up_interrupt(int irq, void *context, void *arg)
           uart_xmitchars(&priv->dev);
           handled = true;
         }
-
     }
 
   return OK;
@@ -2748,7 +2747,7 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
    *
    * Enable             Status          Meaning                   Usage
    * ------------------ --------------- ------------------------- ----------
-   * USART_CR1_IDLEIE   USART_SR_IDLE   Idle Line Detected        
+   * USART_CR1_IDLEIE   USART_SR_IDLE   Idle Line Detected
    */
 
   flags = enter_critical_section();
@@ -2763,7 +2762,6 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
       cr.cr1 |= (USART_CR1_IDLEIE);
-      
     }
   else
     {
@@ -2774,7 +2772,6 @@ static void up_dma_rxint(struct uart_dev_s *dev, bool enable)
 
   up_restoreusartint(priv, &cr);
   leave_critical_section(flags);
-
 }
 #endif
 
