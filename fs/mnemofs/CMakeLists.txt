@@ -54,6 +54,7 @@ if(CONFIG_FS_MNEMOFS)
             mnemofs_fsobj.c
             mnemofs_journal.c
             mnemofs_lru.c
+            mnemofs_master.c
             mnemofs_rw.c
             mnemofs_util.c
             mnemofs.c)

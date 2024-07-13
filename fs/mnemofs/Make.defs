@@ -57,6 +57,7 @@ CSRCS += mnemofs_ctz.c
 CSRCS += mnemofs_fsobj.c
 CSRCS += mnemofs_journal.c
 CSRCS += mnemofs_lru.c
+CSRCS += mnemofs_master.c
 CSRCS += mnemofs_rw.c
 CSRCS += mnemofs_util.c
 CSRCS += mnemofs.c

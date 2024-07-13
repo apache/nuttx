@@ -375,7 +375,9 @@ int mfs_ctz_rdfromoff(FAR struct mfs_sb_s * const sb, mfs_t data_off,
 
   /* Get updated location from the journal */
 
+  finfo("Journal upd!");
   DEBUGASSERT(depth > 0);
+  mfs_jrnl_updatepath(sb, path, depth);
   ctz = path[depth - 1].ctz;
 
   ctz_off2loc(sb, data_off, &idx, &off);
@@ -609,6 +611,7 @@ int mfs_ctz_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
   /* Get updated location from the journal. */
 
   DEBUGASSERT(depth > 0);
+  mfs_jrnl_updatepath(sb, path, depth);
   o_ctz = path[depth - 1].ctz;
 
   /* TODO: Make the traversal in reverse direction. It would cause
@@ -753,6 +756,8 @@ int mfs_ctz_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
 
       o_data_off += ctz_blk_datasz;
     }
+
+  mfs_jrnl_newlog(sb, path, depth, n_ctz);
 
   /* path is not updated to point to the new ctz. This is upto the caller. */
 
