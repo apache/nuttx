@@ -335,6 +335,11 @@ extern "C"
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
 
+/* MAX7219 */
+
+#define STM32_LCD_CS (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN4)
+
 /* LEDs
  *
  * The STM32F401RC-RS485 boards provide 4 blue user LEDs. LD1, LD2, LD3

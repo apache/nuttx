@@ -632,3 +632,35 @@ Now you will be able to access the Device Configuration over Telnet::
        help, ?   - show help
        reset     - reset the board
        exit      - exit shell
+
+max7219
+-------
+
+Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) and enables LCD driver with
+MAX7219 for 8x8 LED matrix::
+
+       NuttShell (NSH) NuttX-12.5.1                                      
+       nsh> 
+       nsh> nxhello
+       nxhello_main: NX handle=0x20005420
+       nxhello_main: Set background color=0
+       nxhello_listener: Connected
+       nxhello_main: Screen resolution (32,8)
+       nxhello_hello: Position (3,0)
+       nxhello_main: Disconnect from the server
+       nsh>
+
+
+======= ====
+MAX7219 PINS
+======= ====
+CS      PC4
+DIN     PA7
+Clk     PA5
+======= ====
+
+As this LED matrix can be combined either horizontally or vetically,
+you can configure this using menuconfig::
+
+       Number of 8x8 LEDs matrices in the horizontal (width)
+       Number of 8x8 LEDs matrices in the vertical (height)
