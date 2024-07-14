@@ -812,6 +812,11 @@ if(CONFIG_BUILD_PROTECTED)
             $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
             $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group>)
 
+  target_include_directories(
+    nuttx_user SYSTEM
+    PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
+            ${CMAKE_BINARY_DIR}/include_arch)
+
   add_custom_command(
     OUTPUT User.map
     COMMAND ${CMAKE_NM} nuttx_user > User.map
