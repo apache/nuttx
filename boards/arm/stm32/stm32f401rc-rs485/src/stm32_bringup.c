@@ -63,6 +63,10 @@
 #include "stm32_hcsr04.h"
 #endif
 
+#ifdef CONFIG_LCD_MAX7219
+#include "stm32_max7219_matrix.h"
+#endif
+
 #ifdef CONFIG_STEPPER_DRV8825
 #include "stm32_drv8266.h"
 #endif
@@ -202,6 +206,17 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LCD_MAX7219
+  /* Configure and initialize the MAX7219 driver */
+
+  ret = board_max7219_matrix_initialize(1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, \
+       "ERROR: board_max7219_matrix_initialize failed: %d\n", ret);
     }
 #endif
 
