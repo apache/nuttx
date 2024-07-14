@@ -37,7 +37,7 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += s32k1xx_appinit.c
 endif
 
-ifeq ($(CONFIG_S32K1XX_LPI2C),y)
+ifeq ($(CONFIG_I2C_DRIVER),y)
 CSRCS += s32k1xx_i2c.c
 endif
 
