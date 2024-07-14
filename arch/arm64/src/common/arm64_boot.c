@@ -89,6 +89,7 @@ void arm64_boot_el3_init(void)
           SCR_SMD_BIT);   /* Do not trap SMC */
   write_sysreg(reg, scr_el3);
 
+#if CONFIG_ARM64_GIC_VERSION > 2
   reg = read_sysreg(ICC_SRE_EL3);
   reg |= (ICC_SRE_ELX_DFB_BIT |   /* Disable FIQ bypass */
           ICC_SRE_ELX_DIB_BIT |   /* Disable IRQ bypass */
@@ -96,6 +97,7 @@ void arm64_boot_el3_init(void)
           ICC_SRE_EL3_EN_BIT);    /* Enables lower Exception level access to
                                    * ICC_SRE_EL1 */
   write_sysreg(reg, ICC_SRE_EL3);
+#endif
 
   ARM64_ISB();
 }
