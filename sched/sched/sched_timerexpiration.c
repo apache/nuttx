@@ -362,7 +362,7 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
   tmp = nxsched_process_scheduler(ticks, elapsed, noswitches);
 
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
-  if (tmp > 0 && tmp < rettime)
+  if (tmp > 0 && (rettime == 0 || tmp < rettime))
     {
       rettime = tmp;
     }

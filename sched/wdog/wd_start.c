@@ -402,7 +402,7 @@ clock_t wd_timer(clock_t ticks, bool noswitches)
   if (list_is_empty(&g_wdactivelist))
     {
       leave_critical_section(flags);
-      return CLOCK_MAX;
+      return 0;
     }
 
   /* Notice that if noswitches, expired - g_wdtickbase
