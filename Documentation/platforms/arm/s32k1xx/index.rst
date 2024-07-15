@@ -39,7 +39,7 @@ eDMA        No
 EEPROM      Yes      EEPROM emulated by FlexRAM
 ENET        Yes
 FlexCAN     Yes      SocketCAN-compatible
-FlexIO      No
+FlexIO      Yes      Emulated I2C Master driver
 FTM         Yes      PWM driver only
 GPIO        Yes
 LPI2C       Yes      I2C Master and Slave
@@ -84,7 +84,16 @@ The S32K1XX family has up to 3x FlexCAN modules (which may not all have CAN FD s
 FlexIO
 ------
 
-A configurable module providing a range of functionality like emulation of a variety of serial/parallel communication protocols, flexible 16-bit timers or programmable logic blocks. No driver available.
+A configurable module providing a range of functionality like emulation of a variety of serial/parallel communication protocols, flexible 16-bit timers or programmable logic blocks.
+
+The ``s32k1xx_flexio_i2c.c`` driver implements an emulated I2C master using FlexIO.
+Albeit the current implementation has some limitations:
+
+* Max I2C speed of 400KHz
+* Max transfer of 12 bytes (Could be extended by utilizing EDMA)
+* No abort on NACK reception, shifter simplies continues on
+* No multi-master support
+* No restart support
 
 FTM
 ---
