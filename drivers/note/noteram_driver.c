@@ -650,8 +650,8 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
                                FAR struct noteram_dump_context_s *ctx)
 {
   pid_t pid;
-  uint32_t nsec = note->nc_systime_nsec;
-  uint32_t sec = note->nc_systime_sec;
+  long nsec = note->nc_systime_nsec;
+  time_t sec = note->nc_systime_sec;
   int ret;
 
   pid = note->nc_pid;
@@ -661,8 +661,10 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
   int cpu = 0;
 #endif
 
-  ret = lib_sprintf(s, "%8s-%-3u [%d] %3" PRIu32 ".%09" PRIu32 ": ",
-                    get_taskname(pid), get_pid(pid), cpu, sec, nsec);
+  ret = lib_sprintf(s, "%8s-%-3u [%d] %3" PRIu64 ".%09lu: ",
+                    get_taskname(pid), get_pid(pid), cpu,
+                    (uint64_t)sec, nsec);
+
   return ret;
 }
 
