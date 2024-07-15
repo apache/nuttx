@@ -33,6 +33,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/pgalloc.h>
 
+#include "sched/sched.h"
 #include "addrenv.h"
 #include "barriers.h"
 #include "pgalloc.h"
@@ -65,7 +66,7 @@
 
 int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 {
-  struct tcb_s          *tcb     = nxsched_self();
+  struct tcb_s          *tcb     = this_task();
   struct arch_addrenv_s *addrenv = &tcb->addrenv_own->addrenv;
 
   /* Sanity checks */
@@ -99,7 +100,7 @@ int up_shmat(uintptr_t *pages, unsigned int npages, uintptr_t vaddr)
 
 int up_shmdt(uintptr_t vaddr, unsigned int npages)
 {
-  struct tcb_s          *tcb     = nxsched_self();
+  struct tcb_s          *tcb     = this_task();
   struct arch_addrenv_s *addrenv = &tcb->addrenv_own->addrenv;
 
   /* Sanity checks */

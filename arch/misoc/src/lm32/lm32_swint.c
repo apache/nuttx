@@ -197,7 +197,7 @@ int lm32_swint(int irq, void *context, void *arg)
 #ifdef CONFIG_BUILD_KERNEL
       case SYS_syscall_return:
         {
-          struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = this_task();
           int index = (int)rtcb->xcp.nsyscalls - 1;
 
           /* Make sure that there is a saved syscall return address. */
@@ -230,7 +230,7 @@ int lm32_swint(int irq, void *context, void *arg)
       default:
         {
 #ifdef CONFIG_BUILD_KERNEL
-          struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = this_task();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */

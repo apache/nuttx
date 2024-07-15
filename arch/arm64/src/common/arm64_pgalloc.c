@@ -35,6 +35,7 @@
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
 
+#include "sched/sched.h"
 #include "addrenv.h"
 #include "barriers.h"
 #include "pgalloc.h"
@@ -89,7 +90,7 @@
 
 uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 {
-  struct tcb_s          *tcb = nxsched_self();
+  struct tcb_s          *tcb = this_task();
   struct arch_addrenv_s *addrenv;
   uintptr_t              ptlast;
   uintptr_t              paddr;

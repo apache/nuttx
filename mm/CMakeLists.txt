@@ -19,4 +19,5 @@
 # ##############################################################################
 nuttx_add_kernel_library(mm SPLIT)
 nuttx_add_subdirectory()
-target_include_directories(mm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(mm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                                      ${NUTTX_DIR}/sched)

@@ -51,6 +51,7 @@
 #  include <nuttx/fdcheck.h>
 #endif
 
+#include "sched/sched.h"
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -551,7 +552,7 @@ found:
 int file_allocate(FAR struct inode *inode, int oflags, off_t pos,
                   FAR void *priv, int minfd, bool addref)
 {
-  return file_allocate_from_tcb(nxsched_self(), inode, oflags,
+  return file_allocate_from_tcb(this_task(), inode, oflags,
                                 pos, priv, minfd, addref);
 }
 
@@ -746,7 +747,7 @@ int nx_dup2_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2)
 
 int nx_dup2(int fd1, int fd2)
 {
-  return nx_dup2_from_tcb(nxsched_self(), fd1, fd2);
+  return nx_dup2_from_tcb(this_task(), fd1, fd2);
 }
 
 /****************************************************************************
@@ -785,7 +786,7 @@ int dup3(int fd1, int fd2, int flags)
 {
   int ret;
 
-  ret = nx_dup3_from_tcb(nxsched_self(), fd1, fd2, flags);
+  ret = nx_dup3_from_tcb(this_task(), fd1, fd2, flags);
   if (ret < 0)
     {
       set_errno(-ret);
@@ -872,7 +873,7 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
 
 int nx_close(int fd)
 {
-  return nx_close_from_tcb(nxsched_self(), fd);
+  return nx_close_from_tcb(this_task(), fd);
 }
 
 /****************************************************************************
