@@ -32,6 +32,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include "sched/sched.h"
+
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 
 /****************************************************************************
@@ -64,7 +66,7 @@ static bool in_range(FAR const void *start, size_t length,
 
 int mm_map_lock(void)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct tcb_s *tcb = this_task();
   FAR struct task_group_s *group = tcb->group;
 
   if (group == NULL)
@@ -85,7 +87,7 @@ int mm_map_lock(void)
 
 void mm_map_unlock(void)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct tcb_s *tcb = this_task();
   FAR struct task_group_s *group = tcb->group;
 
   if (group == NULL)

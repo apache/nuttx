@@ -36,6 +36,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
 
+#include "sched/sched.h"
 #include "lock.h"
 
 /****************************************************************************
@@ -95,7 +96,7 @@ static mutex_t g_protect_lock = NXMUTEX_INITIALIZER;
 
 static int file_lock_get_path(FAR struct file *filep, FAR char *path)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct tcb_s *tcb = this_task();
 
   /* We only apply file lock on mount points (f_inode won't be NULL). */
 
