@@ -210,6 +210,11 @@ static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
   int j;
 
   list = files_getlist(tcb);
+  if (list == NULL)
+    {
+      return;
+    }
+
   for (i = 0; i < list->fl_rows; i++)
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
@@ -442,12 +447,19 @@ void files_dumplist(FAR struct filelist *list)
 
 FAR struct filelist *files_getlist(FAR struct tcb_s *tcb)
 {
-  FAR struct filelist *list = &tcb->group->tg_filelist;
+  FAR struct filelist *list;
 
-  DEBUGASSERT(list->fl_crefs >= 1);
-  list->fl_crefs++;
+  if (tcb->group != NULL)
+    {
+      list = &tcb->group->tg_filelist;
+      if (list->fl_crefs > 0)
+        {
+          list->fl_crefs++;
+          return list;
+        }
+    }
 
-  return list;
+  return NULL;
 }
 
 /****************************************************************************
