@@ -70,6 +70,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_TICKLESS
+static unsigned int g_wdtimernested;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -92,6 +100,14 @@ static inline_function void wd_expiration(clock_t ticks)
 {
   FAR struct wdog_s *wdog;
   wdentry_t func;
+
+#ifdef CONFIG_SCHED_TICKLESS
+  /* Increment the nested watchdog timer count to handle cases where wd_start
+   * is called in the watchdog callback functions.
+   */
+
+  g_wdtimernested++;
+#endif
 
   /* Process the watchdog at the head of the list as well as any
    * other watchdogs that became ready to run at this time
@@ -122,6 +138,12 @@ static inline_function void wd_expiration(clock_t ticks)
       up_setpicbase(wdog->picbase);
       CALL_FUNC(func, wdog->arg);
     }
+
+#ifdef CONFIG_SCHED_TICKLESS
+  /* Decrement the nested watchdog timer count */
+
+  g_wdtimernested--;
+#endif
 }
 
 /****************************************************************************
