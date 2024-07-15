@@ -194,15 +194,12 @@ static void virtio_blk_wait_complete(FAR struct virtqueue *vq,
 {
   FAR struct virtio_blk_priv_s *priv = vq->vq_dev->priv;
   FAR sem_t *sem;
-  irqstate_t flags;
 
   if (up_interrupt_context())
     {
       for (; ; )
         {
-          flags = spin_lock_irqsave(&priv->lock);
-          sem = virtqueue_get_buffer(vq, NULL, NULL);
-          spin_unlock_irqrestore(&priv->lock, flags);
+          sem = virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock);
           if (sem == respsem)
             {
               break;
@@ -266,7 +263,7 @@ static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
 
   if (up_interrupt_context())
     {
-      virtqueue_disable_cb(vq);
+      virtqueue_disable_cb_lock(vq, &priv->lock);
     }
 
   flags = spin_lock_irqsave(&priv->lock);
@@ -294,7 +291,7 @@ static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
 err:
   if (up_interrupt_context())
     {
-      virtqueue_enable_cb(vq);
+      virtqueue_enable_cb_lock(vq, &priv->lock);
     }
 
   return ret >= 0 ? nsectors : ret;
@@ -487,13 +484,10 @@ static void virtio_blk_done(FAR struct virtqueue *vq)
 {
   FAR struct virtio_blk_priv_s *priv = vq->vq_dev->priv;
   FAR sem_t *respsem;
-  irqstate_t flags;
 
   for (; ; )
     {
-      flags = spin_lock_irqsave(&priv->lock);
-      respsem = virtqueue_get_buffer(vq, NULL, NULL);
-      spin_unlock_irqrestore(&priv->lock, flags);
+      respsem = virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock);
       if (respsem == NULL)
         {
           break;

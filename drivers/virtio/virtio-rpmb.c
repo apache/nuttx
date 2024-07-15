@@ -105,14 +105,11 @@ static void virtio_rpmb_done(FAR struct virtqueue *vq)
 {
   FAR struct virtio_rpmb_priv_s *priv = vq->vq_dev->priv;
   FAR struct virtio_rpmb_cookie_s *cookie;
-  irqstate_t flags;
   uint32_t len;
 
   for (; ; )
     {
-      flags = spin_lock_irqsave(&priv->lock);
-      cookie = virtqueue_get_buffer(vq, &len, NULL);
-      spin_unlock_irqrestore(&priv->lock, flags);
+      cookie = virtqueue_get_buffer_lock(vq, &len, NULL, &priv->lock);
       if (cookie == NULL)
         {
           break;

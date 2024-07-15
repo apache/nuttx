@@ -86,6 +86,7 @@ struct virtio_snd_s
   FAR struct virtio_snd_dev_s *dev;
   FAR struct virtio_snd_pcm_info *info;
   struct virtio_snd_config config;
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -332,11 +333,13 @@ virtio_snd_get_support_formats(FAR const struct virtio_snd_pcm_info *info,
 
 static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
 {
+  FAR struct virtio_snd_s *priv = vq->vq_dev->priv;
+
   for (; ; )
     {
       FAR struct virtio_snd_buffer_s *buf;
       FAR struct virtio_snd_dev_s *sdev;
-      buf = virtqueue_get_buffer(vq, NULL, NULL);
+      buf = virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock);
       if (buf == NULL)
         {
           break;
@@ -360,9 +363,10 @@ static void virtio_snd_pcm_notify_cb(FAR struct virtqueue *vq)
 
 static void virtio_snd_ctl_notify_cb(FAR struct virtqueue *vq)
 {
+  FAR struct virtio_snd_s *priv = vq->vq_dev->priv;
   FAR sem_t *ctl_sem;
 
-  ctl_sem = virtqueue_get_buffer(vq, NULL, NULL);
+  ctl_sem = virtqueue_get_buffer_lock(vq, NULL, NULL, &priv->lock);
   nxsem_post(ctl_sem);
 }
 
@@ -388,6 +392,7 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
                                VIRTIO_SND_VQ_RX : VIRTIO_SND_VQ_TX;
   FAR struct virtqueue *vq = priv->vdev->vrings_info[idx].vq;
   struct virtqueue_buf vb[3];
+  irqstate_t flags;
 
   vb[0].buf = &buf->xfer;
   vb[0].len = sizeof(buf->xfer);
@@ -396,6 +401,7 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
   vb[2].buf = &buf->status;
   vb[2].len = sizeof(buf->status);
 
+  flags = spin_lock_irqsave(&priv->lock);
   if (idx == VIRTIO_SND_VQ_RX)
     {
       virtqueue_add_buffer(vq, vb, 1, 2, buf);
@@ -406,6 +412,7 @@ static int virtio_snd_send_pcm(FAR struct virtio_snd_dev_s *sdev,
     }
 
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
   sdev->cache_buffers++;
 
   return OK;
@@ -422,13 +429,16 @@ static int virtio_snd_send_ctl(FAR struct virtio_snd_s *priv,
 {
   FAR struct virtqueue *vq =
     priv->vdev->vrings_info[VIRTIO_SND_VQ_CONTROL].vq;
+  irqstate_t flags;
   sem_t ctl_sem;
   int ret;
 
   nxsem_init(&ctl_sem, 0, 0);
 
+  flags = spin_lock_irqsave(&priv->lock);
   virtqueue_add_buffer(vq, vb, readable, writable, &ctl_sem);
   virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   ret = nxsem_wait_uninterruptible(&ctl_sem);
   nxsem_destroy(&ctl_sem);
@@ -1199,6 +1209,7 @@ static int virtio_snd_probe(FAR struct virtio_device *vdev)
       return -ENOMEM;
     }
 
+  spin_lock_init(&priv->lock);
   priv->vdev = vdev;
   vdev->priv = priv;
 
