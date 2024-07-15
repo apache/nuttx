@@ -93,22 +93,48 @@ int mfs_markbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk)
   return MTD_ISBAD(MFS_MTD(sb), blk);
 }
 
+/* NOTE: These functions do not update the block allocator's state nor do
+ * they enforce it.
+ */
+
 ssize_t mfs_write_page(FAR const struct mfs_sb_s * const sb,
                        FAR const char *data, const mfs_t datalen,
                        const off_t page, const mfs_t pgoff)
 {
-  /* TODO */
+  int ret = OK;
 
-  return OK;
+  mempcpy(MFS_RWBUF(sb) + pgoff, data, datalen);
+
+  ret = MTD_BWRITE(MFS_MTD(sb), page, 1, MFS_RWBUF(sb));
+  if (ret < 0)
+    {
+      goto errout_with_reset;
+    }
+
+errout_with_reset:
+  memset(MFS_RWBUF(sb), 0, MFS_PGSZ(sb));
+
+  return ret;
 }
 
 ssize_t mfs_read_page(FAR const struct mfs_sb_s * const sb,
                       FAR char *data, const mfs_t datalen, const off_t page,
                       const mfs_t pgoff)
 {
-  /* TODO */
+  int ret = OK;
 
-  return OK;
+  ret = MTD_BREAD(MFS_MTD(sb), page, 1, MFS_RWBUF(sb));
+  if (ret < 0)
+    {
+      goto errout_with_reset;
+    }
+
+  memcpy(data, MFS_RWBUF(sb) + pgoff, datalen);
+
+errout_with_reset:
+  memset(MFS_RWBUF(sb), 0, MFS_PGSZ(sb));
+
+  return ret;
 }
 
 int mfs_erase_blk(FAR const struct mfs_sb_s * const sb, const off_t blk)

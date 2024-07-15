@@ -97,6 +97,11 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static FAR char       *ser_mn(const struct mfs_mn_s mn,
+                              FAR char * const out);
+static FAR const char *deser_mn(FAR const char * const in,
+                                FAR struct mfs_mn_s *mn, FAR uint8_t *hash);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -110,12 +115,252 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ser_mn
+ *
+ * Description:
+ *   Serialize master node.
+ *
+ * Input Parameters:
+ *   mn  - Master node.
+ *   out - Out buffer.
+ *
+ * Returned Value:
+ *   Pointer to the end of the serialized data in `out`.
+ *
+ * Assumptions/Limitations:
+ *   Out should contain enough space for `mn` and 1 byte extra for the hash.
+ *
+ ****************************************************************************/
+
+static FAR char *ser_mn(const struct mfs_mn_s mn, FAR char * const out)
+{
+  FAR char *tmp = out;
+
+  tmp = mfs_ser_mfs(mn.jrnl_blk, tmp);
+  tmp = mfs_ser_mfs(mn.mblk_idx, tmp);
+  tmp = mfs_ser_ctz(&mn.root_ctz, tmp);
+  tmp = mfs_ser_mfs(mn.root_sz, tmp);
+  tmp = mfs_ser_timespec(&mn.ts, tmp);
+  tmp = mfs_ser_8(mfs_arrhash(out, tmp - out), tmp);
+
+  return tmp;
+}
+
+/****************************************************************************
+ * Name: ser_mn
+ *
+ * Description:
+ *   Deserialize master node.
+ *
+ * Input Parameters:
+ *   in   - In buffer.
+ *   mn   - Master node to populate.
+ *   hash - Stored hash (of serialized data) to populate.
+ *
+ * Returned Value:
+ *   Pointer to the end of the serialized data in `in`.
+ *
+ * Assumptions/Limitations:
+ *   In should contain enough space for `mn` and 1 byte extra for the hash.
+ *
+ ****************************************************************************/
+
+static FAR const char *deser_mn(FAR const char * const in,
+                                FAR struct mfs_mn_s *mn, FAR uint8_t *hash)
+{
+  FAR const char *tmp = in;
+
+  tmp = mfs_deser_mfs(tmp, &mn->jrnl_blk);
+  tmp = mfs_deser_mfs(tmp, &mn->mblk_idx);
+  tmp = mfs_deser_ctz(tmp, &mn->root_ctz);
+  tmp = mfs_deser_mfs(tmp, &mn->root_sz);
+  tmp = mfs_deser_timespec(tmp, &mn->ts);
+  tmp = mfs_deser_8(tmp, hash);
+
+  return tmp;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
+{
+  int             ret            = OK;
+  mfs_t           i              = 0;
+  mfs_t           mblk1;
+  mfs_t           mblk2;
+  mfs_t           jrnl_blk_tmp;
+  bool            found          = false;
+  uint8_t         hash;
+  struct mfs_mn_s mn;
+  const mfs_t     sz             = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
+  char            buftmp[4];
+  char            buf[sz + 1];
+
+  mblk1 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
+  mblk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
+
+  mn.jrnl_blk = mn.jrnl_blk;
+  mn.mblk_idx = 0;
+  mn.pg       = MFS_BLK2PG(sb, mblk1);
+
+  for (i = 0; i < MFS_PGINBLK(sb); i++)
+    {
+      mfs_read_page(sb, buftmp, 4, mn.pg, 0);
+      mfs_deser_mfs(buftmp, &jrnl_blk_tmp);
+
+      if (jrnl_blk_tmp == 0)
+        {
+          break;
+        }
+
+      if (jrnl_blk_tmp != jrnl_blk)
+        {
+          break;
+        }
+
+      found = true;
+      mn.mblk_idx++;
+      mn.pg++;
+    }
+
+  if (found == false)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  if (i == MFS_PGINBLK(sb))
+    {
+      ret = -ENOSPC;
+      goto errout;
+    }
+  else
+    {
+      mn.mblk_idx--;
+      mn.pg--;
+    }
+
+  mfs_read_page(sb, buf, sz + 1, mn.pg, 0);
+
+  /* Deserialize. */
+
+  deser_mn(buf, &mn, &hash);
+  if (hash != mfs_arrhash(buf, sz))
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* FUTURE TODO: Recovery in case of hash not matching, or page not
+   * readable.
+   */
+
+  MFS_MN(sb) = mn;
+
+errout:
+  return ret;
+}
+
 int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
 {
-  /* TODO */
+  int              ret          = OK;
+  mfs_t            pg;
+  mfs_t            mblk1;
+  mfs_t            mblk2;
+  struct mfs_mn_s  mn;
+  const mfs_t      sz           = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
+  char             buf[sz + 1];
+  struct timespec  ts;
 
-  return OK;
+  clock_gettime(CLOCK_REALTIME, &ts);
+
+  memset(buf, 0, sz + 1);
+
+  mblk1 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
+  mblk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
+
+  pg = mfs_ba_getpg(sb);
+  if (predict_false(pg == 0))
+    {
+      ret = -ENOSPC;
+      goto errout;
+    }
+
+  finfo("Root formatted to be at Page %u", pg);
+
+  mn.root_ctz.idx_e = 0;
+  mn.root_ctz.pg_e  = pg;
+  mn.jrnl_blk       = jrnl_blk;
+  mn.mblk_idx       = 0;
+  mn.pg             = MFS_BLK2PG(sb, mblk1);
+  mn.root_sz        = 0;
+  mn.ts             = ts;
+  mn.root_st_atim   = ts;
+  mn.root_st_ctim   = ts;
+  mn.root_st_mtim   = ts;
+  mn.root_mode      = 0777 | S_IFDIR;
+
+  /* Serialize. */
+
+  ser_mn(mn, buf);
+
+  ret = mfs_write_page(sb, buf, sz, MFS_BLK2PG(sb, mblk1), 0);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  ret = mfs_write_page(sb, buf, sz, MFS_BLK2PG(sb, mblk2), 0);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  MFS_MN(sb) = mn;
+  finfo("Master node written. Now at page %d, timestamp %lld.%.9ld.",
+        MFS_MN(sb).pg, (long long)MFS_MN(sb).ts.tv_sec,
+        MFS_MN(sb).ts.tv_nsec);
+
+errout:
+  return ret;
+}
+
+int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
+                const mfs_t root_sz)
+{
+  int             ret          = OK;
+  mfs_t           mblk1;
+  mfs_t           mblk2;
+  struct mfs_mn_s mn;
+  const mfs_t     sz           = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
+  char            buf[sz + 1];
+
+  if (MFS_MN(sb).mblk_idx == MFS_PGINBLK(sb) - 1)
+    {
+      /* TODO: Move journal. Master blocks are full. */
+    }
+
+  mblk1 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
+  mblk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
+  mn    = MFS_MN(sb);
+
+  mn.root_ctz    = root;
+  mn.root_sz = root_sz;
+  mn.mblk_idx++;
+  mn.pg++;
+
+  ser_mn(mn, buf);
+
+  ret = mfs_write_page(sb, buf, sz + 1, mn.pg, 0);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  MFS_MN(sb) = mn;
+
+errout:
+  return ret;
 }
