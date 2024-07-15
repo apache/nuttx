@@ -36,6 +36,7 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
+#include "sched/sched.h"
 #include "inode/inode.h"
 #include "driver/driver.h"
 #include "notify/notify.h"
@@ -437,7 +438,7 @@ int nx_open(FAR const char *path, int oflags, ...)
   /* Let nx_vopen() do all of the work */
 
   va_start(ap, oflags);
-  fd = nx_vopen(nxsched_self(), path, oflags, ap);
+  fd = nx_vopen(this_task(), path, oflags, ap);
   va_end(ap);
 
   return fd;
@@ -467,7 +468,7 @@ int open(FAR const char *path, int oflags, ...)
   /* Let nx_vopen() do most of the work */
 
   va_start(ap, oflags);
-  fd = nx_vopen(nxsched_self(), path, oflags, ap);
+  fd = nx_vopen(this_task(), path, oflags, ap);
   va_end(ap);
 
   /* Set the errno value if any errors were reported by nx_open() */

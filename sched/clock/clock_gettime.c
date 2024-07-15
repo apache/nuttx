@@ -37,6 +37,7 @@
 #include <nuttx/queue.h>
 
 #include "clock/clock.h"
+#include "sched/sched.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 #  include "clock/clock_timekeeping.h"
 #endif
@@ -148,7 +149,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
         {
           /* Fetch the THREAD_CPUTIME for current thread */
 
-          tcb = nxsched_self();
+          tcb = this_task();
         }
       else
         {
@@ -179,7 +180,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
         {
           /* Fetch the PROCESS_CPUTIME for current process */
 
-          tcb = nxsched_self();
+          tcb = this_task();
         }
       else
         {
