@@ -1304,6 +1304,27 @@ void mfs_lru_updatedsz(FAR struct mfs_sb_s * const sb,
 /* mnemofs_master.c */
 
 /****************************************************************************
+ * Name: mfs_mn_init
+ *
+ * Description:
+ *   Initialize master node by reading from the flash.
+ *
+ * Input Parameters:
+ *   sb       - Superblock instance of the device.
+ *   jrnl_blk - First block of the journal.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   The journal will have to be initialized before this.
+ *
+ ****************************************************************************/
+
+int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
+
+/****************************************************************************
  * Name: mfs_mn_fmt
  *
  * Description:
@@ -1323,6 +1344,29 @@ void mfs_lru_updatedsz(FAR struct mfs_sb_s * const sb,
  ****************************************************************************/
 
 int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
+
+/****************************************************************************
+ * Name: mfs_mn_move
+ *
+ * Description:
+ *   Move the master node.
+ *
+ * Input Parameters:
+ *   sb      - Superblock instance of the device.
+ *   root    - New location of the root of the file system.
+ *   root_sz - New size of the CTZ list of the root of the file syste.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   This is called when the root is updated to a new location.
+ *
+ ****************************************************************************/
+
+int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
+                const mfs_t root_sz);
 
 /* mnemofs_fsobj.c */
 
