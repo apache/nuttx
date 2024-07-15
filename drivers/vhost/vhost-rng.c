@@ -43,6 +43,7 @@ struct vhost_rng_priv_s
 {
   FAR struct vhost_device *hdev;
   struct work_s            work;
+  spinlock_t               lock;
 };
 
 /****************************************************************************
@@ -82,11 +83,13 @@ static void vhost_rng_work(FAR void *arg)
   FAR struct vhost_rng_priv_s *priv = arg;
   FAR struct virtqueue *vq;
   FAR void *buf;
+  irqstate_t flags;
   uint16_t idx;
   uint32_t len;
   ssize_t ret;
 
   vq = priv->hdev->vrings_info[0].vq;
+  flags = spin_lock_irqsave(&priv->lock);
   for (; ; )
     {
       buf = virtqueue_get_available_buffer(vq, &idx, &len);
@@ -95,6 +98,7 @@ static void vhost_rng_work(FAR void *arg)
           break;
         }
 
+      spin_unlock_irqrestore(&priv->lock, flags);
       ret = getrandom(buf, len, 0);
       if (ret < 0)
         {
@@ -102,9 +106,12 @@ static void vhost_rng_work(FAR void *arg)
           ret = 0;
         }
 
+      flags = spin_lock_irqsave(&priv->lock);
       virtqueue_add_consumed_buffer(vq, idx, (uint32_t)ret);
       virtqueue_kick(vq);
     }
+
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -139,6 +146,7 @@ static int vhost_rng_probe(FAR struct vhost_device *hdev)
       return -ENOMEM;
     }
 
+  spin_lock_init(&priv->lock);
   priv->hdev = hdev;
   hdev->priv = priv;
 

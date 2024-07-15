@@ -62,6 +62,7 @@ struct virtio_input_priv
   struct virtio_input_event     evt[VIRTIO_INPUT_EVT_NUM];
   size_t                        evtnum;         /* Input event number */
   struct work_s                 work;           /* Supports the interrupt handling "bottom half" */
+  spinlock_t                    lock;           /* Lock */
   virtio_send_event_handler     eventhandler;
 
   union
@@ -253,7 +254,7 @@ static void virtio_input_worker(FAR void *arg)
   uint32_t len;
 
   while ((evt = (FAR struct virtio_input_event *)
-         virtqueue_get_buffer(vq, &len, NULL)) != NULL)
+         virtqueue_get_buffer_lock(vq, &len, NULL, &priv->lock)) != NULL)
     {
       vrtinfo("virtio_input_worker (type,code,value)-(%d,%d,%" PRIu32 ").\n",
               evt->type, evt->code, evt->value);
@@ -262,10 +263,10 @@ static void virtio_input_worker(FAR void *arg)
 
       vb.buf = evt;
       vb.len = len;
-      virtqueue_add_buffer(vq, &vb, 0, 1, vb.buf);
+      virtqueue_add_buffer_lock(vq, &vb, 0, 1, vb.buf, &priv->lock);
     }
 
-  virtqueue_kick(vq);
+  virtqueue_kick_lock(vq, &priv->lock);
 }
 
 /****************************************************************************
@@ -300,10 +301,10 @@ static void virtio_input_fill_event(FAR struct virtio_input_priv *priv)
     {
       vb.buf = &priv->evt[i];
       vb.len = sizeof(struct virtio_input_event);
-      virtqueue_add_buffer(vq, &vb, 0, 1, vb.buf);
+      virtqueue_add_buffer_lock(vq, &vb, 0, 1, vb.buf, &priv->lock);
     }
 
-    virtqueue_kick(vq);
+  virtqueue_kick_lock(vq, &priv->lock);
 }
 
 /****************************************************************************
@@ -377,6 +378,7 @@ static int virtio_input_probe(FAR struct virtio_device *vdev)
       return -ENOMEM;
     }
 
+  spin_lock_init(&priv->lock);
   priv->vdev = vdev;
   vdev->priv = priv;
 

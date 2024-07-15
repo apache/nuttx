@@ -110,18 +110,15 @@ static void virtio_rng_done(FAR struct virtqueue *vq)
 {
   FAR struct virtio_rng_priv_s *priv = vq->vq_dev->priv;
   FAR struct virtio_rng_cookie_s *cookie;
-  irqstate_t flags;
   uint32_t len;
 
-  /* Get the buffer, virtqueue_get_buffer() return the cookie added in
+  /* Get the buffer, virtqueue_get_buffer_lock() return the cookie added in
    * virtio_rng_read().
    */
 
   for (; ; )
     {
-      flags = spin_lock_irqsave(&priv->lock);
-      cookie = virtqueue_get_buffer(vq, &len, NULL);
-      spin_unlock_irqrestore(&priv->lock, flags);
+      cookie = virtqueue_get_buffer_lock(vq, &len, NULL, &priv->lock);
       if (cookie == NULL)
         {
           break;
