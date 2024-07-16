@@ -328,6 +328,11 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
            * execution
            */
 
+          if (shdr->sh_size == 0)
+            {
+              continue;
+            }
+
           if ((shdr->sh_flags & SHF_ALLOC) == 0)
             {
               continue;
@@ -360,7 +365,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
                 }
 
               *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr,
-                                           shdr->sh_addralign);
+                                               shdr->sh_addralign);
             }
 
           /* SHT_NOBITS indicates that there is no data in the file for the
@@ -370,7 +375,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
           if (shdr->sh_type != SHT_NOBITS)
             {
 #ifdef CONFIG_MODLIB_LOADTO_LMA
-              ret = modlib_vma2lma(loadinfo, shdr, *pptr);
+              ret = modlib_vma2lma(loadinfo, shdr, (FAR Elf_Addr *)pptr);
               if (ret < 0)
                 {
                   berr("ERROR: Failed to convert addr %d: %d\n", i, ret);
@@ -393,7 +398,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
            * section must be cleared.
            */
 
-          else
+          else if (*pptr != NULL)
             {
               memset(*pptr, 0, shdr->sh_size);
             }
@@ -509,7 +514,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
         }
 #endif
     }
-  else
+  else if (loadinfo->ehdr.e_type == ET_DYN)
     {
       loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
                                                     loadinfo->textsize +
