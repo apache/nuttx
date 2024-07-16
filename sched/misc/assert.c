@@ -29,11 +29,14 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/coredump.h>
+#include <nuttx/compiler.h>
+#include <nuttx/irq.h>
 #include <nuttx/init.h>
 #include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/tls.h>
 #include <nuttx/signal.h>
+#include <nuttx/sched.h>
 #ifdef CONFIG_ARCH_LEDS
 #  include <arch/board/board.h>
 #endif
@@ -47,6 +50,7 @@
 #include <debug.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/utsname.h>
 
 #include "irq/irq.h"
@@ -94,7 +98,11 @@
  * Private Data
  ****************************************************************************/
 
-static uintptr_t g_last_regs[XCPTCONTEXT_REGS]
+#ifdef CONFIG_SMP
+static bool g_cpu_paused[CONFIG_SMP_NCPUS];
+#endif
+
+static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
 
 static FAR const char * const g_policy[4] =
@@ -551,20 +559,44 @@ static void dump_deadlock(void)
 }
 #endif
 
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Name: pause_cpu_handler
+ ****************************************************************************/
+
+static noreturn_function int pause_cpu_handler(FAR void *arg)
+{
+  memcpy(g_last_regs[this_cpu()], up_current_regs(), sizeof(g_last_regs[0]));
+  g_cpu_paused[this_cpu()] = true;
+  while (1);
+}
+
 /****************************************************************************
  * Name: pause_all_cpu
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 static void pause_all_cpu(void)
 {
-  int cpu;
+  cpu_set_t cpus = (1 << CONFIG_SMP_NCPUS) - 1;
+  int delay = CONFIG_ASSERT_PAUSE_CPU_TIMEOUT;
 
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+  CPU_CLR(this_cpu(), &cpus);
+  nxsched_smp_call(cpus, pause_cpu_handler, NULL, false);
+  g_cpu_paused[this_cpu()] = true;
+
+  /* Check if all CPUs paused with timeout */
+
+  cpus = 0;
+  while (delay-- > 0 && cpus < CONFIG_SMP_NCPUS)
     {
-      if (cpu != this_cpu())
+      if (g_cpu_paused[cpus])
         {
-          up_cpu_pause(cpu);
+          cpus++;
+        }
+      else
+        {
+          up_mdelay(1);
         }
     }
 }
@@ -654,6 +686,28 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
                             FAR const char *filename, int linenum,
                             FAR const char *msg, FAR void *regs)
 {
+#ifdef CONFIG_SMP
+  int cpu;
+
+  /* Dump other CPUs registers, running task stack and backtrace. */
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      if (cpu == this_cpu())
+        {
+          continue;
+        }
+
+      _alert("Dump CPU%d: %s\n", cpu,
+             g_cpu_paused[cpu] ? "PAUSED" : "RUNNING");
+
+      if (g_cpu_paused[cpu])
+        {
+          dump_running_task(g_running_tasks[cpu], g_last_regs[cpu]);
+        }
+    }
+#endif
+
   /* Dump backtrace of other tasks. */
 
   dump_tasks();
@@ -770,12 +824,12 @@ void _assert(FAR const char *filename, int linenum,
 
   if (regs == NULL)
     {
-      up_saveusercontext(g_last_regs);
-      regs = g_last_regs;
+      up_saveusercontext(g_last_regs[this_cpu()]);
+      regs = g_last_regs[this_cpu()];
     }
   else
     {
-      memcpy(g_last_regs, regs, sizeof(g_last_regs));
+      memcpy(g_last_regs[this_cpu()], regs, sizeof(g_last_regs[0]));
     }
 
   notifier_data.rtcb = rtcb;
