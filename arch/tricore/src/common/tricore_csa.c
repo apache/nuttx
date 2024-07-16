@@ -50,9 +50,17 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
 
   plcsa = (uintptr_t *)tricore_csa2addr(__mfcr(CPU_FCX));
 
+  /* DSYNC instruction should be executed immediately prior to the MTCR */
+
+  __dsync();
+
   pucsa = (uintptr_t *)tricore_csa2addr(plcsa[REG_UPCXI]);
 
   __mtcr(CPU_FCX, pucsa[REG_UPCXI]);
+
+  /* ISYNC instruction executed immediately following MTCR */
+
+  __isync();
 
   memset(pucsa, 0, XCPTCONTEXT_SIZE);
   memset(plcsa, 0, XCPTCONTEXT_SIZE);
