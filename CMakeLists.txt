@@ -642,8 +642,8 @@ if(NOT CONFIG_ARCH_SIM)
 
   # TODO: nostart/nodefault not applicable to nuttx toolchain
   target_link_libraries(
-    nuttx PRIVATE -T${ldscript} -Wl,--start-group ${nuttx_libs}
-                  ${nuttx_extra_libs} -Wl,--end-group)
+    nuttx PRIVATE ${NUTTX_EXTRA_FLAGS} -T${ldscript} -Wl,--start-group
+                  ${nuttx_libs} ${nuttx_extra_libs} -Wl,--end-group)
 
   # generate binary outputs in different formats (.bin, .hex, etc)
   nuttx_generate_outputs(nuttx)
