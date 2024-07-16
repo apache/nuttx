@@ -993,7 +993,8 @@
 #  define end_packed_struct             __attribute__((packed))
 #  define reentrant_function
 #  define naked_function
-#  define always_inline_function        __attribute__((always_inline))
+#  define always_inline_function        __attribute__((always_inline,no_instrument_function))
+#  define inline_function               __attribute__((always_inline)) inline
 #  define noinline_function             __attribute__((noinline))
 #  define noinstrument_function
 #  define nooptimiziation_function      __attribute__((optimize(0)))
