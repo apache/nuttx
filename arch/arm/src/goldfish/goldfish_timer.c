@@ -23,9 +23,11 @@
  ****************************************************************************/
 
 #include <nuttx/timers/arch_alarm.h>
+#include <nuttx/timers/goldfish_timer.h>
 #include <nuttx/fdt.h>
 
 #include "arm_timer.h"
+#include "chip.h"
 
 /****************************************************************************
  * Public Functions
@@ -41,7 +43,7 @@ void up_timer_initialize(void)
 
   lower = goldfish_timer_initialize(
             fdt_get_reg_base_by_path(fdt, "/goldfish_rtc"),
-            fdt_get_irq_by_path(fdt, "/goldfish_rtc"), QEMU_SPI_IRQ_BASE);
+            fdt_get_irq_by_path(fdt, "/goldfish_rtc", QEMU_SPI_IRQ_BASE));
 
   DEBUGASSERT(lower != NULL);
 
