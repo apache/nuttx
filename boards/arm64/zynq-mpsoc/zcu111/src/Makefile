@@ -23,6 +23,10 @@ include $(TOPDIR)/Make.defs
 CSRCS = zcu111_boardinit.c
 CSRCS += zcu111_appinit.c
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += zcu111_autoleds.c
+endif
+
 ifeq ($(CONFIG_ETC_ROMFS),y)
   RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 endif
