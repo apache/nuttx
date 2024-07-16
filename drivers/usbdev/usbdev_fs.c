@@ -510,8 +510,6 @@ static int usbdev_fs_close(FAR struct file *filep)
 
   fs_ep->crefs -= 1;
 
-  ASSERT(fs_ep->crefs >= 0);
-
   if (fs_ep->unlinked && fs_ep->crefs == 0)
     {
       bool do_free = true;
