@@ -150,9 +150,10 @@
 
 enum ncm_notify_state_e
 {
-  NCM_NOTIFY_NONE,    /* Don't notify */
-  NCM_NOTIFY_CONNECT, /* Issue CONNECT next */
-  NCM_NOTIFY_SPEED,   /* Issue SPEED_CHANGE next */
+  NCM_NOTIFY_NONE,               /* Don't notify */
+  NCM_NOTIFY_CONNECT,            /* Issue CONNECT next */
+  NCM_NOTIFY_SPEED,              /* Issue SPEED_CHANGE next */
+  NCM_NOTIFY_RESPONSE_AVAILABLE, /* Issue RESPONSE_AVAILABLE next */
 };
 
 struct ndp_parser_opts_s
@@ -391,6 +392,8 @@ static int  cdcncm_rmmac(FAR struct netdev_lowerhalf_s *dev,
 static int  cdcncm_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
                          unsigned long arg);
 #endif
+
+static void cdcncm_notify_worker(FAR void *arg);
 
 /* USB Device Class Driver **************************************************/
 
@@ -724,6 +727,9 @@ static ssize_t cdcmbim_write(FAR struct file *filep, FAR const char *buffer,
     }
 
   uinfo("wrote %zd bytes\n", buflen);
+  DEBUGASSERT(self->ncmdriver.notify == NCM_NOTIFY_RESPONSE_AVAILABLE);
+  work_queue(ETHWORK, &self->ncmdriver.notifywork, cdcncm_notify_worker,
+             self, 0);
 
 errout:
   nxmutex_unlock(&self->lock);
@@ -1521,12 +1527,12 @@ static void cdcncm_resetconfig(FAR struct cdcncm_driver_s *self)
       EP_DISABLE(self->epint);
       EP_DISABLE(self->epbulkin);
       EP_DISABLE(self->epbulkout);
+      self->notify = NCM_NOTIFY_SPEED;
     }
 
   self->parseropts = &g_ndp16_opts;
   self->ndpsign    = self->isncm ? self->parseropts->ndpsign :
                                    CDC_MBIM_NDP16_NOCRC_SIGN;
-  self->notify     = NCM_NOTIFY_NONE;
 }
 
 /****************************************************************************
@@ -1627,11 +1633,11 @@ error:
 }
 
 /****************************************************************************
- * Name: ncm_notify
+ * Name: cdcncm_notify
  *
  ****************************************************************************/
 
-static int ncm_notify(FAR struct cdcncm_driver_s *self)
+static int cdcncm_notify(FAR struct cdcncm_driver_s *self)
 {
   FAR struct usb_ctrlreq_s *req =
                             (FAR struct usb_ctrlreq_s *)self->notifyreq->buf;
@@ -1677,7 +1683,20 @@ static int ncm_notify(FAR struct cdcncm_driver_s *self)
           self->notify = NCM_NOTIFY_CONNECT;
           break;
         }
-      }
+
+      case NCM_NOTIFY_RESPONSE_AVAILABLE:
+        {
+          req->req      = MBIM_RESPONSE_AVAILABLE;
+          req->value[0] = LSBYTE(0);
+          req->value[1] = MSBYTE(0);
+          req->len[0]   = LSBYTE(0);
+          req->len[1]   = MSBYTE(0);
+          ret           = sizeof(*req);
+
+          self->notify = NCM_NOTIFY_NONE;
+          break;
+        }
+    }
 
   req->type = 0xa1;
   req->index[0] = LSBYTE(self->devinfo.ifnobase);
@@ -1687,18 +1706,18 @@ static int ncm_notify(FAR struct cdcncm_driver_s *self)
 }
 
 /****************************************************************************
- * Name: ncm_do_notify
+ * Name: cdcncm_notify_worker
  *
  ****************************************************************************/
 
-static void ncm_do_notify(FAR void *arg)
+static void cdcncm_notify_worker(FAR void *arg)
 {
   FAR struct cdcncm_driver_s *self = arg;
   int ret;
 
   while (self->notify != NCM_NOTIFY_NONE)
     {
-      ret = ncm_notify(self);
+      ret = cdcncm_notify(self);
       if (ret > 0)
         {
           FAR struct usbdev_req_s *notifyreq = self->notifyreq;
@@ -1709,6 +1728,12 @@ static void ncm_do_notify(FAR void *arg)
           EP_SUBMIT(self->epint, notifyreq);
         }
     }
+
+  /* After the NIC information is synchronized, subsequent notifications
+   * are all related to the mbim control
+   */
+
+  self->notify = NCM_NOTIFY_RESPONSE_AVAILABLE;
 }
 
 /****************************************************************************
@@ -1727,7 +1752,7 @@ static int cdcncm_setinterface(FAR struct cdcncm_driver_s *self,
         }
 
       netdev_lower_carrier_on(&self->dev);
-      work_queue(ETHWORK, &self->notifywork, ncm_do_notify, self,
+      work_queue(ETHWORK, &self->notifywork, cdcncm_notify_worker, self,
                  MSEC2TICK(100));
     }
   else
