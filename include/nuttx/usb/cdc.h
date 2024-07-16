@@ -341,6 +341,7 @@
 /* Table 15: Notifications, Networking Control Model */
 
 #define NCM_NETWORK_CONNECTION  ECM_NETWORK_CONNECTION
+#define NCM_RESPONSE_AVAILABLE  ECM_RESPONSE_AVAILABLE
 #define NCM_SPEED_CHANGE        ECM_SPEED_CHANGE
 
 /* Table 16: Requests, Mobile Broadband Interface Model */
@@ -351,6 +352,7 @@
 /* Table 17: Notifications, Networking Control Model */
 
 #define MBIM_NETWORK_CONNECTION NCM_NETWORK_CONNECTION
+#define MBIM_RESPONSE_AVAILABLE NCM_RESPONSE_AVAILABLE
 #define MBIM_SPEED_CHANGE       NCM_SPEED_CHANGE
 
 /* Descriptors ***************************************************************/
