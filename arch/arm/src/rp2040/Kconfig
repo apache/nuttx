@@ -264,16 +264,16 @@ config RP2040_PWM
 
 if RP2040_PWM
 
-config PWM_MULTICHAN
-	bool "Support Multi-Channel PWM"
+config RP2040_PWM_MULTICHAN
+	bool "Support RP2040 Multi-Channel PWM"
 	default y
 	---help---
 		If support for multi-channel PWM is disabled, the generated code
 		will only support the A channel of the PWM slices.
 
-if PWM_MULTICHAN
+if RP2040_PWM_MULTICHAN
 
-config PWM_NCHANNELS
+config RP2040_PWM_NCHANNELS
 	int "Number of channels"
 	default 2
 	range 1 2
@@ -282,7 +282,7 @@ config PWM_NCHANNELS
 		only support the A channel of the PWM slices.  This is functionally
 		identical to disabling multi-channel PWM support.
 
-endif # PWM_MULTICHAN
+endif # RP2040_PWM_MULTICHAN
 
 config RP2040_PWM0
 	bool "PWM0"
@@ -298,7 +298,7 @@ config RP2040_PWM0A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 	config RP2040_PWM0B_INVERT
 	bool "PWM0 channel 2 invert"
@@ -307,7 +307,7 @@ if PWM_MULTICHAN && PWM_NCHANNELS > 1
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 	config RP2040_PWM0_PHASE_CORRECT
 	bool "PWM0 phase correct"
@@ -329,7 +329,7 @@ config RP2040_PWM1A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM1B_INVERT
 	bool "PWM1 channel 2 invert"
@@ -338,7 +338,7 @@ config RP2040_PWM1B_INVERT
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM1_PHASE_CORRECT
 	bool "PWM1 phase correct"
@@ -360,7 +360,7 @@ config RP2040_PWM2A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM2B_INVERT
 	bool "PWM2 channel 2 invert"
@@ -369,7 +369,7 @@ config RP2040_PWM2B_INVERT
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM2_PHASE_CORRECT
 	bool "PWM2 phase correct"
@@ -393,7 +393,7 @@ config RP2040_PWM3A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM3B_INVERT
 	bool "PWM3 channel 2 invert"
@@ -402,7 +402,7 @@ config RP2040_PWM3B_INVERT
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM3_PHASE_CORRECT
 	bool "PWM3 phase correct"
@@ -424,7 +424,7 @@ config RP2040_PWM4A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM4B_INVERT
 	bool "PWM4 channel 2 invert"
@@ -433,7 +433,7 @@ config RP2040_PWM4B_INVERT
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM4_PHASE_CORRECT
 	bool "PWM4 phase correct"
@@ -455,7 +455,7 @@ config RP2040_PWM5A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM5B_INVERT
 	bool "PWM5 channel 2 invert"
@@ -464,7 +464,7 @@ config RP2040_PWM5B_INVERT
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM5_PHASE_CORRECT
 	bool "PWM5 phase correct"
@@ -486,7 +486,7 @@ config RP2040_PWM6A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM6B_INVERT
 	bool "PWM6 channel 2 invert"
@@ -495,7 +495,7 @@ config RP2040_PWM6B_INVERT
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM6_PHASE_CORRECT
 	bool "PWM6 phase correct"
@@ -517,7 +517,7 @@ config RP2040_PWM7A_INVERT
 		If invert is enabled, the PWM on the A pin will idle high
 		with the pulse going low.
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM7B_GPIO
 
@@ -528,7 +528,7 @@ config RP2040_PWM7B_INVERT
 		If invert is enabled, the PWM on the B pin will idle high
 		with the pulse going low.
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # RP2040_PWM_MULTICHAN && RP2040_PWM_NCHANNELS > 1
 
 config RP2040_PWM7_PHASE_CORRECT
 	bool "PWM7 phase correct"
