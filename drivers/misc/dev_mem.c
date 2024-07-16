@@ -208,7 +208,7 @@ static int devmem_mmap(FAR struct file *filep,
 int devmem_register(void)
 {
   FAR struct memory_region_s *region;
-  bool merge = (_edata == _sbss);
+  bool merge = (&_edata[0] == &_sbss[0]);
   ssize_t len = 0;
   int ret;
 
