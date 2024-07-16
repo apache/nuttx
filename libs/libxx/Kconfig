@@ -45,6 +45,7 @@ config LIBCXX
 	select HAVE_CXXINITIALIZE
 	select LIBC_LOCALE
 	select PTHREAD_MUTEX_TYPES
+	depends on TLS_NELEM > 0
 	---help---
 		LLVM "libc++" C++ Standard Library
 		https://libcxx.llvm.org/
@@ -70,6 +71,7 @@ if LIBCXX || UCLIBCXX
 
 choice
 	prompt "C++ low level library select"
+	default LIBCXXABI if LIBCXX
 	default LIBSUPCXX
 
 config LIBCXXABI
