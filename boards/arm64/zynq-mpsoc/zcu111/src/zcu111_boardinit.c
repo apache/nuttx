@@ -76,10 +76,13 @@ void zynq_memory_initialize(void)
 
 void zynq_board_initialize(void)
 {
+  /* resets the GPIO module by writing reset values to all registers */
+
+  zynq_mio_initialize();
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-  /* board_autoled_initialize(); */
+  board_autoled_initialize();
 #endif
 }
 
