@@ -27,6 +27,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
