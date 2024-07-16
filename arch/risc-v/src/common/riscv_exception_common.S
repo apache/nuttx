@@ -231,7 +231,11 @@ return_from_exception:
 
   load_ctx   sp
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
   REGLOAD    sp, REG_SP(sp)      /* restore original sp */
+#else
+  addi       sp, sp, XCPTCONTEXT_SIZE
+#endif
 
   /* Return from exception */
 
