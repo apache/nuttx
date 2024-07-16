@@ -759,10 +759,8 @@ begin_packed_struct struct tcbinfo_s
   uint16_t regs_num;                     /* Num of general regs             */
 
   /* Offset pointer of xcp.regs, order in GDB org.gnu.gdb.xxx feature.
-   * Please refer:
-   * https://sourceware.org/gdb/current/onlinedocs/gdb/ARM-Features.html
-   * https://sourceware.org/gdb/current/onlinedocs/gdb/RISC_002dV-Features
-   * -.html
+   * Refer to the link of `reg_off` below for more information.
+   *
    * value UINT16_MAX: This register was not provided by NuttX
    */
 
@@ -772,7 +770,7 @@ begin_packed_struct struct tcbinfo_s
     uint8_t             u[8];
     FAR const uint16_t *p;
   }
-  end_packed_struct reg_off;
+  end_packed_struct reg_off; /* Refer to https://sourceware.org/gdb/current/onlinedocs/gdb.html/Standard-Target-Features.html */
 } end_packed_struct;
 
 /* This is the callback type used by nxsched_foreach() */
