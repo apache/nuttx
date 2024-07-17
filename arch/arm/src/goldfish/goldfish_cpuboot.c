@@ -30,6 +30,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <arch/irq.h>
+#include <init/init.h>
 #include <debug.h>
 
 #include "arm_internal.h"
@@ -116,10 +117,8 @@ void arm_cpu_boot(int cpu)
   /* The next thing that we expect to happen is for logic running on CPU0
    * to call up_cpu_start() which generate an SGI and a context switch to
    * the configured NuttX IDLE task.
+   * Transfer control to the IDLE task.
    */
 
-  for (; ; )
-    {
-      asm("WFI");
-    }
+  nx_idle_trampoline();
 }
