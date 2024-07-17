@@ -434,7 +434,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
               continue;
             }
 
-          if (c == 'l')
+          if (c == 'l' || c == 'L')
             {
               if ((flags & FL_LONG) != 0)
                 {
