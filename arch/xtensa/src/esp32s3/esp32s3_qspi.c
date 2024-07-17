@@ -1207,6 +1207,36 @@ void esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv)
   putreg32((SPI_SLV_RX_SEG_TRANS_CLR_EN_M | SPI_SLV_TX_SEG_TRANS_CLR_EN_M),
            SPI_DMA_CONF_REG(config->id));
 }
+
+/****************************************************************************
+ * Name: esp32s3_qspi_dma_deinit
+ *
+ * Description:
+ *   Deinitialize ESP32-S3 QSPI GDMA engine.
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_qspi_dma_deinit(struct esp32s3_qspi_priv_s *priv)
+{
+  /* Release a DMA channel from peripheral */
+
+  esp32s3_dma_release(priv->dma_channel);
+
+  /* Deinitialize DMA controller */
+
+  esp32s3_dma_deinit();
+
+  /* Disable DMA clock for the SPI peripheral */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
+}
+
 #endif
 
 /****************************************************************************
@@ -1391,8 +1421,7 @@ static void esp32s3_qspi_deinit(struct esp32s3_qspi_priv_s *priv)
   const struct esp32s3_qspi_config_s *config = priv->config;
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, config->dma_rst_bit);
-  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, config->dma_clk_bit, 0);
+  esp32s3_qspi_dma_deinit(priv);
 #endif
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, config->rst_bit);
