@@ -73,7 +73,7 @@ add_custom_target(
   COMMAND grep "^CONFIG_ARCH_CHIP_" ${CMAKE_BINARY_DIR}/.config >>
           ${CMAKE_BINARY_DIR}/defconfig.tmp || true
   COMMAND grep "CONFIG_ARCH_CHIP=" ${CMAKE_BINARY_DIR}/.config >>
-          ${CMAKE_BINARY_DIR}/defconfig.tmp
+          ${CMAKE_BINARY_DIR}/defconfig.tmp || true
   COMMAND grep "CONFIG_ARCH_BOARD=" ${CMAKE_BINARY_DIR}/.config >>
           ${CMAKE_BINARY_DIR}/defconfig.tmp || true
   COMMAND grep "^CONFIG_ARCH_CUSTOM" ${CMAKE_BINARY_DIR}/.config >>
