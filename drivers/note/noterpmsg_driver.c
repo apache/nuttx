@@ -151,7 +151,11 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
       memcpy(buffer, drv->buffer + drv->tail, space);
       memcpy(buffer + space, drv->buffer, len - space);
 
-      rpmsg_send_nocopy(&drv->ept, buffer, len);
+      if (rpmsg_send_nocopy(&drv->ept, buffer, len) < 0)
+        {
+          rpmsg_release_tx_buffer(&drv->ept, buffer);
+        }
+
       drv->tail = noterpmsg_next(drv, drv->tail, len);
     }
 }

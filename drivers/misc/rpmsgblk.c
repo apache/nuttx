@@ -395,6 +395,7 @@ static ssize_t rpmsgblk_write(FAR struct inode *inode,
                               sizeof(*msg) - 1 + msg->nsectors * sectorsize);
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
           goto out;
         }
     }
@@ -859,6 +860,11 @@ static int rpmsgblk_send_recv(FAR struct rpmsgblk_s *priv,
 
   if (ret < 0)
     {
+      if (copy == false)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+        }
+
       goto fail;
     }
 

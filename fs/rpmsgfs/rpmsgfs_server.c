@@ -391,7 +391,11 @@ static int rpmsgfs_read_handler(FAR struct rpmsg_endpoint *ept,
         }
 
       rsp->header.result = ret;
-      rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp));
+      if (rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret) + sizeof(*rsp))
+          < 0)
+        {
+          rpmsg_release_tx_buffer(ept, rsp);
+        }
 
       if (ret <= 0)
         {

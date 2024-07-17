@@ -228,6 +228,8 @@ static int usrsock_rpmsg_send_data_ack(FAR struct rpmsg_endpoint *ept,
                               uint16_t valuelen_nontrunc,
                               int32_t datalen)
 {
+  int ret;
+
   ack->reqack.head.msgid  = USRSOCK_MESSAGE_RESPONSE_DATA_ACK;
   ack->reqack.head.flags  = 0;
   ack->reqack.head.events = events;
@@ -249,7 +251,13 @@ static int usrsock_rpmsg_send_data_ack(FAR struct rpmsg_endpoint *ept,
   ack->valuelen          = valuelen;
   ack->valuelen_nontrunc = valuelen_nontrunc;
 
-  return rpmsg_send_nocopy(ept, ack, sizeof(*ack) + valuelen + datalen);
+  ret = rpmsg_send_nocopy(ept, ack, sizeof(*ack) + valuelen + datalen);
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(ept, ack);
+    }
+
+  return ret;
 }
 
 static int usrsock_rpmsg_send_frag_ack(FAR struct rpmsg_endpoint *ept,
@@ -980,6 +988,7 @@ static int usrsock_rpmsg_send_dns_event(FAR void *arg,
   FAR struct rpmsg_endpoint *ept = arg;
   FAR struct usrsock_rpmsg_dns_event_s *dns;
   uint32_t len;
+  int ret;
 
   dns = rpmsg_get_tx_payload_buffer(ept, &len, true);
   if (dns == NULL)
@@ -993,7 +1002,13 @@ static int usrsock_rpmsg_send_dns_event(FAR void *arg,
   dns->addrlen = addrlen;
   memcpy(dns + 1, addr, addrlen);
 
-  return rpmsg_send_nocopy(ept, dns, sizeof(*dns) + addrlen);
+  ret = rpmsg_send_nocopy(ept, dns, sizeof(*dns) + addrlen);
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(ept, dns);
+    }
+
+  return ret;
 }
 #endif
 

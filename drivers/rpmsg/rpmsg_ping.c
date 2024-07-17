@@ -168,6 +168,11 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept,
       ret = rpmsg_send_nocopy(ept, msg, len);
     }
 
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(ept, msg);
+    }
+
   return ret;
 }
 

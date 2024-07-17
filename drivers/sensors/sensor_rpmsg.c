@@ -328,6 +328,7 @@ static void sensor_rpmsg_advsub_one(FAR struct sensor_rpmsg_dev_s *dev,
   ret = rpmsg_send_nocopy(ept, msg, sizeof(*msg) + len);
   if (ret < 0)
     {
+      rpmsg_release_tx_buffer(ept, msg);
       snerr("ERROR: advsub:%d rpmsg send failed:%s, %d, %s\n",
             command, dev->path, ret, rpmsg_get_cpuname(ept->rdev));
     }
@@ -406,6 +407,7 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
       ret = rpmsg_send_nocopy(ept, msg, sizeof(*msg) + len);
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(ept, msg);
           snerr("ERROR: ioctl rpmsg send failed:%s, %d, %s\n",
                 dev->path, ret, rpmsg_get_cpuname(ept->rdev));
           break;
@@ -803,11 +805,19 @@ static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
 static void sensor_rpmsg_data_worker(FAR void *arg)
 {
   FAR struct sensor_rpmsg_ept_s *sre = arg;
+  int ret;
 
   nxrmutex_lock(&sre->lock);
   if (sre->buffer)
     {
-      rpmsg_send_nocopy(&sre->ept, sre->buffer, sre->written);
+      ret = rpmsg_send_nocopy(&sre->ept, sre->buffer, sre->written);
+      if (ret < 0)
+        {
+          rpmsg_release_tx_buffer(&sre->ept, sre->buffer);
+          snerr("ERROR: push event rpmsg send failed:%d, %s\n",
+                ret, rpmsg_get_cpuname(sre->ept.rdev));
+        }
+
       sre->buffer = NULL;
     }
 
@@ -916,12 +926,14 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
   if (sre->expire <= now && sre->buffer)
     {
       ret = rpmsg_send_nocopy(&sre->ept, sre->buffer, sre->written);
-      sre->buffer = NULL;
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(&sre->ept, sre->buffer);
           snerr("ERROR: push event rpmsg send failed:%d, %s\n",
                 ret, rpmsg_get_cpuname(sre->ept.rdev));
         }
+
+      sre->buffer = NULL;
     }
   else
     {
