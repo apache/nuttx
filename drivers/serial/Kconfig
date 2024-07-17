@@ -53,6 +53,23 @@ config SERIAL_GDBSTUB_PATH
 	---help---
 		The path to the serial device that will be used for GDB stub.
 
+config SERIAL_GDBSTUB_AUTO_ATTACH
+	bool "GDBSTUB Serial Auto attach"
+	depends on SERIAL_GDBSTUB
+	default n
+	---help---
+		Attach the serial port to gdbstub by default.
+		Will cover the GDBSTUB_SERIAL_PATH, that port will only
+		be used for GDB stub.
+
+config SERIAL_GDBSTUB_PANIC_TIMEOUT
+	int "GDBSTUB Serial panic timeout"
+	depends on SERIAL_GDBSTUB
+	default 10
+	---help---
+		Delay the panic timeout for gdbstub to connect.
+		0 will disable the timeout.
+
 config UART_HOSTFS
 	bool "Use hostfs read/write on UART_HOSTFS_DEVPATH as uart console"
 	depends on FS_HOSTFS
