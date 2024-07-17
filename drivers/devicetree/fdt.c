@@ -325,7 +325,9 @@ size_t fdt_get_reg_size(FAR const void *fdt, int offset)
   reg = fdt_getprop(fdt, offset, "reg", NULL);
   if (reg != NULL)
     {
-      size = fdt_ld_by_cells(reg, fdt_get_parent_size_cells(fdt, offset));
+      size = fdt_ld_by_cells((FAR fdt32_t *)reg +
+                             fdt_get_parent_address_cells(fdt, offset),
+                             fdt_get_parent_size_cells(fdt, offset));
     }
 
   return size;
