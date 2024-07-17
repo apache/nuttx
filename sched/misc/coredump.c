@@ -212,7 +212,7 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size)
     {
       region = (FAR struct memory_region_s *)g_regions;
 
-      while (region->start != 0)
+      while (region->start < region->end)
         {
           if ((uintptr_t)ptr >= region->start &&
               (uintptr_t)ptr + size < region->end)
