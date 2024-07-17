@@ -91,6 +91,22 @@
 static_assert((ARCH_ADDRENV_VBASE & RV_MMU_SECTION_ALIGN) == 0,
               "Addrenv start address is not aligned to section boundary");
 
+/* Inject the Extra MMU Flags for User Text and Data (Svpbmt / T-Head MMU) */
+
+#ifndef CONFIG_ARCH_MMU_UTEXT_EXTRAFLAGS
+#  define CONFIG_ARCH_MMU_UTEXT_EXTRAFLAGS (0)
+#endif
+
+#ifndef CONFIG_ARCH_MMU_UDATA_EXTRAFLAGS
+#  define CONFIG_ARCH_MMU_UDATA_EXTRAFLAGS (0)
+#endif
+
+#define UTEXT_EXTRAFLAGS ((uint64_t)CONFIG_ARCH_MMU_UTEXT_EXTRAFLAGS << 32)
+#define UDATA_EXTRAFLAGS ((uint64_t)CONFIG_ARCH_MMU_UDATA_EXTRAFLAGS << 32)
+
+#define UTEXT_ALLFLAGS (MMU_UTEXT_FLAGS | UTEXT_EXTRAFLAGS)
+#define UDATA_ALLFLAGS (MMU_UDATA_FLAGS | UDATA_EXTRAFLAGS)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -231,7 +247,7 @@ static int copy_kernel_mappings(arch_addrenv_t *addrenv)
  ****************************************************************************/
 
 static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
-                         size_t size, uint32_t mmuflags)
+                         size_t size, uint64_t mmuflags)
 {
   uintptr_t ptlast;
   uintptr_t ptprev;
@@ -429,7 +445,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Map the reserved area */
 
-  ret = create_region(addrenv, resvbase, resvsize, MMU_UDATA_FLAGS);
+  ret = create_region(addrenv, resvbase, resvsize, UDATA_ALLFLAGS);
 
   if (ret < 0)
     {
@@ -439,7 +455,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Map each region in turn */
 
-  ret = create_region(addrenv, textbase, textsize, MMU_UTEXT_FLAGS);
+  ret = create_region(addrenv, textbase, textsize, UTEXT_ALLFLAGS);
 
   if (ret < 0)
     {
@@ -447,7 +463,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
       goto errout;
     }
 
-  ret = create_region(addrenv, database, datasize, MMU_UDATA_FLAGS);
+  ret = create_region(addrenv, database, datasize, UDATA_ALLFLAGS);
 
   if (ret < 0)
     {
@@ -455,7 +471,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
       goto errout;
     }
 
-  ret = create_region(addrenv, heapbase, heapsize, MMU_UDATA_FLAGS);
+  ret = create_region(addrenv, heapbase, heapsize, UDATA_ALLFLAGS);
 
   if (ret < 0)
     {

@@ -502,6 +502,24 @@ config ARCH_MMU_TYPE_SV32
 	default n
 	select ARCH_HAVE_MMU
 
+config ARCH_MMU_UDATA_EXTRAFLAGS
+	hex "Extra MMU flags for user .data"
+	default 0
+	depends on ARCH_HAVE_MMU
+	---help---
+		Upper 32 bits of the extra MMU flags for user .data. Used for Svpbmt
+		and T-Head MMU. For example, 0x70000000 enables the Shareable,
+		Bufferable and Cacheable flags for T-Head MMU.
+
+config ARCH_MMU_UTEXT_EXTRAFLAGS
+	hex "Extra MMU flags for user .text"
+	default 0
+	depends on ARCH_HAVE_MMU
+	---help---
+		Upper 32 bits of the extra MMU flags for user .text. Used for Svpbmt
+		and T-Head MMU. For example, 0x70000000 enables the Shareable,
+		Bufferable and Cacheable flags for T-Head MMU.
+
 config ARCH_HAVE_S_MODE
 	bool
 	default n
