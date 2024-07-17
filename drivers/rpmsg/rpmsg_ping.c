@@ -181,9 +181,9 @@ static void rpmsg_ping_logout(FAR const char *s, clock_t value)
   perf_convert(value, &ts);
 
 #ifdef CONFIG_SYSTEM_TIME64
-  syslog(LOG_INFO, "%s: %" PRIu64 " s, %ld ns\n", s, ts.tv_sec, ts.tv_nsec);
+  syslog(LOG_EMERG, "%s: %" PRIu64 " s, %ld ns\n", s, ts.tv_sec, ts.tv_nsec);
 #else
-  syslog(LOG_INFO, "%s: %" PRIu32 " s, %ld ns\n", s, ts.tv_sec, ts.tv_nsec);
+  syslog(LOG_EMERG, "%s: %" PRIu32 " s, %ld ns\n", s, ts.tv_sec, ts.tv_nsec);
 #endif
 }
 
@@ -200,7 +200,7 @@ static void rpmsg_ping_logout_rate(uint64_t len, clock_t avg)
   rateint = ratebits / 1000000;
   ratedec = ratebits - rateint * 1000000;
 
-  syslog(LOG_INFO, "rate: %zu.%06zu Mbits/sec\n", rateint, ratedec);
+  syslog(LOG_EMERG, "rate: %zu.%06zu Mbits/sec\n", rateint, ratedec);
 }
 
 /****************************************************************************
@@ -243,7 +243,9 @@ int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
         }
     }
 
-  syslog(LOG_INFO, "ping times: %d\n", ping->times);
+  syslog(LOG_EMERG, "ping times: %d\n", ping->times);
+  syslog(LOG_EMERG, "buffer_len: %" PRIu32 ", send_len: %d\n",
+                    buf_len, send_len);
 
   rpmsg_ping_logout("avg", total / ping->times);
   rpmsg_ping_logout("min", min);
