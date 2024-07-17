@@ -44,7 +44,6 @@
 #define RPMSG_PING_SEND_NOACK       3
 #define RPMSG_PING_SEND_ACK         4
 #define RPMSG_PING_ACK              5
-#define RPMSG_PING_CHECK_DATA       0xee
 
 /****************************************************************************
  * Private Types
@@ -82,7 +81,7 @@ static int rpmsg_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
       data_len = msg->len - sizeof(struct rpmsg_ping_msg_s) + 1;
       for (i = 0; i < data_len; i++)
         {
-          if (msg->data[i] != RPMSG_PING_CHECK_DATA)
+          if (msg->data[i] != msg->data[0])
             {
               syslog(LOG_ERR, "receive data error at %zu of %zu\n",
                      i, data_len);
@@ -108,8 +107,8 @@ static int rpmsg_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
   return 0;
 }
 
-static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept,
-                           int len, int ack, uint32_t *buf_len)
+static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept, int len,
+                           int ack, uint32_t *buf_len, char i)
 {
   FAR struct rpmsg_ping_msg_s *msg;
   int ret;
@@ -147,8 +146,7 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept,
 
       if (msg->cmd == RPMSG_PING_SEND_CHECK)
         {
-          memset(msg->data, RPMSG_PING_CHECK_DATA,
-                 len - sizeof(struct rpmsg_ping_msg_s) + 1);
+          memset(msg->data, i, len - sizeof(struct rpmsg_ping_msg_s) + 1);
         }
 
       nxsem_init(&sem, 0, 0);
@@ -228,7 +226,7 @@ int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
     {
       clock_t tm = perf_gettime();
 
-      send_len = rpmsg_ping_once(ept, ping->len, ping->ack, &buf_len);
+      send_len = rpmsg_ping_once(ept, ping->len, ping->ack, &buf_len, i);
       if (send_len < 0)
         {
           return send_len;
