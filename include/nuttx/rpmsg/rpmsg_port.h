@@ -79,6 +79,7 @@ struct rpmsg_port_spi_config_s
   int             sreq_invert; /* Pin options described in ioexpander.h */
 
   int             mode;        /* Mode of enum spi_mode_e */
+  int             nbits;
   uint32_t        devid;       /* Device ID of enum spi_devtype_e */
   uint32_t        freq;        /* SPI frequency (Hz) */
 };

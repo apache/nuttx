@@ -46,6 +46,8 @@
 #  define rpmsg_port_spi_crc16(hdr) 0
 #endif
 
+#define BYTES2WORDS(s,b)            ((b) / ((s)->nbits >> 3))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -69,11 +71,17 @@ struct rpmsg_port_spi_s
   uint8_t                        mreq;
   uint8_t                        sreq;
 
+  /* SPI devices' configuration */
+
+  int                            nbits;
+
   /* Reserved for cmd send */
 
   FAR struct rpmsg_port_header_s *cmdhdr;
 
-  /* Used for sync data state between sreq_handler and complete_handler */
+  /* Used for sync data state between mreq_handler and
+   * rpmsg_port_spi_slave_notify
+   */
 
   FAR struct rpmsg_port_header_s *txhdr;
   FAR struct rpmsg_port_header_s *rxhdr;
@@ -193,7 +201,8 @@ void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 
   rpmsginfo("send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
 
-  SPIS_CTRLR_ENQUEUE(rpspi->spictrlr, txhdr, rpspi->cmdhdr->len);
+  SPIS_CTRLR_ENQUEUE(rpspi->spictrlr, txhdr,
+                     BYTES2WORDS(rpspi, rpspi->cmdhdr->len));
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 1);
 
   rpspi->rxavail = txhdr->avail;
@@ -277,7 +286,7 @@ static size_t rpmsg_port_spi_slave_getdata(FAR struct spi_slave_dev_s *dev,
     container_of(dev, struct rpmsg_port_spi_s, spislv);
 
   *data = rpspi->rxhdr;
-  return rpspi->cmdhdr->len;
+  return BYTES2WORDS(rpspi, rpspi->cmdhdr->len);
 }
 
 /****************************************************************************
@@ -543,7 +552,8 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
   rpspi->ioe = ioe;
   rpspi->spictrlr = spictrlr;
   rpspi->spislv.ops = &g_rpmsg_port_spi_slave_ops;
-  SPIS_CTRLR_BIND(spictrlr, &rpspi->spislv, spicfg->mode, 8);
+  SPIS_CTRLR_BIND(spictrlr, &rpspi->spislv, spicfg->mode, spicfg->nbits);
+  rpspi->nbits = spicfg->nbits;
 
   return 0;
 }
