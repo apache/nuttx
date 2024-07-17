@@ -168,7 +168,11 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
       msg->count          = len;
       priv->tail         += len;
       msg->header.command = SYSLOG_RPMSG_TRANSFER;
-      rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
+      if (rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len) < 0)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+        }
+
       len                 = SYSLOG_RPMSG_COUNT(priv);
 
       leave_critical_section(flags);

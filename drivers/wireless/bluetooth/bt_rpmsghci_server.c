@@ -132,6 +132,7 @@ static int rpmsghci_send(FAR struct rpmsghci_server_s *priv,
   ret = rpmsg_send_nocopy(&priv->ept, msg, len);
   if (ret < 0)
     {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
       goto errout;
     }
 

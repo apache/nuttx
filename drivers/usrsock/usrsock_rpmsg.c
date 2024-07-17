@@ -100,6 +100,10 @@ static int usrsock_rpmsg_send_dns_request(FAR void *arg,
   net_lock();
   ret = rpmsg_send_nocopy(ept, dns, sizeof(*dns) + addrlen);
   net_unlock();
+  if (ret < 0)
+    {
+      rpmsg_release_tx_buffer(ept, dns);
+    }
 
   return ret;
 }
@@ -225,6 +229,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
       ret = rpmsg_send_nocopy(&priv->ept, buf, ret);
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(&priv->ept, buf);
           break;
         }
 
