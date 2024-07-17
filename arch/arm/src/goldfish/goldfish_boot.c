@@ -36,6 +36,11 @@
 #  include <nuttx/fdt.h>
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+#  include <sched/sched.h>
+#  include <nuttx/sched_note.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
