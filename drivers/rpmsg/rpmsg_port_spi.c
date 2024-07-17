@@ -45,6 +45,8 @@
 #  define rpmsg_port_spi_crc16(hdr) 0
 #endif
 
+#define BYTES2WORDS(s,b)            ((b) / ((s)->nbits >> 3))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -70,6 +72,7 @@ struct rpmsg_port_spi_s
   /* SPI devices' configuration */
 
   uint32_t                       devid;
+  int                            nbits;
 
   /* Reserved for cmd send */
 
@@ -292,7 +295,8 @@ static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
   rpmsginfo("irq send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
 
   SPI_SELECT(rpspi->spi, rpspi->devid, true);
-  SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr, rpspi->cmdhdr->len);
+  SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr,
+               BYTES2WORDS(rpspi, rpspi->cmdhdr->len));
 
   rpspi->rxavail = txhdr->avail;
   return 0;
@@ -470,7 +474,7 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
       return ret;
     }
 
-  SPI_SETBITS(spi, 8);
+  SPI_SETBITS(spi, spicfg->nbits);
   SPI_SETMODE(spi, spicfg->mode);
   SPI_SETFREQUENCY(spi, spicfg->freq);
   SPI_REGISTERCALLBACK(spi, rpmsg_port_spi_complete_handler, rpspi);
@@ -479,6 +483,7 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
   rpspi->spi = spi;
   rpspi->ioe = ioe;
   rpspi->devid = spicfg->devid;
+  rpspi->nbits = spicfg->nbits;
 
   return 0;
 }
