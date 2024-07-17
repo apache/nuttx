@@ -69,7 +69,8 @@ enum nx_initstate_e
                           * initialization. */
   OSINIT_OSREADY   = 5,  /* The OS is fully initialized and multi-tasking is
                           * active. */
-  OSINIT_IDLELOOP  = 6   /* The OS enter idle loop */
+  OSINIT_IDLELOOP  = 6,  /* The OS enter idle loop. */
+  OSINIT_PANIC     = 7   /* Fatal error happened. */
 };
 
 /****************************************************************************
