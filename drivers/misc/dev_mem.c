@@ -101,11 +101,12 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
         }
 
       start = MAX(src, region[i].start);
-      end = MIN(src + buflen, region[i].end);
+      end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_READ))
         {
           memcpy(buffer, (FAR const void *)start, len);
+          filep->f_pos = end;
           return len;
         }
     }
@@ -137,11 +138,12 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
         }
 
       start = MAX(dest, region[i].start);
-      end = MIN(dest + buflen, region[i].end);
+      end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_WRITE))
         {
           memcpy((FAR void *)start, buffer, len);
+          filep->f_pos = end;
           return len;
         }
     }
