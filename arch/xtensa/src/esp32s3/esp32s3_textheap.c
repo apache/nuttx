@@ -223,7 +223,9 @@ IRAM_ATTR void up_textheap_data_sync(void)
 {
   irqstate_t flags = enter_critical_section();
 
+#ifdef CONFIG_ESP32S3_SPIRAM
   esp_spiram_writeback_cache();
+#endif
   cache_hal_disable(CACHE_TYPE_INSTRUCTION);
   cache_hal_enable(CACHE_TYPE_INSTRUCTION);
 
