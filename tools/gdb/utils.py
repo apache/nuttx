@@ -21,7 +21,7 @@
 ############################################################################
 
 import gdb
-
+import re
 
 class CachedType:
     """Cache a type object, so that we can reconnect to the new_objfile event"""
@@ -188,3 +188,50 @@ def get_symbol_value(name):
 
     gdb.execute("set $_%s = %s" % (name, name))
     return gdb.parse_and_eval("$_%s" % name)
+
+def hexdump(address, size):
+    inf = gdb.inferiors()[0]
+    mem = inf.read_memory(address, size)
+    bytes = mem.tobytes()
+    for i in range(0, len(bytes), 16):
+        chunk = bytes[i:i+16]
+        gdb.write(f"{i + address:08x}  ")
+        hex_values = " ".join(f"{byte:02x}" for byte in chunk)
+        hex_display = f"{hex_values:<47}"
+        gdb.write(hex_display)
+        ascii_values = "".join(chr(byte) if 32 <= byte <= 126 else "." for byte in chunk)
+        gdb.write(f"  {ascii_values} \n")
+
+
+def is_decimal(s):
+    return re.fullmatch(r"\d+", s) is not None
+
+def is_hexadecimal(s):
+    return re.fullmatch(r"0[xX][0-9a-fA-F]+|[0-9a-fA-F]+", s) is not None
+
+class Hexdump(gdb.Command):
+    """hexdump address/symbol <size>"""
+
+    def __init__(self):
+        super(Hexdump, self).__init__("hexdump", gdb.COMMAND_USER)
+    def invoke(self, args, from_tty):
+        argv = args.split(" ")
+        argc = len(argv)
+        address = 0
+        size = 0
+        if (argv[0] == ""):
+            gdb.write("Usage: hexdump address/symbol <size>\n")
+            return
+
+        if is_decimal(argv[0]) or is_hexadecimal(argv[0]):
+            address = int(argv[0], 0)
+            size = int(argv[1], 0)
+        else:
+            var = gdb.parse_and_eval(f'{argv[0]}')
+            address = int(var.address)
+            size = int(var.type.sizeof)
+            gdb.write(f"{argv[0]} {hex(address)} {int(size)}\n")
+
+        hexdump(address, size)
+
+Hexdump()
