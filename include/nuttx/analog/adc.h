@@ -50,9 +50,9 @@
 
 #if !defined(CONFIG_ADC_FIFOSIZE)
 #  define CONFIG_ADC_FIFOSIZE 8
-#elif CONFIG_ADC_FIFOSIZE > 255
+#elif CONFIG_ADC_FIFOSIZE > 65535
 #  undef  CONFIG_ADC_FIFOSIZE
-#  define CONFIG_ADC_FIFOSIZE 255
+#  define CONFIG_ADC_FIFOSIZE 65535
 #endif
 
 #if !defined(CONFIG_ADC_NPOLLWAITERS)
@@ -117,8 +117,8 @@ begin_packed_struct struct adc_msg_s
 struct adc_fifo_s
 {
   sem_t        af_sem;                   /* Counting semaphore */
-  uint8_t      af_head;                  /* Index to the head [IN] index in the circular buffer */
-  uint8_t      af_tail;                  /* Index to the tail [OUT] index in the circular buffer */
+  uint16_t     af_head;                  /* Index to the head [IN] index in the circular buffer */
+  uint16_t     af_tail;                  /* Index to the tail [OUT] index in the circular buffer */
                                          /* Circular buffer of CAN messages */
   struct adc_msg_s af_buffer[CONFIG_ADC_FIFOSIZE];
 };
