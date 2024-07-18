@@ -209,6 +209,9 @@
 
 #define pci_map_region(dev, start, size) pci_bus_map_region((dev)->bus, start, size)
 
+#define pci_is_bridge(dev) ((dev)->hdr_type == PCI_HEADER_TYPE_BRIDGE || \
+                            (dev)->hdr_type == PCI_HEADER_TYPE_CARDBUS)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
