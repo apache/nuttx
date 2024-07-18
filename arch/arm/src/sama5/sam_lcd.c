@@ -338,6 +338,13 @@
 #  error Undefined or unrecognized base resolution
 #endif
 
+#ifdef CONFIG_SAMA5_LCDC_FB_EXTBASE
+#  define SAMA5_BASE_EXTFBMEM CONFIG_SAMA5_LCDC_FB_EXTBASE
+#else
+#  warning address FB_UPDATE will use is same as FB_PBASE
+#  define SAMA5_BASE_EXTFBMEM CONFIG_SAMA5_LCDC_FB_PBASE
+#endif
+
 #define SAMA5_BASE_FBSIZE (SAMA5_BASE_STRIDE * BOARD_LCDC_HEIGHT)
 
 #ifdef CONFIG_SAMA5_LCDC_OVR1
@@ -705,6 +712,10 @@ static int sam_base_getvideoinfo(struct fb_vtable_s *vtable,
 static int sam_base_getplaneinfo(struct fb_vtable_s *vtable,
                                  int planeno, struct fb_planeinfo_s *pinfo);
 
+#ifdef CONFIG_FB_UPDATE
+static int sam_base_updatearea(struct fb_vtable_s *vtable,
+                                const struct fb_area_s *area);
+#endif
 /* The following is provided only if the video hardware supports RGB color
  * mapping
  */
@@ -792,6 +803,9 @@ static const struct fb_vtable_s g_base_vtable =
 {
   .getvideoinfo  = sam_base_getvideoinfo,
   .getplaneinfo  = sam_base_getplaneinfo,
+#ifdef CONFIG_FB_UPDATE
+  .updatearea    = sam_base_updatearea,
+#endif
 #ifdef CONFIG_FB_CMAP
   .getcmap       = sam_base_getcmap,
   .putcmap       = sam_base_putcmap,
@@ -1144,23 +1158,62 @@ static int sam_base_getvideoinfo(struct fb_vtable_s *vtable,
  * Name: sam_base_getplaneinfo
  ****************************************************************************/
 
+#ifndef CONFIG_SAMA5_FB_FRAME_NUMBER
+#  define  CONFIG_SAMA5_FB_FRAME_NUMBER 2
+#endif
+
 static int sam_base_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
                                  struct fb_planeinfo_s *pinfo)
 {
   lcdinfo("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
+#ifdef CONFIG_SAMA5_LCDC_FB_EXTBASE
+      pinfo->fbmem   = (void *)SAMA5_BASE_EXTFBMEM;
+#else
       pinfo->fbmem   = (void *)LAYER_BASE.framebuffer;
+#endif
       pinfo->fblen   = SAMA5_BASE_FBSIZE;
       pinfo->stride  = SAMA5_BASE_STRIDE;
       pinfo->display = 0;
       pinfo->bpp     = LAYER_BASE.bpp;
+
       return OK;
     }
 
   lcderr("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
+
+#ifdef CONFIG_FB_UPDATE
+static int sam_base_updatearea(struct fb_vtable_s *vtable,
+                              const struct fb_area_s *area)
+{
+#ifdef CONFIG_SAMA5_LCDC_FB_EXTBASE
+  uint8_t        *fb     = (void *)LAYER_BASE.framebuffer;
+  const uint32_t px_size = (uint32_t)LAYER_BASE.bpp >> 3;
+  uint8_t        *src    = (void *)SAMA5_BASE_EXTFBMEM;
+  uint32_t       fb_pos  = area->x * px_size + area->y * SAMA5_BASE_STRIDE;
+  int            y;
+
+  DEBUGASSERT(vtable != NULL && vtable == &g_base_vtable &&
+              area != NULL);
+
+  ginfo("vtable=%p, x=%d, y=%d, w=%d, h=%d\n", vtable, area->x, area->y,
+                                                       area->w, area->h);
+
+  /* need to copy new pixel data to the framebuffer for display */
+
+  for (y = 0; y < area->h; y++)
+    {
+      memcpy(&fb[fb_pos], &src[fb_pos], area->w * px_size);
+      fb_pos += SAMA5_BASE_STRIDE;
+    }
+#endif
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: sam_base_getcmap

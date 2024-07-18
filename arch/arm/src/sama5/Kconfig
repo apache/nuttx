@@ -767,6 +767,7 @@ config SAMA5_LCDC
 	bool "LCD Controller (LCDC)"
 	default n
 	depends on SAMA5_HAVE_LCDC
+	select FB_UPDATE
 
 config SAMA5_ISI
 	bool "Image Sensor Interface (ISI)"
@@ -1311,16 +1312,31 @@ config SAMA5_LCDC_FB_VBASE
 	---help---
 		If you are using the LCDC, then you must provide the virtual
 		address of the start of the framebuffer.  This address must be
-		aligned to a 1MB bounder (i.e., the last five "digits" of the
+		aligned to a 1MB boundary (i.e., the last five "digits" of the
 		hexadecimal address must be zero).
+		The memory location chosen should be large enough to allow a buffer
+		of size SAMA5_LCDC_FB_SIZE to exist.		
 
 config SAMA5_LCDC_FB_PBASE
-	hex "Framebuffer memory start address (virtual)"
+	hex "Framebuffer memory start address (physical)"
 	---help---
 		If you are using the LCDC, then you must provide the physical
 		address of the start of the framebuffer.  This address must be
-		aligned to a 1MB bounder (i.e., the last five "digits" of the
+		aligned to a 1MB boundary (i.e., the last five "digits" of the
 		hexadecimal address must be zero).
+		The memory location chosen should be large enough to allow a buffer
+		of size SAMA5_LCDC_FB_SIZE to exist.		
+
+config SAMA5_LCDC_FB_EXTBASE
+	hex "Framebuffer external (app) memory start address"
+	---help---
+		If you are using the LCDC, then the application (e.g. LVGL) cannot
+		write directly to the physical FB memory and an additional buffer
+		memory area must be provided. The driver will copy data from this
+		mempory to the LCDC's DMA'd FB when a call to the FB UPDATE ioctl
+		function is made.
+		The memory location chosen should be large enough to allow a buffer
+		of size SAMA5_LCDC_FB_SIZE to exist.
 
 config SAMA5_LCDC_FB_SIZE
 	int "Framebuffer memory size (bytes)"
