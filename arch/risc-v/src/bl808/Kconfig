@@ -224,4 +224,9 @@ config BL808_SPI1_SS
 
 endif
 
+config BL808_TIMERS
+	bool "Timers"
+	default n
+	select TIMER
+
 endmenu

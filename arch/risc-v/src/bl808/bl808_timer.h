@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/bl808/hardware/bl808_memorymap.h
+ * arch/risc-v/src/bl808/bl808_timer.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,29 +18,22 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_MEMORYMAP_H
-#define __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_MEMORYMAP_H
+#ifndef __ARCH_RISC_V_SRC_BL808_BL808_TIMER_H
+#define __ARCH_RISC_V_SRC_BL808_BL808_TIMER_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions Prototypes
  ****************************************************************************/
 
-/* Register Base Address ****************************************************/
+/****************************************************************************
+ * Name: bl808_timer_init
+ *
+ * Description:
+ *   Initialize timer hardware and register character drivers
+ *   for enabled timer channels.
+ *
+ ****************************************************************************/
 
-#define BL808_GLB_BASE     0x20000000ul
-#define BL808_M0IC_BASE    0x20000050ul
-#define BL808_GPIO_BASE    0x200008c4ul
-#define BL808_GPADC_BASE   0x20002000ul
-#define BL808_UART0_BASE   0x2000a000ul
-#define BL808_UART1_BASE   0x2000a100ul
-#define BL808_SPI0_BASE    0x2000a200ul
-#define BL808_TIMER0_BASE  0x2000a500ul
-#define BL808_UART2_BASE   0x2000aa00ul
-#define BL808_AON_BASE     0x2000f000ul
-#define BL808_UART3_BASE   0x30002000ul
-#define BL808_MM_GLB_BASE  0x30007000ul
-#define BL808_SPI1_BASE    0x30008000ul
-#define BL808_TIMER1_BASE  0x30009000ul
-#define BL808_PLIC_BASE    0xe0000000ul
+int bl808_timer_init(void);
 
-#endif /* __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_MEMORYMAP_H */
+#endif /* __ARCH_RISC_V_SRC_BL808_BL808_TIMER_H */
