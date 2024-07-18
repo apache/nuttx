@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -128,7 +129,6 @@ int arm_svcall(int irq, void *context, void *arg)
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
 
-  DEBUGASSERT(regs && regs == up_current_regs());
   cmd = regs[REG_R0];
 
   /* The SVCall software interrupt is called with R0 = system call command
@@ -398,7 +398,6 @@ int arm_svcall(int irq, void *context, void *arg)
           /* Return privileged mode */
 
           regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
-
           rtcb->xcp.sigreturn  = 0;
         }
         break;
@@ -447,7 +446,7 @@ int arm_svcall(int irq, void *context, void *arg)
 
           rtcb->flags         |= TCB_FLAG_SYSCALL;
 #else
-          svcerr("ERROR: Bad SYS call: %d\n", (int)regs[REG_R0]);
+          svcerr("ERROR: Bad SYS call: %" PRId32 "\n", regs[REG_R0]);
 #endif
         }
         break;
