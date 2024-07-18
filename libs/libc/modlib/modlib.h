@@ -195,25 +195,6 @@ int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
                     FAR const Elf_Shdr *shdr);
 
 /****************************************************************************
- * Name: modlib_findsection
- *
- * Description:
- *   A section by its name.
- *
- * Input Parameters:
- *   loadinfo - Load state information
- *   sectname - Name of the section to find
- *
- * Returned Value:
- *   On success, the index to the section is returned; A negated errno value
- *   is returned on failure.
- *
- ****************************************************************************/
-
-int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
-                       FAR const char *sectname);
-
-/****************************************************************************
  * Name: modlib_allocbuffer
  *
  * Description:
