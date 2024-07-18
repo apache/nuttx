@@ -41,6 +41,9 @@
 #if defined(CONFIG_BL808_SPI0) || defined(CONFIG_BL808_SPI1)
 #include "bl808_spi.h"
 #endif
+#ifdef CONFIG_BL808_TIMERS
+#include "bl808_timer.h"
+#endif
 #include "bl808_gpadc.h"
 
 /****************************************************************************
@@ -168,9 +171,7 @@ void board_late_initialize(void)
   /* Perform board-specific initialization */
 
 #ifdef CONFIG_BL808_GPADC
-
   bl808_gpadc_init();
-
 #endif
 
 #ifdef CONFIG_BL808_SPI0
@@ -181,6 +182,10 @@ void board_late_initialize(void)
 #ifdef CONFIG_BL808_SPI1
   struct spi_dev_s *spi1 = bl808_spibus_initialize(1);
   spi_register(spi1, 1);
+#endif
+
+#ifdef CONFIG_BL808_TIMERS
+  bl808_timer_init();
 #endif
 
 #ifdef CONFIG_NSH_ARCHINIT

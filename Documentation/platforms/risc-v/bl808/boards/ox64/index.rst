@@ -150,3 +150,9 @@ spi
 This configuration enables support for SPI0 and spitool.
 By default, GPIO14 is MISO, 13 is MOSI, 15 is SCLK and 12 is SS.
 Serial Console is enabled on UART3 at 2 Mbps.
+
+timer
+-----
+
+This configuration enables support for hardware timers and the timer example app.
+Serial Console is enabled on UART3 at 2 Mbps.
