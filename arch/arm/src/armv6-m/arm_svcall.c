@@ -121,7 +121,6 @@ int arm_svcall(int irq, void *context, void *arg)
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
 
-  DEBUGASSERT(regs && regs == up_current_regs());
   cmd = regs[REG_R0];
 
   /* The SVCall software interrupt is called with R0 = system call command
