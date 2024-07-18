@@ -35,10 +35,24 @@
 
 #include "arm_internal.h"
 #include "exc_return.h"
+#include "nvic.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void exception_direct(void)
+{
+  int irq = getipsr();
+
+  arm_ack_irq(irq);
+  irq_dispatch(irq, NULL);
+
+  if (g_running_tasks[this_cpu()] != this_task())
+    {
+      up_trigger_irq(NVIC_IRQ_PENDSV, 0);
+    }
+}
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
@@ -49,19 +63,20 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   PANIC();
 #else
 
-  if (regs[REG_EXC_RETURN] & EXC_RETURN_THREAD_MODE)
-    {
-      tcb->xcp.regs = regs;
-      up_set_current_regs(regs);
-    }
-
   /* Acknowledge the interrupt */
 
   arm_ack_irq(irq);
 
-  /* Deliver the IRQ */
-
-  irq_dispatch(irq, regs);
+  if (irq == NVIC_IRQ_PENDSV)
+    {
+      up_irq_save();
+      g_running_tasks[this_cpu()]->xcp.regs = regs;
+    }
+  else
+    {
+      tcb->xcp.regs = regs;
+      irq_dispatch(irq, regs);
+    }
 
   /* If a context switch occurred while processing the interrupt then
    * current_regs may have change value.  If we return any value different
@@ -69,30 +84,20 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  if (regs[REG_EXC_RETURN] & EXC_RETURN_THREAD_MODE)
-    {
-      tcb = this_task();
+  tcb = this_task();
 
-      if (regs != tcb->xcp.regs)
-        {
-          /* Update scheduler parameters */
+  /* Update scheduler parameters */
 
-          nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
-          nxsched_resume_scheduler(tcb);
+  nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+  nxsched_resume_scheduler(tcb);
 
-          /* Record the new "running" task when context switch occurred.
-           * g_running_tasks[] is only used by assertion logic for reporting
-           * crashes.
-           */
+  /* Record the new "running" task when context switch occurred.
+   * g_running_tasks[] is only used by assertion logic for reporting
+   * crashes.
+   */
 
-          g_running_tasks[this_cpu()] = tcb;
-          regs = tcb->xcp.regs;
-        }
-
-      /* Update the current_regs to NULL. */
-
-      up_set_current_regs(NULL);
-    }
+  g_running_tasks[this_cpu()] = tcb;
+  regs = tcb->xcp.regs;
 #endif
 
   board_autoled_off(LED_INIRQ);

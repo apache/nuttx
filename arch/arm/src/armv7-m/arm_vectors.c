@@ -41,6 +41,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "ram_vectors.h"
+#include "nvic.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,6 +72,7 @@ static void start(void)
 /* Common exception entrypoint */
 
 extern void exception_common(void);
+extern void exception_direct(void);
 
 /****************************************************************************
  * Public data
@@ -98,5 +100,7 @@ const void * const _vectors[] locate_data(".vectors")
 
   /* Vectors 2 - n point directly at the generic handler */
 
-  [2 ... (15 + ARMV7M_PERIPHERAL_INTERRUPTS)] = exception_common
+  [2 ... NVIC_IRQ_PENDSV] = &exception_common,
+  [(NVIC_IRQ_PENDSV + 1) ... (15 + ARMV7M_PERIPHERAL_INTERRUPTS)]
+                          = &exception_direct
 };
