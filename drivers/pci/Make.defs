@@ -49,6 +49,10 @@ ifeq ($(CONFIG_PCI_EPF_TEST),y)
 CSRCS += pci_epf_test.c
 endif
 
+ifeq ($(CONFIG_PCI_EP_TEST),y)
+CSRCS += pci_ep_test.c
+endif
+
 # Include PCI device driver build support
 
 DEPPATH += --dep-path pci
