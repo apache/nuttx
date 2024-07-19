@@ -2549,6 +2549,22 @@ void nxsched_alarm_tick_expiration(clock_t ticks);
 #endif
 
 /****************************************************************************
+ * Name:  nxsched_get_next_expired
+ *
+ * Description:
+ *   Get the time remaining until the next timer expiration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The time remaining until the next timer expiration.
+ *
+ ****************************************************************************/
+
+clock_t nxsched_get_next_expired(void);
+
+/****************************************************************************
  * Name: nxsched_process_cpuload_ticks
  *
  * Description:

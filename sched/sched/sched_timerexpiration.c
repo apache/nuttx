@@ -93,14 +93,12 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval);
 
 static clock_t g_timer_tick;
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
 /* This is the duration of the currently active timer or, when
  * nxsched_timer_expiration() is called, the duration of interval timer
  * that just expired.  The value zero means that no timer was active.
  */
 
 static unsigned int g_timer_interval;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -464,7 +462,7 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
   nexttime = nxsched_timer_process(ticks, elapsed, false);
 
   flags = enter_critical_section();
-  nxsched_timer_start(ticks, nexttime);
+  g_timer_interval = nxsched_timer_start(ticks, nexttime);
   leave_critical_section(flags);
 }
 
@@ -593,11 +591,33 @@ void nxsched_reassess_timer(void)
   /* Process the timer ticks and start next timer */
 
   nexttime = nxsched_timer_process(ticks, elapsed, true);
-  elapsed = nxsched_timer_start(ticks, nexttime);
+  g_timer_interval = nxsched_timer_start(ticks, nexttime);
+}
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
-  g_timer_interval = elapsed;
-#endif
+/****************************************************************************
+ * Name:  nxsched_get_next_expired
+ *
+ * Description:
+ *   Get the time remaining until the next timer expiration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The time remaining until the next timer expiration.
+ *
+ ****************************************************************************/
+
+clock_t nxsched_get_next_expired(void)
+{
+  irqstate_t flags;
+  sclock_t ret;
+
+  flags = enter_critical_section();
+  ret = g_timer_tick + g_timer_interval - clock_systime_ticks();
+  leave_critical_section(flags);
+
+  return ret < 0 ? 0 : ret;
 }
 
 #endif /* CONFIG_SCHED_TICKLESS */
