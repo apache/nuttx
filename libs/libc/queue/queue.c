@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/queue/dq_count.c
+ * libs/libc/queue/queue.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,31 +24,23 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/queue.h>
-#include <assert.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_LIBC_INLINE_QUEUE
+
+#  define CONFIG_LIBC_INLINE_QUEUE
+#  define STATIC_INLINE
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#  include <nuttx/queue.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: dq_count
- *
- * Description:
- *   Return the number of nodes in the queue.
- *
- ****************************************************************************/
-
-size_t dq_count(FAR dq_queue_t *queue)
-{
-  FAR dq_entry_t *node;
-  size_t count;
-
-  DEBUGASSERT(queue != NULL);
-
-  for (node = queue->head, count = 0;
-       node != NULL;
-       node = node->flink, count++);
-
-  return count;
-}
+#endif
