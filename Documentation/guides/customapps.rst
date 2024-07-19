@@ -172,7 +172,7 @@ For this "Hello, Custom World!" application ``custom_hello()`` is the applicatio
 
       #include <stdio.h>
 
-      int custom_hello(int argc, char *argv[])
+      int main(int argc, char *argv[])
       {
         printf("Hello, Custom World!!\n");
         return 0;
@@ -185,7 +185,7 @@ In order to build with the new custom configuration, you will need the following
 
 :menuselection:`CONFIG_APPS_DIR="../CustomApps"`
 
-:menuselection:`CONFIG_INIT_ENTRYPOINT="custom_hello"`
+:menuselection:`CONFIG_INIT_ENTRYPOINT="custom_hello_main"`
 
 Note that you can only access the ``../CustomApps/Kconfig`` configuration file if ``CONFIG_APPS_DIR`` is set
 to ``../CustomApps`` BEFORE ``make menuconfig`` is executed
