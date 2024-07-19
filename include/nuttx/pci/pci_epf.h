@@ -111,6 +111,7 @@ struct pci_epf_device_id_s
  * is_bound: Indicates if bind notification to function driver has been
  *   invoked
  * event_ops: Callbacks for capturing the EPC events
+ * priv: The private data
  */
 
 struct pci_epf_device_s
@@ -133,6 +134,7 @@ struct pci_epf_device_s
   mutex_t lock;
   bool is_bound;
   FAR const struct pci_epc_event_ops_s *event_ops;
+  FAR void *priv;
 };
 
 /* struct pci_epf_ops_s - Set of function pointers for performing EPF
