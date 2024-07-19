@@ -945,13 +945,16 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc)
  *
  * Input Parameters:
  *   name        - EPC name strings
+ *   priv        - The epc priv data
  *   ops         - Function pointers for performing EPC operations
+ *
  * Returned Value:
  *   Return struct pci_epc_ctrl_s * if success, NULL if failed.
  ****************************************************************************/
 
 FAR struct pci_epc_ctrl_s *
-pci_epc_create(FAR const char *name, FAR const struct pci_epc_ops_s *ops)
+pci_epc_create(FAR const char *name, FAR void *priv,
+               FAR const struct pci_epc_ops_s *ops)
 {
   FAR struct pci_epc_ctrl_s *epc;
   size_t len;
@@ -968,6 +971,7 @@ pci_epc_create(FAR const char *name, FAR const struct pci_epc_ops_s *ops)
       return NULL;
     }
 
+  epc->priv = priv;
   memcpy(epc->name, name, len);
   nxmutex_init(&epc->lock);
   list_initialize(&epc->epf);

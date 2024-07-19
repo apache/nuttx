@@ -177,6 +177,7 @@ struct pci_epc_mem_s
  * node: The node of epc list
  * lock: Mutex to protect pci_epc ops
  * funcno_map: Bitmap to manage physical function number
+ * priv: The private data
  * name: The current epc structure name that used to bind the epf
  */
 
@@ -193,6 +194,7 @@ struct pci_epc_ctrl_s
 
   mutex_t lock;
   unsigned long funcno_map;
+  FAR void *priv;
   char name[0];
 };
 
@@ -684,6 +686,7 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc);
  *
  * Input Parameters:
  *   name - EPC name strings
+ *   priv - The epc priv data
  *   ops  - Function pointers for performing EPC operations
  *
  * Returned Value:
@@ -691,7 +694,8 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc);
  ****************************************************************************/
 
 FAR struct pci_epc_ctrl_s *
-pci_epc_create(FAR const char *name, FAR const struct pci_epc_ops_s *ops);
+pci_epc_create(FAR const char *name, FAR void *priv,
+               FAR const struct pci_epc_ops_s *ops);
 
 /****************************************************************************
  * Name: pci_epc_destroy
