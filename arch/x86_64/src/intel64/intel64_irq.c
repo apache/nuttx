@@ -368,6 +368,8 @@ static inline void up_idtinit(void)
   size_t   offset = 0;
   uint64_t vector = 0;
   int      irq    = 0;
+  uint16_t sel    = X86_GDT_CODE_SEL;
+  uint8_t  ist    = X86_GDT_IST_ISR;
 
   memset(&g_idt_entries, 0, sizeof(g_idt_entries));
 
@@ -376,48 +378,49 @@ static inline void up_idtinit(void)
    * interrupts enabled when the IRS/IRQ handler is entered.
    */
 
-  up_idtentry(ISR0,  (uint64_t)vector_isr0 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR1,  (uint64_t)vector_isr1 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR2,  (uint64_t)vector_isr2 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR3,  (uint64_t)vector_isr3 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR4,  (uint64_t)vector_isr4 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR5,  (uint64_t)vector_isr5 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR6,  (uint64_t)vector_isr6 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR7,  (uint64_t)vector_isr7 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR8,  (uint64_t)vector_isr8 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR9,  (uint64_t)vector_isr9 , 0x08, 0x8e, 0x2);
-  up_idtentry(ISR10, (uint64_t)vector_isr10, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR11, (uint64_t)vector_isr11, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR12, (uint64_t)vector_isr12, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR13, (uint64_t)vector_isr13, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR14, (uint64_t)vector_isr14, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR15, (uint64_t)vector_isr15, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR16, (uint64_t)vector_isr16, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR17, (uint64_t)vector_isr17, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR18, (uint64_t)vector_isr18, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR19, (uint64_t)vector_isr19, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR20, (uint64_t)vector_isr20, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR21, (uint64_t)vector_isr21, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR22, (uint64_t)vector_isr22, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR23, (uint64_t)vector_isr23, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR24, (uint64_t)vector_isr24, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR25, (uint64_t)vector_isr25, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR26, (uint64_t)vector_isr26, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR27, (uint64_t)vector_isr27, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR28, (uint64_t)vector_isr28, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR29, (uint64_t)vector_isr29, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR30, (uint64_t)vector_isr30, 0x08, 0x8e, 0x2);
-  up_idtentry(ISR31, (uint64_t)vector_isr31, 0x08, 0x8e, 0x2);
+  up_idtentry(ISR0,  (uint64_t)vector_isr0 , sel, 0x8e, ist);
+  up_idtentry(ISR1,  (uint64_t)vector_isr1 , sel, 0x8e, ist);
+  up_idtentry(ISR2,  (uint64_t)vector_isr2 , sel, 0x8e, ist);
+  up_idtentry(ISR3,  (uint64_t)vector_isr3 , sel, 0x8e, ist);
+  up_idtentry(ISR4,  (uint64_t)vector_isr4 , sel, 0x8e, ist);
+  up_idtentry(ISR5,  (uint64_t)vector_isr5 , sel, 0x8e, ist);
+  up_idtentry(ISR6,  (uint64_t)vector_isr6 , sel, 0x8e, ist);
+  up_idtentry(ISR7,  (uint64_t)vector_isr7 , sel, 0x8e, ist);
+  up_idtentry(ISR8,  (uint64_t)vector_isr8 , sel, 0x8e, ist);
+  up_idtentry(ISR9,  (uint64_t)vector_isr9 , sel, 0x8e, ist);
+  up_idtentry(ISR10, (uint64_t)vector_isr10, sel, 0x8e, ist);
+  up_idtentry(ISR11, (uint64_t)vector_isr11, sel, 0x8e, ist);
+  up_idtentry(ISR12, (uint64_t)vector_isr12, sel, 0x8e, ist);
+  up_idtentry(ISR13, (uint64_t)vector_isr13, sel, 0x8e, ist);
+  up_idtentry(ISR14, (uint64_t)vector_isr14, sel, 0x8e, ist);
+  up_idtentry(ISR15, (uint64_t)vector_isr15, sel, 0x8e, ist);
+  up_idtentry(ISR16, (uint64_t)vector_isr16, sel, 0x8e, ist);
+  up_idtentry(ISR17, (uint64_t)vector_isr17, sel, 0x8e, ist);
+  up_idtentry(ISR18, (uint64_t)vector_isr18, sel, 0x8e, ist);
+  up_idtentry(ISR19, (uint64_t)vector_isr19, sel, 0x8e, ist);
+  up_idtentry(ISR20, (uint64_t)vector_isr20, sel, 0x8e, ist);
+  up_idtentry(ISR21, (uint64_t)vector_isr21, sel, 0x8e, ist);
+  up_idtentry(ISR22, (uint64_t)vector_isr22, sel, 0x8e, ist);
+  up_idtentry(ISR23, (uint64_t)vector_isr23, sel, 0x8e, ist);
+  up_idtentry(ISR24, (uint64_t)vector_isr24, sel, 0x8e, ist);
+  up_idtentry(ISR25, (uint64_t)vector_isr25, sel, 0x8e, ist);
+  up_idtentry(ISR26, (uint64_t)vector_isr26, sel, 0x8e, ist);
+  up_idtentry(ISR27, (uint64_t)vector_isr27, sel, 0x8e, ist);
+  up_idtentry(ISR28, (uint64_t)vector_isr28, sel, 0x8e, ist);
+  up_idtentry(ISR29, (uint64_t)vector_isr29, sel, 0x8e, ist);
+  up_idtentry(ISR30, (uint64_t)vector_isr30, sel, 0x8e, ist);
+  up_idtentry(ISR31, (uint64_t)vector_isr31, sel, 0x8e, ist);
 
-  /* Set all IRQ vectors */
+  /* Set all IRQ vectors and use separate stack from ISR */
 
+  ist = X86_GDT_IST_IRQ;
   offset = (uint64_t)vector_irq1 - (uint64_t)vector_irq0;
 
   for (irq = IRQ0, vector = (uint64_t)vector_irq0;
        irq <= IRQ255;
        irq += 1, vector += offset)
     {
-      up_idtentry(irq,  (uint64_t)vector,  0x08, 0x8e, 0x1);
+      up_idtentry(irq,  (uint64_t)vector,  sel, 0x8e, ist);
     }
 
   /* Then program the IDT */
