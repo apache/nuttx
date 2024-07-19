@@ -39,8 +39,6 @@
 #include "sched/sched.h"
 #include "shm/shm.h"
 
-#ifdef CONFIG_MM_SHM
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -309,4 +307,3 @@ errout_with_ret:
   return (FAR void *)ERROR;
 }
 
-#endif /* CONFIG_MM_SHM */
