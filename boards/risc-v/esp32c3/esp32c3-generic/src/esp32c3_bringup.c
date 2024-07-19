@@ -84,6 +84,10 @@
 #  include "esp_board_wlan.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_BLE
+#  include "esp_ble.h"
+#endif
+
 #ifdef CONFIG_SPI_SLAVE_DRIVER
 #  include "espressif/esp_spi.h"
 #  include "esp_board_spislavedev.h"
@@ -232,6 +236,25 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_RTC_DRIVER
+  /* Initialize the RTC driver */
+
+  ret = esp_rtc_driverinit();
+  if (ret < 0)
+    {
+      _err("Failed to initialize the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_BLE
+  ret = esp_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
+    }
+#endif
+
 #if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESPRESSIF_SPI2)
   ret = board_spislavedev_initialize(ESPRESSIF_SPI2);
   if (ret < 0)
@@ -260,16 +283,6 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_RTC_DRIVER
-  /* Initialize the RTC driver */
-
-  ret = esp_rtc_driverinit();
-  if (ret < 0)
-    {
-      _err("Failed to initialize the RTC driver: %d\n", ret);
     }
 #endif
 

@@ -45,6 +45,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_WIFI
+
 /****************************************************************************
  * Name: esp_wifi_start_scan
  *
@@ -94,6 +96,8 @@ int esp_wifi_get_scan_results(struct iwreq *iwr);
  ****************************************************************************/
 
 void esp_wifi_scan_event_parse(void);
+
+#endif
 
 /****************************************************************************
  * Name: esp_wifi_to_errno
