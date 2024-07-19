@@ -112,9 +112,10 @@ void nxsched_process_delivered(int cpu)
 
   btcb = g_delivertasks[cpu];
 
-  for (next = tcb;
-      (next && btcb->sched_priority <= next->sched_priority);
+  for (next = tcb; btcb->sched_priority <= next->sched_priority;
       next = next->flink);
+
+  DEBUGASSERT(next);
 
   prev = next->blink;
   if (prev == NULL)
