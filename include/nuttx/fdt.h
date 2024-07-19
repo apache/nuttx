@@ -138,6 +138,16 @@ int fdt_get_irq_by_path(FAR const void *fdt, int offset,
                         FAR const char *path, int irqbase);
 
 /****************************************************************************
+ * Name: fdt_get_bankwidth
+ *
+ * Description:
+ *   Get the value of bankwidth
+ *
+ ****************************************************************************/
+
+uint32_t fdt_get_bankwidth(FAR const void *fdt, int offset);
+
+/****************************************************************************
  * Name: fdt_get_parent_address_cells
  *
  * Description:
@@ -190,6 +200,16 @@ int fdt_get_parent_size_cells(FAR const void *fdt, int offset);
 uintptr_t fdt_ld_by_cells(FAR const void *value, int cells);
 
 /****************************************************************************
+ * Name: fdt_get_reg_count
+ *
+ * Description:
+ *   Get the count (in bytes) of the register space
+ *
+ ****************************************************************************/
+
+uint32_t fdt_get_reg_count(FAR const void *fdt, int offset);
+
+/****************************************************************************
  * Name: fdt_get_reg_base_by_name
  *
  * Description:
@@ -233,6 +253,17 @@ uintptr_t fdt_get_reg_base_by_name(FAR const void *fdt, int offset,
 uintptr_t fdt_get_reg_base(FAR const void *fdt, int offset, int index);
 
 /****************************************************************************
+ * Name: fdt_get_reg_base_by_index
+ *
+ * Description:
+ *   Get the base address of the register space by index
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_reg_base_by_index(FAR const void *fdt, int offset,
+                                    int index);
+
+/****************************************************************************
  * Name: fdt_get_reg_size
  *
  * Description:
@@ -248,6 +279,17 @@ uintptr_t fdt_get_reg_base(FAR const void *fdt, int offset, int index);
  ****************************************************************************/
 
 uintptr_t fdt_get_reg_size(FAR const void *fdt, int offset);
+
+/****************************************************************************
+ * Name: fdt_get_reg_size_by_index
+ *
+ * Description:
+ *   Get the size of the register space by index
+ *
+ ****************************************************************************/
+
+uintptr_t fdt_get_reg_size_by_index(FAR const void *fdt, int offset,
+                                    int index);
 
 /****************************************************************************
  * Name: fdt_get_reg_base_by_path
