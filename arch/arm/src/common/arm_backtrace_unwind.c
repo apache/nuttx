@@ -698,6 +698,14 @@ again:
  * Returned Value:
  *   up_backtrace() returns the number of addresses returned in buffer
  *
+ * Assumptions:
+ *   Have to make sure tcb keep safe during function executing, it means
+ *   1. Tcb have to be self or not-running.  In SMP case, the running task
+ *      PC & SP cannot be backtrace, as whose get from tcb is not the newest.
+ *   2. Tcb have to keep not be freed.  In task exiting case, have to
+ *      make sure the tcb get from pid and up_backtrace in one critical
+ *      section procedure.
+ *
  ****************************************************************************/
 
 int up_backtrace(struct tcb_s *tcb,
@@ -705,7 +713,6 @@ int up_backtrace(struct tcb_s *tcb,
 {
   struct tcb_s *rtcb = running_task();
   struct unwind_frame_s frame;
-  irqstate_t flags;
   int ret;
 
   if (size <= 0 || !buffer)
@@ -748,8 +755,6 @@ int up_backtrace(struct tcb_s *tcb,
     }
   else
     {
-      flags = enter_critical_section();
-
       frame.fp = tcb->xcp.regs[REG_FP];
       frame.sp = tcb->xcp.regs[REG_SP];
       frame.lr = tcb->xcp.regs[REG_LR];
@@ -758,8 +763,6 @@ int up_backtrace(struct tcb_s *tcb,
                                        tcb->adj_stack_size;
 
       ret = backtrace_unwind(&frame, buffer, size, &skip);
-
-      leave_critical_section(flags);
     }
 
   return ret;
