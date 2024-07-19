@@ -42,6 +42,8 @@ extern "C++"
 #    define CONFIG_HAVE_INLINE_SPINLOCK
   using std::atomic_int;
   using std::atomic_load;
+  using std::atomic_uint;
+  using std::atomic_ushort;
   using std::atomic_fetch_add;
   using std::atomic_fetch_sub;
   using std::atomic_compare_exchange_strong;
@@ -343,14 +345,14 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
   unsigned short ticket =
     atomic_load((FAR atomic_ushort *)&lock->tickets.next);
 
-  spinlock_t old =
+  spinlock_t oldval =
     {
       {
         ticket, ticket
       }
     };
 
-  spinlock_t new =
+  spinlock_t newval =
     {
       {
         ticket, ticket + 1
@@ -358,7 +360,7 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
     };
 
   if (!atomic_compare_exchange_strong((FAR atomic_uint *)&lock->value,
-                                      &old.value, new.value))
+                                      &oldval.value, newval.value))
 #else /* CONFIG_TICKET_SPINLOCK */
   if (up_testset(lock) == SP_LOCKED)
 #endif /* CONFIG_TICKET_SPINLOCK */
@@ -410,14 +412,14 @@ spin_trylock_wo_note(FAR volatile spinlock_t *lock)
   unsigned short ticket =
     atomic_load((FAR atomic_ushort *)&lock->tickets.next);
 
-  spinlock_t old =
+  spinlock_t oldval =
     {
       {
         ticket, ticket
       }
     };
 
-  spinlock_t new =
+  spinlock_t newval =
     {
       {
         ticket, ticket + 1
@@ -425,7 +427,7 @@ spin_trylock_wo_note(FAR volatile spinlock_t *lock)
     };
 
   if (!atomic_compare_exchange_strong((FAR atomic_uint *)&lock->value,
-                                      &old.value, new.value))
+                                      &oldval.value, newval.value))
 #else /* CONFIG_TICKET_SPINLOCK */
   if (up_testset(lock) == SP_LOCKED)
 #endif /* CONFIG_TICKET_SPINLOCK */
