@@ -109,6 +109,11 @@
 #define X86_GDT_ISTL_SEL_NUM           8
 #define X86_GDT_ISTH_SEL_NUM           (X86_GDT_ISTL_SEL_NUM + 1)
 
+/* Stack selector for ISR and IRQ (offset in Interrupt Stack Table) */
+
+#define X86_GDT_IST_ISR                2
+#define X86_GDT_IST_IRQ                1
+
 #define X86_GDT_BASE                   0x0000000000000000
 #define X86_GDT_LIMIT                  0x000f00000000ffff
 
