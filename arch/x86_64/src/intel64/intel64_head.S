@@ -647,6 +647,16 @@ x86_64_syscall_entry:
 	movq    (8*REG_R11)(%rdi), %r11
 	movq    (8*REG_RDI)(%rdi), %rdi
 
+#  ifdef CONFIG_BUILD_KERNEL
+	/* Do not return to RING3 if this is nested syscall */
+	cmp %gs:X86_64_CPUPRIV_UVBASE_OFFSET, %rcx
+	jb syscall_no_ring3
+
+	/* Return to user code pointed in RCX */
+	sysretq
+
+syscall_no_ring3:
+#  endif
 	/* Return to address pointed in RCX - must be on stack */
 	pushq   %rcx
 	ret

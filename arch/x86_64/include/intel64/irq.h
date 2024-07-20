@@ -512,6 +512,14 @@ struct xcpt_syscall_s
 
 struct xcptcontext
 {
+#ifdef CONFIG_BUILD_KERNEL
+  /* This is the saved address to use when returning from a user-space
+   * signal handler.
+   */
+
+  uintptr_t sigreturn;
+#endif
+
   /* These are saved copies of instruction pointer and EFLAGS used during
    * signal processing.
    */

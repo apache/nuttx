@@ -24,4 +24,8 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/x86_64/src/intel64/Toolchain.defs
 
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu-kernel.ld
+else
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu.ld
+endif

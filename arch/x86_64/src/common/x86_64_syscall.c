@@ -118,6 +118,144 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 
   switch (cmd)
     {
+#ifdef CONFIG_BUILD_KERNEL
+      /* cmd=SYS_task_start:  This a user task start
+       *
+       *   void up_task_start(main_t taskentry, int argc, char *argv[])
+       *     noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   cmd  = SYS_task_start
+       *   arg1 = taskentry
+       *   arg2 = argc
+       *   arg3 = argv
+       */
+
+      case SYS_task_start:
+        {
+          /* Set up to return to the user-space _start function in
+           * unprivileged mode.  We need:
+           *
+           *   RDI = argc
+           *   RSI = argv
+           *   RCX = taskentry (SYSRETQ return address)
+           *
+           */
+
+          regs[REG_RDI] = arg2;
+          regs[REG_RSI] = arg3;
+          regs[REG_RCX] = arg1;
+
+          break;
+        }
+
+      /* cmd=SYS_pthread_start:  This a user pthread start
+       *
+       *   void up_pthread_start(pthread_startroutine_t entrypt,
+       *                         pthread_addr_t arg) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   cmd  = SYS_pthread_start
+       *   arg1 = startup
+       *   arg2 = entrypt
+       *   arg3 = arg
+       */
+
+      case SYS_pthread_start:
+        {
+          /* Set up to enter the user-space pthread start-up function in
+           * unprivileged mode. We need:
+           *
+           *   RDI   = entrypt
+           *   RSI   = arg
+           *   RCX   = startup (SYSRETQ return address)
+           */
+
+          regs[REG_RDI] = arg2;
+          regs[REG_RSI] = arg3;
+          regs[REG_RCX] = arg1;
+
+          break;
+        }
+
+      /* cmd=SYS_signal_handler:  This a user signal handler callback
+       *
+       * void signal_handler(_sa_sigaction_t sighand, int signo,
+       *                     siginfo_t *info, void *ucontext);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   cmd  = SYS_signal_handler
+       *   arg1 = sighand
+       *   arg2 = signo
+       *   arg3 = info
+       *   arg4 = ucontext (on the stack)
+       */
+
+      case SYS_signal_handler:
+        {
+          struct tcb_s *rtcb = nxsched_self();
+
+          /* Remember the caller's return address */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn == 0);
+          rtcb->xcp.sigreturn = regs[REG_RCX];
+
+          /* Set up to return to the user-space trampoline function in
+           * unprivileged mode.
+           */
+
+          regs[REG_RCX] = (uint64_t)ARCH_DATA_RESERVE->ar_sigtramp;
+
+          /* Change the parameter ordering to match the expectation of struct
+           * userpace_s signal_handler.
+           */
+
+          regs[REG_RDI] = arg2; /* signal */
+          regs[REG_RSI] = arg3; /* info */
+          regs[REG_RDX] = arg4; /* ucontext */
+          regs[REG_R10] = arg1; /* sighand */
+
+          break;
+        }
+
+      /* cmd=SYS_signal_handler_return:  This a user signal handler callback
+       *
+       *   void signal_handler_return(void);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   cmd = SYS_signal_handler_return
+       */
+
+      case SYS_signal_handler_return:
+        {
+          /* Set up to return to the user-space. We need:
+           *
+           *   RCX = taskentry (SYSRETQ return address)
+           *
+           */
+
+          struct tcb_s *rtcb = nxsched_self();
+
+          /* Set up to return to the kernel-mode signal dispatching logic. */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn != 0);
+
+          regs[REG_RCX]       = rtcb->xcp.sigreturn;
+          regs[REG_RSP]       = rtcb->xcp.saved_rsp;
+          rtcb->xcp.sigreturn = 0;
+
+          /* For kernel mode, we should be already on a correct kernel stack
+           * which was recovered in x86_64_syscall_entry.
+           */
+
+          break;
+        }
+#endif  /* CONFIG_BUILD_KERNEL */
+
       /* This is not an architecture-specific system call.  If NuttX is
        * built as a standalone kernel with a system call interface, then
        * all of the additional system calls must be handled as in the

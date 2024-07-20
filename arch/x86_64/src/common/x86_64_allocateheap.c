@@ -93,7 +93,11 @@ const uintptr_t g_idle_topstack[CONFIG_SMP_NCPUS] =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
+#else
 void up_allocate_heap(void **heap_start, size_t *heap_size)
+#endif /* CONFIG_BUILD_KERNEL */
 {
   uintptr_t hstart;
   uintptr_t topstack;

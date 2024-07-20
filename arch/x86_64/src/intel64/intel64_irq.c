@@ -344,11 +344,12 @@ static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
   entry->sel     = sel;
   entry->zero    = 0;
 
-  /* We must uncomment the OR below when we get to using user-mode. It sets
-   * the interrupt gate's privilege level to 3.
+  /* We don't use software interrupts from user-space (INT) so DPL level
+   * can be set to privilage level 0. DPL bits have no effect on hardware
+   * interrupts.
    */
 
-  entry->flags  = flags; /* | 0x60 */
+  entry->flags   = flags;
 }
 
 /****************************************************************************
