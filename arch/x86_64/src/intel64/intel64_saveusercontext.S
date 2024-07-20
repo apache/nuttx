@@ -103,6 +103,15 @@ up_saveusercontext:
 
 	movq    %rbp, (8*REG_RBP)(%rdi)
 
+#ifdef CONFIG_LIB_SYSCALL
+	/* Save CS and SS if we support syscalls */
+	xor     %rax, %rax
+	mov     %cs, %ax
+	movq    %rax, (8*REG_CS)(%rdi)
+	mov     %ss, %ax
+	movq    %rax, (8*REG_SS)(%rdi)
+#endif
+
 	/* Save EAX=1.  This will be the "apparent" return value from this
 	 * function when context is switch back to this thread.  The non-zero
 	 * return value is the indication that we have been resumed.

@@ -83,7 +83,12 @@
 
 /* GDT Definitions */
 
-/* Starting from third selector to confirm the syscall interface */
+/* Selector configuration must compy with the requirements of SYSCALL
+ * and SYSRET instructions. These definitions must match the GDT format
+ * in intel64_head.S:g_gdt64_low.
+ *
+ * For details look at the comment in intel64_cpu.c about MSR_STAT write.
+ */
 
 #define X86_GDT_ENTRY_SIZE        0x8
 
@@ -93,24 +98,44 @@
 #define X86_GDT_DATA_SEL_NUM      2
 #  define X86_GDT_DATA_SEL        (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
+#define X86_GDT_USERDATA_SEL_NUM  6
+#  define X86_GDT_USERDATA_SEL    (X86_GDT_USERDATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+
+#define X86_GDT_USERCODE_SEL_NUM  7
+#  define X86_GDT_USERCODE_SEL    (X86_GDT_USERCODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
+
 /* The first TSS entry */
 
-#define X86_GDT_ISTL_SEL_NUM    6
-#define X86_GDT_ISTH_SEL_NUM    (X86_GDT_ISTL_SEL_NUM + 1)
+#define X86_GDT_ISTL_SEL_NUM      8
+#define X86_GDT_ISTH_SEL_NUM      (X86_GDT_ISTL_SEL_NUM + 1)
 
-#define X86_GDT_BASE      0x0000000000000000
-#define X86_GDT_LIMIT     0x000f00000000ffff
+#define X86_GDT_BASE              0x0000000000000000
+#define X86_GDT_LIMIT             0x000f00000000ffff
 
-#define X86_GDT_FLAG_LONG 0x0020000000000000
+#define X86_GDT_FLAG_LONG         0x0020000000000000
 
-#define X86_GDT_ACC_PR    0x0000800000000000
-#define X86_GDT_ACC_SEG   0x0000100000000000
-#define X86_GDT_ACC_EX    0x0000080000000000
-#define X86_GDT_ACC_WR    0x0000020000000000
+#define X86_GDT_ACC_PR            0x0000800000000000
+#define X86_GDT_ACC_USER          0x0000600000000000
+#define X86_GDT_ACC_SEG           0x0000100000000000
+#define X86_GDT_ACC_EX            0x0000080000000000
+#define X86_GDT_ACC_WR            0x0000020000000000
 
-#define X86_GDT_CODE64_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_FLAG_LONG + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
-#define X86_GDT_CODE32_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
-#define X86_GDT_DATA_ENTRY      (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_WR)
+#define X86_GDT_CODE64_ENTRY      (X86_GDT_BASE + X86_GDT_LIMIT + \
+                                   X86_GDT_FLAG_LONG + X86_GDT_ACC_PR + \
+                                   X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
+#define X86_GDT_CODE32_ENTRY      (X86_GDT_BASE + X86_GDT_LIMIT + \
+                                   X86_GDT_ACC_PR + X86_GDT_ACC_SEG + \
+                                   X86_GDT_ACC_EX)
+#define X86_GDT_DATA_ENTRY        (X86_GDT_BASE + X86_GDT_LIMIT + \
+                                   X86_GDT_ACC_PR + X86_GDT_ACC_SEG + \
+                                   X86_GDT_ACC_WR)
+#define X86_GDT_CODEUSER_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT +       \
+                                   X86_GDT_FLAG_LONG + X86_GDT_ACC_PR + \
+                                   X86_GDT_ACC_SEG + X86_GDT_ACC_EX +   \
+                                   X86_GDT_ACC_USER)
+#define X86_GDT_DATAUSER_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT +     \
+                                   X86_GDT_ACC_PR + X86_GDT_ACC_SEG + \
+                                   X86_GDT_ACC_WR + X86_GDT_ACC_USER)
 
 /* CR0 Definitions */
 
@@ -213,9 +238,20 @@
 
 /* MSR Definitions */
 
+#define MSR_STAR                0xc0000081
+#define   MSR_STAR_CSSYSCALL(x) (((uint64_t)x) << 32)
+#define   MSR_STAR_CSSYSRET(x)  (((uint64_t)x) << 48)
+
+#define MSR_LSTAR               0xc0000082 /* Target RIP for PM64 callers */
+#define MSR_CSTAR               0xc0000083 /* Target RIP for CM callers */
+#define MSR_FMASK               0xc0000084 /* RFLAGS mask for SYSCALL */
+
 #define MSR_FS_BASE             0xc0000100 /* 64bit FS base */
+#define MSR_GS_BASE             0xc0000101 /* 64bit GS base */
+#define MSR_KERNELGS_BASE       0xc0000102 /* kernel GS base (for SWAPGS) */
 
 #define MSR_EFER                0xc0000080
+#  define EFER_SCE              0x00000001
 #  define EFER_LME              0x00000100
 
 #define MSR_MTRR_DEF_TYPE       0x000002ff
@@ -508,6 +544,7 @@ void x86_64_check_and_enable_capability(void);
 extern void __enable_sse_avx(void);
 extern void __revoke_low_memory(void);
 extern void __enable_pcid(void);
+extern void x86_64_syscall_entry(void);
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

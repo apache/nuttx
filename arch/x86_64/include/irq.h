@@ -46,6 +46,13 @@
 #endif
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define X86_64_CPUPRIV_USTACK_OFFSET  (16)
+#define X86_64_CPUPRIV_UVBASE_OFFSET  (24)
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -65,6 +72,16 @@ struct intel64_cpu_s
  */
 
   uint64_t *current_regs;
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* Current user RSP for syscall */
+
+  uint64_t *ustack;
+
+  /* Userspace virtual address */
+
+  uint64_t *uvbase;
+#endif
 };
 
 /****************************************************************************

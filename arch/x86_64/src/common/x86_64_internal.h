@@ -232,7 +232,7 @@ void x86_64_lowputs(const char *str);
 void x86_64_restore_auxstate(struct tcb_s *rtcb);
 void x86_64_checktasks(void);
 
-void x86_64_syscall(uint64_t *regs);
+uint64_t *x86_64_syscall(uint64_t *regs);
 
 #ifdef CONFIG_ARCH_MULTIBOOT2
 void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *tag);

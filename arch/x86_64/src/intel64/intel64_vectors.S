@@ -923,7 +923,7 @@ irq_common:
 
 	add     $8, %rsp
 
-	iretq                /* Pops 5 things at once: CS, RIP, RFLAGS and SS and RSP */
+	iretq                /* Pops 5 things at once: RIP, CS, RFLAGS RSP and SS */
 	.size	irq_common, . - irq_common
 	.end
 
