@@ -439,7 +439,112 @@
 #define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_3|GPIO_SPEED_100MHz)    /* PG14 */
 #define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_2|GPIO_SPEED_100MHz)   /* PG11 */
 
+/* SDRAM FMC definitions ****************************************************/
+
+/* The following settings correspond to W9864G6KH-6 SDRAM
+ * part-number ("-6" speed grades ) and FMC_SDCLK frequency of 166 MHz
+ * (period is ~ 6.25 ns).
+ */
+
+/* Though W9864G6KH-6 SDRAM itself provides 16-bit data bus,
+ * linum board routes only DQ[15:0] bits.
+ */
+#define BOARD_FMC_CLK                   RCC_D1CCIPR_FMCSEL_HCLK
+
+#if CONFIG_STM32H7_FMC
+#  define FMC_SDCLK_FREQUENCY  (STM32_HCLK_FREQUENCY / 2)
+#  if FMC_SDCLK_FREQUENCY > 120000000
+#    error "FMC SDRAM settings need to be adjusted for a higher FMC_SDCLK frequency"
+#  elif FMC_SDCLK_FREQUENCY < 120000000
+#    warning "The current FMC SDRAM settings may not be optimal for a lower FMC_SDCLK frequency"
+#  endif
+#endif
+
+#define BOARD_SDRAM1_SIZE               (8*1024*1024)
+
+/* BOARD_FMC_SDCR1 - Initial value for SDRAM control registers for SDRAM
+ *      bank 1. Note bank 2 isn't used!
+ */
+
+#define BOARD_FMC_SDCR1  (FMC_SDCR_COLBITS_8  |  /* numcols = 8 bits */ \
+                          FMC_SDCR_ROWBITS_12 |  /* numrows = 12 bits */ \
+                          FMC_SDCR_WIDTH_16   |  /* width = 16 bits */ \
+                          FMC_SDCR_SDCLK_2X   |  /* sdclk = 2 hclk */ \
+                          FMC_SDCR_BANKS_4    |  /* 4 internal banks */ \
+                          FMC_SDCR_BURST_READ |  /* enable burst read */ \
+                          FMC_SDCR_RPIPE_0    |  /* rpipe = 0 hclk */ \
+                          FMC_SDCR_CASLAT_3)     /* cas latency = 3 cycles */
+
+/* BOARD_FMC_SDTR1 - Initial value for SDRAM timing registers for SDRAM
+ *      bank 1.
+ *
+ * FMC_SDTR_TMRD - Load mode register to active delay
+ * FMC_SDTR_TXSR - Exit self-refresh delay
+ * FMC_SDTR_TRAS - Self-refresh time
+ * FMC_SDTR_TRCD - SDRAM common row cycle delay
+ * FMC_SDTR_TWR  - Write recovery time
+ * FMC_SDTR_TRP  - SDRAM common row percharge delay
+ * FMC_SDTR_TRC  - Row to collumn delay
+ */
+
+#define BOARD_FMC_SDTR1  (FMC_SDTR_TMRD(2) | /* tMRD     = 2CLK */ \
+                          FMC_SDTR_TXSR(9) | /* tXSR min = ns */ \
+                          FMC_SDTR_TRCD(8) | /* tRCD min = ns */ \
+                          FMC_SDTR_TRAS(6) | /* tRAS min = ns */ \
+                          FMC_SDTR_TWR(4)  | /* tWR      = ns */ \
+                          FMC_SDTR_TRP(2)  | /* tRP  min = ns */ \
+                          FMC_SDTR_TRC(8))   /* tRC  min = ns */ 
+
+#define BOARD_FMC_SDRAM_REFR_CYCLES  4096
+#define BOARD_FMC_SDRAM_REFR_PERIOD  64
+#define BOARD_FMC_SDRAM_AUTOREFRESH  8
+#define BOARD_FMC_SDRAM_MODE         (FMC_SDCMR_MRD_BURST_LENGTH_1 | \
+                                      FMC_SDCMR_MRD_BURST_TYPE_SEQUENTIAL | \
+                                      FMC_SDCMR_MRD_CAS_LATENCY_3 | \
+                                      FMC_SDCMR_MRD_WRITEBURST_MODE_SINGLE)
+
+#define BOARD_FMC_GPIO_CONFIGS \
+  (GPIO_FMC_A0_0 | GPIO_SPEED_100MHz),     /* PF0 */ \
+  (GPIO_FMC_A1_0 | GPIO_SPEED_100MHz),     /* PF1 */ \
+  (GPIO_FMC_A2_0 | GPIO_SPEED_100MHz),     /* PF2 */ \
+  (GPIO_FMC_A3_0 | GPIO_SPEED_100MHz),     /* PF3 */ \
+  (GPIO_FMC_A4_0 | GPIO_SPEED_100MHz),     /* PF4 */ \
+  (GPIO_FMC_A5_0 | GPIO_SPEED_100MHz),     /* PF5 */ \
+  (GPIO_FMC_A6_0 | GPIO_SPEED_100MHz),     /* PF12 */ \
+  (GPIO_FMC_A7_0 | GPIO_SPEED_100MHz),     /* PF13 */ \
+  (GPIO_FMC_A8_0 | GPIO_SPEED_100MHz),     /* PF14 */ \
+  (GPIO_FMC_A9_0 | GPIO_SPEED_100MHz),     /* PF15 */ \
+  (GPIO_FMC_A10_0 | GPIO_SPEED_100MHz),    /* PG0 */ \
+  (GPIO_FMC_A11_0 | GPIO_SPEED_100MHz),    /* PG1 */ \
+  (GPIO_FMC_D0_0 | GPIO_SPEED_100MHz),     /* PD14 */ \
+  (GPIO_FMC_D1_0 | GPIO_SPEED_100MHz),     /* PD15 */ \
+  (GPIO_FMC_D2_0 | GPIO_SPEED_100MHz),     /* PD0 */ \
+  (GPIO_FMC_D3_0 | GPIO_SPEED_100MHz),     /* PD1 */ \
+  (GPIO_FMC_D4_0 | GPIO_SPEED_100MHz),     /* PE7 */ \
+  (GPIO_FMC_D5_0 | GPIO_SPEED_100MHz),     /* PE8 */ \
+  (GPIO_FMC_D6_0 | GPIO_SPEED_100MHz),     /* PE9 */ \
+  (GPIO_FMC_D7_0 | GPIO_SPEED_100MHz),     /* PE10 */ \
+  (GPIO_FMC_D8_0 | GPIO_SPEED_100MHz),     /* PE11 */ \
+  (GPIO_FMC_D9_0 | GPIO_SPEED_100MHz),     /* PE12 */ \
+  (GPIO_FMC_D10_0 | GPIO_SPEED_100MHz),    /* PE13 */ \
+  (GPIO_FMC_D11_0 | GPIO_SPEED_100MHz),    /* PE14 */ \
+  (GPIO_FMC_D12_0 | GPIO_SPEED_100MHz),    /* PE15 */ \
+  (GPIO_FMC_D13_0 | GPIO_SPEED_100MHz),    /* PD8 */ \
+  (GPIO_FMC_D14_0 | GPIO_SPEED_100MHz),    /* PD9 */ \
+  (GPIO_FMC_D15_0 | GPIO_SPEED_100MHz),    /* PD10 */ \
+  (GPIO_FMC_NBL0_0 | GPIO_SPEED_100MHz),   /* PE0 */ \
+  (GPIO_FMC_NBL1_0 | GPIO_SPEED_100MHz),   /* PE1 */ \
+  (GPIO_FMC_BA0_0 | GPIO_SPEED_100MHz),    /* PG4 */ \
+  (GPIO_FMC_BA1_0 | GPIO_SPEED_100MHz),    /* PG5 */ \
+  (GPIO_FMC_SDNCAS_0 | GPIO_SPEED_100MHz), /* PG15 */ \
+  (GPIO_FMC_SDNRAS_0 | GPIO_SPEED_100MHz), /* PF11 */ \
+  (GPIO_FMC_SDNWE_2 | GPIO_SPEED_100MHz),  /* PC0 */ \
+  (GPIO_FMC_SDNE0_1 | GPIO_SPEED_100MHz),  /* PC2 */ \
+  (GPIO_FMC_SDCKE0_1 | GPIO_SPEED_100MHz), /* PC3 */ \
+  (GPIO_FMC_SDCLK_0 | GPIO_SPEED_100MHz)   /* PG8 */
+
 /* QEncoder - TIM5: CH1 and CH2 */
+
 #define GPIO_TIM5_CH1IN  GPIO_TIM5_CH1IN_1 /* PA0 */
 #define GPIO_TIM5_CH2IN  GPIO_TIM5_CH2IN_2 /* PH11 */
 
