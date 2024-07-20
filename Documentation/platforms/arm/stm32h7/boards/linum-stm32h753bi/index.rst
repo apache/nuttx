@@ -759,7 +759,7 @@ This configuration is focused on network testing using the ethernet periferal::
 qencoder
 --------
 
-Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encoder:
+Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encoder::
 
     nsh> qe
     qe_main: Hardware initialized. Opening the encoder device: /dev/qe0
@@ -769,3 +769,21 @@ Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encod
     qe_main:   3. 3
     qe_main:   4. 2
     qe_main:   5. 1
+
+sdram
+--------
+
+This configuration uses the FMC peripheral to connect to external SDRAM with 8 MB and add it to the nuttx heap.
+
+To test the sdram use the command **ramtest**::
+
+    nsh> free
+                    total       used       free    maxused    maxfree  nused  nfree
+          Umem:    9397168       5488    9391680       5880    8388592     28      5
+    nsh> ramtest -w -a 0xc0000000 -s 8388608
+    RAMTest: Marching ones: c0000000 8388608
+    RAMTest: Marching zeroes: c0000000 8388608
+    RAMTest: Pattern test: c0000000 8388608 55555555 aaaaaaaa
+    RAMTest: Pattern test: c0000000 8388608 66666666 99999999
+    RAMTest: Pattern test: c0000000 8388608 33333333 cccccccc
+    RAMTest: Address-in-address test: c0000000 8388608
