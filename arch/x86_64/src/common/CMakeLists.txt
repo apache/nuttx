@@ -56,7 +56,12 @@ if(CONFIG_ARCH_USE_MMU)
 endif()
 
 if(CONFIG_ARCH_ADDRENV)
-  list(APPEND SRCS x86_64_addrenv.c x86_64_addrenv_perms.c)
+  list(APPEND SRCS x86_64_addrenv.c x86_64_pgalloc.c x86_64_addrenv_perms.c)
+endif()
+
+if(NOT CONFIG_BUILD_FLAT)
+  list(APPEND SRCS x86_64_task_start.c x86_64_pthread_start.c
+       x86_64_signal_dispatch.c)
 endif()
 
 if(NOT CONFIG_ALARM_ARCH)
