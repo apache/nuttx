@@ -130,9 +130,12 @@ x86_64_fullcontextrestore:
 
 	movq    (8*REG_RAX)(%rdi), %rax
 
-	/* Restore the correct value of EAX and then return */
+	/* Restore the correct value of RDI */
 
 	popq    %rdi
+
+	/* Pops 5 things at once: RIP, CS, RFLAGS RSP and SS */
+
 	iretq
 	.size x86_64_fullcontextrestore, . - x86_64_fullcontextrestore
 	.end

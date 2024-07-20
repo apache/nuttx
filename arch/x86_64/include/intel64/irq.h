@@ -499,6 +499,15 @@ enum ioapic_trigger_mode
   TRIGGER_LEVEL_ACTIVE_LOW = (1 << 15) | (1 << 13),
 };
 
+/* This structure represents the return state from a system call */
+
+#ifdef CONFIG_LIB_SYSCALL
+struct xcpt_syscall_s
+{
+  uintptr_t sysreturn;   /* The return address */
+};
+#endif
+
 /* This struct defines the way the registers are stored */
 
 struct xcptcontext
@@ -514,6 +523,15 @@ struct xcptcontext
   /* Register save area - allocated from stack in up_initial_state() */
 
   uint64_t *regs;
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* The following array holds information needed to return from each nested
+   * system call.
+   */
+
+  uint8_t nsyscalls;
+  struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
+#endif
 };
 #endif
 

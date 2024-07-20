@@ -198,10 +198,6 @@ void __nxstart(void)
 
   x86_64_timer_calibrate_freq();
 
-#ifdef CONFIG_LIB_SYSCALL
-  enable_syscall();
-#endif
-
   /* Store CPU IDs */
 
   x86_64_cpu_priv_set(0);
