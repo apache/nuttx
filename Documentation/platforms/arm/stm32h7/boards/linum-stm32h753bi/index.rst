@@ -259,7 +259,7 @@ The LINUM-STM32H753BI has a external SDRAM with 16Mbits connected to FMC periphe
   =========== =====
   FMC         PINS
   =========== =====
-  FMC_A0      PF0
+  FMC_A0      PJ12
   FMC_A1      PF1
   FMC_A2      PF2
   FMC_A3      PF3
