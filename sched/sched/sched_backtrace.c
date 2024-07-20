@@ -25,6 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/sched.h>
+#include <nuttx/init.h>
 
 #include "sched.h"
 
@@ -45,16 +47,36 @@
 #ifdef CONFIG_ARCH_HAVE_BACKTRACE
 int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
 {
-  FAR struct tcb_s *rtcb;
-  irqstate_t flags;
+  FAR struct tcb_s *tcb = this_task();
   int ret = 0;
-  if (tid >= 0)
+
+  if (tcb->pid == tid)
     {
-      flags = enter_critical_section();
-      rtcb  = nxsched_get_tcb(tid);
-      if (rtcb != NULL)
+      ret = up_backtrace(tcb, buffer, size, skip);
+    }
+  else
+    {
+      irqstate_t flags = enter_critical_section();
+
+      tcb = nxsched_get_tcb(tid);
+      if (tcb != NULL)
         {
-          ret = up_backtrace(rtcb, buffer, size, skip);
+#ifdef CONFIG_SMP
+          if (tcb->task_state == TSTATE_TASK_RUNNING &&
+              g_nx_initstate != OSINIT_PANIC)
+            {
+              up_cpu_pause(tcb->cpu);
+            }
+#endif
+
+          ret = up_backtrace(tcb, buffer, size, skip);
+#ifdef CONFIG_SMP
+          if (tcb->task_state == TSTATE_TASK_RUNNING &&
+              g_nx_initstate != OSINIT_PANIC)
+            {
+              up_cpu_resume(tcb->cpu);
+            }
+#endif
         }
 
       leave_critical_section(flags);
