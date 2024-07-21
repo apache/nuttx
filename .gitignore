@@ -42,6 +42,8 @@
 /.config-*
 /.config\ *
 /.cproject
+/.cache
+/.clang-format
 /.gdbinit
 /.gdb_history
 /.project
@@ -80,4 +82,4 @@ SAVEMake.defs
 SAVEconfig
 .aider*
 imx9-norimage.img
-
+config.txt
