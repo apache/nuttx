@@ -109,6 +109,19 @@ config ARCH_CHIP_ZYNQ_MPSOC
 	---help---
 		XilinX ZYNQ MPSOC
 
+config ARCH_CHIP_BCM2711
+	bool "Broadcom BCM2711"
+	select ARCH_CORTEX_A72
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_MULTICPU
+	select ARCH_USE_MMU # Required for up_testset
+    select ARMV8A_HAVE_GICv2
+	---help---
+		Broadcom BCM2711 quad-core ARM Cortex A72
+
 config ARCH_CHIP_ARM64_CUSTOM
 	bool "Custom ARM64 chip"
 	select ARCH_CHIP_CUSTOM
@@ -312,6 +325,7 @@ config ARCH_CHIP
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 	default "imx8"      if ARCH_CHIP_IMX8
 	default "imx9"      if ARCH_CHIP_IMX9
+	default "bcm2711"   if ARCH_CHIP_BCM2711
 
 config ARM64_HAVE_PSCI
 	bool "ARM PCSI (Power State Coordination Interface) Support"
@@ -351,7 +365,7 @@ config ARM64_DECODEFIQ
 
 config ARM64_GIC_VERSION
 	int "GIC version"
-	default 2           if ARCH_CHIP_A64
+	default 2 if ARCH_CHIP_A64 || ARCH_CHIP_BCM2711
 	default 3
 	range 2 4
 	---help---
@@ -472,6 +486,10 @@ endif
 
 if ARCH_CHIP_ZYNQ_MPSOC
 source "arch/arm64/src/zynq-mpsoc/Kconfig"
+endif
+
+if ARCH_CHIP_BCM2711
+source "arch/arm64/src/bcm2711/Kconfig"
 endif
 
 endif # ARCH_ARM64
