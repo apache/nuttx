@@ -28,6 +28,19 @@ Configuring and Running
    $ qemu-system-arm -M mps3-an547 -nographic -kernel nuttx.bin
    ```
 
+3. **Pic ostest:**
+
+   ```bash
+   $ ./tools/configure.sh mps3-an547:picostest
+   $ make -j20
+   $ genromfs -f romfs.img -d ../apps/bin/
+   $ qemu-system-arm -M mps3-an547 -m 2G -nographic \
+   -kernel nuttx.bin -gdb tcp::1127 \
+   -device loader,file=romfs.img,addr=0x60000000
+   $ nsh> /pic/hello
+   $ nsh> /pic/ostest
+   ```
+
 Debugging with QEMU
 ===================
 
