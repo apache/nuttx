@@ -445,6 +445,20 @@ config INIT_ENTRYPOINT
 		applications this is of the form 'app_main' where 'app' is the application
 		name. If not defined, INIT_ENTRYPOINT defaults to "main".
 
+		Note that main must take "argc" and "argv" arguments:
+
+		int main(int argc, FAR char *argv[])
+
+		Otherwise, if using a signature such as "int main(void)" a compilation
+		error will result:
+
+		> $ make
+		> CC:  CustomHello.c <command-line>: error: conflicting types for
+		> 'custom_hello_main'
+		> CustomHello.c:3:5: note: in expansion of macro 'main'
+		>     3 | int main(void)
+		>       |     ^~~~
+
 config INIT_ENTRYNAME
 	string "Application entry name"
 	default INIT_ENTRYPOINT
