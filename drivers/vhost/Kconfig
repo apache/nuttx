@@ -14,4 +14,9 @@ config DRIVERS_VHOST_RNG
 	bool "Virtual Host Rng Device Support"
 	default n
 
+config DRIVERS_VHOST_RPMSG
+	bool "Virtual Host Rpmsg Device Support"
+	default n
+	select RPMSG_VIRTIO
+
 endif # DRIVERS_VHOST

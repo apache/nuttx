@@ -79,6 +79,11 @@ config DRIVERS_VIRTIO_RPMB
 	bool "Virtio RPMB support"
 	default n
 
+config DRIVERS_VIRTIO_RPMSG
+	bool "Virtio Rpmsg support"
+	default n
+	select RPMSG_VIRTIO
+
 config DRIVERS_VIRTIO_SERIAL
 	bool "Virtio serial support"
 	depends on SERIAL
