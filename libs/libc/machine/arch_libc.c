@@ -191,7 +191,7 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
   __asan_loadN((FAR void *)src, arch_strlen(src) + 1);
 #    endif
-#endif
+#  endif
   return arch_strcpy(dest, src);
 }
 #endif
@@ -199,16 +199,13 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 #ifdef CONFIG_LIBC_ARCH_STRLEN
 size_t strlen(FAR const char *s)
 {
+  size_t ret = arch_strlen(s);
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  size_t ret = arch_strlen(s);
-
   __asan_loadN((FAR void *)s, ret + 1);
-  return ret;
   #  endif
-#  else
-  return arch_strlen(s);
 #  endif
+  return ret;
 }
 #endif
 
