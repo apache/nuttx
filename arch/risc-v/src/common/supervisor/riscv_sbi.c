@@ -111,7 +111,7 @@ uint64_t riscv_sbi_get_time(void)
   sbiret_t ret = sbi_ecall(SBI_EXT_FIRMWARE, SBI_EXT_FIRMWARE_GET_MTIME,
                            0, 0, 0, 0, 0, 0);
 
-  return ret.value;
+  return ret.error;
 #elif defined(CONFIG_ARCH_RV64)
   return READ_CSR(CSR_TIME);
 #else
