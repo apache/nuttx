@@ -254,6 +254,7 @@ static int icmp_close(FAR struct socket *psock)
 {
   FAR struct icmp_conn_s *conn;
 
+  net_lock();
   conn = psock->s_conn;
 
   /* Is this the last reference to the connection structure (there could be\
@@ -280,6 +281,7 @@ static int icmp_close(FAR struct socket *psock)
       conn->crefs--;
     }
 
+  net_unlock();
   return OK;
 }
 
