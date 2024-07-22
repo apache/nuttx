@@ -55,6 +55,7 @@ SPI          Yes
 Timers       Yes
 UART         Yes
 USB          No
+Watchdogs    Yes
 =========== ======= ====================
 
 Supported Boards

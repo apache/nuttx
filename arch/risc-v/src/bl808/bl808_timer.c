@@ -28,15 +28,12 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/timers/timer.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/serial/tioctl.h>
 
 #include "hardware/bl808_timer.h"
 #include "riscv_internal.h"

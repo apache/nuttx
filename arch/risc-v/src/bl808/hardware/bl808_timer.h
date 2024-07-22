@@ -32,7 +32,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BL808_TIMER_BASE(n) ((n == 0) ? BL808_TIMER0_BASE \
+#define BL808_TIMER_BASE(n) (((n) == 0) ? BL808_TIMER0_BASE \
                              : BL808_TIMER1_BASE)
 
 /* Register offsets *********************************************************/
@@ -44,10 +44,17 @@
 #define BL808_TIMER_CH1_COUNTER_OFFSET 0x30
 #define BL808_TIMER_CH0_IE_OFFSET      0x44
 #define BL808_TIMER_CH1_IE_OFFSET      0x48
+#define BL808_WDT_MODE_OFFSET          0x64
+#define BL808_WDT_COMP_OFFSET          0x68
+#define BL808_WDT_COUNTER_OFFSET       0x6C
 #define BL808_TIMER_CH0_ICLR_OFFSET    0x78
 #define BL808_TIMER_CH1_ICLR_OFFSET    0x7c
+#define BL808_WDT_ICLR_OFFSET          0x80
 #define BL808_TIMER_EN_CLR_OFFSET      0x84
 #define BL808_TIMER_MODE_OFFSET        0x88
+#define BL808_WDT_COUNT_CLEAR_OFFSET   0x98
+#define BL808_WDT_KEY1_OFFSET          0x9C
+#define BL808_WDT_KEY2_OFFSET          0xA0
 #define BL808_TIMER_DIV_OFFSET         0xBC
 
 /* Register definitions *****************************************************/
@@ -59,10 +66,17 @@
 #define BL808_TIMER_CH1_COUNTER(n) (BL808_TIMER_BASE(n) + BL808_TIMER_CH1_COUNTER_OFFSET)
 #define BL808_TIMER_CH0_IE(n) (BL808_TIMER_BASE(n) + BL808_TIMER_CH0_IE_OFFSET)
 #define BL808_TIMER_CH1_IE(n) (BL808_TIMER_BASE(n) + BL808_TIMER_CH1_IE_OFFSET)
+#define BL808_WDT_MODE(n) (BL808_TIMER_BASE(n) + BL808_WDT_MODE_OFFSET)
+#define BL808_WDT_COMP(n) (BL808_TIMER_BASE(n) + BL808_WDT_COMP_OFFSET)
+#define BL808_WDT_COUNTER(n) (BL808_TIMER_BASE(n) + BL808_WDT_COUNTER_OFFSET)
 #define BL808_TIMER_CH0_ICLR(n) (BL808_TIMER_BASE(n) + BL808_TIMER_CH0_ICLR_OFFSET)
 #define BL808_TIMER_CH1_ICLR(n) (BL808_TIMER_BASE(n) + BL808_TIMER_CH1_ICLR_OFFSET)
+#define BL808_WDT_ICLR(n) (BL808_TIMER_BASE(n) + BL808_WDT_ICLR_OFFSET)
 #define BL808_TIMER_EN_CLR(n) (BL808_TIMER_BASE(n) + BL808_TIMER_EN_CLR_OFFSET)
 #define BL808_TIMER_MODE(n) (BL808_TIMER_BASE(n) + BL808_TIMER_MODE_OFFSET)
+#define BL808_WDT_COUNT_CLEAR(n) (BL808_TIMER_BASE(n) + BL808_WDT_COUNT_CLEAR_OFFSET)
+#define BL808_WDT_KEY1(n) (BL808_TIMER_BASE(n) + BL808_WDT_KEY1_OFFSET)
+#define BL808_WDT_KEY2(n) (BL808_TIMER_BASE(n) + BL808_WDT_KEY2_OFFSET)
 #define BL808_TIMER_DIV(n) (BL808_TIMER_BASE(n) + BL808_TIMER_DIV_OFFSET)
 
 /* Register bit definitions *************************************************/
@@ -73,10 +87,25 @@
 #define TIMER_CH0_CLKSEL_MASK    (0xf << TIMER_CH0_CLKSEL_SHIFT)
 #define TIMER_CH1_CLKSEL_SHIFT   (4)
 #define TIMER_CH1_CLKSEL_MASK    (0xf << TIMER_CH1_CLKSEL_SHIFT)
+#define WDT_CLKSEL_SHIFT         (8)
+#define WDT_CLKSEL_MASK          (0xf << WDT_CLKSEL_SHIFT)
 
 /* TIMER_CH(0/1)_I(E/CLR) */
 
 #define TIMER_COMP0_INT          (1 << 0)
+
+/* WDT_MODE */
+
+#define WDT_EN                   (1 << 0)
+#define WDT_RESET_EN             (1 << 1)
+
+/* WDT_COMP */
+
+#define WDT_COMP_MASK            (0xffff)
+
+/* WDT_ICLR */
+
+#define WDT_CLEAR_IRQ            (1 << 0)
 
 /* TIMER_EN_CLR */
 
@@ -89,6 +118,10 @@
 
 #define TIMER_CH0_MODE           (1 << 1)
 #define TIMER_CH1_MODE           (1 << 2)
+
+/* WDT_COUNT_CLEAR */
+
+#define WDT_CLEAR_COUNT          (1 << 0)
 
 /* TIMER_DIV */
 
