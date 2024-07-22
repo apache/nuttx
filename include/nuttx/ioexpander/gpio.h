@@ -150,7 +150,7 @@ struct gpio_dev_s
    * driver when gpio_pin_register() is called.
    */
 
-  uint8_t gp_pintype;  /* See enum gpio_pintype_e */;
+  uint8_t gp_pintype;  /* See enum gpio_pintype_e */
 
   /* Writable storage used by the upper half driver */
 
