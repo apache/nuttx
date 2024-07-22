@@ -24,7 +24,6 @@ if(CONFIG_LIBM)
   endif()
 
   # Add the floating point math C files to the build
-
   set(SRCS
       lib_acosf.c
       lib_asinf.c
@@ -33,7 +32,6 @@ if(CONFIG_LIBM)
       lib_cosf.c
       lib_coshf.c
       lib_expf.c
-      lib_fabsf.c
       lib_fmodf.c
       lib_frexpf.c
       lib_ldexpf.c
@@ -44,7 +42,6 @@ if(CONFIG_LIBM)
       lib_powf.c
       lib_sinf.c
       lib_sinhf.c
-      lib_sqrtf.c
       lib_tanf.c
       lib_tanhf.c
       lib_asinhf.c
@@ -52,6 +49,12 @@ if(CONFIG_LIBM)
       lib_atanhf.c
       lib_erff.c
       lib_copysignf.c
+      lib_scalbnf.c
+      lib_scalbn.c
+      lib_scalbnl.c
+      lib_sincos.c
+      lib_sincosf.c
+      lib_sincosl.c
       lib_acos.c
       lib_asin.c
       lib_atan.c
@@ -128,6 +131,12 @@ if(CONFIG_LIBM)
       lib_nan.c
       lib_nanf.c
       lib_nanl.c
+      lib_fmax.c
+      lib_fmaxf.c
+      lib_fmaxl.c
+      lib_fmin.c
+      lib_fminf.c
+      lib_fminl.c
       __cos.c
       __sin.c
       lib_gamma.c
@@ -136,44 +145,52 @@ if(CONFIG_LIBM)
   # Use the C versions of some functions only if architecture specific optimized
   # versions are not provided.
 
-  if(NOT LIBM_ARCH_CEIL)
+  if(NOT CONFIG_LIBM_ARCH_CEIL)
     list(APPEND SRCS lib_ceil.c)
   endif()
 
-  if(NOT LIBM_ARCH_FLOOR)
+  if(NOT CONFIG_LIBM_ARCH_FLOOR)
     list(APPEND SRCS lib_floor.c)
   endif()
 
-  if(NOT LIBM_ARCH_RINT)
+  if(NOT CONFIG_LIBM_ARCH_RINT)
     list(APPEND SRCS lib_rint.c)
   endif()
 
-  if(NOT LIBM_ARCH_ROUND)
+  if(NOT CONFIG_LIBM_ARCH_ROUND)
     list(APPEND SRCS lib_round.c)
   endif()
 
-  if(NOT LIBM_ARCH_TRUNC)
+  if(NOT CONFIG_LIBM_ARCH_TRUNC)
     list(APPEND SRCS lib_trunc.c)
   endif()
 
-  if(NOT LIBM_ARCH_CEILF)
+  if(NOT CONFIG_LIBM_ARCH_CEILF)
     list(APPEND SRCS lib_ceilf.c)
   endif()
 
-  if(NOT LIBM_ARCH_FLOORF)
+  if(NOT CONFIG_LIBM_ARCH_FLOORF)
     list(APPEND SRCS lib_floorf.c)
   endif()
 
-  if(NOT LIBM_ARCH_RINTF)
+  if(NOT CONFIG_LIBM_ARCH_RINTF)
     list(APPEND SRCS lib_rintf.c)
   endif()
 
-  if(NOT LIBM_ARCH_ROUNDF)
+  if(NOT CONFIG_LIBM_ARCH_ROUNDF)
     list(APPEND SRCS lib_roundf.c)
   endif()
 
-  if(NOT LIBM_ARCH_TRUNCF)
+  if(NOT CONFIG_LIBM_ARCH_TRUNCF)
     list(APPEND SRCS lib_truncf.c)
+  endif()
+
+  if(NOT CONFIG_LIBM_ARCH_FABSF)
+    list(APPEND SRCS lib_fabsf.c)
+  endif()
+
+  if(NOT CONFIG_LIBM_ARCH_SQRTF)
+    list(APPEND SRCS lib_sqrtf.c)
   endif()
 
   target_sources(c PRIVATE ${SRCS})
