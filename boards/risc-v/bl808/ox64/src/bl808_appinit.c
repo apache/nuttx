@@ -44,6 +44,9 @@
 #ifdef CONFIG_BL808_TIMERS
 #include "bl808_timer.h"
 #endif
+#ifdef CONFIG_BL808_WDT
+#include "bl808_wdt.h"
+#endif
 #include "bl808_gpadc.h"
 
 /****************************************************************************
@@ -186,6 +189,10 @@ void board_late_initialize(void)
 
 #ifdef CONFIG_BL808_TIMERS
   bl808_timer_init();
+#endif
+
+#ifdef CONFIG_BL808_WDT
+  bl808_wdt_init();
 #endif
 
 #ifdef CONFIG_NSH_ARCHINIT

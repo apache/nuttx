@@ -229,4 +229,9 @@ config BL808_TIMERS
 	default n
 	select TIMER
 
+config BL808_WDT
+	bool "Watchdog Timers"
+	default n
+	select WATCHDOG
+
 endmenu

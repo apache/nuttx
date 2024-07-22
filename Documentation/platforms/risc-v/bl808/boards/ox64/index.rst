@@ -154,5 +154,6 @@ Serial Console is enabled on UART3 at 2 Mbps.
 timer
 -----
 
-This configuration enables support for hardware timers and the timer example app.
+This configuration enables support for general purpose and watchdog timers,
+as well as the timer and watchdog examples.
 Serial Console is enabled on UART3 at 2 Mbps.
