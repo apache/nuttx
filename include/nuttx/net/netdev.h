@@ -274,13 +274,11 @@ struct netdev_varaddr_s
 };
 #endif
 
-#ifdef CONFIG_NET_IPv6
 struct netdev_ifaddr6_s
 {
   net_ipv6addr_t addr; /* Host IPv6 address */
   net_ipv6addr_t mask; /* Network IPv6 subnet mask */
 };
-#endif
 
 /* This structure collects information that is specific to a specific network
  * interface driver.  If the hardware platform supports only a single
