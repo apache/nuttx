@@ -31,7 +31,9 @@
 	.globl	setjmp
 	.globl	longjmp
 
+#ifndef __ghs__
 	.syntax	unified
+#endif
 	.file	"setjmp.S"
 
 /****************************************************************************
@@ -59,7 +61,12 @@
  *
  ****************************************************************************/
 
+#ifndef __ghs__
 	.type	setjmp, function
+#else
+	.type	setjmp, $function
+#endif
+
 setjmp:
 
 	/* Store callee-saved Core registers */
@@ -121,7 +128,11 @@ setjmp:
  *
  ****************************************************************************/
 
+#ifndef __ghs__
 	.type	longjmp, function
+#else
+	.type	longjmp, $function
+#endif
 longjmp:
 
 	/* Load callee-saved Core registers */
