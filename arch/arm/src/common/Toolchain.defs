@@ -416,8 +416,10 @@ else ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
   ifeq ($(CONFIG_ARCH_FPU),y)
     ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
         COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sf
-    else
+    else ifeq ($(CONFIG_ARCH_DPFPU),y)
         COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_fp
+    else
+        COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sd
     endif
   else
     COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sf
@@ -427,7 +429,21 @@ endif
 EXTRA_LIBS += $(COMPILER_RT_LIB)
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
-  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+          EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_sf
+      else ifeq ($(CONFIG_ARCH_DPFPU),y)
+          EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_fp
+      else
+          EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_sd
+      endif
+    else
+      EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_sf
+    endif
+  else
+    EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
+  endif
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
