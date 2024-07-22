@@ -57,6 +57,10 @@ if(CONFIG_DRIVERS_VIRTIO_RPMB)
   list(APPEND SRCS virtio-rpmb.c)
 endif()
 
+if(CONFIG_DRIVERS_VIRTIO_RPMSG)
+  list(APPEND SRCS virtio-rpmsg.c)
+endif()
+
 if(CONFIG_DRIVERS_VIRTIO_SERIAL)
   list(APPEND SRCS virtio-serial.c)
 endif()

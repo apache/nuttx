@@ -58,6 +58,10 @@ ifeq ($(CONFIG_DRIVERS_VIRTIO_RPMB),y)
   CSRCS += virtio-rpmb.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VIRTIO_RPMSG),y)
+  CSRCS += virtio-rpmsg.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_VIRTIO_SERIAL),y)
   CSRCS += virtio-serial.c
 endif

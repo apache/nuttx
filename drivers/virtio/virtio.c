@@ -37,6 +37,7 @@
 #include "virtio-net.h"
 #include "virtio-rng.h"
 #include "virtio-rpmb.h"
+#include "virtio-rpmsg.h"
 #include "virtio-serial.h"
 #include "virtio-snd.h"
 
@@ -126,6 +127,14 @@ void virtio_register_drivers(void)
   if (ret < 0)
     {
       vrterr("virtio_register_rng_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_RPMSG
+  ret = virtio_register_rpmsg_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_rpmsg_driver failed, ret=%d\n", ret);
     }
 #endif
 
