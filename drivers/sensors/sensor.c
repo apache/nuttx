@@ -195,7 +195,7 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {sizeof(struct sensor_gnss_satellite),      "gnss_satellite"},
   {sizeof(struct sensor_gnss_measurement),    "gnss_measurement"},
   {sizeof(struct sensor_gnss_clock),          "gnss_clock"},
-  {sizeof(struct sensor_gnss_geofence_event), "gnss_geofence"},
+  {sizeof(struct sensor_gnss_geofence_event), "gnss_geofence_event"},
 };
 
 static const struct file_operations g_sensor_fops =
