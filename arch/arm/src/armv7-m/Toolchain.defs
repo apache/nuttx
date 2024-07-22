@@ -64,8 +64,10 @@ ifeq ($(CONFIG_ARCH_FPU),y)
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
     ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
       TOOLCHAIN_MFLOAT += -fsoft
-    else
+    else ifeq ($(CONFIG_ARCH_DPFPU),y)
       TOOLCHAIN_MFLOAT += -fhard
+    else
+      TOOLCHAIN_MFLOAT += -fsingle
     endif
   else
     ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
