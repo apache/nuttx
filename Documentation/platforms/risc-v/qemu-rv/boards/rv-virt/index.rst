@@ -229,6 +229,16 @@ ksmp64
 
 Identical to the `knsh64`_ configuration but with SMP support.
 
+leds
+----
+
+Similar to the `nsh`_ configuration, but with User LEDs support for 32-bit RISC-V.
+
+leds64
+------
+
+Similar to the `nsh64`_ configuration, but with User LEDs support for 64-bit RISC-V.
+
 netnsh
 ------
 

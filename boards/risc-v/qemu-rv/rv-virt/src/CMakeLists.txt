@@ -20,6 +20,14 @@
 
 set(SRCS qemu_rv_appinit.c)
 
+if(CONFIG_ARCH_LEDS)
+  list(APPEND SRCS qemu_rv_autoleds.c)
+endif()
+
+if(CONFIG_USERLED)
+  list(APPEND SRCS qemu_rv_userleds.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_CHIP_QEMU_RV)

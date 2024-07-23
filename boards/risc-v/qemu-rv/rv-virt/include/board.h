@@ -31,6 +31,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* LED definitions **********************************************************/
+
+/* LED index values for use with board_userled() */
+
+typedef enum
+{
+    BOARD_LED1 = 0,
+    BOARD_LED2 = 1,
+    BOARD_LED3 = 2,
+    BOARD_LEDS  /* Number of LEDs */
+} led_typedef_enum;
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+#define BOARD_LED2_BIT    (1 << BOARD_LED2)
+#define BOARD_LED3_BIT    (1 << BOARD_LED3)
+
 #define LED_STARTED       0  /* N/A */
 #define LED_HEAPALLOCATE  1  /* N/A */
 #define LED_IRQSENABLED   2  /* N/A */
