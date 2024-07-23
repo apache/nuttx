@@ -30,11 +30,11 @@ $(RCOBJS): $(ETCDIR)$(DELIM)%: %
 	$(Q) mkdir -p $(dir $@)
 	$(call PREPROCESS, $<, $@)
 
-$(ETCSRC): $(addprefix $(BOARD_DIR)$(DELIM)src$(DELIM),$(RCRAWS)) $(RCOBJS)
+$(ETCSRC): $(foreach raw,$(RCRAWS), $(if $(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw)), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw), $(if $(wildcard $(BOARD_COMMON_DIR)$(DELIM)$(raw)), $(BOARD_COMMON_DIR)$(DELIM)$(raw), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw)))) $(RCOBJS)
 	$(foreach raw, $(RCRAWS), \
 	  $(shell rm -rf $(ETCDIR)$(DELIM)$(raw)) \
 	  $(shell mkdir -p $(dir $(ETCDIR)$(DELIM)$(raw))) \
-	  $(shell cp -rfp $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw) $(ETCDIR)$(DELIM)$(raw)))
+	  $(shell cp -rfp $(if $(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw)), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw), $(if $(wildcard $(BOARD_COMMON_DIR)$(DELIM)$(raw)), $(BOARD_COMMON_DIR)$(DELIM)$(raw), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw))) $(ETCDIR)$(DELIM)$(raw)))
 	$(Q) genromfs -f romfs.img -d $(ETCDIR)$(DELIM)$(CONFIG_ETC_ROMFSMOUNTPT) -V "NSHInitVol"
 	$(Q) echo "#include <nuttx/compiler.h>" > $@
 	$(Q) xxd -i romfs.img | sed -e "s/^unsigned char/const unsigned char aligned_data(4)/g" >> $@

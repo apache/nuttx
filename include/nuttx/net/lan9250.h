@@ -117,6 +117,25 @@ int lan9250_initialize(
 #endif
                        FAR const struct lan9250_lower_s *lower);
 
+/****************************************************************************
+ * Function: lan9250_uninitialize
+ *
+ * Description:
+ *   Un-initialize the Ethernet driver
+ *
+ * Input Parameters:
+ *   lower - The MCU-specific interrupt used to control low-level MCU
+ *           functions (i.e., LAN9250 GPIO interrupts).
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int lan9250_uninitialize(FAR const struct lan9250_lower_s *lower);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

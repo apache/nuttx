@@ -91,8 +91,6 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
   irqstate_t flags;
   int        ret = OK;
 
-  sched_lock();
-
   /* Return the old signal mask if requested */
 
   if (oset != NULL)
@@ -148,7 +146,6 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
       nxsig_unmask_pendingsignal();
     }
 
-  sched_unlock();
   return ret;
 }
 

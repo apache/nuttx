@@ -58,17 +58,15 @@
  * Extern Function Declarations
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
-extern void __trap_vec(void);
-extern void __trap_vec_m(void);
-extern void up_mtimer_initialize(void);
+#ifdef CONFIG_ARCH_USE_S_MODE
+extern void __start(void);
 #endif
 
 /****************************************************************************
  * Name: qemu_rv_clear_bss
  ****************************************************************************/
 
-void qemu_rv_clear_bss(void)
+static void qemu_rv_clear_bss(void)
 {
   uint32_t *dest;
 
@@ -82,15 +80,34 @@ void qemu_rv_clear_bss(void)
     }
 }
 
+#ifdef CONFIG_ARCH_USE_S_MODE
+static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      if (i == mhartid)
+        {
+          continue;
+        }
+
+      riscv_sbi_boot_secondary(i, (uintptr_t)&__start, dtb);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+static bool boot_secondary = false;
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-/* NOTE: g_idle_topstack needs to point the top of the idle stack
- * for CPU0 and this value is used in up_initial_state()
- */
-
-uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_TOP;
 
 /****************************************************************************
  * Public Functions
@@ -100,12 +117,18 @@ uintptr_t g_idle_topstack = QEMU_RV_IDLESTACK_TOP;
  * Name: qemu_rv_start
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
-void qemu_rv_start_s(int mhartid, const char *dtb)
-#else
 void qemu_rv_start(int mhartid, const char *dtb)
-#endif
 {
+#ifdef CONFIG_ARCH_USE_S_MODE
+  /* Boot other cores */
+
+  if (!boot_secondary)
+    {
+      boot_secondary = true;
+      qemu_boot_secondary(mhartid, (uintptr_t)dtb);
+    }
+#endif
+
   /* Configure FPU */
 
   riscv_fpuconfig();
@@ -115,8 +138,10 @@ void qemu_rv_start(int mhartid, const char *dtb)
       goto cpux;
     }
 
-#ifndef CONFIG_BUILD_KERNEL
   qemu_rv_clear_bss();
+
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+  riscv_percpu_add_hart(mhartid);
 #endif
 
 #ifdef CONFIG_DEVICE_TREE
@@ -156,77 +181,6 @@ cpux:
       asm("WFI");
     }
 }
-
-#ifdef CONFIG_BUILD_KERNEL
-
-/****************************************************************************
- * Name: qemu_rv_start
- ****************************************************************************/
-
-void qemu_rv_start(int mhartid, const char *dtb)
-{
-  /* NOTE: still in M-mode */
-
-  if (0 == mhartid)
-    {
-      qemu_rv_clear_bss();
-
-      /* Initialize the per CPU areas */
-
-      riscv_percpu_add_hart(mhartid);
-    }
-
-  /* Disable MMU and enable PMP */
-
-  WRITE_CSR(satp, 0x0);
-  WRITE_CSR(pmpaddr0, 0x3fffffffffffffull);
-  WRITE_CSR(pmpcfg0, 0xf);
-
-  /* Set exception and interrupt delegation for S-mode */
-
-  WRITE_CSR(medeleg, 0xffff);
-  WRITE_CSR(mideleg, 0xffff);
-
-  /* Allow to write satp from S-mode */
-
-  CLEAR_CSR(mstatus, MSTATUS_TVM);
-
-  /* Set mstatus to S-mode */
-
-  CLEAR_CSR(mstatus, MSTATUS_MPP_MASK);
-  SET_CSR(mstatus, MSTATUS_MPPS);
-
-  /* Set the trap vector for S-mode */
-
-  WRITE_CSR(stvec, (uintptr_t)__trap_vec);
-
-  /* Set the trap vector for M-mode */
-
-  WRITE_CSR(mtvec, (uintptr_t)__trap_vec_m);
-
-  if (0 == mhartid)
-    {
-      /* Only the primary CPU needs to initialize mtimer
-       * before entering to S-mode
-       */
-
-      up_mtimer_initialize();
-    }
-
-  /* Set mepc to the entry */
-
-  WRITE_CSR(mepc, (uintptr_t)qemu_rv_start_s);
-
-  /* Set a0 to mhartid and a1 to dtb explicitly and enter to S-mode */
-
-  asm volatile (
-      "mv a0, %0 \n"
-      "mv a1, %1 \n"
-      "mret \n"
-      :: "r" (mhartid), "r" (dtb)
-  );
-}
-#endif
 
 void riscv_earlyserialinit(void)
 {

@@ -38,11 +38,13 @@
 #include <errno.h>
 #include <debug.h>
 #include <malloc.h>
+#include <execinfo.h>
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 #  include <time.h>
 #endif
 
+#include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
 #include <nuttx/sched.h>
@@ -53,6 +55,7 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/queue.h>
 
 #if !defined(CONFIG_SCHED_CPULOAD_NONE) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
@@ -1122,7 +1125,8 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   size_t copysize;
   size_t totalsize;
 #ifdef HAVE_GROUP_MEMBERS
-  int i;
+  FAR sq_entry_t *curr;
+  FAR sq_entry_t *next;
 #endif
 
   DEBUGASSERT(group != NULL);
@@ -1168,13 +1172,14 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
+#ifdef HAVE_GROUP_MEMBERS
   if (totalsize >= buflen)
     {
       return totalsize;
     }
 
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                               "Members:", group->tg_nmembers);
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%zu\n",
+                               "Members:", sq_count(&group->tg_members));
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -1182,7 +1187,6 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
-#ifdef HAVE_GROUP_MEMBERS
   if (totalsize >= buflen)
     {
       return totalsize;
@@ -1202,10 +1206,11 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  for (i = 0; i < group->tg_nmembers; i++)
+  sq_for_every_safe(&group->tg_members, curr, next)
     {
+      tcb = container_of(curr, struct tcb_s, member);
       linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, " %d",
-                                   group->tg_members[i]);
+                                   tcb->pid);
       copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                  remaining, &offset);
 
@@ -1261,8 +1266,14 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   totalsize = 0;
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-7s %-4s %-9s %s\n",
-                               "FD", "OFLAGS", "TYPE", "POS", "PATH");
+                               "\n%-3s %-7s %-4s %-9s %-14s %s\n",
+                               "FD", "OFLAGS", "TYPE", "POS", "PATH",
+#if CONFIG_FS_BACKTRACE > 0
+                               "BACKTRACE"
+#else
+                               ""
+#endif
+                               );
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1294,10 +1305,21 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         }
 
       linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                   "%-3d %-7d %-4x %-9ld %s\n",
+                                   "%-3d %-7d %-4x %-9ld %-14s ",
                                    i, filep->f_oflags,
                                    INODE_GET_TYPE(filep->f_inode),
                                    (long)filep->f_pos, path);
+      if (linesize < STATUS_LINELEN)
+        {
+#if CONFIG_FS_BACKTRACE > 0
+          linesize += backtrace_format(procfile->line + linesize,
+                                       STATUS_LINELEN - linesize,
+                                       filep->f_backtrace,
+                                       CONFIG_FS_BACKTRACE);
+#endif
+          procfile->line[linesize - 2] = '\n';
+        }
+
       copysize   = procfs_memcpy(procfile->line, linesize,
                                  buffer, remaining, &offset);
 

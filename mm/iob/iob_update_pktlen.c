@@ -49,9 +49,9 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
 {
   FAR struct iob_s *penultimate;
   FAR struct iob_s *next;
-  uint16_t offset = 0;
+  int remain = pktlen;
   int ninqueue = 0;
-  int nrequire;
+  int nrequire = 0;
   uint16_t len;
 
   /* The data offset must be less than CONFIG_IOB_BUFSIZE */
@@ -67,19 +67,27 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
   while (next != NULL)
     {
       ninqueue++;
-      offset += next->io_offset;
       penultimate = next;
+      if (remain > 0)
+        {
+          nrequire++;
+          remain -= IOB_BUFSIZE(next) - next->io_offset;
+        }
+
       next = next->io_flink;
     }
 
-  /* Trim inqueue entries if needed */
+  if (remain > 0)
+    {
+      nrequire += (remain + CONFIG_IOB_BUFSIZE - 1) / CONFIG_IOB_BUFSIZE;
+    }
 
-  nrequire = (pktlen + offset + CONFIG_IOB_BUFSIZE - 1) /
-             CONFIG_IOB_BUFSIZE;
   if (nrequire == 0)
     {
       nrequire = 1;
     }
+
+  /* Trim inqueue entries if needed */
 
   if (nrequire < ninqueue)
     {
@@ -130,9 +138,9 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
   next = iob;
   while (next != NULL && pktlen > 0)
     {
-      if (pktlen + next->io_offset > CONFIG_IOB_BUFSIZE)
+      if (pktlen + next->io_offset > IOB_BUFSIZE(next))
         {
-          len = CONFIG_IOB_BUFSIZE - next->io_offset;
+          len = IOB_BUFSIZE(next) - next->io_offset;
         }
       else
         {

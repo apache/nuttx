@@ -131,10 +131,9 @@ errout:
 static int pkt_in(FAR struct net_driver_s *dev)
 {
   FAR struct pkt_conn_s *conn;
-  FAR struct eth_hdr_s  *pbuf = ETHBUF;
   int ret = OK;
 
-  conn = pkt_active(pbuf);
+  conn = pkt_active(dev);
   if (conn)
     {
       uint16_t flags;

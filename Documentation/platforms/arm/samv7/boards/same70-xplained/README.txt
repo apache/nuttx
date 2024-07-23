@@ -32,7 +32,7 @@ Status/Open Issues
   via the EDBG VCOM and LED and buttons support.  SDRAM and the HSMCI
   SD card slot also appear to be fully functional.
 
-See also boards/arm/samv7/samv71-xult/README.txt
+See also Documentation/platforms/arm/samv7/boards/samv71-xult/README.txt
 
 Serial Console
 ==============

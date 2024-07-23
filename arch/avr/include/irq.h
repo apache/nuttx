@@ -74,7 +74,7 @@ extern "C"
 
 #ifndef __ASSEMBLY__
 /* This holds a references to the current interrupt level register storage
- * structure.  If is non-NULL only during interrupt processing.
+ * structure.  It is non-NULL only during interrupt processing.
  */
 
 #ifdef CONFIG_ARCH_FAMILY_AVR32

@@ -28,9 +28,9 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/video_controls.h>
 
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/video/video_controls.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -518,6 +518,8 @@ enum v4l2_buf_type
    || (type) == V4L2_BUF_TYPE_SDR_OUTPUT           \
    || (type) == V4L2_BUF_TYPE_META_OUTPUT)
 
+#define V4L2_TYPE_IS_CAPTURE(type) (!V4L2_TYPE_IS_OUTPUT(type))
+
 /* Memory I/O method. Currently, support only V4L2_MEMORY_USERPTR. */
 
 enum v4l2_memory
@@ -775,15 +777,15 @@ typedef struct v4l2_plane v4l2_plane_t;
 
 struct v4l2_buffer
 {
-  uint16_t             index;     /* Buffer id */
-  uint16_t             type;      /* enum #v4l2_buf_type */
+  uint32_t             index;     /* Buffer id */
+  uint32_t             type;      /* enum #v4l2_buf_type */
   uint32_t             bytesused; /* Driver sets the image size */
-  uint16_t             flags;     /* Buffer flags. */
-  uint16_t             field;     /* The field order of the image */
+  uint32_t             flags;     /* Buffer flags. */
+  uint32_t             field;     /* The field order of the image */
   struct timeval       timestamp; /* Frame timestamp */
   struct v4l2_timecode timecode;  /* Frame timecode */
-  uint16_t             sequence;  /* Frame sequence number */
-  uint16_t             memory;    /* enum #v4l2_memory */
+  uint32_t             sequence;  /* Frame sequence number */
+  uint32_t             memory;    /* enum #v4l2_memory */
   union
   {
     uint32_t           offset;
@@ -897,8 +899,8 @@ struct v4l2_frmivalenum
 
 struct v4l2_pix_format
 {
-  uint16_t  width;              /* Image width in pixels */
-  uint16_t  height;             /* Image height in pixels */
+  uint32_t  width;              /* Image width in pixels */
+  uint32_t  height;             /* Image height in pixels */
   uint32_t  pixelformat;        /* The pixel format or type of compression. */
   uint32_t  field;              /* enum #v4l2_field */
   uint32_t  bytesperline;       /* For padding, zero if unused */
@@ -987,6 +989,16 @@ struct v4l2_captureparm
   uint32_t           readbuffers;   /*  # of buffers for read */
 };
 
+struct v4l2_outputparm
+{
+  uint32_t          capability;      /*  Supported modes */
+  uint32_t          outputmode;      /*  Current mode */
+  struct v4l2_fract timeperframe;    /*  Time per frame in seconds */
+  uint32_t          extendedmode;    /*  Driver-specific extensions */
+  uint32_t          writebuffers;    /*  # of buffers for write */
+  uint32_t          reserved[4];
+};
+
 struct v4l2_cropcap
 {
   uint32_t                type; /* enum v4l2_buf_type */
@@ -1013,7 +1025,9 @@ struct v4l2_streamparm
   union
   {
     struct v4l2_captureparm capture;
+    struct v4l2_outputparm  output;
   } parm;
+  uint8_t  raw_data[200];            /* user-defined */
 };
 
 /* E V E N T S */
@@ -1141,7 +1155,7 @@ enum v4l2_ctrl_type
 
 struct v4l2_queryctrl
 {
-  uint16_t   ctrl_class;               /* Control class */
+  uint16_t   ctrl_class;               /* Control class(not used) */
   uint16_t   id;                       /* Control id */
   uint16_t   type;                     /* enum #v4l2_ctrl_type */
   char       name[32];                 /* Name of control */
@@ -1153,7 +1167,7 @@ struct v4l2_queryctrl
 
 struct v4l2_query_ext_ctrl
 {
-  uint16_t   ctrl_class;               /* Control class */
+  uint16_t   ctrl_class;               /* Control class(not used) */
   uint16_t   id;                       /* Control id */
   uint16_t   type;                     /* enum #v4l2_ctrl_type */
   char       name[32];                 /* Name of control */
@@ -1170,7 +1184,7 @@ struct v4l2_query_ext_ctrl
 
 struct v4l2_querymenu
 {
-  uint16_t   ctrl_class;    /* Camera control class */
+  uint16_t   ctrl_class;    /* Camera control class(not used) */
   uint16_t   id;            /* Camera control id    */
   uint32_t   index;         /* Index of menu.       */
   union

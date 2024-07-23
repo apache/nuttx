@@ -84,6 +84,22 @@ int stm32_bringup(void)
 {
   int ret = OK;
 
+#ifdef CONFIG_STM32F411MINIMUM_GPIO
+  ret = stm32_gpio_initialize();
+  if (ret != OK)
+    {
+      gerr("ERROR: Failed to initialize gpio: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC_HX711
+  ret = stm32_hx711_initialize();
+  if (ret != OK)
+    {
+      aerr("ERROR: Failed to initialize hx711: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
    * thread will monitor for USB connection and disconnection events.

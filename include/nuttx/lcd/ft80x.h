@@ -295,7 +295,7 @@
 #define FT80X_REG_PLAYBACK_PLAY      0x1024bc  /* Start audio playback */
 #define FT80X_REG_PWM_HZ             0x1024c0  /* BACKLIGHT PWM output frequency (Hz) */
 #define FT80X_REG_PWM_DUTY           0x1024c4  /* BACKLIGHT PWM output duty cycle 0=0%,
-                                                  * 128=100% */
+                                                * 128=100% */
 #define FT80X_REG_MACRO_0            0x1024c8  /* Display list macro command 0 */
 #define FT80X_REG_MACRO_1            0x1024cc  /* Display list macro command 1 */
 
@@ -317,7 +317,7 @@
 
 #if defined(CONFIG_LCD_FT800)
 #define FT80X_REG_TOUCH_ADC_MODE     0x1024f4  /* Select single ended (low power) or
-                                                  * differential (accurate) sampling */
+                                                * differential (accurate) sampling */
 #define FT80X_REG_TOUCH_CHARGE       0x1024f8  /* Touch-screen charge time, units of 6 clocks */
 #define FT80X_REG_TOUCH_SETTLE       0x1024fc  /* Touch-screen settle time, units of 6 clocks */
 #define FT80X_REG_TOUCH_OVERSAMPLE   0x102500  /* Touch-screen oversample factor */
@@ -326,7 +326,7 @@
 #define FT80X_REG_TOUCH_RZ           0x10250c  /* Touch-screen resistance */
 #define FT80X_REG_TOUCH_SCREEN_XY    0x102510  /* Touch-screen screen (x-MSB16; y-LSB16) */
 #define FT80X_REG_TOUCH_TAG_XY       0x102514  /* Touch-screen screen (x-MSB16; y-LSB16)
-                                                  * used for tag lookup */
+                                                * used for tag lookup */
 #define FT80X_REG_TOUCH_TAG          0x102518  /* Touch-screen tag result */
 #define FT80X_REG_TOUCH_TRANSFORM_A  0x10251c  /* Touch-screen transform coefficient (s15.16) */
 #define FT80X_REG_TOUCH_TRANSFORM_B  0x102520  /* Touch-screen transform coefficient (s15.16) */
@@ -349,16 +349,16 @@
                                                 * Bits [15:8]: configure register value */
                                                /* 0x1024fc - 0x102504 Reserved */
 #define FT80X_REG_CTOUCH_RAW_XY      0x102508  /* Compatibility mode: touch-screen raw
-                                                  * (x-MSB16; y-LSB16) */
+                                                * (x-MSB16; y-LSB16) */
 #define FT80X_REG_CTOUCH_TOUCH1_XY   0x102508  /* Extended mode: touch-screen screen data for touch 1
-                                                  * (x-MSB16; y-LSB16) */
+                                                * (x-MSB16; y-LSB16) */
 #define FT80X_REG_CTOUCH_TOUCH4_Y    0x10250c  /* Extended mode: touch-screen screen Y data for touch 4 */
 #define FT80X_REG_CTOUCH_SCREEN_XY   0x102510  /* Compatibility mode: touch-screen screen
-                                                  * (x-MSB16; y-LSB16) */
+                                                * (x-MSB16; y-LSB16) */
 #define FT80X_REG_CTOUCH_TOUCH0_XY   0x102510  /* Extended mode: touch-screen screen data for touch 0
-                                                  * (x-MSB16; y-LSB16) */
+                                                * (x-MSB16; y-LSB16) */
 #define FT80X_REG_CTOUCH_TAG_XY      0x102514  /* Touch-screen screen (x-MSB16; y-LSB16)
-                                                  * used for tag lookup */
+                                                * used for tag lookup */
 #define FT80X_REG_CTOUCH_TAG         0x102518  /* Touch-screen tag result */
 #define FT80X_REG_CTOUCH_TRANSFORM_A 0x10251c  /* Touch-screen transform coefficient (s15.16) */
 #define FT80X_REG_CTOUCH_TRANSFORM_B 0x102520  /* Touch-screen transform coefficient (s15.16) */
@@ -589,14 +589,14 @@
 /* FT80X_REG_TOUCH_MODE */
 
 #define TOUCH_MODE_OFF            0         /* Acquisition stopped, touch detection
-                                                  * interrupt is still valid. */
+                                             * interrupt is still valid. */
 #define TOUCH_MODE_ONESHOT        1         /* Perform acquisition once every write of 1
                                              * to REG_TOUCH_MODE. */
 #define TOUCH_MODE_FRAMESYNC      2         /* Perform acquisition for every frame sync
                                              * (~60 data acquisition/second). */
 #define TOUCH_MODE_CONTINUOUS     3         /* Perform acquisition continuously at
-                                         * approximately 1000 data acquisition /
-                                                  * second. */
+                                             * approximately 1000 data acquisition /
+                                             * second. */
 
 /* Interrupts ***************************************************************/
 

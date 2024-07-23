@@ -51,9 +51,28 @@ void sbi_mcall_handle(uintptr_t *regs)
 {
   /* Check the environment call number */
 
-  switch (regs[REG_A0])
+  switch (regs[REG_A7])
   {
-    case MCALL_GET_TIMER:
+    case SBI_EXT_IPI:
+      sbi_send_ipi(regs[REG_A0], regs[REG_A1]);
+      break;
+    case SBI_EXT_TIME:
+      switch (regs[REG_A6])
+      {
+        case SBI_EXT_TIME_SET_TIMER:
+#ifdef CONFIG_ARCH_RV64
+          sbi_set_mtimecmp(regs[REG_A0]);
+#else
+          sbi_set_mtimecmp(regs[REG_A0] + ((uint64_t)regs[REG_A1] << 32));
+#endif
+          CLEAR_CSR(CSR_MIP, MIP_STIP);
+          SET_CSR(CSR_MIE, MIE_MTIE);
+          break;
+        default:
+          break;
+      }
+      break;
+    case SBI_EXT_FIRMWARE:
 #ifdef CONFIG_ARCH_RV64
       regs[REG_A0]    = sbi_get_mtime();
 #else
@@ -63,16 +82,6 @@ void sbi_mcall_handle(uintptr_t *regs)
         regs[REG_A1]  = (uint32_t)(time >> 32);
       }
 #endif
-      break;
-
-    case MCALL_SET_TIMER:
-#ifdef CONFIG_ARCH_RV64
-      sbi_set_mtimecmp(regs[REG_A1]);
-#else
-      sbi_set_mtimecmp(regs[REG_A1] + ((uint64_t)regs[REG_A2] << 32));
-#endif
-      CLEAR_CSR(mip, MIP_STIP);
-      SET_CSR(mie, MIE_MTIE);
       break;
 
     default:

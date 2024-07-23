@@ -98,7 +98,7 @@ extern "C"
  *
  * Returned Value:
  *   A non-NULL MTD driver instance is returned on success.  NULL is
- *   returned on any failaure.
+ *   returned on any failure.
  *
  ****************************************************************************/
 

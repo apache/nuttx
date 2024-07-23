@@ -40,12 +40,23 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* T-Head C906 MMU requires Strong Order and Shareable for I/O Memory */
+/* T-Head C906 MMU Extensions */
 
 #define MMU_THEAD_SHAREABLE    (1ul << 60)
+#define MMU_THEAD_BUFFERABLE   (1ul << 61)
+#define MMU_THEAD_CACHEABLE    (1ul << 62)
 #define MMU_THEAD_STRONG_ORDER (1ul << 63)
+
+/* T-Head C906 MMU requires Strong Order and Shareable for I/O Memory */
+
 #define MMU_THEAD_IO_FLAGS     (MMU_IO_FLAGS | MMU_THEAD_SHAREABLE | \
                                 MMU_THEAD_STRONG_ORDER)
+
+/* T-Head C906 MMU requires Kernel Memory to be explicitly cached */
+
+#define MMU_THEAD_PMA_FLAGS    (MMU_THEAD_SHAREABLE | \
+                                MMU_THEAD_BUFFERABLE | \
+                                MMU_THEAD_CACHEABLE)
 
 /* Map the I/O and PLIC Memory with vaddr = paddr mappings */
 
@@ -258,10 +269,12 @@ void bl808_kernel_mappings(void)
   /* Map the kernel text and data for L2/L3 */
 
   binfo("map kernel text\n");
-  map_region(KFLASH_START, KFLASH_START, KFLASH_SIZE, MMU_KTEXT_FLAGS);
+  map_region(KFLASH_START, KFLASH_START, KFLASH_SIZE,
+             MMU_KTEXT_FLAGS | MMU_THEAD_PMA_FLAGS);
 
   binfo("map kernel data\n");
-  map_region(KSRAM_START, KSRAM_START, KSRAM_SIZE, MMU_KDATA_FLAGS);
+  map_region(KSRAM_START, KSRAM_START, KSRAM_SIZE,
+             MMU_KDATA_FLAGS | MMU_THEAD_PMA_FLAGS);
 
   /* Connect the L1 and L2 page tables for the kernel text and data */
 
@@ -272,7 +285,7 @@ void bl808_kernel_mappings(void)
 
   binfo("map the page pool\n");
   mmu_ln_map_region(2, PGT_L2_VBASE, PGPOOL_START, PGPOOL_START, PGPOOL_SIZE,
-                    MMU_KDATA_FLAGS);
+                    MMU_KDATA_FLAGS | MMU_THEAD_PMA_FLAGS);
 }
 
 /****************************************************************************

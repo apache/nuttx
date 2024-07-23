@@ -19,6 +19,13 @@
 # ##############################################################################
 
 if(CONFIG_LIBC_LOCALE)
-  target_sources(c PRIVATE lib_duplocale.c lib_freelocale.c lib_localeconv.c
-                           lib_newlocale.c lib_setlocale.c lib_uselocale.c)
+  target_sources(
+    c
+    PRIVATE lib_duplocale.c
+            lib_freelocale.c
+            lib_localeconv.c
+            lib_newlocale.c
+            lib_setlocale.c
+            lib_uselocale.c
+            lib_maxlocale.c)
 endif()

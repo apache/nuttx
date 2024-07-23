@@ -88,6 +88,15 @@ SECTIONS
         _edata = ABSOLUTE(.);
     } > ddr
 
+    /* Uninitialized data */
+
+    .noinit :
+    {
+        _snoinit = ABSOLUTE(.);
+        *(.noinit*)
+        _enoinit = ABSOLUTE(.);
+    } > ddr
+
     .bss :
     {
         _sbss = ABSOLUTE(.);
@@ -96,15 +105,6 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
-    } > ddr
-
-    /* Uninitialized data */
-
-    .noinit :
-    {
-        _snoinit = ABSOLUTE(.);
-        *(.noinit*)
-        _enoinit = ABSOLUTE(.);
     } > ddr
 
     /* Stabs debugging sections. */

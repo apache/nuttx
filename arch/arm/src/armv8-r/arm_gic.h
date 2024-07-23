@@ -309,6 +309,16 @@
    (((_aff1) & SGIR_AFF_MASK) << SGIR_AFF1_SHIFT) |               \
    ((_tgt) & SGIR_TGT_MASK))
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI9
+#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI10
+#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI11
+#else
+#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI1
+#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI2
+#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI3
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

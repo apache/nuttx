@@ -18,4 +18,5 @@
 #
 # ##############################################################################
 
-target_sources(c PRIVATE lib_imaxabs.c lib_strtoimax.c lib_strtoumax.c)
+target_sources(c PRIVATE lib_imaxabs.c lib_imaxdiv.c lib_strtoimax.c
+                         lib_strtoumax.c)

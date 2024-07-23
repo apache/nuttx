@@ -237,6 +237,7 @@ void udp_free(FAR struct udp_conn_s *conn);
  ****************************************************************************/
 
 FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
+                                  FAR struct udp_conn_s *conn,
                                   FAR struct udp_hdr_s *udp);
 
 /****************************************************************************
@@ -263,6 +264,9 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
  *   in an infinite loop if that were the case.  In this simple, small UDP
  *   implementation, it is reasonable to assume that that error cannot happen
  *   and that a port number will always be available.
+ *
+ * Returned Value:
+ *   Next available port number in host byte order, 0 for failure.
  *
  ****************************************************************************/
 
@@ -542,7 +546,11 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+#ifdef CONFIG_NET_JUMBO_FRAME
+FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(int len);
+#else
 FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void);
+#endif
 #endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
 
 /****************************************************************************

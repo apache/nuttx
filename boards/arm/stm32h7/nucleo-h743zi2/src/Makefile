@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/nucleo-h743zi/src/Makefile
+# boards/arm/stm32h7/nucleo-h743zi2/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

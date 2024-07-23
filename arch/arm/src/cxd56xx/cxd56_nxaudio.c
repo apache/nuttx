@@ -2020,8 +2020,8 @@ static int cxd56_set_mic_gains(uint8_t gain, enum cxd56_mic_type_e mic_dev,
 static void cxd56_get_mic_config(uint8_t *count, uint8_t *dev, uint8_t *mode)
 {
   uint8_t i;
-  uint8_t is_dmic;
-  uint8_t is_amic;
+  bool is_dmic = false;
+  bool is_amic = false;
   uint8_t mic_sel = 0;
   uint8_t mic_count = 0;
 

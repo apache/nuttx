@@ -87,12 +87,6 @@ static const struct oneshot_operations_s g_arm_timer_ops =
  * Private Functions
  ****************************************************************************/
 
-static inline uint32_t arm_timer_get_freq(void)
-{
-  ARM_ISB();
-  return CP15_GET(CNTFRQ);
-}
-
 static inline void arm_timer_set_freq(uint32_t freq)
 {
   CP15_SET(CNTFRQ, freq);
@@ -129,6 +123,18 @@ static inline void arm_timer_set_tval(uint32_t tval)
   ARM_ISB();
 }
 
+static inline uint64_t arm_timer_get_cval(void)
+{
+  ARM_ISB();
+  return CP15_GET64(CNTP_CVAL);
+}
+
+static inline void arm_timer_set_cval(uint64_t cval)
+{
+  CP15_SET64(CNTP_CVAL, cval);
+  ARM_ISB();
+}
+
 static inline uint64_t nsec_from_count(uint64_t count, uint32_t freq)
 {
   return (uint64_t)count * NSEC_PER_SEC / freq;
@@ -150,7 +156,7 @@ static int arm_timer_maxdelay(struct oneshot_lowerhalf_s *lower_,
   struct arm_timer_lowerhalf_s *lower =
     (struct arm_timer_lowerhalf_s *)lower_;
 
-  uint64_t maxnsec = nsec_from_count(UINT32_MAX, lower->freq);
+  uint64_t maxnsec = nsec_from_count(UINT64_MAX, lower->freq);
 
   ts->tv_sec  = maxnsec / NSEC_PER_SEC;
   ts->tv_nsec = maxnsec % NSEC_PER_SEC;
@@ -165,7 +171,7 @@ static int arm_timer_start(struct oneshot_lowerhalf_s *lower_,
   struct arm_timer_lowerhalf_s *lower =
     (struct arm_timer_lowerhalf_s *)lower_;
   irqstate_t flags;
-  uint32_t count;
+  uint64_t count;
   uint32_t ctrl;
 
   flags = up_irq_save();
@@ -175,7 +181,7 @@ static int arm_timer_start(struct oneshot_lowerhalf_s *lower_,
 
   count = sec_to_count(ts->tv_sec, lower->freq) +
           nsec_to_count(ts->tv_nsec, lower->freq);
-  arm_timer_set_tval(count);
+  arm_timer_set_cval(arm_timer_get_count() + count);
 
   ctrl = arm_timer_get_ctrl();
   ctrl &= ~ARM_TIMER_CTRL_INT_MASK;
@@ -230,6 +236,8 @@ static int arm_timer_interrupt(int irq, void *context, void *arg)
 
   DEBUGASSERT(lower != NULL);
 
+  arm_timer_set_ctrl(arm_timer_get_ctrl() | ARM_TIMER_CTRL_INT_MASK);
+
   if (lower->callback != NULL)
     {
       callback        = lower->callback;
@@ -248,6 +256,12 @@ static int arm_timer_interrupt(int irq, void *context, void *arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+uint32_t arm_timer_get_freq(void)
+{
+  ARM_ISB();
+  return CP15_GET(CNTFRQ);
+}
 
 struct oneshot_lowerhalf_s *arm_timer_initialize(unsigned int freq)
 {

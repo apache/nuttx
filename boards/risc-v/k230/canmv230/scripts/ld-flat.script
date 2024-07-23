@@ -18,9 +18,12 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+
 SECTIONS
 {
-  . = 0x8000000;
+  . = CONFIG_RAM_START;
 
   .text :
     {
@@ -111,6 +114,7 @@ SECTIONS
       *(.sbss.*)
       *(.gnu.linkonce.b*)
       *(COMMON)
+      . = ALIGN(32);
       _ebss = . ;
     }
 

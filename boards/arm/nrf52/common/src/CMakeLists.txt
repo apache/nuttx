@@ -36,6 +36,18 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS nrf52_lsm9ds1.c)
   endif()
 
+  if(CONFIG_BOARDCTL_RESET)
+    list(APPEND SRCS nrf52_reset.c)
+  endif()
+
+  if(CONFIG_NRF52_RADIO_IEEE802154)
+    list(APPEND SRCS nrf52_ieee802154.c)
+  endif()
+
+  if(CONFIG_IEEE802154_MRF24J40)
+    list(APPEND SRCS nrf52_mrf24j40.c)
+  endif()
+
   target_sources(board PRIVATE ${SRCS})
 
 endif()

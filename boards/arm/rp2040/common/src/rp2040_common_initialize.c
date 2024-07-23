@@ -31,6 +31,7 @@
 
 #include "arm_internal.h"
 #include "rp2040_gpio.h"
+#include "rp2040_uniqueid.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -123,6 +124,10 @@ void rp2040_common_earlyinitialize(void)
 
 void rp2040_common_initialize(void)
 {
+#ifdef CONFIG_BOARDCTL_UNIQUEID
+  rp2040_uniqueid_initialize();
+#endif
+
   /* Set default I2C pin */
 
 #ifdef CONFIG_RP2040_I2C0
@@ -175,5 +180,18 @@ void rp2040_common_initialize(void)
   rp2040_gpio_init(CONFIG_RP2040_SPI1_CS_GPIO);        /* CSn */
   rp2040_gpio_setdir(CONFIG_RP2040_SPI1_CS_GPIO, true);
   rp2040_gpio_put(CONFIG_RP2040_SPI1_CS_GPIO, true);
+#endif
+
+#ifdef CONFIG_NET_W5500
+  /* W5500 Reset output */
+
+  rp2040_gpio_setdir(CONFIG_RP2040_W5500_RST_GPIO, true);
+  rp2040_gpio_put(CONFIG_RP2040_W5500_RST_GPIO, false);
+  rp2040_gpio_set_function(CONFIG_RP2040_W5500_RST_GPIO,
+                           RP2040_GPIO_FUNC_SIO);
+
+  /* W5500 Interrupt input */
+
+  rp2040_gpio_init(CONFIG_RP2040_W5500_INT_GPIO);
 #endif
 }

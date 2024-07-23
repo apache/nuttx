@@ -37,3 +37,7 @@ endif
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += k230_userspace.c
 endif
+
+ifeq ($(CONFIG_RPTUN),y)
+CHIP_CSRCS += k230_rptun.c k230_ipi.c
+endif

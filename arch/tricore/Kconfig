@@ -1,0 +1,49 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_TRICORE
+comment "Tricore Options"
+
+choice
+	prompt "Tricore Toolchain Selection"
+	default TRICORE_TOOLCHAIN_GNU
+
+config TRICORE_TOOLCHAIN_TASKING
+	bool "AURIX Tasking C/C++ toolchain"
+	select ARCH_TOOLCHAIN_TASKING
+
+config TRICORE_TOOLCHAIN_GNU
+	bool "Generic GNU toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
+
+endchoice # Tricore Toolchain Selection
+
+config ARCH_TC3XX
+	bool
+	select ARCH_HAVE_TESTSET
+	default n
+
+config ARCH_FAMILY
+	string
+	default "tc3xx"		if ARCH_TC3XX
+
+config ARCH_CHIP
+	string
+	default "tc3xx"		if ARCH_CHIP_TC397
+
+config ARCH_CHIP_TC397
+	bool "AURIX Family TC397"
+	select ARCH_TC3XX
+	select ALARM_ARCH
+	select ONESHOT
+	---help---
+		AURIX TC39x family: TC397
+
+if ARCH_TC3XX
+source "arch/tricore/src/tc3xx/Kconfig"
+endif
+endif # ARCH_TRICORE

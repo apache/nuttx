@@ -31,6 +31,7 @@
 
 #include "esp32_spiram.h"
 #include "esp32_himem.h"
+#include "esp32_spiflash.h"
 #include "hardware/esp32_soc.h"
 
 /****************************************************************************
@@ -78,8 +79,6 @@
 #else
 #  define SPIRAM_BANKSWITCH_RESERVE 0
 #endif
-
-#define CACHE_BLOCKSIZE (32*1024)
 
 /* Start of the virtual address range reserved for himem use */
 
@@ -162,20 +161,6 @@ static inline int ramblock_idx_valid(int ramblock_idx)
 static inline int rangeblock_idx_valid(int rangeblock_idx)
 {
   return (rangeblock_idx >= 0 && rangeblock_idx < g_rangeblockcnt);
-}
-
-static void set_bank(int virt_bank, int phys_bank, int ct)
-{
-  int r;
-
-  r = cache_sram_mmu_set(0, 0, SOC_EXTRAM_DATA_LOW + CACHE_BLOCKSIZE *
-                         virt_bank, phys_bank * CACHE_BLOCKSIZE, 32, ct);
-  DEBUGASSERT(r == 0);
-  r = cache_sram_mmu_set(1, 0, SOC_EXTRAM_DATA_LOW + CACHE_BLOCKSIZE *
-                         virt_bank, phys_bank * CACHE_BLOCKSIZE, 32, ct);
-  DEBUGASSERT(r == 0);
-
-  UNUSED(r);
 }
 
 /****************************************************************************
@@ -567,9 +552,9 @@ int esp_himem_map(esp_himem_handle_t handle,
 
   for (i = 0; i < blockcount; i++)
     {
-      set_bank(VIRT_HIMEM_RANGE_BLOCKSTART + range->block_start + i +
-               range_block, handle->block[i + ram_block] +
-               PHYS_HIMEM_BLOCKSTART, 1);
+      esp32_set_bank(VIRT_HIMEM_RANGE_BLOCKSTART + range->block_start + i +
+                     range_block, handle->block[i + ram_block] +
+                     PHYS_HIMEM_BLOCKSTART, 1);
     }
 
   /* Set out pointer */

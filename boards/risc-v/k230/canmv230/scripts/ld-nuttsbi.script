@@ -18,16 +18,59 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+/* We use a linear layout of zones: kflash, ksram and pgpool. They are
+ * defined by CONFIG_RAM_xx and CONFIG_ARCH_PGPOOL_xx as below:
+ *
+ * |>--- CONFIG_RAM_SIZE ------------------------------------<|
+ * |                           |>- CONFIG_ARCH_PGPOOL_SIZE --<|
+ * +-------------+-------------+------------------------------+
+ * | kflash/text :  ksram zone | pgpool zone                  |
+ * +-------------+-------------+------------------------------+
+ * ^CONFIG_RAM_START           ^CONFIG_ARCH_PGPOOL_PBASE
+ *
+ * We require that:
+ *
+ *   a) KRAM_TOTAL(= CONFIG_ARCH_PGPOOL_PBASE - CONFIG_RAM_START) > 0
+ *   b) CONFIG_RAM_SIZE == CONFIG_ARCH_PGPOOL_SIZE + KRAM_TOTAL
+ *
+ * The split of kernel memory can be adjusted below via KSRAM_SIZE
+ * The script warns if PGPOOL doesn't end at end of configured RAM.
+ */
+
+#define PGRAM_ADDR   (CONFIG_ARCH_PGPOOL_PBASE)
+#define PGRAM_SIZE   (CONFIG_ARCH_PGPOOL_SIZE)
+#define PGRAM_END    (PGRAM_ADDR + PGRAM_SIZE)
+#define CFRAM_END    (CONFIG_RAM_START + CONFIG_RAM_SIZE)
+
+#if (PGRAM_ADDR < CONFIG_RAM_START) || (PGRAM_END > CFRAM_END)
+#error "invalid RAM or PGPOOL config!"
+#endif
+
+#if (PGRAM_END < CFRAM_END)
+#warning "wasted memory after PGPOOL!"
+#endif
+
+/* Adjust KSRAM_SIZE here for your needs */
+
+#define KSRAM_SIZE   (KRAM_TOTAL * 3 / 4)
+
+#define KRAM_TOTAL   (PGRAM_ADDR - KTEXT_ADDR)
+#define KTEXT_SIZE   (KRAM_TOTAL- KSRAM_SIZE)
+#define KTEXT_ADDR   (CONFIG_RAM_START)
+#define KSRAM_ADDR   (KTEXT_ADDR + KTEXT_SIZE)
+
 MEMORY
 {
-    kflash (rx) : ORIGIN = 0x8000000, LENGTH = 384K   /* w/ cache */
-    ksram (rwx) : ORIGIN = 0x8080000, LENGTH = 128K   /* w/ cache */
-    pgram (rwx) : ORIGIN = 0x8600000, LENGTH =  10M   /* w/ cache */
+    kflash (rx) : ORIGIN = KTEXT_ADDR, LENGTH = KTEXT_SIZE
+    ksram (rwx) : ORIGIN = KSRAM_ADDR, LENGTH = KSRAM_SIZE
+    pgram (rwx) : ORIGIN = PGRAM_ADDR, LENGTH = PGRAM_SIZE
 }
 
 OUTPUT_ARCH("riscv")
 
-/* Provide the kernel boundaries */
+/* Boundaries referred in board memory map header */
 
 __kflash_start = ORIGIN(kflash);
 __kflash_size = LENGTH(kflash);
@@ -42,7 +85,7 @@ __pgheap_size = LENGTH(pgram);
 
 SECTIONS
 {
-  . = 0x8000000;
+  . = KTEXT_ADDR;
 
   .text :
     {

@@ -206,146 +206,6 @@
 
 /* Register Bitfield Definitions ********************************************/
 
-/* TASKS_TXEN Register */
-
-#define RADIO_TASKS_TXEN                (1 << 0)    /* Bit 0: Enable RADIO in TX mode */
-
-/* TASKS_RXEN Register */
-
-#define RADIO_TASKS_RXEN                (1 << 0)    /* Bit 0: Enable RADIO in RX mode */
-
-/* TASKS_START Register */
-
-#define RADIO_TASKS_START               (1 << 0)    /* Bit 0: Start RADIO */
-
-/* TASKS_STOP Register */
-
-#define RADIO_TASKS_STOP                (1 << 0)    /* Bit 0: Stop RADIO */
-
-/* TASKS_DISABLE Register */
-
-#define RADIO_TASKS_DISABLE             (1 << 0)    /* Bit 0: Disable RADIO */
-
-/* TASKS_RSSISTART Register */
-
-#define RADIO_TASKS_RSSISTART           (1 << 0)    /* Bit 0: Start the RSSI */
-
-/* TASKS_RSSISTOP Register */
-
-#define RADIO_TASKS_RSSISTOP            (1 << 0)    /* Bit 0: Stop the RSSI */
-
-/* TASKS_BCSTART Register */
-
-#define RADIO_TASKS_BCSTART             (1 << 0)    /* Bit 0: Start the bit counter */
-
-/* TASKS_BCSTOP Register */
-
-#define RADIO_TASKS_BCSTOP              (1 << 0)    /* Bit 0: Stop the bit counter */
-
-/* TASKS_EDSTART Register */
-
-#define RADIO_TASKS_EDSTART             (1 << 0)    /* Bit 0: Start the energy detect measurement (IEEE 802.15.4) */
-
-/* TASKS_EDSTOP Register */
-
-#define RADIO_TASKS_EDSTOP              (1 << 0)    /* Bit 0: Stop the energy detect measurement (IEEE 802.15.4) */
-
-/* TASKS_CCASTART Register */
-
-#define RADIO_TASKS_CCASTART            (1 << 0)    /* Bit 0: Start the channel assessment (IEEE 802.15.4) */
-
-/* TASKS_CCASTOP Register */
-
-#define RADIO_TASKS_CCASTOP             (1 << 0)    /* Bit 0: Stop the channel assessment (IEEE 802.15.4) */
-
-/* EVENTS_READY Register */
-
-#define RADIO_EVENTS_READY              (1 << 0)    /* Bit 0: RADIO has ramped up and is ready to be started */
-
-/* EVENTS_ADDRESS Register */
-
-#define RADIO_EVENTS_ADDRESS            (1 << 0)    /* Bit 0: Address sent or received */
-
-/* EVENTS_PAYLOAD Register */
-
-#define RADIO_EVENTS_PAYLOAD            (1 << 0)    /* Bit 0: Packet payload sent or received */
-
-/* EVENTS_END Register */
-
-#define RADIO_EVENTS_END                (1 << 0)    /* Bit 0: Packet sent or received */
-
-/* EVENTS_DISABLED Register */
-
-#define RADIO_EVENTS_DISABLED           (1 << 0)    /* Bit 0: RADIO has been disabled */
-
-/* EVENTS_DEVMATCH Register */
-
-#define RADIO_EVENTS_DEVMATCH           (1 << 0)    /* Bit 0: A device address match */
-
-/* EVENTS_DEVMISS Register */
-
-#define RADIO_EVENTS_DEVMISS            (1 << 0)    /* Bit 0: No device address match */
-
-/* EVENTS_RSSIEND Register */
-
-#define RADIO_EVENTS_RSSIEND            (1 << 0)    /* Bit 0: Sampling of receive signal strength complete */
-
-/* EVENTS_BCMATCH Register */
-
-#define RADIO_EVENTS_BCMATCH            (1 << 0)    /* Bit 0: Bit counter reached bit count value */
-
-/* EVENTS_CRCOK Register */
-
-#define RADIO_EVENTS_CRCOK              (1 << 0)    /* Bit 0: Packet received with CRC ok */
-
-/* EVENTS_CRCERROR Register */
-
-#define RADIO_EVENTS_CRCERROR           (1 << 0)    /* Bit 0: Packet received with CRC error */
-
-/* EVENTS_FRAMESTART Register */
-
-#define RADIO_EVENTS_FRAMESTART         (1 << 0)    /* Bit 0: IEEE 802.15.4 length field received*/
-
-/* EVENTS_EDEND Register */
-
-#define RADIO_EVENTS_EDEND              (1 << 0)    /* Bit 0: ampling of energy detection complete */
-
-/* EVENTS_EDSTOPPED Register */
-
-#define RADIO_EVENTS_EDSTOPPED          (1 << 0)    /* Bit 0: The sampling of energy detection has stopped */
-
-/* EVENTS_CCAIDLE Register */
-
-#define RADIO_EVENTS_CCAIDLE            (1 << 0)    /* Bit 0: Wireless medium in idle */
-
-/* EVENTS_CCABUSY Register */
-
-#define RADIO_EVENTS_CCABUSY            (1 << 0)    /* Bit 0: Wireless medium busy */
-
-/* EVENTS_CCASTOPPED Register */
-
-#define RADIO_EVENTS_CCASTOPPED         (1 << 0)    /* Bit 0: The CCA has stopped */
-
-/* EVENTS_RATEBOOST Register */
-
-#define RADIO_EVENTS_RATEBOOST          (1 << 0)    /* Bit 0: Ble_LR CI field received */
-
-/* EVENTS_TXREADY Register */
-
-#define RADIO_EVENTS_TXREADY            (1 << 0)    /* Bit 0: RADIO has ramped up and is ready to be started TX path */
-
-/* EVENTS_RXREADY Register */
-
-#define RADIO_EVENTS_RXREADY            (1 << 0)    /* Bit 0: RADIO has ramped up and is ready to be started RX path */
-
-/* EVENTS_MHRMATCH Register */
-
-#define RADIO_EVENTS_MHRMATCH           (1 << 0)    /* Bit 0: MAC header match found */
-
-/* EVENTS_PHYEND Register */
-
-#define RADIO_EVENTS_PHYEND             (1 << 0)    /* Bit 0: Last bit is sent on air */
-
 /* SHORTS Register */
 
 #define RADIO_SHORTS_READY_START        (1 << 0)    /* Bit 0: Shortcut between event READY and task START */
@@ -622,6 +482,12 @@
 #  define RADIO_CCACTRL_CCAMODE_CANDED    (2 << RADIO_CCACTRL_CCAMODE_SHIFT)
 #  define RADIO_CCACTRL_CCAMODE_CORED     (3 << RADIO_CCACTRL_CCAMODE_SHIFT)
 #  define RADIO_CCACTRL_CCAMODE_EDTST1    (4 << RADIO_CCACTRL_CCAMODE_SHIFT)
+#define RADIO_CCACTRL_CCAEDTHRES_SHIFT    (8)
+#define RADIO_CCACTRL_CCAEDTHRES_MASK     (0xff << RADIO_CCACTRL_CCAEDTHRES_SHIFT)
+#define RADIO_CCACTRL_CCACORRTHRES_SHIFT  (16)
+#define RADIO_CCACTRL_CCACORRTHRES_MASK   (0xff << RADIO_CCACTRL_CCACORRTHRES_SHIFT)
+#define RADIO_CCACTRL_CCACORRCNT_SHIFT    (24)
+#define RADIO_CCACTRL_CCACORRCNT_MASK     (0xff << RADIO_CCACTRL_CCACORRCNT_SHIFT)
 
 /* POWER Register */
 

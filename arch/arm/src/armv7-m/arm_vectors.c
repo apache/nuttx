@@ -40,16 +40,13 @@
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "ram_vectors.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define IDLE_STACK      (_ebss + CONFIG_IDLETHREAD_STACKSIZE)
-
-#ifndef ARMV7M_PERIPHERAL_INTERRUPTS
-#  error ARMV7M_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -76,7 +73,8 @@ extern void exception_common(void);
  * Note that the [ ... ] designated initializer is a GCC extension.
  */
 
-const void * const _vectors[] locate_data(".vectors") =
+const void * const _vectors[] locate_data(".vectors")
+  aligned_data(VECTOR_ALIGN) =
 {
   /* Initial stack */
 

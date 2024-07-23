@@ -1,0 +1,45 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_MNEMOFS
+	bool "MNEMOFS NAND Flash File System"
+	default n
+	depends on !DISABLE_MOUNTPOINT && MTD_NAND 
+	---help---
+		Build the mnemofs NAND flash file system.
+
+if FS_MNEMOFS
+config MNEMOFS_JOURNAL_NBLKS
+	int "MNEMOFS Journal Block Count"
+	default 20
+	range 4 65536
+	depends on FS_MNEMOFS
+	---help---
+		Number of blocks that mnemofs will use for the journal. Specifying
+		this will only work on formatting a NAND flash using mnemofs. If the
+		device is already formatted, the on-flash journal block count will
+		be considered instead. Two additional blocks will be allocated for
+		the master blocks.
+
+config MNEMOFS_NLRU
+	int "MNEMOFS LRU Node Count"
+	default 20
+	range 1 255
+	depends on FS_MNEMOFS
+	---help---
+		Number of nodes used by mnemofs for LRU. The higher the value is,
+		the lesser would be the wear on device with higher RAM
+		consumption.
+
+config MNEMOFS_NLRUDELTA
+	int "MNEMOFS LRU Delta Count"
+	default 20
+	range 1 255
+	depends on FS_MNEMOFS
+	---help---
+		Number of deltas used by mnemofs for LRU for every node. The higher
+		the value is, the lesser would be the wear on device with higher RAM
+		consumption.
+endif # FS_MNEMOFS

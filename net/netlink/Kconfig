@@ -116,7 +116,22 @@ config NETLINK_VALIDATE_POLICY
 		VALIDATE_POLICY is used to make sure the parameters
 		you pass in are valid.
 
+config NETLINK_DISABLE_NEWPREFIX
+	bool "Disable RTM_NEWPREFIX support"
+	default n
+	---help---
+		RTM_NEWPREFIX is used to set netdev prefix.
+
 endif # NETLINK_ROUTE
+
+config NETLINK_NETFILTER
+	bool "Netlink Netfilter protocol"
+	default n
+	depends on NET_NAT
+	---help---
+		Support the NETLINK_NETFILTER protocol option, mainly
+		for conntrack with NAT.
+
 endmenu # Netlink Protocols
 endif # NET_NETLINK
 endmenu # Netlink Socket Support

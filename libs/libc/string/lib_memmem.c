@@ -51,12 +51,17 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
   size_t i;
   size_t y;
 
+  if (needlelen == 0)
+    {
+      return (void *)haystack;
+    }
+
   if (needlelen > haystacklen)
     {
       return NULL;
     }
 
-  for (i = 0; i < haystacklen - needlelen; i++)
+  for (i = 0; i <= haystacklen - needlelen; i++)
     {
       y = 0;
       while (h[i + y] == n[y])

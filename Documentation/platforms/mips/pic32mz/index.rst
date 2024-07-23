@@ -36,7 +36,7 @@ timers.
 **NuttX-9.0**. Cache operations were implemented.
 
 Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/mips/pic32mz/pic32mz-starterkit/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/mips/pic32mz/boards/pic32mz-starterkit/README.txt>`__
 file for further information.
 
 **Development Environment:** Same as for the PIC32MZ.

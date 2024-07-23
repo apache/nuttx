@@ -23,7 +23,7 @@ relevant changes incorporated in NuttX-7.26.
    Framebuffer" feature also added in NuttX-7.29.
 
 Refer to the LPCXpresso-LPC54628 board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc54xx/lpcxpresso-lpc54628/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc54xx/boards/lpcxpresso-lpc54628/README.txt>`__
 file for more detailed information about this port.
 
 Supported Boards

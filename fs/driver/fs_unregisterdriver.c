@@ -44,6 +44,16 @@ int unregister_driver(FAR const char *path)
 {
   int ret;
 
+  /* Call unlink to release driver resource and inode. */
+
+  ret = nx_unlink(path);
+  if (ret >= 0)
+    {
+      return ret;
+    }
+
+  /* If unlink failed, only remove inode. */
+
   ret = inode_lock();
   if (ret >= 0)
     {

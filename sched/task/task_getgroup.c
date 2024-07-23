@@ -50,8 +50,7 @@
  *
  * Assumptions:
  *   Called during when signally tasks in a safe context.  No special
- *   precautions should be required here.  However, extra care is taken when
- *   accessing the global g_grouphead list.
+ *   precautions should be required here.
  *
  ****************************************************************************/
 

@@ -67,17 +67,17 @@
 
 /* Alternate function pin selections ****************************************/
 
-/* CAN1: (added 31-03 -- Ben vd Veen (DisruptiveNL)
- *   RXD: PA11
- *        PB8
+/* CAN1:
+ *   RXD: PA11 CN10 pin 14
+ *        PB8  CN5 pin 10, CN10 pin 3
  *        PD0
- *   TXD: PA12
- *        PB9
+ *   TXD: PA12 CN10 pin 12
+ *        PB9  CN5 pin 9, CN10 pin 5
  *        PD1
  */
 
-#define GPIO_CAN1_RX   GPIO_CAN1_RX_2        /* PA11 - AF9 */
-#define GPIO_CAN1_TX   GPIO_CAN1_TX_2        /* PA12 - AF9 */
+#define GPIO_CAN1_RX   GPIO_CAN1_RX_1        /* PA11 */
+#define GPIO_CAN1_TX   GPIO_CAN1_TX_1        /* PA12 */
 
 /* USART1:
  *   RXD: PA10  CN9 pin 3, CN10 pin 33

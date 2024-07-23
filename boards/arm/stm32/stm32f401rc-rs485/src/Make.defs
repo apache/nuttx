@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32/smt32f401rc-rs485/src/Make.defs
+# boards/arm/stm32/stm32f401rc-rs485/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,8 +20,13 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
+ifeq ($(CONFIG_VIDEO_FB),y)
+ifeq ($(CONFIG_LCD_SSD1306),y)
+  CSRCS += stm32_lcd_ssd1306.c
+endif
+endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -33,18 +38,37 @@ endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += stm32_reset.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  stm32_buttons.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS +=  stm32_adc.c
+endif 
+
 ifeq ($(CONFIG_STM32_SDIO),y)
 CSRCS += stm32_sdio.c
 endif
 
+ifeq ($(CONFIG_STM32_OTGFS),y)
+CSRCS += stm32_usb.c
+endif
+
 ifeq ($(CONFIG_I2C_EE_24XX),y)
 CSRCS += stm32_at24.c
+endif
+
+ifeq ($(CONFIG_STM32_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += stm32_usbmsc.c
 endif
 
 DEPPATH += --dep-path board

@@ -57,8 +57,8 @@
 
 /* These file systems require MTD drivers */
 
-#if (defined(CONFIG_FS_SPIFFS) || defined(CONFIG_FS_LITTLEFS)) && \
-    defined(CONFIG_MTD)
+#if (defined(CONFIG_FS_SPIFFS) || defined(CONFIG_FS_LITTLEFS) || \
+    defined(CONFIG_FS_MNEMOFS)) && defined(CONFIG_MTD)
 #  define MDFS_SUPPORT 1
 #endif
 
@@ -68,7 +68,7 @@
     defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS) || \
     defined(CONFIG_FS_TMPFS) || defined(CONFIG_FS_USERFS) || \
     defined(CONFIG_FS_CROMFS) || defined(CONFIG_FS_UNIONFS) || \
-    defined(CONFIG_FS_HOSTFS)
+    defined(CONFIG_FS_HOSTFS) || defined(CONFIG_FS_RPMSGFS)
 #  define NODFS_SUPPORT
 #endif
 
@@ -132,6 +132,9 @@ extern const struct mountpt_operations g_spiffs_operations;
 #ifdef CONFIG_FS_LITTLEFS
 extern const struct mountpt_operations g_littlefs_operations;
 #endif
+#ifdef CONFIG_FS_MNEMOFS
+extern const struct mountpt_operations g_mnemofs_operations;
+#endif
 
 static const struct fsmap_t g_mdfsmap[] =
 {
@@ -143,6 +146,9 @@ static const struct fsmap_t g_mdfsmap[] =
 #endif
 #ifdef CONFIG_FS_LITTLEFS
     { "littlefs", &g_littlefs_operations },
+#endif
+#ifdef CONFIG_FS_MNEMOFS
+    { "mnemofs", &g_mnemofs_operations },
 #endif
     { NULL,   NULL },
 };
@@ -279,12 +285,12 @@ int nx_mount(FAR const char *source, FAR const char *target,
 {
 #if defined(BDFS_SUPPORT) || defined(MDFS_SUPPORT) || defined(NODFS_SUPPORT)
   FAR struct inode *drvr_inode = NULL;
-  FAR struct inode *mountpt_inode;
+  FAR struct inode *mountpt_inode = NULL;
   FAR const struct mountpt_operations *mops = NULL;
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   struct inode_search_s desc;
 #endif
-  void *fshandle;
+  void *fshandle = NULL;
   int ret;
 
   /* Verify required pointer arguments */
@@ -293,7 +299,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
   /* Find the specified filesystem. Try the block driver filesystems first */
 
-  if (source != NULL &&
+  if (source != NULL && source[0] != '\0' &&
       find_blockdriver(source, mountflags, &drvr_inode) >= 0)
     {
       /* Find the block based file system */
@@ -310,7 +316,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
           goto errout_with_inode;
         }
     }
-  else if (source != NULL &&
+  else if (source != NULL && source[0] != '\0' &&
            (ret = find_mtddriver(source, &drvr_inode)) >= 0)
     {
       /* Find the MTD based file system */
@@ -331,6 +337,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #ifdef NODFS_SUPPORT
   if ((mops = mount_findfs(g_nonbdfsmap, filesystemtype)) != NULL)
     {
+      finfo("found %s\n", filesystemtype);
     }
   else
 #endif /* NODFS_SUPPORT */

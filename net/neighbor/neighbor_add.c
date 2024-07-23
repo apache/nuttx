@@ -36,6 +36,7 @@
 #include <nuttx/net/neighbor.h>
 
 #include "netdev/netdev.h"
+#include "netlink/netlink.h"
 #include "neighbor/neighbor.h"
 
 /****************************************************************************
@@ -65,6 +66,8 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
   uint8_t lltype;
   clock_t oldest_time;
   int     oldest_ndx;
+  bool    found = false;
+  bool    new_entry;
   int     i;
 
   DEBUGASSERT(dev != NULL && addr != NULL);
@@ -85,6 +88,7 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
           net_ipv6addr_cmp(g_neighbors[i].ne_ipaddr, ipaddr))
         {
           oldest_ndx = i;
+          found = true;
           break;
         }
 
@@ -94,6 +98,19 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
           oldest_time = g_neighbors[i].ne_time;
         }
     }
+
+  /* When overwite old entry, need to notify RTM_DELNEIGH */
+
+  if (!found && g_neighbors[oldest_ndx].ne_time != 0)
+    {
+      netlink_neigh_notify(&g_neighbors[oldest_ndx], RTM_DELNEIGH,
+                           AF_INET6);
+    }
+
+  /* Need to notify when entry is not found or changes in table */
+
+  new_entry = !found || memcmp(&g_neighbors[oldest_ndx].ne_addr.u, addr,
+                             g_neighbors[oldest_ndx].ne_addr.na_llsize) != 0;
 
   /* Use the oldest or first free entry (either pointed to by the
    * "oldest_ndx" variable).
@@ -108,6 +125,14 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
 
   memcpy(&g_neighbors[oldest_ndx].ne_addr.u, addr,
          g_neighbors[oldest_ndx].ne_addr.na_llsize);
+
+  /* Notify the new entry */
+
+  if (new_entry)
+    {
+      netlink_neigh_notify(&g_neighbors[oldest_ndx], RTM_NEWNEIGH,
+                           AF_INET6);
+    }
 
   /* Dump the contents of the new entry */
 

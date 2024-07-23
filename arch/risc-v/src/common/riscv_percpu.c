@@ -41,12 +41,17 @@
  ****************************************************************************/
 
 #define HART_CNT    (CONFIG_SMP_NCPUS)
-#define STACK_SIZE  (STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
 
+static_assert(RISCV_PERCPU_TCB == offsetof(riscv_percpu_t, tcb),
+              "RISCV_PERCPU_TCB offset is wrong");
 static_assert(RISCV_PERCPU_HARTID == offsetof(riscv_percpu_t, hartid),
               "RISCV_PERCPU_HARTID offset is wrong");
 static_assert(RISCV_PERCPU_IRQSTACK == offsetof(riscv_percpu_t, irq_stack),
               "RISCV_PERCPU_IRQSTACK offset is wrong");
+static_assert(RISCV_PERCPU_USP == offsetof(riscv_percpu_t, usp),
+              "RISCV_PERCPU_USP offset is wrong");
+static_assert(RISCV_PERCPU_KSP == offsetof(riscv_percpu_t, ksp),
+              "RISCV_PERCPU_KSP offset is wrong");
 
 /****************************************************************************
  * Private Data
@@ -96,7 +101,7 @@ static void riscv_percpu_init(void)
       /* Set interrupt stack (if any) */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-      g_percpu[i].irq_stack = (uintptr_t)g_intstacktop - i * STACK_SIZE;
+      g_percpu[i].irq_stack = (uintptr_t)g_intstacktop - i * INT_STACK_SIZE;
 #endif
 
       sq_addlast((struct sq_entry_s *) &g_percpu[i], &g_freelist);
@@ -222,5 +227,37 @@ void riscv_percpu_set_kstack(uintptr_t ksp)
               scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   ((riscv_percpu_t *)scratch)->ksp = ksp;
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: riscv_percpu_set_thread
+ *
+ * Description:
+ *   Set current thread (tcb), so it can be found quickly when a trap is
+ *   taken.
+ *
+ * Input Parameters:
+ *   tcb - Pointer to the current thread's tcb
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void riscv_percpu_set_thread(struct tcb_s *tcb)
+{
+  irqstate_t flags;
+  uintptr_t scratch;
+
+  /* This must be done with interrupts disabled */
+
+  flags   = enter_critical_section();
+  scratch = READ_CSR(CSR_SCRATCH);
+
+  DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
+              scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
+
+  ((riscv_percpu_t *)scratch)->tcb = tcb;
   leave_critical_section(flags);
 }

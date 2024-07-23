@@ -774,9 +774,9 @@ config GD32F4_ONESHOT_MAXTIMERS
 		timers that you can use.
 
 # config GD32F4_TIMER0
-# 	bool "TIMER0"
-# 	default n
-# 	depend on GD32F4_HAVE_TIMER0
+#	bool "TIMER0"
+#	default n
+#	depend on GD32F4_HAVE_TIMER0
 
 config GD32F4_TIMER0_PWM
 	bool "TIMER0 PWM"

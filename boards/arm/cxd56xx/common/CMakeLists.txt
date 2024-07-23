@@ -27,8 +27,8 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS src/cxd56_audio.c)
   endif()
 
-  if(CONFIG_MODEM_ALTMDM)
-    list(APPEND SRCS src/cxd56_altmdm.c)
+  if(CONFIG_MODEM_ALT1250)
+    list(APPEND SRCS src/cxd56_alt1250.c)
   endif()
 
   if(CONFIG_BOARDCTL_UNIQUEID)
@@ -177,6 +177,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
 
   if(CONFIG_BOARD_USBDEV_SERIALSTR)
     list(APPEND SRCS src/cxd56_usbdevserialstr.c)
+  endif()
+
+  if(CONFIG_PM)
+    list(APPEND SRCS src/cxd56_pm.c)
   endif()
 
   if(CONFIG_CXD56_GNSS_ADDON)

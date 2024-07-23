@@ -16,7 +16,7 @@ makes additional P112 derivative hobbyist home brew computers.
 P112 board. Boards from Kickstarter project will not be available,
 however, until the third quarter of 2013. So it will be some time before
 this port is verified on hardware. Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/z80/z180/p112/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/z80/z180/boards/p112/README.txt>`__
 file for further information.
 
 The arch/z80 directories contain files to support a variety of 8-bit architectures

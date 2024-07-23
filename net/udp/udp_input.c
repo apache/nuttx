@@ -64,6 +64,125 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: udp_is_broadcast
+ *
+ * Description:
+ *   Check if the destination address is a broadcast/multicast address.
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the received UDP packet
+ *
+ * Returned Value:
+ *   True if the destination address is a broadcast/multicast address
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_BROADCAST)
+static bool udp_is_broadcast(FAR struct net_driver_s *dev)
+{
+  /* Check if the destination address is a broadcast/multicast address */
+
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
+  if (IFF_IS_IPv4(dev->d_flags))
+#  endif
+    {
+      FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+      in_addr_t destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
+
+      return net_ipv4addr_cmp(destipaddr, INADDR_BROADCAST) ||
+             IN_MULTICAST(NTOHL(destipaddr)) ||
+             (net_ipv4addr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask)
+              && net_ipv4addr_broadcast(destipaddr, dev->d_netmask));
+    }
+#endif
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
+  else
+#  endif
+    {
+      FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+      return net_is_addr_mcast(ipv6->destipaddr);
+    }
+#endif
+
+  return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: udp_input_conn
+ *
+ * Description:
+ *   Handle incoming UDP input for the case where there is an active
+ *   connection.
+ *
+ * Input Parameters:
+ *   dev      - The device driver structure containing the received UDP pkt
+ *   conn     - The UDP connection structure associated with the packet
+ *   udpiplen - Length of the IP and UDP headers
+ *
+ * Returned Value:
+ *   OK     - The packet has been processed
+ *  -EAGAIN - Hold the packet and try again later.  There is a listening
+ *            socket but no receive in place to catch the packet yet.  The
+ *            device's d_len will be set to zero in this case as there is
+ *            no outgoing data.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static int udp_input_conn(FAR struct net_driver_s *dev,
+                          FAR struct udp_conn_s *conn, unsigned int udpiplen)
+{
+  uint16_t flags;
+
+  /* Set-up for the application callback */
+
+  dev->d_appdata = IPBUF(udpiplen);
+  dev->d_sndlen  = 0;
+
+  /* Perform the application callback */
+
+  flags = udp_callback(dev, conn, UDP_NEWDATA);
+
+  /* If the operation was successful and the UDP data was "consumed,"
+   * then the UDP_NEWDATA flag will be cleared by logic in
+   * udp_callback().  The packet memory can then be freed by the
+   * network driver.  OK will be returned to the network driver to
+   * indicate this case.
+   *
+   * "Consumed" here means that either the received data was (1)
+   * accepted by a socket waiting for data on the port or was (2)
+   * buffered in the UDP socket's read-ahead buffer.
+   */
+
+  if ((flags & UDP_NEWDATA) != 0)
+    {
+      /* No.. the packet was not processed now.  Return -EAGAIN so
+       * that the driver may retry again later.  We still need to
+       * set d_len to zero so that the driver is aware that there
+       * is nothing to be sent.
+       */
+
+      nwarn("WARNING: Packet not processed\n");
+      dev->d_len = 0;
+      return -EAGAIN;
+    }
+
+  /* If the application has data to send, setup the UDP/IP header */
+
+  if (dev->d_sndlen > 0)
+    {
+      udp_send(dev, conn);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: udp_input
  *
  * Description:
@@ -90,6 +209,10 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 {
   FAR struct udp_hdr_s *udp;
   FAR struct udp_conn_s *conn;
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_BROADCAST)
+  FAR struct udp_conn_s *nextconn;
+  FAR struct iob_s *iob;
+#endif
   unsigned int udpiplen;
 #ifdef CONFIG_NET_UDP_CHECKSUMS
   uint16_t chksum;
@@ -157,64 +280,54 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
     {
       /* Demultiplex this UDP packet between the UDP "connections".
        *
-       * REVISIT:  The logic here expects either a single receive socket or
-       * none at all.  However, multiple sockets should be capable of
-       * receiving a UDP datagram (multicast reception).  This could be
-       * handled easily by something like:
-       *
-       *   for (conn = NULL; conn = udp_active(dev, udp); )
-       *
-       * If the callback logic that receives a packet responds with an
-       * outgoing packet, then it will over-write the received buffer,
-       * however.  recvfrom() will not do that, however.  We would have to
-       * make that the rule: Recipients of a UDP packet must treat the
-       * packet as read-only.
+       * REVISIT:  If the callback logic that receives a packet responds with
+       * an outgoing packet, then it may be ignored.  recvfrom() will not do
+       * that, however.
        */
 
-      conn = udp_active(dev, udp);
+      conn = udp_active(dev, NULL, udp);
       if (conn)
         {
-          uint16_t flags;
+          /* We'll only get multiple conn when we support SO_REUSEADDR */
 
-          /* Set-up for the application callback */
+#if defined(CONFIG_NET_SOCKOPTS) && defined(CONFIG_NET_BROADCAST)
+          /* Check if the destination is a broadcast/multicast address */
 
-          dev->d_appdata = IPBUF(udpiplen);
-          dev->d_sndlen  = 0;
-
-          /* Perform the application callback */
-
-          flags = udp_callback(dev, conn, UDP_NEWDATA);
-
-          /* If the operation was successful and the UDP data was "consumed,"
-           * then the UDP_NEWDATA flag will be cleared by logic in
-           * udp_callback().  The packet memory can then be freed by the
-           * network driver.  OK will be returned to the network driver to
-           * indicate this case.
-           *
-           * "Consumed" here means that either the received data was (1)
-           * accepted by a socket waiting for data on the port or was (2)
-           * buffered in the UDP socket's read-ahead buffer.
-           */
-
-          if ((flags & UDP_NEWDATA) != 0)
+          if (udp_is_broadcast(dev))
             {
-              /* No.. the packet was not processed now.  Return -EAGAIN so
-               * that the driver may retry again later.  We still need to
-               * set d_len to zero so that the driver is aware that there
-               * is nothing to be sent.
-               */
+              /* Do we have second connection that can hold this packet? */
 
-              nwarn("WARNING: Packet not processed\n");
-              dev->d_len = 0;
-              ret = -EAGAIN;
+              while ((nextconn = udp_active(dev, conn, udp)) != NULL)
+                {
+                  /* Yes... There are multiple listeners on the same port.
+                   * We need to clone the packet and deliver it to each
+                   * listener.
+                   */
+
+                  iob = netdev_iob_clone(dev, true);
+                  if (iob == NULL)
+                    {
+                      nerr("ERROR: IOB clone failed.\n");
+                      break; /* We can still process once without clone. */
+                    }
+
+                  ret = udp_input_conn(dev, conn, udpiplen);
+                  if (ret < 0)
+                    {
+                      nwarn("WARNING: A conn failed to process the pkt %d\n",
+                            ret); /* We can still continue for next conn. */
+                    }
+
+                  netdev_iob_replace(dev, iob);
+                  udp  = IPBUF(iplen);
+                  conn = nextconn;
+                }
             }
+#endif
 
-          /* If the application has data to send, setup the UDP/IP header */
+          /* We can deliver the packet directly to the last listener. */
 
-          if (dev->d_sndlen > 0)
-            {
-              udp_send(dev, conn);
-            }
+          ret = udp_input_conn(dev, conn, udpiplen);
         }
       else
         {

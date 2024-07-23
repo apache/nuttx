@@ -81,6 +81,22 @@ All PM interfaces are declared in the file ``include/nuttx/power/pm.h``.
   initialized (since they may attempt to register with the power
   management subsystem).
 
+.. c:function:: int pm_domain_register(int domain, FAR struct pm_callback_s *cb)
+
+  Called by a device driver in order to register to receive power
+  management event callbacks from specific domain.
+  Refer to the `Callbacks`_
+  section for more details.
+
+  :param domain: Identifies the target register domain
+  :param cb:
+    An instance of :c:struct:`pm_callback_s`
+    providing the driver callback functions.
+
+  :return:
+    Zero (``OK``) on success; otherwise a negated
+    ``errno`` value is returned.
+
 .. c:function:: int pm_register(FAR struct pm_callback_s *callbacks)
 
   Called by a device driver in
@@ -88,7 +104,27 @@ All PM interfaces are declared in the file ``include/nuttx/power/pm.h``.
   Refer to the `Callbacks`_
   section for more details.
 
+  Compatible kept, only register to PM_IDLE_DOMAIN by marcro.
+
   :param callbacks:
+    An instance of :c:struct:`pm_callback_s`
+    providing the driver callback functions.
+
+  :return:
+    Zero (``OK``) on success; otherwise a negated
+    ``errno`` value is returned.
+
+.. c:function:: int pm_domain_unregister(int domain, FAR struct pm_callback_s *cb)
+
+  Called by a device driver in order to unregister previously
+  registered power management event from specific domain.
+  callbacks. Refer to the `Callbacks`_
+  section for more details.
+
+  **Input Parameters:**
+
+  :param domain: Identifies the target unregister domain
+  :param cb:
     An instance of :c:struct:`pm_callback_s`
     providing the driver callback functions.
 
@@ -102,6 +138,8 @@ All PM interfaces are declared in the file ``include/nuttx/power/pm.h``.
   order to unregister previously registered power management event
   callbacks. Refer to the `Callbacks`_
   section for more details.
+
+  Compatible kept, only unregister with PM_IDLE_DOMAIN by marcro.
 
   **Input Parameters:**
 

@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32f7/stm32f746-disco/CMakeLists.txt
+# boards/arm/stm32f7/stm32f746g-disco/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for

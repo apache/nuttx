@@ -81,6 +81,15 @@ config LIBC_FTOK_VFS_PATH
 	---help---
 		The relative path to where ftok will exist in the root namespace.
 
+config LIBC_UNAME_DISABLE_TIMESTAMP
+	bool "Disable uname timestamp support"
+	default n
+	---help---
+		Currently uname command will print the timestamp
+		when the binary was built, and it generates an issue
+		because two identical built binaries will have differents
+		hashes/CRC.
+
 choice
 	prompt "Select memfd implementation"
 

@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Peripheral Support"
+
+config CXD32_UART0
+	bool "UART0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		UART0 must be used as console device at CXD32xx.
+
+endmenu # "Peripheral Support"

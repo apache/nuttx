@@ -40,6 +40,14 @@ if(COMPARE_RESULT EQUAL 0 AND EXISTS ${CONFIG_H})
   return()
 endif()
 
+set(BASE_DEFCONFIG "${NUTTX_BOARD}/${NUTTX_CONFIG}")
+execute_process(
+  COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_BINARY_DIR}/.config
+          ${CMAKE_BINARY_DIR}/.config.orig RESULT_VARIABLE COMPARE_RESULT)
+if(COMPARE_RESULT)
+  string(APPEND BASE_DEFCONFIG "-dirty")
+endif()
+
 set(DEQUOTELIST
     # NuttX
     "CONFIG_DEBUG_OPTLEVEL" # Custom debug level
@@ -81,13 +89,20 @@ file(APPEND ${CONFIG_H} "#define CONFIG_y 1\n")
 file(APPEND ${CONFIG_H} "#define CONFIG_m 2\n\n")
 file(APPEND ${CONFIG_H}
      "/* General Definitions ***********************************/\n")
+file(APPEND ${CONFIG_H} "#define CONFIG_BASE_DEFCONFIG \"${BASE_DEFCONFIG}\"\n")
 
 file(STRINGS ${CMAKE_BINARY_DIR}/.config ConfigContents)
+encode_brackets(ConfigContents)
 foreach(NameAndValue ${ConfigContents})
+  decode_brackets(NameAndValue)
+  encode_semicolon(NameAndValue)
   string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
   string(REGEX MATCH "^CONFIG[^=]+" NAME ${NameAndValue})
+  # skip BASE_DEFCONFIG here as it is handled above
+  if("${NAME}" STREQUAL "CONFIG_BASE_DEFCONFIG")
+    continue()
+  endif()
   string(REPLACE "${NAME}=" "" VALUE ${NameAndValue})
-
   if(NAME AND NOT "${VALUE}" STREQUAL "")
     if(${VALUE} STREQUAL "y")
       file(APPEND ${CONFIG_H} "#define ${NAME} 1\n")
@@ -99,7 +114,8 @@ foreach(NameAndValue ${ConfigContents})
       foreach(dequote ${DEQUOTELIST})
         if("${NAME}" STREQUAL "${dequote}")
           if(NOT "${VALUE}" STREQUAL "\"\"")
-            string(REGEX REPLACE "\"" "" VALUE ${VALUE})
+            string(REGEX REPLACE "^\"(.*)\"$" "\\1" VALUE "${VALUE}")
+            string(REGEX REPLACE "\\\\\\\"" "\"" VALUE "${VALUE}")
           else()
             set(VALUE)
             file(APPEND ${CONFIG_H} "#undef ${NAME}\n")
@@ -108,6 +124,7 @@ foreach(NameAndValue ${ConfigContents})
         endif()
       endforeach()
       if(NOT "${VALUE}" STREQUAL "")
+        decode_semicolon(VALUE)
         file(APPEND ${CONFIG_H} "#define ${NAME} ${VALUE}\n")
       endif()
     endif()

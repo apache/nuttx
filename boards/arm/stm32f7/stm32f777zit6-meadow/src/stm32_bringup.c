@@ -32,6 +32,15 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/board.h>
+
+#ifdef CONFIG_AUDIO_CS4344
+#  include "stm32_cs4344.h"
+#endif
+
+#include "chip.h"
+#include "stm32_gpio.h"
+#include "stm32_rcc.h"
 
 #include "stm32f777zit6-meadow.h"
 
@@ -136,6 +145,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_AUDIO_CS4344
+  /* Configure CS4344 audio as /dev/pcm0 on I2S2 */
+
+  ret = board_cs4344_initialize(1, 2);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to initialize CS4344 audio: %d\n", ret);
     }
 #endif
 

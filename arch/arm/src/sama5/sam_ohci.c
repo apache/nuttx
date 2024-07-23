@@ -202,7 +202,7 @@
 /* This structure contains one endpoint list.  The main reason for the
  * existence of this structure is to contain the sem_t value associated with
  * the ED.  It doesn't work well within the ED itself because then the
- * semaphore counter is subject to DMA cache operations (invalidate a
+ * semaphore counter is subject to DMA cache operations (invalidating a
  * modified semaphore count is fatal!).
  */
 
@@ -253,11 +253,11 @@ struct sam_ohci_s
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   uint8_t ininterval;          /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
-  uint8_t outinterval;         /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
+  uint8_t outinterval;         /* Minimum periodic OUT EP polling interval: 2, 4, 6, 16, or 32 */
 #endif
 
   rmutex_t lock;               /* Support mutually exclusive access */
-  sem_t pscsem;                /* Semaphore to wait Writeback Done Head event */
+  sem_t pscsem;                /* Semaphore to wait for Root Hub Status Change event */
   struct work_s work;          /* Supports interrupt bottom half */
 
 #ifdef CONFIG_USBHOST_HUB
@@ -273,7 +273,7 @@ struct sam_ohci_s
   struct sam_rhport_s rhport[SAM_OHCI_NRHPORT];
 };
 
-/* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
+/* The OHCI expects the size of an endpoint descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes.  This
  * is necessary first because the Cortex-A5 cache line size is 32 bytes and
  * this is the smallest amount of memory that we can perform cache
@@ -298,7 +298,7 @@ struct sam_ed_s
 
 #define SIZEOF_SAM_ED_S 32
 
-/* The OCHI expects the size of an transfer descriptor to be 16 bytes.
+/* The OHCI expects the size of an transfer descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes in
  * RAM.  This extra 16-bytes is used by the OHCI host driver in order to
  * maintain additional endpoint-specific data.
@@ -1428,7 +1428,7 @@ static inline int sam_remisoced(struct sam_ed_s *ed)
  *
  * Description:
  *   Enqueue a transfer descriptor.  Notice that this function only supports
- *   queue on TD per ED.
+ *   queueing one TD per ED.
  *
  ****************************************************************************/
 
@@ -1566,7 +1566,7 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
 
   /* Initialize the control endpoint for this port.
    * Set up some default values (like max packetsize = 8).
-   * NOTE that the SKIP bit is set until the first readl TD is added.
+   * NOTE that the SKIP bit is set until the first real TD is added.
    */
 
   memset(edctrl, 0, sizeof(struct sam_ed_s));
@@ -1877,8 +1877,8 @@ static int sam_ctrltd(struct sam_rhport_s *rhport,
 #warning REVISIT
       nxrmutex_unlock(&g_ohci.lock);
 
-      /* Wait for the Writeback Done Head interrupt  Loop to handle any false
-       * alarm semaphore counts.
+      /* Wait for the Writeback Done Head interrupt.  Loop to handle any
+       * false alarm semaphore counts.
        */
 
       while (eplist->wdhwait && ret >= 0)
@@ -1886,7 +1886,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport,
           ret = nxsem_wait_uninterruptible(&eplist->wdhsem);
         }
 
-      /* Re-acquire the ECHI semaphore.  The caller expects to be holding
+      /* Re-acquire the OHCI semaphore.  The caller expects to be holding
        * this upon return.
        */
 
@@ -2170,15 +2170,14 @@ static void sam_wdh_bottomhalf(void)
             }
 #endif
 
-          /* Determine the number of bytes actually transfer by* subtracting
-           * the buffer start address from the CBP.    A value of zero means
-           * that all bytes were transferred.
+          /* Determine the number of bytes actually transferred.
+           * A CBP value of zero means that all bytes were transferred.
            */
 
           tmp = (uintptr_t)td->hw.cbp;
           if (tmp == 0)
             {
-              /* Set the (fake) CBP to the end of the buffer + 1 */
+              /* All bytes have been transferred */
 
               tmp = eplist->buflen;
             }
@@ -2230,7 +2229,7 @@ static void sam_wdh_bottomhalf(void)
  *
  * Description:
  *   OHCI interrupt bottom half.  This function runs on the high priority
- *   worker thread and was xcheduled when the last interrupt occurred.  The
+ *   worker thread and was scheduled when the last interrupt occurred.  The
  *   set of pending interrupts is provided as the argument.  OHCI interrupts
  *   were disabled when this function is scheduled so no further interrupts
  *   can occur until this work re-enables OHCI interrupts
@@ -3409,7 +3408,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 #warning REVISIT
   nxrmutex_unlock(&g_ohci.lock);
 
-  /* Wait for the Writeback Done Head interrupt  Loop to handle any false
+  /* Wait for the Writeback Done Head interrupt.  Loop to handle any false
    * alarm semaphore counts.
    */
 
@@ -3418,7 +3417,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       ret = nxsem_wait_uninterruptible(&eplist->wdhsem);
     }
 
-  /* Re-acquire the OCHI semaphore.  The caller expects to be holding
+  /* Re-acquire the OHCI semaphore.  The caller expects to be holding
    * this upon return.
    */
 
@@ -4160,7 +4159,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
   sam_putreg((SAM_ALL_INTS | OHCI_INT_MIE), SAM_USBHOST_INTEN);
 
 #ifndef CONFIG_SAMA5_EHCI
-  /* Attach USB host controller interrupt handler.  If ECHI is enabled,
+  /* Attach USB host controller interrupt handler.  If EHCI is enabled,
    * then it will manage the shared interrupt.
    */
 
@@ -4204,7 +4203,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
                       i + 1, g_ohci.rhport[i].connected);
     }
 
-  /* Enable interrupts at the interrupt controller.  If ECHI is enabled,
+  /* Enable interrupts at the interrupt controller.  If EHCI is enabled,
    * then it will manage the shared interrupt.
    */
 

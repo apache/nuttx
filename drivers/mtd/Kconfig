@@ -195,6 +195,13 @@ config MTD_CONFIG_FAIL_SAFE
 		This replaces the drivers/mtd/mtd_config, which
 		is resilient to power loss.
 
+config MTD_WRITE_ALIGN_SIZE
+	int "align size [1,2,4,8,16] for per write operation"
+	default 1
+	depends on MTD_CONFIG_FAIL_SAFE
+	---help---
+		align size will be one of 1,2,4,8,16
+
 endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
@@ -271,17 +278,82 @@ config MTD_NAND_EMBEDDEDECC
 		only one supported) is Micron, 4-bit ECC, device size = 1Gb or 2Gb
 		or 4Gb.
 
+config MTD_NAND_RAM
+	bool "Enable virtual NAND Flash"
+	default n
+	---help---
+		Enable a virtual NAND Flash device emulated from RAM in the simulator.
+
+if MTD_NAND_RAM
+
+config MTD_NAND_RAM_SIZE
+	int "Size of the virtual NAND Flash in MB."
+	default 2
+	---help---
+		Size of the virtual NAND Flash in megabytes.
+
+config MTD_NAND_RAM_DEBUG
+	bool "Enable debugging of virtual NAND Flash."
+	default n
+	---help---
+		Enables debug info being written to syslog for virtual NAND Flash
+		device emulated from RAM in the simulator.
+
+config MTD_NAND_RAM_DEBUG_LEVEL
+	int "Debugging level of virtual NAND Flash raw lower half operations."
+	depends on MTD_NAND_RAM_DEBUG
+	default 1
+	range 1 3
+	---help---
+		1 - Log every instruction.
+		2 - Log every 5 instructions.
+		3 - Log every 10 instructions.
+
+config MTD_NAND_RAM_STATUS
+	int "Log status of virtual NAND Flash."
+	depends on MTD_NAND_RAM_DEBUG
+	default 3
+	range 1 8
+	---help---
+		1 - Log every instruction.
+		2 - Log every 5 instructions.
+		3 - Log every 10 instructions.
+		4 - Log every 50 instructions.
+		5 - Log every 100 instructions.
+		6 - Log every 500 instructions.
+		7 - Log every 1000 instructions.
+		8 - Log every 5000 instructions.
+
+endif #MTD_NAND_RAM
+
+config MTD_NAND_WRAPPER
+	bool "Enable logging wrapper for NAND flash upper half operations."
+	default n
+
+if MTD_NAND_WRAPPER
+
+config MTD_NAND_WRAPPER_DEBUG_LEVEL
+	int "Log level of upper half of virtual NAND Flash."
+	default 1
+	range 1 3
+	---help---
+		1 - Log every instruction.
+		2 - Log every 5 instructions.
+		3 - Log every 10 instructions.
+
+endif # MTD_NAND_WRAPPER
+
 endif # MTD_NAND
 
 config RPMSGMTD
 	bool "MTD RPMSG Client Enable"
 	default n
-	depends on RPTUN
+	depends on RPMSG
 
 config RPMSGMTD_SERVER
 	bool "MTD RPMSG Server Enable"
 	default n
-	depends on RPTUN
+	depends on RPMSG
 
 config RAMMTD
 	bool "RAM-based MTD driver"
@@ -424,7 +496,7 @@ config AT24XX_FREQUENCY
 	int "AT24xx I2C bus frequency"
 	default 100000
 	---help---
-		Set the I2C frequency to use when accessing the AT24CXX EEPROM. 
+		Set the I2C frequency to use when accessing the AT24CXX EEPROM.
 		This value must represent a valid I2C speed (normally less than
 		400.000) or the driver might fail.
 
@@ -437,7 +509,7 @@ config MTD_AT25EE
 	select MTD_BYTE_WRITE
 	---help---
 		Build support for SPI-based AT25xx type EEPROMs. MTD on EEPROM can
-		perform poorly, so it is possible only usable if the EEPROM has a 
+		perform poorly, so it is possible only usable if the EEPROM has a
 		clock speed 10MHz or higher. EEPROMs that use the same commands as
 		the 25AA160 should work OK.
 
@@ -453,7 +525,7 @@ choice
 		pages so that the file system block size is, say, 128, 256 or
 		512 bytes.
 
-		In any event, the block size *must* be an even multiple of the 
+		In any event, the block size *must* be an even multiple of the
 		number of pages and, often, needs to be a factor 2.
 
 		This is up to the user to check!

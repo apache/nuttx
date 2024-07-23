@@ -85,7 +85,8 @@ uint64_t sbi_get_mtime(void)
 
 void sbi_set_mtimecmp(uint64_t value)
 {
-  uintptr_t mtimecmp = g_mtimecmp + READ_CSR(mhartid) * sizeof(uintptr_t);
+  uintptr_t mtimecmp = g_mtimecmp +
+                       READ_CSR(CSR_MHARTID) * sizeof(uintptr_t);
 #if CONFIG_ARCH_RV_MMIO_BITS == 64
   putreg64(value, mtimecmp);
 #else

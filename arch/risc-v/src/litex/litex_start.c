@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/fdt.h>
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
@@ -55,18 +56,6 @@
  * Public Data
  ****************************************************************************/
 
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
- * linker script. _ebss lies at the end of the BSS region. The idle task
- * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
- * The IDLE thread is the thread that the system boots on and, eventually,
- * becomes the IDLE, do nothing task that runs only when there is nothing
- * else to run.  The heap continues from there until the end of memory.
- * g_idle_topstack is a read-only variable the provides this computed
- * address.
- */
-
-uintptr_t g_idle_topstack = LITEX_IDLESTACK_TOP;
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -75,8 +64,11 @@ uintptr_t g_idle_topstack = LITEX_IDLESTACK_TOP;
  * Name: __litex_start
  ****************************************************************************/
 
-void __litex_start(void)
+void __litex_start(int hart_index, const void * fdt, int arg)
 {
+  (void)hart_index;
+  (void)arg;
+
   const uint32_t *src;
   uint32_t *dest;
 
@@ -104,7 +96,18 @@ void __litex_start(void)
       *dest++ = *src++;
     }
 
-#ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
+  /* Assume the FDT address was passed in if not NULL */
+
+  if (fdt)
+    {
+      fdt_register(fdt);
+    }
+  else
+    {
+      fdt_register((const char *)CONFIG_LITEX_FDT_MEMORY_ADDRESS);
+    }
+
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
   riscv_percpu_add_hart(0);
 #endif
 

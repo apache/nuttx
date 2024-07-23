@@ -26,10 +26,17 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <nuttx/wireless/lte/lte_ioctl.h>
 
 #include "altcom_lwm2m_hdlr.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NO_MEMBER (-1)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -328,17 +335,16 @@ static int32_t stop_ov_request_hndl(FAR uint8_t *pktbuf, size_t pktsz,
 }
 
 /****************************************************************************
- * name: fwup_srvop_handle
+ * name: fwupdate_notice_hndl
  ****************************************************************************/
 
-static int32_t fwup_srvop_handle(FAR uint8_t *pktbuf, size_t pktsz,
+static int32_t fwupdate_notice_hndl(FAR uint8_t *pktbuf, size_t pktsz,
                           FAR void **cb_args, size_t arglen)
 {
   uint8_t *ep;
   FAR int *event = (FAR int *)&cb_args[0];
 
   /* Expected unsolicited event
-   *    %LWM2MOPEV: <event>[,....
    *    %LWM2MEV: <event>[,....
    */
 
@@ -352,13 +358,31 @@ static int32_t fwup_srvop_handle(FAR uint8_t *pktbuf, size_t pktsz,
 }
 
 /****************************************************************************
- * name: fwupdate_notice_hndl
+ * name: parse_inst_number
  ****************************************************************************/
 
-static int32_t fwupdate_notice_hndl(FAR uint8_t *pktbuf, size_t pktsz,
-                          FAR void **cb_args, size_t arglen)
+static int parse_inst_number(FAR uint8_t **buf, FAR size_t *bufsz)
 {
-  return fwup_srvop_handle(pktbuf, pktsz, cb_args, arglen);
+  int ret = 0;
+
+  if (!isdigit(**buf))
+    {
+      return NO_MEMBER;
+    }
+
+  while (*bufsz)
+    {
+      if (!isdigit(**buf))
+        {
+          break;
+        }
+
+      ret = ret * 10 + ((**buf) - '0');
+      (*bufsz)--;
+      (*buf)++;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -366,9 +390,57 @@ static int32_t fwupdate_notice_hndl(FAR uint8_t *pktbuf, size_t pktsz,
  ****************************************************************************/
 
 static int32_t server_op_notice_hndl(FAR uint8_t *pktbuf, size_t pktsz,
-                          FAR void **cb_args, size_t arglen)
+                                     FAR void **cb_args, size_t arglen)
 {
-  return fwup_srvop_handle(pktbuf, pktsz, cb_args, arglen);
+  int i;
+  FAR int *event = (FAR int *)&cb_args[0];
+  FAR int *srvid = (FAR int *)&cb_args[1];
+  FAR int *inst  = (FAR int *)cb_args[2];
+
+  /* The content of "inst" is a type of struct lwm2mstub_instance_s in fact.
+   * But actually it is the same as int[4].
+   * To make simpler logic, inst is defined as int[4] (int pointer).
+   */
+
+  /* Set invalid value as initialize */
+
+  *srvid = -1;
+  inst[0] = -1;
+  inst[1] = -1;
+  inst[2] = -1;
+  inst[3] = -1;
+
+  /* Expected unsolicited event
+   *    %LWM2MOPEV: <event>[,[<serverShortId>],[<ObjectID>],
+   *                         [<ObjectInstanceID>],[<ResourceID>],
+   *                         [<ResourceInstanceID>],[<val>][,<MsgId>]]
+   */
+
+  *event = parse_inst_number(&pktbuf, &pktsz);
+  if (*event < 0)
+    {
+      return ERROR;
+    }
+
+  if (pktsz > 0 && pktbuf[0] == ',')
+    {
+      pktsz--;
+      pktbuf++;
+
+      *srvid = parse_inst_number(&pktbuf, &pktsz);
+
+      for (i = 0; i < 4 && pktsz > 0 && pktbuf[0] == ','; i++)
+        {
+          /* Skip comma */
+
+          pktbuf++;
+          pktsz--;
+
+          inst[i] = parse_inst_number(&pktbuf, &pktsz);
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************

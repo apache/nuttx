@@ -1436,4 +1436,22 @@ config CXD56_USE_SYSBUS
 	---help---
 		To make ldrex/strex work correctly, this option must be enabled
 
+config CXD56_GNSS_RAM
+	bool "Use GNSS RAM as general memory"
+	default !CXD56_SUBCORE
+	---help---
+		Enable to use GNSS RAM as general memory. As long as the GNSS feature
+		is not used, GNSS RAM can be used as general memory. This memory is
+		640KByte total, which is lower performance than the application RAM.
+
+if CXD56_GNSS_RAM
+
+config CXD56_GNSS_HEAP
+	bool "Use GNSS RAM as heap memory"
+	default y
+	---help---
+		Enable to use GNSS RAM as heap memory.
+
+endif # CXD56_GNSS_RAM
+
 endmenu

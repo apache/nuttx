@@ -138,6 +138,11 @@
 #include <nuttx/usb/adb.h>
 #endif
 
+#ifdef CONFIG_I2C_DRIVER
+#include <nuttx/i2c/i2c_master.h>
+#include "stm32_i2c.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -170,6 +175,37 @@
 #  define MMCSD_MINOR CONFIG_NSH_MMCSDMINOR
 #else
 #  define MMCSD_MINOR 0
+#endif
+
+/****************************************************************************
+ * Name: stm32_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_I2C_DRIVER
+static void stm32_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 bus, ret);
+          stm32_i2cbus_uninitialize(i2c);
+        }
+    }
+}
 #endif
 
 /****************************************************************************
@@ -222,6 +258,19 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_I2C_DRIVER
+  /* Register I2C drivers on behalf of the I2C tool */
+  #ifdef CONFIG_STM32_I2C1
+    stm32_i2c_register(1);
+  #endif
+  #ifdef CONFIG_STM32_I2C2
+    stm32_i2c_register(2);
+  #endif
+  #ifdef CONFIG_STM32_I2C3
+    stm32_i2c_register(3);
+  #endif
 #endif
 
 #ifdef CONFIG_LCD_BACKPACK

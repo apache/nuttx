@@ -50,6 +50,16 @@
 #define KASAN_REGION_SIZE(size) \
   (sizeof(struct kasan_region_s) + KASAN_SHADOW_SIZE(size))
 
+#ifdef CONFIG_MM_KASAN_GLOBAL
+
+#  define KASAN_GLOBAL_SHADOW_SCALE (32)
+
+#  define KASAN_GLOBAL_NEXT_REGION(region) \
+  (FAR struct kasan_region_s *) \
+  ((FAR char *)region->shadow + (size_t)region->next)
+
+#endif
+
 #define KASAN_INIT_VALUE            0xDEADCAFE
 
 /****************************************************************************
@@ -59,9 +69,9 @@
 struct kasan_region_s
 {
   FAR struct kasan_region_s *next;
-  uintptr_t                  begin;
-  uintptr_t                  end;
-  uintptr_t                  shadow[1];
+  uintptr_t begin;
+  uintptr_t end;
+  uintptr_t shadow[1];
 };
 
 /****************************************************************************
@@ -71,6 +81,14 @@ struct kasan_region_s
 static spinlock_t g_lock;
 static FAR struct kasan_region_s *g_region;
 static uint32_t g_region_init;
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_KASAN_GLOBAL
+extern const unsigned char g_globals_region[];
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -98,6 +116,22 @@ static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
           return &region->shadow[addr / KASAN_BITS_PER_WORD];
         }
     }
+
+#ifdef CONFIG_MM_KASAN_GLOBAL
+  for (region = (FAR struct kasan_region_s *)g_globals_region;
+       region->next;
+       region = KASAN_GLOBAL_NEXT_REGION(region))
+    {
+      if (addr >= region->begin && addr < region->end)
+        {
+          DEBUGASSERT(addr + size <= region->end);
+          addr -= region->begin;
+          addr /= KASAN_GLOBAL_SHADOW_SCALE;
+          *bit  = addr % KASAN_BITS_PER_WORD;
+          return &region->shadow[addr / KASAN_BITS_PER_WORD];
+        }
+    }
+#endif
 
   return NULL;
 }
@@ -314,3 +348,15 @@ DEFINE_ASAN_LOAD_STORE(2)
 DEFINE_ASAN_LOAD_STORE(4)
 DEFINE_ASAN_LOAD_STORE(8)
 DEFINE_ASAN_LOAD_STORE(16)
+
+#ifdef CONFIG_MM_KASAN_GLOBAL
+void __asan_register_globals(void *ptr, ssize_t size)
+{
+  /* Shut up compiler complaints */
+}
+
+void __asan_unregister_globals(void *ptr, ssize_t size)
+{
+  /* Shut up compiler complaints */
+}
+#endif

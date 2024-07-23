@@ -18,23 +18,35 @@
 #
 ############################################################################
 
-# Common x86_64 and intel64 files
+include common/Make.defs
 
-CMN_CSRCS += x86_64_allocateheap.c x86_64_copystate.c x86_64_exit.c
-CMN_CSRCS += x86_64_getintstack.c x86_64_mdelay.c x86_64_initialize.c
-CMN_CSRCS += x86_64_modifyreg8.c x86_64_modifyreg16.c x86_64_modifyreg32.c
-CMN_CSRCS += x86_64_nputs.c x86_64_switchcontext.c x86_64_udelay.c
 CMN_CSRCS += intel64_createstack.c intel64_initialstate.c intel64_irq.c
 CMN_CSRCS += intel64_map_region.c intel64_regdump.c intel64_releasestack.c
 CMN_CSRCS += intel64_rtc.c intel64_restore_auxstate.c intel64_savestate.c
 CMN_CSRCS += intel64_stackframe.c intel64_schedulesigaction.c
 CMN_CSRCS += intel64_sigdeliver.c intel64_usestack.c x86_64_tcbinfo.c
+CMN_CSRCS += intel64_systemreset.c intel64_freq.c intel64_cache.c
 
 # Required Intel64 files
 
 CHIP_ASRCS  = intel64_saveusercontext.S intel64_fullcontextrestore.S intel64_vectors.S intel64_head.S
-CHIP_CSRCS  = intel64_handlers.c intel64_idle.c intel64_lowsetup.c
+CHIP_CSRCS  = intel64_start.c intel64_handlers.c intel64_idle.c intel64_lowsetup.c
 CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
+CHIP_CSRCS += intel64_cpu.c
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CHIP_CSRCS += intel64_pgalloc.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_TESTSET), y)
+CHIP_ASRCS += intel64_testset.S
+endif
+
+ifeq ($(CONFIG_SMP),y)
+CHIP_CSRCS += intel64_cpuidlestack.c
+CHIP_CSRCS += intel64_cpupause.c
+CHIP_CSRCS += intel64_cpustart.c
+endif
 
 # Configuration-dependent intel64 files
 
@@ -42,11 +54,22 @@ ifeq ($(CONFIG_MULTBOOT2_FB_TERM),y)
 CHIP_CSRCS += intel64_mbfb.c
 endif
 
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += intel64_timerisr.c
-endif
-
+ifeq ($(CONFIG_ARCH_INTEL64_HAVE_TSC),y)
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
-CHIP_CSRCS += intel64_tickless.c
+CHIP_CSRCS += intel64_tsc_tickless.c
+else
+CHIP_CSRCS += intel64_tsc_timerisr.c
+endif
 endif
 
+ifeq ($(CONFIG_INTEL64_HPET),y)
+CHIP_CSRCS += intel64_hpet.c
+endif
+
+ifeq ($(CONFIG_INTEL64_ONESHOT),y)
+CHIP_CSRCS += intel64_oneshot.c intel64_oneshot_lower.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CHIP_CSRCS += intel64_fpucmp.c
+endif

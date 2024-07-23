@@ -111,7 +111,15 @@
  * referenced is passed to get the state from the TCB.
  */
 
-#define x86_64_restorestate(regs) (g_current_regs = regs)
+#define x86_64_restorestate(regs) (up_set_current_regs(regs))
+
+/* ISR/IRQ stack size */
+
+#if CONFIG_ARCH_INTERRUPTSTACK == 0
+#  define IRQ_STACK_SIZE 0x2000
+#else
+#  define IRQ_STACK_SIZE CONFIG_ARCH_INTERRUPTSTACK
+#endif
 
 /****************************************************************************
  * Public Types
@@ -132,13 +140,13 @@ typedef void (*up_vector_t)(void);
  * end of the heap is CONFIG_RAM_END
  */
 
-extern const uintptr_t g_idle_topstack;
+extern const uintptr_t g_idle_topstack[];
 
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 extern uint8_t g_intstackalloc[];
-extern uint8_t g_intstacktop[];
+extern uint8_t g_intstackalloc[];
 #endif
 
 /* These symbols are setup by the linker script. */
@@ -221,7 +229,7 @@ void x86_64_timer_initialize(void);
 
 /* Defined in board/x86_64_network.c */
 
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void x86_64_netinitialize(void);
 #else
 #  define x86_64_netinitialize()
@@ -233,6 +241,12 @@ void x86_64_usbuninitialize(void);
 #else
 #  define x86_64_usbinitialize()
 #  define x86_64_usbuninitialize()
+#endif
+
+/* Defined in x86_64_pci.c */
+
+#ifdef CONFIG_PCI
+void x86_64_pci_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

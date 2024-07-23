@@ -56,7 +56,9 @@ void arm_earlyserialinit(void)
    * when they are first opened.
    */
 
+#ifdef CONFIG_UART_PL011
   pl011_earlyserialinit();
+#endif
 }
 
 /***************************************************************************
@@ -69,7 +71,16 @@ void arm_earlyserialinit(void)
 
 void arm_serialinit(void)
 {
+#ifdef CONFIG_UART_PL011
   pl011_serialinit();
+#endif
+}
+
+#else /* USE_SERIALDRIVER */
+
+int up_putc(int ch)
+{
+  return 0;
 }
 
 #endif /* USE_SERIALDRIVER */

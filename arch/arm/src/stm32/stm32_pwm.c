@@ -247,7 +247,7 @@
 #  define TIMRST_TIM16     RCC_APB1RSTR_TIM16RST
 #  define TIMCLK_TIM17     STM32_APB1_TIM17_CLKIN
 #  define TIMRCCEN_TIM17   STM32_RCC_APB1ENR
-#  define TIMEN_TIM17      RCC_APB1ENR_TIM71EN
+#  define TIMEN_TIM17      RCC_APB1ENR_TIM17EN
 #  define TIMRCCRST_TIM17  STM32_RCC_APB1RSTR
 #  define TIMRST_TIM17     RCC_APB1RSTR_TIM17RST
 #endif
@@ -4462,6 +4462,13 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
   pwm_timer_enable(dev, false);
   outputs = pwm_outputs_from_channels(priv);
   ret = pwm_outputs_enable(dev, outputs, false);
+
+  /* Clear all channels */
+
+  pwm_putreg(priv, STM32_GTIM_CCR1_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR2_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR3_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR4_OFFSET, 0);
 
   leave_critical_section(flags);
 

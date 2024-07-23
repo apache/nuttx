@@ -60,7 +60,7 @@ if(CONFIG_ARMV7A_L2CC_PL310)
   list(APPEND SRCS arm_l2cc_pl310.c)
 endif()
 
-if(CONFIG_PAGING)
+if(CONFIG_LEGACY_PAGING)
   list(
     APPEND
     SRCS
@@ -117,6 +117,10 @@ endif()
 
 if(CONFIG_ARCH_HAVE_PSCI)
   list(APPEND SRCS arm_cpu_psci.c arm_smccc.S)
+endif()
+
+if(CONFIG_ARCH_HIPRI_INTERRUPT)
+  list(APPEND SRCS arm_dofiq.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

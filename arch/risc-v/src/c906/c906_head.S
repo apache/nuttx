@@ -59,16 +59,14 @@ __start:
    * mxstatus is a CSR which locates at 0x7C0.
    */
 
-#ifdef __riscv_xthead
-  li t0, (1 << 22) | (1 << 21) | (1 << 15)
-  csrr t1, mxstatus
+  li t0, THEAD_MXSTATUS_ISAEE | THEAD_MXSTATUS_MAEE | THEAD_MXSTATUS_MM
+  csrr t1, THEAD_CSR_MXSTATUS
   or  t0, t1, t0
-  csrw mxstatus, t0
-#endif
+  csrw THEAD_CSR_MXSTATUS, t0
 
   /* Load mhartid (cpuid) */
 
-  csrr a0, mhartid
+  csrr a0, CSR_MHARTID
 
   /* Set stack pointer to the idle thread stack */
 
@@ -76,13 +74,13 @@ __start:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-  csrw mie, zero
-  csrw mip, zero
+  csrw CSR_MIE, zero
+  csrw CSR_MIP, zero
 
   /* Initialize the Machine Trap Vector */
 
   la   t0, __trap_vec
-  csrw mtvec, t0
+  csrw CSR_MTVEC, t0
 
   /* Jump to __c906_start with mhartid */
 

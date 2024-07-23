@@ -32,11 +32,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_RV32
-#define LR_INST lr.w
-#define SC_INST sc.w
+#define AMOSWAP amoswap.w
 #else
-#define LR_INST lr.d
-#define SC_INST sc.d
+#define AMOSWAP amoswap.d
 #endif
 
 /****************************************************************************
@@ -86,18 +84,9 @@
 
 up_testset:
 
-  li       a1, SP_LOCKED
-
-  /* Test if the spinlock is locked or not */
-
-retry:
-  LR_INST  a2, (a0)       /* Test if spinlock is locked or not */
-  beq      a2, a1, locked /* Already locked? Go to locked: */
-
-  /* Not locked ... attempt to lock it */
-
-  SC_INST  a2, a1, (a0)   /* Attempt to set the locked state (a1) to (a0) */
-  bnez     a2, retry      /* a2 will not be zero, if sc.b failed, try again */
+  li        a1, SP_LOCKED
+  AMOSWAP   a2, a1, (a0)  /* Attempt to acquire spinlock atomically */
+  beq       a2, a1, locked /* Already locked? Go to locked: */
 
   /* Lock acquired -- return SP_UNLOCKED */
 

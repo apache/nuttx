@@ -18,7 +18,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
 -include chip/Make.defs
 
 ARCH_SUBDIR = sparc_v8

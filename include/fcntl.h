@@ -109,6 +109,13 @@
 #define F_WRLCK     1  /* Take out a write lease */
 #define F_UNLCK     2  /* Remove a lease */
 
+/* Operations for bsd flock(), also used by the kernel implementation */
+
+#define LOCK_SH     1  /* Shared lock */
+#define LOCK_EX     2  /* Exclusive lock */
+#define LOCK_NB     4  /* Or'd with one of the above to prevent blocking */
+#define LOCK_UN     8  /* Remove lock */
+
 /* close-on-exec flag for F_GETFD and F_SETFD */
 
 #define FD_CLOEXEC  1

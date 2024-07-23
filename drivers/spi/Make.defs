@@ -29,6 +29,10 @@ ifeq ($(CONFIG_SPI_EXCHANGE),y)
   endif
 endif
 
+ifeq ($(CONFIG_SPI_ICE40),y)
+  CSRCS += ice40.c
+endif
+
 ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
   CSRCS += spi_slave_driver.c
 endif

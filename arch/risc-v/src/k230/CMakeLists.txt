@@ -18,17 +18,9 @@
 #
 # ##############################################################################
 
-set(SRCS k230_head.S)
+set(SRCS k230_head.S k230_start.c k230_irq.c k230_irq_dispatch.c)
 
-list(
-  APPEND
-  SRCS
-  k230_start.c
-  k230_irq_dispatch.c
-  k230_irq.c
-  k230_hart.c
-  k230_timerisr.c
-  k230_allocateheap.c)
+list(APPEND SRCS k230_timerisr.c k230_allocateheap.c k230_hart.c)
 
 if(CONFIG_BUILD_KERNEL)
   list(APPEND SRCS k230_mm_init.c)
@@ -38,6 +30,14 @@ endif()
 
 if(CONFIG_MM_PGALLOC)
   list(APPEND SRCS k230_pgalloc.c)
+endif()
+
+if(CONFIG_K230_IPI)
+  list(APPEND SRCS k230_ipi.c)
+endif()
+
+if(CONFIG_RPTUN)
+  list(APPEND SRCS k230_rptun.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

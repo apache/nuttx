@@ -6,7 +6,7 @@
 config NET_IPFRAG
 	bool "IP fragmentation support"
 	default n
-	depends on (NET_IPv4 || NET_IPv6)
+	depends on (NET_IPv4 || NET_IPv6) && IOB_NCHAINS > 0
 	---help---
 		Enable support IP packet fragmentation and IP packet reassembly of
 		fragmented IP packets.

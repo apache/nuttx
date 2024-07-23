@@ -773,7 +773,7 @@ static int hyt271_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *              read.
  *
  * Parameter:
- *   argc - Number opf arguments
+ *   argc - Number of arguments
  *   argv - Pointer to argument list
  ****************************************************************************/
 

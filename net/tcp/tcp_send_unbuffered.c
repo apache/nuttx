@@ -288,6 +288,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
                        sndlen, tcpip_hdrsize(conn));
       if (ret <= 0)
         {
+          pstate->snd_sent = ret;
           goto end_wait;
         }
 
@@ -374,6 +375,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
                            sndlen, tcpip_hdrsize(conn));
           if (ret <= 0)
             {
+              pstate->snd_sent = ret;
               goto end_wait;
             }
 

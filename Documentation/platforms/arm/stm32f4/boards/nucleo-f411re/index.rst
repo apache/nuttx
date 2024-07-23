@@ -1,5 +1,5 @@
 ================
-ST Nucleo F401RE
+ST Nucleo F411RE
 ================
 
 This page discusses issues unique to NuttX configurations for the ST

@@ -1,0 +1,32 @@
+############################################################################
+# arch/risc-v/src/hpm6000/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include common/Make.defs
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+HEAD_ASRC = hpm_head.S
+
+# Specify our C code within this directory to be included
+CHIP_CSRCS  = hpm_clockconfig.c
+CHIP_CSRCS += hpm_irq.c hpm_irq_dispatch.c
+CHIP_CSRCS += hpm_lowputc.c hpm_serial.c
+CHIP_CSRCS += hpm_start.c hpm_timerisr.c
+CHIP_CSRCS += hpm_ioc.c hpm_gpio.c

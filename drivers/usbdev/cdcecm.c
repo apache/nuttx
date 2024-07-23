@@ -138,7 +138,6 @@ struct cdcecm_driver_s
 
   struct net_driver_s          dev;         /* Interface understood by the
                                              * network */
-  bool                         registered;  /* netdev is currently registered */
 };
 
 /****************************************************************************
@@ -950,6 +949,7 @@ static void cdcecm_resetconfig(FAR struct cdcecm_driver_s *self)
 static int cdcecm_setconfig(FAR struct cdcecm_driver_s *self, uint8_t config)
 {
   struct usb_epdesc_s epdesc;
+  bool is_high_speed;
   int ret = OK;
 
   if (config == self->config)
@@ -979,7 +979,7 @@ static int cdcecm_setconfig(FAR struct cdcecm_driver_s *self, uint8_t config)
 
   self->epint->priv = self;
 
-  bool is_high_speed = (self->usbdev.speed == USB_SPEED_HIGH);
+  is_high_speed = (self->usbdev.speed == USB_SPEED_HIGH);
   cdcecm_mkepdesc(CDCECM_EP_BULKIN_IDX,
                   &epdesc, &self->devinfo, is_high_speed);
   ret = EP_CONFIGURE(self->epbulkin, &epdesc, false);
@@ -1365,7 +1365,7 @@ static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
 
   if (desc)
     {
-      FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)desc;
+      FAR struct usb_ifdesc_s *ifdesc;
 
       ifdesc = (FAR struct usb_ifdesc_s *)desc;
       ifdesc->len      = USB_SIZEOF_IFDESC;
@@ -1385,7 +1385,7 @@ static int16_t cdcecm_mkcfgdesc(FAR uint8_t *desc,
 
   if (desc)
     {
-      FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)desc;
+      FAR struct usb_ifdesc_s *ifdesc;
 
       ifdesc = (FAR struct usb_ifdesc_s *)desc;
       ifdesc->len      = USB_SIZEOF_IFDESC;
@@ -1864,10 +1864,7 @@ static int cdcecm_classobject(int minor,
   if (ret < 0)
     {
       nerr("netdev_register failed. ret: %d\n", ret);
-      return ret;
     }
-
-  self->registered = true;
 
   *classdev = (FAR struct usbdevclass_driver_s *)self;
   return ret;
@@ -1887,43 +1884,17 @@ static int cdcecm_classobject(int minor,
  *   CDC/ECM driver is an internal part of a composite device, or a
  *   standalone USB driver:
  *
- *     classdev - The class object returned by cdcacm_classobject()
- *     handle   - The opaque handle representing the class object returned by
- *                a previous call to cdcacm_initialize().
+ *     classdev - The class object returned by cdcecm_classobject()
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CDCECM_COMPOSITE
 void cdcecm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
-#else
-void cdcecm_uninitialize(FAR void *handle)
-#endif
 {
-#ifdef CONFIG_CDCECM_COMPOSITE
   FAR struct cdcecm_driver_s *self = (FAR struct cdcecm_driver_s *)classdev;
-#else
-  FAR struct cdcecm_driver_s *self = (FAR struct cdcecm_driver_s *)handle;
-#endif
   int ret;
-
-#ifdef CONFIG_CDCECM_COMPOSITE
-  /* Check for pass 2 uninitialization.  We did most of the work on the
-   * first pass uninitialization.
-   */
-
-  if (!self->registered)
-    {
-      /* In this second and final pass, all that remains to be done is to
-       * free the memory resources.
-       */
-
-      kmm_free(self);
-      return;
-    }
-#endif
 
   /* Un-register the CDC/ECM netdev device */
 
@@ -1933,33 +1904,13 @@ void cdcecm_uninitialize(FAR void *handle)
       nerr("ERROR: netdev_unregister failed. ret: %d\n", ret);
     }
 
-  /* For the case of the composite driver, there is a two pass
-   * uninitialization sequence.  We cannot yet free the driver structure.
-   * We will do that on the second pass.  We mark the fact that we have
-   * already uninitialized by setting the registered flag to false.
-   * If/when we are called again, then we will free the memory resources.
-   */
-
-  self->registered = false; /* Successfully unregistered netdev */
-
-  /* Unregister the driver (unless we are a part of a composite device).  The
-   * device unregister logic will (1) return all of the requests to us then
-   * (2) call the unbind method.
-   *
-   * The same thing will happen in the composite case except that: (1) the
-   * composite driver will call usbdev_unregister() which will (2) return the
-   * requests for all members of the composite, and (3) call the unbind
-   * method in the composite device which will (4) call the unbind method
-   * for this device.
-   */
-
 #ifndef CONFIG_CDCECM_COMPOSITE
   usbdev_unregister(&self->usbdev);
+#endif
 
   /* And free the driver structure */
 
   kmm_free(self);
-#endif
 }
 
 /****************************************************************************

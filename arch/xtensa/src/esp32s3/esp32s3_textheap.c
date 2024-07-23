@@ -31,21 +31,22 @@
 #include <debug.h>
 #include <nuttx/kmalloc.h>
 
+#include "hal/cache_hal.h"
 #include "hardware/esp32s3_soc.h"
 
 #ifdef CONFIG_ESP32S3_RTC_HEAP
 #  include "esp32s3_rtcheap.h"
 #endif
+#include "esp32s3_spiram.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ESP32S3_RTC_HEAP
-#error "No suitable heap available. Enable ESP32S3_RTC_HEAP."
-#endif
+#define EXTRAM_INSTRUCTION_BUS_LOW  0x42000000
+#define EXTRAM_INSTRUCTION_BUS_HIGH 0x44000000
 
-#define D_I_BUS_OFFSET  0x700000
+#define EXTRAM_D_I_BUS_OFFSET  0x6000000
 
 /****************************************************************************
  * Public Functions
@@ -92,7 +93,19 @@ void *up_textheap_memalign(size_t align, size_t size)
            * can access it from the Instruction bus.
            */
 
-          ret += D_I_BUS_OFFSET;
+          uintptr_t addr = (uintptr_t)ret;
+          if (SOC_DIRAM_DRAM_LOW <= addr && addr < SOC_DIRAM_DRAM_HIGH)
+            {
+              addr = MAP_DRAM_TO_IRAM(addr);
+            }
+          else
+            {
+              /* extram */
+
+              addr += EXTRAM_D_I_BUS_OFFSET;
+            }
+
+          ret = (void *)addr;
         }
     }
 
@@ -122,7 +135,7 @@ void up_textheap_free(void *p)
       else
 #endif
         {
-          p -= D_I_BUS_OFFSET;
+          p = up_textheap_data_address(p);
           kmm_free(p);
         }
     }
@@ -156,6 +169,65 @@ bool up_textheap_heapmember(void *p)
     }
 #endif
 
-  p -= D_I_BUS_OFFSET;
+  p = up_textheap_data_address(p);
   return kmm_heapmember(p);
+}
+
+/****************************************************************************
+ * Name: up_textheap_data_address
+ *
+ * Description:
+ *   If an instruction bus address is specified, return the corresponding
+ *   data bus address. Otherwise, return the given address as it is.
+ *
+ *   For some platforms, up_textheap_memalign() might return memory regions
+ *   with separate instruction/data bus mappings. In that case,
+ *   up_textheap_memalign() returns the address of the instruction bus
+ *   mapping.
+ *   The instruction bus mapping might provide only limited data access.
+ *   (For example, only read-only, word-aligned access.)
+ *   You can use up_textheap_data_address() to query the corresponding data
+ *   bus mapping.
+ *
+ ****************************************************************************/
+
+FAR void *up_textheap_data_address(FAR void *p)
+{
+  uintptr_t addr = (uintptr_t)p;
+  if (SOC_DIRAM_IRAM_LOW <= addr && addr < SOC_DIRAM_IRAM_HIGH)
+    {
+      addr = MAP_IRAM_TO_DRAM(addr);
+    }
+  else if (EXTRAM_INSTRUCTION_BUS_LOW <= addr &&
+           addr < EXTRAM_INSTRUCTION_BUS_HIGH)
+    {
+      /* extram */
+
+      addr -= EXTRAM_D_I_BUS_OFFSET;
+    }
+
+  return (FAR void *)addr;
+}
+
+/****************************************************************************
+ * Name: up_textheap_data_sync
+ *
+ * Description:
+ *   Ensure modifications made on the data bus addresses (the addresses
+ *   returned by up_textheap_data_address) fully visible on the corresponding
+ *   instruction bus addresses.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR void up_textheap_data_sync(void)
+{
+  irqstate_t flags = enter_critical_section();
+
+#ifdef CONFIG_ESP32S3_SPIRAM
+  esp_spiram_writeback_cache();
+#endif
+  cache_hal_disable(CACHE_TYPE_INSTRUCTION);
+  cache_hal_enable(CACHE_TYPE_INSTRUCTION);
+
+  leave_critical_section(flags);
 }

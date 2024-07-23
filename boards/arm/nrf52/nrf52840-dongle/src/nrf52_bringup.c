@@ -31,6 +31,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_NRF52_RADIO_IEEE802154
+#  include "nrf52_ieee802154.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -53,6 +57,17 @@ int nrf52_bringup(void)
 {
   int ret;
 
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, NRF52_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
+    }
+#endif /* CONFIG_FS_PROCFS */
+
 #ifdef CONFIG_USERLED
   /* Register the LED driver */
 
@@ -60,6 +75,15 @@ int nrf52_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF52_RADIO_IEEE802154
+  ret = nrf52_ieee802154_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize IEE802154 radio: %d\n",
+             ret);
     }
 #endif
 

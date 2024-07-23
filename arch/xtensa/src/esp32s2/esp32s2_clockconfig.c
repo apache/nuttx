@@ -28,7 +28,7 @@
 #include <sys/param.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "hardware/esp32s2_soc.h"
 #include "hardware/esp32s2_uart.h"
 #include "hardware/esp32s2_rtccntl.h"

@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/common/CMakeLists.txt
+# arch/risc-v/src/common/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -48,10 +48,16 @@ if(CONFIG_RISCV_MISALIGNED_HANDLER)
   list(APPEND SRCS riscv_misaligned.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_DEBUG)
+  list(APPEND SRCS riscv_debug.c)
+endif()
+
 if(NOT CONFIG_BUILD_FLAT)
   list(APPEND SRCS riscv_task_start.c riscv_pthread_start.c
        riscv_signal_dispatch.c)
-  list(APPEND SRCS riscv_signal_handler.S)
+  if(CONFIG_BUILD_PROTECTED)
+    target_sources(arch_interface PRIVATE riscv_signal_handler.S)
+  endif()
 endif()
 
 if(CONFIG_SCHED_BACKTRACE)
@@ -74,6 +80,10 @@ if(CONFIG_ARCH_FPU)
   list(APPEND SRCS riscv_fpu.S riscv_fpucmp.c)
 endif()
 
+if(CONFIG_ARCH_RV_ISA_V)
+  list(APPEND SRCS riscv_vpu.S)
+endif()
+
 if(CONFIG_ARCH_RV_ISA_A)
   list(APPEND SRCS riscv_testset.S)
 endif()
@@ -91,12 +101,20 @@ if(CONFIG_ARCH_USE_MMU)
 endif()
 
 if(CONFIG_ARCH_KERNEL_STACK)
-  list(APPEND SRCS riscv_addrenv_kstack.c)
+  list(APPEND SRCS riscv_addrenv_kstack.c riscv_ksp.c)
 endif()
 
 if(CONFIG_ARCH_ADDRENV)
   list(APPEND SRCS riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c)
   list(APPEND SRCS riscv_addrenv_utils.c riscv_addrenv_shm.c)
+endif()
+
+if(CONFIG_RISCV_PERCPU_SCRATCH)
+  list(APPEND SRCS riscv_percpu.c)
+endif()
+
+if(CONFIG_ARCH_USE_S_MODE)
+  add_subdirectory(supervisor)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

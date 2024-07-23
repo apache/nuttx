@@ -40,7 +40,7 @@
 
 static void pm_auto_updatestate_cb(FAR void *arg)
 {
-  int domain = (uintptr_t)arg;
+  int domain = (intptr_t)arg;
   enum pm_state_e newstate;
   irqstate_t flags;
 
@@ -73,7 +73,7 @@ static void pm_auto_updatestate_cb(FAR void *arg)
 void pm_auto_updatestate(int domain)
 {
   FAR struct pm_domain_s *pdom;
-  pdom = &g_pmglobals.domain[domain];
+  pdom = &g_pmdomains[domain];
 
   if (pdom->auto_update)
     {
@@ -81,12 +81,13 @@ void pm_auto_updatestate(int domain)
       if (up_interrupt_context())
         {
           work_queue(HPWORK, &pdom->update_work,
-                     pm_auto_updatestate_cb, (FAR void *)domain, 0);
+                     pm_auto_updatestate_cb,
+                     (FAR void *)(intptr_t)domain, 0);
         }
       else
 #endif
         {
-          pm_auto_updatestate_cb((FAR void *)domain);
+          pm_auto_updatestate_cb((FAR void *)(intptr_t)domain);
         }
     }
 }
@@ -112,7 +113,7 @@ void pm_auto_update(int domain, bool auto_update)
   irqstate_t flags;
 
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
+  pdom = &g_pmdomains[domain];
 
   flags = pm_domain_lock(domain);
   pdom->auto_update = auto_update;

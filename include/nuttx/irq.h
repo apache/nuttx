@@ -70,6 +70,18 @@
 
 #endif /* __ASSEMBLY__ */
 
+#ifdef CONFIG_SMP
+#  define cpu_irqlock_clear() \
+  do \
+    { \
+      g_cpu_irqset = 0; \
+      SP_DMB(); \
+      g_cpu_irqlock = SP_UNLOCKED; \
+      SP_DSB(); \
+    } \
+  while (0)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

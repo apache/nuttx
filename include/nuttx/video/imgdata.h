@@ -111,6 +111,14 @@ struct imgdata_ops_s
                             FAR imgdata_capture_t callback,
                             FAR void *arg);
   CODE int (*stop_capture)(FAR struct imgdata_s *data);
+
+  /* This is a pair of user define frame memory allocation interface.
+   * If both are NULL, just using system memory operations.
+   */
+
+  CODE void *(*alloc)(FAR struct imgdata_s *data,
+                           uint32_t align_size, uint32_t size);
+  CODE void (*free)(FAR struct imgdata_s *data, void *addr);
 };
 
 /* Image data private data.  This structure only defines the initial fields

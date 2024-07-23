@@ -78,6 +78,10 @@
 #  define _MQ_TIMEDRECEIVE(d,m,l,p,t) mq_timedreceive(d,m,l,p,t)
 #endif
 
+#ifndef CONFIG_FS_MQUEUE_NPOLLWAITERS
+#  define CONFIG_FS_MQUEUE_NPOLLWAITERS 0
+#endif
+
 #if CONFIG_FS_MQUEUE_NPOLLWAITERS > 0
 #  define nxmq_pollnotify(msgq, eventset) \
    poll_notify(msgq->fds, CONFIG_FS_MQUEUE_NPOLLWAITERS, eventset)
@@ -585,6 +589,52 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
                       FAR const struct timespec *abstime);
 
 /****************************************************************************
+ * Name: file_mq_ticksend
+ *
+ * Description:
+ *   This function adds the specified message (msg) to the message queue
+ *   (mq).  file_mq_ticksend() behaves just like mq_send(), except that if
+ *   the queue is full and the O_NONBLOCK flag is not enabled for the
+ *   message queue description, then abstime points to a structure which
+ *   specifies a ceiling on the time for which the call will block.
+ *
+ *   file_mq_ticksend() is functionally equivalent to mq_timedsend() except
+ *   that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_timedsend() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mq      - Message queue descriptor
+ *   msg     - Message to send
+ *   msglen  - The length of the message in bytes
+ *   prio    - The priority of the message
+ *   ticks   - Ticks to wait from the start time until the semaphore is
+ *             posted.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_timedsend() for the list list valid return values).
+ *
+ *   EAGAIN   The queue was empty, and the O_NONBLOCK flag was set for the
+ *            message queue description referred to by mq.
+ *   EINVAL   Either msg or mq is NULL or the value of prio is invalid.
+ *   EBADF    Message queue opened not opened for writing.
+ *   EMSGSIZE 'msglen' was greater than the maxmsgsize attribute of the
+ *            message queue.
+ *   EINTR    The call was interrupted by a signal handler.
+ *
+ ****************************************************************************/
+
+int file_mq_ticksend(FAR struct file *mq, FAR const char *msg,
+                     size_t msglen, unsigned int prio, sclock_t ticks);
+
+/****************************************************************************
  * Name: file_mq_receive
  *
  * Description:
@@ -651,6 +701,44 @@ ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
 ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
                              size_t msglen, FAR unsigned int *prio,
                              FAR const struct timespec *abstime);
+
+/****************************************************************************
+ * Name: file_mq_tickreceive
+ *
+ * Description:
+ *   This function receives the oldest of the highest priority messages from
+ *   the message queue specified by "mq."  If the message queue is empty
+ *   and O_NONBLOCK was not set, file_mq_tickreceive() will block until a
+ *   message is added to the message queue (or until a timeout occurs).
+ *
+ *   file_mq_tickreceive() is an internal OS interface.  It is functionally
+ *   equivalent to mq_timedreceive() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_timedreceive() for a more complete description of
+ *  the behavior of this function
+ *
+ * Input Parameters:
+ *   mq      - Message Queue Descriptor
+ *   msg     - Buffer to receive the message
+ *   msglen  - Size of the buffer in bytes
+ *   prio    - If not NULL, the location to store message priority.
+ *   ticks   - Ticks to wait from the start time until the semaphore is
+ *             posted.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   (see mq_timedreceive() for the list list valid return values).
+ *
+ ****************************************************************************/
+
+ssize_t file_mq_tickreceive(FAR struct file *mq, FAR char *msg,
+                            size_t msglen, FAR unsigned int *prio,
+                            sclock_t ticks);
 
 /****************************************************************************
  * Name:  file_mq_setattr

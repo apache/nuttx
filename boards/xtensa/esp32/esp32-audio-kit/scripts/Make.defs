@@ -36,6 +36,8 @@ else
 
   ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
     ARCHSCRIPT += $(call FINDSCRIPT,mcuboot_sections.ld)
+  else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+    ARCHSCRIPT += $(call FINDSCRIPT,simple_boot_sections.ld)
   else
     ARCHSCRIPT += $(call FINDSCRIPT,legacy_sections.ld)
   endif

@@ -743,6 +743,7 @@ struct imxrt_uart_s
 #endif
 #ifdef CONFIG_IMXRT_LPUART_SINGLEWIRE
   const uint32_t tx_gpio;   /* TX GPIO pin configuration */
+  const struct uart_ops_s *prev_ops;
 #endif
 
   uint8_t  stopbits2:1;     /* 1: Configure with 2 stop bits vs 1 */
@@ -806,10 +807,16 @@ static bool imxrt_rxavailable(struct uart_dev_s *dev);
 #if !defined(SERIAL_HAVE_ONLY_TXDMA)
 static void imxrt_txint(struct uart_dev_s *dev, bool enable);
 #endif
+#ifdef CONFIG_IMXRT_LPUART_SINGLEWIRE
+static void imxrt_singlewire_txint(struct uart_dev_s *dev, bool enable);
+#endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
 static bool imxrt_rxflowcontrol(struct uart_dev_s *dev,
                                 unsigned int nbuffered, bool upper);
+#endif
+#ifdef CONFIG_IMXRT_LPUART_SINGLEWIRE
+static void imxrt_singlewire_send(struct uart_dev_s *dev, int ch);
 #endif
 static void imxrt_send(struct uart_dev_s *dev, int ch);
 
@@ -854,6 +861,27 @@ static int  up_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 /* Serial driver UART operations */
+
+#ifdef CONFIG_IMXRT_LPUART_SINGLEWIRE
+static const struct uart_ops_s g_lpuart_singlewire_ops =
+{
+  .setup          = imxrt_setup,
+  .shutdown       = imxrt_shutdown,
+  .attach         = imxrt_attach,
+  .detach         = imxrt_detach,
+  .ioctl          = imxrt_ioctl,
+  .receive        = imxrt_receive,
+  .rxint          = imxrt_rxint,
+  .rxavailable    = imxrt_rxavailable,
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
+  .rxflowcontrol  = imxrt_rxflowcontrol,
+#endif
+  .send           = imxrt_singlewire_send,
+  .txint          = imxrt_singlewire_txint,
+  .txready        = imxrt_txready,
+  .txempty        = imxrt_txempty,
+};
+#endif
 
 #if !defined(SERIAL_HAVE_ONLY_TXDMA) && !defined(SERIAL_HAVE_ONLY_RXDMA)
 static const struct uart_ops_s g_lpuart_ops =
@@ -2629,7 +2657,9 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
-            uint32_t gpio_val = IOMUX_OPENDRAIN;
+            uint32_t gpio_val = (arg & SER_SINGLEWIRE_PUSHPULL) ==
+                                 SER_SINGLEWIRE_PUSHPULL ?
+                                 IOMUX_CMOS_OUTPUT : IOMUX_OPENDRAIN;
             gpio_val |= (arg & SER_SINGLEWIRE_PULL_MASK) ==
                          SER_SINGLEWIRE_PULLUP ?
                                         IOMUX_PULL_UP : IOMUX_PULL_NONE;
@@ -2639,6 +2669,8 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
             imxrt_config_gpio((priv->tx_gpio &
                           ~(IOMUX_PULL_MASK | IOMUX_OPENDRAIN)) | gpio_val);
             regval |= LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC;
+            priv->prev_ops = priv->dev.ops;
+            priv->dev.ops = &g_lpuart_singlewire_ops;
           }
         else
           {
@@ -2646,6 +2678,10 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
                                                  IOMUX_OPENDRAIN)) |
                                                  IOMUX_PULL_NONE);
             regval &= ~(LPUART_CTRL_LOOPS | LPUART_CTRL_RSRC);
+            if (priv->dev.ops == &g_lpuart_singlewire_ops)
+              {
+                priv->dev.ops = priv->prev_ops;
+              }
           }
 
         imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
@@ -3206,6 +3242,34 @@ static void imxrt_dma_send(struct uart_dev_s *dev)
 }
 #endif
 
+#ifdef CONFIG_IMXRT_LPUART_SINGLEWIRE
+/****************************************************************************
+ * Name: imxrt_singlewire_send
+ *
+ * Description:
+ *   This method will will switch TXDIR to an output
+ *   and send one byte on the UART
+ *
+ ****************************************************************************/
+
+static void imxrt_singlewire_send(struct uart_dev_s *dev, int ch)
+{
+  struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+  uint32_t regval;
+  irqstate_t flags;
+
+  flags  = spin_lock_irqsave(NULL);
+  regval = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+  regval &= ~(LPUART_CTRL_RSRC);
+  regval |= (LPUART_CTRL_TXDIR);
+  imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+  spin_unlock_irqrestore(NULL, flags);
+
+  imxrt_serialout(priv, IMXRT_LPUART_DATA_OFFSET, (uint32_t)ch);
+}
+
+#endif
+
 /****************************************************************************
  * Name: imxrt_send
  *
@@ -3274,6 +3338,51 @@ static void imxrt_txint(struct uart_dev_s *dev, bool enable)
   regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
   regval &= ~LPUART_ALL_INTS;
   regval |= priv->ie;
+  imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
+  spin_unlock_irqrestore(NULL, flags);
+}
+#endif
+
+/****************************************************************************
+ * Name: imxrt_singlewire_txint
+ *
+ * Description:
+ *   Call to enable or disable TX interrupts in single wire mode
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IMXRT_LPUART_SINGLEWIRE
+static void imxrt_singlewire_txint(struct uart_dev_s *dev, bool enable)
+{
+  struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev;
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* Enable interrupt for TX complete */
+
+  flags = spin_lock_irqsave(NULL);
+  regval  = imxrt_serialin(priv, IMXRT_LPUART_CTRL_OFFSET);
+  if (enable)
+    {
+#ifndef CONFIG_SUPPRESS_SERIAL_INTS
+      priv->ie |= LPUART_CTRL_TIE;
+#endif
+    }
+  else
+    {
+      /* Don't disable TX interrupt yet if transmission isn't complete */
+
+      if (imxrt_txempty(dev))
+        {
+          regval |= LPUART_CTRL_RSRC;
+          regval &= ~(LPUART_CTRL_TXDIR);
+          priv->ie &= ~LPUART_CTRL_TIE;
+        }
+    }
+
+  regval &= ~LPUART_ALL_INTS;
+  regval |= priv->ie;
+
   imxrt_serialout(priv, IMXRT_LPUART_CTRL_OFFSET, regval);
   spin_unlock_irqrestore(NULL, flags);
 }

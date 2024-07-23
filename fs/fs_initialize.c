@@ -29,6 +29,7 @@
 #include "rpmsgfs/rpmsgfs.h"
 #include "inode/inode.h"
 #include "aio/aio.h"
+#include "vfs/lock.h"
 
 /****************************************************************************
  * Private Functions
@@ -82,6 +83,8 @@ void fs_initialize(void)
   /* Initial inode, file, and VFS data structures */
 
   inode_initialize();
+
+  file_initlk();
 
 #ifdef CONFIG_FS_AIO
   /* Initialize for asynchronous I/O */

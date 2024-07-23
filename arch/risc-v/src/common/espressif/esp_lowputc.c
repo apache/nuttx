@@ -35,6 +35,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "chip.h"
 #include "riscv_internal.h"
@@ -207,7 +208,7 @@ void esp_lowputc_disable_all_uart_int(const struct esp_uart_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   if (current_status != NULL)
     {
@@ -224,7 +225,7 @@ void esp_lowputc_disable_all_uart_int(const struct esp_uart_s *priv,
 
   uart_hal_clr_intsts_mask(priv->hal, UINT32_MAX);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -263,11 +264,11 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
 {
   /* Configure the pins */
 
-  esp_configgpio(priv->txpin, OUTPUT);
-  esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
-
   esp_configgpio(priv->rxpin, INPUT | PULLUP);
   esp_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
+
+  esp_configgpio(priv->txpin, OUTPUT);
+  esp_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)

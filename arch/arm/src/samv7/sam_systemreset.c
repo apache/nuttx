@@ -33,12 +33,58 @@
 
 #include "arm_internal.h"
 #include "hardware/sam_rstc.h"
-
-#ifdef CONFIG_SAMV7_SYSTEMRESET
+#include "sam_systemreset.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_get_reset_cause
+ *
+ * Description:
+ *   Get cause of the last CPU reset. This is done by reading reset status
+ *   registger.
+ *
+ * Returned Value:
+ *   CPU reset cause in form of macros defined in sam_systemreset.h. This is
+ *   to avoid passing boardctl dependent structure to architecture layer.
+ *   Board level specific code should include sam_systemreset.h and set
+ *   boardctl result according to that. -1 is returned in case of invalid
+ *   value in status register.
+ *
+ ****************************************************************************/
+
+int sam_get_reset_cause(void)
+{
+  int ret;
+  uint32_t rstsr;
+
+  rstsr = getreg32(SAM_RSTC_SR);
+  switch (rstsr & RSTC_SR_RSTTYP_MASK)
+    {
+      case RSTC_SR_RSTTYP_PWRUP:
+        ret = SAMV7_RESET_PWRUP;
+        break;
+      case RSTC_SR_RSTTYP_BACKUP:
+        ret =  SAMV7_RESET_BACKUP;
+        break;
+      case RSTC_SR_RSTTYP_WDOG:
+        ret =  SAMV7_RESET_WDOG;
+        break;
+      case RSTC_SR_RSTTYP_SWRST:
+        ret =  SAMV7_RESET_SWRST;
+        break;
+      case RSTC_SR_RSTTYP_NRST:
+        ret = SAMV7_RESET_NRST;
+        break;
+      default:
+        ret = -1;
+        break;
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: up_systemreset
@@ -48,6 +94,7 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMV7_SYSTEMRESET
 void up_systemreset(void)
 {
   uint32_t rstcr;

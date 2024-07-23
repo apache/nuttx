@@ -865,7 +865,11 @@ int esp_rtc_driverinit(void)
 
   /* Enable HR-Timer */
 
-  VERIFY(esp_hr_timer_init());
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   g_hr_timer_enabled = true;
 

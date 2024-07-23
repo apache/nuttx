@@ -60,8 +60,6 @@ void up_exit(int status)
 
   enter_critical_section();
 
-  nxsched_dumponexit();
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
@@ -92,7 +90,17 @@ void up_exit(int status)
   addrenv_switch(tcb);
 #endif
 
+  /* Restore the cpu lock */
+
+  restore_critical_section();
+
   /* Then switch contexts */
 
   x86_64_fullcontextrestore(tcb->xcp.regs);
+
+  /* x86_64_fullcontextrestore() should not return but could if the software
+   * interrupts are disabled.
+   */
+
+  PANIC();
 }

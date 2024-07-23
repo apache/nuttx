@@ -38,7 +38,7 @@
 void kmm_map_initialize(void);
 
 /****************************************************************************
- * Name: kmm_map_pages
+ * Name: kmm_map
  *
  * Description:
  *   Map pages into kernel virtual memory.

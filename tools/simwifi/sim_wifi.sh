@@ -23,6 +23,7 @@
 
 NUTTX_BR_IF="nuttx0"
 RUN_DIR="/var/run/simwifi"
+LINK_DIR="/usr/bin"
 CUR_DIR=""
 DBG_LEVEL=1
 
@@ -509,6 +510,8 @@ init()
 
   init_env
 
+  ln -s $CUR_DIR/sim_wifi.sh $LINK_DIR/sim_wifi.sh
+
   echo "defwan:$1" > $DEFCONF_FILE
   [ -n "$1" -a  -n "$(ifconfig | grep $1)" ] && start_bridge $1
 
@@ -520,10 +523,20 @@ init()
 
 clean()
 {
+  [ -z "$1" ] && {
+    echo "Missing the default wan interface."
+    exit -1
+  }
+
   recovery_to_init
+
+  rm $LINK_DIR/sim_wifi.sh
 
   cur_mode=$(get_var mode $DEFCONF_FILE)
   [ "$cur_mode" = "hwsim" ] &&  modprobe -r mac80211_hwsim
+
+  echo "defwan:$1" > $DEFCONF_FILE
+  [ -n "$1" -a  -n "$(ifconfig | grep $1)" ] && stop_bridge $1
 
   rm -fr $RUN_DIR
   rm -f $UDHCPC_SCRIPT
@@ -532,7 +545,7 @@ clean()
 usage()
 {
   echo "$(basename $SOURCE) (rename <old> <new> |"
-  echo -e "\t init <wan> <mode> |clean |"
+  echo -e "\t init <wan> <mode> |clean <wan> |"
   echo -e "\t start_wpa <wlan0> |stop_wpa |"
   echo -e "\t start_hostapd <wlan0> |stop_hostapd |"
   echo -e "\t start_udhcpc <wlan0> |stop_udhcpc |"
@@ -552,7 +565,7 @@ get_script_path $0
 
 case $1 in
   init) init $2 $3;;
-  clean) clean;;
+  clean) clean $2;;
   start_bridge) start_bridge $2;;
   stop_bridge) stop_bridge $2;;
   start_hwsim)  start_hwsim $2 $3;;

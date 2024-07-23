@@ -286,7 +286,7 @@ static uint8_t fat_lfnchecksum(FAR const uint8_t *sfname)
  *     0x2a-0x2c = '*', '+', ','
  *     0x2e-0x2f = '.', '/'
  *     0x3a-0x3f = ':', ';', '<', '=', '>', '?'
- *     0x5b-0x5d = '[', '\\', ;]'
+ *     0x5b-0x5d = '[', '\\', ']'
  *     0x7c      = '|'
  *
  *   '.' May only occur once within string and only within the first 9
@@ -296,7 +296,7 @@ static uint8_t fat_lfnchecksum(FAR const uint8_t *sfname)
  *   Lower case characters are not allowed in directory names (without some
  *   poorly documented operations on the NTRes directory byte).  Lower case
  *   codes may represent different characters in other character sets ("DOS
- *   code pages".  The logic below does not, at present, support any other
+ *   code pages").  The logic below does not, at present, support any other
  *   character sets.
  *
  * Returned Value:
@@ -2556,7 +2556,7 @@ int fat_finddirentry(FAR struct fat_mountpt_s *fs,
     }
 
   /* fd_index is the index into the current directory table. It is set to the
-   * the first, entry in the root directory.
+   * the first entry in the root directory.
    */
 
   dirinfo->dir.fd_index = 0;
@@ -2641,7 +2641,7 @@ int fat_finddirentry(FAR struct fat_mountpt_s *fs,
 
       if (terminator == '\0')
         {
-          /* Return success meaning that the description the matching
+          /* Return success meaning that the description matching the
            * directory entry is in dirinfo.
            */
 

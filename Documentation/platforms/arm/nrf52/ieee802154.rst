@@ -1,0 +1,44 @@
+==========================
+Nordic nRF52 IEEE 802.15.4
+==========================
+
+.. note::
+
+   This driver is highly experimental.
+   Help with development and testing will be appreciated ;)
+
+Supported features:
+
+* frame transmission
+* frame reception and filtering
+* immediate ACK (incoming and outgoing)
+* promiscuous mode
+* delayed transmision
+* radio events trace
+* setting pending bit for all incoming Data Request frames
+* un-slotted CSMA-CA
+
+Work in progres features (some logic is present, but they require more work):
+    
+* beacon transmision (periodic transmition works, but requires verification)
+* slotted CSMA-CA
+* GTS
+
+Fetures not implemented:
+
+* enhanced ACK (Enh-ACK)
+* enhanced beacon
+* low power mode
+* advanced features from IEEE 802.15.4e (DSME, TSCH)
+
+Reserved peripherals
+====================
+
+This implementation reserves the following peripherals:
+
+* ``RADIO`` - used for radio operations
+
+* ``TIMER0`` - used as high resolution timer for ACK, IFS and other radio delays
+
+* ``RTC0`` - if superframe support is enabled, used as low power timer to hande
+  superframe events

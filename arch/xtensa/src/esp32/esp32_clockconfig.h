@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include "esp_private/esp_clk.h"
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -76,37 +78,5 @@ void esp32_set_cpu_freq(int cpu_freq_mhz);
  ****************************************************************************/
 
 void esp32_clockconfig(void);
-
-/****************************************************************************
- * Name:  esp_clk_cpu_freq
- *
- * Description:
- *   Get CPU frequency
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   CPU frequency
- *
- ****************************************************************************/
-
-int esp_clk_cpu_freq(void);
-
-/****************************************************************************
- * Name:  esp_clk_apb_freq
- *
- * Description:
- *   Return current APB clock frequency.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   APB clock frequency, in Hz
- *
- ****************************************************************************/
-
-int esp_clk_apb_freq(void);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_CLOCKCONFIG_H */

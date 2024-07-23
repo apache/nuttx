@@ -275,11 +275,19 @@ config SAMV7_DAC
 	bool
 	default n
 
+config SAMV7_QENCODER
+	bool
+	default n
+
 config SAMV7_HAVE_DAC1
 	bool
 	default n
 
 config SAMV7_HAVE_EBI
+	bool
+	default n
+
+config SAMV7_EEFC
 	bool
 	default n
 
@@ -665,14 +673,31 @@ menuconfig SAMV7_PWM0
 
 if SAMV7_PWM0
 
+config SAMV7_PWM0_SYNC
+	bool "PWM0 synchronous channels"
+	depends on PWM_MULTICHAN
+	default n
+	---help---
+		This option makes the synchronization between channels possible.
+		This means every synchronized channel has the same clock, the
+		same period and the same alignment. If any channel is defined
+		as synchronous, channel 0 is defined as synchronous too because
+		channel 0's counter is used by other synchronous channels.
+		This option automatically defines channel 0 as synchronous.
+
 config SAMV7_PWM0_CH0
 	bool "PWM0 Channel 0"
 	default n
 
 if SAMV7_PWM0_CH0
 
+config SAMV7_PWM0_CH0_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH0_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH0_LONLY
 	default n
 
 endif
@@ -683,8 +708,18 @@ config SAMV7_PWM0_CH1
 
 if SAMV7_PWM0_CH1
 
+config SAMV7_PWM0_CH1_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH1_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH1_LONLY
+	default n
+
+config SAMV7_PWM0_CH1_SYNC
+	bool "Synchronous channel"
+	depends on SAMV7_PWM0_SYNC
 	default n
 
 endif
@@ -695,8 +730,18 @@ config SAMV7_PWM0_CH2
 
 if SAMV7_PWM0_CH2
 
+config SAMV7_PWM0_CH2_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH2_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH2_LONLY
+	default n
+
+config SAMV7_PWM0_CH2_SYNC
+	bool "Synchronous channel"
+	depends on SAMV7_PWM0_SYNC
 	default n
 
 endif
@@ -707,8 +752,18 @@ config SAMV7_PWM0_CH3
 
 if SAMV7_PWM0_CH3
 
+config SAMV7_PWM0_CH3_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM0_CH3_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM0_CH3_LONLY
+	default n
+
+config SAMV7_PWM0_CH3_SYNC
+	bool "Synchronous channel"
+	depends on SAMV7_PWM0_SYNC
 	default n
 
 endif
@@ -789,9 +844,9 @@ config SAMV7_PWM0_PA9
 	bool "External fault input from PA9"
 	default n
 
-if SAMV7_PWM1_PA9
+if SAMV7_PWM0_PA9
 
-config SAMV7_PWM1_PA9_POL
+config SAMV7_PWM0_PA9_POL
 	bool "Inverted polarity"
 	default n
 	---help---
@@ -804,9 +859,9 @@ config SAMV7_PWM0_PD8
 	bool "External fault input from PD8"
 	default n
 
-if SAMV7_PWM1_PD8
+if SAMV7_PWM0_PD8
 
-config SAMV7_PWM1_PD8_POL
+config SAMV7_PWM0_PD8_POL
 	bool "Inverted polarity"
 	default n
 	---help---
@@ -819,9 +874,9 @@ config SAMV7_PWM0_PD9
 	bool "External fault input from PD9"
 	default n
 
-if SAMV7_PWM1_PD9
+if SAMV7_PWM0_PD9
 
-config SAMV7_PWM1_PD9_POL
+config SAMV7_PWM0_PD9_POL
 	bool "Inverted polarity"
 	default n
 	---help---
@@ -881,14 +936,31 @@ menuconfig SAMV7_PWM1
 
 if SAMV7_PWM1
 
+config SAMV7_PWM1_SYNC
+	bool "PWM1 synchronous channels"
+	depends on PWM_MULTICHAN
+	default n
+	---help---
+		This option makes the synchronization between channels possible.
+		This means every synchronized channel has the same clock, the
+		same period and the same alignment. If any channel is defined
+		as synchronous, channel 0 is defined as synchronous too because
+		channel 0's counter is used by other synchronous channels.
+		This option automatically defines channel 0 as synchronous.
+
 config SAMV7_PWM1_CH0
 	bool "PWM1 Channel 0"
 	default n
 
 if SAMV7_PWM1_CH0
 
+config SAMV7_PWM1_CH0_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH0_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH0_LONLY
 	default n
 
 endif
@@ -899,8 +971,18 @@ config SAMV7_PWM1_CH1
 
 if SAMV7_PWM1_CH1
 
+config SAMV7_PWM1_CH1_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH1_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH1_LONLY
+	default n
+
+config SAMV7_PWM1_CH1_SYNC
+	bool "Synchronous channel"
+	depends on SAMV7_PWM1_SYNC
 	default n
 
 endif
@@ -911,8 +993,18 @@ config SAMV7_PWM1_CH2
 
 if SAMV7_PWM1_CH2
 
+config SAMV7_PWM1_CH2_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH2_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH2_LONLY
+	default n
+
+config SAMV7_PWM1_CH2_SYNC
+	bool "Synchronous channel"
+	depends on SAMV7_PWM1_SYNC
 	default n
 
 endif
@@ -923,8 +1015,18 @@ config SAMV7_PWM1_CH3
 
 if SAMV7_PWM1_CH3
 
+config SAMV7_PWM1_CH3_LONLY
+	bool "Use only L output"
+	default n
+
 config SAMV7_PWM1_CH3_COMP
 	bool "Use complementary output"
+	depends on !SAMV7_PWM1_CH3_LONLY
+	default n
+
+config SAMV7_PWM1_CH3_SYNC
+	bool "Synchronous channel"
+	depends on SAMV7_PWM1_SYNC
 	default n
 
 endif
@@ -1688,6 +1790,7 @@ menuconfig SAMV7_PROGMEM
 	bool "FLASH program memory"
 	default n
 	select ARCH_HAVE_PROGMEM
+	select SAMV7_EEFC
 	---help---
 		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
 
@@ -1705,6 +1808,16 @@ config SAMV7_PROGMEM_NSECTORS
 		prototyped in include/nuttx/progmem.h
 
 endif # SAMV7_PROGMEM
+
+config SAMV7_USER_SIGNATURE
+	bool "FLASH user signature"
+	default n
+	select SAMV7_EEFC
+	---help---
+		Each SAMv7 product contains a user signature area of 512 bytes in
+		embedded flash. It is possible to read, write and erase this area.
+		Data stored in this area are not erased by asserting ERASE pin or by
+		software ERASE command.
 
 menu "SDRAM Configuration"
 	depends on SAMV7_SDRAMC
@@ -3151,21 +3264,21 @@ config SAMV7_MCAN0_PROPSEG
 
 config SAMV7_MCAN0_PHASESEG1
 	int "MCAN0 PhaseSeg1"
-	default 11
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN0_PHASESEG2
 	int "MCAN0 PhaseSeg2"
-	default 11
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN0_FSJW
 	int "MCAN0 synchronization jump width"
-	default 4
+	default 2
 	range 1 5
 	---help---
 		The duration of a synchronization jump is Tcan_clk x FSJW.
@@ -3186,14 +3299,14 @@ config SAMV7_MCAN0_FPROPSEG
 
 config SAMV7_MCAN0_FPHASESEG1
 	int "MCAN0 fast PhaseSeg1"
-	default 4
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN0_FPHASESEG2
 	int "MCAN0 fast PhaseSeg2"
-	default 4
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
@@ -3229,31 +3342,31 @@ config SAMV7_MCAN0_RXFIFO0_8BYTES
 
 config SAMV7_MCAN0_RXFIFO0_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO0_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 RX buffer element size
 
@@ -3273,31 +3386,31 @@ config SAMV7_MCAN0_RXFIFO1_8BYTES
 
 config SAMV7_MCAN0_RXFIFO1_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXFIFO1_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 RX buffer element size
 
@@ -3317,31 +3430,31 @@ config SAMV7_MCAN0_RXBUFFER_8BYTES
 
 config SAMV7_MCAN0_RXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_RXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 RX buffer element size
 
@@ -3364,31 +3477,31 @@ config SAMV7_MCAN0_TXBUFFER_8BYTES
 
 config SAMV7_MCAN0_TXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 config SAMV7_MCAN0_TXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN0_FD
+	depends on SAMV7_MCAN0_FD || SAMV7_MCAN0_FD_BSW
 
 endchoice # MCAN0 TX buffer element size
 
@@ -3467,21 +3580,21 @@ config SAMV7_MCAN1_PROPSEG
 
 config SAMV7_MCAN1_PHASESEG1
 	int "MCAN1 PhaseSeg1"
-	default 11
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN1_PHASESEG2
 	int "MCAN1 PhaseSeg2"
-	default 11
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN1_FSJW
 	int "MCAN1 synchronization jump width"
-	default 4
+	default 2
 	range 1 5
 	---help---
 		The duration of a synchronization jump is Tcan_clk x FSJW.
@@ -3502,14 +3615,14 @@ config SAMV7_MCAN1_FPROPSEG
 
 config SAMV7_MCAN1_FPHASESEG1
 	int "MCAN1 fast PhaseSeg1"
-	default 4
+	default 9
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
 config SAMV7_MCAN1_FPHASESEG2
 	int "MCAN1 fast PhaseSeg2"
-	default 4
+	default 1
 	range 1 63
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
@@ -3545,31 +3658,31 @@ config SAMV7_MCAN1_RXFIFO0_8BYTES
 
 config SAMV7_MCAN1_RXFIFO0_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO0_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 RX buffer element size
 
@@ -3589,31 +3702,31 @@ config SAMV7_MCAN1_RXFIFO1_8BYTES
 
 config SAMV7_MCAN1_RXFIFO1_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXFIFO1_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 RX buffer element size
 
@@ -3633,31 +3746,31 @@ config SAMV7_MCAN1_RXBUFFER_8BYTES
 
 config SAMV7_MCAN1_RXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_RXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 RX buffer element size
 
@@ -3680,31 +3793,31 @@ config SAMV7_MCAN1_TXBUFFER_8BYTES
 
 config SAMV7_MCAN1_TXBUFFER_12BYTES
 	bool "12 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_16BYTES
 	bool "16 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_20BYTES
 	bool "20 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_24BYTES
 	bool "24 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_32BYTES
 	bool "32 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_48BYTES
 	bool "48 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 config SAMV7_MCAN1_TXBUFFER_64BYTES
 	bool "64 bytes"
-	depends on SAMV7_MCAN1_FD
+	depends on SAMV7_MCAN1_FD || SAMV7_MCAN1_FD_BSW
 
 endchoice # MCAN1 TX buffer element size
 
@@ -3754,6 +3867,7 @@ config SAMV7_TC0_QE
 	bool "TC0"
 	default n
 	depends on SAMV7_TC0
+	select SAMV7_QENCODER
 	select SAMV7_TC0_TIOA0
 	select SAMV7_TC0_TIOB0
 	---help---
@@ -3763,6 +3877,7 @@ config SAMV7_TC1_QE
 	bool "TC1"
 	default n
 	depends on SAMV7_TC1
+	select SAMV7_QENCODER
 	select SAMV7_TC1_TIOA3
 	select SAMV7_TC1_TIOB3
 	---help---
@@ -3772,6 +3887,7 @@ config SAMV7_TC2_QE
 	bool "TC2"
 	default n
 	depends on SAMV7_TC2
+	select SAMV7_QENCODER
 	select SAMV7_TC2_TIOA6
 	select SAMV7_TC2_TIOB6
 	---help---
@@ -3781,10 +3897,24 @@ config SAMV7_TC3_QE
 	bool "TC3"
 	default n
 	depends on SAMV7_TC3
+	select SAMV7_QENCODER
 	select SAMV7_TC3_TIOA9
 	select SAMV7_TC3_TIOB9
 	---help---
 		Reserve TC3 for use by QEncoder.
+
+config SAMV7_QENCODER_ENABLE_GETINDEX
+	bool "Support ioctl GETINDEX call"
+	default n
+	---help---
+		Index signal does not reset the internal counter.
+		However, each time index is hit, capture A and B registers
+		are used to save the counter's value instead of
+		resetting it.
+
+		This provides support for the GETINDEX ioctl call
+		with the qe_index_s struct. The 16 to 32 bit extension
+		of the driver's counter is also done.
 
 config SAMV7_QENCODER_FILTER
 	bool "Enable filtering on SAMV7 QEncoder input"

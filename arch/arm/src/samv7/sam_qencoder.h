@@ -29,7 +29,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_SENSORS_QENCODER
+#if defined(CONFIG_SENSORS_QENCODER) && defined(CONFIG_SAMV7_QENCODER)
 
 /****************************************************************************
  * Included Files
@@ -77,5 +77,5 @@
 
 int sam_qeinitialize(const char *devpath, int tc);
 
-#endif /* CONFIG_SENSORS_QENCODER */
+#endif /* CONFIG_SENSORS_QENCODER && CONFIG_SAMV7_QENCODER */
 #endif /* __ARCH_ARM_SRC_SAMV7_SAM_QENCODER_H */

@@ -31,45 +31,6 @@
 
 #include "esp_bt.h"
 
-/* Bluetooth system and controller config */
-
-#define BTDM_CFG_BT_DATA_RELEASE            (1 << 0)
-#define BTDM_CFG_HCI_UART                   (1 << 1)
-#define BTDM_CFG_CONTROLLER_RUN_APP_CPU     (1 << 2)
-#define BTDM_CFG_SCAN_DUPLICATE_OPTIONS     (1 << 3)
-#define BTDM_CFG_SEND_ADV_RESERVED_SIZE     (1 << 4)
-#define BTDM_CFG_BLE_FULL_SCAN_SUPPORTED    (1 << 5)
-
-/* Bluetooth memory regions */
-
-#define SOC_MEM_BT_DATA_START               0x3ffae6e0
-#define SOC_MEM_BT_DATA_END                 0x3ffaff10
-#define SOC_MEM_BT_EM_START                 0x3ffb0000
-#define SOC_MEM_BT_EM_END                   0x3ffb7cd8
-#define SOC_MEM_BT_EM_BTDM0_START           0x3ffb0000
-#define SOC_MEM_BT_EM_BTDM0_END             0x3ffb09a8
-#define SOC_MEM_BT_EM_BLE_START             0x3ffb09a8
-#define SOC_MEM_BT_EM_BLE_END               0x3ffb1ddc
-#define SOC_MEM_BT_EM_BTDM1_START           0x3ffb1ddc
-#define SOC_MEM_BT_EM_BTDM1_END             0x3ffb2730
-#define SOC_MEM_BT_EM_BREDR_START           0x3ffb2730
-#define SOC_MEM_BT_EM_BREDR_NO_SYNC_END     0x3ffb6388  /* Not calculate with synchronize connection support */
-#define SOC_MEM_BT_EM_BREDR_END             0x3ffb7cd8  /* Calculate with synchronize connection support */
-#define SOC_MEM_BT_EM_SYNC0_START           0x3ffb6388
-#define SOC_MEM_BT_EM_SYNC0_END             0x3ffb6bf8
-#define SOC_MEM_BT_EM_SYNC1_START           0x3ffb6bf8
-#define SOC_MEM_BT_EM_SYNC1_END             0x3ffb7468
-#define SOC_MEM_BT_EM_SYNC2_START           0x3ffb7468
-#define SOC_MEM_BT_EM_SYNC2_END             0x3ffb7cd8
-#define SOC_MEM_BT_BSS_START                0x3ffb8000
-#define SOC_MEM_BT_BSS_END                  0x3ffb9a20
-#define SOC_MEM_BT_MISC_START               0x3ffbdb28
-#define SOC_MEM_BT_MISC_END                 0x3ffbdb5c
-
-#define SOC_MEM_BT_EM_PER_SYNC_SIZE         0x870
-
-#define SOC_MEM_BT_EM_BREDR_REAL_END        (SOC_MEM_BT_EM_BREDR_NO_SYNC_END + CONFIG_BTDM_CTRL_BR_EDR_MAX_SYNC_CONN_EFF * SOC_MEM_BT_EM_PER_SYNC_SIZE)
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

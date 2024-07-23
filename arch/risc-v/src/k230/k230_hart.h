@@ -22,8 +22,14 @@
 #define __ARCH_RISCV_SRC_K230_K230_HART_H
 
 /****************************************************************************
- * Included Files
+ * Preprocessor Macros
  ****************************************************************************/
+
+#define CSR_MSECCFG     0x747
+#define CSR_MSECCFGH    0x757
+
+#define MSECCFG_MML     (1 << 0)
+#define MSECCFG_RLB     (1 << 2)
 
 /****************************************************************************
  * Public functions
@@ -32,8 +38,10 @@
 #ifndef __ASSEMBLY__
 #if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
 
-int  hart_has_vec_ext(void);         /* checks for vector extension */
-void k230_hart_init(void);           /* M-mode initialization */
+void k230_hart_init(void);                /* M-mode initialization */
+bool k230_hart_is_big(void);              /* true if on big core */
+void k230_hart_big_boot(uintptr_t addr);  /* turn on big core w/ boot addr */
+void k230_hart_big_stop(void);            /* turn off big core */
 
 #endif /* !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI) */
 #endif /* __ASSEMBLY__ */

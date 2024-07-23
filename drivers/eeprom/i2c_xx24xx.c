@@ -873,7 +873,7 @@ int ee24xx_initialize(FAR struct i2c_master_s *bus, uint8_t devaddr,
         }
     }
 
-  finfo("EEPROM device %s, %d bytes, %d per page, addrlen %d, %s\n",
+  finfo("EEPROM device %s, %" PRIu32 " bytes, %d per page, addrlen %d, %s\n",
         devname, eedev->size, eedev->pgsize, eedev->addrlen,
         eedev->readonly ? "readonly" : "");
 

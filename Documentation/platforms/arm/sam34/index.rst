@@ -53,7 +53,7 @@ Support for the SAM4L Xplained modules was added in NuttX-6.29:
    module
 
 Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/sam34/sam4l-xplained/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/sam34/boards/sam4l-xplained/README.txt>`__
 file for further information.
 
 **Memory Usage**. The ATSAM4LC4C comes in a 100-pin package and has
@@ -91,7 +91,7 @@ to NuttX by Masayuki Ishikawa in NuttX-7.19. The SAM4CM is a dual-CPU
 part and SMP was included for the ARMv7-M and SAM3/4 families. The
 SAM4CMP-DB board support includes an NSH configuration that operates in
 an SMP configuration. Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/sam34/sam4cmp-db/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/sam34/boards/sam4cmp-db/README.txt>`__
 file for further information.
 
 Microchip SAM4E

@@ -198,7 +198,8 @@ struct esp32_emac_s
   struct work_s         timeoutwork; /* For TX timeout work to the work queue */
   struct work_s         pollwork;    /* For deferring poll work to the work queue */
 
-  int                   cpuint;      /* SPI interrupt ID */
+  uint8_t               cpu;         /* CPU ID */
+  int                   cpuint;      /* CPU interrupt assigned to EMAC */
 
   sq_queue_t            freeb;       /* The free buffer list */
 
@@ -1793,7 +1794,9 @@ static int emac_ifdown(struct net_driver_s *dev)
 
   emac_reset_regbits(EMAC_CR_OFFSET, EMAC_TX_E | EMAC_RX_E);
 
-  up_disable_irq(priv->cpuint);
+  /* Disable the Ethernet interrupt */
+
+  up_disable_irq(ESP32_IRQ_EMAC);
 
   /* Cancel the TX timeout timers */
 
@@ -2032,7 +2035,8 @@ int esp32_emac_init(void)
 
   memset(priv, 0, sizeof(struct esp32_emac_s));
 
-  priv->cpuint = esp32_setup_irq(0, ESP32_PERIPH_EMAC,
+  priv->cpu = up_cpu_index();
+  priv->cpuint = esp32_setup_irq(priv->cpu, ESP32_PERIPH_EMAC,
                                  1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
@@ -2083,7 +2087,7 @@ int esp32_emac_init(void)
   return 0;
 
 errout_with_attachirq:
-  esp32_teardown_irq(0, ESP32_PERIPH_EMAC, priv->cpuint);
+  esp32_teardown_irq(priv->cpu, ESP32_PERIPH_EMAC, priv->cpuint);
 
 error:
   return ret;

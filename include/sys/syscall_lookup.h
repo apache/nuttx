@@ -89,7 +89,7 @@ SYSCALL_LOOKUP(nxsem_wait,                 1)
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-  SYSCALL_LOOKUP(nxsem_open,               4)
+  SYSCALL_LOOKUP(nxsem_open,               5)
   SYSCALL_LOOKUP(nxsem_close,              1)
   SYSCALL_LOOKUP(nxsem_unlink,             1)
 #endif

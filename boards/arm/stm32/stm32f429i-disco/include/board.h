@@ -205,6 +205,11 @@
 
 #define GPIO_USART3_RX GPIO_USART3_RX_1
 #define GPIO_USART3_TX GPIO_USART3_TX_1
+
+/* CAN: */
+#define GPIO_CAN1_RX GPIO_CAN1_RX_2
+#define GPIO_CAN1_TX GPIO_CAN1_TX_2
+
 /* PWM
  *
  * The STM32F4 Discovery has no real on-board PWM devices, but the board can

@@ -99,6 +99,15 @@ config ARCH_CHIP_ESP32PICOD4
 
 endchoice # ESP32 Chip Selection
 
+config ESPRESSIF_CHIP_SERIES
+	string
+	default "esp32"
+
+config ESPRESSIF_NUM_CPUS
+	int
+	default 1 if ESP32_SINGLE_CPU
+	default 2 if ESP32_DUAL_CPU
+
 config ESP32_SINGLE_CPU
 	bool
 	default n
@@ -209,6 +218,8 @@ config ESP32_EXCEPTION_ENABLE_CACHE
 
 menu "ESP32 Peripheral Selection"
 
+source "arch/xtensa/src/common/espressif/Kconfig"
+
 config ESP32_UART
 	bool
 	default n
@@ -241,6 +252,26 @@ config ESP32_EMAC
 	---help---
 		Enable ESP32 ethernet support.
 
+config ESP32_OPENETH
+	bool "Opencores Ethernet MAC"
+	default n
+	depends on !ESP32_EMAC
+	select NET
+	select SCHED_WORKQUEUE
+	---help---
+		Enable ESP32 ethernet opencores support for use with QEMU.
+		Disable this if you are using the real device.
+
+if ESP32_OPENETH
+config ESP32_OPENETH_DMA_RX_BUFFER_NUM
+	int "Number of Ethernet DMA Rx buffers"
+	range 1 64
+	default 4
+	---help---
+		Number of DMA receive buffers, each buffer is 1600 bytes.
+
+endif # ESP32_OPENETH
+
 config ESP32_I2C
 	bool
 	default n
@@ -264,14 +295,6 @@ config ESP32_PCNT
 	---help---
 		Pulse Counter is currently used to implement Quadracture
 		Encoder.
-
-config ESP32_RMT
-	bool "Remote Control Module (RMT)"
-	default n
-	depends on EXPERIMENTAL
-	---help---
-		Remote Control Module is currently used to control WS2812
-		RGB LED normally used on LED strips.
 
 config ESP32_RNG
 	bool "Random Number Generator (RNG)"
@@ -764,8 +787,10 @@ endmenu # ESP32 Peripheral Selection
 
 config ESP32_WIFI_BT_COEXIST
 	bool "Wi-Fi and BT coexist"
+	default y if ESP32_WIFI && ESP32_BLE
 	default n
 	depends on ESP32_WIFI && ESP32_BLE
+	select ESP32_WIFI_STA_DISCONNECT_PM
 
 menu "Interrupt Configuration"
 
@@ -1870,7 +1895,6 @@ comment "Partition Table Configuration"
 config ESP32_PARTITION_TABLE
 	bool "Create MTD partitions from Partition Table"
 	default n
-	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Decode partition table and initialize partitions as MTD.
 
@@ -2469,16 +2493,85 @@ config ESP32_LEDC_CHANNEL7_PIN
 
 endmenu # LEDC configuration
 
+menu "MCPWM Configuration"
+	depends on ESP_MCPWM
+
+config ESP_MCPWM_CAPTURE
+	bool "MCPWM Capture Submodule"
+	depends on ESP_MCPWM
+	select CAPTURE
+	default n
+	---help---
+		Enables the use of the MCPWM capture submodule.
+
+if ESP_MCPWM_CAPTURE
+
+config ESP_MCPWM_CAPTURE_CH0
+	bool "Capture Channel 0"
+	default n
+	---help---
+		Enables capture on channel 0.
+
+if ESP_MCPWM_CAPTURE_CH0
+
+config ESP_MCPWM_CAPTURE_CH0_GPIO
+	int "GPIO Pin"
+	default 14
+	---help---
+		GPIO pin assigned to capture channel 0.
+
+endif # ESP_MCPWM_CAPTURE_CH0
+
+config ESP_MCPWM_CAPTURE_CH1
+	bool "Capture Channel 1"
+	default n
+	---help---
+		Enables capture on channel 1.
+
+if ESP_MCPWM_CAPTURE_CH1
+
+config ESP_MCPWM_CAPTURE_CH1_GPIO
+	int "GPIO Pin"
+	default 15
+	---help---
+		GPIO pin assigned to capture channel 1.
+
+endif # ESP_MCPWM_CAPTURE_CH1
+
+config ESP_MCPWM_CAPTURE_CH2
+	bool "Capture Channel 2"
+	default n
+	---help---
+		Enables capture on channel 2.
+
+if ESP_MCPWM_CAPTURE_CH2
+
+config ESP_MCPWM_CAPTURE_CH2_GPIO
+	int "GPIO Pin"
+	default 16
+	---help---
+		GPIO pin assigned to capture channel 2.
+
+endif # ESP_MCPWM_CAPTURE_CH2
+
+endif # ESP_MCPWM_CAPTURE
+
+endmenu # MCPWM Configuration
+
 config ESP32_HAVE_OTA_PARTITION
 	bool
 	default n
 
 menu "Bootloader and Image Configuration"
 
-config ESP32_APP_FORMAT_LEGACY
+config ESPRESSIF_SIMPLE_BOOT
 	bool
-	default y if !ESP32_APP_FORMAT_MCUBOOT
-	depends on !ESP32_APP_FORMAT_MCUBOOT
+	depends on !ESP32_APP_FORMAT_MCUBOOT && !ESP32_APP_FORMAT_LEGACY
+	default y
+
+config ESP32_APP_FORMAT_LEGACY
+	bool "Enable legacy IDF bootloader format"
+	default y if BUILD_PROTECTED
 	---help---
 		This is the legacy application image format, as supported by the ESP-IDF
 		2nd stage bootloader.
@@ -2486,27 +2579,10 @@ config ESP32_APP_FORMAT_LEGACY
 config ESP32_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
+	default n
 	select ESP32_HAVE_OTA_PARTITION
-	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
-
-config ESP32_BOOTLOADER_DOWNLOAD_PREBUILT
-	bool
-	default y if !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
-	depends on !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
-	---help---
-		The build system will download the prebuilt binaries from
-		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
-		Application Image Format (ESP32_APP_FORMAT_LEGACY or ESP32_APP_FORMAT_MCUBOOT)
-
-config ESP32_BOOTLOADER_BUILD_FROM_SOURCE
-	bool "Build binaries from source"
-	---help---
-		The build system will build all the required binaries from source. It will clone
-		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
-		custom bootloader according to the chosen Application Image Format
-		(ESP32_APP_FORMAT_LEGACY or ESP32_APP_FORMAT_MCUBOOT) and partition information.
 
 choice
 	prompt "Target slot for image flashing"
@@ -2552,7 +2628,6 @@ config ESP32_CUSTOM_PARTITION_TABLE_OFFSET
 	bool "Customize partition table offset"
 	default n
 	depends on ESP32_APP_FORMAT_LEGACY
-	select ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enable to select the offset of the partition table in the flash.
 

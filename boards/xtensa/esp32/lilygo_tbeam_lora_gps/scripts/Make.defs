@@ -1,5 +1,5 @@
 ############################################################################
-# boards/xtensa/esp32/ttgo_lora_esp32/scripts/Make.defs
+# boards/xtensa/esp32/lilygo_tbeam_lora_gps/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -36,6 +36,8 @@ else
 
   ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
     ARCHSCRIPT += $(call FINDSCRIPT,mcuboot_sections.ld)
+  else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+    ARCHSCRIPT += $(call FINDSCRIPT,simple_boot_sections.ld)
   else
     ARCHSCRIPT += $(call FINDSCRIPT,legacy_sections.ld)
   endif

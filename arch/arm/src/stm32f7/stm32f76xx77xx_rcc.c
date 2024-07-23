@@ -405,13 +405,13 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR_WWDGEN;
 #endif
 
-#ifdef CONFIG_STM32F7_SPI2
+#if defined(CONFIG_STM32F7_SPI2) || defined(CONFIG_STM32F7_I2S2)
   /* SPI2 clock enable */
 
   regval |= RCC_APB1ENR_SPI2EN;
 #endif
 
-#ifdef CONFIG_STM32F7_SPI3
+#if defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_I2S3)
   /* SPI3 clock enable */
 
   regval |= RCC_APB1ENR_SPI3EN;
@@ -913,7 +913,10 @@ static void stm32_stdclockconfig(void)
         {
         }
 #endif
-#if defined(CONFIG_STM32F7_PLLI2S) || (STM32_RCC_DCKCFGR1_SAI1SRC == RCC_DCKCFGR1_SAI1SEL(1)) || (STM32_RCC_DCKCFGR1_SAI2SRC == RCC_DCKCFGR1_SAI2SEL(1))
+
+#if defined(CONFIG_STM32F7_PLLI2S) || \
+    (STM32_RCC_DCKCFGR1_SAI1SRC == RCC_DCKCFGR1_SAI1SEL(1)) || \
+    (STM32_RCC_DCKCFGR1_SAI2SRC == RCC_DCKCFGR1_SAI2SEL(1))
 
       /* Configure PLLI2S */
 
@@ -922,10 +925,10 @@ static void stm32_stdclockconfig(void)
                   | RCC_PLLI2SCFGR_PLLI2SP_MASK
                   | RCC_PLLI2SCFGR_PLLI2SQ_MASK
                   | RCC_PLLI2SCFGR_PLLI2SR_MASK);
-      regval |= (STM32_RCC_PLLSAICFGR_PLLSAIN
-                 | STM32_RCC_PLLSAICFGR_PLLSAIP
-                 | STM32_RCC_PLLSAICFGR_PLLSAIQ
-                 | STM32_RCC_PLLSAICFGR_PLLSAIR);
+      regval |= (STM32_RCC_PLLI2SCFGR_PLLI2SN
+                 | STM32_RCC_PLLI2SCFGR_PLLI2SP
+                 | STM32_RCC_PLLI2SCFGR_PLLI2SQ
+                 | STM32_RCC_PLLI2SCFGR_PLLI2SR);
       putreg32(regval, STM32_RCC_PLLI2SCFGR);
 
       /* Enable PLLI2S */

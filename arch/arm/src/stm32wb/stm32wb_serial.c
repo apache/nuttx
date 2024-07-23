@@ -36,6 +36,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/power/pm.h>
 #include <arch/board/board.h>
 
@@ -556,11 +557,11 @@ static void stm32wb_serial_restoreusartint(struct stm32wb_serial_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   stm32wb_serial_setusartint(priv, ie);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -572,7 +573,7 @@ static void stm32wb_serial_disableusartint(struct stm32wb_serial_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   if (ie)
     {
@@ -620,7 +621,7 @@ static void stm32wb_serial_disableusartint(struct stm32wb_serial_s *priv,
 
   stm32wb_serial_setusartint(priv, 0);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

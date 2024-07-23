@@ -9,35 +9,61 @@ comment "ESP32-S3 Configuration Options"
 
 choice
 	prompt "ESP32-S3 Chip Selection"
-	default ARCH_CHIP_ESP32S3WROOM1
+	default ARCH_CHIP_ESP32S3WROOM1N4
 
-config ARCH_CHIP_ESP32S3WROOM1
-	bool "ESP32-S3-WROOM-1"
+config ARCH_CHIP_ESP32S3WROOM1N4
+	bool "ESP32-S3-WROOM-1-N4"
 	select ESP32S3_FLASH_4M
 	select ARCH_HAVE_I2CRESET
 	---help---
-		Generic module with an embedded ESP32-S3.
+		Generic module with an embedded ESP32-S3. This chip comes with 4MB SPI Flash
 
-config ARCH_CHIP_ESP32S3WROOM2
-	bool "ESP32-S3-WROOM-2"
+config ARCH_CHIP_ESP32S3WROOM2N16R8V
+	bool "ESP32-S3-WROOM-2-N16R8V"
 	select ESP32S3_FLASH_16M
 	select ESP32S3_PSRAM_8M
 	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
 
-config ARCH_CHIP_ESP32S3MINI1
-	bool "ESP32-S3-MINI-1"
-	select ESP32S3_FLASH_8M
+		Note: depending on the modules, WROOM2 has 16MB flash
+		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
+
+config ARCH_CHIP_ESP32S3WROOM2N32R8V
+	bool "ESP32-S3-WROOM-2-N32R8V"
+	select ESP32S3_FLASH_32M
+	select ESP32S3_PSRAM_8M
 	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3.
+
+		Note: depending on the modules, WROOM2 has 16MB flash
+		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
+
+config ARCH_CHIP_ESP32S3MINI1N8
+	bool "ESP32-S3-MINI-1-N8"
+	select ESP32S3_FLASH_8M
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic ESP32S3-Mini Module with 8MB of Flash
+
+config ARCH_CHIP_ESP32S3CUSTOM
+	bool "ESP32-S3-Custom-Module"
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3. Chip Flash Size should be selected
+		under SPI FLash Menu. 
+
 
 endchoice # ESP32-S3 Chip Selection
 
 config ESPRESSIF_CHIP_SERIES
 	string
 	default "esp32s3"
+
+config ESPRESSIF_NUM_CPUS
+	int
+	default 2
 
 choice ESP32S3_DEFAULT_CPU_FREQ
 	prompt "CPU frequency"
@@ -256,7 +282,7 @@ config ESP32S3_FLASH_DETECT
 		Auto detect flash size when flashing.
 
 config ESP32S3_PSRAM_8M
-	bool
+	bool "ESP32S3 PSRAM 8M"
 	default n
 
 config ESP32S3_RUN_IRAM
@@ -269,6 +295,12 @@ config ESP32S3_RUN_IRAM
 menu "ESP32-S3 Peripheral Selection"
 
 source "arch/xtensa/src/common/espressif/Kconfig"
+
+config ESP32S3_ADC
+	bool "ADC"
+	default n
+	select ANALOG
+	select ADC
 
 config ESP32S3_UART
 	bool
@@ -366,26 +398,24 @@ config ESP32S3_I2S0_SAMPLE_RATE
 config ESP32S3_I2S0_BCLKPIN
 	int "I2S0 BCLK pin"
 	default 4
-	range 0 33 if ESP32S3_I2S0_ROLE_MASTER
-	range 0 39 if ESP32S3_I2S0_ROLE_SLAVE
+	range 0 48
 
 config ESP32S3_I2S0_WSPIN
 	int "I2S0 WS pin"
 	default 5
-	range 0 33 if ESP32S3_I2S0_ROLE_MASTER
-	range 0 39 if ESP32S3_I2S0_ROLE_SLAVE
+	range 0 48
 
 config ESP32S3_I2S0_DINPIN
 	int "I2S0 DIN pin"
 	depends on ESP32S3_I2S0_RX
 	default 19
-	range 0 39
+	range 0 48
 
 config ESP32S3_I2S0_DOUTPIN
 	int "I2S0 DOUT pin"
 	depends on ESP32S3_I2S0_TX
 	default 18
-	range 0 33
+	range 0 48
 
 config ESP32S3_I2S0_MCLK
 	bool "Enable I2S Master Clock"
@@ -398,7 +428,7 @@ config ESP32S3_I2S0_MCLKPIN
 	int "I2S MCLK pin"
 	depends on ESP32S3_I2S0_MCLK
 	default 0
-	range 0 39
+	range 0 48
 
 endif #ESP32S3_I2S0
 
@@ -478,26 +508,24 @@ config ESP32S3_I2S1_SAMPLE_RATE
 config ESP32S3_I2S1_BCLKPIN
 	int "I2S1 BCLK pin"
 	default 22
-	range 0 33 if ESP32S3_I2S1_ROLE_MASTER
-	range 0 39 if ESP32S3_I2S1_ROLE_SLAVE
+	range 0 48
 
 config ESP32S3_I2S1_WSPIN
 	int "I2S1 WS pin"
 	default 23
-	range 0 33 if ESP32S3_I2S1_ROLE_MASTER
-	range 0 39 if ESP32S3_I2S1_ROLE_SLAVE
+	range 0 48
 
 config ESP32S3_I2S1_DINPIN
 	int "I2S1 DIN pin"
 	depends on ESP32S3_I2S1_RX
 	default 26
-	range 0 39
+	range 0 48
 
 config ESP32S3_I2S1_DOUTPIN
 	int "I2S1 DOUT pin"
 	depends on ESP32S3_I2S1_TX
 	default 25
-	range 0 33
+	range 0 48
 
 config ESP32S3_I2S1_MCLK
 	bool "Enable I2S Master Clock"
@@ -510,7 +538,7 @@ config ESP32S3_I2S1_MCLKPIN
 	int "I2S MCLK pin"
 	depends on ESP32S3_I2S1_MCLK
 	default 1
-	range 0 39
+	range 0 48
 
 endif #ESP32S3_I2S1
 
@@ -534,6 +562,7 @@ config ESP32S3_WDT
 
 config ESP32S3_EFUSE
 	bool "EFUSE support"
+	select EFUSE
 	default n
 	---help---
 		Enable ESP32-S3 efuse support.
@@ -727,7 +756,7 @@ config ESP32S3_XTWDT_BACKUP_CLK_ENABLE
 	bool "Automatically switch to BACKUP32K_CLK when timer expires"
 	depends on ESP32S3_XTWDT
 	default y
-	help
+	---help---
 		Enable this to automatically switch to BACKUP32K_CLK as the source of
 		RTC_SLOW_CLK when the watchdog timer expires.
 
@@ -749,9 +778,12 @@ config ESP32S3_LCD
 	select DRIVERS_VIDEO
 	select VIDEO_FB
 	select FB_UPDATE
-	help
 	---help---
 		LCD controller that outputs parallel data and supports RGB interface.
+
+config ESP32S3_AES_ACCELERATOR
+	bool "AES Accelerator"
+	default n
 
 endmenu # ESP32-S3 Peripheral Selection
 
@@ -1266,6 +1298,73 @@ endif # ESP32S3_UART2
 
 endmenu # UART Configuration
 
+menu "ADC Configuration"
+	depends on ESP32S3_ADC
+
+if ESP32S3_ADC
+
+choice ESP32S3_ADC_VOL_RANGES
+	prompt "ADC voltage ranges"
+	default ESP32S3_ADC_VOL_3100
+
+config ESP32S3_ADC_VOL_950
+	bool "0~950mV"
+
+config ESP32S3_ADC_VOL_1250
+	bool "0~1250mV"
+
+config ESP32S3_ADC_VOL_1750
+	bool "0~1750mV"
+
+config ESP32S3_ADC_VOL_3100
+	bool "0~3100mV"
+
+endchoice # ADC voltage ranges
+
+config ESP32S3_ADC1_CHANNEL0
+	bool "ADC1 channel 0"
+	default n
+
+config ESP32S3_ADC1_CHANNEL1
+	bool "ADC1 channel 1"
+	default n
+
+config ESP32S3_ADC1_CHANNEL2
+	bool "ADC1 channel 2"
+	default n
+
+config ESP32S3_ADC1_CHANNEL3
+	bool "ADC1 channel 3"
+	default n
+
+config ESP32S3_ADC1_CHANNEL4
+	bool "ADC1 channel 4"
+	default n
+
+config ESP32S3_ADC1_CHANNEL5
+	bool "ADC1 channel 5"
+	default n
+
+config ESP32S3_ADC1_CHANNEL6
+	bool "ADC1 channel 6"
+	default n
+
+config ESP32S3_ADC1_CHANNEL7
+	bool "ADC1 channel 7"
+	default n
+
+config ESP32S3_ADC1_CHANNEL8
+	bool "ADC1 channel 8"
+	default n
+
+config ESP32S3_ADC1_CHANNEL9
+	bool "ADC1 channel 9"
+	default n
+
+endif # ESP32S3_ADC
+
+endmenu # ADC Configuration
+
 menu "I2C Configuration"
 	depends on ESP32S3_I2C
 
@@ -1444,6 +1543,10 @@ config ESP32S3_WIFI_RX_AMPDU
 config ESP32S3_WIFI_RXBA_AMPDU_WZ
 	int "Wi-Fi RX BA AMPDU windown size"
 	default 6
+
+config ESP32S3_WLAN_PKTBUF_NUM
+	int "WLAN netcard packet buffer number per netcard"
+	default 16
 
 config ESP_WIFI_GCMP_SUPPORT
 	bool "WiFi GCMP Support(GCMP128 and GCMP256)"
@@ -1789,6 +1892,29 @@ config ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 		if select the option, it will force to use source code instead
 		of functions in ROM, so that SPI flash driver can access full
 		32-bit address.
+		
+choice ESP32S3_FLASH_SIZE
+	prompt "ESP32S3 Custom Module Flash Size"
+	depends on ARCH_CHIP_ESP32S3CUSTOM
+	default ESP32S3CUSTOM_FLASH_4M
+
+	config ESP32S3CUSTOM_FLASH_4M
+		bool "ESP32S3 Flash 4MB"
+		select ESP32S3_FLASH_4M
+
+	config ESP32S3CUSTOM_FLASH_8M
+		bool "ESP32S3 Flash 8MB"
+		select ESP32S3_FLASH_8M
+
+	config ESP32S3CUSTOM_FLASH_16M
+		bool "ESP32S3 Flash 16MB"
+		select ESP32S3_FLASH_16M
+
+	config ESP32S3CUSTOM_FLASH_32M
+		bool "ESP32S3 Flash 32MB"
+		select ESP32S3_FLASH_32M
+		select ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
+endchoice # ESP32S3_FLASH_SIZE
 
 config ESP32S3_HAVE_OTA_PARTITION
 	bool
@@ -1880,22 +2006,20 @@ config ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
 		can do SPI Flash read/write/erase/map/unmap. Otherwise,
 		it may cause exception, the root cause is as following:
 			1. When operating SPI flash, cache is also disable,
-		   		then software can't access PSRAM by data cache.
+				then software can't access PSRAM by data cache.
 			2. SPI flash read/write/erase functions have instruction like
 				stack-pop and stack-push which may use stack buffer which is
-		   		PSRAM space or load/store temp variables which locate in PSRAM space too.
+				PSRAM space or load/store temp variables which locate in PSRAM space too.
 			3. Once operation in step 2 triggers, CPU will trigger exception.
 		So related SPI flash functions should be sent and run in tasks which use SRAM as task stack.
-
-if ESP32S3_APP_FORMAT_LEGACY
 
 comment "Partition Table configuration"
 
 config ESP32S3_PARTITION_TABLE
 	bool "Create MTD partitions from Partition Table"
 	default n
-	depends on ESP32S3_MTD && ESP32S3_APP_FORMAT_LEGACY
-	select ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
+	depends on ESP32S3_MTD
+	select ESP32S3_APP_FORMAT_LEGACY
 	---help---
 		Decode partition table and initialize partitions as MTD.
 
@@ -1903,8 +2027,6 @@ config ESP32S3_PARTITION_MOUNTPT
 	string "Partition mount point"
 	default "/dev/esp/partition/"
 	depends on ESP32S3_PARTITION_TABLE
-
-endif # ESP32S3_APP_FORMAT_LEGACY
 
 endif # ESP32S3_SPIFLASH
 
@@ -1994,6 +2116,71 @@ config ESP32S3_LEDC_CHANNEL7_PIN
 	default 9
 
 endmenu # LEDC configuration
+
+menu "MCPWM Configuration"
+	depends on ESP_MCPWM
+
+config ESP_MCPWM_CAPTURE
+	bool "MCPWM Capture Submodule"
+	depends on ESP_MCPWM
+	select CAPTURE
+	default n
+	---help---
+		Enables the use of the MCPWM capture submodule.
+
+if ESP_MCPWM_CAPTURE
+
+config ESP_MCPWM_CAPTURE_CH0
+	bool "Capture Channel 0"
+	default n
+	---help---
+		Enables capture on channel 0.
+
+if ESP_MCPWM_CAPTURE_CH0
+
+config ESP_MCPWM_CAPTURE_CH0_GPIO
+	int "GPIO Pin"
+	default 12
+	---help---
+		GPIO pin assigned to capture channel 0.
+
+endif # ESP_MCPWM_CAPTURE_CH0
+
+config ESP_MCPWM_CAPTURE_CH1
+	bool "Capture Channel 1"
+	default n
+	---help---
+		Enables capture on channel 1.
+
+if ESP_MCPWM_CAPTURE_CH1
+
+config ESP_MCPWM_CAPTURE_CH1_GPIO
+	int "GPIO Pin"
+	default 15
+	---help---
+		GPIO pin assigned to capture channel 1.
+
+endif # ESP_MCPWM_CAPTURE_CH1
+
+config ESP_MCPWM_CAPTURE_CH2
+	bool "Capture Channel 2"
+	default n
+	---help---
+		Enables capture on channel 2.
+
+if ESP_MCPWM_CAPTURE_CH2
+
+config ESP_MCPWM_CAPTURE_CH2_GPIO
+	int "GPIO Pin"
+	default 16
+	---help---
+		GPIO pin assigned to capture channel 2.
+
+endif # ESP_MCPWM_CAPTURE_CH2
+
+endif # ESP_MCPWM_CAPTURE
+
+endmenu # MCPWM Configuration
 
 menu "USB OTG Configuration"
 	depends on ESP32S3_OTG
@@ -2173,38 +2360,27 @@ endmenu
 
 menu "Bootloader and Image Configuration"
 
-config ESP32S3_APP_FORMAT_LEGACY
+config ESPRESSIF_SIMPLE_BOOT
 	bool
-	default y if !ESP32S3_APP_FORMAT_MCUBOOT
 	depends on !ESP32S3_APP_FORMAT_MCUBOOT
-	---help---
-		This is the legacy application image format, as supported by the ESP-IDF
-		2nd stage bootloader.
+	depends on !ESP32S3_APP_FORMAT_LEGACY
+	default y
 
 config ESP32S3_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
+	default n
 	select ESP32S3_HAVE_OTA_PARTITION
-	select ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
-config ESP32S3_BOOTLOADER_DOWNLOAD_PREBUILT
-	bool
-	default y if !ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
-	depends on !ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
+config ESP32S3_APP_FORMAT_LEGACY
+	bool "Enable legacy IDF bootloader format"
+	default y if BUILD_PROTECTED
 	---help---
-		The build system will download the prebuilt binaries from
-		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
-		Application Image Format (ESP32S3_APP_FORMAT_LEGACY or ESP32S3_APP_FORMAT_MCUBOOT)
-
-config ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
-	bool "Build binaries from source"
-	---help---
-		The build system will build all the required binaries from source. It will clone
-		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
-		custom bootloader according to the chosen Application Image Format
-		(ESP32S3_APP_FORMAT_LEGACY or ESP32S3_APP_FORMAT_MCUBOOT) and partition information.
+		This is the legacy application image format, as supported by the ESP-IDF
+		2nd stage bootloader. Please note that this requires ESP-IDF toolchain
+		to be built properly.
 
 choice
 	prompt "Target slot for image flashing"
@@ -2250,7 +2426,6 @@ config ESP32S3_CUSTOM_PARTITION_TABLE_OFFSET
 	bool "Customize partition table offset"
 	default n
 	depends on ESP32S3_APP_FORMAT_LEGACY
-	select ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
 	---help---
 		Enable to select the offset of the partition table in the flash.
 
@@ -2292,7 +2467,7 @@ config ESP32S3_KERNEL_IMAGE_SIZE
 
 config ESP32S3_KERNEL_RAM_SIZE
 	hex "Kernel Allocated RAM"
-	default 0x29000
+	default 0x30000
 	range 0x10000 0x54700
 	depends on ESP32S3_APP_FORMAT_LEGACY
 	---help---
@@ -2306,5 +2481,14 @@ config ESP32S3_KERNEL_RAM_SIZE
 endif # BUILD_PROTECTED
 
 endmenu # Bootloader and Image Configuration
+
+menu "AES accelerate"
+	depends on ESP32S3_AES_ACCELERATOR
+
+config ESP32S3_AES_ACCELERATOR_TEST
+	bool "AES driver test"
+	default n
+
+endmenu # ESP32S3_AES_ACCELERATOR
 
 endif # ARCH_CHIP_ESP32S3

@@ -149,10 +149,15 @@ void __start(void)
   const register uint32_t *src;
   register uint32_t *dest;
 
-  /* Make sure that interrupts are disabled and set SP */
+  /* Make sure that interrupts are disabled and set MSP */
 
   __asm__ __volatile__ ("\tcpsid  i\n");
   __asm__ __volatile__ ("MSR MSP, %0\n" : : "r" (IDLE_STACK) :);
+
+  /* Make sure that we use MSP from now on */
+
+  __asm__ __volatile__ ("MSR CONTROL, %0\n" : : "r" (0) :);
+  __asm__ __volatile__ ("ISB SY\n");
 
   /* Make sure VECTAB is set to NuttX vector table
    * and not the one from the boot ROM and have consistency

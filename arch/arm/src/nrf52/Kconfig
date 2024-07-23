@@ -42,6 +42,8 @@ config ARCH_CHIP_NRF52840
 	select NRF52_HAVE_USBDEV
 	select NRF52_HAVE_PWM3
 	select NRF52_HAVE_CRYPTOCELL
+	select NRF52_HAVE_IEEE802154
+	select NRF52_HAVE_BLELR
 
 endchoice # NRF52 Chip Selection
 
@@ -131,6 +133,14 @@ config NRF52_HAVE_PWM3
 	default n
 
 config NRF52_HAVE_CRYPTOCELL
+	bool
+	default n
+
+config NRF52_HAVE_BLELE
+	bool
+	default n
+
+config NRF52_HAVE_IEEE802154
 	bool
 	default n
 
@@ -610,6 +620,52 @@ endif # !NRF52_PWM_MULTICHAN
 endif # NRF52_PWM
 
 endmenu # PWM configuration
+
+menu "RADIO Configuration"
+
+if NRF52_RADIO
+
+config NRF52_RADIO_CUSTOM
+	bool "RADIO uses custom IRQ handlers"
+	default n
+
+config NRF52_RADIO_IEEE802154
+	bool "RADIO IEEE802.15.4 protocol"
+	default n
+	depends on NRF52_HAVE_IEEE802154
+	select ARMV7M_USEBASEPRI
+	select ARCH_RAMVECTORS
+	select ARCH_IRQPRIO
+	select NRF52_RADIO_CUSTOM
+	select NRF52_TIMER0
+
+if NRF52_RADIO_IEEE802154
+
+config NRF52_RADIO_IEEE802154_SUPERFRAME
+	bool "RADIO IEEE802.15.4 superframe support"
+	default n
+	select NRF52_RTC0
+	select NRF52_USE_LFCLK
+
+config NRF52_RADIO_IEEE802154_GTS_SLOTS
+	int "RADIO IEEE802.15.4 GTS slots"
+	default 2
+	depends on NRF52_RADIO_IEEE802154_SUPERFRAME
+
+config NRF52_RADIO_IEEE802154_TRACE
+	bool "RADIO IEEE802.15.4 trace support"
+	default n
+
+config NRF52_RADIO_IEEE802154_TRACE_BUFSIZE
+	int "RADIO IEEE802.15.4 trace buffer size"
+	depends on NRF52_RADIO_IEEE802154_TRACE
+	default 1024
+
+endif
+
+endif #NRF52_RADIO
+
+endmenu # "RADIO Configuration"
 
 menu "SAADC Configuration"
 

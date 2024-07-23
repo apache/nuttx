@@ -74,10 +74,10 @@
  * Name: board_rmt_rxinitialize
  *
  * Description:
- *   Initialize the RMT peripheral and register a RX device.
+ *   Initialize the RMT peripheral and register an RX device.
  *
  * Input Parameters:
- *   ch  - the RMT's channel that will be used
+ *   ch  - The RMT's channel that will be used
  *   pin - The pin used for the RX channel
  *
  * Returned Value:
@@ -105,10 +105,10 @@ int board_rmt_rxinitialize(int ch, int pin)
  * Name: board_rmt_txinitialize
  *
  * Description:
- *   Initialize the RMT peripheral and register a TX device.
+ *   Initialize the RMT peripheral and register an TX device.
  *
  * Input Parameters:
- *   ch  - the RMT's channel that will be used
+ *   ch  - The RMT's channel that will be used
  *   pin - The pin used for the TX channel
  *
  * Returned Value:

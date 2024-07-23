@@ -87,6 +87,9 @@ SECTIONS
     *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
 
+    *libarch.a:*esp_rom_spiflash.*(.literal .text .literal.* .text.*)
+    *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
+
 #ifdef CONFIG_ESP32S3_BLE
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 #endif
@@ -101,6 +104,8 @@ SECTIONS
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
+
+    *libc.a:*lib_instrument.*(.literal .text .literal.* .text.*)
 
 #ifdef CONFIG_ESP32S3_SPEED_UP_ISR
     *libarch.a:xtensa_switchcontext.*(.literal.up_switch_context .text.up_switch_context)
@@ -237,6 +242,8 @@ SECTIONS
   .flash.text :
   {
     _stext = .;
+    _instruction_reserved_start = ABSOLUTE(.);
+
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
@@ -251,6 +258,7 @@ SECTIONS
 
     . += 16;
 
+    _instruction_reserved_end = ABSOLUTE(.);
     _etext = .;
   } >default_code_seg
 

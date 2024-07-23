@@ -305,6 +305,7 @@ config ARCH_CHIP_NRF91
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_HAVE_TICKLESS
 	select ARCH_DMA_NO_FLASH_TRANSFER
+	select ARCH_HAVE_FPU
 	depends on EXPERIMENTAL
 	---help---
 		Nordic nRF91 architectures (ARM Cortex-M33 with integrated
@@ -600,6 +601,7 @@ config ARCH_CHIP_XMC4
 	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_MPU_UNIFIED
 	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
 	---help---
 		Infineon XMC4xxx(ARM Cortex-M4) architectures
 
@@ -648,6 +650,11 @@ config ARCH_CHIP_TLSR82
 	---help---
 		Telink tlsr82xx architectures (Customed armv6m)
 
+config ARCH_CHIP_MPS
+	bool "MPS ARM Series"
+	---help---
+		MPS platform (MPS2 MPS3)
+
 config ARCH_CHIP_QEMU_ARM
 	bool "QEMU virt platform (ARMv7a)"
 	select ARCH_HAVE_PSCI
@@ -678,6 +685,13 @@ config ARCH_CHIP_AT32
 	select ARMV7M_HAVE_STACKCHECK
 	---help---
 		Artery AT32 architectures (ARM Cortex-M4)
+
+config ARCH_CHIP_CXD32XX
+	bool "Sony CXD32xx"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
+	---help---
+		Sony CXD32XX (ARM Cortex-M4) architectures
 
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
@@ -1094,8 +1108,10 @@ config ARCH_CHIP
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
+	default "mps"		if ARCH_CHIP_MPS
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 	default "at32"		if ARCH_CHIP_AT32
+	default "cxd32xx"	if ARCH_CHIP_CXD32XX
 
 config ARM_THUMB
 	bool "Thumb Mode"
@@ -1571,10 +1587,16 @@ endif
 if ARCH_CHIP_QEMU_ARM
 source "arch/arm/src/qemu/Kconfig"
 endif
+if ARCH_CHIP_MPS
+source "arch/arm/src/mps/Kconfig"
+endif
 if ARCH_CHIP_GOLDFISH_ARM
 source "arch/arm/src/goldfish/Kconfig"
 endif
 if ARCH_CHIP_AT32
 source "arch/arm/src/at32/Kconfig"
+endif
+if ARCH_CHIP_CXD32XX
+source "arch/arm/src/cxd32xx/Kconfig"
 endif
 endif # ARCH_ARM

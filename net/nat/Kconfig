@@ -6,14 +6,64 @@
 config NET_NAT
 	bool "Network Address Translation (NAT)"
 	default n
-	depends on NET_IPFORWARD && IOB_BUFSIZE >= 68
+	depends on NET_IPFORWARD
 	---help---
 		Enable or disable Network Address Translation (NAT) function.
 
 		Note: When forwarding IPv4 packet and applying NAT, NAT may be
 		applied directly on a single I/O buffer containing L3 packet header,
 		and NAT may need a continuous buffer of at least 68 Bytes
-		(IPv4 20B + ICMP 8B + IPv4 20B + TCP 20B).
+		(IPv4 20B + ICMP 8B + IPv4 20B + TCP 20B). And 108 Bytes for IPv6.
+
+config NET_NAT44
+	bool "IPv4-to-IPv4 NAT (NAT44)"
+	default y
+	depends on NET_IPv4 && NET_NAT
+	depends on IOB_BUFSIZE >= 68
+
+choice
+	prompt "NAT44 Type"
+	default NET_NAT44_FULL_CONE
+	depends on NET_NAT44
+
+config NET_NAT44_FULL_CONE
+	bool "Full Cone NAT"
+	---help---
+		Full Cone NAT is easier to traverse than Symmetric NAT, and uses
+		less resources than Symmetric NAT.
+
+config NET_NAT44_SYMMETRIC
+	bool "Symmetric NAT"
+	---help---
+		Symmetric NAT will be safer than Full Cone NAT, be more difficult
+		to traverse, and has more entries which may lead to heavier load.
+
+endchoice
+
+config NET_NAT66
+	bool "IPv6-to-IPv6 NAT (NAT66)"
+	default y
+	depends on NET_IPv6 && NET_NAT
+	depends on IOB_BUFSIZE >= 108
+
+choice
+	prompt "NAT66 Type"
+	default NET_NAT66_FULL_CONE
+	depends on NET_NAT66
+
+config NET_NAT66_FULL_CONE
+	bool "Full Cone NAT"
+	---help---
+		Full Cone NAT is easier to traverse than Symmetric NAT, and uses
+		less resources than Symmetric NAT.
+
+config NET_NAT66_SYMMETRIC
+	bool "Symmetric NAT"
+	---help---
+		Symmetric NAT will be safer than Full Cone NAT, be more difficult
+		to traverse, and has more entries which may lead to heavier load.
+
+endchoice
 
 config NET_NAT_HASH_BITS
 	int "The bits of NAT entry hashtable"
@@ -53,6 +103,13 @@ config NET_NAT_ICMP_EXPIRE_SEC
 
 		Note: The default value 60 is suggested by RFC5508, Section 3.2,
 		Page 8.
+
+config NET_NAT_ICMPv6_EXPIRE_SEC
+	int "ICMPv6 NAT entry expiration seconds"
+	default 60
+	depends on NET_NAT
+	---help---
+		The expiration time for idle ICMPv6 entry in NAT.
 
 config NET_NAT_ENTRY_RECLAIM_SEC
 	int "The time to auto reclaim all expired entries"

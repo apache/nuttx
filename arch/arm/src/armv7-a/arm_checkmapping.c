@@ -33,7 +33,7 @@
 
 #include "arm_internal.h"
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 /****************************************************************************
  * Public Functions
@@ -92,4 +92,4 @@ bool arm_checkmapping(struct tcb_s *tcb)
   return (*pte != 0);
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */

@@ -145,7 +145,7 @@
 #define TIMRST_TIM16     RCC_APB2RSTR_TIM16RST
 #define TIMCLK_TIM17     STM32_APB2_TIM17_CLKIN
 #define TIMRCCEN_TIM17   STM32_RCC_APB2ENR
-#define TIMEN_TIM17      RCC_APB2ENR_TIM71EN
+#define TIMEN_TIM17      RCC_APB2ENR_TIM17EN
 #define TIMRCCRST_TIM17  STM32_RCC_APB2RSTR
 #define TIMRST_TIM17     RCC_APB2RSTR_TIM17RST
 
@@ -4227,6 +4227,14 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
 
   regval &= ~resetbit;
   putreg32(regval, regaddr);
+
+  /* Clear all channels */
+
+  pwm_putreg(priv, STM32_GTIM_CCR1_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR2_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR3_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_CCR4_OFFSET, 0);
+
   leave_critical_section(flags);
 
   pwminfo("regaddr: %08" PRIx32 " resetbit: %08" PRIx32 "\n",

@@ -133,6 +133,8 @@ static FAR struct virtio_gpu_priv_s *g_virtio_gpu[VIRTIO_GPU_MAX_DISP];
 
 /****************************************************************************
  * Name: virtio_gpu_send_cmd
+ * Note: the caller should not touch `buf` after calling this, as it will be
+ *       freed either here or in virtio_gpu_done().
  ****************************************************************************/
 
 static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
@@ -146,6 +148,7 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
       sem_t sem;
       struct virtio_gpu_cookie_s cookie;
 
+      virtio_free_buf(vq->vq_dev, buf);
       nxsem_init(&sem, 0, 0);
       cookie.blocking = true;
       cookie.p = &sem;
@@ -180,9 +183,13 @@ static int virtio_gpu_send_cmd(FAR struct virtqueue *vq,
             }
           else
             {
-              virtio_free_buf(vq->vq_dev, buf);
               kmm_free(cookie);
             }
+        }
+
+      if (buf && ret < 0)
+        {
+          virtio_free_buf(vq->vq_dev, buf);
         }
     }
 

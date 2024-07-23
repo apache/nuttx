@@ -56,46 +56,136 @@
 
 void x86_64_check_and_enable_capability(void)
 {
+  unsigned long ebx;
   unsigned long ecx;
-  unsigned long require;
+  unsigned long require = 0;
 
-  require = X86_64_CPUID_01_X2APIC;
+  /* Check SSE3 instructions availability */
 
-  /* Check timer availability */
-
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
-  require |= X86_64_CPUID_01_TSCDEA;
+#ifdef CONFIG_ARCH_X86_64_SSE3
+  require |= X86_64_CPUID_01_SSE3;
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_XSAVE
-  require |= X86_64_CPUID_01_XSAVE;
+  /* Check Suplement SSE3 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_SSEE3
+  require |= X86_64_CPUID_01_SSEE3;
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_RDRAND
-  require |= X86_64_CPUID_01_RDRAND;
+  /* Check Fused multiply-add (FMA) instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_FMA
+  require |= X86_64_CPUID_01_FMA;
 #endif
+
+  /* Check process context identifiers availability */
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
   require |= X86_64_CPUID_01_PCID;
 #endif
 
-  asm volatile("cpuid" : "=c" (ecx) : "a" (X86_64_CPUID_CAP)
-      : "rbx", "rdx", "memory");
+  /* Check SSE4.1 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_SSE41
+  require |= X86_64_CPUID_01_SSE41;
+#endif
+
+  /* Check SSE4.2 instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_SSE42
+  require |= X86_64_CPUID_01_SSE42;
+#endif
 
   /* Check x2APIC availability */
+
+  require |= X86_64_CPUID_01_X2APIC;
+
+  /* Check timer availability */
+
+#ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
+  require |= X86_64_CPUID_01_TSCDEA;
+#endif
+
+  /* Check XSAVE/XRSTOR availability */
+
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
+  require |= X86_64_CPUID_01_XSAVE;
+#endif
+
+  /* Check AVX instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_AVX
+  require |= X86_64_CPUID_01_AVX;
+#endif
+
+  /* Check RDRAND feature availability */
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_RDRAND
+  require |= X86_64_CPUID_01_RDRAND;
+#endif
+
+  asm volatile("cpuid" : "=c" (ecx) : "a" (X86_64_CPUID_CAP)
+      : "rdx", "memory");
+
+  /* Check features availability from ECX */
 
   if ((ecx & require) != require)
     {
       goto err;
     }
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_XSAVE
+  /* Extended features */
+
+  require = 0;
+
+  /* Check AVX512 Foundation instructions availability */
+
+#ifdef CONFIG_ARCH_X86_64_AVX512
+  require |= X86_64_CPUID_07_AVX512F;
+#endif
+
+  /* Check CLWB instruction availability */
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_CLWB
+  require |= X86_64_CPUID_07_CLWB;
+#endif
+
+  asm volatile("cpuid" : "=b" (ebx) : "a" (X86_64_CPUID_EXTCAP), "c" (0)
+               : "rdx", "memory");
+
+  /* Check features availability */
+
+  if ((ebx & require) != require)
+    {
+      goto err;
+    }
+
+#if defined(CONFIG_ARCH_HAVE_SSE) || defined(CONFIG_ARCH_X86_64_AVX) || \
+    defined(CONFIG_ARCH_X86_64_AVX512)
   __enable_sse_avx();
+#endif
+
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
+  /* Check XSAVE state area size for the current XCR0 state */
+
+  asm volatile("cpuid" : "=b" (ebx)
+               : "a" (X86_64_CPUID_XSAVE), "c" (0)
+               : "rdx", "memory");
+
+  if (XCPTCONTEXT_XMM_AREA_SIZE < ebx)
+    {
+      goto err;
+    }
 #endif
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
   __enable_pcid();
 #endif
+
+  /* Enable I- and D-Caches */
+
+  up_enable_icache();
+  up_enable_dcache();
 
   return;
 

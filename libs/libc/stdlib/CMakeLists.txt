@@ -39,6 +39,7 @@ set(SRCS
     lib_bsearch.c
     lib_rand.c
     lib_rand48.c
+    lib_reallocarray.c
     lib_qsort.c
     lib_srand.c
     lib_strtol.c

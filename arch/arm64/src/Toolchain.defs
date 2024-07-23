@@ -30,22 +30,20 @@
 #                   reliable code generation.
 #
 
-ifeq ($(CONFIG_ARCH_ARMV8A),y)
-  ARCHCPUFLAGS += -march=armv8-a
-endif
-
-ifeq ($(CONFIG_ARCH_ARMV8R),y)
-  ARCHCPUFLAGS += -march=armv8-r
-endif
-
 ifeq ($(CONFIG_ARCH_CORTEX_A53),y)
   ARCHCPUFLAGS += -mcpu=cortex-a53
+else ifeq ($(CONFIG_ARCH_CORTEX_A55),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a55
 else ifeq ($(CONFIG_ARCH_CORTEX_A57),y)
   ARCHCPUFLAGS += -mcpu=cortex-a57
 else ifeq ($(CONFIG_ARCH_CORTEX_A72),y)
   ARCHCPUFLAGS += -mcpu=cortex-a72
 else ifeq ($(CONFIG_ARCH_CORTEX_R82),y)
   ARCHCPUFLAGS += -mcpu=cortex-r82
+else ifeq ($(CONFIG_ARCH_ARMV8A),y)
+  ARCHCPUFLAGS += -march=armv8-a
+else ifeq ($(CONFIG_ARCH_ARMV8R),y)
+  ARCHCPUFLAGS += -march=armv8-r
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
@@ -84,6 +82,10 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+  ARCHOPTIMIZATION += --param asan-globals=1
+endif
+
 # Instrumentation options
 
 ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
@@ -96,7 +98,7 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 endif
 
 ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common -nostdinc++
+ARCHCXXFLAGS += -fno-common
 
 ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Werror -Wno-attributes -Wno-unknown-pragmas
 ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
@@ -104,6 +106,10 @@ ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 # When all C++ code is built using GCC 7.1 or a higher version,
 # we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
 # Refer to : https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
+
+ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  ARCHCXXFLAGS += -nostdinc++
+endif
 
 ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   ARCHCFLAGS += -Wno-psabi
@@ -129,6 +135,12 @@ LDFLAGS += -nostdlib
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   LDFLAGS          += --gc-sections
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# Debug --whole-archive
+
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
 endif
 
 # Debug link map

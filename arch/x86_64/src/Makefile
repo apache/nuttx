@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
+include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_INTEL64),y)
@@ -113,7 +113,7 @@ nuttx$(EXEEXT): board/libboard$(LIBEXT) $(ARCHSCRIPT)
 	@echo "LD: nuttx$(EXEEXT)"
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(EXTRA_LIBS) --whole-archive --no-relax $(LDLIBS) $(LDENDGROUP)
+		$(LDSTARTGROUP) $(EXTRA_LIBS) --no-relax $(LDLIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \

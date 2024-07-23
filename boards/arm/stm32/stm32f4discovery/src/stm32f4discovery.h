@@ -523,18 +523,6 @@ int stm32_max7219init(const char *devpath);
 #endif
 
 /****************************************************************************
- * Name: stm32_ds1307_init
- *
- * Description:
- *   Initialize and register the DS1307 RTC
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_DS1307
-int stm32_ds1307_init(void);
-#endif
-
-/****************************************************************************
  * Name: stm32_st7032init
  *
  * Description:

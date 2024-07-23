@@ -1,0 +1,150 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if CMSDK_UART
+
+config CMSDK_UART0
+	bool "CMSDK UART0"
+	default n
+
+if CMSDK_UART0
+
+config CMSDK_UART0_BASE
+	hex "CMSDK UART0 base address"
+
+config CMSDK_UART0_CLOCK
+	int "CMSDK UART0 clock"
+
+config CMSDK_UART0_TX_IRQ
+	int "CMSDK UART0 TX IRQ number"
+
+config CMSDK_UART0_RX_IRQ
+	int "CMSDK UART0 RX IRQ number"
+
+config CMSDK_UART0_OV_IRQ
+	int "CMSDK UART0 OVERRUN IRQ number"
+
+config CMSDK_UART0_BAUD
+	int "CMSDK UART0 BAUD"
+	default 115200
+
+config CMSDK_UART0_RXBUFSIZE
+	int "CMSDK UART0 RX buffer size"
+	default 256
+	---help---
+		CMSDK UART0 RX buffer size.  Default: 256
+
+config CMSDK_UART0_TXBUFSIZE
+	int "CMSDK UART0 TX buffer size"
+	default 256
+	---help---
+		CMSDK UART0 TX buffer size.  Default: 256
+
+endif # CMSDK_UART0
+
+config CMSDK_UART1
+	bool "CMSDK UART1"
+	default n
+
+if CMSDK_UART1
+
+config CMSDK_UART1_BASE
+	hex "CMSDK UART1 base address"
+
+config CMSDK_UART1_CLOCK
+	int "CMSDK UART1 clock"
+
+config CMSDK_UART1_TX_IRQ
+	int "CMSDK UART1 TX IRQ number"
+
+config CMSDK_UART1_RX_IRQ
+	int "CMSDK UART1 RX IRQ number"
+
+config CMSDK_UART1_OV_IRQ
+	int "CMSDK UART1 OVERRUN IRQ number"
+
+config CMSDK_UART1_BAUD
+	int "CMSDK UART1 BAUD"
+	default 115200
+
+config CMSDK_UART1_RXBUFSIZE
+	int "CMSDK UART1 RX buffer size"
+	default 256
+	---help---
+		CMSDK UART1 RX buffer size.  Default: 256
+
+config CMSDK_UART1_TXBUFSIZE
+	int "CMSDK UART1 TX buffer size"
+	default 256
+	---help---
+		CMSDK UART1 TX buffer size.  Default: 256
+
+endif # CMSDK_UART1
+
+config CMSDK_UART2
+	bool "CMSDK UART2"
+	default n
+
+if CMSDK_UART2
+
+config CMSDK_UART2_BASE
+	hex "CMSDK UART2 base address"
+
+config CMSDK_UART2_CLOCK
+	hex "CMSDK UART2 clock"
+
+config CMSDK_UART2_TX_IRQ
+	int "CMSDK UART2 TX IRQ number"
+
+config CMSDK_UART2_RX_IRQ
+	int "CMSDK UART2 RX IRQ number"
+
+config CMSDK_UART2_OV_IRQ
+	int "CMSDK UART2 OVERRUN IRQ number"
+
+config CMSDK_UART2_BAUD
+	int "CMSDK UART2 BAUD"
+	default 115200
+
+config CMSDK_UART2_RXBUFSIZE
+	int "CMSDK UART2 RX buffer size"
+	default 256
+	---help---
+		CMSDK UART2 RX buffer size.  Default: 256
+
+config CMSDK_UART2_TXBUFSIZE
+	int "CMSDK UART2 TX buffer size"
+	default 256
+	---help---
+		CMSDK UART2 TX buffer size.  Default: 256
+
+endif # CMSDK_UART2
+
+choice
+	prompt "CMSDK Serial Console"
+	default CMSDK_NO_SERIAL_CONSOLE
+	depends on DEV_CONSOLE
+
+config CMSDK_UART0_SERIAL_CONSOLE
+	bool "CMSDK UART0 serial console"
+	depends on CMSDK_UART0
+	select SERIAL_CONSOLE
+
+config CMSDK_UART1_SERIAL_CONSOLE
+	bool "CMSDK UART1 serial console"
+	depends on CMSDK_UART1
+	select SERIAL_CONSOLE
+
+config CMSDK_UART2_SERIAL_CONSOLE
+	bool "CMSDK UART2 serial console"
+	depends on CMSDK_UART2
+	select SERIAL_CONSOLE
+
+config CMSDK_NO_SERIAL_CONSOLE
+	bool "No CMSDK serial console"
+
+endchoice # CMSDK Serial Console
+
+endif # CMSDK_UART

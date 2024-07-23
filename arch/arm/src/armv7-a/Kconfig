@@ -8,6 +8,8 @@ comment "ARMv7-A Configuration Options"
 config ARMV7A_HAVE_GICv2
 	bool
 	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_HIPRI_INTERRUPT
 	default n
 	---help---
 		Selected by the configuration tool if the architecture supports the
@@ -44,6 +46,17 @@ config ARMV7A_HAVE_L2CC
 	---help---
 		Selected by the configuration tool if the architecture supports any
 		kind of L2 cache.
+
+config ARMV7A_SMP_BUSY_WAIT
+	bool "Busy wait when SMP boot"
+	default n
+	depends on SMP
+	---help---
+		Enables busy wait when SMP boot
+
+config ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR
+	hex "Busy wait flag address"
+	depends on ARMV7A_SMP_BUSY_WAIT
 
 config ARMV7A_HAVE_L2CC_PL310
 	bool
@@ -172,14 +185,6 @@ endchoice # L2 Cache Associativity
 endif # ARCH_L2CACHE
 endmenu # L2 Cache Configuration
 endif # ARMV7A_HAVE_L2CC
-
-config ARMV7A_DECODEFIQ
-	bool "FIQ Handler"
-	default n
-	---help---
-		Select this option if your platform supports the function
-		arm_decodefiq().  This is used primarily to support secure TrustZone
-		interrupts received on the FIQ vector.
 
 config ARMV7A_ALIGNMENT_TRAP
 	bool "Enable Alignment Check at __start"

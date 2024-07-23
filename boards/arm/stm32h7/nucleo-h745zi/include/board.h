@@ -281,6 +281,12 @@
 
 /* Ethernet definitions *****************************************************/
 
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0|GPIO_SPEED_100MHz)
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0|GPIO_SPEED_100MHz)
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2    /* PG13 */
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1    /* PB 13 */
 #define GPIO_ETH_RMII_TX_EN   GPIO_ETH_RMII_TX_EN_2
@@ -352,6 +358,14 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* ADC */
+
+#define GPIO_ADC12_INP5   GPIO_ADC12_INP5_0                      /* PB1 */
+#define GPIO_ADC123_INP10 GPIO_ADC123_INP10_0                    /* PC0 */
+#define GPIO_ADC123_INP12 GPIO_ADC123_INP12_0                    /* PC2 */
+#define GPIO_ADC12_INP13  GPIO_ADC12_INP13_0                     /* PC3 */
+#define GPIO_ADC12_INP15  GPIO_ADC12_INP15_0                     /* PA3 */
+
 /* USART1 (Arduino Serial Shield) */
 
 #define GPIO_USART1_RX    (GPIO_USART1_RX_3) /* PB7 */
@@ -364,6 +378,35 @@
 
 #define DMAMAP_USART3_RX DMAMAP_DMA12_USART3RX_0
 #define DMAMAP_USART3_TX DMAMAP_DMA12_USART3TX_1
+
+/* TIM1 */
+
+#define GPIO_TIM1_CH1OUT  (GPIO_TIM1_CH1OUT_2|GPIO_SPEED_50MHz)  /* PE9  - D6 */
+#define GPIO_TIM1_CH1NOUT (GPIO_TIM1_CH1NOUT_3|GPIO_SPEED_50MHz) /* PE8  - D42 */
+#define GPIO_TIM1_CH2OUT  (GPIO_TIM1_CH2OUT_2|GPIO_SPEED_50MHz)  /* PE11 - D5 */
+#define GPIO_TIM1_CH2NOUT (GPIO_TIM1_CH2NOUT_3|GPIO_SPEED_50MHz) /* PE10 - D40 */
+
+#define GPIO_TIM1_CH1IN   (GPIO_TIM1_CH1IN_2|GPIO_SPEED_50MHz)   /* PE9 */
+#define GPIO_TIM1_CH2IN   (GPIO_TIM1_CH2IN_2|GPIO_SPEED_50MHz)   /* PE11 */
+
+/* TIM3 */
+
+#define GPIO_TIM3_CH1OUT  (GPIO_TIM3_CH1OUT_2|GPIO_SPEED_50MHz)  /* PB4  */
+#define GPIO_TIM3_CH2OUT  (GPIO_TIM3_CH2OUT_2|GPIO_SPEED_50MHz)  /* PB5  */
+
+#define GPIO_TIM3_CH1IN   (GPIO_TIM3_CH1IN_2|GPIO_SPEED_50MHz)   /* PA4 */
+#define GPIO_TIM3_CH2IN   (GPIO_TIM3_CH2IN_2|GPIO_SPEED_50MHz)   /* PB5 */
+
+/* TIM4 */
+
+#define GPIO_TIM4_CH1IN   (GPIO_TIM4_CH1IN_2|GPIO_SPEED_50MHz)   /* PD12 */
+#define GPIO_TIM4_CH2IN   (GPIO_TIM4_CH2IN_2|GPIO_SPEED_50MHz)   /* PD13 */
+
+/* OTG */
+
+#define GPIO_OTGFS_DM     (GPIO_OTGFS_DM_0|GPIO_SPEED_100MHz)    /* PA11 */
+#define GPIO_OTGFS_DP     (GPIO_OTGFS_DP_0|GPIO_SPEED_100MHz)    /* PA12 */
+#define GPIO_OTGFS_ID     (GPIO_OTGFS_ID_0|GPIO_SPEED_100MHz)    /* PA10 */
 
 /****************************************************************************
  * Public Data

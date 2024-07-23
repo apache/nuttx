@@ -33,6 +33,7 @@
 #include <nuttx/irq.h>
 
 #include "riscv_internal.h"
+#include "riscv_ipi.h"
 #include "k210.h"
 
 /****************************************************************************
@@ -85,9 +86,9 @@ void up_irqinitialize(void)
   riscv_exception_attach();
 
 #ifdef CONFIG_SMP
-  /* Clear RISCV_IPI for CPU0 */
+  /* Clear IPI for CPU0 */
 
-  putreg32(0, RISCV_IPI);
+  riscv_ipi_clear(0);
 
   up_enable_irq(RISCV_IRQ_SOFT);
 #endif
@@ -116,13 +117,13 @@ void up_disable_irq(int irq)
     {
       /* Read mstatus & clear machine software interrupt enable in mie */
 
-      CLEAR_CSR(mie, MIE_MSIE);
+      CLEAR_CSR(CSR_MIE, MIE_MSIE);
     }
   else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
-      CLEAR_CSR(mie, MIE_MTIE);
+      CLEAR_CSR(CSR_MIE, MIE_MTIE);
     }
   else if (irq > RISCV_IRQ_MEXT)
     {
@@ -158,13 +159,13 @@ void up_enable_irq(int irq)
     {
       /* Read mstatus & set machine software interrupt enable in mie */
 
-      SET_CSR(mie, MIE_MSIE);
+      SET_CSR(CSR_MIE, MIE_MSIE);
     }
   else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 
-      SET_CSR(mie, MIE_MTIE);
+      SET_CSR(CSR_MIE, MIE_MTIE);
     }
   else if (irq > RISCV_IRQ_MEXT)
     {
@@ -213,11 +214,11 @@ irqstate_t up_irq_enable(void)
 
   /* TODO: should move to up_enable_irq() */
 
-  SET_CSR(mie, MIE_MEIE);
+  SET_CSR(CSR_MIE, MIE_MEIE);
 #endif
 
   /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
 
-  oldstat = READ_AND_SET_CSR(mstatus, MSTATUS_MIE);
+  oldstat = READ_AND_SET_CSR(CSR_MSTATUS, MSTATUS_MIE);
   return oldstat;
 }

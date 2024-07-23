@@ -77,9 +77,9 @@ int board_bmi160_initialize(int bus);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_BMI160_I2C
+#ifdef CONFIG_SENSORS_BMI160_SCU_I2C
 int bmi160_init(struct i2c_master_s *dev, int port);
-#else /* CONFIG_SENSORS_BMI160_SPI */
+#else /* CONFIG_SENSORS_BMI160_SCU_SPI */
 int bmi160_init(struct spi_dev_s *dev);
 #endif
 
@@ -101,10 +101,10 @@ int bmi160_init(struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_BMI160_I2C
+#ifdef CONFIG_SENSORS_BMI160_SCU_I2C
 int bmi160gyro_register(const char *devpath, int minor,
                         struct i2c_master_s *dev, int port);
-#else /* CONFIG_SENSORS_BMI160_SPI */
+#else /* CONFIG_SENSORS_BMI160_SCU_SPI */
 int bmi160gyro_register(const char *devpath, int minor,
                         struct spi_dev_s *dev);
 #endif
@@ -127,10 +127,10 @@ int bmi160gyro_register(const char *devpath, int minor,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_BMI160_I2C
+#ifdef CONFIG_SENSORS_BMI160_SCU_I2C
 int bmi160accel_register(const char *devpath, int minor,
                          struct i2c_master_s *dev, int port);
-#else /* CONFIG_SENSORS_BMI160_SPI */
+#else /* CONFIG_SENSORS_BMI160_SCU_SPI */
 int bmi160accel_register(const char *devpath, int minor,
                          struct spi_dev_s *dev);
 #endif

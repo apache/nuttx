@@ -43,6 +43,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <nuttx/mtd/nand.h>
 #include <nuttx/mtd/hamming.h>

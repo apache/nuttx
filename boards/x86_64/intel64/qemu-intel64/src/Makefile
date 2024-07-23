@@ -20,14 +20,14 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = qemu_boot.c qemu_bringup.c qemu_freq.c qemu_net.c
+CSRCS = qemu_boot.c qemu_bringup.c qemu_net.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
   CSRCS += qemu_appinit.c
 endif
 
-ifeq ($(CONFIG_QEMU_PCI),y)
-  CSRCS += qemu_pci.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+  CSRCS += qemu_reset.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

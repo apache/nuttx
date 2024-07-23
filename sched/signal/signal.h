@@ -42,7 +42,6 @@
  * allocate in a block
  */
 
-#define NUM_SIGNAL_ACTIONS       4
 #define NUM_PENDING_ACTIONS      4
 #define NUM_SIGNALS_PENDING      4
 

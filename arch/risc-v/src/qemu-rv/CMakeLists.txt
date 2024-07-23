@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/qemu-rv/CMakeLists.txt
+# arch/risc-v/src/qemu-rv/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -30,7 +30,7 @@ list(
   qemu_rv_allocateheap.c)
 
 if(CONFIG_BUILD_KERNEL)
-  list(APPEND SRCS qemu_rv_mm_init.c qemu_rv_exception_m.S)
+  list(APPEND SRCS qemu_rv_mm_init.c)
 endif()
 
 if(CONFIG_MM_PGALLOC)

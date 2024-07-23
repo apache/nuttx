@@ -61,16 +61,22 @@ SECTIONS
   _image_drom_lma = LOADADDR(.flash.rodata);
   _image_drom_size = LOADADDR(.flash.rodata) + SIZEOF(.flash.rodata) - _image_drom_lma;
 
-  .flash.rodata :
+  .flash.rodata : ALIGN(4)
   {
     _rodata_reserved_start = .;
 
     _srodata = ABSOLUTE(.);
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata)
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata.*)
+    *(EXCLUDE_FILE (esp32s3_start.* esp32s3_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s3_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata)
+    *(EXCLUDE_FILE (esp32s3_start.* esp32s3_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s3_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata.*)
 
-    *(.rodata)
-    *(.rodata.*)
 #ifdef CONFIG_ESP32S3_WIRELESS
     *(.rodata_wlog_verbose.*)
     *(.rodata_wlog_debug.*)
@@ -128,7 +134,7 @@ SECTIONS
 
   /* Send .iram0 code to iram */
 
-  .iram0.vectors :
+  .iram0.vectors : ALIGN(4)
   {
     _iram_start = ABSOLUTE(.);
 
@@ -168,13 +174,15 @@ SECTIONS
     *(.init)
   } >iram0_0_seg AT>ROM
 
-  .iram0.text :
+  .iram0.text : ALIGN(4)
   {
     /* Code marked as running out of IRAM */
 
     *(.iram1 .iram1.*)
     esp32s3_start.*(.literal .text .literal.* .text.*)
+    esp32s3_region.*(.literal .text .literal.* .text.*)
 
+    *libarch.a:*esp_loader.*(.text .text.* .literal .literal.*)
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_irq.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_user.*(.literal .text .literal.* .text.*)
@@ -185,6 +193,10 @@ SECTIONS
     *libarch.a:xtensa_irqdispatch.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_modifyreg32.*(.literal .text .literal.* .text.*)
     *libarch.a:xtensa_testset.*(.literal .text .literal.* .text.*)
+    *libarch.a:*cache_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
 
 #ifdef CONFIG_ESP32S3_BLE
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
@@ -299,7 +311,7 @@ SECTIONS
     . = ALIGN(4);
   } >dram0_0_seg
 
-  .dram0.data :
+  .dram0.data : ALIGN(4)
   {
     /* .data initialized on power-up in ROMed configurations. */
 
@@ -317,9 +329,17 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     esp32s3_start.*(.rodata .rodata.*)
+    esp32s3_region.*(.rodata .rodata.*)
 
     *libphy.a:(.rodata  .rodata.*)
+    *libarch.a:*esp_loader.*(.rodata .rodata.*)
     *libarch.a:xtensa_context.*(.rodata  .rodata.*)
+    *libarch.a:esp32s3_spiflash.*(.rodata  .rodata.*)
+    *libarch.a:*cache_hal.*(.rodata .rodata.*)
+    *libarch.a:*uart_hal.*(.rodata .rodata.*)
+    *libarch.a:*mpu_hal.*(.rodata .rodata.*)
+    *libarch.a:*mmu_hal.*(.rodata .rodata.*)
+
 #if defined(CONFIG_STACK_CANARIES) && \
     (defined(CONFIG_ESP32S3_SPIFLASH) || \
      defined(CONFIG_ESP32S3_SPIRAM))
@@ -393,6 +413,8 @@ SECTIONS
   .flash.text : ALIGN(0x00010000)
   {
     _stext = .;
+    _instruction_reserved_start = ABSOLUTE(.);
+
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
@@ -407,6 +429,7 @@ SECTIONS
 
     . += 16;
 
+    _instruction_reserved_end = ABSOLUTE(.);
     _etext = .;
   } >irom0_0_seg AT>ROM
 

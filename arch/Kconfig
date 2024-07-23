@@ -92,6 +92,7 @@ config ARCH_RISCV
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_THREAD_LOCAL
+	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_LAZYFPU if ARCH_HAVE_FPU
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
@@ -130,7 +131,14 @@ config ARCH_X86
 config ARCH_X86_64
 	bool "x86_64"
 	select ARCH_HAVE_TCBINFO
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select ARCH_TOOLCHAIN_GNU
 	---help---
 		x86-64 architectures.
 
@@ -174,6 +182,15 @@ config ARCH_SPARC
 	---help---
 		SPARC architectures (SPARC V8)
 
+config ARCH_TRICORE
+	bool "Infineon TriCore"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_CUSTOMOPT
+	select ARCH_HAVE_TCBINFO
+	---help---
+		Infineon 32-bit AURIX TriCore architectures
+
 endchoice
 
 config ARCH
@@ -194,6 +211,7 @@ config ARCH
 	default "z80"     if ARCH_Z80
 	default "or1k"    if ARCH_OR1K
 	default "sparc"   if ARCH_SPARC
+	default "tricore" if ARCH_TRICORE
 
 source "arch/arm/Kconfig"
 source "arch/arm64/Kconfig"
@@ -211,6 +229,7 @@ source "arch/z16/Kconfig"
 source "arch/z80/Kconfig"
 source "arch/or1k/Kconfig"
 source "arch/sparc/Kconfig"
+source "arch/tricore/Kconfig"
 
 config ARCH_CHIP_CUSTOM
 	bool "Custom Chip Support"
@@ -263,43 +282,9 @@ config ARCH_TOOLCHAIN_CLANG
 	select ARCH_TOOLCHAIN_GNU
 	default n
 
-choice
-	prompt "Link Time Optimization (LTO)"
-	default LTO_NONE
-	---help---
-		This option enables Link Time Optimization (LTO), which allows the
-		compiler to optimize binaries globally.
-
-		If unsure, select LTO_NONE. Note that LTO is very resource-intensive
-		so it's disabled by default.
-
-config LTO_NONE
-	bool "None"
-	---help---
-		Build the kernel normally, without Link Time Optimization (LTO).
-
-config LTO_FULL
-	bool "GNU Full LTO (EXPERIMENTAL)"
-	depends on ARCH_TOOLCHAIN_GNU
-	---help---
-		Link time optimization is implemented as a GCC front end for a bytecode
-		bytecode representation of GIMPLE that is emitted in special sections
-		of .o files. Currently, LTO support is enabled in most ELF-based systems,
-		as well as darwin, cygwin and mingw systems.
-
-config LTO_THIN
-	bool "Clang ThinLTO (EXPERIMENTAL)"
-	depends on ARCH_TOOLCHAIN_CLANG
-	---help---
-		This option enables Clang's ThinLTO, which allows for parallel
-		optimization and faster incremental compiles compared to the
-		CONFIG_LTO_FULL option. More information can be found
-		from Clang's documentation:
-
-		https://clang.llvm.org/docs/ThinLTO.html
-
-		If unsure, say Y.
-endchoice
+config ARCH_TOOLCHAIN_TASKING
+	bool
+	default n
 
 config ARCH_GNU_NO_WEAKFUNCTIONS
 	bool
@@ -410,6 +395,18 @@ config ARCH_HAVE_TEXT_HEAP
 	default n
 	---help---
 		Special memory region for dynamic code loading
+
+config ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS
+	bool
+	default n
+	---help---
+		Textheap might have separate instruction/data mappings
+
+config ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+	bool
+	default n
+	---help---
+		Loads from the instruction mapping of textheap need to be word-aligned
 
 config ARCH_HAVE_DATA_HEAP
 	bool
@@ -555,14 +552,17 @@ config ARCH_HAVE_TRUSTZONE
 
 choice
 	prompt "TrustZone Configuration"
-	default ARCH_TRUSTZONE_NONSECURE
+	default ARCH_TRUSTZONE_DISABLED
 	depends on ARCH_HAVE_TRUSTZONE
 
+config ARCH_TRUSTZONE_DISABLED
+	bool "TrustZone disabled, all CPUs operate in secure state"
+
 config ARCH_TRUSTZONE_SECURE
-	bool "All CPUs operate secure state"
+	bool "TrustZone enabled, all CPUs operate secure state"
 
 config ARCH_TRUSTZONE_NONSECURE
-	bool "All CPUs operate non-secure state"
+	bool "TrustZone enabled, all CPUs operate non-secure state"
 
 endchoice # TrustZone Configuration
 
@@ -701,6 +701,10 @@ config ARCH_VMA_MAPPING
 	bool "Support runtime memory mapping into SHM area"
 	default n
 
+config ARCH_KVMA_MAPPING
+	bool
+	default n
+
 config ARCH_SHM_VBASE
 	hex "Shared memory base"
 	depends on ARCH_VMA_MAPPING
@@ -709,7 +713,7 @@ config ARCH_SHM_VBASE
 
 config ARCH_KMAP_VBASE
 	hex "Kernel dynamic virtual mappings base"
-	depends on MM_KMAP
+	depends on ARCH_KVMA_MAPPING
 	---help---
 		The virtual address of the beginning of the kernel dynamic mapping
 		region.
@@ -744,41 +748,27 @@ config ARCH_SHM_MAXREGIONS
 	int "Max shared memory regions"
 	default 1
 	---help---
-		The maximum number of regions that can allocated for the shared
-		memory space.  This hard-coded value permits static allocation of
+		The maximum number of regions that can be used with SysV shared
+		memory interface. This hard-coded value permits static allocation of
 		the shared memory data structures and serves no other purpose.
 		Default is 1.
 
-		The size of the virtual shared memory address space is then
-		determined by the product of the maximum number of regions, the
-		maximum number of pages per region, and the configured size of
-		each page.
-
 config ARCH_SHM_NPAGES
-	int "Max shared memory pages"
+	int "Max size of userspace VM mapping in pages"
 	default 1
 	---help---
-		The maximum number of pages that can allocated per region for the shared memory
-		region. Default is 1.
-
-		The size of the virtual shared memory address space is then
-		determined by the product of the maximum number of regions, the
-		maximum number of pages per region, and the configured size of
-		each page.
+		The max size of the virtual memory region for shared memory,
+		userspace device mappings etc.
 
 endif # ARCH_VMA_MAPPING
 
 config ARCH_KMAP_NPAGES
 	int "Max kernel dynamic mapping pages"
 	default 1
+	depends on ARCH_KVMA_MAPPING
 	---help---
 		The maximum amount of pages that a kernel can use for dynamically
 		mapping physical pages to itself.
-
-		The size of the virtual shared memory address space is then
-		determined by the product of the maximum number of regions, the
-		maximum number of pages per region, and the configured size of
-		each page.
 
 config ARCH_STACK_DYNAMIC
 	bool "Dynamic user stack"
@@ -885,16 +875,26 @@ config ARCH_PGPOOL_SIZE
 endif # ARCH_PGPOOL_MAPPING
 endif # ARCH_ADDRENV && ARCH_NEED_ADDRENV_MAPPING
 
-menuconfig PAGING
+config PAGING
 	bool "On-demand paging"
 	default n
-	depends on ARCH_USE_MMU && !ARCH_ROMPGTABLE
+	depends on BUILD_KERNEL && ARCH_USE_MMU && !ARCH_ROMPGTABLE && !LEGACY_PAGING
 	---help---
-		If set =y in your configation file, this setting will enable the on-demand
-		paging feature as described in
+		If set =y in your configation file, this setting will enable on-demand
+		paging, which relies on a MMU to enable larger virtual memory spaces
+		and map it to physical memory on-demand (usually during a page-fault
+		exception).
+
+menuconfig LEGACY_PAGING
+	bool "Legacy On-demand paging"
+	default n
+	depends on EXPERIMENTAL && ARCH_USE_MMU && !ARCH_ROMPGTABLE
+	---help---
+		If set =y in your configation file, this setting will enable lazy loading
+		backed up by the experimental on-demand paging feature as described in
 		https://nuttx.apache.org/docs/latest/components/paging.html.
 
-if PAGING
+if LEGACY_PAGING
 
 config PAGING_PAGESIZE
 	int "Page size (bytes)"
@@ -1012,7 +1012,7 @@ config PAGING_TIMEOUT_TICKS
 		number if microseconds, then a fatal error will be declared.
 		Default: No timeouts monitored
 
-endif # PAGING
+endif # LEGACY_PAGING
 
 config ARCH_IRQPRIO
 	bool "Prioritized interrupt support"
@@ -1042,7 +1042,6 @@ config ARCH_STACKDUMP_MAX_LENGTH
 config DUMP_ON_EXIT
 	bool "Dump all tasks state on exit"
 	default n
-	depends on DEBUG_SCHED_INFO
 	---help---
 		Dump all tasks state on exit()
 

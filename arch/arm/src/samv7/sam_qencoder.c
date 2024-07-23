@@ -41,7 +41,7 @@
 #include "sam_tc.h"
 #include "sam_qencoder.h"
 
-#ifdef CONFIG_SENSORS_QENCODER
+#if defined(CONFIG_SENSORS_QENCODER) && defined(CONFIG_SAMV7_QENCODER)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,6 +67,19 @@ struct sam_lowerhalf_s
   TC_HANDLE        tch;          /* Handle returned by sam_tc_initialize() */
 
   bool             inuse;        /* True: The lower-half driver is in-use */
+
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+  /* qe_index_s IOCTL support:
+   * All variables are of an unsigned type, while the variables in the
+   * struct qe_index_s are of a signed type. The reason for using unsigned
+   * types is that the operations on unsigned types when extending is
+   * defined (overflow arithmetics).
+   */
+
+  uint32_t last_pos;             /* The actual position */
+  uint32_t last_index;           /* The actual position of the last index */
+  uint32_t index_cnt;            /* The number of index hits */
+#endif
 };
 
 /****************************************************************************
@@ -85,6 +98,14 @@ static int sam_position(struct qe_lowerhalf_s *lower, int32_t *pos);
 static int sam_reset(struct qe_lowerhalf_s *lower);
 static int sam_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                      unsigned long arg);
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+static int sam_qeindex(struct qe_lowerhalf_s *lower,
+                       struct qe_index_s *dest);
+static inline int32_t sam_qe_pos_16to32b(struct qe_lowerhalf_s *lower,
+                                         uint32_t current_pos);
+static inline int32_t sam_qe_indx_pos_16to32b(struct qe_lowerhalf_s *lower,
+                                              uint32_t current_indx_pos);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -229,10 +250,15 @@ static int sam_shutdown(struct qe_lowerhalf_s *lower)
 static int sam_position(struct qe_lowerhalf_s *lower, int32_t *pos)
 {
   struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
+  uint32_t new_pos;
+  new_pos = sam_tc_getcounter(priv->tch);
 
   /* Return the counter value */
-
-  *pos = (int32_t)sam_tc_getcounter(priv->tch);
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+  *pos = sam_qe_pos_16to32b(lower, new_pos);
+#else
+  *pos = (int32_t)new_pos;
+#endif
 
   return OK;
 }
@@ -270,10 +296,139 @@ static int sam_reset(struct qe_lowerhalf_s *lower)
 static int sam_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                      unsigned long arg)
 {
-  /* No ioctl commands supported */
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+  switch (cmd)
+    {
+      case QEIOC_GETINDEX:
+        {
+          /* Call the qeindex function */
 
+          sam_qeindex(lower, (struct qe_index_s *)arg);
+          return OK;
+        }
+
+      default:
+        {
+          return -ENOTTY;
+        }
+    }
+#else
   return -ENOTTY;
+#endif
 }
+
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+/****************************************************************************
+ * Name: sam_qe_pos_16to32b
+ *
+ * Description:
+ *   An inline function performing the extension of current position.
+ *   Last reading is saved to priv->last_pos.
+ *
+ ****************************************************************************/
+
+static inline int32_t sam_qe_pos_16to32b(struct qe_lowerhalf_s *lower,
+                                         uint32_t current_pos)
+{
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
+
+  uint32_t new_pos = *(volatile uint32_t *)&priv->last_pos;
+  new_pos += (int16_t)(current_pos - new_pos);
+  *(volatile uint32_t *)&priv->last_pos = new_pos;
+
+  return (int32_t)new_pos;
+}
+#endif
+
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+/****************************************************************************
+ * Name: sam_qe_indx_pos_16to32b
+ *
+ * Description:
+ *   An inline function performing the extension of the last index position.
+ *   Last reading is saved to priv->last_index.
+ *
+ ****************************************************************************/
+
+static inline int32_t sam_qe_indx_pos_16to32b(struct qe_lowerhalf_s *lower,
+                                              uint32_t current_indx_pos)
+{
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
+
+  uint32_t new_index = *(volatile uint32_t *)&priv->last_pos;
+  new_index += (int16_t)(current_indx_pos - new_index);
+  *(volatile uint32_t *)&priv->last_index = new_index;
+
+  return (int32_t)new_index;
+}
+#endif
+
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+/****************************************************************************
+ * Name: sam_qeindex
+ *
+ * Description:
+ *   A function used for a GETINDEX ioctl call. Works with the internal
+ *   variables needed for the 32 bit extension.
+ *
+ ****************************************************************************/
+
+static int sam_qeindex(struct qe_lowerhalf_s *lower, struct qe_index_s *dest)
+{
+  int32_t current_pos;
+  uint32_t status;
+  uint32_t current_indx_pos;
+  bool captured = false;
+  struct sam_lowerhalf_s *priv = (struct sam_lowerhalf_s *)lower;
+
+  /* Perform the current position retrieval everytime */
+
+  sam_position(lower, &current_pos);
+  dest->qenc_pos = current_pos;
+
+  /* Perform the capture logic */
+
+  TC_HANDLE handle = priv->tch;
+
+  /* Get the interrupt */
+
+  status = sam_tc_getpending(handle);
+
+  /* Check if something has been captured.
+   * The reason for using two capture registers is due to their exclusive
+   * access. So it requires reading switching.
+   */
+
+  if (status & TC_INT_LDRAS)
+    {
+      /* The new index pos is in the Capture A register */
+
+      current_indx_pos = sam_tc_getregister(handle, TC_REGA);
+      captured = true;
+    }
+  else if (status & TC_INT_LDRBS)
+    {
+      /* The new index pos is in the Capture B register */
+
+      current_indx_pos = sam_tc_getregister(handle, TC_REGB);
+      captured = true;
+    }
+
+  /* We've caught something. Increase the index hit count
+   * and extend the reading.
+   */
+
+  if (captured)
+    {
+      priv->index_cnt++;
+      sam_qe_indx_pos_16to32b(lower, current_indx_pos);
+    }
+
+  dest->indx_pos = priv->last_index;
+  dest->indx_cnt = priv->index_cnt;
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -323,10 +478,30 @@ int sam_qeinitialize(const char *devpath, int tc)
 
   /* Allocate the timer/counter and select its mode of operation */
 
+  /* When configuring the timer with no index reset, do not obey
+   * the datasheet's QDEC instructions. Do not set the TC_CMR_ABETRG and
+   * TC_CMR_ETRGEDG_RISING bits responsible for the counter reset,
+   * because triggers reset the internal counter.
+   * Instead, to get the position of the last index, use the ability
+   * to capture internal counter's value with an upcoming index.
+   *
+   * Due to the internal structure of the Timer/Counter, both Capture
+   * registers (A and B) must be used, because of the exclusive access
+   * to both Capture registers (refer to section 49-6 in the latest 2023
+   * ATSAMV7's datasheet).
+   */
+#ifdef CONFIG_SAMV7_QENCODER_ENABLE_GETINDEX
+  mode = TC_CMR_TCCLKS_XC0 |     /* Use XC0 as an external TCCLKS value */
+         TC_CMR_CAPTURE |        /* Select 'Capture mode' */
+         TC_CMR_LDRA_RISING |    /* Select 'Rising edge' for the RA loading */
+         TC_CMR_LDRB_RISING |    /* Select 'Rising edge' for the RB loading */
+         TC_CMR_SBSMPLR_ONE;     /* Capture every upcoming edge */
+#else
   mode = TC_CMR_TCCLKS_XC0 |     /* Use XC0 as an external TCCLKS value */
          TC_CMR_ETRGEDG_RISING | /* Select 'Rising edge' as the External Trigger Edge */
          TC_CMR_ABETRG |         /* Select 'TIOAx' as the External Trigger */
          TC_CMR_CAPTURE;         /* Select 'Capture mode' */
+#endif
 
   priv->tch = sam_tc_allocate(tc * SAM_TC_NCHANNELS, mode);
   if (priv->tch == NULL)
@@ -366,4 +541,4 @@ int sam_qeinitialize(const char *devpath, int tc)
   return OK;
 }
 
-#endif /* CONFIG_SENSORS_QENCODER */
+#endif /* CONFIG_SENSORS_QENCODER && CONFIG_SAMV7_QENCODER */

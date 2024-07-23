@@ -25,18 +25,10 @@
  * Included Files
  ****************************************************************************/
 
+#include "riscv_common_memorymap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Idle thread stack starts from _ebss */
-
-#ifndef __ASSEMBLY__
-#define ESP32C3_IDLESTACK_BASE  (uint32_t)&g_idlestack
-#else
-#define ESP32C3_IDLESTACK_BASE  g_idlestack
-#endif
-
-#define ESP32C3_IDLESTACK_TOP  (ESP32C3_IDLESTACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
 
 #endif /* __ARCH_RISCV_SRC_ESP32C3_LEGACY_ESP32C3_MEMORYMAP_H */

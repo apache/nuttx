@@ -72,11 +72,14 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       return NULL;
     }
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  node = mempool_multiple_memalign(heap->mm_mpool, alignment, size);
-  if (node != NULL)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return node;
+      node = mempool_multiple_memalign(heap->mm_mpool, alignment, size);
+      if (node != NULL)
+        {
+          return node;
+        }
     }
 #endif
 
@@ -146,6 +149,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    */
 
   node = (FAR struct mm_allocnode_s *)(rawchunk - MM_SIZEOF_ALLOCNODE);
+  heap->mm_curused -= MM_SIZEOF_NODE(node);
 
   /* Find the aligned subregion */
 

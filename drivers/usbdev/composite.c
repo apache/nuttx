@@ -298,8 +298,6 @@ static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
   memcpy(buf, priv->descs->cfgdesc, sizeof(struct usb_cfgdesc_s));
 
   cfgdesc = (FAR struct usb_cfgdesc_s *)buf;
-  cfgdesc->totallen[0] = LSBYTE(priv->cfgdescsize);
-  cfgdesc->totallen[1] = MSBYTE(priv->cfgdescsize);
   cfgdesc->ninterfaces = priv->ninterfaces;
 
   /* Increment the size and buf to point right behind the information
@@ -328,6 +326,9 @@ static int16_t composite_mkcfgdesc(FAR struct usbdevclass_driver_s *driver,
       buf += len;
 #endif
     }
+
+  cfgdesc->totallen[0] = LSBYTE(total);
+  cfgdesc->totallen[1] = MSBYTE(total);
 
   return total;
 }
@@ -644,6 +645,20 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
                 {
                   ret = USB_SIZEOF_DEVDESC;
                   memcpy(ctrlreq->buf, priv->descs->devdesc, ret);
+#ifdef CONFIG_BOARD_USBDEV_PIDVID
+                  {
+                    uint16_t pid = board_usbdev_pid();
+                    uint16_t vid = board_usbdev_vid();
+                    FAR struct usb_devdesc_s *p_desc =
+                               (FAR struct usb_devdesc_s *)ctrlreq->buf;
+
+                    p_desc->vendor[0] = LSBYTE(vid);
+                    p_desc->vendor[1] = MSBYTE(vid);
+
+                    p_desc->product[0] = LSBYTE(pid);
+                    p_desc->product[1] = MSBYTE(pid);
+                  }
+#endif
                 }
                 break;
 
@@ -1002,6 +1017,7 @@ FAR void *composite_initialize(FAR const struct usbdev_devdescs_s *devdescs,
                                FAR struct composite_devdesc_s *pdevices,
                                uint8_t ndevices)
 {
+  FAR const struct usbdev_strdesc_s *strdesc;
   FAR struct composite_alloc_s *alloc;
   FAR struct composite_dev_s *priv;
   FAR struct composite_driver_s *drvr;
@@ -1057,6 +1073,26 @@ FAR void *composite_initialize(FAR const struct usbdev_devdescs_s *devdescs,
 
       priv->cfgdescsize += devobj->compdesc.cfgdescsize;
       priv->ninterfaces += devobj->compdesc.devinfo.ninterfaces;
+    }
+
+  /* Update cfgdescsize based on the longest string descriptor */
+
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
+  ret = sizeof(struct usb_strdesc_s) + strlen(board_usbdev_serialstr()) * 2;
+  if (priv->cfgdescsize < ret)
+    {
+      priv->cfgdescsize = ret;
+    }
+#endif
+
+  strdesc = devdescs->strdescs->strdesc;
+  for (i = 0; strdesc[i].string != NULL; i++)
+    {
+      ret = sizeof(struct usb_strdesc_s) + strlen(strdesc[i].string) * 2;
+      if (priv->cfgdescsize < ret)
+        {
+          priv->cfgdescsize = ret;
+        }
     }
 
   priv->ndevices = ndevices;
@@ -1115,24 +1151,15 @@ void composite_uninitialize(FAR void *handle)
 
   DEBUGASSERT(alloc != NULL);
 
-  /* First phase uninitialization each of the member classes */
-
   priv = &alloc->dev;
-
-  for (i = 0; i < priv->ndevices; i++)
-    {
-      priv->device[i].compdesc.uninitialize(priv->device[i].dev);
-    }
 
   /* Then unregister and destroy the composite class */
 
   usbdev_unregister(&alloc->drvr.drvr);
 
-  /* Free any resources used by the composite driver */
-
-  /* None */
-
-  /* Second phase uninitialization:  Clean up all memory resources */
+  /* Uninitialization each of the member classes and clean up
+   * all memory resources
+   */
 
   for (i = 0; i < priv->ndevices; i++)
     {

@@ -8,7 +8,7 @@ menu "RPMSG Socket Support"
 
 config NET_RPMSG
 	bool "RPMSG domain (remote) sockets"
-	depends on RPTUN
+	depends on RPMSG
 	default n
 	---help---
 		Enable or disable RPMSG (aka remote) sockets.

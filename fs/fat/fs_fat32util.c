@@ -888,6 +888,8 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 
           case FSTYPE_FAT16 :
             {
+              /* 16 bits per entry, ie. 2 bytes per entry */
+
               unsigned int fatoffset = 2 * clusterno;
               off_t        fatsector = fs->fs_fatbase +
                                        SEC_NSECTORS(fs, fatoffset);
@@ -905,6 +907,8 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
 
           case FSTYPE_FAT32 :
             {
+              /* 32 bits per entry, ie. 4 bytes per entry */
+
               unsigned int fatoffset = 4 * clusterno;
               off_t        fatsector = fs->fs_fatbase +
                                        SEC_NSECTORS(fs, fatoffset);
@@ -1332,7 +1336,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 
   ndx = dir->fd_index + 1;
 
-  /* Check if all of the directory entries in this sectory have
+  /* Check if all of the directory entries in this sector have
    * been examined.
    */
 
@@ -1368,7 +1372,7 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
            * entire cluster comprising the directory.
            *
            * The current sector within the cluster is the entry number
-           * divided byte the number of entries per sector
+           * divided by the number of entries per sector
            */
 
           int sector = ndx / DIRSEC_NDIRS(fs);

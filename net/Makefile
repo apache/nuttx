@@ -47,6 +47,7 @@ include sixlowpan/Make.defs
 include bluetooth/Make.defs
 include ieee802154/Make.defs
 include devif/Make.defs
+include ipfilter/Make.defs
 include ipforward/Make.defs
 include nat/Make.defs
 include netfilter/Make.defs

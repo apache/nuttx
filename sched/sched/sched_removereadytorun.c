@@ -97,7 +97,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
 
   rtcb->task_state = TSTATE_TASK_INVALID;
 
-  if (g_pendingtasks.head && merge)
+  if (list_pendingtasks()->head && merge)
     {
       doswitch |= nxsched_merge_pending();
     }
@@ -200,7 +200,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
        * CPU.
        */
 
-      for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
+      for (rtrtcb = (FAR struct tcb_s *)list_readytorun()->head;
            rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
            rtrtcb = rtrtcb->flink);
 
@@ -218,7 +218,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
            * list and add to the head of the g_assignedtasks[cpu] list.
            */
 
-          dq_rem((FAR dq_entry_t *)rtrtcb, &g_readytorun);
+          dq_rem((FAR dq_entry_t *)rtrtcb, list_readytorun());
           dq_addfirst((FAR dq_entry_t *)rtrtcb, tasklist);
 
           rtrtcb->cpu = cpu;
@@ -233,15 +233,13 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
         {
           /* Yes... make sure that scheduling logic knows about this */
 
-          spin_setbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                      &g_cpu_schedlock);
+          g_cpu_lockset |= (1 << cpu);
         }
       else
         {
           /* No.. we may need to perform release our hold on the lock. */
 
-          spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                      &g_cpu_schedlock);
+          g_cpu_lockset &= ~(1 << cpu);
         }
 
       /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ
@@ -279,7 +277,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
 
   rtcb->task_state = TSTATE_TASK_INVALID;
 
-  if (g_pendingtasks.head && merge)
+  if (list_pendingtasks()->head && merge)
     {
       doswitch |= nxsched_merge_pending();
     }

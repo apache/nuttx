@@ -1905,7 +1905,7 @@ static int mpfs_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
                  getreg8(MPFS_COREMMC_RR14) << 8  |
                  getreg8(MPFS_COREMMC_RR15);
 
-      mcinfo("recv: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" \
+      mcinfo("recv: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08"
              PRIx32"\n", rlong[0], rlong[1], rlong[2], rlong[3]);
     }
 

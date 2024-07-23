@@ -29,6 +29,7 @@
 
 #include "chip.h"
 #include "riscv_internal.h"
+#include "riscv_macros.S"
 
 /****************************************************************************
  * Public Symbols
@@ -74,13 +75,6 @@ real_start:
 
   addi a0, a0, -1
 
-  /* Set stack pointer to the idle thread stack */
-
-  bnez a0, 1f
-  la   sp, JH7110_IDLESTACK_TOP
-  j    2f
-1:
-
   /* Load the number of CPUs that the kernel supports */
 
 #ifdef CONFIG_SMP
@@ -92,45 +86,19 @@ real_start:
   /* If a0 (hartid) >= t1 (the number of CPUs), stop here */
 
   blt  a0, t1, 3f
-  csrw sie, zero
+  csrw CSR_SIE, zero
   wfi
 
 3:
-  /* To get g_cpu_basestack[hartid], must get g_cpu_basestack first */
-
-  la   t0, g_cpu_basestack
-
-  /* Offset = pointer width * hart id */
-
-#ifdef CONFIG_ARCH_RV32
-  slli t1, a0, 2
-#else
-  slli t1, a0, 3
-#endif
-  add  t0, t0, t1
-
-  /* Load idle stack base to sp */
-
-  REGLOAD sp, 0(t0)
-
-  /*
-   * sp (stack top) = sp + idle stack size - XCPTCONTEXT_SIZE
-   *
-   * Note: Reserve some space used by up_initial_state since we are already
-   * running and using the per CPU idle stack.
-   */
-
-  li   t0, STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE - XCPTCONTEXT_SIZE)
-  add  sp, sp, t0
-
-2:
+  /* Set stack pointer to the idle thread stack */
+  riscv_set_inital_sp JH7110_IDLESTACK_BASE, SMP_STACK_SIZE, a0
 
   /* Disable all interrupts (i.e. timer, external) in sie */
 
-  csrw	sie, zero
+  csrw CSR_SIE, zero
 
   la   t0, __trap_vec
-  csrw stvec, t0
+  csrw CSR_STVEC, t0
 
   /* Jump to jh7110_start */
 

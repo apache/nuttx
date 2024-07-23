@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
 void x86_64_netinitialize(void)
 {
 }

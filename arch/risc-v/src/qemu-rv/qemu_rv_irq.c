@@ -33,6 +33,7 @@
 #include <nuttx/irq.h>
 
 #include "riscv_internal.h"
+#include "riscv_ipi.h"
 #include "chip.h"
 
 /****************************************************************************
@@ -79,9 +80,9 @@ void up_irqinitialize(void)
   riscv_exception_attach();
 
 #ifdef CONFIG_SMP
-  /* Clear RISCV_IPI for CPU0 */
+  /* Clear IPI for CPU0 */
 
-  putreg32(0, RISCV_IPI);
+  riscv_ipi_clear(0);
 
   up_enable_irq(RISCV_IRQ_SOFT);
 #endif
@@ -160,14 +161,6 @@ void up_enable_irq(int irq)
 
       SET_CSR(CSR_IE, IE_TIE);
     }
-#ifdef CONFIG_BUILD_KERNEL
-  else if (irq == RISCV_IRQ_MTIMER)
-    {
-      /* Read m/sstatus & set timer interrupt enable in m/sie */
-
-      SET_CSR(mie, MIE_MTIE);
-    }
-#endif
   else if (irq > RISCV_IRQ_EXT)
     {
       extirq = irq - RISCV_IRQ_EXT;

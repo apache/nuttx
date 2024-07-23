@@ -210,7 +210,7 @@ static const struct spi_ops_s g_spi1ops =
 #  ifdef CONFIG_SPI_EXCHANGE
   .exchange          = nrf53_spi_exchange,
 #  else
-  .sndlock           = nrf53_spi_sndblock,
+  .sndblock          = nrf53_spi_sndblock,
   .recvblock         = nrf53_spi_recvblock,
 #  endif
 #ifdef CONFIG_SPI_TRIGGER
@@ -1158,11 +1158,11 @@ static void nrf53_spi_exchange(struct spi_dev_s *dev,
       nxsem_wait_uninterruptible(&priv->sem_isr);
 #endif
 
-      if (nrf53_spi_getreg(priv, NRF53_SPIM_TXDAMOUNT_OFFSET) !=
-          transfer_size)
+      regval = nrf53_spi_getreg(priv, NRF53_SPIM_TXDAMOUNT_OFFSET);
+      if (regval != transfer_size)
         {
           spierr("Incomplete transfer wrote %" PRId32 " expected %zu\n",
-                 regval, nwords);
+                 regval, transfer_size);
         }
 
       /* SPI stop */

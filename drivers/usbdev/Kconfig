@@ -25,6 +25,12 @@ config USBDEV_DUALSPEED
 	---help---
 		Hardware handles high and full speed operation (USB 2.0)
 
+config USBDEV_EPBUFFER_ALIGNMENT
+	int "The usbdev ep req bffer aligned bytes"
+	default 0
+	---help---
+		The aligned bytes of usbdev ep req buffer
+
 choice
 	prompt "Select USB device powered"
 	default USBDEV_SELFPOWERED
@@ -1223,6 +1229,7 @@ endif # CDCECM
 config USBDEV_FS
 	bool
 	default n
+	select SCHED_HPWORK
 	---help---
 		Enables USBDEV FS support, userspace can use fs to control USB device.
 

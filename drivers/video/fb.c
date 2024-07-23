@@ -135,6 +135,12 @@ static int     fb_sem_wait(FAR struct fb_chardev_s *fb,
 static void    fb_sem_post(FAR struct fb_chardev_s *fb, int overlay);
 #endif
 
+#ifdef CONFIG_BUILD_KERNEL
+static int     fb_munmap(FAR struct task_group_s *group,
+                         FAR struct mm_map_entry_s *entry,
+                         FAR void *start, size_t length);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -1002,6 +1008,22 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
+#ifdef CONFIG_BUILD_KERNEL
+static int fb_munmap(FAR struct task_group_s *group,
+                     FAR struct mm_map_entry_s *entry,
+                     FAR void *start, size_t length)
+{
+  if (group && entry)
+    {
+      ginfo("%p, len=%zu\n", entry->vaddr, entry->length);
+      vm_unmap_region(entry->vaddr, entry->length);
+      mm_map_remove(get_current_mm(), entry);
+    }
+
+  return OK;
+}
+#endif
+
 static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
 {
   FAR struct inode *inode;
@@ -1032,7 +1054,15 @@ static int fb_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
   if (map->offset >= 0 && map->offset < panelinfo.fblen &&
       map->length && map->offset + map->length <= panelinfo.fblen)
     {
+#ifdef CONFIG_BUILD_KERNEL
+      map->vaddr = vm_map_region((uintptr_t)panelinfo.fbmem + map->offset,
+                                 panelinfo.fblen);
+      map->length = panelinfo.fblen;
+      map->munmap = fb_munmap;
+      mm_map_add(get_current_mm(), map);
+#else
       map->vaddr = (FAR char *)panelinfo.fbmem + map->offset;
+#endif
       return OK;
     }
 
@@ -1609,52 +1639,4 @@ errout_with_paninfo:
 errout_with_fb:
   kmm_free(fb);
   return ret;
-}
-
-/****************************************************************************
- * Name: fb_register
- *
- * Description:
- *   Register the framebuffer character device at /dev/fbN where N is the
- *   display number if the devices supports only a single plane.  If the
- *   hardware supports multiple color planes, then the device will be
- *   registered at /dev/fbN.M where N is the again display number but M
- *   is the display plane.
- *
- * Input Parameters:
- *   display - The display number for the case of boards supporting multiple
- *             displays or for hardware that supports multiple
- *             layers (each layer is consider a display).  Typically zero.
- *   plane   - Identifies the color plane on hardware that supports separate
- *             framebuffer "planes" for each color component.
- *
- * Returned Value:
- *   Zero (OK) is returned success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-int fb_register(int display, int plane)
-{
-  FAR struct fb_vtable_s *vtable;
-  int ret;
-
-  /* Initialize the frame buffer device. */
-
-  ret = up_fbinitialize(display);
-  if (ret < 0)
-    {
-      gerr("ERROR: up_fbinitialize() failed for display %d: %d\n",
-           display, ret);
-      return ret;
-    }
-
-  vtable = up_fbgetvplane(display, plane);
-  if (vtable == NULL)
-    {
-      gerr("ERROR: up_fbgetvplane() failed, vplane=%d\n", plane);
-      return -EINVAL;
-    }
-
-  return fb_register_device(display, plane, vtable);
 }

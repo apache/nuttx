@@ -37,76 +37,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SMP_STACK_MASK       15
-#define SMP_STACK_SIZE       (CONFIG_IDLETHREAD_STACKSIZE & ~15)
 #define STACK_ISALIGNED(a)   ((uintptr_t)(a) & ~SMP_STACK_MASK)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* Note:
- *   1. QEMU-RV supports up to 8 cores currently.
- *   2. RISC-V requires a 16-byte stack alignment.
- */
-
-#if CONFIG_SMP_NCPUS > 1
-static uint8_t aligned_data(16) cpu1_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
-#endif
-
-#if CONFIG_SMP_NCPUS > 2
-static uint8_t aligned_data(16) cpu2_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
-#endif
-
-#if CONFIG_SMP_NCPUS > 3
-static uint8_t aligned_data(16) cpu3_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
-#endif
-
-#if CONFIG_SMP_NCPUS > 4
-static uint8_t aligned_data(16) cpu4_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
-#endif
-
-#if CONFIG_SMP_NCPUS > 5
-static uint8_t aligned_data(16) cpu5_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
-#endif
-
-#if CONFIG_SMP_NCPUS > 6
-static uint8_t aligned_data(16) cpu6_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
-#endif
-
-#if CONFIG_SMP_NCPUS > 7
-static uint8_t aligned_data(16) cpu7_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-const uint8_t * const g_cpu_basestack[CONFIG_SMP_NCPUS] =
-{
-    (uint8_t *)_ebss,
-#if CONFIG_SMP_NCPUS > 1
-    cpu1_idlestack,
-#endif
-#if CONFIG_SMP_NCPUS > 2
-    cpu2_idlestack,
-#endif
-#if CONFIG_SMP_NCPUS > 3
-    cpu3_idlestack,
-#endif
-#if CONFIG_SMP_NCPUS > 4
-    cpu4_idlestack,
-#endif
-#if CONFIG_SMP_NCPUS > 5
-    cpu5_idlestack,
-#endif
-#if CONFIG_SMP_NCPUS > 6
-    cpu6_idlestack,
-#endif
-#if CONFIG_SMP_NCPUS > 7
-    cpu7_idlestack,
-#endif
-};
+uintptr_t g_idle_topstack = (uintptr_t)_ebss +
+                                       SMP_STACK_SIZE * CONFIG_SMP_NCPUS;
 
 /****************************************************************************
  * Public Functions
@@ -155,6 +97,7 @@ const uint8_t * const g_cpu_basestack[CONFIG_SMP_NCPUS] =
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
 int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 {
   uintptr_t stack_alloc;
@@ -164,7 +107,7 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 
   /* Get the top of the stack */
 
-  stack_alloc          = (uintptr_t)g_cpu_basestack[cpu];
+  stack_alloc = (uintptr_t)g_cpux_idlestack(cpu);
   DEBUGASSERT(stack_alloc != 0 && STACK_ISALIGNED(stack_alloc));
 
   tcb->adj_stack_size  = SMP_STACK_SIZE;
@@ -172,3 +115,4 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
   tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
   return OK;
 }
+#endif /* CONFIG_SMP */

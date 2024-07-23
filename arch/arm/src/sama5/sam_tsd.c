@@ -65,7 +65,10 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/wdog.h>
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
+#  include <nuttx/wdog.h>
+#endif
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
@@ -91,13 +94,13 @@
  */
 
 #define DEV_FORMAT          "/dev/input%d"
-#define DEV_NAMELEN         16
+#define DEV_NAMELEN         24
 
 /* Poll the pen position while the pen is down at this rate (50MS): */
 
 #define TSD_WDOG_DELAY      MSEC2TICK(50)
 
-/* This is a value for the threshold that guantees a big difference on the
+/* This is a value for the threshold that guarantees a big difference on the
  * first pendown (but can't overflow).
  */
 
@@ -114,7 +117,7 @@
 /* Pen sample state bit sets */
 
 #ifdef CONFIG_SAMA5_TSD_4WIRE
-#  define TSD_PENUP_VALID   (TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID | \
+#  define TSD_PENUP_VALID   (TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID   | \
                              TOUCH_PRESSURE_VALID)
 #  define TSD_PENUP_INVALID (TOUCH_UP | TOUCH_ID_VALID)
 #  define TSD_PENDOWN       (TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID | \
@@ -122,8 +125,8 @@
 #  define TSD_PENMOVE       (TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID | \
                              TOUCH_PRESSURE_VALID)
 #else
-#  define TSD_PENUP_VALID   (TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID)
-#  define TSD_PENUP_INVALID (TOUCH_UP | TOUCH_ID_VALID)
+#  define TSD_PENUP_VALID   (TOUCH_UP   | TOUCH_ID_VALID | TOUCH_POS_VALID)
+#  define TSD_PENUP_INVALID (TOUCH_UP   | TOUCH_ID_VALID)
 #  define TSD_PENDOWN       (TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID)
 #  define TSD_PENMOVE       (TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID)
 #endif
@@ -136,59 +139,78 @@
 #  define BOARD_TSD_PENDETSENS 0
 #endif
 
+/* The driver has always used 8 sample averages for the default filtering,
+ * once a pen down has been detected.
+ * With typical periodic sample rates of 20ms+, this means some loss of
+ * precision of touchscreen movement detection, or even missed touches.
+ * A board-level #define can override this default
+ */
+
+#ifndef BOARD_TSD_PENDOWN_TSAV
+#  define BOARD_TSD_PENDOWN_TSAV ADC_TSMR_TSAV_8CONV
+#endif
+
 #if !defined BOARD_TSD_IBCTL && defined ATSAMA5D2
 #  define BOARD_TSD_IBCTL 0
+#endif
+
+#ifndef BOARD_TOUCHSCREEN_SAMPLE_CACHES
+#  define BOARD_TOUCHSCREEN_SAMPLE_CACHES 64
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This describes the state of one contact */
+/* This describes the state of one contact                                  */
 
 enum sam_contact_e
 {
-  CONTACT_NONE = 0,             /* No contact */
-  CONTACT_DOWN,                 /* First contact */
-  CONTACT_MOVE,                 /* Same contact, possibly different position */
-  CONTACT_UP,                   /* Contact lost */
+  CONTACT_NONE = 0,             /* No contact                               */
+  CONTACT_DOWN,                 /* First contact                            */
+  CONTACT_MOVE,                 /* Same contact, possibly diff. position    */
+  CONTACT_UP,                   /* Contact lost                             */
 };
 
-/* This structure describes the results of one touchscreen sample */
+/* This structure describes the results of one touchscreen sample           */
 
 struct sam_sample_s
 {
-  uint8_t id;                   /* Sampled touch point ID */
-  uint8_t contact;              /* Contact state (see enum sam_contact_e) */
-  bool valid;                   /* True: x,y,p contain valid, sampled data */
-  uint16_t x;                   /* Measured X position */
-  uint16_t y;                   /* Measured Y position */
+  uint8_t id;                   /* Sampled touch point ID                   */
+  uint8_t contact;              /* Contact state (see enum sam_contact_e)   */
+  bool valid;                   /* True: x,y,p contain valid, sampled data  */
+  uint16_t x;                   /* Measured X position                      */
+  uint16_t y;                   /* Measured Y position                      */
 #ifdef CONFIG_SAMA5_TSD_4WIRE
-  uint16_t p;                   /* Measured pressure */
+  uint16_t p;                   /* Measured pressure                        */
 #endif
 };
 
-/* This structure describes the state of one touchscreen driver instance */
+/* This structure describes the state of one touchscreen driver instance    */
 
 struct sam_tsd_s
 {
-  uint8_t              nwaiters;  /* Num threads waiting for TSD data */
-  uint8_t              id;        /* Current touch point ID */
-  uint8_t              valid;     /* Data ready bit set */
-  uint8_t              crefs;     /* Number of times device opened */
-  volatile bool        penchange; /* An unreported event is buffered */
-  uint32_t             threshx;   /* Thresholding X value */
-  uint32_t             threshy;   /* Thresholding Y value */
-  sem_t                waitsem;   /* Used to wait for data available */
+  uint8_t              nwaiters;  /* Num threads waiting for TSD data       */
+  uint8_t              id;        /* Current touch point ID                 */
+  uint8_t              valid;     /* Data ready bit set                     */
+  uint8_t              crefs;     /* Number of times device opened          */
+  volatile bool        penchange; /* An unreported event is buffered        */
+  uint32_t             threshx;   /* Thresholding X value                   */
+  uint32_t             threshy;   /* Thresholding Y value                   */
+  sem_t                waitsem;   /* Used to wait for data available        */
 
-  struct sam_adc_s     *adc;      /* ADC device handle */
-  struct work_s        work;      /* Supports int. handling "bottom half" */
-  struct sam_sample_s  sample;    /* Last sampled touch point data */
-  struct wdog_s        wdog;      /* Poll position while the pen is down */
-  struct g_tscaldata_s caldata;   /* Touchscreen Calibration Data */
+  struct sam_adc_s     *adc;      /* ADC device handle                      */
+  struct work_s        work;      /* Supports int. handling "bottom half"   */
+  struct sam_sample_s  sample;    /* Last sampled touch point data          */
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
+  struct wdog_s        wdog;      /* Poll position while the pen is down    */
+#endif
+  struct g_tscaldata_s caldata;   /* Touchscreen Calibration Data           */
   bool                 scaled;    /* Character dreiver read should return
                                    * scaled values (true) or not (false).
                                    */
+  uint32_t             pending;   /* saved ISR status from the ADC driver   */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -211,8 +233,10 @@ static int  sam_tsd_waitsample(struct sam_tsd_s *priv,
                                struct sam_sample_s *sample);
 static void sam_tsd_bottomhalf(void *arg);
 static int  sam_tsd_schedule(struct sam_tsd_s *priv);
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
 static void sam_tsd_expiry(wdparm_t arg);
-
+#endif
 /* Character driver methods */
 
 static int  sam_tsd_open(struct file *filep);
@@ -501,25 +525,31 @@ static void sam_tsd_bottomhalf(void *arg)
   uint32_t yscale;
   uint32_t y;
   uint32_t ydiff;
+#ifdef CONFIG_SAMA5_TSD_4WIRE  
   uint32_t z1;
   uint32_t z2;
   uint32_t pressr;
   uint32_t p;
+#endif
   bool pendown;
 
   DEBUGASSERT(priv != NULL);
-
-  /* Get the set of pending ADC interrupts and pen status */
-
-  pending = sam_adc_getreg(priv->adc, SAM_ADC_ISR);
+  regval = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
 
   /* Get exclusive access to the driver data structure */
 
   sam_adc_lock(priv->adc);
+  pending = priv->pending; /* ISR status passed to us from the ADC driver */
 
-  /* Check the pen state */
+  /* Check the pen state. Down if:
+   *   - Pen status is down OR
+   *   - Pen down interrupt seen, but NOT if
+   *   - Pen up interrrupt occurred as we need to deal with that
+   */
 
-  pendown = ((pending & ADC_SR_PENS) != 0);
+  pendown = ((((pending & ADC_SR_PENS) != 0) ||
+              ((pending & ADC_INT_PEN) != 0)) &&
+             (pending & ADC_INT_NOPEN) == 0);
 
   /* Handle the change from pen down to pen up */
 
@@ -536,8 +566,11 @@ static void sam_tsd_bottomhalf(void *arg)
       /* We will enable only the ADC_INT_PEN interrupt on exit.  We don't
        * want to hear anything from the touchscreen until the next touch.
        */
-
+#ifdef SAMA5_TSD_TRIG_CHANGE_ALLOWED
       ier = ADC_INT_PEN;
+#else
+      ier = ADC_TSD_PRESSINTS;
+#endif      
 
       /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen
        * up and already reported; CONTACT_UP == pen up, but not reported)
@@ -547,6 +580,7 @@ static void sam_tsd_bottomhalf(void *arg)
           priv->sample.contact == CONTACT_UP)
 
         {
+          iinfo("\t\t\t\t\tIgnored interrupt\n");
           goto ignored;
         }
 
@@ -562,7 +596,7 @@ static void sam_tsd_bottomhalf(void *arg)
       sam_tsd_setaverage(priv, ADC_TSMR_TSAV_NOFILTER);
       sam_tsd_debounce(priv, BOARD_TSD_DEBOUNCE);
 
-#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
+#ifdef SAMA5_TSD_TRIG_CHANGE_ALLOWED
       regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
       regval &= ~ADC_TRGR_TRGMOD_MASK;
       regval |= ADC_TRGR_TRGMOD_PEN;
@@ -583,10 +617,13 @@ static void sam_tsd_bottomhalf(void *arg)
        * a little later.  NOTE that pen interrupts are not re-enabled in
        * this case; we rely on the timer expiry to get us going again.
        */
-
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
       wd_start(&priv->wdog, TSD_WDOG_DELAY,
                sam_tsd_expiry, (wdparm_t)priv);
       ier = 0;
+#endif
+      iinfo("\t\t\t\t\tlast event not processed\n");
       goto ignored;
     }
   else
@@ -599,7 +636,7 @@ static void sam_tsd_bottomhalf(void *arg)
 
       ier = ADC_TSD_RELEASEINTS;
 
-      /* Check if all of the date that we need is available.  If not, just
+      /* Check if all of the data that we need is available.  If not, just
        * re-enable interrupts and wait until it is.
        */
 
@@ -607,15 +644,14 @@ static void sam_tsd_bottomhalf(void *arg)
         {
           /* But don't enable interrupts for the data that we already have */
 
-          ier &= ~(pending & TSD_ALLREADY);
+          ier &= ~pending & TSD_ALLREADY;
 
           /* datasheet says that if TSAV != 0 there may not be interrupts
-           * for TSD channels so periodic or continuous triggers are needed
-           * unless we're already using periodic triggers (for std adc ops).
+           * for TSD channels so periodic or continuous triggers are needed.
+           * We may be already using periodic triggers (for std adc ops).
            */
-#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
+#ifdef SAMA5_TSD_TRIG_CHANGE_ALLOWED
           regval  = sam_adc_getreg(priv->adc, SAM_ADC_TSMR);
-          regval &= ADC_TSMR_TSAV_MASK;
           if ((regval & ADC_TSMR_TSAV_MASK) != 0)
             {
               regval = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
@@ -628,11 +664,13 @@ static void sam_tsd_bottomhalf(void *arg)
             }
 #endif
 
+          iinfo("\t\t\t\t\tNot all data ready to read\n");
           goto ignored;
         }
 
       /* Sample positional values.  Get raw X and Y position data */
 
+      iinfo("\t\t\t\t\tsampling data\n");
       regval = sam_adc_getreg(priv->adc, SAM_ADC_XPOSR);
       xraw   = (regval & ADC_XPOSR_XPOS_MASK) >> ADC_XPOSR_XPOS_SHIFT;
       xscale = (regval & ADC_XPOSR_XSCALE_MASK) >> ADC_XPOSR_XSCALE_SHIFT;
@@ -650,12 +688,13 @@ static void sam_tsd_bottomhalf(void *arg)
 #endif
       /* Discard any bad readings.  This check may not be necessary. */
 
-      if (xraw == 0 || xraw >= xscale || yraw == 0 || yraw > yscale)
+      if (xraw == 0 || xraw > xscale || yraw == 0 || yraw > yscale)
         {
           iwarn("WARNING: Discarding: x %" PRId32 ":%" PRId32
                 " y %" PRId32 ":%" PRId32 "\n",
                 xraw, xscale,
                 yraw, yscale);
+          iinfo("\t\t\t\t\tBad reading\n");
           goto ignored;
         }
 
@@ -668,11 +707,11 @@ static void sam_tsd_bottomhalf(void *arg)
        */
 
 #ifdef CONFIG_SAMA5_TSD_SWAPXY
-      x  = ((yraw << 12)) / yscale;
-      y  = ((xraw << 12)) / xscale;
+      x  = ((yraw << 12) - yraw) / yscale;
+      y  = ((xraw << 12) - xraw) / xscale;
 #else
-      x  = ((xraw << 12)) / xscale;
-      y  = ((yraw << 12)) / yscale;
+      x  = ((xraw << 12) - xraw) / xscale;
+      y  = ((yraw << 12) - yraw) / yscale;
 #endif
 
       /* Perform a thresholding operation so that the results will be
@@ -685,10 +724,11 @@ static void sam_tsd_bottomhalf(void *arg)
       ydiff = y > priv->threshy ? (y - priv->threshy) : (priv->threshy - y);
 
       /* Continue to sample the position while the pen is down */
-
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
       wd_start(&priv->wdog, TSD_WDOG_DELAY,
                sam_tsd_expiry, (wdparm_t)priv);
-
+#endif
       /* Check the thresholds.  Bail if (1) this is not the first
        * measurement and (2) there is no significant difference from
        * the last measurement.
@@ -702,6 +742,7 @@ static void sam_tsd_bottomhalf(void *arg)
            * anything.
            */
 
+          iinfo("\t\t\t\t\tNo change\n");
           goto ignored;
         }
 
@@ -753,13 +794,12 @@ static void sam_tsd_bottomhalf(void *arg)
           /* First contact.  Handle transitions from pen UP to pen DOWN */
 
           priv->sample.contact = CONTACT_DOWN;
-
-#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
-          /* Configure for periodic trigger */
-
-          sam_tsd_setaverage(priv, ADC_TSMR_TSAV_8CONV);
+          sam_tsd_setaverage(priv, BOARD_TSD_PENDOWN_TSAV);
           sam_tsd_debounce(priv, 300);         /* 300ns */
 
+          /* Configure for periodic trigger */
+
+#ifdef SAMA5_TSD_TRIG_CHANGE_ALLOWED
           regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
           regval &= ~ADC_TRGR_TRGMOD_MASK;
           regval |= ADC_TRGR_TRGMOD_PERIOD;
@@ -801,9 +841,10 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv)
   /* Disable the watchdog timer.  It will be re-enabled in the worker thread
    * while the pen remains down.
    */
-
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
   wd_cancel(&priv->wdog);
-
+#endif
   /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
    * re-enabled after the worker thread executes.
    */
@@ -833,7 +874,8 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv)
  *   watchdog timer.  This function handles that timer expiration.
  *
  ****************************************************************************/
-
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
 static void sam_tsd_expiry(wdparm_t arg)
 {
   struct sam_tsd_s *priv = (struct sam_tsd_s *)arg;
@@ -842,6 +884,7 @@ static void sam_tsd_expiry(wdparm_t arg)
 
   sam_tsd_schedule(priv);
 }
+#endif
 
 /****************************************************************************
  * Name: sam_tsd_open
@@ -936,6 +979,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
   struct sam_tsd_s *priv;
   struct touch_sample_s *report;
   struct sam_sample_s sample;
+  int regval;
   int ret;
 
   iinfo("buffer:%p len:%d\n", buffer, len);
@@ -967,7 +1011,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
   ret = sam_tsd_sample(priv, &sample);
   if (ret < 0)
     {
-      /* Sample data is not available now.  We would ave to wait to get
+      /* Sample data is not available now.  We would have to wait to get
        * receive sample data.  If the user has specified the O_NONBLOCK
        * option, then just return an error.
        */
@@ -977,6 +1021,18 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
         {
           ret = -EAGAIN;
           goto errout;
+        }
+      else
+        {
+          /* If we have opened in blocking mode, there is a big risk that
+           * we cause the system to hang because tsd_wait_sample will enter
+           * a critical section until an adc sample is available - which may
+           * be a very long time if the pen detect ADC trigger is in use.
+           */
+
+          regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
+          regval &= ADC_TRGR_TRGMOD_MASK;
+          DEBUGASSERT(regval != ADC_TRGR_TRGMOD_PEN);
         }
 
       /* Wait for sample data */
@@ -1554,7 +1610,7 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
 {
   uint32_t regval;
 
-#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
+#ifdef SAMA5_TSD_TRIG_CHANGE_ALLOWED
   /* Disable touch trigger */
 
   regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
@@ -1569,16 +1625,19 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
   sam_tsd_tracking(priv, BOARD_TSD_TRACKTIM);
 
   /* set trigger mode to be periodic in case ADC not already
-   * been initialised. It's the only option allowed and that works.
+   * been initialised. It's the only option allowed and that works, unless
+   * continuous mode is set of course.
    */
 
-#ifndef SAMA5_TSD_PENDET_TRIG_ALLOWED
-  /* if we're allowed to use pendet trigger no need to do this */
-
+#ifdef CONFIG_SAMA5_ADC_TRIGGER_PERIOD
   regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
   regval &= ~ADC_TRGR_TRGMOD_MASK;
   regval |= ADC_TRGR_TRGMOD_PERIOD;
   sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
+  sam_tsd_trigperiod(priv, CONFIG_SAMA5_ADC_TRIGGER_PERIOD);
+
+  /* Make sure the configured trigger period is used */
+
   sam_tsd_trigperiod(priv, CONFIG_SAMA5_ADC_TRIGGER_PERIOD);
 #else
   sam_tsd_trigperiod(priv, 20000); /*  20ms */
@@ -1643,7 +1702,7 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
 #endif
   sam_adc_putreg(priv->adc, SAM_ADC_ACR, regval);
 
-#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
+#ifdef SAMA5_TSD_TRIG_CHANGE_ALLOWED /* we assume periodic otherwise */
   /* Configure pen interrupt generation */
 
   regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
@@ -1661,6 +1720,7 @@ static void sam_tsd_initialize(struct sam_tsd_s *priv)
   sam_adc_putreg(priv->adc, SAM_ADC_CR, regval);
 #endif
 
+  regval = sam_adc_getreg(priv->adc, SAM_ADC_ISR);
   up_enable_irq(SAM_IRQ_ADC);
 }
 
@@ -1687,15 +1747,16 @@ static void sam_tsd_uninitialize(struct sam_tsd_s *priv)
   /* Disable the watchdog timer.  It will be re-enabled in the worker thread
    * while the pen remains down.
    */
-
+#if !defined(CONFIG_SAMA5_ADC_PERIODIC_TRIG) && \
+    !defined(CONFIG_SAMA5_ADC_CONTINUOUS_TRIG)
   wd_cancel(&priv->wdog);
-
+#endif
   /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
    * re-enabled after the worker thread executes.
    */
 
   sam_adc_putreg(priv->adc, SAM_ADC_IDR, ADC_TSD_ALLINTS);
-#ifdef SAMA5_TSD_PENDET_TRIG_ALLOWED
+#ifdef SAMA5_TSD_TRIG_CHANGE_ALLOWED
   /* Disable touch trigger */
 
   regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
@@ -1800,6 +1861,7 @@ void sam_tsd_interrupt(uint32_t pending)
        * worker thread.
        */
 
+      priv->pending = pending;
       ret = sam_tsd_schedule(priv);
       if (ret < 0)
         {

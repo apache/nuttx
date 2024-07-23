@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/src/fvp-v8r/Make.defs
+# arch/arm/src/fvp-v8r-aarch32/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -21,4 +21,4 @@
 include armv8-r/Make.defs
 
 # fvp-specific C source files
-CHIP_CSRCS  = fvp_boot.c fvp_serial.c
+CHIP_CSRCS = fvp_boot.c fvp_serial.c

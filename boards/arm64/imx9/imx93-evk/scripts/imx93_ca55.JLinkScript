@@ -1,0 +1,58 @@
+/* Adds custom i.MX93 logic to replace default procedures from JLink */
+
+int ResetTarget(void) {
+
+  JLINK_SYS_Report("-- Resetting target device...");
+  
+  JLINK_TIF_ActivateTargetReset();
+  JLINK_Delay_us(50000);                 // _Delay_us: Keep reset active for some time so possible glitch filters on target do not filter out reset pulse
+  JLINK_TIF_ReleaseTargetReset();
+
+  //
+  // This device requires a special reset as default reset does not work for this device.
+  //
+  JLINK_TARGET_Halt(); // Make sure that the CPU is halted when reset is called
+
+  return 0;
+}
+
+void ConfigTargetSettings(void) {
+  //  JLINK_SYS_Report("J-Link script: Manually configuring JTAG chain");
+  
+  // AP[0]: AHB-AP (IDR: 0x74770001)
+  // AP[1]: APB-AP (IDR: 0x44770002)
+  
+  JLINK_ExecCommand("CORESIGHT_AddAP Index=0 Type=AHB-AP"); // Connects to System Bus
+  JLINK_ExecCommand("CORESIGHT_AddAP Index=1 Type=APB-AP"); // Connects to CoreSight/A-core Platform (see APBIC)
+  JLINK_ExecCommand("CORESIGHT_AddAP Index=3 Type=DAP-AP"); // Connects to a Cortex-M33
+  JLINK_ExecCommand("CORESIGHT_AddAP Index=4 Type=DAP-AP"); // Connects to a EdgeLock (Risc-V)
+  JLINK_ExecCommand("CORESIGHT_AddAP Index=6 Type=MDM-AP"); // Connects to a MDM
+  
+  // A55_0
+  JLINK_ExecCommand("CORESIGHT_SetCoreBaseAddr = 0x40810000");      // Location in AP address space where debug registers of core are located
+  JLINK_ExecCommand("CORESIGHT_SetCSCTICoreBaseAddr = 0x40820000"); // Location in AP address space where CTI that connects to the core is located
+  
+  // A55_1
+  //JLINK_ExecCommand("CORESIGHT_SetCoreBaseAddr = 0x40910000");      // Location in AP address space where debug registers of core are located
+  //JLINK_ExecCommand("CORESIGHT_SetCSCTICoreBaseAddr = 0x40920000"); // Location in AP address space where CTI that connects to the core is located
+  
+  // There is also a debug core at SetCoreBaseAddr = 0x40840000, but don't know what it is
+  
+  JTAG_AllowTAPReset = 1; // J-Link is allowed to use a TAP reset for JTAG-chain auto-detection
+  
+  JLINK_JTAG_IRPre  = 0;   // Sum of IRLen of all JTAG TAPs preceding the one we want to communicate with
+  JLINK_JTAG_DRPre  = 0;   // Number of JTAG TAPs preceding the one we want to communicate with
+  JLINK_JTAG_IRPost = 0;  // Sum of IRLen of all JTAG TAPs following the one we want to communicate with
+  JLINK_JTAG_DRPost = 0;   // Number of JTAG TAPs following the one we want to communicate with
+  JLINK_JTAG_IRLen  = 4;   // IRLen of device we want to communicate with
+  
+  JLINK_JTAG_SetDeviceId(0, 0x6BA00477);
+  
+  // For Cortex-A55:
+  JLINK_ExecCommand("CORESIGHT_SetIndexAPBAPToUse = 1");
+  // For Cortex-M33:
+  // JLINK_ExecCommand("CORESIGHT_SetIndexAPBAPToUse = 3");
+
+  return 0;
+}
+

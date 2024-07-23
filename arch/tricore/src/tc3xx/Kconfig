@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "TC3XX Configuration Options"
+
+menu "TC3XX Peripheral Support"
+
+# These are the peripheral selections proper
+
+config TC3XX_UART0
+	bool "TC3XX UART0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+endmenu

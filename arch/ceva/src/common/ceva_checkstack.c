@@ -143,7 +143,7 @@ size_t up_check_tcbstack(struct tcb_s *tcb)
                           tcb->adj_stack_size);
 }
 
-size_t up_check_intstack(void)
+size_t up_check_intstack(int cpu)
 {
   return ceva_stack_check((uintptr_t)g_intstackalloc,
                           g_intstackbase - g_intstackalloc);

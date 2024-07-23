@@ -452,7 +452,7 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
       /* Add the task to the inactive task list */
 
       sched_lock();
-      dq_addfirst((FAR dq_entry_t *)tcb, &g_inactivetasks);
+      dq_addfirst((FAR dq_entry_t *)tcb, list_inactivetasks());
       tcb->task_state = TSTATE_TASK_INACTIVE;
       sched_unlock();
     }
@@ -514,6 +514,7 @@ static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
  *
  * Input Parameters:
  *   tcb  - Address of the new task's TCB
+ *   name - Name of the new task
  *   argv - A pointer to an array of input parameters. The array should be
  *          terminated with a NULL argv[] value. If no parameters are
  *          required, argv may be NULL.
@@ -629,7 +630,6 @@ static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
    */
 
   stackargv[argc + 1] = NULL;
-  tcb->cmn.group->tg_info->argv = stackargv;
 
   return OK;
 }

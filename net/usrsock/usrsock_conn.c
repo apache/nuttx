@@ -90,7 +90,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
     {
 #if CONFIG_NET_USRSOCK_MAX_CONNS > 0
       if (dq_count(&g_active_usrsock_connections) +
-          CONFIG_NET_USRSOCK_ALLOC_CONNS >= CONFIG_NET_USRSOCK_MAX_CONNS)
+          CONFIG_NET_USRSOCK_ALLOC_CONNS > CONFIG_NET_USRSOCK_MAX_CONNS)
         {
           nxmutex_unlock(&g_free_lock);
           return NULL;

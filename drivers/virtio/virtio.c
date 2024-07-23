@@ -24,6 +24,7 @@
 
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/virtio/virtio.h>
@@ -119,7 +120,14 @@ void virtio_free_buf(FAR struct virtio_device *vdev, FAR void *buf)
 
 void virtio_register_drivers(void)
 {
+  struct metal_init_params params = METAL_INIT_DEFAULTS;
   int ret = OK;
+
+  ret = metal_init(&params);
+  if (ret < 0)
+    {
+      vrterr("metal_init failed, ret=%d\n", ret);
+    }
 
 #ifdef CONFIG_DRIVERS_VIRTIO_BLK
   ret = virtio_register_blk_driver();

@@ -41,10 +41,14 @@
 
 #if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
 
-/* Output pins. GPIO25 is onboard LED any other outputs could be used.
+/**
+ * Output pins. Those pins are onboard LEDs
+ * any other outputs could be used
  */
 
 #define GPIO_OUT1     25
+#define GPIO_OUT2     17
+#define GPIO_OUT3     16
 
 /* Input pins.
  */
@@ -109,7 +113,9 @@ static const struct gpio_operations_s gpout_ops =
 
 static const uint32_t g_gpiooutputs[BOARD_NGPIOOUT] =
 {
-  GPIO_OUT1
+  GPIO_OUT1,
+  GPIO_OUT2,
+  GPIO_OUT3,
 };
 
 static struct rp2040gpio_dev_s g_gpout[BOARD_NGPIOOUT];

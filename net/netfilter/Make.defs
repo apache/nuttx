@@ -22,10 +22,20 @@
 
 ifeq ($(CONFIG_NET_IPTABLES),y)
 
+ifeq ($(CONFIG_NET_IPv4),y)
 NET_CSRCS += ipt_sockopt.c
+endif
+
+ifeq ($(CONFIG_NET_IPv6),y)
+NET_CSRCS += ip6t_sockopt.c
+endif
 
 ifeq ($(CONFIG_NET_NAT),y)
 NET_CSRCS += ipt_nat.c
+endif
+
+ifeq ($(CONFIG_NET_IPFILTER),y)
+NET_CSRCS += ipt_filter.c
 endif
 
 # Include Netfilter build support

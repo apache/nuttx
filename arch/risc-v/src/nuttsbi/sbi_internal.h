@@ -43,7 +43,15 @@
 
 #define MMODE_IRQSTACK      (1024)
 
-/* Timer interrupt is the only one we handle, others are discarded */
+/* IPI memory mapped registers */
+
+#define IPI_IRQ             (3)
+
+/* IPI memory mapped registers */
+
+#define IPI_BASE            (CONFIG_NUTTSBI_IPI_BASE)
+
+/* Timer interrupt */
 
 #define MTIMER_IRQ          (7)
 
@@ -96,6 +104,20 @@ void sbi_mscratch_assign(uintptr_t hartid);
  ****************************************************************************/
 
 void sbi_start(void) noreturn_function;
+
+/****************************************************************************
+ * Name: sbi_send_ipi
+ *
+ * Description:
+ *   Send an inter-processor interrupt to all the harts defined
+ *
+ * Input Parameters:
+ *   hmask - Mask fo CPU to send IPI
+ *   hbase - The firset CPU id to send
+ *
+ ****************************************************************************/
+
+void sbi_send_ipi(uintptr_t hmask, uintptr_t hbase);
 
 /****************************************************************************
  * Name: sbi_init_mtimer

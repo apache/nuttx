@@ -865,9 +865,6 @@ uint32_t IRAM_ATTR esp32_rtc_clk_cal(enum esp32_rtc_cal_sel_e cal_clk,
   return period;
 }
 
-enum esp32_rtc_xtal_freq_e rtc_get_xtal(void)
-                __attribute__((alias("esp32_rtc_clk_xtal_freq_get")));
-
 /****************************************************************************
  * Name: esp32_rtc_clk_xtal_freq_get
  *

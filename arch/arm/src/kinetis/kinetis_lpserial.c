@@ -37,6 +37,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
@@ -705,10 +706,10 @@ static void kinetis_restoreuartint(struct kinetis_dev_s *priv, uint32_t ie)
    * ie
    */
 
-  flags    = enter_critical_section();
+  flags    = spin_lock_irqsave(NULL);
   priv->ie = ie & LPUART_CTRL_ALL_INTS;
   kinetis_setuartint(priv);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -720,14 +721,14 @@ static void kinetis_disableuartint(struct kinetis_dev_s *priv, uint32_t *ie)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
   if (ie)
     {
       *ie = priv->ie;
     }
 
   kinetis_restoreuartint(priv, 0);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 #endif
 

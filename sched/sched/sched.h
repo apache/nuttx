@@ -42,18 +42,32 @@
 
 #define PIDHASH(pid)             ((pid) & (g_npidhash - 1))
 
+/* The state of a task is indicated both by the task_state field of the TCB
+ * and by a series of task lists.  All of these tasks lists are declared
+ * below. Although it is not always necessary, most of these lists are
+ * prioritized so that common list handling logic can be used (only the
+ * g_readytorun, the g_pendingtasks, and the g_waitingforsemaphore lists
+ * need to be prioritized).
+ */
+
+#define list_readytorun()        (&g_readytorun)
+#define list_pendingtasks()      (&g_pendingtasks)
+#define list_waitingforsignal()  (&g_waitingforsignal)
+#define list_waitingforfill()    (&g_waitingforfill)
+#define list_stoppedtasks()      (&g_stoppedtasks)
+#define list_inactivetasks()     (&g_inactivetasks)
+#define list_assignedtasks(cpu)  (&g_assignedtasks[cpu])
+
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
  * NOTE: this_task() for SMP is implemented in sched_thistask.c
  */
 
 #ifdef CONFIG_SMP
-#  define current_task(cpu)      ((FAR struct tcb_s *)g_assignedtasks[cpu].head)
-#  define this_cpu()             up_cpu_index()
+#  define current_task(cpu)      ((FAR struct tcb_s *)list_assignedtasks(cpu)->head)
 #else
-#  define current_task(cpu)      ((FAR struct tcb_s *)g_readytorun.head)
-#  define this_cpu()             (0)
-#  define this_task()            (current_task(this_cpu()))
+#  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
+#  define this_task()            (current_task(up_cpu_index()))
 #endif
 
 #define is_idle_task(t)          ((t)->pid < CONFIG_SMP_NCPUS)
@@ -63,7 +77,7 @@
  */
 
 #define running_task() \
-  (up_interrupt_context() ? g_running_tasks[this_cpu()] : this_task())
+  (up_interrupt_context() ? g_running_tasks[up_cpu_index()] : this_task())
 
 /* List attribute flags */
 
@@ -194,7 +208,7 @@ extern dq_queue_t g_waitingforsignal;
 
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 extern dq_queue_t g_waitingforfill;
 #endif
 
@@ -233,14 +247,14 @@ extern volatile int g_npidhash;
  * ordered list or not.
  */
 
-extern const struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+extern struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
 /* This is the total number of clock tick counts.  Essentially the
  * 'denominator' for all CPU load calculations.
  */
 
-extern volatile uint32_t g_cpuload_total;
+extern volatile clock_t g_cpuload_total;
 #endif
 
 /* Declared in sched_lock.c *************************************************/
@@ -263,50 +277,8 @@ extern volatile uint32_t g_cpuload_total;
  */
 
 #ifdef CONFIG_SMP
-/* In the multiple CPU, SMP case, disabling context switches will not give a
- * task exclusive access to the (multiple) CPU resources (at least without
- * stopping the other CPUs): Even though pre-emption is disabled, other
- * threads will still be executing on the other CPUS.
- *
- * There are additional rules for this multi-CPU case:
- *
- * 1. There is a global lock count 'g_cpu_lockset' that includes a bit for
- *    each CPU: If the bit is '1', then the corresponding CPU has the
- *    scheduler locked; if '0', then the CPU does not have the scheduler
- *    locked.
- * 2. Scheduling logic would set the bit associated with the cpu in
- *    'g_cpu_lockset' when the TCB at the head of the g_assignedtasks[cpu]
- *    list transitions has 'lockcount' > 0. This might happen when
- *    sched_lock() is called, or after a context switch that changes the
- *    TCB at the head of the g_assignedtasks[cpu] list.
- * 3. Similarly, the cpu bit in the global 'g_cpu_lockset' would be cleared
- *    when the TCB at the head of the g_assignedtasks[cpu] list has
- *    'lockcount' == 0. This might happen when sched_unlock() is called, or
- *    after a context switch that changes the TCB at the head of the
- *    g_assignedtasks[cpu] list.
- * 4. Modification of the global 'g_cpu_lockset' must be protected by a
- *    spinlock, 'g_cpu_schedlock'. That spinlock would be taken when
- *    sched_lock() is called, and released when sched_unlock() is called.
- *    This assures that the scheduler does enforce the critical section.
- *    NOTE: Because of this spinlock, there should never be more than one
- *    bit set in 'g_cpu_lockset'; attempts to set additional bits should
- *    be cause the CPU to block on the spinlock.  However, additional bits
- *    could get set in 'g_cpu_lockset' due to the context switches on the
- *    various CPUs.
- * 5. Each the time the head of a g_assignedtasks[] list changes and the
- *    scheduler modifies 'g_cpu_lockset', it must also set 'g_cpu_schedlock'
- *    depending on the new state of 'g_cpu_lockset'.
- * 5. Logic that currently uses the currently running tasks lockcount
- *    instead uses the global 'g_cpu_schedlock'. A value of SP_UNLOCKED
- *    means that no CPU has pre-emption disabled; SP_LOCKED means that at
- *    least one CPU has pre-emption disabled.
- */
-
-extern volatile spinlock_t g_cpu_schedlock;
-
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
-extern volatile spinlock_t g_cpu_locksetlock;
 extern volatile cpu_set_t g_cpu_lockset;
 
 /* Used to lock tasklist to prevent from concurrent access */
@@ -386,7 +358,7 @@ FAR struct tcb_s *this_task(void) noinstrument_function;
 int  nxsched_select_cpu(cpu_set_t affinity);
 int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 
-#  define nxsched_islocked_global() spin_is_locked(&g_cpu_schedlock)
+#  define nxsched_islocked_global() (g_cpu_lockset != 0)
 #  define nxsched_islocked_tcb(tcb) nxsched_islocked_global()
 
 #else
@@ -399,8 +371,8 @@ int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 
 #if defined(CONFIG_SCHED_CPULOAD_SYSCLK) || \
     defined (CONFIG_SCHED_CPULOAD_CRITMONITOR)
-void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, uint32_t ticks);
-void nxsched_process_cpuload_ticks(uint32_t ticks);
+void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, clock_t ticks);
+void nxsched_process_cpuload_ticks(clock_t ticks);
 #define nxsched_process_cpuload() nxsched_process_cpuload_ticks(1)
 #endif
 
@@ -421,5 +393,6 @@ bool nxsched_verify_tcb(FAR struct tcb_s *tcb);
 
 struct tls_info_s; /* Forward declare */
 FAR struct tls_info_s *nxsched_get_tls(FAR struct tcb_s *tcb);
+FAR char **nxsched_get_stackargs(FAR struct tcb_s *tcb);
 
 #endif /* __SCHED_SCHED_SCHED_H */

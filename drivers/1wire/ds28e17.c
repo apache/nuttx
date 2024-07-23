@@ -537,11 +537,12 @@ static int ds_i2c_setfrequency(FAR struct ds_i2c_inst_s *inst,
         break;
 
       default:
-        i2cerr("ERROR: bad I2C freq %lu\n", frequency);
+        i2cerr("ERROR: bad I2C freq %" PRId32 "\n", frequency);
         return -EINVAL;
     }
 
-  i2cinfo("Changing I2C freq %lu -> %lu\n", inst->frequency, frequency);
+  i2cinfo("Changing I2C freq %" PRId32 " -> %" PRId32 "\n",
+          inst->frequency, frequency);
 
   /* Select DS28E17 */
 
@@ -795,7 +796,7 @@ static int ds28e17_selftest(FAR struct ds_i2c_inst_s *inst)
 
 #endif
   memcpy(&rom, rxbuf, 8);
-  i2cinfo("recv rom: 0x%llx\n", rom);
+  i2cinfo("recv rom: 0x%" PRIx64 "\n", rom);
 
   crc = onewire_crc8(rxbuf, sizeof(rxbuf)-1);
   i2cinfo("crc8=%d, recv crc8=%d\n", crc, (int)rxbuf[7]);

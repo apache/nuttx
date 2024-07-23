@@ -119,43 +119,43 @@ struct fork_s
 {
   /* CPU registers */
 
-  uintptr_t s1;   /* Saved register s1 */
-  uintptr_t s2;   /* Saved register s2 */
-  uintptr_t s3;   /* Saved register s3 */
-  uintptr_t s4;   /* Saved register s4 */
-  uintptr_t s5;   /* Saved register s5 */
-  uintptr_t s6;   /* Saved register s6 */
-  uintptr_t s7;   /* Saved register s7 */
-  uintptr_t s8;   /* Saved register s8 */
-  uintptr_t s9;   /* Saved register s9 */
-  uintptr_t s10;  /* Saved register s10 */
-  uintptr_t s11;  /* Saved register s11 */
+  uintreg_t s1;   /* Saved register s1 */
+  uintreg_t s2;   /* Saved register s2 */
+  uintreg_t s3;   /* Saved register s3 */
+  uintreg_t s4;   /* Saved register s4 */
+  uintreg_t s5;   /* Saved register s5 */
+  uintreg_t s6;   /* Saved register s6 */
+  uintreg_t s7;   /* Saved register s7 */
+  uintreg_t s8;   /* Saved register s8 */
+  uintreg_t s9;   /* Saved register s9 */
+  uintreg_t s10;  /* Saved register s10 */
+  uintreg_t s11;  /* Saved register s11 */
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  uintptr_t fp;   /* Frame pointer */
+  uintreg_t fp;   /* Frame pointer */
 #else
-  uintptr_t s0;   /* Saved register s0 */
+  uintreg_t s0;   /* Saved register s0 */
 #endif
-  uintptr_t sp;   /* Stack pointer */
-  uintptr_t ra;   /* Return address */
+  uintreg_t sp;   /* Stack pointer */
+  uintreg_t ra;   /* Return address */
 #ifdef RISCV_SAVE_GP
-  uintptr_t gp;   /* Global pointer */
+  uintreg_t gp;   /* Global pointer */
 #endif
 
   /* Floating point registers */
 
 #ifdef CONFIG_ARCH_FPU
-  uintptr_t fs0;   /* Saved register fs0 */
-  uintptr_t fs1;   /* Saved register fs1 */
-  uintptr_t fs2;   /* Saved register fs2 */
-  uintptr_t fs3;   /* Saved register fs3 */
-  uintptr_t fs4;   /* Saved register fs4 */
-  uintptr_t fs5;   /* Saved register fs5 */
-  uintptr_t fs6;   /* Saved register fs6 */
-  uintptr_t fs7;   /* Saved register fs7 */
-  uintptr_t fs8;   /* Saved register fs8 */
-  uintptr_t fs9;   /* Saved register fs9 */
-  uintptr_t fs10;  /* Saved register fs10 */
-  uintptr_t fs11;  /* Saved register fs11 */
+  uintreg_t fs0;   /* Saved register fs0 */
+  uintreg_t fs1;   /* Saved register fs1 */
+  uintreg_t fs2;   /* Saved register fs2 */
+  uintreg_t fs3;   /* Saved register fs3 */
+  uintreg_t fs4;   /* Saved register fs4 */
+  uintreg_t fs5;   /* Saved register fs5 */
+  uintreg_t fs6;   /* Saved register fs6 */
+  uintreg_t fs7;   /* Saved register fs7 */
+  uintreg_t fs8;   /* Saved register fs8 */
+  uintreg_t fs9;   /* Saved register fs9 */
+  uintreg_t fs10;  /* Saved register fs10 */
+  uintreg_t fs11;  /* Saved register fs11 */
 #endif
 };
 #endif

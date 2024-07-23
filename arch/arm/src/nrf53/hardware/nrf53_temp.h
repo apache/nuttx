@@ -94,4 +94,4 @@
 
 #define NRF53_TEMP_INTENCLR_DATARDY  (1 << 0)  /* Read: Enabled */
 
-#endif // __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_TEMP_H
+#endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_TEMP_H */

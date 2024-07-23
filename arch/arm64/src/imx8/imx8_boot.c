@@ -29,7 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/cache.h>
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>
 #endif
 

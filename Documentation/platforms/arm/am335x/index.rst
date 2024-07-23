@@ -20,7 +20,7 @@ AM335x are supported by NuttX:
    -  **NuttX-7.31**. An LCD driver was added in NuttX-7.31.
 
    Refer to the Beaglebone Black board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/am335x/beaglebone-black/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/am335x/boards/beaglebone-black/README.txt>`__
    file for further, up-to-date information.
 
 Supported Boards

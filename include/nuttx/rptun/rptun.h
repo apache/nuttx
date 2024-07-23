@@ -37,6 +37,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define _RPTUNIOCVALID(c)           _RPMSGIOCVALID(c)
+#define _RPTUNIOC(nr)               _RPMSGIOC(nr)
+
+#define RPTUNIOC_START              _RPTUNIOC(100)
+#define RPTUNIOC_STOP               _RPTUNIOC(101)
+#define RPTUNIOC_RESET              _RPTUNIOC(102)
+
 #define RPTUN_NOTIFY_ALL            (UINT32_MAX - 0)
 
 /* Access macros ************************************************************/
@@ -352,8 +359,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev);
 int rptun_boot(FAR const char *cpuname);
 int rptun_poweroff(FAR const char *cpuname);
 int rptun_reset(FAR const char *cpuname, int value);
-int rptun_panic(FAR const char *cpuname);
-void rptun_dump_all(void);
 
 #ifdef __cplusplus
 }

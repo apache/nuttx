@@ -24,16 +24,37 @@
 
 #include <nuttx/config.h>
 #include <arch/arch.h>
+#include <arch/irq.h>
 #include <arch/multiboot2.h>
+#include <sys/types.h>
 
-    .file    "intel64_head.S"
+	.file "intel64_head.S"
 
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
 
+/* Get XCR0 register value */
+
+#if defined(CONFIG_ARCH_X86_64_AVX512)
+#  define X86_XCR0_VAL (X86_XCR0_X87 | X86_XCR0_SSE | X86_XCR0_AVX | \
+                        X86_XCR0_OPMASK | X86_XCR0_HI256 | X86_XCR0_HI16)
+#elif defined(CONFIG_ARCH_X86_64_AVX)
+#  define X86_XCR0_VAL (X86_XCR0_X87 | X86_XCR0_SSE | X86_XCR0_AVX)
+#else
+#  define X86_XCR0_VAL (X86_XCR0_X87 | X86_XCR0_SSE)
+#endif
+
+/* Get CR4 register value */
+
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
+#  define X86_CR4_FPU_VAL (X86_CR4_OSXSAVE | X86_CR4_OSXFSR | X86_CR4_XMMEXCPT)
+#else
+#  define X86_CR4_FPU_VAL (X86_CR4_OSXFSR | X86_CR4_XMMEXCPT)
+#endif
+
 /* Memory Map: _sbss is the start of the BSS region (see ld.script) _ebss is
- * the end of the BSS regsion (see ld.script). The idle task stack starts at
+ * the end of the BSS region (see ld.script). The idle task stack starts at
  * the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.  The IDLE thread
  * is the thread that the system boots on and, eventually, becomes the idle,
  * do nothing task that runs only when there is nothing else to run.  The
@@ -41,114 +62,148 @@
  */
 
 /****************************************************************************
- * Macros
- ****************************************************************************/
-
-/* Trace macros, use like trace 'i' to print char to serial port. */
-
-    .macro    trace, ch
-#ifdef CONFIG_DEBUG_FEATURES
-    mov        $0x3f8, %dx
-    mov        $\ch, %al
-    out        %al, %dx
-#endif
-    .endm
-
-/****************************************************************************
  * Public Symbols
  ****************************************************************************/
-    .global     __pmode_entry                   /* The 32bit protected mode entry */
-    .global     __nxstart
-    .global     __enable_sse_avx
-    .global     __enable_pcid
-    .global     __revoke_low_memory
-    .global     nx_start                        /* nx_start is defined elsewhere */
-    .global     up_lowsetup                     /* up_lowsetup is defined elsewhere */
-    .global     g_idle_topstack                 /* The end of the idle stack, the start of the heap */
-    .global     mb_info_struct
-    .global     mb_magic
 
-    /* These are the page tables */
-    .global     pdpt_low
-    .global     pd_low
-    .global     pt_low
+	.global    __pmode_entry                   /* The 32bit protected mode entry */
+#ifdef CONFIG_SMP
+	.global    __ap_entry                      /* The 32bit real mode entry for AP */
+#endif
+	.global    __enable_sse_avx
+	.global    __enable_pcid
+	.global    __revoke_low_memory
+	.global    __nxstart                       /* __nxstart is defined elsewhere */
+	.global    nx_start                        /* nx_start is defined elsewhere */
+	.global    x86_64_ap_boot                  /* x86_64_ap_boot is defined elsewhere */
+	.global    g_idle_topstack                 /* The end of the idle stack, the start of the heap */
+	.global    g_mb_info_struct
+	.global    g_mb_magic
+	.global    g_cpu_count
 
-    /* These are the GDT */
-    .global     gdt64_low
-    .global     gdt64_ist_low
-    .global     gdt64_low_end
+	/* These are the page tables */
+	.global    g_pdpt_low
+	.global    g_pd_low
+	.global    g_pt_low
 
-    .global     ist64_low
+	/* These are the GDT */
+	.global    g_gdt64_low
+	.global    g_gdt64_ist_low
+	.global    g_gdt64_low_end
+
+	.global    g_ist64_low
 
 /****************************************************************************
  * The multiboot2 header
  ****************************************************************************/
 
-    .set    HEADER_LENGTH, header_end - header_start
-    .set    CHECKSUM, -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT_ARCHITECTURE_I386 + HEADER_LENGTH)
+	.set    HEADER_LENGTH, header_end - header_start
+	.set    CHECKSUM, -(MULTIBOOT2_HEADER_MAGIC + MULTIBOOT_ARCHITECTURE_I386 + HEADER_LENGTH)
 
-    .section ".multiboot", "a"
-    .align    8
+	.section ".multiboot", "a"
+	.align  8
 
 header_start:
 #ifdef CONFIG_ARCH_MULTIBOOT2
-    .long MULTIBOOT2_HEADER_MAGIC
-    .long MULTIBOOT_ARCHITECTURE_I386
-    .long HEADER_LENGTH
-    .long CHECKSUM
+	.long   MULTIBOOT2_HEADER_MAGIC
+	.long   MULTIBOOT_ARCHITECTURE_I386
+	.long   HEADER_LENGTH
+	.long   CHECKSUM
 
-    // multiboot tags go here
+	/* multiboot tags go here */
 
-    .short MULTIBOOT_HEADER_TAG_INFORMATION_REQUEST
-    .short 0    // flags, none set
-    .long 16     // size, including itself (short + short + long)
-    .long MULTIBOOT_TAG_TYPE_EFI64
-    .long MULTIBOOT_TAG_TYPE_FRAMEBUFFER
+	.short  MULTIBOOT_HEADER_TAG_INFORMATION_REQUEST
+	.short  0    /* flags, none set */
+	.long   24   /* size, including itself (short + short + long) */
+	.long   MULTIBOOT_TAG_TYPE_EFI64
+	.long   MULTIBOOT_TAG_TYPE_FRAMEBUFFER
+	.long   MULTIBOOT_TAG_TYPE_ACPI_OLD
+	.long   MULTIBOOT_TAG_TYPE_ACPI_NEW
 
-    .short MULTIBOOT_HEADER_TAG_END
-    .short 0    // flags, none set
-    .long 8     // size, including itself (short + short + long)
+	.short  MULTIBOOT_HEADER_TAG_END
+	.short  0    /* flags, none set */
+	.long   8    /* size, including itself (short + short + long) */
 #endif
 header_end:
 
 	.code16
 	.section ".realmode", "ax"
 
-    .type   __reset_entry, @function
+/****************************************************************************
+ * Name: __reset_entry
+ *
+ * Description:
+ *   Real mode entry point.
+ *
+ ****************************************************************************/
+
+	.type   __reset_entry, @function
+
 __reset_entry:
-    // Load a GDT for protected mode
-    movl $loader_gdt_ptr, %ebx
-	lgdtl (%ebx)
+	/* Load a GDT for protected mode */
+	movl    $loader_gdt_ptr, %ebx
+	lgdtl   (%ebx)
 
-    // enable protected mode in CR0
-	mov %cr0,%eax
-	or $X86_CR0_PE,%al
-	mov %eax,%cr0
+	/* Enable protected mode in CR0 */
+	mov     %cr0, %eax
+	or      $X86_CR0_PE, %al
+	mov     %eax, %cr0
 
-    // Long jump into protected mode
-    // Hardcode the address
-	ljmpl $0x8,$0x100000
+	/* Long jump into protected mode. Hardcode the address. */
+	ljmpl   $0x8, $0x100000
 
-    // Loader GDT and GDTR
+	/* Loader GDT and GDTR */
 	.align(16)
 	.global loader_gdt
 loader_gdt:
-	.quad	0
-	.quad	0x00cf9a000000ffff
-	.quad	0x00cf92000000ffff
-
+	.quad   0
+	.quad   0x00cf9a000000ffff
+	.quad   0x00cf92000000ffff
 loader_gdt_ptr:
-	.short	loader_gdt_ptr - loader_gdt - 1
-	.long	loader_gdt
+	.short  loader_gdt_ptr - loader_gdt - 1
+	.long   loader_gdt
 
-    .size	__reset_entry, . - __reset_entry
+	.size   __reset_entry, . - __reset_entry
+
+bsp_done:
+	.long   0
+
+#ifdef CONFIG_SMP
+/****************************************************************************
+ * Name: __ap_entry
+ *
+ * Description:
+ *   Entry point for AP CPU 32-bit real mode which must be aligned to 4096
+ *   bytes. This is simply copy of __reset_entry.
+ *
+ ****************************************************************************/
+
+	.type   __ap_entry, @function
+	.align(4096)
+__ap_entry:
+	/* Load a GDT for protected mode */
+	movl    $loader_gdt_ptr, %ebx
+	lgdtl   (%ebx)
+
+	/* enable protected mode in CR0 */
+	mov     %cr0, %eax
+	or      $X86_CR0_PE, %al
+	mov     %eax, %cr0
+
+	/* Long jump into protected mode. Hardcode the address. */
+	ljmpl   $0x8, $0x100000
+#endif
 
 /****************************************************************************
  * .text
  ****************************************************************************/
 
-    .code32
-    .section ".loader.text", "ax"
+	.code32
+	.section ".loader.text", "ax"
+
+start32_0:
+	mov     $0x10, %ax
+	mov     %ax, %ss
+	mov     %ax, %ds
 
 /****************************************************************************
  * Name: __pmode_entry
@@ -159,188 +214,201 @@ loader_gdt_ptr:
  *
  ****************************************************************************/
 
-start32_0:
-    mov $0x10, %ax
-    mov %ax, %ss
-    mov %ax, %ds
+	.type   __pmode_entry, @function
 
-    .type   __pmode_entry, @function
 __pmode_entry:
 start32:
 #ifdef CONFIG_ARCH_MULTIBOOT2
-    movl %ebx, mb_info_struct
-    movl %eax, mb_magic
+	movl    %ebx, g_mb_info_struct
+	movl    %eax, g_mb_magic
 #endif
 
-    // initialize rest of the page directory
-    lea     pd_low, %edi
-    lea     pt_low, %esi
+	/* Jump to 64 bit initialiation if this is AP core */
+	mov     bsp_done, %eax
+	cmp     $0, %eax
+	jne     start64_init
 
-    // Popluate the lower 4GB as non-present
-    // for ecx = 0...512 * 4 : Loop and setup the page directories
-    mov     $0x800, %ecx // 512 * 4
+	/* initialize rest of the page directory */
+	lea     g_pd_low, %edi
+	lea     g_pt_low, %esi
+
+	/* Popluate the lower 4GB as non-present
+	 * for ecx = 0...512 * 4 : Loop and setup the page directories
+	 */
+	mov     $0x800, %ecx /* 512 * 4 */
 epd_loop:
-    mov     %esi,   %edx
-    or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
-    mov     %edx, 0(%edi)
-    add     $(X86_PAGE_ENTRY_SIZE), %edi
+	mov     %esi,   %edx
+	or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
+	mov     %edx, 0(%edi)
+	add     $(X86_PAGE_ENTRY_SIZE), %edi
 
-    // for ebx = 0...1024: Loop and clear the page table of each page directory
-    mov     $1024,  %ebx
+	/* for ebx = 0...1024: Loop and clear the page table of each page directory */
+	mov     $1024,  %ebx
 ept_loop:
-    movl    $0x0, 0(%esi)
-    add     $4,     %esi
+	movl    $0x0, 0(%esi)
+	add     $4,     %esi
 
-    // end for ebx
-    dec     %ebx
-    jnz     ept_loop
+	/* end for ebx */
+	dec     %ebx
+	jnz     ept_loop
 
-    // end for ecx
-    dec     %ecx
-    jnz     epd_loop
+	/* end for ecx */
+	dec     %ecx
+	jnz     epd_loop
 
-    // Temporary populate the lower 128MB on 1:1 mapping
-    lea     pd_low, %edi
-    mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
+	/* Temporary populate the lower 128MB on 1:1 mapping */
+	lea     g_pd_low, %edi
+	mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
 
-    // for ecx = 0...64 : Loop and setup 64x 2MB page directories
-    mov     $64,    %ecx
+	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
+	mov     $64,    %ecx
 pd_loop:
-    mov     %eax, 0(%edi)
-    add     $(HUGE_PAGE_SIZE), %eax
-    add     $(X86_PAGE_ENTRY_SIZE), %edi
+	mov     %eax, 0(%edi)
+	add     $(HUGE_PAGE_SIZE), %eax
+	add     $(X86_PAGE_ENTRY_SIZE), %edi
 
-    // end for ecx
-    dec     %ecx
-    jnz     pd_loop
+	/* end for ecx */
+	dec     %ecx
+	jnz     pd_loop
 
-    // Populate the 1GB after 4GB boundary with Global mapping to kernel code
-    // This creates maps the lower 1GB to 4GB~5GB
-    lea     pdpt_low, %edi
-    mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
+start64_init:
+	/* Populate the 1GB after 4GB boundary with Global mapping to kernel code.
+	 * This creates maps the lower 1GB to 4GB~5GB
+	 */
+	lea     g_pdpt_low, %edi
+	mov     $(X86_PDPT_KERNEL_MAP), %eax
 
-    mov     $0x4,   %ecx
-    mov     %eax,   0(%edi, %ecx, X86_PAGE_ENTRY_SIZE)
+	mov     $0x4,   %ecx
+	mov     %eax,   0(%edi, %ecx, X86_PAGE_ENTRY_SIZE)
 
-    // Enable PAE
-    mov     %cr4,   %eax
-    or      $(X86_CR4_PAE | X86_CR4_PGE),   %eax
-    mov     %eax,   %cr4
+	/* Enable PAE */
+	mov     %cr4,   %eax
+	or      $(X86_CR4_PAE | X86_CR4_PGE),   %eax
+	mov     %eax,   %cr4
 
-    // Load the 4 level page table
-    // Level 1 and 2 were preset at build time in assembly for this loading
-    // process
-    // 4KiB page table is used
-    // Kernel mapped to 1GB HiMem
-    lea     pml4,   %eax
-    mov     %eax,   %cr3
+	/* Load the 4 level page table.
+	 * Level 1 and 2 were preset at build time in assembly for this loading process.
+	 * 4KiB page table is used.
+	 * Kernel mapped to 1GB HiMem
+	 */
+	lea     pml4,   %eax
+	mov     %eax,   %cr3
 
-    movl    $MSR_MTRR_DEF_TYPE, %ecx
-    rdmsr
-    or      $MTRR_ENABLE,   %eax
-    wrmsr
+	movl    $MSR_MTRR_DEF_TYPE, %ecx
+	rdmsr
+	or      $MTRR_ENABLE,   %eax
+	wrmsr
 
-    movl    $MSR_EFER,  %ecx
-    rdmsr
-    or      $EFER_LME,  %eax
-    wrmsr
+	movl    $MSR_EFER,  %ecx
+	rdmsr
+	or      $EFER_LME,  %eax
+	wrmsr
 
-    // Enable paging related bits in CR0
-    mov     $(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE),    %eax
-    mov     %eax,   %cr0
+	/* Enable paging related bits in CR0 */
+	mov     $(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE),    %eax
+	mov     %eax,   %cr0
 
-    // Enable FGSBASE
-    mov     %cr4,   %eax
-    or      $X86_CR4_FGSBASE,   %eax
-    mov     %eax,   %cr4
+	/* Enable FGSBASE */
+	mov     %cr4,   %eax
+	or      $X86_CR4_FGSBASE,   %eax
+	mov     %eax,   %cr4
 
-    // Load a GDT with 64bits mode set
-    lgdt    gdt64_ptr
+	/* Load a GDT with 64bits mode set */
+	lgdt    gdt64_ptr
 
-    // Long jump into 64 bit mode, updating cs to new GDT
-    ljmpl   $(X86_GDT_CODE_SEL),   $start64
+	/* Long jump into 64 bit mode, updating cs to new GDT */
+	ljmpl   $(X86_GDT_CODE_SEL),   $start64
 
-    .code64
+	.code64
+
 start64:
+	/* Set Segement Registers for proper iret, etc. operation */
+	mov     $(X86_GDT_DATA_SEL),  %ax
+	mov     %ax,    %ss
+	mov     %ax,    %ds
+	mov     %ax,    %es
+	mov     %ax,    %fs
+	mov     %ax,    %gs
 
-    // Set Segement Registers for proper iret, etc. operation
-    mov     $(X86_GDT_DATA_SEL),  %ax
-    mov     %ax,    %ss
-    mov     %ax,    %ds
-    mov     %ax,    %es
-    mov     %ax,    %fs
-    mov     %ax,    %gs
+	/* Start BSP or AP */
+	mov     bsp_done, %eax
+	cmp     $0, %eax
+	jne     ap_start
 
-    // Finally, we can start the OS
-    movabs  $__nxstart,   %rbx
-    jmp     *%rbx
-    .size   __pmode_entry, . - __pmode_entry
+	/* Properly setup RSP to idle stack */
+	movabs  $g_idle_topstack,    %rbx
+	mov     (%rbx),   %rsp
+
+	/* Allocate space XCPTCONTEXT */
+	leaq    -XCPTCONTEXT_SIZE(%rsp), %rsp
+
+	/* Set bsp_done flag */
+	movl     $1, bsp_done
+
+	/* We use jmp instruction below which doesn't push 1 byte on stack, so we
+	 * have to push a dummy value here, otherwise SSE instructions called
+	 * during initialization will fail.
+	 */
+	pushq   $0
+
+	/* Finally, we can start the OS */
+	movabs  $__nxstart,   %rbx
+	jmp     *%rbx
+
+ap_start:
+#ifdef CONFIG_SMP
+	/* Get CPU ID */
+	movl    g_cpu_count, %edi
+
+	/* Setup AP stack */
+	movabs  $g_idle_topstack,    %rbx
+	movl    %edi, %eax
+	imul    $8, %eax, %eax
+	add     %rax, %rbx
+	mov     (%rbx),   %rsp
+
+	/* Jump to ap_start routine */
+	movabs  $x86_64_ap_boot,   %rbx
+	jmp     *%rbx
+#endif
+
+	.size   __pmode_entry, . - __pmode_entry
+
+g_cpu_count:
+	.long 1
 
 /****************************************************************************
- * Name: __nxstart
+ * Name: __revoke_low_memory
  *
  * Description:
- *   Do low-level initialization and call nx_start
+ *   Revoke the lower 128MB memory mapping
  *
  ****************************************************************************/
 
-    .section .text, "ax"
-    .type   __nxstart, @function
+	.section .text, "ax"
+	.type   __revoke_low_memory, @function
 
-__nxstart:
-    /* We are now in high memory, will revoke the lower 128MB memory mapping in lowsetup*/
-
-    //clear out bss section
-    movabs  $_sbss, %rbx
-    movabs  $_ebss, %rdx
-clear_bss:
-    movb    $0,    (%rbx)
-    inc     %rbx
-    cmp     %rbx,   %rdx
-    jne     clear_bss
-
-    // Properly setup RSP to idle stack
-    movabs  $g_idle_topstack,    %rbx
-    mov     (%rbx),   %rsp
-
-    /* Initialize and start NuttX */
-    call    up_lowsetup                     /* Low-level, pre-OS initialization */
-
-    call    nx_start                        /* Start NuttX */
-
-    /* NuttX will not return */
-    /* We should never end up here */
-    /* If we really do, then we are doomed, halting the processor for ever */
-
-    cli
-hang:
-    hlt                                    /* Halt machine should NuttX return */
-    jmp    hang
-    .size    __nxstart, . - __nxstart
-
-    .type   __revoke_low_memory, @function
 __revoke_low_memory:
+	/* Revoke the lower 128MB memory mapping */
+	lea     g_pd_low, %edi
+	lea     g_pt_low, %esi
 
-    /* Revoke the lower 128MB memory mapping */
-    lea     pd_low, %edi
-    lea     pt_low, %esi
-
-    // for ecx = 0...64 : Loop and setup 64x 2MB page directories
-    mov     $64,   %ecx
+	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
+	mov     $64,   %ecx
 npd_loop:
-    mov     %esi,   %edx
-    or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
-    mov     %edx, 0(%edi)
-    add     $(PAGE_SIZE), %esi
-    add     $(X86_PAGE_ENTRY_SIZE), %edi
+	mov     %esi,   %edx
+	or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
+	mov     %edx, 0(%edi)
+	add     $(PAGE_SIZE), %esi
+	add     $(X86_PAGE_ENTRY_SIZE), %edi
 
-    // end for ecx
-    dec     %ecx
-    jnz     npd_loop
+	/* end for ecx */
+	dec     %ecx
+	jnz     npd_loop
 
-    ret
+	ret
 
-    .size    __revoke_low_memory, . - __revoke_low_memory
+	.size   __revoke_low_memory, . - __revoke_low_memory
 
 /****************************************************************************
  * Name: __enable_sse_avx
@@ -350,28 +418,38 @@ npd_loop:
  *
  ****************************************************************************/
 
-    .type   __enable_sse_avx, @function
+	.type   __enable_sse_avx, @function
 
 __enable_sse_avx:
-    // Enable SSE
-    mov     %cr0,   %rax
-    mov     $(X86_CR0_EM), %rbx
-    not     %rbx
-    and     %rbx,   %rax
-    or      $(X86_CR0_MP), %rax
-    mov     %rax,   %cr0
+	/* Enable SSE */
+	mov     %cr0,   %rax
+	mov     $(X86_CR0_EM), %rbx
+	not     %rbx
+	and     %rbx,   %rax
+	or      $(X86_CR0_MP), %rax
+	mov     %rax,   %cr0
 
-    // Enable Saving XMM context
-    mov     %cr4,   %rax
-    or      $(X86_CR4_OSXFSR | X86_CR4_XMMEXCPT),   %rax
-    mov     %rax,   %cr4
+	/* Enable Saving XMM context */
+	mov     %cr4,   %rax
+	or      $X86_CR4_FPU_VAL,   %rax
+	mov     %rax,   %cr4
 
-    // Setup MXCSR, masking all SSE precision exception
-    ldmxcsr     mxcsr_mem
+#ifdef CONFIG_ARCH_X86_64_HAVE_XSAVE
+	/* Configure XSAVE/XRSTOR for user state*/
+	mov     $X86_XCR0_VAL, %eax
 
-    ret
+	xor     %rdx,  %rdx
+	xor     %rcx,  %rcx
+	xsetbv
 
-    .size    __enable_sse_avx, . - __enable_sse_avx
+#else
+	/* Setup MXCSR, masking all SSE precision exception */
+	ldmxcsr mxcsr_mem
+#endif
+
+	ret
+
+	.size   __enable_sse_avx, . - __enable_sse_avx
 
 /****************************************************************************
  * Name: __enable_pcid
@@ -381,97 +459,83 @@ __enable_sse_avx:
  *
  ****************************************************************************/
 
-    .type   __enable_pcid, @function
+	.type   __enable_pcid, @function
 
 __enable_pcid:
-    // Enable PCID and FGSBASE
-    mov     %cr4,   %rax
-    or      $X86_CR4_PCIDE,     %rax
-    mov     %rax,   %cr4
+	/* Enable PCID and FGSBASE */
+	mov     %cr4,   %rax
+	or      $X86_CR4_PCIDE,     %rax
+	mov     %rax,   %cr4
 
-    ret
+	ret
 
-    .size    __enable_pcid, . - __enable_pcid
+	.size   __enable_pcid, . - __enable_pcid
 
 /****************************************************************************
  * .data
  ****************************************************************************/
 
-    .section ".loader.data", "ax"
+	.section ".loader.data", "ax"
 
-    // IST for 64 bit long mode
-    // will be filled in up_irq
-    .align(16)
-ist64_low:
-    .long    0
-    .quad    0xdeadbeefdeadbee0
-    .quad    0xdeadbeefdeadbee1
-    .quad    0xdeadbeefdeadbee2
-    .quad    0
-    .quad    0
-    .quad    0
-    .quad    0
-    .quad    0
-    .quad    0
-    .quad    0
-    .quad    0
-    .quad    0
-    .word    0
+	/* TSS (IST) for 64 bit long mode will be filled in up_irq. */
+	.align(16)
+g_ist64_low:
+	.fill   X86_TSS_SIZE * CONFIG_SMP_NCPUS, 1, 0
 
-    // GDT for 64 bit long mode
-    .align(16)
-gdt64_low:
-    .quad   0
-    .quad   X86_GDT_CODE64_ENTRY
-    .quad   X86_GDT_DATA_ENTRY
-    .quad   X86_GDT_CODE32_ENTRY
-    .quad   X86_GDT_DATA_ENTRY
-    .quad   X86_GDT_CODE64_ENTRY
-gdt64_ist_low:
-    .quad   0x0 // TSS segment low
-    .quad   0x0 // TSS segment high
-gdt64_low_end:
+	/* GDT for 64 bit long mode */
+	.align(16)
+g_gdt64_low:
+	.quad   0
+	.quad   X86_GDT_CODE64_ENTRY
+	.quad   X86_GDT_DATA_ENTRY
+	.quad   X86_GDT_CODE32_ENTRY
+	.quad   X86_GDT_DATA_ENTRY
+	.quad   X86_GDT_CODE64_ENTRY
+g_gdt64_ist_low:
+	/* TSS segment low + segment high per CPU */
+	.fill   CONFIG_SMP_NCPUS * 16, 1, 0
+
+g_gdt64_low_end:
 
 gdt64_ptr:
-    .short  gdt64_low_end - gdt64_low - 1
-    .long   gdt64_low
+	.short  g_gdt64_low_end - g_gdt64_low - 1
+	.long   g_gdt64_low
 
 mxcsr_mem:
-    .long   0x00001f80
+	.long   0x00001f80
 
-    .align(PAGE_SIZE)
+	.align(PAGE_SIZE)
 pml4:
-    .quad    pdpt_low + X86_PAGE_PRESENT + X86_PAGE_WR
+	.quad   g_pdpt_low + X86_PAGE_PRESENT + X86_PAGE_WR
 
-    .align(PAGE_SIZE)
-pdpt_low:
-    .quad    pd_low   + X86_PAGE_PRESENT + X86_PAGE_WR
-    .quad    pd_2_low + X86_PAGE_PRESENT + X86_PAGE_WR
-    .quad    pd_3_low + X86_PAGE_PRESENT + X86_PAGE_WR
-    .quad    pd_4_low + X86_PAGE_PRESENT + X86_PAGE_WR
+	.align(PAGE_SIZE)
+g_pdpt_low:
+	.quad   g_pd_low + X86_PAGE_PRESENT + X86_PAGE_WR
+	.quad   pd_2_low + X86_PAGE_PRESENT + X86_PAGE_WR
+	.quad   pd_3_low + X86_PAGE_PRESENT + X86_PAGE_WR
+	.quad   pd_4_low + X86_PAGE_PRESENT + X86_PAGE_WR
 
-    .fill    X86_NUM_PAGE_ENTRY - 4, X86_PAGE_ENTRY_SIZE, 0
+	.fill   X86_NUM_PAGE_ENTRY - 4, X86_PAGE_ENTRY_SIZE, 0
 
-    .align(PAGE_SIZE)
-pd_low:
-    .fill X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+	.align(PAGE_SIZE)
+g_pd_low:
+	.fill   X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
-    .align(PAGE_SIZE)
+	.align(PAGE_SIZE)
 pd_2_low:
-    .fill X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+	.fill   X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
-    .align(PAGE_SIZE)
+	.align(PAGE_SIZE)
 pd_3_low:
-    .fill X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+	.fill   X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
-    .align(PAGE_SIZE)
+	.align(PAGE_SIZE)
 pd_4_low:
-    .fill X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+	.fill   X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
-    .align(PAGE_SIZE)
-pt_low:
-    .fill X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
-    .fill X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
-    .fill X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
-    .fill X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
-
+	.align(PAGE_SIZE)
+g_pt_low:
+	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0

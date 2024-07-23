@@ -27,7 +27,14 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include <arch/arch.h>
+#include <arch/types.h>
+
+#include <nuttx/compiler.h>
+#include <nuttx/cache.h>
 #include <nuttx/atexit.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/list.h>
@@ -48,7 +55,6 @@
 #endif
 
 #ifndef CONFIG_TLS_NELEM
-#  warning CONFIG_TLS_NELEM is not defined
 #  define CONFIG_TLS_NELEM 0
 #endif
 
@@ -116,7 +122,6 @@ struct pthread_atfork_s
 struct task_info_s
 {
   mutex_t         ta_lock;
-  FAR char      **argv;                         /* Name+start-up parameters     */
 #if CONFIG_TLS_TASK_NELEM > 0
   uintptr_t       ta_telem[CONFIG_TLS_TASK_NELEM]; /* Task local storage elements */
 #endif
@@ -212,6 +217,7 @@ struct tls_info_s
   int16_t tl_cpcount;                  /* Nested cancellation point count */
 #endif
 
+  uint16_t tl_size;                    /* Actual size with alignments */
   int tl_errno;                        /* Per-thread error number */
 };
 

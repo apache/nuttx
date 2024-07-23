@@ -33,6 +33,7 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
@@ -40,7 +41,7 @@
 #include <nuttx/spinlock.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "esp32s3_irq.h"
 #include "esp32s3_rt_timer.h"
 #include "hardware/esp32s3_soc.h"

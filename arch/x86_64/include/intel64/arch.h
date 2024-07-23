@@ -34,6 +34,7 @@
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
 #  include <stdint.h>
+#  include <stddef.h>
 #endif
 
 /****************************************************************************
@@ -41,6 +42,19 @@
  ****************************************************************************/
 
 #define X86_64_LOAD_OFFSET 0x100000000
+
+/* Page pool configuration for CONFIG_ARCH_PGPOOL_MAPPING=n */
+
+#ifndef CONFIG_ARCH_X86_64_PGPOOL_SIZE
+#  define X86_64_PGPOOL_SIZE      (0)
+#else
+#  if CONFIG_ARCH_X86_64_PGPOOL_SIZE % CONFIG_MM_PGSIZE != 0
+#    error CONFIG_ARCH_X86_64_PGPOOL_SIZE must be multiple of page size
+#  endif
+#  define X86_64_PGPOOL_SIZE      (CONFIG_ARCH_X86_64_PGPOOL_SIZE)
+#endif
+
+#define X86_64_PGPOOL_BASE        (CONFIG_RAM_SIZE - X86_64_PGPOOL_SIZE)
 
 /* RFLAGS bits */
 
@@ -71,13 +85,15 @@
 
 /* Starting from third selector to confirm the syscall interface */
 
-#define X86_GDT_ENTRY_SIZE      0x8
+#define X86_GDT_ENTRY_SIZE        0x8
 
-#define X86_GDT_CODE_SEL_NUM    1
-#  define X86_GDT_CODE_SEL      (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_CODE_SEL_NUM      1
+#  define X86_GDT_CODE_SEL        (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
-#define X86_GDT_DATA_SEL_NUM    2
-#  define X86_GDT_DATA_SEL      (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_DATA_SEL_NUM      2
+#  define X86_GDT_DATA_SEL        (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+
+/* The first TSS entry */
 
 #define X86_GDT_ISTL_SEL_NUM    6
 #define X86_GDT_ISTH_SEL_NUM    (X86_GDT_ISTL_SEL_NUM + 1)
@@ -112,6 +128,30 @@
 #define X86_CR4_XMMEXCPT 0x00000400
 #define X86_CR4_FGSBASE  0x00010000
 #define X86_CR4_PCIDE    0x00020000
+#define X86_CR4_OSXSAVE  0x00040000
+
+/* XCR0 */
+
+#define X86_XCR0_X87       (1 << 0)
+#define X86_XCR0_SSE       (1 << 1)
+#define X86_XCR0_AVX       (1 << 2)
+#define X86_XCR0_BNDREG    (1 << 3)
+#define X86_XCR0_BNDCSR    (1 << 4)
+#define X86_XCR0_OPMASK    (1 << 5)
+#define X86_XCR0_HI256     (1 << 6)
+#define X86_XCR0_HI16      (1 << 7)
+#define X86_XCR0_PT        (1 << 8)
+#define X86_XCR0_PKRU      (1 << 9)
+#define X86_XCR0_PASID     (1 << 10)
+#define X86_XCR0_CETU      (1 << 11)
+#define X86_XCR0_CETS      (1 << 12)
+#define X86_XCR0_HDC       (1 << 13)
+#define X86_XCR0_UINTR     (1 << 14)
+#define X86_XCR0_LBR       (1 << 15)
+#define X86_XCR0_HWP       (1 << 16)
+#define X86_XCR0_XTILECFG  (1 << 17)
+#define X86_XCR0_XTILEDATA (1 << 18)
+#define X86_XCR0_APX       (1 << 19)
 
 /* PAGE TABLE ENTRY Definitions */
 
@@ -133,16 +173,41 @@
 #define HUGE_PAGE_SIZE   (0x200000)
 #  define HUGE_PAGE_MASK (~(HUGE_PAGE_SIZE - 1))
 
+/* Kernel mapping - lower 1GB maps to 4GB-5GB */
+
+#define X86_PDPT_KERNEL_MAP (X86_PAGE_GLOBAL | X86_PAGE_WR | \
+                             X86_PAGE_PRESENT | X86_PAGE_HUGE)
+
 /* CPUID Leaf Definitions */
 
-#define X86_64_CPUID_CAP         0x01
-#  define X86_64_CPUID_01_SSE3   (1 << 0)
-#  define X86_64_CPUID_01_PCID   (1 << 17)
-#  define X86_64_CPUID_01_X2APIC (1 << 21)
-#  define X86_64_CPUID_01_TSCDEA (1 << 24)
-#  define X86_64_CPUID_01_XSAVE  (1 << 26)
-#  define X86_64_CPUID_01_RDRAND (1 << 30)
-#define X86_64_CPUID_TSC         0x15
+#define X86_64_CPUID_VENDOR           0x00
+#define X86_64_CPUID_CAP              0x01
+#  define X86_64_CPUID_01_SSE3        (1 << 0)
+#  define X86_64_CPUID_01_SSSE3       (1 << 9)
+#  define X86_64_CPUID_01_FMA         (1 << 12)
+#  define X86_64_CPUID_01_PCID        (1 << 17)
+#  define X86_64_CPUID_01_SSE41       (1 << 19)
+#  define X86_64_CPUID_01_SSE42       (1 << 20)
+#  define X86_64_CPUID_01_X2APIC      (1 << 21)
+#  define X86_64_CPUID_01_TSCDEA      (1 << 24)
+#  define X86_64_CPUID_01_XSAVE       (1 << 26)
+#  define X86_64_CPUID_01_AVX         (1 << 28)
+#  define X86_64_CPUID_01_RDRAND      (1 << 30)
+#  define X86_64_CPUID_01_APICID(ebx) ((ebx) >> 24)
+#define X86_64_CPUID_EXTCAP           0x07
+#  define X86_64_CPUID_07_AVX2        (1 << 5)
+#  define X86_64_CPUID_07_AVX512F     (1 << 16)
+#  define X86_64_CPUID_07_AVX512DQ    (1 << 17)
+#  define X86_64_CPUID_07_SMAP        (1 << 20)
+#  define X86_64_CPUID_07_AVX512IFMA  (1 << 21)
+#  define X86_64_CPUID_07_CLWB        (1 << 24)
+#  define X86_64_CPUID_07_AVX512PF    (1 << 26)
+#  define X86_64_CPUID_07_AVX512ER    (1 << 27)
+#  define X86_64_CPUID_07_AVX512CD    (1 << 28)
+#  define X86_64_CPUID_07_AVX512BW    (1 << 30)
+#  define X86_64_CPUID_07_AVX512VL    (1 << 31)
+#define X86_64_CPUID_XSAVE            0x0d
+#define X86_64_CPUID_TSC              0x15
 
 /* MSR Definitions */
 
@@ -207,8 +272,10 @@
 #  define MSR_X2APIC_ICR_DEASSERT      0x00000000
 #  define MSR_X2APIC_ICR_LEVEL         0x00008000  /* Level triggered */
 #  define MSR_X2APIC_ICR_BCAST         0x00080000  /* Send to all APICs, including self. */
+#  define MSR_X2APIC_ICR_OTHERS        0x000c0000  /* Send to all APICs, excluding self. */
 #  define MSR_X2APIC_ICR_BUSY          0x00001000
 #  define MSR_X2APIC_ICR_FIXED         0x00000000
+#  define MSR_X2APIC_DESTINATION(d)    ((d) << 32ul)
 #define MSR_X2APIC_LVTT         0x832
 #  define MSR_X2APIC_LVTT_X1           0x0000000B  /* divide counts by 1 */
 #  define MSR_X2APIC_LVTT_PERIODIC     0x00020000  /* Periodic */
@@ -222,6 +289,7 @@
 #define MSR_X2APIC_TMICT        0x838
 #define MSR_X2APIC_TMCCT        0x839
 #define MSR_X2APIC_TDCR         0x83e
+#define MSR_IA32_XSS            0xda0
 
 /* IOAPIC related Definitions */
 
@@ -246,7 +314,55 @@
 #define X86_PIC_8086           1
 #define X86_PIC_EOI            0x20
 
-#define BITS_PER_LONG    64
+#define BITS_PER_LONG          64
+
+/* Interrupt Stack Table size */
+
+#define X86_IST_SIZE           104
+#define X86_TSS_SIZE           (104 + 8)
+
+/* Reset Control Register (RST_CNT) */
+
+#define X86_RST_CNT_REG        0xcf9
+#  define X86_RST_CNT_SYS_RST  0x02
+#  define X86_RST_CNT_CPU_RST  0x04
+#  define X86_RST_CNT_FULL_RST 0x08
+
+/* XSAVE state component bitmap */
+
+#define X86_XSAVE_X87           (1 << 0)  /* Bit 0: X87 state */
+#define X86_XSAVE_SSE           (1 << 1)  /* Bit 1: SSE state (512 bytes) */
+#define X86_XSAVE_AVX           (1 << 2)  /* Bit 2: AVX state (256 bytes) */
+#define X86_XSAVE_MPX_BNDREGS   (1 << 3)  /* Bit 3: MPX BNDREGS (64 bytes) */
+#define X86_XSAVE_MPX_BNDCSR    (1 << 4)  /* Bit 4: MPX BNDCSR (16 bytes) */
+#define X86_XSAVE_AVX512_OPMASK (1 << 5)  /* Bit 5: AVX-512 opmask (64 bytes) */
+#define X86_XSAVE_AVX512_HI256  (1 << 6)  /* Bit 6: AVX-512 ZMM_Hi256 (512 bytes) */
+#define X86_XSAVE_AVX512_HI16   (1 << 7)  /* Bit 7: AVX-512 Hi16_ZMM (1024 bytes) */
+#define X86_XSAVE_PT            (1 << 8)  /* Bit 8: PT (72 bytes) */
+#define X86_XSAVE_PKRU          (1 << 9)  /* Bit 9: PKRU (4 bytes) */
+#define X86_XSAVE_PASID         (1 << 10) /* Bit 10: PASID state */
+#define X86_XSAVE_CET_U         (1 << 11) /* Bit 11: CET_U state */
+#define X86_XSAVE_CET_S         (1 << 12) /* Bit 12: CET_S state */
+#define X86_XSAVE_HDC           (1 << 13) /* Bit 13: HDC */
+#define X86_XSAVE_UINTR         (1 << 14) /* Bit 14: UINTR state */
+#define X86_XSAVE_LBR           (1 << 15) /* Bit 15: LBR state */
+#define X86_XSAVE_HWP           (1 << 16) /* Bit 16: HWP state */
+#define X86_XSAVE_AMX_TILECFG   (1 << 17) /* Bit 17: AMX TILECFG state (64 bytes) */
+#define X86_XSAVE_AMX_TILEDATA  (1 << 18) /* Bit 18: AMX TILEDATA state (8192 bytes) */
+
+/* XSAVE area size */
+
+#define XSAVE_LEGACY_SIZE       (512) /* X87 + SSE */
+#define XSAVE_HEADER_SIZE       (64)  /* XSAVE header */
+#define XSAVE_AVX_SIZE          (256)
+#define XSAVE_MXP_BNDREGS_SIZE  (64)
+#define XSAVE_MXP_BNDCSR_SIZE   (16)
+#define XSAVE_AVX512OPMASK_SIZE (64)
+#define XSAVE_AVX512HI256_SIZE  (512)
+#define XSAVE_AVX512HI16_SIZE   (1024)
+#define XSAVE_PT_SIZE           (72)
+#define XSAVE_PKRU_SIZE         (4)
+#define XSAVE_HDC_SIZE          (8)
 
 #ifndef __ASSEMBLY__
 
@@ -342,14 +458,17 @@ begin_packed_struct struct ist_s
   uint64_t IST6;                 /* Interrupt Stack 6 */
   uint64_t IST7;                 /* Interrupt Stack 7 */
   uint64_t reserved3;            /* reserved */
-  uint64_t reserved4;            /* reserved */
-  uint16_t reserved5;            /* reserved */
+  uint16_t reserved4;            /* reserved */
   uint16_t IOPB_OFFSET;          /* IOPB_offset */
 } end_packed_struct;
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* TSS */
+
+begin_packed_struct struct tss_s
+{
+  struct ist_s  ist;    /* IST  */
+  void         *cpu;    /* CPU private data */
+} end_packed_struct;
 
 /****************************************************************************
  * Public Data
@@ -357,31 +476,31 @@ begin_packed_struct struct ist_s
 
 /* These are defined in intel64_head.S */
 
-extern volatile uint8_t pdpt_low;
-extern volatile uint8_t pd_low;
-extern volatile uint8_t pt_low;
+extern volatile uint8_t g_pdpt_low;
+extern volatile uint8_t g_pd_low;
+extern volatile uint8_t g_pt_low;
 
-extern volatile uint8_t ist64_low;
-extern volatile uint8_t gdt64_low;
-extern volatile uint8_t gdt64_ist_low;
-extern volatile uint8_t gdt64_low_end;
+extern volatile uint8_t g_ist64_low;
+extern volatile uint8_t g_gdt64_low;
+extern volatile uint8_t g_gdt64_ist_low;
+extern volatile uint8_t g_gdt64_low_end;
 
 /* The actual address of the page table and gdt/ist after mapping the kernel
  * in high address
  */
 
-extern volatile uint64_t *pdpt;
-extern volatile uint64_t *pd;
-extern volatile uint64_t *pt;
+extern volatile uint64_t *g_pdpt;
+extern volatile uint64_t *g_pd;
+extern volatile uint64_t *g_pt;
 
-extern volatile struct ist_s *ist64;
-extern volatile struct gdt_entry_s *gdt64;
+extern volatile struct ist_s       *g_ist64;
+extern volatile struct gdt_entry_s *g_gdt64;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-int up_map_region(void *base, int size, int flags);
+int up_map_region(void *base, size_t size, int flags);
 void x86_64_check_and_enable_capability(void);
 
 extern void __enable_sse_avx(void);

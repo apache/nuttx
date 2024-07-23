@@ -33,6 +33,14 @@
 
 #define SI_LOAD_SHIFT 16
 
+#ifdef CONFIG_SMP_NCPUS
+#define get_nprocs()      CONFIG_SMP_NCPUS
+#define get_nprocs_conf() CONFIG_SMP_NCPUS
+#else
+#define get_nprocs()      1
+#define get_nprocs_conf() 1
+#endif
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/

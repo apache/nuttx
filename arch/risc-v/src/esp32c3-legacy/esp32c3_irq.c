@@ -636,7 +636,7 @@ uint32_t *riscv_int_decode(uint32_t cpuints, uint32_t *regs)
  *
  ****************************************************************************/
 
-IRAM_ATTR uintptr_t *riscv_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
+IRAM_ATTR void *riscv_dispatch_irq(uintptr_t mcause, uintreg_t *regs)
 {
   int irq;
   uint8_t cpuint = mcause & RISCV_IRQ_MASK;
@@ -702,6 +702,6 @@ irqstate_t up_irq_enable(void)
 
   /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
 
-  flags = READ_AND_SET_CSR(mstatus, MSTATUS_MIE);
+  flags = READ_AND_SET_CSR(CSR_MSTATUS, MSTATUS_MIE);
   return flags;
 }

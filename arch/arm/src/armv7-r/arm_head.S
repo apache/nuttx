@@ -76,11 +76,7 @@
  */
 
 #ifndef IDLE_STACK_BASE
-#  ifdef CONFIG_SMP
-#    define IDLE_STACK_BASE _enoinit
-#  else
-#    define IDLE_STACK_BASE _ebss
-#  endif
+#  define IDLE_STACK_BASE _ebss
 #endif
 
 #define IDLE_STACK_TOP  IDLE_STACK_BASE+CONFIG_IDLETHREAD_STACKSIZE

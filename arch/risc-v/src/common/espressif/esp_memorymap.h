@@ -27,18 +27,10 @@
 
 #include <nuttx/config.h>
 
+#include "riscv_common_memorymap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Idle thread stack starts from _ebss */
-
-#ifndef __ASSEMBLY__
-#define ESP_IDLESTACK_BASE  (uint32_t)&g_idlestack
-#else
-#define ESP_IDLESTACK_BASE  g_idlestack
-#endif
-
-#define ESP_IDLESTACK_TOP  (ESP_IDLESTACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
 
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_MEMORYMAP_H */

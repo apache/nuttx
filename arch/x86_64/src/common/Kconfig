@@ -6,4 +6,131 @@
 if ARCH_X86_64
 comment "Common Configuration Options"
 
+config ARCH_X86_64_PGPOOL_SIZE
+	int "Page pool size"
+	depends on !ARCH_PGPOOL_MAPPING && MM_PGALLOC
+	default 8192000
+	---help---
+		Page pool size if ARCH_PGPOOL_MAPPING is not enabled
+
+config ARCH_X86_64_ACPI
+	bool "ACPI support"
+	default y
+	---help---
+		Select to enable ACPI parser.
+
+if ARCH_X86_64_ACPI
+
+config ARCH_X86_64_ACPI_DUMP
+	bool "ACPI dump"
+	default DEBUG_FEATURES
+	---help---
+		Select to dump ACPI tables.
+
+config ARCH_X86_64_ACPI_BIOS
+	bool "Look for ACPI RSDP in BIOS legacy region"
+	default y
+	---help---
+		Look for RSDP in BIOS legacy region (0x000e0000-0x000fffff).
+
+endif # ARCH_X86_64_ACPI
+
+config ARCH_X86_64_HAVE_XSAVE
+	bool "XSAVE support"
+	default y
+	---help---
+		Select to enable the use of XSAVE and FPU/SSE/AVX functions
+		of x86_64
+
+config ARCH_X86_64_MMX
+	bool "MMX support"
+	depends on ARCH_HAVE_MMX
+	default y
+
+config ARCH_X86_64_SSE
+	bool "SSE support"
+	depends on ARCH_HAVE_SSE
+	default y
+
+config ARCH_X86_64_SSE2
+	bool "SSE2 support"
+	depends on ARCH_HAVE_SSE2
+	default y
+
+config ARCH_X86_64_SSE3
+	bool "SSE3 support"
+	depends on ARCH_HAVE_SSE3
+	default n
+
+config ARCH_X86_64_SSSE3
+	bool "SSSE3 support"
+	depends on ARCH_HAVE_SSSE3
+	default n
+
+config ARCH_X86_64_SSE41
+	bool "SSE41 support"
+	depends on ARCH_HAVE_SSE41
+	default n
+
+config ARCH_X86_64_SSE42
+	bool "SSE42 support"
+	depends on ARCH_HAVE_SSE42
+	default n
+
+config ARCH_X86_64_SSE4A
+	bool "SSE4A support"
+	depends on ARCH_HAVE_SSE4A
+	default n
+
+config ARCH_X86_64_FMA
+	bool "FMA support"
+	depends on ARCH_HAVE_FMA && ARCH_X86_64_AVX
+	default n
+
+config ARCH_X86_64_AVX
+	bool "AVX support"
+	depends on ARCH_HAVE_AVX
+	default n
+
+config ARCH_X86_64_AVX512
+	bool "AVX512 support"
+	depends on ARCH_HAVE_AVX512
+	default n
+
+if ARCH_X86_64_AVX512
+
+config ARCH_X86_64_AVX512PF
+	bool "AVX512 Prefetch Instructions (AVX512PF)"
+	default n
+
+config ARCH_X86_64_AVX512ER
+	bool "AVX512 Exponential and Reciprocal Instructions (AVX512ER)"
+	default n
+
+config ARCH_X86_64_AVX512CD
+	bool "AVX512 Conflict Detection Instructions (AVX512CD)"
+	default n
+
+config ARCH_X86_64_AVX512VL
+	bool "AVX512 Vector Length Extensions (AVX512VL)"
+	default n
+
+config ARCH_X86_64_AVX512BW
+	bool "AVX512 Byte and Word Instructions (AVX512BW)"
+	default n
+
+config ARCH_X86_64_AVX512DQ
+	bool "AVX512 Doubleword and Quadword Instructions (AVX512DQ)"
+	default n
+
+config ARCH_X86_64_AVX512IFMA
+	bool "AVX512 Integer Fused Multiply-Add Instructions (AVX512IFMA)"
+	default n
+
+config ARCH_X86_64_AVX512VBMI
+	bool "AVX512 Vector Bit Manipulation Instructions (AVX512VBMI)"
+	default n
+
+endif # ARCH_X86_64_AVX512
+
 endif

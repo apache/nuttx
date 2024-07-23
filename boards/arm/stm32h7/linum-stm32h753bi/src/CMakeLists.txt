@@ -32,6 +32,38 @@ if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinitialize.c)
 endif()
 
+if(CONFIG_STM32H7_OTGFS)
+  list(APPEND SRCS stm32_usb.c)
+endif()
+
+if(CONFIG_STM32H7_SDMMC)
+  list(APPEND SRCS stm32_sdmmc.c)
+endif()
+
+if(CONFIG_FAT_DMAMEMORY)
+  list(APPEND SRCS stm32_dma_alloc.c)
+endif()
+
+if(CONFIG_I2C_EE_24XX)
+  list(APPEND SRCS stm32_at24.c)
+endif()
+
+if(CONFIG_PWM)
+  list(APPEND SRCS stm32_pwm.c)
+endif()
+
+if(CONFIG_MTD_W25QXXXJV)
+  list(APPEND SRCS stm32_w25q.c)
+endif()
+
+if(CONFIG_USBMSC)
+  list(APPEND SRCS stm32_usbmsc.c)
+endif()
+
+if(CONFIG_SENSORS_QENCODER)
+  list(APPEND SRCS stm32_qencoder.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")

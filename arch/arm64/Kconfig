@@ -31,9 +31,9 @@ config ARCH_CHIP_A64
 	select ARCH_CORTEX_A53
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_RESET
-	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
 	---help---
 		Allwinner A64 SoC
 
@@ -42,8 +42,8 @@ config ARCH_CHIP_RK3399
 	select ARCH_CORTEX_A53
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_RESET
-	select ARCH_HAVE_PSCI
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
 	---help---
 		Rockchip RK3399 SoC
 
@@ -51,11 +51,11 @@ config ARCH_CHIP_QEMU
 	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_HAVE_ADDRENV
 	select ARCH_HAVE_IRQTRIGGER
-	select ARCH_HAVE_PSCI
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TEXT_HEAP
+	select ARM64_HAVE_PSCI
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		QEMU virt platform (ARMv8a)
@@ -63,7 +63,6 @@ config ARCH_CHIP_QEMU
 config ARCH_CHIP_GOLDFISH
 	bool "goldfish platform (ARMv8a)"
 	select ARCH_CORTEX_A53
-	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv2
 	select ARCH_HAVE_ADDRENV
@@ -71,6 +70,7 @@ config ARCH_CHIP_GOLDFISH
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		Android GoldFish platform for NuttX (ARMv8a),
@@ -91,6 +91,26 @@ config ARCH_CHIP_IMX8
 	---help---
 		NXP i.MX8 (ARMv8a) applications processors
 
+config ARCH_CHIP_IMX9
+	bool "NXP i.MX9 Platform (ARMv8.2a)"
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_NEED_ADDRENV_MAPPING
+	---help---
+		NXP i.MX9 (ARMv8.2a) applications processors
+
+config ARCH_CHIP_ZYNQ_MPSOC
+	bool "XilinX Zynq UltraScale+ MPSoC"
+	select ARCH_CORTEX_A53
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARM64_HAVE_PSCI
+	---help---
+		XilinX ZYNQ MPSOC
+		
 config ARCH_CHIP_ARM64_CUSTOM
 	bool "Custom ARM64 chip"
 	select ARCH_CHIP_CUSTOM
@@ -109,16 +129,6 @@ config ARCH_ARMV8R
 	default n
 	select ARCH_SINGLE_SECURITY_STATE
 
-config ARCH_HAVE_PSCI
-	bool "ARM PCSI (Power State Coordination Interface) Support"
-	default n
-	---help---
-		This Power State Coordination Interface (PSCI) defines
-		a standard interface for power management. the PCSI need
-		to implement handling firmware at EL2 or EL3. The option
-		maybe not applicable for arm core without PCSI firmware
-		interface implement
-
 config ARCH_SINGLE_SECURITY_STATE
 	bool "ARM Single Security State Support"
 	default n
@@ -136,6 +146,15 @@ config ARCH_HAVE_EL3
 		EL0~El2(eg. Cortex-R82). For these Processors, the code
 		runing at EL3 is not necessary and system register for EL3
 		is not accessible
+
+config ARCH_ARM64_EXCEPTION_LEVEL
+	int "Exception level to operate"
+	default 1
+	range 1 3
+	---help---
+		Default exception level is EL1 for the NuttX OS. However,
+		if NuttX works as the primary bootloader, this may be set
+		to EL3. Other levels are not supported at the moment.
 
 config ARCH_SET_VMPIDR_EL2
 	bool "Set VMPIDR_EL2 at EL2 stage"
@@ -179,7 +198,19 @@ config ARCH_CORTEX_A53
 	select ARCH_HAVE_MMU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
-	select ARM_HAVE_NEON
+	select ARM64_HAVE_NEON
+
+config ARCH_CORTEX_A55
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_TESTSET
+	select ARM64_HAVE_NEON
 
 config ARCH_CORTEX_A57
 	bool
@@ -191,7 +222,7 @@ config ARCH_CORTEX_A57
 	select ARCH_HAVE_MMU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
-	select ARM_HAVE_NEON
+	select ARM64_HAVE_NEON
 
 config ARCH_CORTEX_A72
 	bool
@@ -203,7 +234,7 @@ config ARCH_CORTEX_A72
 	select ARCH_HAVE_MMU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
-	select ARM_HAVE_NEON
+	select ARM64_HAVE_NEON
 
 config ARCH_CORTEX_R82
 	bool
@@ -214,7 +245,7 @@ config ARCH_CORTEX_R82
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
-	select ARM_HAVE_NEON
+	select ARM64_HAVE_NEON
 
 config ARCH_FAMILY
 	string
@@ -225,16 +256,40 @@ config ARCH_CHIP
 	string
 	default "a64"       if ARCH_CHIP_A64
 	default "rk3399"    if ARCH_CHIP_RK3399
+	default "zynq-mpsoc" if ARCH_CHIP_ZYNQ_MPSOC
 	default "qemu"      if ARCH_CHIP_QEMU
 	default "goldfish"  if ARCH_CHIP_GOLDFISH
 	default "fvp-v8r"   if ARCH_CHIP_FVP_ARMV8R
 	default "imx8"      if ARCH_CHIP_IMX8
+	default "imx9"      if ARCH_CHIP_IMX9
 
-config ARM_HAVE_NEON
+config ARM64_HAVE_PSCI
+	bool "ARM PCSI (Power State Coordination Interface) Support"
+	default n
+	---help---
+		This Power State Coordination Interface (PSCI) defines
+		a standard interface for power management. the PCSI need
+		to implement handling firmware at EL2 or EL3. The option
+		maybe not applicable for arm core without PCSI firmware
+		interface implement
+
+config ARM64_PSCI
+	bool "Enabled PSCI"
+	depends on ARM64_HAVE_PSCI
+	default y
+	---help---
+		See ARM64_HAVE_PSCI for details
+
+config ARM64_HAVE_NEON
 	bool
 	default n
 	---help---
 		Decide whether support NEON instruction
+
+config ARM64_NEON
+	bool "Advanced SIMD (NEON) Extension"
+	default y
+	depends on ARM64_HAVE_NEON
 
 config ARM64_DECODEFIQ
 	bool "FIQ Handler"
@@ -244,7 +299,7 @@ config ARM64_DECODEFIQ
 		arm_decodefiq().  This is used primarily to support secure TrustZone
 		interrupts received on the FIQ vector.
 
-config ARM_GIC_VERSION
+config ARM64_GIC_VERSION
 	int "GIC version"
 	default 2           if ARCH_CHIP_A64
 	default 3
@@ -253,9 +308,9 @@ config ARM_GIC_VERSION
 		Version of Generic Interrupt Controller (GIC) supported by the
 		architecture
 
-if ARM_GIC_VERSION = 2
+if ARM64_GIC_VERSION = 2
 
-config ARM_GIC_EOIMODE
+config ARM64_GIC_EOIMODE
 	bool
 	default n
 	---help---
@@ -311,8 +366,16 @@ if ARCH_CHIP_IMX8
 source "arch/arm64/src/imx8/Kconfig"
 endif
 
+if ARCH_CHIP_IMX9
+source "arch/arm64/src/imx9/Kconfig"
+endif
+
 if ARCH_CHIP_GOLDFISH
 source "arch/arm64/src/goldfish/Kconfig"
+endif
+
+if ARCH_CHIP_ZYNQ_MPSOC
+source "arch/arm64/src/zynq-mpsoc/Kconfig"
 endif
 
 endif # ARCH_ARM64

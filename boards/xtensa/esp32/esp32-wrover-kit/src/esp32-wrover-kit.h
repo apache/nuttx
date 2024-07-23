@@ -57,6 +57,9 @@
 #define ONESHOT_TIMER         1
 #define ONESHOT_RESOLUTION_US 1
 
+/* Zero Cross */
+#define GPIO_ZERO_CROSS_IRQ 22
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

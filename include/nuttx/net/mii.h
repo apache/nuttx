@@ -951,6 +951,8 @@ struct phy_desc_s
   uint16_t  mbps100;        /* The bit mask for 100MBP if status is not 0xffff */
   uint16_t  duplex;         /* The bit mask for DUPLEX if status is not 0xffff */
   uint16_t  clause;         /* The PHY clause supported. 22 or 45 */
+  uint16_t  mbps1000;       /* The bit mask for 1000MBP if status is not 0xffff */
+  uint16_t  speed_mask;     /* The bit mask for mbps10, 100, 1000 */
 };
 
 /****************************************************************************

@@ -58,12 +58,6 @@ extern void __trap_vec(void);
  * Public Data
  ****************************************************************************/
 
-/* NOTE: g_idle_topstack needs to point the top of the idle stack
- * for CPU0 and this value is used in up_initial_state()
- */
-
-uintptr_t g_idle_topstack = BL808_IDLESTACK_TOP;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -113,7 +107,7 @@ static void bl808_copy_overlap(uint8_t *dest, const uint8_t *src,
 static void bl808_copy_ramdisk(void)
 {
   const char *header = "-rom1fs-";
-  const uint8_t *limit = (uint8_t *)BL808_IDLESTACK_TOP + (256 * 1024);
+  const uint8_t *limit = (uint8_t *)g_idle_topstack + (256 * 1024);
   uint8_t *ramdisk_addr = NULL;
   uint8_t *addr;
   uint32_t size;
@@ -122,9 +116,9 @@ static void bl808_copy_ramdisk(void)
    * Limit search to 256 KB after Idle Stack Top.
    */
 
-  binfo("_edata=%p, _sbss=%p, _ebss=%p, BL808_IDLESTACK_TOP=%p\n",
+  binfo("_edata=%p, _sbss=%p, _ebss=%p, idlestack_top=%p\n",
         (void *)_edata, (void *)_sbss, (void *)_ebss,
-        (void *)BL808_IDLESTACK_TOP);
+        (void *)g_idle_topstack);
   for (addr = _edata; addr < limit; addr++)
     {
       if (memcmp(addr, header, strlen(header)) == 0)
@@ -145,9 +139,9 @@ static void bl808_copy_ramdisk(void)
 
   /* RAM Disk must be after Idle Stack, to prevent overwriting */
 
-  if (ramdisk_addr <= (uint8_t *)BL808_IDLESTACK_TOP)
+  if (ramdisk_addr <= (uint8_t *)g_idle_topstack)
     {
-      const size_t pad = (size_t)BL808_IDLESTACK_TOP - (size_t)ramdisk_addr;
+      const size_t pad = (size_t)g_idle_topstack - (size_t)ramdisk_addr;
       _err("RAM Disk must be after Idle Stack. Increase initrd padding "
             "by %ul bytes.", pad);
       PANIC();
@@ -284,11 +278,11 @@ void bl808_start(int mhartid)
 
   /* Disable MMU */
 
-  WRITE_CSR(satp, 0x0);
+  WRITE_CSR(CSR_SATP, 0x0);
 
   /* Set the trap vector for S-mode */
 
-  WRITE_CSR(stvec, (uintptr_t)__trap_vec);
+  WRITE_CSR(CSR_STVEC, (uintptr_t)__trap_vec);
 
   /* Start S-mode */
 

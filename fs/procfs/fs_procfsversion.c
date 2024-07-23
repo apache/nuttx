@@ -201,8 +201,9 @@ static ssize_t version_read(FAR struct file *filep, FAR char *buffer,
     {
       uname(&name);
       linesize = procfs_snprintf(attr->line, VERSION_LINELEN,
-                                 "%s version %s %s\n",
-                                 name.sysname, name.release, name.version);
+                                 "%s version %s %s %s\n",
+                                 name.sysname, name.release, name.version,
+                                 CONFIG_BASE_DEFCONFIG);
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 

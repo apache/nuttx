@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
-#include <nuttx/spinlock.h>
 
 #include <debug.h>
 #include <assert.h>
@@ -39,20 +38,23 @@
 #include "hardware/esp32s3_syscon.h"
 #include "hardware/esp32s3_system.h"
 #include "esp32s3_irq.h"
-#include "esp32s3_periph.h"
+#include "esp32s3_partition.h"
 
+#include "esp_private/phy.h"
+#ifdef CONFIG_ESP32S3_WIFI
+#  include "esp_private/wifi.h"
+#  include "esp_wpa.h"
+#endif
+#include "esp_coexist_internal.h"
+#include "periph_ctrl.h"
 #include "esp_phy_init.h"
 #include "phy_init_data.h"
 
 #include "esp32s3_wireless.h"
-#include "esp32s3_partition.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define MAC_ADDR0_REG EFUSE_RD_MAC_SPI_SYS_0_REG
-#define MAC_ADDR1_REG EFUSE_RD_MAC_SPI_SYS_1_REG
 
 /* Software Interrupt */
 
@@ -81,12 +83,12 @@ struct esp_wireless_priv_s
 
 static inline void phy_digital_regs_store(void);
 static inline void phy_digital_regs_load(void);
+static int esp_swi_irq(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Extern Functions declaration
  ****************************************************************************/
 
-extern void coex_pti_v2(void);
 extern uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 extern void phy_wakeup_init(void);
 extern void phy_close_rf(void);
@@ -115,10 +117,6 @@ static uint32_t *g_phy_digital_regs_mem = NULL;
 /* Indicate PHY is calibrated or not */
 
 static bool g_is_phy_calibrated = false;
-
-/* Reference count of power on of wifi and bt power domain */
-
-static uint8_t g_wifi_bt_pd_controller;
 
 /* Private data of the wireless common interface */
 
@@ -152,51 +150,51 @@ static const char *g_phy_type[ESP_PHY_INIT_DATA_TYPE_NUMBER] =
 
 static phy_country_to_bin_type_t g_country_code_map_type_table[] =
 {
-  {"01",  ESP_PHY_INIT_DATA_TYPE_DEFAULT},
-  {"AT",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"AU",  ESP_PHY_INIT_DATA_TYPE_ACMA},
-  {"BE",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"BG",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"BR",  ESP_PHY_INIT_DATA_TYPE_ANATEL},
-  {"CA",  ESP_PHY_INIT_DATA_TYPE_ISED},
-  {"CH",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"CN",  ESP_PHY_INIT_DATA_TYPE_SRRC},
-  {"CY",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"CZ",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"DE",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"DK",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"EE",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"ES",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"FI",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"FR",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"GB",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"GR",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"HK",  ESP_PHY_INIT_DATA_TYPE_OFCA},
-  {"HR",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"HU",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"IE",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"IN",  ESP_PHY_INIT_DATA_TYPE_WPC},
-  {"IS",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"IT",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"JP",  ESP_PHY_INIT_DATA_TYPE_MIC},
-  {"KR",  ESP_PHY_INIT_DATA_TYPE_KCC},
-  {"LI",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"LT",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"LU",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"LV",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"MT",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"MX",  ESP_PHY_INIT_DATA_TYPE_IFETEL},
-  {"NL",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"NO",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"NZ",  ESP_PHY_INIT_DATA_TYPE_RCM},
-  {"PL",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"PT",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"RO",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"SE",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"SI",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"SK",  ESP_PHY_INIT_DATA_TYPE_CE},
-  {"TW",  ESP_PHY_INIT_DATA_TYPE_NCC},
-  {"US",  ESP_PHY_INIT_DATA_TYPE_FCC},
+  {"01", ESP_PHY_INIT_DATA_TYPE_DEFAULT},
+  {"AT", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"AU", ESP_PHY_INIT_DATA_TYPE_ACMA},
+  {"BE", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"BG", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"BR", ESP_PHY_INIT_DATA_TYPE_ANATEL},
+  {"CA", ESP_PHY_INIT_DATA_TYPE_ISED},
+  {"CH", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"CN", ESP_PHY_INIT_DATA_TYPE_SRRC},
+  {"CY", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"CZ", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"DE", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"DK", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"EE", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"ES", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"FI", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"FR", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"GB", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"GR", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"HK", ESP_PHY_INIT_DATA_TYPE_OFCA},
+  {"HR", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"HU", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"IE", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"IN", ESP_PHY_INIT_DATA_TYPE_WPC},
+  {"IS", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"IT", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"JP", ESP_PHY_INIT_DATA_TYPE_MIC},
+  {"KR", ESP_PHY_INIT_DATA_TYPE_KCC},
+  {"LI", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"LT", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"LU", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"LV", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"MT", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"MX", ESP_PHY_INIT_DATA_TYPE_IFETEL},
+  {"NL", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"NO", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"NZ", ESP_PHY_INIT_DATA_TYPE_RCM},
+  {"PL", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"PT", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"RO", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"SE", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"SI", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"SK", ESP_PHY_INIT_DATA_TYPE_CE},
+  {"TW", ESP_PHY_INIT_DATA_TYPE_NCC},
+  {"US", ESP_PHY_INIT_DATA_TYPE_FCC},
 };
 
 #endif
@@ -302,6 +300,41 @@ static int esp_swi_irq(int irq, void *context, void *arg)
   return OK;
 }
 
+#ifdef CONFIG_ESP32S3_WIFI
+
+/****************************************************************************
+ * Name: esp_wifi_set_log_level
+ *
+ * Description:
+ *   Sets the log level for the ESP32 WiFi module based on preprocessor
+ *   definitions. The log level can be verbose, warning, or error.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp_wifi_set_log_level(void)
+{
+  wifi_log_level_t wifi_log_level = WIFI_LOG_NONE;
+
+  /* set WiFi log level */
+
+#if defined(CONFIG_DEBUG_WIRELESS_INFO)
+  wifi_log_level = WIFI_LOG_VERBOSE;
+#elif defined(CONFIG_DEBUG_WIRELESS_WARN)
+  wifi_log_level = WIFI_LOG_WARNING;
+#elif defined(CONFIG_LOG_MAXIMUM_LEVEL)
+  wifi_log_level = WIFI_LOG_ERROR;
+#endif
+
+  esp_wifi_internal_set_log_level(wifi_log_level);
+}
+#endif /* CONFIG_ESP32S3_WIFI */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -354,44 +387,6 @@ int phy_printf(const char *format, ...)
 #endif
 
   return 0;
-}
-
-/****************************************************************************
- * Name: esp32s3_phy_enable_clock
- *
- * Description:
- *   Enable PHY hardware clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp32s3_phy_enable_clock(void)
-{
-  esp32s3_periph_wifi_bt_common_module_enable();
-}
-
-/****************************************************************************
- * Name: esp32s3_phy_disable_clock
- *
- * Description:
- *   Disable PHY hardware clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp32s3_phy_disable_clock(void)
-{
-  esp32s3_periph_wifi_bt_common_module_disable();
 }
 
 #ifdef CONFIG_ESP32S3_SUPPORT_MULTIPLE_PHY_INIT_DATA
@@ -540,7 +535,9 @@ static int phy_get_multiple_init_data(uint8_t *data, size_t length,
       return -ENOMEM;
     }
 
-  int ret = esp32s3_partition_read(phy_partion_label, length, control_info,
+  int ret = esp32s3_partition_read(phy_partion_label,
+                                   length,
+                                   control_info,
                                    sizeof(phy_control_info_data_t));
   if (ret != OK)
     {
@@ -592,8 +589,8 @@ static int phy_get_multiple_init_data(uint8_t *data, size_t length,
   if ((control_info->check_algorithm) == PHY_CRC_ALGORITHM)
     {
       ret = phy_crc_check(init_data_multiple,
-                    control_info->multiple_bin_checksum,
-                    sizeof(esp_phy_init_data_t) * control_info->number);
+              control_info->multiple_bin_checksum,
+              sizeof(esp_phy_init_data_t) * control_info->number);
       if (ret != OK)
         {
           kmm_free(init_data_multiple);
@@ -870,89 +867,6 @@ void esp_phy_release_init_data(const esp_phy_init_data_t *init_data)
 #endif
 
 /****************************************************************************
- * Name: esp_read_mac
- *
- * Description:
- *   Read MAC address from efuse
- *
- * Input Parameters:
- *   mac  - MAC address buffer pointer
- *   type - MAC address type
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
-{
-  uint32_t regval[2];
-  uint8_t tmp;
-  uint8_t *data = (uint8_t *)regval;
-  int i;
-
-  if (mac == NULL)
-    {
-      wlerr("mac address param is NULL");
-      return -1;
-    }
-
-  if (type > ESP_MAC_BT)
-    {
-      wlerr("Input type is error=%d\n", type);
-      return -1;
-    }
-
-  regval[0] = getreg32(MAC_ADDR0_REG);
-  regval[1] = getreg32(MAC_ADDR1_REG);
-
-  for (i = 0; i < MAC_LEN; i++)
-    {
-      mac[i] = data[5 - i];
-    }
-
-  if (type == ESP_MAC_WIFI_SOFTAP)
-    {
-      tmp = mac[0];
-      for (i = 0; i < 64; i++)
-        {
-          mac[0] = tmp | 0x02;
-          mac[0] ^= i << 2;
-
-          if (mac[0] != tmp)
-            {
-              break;
-            }
-        }
-
-      if (i >= 64)
-        {
-          wlerr("Failed to generate SoftAP MAC\n");
-          return -1;
-        }
-    }
-
-  if (type == ESP_MAC_BT)
-    {
-      tmp = mac[0];
-      for (i = 0; i < 64; i++)
-        {
-          mac[0] = tmp | 0x02;
-          mac[0] ^= i << 2;
-
-          if (mac[0] != tmp)
-            {
-              break;
-            }
-        }
-
-      mac[5] += 1;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
  * Name: esp32s3_phy_update_country_info
  *
  * Description:
@@ -998,182 +912,6 @@ int esp32s3_phy_update_country_info(const char *country)
 #endif
 
   return OK;
-}
-
-/****************************************************************************
- * Name: esp32s3_phy_disable
- *
- * Description:
- *   Deinitialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_phy_disable(void)
-{
-  irqstate_t flags;
-  flags = enter_critical_section();
-
-  g_phy_access_ref--;
-
-  if (g_phy_access_ref == 0)
-    {
-      phy_digital_regs_store();
-
-      /* Disable PHY and RF. */
-
-      phy_close_rf();
-
-      /* Disable PHY temperature sensor */
-
-      phy_xpd_tsens();
-
-      /* Disable Wi-Fi/BT common peripheral clock.
-       * Do not disable clock for hardware RNG.
-       */
-
-      esp32s3_phy_disable_clock();
-    }
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: esp32s3_phy_enable
- *
- * Description:
- *   Initialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_phy_enable(void)
-{
-  static bool debug = false;
-  irqstate_t flags;
-  esp_phy_calibration_data_t *cal_data;
-
-  if (debug == false)
-    {
-      char *phy_version = get_phy_version_str();
-      wlinfo("phy_version %s\n", phy_version);
-      debug = true;
-    }
-
-  flags = spin_lock_irqsave(NULL);
-
-  if (g_phy_access_ref == 0)
-    {
-      esp32s3_phy_enable_clock();
-
-      if (g_is_phy_calibrated == false)
-        {
-          cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
-          if (cal_data == NULL)
-            {
-              wlerr("ERROR: Failed to allocate PHY"
-                    "calibration data buffer.");
-              abort();
-            }
-
-#if CONFIG_ESP_PHY_ENABLE_USB
-          phy_bbpll_en_usb(true);
-#endif
-          wlinfo("calibrating");
-          const esp_phy_init_data_t *init_data = esp_phy_get_init_data();
-          if (init_data == NULL)
-            {
-              wlerr("ERROR: Failed to obtain PHY init data");
-              abort();
-            }
-
-          register_chipv7_phy(init_data, cal_data, PHY_RF_CAL_FULL);
-          esp_phy_release_init_data(init_data);
-          g_is_phy_calibrated = true;
-          kmm_free(cal_data);
-        }
-      else
-        {
-          phy_wakeup_init();
-          phy_digital_regs_load();
-        }
-    }
-
-  g_phy_access_ref++;
-
-  spin_unlock_irqrestore(NULL, flags);
-}
-
-/****************************************************************************
- * Name: esp_wifi_bt_power_domain_on
- *
- * Description:
- *   Initialize Bluetooth and Wi-Fi power domain
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp_wifi_bt_power_domain_on(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_wifi_bt_pd_controller++ == 0)
-    {
-      modifyreg32(RTC_CNTL_DIG_PWC_REG, RTC_CNTL_WIFI_FORCE_PD, 0);
-
-      modifyreg32(SYSCON_WIFI_RST_EN_REG, 0, MODEM_RESET_FIELD_WHEN_PU);
-      modifyreg32(SYSCON_WIFI_RST_EN_REG, MODEM_RESET_FIELD_WHEN_PU, 0);
-
-      modifyreg32(RTC_CNTL_DIG_ISO_REG, RTC_CNTL_WIFI_FORCE_ISO, 0);
-    }
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: esp_wifi_bt_power_domain_off
- *
- * Description:
- *   Deinitialize Bluetooth and Wi-Fi power domain
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp_wifi_bt_power_domain_off(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (--g_wifi_bt_pd_controller == 0)
-    {
-      modifyreg32(RTC_CNTL_DIG_ISO_REG, 0, RTC_CNTL_WIFI_FORCE_ISO);
-      modifyreg32(RTC_CNTL_DIG_PWC_REG, 0, RTC_CNTL_WIFI_FORCE_PD);
-    }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -1523,3 +1261,92 @@ int esp_wireless_deinit(void)
 
   return OK;
 }
+
+#ifdef CONFIG_ESP32S3_WIFI
+
+/****************************************************************************
+ * Name: esp_wifi_init
+ *
+ * Description:
+ *   Initialize Wi-Fi
+ *
+ * Input Parameters:
+ *   config - Initialization config parameters
+ *
+ * Returned Value:
+ *   0 if success or others if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_wifi_init(const wifi_init_config_t *config)
+{
+  int32_t ret;
+
+  esp_wifi_power_domain_on();
+
+#ifdef CONFIG_ESP32S3_WIFI_BT_COEXIST
+  ret = coex_init();
+  if (ret)
+    {
+      wlerr("ERROR: Failed to initialize coex error=%d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_ESP32S3_WIFI_BT_COEXIST */
+
+  esp_wifi_set_log_level();
+
+  ret = esp_wifi_init_internal(config);
+  if (ret)
+    {
+      wlerr("Failed to initialize Wi-Fi error=%d\n", ret);
+      return ret;
+    }
+
+  esp_phy_modem_init();
+
+  ret = esp_supplicant_init();
+  if (ret)
+    {
+      wlerr("Failed to initialize WPA supplicant error=%d\n", ret);
+      esp_wifi_deinit_internal();
+      return ret;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp_wifi_deinit
+ *
+ * Description:
+ *   Deinitialize Wi-Fi and free resource
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   0 if success or others if fail
+ *
+ ****************************************************************************/
+
+int32_t esp_wifi_deinit(void)
+{
+  int ret;
+
+  ret = esp_supplicant_deinit();
+  if (ret)
+    {
+      wlerr("Failed to deinitialize supplicant\n");
+      return ret;
+    }
+
+  ret = esp_wifi_deinit_internal();
+  if (ret != 0)
+    {
+      wlerr("Failed to deinitialize Wi-Fi\n");
+      return ret;
+    }
+
+  return ret;
+}
+#endif /* CONFIG_ESP32S3_WIFI */

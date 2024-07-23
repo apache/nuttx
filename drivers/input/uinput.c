@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/input/buttons.h>
 #include <nuttx/input/keyboard.h>
 #include <nuttx/input/touchscreen.h>

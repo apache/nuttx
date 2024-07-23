@@ -45,8 +45,36 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CACHE_BLOCKSIZE (32*1024)
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32_SPIRAM
+
+/****************************************************************************
+ * Name: esp32_set_bank
+ *
+ * Description:
+ *   Set Ext-SRAM-Cache mmu mapping.
+ *
+ * Input Parameters:
+ *   virt_bank - Beginning of the virtual bank
+ *   phys_bank - Beginning of the physical bank
+ *   ct        - Number of banks
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32_set_bank(int virt_bank, int phys_bank, int ct);
+
+#endif
 
 /****************************************************************************
  * Name: esp32_spiflash_init

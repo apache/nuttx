@@ -28,6 +28,15 @@
 #include <nuttx/config.h>
 #include <arch/sama5/chip.h>
 
+/* SAMA5 Virtual (mapped) Memory Map
+ *
+ * board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -373,15 +382,6 @@
 #define SAM_PERIPHB_MMUFLAGS     MMU_IOFLAGS
 #define SAM_PERIPHC_MMUFLAGS     MMU_IOFLAGS
 
-/* SAMA5 Virtual (mapped) Memory Map
- *
- * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it
- * depends on some the virtual address definitions provided above.
- */
-
-#include <arch/board/board_memorymap.h>
-
 /* SAMA5 Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,
  * read-only, pre-initialized page table (perhaps in ROM), then the
@@ -664,12 +664,12 @@
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  endif
 
-/* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
- * map probably do not apply because paging logic will probably partition
- * the SRAM section differently.  In particular, if the page table is located
- * at the end of SRAM, then the virtual page table address defined below
- * will probably be in error.  In that case PGTABLE_BASE_VADDR is defined
- * in the file mmu.h
+/* If CONFIG_LEGACY_PAGING is selected, then parts of the 1-to-1 virtual
+ * memory map probably do not apply because paging logic will probably
+ * partition the SRAM section differently.  In particular, if the page
+ * table is located at the end of SRAM, then the virtual page table address
+ * defined below will probably be in error.  In that case PGTABLE_BASE_VADDR
+ * is defined in the file mmu.h
  *
  * We must declare the page table at the bottom or at the top of internal
  * SRAM.  We pick the bottom of internal SRAM *unless* there are vectors
@@ -681,18 +681,18 @@
   /* In this case, page table must lie at the top 16Kb of ISRAM1 (or ISRAM0
    * if ISRAM1 is not available in this architecture)
    *
-   * If CONFIG_PAGING is defined, then mmu.h assign the virtual address
-   * of the page table.
+   * If CONFIG_LEGACY_PAGING is defined, then mmu.h assign the virtual
+   * address of the page table.
    */
 
 #    if SAM_ISRAM1_SIZE > 0
 #      define PGTABLE_BASE_PADDR (SAM_ISRAM1_PADDR+SAM_ISRAM1_SIZE-PGTABLE_SIZE)
-#      ifndef CONFIG_PAGING
+#      ifndef CONFIG_LEGACY_PAGING
 #        define PGTABLE_BASE_VADDR (SAM_ISRAM1_VADDR+SAM_ISRAM1_SIZE-PGTABLE_SIZE)
 #      endif
 #    else
 #      define PGTABLE_BASE_PADDR (SAM_ISRAM0_PADDR+SAM_ISRAM0_SIZE-PGTABLE_SIZE)
-#      ifndef CONFIG_PAGING
+#      ifndef CONFIG_LEGACY_PAGING
 #        define PGTABLE_BASE_VADDR (SAM_ISRAM0_VADDR+SAM_ISRAM0_SIZE-PGTABLE_SIZE)
 #      endif
 #    endif
@@ -721,7 +721,7 @@
  */
 
 #    define PGTABLE_BASE_PADDR    SAM_ISRAM0_PADDR
-#    ifndef CONFIG_PAGING
+#    ifndef CONFIG_LEGACY_PAGING
 #      define PGTABLE_BASE_VADDR  SAM_ISRAM0_VADDR
 #    endif
 #    define PGTABLE_IN_LOWSRAM    1
@@ -803,9 +803,9 @@
  *    memory to address 0x0000:0000 using both the MMU and the AXI matrix
  *    REMAP register.  So no L2 page table is required.
  *
- * 2) If on-demand paging is supported (CONFIG_PAGING=y), than an additional
- *    L2 page table is needed.  This page table will use the remainder of
- *    the address space.
+ * 2) If on-demand paging is supported (CONFIG_LEGACY_PAGING=y), than an
+ *    additional L2 page table is needed.  This page table will use the
+ *    remainder of the address space.
  */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
@@ -838,7 +838,7 @@
 
 /* Paging L2 page table base addresses
  *
- * NOTE: If CONFIG_PAGING is defined, mmu.h will re-assign the virtual
+ * NOTE: If CONFIG_LEGACY_PAGING is defined, mmu.h will re-assign the virtual
  * address of the page table.
  */
 

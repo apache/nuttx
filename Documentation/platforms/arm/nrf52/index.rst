@@ -51,9 +51,9 @@ Peripheral Support
 
 The following list indicates peripherals supported in NuttX:
 
-==========  ======= =====
+==========  ======= ===============
 Peripheral  Support Notes
-==========  ======= =====
+==========  ======= ===============
 GPIO        Yes
 GPIOTE      Yes
 I2S         No
@@ -64,7 +64,7 @@ PPI         Yes
 PWM         Yes
 QDEC        No
 QSPI        Yes
-RADIO       Yes     Basic
+RADIO       Yes     BLE, IEEE 802.15.4
 RNG         Yes
 RTC         Yes
 SAADC       Yes
@@ -78,7 +78,7 @@ UART        Yes
 UARTE       No
 USBD        Yes
 WDT         Yes
-==========  ======= =====
+==========  ======= ===============
 
 Peripherals such as AAR, ACL, CCM, ECB are not directly used by NuttX since they
 are part of BLE controller implementation (link).
@@ -206,6 +206,11 @@ is provided with settings already set.
 Note that in this case, some peripherals (mostly those related to BLE) will be unavailable. Some PPI
 channels will also be ocuppied (``NRF52_PPI_NUM_CONFIGURABLE_CHANNELS`` will be set accordingly in this case).
 
+IEEE 802.15.4 Support
+=====================
+
+Details about IEEE 802.15.4 support for nRF52 can be found in :doc:`ieee802154`.
+
 Supported Boards
 ================
 
@@ -214,3 +219,4 @@ Supported Boards
    :maxdepth: 1
 
    boards/*/*
+   ieee802154.rst

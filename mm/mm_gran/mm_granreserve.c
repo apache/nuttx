@@ -25,10 +25,12 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/mm/gran.h>
 
 #include "mm_gran/mm_gran.h"
+#include "mm_gran/mm_grantable.h"
 
 #ifdef CONFIG_GRAN
 
@@ -36,67 +38,58 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: gran_reserve
- *
- * Description:
- *   Reserve memory in the granule heap.  This will reserve the granules
- *   that contain the start and end addresses plus all of the granules
- *   in between.  This should be done early in the initialization sequence
- *   before any other allocations are made.
- *
- *   Reserved memory can never be allocated (it can be freed however which
- *   essentially unreserves the memory).
- *
- * Input Parameters:
- *   handle - The handle previously returned by gran_initialize
- *   start  - The address of the beginning of the region to be reserved.
- *   size   - The size of the region to be reserved
- *
- * Returned Value:
- *   On success, a non-NULL pointer to the allocated memory is returned;
- *   NULL is returned on failure.
- *
- ****************************************************************************/
-
 FAR void *gran_reserve(GRAN_HANDLE handle, uintptr_t start, size_t size)
 {
-  FAR struct gran_s *priv = (FAR struct gran_s *)handle;
-  FAR void *ret = NULL;
+  FAR gran_t *gran = (FAR gran_t *)handle;
+  uintptr_t   end;
+  size_t      ngran;
+  size_t      posi;
+  bool        avail;
 
-  DEBUGASSERT(priv != NULL);
-
-  if (size > 0)
+  DEBUGASSERT(gran);
+  if (!size || size > GRANBYTE(gran))
     {
-      uintptr_t mask = (1 << priv->log2gran) - 1;
-      uintptr_t end  = start + size - 1;
-      unsigned int ngranules;
-
-      /* Get the aligned (down) start address and the aligned (up) end
-       * address
-       */
-
-      start &= ~mask;
-      end = (end + mask) & ~mask;
-
-      /* Calculate the new size in granules */
-
-      ngranules = ((end - start) >> priv->log2gran) + 1;
-
-      /* Must lock the granule allocator */
-
-      if (gran_enter_critical(priv) < 0)
-        {
-          return NULL;
-        }
-
-      /* And reserve the granules */
-
-      ret = gran_mark_allocated(priv, start, ngranules);
-      gran_leave_critical(priv);
+      return NULL;
     }
 
-  return ret;
+  /* align down/up start/ending addresses */
+
+  end = END_RSRV(gran, start, size);
+  if (!GRAN_INRANGE(gran, end))
+    {
+      return NULL;
+    }
+
+  start = MEM_RSRV(gran, start);
+  if (!GRAN_INRANGE(gran, start))
+    {
+      return NULL;
+    }
+
+  /* convert unit to granule */
+
+  posi  = MEM2GRAN(gran, start);
+  ngran = ((end - start) >> gran->log2gran) + 1;
+
+  /* lock the granule allocator */
+
+  if (gran_enter_critical(gran) < 0)
+    {
+      return NULL;
+    }
+
+  avail = gran_match(gran, posi, ngran, 0, NULL);
+  if (avail)
+    {
+      gran_set(gran, posi, ngran);
+    }
+
+  gran_leave_critical(gran);
+
+  graninfo("%s posi=%zu retp=%zx size=%zu n=%zu\n",
+           avail ? "  done" : " error", posi, (size_t)start, size, ngran);
+
+  return avail ? (FAR void *)start : NULL;
 }
 
 #endif /* CONFIG_GRAN */

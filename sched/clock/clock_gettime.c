@@ -30,9 +30,11 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/queue.h>
 
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING
@@ -164,11 +166,14 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
     }
   else if (clock_type == CLOCK_PROCESS_CPUTIME_ID)
     {
-      FAR struct task_group_s *group;
       unsigned long runtime;
-      irqstate_t flags;
-      int i;
       FAR struct tcb_s *tcb;
+# ifdef HAVE_GROUP_MEMBERS
+      FAR struct task_group_s *group;
+      FAR sq_entry_t *curr;
+      FAR sq_entry_t *next;
+      irqstate_t flags;
+# endif
 
       if (pid == 0)
         {
@@ -183,20 +188,23 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
       if (tcb != NULL)
         {
+# ifdef HAVE_GROUP_MEMBERS
           group = tcb->group;
           runtime = 0;
 
-          flags = enter_critical_section();
-          for (i = group->tg_nmembers - 1; i >= 0; i--)
+          flags = spin_lock_irqsave(NULL);
+          sq_for_every_safe(&group->tg_members, curr, next)
             {
-              tcb = nxsched_get_tcb(group->tg_members[i]);
-              if (tcb != NULL)
-                {
-                  runtime += tcb->run_time;
-                }
+              tcb = container_of(curr, struct tcb_s, member);
+
+              runtime += tcb->run_time;
             }
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(NULL, flags);
+# else  /* HAVE_GROUP_MEMBERS */
+          runtime = tcb->run_time;
+# endif /* HAVE_GROUP_MEMBERS */
+
           perf_convert(runtime, tp);
         }
       else

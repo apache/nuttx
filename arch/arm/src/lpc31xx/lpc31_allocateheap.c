@@ -37,7 +37,7 @@
 #include "arm_internal.h"
 #include "lpc31_memorymap.h"
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>
 #  include "pg_macros.h"
 #endif
@@ -134,7 +134,7 @@
  * will let the heap run all the way to the end of SRAM.
  */
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 #  ifdef PGTABLE_IN_HIGHSRAM
 #    define LPC31_HEAP_VEND (PG_LOCKED_VBASE + PG_TOTAL_VSIZE - PGTABLE_SIZE)
 #  else

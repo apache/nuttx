@@ -112,8 +112,8 @@ FAR struct can_conn_s *can_alloc(void)
   if (dq_peek(&g_free_can_connections) == NULL)
     {
 #if CONFIG_CAN_MAX_CONNS > 0
-      if (dq_count(&g_active_can_connections) + CONFIG_CAN_ALLOC_CONNS
-          >= CONFIG_CAN_MAX_CONNS)
+      if (dq_count(&g_active_can_connections) +
+          CONFIG_CAN_ALLOC_CONNS > CONFIG_CAN_MAX_CONNS)
         {
           nxmutex_unlock(&g_free_lock);
           return NULL;
@@ -223,6 +223,36 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
     {
       return (FAR struct can_conn_s *)conn->sconn.node.flink;
     }
+}
+
+/****************************************************************************
+ * Name: can_active()
+ *
+ * Description:
+ *   Traverse the list of NetLink connections that match dev
+ *
+ * Input Parameters:
+ *   dev  - The device to search for.
+ *   conn - The current connection; may be NULL to start the search at the
+ *          beginning
+ *
+ * Assumptions:
+ *   This function is called from NetLink device logic.
+ *
+ ****************************************************************************/
+
+FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
+                                  FAR struct can_conn_s *conn)
+{
+  while ((conn = can_nextconn(conn)) != NULL)
+    {
+      if (conn->dev == NULL || conn->dev == dev)
+        {
+          break;
+        }
+    }
+
+  return conn;
 }
 
 #endif /* CONFIG_NET_CAN */

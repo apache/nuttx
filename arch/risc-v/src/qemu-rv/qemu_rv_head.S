@@ -29,6 +29,7 @@
 
 #include "chip.h"
 #include "riscv_internal.h"
+#include "riscv_macros.S"
 
 /****************************************************************************
  * Public Symbols
@@ -44,65 +45,29 @@ __start:
   /* Preserve a1 as it contains the pointer to DTB */
   /* Load mhartid (cpuid) */
 
-  csrr a0, mhartid
-
-  /* Set stack pointer to the idle thread stack */
-
-  bnez a0, 1f
-  la   sp, QEMU_RV_IDLESTACK_TOP
-  j    2f
-1:
+#ifndef CONFIG_ARCH_USE_S_MODE
+  csrr a0, CSR_MHARTID
+#endif
 
   /* Load the number of CPUs that the kernel supports */
-
-#ifdef CONFIG_SMP
   li   t1, CONFIG_SMP_NCPUS
-#else
-  li   t1, 1
-#endif
 
   /* If a0 (mhartid) >= t1 (the number of CPUs), stop here */
 
-  blt  a0, t1, 3f
-  csrw mie, zero
+  blt  a0, t1, 2f
+  csrw CSR_IE, zero
   wfi
 
-3:
-  /* To get g_cpu_basestack[mhartid], must get g_cpu_basestack first */
-
-  la   t0, g_cpu_basestack
-
-  /* Offset = pointer width * hart id */
-
-#ifdef CONFIG_ARCH_RV32
-  slli t1, a0, 2
-#else
-  slli t1, a0, 3
-#endif
-  add  t0, t0, t1
-
-  /* Load idle stack base to sp */
-
-  REGLOAD sp, 0(t0)
-
-  /*
-   * sp (stack top) = sp + idle stack size - XCPTCONTEXT_SIZE
-   *
-   * Note: Reserve some space used by up_initial_state since we are already
-   * running and using the per CPU idle stack.
-   */
-
-  li   t0, STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE - XCPTCONTEXT_SIZE)
-  add  sp, sp, t0
-
 2:
+  /* Set stack pointer to the idle thread stack */
+  riscv_set_inital_sp QEMU_RV_IDLESTACK_BASE, SMP_STACK_SIZE, a0
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
-	csrw	mie, zero
+  csrw CSR_IE, zero
 
   la   t0, __trap_vec
-  csrw mtvec, t0
+  csrw CSR_TVEC, t0
 
   /* Jump to qemu_rv_start */
 

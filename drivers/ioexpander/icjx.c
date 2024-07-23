@@ -45,12 +45,20 @@
 
 #define ICJX_NOP     0x00
 #define ICJX_RNW     0x01
-#define ICJX_NOB     0x0f
+#define ICJX_NOB1    0x0f
+#define ICJX_NOB2    0x1e
 #define ICJX_CONTROL 0x59
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct icjx_callback_s
+{
+  ioe_pinset_t pinset;
+  ioe_callback_t function;
+  FAR void *arg;
+};
 
 struct icjx_dev_s
 {
@@ -58,9 +66,16 @@ struct icjx_dev_s
                                         * as public gpio expander. */
   FAR struct icjx_config_s *config;    /* Board configuration data */
   FAR struct spi_dev_s *spi;           /* Saved SPI driver instance */
+
   uint16_t outpins;
   uint16_t outstate;
+  uint16_t irqpins;
   mutex_t lock;
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  struct work_s work;
+  struct icjx_callback_s callback;
+#endif
 };
 
 /****************************************************************************
@@ -77,9 +92,9 @@ static void icjx_deselect(FAR struct spi_dev_s *spi,
 /* Read/Write helpers */
 
 static int icjx_read(FAR struct icjx_dev_s *priv, uint8_t reg,
-                     uint8_t *data);
+                     uint16_t *data, int nob);
 static int icjx_write(FAR struct icjx_dev_s *priv, uint8_t reg,
-                      uint8_t data);
+                      uint16_t data, int nob);
 
 /* I/O Expander Methods */
 
@@ -93,11 +108,17 @@ static int icjx_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                         FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int icjx_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                              FAR const uint8_t *pins, FAR bool *values,
-                              int count);
+                              FAR const uint8_t *pins,
+                              FAR const bool *values, int count);
 static int icjx_multireadpin(FAR struct ioexpander_dev_s *dev,
                              FAR const uint8_t *pins, FAR bool *values,
                              int count);
+#endif
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+static FAR void *icjx_attach(FAR struct ioexpander_dev_s *dev,
+                             ioe_pinset_t pinset, ioe_callback_t callback,
+                             FAR void *arg);
+static int icjx_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle);
 #endif
 
 /****************************************************************************
@@ -125,6 +146,10 @@ static const struct ioexpander_ops_s g_icjx_ops =
   , icjx_multiwritepin
   , icjx_multireadpin
   , icjx_multireadpin
+#endif
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+  , icjx_attach
+  , icjx_detach
 #endif
 };
 
@@ -207,16 +232,17 @@ static void icjx_deselect(FAR struct spi_dev_s *spi,
  *
  ****************************************************************************/
 
-static int icjx_read(FAR struct icjx_dev_s *priv, uint8_t reg, uint8_t *data)
+static int icjx_read(FAR struct icjx_dev_s *priv, uint8_t reg,
+                     uint16_t *data, int nob)
 {
   uint8_t startaddr;
-  uint8_t tx_buffer[5];
-  uint8_t rx_buffer[5];
+  uint8_t tx_buffer[6];
+  uint8_t rx_buffer[6];
 
   startaddr =  (priv->config->addr << 6) | (reg << 1) | ICJX_RNW;
   tx_buffer[0] = startaddr;
   tx_buffer[1] = ICJX_NOP;
-  tx_buffer[2] = ICJX_NOB;
+  tx_buffer[2] = nob;
 
   icjx_select(priv->spi, priv->config, 8);
   SPI_EXCHANGE(priv->spi, tx_buffer, rx_buffer, 3);
@@ -225,7 +251,20 @@ static int icjx_read(FAR struct icjx_dev_s *priv, uint8_t reg, uint8_t *data)
 
   if (priv->config->verification)
     {
-      tx_buffer[0] = rx_buffer[2];
+      if (nob == ICJX_NOB2)
+        {
+          tx_buffer[0] = rx_buffer[2];
+          SPI_EXCHANGE(priv->spi, tx_buffer, rx_buffer, 1);
+          *data |= rx_buffer[0] << 8;
+          tx_buffer[0] = rx_buffer[0];
+          startaddr =  (priv->config->addr << 6) |
+                       ((reg + 1) << 1) | ICJX_RNW;
+        }
+      else
+        {
+          tx_buffer[0] = rx_buffer[2];
+        }
+
       tx_buffer[1] = ICJX_CONTROL;
       SPI_EXCHANGE(priv->spi, tx_buffer, rx_buffer, 2);
     }
@@ -268,24 +307,34 @@ static int icjx_read(FAR struct icjx_dev_s *priv, uint8_t reg, uint8_t *data)
  *
  ****************************************************************************/
 
-static int icjx_write(FAR struct icjx_dev_s *priv, uint8_t reg, uint8_t data)
+static int icjx_write(FAR struct icjx_dev_s *priv, uint8_t reg,
+                      uint16_t data, int nob)
 {
   uint8_t startaddr;
   uint8_t bytes_to_exchange;
-  uint8_t tx_buffer[5];
-  uint8_t rx_buffer[5];
+  uint8_t tx_buffer[6];
+  uint8_t rx_buffer[6];
+  int ver_idx;
+  int data_len;
 
-  bytes_to_exchange = 3;
+  data_len = 1;
+  ver_idx = 2;
+  bytes_to_exchange = 0;
   startaddr =  (priv->config->addr << 6) | (reg << 1);
-  tx_buffer[0] = startaddr;
-  tx_buffer[1] = ICJX_NOB;
-  tx_buffer[2] = data;
+  tx_buffer[bytes_to_exchange++] = startaddr;
+  tx_buffer[bytes_to_exchange++] = nob;
+  tx_buffer[bytes_to_exchange++] = data & 0xff;
+  if (nob == ICJX_NOB2)
+    {
+      data_len = 2;
+      tx_buffer[bytes_to_exchange++] = (data >> 8) & 0xff;
+    }
 
   if (priv->config->verification)
     {
-      tx_buffer[3] = startaddr;
-      tx_buffer[4] = ICJX_CONTROL;
-      bytes_to_exchange = 5;
+      tx_buffer[bytes_to_exchange++] = (priv->config->addr << 6) |
+                                       ((reg + (data_len - 1)) << 1);
+      tx_buffer[bytes_to_exchange++] = ICJX_CONTROL;
     }
 
   icjx_select(priv->spi, priv->config, 8);
@@ -294,23 +343,26 @@ static int icjx_write(FAR struct icjx_dev_s *priv, uint8_t reg, uint8_t data)
 
   if (priv->config->verification)
     {
-      if (rx_buffer[2] != ICJX_NOB)
+      if (rx_buffer[ver_idx++] != nob)
         {
           gpioerr("ERROR: Start address verification error for register"
                   "0x%x!\n", reg);
           return -EIO;
         }
 
-      if (rx_buffer[3] != data)
+      for (int i = 0; i < data_len; i++)
         {
-          gpioerr("ERROR: Data verification error for register 0x%x!\n",
-                  reg);
-          return -EIO;
+          if (rx_buffer[ver_idx++] != ((data >> (i * 8)) & 0xff))
+            {
+              gpioerr("ERROR: Data verification error for register 0x%x!\n",
+                      reg);
+              return -EIO;
+            }
         }
 
-      if (rx_buffer[4] != ICJX_CONTROL)
+      if (rx_buffer[ver_idx++] != ICJX_CONTROL)
         {
-          gpioerr("ERROR: Data verification error for register 0x%x!\n",
+          gpioerr("ERROR: Control verification error for register 0x%x!\n",
                   reg);
           return -EIO;
         }
@@ -341,7 +393,7 @@ static int icjx_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)dev;
   uint8_t outpins;
-  uint8_t out_set;
+  uint16_t out_set;
   uint8_t regaddr;
   int ret;
 
@@ -379,7 +431,7 @@ static int icjx_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
       outpins = (priv->outpins >> 8) & 0xff;
     }
 
-  ret = icjx_read(priv, regaddr, &out_set);
+  ret = icjx_read(priv, regaddr, &out_set, ICJX_NOB1);
   if (ret < 0)
     {
       nxmutex_unlock(&priv->lock);
@@ -406,7 +458,7 @@ static int icjx_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
       out_set &= ~ICJX_CTRL_WORD_2_NIOH;
     }
 
-  ret = icjx_write(priv, regaddr, out_set);
+  ret = icjx_write(priv, regaddr, out_set, ICJX_NOB1);
   nxmutex_unlock(&priv->lock);
 
   return ret;
@@ -435,15 +487,81 @@ static int icjx_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                        int opt, FAR void *value)
 {
   /* TODO: Implementation of iC-JX options should be here. This includes
-   * setup of filters, ADC, interrupts etc. The right way to implement
+   * setup of filters, ADC etc. The right way to implement
    * this would probably be to introduce config structure to
    * include/nuttx/ioexpanders/icjx.h that the user could use for the
    * nibbles configuration.
+   *
+   * Currently only interrupts are implemented.
    */
 
-  gpiowarn("ERROR: iC-JX options are not yet implemted!\n");
+  FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)dev;
+  uint8_t data;
+  uint8_t reg;
+  int ret;
 
-  return -ENOTSUP;
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
+
+  gpioinfo("Expander id=%02x pin=%u option=%u\n",
+           priv->config->id, pin, opt);
+
+  if (opt == IOEXPANDER_OPTION_INTCFG)
+    {
+      unsigned int ival = (unsigned int)((uintptr_t)value);
+      ret = nxmutex_lock(&priv->lock);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      switch (ival)
+        {
+          case IOEXPANDER_VAL_HIGH:
+          case IOEXPANDER_VAL_LOW:
+          case IOEXPANDER_VAL_RISING:
+          case IOEXPANDER_VAL_FALLING:
+          case IOEXPANDER_VAL_BOTH:
+            priv->irqpins |= 1 << pin;
+            break;
+          case IOEXPANDER_VAL_DISABLE:
+            priv->irqpins &= ~(1 << pin);
+            break;
+          default:
+            nxmutex_unlock(&priv->lock);
+            return -EINVAL;
+        }
+
+      /* We have to modify ICJX_CHNG_INT_EN_A or ICJX_CHNG_INT_EN_B
+       * register.
+       */
+
+      if (pin < 8)
+        {
+          reg = ICJX_CHNG_INT_EN_A;
+          data = priv->irqpins & 0xff;
+        }
+      else
+        {
+          reg = ICJX_CHNG_INT_EN_B;
+          data = (priv->irqpins >> 8) & 0xff;
+        }
+
+      ret = icjx_write(priv, reg, data, ICJX_NOB1);
+      if (ret < 0)
+        {
+          gpioerr("Cannot write to %s register\n.",
+            reg == ICJX_CHNG_INT_EN_A ?
+            "ICJX_CHNG_INT_EN_A" : "ICJX_CHNG_INT_EN_B");
+        }
+
+      nxmutex_unlock(&priv->lock);
+    }
+  else
+    {
+      return -ENOTTY;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -517,7 +635,7 @@ static int icjx_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
       outstate = (priv->outstate >> 8) & 0xff;
     }
 
-  ret = icjx_write(priv, regaddr, outstate);
+  ret = icjx_write(priv, regaddr, outstate, ICJX_NOB1);
   nxmutex_unlock(&priv->lock);
 
   return ret;
@@ -547,7 +665,7 @@ static int icjx_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 {
   FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)dev;
   uint8_t regaddr;
-  uint8_t data;
+  uint16_t data;
   int ret;
 
   if (pin > 16)
@@ -578,7 +696,7 @@ static int icjx_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   regaddr = pin < 8 ? ICJX_INPUT_A : ICJX_INPUT_B;
 
-  ret = icjx_read(priv, regaddr, &data);
+  ret = icjx_read(priv, regaddr, &data, ICJX_NOB1);
   nxmutex_unlock(&priv->lock);
   if (ret != OK)
     {
@@ -610,12 +728,58 @@ static int icjx_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int icjx_multiwritepin(FAR struct ioexpander_dev_s *dev,
                               FAR const uint8_t *pins,
-                              FAR bool *values, int count)
+                              FAR const bool *values, int count)
 {
-  gpiowarn("WARNING: iC-JX does not have implemented support for"
-           "multiple pin write operation!\n");
+  FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)dev;
+  int ret;
+  int pin;
+  int value;
 
-  return -ENOTSUP;
+  if (count >= 16)
+    {
+      return -ENXIO;
+    }
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL);
+
+  /* Get exclusive access to the I/O Expander */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  for (int i = 0; i < count; i++)
+    {
+      pin = pins[i];
+      value = values[i];
+
+      gpioinfo("Expander id=%02x, pin=%u\n", priv->config->id, pin);
+
+      if ((priv->outpins & (1 << pin)) == 0)
+        {
+          gpioerr("ERROR: pin%u is an input\n", pin);
+          nxmutex_unlock(&priv->lock);
+          return -EINVAL;
+        }
+
+      /* Set/clear a bit in outstate. */
+
+      if (value)
+        {
+          priv->outstate |= (1 << pin);
+        }
+      else
+        {
+          priv->outstate &= ~(1 << pin);
+        }
+    }
+
+  ret = icjx_write(priv, ICJX_OUTPUT_A, priv->outstate, ICJX_NOB2);
+  nxmutex_unlock(&priv->lock);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -640,12 +804,205 @@ static int icjx_multireadpin(FAR struct ioexpander_dev_s *dev,
                              FAR const uint8_t *pins, FAR bool *values,
                              int count)
 {
-  gpiowarn("WARNING: iC-JX does not have implemented support for"
-           "multiple pin read operation!\n");
+  FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)dev;
+  uint16_t data;
+  int pin;
+  int ret;
 
-  return -ENOTSUP;
+  if (count > 16)
+    {
+      return -ENXIO;
+    }
+
+  DEBUGASSERT(priv != NULL && priv->config != NULL && values != NULL);
+
+  /* Get exclusive access to the I/O Expander */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  for (int i = 0; i < count; i++)
+    {
+      pin = pins[i];
+
+      gpioinfo("Expander id=%02x, pin=%u\n", priv->config->id, pin);
+
+      if ((priv->outpins & (1 << pin)) != 0)
+        {
+           values[i] = (bool)((priv->outstate & (1 << pin)) != 0);
+        }
+    }
+
+  ret = icjx_read(priv, ICJX_INPUT_A, &data, ICJX_NOB2);
+  nxmutex_unlock(&priv->lock);
+  if (ret != OK)
+    {
+      return ret;
+    }
+
+  for (int i = 0; i < count; i++)
+    {
+      values[i] = (bool)((data >> (pins[i] & 0xf)) & 1);
+    }
+
+  return OK;
 }
 #endif /* CONFIG_IOEXPANDER_MULTIPIN */
+
+/****************************************************************************
+ * Name: icjx_attach
+ *
+ * Description:
+ *   Attach and enable a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   pinset   - The set of pin events that will generate the callback
+ *   callback - The pointer to callback function.  NULL will detach the
+ *              callback.
+ *   arg      - User-provided callback argument
+ *
+ * Returned Value:
+ *   A non-NULL handle value is returned on success.  This handle may be
+ *   used later to detach and disable the pin interrupt.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+static FAR void *icjx_attach(FAR struct ioexpander_dev_s *dev,
+                             ioe_pinset_t pinset, ioe_callback_t callback,
+                             FAR void *arg)
+{
+  FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)dev;
+  FAR void *handle = NULL;
+  int ret;
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return NULL;
+    }
+
+  if (priv->callback.function == NULL)
+    {
+      /* Yes.. use this entry */
+
+      priv->callback.pinset   = pinset;
+      priv->callback.function = callback;
+      priv->callback.arg      = arg;
+      handle                  = &priv->callback;
+    }
+
+  /* Add this callback to the table */
+
+  nxmutex_unlock(&priv->lock);
+  return handle;
+}
+
+/****************************************************************************
+ * Name: icjx_detach
+ *
+ * Description:
+ *   Detach and disable a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   handle   - The non-NULL opaque value return by pca9555_attch()
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+static int icjx_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
+{
+  FAR struct icjx_callback_s *cb =
+    (FAR struct icjx_callback_s *)handle;
+
+  cb->pinset = 0;
+  cb->function = NULL;
+  cb->arg  = NULL;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: icjx_interrupt_worker
+ *
+ * Description:
+ *   Handle GPIO interrupt events (this function actually executes in the
+ *   context of the worker thread).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ICJX_INT_ENABLE
+static void icjx_interrupt_worker(void *arg)
+{
+  FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)arg;
+  uint16_t change_of_input;
+  uint16_t isr;
+  ioe_pinset_t irq_match;
+  int ret;
+
+  /* Read interrupt status register */
+
+  icjx_read(priv, ICJX_INT_STATUS_A, &isr, ICJX_NOB2);
+  while (isr != 0)
+    {
+      if ((isr & ICJX_ISR_A_DCHI) != 0)
+        {
+          ret = icjx_read(priv, ICJX_CHNG_MSG_A, &change_of_input,
+                          ICJX_NOB2);
+          if (ret == OK)
+            {
+              irq_match = change_of_input & priv->callback.pinset;
+              if (irq_match != 0)
+                {
+                  /* Change of input.. perform the callback */
+
+                  priv->callback.function(&priv->dev, irq_match,
+                                          priv->callback.arg);
+                }
+            }
+        }
+
+      /* Clear interrupt and check ISR again */
+
+      icjx_write(priv, ICJX_CTRL_WORD_4, ICJX_CTRL_WORD_4_EOI, ICJX_NOB1);
+      icjx_read(priv, ICJX_INT_STATUS_A, &isr, ICJX_NOB2);
+    }
+}
+
+/****************************************************************************
+ * Name: icjx_interrupt
+ *
+ * Description:
+ *   Handle GPIO interrupt events (this function executes in the
+ *   context of the interrupt).
+ *
+ ****************************************************************************/
+
+static int icjx_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct icjx_dev_s *priv = (FAR struct icjx_dev_s *)arg;
+
+  /* Create HP work to handle the interrupt. We do not want to do
+   * this in the interrupt handler because SPI communication speed.
+   */
+
+  DEBUGASSERT(work_available(&priv->work));
+  DEBUGVERIFY(work_queue(HPWORK, &priv->work, icjx_interrupt_worker,
+                        (void *)priv, 0));
+
+  return OK;
+}
+
+#endif /* CONFIG_ICJX_INT_ENABLE */
+#endif /* CONFIG_IOEXPANDER_INT_ENABLE */
 
 /****************************************************************************
  * Public Functions
@@ -696,6 +1053,12 @@ FAR struct ioexpander_dev_s *icjx_initialize(FAR struct spi_dev_s *spi,
   priv->config   = config;
   priv->outpins  = 0;
   priv->outstate = 0;
+  priv->irqpins  = 0;
+
+#ifdef CONFIG_ICJX_INT_ENABLE
+  config->attach(config, icjx_interrupt, priv);
+  config->enable(config, true);
+#endif
 
   nxmutex_init(&priv->lock);
 
@@ -706,14 +1069,14 @@ FAR struct ioexpander_dev_s *icjx_initialize(FAR struct spi_dev_s *spi,
 
   regval = (config->current_src << 4) | config->current_src;
 
-  ret = icjx_write(priv, ICJX_CTRL_WORD_2_A, regval);
+  ret = icjx_write(priv, ICJX_CTRL_WORD_2_A, regval, ICJX_NOB1);
   if (ret < 0)
     {
       gpioerr("ERROR: Could write to ICJX_CTRL_WORD_2_A: %d!\n", ret);
       goto err;
     }
 
-  ret = icjx_write(priv, ICJX_CTRL_WORD_2_B, regval);
+  ret = icjx_write(priv, ICJX_CTRL_WORD_2_B, regval, ICJX_NOB1);
   if (ret < 0)
     {
       gpioerr("ERROR: Could write to ICJX_CTRL_WORD_2_B: %d!\n", ret);
@@ -723,19 +1086,23 @@ FAR struct ioexpander_dev_s *icjx_initialize(FAR struct spi_dev_s *spi,
   /* Bypass filters as those are not yet supported. */
 
   regval = ICJX_CTRL_WORD_1_BYP0 | ICJX_CTRL_WORD_1_BYP1;
-  ret = icjx_write(priv, ICJX_CTRL_WORD_1_A, regval);
+  ret = icjx_write(priv, ICJX_CTRL_WORD_1_A, regval, ICJX_NOB1);
   if (ret < 0)
     {
       gpioerr("ERROR: Could write to ICJX_CTRL_WORD_1_A: %d!\n", ret);
       goto err;
     }
 
-  ret = icjx_write(priv, ICJX_CTRL_WORD_1_B, regval);
+  ret = icjx_write(priv, ICJX_CTRL_WORD_1_B, regval, ICJX_NOB1);
   if (ret < 0)
     {
       gpioerr("ERROR: Could write to ICJX_CTRL_WORD_1_B: %d!\n", ret);
       goto err;
     }
+
+  /* Clear initial interrupts if any */
+
+  icjx_write(priv, ICJX_CTRL_WORD_4, ICJX_CTRL_WORD_4_EOI, ICJX_NOB1);
 
   return &priv->dev;
 

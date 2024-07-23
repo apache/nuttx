@@ -31,11 +31,10 @@
 #include "esp32s3_psram.h"
 #include "esp32s3_spi_timing.h"
 
-#include "rom/esp32s3_spiflash.h"
-#include "rom/esp32s3_opi_flash.h"
-#include "hardware/esp32s3_spi_mem_reg.h"
 #include "hardware/esp32s3_iomux.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
+#include "rom/esp32s3_spiflash.h"
+#include "rom/opi_flash.h"
 
 /* EFUSE */
 
@@ -147,6 +146,16 @@ static void psram_set_op_mode(int spi_num, int mode)
       esp_rom_spi_set_op_mode(spi_num, ESP_ROM_SPIFLASH_SLOWRD_MODE);
     }
 }
+
+/* Redefine external struct members name */
+
+#define addr_bit_len      addrBitLen
+#define cmd_bit_len       cmdBitLen
+#define dummy_bit_len     dummyBitLen
+#define tx_data           txData
+#define tx_data_bit_len   txDataBitLen
+#define rx_data           rxData
+#define rx_data_bit_len   rxDataBitLen
 
 static void _psram_exec_cmd(int spi_num,
                             uint32_t cmd, int cmd_bit_len,
@@ -388,7 +397,7 @@ static void psram_gpio_config(void)
 
 int psram_enable(int mode, int vaddrmode)
 {
-  assert(mode < PSRAM_CACHE_MAX && \
+  ASSERT(mode < PSRAM_CACHE_MAX && \
          "we don't support any other mode for now.");
 
   psram_gpio_config();

@@ -47,13 +47,6 @@
 #define IPT_SO_GET_REVISION_TARGET (IPT_BASE_CTL + 3)
 #define IPT_SO_GET_MAX             IPT_SO_GET_REVISION_TARGET
 
-/* Values for "flag" field in struct ip6t_ip6 (general ip6 structure). */
-
-#define IP6T_F_PROTO               0x01    /* Set if rule cares about upper protocols */
-#define IP6T_F_TOS                 0x02    /* Match the TOS. */
-#define IP6T_F_GOTO                0x04    /* Set if jump is a goto */
-#define IP6T_F_MASK                0x07    /* All possible flag bits mask. */
-
 /* Values for "inv" field in struct ipt_ip. */
 
 #define IPT_INV_VIA_IN             0x01    /* Invert the sense of IN IFACE. */
@@ -64,6 +57,10 @@
 #define IPT_INV_FRAG               0x20    /* Invert the sense of FRAG. */
 #define IPT_INV_PROTO              XT_INV_PROTO
 #define IPT_INV_MASK               0x7F    /* All possible flag bits mask. */
+
+/* Values for "inv" field for struct ipt_icmp. */
+
+#define IPT_ICMP_INV               0x01    /* Invert the sense of type/code test */
 
 /* Standard return verdict, or do jump. */
 
@@ -85,8 +82,10 @@
        (entry) = (FAR struct ipt_entry *) \
                      ((FAR uint8_t *)(entry) + (entry)->next_offset))
 
-/* Get pointer to target from an entry pointer. */
+/* Get pointer to match / target from an entry pointer. */
 
+#define IPT_MATCH(e) \
+  ((FAR struct xt_entry_match *)((FAR struct ipt_entry *)(e) + 1))
 #define IPT_TARGET(e) \
   ((FAR struct xt_entry_target *)((FAR uint8_t *)(e) + (e)->target_offset))
 
@@ -95,9 +94,10 @@
 #define IPT_FILL_ENTRY(e, target_name) \
   do \
     { \
-      (e)->entry.target_offset = sizeof((e)->entry); \
+      (e)->entry.target_offset = offsetof(typeof(*(e)), target); \
       (e)->entry.next_offset = sizeof(*(e)); \
-      (e)->target.target.u.target_size = sizeof(*(e)) - sizeof((e)->entry); \
+      (e)->target.target.u.target_size = sizeof(*(e)) - \
+                                         (e)->entry.target_offset; \
       strlcpy((e)->target.target.u.user.name, (target_name), \
               sizeof((e)->target.target.u.user.name)); \
     } \
@@ -276,6 +276,15 @@ struct ipt_get_entries
   struct ipt_entry entrytable[0];
 };
 
+/* ICMP matching stuff */
+
+struct ipt_icmp
+{
+  uint8_t type;     /* type to match */
+  uint8_t code[2];  /* range of code */
+  uint8_t invflags; /* Inverse flags */
+};
+
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
@@ -285,7 +294,7 @@ struct ipt_get_entries
 static inline FAR struct xt_entry_target *
 ipt_get_target(FAR struct ipt_entry *e)
 {
-  return (FAR char *)e + e->target_offset;
+  return (FAR struct xt_entry_target *)((FAR char *)e + e->target_offset);
 }
 
 #endif /* __INCLUDE_NUTTX_NET_NETFILTER_IP_TABLES_H */

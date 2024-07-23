@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/arm/lpc31xx/olimex-lpc-h3131/README.txt for information about
+# See Documentation/platforms/arm/lpc31xx/boards/olimex-lpc-h3131/README.txt for information about
 # this file.
 
 TOPDIR=$1

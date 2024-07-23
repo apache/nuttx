@@ -231,7 +231,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
   Building OpenOCD under Cygwin:
 
-    Refer to boards/arm/lpc17xx_40xx/olimex-lpc1766stk/README.txt
+    Refer to Documentation/platforms/arm/lpc17xx/boards/olimex-lpc1766stk/README.txt
 
   Installing OpenOCD in Linux:
 

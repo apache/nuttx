@@ -61,5 +61,5 @@
 
 int sched_getcpu(void)
 {
-  return up_cpu_index();  /* Does not fail */
+  return this_cpu();  /* Does not fail */
 }

@@ -105,11 +105,9 @@ int sched_unlock(void)
            * release our hold on the lock.
            */
 
-          DEBUGASSERT(spin_is_locked(&g_cpu_schedlock) &&
-                      (g_cpu_lockset & (1 << cpu)) != 0);
+          DEBUGASSERT((g_cpu_lockset & (1 << cpu)) != 0);
 
-          spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                      &g_cpu_schedlock);
+          g_cpu_lockset &= ~(1 << cpu);
 
           /* Release any ready-to-run tasks that have collected in
            * g_pendingtasks.
@@ -121,7 +119,7 @@ int sched_unlock(void)
           /* In the SMP case, the tasks remains pend(1) if we are
            * in a critical section, i.e., g_cpu_irqlock is locked by other
            * CPUs, or (2) other CPUs still have pre-emption disabled, i.e.,
-           * g_cpu_schedlock is locked.  In those cases, the release of the
+           * g_cpu_lockset is locked.  In those cases, the release of the
            * pending tasks must be deferred until those conditions are met.
            *
            * There are certain conditions that we must avoid by preventing
@@ -137,8 +135,8 @@ int sched_unlock(void)
            * BEFORE it clears IRQ lock.
            */
 
-          if (!nxsched_islocked_global() && !irq_cpu_locked(cpu) &&
-              g_pendingtasks.head != NULL)
+          if (!nxsched_islocked_global() &&
+              list_pendingtasks()->head != NULL)
             {
               if (nxsched_merge_pending())
                 {
@@ -272,7 +270,7 @@ int sched_unlock(void)
            * fully independently.
            */
 
-          if (g_pendingtasks.head != NULL)
+          if (list_pendingtasks()->head != NULL)
             {
               if (nxsched_merge_pending())
                 {

@@ -79,6 +79,7 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         *(.eh_frame)
+        *(.note.gnu.*)
         _erodata = ABSOLUTE(.);
     }
 
@@ -98,7 +99,7 @@ SECTIONS
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
         *(COMMON)
-        . = ALIGN(4);
+        . = ALIGN(16);
         _ebss = ABSOLUTE(.);
     }
 

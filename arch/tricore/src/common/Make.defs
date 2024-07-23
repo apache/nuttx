@@ -1,0 +1,54 @@
+############################################################################
+# arch/tricore/src/common/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+HEAD_CSRC += tricore_doirq.c
+
+CMN_CSRCS += tricore_allocateheap.c
+CMN_CSRCS += tricore_checkstack.c
+CMN_CSRCS += tricore_createstack.c
+CMN_CSRCS += tricore_csa.c
+CMN_CSRCS += tricore_exit.c
+CMN_CSRCS += tricore_getintstack.c
+CMN_CSRCS += tricore_idle.c
+CMN_CSRCS += tricore_initialize.c
+CMN_CSRCS += tricore_initialstate.c
+CMN_CSRCS += tricore_irq.c
+CMN_CSRCS += tricore_main.c
+CMN_CSRCS += tricore_mdelay.c
+CMN_CSRCS += tricore_nputs.c
+CMN_CSRCS += tricore_registerdump.c
+CMN_CSRCS += tricore_releasestack.c
+CMN_CSRCS += tricore_saveusercontext.c
+CMN_CSRCS += tricore_schedulesigaction.c
+CMN_CSRCS += tricore_sigdeliver.c
+CMN_CSRCS += tricore_stackframe.c
+CMN_CSRCS += tricore_svcall.c
+CMN_CSRCS += tricore_switchcontext.c
+CMN_CSRCS += tricore_tcbinfo.c
+CMN_CSRCS += tricore_trapcall.c
+CMN_CSRCS += tricore_systimer.c
+CMN_CSRCS += tricore_usestack.c
+
+ifeq ($(CONFIG_SPINLOCK),y)
+  CMN_CSRCS += tricore_testset.c
+endif
+
+CFLAGS += -DIFX_CFG_EXTEND_TRAP_HOOKS
+CFLAGS += -DIFX_USE_SW_MANAGED_INT

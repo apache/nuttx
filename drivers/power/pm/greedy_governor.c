@@ -94,14 +94,14 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
   irqstate_t flags;
   int state;
 
-  pdom = &g_pmglobals.domain[domain];
+  pdom = &g_pmdomains[domain];
   state = PM_NORMAL;
 
   /* We disable interrupts since pm_stay()/pm_relax() could be simultaneously
    * invoked, which modifies the stay count which we are about to read
    */
 
-  flags = pm_domain_lock(domain);
+  flags = spin_lock_irqsave(&pdom->lock);
 
   /* Find the lowest power-level which is not locked. */
 
@@ -110,7 +110,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain)
       state++;
     }
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
 
   /* Return the found state */
 

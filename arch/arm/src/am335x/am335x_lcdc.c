@@ -338,7 +338,7 @@ done:
 static uint32_t am335x_lcd_divisor(uint32_t reference, uint32_t frequency)
 {
   uint32_t div;
-  uint32_t delta;
+  int32_t delta;
   uint32_t mindelta;
   int i;
 
@@ -374,7 +374,7 @@ static int am335x_set_refclk(uint32_t frequency)
   uint32_t sysclk;
   uint32_t mul;
   uint32_t div;
-  uint32_t delta;
+  int32_t delta;
   uint32_t mindelta;
   int timeout;
   int i;

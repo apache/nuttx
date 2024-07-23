@@ -65,7 +65,12 @@ ifeq ($(CONFIG_SENSORS_DHTXX),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BMI270),y)
+  CSRCS += bmi270_base.c
+ifeq ($(CONFIG_SENSORS_BMI270_UORB),y)
+  CSRCS += bmi270_uorb.c
+else
   CSRCS += bmi270.c
+endif
 endif
 
 # These drivers depend on I2C support
@@ -121,7 +126,12 @@ ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_LSM9DS1),y)
-  CSRCS += lsm9ds1.c
+  CSRCS += lsm9ds1_base.c
+  ifeq ($(CONFIG_SENSORS_LSM9DS1_UORB),y)
+    CSRCS += lsm9ds1_uorb.c
+  else
+    CSRCS += lsm9ds1.c
+  endif
 endif
 
 ifeq ($(CONFIG_SENSORS_MSA301),y)
@@ -137,7 +147,12 @@ ifeq ($(CONFIG_ADXL345_I2C),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_BH1749NUC),y)
+  CSRCS += bh1749nuc_base.c
+ifeq ($(CONFIG_SENSORS_BH1749NUC_UORB),y)
+  CSRCS += bh1749nuc_uorb.c
+else
   CSRCS += bh1749nuc.c
+endif
 endif
 
 ifeq ($(CONFIG_SENSORS_BH1750FVI),y)
@@ -155,6 +170,10 @@ ifeq ($(CONFIG_SENSORS_BMI160_UORB),y)
 else
   CSRCS += bmi160.c
 endif
+endif
+
+ifeq ($(CONFIG_SENSORS_BMM150),y)
+  CSRCS += bmm150.c
 endif
 
 ifeq ($(CONFIG_SENSORS_BMP180),y)
@@ -258,6 +277,10 @@ ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += sht3x.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SHT4X),y)
+  CSRCS += sht4x.c
+endif
+
 ifeq ($(CONFIG_SENSORS_SPS30),y)
   CSRCS += sps30.c
 endif
@@ -270,6 +293,10 @@ ifeq ($(CONFIG_SENSORS_LTR308),y)
   CSRCS += ltr308_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMM150),y)
+  CSRCS += bmm150_uorb.c
+endif
+
 endif # CONFIG_I2C
 
 # These drivers depend on SPI support
@@ -280,8 +307,16 @@ ifeq ($(CONFIG_ADXL345_SPI),y)
   CSRCS += adxl345_spi.c
 endif
 
+ifeq ($(CONFIG_SENSORS_ADXL362),y)
+  CSRCS += adxl362_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_ADXL372),y)
+ifeq ($(CONFIG_SENSORS_ADXL372_UORB),y)
+  CSRCS += adxl372_uorb.c
+else
   CSRCS += adxl372.c
+endif
 endif
 
 ifeq ($(CONFIG_LIS3DSH),y)

@@ -79,6 +79,10 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += rp2040_bmp180.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+  CSRCS += rp2040_bmp280.c
+endif
+
 ifeq ($(CONFIG_SENSORS_INA219),y)
   CSRCS += rp2040_ina219.c
 endif
@@ -89,6 +93,18 @@ endif
 
 ifeq ($(CONFIG_LCD_BACKPACK),y)
   CSRCS += rp2040_lcd_backpack.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+  CSRCS += rp2040_uniqueid.c
+endif
+
+ifeq ($(CONFIG_NET_W5500),y)
+CSRCS += rp2040_w5500.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
+  CSRCS += rp2040_max6675.c
 endif
 
 DEPPATH += --dep-path src

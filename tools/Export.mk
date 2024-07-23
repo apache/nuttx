@@ -80,6 +80,31 @@ endif
 	@echo "OBJDUMP=\"$(OBJDUMP)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "OBJEXT=\"$(OBJEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
 	@echo "STRIP=\"$(STRIP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "NUTTX_ARCH=\"$(CONFIG_ARCH)\"" >> $(EXPORTDIR)/makeinfo.sh
+ifdef CONFIG_ARCH_CHIP
+	@echo "NUTTX_ARCH_CHIP=\"$(CONFIG_ARCH_CHIP)\"" >> $(EXPORTDIR)/makeinfo.sh
+else
+	@echo "NUTTX_ARCH_CHIP=\"$(ARCH_CHIP_CUSTOM_NAME)\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
+ifdef CONFIG_ARCH_BOARD
+	@echo "NUTTX_BOARD=\"$(CONFIG_ARCH_BOARD)\"" >> $(EXPORTDIR)/makeinfo.sh
+else
+	@echo "NUTTX_BOARD=\"$(CONFIG_ARCH_BOARD_CUSTOM_NAME)\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
+ifdef CONFIG_BUILD_FLAT
+	@echo "NUTTX_BUILD=\"flat\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
+ifdef CONFIG_BUILD_PROTECTED
+	@echo "NUTTX_BUILD=\"protected\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
+ifdef CONFIG_BUILD_KERNEL
+	@echo "NUTTX_BUILD=\"kernel\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
+ifdef CONFIG_LIBCXX
+	@echo "NUTTX_CXX=\"libcxx\"" >> $(EXPORTDIR)/makeinfo.sh
+else
+	@echo "NUTTX_CXX=\"cxx\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
 	$(Q) chmod 755 $(EXPORTDIR)/makeinfo.sh
 
 clean:

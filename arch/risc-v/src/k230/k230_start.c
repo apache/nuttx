@@ -28,6 +28,7 @@
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/uart_16550.h>
+#include <nuttx/serial/uart_rpmsg.h>
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
@@ -63,9 +64,7 @@ static void k230_clear_bss(void)
 {
   uint32_t *dest;
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
+  /* Doing this inline just to be sure on the state of global variables. */
 
   for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
@@ -75,17 +74,17 @@ static void k230_clear_bss(void)
 
 #ifndef CONFIG_BUILD_KERNEL
 /****************************************************************************
- * Name: k230_copy_initialized
+ * Name: k230_copy_init_data
  ****************************************************************************/
 
-static void k230_copy_initialized(void)
+static void k230_copy_init_data(void)
 {
   const uint32_t *src;
   uint32_t *dest;
 
-  /* Move the initialized data section from his temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
+  /* Move the initialized data from their temporary holding spot at FLASH
+   * into the correct place in SRAM.  The correct place in SRAM is given
+   * by _sdata and _edata.  The temporary location is in FLASH at the
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
@@ -102,12 +101,6 @@ static void k230_copy_initialized(void)
  * Public Data
  ****************************************************************************/
 
-/* NOTE: g_idle_topstack needs to point the top of the idle stack
- * for CPU0 and this value is used in up_initial_state()
- */
-
-uintptr_t g_idle_topstack = K230_IDLESTACK_TOP;
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -122,20 +115,20 @@ void k230_start(int mhartid, const char *dtb)
     {
       k230_clear_bss();
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
       riscv_percpu_add_hart(mhartid);
 #else
-      k230_copy_initialized();
+      k230_copy_init_data();
 #endif
     }
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_ARCH_USE_S_MODE
     k230_hart_init();
 #endif
 
   /* Disable MMU */
 
-  WRITE_CSR(satp, 0x0);
+  WRITE_CSR(CSR_SATP, 0x0);
 
   /* Configure FPU */
 
@@ -184,10 +177,23 @@ cpux:
 
 void riscv_earlyserialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_earlyserialinit();
+#endif
 }
 
 void riscv_serialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_serialinit();
+#endif
 }
+
+#ifdef CONFIG_RPMSG_UART_CONSOLE
+int up_putc(int ch)
+{
+  /* place holder for now */
+
+  return ch;
+}
+#endif

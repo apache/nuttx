@@ -45,7 +45,9 @@
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/init.h>
+#include <nuttx/lib/math32.h>
 
+#include "task/task.h"
 #include "sched/sched.h"
 #include "signal/signal.h"
 #include "semaphore/semaphore.h"
@@ -142,7 +144,7 @@ dq_queue_t g_pendingtasks;
 
 dq_queue_t g_waitingforsignal;
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
 dq_queue_t g_waitingforfill;
@@ -183,77 +185,7 @@ volatile int g_npidhash;
  * ordered list or not.
  */
 
-const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
-{
-  {                                              /* TSTATE_TASK_INVALID */
-    NULL,
-    0
-  },
-  {                                              /* TSTATE_TASK_PENDING */
-    &g_pendingtasks,
-    TLIST_ATTR_PRIORITIZED
-  },
-#ifdef CONFIG_SMP
-  {                                              /* TSTATE_TASK_READYTORUN */
-    &g_readytorun,
-    TLIST_ATTR_PRIORITIZED
-  },
-  {                                              /* TSTATE_TASK_ASSIGNED */
-    g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
-  },
-  {                                              /* TSTATE_TASK_RUNNING */
-    g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
-  },
-#else
-  {                                              /* TSTATE_TASK_READYTORUN */
-    &g_readytorun,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
-  },
-  {                                              /* TSTATE_TASK_RUNNING */
-    &g_readytorun,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
-  },
-#endif
-  {                                              /* TSTATE_TASK_INACTIVE */
-    &g_inactivetasks,
-    0
-  },
-  {                                              /* TSTATE_WAIT_SEM */
-    (FAR void *)offsetof(sem_t, waitlist),
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
-  },
-  {                                              /* TSTATE_WAIT_SIG */
-    &g_waitingforsignal,
-    0
-  }
-#ifndef CONFIG_DISABLE_MQUEUE
-  ,
-  {                                              /* TSTATE_WAIT_MQNOTEMPTY */
-    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotempty),
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
-  },
-  {                                              /* TSTATE_WAIT_MQNOTFULL */
-    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotfull),
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_OFFSET
-  }
-#endif
-#ifdef CONFIG_PAGING
-  ,
-  {                                              /* TSTATE_WAIT_PAGEFILL */
-    &g_waitingforfill,
-    TLIST_ATTR_PRIORITIZED
-  }
-#endif
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-  ,
-  {                                              /* TSTATE_TASK_STOPPED */
-    &g_stoppedtasks,
-    0                                            /* See tcb->prev_state */
-  },
-#endif
-};
+struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
 
 /* This is the current initialization state.  The level of initialization
  * is only important early in the start-up sequence when certain OS or
@@ -274,24 +206,287 @@ uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
  * bringing up the rest of the system.
  */
 
-static struct task_tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+static struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
 
 /* This is the name of the idle task */
 
-#if CONFIG_TASK_NAME_SIZE <= 0 || !defined(CONFIG_SMP)
-#  ifdef CONFIG_SMP
-static const char g_idlename[] = "CPU_Idle";
-#  else
+#if CONFIG_TASK_NAME_SIZE > 0 && !defined(CONFIG_SMP)
 static const char g_idlename[] = "Idle_Task";
-#  endif
 #endif
 
-/* This is IDLE threads argument list.  NOTE: Normally the argument
- * list is created on the stack prior to starting the task.  We have to
- * do things little differently here for the IDLE tasks.
- */
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
+/****************************************************************************
+ * Name: tasklist_initialize
+ *
+ * Description:
+ *   Initialization of table of task lists.This table is indexed by the
+ *   task state enumeration type (tstate_t) and provides a pointer to
+ *   the associated static task list (if there is one) as well as a set
+ *   of attribute flags indicating properties of the list, for example,
+ *   if the list is an ordered list or not.
+ *
+ ****************************************************************************/
+
+static void tasklist_initialize(void)
+{
+  FAR struct tasklist_s *tlist = (FAR void *)&g_tasklisttable;
+
+  /* TSTATE_TASK_INVALID */
+
+  tlist[TSTATE_TASK_INVALID].list = NULL;
+  tlist[TSTATE_TASK_INVALID].attr = 0;
+
+  /* TSTATE_TASK_PENDING */
+
+  tlist[TSTATE_TASK_PENDING].list = list_pendingtasks();
+  tlist[TSTATE_TASK_PENDING].attr = TLIST_ATTR_PRIORITIZED;
+
+#ifdef CONFIG_SMP
+
+  /* TSTATE_TASK_READYTORUN */
+
+  tlist[TSTATE_TASK_READYTORUN].list = list_readytorun();
+  tlist[TSTATE_TASK_READYTORUN].attr = TLIST_ATTR_PRIORITIZED;
+
+  /* TSTATE_TASK_ASSIGNED */
+
+  tlist[TSTATE_TASK_ASSIGNED].list = list_assignedtasks(0);
+  tlist[TSTATE_TASK_ASSIGNED].attr = TLIST_ATTR_PRIORITIZED |
+                                     TLIST_ATTR_INDEXED |
+                                     TLIST_ATTR_RUNNABLE;
+
+  /* TSTATE_TASK_RUNNING */
+
+  tlist[TSTATE_TASK_RUNNING].list = list_assignedtasks(0);
+  tlist[TSTATE_TASK_RUNNING].attr = TLIST_ATTR_PRIORITIZED |
+                                    TLIST_ATTR_INDEXED |
+                                    TLIST_ATTR_RUNNABLE;
+#else
+
+  /* TSTATE_TASK_READYTORUN */
+
+  tlist[TSTATE_TASK_READYTORUN].list = list_readytorun();
+  tlist[TSTATE_TASK_READYTORUN].attr = TLIST_ATTR_PRIORITIZED |
+                                       TLIST_ATTR_RUNNABLE;
+
+  /* TSTATE_TASK_RUNNING */
+
+  tlist[TSTATE_TASK_RUNNING].list = list_readytorun();
+  tlist[TSTATE_TASK_RUNNING].attr = TLIST_ATTR_PRIORITIZED |
+                                    TLIST_ATTR_RUNNABLE;
+#endif
+
+  /* TSTATE_TASK_INACTIVE */
+
+  tlist[TSTATE_TASK_INACTIVE].list = list_inactivetasks();
+  tlist[TSTATE_TASK_INACTIVE].attr = 0;
+
+  /* TSTATE_WAIT_SEM */
+
+  tlist[TSTATE_WAIT_SEM].list = (FAR void *)offsetof(sem_t, waitlist);
+  tlist[TSTATE_WAIT_SEM].attr = TLIST_ATTR_PRIORITIZED |
+                                TLIST_ATTR_OFFSET;
+
+  /* TSTATE_WAIT_SIG */
+
+  tlist[TSTATE_WAIT_SIG].list = list_waitingforsignal();
+  tlist[TSTATE_WAIT_SIG].attr = 0;
+
+#ifndef CONFIG_DISABLE_MQUEUE
+
+  /* TSTATE_WAIT_MQNOTEMPTY */
+
+  tlist[TSTATE_WAIT_MQNOTEMPTY].list =
+    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotempty);
+  tlist[TSTATE_WAIT_MQNOTEMPTY].attr = TLIST_ATTR_PRIORITIZED |
+                                       TLIST_ATTR_OFFSET;
+
+  /* TSTATE_WAIT_MQNOTFULL */
+
+  tlist[TSTATE_WAIT_MQNOTFULL].list =
+    (FAR void *)offsetof(struct mqueue_inode_s, cmn.waitfornotfull);
+  tlist[TSTATE_WAIT_MQNOTFULL].attr = TLIST_ATTR_PRIORITIZED |
+                                      TLIST_ATTR_OFFSET;
+#endif
+
+#ifdef CONFIG_LEGACY_PAGING
+
+  /* TSTATE_WAIT_PAGEFILL */
+
+  tlist[TSTATE_WAIT_PAGEFILL].list = list_waitingforfill();
+  tlist[TSTATE_WAIT_PAGEFILL].attr = TLIST_ATTR_PRIORITIZED;
+#endif
+
+#ifdef CONFIG_SIG_SIGSTOP_ACTION
+
+  /* TSTATE_TASK_STOPPED */
+
+  tlist[TSTATE_TASK_STOPPED].list = list_stoppedtasks();
+  tlist[TSTATE_TASK_STOPPED].attr = 0;
+
+#endif
+}
+
+/****************************************************************************
+ * Name: idle_task_initialize
+ *
+ * Description:
+ *   IDLE Task Initialization
+ *
+ ****************************************************************************/
+
+static void idle_task_initialize(void)
+{
+  FAR struct tcb_s *tcb;
+  FAR dq_queue_t *tasklist;
+  int i;
+
+  memset(g_idletcb, 0, sizeof(g_idletcb));
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      tcb = &g_idletcb[i];
+
+      /* Initialize a TCB for this thread of execution.  NOTE:  The default
+       * value for most components of the g_idletcb are zero.  The entire
+       * structure is set to zero.  Then only the (potentially) non-zero
+       * elements are initialized. NOTE:  The idle task is the only task in
+       * that has pid == 0 and sched_priority == 0.
+       */
+
+      tcb->pid        = i;
+      tcb->task_state = TSTATE_TASK_RUNNING;
+
+      /* Set the entry point.  This is only for debug purposes.  NOTE: that
+       * the start_t entry point is not saved.  That is acceptable, however,
+       * because it can be used only for restarting a task: The IDLE task
+       * cannot be restarted.
+       */
+
+#ifdef CONFIG_SMP
+      if (i > 0)
+        {
+          tcb->start      = nx_idle_trampoline;
+          tcb->entry.main = (main_t)nx_idle_trampoline;
+        }
+      else
+#endif
+        {
+          tcb->start      = nx_start;
+          tcb->entry.main = (main_t)nx_start;
+        }
+
+      /* Set the task flags to indicate that this is a kernel thread and, if
+       * configured for SMP, that this task is locked to this CPU.
+       */
+
+#ifdef CONFIG_SMP
+      tcb->flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
+      tcb->cpu   = i;
+
+      /* Set the affinity mask to allow the thread to run on all CPUs.  No,
+       * this IDLE thread can only run on its assigned CPU.  That is
+       * enforced by the TCB_FLAG_CPU_LOCKED which overrides the affinity
+       * mask.  This is essential because all tasks inherit the affinity
+       * mask from their parent and, ultimately, the parent of all tasks is
+       * the IDLE task.
+       */
+
+      tcb->affinity =
+        (cpu_set_t)(CONFIG_SMP_DEFAULT_CPUSET & SCHED_ALL_CPUS);
+#else
+      tcb->flags = TCB_FLAG_TTYPE_KERNEL;
+#endif
+
+#if CONFIG_TASK_NAME_SIZE > 0
+      /* Set the IDLE task name */
+
+#  ifdef CONFIG_SMP
+      snprintf(tcb->name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", i);
+#  else
+      strlcpy(tcb->name, g_idlename, CONFIG_TASK_NAME_SIZE);
+#  endif
+
+#endif /* CONFIG_TASK_NAME_SIZE */
+
+      /* Then add the idle task's TCB to the head of the current ready to
+       * run list.
+       */
+
+#ifdef CONFIG_SMP
+      tasklist = TLIST_HEAD(tcb, i);
+#else
+      tasklist = TLIST_HEAD(tcb);
+#endif
+      dq_addfirst((FAR dq_entry_t *)tcb, tasklist);
+
+      /* Mark the idle task as the running task */
+
+      g_running_tasks[i] = tcb;
+    }
+}
+
+/****************************************************************************
+ * Name: idle_group_initialize
+ *
+ * Description:
+ *   IDLE Group Initialization
+ *
+ ****************************************************************************/
+
+static void idle_group_initialize(void)
+{
+  FAR struct tcb_s *tcb;
+  int hashndx;
+  int i;
+
+  /* Assign the process ID(s) of ZERO to the idle task(s) */
+
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      tcb = &g_idletcb[i];
+
+      hashndx = PIDHASH(i);
+      g_pidhash[hashndx] = tcb;
+
+      /* Allocate the IDLE group */
+
+      DEBUGVERIFY(
+        group_initialize((FAR struct task_tcb_s *)tcb, tcb->flags));
+
+      /* Initialize the task join */
+
+      nxtask_joininit(tcb);
+
+#ifdef CONFIG_SMP
+      /* Create a stack for all CPU IDLE threads (except CPU0 which already
+       * has a stack).
+       */
+
+      if (i > 0)
+        {
+          DEBUGVERIFY(up_cpu_idlestack(i, tcb, CONFIG_IDLETHREAD_STACKSIZE));
+        }
+#endif
+
+      /* Initialize the processor-specific portion of the TCB */
+
+      up_initial_state(tcb);
+
+      /* Initialize the thread local storage */
+
+      tls_init_info(tcb);
+
+      /* Complete initialization of the IDLE group.  Suppress retention
+       * of child status in the IDLE group.
+       */
+
+      group_postinitialize((FAR struct task_tcb_s *)tcb);
+      tcb->group->tg_flags = GROUP_FLAG_NOCLDWAIT | GROUP_FLAG_PRIVILEGED;
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -323,110 +518,23 @@ void nx_start(void)
 
   g_nx_initstate = OSINIT_BOOT;
 
-  /* Initialize RTOS Data ***************************************************/
+  /* Initialize task list table *********************************************/
 
-  sched_trace_begin();
+  tasklist_initialize();
 
   /* Initialize the IDLE task TCB *******************************************/
 
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      FAR dq_queue_t *tasklist;
-
-      /* Initialize a TCB for this thread of execution.  NOTE:  The default
-       * value for most components of the g_idletcb are zero.  The entire
-       * structure is set to zero.  Then only the (potentially) non-zero
-       * elements are initialized. NOTE:  The idle task is the only task in
-       * that has pid == 0 and sched_priority == 0.
-       */
-
-      memset((void *)&g_idletcb[i], 0, sizeof(struct task_tcb_s));
-      g_idletcb[i].cmn.pid        = i;
-      g_idletcb[i].cmn.task_state = TSTATE_TASK_RUNNING;
-
-      /* Set the entry point.  This is only for debug purposes.  NOTE: that
-       * the start_t entry point is not saved.  That is acceptable, however,
-       * because it can be used only for restarting a task: The IDLE task
-       * cannot be restarted.
-       */
-
-#ifdef CONFIG_SMP
-      if (i > 0)
-        {
-          g_idletcb[i].cmn.start      = nx_idle_trampoline;
-          g_idletcb[i].cmn.entry.main = (main_t)nx_idle_trampoline;
-        }
-      else
-#endif
-        {
-          g_idletcb[i].cmn.start      = nx_start;
-          g_idletcb[i].cmn.entry.main = (main_t)nx_start;
-        }
-
-      /* Set the task flags to indicate that this is a kernel thread and, if
-       * configured for SMP, that this task is locked to this CPU.
-       */
-
-#ifdef CONFIG_SMP
-      g_idletcb[i].cmn.flags = (TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_CPU_LOCKED);
-      g_idletcb[i].cmn.cpu   = i;
-
-      /* Set the affinity mask to allow the thread to run on all CPUs.  No,
-       * this IDLE thread can only run on its assigned CPU.  That is
-       * enforced by the TCB_FLAG_CPU_LOCKED which overrides the affinity
-       * mask.  This is essential because all tasks inherit the affinity
-       * mask from their parent and, ultimately, the parent of all tasks is
-       * the IDLE task.
-       */
-
-      g_idletcb[i].cmn.affinity =
-        (cpu_set_t)(CONFIG_SMP_DEFAULT_CPUSET & SCHED_ALL_CPUS);
-#else
-      g_idletcb[i].cmn.flags = TCB_FLAG_TTYPE_KERNEL;
-#endif
-
-#if CONFIG_TASK_NAME_SIZE > 0
-      /* Set the IDLE task name */
-
-#  ifdef CONFIG_SMP
-      snprintf(g_idletcb[i].cmn.name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE",
-               i);
-#  else
-      strlcpy(g_idletcb[i].cmn.name, g_idlename, CONFIG_TASK_NAME_SIZE);
-#  endif
-
-      /* Configure the task name in the argument list.  The IDLE task does
-       * not really have an argument list, but this name is still useful
-       * for things like the NSH PS command.
-       *
-       * In the kernel mode build, the arguments are saved on the task's
-       * stack and there is no support that yet.
-       */
-
-      g_idleargv[i][0] = g_idletcb[i].cmn.name;
-#else
-      g_idleargv[i][0] = (FAR char *)g_idlename;
-#endif /* CONFIG_TASK_NAME_SIZE */
-
-      /* Then add the idle task's TCB to the head of the current ready to
-       * run list.
-       */
-
-#ifdef CONFIG_SMP
-      tasklist = TLIST_HEAD(&g_idletcb[i].cmn, i);
-#else
-      tasklist = TLIST_HEAD(&g_idletcb[i].cmn);
-#endif
-      dq_addfirst((FAR dq_entry_t *)&g_idletcb[i], tasklist);
-
-      /* Mark the idle task as the running task */
-
-      g_running_tasks[i] = &g_idletcb[i].cmn;
-    }
+  idle_task_initialize();
 
   /* Task lists are initialized */
 
   g_nx_initstate = OSINIT_TASKLISTS;
+
+  /* Initialize RTOS Data ***************************************************/
+
+  drivers_early_initialize();
+
+  sched_trace_begin();
 
   /* Initialize RTOS facilities *********************************************/
 
@@ -494,7 +602,7 @@ void nx_start(void)
 
   /* Initialize the logic that determine unique process IDs. */
 
-  g_npidhash = 4;
+  g_npidhash = 1 << LOG2_CEIL(CONFIG_PID_INITIAL_COUNT);
   while (g_npidhash <= CONFIG_SMP_NCPUS)
     {
       g_npidhash <<= 1;
@@ -505,48 +613,7 @@ void nx_start(void)
 
   /* IDLE Group Initialization **********************************************/
 
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      int hashndx;
-
-      /* Assign the process ID(s) of ZERO to the idle task(s) */
-
-      hashndx            = PIDHASH(i);
-      g_pidhash[hashndx] = &g_idletcb[i].cmn;
-
-      /* Allocate the IDLE group */
-
-      DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
-      g_idletcb[i].cmn.group->tg_info->argv = &g_idleargv[i][0];
-
-#ifdef CONFIG_SMP
-      /* Create a stack for all CPU IDLE threads (except CPU0 which already
-       * has a stack).
-       */
-
-      if (i > 0)
-        {
-          DEBUGVERIFY(up_cpu_idlestack(i, &g_idletcb[i].cmn,
-                                       CONFIG_IDLETHREAD_STACKSIZE));
-        }
-#endif
-
-      /* Initialize the processor-specific portion of the TCB */
-
-      up_initial_state(&g_idletcb[i].cmn);
-
-      /* Initialize the thread local storage */
-
-      tls_init_info(&g_idletcb[i].cmn);
-
-      /* Complete initialization of the IDLE group.  Suppress retention
-       * of child status in the IDLE group.
-       */
-
-      group_initialize(&g_idletcb[i]);
-      g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT |
-                                         GROUP_FLAG_PRIVILEGED;
-    }
+  idle_group_initialize();
 
   g_lastpid = CONFIG_SMP_NCPUS - 1;
 
@@ -595,12 +662,6 @@ void nx_start(void)
   nxmq_initialize();
 #endif
 
-#ifndef CONFIG_DISABLE_MQUEUE_SYSV
-  /* Initialize the System V message queue facility (if in link) */
-
-  nxmsg_initialize();
-#endif
-
 #ifdef CONFIG_NET
   /* Initialize the networking system */
 
@@ -644,7 +705,7 @@ void nx_start(void)
 
   /* Announce that the CPU0 IDLE task has started */
 
-  sched_note_start(&g_idletcb[0].cmn);
+  sched_note_start(&g_idletcb[0]);
 
   /* Initialize stdio for the IDLE task of each CPU */
 
@@ -654,7 +715,8 @@ void nx_start(void)
         {
           /* Clone stdout, stderr, stdin from the CPU0 IDLE task. */
 
-          DEBUGVERIFY(group_setuptaskfiles(&g_idletcb[i], NULL, true));
+          DEBUGVERIFY(group_setuptaskfiles(
+            (FAR struct task_tcb_s *)&g_idletcb[i], NULL, true));
         }
       else
         {

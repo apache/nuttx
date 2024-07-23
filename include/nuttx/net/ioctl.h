@@ -140,6 +140,11 @@
 
 #define SIOCETHTOOL        _SIOC(0x003D)  /* Ethtool interface */
 
+/* TCP socket control *******************************************************/
+
+#define SIOCATMARK         _SIOC(0x003E)  /* Determine whether socket is at
+                                           * out-of-band mark */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

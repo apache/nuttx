@@ -412,22 +412,22 @@ static void imxrt_pll2_pfd(void)
 
   if (g_initial_clkconfig.sys_pll2.pfd0 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD0_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD0_UPDATE;
     }
 
   if (g_initial_clkconfig.sys_pll2.pfd1 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD1_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD1_UPDATE;
     }
 
   if (g_initial_clkconfig.sys_pll2.pfd2 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD2_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD2_UPDATE;
     }
 
   if (g_initial_clkconfig.sys_pll2.pfd3 > 0)
     {
-      reg |= ANADIG_PLL_SYS_PLL2_UPDATE_PFD3_UPDATE;
+      reg ^= ANADIG_PLL_SYS_PLL2_UPDATE_PFD3_UPDATE;
     }
 
   putreg32(reg, IMXRT_ANADIG_PLL_SYS_PLL2_UPDATE);
@@ -670,15 +670,7 @@ void imxrt_clockconfig()
 
   /* Set Soc VDD and wait for it to stablise */
 
-  if ((getreg32(IMXRT_OCOTP_FUSE(16)) == 0x57ac5969)
-      && ((getreg32(IMXRT_OCOTP_FUSE(17)) & 0xffu) == 0x0b))
-    {
-      imxrt_pmu_vdd1p0_buckmode_targetvoltage(dcdc_1p0bucktarget1p15v);
-    }
-  else
-    {
-      imxrt_pmu_vdd1p0_buckmode_targetvoltage(dcdc_1p0bucktarget1p125v);
-    }
+  imxrt_pmu_vdd1p0_buckmode_targetvoltage(dcdc_1p0bucktarget1p15v);
 
   /* FUSE FBB bit so that FBB has to be enabled */
 

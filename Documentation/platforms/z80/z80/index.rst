@@ -9,7 +9,7 @@ Z80 instruction simulator called z80sim.
 
 **STATUS:** This port is complete and stable to the extent that it can
 be tested using an instruction set simulator. Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/z80/z80/z80sim/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/z80/z80/boards/z80sim/README.txt>`__
 file for further information.
 
 **XTRS: TRS-80 Model I/III/4/4P Emulator for Unix**. A very similar Z80

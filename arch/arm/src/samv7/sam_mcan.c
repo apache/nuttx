@@ -144,10 +144,10 @@
                         (float)CONFIG_SAMV7_MCAN0_FBITRATE)) - 1))
 #  define MCAN0_DSJW   (CONFIG_SAMV7_MCAN0_FFSJW - 1)
 
-#  if MCAN0_DTSEG1 > 15
+#  if MCAN0_DTSEG1 > 31
 #    error Invalid MCAN0 DTSEG1
 #  endif
-#  if MCAN0_DTSEG2 > 7
+#  if MCAN0_DTSEG2 > 15
 #    error Invalid MCAN0 DTSEG2
 #  endif
 #  if MCAN0_DSJW > 3
@@ -412,13 +412,13 @@
                         (float)CONFIG_SAMV7_MCAN1_BITRATE)) - 1))
 #  define MCAN1_SJW    (CONFIG_SAMV7_MCAN1_FSJW - 1)
 
-#  if MCAN1_NTSEG1 > 63
+#  if MCAN1_TSEG1 > 63
 #    error Invalid MCAN1 NTSEG1
 #  endif
-#  if MCAN1_NTSEG2 > 15
+#  if MCAN1_TSEG2 > 15
 #    error Invalid MCAN1 NTSEG2
 #  endif
-#  if MCAN1_NSJW > 15
+#  if MCAN1_SJW > 15
 #    error Invalid MCAN1 NSJW
 #  endif
 
@@ -429,10 +429,10 @@
                         (float)CONFIG_SAMV7_MCAN1_FBITRATE)) - 1))
 #  define MCAN1_DSJW   (CONFIG_SAMV7_MCAN1_FFSJW - 1)
 
-#if MCAN1_DTSEG1 > 15
+#if MCAN1_DTSEG1 > 31
 #  error Invalid MCAN1 DTSEG1
 #endif
-#if MCAN1_DTSEG2 > 7
+#if MCAN1_DTSEG2 > 15
 #  error Invalid MCAN1 DTSEG2
 #endif
 #if MCAN1_DSJW > 3
@@ -2650,33 +2650,70 @@ static int mcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
 
           DEBUGASSERT(bt != NULL);
 
-          regval       = mcan_getreg(priv, SAM_MCAN_NBTP_OFFSET);
-
-          if (priv->rev == 0)
+#ifdef CONFIG_CAN_FD
+          if (bt->type == CAN_BITTIMING_DATA)
             {
-              /* Revision A */
+              if (priv->rev == 0)
+                {
+                  /* Revision A */
 
-              bt->bt_sjw   = ((regval & MCAN_REVA_BTP_SJW_MASK) >>
-                              MCAN_REVA_BTP_SJW_SHIFT) + 1;
-              bt->bt_tseg1 = ((regval & MCAN_REVA_BTP_TSEG1_MASK) >>
-                              MCAN_REVA_BTP_TSEG1_SHIFT) + 1;
-              bt->bt_tseg2 = ((regval & MCAN_REVA_BTP_TSEG2_MASK) >>
-                              MCAN_REVA_BTP_TSEG2_SHIFT) + 1;
-              brp          = ((regval & MCAN_REVA_BTP_BRP_MASK) >>
-                              MCAN_REVA_BTP_BRP_SHIFT) + 1;
+                  regval       = mcan_getreg(priv,
+                                  SAM_MCAN_REVA_FBTP_OFFSET);
+                  bt->bt_sjw   = ((regval & MCAN_REVA_FBTP_FSJW_MASK) >>
+                                  MCAN_REVA_FBTP_FSJW_SHIFT) + 1;
+                  bt->bt_tseg1 = ((regval & MCAN_REVA_FBTP_FTSEG1_MASK) >>
+                                  MCAN_REVA_FBTP_FTSEG1_SHIFT) + 1;
+                  bt->bt_tseg2 = ((regval & MCAN_REVA_FBTP_FTSEG2_MASK) >>
+                                  MCAN_REVA_FBTP_FTSEG2_SHIFT) + 1;
+                  brp          = ((regval & MCAN_REVA_FBTP_FBRP_MASK) >>
+                                  MCAN_REVA_FBTP_FBRP_SHIFT) + 1;
+                }
+              else
+                {
+                  /* Revision B */
+
+                  regval       = mcan_getreg(priv, SAM_MCAN_DBTP_OFFSET);
+                  bt->bt_sjw   = ((regval & MCAN_DBTP_DSJW_MASK) >>
+                                  MCAN_DBTP_DSJW_SHIFT) + 1;
+                  bt->bt_tseg1 = ((regval & MCAN_DBTP_DTSEG1_MASK) >>
+                                  MCAN_DBTP_DTSEG1_SHIFT) + 1;
+                  bt->bt_tseg2 = ((regval & MCAN_DBTP_DTSEG2_MASK) >>
+                                  MCAN_DBTP_DTSEG2_SHIFT) + 1;
+                  brp          = ((regval & MCAN_DBTP_DBRP_MASK) >>
+                                  MCAN_DBTP_DBRP_SHIFT) + 1;
+                }
             }
           else
+#endif
             {
-              /* Revision B */
+              if (priv->rev == 0)
+                {
+                  /* Revision A */
 
-              bt->bt_sjw   = ((regval & MCAN_NBTP_NSJW_MASK) >>
-                              MCAN_NBTP_NSJW_SHIFT) + 1;
-              bt->bt_tseg1 = ((regval & MCAN_NBTP_NTSEG1_MASK) >>
-                              MCAN_NBTP_NTSEG1_SHIFT) + 1;
-              bt->bt_tseg2 = ((regval & MCAN_NBTP_NTSEG2_MASK) >>
-                              MCAN_NBTP_NTSEG2_SHIFT) + 1;
-              brp          = ((regval & MCAN_NBTP_NBRP_MASK) >>
-                              MCAN_NBTP_NBRP_SHIFT) + 1;
+                  regval       = mcan_getreg(priv, SAM_MCAN_REVA_BTP_OFFSET);
+                  bt->bt_sjw   = ((regval & MCAN_REVA_BTP_SJW_MASK) >>
+                                  MCAN_REVA_BTP_SJW_SHIFT) + 1;
+                  bt->bt_tseg1 = ((regval & MCAN_REVA_BTP_TSEG1_MASK) >>
+                                  MCAN_REVA_BTP_TSEG1_SHIFT) + 1;
+                  bt->bt_tseg2 = ((regval & MCAN_REVA_BTP_TSEG2_MASK) >>
+                                  MCAN_REVA_BTP_TSEG2_SHIFT) + 1;
+                  brp          = ((regval & MCAN_REVA_BTP_BRP_MASK) >>
+                                  MCAN_REVA_BTP_BRP_SHIFT) + 1;
+                }
+              else
+                {
+                  /* Revision B */
+
+                  regval       = mcan_getreg(priv, SAM_MCAN_NBTP_OFFSET);
+                  bt->bt_sjw   = ((regval & MCAN_NBTP_NSJW_MASK) >>
+                                  MCAN_NBTP_NSJW_SHIFT) + 1;
+                  bt->bt_tseg1 = ((regval & MCAN_NBTP_NTSEG1_MASK) >>
+                                  MCAN_NBTP_NTSEG1_SHIFT) + 1;
+                  bt->bt_tseg2 = ((regval & MCAN_NBTP_NTSEG2_MASK) >>
+                                  MCAN_NBTP_NTSEG2_SHIFT) + 1;
+                  brp          = ((regval & MCAN_NBTP_NBRP_MASK) >>
+                                  MCAN_NBTP_NBRP_SHIFT) + 1;
+                }
             }
 
           bt->bt_baud  = SAMV7_MCANCLK_FREQUENCY / brp /
@@ -2733,17 +2770,41 @@ static int mcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
           /* Save the value of the new bit timing register */
 
           flags = enter_critical_section();
-          if (priv->rev == 0)
+#ifdef CONFIG_CAN_FD
+          if (bt->type == CAN_BITTIMING_DATA)
             {
-              priv->btp = MCAN_REVA_BTP_BRP(brp) |
-                          MCAN_REVA_BTP_TSEG1(tseg1) |
-                          MCAN_REVA_BTP_TSEG2(tseg2) |
-                          MCAN_REVA_BTP_SJW(sjw);
+              if (priv->rev == 0)
+                {
+                  priv->fbtp = MCAN_REVA_FBTP_FBRP(brp) |
+                               MCAN_REVA_FBTP_FTSEG1(tseg1) |
+                               MCAN_REVA_FBTP_FTSEG2(tseg2) |
+                               MCAN_REVA_FBTP_FSJW(sjw);
+                }
+              else
+                {
+                  priv->fbtp = MCAN_DBTP_DBRP(brp) |
+                               MCAN_DBTP_DTSEG1(tseg1) |
+                               MCAN_DBTP_DTSEG2(tseg2) |
+                               MCAN_DBTP_DSJW(sjw);
+                }
             }
           else
+#endif
             {
-              priv->btp = MCAN_NBTP_NBRP(brp) | MCAN_NBTP_NTSEG1(tseg1) |
-                          MCAN_NBTP_NTSEG2(tseg2) | MCAN_NBTP_NSJW(sjw);
+              if (priv->rev == 0)
+                {
+                  priv->btp = MCAN_REVA_BTP_BRP(brp) |
+                              MCAN_REVA_BTP_TSEG1(tseg1) |
+                              MCAN_REVA_BTP_TSEG2(tseg2) |
+                              MCAN_REVA_BTP_SJW(sjw);
+                }
+              else
+                {
+                  priv->btp = MCAN_NBTP_NBRP(brp) |
+                              MCAN_NBTP_NTSEG1(tseg1) |
+                              MCAN_NBTP_NTSEG2(tseg2) |
+                              MCAN_NBTP_NSJW(sjw);
+                }
             }
 
           /* We need to reset to instantiate the new timing.  Save

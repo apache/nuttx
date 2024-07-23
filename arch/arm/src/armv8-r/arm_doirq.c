@@ -31,6 +31,7 @@
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <sched/sched.h>
 
 #include "arm_internal.h"
 #include "arm_gic.h"
@@ -64,6 +65,13 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (regs != CURRENT_REGS)
     {
+      /* Record the new "running" task when context switch occurred.
+       * g_running_tasks[] is only used by assertion logic for reporting
+       * crashes.
+       */
+
+      g_running_tasks[this_cpu()] = this_task();
+
       restore_critical_section();
       regs = (uint32_t *)CURRENT_REGS;
     }

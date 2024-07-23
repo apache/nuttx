@@ -89,10 +89,6 @@ int tgkill(pid_t pid, pid_t tid, int signo)
       goto errout;
     }
 
-  /* Keep things stationary through the following */
-
-  sched_lock();
-
   /* Create the siginfo structure */
 
   info.si_signo           = signo;
@@ -110,7 +106,7 @@ int tgkill(pid_t pid, pid_t tid, int signo)
   if (!stcb)
     {
       ret = -ESRCH;
-      goto errout_with_lock;
+      goto errout;
     }
 
   /* Dispatch the signal to thread, bypassing normal task group thread
@@ -118,7 +114,6 @@ int tgkill(pid_t pid, pid_t tid, int signo)
    */
 
   ret = nxsig_tcbdispatch(stcb, &info);
-  sched_unlock();
 
   if (ret < 0)
     {
@@ -127,8 +122,6 @@ int tgkill(pid_t pid, pid_t tid, int signo)
 
   return OK;
 
-errout_with_lock:
-  sched_unlock();
 errout:
   set_errno(-ret);
   return ERROR;

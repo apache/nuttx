@@ -24,21 +24,29 @@ set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_C_COMPILER_FORCED TRUE)
 set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
-if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32 OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64)
+if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32
+   OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64
+   OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64ILP32
+   OR CONFIG_RISCV_TOOLCHAIN_CLANG)
   if(NOT CONFIG_RISCV_TOOLCHAIN)
     set(CONFIG_RISCV_TOOLCHAIN GNU_RVG)
   endif()
 endif()
 
 # Default toolchain
-find_program(RV_COMPILER riscv-none-elf-gcc)
-if(RV_COMPILER)
-  set(TOOLCHAIN_PREFIX riscv-none-elf)
+
+if(CONFIG_ARCH_TOOLCHAIN_CLANG)
+  set(TOOLCHAIN_PREFIX riscv64-unknown-elf)
 else()
-  if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32)
-    set(TOOLCHAIN_PREFIX riscv32-unknown-elf)
+  find_program(RV_COMPILER riscv-none-elf-gcc)
+  if(RV_COMPILER)
+    set(TOOLCHAIN_PREFIX riscv-none-elf)
   else()
-    set(TOOLCHAIN_PREFIX riscv64-unknown-elf)
+    if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32)
+      set(TOOLCHAIN_PREFIX riscv32-unknown-elf)
+    else()
+      set(TOOLCHAIN_PREFIX riscv64-unknown-elf)
+    endif()
   endif()
 endif()
 
@@ -46,26 +54,56 @@ set(CMAKE_LIBRARY_ARCHITECTURE ${TOOLCHAIN_PREFIX})
 set(CMAKE_C_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
 set(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_PREFIX})
 
-set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
-set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
-set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
-set(CMAKE_STRIP ${TOOLCHAIN_PREFIX}-strip --strip-unneeded)
-set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-objcopy)
-set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-objdump)
-set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-gcc)
-set(CMAKE_LD ${TOOLCHAIN_PREFIX}-ld)
-set(CMAKE_AR ${TOOLCHAIN_PREFIX}-ar)
-set(CMAKE_NM ${TOOLCHAIN_PREFIX}-nm)
-set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-gcc-ranlib)
+if(CONFIG_ARCH_TOOLCHAIN_CLANG)
+  set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}-clang)
+  set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-clang)
+  set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-clang++)
+  set(CMAKE_STRIP ${TOOLCHAIN_PREFIX}-llvm-strip --strip-unneeded)
+  set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-llvm-objcopy)
+  set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-llvm-objdump)
+  set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-ld)
+  set(CMAKE_LD ${TOOLCHAIN_PREFIX}-ld)
+  set(CMAKE_AR ${TOOLCHAIN_PREFIX}-llvm-ar)
+  set(CMAKE_NM ${TOOLCHAIN_PREFIX}-llvm-nm)
+  set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-llvm-ranlib)
 
-if(CONFIG_LTO_FULL)
-  add_compile_options(-flto)
-  if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL "GNU_RVG")
+  # Since the no_builtin attribute is not fully supported on Clang disable the
+  # built-in functions, refer:
+  # https://github.com/apache/incubator-nuttx/pull/5971
+
+  add_compile_options(-fno-builtin)
+else()
+  set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+  set(CMAKE_C_COMPILER ${CMAKE_ASM_COMPILER})
+  set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
+  set(CMAKE_STRIP ${TOOLCHAIN_PREFIX}-strip --strip-unneeded)
+  set(CMAKE_OBJCOPY ${TOOLCHAIN_PREFIX}-objcopy)
+  set(CMAKE_OBJDUMP ${TOOLCHAIN_PREFIX}-objdump)
+
+  if(CONFIG_LTO_FULL AND CONFIG_ARCH_TOOLCHAIN_GNU)
+    set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-gcc)
     set(CMAKE_LD ${TOOLCHAIN_PREFIX}-gcc)
     set(CMAKE_AR ${TOOLCHAIN_PREFIX}-gcc-ar)
     set(CMAKE_NM ${TOOLCHAIN_PREFIX}-gcc-nm)
-    add_compile_options(-fuse-linker-plugin)
+    set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-gcc-ranlib)
+  else()
+    set(CMAKE_LINKER ${TOOLCHAIN_PREFIX}-ld)
+    set(CMAKE_LD ${TOOLCHAIN_PREFIX}-ld)
+    set(CMAKE_AR ${TOOLCHAIN_PREFIX}-ar)
+    set(CMAKE_NM ${TOOLCHAIN_PREFIX}-nm)
+    set(CMAKE_RANLIB ${TOOLCHAIN_PREFIX}-ranlib)
+  endif()
+endif()
+
+# Link Time Optimization
+
+if(CONFIG_LTO_THIN)
+  add_compile_options(-flto=thin)
+elseif(CONFIG_LTO_FULL)
+  add_compile_options(-flto)
+  if(CONFIG_ARCH_TOOLCHAIN_GNU)
     add_compile_options(-fno-builtin)
+    add_compile_options(-fuse-linker-plugin)
   endif()
 endif()
 
@@ -78,7 +116,11 @@ set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
 elseif(CONFIG_DEBUG_FULLOPT)
-  add_compile_options(-Os)
+  if(CONFIG_ARCH_TOOLCHAIN_CLANG)
+    add_compile_options(-Oz)
+  else()
+    add_compile_options(-Os)
+  endif()
 endif()
 
 if(NOT CONFIG_DEBUG_NOOPT)
@@ -109,40 +151,56 @@ if(CONFIG_ARCH_COVERAGE)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 
-set(ARCHCFLAGS
-    "-Wstrict-prototypes -fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas"
-)
-set(ARCHCXXFLAGS
-    "-nostdinc++ -fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas"
-)
+add_compile_options(
+  -fno-common
+  -Wall
+  -Wshadow
+  -Wundef
+  -Wno-attributes
+  -Wno-unknown-pragmas
+  $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
+
+if(NOT CONFIG_LIBCXXTOOLCHAIN)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
+endif()
 
 if(NOT ${CONFIG_ARCH_TOOLCHAIN_CLANG})
-  string(APPEND ARCHCFLAGS " -Wno-psabi")
-  string(APPEND ARCHCXXFLAGS " -Wno-psabi")
+  add_compile_options(-Wno-psabi)
 endif()
 
-if(${CONFIG_CXX_STANDARD})
-  string(APPEND ARCHCXXFLAGS " -std=${CONFIG_CXX_STANDARD}")
+if(CONFIG_CXX_STANDARD)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
 endif()
 
-if(NOT ${CONFIG_CXX_EXCEPTION})
-  string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")
+if(NOT CONFIG_CXX_EXCEPTION)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+                      $<$<COMPILE_LANGUAGE:CXX>:-fcheck-new>)
 endif()
 
-if(NOT ${CONFIG_CXX_RTTI})
-  string(APPEND ARCHCXXFLAGS " -fno-rtti")
+if(NOT CONFIG_CXX_RTTI)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
 if(CONFIG_ARCH_RV32)
   add_link_options(-Wl,-melf32lriscv)
 elseif(CONFIG_ARCH_RV64)
   add_compile_options(-mcmodel=medany)
-  add_link_options(-Wl,-melf64lriscv)
+  if(CONFIG_ARCH_RV64ILP32)
+    add_link_options(-Wl,-melf32lriscv)
+  else()
+    add_link_options(-Wl,-melf64lriscv)
+  endif()
 endif()
 
 if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
   add_link_options(-Wl,--gc-sections)
   add_compile_options(-ffunction-sections -fdata-sections)
+endif()
+
+# Debug --whole-archive
+
+if(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE)
+  add_link_options(-Wl,--whole-archive)
 endif()
 
 add_link_options(-nostdlib)
@@ -156,33 +214,8 @@ if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(-g)
 endif()
 
-if(NOT "${CMAKE_C_FLAGS}" STREQUAL "")
-  string(REGEX MATCH "${ARCHCFLAGS}" EXISTS_FLAGS "${CMAKE_C_FLAGS}")
-endif()
-
-if(NOT EXISTS_FLAGS)
-  set(CMAKE_ASM_FLAGS
-      "${CMAKE_ASM_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_C_FLAGS
-      "${CMAKE_C_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} ${ARCHCXXFLAGS}"
-      CACHE STRING "" FORCE)
-endif()
-
 # Generic GNU RVG toolchain
-if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
-
-  execute_process(COMMAND ${TOOLCHAIN_PREFIX}-gcc --version
-                  OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
-  string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" GCC_VERSION
-               ${GCC_VERSION_OUTPUT})
-  string(REGEX MATCH "^[0-9]+" GCC_VERSION_MAJOR ${GCC_VERSION})
-  if(GCC_VERSION GREATER_EQUAL 12)
-    set(ARCHRVISAZ "_zicsr_zifencei")
-  endif()
+if(CONFIG_RISCV_TOOLCHAIN STREQUAL GNU_RVG)
 
   set(ARCHCPUEXTFLAGS i)
 
@@ -222,9 +255,15 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
                    "${GCC_VERSION_OUTPUT}")
       set(GCCVER ${CMAKE_MATCH_1})
     endif()
-    if(GCCVER GREATER_EQUAL 12)
+    if(GCCVER GREATER_EQUAL 12 OR CONFIG_ARCH_TOOLCHAIN_CLANG)
       set(ARCHCPUEXTFLAGS ${ARCHCPUEXTFLAGS}_zicsr_zifencei)
     endif()
+  endif()
+
+  if(CONFIG_ARCH_RV_EXPERIMENTAL_EXTENSIONS)
+    set(ARCHCPUEXTFLAGS
+        ${ARCHCPUEXTFLAGS}_${CONFIG_ARCH_RV_EXPERIMENTAL_EXTENSIONS})
+    add_compile_options(-menable-experimental-extensions)
   endif()
 
   if(CONFIG_ARCH_RV_ISA_VENDOR_EXTENSIONS)
@@ -240,7 +279,11 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
     set(LLVM_ARCHTYPE "riscv32")
   elseif(CONFIG_ARCH_RV64)
     set(ARCHTYPE "rv64")
-    set(ARCHABITYPE "lp64")
+    if(CONFIG_ARCH_RV64ILP32)
+      set(ARCHABITYPE "ilp32")
+    else()
+      set(ARCHABITYPE "lp64")
+    endif()
     set(LLVM_ARCHTYPE "riscv64")
   endif()
 

@@ -330,7 +330,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   * CONFIG_VNCSERVER_KBD.
                   */
 
-                  session->kbdout(&session->kbd, keyevent->down,
+                  session->kbdout(session->arg, keyevent->down,
                                   (FAR const uint8_t *)keyevent->key);
 
 #else

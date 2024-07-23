@@ -38,6 +38,7 @@
 #include "sched/sched.h"
 #include "init/init.h"
 #include "riscv_internal.h"
+#include "riscv_ipi.h"
 
 #ifdef CONFIG_BUILD_KERNEL
 #  include "riscv_mmu.h"
@@ -67,7 +68,7 @@ void riscv_cpu_boot(int cpu)
 {
   /* Clear IPI for CPU(cpu) */
 
-  putreg32(0, (uintptr_t)RISCV_IPI + (4 * cpu));
+  riscv_ipi_clear(cpu);
 
   /* Enable machine software interrupt for IPI to boot */
 
@@ -77,11 +78,13 @@ void riscv_cpu_boot(int cpu)
 
   asm("WFI");
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
   /* Initialize the per CPU areas */
 
   riscv_percpu_add_hart((uintptr_t)cpu);
+#endif
 
+#ifdef CONFIG_BUILD_KERNEL
   /* Enable MMU */
 
   binfo("mmu_enable: satp=%lx\n", g_kernel_pgt_pbase);
@@ -105,7 +108,7 @@ void riscv_cpu_boot(int cpu)
 
   /* Clear machine software interrupt for CPU(cpu) */
 
-  putreg32(0, (uintptr_t)RISCV_IPI + (4 * cpu));
+  riscv_ipi_clear(cpu);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -159,7 +162,7 @@ int up_cpu_start(int cpu)
 
   /* Send IPI to CPU(cpu) */
 
-  putreg32(1, (uintptr_t)RISCV_IPI + (cpu * 4));
+  riscv_ipi_send(cpu);
 
   return 0;
 }

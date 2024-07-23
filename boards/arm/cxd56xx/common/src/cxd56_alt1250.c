@@ -377,7 +377,8 @@ static void alt1250_reset(void)
 {
   /* Reset Altair modem device */
 
-  board_alt1250_reset();
+  alt1250_poweroff();
+  alt1250_poweron(false);
 }
 
 /****************************************************************************
@@ -499,6 +500,46 @@ int board_alt1250_initialize(const char *devpath)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: board_alt1250_reset
+ *
+ * Description:
+ *   Reset the Altair modem device on the board.
+ *
+ ****************************************************************************/
+
+void board_alt1250_reset(void)
+{
+  /* power off Altair modem device */
+
+  board_alt1250_poweroff();
+
+  /* Hi-Z SHUTDOWN and PowerBTN signals before power-on */
+
+  cxd56_gpio_config(ALT1250_SHUTDOWN, false);
+
+  /* power on alt1250 modem device and wait until the power is distributed */
+
+  board_alt1250_poweron();
+  up_mdelay(POWER_ON_WAIT_TIME);
+
+  /* Drive SHUTDOWN signal low */
+
+  cxd56_gpio_write(ALT1250_SHUTDOWN, 0);
+
+  /* Keep the SHUTDOWN signal low for reset period */
+
+  up_mdelay(ACTIVE_SHUTDOWN_TIME);
+
+  /* Undrive SHUTDOWN signal to rise up to high by pull-up */
+
+  cxd56_gpio_write_hiz(ALT1250_SHUTDOWN);
+
+  /* Wait VDDIO on Alt1250 stable */
+
+  up_mdelay(TIME_TO_STABLE_VDDIO);
 }
 
 #endif

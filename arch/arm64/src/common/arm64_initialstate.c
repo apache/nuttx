@@ -56,7 +56,7 @@
 
 void arm64_new_task(struct tcb_s * tcb)
 {
-  char *stack_ptr = tcb->stack_base_ptr + tcb->adj_stack_size;
+  uint64_t stack_ptr = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
   struct regs_context *pinitctx;
 
 #ifdef CONFIG_ARCH_FPU
@@ -67,16 +67,20 @@ void arm64_new_task(struct tcb_s * tcb)
   /* set fpu context */
 
   arm64_init_fpu(tcb);
-  stack_ptr  = (char *)pfpuctx;
+  stack_ptr  = (uintptr_t)pfpuctx;
 #endif
 
   pinitctx = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
   memset(pinitctx, 0, sizeof(struct regs_context));
   pinitctx->elr       = (uint64_t)tcb->start;
 
-  /* Keep using SP_EL1 */
+  /* Keep using SP_EL1 or SP_EL3 */
 
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
+  pinitctx->spsr      = SPSR_MODE_EL3H;
+#else
   pinitctx->spsr      = SPSR_MODE_EL1H;
+#endif
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   pinitctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);

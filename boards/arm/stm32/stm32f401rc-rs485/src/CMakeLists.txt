@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32/smt32f401rc-rs485/src/CMakeLists.txt
+# boards/arm/stm32/stm32f401rc-rs485/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -30,18 +30,37 @@ endif()
 
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinit.c)
+  if(CONFIG_BOARDCTL_RESET)
+    list(APPEND SRCS stm32_reset.c)
+  endif()
 endif()
 
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
+if(CONFIG_ADC)
+  list(APPEND SRCS stm32_adc.c)
+endif()
+
 if(CONFIG_STM32_SDIO)
   list(APPEND SRCS stm32_sdio.c)
 endif()
 
+if(CONFIG_STM32_OTGFS)
+  list(APPEND SRCS stm32_usb.c)
+endif()
+
 if(CONFIG_STM32_CONFIG_I2C_EE_24XXEEPROM)
   list(APPEND SRCS stm32_at24.c)
+endif()
+
+if(CONFIG_STM32_PWM)
+  list(APPEND SRCS stm32_pwm.c)
+endif()
+
+if(CONFIG_USBMSC)
+  list(APPEND SRCS stm32_usbmsc.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

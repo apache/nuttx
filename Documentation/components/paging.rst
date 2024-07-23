@@ -4,17 +4,78 @@
 On-Demand Paging
 ================
 
-Introduction
-============
+Kernel Build Implementation
+===========================
 
-Overview
---------
+On-demand paging and lazy loading are techniques used to manage physical
+memory. The basic idea is to allow a program to execute even though the
+entire program is not resident in memory. The program is loaded into
+memory on demand. This is a technique that is used in many operating
+systems to allow large programs to execute on small memory systems.
+Commonly, a Memory Management Unit (MMU) is used to map virtual memory
+into physical memory. Applications are then loaded into virtual memory
+address spaces and access to physical memory is managed by the MMU. If
+the virtual memory is not resident in physical memory, then a page fault
+occurs. The operating system then loads the missing page into memory and
+resumes execution.
 
-This document summarizes the design of NuttX on-demand paging. This
-feature permits embedded MCUs with some limited RAM space to execute
-large programs from some non-random access media.
+Requirements and Assumptions
+----------------------------
 
-What kind of platforms can support NuttX on-demang paging?
+On-demand paging requires *Kernel Build* (``CONFIG_BUILD_KERNEL=y``) mode.
+In this mode, no applications are built within the NuttX kernel. Instead,
+the applications are built as separate programs that are loaded into memory
+(``CONFIG_ELF=y`` and ``CONFIG_BINFMT_LOADABLE=y``). In this mode, each
+process has its own address environment (``CONFIG_ARCH_ADDRENV=y``).
+
+Logic Design Description
+------------------------
+
+When an application is being loaded ``up_addrenv_create`` is called to create
+the process's address environment. This includes mapping the commonly used
+``text``, ``data`` and ``heap`` sections withing the virtual memory space.
+Without on-demand paging, the physical memory is then allocated and mapped
+accordingly, before the process is started. When on-demand paging is enabled,
+usually only one single page for each section is allocated and mapped.
+
+The process starts executing within its address environment, accessing the
+virtual memory. Whenever it tries to access a virtual memory address that is
+not mapped in the MMU, a page fault occurs. The MMU then triggers an
+exception that is handled by the kernel. The kernel then checks if there are
+enough free physical pages available and maps the virtual memory address to
+it. Finally, execution is resumed from the same point where the page fault
+first occurred.
+
+Example: RISC-V
+^^^^^^^^^^^^^^^
+
+RISC-V's ``up_addrenv_create`` calls ``create_region`` (both defined in
+``arch/risc-v/src/common/riscv_addrenv.c``). ``create_region`` maps a single
+region to MMU by allocating physical memory for the page tables. When
+``CONFIG_PAGING=y`` is not selected, all the physical page tables are
+allocated from the physical memory space and then mapped to the virtual
+memory space. When ``CONFIG_PAGING=y`` is selected, only the first page of
+each section is mapped to the virtual memory space. The rest of the pages are
+mapped to the virtual memory space only when a page fault occurs.
+
+The page fault is handled by the ``riscv_fillpage`` function in the exception
+handler (defined in ``arch/risc-v/src/common/riscv_exception.c``). Whenever
+a page fault occurs, the ``riscv_fillpage`` function is called. This function
+allocates a physical page and maps it to the virtual memory space that
+triggered the page fault exception and then resumes execution from the same
+point where the page fault first occurred.
+
+:ref:`knsh32_paging` simulates a device with 4MiB physical memory with 8MiB
+of virtual heap memory allocated for each process. This is possible by
+enabling on-demand paging.
+
+Legacy Implementation
+=====================
+
+This legacy implementation runs on *Flat Build* (*Kernel Build* did not
+even exist at that time).
+
+What kind of platforms can support NuttX legacy on-demand paging?
 
   #. The MCU should have some large, probably low-cost non-volatile
      storage such as serial FLASH or an SD card. This storage probably
@@ -29,7 +90,7 @@ What kind of platforms can support NuttX on-demang paging?
      LPC3131) would be sufficient for many applications.
   #. The MCU has an MMU (again like the NXP LPC3131).
 
-If the platform meets these requirement, then NuttX can provide
+If the platform meets these requirements, then NuttX can provide
 on-demand paging: It can copy .text from the large program in
 non-volatile media into RAM as needed to execute a huge program from the
 small RAM.
@@ -55,10 +116,10 @@ Terminology
      Task Control Block
 
 NuttX Common Logic Design Description
-=====================================
+-------------------------------------
 
 Initialization
---------------
+^^^^^^^^^^^^^^
 
 The following declarations will be added.
 
@@ -89,7 +150,7 @@ logic, those architecture specific functions are instead declared in
 ``include/nuttx/page.h``.
 
 Page Faults
------------
+^^^^^^^^^^^
 
 **Page fault exception handling**. Page fault handling is performed by
 the function ``pg_miss()``. This function is called from
@@ -146,7 +207,7 @@ inputs are required.
    page fill.
 
 Fill Initiation
----------------
+^^^^^^^^^^^^^^^
 
 The page fill worker thread will be awakened on one of three conditions:
 
@@ -217,7 +278,7 @@ The architecture-specific functions, ``up_checkmapping()``,
 will be prototyped in ``include/nuttx/arch.h``
 
 Fill Complete
--------------
+^^^^^^^^^^^^^
 
 For the blocking ``up_fillpage()``, the result of the fill will be
 returned directly from the call to ``up_fillpage``.
@@ -246,7 +307,7 @@ completed:
 -  Signal the page fill worker thread.
 
 Task Resumption
----------------
+^^^^^^^^^^^^^^^
 
 For the non-blocking ``up_fillpage()``, the page fill worker thread will
 detect that the page fill is complete when it is awakened with
@@ -279,10 +340,10 @@ In this either, the page fill worker thread will:
    -  Wait for the next fill related event (a new page fault).
 
 Architecture-Specific Support Requirements
-==========================================
+------------------------------------------
 
 Memory Organization
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 **Memory Regions**. Chip specific logic will map the virtual and
 physical address spaces into three general regions:
@@ -367,7 +428,7 @@ would be a two phase link:
    "non-swappable" region.
 
 Architecture-Specific Functions
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Most standard, architecture-specific functions are declared in
 ``include/nuttx/arch.h``. However, for the case of this paging logic,
@@ -406,4 +467,3 @@ implemented just for on-demand paging support are:
   will be called when the page fill is finished (or an error occurs). This
   callback is assumed to occur from an interrupt level when the device
   driver completes the fill operation.
-

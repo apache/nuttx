@@ -1212,7 +1212,6 @@ errout_with_restart:
 
   /* Re-start the poll timer */
 
-  sched_lock();
   ret = wd_start(&priv->wdog, TCA64XX_POLLDELAY,
                  tca64_poll_expiry, (wdparm_t)priv);
   if (ret < 0)
@@ -1224,10 +1223,6 @@ errout_with_restart:
   /* Re-enable interrupts */
 
   priv->config->enable(priv->config, true);
-
-#ifdef CONFIG_TCA64XX_INT_POLL
-  sched_unlock();
-#endif
 }
 #endif
 

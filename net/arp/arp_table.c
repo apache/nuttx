@@ -61,6 +61,7 @@
 #include <nuttx/net/ip.h>
 
 #include "netdev/netdev.h"
+#include "netlink/netlink.h"
 #include "arp/arp.h"
 
 #ifdef CONFIG_NET_ARP
@@ -209,6 +210,37 @@ static FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr,
 }
 
 /****************************************************************************
+ * Name: arp_get_arpreq
+ *
+ * Description:
+ *   Translate (struct arp_entry_s) to (struct arpreq) for netlink notify.
+ *
+ * Input Parameters:
+ *   output - Location to return the ARP table copy
+ *   input  - The arp entry in table
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_ROUTE
+static void arp_get_arpreq(FAR struct arpreq *output,
+                           FAR struct arp_entry_s *input)
+{
+  FAR struct sockaddr_in *outaddr;
+
+  DEBUGASSERT(output != NULL && input != NULL);
+
+  outaddr = (FAR struct sockaddr_in *)&output->arp_pa;
+  outaddr->sin_family      = AF_INET;
+  outaddr->sin_port        = 0;
+  outaddr->sin_addr.s_addr = input->at_ipaddr;
+  memcpy(output->arp_ha.sa_data, input->at_ethaddr.ether_addr_octet,
+         sizeof(struct ether_addr));
+  strlcpy((FAR char *)output->arp_dev, input->at_dev->d_ifname,
+          sizeof(output->arp_dev));
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -237,6 +269,11 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
                FAR const uint8_t *ethaddr)
 {
   FAR struct arp_entry_s *tabptr = &g_arptable[0];
+#ifdef CONFIG_NETLINK_ROUTE
+  struct arpreq arp_notify;
+  bool found = false;
+  bool new_entry;
+#endif
   int i;
 
   /* Walk through the ARP mapping table and try to find an entry to
@@ -257,6 +294,9 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
           /* An old entry found, break. */
 
           tabptr = &g_arptable[i];
+#ifdef CONFIG_NETLINK_ROUTE
+          found = true;
+#endif
           break;
         }
       else
@@ -267,6 +307,21 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
         }
     }
 
+  /* When overwite old entry, notify old entry RTM_DELNEIGH */
+
+#ifdef CONFIG_NETLINK_ROUTE
+  if (!found && tabptr->at_ipaddr != 0)
+    {
+      arp_get_arpreq(&arp_notify, tabptr);
+      netlink_neigh_notify(&arp_notify, RTM_DELNEIGH, AF_INET);
+    }
+
+  /* Need to notify when entry is not found or changes in table */
+
+  new_entry = !found || memcmp(tabptr->at_ethaddr.ether_addr_octet,
+                               ethaddr, ETHER_ADDR_LEN) != 0;
+#endif
+
   /* Now, tabptr is the ARP table entry which we will fill with the new
    * information.
    */
@@ -275,6 +330,17 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
   memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
   tabptr->at_dev = dev;
   tabptr->at_time = clock_systime_ticks();
+
+  /* Notify the new entry */
+
+#ifdef CONFIG_NETLINK_ROUTE
+  if (new_entry)
+    {
+      arp_get_arpreq(&arp_notify, tabptr);
+      netlink_neigh_notify(&arp_notify, RTM_NEWNEIGH, AF_INET);
+    }
+#endif
+
   return OK;
 }
 
@@ -392,12 +458,21 @@ int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
 int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev)
 {
   FAR struct arp_entry_s *tabptr;
-
+#ifdef CONFIG_NETLINK_ROUTE
+  struct arpreq arp_notify;
+#endif
   /* Check if the IPv4 address is in the ARP table. */
 
   tabptr = arp_lookup(ipaddr, dev);
   if (tabptr != NULL)
     {
+      /* Notify to netlink */
+
+#ifdef CONFIG_NETLINK_ROUTE
+      arp_get_arpreq(&arp_notify, tabptr);
+      netlink_neigh_notify(&arp_notify, RTM_DELNEIGH, AF_INET);
+#endif
+
       /* Yes.. Set the IP address to zero to "delete" it */
 
       tabptr->at_ipaddr = 0;
@@ -459,7 +534,6 @@ unsigned int arp_snapshot(FAR struct arpreq *snapshot,
                           unsigned int nentries)
 {
   FAR struct arp_entry_s *tabptr;
-  FAR struct sockaddr_in *outaddr;
   clock_t now;
   unsigned int ncopied;
   int i;
@@ -474,16 +548,7 @@ unsigned int arp_snapshot(FAR struct arpreq *snapshot,
       if (tabptr->at_ipaddr != 0 &&
           now - tabptr->at_time <= ARP_MAXAGE_TICK)
         {
-          outaddr = (FAR struct sockaddr_in *)&snapshot[ncopied].arp_pa;
-          outaddr->sin_family      = AF_INET;
-          outaddr->sin_port        = 0;
-          outaddr->sin_addr.s_addr = tabptr->at_ipaddr;
-          memcpy(snapshot[ncopied].arp_ha.sa_data,
-                 tabptr->at_ethaddr.ether_addr_octet,
-                 sizeof(struct ether_addr));
-          strlcpy((FAR char *)snapshot[ncopied].arp_dev,
-                  tabptr->at_dev->d_ifname,
-                  sizeof(snapshot[ncopied].arp_dev));
+          arp_get_arpreq(&snapshot[ncopied], tabptr);
           ncopied++;
         }
     }

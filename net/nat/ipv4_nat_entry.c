@@ -31,30 +31,18 @@
 #include <nuttx/hashtable.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
-#include <nuttx/queue.h>
 
-#include "icmp/icmp.h"
 #include "nat/nat.h"
-#include "tcp/tcp.h"
-#include "udp/udp.h"
+#include "netlink/netlink.h"
 
-#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* TODO: Why we limit to 32000 in net stack? */
-
-#define NAT_PORT_REASSIGN_MAX 32000
-#define NAT_PORT_REASSIGN_MIN 4096
+#ifdef CONFIG_NET_NAT44
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static DECLARE_HASHTABLE(g_table_inbound, CONFIG_NET_NAT_HASH_BITS);
-static DECLARE_HASHTABLE(g_table_outbound, CONFIG_NET_NAT_HASH_BITS);
+static DECLARE_HASHTABLE(g_nat44_inbound, CONFIG_NET_NAT_HASH_BITS);
+static DECLARE_HASHTABLE(g_nat44_outbound, CONFIG_NET_NAT_HASH_BITS);
 
 /****************************************************************************
  * Private Functions
@@ -93,148 +81,6 @@ static inline uint32_t ipv4_nat_outbound_key(in_addr_t local_ip,
 }
 
 /****************************************************************************
- * Name: ipv4_nat_select_port_without_stack
- *
- * Description:
- *   Select an available port number for TCP/UDP protocol, or id for ICMP.
- *   Used when corresponding stack is disabled.
- *
- * Input Parameters:
- *   protocol   - The L4 protocol of the packet.
- *   ip         - The IP bind with the port (in network byte order).
- *   portno     - The local port (in network byte order), as reference.
- *
- * Returned Value:
- *   port number on success; 0 on failure
- *
- ****************************************************************************/
-
-#if (defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_NO_STACK)) || \
-    (defined(CONFIG_NET_UDP) && defined(CONFIG_NET_UDP_NO_STACK)) || \
-    (defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_SOCKET))
-
-static uint16_t ipv4_nat_select_port_without_stack(
-    uint8_t protocol, in_addr_t ip, uint16_t portno)
-{
-  uint16_t hport = NTOHS(portno);
-  while (ipv4_nat_port_inuse(protocol, ip, portno))
-    {
-      if (++hport >= NAT_PORT_REASSIGN_MAX)
-        {
-          hport = NAT_PORT_REASSIGN_MIN;
-        }
-
-      portno = HTONS(hport);
-    }
-
-  return portno;
-}
-
-#endif
-
-/****************************************************************************
- * Name: ipv4_nat_select_port
- *
- * Description:
- *   Select an available port number for TCP/UDP protocol, or id for ICMP.
- *
- * Input Parameters:
- *   dev        - The device on which the packet will be sent.
- *   protocol   - The L4 protocol of the packet.
- *   local_port - The local port of the packet, as reference.
- *
- * Returned Value:
- *   port number on success; 0 on failure
- *
- ****************************************************************************/
-
-static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
-                                     uint8_t protocol,
-                                     uint16_t local_port)
-{
-  switch (protocol)
-    {
-#ifdef CONFIG_NET_TCP
-      case IP_PROTO_TCP:
-        {
-#ifndef CONFIG_NET_TCP_NO_STACK
-          /* Try to select local_port first. */
-
-          int ret = tcp_selectport(PF_INET,
-                        (FAR const union ip_addr_u *)&dev->d_ipaddr,
-                        local_port);
-
-          /* If failed, try select another unused port. */
-
-          if (ret < 0)
-            {
-              ret = tcp_selectport(PF_INET,
-                        (FAR const union ip_addr_u *)&dev->d_ipaddr, 0);
-            }
-
-          return ret > 0 ? ret : 0;
-#else
-          return ipv4_nat_select_port_without_stack(IP_PROTO_TCP,
-                                                    dev->d_ipaddr,
-                                                    local_port);
-#endif
-        }
-#endif
-
-#ifdef CONFIG_NET_UDP
-      case IP_PROTO_UDP:
-        {
-#ifndef CONFIG_NET_UDP_NO_STACK
-          union ip_binding_u u;
-          u.ipv4.laddr = dev->d_ipaddr;
-          u.ipv4.raddr = INADDR_ANY;
-
-          /* TODO: Try keep origin port as possible. */
-
-          return HTONS(udp_select_port(PF_INET, &u));
-#else
-          return ipv4_nat_select_port_without_stack(IP_PROTO_UDP,
-                                                    dev->d_ipaddr,
-                                                    local_port);
-#endif
-        }
-#endif
-
-#ifdef CONFIG_NET_ICMP
-      case IP_PROTO_ICMP:
-        {
-#ifdef CONFIG_NET_ICMP_SOCKET
-          uint16_t id = local_port;
-          uint16_t hid = NTOHS(id);
-          while (icmp_findconn(dev, id) ||
-                 ipv4_nat_port_inuse(IP_PROTO_ICMP, dev->d_ipaddr, id))
-            {
-              if (++hid >= NAT_PORT_REASSIGN_MAX)
-                {
-                  hid = NAT_PORT_REASSIGN_MIN;
-                }
-
-              id = HTONS(hid);
-            }
-
-          return id;
-#else
-          return ipv4_nat_select_port_without_stack(IP_PROTO_ICMP,
-                                                    dev->d_ipaddr,
-                                                    local_port);
-#endif
-        }
-#endif
-    }
-
-  /* TODO: Currently select original port for unsupported protocol, maybe
-   * return zero to indicate failure.
-   */
-
-  return local_port;
-}
-
-/****************************************************************************
  * Name: ipv4_nat_entry_refresh
  *
  * Description:
@@ -245,42 +91,9 @@ static uint16_t ipv4_nat_select_port(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
+static void ipv4_nat_entry_refresh(FAR ipv4_nat_entry_t *entry)
 {
-  /* Note: May add logic here to move recent node to head side if each chain
-   * in hashtable is still too long (with long expire time).
-   */
-
-  switch (entry->protocol)
-    {
-#ifdef CONFIG_NET_TCP
-      case IP_PROTO_TCP:
-        /* NOTE: According to RFC2663, Section 2.6, Page 5, we can reduce the
-         * time to 4min if we have received FINs from both side of one
-         * connection, and keep 24h for other TCP connections. However, full
-         * cone NAT may have multiple connections on one entry, so this
-         * optimization may not work and we only use one expiration time.
-         */
-
-        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
-                             CONFIG_NET_NAT_TCP_EXPIRE_SEC;
-        break;
-#endif
-
-#ifdef CONFIG_NET_UDP
-      case IP_PROTO_UDP:
-        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
-                             CONFIG_NET_NAT_UDP_EXPIRE_SEC;
-        break;
-#endif
-
-#ifdef CONFIG_NET_ICMP
-      case IP_PROTO_ICMP:
-        entry->expire_time = TICK2SEC(clock_systime_ticks()) +
-                             CONFIG_NET_NAT_ICMP_EXPIRE_SEC;
-        break;
-#endif
-  }
+  entry->expire_time = nat_expire_time(entry->protocol);
 }
 
 /****************************************************************************
@@ -295,19 +108,21 @@ static void ipv4_nat_entry_refresh(FAR struct ipv4_nat_entry *entry)
  *   external_port - The external port of the packet.
  *   local_ip      - The local ip of the packet.
  *   local_port    - The local port of the packet.
+ *   peer_ip       - The peer ip of the packet.
+ *   peer_port     - The peer port of the packet.
  *
  * Returned Value:
  *   Pointer to entry on success; null on failure
  *
  ****************************************************************************/
 
-static FAR struct ipv4_nat_entry *
+static FAR ipv4_nat_entry_t *
 ipv4_nat_entry_create(uint8_t protocol,
                       in_addr_t external_ip, uint16_t external_port,
-                      in_addr_t local_ip, uint16_t local_port)
+                      in_addr_t local_ip, uint16_t local_port,
+                      in_addr_t peer_ip, uint16_t peer_port)
 {
-  FAR struct ipv4_nat_entry *entry =
-      kmm_malloc(sizeof(struct ipv4_nat_entry));
+  FAR ipv4_nat_entry_t *entry = kmm_malloc(sizeof(ipv4_nat_entry_t));
   if (entry == NULL)
     {
       nwarn("WARNING: Failed to allocate IPv4 NAT entry\n");
@@ -319,13 +134,21 @@ ipv4_nat_entry_create(uint8_t protocol,
   entry->external_port = external_port;
   entry->local_ip      = local_ip;
   entry->local_port    = local_port;
+#ifdef CONFIG_NET_NAT44_SYMMETRIC
+  entry->peer_ip       = peer_ip;
+  entry->peer_port     = peer_port;
+#endif
 
   ipv4_nat_entry_refresh(entry);
 
-  hashtable_add(g_table_inbound, &entry->hash_inbound,
+  hashtable_add(g_nat44_inbound, &entry->hash_inbound,
                 ipv4_nat_inbound_key(external_ip, external_port, protocol));
-  hashtable_add(g_table_outbound, &entry->hash_outbound,
+  hashtable_add(g_nat44_outbound, &entry->hash_outbound,
                 ipv4_nat_outbound_key(local_ip, local_port, protocol));
+
+#ifdef CONFIG_NETLINK_NETFILTER
+  netlink_conntrack_notify(IPCTNL_MSG_CT_NEW, PF_INET, entry);
+#endif
 
   return entry;
 }
@@ -341,20 +164,25 @@ ipv4_nat_entry_create(uint8_t protocol,
  *
  ****************************************************************************/
 
-static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
+static void ipv4_nat_entry_delete(FAR ipv4_nat_entry_t *entry)
 {
-  ninfo("INFO: Removing NAT entry proto=%" PRIu8
+  ninfo("INFO: Removing NAT44 entry proto=%" PRIu8
         ", local=%" PRIx32 ":%" PRIu16 ", external=:%" PRIu16 "\n",
         entry->protocol, entry->local_ip, entry->local_port,
         entry->external_port);
 
-  hashtable_delete(g_table_inbound, &entry->hash_inbound,
+  hashtable_delete(g_nat44_inbound, &entry->hash_inbound,
                    ipv4_nat_inbound_key(entry->external_ip,
                                         entry->external_port,
                                         entry->protocol));
-  hashtable_delete(g_table_outbound, &entry->hash_outbound,
-                   ipv4_nat_outbound_key(entry->local_ip, entry->local_port,
+  hashtable_delete(g_nat44_outbound, &entry->hash_outbound,
+                   ipv4_nat_outbound_key(entry->local_ip,
+                                         entry->local_port,
                                          entry->protocol));
+
+#ifdef CONFIG_NETLINK_NETFILTER
+  netlink_conntrack_notify(IPCTNL_MSG_CT_DELETE, PF_INET, entry);
+#endif
 
   kmm_free(entry);
 }
@@ -376,36 +204,51 @@ static void ipv4_nat_entry_delete(FAR struct ipv4_nat_entry *entry)
  ****************************************************************************/
 
 #if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
+static void ipv4_nat_reclaim_entry_cb(FAR ipv4_nat_entry_t *entry,
+                                      FAR void *arg)
+{
+  int32_t current_time = *(FAR int32_t *)arg;
+
+  if (entry->expire_time - current_time <= 0)
+    {
+      ipv4_nat_entry_delete(entry);
+    }
+}
+
 static void ipv4_nat_reclaim_entry(int32_t current_time)
 {
   static int32_t next_reclaim_time = CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
 
   if (next_reclaim_time - current_time <= 0)
     {
-      FAR hash_node_t *p;
-      FAR hash_node_t *tmp;
-      int count = 0;
-      int i;
-
-      ninfo("INFO: Reclaiming all expired NAT entries.\n");
-
-      hashtable_for_every_safe(g_table_inbound, p, tmp, i)
-        {
-          FAR struct ipv4_nat_entry *entry =
-            container_of(p, struct ipv4_nat_entry, hash_inbound);
-
-          if (entry->expire_time - current_time <= 0)
-            {
-              ipv4_nat_entry_delete(entry);
-              count++;
-            }
-        }
-
-      ninfo("INFO: %d expired NAT entries reclaimed.\n", count);
+      ninfo("INFO: Reclaiming all expired NAT44 entries.\n");
+      ipv4_nat_entry_foreach(ipv4_nat_reclaim_entry_cb, &current_time);
       next_reclaim_time = current_time + CONFIG_NET_NAT_ENTRY_RECLAIM_SEC;
     }
 }
+#else
+#  define ipv4_nat_reclaim_entry(t)
 #endif
+
+/****************************************************************************
+ * Name: ipv4_nat_entry_clear_cb
+ *
+ * Description:
+ *   Clear an entry related to dev. Called when NAT will be disabled on
+ *   any device.
+ *
+ ****************************************************************************/
+
+static void ipv4_nat_entry_clear_cb(FAR ipv4_nat_entry_t *entry,
+                                    FAR void *arg)
+{
+  FAR struct net_driver_s *dev = arg;
+
+  if (net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr))
+    {
+      ipv4_nat_entry_delete(entry);
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -419,7 +262,7 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
  *   any device.
  *
  * Input Parameters:
- *   dev        - The device on which NAT entries will be cleared.
+ *   dev - The device on which NAT entries will be cleared.
  *
  * Assumptions:
  *   NAT is initialized.
@@ -428,21 +271,34 @@ static void ipv4_nat_reclaim_entry(int32_t current_time)
 
 void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
 {
+  ninfo("INFO: Clearing all NAT44 entries for %s\n", dev->d_ifname);
+  ipv4_nat_entry_foreach(ipv4_nat_entry_clear_cb, dev);
+}
+
+/****************************************************************************
+ * Name: ipv4_nat_entry_foreach
+ *
+ * Description:
+ *   Call the callback function for each NAT entry.
+ *
+ * Input Parameters:
+ *   cb  - The callback function.
+ *   arg - The argument to pass to the callback function.
+ *
+ ****************************************************************************/
+
+void ipv4_nat_entry_foreach(ipv4_nat_entry_cb_t cb, FAR void *arg)
+{
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
   int i;
 
-  ninfo("INFO: Clearing all NAT entries for %s\n", dev->d_ifname);
-
-  hashtable_for_every_safe(g_table_inbound, p, tmp, i)
+  hashtable_for_every_safe(g_nat44_inbound, p, tmp, i)
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_inbound);
+      FAR ipv4_nat_entry_t *entry =
+        container_of(p, ipv4_nat_entry_t, hash_inbound);
 
-      if (net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr))
-        {
-          ipv4_nat_entry_delete(entry);
-        }
+      cb(entry, arg);
     }
 }
 
@@ -456,6 +312,8 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
  *   protocol      - The L4 protocol of the packet.
  *   external_ip   - The external ip of the packet, supports INADDR_ANY.
  *   external_port - The external port of the packet.
+ *   peer_ip       - The peer ip of the packet.
+ *   peer_port     - The peer port of the packet.
  *   refresh       - Whether to refresh the selected entry.
  *
  * Returned Value:
@@ -463,24 +321,26 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
+FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
-                            uint16_t external_port, bool refresh)
+                            uint16_t external_port, in_addr_t peer_ip,
+                            uint16_t peer_port, bool refresh)
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
   bool skip_ip = net_ipv4addr_cmp(external_ip, INADDR_ANY);
+#ifdef CONFIG_NET_NAT44_SYMMETRIC
+  bool skip_peer = net_ipv4addr_cmp(peer_ip, INADDR_ANY);
+#endif
   int32_t current_time = TICK2SEC(clock_systime_ticks());
 
-#if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
   ipv4_nat_reclaim_entry(current_time);
-#endif
 
-  hashtable_for_every_possible_safe(g_table_inbound, p, tmp,
+  hashtable_for_every_possible_safe(g_nat44_inbound, p, tmp,
                   ipv4_nat_inbound_key(external_ip, external_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_inbound);
+      FAR ipv4_nat_entry_t *entry =
+        container_of(p, ipv4_nat_entry_t, hash_inbound);
 
       /* Remove expired entries. */
 
@@ -492,7 +352,12 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
 
       if (entry->protocol == protocol &&
           (skip_ip || net_ipv4addr_cmp(entry->external_ip, external_ip)) &&
-          entry->external_port == external_port)
+          entry->external_port == external_port
+#ifdef CONFIG_NET_NAT44_SYMMETRIC
+          && (skip_peer || (net_ipv4addr_cmp(entry->peer_ip, peer_ip) &&
+                            entry->peer_port == peer_port))
+#endif
+          )
         {
           if (refresh)
             {
@@ -525,6 +390,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *   protocol   - The L4 protocol of the packet.
  *   local_ip   - The local ip of the packet.
  *   local_port - The local port of the packet.
+ *   peer_ip    - The peer ip of the packet.
+ *   peer_port  - The peer port of the packet.
  *   try_create - Try create the entry if no entry found.
  *
  * Returned Value:
@@ -532,24 +399,24 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
+FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              in_addr_t local_ip, uint16_t local_port,
+                             in_addr_t peer_ip, uint16_t peer_port,
                              bool try_create)
 {
   FAR hash_node_t *p;
   FAR hash_node_t *tmp;
+  uint16_t external_port;
   int32_t current_time = TICK2SEC(clock_systime_ticks());
 
-#if CONFIG_NET_NAT_ENTRY_RECLAIM_SEC > 0
   ipv4_nat_reclaim_entry(current_time);
-#endif
 
-  hashtable_for_every_possible_safe(g_table_outbound, p, tmp,
+  hashtable_for_every_possible_safe(g_nat44_outbound, p, tmp,
                       ipv4_nat_outbound_key(local_ip, local_port, protocol))
     {
-      FAR struct ipv4_nat_entry *entry =
-        container_of(p, struct ipv4_nat_entry, hash_outbound);
+      FAR ipv4_nat_entry_t *entry =
+        container_of(p, ipv4_nat_entry_t, hash_outbound);
 
       /* Remove expired entries. */
 
@@ -562,7 +429,12 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
       if (entry->protocol == protocol &&
           net_ipv4addr_cmp(entry->external_ip, dev->d_ipaddr) &&
           net_ipv4addr_cmp(entry->local_ip, local_ip) &&
-          entry->local_port == local_port)
+          entry->local_port == local_port
+#ifdef CONFIG_NET_NAT44_SYMMETRIC
+          && net_ipv4addr_cmp(entry->peer_ip, peer_ip) &&
+          entry->peer_port == peer_port
+#endif
+          )
         {
           ipv4_nat_entry_refresh(entry);
           return entry;
@@ -580,7 +452,8 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
         "proto=%" PRIu8 ", local=%" PRIx32 ":%" PRIu16 ", try create one.\n",
         protocol, local_ip, local_port);
 
-  uint16_t external_port = ipv4_nat_select_port(dev, protocol, local_port);
+  external_port = nat_port_select(dev, PF_INET, protocol,
+                          (FAR union ip_addr_u *)&dev->d_ipaddr, local_port);
   if (!external_port)
     {
       nwarn("WARNING: Failed to find an available port!\n");
@@ -588,7 +461,7 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
     }
 
   return ipv4_nat_entry_create(protocol, dev->d_ipaddr, external_port,
-                               local_ip, local_port);
+                               local_ip, local_port, peer_ip, peer_port);
 }
 
-#endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */
+#endif /* CONFIG_NET_NAT44 */

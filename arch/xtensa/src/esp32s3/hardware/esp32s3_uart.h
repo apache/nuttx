@@ -860,7 +860,7 @@
  * Rx Filter configuration
  */
 
-#define UART_RX_FILT_REG (DR_REG_UART_BASE + 0x18)
+#define UART_RX_FILT_REG(i) (REG_UART_BASE(i) + 0x18)
 
 /* UART_GLITCH_FILT_EN : R/W; bitpos: [8]; default: 0;
  * Set this bit to enable Rx signal filter.
@@ -1280,7 +1280,7 @@
  * Autobaud minimum low pulse duration register
  */
 
-#define UART_LOWPULSE_REG (DR_REG_UART_BASE + 0x28)
+#define UART_LOWPULSE_REG(i) (REG_UART_BASE(i) + 0x28)
 
 /* UART_LOWPULSE_MIN_CNT : RO; bitpos: [11:0]; default: 4095;
  * This register stores the value of the minimum duration time of the low
@@ -1296,7 +1296,7 @@
  * Autobaud minimum high pulse duration register
  */
 
-#define UART_HIGHPULSE_REG (DR_REG_UART_BASE + 0x2c)
+#define UART_HIGHPULSE_REG(i) (REG_UART_BASE(i) + 0x2c)
 
 /* UART_HIGHPULSE_MIN_CNT : RO; bitpos: [11:0]; default: 4095;
  * This register stores  the value of the maximum duration time for the high
@@ -1312,7 +1312,7 @@
  * Autobaud edge change count register
  */
 
-#define UART_RXD_CNT_REG (DR_REG_UART_BASE + 0x30)
+#define UART_RXD_CNT_REG(i) (REG_UART_BASE(i) + 0x30)
 
 /* UART_RXD_EDGE_CNT : RO; bitpos: [9:0]; default: 0;
  * This register stores the count of rxd edge change. It is used in baud
@@ -1328,7 +1328,7 @@
  * Software flow-control configuration
  */
 
-#define UART_FLOW_CONF_REG (DR_REG_UART_BASE + 0x34)
+#define UART_FLOW_CONF_REG(i) (REG_UART_BASE(i) + 0x34)
 
 /* UART_SEND_XOFF : R/W/SS/SC; bitpos: [5]; default: 0;
  * Set this bit to send Xoff char. It is cleared by hardware automatically.
@@ -1389,7 +1389,7 @@
  * Sleep-mode configuration
  */
 
-#define UART_SLEEP_CONF_REG (DR_REG_UART_BASE + 0x38)
+#define UART_SLEEP_CONF_REG(i) (REG_UART_BASE(i) + 0x38)
 
 /* UART_ACTIVE_THRESHOLD : R/W; bitpos: [9:0]; default: 240;
  * The uart is activated from light sleeping mode when the input rxd edge
@@ -1405,7 +1405,7 @@
  * Software flow-control character configuration
  */
 
-#define UART_SWFC_CONF0_REG (DR_REG_UART_BASE + 0x3c)
+#define UART_SWFC_CONF0_REG(i) (REG_UART_BASE(i) + 0x3c)
 
 /* UART_XOFF_CHAR : R/W; bitpos: [17:10]; default: 19;
  * This register stores the Xoff flow control char.
@@ -1430,7 +1430,7 @@
  * Software flow-control character configuration
  */
 
-#define UART_SWFC_CONF1_REG (DR_REG_UART_BASE + 0x40)
+#define UART_SWFC_CONF1_REG(i) (REG_UART_BASE(i) + 0x40)
 
 /* UART_XON_CHAR : R/W; bitpos: [17:10]; default: 17;
  * This register stores the Xon flow control char.
@@ -1455,7 +1455,7 @@
  * Tx Break character configuration
  */
 
-#define UART_TXBRK_CONF_REG (DR_REG_UART_BASE + 0x44)
+#define UART_TXBRK_CONF_REG(i) (REG_UART_BASE(i) + 0x44)
 
 /* UART_TX_BRK_NUM : R/W; bitpos: [7:0]; default: 10;
  * This register is used to configure the number of 0 to be sent after the
@@ -1567,7 +1567,7 @@
  * Pre-sequence timing configuration
  */
 
-#define UART_AT_CMD_PRECNT_REG (DR_REG_UART_BASE + 0x50)
+#define UART_AT_CMD_PRECNT_REG(i) (REG_UART_BASE(i) + 0x50)
 
 /* UART_PRE_IDLE_NUM : R/W; bitpos: [15:0]; default: 2305;
  * This register is used to configure the idle duration time before the
@@ -1583,7 +1583,7 @@
  * Post-sequence timing configuration
  */
 
-#define UART_AT_CMD_POSTCNT_REG (DR_REG_UART_BASE + 0x54)
+#define UART_AT_CMD_POSTCNT_REG(i) (REG_UART_BASE(i) + 0x54)
 
 /* UART_POST_IDLE_NUM : R/W; bitpos: [15:0]; default: 2305;
  * This register is used to configure the duration time between the last
@@ -1599,7 +1599,7 @@
  * Timeout configuration
  */
 
-#define UART_AT_CMD_GAPTOUT_REG (DR_REG_UART_BASE + 0x58)
+#define UART_AT_CMD_GAPTOUT_REG(i) (REG_UART_BASE(i) + 0x58)
 
 /* UART_RX_GAP_TOUT : R/W; bitpos: [15:0]; default: 11;
  * This register is used to configure the duration time between the at_cmd
@@ -1615,7 +1615,7 @@
  * AT escape sequence detection configuration
  */
 
-#define UART_AT_CMD_CHAR_REG (DR_REG_UART_BASE + 0x5c)
+#define UART_AT_CMD_CHAR_REG(i) (REG_UART_BASE(i) + 0x5c)
 
 /* UART_CHAR_NUM : R/W; bitpos: [15:8]; default: 3;
  * This register is used to configure the num of continuous at_cmd chars
@@ -1705,7 +1705,7 @@
  * Tx-FIFO write and read offset address.
  */
 
-#define UART_MEM_TX_STATUS_REG (DR_REG_UART_BASE + 0x64)
+#define UART_MEM_TX_STATUS_REG(i) (REG_UART_BASE(i) + 0x64)
 
 /* UART_TX_RADDR : RO; bitpos: [20:11]; default: 0;
  * This register stores the offset address in Tx-FIFO when Tx-FSM reads data
@@ -1731,7 +1731,7 @@
  * Rx-FIFO write and read offset address.
  */
 
-#define UART_MEM_RX_STATUS_REG (DR_REG_UART_BASE + 0x68)
+#define UART_MEM_RX_STATUS_REG(i) (REG_UART_BASE(i) + 0x68)
 
 /* UART_RX_WADDR : RO; bitpos: [20:11]; default: 512;
  * This register stores the offset address in Rx-FIFO when Rx-FIFO_Ctrl
@@ -1758,7 +1758,7 @@
  * UART transmit and receive status.
  */
 
-#define UART_FSM_STATUS_REG (DR_REG_UART_BASE + 0x6c)
+#define UART_FSM_STATUS_REG(i) (REG_UART_BASE(i) + 0x6c)
 
 /* UART_ST_UTX_OUT : RO; bitpos: [7:4]; default: 0;
  * This is the status register of transmitter.
@@ -1782,7 +1782,7 @@
  * Autobaud high pulse register
  */
 
-#define UART_POSPULSE_REG (DR_REG_UART_BASE + 0x70)
+#define UART_POSPULSE_REG(i) (REG_UART_BASE(i) + 0x70)
 
 /* UART_POSEDGE_MIN_CNT : RO; bitpos: [11:0]; default: 4095;
  * This register stores the minimal input clock count between two positive
@@ -1798,7 +1798,7 @@
  * Autobaud low pulse register
  */
 
-#define UART_NEGPULSE_REG (DR_REG_UART_BASE + 0x74)
+#define UART_NEGPULSE_REG(i) (REG_UART_BASE(i) + 0x74)
 
 /* UART_NEGEDGE_MIN_CNT : RO; bitpos: [11:0]; default: 4095;
  * This register stores the minimal input clock count between two negative
@@ -1910,7 +1910,7 @@
  * UART Version register
  */
 
-#define UART_DATE_REG (DR_REG_UART_BASE + 0x7c)
+#define UART_DATE_REG(i) (REG_UART_BASE(i) + 0x7c)
 
 /* UART_DATE : R/W; bitpos: [31:0]; default: 33587824;
  * This is the version register.
@@ -1925,7 +1925,7 @@
  * UART ID register
  */
 
-#define UART_ID_REG (DR_REG_UART_BASE + 0x80)
+#define UART_ID_REG(i) (REG_UART_BASE(i) + 0x80)
 
 /* UART_REG_UPDATE : R/W/SC; bitpos: [31]; default: 0;
  * Software write 1 would synchronize registers into UART Core clock domain

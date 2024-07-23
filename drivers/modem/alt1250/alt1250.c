@@ -640,6 +640,7 @@ static int alt1250_power_control(FAR struct alt1250_dev_s *dev,
 
 #ifdef CONFIG_PM
       case LTE_CMDID_STOPAPI:
+      case LTE_CMDID_RESTARTAPI:
       case LTE_CMDID_SUSPEND:
         alt1250_receive_daemon_response(req);
         break;
@@ -1379,6 +1380,19 @@ static int alt1250_pm_prepare(struct pm_callback_s *cb, int domain,
         }
 
       ret = alt1250_send_daemon_request(ALT1250_EVTBIT_STOPAPI);
+
+      if (ret)
+        {
+          return ERROR;
+        }
+      else
+        {
+          return OK;
+        }
+    }
+  else if (pmstate == PM_NORMAL)
+    {
+      ret = alt1250_send_daemon_request(ALT1250_EVTBIT_RESTARTAPI);
 
       if (ret)
         {

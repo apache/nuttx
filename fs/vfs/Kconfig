@@ -64,3 +64,16 @@ config SIGNAL_FD_NPOLLWAITERS
 		Maximum number of threads that can be waiting on poll()
 
 endif # SIGNAL_FD
+
+config FS_BACKTRACE
+	int "VFS backtrace"
+	default 0
+	---help---
+		Add backtrace to vfs file open.
+
+config FS_BACKTRACE_SKIP
+	int "Backtrace to skip"
+	default 2
+	depends on FS_BACKTRACE > 0
+	---help---
+		Skip depth of backtrace.

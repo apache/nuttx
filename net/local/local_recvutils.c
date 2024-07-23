@@ -36,8 +36,6 @@
 
 #include "local/local.h"
 
-#if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -190,8 +188,8 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
 
   if (totlen > *addrlen)
     {
-      pathlen    -= (totlen - *addrlen);
-      totlen      = *addrlen;
+      pathlen -= (totlen - *addrlen);
+      totlen   = *addrlen;
     }
 
   /* Copy the Unix domain address */
@@ -206,5 +204,3 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
   *addrlen = totlen;
   return OK;
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_LOCAL */

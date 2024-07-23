@@ -57,6 +57,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/lib/math32.h>
 
 #include "hardware/xmc4_memorymap.h"
 
@@ -1008,12 +1009,7 @@
 #define USIC_TBCTR_SIZE_SHIFT       (24)      /* Bits 24-26: Buffer Size */
 #define USIC_TBCTR_SIZE_MASK        (7 << USIC_TBCTR_SIZE_SHIFT)
 #  define USIC_TBCTR_SIZE_DISABLE   (0 << USIC_TBCTR_SIZE_SHIFT) /* FIFO mechanism is disabled */
-#  define USIC_TBCTR_SIZE_2         (1 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 2 entries */
-#  define USIC_TBCTR_SIZE_4         (2 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 4 entries */
-#  define USIC_TBCTR_SIZE_8         (3 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 8 entries */
-#  define USIC_TBCTR_SIZE_16        (4 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 16 entries */
-#  define USIC_TBCTR_SIZE_32        (5 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 32 entries */
-#  define USIC_TBCTR_SIZE_64        (6 << USIC_TBCTR_SIZE_SHIFT) /* FIFO buffer contains 64 entries */
+#  define USIC_TBCTR_SIZE(n)        ((uint32_t)(LOG2_CEIL(n)) << USIC_TBCTR_SIZE_SHIFT)
 
 #define USIC_TBCTR_LOF              (1 << 28) /* Bit 28: Buffer Event on Limit Overflow */
 #define USIC_TBCTR_STBIEN           (1 << 30) /* Bit 30: Standard Transmit Buffer Interrupt Enable */
@@ -1058,12 +1054,7 @@
 #define USIC_RBCTR_SIZE_SHIFT       (24)      /* Bits 24-26: Buffer Size */
 #define USIC_RBCTR_SIZE_MASK        (7 << USIC_RBCTR_SIZE_SHIFT)
 #  define USIC_RBCTR_SIZE_DISABLE   (0 << USIC_RBCTR_SIZE_SHIFT) /* FIFO mechanism is disabled */
-#  define USIC_RBCTR_SIZE_2         (1 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 2 entries */
-#  define USIC_RBCTR_SIZE_4         (2 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 4 entries */
-#  define USIC_RBCTR_SIZE_8         (3 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 8 entries */
-#  define USIC_RBCTR_SIZE_16        (4 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 16 entries */
-#  define USIC_RBCTR_SIZE_32        (5 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 32 entries */
-#  define USIC_RBCTR_SIZE_64        (6 << USIC_RBCTR_SIZE_SHIFT) /* FIFO buffer contains 64 entries */
+#  define USIC_RBCTR_SIZE(n)        ((uint32_t)(LOG2_CEIL(n)) << USIC_RBCTR_SIZE_SHIFT)
 
 #define USIC_RBCTR_RNM              (1 << 27) /* Bit 27: Receiver Notification Mode */
 #define USIC_RBCTR_LOF              (1 << 28) /* Bit 28: Buffer Event on Limit Overflow */

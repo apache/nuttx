@@ -2,3 +2,9 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
+config MX8MP_RUN_FROM_ITCM
+	bool "Run from Instruction Tightly Coupled Memory (ITCM)"
+	default n
+	---help---
+		Run software from ITCM instead of DDR memory

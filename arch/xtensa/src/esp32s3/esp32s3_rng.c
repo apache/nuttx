@@ -41,9 +41,11 @@
 #include <arch/xtensa/core_macros.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "hardware/wdev_reg.h"
 #include "esp32s3_clockconfig.h"
+
+#include "esp_random.h"
 
 #if defined(CONFIG_ESP32S3_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
@@ -82,52 +84,6 @@ static const struct file_operations g_rngops =
 /****************************************************************************
  * Private functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32s3_random
- *
- * Description:
- *   Read a random number (unsigned int 32-bit) from ESP32S3 PRNG.
- *
- * Input Parameters:
- *   none
- *
- * Returned Value:
- *   A uint32_t random number.
- *
- ****************************************************************************/
-
-uint32_t IRAM_ATTR esp_random(void)
-{
-  /* The PRNG which implements WDEV_RANDOM register gets 2 bits
-   * of extra entropy from a hardware randomness source every APB clock cycle
-   * (provided Wi-Fi or BT are enabled). To make sure entropy is not drained
-   * faster than it is added, this function needs to wait for at least 1778
-   * APB clock cycles after reading previous word. This implementation may
-   * actually wait a bit longer due to extra time spent in arithmetic and
-   * branch statements.
-   *
-   * As a (probably unnecessary) precaution to avoid returning the
-   * RNG state as-is, the result is XORed with additional
-   * WDEV_RND_REG reads while waiting.
-   */
-
-  uint32_t cpu_to_apb_freq_ratio = esp_clk_cpu_freq() / esp_clk_apb_freq();
-
-  static uint32_t last_ccount = 0;
-  uint32_t ccount;
-  uint32_t result = 0;
-
-  do
-    {
-      ccount = XTHAL_GET_CCOUNT();
-      result ^= getreg32(WDEV_RND_REG);
-    }
-  while (ccount - last_ccount < cpu_to_apb_freq_ratio * 1778);
-
-  last_ccount = ccount;
-  return result ^ getreg32(WDEV_RND_REG);
-}
 
 /****************************************************************************
  * Name: esp32s3_rng_read

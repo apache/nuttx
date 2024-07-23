@@ -939,7 +939,6 @@ static void pcf8574_irqworker(void *arg)
 
   /* Re-start the poll timer */
 
-  sched_lock();
   ret = wd_start(&priv->wdog, PCF8574_POLLDELAY,
                  pcf8574_poll_expiry, (wdparm_t)priv);
   if (ret < 0)
@@ -951,10 +950,6 @@ static void pcf8574_irqworker(void *arg)
   /* Re-enable interrupts */
 
   priv->config->enable(priv->config, true);
-
-#ifdef CONFIG_PCF8574_INT_POLL
-  sched_unlock();
-#endif
 }
 #endif
 

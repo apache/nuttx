@@ -68,8 +68,16 @@
 
 /* RMT gpio */
 
-#define RMT_OUTPUT_PIN 4
-#define RMT_CHANNEL    0
+#define RMT_RXCHANNEL       1
+#define RMT_TXCHANNEL       0
+
+#ifdef CONFIG_RMT_LOOP_TEST_MODE
+#  define RMT_INPUT_PIN     0
+#  define RMT_OUTPUT_PIN    0
+#else
+#  define RMT_INPUT_PIN     2
+#  define RMT_OUTPUT_PIN    4
+#endif
 
 /****************************************************************************
  * Public Types
@@ -226,6 +234,19 @@ int board_ws2812_initialize(
     void *dev);
 #    endif
 #  endif
+
+/****************************************************************************
+ * Name:  openeth_initialize
+ *
+ * Description:
+ *   This function may called from application-specific logic during its
+ *   to perform board-specific initialization of the Open ETH interface
+ *
+ *
+ ****************************************************************************/
+#ifdef CONFIG_ESP32_OPENETH
+int esp32_openeth_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H */

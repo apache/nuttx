@@ -476,6 +476,13 @@ static void stm32_stdclockconfig(void)
 
 #endif
 
+  /* Enable FLASH prefetch buffer and set FLASH wait states */
+
+  regval  = getreg32(STM32_FLASH_ACR);
+  regval &= ~FLASH_ACR_LATENCY_MASK;
+  regval |= (FLASH_ACR_LATENCY_SETTING | FLASH_ACR_PRTFBE);
+  putreg32(regval, STM32_FLASH_ACR);
+
   /* Set the HCLK source/divider */
 
   regval = getreg32(STM32_RCC_CFGR);

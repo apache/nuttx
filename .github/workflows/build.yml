@@ -110,7 +110,7 @@ jobs:
         run: tar zcf sources.tar.gz sources
 
       - name: Archive Source Bundle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: source-bundle
           path: sources.tar.gz
@@ -123,11 +123,11 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa, codechecker]
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa]
 
     steps:
       - name: Download Source Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: source-bundle
           path: .
@@ -160,15 +160,15 @@ jobs:
             git config --global --add safe.directory /github/workspace/sources/apps
             cd sources/nuttx/tools/ci
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
-                ./cibuild.sh -c -A -R --codechecker testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
-                ./cibuild.sh -c -A -R testlist/${{matrix.boards}}.dat
+                ./cibuild.sh -c -A -N -R testlist/${{matrix.boards}}.dat
             fi
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
-          name: linux-builds
+          name: linux-${{matrix.boards}}-builds
           path: buildartifacts/
         continue-on-error: true
 
@@ -182,7 +182,7 @@ jobs:
         boards: [macos, sim-01, sim-02]
     steps:
       - name: Download Source Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: source-bundle
           path: .
@@ -197,7 +197,7 @@ jobs:
           cache-name: ${{ runner.os }}-cache-tools
         with:
           path: ./sources/tools
-          key: ${{ runner.os }}-tools-${{ hashFiles('./sources/nuttx/tools/ci/cibuild.sh') }}
+          key: ${{ runner.os }}-tools-${{ hashFiles('./sources/nuttx/tools/ci/platforms/darwin.sh') }}
 
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
@@ -214,9 +214,9 @@ jobs:
           cd sources/nuttx/tools/ci
           ./cibuild.sh -i -c -A -R testlist/${{matrix.boards}}.dat
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: macos-builds
+          name: macos-${{matrix.boards}}-builds
           path: buildartifacts/
         continue-on-error: true
 
@@ -262,7 +262,7 @@ jobs:
       - run: git config --global core.autocrlf false
 
       - name: Download Source Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: source-bundle
           path: .
@@ -282,8 +282,8 @@ jobs:
           cd sources/nuttx/tools/ci
           ./cibuild.sh -g -i -A -C -R testlist/${{matrix.boards}}.dat
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: msys2-builds
+          name: msys2-${{matrix.boards}}-builds
           path: buildartifacts/
         continue-on-error: true

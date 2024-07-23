@@ -34,7 +34,7 @@
 #include "sched/sched.h"
 #include "arm_internal.h"
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>
 #  include "arm.h"
 #endif
@@ -49,8 +49,8 @@
  * Input Parameters:
  *   regs - The standard, ARM register save array.
  *
- * If CONFIG_PAGING is selected in the NuttX configuration file, then these
- * additional input values are expected:
+ * If CONFIG_LEGACY_PAGING is selected in the NuttX configuration file, then
+ * these additional input values are expected:
  *
  *   far - Fault address register.  On a data abort, the ARM MMU places the
  *     miss virtual address (MVA) into the FAR register.  This is the address
@@ -65,11 +65,11 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 {
   struct tcb_s *tcb = this_task();
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
   uint32_t *savestate;
 
   /* Save the saved processor context in CURRENT_REGS where it can be
@@ -80,7 +80,7 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 #endif
   CURRENT_REGS = regs;
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
   /* In the NuttX on-demand paging implementation, only the read-only, .text
    * section is paged.  However, the ARM compiler generated PC-relative data
    * fetches from within the .text sections.  Also, it is customary to locate
@@ -149,7 +149,7 @@ segfault:
   PANIC_WITH_REGS("panic", regs);
 }
 
-#else /* CONFIG_PAGING */
+#else /* CONFIG_LEGACY_PAGING */
 
 void arm_dataabort(uint32_t *regs)
 {
@@ -165,4 +165,4 @@ void arm_dataabort(uint32_t *regs)
   PANIC_WITH_REGS("panic", regs);
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */

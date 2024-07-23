@@ -26,6 +26,7 @@
 #include <nuttx/clock.h>
 
 #include "arm_internal.h"
+#include "arm_timer.h"
 #include "sctlr.h"
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
@@ -63,6 +64,13 @@ static unsigned long g_cpu_freq = ULONG_MAX;
 void up_perf_init(void *arg)
 {
   g_cpu_freq = (unsigned long)(uintptr_t)arg;
+
+#ifdef CONFIG_ARMV7A_HAVE_PTM
+  if (g_cpu_freq == ULONG_MAX || g_cpu_freq == 0)
+    {
+      g_cpu_freq = arm_timer_get_freq();
+    }
+#endif
 
   cp15_pmu_uer(PMUER_UME);
   cp15_pmu_pmcr(PMCR_E);

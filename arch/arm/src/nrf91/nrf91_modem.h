@@ -68,10 +68,6 @@
 #  error SHMEM base addres must be word-aligned (4 bytes)
 #endif
 
-#ifdef CONFIG_ARCH_FPU
-#  error missing FPU configuration - FPU must be activated in SPE and NSPE
-#endif
-
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/

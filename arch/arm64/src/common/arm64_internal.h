@@ -32,6 +32,7 @@
 #  include <nuttx/arch.h>
 #  include <sys/types.h>
 #  include <stdint.h>
+#  include <syscall.h>
 #endif
 
 #include "arm64_arch.h"
@@ -116,6 +117,18 @@
 #  define SMP_STACK_WORDS   (SMP_STACK_SIZE >> 2)
 #endif
 
+/* Context switching */
+
+#define arm64_fullcontextrestore(restoreregs) \
+  do \
+    { \
+      sys_call1(SYS_restore_context, (uintptr_t)restoreregs); \
+    } \
+  while (1)
+
+#define arm64_switchcontext(saveregs, restoreregs) \
+  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -152,7 +165,7 @@ extern "C"
     EXTERN char sym[n][size]
 
 #define STACK_PTR_TO_FRAME(type, ptr) \
-    (type *)((uintptr_t)(ptr) - sizeof(type))
+    (type *)STACK_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
 
 #define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
@@ -167,9 +180,6 @@ INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_stacks, CONFIG_SMP_NCPUS,
 INIT_STACK_ARRAY_DEFINE_EXTERN(g_interrupt_fiq_stacks, CONFIG_SMP_NCPUS,
                           INTSTACK_SIZE);
 #endif
-
-uintptr_t arm64_intstack_alloc(void);
-uintptr_t arm64_intstack_top(void);
 #else
 /* idle thread stack for primary core */
 
@@ -270,11 +280,6 @@ int arm64_psci_init(const char *method);
 void __start(void);
 void arm64_secondary_start(void);
 
-/* Context switching */
-
-void arm64_fullcontextrestore(uint64_t *restoreregs) noreturn_function;
-void arm64_switchcontext(uint64_t **saveregs, uint64_t *restoreregs);
-
 /* Signal handling **********************************************************/
 
 void arm64_sigdeliver(void);
@@ -299,14 +304,18 @@ uint64_t *arm64_doirq(int irq, uint64_t *regs);
 
 /* Paging support */
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 void arm64_pginitialize(void);
-#else /* CONFIG_PAGING */
+#else /* CONFIG_LEGACY_PAGING */
 #  define arm64_pginitialize()
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */
 
 uint64_t * arm64_syscall_switch(uint64_t *regs);
 int arm64_syscall(uint64_t *regs);
+
+/* Low level serial output **************************************************/
+
+void arm64_lowputc(char ch);
 
 #ifdef USE_SERIALDRIVER
 /****************************************************************************

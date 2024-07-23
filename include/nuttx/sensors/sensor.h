@@ -966,7 +966,7 @@ struct sensor_ops_s
                              FAR struct file *filep,
                              unsigned long arg);
 
-/****************************************************************************
+  /**************************************************************************
    * Name: calibrate
    *
    * This operation can trigger the calibration operation, and if the

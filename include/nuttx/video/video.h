@@ -30,6 +30,7 @@
  ****************************************************************************/
 
 #include <sys/videoio.h>
+#include <nuttx/fs/fs.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -56,29 +57,99 @@ extern "C"
 #define VIDEO_VSIZE_3M          (1536)  /* 3M      vertical   size */
 
 /****************************************************************************
+* Public Types
+*****************************************************************************/
+
+struct v4l2_s
+{
+  FAR const struct v4l2_ops_s      *vops;
+  FAR const struct file_operations *fops;
+};
+
+struct v4l2_ops_s
+{
+  CODE int (*querycap)(FAR struct file *filep,
+                       FAR struct v4l2_capability *cap);
+  CODE int (*g_input)(FAR int *num);
+  CODE int (*enum_input)(FAR struct file *filep,
+                         FAR struct v4l2_input *input);
+  CODE int (*reqbufs)(FAR struct file *filep,
+                      FAR struct v4l2_requestbuffers *reqbufs);
+  CODE int (*querybuf)(FAR struct file *filep,
+                       FAR struct v4l2_buffer *buf);
+  CODE int (*qbuf)(FAR struct file *filep,
+                   FAR struct v4l2_buffer *buf);
+  CODE int (*dqbuf)(FAR struct file *filep,
+                    FAR struct v4l2_buffer *buf);
+  CODE int (*cancel_dqbuf)(FAR struct file *filep,
+                           enum v4l2_buf_type type);
+  CODE int (*g_fmt)(FAR struct file *filep,
+                    FAR struct v4l2_format *fmt);
+  CODE int (*s_fmt)(FAR struct file *filep,
+                    FAR struct v4l2_format *fmt);
+  CODE int (*try_fmt)(FAR struct file *filep,
+                      FAR struct v4l2_format *v4l2);
+  CODE int (*g_parm)(FAR struct file *filep,
+                     FAR struct v4l2_streamparm *parm);
+  CODE int (*s_parm)(FAR struct file *filep,
+                     FAR struct v4l2_streamparm *parm);
+  CODE int (*streamon)(FAR struct file *filep,
+                       FAR enum v4l2_buf_type *type);
+  CODE int (*streamoff)(FAR struct file *filep,
+                        FAR enum v4l2_buf_type *type);
+  CODE int (*do_halfpush)(FAR struct file *filep,
+                          bool enable);
+  CODE int (*takepict_start)(FAR struct file *filep,
+                             int32_t capture_num);
+  CODE int (*takepict_stop)(FAR struct file *filep,
+                            bool halfpush);
+  CODE int (*s_selection)(FAR struct file *filep,
+                          FAR struct v4l2_selection *clip);
+  CODE int (*g_selection)(FAR struct file *filep,
+                          FAR struct v4l2_selection *clip);
+  CODE int (*queryctrl)(FAR struct file *filep,
+                        FAR struct v4l2_queryctrl *ctrl);
+  CODE int (*query_ext_ctrl)(FAR struct file *filep,
+                             FAR struct v4l2_query_ext_ctrl *ctrl);
+  CODE int (*querymenu)(FAR struct file *filep,
+                        FAR struct v4l2_querymenu *menu);
+  CODE int (*g_ctrl)(FAR struct file *filep,
+                     FAR struct v4l2_control *ctrl);
+  CODE int (*s_ctrl)(FAR struct file *filep,
+                     FAR struct v4l2_control *ctrl);
+  CODE int (*g_ext_ctrls)(FAR struct file *filep,
+                          FAR struct v4l2_ext_controls *ctrls);
+  CODE int (*s_ext_ctrls)(FAR struct file *filep,
+                          FAR struct v4l2_ext_controls *ctrls);
+  CODE int (*query_ext_ctrl_scene)(FAR struct file *filep,
+              FAR struct v4s_query_ext_ctrl_scene *ctrl);
+  CODE int (*querymenu_scene)(FAR struct file *filep,
+              FAR struct v4s_querymenu_scene *menu);
+  CODE int (*g_ext_ctrls_scene)(FAR struct file *filep,
+              FAR struct v4s_ext_controls_scene *ctrls);
+  CODE int (*s_ext_ctrls_scene)(FAR struct file *filep,
+              FAR struct v4s_ext_controls_scene *ctrls);
+  CODE int (*enum_fmt)(FAR struct file *filep,
+                       FAR struct v4l2_fmtdesc *f);
+  CODE int (*enum_frminterval)(FAR struct file *filep,
+                               FAR struct v4l2_frmivalenum *f);
+  CODE int (*enum_frmsize)(FAR struct file *filep,
+                           FAR struct v4l2_frmsizeenum *f);
+  CODE int (*cropcap)(FAR struct file *filep,
+                      FAR struct v4l2_cropcap *cropcap);
+  CODE int (*dqevent)(FAR struct file *filep,
+                      FAR struct v4l2_event *event);
+  CODE int (*subscribe_event)(FAR struct file *filep,
+                              FAR struct v4l2_event_subscription *sub);
+  CODE int (*decoder_cmd)(FAR struct file *filep,
+                          FAR struct v4l2_decoder_cmd *cmd);
+  CODE int (*encoder_cmd)(FAR struct file *filep,
+                          FAR struct v4l2_encoder_cmd *cmd);
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-struct imgdata_s;
-struct imgsensor_s;
-
-/* Initialize video driver.
- *
- *  param [in] devpath: path to video device
- *
- *  Return on success, 0 is returned. On failure,
- *  negative value is returned.
- */
-
-int video_initialize(FAR const char *devpath);
-
-/* Uninitialize video driver.
- *
- *  Return on success, 0 is returned. On failure,
- *  negative value is returned.
- */
-
-int video_uninitialize(FAR const char *devpath);
 
 /* New API to register video driver.
  *
@@ -92,9 +163,7 @@ int video_uninitialize(FAR const char *devpath);
  */
 
 int video_register(FAR const char *devpath,
-                   FAR struct imgdata_s *data,
-                   FAR struct imgsensor_s **sensors,
-                   size_t sensor_num);
+                   FAR struct v4l2_s *ctx);
 
 /* New API to Unregister video driver.
  *

@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_OPENH743I
+
+config OPENH743I_DISABLE_OTGFS_PWRON
+	bool "Disable OTGFS PWRON pin"
+	depends on USBHOST
+	default n
+	---help---
+		This option disable PWRON pin control from MCU.
+		Setting PWRON in high state somehow breaks USBDEV on OTGHS.
+		If both OTG peripherals are used, and OTGFS is used as HOST,
+		then the power switch enable pin must be set directly from 3.3V bus.
+
+endif # ARCH_BOARD_OPENH743I

@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 
+#include <sys/lock.h>
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/types.h>
@@ -37,8 +38,6 @@
 #include <signal.h>
 
 #include <nuttx/mutex.h>
-
-#define _lock_t int
 
 /* Forward declaration */
 

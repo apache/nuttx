@@ -26,11 +26,18 @@ function(nuttx_add_library_internal target)
   # ensure nuttx_context is created before this
   add_dependencies(${target} nuttx_context)
 
+  # add specified search directories for CXX targets
+  target_include_directories(
+    ${target}
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:CXX>:$<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_CXX_INCLUDE_DIRECTORIES>>>
+  )
+
   # add main include directories
   target_include_directories(
     ${target} SYSTEM
-    PUBLIC ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
-           ${CMAKE_BINARY_DIR}/include_arch)
+    PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
+            ${CMAKE_BINARY_DIR}/include_arch)
 
   # Set global compile options & definitions We use the "nuttx" target to hold
   # these properties so that libraries added after this property is set can read
@@ -44,6 +51,9 @@ function(nuttx_add_library_internal target)
   target_include_directories(
     ${target}
     PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_INCLUDE_DIRECTORIES>>)
+
+  # Set install config for all library
+  install(TARGETS ${target})
 endfunction()
 
 # Auxiliary libraries
@@ -94,9 +104,6 @@ function(nuttx_add_system_library target)
 
   # add to list of libraries to link to final nuttx binary
   set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
-
-  # install to library dir
-  install(TARGETS ${target} DESTINATION lib)
 endfunction()
 
 # Kernel Libraries
@@ -131,16 +138,19 @@ function(nuttx_add_kernel_library target)
 
   # Add kernel options & definitions See note above in
   # nuttx_add_library_internal() on syntax and nuttx target use
-  target_compile_options(
-    ${kernel_target}
-    PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_COMPILE_OPTIONS>>)
-  target_compile_definitions(
-    ${kernel_target}
-    PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_DEFINITIONS>>)
-  target_include_directories(
-    ${kernel_target}
-    PRIVATE
-      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_INCLUDE_DIRECTORIES>>)
+  if(NOT ARGS_SPLIT OR NOT "${target}" STREQUAL "${kernel_target}")
+    target_compile_options(
+      ${kernel_target}
+      PRIVATE
+        $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_COMPILE_OPTIONS>>)
+    target_compile_definitions(
+      ${kernel_target}
+      PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_DEFINITIONS>>)
+    target_include_directories(
+      ${kernel_target}
+      PRIVATE
+        $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_INCLUDE_DIRECTORIES>>)
+  endif()
 
   if(NOT "${target}" STREQUAL "${kernel_target}")
     # The k${target} lib will have the same sources added to that ${target} lib.
@@ -173,11 +183,6 @@ function(nuttx_add_library target)
 
   set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
 
-  get_target_property(target_type ${target} TYPE)
-  if(${target_type} STREQUAL "STATIC_LIBRARY")
-    install(TARGETS ${target} ARCHIVE DESTINATION ${CMAKE_BINARY_DIR}/staging)
-  endif()
-
   nuttx_add_library_internal(${target})
 endfunction()
 
@@ -199,4 +204,23 @@ function(nuttx_library_import library_name library_path)
   add_library(${library_name} STATIC IMPORTED GLOBAL)
   set_target_properties(${library_name} PROPERTIES IMPORTED_LOCATION
                                                    ${library_path})
+endfunction()
+
+# nuttx_add_external_library
+#
+# the target library of add_library has been called in external CMakeLists.txt
+# so that they can be added to the final link
+#
+# Usually used with Nuttx to include an external system that already supports
+# CMake compilation
+function(nuttx_add_external_library target)
+  cmake_parse_arguments(ARGS "" MODE "" ${ARGN})
+  if(NOT ARGS_MODE)
+    set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
+  elseif("${ARGS_MODE}" STREQUAL "APPS")
+    set_property(GLOBAL APPEND PROPERTY NUTTX_APPS_LIBRARIES ${target})
+  elseif("${ARGS_MODE}" STREQUAL "KERNEL")
+    set_property(GLOBAL APPEND PROPERTY NUTTX_KERNEL_LIBRARIES ${target})
+  endif()
+  nuttx_add_library_internal(${target})
 endfunction()

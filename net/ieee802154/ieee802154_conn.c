@@ -119,8 +119,7 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
     {
 #if CONFIG_NET_IEEE802154_MAX_CONNS > 0
       if (dq_count(&g_active_ieee802154_connections) +
-          CONFIG_NET_IEEE802154_ALLOC_CONNS
-          >= CONFIG_NET_IEEE802154_MAX_CONNS)
+         CONFIG_NET_IEEE802154_ALLOC_CONNS > CONFIG_NET_IEEE802154_MAX_CONNS)
         {
           net_unlock();
           return NULL;

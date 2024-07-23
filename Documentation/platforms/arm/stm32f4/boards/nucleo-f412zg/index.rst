@@ -1,9 +1,9 @@
 ================
-ST Nucleo F410RB
+ST Nucleo F412ZG
 ================
 
 This page discusses issues unique to NuttX configurations for the ST
-Nucleo F410RB board from ST Micro.  See
+Nucleo F412ZG board from ST Micro.  See
 
   http://www.st.com/en/evaluation-tools/nucleo-f412zg.html
 
@@ -92,7 +92,7 @@ Pins and Connectors::
 
 TTL to RS-232 converter connection::
 
-    Nucleo CN10 STM32F410RB
+    Nucleo CN10 STM32F412ZG
     ----------- ------------
     Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
     Pin 33 PA10 USART1_TX    some RS-232 converters
@@ -125,7 +125,7 @@ Pins and Connectors::
 
 TTL to RS-232 converter connection::
 
-    Nucleo CN9  STM32F410RB
+    Nucleo CN9  STM32F412ZG
     ----------- ------------
     Pin 1  PA3  USART2_RX   *Warning you make need to reverse RX/TX on
     Pin 2  PA2  USART2_TX    some RS-232 converters

@@ -110,7 +110,7 @@ const struct section_mapping_s g_section_mapping[] =
     SAM_NFCSRAM_MMUFLAGS,  SAM_NFCSRAM_NSECTIONS
   },
 
-#ifndef CONFIG_PAGING /* Internal SRAM is already fully mapped */
+#ifndef CONFIG_LEGACY_PAGING /* Internal SRAM is already fully mapped */
   { SAM_ISRAM_PSECTION,    SAM_ISRAM_VSECTION,
     SAM_ISRAM_MMUFLAGS,    SAM_ISRAM_NSECTIONS
   },

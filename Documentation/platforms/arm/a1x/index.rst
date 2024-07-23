@@ -12,7 +12,7 @@ have are supported by NuttX:
    board, but the others may be compatible:
 
    Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/a1x/pcduino-a10/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/a1x/boards/pcduino-a10/README.txt>`__
    file for further information.
 
    **STATUS**. This port was an experiment was was not completely

@@ -24,66 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/kmalloc.h>
-#include <nuttx/i2c/i2c_master.h>
-
-#include <nuttx/sensors/bh1749nuc.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define BH1749NUC_I2C_FREQ          400000
-
-#define BH1749NUC_MANUFACTID        0xE0    /* Manufact ID */
-#define BH1749NUC_PARTID            0x0D    /* Part ID */
-
-/* BH1749NUC Registers */
-
-#define BH1749NUC_SYSTEM_CONTROL    0x40
-#define BH1749NUC_MODE_CONTROL1     0x41
-#define BH1749NUC_MODE_CONTROL2     0x42
-#define BH1749NUC_RED_DATA_LSB      0x50
-#define BH1749NUC_GREEN_DATA_LSB    0x52
-#define BH1749NUC_BLUE_DATA_LSB     0x54
-#define BH1749NUC_IR_DATA_LSB       0x58
-#define BH1749NUC_GREEN2_DATA_LSB   0x5a
-#define BH1749NUC_MANUFACTURER_ID   0x92
-
-/* Register SYSTEM_CONTROL */
-
-#define BH1749NUC_SYSTEM_CONTROL_SW_RESET      (1 << 7)
-#define BH1749NUC_SYSTEM_CONTROL_INT_RESET     (1 << 6)
-
-/* Register MODE_CONTROL1 */
-
-#define BH1749NUC_MODE_CONTROL1_IR_GAIN_X1     (0x20)
-#define BH1749NUC_MODE_CONTROL1_IR_GAIN_X32    (0x60)
-#define BH1749NUC_MODE_CONTROL1_RGB_GAIN_X1    (0x08)
-#define BH1749NUC_MODE_CONTROL1_RGB_GAIN_X32   (0x18)
-#define BH1749NUC_MODE_CONTROL1_MEAS_TIME160MS (0x02)
-
-/* Register MODE_CONTROL2 */
-
-#define BH1749NUC_MODE_CONTROL2_RGBI_EN        (1 << 4)
-
-/****************************************************************************
- * Private Type Definitions
- ****************************************************************************/
-
-/* Structure for bh1749nuc device */
-
-struct bh1749nuc_dev_s
-{
-  FAR struct i2c_master_s *i2c;   /* I2C interface */
-  int                      freq;  /* Frequency */
-  uint8_t                  addr;  /* I2C address */
-};
+#include "bh1749nuc_base.h"
 
 /****************************************************************************
  * Private Function Prototypes
@@ -119,146 +60,6 @@ static const struct file_operations g_bh1749nucfops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: bh1749nuc_getreg8
- *
- * Description:
- *   Read from an 8-bit BH1749NUC register
- *
- ****************************************************************************/
-
-static uint8_t bh1749nuc_getreg8(FAR struct bh1749nuc_dev_s *priv,
-                                 uint8_t regaddr)
-{
-  struct i2c_msg_s msg[2];
-  uint8_t regval = 0;
-  int ret;
-
-  msg[0].frequency = priv->freq;
-  msg[0].addr      = priv->addr;
-  msg[0].flags     = I2C_M_NOSTOP;
-  msg[0].buffer    = &regaddr;
-  msg[0].length    = 1;
-
-  msg[1].frequency = priv->freq;
-  msg[1].addr      = priv->addr;
-  msg[1].flags     = I2C_M_READ;
-  msg[1].buffer    = &regval;
-  msg[1].length    = 1;
-
-  ret = I2C_TRANSFER(priv->i2c, msg, 2);
-  if (ret < 0)
-    {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
-    }
-
-  return regval;
-}
-
-/****************************************************************************
- * Name: bh1749nuc_read16
- *
- * Description:
- *   Read 16-bit register
- *
- ****************************************************************************/
-
-static uint16_t bh1749nuc_read16(FAR struct bh1749nuc_dev_s *priv,
-                                 uint8_t regaddr)
-{
-  struct i2c_msg_s msg[2];
-  uint8_t regval[2];
-  int ret;
-
-  msg[0].frequency = priv->freq;
-  msg[0].addr      = priv->addr;
-  msg[0].flags     = I2C_M_NOSTOP;
-  msg[0].buffer    = &regaddr;
-  msg[0].length    = 1;
-
-  msg[1].frequency = priv->freq;
-  msg[1].addr      = priv->addr;
-  msg[1].flags     = I2C_M_READ;
-  msg[1].buffer    = (uint8_t *)&regval;
-  msg[1].length    = 2;
-
-  ret = I2C_TRANSFER(priv->i2c, msg, 2);
-  if (ret < 0)
-    {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
-    }
-
-  return regval[1] << 8 | regval[0] << 0;
-}
-
-/****************************************************************************
- * Name: bh1749nuc_putreg8
- *
- * Description:
- *   Write to an 8-bit BH1749NUC register
- *
- ****************************************************************************/
-
-static void bh1749nuc_putreg8(FAR struct bh1749nuc_dev_s *priv,
-                              uint8_t regaddr, uint8_t regval)
-{
-  struct i2c_msg_s msg[2];
-  uint8_t txbuffer[2];
-  int ret;
-
-  txbuffer[0] = regaddr;
-  txbuffer[1] = regval;
-
-  msg[0].frequency = priv->freq;
-  msg[0].addr      = priv->addr;
-  msg[0].flags     = 0;
-  msg[0].buffer    = txbuffer;
-  msg[0].length    = 2;
-
-  ret = I2C_TRANSFER(priv->i2c, msg, 1);
-  if (ret < 0)
-    {
-      snerr("I2C_TRANSFER failed: %d\n", ret);
-    }
-}
-
-/****************************************************************************
- * Name: bh1749nuc_checkid
- *
- * Description:
- *   Read and verify the BH1749NUC chip ID
- *
- ****************************************************************************/
-
-static int bh1749nuc_checkid(FAR struct bh1749nuc_dev_s *priv)
-{
-  uint8_t id;
-
-  /* Read Manufact ID */
-
-  id = bh1749nuc_getreg8(priv, BH1749NUC_MANUFACTURER_ID);
-  if (id != BH1749NUC_MANUFACTID)
-    {
-      /* Manufact ID is not Correct */
-
-      snerr("Wrong Manufact ID! %02x\n", id);
-      return -ENODEV;
-    }
-
-  /* Read Part ID */
-
-  id = bh1749nuc_getreg8(priv, BH1749NUC_SYSTEM_CONTROL);
-  if ((id & 0x3f) != BH1749NUC_PARTID)
-    {
-      /* Part ID is not Correct */
-
-      snerr("Wrong Part ID! %02x\n", id);
-      return -ENODEV;
-    }
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: bh1749nuc_open
@@ -402,7 +203,7 @@ int bh1749nuc_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   priv->i2c   = i2c;
   priv->addr  = addr;
-  priv->freq  = BH1749NUC_I2C_FREQ;
+  priv->freq  = CONFIG_BH1749NUC_I2C_FREQUENCY;
 
   /* Check Device ID */
 

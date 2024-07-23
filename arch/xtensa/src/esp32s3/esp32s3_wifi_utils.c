@@ -35,7 +35,16 @@
 #include "esp32s3_wifi_adapter.h"
 #include "esp32s3_wifi_utils.h"
 #include "esp32s3_wireless.h"
-#include "esp_hal_wifi.h"
+
+#include "esp_log.h"
+#include "esp_mac.h"
+#include "esp_private/phy.h"
+#include "esp_private/wifi.h"
+#include "esp_random.h"
+#include "esp_timer.h"
+#include "esp_wpa.h"
+#include "rom/ets_sys.h"
+#include "soc/soc_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,7 +96,7 @@ static struct wifi_scan_result g_scan_priv =
 {
   .scan_signal = SEM_INITIALIZER(0),
 };
-static uint8_t g_channel_num = 0;
+static uint8_t g_channel_num;
 static uint8_t g_channel_list[CHANNEL_MAX_NUM];
 
 /****************************************************************************
@@ -201,6 +210,7 @@ int esp_wifi_start_scan(struct iwreq *iwr)
   if (ret != OK)
     {
       wlerr("ERROR: Scan error, ret: %d\n", ret);
+      ret = ERROR;
     }
   else
     {
@@ -221,14 +231,17 @@ int esp_wifi_start_scan(struct iwreq *iwr)
         }
     }
 
-  if (config != NULL)
+  if (config)
     {
       kmm_free(config);
       config = NULL;
-      wlinfo("INFO: start scan\n");
     }
 
-  g_scan_priv.scan_status = ESP_SCAN_RUN;
+  if (ret == OK)
+    {
+      wlinfo("INFO: start scan\n");
+      g_scan_priv.scan_status = ESP_SCAN_RUN;
+    }
 
   return ret;
 }
@@ -257,7 +270,7 @@ int esp_wifi_get_scan_results(struct iwreq *iwr)
   if (g_scan_priv.scan_status == ESP_SCAN_RUN)
     {
       irqstate_t irqstate = enter_critical_section();
-      if (scan_block == false)
+      if (!scan_block)
         {
           scan_block = true;
           leave_critical_section(irqstate);
@@ -273,7 +286,8 @@ int esp_wifi_get_scan_results(struct iwreq *iwr)
     }
   else if (g_scan_priv.scan_status == ESP_SCAN_DISABLED)
     {
-      return -EINVAL;
+      ret = -EINVAL;
+      goto exit_failed;
     }
 
   if ((iwr == NULL) || (g_scan_priv.scan_status != ESP_SCAN_DONE))
@@ -291,6 +305,13 @@ int esp_wifi_get_scan_results(struct iwreq *iwr)
       goto exit_failed;
     }
 
+  if (priv->scan_result_size <= 0)
+    {
+      ret = OK;
+      iwr->u.data.length = 0;
+      goto exit_free_buffer;
+    }
+
   if (iwr->u.data.pointer == NULL ||
       iwr->u.data.length < priv->scan_result_size)
     {
@@ -299,14 +320,7 @@ int esp_wifi_get_scan_results(struct iwreq *iwr)
       ret = -E2BIG;
       iwr->u.data.pointer = NULL;
       iwr->u.data.length = priv->scan_result_size;
-      goto exit_failed;
-    }
-
-  if (priv->scan_result_size <= 0)
-    {
-      ret = OK;
-      iwr->u.data.length = 0;
-      goto exit_free_buffer;
+      return ret;
     }
 
   /* Copy result to user buffer */
@@ -410,7 +424,7 @@ void esp_wifi_scan_event_parse(void)
               is_target_channel = true;
             }
 
-          if (is_target_channel == true)
+          if (is_target_channel)
             {
               result_size = WIFI_SCAN_RESULT_SIZE - priv->scan_result_size;
 
@@ -544,12 +558,12 @@ scan_result_full:
 
   /* Continue instead of break to log dropped AP results */
 
-  if (parse_done == false)
+  if (!parse_done)
     {
       wlerr("ERROR: No more space in scan_result buffer\n");
     }
 
-  if (ap_list_buffer != NULL)
+  if (ap_list_buffer)
     {
       kmm_free(ap_list_buffer);
       ap_list_buffer = NULL;

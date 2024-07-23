@@ -81,7 +81,7 @@
 #define _FBIOCBASE      (0x2800) /* Frame buffer character driver ioctl commands */
 #define _NXTERMBASE     (0x2900) /* NxTerm character driver ioctl commands */
 #define _RFIOCBASE      (0x2a00) /* RF devices ioctl commands */
-#define _RPMSGBASE      (0x2b00) /* Remote processor tunnel ioctl commands */
+#define _RPMSGBASE      (0x2b00) /* Remote processor message ioctl commands */
 #define _NOTECTLBASE    (0x2c00) /* Note filter control ioctl commands*/
 #define _NOTERAMBASE    (0x2d00) /* Noteram device ioctl commands*/
 #define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
@@ -99,6 +99,7 @@
 #define _SEIOCBASE      (0x3a00) /* Secure element ioctl commands */
 #define _SYSLOGBASE     (0x3c00) /* Syslog device ioctl commands */
 #define _STEPIOBASE     (0x3d00) /* Stepper device ioctl commands */
+#define _FPGACFGBASE    (0x3e00) /* FPGA configuration ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -189,13 +190,25 @@
                                            */
 
 #ifdef CONFIG_FDSAN
-#define FIOC_SETTAG     _FIOC(0x000e)     /* IN:  FAR uint64_t *
+#define FIOC_SETTAG_FDSAN _FIOC(0x000e)   /* IN:  FAR uint64_t *
                                            * Pointer to file tag
                                            * OUT: None
                                            */
 
-#define FIOC_GETTAG     _FIOC(0x000f)     /* IN:  FAR uint64_t *
+#define FIOC_GETTAG_FDSAN _FIOC(0x000f)   /* IN:  FAR uint64_t *
                                            * Pointer to file tag
+                                           * OUT: None
+                                           */
+#endif
+
+#ifdef CONFIG_FDCHECK
+#define FIOC_SETTAG_FDCHECK _FIOC(0x0010) /* IN:  FAR uint8_t *
+                                           * Pointer to file fdcheck tag
+                                           * OUT: None
+                                           */
+
+#define FIOC_GETTAG_FDCHECK _FIOC(0x0011) /* IN:  FAR uint8_t *
+                                           * Pointer to file fdcheck tag
                                            * OUT: None
                                            */
 #endif
@@ -681,6 +694,11 @@
 
 #define _BOARDIOCVALID(c) (_IOC_TYPE(c)==_BOARDBASE)
 #define _BOARDIOC(nr)     _IOC(_BOARDBASE,nr)
+
+/* FPAG configuration ioctl definitions *************************************/
+
+#define _FPGACFGVALID(c) (_IOC_TYPE(c) == _FPGACFGBASE)
+#define _FPGACFGIOC(nr) _IOC(_FPGACFGBASE, nr)
 
 /****************************************************************************
  * Public Type Definitions

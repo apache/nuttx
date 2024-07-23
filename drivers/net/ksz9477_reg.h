@@ -118,6 +118,18 @@
 #define SGMII_AUTONEG_CONTROL_TC_MASTER    (1 << 3)
 #define SGMII_AUTONEG_CONTROL_LINK_STATUS  (1 << 4)
 
+/* Port Mirroring Control Register */
+
+#define KSZ9477_PORT_MIRROR_CONTROL(p)     KSZ9477_PORT_REG(p, 0x800)
+#define KSZ9477_PORT_MIRROR_SNIFFER_PORT   (1 << 1)
+#define KSZ9477_PORT_MIRROR_TX_SNIFF       (1 << 5)
+#define KSZ9477_PORT_MIRROR_RX_SNIFF       (1 << 6)
+
+/* Global Port Mirroring and Snooping Control Register */
+
+#define KSZ9477_GLOBAL_PORT_MIRROR_CONTROL 0x0370
+#define KSZ9477_GLOBAL_PORT_SNIFF_MODE     (1 << 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

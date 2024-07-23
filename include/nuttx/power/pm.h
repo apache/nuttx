@@ -145,6 +145,15 @@ enum pm_state_e
   PM_COUNT,
 };
 
+#ifdef CONFIG_PM_PROCFS
+struct pm_preparefail_s
+{
+  enum pm_state_e state;
+  struct timespec start;
+  struct timespec duration[PM_COUNT];
+};
+#endif
+
 /* This structure contain pointers callback functions in the driver.  These
  * callback functions can be used to provide power management information
  * to the driver.
@@ -211,6 +220,10 @@ struct pm_callback_s
 
   CODE void (*notify)(FAR struct pm_callback_s *cb, int domain,
                       enum pm_state_e pmstate);
+
+#ifdef CONFIG_PM_PROCFS
+  struct pm_preparefail_s preparefail;
+#endif
 };
 
 /* An instance of a given PM governor */
@@ -352,6 +365,19 @@ extern "C"
 void pm_initialize(void);
 
 /****************************************************************************
+ * Name: pm_stability_governor_initialize
+ *
+ * Description:
+ *   Return the stability governor instance.
+ *
+ * Returned Value:
+ *   A pointer to the governor struct. Otherwise NULL is returned on error.
+ *
+ ****************************************************************************/
+
+FAR const struct pm_governor_s *pm_stability_governor_initialize(void);
+
+/****************************************************************************
  * Name: pm_greedy_governor_initialize
  *
  * Description:
@@ -414,14 +440,15 @@ int pm_set_governor(int domain, FAR const struct pm_governor_s *gov);
 void pm_auto_update(int domain, bool auto_update);
 
 /****************************************************************************
- * Name: pm_register
+ * Name: pm_domain_register
  *
  * Description:
  *   This function is called by a device driver in order to register to
  *   receive power management event callbacks.
  *
  * Input Parameters:
- *   callbacks - An instance of struct pm_callback_s providing the driver
+ *   domain - Target register domain.
+ *   cb     - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
  * Returned Value:
@@ -429,17 +456,20 @@ void pm_auto_update(int domain, bool auto_update);
  *
  ****************************************************************************/
 
-int pm_register(FAR struct pm_callback_s *callbacks);
+int pm_domain_register(int domain, FAR struct pm_callback_s *cb);
+
+#define pm_register(cb) pm_domain_register(PM_IDLE_DOMAIN, cb)
 
 /****************************************************************************
- * Name: pm_unregister
+ * Name: pm_domain_unregister
  *
  * Description:
  *   This function is called by a device driver in order to unregister
  *   previously registered power management event callbacks.
  *
  * Input parameters:
- *   callbacks - An instance of struct pm_callback_s providing the driver
+ *   domain - Target unregister domain.
+ *   cb     - An instance of struct pm_callback_s providing the driver
  *               callback functions.
  *
  * Returned Value:
@@ -447,7 +477,9 @@ int pm_register(FAR struct pm_callback_s *callbacks);
  *
  ****************************************************************************/
 
-int pm_unregister(FAR struct pm_callback_s *callbacks);
+int pm_domain_unregister(int domain, FAR struct pm_callback_s *cb);
+
+#define pm_unregister(cb) pm_domain_unregister(PM_IDLE_DOMAIN, cb)
 
 /****************************************************************************
  * Name: pm_activity
@@ -805,7 +837,9 @@ void pm_auto_updatestate(int domain);
 #  define PM_WAKELOCK_DECLARE(v,n,d,s)
 #  define PM_WAKELOCK_DECLARE_STATIC(v,n,d,s)
 #  define pm_initialize()
+#  define pm_domain_register(domain,cb)       (0)
 #  define pm_register(cb)                     (0)
+#  define pm_domain_unregister(domain,cb)     (0)
 #  define pm_unregister(cb)                   (0)
 #  define pm_activity(domain,prio)
 #  define pm_stay(domain,state)

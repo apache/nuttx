@@ -37,6 +37,7 @@
 
 #include <nuttx/irq.h>
 
+#include "riscv_sbi.h"
 #include "riscv_common_memorymap.h"
 
 /****************************************************************************
@@ -81,19 +82,14 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
-/* Format output with register width and hex */
-
-#ifdef CONFIG_ARCH_RV32
-#  define PRIxREG "08" PRIxPTR
-#else
-#  define PRIxREG "016" PRIxPTR
-#endif
+/* Interrupt Stack macros */
+#define INT_STACK_SIZE  (STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
 
 /* In the RISC-V model, the state is saved in stack,
  * only a reference stored in TCB.
  */
 
-#define riscv_savestate(regs) (regs = (uintptr_t *)CURRENT_REGS)
+#define riscv_savestate(regs) (regs = (uintreg_t *)CURRENT_REGS)
 #define riscv_restorestate(regs) (CURRENT_REGS = regs)
 
 /* Determine which (if any) console driver to use.  If a console is enabled
@@ -122,27 +118,68 @@
 
 #ifndef __ASSEMBLY__
 
-#define getreg8(a)          (*(volatile uint8_t *)(a))
-#define putreg8(v,a)        (*(volatile uint8_t *)(a) = (v))
-#define getreg16(a)         (*(volatile uint16_t *)(a))
-#define putreg16(v,a)       (*(volatile uint16_t *)(a) = (v))
-#define getreg32(a)         (*(volatile uint32_t *)(a))
-#define putreg32(v,a)       (*(volatile uint32_t *)(a) = (v))
-#define getreg64(a)         (*(volatile uint64_t *)(a))
-#define putreg64(v,a)       (*(volatile uint64_t *)(a) = (v))
+/* Use ASM as rv64ilp32 compiler generated address is limited */
+
+static inline uint8_t getreg8(const volatile uintreg_t a)
+{
+  uint8_t v;
+  __asm__ __volatile__("lb %0, 0(%1)" : "=r" (v) : "r" (a));
+  return v;
+}
+
+static inline void putreg8(uint8_t v, const volatile uintreg_t a)
+{
+  __asm__ __volatile__("sb %0, 0(%1)" : : "r" (v), "r" (a));
+}
+
+static inline uint16_t getreg16(const volatile uintreg_t a)
+{
+  uint16_t v;
+  __asm__ __volatile__("lh %0, 0(%1)" : "=r" (v) : "r" (a));
+  return v;
+}
+
+static inline void putreg16(uint16_t v, const volatile uintreg_t a)
+{
+  __asm__ __volatile__("sh %0, 0(%1)" : : "r" (v), "r" (a));
+}
+
+static inline uint32_t getreg32(const volatile uintreg_t a)
+{
+  uint32_t v;
+  __asm__ __volatile__("lw %0, 0(%1)" : "=r" (v) : "r" (a));
+  return v;
+}
+
+static inline void putreg32(uint32_t v, const volatile uintreg_t a)
+{
+  __asm__ __volatile__("sw %0, 0(%1)" : : "r" (v), "r" (a));
+}
+
+static inline uint64_t getreg64(const volatile uintreg_t a)
+{
+  uint64_t v;
+  __asm__ __volatile__("ld %0, 0(%1)" : "=r" (v) : "r" (a));
+  return v;
+}
+
+static inline void putreg64(uint64_t v, const volatile uintreg_t a)
+{
+  __asm__ __volatile__("sd %0, 0(%1)" : : "r" (v), "r" (a));
+}
 
 #define READ_CSR(reg) \
   ({ \
-     uintptr_t reg##_val; \
-     __asm__ __volatile__("csrr %0, " __STR(reg) : "=r"(reg##_val)); \
-     reg##_val; \
+     uintreg_t __regval; \
+     __asm__ __volatile__("csrr %0, " __STR(reg) : "=r"(__regval)); \
+     __regval; \
   })
 
 #define READ_AND_SET_CSR(reg, bits) \
   ({ \
-     uintptr_t reg##_val; \
-     __asm__ __volatile__("csrrs %0, " __STR(reg) ", %1": "=r"(reg##_val) : "rK"(bits)); \
-     reg##_val; \
+     uintreg_t __regval; \
+     __asm__ __volatile__("csrrs %0, " __STR(reg) ", %1": "=r"(__regval) : "rK"(bits)); \
+     __regval; \
   })
 
 #define WRITE_CSR(reg, val) \
@@ -159,6 +196,9 @@
   ({ \
      __asm__ __volatile__("csrc " __STR(reg) ", %0" :: "rK"(bits)); \
   })
+
+#define riscv_append_pmp_region(a, b, s) \
+  riscv_config_pmp_region(riscv_next_free_pmp_region(), a, b, s)
 
 #endif
 
@@ -182,7 +222,7 @@ extern "C"
 #ifndef __ASSEMBLY__
 /* Atomic modification of registers */
 
-void modifyreg32(uintptr_t addr, uint32_t clearbits, uint32_t setbits);
+void modifyreg32(uintreg_t addr, uint32_t clearbits, uint32_t setbits);
 
 /* Memory allocation ********************************************************/
 
@@ -204,12 +244,12 @@ void riscv_exception_attach(void);
 
 #ifdef CONFIG_ARCH_FPU
 void riscv_fpuconfig(void);
-void riscv_savefpu(uintptr_t *regs, uintptr_t *fregs);
-void riscv_restorefpu(uintptr_t *regs, uintptr_t *fregs);
+void riscv_savefpu(uintreg_t *regs, uintreg_t *fregs);
+void riscv_restorefpu(uintreg_t *regs, uintreg_t *fregs);
 
 /* Get FPU register save area */
 
-static inline uintptr_t *riscv_fpuregs(struct tcb_s *tcb)
+static inline uintreg_t *riscv_fpuregs(struct tcb_s *tcb)
 {
 #ifdef CONFIG_ARCH_LAZYFPU
   /* With lazy FPU the registers are simply in tcb */
@@ -218,7 +258,7 @@ static inline uintptr_t *riscv_fpuregs(struct tcb_s *tcb)
 #else
   /* Otherwise they are after the integer registers */
 
-  return (uintptr_t *)((uintptr_t)tcb->xcp.regs + INT_XCPT_SIZE);
+  return (uintreg_t *)((uintptr_t)tcb->xcp.regs + INT_XCPT_SIZE);
 #endif
 }
 #else
@@ -228,27 +268,57 @@ static inline uintptr_t *riscv_fpuregs(struct tcb_s *tcb)
 #  define riscv_fpuregs(tcb)
 #endif
 
+#ifdef CONFIG_ARCH_RV_ISA_V
+void riscv_vpuconfig(void);
+void riscv_savevpu(uintptr_t *regs, uintptr_t *vregs);
+void riscv_restorevpu(uintptr_t *regs, uintptr_t *vregs);
+
+/* Get VPU register save area */
+
+static inline uintptr_t *riscv_vpuregs(struct tcb_s *tcb)
+{
+  return tcb->xcp.vregs;
+}
+#else
+#  define riscv_vpuconfig()
+#  define riscv_savevpu(regs, vregs)
+#  define riscv_restorevpu(regs, vregs)
+#  define riscv_vpuregs(tcb)
+#endif
+
 /* Save / restore context of task */
 
 static inline void riscv_savecontext(struct tcb_s *tcb)
 {
-  tcb->xcp.regs = (uintptr_t *)CURRENT_REGS;
+  tcb->xcp.regs = (uintreg_t *)CURRENT_REGS;
 
 #ifdef CONFIG_ARCH_FPU
   /* Save current process FPU state to TCB */
 
   riscv_savefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
 #endif
+
+#ifdef CONFIG_ARCH_RV_ISA_V
+  /* Save current process VPU state to TCB */
+
+  riscv_savevpu(tcb->xcp.regs, riscv_vpuregs(tcb));
+#endif
 }
 
 static inline void riscv_restorecontext(struct tcb_s *tcb)
 {
-  CURRENT_REGS = (uintptr_t *)tcb->xcp.regs;
+  CURRENT_REGS = (uintreg_t *)tcb->xcp.regs;
 
 #ifdef CONFIG_ARCH_FPU
   /* Restore FPU state for next process */
 
   riscv_restorefpu(tcb->xcp.regs, riscv_fpuregs(tcb));
+#endif
+
+#ifdef CONFIG_ARCH_RV_ISA_V
+  /* Restore VPU state for next process */
+
+  riscv_restorevpu(tcb->xcp.regs, riscv_vpuregs(tcb));
 #endif
 }
 
@@ -260,13 +330,6 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
 int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size);
 int riscv_configured_pmp_regions(void);
 int riscv_next_free_pmp_region(void);
-
-/* RISC-V SBI wrappers ******************************************************/
-
-#ifdef CONFIG_ARCH_USE_S_MODE
-void riscv_sbi_set_timer(uint64_t stime_value);
-uint64_t riscv_sbi_get_time(void);
-#endif
 
 /* Power management *********************************************************/
 
@@ -310,8 +373,9 @@ void riscv_netinitialize(void);
 
 /* Exception Handler ********************************************************/
 
-uintptr_t *riscv_doirq(int irq, uintptr_t *regs);
+uintreg_t *riscv_doirq(int irq, uintreg_t *regs);
 int riscv_exception(int mcause, void *regs, void *args);
+int riscv_fillpage(int mcause, void *regs, void *args);
 int riscv_misaligned(int irq, void *context, void *arg);
 
 /* Debug ********************************************************************/
@@ -342,7 +406,7 @@ uintptr_t riscv_mhartid(void);
 /* If kernel runs in Supervisor mode, a system call trampoline is needed */
 
 #ifdef CONFIG_ARCH_USE_S_MODE
-void *riscv_perform_syscall(uintptr_t *regs);
+void *riscv_perform_syscall(uintreg_t *regs);
 #endif
 
 /* Context switching via system calls ***************************************/
@@ -362,16 +426,6 @@ void *riscv_perform_syscall(uintptr_t *regs);
 
 #define riscv_switchcontext(prev, next) \
   sys_call2(SYS_switch_context, (uintptr_t)prev, (uintptr_t)next)
-
-#ifdef CONFIG_BUILD_KERNEL
-/* SYS call 3:
- *
- * void riscv_syscall_return(void);
- */
-
-#define riscv_syscall_return() sys_call0(SYS_syscall_return)
-
-#endif /* CONFIG_BUILD_KERNEL */
 
 #undef EXTERN
 #ifdef __cplusplus

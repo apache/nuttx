@@ -31,6 +31,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* RMT gpio */
+
+#define RMT_RXCHANNEL       2
+#define RMT_TXCHANNEL       0
+
+#ifdef CONFIG_RMT_LOOP_TEST_MODE
+#  define RMT_INPUT_PIN     0
+#  define RMT_OUTPUT_PIN    0
+#else
+#  define RMT_INPUT_PIN     2
+#  define RMT_OUTPUT_PIN    8
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -67,6 +80,25 @@
  ****************************************************************************/
 
 int esp_bringup(void);
+
+/****************************************************************************
+ * Name: board_twai_setup
+ *
+ * Description:
+ *  Initialize TWAI and register the TWAI device
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_TWAI
+int board_twai_setup(void);
+#endif
 
 /****************************************************************************
  * Name: esp_gpio_init

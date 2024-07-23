@@ -75,7 +75,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
       /* Move the TCB to the g_stoppedtasks list. */
 
       tcb->task_state = TSTATE_TASK_STOPPED;
-      dq_addlast((FAR dq_entry_t *)tcb, &g_stoppedtasks);
+      dq_addlast((FAR dq_entry_t *)tcb, list_stoppedtasks());
     }
   else
     {
@@ -97,7 +97,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
       /* Add the task to the specified blocked task list */
 
       tcb->task_state = TSTATE_TASK_STOPPED;
-      dq_addlast((FAR dq_entry_t *)tcb, &g_stoppedtasks);
+      dq_addlast((FAR dq_entry_t *)tcb, list_stoppedtasks());
 
       /* Now, perform the context switch if one is needed */
 

@@ -64,7 +64,7 @@ static int jh7110_ssoft_interrupt(int irq, void *context, void *arg)
 {
   /* Cleaer Supervisor Software Interrupt */
 
-  CLEAR_CSR(sip, SIP_SSIP);
+  CLEAR_CSR(CSR_SIP, SIP_SSIP);
 
   if (g_stimer_pending)
     {

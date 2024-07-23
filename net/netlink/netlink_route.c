@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <arpa/inet.h>
 
 #include <net/route.h>
 #include <netpacket/netlink.h>
@@ -177,6 +178,32 @@ struct getaddr_recvfrom_rsplist_s
 {
   sq_entry_t flink;
   struct getaddr_recvfrom_response_s payload;
+};
+
+struct getprefix_recvfrom_addr_s
+{
+  struct rtattr  attr;
+  net_ipv6addr_t addr;
+};
+
+struct getprefix_recvfrom_cache_s
+{
+  struct rtattr           attr;
+  struct prefix_cacheinfo pci;
+};
+
+struct getprefix_recvfrom_response_s
+{
+  struct nlmsghdr  hdr;
+  struct prefixmsg pmsg;
+  struct getprefix_recvfrom_addr_s  prefix;
+  struct getprefix_recvfrom_cache_s pci;
+};
+
+struct getprefix_recvfrom_rsplist_s
+{
+  sq_entry_t flink;
+  struct getprefix_recvfrom_response_s payload;
 };
 
 /* netdev_foreach() callback */
@@ -441,66 +468,6 @@ netlink_get_ifaddr(FAR struct net_driver_s *dev, int domain, int type,
 #endif
 
 /****************************************************************************
- * Name: netlink_get_terminator
- *
- * Description:
- *   Generate one NLMSG_DONE response.
- *
- ****************************************************************************/
-
-static FAR struct netlink_response_s *
-netlink_get_terminator(FAR const struct nlroute_sendto_request_s *req)
-{
-  FAR struct netlink_response_s *resp;
-  FAR struct nlmsghdr *hdr;
-
-  /* Allocate the list terminator */
-
-  resp = kmm_zalloc(sizeof(struct netlink_response_s));
-  if (resp == NULL)
-    {
-      nerr("ERROR: Failed to allocate response terminator.\n");
-      return NULL;
-    }
-
-  /* Initialize and send the list terminator */
-
-  hdr              = &resp->msg;
-  hdr->nlmsg_len   = sizeof(struct nlmsghdr);
-  hdr->nlmsg_type  = NLMSG_DONE;
-  hdr->nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
-  hdr->nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
-  hdr->nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
-
-  /* Finally, return the response */
-
-  return resp;
-}
-
-/****************************************************************************
- * Name: netlink_add_terminator
- *
- * Description:
- *   Add one NLMSG_DONE response to handle.
- *
- ****************************************************************************/
-
-static int netlink_add_terminator(NETLINK_HANDLE handle,
-                              FAR const struct nlroute_sendto_request_s *req)
-{
-  FAR struct netlink_response_s * resp;
-
-  resp = netlink_get_terminator(req);
-  if (resp == NULL)
-    {
-      return -ENOMEM;
-    }
-
-  netlink_add_response(handle, resp);
-  return OK;
-}
-
-/****************************************************************************
  * Name: netlink_get_devlist
  *
  * Description:
@@ -544,12 +511,12 @@ static int netlink_get_devlist(NETLINK_HANDLE handle,
       return ret;
     }
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
 #endif
 
 /****************************************************************************
- * Name: netlink_get_arptable()
+ * Name: netlink_fill_arptable()
  *
  * Description:
  *   Return the entire ARP table.
@@ -557,13 +524,122 @@ static int netlink_get_devlist(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ARP) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
-static int netlink_get_arptable(NETLINK_HANDLE handle,
-                              FAR const struct nlroute_sendto_request_s *req)
+static size_t netlink_fill_arptable(
+                              FAR struct getneigh_recvfrom_rsplist_s **entry)
 {
-  FAR struct getneigh_recvfrom_rsplist_s *entry;
   unsigned int ncopied;
   size_t allocsize;
   size_t tabsize;
+  size_t rspsize;
+
+  /* Lock the network so that the ARP table will be stable, then copy
+   * the ARP table into the allocated memory.
+   */
+
+  net_lock();
+  ncopied = arp_snapshot((FAR struct arpreq *)(*entry)->payload.data,
+                         CONFIG_NET_ARPTAB_SIZE);
+  net_unlock();
+
+  /* Now we have the real number of valid entries in the ARP table and
+   * we can trim the allocation.
+   */
+
+  if (ncopied > 0)
+    {
+      FAR struct getneigh_recvfrom_rsplist_s *newentry;
+
+      tabsize = ncopied * sizeof(struct arpreq);
+      rspsize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
+
+      newentry = kmm_realloc(*entry, allocsize);
+
+      if (newentry != NULL)
+        {
+          *entry = newentry;
+        }
+
+      (*entry)->payload.hdr.nlmsg_len = rspsize;
+      (*entry)->payload.attr.rta_len  = RTA_LENGTH(tabsize);
+    }
+
+  return ncopied;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_fill_nbtable()
+ *
+ * Description:
+ *   Return the entire IPv6 neighbor table.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
+static size_t netlink_fill_nbtable(
+                              FAR struct getneigh_recvfrom_rsplist_s **entry)
+{
+  unsigned int ncopied;
+  size_t allocsize;
+  size_t tabsize;
+  size_t rspsize;
+
+  /* Lock the network so that the Neighbor table will be stable, then
+   * copy the Neighbor table into the allocated memory.
+   */
+
+  net_lock();
+  ncopied = neighbor_snapshot(
+                      (FAR struct neighbor_entry_s *)(*entry)->payload.data,
+                      CONFIG_NET_IPv6_NCONF_ENTRIES);
+  net_unlock();
+
+  /* Now we have the real number of valid entries in the Neighbor table
+   * and we can trim the allocation.
+   */
+
+  if (ncopied > 0)
+    {
+      FAR struct getneigh_recvfrom_rsplist_s *newentry;
+
+      tabsize   = ncopied * sizeof(struct neighbor_entry_s);
+      rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
+      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
+
+      newentry = kmm_realloc(*entry, allocsize);
+
+      if (newentry != NULL)
+        {
+          *entry = newentry;
+        }
+
+      (*entry)->payload.hdr.nlmsg_len = rspsize;
+      (*entry)->payload.attr.rta_len  = RTA_LENGTH(tabsize);
+    }
+
+  return ncopied;
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_fill_nbtable()
+ *
+ * Description:
+ *   Return the entire IPv6 neighbor table.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
+static FAR struct netlink_response_s *
+netlink_get_neighbor(FAR const void *neigh, int domain, int type,
+                     FAR const struct nlroute_sendto_request_s *req)
+{
+  FAR struct getneigh_recvfrom_rsplist_s *alloc;
+  FAR struct getneigh_recvfrom_response_s *resp;
+  size_t allocsize;
+  size_t tabsize;
+  size_t tabnum;
   size_t rspsize;
 
   /* Preallocate memory to hold the maximum sized ARP table
@@ -572,147 +648,105 @@ static int netlink_get_arptable(NETLINK_HANDLE handle,
    * the number of valid entries in the ARP table.
    */
 
-  tabsize   = CONFIG_NET_ARPTAB_SIZE * sizeof(struct arpreq);
+#if defined(CONFIG_NET_ARP)
+  if (domain == AF_INET)
+    {
+      tabnum  = req ? CONFIG_NET_ARPTAB_SIZE : 1;
+      tabsize = tabnum * sizeof(struct arpreq);
+    }
+  else
+#endif
+#if defined(CONFIG_NET_IPv6)
+  if (domain == AF_INET6)
+    {
+      tabnum  = req ? CONFIG_NET_IPv6_NCONF_ENTRIES : 1;
+      tabsize = tabnum * sizeof(struct neighbor_entry_s);
+    }
+  else
+#endif
+    {
+      return NULL;
+    }
+
   rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
   allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-  entry = kmm_zalloc(allocsize);
-  if (entry == NULL)
+  /* Allocate the response buffer */
+
+  alloc = kmm_zalloc(allocsize);
+  if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");
-      return -ENOMEM;
+      return NULL;
     }
 
-  /* Populate the entry */
+  /* Initialize the response buffer */
 
-  memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
-  entry->payload.hdr.nlmsg_len  = rspsize;
-  entry->payload.msg.ndm_family = req->gen.rtgen_family;
-  entry->payload.attr.rta_len   = RTA_LENGTH(tabsize);
+  resp                  = &alloc->payload;
+  resp->hdr.nlmsg_len   = rspsize;
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
 
-  /* Lock the network so that the ARP table will be stable, then copy
-   * the ARP table into the allocated memory.
-   */
+  resp->msg.ndm_family = domain;
+  resp->attr.rta_len   = RTA_LENGTH(tabsize);
 
-  net_lock();
-  ncopied = arp_snapshot((FAR struct arpreq *)entry->payload.data,
-                         CONFIG_NET_ARPTAB_SIZE);
-  net_unlock();
+  /* Copy neigh or arp entries into resp data */
 
-  /* Now we have the real number of valid entries in the ARP table and
-   * we can trim the allocation.
-   */
-
-  if (ncopied < CONFIG_NET_ARPTAB_SIZE)
+  if (req == NULL)
     {
-      FAR struct getneigh_recvfrom_rsplist_s *newentry;
-
-      tabsize = ncopied * sizeof(struct arpreq);
-      rspsize = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
-
-      newentry = (FAR struct getneigh_recvfrom_rsplist_s *)
-        kmm_realloc(entry, allocsize);
-
-      if (newentry != NULL)
+      if (neigh == NULL)
         {
-           entry = newentry;
+          return NULL;
         }
 
-      entry->payload.hdr.nlmsg_len = rspsize;
-      entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
+      /* Only one entry need to notify */
+
+      memcpy(resp->data, neigh, tabsize);
     }
-
-  /* Finally, add the data to the list of pending responses */
-
-  netlink_add_response(handle, (FAR struct netlink_response_s *)entry);
-  return OK;
-}
+#if defined(CONFIG_NET_ARP)
+  else if (domain == AF_INET)
+    {
+      tabnum = netlink_fill_arptable(&alloc);
+    }
+#endif
+#if defined(CONFIG_NET_IPv6)
+  else if (domain == AF_INET6)
+    {
+      tabnum = netlink_fill_nbtable(&alloc);
+    }
 #endif
 
-/****************************************************************************
- * Name: netlink_get_nbtable()
- *
- * Description:
- *   Return the entire IPv6 neighbor table.
- *
- ****************************************************************************/
+  /* If no entry in table, just free alloc */
 
-#if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
-static int netlink_get_nbtable(NETLINK_HANDLE handle,
+  if (tabnum <= 0)
+    {
+      kmm_free(alloc);
+      nwarn("WARNING: Failed to get entry in %s table.\n",
+            domain == AF_INET ? "ARP" : "neighbor");
+      return NULL;
+    }
+
+  return (FAR struct netlink_response_s *)alloc;
+}
+
+static int netlink_get_neighborlist(NETLINK_HANDLE handle, int domain,
                               FAR const struct nlroute_sendto_request_s *req)
 {
-  FAR struct getneigh_recvfrom_rsplist_s *entry;
-  unsigned int ncopied;
-  size_t allocsize;
-  size_t tabsize;
-  size_t rspsize;
+  FAR struct netlink_response_s *resp;
 
-  /* Preallocate memory to hold the maximum sized Neighbor table
-   * REVISIT:  This is probably excessively large and could cause false
-   * memory out conditions.  A better approach would be to actually count
-   * the number of valid entries in the Neighbor table.
-   */
-
-  tabsize   = CONFIG_NET_IPv6_NCONF_ENTRIES *
-              sizeof(struct neighbor_entry_s);
-  rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-  allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
-
-  entry = kmm_zalloc(allocsize);
-  if (entry == NULL)
+  resp = netlink_get_neighbor(NULL, domain, RTM_GETNEIGH, req);
+  if (resp == NULL)
     {
-      nerr("ERROR: Failed to allocate response buffer.\n");
-      return -ENOMEM;
+      return -ENOENT;
     }
 
-  /* Populate the entry */
+  netlink_add_response(handle, resp);
 
-  memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
-  entry->payload.hdr.nlmsg_len  = rspsize;
-  entry->payload.msg.ndm_family = req->gen.rtgen_family;
-  entry->payload.attr.rta_len   = RTA_LENGTH(tabsize);
-
-  /* Lock the network so that the Neighbor table will be stable, then
-   * copy the Neighbor table into the allocated memory.
-   */
-
-  net_lock();
-  ncopied = neighbor_snapshot(
-    (FAR struct neighbor_entry_s *)entry->payload.data,
-    CONFIG_NET_IPv6_NCONF_ENTRIES);
-  net_unlock();
-
-  /* Now we have the real number of valid entries in the Neighbor table
-   * and we can trim the allocation.
-   */
-
-  if (ncopied < CONFIG_NET_IPv6_NCONF_ENTRIES)
-    {
-      FAR struct getneigh_recvfrom_rsplist_s *newentry;
-
-      tabsize   = ncopied * sizeof(struct neighbor_entry_s);
-      rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
-      allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
-
-      newentry = (FAR struct getneigh_recvfrom_rsplist_s *)
-        kmm_realloc(entry, allocsize);
-
-      if (newentry != NULL)
-        {
-           entry = newentry;
-        }
-
-      entry->payload.hdr.nlmsg_len = rspsize;
-      entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
-    }
-
-  /* Finally, add the response to the list of pending responses */
-
-  netlink_add_response(handle, (FAR struct netlink_response_s *)entry);
-  return OK;
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
-#endif
+#endif /* CONFIG_NETLINK_DISABLE_GETNEIGH */
 
 /****************************************************************************
  * Name: netlink_ipv4_route
@@ -723,15 +757,14 @@ static int netlink_get_nbtable(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
-                              FAR void *arg)
+static FAR struct netlink_response_s *
+netlink_get_ipv4_route(FAR const struct net_route_ipv4_s *route, int type,
+                       FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getroute_recvfrom_ipv4resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv4response_s *resp;
-  FAR struct nlroute_info_s *info;
 
-  DEBUGASSERT(route != NULL && arg != NULL);
-  info = (FAR struct nlroute_info_s *)arg;
+  DEBUGASSERT(route != NULL);
 
   /* Allocate the response */
 
@@ -739,19 +772,19 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
     kmm_zalloc(sizeof(struct getroute_recvfrom_ipv4resplist_s));
   if (alloc == NULL)
     {
-      return -ENOMEM;
+      return NULL;
     }
 
   /* Format the response */
 
   resp                  = &alloc->payload;
   resp->hdr.nlmsg_len   = sizeof(struct getroute_recvfrom_ipv4response_s);
-  resp->hdr.nlmsg_type  = RTM_NEWROUTE;
-  resp->hdr.nlmsg_flags = info->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq   = info->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid   = info->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
 
-  resp->rte.rtm_family   = info->req->gen.rtgen_family;
+  resp->rte.rtm_family   = AF_INET;
   resp->rte.rtm_table    = RT_TABLE_MAIN;
   resp->rte.rtm_protocol = RTPROT_STATIC;
   resp->rte.rtm_scope    = RT_SCOPE_SITE;
@@ -768,15 +801,39 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
   resp->gateway.attr.rta_type = RTA_GATEWAY;
   resp->gateway.addr          = route->router;
 
+  return (FAR struct netlink_response_s *)alloc;
+}
+
+/****************************************************************************
+ * Name: netlink_ipv4route_callback
+ *
+ * Input Parameters:
+ *   route - The entry of IPV4 routing table.
+ *   arg   - The netlink info of request.
+ *
+ ****************************************************************************/
+
+static int netlink_ipv4route_callback(FAR struct net_route_ipv4_s *route,
+                                      FAR void *arg)
+{
+  FAR struct nlroute_info_s *info = arg;
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_get_ipv4_route(route, RTM_NEWROUTE, info->req);
+  if (resp == NULL)
+    {
+      return -ENOENT;
+    }
+
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->handle, resp);
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: netlink_get_ipv4route
+ * Name: netlink_list_ipv4_route
  *
  * Description:
  *   Dump a list of all network devices of the specified type.
@@ -784,7 +841,7 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_get_ipv4route(NETLINK_HANDLE handle,
+static int netlink_list_ipv4_route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -795,7 +852,7 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
   info.handle = handle;
   info.req    = req;
 
-  ret = net_foreachroute_ipv4(netlink_ipv4_route, &info);
+  ret = net_foreachroute_ipv4(netlink_ipv4route_callback, &info);
   if (ret < 0)
     {
       return ret;
@@ -803,12 +860,12 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
 
   /* Terminate the routing table */
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
 #endif
 
 /****************************************************************************
- * Name: netlink_ipv6_route
+ * Name: netlink_get_ipv6_route
  *
  * Description:
  *   Dump a list of all network devices of the specified type.
@@ -816,15 +873,14 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
-                              FAR void *arg)
+static FAR struct netlink_response_s *
+netlink_get_ipv6_route(FAR const struct net_route_ipv6_s *route, int type,
+                       FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getroute_recvfrom_ipv6resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv6response_s *resp;
-  FAR struct nlroute_info_s *info;
 
-  DEBUGASSERT(route != NULL && arg != NULL);
-  info = (FAR struct nlroute_info_s *)arg;
+  DEBUGASSERT(route != NULL);
 
   /* Allocate the response */
 
@@ -832,19 +888,19 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
     kmm_zalloc(sizeof(struct getroute_recvfrom_ipv6resplist_s));
   if (alloc == NULL)
     {
-      return -ENOMEM;
+      return NULL;
     }
 
   /* Format the response */
 
   resp                  = &alloc->payload;
   resp->hdr.nlmsg_len   = sizeof(struct getroute_recvfrom_ipv6response_s);
-  resp->hdr.nlmsg_type  = RTM_NEWROUTE;
-  resp->hdr.nlmsg_flags = info->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq   = info->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid   = info->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
 
-  resp->rte.rtm_family   = info->req->gen.rtgen_family;
+  resp->rte.rtm_family   = AF_INET6;
   resp->rte.rtm_table    = RT_TABLE_MAIN;
   resp->rte.rtm_protocol = RTPROT_STATIC;
   resp->rte.rtm_scope    = RT_SCOPE_SITE;
@@ -861,15 +917,43 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
   resp->gateway.attr.rta_type = RTA_GATEWAY;
   net_ipv6addr_copy(resp->gateway.addr, route->router);
 
+  return (FAR struct netlink_response_s *)alloc;
+}
+
+/****************************************************************************
+ * Name: netlink_ipv6route_callback
+ *
+ * Description:
+ *   Response netlink message from ipv6 route list.
+ *
+ * Input Parameters:
+ *   route - The entry of IPV6 routing table.
+ *   arg   - The netlink info of request.
+ *
+ ****************************************************************************/
+
+static int netlink_ipv6route_callback(FAR struct net_route_ipv6_s *route,
+                                      FAR void *arg)
+{
+  FAR struct nlroute_info_s *info = arg;
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_get_ipv6_route(route, RTM_NEWROUTE, info->req);
+  if (resp == NULL)
+    {
+      return -ENOENT;
+    }
+
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->handle, resp);
+
   return OK;
 }
 #endif
 
 /****************************************************************************
- * Name: netlink_get_ip6vroute
+ * Name: netlink_get_ipv6route
  *
  * Description:
  *   Dump a list of all network devices of the specified type.
@@ -877,7 +961,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
+static int netlink_list_ipv6_route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -888,7 +972,7 @@ static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
   info.handle = handle;
   info.req    = req;
 
-  ret = net_foreachroute_ipv6(netlink_ipv6_route, &info);
+  ret = net_foreachroute_ipv6(netlink_ipv6route_callback, &info);
   if (ret < 0)
     {
       return ret;
@@ -896,7 +980,7 @@ static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
 
   /* Terminate the routing table */
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
 }
 #endif
 
@@ -1188,7 +1272,59 @@ static int netlink_get_addr(NETLINK_HANDLE handle,
       return ret;
     }
 
-  return netlink_add_terminator(handle, req);
+  return netlink_add_terminator(handle, &req->hdr, 0);
+}
+#endif
+
+#if !defined(CONFIG_NETLINK_DISABLE_NEWADDR) && defined(CONFIG_NET_IPv6)
+static FAR struct netlink_response_s *
+netlink_fill_ipv6prefix(FAR struct net_driver_s *dev, int type,
+                        FAR const struct icmpv6_prefixinfo_s *pinfo)
+{
+  FAR struct getprefix_recvfrom_rsplist_s *alloc;
+  FAR struct getprefix_recvfrom_response_s *resp;
+
+  DEBUGASSERT(dev != NULL && pinfo != NULL);
+
+  alloc = kmm_zalloc(sizeof(struct getprefix_recvfrom_rsplist_s));
+  if (alloc == NULL)
+    {
+      nerr("ERROR: Failed to allocate response buffer.\n");
+      return NULL;
+    }
+
+  /* Initialize the response buffer */
+
+  resp                  = &alloc->payload;
+
+  resp->hdr.nlmsg_len   = sizeof(struct getprefix_recvfrom_response_s);
+  resp->hdr.nlmsg_type  = type;
+  resp->hdr.nlmsg_flags = 0;
+  resp->hdr.nlmsg_seq   = 0;
+  resp->hdr.nlmsg_pid   = 0;
+
+  resp->pmsg.prefix_family = AF_INET6;
+#ifdef CONFIG_NETDEV_IFINDEX
+  resp->pmsg.prefix_ifindex = dev->d_ifindex;
+#endif
+  resp->pmsg.prefix_len  = pinfo->optlen;
+  resp->pmsg.prefix_type = pinfo->opttype;
+
+  resp->prefix.attr.rta_len  = RTA_LENGTH(sizeof(net_ipv6addr_t));
+  resp->prefix.attr.rta_type = PREFIX_ADDRESS;
+  net_ipv6addr_copy(resp->prefix.addr, pinfo->prefix);
+
+  resp->pci.attr.rta_len  = RTA_LENGTH(sizeof(struct prefix_cacheinfo));
+  resp->pci.attr.rta_type = PREFIX_CACHEINFO;
+
+  resp->pci.pci.preferred_time  = NTOHS(pinfo->plifetime[0]) << 16;
+  resp->pci.pci.preferred_time |= NTOHS(pinfo->plifetime[1]);
+  resp->pci.pci.valid_time      = NTOHS(pinfo->vlifetime[0]) << 16;
+  resp->pci.pci.valid_time     |= NTOHS(pinfo->vlifetime[1]);
+
+  /* Finally, return the response */
+
+  return (FAR struct netlink_response_s *)alloc;
 }
 #endif
 
@@ -1244,7 +1380,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 
         if (req->gen.rtgen_family == AF_INET)
           {
-            ret = netlink_get_arptable(handle, req);
+            ret = netlink_get_neighborlist(handle, AF_INET, req);
           }
         else
 #endif
@@ -1254,7 +1390,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 
         if (req->gen.rtgen_family == AF_INET6)
           {
-             ret = netlink_get_nbtable(handle, req);
+             ret = netlink_get_neighborlist(handle, AF_INET6, req);
           }
         else
 #endif
@@ -1271,14 +1407,14 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 #ifdef CONFIG_NET_IPv4
         if (req->gen.rtgen_family == AF_INET)
           {
-            ret = netlink_get_ipv4route(handle, req);
+            ret = netlink_list_ipv4_route(handle, req);
           }
         else
 #endif
 #ifdef CONFIG_NET_IPv6
         if (req->gen.rtgen_family == AF_INET6)
           {
-            ret = netlink_get_ip6vroute(handle, req);
+            ret = netlink_list_ipv6_route(handle, req);
           }
         else
 #endif
@@ -1394,12 +1530,7 @@ void netlink_device_notify(FAR struct net_driver_s *dev)
   if (resp != NULL)
     {
       netlink_add_broadcast(RTNLGRP_LINK, resp);
-
-      resp = netlink_get_terminator(NULL);
-      if (resp != NULL)
-        {
-          netlink_add_broadcast(RTNLGRP_LINK, resp);
-        }
+      netlink_add_terminator(NULL, NULL, RTNLGRP_LINK);
     }
 }
 #endif
@@ -1448,13 +1579,110 @@ void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
         }
 
       netlink_add_broadcast(group, resp);
-
-      resp = netlink_get_terminator(NULL);
-      if (resp != NULL)
-        {
-          netlink_add_broadcast(group, resp);
-        }
+      netlink_add_terminator(NULL, NULL, group);
     }
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_route_notify
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_NETFILTER protocol.
+ *
+ * Input Parameters:
+ *   route  - The route entry
+ *   type   - The type of the message, RTM_*ROUTE
+ *   domain - The domain of the message
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETROUTE
+void netlink_route_notify(FAR const void *route, int type, int domain)
+{
+  FAR struct netlink_response_s *resp;
+  int group;
+
+  DEBUGASSERT(route != NULL);
+
+#ifdef CONFIG_NET_IPv4
+  if (domain == AF_INET)
+    {
+      resp = netlink_get_ipv4_route((FAR struct net_route_ipv4_s *)route,
+                                    type, NULL);
+      group = RTNLGRP_IPV4_ROUTE;
+    }
+  else
+#endif
+#ifdef CONFIG_NET_IPv6
+  if (domain == AF_INET6)
+    {
+      resp = netlink_get_ipv6_route((FAR struct net_route_ipv6_s *)route,
+                                    type, NULL);
+      group = RTNLGRP_IPV6_ROUTE;
+    }
+    else
+#endif
+    {
+      nwarn("netlink_route_notify unknown type %d domain %d\n",
+            type, domain);
+      return;
+    }
+
+  if (resp != NULL)
+    {
+      netlink_add_broadcast(group, resp);
+      netlink_add_terminator(NULL, NULL, group);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_neigh_notify()
+ *
+ * Description:
+ *   Perform the neigh broadcast for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETNEIGH
+void netlink_neigh_notify(FAR const void *neigh, int type, int domain)
+{
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_get_neighbor(neigh, domain, type, NULL);
+  if (resp == NULL)
+    {
+      return;
+    }
+
+  netlink_add_broadcast(RTNLGRP_NEIGH, resp);
+  netlink_add_terminator(NULL, NULL, RTNLGRP_NEIGH);
+}
+#endif
+
+/****************************************************************************
+ * Name: netlink_ipv6_prefix_notify()
+ *
+ * Description:
+ *   Perform the RA prefix for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETLINK_DISABLE_NEWADDR) && defined(CONFIG_NET_IPv6)
+void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
+                                FAR const struct icmpv6_prefixinfo_s *pinfo)
+{
+  FAR struct netlink_response_s *resp;
+
+  resp = netlink_fill_ipv6prefix(dev, type, pinfo);
+  if (resp == NULL)
+    {
+      return;
+    }
+
+  netlink_add_broadcast(RTNLGRP_IPV6_PREFIX, resp);
+  netlink_add_terminator(NULL, NULL, RTNLGRP_IPV6_PREFIX);
 }
 #endif
 

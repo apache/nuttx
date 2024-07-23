@@ -71,7 +71,6 @@ void arm64_sigdeliver(void)
   struct regs_context  *pctx =
                 (struct regs_context *)rtcb->xcp.saved_reg;
   flags = (pctx->spsr & SPSR_DAIF_MASK);
-  enter_critical_section();
 #endif
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
@@ -86,17 +85,16 @@ retry:
    */
 
   saved_irqcount = rtcb->irqcount;
-  DEBUGASSERT(saved_irqcount >= 1);
+  DEBUGASSERT(saved_irqcount >= 0);
 
   /* Now we need call leave_critical_section() repeatedly to get the irqcount
    * to zero, freeing all global spinlocks that enforce the critical section.
    */
 
-  do
+  while (rtcb->irqcount > 0)
     {
       leave_critical_section(flags);
     }
-  while (rtcb->irqcount > 0);
 #endif /* CONFIG_SMP */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -127,7 +125,7 @@ retry:
    */
 
   DEBUGASSERT(rtcb->irqcount == 0);
-  while (rtcb->irqcount < saved_irqcount)
+  while (rtcb->irqcount < saved_irqcount + 1)
     {
       enter_critical_section();
     }
@@ -140,6 +138,9 @@ retry:
   if (!sq_empty(&rtcb->sigpendactionq) &&
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
+#ifdef CONFIG_SMP
+      leave_critical_section(flags);
+#endif
       goto retry;
     }
 

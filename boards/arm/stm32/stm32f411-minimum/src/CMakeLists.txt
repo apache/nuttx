@@ -44,8 +44,16 @@ if(CONFIG_USBDEV_COMPOSITE)
   list(APPEND SRCS stm32_composite.c)
 endif()
 
+if(CONFIG_STM32F411MINIMUM_GPIO)
+  list(APPEND SRCS stm32_gpio.c)
+endif()
+
 if(CONFIG_USBMSC)
   list(APPEND SRCS stm32_usbmsc.c)
+endif()
+
+if(CONFIG_ADC_HX711)
+  list(APPEND SRCS stm32_hx711.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

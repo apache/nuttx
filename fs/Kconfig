@@ -64,6 +64,10 @@ config FS_NEPOLL_DESCRIPTORS
 	---help---
 		The maximum number of default epoll descriptors for epoll_create1(2)
 
+config FS_LOCK_BUCKET_SIZE
+	int "Maximum number of hash bucket using file locks"
+	default 0
+
 config DISABLE_PSEUDOFS_OPERATIONS
 	bool "Disable pseudo-filesystem operations"
 	default DEFAULT_SMALL
@@ -130,3 +134,4 @@ source "fs/userfs/Kconfig"
 source "fs/hostfs/Kconfig"
 source "fs/rpmsgfs/Kconfig"
 source "fs/zipfs/Kconfig"
+source "fs/mnemofs/Kconfig"

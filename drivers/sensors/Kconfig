@@ -20,7 +20,7 @@ config USENSOR
 config SENSORS_RPMSG
 	bool "Sensor RPMSG Support"
 	default n
-	depends on RPTUN
+	depends on RPMSG
 	---help---
 		Allow application to read or control remote sensor device by RPMSG.
 
@@ -141,6 +141,43 @@ config SENSORS_BH1749NUC
 	---help---
 		Enable driver support for the Rohm BH1749NUC color sensor.
 
+if SENSORS_BH1749NUC
+
+config BH1749NUC_I2C_FREQUENCY
+	int "BH1749NUC I2C frequency"
+	default 400000
+
+config SENSORS_BH1749NUC_UORB
+	bool "BH1749NUC UORB Interface"
+	default n
+
+if SENSORS_BH1749NUC_UORB
+
+config SENSORS_BH1749NUC_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_BH1749NUC_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_BH1749NUC_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_BH1749NUC_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_BH1749NUC_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif #SENSORS_BH1749NUC_UORB
+
+endif # SENSORS_BH1749NUC
+
 config SENSORS_BH1750FVI
 	bool "Rohm BH1750FVI Ambient Light Sensor support"
 	default n
@@ -223,6 +260,35 @@ config SENSORS_BMI270
 
 if SENSORS_BMI270
 
+config SENSORS_BMI270_UORB
+	bool "Bosch BMI270 UORB"
+	default n
+
+if SENSORS_BMI270_UORB
+
+config SENSORS_BMI270_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_BMI270_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_BMI270_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_BMI270_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_BMI270_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif #SENSORS_BMI270_UORB
+
 choice
 	prompt "BMI270 Interface"
 	default SENSORS_BMI270_SPI
@@ -250,6 +316,42 @@ config SENSORS_BMI270_LOAD_FROM_HEAP
 		it is necessary to transfer the configuration file to RAM.
 
 endif # SENSORS_BMI270
+
+config SENSORS_BMM150
+	bool "Bosch BMM150 Magnetometer support (uorb)"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Bosch BMM150 magnetometer sensor.
+
+if SENSORS_BMM150
+
+config BMM150_I2C_FREQUENCY
+	int "BMM150 I2C frequency"
+	default 400000
+
+config SENSORS_BMM150_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_BMM150_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_BMM150_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_BMM150_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_BMM150_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_BMM150
 
 config SENSORS_BMP180
 	bool "Bosch BMP180 Barometer Sensor support"
@@ -290,35 +392,32 @@ config SENSORS_BME680
 	---help---
 		Enable driver for the Bosch BME680 sensor.
 
+if SENSORS_BME680
+
 config BME680_I2C_FREQUENCY
 	int "BME680 I2C frequency"
-	depends on SENSORS_BME680
 	default 400000
 
 config BME680_DISABLE_PRESS_MEAS
 	bool "Disable Pressure Measurement"
-	depends on SENSORS_BME680
 	default n
 	---help---
 		If enabled, the sensor will not measure pressure.
 
 config BME680_DISABLE_HUM_MEAS
 	bool "Disable Humidity Measurement"
-	depends on SENSORS_BME680
 	default n
 	---help---
 		If enabled, the sensor will not measure humidity.
 
 config BME680_DISABLE_GAS_MEAS
 	bool "Disable Gas Measurement"
-	depends on SENSORS_BME680
 	default n
 	---help---
 		If enabled, the sensor will not measure gas.
 
 config BME680_ENABLE_IIR_FILTER
 	bool "Enable IIR Filter"
-	depends on SENSORS_BME680
 	default n
 	---help---
 		Enable IIR filtering for temperature and pressure
@@ -326,7 +425,6 @@ config BME680_ENABLE_IIR_FILTER
 
 config SENSORS_BME680_POLL_INTERVAL
 	int "Polling interval in microseconds, default 3 sec"
-	depends on SENSORS_BME680
 	default 3000000
 	range 0 4294967295
 	---help---
@@ -334,10 +432,11 @@ config SENSORS_BME680_POLL_INTERVAL
 
 config SENSORS_BME680_THREAD_STACKSIZE
 	int "Worker thread stack size"
-	depends on SENSORS_BME680
 	default 1024
 	---help---
 		The stack size for the worker thread.
+
+endif # SENSORS_BME680
 
 config SENSORS_DHTXX
 	bool "DHTxx humidity/temperature Sensor support"
@@ -387,6 +486,22 @@ config SENSORS_HCSR04
 	---help---
 		Enable driver support for the HC-SR04 Distance Sensor.
 
+if SENSORS_HCSR04
+
+config HCSR04_DEBUG
+	bool "Debug support for the HC-SR04"
+	default n
+	---help---
+		Enables debug features for the HC-SR04
+
+config HCSR04_NPOLLWAITERS
+	int "Number of waiters to poll"
+	default 1
+	---help---
+		Number of waiters to poll
+
+endif # SENSORS_HCSR04
+
 config SENSORS_HYT271
 	bool "IST HYT271 Humidity and Temperature Sensor support"
 	default n
@@ -414,22 +529,6 @@ config SENSORS_HYT271_THREAD_STACKSIZE
 	default 1024
 	---help---
 		The stack size for the worker thread.
-
-if SENSORS_HCSR04
-
-config HCSR04_DEBUG
-	bool "Debug support for the HC-SR04"
-	default n
-	---help---
-		Enables debug features for the HC-SR04
-
-config HCSR04_NPOLLWAITERS
-	int "Number of waiters to poll"
-	default 1
-	---help---
-		Number of waiters to poll
-
-endif # SENSORS_HCSR04
 
 config SENSORS_ISL29023
 	bool "Renesas ISL29023 ALS sensor"
@@ -605,6 +704,36 @@ config SENSORS_LSM9DS1
 	---help---
 		Enable driver support for the STMicro LSM9DS1.
 
+config SENSORS_LSM9DS1_UORB
+	bool "LSM9DS1 UORB Interface"
+	default n
+	depends on SENSORS_LSM9DS1
+
+if SENSORS_LSM9DS1_UORB
+
+config SENSORS_LSM9DS1_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_LSM9DS1_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_LSM9DS1_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_LSM9DS1_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_LSM9DS1_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif #SENSORS_LSM9DS1_UORB
+
 config SENSORS_MSA301
 	bool "MSA301 support"
 	default n
@@ -616,7 +745,7 @@ config LSM9DS1_I2C_FREQUENCY
 	int "LSM9DS1 I2C frequency"
 	default 400000
 	range 1 400000
-	depends on SENSORS_LSM9DS1
+	depends on SENSORS_LSM9DS1 || SENSORS_LSM9DS1_UORB
 
 config SENSORS_LPS25H
 	bool "STMicro LPS25H pressure sensor"
@@ -862,12 +991,76 @@ config ADXL345_REGDEBUG
 
 endif # SENSORS_ADXL345
 
+config SENSORS_ADXL362
+	bool "Analog Devices ADXL362 Driver"
+	default n
+	---help---
+		Enables support for the ADXL362 driver
+
+if SENSORS_ADXL362
+
+config SENSORS_ADXL362_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_ADXL362_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_ADXL362_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_ADXL362_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_ADXL362_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_ADXL362
+
 config SENSORS_ADXL372
 	bool "Analog Devices ADXL372 Sensor support"
 	default n
 	select SPI
 	---help---
 		Enable driver support for the Analog Devices ADXL372 Sensor.
+
+if SENSORS_ADXL372
+
+config SENSORS_ADXL372_UORB
+	bool "ADXL372 UORB interface"
+	default n
+
+if SENSORS_ADXL372_UORB
+
+config SENSORS_ADXL372_POLL
+	bool "Enables polling sensor data"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_ADXL372_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on SENSORS_ADXL372_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_ADXL372_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_ADXL372_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif #SENSORS_ADXL372_UORB
+
+endif # SENSORS_ADXL372
 
 config SENSORS_MPU60X0
 	bool "Invensense MPU60x0 Sensor support"
@@ -1305,6 +1498,54 @@ config SHT3X_DEBUG
 		Enables debug features for the SHT3x
 
 endif # SENSORS_SHT3X
+
+config SENSORS_SHT4X
+	bool "Sensirion SHT4x temperature and humidity sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Sensirion SHT4x temperature
+		and humidity sensors.
+
+if SENSORS_SHT4X
+
+config SHT4X_I2C_FREQUENCY
+	int "SHT4X I2C frequency"
+	default 400000
+	range 1 400000
+
+config SHT4X_I2C_ADDR
+	hex "SHT4X I2C address"
+	default 0x44
+    range 0x44 0x46
+	---help---
+		Enables debug features for the SHT4X
+
+config SHT4X_FAHRENHEIT
+	bool "SHT4X use Fahrenheit"
+	default n
+	---help---
+		Configures read outputs of the SHT4X to be in Fahrenheit. Default uses Celsius.
+
+config SHT4X_LIMIT_HUMIDITY
+	bool "SHT4X limit humidity between 0-100%"
+	default y
+	---help---
+		Limits humidity calculations to be between 0-100 percent. Uncropped boundaries may be beneficial in some cases, see datasheet section 4.6.
+
+config SHT4X_CRC_LOOKUP
+	bool "SHT4X use CRC lookup"
+	default n
+	---help---
+		Configures the SHT4X to do CRC checks with a lookup table. Default uses a bitwise CRC calculation.
+
+config SHT4X_DEBUG
+	bool "SHT4X debug support"
+	default n
+	---help---
+		Enables debug features for the SHT4X
+
+endif # SENSORS_SHT4X
 
 config SENSORS_SPS30
 	bool "Sensirion SPS30 particulate matter sensor"

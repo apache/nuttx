@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-void up_allocate_heap(void **heap_start, size_t *heap_size)
+void weak_function up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
   *heap_start = (void *)g_idle_topstack;

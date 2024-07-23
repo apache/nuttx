@@ -45,12 +45,12 @@
 #include "hardware/esp32s3_uart.h"
 #include "hardware/esp32s3_soc.h"
 
+#include "periph_ctrl.h"
+
 #include "esp32s3_clockconfig.h"
 #include "esp32s3_gpio.h"
 
 #include "esp32s3_lowputc.h"
-
-#include "esp32s3_periph.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -706,7 +706,7 @@ void esp32s3_lowputc_send_byte(const struct esp32s3_uart_s *priv,
 
 void esp32s3_lowputc_enable_sysclk(const struct esp32s3_uart_s *priv)
 {
-  esp32s3_periph_module_enable(PERIPH_UART0_MODULE + priv->id);
+  periph_module_enable(PERIPH_UART0_MODULE + priv->id);
 }
 
 /****************************************************************************

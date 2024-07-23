@@ -2119,6 +2119,25 @@ size_t sam_destaddr(DMA_HANDLE handle)
 }
 
 /****************************************************************************
+ * Name: sam_dmaresidual
+ *
+ * Description:
+ *   Returns the number of bytes remaining to be transferred
+ *
+ * Assumptions:
+ *   - DMA handle allocated by sam_dmachannel()
+ *
+ ****************************************************************************/
+
+size_t sam_dmaresidual(DMA_HANDLE handle)
+{
+  struct sam_xdmach_s *xdmach = (struct sam_xdmach_s *)handle;
+  uint32_t cubc = sam_getdmach(xdmach, SAM_XDMACH_CUBC_OFFSET);
+
+  return cubc & XDMACH_CUBC_UBLEN_MASK;
+}
+
+/****************************************************************************
  * Name: sam_dmasample
  *
  * Description:

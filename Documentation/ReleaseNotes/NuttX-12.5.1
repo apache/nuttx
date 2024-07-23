@@ -1,0 +1,45 @@
+NuttX-12.5.1
+------------
+
+What's New In This Release
+
+Major Changes to Core OS
+Bug Fixes
+sched
+* [#12062](https://github.com/apache/nuttx/pull/12062) sched/SMP: Fix returning uninitialized variable in nxsched_add_readytorun()
+
+mm
+* [#12068](https://github.com/apache/nuttx/pull/12068) mm/kmap.h: fix typo in comments
+
+Architectural Support
+Bug Fixes
+* [#12073](https://github.com/apache/nuttx/pull/12073) all: Fix accessing uninitialized local variables
+
+arm
+* [#12071](https://github.com/apache/nuttx/pull/12071) arch/arm/am335x: Fix incorrect signedness of variable
+* [#12072](https://github.com/apache/nuttx/pull/12072) arch/arm/s32k3xx: Fix incorrect check for invalid port or pin number
+* [#12098](https://github.com/apache/nuttx/pull/12098) arch/arm/stm32h7/fdcan: fixed kconfig and debug register
+* [#12099](https://github.com/apache/nuttx/pull/12099) arch/arm/stm32h7/stm32_i2c: fix sending large data over i2c
+* [#12070](https://github.com/apache/nuttx/pull/12070) arch/arm/stm32h7: Serial Fix Logic error in up_dma_txavailable
+risc-v
+* [#12069](https://github.com/apache/nuttx/pull/12069) arch/risc-v/esp32[c3|c6|h2]: Fix filesystem test support
+* [#12061](https://github.com/apache/nuttx/pull/12061) arch/risc-v/espressif: Fix empty cpuint number
+Xtensa
+* [#12065](https://github.com/apache/nuttx/pull/12065) arch/xtensa/esp32s3: Fix one page program span over 2 pages
+
+Driver Support
+Bug Fixes
+* [#12074](https://github.com/apache/nuttx/pull/12074) drivers/net/lan9250: Fix crash issue of sending packets by lan9250 driver
+* [#12066](https://github.com/apache/nuttx/pull/12066) drivers/video/isx019: Fix the default_value of some parameters
+
+Board Support
+Bug Fixes
+* [#12060](https://github.com/apache/nuttx/pull/12060) boards: Fix board configs after disabling NSH_DISABLE_HELP
+
+arm
+* [#12063](https://github.com/apache/nuttx/pull/12063) boards/arm/rp2040: Fix build errors for nshsram configurations
+* [#12064](https://github.com/apache/nuttx/pull/12064) boards/arm/raspberrypi-pico: Fix nshsram build error
+
+Networking
+Bug Fixes
+* [#12097](https://github.com/apache/nuttx/pull/12097) net: Fix max conn always one less than configured value

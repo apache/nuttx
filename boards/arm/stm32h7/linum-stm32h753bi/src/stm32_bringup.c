@@ -32,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "stm32_gpio.h"
+#include "stm32_i2c.h"
 
 #include "linum-stm32h753bi.h"
 
@@ -44,9 +45,69 @@
 #  include "stm32_rtc.h"
 #endif
 
+#ifdef CONFIG_STM32H7_FDCAN
+#include "stm32_fdcan_sock.h"
+#endif
+
+#ifdef CONFIG_RNDIS
+#include <nuttx/usb/rndis.h>
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+static void stm32_i2c_register(int bus)
+{
+  struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = stm32_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 bus, ret);
+          stm32_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+static void stm32_i2ctool(void)
+{
+#ifdef CONFIG_STM32H7_I2C3
+  stm32_i2c_register(3);
+#endif
+#ifdef CONFIG_STM32H7_I2C4
+  stm32_i2c_register(4);
+#endif
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -75,6 +136,15 @@ int stm32_bringup(void)
 
 #ifdef HAVE_RTC_DRIVER
   struct rtc_lowerhalf_s *lower;
+#endif
+
+#ifdef CONFIG_STM32H7_RMII
+  /* Reset Ethernet PHY */
+
+  stm32_configgpio(GPIO_ETH_RESET);
+  stm32_gpiowrite(GPIO_ETH_RESET, 0);
+  usleep(50000);
+  stm32_gpiowrite(GPIO_ETH_RESET, 1);
 #endif
 
 #ifdef CONFIG_FS_PROCFS
@@ -121,6 +191,91 @@ int stm32_bringup(void)
                  "ERROR: Failed to bind/register the RTC driver: %d\n", ret);
           return ret;
         }
+    }
+#endif
+
+#if defined(CONFIG_FAT_DMAMEMORY)
+  if (stm32_dma_alloc_init() < 0)
+    {
+      syslog(LOG_ERR, "DMA alloc FAILED");
+    }
+#endif
+
+#ifdef HAVE_SDIO
+  /* Initialize the SDIO block driver */
+
+  ret = stm32_sdio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
+  stm32_i2ctool();
+#endif
+
+#ifdef CONFIG_I2C_EE_24XX
+  ret = stm32_at24_init("/dev/eeprom");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize EEPROM HX24LCXXB: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NETDEV_LATEINIT
+
+#  ifdef CONFIG_STM32H7_FDCAN1
+  stm32_fdcansockinitialize(0);
+#  endif
+
+#  ifdef CONFIG_STM32H7_FDCAN2
+  stm32_fdcansockinitialize(1);
+#  endif
+
+#endif
+
+#ifdef CONFIG_MTD_W25QXXXJV
+  ret = stm32_w25qxxx_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_n25qxxx_setup failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
+  uint8_t mac[6];
+  mac[0] = 0xa0;
+  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
+  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
+  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
+  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
+  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
+  usbdev_rndis_initialize(mac);
+#endif
+
+#if defined(CONFIG_SENSORS_QENCODER)
+  /* Initialize and register the qencoder driver */
+
+  ret = board_qencoder_initialize(0, LINUMSTM32H753BI_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
     }
 #endif
 

@@ -57,6 +57,20 @@ config NET_PROMISCUOUS
 		Force the Ethernet driver to operate in promiscuous mode (if supported
 		by the Ethernet driver).
 
+config NET_DEFAULT_MIN_PORT
+	int "Net Default Min Port"
+	range 1 65535
+	default 4096
+	---help---
+		Default Network min port
+
+config NET_DEFAULT_MAX_PORT
+	int "Net Default Max Port"
+	range NET_DEFAULT_MIN_PORT 65535
+	default 32000
+	---help---
+		Default Network max port
+
 menu "Driver buffer configuration"
 
 config NET_ETH_PKTSIZE
@@ -131,6 +145,13 @@ config NET_LL_GUARDSIZE
 		This is reserved l2 buffer header size of network buffer to isolate
 		the L2/L3 (MAC/IP) data on Network layer, which will be beneficial
 		to L3 network layer protocol transparent transmission and forwarding
+
+config NET_JUMBO_FRAME
+	bool "Net jumbo frame"
+	depends on IOB_ALLOC
+	default n
+	---help---
+		Optimize the sending of the JUMBO frame in network stack.
 
 config NET_RECV_BUFSIZE
 	int "Net Default Receive buffer size"
@@ -338,6 +359,7 @@ menuconfig NET_6LOWPAN
 source "net/sixlowpan/Kconfig"
 source "net/ipforward/Kconfig"
 source "net/nat/Kconfig"
+source "net/ipfilter/Kconfig"
 source "net/netfilter/Kconfig"
 source "net/ipfrag/Kconfig"
 
@@ -394,7 +416,7 @@ choice
 	depends on NET_STAR
 	default NET_STARPOINT
 	---help---
-		Specifies the role of this not in the star configuration.
+		Specifies the role of this node in the star configuration.
 
 config NET_STARPOINT
 	bool "Point node in star"

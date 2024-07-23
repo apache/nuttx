@@ -2652,18 +2652,39 @@ static int mcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
 
           DEBUGASSERT(bt != NULL);
 
-          regval       = mcan_getreg(priv, SAM_MCAN_BTP_OFFSET);
-          bt->bt_sjw   = ((regval & MCAN_BTP_SJW_MASK) >>
-                          MCAN_BTP_SJW_SHIFT) + 1;
-          bt->bt_tseg1 = ((regval & MCAN_BTP_TSEG1_MASK) >>
-                          MCAN_BTP_TSEG1_SHIFT) + 1;
-          bt->bt_tseg2 = ((regval & MCAN_BTP_TSEG2_MASK) >>
-                          MCAN_BTP_TSEG2_SHIFT) + 1;
+#ifdef CONFIG_CAN_FD
+          if (bt->type == CAN_BITTIMING_DATA)
+            {
+              regval       = mcan_getreg(priv, SAM_MCAN_FBTP_OFFSET);
+              bt->bt_sjw   = ((regval & MCAN_FBTP_FSJW_MASK) >>
+                              MCAN_FBTP_FSJW_SHIFT) + 1;
+              bt->bt_tseg1 = ((regval & MCAN_FBTP_FTSEG1_MASK) >>
+                              MCAN_FBTP_FTSEG1_SHIFT) + 1;
+              bt->bt_tseg2 = ((regval & MCAN_FBTP_FTSEG2_MASK) >>
+                              MCAN_FBTP_FTSEG2_SHIFT) + 1;
 
-          brp          = ((regval & MCAN_BTP_BRP_MASK) >>
-                          MCAN_BTP_BRP_SHIFT) + 1;
-          bt->bt_baud  = SAMA5_MCANCLK_FREQUENCY / brp /
-                         (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+              brp          = ((regval & MCAN_FBTP_FBRP_MASK) >>
+                              MCAN_FBTP_FBRP_SHIFT) + 1;
+              bt->bt_baud  = SAMA5_MCANCLK_FREQUENCY / brp /
+                            (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+            }
+          else
+#endif
+            {
+              regval       = mcan_getreg(priv, SAM_MCAN_BTP_OFFSET);
+              bt->bt_sjw   = ((regval & MCAN_BTP_SJW_MASK) >>
+                              MCAN_BTP_SJW_SHIFT) + 1;
+              bt->bt_tseg1 = ((regval & MCAN_BTP_TSEG1_MASK) >>
+                              MCAN_BTP_TSEG1_SHIFT) + 1;
+              bt->bt_tseg2 = ((regval & MCAN_BTP_TSEG2_MASK) >>
+                              MCAN_BTP_TSEG2_SHIFT) + 1;
+
+              brp          = ((regval & MCAN_BTP_BRP_MASK) >>
+                              MCAN_BTP_BRP_SHIFT) + 1;
+              bt->bt_baud  = SAMA5_MCANCLK_FREQUENCY / brp /
+                            (bt->bt_tseg1 + bt->bt_tseg2 + 1);
+            }
+
           ret = OK;
         }
         break;
@@ -2716,8 +2737,18 @@ static int mcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
           /* Save the value of the new bit timing register */
 
           flags = enter_critical_section();
-          priv->btp = MCAN_BTP_BRP(brp) | MCAN_BTP_TSEG1(tseg1) |
-                      MCAN_BTP_TSEG2(tseg2) | MCAN_BTP_SJW(sjw);
+#ifdef CONFIG_CAN_FD
+          if (bt->type == CAN_BITTIMING_DATA)
+            {
+              priv->fbtp = MCAN_FBTP_FBRP(brp) | MCAN_FBTP_FTSEG1(tseg1) |
+                           MCAN_FBTP_FTSEG2(tseg2) | MCAN_FBTP_FSJW(sjw);
+            }
+          else
+#endif
+            {
+              priv->btp = MCAN_BTP_BRP(brp) | MCAN_BTP_TSEG1(tseg1) |
+                          MCAN_BTP_TSEG2(tseg2) | MCAN_BTP_SJW(sjw);
+            }
 
           /* We need to reset to instantiate the new timing.  Save
            * current state information so that recover to this

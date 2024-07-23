@@ -1,0 +1,95 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_TOOLCHAIN_GNU && ALLOW_BSD_COMPONENTS
+
+config X86_64_MEMCMP
+	bool "Enable optimized memcmp() for X86_64"
+	select LIBC_ARCH_MEMCMP
+	depends on ARCH_HAVE_SSE41
+	---help---
+		Enable optimized X86_64 specific memcmp() library function
+
+config X86_64_MEMMOVE
+	bool "Enable optimized memmove()/memcpy() for X86_64"
+	default n
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMCPY
+	---help---
+		Enable optimized X86_64 specific memmove()/memcpy() library function
+
+config X86_64_MEMSET
+	bool "Enable optimized memset() for X86_64"
+	default n
+	select LIBC_ARCH_MEMSET
+	---help---
+		Enable optimized X86_64 specific memset() library function
+
+config X86_64_STPCPY
+	bool "Enable optimized stpcpy() for X86_64"
+	default n
+	select LIBC_ARCH_STPCPY
+	---help---
+		Enable optimized X86_64 specific stpcpy() library function
+
+config X86_64_STPNCPY
+	bool "Enable optimized stpncpy() for X86_64"
+	default n
+	select LIBC_ARCH_STPNCPY
+	---help---
+		Enable optimized X86_64 specific stpncpy() library function
+
+config X86_64_STRCAT
+	bool "Enable optimized strcat() for X86_64"
+	default n
+	select LIBC_ARCH_STRCAT
+	---help---
+		Enable optimized X86_64 specific strcat() library function
+
+config X86_64_STRCMP
+	bool "Enable optimized strcmp() for X86_64"
+	default n
+	select LIBC_ARCH_STRCMP
+	depends on ARCH_HAVE_SSSE3
+	---help---
+		Enable optimized X86_64 specific strcmp() library function
+
+config X86_64_STRNCMP
+	bool "Enable optimized strncmp() for X86_64"
+	default n
+	select LIBC_ARCH_STRNCMP
+	depends on ARCH_HAVE_SSSE3
+	---help---
+		Enable optimized X86_64 specific strncmp() library function
+
+config X86_64_STRCPY
+	bool "Enable optimized strcpy() for X86_64"
+	default n
+	select LIBC_ARCH_STRCPY
+	---help---
+		Enable optimized X86_64 specific strcpy() library function
+
+config X86_64_STRLEN
+	bool "Enable optimized strlen() for X86_64"
+	default n
+	select LIBC_ARCH_STRLEN
+	---help---
+		Enable optimized X86_64 specific strlen() library function
+
+config X86_64_STRNCPY
+	bool "Enable optimized strncpy() for X86_64"
+	default n
+	select LIBC_ARCH_STRNCPY
+	---help---
+		Enable optimized X86_64 specific strncpy() library function
+
+config X86_64_STRNCMP
+	bool "Enable optimized strncmp() for X86_64"
+	default n
+	select LIBC_ARCH_STRNCMP
+	---help---
+		Enable optimized X86_64 specific strncmp() library function
+
+endif # ARCH_TOOLCHAIN_GNU && ALLOW_BSD_COMPONENTS

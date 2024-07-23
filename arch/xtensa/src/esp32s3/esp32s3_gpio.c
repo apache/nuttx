@@ -41,6 +41,7 @@
 #include "esp32s3_irq.h"
 #include "hardware/esp32s3_gpio.h"
 #include "hardware/esp32s3_iomux.h"
+#include "hardware/esp32s3_usb_serial_jtag.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -206,6 +207,17 @@ int esp32s3_configgpio(uint32_t pin, gpio_pinattr_t attr)
 
   func  = 0;
   cntrl = 0;
+
+  /* if pin 19 or 20 disable the USB/JTAG function and pull-up */
+
+  if (pin ==  19 || pin == 20)
+    {
+      uint32_t regval;
+      regval = getreg32(USB_SERIAL_JTAG_CONF0_REG);
+      regval &= ~(USB_SERIAL_JTAG_USB_PAD_ENABLE |
+                  USB_SERIAL_JTAG_DP_PULLUP);
+      putreg32(regval, USB_SERIAL_JTAG_CONF0_REG);
+    }
 
   /* Handle input pins */
 
@@ -504,6 +516,17 @@ void esp32s3_gpioirqdisable(int irq)
   regval  = getreg32(regaddr);
   regval &= ~(GPIO_PIN0_INT_ENA_M | GPIO_PIN0_INT_TYPE_M);
   putreg32(regval, regaddr);
+
+  /* Clear pending GPIO interrupt status before enable IRQ */
+
+  if (pin < 32)
+    {
+      putreg32(1 << pin, GPIO_STATUS_W1TC_REG);
+    }
+  else
+    {
+      putreg32(1 << (pin - 32), GPIO_STATUS1_W1TC_REG);
+    }
 
   /* Configuration done. Re-enable the GPIO interrupt. */
 

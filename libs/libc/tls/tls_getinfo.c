@@ -28,6 +28,7 @@
 #include <assert.h>
 
 #include <nuttx/tls.h>
+#include <nuttx/sched.h>
 
 #if !defined(up_tls_info) && (defined(__KERNEL__) || !defined(CONFIG_TLS_ALIGNED))
 

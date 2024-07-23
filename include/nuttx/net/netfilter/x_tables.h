@@ -39,9 +39,37 @@
 
 #define XT_INV_PROTO            0x40 /* Invert the sense of PROTO. */
 
+/* Values for "inv" field in struct xt_tcp. */
+
+#define XT_TCP_INV_SRCPT        0x01 /* Invert the sense of source ports. */
+#define XT_TCP_INV_DSTPT        0x02 /* Invert the sense of dest ports. */
+#define XT_TCP_INV_FLAGS        0x04 /* Invert the sense of TCP flags. */
+#define XT_TCP_INV_OPTION       0x08 /* Invert the sense of option test. */
+#define XT_TCP_INV_MASK         0x0F /* All possible flags. */
+
+/* Values for "invflags" field in struct xt_udp. */
+
+#define XT_UDP_INV_SRCPT        0x01 /* Invert the sense of source ports. */
+#define XT_UDP_INV_DSTPT        0x02 /* Invert the sense of dest ports. */
+#define XT_UDP_INV_MASK         0x03 /* All possible flags. */
+
+/* Target names */
+
 #define XT_STANDARD_TARGET      ""   /* Standard return verdict, or do jump. */
 #define XT_ERROR_TARGET         "ERROR"
 #define XT_MASQUERADE_TARGET    "MASQUERADE"
+#define XT_REJECT_TARGET        "REJECT"
+
+/* Match name to simplify our code */
+
+#define XT_MATCH_NAME_TCP       "tcp"
+#define XT_MATCH_NAME_UDP       "udp"
+#define XT_MATCH_NAME_ICMP      "icmp"
+#define XT_MATCH_NAME_ICMP6     "icmp6"
+
+/* Table name to simplify our code */
+
+#define XT_TABLE_NAME_FILTER    "filter"
 
 /* For standard target */
 
@@ -154,6 +182,27 @@ struct xt_entry_match
     uint16_t match_size;
   } u;
   unsigned char data[1];
+};
+
+/* TCP matching stuff */
+
+struct xt_tcp
+{
+  uint16_t spts[2]; /* Source port range. */
+  uint16_t dpts[2]; /* Destination port range. */
+  uint8_t option;   /* TCP Option iff non-zero */
+  uint8_t flg_mask; /* TCP flags mask byte */
+  uint8_t flg_cmp;  /* TCP flags compare byte */
+  uint8_t invflags; /* Inverse flags */
+};
+
+/* UDP matching stuff */
+
+struct xt_udp
+{
+  uint16_t spts[2]; /* Source port range. */
+  uint16_t dpts[2]; /* Destination port range. */
+  uint8_t invflags; /* Inverse flags */
 };
 
 #endif /* __INCLUDE_NUTTX_NET_NETFILTER_X_TABLES_H */

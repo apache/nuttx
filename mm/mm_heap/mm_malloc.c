@@ -64,21 +64,21 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
 
   flags = up_irq_save();
 
-  tmp = heap->mm_delaylist[up_cpu_index()];
+  tmp = heap->mm_delaylist[this_cpu()];
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
   if (tmp == NULL ||
       (!force &&
-        heap->mm_delaycount[up_cpu_index()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
+        heap->mm_delaycount[this_cpu()] < CONFIG_MM_FREE_DELAYCOUNT_MAX))
     {
       up_irq_restore(flags);
       return false;
     }
 
-  heap->mm_delaycount[up_cpu_index()] = 0;
+  heap->mm_delaycount[this_cpu()] = 0;
 #endif
 
-  heap->mm_delaylist[up_cpu_index()] = NULL;
+  heap->mm_delaylist[this_cpu()] = NULL;
 
   up_irq_restore(flags);
 
@@ -121,7 +121,7 @@ void mm_dump_handler(FAR struct tcb_s *tcb, FAR void *arg)
 }
 #endif
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
 void mm_mempool_dump_handle(FAR struct mempool_s *pool, FAR void *arg)
 {
   struct mempoolinfo_s info;
@@ -160,11 +160,14 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   free_delaylist(heap, false);
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ret = mempool_multiple_alloc(heap->mm_mpool, size);
-  if (ret != NULL)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return ret;
+      ret = mempool_multiple_alloc(heap->mm_mpool, size);
+      if (ret != NULL)
+        {
+          return ret;
+        }
     }
 #endif
 
@@ -305,7 +308,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       MM_ADD_BACKTRACE(heap, node);
       kasan_unpoison(ret, mm_malloc_size(heap, ret));
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-      memset(ret, 0xaa, alignsize - MM_ALLOCNODE_OVERHEAD);
+      memset(ret, MM_ALLOC_MAGIC, alignsize - MM_ALLOCNODE_OVERHEAD);
 #endif
 #ifdef CONFIG_DEBUG_MM
       minfo("Allocated %p, size %zu\n", ret, alignsize);
@@ -344,7 +347,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       nxsched_foreach(mm_dump_handler, heap);
       mm_dump_handler(NULL, heap);
 #  endif
-#  if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#  ifdef CONFIG_MM_HEAP_MEMPOOL
       mwarn("%11s%9s%9s%9s%9s%9s\n",
             "bsize", "total", "nused",
             "nfree", "nifree", "nwaiter");

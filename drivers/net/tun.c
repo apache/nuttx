@@ -306,6 +306,13 @@ static int tun_txpoll(FAR struct net_driver_s *dev)
   int ret;
 
   DEBUGASSERT(priv->read_buf == NULL);
+
+#ifdef CONFIG_NET_PKT
+  /* When packet sockets are enabled, feed the frame into the tap */
+
+  pkt_input(dev);
+#endif
+
   priv->read_d_len = dev->d_len;
   priv->read_buf   = dev->d_iob;
   netdev_iob_clear(dev);
@@ -990,6 +997,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
       if (priv->write_d_len == 0)
         {
           net_lock();
+          netdev_iob_release(&priv->dev);
           ret = netdev_iob_prepare(&priv->dev, false, 0);
           priv->dev.d_buf = NULL;
           if (ret < 0)

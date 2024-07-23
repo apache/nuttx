@@ -54,6 +54,39 @@
 
 int nrf52_lsm9ds1_initialize(int bus)
 {
+#ifdef CONFIG_SENSORS_LSM9DS1_UORB
+  struct lsm9ds1_config_s  config;
+  struct i2c_master_s     *i2c;
+  int                      ret = OK;
+
+  sninfo("Initializing LMS6DSL!\n");
+
+  i2c = nrf52_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      return -ENODEV;
+    }
+
+  sninfo("INFO: Initializing LMS9DS1 9DoF sensor over I2C%d\n", bus);
+
+  config.i2c       = i2c;
+  config.addr_acc  = LSM9DS1ACCEL_ADDR1;
+  config.addr_gyro = LSM9DS1GYRO_ADDR1;
+  config.addr_mag  = LSM9DS1MAG_ADDR1;
+
+  /* Register sensor as uorb devices */
+
+  ret = lsm9ds1_register_uorb(0, &config);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to initialize LMS9DS1 mag driver\n");
+      return -ENODEV;
+    }
+
+  sninfo("INFO: LMS9DS1 sensor has been initialized successfully\n");
+
+  return ret;
+#else
   struct i2c_master_s *i2c;
   int ret = OK;
 
@@ -67,7 +100,7 @@ int nrf52_lsm9ds1_initialize(int bus)
 
   sninfo("INFO: Initializing LMS9DS1 9DoF sensor over I2C%d\n", bus);
 
-  /* Register snesors as character devices */
+  /* Register sensor as character devices */
 
   ret = lsm9ds1mag_register(LSM9DS1MAG_DEVPATH, i2c, LSM9DS1MAG_ADDR1);
   if (ret < 0)
@@ -94,4 +127,5 @@ int nrf52_lsm9ds1_initialize(int bus)
     }
 
   return ret;
+#endif
 }

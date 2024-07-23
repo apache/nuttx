@@ -362,6 +362,25 @@ define COMPILEZIG
 	$(ECHO_END)
 endef
 
+# COMPILED - Default macro to compile one D file
+# Example: $(call COMPILED, in-file, out-file)
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   DC - The command to invoke the D compiler
+#   DFLAGS - Options to pass to the D compiler
+#
+# '<filename>.d_DFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.d. The same
+# applies mutatis mutandis.
+
+define COMPILED
+	$(ECHO_BEGIN)"DC: $1 "
+	$(Q) $(DC) -c $(DFLAGS) $($(strip $1)_DFLAGS) $1 -of $2
+	$(ECHO_END)
+endef
+
 # ASSEMBLE - Default macro to assemble one assembly language file
 # Example: $(call ASSEMBLE, in-file, out-file)
 #
@@ -578,6 +597,11 @@ ifeq ($(CONFIG_STACK_USAGE),y)
 	EXTRA += *.su
 endif
 
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_TASKING),y)
+	EXTRA += *.d
+	EXTRA += *.src
+endif
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CLEAN
 	$(Q) if exist *$(OBJEXT) (del /f /q *$(OBJEXT))
@@ -657,6 +681,10 @@ else
   ifeq ($(CONFIG_ETL),y)
     ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)etl
   endif
+endif
+
+ifeq ($(CONFIG_LIBCXXABI),y)
+ARCHXXINCLUDES += ${INCSYSDIR_PREFIX}$(TOPDIR)$(DELIM)include$(DELIM)libcxxabi
 endif
 
 ifeq ($(CONFIG_LIBM_NEWLIB),y)

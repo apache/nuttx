@@ -26,6 +26,13 @@ choice
 	prompt "C++ Library"
 	default LIBCXXMINI
 
+config LIBCXXTOOLCHAIN
+	bool "Toolchain C++ support"
+	select HAVE_CXXINITIALIZE
+	select LIBC_LOCALE
+	---help---
+		Use Standard C++ library from toolchain.
+
 config LIBCXXMINI
 	bool "Basic C++ support"
 	---help---

@@ -30,8 +30,9 @@
  * Public Functions
  ****************************************************************************/
 
-void sbi_mexception(uintptr_t mcause, uintptr_t *mepc)
+void sbi_mexception(uintreg_t mcause, uintreg_t *mepc, uintreg_t tval)
 {
-  (void) mcause;
-  (void) mepc;
+  UNUSED(mcause);
+  UNUSED(mepc);
+  UNUSED(tval);
 }

@@ -185,6 +185,9 @@ static int audio_i2s_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
             /* Report the Sample rates we support */
 
               caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_DEF_ALL;
+
+              caps->ac_channels = 2;
+
               break;
           }
 

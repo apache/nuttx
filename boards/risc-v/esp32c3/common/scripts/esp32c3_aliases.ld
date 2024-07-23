@@ -18,11 +18,13 @@
  *
  ****************************************************************************/
 
+cache_set_idrom_mmu_size = Cache_Set_IDROM_MMU_Size;
 cache_dbus_mmu_set = Cache_Dbus_MMU_Set;
 cache_ibus_mmu_set = Cache_Ibus_MMU_Set;
 cache_invalidate_icache_all = Cache_Invalidate_ICache_All;
 cache_resume_icache = Cache_Resume_ICache;
 cache_suspend_icache = Cache_Suspend_ICache;
+cache_invalidate_icache_all = Cache_Invalidate_ICache_All;
 
 #ifdef CONFIG_ESPRESSIF_BLE
 

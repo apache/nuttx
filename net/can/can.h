@@ -88,6 +88,10 @@ struct can_conn_s
 
   struct iob_queue_s readahead;      /* remove Read-ahead buffering */
 
+#if CONFIG_NET_RECV_BUFSIZE > 0
+  int32_t recv_buffnum;              /* Recv buffer number */
+#endif
+
   /* CAN-specific content follows */
 
   int16_t crefs;                     /* Reference count */
@@ -183,6 +187,25 @@ void can_free(FAR struct can_conn_s *conn);
  ****************************************************************************/
 
 FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn);
+
+/****************************************************************************
+ * Name: can_active()
+ *
+ * Description:
+ *   Traverse the list of NetLink connections that match dev
+ *
+ * Input Parameters:
+ *   dev  - The device to search for.
+ *   conn - The current connection; may be NULL to start the search at the
+ *          beginning
+ *
+ * Assumptions:
+ *   This function is called from NetLink device logic.
+ *
+ ****************************************************************************/
+
+FAR struct can_conn_s *can_active(FAR struct net_driver_s *dev,
+                                  FAR struct can_conn_s *conn);
 
 /****************************************************************************
  * Name: can_callback

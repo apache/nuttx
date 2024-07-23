@@ -1031,7 +1031,7 @@ mipi_dsi_device_register(FAR struct mipi_dsi_host *host,
           kmm_free(dev);
           dev = NULL;
         }
-#endif // CONFIG_MIPI_DSI_DRIVER
+#endif /* CONFIG_MIPI_DSI_DRIVER */
     }
 
   return dev;

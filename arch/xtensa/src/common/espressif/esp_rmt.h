@@ -72,7 +72,7 @@ extern "C"
  *   Initialize the selected RMT device in TX mode
  *
  * Input Parameters:
- *   ch   - the RMT's channel that will be used
+ *   ch   - The RMT's channel that will be used
  *   pin  - The pin used for the TX channel
  *
  * Returned Value:
@@ -89,7 +89,7 @@ struct rmt_dev_s *esp_rmt_tx_init(int ch, int pin);
  *   Initialize the selected RMT device in RC mode
  *
  * Input Parameters:
- *   ch   - the RMT's channel that will be used
+ *   ch   - The RMT's channel that will be used
  *   pin  - The pin used for the RX channel
  *
  * Returned Value:

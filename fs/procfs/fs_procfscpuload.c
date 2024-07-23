@@ -203,8 +203,8 @@ static ssize_t cpuload_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos == 0)
     {
-      uint32_t total = 0;
-      uint32_t active = 0;
+      clock_t total = 0;
+      clock_t active = 0;
       uint32_t intpart;
       uint32_t fracpart;
 

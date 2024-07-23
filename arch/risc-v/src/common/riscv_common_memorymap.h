@@ -45,6 +45,10 @@
 #define _START_TBSS  _stbss
 #define _END_TBSS    _etbss
 
+#define SMP_STACK_MASK (15)
+#define SMP_STACK_SIZE \
+   ((CONFIG_IDLETHREAD_STACKSIZE + SMP_STACK_MASK) & ~SMP_STACK_MASK)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -63,7 +67,8 @@ EXTERN uintptr_t g_idle_topstack;
 
 /* Address of per-cpu idle stack base */
 
-EXTERN const uint8_t * const g_cpu_basestack[CONFIG_SMP_NCPUS];
+#define g_cpux_idlestack(cpuid) \
+   (g_idle_topstack - SMP_STACK_SIZE * (CONFIG_SMP_NCPUS - (cpuid)))
 
 /* Address of the saved user stack pointer */
 

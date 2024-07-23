@@ -32,6 +32,7 @@
 #include <nuttx/board.h>
 #include <nuttx/mm/mm.h>
 
+#include "riscv_internal.h"
 #include "rom/rom_layout.h"
 
 /****************************************************************************
@@ -74,13 +75,11 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
    * Check boards/risc-v/espressif.
    */
 
-  extern uint8_t _sheap[];
-
   board_autoled_on(LED_HEAPALLOCATE);
 
-  *heap_start = _sheap;
+  *heap_start = (void *)g_idle_topstack;
   *heap_size  = (uintptr_t)ets_rom_layout_p->dram0_rtos_reserved_start -
-                (uintptr_t)_sheap;
+                           g_idle_topstack;
 }
 
 /****************************************************************************

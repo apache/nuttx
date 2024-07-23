@@ -31,7 +31,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/page.h>
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 #ifdef CONFIG_PAGING_BINPATH
 #  include <sys/stat.h>
 #  include <sys/types.h>
@@ -520,4 +520,4 @@ void weak_function lpc31_pginitialize(void)
    */
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */

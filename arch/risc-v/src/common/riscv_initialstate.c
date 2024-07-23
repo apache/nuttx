@@ -30,6 +30,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <nuttx/kmalloc.h>
 #include <arch/irq.h>
 
 #include "addrenv.h"
@@ -56,6 +57,9 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+#if defined(CONFIG_ARCH_RV_ISA_V) && (CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH == 0)
+  uintptr_t *vregs = tcb->vregs;
+#endif
   uintptr_t regval;
   uintptr_t topstack;
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -66,14 +70,36 @@ void up_initial_state(struct tcb_s *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
+#if defined(CONFIG_ARCH_RV_ISA_V) && (CONFIG_ARCH_RV_VECTOR_BYTE_LENGTH == 0)
+
+  /* Initialize vector registers */
+
+  if (vregs == NULL)
+    {
+      regval = READ_CSR(CSR_VLENB);
+      if (regval != 0)
+        {
+          /* There are 32 vector registers(v0 - v31) with vlenb length. */
+
+          xcp->vregs = kmm_calloc(1, regval * 32 + VPU_XCPT_SIZE);
+          DEBUGASSERT(xcp->vregs != NULL);
+        }
+    }
+  else
+    {
+      /* Keep the vector region if task restart */
+
+      xcp->vregs = vregs;
+    }
+#endif
+
   /* Initialize the idle thread stack */
 
   if (tcb->pid == IDLE_PROCESS_ID)
     {
-      tcb->stack_alloc_ptr = (void *)(g_idle_topstack -
-                                      CONFIG_IDLETHREAD_STACKSIZE);
+      tcb->stack_alloc_ptr = (void *)g_cpux_idlestack(riscv_mhartid());
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->adj_stack_size  = SMP_STACK_SIZE;
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
@@ -105,7 +131,7 @@ void up_initial_state(struct tcb_s *tcb)
     }
 #endif
 
-  xcp->regs = (uintptr_t *)(topstack - XCPTCONTEXT_SIZE);
+  xcp->regs = (uintreg_t *)(topstack - XCPTCONTEXT_SIZE);
   memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
 
   /* Save the initial stack pointer.  Hmmm.. the stack is set to the very

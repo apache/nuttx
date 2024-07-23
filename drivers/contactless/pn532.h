@@ -141,6 +141,7 @@ struct pn_firmware_version
 struct pn532_dev_s
 {
   uint8_t state;
+  uint8_t pm_level;
   FAR struct spi_dev_s *spi;          /* SPI interface */
   FAR struct pn532_config_s *config;  /* Board configuration data */
 };

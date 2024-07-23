@@ -754,7 +754,7 @@
 #define CCM_CCGR_MU_A                        20
 #define CCM_CCGR_MU_B                        21
 #define CCM_CCGR_EDMA                        22
-#define CCM_CCGR_DMA                         22 //Note Added CTRL for compatiblity
+#define CCM_CCGR_DMA                         22 /* Note Added CTRL for compatiblity */
 #define CCM_CCGR_EDMA_LPSR                   23
 #define CCM_CCGR_ROMCP                       24
 #define CCM_CCGR_OCRAM                       25
@@ -770,10 +770,10 @@
 #define CCM_CCGR_IEE                         35
 #define CCM_CCGR_KEY_MANAGER                 36
 #define CCM_CCGR_PUF                         36
-#define CCM_CCGR_OCOTP_CTRL                  37 //Note Added CTRL for compatiblity
+#define CCM_CCGR_OCOTP_CTRL                  37 /* Note Added CTRL for compatiblity */
 #define CCM_CCGR_SNVS_HP                     38
 #define CCM_CCGR_SNVS                        39
-#define CCM_CCGR_SNVS_LP                     39 //Note Added CTRL for compatiblity
+#define CCM_CCGR_SNVS_LP                     39 /* Note Added CTRL for compatiblity */
 #define CCM_CCGR_CAAM                        40
 #define CCM_CCGR_JTAG_MUX                    41
 #define CCM_CCGR_CSTRACE                     42
@@ -796,7 +796,7 @@
 #define CCM_CCGR_ACMP2                       59
 #define CCM_CCGR_ACMP3                       60
 #define CCM_CCGR_ACMP4                       61
-#define CCM_CCGR_PIT                         62 // Renamed from PIT1 to PIT for compatibility
+#define CCM_CCGR_PIT                         62 /* Renamed from PIT1 to PIT for compatibility */
 #define CCM_CCGR_PIT2                        63
 #define CCM_CCGR_GPT1                        64
 #define CCM_CCGR_GPT2                        65

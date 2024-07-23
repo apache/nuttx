@@ -1,0 +1,46 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if RPTUN
+
+config K230_RPTUN_MASTER
+	bool "RPTUN master node"
+	default y if RPTUN_LOADER
+	default n
+
+config K230_RPTUN_SHM_ADDR
+	hex "RPTUN share memory address"
+	default 0x80200000
+	---help---
+		RPTUN shared memory start address.
+
+config K230_RPTUN_SHM_SIZE
+	int "RPTUN share memory size"
+	default 32768
+	---help---
+		RPTUN shared memory size in bytes.
+
+config K230_RPTUN_IPI_DEV
+	int "IPI device num for RPTUN purpose"
+	default 0
+	---help---
+		Choose the IPI device for RPTUN purpose, should be within 0..3
+
+endif # RPTUN
+
+config K230_IPI
+	bool "Enable K230 IPI driver"
+	default y if RPTUN
+	default n
+
+if K230_IPI
+
+config K230_IPI_RESET_UPON_INIT
+	bool "Reset K230 mailbox device upon initialization"
+	default n
+	---help---
+		Reset whole K230 mailbox device upon k230_ipi_init.
+
+endif # K230_IPI

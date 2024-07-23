@@ -100,6 +100,7 @@ exception_common:
 	mrs		r1, msp					/* R1=The main stack pointer */
 	subs		r1, #SW_XCPT_SIZE			/* R1=Beginning of context array on the stack */
 	msr		msp, r1					/* Reserved stack space */
+	isb		sy
 	b		2f
 
 1:
@@ -160,6 +161,7 @@ exception_common:
 	mov		r2, r1					/* Reserve signal context */
 	subs		r2, r2, #XCPTCONTEXT_SIZE
 	msr		msp, r2					/* We are using the main stack pointer */
+	isb		sy
 3:
 #endif
 
@@ -197,10 +199,12 @@ exception_common:
 	lsls		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
 	bmi		4f					/* Test bit 31 */
 	msr		msp, r1					/* R1=The main stack pointer */
+	isb		sy
 	b		5f
 
 4:
 	msr		psp, r1					/* R1=The process stack pointer */
+	isb		sy
 
 5:
 

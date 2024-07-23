@@ -55,7 +55,7 @@ Character device drivers have these properties:
   :maxdepth: 2
 
   1wire.rst
-  analog.rst
+  analog/index.rst
   bch.rst
   can.rst
   contactless.rst

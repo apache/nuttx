@@ -15,6 +15,12 @@ config NUTTSBI_HART_CNT
 	int "Amount of harts in SoC"
 	default 1
 
+config NUTTSBI_IPI_BASE
+	hex "MSWI base address"
+	default 0
+	---help---
+		Sets the address of mtimecmp memory mapped register
+
 config NUTTSBI_MTIME_BASE
 	hex "MTIME base address"
 	default 0

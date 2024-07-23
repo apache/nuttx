@@ -78,12 +78,18 @@ void arm64_boot_el3_init(void)
   reg = 0U;               /* Reset */
   reg |= SCR_NS_BIT;      /* EL2 / EL3 non-secure */
   reg |= (SCR_RES1 |      /* RES1 */
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
+          SCR_IRQ_BIT |   /* Route IRQs to EL3 */
+          SCR_FIQ_BIT |   /* Route FIQs to EL3 */
+          SCR_EA_BIT |    /* Route EAs to EL3 */
+#endif
           SCR_RW_BIT |    /* EL2 execution state is AArch64 */
           SCR_ST_BIT |    /* Do not trap EL1 accesses to timer */
           SCR_HCE_BIT |   /* Do not trap HVC */
           SCR_SMD_BIT);   /* Do not trap SMC */
   write_sysreg(reg, scr_el3);
 
+#if CONFIG_ARM64_GIC_VERSION > 2
   reg = read_sysreg(ICC_SRE_EL3);
   reg |= (ICC_SRE_ELX_DFB_BIT |   /* Disable FIQ bypass */
           ICC_SRE_ELX_DIB_BIT |   /* Disable IRQ bypass */
@@ -91,6 +97,7 @@ void arm64_boot_el3_init(void)
           ICC_SRE_EL3_EN_BIT);    /* Enables lower Exception level access to
                                    * ICC_SRE_EL1 */
   write_sysreg(reg, ICC_SRE_EL3);
+#endif
 
   ARM64_ISB();
 }

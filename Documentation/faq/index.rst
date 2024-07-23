@@ -8,6 +8,55 @@ FAQ
 NSH Tricks
 ==========
 
+How to get an application available in the NSH?
+-----------------------------------------------
+
+You will need at least three things enabled inside NuttX menuconfig
+to be able to see an application this displayed there:
+BUILTIN,  NSH_BUILTIN_APPS and the application itself.
+Enabling BUILTIN::
+
+    Library Routines  --->
+            [*] Support Builtin Applications
+
+Enabling NSH_BUILTIN_APPS::
+
+    Application Configuration  --->
+            NSH Library  --->
+                [*]   Enable built-in applications
+
+Enabling Hello World Application::
+
+    Application Configuration  --->
+            Examples  --->
+                [*]   "Hello, World!" example
+
+After compilation you should see the hello at NSH:
+
+.. code-block:: shell
+
+  NuttShell (NSH) NuttX-12.5.1
+  nsh> ?
+  help usage:  help [-v] [<cmd>]
+    .           cp          exit        mkdir       set         unset
+    [           cmp         expr        mkrd        sleep       uptime
+    ?           dirname     false       mount       source      usleep
+    alias       dd          fdinfo      mv          test        xd
+    unalias     df          free        pidof       time
+    basename    dmesg       help        printf      true
+    break       echo        hexdump     pwd         truncate
+    cat         env         kill        rm          uname
+    cd          exec        ls          rmdir       umount
+  Builtin Apps:
+    hello        nsh          sh
+  nsh>
+
+Note: if you want to see the applications physically at /bin you can
+enable BINFS::
+
+    File Systems  --->
+            [*] BINFS File System
+
 How to increase the command line length?
 ----------------------------------------
 

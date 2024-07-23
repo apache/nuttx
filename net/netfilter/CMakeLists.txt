@@ -22,10 +22,20 @@
 
 if(CONFIG_NET_IPTABLES)
 
-  set(SRCS ipt_sockopt.c)
+  if(CONFIG_NET_IPv4)
+    list(APPEND SRCS ipt_sockopt.c)
+  endif()
+
+  if(CONFIG_NET_IPv6)
+    list(APPEND SRCS ip6t_sockopt.c)
+  endif()
 
   if(CONFIG_NET_NAT)
     list(APPEND SRCS ipt_nat.c)
+  endif()
+
+  if(CONFIG_NET_IPFILTER)
+    list(APPEND SRCS ipt_filter.c)
   endif()
 
   target_sources(net PRIVATE ${SRCS})

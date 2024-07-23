@@ -180,10 +180,10 @@ arm_vectorirq:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
-	cpsid		if, #PSR_MODE_SYS
-#else
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		i, #PSR_MODE_SYS
+#else
+	cpsid		if, #PSR_MODE_SYS
 #endif
 
 	/* Create a context structure.  First set aside a stack frame
@@ -290,10 +290,10 @@ arm_vectorsvc:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
-	cpsid		if, #PSR_MODE_SYS
-#else
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		i, #PSR_MODE_SYS
+#else
+	cpsid		if, #PSR_MODE_SYS
 #endif
 
 	/* Create a context structure.  First set aside a stack frame
@@ -401,10 +401,10 @@ arm_vectordata:
 
 	/* Switch to SYS mode */
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
-	cpsid		if, #PSR_MODE_SYS
-#else
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsid		i, #PSR_MODE_SYS
+#else
+	cpsid		if, #PSR_MODE_SYS
 #endif
 
 	/* Create a context structure.  First set aside a stack frame
@@ -642,14 +642,14 @@ arm_vectorundefinsn:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
 	.globl	arm_decodefiq
 #endif
 	.globl	arm_vectorfiq
 	.type	arm_vectorfiq, %function
 
 arm_vectorfiq:
-#ifdef CONFIG_ARMV7A_DECODEFIQ
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
 
 	/* Save the LR and SPSR onto the SYS mode stack before switch. */
 
@@ -771,7 +771,7 @@ g_intstacktop:
  *  Name: g_fiqstackalloc/g_fiqstacktop
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7A_DECODEFIQ
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_HIPRI_INTERRUPT)
 	.globl	g_fiqstackalloc
 	.type	g_fiqstackalloc, object
 	.globl	g_fiqstacktop

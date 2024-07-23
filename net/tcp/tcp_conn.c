@@ -514,8 +514,8 @@ static FAR struct tcp_conn_s *tcp_alloc_conn(void)
   if (dq_peek(&g_free_tcp_connections) == NULL)
     {
 #if CONFIG_NET_TCP_MAX_CONNS > 0
-      if (dq_count(&g_active_tcp_connections) + CONFIG_NET_TCP_ALLOC_CONNS
-          >= CONFIG_NET_TCP_MAX_CONNS)
+      if (dq_count(&g_active_tcp_connections) +
+          CONFIG_NET_TCP_ALLOC_CONNS > CONFIG_NET_TCP_MAX_CONNS)
         {
           return NULL;
         }
@@ -583,42 +583,34 @@ int tcp_selectport(uint8_t domain,
 
   if (g_last_tcp_port == 0)
     {
-      net_getrandom(&g_last_tcp_port, sizeof(uint16_t));
-
-      g_last_tcp_port = g_last_tcp_port % 32000;
-
-      if (g_last_tcp_port < 4096)
-        {
-          g_last_tcp_port += 4096;
-        }
+      NET_PORT_RANDOM_INIT(g_last_tcp_port);
     }
 
   if (portno == 0)
     {
+      uint16_t loop_start = g_last_tcp_port;
+
       /* No local port assigned. Loop until we find a valid listen port
-       * number that is not being used by any other connection. NOTE the
-       * following loop is assumed to terminate but could not if all
-       * 32000-4096+1 ports are in used (unlikely).
+       * number that is not being used by any other connection.
        */
 
       do
         {
           /* Guess that the next available port number will be the one after
-           * the last port number assigned. Make sure that the port number
-           * is within range.
+           * the last port number assigned.
            */
 
-          if (++g_last_tcp_port >= 32000)
+          NET_PORT_NEXT_NH(portno, g_last_tcp_port);
+          if (g_last_tcp_port == loop_start)
             {
-              g_last_tcp_port = 4096;
-            }
+              /* We have looped back, failed. */
 
-          portno = HTONS(g_last_tcp_port);
+              return -EADDRINUSE;
+            }
         }
       while (tcp_listener(domain, ipaddr, portno)
-#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
-             || (domain == PF_INET &&
-                 ipv4_nat_port_inuse(IP_PROTO_TCP, ipaddr->ipv4, portno))
+#ifdef CONFIG_NET_NAT
+             || nat_port_inuse(domain, IP_PROTO_TCP, ipaddr, portno)
 #endif
       );
     }
@@ -629,9 +621,8 @@ int tcp_selectport(uint8_t domain,
        */
 
       if (tcp_listener(domain, ipaddr, portno)
-#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
-          || (domain == PF_INET &&
-              ipv4_nat_port_inuse(IP_PROTO_TCP, ipaddr->ipv4, portno))
+#ifdef CONFIG_NET_NAT
+          || nat_port_inuse(domain, IP_PROTO_TCP, ipaddr, portno)
 #endif
       )
         {
@@ -789,7 +780,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
   if (conn)
     {
       memset(conn, 0, sizeof(struct tcp_conn_s));
-      conn->sconn.ttl     = IP_TTL_DEFAULT;
+      conn->sconn.s_ttl   = IP_TTL_DEFAULT;
       conn->tcpstateflags = TCP_ALLOCATED;
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
       conn->domain        = domain;
@@ -1180,7 +1171,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 #endif
 
       conn->sconn.s_tos      = listener->sconn.s_tos;
-      conn->sconn.ttl        = listener->sconn.ttl;
+      conn->sconn.s_ttl      = listener->sconn.s_ttl;
 #if CONFIG_NET_RECV_BUFSIZE > 0
       conn->rcv_bufs         = listener->rcv_bufs;
 #endif

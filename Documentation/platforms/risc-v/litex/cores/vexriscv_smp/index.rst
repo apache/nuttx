@@ -45,6 +45,7 @@ Create a file, 'boot.json' in the Nuttx root directory, with the following conte
   {
     "romfs.img":   "0x40C00000",
     "nuttx.bin":   "0x40000000",
+    "board.dtb":   "0x41ec0000",
     "opensbi.bin": "0x40f00000"
   }
 

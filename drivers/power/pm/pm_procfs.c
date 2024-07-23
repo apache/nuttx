@@ -44,17 +44,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STHDR "DOMAIN%d           WAKE         SLEEP         TOTAL\n"
-#define WAHDR "DOMAIN%d      STATE     COUNT      TIME\n"
+#define STHDR "DOMAIN%-2d                  WAKE           SLEEP          TOTAL\n"
+#define PFHDR "CALLBACKS                 IDLE           STANDBY        SLEEP\n"
+#define WAHDR "DOMAIN%-2d                  STATE          COUNT          TIME\n"
 
 #ifdef CONFIG_SYSTEM_TIME64
-#  define STFMT "%-8s %8" PRIu64 "s %02" PRIu64 "%% %8" PRIu64 "s %02" \
-                PRIu64 "%% %8" PRIu64 "s %02" PRIu64 "%%\n"
-#  define WAFMT "%-12s %-10s %4" PRIu32 " %8" PRIu64 "s\n"
+#  define STFMT "%-18s %8" PRIu64 "s %3" PRIu64 "%% %8" PRIu64 "s %3" \
+                PRIu64 "%% %8" PRIu64 "s %3" PRIu64 "%%\n"
+#  define PFFMT "%-18p %8" PRIu64 "s %3" PRIu64 "%% %8" PRIu64 "s %3" \
+                PRIu64 "%% %8" PRIu64 "s %3" PRIu64 "%%\n"
+#  define WAFMT "%-25s %-14s %-14" PRIu32 " %" PRIu64 "s\n"
 #else
-#  define STFMT "%-8s %8" PRIu32 "s %02" PRIu32 "%% %8" PRIu32 "s %02" \
-                PRIu32 "%% %8" PRIu32 "s %02" PRIu32 "%%\n"
-#  define WAFMT "%-12s %-10s %4" PRIu32 " %8" PRIu32 "s\n"
+#  define STFMT "%-18s %8" PRIu32 "s %3" PRIu32 "%% %8" PRIu32 "s %3" \
+                PRIu32 "%% %8" PRIu32 "s %3" PRIu32 "%%\n"
+#  define PFFMT "%-18p %8" PRIu32 "s %3" PRIu32 "%% %8" PRIu32 "s %3" \
+                PRIu32 "%% %8" PRIu32 "s %3" PRIu32 "%%\n"
+#  define WAFMT "%-25s %-14s %-14" PRIu32 " %" PRIu32 "s\n"
 #endif
 
 /* Determines the size of an intermediate buffer that must be large enough
@@ -100,6 +105,8 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
                              size_t buflen);
 static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen);
+static ssize_t pm_read_preparefail(FAR struct file *filep, FAR char *buffer,
+                                   size_t buflen);
 static ssize_t pm_read(FAR struct file *filep, FAR char *buffer,
                        size_t buflen);
 static int     pm_dup(FAR const struct file *oldp,
@@ -149,8 +156,9 @@ const struct procfs_operations g_pm_operations =
 
 static const struct pm_file_ops_s g_pm_files[] =
 {
-  {"state",    pm_read_state},
-  {"wakelock", pm_read_wakelock},
+  {"state",        pm_read_state},
+  {"wakelock",     pm_read_wakelock},
+  {"preparefail",  pm_read_preparefail},
 };
 
 static FAR const char *g_pm_state[PM_COUNT] =
@@ -252,17 +260,27 @@ static int pm_close(FAR struct file *filep)
   return OK;
 }
 
+/****************************************************************************
+ * Name: pm_read_state
+ *
+ * Description:
+ *   The statistic values about every domain states.
+ *
+ ****************************************************************************/
+
 static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
                              size_t buflen)
 {
   FAR struct pm_domain_s *dom;
   FAR struct pm_file_s *pmfile;
+  time_t sleep[PM_COUNT];
+  time_t wake[PM_COUNT];
   irqstate_t flags;
   size_t totalsize = 0;
   size_t linesize;
   size_t copysize;
   off_t offset;
-  uint32_t sum = 0;
+  time_t sum = 0;
   uint32_t state;
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
@@ -270,7 +288,7 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
   /* Recover our private data from the struct file instance */
 
   pmfile = (FAR struct pm_file_s *)filep->f_priv;
-  dom    = &g_pmglobals.domain[pmfile->domain];
+  dom    = &g_pmdomains[pmfile->domain];
   DEBUGASSERT(pmfile);
   DEBUGASSERT(dom);
 
@@ -290,8 +308,29 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
 
   for (state = 0; state < PM_COUNT; state++)
     {
-      sum += dom->wake[state].tv_sec + dom->sleep[state].tv_sec;
+      wake[state] = dom->wake[state].tv_sec;
+      sleep[state] = dom->sleep[state].tv_sec;
+
+      if (state == dom->state)
+        {
+          struct timespec ts;
+
+          clock_systime_timespec(&ts);
+          clock_timespec_subtract(&ts, &dom->start, &ts);
+          if (dom->in_sleep)
+            {
+              sleep[state] += ts.tv_sec;
+            }
+          else
+            {
+              wake[state] += ts.tv_sec;
+            }
+        }
+
+      sum += wake[state] + sleep[state];
     }
+
+  pm_domain_unlock(pmfile->domain, flags);
 
   sum = sum ? sum : 1;
 
@@ -299,14 +338,14 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
     {
       time_t total;
 
-      total = dom->wake[state].tv_sec + dom->sleep[state].tv_sec;
+      total = wake[state] + sleep[state];
 
       linesize = snprintf(pmfile->line, PM_LINELEN, STFMT,
                           g_pm_state[state],
-                          dom->wake[state].tv_sec,
-                          100 * dom->wake[state].tv_sec / sum,
-                          dom->sleep[state].tv_sec,
-                          100 * dom->sleep[state].tv_sec / sum,
+                          wake[state],
+                          100 * wake[state] / sum,
+                          sleep[state],
+                          100 * sleep[state] / sum,
                           total,
                           100 * total / sum);
       buffer += copysize;
@@ -317,8 +356,6 @@ static ssize_t pm_read_state(FAR struct file *filep, FAR char *buffer,
 
       totalsize += copysize;
     }
-
-  pm_domain_unlock(pmfile->domain, flags);
 
   filep->f_pos += totalsize;
   return totalsize;
@@ -341,7 +378,7 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
   /* Recover our private data from the struct file instance */
 
   pmfile = (FAR struct pm_file_s *)filep->f_priv;
-  dom    = &g_pmglobals.domain[pmfile->domain];
+  dom    = &g_pmdomains[pmfile->domain];
   DEBUGASSERT(pmfile);
   DEBUGASSERT(dom);
 
@@ -394,6 +431,102 @@ static ssize_t pm_read_wakelock(FAR struct file *filep, FAR char *buffer,
 
   pm_domain_unlock(pmfile->domain, flags);
 
+  filep->f_pos += totalsize;
+  return totalsize;
+}
+
+/****************************************************************************
+ * Name: pm_read_preparefail
+ *
+ * Description:
+ *   The statistic values about prepare callback failed.
+ *
+ ****************************************************************************/
+
+static ssize_t pm_read_preparefail(FAR struct file *filep, FAR char *buffer,
+                                   size_t buflen)
+{
+  FAR struct pm_preparefail_s *pf;
+  FAR struct pm_file_s *pmfile;
+  FAR struct pm_callback_s *cb;
+  FAR struct pm_domain_s *dom;
+  FAR dq_entry_t *entry;
+  irqstate_t flags;
+  size_t totalsize = 0;
+  size_t linesize;
+  size_t copysize;
+  off_t offset;
+  time_t sum = 0;
+  uint32_t state;
+
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
+
+  /* Recover our private data from the struct file instance */
+
+  pmfile = (FAR struct pm_file_s *)filep->f_priv;
+  dom    = &g_pmdomains[pmfile->domain];
+  DEBUGASSERT(pmfile);
+  DEBUGASSERT(dom);
+
+  /* Save the file offset and the user buffer information */
+
+  offset = filep->f_pos;
+
+  /* Then list the power state */
+
+  linesize = snprintf(pmfile->line, PM_LINELEN, PFHDR);
+  copysize = procfs_memcpy(pmfile->line, linesize, buffer,
+                           buflen, &offset);
+  totalsize += copysize;
+
+  flags = pm_domain_lock(pmfile->domain);
+
+  for (entry = dq_peek(&dom->registry);
+       entry; entry = dq_next(entry))
+    {
+      cb = (FAR struct pm_callback_s *)entry;
+      pf = &cb->preparefail;
+      for (state = 0; state < PM_COUNT; state++)
+        {
+          sum +=  pf->duration[state].tv_sec;
+        }
+    }
+
+  sum = sum ? sum : 1;
+  for (entry = dq_peek(&dom->registry);
+       entry; entry = dq_next(entry))
+    {
+      time_t total = 0;
+
+      cb = (FAR struct pm_callback_s *)entry;
+      pf = &cb->preparefail;
+      for (state = 0; state < PM_COUNT; state++)
+        {
+          total +=  pf->duration[state].tv_sec;
+        }
+
+      if (total == 0)
+        {
+          continue;
+        }
+
+      linesize = snprintf(pmfile->line, PM_LINELEN, PFFMT,
+                          cb->prepare,
+                          pf->duration[PM_IDLE].tv_sec,
+                          100 * pf->duration[PM_IDLE].tv_sec / sum,
+                          pf->duration[PM_STANDBY].tv_sec,
+                          100 * pf->duration[PM_STANDBY].tv_sec / sum,
+                          pf->duration[PM_SLEEP].tv_sec,
+                          100 * pf->duration[PM_SLEEP].tv_sec / sum
+                         );
+      buffer += copysize;
+      buflen -= copysize;
+      copysize = procfs_memcpy(pmfile->line, linesize, buffer,
+                               buflen, &offset);
+      totalsize += copysize;
+    }
+
+  pm_domain_unlock(pmfile->domain, flags);
   filep->f_pos += totalsize;
   return totalsize;
 }

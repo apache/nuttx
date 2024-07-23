@@ -33,7 +33,7 @@
 #include <nuttx/page.h>
 #include <nuttx/signal.h>
 
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 
 #include "sched/sched.h"
 #include "paging/paging.h"
@@ -143,7 +143,7 @@ void pg_miss(void)
   /* Add the task to the specified blocked task list */
 
   ftcb->task_state = TSTATE_WAIT_PAGEFILL;
-  nxsched_add_prioritized(ftcb, &g_waitingforfill);
+  nxsched_add_prioritized(ftcb, list_waitingforfill());
 
   /* Now, perform the context switch if one is needed */
 
@@ -183,4 +183,4 @@ void pg_miss(void)
     }
 }
 
-#endif /* CONFIG_PAGING */
+#endif /* CONFIG_LEGACY_PAGING */

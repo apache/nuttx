@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/irq.h>
+
 #include <stdint.h>
 
 /****************************************************************************
@@ -78,12 +80,12 @@ enum nrf91_rtc_cc_e
 
 enum nrf91_rtc_evt_e
 {
-  NRF91_RTC_EVT_TICK     = 0,
-  NRF91_RTC_EVT_OVRFLW   = 1,
-  NRF91_RTC_EVT_COMPARE0 = 2,
-  NRF91_RTC_EVT_COMPARE1 = 3,
-  NRF91_RTC_EVT_COMPARE2 = 4,
-  NRF91_RTC_EVT_COMPARE3 = 5,
+  NRF91_RTC_EVT_COMPARE0 = 0,
+  NRF91_RTC_EVT_COMPARE1 = 1,
+  NRF91_RTC_EVT_COMPARE2 = 2,
+  NRF91_RTC_EVT_COMPARE3 = 3,
+  NRF91_RTC_EVT_TICK     = 4,
+  NRF91_RTC_EVT_OVRFLW   = 5,
 };
 
 /* NRF91 RTC device */

@@ -35,6 +35,14 @@
 #include <sys/boardctl.h>
 #include <arch/board/board_memorymap.h>
 
+#ifdef CONFIG_USERLED
+#include <nuttx/leds/userled.h>
+#endif
+#if defined(CONFIG_BL808_SPI0) || defined(CONFIG_BL808_SPI1)
+#include "bl808_spi.h"
+#endif
+#include "bl808_gpadc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -159,9 +167,35 @@ void board_late_initialize(void)
 
   /* Perform board-specific initialization */
 
+#ifdef CONFIG_BL808_GPADC
+
+  bl808_gpadc_init();
+
+#endif
+
+#ifdef CONFIG_BL808_SPI0
+  struct spi_dev_s *spi0 = bl808_spibus_initialize(0);
+  spi_register(spi0, 0);
+#endif
+
+#ifdef CONFIG_BL808_SPI1
+  struct spi_dev_s *spi1 = bl808_spibus_initialize(1);
+  spi_register(spi1, 1);
+#endif
+
 #ifdef CONFIG_NSH_ARCHINIT
 
   mount(NULL, "/proc", "procfs", 0, NULL);
 
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  int ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 }

@@ -91,6 +91,13 @@ SECTIONS
         _edata = ABSOLUTE(.);
     } > ddr3
 
+    .noinit :
+    {
+        _snoinit = ABSOLUTE(.);
+        *(.noinit*)
+        _enoinit = ABSOLUTE(.);
+    } > ddr3
+
     .bss :
     {
         _sbss = ABSOLUTE(.);
@@ -99,13 +106,6 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
-    } > ddr3
-
-    .noinit :
-    {
-        _snoinit = ABSOLUTE(.);
-        *(.noinit*)
-        _enoinit = ABSOLUTE(.);
     } > ddr3
 
     /* Stabs debugging sections. */

@@ -18,6 +18,10 @@ config LITEX_COHERENT_DMA
 		Select this option if the soft core was build with coherent DMA. When selected,
 		dcache is considered coherent and not invalidated before DMA transfers.
 
+config LITEX_FDT_MEMORY_ADDRESS
+	hex "Location of the FDT in memory"
+	default 0x41ec0000
+
 menu "LITEX Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available

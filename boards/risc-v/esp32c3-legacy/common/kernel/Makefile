@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/esp32c3-legacy/esp32c3-devkit/kernel/Makefile
+# boards/risc-v/esp32c3-legacy/common/kernel/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

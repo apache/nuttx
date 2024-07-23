@@ -102,7 +102,7 @@ There are ports to two Microchip SAMA5D3 boards:
    *Tickless* operation.
 
    Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/sama5/sama5d3x-ek/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/sama5/boards/sama5d3x-ek/README.txt>`__
    file for further information.
 
 **Microchip SAMA5D3 Xplained development board** This is the port of NuttX
@@ -124,7 +124,7 @@ does not have NOR FLASH and, as a consequence NuttX must boot into SDRAM
 with the help of U-Boot.
 
 Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/boards/arm/sama5/sama5d3-xplained/README.txt>`__
+`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/sama5/boards/sama5d3-xplained/README.txt>`__
 file for further information.
 
 
@@ -150,7 +150,7 @@ There is a port in progress on one Microchip SAMA5D4 board:
    that larger display. Support for a graphics media player is included
    (although there were issues with the WM8904 audio CODEC on my board).
    An SRAM bootloader was also included. Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/sama5/sama5d4-ek/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/sama5/boards/sama5d4-ek/README.txt>`__
    file for current status.
 
 **Development Environments:** 1) Linux with native Linux GNU toolchain,

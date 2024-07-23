@@ -531,7 +531,7 @@ static int ds18b20_set_alarm(FAR struct ds18b20_dev_s *dev,
   if (spad[DS18B20_SPAD_TH_OFFSET] != alarm->thigh ||
       spad[DS18B20_SPAD_TL_OFFSET] != alarm->tlow)
     {
-      snerr("ERROR: Expected alarm trigger does not match, " \
+      snerr("ERROR: Expected alarm trigger does not match, "
             "received TH: %d, TL: %d\n",
             spad[DS18B20_SPAD_TH_OFFSET],
             spad[DS18B20_SPAD_TL_OFFSET]);
@@ -802,7 +802,7 @@ static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *              read.
  *
  * Parameter:
- *   argc - Number opf arguments
+ *   argc - Number of arguments
  *   argv - Pointer to argument list
  ****************************************************************************/
 

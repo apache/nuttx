@@ -28,6 +28,41 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* IOCTL Commands ***********************************************************/
+
+/* The watchdog driver uses a standard character driver framework.  However,
+ * since the watchdog driver is a device control interface and not a data
+ * transfer interface, the majority of the functionality is implemented in
+ * driver ioctl calls.
+ *
+ * See nuttx/timers/watchdog.h for the IOCTLs handled by the upper half.
+ *
+ * These are detected and handled by the "lower half" watchdog timer driver.
+ *
+ * WDIOC_RSTCLK     - Restores the xtal32k clock
+ *                    Argument: Ignored
+ */
+
+#define WDIOC_RSTCLK      _WDIOC(0x032)
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* Instances of Watchdog Timer  */
+
+enum esp_wdt_inst_e
+{
+  ESP_WDT_MWDT0 = 0,  /* Main System Watchdog Timer (MWDT) of Timer Group 0 */
+  ESP_WDT_MWDT1,      /* Main System Watchdog Timer (MWDT) of Timer Group 1 */
+  ESP_WDT_RWDT,       /* RTC Watchdog Timer (RWDT) */
+  ESP_WDT_XTAL32K     /* XTAL32K Watchdog Timer (XTWDT) */
+};
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -38,7 +73,9 @@
  *   Initialize the watchdog timer.
  *
  * Input Parameters:
- *   None.
+ *   devpath - The full path to the watchdog.  This should
+ *             be of the form /dev/watchdogX
+ *   wdt_id  - A Watchdog Timer instance to be initialized.
  *
  * Returned Values:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -46,6 +83,6 @@
  *
  ****************************************************************************/
 
-int esp_wdt_initialize(void);
+int esp_wdt_initialize(const char *devpath, enum esp_wdt_inst_e wdt_id);
 
 #endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_WDT_H */

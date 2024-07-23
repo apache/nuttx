@@ -1,0 +1,1019 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_IMX9
+
+menu "i.MX9 Chip Selection"
+
+choice
+	prompt "i.MX9 Core Configuration"
+	default ARCH_CHIP_IMX93
+
+config ARCH_CHIP_IMX93
+	bool "i.MX9 Application Processor"
+	select ARCH_HAVE_MULTICPU
+	select ARMV8A_HAVE_GICv3
+	select ARCH_CORTEX_A55
+	select ARM64_HAVE_PSCI if !IMX9_BOOTLOADER
+	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_RESET
+
+endchoice # i.MX9 Chip Selection
+
+endmenu # "i.MX9 Chip Selection"
+
+config IMX9_DMA_ALLOC
+	bool "Enable DMA capable memory allocator"
+	depends on GRAN
+	default y if CONFIG_FAT_DMAMEMORY
+
+menu "DMA Allocator Configuration"
+	depends on IMX9_DMA_ALLOC
+
+config IMX9_DMA_ALLOC_POOL_SIZE
+	int "DMA allocator memory pool size in bytes"
+	default 4096
+
+config IMX9_DMA_ALLOC_SECT
+	string "Section for DMA allocator memory pool, default is .bss"
+	default ".bss"
+
+endmenu # DMA Allocator Configuration
+
+config IMX9_FLEXIO_PWM
+	bool
+	select PWM_MULTICHAN
+	default n
+
+config IMX9_BOOTLOADER
+	bool "Bootloader"
+	select ARM64_DECODEFIQ
+	default n
+	---help---
+		Configure NuttX as the bootloader. NuttX will be compiled
+		into OCRAM. It will run in EL3 secure state.
+
+config BOOTLOADER_SYS_CLOCK
+	int "Bootloader system clock for timer"
+	default 1700000000
+	depends on IMX9_BOOTLOADER
+	---help---
+		If the sysclk is set to a certain value, this should be it.
+		The value is used by the timer interrupt infrastructure.
+
+menu "i.MX9 Peripheral Selection"
+
+config IMX9_EDMA
+	bool "eDMA"
+	default n
+	select ARCH_DMA
+
+menu "USDHC"
+
+config IMX9_USDHC
+	bool
+	default n
+	select ARCH_HAVE_SDIO_PREFLIGHT
+
+config IMX9_USDHC1
+	bool "USDHC1"
+	default n
+	select ARCH_HAVE_SDIO
+	select IMX9_USDHC
+	---help---
+		Support USDHC host controller 1
+
+config IMX9_USDHC2
+	bool "USDHC2"
+	default n
+	select ARCH_HAVE_SDIO
+	select IMX9_USDHC
+	---help---
+		Support USDHC host controller 2
+
+menu "USDHC Configuration"
+	depends on IMX9_USDHC
+
+config IMX9_USDHC_DMA
+	bool "Support DMA data transfers"
+	default y
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+		Enable SD card DMA data transfers.  This is marginally optional.
+		For most usages, SD accesses will cause data overruns if used without
+		DMA.
+
+choice
+	prompt "Bus width for USDHC1"
+	default IMX9_USDHC1_WIDTH_D1_ONLY
+	depends on IMX9_USDHC1
+
+config IMX9_USDHC1_WIDTH_D1_ONLY
+	bool "One bit"
+
+config IMX9_USDHC1_WIDTH_D1_D4
+	bool "Four bit"
+
+config IMX9_USDHC1_WIDTH_D1_D8
+	bool "Eight bit"
+
+endchoice
+
+config IMX9_USDHC1_INVERT_CD
+	bool "Invert the USDHC1 CD"
+	default n
+	depends on IMX9_USDHC1
+	---help---
+		If the board defines PIN_USDHC1_CD the CD_B input to the USDHC it is
+		assumed to be active low. Selecting IMX9_USDHC1_INVERT_CD will make it
+		active high.
+
+		If the board defines PIN_USDHC1_CD_GPIO it is assumed to be active low.
+		Selecting IMX9_USDHC1_INVERT_CD will make it active high.
+
+choice
+	depends on IMX9_USDHC2
+	prompt "Bus width for USDHC2"
+	default IMX9_USDHC2_WIDTH_D1_D4
+
+config IMX9_USDHC2_WIDTH_D1_ONLY
+	bool "One bit"
+
+config IMX9_USDHC2_WIDTH_D1_D4
+	bool "Four bit"
+
+endchoice
+
+config IMX9_USDHC2_INVERT_CD
+	bool "Invert the USDHC2 CD"
+	default n
+	depends on IMX9_USDHC2
+	---help---
+		If the board defines PIN_USDHC2_CD the CD_B input to the USDHC it is
+		assumed to be active low. Selecting IMX9_USDHC_INVERT_CD will make it
+		active high.
+
+		If the board defines PIN_USDHC2_CD_GPIO it is assumed to be active low.
+		Selecting IMX9_USDHC2_INVERT_CD will make it active high.
+
+endmenu # USDHC Configuration
+
+endmenu # USDHC
+
+menu "LPUART"
+
+config IMX9_LPUART
+	bool
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config IMX9_LPUART1
+	bool "LPUART1"
+	default n
+	select IMX9_LPUART
+	select LPUART1_SERIALDRIVER
+
+config IMX9_LPUART2
+	bool "LPUART2"
+	default n
+	select IMX9_LPUART
+	select LPUART2_SERIALDRIVER
+
+config IMX9_LPUART3
+	bool "LPUART3"
+	default n
+	select IMX9_LPUART
+	select LPUART3_SERIALDRIVER
+
+config IMX9_LPUART4
+	bool "LPUART4"
+	default n
+	select IMX9_LPUART
+	select LPUART4_SERIALDRIVER
+
+config IMX9_LPUART5
+	bool "LPUART5"
+	default n
+	select IMX9_LPUART
+	select LPUART5_SERIALDRIVER
+
+config IMX9_LPUART6
+	bool "LPUART6"
+	default n
+	select IMX9_LPUART
+	select LPUART6_SERIALDRIVER
+
+config IMX9_LPUART7
+	bool "LPUART7"
+	default n
+	select IMX9_LPUART
+	select LPUART7_SERIALDRIVER
+
+config IMX9_LPUART8
+	bool "LPUART8"
+	default n
+	select IMX9_LPUART
+	select LPUART8_SERIALDRIVER
+
+menu "LPUART Configuration"
+	depends on IMX9_LPUART
+
+config IMX9_LPUART_INVERT
+	bool "Signal Invert Support"
+	default n
+
+config IMX9_LPUART_SINGLEWIRE
+	bool "Signal Wire Support"
+	default n
+
+config IMX9_SERIAL_RXDMA_BUFFER_SIZE
+	int "RX DMA buffer size"
+	default 64
+	depends on LPUART1_RXDMA || LPUART2_RXDMA || LPUART3_RXDMA || LPUART4_RXDMA || \
+               LPUART5_RXDMA || LPUART6_RXDMA || LPUART7_RXDMA || LPUART8_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 64 bytes.
+
+endmenu # LPUART Configuration
+
+endmenu # LPUART
+
+config IMX9_FLEXSPI
+	bool "ENABLE FLEXSPI interface"
+	default n
+
+config IMX9_FLEXSPI_NOR
+	bool "Enable NOR flash on FLEXSPI interface"
+	select IMX9_FLEXSPI
+	default n
+
+config IMX9_FLEXIO1_PWM
+	depends on PWM
+	bool "Enable FLEXIO1 based PWM generation"
+	select IMX9_FLEXIO_PWM
+	default n
+
+config IMX9_FLEXIO2_PWM
+	depends on PWM
+	bool "Enable FLEXIO2 based PWM generation"
+	select IMX9_FLEXIO_PWM
+	default n
+
+config IMX9_FLEXIO1_PWM_NCHANNELS
+	depends on IMX9_FLEXIO1_PWM
+	int "Number of channels for FLEXIO1"
+	default 4
+	range 1 7
+
+config IMX9_FLEXIO1_PWM_CHANNEL_PINS
+	depends on IMX9_FLEXIO1_PWM
+	hex "FlexIO outputs used for FLEXIO1 timers"
+	default 0x0000000007060504
+
+config IMX9_FLEXIO2_PWM_NCHANNELS
+	depends on IMX9_FLEXIO2_PWM
+	int "Number of channels for FLEXIO2"
+	default 1
+	range 1 7
+
+config IMX9_FLEXIO2_PWM_CHANNEL_PINS
+	depends on IMX9_FLEXIO2_PWM
+	hex "FlexIO outputs used for FLEXIO2 timers"
+	default 0x0000000000000000
+
+config IMX9_TPM_PWM
+	bool
+	select PWM_MULTICHAN
+	default n
+
+config IMX9_TPM1_PWM
+	depends on PWM
+	bool "Enable TPM1 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM1_PWM_NCHANNELS
+	depends on IMX9_TPM1_PWM
+	int "Number of channels for TPM1"
+	default 1
+
+config IMX9_TPM1_PWM_CHMUX
+	depends on IMX9_TPM1_PWM
+	hex "Channel mux for TPM1"
+	default 0x03020100
+
+config IMX9_TPM2_PWM
+	depends on PWM
+	bool "Enable TPM2 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM2_PWM_NCHANNELS
+	depends on IMX9_TPM2_PWM
+	int "Number of channels for TPM2"
+	default 1
+
+config IMX9_TPM2_PWM_CHMUX
+	depends on IMX9_TPM2_PWM
+	hex "Channel mux for TPM2"
+	default 0x03020100
+
+config IMX9_TPM3_PWM
+	depends on PWM
+	bool "Enable TPM3 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM3_PWM_NCHANNELS
+	depends on IMX9_TPM3_PWM
+	int "Number of channels for TPM3"
+	default 1
+
+config IMX9_TPM3_PWM_CHMUX
+	depends on IMX9_TPM3_PWM
+	hex "Channel mux for TPM3"
+	default 0x03020100
+
+config IMX9_TPM4_PWM
+	depends on PWM
+	bool "Enable TPM4 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM4_PWM_NCHANNELS
+	depends on IMX9_TPM4_PWM
+	int "Number of channels for TPM4"
+	default 1
+
+config IMX9_TPM4_PWM_CHMUX
+	depends on IMX9_TPM4_PWM
+	hex "Channel mux for TPM4"
+	default 0x03020100
+
+config IMX9_TPM5_PWM
+	depends on PWM
+	bool "Enable TPM5 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM5_PWM_NCHANNELS
+	depends on IMX9_TPM5_PWM
+	int "Number of channels for TPM5"
+	default 1
+
+config IMX9_TPM5_PWM_CHMUX
+	depends on IMX9_TPM5_PWM
+	hex "Channel mux for TPM5"
+	default 0x03020100
+
+config IMX9_TPM6_PWM
+	depends on PWM
+	bool "Enable TPM6 based PWM generation"
+	select IMX9_TPM_PWM
+	default n
+
+config IMX9_TPM6_PWM_NCHANNELS
+	depends on IMX9_TPM6_PWM
+	int "Number of channels for TPM6"
+	default 1
+
+config IMX9_TPM6_PWM_CHMUX
+	depends on IMX9_TPM6_PWM
+	hex "Channel mux for TPM6"
+	default 0x03020100
+
+config IMX9_USBDEV
+	bool
+	default n
+	select USBDEV
+
+config IMX9_USBDEV_USBC1
+	bool "USB Device using controller 1"
+	default n
+	select IMX9_USBDEV
+
+config IMX9_USBDEV_USBC2
+	depends on !IMX9_USBDEV_USBC1
+	bool "USB Device using controller 2"
+	default n
+	select IMX9_USBDEV
+
+if IMX9_USBDEV
+
+menu "USB device controller driver (DCD) options"
+
+config IMX9_USBDEV_NOVBUS
+	bool "No USB VBUS sensing"
+	default n
+
+config IMX9_USBDEV_FRAME_INTERRUPT
+	bool "USB frame interrupt"
+	default n
+	---help---
+		Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
+		handler vs. simply reading on demand. Probably a bad idea... Unless
+		there is some issue with sampling the SOF from hardware asynchronously.
+
+config IMX9_USBDEV_REGDEBUG
+	bool "Register level debug"
+	depends on DEBUG_USB_INFO
+	default n
+	---help---
+		Output detailed register-level USB device debug information.  Requires
+		also CONFIG_DEBUG_USB_INFO.
+
+endmenu # USB device controller driver (DCD) options
+
+endif # IMX9_USBDEV
+
+config IMX9_ENET
+	bool "Ethernet"
+	default n
+	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
+
+config IMX9_GPIO_IRQ
+	bool "GPIO Interrupt Support"
+	default n
+
+config IMX9_LPI2C
+	bool "LPI2C support"
+	default n
+
+config IMX9_LPSPI
+	bool "LPSPI support"
+	default n
+
+menu "LPI2C Peripherals"
+
+menuconfig IMX9_LPI2C1
+	bool "LPI2C1"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C1
+
+config IMX9_LPI2C1_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C1_DMA
+	bool "Enable DMA for I2C1"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C1_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C1_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C1
+
+menuconfig IMX9_LPI2C2
+	bool "LPI2C2"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C2
+
+config IMX9_LPI2C2_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C2_DMA
+	bool "Enable DMA for I2C2"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C2_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C2_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C2
+
+menuconfig IMX9_LPI2C3
+	bool "LPI2C3"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C3
+
+config IMX9_LPI2C3_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C3_DMA
+	bool "Enable DMA for I2C3"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C3_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C3_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C3
+
+menuconfig IMX9_LPI2C4
+	bool "LPI2C4"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C4
+
+config IMX9_LPI2C4_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C4_DMA
+	bool "Enable DMA for I2C4"
+	default n
+	depends on IMX9_LPI2C_DMA
+
+config IMX9_LPI2C4_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C4_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C4
+
+menuconfig IMX9_LPI2C5
+	bool "LPI2C5"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C5
+
+config IMX9_LPI2C5_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C5_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C5_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C5
+
+menuconfig IMX9_LPI2C6
+	bool "LPI2C6"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C6
+
+config IMX9_LPI2C6_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C6_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C6_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C6
+
+menuconfig IMX9_LPI2C7
+	bool "LPI2C7"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C7
+
+config IMX9_LPI2C7_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C7_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C7_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C7
+
+menuconfig IMX9_LPI2C8
+	bool "LPI2C8"
+	default n
+	select IMX9_LPI2C
+
+if IMX9_LPI2C8
+
+config IMX9_LPI2C8_BUSYIDLE
+	int "Bus idle timeout period in clock cycles"
+	default 0
+
+config IMX9_LPI2C8_FILTSCL
+	int "I2C master digital glitch filters for SCL input in clock cycles"
+	default 0
+
+config IMX9_LPI2C8_FILTSDA
+	int "I2C master digital glitch filters for SDA input in clock cycles"
+	default 0
+
+endif # IMX9_LPI2C8
+
+endmenu # LPI2C Peripherals
+
+menu "LPSPI Peripherals"
+
+menuconfig IMX9_LPSPI1
+	bool "LPSPI1"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI2
+	bool "LPSPI2"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI3
+	bool "LPSPI3"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI4
+	bool "LPSPI4"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI5
+	bool "LPSPI5"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI6
+	bool "LPSPI6"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI7
+	bool "LPSPI7"
+	default n
+	select IMX9_LPSPI
+
+menuconfig IMX9_LPSPI8
+	bool "LPSPI8"
+	default n
+	select IMX9_LPSPI
+
+endmenu # LPSPI Peripherals
+
+menu "eDMA Configuration"
+	depends on IMX9_EDMA
+
+config IMX9_EDMA_NTCD
+	int "Number of transfer descriptors"
+	default 0
+	---help---
+		Number of pre-allocated transfer descriptors.  Needed for scatter-
+		gather DMA.  Make to be set to zero to disable in-memory TCDs in
+		which case only the TCD channel registers will be used and scatter-
+		will not be supported.
+
+config IMX9_EDMA_ELINK
+	bool "Channeling Linking"
+	default n
+	---help---
+		This option enables optional minor or major loop channel linking:
+
+		Minor loop channel linking:  As the channel completes the minor
+		loop, this flag enables linking to another channel. The link target
+		channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the specified
+		channel.
+
+		If minor loop channel linking is disabled, this link mechanism is
+		suppressed in favor of the major loop channel linking.
+
+		Major loop channel linking:  As the channel completes the minor
+		loop, this option enables the linking to another channel. The link
+		target channel initiates a channel service request via an internal
+		mechanism that sets the TCDn_CSR[START] bit of the linked channel.
+
+config IMX9_EDMA_ERCA
+	bool "Round Robin Channel Arbitration"
+	default n
+	---help---
+		Normally, a fixed priority arbitration is used for channel
+		selection.  If this option is selected, round robin arbitration is
+		used for channel selection.
+
+config IMX9_EDMA_HOE
+	bool "Halt On Error"
+	default y
+	---help---
+		Any error causes the HALT bit to set. Subsequently, all service
+		requests are ignored until the HALT bit is cleared.
+
+config IMX9_EDMA_CLM
+	bool "Continuous Link Mode"
+	default n
+	---help---
+		By default, A minor loop channel link made to itself goes through
+		channel arbitration before being activated again.  If this option is
+		selected, a minor loop channel link made to itself does not go
+		through channel arbitration before being activated again. Upon minor
+		loop completion, the channel activates again if that channel has a
+		minor loop channel link enabled and the link channel is itself. This
+		effectively applies the minor loop offsets and restarts the next
+		minor loop.
+
+config IMX9_EDMA_EMLIM
+	bool "Minor Loop Mapping"
+	default n
+	---help---
+		Normally TCD word 2 is a 32-bit NBYTES field.  When this option is
+		enabled, TCD word 2 is redefined to include individual enable fields,
+		an offset field, and the NBYTES field.  The individual enable fields
+		allow the minor loop offset to be applied to the source address, the
+		destination address, or both. The NBYTES field is reduced when either
+		offset is enabled.
+
+config IMX9_EDMA_EDBG
+	bool "Enable Debug"
+	default n
+	---help---
+		When in debug mode, the DMA stalls the start of a new channel. Executing
+		channels are allowed to complete. Channel execution resumes when the
+		system exits debug mode or the EDBG bit is cleared
+
+endmenu # eDMA Global Configuration
+
+menu "LPI2C Configuration"
+	depends on IMX9_LPI2C
+
+config IMX9_LPI2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on IMX9_LPI2C && IMX9_EDMA && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value
+		for the I2C dma streams, else the default priority level is set to
+		medium.
+
+config IMX9_LPI2C_DMA_MAXMSG
+	int "Maximum number messages that will be DMAed"
+	default 8
+	depends on IMX9_LPI2C_DMA
+	---help---
+		This option set the mumber of mesg that can be in a transfer.
+		It is used to allocate space for the 16 bit LPI2C commands
+		that will be DMA-ed to the LPI2C device.
+
+config IMX9_LPI2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on IMX9_LPI2C
+
+config IMX9_LPI2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on IMX9_LPI2C_DYNTIMEO
+
+config IMX9_LPI2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on IMX9_LPI2C_DYNTIMEO
+
+config IMX9_LPI2C_TIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on IMX9_LPI2C
+
+config IMX9_LPI2C_TIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on IMX9_LPI2C && !IMX9_LPI2C_DYNTIMEO
+
+config IMX9_LPI2C_TIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on IMX9_LPI2C && !IMX9_LPI2C_DYNTIMEO
+
+endmenu # LPI2C Configuration
+
+menu "LPSPI Configuration"
+	depends on IMX9_LPSPI
+
+config IMX9_LPSPI_DMA
+	bool "LPSPI DMA"
+	depends on IMX9_EDMA
+	default n
+	---help---
+		Use DMA to improve LPSPI transfer performance.
+
+config IMX9_LPSPI_DMATHRESHOLD
+	int "LPSPI DMA threshold"
+	default 4
+	depends on IMX9_LPSPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config IMX9_LPSPI_DMA_BUFFER_SIZE
+	int "LPSPI DMA buffer size"
+	default 4096
+	depends on IMX9_LPSPI_DMA
+	---help---
+		Set the LPSPI driver DMA buffer size.
+
+config IMX9_LPSPI1_DMA
+	bool "LPSPI1 DMA"
+	default n
+	depends on IMX9_LPSPI1 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI1 transfer performance.
+
+config IMX9_LPSPI2_DMA
+	bool "LPSPI2 DMA"
+	default n
+	depends on IMX9_LPSPI2 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI2 transfer performance.
+
+config IMX9_LPSPI3_DMA
+	bool "LPSPI3 DMA"
+	default n
+	depends on IMX9_LPSPI3 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve LPSPI3 transfer performance.
+
+config IMX9_LPSPI4_DMA
+	bool "LPSPI4 DMA"
+	default n
+	depends on IMX9_LPSPI4 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.
+
+config IMX9_LPSPI5_DMA
+	bool "LPSPI5 DMA"
+	default n
+	depends on IMX9_LPSPI5 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI5 transfer performance.
+
+config IMX9_LPSPI6_DMA
+	bool "LPSPI6 DMA"
+	default n
+	depends on IMX9_LPSPI6 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI6 transfer performance.
+
+config IMX9_LPSPI7_DMA
+	bool "LPSPI7 DMA"
+	default n
+	depends on IMX9_LPSPI7 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI7 transfer performance.
+
+config IMX9_LPSPI8_DMA
+	bool "LPSPI8 DMA"
+	default n
+	depends on IMX9_LPSPI8 && IMX9_LPSPI_DMA
+	---help---
+		Use DMA to improve SPI8 transfer performance.
+
+endmenu # LPSPI Configuration
+
+menu "Ethernet Configuration"
+	depends on IMX9_ENET
+
+config IMX9_ENET1
+	bool "Ethernet MAC (non-QoS)"
+	depends on IMX9_ENET
+	default y
+
+config IMX9_ENET_NRXBUFFERS
+	int "Number of Rx buffers"
+	default 6
+
+config IMX9_ENET_NTXBUFFERS
+	int "Number of Tx buffers"
+	default 2
+
+config IMX9_ENET_USE_OTP_MAC
+	bool "Use MAC address from OCOTP"
+	default n
+	depends on IMX9_ENET
+
+config IMX9_ENET1_OTP_MAC_ADDR
+	hex "MAC address offset in OCOTP"
+	default 0x4ec
+	depends on IMX9_ENET_USE_OTP_MAC
+
+config IMX9_ENET1_PROMISCUOUS
+	bool "Set promiscuous mode"
+	depends on IMX9_ENET1
+	default n
+
+choice
+	prompt "i.MX9 ENET1 interface type"
+	default IMX9_ENET1_RMII
+	depends on IMX9_ENET1
+
+config IMX9_ENET1_RMII
+	bool "RMII"
+
+config IMX9_ENET1_RGMII
+	bool "RGMII"
+
+endchoice
+
+config IMX9_ENET1_PHY_AUTONEG
+	bool "ENET1 PHY autonegotiation enable"
+	default y
+	---help---
+		Enable PHY autonegotiation. If set to n, configure the speed
+		and duplex mode manually. Note that only disabling this doesn't
+		disable the autonegotiation completely; it just sets the MAC
+		speed and duplex, and disables autonegotiation advertisement
+		for other than the configured mode. To disable autonegotiation
+		completely, also set the FORCE_SPEED flag.
+
+choice
+	prompt "Select ENET1 PHY link duplex mode"
+	default IMX9_ENET1_PHY_FD
+	depends on !IMX9_ENET1_PHY_AUTONEG
+
+config IMX9_ENET1_PHY_FD
+	bool "Full Duplex"
+
+config IMX9_ENET1_PHY_HD
+	bool "Half Duplex"
+endchoice
+
+choice
+	prompt "Select ENET1 PHY link speed"
+	default IMX9_ENET1_PHY_100MBPS if IMX9_ENET1_RMII
+	default IMX9_ENET1_PHY_1000MBPS if IMX9_ENET1_RGMII
+	depends on !IMX9_ENET1_PHY_AUTONEG
+
+config IMX9_ENET1_PHY_10MBPS
+	bool "10 MBPS"
+
+config IMX9_ENET1_PHY_100MBPS
+	bool "100 MBPS"
+
+config IMX9_ENET1_PHY_1000MBPS
+	bool "1000 MBPS"
+	depends on IMX9_ENET1_RGMII
+endchoice
+
+config IMX9_ENET1_PHY_FORCE_SPEED
+	bool "Disable PHY autonegotiation and force speed and duplex"
+	depends on !IMX9_ENET1_PHY_AUTONEG
+	default n
+	---help---
+		This disables PHY autonegotiation completely. Note that
+		if the link partner has got autonegotiation enabled, the
+		duplex mode is not auto-detected by the link partner. Only
+		enable if you really know what you are doing!
+
+config IMX9_ENET1_PHYINIT
+	bool "Board-specific PHY Initialization for ENET1"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it
+		can be used.  This may include such things as configuring GPIOs,
+		resetting the PHY, etc.  If CONFIG_IMX9_ENET_PHYINIT is defined in
+		the configuration then the board specific logic must provide
+		imx9_phy_boardinitialize();  The i.MX9 ENET driver will call this
+		function one time before it first uses the PHY.
+
+endmenu # IMX9_ENET
+
+endmenu # iMX Peripheral Selection
+
+endif # ARCH_CHIP_IMX9

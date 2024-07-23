@@ -44,7 +44,7 @@ struct task_group_s;
 
 struct mm_map_entry_s
 {
-  FAR struct mm_map_entry *flink;  /* this is used as sq_entry_t */
+  FAR struct mm_map_entry_s *flink;  /* this is used as sq_entry_t */
   FAR void *vaddr;
   size_t length;
   off_t offset;
@@ -56,11 +56,11 @@ struct mm_map_entry_s
     int i;
   } priv;
 
-  /* Drivers which register mappings may also
-   * implement the unmap function to undo anything done in mmap.
-   * Nb. Implementation must NOT use "this_task()->group" since
-   * this is not valid during process exit. The argument "group" will be
-   * NULL in this case.
+  /* Drivers which register mappings may also implement the unmap function
+   * to undo anything done in mmap.
+   * Nb. Implementation must NOT use "this_task()->group" since it is not
+   * valid during process exit. The argument "group" will be NULL in this
+   * case.
    */
 
   int (*munmap)(FAR struct task_group_s *group,
@@ -69,16 +69,15 @@ struct mm_map_entry_s
                 size_t length);
 };
 
-/* A structure for the task group */
+/* memory mapping structure for the task group */
 
 struct mm_map_s
 {
-  sq_queue_t mm_map_sq;
-
-  size_t map_count;
+  sq_queue_t mm_map_sq;         /* mappings list */
+  size_t map_count;             /* mappings list length */
 
 #ifdef CONFIG_ARCH_VMA_MAPPING
-  GRAN_HANDLE mm_map_vpages;
+  GRAN_HANDLE mm_map_vpages;    /* SHM virtual zone allocator */
 #endif
 
   rmutex_t mm_map_mutex;
@@ -125,7 +124,7 @@ void mm_map_unlock(void);
  * Name: mm_map_initialize
  *
  * Description:
- *   Initialization function, called only by group_initialize
+ *   Initialization function, called only by group_postinitialize
  *
  * Input Parameters:
  *   mm     - Pointer to the mm_map structure to be initialized
@@ -193,6 +192,48 @@ void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr,
                        size_t size);
 
 #endif
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+
+/****************************************************************************
+ * Name: vm_map_region
+ *
+ * Description:
+ *   Allocate virtual memory and maps given physical memory into user space
+ *   of the current process. The mapped region can be larger than requested
+ *   if given paddr isn't page-aligned, use with care so that not to create
+ *   unwanted security holes. The returned virtual address has same in-page
+ *   alignment as given paddr.
+ *
+ * Input Parameters:
+ *   paddr - Starting physical address
+ *   size  - Size of the address range
+ *
+ * Returned Value:
+ *   Virtual address if success, or NULL if error
+ *
+ ****************************************************************************/
+
+FAR void *vm_map_region(uintptr_t paddr, size_t size);
+
+/****************************************************************************
+ * Name: vm_unmap_region
+ *
+ * Description:
+ *   Unmap previously mapped userspace device and release the virtual memory.
+ *
+ * Input Parameters:
+ *   vaddr - Starting virtual address of the mapped device
+ *   size - Size of the address range
+ *
+ * Returned Value:
+ *   OK for success or negative value for error
+ *
+ ****************************************************************************/
+
+int vm_unmap_region(FAR void *vaddr, size_t size);
+
+#endif /* CONFIG_ARCH_VMA_MAPPING */
 
 /****************************************************************************
  * Name: mm_map_add

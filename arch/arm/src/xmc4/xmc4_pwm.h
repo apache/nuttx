@@ -29,6 +29,10 @@
 
 #include "chip.h"
 
+#include <nuttx/timers/pwm.h>
+
+#include <arch/board/board.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -73,7 +77,7 @@ extern "C"
  *
  ****************************************************************************/
 
-struct pwm_lowerhalf_s *xmc4_pwm_initialize(int timer);
+struct pwm_lowerhalf_s *xmc4_pwminitialize(int module, int slice);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -81,5 +85,4 @@ struct pwm_lowerhalf_s *xmc4_pwm_initialize(int timer);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_XMC4_FTMx_PWM */
 #endif /* __ARCH_ARM_SRC_XMC4_XMC4_PWM_H */

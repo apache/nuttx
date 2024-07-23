@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
+#include <sched.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -36,16 +37,24 @@
 #include <arch/io.h>
 #include <arch/board/board.h>
 
+#include <nuttx/spinlock.h>
+
 #include "x86_64_internal.h"
+#include "intel64_cpu.h"
 #include "intel64.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UART_BASE 0x3f8
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
-#define IRQ_STACK_SIZE 0x2000
+struct intel64_irq_priv_s
+{
+  cpu_set_t busy;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -60,19 +69,13 @@ static inline void up_idtinit(void);
  * Public Data
  ****************************************************************************/
 
-volatile uint64_t *g_current_regs;
-
-uint8_t g_interrupt_stack[IRQ_STACK_SIZE] aligned_data(16);
-uint8_t *g_interrupt_stack_end = g_interrupt_stack + IRQ_STACK_SIZE - 16;
-
-uint8_t g_isr_stack[IRQ_STACK_SIZE] aligned_data(16);
-uint8_t *g_isr_stack_end = g_isr_stack + IRQ_STACK_SIZE - 16;
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct idt_entry_s idt_entries[256];
+static struct idt_entry_s        g_idt_entries[NR_IRQS];
+static struct intel64_irq_priv_s g_irq_priv[NR_IRQS];
+static spinlock_t                g_irq_spin;
 
 /****************************************************************************
  * Private Functions
@@ -156,49 +159,6 @@ void up_ioapic_unmask_pin(unsigned int pin)
   cur = up_ioapic_read(IOAPIC_REG_TABLE + pin * 2);
   up_ioapic_write(IOAPIC_REG_TABLE + pin * 2,
       cur & ~(IOAPIC_PIN_DISABLE));
-}
-
-/****************************************************************************
- * Name: up_init_ist
- *
- * Description:
- *  Initialize the Interrupt Stack Table
- *
- ****************************************************************************/
-
-static void up_ist_init(void)
-{
-  struct gdt_entry_s tss_l;
-  uint64_t           tss_h;
-
-  memset(&tss_l, 0, sizeof(tss_l));
-  memset(&tss_h, 0, sizeof(tss_h));
-
-  tss_l.limit_low = (((104 - 1) & 0xffff));    /* Segment limit = TSS size - 1 */
-
-  tss_l.base_low  = ((uintptr_t)ist64 & 0x00ffffff);          /* Low address 1 */
-  tss_l.base_high = (((uintptr_t)ist64 & 0xff000000) >> 24);  /* Low address 2 */
-
-  tss_l.P = 1;
-
-  /* Set type as IST */
-
-  tss_l.AC = 1;
-  tss_l.EX = 1;
-
-  tss_h = (((uintptr_t)ist64 >> 32) & 0xffffffff);  /* High address */
-
-  gdt64[X86_GDT_ISTL_SEL_NUM] = tss_l;
-
-  /* memcpy used to handle type punning compiler warning */
-
-  memcpy((void *)&gdt64[X86_GDT_ISTH_SEL_NUM],
-      (void *)&tss_h, sizeof(gdt64[0]));
-
-  ist64->IST1 = (uintptr_t)g_interrupt_stack_end;
-  ist64->IST2 = (uintptr_t)g_isr_stack_end;
-
-  asm volatile ("mov $0x30, %%ax; ltr %%ax":::"memory", "rax");
 }
 
 /****************************************************************************
@@ -345,6 +305,7 @@ legacy_pic_irq_handler(int irq, uint32_t *regs, void *arg)
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
 static void up_ioapic_init(void)
 {
+  uint32_t maxintr;
   int i;
 
   up_map_region((void *)IOAPIC_BASE, HUGE_PAGE_SIZE,
@@ -352,7 +313,7 @@ static void up_ioapic_init(void)
 
   /* Setup the IO-APIC, remap the interrupt to 32~ */
 
-  uint32_t maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xff;
+  maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xff;
 
   for (i = 0; i < maxintr; i++)
     {
@@ -373,7 +334,7 @@ static void up_ioapic_init(void)
 static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
                         uint8_t flags, uint8_t ist)
 {
-  struct idt_entry_s *entry = &idt_entries[index];
+  struct idt_entry_s *entry = &g_idt_entries[index];
 
   entry->lobase  = base & 0xffff;
   entry->hibase  = (base >> 16) & 0xffff;
@@ -400,11 +361,13 @@ static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
  *
  ****************************************************************************/
 
-struct idt_ptr_s idt_ptr;
-
 static inline void up_idtinit(void)
 {
-  memset(&idt_entries, 0, sizeof(struct idt_entry_s)*256);
+  size_t   offset = 0;
+  uint64_t vector = 0;
+  int      irq    = 0;
+
+  memset(&g_idt_entries, 0, sizeof(g_idt_entries));
 
   /* Set each ISR/IRQ to the appropriate vector with selector=8 and with
    * 32-bit interrupt gate.  Interrupt gate (vs. trap gate) will leave
@@ -444,26 +407,20 @@ static inline void up_idtinit(void)
   up_idtentry(ISR30, (uint64_t)vector_isr30, 0x08, 0x8e, 0x2);
   up_idtentry(ISR31, (uint64_t)vector_isr31, 0x08, 0x8e, 0x2);
 
-  up_idtentry(IRQ0,  (uint64_t)vector_irq0,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ1,  (uint64_t)vector_irq1,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ2,  (uint64_t)vector_irq2,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ3,  (uint64_t)vector_irq3,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ4,  (uint64_t)vector_irq4,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ5,  (uint64_t)vector_irq5,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ6,  (uint64_t)vector_irq6,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ7,  (uint64_t)vector_irq7,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ8,  (uint64_t)vector_irq8,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ9,  (uint64_t)vector_irq9,  0x08, 0x8e, 0x1);
-  up_idtentry(IRQ10, (uint64_t)vector_irq10, 0x08, 0x8e, 0x1);
-  up_idtentry(IRQ11, (uint64_t)vector_irq11, 0x08, 0x8e, 0x1);
-  up_idtentry(IRQ12, (uint64_t)vector_irq12, 0x08, 0x8e, 0x1);
-  up_idtentry(IRQ13, (uint64_t)vector_irq13, 0x08, 0x8e, 0x1);
-  up_idtentry(IRQ14, (uint64_t)vector_irq14, 0x08, 0x8e, 0x1);
-  up_idtentry(IRQ15, (uint64_t)vector_irq15, 0x08, 0x8e, 0x1);
+  /* Set all IRQ vectors */
+
+  offset = (uint64_t)vector_irq1 - (uint64_t)vector_irq0;
+
+  for (irq = IRQ0, vector = (uint64_t)vector_irq0;
+       irq <= IRQ255;
+       irq += 1, vector += offset)
+    {
+      up_idtentry(irq,  (uint64_t)vector,  0x08, 0x8e, 0x1);
+    }
 
   /* Then program the IDT */
 
-  setidt(&idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
+  setidt(&g_idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
 }
 
 /****************************************************************************
@@ -476,29 +433,36 @@ static inline void up_idtinit(void)
 
 void up_irqinitialize(void)
 {
-  /* Initialize the IST */
+  int cpu = up_cpu_index();
 
-  up_ist_init();
+  /* Initialize the TSS */
 
-#ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  /* Disable 8259 PIC */
-
-  up_deinit_8259();
-#endif
+  x86_64_cpu_tss_init(cpu);
 
   /* Initialize the APIC */
 
   up_apic_init();
 
+  if (cpu == 0)
+    {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  /* Initialize the IOAPIC */
+      /* Disable 8259 PIC */
 
-  up_ioapic_init();
+      up_deinit_8259();
+
+      /* Initialize the IOAPIC */
+
+      up_ioapic_init();
 #endif
 
-  /* Initialize the IDT */
+      /* Initialize the IDT */
 
-  up_idtinit();
+      up_idtinit();
+    }
+
+  /* Program the IDT - one per all cores */
+
+  setidt(&g_idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
 
   /* And finally, enable interrupts */
 
@@ -518,10 +482,33 @@ void up_irqinitialize(void)
 void up_disable_irq(int irq)
 {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  if (irq >= IRQ0)
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+
+  if (irq > IRQ255)
     {
-      up_ioapic_mask_pin(irq - IRQ0);
+      /* Not supported yet */
+
+      ASSERT(0);
     }
+
+  if (g_irq_priv[irq].busy > 0)
+    {
+      g_irq_priv[irq].busy -= 1;
+    }
+
+  CPU_CLR(up_cpu_index(), &g_irq_priv[irq].busy);
+
+  if (CPU_COUNT(&g_irq_priv[irq].busy) == 0)
+    {
+      /* One time disable */
+
+      if (irq >= IRQ0)
+        {
+          up_ioapic_mask_pin(irq - IRQ0);
+        }
+    }
+
+  spin_unlock_irqrestore(&g_irq_spin, flags);
 #endif
 }
 
@@ -536,10 +523,37 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  if (irq >= IRQ0)
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+
+#  ifndef CONFIG_IRQCHAIN
+  /* Check if IRQ is free if we don't support IRQ chains */
+
+  if (CPU_ISSET(up_cpu_index(), &g_irq_priv[irq].busy))
     {
-      up_ioapic_unmask_pin(irq - IRQ0);
+      ASSERT(0);
     }
+#  endif
+
+  if (irq > IRQ255)
+    {
+      /* Not supported yet */
+
+      ASSERT(0);
+    }
+
+  if (CPU_COUNT(&g_irq_priv[irq].busy) == 0)
+    {
+      /* One time enable */
+
+      if (irq >= IRQ0)
+        {
+          up_ioapic_unmask_pin(irq - IRQ0);
+        }
+    }
+
+  CPU_SET(up_cpu_index(), &g_irq_priv[irq].busy);
+
+  spin_unlock_irqrestore(&g_irq_spin, flags);
 #endif
 }
 
@@ -561,3 +575,29 @@ int up_prioritize_irq(int irq, int priority)
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: up_trigger_irq
+ *
+ * Description:
+ *   Trigger IRQ interrupt.
+ *
+ ****************************************************************************/
+
+void up_trigger_irq(int irq, cpu_set_t cpuset)
+{
+  uint32_t cpu = 0;
+
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
+      if (CPU_ISSET(cpu, &cpuset))
+        {
+          write_msr(MSR_X2APIC_ICR,
+                    MSR_X2APIC_ICR_FIXED |
+                    MSR_X2APIC_ICR_ASSERT |
+                    MSR_X2APIC_DESTINATION(
+                      (uint64_t)x86_64_cpu_to_loapic(cpu)) |
+                    irq);
+        }
+    }
+}

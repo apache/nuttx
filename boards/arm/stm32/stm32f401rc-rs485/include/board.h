@@ -282,6 +282,33 @@ extern "C"
 #define GPIO_USART6_RX   GPIO_USART6_RX_1    /* PC7 */
 #define GPIO_USART6_TX   GPIO_USART6_TX_1    /* PC6 */
 
+/* PWM
+ *
+ * The STM32F401RC-RS485 has no real on-board PWM devices, but the board
+ * can be configured to output a pulse train using TIM3 CH1 on PA6.
+ */
+
+#define GPIO_TIM3_CH1OUT  GPIO_TIM3_CH1OUT_1
+
+/* Quadrature Encoder
+ *
+ * Use Timer 3 (TIM3) on channels 1 and 2 for QEncoder, using PB4 and PA7.
+ */
+
+#define  GPIO_TIM3_CH1IN GPIO_TIM3_CH1IN_2
+#define  GPIO_TIM3_CH2IN GPIO_TIM3_CH2IN_1
+
+/* HCSR04 driver */
+
+/* Pins config to use with HC-SR04 sensor */
+
+#define GPIO_HCSR04_INT   (GPIO_INPUT |GPIO_FLOAT |GPIO_EXTI | GPIO_PORTB | GPIO_PIN1)
+#define GPIO_HCSR04_TRIG  (GPIO_OUTPUT_CLEAR | GPIO_OUTPUT | GPIO_SPEED_50MHz | GPIO_PORTB | GPIO_PIN0)
+
+#define BOARD_HCSR04_GPIO_INT  GPIO_HCSR04_INT
+#define BOARD_HCSR04_GPIO_TRIG GPIO_HCSR04_TRIG
+#define BOARD_HCSR04_FRTIMER   1    /* TIM1 as free running timer */
+
 /* I2C
  *
  * The optional _GPIO configurations allow the I2C driver to manually
@@ -307,6 +334,11 @@ extern "C"
 #define GPIO_SPI2_MISO   GPIO_SPI2_MISO_1
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
+
+/* MAX7219 */
+
+#define STM32_LCD_CS (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN4)
 
 /* LEDs
  *
@@ -378,5 +410,24 @@ extern "C"
 
 #define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
 #define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
+
+/* Stepper Motor - DRV8266 */
+
+#define GPIO_DIR     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN7)
+#define GPIO_STEP    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN4)
+#define GPIO_SLEEP   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTC|GPIO_PIN5)
+
+#define GPIO_M1      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN0)
+#define GPIO_M2      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+#define GPIO_M3      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN2)
+
+#define GPIO_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN10)
 
 #endif /* __BOARDS_ARM_STM32F401RC_RS485_INCLUDE_BOARD_H */

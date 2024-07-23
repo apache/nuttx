@@ -62,8 +62,6 @@ void up_exit(int status)
 
   (void)enter_critical_section();
 
-  nxsched_dumponexit();
-
   /* Update scheduler parameters */
 
   nxsched_suspend_scheduler(tcb);

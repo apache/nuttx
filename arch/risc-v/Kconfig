@@ -46,6 +46,8 @@ config ARCH_CHIP_LITEX
 	select ARCH_DCACHE
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_RESET
+	select LIBC_FDT
+	select DEVICE_TREE
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
@@ -87,6 +89,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_DEBUG
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -116,6 +119,7 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
+	select ARCH_HAVE_DEBUG
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -126,7 +130,7 @@ config ARCH_CHIP_ESP32C6
 	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
-	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
@@ -154,7 +158,7 @@ config ARCH_CHIP_ESP32H2
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
-	select ARCH_HAVE_BOOTLOADER
+	select ARCH_HAVE_BOOTLOADER if !ESPRESSIF_SIMPLE_BOOT
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
@@ -235,8 +239,20 @@ config ARCH_CHIP_QEMU_RV
 	select ARCH_HAVE_ELF_EXECUTABLE
 	select ONESHOT
 	select ALARM_ARCH
+	select ARCH_HAVE_DEBUG
 	---help---
 		QEMU Generic RV32/RV64 processor
+
+config ARCH_CHIP_HPM6000
+	bool "Hpmicro HPM6000"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		Hpmicro HPM6000 processor (D45 RISC-V Core with MAC extensions).
 
 config ARCH_CHIP_HPM6750
 	bool "Hpmicro HPM6750"
@@ -297,16 +313,36 @@ config ARCH_CHIP_K230
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ARCH_HAVE_MPU
-	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
-	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_RESET
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_NEED_ADDRENV_MAPPING
+	select NUTTSBI_LATE_INIT if NUTTSBI
 	select ONESHOT
 	select ALARM_ARCH
 	---help---
 		Kendryte K230 SoC (RV64GCV and RV64GCVX C908 cores).
 
+config ARCH_CHIP_SG2000
+	bool "SOPHGO SG2000"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MPU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		SOPHGO SG2000 SoC.
 
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
@@ -314,7 +350,7 @@ config ARCH_CHIP_RISCV_CUSTOM
 	---help---
 		Select this option if there is no directory for the chip under arch/risc-v/src/.
 
-endchoice
+endchoice # RISC-V chip selection
 
 config ARCH_RV32
 	bool
@@ -323,7 +359,12 @@ config ARCH_RV32
 config ARCH_RV64
 	bool
 	default n
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !ARCH_RV64ILP32
+
+config ARCH_RV64ILP32
+	bool
+	depends on ARCH_RV64
+	default n
 
 config ARCH_RV_ISA_M
 	bool
@@ -343,6 +384,23 @@ config ARCH_RV_ISA_V
 	default n
 	depends on ARCH_FPU
 
+if ARCH_RV_ISA_V
+
+config ARCH_RV_VECTOR_BYTE_LENGTH
+	int "Vector Register Length in bytes"
+	default 32
+	---help---
+		Predefined vector register length. If CSR vlenb is greater than the
+		current reserved value, appropriate memory will be allocated to
+		save/restore the vector registers.
+		The XLEN-bit-wide read-only CSR vlenb holds the value VLEN/8, i.e.,
+		the vector register length in bytes.  The value in vlenb is a
+		design-time constant in any implementation.  Without this CSR, several
+		instructions are needed to calculate VLEN in bytes. The code has to
+		disturb current vl and vtype settings which require them to be saved and restored.
+
+endif
+
 config ARCH_RV_ISA_ZICSR_ZIFENCEI
 	bool
 	default y
@@ -356,6 +414,18 @@ config ARCH_RV_ISA_ZICSR_ZIFENCEI
 		toolchains that default to a newer ISA spec to version 2.2. For
 		clang < 17 or GCC < 11.3.0, for which this is not possible or need
 		special treatment.
+
+config ARCH_RV_EXPERIMENTAL_EXTENSIONS
+	string "LLVM RISC-V Experimental Extensions"
+	default ""
+	depends on RISCV_TOOLCHAIN_CLANG
+	---help---
+		This option allows the platform to enable experimental extensions,
+		LLVM supports (to various degrees) a number of experimental extensions.
+		All experimental extensions have experimental- as a prefix. There is
+		explicitly no compatibility promised between versions of the toolchain,
+		and regular users are strongly advised not to make use of experimental
+		extensions before they reach ratification.
 
 config ARCH_RV_ISA_VENDOR_EXTENSIONS
 	string "Vendor Custom RISC-V Instruction Set Architecture Extensions"
@@ -375,34 +445,36 @@ config ARCH_RV_ISA_VENDOR_EXTENSIONS
 config ARCH_RV_MMIO_BITS
 	int
 	# special cases
-	default 32		if ARCH_CHIP_K230
+	default 32 if ARCH_CHIP_K230
 	# general fallbacks
-	default 32 		if ARCH_RV32
-	default 64		if ARCH_RV64
+	default 32 if ARCH_RV32
+	default 64 if ARCH_RV64
 
 config ARCH_FAMILY
 	string
-	default "rv32"		if ARCH_RV32
-	default "rv64"		if ARCH_RV64
+	default "rv32" if ARCH_RV32
+	default "rv64" if ARCH_RV64
 
 config ARCH_CHIP
 	string
-	default "fe310"					if ARCH_CHIP_FE310
-	default "k210"					if ARCH_CHIP_K210
-	default "litex"					if ARCH_CHIP_LITEX
-	default "bl602"					if ARCH_CHIP_BL602
-	default "esp32c3-legacy"			if ARCH_CHIP_ESP32C3
-	default "esp32c3"				if ARCH_CHIP_ESP32C3_GENERIC
-	default "esp32c6"				if ARCH_CHIP_ESP32C6
-	default "esp32h2"				if ARCH_CHIP_ESP32H2
-	default "c906"					if ARCH_CHIP_C906
-	default "mpfs"					if ARCH_CHIP_MPFS
-	default "rv32m1"				if ARCH_CHIP_RV32M1
-	default "qemu-rv"				if ARCH_CHIP_QEMU_RV
-	default "hpm6750"				if ARCH_CHIP_HPM6750
-	default "jh7110"				if ARCH_CHIP_JH7110
-	default "bl808"					if ARCH_CHIP_BL808
-	default "k230"					if ARCH_CHIP_K230
+	default "fe310"                 if ARCH_CHIP_FE310
+	default "k210"                  if ARCH_CHIP_K210
+	default "litex"                 if ARCH_CHIP_LITEX
+	default "bl602"                 if ARCH_CHIP_BL602
+	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3
+	default "esp32c3"               if ARCH_CHIP_ESP32C3_GENERIC
+	default "esp32c6"               if ARCH_CHIP_ESP32C6
+	default "esp32h2"               if ARCH_CHIP_ESP32H2
+	default "c906"                  if ARCH_CHIP_C906
+	default "mpfs"                  if ARCH_CHIP_MPFS
+	default "rv32m1"                if ARCH_CHIP_RV32M1
+	default "qemu-rv"               if ARCH_CHIP_QEMU_RV
+	default "hpm6000"               if ARCH_CHIP_HPM6000
+	default "hpm6750"               if ARCH_CHIP_HPM6750
+	default "jh7110"                if ARCH_CHIP_JH7110
+	default "bl808"                 if ARCH_CHIP_BL808
+	default "k230"                  if ARCH_CHIP_K230
+	default "sg2000"                if ARCH_CHIP_SG2000
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -445,6 +517,16 @@ config RISCV_MISALIGNED_HANDLER
 	depends on ARCH_HAVE_MISALIGN_EXCEPTION
 	default y
 
+config RISCV_PERCPU_SCRATCH
+	bool "Enable Scratch-based Per-CPU storage"
+	default n
+	---help---
+		In some special chipsets, multiple CPUs may be bundled in one hardware
+		thread cluster, which results in hartid and cpuindex not being exactly
+		the same.
+		This option will enable Scratch-based Per-CPU storage to distinguish
+		the real cpu index.
+
 # Option to run NuttX in supervisor mode. This is obviously not usable in
 # flat mode, is questionable in protected mode, but is mandatory in kernel
 # mode.
@@ -457,13 +539,19 @@ config RISCV_MISALIGNED_HANDLER
 #
 
 config ARCH_USE_S_MODE
-	bool "Run the NuttX kernel in S-mode"
+	bool "Run NuttX in S-mode"
 	default n
-	depends on ARCH_HAVE_S_MODE && BUILD_KERNEL && ARCH_USE_MMU
+	depends on ARCH_HAVE_S_MODE
+	select RISCV_PERCPU_SCRATCH
 	---help---
 		Most of the RISC-V implementations run in M-mode (flat addressing)
 		and/or U-mode (in case of separate kernel-/userspaces). This provides
 		an option to run the kernel in S-mode, if the target supports it.
+
+config ARCH_RV_EXT_SSTC
+	bool "Enable RISC-V SSTC extension support"
+	default n
+	depends on ARCH_USE_S_MODE
 
 choice
 	prompt "Toolchain Selection"
@@ -483,7 +571,19 @@ config RISCV_TOOLCHAIN_GNU_RV32
 		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
 		configured for riscv32-unknown-elf.
 
-endchoice
+config RISCV_TOOLCHAIN_CLANG
+	bool "LLVM Clang toolchain"
+	select ARCH_TOOLCHAIN_CLANG
+
+config RISCV_TOOLCHAIN_GNU_RV64ILP32
+	bool "Generic GNU RV64ILP32 toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	select ARCH_RV64ILP32
+	---help---
+		This option work with Ruyisdk toolchain (GCC 13 or newer)
+		configured for riscv64-unknown-elf.
+
+endchoice # Toolchain Selection
 
 config RISCV_SEMIHOSTING_HOSTFS
 	bool "Semihosting HostFS"
@@ -502,7 +602,7 @@ config RISCV_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
 	---help---
 		Flush & Invalidte cache before & after bkpt instruction.
 
-endif
+endif # RISCV_SEMIHOSTING_HOSTFS
 
 if ARCH_CHIP_LITEX
 
@@ -523,9 +623,9 @@ config LITEX_CORE_VEXRISCV_SMP
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
 
-endchoice
+endchoice # LITEX Core Selection
 
-endif
+endif # ARCH_CHIP_LITEX
 
 source "arch/risc-v/src/opensbi/Kconfig"
 source "arch/risc-v/src/nuttsbi/Kconfig"
@@ -566,6 +666,9 @@ endif
 if ARCH_CHIP_QEMU_RV
 source "arch/risc-v/src/qemu-rv/Kconfig"
 endif
+if ARCH_CHIP_HPM6000
+source "arch/risc-v/src/hpm6000/Kconfig"
+endif
 if ARCH_CHIP_HPM6750
 source "arch/risc-v/src/hpm6750/Kconfig"
 endif
@@ -578,4 +681,7 @@ endif
 if ARCH_CHIP_K230
 source "arch/risc-v/src/k230/Kconfig"
 endif
+if ARCH_CHIP_SG2000
+source "arch/risc-v/src/sg2000/Kconfig"
 endif
+endif # ARCH_RISCV

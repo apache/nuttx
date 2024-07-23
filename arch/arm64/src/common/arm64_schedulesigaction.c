@@ -74,7 +74,11 @@ void arm64_init_signal_process(struct tcb_s *tcb, struct regs_context *regs)
 
   /* Keep using SP_EL1 */
 
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
+  psigctx->spsr      = SPSR_MODE_EL3H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
+#else
   psigctx->spsr      = SPSR_MODE_EL1H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
+#endif
   psigctx->sp_elx    = (uint64_t)stack_ptr;
   psigctx->sp_el0    = (uint64_t)psigctx;
   psigctx->exe_depth = 1;

@@ -222,6 +222,7 @@ static bool    cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 #endif
 static void    cdcuart_txint(FAR struct uart_dev_s *dev, bool enable);
 static bool    cdcuart_txempty(FAR struct uart_dev_s *dev);
+static int     cdcuart_release(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -272,7 +273,8 @@ static const struct uart_ops_s g_uartops =
   NULL,                  /* send */
   cdcuart_txint,         /* txinit */
   NULL,                  /* txready */
-  cdcuart_txempty        /* txempty */
+  cdcuart_txempty,       /* txempty */
+  cdcuart_release        /* release */
 };
 
 /****************************************************************************
@@ -866,6 +868,16 @@ errout_with_flags:
 
 static void cdcacm_resetconfig(FAR struct cdcacm_dev_s *priv)
 {
+  /* When the USB is pulled out, if there is an unprocessed buffer,
+   * it needs to be push them to upper half serial drivers RX buffer.
+   */
+
+  if (priv->nrdq != 0)
+    {
+      cdcacm_release_rxpending(priv);
+      priv->nrdq = 0;
+    }
+
   /* Are we configured? */
 
   if (priv->config != CDCACM_CONFIGIDNONE)
@@ -2801,6 +2813,28 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
+ * Name: cdcuart_release
+ *
+ * Description:
+ *   This is called to release some resource about the device when device
+ *   was close and unregistered.
+ *
+ ****************************************************************************/
+
+static int cdcuart_release(FAR struct uart_dev_s *dev)
+{
+  FAR struct cdcacm_dev_s *priv = (FAR struct cdcacm_dev_s *)dev->priv;
+
+  usbtrace(CDCACM_CLASSAPI_RELEASE, 0);
+
+  /* And free the memory resources. */
+
+  wd_cancel(&priv->rxfailsafe);
+  kmm_free(priv);
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -3034,44 +3068,21 @@ int cdcacm_initialize(int minor, FAR void **handle)
  *   standalone USB driver:
  *
  *     classdev - The class object returned by cdcacm_classobject()
- *     handle - The opaque handle representing the class object returned by
- *       a previous call to cdcacm_initialize().
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CDCACM_COMPOSITE
 void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
-#else
-void cdcacm_uninitialize(FAR void *handle)
-#endif
 {
-#ifdef CONFIG_CDCACM_COMPOSITE
   FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)classdev;
-#else
-  FAR struct cdcacm_driver_s *drvr = (FAR struct cdcacm_driver_s *)handle;
-#endif
   FAR struct cdcacm_dev_s    *priv = drvr->dev;
   char devname[CDCACM_DEVNAME_SIZE];
   int ret;
 
-#ifdef CONFIG_CDCACM_COMPOSITE
-  /* Check for pass 2 uninitialization.  We did most of the work on the
-   * first pass uninitialization.
-   */
-
-  if (priv->minor == (uint8_t)-1)
-    {
-      /* In this second and final pass, all that remains to be done is to
-       * free the memory resources.
-       */
-
-      wd_cancel(&priv->rxfailsafe);
-      kmm_free(priv);
-      return;
-    }
+#ifndef CONFIG_CDCACM_COMPOSITE
+  usbdev_unregister(&drvr->drvr);
 #endif
 
   /* Un-register the CDC/ACM TTY device */
@@ -3083,36 +3094,6 @@ void cdcacm_uninitialize(FAR void *handle)
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_UARTUNREGISTER),
                (uint16_t)-ret);
     }
-
-  /* Unregister the driver (unless we are a part of a composite device).  The
-   * device unregister logic will (1) return all of the requests to us then
-   * (2) all the unbind method.
-   *
-   * The same thing will happen in the composite case except that: (1) the
-   * composite driver will call usbdev_unregister() which will (2) return the
-   * requests for all members of the composite, and (3) call the unbind
-   * method in the composite device which will (4) call the unbind method
-   * for this device.
-   */
-
-#ifndef CONFIG_CDCACM_COMPOSITE
-  usbdev_unregister(&drvr->drvr);
-
-  /* And free the memory resources. */
-
-  wd_cancel(&priv->rxfailsafe);
-  kmm_free(priv);
-
-#else
-  /* For the case of the composite driver, there is a two pass
-   * uninitialization sequence.  We cannot yet free the driver structure.
-   * We will do that on the second pass.  We mark the fact that we have
-   * already uninitialized by setting the minor number to -1.  If/when we
-   * are called again, then we will free the memory resources.
-   */
-
-  priv->minor = (uint8_t)-1;
-#endif
 }
 
 /****************************************************************************

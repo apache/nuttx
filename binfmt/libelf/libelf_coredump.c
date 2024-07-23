@@ -91,7 +91,7 @@ static int elf_emit(FAR struct elf_dumpinfo_s *cinfo,
 {
   FAR const uint8_t *ptr = buf;
   size_t total = len;
-  int ret;
+  int ret = 0;
 
   while (total > 0)
     {
@@ -122,7 +122,7 @@ static int elf_emit_align(FAR struct elf_dumpinfo_s *cinfo)
                         ELF_PAGESIZE) - cinfo->stream->nput;
   unsigned char null[256];
   off_t total = align;
-  off_t ret;
+  off_t ret = 0;
 
   memset(null, 0, sizeof(null));
 

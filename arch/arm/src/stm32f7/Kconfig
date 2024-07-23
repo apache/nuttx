@@ -1214,6 +1214,11 @@ config STM32F7_HAVE_EXTERNAL_ULPI
 	bool
 	default n
 
+config STM32F7_I2S
+	bool
+	default n
+	select STM32F7_SPI_DMA
+
 config STM32F7_HAVE_SAI1
 	bool
 	default n
@@ -1498,6 +1503,24 @@ config STM32F7_RNG
 	default n
 	depends on STM32F7_HAVE_RNG
 	select ARCH_HAVE_RNG
+
+config STM32F7_I2S1
+	bool "I2S1"
+	default n
+	depends on !STM32F7_SPI1
+	select STM32F7_I2S
+
+config STM32F7_I2S2
+	bool "I2S2"
+	default n
+	depends on !STM32F7_SPI2
+	select STM32F7_I2S
+
+config STM32F7_I2S3
+	bool "I2S3"
+	default n
+	depends on !STM32F7_SPI3
+	select STM32F7_I2S
 
 config STM32F7_SAI1
 	bool "SAI1"
@@ -2428,6 +2451,131 @@ config STM32F7_SPI6_DMA_BUFFER
 		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
 
 endmenu # "SPI Configuration"
+
+menu "I2S Configuration"
+	depends on STM32F7_I2S
+
+config STM32F7_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+if STM32F7_I2S1
+
+comment "I2S1 Configuration"
+
+config STM32F7_I2S1_MCK
+	bool "I2S1_MCK"
+	default n
+	---help---
+		TBD.
+
+config STM32F7_I2S1_RX
+	bool "Enable I2S1 receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+config STM32F7_I2S1_TX
+	bool "Enable I2S1 transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+config STM32F7_I2S1_DATALEN
+	int "I2S1 Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+endif #STM32F7_I2S1
+
+if STM32F7_I2S2
+
+comment "I2S2 Configuration"
+
+config STM32F7_I2S2_MCK
+	bool "I2S2_MCK"
+	default n
+	---help---
+		TBD.
+
+config STM32F7_I2S2_RX
+	bool "Enable I2S2 receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+config STM32F7_I2S2_TX
+	bool "Enable I2S2 transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+config STM32F7_I2S2_DATALEN
+	int "I2S2 Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+endif #STM32F7_I2S2
+
+if STM32F7_I2S3
+
+comment "I2S3 Configuration"
+
+config STM32F7_I2S3_MCK
+	bool "I2S3_MCK"
+	default n
+	---help---
+		TBD.
+
+config STM32F7_I2S3_RX
+	bool "Enable I2S3 receiver"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+config STM32F7_I2S3_TX
+	bool "Enable I2S3 transmitter"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+config STM32_I2S3_DATALEN
+	int "I2S3 Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+endif #STM32F7_I2S3
+
+config STM32F7_I2S_DMADEBUG
+	bool "I2S DMA transfer debug"
+	depends on DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze I2S DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32_I2S_REGDEBUG
+	bool "SSC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # I2S Configuration
 
 menu "I2C Configuration"
 	depends on STM32F7_I2C

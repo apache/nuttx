@@ -121,7 +121,7 @@ static int a4988_work(FAR struct stepper_lowerhalf_s *dev,
       stpwarn("Delay is clamped to 1 us\n");
     }
 
-  stpinfo("Delay is %ld us\n", delay);
+  stpinfo("Delay is %d us\n", delay);
 
   /* Set direction */
 
@@ -284,7 +284,7 @@ int a4988_register(FAR const char *devpath, FAR struct a4988_ops_s *ops)
   priv->ops = ops;
 
   lower = kmm_malloc(sizeof(struct stepper_lowerhalf_s));
-  if (priv == NULL)
+  if (lower == NULL)
     {
       stperr("Failed to allocate instance\n");
       kmm_free(priv);

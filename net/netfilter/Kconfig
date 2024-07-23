@@ -4,10 +4,10 @@
 #
 
 config NET_IPTABLES
-	bool "Iptables Interface"
+	bool "Iptables & Ip6tables Interface"
 	default y
-	depends on NET_IPv4
+	depends on NET_IPv4 || NET_IPv6
 	depends on NET_SOCKOPTS
-	depends on NET_NAT # May change dependency if we have firewall later.
+	depends on NET_NAT || NET_IPFILTER
 	---help---
 		Enable or disable iptables compatible interface (for NAT).

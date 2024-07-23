@@ -313,7 +313,7 @@ static int arm_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   uint32_t aff1;
   uint64_t sgi_val;
 
-  assert(GIC_IS_SGI(sgi_id));
+  ASSERT(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
 
@@ -448,7 +448,7 @@ static void gicv3_cpuif_init(void)
       CP15_SET(ICC_SRE, icc_sre);
       icc_sre = CP15_GET(ICC_SRE);
 
-      assert(icc_sre & ICC_SRE_ELX_SRE_BIT);
+      ASSERT(icc_sre & ICC_SRE_ELX_SRE_BIT);
     }
 
   CP15_SET(ICC_PMR, GIC_IDLE_PRIO);
@@ -528,7 +528,15 @@ static void gicv3_dist_init(void)
        intid += GIC_NUM_CFG_PER_REG)
     {
       idx = intid / GIC_NUM_CFG_PER_REG;
+#ifdef CONFIG_ARMV8R_GIC_SPI_EDGE
+      /* Configure all SPIs as edge-triggered by default */
+
+      putreg32(0xaaaaaaaa, ICFGR(base, idx));
+#else
+      /* Configure all SPIs as level-sensitive by default */
+
       putreg32(0, ICFGR(base, idx));
+#endif
     }
 
   /* TODO: Some arrch64 Cortex-A core maybe without security state
@@ -560,7 +568,12 @@ static void gicv3_dist_init(void)
 #ifdef CONFIG_SMP
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
-  DEBUGVERIFY(irq_attach(GIC_IRQ_SGI2, arm64_pause_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
+
+#  ifdef CONFIG_SMP_CALL
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
+                         nxsched_smp_call_handler, NULL));
+#  endif
 #endif
 }
 
@@ -800,7 +813,7 @@ static void arm_gic_init(void)
   gicv3_cpuif_init();
 
 #ifdef CONFIG_SMP
-  up_enable_irq(GIC_IRQ_SGI2);
+  up_enable_irq(GIC_SMP_CPUPAUSE);
 #endif
 }
 
@@ -828,4 +841,10 @@ void arm_gic_secondary_init(void)
   arm_gic_init();
 }
 
+#  ifdef CONFIG_SMP_CALL
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
+}
+#  endif
 #endif

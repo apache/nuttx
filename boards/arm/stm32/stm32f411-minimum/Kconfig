@@ -34,4 +34,53 @@ config STM32F411MINIMUM_FLASH_MINOR
 	---help---
 		Sets the minor number for the FLASH MTD /dev entry
 
+menuconfig STM32F411MINIMUM_HX711
+	bool "Enable hx711 scale sensor"
+	default n
+	select ADC_HX711
+
+if STM32F411MINIMUM_HX711
+
+choice
+	prompt "Select GPIO port for clock pin"
+	default STM32F411MINIMUM_HX711_CLK_PORTA
+
+config STM32F411MINIMUM_HX711_CLK_PORTA
+	bool "Port A"
+config STM32F411MINIMUM_HX711_CLK_PORTB
+	bool "Port B"
+
+endchoice # Select GPIO port for clock pin
+
+config STM32F411MINIMUM_HX711_CLK_PIN
+	int "Select GPIO pin number for clock pin"
+	default 1
+	range 0 15
+
+choice
+	prompt "Select GPIO port for data pin"
+	default STM32F411MINIMUM_HX711_DATA_PORTA
+
+config STM32F411MINIMUM_HX711_DATA_PORTA
+	bool "Port A"
+config STM32F411MINIMUM_HX711_DATA_PORTB
+	bool "Port B"
+
+endchoice # Select GPIO port for data pin
+
+config STM32F411MINIMUM_HX711_DATA_PIN
+	int "Select GPIO pin number for data pin"
+	default 2
+	range 0 15
+
+endif # STM32F411MINIMUM_HX711
+
+menuconfig STM32F411MINIMUM_GPIO
+	select DEV_GPIO
+	bool "enable gpio subsystem"
+
+if STM32F411MINIMUM_GPIO
+source "boards/arm/stm32/stm32f411-minimum/Kconfig.gpio"
+endif
+
 endif

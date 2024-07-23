@@ -28,6 +28,13 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
+/* board_memorymap.h contains special mappings that are needed when a ROM
+ * memory map is used.  It is included in this odd location because it
+ * depends on some the virtual address definitions provided above.
+ */
+
+#include <arch/board/board_memorymap.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -185,13 +192,6 @@
 #define LPC31_INTC_MMUFLAGS          MMU_IOFLAGS
 #define LPC31_NAND_MMUFLAGS          MMU_IOFLAGS
 
-/* board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location because it
- * depends on some the virtual address definitions provided above.
- */
-
-#include <arch/board/board_memorymap.h>
-
 /* LPC31XX Virtual (mapped) Memory Map.  These are the mappings that will
  * be created if the page table lies in RAM.  If the platform has another,
  * read-only, pre-initialized page table (perhaps in ROM), then the board.h
@@ -243,7 +243,7 @@
 #elif defined(CONFIG_BOOT_RUNFROMEXTSRAM)
 #  define NUTTX_START_VADDR            LPC31_EXTSRAM0_VADDR
 #  define NUTTX_START_PADDR            LPC31_EXTSRAM0_PADDR
-#else /* CONFIG_BOOT_RUNFROMISRAM, CONFIG_PAGING */
+#else /* CONFIG_BOOT_RUNFROMISRAM, CONFIG_LEGACY_PAGING */
 #  define NUTTX_START_VADDR            LPC31_INTSRAM0_VADDR
 #  define NUTTX_START_PADDR            LPC31_INTSRAM0_PADDR
 #endif
@@ -277,18 +277,18 @@
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
 #  else
 
-/* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
- * map probably do not apply because paging logic will probably partition
- * the SRAM section differently.  In particular, if the page table is located
- * at the end of SRAM, then the virtual page table address defined below
- * will probably be in error.
+/* If CONFIG_LEGACY_PAGING is selected, then parts of the 1-to-1 virtual
+ * memory map probably do not apply because paging logic will probably
+ * partition the SRAM section differently.  In particular, if the page
+ * table is located at the end of SRAM, then the virtual page table address
+ * defined below will probably be in error.
  *
  * We work around this header file interdependency by (1) insisting that
  * pg_macros.h be included AFTER this header file, then (2) allowing the
  * pg_macros.h header file to redefine PGTABLE_BASE_VADDR.
  */
 
-#    if defined(CONFIG_PAGING) && defined(__ARCH_ARM_SRC_ARM_PG_MACROS_H)
+#    if defined(CONFIG_LEGACY_PAGING) && defined(__ARCH_ARM_SRC_ARM_PG_MACROS_H)
 #       error "pg_macros.h must be included AFTER this header file"
 #    endif
 
@@ -312,11 +312,11 @@
 #      endif
 #      define PGTABLE_IN_HIGHSRAM    1
 
-/* If CONFIG_PAGING is defined, insist that pg_macros.h assign the virtual
+/* If CONFIG_LEGACY_PAGING is defined, insist that pg_macros.h assign the
  * address of the page table.
  */
 
-#      ifdef CONFIG_PAGING
+#      ifdef CONFIG_LEGACY_PAGING
 #        undef PGTABLE_BASE_VADDR
 #      endif
 #    else
@@ -341,8 +341,8 @@
  * (for normal operation). We will reuse this memory for coarse page tables
  * as follows:
  *
- * NOTE: If CONFIG_PAGING is defined, pg_macros.h will re-assign the virtual
- * address of the page table.
+ * NOTE: If CONFIG_LEGACY_PAGING is defined, pg_macros.h will re-assign the
+ * virtual address of the page table.
  */
 
 #define PGTABLE_L2_COARSE_OFFSET    ((((LPC31_LAST_PSECTION >> 20) + 255) & ~255) << 2)

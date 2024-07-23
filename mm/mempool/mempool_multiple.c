@@ -370,7 +370,7 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
 
 FAR struct mempool_multiple_s *
 mempool_multiple_init(FAR const char *name,
-                      FAR size_t *poolsize, size_t npools,
+                      FAR const size_t *poolsize, size_t npools,
                       mempool_multiple_alloc_t alloc,
                       mempool_multiple_alloc_size_t alloc_size,
                       mempool_multiple_free_t free, FAR void *arg,
@@ -774,11 +774,14 @@ mempool_multiple_info_task(FAR struct mempool_multiple_s *mpool,
       0, 0
     };
 
-  for (i = 0; i < mpool->npools; i++)
+  if (mpool != NULL)
     {
-      info = mempool_info_task(mpool->pools + i, task);
-      ret.aordblks += info.aordblks;
-      ret.uordblks += info.uordblks;
+      for (i = 0; i < mpool->npools; i++)
+        {
+          info = mempool_info_task(mpool->pools + i, task);
+          ret.aordblks += info.aordblks;
+          ret.uordblks += info.uordblks;
+        }
     }
 
   return ret;

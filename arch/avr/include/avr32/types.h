@@ -79,7 +79,7 @@ typedef int                _wchar_t;
  */
 
 #define unsigned signed
-typedef __SIZE_TYPE__      _ssize_t;
+typedef int                _ssize_t; /* Keep avr32-gcc 4.4.7 happy. */
 #undef unsigned
 typedef __SIZE_TYPE__      _size_t;
 #elif defined(CONFIG_ARCH_SIZET_LONG)

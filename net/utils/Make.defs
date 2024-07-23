@@ -27,7 +27,7 @@ NET_CSRCS += net_cmsg.c net_iob_concat.c net_getrandom.c net_mask2pref.c
 # IPv6 utilities
 
 ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += net_ipv6_maskcmp.c net_ipv6_pref2mask.c
+NET_CSRCS += net_ipv6_maskcmp.c net_ipv6_pref2mask.c net_ipv6_payload.c
 endif
 
 # TCP utilities

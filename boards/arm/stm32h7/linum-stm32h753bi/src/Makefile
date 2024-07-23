@@ -30,6 +30,38 @@ else
   endif
 endif
 
+ifeq ($(CONFIG_STM32H7_OTGFS),y)
+CSRCS += stm32_usb.c
+endif
+
+ifeq ($(CONFIG_STM32H7_SDMMC),y)
+CSRCS += stm32_sdmmc.c
+endif
+
+ifeq ($(CONFIG_FAT_DMAMEMORY),y)
+CSRCS += stm32_dma_alloc.c
+endif
+
+ifeq ($(CONFIG_I2C_EE_24XX),y)
+CSRCS += stm32_at24.c
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CSRCS += stm32_pwm.c
+endif
+
+ifeq ($(CONFIG_MTD_W25QXXXJV),y)
+CSRCS += stm32_w25q.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += stm32_usbmsc.c
+endif
+
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CSRCS += stm32_qencoder.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif

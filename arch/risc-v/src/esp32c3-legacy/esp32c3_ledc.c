@@ -419,7 +419,7 @@ static void setup_timer(struct esp32c3_ledc_s *priv)
 
   prescaler = pwmclk * 256 / reload / priv->frequency;
 
-  pwminfo("PWM timer%" PRIu8 " frequency=%0.4f reload=%" PRIu32 " shift=%" \
+  pwminfo("PWM timer%" PRIu8 " frequency=%0.4f reload=%" PRIu32 " shift=%"
           PRIu32 " prescaler=%0.4f\n",
           priv->num, (float)pwmclk / reload / ((float)prescaler / 256),
           reload, shift, (float)prescaler / 256);

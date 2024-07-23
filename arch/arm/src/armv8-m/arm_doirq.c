@@ -68,7 +68,7 @@ static inline bool arm_from_thread(uint32_t excret)
       return true;
     }
 
-#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   if (!(excret & EXC_RETURN_SECURE_STACK) &&
       (excret & EXC_RETURN_EXC_SECURE))
     {

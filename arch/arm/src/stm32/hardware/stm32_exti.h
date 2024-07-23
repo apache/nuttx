@@ -147,6 +147,34 @@
 #  define EXTI_RTC_TAMPER        (1 << 19) /* EXTI line 19 is connected to the RTC Tamper and TimeStamp events */
 #  define EXTI_RTC_TIMESTAMP     (1 << 19) /* EXTI line 19 is connected to the RTC Tamper and TimeStamp events */
 #  define EXTI_RTC_WAKEUP        (1 << 20) /* EXTI line 20 is connected to the RTC Wakeup event */
+#elif defined(CONFIG_STM32_STM32G47XX)
+#  define EXTI_PVD_LINE          (1 << 16) /* EXTI line 16 is connected to the PVD output */
+#  define EXTI_RTC_ALARM         (1 << 17) /* EXTI line 17 is connected to the RTC Alarm event */
+#  define EXTI_USB_WAKEUP        (1 << 18) /* EXTI line 18 is connected to the USB Device FS Wakeup event */
+#  define EXTI_RTC_TIMESTAMP     (1 << 19) /* EXTI line 19 is connected to the Timestamp or CSS_LSE events */
+#  define EXTI_CSS_LSE           (1 << 19) /* EXTI line 19 is connected to the Timestamp or CSS_LSE events */
+#  define EXTI_RTC_WAKEUP        (1 << 20) /* EXTI line 20 is connected to the RTC Wakeup event */
+#  define EXTI_COMP1             (1 << 21) /* EXTI line 21 is connected to the Comparator 1 wakeup event */
+#  define EXTI_COMP2             (1 << 22) /* EXTI line 22 is connected to the Comparator 2 wakeup event */
+#  define EXTI_I2C1              (1 << 23) /* EXTI line 23 is connected to the I2C1 wakeup event */
+#  define EXTI_I2C2              (1 << 24) /* EXTI line 24 is connected to the I2C2 wakeup event */
+#  define EXTI_USART1            (1 << 25) /* EXTI line 25 is connected to the USART1 wakeup event */
+#  define EXTI_USART2            (1 << 26) /* EXTI line 26 is connected to the USART2 wakeup event */
+#  define EXTI_I2C3              (1 << 27) /* EXTI line 27 is connected to the I2C3 wakeup event */
+#  define EXTI_USART3            (1 << 28) /* EXTI line 28 is connected to the USART3 wakeup event */
+#  define EXTI_COMP3             (1 << 29) /* EXTI line 29 is connected to the Comparator 3 wakeup event */
+#  define EXTI_COMP4             (1 << 30) /* EXTI line 30 is connected to the Comparator 4 wakeup event */
+#  define EXTI_COMP5             (1 << 31) /* EXTI line 31 is connected to the Comparator 5 wakeup event */
+#  define EXTI_COMP6             (1 << 0)  /* EXTI line 32 is connected to the Comparator 6 wakeup event */
+#  define EXTI_COMP7             (1 << 1)  /* EXTI line 33 is connected to the Comparator 7 wakeup event */
+#  define EXTI_USART4            (1 << 2)  /* EXTI line 34 is connected to the USART4 wakeup event */
+#  define EXTI_USART5            (1 << 3)  /* EXTI line 35 is connected to the USART5 wakeup event */
+#  define EXTI_LPUART1           (1 << 4)  /* EXTI line 36 is connected to the LPUART1 wakeup event */
+#  define EXTI_LPTIM1            (1 << 5)  /* EXTI line 37 is connected to the LPTIM1 wakeup event */
+#  define EXTI_PVM1              (1 << 8)  /* EXTI line 40 is connected to the PVM1 wakeup event */
+#  define EXTI_PVM2              (1 << 9)  /* EXTI line 41 is connected to the PVM2 wakeup event */
+#  define EXTI_I2C4              (1 << 10) /* EXTI line 42 is connected to the I2C4 wakeup event */
+#  define EXTI_UCPD1             (1 << 11) /* EXTI line 43 is connected to the UCPD1 wakeup event */
 #endif
 
 /* Interrupt mask register */

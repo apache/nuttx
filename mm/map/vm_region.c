@@ -22,8 +22,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/arch.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/mm/gran.h>
+#include <nuttx/pgalloc.h>
 #include <debug.h>
 
 /****************************************************************************
@@ -62,8 +64,7 @@ FAR void *vm_alloc_region(FAR struct mm_map_s *mm, FAR void *vaddr,
         }
       else
         {
-          ret = gran_reserve(mm->mm_map_vpages, (uintptr_t)vaddr,
-                             size);
+          ret = gran_reserve(mm->mm_map_vpages, (uintptr_t)vaddr, size);
         }
     }
 
@@ -91,4 +92,61 @@ void vm_release_region(FAR struct mm_map_s *mm, FAR void *vaddr, size_t size)
     {
       gran_free(mm->mm_map_vpages, vaddr, size);
     }
+}
+
+/* map physical region to userspace */
+
+FAR void *vm_map_region(uintptr_t paddr, size_t size)
+{
+  FAR void *vaddr;
+  uintptr_t tvaddr;
+  size_t    npages;
+  uintptr_t tpaddr = MM_PGALIGNDOWN(paddr);
+  uint      i      = 0;
+  int       ret    = OK;
+
+  DEBUGASSERT(paddr);
+
+  size += (paddr & MM_PGMASK);
+  npages = MM_NPAGES(size);
+  DEBUGASSERT(npages);
+
+  vaddr = vm_alloc_region(get_current_mm(), 0, size);
+  if (vaddr)
+    {
+      tvaddr = (uintptr_t)vaddr;
+      for (; i < npages; i++, tvaddr += MM_PGSIZE, tpaddr += MM_PGSIZE)
+        {
+          ret = up_shmat(&tpaddr, 1, tvaddr);
+          if (ret)
+            {
+              goto error;
+            }
+        }
+    }
+
+  return vaddr + (MM_PGMASK & paddr);
+
+error:
+  if (i)   /* undo alway mapped pages */
+    {
+      up_shmdt((uintptr_t)vaddr, i);
+    }
+
+  vm_release_region(get_current_mm(), vaddr, size);
+  return 0;
+}
+
+/* unmap userspace device pointer */
+
+int vm_unmap_region(FAR void *vaddr, size_t size)
+{
+  int ret;
+
+  DEBUGASSERT(size && vaddr);
+  size += ((uintptr_t)vaddr & MM_PGMASK);
+  vaddr = (void *)MM_PGALIGNDOWN(vaddr);
+  ret = up_shmdt((uintptr_t)vaddr, MM_NPAGES(size));
+  vm_release_region(get_current_mm(), vaddr, size);
+  return ret;
 }

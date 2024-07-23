@@ -75,7 +75,7 @@ boards.
 
    -  Support for the mbed board was contributed by Dave Marples and
       released in NuttX-5.11. Refer to the NuttX board
-      `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc17xx_40xx/mbed/README.txt>`__
+      `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/mbed/README.txt>`__
       file for further information.
 
 #. **Olimex LPC1766-STK**
@@ -90,7 +90,7 @@ boards.
    -  The NuttX-5.17 released added support for low-speed USB devices,
       interrupt endpoints, and a *USB host HID keyboard class driver*.
    -  Refer to the NuttX board
-      `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc17xx_40xx/olimex-lpc1766stk/README.txt>`__
+      `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/olimex-lpc1766stk/README.txt>`__
       file for further information.
 
    Verified configurations are now available for the NuttShell with
@@ -111,7 +111,7 @@ boards.
    Verified configurations include DHCPD, the NuttShell (NSH), NuttX
    graphis (NX), THTTPD, and USB mass storage device. Refer to the NuttX
    board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc17xx_40xx/lpcxpresso-lpc1768/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/lpcxpresso-lpc1768/README.txt>`__
    file for further information.
 
 #. **Zilogic's ZKIT-ARM-1769 board**
@@ -121,7 +121,7 @@ boards.
    NuttX-6.26. The NuttX Buildroot toolchain is used by default. Verifed
    configurations include the "Hello, World!" example application and a
    THTTPD demonstration. Refer to the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc17xx_40xx/zkit-arm-1769/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/zkit-arm-1769/README.txt>`__
    file for further information.
 
 #. **Micromint Lincoln60 board with an NXP LPC1769**
@@ -130,7 +130,7 @@ boards.
    NuttX-6.20. As contributed board support, I am unsure of what all has
    been verfied and what has not. See the Microment website
    and the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc17xx_40xx/lincoln60/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/lincoln60/README.txt>`__
    file for further information about the Lincoln board.
 
 #. **U-Blox Modem Evaluation (LPCXpresso LPC1768)**
@@ -139,7 +139,7 @@ boards.
    and made available in NuttX-7.15. This is a variant of the LPCXpresso
    LPC1768 board support with special provisions for the U-Blox Model
    Evaluation board. See the NuttX board
-   `README <https://github.com/apache/nuttx/blob/master/boards/arm/lpc17xx_40xx/u-blox-c027/README.txt>`__
+   `README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/lpc17xx/boards/u-blox-c027/README.txt>`__
    file for further information about this port.
 
 #. **Keil MCB1700 (LPC1768)**

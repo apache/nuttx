@@ -24,7 +24,7 @@ TOPDIR="${WD}/.."
 MAKECMD="make"
 USAGE="
 
-USAGE: ${0} [-E] [-e] [-l|m|c|g|n|B] [L] [-a <app-dir>] <board-selection> [make-opts]
+USAGE: ${0} [-E] [-e] [-l|m|c|g|n|B] [-L [boardname]] [-a <app-dir>] <board-selection> [make-opts]
 
 Where:
   -E enforces distclean if already configured.
@@ -37,7 +37,8 @@ Where:
   -B selects the *BSD (B) host environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
-  -L  Lists all available configurations.
+  -L lists available configurations for given boards, or all boards if no
+     board is given. board name can be partial here.
   -a <app-dir> is the path to the apps/ directory, relative to the nuttx
      directory
   <board-selection> is either:
@@ -70,7 +71,13 @@ unset distclean
 
 function dumpcfgs
 {
-  configlist=`find ${TOPDIR}/boards -name defconfig`
+  if [ -n "$1" ]; then
+    local boards=$(find ${TOPDIR}/boards -mindepth 3 -maxdepth 3 -type d -name "*$1*")
+    [ -z "$boards" ] && { echo board "$1" not found; return ;}
+    configlist=$(find $boards -name defconfig -type f)
+  else
+    configlist=$(find ${TOPDIR}/boards -name defconfig -type f)
+  fi
   for defconfig in ${configlist}; do
     config=`dirname ${defconfig} | sed -e "s,${TOPDIR}/boards/,,g"`
     boardname=`echo ${config} | cut -d'/' -f3`
@@ -109,7 +116,8 @@ while [ ! -z "$1" ]; do
     exit 0
     ;;
   -L )
-    dumpcfgs
+    shift
+    dumpcfgs $1
     exit 0
     ;;
   *)
@@ -269,6 +277,10 @@ if [ -z "${appdir}" ]; then
 
   if [ -d "${TOPDIR}/../apps" ]; then
     appdir="../apps"
+  elif [ -d "${TOPDIR}/../nuttx-apps" ]; then
+    appdir="../nuttx-apps"
+  elif [ -d "${TOPDIR}/../nuttx-apps.git" ]; then
+    appdir="../nuttx-apps.git"
   else
     # Check for a versioned apps/ directory
 

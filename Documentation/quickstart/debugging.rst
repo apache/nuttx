@@ -129,7 +129,7 @@ as there are some options hardcoded into
 opencd. By default, it assumes:
 
   * ``CONFIG_DISABLE_MQUEUE=y``
-  * ``CONFIG_PAGING=n``
+  * ``CONFIG_LEGACY_PAGING=n``
   
 If you need these options to be set differently, you will have to edit ``./src/rtos/nuttx_header.h`` from ``openocd``, 
 change the corresponding settings and then rebuild it.

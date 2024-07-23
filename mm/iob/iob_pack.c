@@ -86,7 +86,7 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob)
            */
 
           ncopy  = next->io_len;
-          navail = CONFIG_IOB_BUFSIZE - iob->io_len;
+          navail = IOB_BUFSIZE(iob) - iob->io_len;
           if (ncopy > navail)
             {
               ncopy = navail;

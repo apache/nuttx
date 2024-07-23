@@ -29,7 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/cache.h>
-#ifdef CONFIG_PAGING
+#ifdef CONFIG_LEGACY_PAGING
 #  include <nuttx/page.h>
 #endif
 
@@ -102,7 +102,7 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
-#if defined(CONFIG_SMP) || defined(CONFIG_ARCH_HAVE_PSCI)
+#if defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("smc");
 
 #endif

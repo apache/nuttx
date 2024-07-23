@@ -52,10 +52,13 @@ struct gyro_t
 
 struct accel_gyro_st_s
 {
-  struct gyro_t  gyro;
   struct accel_t accel;
+  struct gyro_t  gyro;
   uint32_t sensor_time;
 };
+
+struct i2c_master_s;
+struct spi_dev_s;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -86,12 +89,15 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SENSORS_BMI270_I2C
-struct i2c_master_s;
+#if defined(CONFIG_SENSORS_BMI270_I2C) && defined(CONFIG_SENSORS_BMI270_UORB)
+int bmi270_register_uorb(int devno, FAR struct i2c_master_s *dev,
+                         uint8_t addr);
+#elif defined(CONFIG_SENSORS_BMI270_I2C) && !defined(CONFIG_SENSORS_BMI270_UORB)
 int bmi270_register(FAR const char *devpath, FAR struct i2c_master_s *dev,
                     uint8_t addr);
-#else /* CONFIG_BMI270_SPI */
-struct spi_dev_s;
+#elif !defined(CONFIG_SENSORS_BMI270_I2C) && defined(CONFIG_SENSORS_BMI270_UORB)
+int bmi270_register_uorb(int devno, FAR struct spi_dev_s *dev);
+#elif !defined(CONFIG_SENSORS_BMI270_I2C) && !defined(CONFIG_SENSORS_BMI270_UORB)
 int bmi270_register(FAR const char *devpath, FAR struct spi_dev_s *dev);
 #endif
 

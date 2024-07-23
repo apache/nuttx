@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <arpa/inet.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/crc64.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
@@ -200,7 +201,7 @@ struct wlan_priv_s
 
 /* Reference count of register Wi-Fi handler */
 
-static uint8_t g_callback_register_ref = 0;
+static uint8_t g_callback_register_ref;
 
 static struct wlan_priv_s g_wlan_priv[ESP32_WLAN_DEVS];
 

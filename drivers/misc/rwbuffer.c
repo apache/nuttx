@@ -141,18 +141,10 @@ static void rwb_wrflush(FAR struct rwbuffer_s *rwb)
     {
       size_t padblocks;
 
+      DEBUGASSERT(rwb->wrblockstart % rwb->wralignblocks == 0);
+
       finfo("Flushing: blockstart=0x%08lx nblocks=%d from buffer=%p\n",
             (long)rwb->wrblockstart, rwb->wrnblocks, rwb->wrbuffer);
-
-      padblocks = rwb->wrblockstart % rwb->wralignblocks;
-      if (padblocks)
-        {
-          memmove(rwb->wrbuffer + padblocks * rwb->blocksize,
-                  rwb->wrbuffer, rwb->wrnblocks * rwb->blocksize);
-          rwb->wrblockstart -= padblocks;
-          rwb->wrnblocks += padblocks;
-          rwb_read_(rwb, rwb->wrblockstart, padblocks, rwb->wrbuffer);
-        }
 
       padblocks = rwb->wrnblocks % rwb->wralignblocks;
       if (padblocks)
@@ -326,40 +318,11 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
           nblocks       -= ncopy;
         }
 
-      /* 5. We update a portion at the beginning of the write buffer */
-
-      else /* if (rwb->wrblockstart >= startblock && wrbend >= newend) */
-        {
-          FAR uint8_t *dest;
-          FAR const uint8_t *src;
-          size_t ncopy;
-
-          DEBUGASSERT(rwb->wrblockstart >= startblock && wrbend >= newend);
-
-          /* Move the cached data to the end of the write buffer */
-
-          ncopy = rwb->wrblockstart - startblock;
-          if (ncopy > rwb->wrmaxblocks - rwb->wrnblocks)
-            {
-              ncopy = rwb->wrmaxblocks - rwb->wrnblocks;
-            }
-
-          dest = rwb->wrbuffer + ncopy * rwb->blocksize;
-          memmove(dest, rwb->wrbuffer, ncopy * rwb->blocksize);
-
-          rwb->wrblockstart -= ncopy;
-          rwb->wrnblocks    += ncopy;
-
-          /* Copy the data from the updating region to the beginning
-           * of the write buffer.
-           */
-
-          ncopy = newend - rwb->wrblockstart;
-          src   = wrbuffer + (nblocks - ncopy) * rwb->blocksize;
-          memcpy(rwb->wrbuffer, src, ncopy * rwb->blocksize);
-
-          nblocks -= ncopy;
-        }
+      /* 5. We update a portion at the beginning of the write buffer.
+       * For writes that are ahead of the writerbuffer, we first flush and
+       * then process the write in the new writebuffer to ensure that each
+       * wrblockstart is aligned according to wralignblocks.
+       */
     }
 
   /* Use the block cache unless the buffer size is bigger than block cache */
@@ -372,17 +335,42 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
           return ret;
         }
     }
-  else if (nblocks)
+
+  while (nblocks > 0)
     {
+      size_t padblocks;
+      size_t remain = nblocks;
+
       /* Flush the write buffer */
 
       rwb_wrflush(rwb);
 
+      /* Get the alignment padding of startblock, and read the contents
+       * of the padding area, ensure that wrblockstart is aligned
+       * according to wralignblocks.
+       */
+
+      padblocks = startblock % rwb->wralignblocks;
+      rwb->wrblockstart = startblock - padblocks;
+      rwb->wrnblocks = padblocks;
+      rwb_read_(rwb, rwb->wrblockstart, padblocks, rwb->wrbuffer);
+
+      if (remain > rwb->wrmaxblocks - padblocks)
+        {
+          remain = rwb->wrmaxblocks - padblocks;
+        }
+
       /* Buffer the data in the write buffer */
 
-      memcpy(rwb->wrbuffer, wrbuffer, nblocks * rwb->blocksize);
-      rwb->wrblockstart = startblock;
-      rwb->wrnblocks    = nblocks;
+      memcpy(rwb->wrbuffer + padblocks * rwb->blocksize, wrbuffer,
+             remain * rwb->blocksize);
+      rwb->wrnblocks += remain;
+
+      /* Update remain state of write buffer */
+
+      nblocks -= remain;
+      startblock += remain;
+      wrbuffer += remain * rwb->blocksize;
     }
 
   if (rwb->wrnblocks > 0)
@@ -989,7 +977,10 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
        * the user buffer.
        */
 
-      ret = rwb->rhreload(rwb->dev, rdbuffer, startblock, nblocks);
+      if (nblocks)
+        {
+          ret = rwb->rhreload(rwb->dev, rdbuffer, startblock, nblocks);
+        }
     }
 
   return ret;

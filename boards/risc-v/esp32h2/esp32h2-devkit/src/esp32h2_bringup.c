@@ -35,6 +35,9 @@
 #include <nuttx/fs/fs.h>
 
 #include "esp_board_ledc.h"
+#include "esp_board_spiflash.h"
+#include "esp_board_i2c.h"
+#include "esp_board_bmp180.h"
 
 #ifdef CONFIG_WATCHDOG
 #  include "espressif/esp_wdt.h"
@@ -58,6 +61,24 @@
 
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
+#endif
+
+#ifdef CONFIG_ESP_RMT
+#  include "esp_board_rmt.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPI
+#  include "espressif/esp_spi.h"
+#  include "esp_board_spidev.h"
+#endif
+
+#ifdef CONFIG_SPI_SLAVE_DRIVER
+#  include "espressif/esp_spi.h"
+#  include "esp_board_spislavedev.h"
+#endif
+
+#ifdef CONFIG_ESP_MCPWM
+#  include "esp_board_mcpwm.h"
 #endif
 
 #include "esp32h2-devkit.h"
@@ -115,8 +136,24 @@ int esp_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_WATCHDOG
-  ret = esp_wdt_initialize();
+#ifdef CONFIG_ESPRESSIF_MWDT0
+  ret = esp_wdt_initialize("/dev/watchdog0", ESP_WDT_MWDT0);
+  if (ret < 0)
+    {
+      _err("Failed to initialize WDT: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_MWDT1
+  ret = esp_wdt_initialize("/dev/watchdog1", ESP_WDT_MWDT1);
+  if (ret < 0)
+    {
+      _err("Failed to initialize WDT: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_RWDT
+  ret = esp_wdt_initialize("/dev/watchdog2", ESP_WDT_RWDT);
   if (ret < 0)
     {
       _err("Failed to initialize WDT: %d\n", ret);
@@ -147,6 +184,20 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP_RMT
+  ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
+    }
+
+  ret = board_rmt_rxinitialize(RMT_RXCHANNEL, RMT_INPUT_PIN);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_RTC_DRIVER
   /* Initialize the RTC driver */
 
@@ -154,6 +205,65 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize the RTC driver: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_SPI_DRIVER)
+  ret = board_spidev_initialize(ESPRESSIF_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
+#endif
+
+#if defined(CONFIG_I2C_DRIVER)
+  /* Configure I2C peripheral interfaces */
+
+  ret = board_i2c_init();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+  /* Try to register BMP180 device in I2C0 */
+
+  ret = board_bmp180_initialize(0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize BMP180 "
+             "Driver for I2C0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TWAI
+
+  /* Initialize TWAI and register the TWAI driver. */
+
+  ret = board_twai_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_twai_setup failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESPRESSIF_SPI2)
+  ret = board_spislavedev_initialize(ESPRESSIF_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+             ESPRESSIF_SPI2, ret);
     }
 #endif
 
@@ -182,6 +292,14 @@ int esp_bringup(void)
       syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
+
+#ifdef CONFIG_ESP_MCPWM_CAPTURE
+  ret = board_capture_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_capture_initialize failed: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

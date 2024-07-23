@@ -100,9 +100,21 @@
 #  include "esp32s3_board_rmt.h"
 #endif
 
+#ifdef CONFIG_ESP_MCPWM
+#  include "esp32s3_board_mcpwm.h"
+#endif
+
 #ifdef CONFIG_ESP32S3_SPI
 #include "esp32s3_spi.h"
 #include "esp32s3_board_spidev.h"
+#endif
+
+#ifdef CONFIG_ESP32S3_AES_ACCELERATOR
+#  include "esp32s3_aes.h"
+#endif
+
+#ifdef CONFIG_ESP32S3_ADC
+#include "esp32s3_board_adc.h"
 #endif
 
 #include "esp32s3-devkit.h"
@@ -435,6 +447,38 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI ethernet LAN9250.\n");
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_AES_ACCELERATOR
+  ret = esp32s3_aes_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize AES: %d\n", ret);
+    }
+#ifdef CONFIG_ESP32S3_AES_ACCELERATOR_TEST
+  else
+    {
+      esp32s3_aes_test();
+    }
+#endif
+#endif
+
+#ifdef CONFIG_ESP32S3_ADC
+  /* Configure ADC */
+
+  ret = board_adc_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_MCPWM_CAPTURE
+  ret = board_capture_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_capture_initialize failed: %d\n", ret);
     }
 #endif
 

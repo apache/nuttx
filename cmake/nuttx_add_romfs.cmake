@@ -59,11 +59,12 @@ function(nuttx_add_romfs)
 
   foreach(rcsrc ${RCSRCS})
     get_filename_component(rcpath ${rcsrc} DIRECTORY)
+    separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
     add_custom_command(
       OUTPUT ${rcsrc}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${rcpath}
       COMMAND
-        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} -E -P -x c
+        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c
         -I${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/${rcsrc} >
         ${rcsrc}
       DEPENDS nuttx_context ${CMAKE_CURRENT_SOURCE_DIR}/${rcsrc})

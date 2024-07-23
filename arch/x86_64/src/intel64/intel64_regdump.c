@@ -111,7 +111,7 @@ void backtrace(uint64_t rbp)
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uint64_t *regs = dumpregs ? dumpregs : g_current_regs;
+  volatile uint64_t *regs = dumpregs ? dumpregs : up_current_regs();
   uint64_t mxcsr;
   uint64_t cr2;
 

@@ -114,7 +114,7 @@ uint32_t *avr_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = g_current_regs;
+  regs = (uint32_t *)g_current_regs;
 
   /* Set g_current_regs to NULL to indicate that we are no longer in
    * an interrupt handler.

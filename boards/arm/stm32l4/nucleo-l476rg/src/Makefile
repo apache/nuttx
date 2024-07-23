@@ -85,6 +85,14 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
 CSRCS += stm32_bmp180.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+  CSRCS += stm32_bmp280.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MPU9250),y)
+  CSRCS += stm32_mpu9250.c
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif

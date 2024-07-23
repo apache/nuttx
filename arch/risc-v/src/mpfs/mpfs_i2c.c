@@ -83,7 +83,10 @@ typedef enum mpfs_i2c_status
   MPFS_I2C_SUCCESS = 0u,
   MPFS_I2C_IN_PROGRESS,
   MPFS_I2C_FAILED,
-  MPFS_I2C_TIMED_OUT
+  MPFS_I2C_FAILED_SLAW_NACK,
+  MPFS_I2C_FAILED_SLAR_NACK,
+  MPFS_I2C_FAILED_TX_DATA_NACK,
+  MPFS_I2C_FAILED_BUS_ERROR,
 } mpfs_i2c_status_t;
 
 typedef enum mpfs_i2c_clock_divider
@@ -122,6 +125,8 @@ static const uint32_t mpfs_i2c_freqs_fpga[MPFS_I2C_NUMBER_OF_DIVIDERS] =
   MPFS_FPGA_PERIPHERAL_CLK / 60,
   MPFS_FPGA_BCLK / 8
 };
+
+static int mpfs_i2c_irq(int cpuint, void *context, void *arg);
 
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
                              struct i2c_msg_s *msgs,
@@ -298,8 +303,67 @@ static uint32_t mpfs_i2c_timeout(int msgc, struct i2c_msg_s *msgv);
 
 static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 {
+  int ret = OK;
+  uint32_t ctrl;
+  uint32_t status;
+
   if (!priv->initialized)
     {
+      /* In case of warm boot, or after reset, check that the IP block is
+       * not already active and try to recover from any pending data
+       * transfer if it is.
+       */
+
+      ctrl = getreg32(MPFS_I2C_CTRL);
+      if (ctrl != 0)
+        {
+          /* Check if the IP is enabled */
+
+          status = getreg32(MPFS_I2C_STATUS);
+          if (ctrl & MPFS_I2C_CTRL_ENS1_MASK)
+            {
+              if (status == MPFS_I2C_ST_RX_DATA_ACK)
+                {
+                  /* In case the machine was in the middle of data RX, try to
+                   * receive one byte and nack it
+                   */
+
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_AA_MASK, 0);
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                  usleep(100);
+                  status = getreg32(MPFS_I2C_STATUS);
+                }
+
+              if (status != MPFS_I2C_ST_IDLE)
+                {
+                  /* If the bus is not idle, send STOP */
+
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                  modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
+                  usleep(100);
+                  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                  status = getreg32(MPFS_I2C_STATUS);
+                }
+            }
+
+          if (status != MPFS_I2C_ST_IDLE)
+            {
+              i2cerr("Bus not idle before init\n");
+            }
+
+          /* Disable IP and continue initialization */
+
+          putreg32(0, MPFS_I2C_CTRL);
+        }
+
+      /* Attach interrupt */
+
+      ret = irq_attach(priv->plic_irq, mpfs_i2c_irq, priv);
+      if (ret != OK)
+        {
+          return ret;
+        }
+
       if (priv->fpga)
         {
           /* FIC3 is used by many, don't reset it here, or many
@@ -358,10 +422,9 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 
       putreg32(priv->ser_address, MPFS_I2C_ADDR);
 
-      /* Enable i2c bus */
+      /* Enable i2c bus, clear all other bits */
 
-      modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_ENS1_MASK,
-                  MPFS_I2C_CTRL_ENS1_MASK);
+      putreg32(MPFS_I2C_CTRL_ENS1_MASK, MPFS_I2C_CTRL);
 
       priv->initialized = true;
     }
@@ -385,8 +448,7 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
   up_disable_irq(priv->plic_irq);
   irq_detach(priv->plic_irq);
 
-  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_ENS1_MASK,
-              ~MPFS_I2C_CTRL_ENS1_MASK);
+  putreg32(0, MPFS_I2C_CTRL);
 
   priv->initialized = false;
 }
@@ -437,8 +499,6 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
   volatile uint32_t status;
   uint8_t clear_irq = 1u;
 
-  DEBUGASSERT(msg != NULL);
-
   status = getreg32(MPFS_I2C_STATUS);
 
   switch (status)
@@ -472,14 +532,23 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
       case MPFS_I2C_ST_SLAW_NACK:
         modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
-        priv->status = MPFS_I2C_FAILED;
+        priv->status = MPFS_I2C_FAILED_SLAW_NACK;
         break;
 
       case MPFS_I2C_ST_SLAW_ACK:
       case MPFS_I2C_ST_TX_DATA_ACK:
         if (priv->tx_idx < priv->tx_size)
           {
-            DEBUGASSERT(priv->tx_buffer != NULL);
+            if (priv->tx_buffer == NULL)
+              {
+                i2cerr("ERROR: tx_buffer is NULL!\n");
+
+                /* Clear the serial interrupt flag and exit */
+
+                modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+                return 0;
+              }
+
             putreg32(priv->tx_buffer[priv->tx_idx], MPFS_I2C_DATA);
             priv->tx_idx++;
           }
@@ -493,7 +562,10 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
             /* Jump to the next message */
 
-            priv->msgid++;
+            if (priv->msgid < (priv->msgc - 1))
+              {
+                priv->msgid++;
+              }
           }
         else
           {
@@ -512,7 +584,10 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
                 /* Jump to the next message */
 
-                priv->msgid++;
+                if (priv->msgid < (priv->msgc - 1))
+                  {
+                    priv->msgid++;
+                  }
               }
             else
               {
@@ -525,7 +600,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
       case MPFS_I2C_ST_TX_DATA_NACK:
         modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
-        priv->status = MPFS_I2C_FAILED;
+        priv->status = MPFS_I2C_FAILED_TX_DATA_NACK;
         break;
 
       case MPFS_I2C_ST_SLAR_ACK: /* SLA+R tx'ed. */
@@ -547,14 +622,22 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
       case MPFS_I2C_ST_SLAR_NACK: /* SLA+R tx'ed; send a stop condition */
         modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
-        priv->status = MPFS_I2C_FAILED;
+        priv->status = MPFS_I2C_FAILED_SLAR_NACK;
         break;
 
       case MPFS_I2C_ST_RX_DATA_ACK:
+        if (priv->rx_buffer == NULL)
+          {
+            i2cerr("ERROR: rx_buffer is NULL!\n");
+
+            /* Clear the serial interrupt flag and exit */
+
+            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+            return 0;
+          }
 
         /* Data byte received, ACK returned */
 
-        DEBUGASSERT(priv->rx_buffer != NULL);
         priv->rx_buffer[priv->rx_idx] = (uint8_t)getreg32(MPFS_I2C_DATA);
         priv->rx_idx++;
 
@@ -566,13 +649,31 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
       case MPFS_I2C_ST_RX_DATA_NACK:
 
+        /* Some sanity checks */
+
+        if (priv->rx_buffer == NULL)
+          {
+            i2cerr("ERROR: rx_buffer is NULL!\n");
+
+            /* Clear the serial interrupt flag and exit */
+
+            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+            return 0;
+          }
+        else if (priv->rx_idx >= priv->rx_size)
+          {
+            i2cerr("ERROR: rx_idx is out of bounds!\n");
+
+            /* Clear the serial interrupt flag and exit */
+
+            modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_SI_MASK, 0);
+            return 0;
+          }
+
         /* Data byte received, NACK returned */
 
-        DEBUGASSERT(priv->rx_buffer != NULL);
-        DEBUGASSERT(priv->rx_idx < priv->rx_size);
         priv->rx_buffer[priv->rx_idx] = (uint8_t)getreg32(MPFS_I2C_DATA);
         priv->rx_idx++;
-
         priv->status = MPFS_I2C_SUCCESS;
         modifyreg32(MPFS_I2C_CTRL, 0, MPFS_I2C_CTRL_STO_MASK);
         break;
@@ -613,7 +714,7 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
         if (priv->status == MPFS_I2C_IN_PROGRESS)
           {
-            priv->status = MPFS_I2C_FAILED;
+            priv->status = MPFS_I2C_FAILED_BUS_ERROR;
           }
 
         break;
@@ -665,15 +766,41 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
   int ret = OK;
+#ifdef CONFIG_DEBUG_I2C_ERROR
+  int sval;
+  uint32_t status;
+#endif
 
   i2cinfo("Starting transfer request of %d message(s):\n", count);
-  DEBUGASSERT(count > 0);
+
+  if (count <= 0)
+    {
+      return -EINVAL;
+    }
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
       return ret;
     }
+
+#ifdef CONFIG_DEBUG_I2C_ERROR
+  /* We should never start at transfer with semaphore already signalled */
+
+  sem_getvalue(&priv->sem_isr, &sval);
+  if (sval != 0)
+    {
+      i2cerr("Already signalled at start? %d\n", sval);
+    }
+
+  /* We should always be idle before transfer */
+
+  status = getreg32(MPFS_I2C_STATUS);
+  if (status != MPFS_I2C_ST_IDLE)
+    {
+      i2cerr("I2C bus not idle before transfer! Status: 0x%x\n", status);
+    }
+#endif
 
   priv->msgv = msgs;
   priv->msgc = count;
@@ -709,9 +836,17 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 
           if (msgs[i].flags & I2C_M_NOSTOP)
             {
-              /* Support only write + read combinations */
+              /* Support only write + read combinations.  No write + write,
+               * nor read + write without stop condition between supported
+               * yet.
+               */
 
-              DEBUGASSERT(!(msgs[i].flags & I2C_M_READ));
+              if (msgs[i].flags & I2C_M_READ)
+                {
+                  i2cerr("No read before write supported!\n");
+                  nxmutex_unlock(&priv->lock);
+                  return -EINVAL;
+                }
 
               /* Combine write + read transaction into one */
 
@@ -759,6 +894,20 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
         i2cinfo("Message %" PRIu8 " transfer complete.\n", priv->msgid);
     }
 
+#ifdef CONFIG_DEBUG_I2C_ERROR
+  /* We should always be idle after the transfers */
+
+  status = getreg32(MPFS_I2C_STATUS);
+  if (status != MPFS_I2C_ST_IDLE)
+    {
+      i2cerr("I2C bus not idle after transfer! Status: 0x%x\n", status);
+    }
+#endif
+
+  /* Irq was enabled at mpfs_i2c_sendstart()  */
+
+  up_disable_irq(priv->plic_irq);
+
   nxmutex_unlock(&priv->lock);
   return ret;
 }
@@ -782,26 +931,15 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
   int ret;
-  irqstate_t flags;
 
-  DEBUGASSERT(priv != NULL);
+  nxmutex_lock(&priv->lock);
 
-  flags = enter_critical_section();
-
-  /* Disabling I2C interrupts.
-   * NOTE: up_enable_irq() will be called at mpfs_i2c_sendstart()
-   */
-
-  up_disable_irq(priv->plic_irq);
-
-  priv->inflight = false;
-  priv->status = MPFS_I2C_SUCCESS;
-  priv->initialized = false;
+  mpfs_i2c_deinit(priv);
 
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
     {
-      leave_critical_section(flags);
+      nxmutex_unlock(&priv->lock);
       return ret;
     }
 
@@ -809,8 +947,10 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   priv->tx_idx  = 0;
   priv->rx_size = 0;
   priv->rx_idx  = 0;
+  priv->inflight = false;
+  priv->status = MPFS_I2C_SUCCESS;
 
-  leave_critical_section(flags);
+  nxmutex_unlock(&priv->lock);
 
   return OK;
 }
@@ -988,7 +1128,7 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
       nxmutex_unlock(&priv->lock);
 
       i2cinfo("Returning previously initialized I2C bus. "
-              "Handler: %" PRIxPTR "\n", (uintptr_t)priv);
+              "Handler: %p\n", priv);
 
       return (struct i2c_master_s *)priv;
     }
@@ -1004,14 +1144,6 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
   priv->fpga = true;
 #endif
 
-  ret = irq_attach(priv->plic_irq, mpfs_i2c_irq, priv);
-  if (ret != OK)
-    {
-      priv->refs--;
-      nxmutex_unlock(&priv->lock);
-      return NULL;
-    }
-
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
     {
@@ -1022,7 +1154,7 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
 
   nxmutex_unlock(&priv->lock);
 
-  i2cinfo("I2C bus initialized! Handler: %" PRIxPTR "\n", (uintptr_t)priv);
+  i2cinfo("I2C bus initialized! Handler: %p\n", priv);
 
   return (struct i2c_master_s *)priv;
 }

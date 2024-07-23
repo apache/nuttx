@@ -68,6 +68,10 @@ if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
+if(CONFIG_STM32_CAN_CHARDRIVER)
+  list(APPEND SRCS stm32_can.c)
+endif()
+
 if(CONFIG_STM32F429I_DISCO_HIGHPRI)
   list(APPEND SRCS stm32_highpri.c)
 endif()

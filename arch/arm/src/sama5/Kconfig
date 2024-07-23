@@ -491,7 +491,6 @@ config SAMA5_SAIC
 	bool "Secure Advanced Interrupt Controller (SAIC)"
 	default n
 	depends on SAMA5_HAVE_SAIC
-	select ARMV7A_DECODEFIQ
 
 config SAMA5_RXLP
 	bool "Low power asynchronous receiver"
@@ -1109,16 +1108,16 @@ choice
 	default SAMA5D2_CLASSD_PWM_TRAILING
 	---help---
 		TRAILING EDGE: The signal is single-ended.
-			If bit NON_OVERLAP is cleared, the signal is sent to 
+			If bit NON_OVERLAP is cleared, the signal is sent to
 			CLASSD_L0 and CLASSD_R0.
 
 			If bit NON_OVERLAP is set, the signal is sent to
 			CLASSD_L0/L1 and CLASSD_R0/R1.
 		UNIFORM: The signal is differential.
-			If bit NON_OVERLAP is cleared, the signal is sent to 
+			If bit NON_OVERLAP is cleared, the signal is sent to
 			CLASSD_L0/L2 and CLASSD_R0/R2.
 
-			If bit NON_OVERLAP is set, the signal is sent to 
+			If bit NON_OVERLAP is set, the signal is sent to
 			CLASSD_L0/L1/L2/L3 and CLASSD_R0/R1/R2/R3.
 
 config SAMA5D2_CLASSD_PWM_TRAILING
@@ -1246,8 +1245,8 @@ config SAMA5D2_CLASSD_MONO
 	default 0
 	---help---
 		Disabled. The signal is sent stereo to the left and right channels.
-		Enabled.  The same signal is sent on both left and right channels. 
-				  The sent signal is defined by the MONOMODE field value. 
+		Enabled.  The same signal is sent on both left and right channels.
+				  The sent signal is defined by the MONOMODE field value.
 
 choice
 	prompt "Mono Mode Selection (MONOMODE)"
@@ -5535,9 +5534,9 @@ endchoice # CS0 Memory Type
 #	depends on SAMA5_EBICS0_NAND
 #
 # config SAMA5_EBICS0_ECCNONE
-# 	bool "No ECC"
-# 	---help---
-# 		Only raw transfers to/from NAND are supported
+#	bool "No ECC"
+#	---help---
+#		Only raw transfers to/from NAND are supported
 #
 # config SAMA5_EBICS0_SWECC
 #	bool "Software ECC"

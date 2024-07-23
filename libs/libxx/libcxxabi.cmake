@@ -52,12 +52,6 @@ endif()
 
 nuttx_add_system_library(libcxxabi)
 
-set_property(
-  TARGET nuttx
-  APPEND
-  PROPERTY NUTTX_INCLUDE_DIRECTORIES
-           ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include)
-
 set(SRCS)
 
 # C++ABI files
@@ -103,3 +97,7 @@ endforeach()
 target_compile_options(libcxxabi PRIVATE -frtti)
 
 target_sources(libcxxabi PRIVATE ${TARGET_SRCS})
+target_compile_options(libcxxabi PRIVATE -frtti)
+target_include_directories(
+  libcxxabi BEFORE PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include
+                           ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)

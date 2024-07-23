@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/esp32h2/esp32h2-generic/scripts/Make.defs
+# boards/risc-v/esp32h2/esp32h2-devkit/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,14 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 ARCHSCRIPT += $(BOARD_COMMON_DIR)/scripts/$(CHIP_SERIES)_aliases.ld
 
 ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_flat_memory.ld)
-ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_legacy_sections.ld)
+
+ifeq ($(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT),y)
+  ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_sections.ld)
+else ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+  ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_sections.ld)
+else
+  ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_legacy_sections.ld)
+endif
 
 ARCHPICFLAGS = -fpic
 

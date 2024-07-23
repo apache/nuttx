@@ -195,8 +195,7 @@ struct isx012_dev_s
   struct imgsensor_s      sensor;
   mutex_t                 i2c_lock;
   FAR struct i2c_master_s *i2c;        /* I2C interface */
-  uint8_t                 i2c_addr;    /* I2C address */
-  int                     i2c_freq;    /* Frequency */
+  struct i2c_config_s     i2c_cfg;     /* I2C config */
   isx012_state_t          state;       /* ISX012 status */
   uint8_t                 mode;        /* ISX012 mode */
   isx012_rect_t           clip_video;  /* Clip information for VIDEO */
@@ -216,7 +215,7 @@ typedef struct isx012_dev_s isx012_dev_t;
 static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
                               uint16_t regaddr, uint16_t regsize);
 static int     isx012_putreg(FAR isx012_dev_t *priv, uint16_t regaddr,
-                             uint16_t regval, uint16_t regsize);
+                             uint32_t regval, uint16_t regsize);
 static int     isx012_putreglist(FAR isx012_dev_t *priv,
                          FAR const isx012_reg_t *reglist, size_t nentries);
 #ifdef ISX012_CHECK_IN_DETAIL
@@ -675,16 +674,10 @@ static isx012_dev_t g_isx012_private =
 static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
                               uint16_t regaddr, uint16_t regsize)
 {
-  struct i2c_config_s config;
-  volatile uint16_t regval = 0;
-  volatile uint8_t buffer[2];
+  uint16_t regval = 0;
+  uint8_t buffer[2];
   int ret;
 
-  /* Set up the I2C configuration */
-
-  config.frequency = priv->i2c_freq;
-  config.address   = priv->i2c_addr;
-  config.addrlen   = 7;
   buffer[0] = regaddr >> 8;
   buffer[1] = regaddr & 0xff;
 
@@ -692,7 +685,7 @@ static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
 
   /* Write the register address */
 
-  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)buffer, 2);
+  ret = i2c_write(priv->i2c, &priv->i2c_cfg, (FAR uint8_t *)buffer, 2);
   if (ret < 0)
     {
       verr("i2c_write failed: %d\n", ret);
@@ -701,7 +694,8 @@ static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
     {
       /* Restart and read 16bits from the register */
 
-      ret = i2c_read(priv->i2c, &config, (FAR uint8_t *)buffer, regsize);
+      ret = i2c_read(priv->i2c, &priv->i2c_cfg,
+                     (FAR uint8_t *)buffer, regsize);
       if (ret < 0)
         {
           verr("i2c_read failed: %d\n", ret);
@@ -719,17 +713,12 @@ static uint16_t isx012_getreg(FAR isx012_dev_t *priv,
 }
 
 static int isx012_putreg(FAR isx012_dev_t *priv,
-                         uint16_t regaddr, uint16_t regval, uint16_t regsize)
+                         uint16_t regaddr, uint32_t regval, uint16_t regsize)
 {
-  struct i2c_config_s config;
-  volatile uint8_t buffer[4];
+  uint8_t buffer[6];
   int ret;
 
-  /* Set up the I2C configuration */
-
-  config.frequency = priv->i2c_freq;
-  config.address   = priv->i2c_addr;
-  config.addrlen   = 7;
+  DEBUGASSERT(regsize <= 4);
 
   /* Set up for the transfer */
 
@@ -742,7 +731,7 @@ static int isx012_putreg(FAR isx012_dev_t *priv,
 
   /* And do it */
 
-  ret = i2c_write(priv->i2c, &config,
+  ret = i2c_write(priv->i2c, &priv->i2c_cfg,
                  (FAR uint8_t *)buffer, regsize + 2);
   if (ret < 0)
     {
@@ -779,7 +768,7 @@ static int isx012_chk_int_state(FAR isx012_dev_t *priv,
                                 uint32_t wait_time, uint32_t timeout)
 {
   int ret = 0;
-  volatile uint8_t data;
+  uint8_t data;
   uint32_t time = 0;
 
   nxsig_usleep(delay_time * 1000);
@@ -1393,7 +1382,7 @@ int init_isx012(FAR isx012_dev_t *priv)
 #endif
 
   priv->state = STATE_ISX012_SLEEP;
-  priv->i2c_freq = I2CFREQ_FAST;
+  priv->i2c_cfg.frequency = I2CFREQ_FAST;
 
   /* initialize the isx012 hardware */
 
@@ -1441,9 +1430,10 @@ static int isx012_init(FAR struct imgsensor_s *sensor)
   FAR isx012_dev_t *priv = (FAR isx012_dev_t *)sensor;
   int ret = 0;
 
-  priv->i2c      = board_isx012_initialize();
-  priv->i2c_addr = ISX012_I2C_SLV_ADDR;
-  priv->i2c_freq = I2CFREQ_STANDARD;
+  priv->i2c               = board_isx012_initialize();
+  priv->i2c_cfg.address   = ISX012_I2C_SLV_ADDR;
+  priv->i2c_cfg.addrlen   = 7;
+  priv->i2c_cfg.frequency = I2CFREQ_STANDARD;
 
   ret = board_isx012_power_on();
   if (ret < 0)
@@ -1486,8 +1476,8 @@ static int isx012_uninit(FAR struct imgsensor_s *sensor)
 
   board_isx012_uninitialize(priv->i2c);
 
-  priv->i2c_freq = I2CFREQ_STANDARD;
-  priv->state    = STATE_ISX012_POWEROFF;
+  priv->i2c_cfg.frequency = I2CFREQ_STANDARD;
+  priv->state             = STATE_ISX012_POWEROFF;
 
   return ret;
 }
@@ -1764,7 +1754,7 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_CONTRAST:
-        value->type          = IMGSENSOR_CTRL_TYPE_U8FIXEDPOINT_Q7;
+        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER;
         range->minimum       = ISX012_MIN_CONTRAST;
         range->maximum       = ISX012_MAX_CONTRAST;
         range->step          = ISX012_STEP_CONTRAST;
@@ -1808,7 +1798,7 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_EXPOSURE:
-        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER_TIMES_3;
+        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER;
         range->minimum       = ISX012_MIN_EXPOSURE;
         range->maximum       = ISX012_MAX_EXPOSURE;
         range->step          = ISX012_STEP_EXPOSURE;
@@ -1925,7 +1915,7 @@ static int isx012_get_supported_value(FAR struct imgsensor_s *sensor,
         break;
 
       case IMGSENSOR_ID_WIDE_DYNAMIC_RANGE:
-        value->type          = IMGSENSOR_CTRL_TYPE_BOOLEAN;
+        value->type          = IMGSENSOR_CTRL_TYPE_INTEGER;
         range->minimum       = ISX012_MIN_YGAMMA;
         range->maximum       = ISX012_MAX_YGAMMA;
         range->step          = ISX012_STEP_YGAMMA;

@@ -26,7 +26,9 @@
  ****************************************************************************/
 
 #include <sys/videoio.h>
+
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Public Types
@@ -42,14 +44,14 @@ typedef struct vbuf_container_s vbuf_container_t;
 
 struct video_framebuff_s
 {
-  enum v4l2_buf_mode  mode;
+  enum v4l2_buf_mode mode;
+  spinlock_t lock_queue;
   mutex_t lock_empty;
   int container_size;
   vbuf_container_t *vbuf_alloced;
   vbuf_container_t *vbuf_empty;
   vbuf_container_t *vbuf_top;
   vbuf_container_t *vbuf_tail;
-  vbuf_container_t *vbuf_curr;
   vbuf_container_t *vbuf_next;
 };
 

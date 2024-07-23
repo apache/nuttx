@@ -36,6 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
@@ -343,11 +344,11 @@ static void up_putreg(struct up_dev_s *priv, int offset, uint32_t value)
 
 static void up_restoreuartint(struct up_dev_s *priv, uint32_t im)
 {
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(NULL);
 
   up_putreg(priv, RV32M1_LPUART_CTRL_OFFSET, im);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -356,7 +357,7 @@ static void up_restoreuartint(struct up_dev_s *priv, uint32_t im)
 
 static void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
 {
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(NULL);
   uint32_t regval = up_getreg(priv, RV32M1_LPUART_CTRL_OFFSET);
 
   /* Return the current interrupt mask value */
@@ -371,7 +372,7 @@ static void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
   regval &= ~(LPUART_CTRL_TCIE | LPUART_CTRL_TIE | LPUART_CTRL_RIE);
   up_putreg(priv, RV32M1_LPUART_CTRL_OFFSET, regval);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

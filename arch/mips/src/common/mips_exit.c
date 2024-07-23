@@ -62,8 +62,6 @@ void up_exit(int status)
 
   enter_critical_section();
 
-  nxsched_dumponexit();
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();

@@ -60,9 +60,7 @@ struct pkt_conn_s
 
   /* Pkt socket-specific content follows */
 
-  uint8_t    lmac[6];  /* The local Ethernet address in network byte order */
   uint8_t    ifindex;
-  uint16_t   proto;
   uint8_t    crefs;    /* Reference counts on this instance */
 
   /* Read-ahead buffering.
@@ -97,7 +95,6 @@ EXTERN const struct sock_intf_s g_pkt_sockif;
  ****************************************************************************/
 
 struct net_driver_s; /* Forward reference */
-struct eth_hdr_s;    /* Forward reference */
 struct socket;       /* Forward reference */
 
 /****************************************************************************
@@ -137,15 +134,15 @@ void pkt_free(FAR struct pkt_conn_s *conn);
  * Name: pkt_active()
  *
  * Description:
- *   Find a connection structure that is the appropriate
- *   connection to be used with the provided Ethernet header
+ *   Find a connection structure that is the appropriate connection to be
+ *   used with the provided network device
  *
  * Assumptions:
  *   This function is called from network logic at with the network locked.
  *
  ****************************************************************************/
 
-FAR struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf);
+FAR struct pkt_conn_s *pkt_active(FAR struct net_driver_s *dev);
 
 /****************************************************************************
  * Name: pkt_nextconn()

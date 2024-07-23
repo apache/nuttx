@@ -38,10 +38,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_MM_DFAULT_ALIGNMENT == 0
+#if CONFIG_MM_DEFAULT_ALIGNMENT == 0
 #  define MEMPOOL_ALIGN       (2 * sizeof(uintptr_t))
 #else
-#  define MEMPOOL_ALIGN       CONFIG_MM_DFAULT_ALIGNMENT
+#  define MEMPOOL_ALIGN       CONFIG_MM_DEFAULT_ALIGNMENT
 #endif
 
 #if CONFIG_MM_BACKTRACE >= 0
@@ -339,7 +339,7 @@ struct mempool_multiple_s;
 
 FAR struct mempool_multiple_s *
 mempool_multiple_init(FAR const char *name,
-                      FAR size_t *poolsize, size_t npools,
+                      FAR const size_t *poolsize, size_t npools,
                       mempool_multiple_alloc_t alloc,
                       mempool_multiple_alloc_size_t alloc_size,
                       mempool_multiple_free_t free, FAR void *arg,

@@ -114,7 +114,7 @@ FAR struct icmp_conn_s *icmp_alloc(void)
         {
 #if CONFIG_NET_ICMP_MAX_CONNS > 0
           if (dq_count(&g_active_icmp_connections) +
-              CONFIG_NET_ICMP_ALLOC_CONNS >= CONFIG_NET_ICMP_MAX_CONNS)
+              CONFIG_NET_ICMP_ALLOC_CONNS > CONFIG_NET_ICMP_MAX_CONNS)
             {
               nxmutex_unlock(&g_free_lock);
               return NULL;

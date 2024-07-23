@@ -1,0 +1,39 @@
+From 3035e2e223999497364dbc54b881ebc958be701c Mon Sep 17 00:00:00 2001
+From: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
+Date: Thu, 22 Feb 2024 15:05:36 +0100
+Subject: [PATCH] newlib: fix compilation for x86
+
+Change-Id: I5286ef72e358010ea7b4805e6087b06f67e42d44
+Signed-off-by: p-szafonimateusz <p-szafonimateusz@xiaomi.com>
+---
+ newlib/libc/machine/shared_x86/sys/fenv.h | 1 +
+ newlib/libm/machine/shared_x86/fenv.c     | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/newlib/newlib/newlib/libc/machine/shared_x86/sys/fenv.h newlib/newlib/newlib/libc/machine/shared_x86/sys/fenv.h
+index 243cac27a..be39db4d0 100644
+--- a/newlib/newlib/newlib/libc/machine/shared_x86/sys/fenv.h
++++ newlib/newlib/newlib/libc/machine/shared_x86/sys/fenv.h
+@@ -30,6 +30,7 @@
+ #define _SYS_FENV_H 1
+ 
+ #include <sys/cdefs.h>
++#include <stdint.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+diff --git a/newlib/newlib/newlib/libm/machine/shared_x86/fenv.c newlib/newlib/newlib/libm/machine/shared_x86/fenv.c
+index ccc08e2d8..892a8b2cd 100644
+--- a/newlib/newlib/newlib/libm/machine/shared_x86/fenv.c
++++ newlib/newlib/newlib/libm/machine/shared_x86/fenv.c
+@@ -5,6 +5,7 @@
+  */
+ 
+ #define _GNU_SOURCE        // for FE_NOMASK_ENV
++#define __GNU_VISIBLE 1
+ 
+ #include <fenv.h>
+ #include <errno.h>
+-- 
+2.43.1
+

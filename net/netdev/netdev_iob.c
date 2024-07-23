@@ -85,6 +85,43 @@ int netdev_iob_prepare(FAR struct net_driver_s *dev, bool throttled,
 }
 
 /****************************************************************************
+ * Name: netdev_iob_prepare_dynamic
+ *
+ * Description:
+ *   Pre-alloc the iob for the data to be sent.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOB_ALLOC
+void netdev_iob_prepare_dynamic(FAR struct net_driver_s *dev, uint16_t size)
+{
+  FAR struct iob_s *iob;
+  size += CONFIG_NET_LL_GUARDSIZE;
+
+  if (dev->d_iob && size <= IOB_BUFSIZE(dev->d_iob))
+    {
+      return;
+    }
+
+  /* alloc new iob for jumbo frame */
+
+  iob = iob_alloc_dynamic(size);
+  if (iob == NULL)
+    {
+      nerr("ERROR: Failed to allocate an I/O buffer.");
+      return;
+    }
+
+  iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
+
+  netdev_iob_replace(dev, iob);
+}
+#endif
+
+/****************************************************************************
  * Name: netdev_iob_replace
  *
  * Description:
@@ -152,4 +189,42 @@ void netdev_iob_release(FAR struct net_driver_s *dev)
     }
 
   dev->d_buf = NULL;
+}
+
+/****************************************************************************
+ * Name: netdev_iob_clone
+ *
+ * Description:
+ *   Backup the current iob buffer for a given NIC by cloning it.
+ *
+ * Assumptions:
+ *   The caller has locked the network.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *netdev_iob_clone(FAR struct net_driver_s *dev,
+                                   bool throttled)
+{
+  FAR struct iob_s *iob;
+  int ret;
+
+  iob = iob_tryalloc(throttled);
+  if (iob == NULL)
+    {
+      nwarn("WARNING: IOB alloc failed for dev %s!\n", dev->d_ifname);
+      return NULL;
+    }
+
+  iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
+  ret = iob_clone_partial(dev->d_iob, dev->d_iob->io_pktlen, 0,
+                          iob, 0, throttled, false);
+  if (ret < 0)
+    {
+      iob_free_chain(iob);
+      nwarn("WARNING: IOB clone failed for dev %s, ret=%d!\n",
+            dev->d_ifname, ret);
+      return NULL;
+    }
+
+  return iob;
 }

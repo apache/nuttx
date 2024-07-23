@@ -128,6 +128,14 @@ config LIBC_ARCH_STRNCASECMP
 	bool
 	default n
 
+config LIBC_ARCH_STPCPY
+	bool
+	default n
+
+config LIBC_ARCH_STPNCPY
+	bool
+	default n
+
 config LIBC_ARCH_ELF
 	bool
 	default n
@@ -787,6 +795,9 @@ source "libs/libc/machine/sim/Kconfig"
 endif
 if ARCH_X86
 source "libs/libc/machine/x86/Kconfig"
+endif
+if ARCH_X86_64
+source "libs/libc/machine/x86_64/Kconfig"
 endif
 if ARCH_XTENSA
 source "libs/libc/machine/xtensa/Kconfig"

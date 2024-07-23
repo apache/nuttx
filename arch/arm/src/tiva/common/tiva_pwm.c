@@ -757,7 +757,7 @@ static int tiva_pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
 
 struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
 {
-  assert(channel >= 0 && channel <= 7);
+  ASSERT(channel >= 0 && channel <= 7);
   struct tiva_pwm_chan_s *chan;
 
   switch (channel)
@@ -824,7 +824,7 @@ struct pwm_lowerhalf_s *tiva_pwm_initialize(int channel)
 
   /* Enable PWM controller (refer to TM4C1294NCPDT 23.4.1) */
 
-  assert(chan->controller_id == 0);
+  ASSERT(chan->controller_id == 0);
   tiva_pwm_enablepwr(chan->controller_id);
   tiva_pwm_enableclk(chan->controller_id);
 

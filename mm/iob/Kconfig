@@ -103,6 +103,12 @@ config IOB_NOTIFIER_DIV
 		a notification will be sent only when there are a multiple of 4 IOBs
 		available.
 
+config IOB_ALLOC
+	bool "Dynamic I/O buffer allocation"
+	default n
+	---help---
+		This option will enable dynamic I/O buffer allocation
+
 config IOB_DEBUG
 	bool "Force I/O buffer debug"
 	default n

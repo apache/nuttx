@@ -88,9 +88,17 @@
 #  define IOB_QEMPTY(q)  ((q)->qh_head == NULL)
 #endif
 
+#ifdef CONFIG_IOB_ALLOC
+#  define IOB_BUFSIZE(p) ((p)->io_bufsize)
+#else
+#  define IOB_BUFSIZE(p) CONFIG_IOB_BUFSIZE
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+typedef CODE void (*iob_free_cb_t)(FAR void *data);
 
 /* Represents one I/O buffer.  A packet is contained by one or more I/O
  * buffers in a chain.  The io_pktlen is only valid for the I/O buffer at
@@ -105,16 +113,24 @@ struct iob_s
 
   /* Payload */
 
-#if CONFIG_IOB_BUFSIZE < 256
+#if CONFIG_IOB_BUFSIZE < 256 && !defined(CONFIG_IOB_ALLOC)
   uint8_t  io_len;      /* Length of the data in the entry */
   uint8_t  io_offset;   /* Data begins at this offset */
 #else
   uint16_t io_len;      /* Length of the data in the entry */
   uint16_t io_offset;   /* Data begins at this offset */
+#  ifdef CONFIG_IOB_ALLOC
+  uint16_t io_bufsize;  /* Total length of the data buffer */
+#  endif
 #endif
   unsigned int io_pktlen; /* Total length of the packet */
 
-  uint8_t  io_data[CONFIG_IOB_BUFSIZE];
+#ifdef CONFIG_IOB_ALLOC
+  iob_free_cb_t io_free;  /* Custom free callback */
+  FAR uint8_t  *io_data;
+#else
+  uint8_t       io_data[CONFIG_IOB_BUFSIZE];
+#endif
 };
 
 #if CONFIG_IOB_NCHAINS > 0
@@ -202,6 +218,53 @@ FAR struct iob_s *iob_alloc(bool throttled);
  ****************************************************************************/
 
 FAR struct iob_s *iob_tryalloc(bool throttled);
+
+#ifdef CONFIG_IOB_ALLOC
+/****************************************************************************
+ * Name: iob_alloc_dynamic
+ *
+ * Description:
+ *   Allocate an I/O buffer and playload from heap
+ *
+ * Input Parameters:
+ *   size    - The size of the io_data that is allocated.
+ *
+ *             +---------+
+ *             |   IOB   |
+ *             | io_data |--+
+ *             | buffer  |<-+
+ *             +---------+
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_alloc_dynamic(uint16_t size);
+
+/****************************************************************************
+ * Name: iob_alloc_with_data
+ *
+ * Description:
+ *   Allocate an I/O buffer from heap and attach the external payload
+ *
+ * Input Parameters:
+ *   data    - Make io_data point to a specific address, the caller is
+ *             responsible for the memory management. The caller should
+ *             ensure that the memory is not freed before the iob is freed.
+ *
+ *             +---------+  +-->+--------+
+ *             |   IOB   |  |   |  data  |
+ *             | io_data |--+   +--------+
+ *             +---------+
+ *
+ *   size    - The size of the data parameter
+ *   free_cb - Notify the caller when the iob is freed. The caller can
+ *             perform additional operations on the data before it is freed.
+ *             The free_cb is called when the iob is freed.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_alloc_with_data(FAR void *data, uint16_t size,
+                                      iob_free_cb_t free_cb);
+#endif
 
 /****************************************************************************
  * Name: iob_navail
@@ -393,6 +456,7 @@ void iob_free_queue_qentry(FAR struct iob_s *iob,
 
 #if CONFIG_IOB_NCHAINS > 0
 unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
+unsigned int iob_get_queue_entry_count(FAR struct iob_queue_s *queue);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************

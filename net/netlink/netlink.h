@@ -32,6 +32,7 @@
 
 #include <netpacket/netlink.h>
 #include <nuttx/queue.h>
+#include <nuttx/net/icmpv6.h>
 #include <nuttx/net/netlink.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
@@ -46,6 +47,9 @@
 #ifndef CONFIG_NETLINK_ROUTE
 #  define netlink_device_notify(dev)
 #  define netlink_device_notify_ipaddr(dev, type, domain, addr, preflen)
+#  define netlink_route_notify(route, type, domain)
+#  define netlink_neigh_notify(neigh, type, domain)
+#  define netlink_ipv6_prefix_notify(dev, type, pinfo)
 #endif
 
 #ifdef CONFIG_NET_NETLINK
@@ -399,6 +403,29 @@ void netlink_notifier_teardown(FAR struct netlink_conn_s *conn);
 void netlink_notifier_signal(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
+ * Name: netlink_add_terminator
+ *
+ * Description:
+ *   Add one NLMSG_DONE response to handle.
+ *
+ * Input Parameters:
+ *   handle - The handle previously provided to the sendto() implementation
+ *            for the protocol.  This is an opaque reference to the Netlink
+ *            socket state structure.
+ *   req    - The request message header.
+ *   group  - The broadcast group index, 0 for normal response.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned if the terminator was successfully added to the
+ *   response list.
+ *   A negated error value is returned if an unexpected error occurred.
+ *
+ ****************************************************************************/
+
+int netlink_add_terminator(NETLINK_HANDLE handle,
+                           FAR const struct nlmsghdr *req, int group);
+
+/****************************************************************************
  * Name: netlink_tryget_response
  *
  * Description:
@@ -490,6 +517,59 @@ void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
                                   FAR const void *addr, uint8_t preflen);
 
 /****************************************************************************
+ * Name: netlink_route_notify
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_NETFILTER protocol.
+ *
+ * Input Parameters:
+ *   route  - The route entry
+ *   type   - The type of the message, RTM_*ROUTE
+ *   domain - The domain of the message
+ *
+ ****************************************************************************/
+
+#if defined CONFIG_NETLINK_DISABLE_GETROUTE
+# define netlink_route_notify(route, type, domain)
+#else
+void netlink_route_notify(FAR const void *route, int type, int domain);
+#endif
+
+/****************************************************************************
+ * Name: netlink_neigh_notify()
+ *
+ * Description:
+ *   Perform the neigh broadcast for the NETLINK_ROUTE protocol.
+ *
+ * Input Parameters:
+ *   neigh  - The ARP entry or neighbour entry
+ *   type   - The type of the message, RTM_*NEIGH
+ *   domain - The domain of the message
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
+#  define netlink_neigh_notify(neigh, type, domain)
+#else
+void netlink_neigh_notify(FAR const void *neigh, int type, int domain);
+#endif
+
+/****************************************************************************
+ * Name: netlink_ipv6_prefix_notify()
+ *
+ * Description:
+ *   Perform the RA prefix for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETLINK_DISABLE_NEWPREFIX) || !defined(CONFIG_NET_IPv6)
+#  define netlink_ipv6_prefix_notify(dev, type, pinfo)
+#else
+void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
+                                FAR const struct icmpv6_prefixinfo_s *pinfo);
+#endif
+
+/****************************************************************************
  * Name: nla_next
  *
  * Description:
@@ -520,7 +600,40 @@ int nla_parse(FAR struct nlattr **tb, int maxtype,
               FAR const struct nlattr *head,
               int len, FAR const struct nla_policy *policy,
               FAR struct netlink_ext_ack *extack);
-#endif
+#endif /* CONFIG_NETLINK_ROUTE */
+
+/****************************************************************************
+ * Name: netlink_netfilter_sendto
+ *
+ * Description:
+ *   Perform the sendto() operation for the NETLINK_NETFILTER protocol.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETLINK_NETFILTER
+ssize_t netlink_netfilter_sendto(NETLINK_HANDLE handle,
+                                 FAR const struct nlmsghdr *nlmsg,
+                                 size_t len, int flags,
+                                 FAR const struct sockaddr_nl *to,
+                                 socklen_t tolen);
+
+/****************************************************************************
+ * Name: netlink_conntrack_notify
+ *
+ * Description:
+ *   Perform the conntrack broadcast for the NETLINK_NETFILTER protocol.
+ *
+ * Input Parameters:
+ *   type      - The type of the message, IPCTNL_MSG_CT_*
+ *   domain    - The domain of the message
+ *   nat_entry - The NAT entry
+ *
+ ****************************************************************************/
+
+void netlink_conntrack_notify(uint8_t type, uint8_t domain,
+                              FAR const void *nat_entry);
+
+#endif /* CONFIG_NETLINK_NETFILTER */
 
 #undef EXTERN
 #ifdef __cplusplus

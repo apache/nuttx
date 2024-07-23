@@ -29,7 +29,11 @@
 
 ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV64)),y)
   CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
+else ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV64ILP32)),y)
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
 else ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RV32)),y)
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
+else ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_CLANG)),y)
   CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
 endif
 
@@ -48,7 +52,11 @@ endif
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
-  ARCHOPTIMIZATION += -Os
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+    ARCHOPTIMIZATION += -Oz
+  else
+    ARCHOPTIMIZATION += -Os
+  endif
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
@@ -78,7 +86,7 @@ ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
 endif
 
 ARCHCFLAGS += -fno-common
-ARCHCXXFLAGS += -fno-common -nostdinc++
+ARCHCXXFLAGS += -fno-common
 
 ARCHCFLAGS += -Wall -Wstrict-prototypes -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
@@ -86,6 +94,10 @@ ARCHCXXFLAGS += -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas
 # When all C++ code is built using GCC 7.1 or a higher version,
 # we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
 # Refer to : https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
+
+ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  ARCHCXXFLAGS += -nostdinc++
+endif
 
 ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   ARCHCFLAGS += -Wno-psabi
@@ -104,7 +116,12 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
+SHMODULEFLAGS = -Bsymbolic -G -Bdynamic --entry=__start
+
 ifeq ($(CONFIG_ARCH_RV32),y)
+LDFLAGS += -melf32lriscv
+SHMODULEFLAGS += -melf32lriscv
+else ifeq ($(CONFIG_ARCH_RV64ILP32),y)
 LDFLAGS += -melf32lriscv
 else
 LDFLAGS += -melf64lriscv
@@ -117,7 +134,14 @@ ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 endif
 
-LDFLAGS += -nostdlib
+LDFLAGS          += -nostdlib
+ARCHOPTIMIZATION += -nostdlib
+
+# Debug --whole-archive
+
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
+endif
 
 # Debug link map
 
@@ -136,13 +160,17 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   # Generic GNU RVG toolchain, prefer to use riscv-none-elf-gcc from xPack
   # if CROSSDEV is not defined.
 
-  ifeq ($(shell riscv-none-elf-gcc --version > /dev/null 2>&1; echo $$?), 0)
-    CROSSDEV ?= riscv-none-elf-
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+    CROSSDEV ?= riscv64-unknown-elf-
   else
-    ifeq ($(CONFIG_RISCV_TOOLCHAIN_GNU_RV32),y)
-      CROSSDEV ?= riscv32-unknown-elf-
+    ifeq ($(shell riscv-none-elf-gcc --version > /dev/null 2>&1; echo $$?), 0)
+      CROSSDEV ?= riscv-none-elf-
     else
-      CROSSDEV ?= riscv64-unknown-elf-
+        ifeq ($(CONFIG_RISCV_TOOLCHAIN_GNU_RV32),y)
+          CROSSDEV ?= riscv32-unknown-elf-
+        else
+          CROSSDEV ?= riscv64-unknown-elf-
+        endif
     endif
   endif
 
@@ -194,6 +222,12 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     endif
   endif
 
+  ARCH_RV_EXPERIMENTAL_EXTENSIONS = $(strip $(subst ",,$(CONFIG_ARCH_RV_EXPERIMENTAL_EXTENSIONS)))
+  ifneq ($(ARCH_RV_EXPERIMENTAL_EXTENSIONS),)
+      ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_$(ARCH_RV_EXPERIMENTAL_EXTENSIONS)
+      ARCHOPTIMIZATION += -menable-experimental-extensions
+  endif
+
   ARCH_RV_ISA_VENDOR_EXTENSIONS = $(strip $(subst ",,$(CONFIG_ARCH_RV_ISA_VENDOR_EXTENSIONS)))
   ifneq ($(ARCH_RV_ISA_VENDOR_EXTENSIONS),)
       ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_$(ARCH_RV_ISA_VENDOR_EXTENSIONS)
@@ -207,7 +241,11 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     LLVM_ARCHTYPE := riscv32
   else ifeq ($(CONFIG_ARCH_RV64),y)
     ARCHTYPE = rv64
-    ARCHABITYPE = lp64
+    ifeq ($(CONFIG_ARCH_RV64ILP32),y)
+      ARCHABITYPE = ilp32
+    else
+      ARCHABITYPE = lp64
+    endif
     LLVM_ARCHTYPE := riscv64
     # https://www.sifive.com/blog/all-aboard-part-4-risc-v-code-models
     ARCHCPUFLAGS = -mcmodel=medany
@@ -260,6 +298,10 @@ ifeq ($(CONFIG_MM_KASAN_ALL),y)
   ARCHOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+  ARCHOPTIMIZATION += --param asan-globals=1
+endif
+
 ifeq ($(CONFIG_MM_KASAN_DISABLE_READS_CHECK),y)
   ARCHOPTIMIZATION += --param asan-instrument-reads=0
 endif
@@ -282,34 +324,78 @@ ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
   ARCHOPTIMIZATION += -finstrument-functions
 endif
 
+# Link Time Optimization
+
+ifeq ($(CONFIG_LTO_THIN),y)
+  ARCHOPTIMIZATION += -flto=thin
+else ifeq ($(CONFIG_LTO_FULL),y)
+  ARCHOPTIMIZATION += -flto
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
+    ARCHOPTIMIZATION += -fuse-linker-plugin
+  endif
+endif
+
+# Clang toolchain
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+
+  CC      = $(CROSSDEV)clang
+  CXX     = $(CROSSDEV)clang++
+  CPP     = $(CROSSDEV)clang -E -P -x c
+  LD      = $(CROSSDEV)clang
+  STRIP   = $(CROSSDEV)llvm-strip --strip-unneeded
+  AR      = $(CROSSDEV)llvm-ar rcs
+  NM      = $(CROSSDEV)llvm-nm
+  OBJCOPY = $(CROSSDEV)llvm-objcopy
+  OBJDUMP = $(CROSSDEV)llvm-objdump
+
+  # Since the no_builtin attribute is not fully supported on Clang
+  # disable the built-in functions, refer:
+  # https://github.com/apache/nuttx/pull/5971
+
+  ARCHOPTIMIZATION += -fno-builtin
+
+  ARCHOPTIMIZATION += -fshort-enums
+
 # Default toolchain
 
-CC      = $(CROSSDEV)gcc
-CXX     = $(CROSSDEV)g++
-CPP     = $(CROSSDEV)gcc -E -P -x c
-STRIP   = $(CROSSDEV)strip --strip-unneeded
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-LD      = $(CROSSDEV)ld
-AR      = $(CROSSDEV)ar rcs
-NM      = $(CROSSDEV)nm
+else
+
+  CC      = $(CROSSDEV)gcc
+  CXX     = $(CROSSDEV)g++
+  CPP     = $(CROSSDEV)gcc -E -P -x c
+  STRIP   = $(CROSSDEV)strip --strip-unneeded
+  OBJCOPY = $(CROSSDEV)objcopy
+  OBJDUMP = $(CROSSDEV)objdump
+  LD      = $(CROSSDEV)ld
+  AR      = $(CROSSDEV)ar rcs
+  NM      = $(CROSSDEV)nm
 
 # Link Time Optimization
 
-ifeq ($(CONFIG_LTO_FULL),y)
-  ARCHOPTIMIZATION += -flto
-  ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
-    LD := $(CROSSDEV)gcc
-    AR := $(CROSSDEV)gcc-ar rcs
-    NM := $(CROSSDEV)gcc-nm
-    ARCHOPTIMIZATION += -fuse-linker-plugin
-    ARCHOPTIMIZATION += -fno-builtin
+  ifeq ($(CONFIG_LTO_FULL),y)
+    ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
+      LD := $(CROSSDEV)gcc
+      AR := $(CROSSDEV)gcc-ar rcs
+      NM := $(CROSSDEV)gcc-nm
+      ARCHOPTIMIZATION += -fno-builtin
+    endif
   endif
+
 endif
 
 # Add the builtin library
 
-EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name))
+COMPILER_RT_LIB = $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name)
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+  ifeq ($(wildcard $(COMPILER_RT_LIB)),)
+    # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
+    # then go ahead and try "--print-file-name"
+    COMPILER_RT_LIB := $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
+  endif
+endif
+
+EXTRA_LIBS += $(COMPILER_RT_LIB)
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
@@ -330,3 +416,16 @@ include $(TOPDIR)/tools/Zig.defs
 # Rust toolchain
 
 include $(TOPDIR)/tools/Rust.defs
+
+# LDC (LLVM D Compiler) toolchain
+
+include $(TOPDIR)/tools/D.defs
+
+# Shared library build flags
+
+SHCCFLAGS = -fPIC -fPIE -fvisibility=default
+SHLDFLAGS = -shared -Bsymbolic -Bdynamic -G
+
+ifeq ($(CONFIG_SIM_M32),y)
+  SHLDFLAGS += -melf_i386
+endif

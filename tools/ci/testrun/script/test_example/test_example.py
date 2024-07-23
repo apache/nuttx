@@ -16,7 +16,7 @@ def test_helloxx(p):
 
 
 def test_pipe(p):
-    ret = p.sendCommand("pipe", "redirect_reader: Returning success", 60)
+    ret = p.sendCommand("pipe", "redirect_reader: Returning success", timeout=60)
     assert ret == 0
 
 
@@ -26,5 +26,5 @@ def test_popen(p):
 
 
 def test_usrsocktest(p):
-    ret = p.sendCommand("usrsocktest", "FAILED:0", 60)
+    ret = p.sendCommand("usrsocktest", "FAILED:0", timeout=60)
     assert ret == 0

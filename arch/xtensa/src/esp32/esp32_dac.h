@@ -27,8 +27,6 @@
 
 #include <nuttx/config.h>
 #include <nuttx/analog/dac.h>
-#include "hardware/esp32_sens.h"
-#include "hardware/esp32_rtc_io.h"
 
 /****************************************************************************
  * Pre-processor definitions

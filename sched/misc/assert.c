@@ -71,12 +71,26 @@
 #endif
 
 #define DUMP_PTR(p, x) ((uintptr_t)(&(p)[(x)]) < stack_top ? (p)[(x)] : 0)
+#define DUMP_STRIDE    (sizeof(FAR void *) * 8)
+
+#if UINTPTR_MAX <= UINT32_MAX
+#  define DUMP_FORMAT " %08" PRIxPTR ""
+#elif UINTPTR_MAX <= UINT64_MAX
+#  define DUMP_FORMAT " %016" PRIxPTR ""
+#endif
+
+/* Architecture can overwrite the default XCPTCONTEXT alignment */
+
+#ifndef XCPTCONTEXT_ALIGN
+#  define XCPTCONTEXT_ALIGN 16
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static uintptr_t g_last_regs[XCPTCONTEXT_REGS] aligned_data(16);
+static uintptr_t
+g_last_regs[XCPTCONTEXT_REGS] aligned_data(XCPTCONTEXT_ALIGN);
 static FAR const char *g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
@@ -128,13 +142,12 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
 
-  for (stack = sp; stack <= stack_top; stack += 32)
+  for (stack = sp; stack <= stack_top; stack += DUMP_STRIDE)
     {
-      FAR uint32_t *ptr = (FAR uint32_t *)stack;
+      FAR uintptr_t *ptr = (FAR uintptr_t *)stack;
 
-      _alert("%p: %08" PRIx32 " %08" PRIx32 " %08" PRIx32
-             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
-             " %08" PRIx32 "\n",
+      _alert("%p:"DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT
+             DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT DUMP_FORMAT "\n",
              (FAR void *)stack, DUMP_PTR(ptr, 0), DUMP_PTR(ptr , 1),
              DUMP_PTR(ptr, 2), DUMP_PTR(ptr, 3), DUMP_PTR(ptr, 4),
              DUMP_PTR(ptr, 5), DUMP_PTR(ptr , 6), DUMP_PTR(ptr, 7));
@@ -160,9 +173,9 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 
       /* Get more information */
 
-      if (sp - 32 >= base)
+      if (sp - DUMP_STRIDE >= base)
         {
-          sp -= 32;
+          sp -= DUMP_STRIDE;
         }
 
       stack_dump(sp, top);
@@ -194,7 +207,7 @@ static void dump_stack(FAR const char *tag, uintptr_t sp,
 static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 {
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  uintptr_t intstack_base = up_get_intstackbase();
+  uintptr_t intstack_base = up_get_intstackbase(up_cpu_index());
   size_t intstack_size = CONFIG_ARCH_INTERRUPTSTACK;
   uintptr_t intstack_top = intstack_base + intstack_size;
   uintptr_t intstack_sp = 0;
@@ -243,7 +256,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                  intstack_base,
                  intstack_size,
 #ifdef CONFIG_STACK_COLORATION
-                 up_check_intstack()
+                 up_check_intstack(up_cpu_index())
 #else
                  0
 #endif
@@ -405,17 +418,8 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 
 static void dump_tasks(void)
 {
-#if CONFIG_ARCH_INTERRUPTSTACK > 0 && defined(CONFIG_STACK_COLORATION)
-  size_t stack_used = up_check_intstack();
-  size_t stack_filled = 0;
-
-  if (stack_used > 0)
-    {
-      /* Use fixed-point math with one decimal place */
-
-      stack_filled = 10 * 100 *
-                     stack_used / CONFIG_ARCH_INTERRUPTSTACK;
-    }
+#if CONFIG_ARCH_INTERRUPTSTACK > 0
+  int cpu;
 #endif
 
   /* Dump interesting properties of each task in the crash environment */
@@ -438,31 +442,50 @@ static void dump_tasks(void)
          "   COMMAND\n");
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
-  _alert("  ----   ---"
-#  ifdef CONFIG_SMP
-         "  ----"
-#  endif
-         " --- --------"
-         " ------- ---"
-         " ------- ----------"
-         " ----------------"
-         " %p"
-         "   %7u"
+  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
+    {
 #  ifdef CONFIG_STACK_COLORATION
-         "   %7zu   %3zu.%1zu%%%c"
+      size_t stack_used = up_check_intstack(cpu);
+      size_t stack_filled = 0;
+
+      if (stack_used > 0)
+        {
+          /* Use fixed-point math with one decimal place */
+
+          stack_filled = 10 * 100 *
+                         stack_used / CONFIG_ARCH_INTERRUPTSTACK;
+        }
+#  endif
+
+      _alert("  ----   ---"
+#  ifdef CONFIG_SMP
+             "  %4d"
+#  endif
+             " --- --------"
+             " ------- ---"
+             " ------- ----------"
+             " ----------------"
+             " %p"
+             "   %7u"
+#  ifdef CONFIG_STACK_COLORATION
+             "   %7zu   %3zu.%1zu%%%c"
 #  endif
 #  ifndef CONFIG_SCHED_CPULOAD_NONE
-         "     ----"
+             "     ----"
 #  endif
-         "   irq\n"
-         , (FAR void *)up_get_intstackbase()
-         , CONFIG_ARCH_INTERRUPTSTACK
+             "   irq\n"
+#ifdef CONFIG_SMP
+             , cpu
+#endif
+             , (FAR void *)up_get_intstackbase(cpu)
+             , CONFIG_ARCH_INTERRUPTSTACK
 #  ifdef CONFIG_STACK_COLORATION
-         , stack_used
-         , stack_filled / 10, stack_filled % 10,
-         (stack_filled >= 10 * 80 ? '!' : ' ')
+             , stack_used
+             , stack_filled / 10, stack_filled % 10,
+             (stack_filled >= 10 * 80 ? '!' : ' ')
 #  endif
-        );
+            );
+    }
 #endif
 
   nxsched_foreach(dump_task, NULL);
@@ -526,8 +549,6 @@ void _assert(FAR const char *filename, int linenum,
 
   flags = enter_critical_section();
 
-  sched_lock();
-
   /* try to save current context if regs is null */
 
   if (regs == NULL)
@@ -581,7 +602,7 @@ void _assert(FAR const char *filename, int linenum,
          msg ? msg : "",
          filename ? filename : "", linenum,
 #ifdef CONFIG_SMP
-         up_cpu_index(),
+         this_cpu(),
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
          rtcb->name,
@@ -661,8 +682,6 @@ void _assert(FAR const char *filename, int linenum,
         }
 #endif
     }
-
-  sched_unlock();
 
   leave_critical_section(flags);
 }

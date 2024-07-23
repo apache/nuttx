@@ -37,6 +37,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/power/pm.h>
 
 #ifdef CONFIG_SERIAL_TERMIOS
@@ -1124,7 +1125,7 @@ static void up_disableusartint(struct up_dev_s *priv, uint32_t *ie)
   irqstate_t flags;
   uint32_t ctl_ie;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   if (ie)
     {
@@ -1158,7 +1159,7 @@ static void up_disableusartint(struct up_dev_s *priv, uint32_t *ie)
   ctl_ie = (USART_CFG_CTL_MASK << USART_CFG_SHIFT);
   up_setusartint(priv, ctl_ie);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1169,11 +1170,11 @@ static void up_restoreusartint(struct up_dev_s *priv, uint32_t ie)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(NULL);
 
   up_setusartint(priv, ie);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************

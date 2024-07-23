@@ -78,7 +78,7 @@
 int mpfs_read_dsn(uint8_t *dsn, size_t len)
 {
   uint32_t reg;
-  uint8_t *p = (uint8_t *)MSS_SCBMAILBOX;
+  uintptr_t p = MSS_SCBMAILBOX;
   irqstate_t flags = enter_critical_section();
   unsigned retries = RETRIES;
 

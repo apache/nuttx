@@ -169,3 +169,7 @@ endif
 ifeq ($(CONFIG_CXD56_HOSTIF),y)
 CHIP_CSRCS += cxd56_hostif.c
 endif
+
+ifeq ($(CONFIG_CXD56_GNSS_HEAP),y)
+CHIP_CSRCS += cxd56_gnssheap.c
+endif

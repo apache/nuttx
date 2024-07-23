@@ -42,8 +42,8 @@
 struct riscv_mtimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
-  uintptr_t                  mtime;
-  uintptr_t                  mtimecmp;
+  uintreg_t                  mtime;
+  uintreg_t                  mtimecmp;
   uint64_t                   freq;
   uint64_t                   alarm;
   oneshot_callback_t         callback;
@@ -90,7 +90,7 @@ static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
    *    it could be read from the CSR "time".
    */
 
-  return -1 == priv->mtime ? READ_CSR(time) : getreg64(priv->mtime);
+  return -1 == priv->mtime ? READ_CSR(CSR_TIME) : getreg64(priv->mtime);
 #else
   uint32_t hi;
   uint32_t lo;
@@ -127,6 +127,19 @@ static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
   __MB();
 }
 #else
+
+#ifdef CONFIG_ARCH_RV_EXT_SSTC
+static inline void riscv_write_stime(uint64_t value)
+{
+#ifdef CONFIG_ARCH_RV64
+  WRITE_CSR(CSR_STIMECMP, value);
+#else
+  WRITE_CSR(CSR_STIMECMP, (uint32_t)value);
+  WRITE_CSR(CSR_STIMECMPH, (uint32_t)(value >> 32));
+#endif
+}
+#endif
+
 static uint64_t riscv_mtimer_get_mtime(struct riscv_mtimer_lowerhalf_s *priv)
 {
   UNUSED(priv);
@@ -137,7 +150,11 @@ static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
                                       uint64_t value)
 {
   UNUSED(priv);
+#ifndef CONFIG_ARCH_RV_EXT_SSTC
   riscv_sbi_set_timer(value);
+#else
+  riscv_write_stime(value);
+#endif
 }
 #endif
 
@@ -195,18 +212,27 @@ static int riscv_mtimer_start(struct oneshot_lowerhalf_s *lower,
   struct riscv_mtimer_lowerhalf_s *priv =
     (struct riscv_mtimer_lowerhalf_s *)lower;
   uint64_t mtime = riscv_mtimer_get_mtime(priv);
+  uint64_t alarm = mtime + ts->tv_sec * priv->freq +
+                   ts->tv_nsec * priv->freq / NSEC_PER_SEC;
 
-  priv->alarm = mtime + ts->tv_sec * priv->freq +
-                ts->tv_nsec * priv->freq / NSEC_PER_SEC;
-  if (priv->alarm < mtime)
+  if (alarm < mtime)
     {
-      priv->alarm = UINT64_MAX;
+      priv->alarm    = UINT64_MAX;
+      priv->callback = NULL;
+      priv->arg      = NULL;
+    }
+  else
+    {
+      priv->alarm    = alarm;
+      priv->callback = callback;
+      priv->arg      = arg;
     }
 
-  priv->callback = callback;
-  priv->arg      = arg;
+  if (!up_interrupt_context())
+    {
+      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
+    }
 
-  riscv_mtimer_set_mtimecmp(priv, priv->alarm);
   return 0;
 }
 
@@ -240,15 +266,18 @@ static int riscv_mtimer_cancel(struct oneshot_lowerhalf_s *lower,
   struct riscv_mtimer_lowerhalf_s *priv =
     (struct riscv_mtimer_lowerhalf_s *)lower;
   uint64_t mtime;
+  uint64_t alarm = priv->alarm;
 
-  riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
+  priv->alarm = UINT64_MAX;
+  if (!up_interrupt_context())
+    {
+      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
+    }
 
   mtime = riscv_mtimer_get_mtime(priv);
-  if (priv->alarm > mtime)
+  if (alarm > mtime)
     {
-      uint64_t nsec = (priv->alarm - mtime) *
-                      NSEC_PER_SEC / priv->freq;
-
+      uint64_t nsec = (alarm - mtime) * NSEC_PER_SEC / priv->freq;
       ts->tv_sec  = nsec / NSEC_PER_SEC;
       ts->tv_nsec = nsec % NSEC_PER_SEC;
     }
@@ -302,12 +331,14 @@ static int riscv_mtimer_interrupt(int irq, void *context, void *arg)
 {
   struct riscv_mtimer_lowerhalf_s *priv = arg;
 
-  riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
+  priv->alarm = UINT64_MAX;
+
   if (priv->callback != NULL)
     {
       priv->callback(&priv->lower, priv->arg);
     }
 
+  riscv_mtimer_set_mtimecmp(priv, priv->alarm);
   return 0;
 }
 
@@ -316,7 +347,7 @@ static int riscv_mtimer_interrupt(int irq, void *context, void *arg)
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *
-riscv_mtimer_initialize(uintptr_t mtime, uintptr_t mtimecmp,
+riscv_mtimer_initialize(uintreg_t mtime, uintreg_t mtimecmp,
                         int irq, uint64_t freq)
 {
   struct riscv_mtimer_lowerhalf_s *priv;
@@ -328,8 +359,9 @@ riscv_mtimer_initialize(uintptr_t mtime, uintptr_t mtimecmp,
       priv->mtime     = mtime;
       priv->mtimecmp  = mtimecmp;
       priv->freq      = freq;
+      priv->alarm     = UINT64_MAX;
 
-      riscv_mtimer_set_mtimecmp(priv, UINT64_MAX);
+      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
       irq_attach(irq, riscv_mtimer_interrupt, priv);
       up_enable_irq(irq);
     }

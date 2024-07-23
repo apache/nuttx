@@ -57,18 +57,6 @@
  * Public Data
  ****************************************************************************/
 
-/* g_idle_topstack: _sbss is the start of the BSS region as defined by the
- * linker script. _ebss lies at the end of the BSS region. The idle task
- * stack starts at the end of BSS and is of size CONFIG_IDLETHREAD_STACKSIZE.
- * The IDLE thread is the thread that the system boots on and, eventually,
- * becomes the IDLE, do nothing task that runs only when there is nothing
- * else to run.  The heap continues from there until the end of memory.
- * g_idle_topstack is a read-only variable the provides this computed
- * address.
- */
-
-uintptr_t g_idle_topstack = MPFS_IDLESTACK_TOP;
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -149,14 +137,14 @@ void __mpfs_start(uint64_t mhartid)
 
   mpfs_boardinitialize();
 
-#ifdef CONFIG_ARCH_USE_S_MODE
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
   /* Initialize the per CPU areas */
 
   if (mhartid != 0)
     {
       riscv_percpu_add_hart(mhartid);
     }
-#endif /* CONFIG_ARCH_USE_S_MODE */
+#endif /* CONFIG_RISCV_PERCPU_SCRATCH */
 
   /* Initialize the caches.  Should only be executed from E51 (hart 0) to be
    * functional.  Consider the caches already configured if running without

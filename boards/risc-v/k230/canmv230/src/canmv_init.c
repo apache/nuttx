@@ -36,6 +36,18 @@
 #include <sys/boardctl.h>
 #include <arch/board/board_memorymap.h>
 
+#ifdef CONFIG_RPMSG_UART
+#  include <nuttx/serial/uart_rpmsg.h>
+#endif
+
+#if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
+#  include "k230_hart.h"
+#endif
+
+#ifdef CONFIG_RPTUN
+#  include "k230_rptun.h"
+#endif
+
 #ifdef CONFIG_BUILD_KERNEL
 #include "romfs.h"
 #endif
@@ -53,9 +65,45 @@
  * Private Functions
  ****************************************************************************/
 
+static void debug_dumps(void)
+{
+  /* Dumps to aid investigation */
+
+#if !defined(CONFIG_BUILD_KERNEL) || defined(CONFIG_NUTTSBI)
+  sinfo("is_big=%d\n", k230_hart_is_big());
+#endif
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+int board_reset(int status)
+{
+  _alert("status=%d, halt now.\n", status);
+  while (1)
+    {
+      asm volatile("wfi");
+    }
+
+  return 0;
+}
+
+#ifdef CONFIG_RPMSG_UART
+/****************************************************************************
+ * Name: rpmsg_serialinit
+ * Description: initialize /dev/ttyRpmsg device
+ ****************************************************************************/
+
+void rpmsg_serialinit(void)
+{
+#ifdef CONFIG_K230_RPTUN_MASTER
+  uart_rpmsg_init("remote", "Rpmsg", 4096, false);
+#else
+  uart_rpmsg_init("master", "Rpmsg", 4096, true);
+#endif
+}
+#endif
 
 /****************************************************************************
  * Name: board_app_initialize
@@ -94,7 +142,7 @@ int board_app_initialize(uintptr_t arg)
   mount(NULL, "/proc", "procfs", 0, NULL);
 
 #endif
-
+  debug_dumps();
   return OK;
 #endif
 }
@@ -120,6 +168,8 @@ int board_app_initialize(uintptr_t arg)
 
 void board_late_initialize(void)
 {
+  debug_dumps();
+
   /* Perform board-specific initialization */
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -141,5 +191,13 @@ void board_late_initialize(void)
 
   mount(NULL, "/proc", "procfs", 0, NULL);
 
+#endif
+
+#ifdef CONFIG_RPTUN
+#  ifdef CONFIG_K230_RPTUN_MASTER
+  k230_rptun_init("remote");
+#  else
+  k230_rptun_init("master");
+#  endif
 #endif
 }

@@ -3,7 +3,7 @@
 ==================================================
 
 Description
------------
+===========
 
 The i8sak app is a useful CLI for testing various IEEE 802.15.4 functionality.
 It also serves as a starting place for learning how to interface with the NuttX
@@ -30,7 +30,8 @@ _sticky_, meaning, if you set the endpoint short address once, any future
 operation using the endpoint short address can default to the previously used
 address. This is particularly useful to keep the command lengths down.
 
-## How To Use
+How To Use
+==========
 
 The i8sak app has a series of CLI functions that can be invoked. The default
 i8sak command is ``i8`` to make things quick and easy to type.
@@ -46,6 +47,11 @@ On that device, run::
 This will tell the MAC layer that it should now act as a PAN coordinator using
 PAN ID CD:AB. For now, this function assumes that we are operating a non-beacon
 enabled PAN, since, as of this writing, beacon-enabled networks are unfinished.
+
+Configure PAN coordinator short address and EP short addres::
+
+  i8 set saddr 0A:00
+  i8 set ep_saddr 0B:00
 
 Next, on the same device, run::
 
@@ -117,7 +123,7 @@ similar to the following::
       Dest. Address   - 0xDEADBEEF00FADE0C
       Src.  Address   - 0xDEADBEEF00FADE0A
       Command Type    - Association Response
-      Assigned SADDR  - 0x000C
+      Assigned SADDR  - 0x000B
       Assoc Status    - Successful
 
       3a) ACK

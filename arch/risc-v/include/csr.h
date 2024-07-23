@@ -135,9 +135,18 @@
 #define CSR_STVAL           0x143
 #define CSR_SIP             0x144
 
+/* Supervisor Environment Configuration Registers */
+
+#define CSR_SENVCFG         0x10a
+
 /* Supervisor Protection and Translation Registers */
 
 #define CSR_SATP            0x180
+
+/* Supervisor Time Registers */
+
+#define CSR_STIMECMP        0x14d
+#define CSR_STIMECMPH       0x15d
 
 /* Machine Information Registers */
 
@@ -163,6 +172,11 @@
 #define CSR_MCAUSE          0x342
 #define CSR_MTVAL           0x343
 #define CSR_MIP             0x344
+
+/* Machine Environment Configuration Registers */
+
+#define CSR_MENVCFG         0x30a
+#define CSR_MENVCFGH        0x31a
 
 /* Machine Protection and Translation */
 
@@ -286,16 +300,95 @@
 
 /* Debug/Trace Registers */
 
-#define CSR_TSELECT         0x7a0
-#define CSR_TDATA1          0x7a1
-#define CSR_TDATA2          0x7a2
-#define CSR_TDATA3          0x7a3
+#define CSR_TSELECT         0x7a0 /* Trigger Select */
+#define CSR_TDATA1          0x7a1 /* Trigger Data 1 */
+#define CSR_TDATA2          0x7a2 /* Trigger Data 2 */
+#define CSR_TDATA3          0x7a3 /* Trigger Data 3 */
+#define CSR_TINFO           0x7a4 /* Trigger Info */
+#define CSR_TCONTROL        0x7a5 /* Trigger Control */
+#define CSR_MCONTEXT        0x7a8 /* Machine Context */
+#define CSR_MSCONTEXT       0x7aa /* Machine Supervisor Context */
+#define CSR_SCONTEXT        0x5a8 /* Supervisor Context */
+#define CSR_HCONTEXT        0x5aa /* Hypervisor Context */
+
+/* In tcontrol register */
+
+#define CSR_TCONTROL_MTE   (0x1 << 3) /* M-mode trigger enable */
+#define CSR_TCONTROL_MPTE  (0x1 << 7) /* M-mode previous trigger enable */
 
 /* Debug interface CSRs */
 
-#define CSR_DCSR            0x7b0
-#define CSR_DPC             0x7b1
-#define CSR_DSCRATCH        0x7b2
+#define CSR_DCSR            0x7b0 /* Debug Control and Status */
+#define CSR_DPC             0x7b1 /* Debug PC */
+#define CSR_DSCRATCH0       0x7b2 /* Debug Scratch 0 */
+#define CSR_DSCRATCH1       0x7b3 /* Debug Scratch 1 */
+
+/* Vector CSRs */
+
+#define CSR_VSTART          0x008 /* Vector Start Position */
+#define CSR_VXSAT           0x009 /* Fixed-Point Saturate Flag */
+#define CSR_VXRM            0x00a /* Fixed-Point Rounding Mode */
+#define CSR_VCSR            0x00f /* Vector Control and Status */
+#define CSR_VL              0xc20 /* Vector Length */
+#define CSR_VTYPE           0xc21 /* Vector Data Type */
+#define CSR_VLENB           0xc22 /* Vector Length in Bytes (VLEN/8) */
+
+/* Indirect CSR Access CSRs */
+
+#define CSR_MISELECT        0x350 /* Machine indirect register select */
+#define CSR_MIREG           0x351 /* Machine indirect register alias */
+#define CSR_MIREG2          0x352 /* Machine indirect register alias 2 */
+#define CSR_MIREG3          0x353 /* Machine indirect register alias 3 */
+#define CSR_MIREG4          0x355 /* Machine indirect register alias 4 */
+#define CSR_MIREG5          0x356 /* Machine indirect register alias 5 */
+#define CSR_MIREG6          0x357 /* Machine indirect register alias 6 */
+
+#define CSR_SISELECT        0x150 /* Supervisor indirect register select */
+#define CSR_SIREG           0x151 /* Supervisor indirect register alias */
+#define CSR_SIREG2          0x152 /* Supervisor indirect register alias 2 */
+#define CSR_SIREG3          0x153 /* Supervisor indirect register alias 3 */
+#define CSR_SIREG4          0x155 /* Supervisor indirect register alias 4 */
+#define CSR_SIREG5          0x156 /* Supervisor indirect register alias 5 */
+#define CSR_SIREG6          0x157 /* Supervisor indirect register alias 6 */
+
+#define CSR_VSISELECT       0x250 /* Virtual supervisor indirect register select */
+#define CSR_VSIREG          0x251 /* Virtual supervisor indirect register alias */
+#define CSR_VSIREG2         0x252 /* Virtual supervisor indirect register alias 2 */
+#define CSR_VSIREG3         0x253 /* Virtual supervisor indirect register alias 3 */
+#define CSR_VSIREG4         0x255 /* Virtual supervisor indirect register alias 4 */
+#define CSR_VSIREG5         0x256 /* Virtual supervisor indirect register alias 5 */
+#define CSR_VSIREG6         0x257 /* Virtual supervisor indirect register alias 6 */
+
+/* CLIC CSRs */
+
+#define CSR_MTVT            0x307 /* Trap-handler vector table base address */
+#define CSR_MNXTI           0x345 /* Interrupt handler address and enable modifier */
+#define CSR_MINTSTATUS      0xfb1 /* Current interrupt levels */
+#define CSR_MINTTHRESH      0x347 /* Interrupt-level threshold */
+#define CSR_MSCRATCHCSW     0x348 /* Conditional scratch swap on priv mode change */
+#define CSR_MSCRATCHCSWL    0x349 /* Conditional scratch swap on level change */
+
+#define CSR_STVT            0x107 /* Trap-handler vector table base address */
+#define CSR_SNXTI           0x145 /* Interrupt handler address and enable modifier */
+#define CSR_SINTSTATUS      0xdb1 /* Current interrupt levels */
+#define CSR_SINTTHRESH      0x147 /* Interrupt-level threshold */
+#define CSR_SSCRATCHCSW     0x148 /* Conditional scratch swap on priv mode change */
+#define CSR_SSCRATCHCSWL    0x149 /* Conditional scratch swap on level change */
+
+#define CSR_UTVT            0x007 /* Trap-handler vector table base address */
+#define CSR_UNXTI           0x045 /* Interrupt handler address and enable modifier */
+#define CSR_UINTSTATUS      0xcb1 /* Current interrupt levels */
+#define CSR_UINTTHRESH      0x047 /* Interrupt-level threshold */
+#define CSR_USCRATCHCSWL    0x049 /* Conditional scratch swap on level change */
+
+/* CLIC Indirect CSRs */
+
+#define MISELECT_CLICCFG     0x14a0 /* MIREG */
+#define MISELECT_CLICINTCTL  0x1000 /* MIREG */
+#define MISELECT_CLICINTATTR 0x1000 /* MIREG2 */
+#define MISELECT_CLICINTIP   0x1400 /* MIREG */
+#define MISELECT_CLICINTIE   0x1400 /* MIREG2 */
+#define MISELECT_CLICINTTRIG 0x1480 /* MIREG */
 
 /* In mstatus register */
 
@@ -337,6 +430,23 @@
 #define MSTATUS_WPRI        (UINT64_C(0x1ffffff) << 38 | UINT64_C(0x1ff) << 23 | 0x15)
 #endif
 
+/* In menvcfg register */
+#define MENVCFG_FIOM        (0x1 << 0)
+#define MENVCFG_CBIE        (0x3 << 4)
+#define MENVCFG_CBIE_ILL    (0x0 << 4)
+#define MENVCFG_CBIE_FLUSH  (0x1 << 4)
+#define MENVCFG_CBIE_INV    (0x3 << 4)
+#define MENVCFG_CBCFE       (0x1 << 6)
+#define MENVCFG_CBZE        (0x1 << 7)
+
+#ifdef CONFIG_ARCH_RV32
+#define MENVCFG_PBMTE       (0x1 << 30)
+#define MENVCFG_STCE        (0x1 << 31)
+#else
+#define MENVCFG_PBMTE       (UINT64_C(0x1) << 62)
+#define MENVCFG_STCE        (UINT64_C(0x1) << 63)
+#endif
+
 /* In mie (machine interrupt enable) register */
 
 #define MIE_SSIE            (0x1 << 1)  /* Supervisor Software Interrupt Enable */
@@ -349,9 +459,11 @@
 /* In mip (machine interrupt pending) register */
 
 #define MIP_SSIP            (0x1 << 1)
+#define MIP_MSIP            (0x1 << 3)
 #define MIP_STIP            (0x1 << 5)
 #define MIP_MTIP            (0x1 << 7)
 #define MIP_SEIP            (0x1 << 9)
+#define MIP_MEIP            (0x1 << 11)
 
 /* In sstatus register (which is a view of mstatus) */
 
@@ -386,6 +498,15 @@
 #define SIP_STIP            MIP_STIP
 #define SIP_SEIP            MIP_SEIP
 
+/* In senvcfg register */
+#define SENVCFG_FIOM        MENVCFG_FIOM
+#define SENVCFG_CBIE        MENVCFG_CBIE
+#define SENVCFG_CBIE_ILL    MENVCFG_CBIE_ILL
+#define SENVCFG_CBIE_FLUSH  MENVCFG_CBIE_FLUSH
+#define SENVCFG_CBIE_INV    MENVCFG_CBIE_INV
+#define SENVCFG_CBCFE       MENVCFG_CBCFE
+#define SENVCFG_CBZE        MENVCFG_CBZE
+
 /* In pmpcfg (PMP configuration) register */
 
 #define PMPCFG_R            (1 << 0)  /* readable ? */
@@ -398,6 +519,40 @@
 #define PMPCFG_A_NAPOT      (3 << 3)  /* naturally aligned power-of-two region */
 #define PMPCFG_A_MASK       (3 << 3)  /* address-matching mode mask */
 #define PMPCFG_L            (1 << 7)  /* locked ? */
+
+/* In mcounteren/scounteren register */
+#define COUNTEREN_CY       (0x1 << 0)
+#define COUNTEREN_TM       (0x1 << 1)
+#define COUNTEREN_IR       (0x1 << 2)
+#define COUNTEREN_HPM3     (0x1 << 3)
+#define COUNTEREN_HPM4     (0x1 << 4)
+#define COUNTEREN_HPM5     (0x1 << 5)
+#define COUNTEREN_HPM6     (0x1 << 6)
+#define COUNTEREN_HPM7     (0x1 << 7)
+#define COUNTEREN_HPM8     (0x1 << 8)
+#define COUNTEREN_HPM9     (0x1 << 9)
+#define COUNTEREN_HPM10    (0x1 << 10)
+#define COUNTEREN_HPM11    (0x1 << 11)
+#define COUNTEREN_HPM12    (0x1 << 12)
+#define COUNTEREN_HPM13    (0x1 << 13)
+#define COUNTEREN_HPM14    (0x1 << 14)
+#define COUNTEREN_HPM15    (0x1 << 15)
+#define COUNTEREN_HPM16    (0x1 << 16)
+#define COUNTEREN_HPM17    (0x1 << 17)
+#define COUNTEREN_HPM18    (0x1 << 18)
+#define COUNTEREN_HPM19    (0x1 << 19)
+#define COUNTEREN_HPM20    (0x1 << 20)
+#define COUNTEREN_HPM21    (0x1 << 21)
+#define COUNTEREN_HPM22    (0x1 << 22)
+#define COUNTEREN_HPM23    (0x1 << 23)
+#define COUNTEREN_HPM24    (0x1 << 24)
+#define COUNTEREN_HPM25    (0x1 << 25)
+#define COUNTEREN_HPM26    (0x1 << 26)
+#define COUNTEREN_HPM27    (0x1 << 27)
+#define COUNTEREN_HPM28    (0x1 << 28)
+#define COUNTEREN_HPM29    (0x1 << 29)
+#define COUNTEREN_HPM30    (0x1 << 30)
+#define COUNTEREN_HPM31    (0x1 << 31)
 
 /****************************************************************************
  * Public Types

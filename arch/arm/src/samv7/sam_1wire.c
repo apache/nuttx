@@ -471,7 +471,7 @@ static int sam_init(struct sam_1wire_s *priv)
       up_enable_irq(priv->irq);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -885,41 +885,49 @@ struct onewire_dev_s *sam_1wireinitialize(int port)
     {
 #ifdef CONFIG_SAMV7_UART0_1WIREDRIVER
     case 0:
+      sam_uart0_enableclk();
       priv = &sam_1wire0_priv;
       break;
 #endif
 #ifdef CONFIG_SAMV7_UART1_1WIREDRIVER
     case 1:
+      sam_uart1_enableclk();
       priv = &sam_1wire1_priv;
       break;
 #endif
 #ifdef CONFIG_SAMV7_UART2_1WIREDRIVER
     case 2:
+      sam_uart2_enableclk();
       priv = &sam_1wire2_priv;
       break;
 #endif
 #ifdef CONFIG_SAMV7_UART3_1WIREDRIVER
     case 3:
+      sam_uart3_enableclk();
       priv = &sam_1wire3_priv;
       break;
 #endif
 #ifdef CONFIG_SAMV7_UART4_1WIREDRIVER
     case 4:
+      sam_uart4_enableclk();
       priv = &sam_1wire4_priv;
       break;
 #endif
 #ifdef CONFIG_SAMV7_USART0_1WIREDRIVER
     case 5:
+      sam_usart0_enableclk();
       priv = &sam_1wire5_priv;
       break;
 #endif
 #ifdef CONFIG_SAMV7_USART1_1WIREDRIVER
     case 6:
+      sam_usart1_enableclk();
       priv = &sam_1wire6_priv;
       break;
 #endif
 #ifdef CONFIG_SAMV7_USART2_1WIREDRIVER
     case 7:
+      sam_usart2_enableclk();
       priv = &sam_1wire7_priv;
       break;
 #endif

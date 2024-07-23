@@ -33,13 +33,12 @@
 #include "esp32s3_psram.h"
 #include "esp32s3_spi_timing.h"
 
-#include "hardware/esp32s3_spi_mem_reg.h"
 #include "hardware/esp32s3_iomux.h"
 #include "hardware/esp32s3_gpio.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
 #include "hardware/esp32s3_syscon.h"
 #include "rom/esp32s3_spiflash.h"
-#include "rom/esp32s3_opi_flash.h"
+#include "rom/opi_flash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -600,7 +599,7 @@ static void IRAM_ATTR config_psram_spi_phases(void)
  *
  ****************************************************************************/
 
-static inline void spi_flash_set_rom_required_regs(void)
+void IRAM_ATTR spi_flash_set_rom_required_regs(void)
 {
 #ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
 

@@ -35,7 +35,7 @@ endif
 
 # Common assembly language files
 CMN_ASRCS  = arm64_vector_table.S arm64_vectors.S arm64_smccc.S
-CMN_ASRCS += arm64_cpu_idle.S arm64_fork_func.S
+CMN_ASRCS += arm64_fork_func.S
 
 ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
 CMN_ASRCS += arm64_testset.S
@@ -43,9 +43,9 @@ endif
 
 # Common C source files ( OS call up_xxx)
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
-CMN_CSRCS += arm64_nputs.c arm64_idle.c arm64_copystate.c arm64_createstack.c
+CMN_CSRCS += arm64_nputs.c arm64_copystate.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
-CMN_CSRCS += arm64_task_sched.c arm64_exit.c arm64_fork.c arm64_switchcontext.c
+CMN_CSRCS += arm64_exit.c arm64_fork.c arm64_switchcontext.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
 CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
 CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
@@ -54,15 +54,20 @@ CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
 CMN_CSRCS += arm64_arch_timer.c arm64_cache.c
 CMN_CSRCS += arm64_doirq.c arm64_fatal.c
 CMN_CSRCS += arm64_syscall.c
+CMN_CSRCS += arm64_modifyreg8.c arm64_modifyreg16.c arm64_modifyreg32.c
 
 # Use common heap allocation for now (may need to be customized later)
 CMN_CSRCS += arm64_allocateheap.c
 
-ifeq ($(CONFIG_ARM_GIC_VERSION),3)
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+  CMN_CSRCS += arm64_idle.c
+endif
+
+ifeq ($(CONFIG_ARM64_GIC_VERSION),3)
 CMN_CSRCS += arm64_gicv3.c
 endif
 
-ifeq ($(CONFIG_ARM_GIC_VERSION),2)
+ifeq ($(CONFIG_ARM64_GIC_VERSION),2)
 CMN_CSRCS += arm64_gicv2.c
 endif
 
@@ -74,8 +79,8 @@ ifeq ($(CONFIG_ARCH_HAVE_MPU),y)
 CMN_CSRCS += arm64_mpu.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_PSCI),y)
-CMN_CSRCS += arm64_cpu_psci.c arm64_systemreset.c
+ifeq ($(CONFIG_ARM64_PSCI),y)
+CMN_CSRCS += arm64_cpu_psci.c
 endif
 
 ifeq ($(CONFIG_SMP),y)

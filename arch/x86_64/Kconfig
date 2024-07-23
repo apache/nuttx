@@ -16,11 +16,28 @@ choice
 
 config ARCH_INTEL64
 	bool "Intel x86_64"
-	select ARCH_HAVE_MPU
-	select ARCH_USE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_USE_MMU
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_RNG
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_MMX
+	select ARCH_HAVE_SSE
+	select ARCH_HAVE_SSE2
+	select ARCH_HAVE_SSE3
+	select ARCH_HAVE_SSSE3
+	select ARCH_HAVE_SSE41
+	select ARCH_HAVE_SSE42
+	select ARCH_HAVE_SSE4A
+	select ARCH_HAVE_FMA if ARCH_X86_64_HAVE_XSAVE
+	select ARCH_HAVE_AVX if ARCH_X86_64_HAVE_XSAVE
+	select ARCH_HAVE_AVX512 if ARCH_X86_64_HAVE_XSAVE
+	select ARCH_ICACHE
+	select ARCH_DCACHE
+	select ARCH_HAVE_IRQTRIGGER
 	---help---
 		Intel x86_64 architecture
 
@@ -32,16 +49,51 @@ config ARCH_CHIP_X86_64_CUSTOM
 
 endchoice
 
-choice
-	prompt "x86_64 system selection"
-	default ARCH_BOARD_QEMU
+# CPU features
 
-config ARCH_BOARD_QEMU
-	bool "Qemu environment"
-	---help---
-		Targeting virtualized qemu environment
+config ARCH_HAVE_MMX
+	bool
+	default n
 
-endchoice
+config ARCH_HAVE_SSE
+	bool
+	default y
+
+config ARCH_HAVE_SSE2
+	bool
+	default y
+
+config ARCH_HAVE_SSE3
+	bool
+	default n
+
+config ARCH_HAVE_SSSE3
+	bool
+	default n
+
+config ARCH_HAVE_SSE41
+	bool
+	default n
+
+config ARCH_HAVE_SSE42
+	bool
+	default n
+
+config ARCH_HAVE_SSE4A
+	bool
+	default n
+
+config ARCH_HAVE_FMA
+	bool
+	default n
+
+config ARCH_HAVE_AVX
+	bool
+	default n
+
+config ARCH_HAVE_AVX512
+	bool
+	default n
 
 source "arch/x86_64/src/common/Kconfig"
 
@@ -53,15 +105,6 @@ config ARCH_CHIP
 	default "intel64"
 
 endif # ARCH_INTEL64
-
-if ARCH_BOARD_QEMU
-source "arch/x86_64/src/qemu/Kconfig"
-
-config ARCH_BOARD
-	string
-	default "qemu-intel64"
-
-endif # ARCH_CHIP_QEMU
 
 config ARCH_MULTIBOOT2
 	bool "Append multiboot2 header"
@@ -76,8 +119,8 @@ config MULTBOOT2_FB_TERM
 	bool "Multiboot2 framebuffer terminal"
 	default n
 	depends on NXFONTS
-    ---help---
-	Enable a framebuffer terminal for early debug printing
+	---help---
+		Enable a framebuffer terminal for early debug printing
 
 endif # ARCH_MULTIBOOT2
 

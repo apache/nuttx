@@ -20,7 +20,7 @@
 
 .PHONY: bootloader clean_bootloader
 
-ifeq ($(CONFIG_ESP32_BOOTLOADER_BUILD_FROM_SOURCE),y)
+ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),)
 
 TOOLSDIR           = $(TOPDIR)/tools/espressif
 CHIPDIR            = $(TOPDIR)/arch/xtensa/src/chip
@@ -36,6 +36,7 @@ BOOTLOADER_CONFIG  = $(BOOTLOADER_DIR)/bootloader.conf
 MCUBOOT_SRCDIR     = $(BOOTLOADER_DIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
 MCUBOOT_URL        = https://github.com/mcu-tools/mcuboot
+MCUBOOT_TOOLCHAIN  = $(TOPDIR)/tools/esp32/mcuboot_toolchain_esp32.cmake
 
 # Helpers for creating the configuration file
 
@@ -112,8 +113,13 @@ else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 		$(call cfg_val,CONFIG_PARTITION_TABLE_OFFSET,$(CONFIG_ESP32_PARTITION_TABLE_OFFSET)) \
 	} >> $(BOOTLOADER_CONFIG)
 endif
+endif
 
-ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
+ifeq ($(CONFIG_ESPRESSIF_SIMPLE_BOOT),y)
+bootloader:
+	$(Q) echo "Using direct bootloader to boot NuttX."
+
+else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 
 BOOTLOADER_BIN        = $(TOPDIR)/mcuboot-esp32.bin
 BOOTLOADER_SIGNED_BIN = $(TOPDIR)/mcuboot-esp32.signed.bin
@@ -130,7 +136,8 @@ $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_
 		-c esp32 \
 		-f $(BOOTLOADER_CONFIG) \
 		-p $(BOOTLOADER_DIR) \
-		-e $(HALDIR)
+		-e $(HALDIR) \
+		-d $(MCUBOOT_TOOLCHAIN)
 	$(call COPYFILE, $(BOOTLOADER_DIR)/$(BOOTLOADER_OUTDIR)/mcuboot-esp32.bin, $(TOPDIR))
 
 bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)
@@ -184,24 +191,5 @@ clean_bootloader:
 	$(call DELFILE,$(BOOTLOADER_CONFIG))
 	$(call DELFILE,$(TOPDIR)/bootloader-esp32.bin)
 	$(call DELFILE,$(TOPDIR)/partition-table-esp32.bin)
-
-endif
-
-else ifeq ($(CONFIG_ESP32_BOOTLOADER_DOWNLOAD_PREBUILT),y)
-
-BOOTLOADER_VERSION = latest
-BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader/releases/download/$(BOOTLOADER_VERSION)
-
-ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
-
-bootloader:
-	$(call DOWNLOAD,$(BOOTLOADER_URL),bootloader-esp32.bin,$(TOPDIR)/bootloader-esp32.bin)
-	$(call DOWNLOAD,$(BOOTLOADER_URL),partition-table-esp32.bin,$(TOPDIR)/partition-table-esp32.bin)
-
-clean_bootloader:
-	$(call DELFILE,$(TOPDIR)/bootloader-esp32.bin)
-	$(call DELFILE,$(TOPDIR)/partition-table-esp32.bin)
-
-endif
 
 endif

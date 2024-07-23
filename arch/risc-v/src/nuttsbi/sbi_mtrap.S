@@ -51,15 +51,15 @@ machine_trap:
 
   /* Switch to M-mode IRQ stack */
 
-  csrrw      sp, mscratch, sp     /* mscratch has user stack */
+  csrrw      sp, CSR_MSCRATCH, sp /* mscratch has user stack */
   beqz       sp, .Lmtrap          /* Detect recursive traps */
 
   addi       sp, sp, -XCPTCONTEXT_SIZE
   save_ctx   sp
 
-  csrr       a0, mcause           /* exception cause  */
+  csrr       a0, CSR_MCAUSE       /* exception cause  */
 
-  csrrw      s0, mscratch, x0     /* read user stack */
+  csrrw      s0, CSR_MSCRATCH, x0 /* read user stack */
   REGSTORE   s0, REG_X2(sp)       /* original SP      */
 
   /* Check if this is an exception */
@@ -70,20 +70,29 @@ machine_trap:
 
   sll        a0, a0, 1            /* Shift msbit out */
   li         a1, MTIMER_IRQ * 2   /* Machine timer irq ? (shifted left) */
+  beq        a0, a1, 2f
+  li         a1, IPI_IRQ * 2      /* Machine IPI irq ? (shifted left) */
   bne        a0, a1, 1f
 
   /* Delegate interrupt to S-mode handler */
 
+  li         a0, MIP_MSIP
+  csrc       CSR_MIE, a0
+  li         a0, MIP_SSIP
+  csrs       CSR_MIP, a0
+  j          1f
+
+2:
   li         a0, MIP_MTIP
-  csrc       mie, a0
+  csrc       CSR_MIE, a0
   li         a0, MIP_STIP
-  csrs       mip, a0
+  csrs       CSR_MIP, a0
 
 1:
   /* Restore mscratch */
 
   addi       s0, sp, XCPTCONTEXT_SIZE
-  csrw       mscratch, s0         /* original mscratch */
+  csrw       CSR_MSCRATCH, s0     /* original mscratch */
 
   /* Restore original context */
 
@@ -107,17 +116,18 @@ machine_trap:
 
   mv         a0, sp
   jal        x1, sbi_mcall_handle
-  csrr       a0, mepc
+  csrr       a0, CSR_MEPC
   addi       a0, a0, 4
-  csrw       mepc, a0
+  csrw       CSR_MEPC, a0
   j          1b
 
   /* An unhandled trap to M-mode: this is an error and we cannot proceed */
 
 .Lmtrap:
 
-  csrr        a0, mcause         /* Interrupt cause [arg0] */
-  csrr        a1, mepc           /* Interrupt PC (instruction) [arg1] */
+  csrr        a0, CSR_MCAUSE     /* Interrupt cause [arg0] */
+  csrr        a1, CSR_MEPC       /* Interrupt PC (instruction) [arg1] */
+  csrr        a2, CSR_MTVAL      /* The MTVAL value [arg2] */
   jal         x1, sbi_mexception
   j           __start
 

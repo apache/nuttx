@@ -35,4 +35,9 @@ config ARCH_CHIP_QEMU_RV_ISA_C
 	default n
 	select ARCH_RV_ISA_C
 
+config ARCH_CHIP_QEMU_RV_ISA_V
+	bool "Standard Extension for Vector Instructions"
+	default n
+	select ARCH_RV_ISA_V
+
 endif

@@ -177,7 +177,7 @@ static int nxtask_restart(pid_t pid)
 
   /* Add the task to the inactive task list */
 
-  dq_addfirst((FAR dq_entry_t *)tcb, &g_inactivetasks);
+  dq_addfirst((FAR dq_entry_t *)tcb, list_inactivetasks());
   tcb->cmn.task_state = TSTATE_TASK_INACTIVE;
 
 #ifdef CONFIG_SMP

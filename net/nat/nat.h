@@ -36,13 +36,39 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 
-#if defined(CONFIG_NET_NAT) && defined(CONFIG_NET_IPv4)
+#ifdef CONFIG_NET_NAT
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Adjust checksums in headers. */
+
+#define nat_chksum_adjust(chksum,optr,nptr,len) \
+  net_chksum_adjust((FAR uint16_t *)(chksum), (FAR uint16_t *)(optr), len, \
+                    (FAR uint16_t *)(nptr), len)
+
+/* Getting IP & Port to manipulate from L3/L4 header. */
+
+#define MANIP_IPADDR(iphdr,manip_type) \
+  ((manip_type) == NAT_MANIP_SRC ? (iphdr)->srcipaddr : (iphdr)->destipaddr)
+
+#define MANIP_PORT(l4hdr,manip_type) \
+  ((manip_type) == NAT_MANIP_SRC ? &(l4hdr)->srcport : &(l4hdr)->destport)
+
+/* Getting peer IP & Port (just other than MANIP) */
+
+#define PEER_IPADDR(iphdr,manip_type) \
+  ((manip_type) != NAT_MANIP_SRC ? (iphdr)->srcipaddr : (iphdr)->destipaddr)
+
+#define PEER_PORT(l4hdr,manip_type) \
+  ((manip_type) != NAT_MANIP_SRC ? &(l4hdr)->srcport : &(l4hdr)->destport)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-struct ipv4_nat_entry
+struct ipv4_nat_entry_s
 {
   hash_node_t hash_inbound;
   hash_node_t hash_outbound;
@@ -55,17 +81,52 @@ struct ipv4_nat_entry
    *                |----------------|
    *
    * Full cone NAT only need to save local ip:port and external ip:port.
+   * Symmetric NAT need to save peer ip:port as well.
    * For ICMP, save id in port field.
    */
 
   in_addr_t  local_ip;       /* IP address of the local (private) host. */
   in_addr_t  external_ip;    /* External IP address. */
+#ifdef CONFIG_NET_NAT44_SYMMETRIC
+  in_addr_t  peer_ip;        /* Peer IP address. */
+#endif
   uint16_t   local_port;     /* Port of the local (private) host. */
   uint16_t   external_port;  /* The external port of local (private) host. */
+#ifdef CONFIG_NET_NAT44_SYMMETRIC
+  uint16_t   peer_port;      /* Peer port. */
+#endif
   uint8_t    protocol;       /* L4 protocol (TCP, UDP etc). */
 
   int32_t    expire_time;    /* The expiration time of this entry. */
 };
+
+struct ipv6_nat_entry_s
+{
+  hash_node_t    hash_inbound;
+  hash_node_t    hash_outbound;
+
+  net_ipv6addr_t local_ip;      /* IP address of the local host. */
+  net_ipv6addr_t external_ip;   /* External IP address. */
+#ifdef CONFIG_NET_NAT66_SYMMETRIC
+  net_ipv6addr_t peer_ip;       /* Peer IP address. */
+#endif
+  uint16_t       local_port;    /* Port of the local host. */
+  uint16_t       external_port; /* The external port of local host. */
+#ifdef CONFIG_NET_NAT66_SYMMETRIC
+  uint16_t       peer_port;     /* Peer port. */
+#endif
+  uint8_t        protocol;      /* L4 protocol (TCP, UDP etc). */
+
+  int32_t        expire_time;   /* The expiration time of this entry. */
+};
+
+typedef struct ipv4_nat_entry_s ipv4_nat_entry_t;
+typedef struct ipv6_nat_entry_s ipv6_nat_entry_t;
+
+typedef CODE void (*ipv4_nat_entry_cb_t)(FAR ipv4_nat_entry_t *entry,
+                                         FAR void *arg);
+typedef CODE void (*ipv6_nat_entry_cb_t)(FAR ipv6_nat_entry_t *entry,
+                                         FAR void *arg);
 
 /* NAT IP/Port manipulate type, to indicate whether to manipulate source or
  * destination IP/Port in a packet.
@@ -82,7 +143,7 @@ enum nat_manip_type_e
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ipv4_nat_enable
+ * Name: nat_enable
  *
  * Description:
  *   Enable NAT function on a network device.
@@ -96,10 +157,10 @@ enum nat_manip_type_e
  *
  ****************************************************************************/
 
-int ipv4_nat_enable(FAR struct net_driver_s *dev);
+int nat_enable(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: ipv4_nat_disable
+ * Name: nat_disable
  *
  * Description:
  *   Disable NAT function on a network device.
@@ -113,38 +174,39 @@ int ipv4_nat_enable(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-int ipv4_nat_disable(FAR struct net_driver_s *dev);
+int nat_disable(FAR struct net_driver_s *dev);
 
 /****************************************************************************
- * Name: ipv4_nat_inbound
+ * Name: ipv4/ipv6_nat_inbound
  *
  * Description:
  *   Check if a received packet belongs to a NAT entry. If so, translate it.
  *
  * Input Parameters:
- *   dev   - The device on which the packet is received.
- *   ipv4  - Points to the IPv4 header with dev->d_buf.
- *
- * Returned Value:
- *   Zero is returned if NAT is successfully applied, or is not enabled for
- *   this packet;
- *   A negated errno value is returned if error occured.
+ *   dev       - The device on which the packet is received.
+ *   ipv4/ipv6 - Points to the IP header with dev->d_buf.
  *
  ****************************************************************************/
 
-int ipv4_nat_inbound(FAR struct net_driver_s *dev,
-                     FAR struct ipv4_hdr_s *ipv4);
+#ifdef CONFIG_NET_NAT44
+void ipv4_nat_inbound(FAR struct net_driver_s *dev,
+                      FAR struct ipv4_hdr_s *ipv4);
+#endif
+#ifdef CONFIG_NET_NAT66
+void ipv6_nat_inbound(FAR struct net_driver_s *dev,
+                      FAR struct ipv6_hdr_s *ipv6);
+#endif
 
 /****************************************************************************
- * Name: ipv4_nat_outbound
+ * Name: ipv4/ipv6_nat_outbound
  *
  * Description:
  *   Check if we want to perform NAT with this outbound packet before sending
  *   it. If so, translate it.
  *
  * Input Parameters:
- *   dev   - The device on which the packet will be sent.
- *   ipv4  - Points to the IPv4 header to be filled into dev->d_buf later.
+ *   dev        - The device on which the packet will be sent.
+ *   ipv4/ipv6  - Points to the IP header to be filled into dev->d_buf later.
  *   manip_type - Whether local IP/Port is in source or destination.
  *
  * Returned Value:
@@ -154,17 +216,25 @@ int ipv4_nat_inbound(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_NAT44
 int ipv4_nat_outbound(FAR struct net_driver_s *dev,
                       FAR struct ipv4_hdr_s *ipv4,
                       enum nat_manip_type_e manip_type);
+#endif
+#ifdef CONFIG_NET_NAT66
+int ipv6_nat_outbound(FAR struct net_driver_s *dev,
+                      FAR struct ipv6_hdr_s *ipv6,
+                      enum nat_manip_type_e manip_type);
+#endif
 
 /****************************************************************************
- * Name: ipv4_nat_port_inuse
+ * Name: nat_port_inuse
  *
  * Description:
  *   Check whether a port is currently used by NAT.
  *
  * Input Parameters:
+ *   domain        - The domain of the packet.
  *   protocol      - The L4 protocol of the packet.
  *   ip            - The IP bind with the port (in network byte order).
  *   port          - The port number to check (in network byte order).
@@ -174,27 +244,91 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-bool ipv4_nat_port_inuse(uint8_t protocol, in_addr_t ip, uint16_t port);
+bool nat_port_inuse(uint8_t domain, uint8_t protocol,
+                    FAR const union ip_addr_u *ip, uint16_t port);
 
 /****************************************************************************
- * Name: ipv4_nat_entry_clear
+ * Name: nat_port_select
+ *
+ * Description:
+ *   Select an available port number for TCP/UDP protocol, or id for ICMP.
+ *
+ * Input Parameters:
+ *   dev         - The device on which the packet will be sent.
+ *   domain      - The domain of the packet.
+ *   protocol    - The L4 protocol of the packet.
+ *   external_ip - The external IP bind with the port.
+ *   local_port  - The local port of the packet, as reference.
+ *
+ * Returned Value:
+ *   External port number on success; 0 on failure
+ *
+ ****************************************************************************/
+
+uint16_t nat_port_select(FAR struct net_driver_s *dev,
+                         uint8_t domain, uint8_t protocol,
+                         FAR const union ip_addr_u *external_ip,
+                         uint16_t local_port);
+
+/****************************************************************************
+ * Name: nat_expire_time
+ *
+ * Description:
+ *   Get the expiration time of a specific protocol.
+ *
+ * Input Parameters:
+ *   protocol - The L4 protocol of the packet.
+ *
+ * Returned Value:
+ *   The expiration time of the protocol.
+ *
+ ****************************************************************************/
+
+uint32_t nat_expire_time(uint8_t protocol);
+
+/****************************************************************************
+ * Name: ipv4/ipv6_nat_entry_foreach
+ *
+ * Description:
+ *   Call the callback function for each NAT entry.
+ *
+ * Input Parameters:
+ *   cb  - The callback function.
+ *   arg - The argument to pass to the callback function.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_NAT44
+void ipv4_nat_entry_foreach(ipv4_nat_entry_cb_t cb, FAR void *arg);
+#endif
+#ifdef CONFIG_NET_NAT66
+void ipv6_nat_entry_foreach(ipv6_nat_entry_cb_t cb, FAR void *arg);
+#endif
+
+/****************************************************************************
+ * Name: ipv4/ipv6_nat_entry_clear
  *
  * Description:
  *   Clear all entries related to dev. Called when NAT will be disabled on
  *   any device.
  *
  * Input Parameters:
- *   dev        - The device on which NAT entries will be cleared.
+ *   dev - The device on which NAT entries will be cleared.
  *
  * Assumptions:
  *   NAT is initialized.
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_NAT44
 void ipv4_nat_entry_clear(FAR struct net_driver_s *dev);
+#endif
+#ifdef CONFIG_NET_NAT66
+void ipv6_nat_entry_clear(FAR struct net_driver_s *dev);
+#endif
 
 /****************************************************************************
- * Name: ipv4_nat_inbound_entry_find
+ * Name: ipv4/ipv6_nat_inbound_entry_find
  *
  * Description:
  *   Find the inbound entry in NAT entry list.
@@ -203,6 +337,8 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev);
  *   protocol      - The L4 protocol of the packet.
  *   external_ip   - The external ip of the packet, supports INADDR_ANY.
  *   external_port - The external port of the packet.
+ *   peer_ip       - The peer ip of the packet.
+ *   peer_port     - The peer port of the packet.
  *   refresh       - Whether to refresh the selected entry.
  *
  * Returned Value:
@@ -210,12 +346,23 @@ void ipv4_nat_entry_clear(FAR struct net_driver_s *dev);
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
+#ifdef CONFIG_NET_NAT44
+FAR ipv4_nat_entry_t *
 ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
-                            uint16_t external_port, bool refresh);
+                            uint16_t external_port, in_addr_t peer_ip,
+                            uint16_t peer_port, bool refresh);
+#endif
+#ifdef CONFIG_NET_NAT66
+FAR ipv6_nat_entry_t *
+ipv6_nat_inbound_entry_find(uint8_t protocol,
+                            const net_ipv6addr_t external_ip,
+                            uint16_t external_port,
+                            const net_ipv6addr_t peer_ip,
+                            uint16_t peer_port, bool refresh);
+#endif
 
 /****************************************************************************
- * Name: ipv4_nat_outbound_entry_find
+ * Name: ipv4/ipv6_nat_outbound_entry_find
  *
  * Description:
  *   Find the outbound entry in NAT entry list. Create one if corresponding
@@ -226,6 +373,8 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *   protocol   - The L4 protocol of the packet.
  *   local_ip   - The local ip of the packet.
  *   local_port - The local port of the packet.
+ *   peer_ip    - The peer ip of the packet.
+ *   peer_port  - The peer port of the packet.
  *   try_create - Try create the entry if no entry found.
  *
  * Returned Value:
@@ -233,10 +382,21 @@ ipv4_nat_inbound_entry_find(uint8_t protocol, in_addr_t external_ip,
  *
  ****************************************************************************/
 
-FAR struct ipv4_nat_entry *
+#ifdef CONFIG_NET_NAT44
+FAR ipv4_nat_entry_t *
 ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
                              in_addr_t local_ip, uint16_t local_port,
+                             in_addr_t peer_ip, uint16_t peer_port,
                              bool try_create);
+#endif
+#ifdef CONFIG_NET_NAT66
+FAR ipv6_nat_entry_t *
+ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
+                             const net_ipv6addr_t local_ip,
+                             uint16_t local_port,
+                             const net_ipv6addr_t peer_ip,
+                             uint16_t peer_port, bool try_create);
+#endif
 
-#endif /* CONFIG_NET_NAT && CONFIG_NET_IPv4 */
+#endif /* CONFIG_NET_NAT */
 #endif /* __NET_NAT_NAT_H */

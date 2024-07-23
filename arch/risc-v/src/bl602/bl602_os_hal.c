@@ -933,7 +933,7 @@ void *bl_os_timer_create(void *func, void *argv)
   struct timer_adpt *timer = kmm_malloc(sizeof(struct timer_adpt));
   if (!timer)
     {
-      assert(0);
+      ASSERT(0);
     }
 
   memset((void *)timer, 0, sizeof(struct timer_adpt));
@@ -1066,7 +1066,7 @@ void *bl_os_workqueue_create(void)
   struct work_s *work = kmm_calloc(1, sizeof(struct work_s));
   if (!work)
     {
-      assert(0);
+      ASSERT(0);
     }
 
   return (void *)work;

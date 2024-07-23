@@ -91,6 +91,10 @@ if(CONFIG_ADC)
   if(CONFIG_ADC_LTC1867L)
     list(APPEND SRCS ltc1867l.c)
   endif()
+
+  if(CONFIG_ADC_HX711)
+    list(APPEND SRCS hx711.c)
+  endif()
 endif()
 
 if(CONFIG_LMP92001)

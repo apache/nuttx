@@ -361,8 +361,8 @@
 #define ECMCAP_RVC_OK              (1 << 1)  /* Frames received without errors */
 #define ECMCAP_XMIT_ERROR          (1 << 2)  /* Frames not transmitted, or transmitted with errors */
 #define ECMCAP_RCV_ERROR           (1 << 3)  /* Frames received with errors that are not delivered
-                                           * to the USB host
-                                           */
+                                              * to the USB host
+                                              */
 #define ECMCAP_RCV_NO_BUFFER       (1 << 4)  /* Frame missed, no buffers */
 #define ECMCAP_DIR_BYTES_XMIT      (1 << 5)  /* Directed bytes transmitted without errors */
 #define ECMCAP_DIR_FRAMES_XMIT     (1 << 6)  /* Directed frames transmitted without errors */

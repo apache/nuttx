@@ -27,15 +27,24 @@
 
 #include <nuttx/sched.h>
 
+#include <assert.h>
+#include <stdio.h>
 #include <sys/types.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define backtrace(buffer, size) sched_backtrace(_SCHED_GETTID(), \
-                                                buffer, size, 0)
-#define dump_stack()            sched_dumpstack(_SCHED_GETTID())
+/* 3: ' 0x' prefix */
+
+#define BACKTRACE_PTR_FMT_WIDTH  ((int)sizeof(uintptr_t) * 2 + 3)
+
+/* Buffer size needed to hold formatted `depth` backtraces */
+
+#define BACKTRACE_BUFFER_SIZE(d) (BACKTRACE_PTR_FMT_WIDTH * (d) + 1)
+
+#define backtrace(b, s) sched_backtrace(_SCHED_GETTID(), b, s, 0)
+#define dump_stack()    sched_dumpstack(_SCHED_GETTID())
 
 /****************************************************************************
  * Public Function Prototypes
@@ -52,6 +61,8 @@ extern "C"
 
 FAR char **backtrace_symbols(FAR void *const *buffer, int size);
 void backtrace_symbols_fd(FAR void *const *buffer, int size, int fd);
+int backtrace_format(FAR char *buffer, int size,
+                     FAR void *backtrace[], int depth);
 
 #undef EXTERN
 #if defined(__cplusplus)

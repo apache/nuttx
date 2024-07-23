@@ -42,16 +42,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define _lock_t int
-
 #define ROM_MUTEX_MAGIC   0xbb10c433
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-static mutex_t g_nxlock_common;
-static mutex_t g_nxlock_recursive;
 
 /* Forward declaration */
 
@@ -173,64 +168,108 @@ void _raise_r(struct _reent *r)
 
 void _lock_init(_lock_t *lock)
 {
-  nxmutex_init(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
+  mutex_t *mutex = (mutex_t *)kmm_malloc(sizeof(mutex_t));
+
+  nxmutex_init(mutex);
+
+  *lock = (_lock_t)mutex;
 }
 
 void _lock_init_recursive(_lock_t *lock)
 {
-  nxmutex_init(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
+  rmutex_t *rmutex = (rmutex_t *)kmm_malloc(sizeof(rmutex_t));
+
+  nxrmutex_init(rmutex);
+
+  *lock = (_lock_t)rmutex;
 }
 
 void _lock_close(_lock_t *lock)
 {
-  nxmutex_destroy(&g_nxlock_common);
+  mutex_t *mutex = (mutex_t *)(*lock);
+
+  nxmutex_destroy(mutex);
+  kmm_free(*lock);
   *lock = 0;
 }
 
 void _lock_close_recursive(_lock_t *lock)
 {
-  nxmutex_destroy(&g_nxlock_recursive);
+  rmutex_t *rmutex = (rmutex_t *)(*lock);
+
+  nxrmutex_destroy(rmutex);
+  kmm_free(*lock);
   *lock = 0;
 }
 
 void _lock_acquire(_lock_t *lock)
 {
-  nxmutex_lock(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
+  if ((*lock) == NULL)
+    {
+      mutex_t *mutex = (mutex_t *)kmm_malloc(sizeof(mutex_t));
+
+      nxmutex_init(mutex);
+
+      *lock = (_lock_t)mutex;
+    }
+
+  nxmutex_lock((mutex_t *)(*lock));
 }
 
 void _lock_acquire_recursive(_lock_t *lock)
 {
-  nxmutex_lock(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
+  if ((*lock) == NULL)
+    {
+      rmutex_t *rmutex = (rmutex_t *)kmm_malloc(sizeof(rmutex_t));
+
+      nxrmutex_init(rmutex);
+
+      *lock = (_lock_t)rmutex;
+    }
+
+  nxrmutex_lock((rmutex_t *)(*lock));
 }
 
 int _lock_try_acquire(_lock_t *lock)
 {
-  nxmutex_trylock(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
-  return 0;
+  if ((*lock) == NULL)
+    {
+      mutex_t *mutex = (mutex_t *)kmm_malloc(sizeof(mutex_t));
+
+      nxmutex_init(mutex);
+
+      *lock = (_lock_t)mutex;
+    }
+
+  return nxmutex_trylock((mutex_t *)(*lock));
 }
 
 int _lock_try_acquire_recursive(_lock_t *lock)
 {
-  nxmutex_trylock(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
-  return 0;
+  if ((*lock) == NULL)
+    {
+      rmutex_t *rmutex = (rmutex_t *)kmm_malloc(sizeof(rmutex_t));
+
+      nxrmutex_init(rmutex);
+
+      *lock = (_lock_t)rmutex;
+    }
+
+  return nxrmutex_trylock((rmutex_t *)(*lock));
 }
 
 void _lock_release(_lock_t *lock)
 {
-  nxmutex_unlock(&g_nxlock_common);
-  nxsem_get_value(&g_nxlock_common.sem, lock);
+  mutex_t *mutex = (mutex_t *)(*lock);
+
+  nxmutex_unlock(mutex);
 }
 
 void _lock_release_recursive(_lock_t *lock)
 {
-  nxmutex_unlock(&g_nxlock_recursive);
-  nxsem_get_value(&g_nxlock_recursive.sem, lock);
+  rmutex_t *rmutex = (rmutex_t *)(*lock);
+
+  nxrmutex_unlock(rmutex);
 }
 
 void __retarget_lock_init(_lock_t *lock)
@@ -376,6 +415,9 @@ static const struct syscall_stub_table g_stub_table =
 
 void esp_setup_syscall_table(void)
 {
+  static_assert(sizeof(struct __lock) >= sizeof(mutex_t),
+                "Invalid size of struct __lock");
+
   syscall_table_ptr = (struct syscall_stub_table *)&g_stub_table;
 
   /* Newlib 3.3.0 is used in ROM, built with _RETARGETABLE_LOCKING.

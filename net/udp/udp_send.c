@@ -58,8 +58,66 @@
 
 #include "devif/devif.h"
 #include "inet/inet.h"
+#include "socket/socket.h"
 #include "utils/utils.h"
 #include "udp/udp.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: udp_send_loopback
+ *
+ * Description:
+ *   Send a copy of the UDP packet to ourself.
+ *
+ * Input Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_SOCKOPTS) && \
+    (defined(CONFIG_NET_IGMP) || defined(CONFIG_NET_MLD))
+static void udp_send_loopback(FAR struct net_driver_s *dev)
+{
+  FAR struct iob_s *iob = netdev_iob_clone(dev, true);
+  if (iob == NULL)
+    {
+      nerr("ERROR: IOB clone failed when looping UDP.\n");
+      return;
+    }
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  if (IFF_IS_IPv4(dev->d_flags))
+#endif
+    {
+      ninfo("IPv4 frame\n");
+      NETDEV_RXIPV4(dev);
+      ipv4_input(dev);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else
+#endif
+    {
+      ninfo("IPv6 frame\n");
+      NETDEV_RXIPV6(dev);
+      ipv6_input(dev);
+    }
+#endif /* CONFIG_NET_IPv6 */
+
+  /* Restore device IOB with backup IOB */
+
+  netdev_iob_replace(dev, iob);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -126,7 +184,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
           dev->d_len        = dev->d_sndlen + IPv4UDP_HDRLEN;
 
           ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_UDP,
-                            &dev->d_ipaddr, &raddr, conn->sconn.ttl,
+                            &dev->d_ipaddr, &raddr, conn->sconn.s_ttl,
                             conn->sconn.s_tos, NULL);
 
 #ifdef CONFIG_NET_STATISTICS
@@ -161,7 +219,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
           ipv6_build_header(IPv6BUF, dev->d_len, IP_PROTO_UDP,
                             laddr, conn->u.ipv6.raddr,
-                            conn->sconn.ttl, conn->sconn.s_tclass);
+                            conn->sconn.s_ttl, conn->sconn.s_tclass);
 
           /* The total length to send is the size of the application data
            * plus the IPv6 and UDP headers (and, eventually, the link layer
@@ -192,9 +250,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-      if (conn->domain == PF_INET ||
-          (conn->domain == PF_INET6 &&
-           ip6_is_ipv4addr((FAR struct in6_addr *)conn->u.ipv6.raddr)))
+      if (IFF_IS_IPv4(dev->d_flags))
 #endif
         {
           udp->udpchksum = ~udp_ipv4_chksum(dev);
@@ -221,6 +277,32 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 #ifdef CONFIG_NET_STATISTICS
       g_netstats.udp.sent++;
 #endif
+
+#ifdef CONFIG_NET_SOCKOPTS
+      /* Try loopback multicast to ourself. */
+
+#ifdef CONFIG_NET_IGMP
+      if (_SO_GETOPT(conn->sconn.s_options, IP_MULTICAST_LOOP) &&
+#ifdef CONFIG_NET_IPv6
+          IFF_IS_IPv4(dev->d_flags) &&
+#endif
+          IN_MULTICAST(NTOHL(raddr)))
+        {
+          udp_send_loopback(dev);
+        }
+#endif /* CONFIG_NET_IGMP */
+
+#ifdef CONFIG_NET_MLD
+      if (_SO_GETOPT(conn->sconn.s_options, IPV6_MULTICAST_LOOP) &&
+#ifdef CONFIG_NET_IPv4
+          IFF_IS_IPv6(dev->d_flags) &&
+#endif
+          IN6_IS_ADDR_MULTICAST((FAR struct in6_addr *)conn->u.ipv6.raddr))
+        {
+          udp_send_loopback(dev);
+        }
+#endif /* CONFIG_NET_MLD */
+#endif /* CONFIG_NET_SOCKOPTS */
     }
 }
 

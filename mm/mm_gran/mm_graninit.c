@@ -132,6 +132,7 @@ GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
       /* Initialize non-zero elements of the granules heap info structure */
 
       priv->log2gran  = log2gran;
+      priv->log2align = log2align;
       priv->ngranules = ngranules;
       priv->heapstart = alignedstart;
 

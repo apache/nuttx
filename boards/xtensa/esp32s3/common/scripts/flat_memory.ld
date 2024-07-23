@@ -48,6 +48,8 @@
 
 #ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
 #define SRAM_IRAM_END       0x403ba000
+#elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
+#define SRAM_IRAM_END       0x403c0000
 #else
 #define SRAM_IRAM_END       0x403cc700
 #endif
@@ -77,6 +79,8 @@
 #  define FLASH_SIZE        0x2000000
 #endif
 
+#define RESERVE_RTC_MEM     24
+
 MEMORY
 {
 #ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
@@ -91,6 +95,16 @@ MEMORY
 
   metadata (RX) :        org = CONFIG_ESP32S3_APP_MCUBOOT_HEADER_SIZE, len = 0x20
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
+                         len = FLASH_SIZE - ORIGIN(ROM)
+#elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  /* The 0x20 offset is a convenience for the app binary image generation.
+   * Flash cache has 64KB pages. The .bin file which is flashed to the chip
+   * has a 0x18 byte file header, and each segment has a 0x08 byte segment
+   * header. Setting this offset makes it simple to meet the flash cache MMU's
+   * constraint that (paddr % 64KB == vaddr % 64KB).
+   */
+
+  ROM (RX) :             org = 0x20,
                          len = FLASH_SIZE - ORIGIN(ROM)
 #endif
 
@@ -109,12 +123,7 @@ MEMORY
 #ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
   irom0_0_seg (RX) :                 org = 0x42000000, len = FLASH_SIZE
 #else
-  /* The 0x20 offset is a convenience for the app binary image generation.
-   * Flash cache has 64KB pages. The .bin file which is flashed to the chip
-   * has a 0x18 byte file header, and each segment has a 0x08 byte segment
-   * header. Setting this offset makes it simple to meet the flash cache MMU's
-   * constraint that (paddr % 64KB == vaddr % 64KB).
-   */
+  /* (See ROM segment above for meaning of 0x20 offset.) */
 
   irom0_0_seg (RX) :                 org = 0x42000020, len = FLASH_SIZE - 0x20
 #endif
@@ -144,23 +153,27 @@ MEMORY
   drom0_0_seg (R) :      org = 0x3c000000 + ORIGIN(ROM),
                          len = FLASH_SIZE - ORIGIN(ROM)
 #else
-  /* The 0x20 offset is a convenience for the app binary image generation.
-   * Flash cache has 64KB pages. The .bin file which is flashed to the chip
-   * has a 0x18 byte file header, and each segment has a 0x08 byte segment
-   * header. Setting this offset makes it simple to meet the flash cache MMU's
-   * constraint that (paddr % 64KB == vaddr % 64KB).
-   */
+  /* (See ROM segment above for meaning of 0x20 offset.) */
 
   drom0_0_seg (R) :                  org = 0x3c000020, len = FLASH_SIZE - 0x20
 #endif
 
   /* RTC fast memory (executable). Persists over deep sleep. */
 
-  rtc_iram_seg(RWX) :                org = 0x600fe000, len = 0x2000
+  rtc_iram_seg(RWX) :                org = 0x600fe000, len = 0x2000 - RESERVE_RTC_MEM
 
   /* RTC fast memory (same block as above), viewed from data bus */
 
-  rtc_data_seg(RW)  :                org = 0x600fe000, len = 0x2000
+  rtc_data_seg(RW)  :                org = 0x600fe000, len = 0x2000 - RESERVE_RTC_MEM
+
+  /* We reduced the size of rtc_iram_seg by RESERVE_RTC_MEM value.
+     It reserves the amount of RTC fast memory that we use for this memory segment.
+     This segment is intended for keeping:
+       - (lower addr) rtc timer data (s_rtc_timer_retain_mem, see esp_clk.c files).
+       - (higher addr) bootloader rtc data (s_bootloader_retain_mem, when a Kconfig option is on).
+     The aim of this is to keep data that will not be moved around and have a fixed address.
+  */
+  rtc_reserved_seg(RW) :             org = 0x600fe000 + 0x2000 - RESERVE_RTC_MEM, len = RESERVE_RTC_MEM
 
   /* RTC slow memory (data accessible). Persists over deep sleep.
    * Start of RTC slow memory is reserved for ULP co-processor code + data,
