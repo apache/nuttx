@@ -55,7 +55,7 @@
 
 /****************************************************************************
  * Name:
- *   read_/write_/zero_ sysreg
+ *   read_/write_/zero_/modify_ sysreg
  *
  * Description:
  *
@@ -83,6 +83,10 @@
     __asm__ volatile ("msr " STRINGIFY(reg) ", xzr" \
                       ::: "memory");                \
   })
+
+#define modify_sysreg(v,m,a)                        \
+  write_sysreg((read_sysreg(a) & ~(m)) |            \
+               ((uintptr_t)(v) & (m)), a)
 
 /****************************************************************************
  * Inline functions
