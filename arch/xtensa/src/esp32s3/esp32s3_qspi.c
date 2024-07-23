@@ -236,9 +236,9 @@ static void esp32s3_qspi_free(struct qspi_dev_s *dev, void *buffer);
 #ifdef CONFIG_ESP32S3_SPI_DMA
 static int esp32s3_qspi_interrupt(int irq, void *context, void *arg);
 static int esp32s3_qspi_wait_sem(struct esp32s3_qspi_priv_s *priv);
-static void esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv);
+static int esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv);
 #endif
-static void esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv);
+static int esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv);
 static void esp32s3_qspi_deinit(struct esp32s3_qspi_priv_s *priv);
 
 /****************************************************************************
@@ -1171,12 +1171,12 @@ static int esp32s3_qspi_wait_sem(struct esp32s3_qspi_priv_s *priv)
  *   priv - QSPI private state data
  *
  * Returned Value:
- *   None.
+ *   Zero on success; a negated errno on failure
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-void esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv)
+static int esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv)
 {
   const struct esp32s3_qspi_config_s *config = priv->config;
 
@@ -1188,24 +1188,21 @@ void esp32s3_qspi_init_dma(struct esp32s3_qspi_priv_s *priv)
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, config->dma_rst_bit, 0);
 
-  /* Initialize GDMA controller */
-
-  esp32s3_dma_init();
-
   /* Request a GDMA channel for QSPI peripheral */
 
   priv->dma_channel = esp32s3_dma_request(config->dma_periph, 1, 1, true);
   if (priv->dma_channel < 0)
     {
       spierr("Failed to allocate GDMA channel\n");
-
-      DEBUGPANIC();
+      return ERROR;
     }
 
   /* Disable segment transaction mode for QSPI Master */
 
   putreg32((SPI_SLV_RX_SEG_TRANS_CLR_EN_M | SPI_SLV_TX_SEG_TRANS_CLR_EN_M),
            SPI_DMA_CONF_REG(config->id));
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1227,10 +1224,6 @@ void esp32s3_qspi_dma_deinit(struct esp32s3_qspi_priv_s *priv)
   /* Release a DMA channel from peripheral */
 
   esp32s3_dma_release(priv->dma_channel);
-
-  /* Deinitialize DMA controller */
-
-  esp32s3_dma_deinit();
 
   /* Disable DMA clock for the SPI peripheral */
 
@@ -1368,11 +1361,11 @@ static void esp32s3_qspi_init_gpio(struct esp32s3_qspi_priv_s *priv)
  *   priv - QSPI private state data
  *
  * Returned Value:
- *   None.
+ *   Zero on success; a negated errno on failure
  *
  ****************************************************************************/
 
-static void esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv)
+static int esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv)
 {
   const struct esp32s3_qspi_config_s *config = priv->config;
   uint8_t id = config->id;
@@ -1394,12 +1387,19 @@ static void esp32s3_qspi_init(struct esp32s3_qspi_priv_s *priv)
   putreg32(0, SPI_CTRL_REG(id));
 
 #ifdef CONFIG_ESP32S3_SPI_DMA
-  esp32s3_qspi_init_dma(priv);
+  if (esp32s3_qspi_init_dma(priv) != OK)
+    {
+      modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, priv->config->clk_bit);
+      modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->clk_bit, 0);
+      return ERROR;
+    }
 #endif
 
   esp32s3_qspi_setfrequency(&priv->spi_dev, QSPI_DEFAULT_FREQ);
   esp32s3_qspi_setbits(&priv->spi_dev, QSPI_DEFAULT_WIDTH);
   esp32s3_qspi_setmode(&priv->spi_dev, QSPI_DEFAULT_MODE);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1603,7 +1603,18 @@ struct qspi_dev_s *esp32s3_qspibus_initialize(int port)
   up_enable_irq(priv->config->irq);
 #endif
 
-  esp32s3_qspi_init(priv);
+  if (esp32s3_qspi_init(priv) != OK)
+    {
+#ifdef CONFIG_ESP32S3_SPI_DMA
+      up_disable_irq(priv->config->irq);
+      esp32s3_teardown_irq(priv->cpu, priv->config->periph, priv->cpuint);
+      irq_detach(priv->config->irq);
+      priv->cpuint = -ENOMEM;
+#endif
+      nxmutex_unlock(&priv->lock);
+      return NULL;
+    }
+
   priv->refs++;
   nxmutex_unlock(&priv->lock);
   return spi_dev;
