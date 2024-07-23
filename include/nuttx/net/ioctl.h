@@ -107,6 +107,7 @@
 
 #define TUNSETIFF        _SIOC(0x0028)  /* Set TUN/TAP interface */
 #define TUNGETIFF        _SIOC(0x0035)  /* Get TUN/TAP interface */
+#define TUNSETCARRIER    _SIOC(0x0040)  /* Set TUN/TAP carrier state */
 
 /* Telnet driver ************************************************************/
 
