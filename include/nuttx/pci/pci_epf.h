@@ -128,6 +128,7 @@ struct pci_epf_device_s
   FAR struct pci_epf_driver_s *driver;
   FAR const struct pci_epf_device_id_s *id;
   struct list_node node;
+  struct list_node epc_node;
 
   /* Mutex to protect against concurrent access of pci_epf_ops_s */
 

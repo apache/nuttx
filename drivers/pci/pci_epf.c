@@ -448,7 +448,7 @@ int pci_epf_register_driver(FAR struct pci_epf_driver_s *drv)
           continue;
         }
 
-      epc = pci_get_epc(epf->name);
+      epc = pci_get_epc(epf->epc_name);
       if (epc == NULL)
         {
           ret = -ENODEV;
