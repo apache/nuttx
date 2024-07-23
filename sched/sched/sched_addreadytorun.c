@@ -100,6 +100,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
+      up_update_task(btcb);
       ret = true;
     }
   else
@@ -269,6 +270,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        */
 
       dq_addfirst_nonempty((FAR dq_entry_t *)btcb, tasklist);
+      up_update_task(btcb);
 
       DEBUGASSERT(task_state == TSTATE_TASK_RUNNING);
       btcb->cpu        = cpu;
