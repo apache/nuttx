@@ -80,7 +80,7 @@ MEMORY
   /* Instruction RAM */
 
   UIRAM (RWX) :     org = SRAM_IRAM_ORG, len = 16K
-  KIRAM (RWX) :     org = ORIGIN(UIRAM) + LENGTH(UIRAM), len = 32K
+  KIRAM (RWX) :     org = ORIGIN(UIRAM) + LENGTH(UIRAM), len = 48K
 
   /* Flash mapped instruction data. */
 

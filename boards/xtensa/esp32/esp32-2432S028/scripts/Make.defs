@@ -23,8 +23,6 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
-ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
-
 # Pick the linker scripts from the board level if they exist, if not
 # pick the common linker scripts.
 

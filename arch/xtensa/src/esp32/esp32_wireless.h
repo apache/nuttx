@@ -86,8 +86,47 @@ struct esp_queuecache_s
 };
 
 /****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nuttx_err_to_freertos
+ *
+ * Description:
+ *   Transform from Nuttx OS error code to FreeRTOS's pdTRUE or pdFALSE.
+ *
+ * Input Parameters:
+ *   ret - NuttX error code
+ *
+ * Returned Value:
+ *   Wi-Fi adapter error code
+ *
+ ****************************************************************************/
+
+static inline int32_t nuttx_err_to_freertos(int ret)
+{
+  return ret >= 0;
+}
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_wifi_to_errno
+ *
+ * Description:
+ *   Transform from ESP Wi-Fi error code to NuttX error code
+ *
+ * Input Parameters:
+ *   err - ESP Wi-Fi error code
+ *
+ * Returned Value:
+ *   NuttX error code defined in errno.h
+ *
+ ****************************************************************************/
+
+int32_t esp_wifi_to_errno(int err);
 
 /****************************************************************************
  * Functions needed by libphy.a

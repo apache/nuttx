@@ -425,6 +425,47 @@ void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
 }
 
 /****************************************************************************
+ * Name: esp_hr_timer_start_once
+ *
+ * Description:
+ *   Start the High Resolution Timer with one shot mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout)
+{
+  esp_hr_timer_start(timer, timeout, false);
+}
+
+/****************************************************************************
+ * Name: esp_hr_timer_start_periodic
+ *
+ * Description:
+ *   Start the High Resolution Timer with periodic mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
+                                 uint64_t timeout)
+{
+  esp_hr_timer_start(timer, timeout, true);
+}
+
+/****************************************************************************
  * Name: esp_hr_timer_stop
  *
  * Description:

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32h2/common/scripts/common.ld
+ * boards/xtensa/esp32s2/common/scripts/esp32s2_aliases.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,23 +17,20 @@
  * under the License.
  *
  ****************************************************************************/
+
 #include <nuttx/config.h>
 
-/* From esp-hal-3rdparty */
-#include "sdkconfig.h"
-#include "ld.common"
+/* Lower-case aliases for symbols not compliant to nxstyle */
 
-#if CONFIG_ESPRESSIF_SOC_RTC_MEM_SUPPORTED
-#  define ESP_BOOTLOADER_RESERVE_RTC 0
-
-   /* rtc timer data (s_rtc_timer_retain_mem, see esp_clk.c files).
-    * For rtc_timer_data_in_rtc_mem section.
-    */
-#  define RTC_TIMER_RESERVE_RTC (24)
-
-#  ifdef CONFIG_ARCH_CHIP_ESP32
-#    define RESERVE_RTC_MEM (RTC_TIMER_RESERVE_RTC)
-#  else
-#    define RESERVE_RTC_MEM (ESP_BOOTLOADER_RESERVE_RTC + RTC_TIMER_RESERVE_RTC)
-#  endif /* CONFIG_ARCH_CHIP_ESP32 */
-#endif /* CONFIG_ESPRESSIF_SOC_RTC_MEM_SUPPORTED */
+PROVIDE( cache_allocate_sram = Cache_Allocate_SRAM );
+PROVIDE( cache_invalidate_icache_all = Cache_Invalidate_ICache_All );
+PROVIDE( cache_resume_dcache = Cache_Resume_DCache );
+PROVIDE( cache_resume_icache = Cache_Resume_ICache );
+PROVIDE( cache_resume_icache = Cache_Resume_ICache );
+PROVIDE( cache_set_icache_mode = Cache_Set_ICache_Mode );
+PROVIDE( cache_suspend_dcache = Cache_Suspend_DCache );
+PROVIDE( cache_suspend_icache = Cache_Suspend_ICache );
+PROVIDE( rom_i2c_readreg = rom_i2c_readReg );
+PROVIDE( rom_i2c_readreg_mask = rom_i2c_readReg_Mask );
+PROVIDE( rom_i2c_writereg = rom_i2c_writeReg );
+PROVIDE( rom_i2c_writereg_mask = rom_i2c_writeReg_Mask );

@@ -41,10 +41,10 @@
 #include "esp_timer.h"
 #include "soc/rtc.h"
 #include "esp_private/esp_clk.h"
-#include "esp_coexist_adapter.h"
+#include "private/esp_coexist_adapter.h"
 #include "rom/ets_sys.h"
 #include "soc/soc_caps.h"
-#include "esp_modem_wrapper.h"
+#include "private/esp_modem_wrapper.h"
 
 /****************************************************************************
  * Pre-processor Definitions

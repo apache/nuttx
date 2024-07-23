@@ -378,7 +378,6 @@ static void IRAM_ATTR esp32s3_rtc_clk_fast_freq_set(
 static uint32_t IRAM_ATTR esp32s3_rtc_clk_cal_internal(
                 enum esp32s3_rtc_cal_sel_e cal_clk,
                 uint32_t slowclk_cycles);
-static int  IRAM_ATTR esp32s3_rtc_clk_slow_freq_get(void);
 static void IRAM_ATTR esp32s3_rtc_clk_slow_freq_set(
                       enum esp32s3_rtc_slow_freq_e slow_freq);
 static void esp32s3_select_rtc_slow_clk(enum esp32s3_slow_clk_sel_e
@@ -1167,7 +1166,21 @@ static void esp32s3_rtc_calibrate_ocode(void)
  * Public Functions
  ****************************************************************************/
 
-static int IRAM_ATTR esp32s3_rtc_clk_slow_freq_get(void)
+/****************************************************************************
+ * Name: esp32s3_rtc_clk_slow_freq_get
+ *
+ * Description:
+ *   This function gets the frequency of the slow clock from the RTC.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The frequency of the slow clock from the RTC.
+ *
+ ****************************************************************************/
+
+int IRAM_ATTR esp32s3_rtc_clk_slow_freq_get(void)
 {
   return REG_GET_FIELD(RTC_CNTL_RTC_CLK_CONF_REG, RTC_CNTL_ANA_CLK_RTC_SEL);
 }
