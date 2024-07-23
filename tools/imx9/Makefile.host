@@ -44,6 +44,8 @@ endif
 	$(call DELFILE, imx8qxb0.c)
 	$(call DELFILE, mkimage_common.h)
 	$(call DELFILE, build_info.h)
+	$(call DELFILE, fspi_fcb_gen.sh)
+	$(call DELFILE, fspi_header)
 	$(call DELFILE, firmware-ele-imx-0.1.1.bin)
 	$(call DELDIR, firmware-ele-imx-0.1.1)
 	$(call CLEAN)

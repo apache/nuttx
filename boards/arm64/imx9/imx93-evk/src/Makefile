@@ -50,4 +50,5 @@ ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
 .PHONY: distclean
 distclean::
 	$(call DELFILE, ${TOPDIR}${DELIM}imx9-sdimage.img)
+	$(call DELFILE, ${TOPDIR}${DELIM}imx9-norimage.img)
 endif
