@@ -89,7 +89,7 @@ static struct inode g_signalfd_inode =
   NULL,                   /* i_parent */
   NULL,                   /* i_peer */
   NULL,                   /* i_child */
-  1,                      /* i_crefs */
+  ATOMIC_VAR_INIT(1),     /* i_crefs */
   FSNODEFLAG_TYPE_DRIVER, /* i_flags */
   {
     &g_signalfd_fileops   /* u */

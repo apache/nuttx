@@ -96,7 +96,7 @@ static FAR struct inode *inode_unlink(FAR const char *path)
 
       node->i_peer   = NULL;
       node->i_parent = NULL;
-      node->i_crefs--;
+      atomic_fetch_sub(&node->i_crefs, 1);
     }
 
   RELEASE_SEARCH(&desc);
@@ -134,7 +134,7 @@ int inode_remove(FAR const char *path)
        * to it
        */
 
-      if (node->i_crefs)
+      if (atomic_load(&node->i_crefs))
         {
           return -EBUSY;
         }

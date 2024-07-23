@@ -154,7 +154,7 @@ static const struct file_operations g_cryptoops =
 
 static struct inode g_cryptoinode =
 {
-  .i_crefs = 1,
+  .i_crefs = ATOMIC_VAR_INIT(1),
   .u.i_ops = &g_cryptofops
 };
 
