@@ -3053,10 +3053,6 @@ static int i2s_dma_setup(struct esp32s3_i2s_s *priv)
   int ret;
   int i2s_dma_dev;
 
-  /* Initialize GDMA controller */
-
-  esp32s3_dma_init();
-
   if (priv->config->port == 0)
     {
       i2s_dma_dev = ESP32S3_DMA_PERIPH_I2S0;
@@ -3072,7 +3068,6 @@ static int i2s_dma_setup(struct esp32s3_i2s_s *priv)
   if (priv->dma_channel < 0)
     {
       i2serr("Failed to allocate GDMA channel\n");
-
       return ERROR;
     }
 

@@ -1349,10 +1349,6 @@ static int esp32s3_spi_dma_init(struct spi_dev_s *dev)
 
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, priv->config->dma_rst_bit, 0);
 
-  /* Initialize GDMA controller */
-
-  esp32s3_dma_init();
-
   /* Request a GDMA channel for SPI peripheral */
 
   priv->dma_channel = esp32s3_dma_request(priv->config->dma_periph, 1, 1,
@@ -1360,8 +1356,6 @@ static int esp32s3_spi_dma_init(struct spi_dev_s *dev)
   if (priv->dma_channel < 0)
     {
       spierr("Failed to allocate GDMA channel\n");
-
-      esp32s3_dma_deinit();
       return ERROR;
     }
 
@@ -1394,10 +1388,6 @@ void esp32s3_spi_dma_deinit(struct spi_dev_s *dev)
   /* Release a DMA channel from peripheral */
 
   esp32s3_dma_release(priv->dma_channel);
-
-  /* Deinitialize DMA controller */
-
-  esp32s3_dma_deinit();
 
   /* Disable DMA clock for the SPI peripheral */
 
