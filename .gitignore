@@ -79,3 +79,5 @@ kwarning
 SAVEMake.defs
 SAVEconfig
 .aider*
+imx9-norimage.img
+
