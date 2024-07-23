@@ -382,31 +382,17 @@ static inline void up_irq_restore(irqstate_t flags)
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
- * Name:
- *   up_current_regs/up_set_current_regs
+ * Schedule acceleration macros
  *
- * Description:
- *   We use the following code to manipulate the tpidr_el1 register,
- *   which exists uniquely for each CPU and is primarily designed to store
- *   current thread information. Currently, we leverage it to store interrupt
- *   information, with plans to further optimize its use for storing both
- *   thread and interrupt information in the future.
- *
+ * The lsbit of tpidr_el1 stores information about whether the current
+ * execution is in an interrupt context, where 1 indicates being in an
+ * interrupt context and 0 indicates being in a thread context.
  ****************************************************************************/
 
-noinstrument_function
-static inline_function uint64_t *up_current_regs(void)
-{
-  uint64_t *regs;
-  __asm__ volatile ("mrs %0, " "tpidr_el1" : "=r" (regs));
-  return regs;
-}
-
-noinstrument_function
-static inline_function void up_set_current_regs(uint64_t *regs)
-{
-  __asm__ volatile ("msr " "tpidr_el1" ", %0" : : "r" (regs));
-}
+#define up_current_regs()      (this_task()->xcp.regs)
+#define up_this_task()         ((struct tcb_s *)(read_sysreg(tpidr_el1) & ~1ul))
+#define up_update_task(t)      modify_sysreg(t, ~1ul, tpidr_el1)
+#define up_interrupt_context() (read_sysreg(tpidr_el1) & 1)
 
 #define up_switch_context(tcb, rtcb)                              \
   do {                                                            \
@@ -416,19 +402,6 @@ static inline_function void up_set_current_regs(uint64_t *regs)
                   (uintptr_t)tcb->xcp.regs);                      \
       }                                                           \
   } while (0)
-
-/****************************************************************************
- * Name: up_interrupt_context
- *
- * Description: Return true is we are currently executing in
- * the interrupt handler context.
- *
- ****************************************************************************/
-
-static inline bool up_interrupt_context(void)
-{
-  return up_current_regs() != NULL;
-}
 
 /****************************************************************************
  * Name: up_getusrpc
