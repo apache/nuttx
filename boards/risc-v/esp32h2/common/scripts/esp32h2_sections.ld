@@ -88,6 +88,7 @@ SECTIONS
     *libarch.a:*gpio_periph.*(.text .text.* .literal .literal.*)
     *libarch.a:*modem_clock_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_systimer.*(.text .text.* .literal .literal.*)
+    *libarch.a:*esp_rom_tlsf.*(.literal .literal.* .text .text.*)
     *libarch.a:*esp_rom_wdt.*(.text .text.* .literal .literal.*)
     *libarch.a:*ocode_init.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_regi2c_esp32h2.*(.text .text.* .literal .literal.*)
@@ -124,6 +125,7 @@ SECTIONS
     *libarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*pmu_hal.*(.literal .literal.* .text .text.*)
     *libarch.a:*uart_periph.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_uart.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_sys.*(.text .text.* .literal .literal.*)
@@ -226,6 +228,7 @@ SECTIONS
     *libarch.a:*gpio_periph.*(.rodata .rodata.*)
     *libarch.a:*modem_clock_hal.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_systimer.*(.rodata .rodata.*)
+    *libarch.a:*esp_rom_tlsf.*(.rodata .rodata.* .sdata2 .sdata2.* .srodata .srodata.*)
     *libarch.a:*esp_rom_wdt.*(.rodata .rodata.*)
     *libarch.a:*ocode_init.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_regi2c_esp32h2.*(.rodata .rodata.*)
@@ -262,6 +265,7 @@ SECTIONS
     *libarch.a:*uart_hal.*(.rodata .rodata.*)
     *libarch.a:*mpu_hal.*(.rodata .rodata.*)
     *libarch.a:*mmu_hal.*(.rodata .rodata.*)
+    *libarch.a:*pmu_hal.*(.rodata .rodata.* .sdata2 .sdata2.* .srodata .srodata.*)
     *libarch.a:*uart_periph.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_uart.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_sys.*(.rodata .rodata.*)
@@ -326,12 +330,24 @@ SECTIONS
   .flash.text : ALIGN(0xFFFF)
   {
     _stext = .;
+    _instruction_reserved_start = ABSOLUTE(.);
+    _text_start = ABSOLUTE(.);
 
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+
+    /** CPU will try to prefetch up to 16 bytes of
+      * of instructions. This means that any configuration (e.g. MMU, PMS) must allow
+      * safe access to up to 16 bytes after the last real instruction, add
+      * dummy bytes to ensure this
+      */
+    . += _esp_flash_mmap_prefetch_pad_size;
+
+    _text_end = ABSOLUTE(.);
+    _instruction_reserved_end = ABSOLUTE(.);
     _etext = .;
 
     /* Similar to _iram_start, this symbol goes here so it is
@@ -435,6 +451,10 @@ SECTIONS
   .rtc.text :
   {
     . = ALIGN(4);
+    _rtc_fast_start = ABSOLUTE(.);
+    _rtc_text_start = ABSOLUTE(.);
+    *(.rtc.entry.text)
+
     *(.rtc.literal .rtc.text)
   } >rtc_iram_seg
 

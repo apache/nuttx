@@ -22,6 +22,13 @@
 
 /* Lower-case aliases for symbols not compliant to nxstyle */
 
+PROVIDE( rom_i2c_writereg = rom_i2c_writeReg );
+
+PROVIDE( cache_flash_mmu_set = cache_flash_mmu_set_rom);
+PROVIDE( cache_flush = Cache_Flush_rom );
+PROVIDE( cache_read_disable = Cache_Read_Disable_rom );
+PROVIDE( cache_read_enable = Cache_Read_Enable_rom );
+
 /* Bluetooth needs symbol alias, to be removed after IDF rename it */
 
 #ifdef CONFIG_ESP32_BLE

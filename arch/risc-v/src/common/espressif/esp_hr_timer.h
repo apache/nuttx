@@ -71,6 +71,8 @@ struct esp_hr_timer_args_s
 {
   void (*callback)(void *arg);      /* Callback function */
   void *arg;                        /* Private data */
+  const char *name;                 /* Timer name, used in esp_timer_dump function */
+  bool skip_unhandled_events;       /* Skip unhandled events for periodic timers */
 };
 
 #undef EXTERN
@@ -126,6 +128,41 @@ int esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
 void esp_hr_timer_start(struct esp_hr_timer_s *timer,
                         uint64_t timeout,
                         bool repeat);
+
+/****************************************************************************
+ * Name: esp_hr_timer_start_once
+ *
+ * Description:
+ *   Start the High Resolution Timer with one shot mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout);
+
+/****************************************************************************
+ * Name: esp_hr_timer_start_periodic
+ *
+ * Description:
+ *   Start the High Resolution Timer with periodic mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
+                                 uint64_t timeout);
 
 /****************************************************************************
  * Name: esp_hr_timer_stop

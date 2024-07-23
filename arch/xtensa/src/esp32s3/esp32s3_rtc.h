@@ -199,6 +199,22 @@ struct alm_setalarm_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp32s3_rtc_clk_slow_freq_get
+ *
+ * Description:
+ *   This function gets the frequency of the slow clock from the RTC.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The frequency of the slow clock from the RTC.
+ *
+ ****************************************************************************/
+
+int esp32s3_rtc_clk_slow_freq_get(void);
+
+/****************************************************************************
  * Name: esp32s3_rtc_clk_slow_freq_get_hz
  *
  * Description:

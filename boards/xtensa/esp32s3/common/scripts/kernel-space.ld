@@ -106,6 +106,8 @@ SECTIONS
     esp32s3_userspace.*(.literal .text .literal.* .text.*)
     *librtc.a:(.literal .text .literal.* .text.*)
     *libkarch.a:esp32s3_spiflash.*(.literal .text .literal.* .text.*)
+    *libkarch.a:cache_hal.*(.literal .text .literal.* .text.*)
+    *libkarch.a:esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_cpupause.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_copystate.*(.literal .text .literal.* .text.*)
     *libkarch.a:xtensa_interruptcontext.*(.literal .text .literal.* .text.*)

@@ -43,7 +43,7 @@
 #  include "esp_private/wifi.h"
 #  include "esp_wpa.h"
 #endif
-#include "esp_coexist_internal.h"
+#include "private/esp_coexist_internal.h"
 #include "periph_ctrl.h"
 #include "esp_phy_init.h"
 #include "phy_init_data.h"
@@ -350,6 +350,85 @@ static void esp_wifi_set_log_level(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_wifi_to_errno
+ *
+ * Description:
+ *   Transform from ESP Wi-Fi error code to NuttX error code
+ *
+ * Input Parameters:
+ *   err - ESP Wi-Fi error code
+ *
+ * Returned Value:
+ *   NuttX error code defined in errno.h
+ *
+ ****************************************************************************/
+
+int32_t esp_wifi_to_errno(int err)
+{
+  int ret;
+
+  if (err < ESP_ERR_WIFI_BASE)
+    {
+      /* Unmask component error bits */
+
+      ret = err & 0xfff;
+
+      switch (ret)
+        {
+          case ESP_OK:
+            ret = OK;
+            break;
+          case ESP_ERR_NO_MEM:
+            ret = -ENOMEM;
+            break;
+
+          case ESP_ERR_INVALID_ARG:
+            ret = -EINVAL;
+            break;
+
+          case ESP_ERR_INVALID_STATE:
+            ret = -EIO;
+            break;
+
+          case ESP_ERR_INVALID_SIZE:
+            ret = -EINVAL;
+            break;
+
+          case ESP_ERR_NOT_FOUND:
+            ret = -ENOSYS;
+            break;
+
+          case ESP_ERR_NOT_SUPPORTED:
+            ret = -ENOSYS;
+            break;
+
+          case ESP_ERR_TIMEOUT:
+            ret = -ETIMEDOUT;
+            break;
+
+          case ESP_ERR_INVALID_MAC:
+            ret = -EINVAL;
+            break;
+
+          default:
+            ret = ERROR;
+            break;
+        }
+    }
+  else
+    {
+      ret = ERROR;
+    }
+
+  if (ret != OK)
+    {
+      wlerr("ERROR: %s\n", esp_err_to_name(err));
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Functions needed by libphy.a

@@ -73,9 +73,9 @@
 #include "esp_private/esp_clk.h"
 #include "os.h"
 #include "esp_smartconfig.h"
-#include "esp_coexist_internal.h"
+#include "private/esp_coexist_internal.h"
 #include "rom/ets_sys.h"
-#include "esp_modem_wrapper.h"
+#include "private/esp_modem_wrapper.h"
 
 #if SOC_PM_MODEM_RETENTION_BY_REGDMA
 #include "esp_private/esp_regdma.h"
@@ -284,6 +284,8 @@ int32_t esp_event_post_wrapper(const char *event_base,
                                uint32_t ticks);
 static void wifi_apb80m_request_wrapper(void);
 static void wifi_apb80m_release_wrapper(void);
+static void esp_phy_enable_wrapper(void);
+static void esp_phy_disable_wrapper(void);
 static void timer_arm_wrapper(void *timer, uint32_t tmout, bool repeat);
 static void wifi_reset_mac_wrapper(void);
 static void wifi_clock_enable_wrapper(void);
@@ -327,6 +329,8 @@ static void *coex_schm_curr_phase_get_wrapper(void);
 static int coex_register_start_cb_wrapper(int (* cb)(void));
 static int coex_schm_process_restart_wrapper(void);
 static int coex_schm_register_cb_wrapper(int type, int(*cb)(int));
+static int coex_schm_flexible_period_set_wrapper(uint8_t period);
+static uint8_t coex_schm_flexible_period_get_wrapper(void);
 static void esp_empty_wrapper(void);
 
 /* Second block of functions
@@ -501,8 +505,8 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
       esp_empty_wrapper,
   ._wifi_apb80m_request = wifi_apb80m_request_wrapper,
   ._wifi_apb80m_release = wifi_apb80m_release_wrapper,
-  ._phy_disable = esp_phy_disable,
-  ._phy_enable = esp_phy_enable,
+  ._phy_disable = esp_phy_disable_wrapper,
+  ._phy_enable = esp_phy_enable_wrapper,
   ._phy_update_country_info = esp_phy_update_country_info,
   ._read_mac = esp_read_mac_wrapper,
   ._timer_arm = timer_arm_wrapper,
@@ -564,6 +568,8 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._coex_register_start_cb = coex_register_start_cb_wrapper,
   ._coex_schm_process_restart = coex_schm_process_restart_wrapper,
   ._coex_schm_register_cb = coex_schm_register_cb_wrapper,
+  ._coex_schm_flexible_period_set = coex_schm_flexible_period_set_wrapper,
+  ._coex_schm_flexible_period_get = coex_schm_flexible_period_get_wrapper,
   ._magic = ESP_WIFI_OS_ADAPTER_MAGIC,
 };
 
@@ -1562,6 +1568,48 @@ static void IRAM_ATTR wifi_apb80m_release_wrapper(void)
 }
 
 /****************************************************************************
+ * Name: esp_phy_enable_wrapper
+ *
+ * Description:
+ *   This function enables the WiFi PHY. It first enables the PHY for the
+ *   WiFi modem, then sets the WiFi PHY enable flag to 1.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp_phy_enable_wrapper(void)
+{
+  esp_phy_enable(PHY_MODEM_WIFI);
+  phy_wifi_enable_set(1);
+}
+
+/****************************************************************************
+ * Name: esp_phy_disable_wrapper
+ *
+ * Description:
+ *   This function disables the WiFi PHY. It first sets the WiFi PHY enable
+ *   flag to 0, then disables the PHY for the WiFi modem.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp_phy_disable_wrapper(void)
+{
+  phy_wifi_enable_set(0);
+  esp_phy_disable(PHY_MODEM_WIFI);
+}
+
+/****************************************************************************
  * Name: timer_arm_wrapper
  *
  * Description:
@@ -2296,6 +2344,60 @@ static int coex_schm_register_cb_wrapper(int type, int(*cb)(int))
   return coex_schm_register_callback(type, cb);
 #else
   return 0;
+#endif
+}
+
+/****************************************************************************
+ * Name: coex_schm_flexible_period_set_wrapper
+ *
+ * Description:
+ *   This function sets the coexistence scheme flexible period. If the
+ *   coexistence power management feature is enabled
+ *   (CONFIG_ESP_COEX_POWER_MANAGEMENT), it calls the function
+ *   coex_schm_flexible_period_set with the given period and returns its
+ *   result. If the feature is not enabled, it returns 0.
+ *
+ * Input Parameters:
+ *   period - The flexible period to set.
+ *
+ * Returned Value:
+ *   ESP_OK on success, or the result of coex_schm_flexible_period_set.
+ *
+ ****************************************************************************/
+
+static int coex_schm_flexible_period_set_wrapper(uint8_t period)
+{
+#if CONFIG_ESP_COEX_POWER_MANAGEMENT
+  return coex_schm_flexible_period_set(period);
+#else
+  return 0;
+#endif
+}
+
+/****************************************************************************
+ * Name: coex_schm_flexible_period_get_wrapper
+ *
+ * Description:
+ *   This function gets the coexistence scheme flexible period. If the
+ *   coexistence power management feature is enabled
+ *   (CONFIG_ESP_COEX_POWER_MANAGEMENT), it calls the function
+ *   coex_schm_flexible_period_get and returns its result. If the feature is
+ *   not enabled, it returns 1.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The coexistence scheme flexible period.
+ *
+ ****************************************************************************/
+
+static uint8_t coex_schm_flexible_period_get_wrapper(void)
+{
+#if CONFIG_ESP_COEX_POWER_MANAGEMENT
+  return coex_schm_flexible_period_get();
+#else
+  return 1;
 #endif
 }
 

@@ -79,6 +79,7 @@ CHIP_CSRCS += pkcs5.c
 CHIP_CSRCS += platform_util.c
 CHIP_CSRCS += platform.c
 CHIP_CSRCS += sha1.c
+CHIP_CSRCS += sha3.c
 CHIP_CSRCS += sha256.c
 CHIP_CSRCS += sha512.c
 CHIP_CSRCS += pk.c
@@ -92,9 +93,9 @@ CHIP_CSRCS += md5.c
 CHIP_CSRCS += oid.c
 CHIP_CSRCS += pem.c
 CHIP_CSRCS += hmac_drbg.c
-CHIP_CSRCS += hash_info.c
 CHIP_CSRCS += rsa_alt_helpers.c
 CHIP_CSRCS += ecdh.c
+CHIP_CSRCS += pk_ecc.c
 
 VPATH += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)mbedtls$(DELIM)port
 
@@ -123,6 +124,7 @@ CFLAGS += $(DEFINE_PREFIX)IEEE8021X_EAPOL
 CFLAGS += $(DEFINE_PREFIX)USE_WPA2_TASK
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SHA256
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE
+CFLAGS += $(DEFINE_PREFIX)USE_WPS_TASK
 
 ifeq ($(CONFIG_ESP_WIFI_ENABLE_SAE_PK),y)
 CFLAGS += $(DEFINE_PREFIX)CONFIG_SAE_PK
@@ -233,11 +235,11 @@ INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)$(WIFI_WPA_SUPPLICANT)$(DELIM)
 CHIP_CSRCS += esp_common.c
 CHIP_CSRCS += esp_hostap.c
 CHIP_CSRCS += esp_wpa_main.c
-CHIP_CSRCS += esp_wpa2.c
 CHIP_CSRCS += esp_wpa3.c
 CHIP_CSRCS += esp_wpas_glue.c
 CHIP_CSRCS += esp_owe.c
 CHIP_CSRCS += esp_scan.c
+CHIP_CSRCS += esp_wps.c
 
 VPATH += $(WIFI_WPA_SUPPLICANT)$(DELIM)esp_supplicant$(DELIM)src$(DELIM)crypto
 
