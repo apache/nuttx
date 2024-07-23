@@ -183,7 +183,7 @@ static int esp32s2_erase(struct mtd_dev_s *dev, off_t startblock,
 #ifdef CONFIG_ESP32S2_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d)\n", __func__, dev, startblock, nblocks);
 
-  finfo("spi_flash_erase_range(0x%x, %d)\n", offset, nbytes);
+  finfo("esp32s2_erase(0x%x, %d)\n", offset, nbytes);
 #endif
 
   ret = nxmutex_lock(&g_lock);
@@ -239,7 +239,7 @@ static ssize_t esp32s2_read(struct mtd_dev_s *dev, off_t offset,
 #ifdef CONFIG_ESP32S2_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
 
-  finfo("spi_flash_read(0x%x, %p, %d)\n", offset, buffer, nbytes);
+  finfo("esp32s2_read(0x%x, %p, %d)\n", offset, buffer, nbytes);
 #endif
 
   /* Acquire the mutex. */
@@ -293,7 +293,7 @@ static ssize_t esp32s2_bread(struct mtd_dev_s *dev, off_t startblock,
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
         buffer);
 
-  finfo("spi_flash_read(0x%x, %p, %d)\n", addr, buffer, size);
+  finfo("esp32s2_bread(0x%x, %p, %d)\n", addr, buffer, size);
 #endif
 
   ret = nxmutex_lock(&g_lock);
@@ -345,7 +345,7 @@ static ssize_t esp32s2_read_decrypt(struct mtd_dev_s *dev,
 #ifdef CONFIG_ESP32S2_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
 
-  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", offset, buffer,
+  finfo("esp32s2_read_decrypt(0x%x, %p, %d)\n", offset, buffer,
         nbytes);
 #endif
 
@@ -402,7 +402,7 @@ static ssize_t esp32s2_bread_decrypt(struct mtd_dev_s *dev,
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
         buffer);
 
-  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", addr, buffer, size);
+  finfo("esp32s2_bread_decrypt(0x%x, %p, %d)\n", addr, buffer, size);
 #endif
 
   ret = nxmutex_lock(&g_lock);
@@ -458,7 +458,7 @@ static ssize_t esp32s2_write(struct mtd_dev_s *dev, off_t offset,
 #ifdef CONFIG_ESP32S2_STORAGE_MTD_DEBUG
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
 
-  finfo("spi_flash_write(0x%x, %p, %d)\n", offset, buffer, nbytes);
+  finfo("esp32s2_write(0x%x, %p, %d)\n", offset, buffer, nbytes);
 #endif
 
   /* Acquire the mutex. */
@@ -514,7 +514,7 @@ static ssize_t esp32s2_bwrite_encrypt(struct mtd_dev_s *dev,
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock,
         nblocks, buffer);
 
-  finfo("spi_flash_write_encrypted(0x%x, %p, %d)\n", addr, buffer, size);
+  finfo("esp32s2_bwrite_encrypt(0x%x, %p, %d)\n", addr, buffer, size);
 #endif
 
   ret = nxmutex_lock(&g_lock);
@@ -523,7 +523,7 @@ static ssize_t esp32s2_bwrite_encrypt(struct mtd_dev_s *dev,
       return ret;
     }
 
-  ret = spi_flash_write_encrypted(addr, buffer, size);
+  ret = esp_rom_spiflash_write_encrypted(addr, (uint32_t *)buffer, size);
   nxmutex_unlock(&g_lock);
 
   if (ret == OK)
@@ -566,7 +566,7 @@ static ssize_t esp32s2_bwrite(struct mtd_dev_s *dev, off_t startblock,
   finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock,
         nblocks, buffer);
 
-  finfo("spi_flash_write(0x%x, %p, %d)\n", addr, buffer, size);
+  finfo("esp32s2_bwrite(0x%x, %p, %d)\n", addr, buffer, size);
 #endif
 
   ret = nxmutex_lock(&g_lock);

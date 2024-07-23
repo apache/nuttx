@@ -130,7 +130,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 8e8e62cf6a7ae8a9659b91706024cab38af29118
+	ESP_HAL_3RDPARTY_VERSION = 51afbfd1a17e806fa6fd8227a18395c1bbecbad3
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -161,7 +161,7 @@ include common$(DELIM)espressif$(DELIM)Bootloader.mk
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
 
 # Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
 

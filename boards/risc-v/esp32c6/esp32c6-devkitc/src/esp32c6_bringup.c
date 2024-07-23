@@ -77,7 +77,7 @@
 #endif
 
 #ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
-#  include "esp_coexist_internal.h"
+#  include "private/esp_coexist_internal.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_WIFI

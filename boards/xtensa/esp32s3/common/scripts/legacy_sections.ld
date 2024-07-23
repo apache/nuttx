@@ -141,6 +141,8 @@ SECTIONS
      defined(CONFIG_ESP32S3_SPIRAM))
     *libc.a:lib_stackchk.*(.literal .text .literal.* .text.*)
 #endif
+    *libarch.a:*cache_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
 
     *(.wifirxiram .wifirxiram.*)
     *(.wifi0iram  .wifi0iram.*)
@@ -225,6 +227,7 @@ SECTIONS
 
     *libphy.a:(.rodata  .rodata.*)
     *libarch.a:xtensa_context.*(.rodata  .rodata.*)
+    *libarch.a:*cache_hal.*(.rodata .rodata.*)
 #if defined(CONFIG_STACK_CANARIES) && \
     (defined(CONFIG_ESP32S3_SPIFLASH) || \
      defined(CONFIG_ESP32S3_SPIRAM))
@@ -249,6 +252,13 @@ SECTIONS
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram.*)
+    *(.wifiextrairam .wifiextrairam.*)
+    *(EXCLUDE_FILE(*libpp.a) .wifiorslpiram EXCLUDE_FILE(*libpp.a) .wifiorslpiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram.*)
 
     /* CPU will try to prefetch up to 16 bytes of instructions.
      * This means that any configuration (e.g. MMU, PMS) must allow

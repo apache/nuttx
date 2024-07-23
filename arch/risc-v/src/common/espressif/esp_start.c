@@ -38,6 +38,7 @@
 #include "esp_start.h"
 
 #include "esp_clk_internal.h"
+#include "esp_private/rtc_clk.h"
 #include "esp_cpu.h"
 #include "esp_private/brownout.h"
 #include "hal/wdt_hal.h"
@@ -435,6 +436,10 @@ void __esp_start(void)
   cache_set_idrom_mmu_size(cache_mmu_irom_size,
                            CACHE_DROM_MMU_MAX_END - cache_mmu_irom_size);
 #endif /* CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE */
+
+#if CONFIG_ESP_SYSTEM_BBPLL_RECALIB
+  rtc_clk_recalib_bbpll();
+#endif
 
 #ifdef CONFIG_ESPRESSIF_REGION_PROTECTION
   /* Configure region protection */

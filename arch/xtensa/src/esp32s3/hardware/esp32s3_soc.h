@@ -39,8 +39,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define REG_SPI_BASE(i)                         (DR_REG_SPI2_BASE + (((i) > 3) ? ((((i) - 2) * 0x1000) + 0x10000) : (((i) - 2) * 0x1000)))
-
 #define DR_REG_USB_BASE                         0x60080000
 
 #define DR_REG_ASSIST_DEBUG_BASE                0x600CE000
