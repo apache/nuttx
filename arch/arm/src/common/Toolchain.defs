@@ -45,7 +45,11 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(CONFIG_FRAME_POINTER),y)
-  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+    ARCHOPTIMIZATION += -ga
+  else
+    ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  endif
 else
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
     ARCHOPTIMIZATION += -noga
@@ -101,7 +105,11 @@ ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
 endif
 
 ifeq ($(CONFIG_UNWINDER_ARM),y)
-  ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+    ARCHOPTIMIZATION += -gtws
+  else
+    ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
+  endif
 endif
 
 # Link Time Optimization
