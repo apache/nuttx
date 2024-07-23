@@ -34,6 +34,7 @@
 
 #include <sys/param.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/net/snoop.h>
 
 /****************************************************************************

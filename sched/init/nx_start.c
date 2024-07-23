@@ -429,6 +429,11 @@ static void idle_task_initialize(void)
       /* Mark the idle task as the running task */
 
       g_running_tasks[i] = tcb;
+
+      if (i == 0)
+        {
+          up_update_task(&g_idletcb[0]); /* Init idle task to percpu reg */
+        }
     }
 }
 

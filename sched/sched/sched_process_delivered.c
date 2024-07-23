@@ -120,6 +120,7 @@ void nxsched_process_delivered(int cpu)
       dq_addfirst_nonempty((FAR dq_entry_t *)btcb, tasklist);
       btcb->cpu = cpu;
       btcb->task_state = TSTATE_TASK_RUNNING;
+      up_update_task(btcb);
 
       DEBUGASSERT(btcb->flink != NULL);
       DEBUGASSERT(next == btcb->flink);
