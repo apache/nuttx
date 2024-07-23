@@ -130,9 +130,12 @@ SYMBOL(longjmp):
 	/* Setup return value */
 
 	movl	%esi,%eax
+	testl	%eax,%eax
+	jnz	1f
+	incl	%eax
 
 	/* Restore registers */
-
+1:
 	movq	JB_RBX(REGS),%rbx	/* Load 1: rbx */
 	movq	JB_RSP(REGS),%rsp	/* Load 2: rsp */
 	movq	JB_RBP(REGS),%rbp	/* Load 3: rdi */
