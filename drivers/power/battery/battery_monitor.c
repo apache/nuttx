@@ -434,7 +434,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
         break;
 
       default:
-        _err("ERROR: Unrecognized cmd: %d\n", cmd);
+        batinfo("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -554,7 +554,7 @@ int battery_monitor_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_batteryops, 0555, dev);
   if (ret < 0)
     {
-      _err("ERROR: Failed to register driver: %d\n", ret);
+      baterr("ERROR: Failed to register driver: %d\n", ret);
     }
 
   return ret;

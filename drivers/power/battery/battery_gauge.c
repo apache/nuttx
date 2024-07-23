@@ -365,7 +365,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         break;
 
       default:
-        _err("ERROR: Unrecognized cmd: %d\n", cmd);
+        batinfo("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
         break;
     }
@@ -489,7 +489,7 @@ int battery_gauge_register(FAR const char *devpath,
   ret = register_driver(devpath, &g_batteryops, 0666, dev);
   if (ret < 0)
     {
-      _err("ERROR: Failed to register driver: %d\n", ret);
+      baterr("ERROR: Failed to register driver: %d\n", ret);
     }
 
   return ret;
