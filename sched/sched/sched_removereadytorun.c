@@ -85,6 +85,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
       DEBUGASSERT(nxttcb != NULL);
 
       nxttcb->task_state = TSTATE_TASK_RUNNING;
+      up_update_task(nxttcb);
       doswitch = true;
     }
 
@@ -270,6 +271,8 @@ void nxsched_remove_running(FAR struct tcb_s *tcb)
   /* Since the TCB is no longer in any list, it is now invalid */
 
   tcb->task_state = TSTATE_TASK_INVALID;
+
+  up_update_task(nxttcb);
 }
 
 void nxsched_remove_self(FAR struct tcb_s *tcb)

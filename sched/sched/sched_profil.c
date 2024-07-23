@@ -28,6 +28,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/wdog.h>
 #include <nuttx/spinlock.h>
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions
