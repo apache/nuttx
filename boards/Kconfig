@@ -1993,6 +1993,7 @@ config ARCH_BOARD_RV32M1_VEGA
 config ARCH_BOARD_QEMU_RV_VIRT
 	bool "QEMU RV Virt"
 	depends on ARCH_CHIP_QEMU_RV
+	select ARCH_HAVE_LEDS
 	---help---
 		This is the board configuration for the port of NuttX to the
 		QEMU RV32 Virt board. This board features the QEMU RV32 CPU.

@@ -43,6 +43,10 @@
 #include "riscv_internal.h"
 #include "romfs.h"
 
+#ifdef CONFIG_USERLED
+#include <nuttx/leds/userled.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -180,6 +184,16 @@ void board_late_initialize(void)
 
   mount(NULL, "/proc", "procfs", 0, NULL);
 
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  int ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
 #endif
 }
 
