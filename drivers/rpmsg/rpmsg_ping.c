@@ -101,8 +101,6 @@ static int rpmsg_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
                      i, data_len);
               break;
             }
-
-          msg->data[i] = 0;
         }
     }
 
@@ -132,9 +130,6 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept, int len,
       return -ENOMEM;
     }
 
-  len = MAX(len, sizeof(struct rpmsg_ping_msg_s));
-  len = MIN(len, *buf_len);
-
   msg->cmd = cmd;
 
   if ((msg->cmd & RPMSG_PING_RANDOMLEN_MASK) != 0)
@@ -146,13 +141,16 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept, int len,
       msg->len = len;
     }
 
+  msg->len = MAX(msg->len, sizeof(struct rpmsg_ping_msg_s));
+  msg->len = MIN(msg->len, *buf_len);
+
   if ((msg->cmd & RPMSG_PING_CHECK_MASK) != 0)
     {
       memset(msg->data, i, msg->len - sizeof(struct rpmsg_ping_msg_s) + 1);
     }
   else
     {
-      memset(msg->data, 0, msg->len);
+      memset(msg->data, 0, msg->len - sizeof(struct rpmsg_ping_msg_s) + 1);
     }
 
   if ((msg->cmd & RPMSG_PING_ACK_MASK) != 0)
