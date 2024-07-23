@@ -1268,6 +1268,24 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       return OK;
     }
+  else if (cmd == TUNSETCARRIER)
+    {
+      if (priv == NULL || arg == 0)
+        {
+          return -EINVAL;
+        }
+
+      if (*(FAR int *)((uintptr_t)arg))
+        {
+          netdev_carrier_on(&priv->dev);
+        }
+      else
+        {
+          netdev_carrier_off(&priv->dev);
+        }
+
+      return OK;
+    }
 
   return -ENOTTY;
 }
