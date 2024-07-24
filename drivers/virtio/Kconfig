@@ -74,6 +74,14 @@ if DRIVERS_VIRTIO_SERIAL
 config DRIVERS_VIRTIO_SERIAL_BUFSIZE
 	int "Virtio serial driver buffer size"
 	default 256
+
+config DRIVERS_VIRTIO_SERIAL_CONSOLE
+	bool "Virtio serial console"
+	default n
+	select SERIAL_CONSOLE
+	---help---
+		This enables using first virtio serial device as console.
+
 endif
 
 config DRIVERS_VIRTIO_SOUND
