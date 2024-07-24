@@ -688,44 +688,17 @@ elseif(WIN32)
   target_link_libraries(nuttx PRIVATE $<TARGET_OBJECTS:sim_head>
                                       ${CMAKE_BINARY_DIR}/nuttx_all.lib)
 else()
+
+  if(NOT APPLE)
+    # generate SIM ld.script for cheat C++ global construction
+    include(nuttx_generate_sim_ld)
+  endif()
+
   # On sim platform the link step is a little different. NuttX is first built
   # into a partially linked relocatable object nuttx.rel with no interface to
   # host OS. Then, the names of symbols that conflict with libc symbols are
   # renamed. The final nuttx binary is built by linking the host-specific
   # objects with the relocatable binary.
-
-  # C++ global objects are constructed before main get executed, but it isn't a
-  # good point for simulator because NuttX doesn't finish the kernel
-  # initialization yet. So we have to skip the standard facilities and do the
-  # construction by ourself. But how to achieve the goal? 1.Command linker
-  # generate the default script(-verbose) 2.Replace
-  # __init_array_start/__init_array_end with _sinit/_einit 3.Append
-  # __init_array_start = .; __init_array_end = .; Step 2 let nxtask_startup find
-  # objects need to construct Step 3 cheat the host there is no object to
-  # construct Note: the destructor can be fixed in the same way.
-
-  if(NOT APPLE)
-    add_custom_command(
-      OUTPUT nuttx.ld
-      COMMAND
-        ${CMAKE_C_COMPILER} ${CMAKE_EXE_LINKER_FLAGS}
-        $<$<BOOL:${CONFIG_SIM_M32}>:-m32> -Wl,-verbose 2> /dev/null >
-        nuttx-orig.ld || true
-      COMMAND
-        cat nuttx-orig.ld | sed -e '/====/,/====/!d\;//d' -e
-        's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' -e
-        's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e
-        's/__fini_array_end/_efini/g' > nuttx.ld
-      COMMAND
-        echo ARGS
-        '__init_array_start = .\; __init_array_end = .\; __fini_array_start = .\; __fini_array_end = .\;'
-        >> nuttx.ld
-      COMMAND sed -i '/\\.data *:/i " ${CONFIG_SIM_CUSTOM_DATA_SECTION} " '
-              nuttx.ld)
-  endif()
-
-  # conflicting symbols to rename
-
   include(nuttx_redefine_symbols)
 
   # TODO: do with single function call?
