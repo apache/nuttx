@@ -211,15 +211,28 @@ squash before submitting the Pull Request:
    In the commit title please include the subsystem/area related to your contribution,
    followed by a descriptive message. Some examples:
 
+    Adding or fixing a platform
+
     .. code-block:: bash
 
-       boards/stm32f4discover: Add board initialization for SSD1306 OLED Display
+       arch/arm/stm32/: Add arch support for stm32 platform
+
+       This patch adds initial support for stm32 platform. Please read
+       the documentation included for more details how to wire the display.
+
+       Signed-off-by: Your Name <you@whoareyou.com>
+
+    Adding or fixing a board
+
+    .. code-block:: bash
+
+       arm/stm32f4discover: Add board initialization for SSD1306 OLED Display
 
        This patch adds support to use the display SSD1306 on I2C1, please read
        the documentation included for more details how to wire the display.
 
        Signed-off-by: Your Name <you@whoareyou.com>
-      
+
    Another example, submitting a commit to fix an issue in the fictional sensor xyz123:
 
     .. code-block:: bash
