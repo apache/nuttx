@@ -131,7 +131,9 @@ int board_app_initialize(uintptr_t arg)
 #endif
 
 #ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+#ifndef CONFIG_BOARD_EARLY_INITIALIZE
   qemu_virtio_register_mmio_devices();
+#endif
 #endif
 
   return OK;
@@ -180,6 +182,13 @@ void board_late_initialize(void)
 
   mount(NULL, "/proc", "procfs", 0, NULL);
 
+#endif
+}
+
+void board_early_initialize(void)
+{
+#ifdef CONFIG_DRIVERS_VIRTIO_MMIO
+  qemu_virtio_register_mmio_devices();
 #endif
 }
 
