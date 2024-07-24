@@ -254,7 +254,7 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
   CC       = ccarm
   CXX      = cxarm
-  CPP      = ccarm -E
+  CPP      = ccarm -E -P
   LD       = cxarm
   STRIP    = gstrip
   AR       = cxarm
