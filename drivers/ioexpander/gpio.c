@@ -464,7 +464,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* Check if the argument is a valid pintype */
 
-          if (pintype < GPIO_INPUT_PIN || pintype >= GPIO_NPINTYPES)
+          if (pintype >= GPIO_NPINTYPES)
             {
               ret = -EINVAL;
               break;
