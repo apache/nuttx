@@ -48,8 +48,8 @@ struct notesnap_s
 {
   struct note_driver_s driver;
   struct notifier_block nb;
-  size_t index;
-  bool dumping;
+  atomic_int index;
+  atomic_bool dumping;
   struct notesnap_chunk_s buffer[CONFIG_DRIVERS_NOTESNAP_NBUFFERS];
 };
 
@@ -197,7 +197,7 @@ static inline void notesnap_common(FAR struct note_driver_s *drv,
   FAR struct notesnap_chunk_s *note;
   size_t index;
 
-  if (snap->dumping)
+  if (atomic_load(&snap->dumping))
     {
       return;
     }
@@ -369,7 +369,8 @@ int notesnap_register(void)
 void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
 {
   size_t i;
-  size_t index = g_notesnap.index % CONFIG_DRIVERS_NOTESNAP_NBUFFERS;
+  size_t index = atomic_load(&g_notesnap.index) %
+                 CONFIG_DRIVERS_NOTESNAP_NBUFFERS;
   clock_t lastcount = g_notesnap.buffer[index].count;
   struct timespec lasttime =
   {
