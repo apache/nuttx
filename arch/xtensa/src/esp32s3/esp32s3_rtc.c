@@ -100,6 +100,10 @@
 
 #define RETRY_CAL_EXT               1
 
+#define CLK_LL_PLL_80M_FREQ_MHZ    (80)
+#define CLK_LL_PLL_160M_FREQ_MHZ   (160)
+#define CLK_LL_PLL_240M_FREQ_MHZ   (240)
+
 /* Lower threshold for a reasonably-looking calibration value for a 32k XTAL.
  * The ideal value (assuming 32768 Hz frequency)
  * is 1000000/32768*(2**19) = 16*10^6.
@@ -137,6 +141,10 @@
 #define RTC_CNTL_BIASSLP_MONITOR_ON            (0)
 #define RTC_CNTL_PD_CUR_MONITOR_DEFAULT        (1)
 #define RTC_CNTL_PD_CUR_MONITOR_ON             (0)
+
+/* Set LDO slave during CPU switch */
+
+#define DEFAULT_LDO_SLAVE 0x7
 
 /* Approximate mapping of voltages to RTC_CNTL_DBIAS_WAK, RTC_CNTL_DBIAS_SLP,
  * RTC_CNTL_DIG_DBIAS_WAK, RTC_CNTL_DIG_DBIAS_SLP values.
@@ -353,6 +361,8 @@ static RTC_DATA_ATTR struct esp32s3_rtc_backup_s rtc_saved_data;
 
 static struct esp32s3_rtc_backup_s *g_rtc_save;
 static bool g_rt_timer_enabled = false;
+static uint32_t g_dig_dbias_pvt_240m = 28;
+static uint32_t g_rtc_dbias_pvt_240m = 28;
 static uint32_t g_dig_dbias_pvt_non_240m = 27;
 static uint32_t g_rtc_dbias_pvt_non_240m = 27;
 
@@ -377,17 +387,15 @@ static void esp32s3_rtc_clk_32k_enable(bool enable);
 static void IRAM_ATTR esp32s3_rtc_clk_8m_enable(bool clk_8m_en,
                                                 bool d256_en);
 static void esp32s3_rtc_calibrate_ocode(void);
-static void IRAM_ATTR esp32s3_rtc_clk_bbpll_disable(void);
+static void IRAM_ATTR esp32s3_rtc_bbpll_disable(void);
+static void IRAM_ATTR esp32s3_rtc_bbpll_enable(void);
 static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
                      enum esp32s3_rtc_xtal_freq_e xtal_freq, int pll_freq);
 static void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_to_8m(void);
 static void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_to_pll_mhz(
                                              int cpu_freq_mhz);
-
-void IRAM_ATTR esp32s3_rtc_bbpll_disable(void);
 void esp32s3_rtc_clk_apb_freq_update(uint32_t apb_freq);
 void IRAM_ATTR esp32s3_rtc_update_to_xtal(int freq, int div);
-static void esp32s3_wait_dig_dbias_valid(uint64_t rtc_cycles);
 uint32_t esp32s3_rtc_clk_apb_freq_get(void);
 
 #ifdef CONFIG_RTC_ALARM
@@ -650,23 +658,6 @@ static uint32_t IRAM_ATTR esp32s3_rtc_clk_cal_internal(
   return cal_val;
 }
 
-static void esp32s3_wait_dig_dbias_valid(uint64_t rtc_cycles)
-{
-  int slow_clk_freq = esp32s3_rtc_clk_slow_freq_get();
-  int cal_clk = RTC_CAL_RTC_MUX;
-
-  if (slow_clk_freq == RTC_SLOW_FREQ_32K_XTAL)
-    {
-      cal_clk = RTC_CAL_32K_XTAL;
-    }
-  else if (slow_clk_freq == RTC_SLOW_FREQ_8MD256)
-    {
-      cal_clk = RTC_CAL_8MD256;
-    }
-
-  esp32s3_rtc_clk_cal(cal_clk, rtc_cycles);
-}
-
 /****************************************************************************
  * Name: esp32s3_rtc_update_to_xtal
  *
@@ -684,21 +675,13 @@ static void esp32s3_wait_dig_dbias_valid(uint64_t rtc_cycles)
 
 void IRAM_ATTR esp32s3_rtc_update_to_xtal(int freq, int div)
 {
+  struct esp32s3_cpu_freq_config_s cur_config =
+    {
+      0
+    };
+
+  esp32s3_rtc_clk_cpu_freq_get_config(&cur_config);
   ets_update_cpu_frequency(freq);
-
-  /* Set digital voltage for different cpu freq from xtal */
-
-  if (freq <= 2)
-    {
-      REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG, DIG_DBIAS_2M);
-    }
-  else
-    {
-      REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG,
-                        DIG_DBIAS_XTAL);
-    }
-
-  esp32s3_wait_dig_dbias_valid(2);
 
   /* Set divider from XTAL to APB clock.
    * Need to set divider to 1 (reg. value 0) first.
@@ -715,6 +698,17 @@ void IRAM_ATTR esp32s3_rtc_update_to_xtal(int freq, int div)
                 SYSTEM_SOC_CLK_SEL, DPORT_SOC_CLK_SEL_XTAL);
 
   esp32s3_rtc_clk_apb_freq_update(freq * MHZ);
+
+  if (cur_config.freq_mhz == 240)
+    {
+      REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG,
+                        g_rtc_dbias_pvt_non_240m);
+      REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG,
+                        g_dig_dbias_pvt_non_240m);
+      esp_rom_delay_us(40);
+    }
+
+  REG_SET_FIELD(RTC_CNTL_DATE_REG, RTC_CNTL_SLAVE_PD, DEFAULT_LDO_SLAVE);
 }
 
 /****************************************************************************
@@ -932,26 +926,16 @@ static void esp32s3_select_rtc_slow_clk(enum esp32s3_slow_clk_sel_e slow_clk)
 
 static void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_to_8m(void)
 {
-  int origin_soc_clk = REG_GET_FIELD(SYSTEM_SYSCLK_CONF_REG,
-                                        SYSTEM_SOC_CLK_SEL);
-  int origin_div_cnt = REG_GET_FIELD(SYSTEM_SYSCLK_CONF_REG,
-                                        SYSTEM_PRE_DIV_CNT);
-  ets_update_cpu_frequency(8);
-
-  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG,
-                                          DIG_DBIAS_XTAL);
-  esp32s3_wait_dig_dbias_valid(2);
-
-  if ((DPORT_SOC_CLK_SEL_XTAL == origin_soc_clk)
-                            && (origin_div_cnt > 4))
-    {
-      esp32s3_wait_dig_dbias_valid(2);
-    }
-
+  ets_update_cpu_frequency(20);
   REG_SET_FIELD(SYSTEM_SYSCLK_CONF_REG, SYSTEM_PRE_DIV_CNT, 0);
-  REG_SET_FIELD(SYSTEM_SYSCLK_CONF_REG, SYSTEM_SOC_CLK_SEL,
-                DPORT_SOC_CLK_SEL_8M);
+  REG_SET_FIELD(SYSTEM_SYSCLK_CONF_REG, SYSTEM_SOC_CLK_SEL, 2);
   esp32s3_rtc_clk_apb_freq_update(RTC_FAST_CLK_FREQ_APPROX);
+  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG,
+                    g_rtc_dbias_pvt_non_240m);
+  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG,
+                    g_dig_dbias_pvt_non_240m);
+  REG_SET_FIELD(RTC_CNTL_DATE_REG, RTC_CNTL_SLAVE_PD,
+                DEFAULT_LDO_SLAVE);
 }
 
 /****************************************************************************
@@ -971,46 +955,85 @@ static void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_to_8m(void)
 static void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_to_pll_mhz(
                                              int cpu_freq_mhz)
 {
-  int origin_soc_clk = REG_GET_FIELD(SYSTEM_SYSCLK_CONF_REG,
-                                        SYSTEM_SOC_CLK_SEL);
-  int origin_cpuperiod_sel = REG_GET_FIELD(SYSTEM_CPU_PER_CONF_REG,
-                                              SYSTEM_CPUPERIOD_SEL);
-  int dbias = DIG_DBIAS_80M_160M;
-  int per_conf = DPORT_CPUPERIOD_SEL_80;
-  if (cpu_freq_mhz == 80)
+  /* There are totally 6 LDO slaves(all on by default). At the moment of
+   * swithing LDO slave, LDO voltage will also change instantaneously.
+   * LDO slave can reduce the voltage change caused by switching frequency.
+   * CPU frequency <= 40M : just open 3 LDO slaves; CPU frequency = 80M :
+   * open 4 LDO slaves; CPU frequency = 160M : open 5 LDO slaves;
+   * CPU frequency = 240M : open 6 LDO slaves; LDO voltage will decrease
+   * at the moment of switching from low frequency to high frequency;
+   * otherwise, LDO voltage will increase.In order to reduce LDO voltage
+   * drop, LDO voltage should rise first then fall.
+   */
+
+  int pd_slave = cpu_freq_mhz / 80;
+  struct esp32s3_cpu_freq_config_s cur_config =
     {
-      /* Nothing to do */
-    }
-  else if (cpu_freq_mhz == 160)
+      0
+    };
+
+  esp32s3_rtc_clk_cpu_freq_get_config(&cur_config);
+
+  /* cpu_frequency < 240M: dbias = pvt-dig + 2;
+   * cpu_frequency = 240M: dbias = pvt-dig + 3;
+   */
+
+  if (cpu_freq_mhz > cur_config.freq_mhz)
     {
-      dbias = DIG_DBIAS_80M_160M;
-      per_conf = DPORT_CPUPERIOD_SEL_160;
-    }
-  else if (cpu_freq_mhz == 240)
-    {
-      dbias = DIG_DBIAS_240M;
-      per_conf = DPORT_CPUPERIOD_SEL_240;
-    }
-  else
-    {
-      rtcerr("Invalid frequency\n");
+      if (cpu_freq_mhz == 240)
+        {
+          REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG,
+                            g_rtc_dbias_pvt_240m);
+          REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG,
+                            g_dig_dbias_pvt_240m);
+          esp_rom_delay_us(40);
+        }
+
+      REG_SET_FIELD(RTC_CNTL_DATE_REG, RTC_CNTL_SLAVE_PD,
+                    DEFAULT_LDO_SLAVE >> pd_slave);
     }
 
-  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG, dbias);
-  if ((origin_soc_clk == DPORT_SOC_CLK_SEL_XTAL)
-      || (origin_soc_clk == DPORT_SOC_CLK_SEL_8M)
-      || (((origin_soc_clk == DPORT_SOC_CLK_SEL_PLL)
-      && (0 == origin_cpuperiod_sel))))
+  switch (cpu_freq_mhz)
     {
-      esp32s3_wait_dig_dbias_valid(2);
+      case CLK_LL_PLL_80M_FREQ_MHZ:
+        REG_SET_FIELD(SYSTEM_CPU_PER_CONF_REG, SYSTEM_CPUPERIOD_SEL, 0);
+        break;
+
+      case CLK_LL_PLL_160M_FREQ_MHZ:
+        REG_SET_FIELD(SYSTEM_CPU_PER_CONF_REG, SYSTEM_CPUPERIOD_SEL, 1);
+        break;
+
+      case CLK_LL_PLL_240M_FREQ_MHZ:
+        REG_SET_FIELD(SYSTEM_CPU_PER_CONF_REG, SYSTEM_CPUPERIOD_SEL, 2);
+        break;
+
+      default:
+        DEBUGASSERT(0);
     }
 
-  REG_SET_FIELD(SYSTEM_CPU_PER_CONF_REG, SYSTEM_CPUPERIOD_SEL, per_conf);
   REG_SET_FIELD(SYSTEM_SYSCLK_CONF_REG, SYSTEM_PRE_DIV_CNT, 0);
+
+  /* switch clock source */
+
   REG_SET_FIELD(SYSTEM_SYSCLK_CONF_REG, SYSTEM_SOC_CLK_SEL,
                 DPORT_SOC_CLK_SEL_PLL);
   esp32s3_rtc_clk_apb_freq_update(80 * MHZ);
   ets_update_cpu_frequency(cpu_freq_mhz);
+
+  if (cpu_freq_mhz < cur_config.freq_mhz)
+    {
+      if (cur_config.freq_mhz == 240)
+        {
+          REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG,
+                            g_rtc_dbias_pvt_non_240m);
+          REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG,
+                            g_dig_dbias_pvt_non_240m);
+          esp_rom_delay_us(40);
+        }
+
+      REG_SET_FIELD(RTC_CNTL_DATE_REG, RTC_CNTL_SLAVE_PD,
+                    DEFAULT_LDO_SLAVE >> pd_slave);
+    }
 }
 
 #ifdef CONFIG_RTC_ALARM
@@ -1080,7 +1103,10 @@ static void esp32s3_rtc_calibrate_ocode(void)
   bool bg_odone_flag = 0;
   uint64_t cycle1 = 0;
   uint64_t max_delay_time_us = 10000;
-  struct esp32s3_cpu_freq_config_s freq_config;
+  struct esp32s3_cpu_freq_config_s freq_config =
+    {
+      0
+    };
 
   /* Bandgap output voltage is not precise when calibrate o-code by hardware
    * sometimes, so need software o-code calibration (must turn off PLL).
@@ -1292,10 +1318,10 @@ enum esp32s3_rtc_xtal_freq_e IRAM_ATTR esp32s3_rtc_clk_xtal_freq_get(void)
 }
 
 /****************************************************************************
- * Name: esp32s3_rtc_clk_bbpll_disable
+ * Name: esp32_rtc_bbpll_disable
  *
  * Description:
- *   Disable BBPLL.
+ *   Power down BBPLL circuit.
  *
  * Input Parameters:
  *   None
@@ -1305,10 +1331,30 @@ enum esp32s3_rtc_xtal_freq_e IRAM_ATTR esp32s3_rtc_clk_xtal_freq_get(void)
  *
  ****************************************************************************/
 
-static void IRAM_ATTR esp32s3_rtc_clk_bbpll_disable(void)
+static void IRAM_ATTR esp32s3_rtc_bbpll_disable(void)
 {
   modifyreg32(RTC_CNTL_RTC_OPTIONS0_REG, 0, RTC_CNTL_BB_I2C_FORCE_PD |
               RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD);
+}
+
+/****************************************************************************
+ * Name: esp32s3_rtc_bbpll_enable
+ *
+ * Description:
+ *   Power up BBPLL circuit.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR esp32s3_rtc_bbpll_enable(void)
+{
+  modifyreg32(RTC_CNTL_RTC_OPTIONS0_REG, RTC_CNTL_BB_I2C_FORCE_PD |
+              RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD, 0);
 }
 
 /****************************************************************************
@@ -1329,26 +1375,36 @@ static void IRAM_ATTR esp32s3_rtc_clk_bbpll_disable(void)
 static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
                      enum esp32s3_rtc_xtal_freq_e xtal_freq, int pll_freq)
 {
-  static uint8_t div_ref = 0;
-  static uint8_t div7_0 = 0;
-  static uint8_t dr1 = 0 ;
-  static uint8_t dr3 = 0 ;
-  static uint8_t dchgp = 0;
-  static uint8_t dcur = 0;
-  static uint8_t dbias = 0;
-  uint8_t i2c_bbpll_lref  = 0;
+  uint8_t div_ref = 0;
+  uint8_t div7_0 = 0;
+  uint8_t dr1 = 0;
+  uint8_t dr3 = 0;
+  uint8_t dchgp = 0;
+  uint8_t dcur = 0;
+  uint8_t dbias = 3;
+  uint8_t i2c_bbpll_lref = 0;
   uint8_t i2c_bbpll_div_7_0 = 0;
   uint8_t i2c_bbpll_dcur = 0;
+
+  switch (pll_freq)
+    {
+      case RTC_PLL_FREQ_320M:
+        REG_SET_FIELD(SYSTEM_CPU_PER_CONF_REG, SYSTEM_PLL_FREQ_SEL, 0);
+        break;
+
+      case RTC_PLL_FREQ_480M:
+        REG_SET_FIELD(SYSTEM_CPU_PER_CONF_REG, SYSTEM_PLL_FREQ_SEL, 1);
+        break;
+
+      default:
+        DEBUGASSERT(0);
+    }
 
   modifyreg32(I2C_MST_ANA_CONF0_REG, I2C_MST_BBPLL_STOP_FORCE_HIGH, 0);
   modifyreg32(I2C_MST_ANA_CONF0_REG, 0, I2C_MST_BBPLL_STOP_FORCE_LOW);
 
   if (pll_freq == RTC_PLL_FREQ_480M)
     {
-      /* Set this register to let the digital part know 480M PLL is used */
-
-      modifyreg32(SYSTEM_CPU_PER_CONF_REG, 0, SYSTEM_PLL_FREQ_SEL);
-
       /* Configure 480M PLL */
 
       switch (xtal_freq)
@@ -1361,7 +1417,6 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
               dr3     = 0;
               dchgp   = 5;
               dcur    = 3;
-              dbias   = 2;
             }
             break;
 
@@ -1373,7 +1428,6 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
               dr3     = 1;
               dchgp   = 4;
               dcur    = 0;
-              dbias   = 2;
             }
             break;
 
@@ -1385,7 +1439,6 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
               dr3     = 0;
               dchgp   = 5;
               dcur    = 3;
-              dbias   = 2;
             }
             break;
         }
@@ -1394,11 +1447,7 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
     }
   else
     {
-      /* Clear this register to let the digital part know 320M PLL is used */
-
-      modifyreg32(SYSTEM_CPU_PER_CONF_REG, SYSTEM_PLL_FREQ_SEL, 0);
-
-      /* Configure 480M PLL */
+      /* Configure 320M PLL */
 
       switch (xtal_freq)
         {
@@ -1410,7 +1459,6 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
               dr3     = 0;
               dchgp   = 5;
               dcur    = 3;
-              dbias   = 2;
             }
             break;
 
@@ -1422,7 +1470,6 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
               dr3     = 0;
               dchgp   = 5;
               dcur    = 3;
-              dbias   = 2;
             }
             break;
 
@@ -1434,7 +1481,6 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
               dr3     = 0;
               dchgp   = 5;
               dcur    = 3;
-              dbias   = 2;
             }
             break;
         }
@@ -1445,7 +1491,7 @@ static void IRAM_ATTR esp32s3_rtc_bbpll_configure(
   i2c_bbpll_lref  = (dchgp << I2C_BBPLL_OC_DCHGP_LSB) | (div_ref);
   i2c_bbpll_div_7_0 = div7_0;
   i2c_bbpll_dcur = (1 << I2C_BBPLL_OC_DLREF_SEL_LSB) |
-                   (2 << I2C_BBPLL_OC_DHREF_SEL_LSB) | dcur;
+                   (3 << I2C_BBPLL_OC_DHREF_SEL_LSB) | dcur;
 
   REGI2C_WRITE(I2C_BBPLL, I2C_BBPLL_OC_REF_DIV, i2c_bbpll_lref);
   REGI2C_WRITE(I2C_BBPLL, I2C_BBPLL_OC_DIV_7_0, i2c_bbpll_div_7_0);
@@ -1529,6 +1575,18 @@ void IRAM_ATTR esp32s3_rtc_init(void)
     {
       cfg.cali_ocode = 1;
     }
+
+  /* When run rtc_init, it maybe deep sleep reset. Since we power down modem
+   * in deep sleep, after wakeup from deep sleep, these fields are changed
+   * and not reset. We will access two BB regs(BBPD_CTRL and NRXPD_CTRL) in
+   * rtc_sleep_pu. If PD modem and no iso, CPU will stuck when access these
+   * two BB regs and finally triggle RTC WDT. So need to clear modem Force
+   * PD. No worry about the power consumption, Because modem Force PD will
+   * be set at the end of this function.
+   */
+
+  modifyreg32(RTC_CNTL_DIG_ISO_REG, RTC_CNTL_WIFI_FORCE_ISO, 0);
+  modifyreg32(RTC_CNTL_DIG_PWC_REG, RTC_CNTL_WIFI_FORCE_PD, 0);
 
   REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_XPD_RTC_REG, 0);
   REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_XPD_DIG_REG, 0);
@@ -1941,9 +1999,8 @@ uint32_t esp32s3_rtc_clk_apb_freq_get(void)
 
 void IRAM_ATTR esp32s3_rtc_cpu_freq_set_xtal(void)
 {
-  int freq_mhz = (int) esp32s3_rtc_clk_xtal_freq_get();
+  int freq_mhz = (int)esp32s3_rtc_clk_xtal_freq_get();
   esp32s3_rtc_update_to_xtal(freq_mhz, 1);
-  esp32s3_rtc_wait_for_slow_cycle();
   esp32s3_rtc_bbpll_disable();
 }
 
@@ -2383,15 +2440,16 @@ void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_set_config(
       esp32s3_rtc_update_to_xtal(config->freq_mhz, config->div);
       if (soc_clk_sel == DPORT_SOC_CLK_SEL_PLL)
         {
-          esp32s3_rtc_clk_bbpll_disable();
+          esp32s3_rtc_bbpll_disable();
         }
     }
   else if (config->source == RTC_CPU_FREQ_SRC_PLL)
     {
       if (soc_clk_sel != DPORT_SOC_CLK_SEL_PLL)
         {
+          esp32s3_rtc_bbpll_enable();
           modifyreg32(RTC_CNTL_RTC_OPTIONS0_REG, RTC_CNTL_BB_I2C_FORCE_PD |
-                RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD,  0);
+                RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD, 0);
           esp32s3_rtc_bbpll_configure(esp32s3_rtc_clk_xtal_freq_get(),
                                              config->source_freq_mhz);
         }
@@ -2403,7 +2461,7 @@ void IRAM_ATTR esp32s3_rtc_clk_cpu_freq_set_config(
       esp32s3_rtc_clk_cpu_freq_to_8m();
       if (soc_clk_sel == DPORT_SOC_CLK_SEL_PLL)
         {
-          esp32s3_rtc_clk_bbpll_disable();
+          esp32s3_rtc_bbpll_disable();
         }
     }
 }
@@ -2536,46 +2594,6 @@ uint64_t esp32s3_rtc_get_time_us(void)
 }
 
 /****************************************************************************
- * Name: esp32s3_rtc_bbpll_enable
- *
- * Description:
- *   Power up BBPLL circuit.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp32s3_rtc_bbpll_enable(void)
-{
-  modifyreg32(RTC_CNTL_RTC_OPTIONS0_REG, RTC_CNTL_BB_I2C_FORCE_PD |
-              RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD, 0);
-}
-
-/****************************************************************************
- * Name: esp32_rtc_bbpll_disable
- *
- * Description:
- *   Power down BBPLL circuit.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void IRAM_ATTR esp32s3_rtc_bbpll_disable(void)
-{
-  modifyreg32(RTC_CNTL_RTC_OPTIONS0_REG, 0, RTC_CNTL_BB_I2C_FORCE_PD |
-              RTC_CNTL_BBPLL_FORCE_PD | RTC_CNTL_BBPLL_I2C_FORCE_PD);
-}
-
-/****************************************************************************
  * Name: esp32c3_rtc_sleep_low_init
  *
  * Description:
@@ -2661,13 +2679,27 @@ uint64_t IRAM_ATTR esp32s3_rtc_get_boot_time(void)
 #ifdef CONFIG_ESP32S3_SYSTEM_BBPLL_RECALIB
 void IRAM_ATTR esp32s3_rtc_recalib_bbpll(void)
 {
-  struct esp32s3_cpu_freq_config_s freq_config;
+  struct esp32s3_cpu_freq_config_s freq_config =
+    {
+      0
+    };
+
   esp32s3_rtc_clk_cpu_freq_get_config(&freq_config);
-  esp32s3_rtc_cpu_freq_set_xtal();
-  esp32s3_rtc_bbpll_disable();
-  esp32s3_rtc_bbpll_enable();
-  esp32s3_rtc_bbpll_configure(esp32s3_rtc_clk_xtal_freq_get(), 480);
-  esp32s3_rtc_clk_cpu_freq_set_config(&freq_config);
+
+  /* There are two paths we arrive here: 1.CPU reset. 2.Other reset reasons.
+   * - For other reasons, the bootloader will set CPU source to BBPLL and
+   *   enable it. But there are calibration issues. Turn off the BBPLL and
+   *   do calibration again to fix the issue.
+   * - For CPU reset, the CPU source will be set to XTAL, while the BBPLL
+   *   is kept to meet USB Serial JTAG's requirements. In this case, we
+   *   don't touch BBPLL to avoid USJ disconnection.
+   */
+
+  if (freq_config.source == RTC_CPU_FREQ_SRC_PLL)
+    {
+      esp32s3_rtc_cpu_freq_set_xtal();
+      esp32s3_rtc_clk_cpu_freq_set_config(&freq_config);
+    }
 }
 #endif
 

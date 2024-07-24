@@ -5843,6 +5843,13 @@
 #define RTC_CNTL_DATE_V  0x0fffffff
 #define RTC_CNTL_DATE_S  0
 
+/* LDO SLAVE : R/W ;bitpos:[18:13] ; default: 6'd0 ; */
+
+#define RTC_CNTL_SLAVE_PD    0x0000003F
+#define RTC_CNTL_SLAVE_PD_M  ((RTC_CNTL_SLAVE_PD_V)<<(RTC_CNTL_SLAVE_PD_S))
+#define RTC_CNTL_SLAVE_PD_V  0x3f
+#define RTC_CNTL_SLAVE_PD_S  13
+
 /* Deep sleep (power down digital domain) */
 
 #define RTC_SLEEP_PD_DIG                BIT(0)
