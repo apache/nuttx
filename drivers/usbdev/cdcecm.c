@@ -1887,9 +1887,12 @@ static int cdcecm_setup(FAR struct usbdevclass_driver_s *driver,
       ctrlreq->len   = MIN(len, ret);
       ctrlreq->flags = USBDEV_REQFLAGS_NULLPKT;
 
+#ifndef CONFIG_CDCECM_COMPOSITE
       ret = EP_SUBMIT(dev->ep0, ctrlreq);
       uinfo("EP_SUBMIT ret: %d\n", ret);
-
+#else
+      ret = composite_ep0submit(driver, dev, ctrlreq, ctrl);
+#endif
       if (ret < 0)
         {
           ctrlreq->result = OK;
