@@ -184,10 +184,14 @@ cpux:
 
 void riscv_earlyserialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_earlyserialinit();
+#endif
 }
 
 void riscv_serialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_serialinit();
+#endif
 }
