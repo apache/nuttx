@@ -24,8 +24,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/nuttx.h>
+#include <string.h>
+
 #include <nuttx/drivers/addrenv.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/list.h>
 #include <nuttx/wqueue.h>
@@ -45,9 +47,32 @@
 #define SIM_RPTUN_STATUS_OK          0x02
 #define SIM_RPTUN_STATUS_NEED_RESET  0x04
 
+#define SIM_RPTUN_VIRTIO_NUM         3
+#define SIM_RPTUN_RSC_NUM            (2 * SIM_RPTUN_VIRTIO_NUM)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct aligned_data(8) sim_rptun_rsc_s
+{
+  struct resource_table    hdr;
+  uint32_t                 offset[SIM_RPTUN_RSC_NUM];
+  struct fw_rsc_vdev       rng0;
+  struct fw_rsc_vdev_vring rng0_vring;
+  struct fw_rsc_carveout   rng0_carveout;
+  char                     rng0_shm[SIM_RPTUN_SHMEM_SIZE];
+  struct fw_rsc_vdev       rng1;
+  struct fw_rsc_vdev_vring rng1_vring;
+  struct fw_rsc_carveout   rng1_carveout;
+  char                     rng1_shm[SIM_RPTUN_SHMEM_SIZE];
+  struct fw_rsc_vdev       rpmsg0;
+  struct fw_rsc_vdev_vring rpmsg0_vring0;
+  struct fw_rsc_vdev_vring rpmsg0_vring1;
+  struct fw_rsc_config     rpmsg0_config;
+  struct fw_rsc_carveout   rpmsg0_carveout;
+  char                     rpmsg0_shm[SIM_RPTUN_SHMEM_SIZE];
+};
 
 struct sim_rptun_shmem_s
 {
@@ -56,8 +81,7 @@ struct sim_rptun_shmem_s
   volatile uint32_t         seqm;
   volatile uint32_t         boots;
   volatile uint32_t         bootm;
-  struct rptun_rsc_s        rsc;
-  char                      buf[0x10000];
+  struct sim_rptun_rsc_s    rsc;
 };
 
 struct sim_rptun_dev_s
@@ -100,7 +124,7 @@ sim_rptun_get_addrenv(struct rptun_dev_s *dev)
   return &priv->raddrenv[0];
 }
 
-static struct rptun_rsc_s *
+static struct resource_table *
 sim_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
@@ -113,41 +137,110 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       return NULL;
     }
 
-  priv->raddrenv[0].da   = 0;
-  priv->raddrenv[0].size = sizeof(*priv->shmem);
-
   if (priv->master)
     {
-      struct rptun_rsc_s *rsc = &priv->shmem->rsc;
+      struct sim_rptun_rsc_s *rsc = &priv->shmem->rsc;
+      memset(rsc, 0, sizeof(struct sim_rptun_rsc_s));
 
-      memset(priv->shmem->buf, 0, sizeof(priv->shmem->buf));
-      memset(rsc, 0, sizeof(struct rptun_rsc_s));
+      rsc->hdr.ver                    = 1;
+      rsc->hdr.num                    = SIM_RPTUN_RSC_NUM;
 
-      priv->raddrenv[0].pa          = (uintptr_t)priv->shmem;
+      /* Virtio Driver 0, VIRTIO_ID_ENTROPY */
 
-      rsc->rsc_tbl_hdr.ver          = 1;
-      rsc->rsc_tbl_hdr.num          = 1;
-      rsc->offset[0]                = offsetof(struct rptun_rsc_s,
-                                               rpmsg_vdev);
-      rsc->rpmsg_vdev.type          = RSC_VDEV;
-      rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
-      rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS
-                                    | 1 << VIRTIO_RPMSG_F_ACK
-                                    | 1 << VIRTIO_RPMSG_F_BUFSZ;
-      rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
-      rsc->rpmsg_vdev.num_of_vrings = 2;
-      rsc->rpmsg_vring0.da          = 0;
-      rsc->rpmsg_vring0.align       = 8;
-      rsc->rpmsg_vring0.num         = 8;
-      rsc->rpmsg_vring0.notifyid    = RSC_NOTIFY_ID_ANY;
-      rsc->rpmsg_vring1.da          = 0;
-      rsc->rpmsg_vring1.align       = 8;
-      rsc->rpmsg_vring1.num         = 8;
-      rsc->rpmsg_vring1.notifyid    = RSC_NOTIFY_ID_ANY;
-      rsc->config.r2h_buf_size      = 0x800;
-      rsc->config.h2r_buf_size      = 0x800;
+      rsc->offset[0]                  = offsetof(struct sim_rptun_rsc_s,
+                                                 rng0);
+      rsc->rng0.type                  = RSC_VDEV;
+      rsc->rng0.id                    = VIRTIO_ID_ENTROPY;
+      rsc->rng0.notifyid              = RSC_NOTIFY_ID_ANY;
+      rsc->rng0.dfeatures             = 0;
+      rsc->rng0.config_len            = 0;
+      rsc->rng0.num_of_vrings         = 1;
+      rsc->rng0.reserved[0]           = VIRTIO_DEV_DRIVER;
+      rsc->rng0.reserved[1]           = 0;
+      rsc->rng0_vring.align           = 8;
+      rsc->rng0_vring.num             = 8;
+      rsc->rng0_vring.notifyid        = RSC_NOTIFY_ID_ANY;
+      rsc->rng0_vring.da              = 0;
 
-      priv->shmem->base             = (uintptr_t)priv->shmem;
+      /* Virtio Rng0 share memory buffer */
+
+      rsc->offset[1]                  = offsetof(struct sim_rptun_rsc_s,
+                                                 rng0_carveout);
+      rsc->rng0_carveout.type         = RSC_CARVEOUT;
+      rsc->rng0_carveout.da           = offsetof(struct sim_rptun_shmem_s,
+                                                 rsc.rng0_shm);
+      rsc->rng0_carveout.pa           = FW_RSC_U32_ADDR_ANY;
+      rsc->rng0_carveout.len          = sizeof(priv->shmem->rsc.rng0_shm);
+      memcpy(rsc->rng0_carveout.name, "rng0_shm", 9);
+
+      /* Virtio Driver 1, VIRTIO_ID_ENTROPY */
+
+      rsc->offset[2]                  = offsetof(struct sim_rptun_rsc_s,
+                                                 rng1);
+      rsc->rng1.type                  = RSC_VDEV;
+      rsc->rng1.id                    = VIRTIO_ID_ENTROPY;
+      rsc->rng1.notifyid              = RSC_NOTIFY_ID_ANY;
+      rsc->rng1.dfeatures             = 0;
+      rsc->rng1.config_len            = 0;
+      rsc->rng1.num_of_vrings         = 1;
+      rsc->rng1.reserved[0]           = VIRTIO_DEV_DRIVER;
+      rsc->rng1.reserved[1]           = 0;
+      rsc->rng1_vring.align           = 8;
+      rsc->rng1_vring.num             = 8;
+      rsc->rng1_vring.notifyid        = RSC_NOTIFY_ID_ANY;
+      rsc->rng1_vring.da              = 0;
+
+      /* Virtio Rng1 share memory buffer */
+
+      rsc->offset[3]                  = offsetof(struct sim_rptun_rsc_s,
+                                                 rng1_carveout);
+      rsc->rng1_carveout.type         = RSC_CARVEOUT;
+      rsc->rng1_carveout.da           = offsetof(struct sim_rptun_shmem_s,
+                                                 rsc.rng1_shm);
+      rsc->rng1_carveout.pa           = FW_RSC_U32_ADDR_ANY;
+      rsc->rng1_carveout.len          = sizeof(priv->shmem->rsc.rng1_shm);
+      memcpy(rsc->rng1_carveout.name, "rng1_shm", 9);
+
+      /* Virtio Driver 2, VIRTIO_ID_RPMSG */
+
+      rsc->offset[4]                  = offsetof(struct sim_rptun_rsc_s,
+                                                 rpmsg0);
+      rsc->rpmsg0.type                = RSC_VDEV;
+      rsc->rpmsg0.id                  = VIRTIO_ID_RPMSG;
+      rsc->rpmsg0.notifyid            = RSC_NOTIFY_ID_ANY;
+      rsc->rpmsg0.dfeatures           = (1 << VIRTIO_RPMSG_F_NS) |
+                                        (1 << VIRTIO_RPMSG_F_ACK) |
+                                        (1 << VIRTIO_RPMSG_F_BUFSZ) |
+                                        (1 << VIRTIO_RPMSG_F_CPUNAME);
+      rsc->rpmsg0.config_len          = sizeof(struct fw_rsc_config);
+      rsc->rpmsg0.num_of_vrings       = 2;
+      rsc->rpmsg0.reserved[0]         = VIRTIO_DEV_DRIVER;
+      rsc->rpmsg0.reserved[1]         = 0;
+      rsc->rpmsg0_vring0.align        = 8;
+      rsc->rpmsg0_vring0.num          = 8;
+      rsc->rpmsg0_vring0.notifyid     = RSC_NOTIFY_ID_ANY;
+      rsc->rpmsg0_vring0.da           = 0;
+      rsc->rpmsg0_vring1.align        = 8;
+      rsc->rpmsg0_vring1.num          = 8;
+      rsc->rpmsg0_vring1.notifyid     = RSC_NOTIFY_ID_ANY;
+      rsc->rpmsg0_vring1.da           = 0;
+      rsc->rpmsg0_config.h2r_buf_size = 0x600;
+      rsc->rpmsg0_config.r2h_buf_size = 0x600;
+      memcpy(rsc->rpmsg0_config.host_cpuname, "server", 6);
+      memcpy(rsc->rpmsg0_config.remote_cpuname, "proxy", 5);
+
+      /* Virtio Rpmsg0 share memory buffer */
+
+      rsc->offset[5]                  = offsetof(struct sim_rptun_rsc_s,
+                                                 rpmsg0_carveout);
+      rsc->rpmsg0_carveout.type       = RSC_CARVEOUT;
+      rsc->rpmsg0_carveout.da         = offsetof(struct sim_rptun_shmem_s,
+                                                 rsc.rpmsg0_shm);
+      rsc->rpmsg0_carveout.pa         = FW_RSC_U32_ADDR_ANY;
+      rsc->rpmsg0_carveout.len        = sizeof(priv->shmem->rsc.rpmsg0_shm);
+      memcpy(rsc->rpmsg0_carveout.name, "rpmsg0_shm", 10);
+
+      priv->shmem->base               = (uintptr_t)priv->shmem;
 
       /* The master notifies its slave when it starts again */
 
@@ -176,8 +269,6 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
           usleep(1000);
         }
 
-      priv->raddrenv[0].pa  = (uintptr_t)priv->shmem->base;
-
       priv->shmem->boots    = SIM_RPTUN_STATUS_OK;
 
       priv->addrenv[0].va   = (uintptr_t)priv->shmem;
@@ -187,7 +278,12 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       simple_addrenv_initialize(&priv->addrenv[0]);
     }
 
-  return &priv->shmem->rsc;
+  priv->raddrenv[0].pa   = priv->master ? (uintptr_t)priv->shmem :
+                                          (uintptr_t)priv->shmem->base;
+  priv->raddrenv[0].da   = 0;
+  priv->raddrenv[0].size = sizeof(*priv->shmem);
+
+  return &priv->shmem->rsc.hdr;
 }
 
 static bool sim_rptun_is_autostart(struct rptun_dev_s *dev)
