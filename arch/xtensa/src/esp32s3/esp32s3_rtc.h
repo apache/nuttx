@@ -302,22 +302,6 @@ enum esp32s3_rtc_xtal_freq_e esp32s3_rtc_clk_xtal_freq_get(void);
 void esp32s3_rtc_update_to_xtal(int freq, int div);
 
 /****************************************************************************
- * Name: esp32s3_rtc_bbpll_enable
- *
- * Description:
- *   Reset BBPLL configuration.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_rtc_bbpll_enable(void);
-
-/****************************************************************************
  * Name: esp32s3_rtc_clk_set
  *
  * Description:
@@ -433,22 +417,6 @@ uint64_t esp32s3_rtc_time_slowclk_to_us(uint64_t rtc_cycles,
  ****************************************************************************/
 
 uint32_t esp32s3_clk_slowclk_cal_get(void);
-
-/****************************************************************************
- * Name: esp32s3_rtc_bbpll_disable
- *
- * Description:
- *   disable BBPLL.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32s3_rtc_bbpll_disable(void);
 
 /****************************************************************************
  * Name: esp32s3_rtc_sleep_set_wakeup_time
