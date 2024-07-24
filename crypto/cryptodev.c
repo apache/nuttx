@@ -569,27 +569,66 @@ int cryptodev_key(FAR struct crypt_kop *kop)
     {
       case CRK_MOD_EXP:
         if (in == 3 && out == 1)
-          break;
+          {
+            break;
+          }
+
         return -EINVAL;
       case CRK_MOD_EXP_CRT:
         if (in == 6 && out == 1)
-          break;
+          {
+            break;
+          }
+
         return -EINVAL;
       case CRK_DSA_SIGN:
         if (in == 5 && out == 2)
-          break;
+          {
+            break;
+          }
+
         return -EINVAL;
       case CRK_DSA_VERIFY:
         if (in == 7 && out == 0)
-          break;
+          {
+            break;
+          }
+
         return -EINVAL;
       case CRK_DH_COMPUTE_KEY:
         if (in == 3 && out == 1)
-          break;
+          {
+            break;
+          }
+
         return -EINVAL;
       case CRK_RSA_PKCS15_VERIFY:
         if (in == 5 && out == 0)
-          break;
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_ECDSA_SECP256R1_SIGN:
+        if (in == 2 && out == 2)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_ECDSA_SECP256R1_VERIFY:
+        if (in == 6 && out == 0)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_ECDSA_SECP256R1_GENKEY:
+        if (in == 0 && out == 4)
+          {
+            break;
+          }
+
         return -EINVAL;
       default:
         return -EINVAL;
