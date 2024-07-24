@@ -218,38 +218,41 @@ int devmem_register(void)
       return -ENOMEM;
     }
 
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-  len = parse_memory_region(CONFIG_BOARD_MEMORY_RANGE, region,
-                            DEVMEM_REGION - 1);
-  if (len < 0)
+  if (CONFIG_BOARD_MEMORY_RANGE[0] != '\0')
     {
-      kmm_free(region);
-      return len;
-    }
-#else
-  if (len + (4 - merge) > DEVMEM_REGION)
-    {
-      len = DEVMEM_REGION - (4 - merge);
-    }
-
-  region[len].flags = PROT_EXEC | PROT_READ;
-  region[len].start = (uintptr_t)_stext;
-  region[len++].end = (uintptr_t)_etext;
-  region[len].flags = PROT_WRITE | PROT_READ;
-  region[len].start = (uintptr_t)_sdata;
-  region[len++].end = (uintptr_t)_edata;
-
-  if (merge)
-    {
-      region[len - 1].end = (uintptr_t)_ebss;
+      len = parse_memory_region(CONFIG_BOARD_MEMORY_RANGE, region,
+                                DEVMEM_REGION - 1);
+      if (len < 0)
+        {
+          kmm_free(region);
+          return len;
+        }
     }
   else
     {
+      if (len + (4 - merge) > DEVMEM_REGION)
+        {
+          len = DEVMEM_REGION - (4 - merge);
+        }
+
+      region[len].flags = PROT_EXEC | PROT_READ;
+      region[len].start = (uintptr_t)_stext;
+      region[len++].end = (uintptr_t)_etext;
       region[len].flags = PROT_WRITE | PROT_READ;
-      region[len].start = (uintptr_t)_sbss;
-      region[len++].end = (uintptr_t)_ebss;
+      region[len].start = (uintptr_t)_sdata;
+      region[len++].end = (uintptr_t)_edata;
+
+      if (merge)
+        {
+          region[len - 1].end = (uintptr_t)_ebss;
+        }
+      else
+        {
+          region[len].flags = PROT_WRITE | PROT_READ;
+          region[len].start = (uintptr_t)_sbss;
+          region[len++].end = (uintptr_t)_ebss;
+        }
     }
-#endif
 
   /* register the new MEM driver */
 
