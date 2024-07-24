@@ -89,8 +89,12 @@
                                              * int Y threshold value
                                              */
 
+#define TSIOC_GRAB           _TSIOC(0x000e) /* arg: Pointer to
+                                             * int for enable grab
+                                             */
+
 #define TSC_FIRST            0x0001          /* First common command */
-#define TSC_NCMDS            13              /* Thirteen common commands */
+#define TSC_NCMDS            14              /* Fourteen common commands */
 
 /* Backward compatible IOCTL */
 
