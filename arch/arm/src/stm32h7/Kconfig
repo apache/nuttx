@@ -293,6 +293,12 @@ config STM32H7_PWR_DIRECT_SMPS_SUPPLY
 	depends on STM32H7_HAVE_SMPS
 	default n
 
+config STM32H7_PWR_EXTERNAL_SOURCE_SUPPLY
+	bool "Use external source as power supply"
+	default n
+	---help---
+		Select this option for using an external power supply connected directly to the VCAP pin.
+
 choice
 	prompt "STM32 H7 Power Supply Selection"
 	default STM32H7_PWR_DEFAULT_SUPPLY
