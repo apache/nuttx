@@ -61,6 +61,10 @@ struct unwind_frame_s
 
   unsigned long *lr_addr;
 
+  /* Lowest value of sp allowed */
+
+  unsigned long stack_base;
+
   /* Highest value of sp allowed */
 
   unsigned long stack_top;
@@ -588,7 +592,7 @@ int unwind_frame(struct unwind_frame_s *frame)
           return urc;
         }
 
-      if (ctrl.vrs[SP] < frame->sp ||
+      if (ctrl.vrs[SP] < frame->stack_base ||
           ctrl.vrs[SP] > ctrl.stack_top)
         {
           return -1;
@@ -726,13 +730,14 @@ int up_backtrace(struct tcb_s *tcb,
       frame.lr = (unsigned long)__builtin_return_address(0);
       frame.pc = (unsigned long)&up_backtrace;
       frame.sp = frame.fp;
-      frame.stack_top = (unsigned long)rtcb->stack_base_ptr +
-                                       rtcb->adj_stack_size;
+      frame.stack_base = (unsigned long)rtcb->stack_base_ptr;
+      frame.stack_top = frame.stack_base + rtcb->adj_stack_size;
+
       if (up_interrupt_context())
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
-          frame.stack_top = up_get_intstackbase(up_cpu_index()) +
-                            INTSTACK_SIZE;
+          frame.stack_base = up_get_intstackbase(up_cpu_index());
+          frame.stack_top = frame.stack_base + INTSTACK_SIZE;
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
 
           ret = backtrace_unwind(&frame, buffer, size, &skip);
@@ -742,8 +747,8 @@ int up_backtrace(struct tcb_s *tcb,
               frame.sp = CURRENT_REGS[REG_SP];
               frame.pc = CURRENT_REGS[REG_PC];
               frame.lr = CURRENT_REGS[REG_LR];
-              frame.stack_top = (unsigned long)rtcb->stack_base_ptr +
-                                               rtcb->adj_stack_size;
+              frame.stack_base = (unsigned long)rtcb->stack_base_ptr;
+              frame.stack_top = frame.stack_base + rtcb->adj_stack_size;
               ret += backtrace_unwind(&frame, &buffer[ret],
                                       size - ret, &skip);
             }
@@ -759,8 +764,8 @@ int up_backtrace(struct tcb_s *tcb,
       frame.sp = tcb->xcp.regs[REG_SP];
       frame.lr = tcb->xcp.regs[REG_LR];
       frame.pc = tcb->xcp.regs[REG_PC];
-      frame.stack_top = (unsigned long)tcb->stack_base_ptr +
-                                       tcb->adj_stack_size;
+      frame.stack_base = (unsigned long)tcb->stack_base_ptr;
+      frame.stack_top = frame.stack_base + tcb->adj_stack_size;
 
       ret = backtrace_unwind(&frame, buffer, size, &skip);
     }
