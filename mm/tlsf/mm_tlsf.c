@@ -131,6 +131,11 @@ struct mm_mallinfo_handler_s
   FAR struct mallinfo_task *info;
 };
 
+struct mm_memdump_priv_s
+{
+  FAR const struct mm_memdump_s *dump;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -140,6 +145,28 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void memdump_allocnode(FAR void *ptr, size_t size)
+{
+#if CONFIG_MM_BACKTRACE < 0
+  syslog(LOG_INFO, "%12zu%*p\n", size, BACKTRACE_PTR_FMT_WIDTH, ptr);
+
+#elif CONFIG_MM_BACKTRACE == 0
+  syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
+         buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH, ptr);
+#else
+  char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
+  FAR struct memdump_backtrace_s *buf =
+    ptr + size - sizeof(struct memdump_backtrace_s);
+
+  backtrace_format(tmp, sizeof(tmp), buf->backtrace,
+                   CONFIG_MM_BACKTRACE);
+
+  syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
+         buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH,
+         ptr, tmp);
+#endif
+}
 
 #if CONFIG_MM_BACKTRACE >= 0
 
@@ -321,25 +348,20 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
 
   if (used)
     {
-#if CONFIG_MM_BACKTRACE < 0
-      if (task->pid == PID_MM_ALLOC)
-        {
-          info->aordblks++;
-          info->uordblks += size;
-        }
-#else
+#if CONFIG_MM_BACKTRACE >= 0
       FAR struct memdump_backtrace_s *buf =
         ptr + size - sizeof(struct memdump_backtrace_s);
+#else
+#  define buf NULL
+#endif
 
-      if ((MM_DUMP_ASSIGN(task->pid, buf->pid) ||
-           MM_DUMP_ALLOC(task->pid, buf->pid) ||
-           MM_DUMP_LEAK(task->pid, buf->pid)) &&
-          buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
+      if ((MM_DUMP_ASSIGN(task, buf) || MM_DUMP_ALLOC(task, buf) ||
+           MM_DUMP_LEAK(task, buf)) && MM_DUMP_SEQNO(task, buf))
         {
           info->aordblks++;
           info->uordblks += size;
         }
-#endif
+#undef buf
     }
   else if (task->pid == PID_MM_FREE)
     {
@@ -434,45 +456,23 @@ static void mm_unlock(FAR struct mm_heap_s *heap)
 static void memdump_handler(FAR void *ptr, size_t size, int used,
                             FAR void *user)
 {
-  FAR const struct mm_memdump_s *dump = user;
+  FAR struct mm_memdump_priv_s *priv = user;
+  FAR const struct mm_memdump_s *dump = priv->dump;
 
   if (used)
     {
-#if CONFIG_MM_BACKTRACE < 0
-      if (dump->pid == PID_MM_ALLOC)
-        {
-          syslog(LOG_INFO, "%12zu%*p\n", size, BACKTRACE_PTR_FMT_WIDTH, ptr);
-        }
-#elif CONFIG_MM_BACKTRACE == 0
+#if CONFIG_MM_BACKTRACE >= 0
       FAR struct memdump_backtrace_s *buf =
         ptr + size - sizeof(struct memdump_backtrace_s);
-
-      if ((MM_DUMP_ASSIGN(dump->pid, buf->pid) ||
-           MM_DUMP_ALLOC(dump->pid, buf->pid) ||
-           MM_DUMP_LEAK(dump->pid, buf->pid)) &&
-          buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
-        {
-          syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
-                 buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH, ptr);
-        }
 #else
-      FAR struct memdump_backtrace_s *buf =
-        ptr + size - sizeof(struct memdump_backtrace_s);
-
-      if ((MM_DUMP_ASSIGN(dump->pid, buf->pid) ||
-           MM_DUMP_ALLOC(dump->pid, buf->pid) ||
-           MM_DUMP_LEAK(dump->pid, buf->pid)) &&
-          buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
-        {
-          char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
-          backtrace_format(tmp, sizeof(tmp), buf->backtrace,
-                           CONFIG_MM_BACKTRACE);
-
-          syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
-                 buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH,
-                 ptr, tmp);
-        }
+#  define buf NULL
 #endif
+      if ((MM_DUMP_ASSIGN(dump, buf) || MM_DUMP_ALLOC(dump, buf) ||
+           MM_DUMP_LEAK(dump, buf)) && MM_DUMP_SEQNO(dump, buf))
+        {
+          memdump_allocnode(ptr, size);
+        }
+#undef buf
     }
   else if (dump->pid == PID_MM_FREE)
     {
@@ -494,6 +494,7 @@ static void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
   if (mm_lock(heap) == 0)
     {
       size_t size = mm_malloc_size(heap, mem);
+      UNUSED(size);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
       memset(mem, MM_FREE_MAGIC, size);
 #endif
@@ -1062,6 +1063,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 #else
 #  define region 0
 #endif
+  struct mm_memdump_priv_s priv;
   struct mallinfo_task info;
 
   if (dump->pid >= PID_MM_ALLOC)
@@ -1075,7 +1077,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
                         BACKTRACE_PTR_FMT_WIDTH, "Address", "Backtrace");
 #endif
     }
-  else
+  else if (dump->pid == PID_MM_FREE)
     {
       syslog(LOG_INFO, "Dump all free memory node info:\n");
       syslog(LOG_INFO, "%12s%*s\n", "Size", BACKTRACE_PTR_FMT_WIDTH,
@@ -1086,20 +1088,25 @@ void mm_memdump(FAR struct mm_heap_s *heap,
   mempool_multiple_memdump(heap->mm_mpool, dump);
 #endif
 
+  memset(&priv, 0, sizeof(struct mm_memdump_priv_s));
+  priv.dump = dump;
 #if CONFIG_MM_REGIONS > 1
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
       DEBUGVERIFY(mm_lock(heap));
       tlsf_walk_pool(heap->mm_heapstart[region],
-                     memdump_handler, (FAR void *)dump);
+                     memdump_handler, &priv);
       mm_unlock(heap);
     }
 #undef region
 
-  info = mm_mallinfo_task(heap, dump);
-  syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
-  syslog(LOG_INFO, "%12d%12d\n", info.aordblks, info.uordblks);
+  if (dump->pid == PID_MM_FREE)
+    {
+      info = mm_mallinfo_task(heap, dump);
+      syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
+      syslog(LOG_INFO, "%12d%12d\n", info.aordblks, info.uordblks);
+    }
 }
 
 /****************************************************************************
