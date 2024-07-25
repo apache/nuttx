@@ -623,6 +623,9 @@ struct up_dev_s
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   const uint32_t    cts_gpio;  /* U[S]ART CTS GPIO pin configuration */
 #endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  const uint32_t    ck_gpio;   /* U[S]ART Clock GPIO pin configuration */
+#endif
 
   /* TX DMA state */
 
@@ -651,6 +654,10 @@ struct up_dev_s
 #ifdef HAVE_RS485
   const uint32_t    rs485_dir_gpio;     /* U[S]ART RS-485 DIR GPIO pin configuration */
   const bool        rs485_dir_polarity; /* U[S]ART RS-485 DIR pin state for TX enabled */
+#endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  const bool        sc_supported;       /* Smartcard mode supported on this peripheral */
+  struct serial_smartcard_s smartcard;  /* Structure to remember current smartcard settings */
 #endif
 };
 
@@ -955,6 +962,13 @@ static struct up_dev_s g_usart1priv =
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+#ifdef GPIO_USART1_CK
+  .ck_gpio       = GPIO_USART1_CK,
+#else
+  .ck_gpio       = 0,
+#endif
+#endif
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART1_CTS,
@@ -978,6 +992,9 @@ static struct up_dev_s g_usart1priv =
 #  else
   .rs485_dir_polarity = true,
 #  endif
+#endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = true,
 #endif
 };
 #endif
@@ -1024,6 +1041,13 @@ static struct up_dev_s g_usart2priv =
   .usartbase     = STM32_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+#ifdef GPIO_USART2_CK
+  .ck_gpio       = GPIO_USART2_CK,
+#else
+  .ck_gpio       = 0,
+#endif
+#endif
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART2_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART2_CTS,
@@ -1047,6 +1071,9 @@ static struct up_dev_s g_usart2priv =
 #  else
   .rs485_dir_polarity = true,
 #  endif
+#endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = true,
 #endif
 };
 #endif
@@ -1093,6 +1120,13 @@ static struct up_dev_s g_usart3priv =
   .usartbase     = STM32_USART3_BASE,
   .tx_gpio       = GPIO_USART3_TX,
   .rx_gpio       = GPIO_USART3_RX,
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+#ifdef GPIO_USART3_CK
+  .ck_gpio       = GPIO_USART3_CK,
+#else
+  .ck_gpio       = 0,
+#endif
+#endif
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART3_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART3_CTS,
@@ -1116,6 +1150,9 @@ static struct up_dev_s g_usart3priv =
 #  else
   .rs485_dir_polarity = true,
 #  endif
+#endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = true,
 #endif
 };
 #endif
@@ -1186,6 +1223,9 @@ static struct up_dev_s g_uart4priv =
   .rs485_dir_polarity = true,
 #  endif
 #endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = false,
+#endif
 };
 #endif
 
@@ -1255,6 +1295,9 @@ static struct up_dev_s g_uart5priv =
   .rs485_dir_polarity = true,
 #  endif
 #endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = false,
+#endif
 };
 #endif
 
@@ -1300,6 +1343,13 @@ static struct up_dev_s g_usart6priv =
   .usartbase     = STM32_USART6_BASE,
   .tx_gpio       = GPIO_USART6_TX,
   .rx_gpio       = GPIO_USART6_RX,
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+#ifdef GPIO_USART6_CK
+  .ck_gpio       = GPIO_USART6_CK,
+#else
+  .ck_gpio       = 0,
+#endif
+#endif
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART6_OFLOWCONTROL)
   .oflow         = true,
   .cts_gpio      = GPIO_USART6_CTS,
@@ -1323,6 +1373,9 @@ static struct up_dev_s g_usart6priv =
 #  else
   .rs485_dir_polarity = true,
 #  endif
+#endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = true,
 #endif
 };
 #endif
@@ -1393,6 +1446,9 @@ static struct up_dev_s g_uart7priv =
   .rs485_dir_polarity = true,
 #  endif
 #endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = false,
+#endif
 };
 #endif
 
@@ -1461,6 +1517,9 @@ static struct up_dev_s g_uart8priv =
 #  else
   .rs485_dir_polarity = true,
 #  endif
+#endif
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+  .sc_supported = false,
 #endif
 };
 #endif
@@ -2650,6 +2709,201 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         leave_critical_section(flags);
       }
      break;
+#endif
+
+#ifdef CONFIG_STM32H7_USART_SMARTCARD
+    case TIOCGSMARTCARD:
+      {
+        struct serial_smartcard_s *sc = (struct serial_smartcard_s *)arg;
+
+        /* Determine argument validity */
+
+        if (!sc)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Determine if this uart supports smartcard mode */
+
+        if (!priv->sc_supported)
+          {
+            ret = -ENOTTY;
+            break;
+          }
+
+        memcpy(sc, &priv->smartcard, sizeof(struct serial_smartcard_s));
+        break;
+      }
+
+    case TIOCSSMARTCARD:
+      {
+        struct serial_smartcard_s *sc = (struct serial_smartcard_s *)arg;
+        uint32_t cr1;
+        uint32_t cr1_ue;
+        uint32_t cr2;
+        uint32_t cr3;
+        uint32_t gtpr;
+        irqstate_t flags;
+
+        /* Determine argument validity */
+
+        if (!sc)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        /* Determine if this uart supports smartcard mode */
+
+        if (!priv->sc_supported)
+          {
+            ret = -ENOTTY;
+            break;
+          }
+
+        memcpy(&priv->smartcard, sc, sizeof(struct serial_smartcard_s));
+
+        flags = enter_critical_section();
+
+        /* Get the original state of UE */
+
+        cr1  = up_serialin(priv, STM32_USART_CR1_OFFSET);
+        cr1_ue = cr1 & USART_CR1_UE;
+        cr1 &= ~USART_CR1_UE;
+
+        /* Disable UE, config can only be written when UE=0 */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1);
+
+        /* Read smart card related registers */
+
+        cr2  = up_serialin(priv, STM32_USART_CR2_OFFSET);
+        cr3  = up_serialin(priv, STM32_USART_CR3_OFFSET);
+        gtpr = up_serialin(priv, STM32_USART_GTPR_OFFSET);
+
+        /* Apply settings */
+
+        if (priv->smartcard.enabled)
+          {
+            /* User has requested to enable smart card mode */
+
+            cr3 |= USART_CR3_SCEN | USART_CR3_NACK; /* Always enable NACK */
+
+            /* Smart card mode does not use RX, but uses CLK */
+
+            stm32_unconfiggpio(priv->rx_gpio);
+            if (!priv->ck_gpio)
+              {
+                ret = -EIO;
+                break;
+              }
+
+            stm32_configgpio(priv->ck_gpio);
+
+            /* Note: TX gpio has to be open drain */
+
+            if (priv->smartcard.clken)
+              {
+                /* Enable smart card clock */
+
+                cr2 |=   USART_CR2_CLKEN | USART_CR2_LBCL;
+                cr2 &= ~(USART_CR2_CPOL  | USART_CR2_CPHA);
+              }
+            else
+              {
+                cr2 &= ~USART_CR2_CLKEN; /* Disable smart card clock */
+              }
+
+            if (priv->smartcard.inverse)
+              {
+                /* Enable inverse convention */
+
+                cr2 |= USART_CR2_MSBFIRST | USART_CR2_DATAINV;
+              }
+            else
+              {
+                /* Enable direct convention */
+
+                cr3 &= ~(USART_CR2_MSBFIRST | USART_CR2_DATAINV);
+              }
+
+            if (priv->smartcard.clkout)
+              {
+                /* Compute prescaler to match request,
+                 * then return the actual value.
+                 */
+
+                uint8_t clkdiv = 1;
+                uint32_t divided = priv->apbclock >> 1;
+                while ((divided > priv->smartcard.clkout) && (clkdiv < 31))
+                  {
+                    clkdiv++;
+                    divided >>= 1;
+                  }
+
+                priv->smartcard.clkout = priv->apbclock / (clkdiv << 1);
+                gtpr = (gtpr & ~USART_GTPR_PSC_MASK) |
+                       (clkdiv << USART_GTPR_PSC_SHIFT);
+              }
+
+            if (priv->smartcard.etu)
+              {
+                uint8_t clkdiv;
+                uint32_t etuclock;
+
+                /* Get the current prescaler from gtpr, either the original
+                 * value, or the one that was just updated
+                 */
+
+                clkdiv = (gtpr & USART_GTPR_PSC_MASK) >>
+                         USART_GTPR_PSC_SHIFT;
+                clkdiv <<= 1; /* Actual divider is twice the reg contents */
+
+                /* The refernce clock for the ETU is the divided clock */
+
+                etuclock = priv->apbclock / clkdiv;
+
+                /* Compute baud rate from clock divider and ETU */
+
+                priv->baud      = etuclock / priv->smartcard.etu;
+                priv->bits      = 8;
+                priv->parity    = 2; /* even */
+                priv->stopbits2 = true;
+                up_set_format(dev);
+              }
+
+            if (priv->smartcard.cgt)
+              {
+                gtpr = (gtpr & ~USART_GTPR_GT_MASK) |
+                       (sc->cgt << USART_GTPR_GT_SHIFT);
+              }
+          }
+        else
+          {
+            /* User has requested to disable smart card mode */
+
+            cr3 &= ~USART_CR3_SCEN;
+            cr2 &= ~USART_CR2_CLKEN; /* Disable smart card clock */
+
+            /* Re-enable RX and disable CLK */
+
+            stm32_configgpio  (priv->rx_gpio);
+            stm32_unconfiggpio(priv->ck_gpio);
+          }
+
+        /* Apply new settings */
+
+        up_serialout(priv, STM32_USART_CR3_OFFSET , cr2);
+        up_serialout(priv, STM32_USART_CR3_OFFSET , cr3);
+        up_serialout(priv, STM32_USART_GTPR_OFFSET, gtpr);
+
+        /* Re-enable UE if appropriate */
+
+        up_serialout(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
+        leave_critical_section(flags);
+      }
+    break;
 #endif
 
 #ifdef CONFIG_STM32H7_USART_INVERT
