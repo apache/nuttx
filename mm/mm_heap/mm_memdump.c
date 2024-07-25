@@ -43,52 +43,54 @@
  * Private Types
  ****************************************************************************/
 
+struct mm_memdump_priv_s
+{
+  FAR const struct mm_memdump_s *dump;
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+static void memdump_allocnode(FAR struct mm_allocnode_s *node)
+{
+  size_t nodesize = MM_SIZEOF_NODE(node);
+#if CONFIG_MM_BACKTRACE < 0
+  syslog(LOG_INFO, "%12zu%*p\n",
+         nodesize, BACKTRACE_PTR_FMT_WIDTH,
+         (FAR const char *)node + MM_SIZEOF_ALLOCNODE);
+#elif CONFIG_MM_BACKTRACE == 0
+  syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
+         node->pid, nodesize, node->seqno,
+         BACKTRACE_PTR_FMT_WIDTH,
+         (FAR const char *)node + MM_SIZEOF_ALLOCNODE);
+#else
+  char buf[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
+
+  backtrace_format(buf, sizeof(buf), node->backtrace,
+                   CONFIG_MM_BACKTRACE);
+
+  syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
+         node->pid, nodesize, node->seqno,
+         BACKTRACE_PTR_FMT_WIDTH,
+         (FAR const char *)node + MM_SIZEOF_ALLOCNODE, buf);
+#endif
+}
+
 static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 {
-  FAR const struct mm_memdump_s *dump = arg;
+  FAR struct mm_memdump_priv_s *priv = arg;
+  FAR const struct mm_memdump_s *dump = priv->dump;
   size_t nodesize = MM_SIZEOF_NODE(node);
 
   if (MM_NODE_IS_ALLOC(node))
     {
       DEBUGASSERT(nodesize >= MM_SIZEOF_ALLOCNODE);
-#if CONFIG_MM_BACKTRACE < 0
-      if (dump->pid == PID_MM_ALLOC)
+      if ((MM_DUMP_ASSIGN(dump, node) || MM_DUMP_ALLOC(dump, node) ||
+           MM_DUMP_LEAK(dump, node)) && MM_DUMP_SEQNO(dump, node))
         {
-          syslog(LOG_INFO, "%12zu%*p\n",
-                 nodesize, BACKTRACE_PTR_FMT_WIDTH,
-                 ((FAR char *)node + MM_SIZEOF_ALLOCNODE));
+          memdump_allocnode(node);
         }
-#elif CONFIG_MM_BACKTRACE == 0
-      if ((MM_DUMP_ASSIGN(dump->pid, node->pid) ||
-           MM_DUMP_ALLOC(dump->pid, node->pid) ||
-           MM_DUMP_LEAK(dump->pid, node->pid)) &&
-          node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
-        {
-          syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
-                 node->pid, nodesize, node->seqno,
-                 BACKTRACE_PTR_FMT_WIDTH,
-                 ((FAR char *)node + MM_SIZEOF_ALLOCNODE));
-        }
-#else
-      if ((MM_DUMP_ASSIGN(dump->pid, node->pid) ||
-           MM_DUMP_ALLOC(dump->pid, node->pid) ||
-           MM_DUMP_LEAK(dump->pid, node->pid)) &&
-          node->seqno >= dump->seqmin && node->seqno <= dump->seqmax)
-        {
-          char buf[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
-          backtrace_format(buf, sizeof(buf), node->backtrace,
-                           CONFIG_MM_BACKTRACE);
-
-          syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
-                 node->pid, nodesize, node->seqno,
-                 BACKTRACE_PTR_FMT_WIDTH,
-                 ((FAR char *)node + MM_SIZEOF_ALLOCNODE), buf);
-        }
-#endif
     }
   else if (dump->pid == PID_MM_FREE)
     {
@@ -127,7 +129,15 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
 void mm_memdump(FAR struct mm_heap_s *heap,
                 FAR const struct mm_memdump_s *dump)
 {
+  struct mm_memdump_priv_s priv;
   struct mallinfo_task info;
+
+  info = mm_mallinfo_task(heap, dump);
+
+  if (info.aordblks == 0 && dump->pid >= PID_MM_FREE)
+    {
+      return;
+    }
 
   if (dump->pid >= PID_MM_ALLOC)
     {
@@ -140,7 +150,7 @@ void mm_memdump(FAR struct mm_heap_s *heap,
                         BACKTRACE_PTR_FMT_WIDTH, "Address", "Backtrace");
 #endif
     }
-  else
+  else if (dump->pid == PID_MM_FREE)
     {
       syslog(LOG_INFO, "Dump all free memory node info:\n");
       syslog(LOG_INFO, "%12s%*s\n", "Size", BACKTRACE_PTR_FMT_WIDTH,
@@ -150,10 +160,14 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   mempool_multiple_memdump(heap->mm_mpool, dump);
 #endif
-  mm_foreach(heap, memdump_handler, (FAR void *)dump);
+  memset(&priv, 0, sizeof(struct mm_memdump_priv_s));
+  priv.dump = dump;
 
-  info = mm_mallinfo_task(heap, dump);
+  mm_foreach(heap, memdump_handler, &priv);
 
-  syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
-  syslog(LOG_INFO, "%12d%12d\n", info.aordblks, info.uordblks);
+  if (dump->pid == PID_MM_FREE)
+    {
+      syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
+      syslog(LOG_INFO, "%12d%12d\n", info.aordblks, info.uordblks);
+    }
 }

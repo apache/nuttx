@@ -176,10 +176,8 @@ static void mempool_info_task_callback(FAR struct mempool_s *pool,
       return;
     }
 
-  if ((MM_DUMP_ASSIGN(task->pid, buf->pid) ||
-       MM_DUMP_ALLOC(task->pid, buf->pid) ||
-       MM_DUMP_LEAK(task->pid, buf->pid)) &&
-      buf->seqno >= task->seqmin && buf->seqno <= task->seqmax)
+  if ((MM_DUMP_ASSIGN(task, buf) || MM_DUMP_ALLOC(task, buf) ||
+       MM_DUMP_LEAK(task, buf)) && MM_DUMP_SEQNO(task, buf))
     {
       info->aordblks++;
       info->uordblks += blocksize;
@@ -198,10 +196,8 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
       return;
     }
 
-  if ((MM_DUMP_ASSIGN(dump->pid, buf->pid) ||
-       MM_DUMP_ALLOC(dump->pid, buf->pid) ||
-       MM_DUMP_LEAK(dump->pid, buf->pid)) &&
-      buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
+  if ((MM_DUMP_ASSIGN(dump, buf) || MM_DUMP_ALLOC(dump, buf) ||
+       MM_DUMP_LEAK(dump, buf)) && MM_DUMP_SEQNO(dump, buf))
     {
       char tmp[CONFIG_MM_BACKTRACE * BACKTRACE_PTR_FMT_WIDTH + 1] = "";
 

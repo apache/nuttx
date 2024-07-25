@@ -139,11 +139,23 @@
 #  define MM_INTERNAL_HEAP(heap) ((heap) == USR_HEAP)
 #endif
 
-#define MM_DUMP_ASSIGN(dump, pid) ((dump) == (pid))
-#define MM_DUMP_ALLOC(dump, pid) \
-    ((dump) == PID_MM_ALLOC && (pid) != PID_MM_MEMPOOL)
-#define MM_DUMP_LEAK(dump, pid) \
-    ((dump) == PID_MM_LEAK && (pid) >= 0 && nxsched_get_tcb(pid) == NULL)
+#if CONFIG_MM_BACKTRACE >= 0
+#  define MM_DUMP_ALLOC(dump, node) \
+    ((node) != NULL && (dump)->pid == PID_MM_ALLOC && \
+     (node)->pid != PID_MM_MEMPOOL)
+#  define MM_DUMP_SEQNO(dump, node) \
+    ((node)->seqno >= (dump)->seqmin && (node)->seqno <= (dump)->seqmax)
+#  define MM_DUMP_ASSIGN(dump, node) \
+    ((node) != NULL && (dump)->pid == (node)->pid)
+#  define MM_DUMP_LEAK(dump, node) \
+    ((node) != NULL && (dump)->pid == PID_MM_LEAK && (node)->pid >= 0 && \
+     nxsched_get_tcb((node)->pid) == NULL)
+#else
+#  define MM_DUMP_ALLOC(dump,node)  ((dump)->pid == PID_MM_ALLOC)
+#  define MM_DUMP_SEQNO(dump,node)  (true)
+#  define MM_DUMP_ASSIGN(dump,node) (false)
+#  define MM_DUMP_LEAK(dump,pid)    (false)
+#endif
 
 #define MM_INIT_MAGIC    0xcc
 #define MM_ALLOC_MAGIC   0xaa
