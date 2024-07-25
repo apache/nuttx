@@ -131,10 +131,25 @@ struct mm_mallinfo_handler_s
   FAR struct mallinfo_task *info;
 };
 
+#if CONFIG_MM_HEAP_BIGGEST_COUNT > 0
+struct mm_tlsf_node_s
+{
+  FAR void *ptr;
+  size_t size;
+};
+
+struct mm_memdump_priv_s
+{
+  FAR const struct mm_memdump_s *dump;
+  struct mm_tlsf_node_s node[CONFIG_MM_HEAP_BIGGEST_COUNT];
+  size_t filled;
+};
+#else
 struct mm_memdump_priv_s
 {
   FAR const struct mm_memdump_s *dump;
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -167,6 +182,54 @@ static void memdump_allocnode(FAR void *ptr, size_t size)
          ptr, tmp);
 #endif
 }
+
+#if CONFIG_MM_HEAP_BIGGEST_COUNT > 0
+static int memdump_record_comare(FAR const void *a, FAR const void *b)
+{
+  FAR struct mm_tlsf_node_s *node_a = (FAR struct mm_tlsf_node_s *)a;
+  FAR struct mm_tlsf_node_s *node_b = (FAR struct mm_tlsf_node_s *)b;
+  size_t size_a = node_a->size;
+  size_t size_b = node_b->size;
+  return size_a > size_b ? 1 : -1;
+}
+
+static void memdump_record_biggest(FAR struct mm_memdump_priv_s *priv,
+                                   FAR void *ptr, size_t size)
+{
+  if (priv->filled < CONFIG_MM_HEAP_BIGGEST_COUNT)
+    {
+      priv->node[priv->filled].ptr  = ptr;
+      priv->node[priv->filled].size = size;
+      priv->filled++;
+    }
+  else
+    {
+      if (size <= priv->node[0].size)
+        {
+          return;
+        }
+
+      priv->node[0].ptr  = ptr;
+      priv->node[0].size = size;
+    }
+
+  if (priv->filled > 1)
+    {
+      qsort(priv->node, priv->filled, sizeof(struct mm_tlsf_node_s),
+            memdump_record_comare);
+    }
+}
+
+static void memdump_dump_biggestnodes(FAR struct mm_memdump_priv_s *priv)
+{
+  size_t i;
+  for (i = 0; i < priv->filled; i++)
+    {
+      memdump_allocnode(priv->node[i].ptr, priv->node[i].size);
+    }
+}
+
+#endif
 
 #if CONFIG_MM_BACKTRACE >= 0
 
@@ -472,6 +535,12 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
         {
           memdump_allocnode(ptr, size);
         }
+#if CONFIG_MM_HEAP_BIGGEST_COUNT > 0
+      else if(dump->pid == PID_MM_BIGGEST && MM_DUMP_SEQNO(dump, buf))
+        {
+          memdump_record_biggest(priv, ptr, size);
+        }
+#endif
 #undef buf
     }
   else if (dump->pid == PID_MM_FREE)
@@ -1083,6 +1152,20 @@ void mm_memdump(FAR struct mm_heap_s *heap,
       syslog(LOG_INFO, "%12s%*s\n", "Size", BACKTRACE_PTR_FMT_WIDTH,
              "Address");
     }
+#if CONFIG_MM_HEAP_BIGGEST_COUNT > 0
+  else if (dump->pid == PID_MM_BIGGEST)
+    {
+      syslog(LOG_INFO, "Memdump biggest allocated top %d\n",
+                       CONFIG_MM_HEAP_BIGGEST_COUNT);
+#  if CONFIG_MM_BACKTRACE < 0
+      syslog(LOG_INFO, "%12s%*s\n", "Size", BACKTRACE_PTR_FMT_WIDTH,
+             "Address");
+#  else
+      syslog(LOG_INFO, "%6s%12s%12s%*s %s\n", "PID", "Size", "Sequence",
+                        BACKTRACE_PTR_FMT_WIDTH, "Address", "Backtrace");
+#  endif
+    }
+#endif
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   mempool_multiple_memdump(heap->mm_mpool, dump);
@@ -1107,6 +1190,12 @@ void mm_memdump(FAR struct mm_heap_s *heap,
       syslog(LOG_INFO, "%12s%12s\n", "Total Blks", "Total Size");
       syslog(LOG_INFO, "%12d%12d\n", info.aordblks, info.uordblks);
     }
+#if CONFIG_MM_HEAP_BIGGEST_COUNT > 0
+  else if (dump->pid == PID_MM_BIGGEST)
+    {
+      memdump_dump_biggestnodes(&priv);
+    }
+#endif
 }
 
 /****************************************************************************
