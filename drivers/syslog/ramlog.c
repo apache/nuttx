@@ -510,7 +510,7 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
   irqstate_t flags;
   int ret = 0;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
 
   switch (cmd)
     {
@@ -528,7 +528,7 @@ static int ramlog_file_ioctl(FAR struct file *filep, int cmd,
         break;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -615,11 +615,11 @@ static int ramlog_file_open(FAR struct file *filep)
   nxsem_init(&upriv->rl_waitsem, 0, 0);
 #endif
 
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
   list_add_tail(&priv->rl_list, &upriv->rl_node);
   upriv->rl_tail = header->rl_head > priv->rl_bufsize ?
                    header->rl_head - priv->rl_bufsize : 0;
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
 
   filep->f_priv = upriv;
   return 0;
@@ -636,9 +636,9 @@ static int ramlog_file_close(FAR struct file *filep)
 
   /* Get exclusive access to the rl_tail index */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
   list_delete(&upriv->rl_node);
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
 
 #ifndef CONFIG_RAMLOG_NONBLOCKING
   nxsem_destroy(&upriv->rl_waitsem);
