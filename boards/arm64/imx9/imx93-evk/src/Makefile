@@ -43,3 +43,9 @@ CSRCS += imx9_usdhc.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
+
+ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
+.PHONY: distclean
+distclean::
+	$(call DELFILE, ${TOPDIR}${DELIM}imx9-sdimage.img)
+endif
