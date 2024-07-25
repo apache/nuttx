@@ -380,14 +380,11 @@ int pci_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
  * Description:
  *   Set the number of MSI interrupt numbers required.
  *
- *   Message Control Register for MSI:bit6-bit4:Multiple Message Enable
- *   Software writes to this field to indicate the number of allocate vectors
- *   Equal to or less than the number of requested vectors. The number of
- *   allocated vectors is aligned to a power of two. If a Function requests
- *   four vectors (indicated by a Multiple Message Capable encoding of
- *   010b), system software can allocate either four, two, or one vector
- *   by writing a 010b, 001b, or 000b to this field, respectively. When
- *   MSI Enable is Set, a Function will be allocated at least 1 vector
+ *   Message Control Register for MSI:bit3-bit1:System software reads this
+ *   field to determine the number of requested vectors. The number of
+ *   requested vectors must be aligned to a power of two (if a Function
+ *   requires three vectors, it requests four by initializing this field
+ *   to 010b).
  *
  *   Invoke to set the required number of MSI interrupts.
  *
