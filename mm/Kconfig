@@ -463,4 +463,12 @@ config MM_FREE_DELAYCOUNT_MAX
 		the value decides the maximum number of memory nodes that
 		will be delayed to free.
 
+config MM_HEAP_BIGGEST_COUNT
+	int "The largest malloc element dump count"
+	default 30
+	---help---
+		The dump support for largest allocated memory.
+		If too big, should take care of stack usage.
+		Define 0 to disable largest allocated element dump feature.
+
 source "mm/iob/Kconfig"
