@@ -148,6 +148,8 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.notifyid    = RSC_NOTIFY_ID_ANY;
       rsc->config.r2h_buf_size      = 0x800;
       rsc->config.h2r_buf_size      = 0x800;
+      rsc->cmd_master               = 0;
+      rsc->cmd_slave                = 0;
 
       priv->shmem->base             = (uintptr_t)priv->shmem;
 

@@ -115,6 +115,8 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
       rsc->rpmsg_vring1.num         = 8;
       rsc->config.r2h_buf_size      = 2048;
       rsc->config.h2r_buf_size      = 2048;
+      rsc->cmd_master               = 0;
+      rsc->cmd_slave                = 0;
 
       priv->shmem->base = (uintptr_t)priv->shmem;
     }
