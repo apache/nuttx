@@ -153,6 +153,12 @@ static int __wdt_interrupt(int irq, void *context, void *arg)
  * Description:
  *   Reset the time to the current timeout and start the watchdog.
  *
+ * Input parameters:
+ *   lower  - A pointer to the lower-half driver of the watchdog.
+ *
+ * Returned Value:
+ *   Error status. Always returns OK.
+ *
  ****************************************************************************/
 
 int bl808_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
@@ -177,10 +183,16 @@ int bl808_wdt_start(FAR struct watchdog_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: bl808_timer_stop
+ * Name: bl808_wdt_stop
  *
  * Description:
  *   Stop the watchdog.
+ *
+ * Input parameters:
+ *   lower  - A pointer to the lower-half driver of the watchdog.
+ *
+ * Returned Value:
+ *   Error status. Always returns OK.
  *
  ****************************************************************************/
 
@@ -200,6 +212,21 @@ int bl808_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
   priv->started = false;
   return OK;
 }
+
+/****************************************************************************
+ * Name: bl808_wdt_keepalive
+ *
+ * Description:
+ *   Reset the watchdog to keep it running.
+ *
+ * Input parameters:
+ *   lower  - A pointer to the lower-half driver of the watchdog.
+ *
+ * Returned Value:
+ *   Error status. Returns an IO error if the watchdog is not
+ *   running, otherwise returns OK.
+ *
+ ****************************************************************************/
 
 int bl808_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
@@ -227,6 +254,13 @@ int bl808_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  * Description:
  *   Get current watchdog status. Returns to status parameter.
  *
+ * Input parameters:
+ *   lower  - A pointer to the lower-half driver of the watchdog.
+ *   status - Return location for the watchdog status.
+ *
+ * Returned Value:
+ *   Error status. Always returns OK.
+ *
  ****************************************************************************/
 
 int bl808_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
@@ -251,6 +285,13 @@ int bl808_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  * Description:
  *   Set a new timeout value and reset the watchdog.
+ *
+ * Input parameters:
+ *   lower   - A pointer to the lower-half driver of the watchdog.
+ *   timeout - Watchdog timeout, in milliseconds.
+ *
+ * Returned Value:
+ *   Error status. Always returns OK.
  *
  ****************************************************************************/
 
@@ -291,12 +332,21 @@ int bl808_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   the callback is null, configure the watchdog
  *   as a reset source.
  *
+ * Input parameters:
+ *   lower    - A pointer to the lower-half driver of the watchdog.
+ *   callback - Callback to run on watchdog timeout. If null,
+ *              timeout should trigger a reset.
+ *
+ * Returned Value:
+ *   The last assigned callback, or null if there was none.
+ *
  ****************************************************************************/
 
 xcpt_t bl808_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
                          CODE xcpt_t callback)
 {
   struct bl808_wdt_s *priv = (struct bl808_wdt_s *)lower;
+  xcpt_t prev_callback = priv->callback;
   priv->callback = callback;
 
   /* Configure watchdog mode */
@@ -328,7 +378,7 @@ xcpt_t bl808_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
         }
     }
 
-  return NULL;
+  return prev_callback;
 }
 
 /****************************************************************************
@@ -336,6 +386,13 @@ xcpt_t bl808_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
  *
  * Description:
  *   Handle ioctl commands not recognized by upper-half.
+ *
+ * Input parameters:
+ *   lower  - A pointer to the lower-half driver of the watchdog.
+ *
+ * Returned Value:
+ *   Error status. Always returns an IO error because no additional
+ *   ioctl methods are implemented.
  *
  ****************************************************************************/
 
@@ -349,6 +406,14 @@ int bl808_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower,
 
 /****************************************************************************
  * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: bl808_wdt_init
+ *
+ * Description:
+ *   Initialize watchdog hardware and register character drivers.
+ *
  ****************************************************************************/
 
 int bl808_wdt_init(void)
