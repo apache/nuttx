@@ -236,6 +236,9 @@ uint64_t *arm64_syscall_switch(uint64_t * regs)
 
   if ((uint64_t *)f_regs != ret_regs)
     {
+      cpu = this_cpu();
+      tcb = current_task(cpu);
+
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -246,12 +249,15 @@ uint64_t *arm64_syscall_switch(uint64_t * regs)
       addrenv_switch(NULL);
 #endif
 
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[cpu]);
+      nxsched_resume_scheduler(tcb);
+
       /* Record the new "running" task.  g_running_tasks[] is only used by
        * assertion logic for reporting crashes.
        */
 
-      cpu = this_cpu();
-      tcb = current_task(cpu);
       g_running_tasks[cpu] = tcb;
 
       /* Restore the cpu lock */

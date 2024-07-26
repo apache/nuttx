@@ -565,11 +565,17 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   if (regs != tcb->xcp.regs)
     {
+      cpu = this_cpu();
+
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[cpu]);
+      nxsched_resume_scheduler(tcb);
+
       /* Record the new "running" task.  g_running_tasks[] is only used by
        * assertion logic for reporting crashes.
        */
 
-      cpu = this_cpu();
       g_running_tasks[cpu] = tcb;
 
       /* Restore the cpu lock */
