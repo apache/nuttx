@@ -185,7 +185,7 @@ struct pci_epf_driver_s
   CODE void (*remove)(FAR struct pci_epf_device_s *epf);
 
   struct list_node node;
-  FAR struct pci_epf_ops_s *ops;
+  FAR const struct pci_epf_ops_s *ops;
   FAR const struct pci_epf_device_id_s *id_table;
 };
 
