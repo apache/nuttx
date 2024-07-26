@@ -184,6 +184,7 @@ static const struct file_section_s g_section_info[] =
 static const char *g_white_prefix[] =
 {
   "ASCII_",  /* Ref:  include/nuttx/ascii.h */
+  "Dl_info", /* Ref:  include/dlfcn.h */
   "Elf",     /* Ref:  include/elf.h, include/elf32.h, include/elf64.h */
   "PRId",    /* Ref:  inttypes.h */
   "PRIi",    /* Ref:  inttypes.h */
