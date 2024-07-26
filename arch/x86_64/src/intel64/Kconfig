@@ -203,5 +203,9 @@ config ARCH_INTEL64_DISABLE_CET
 		It inserts the endbr64 instruction at the beginning of functions,
 		which may impact CPU branch prediction performance.
 
+config ARCH_INTEL64_DISABLE_VECTORIZE
+	bool "Disable vectorize completely"
+	---help---
+		Disable the compiler from vectorizing code optimization during compilation
 
 endif
