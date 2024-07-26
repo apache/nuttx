@@ -82,6 +82,11 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
       addrenv_switch(NULL);
 #endif
 
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+      nxsched_resume_scheduler(this_task());
+
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
