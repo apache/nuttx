@@ -146,6 +146,15 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
         {
           memdump_allocnode(node);
         }
+      else if(dump->pid == PID_MM_ORPHAN && MM_DUMP_SEQNO(dump, node))
+        {
+          FAR struct mm_allocnode_s *next = (FAR struct mm_allocnode_s *)
+                                            ((FAR char *)node + nodesize);
+          if (MM_PREVNODE_IS_FREE(node) || MM_NODE_IS_FREE(next))
+            {
+              memdump_allocnode(node);
+            }
+        }
 #if CONFIG_MM_HEAP_BIGGEST_COUNT > 0
       else if (dump->pid == PID_MM_BIGGEST && MM_DUMP_SEQNO(dump, node))
         {
@@ -231,6 +240,17 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 #  endif
     }
 #endif
+  else if (dump->pid == PID_MM_ORPHAN)
+    {
+      syslog(LOG_INFO, "Dump allocated orphan nodes\n");
+#  if CONFIG_MM_BACKTRACE < 0
+      syslog(LOG_INFO, "%12s%*s\n", "Size", BACKTRACE_PTR_FMT_WIDTH,
+             "Address");
+#  else
+      syslog(LOG_INFO, "%6s%12s%12s%*s %s\n", "PID", "Size", "Sequence",
+                        BACKTRACE_PTR_FMT_WIDTH, "Address", "Backtrace");
+#  endif
+    }
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   mempool_multiple_memdump(heap->mm_mpool, dump);

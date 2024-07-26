@@ -35,6 +35,7 @@
 
 /* Special PID to query the info about alloc, free and mempool */
 
+#define PID_MM_ORPHAN  ((pid_t)-6)
 #define PID_MM_BIGGEST ((pid_t)-5)
 #define PID_MM_FREE    ((pid_t)-4)
 #define PID_MM_ALLOC   ((pid_t)-3)
