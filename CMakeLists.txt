@@ -420,6 +420,7 @@ add_executable(nuttx)
 add_custom_target(nuttx_post)
 if(CONFIG_BUILD_PROTECTED)
   add_executable(nuttx_user)
+  nuttx_add_library_internal(nuttx_user)
 endif()
 
 if(CONFIG_ALLSYMS)
