@@ -430,7 +430,7 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(procfile);
 
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                 "usage: <used/free"
+                 "usage: <used/free/orphan"
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
                  "/mempool"
 #endif
@@ -446,6 +446,7 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
                  ">\n"
                  "used: dump all allocated node\n"
                  "free: dump all free node\n"
+                 "orphan: dump allocated free neighbored node\n"
 #if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
                  "mempool: dump all mempool alloc node\n"
 #endif
@@ -599,6 +600,14 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
 #  endif
         break;
 #endif
+
+      case 'o':
+        dump.pid = PID_MM_ORPHAN;
+#  if CONFIG_MM_BACKTRACE >= 0
+        p = (FAR char *)buffer + 6;
+        goto dump;
+#  endif
+        break;
 
 #if CONFIG_MM_BACKTRACE >= 0
       default:
