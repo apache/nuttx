@@ -294,7 +294,7 @@
  ****************************************************************************/
 
 #define RPTUN_RESET(d,v) ((d)->ops->reset ? \
-                          (d)->ops->reset(d,v) : -ENOSYS)
+                          (d)->ops->reset(d,v) : UNUSED(d))
 
 /****************************************************************************
  * Name: RPTUN_PANIC
@@ -311,7 +311,7 @@
  ****************************************************************************/
 
 #define RPTUN_PANIC(d) ((d)->ops->panic ? \
-                        (d)->ops->panic(d) : -ENOSYS)
+                        (d)->ops->panic(d) : UNUSED(d))
 
 /****************************************************************************
  * Public Types
@@ -335,6 +335,8 @@ struct aligned_data(8) rptun_rsc_s
   struct fw_rsc_vdev_vring rpmsg_vring0;
   struct fw_rsc_vdev_vring rpmsg_vring1;
   struct fw_rsc_config     config;
+  uint32_t                 cmd_master;
+  uint32_t                 cmd_slave;
 };
 
 struct rptun_dev_s;

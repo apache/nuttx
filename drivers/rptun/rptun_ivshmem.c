@@ -191,6 +191,8 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.notifyid    = RSC_NOTIFY_ID_ANY;
       rsc->config.r2h_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
       rsc->config.h2r_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
+      rsc->cmd_master               = 0;
+      rsc->cmd_slave                = 0;
 
       priv->shmem->rsc_size         = sizeof(struct rptun_rsc_s);
       priv->shmem->cmds             = RPTUN_IVSHMEM_READY;
