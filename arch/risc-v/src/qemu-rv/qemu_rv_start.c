@@ -33,6 +33,8 @@
 #include "riscv_internal.h"
 #include "chip.h"
 
+#include "qemu_rv_userspace.h"
+
 #ifdef CONFIG_BUILD_KERNEL
 #  include "qemu_rv_mm_init.h"
 #endif
@@ -170,6 +172,17 @@ void qemu_rv_start(int mhartid, const char *dtb)
   /* Do board initialization */
 
   showprogress('C');
+
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  qemu_rv_userspace();
+  showprogress('D');
+#endif
 
 #ifdef CONFIG_BUILD_KERNEL
   /* Setup page tables for kernel and enable MMU */
