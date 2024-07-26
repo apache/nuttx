@@ -203,6 +203,16 @@ int board_boot_image(const char *path, uint32_t hdr_size)
 
   ARM_ISB();
 
+  /* Check if reset is valid */
+
+  if (vt.reset == 0xffffffff)
+    {
+      syslog(LOG_ERR, "Not found image to boot!");
+      PANIC();
+    }
+
+  syslog(LOG_INFO, "Jump to 0x%" PRIx32 "\n", vt.reset);
+
   /* Jump to non-secure entry point */
 
   nsfunc *ns_reset = (nsfunc *)(vt.reset);
