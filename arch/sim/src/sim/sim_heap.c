@@ -27,10 +27,10 @@
 #include <assert.h>
 #include <debug.h>
 #include <string.h>
-#include <stdatomic.h>
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/atomic.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mm/mm.h>
 

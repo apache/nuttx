@@ -31,30 +31,12 @@
 #include <assert.h>
 #include <stdint.h>
 
-#if defined(CONFIG_TICKET_SPINLOCK) || defined(CONFIG_RW_SPINLOCK)
-#  if !defined(__cplusplus)
-#    include <stdatomic.h>
-#    define CONFIG_HAVE_INLINE_SPINLOCK
-#  elif  defined(__has_include) && __has_include(<atomic>)
-extern "C++"
-{
-#    include <atomic>
-#    define CONFIG_HAVE_INLINE_SPINLOCK
-  using std::atomic_int;
-  using std::atomic_load;
-  using std::atomic_uint;
-  using std::atomic_ushort;
-  using std::atomic_fetch_add;
-  using std::atomic_fetch_sub;
-  using std::atomic_compare_exchange_strong;
-}
-#  endif
-#else
-#  define CONFIG_HAVE_INLINE_SPINLOCK
-#endif
-
 #include <nuttx/compiler.h>
 #include <nuttx/irq.h>
+
+#if defined(CONFIG_TICKET_SPINLOCK) || defined(CONFIG_RW_SPINLOCK)
+#  include <nuttx/atomic.h>
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -231,8 +213,6 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
 
 /* void spin_lock_init(FAR spinlock_t *lock); */
 #define spin_lock_init(l) do { *(l) = SP_UNLOCKED; } while (0)
-
-#ifdef CONFIG_HAVE_INLINE_SPINLOCK
 
 /****************************************************************************
  * Name: spin_lock_wo_note
@@ -1172,7 +1152,6 @@ void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 #endif
 
 #endif /* CONFIG_RW_SPINLOCK */
-#endif /* CONFIG_HAVE_INLINE_SPINLOCK */
 
 #undef EXTERN
 #if defined(__cplusplus)

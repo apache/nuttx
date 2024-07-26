@@ -22,8 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdatomic.h>
-
+#include <nuttx/atomic.h>
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/notesnap_driver.h>
 #include <nuttx/panic_notifier.h>
