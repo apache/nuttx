@@ -506,7 +506,7 @@ FAR void *dlopen(FAR const char *file, int mode)
        * be loaded.
        */
 
-       handle = dlinsert(file);
+      handle = dlinsert(file);
     }
 
   return handle;
