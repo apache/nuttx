@@ -89,6 +89,10 @@ to be set to the same value as ``CONFIG_SMP_NCPUS`` in the build config file.
 If testing with S-mode build, remove the ``-bios none`` option. S-mode build
 requires SBI to function properly.
 
+For BUILD_PROTECTED the user-space binary must also be loaded, which can be
+done by adding ``-device loader,file=./nuttx_user.elf`` to the command line
+arguments.
+
 citest
 ------
 

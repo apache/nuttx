@@ -34,3 +34,7 @@ endif
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += qemu_rv_pgalloc.c
 endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += qemu_rv_userspace.c
+endif
