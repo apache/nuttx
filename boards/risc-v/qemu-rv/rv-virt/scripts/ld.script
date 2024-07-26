@@ -20,11 +20,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_USE_S_MODE
-#define TEXT_ADDR     0x80200000
-#else
-#define TEXT_ADDR     0x80000000
-#endif
+#define TEXT_ADDR     CONFIG_RAM_START
 
 SECTIONS
 {
