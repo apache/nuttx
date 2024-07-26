@@ -51,16 +51,20 @@ ifeq ($(CONFIG_FRAME_POINTER),y)
   ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
 endif
 
+ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_CET),y)
+  ARCHOPTIMIZATION += -fcf-protection=none
+endif
+
+ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_VECTORIZE),y)
+  ARCHOPTIMIZATION += -fno-tree-vectorize
+endif
+
 ARCHCFLAGS += -fno-common -Wno-attributes
 ARCHCXXFLAGS += -fno-common -Wno-attributes -nostdinc++
 
 ARCHCPUFLAGS = -fno-pic -mcmodel=large -fno-stack-protector -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-
-ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_CET),y)
-  ARCHOPTIMIZATION += -fcf-protection=none
-endif
 
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.
