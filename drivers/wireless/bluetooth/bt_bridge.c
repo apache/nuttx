@@ -23,10 +23,10 @@
  ****************************************************************************/
 
 #include <debug.h>
-#include <stdatomic.h>
 #include <string.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/atomic.h>
 #include <nuttx/net/snoop.h>
 
 #include <nuttx/wireless/bluetooth/bt_bridge.h>
