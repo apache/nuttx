@@ -26,9 +26,9 @@
  ****************************************************************************/
 
 #include <sys/types.h>
-#include <stdatomic.h>
 #include <stdbool.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/list.h>
 
 /****************************************************************************

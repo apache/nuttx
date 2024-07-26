@@ -29,8 +29,8 @@
 
 #ifdef CONFIG_RAM_UART
 
-#include <stdatomic.h>
 #include <stdbool.h>
+#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Pre-processor Definitions
