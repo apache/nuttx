@@ -17,7 +17,7 @@ P0.28 APP UART0 TX virtual COM 0
 P0.29 APP UART0 RX virtual COM 0
 ===== ============ =============
 
-Serial console for the MCUBOOT (secure domain):
+Serial console for the bootloader (secure domain):
 
 ===== ============ =============
 Pin   Signal       Notes
@@ -86,3 +86,38 @@ ostest_tickless
 
 This is a NSH configuration that includes ``apps/testing/ostest`` as a builtin and
 enable support for the tick-less OS.
+
+miniboot_s
+----------
+
+This configuration is a simple bootloader that allows you to enter
+a TZ non-secure environment.
+
+modem_ns
+--------
+
+This configuration includes modem firmware and MUST BE run in non-secure
+environment. Booting into a non-secure environment can be done using
+the miniboot_s configuration.
+
+To get this configuration working with miniboot bootloader follow these steps:
+
+#. build firmware for miniboot and modem configuration::
+
+     cmake -B build_boot -DBOARD_CONFIG=nrf9160-dk:miniboot_s -GNinja
+     cmake -B build_modem -DBOARD_CONFIG=nrf9160-dk:modem_ns -GNinja
+     cmake --build build_boot
+     cmake --build build_modem
+
+#. flash bootloader::
+
+     nrfjprog --program build_boot/nuttx.hex --chiperase --verify
+
+#. flash modem image::
+
+     nrfjprog --program build_modem/nuttx.hex
+
+#. reset chip::
+
+     nrfjprog --reset
+
