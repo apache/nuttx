@@ -67,19 +67,19 @@ struct ubxmdm_status
 {
   bool on;
   int register_values_size;
-  FAR struct ubxmdm_regval* register_values;
+  FAR struct ubxmdm_regval *register_values;
 };
 
 struct ubxmdm_lower;
 
 struct ubxmdm_ops
 {
-  CODE int (*poweron)  (FAR struct ubxmdm_lower* lower);
-  CODE int (*poweroff) (FAR struct ubxmdm_lower* lower);
-  CODE int (*reset)    (FAR struct ubxmdm_lower* lower);
-  CODE int (*getstatus)(FAR struct ubxmdm_lower* lower,
-                        FAR struct ubxmdm_status* status);
-  CODE int (*ioctl)    (FAR struct ubxmdm_lower* lower,
+  CODE int (*poweron)  (FAR struct ubxmdm_lower  *lower);
+  CODE int (*poweroff) (FAR struct ubxmdm_lower  *lower);
+  CODE int (*reset)    (FAR struct ubxmdm_lower  *lower);
+  CODE int (*getstatus)(FAR struct ubxmdm_lower  *lower,
+                        FAR struct ubxmdm_status *status);
+  CODE int (*ioctl)    (FAR struct ubxmdm_lower  *lower,
                         int cmd,
                         unsigned long arg);
 };
@@ -90,7 +90,7 @@ struct ubxmdm_lower
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #undef EXTERN
