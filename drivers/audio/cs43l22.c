@@ -88,7 +88,7 @@ static int  cs43l22_configure(FAR struct audio_lowerhalf_s *dev,
 static int  cs43l22_configure(FAR struct audio_lowerhalf_s *dev,
                               FAR const struct audio_caps_s *caps);
 #endif
-static int  cs43l22_shutdown(FAR struct audio_lowerhalf_s *dev);
+static int  cs43l22_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt);
 static void cs43l22_senddone(FAR struct i2s_dev_s *i2s,
                              FAR struct ap_buffer_s *apb, FAR void *arg,
                              int result);
@@ -168,6 +168,7 @@ static void cs43l22_reset(FAR struct cs43l22_dev_s *priv);
 
 static const struct audio_ops_s g_audioops =
 {
+  NULL,                  /* setup */
   cs43l22_getcaps,       /* getcaps */
   cs43l22_configure,     /* configure */
   cs43l22_shutdown,      /* shutdown */
@@ -858,7 +859,7 @@ cs43l22_configure(FAR struct audio_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int cs43l22_shutdown(FAR struct audio_lowerhalf_s *dev)
+static int cs43l22_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt)
 {
   FAR struct cs43l22_dev_s *priv = (FAR struct cs43l22_dev_s *)dev;
 

@@ -48,7 +48,7 @@ struct audio_i2s_s
 
 static int audio_i2s_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                              FAR struct audio_caps_s *caps);
-static int audio_i2s_shutdown(FAR struct audio_lowerhalf_s *dev);
+static int audio_i2s_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int audio_i2s_configure(FAR struct audio_lowerhalf_s *dev,
                                FAR void *session,
@@ -101,6 +101,7 @@ static void audio_i2s_callback(struct i2s_dev_s *dev,
 
 static const struct audio_ops_s g_audio_i2s_ops =
 {
+  NULL,                    /* setup          */
   audio_i2s_getcaps,       /* getcaps        */
   audio_i2s_configure,     /* configure      */
   audio_i2s_shutdown,      /* shutdown       */
@@ -185,9 +186,7 @@ static int audio_i2s_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
             /* Report the Sample rates we support */
 
               caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_DEF_ALL;
-
               caps->ac_channels = 2;
-
               break;
           }
 
@@ -255,7 +254,7 @@ static int audio_i2s_configure(FAR struct audio_lowerhalf_s *dev,
   return ret;
 }
 
-static int audio_i2s_shutdown(FAR struct audio_lowerhalf_s *dev)
+static int audio_i2s_shutdown(FAR struct audio_lowerhalf_s *dev, int cnt)
 {
   FAR struct audio_i2s_s *audio_i2s = (struct audio_i2s_s *)dev;
   FAR struct i2s_dev_s *i2s = audio_i2s->i2s;
