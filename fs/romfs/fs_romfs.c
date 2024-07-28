@@ -265,7 +265,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   rf->rf_size = nodeinfo.rn_size;
   rf->rf_type = (uint8_t)(nodeinfo.rn_next & RFNEXT_ALLMODEMASK);
-  strlcpy(rf->rf_path, relpath, len + 1);
+  memcpy(rf->rf_path, relpath, len + 1);
 
   /* Get the start of the file data */
 
@@ -714,7 +714,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newrf->rf_startoffset = oldrf->rf_startoffset;
   newrf->rf_size        = oldrf->rf_size;
   newrf->rf_type        = oldrf->rf_type;
-  strlcpy(newrf->rf_path, oldrf->rf_path, len + 1);
+  memcpy(newrf->rf_path, oldrf->rf_path, len + 1);
 
   /* Configure buffering to support access to this file */
 

@@ -277,7 +277,7 @@ static int romfs_nodeinfo_search(FAR const void *a, FAR const void *b)
 {
   FAR struct romfs_nodeinfo_s *nodeinfo = *(FAR struct romfs_nodeinfo_s **)b;
   FAR const struct romfs_entryname_s *entry = a;
-  FAR const char *name2 = nodeinfo->rn_name;
+  FAR const char *name = nodeinfo->rn_name;
   size_t len = nodeinfo->rn_namesize;
   int ret;
 
@@ -286,12 +286,12 @@ static int romfs_nodeinfo_search(FAR const void *a, FAR const void *b)
       len = entry->re_len;
     }
 
-  ret = strncmp(entry->re_name, name2, len);
-  if (!ret)
+  ret = memcmp(entry->re_name, name, len);
+  if (ret == 0)
     {
       if (entry->re_name[len] == '/' || entry->re_name[len] == '\0')
         {
-          return name2[len] == '\0' ? 0 : -1;
+          return name[len] == '\0' ? 0 : -1;
         }
       else
         {
@@ -642,7 +642,7 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
   nodeinfo->rn_origoffset = origoffset;
   nodeinfo->rn_next       = next;
   nodeinfo->rn_namesize   = nsize;
-  strlcpy(nodeinfo->rn_name, name, nsize + 1);
+  memcpy(nodeinfo->rn_name, name, nsize + 1);
 
 #ifdef CONFIG_FS_ROMFS_WRITEABLE
   if (!list_is_empty(&rm->rm_sparelist))
