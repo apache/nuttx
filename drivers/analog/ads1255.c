@@ -494,7 +494,7 @@ static int adc_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ads1255initialize
+ * Name: ads1255_initialize
  *
  * Description:
  *   Initialize the selected adc port
@@ -507,8 +507,8 @@ static int adc_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
-                                           unsigned int devno)
+FAR struct adc_dev_s *ads1255_initialize(FAR struct spi_dev_s *spi,
+                                         unsigned int devno)
 {
   FAR struct ads1255_dev_s *priv =
     (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
