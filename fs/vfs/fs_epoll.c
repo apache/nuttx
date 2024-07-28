@@ -535,21 +535,20 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
              */
 
             extend = kmm_zalloc(sizeof(*extend) +
-                                sizeof(epoll_node_t) * eph->size);
+                                2 * sizeof(epoll_node_t) * eph->size);
             if (extend == NULL)
               {
                 ret = -ENOMEM;
                 goto err;
               }
 
+            eph->size *= 2;
             list_add_tail(&eph->extend, extend);
             epn = (FAR epoll_node_t *)(extend + 1);
             for (i = 0; i < eph->size; i++)
               {
                 list_add_tail(&eph->free, &epn[i].node);
               }
-
-            eph->size += eph->size;
           }
 
         epn = container_of(list_remove_head(&eph->free), epoll_node_t, node);
