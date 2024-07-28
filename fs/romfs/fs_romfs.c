@@ -492,7 +492,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
 
 errout_with_lock:
   nxrmutex_unlock(&rm->rm_lock);
-  return ret < 0 ? ret : readsize;
+  return readsize ? readsize : ret;
 }
 
 /****************************************************************************
