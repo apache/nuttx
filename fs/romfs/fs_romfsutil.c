@@ -650,7 +650,7 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
       uint32_t totalsize = ROMFS_ALIGNUP(ROMFS_FHDR_NAME + nsize + 1);
       if (offset == origoffset)
         {
-          totalsize += size;
+          totalsize += ROMFS_ALIGNUP(size);
         }
 
       rm->rm_volsize += totalsize;
@@ -1463,9 +1463,9 @@ int romfs_mkfs(FAR struct romfs_mountpt_s *rm)
 
   romfs_devmemcpy(rm, ROMFS_VHDR_ROM1FS, ROMFS_VHDR_MAGIC, ROMFS_VHDR_SIZE);
 
-  /* Init the ROMFS volume to zero */
+  /* Init the ROMFS volume size */
 
-  romfs_devwrite32(rm, ROMFS_VHDR_SIZE, 0);
+  romfs_devwrite32(rm, ROMFS_VHDR_SIZE, 0x60);
 
   /* Write the volume name */
 
