@@ -1020,10 +1020,19 @@ int romfs_fileconfigure(FAR struct romfs_mountpt_s *rm,
     }
   else
     {
+      uint32_t startsector;
+      uint32_t endoffset;
       uint32_t nsectors;
 
-      rf->rf_endsector = SEC_NSECTORS(rm, rf->rf_startoffset + rf->rf_size);
-      nsectors = rf->rf_endsector - SEC_NSECTORS(rm, rf->rf_startoffset) + 1;
+      endoffset = rf->rf_startoffset + rf->rf_size;
+      if (rf->rf_size)
+        {
+          endoffset--;
+        }
+
+      rf->rf_endsector = SEC_NSECTORS(rm, endoffset);
+      startsector = SEC_NSECTORS(rm, rf->rf_startoffset);
+      nsectors = rf->rf_endsector - startsector + 1;
       if (nsectors > CONFIG_FS_ROMFS_CACHE_FILE_NSECTORS)
         {
           nsectors = CONFIG_FS_ROMFS_CACHE_FILE_NSECTORS;
