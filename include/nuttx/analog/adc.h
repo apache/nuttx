@@ -269,15 +269,15 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ads1255initialize
+ * Name: ads1255_initialize
  *
  * Description:
  *   Initialize the TI ADS 125X lower half driver
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
-                                           unsigned int devno);
+FAR struct adc_dev_s *ads1255_initialize(FAR struct spi_dev_s *spi,
+                                         unsigned int devno);
 
 /****************************************************************************
  * Name: lmp92001_adc_initialize
@@ -313,7 +313,7 @@ FAR struct adc_dev_s *lmp92001_adc_initialize(FAR struct i2c_master_s *i2c,
  ****************************************************************************/
 
 FAR struct adc_dev_s *ads7828_initialize(FAR struct i2c_master_s *i2c,
-                                               uint8_t addr);
+                                         uint8_t addr);
 
 /****************************************************************************
  * Name: max1161x_initialize
