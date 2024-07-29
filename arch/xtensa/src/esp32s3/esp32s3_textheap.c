@@ -236,7 +236,14 @@ IRAM_ATTR void up_textheap_data_sync(void)
  * Name: up_copy_section
  *
  * Description:
- *   Copy section from general temporary buffer(src) to special addr(dest).
+ *   This function copies a section from a general temporary buffer (src) to
+ *   a specific address (dest). This is typically used in architectures that
+ *   require specific handling of memory sections.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the destination where the data needs to be copied.
+ *   src  - A pointer to the source from where the data needs to be copied.
+ *   n    - The number of bytes to be copied from src to dest.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
