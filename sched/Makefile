@@ -23,6 +23,7 @@ include $(TOPDIR)/Make.defs
 include addrenv/Make.defs
 include clock/Make.defs
 include environ/Make.defs
+include event/Make.defs
 include group/Make.defs
 include init/Make.defs
 include instrument/Make.defs
