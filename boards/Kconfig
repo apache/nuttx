@@ -314,7 +314,7 @@ config ARCH_BOARD_ESP32_2432S028
 	depends on ARCH_CHIP_ESP32WROVER
 	---help---
 	ESP32-2432S028 is an ESP32 board with LCD Display, LED RGB and SD Cards.
-	
+
 config ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
 	bool "LilyGO TBeam V1.1 LoRa/GPS"
 	depends on ARCH_CHIP_ESP32WROOM32
@@ -476,6 +476,21 @@ config ARCH_BOARD_ESP32S3_BOX
 		Leveraging the multi-functional accessories and reliable examples from the repo’s,
 		these development boards cater to both prototyping new projects and building complex
 		IoT systems, providing a perfect balance of form and function.
+
+config ARCH_BOARD_ESP32S3_KORVO_2
+	bool "Espressif ESP32-S3-Korvo-2 Board"
+	depends on ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM1N8R8
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		The ESP32-S3-Korvo-2 is a multimedia development board based on the ESP32-S3 chip.
+		It is equipped with a two-microphone array which is suitable for voice recognition
+		and near/far-field voice wake-up applications. The board integrates multiple
+		peripherals such as LCD, camera, and microSD card. It also supports JPEG video
+		stream processing. With all of its outstanding features, the board is an ideal
+		choice for the development of low-cost and low-power network-connected audio and
+		video products.
 
 config ARCH_BOARD_ESP32S3_MEADOW
 	bool "WildernessLabs ESP32S3-Meadow Board"
@@ -2211,7 +2226,7 @@ config ARCH_BOARD_ZCU111
 	---help---
 		This options selects support for NuttX on XilinX ZCU111 board
 		based on XCZU28DR SoC with ARM Cortex-A53
-		
+
 config ARCH_BOARD_SAMA5D2_XULT
 	bool "Atmel SAMA5D2 Xplained Ultra development board"
 	depends on ARCH_CHIP_ATSAMA5D27
@@ -3229,6 +3244,7 @@ config ARCH_BOARD
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
+	default "esp32s3-korvo-2"           if ARCH_BOARD_ESP32S3_KORVO_2
 	default "esp32c6-devkitc"           if ARCH_BOARD_ESP32C6_DEVKITC
 	default "esp32c6-devkitm"           if ARCH_BOARD_ESP32C6_DEVKITM
 	default "esp32h2-devkit"            if ARCH_BOARD_ESP32H2_DEVKIT
@@ -4374,6 +4390,9 @@ source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_BOX
 source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_KORVO_2
+source "boards/xtensa/esp32s3/esp32s3-korvo-2/Kconfig"
 endif
 #if ARCH_BOARD_ESP32C6_DEVKITC
 #source "boards/risc-v/esp32c6/esp32c6-devkitc/Kconfig"
