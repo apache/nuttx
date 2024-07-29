@@ -451,6 +451,20 @@ config ARCH_RV_MMIO_BITS
 	default 32 if ARCH_RV32
 	default 64 if ARCH_RV64
 
+config ARCH_RV_HARTID_BASE
+	int "Base hartid of this cluster"
+	default 0
+	---help---
+		Some RV chips have multiple cluster of harts with
+		globally numbered mhartids, like qemu-rv, mpfs and
+		jh7110 etc.  Clusters with SMP ability can be managed
+		by NuttX. As NuttX expects cluster-local hart ids,
+		we can shift mhartid by this value to derive such
+		local ids. The SMP_NCPUS still defines number of
+		harts in the cluster. Note that we assume that global
+		ids for each cluster are continuous. Note that there
+		are chips like k230 which don't have global mhartid.
+
 config ARCH_FAMILY
 	string
 	default "rv32" if ARCH_RV32
