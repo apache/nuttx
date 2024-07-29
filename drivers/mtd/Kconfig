@@ -1459,4 +1459,10 @@ config DHARA_READ_NCACHES
 	default 4
 endif
 
+config MTD_CFI
+	bool "CFI(common flash interface) NOR FLASH"
+	default n
+	---help---
+		Support CFI(common flash interface) NOR FLASH.
+
 endif # MTD

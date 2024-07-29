@@ -181,5 +181,10 @@ if(CONFIG_MTD)
     target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_LIST_DIR}/dhara)
   endif()
 
+  if(CONFIG_MTD_CFI)
+    list(APPEND SRCS mtd_cfi.c)
+    list(APPEND SRCS cfi.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
