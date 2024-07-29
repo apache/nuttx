@@ -4,7 +4,7 @@
 #
 
 config LIBC_MODLIB
-	bool
+	bool "Enable module library"
 	default n
 	select LIBC_ARCH_ELF
 	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
