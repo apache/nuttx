@@ -1,4 +1,4 @@
-/risc-v
+/risc-v/[f-s]*
 -,arty_a7:.+
 
 # Boards build by CMake
