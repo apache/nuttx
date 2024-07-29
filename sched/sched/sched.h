@@ -401,11 +401,9 @@ static inline_function FAR struct tcb_s *this_task(void)
 }
 
 int  nxsched_select_cpu(cpu_set_t affinity);
-int  nxsched_pause_cpu(FAR struct tcb_s *tcb);
 void nxsched_process_delivered(int cpu);
 #else
 #  define nxsched_select_cpu(a)     (0)
-#  define nxsched_pause_cpu(t)      (-38)  /* -ENOSYS */
 #endif
 
 #define nxsched_islocked_tcb(tcb)   ((tcb)->lockcount > 0)

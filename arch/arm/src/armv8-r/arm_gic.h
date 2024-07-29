@@ -335,32 +335,7 @@ int arm_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 
 #ifdef CONFIG_SMP
 
-/****************************************************************************
- * Name: arm_pause_handler
- *
- * Description:
- *   This is the handler for SGI2.  It performs the following operations:
- *
- *   1. It saves the current task state at the head of the current assigned
- *      task list.
- *   2. It waits on a spinlock, then
- *   3. Returns from interrupt, restoring the state of the new task at the
- *      head of the ready to run list.
- *
- * Input Parameters:
- *   Standard interrupt handling
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-int arm_pause_handler(int irq, void *context, void *arg);
-
-#ifdef CONFIG_SMP
 int arm_pause_async_handler(int irq, void *context, void *arg);
-#endif
-
 void arm_gic_secondary_init(void);
 
 #endif
