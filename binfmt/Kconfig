@@ -50,9 +50,7 @@ config ELF
 	bool "Enable the ELF Binary Format"
 	default n
 	select BINFMT_LOADABLE
-	select LIBC_ARCH_ELF
 	select LIBC_MODLIB
-	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 	---help---
 		Enable support for the ELF binary format.  Default: n
 
