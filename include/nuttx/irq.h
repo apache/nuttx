@@ -83,6 +83,7 @@
       SP_DMB(); \
       g_cpu_irqlock = SP_UNLOCKED; \
       SP_DSB(); \
+      SP_SEV(); \
     } \
   while (0)
 #endif

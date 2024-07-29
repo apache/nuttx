@@ -63,7 +63,7 @@
  * Public Data
  ****************************************************************************/
 
-extern volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
+static volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Private Functions
