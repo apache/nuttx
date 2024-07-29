@@ -325,7 +325,6 @@ config ARCH_CHIP_RP2040
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_WFE_SEV
-	select LIBC_ARCH_ATOMIC
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_BOARD_COMMON
 	---help---
@@ -638,7 +637,6 @@ config ARCH_CHIP_CXD56XX
 config ARCH_CHIP_PHY62XX
 	bool "Phyplus PHY62XX BLE"
 	select ARCH_CORTEXM0
-	select LIBC_ARCH_ATOMIC
 	---help---
 		Phyplus PHY62XX architectures (ARM Cortex-M0).
 
@@ -646,7 +644,6 @@ config ARCH_CHIP_TLSR82
 	bool "Telink TLSR82XX"
 	select ARCH_ARMV6M
 	select ARCH_HAVE_RESET
-	select LIBC_ARCH_ATOMIC
 	---help---
 		Telink tlsr82xx architectures (Customed armv6m)
 
