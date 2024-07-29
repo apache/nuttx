@@ -59,7 +59,6 @@ if(CONFIG_SMP)
     APPEND
     SRCS
     sched_cpuselect.c
-    sched_cpupause.c
     sched_getcpu.c
     sched_getaffinity.c
     sched_setaffinity.c
