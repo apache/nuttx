@@ -78,6 +78,8 @@
 #    define false (bool)0
 
 #    define __bool_true_false_are_defined 1
+#  else
+#    define _Bool uint8_t
 #  endif /* __cplusplus */
 
 #  endif /* CONFIG_ARCH_STDBOOL_H */
