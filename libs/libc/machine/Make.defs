@@ -18,9 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_ARCH_ATOMIC),y)
-  CSRCS += arch_atomic.c
-endif
+CSRCS += arch_atomic.c
 
 ifeq ($(CONFIG_ARCH_ARM),y)
 include $(TOPDIR)/libs/libc/machine/arm/Make.defs
