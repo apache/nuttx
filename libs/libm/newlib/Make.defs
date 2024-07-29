@@ -116,6 +116,6 @@ endif
 
 CSRCS := $(shell echo $(notdir $(CSRCS) | tr " " "\n" | sort | uniq))
 
-CFLAGS += -Wno-undef -Wno-unused-but-set-variable -Wno-unused-const-variable -Wno-maybe-uninitialized
+CFLAGS += -Wno-undef -Wno-unused-but-set-variable -Wno-unused-const-variable
 CFLAGS += ${INCDIR_PREFIX}newlib/newlib/newlib/libm/common
 CFLAGS += -D__int32_t=int32_t -D__uint32_t=uint32_t -D_REENT=0 -D_REENT_THREAD_LOCAL=1
