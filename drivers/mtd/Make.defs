@@ -208,6 +208,11 @@ CSRCS += mtd/dhara/dhara/journal.c
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)mtd$(DELIM)dhara
 endif
 
+ifeq ($(CONFIG_MTD_CFI),y)
+CSRCS += mtd_cfi.c
+CSRCS += cfi.c
+endif
+
 # Include MTD driver support
 
 DEPPATH += --dep-path mtd

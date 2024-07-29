@@ -805,6 +805,26 @@ int dhara_initialize_by_path(FAR const char *path,
                              FAR struct mtd_dev_s *mtd);
 #endif
 
+/****************************************************************************
+ * Name: register_cfi_driver
+ *
+ * Description:
+ *   Initialize and register a cfi nor flash.
+ *
+ * Input Parameters:
+ *   addr_base - The base(start) address of the device.
+ *   addr_end  - The end address of the device.
+ *   bankwidth - The bankwidth(port width) of the device.
+ *   id        - The device id used for register name.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_CFI
+int register_cfi_driver(volatile uintptr_t addr_base,
+                        volatile uintptr_t addr_end, uint32_t bankwidth,
+                        int id);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
