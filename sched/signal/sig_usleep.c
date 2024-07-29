@@ -77,9 +77,9 @@ int nxsig_usleep(useconds_t usec)
     {
       /* Let nxsig_nanosleep() do all of the work. */
 
-      sec          = usec / 1000000;
+      sec          = USEC2SEC(usec);
       rqtp.tv_sec  = sec;
-      rqtp.tv_nsec = (usec - (sec * 1000000)) * 1000;
+      rqtp.tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
       ret = nxsig_nanosleep(&rqtp, NULL);
     }

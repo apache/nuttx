@@ -78,7 +78,7 @@ int gettimeofday(FAR struct timeval *tv, FAR struct timezone *tz)
       /* Convert the struct timespec to a struct timeval */
 
       tv->tv_sec  = ts.tv_sec;
-      tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
+      tv->tv_usec = NSEC2USEC(ts.tv_nsec);
     }
 
   return ret;

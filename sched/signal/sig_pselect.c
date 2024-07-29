@@ -116,7 +116,7 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
       if (timeout)
         {
           timeval_buf.tv_sec  = timeout->tv_sec;
-          timeval_buf.tv_usec = timeout->tv_nsec / 1000;
+          timeval_buf.tv_usec = NSEC2USEC(timeout->tv_nsec);
           timeval = &timeval_buf;
         }
 
