@@ -16,7 +16,29 @@ config ARCH_CHIP_ESP32S3WROOM1N4
 	select ESP32S3_FLASH_4M
 	select ARCH_HAVE_I2CRESET
 	---help---
-		Generic module with an embedded ESP32-S3. This chip comes with 4MB SPI Flash
+		Generic module with an embedded ESP32-S3.
+
+		This chip comes with 4MB SPI Flash (quad).
+
+config ARCH_CHIP_ESP32S3WROOM1N8R8
+	bool "ESP32-S3-WROOM-1-N8R8"
+	select ESP32S3_FLASH_8M
+	select ESP32S3_PSRAM_8M
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 8MB SPI Flash (quad) and 8MB PSRAM (octal).
+
+config ARCH_CHIP_ESP32S3WROOM1N16R8
+	bool "ESP32-S3-WROOM-1-N16R8"
+	select ESP32S3_FLASH_16M
+	select ESP32S3_PSRAM_8M
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 16MB SPI Flash (quad) and 8MB PSRAM (octal).
 
 config ARCH_CHIP_ESP32S3WROOM2N16R8V
 	bool "ESP32-S3-WROOM-2-N16R8V"
@@ -26,8 +48,7 @@ config ARCH_CHIP_ESP32S3WROOM2N16R8V
 	---help---
 		Generic module with an embedded ESP32-S3.
 
-		Note: depending on the modules, WROOM2 has 16MB flash
-		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
+		This module comes with 16MB SPI Flash (octal) and 8MB PSRAM (octal).
 
 config ARCH_CHIP_ESP32S3WROOM2N32R8V
 	bool "ESP32-S3-WROOM-2-N32R8V"
@@ -37,15 +58,16 @@ config ARCH_CHIP_ESP32S3WROOM2N32R8V
 	---help---
 		Generic module with an embedded ESP32-S3.
 
-		Note: depending on the modules, WROOM2 has 16MB flash
-		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
+		This module comes with 32MB SPI Flash (octal) and 8MB PSRAM (octal).
 
 config ARCH_CHIP_ESP32S3MINI1N8
 	bool "ESP32-S3-MINI-1-N8"
 	select ESP32S3_FLASH_8M
 	select ARCH_HAVE_I2CRESET
 	---help---
-		Generic ESP32S3-Mini Module with 8MB of Flash
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 8MB SPI Flash (quad).
 
 config ARCH_CHIP_ESP32S3CUSTOM
 	bool "ESP32-S3-Custom-Module"
