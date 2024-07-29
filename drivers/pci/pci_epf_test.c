@@ -675,7 +675,7 @@ static int pci_epf_test_probe(FAR struct pci_epf_device_s *epf)
   test->header.deviceid = 0xb500;
   test->header.baseclass_code = PCI_CLASS_OTHERS;
   test->header.interrupt_pin  = PCI_INTERRUPT_INTA;
-  test->bar_size[0] = 512;
+  test->bar_size[0] = 1024;
   test->bar_size[1] = 512;
   test->bar_size[2] = 1024;
   test->bar_size[3] = 16384;
@@ -717,6 +717,7 @@ int pci_register_epf_test_device(FAR const char *epc_name)
   epf->name = "pci_epf_test";
   epf->epc_name = epc_name;
   epf->msi_interrupts = 1;
+  epf->msix_interrupts = 32;
   nxmutex_init(&epf->lock);
   ret = pci_epf_device_register(epf);
   if (ret < 0)

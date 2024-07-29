@@ -28,6 +28,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/pci/pci_epc.h>
+#include <nuttx/pci/pci_epf.h>
 
 #include "pci_drivers.h"
 
@@ -63,6 +64,7 @@
 #define QEMU_EPC_BAR_CFG_OFF_SIZE        0x10
 #define QEMU_EPC_BAR_CFG_SIZE            0x18
 #define QEMU_EPC_BAR_CFG_MSI             0x40
+#define QEMU_EPC_BAR_CFG_MSIX            0x60
 
 /****************************************************************************
  * Private Types
@@ -78,6 +80,9 @@ struct qemu_epc_s
   FAR void *msi_vaddr;
   uintptr_t msi_paddr;
   uint32_t msi_data;
+  FAR void *msix_vaddr;
+  FAR void *msix_vob;
+  uintptr_t msix_pob;
   uint64_t ob_phys[32];
 };
 
@@ -109,6 +114,10 @@ qemu_epc_get_features(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno);
 static int qemu_epc_set_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
                             uint8_t interrupts);
 static int qemu_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno);
+static int qemu_epc_get_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno);
+static int
+qemu_epc_set_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
+                  uint16_t interrupts, int barno, uint32_t offset);
 
 /****************************************************************************
  * Private Data
@@ -131,7 +140,7 @@ static const struct pci_epc_features_s g_qemu_epc_features =
   .linkup_notifier = false,
   .core_init_notifier = false,
   .msi_capable = true,
-  .msix_capable = false,
+  .msix_capable = true,
 };
 
 static const struct pci_epc_ops_s g_qemu_epc_ops =
@@ -146,6 +155,8 @@ static const struct pci_epc_ops_s g_qemu_epc_ops =
   .get_features = qemu_epc_get_features,
   .set_msi      = qemu_epc_set_msi,
   .get_msi      = qemu_epc_get_msi,
+  .set_msix     = qemu_epc_set_msix,
+  .get_msix     = qemu_epc_get_msix,
 };
 
 /****************************************************************************
@@ -225,6 +236,12 @@ static void qemu_epc_cfg_write16(FAR struct qemu_epc_s *qep,
                                  unsigned offset, uint16_t value)
 {
   pci_write_mmio_word(qep->pdev, qep->cfg_base + offset, value);
+}
+
+static void qemu_epc_cfg_write32(FAR struct qemu_epc_s *qep,
+                                 unsigned offset, uint32_t value)
+{
+  pci_write_mmio_dword(qep->pdev, qep->cfg_base + offset, value);
 }
 
 static uint8_t qemu_epc_bar_cfg_read8(FAR struct qemu_epc_s *qep,
@@ -416,6 +433,23 @@ qemu_epc_unmap_addr(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
     }
 }
 
+FAR void *
+qemu_epc_get_bar_addr_from_funcno(FAR struct pci_epc_ctrl_s *epc,
+                                  uint8_t funcno, uint8_t bar)
+{
+  FAR struct pci_epf_device_s *epf;
+
+  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, epc_node)
+    {
+      if (epf->funcno == funcno)
+        {
+          return epf->bar[bar].addr;
+        }
+    }
+
+  return NULL;
+}
+
 /****************************************************************************
  * Name: qemu_epc_raise_irq
  *
@@ -438,6 +472,8 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
 {
   FAR struct qemu_epc_s *qep = epc->priv;
   uint64_t pci_addr;
+  uint32_t offset;
+  uint32_t data;
 
   switch (type)
     {
@@ -488,10 +524,34 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
         pci_write_mmio_qword(qep->pdev, qep->msi_vaddr, qep->msi_data);
         return 0;
       case PCI_EPC_IRQ_MSIX:
+        if (--interrupt_num > qemu_epc_get_msix(epc, funcno))
+          {
+            return -EINVAL;
+          }
 
-        /* Not support yet */
+        data = qemu_epc_cfg_read32(qep,
+                                   QEMU_EPC_BAR_CFG_MSIX +
+                                   PCI_MSIX_TABLE);
+        offset = data & PCI_MSIX_TABLE_OFFSET;
+        if (qep->msix_vaddr == NULL)
+          {
+            uint8_t bar = data & PCI_MSIX_TABLE_BIR;
+            qep->msix_vaddr =
+              qemu_epc_get_bar_addr_from_funcno(epc, funcno, bar);
+            qep->msix_vob =
+              pci_epc_mem_alloc_addr(epc, &qep->msix_pob, 0x1000);
+            pci_read_mmio_qword(qep->pdev, qep->msix_vaddr + offset,
+                                &pci_addr);
+            qemu_epc_map_addr(epc, funcno, qep->msix_pob,
+                              pci_addr, 0x1000);
+          }
 
-        return -ENOTSUP;
+        pci_read_mmio_dword(qep->pdev,
+                            qep->msix_vaddr + offset +
+                            interrupt_num * PCI_MSIX_ENTRY_SIZE +
+                            PCI_MSIX_ENTRY_DATA, &data);
+        pci_write_mmio_qword(qep->pdev, qep->msix_vob, data);
+        return 0;
       default:
         pcierr("Failed to raise IRQ, unknown type\n");
         return -EINVAL;
@@ -590,6 +650,70 @@ static int qemu_epc_set_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
   flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS);
   flags |= (interrupts << PCI_MSI_FLAGS_QMASK_SHIFT) & PCI_MSI_FLAGS_QMASK;
   qemu_epc_cfg_write16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS, flags);
+  return 0;
+}
+
+/****************************************************************************
+ * Name: qemu_epc_get_msix
+ *
+ * Description:
+ *   This function is used to get number of the supported msix.
+ *
+ * Input Parameters:
+ *   epc    - Device name of the endpoint controller
+ *   funcno - The epc's function number
+ *
+ * Returned Value:
+ *   Return the number of interrupts
+ ****************************************************************************/
+
+static int qemu_epc_get_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
+{
+  FAR struct qemu_epc_s *qep = epc->priv;
+  uint16_t flags;
+
+  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_FLAGS);
+  if ((flags & PCI_MSIX_FLAGS_ENABLE) == 0)
+    {
+      return -EINVAL;
+    }
+
+  return flags & PCI_MSIX_FLAGS_QSIZE;
+}
+
+/****************************************************************************
+ * Name: qemu_epc_set_msix
+ *
+ * Description:
+ *   This function is used to set Epc msix interrupt number.
+ *
+ * Input Parameters:
+ *   epc        - Device name of the endpoint controller
+ *   funcno     - The epc's function number
+ *   interrupts - The interrupts number
+ *   barno      - BAR where the MSI-X table resides
+ *   offset     - Offset pointing to the start of MSI-X table
+ *
+ * Returned Value:
+ *   Return 0
+ ****************************************************************************/
+
+static int qemu_epc_set_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
+                             uint16_t interrupts, int barno, uint32_t offset)
+{
+  FAR struct qemu_epc_s *qep = epc->priv;
+  uint32_t data;
+  uint16_t flags;
+
+  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_FLAGS);
+  flags &= ~PCI_MSIX_FLAGS_QSIZE;
+  flags |= interrupts;
+  qemu_epc_cfg_write16(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_FLAGS, flags);
+  data = offset | barno;
+  qemu_epc_cfg_write32(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_TABLE, data);
+  data = (offset + (interrupts * PCI_MSIX_ENTRY_SIZE)) | barno;
+  qemu_epc_cfg_write32(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_PBA, data);
+
   return 0;
 }
 
