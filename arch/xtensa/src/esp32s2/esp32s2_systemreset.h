@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SYSTEMRESET_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SYSTEMRESET_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_SYSTEMRESET_H
+#define __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_SYSTEMRESET_H
 
 /****************************************************************************
  * Included Files

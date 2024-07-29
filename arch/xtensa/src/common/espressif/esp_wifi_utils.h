@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_systemreset.c
+ * arch/xtensa/src/common/espressif/esp_wifi_utils.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,46 +22,37 @@
  * Included Files
  ****************************************************************************/
 
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_UTILS_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_UTILS_H
+
 #include <nuttx/config.h>
+#include <nuttx/net/netdev.h>
+
+#ifndef __ASSEMBLY__
 
 #include <stdint.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-
-#include "xtensa.h"
-#include "hardware/esp32s2_rtccntl.h"
-#include "esp32s2_systemreset.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Each handler allows setting a callback function which is called in case
- * of a system reset, for whatever reason.
- */
-
-#define SHUTDOWN_HANDLERS_NO 4
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s2_register_shutdown_handler
+ * Name: esp_wifi_start_scan
  *
  * Description:
- *   This function allows you to register a handler that gets invoked before
- *   the application is restarted.
+ *   Scan all available APs.
  *
  * Input Parameters:
- *   handler - Function to execute on restart
+ *   iwr - The argument of the ioctl cmd
  *
  * Returned Value:
  *   OK on success (positive non-zero values are cmd-specific)
@@ -69,33 +60,16 @@ static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
  *
  ****************************************************************************/
 
-int esp32s2_register_shutdown_handler(shutdown_handler_t handler)
-{
-  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
-    {
-      if (shutdown_handlers[i] == handler)
-        {
-          return -EEXIST;
-        }
-      else if (shutdown_handlers[i] == NULL)
-        {
-          shutdown_handlers[i] = handler;
-          return OK;
-        }
-    }
-
-  return -ENOMEM;
-}
+int esp_wifi_start_scan(struct iwreq *iwr);
 
 /****************************************************************************
- * Name: esp32s2_unregister_shutdown_handler
+ * Name: esp_wifi_get_scan_results
  *
  * Description:
- *   This function allows you to unregister a handler which was previously
- *   registered using up_register_shutdown_handler function.
+ *   Get scan result
  *
  * Input Parameters:
- *   handler - Function to execute on restart
+ *   req      The argument of the ioctl cmd
  *
  * Returned Value:
  *   OK on success (positive non-zero values are cmd-specific)
@@ -103,33 +77,28 @@ int esp32s2_register_shutdown_handler(shutdown_handler_t handler)
  *
  ****************************************************************************/
 
-int esp32s2_unregister_shutdown_handler(shutdown_handler_t handler)
-{
-  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
-    {
-      if (shutdown_handlers[i] == handler)
-        {
-          shutdown_handlers[i] = NULL;
-          return OK;
-        }
-    }
-
-  return -EINVAL;
-}
+int esp_wifi_get_scan_results(struct iwreq *iwr);
 
 /****************************************************************************
- * Name: up_systemreset
+ * Name: esp_wifi_scan_event_parse
  *
  * Description:
- *   Internal reset logic.
+ *   Parse scan information
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *     None
  *
  ****************************************************************************/
 
-void up_systemreset(void)
-{
-  putreg32(RTC_CNTL_SW_SYS_RST, RTC_CNTL_OPTIONS0_REG);
+void esp_wifi_scan_event_parse(void);
 
-  /* Wait for the reset */
-
-  for (; ; );
+#ifdef __cplusplus
 }
+#endif
+#undef EXTERN
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WIFI_UTILS_H */

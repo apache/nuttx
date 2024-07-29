@@ -59,8 +59,12 @@
  *   sources.
  */
 
-/* RESERVED interrupts: 0, 1, 3, 4, 5, 6, 7, 8, 9 */
+/* RESERVED interrupts: 0, 1, 3, 4, 5, 6, 7, 8, 9
+ * 0 and 1 are the exception because it is required for WiFi.
+ */
 
+#define ESP32S2_PERIPH_MAC               0
+#define ESP32S2_PERIPH_MAC_NMI           1
 #define ESP32S2_PERIPH_PWR               2
 
 /* RESERVED interrupts: 10, 11, 12, 14 */
@@ -196,6 +200,9 @@
 
 #define ESP32S2_IRQ2PERIPH(irq)       ((irq) - XTENSA_IRQ_FIRSTPERIPH)
 #define ESP32S2_PERIPH2IRQ(id)        ((id) + XTENSA_IRQ_FIRSTPERIPH)
+
+#define ESP32S2_IRQ_MAC               (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_MAC)
+#define ESP32S2_IRQ_MAC_NMI           (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_MAC_NMI)
 
 #define ESP32S2_IRQ_PWR               (XTENSA_IRQ_FIRSTPERIPH + ESP32S2_PERIPH_PWR)
 
@@ -415,6 +422,7 @@
 #define ESP32S2_CPUINT_NMISET         0x00004000
 
 #define ESP32S2_CPUINT_MAC            0
+#define ESP32S2_CPUINT_PWR            0
 #define ESP32S2_CPUINT_TIMER0         6
 #define ESP32S2_CPUINT_SOFTWARE0      7
 #define ESP32S2_CPUINT_PROFILING      11

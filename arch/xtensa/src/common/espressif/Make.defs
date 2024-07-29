@@ -47,4 +47,16 @@ CHIP_CSRCS += esp_spiflash_mtd.c
 endif
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+CHIP_CSRCS += esp_wireless.c
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp_wifi_utils.c
+CHIP_CSRCS += esp_wlan.c
+endif
+endif
+
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
+include common$(DELIM)espressif$(DELIM)Wireless.mk
+endif
+
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include
