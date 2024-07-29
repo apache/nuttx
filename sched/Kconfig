@@ -1976,3 +1976,11 @@ config PID_INITIAL_COUNT
 		can still expand when needed. It is rounded up to power of
 		two by current implementation. If the number of threads in
 		your system is known at design time, setting this to it.
+
+config SCHED_EVENTS
+	bool "Schedule Event objects"
+	default n
+	help
+	  This option enables event objects. Threads may wait on event
+	  objects for specific events, but both threads and ISRs may deliver
+	  events to event objects.
