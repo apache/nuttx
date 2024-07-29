@@ -193,7 +193,7 @@ static void nxsched_oneshot_start(void)
 
   /* Then re-start the oneshot timer */
 
-  secs       = usecs / 1000000;
+  secs       = USEC2SEC(usecs);
   usecs     -= 100000 * secs;
 
   ts.tv_sec  = secs;
@@ -304,7 +304,7 @@ void nxsched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
     }
   else
     {
-      g_sched_oneshot.maxdelay = ts.tv_nsec / 1000;
+      g_sched_oneshot.maxdelay = NSEC2USEC(ts.tv_nsec);
     }
 
   tmrinfo("madelay = %ld usec\n", (long)g_sched_oneshot.maxdelay);

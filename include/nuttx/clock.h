@@ -206,9 +206,21 @@
 #define TICK2HSEC(tick)       div_const_roundnearest(tick, TICK_PER_HSEC)
 #define TICK2SEC(tick)        div_const_roundnearest(tick, TICK_PER_SEC)
 
+/* MSEC2SEC */
+
+#define MSEC2SEC(usec)        div_const(msec, MSEC_PER_SEC)
+
 /* USEC2SEC */
 
 #define USEC2SEC(usec)        div_const(usec, USEC_PER_SEC)
+
+/* NSEC2USEC */
+
+#define NSEC2USEC(nsec)       div_const(nsec, NSEC_PER_USEC)
+
+/* NSEC2MSEC */
+
+#define NSEC2MSEC(nsec)       div_const(nsec, NSEC_PER_MSEC)
 
 #if defined(CONFIG_DEBUG_SCHED) && defined(CONFIG_SYSTEM_TIME64) && \
     !defined(CONFIG_SCHED_TICKLESS)
