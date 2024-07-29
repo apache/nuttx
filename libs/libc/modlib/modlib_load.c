@@ -398,10 +398,12 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
            * section must be cleared.
            */
 
+#ifndef CONFIG_MODLIB_LOADTO_LMA
           else if (*pptr != NULL)
             {
               memset(*pptr, 0, shdr->sh_size);
             }
+#endif
 
           /* Update sh_addr to point to copy in memory */
 
