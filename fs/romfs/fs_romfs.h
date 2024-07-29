@@ -157,6 +157,7 @@ struct romfs_mountpt_s
   FAR uint8_t *rm_devbuffer;      /* Device sector buffer, allocated for write if rm_xipbase != 0 */
 #ifdef CONFIG_FS_ROMFS_WRITEABLE
   struct list_node rm_sparelist;  /* The list of spare space */
+  sem_t            rm_sem;        /* The semaphore to assume write safe */
 #endif
 };
 
