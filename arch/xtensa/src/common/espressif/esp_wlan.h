@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_systemreset.c
+ * arch/xtensa/src/common/espressif/esp_wlan.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,118 +18,102 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WLAN_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WLAN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#ifdef CONFIG_ARCH_CHIP_ESP32S2
+#  include "esp32s2_wifi_adapter.h"
+#endif
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
+#ifndef __ASSEMBLY__
 
-#include "xtensa.h"
-#include "hardware/esp32s2_rtccntl.h"
-#include "esp32s2_systemreset.h"
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIFI
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Each handler allows setting a callback function which is called in case
- * of a system reset, for whatever reason.
- */
-
-#define SHUTDOWN_HANDLERS_NO 4
+#
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
 
-static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
+#ifdef ESPRESSIF_WLAN_HAS_STA
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32s2_register_shutdown_handler
+ * Name: esp_wlan_sta_set_linkstatus
  *
  * Description:
- *   This function allows you to register a handler that gets invoked before
- *   the application is restarted.
+ *   Set Wi-Fi station link status
  *
- * Input Parameters:
- *   handler - Function to execute on restart
+ * Parameters:
+ *   linkstatus - true Notifies the networking layer about an available
+ *                carrier, false Notifies the networking layer about an
+ *                disappeared carrier.
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int esp32s2_register_shutdown_handler(shutdown_handler_t handler)
-{
-  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
-    {
-      if (shutdown_handlers[i] == handler)
-        {
-          return -EEXIST;
-        }
-      else if (shutdown_handlers[i] == NULL)
-        {
-          shutdown_handlers[i] = handler;
-          return OK;
-        }
-    }
-
-  return -ENOMEM;
-}
+int esp_wlan_sta_set_linkstatus(bool linkstatus);
 
 /****************************************************************************
- * Name: esp32s2_unregister_shutdown_handler
+ * Name: esp_wlan_sta_initialize
  *
  * Description:
- *   This function allows you to unregister a handler which was previously
- *   registered using up_register_shutdown_handler function.
+ *   Initialize the ESP32|S2|S3 WLAN station netcard driver
  *
  * Input Parameters:
- *   handler - Function to execute on restart
+ *   None
  *
  * Returned Value:
- *   OK on success (positive non-zero values are cmd-specific)
- *   Negated errno returned on failure.
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-int esp32s2_unregister_shutdown_handler(shutdown_handler_t handler)
-{
-  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
-    {
-      if (shutdown_handlers[i] == handler)
-        {
-          shutdown_handlers[i] = NULL;
-          return OK;
-        }
-    }
-
-  return -EINVAL;
-}
+int esp_wlan_sta_initialize(void);
+#endif /* ESPRESSIF_WLAN_HAS_STA */
 
 /****************************************************************************
- * Name: up_systemreset
+ * Name: esp_wlan_softap_initialize
  *
  * Description:
- *   Internal reset logic.
+ *   Initialize the ESP32|S2|S3 WLAN softAP netcard driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
  *
  ****************************************************************************/
 
-void up_systemreset(void)
-{
-  putreg32(RTC_CNTL_SW_SYS_RST, RTC_CNTL_OPTIONS0_REG);
+#ifdef ESPRESSIF_WLAN_HAS_SOFTAP
+int esp_wlan_softap_initialize(void);
+#endif /* ESPRESSIF_WLAN_HAS_SOFTAP */
 
-  /* Wait for the reset */
-
-  for (; ; );
+#endif /* CONFIG_ESPRESSIF_WIFI */
+#ifdef __cplusplus
 }
+#endif
+#undef EXTERN
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_WLAN_H */

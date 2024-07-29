@@ -50,6 +50,10 @@
 #  include "esp32s2_tim_lowerhalf.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  include "esp32s2_board_wlan.h"
+#endif
+
 #ifdef CONFIG_ESP32S2_I2C
 #  include "esp32s2_i2c.h"
 #endif
@@ -300,6 +304,19 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: board_twai_setup failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_WIRELESS
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+  ret = board_wlan_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
+             ret);
+    }
+#endif
+
 #endif
 
 #ifdef CONFIG_SENSORS_BMP180
