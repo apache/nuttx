@@ -290,19 +290,9 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *tcb, bool merge)
 
   if (tcb->task_state == TSTATE_TASK_RUNNING)
     {
-      int me = this_cpu();
-      int cpu = tcb->cpu;
-      if (cpu != me)
-        {
-          up_cpu_pause(tcb->cpu);
-          nxsched_remove_running(tcb);
-          up_cpu_resume(tcb->cpu);
-        }
-      else
-        {
-          nxsched_remove_running(tcb);
-          doswitch = true;
-        }
+      DEBUGASSERT(tcb->cpu == this_cpu());
+      nxsched_remove_running(tcb);
+      return true;
     }
   else
     {

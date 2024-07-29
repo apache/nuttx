@@ -125,7 +125,6 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
 
   call_queue = &g_smp_call_queue[cpu];
 
-  up_cpu_paused_save();
   sq_for_every_safe(call_queue, curr, next)
     {
       FAR struct smp_call_data_s *call_data =
@@ -158,7 +157,6 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
         }
     }
 
-  up_cpu_paused_restore();
   spin_unlock_irqrestore(&g_smp_call_lock, flags);
   return OK;
 }
