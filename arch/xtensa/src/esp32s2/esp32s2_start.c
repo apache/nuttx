@@ -50,11 +50,16 @@
 #include "hal/cache_types.h"
 #include "hal/cache_ll.h"
 #include "hal/cache_hal.h"
+#include "hal/sar_ctrl_ll.h"
 #include "rom/spi_flash.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #  include "bootloader_init.h"
 #endif
+
+#include "bootloader_random.h"
+#include "bootloader_soc.h"
+#include "esp_clk_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -345,6 +350,17 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
       *dest++ = 0;
     }
 #endif
+
+  /* Initialize peripherals parameters */
+
+  esp_perip_clk_init();
+
+  /* RNG is enabled during boot and must be disabled otherwise
+   * Wi-Fi gets unstable.
+   */
+
+  bootloader_random_disable();
+  bootloader_ana_clock_glitch_reset_config(false);
 
   /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
    * related issues in application. Hence disable that as we are about to

@@ -217,7 +217,7 @@ Timers       Yes
 Touch        Yes
 UART         Yes
 Watchdog     Yes
-Wifi         No
+Wifi         Yes
 ========== ======= =====
 
 Memory Map
@@ -363,6 +363,50 @@ audio subsystem and develop specific usages of the I2S peripheral.
    such parameters are set on compile time through `make menuconfig`.
 
 Please check for usage examples using the :doc:`ESP32-S2-Saola-1 </platforms/xtensa/esp32s2/boards/esp32s2-saola-1/index>`.
+
+Wi-Fi
+======
+
+.. tip:: Boards usually expose a ``wifi`` defconfig which enables Wi-Fi.
+
+A standard network interface will be configured and can be initialized such as::
+
+    nsh> ifup wlan0
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+In this case a connection to AP with SSID ``myssid`` is done, using ``mypasswd`` as
+password. IP address is obtained via DHCP using ``renew`` command. You can check
+the result by running ``ifconfig`` afterwards.
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi Station Mode <esp32_wi-fi_sta>`
+  for more information.
+
+Wi-Fi SoftAP
+============
+
+It is possible to use ESP32-S2 as an Access Point (SoftAP).
+
+.. tip:: Boards usually expose a ``sta_softap`` defconfig which enables Wi-Fi
+   (STA + SoftAP).
+
+If you are using this board config profile you can run these commands to be able
+to connect your smartphone or laptop to your board::
+
+    nsh> ifup wlan1
+    nsh> dhcpd_start wlan1
+    nsh> wapi psk wlan1 mypasswd 3
+    nsh> wapi essid wlan1 nuttxap 1
+
+In this case, you are creating the access point ``nuttxapp`` in your board and to
+connect to it on your smartphone you will be required to type the password ``mypasswd``
+using WPA2.
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi SoftAP Mode <esp32_wi-fi_softap>`
+  for more information.
+
+The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 Secure Boot and Flash Encryption
 ================================
