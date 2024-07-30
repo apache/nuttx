@@ -21,7 +21,12 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = zcu111_boardinit.c
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += zcu111_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += zcu111_reset.c
+endif
+endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += zcu111_autoleds.c

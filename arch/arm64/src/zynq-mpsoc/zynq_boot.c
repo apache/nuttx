@@ -181,9 +181,17 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
-#if defined(CONFIG_SMP) || defined(CONFIG_ARCH_HAVE_PSCI)
-  /* arm64_psci_init("smc"); */
+#if defined(CONFIG_ARM64_PSCI)
 
+  /* Default exception level is EL1 for the NuttX OS. However, if we debug
+   * NuttX by JTAG, The XSCT of Vivado SDK will set the Zynq MPSoC
+   * to EL3. Other levels are not supported at the moment. And in this
+   * operating conditon, we can't use SMC for there's no ATF support.
+   */
+
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL < 3
+  arm64_psci_init("smc");
+#endif
 #endif
 
   /* Perform board-specific device initialization. This would include
