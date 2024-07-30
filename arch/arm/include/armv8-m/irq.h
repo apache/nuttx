@@ -213,6 +213,7 @@ struct xcpt_syscall_s
 {
   uint32_t excreturn;   /* The EXC_RETURN value */
   uint32_t sysreturn;   /* The return PC */
+  uint32_t ctrlreturn;  /* The return CONTROL value */
 };
 #endif
 

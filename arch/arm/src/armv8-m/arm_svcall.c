@@ -232,6 +232,7 @@ int arm_svcall(int irq, void *context, void *arg)
 
           regs[REG_PC]         = rtcb->xcp.syscall[index].sysreturn;
           regs[REG_EXC_RETURN] = rtcb->xcp.syscall[index].excreturn;
+          regs[REG_CONTROL]    = rtcb->xcp.syscall[index].ctrlreturn;
           rtcb->xcp.nsyscalls  = index;
 
           /* The return value must be in R0-R1.  dispatch_syscall()
@@ -427,6 +428,7 @@ int arm_svcall(int irq, void *context, void *arg)
 
           rtcb->xcp.syscall[index].sysreturn  = regs[REG_PC];
           rtcb->xcp.syscall[index].excreturn  = regs[REG_EXC_RETURN];
+          rtcb->xcp.syscall[index].ctrlreturn = regs[REG_CONTROL];
           rtcb->xcp.nsyscalls  = index + 1;
 
           regs[REG_PC]         = (uint32_t)dispatch_syscall & ~1;
