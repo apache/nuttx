@@ -43,12 +43,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Avoid undefined error when CONFIG_SPINLOCK=n */
-
-#ifndef spin_lock
-#  define spin_lock(s)
-#endif
-
 #define IRQ_STACK_ALLOC (IRQ_STACK_SIZE * CONFIG_SMP_NCPUS)
 
 /****************************************************************************
