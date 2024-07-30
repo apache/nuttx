@@ -32,6 +32,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/cache.h>
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
 #include <nuttx/drivers/ramdisk.h>
@@ -394,6 +395,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_POWEROFF:
         {
           reboot_notifier_call_chain(SYS_POWER_OFF, (FAR void *)arg);
+          up_flush_dcache_all();
           ret = board_power_off((int)arg);
         }
         break;
@@ -410,6 +412,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_RESET:
         {
           reboot_notifier_call_chain(SYS_RESTART, (FAR void *)arg);
+          up_flush_dcache_all();
           ret = board_reset((int)arg);
         }
         break;
