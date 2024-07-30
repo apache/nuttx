@@ -195,7 +195,7 @@ fi
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function exportandimport {
-  # Do nothing until we finish to build the nuttx
+  # Do nothing until we finish to build the nuttx.
   if [ ! -f nuttx ]; then
     return $fail
   fi
@@ -385,6 +385,14 @@ function build_cmake {
   if ! cmake --build build 1>/dev/null; then
     cmake --build build
     fail=1
+  fi
+
+  if [ ${SAVEARTIFACTS} -eq 1 ]; then
+    artifactconfigdir=$ARTIFACTDIR/$(echo $config | sed "s/:/\//")/
+    mkdir -p $artifactconfigdir
+    cd $nuttx/build
+    xargs -I "{}" cp "{}" $artifactconfigdir < $nuttx/build/nuttx.manifest
+    cd $nuttx
   fi
 
   return $fail
