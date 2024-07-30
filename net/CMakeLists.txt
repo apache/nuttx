@@ -27,4 +27,8 @@ if(CONFIG_NET)
 
   target_sources(net PRIVATE net_initialize.c)
   target_include_directories(net PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+  if(CONFIG_NET_NO_LTO)
+    add_compile_options(-fno-lto)
+  endif()
 endif()

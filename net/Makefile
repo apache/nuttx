@@ -70,6 +70,10 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
+ifeq ($(CONFIG_NET_NO_LTO),y)
+CFLAGS += -fno-lto
+endif
+
 BIN = libnet$(LIBEXT)
 
 all: $(BIN)

@@ -457,4 +457,19 @@ endmenu # Network Topologies
 
 source "net/route/Kconfig"
 
+config NET_NO_LTO
+	bool "Support no-lto option for the network Makefile"
+	default n
+	---help---
+		This option disables Link Time Optimization (LTO) specifically for the
+		network subsystem.
+
+		LTO can sometimes introduce build issues, excessive compilation time,
+		or difficult-to-debug runtime behaviors in complex network stacks
+		depending on the compiler version and architecture.
+
+		Enable this option if you encounter LTO-related issues in the network
+		stack or need to debug network code without the aggressive optimizations
+		introduced by LTO, while keeping LTO enabled for the rest of the system.
+
 endif # NET
