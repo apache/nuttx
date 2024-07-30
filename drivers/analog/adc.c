@@ -223,11 +223,12 @@ static int adc_close(FAR struct file *filep)
 static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct adc_dev_s *dev   = inode->i_private;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct adc_dev_s  *dev   = inode->i_private;
+  FAR struct adc_fifo_s *fifo  = &dev->ad_recv;
   size_t                nread;
   irqstate_t            flags;
-  int                   ret   = 0;
+  int                   ret    = 0;
   int                   msglen;
 
   ainfo("buflen: %d\n", (int)buflen);
@@ -267,10 +268,10 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen >= msglen)
     {
-      /* Interrupts must be disabled while accessing the ad_recv FIFO */
+      /* Interrupts must be disabled while accessing the fifo FIFO */
 
       flags = enter_critical_section();
-      while (dev->ad_recv.af_head == dev->ad_recv.af_tail)
+      while (fifo->af_head == fifo->af_tail)
         {
           /* Check if there was an overrun, if set we need to return EIO */
 
@@ -292,7 +293,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
           /* Wait for a message to be received */
 
           dev->ad_nrxwaiters++;
-          ret = nxsem_wait(&dev->ad_recv.af_sem);
+          ret = nxsem_wait(&fifo->af_sem);
           dev->ad_nrxwaiters--;
           if (ret < 0)
             {
@@ -300,98 +301,106 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
             }
         }
 
-      /* The ad_recv FIFO is not empty.  Copy all buffered data that will fit
+      /* The FIFO is not empty.  Copy all buffered data that will fit
        * in the user buffer.
        */
 
-      nread = 0;
-      do
+      if (msglen == 4)
         {
-          uint8_t channel = dev->ad_recv.af_channel[dev->ad_recv.af_head];
-          int32_t data    = dev->ad_recv.af_data[dev->ad_recv.af_head];
+          size_t first;
+          size_t second;
+          size_t count;
+          size_t used;
 
-          /* Will the next message in the FIFO fit into the user buffer? */
+          used = (fifo->af_tail - fifo->af_head + CONFIG_ADC_FIFOSIZE)
+                  % CONFIG_ADC_FIFOSIZE;
+          count = MIN(used, buflen / msglen);
 
-          if (nread + msglen > buflen)
+          /* Check if flipping is required and memcopy */
+
+          first = MIN(CONFIG_ADC_FIFOSIZE - fifo->af_head, count);
+          second = count - first;
+          memcpy(buffer, &fifo->af_data[fifo->af_head], first * 4);
+
+          if (second > 0)
             {
-              /* No.. break out of the loop now with nread equal to the
-               * actual number of bytes transferred.
-               */
-
-              break;
+              memcpy(&buffer[4 * first], &fifo->af_data[0], second * 4);
             }
 
-          /* Feed ADC data to entropy pool */
-
-          add_sensor_randomness(data);
-
-          /* Copy the message to the user buffer */
-
-          if (msglen == 1)
-            {
-              /* Only one channel, return MS 8-bits of the sample. */
-
-              buffer[nread] = data >> 24;
-            }
-          else if (msglen == 2)
-            {
-              /* Only one channel, return only the MS 16-bits of the sample.
-               */
-
-              int16_t data16 = data >> 16;
-              memcpy(&buffer[nread], &data16, 2);
-            }
-          else if (msglen == 3)
-            {
-              int16_t data16;
-
-              /* Return the channel and the MS 16-bits of the sample. */
-
-              buffer[nread] = channel;
-              data16 = data >> 16;
-              memcpy(&buffer[nread + 1], &data16, 2);
-            }
-          else if (msglen == 4)
-            {
-              int32_t data24;
-
-#ifdef CONFIG_ENDIAN_BIG
-              /* In the big endian case, we simply copy the MS three bytes
-               * which are indices: 0-2.
-               */
-
-              data24 = data;
-#else
-              /* In the little endian case, indices 0-2 correspond to the
-               * the three LS bytes.
-               */
-
-              data24 = data >> 8;
-#endif
-
-              /* Return the channel and the most significant 24-bits */
-
-              buffer[nread] = channel;
-              memcpy(&buffer[nread + 1], &data24, 3);
-            }
-          else
-            {
-              /* Return the channel and all four bytes of the sample */
-
-              buffer[nread] = channel;
-              memcpy(&buffer[nread + 1], &data, 4);
-            }
-
-          nread += msglen;
-
-          /* Increment the head of the circular message buffer */
-
-          if (++dev->ad_recv.af_head >= CONFIG_ADC_FIFOSIZE)
-            {
-              dev->ad_recv.af_head = 0;
-            }
+          fifo->af_head = (fifo->af_head + count) % CONFIG_ADC_FIFOSIZE;
+          nread = count * msglen;
         }
-      while (dev->ad_recv.af_head != dev->ad_recv.af_tail);
+      else
+        {
+          nread = 0;
+          do
+            {
+              uint8_t channel = fifo->af_channel[fifo->af_head];
+              int32_t data    = fifo->af_data[fifo->af_head];
+
+              /* Will the next message in the FIFO fit into
+               * the user buffer?
+               */
+
+              if (nread + msglen > buflen)
+                {
+                  /* No.. break out of the loop now with nread equal to the
+                   * actual number of bytes transferred.
+                   */
+
+                  break;
+                }
+
+              /* Feed ADC data to entropy pool */
+
+              add_sensor_randomness(data);
+
+              /* Copy the message to the user buffer */
+
+              if (msglen == 1)
+                {
+                  /* Only one channel, return MS 8-bits of the sample. */
+
+                  buffer[nread] = data >> 24;
+                }
+              else if (msglen == 2)
+                {
+                  /* Only one channel, return only the
+                   * MS 16-bits of the sample.
+                   */
+
+                  int16_t data16 = data >> 16;
+                  memcpy(&buffer[nread], &data16, 2);
+                }
+              else if (msglen == 3)
+                {
+                  int16_t data16;
+
+                  /* Return the channel and the MS 16-bits of the sample. */
+
+                  buffer[nread] = channel;
+                  data16 = data >> 16;
+                  memcpy(&buffer[nread + 1], &data16, 2);
+                }
+              else
+                {
+                  /* Return the channel and all four bytes of the sample */
+
+                  buffer[nread] = channel;
+                  memcpy(&buffer[nread + 1], &data, 4);
+                }
+
+              nread += msglen;
+
+              /* Increment the head of the circular message buffer */
+
+              if (++fifo->af_head >= CONFIG_ADC_FIFOSIZE)
+                {
+                  fifo->af_head = 0;
+                }
+            }
+          while (fifo->af_head != fifo->af_tail);
+        }
 
       /* All of the messages have been transferred.  Return the number of
        * bytes that were read.
