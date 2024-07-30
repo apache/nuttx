@@ -520,7 +520,7 @@ config RISCV_MISALIGNED_HANDLER
 
 config RISCV_PERCPU_SCRATCH
 	bool "Enable Scratch-based Per-CPU storage"
-	default n
+	default y if LIB_SYSCALL
 	---help---
 		In some special chipsets, multiple CPUs may be bundled in one hardware
 		thread cluster, which results in hartid and cpuindex not being exactly

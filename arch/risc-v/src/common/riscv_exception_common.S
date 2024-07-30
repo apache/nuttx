@@ -55,6 +55,14 @@
 #  endif
 #endif
 
+/* System calls require the per CPU scratch area */
+
+#ifdef CONFIG_LIB_SYSCALL
+#  ifndef CONFIG_RISCV_PERCPU_SCRATCH
+#    error "CONFIG_RISCV_PERCPU_SCRATCH is needed for handling system calls"
+#  endif
+#endif
+
 /* Provide a default section for the exeception handler. */
 
 #ifndef EXCEPTION_SECTION
