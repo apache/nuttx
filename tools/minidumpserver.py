@@ -430,13 +430,39 @@ class DumpLogFile:
         return self.__memories
 
 
+class RawMemoryFile:
+    def __init__(self, rawfile):
+        self.__memories = list()
+
+        if rawfile is None:
+            return
+
+        for raw in rawfile:
+            file, start = raw.split(":")
+            start = int(start, 0)
+
+            size = os.path.getsize(file)
+            with open(file, "rb") as f:
+                data = f.read(size)
+                self.__memories.append(pack_memory(start, start + len(data), data))
+
+    def get_memories(self):
+        return self.__memories
+
+
 class GDBStub:
-    def __init__(self, logfile: DumpLogFile, elffile: DumpELFFile):
+    def __init__(
+        self, logfile: DumpLogFile, elffile: DumpELFFile, rawfile: RawMemoryFile
+    ):
         self.logfile = logfile
         self.elffile = elffile
         self.socket = None
         self.gdb_signal = GDB_SIGNAL_DEFAULT
-        self.mem_regions = self.elffile.get_memories() + self.logfile.get_memories()
+        self.mem_regions = (
+            self.elffile.get_memories()
+            + self.logfile.get_memories()
+            + rawfile.get_memories()
+        )
         self.reg_digits = elffile.xlen() // 4
         self.reg_fmt = "<I" if elffile.xlen() <= 32 else "<Q"
 
@@ -675,6 +701,12 @@ def arg_parser():
         f"if you don't provide any command, it will use default command [{DEFAULT_GDB_INIT_CMD}]. ",
     )
     parser.add_argument(
+        "-r",
+        "--rawfile",
+        nargs="*",
+        help="rawfile is a binary file, args format like ram.bin:0x10000 ...",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         default=False,
@@ -771,7 +803,9 @@ def main(args):
         logger.error("Architecture unknown, exiting...")
         sys.exit(2)
 
-    gdb_stub = GDBStub(log, elf)
+    raw = RawMemoryFile(args.rawfile)
+
+    gdb_stub = GDBStub(log, elf, raw)
 
     gdbserver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
