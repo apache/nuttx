@@ -29,12 +29,45 @@ FSNODEFLAG_TYPE_MOUNTPT = utils.get_symbol_value("FSNODEFLAG_TYPE_MOUNTPT")
 CONFIG_PSEUDOFS_FILE = utils.get_symbol_value("CONFIG_PSEUDOFS_FILE")
 CONFIG_PSEUDOFS_ATTRIBUTES = utils.get_symbol_value("CONFIG_PSEUDOFS_ATTRIBUTES")
 
+CONFIG_FS_BACKTRACE = utils.get_symbol_value("CONFIG_FS_BACKTRACE")
+CONFIG_NFILE_DESCRIPTORS_PER_BLOCK = int(
+    utils.get_symbol_value("CONFIG_NFILE_DESCRIPTORS_PER_BLOCK")
+)
+
 
 def get_inode_name(inode):
     if not inode:
         return ""
     ptr = inode["i_name"].cast(gdb.lookup_type("char").pointer())
     return ptr.string()
+
+
+def inode_getpath(inode):
+    """get path fron inode"""
+    if not inode:
+        return ""
+
+    name = get_inode_name(inode)
+
+    if inode["i_parent"]:
+        return inode_getpath(inode["i_parent"]) + "/" + name
+
+    return name
+
+
+def get_file(tcb, fd):
+    group = tcb["group"]
+    filelist = group["tg_filelist"]
+    fl_files = filelist["fl_files"]
+    fl_rows = filelist["fl_rows"]
+
+    row = fd // CONFIG_NFILE_DESCRIPTORS_PER_BLOCK
+    col = fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK
+
+    if row >= fl_rows:
+        return None
+
+    return fl_files[row][col]
 
 
 def foreach_inode(handler, root=None, path=""):
@@ -45,6 +78,104 @@ def foreach_inode(handler, root=None, path=""):
         if node["i_child"]:
             foreach_inode(handler, node["i_child"], newpath)
         node = node["i_peer"]
+
+
+def foreach_file(tcb):
+    """Iterate over all file descriptors in a tcb"""
+    group = tcb["group"]
+    filelist = group["tg_filelist"]
+    fl_files = filelist["fl_files"]
+    fl_rows = filelist["fl_rows"]
+
+    for row in range(fl_rows):
+        for col in range(CONFIG_NFILE_DESCRIPTORS_PER_BLOCK):
+            file = fl_files[row][col]
+
+            if not file or not file["f_inode"]:
+                continue
+
+            fd = row * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + col
+
+            yield fd, file
+
+
+class Fdinfo(gdb.Command):
+    """Dump fd info information of process"""
+
+    def __init__(self):
+        super(Fdinfo, self).__init__(
+            "fdinfo", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
+        )
+
+    def print_file_info(self, fd, file, formatter):
+        backtrace_formatter = "{0:<5} {1:<36} {2}"
+
+        oflags = int(file["f_oflags"])
+        pos = int(file["f_pos"])
+        path = inode_getpath(file["f_inode"])
+
+        output = []
+        if CONFIG_FS_BACKTRACE:
+            backtrace = utils.backtrace(
+                [file["f_backtrace"][i] for i in range(CONFIG_FS_BACKTRACE)]
+            )
+
+            backtrace = [
+                backtrace_formatter.format(
+                    hex(addr),
+                    func,
+                    source,
+                )
+                for addr, func, source in backtrace
+            ]
+
+            output.append(formatter.format(fd, oflags, pos, path, backtrace[0]))
+            output.extend(formatter.format("", "", "", "", bt) for bt in backtrace[1:])
+            output.append("")  # separate each backtrace
+        else:
+            output = [formatter.format(fd, oflags, pos, path, "")]
+
+        gdb.write("\n".join(output))
+        gdb.write("\n")
+
+    def print_fdinfo_by_tcb(self, tcb):
+        """print fdlist from tcb"""
+        gdb.write(f"PID: {tcb['pid']}\n")
+        group = tcb["group"]
+
+        if not group:
+            return
+
+        if group in self.processed_groups:
+            return
+
+        self.processed_groups.add(group)
+
+        headers = ["FD", "OFLAGS", "POS", "PATH", "BACKTRACE"]
+        formatter = "{:<4}{:<8}{:<6}{:<22}{:<50}"
+        gdb.write(formatter.format(*headers) + "\n")
+
+        for fd, file in foreach_file(tcb):
+            self.print_file_info(fd, file, formatter)
+
+        gdb.write("\n")
+
+    def invoke(self, arg, from_tty):
+        parser = argparse.ArgumentParser(
+            description="Get fdinfo for a process or all processes."
+        )
+        parser.add_argument("-p", "--pid", type=int, help="Optional process ID")
+
+        try:
+            args = parser.parse_args(gdb.string_to_argv(arg))
+        except SystemExit:
+            gdb.write("Invalid arguments.\n")
+            return
+
+        self.processed_groups = set()
+        tcbs = [utils.get_tcb(args.pid)] if args.pid else utils.get_tcbs()
+        for tcb in tcbs:
+            self.print_fdinfo_by_tcb(tcb)
 
 
 class Mount(gdb.Command):
@@ -163,6 +294,8 @@ class ForeachInode(gdb.Command):
         self.level = arg["level"]
         self.print_inode_info(arg["root_inode"], 1, "")
 
+
+Fdinfo()
 
 if not utils.get_symbol_value("CONFIG_DISABLE_MOUNTPOINT"):
     Mount()
