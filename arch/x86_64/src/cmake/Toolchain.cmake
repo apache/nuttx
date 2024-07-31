@@ -78,7 +78,7 @@ if(CONFIG_ARCH_COVERAGE)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-g3)
+  add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
 
 # Architecture flags

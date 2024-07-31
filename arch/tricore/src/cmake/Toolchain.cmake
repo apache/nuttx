@@ -147,3 +147,7 @@ endif()
 if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
+
+if(CONFIG_DEBUG_SYMBOLS)
+  add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
+endif()
