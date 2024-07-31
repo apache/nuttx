@@ -130,13 +130,14 @@ static uintptr_t do_syscall(unsigned int nbr, uintptr_t parm1,
  *     A4 = parm3
  *     A5 = parm4
  *     A6 = parm5
+ *     A7 = context (aka SP)
  *
  ****************************************************************************/
 
 uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
                            uintptr_t parm2, uintptr_t parm3,
                            uintptr_t parm4, uintptr_t parm5,
-                           uintptr_t parm6)
+                           uintptr_t parm6, void *context)
 {
   register long a0 asm("a0") = (long)(nbr);
   register long a1 asm("a1") = (long)(parm1);
@@ -156,6 +157,10 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
       return -ENOSYS;
     }
+
+  /* Set the user register context to TCB */
+
+  rtcb->xcp.regs = context;
 
   /* Indicate that we are in a syscall handler */
 

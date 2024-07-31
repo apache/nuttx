@@ -39,6 +39,8 @@
 
 #include "sched/sched.h"
 
+#ifdef CONFIG_ARCH_HAVE_FORK
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -96,7 +98,80 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_HAVE_FORK
+#ifdef CONFIG_LIB_SYSCALL
+
+pid_t riscv_fork(const struct fork_s *context)
+{
+  struct tcb_s *parent = this_task();
+  struct task_tcb_s *child;
+  uintptr_t newsp;
+  uintptr_t newtop;
+  uintptr_t stacktop;
+  uintptr_t stackutil;
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  uintptr_t tp;
+#endif
+  UNUSED(context);
+
+  /* Allocate and initialize a TCB for the child task. */
+
+  child = nxtask_setup_fork((start_t)parent->xcp.regs[REG_RA]);
+  if (!child)
+    {
+      sinfo("nxtask_setup_fork failed\n");
+      return (pid_t)ERROR;
+    }
+
+  /* Copy parent user stack to child */
+
+  stacktop = (uintptr_t)parent->stack_base_ptr + parent->adj_stack_size;
+  DEBUGASSERT(stacktop > parent->xcp.regs[REG_SP]);
+  stackutil = stacktop - parent->xcp.regs[REG_SP];
+
+  /* Copy the parent stack contents (overwrites child's SP and TP) */
+
+  newtop = (uintptr_t)child->cmn.stack_base_ptr + child->cmn.adj_stack_size;
+  newsp = newtop - stackutil;
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  /* Save child's thread pointer */
+
+  tp = child->cmn.xcp.regs[REG_TP];
+#endif
+
+  /* Set up frame for context and copy the parent's user context there */
+
+  memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
+         parent->xcp.regs, XCPTCONTEXT_SIZE);
+
+  /* Save FPU */
+
+  riscv_savefpu(child->cmn.xcp.regs, riscv_fpuregs(&child->cmn));
+
+  /* Copy the parent stack contents */
+
+  memcpy((void *)newsp, (const void *)parent->xcp.regs[REG_SP], stackutil);
+
+  /* Set the new register restore area to the new stack top */
+
+  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
+
+  /* Return 0 to child */
+
+  child->cmn.xcp.regs[REG_A0] = 0;
+  child->cmn.xcp.regs[REG_SP] = newsp;
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  child->cmn.xcp.regs[REG_TP] = tp;
+#endif
+
+  /* And, finally, start the child task.  On a failure, nxtask_start_fork()
+   * will discard the TCB by calling nxtask_abort_fork().
+   */
+
+  return nxtask_start_fork(child);
+}
+
+#else
 
 pid_t riscv_fork(const struct fork_s *context)
 {
@@ -171,13 +246,18 @@ pid_t riscv_fork(const struct fork_s *context)
   newtop = (uintptr_t)child->cmn.stack_base_ptr + child->cmn.adj_stack_size;
   newsp = newtop - stackutil;
 
-  /* Set up frame for context */
+  /* Set up frame for context and copy the initial context there */
 
   memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
          child->cmn.xcp.regs, XCPTCONTEXT_SIZE);
 
-  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
+  /* Copy the parent stack contents (overwrites child's SP and TP) */
+
   memcpy((void *)newsp, (const void *)(uintptr_t)context->sp, stackutil);
+
+  /* Set the new register restore area to the new stack top */
+
+  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
 
   /* Was there a frame pointer in place before? */
 
@@ -246,14 +326,6 @@ pid_t riscv_fork(const struct fork_s *context)
   fregs[REG_FS11]               = context->fs11; /* Saved register fs11 */
 #endif
 
-#ifdef CONFIG_LIB_SYSCALL
-  /* Forked task starts at `dispatch_syscall()`, which requires TP holding
-   * TCB, in this case the child's TCB is needed.
-   */
-
-  child->cmn.xcp.regs[REG_TP]   = (uintptr_t)child;
-#endif
-
   /* And, finally, start the child task.  On a failure, nxtask_start_fork()
    * will discard the TCB by calling nxtask_abort_fork().
    */
@@ -261,4 +333,5 @@ pid_t riscv_fork(const struct fork_s *context)
   return nxtask_start_fork(child);
 }
 
+#endif /* CONFIG_LIB_SYSCALL */
 #endif /* CONFIG_ARCH_HAVE_FORK */

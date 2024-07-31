@@ -90,6 +90,12 @@
 .type up_fork, function
 
 up_fork:
+
+#ifdef CONFIG_LIB_SYSCALL
+  /* When coming via system call, everything is in place already */
+
+  tail        riscv_fork
+#else
   /* Create a stack frame */
 
   addi        sp, sp, -FORK_SIZEOF
@@ -148,6 +154,7 @@ up_fork:
   REGLOAD     x1, FORK_RA_OFFSET(sp)
   addi        sp, sp, FORK_SIZEOF
   ret
+#endif
 
   .size  up_fork, .-up_fork
   .end
