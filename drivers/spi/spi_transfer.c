@@ -80,7 +80,7 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
     }
 #endif
 
-  SPI_SETMODE(spi, seq->mode);
+  SPI_SETMODE(spi, (enum spi_mode_e)seq->mode);
   SPI_SETBITS(spi, seq->nbits);
 
   /* Select the SPI device in preparation for the transfer.
