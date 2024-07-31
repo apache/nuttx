@@ -42,6 +42,10 @@
 #include "stm32_romfs.h"
 #endif
 
+#ifdef CONFIG_SYSTEMTICK_HOOK
+#include <semaphore.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -209,6 +213,18 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_STM32F7_TIM8_QE
+  snprintf(buf, sizeof(buf), "/dev/qe4");
+  ret = stm32_qencoder_initialize(buf, 8);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
 #endif
 
 #ifdef CONFIG_STM32F7_CAN_CHARDRIVER
@@ -265,3 +281,13 @@ int stm32_bringup(void)
   UNUSED(ret);
   return OK;
 }
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+
+sem_t g_waitsem;
+
+void board_timerhook(void)
+{
+  (void)sem_post(&g_waitsem);
+}
+#endif
