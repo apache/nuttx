@@ -102,9 +102,9 @@ struct netdev_upperhalf_s
 static bool quota_is_valid(FAR struct netdev_lowerhalf_s *lower)
 {
   int total = 0;
-  int type;
+  enum netpkt_type_e type;
 
-  for (type = 0; type < NETPKT_TYPENUM; type++)
+  for (type = NETPKT_TX; type < NETPKT_TYPENUM; type++)
     {
       total += netdev_lower_quota_load(lower, type);
     }
