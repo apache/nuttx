@@ -348,5 +348,9 @@ int stm32_cansock_setup(void);
 int stm32_gpio_initialize(void);
 #endif
 
+#ifdef CONFIG_SYSTEMTICK_HOOK
+void board_timerhook(void);
+#endif 
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32F7_NUCLEO_144_SRC_NUCLEO_144_H */

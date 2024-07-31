@@ -226,4 +226,8 @@ int stm32_pwm_setup(void);
 int stm32_qencoder_initialize(const char *devpath, int timer);
 #endif
 
+#ifdef CONFIG_SYSTEMTICK_HOOK
+void board_timerhook(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI2_SRC_NUCLEO_H743ZI2_H */
