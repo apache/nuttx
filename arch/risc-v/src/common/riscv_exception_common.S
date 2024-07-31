@@ -155,6 +155,7 @@ exception_common:
   csrr       tp, CSR_SCRATCH      /* Load kernel TP */
   REGLOAD    tp, RISCV_PERCPU_TCB(tp)
 
+  mv         a7, sp               /* a7 = context */
   call       x1, dispatch_syscall /* Dispatch the system call */
 
 return_from_syscall:
@@ -239,11 +240,7 @@ return_from_exception:
 
   load_ctx   sp
 
-#ifdef CONFIG_ARCH_KERNEL_STACK
   REGLOAD    sp, REG_SP(sp)      /* restore original sp */
-#else
-  addi       sp, sp, XCPTCONTEXT_SIZE
-#endif
 
   /* Return from exception */
 
