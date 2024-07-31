@@ -150,7 +150,7 @@ static const struct procfs_entry_s g_procfs_entries[] =
   { "meminfo",      &g_meminfo_operations,  PROCFS_FILE_TYPE   },
 #endif
 
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL
+#if defined(CONFIG_MM_HEAP_MEMPOOL) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMPOOL)
   { "mempool",      &g_mempool_operations,  PROCFS_FILE_TYPE   },
 #endif
 
