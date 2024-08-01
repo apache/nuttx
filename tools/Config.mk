@@ -560,6 +560,18 @@ define COPYFILE
 endef
 endif
 
+# COPYDIR - Copy one directory
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define COPYDIR
+	$(Q) if exist $1 (xcopy /c /q /s /e /y /i $1 $2)
+endef
+else
+define COPYDIR
+	$(Q) cp -fr $1 $2
+endef
+endif
+
 # CATFILE - Cat a list of files
 #
 # USAGE: $(call CATFILE,dest,src1,src2,src3,...)
@@ -605,6 +617,43 @@ endef
 define DOWNLOAD
 	$(ECHO_BEGIN)"Downloading: $(if $3,$3,$2) "
 	$(Q) curl -L $(if $(V),,-Ss) $(1)/$(2) -o $(if $(3),$(3),$(2))
+	$(ECHO_END)
+endef
+
+# CLONE - Git clone repository. Initializes a new Git repository in the 
+#         folder on your local machine and populates it with the contents
+#         of the central repository.
+#         The third argument is an storage path. The second argument is used
+#         if it is not provided or is empty.
+# Example: $(call CLONE,$(URL_BASE),$(PATH),$(STORAGE_FOLDER))
+
+define CLONE
+	$(ECHO_BEGIN)"Clone: $(if $3,$3,$2) "
+	if [ -z $3 ]; then \
+		git clone --quiet $1 $2; \
+	else \
+		if [ ! -d $3 ]; then \
+			git clone --quiet $1 $3; \
+		fi; \
+		cp -fr $3 $2; \
+	fi
+	$(ECHO_END)
+endef
+
+# CHECK_COMMITSHA - Check if the branch contains the commit SHA-1.
+#         Remove the folder if the commit is not present in the branch.
+#         The first argument is the repository folder on the local machine.
+#         The second argument is a unique SHA-1 hash value.
+# Example: $(call CHECK_COMMITSHA,$(GIT_FOLDER),$(COMMIT_SHA-1))
+
+define CHECK_COMMITSHA
+	$(ECHO_BEGIN)"COMMIT SHA-1: $2 "
+	if [ -d $1 ]; then \
+		if ! git -C $1 branch --contains $2 > /dev/null 2>&1; then \
+			echo "Commit is not present removed folder $1 "; \
+			rm -rf $1; \
+		fi \
+	fi
 	$(ECHO_END)
 endef
 

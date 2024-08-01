@@ -21,6 +21,9 @@
 ############################################################################
 
 export TOPDIR := ${shell echo $(CURDIR) | sed -e 's/ /\\ /g'}
+WSDIR := ${shell cd "${TOPDIR}"/.. && pwd -P}
+
+export NXTMPDIR := $(WSDIR)/nxtmpdir
 
 ifeq ($(V),)
   MAKE := $(MAKE) -s --no-print-directory
