@@ -91,6 +91,8 @@ struct rpmsg_port_spi_s
   uint16_t                       txavail;
   uint16_t                       rxavail;
   uint16_t                       rxthres;
+
+  atomic_int                     transferring;
 };
 
 /****************************************************************************
@@ -184,88 +186,18 @@ static void rpmsg_port_spi_register_cb(FAR struct rpmsg_port_s *port,
 }
 
 /****************************************************************************
- * Name: rpmsg_port_spi_complete_handler
+ * Name: rpmsg_port_spi_exchange
  ****************************************************************************/
 
-static void rpmsg_port_spi_complete_handler(FAR void *arg)
+static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 {
-  FAR struct rpmsg_port_spi_s *rpspi = arg;
-
-  SPI_SELECT(rpspi->spi, rpspi->devid, false);
-
-  rpmsginfo("received cmd:%u avail:%u\n",
-            rpspi->rxhdr->cmd, rpspi->rxhdr->avail);
-
-  if (rpspi->txhdr != NULL)
-    {
-      rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);
-      rpspi->txhdr = NULL;
-    }
-
-  if (rpspi->rxhdr->crc != 0)
-    {
-      uint16_t crc = rpmsg_port_spi_crc16(rpspi->rxhdr);
-
-      if (rpspi->rxhdr->crc != crc)
-        {
-          rpmsgerr("crc check fail received: %u calculated: %u\n",
-                   rpspi->rxhdr->crc, crc);
-          return;
-        }
-    }
-
-  /* Skip any data received when connection is not established until a
-   * connect req data packet has been received.
-   */
-
-  if (!rpspi->connected)
-    {
-      if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
-        {
-          return;
-        }
-
-      rpspi->txavail = rpspi->rxhdr->avail;
-      rpspi->connected = true;
-    }
-  else
-    {
-      rpspi->txavail = rpspi->rxhdr->avail;
-      if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
-        {
-          rpspi->connected = false;
-          rpmsg_port_spi_drop_packets(rpspi);
-        }
-    }
-
-  if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
-    {
-      rpmsg_port_queue_add_buffer(&rpspi->port.rxq, rpspi->rxhdr);
-      rpspi->rxhdr = rpmsg_port_queue_get_available_buffer(
-        &rpspi->port.rxq, false);
-      DEBUGASSERT(rpspi->rxhdr != NULL);
-    }
-
-  if (rpspi->connected &&
-      rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
-    {
-      IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
-    }
-}
-
-/****************************************************************************
- * Name: rpmsg_port_spi_sreq_handler
- ****************************************************************************/
-
-static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
-                                       ioe_pinset_t pinset, FAR void *arg)
-{
-  FAR struct rpmsg_port_spi_s *rpspi = arg;
   FAR struct rpmsg_port_header_s *txhdr;
 
-  rpmsginfo("sreq enter\n");
-
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
+  if (atomic_fetch_add(&rpspi->transferring, 1))
+    {
+      return;
+    }
 
   if (!rpspi->connected)
     {
@@ -299,6 +231,95 @@ static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
                BYTES2WORDS(rpspi, rpspi->cmdhdr->len));
 
   rpspi->rxavail = txhdr->avail;
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_complete_handler
+ ****************************************************************************/
+
+static void rpmsg_port_spi_complete_handler(FAR void *arg)
+{
+  FAR struct rpmsg_port_spi_s *rpspi = arg;
+
+  SPI_SELECT(rpspi->spi, rpspi->devid, false);
+
+  rpmsginfo("received cmd:%u avail:%u\n",
+            rpspi->rxhdr->cmd, rpspi->rxhdr->avail);
+
+  if (rpspi->txhdr != NULL)
+    {
+      rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);
+      rpspi->txhdr = NULL;
+    }
+
+  if (rpspi->rxhdr->crc != 0)
+    {
+      uint16_t crc = rpmsg_port_spi_crc16(rpspi->rxhdr);
+
+      if (rpspi->rxhdr->crc != crc)
+        {
+          rpmsgerr("crc check fail received: %u calculated: %u\n",
+                   rpspi->rxhdr->crc, crc);
+          goto out;
+        }
+    }
+
+  /* Skip any data received when connection is not established until a
+   * connect req data packet has been received.
+   */
+
+  if (!rpspi->connected)
+    {
+      if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
+        {
+          goto out;
+        }
+
+      rpspi->txavail = rpspi->rxhdr->avail;
+      rpspi->connected = true;
+    }
+  else
+    {
+      rpspi->txavail = rpspi->rxhdr->avail;
+      if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
+        {
+          rpspi->connected = false;
+          rpmsg_port_spi_drop_packets(rpspi);
+        }
+    }
+
+  if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
+    {
+      rpmsg_port_queue_add_buffer(&rpspi->port.rxq, rpspi->rxhdr);
+      rpspi->rxhdr = rpmsg_port_queue_get_available_buffer(
+        &rpspi->port.rxq, false);
+      DEBUGASSERT(rpspi->rxhdr != NULL);
+    }
+
+out:
+  if (atomic_exchange(&rpspi->transferring, 0) > 1)
+    {
+      rpmsg_port_spi_exchange(rpspi);
+    }
+  else if (rpspi->connected &&
+      rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
+    {
+      IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+    }
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_sreq_handler
+ ****************************************************************************/
+
+static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
+                                       ioe_pinset_t pinset, FAR void *arg)
+{
+  FAR struct rpmsg_port_spi_s *rpspi = arg;
+
+  rpmsginfo("sreq enter\n");
+
+  rpmsg_port_spi_exchange(rpspi);
   return 0;
 }
 
@@ -320,7 +341,7 @@ static void rpmsg_port_spi_connect(FAR struct rpmsg_port_spi_s *rpspi)
 
   if (val)
     {
-      rpmsg_port_spi_sreq_handler(NULL, 0, rpspi);
+      rpmsg_port_spi_exchange(rpspi);
     }
   else
     {
