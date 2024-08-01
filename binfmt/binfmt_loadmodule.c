@@ -174,39 +174,52 @@ int load_module(FAR struct binary_s *bin, FAR const char *filename,
 #ifdef CONFIG_LIBC_ENVPATH
       if (filename[0] != '/')
         {
+          FAR const char *envnames[] =
+            {
+              "PATH",
+              "PWD",
+              NULL
+            };
+
           FAR char *fullpath;
           ENVPATH_HANDLE handle;
+          int i;
 
           ret = -ENOENT;
 
-          /* Initialize to traverse the PATH variable */
+          /* Look from the list of environment variable names */
 
-          handle = envpath_init("PATH");
-          if (handle)
+          for (i = 0; envnames[i] && ret != OK; i++)
             {
-              /* Get the next absolute file path */
+              /* Initialize to traverse the environment paths */
 
-              while ((fullpath = envpath_next(handle, filename)) != NULL)
+              handle = envpath_init(envnames[i]);
+              if (handle)
                 {
-                  /* Try to load the file at this path */
+                  /* Get the next absolute file path */
 
-                  ret = load_absmodule(bin, fullpath, exports, nexports);
-
-                  /* Free the allocated fullpath */
-
-                  lib_free(fullpath);
-
-                  /* Break out of the loop with ret == OK on success */
-
-                  if (ret == OK)
+                  while ((fullpath = envpath_next(handle, filename)) != NULL)
                     {
-                      break;
+                      /* Try to load the file at this path */
+
+                      ret = load_absmodule(bin, fullpath, exports, nexports);
+
+                      /* Free the allocated fullpath */
+
+                      lib_free(fullpath);
+
+                      /* Break out of the loop with ret == OK on success */
+
+                      if (ret == OK)
+                        {
+                          break;
+                        }
                     }
+
+                  /* Release the traversal handle */
+
+                  envpath_release(handle);
                 }
-
-              /* Release the traversal handle */
-
-              envpath_release(handle);
             }
         }
       else
