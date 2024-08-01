@@ -813,6 +813,10 @@ static int i2c_transfer(struct i2c_master_s *dev,
 
   nxmutex_lock(&priv->lock);
 
+  /* Enter critical section to avoid interrupts during i2c transfert */
+
+  irqstate_t state = enter_critical_section();
+
   for (int i = 0; i < count; i++)
     {
       /* Check if frequency must be changed */
@@ -832,6 +836,7 @@ static int i2c_transfer(struct i2c_master_s *dev,
           else
             {
               i2cerr("Can't update frequency between Start & Stop symbols\n");
+              leave_critical_section(state);
               nxmutex_unlock(&priv->lock);
               return -EINVAL;
             }
@@ -840,10 +845,6 @@ static int i2c_transfer(struct i2c_master_s *dev,
       /* R/W bit */
 
       bool read = ((msgs[i].flags & I2C_M_READ) != 0);
-
-      /* Enter critical section to avoid interrupts during i2c transfert */
-
-      irqstate_t state = enter_critical_section();
 
       /* Check if you should start or restart a new i2c frame */
 
