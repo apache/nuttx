@@ -1127,7 +1127,7 @@ static int pci_enable_msi(FAR struct pci_device_s *dev, FAR int *irq,
     {
       mme = mmc;
       num = 1 << mme;
-      pciinfo("Limit MME to %x, num to %d\n", mmc, num);
+      pciinfo("Limit MME to %"PRIx32", num to %d\n", mmc, num);
     }
 
   /* Configure MSI (arch-specific) */
