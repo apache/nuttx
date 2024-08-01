@@ -235,17 +235,17 @@ static void esp_spi_deinit(struct spi_dev_s *dev);
 
 #ifdef CONFIG_ESPRESSIF_SPI2
 
-spi_hal_config_t cfg =
+static spi_hal_config_t cfg =
 {
     0
 };
 
-spi_hal_context_t ctx =
+static spi_hal_context_t ctx =
 {
     0
 };
 
-spi_hal_dev_config_t dev_cfg  =
+static spi_hal_dev_config_t dev_cfg  =
 {
     .mode = SPI_DEFAULT_MODE,
     .cs_setup = 0,
@@ -260,7 +260,7 @@ spi_hal_dev_config_t dev_cfg  =
     }
 };
 
-spi_hal_timing_param_t timing_param =
+static spi_hal_timing_param_t timing_param =
 {
     .no_compensate = 0,
     .half_duplex = 0,
