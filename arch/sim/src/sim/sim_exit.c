@@ -68,6 +68,7 @@ void up_exit(int status)
    */
 
   nxsched_resume_scheduler(tcb);
+  g_running_tasks[this_cpu()] = tcb;
 
   /* Restore the cpu lock */
 
