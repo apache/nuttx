@@ -56,7 +56,7 @@ struct rpmsg_port_config_s
   FAR void       *rxbuf;
 };
 
-#ifdef CONFIG_RPMSG_PORT_SPI
+#if defined(CONFIG_RPMSG_PORT_SPI) || defined(CONFIG_RPMSG_PORT_SPI_SLAVE)
 
 /* There are two gpios used for communication between two chips. At the SPI
  * master side, mreq is an output gpio pin which is used to notify the
