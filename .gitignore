@@ -12,6 +12,7 @@
 *.hex
 *.i
 *.ihx
+*.inf
 *.lib
 *.lod
 *.lst
