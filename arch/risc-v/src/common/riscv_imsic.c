@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libm/libm/lib_copysign.c
+ * arch/risc-v/src/common/riscv_imsic.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,23 +22,42 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#include <math.h>
+#include "riscv_internal.h"
+#include "riscv_aia.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_DOUBLE
-double copysign(double x, double y)
+void riscv_imsic_local_eix_update(unsigned long base_id,
+                                  unsigned long num_id,
+                                  bool pend, bool val)
 {
-  if (signbit(y))
-    {
-      return -fabs(x);
-    }
+  uintptr_t i, isel, ireg;
+  unsigned long id = base_id;
+  unsigned long last_id = base_id + num_id;
 
-  return fabs(x);
+  while (id < last_id)
+    {
+      isel = id / __riscv_xlen;
+      isel *= __riscv_xlen / RISCV_IMSIC_EIP_BITS;
+      isel += (pend) ? ISELECT_EIP0 : ISELECT_EIE0;
+
+      ireg = 0;
+      for (i = id & (__riscv_xlen - 1);
+          (id < last_id) && (i < __riscv_xlen); i++)
+        {
+          ireg |= BIT(i);
+          id++;
+        }
+
+      if (val)
+        {
+          riscv_imsic_csr_set(isel, ireg);
+        }
+      else
+        {
+          riscv_imsic_csr_clear(isel, ireg);
+        }
+    }
 }
-#endif

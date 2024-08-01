@@ -2973,7 +2973,7 @@ bool up_fpucmp(FAR const void *saveregs1, FAR const void *saveregs2);
 #ifdef CONFIG_ARCH_HAVE_DEBUG
 
 /****************************************************************************
- * Name: up_debugpoint
+ * Name: up_debugpoint_add
  *
  * Description:
  *   Add a debugpoint.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libm/libm/lib_copysign.c
+ * arch/risc-v/src/qemu-rv/hardware/qemu_rv_aplic.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,27 +18,19 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_APLIC_H
+#define __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_APLIC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#include <math.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_DOUBLE
-double copysign(double x, double y)
-{
-  if (signbit(y))
-    {
-      return -fabs(x);
-    }
+#define QEMU_RV_APLIC_NR_IRQ      0x60
 
-  return fabs(x);
-}
-#endif
+#endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_APLIC_H */

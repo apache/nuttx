@@ -78,12 +78,12 @@
  * Private Type
  ****************************************************************************/
 
-/* Trigger Match Control, from version 0.13.2.
+/* Represent the tdata1 register, from the RISC-V Debug Specification 0.13.2
  * Read https://riscv.org/wp-content/uploads/2019/03/riscv-debug-release.pdf
  * for more information
  */
 
-union mcontrol
+union tdata1
 {
   uintptr_t reg;
   struct
@@ -109,7 +109,21 @@ union mcontrol
       uintptr_t maskmax : 6;
       uintptr_t dmode : 1;
       uintptr_t type : 4;
-    };
+    } match;
+
+  struct
+    {
+      uintptr_t action: 6;
+      uintptr_t u : 1;
+      uintptr_t s : 1;
+      uintptr_t reserved0 : 1;
+      uintptr_t m : 1;
+      uintptr_t count : 14;
+      uintptr_t hit : 1;
+      uintptr_t reserved1 : sizeof(uintptr_t) * 8 - 30;
+      uintptr_t dmode : 1;
+      uintptr_t type : 4;
+    } icount;
 };
 
 struct riscv_debug_trigger
@@ -190,7 +204,7 @@ static int riscv_debug_handler(int irq, void *context, void *arg)
 
 static int riscv_debug_init(void)
 {
-  union mcontrol mc;
+  union tdata1 reg;
 
   /* Attach the debug exception handler */
 
@@ -223,22 +237,23 @@ static int riscv_debug_init(void)
 
   WRITE_CSR(CSR_TSELECT, 0);
 
-  mc.reg = READ_CSR(CSR_TDATA1);
+  reg.reg = READ_CSR(CSR_TDATA1);
 
   /* REVISIT: NAPOT match is supported and tested on
    * QEMU and ESP32C3, prefer to use it.
    */
 
-  mc.match = MATCH_TYPE_TOPBITS;
+  reg.match.type = TRIGGER_TYPE_ADDRESS_DATA;
+  reg.match.match = MATCH_TYPE_TOPBITS;
 
   /* Write it to tdata1 and read back
    * to check if the NAPOT is supported
    */
 
-  WRITE_CSR(CSR_TDATA1, mc.reg);
-  mc.reg = READ_CSR(CSR_TDATA1);
+  WRITE_CSR(CSR_TDATA1, reg.reg);
+  reg.reg = READ_CSR(CSR_TDATA1);
 
-  if (mc.match == MATCH_TYPE_TOPBITS)
+  if (reg.match.match == MATCH_TYPE_TOPBITS)
     {
       g_support_napot = true;
     }
@@ -257,6 +272,74 @@ static int riscv_debug_init(void)
 }
 
 /****************************************************************************
+ * Name: riscv_debug_setup_match
+ ****************************************************************************/
+
+static uintptr_t riscv_debug_setup_match(int type, void *addr, size_t size)
+{
+  union tdata1 reg;
+  uintptr_t    addr_napot;
+
+  if (type == DEBUGPOINT_BREAKPOINT)
+    {
+      reg.match.execute = 1;
+    }
+  else if (type == DEBUGPOINT_WATCHPOINT_RO)
+    {
+      reg.match.load = 1;
+    }
+  else if (type == DEBUGPOINT_WATCHPOINT_WO)
+    {
+      reg.match.store = 1;
+    }
+  else if (type == DEBUGPOINT_WATCHPOINT_RW)
+    {
+      reg.match.load = 1;
+      reg.match.store = 1;
+    }
+
+  reg.match.type = TRIGGER_TYPE_ADDRESS_DATA;
+  reg.match.m = 1;
+  reg.match.u = 1;
+  reg.match.hit = 0;
+  reg.match.dmode = DMODE_TYPE_BOTH;
+  reg.match.action = ACTION_TYPE_EXCEPTION;
+
+  /* From RISC-V Debug Specification:
+   * tdata1(mcontrol) match = 0 : Exact byte match
+   *
+   * tdata1(mcontrol) match = 1 : NAPOT (Naturally Aligned Power-Of-Two):
+   *
+   * Examples for understanding how to calculate match pattern to tdata2:
+   *
+   * nnnn...nnnnn 1-byte  Exact byte match
+   * nnnn...nnnn0 2-byte  NAPOT range
+   * nnnn...nnn01 4-byte  NAPOT range
+   * nnnn...nn011 8-byte  NAPOT range
+   * nnnn...n0111 16-byte NAPOT range
+   * nnnn...01111 32-byte NAPOT range
+   * ...
+   * n011...11111 2^31 byte NAPOT range
+   * where n are bits from original address
+   */
+
+  if (size > 1 && g_support_napot)
+    {
+      reg.match.match = MATCH_TYPE_TOPBITS;
+      addr_napot = ((uintptr_t)addr & ~(size - 1)) |
+                    ((size - 1) >> 1);
+      WRITE_CSR(CSR_TDATA2, addr_napot);
+    }
+  else
+    {
+      reg.match.match = MATCH_TYPE_EQUAL;
+      WRITE_CSR(CSR_TDATA2, (uintptr_t)addr);
+    }
+
+  return reg.reg;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -268,9 +351,8 @@ int up_debugpoint_add(int type, void *addr, size_t size,
                       debug_callback_t callback, void *arg)
 {
   int slot;
-  union mcontrol mc;
+  union tdata1 reg;
   int ret = OK;
-  uintptr_t addr_napot;
 
   /* Initialize the debug module if it is not initialized yet */
 
@@ -297,77 +379,31 @@ int up_debugpoint_add(int type, void *addr, size_t size,
 
   WRITE_CSR(CSR_TSELECT, slot);
 
-  /* Fetch the current setting from tdata1 */
-
-  mc.reg = READ_CSR(CSR_TDATA1);
-
-  /* Configure trigger */
-
-  mc.m = 1;
-  mc.u = 1;
-  mc.hit = 0;
-  mc.dmode = DMODE_TYPE_BOTH;
-  mc.action = ACTION_TYPE_EXCEPTION;
-
-  mc.execute = 0;
-  mc.load = 0;
-  mc.store = 0;
-
-  if (type == DEBUGPOINT_BREAKPOINT)
+  switch (type)
     {
-      mc.execute = 1;
-    }
-  else if (type == DEBUGPOINT_WATCHPOINT_RO)
-    {
-      mc.load = 1;
-    }
-  else if (type == DEBUGPOINT_WATCHPOINT_WO)
-    {
-      mc.store = 1;
-    }
-  else if (type == DEBUGPOINT_WATCHPOINT_RW)
-    {
-      mc.load = 1;
-      mc.store = 1;
-    }
-  else
-    {
-      /* DEBUGPOINT_STEPPOINT is not supported since current test platform
-       * such as QEMU don't implemented yet.
-       */
+      case DEBUGPOINT_STEPPOINT:
+        /* NOTICE: STEPPOINT implemented but not tested since no such
+         * hardware that implemented icount is available.
+         */
 
-      return -ENOTSUP;
-    }
-
-  /* From RISC-V Debug Specification:
-   * tdata1(mcontrol) match = 0 : Exact byte match
-   *
-   * tdata1(mcontrol) match = 1 : NAPOT (Naturally Aligned Power-Of-Two):
-   *
-   * Examples for understanding how to calculate match pattern to tdata2:
-   *
-   * nnnn...nnnnn 1-byte  Exact byte match
-   * nnnn...nnnn0 2-byte  NAPOT range
-   * nnnn...nnn01 4-byte  NAPOT range
-   * nnnn...nn011 8-byte  NAPOT range
-   * nnnn...n0111 16-byte NAPOT range
-   * nnnn...01111 32-byte NAPOT range
-   * ...
-   * n011...11111 2^31 byte NAPOT range
-   * where n are bits from original address
-   */
-
-  if (size > 1 && g_support_napot)
-    {
-      mc.match = MATCH_TYPE_TOPBITS;
-      addr_napot = ((uintptr_t)addr & ~(size - 1)) |
-                    ((size - 1) >> 1);
-      WRITE_CSR(CSR_TDATA2, addr_napot);
-    }
-  else
-    {
-      mc.match = MATCH_TYPE_EQUAL;
-      WRITE_CSR(CSR_TDATA2, (uintptr_t)addr);
+        reg.reg = 0;
+        reg.icount.type = TRIGGER_TYPE_ICOUNT;
+        reg.icount.dmode = DMODE_TYPE_BOTH;
+        reg.icount.count = 1;
+        reg.icount.hit = 0;
+        reg.icount.m = 1;
+        reg.icount.s = 1;
+        reg.icount.u = 1;
+        reg.icount.action = ACTION_TYPE_EXCEPTION;
+        break;
+      case DEBUGPOINT_BREAKPOINT:
+      case DEBUGPOINT_WATCHPOINT_RO:
+      case DEBUGPOINT_WATCHPOINT_RW:
+      case DEBUGPOINT_WATCHPOINT_WO:
+        reg.reg = riscv_debug_setup_match(type, addr, size);
+        break;
+      default:
+        return -EINVAL;
     }
 
   /* Register the callback and arg */
@@ -377,7 +413,7 @@ int up_debugpoint_add(int type, void *addr, size_t size,
   g_trigger_map[slot].size     = size;
   g_trigger_map[slot].callback = callback;
   g_trigger_map[slot].arg      = arg;
-  WRITE_CSR(CSR_TDATA1, mc.reg);
+  WRITE_CSR(CSR_TDATA1, reg.reg);
 
   return 0;
 }

@@ -553,6 +553,30 @@ config ARCH_RV_EXT_SSTC
 	default n
 	depends on ARCH_USE_S_MODE
 
+config ARCH_RV_HAVE_APLIC
+	bool "Enable RISC-V Advanced Platform-Level Interrupt Controller support"
+	default n
+	---help---
+		Instead of PLIC, RISC-V also defines Advanced Platform-Level Interrupt
+		Controller (APLIC) to provide flexible interrupt control. This device
+		is not backward compatible with PLIC.
+
+config ARCH_RV_EXT_AIA
+	bool "Enable RISC-V SxAIA support"
+	default n
+	---help---
+		Advanced Interrupt Architecture defines necessary features that
+		impact the ISA at a hart. This should not be selected if the
+		target does not support SxAIA for the operating mode of NuttX.
+
+if ARCH_RV_EXT_AIA
+
+config ARCH_RV_HAVE_IMSIC
+	bool "Enable RISC-V AIA Incoming Message Controller support"
+	default n
+
+endif # ARCH_RV_EXT_AIA
+
 choice
 	prompt "Toolchain Selection"
 	default RISCV_TOOLCHAIN_GNU_RV64

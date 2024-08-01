@@ -34,10 +34,12 @@
 #define RISCV_CLINT_MSIP        QEMU_RV_CLINT_MSIP
 #define RISCV_ACLINT_SSIP       QEMU_RV_ACLINT_SSIP
 
+#ifndef CONFIG_ARCH_RV_USE_IMSIC_IPI
 #ifdef CONFIG_ARCH_USE_S_MODE
 #  define RISCV_IPI             RISCV_ACLINT_SSIP
 #else
 #  define RISCV_IPI             RISCV_CLINT_MSIP
+#endif
 #endif
 
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_CLINT_H */

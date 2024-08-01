@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libm/libm/lib_copysign.c
+ * arch/risc-v/src/common/riscv_aplic.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,23 +22,40 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#include <math.h>
+#include "riscv_internal.h"
+#include "riscv_aia.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_DOUBLE
-double copysign(double x, double y)
+void riscv_aplic_init(uintptr_t base,
+                      uint32_t idelivery, uint32_t ithreshold)
 {
-  if (signbit(y))
-    {
-      return -fabs(x);
-    }
+  int i;
 
-  return fabs(x);
+  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
+    {
+      uintptr_t idc_base = RISCV_APLIC_IDC(base, i);
+
+      putreg32(idelivery, idc_base + RISCV_APLIC_IDC_IDELIVERY);
+      putreg32(0, idc_base + RISCV_APLIC_IDC_IFORCE);
+      putreg32(ithreshold, idc_base + RISCV_APLIC_IDC_ITHRESHOLD);
+    }
 }
-#endif
+
+void riscv_aplic_init_msi(uintptr_t base, uint64_t imsic_addr,
+                          uint32_t lhxs, uint32_t lhxw,
+                          uint32_t hhxs, uint32_t hhxw)
+{
+    uint32_t tmp;
+
+    tmp = imsic_addr >> RISCV_IMSIC_MMIO_PAGE_BIT;
+    putreg32(tmp, base + RISCV_APLIC_MMSICFGADDR);
+    tmp = (uint32_t)(imsic_addr >> 32) |
+            (lhxw << RISCV_APLIC_MSICFGADDRH_LHXW_SHIFT) |
+            (lhxs << RISCV_APLIC_MSICFGADDRH_LHXS_SHIFT) |
+            (hhxw << RISCV_APLIC_MSICFGADDRH_HHXW_SHIFT) |
+            (hhxs << RISCV_APLIC_MSICFGADDRH_HHXS_SHIFT);
+    putreg32(tmp, base + RISCV_APLIC_MMSICFGADDRH);
+}
