@@ -4815,12 +4815,11 @@ config BOARDCTL_USBDEVCTRL
 	---help---
 		Enables support for the BOARDIOC_USBDEV_CONTROL boardctl() command.
 
-config BOARDCTL_TESTSET
-	bool "Architecture-specific test/set operation"
+config BOARDCTL_SPINLOCK
+	bool "spinlock specific operation"
 	default n
 	---help---
 		Enables support for the BOARDIOC_SPINLOCK boardctl() command.
-		Architecture specific logic must provide up_testset() interface.
 
 config BOARDCTL_IRQ_AFFINITY
 	bool "Set an IRQ affinity to CPUs by software"
