@@ -1,8 +1,6 @@
 ############################################################################
 # tools/gdb/memdump.py
 #
-# SPDX-License-Identifier: Apache-2.0
-#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,10 +19,12 @@
 ############################################################################
 
 import argparse
+import bisect
+import time
 
 import gdb
 from lists import sq_for_every, sq_queue
-from utils import get_symbol_value
+from utils import get_long_type, get_symbol_value, read_ulong
 
 MM_ALLOC_BIT = 0x1
 MM_PREVFREE_BIT = 0x2
@@ -91,11 +91,12 @@ def mm_dumpnode(node, count, align, simple, detail, alive):
             max = node["backtrace"].type.range()[1]
             firstrow = True
             for x in range(0, max):
-                if int(node["backtrace"][x]) == 0:
+                backtrace = int(node["backtrace"][x])
+                if backtrace == 0:
                     break
 
                 if simple:
-                    gdb.write(" %0#*x" % (align, int(node["backtrace"][x])))
+                    gdb.write(" %0#*x" % (align, backtrace))
                 else:
                     if firstrow:
                         firstrow = False
@@ -107,12 +108,12 @@ def mm_dumpnode(node, count, align, simple, detail, alive):
                         "  [%0#*x] %-20s %s:%d\n"
                         % (
                             align,
-                            int(node["backtrace"][x]),
+                            backtrace,
                             node["backtrace"][x].format_string(
                                 raw=False, symbols=True, address=False
                             ),
-                            gdb.find_pc_line(node["backtrace"][x]).symtab,
-                            gdb.find_pc_line(node["backtrace"][x]).line,
+                            gdb.find_pc_line(backtrace).symtab,
+                            gdb.find_pc_line(backtrace).line,
                         )
                     )
 
@@ -242,11 +243,12 @@ def mempool_dumpbuf(buf, blksize, count, align, simple, detail, alive):
         max = buf["backtrace"].type.range()[1]
         firstrow = True
         for x in range(0, max):
-            if buf["backtrace"][x] == 0:
+            backtrace = int(buf["backtrace"][x])
+            if backtrace == 0:
                 break
 
             if simple:
-                gdb.write(" %0#*x" % (align, int(buf["backtrace"][x])))
+                gdb.write(" %0#*x" % (align, backtrace))
             else:
                 if firstrow:
                     firstrow = False
@@ -258,12 +260,12 @@ def mempool_dumpbuf(buf, blksize, count, align, simple, detail, alive):
                     "  [%0#*x] %-20s %s:%d\n"
                     % (
                         align,
-                        int(buf["backtrace"][x]),
+                        backtrace,
                         buf["backtrace"][x].format_string(
                             raw=False, symbols=True, address=False
                         ),
-                        gdb.find_pc_line(buf["backtrace"][x]).symtab,
-                        gdb.find_pc_line(buf["backtrace"][x]).line,
+                        gdb.find_pc_line(backtrace).symtab,
+                        gdb.find_pc_line(backtrace).line,
                     )
                 )
 
@@ -540,3 +542,259 @@ class Nxmemdump(gdb.Command):
 
 
 Nxmemdump()
+
+
+class Memleak(gdb.Command):
+    """Memleak check"""
+
+    def __init__(self):
+        super(Memleak, self).__init__("memleak", gdb.COMMAND_USER)
+
+    def check_alive(self, pid):
+        return self.pidhash[pid & self.npidhash - 1] != 0
+
+    def next_ptr(self):
+
+        inf = gdb.inferiors()[0]
+        heap = gdb.parse_and_eval("g_mmheap")
+        start = []
+        end = []
+        longsize = get_long_type().sizeof
+        region = get_symbol_value("CONFIG_MM_REGIONS")
+
+        for i in range(0, region):
+            start.append(int(gdb.Value(heap["mm_heapstart"][i])))
+            end.append(int(gdb.Value(heap["mm_heapend"][i])))
+
+        # Serach in global variables
+        sdata = gdb.parse_and_eval("(uintptr_t)&_sdata")
+        ebss = gdb.parse_and_eval("(uintptr_t)&_ebss")
+        gdb.write(f"Searching in global variables {hex(sdata)} ~ {hex(ebss)}\n")
+        mem = inf.read_memory(int(sdata), int(ebss) - int(sdata))
+        i = 0
+        while i < int(ebss) - int(sdata):
+            ptr = read_ulong(mem[i : i + longsize].tobytes(), 0)
+            for j in range(0, region):
+                if ptr >= start[j] and ptr < end[j]:
+                    yield ptr
+                    break
+
+            i = i + longsize
+
+        gdb.write("Searching in grey memory\n")
+        for node in self.grey_list:
+            addr = node["addr"]
+            mem = inf.read_memory(addr, node["size"])
+            i = 0
+            while i < node["size"]:
+                ptr = read_ulong(mem[i : i + longsize].tobytes(), 0)
+                for j in range(0, region):
+                    if ptr >= start[j] and ptr < end[j]:
+                        yield ptr
+                        break
+                i = i + longsize
+
+    def collect_white_dict(self):
+        white_dict = {}
+        allocnode_size = gdb.lookup_type("struct mm_allocnode_s").sizeof
+
+        # collect all user malloc ptr
+
+        heap = gdb.parse_and_eval("g_mmheap")
+        for node in mm_foreach(heap):
+            if node["size"] & MM_ALLOC_BIT != 0 and node["pid"] != PID_MM_MEMPOOL:
+                addr = (
+                    gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+                    + allocnode_size
+                )
+
+                node_dict = {}
+                node_dict["node"] = node
+                node_dict["size"] = mm_nodesize(node["size"]) - allocnode_size
+                node_dict["addr"] = addr
+                white_dict[int(addr)] = node_dict
+
+        if heap.type.has_key("mm_mpool"):
+            for pool in mempool_multiple_foreach(heap["mm_mpool"]):
+                for buf in mempool_foreach(pool):
+                    if buf["magic"] == MEMPOOL_MAGIC_ALLOC:
+                        addr = (
+                            gdb.Value(buf).cast(gdb.lookup_type("char").pointer())
+                            - pool["blocksize"]
+                        )
+
+                        buf_dict = {}
+                        buf_dict["node"] = buf
+                        buf_dict["size"] = pool["blocksize"]
+                        buf_dict["addr"] = addr
+                        white_dict[int(addr)] = buf_dict
+
+        return white_dict
+
+    def parse_arguments(self, argv):
+        parser = argparse.ArgumentParser(description="memleak command")
+        parser.add_argument(
+            "-s",
+            "--simple",
+            action="store_true",
+            help="Simplified Output",
+            default=False,
+        )
+        parser.add_argument(
+            "-d",
+            "--detail",
+            action="store_true",
+            help="Output details of each node",
+            default=False,
+        )
+
+        if argv[0] == "":
+            argv = None
+        try:
+            args = parser.parse_args(argv)
+        except SystemExit:
+            return None
+
+        return {"simple": args.simple, "detail": args.detail}
+
+    def invoke(self, args, from_tty):
+        if gdb.lookup_type("size_t").sizeof == 4:
+            align = 11
+        else:
+            align = 19
+
+        arg = self.parse_arguments(args.split(" "))
+
+        if arg is None:
+            return
+
+        if get_symbol_value("CONFIG_MM_BACKTRACE") <= 0:
+            gdb.write("Better use CONFIG_MM_BACKTRACE=16 or 8 get more information\n")
+
+        white_dict = self.collect_white_dict()
+
+        self.grey_list = []
+        gdb.write("Searching for leaked memory, please wait a moment\n")
+        start = time.time()
+
+        sorted_keys = sorted(white_dict.keys())
+
+        for ptr in self.next_ptr():
+            # Find a closest addres in white_dict
+            pos = bisect.bisect_right(sorted_keys, ptr)
+            if pos == 0:
+                continue
+            grey_key = sorted_keys[pos - 1]
+            if (
+                grey_key in white_dict.keys()
+                and ptr < grey_key + white_dict[grey_key]["size"]
+            ):
+                self.grey_list.append(white_dict[grey_key])
+                del white_dict[grey_key]
+
+        # All white node is leak
+
+        end = time.time()
+        gdb.write(f"Search all memory use {(end - start):.2f} seconds\n")
+
+        gdb.write("\n")
+        if len(white_dict) == 0:
+            gdb.write("All node have references, no memory leak!\n")
+            return
+
+        gdb.write("Leak catch!, use '\x1b[33;1m*\x1b[m' mark pid is not exist:\n")
+
+        if get_symbol_value("CONFIG_MM_BACKTRACE") > 0 and arg["detail"] is False:
+            gdb.write("%6s" % ("CNT"))
+
+        gdb.write(
+            "%6s%12s%12s%*s %s\n"
+            % ("PID", "Size", "Sequence", align, "Address", "Callstack")
+        )
+
+        self.npidhash = gdb.parse_and_eval("g_npidhash")
+        self.pidhash = gdb.parse_and_eval("g_pidhash")
+
+        if get_symbol_value("CONFIG_MM_BACKTRACE") > 0 and arg["detail"] is False:
+
+            # Filter same backtrace
+
+            backtrace_dict = {}
+            for addr in white_dict.keys():
+                backtrace_dict = record_backtrace(
+                    white_dict[addr]["node"], white_dict[addr]["size"], backtrace_dict
+                )
+
+            leaksize = 0
+            leaklist = []
+            for node in backtrace_dict.values():
+                leaklist.append(node)
+
+            # sort by count
+            leaklist.sort(key=get_count, reverse=True)
+
+            i = 0
+            for node in leaklist:
+                if (
+                    node["node"].type
+                    == gdb.lookup_type("struct mm_allocnode_s").pointer()
+                ):
+                    mm_dumpnode(
+                        node["node"],
+                        node["count"],
+                        align,
+                        arg["simple"],
+                        arg["detail"],
+                        self.check_alive(node["pid"]),
+                    )
+                else:
+                    mempool_dumpbuf(
+                        node["node"],
+                        node["size"],
+                        node["count"],
+                        align,
+                        arg["simple"],
+                        arg["detail"],
+                        self.check_alive(node["pid"]),
+                    )
+
+                leaksize += node["count"] * node["size"]
+                i += 1
+
+            gdb.write(
+                f"Alloc {len(white_dict)} count,\
+have {i} some backtrace leak, total leak memory is {int(leaksize)} bytes\n"
+            )
+        else:
+            leaksize = 0
+            for node in white_dict.values():
+                if (
+                    node["node"].type
+                    == gdb.lookup_type("struct mm_allocnode_s").pointer()
+                ):
+                    mm_dumpnode(
+                        node["node"],
+                        1,
+                        align,
+                        arg["simple"],
+                        True,
+                        self.check_alive(node["pid"]),
+                    )
+                else:
+                    mempool_dumpbuf(
+                        node["node"],
+                        node["size"],
+                        1,
+                        align,
+                        arg["simple"],
+                        True,
+                        self.check_alive(node["pid"]),
+                    )
+                leaksize += node["size"]
+
+            gdb.write(
+                f"Alloc {len(white_dict)} count, total leak memory is {int(leaksize)} bytes\n"
+            )
+
+
+Memleak()
