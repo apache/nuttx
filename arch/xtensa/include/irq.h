@@ -68,10 +68,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
-
 /* IRQ Stack Frame Format.  Each value is a uint32_t register index */
 
 #define REG_PC              (0)  /* Return PC */
@@ -142,9 +138,13 @@
 #endif
 
 #if XCHAL_CP_NUM > 0
-  /* FPU first address must align to CP align size. */
+  /* FPU first address must align to CP align size.
+   * ESP32 3rd party redefine the ALIGN_UP, so define a new macro XALIGN_UP()
+   * instead use ALGIN_UP() in nuttx/nuttx.h
+   */
 
-#  define COMMON_CTX_REGS   ALIGN_UP(_REG_CP_START, XCHAL_TOTAL_SA_ALIGN / 4)
+#  define XALIGN_UP(x,a)    (((x) + ((a) - 1)) & ~((a) - 1))
+#  define COMMON_CTX_REGS   XALIGN_UP(_REG_CP_START, XCHAL_TOTAL_SA_ALIGN / 4)
 #  define COPROC_CTX_REGS   (XTENSA_CP_SA_SIZE / 4)
 #  define RESERVE_REGS      8
 #  define XCPTCONTEXT_REGS  (COMMON_CTX_REGS + COPROC_CTX_REGS + RESERVE_REGS)

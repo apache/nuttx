@@ -30,6 +30,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/rpmsg/rpmsg_virtio.h>
 #include <rpmsg/rpmsg_internal.h>
@@ -37,10 +38,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(s, a)        (((s) + (a) - 1) & ~((a) - 1))
-#endif
 
 #define RPMSG_VIRTIO_TIMEOUT_MS 20
 #define RPMSG_VIRTIO_NOTIFYID   0
