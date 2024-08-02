@@ -1010,6 +1010,22 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
 }
 
 /****************************************************************************
+ * Name: notify_free_entry
+ *
+ * Description:
+ *   Deallocate the hash entry.
+ *
+ ****************************************************************************/
+
+static void notify_free_entry(FAR ENTRY *entry)
+{
+  /* Key is alloced by lib_malloc, value is alloced by kmm_malloc */
+
+  lib_free(entry->key);
+  kmm_free(entry->data);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1276,6 +1292,7 @@ void notify_initialize(void)
 {
   int ret;
 
+  g_inotify.hash.free_entry = notify_free_entry;
   ret = hcreate_r(CONFIG_FS_NOTIFY_BUCKET_SIZE, &g_inotify.hash);
   if (ret != 1)
     {
