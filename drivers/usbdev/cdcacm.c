@@ -103,7 +103,7 @@ struct cdcacm_dev_s
   bool upper;                          /* True: RX buffer is (nearly) full */
 #endif
   bool rxenabled;                      /* true: UART RX "interrupts" enabled */
-  bool issending;
+  bool ispolling;
 
   struct cdc_linecoding_s linecoding;  /* Buffered line status */
   cdcacm_callback_t callback;          /* Serial event callback function */
@@ -293,6 +293,14 @@ static const struct uart_ops_s g_uartops =
 static bool cdcuart_txready(FAR struct uart_dev_s *dev)
 {
   FAR struct cdcacm_dev_s *priv = dev->priv;
+  FAR struct usbdev_ep_s *ep = priv->epbulkin;
+
+  if (sq_empty(&priv->txfree))
+    {
+      priv->ispolling = true;
+      EP_POLL(ep);
+      priv->ispolling = false;
+    }
 
   return !sq_empty(&priv->txfree);
 }
@@ -337,7 +345,9 @@ static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
   req->len   = nbytes;
   req->priv  = wrcontainer;
   req->flags = USBDEV_REQFLAGS_NULLPKT;
+  priv->ispolling = true;
   ret        = EP_SUBMIT(ep, req);
+  priv->ispolling = false;
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL),
@@ -372,13 +382,9 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
 #endif
 
   flags = enter_critical_section();
-  if (priv->issending)
+  if (priv->ispolling)
     {
       goto out;
-    }
-  else
-    {
-      priv->issending = true;
     }
 
   uinfo("head=%d tail=%d nwrq=%d empty=%d\n",
@@ -389,8 +395,6 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
     {
       uart_xmitchars_dma(&priv->serdev);
     }
-
-  priv->issending = false;
 
 out:
   leave_critical_section(flags);
@@ -408,6 +412,14 @@ out:
 static bool cdcuart_rxavailable(FAR struct uart_dev_s *dev)
 {
   FAR struct cdcacm_dev_s *priv = dev->priv;
+  FAR struct usbdev_ep_s *ep = priv->epbulkout;
+
+  if (sq_empty(&priv->rxpending))
+    {
+      priv->ispolling = true;
+      EP_POLL(ep);
+      priv->ispolling = false;
+    }
 
   return !sq_empty(&priv->rxpending);
 }
@@ -519,6 +531,11 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
   flags = enter_critical_section();
 
+  if (priv->ispolling)
+    {
+      goto out;
+    }
+
   /* Cancel any pending failsafe timer */
 
   wd_cancel(&priv->rxfailsafe);
@@ -568,6 +585,7 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
                cdcacm_rxtimeout, (wdparm_t)priv);
     }
 
+out:
   leave_critical_section(flags);
   return ret;
 }
@@ -2647,6 +2665,9 @@ static void cdcuart_txint(FAR struct uart_dev_s *dev, bool enable)
 static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
 {
   FAR struct cdcacm_dev_s *priv = (FAR struct cdcacm_dev_s *)dev->priv;
+  FAR struct usbdev_ep_s *ep = priv->epbulkin;
+  irqstate_t flags;
+  bool empty;
 
   usbtrace(CDCACM_CLASSAPI_TXEMPTY, 0);
 
@@ -2658,11 +2679,19 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
     }
 #endif
 
+  flags = enter_critical_section();
+  priv->ispolling = true;
+  EP_POLL(ep);
+  priv->ispolling = false;
+
   /* When all of the allocated write requests have been returned to the
    * txfree, then there is no longer any TX data in flight.
    */
 
-  return priv->nwrq >= CONFIG_CDCACM_NWRREQS;
+  empty = priv->nwrq >= CONFIG_CDCACM_NWRREQS;
+  leave_critical_section(flags);
+
+  return empty;
 }
 
 /****************************************************************************
