@@ -255,6 +255,7 @@ struct perf_event_s
   struct list_node group_node;              /* Connect to group_list in perf_event_context_s */
   struct list_node sibling_list;            /* Used for list event in one group */
   struct list_node child_list;              /* Used for list inherit group leader event */
+  struct list_node sw_list;                 /* Used for list event in swevent_manager_s */
   mutex_t child_mutex;                      /* Mutex for child_list */
   FAR struct perf_event_s *group_leader;    /* Indicate the group leader of this event */
   FAR struct perf_event_s *parent_event;    /* Indicate the parent event of this event */

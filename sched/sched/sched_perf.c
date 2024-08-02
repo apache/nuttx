@@ -34,6 +34,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/perf.h>
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
 
@@ -49,6 +50,12 @@
  ****************************************************************************/
 
 typedef int (*perf_func_t)(FAR struct perf_event_s *event);
+
+struct swevent_manger_s
+{
+  struct list_node list_swevent;
+  spinlock_t lock;
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -74,6 +81,18 @@ static int perf_cpuclock_event_stop(FAR struct perf_event_s *event,
                                     int flags);
 static int perf_cpuclock_event_read(FAR struct perf_event_s *event);
 static int perf_cpuclock_event_match(FAR struct perf_event_s *event);
+
+static int perf_swevent_init(FAR struct perf_event_s *event);
+static int perf_swevent_add(FAR struct perf_event_s *event,
+                            int flags);
+static void perf_swevent_del(FAR struct perf_event_s *event,
+                             int flags);
+static int perf_swevent_start(FAR struct perf_event_s *event,
+                              int flags);
+static int perf_swevent_stop(FAR struct perf_event_s *event,
+                             int flags);
+static int perf_swevent_read(FAR struct perf_event_s *event);
+static int perf_swevent_match(FAR struct perf_event_s *event);
 
 /****************************************************************************
  * Private Data
@@ -121,6 +140,25 @@ static struct pmu_s g_perf_cpu_clock =
   .ops = &g_perf_cpu_clock_ops,
 };
 
+/* swevent */
+
+static struct swevent_manger_s g_swevent[CONFIG_SMP_NCPUS];
+static struct pmu_ops_s g_perf_swevent_ops =
+{
+  .event_init  = perf_swevent_init,
+  .event_add   = perf_swevent_add,
+  .event_del   = perf_swevent_del,
+  .event_start = perf_swevent_start,
+  .event_stop  = perf_swevent_stop,
+  .event_read  = perf_swevent_read,
+  .event_match = perf_swevent_match,
+};
+
+static struct pmu_s g_perf_swevent =
+{
+  .ops = &g_perf_swevent_ops,
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -159,8 +197,15 @@ static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
 
       if (event->ctx && event->ctx->tcb)
         {
-          pid = event->ctx->tcb->group->tg_pid;
           tid = event->ctx->tcb->pid;
+          if (event->ctx->tcb->group)
+            {
+              pid = event->ctx->tcb->group->tg_pid;
+            }
+          else
+            {
+              pid = tid;
+            }
         }
       else
         {
@@ -1967,6 +2012,7 @@ static int perf_close(FAR struct file *filep)
 {
   FAR struct perf_event_s *event = filep->f_priv;
   FAR struct perf_event_context_s *ctx;
+  irqstate_t flags = enter_critical_section();
 
   ASSERT(event != NULL);
 
@@ -1977,6 +2023,7 @@ static int perf_close(FAR struct file *filep)
     }
 
   perf_free_event(event);
+  leave_critical_section(flags);
   return OK;
 }
 
@@ -2359,6 +2406,66 @@ static int perf_cpuclock_event_match(FAR struct perf_event_s *event)
   return -ENOENT;
 }
 
+static int perf_swevent_init(FAR struct perf_event_s *event)
+{
+  if (event->attr.type != PERF_TYPE_SOFTWARE)
+    {
+      return -ENOENT;
+    }
+
+  return 0;
+}
+
+static int perf_swevent_add(FAR struct perf_event_s *event,
+                            int flags)
+{
+  irqstate_t irq_flags;
+
+  irq_flags = spin_lock_irqsave(&g_swevent[this_cpu()].lock);
+  list_add_tail(&g_swevent[this_cpu()].list_swevent, &event->sw_list);
+  spin_unlock_irqrestore(&g_swevent[this_cpu()].lock, irq_flags);
+
+  return 0;
+}
+
+static void perf_swevent_del(FAR struct perf_event_s *event,
+                             int flags)
+{
+  irqstate_t irq_flags = spin_lock_irqsave(&g_swevent[this_cpu()].lock);
+
+  list_delete(&event->sw_list);
+  spin_unlock_irqrestore(&g_swevent[this_cpu()].lock, irq_flags);
+}
+
+static int perf_swevent_start(FAR struct perf_event_s *event,
+                                     int flags)
+{
+  event->hw.state = 1;
+  return 0;
+}
+
+static int perf_swevent_stop(FAR struct perf_event_s *event,
+                                    int flags)
+{
+  event->hw.state = 0;
+  return 0;
+}
+
+static int perf_swevent_read(FAR struct perf_event_s *event)
+{
+  return 0;
+}
+
+static int perf_swevent_match(FAR struct perf_event_s *event)
+{
+  if (event->attr.config == PERF_COUNT_SW_CONTEXT_SWITCHES)
+    {
+      return 0;
+    }
+
+  return -ENOENT;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -2366,6 +2473,29 @@ static int perf_cpuclock_event_match(FAR struct perf_event_s *event)
 int perf_event_overflow(FAR struct perf_event_s *event)
 {
   return 0;
+}
+
+void perf_swevent(uint32_t event_id, uintptr_t ip)
+{
+  struct perf_sample_data_s data;
+  irqstate_t flags;
+  FAR struct perf_event_s *node;
+
+  perf_sample_data_init(&data, 0);
+
+  flags = spin_lock_irqsave(&g_swevent[this_cpu()].lock);
+
+  list_for_every_entry(&g_swevent[this_cpu()].list_swevent, node,
+                       struct perf_event_s, sw_list)
+    {
+      if (node->attr.type == PERF_TYPE_SOFTWARE &&
+          node->attr.config == event_id && node->hw.state == 1)
+        {
+          perf_event_data_overflow(node, &data, ip);
+        }
+    }
+
+  spin_unlock_irqrestore(&g_swevent[this_cpu()].lock, flags);
 }
 
 /****************************************************************************
@@ -2391,10 +2521,13 @@ int perf_event_init(void)
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
     {
       perf_init_context(&g_perf_cpu_ctx[i]);
+      list_initialize(&g_swevent[i].list_swevent);
+      spin_initialize(&g_swevent[i].lock, SP_UNLOCKED);
     }
 
   /* Register clock event */
 
+  perf_pmu_register(&g_perf_swevent, "software", PERF_TYPE_SOFTWARE);
   perf_pmu_register(&g_perf_cpu_clock, "cpu_clock", PERF_TYPE_SOFTWARE);
 
   return OK;
@@ -2715,6 +2848,8 @@ void perf_event_task_sched_in(FAR struct tcb_s *tcb)
 void perf_event_task_sched_out(FAR struct tcb_s *tcb)
 {
   FAR struct perf_event_context_s *ctx = tcb->perf_event_ctx;
+
+  perf_swevent(PERF_COUNT_SW_CONTEXT_SWITCHES, SCHED_NOTE_IP);
 
   if (ctx != NULL)
     {
