@@ -45,6 +45,35 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: m0ic_mask_irq
+ *
+ * Description:
+ *   Masks or unmasks an interrupt in the M0 Interrupt Controller.
+ *
+ * Input parameters:
+ *   irq  - IRQ number to mask or unmask
+ *   mask - 0 to unmask (enable), 1 to mask (disable)
+ *
+ ****************************************************************************/
+
+void m0ic_mask_irq(int irq, bool mask)
+{
+  int m0_extirq = irq - RISCV_IRQ_EXT
+    - BL808_M0_IRQ_OFFSET - BL808_IRQ_NUM_BASE;
+
+  if (mask)
+    {
+      modifyreg32(BL808_M0IC_MASK(m0_extirq / 32),
+                  0, 1 << (m0_extirq % 32));
+    }
+  else
+    {
+      modifyreg32(BL808_M0IC_MASK(m0_extirq / 32),
+                  1 << (m0_extirq % 32), 0);
+    }
+}
+
+/****************************************************************************
  * Name: m0ic_interrupt
  *
  * Description:
@@ -83,6 +112,15 @@ static int __m0ic_interrupt(int irq, void *context, void *arg)
 
   putreg32(status_0, BL808_M0IC_CLEAR(0));
   putreg32(status_1, BL808_M0IC_CLEAR(1));
+
+  /* M0IC interrupts respond to the rising edge of the
+   * source interrupts. If the source is held high but
+   * the M0IC interrupt is cleared, the interrupt
+   * never happens. So, use masks to refresh the interrupt.
+   */
+
+  m0ic_mask_irq(irqn, 1);
+  m0ic_mask_irq(irqn, 0);
 
   return OK;
 }
@@ -192,9 +230,7 @@ void up_disable_irq(int irq)
                && extirq <= (BL808_M0_MAX_EXTIRQ
                              + BL808_M0_IRQ_OFFSET))
         {
-          int m0_extirq = extirq - BL808_M0_IRQ_OFFSET - BL808_IRQ_NUM_BASE;
-          modifyreg32(BL808_M0IC_MASK(m0_extirq / 32),
-                      0, 1 << (m0_extirq % 32));
+          m0ic_mask_irq(irq, 1);
         }
       else
         {
@@ -242,9 +278,7 @@ void up_enable_irq(int irq)
                && extirq <= (BL808_M0_MAX_EXTIRQ
                              + BL808_M0_IRQ_OFFSET))
         {
-          int m0_extirq = extirq - BL808_M0_IRQ_OFFSET - BL808_IRQ_NUM_BASE;
-          modifyreg32(BL808_M0IC_MASK(m0_extirq / 32),
-                      1 << (m0_extirq % 32), 0);
+          m0ic_mask_irq(irq, 0);
         }
       else
         {
