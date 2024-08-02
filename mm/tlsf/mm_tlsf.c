@@ -1447,3 +1447,19 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size)
 
   return alloc;
 }
+
+/****************************************************************************
+ * Name: mm_free_delaylist
+ *
+ * Description:
+ *   force freeing the delaylist of this heap.
+ *
+ ****************************************************************************/
+
+void mm_free_delaylist(FAR struct mm_heap_s *heap)
+{
+  if (heap)
+    {
+       free_delaylist(heap, true);
+    }
+}
