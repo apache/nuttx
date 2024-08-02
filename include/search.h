@@ -43,6 +43,7 @@ struct hsearch_data
 {
   FAR struct internal_head *htable;
   size_t htablesize;
+  CODE void (*free_entry)(FAR ENTRY *entry);
 };
 
 /****************************************************************************

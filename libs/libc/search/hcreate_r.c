@@ -83,6 +83,16 @@ SLIST_HEAD(internal_head, internal_entry);
 extern uint32_t (*g_default_hash)(FAR const void *, size_t);
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void hfree_r(FAR ENTRY *entry)
+{
+  lib_free(entry->key);
+  lib_free(entry->data);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -157,6 +167,11 @@ int hcreate_r(size_t nel, FAR struct hsearch_data *htab)
       SLIST_INIT(&(htab->htable[idx]));
     }
 
+  if (htab->free_entry == NULL)
+    {
+      htab->free_entry = hfree_r;
+    }
+
   return 1;
 }
 
@@ -190,8 +205,7 @@ void hdestroy_r(FAR struct hsearch_data *htab)
         {
           ie = SLIST_FIRST(&(htab->htable[idx]));
           SLIST_REMOVE_HEAD(&(htab->htable[idx]), link);
-          lib_free(ie->ent.key);
-          lib_free(ie->ent.data);
+          htab->free_entry(&ie->ent);
           lib_free(ie);
         }
     }
@@ -245,8 +259,7 @@ int hsearch_r(ENTRY item, ACTION action, FAR ENTRY **retval,
       if (ie != NULL)
         {
           SLIST_REMOVE(head, ie, internal_entry, link);
-          lib_free(ie->ent.key);
-          lib_free(ie->ent.data);
+          htab->free_entry(&ie->ent);
           lib_free(ie);
           return 1;
         }
