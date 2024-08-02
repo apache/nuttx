@@ -119,15 +119,6 @@
 
 #define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
 
-/* The SAMV7x QSPI driver insists that transfers be performed in multiples
- * of 32-bits.  The alignment requirement only applies to RX DMA data.
- */
-
-#define ALIGN_SHIFT       2
-#define ALIGN_MASK        3
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
-
 /* Debug ********************************************************************/
 
 /* Check if QSPI debug is enabled */
@@ -1558,8 +1549,8 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   if (priv->candma &&
       meminfo->buflen > CONFIG_SAMV7_QSPI_DMATHRESHOLD &&
-      IS_ALIGNED((uintptr_t)meminfo->buffer) &&
-      IS_ALIGNED(meminfo->buflen))
+      IS_ALIGNED((uintptr_t)meminfo->buffer, 4) &&
+      IS_ALIGNED(meminfo->buflen, 4))
     {
       return qspi_memory_dma(priv, meminfo);
     }
@@ -1593,7 +1584,11 @@ static void *qspi_alloc(struct qspi_dev_s *dev, size_t buflen)
    * enough to hold the rested buflen in units a 32-bits.
    */
 
-  return kmm_malloc(ALIGN_UP(buflen));
+  /* The SAMV7x QSPI driver insists that transfers be performed in multiples
+   * of 32-bits.  The alignment requirement only applies to RX DMA data.
+   */
+
+  return kmm_malloc(ALIGN_UP(buflen, 4));
 }
 
 /****************************************************************************

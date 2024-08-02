@@ -46,6 +46,7 @@
 #include <nuttx/cache.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
@@ -68,13 +69,6 @@
 /* QSPI memory synchronization */
 
 #define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
-
-/* Ensure that the DMA buffers are word-aligned. */
-
-#define ALIGN_SHIFT       2
-#define ALIGN_MASK        3
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
-#define IS_ALIGNED(n)     (((uint32_t)(n) & ALIGN_MASK) == 0)
 
 /* LUT entries used for various command sequences                 */
 #define QSPI_LUT_READ        0U /* Quad Output read               */
@@ -1402,9 +1396,10 @@ static void *qspi_alloc(struct qspi_dev_s *dev, size_t buflen)
   /* Here we exploit the carnal knowledge the kmm_malloc() will return memory
    * aligned to 64-bit addresses.  The buffer length must be large enough to
    * hold the rested buflen in units a 32-bits.
+   * Ensure that the DMA buffers are word-aligned.
    */
 
-  return kmm_malloc(ALIGN_UP(buflen));
+  return kmm_malloc(ALIGN_UP(buflen, 4));
 }
 
 /****************************************************************************

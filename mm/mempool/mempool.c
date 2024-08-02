@@ -33,14 +33,12 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mempool.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#undef  ALIGN_UP
-#define ALIGN_UP(x, a) (((x) + ((a) - 1)) & (~((a) - 1)))
 
 #if CONFIG_MM_BACKTRACE >= 0
 #define MEMPOOL_MAGIC_FREE  0xAAAAAAAA
