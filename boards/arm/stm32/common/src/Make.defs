@@ -136,6 +136,10 @@ ifeq ($(CONFIG_CL_MFRC522),y)
   CSRCS += stm32_mfrc522.c
 endif
 
+ifeq ($(CONFIG_SENSORS_AMG88XX),y)
+  CSRCS+= stm32_amg88xx.c
+endif
+
 ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += stm32_lis3dsh.c
 endif
