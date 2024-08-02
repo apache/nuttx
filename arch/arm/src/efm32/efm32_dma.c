@@ -34,20 +34,13 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
 #include "hardware/efm32_cmu.h"
 #include "hardware/efm32_dma.h"
 #include "efm32_dma.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ALIGN_MASK(s)   ((1 << s) - 1)
-#define ALIGN_DOWN(v,m) ((v) & ~m)
-#define ALIGN_UP(v,m)   (((v) + (m)) & ~m)
 
 /****************************************************************************
  * Private Types
@@ -466,7 +459,7 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
    */
 
   xfersize = (1 << shift);
-  nbytes   = ALIGN_DOWN(nbytes, mask);
+  nbytes   = ALIGN_DOWN_MASK(nbytes, mask);
   DEBUGASSERT(nbytes > 0);
 
   /* Save the configuration (for efm32_dmastart()). */
@@ -563,7 +556,7 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
    */
 
   xfersize = (1 << shift);
-  nbytes   = ALIGN_DOWN(nbytes, mask);
+  nbytes   = ALIGN_DOWN_MASK(nbytes, mask);
   DEBUGASSERT(nbytes > 0);
 
   /* Save the configuration (for efm32_dmastart()). */

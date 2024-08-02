@@ -42,8 +42,6 @@
 #define readl(a)     (*(FAR volatile uint32_t *)(a))
 #define writel(v,a)  (*(FAR volatile uint32_t *)(a) = (v))
 
-#define IS_ALIGNED(x, a) (((x) & ((a) - 1)) == 0)
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
