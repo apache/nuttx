@@ -36,25 +36,43 @@
 
 /* Register offsets *********************************************************/
 
+#define BL808_MM_GLB_CLK_CTRL_CPU_OFFSET 0x00
 #define BL808_MM_GLB_CLK_CTRL_PERI_OFFSET 0x10
+#define BL808_MM_GLB_CLK_CTRL_PERI3_OFFSET 0x18
 
 /* Register definitions *****************************************************/
 
+#define BL808_MM_GLB_CLK_CTRL_CPU (BL808_MM_GLB_BASE \
+                                   + BL808_MM_GLB_CLK_CTRL_CPU_OFFSET)
 #define BL808_MM_GLB_CLK_CTRL_PERI (BL808_MM_GLB_BASE \
                                    + BL808_MM_GLB_CLK_CTRL_PERI_OFFSET)
+#define BL808_MM_GLB_CLK_CTRL_PERI3 (BL808_MM_GLB_BASE \
+                                   + BL808_MM_GLB_CLK_CTRL_PERI3_OFFSET)
 
 /* Register bit definitions *************************************************/
+
+/* CLK_CTRL_CPU */
+
+#define CLK_CTRL_CPU_I2C_CLK_XTAL (1 << 6)
 
 /* CLK_CTRL_PERI ************************************************************/
 
 #define CLK_CTRL_PERI_I2C0_DIV_SHIFT 0
 #define CLK_CTRL_PERI_I2C0_DIV_MASK (0xff << CLK_CTRL_PERI_I2C0_DIV_SHIFT)
-#define CLK_CTRL_PERI_I2C0_EN_SHIFT 9
+#define CLK_CTRL_PERI_I2C0_DIV_EN (1 << 8)
+#define CLK_CTRL_PERI_I2C0_EN (1 << 9)
 #define CLK_CTRL_PERI_UART_DIV_EN_SHIFT 16
 #define CLK_CTRL_PERI_UART_DIV_SHIFT 17
 #define CLK_CTRL_PERI_UART_DIV_MASK (0x07 << CLK_CTRL_PERI_UART_DIV_SHIFT)
 #define CLK_CTRL_PERI_SPI_DIV_EN_SHIFT 23
 #define CLK_CTRL_PERI_SPI_DIV_SHIFT 24
 #define CLK_CTRL_PERI_SPI_DIV_MASK (0xff << CLK_CTRL_PERI_SPI_DIV_SHIFT)
+
+/* CLK_CTRL_PERI3 ***********************************************************/
+
+#define CLK_CTRL_PERI_I2C1_DIV_SHIFT 0
+#define CLK_CTRL_PERI_I2C1_DIV_MASK (0xff << CLK_CTRL_PERI_I2C0_DIV_SHIFT)
+#define CLK_CTRL_PERI_I2C1_DIV_EN (1 << 8)
+#define CLK_CTRL_PERI_I2C1_EN (1 << 9)
 
 #endif /* __ARCH_RISCV_SRC_BL808_HARDWARE_BL808_MM_GLB_H */
