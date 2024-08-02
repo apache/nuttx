@@ -240,6 +240,28 @@
 #define SNIOC_FEAT_MANAGE          _SNIOC(0x006b)  /* Feature manage command */
 #define SNIOC_SET_SCALE_XL         _SNIOC(0x006c)  /* Set accelerator scale command */
 
+/* IOCTL commands unique to AMG88xx */
+
+/* Command:      SNIOC_SET_OPERATIONAL_MODE
+ * Description:  Control power mode: Normal / Sleep
+ *               Reuse from ISL29023
+ * Arg:          amg88xx_operation_mode_e pointer
+ */
+
+/* Command:      SNIOC_SET_FRAMERATE
+ * Description:  Set the framerate of the sensor
+ * Arg:          amg88xx_fps_e
+ */
+
+#define SNIOC_SET_FRAMERATE        _SNIOC(0x006d)
+
+/* Command:      SNIOC_SET_MOVING_AVG
+ * Description:  Toggle moving average mode
+ * Arg:          bool
+ */
+
+#define SNIOC_SET_MOVING_AVG       _SNIOC(0x006e)
+
 /* Command:      SNIOC_GET_STATE
  * Description:  Get state for all subscribers, include min_interval,
  *               min_latency and the number of subscribers.

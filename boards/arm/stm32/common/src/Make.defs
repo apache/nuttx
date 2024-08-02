@@ -128,6 +128,10 @@ ifeq ($(CONFIG_LCD_MAX7219),y)
   CSRCS += stm32_max7219_matrix.c
 endif
 
+ifeq ($(CONFIG_SENSORS_AMG88XX),y)
+  CSRCS+= stm32_amg88xx.c
+endif
+
 ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += stm32_lis3dsh.c
 endif
