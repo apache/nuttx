@@ -97,6 +97,7 @@ struct u16550_s
   bool                   flow;      /* flow control (RTS/CTS) enabled */
 #endif
 #endif
+  uart_datawidth_t       rxtrigger; /* RX trigger level */
 };
 
 /****************************************************************************
@@ -226,6 +227,7 @@ static struct u16550_s g_uart0priv =
   .flow           = true,
 #endif
 #endif
+  .rxtrigger      = CONFIG_16550_UART0_RX_TRIGGER,
 };
 
 static uart_dev_t g_uart0port =
@@ -279,6 +281,7 @@ static struct u16550_s g_uart1priv =
   .flow           = true,
 #endif
 #endif
+  .rxtrigger      = CONFIG_16550_UART1_RX_TRIGGER,
 };
 
 static uart_dev_t g_uart1port =
@@ -332,6 +335,7 @@ static struct u16550_s g_uart2priv =
   .flow           = true,
 #endif
 #endif
+  .rxtrigger      = CONFIG_16550_UART2_RX_TRIGGER,
 };
 
 static uart_dev_t g_uart2port =
@@ -385,6 +389,7 @@ static struct u16550_s g_uart3priv =
   .flow           = true,
 #endif
 #endif
+  .rxtrigger      = CONFIG_16550_UART3_RX_TRIGGER,
 };
 
 static uart_dev_t g_uart3port =
@@ -759,11 +764,6 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
   u16550_serialout(priv, UART_FCR_OFFSET,
                    (UART_FCR_RXRST | UART_FCR_TXRST));
 
-  /* Set trigger */
-
-  u16550_serialout(priv, UART_FCR_OFFSET,
-                   (UART_FCR_FIFOEN | UART_FCR_RXTRIGGER_8));
-
   /* Set up the IER */
 
   priv->ier = u16550_serialin(priv, UART_IER_OFFSET);
@@ -842,7 +842,8 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
   /* Configure the FIFOs */
 
   u16550_serialout(priv, UART_FCR_OFFSET,
-                   (UART_FCR_RXTRIGGER_8 | UART_FCR_TXRST | UART_FCR_RXRST |
+                   (priv->rxtrigger << UART_FCR_RXTRIGGER_SHIFT |
+                    UART_FCR_TXRST | UART_FCR_RXRST |
                     UART_FCR_FIFOEN));
 
   /* Set up the auto flow control */
