@@ -293,6 +293,16 @@ file_lock_find_bucket(FAR const char *filepath)
 }
 
 /****************************************************************************
+ * Name: file_lock_free_entry
+ ****************************************************************************/
+
+static void file_lock_free_entry(FAR ENTRY *entry)
+{
+  lib_free(entry->key);
+  kmm_free(entry->data);
+}
+
+/****************************************************************************
  * Name: file_lock_create_bucket
  ****************************************************************************/
 
@@ -824,5 +834,6 @@ void file_initlk(void)
 {
   /* Initialize file lock context hash table */
 
+  g_file_lock_table.free_entry = file_lock_free_entry;
   hcreate_r(CONFIG_FS_LOCK_BUCKET_SIZE, &g_file_lock_table);
 }
