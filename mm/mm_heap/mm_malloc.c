@@ -138,6 +138,22 @@ void mm_mempool_dump_handle(FAR struct mempool_s *pool, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mm_free_delaylist
+ *
+ * Description:
+ *   force freeing the delaylist of this heap.
+ *
+ ****************************************************************************/
+
+void mm_free_delaylist(FAR struct mm_heap_s *heap)
+{
+  if (heap)
+    {
+       free_delaylist(heap, true);
+    }
+}
+
+/****************************************************************************
  * Name: mm_malloc
  *
  * Description:
