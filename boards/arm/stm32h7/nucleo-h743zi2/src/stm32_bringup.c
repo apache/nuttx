@@ -41,6 +41,10 @@
 #include "stm32_fdcan_sock.h"
 #endif
 
+#ifdef CONFIG_SYSTEMTICK_HOOK
+#include <semaphore.h>
+#endif
+
 #include "nucleo-h743zi2.h"
 
 /****************************************************************************
@@ -258,3 +262,13 @@ int stm32_bringup(void)
 
   return OK;
 }
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+
+sem_t g_waitsem;
+
+void board_timerhook(void)
+{
+  (void)sem_post(&g_waitsem);
+}
+#endif
