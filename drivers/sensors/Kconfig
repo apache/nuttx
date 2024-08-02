@@ -1717,4 +1717,36 @@ config SENSORS_LTR308_THREAD_STACKSIZE
 
 endif # SENSORS_LTR308
 
+config SENSORS_AMG88XX
+  bool "AMG88xx infrared array sensor"
+  default n
+  select I2C
+  ---help---
+    Enable driver support for AMG88xx infrared array sensor.
+
+if SENSORS_AMG88XX
+
+choice
+  prompt "AMG88xx AD_SELECT value"
+  default SENSOR_AMG88XX_AD_SELECT_0
+  ---help---
+    AD SELECT sets the amg88xx i2c address
+    AD_SELECT tied to GND -> sensor address 0x68
+    AD_SELECT tied to VCC -> sensor address 0x69
+
+  config SENSOR_AMG88XX_AD_SELECT_0
+    bool "AD_SELECT tied to GND"
+
+  config SENSOR_AMG88XX_AD_SELECT_1
+    bool "AD_SELECT tied to VCC"
+
+endchoice
+
+config SENSOR_AMG88XX_ADDR
+  hex
+  default 0x68 if SENSOR_AMG88XX_AD_SELECT_0
+  default 0x69 if SENSOR_AMG88XX_AD_SELECT_1
+
+endif # SENSORS_AMG88XX
+
 endif # SENSORS
