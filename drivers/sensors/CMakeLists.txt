@@ -284,6 +284,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS bmm150_uorb.c)
     endif()
 
+    if(CONFIG_SENSORS_AMG88XX)
+      list(APPEND SRCS amg88xx.c)
+    endif()
+
   endif() # CONFIG_I2C
 
   # These drivers depend on SPI support
