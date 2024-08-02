@@ -62,9 +62,7 @@
 #define QEMU_EPC_BAR_CFG_OFF_PHYS_ADDR   0x08
 #define QEMU_EPC_BAR_CFG_OFF_SIZE        0x10
 #define QEMU_EPC_BAR_CFG_SIZE            0x18
-
-#define MSI_CAP_CONTROL                  0x42
-#define MSI_CAP_MSG_ADDR                 0x44
+#define QEMU_EPC_BAR_CFG_MSI             0x40
 
 /****************************************************************************
  * Private Types
@@ -78,10 +76,9 @@ struct qemu_epc_s
   FAR void *cfg_base;
   FAR void *bar_base;
   FAR void *msi_vaddr;
-  uint64_t msi_pci_addr;
+  uintptr_t msi_paddr;
   uint32_t msi_data;
   uint64_t ob_phys[32];
-  uintptr_t ob_addr;
 };
 
 /****************************************************************************
@@ -188,15 +185,6 @@ qemu_epc_ctl_read64(FAR struct qemu_epc_s *qep, unsigned offset)
   uint64_t val;
 
   pci_read_mmio_qword(qep->pdev, qep->ctl_base + offset, &val);
-  return val;
-}
-
-static uint8_t qemu_epc_cfg_read8(FAR struct qemu_epc_s *qep,
-                                  unsigned offset)
-{
-  uint8_t val;
-
-  pci_read_mmio_byte(qep->pdev, qep->cfg_base + offset, &val);
   return val;
 }
 
@@ -449,7 +437,7 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
                    enum pci_epc_irq_type_e type, uint16_t interrupt_num)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
-  uint8_t flag;
+  uint64_t pci_addr;
 
   switch (type)
     {
@@ -458,33 +446,43 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
         qemu_epc_ctl_write32(qep, QEMU_EPC_CTRL_OFF_IRQ_NUM, interrupt_num);
         return 0;
       case PCI_EPC_IRQ_MSI:
-        if (qep->msi_pci_addr == 0 && qep->msi_data == 0)
+        if (qep->msi_vaddr == NULL)
           {
-            flag = qemu_epc_cfg_read8(qep, MSI_CAP_CONTROL);
-            if (flag >> 7)
+            uint16_t flags = qemu_epc_cfg_read16(qep,
+                                                 QEMU_EPC_BAR_CFG_MSI +
+                                                 PCI_MSI_FLAGS);
+            if (flags & PCI_MSI_FLAGS_64BIT)
               {
-                qep->msi_pci_addr = qemu_epc_cfg_read64(qep,
-                                                        MSI_CAP_MSG_ADDR);
-                qep->msi_data = qemu_epc_cfg_read32(qep,
-                                                    MSI_CAP_MSG_ADDR + 8);
+                pci_addr =
+                  qemu_epc_cfg_read64(qep,
+                                      QEMU_EPC_BAR_CFG_MSI +
+                                      PCI_MSI_ADDRESS_LO);
+                qep->msi_data =
+                  qemu_epc_cfg_read32(qep,
+                                      QEMU_EPC_BAR_CFG_MSI +
+                                      PCI_MSI_DATA_64);
               }
             else
               {
-                qep->msi_pci_addr = qemu_epc_cfg_read32(qep,
-                                                        MSI_CAP_MSG_ADDR);
-                qep->msi_data = qemu_epc_cfg_read32(qep,
-                                                    MSI_CAP_MSG_ADDR + 4);
+                pci_addr =
+                  qemu_epc_cfg_read32(qep,
+                                      QEMU_EPC_BAR_CFG_MSI +
+                                      PCI_MSI_ADDRESS_LO);
+                qep->msi_data =
+                  qemu_epc_cfg_read32(qep,
+                                      QEMU_EPC_BAR_CFG_MSI +
+                                      PCI_MSI_DATA_32);
               }
 
-            if (qep->msi_pci_addr == 0 || qep->msi_data == 0)
+            if (pci_addr == 0 || qep->msi_data == 0)
               {
                 return -EINVAL;
               }
 
             qep->msi_vaddr = pci_epc_mem_alloc_addr(epc,
-                                                    &qep->ob_addr, 0x1000);
+                                                    &qep->msi_paddr, 0x1000);
             qemu_epc_map_addr(epc, funcno,
-                              qep->ob_addr, qep->msi_pci_addr, 0x1000);
+                              qep->msi_paddr, pci_addr, 0x1000);
           }
 
         pci_write_mmio_qword(qep->pdev, qep->msi_vaddr, qep->msi_data);
@@ -554,20 +552,18 @@ qemu_epc_get_features(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
  * Input Parameters:
  *   epc    - Device name of the endpoint controller
  *   funcno - The epc's function number
- *   interrupts - The interrupts number
  *
  * Returned Value:
  *   Return the number of interrupts
  ****************************************************************************/
 
-int qemu_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
+static int qemu_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
-  uint16_t interrupts;
+  uint16_t flags;
 
-  interrupts = qemu_epc_cfg_read16(qep, MSI_CAP_CONTROL);
-  interrupts = (interrupts >> 1) & 7;
-  return interrupts;
+  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS);
+  return (flags & PCI_MSI_FLAGS_QSIZE) >> PCI_MSI_FLAGS_QSIZE_SHIFT;
 }
 
 /****************************************************************************
@@ -589,11 +585,11 @@ static int qemu_epc_set_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
                             uint8_t interrupts)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
-  uint16_t data;
+  uint16_t flags;
 
-  data = qemu_epc_cfg_read16(qep, MSI_CAP_CONTROL);
-  data |= (interrupts << 1) & 0xe;
-  qemu_epc_cfg_write16(qep, MSI_CAP_CONTROL, data);
+  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS);
+  flags |= (interrupts << PCI_MSI_FLAGS_QMASK_SHIFT) & PCI_MSI_FLAGS_QMASK;
+  qemu_epc_cfg_write16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS, flags);
   return 0;
 }
 
