@@ -28,6 +28,7 @@ If your compiler support it then you still need further configuration to use it:
 2. Handle ``tbss`` and ``tdata`` sections in linker script, your can refer to the example in rv-virt
 
 To confirm that your compiler supports TLS, you can try this command:
+
 .. code-block:: console
 
     arm-none-eabi-gcc --verbose
