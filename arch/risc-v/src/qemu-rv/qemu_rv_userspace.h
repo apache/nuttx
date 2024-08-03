@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_QEMURV_QEMURV_USERSPACE_H
-#define __ARCH_RISC_V_SRC_QEMURV_QEMURV_USERSPACE_H
+#ifndef __ARCH_RISCV_SRC_QEMU_RV_QEMU_RV_USERSPACE_H
+#define __ARCH_RISCV_SRC_QEMU_RV_QEMU_RV_USERSPACE_H
 
 /****************************************************************************
  * Included Files
@@ -46,4 +46,4 @@
 void qemu_rv_userspace(void);
 #endif
 
-#endif /* __ARCH_RISC_V_SRC_QEMURV_QEMURV_USERSPACE_H */
+#endif /* __ARCH_RISCV_SRC_QEMU_RV_QEMU_RV_USERSPACE_H */

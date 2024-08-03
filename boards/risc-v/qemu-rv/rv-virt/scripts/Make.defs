@@ -30,16 +30,10 @@ ifeq ($(CONFIG_BUILD_KERNEL),y)
     LDSCRIPT = ld-nuttsbi.script
   endif
 else ifeq ($(CONFIG_BUILD_PROTECTED),y)
-  LDMEMORY = memory.ld
-  LDSCRIPT = kernel-space.ld
-else
-  LDSCRIPT = ld.script
+  LDSCRIPT = ld-protected.script
 endif
 endif
 
-ifneq ($(LDMEMORY),)
-  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDMEMORY)
-endif
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 ARCHPICFLAGS = -fpic -msingle-pic-base
 

@@ -90,7 +90,7 @@ If testing with S-mode build, remove the ``-bios none`` option. S-mode build
 requires SBI to function properly.
 
 For BUILD_PROTECTED the user-space binary must also be loaded, which can be
-done by adding ``-device loader,file=./nuttx_user.elf`` to the command line
+done by adding ``-device loader,file=./nuttx_user`` to the command line
 arguments.
 
 citest

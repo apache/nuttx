@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/qemu-rv/rv-virt/scripts/user-space.ld
+ * boards/risc-v/qemu-rv/rv-virt/scripts/ld-protected.script
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,30 +18,32 @@
  *
  ****************************************************************************/
 
-/* NOTE:  This depends on the memory.ld script having been included prior to
- * this script.
- */
+#include "ld-protected.mem"
 
 OUTPUT_ARCH("riscv")
 
+/* Provide these to avoid using config files for them */
+
+__uflash_start = ORIGIN(uflash);
+__uflash_size = LENGTH(uflash);
+__usram_start = ORIGIN(usram);
+__usram_size = LENGTH(usram);
+
+/* Provide the kernel boundaries as well */
+
+__kflash_start = ORIGIN(kflash);
+__kflash_size = LENGTH(kflash);
+__ksram_start = ORIGIN(ksram);
+__ksram_size = LENGTH(ksram);
+__ksram_end = ORIGIN(ksram) + LENGTH(ksram);
+
+ENTRY(_stext)
+EXTERN(__start)
 SECTIONS
 {
-    /* section info */
-
-    __ld_uflash_start = ORIGIN(uflash);
-    __ld_uflash_end = ORIGIN(uflash)+ LENGTH(uflash);
-    __ld_uflash_size = LENGTH(uflash);
-
-    __ld_usram_start = ORIGIN(usram);
-    __ld_usram_end = ORIGIN(usram)+ LENGTH(usram);
-    __ld_usram_size = LENGTH(usram);
-
-    .userspace : {
-        *(.userspace)
-    } > uflash
-
     .text : {
         _stext = ABSOLUTE(.);
+        *(.start .start.*)
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
@@ -53,42 +55,47 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         _etext = ABSOLUTE(.);
-    } > uflash
+    } > kflash
 
-    .init_section : {
+    .init_section : ALIGN(4) {
         _sinit = ABSOLUTE(.);
         KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
         KEEP(*(.init_array .ctors))
         _einit = ABSOLUTE(.);
-    } > uflash
-
-    __exidx_start = ABSOLUTE(.);
-
-    __exidx_end = ABSOLUTE(.);
+    } > kflash
 
     _eronly = ABSOLUTE(.);
 
-    .data : {
+    .data : ALIGN(4) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.sdata .sdata.* .sdata2.*)
         *(.gnu.linkonce.d.*)
+        *(.gnu.linkonce.s.*)
         CONSTRUCTORS
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
-    } > usram AT > uflash
+    } > ksram AT > kflash
 
-    .bss : {
+    PROVIDE(__global_pointer$ = _sdata + ((_edata - _sdata) / 2));
+
+    .bss : ALIGN(4) {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
         *(.sbss .sbss.*)
         *(.gnu.linkonce.b.*)
+        *(.gnu.linkonce.sb.*)
         *(COMMON)
-        . = ALIGN(4);
-        _ebss = ABSOLUTE(.);
-    } > usram
+    } > ksram
 
-    /* Stabs debugging sections */
+    /* Page tables here, align to 4K boundary */
+    .pgtables (NOLOAD) : ALIGN(0x1000) {
+        *(.pgtables)
+         . = ALIGN(32);
+        _ebss = ABSOLUTE(.);
+    } > ksram
+
+    /* Stabs debugging sections. */
 
     .stab 0 : { *(.stab) }
     .stabstr 0 : { *(.stabstr) }
