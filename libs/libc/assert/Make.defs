@@ -20,8 +20,11 @@
 
 CSRCS += lib_assert.c lib_stackchk.c
 
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-  ifeq ($(CONFIG_LTO_NONE),n)
+ifeq ($(CONFIG_LTO_NONE),n)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+    assert/lib_assert.c_CFLAGS += -Onolink
+    assert/lib_stackchk.c_CFLAGS += -Onolink
+  else ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
     assert/lib_assert.c_CFLAGS += -fno-lto
     assert/lib_stackchk.c_CFLAGS += -fno-lto
   endif
