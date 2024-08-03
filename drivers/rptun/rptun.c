@@ -70,9 +70,9 @@ struct rptun_priv_s
   sem_t                        semtx;
   sem_t                        semrx;
   pid_t                        tid;
+  uint16_t                     headrx;
 #ifdef CONFIG_RPTUN_PM
   struct pm_wakelock_s         wakelock;
-  uint16_t                     headrx;
   struct wdog_s                wdog;
 #endif
 };
@@ -268,28 +268,6 @@ static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
   leave_critical_section(flags);
 }
 
-static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
-{
-  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct virtqueue *rvq = rvdev->rvq;
-
-  if (priv->rproc.state != RPROC_RUNNING)
-    {
-      return;
-    }
-
-  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
-    {
-      RPTUN_INVALIDATE(rvq->vq_ring.used->idx);
-      priv->headrx = rvq->vq_ring.used->idx;
-    }
-  else
-    {
-      RPTUN_INVALIDATE(rvq->vq_ring.avail->idx);
-      priv->headrx = rvq->vq_ring.avail->idx;
-    }
-}
-
 static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
 {
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
@@ -312,9 +290,30 @@ static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
 
 #else
 #  define rptun_pm_action(priv, stay)
-#  define rptun_update_rx(priv)
 #  define rptun_available_rx(priv) true
 #endif
+
+static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
+{
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtqueue *rvq = rvdev->rvq;
+
+  if (priv->rproc.state != RPROC_RUNNING)
+    {
+      return;
+    }
+
+  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
+    {
+      RPTUN_INVALIDATE(rvq->vq_ring.used->idx);
+      priv->headrx = rvq->vq_ring.used->idx;
+    }
+  else
+    {
+      RPTUN_INVALIDATE(rvq->vq_ring.avail->idx);
+      priv->headrx = rvq->vq_ring.avail->idx;
+    }
+}
 
 static void rptun_start_worker(FAR void *arg)
 {
@@ -665,6 +664,9 @@ static void rptun_dump(FAR struct rpmsg_s *rpmsg)
   FAR struct metal_list *node;
   bool needlock = true;
 
+  metal_log(METAL_LOG_EMERGENCY, "Remote: %s headrx %d\n",
+            RPTUN_GET_CPUNAME(priv->dev), priv->headrx);
+
   if (!rvdev->vdev)
     {
       return;
@@ -708,10 +710,6 @@ static void rptun_dump(FAR struct rpmsg_s *rpmsg)
     {
       metal_mutex_release(&rdev->lock);
     }
-
-#ifdef CONFIG_RPTUN_PM
-  metal_log(METAL_LOG_EMERGENCY, "rptun headrx %d\n", priv->headrx);
-#endif
 }
 
 static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
