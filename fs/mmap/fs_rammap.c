@@ -125,7 +125,8 @@ static int unmap_rammap(FAR struct task_group_s *group,
                         size_t length)
 {
   FAR struct file *filep = (FAR void *)((uintptr_t)entry->priv.p & ~3);
-  enum mm_map_type_e type = (uintptr_t)entry->priv.p & 3;
+  enum mm_map_type_e type =
+                    (enum mm_map_type_e)((uintptr_t)entry->priv.p & 3);
   FAR void *newaddr = NULL;
   off_t offset;
   int ret = OK;
