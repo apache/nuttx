@@ -89,6 +89,27 @@ static void qemu_rv_clear_bss(void)
     }
 }
 
+#ifdef CONFIG_BUILD_PROTECTED
+static void qemu_rv_copy_data(void)
+{
+  const uint32_t *src;
+  uint32_t *dest;
+
+  /* Move the initialized data from their temporary holding spot at FLASH
+   * into the correct place in SRAM.  The correct place in SRAM is given
+   * by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
+    {
+      *dest++ = *src++;
+    }
+}
+#endif
+
 #ifdef CONFIG_ARCH_USE_S_MODE
 static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
 {
@@ -152,6 +173,10 @@ void qemu_rv_start(int mhartid, const char *dtb)
     }
 
   qemu_rv_clear_bss();
+
+#ifdef CONFIG_BUILD_PROTECTED
+  qemu_rv_copy_data();
+#endif
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   riscv_percpu_add_hart(mhartid);
