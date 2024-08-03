@@ -1645,11 +1645,11 @@ config LCD_FT80X_AUDIO_GPIO
 endif # LCD_FT80X
 
 config LCD_SSD1680
-	bool "SSD1680 E-PAPER Single Chip Driver"
+	bool "SSD1680/SSD1681 E-PAPER Single Chip Driver"
 	default n
 	select SPI_CMDDATA
 	---help---
-		e-paper Display Module based on SSD1680 controller.
+		e-paper Display Module based on SSD1680/SSD1681 controller.
 
 		Required SPI driver settings:
 		SPI_CMDDATA - Include support for cmd/data selection.
@@ -1671,6 +1671,11 @@ config LCD_SSD1680_2_90
 
 config LCD_SSD1680_2_90_RED
 	bool "2.9 inch 128/296 tri color (red)"
+
+config LCD_SSD1681_1_54
+	bool "1.54 inch 200/200 mono"
+	---help---
+		1.54 inch 200x200 e-paper display module based on SSD1681 controller.
 
 endchoice # Display size
 

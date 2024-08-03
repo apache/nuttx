@@ -155,9 +155,11 @@ static void ssd1680_snd_cmd_with_data4(FAR struct ssd1680_dev_s *priv,
                                        uint8_t dta2, uint8_t dta3,
                                        uint8_t dta4);
 
+#ifndef CONFIG_LCD_SSD1681_1_54
 static void ssd1680_snd_cmd_with_data(FAR struct ssd1680_dev_s *priv,
                                       uint8_t cmd, const uint8_t *dta,
                                       int dta_len);
+#endif
 
 #if !defined(CONFIG_LCD_PORTRAIT) && !defined(CONFIG_LCD_RPORTRAIT)
 #  if SSD1680_DEV_BPP == 1
@@ -285,6 +287,7 @@ static const struct lcd_dev_s g_lcd_epaper_dev =
 
 static struct ssd1680_dev_s g_epaperdev;
 
+#if !defined(CONFIG_LCD_SSD1681_1_54)
 static const uint8_t ssd1680_lut[] =
 {
 #if defined(CONFIG_LCD_SSD1680_2_90)
@@ -311,6 +314,7 @@ static const uint8_t ssd1680_lut[] =
 #  error "Missing LUT table"
 #endif
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -571,9 +575,10 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
    * last data byte depends on connection between display and controller
    */
 
-  lcdinfo("Set the driver output control (0x%02x): %d 0x%02x\n",
+  lcdinfo("Set the driver output control (0x%02x): %d 0x%02x, 0x%02x\n",
       SSD1680_DRIVER_CONTROL,
       SSD1680_DEV_NATIVE_YRES - 1,
+      (SSD1680_DEV_NATIVE_YRES - 1) >> 8,
       SSD1680_DEV_GATE_LAYOUT);
   ssd1680_snd_cmd_with_data3(priv, SSD1680_DRIVER_CONTROL,
      (uint8_t)((SSD1680_DEV_NATIVE_YRES - 1) & 0xff),
@@ -596,6 +601,7 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
   ssd1680_snd_cmd_with_data1(priv, SSD1680_SET_DIGITAL_BLOCK_CTRL, 0x3b);
 #endif
 
+#ifndef CONFIG_LCD_SSD1681_1_54
   /* Step 2: SSD1680_BOOST_SOFTSTART 0x0C D7 D6 9D */
 
   lcdinfo("Set boost soft start (0x%02x): 0x%02x, 0x%02x, 0x%02x\n",
@@ -634,6 +640,7 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
           SSD1680_VALUE_GATE_TIME);
   ssd1680_snd_cmd_with_data1(priv, SSD1680_GATE_TIME,
           SSD1680_VALUE_GATE_TIME);
+#endif
 
 #if defined(CONFIG_LCD_SSD1680_2_13_V2)
   /* Step 5a: Sending command write border with data 0x03:
@@ -644,9 +651,18 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
   lcdinfo("Set Border Waveform (0x%02x): 0x%02x\n",
       SSD1680_WRITE_BORDER, 0x03);
   ssd1680_snd_cmd_with_data1(priv, SSD1680_WRITE_BORDER, 0x03);
+#elif defined(CONFIG_LCD_SSD1681_1_54)
+  /* Step 5a: Sending command write border with data 0x01:
+   *  - Follow LUT (Output VCOM @ RED)
+   *  - Transition setting for VBD: LUT0
+   */
+
+  lcdinfo("Set Border Waveform (0x%02x): 0x%02x\n",
+      SSD1680_WRITE_BORDER, 0x01);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_WRITE_BORDER, 0x05);
 #endif
 
-  /* Step 6: Data entry mode SSD1680_DATA_MODE, 0x03 */
+  /* Step 6: Data entry mode SSD1680_DATA_MODE */
 
   lcdinfo("Set data entry mode (0x%02x): 0x%02x\n",
       SSD1680_DATA_MODE, SSD1680_VAL_DATA_MODE);
@@ -681,18 +697,27 @@ static int ssd1680_configuredisplay(struct ssd1680_dev_s *priv)
 
   /* Step 11: Lookup table */
 
+#ifndef CONFIG_LCD_SSD1681_1_54
   lcdinfo("Write lookup table (0x%02x): (%d bytes)\n", SSD1680_WRITE_LUT,
       sizeof (ssd1680_lut));
   ssd1680_snd_cmd_with_data(priv, SSD1680_WRITE_LUT, ssd1680_lut,
       sizeof (ssd1680_lut));
+#endif
 
-  /* Step 12: Write sequence */
+  /* Step 12: Set temperature control */
+
+#ifdef CONFIG_LCD_SSD1681_1_54
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_TEMP_CONTROL, 0x80);
+#endif
+
+  /* Step 13: Write sequence */
 
   lcdinfo("Write control sequence (0x%02x): 0x%02x\n", SSD1680_DISP_CTRL2,
-      0xc0);
-  ssd1680_snd_cmd_with_data1(priv, SSD1680_DISP_CTRL2, 0xc7);
+          SSD1680_VALUE_UPDATE_CTRL);
+  ssd1680_snd_cmd_with_data1(priv, SSD1680_DISP_CTRL2,
+                             SSD1680_VALUE_UPDATE_CTRL);
 
-  /* Step 13: Master Activate and busy wait */
+  /* Step 14: Master Activate and busy wait */
 
   lcdinfo("Write master activate (0x%02x) command\n",
       SSD1680_MASTER_ACTIVATE);
@@ -984,6 +1009,7 @@ static void ssd1680_snd_cmd_with_data4(FAR struct ssd1680_dev_s *priv,
   ssd1680_select(priv, false);
 }
 
+#ifndef CONFIG_LCD_SSD1681_1_54
 static void ssd1680_snd_cmd_with_data(FAR struct ssd1680_dev_s *priv,
     uint8_t cmd, const uint8_t *dta, int dta_len)
 {
@@ -994,6 +1020,7 @@ static void ssd1680_snd_cmd_with_data(FAR struct ssd1680_dev_s *priv,
   SPI_SNDBLOCK(priv->spi, dta, dta_len);
   ssd1680_select(priv, false);
 }
+#endif
 
 #if !defined(CONFIG_LCD_PORTRAIT) && !defined(CONFIG_LCD_RPORTRAIT)
 
