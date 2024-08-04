@@ -156,7 +156,7 @@ void sched_note_spinlock_unlock(FAR volatile spinlock_t *spinlock);
 #  define sched_note_spinlock_lock(spinlock)
 #  define sched_note_spinlock_locked(spinlock)
 #  define sched_note_spinlock_abort(spinlock)
-#  define sched_note_spinlock_unlocked(spinlock)
+#  define sched_note_spinlock_unlock(spinlock)
 #endif
 
 /****************************************************************************
