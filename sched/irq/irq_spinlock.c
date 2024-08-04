@@ -196,7 +196,7 @@ void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags)
 }
 
 /****************************************************************************
- * Name: spin_lock_irqsave_wo_note
+ * Name: spin_unlock_irqrestore_wo_note
  ****************************************************************************/
 
 void spin_unlock_irqrestore_wo_note(spinlock_t *lock, irqstate_t flags)
