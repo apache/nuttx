@@ -340,6 +340,10 @@ extern "C"
 #define STM32_LCD_CS (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN4)
 
+/* MFRC522 */
+
+#define GPIO_RFID_CS      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN5)
 /* LEDs
  *
  * The STM32F401RC-RS485 boards provide 4 blue user LEDs. LD1, LD2, LD3

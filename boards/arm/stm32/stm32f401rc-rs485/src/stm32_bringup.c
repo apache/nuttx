@@ -67,6 +67,10 @@
 #include "stm32_max7219_matrix.h"
 #endif
 
+#ifdef CONFIG_CL_MFRC522
+#include "stm32_mfrc522.h"
+#endif
+
 #ifdef CONFIG_STEPPER_DRV8825
 #include "stm32_drv8266.h"
 #endif
@@ -283,6 +287,14 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_drv8825_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_CL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
     }
 #endif
 

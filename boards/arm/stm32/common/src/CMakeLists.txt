@@ -120,6 +120,10 @@ if(CONFIG_LCD_MAX7219)
   list(APPEND SRCS stm32_max7219_matrix.c)
 endif()
 
+if(CONFIG_CL_MFRC522)
+  list(APPEND SRCS stm32_mfrc522.c)
+endif()
+
 if(CONFIG_LIS3DSH)
   list(APPEND SRCS stm32_lis3dsh.c)
 endif()

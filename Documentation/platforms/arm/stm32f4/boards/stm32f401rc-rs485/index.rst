@@ -664,3 +664,30 @@ you can configure this using menuconfig::
 
        Number of 8x8 LEDs matrices in the horizontal (width)
        Number of 8x8 LEDs matrices in the vertical (height)
+
+mfrc522
+-------
+
+Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) and enables RFID driver with
+MFRC522::
+
+       nsh> rfid_readuid
+       Trying to READ: Card is not present!
+       Trying to READ: Card is not present!
+       Trying to READ: RFID CARD UID = 0x3DB3F169
+
+
+======= ====
+MFRC522 PINS
+======= ====
+SCK     PA5
+MISO    PA6
+MOSI    PA7
+CS      PC5  
+======= ====
+
+The board used is based on MFRC522 NXP IC that supports contactless communication
+at 13.56 MHz and ISO/IEC 14443 A/MIFARE and NTAG.
+
+.. figure:: mfrc522_image.jpg
+   :align: center
