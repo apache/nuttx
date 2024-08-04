@@ -75,7 +75,7 @@ static inline void up_idtinit(void);
 
 static struct idt_entry_s        g_idt_entries[NR_IRQS];
 static struct intel64_irq_priv_s g_irq_priv[NR_IRQS];
-static spinlock_t                g_irq_spin;
+static spinlock_t                g_irq_spinlock;
 
 /****************************************************************************
  * Private Functions
@@ -482,7 +482,7 @@ void up_irqinitialize(void)
 void up_disable_irq(int irq)
 {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
 
   if (irq > IRQ255)
     {
@@ -508,7 +508,7 @@ void up_disable_irq(int irq)
         }
     }
 
-  spin_unlock_irqrestore(&g_irq_spin, flags);
+  spin_unlock_irqrestore(&g_irq_spinlock, flags);
 #endif
 }
 
@@ -523,7 +523,7 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
 #ifndef CONFIG_ARCH_INTEL64_DISABLE_INT_INIT
-  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
 
 #  ifndef CONFIG_IRQCHAIN
   /* Check if IRQ is free if we don't support IRQ chains */
@@ -553,7 +553,7 @@ void up_enable_irq(int irq)
 
   CPU_SET(up_cpu_index(), &g_irq_priv[irq].busy);
 
-  spin_unlock_irqrestore(&g_irq_spin, flags);
+  spin_unlock_irqrestore(&g_irq_spinlock, flags);
 #endif
 }
 
