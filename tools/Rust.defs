@@ -46,7 +46,25 @@ ifeq ($(CONFIG_ARCH_SIM),y)
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
   # Traget triple is riscv[32|64][isa]-unknown-none-elf
-  RUSTFLAGS += --target $(LLVM_ARCHTYPE)i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)-unknown-none-elf
+
+  RUST_ARCHTYPE = $(LLVM_ARCHTYPE)i
+  ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
+    RUST_ARCHTYPE := $(RUST_ARCHTYPE)m
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
+    RUST_ARCHTYPE := $(RUST_ARCHTYPE)a
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_F),y)
+    RUST_ARCHTYPE := $(RUST_ARCHTYPE)f
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_D),y)
+    RUST_ARCHTYPE := $(RUST_ARCHTYPE)d
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
+    RUST_ARCHTYPE := $(RUST_ARCHTYPE)c
+  endif
+
+  RUSTFLAGS += --target $(RUST_ARCHTYPE)-unknown-none-elf
 else
   # For arm, but there are some other archs not support yet,
   # such as xtensa, x86 bare metal, etc.

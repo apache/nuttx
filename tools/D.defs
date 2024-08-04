@@ -47,7 +47,25 @@ ifeq ($(CONFIG_ARCH_SIM),y)
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
   # Traget triple is riscv[32|64][isa]-unknown-none-elf
-  DFLAGS += -mtriple=$(LLVM_ARCHTYPE)$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)-unknown-none-elf
+
+  D_ARCHTYPE = $(LLVM_ARCHTYPE)i
+  ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
+    D_ARCHTYPE := $(D_ARCHTYPE)m
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
+    D_ARCHTYPE := $(D_ARCHTYPE)a
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_F),y)
+    D_ARCHTYPE := $(D_ARCHTYPE)f
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_D),y)
+    D_ARCHTYPE := $(D_ARCHTYPE)d
+  endif
+  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
+    D_ARCHTYPE := $(D_ARCHTYPE)c
+  endif
+
+  DFLAGS += -mtriple=$(D_ARCHTYPE)-unknown-none-elf
   DFLAGS += -mattr=+m,+a,+f,+d,+c -mabi=ilp32d
   DFLAGS += -mcpu=generic-rv32
 else
