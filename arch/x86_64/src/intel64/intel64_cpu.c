@@ -311,7 +311,9 @@ uint8_t x86_64_cpu_to_loapic(uint8_t cpu)
 
 void x86_64_cpu_ready_set(uint8_t cpu)
 {
-  spin_lock(&g_ap_boot);
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_ap_boot);
 
   if (!g_cpu_priv[cpu].ready)
     {
@@ -319,7 +321,7 @@ void x86_64_cpu_ready_set(uint8_t cpu)
       g_cpu_count++;
     }
 
-  spin_unlock(&g_ap_boot);
+  spin_unlock_irqrestore(&g_ap_boot, flags);
 }
 
 /****************************************************************************
@@ -333,11 +335,12 @@ void x86_64_cpu_ready_set(uint8_t cpu)
 bool x86_64_cpu_ready_get(uint8_t cpu)
 {
   struct intel64_cpu_s *priv  = &g_cpu_priv[cpu];
+  irqstate_t flags;
   bool ready;
 
-  spin_lock(&g_ap_boot);
+  flags = spin_lock_irqsave(&g_ap_boot);
   ready = priv->ready;
-  spin_unlock(&g_ap_boot);
+  spin_unlock_irqrestore(&g_ap_boot, flags);
 
   return ready;
 }
@@ -352,11 +355,12 @@ bool x86_64_cpu_ready_get(uint8_t cpu)
 
 uint8_t x86_64_cpu_count_get(void)
 {
+  irqstate_t flags;
   uint8_t count;
 
-  spin_lock(&g_ap_boot);
+  flags = spin_lock_irqsave(&g_ap_boot);
   count = g_cpu_count;
-  spin_unlock(&g_ap_boot);
+  spin_unlock_irqrestore(&g_ap_boot, flags);
 
   return count;
 }
