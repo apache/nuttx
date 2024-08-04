@@ -160,6 +160,18 @@ void sched_note_spinlock_unlock(FAR volatile spinlock_t *spinlock);
 #endif
 
 /****************************************************************************
+ * Public Data Types
+ ****************************************************************************/
+
+/* Used for access control */
+
+extern volatile spinlock_t g_irq_spin;
+
+/* Handles nested calls to spin_lock_irqsave and spin_unlock_irqrestore */
+
+extern volatile uint8_t g_irq_spin_count[CONFIG_SMP_NCPUS];
+
+/****************************************************************************
  * Name: up_testset
  *
  * Description:
@@ -509,6 +521,43 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 #define spin_initialize(l,s) do { *(l) = (s); } while (0)
 
 /****************************************************************************
+ * Name: spin_lock_irqsave_wo_note
+ *
+ * Description:
+ *   This function is no trace version of spin_lock_irqsave()
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SPINLOCK)
+static inline_function
+irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
+{
+  irqstate_t ret;
+  ret = up_irq_save();
+
+  if (NULL == lock)
+    {
+      int me = up_cpu_index();
+      if (0 == g_irq_spin_count[me])
+        {
+          spin_lock_wo_note(&g_irq_spin);
+        }
+
+      g_irq_spin_count[me]++;
+      DEBUGASSERT(0 != g_irq_spin_count[me]);
+    }
+  else
+    {
+      spin_lock_wo_note(lock);
+    }
+
+  return ret;
+}
+#else
+#  define spin_lock_irqsave_wo_note(l) ((void)(l), up_irq_save())
+#endif
+
+/****************************************************************************
  * Name: spin_lock_irqsave
  *
  * Description:
@@ -542,19 +591,62 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #if defined(CONFIG_SPINLOCK)
-irqstate_t spin_lock_irqsave(FAR spinlock_t *lock);
+static inline_function
+irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
+{
+  irqstate_t flags;
+
+  /* Notify that we are waiting for a spinlock */
+
+  sched_note_spinlock_lock(lock);
+
+  /* Lock without trace note */
+
+  flags = spin_lock_irqsave_wo_note(lock);
+
+  /* Notify that we have the spinlock */
+
+  sched_note_spinlock_locked(lock);
+
+  return flags;
+}
 #else
 #  define spin_lock_irqsave(l) ((void)(l), up_irq_save())
 #endif
 
 /****************************************************************************
- * Name: spin_lock_irqsave_wo_note
+ * Name: spin_unlock_irqrestore_wo_note
+ *
+ * Description:
+ *   This function is no trace version of spin_unlock_irqrestore()
+ *
  ****************************************************************************/
 
 #if defined(CONFIG_SPINLOCK)
-irqstate_t spin_lock_irqsave_wo_note(FAR spinlock_t *lock);
+static inline_function
+void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
+                                    irqstate_t flags)
+{
+  if (NULL == lock)
+    {
+      int me = up_cpu_index();
+      DEBUGASSERT(0 < g_irq_spin_count[me]);
+      g_irq_spin_count[me]--;
+
+      if (0 == g_irq_spin_count[me])
+        {
+          spin_unlock_wo_note(&g_irq_spin);
+        }
+    }
+  else
+    {
+      spin_unlock_wo_note(lock);
+    }
+
+  up_irq_restore(flags);
+}
 #else
-#  define spin_lock_irqsave_wo_note(l) ((void)(l), up_irq_save())
+#  define spin_unlock_irqrestore_wo_note(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 /****************************************************************************
@@ -587,19 +679,20 @@ irqstate_t spin_lock_irqsave_wo_note(FAR spinlock_t *lock);
  ****************************************************************************/
 
 #if defined(CONFIG_SPINLOCK)
-void spin_unlock_irqrestore(FAR spinlock_t *lock, irqstate_t flags);
+static inline_function
+void spin_unlock_irqrestore(FAR volatile spinlock_t *lock,
+                            irqstate_t flags)
+{
+  /* Unlock without trace note */
+
+  spin_unlock_irqrestore_wo_note(lock, flags);
+
+  /* Notify that we are unlocking the spinlock */
+
+  sched_note_spinlock_unlock(lock);
+}
 #else
 #  define spin_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
-#endif
-
-/****************************************************************************
- * Name: spin_unlock_irqrestore_wo_note
- ****************************************************************************/
-
-#if defined(CONFIG_SPINLOCK)
-void spin_unlock_irqrestore_wo_note(FAR spinlock_t *lock, irqstate_t flags);
-#else
-#  define spin_unlock_irqrestore_wo_note(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 #if defined(CONFIG_RW_SPINLOCK)
