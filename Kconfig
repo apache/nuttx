@@ -453,15 +453,15 @@ config OUTPUT_STRIP_PATHS
 	default y
 	depends on ARCH_TOOLCHAIN_GNU
 	---help---
-	  Cmake build provide absolute paths to compile files. If __FILE__
-	  macros are used in the source code(ASSERT), the binary will contain
-	  many invalid paths.
-	  This saves some memory, stops exposing build systems locations in binaries,
-	  make failure logs more deterministic and most importantly makes builds more
-	  failure logs more deterministic and most importantly makes builds more
-	  deterministic.
-	  Debuggers usually have a path mapping feature to ensure the files are
-	  still found.
+		Cmake build provide absolute paths to compile files. If __FILE__
+		macros are used in the source code(ASSERT), the binary will contain
+		many invalid paths.
+		This saves some memory, stops exposing build systems locations in binaries,
+		make failure logs more deterministic and most importantly makes builds more
+		failure logs more deterministic and most importantly makes builds more
+		deterministic.
+		Debuggers usually have a path mapping feature to ensure the files are
+		still found.
 
 endmenu # Binary Output Formats
 
