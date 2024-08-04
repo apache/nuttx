@@ -223,58 +223,6 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
 #ifdef CONFIG_HAVE_INLINE_SPINLOCK
 
 /****************************************************************************
- * Name: spin_lock
- *
- * Description:
- *   If this CPU does not already hold the spinlock, then loop until the
- *   spinlock is successfully locked.
- *
- *   This implementation is non-reentrant and is prone to deadlocks in
- *   the case that any logic on the same CPU attempts to take the lock
- *   more than once.
- *
- * Input Parameters:
- *   lock - A reference to the spinlock object to lock.
- *
- * Returned Value:
- *   None.  When the function returns, the spinlock was successfully locked
- *   by this CPU.
- *
- * Assumptions:
- *   Not running at the interrupt level.
- *
- ****************************************************************************/
-
-static inline_function void spin_lock(FAR volatile spinlock_t *lock)
-{
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-
-  /* Notify that we are waiting for a spinlock */
-
-  sched_note_spinlock_lock(lock);
-#endif
-
-#ifdef CONFIG_TICKET_SPINLOCK
-  unsigned short ticket =
-    atomic_fetch_add((FAR atomic_ushort *)&lock->tickets.next, 1);
-  while (atomic_load((FAR atomic_ushort *)&lock->tickets.owner) != ticket)
-#else /* CONFIG_SPINLOCK */
-  while (up_testset(lock) == SP_LOCKED)
-#endif
-    {
-      SP_DSB();
-      SP_WFE();
-    }
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  /* Notify that we have the spinlock */
-
-  sched_note_spinlock_locked(lock);
-#endif
-  SP_DMB();
-}
-
-/****************************************************************************
  * Name: spin_lock_wo_note
  *
  * Description:
@@ -314,73 +262,41 @@ static inline_function void spin_lock_wo_note(FAR volatile spinlock_t *lock)
 }
 
 /****************************************************************************
- * Name: spin_trylock
+ * Name: spin_lock
  *
  * Description:
- *   Try once to lock the spinlock.  Do not wait if the spinlock is already
- *   locked.
+ *   If this CPU does not already hold the spinlock, then loop until the
+ *   spinlock is successfully locked.
+ *
+ *   This implementation is non-reentrant and is prone to deadlocks in
+ *   the case that any logic on the same CPU attempts to take the lock
+ *   more than once.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
  *
  * Returned Value:
- *   SP_LOCKED   - Failure, the spinlock was already locked
- *   SP_UNLOCKED - Success, the spinlock was successfully locked
+ *   None.  When the function returns, the spinlock was successfully locked
+ *   by this CPU.
  *
  * Assumptions:
  *   Not running at the interrupt level.
  *
  ****************************************************************************/
 
-static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
+static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-
   /* Notify that we are waiting for a spinlock */
 
   sched_note_spinlock_lock(lock);
-#endif
 
-#ifdef CONFIG_TICKET_SPINLOCK
-  unsigned short ticket =
-    atomic_load((FAR atomic_ushort *)&lock->tickets.next);
+  /* Lock without trace note */
 
-  spinlock_t oldval =
-    {
-      {
-        ticket, ticket
-      }
-    };
+  spin_lock_wo_note(lock);
 
-  spinlock_t newval =
-    {
-      {
-        ticket, ticket + 1
-      }
-    };
-
-  if (!atomic_compare_exchange_strong((FAR atomic_uint *)&lock->value,
-                                      &oldval.value, newval.value))
-#else /* CONFIG_TICKET_SPINLOCK */
-  if (up_testset(lock) == SP_LOCKED)
-#endif /* CONFIG_TICKET_SPINLOCK */
-    {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-      /* Notify that we abort for a spinlock */
-
-      sched_note_spinlock_abort(lock);
-#endif
-      SP_DSB();
-      return false;
-    }
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we have the spinlock */
 
   sched_note_spinlock_locked(lock);
-#endif
-  SP_DMB();
-  return true;
 }
 
 /****************************************************************************
@@ -441,43 +357,50 @@ spin_trylock_wo_note(FAR volatile spinlock_t *lock)
 }
 
 /****************************************************************************
- * Name: spin_unlock
+ * Name: spin_trylock
  *
  * Description:
- *   Release one count on a non-reentrant spinlock.
+ *   Try once to lock the spinlock.  Do not wait if the spinlock is already
+ *   locked.
  *
  * Input Parameters:
- *   lock - A reference to the spinlock object to unlock.
+ *   lock - A reference to the spinlock object to lock.
  *
  * Returned Value:
- *   None.
+ *   SP_LOCKED   - Failure, the spinlock was already locked
+ *   SP_UNLOCKED - Success, the spinlock was successfully locked
  *
  * Assumptions:
  *   Not running at the interrupt level.
  *
  ****************************************************************************/
 
-#ifdef __SP_UNLOCK_FUNCTION
-static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
+static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
 {
-#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  /* Notify that we are unlocking the spinlock */
+  bool locked;
 
-  sched_note_spinlock_unlock(lock);
-#  endif
+  /* Notify that we are waiting for a spinlock */
 
-  SP_DMB();
-#  ifdef CONFIG_TICKET_SPINLOCK
-  atomic_fetch_add((FAR atomic_ushort *)&lock->tickets.owner, 1);
-#  else
-  *lock = SP_UNLOCKED;
-#  endif
-  SP_DSB();
-  SP_SEV();
+  sched_note_spinlock_lock(lock);
+
+  /* Try lock without trace note */
+
+  locked = spin_trylock_wo_note(lock);
+  if (locked)
+    {
+      /* Notify that we have the spinlock */
+
+      sched_note_spinlock_locked(lock);
+    }
+  else
+    {
+      /* Notify that we abort for a spinlock */
+
+      sched_note_spinlock_abort(lock);
+    }
+
+  return locked;
 }
-#else
-#  define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
-#endif
 
 /****************************************************************************
  * Name: spin_unlock_wo_note
@@ -511,6 +434,38 @@ spin_unlock_wo_note(FAR volatile spinlock_t *lock)
   SP_DSB();
   SP_SEV();
 }
+
+/****************************************************************************
+ * Name: spin_unlock
+ *
+ * Description:
+ *   Release one count on a non-reentrant spinlock.
+ *
+ * Input Parameters:
+ *   lock - A reference to the spinlock object to unlock.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   Not running at the interrupt level.
+ *
+ ****************************************************************************/
+
+#ifdef __SP_UNLOCK_FUNCTION
+static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
+{
+  /* Unlock without trace note */
+
+  spin_unlock_wo_note(lock);
+
+  /* Notify that we are unlocking the spinlock */
+
+  sched_note_spinlock_unlock(lock);
+}
+#else
+#  define spin_unlock(l)  do { *(l) = SP_UNLOCKED; } while (0)
+#endif
 
 /****************************************************************************
  * Name: spin_is_locked
