@@ -39,7 +39,10 @@
 #include "init/init.h"
 #include "riscv_internal.h"
 #include "riscv_ipi.h"
+
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
 #include "riscv_percpu.h"
+#endif
 
 #ifdef CONFIG_BUILD_KERNEL
 #  include "riscv_mmu.h"
