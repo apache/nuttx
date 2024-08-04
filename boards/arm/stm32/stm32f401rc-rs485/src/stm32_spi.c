@@ -62,6 +62,10 @@ void weak_function stm32_spidev_initialize(void)
 #ifdef CONFIG_LCD_MAX7219
   stm32_configgpio(STM32_LCD_CS);    /* MAX7219 chip select */
 #endif
+
+#ifdef CONFIG_CL_MFRC522
+  stm32_configgpio(GPIO_RFID_CS);    /* MFRC522 chip select */
+#endif
 }
 
 /****************************************************************************
@@ -108,6 +112,13 @@ void stm32_spi1select(struct spi_dev_s *dev,
   if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(STM32_LCD_CS, !selected);
+    }
+  #endif
+
+  #if defined(CONFIG_CL_MFRC522)
+  if (devid == SPIDEV_CONTACTLESS(0))
+    {
+      stm32_gpiowrite(GPIO_RFID_CS, !selected);
     }
   #endif
 }
