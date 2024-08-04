@@ -162,7 +162,11 @@
 #  define _SCHED_ERRNO(r)            (-(r))
 #  define _SCHED_ERRVAL(r)           (r)
 #else
+#if defined(CONFIG_SCHED_THREAD_LOCAL)
+#  define _SCHED_GETTID()            sched_gettid()
+#else
 #  define _SCHED_GETTID()            gettid()
+#endif
 #  define _SCHED_GETPID()            getpid()
 #  define _SCHED_GETPPID()           getppid()
 #  define _SCHED_GETPARAM(t,p)       sched_getparam(t,p)
