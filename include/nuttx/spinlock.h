@@ -589,7 +589,7 @@ irqstate_t spin_lock_irqsave_wo_note(FAR spinlock_t *lock);
 #if defined(CONFIG_SPINLOCK)
 void spin_unlock_irqrestore(FAR spinlock_t *lock, irqstate_t flags);
 #else
-#  define spin_unlock_irqrestore(l, f) up_irq_restore(f)
+#  define spin_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 /****************************************************************************
@@ -599,7 +599,7 @@ void spin_unlock_irqrestore(FAR spinlock_t *lock, irqstate_t flags);
 #if defined(CONFIG_SPINLOCK)
 void spin_unlock_irqrestore_wo_note(FAR spinlock_t *lock, irqstate_t flags);
 #else
-#  define spin_unlock_irqrestore_wo_note(l, f) up_irq_restore(f)
+#  define spin_unlock_irqrestore_wo_note(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 #if defined(CONFIG_RW_SPINLOCK)
@@ -914,7 +914,7 @@ irqstate_t read_lock_irqsave(FAR rwlock_t *lock);
 #if defined(CONFIG_SPINLOCK)
 void read_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 #else
-#  define read_unlock_irqrestore(l, f) up_irq_restore(f)
+#  define read_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 /****************************************************************************
@@ -988,7 +988,7 @@ irqstate_t write_lock_irqsave(FAR rwlock_t *lock);
 #if defined(CONFIG_SPINLOCK)
 void write_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
 #else
-#  define write_unlock_irqrestore(l, f) up_irq_restore(f)
+#  define write_unlock_irqrestore(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 #endif /* CONFIG_RW_SPINLOCK */
