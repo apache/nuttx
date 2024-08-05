@@ -157,7 +157,7 @@ void pm_idle(pm_idle_handler_t handler)
   ret = pm_changestate(domain, newstate);
   if (ret < 0)
     {
-      newstate = PM_NORMAL;
+      newstate = oldstate;
     }
 
   if (oldstate != newstate)
