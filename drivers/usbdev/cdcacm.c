@@ -753,7 +753,9 @@ static void cdcacm_resetconfig(FAR struct cdcacm_dev_s *priv)
        * transfers.
        */
 
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
       EP_DISABLE(priv->epintin);
+#endif
       EP_DISABLE(priv->epbulkin);
       EP_DISABLE(priv->epbulkout);
     }
@@ -828,6 +830,7 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
       return -EINVAL;
     }
 
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
   /* Configure the IN interrupt endpoint */
 
   ret = cdcacm_epconfigure(priv->epintin, CDCACM_EPINTIN, false,
@@ -840,6 +843,7 @@ static int cdcacm_setconfig(FAR struct cdcacm_dev_s *priv, uint8_t config)
     }
 
   priv->epintin->priv = priv;
+#endif
 
   /* Configure the IN bulk endpoint */
 
@@ -1121,6 +1125,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
    * logic where kmm_malloc calls will fail.
    */
 
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
   /* Pre-allocate the IN interrupt endpoint */
 
   priv->epintin = DEV_ALLOCEP(dev, CDCACM_MKEPINTIN(&priv->devinfo),
@@ -1133,6 +1138,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
     }
 
   priv->epintin->priv = priv;
+#endif
 
   /* Pre-allocate the IN bulk endpoint */
 
@@ -1390,6 +1396,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
       DEBUGASSERT(priv->nwrq == 0);
       leave_critical_section(flags);
 
+#ifdef CONFIG_CDCACM_HAVE_EPINTIN
       /* Free the interrupt IN endpoint */
 
       if (priv->epintin)
@@ -1397,6 +1404,7 @@ static void cdcacm_unbind(FAR struct usbdevclass_driver_s *driver,
           DEV_FREEEP(dev, priv->epintin);
           priv->epintin = NULL;
         }
+#endif
 
       /* Free the bulk OUT endpoint */
 
