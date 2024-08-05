@@ -26,9 +26,13 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <debug.h>
 #include <dlfcn.h>
+#include <errno.h>
 
 #include <nuttx/lib/modlib.h>
+#include <nuttx/symtab.h>
 
 /****************************************************************************
  * Private Functions
