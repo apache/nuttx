@@ -337,6 +337,65 @@ int nxmutex_breaklock(FAR mutex_t *mutex, FAR unsigned int *locked);
 int nxmutex_restorelock(FAR mutex_t *mutex, unsigned int locked);
 
 /****************************************************************************
+ * Name: nxmutex_set_protocol
+ *
+ * Description:
+ *   This function attempts to set the priority protocol of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   protocol     - mutex protocol value to set.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+int nxmutex_set_protocol(FAR mutex_t *mutex, int protocol);
+
+/****************************************************************************
+ * Name: nxmutex_getprioceiling
+ *
+ * Description:
+ *   This function attempts to get the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - location to return the mutex priority ceiling.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+int nxmutex_getprioceiling(FAR const mutex_t *mutex, FAR int *prioceiling);
+
+/****************************************************************************
+ * Name: nxmutex_setprioceiling
+ *
+ * Description:
+ *   This function attempts to set the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - mutex priority ceiling value to set.
+ *   old_ceiling  - location to return the mutex ceiling priority set before.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+int nxmutex_setprioceiling(FAR mutex_t *mutex, int prioceiling,
+                           FAR int *old_ceiling);
+
+/****************************************************************************
  * Name: nxrmutex_init
  *
  * Description:
@@ -614,6 +673,13 @@ int nxrmutex_breaklock(FAR rmutex_t *rmutex, FAR unsigned int *count);
  ****************************************************************************/
 
 int nxrmutex_restorelock(FAR rmutex_t *rmutex, unsigned int count);
+
+#define nxrmutex_set_protocol(rmutex, protocol) \
+        nxmutex_set_protocol(&(rmutex)->mutex, protocol)
+#define nxrmutex_getprioceiling(rmutex, prioceiling) \
+        nxmutex_getprioceiling(&(rmutex)->mutex, prioceiling)
+#define nxrmutex_setprioceiling(rmutex, prioceiling, old_ceiling) \
+        nxmutex_setprioceiling(&(rmutex)->mutex, prioceiling, old_ceiling)
 
 #undef EXTERN
 #ifdef __cplusplus
