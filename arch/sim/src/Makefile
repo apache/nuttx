@@ -94,7 +94,7 @@ DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 CFLAGS += -fvisibility=default
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe \
+   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ \
    -fvisibility=default
 
 HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)
