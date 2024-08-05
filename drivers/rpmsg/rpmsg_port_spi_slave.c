@@ -165,7 +165,7 @@ static void rpmsg_port_spi_drop_packets(FAR struct rpmsg_port_spi_s *rpspi)
  * Name: rpmsg_port_spi_exchange
  ****************************************************************************/
 
-void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
+static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 {
   FAR struct rpmsg_port_header_s *txhdr;
 
@@ -342,7 +342,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
     {
       if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
         {
-          return;
+          goto out;
         }
 
       rpspi->txavail = rpspi->rxhdr->avail;
@@ -394,7 +394,7 @@ static int rpmsg_port_spi_mreq_handler(FAR struct ioexpander_dev_s *dev,
 
 static inline void rpmsg_port_spi_connect(FAR struct rpmsg_port_spi_s *rpspi)
 {
-  rpmsg_port_spi_mreq_handler(NULL, 0, rpspi);
+  rpmsg_port_spi_exchange(rpspi);
 }
 
 /****************************************************************************
@@ -552,8 +552,8 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
   rpspi->ioe = ioe;
   rpspi->spictrlr = spictrlr;
   rpspi->spislv.ops = &g_rpmsg_port_spi_slave_ops;
-  SPIS_CTRLR_BIND(spictrlr, &rpspi->spislv, spicfg->mode, spicfg->nbits);
   rpspi->nbits = spicfg->nbits;
+  SPIS_CTRLR_BIND(spictrlr, &rpspi->spislv, spicfg->mode, spicfg->nbits);
 
   return 0;
 }
@@ -583,13 +583,6 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
       return -ENOMEM;
     }
 
-  ret = rpmsg_port_spi_init_hardware(rpspi, spicfg, spictrlr, ioe);
-  if (ret < 0)
-    {
-      rpmsgerr("rpmsg port spi hardware init failed\n");
-      goto rpmsg_err;
-    }
-
   DEBUGASSERT(cfg->txlen == cfg->rxlen);
   ret = rpmsg_port_initialize(&rpspi->port, cfg, &g_rpmsg_port_spi_ops);
   if (ret < 0)
@@ -609,6 +602,13 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
   rpspi->rxthres = rpmsg_port_queue_navail(&rpspi->port.rxq) *
                    CONFIG_RPMSG_PORT_SPI_RX_THRESHOLD / 100;
 
+  ret = rpmsg_port_spi_init_hardware(rpspi, spicfg, spictrlr, ioe);
+  if (ret < 0)
+    {
+      rpmsgerr("rpmsg port spi hardware init failed\n");
+      goto out;
+    }
+
   snprintf(arg1, sizeof(arg1), "%p", rpspi);
   argv[0] = (FAR char *)cfg->remotecpu;
   argv[1] = arg1;
@@ -620,12 +620,12 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
   if (ret < 0)
     {
       rpmsgerr("rpmsg port spi create thread failed\n");
-      goto thread_err;
+      goto out;
     }
 
   return 0;
 
-thread_err:
+out:
   rpmsg_port_uninitialize(&rpspi->port);
 rpmsg_err:
   kmm_free(rpspi);

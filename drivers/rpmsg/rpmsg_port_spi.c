@@ -541,13 +541,6 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
       return -ENOMEM;
     }
 
-  ret = rpmsg_port_spi_init_hardware(rpspi, spicfg, spi, ioe);
-  if (ret < 0)
-    {
-      rpmsgerr("rpmsg port spi hardware init failed\n");
-      goto rpmsg_err;
-    }
-
   DEBUGASSERT(cfg->txlen == cfg->rxlen);
   ret = rpmsg_port_initialize(&rpspi->port, cfg, &g_rpmsg_port_spi_ops);
   if (ret < 0)
@@ -567,6 +560,13 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
   rpspi->rxthres = rpmsg_port_queue_navail(&rpspi->port.rxq) *
                    CONFIG_RPMSG_PORT_SPI_RX_THRESHOLD / 100;
 
+  ret = rpmsg_port_spi_init_hardware(rpspi, spicfg, spi, ioe);
+  if (ret < 0)
+    {
+      rpmsgerr("rpmsg port spi hardware init failed\n");
+      goto out;
+    }
+
   snprintf(arg1, sizeof(arg1), "%p", rpspi);
   argv[0] = (FAR void *)cfg->remotecpu;
   argv[1] = arg1;
@@ -578,12 +578,12 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
   if (ret < 0)
     {
       rpmsgerr("rpmsg port spi create thread failed\n");
-      goto thread_err;
+      goto out;
     }
 
   return 0;
 
-thread_err:
+out:
   rpmsg_port_uninitialize(&rpspi->port);
 rpmsg_err:
   kmm_free(rpspi);
