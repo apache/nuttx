@@ -767,7 +767,7 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 
   /* Initialize the af_channale */
 
-  memset(&fifo->af_channel[fifo->af_tail], 0, CONFIG_ADC_FIFOSIZE);
+  memset(&fifo->af_channel[0], 0, CONFIG_ADC_FIFOSIZE);
 
   return ret;
 }
