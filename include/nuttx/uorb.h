@@ -63,12 +63,19 @@
 
 #define SENSOR_TYPE_MAGNETIC_FIELD                  2
 
-/* Ultraviolet light sensor
- * This sensor can identify the UV index in ambient light help people
- * to effectively protect themselves from sunburns, cancer or eye damage.
- * This value range is 0 - 15.
+/* Orientation
+ * An orientation sensor reports the attitude of the device. The measurements
+ * are reported in degrees in the x, y, and z.
+ *   x:azimuth, the angle between the magnetic north direction and the
+ *     Y axis, around the Z axis (0<=azimuth<360). 0=North, 90=East,
+ *     180=South, 270=West.
+ *   y:pitch, rotation around X axis (-180<=pitch<=180), with positive values
+ *     when the Z axis moves toward the Y axis.
+ *   z:roll, rotation around Y axis (-90<=roll<=90), with positive values
+ *     when the X axis moves towards the Z axis.
  */
-#define SENSOR_TYPE_ULTRAVIOLET                     3
+
+#define SENSOR_TYPE_ORIENTATION                     3
 
 /* Gyroscope
  * All values are in radians/second and measure the rate of rotation around
@@ -110,19 +117,26 @@
 
 #define SENSOR_TYPE_RGB                             9
 
-/* Hall
- * All values are in bool type (0 or 1) and it often is used to as switch.
- * A values of 1 indicates that switch on.
+/* Linear acceleration
+ * A linear acceleration sensor reports the linear acceleration of the device
+ * in the sensor frame, not including gravity(output of the accelerometer
+ * minus the output of the gravity sensor).
  */
 
-#define SENSOR_TYPE_HALL                            10
+#define SENSOR_TYPE_LINEAR_ACCELERATION             10
 
-/* IR (Infrared Ray)
- * This sensor can detect a human approach and outputs a signal from
- * interrupt pins. This sensor value is in lux.
+/* Rotation
+ * A rotation vector sensor reports the orientation of the device relative
+ * to the East-North-Up coordinates frame. It's usually obtained by
+ * integration of accelerometer, gyroscope, and magnetometer readings.
+ * The East-North-Up coordinate system is defined as a direct orthonormal
+ * basis where:
+ *   X points east and is tangential to the ground.
+ *   Y points north and is tangential to the ground.
+ *   Z points towards the sky and is perpendicular to the ground.
  */
 
-#define SENSOR_TYPE_IR                              11
+#define SENSOR_TYPE_ROTATION_VECTOR                 11
 
 /* Relative Humidity
  * A relative humidity sensor measure relative ambient air humidity and
@@ -158,26 +172,32 @@
 
 #define SENSOR_TYPE_PM10                            16
 
-/* CO2
- * A sensor of this type returns the content of CO2 in the air
- * This value is in units (ppm-part per million).
+/* Significant motion
+ * A significant motion detector triggers when detecting a significant
+ * motion: a motion that might lead to a change in the user location.
  */
 
-#define SENSOR_TYPE_CO2                             17
+#define SENSOR_TYPE_SIGNIFICANT_MOTION              17
 
-/* HCHO
- * The HCHO pollution is an important indicator of household air
- * pollution. This value is in units (ppm-part per million).
+/* Step detector
+ * A step detector generates an event each time a step is taken by the user.
+ * The timestamp of the event corresponds to when the foot hit the ground,
+ * generating a high variation in acceleration. Compared to the step counter,
+ * the step detector should have a lower latency (less than two seconds).
+ * Both the step detector and the step counter detect when the user is
+ * walking, running, and walking up the stairs. They shouldn't trigger when
+ * the user is biking, driving, or in other vehicles.
  */
 
-#define SENSOR_TYPE_HCHO                            18
+#define SENSOR_TYPE_STEP_DETECTOR                   18
 
-/* TVOC (total volatile organic compounds)
- * The indoor TVOC is cause indoor air pollution is one of the
- * main reasons why. This value is in units (ppb-part per billion).
+/* Step counter
+ * A step counter reports the number of steps taken by the user since the
+ * last reboot while activated. A step counter reports the number of steps
+ * taken by the user since the last reboot while activated.
  */
 
-#define SENSOR_TYPE_TVOC                            19
+#define SENSOR_TYPE_STEP_COUNTER                    19
 
 /* PH
  * The acid-base degree describes the strength of the aqueous
@@ -195,12 +215,11 @@
 
 #define SENSOR_TYPE_HEART_RATE                      21
 
-/* Dust
- * A sensor of this type returns the content of dust in the air
- * values is in ug/m^3.
+/* Tilt detector
+ * A tilt detector generates an event each time a tilt event is detected.
  */
 
-#define SENSOR_TYPE_DUST                            22
+#define SENSOR_TYPE_TILT_DETECTOR                   22
 
 /* Wake gesture
  * A sensor enabling waking up the device based on a device specific
@@ -211,52 +230,57 @@
 
 #define SENSOR_TYPE_WAKE_GESTURE                    23
 
-/* ECG (Electrocardiogram)
- * A sensor of this type returns the ECG voltage in μV. Sensors may amplify
- * the input ECG signal. Here the ECG voltage is the un-amplified ECG
- * voltage.
+/* Glance gesture
+ * A glance gesture sensor enables briefly turning the screen on to enable
+ * the user to glance content on screen based on a specific motion.
+ * When this sensor triggers, the device will turn the screen on momentarily
+ * to allow the user to glance notifications or other content while the
+ * device remains locked in a non-interactive state (dozing), then the screen
+ * will turn off again.
  */
 
-#define SENSOR_TYPE_ECG                             24
+#define SENSOR_TYPE_GLANCE_GESTURE                  24
 
-/* PPG Dual (2-channel photoplethysmography)
- * A sensor of this type returns the 2 channels PPG measurements in ADC
- * counts and their corresponding LED current and ADC gains. The PPG
- * measurements come from photodiodes and following current amplifiers and
- * ADCs, where a photodiode switches reflected light intensity to current.
- * The LED current decides the lightness of LED, which is the input of PPG
- * measurements. The ADC gains are multipled on the output and affect SNR.
+/* Pick up gesture
+ * A pick-up gesture sensor triggers when the device is picked up regardless
+ * of wherever it was before (desk, pocket, bag).
  */
 
-#define SENSOR_TYPE_PPGD                            25
+#define SENSOR_TYPE_PICK_UP_GESTURE                 25
 
-/* PPG Quad (4-channel photoplethysmography)
- * A sensor of this type returns the 4 channels PPG measurements in ADC
- * counts and their corresponding LED current and ADC gains. The PPG
- * measurements come from photodiodes and following current amplifiers and
- * ADCs, where a photodiode switches reflected light intensity to current.
- * The LED current decides the lightness of LED, which is the input of PPG
- * measurements. The ADC gains are multipled on the output and affect SNR.
+/* Wrist tilt
+ * The wrist-off detection sensor is only triggered when the device is off
+ * the wrist.
  */
 
-#define SENSOR_TYPE_PPGQ                            26
+#define SENSOR_TYPE_WRIST_TILT_GESTURE              26
 
-/* Imdepance
- * A sensor of this type returns the impedance measurements. An impedance
- * is a complex number, which consists of a real part(resistance) and an
- * imaginary part(reactance). Both of them are in uint Ohm(Ω).
+/* Device_orientation
+ * A device orientation sensor reports the current orientation of the device.
  */
 
-#define SENSOR_TYPE_IMPEDANCE                       27
+#define SENSOR_TYPE_DEVICE_ORIENTATION              27
 
-/* OTS (Optical tracking sensor)
- * A sensor of this type returns the OTS measurements in counts. It
- * integrates an optical chip and a LASER light source in a single miniature
- * package. It provies wide depth of field range on glossy surface, and
- * design flexibility into a compact device.
+/* Pose 6DOF
+ * A Pose 6DOF sensor reports the orientation of the device relative to the
+ * East-North-Up coordinates frame. It is obtained by integration of
+ * accelerometer and gyroscope readings.
+ * The East-North-Up coordinate system is defined as a direct orthonormal
+ * basis where:
+ *   X points east and is tangential to the ground.
+ *   Y points north and is tangential to the ground.
+ *   Z points towards the sky and is perpendicular to the ground.
+ * The orientation is represented by the rotation necessary to align the
+ * East-North-Up coordinates with the device's coordinates. That is, applying
+ * the rotation to the world frame (X,Y,Z) would align them with the device
+ * coordinates (x,y,z).
+ * The rotation can be seen as rotating the device by an angle theta around
+ * an axis rot_axis to go from the reference (East-North-Up aligned) device
+ * orientation to the current device orientation. The rotation is encoded as
+ * the four unitless x, y, z, w components of a unit quaternion.
  */
 
-#define SENSOR_TYPE_OTS                             28
+#define SENSOR_TYPE_POSE_6DOF                       28
 
 /* Gas sensor
  * This sensor measures the gas resistance, indicating the presence
@@ -265,13 +289,15 @@
 
 #define SENSOR_TYPE_GAS                             29
 
-/* CAP (Capacitive proximity sensor)
- * The purpose of the proximity sensing interface is to detect when a
- * conductive object (usually a body part i.e. finger, palm, face, etc.)
- * is in the proximity of the system.
+/* Motion detect
+ * Motion detection sensor is used to detect the motion status of the device.
+ * motion detect event is produced if the device has been in motion
+ * for at least 5 seconds with a maximal latency of 5 additional seconds.
+ * ie: it may take up anywhere from 5 to 10 seconds afte the device has been
+ * at rest to trigger this event. The only allowed value is 1.0.
  */
 
-#define SENSOR_TYPE_CAP                             30
+#define SENSOR_TYPE_MOTION_DETECT                   30
 
 /* Heart Beat
  * A sensor of this type returns an event evetytime
@@ -291,35 +317,157 @@
 
 #define SENSOR_TYPE_FORCE                           32
 
+/* Hall
+ * All values are in bool type (0 or 1) and it often is used to as switch.
+ * A values of 1 indicates that switch on.
+ */
+
+#define SENSOR_TYPE_HALL                            33
+
+/* Offbody detect
+ * An offbody detect sensor reports every time the device transitions from
+ * off-body to on-body and from on-body to off-body (e.g. a wearable device
+ * being removed from the wrist would trigger an event indicating an off-body
+ * transition).
+ */
+
+#define SENSOR_TYPE_LOW_LATENCY_OFFBODY_DETECT      34
+
+/* Ultraviolet light sensor
+ * This sensor can identify the UV index in ambient light help people
+ * to effectively protect themselves from sunburns, cancer or eye damage.
+ * This value range is 0 - 15.
+ */
+#define SENSOR_TYPE_ULTRAVIOLET                     35
+
+/* Hinge angle
+ * A hinge angle sensor measures the angle, in degrees, between two integral
+ * parts of the device. Movement of a hinge measured by this sensor type is
+ * expected to alter the ways in which the user can interact with the device,
+ * for example, by unfolding or revealing a display.
+ */
+
+#define SENSOR_TYPE_HINGE_ANGLE                     36
+
+/* IR (Infrared Ray)
+ * This sensor can detect a human approach and outputs a signal from
+ * interrupt pins. This sensor value is in lux.
+ */
+
+#define SENSOR_TYPE_IR                              37
+
+/* HCHO
+ * The HCHO pollution is an important indicator of household air
+ * pollution. This value is in units (ppm-part per million).
+ */
+
+#define SENSOR_TYPE_HCHO                            38
+
+/* TVOC (total volatile organic compounds)
+ * The indoor TVOC is cause indoor air pollution is one of the
+ * main reasons why. This value is in units (ppb-part per billion).
+ */
+
+#define SENSOR_TYPE_TVOC                            39
+
+/* Dust
+ * A sensor of this type returns the content of dust in the air
+ * values is in ug/m^3.
+ */
+
+#define SENSOR_TYPE_DUST                            40
+
+/* ECG (Electrocardiogram)
+ * A sensor of this type returns the ECG voltage in μV. Sensors may amplify
+ * the input ECG signal. Here the ECG voltage is the un-amplified ECG
+ * voltage.
+ */
+
+#define SENSOR_TYPE_ECG                             41
+
+/* PPG Dual (2-channel photoplethysmography)
+ * A sensor of this type returns the 2 channels PPG measurements in ADC
+ * counts and their corresponding LED current and ADC gains. The PPG
+ * measurements come from photodiodes and following current amplifiers and
+ * ADCs, where a photodiode switches reflected light intensity to current.
+ * The LED current decides the lightness of LED, which is the input of PPG
+ * measurements. The ADC gains are multipled on the output and affect SNR.
+ */
+
+#define SENSOR_TYPE_PPGD                            42
+
+/* PPG Quad (4-channel photoplethysmography)
+ * A sensor of this type returns the 4 channels PPG measurements in ADC
+ * counts and their corresponding LED current and ADC gains. The PPG
+ * measurements come from photodiodes and following current amplifiers and
+ * ADCs, where a photodiode switches reflected light intensity to current.
+ * The LED current decides the lightness of LED, which is the input of PPG
+ * measurements. The ADC gains are multipled on the output and affect SNR.
+ */
+
+#define SENSOR_TYPE_PPGQ                            43
+
+/* Imdepance
+ * A sensor of this type returns the impedance measurements. An impedance
+ * is a complex number, which consists of a real part(resistance) and an
+ * imaginary part(reactance). Both of them are in uint Ohm(Ω).
+ */
+
+#define SENSOR_TYPE_IMPEDANCE                       44
+
+/* OTS (Optical tracking sensor)
+ * A sensor of this type returns the OTS measurements in counts. It
+ * integrates an optical chip and a LASER light source in a single miniature
+ * package. It provies wide depth of field range on glossy surface, and
+ * design flexibility into a compact device.
+ */
+
+#define SENSOR_TYPE_OTS                             45
+
+/* CO2
+ * A sensor of this type returns the content of CO2 in the air
+ * This value is in units (ppm-part per million).
+ */
+
+#define SENSOR_TYPE_CO2                             46
+
+/* CAP (Capacitive proximity sensor)
+ * The purpose of the proximity sensing interface is to detect when a
+ * conductive object (usually a body part i.e. finger, palm, face, etc.)
+ * is in the proximity of the system.
+ */
+
+#define SENSOR_TYPE_CAP                             47
+
 /* GNSS
  * A sensor of this type returns GNSS data. Include latitude, longitude,
  * altitude, horizontal position accuracy, vertical position accuracy,
  * horizontal dilution of precision, vertical dilution of precision...
  */
 
-#define SENSOR_TYPE_GNSS                            33
+#define SENSOR_TYPE_GNSS                            48
 
 /* Sensor of GNSS satellite
  * A sensor of this type returns the GNSS satellite information.
  */
 
-#define SENSOR_TYPE_GNSS_SATELLITE                  34
+#define SENSOR_TYPE_GNSS_SATELLITE                  49
 
 /* GNSS Measurement */
 
-#define SENSOR_TYPE_GNSS_MEASUREMENT                35
+#define SENSOR_TYPE_GNSS_MEASUREMENT                50
 
 /* GNSS Clock */
 
-#define SENSOR_TYPE_GNSS_CLOCK                      36
+#define SENSOR_TYPE_GNSS_CLOCK                      51
 
 /* GNSS Geofence */
 
-#define SENSOR_TYPE_GNSS_GEOFENCE                   37
+#define SENSOR_TYPE_GNSS_GEOFENCE                   52
 
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           38
+#define SENSOR_TYPE_COUNT                           53
 
 /* The additional sensor open flags */
 
@@ -423,6 +571,12 @@
  * reported.
  */
 
+struct sensor_event  /* Type: Sensor Common Event */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  uint32_t event;           /* Common events */
+};
+
 struct sensor_accel         /* Type: Accerometer */
 {
   uint64_t timestamp;       /* Units is microseconds */
@@ -442,10 +596,12 @@ struct sensor_mag           /* Type: Magnetic Field */
   int32_t status;           /* Status of calibration */
 };
 
-struct sensor_uv            /* Type: Ultraviolet Light */
+struct sensor_orientation   /* Type: Orientation */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float uvi;                /* the value range is 0 - 15 */
+  float    x;               /* azimuth */
+  float    y;               /* pitch */
+  float    z;               /* roll */
 };
 
 struct sensor_gyro          /* Type: Gyroscope */
@@ -491,16 +647,14 @@ struct sensor_rgb           /* Type: RGB */
   float b;                  /* Units is percent */
 };
 
-struct sensor_hall          /* Type: HALL */
+struct sensor_rotation      /* Type: Rotation */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  int32_t hall;             /* Hall state */
-};
-
-struct sensor_ir            /* Type: Infrared Ray */
-{
-  uint64_t timestamp;       /* Units is microseconds */
-  float ir;                 /* in SI units lux */
+  float    x;               /* x*sin(θ/2) */
+  float    y;               /* y*sin(θ/2) */
+  float    z;               /* z*sin(θ/2) */
+  float    w;               /* cos(θ/2) */
+  float    status;          /* estimated heading Accuracy (in radians) (-1 if unavailable) */
 };
 
 struct sensor_humi          /* Type: Relative Humidity */
@@ -533,22 +687,11 @@ struct sensor_pm10          /* Type: PM10 */
   float pm10;               /* in SI units ug/m^3 */
 };
 
-struct sensor_co2           /* Type: CO2 */
+struct sensor_step_counter  /* Type: Step Coun */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float co2;                /* in SI units ppm */
-};
-
-struct sensor_hcho          /* Type: HCHO */
-{
-  uint64_t timestamp;       /* Units is microseconds */
-  float hcho;               /* in SI units ppm */
-};
-
-struct sensor_tvoc          /* Type: TVOC */
-{
-  uint64_t timestamp;       /* Units is microseconds */
-  float tvoc;               /* in SI units ppm */
+  uint32_t steps;           /* Step counting */
+  uint32_t cadence;         /* Stride frequency */
 };
 
 struct sensor_ph            /* Type: PH */
@@ -563,21 +706,85 @@ struct sensor_hrate         /* Type: Heart Rate */
   float bpm;                /* is SI units BPM */
 };
 
+struct sensor_pose_6dof     /* Type: Pose 6dof */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float    x;               /* x*sin(theta/2) */
+  float    y;               /* y*sin(theta/2) */
+  float    z;               /* z*sin(theta/2) */
+  float    w;               /* cos(theta/2) */
+  float    tx;              /* Translation along x axis from an arbitrary origin. */
+  float    ty;              /* Translation along y axis from an arbitrary origin. */
+  float    tz;              /* Translation along z axis from an arbitrary origin. */
+  float    dx;              /* Delta quaternion rotation x*sin(theta/2) */
+  float    dy;              /* Delta quaternion rotation y*sin(theta/2) */
+  float    dz;              /* Delta quaternion rotation z*sin(theta/2) */
+  float    dw;              /* Delta quaternion rotation cos(theta/2) */
+  float    dtx;             /* Delta translation along x axis. */
+  float    dty;             /* Delta translation along y axis. */
+  float    dtz;             /* Delta translation along z axis. */
+  uint64_t number;          /* Sequence number; ascending sequentially from 0 */
+};
+
+struct sensor_gas           /* Type: Gas */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float gas_resistance;     /* Gas resistance in kOhm */
+};
+
+struct sensor_hbeat         /* Type: Heart Beat */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float beat;               /* Units is times/minutes */
+};
+
+struct sensor_force         /* Type: Force */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  float force;              /* Force value, units is N */
+  int32_t event;            /* Force event */
+};
+
+struct sensor_hall          /* Type: HALL */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  int32_t hall;             /* Hall state */
+};
+
+struct sensor_uv            /* Type: Ultraviolet Light */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float uvi;                /* the value range is 0 - 15 */
+};
+
+struct sensor_angle         /* Type: Angle */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float    angle;           /* Angle. Unit is degree */
+};
+
+struct sensor_ir            /* Type: Infrared Ray */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float ir;                 /* in SI units lux */
+};
+
+struct sensor_hcho          /* Type: HCHO */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float hcho;               /* in SI units ppm */
+};
+
+struct sensor_tvoc          /* Type: TVOC */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float tvoc;               /* in SI units ppm */
+};
+
 struct sensor_dust          /* Type: DUST */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float dust;               /* is SI units ug/m^3 */
-};
-
-struct sensor_wake_gesture  /* Type: Wake gesture */
-{
-  uint64_t timestamp;                /* Units is microseconds */
-
-  /* wake gesture event, 0: sleep, 1: wake,
-   * others: Uncalibrated status value.
-   */
-
-  uint32_t event;
 };
 
 struct sensor_ecg           /* Type: ECG */
@@ -617,10 +824,10 @@ struct sensor_ots           /* Type: OTS */
   int32_t y;                /* Axis Y in counts */
 };
 
-struct sensor_gas           /* Type: Gas */
+struct sensor_co2           /* Type: CO2 */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float gas_resistance;     /* Gas resistance in kOhm */
+  float co2;                /* in SI units ppm */
 };
 
 struct sensor_cap           /* Type: Capacitance */
@@ -628,19 +835,6 @@ struct sensor_cap           /* Type: Capacitance */
   uint64_t timestamp;       /* Unit is microseconds */
   int32_t status;           /* Detection status */
   int32_t rawdata[4];       /* in SI units pF */
-};
-
-struct sensor_hbeat         /* Type: Heart Beat */
-{
-  uint64_t timestamp;       /* Units is microseconds */
-  float beat;               /* Units is times/minutes */
-};
-
-struct sensor_force         /* Type: Force */
-{
-  uint64_t timestamp;       /* Unit is microseconds */
-  float force;              /* Force value, units is N */
-  int32_t event;            /* Force event */
 };
 
 struct sensor_gnss          /* Type: GNSS */
