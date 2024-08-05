@@ -35,7 +35,6 @@
  ****************************************************************************/
 
 #define SIM_RPTUN_STOP      0x1
-#define SIM_RPTUN_PANIC     0x2
 #define SIM_RPTUN_MASK      0xffff
 #define SIM_RPTUN_SHIFT     16
 #define SIM_RPTUN_WORK_DELAY 1
@@ -292,21 +291,6 @@ static int sim_rptun_register_callback(struct rptun_dev_s *dev,
   return 0;
 }
 
-static void sim_rptun_panic(struct rptun_dev_s *dev)
-{
-  struct sim_rptun_dev_s *priv = container_of(dev,
-                                 struct sim_rptun_dev_s, rptun);
-
-  if (priv->master)
-    {
-      priv->shmem->cmdm = SIM_RPTUN_PANIC << SIM_RPTUN_SHIFT;
-    }
-  else
-    {
-      priv->shmem->cmds = SIM_RPTUN_PANIC << SIM_RPTUN_SHIFT;
-    }
-}
-
 static void sim_rptun_check_cmd(struct sim_rptun_dev_s *priv)
 {
   unsigned int cmd = priv->master ? priv->shmem->cmds : priv->shmem->cmdm;
@@ -315,10 +299,6 @@ static void sim_rptun_check_cmd(struct sim_rptun_dev_s *priv)
     {
       case SIM_RPTUN_STOP:
         host_abort(cmd & SIM_RPTUN_MASK);
-        break;
-
-      case SIM_RPTUN_PANIC:
-        PANIC();
         break;
 
       default:
@@ -391,7 +371,6 @@ static const struct rptun_ops_s g_sim_rptun_ops =
   .stop              = sim_rptun_stop,
   .notify            = sim_rptun_notify,
   .register_callback = sim_rptun_register_callback,
-  .panic             = sim_rptun_panic,
 };
 
 /****************************************************************************
