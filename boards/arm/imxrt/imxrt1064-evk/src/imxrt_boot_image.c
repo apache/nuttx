@@ -172,10 +172,12 @@ int board_boot_image(const char *path, uint32_t hdr_size)
 
   /* Set main and process stack pointers */
 
-  __asm__ __volatile__("\tmsr msp, %0\n" : : "r" (vt.spr));
-  setcontrol(0x00);
-  ARM_ISB();
-  ((void (*)(void))vt.reset)();
+  __asm__ __volatile__("\tmsr msp, %0\n"
+                       "\tmsr control, %1\n"
+                       "\tisb\n"
+                       "\tmov pc, %2\n"
+                       :
+                       : "r" (vt.spr), "r" (0), "r" (vt.reset));
 
   return 0;
 }
