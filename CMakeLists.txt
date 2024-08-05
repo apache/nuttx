@@ -423,6 +423,7 @@ include(platform)
 # Setup main nuttx target ####################################################
 
 add_executable(nuttx)
+add_custom_target(nuttx_post)
 if(CONFIG_BUILD_PROTECTED)
   add_executable(nuttx_user)
 endif()
@@ -432,6 +433,7 @@ if(CONFIG_ALLSYMS)
 endif()
 
 add_dependencies(nuttx nuttx_context)
+add_dependencies(nuttx_post nuttx)
 
 if(WIN32)
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT
@@ -573,6 +575,9 @@ add_subdirectory(boards)
 # with the correct operations for that platform
 
 if(TARGET nuttx_post_build)
+  # ensure thae the custom post build is executed after all steps of the nuttx
+  # build are completed
+  add_dependencies(nuttx_post_build nuttx_post)
   add_custom_target(post_build ALL DEPENDS nuttx_post_build)
 endif()
 
