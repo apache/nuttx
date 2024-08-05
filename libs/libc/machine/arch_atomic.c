@@ -754,3 +754,16 @@ SYNC_VAL_CMP_SWAP(4, uint32_t)
 SYNC_VAL_CMP_SWAP(8, uint64_t)
 
 #endif /* __clang__ */
+
+#ifdef __ghs__
+
+/****************************************************************************
+ * Name: __sync_synchronize
+ ****************************************************************************/
+
+void weak_function __sync_synchronize(void)
+{
+  asm volatile("" ::: "memory");
+}
+
+#endif
