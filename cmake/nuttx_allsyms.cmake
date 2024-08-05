@@ -95,7 +95,8 @@ define_allsyms_link_target(nuttx NULL NULL)
 define_allsyms_link_target(allsyms_inter nuttx allsyms_first_link)
 # allsyms link phase 2 since the table offset may changed
 define_allsyms_link_target(allsyms_nuttx allsyms_inter allsyms_final_link)
-
+# fixing timing dependencies
+add_dependencies(nuttx_post allsyms_nuttx)
 # finally use allsyms_nuttx to overwrite the already generated nuttx
 add_custom_command(
   TARGET allsyms_nuttx

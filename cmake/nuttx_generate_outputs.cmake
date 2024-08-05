@@ -25,6 +25,7 @@ function(nuttx_generate_outputs target)
       COMMAND ${CMAKE_OBJCOPY} -O ihex ${target} ${target}.hex
       DEPENDS ${target})
     add_custom_target(${target}-hex ALL DEPENDS ${target}.hex)
+    add_dependencies(nuttx_post ${target}-hex)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.hex\n")
   endif()
 
@@ -34,6 +35,7 @@ function(nuttx_generate_outputs target)
       COMMAND ${CMAKE_OBJCOPY} -O srec ${target} ${target}.srec
       DEPENDS ${target})
     add_custom_target(${target}-srec ALL DEPENDS ${target}.srec)
+    add_dependencies(nuttx_post ${target}-srec)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.srec\n")
   endif()
 
@@ -43,6 +45,7 @@ function(nuttx_generate_outputs target)
       COMMAND ${CMAKE_OBJCOPY} -O binary ${target} ${target}.bin
       DEPENDS ${target})
     add_custom_target(${target}-bin ALL DEPENDS ${target}.bin)
+    add_dependencies(nuttx_post ${target}-bin)
     file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "${target}.bin\n")
   endif()
 
