@@ -116,6 +116,10 @@ struct sem_s
   struct semholder_s holder;     /* Slot for old and new holder */
 #  endif
 #endif
+#ifdef CONFIG_PRIORITY_PROTECT
+  uint8_t ceiling;               /* The priority ceiling owned by mutex  */
+  uint8_t saved;                 /* The saved priority of thread before boost */
+#endif
 };
 
 typedef struct sem_s sem_t;
