@@ -21,8 +21,8 @@ body:
         Hello NuttX Community member! Please keep things tidy by putting your post in the proper place:
 
         Reporting a bug: use this form.
-        Asking a question or getting help: use the [General Help](https://github.com/simbit18/nuttx-testing-templates/issues/new?assignees=&labels=question&projects=&template=003_help.yml&title=help%3A+help+title) form or [Mailing list](https://nuttx.apache.org/community/).
-        Requesting a new feature: use the [Feature request](https://github.com/simbit18/nuttx-testing-templates/issues/new?assignees=&labels=enhancement&projects=&template=002_feature_request.yml) form.
+        Asking a question or getting help: use the [General Help](https://github.com/apache/nuttx/issues/new?assignees=&labels=question&projects=&template=003_help.yml&title=help%3A+help+title) form or [Mailing list](https://nuttx.apache.org/community/).
+        Requesting a new feature: use the [Feature request](https://github.com/apache/nuttx/issues/new?assignees=&labels=enhancement&projects=&template=002_feature_request.yml) form.
   - type: textarea
     attributes:
       label: "Description / Steps to reproduce the issue"
@@ -47,6 +47,7 @@ body:
       label: On which OS does this issue occur?
       multiple: true
       options:
+        - "[BSD]"
         - "[Linux]"
         - "[Mac]"
         - "[Windows]"
