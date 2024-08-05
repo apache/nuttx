@@ -1436,6 +1436,13 @@ config SEM_PREALLOCHOLDERS
 
 endif # PRIORITY_INHERITANCE
 
+config PRIORITY_PROTECT
+	bool "Enable priority protect"
+	default n
+	---help---
+		When a thread locks a mutex it inherits the priority ceiling of the
+		mutex, which is defined by the application as a mutex attribute.
+
 menu "RTOS hooks"
 
 config BOARD_EARLY_INITIALIZE

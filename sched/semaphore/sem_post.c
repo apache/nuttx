@@ -72,8 +72,8 @@ int nxsem_post(FAR sem_t *sem)
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
   int16_t sem_count;
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  uint8_t prioinherit;
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+  uint8_t proto;
 #endif
 
   DEBUGASSERT(sem != NULL);
@@ -116,7 +116,7 @@ int nxsem_post(FAR sem_t *sem)
   sem_count++;
   sem->semcount = sem_count;
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   /* Don't let any unblocked tasks run until we complete any priority
    * restoration steps.  Interrupts are disabled, but we do not want
    * the head of the ready-to-run list to be modified yet.
@@ -125,8 +125,8 @@ int nxsem_post(FAR sem_t *sem)
    * will do nothing.
    */
 
-  prioinherit = sem->flags & SEM_PRIO_MASK;
-  if (prioinherit == SEM_PRIO_INHERIT)
+  proto = sem->flags & SEM_PRIO_MASK;
+  if (proto != SEM_PRIO_NONE)
     {
       sched_lock();
     }
@@ -191,10 +191,27 @@ int nxsem_post(FAR sem_t *sem)
    * held the semaphore.
    */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  if (prioinherit == SEM_PRIO_INHERIT)
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+  if (proto != SEM_PRIO_NONE)
     {
-      nxsem_restore_baseprio(stcb, sem);
+      if (proto == SEM_PRIO_INHERIT)
+        {
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          nxsem_restore_baseprio(stcb, sem);
+#endif
+        }
+
+      if (proto == SEM_PRIO_PROTECT)
+        {
+#ifdef CONFIG_PRIORITY_PROTECT
+          if (sem->saved > 0)
+            {
+              nxsched_set_priority(this_task(), sem->saved);
+              sem->saved = 0;
+            }
+#endif
+        }
+
       sched_unlock();
     }
 #endif

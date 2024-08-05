@@ -90,10 +90,13 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
         break;
 
       case SEM_PRIO_PROTECT:
-
+#ifdef CONFIG_PRIORITY_PROTECT
+        break;
+#else
         /* Not yet supported */
 
         return -ENOTSUP;
+#endif
 
       default:
         return -EINVAL;
