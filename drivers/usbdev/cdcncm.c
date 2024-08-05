@@ -417,6 +417,8 @@ static void cdcncm_disconnect(FAR struct usbdevclass_driver_s *driver,
 
 static void cdcncm_ep0incomplete(FAR struct usbdev_ep_s *ep,
                                  FAR struct usbdev_req_s *req);
+static void cdcncm_intcomplete(FAR struct usbdev_ep_s *ep,
+                               FAR struct usbdev_req_s *req);
 static void cdcncm_rdcomplete(FAR struct usbdev_ep_s *ep,
                               FAR struct usbdev_req_s *req);
 static void cdcncm_wrcomplete(FAR struct usbdev_ep_s *ep,
@@ -1425,6 +1427,39 @@ static void cdcncm_ep0incomplete(FAR struct usbdev_ep_s *ep,
 }
 
 /****************************************************************************
+ * Name: cdcncm_intcomplete
+ *
+ * Description:
+ *   Handle completion of interrupt write request.  This function probably
+ *   executes in the context of an interrupt handler.
+ *
+ ****************************************************************************/
+
+static void cdcncm_intcomplete(FAR struct usbdev_ep_s *ep,
+                               FAR struct usbdev_req_s *req)
+{
+  FAR struct cdcncm_driver_s *self = (FAR struct cdcncm_driver_s *)ep->priv;
+
+  if (req->result || req->xfrd != req->len)
+    {
+      uerr("result: %hd, xfrd: %hu\n", req->result, req->xfrd);
+    }
+
+  if (self->notify != NCM_NOTIFY_NONE)
+    {
+      cdcncm_notify_worker(self);
+    }
+  else if (!self->isncm)
+    {
+      /* After the NIC information is synchronized, subsequent
+       * notifications are all related to the mbim control.
+       */
+
+      self->notify = NCM_NOTIFY_RESPONSE_AVAILABLE;
+    }
+}
+
+/****************************************************************************
  * Name: cdcncm_rdcomplete
  *
  * Description:
@@ -1715,25 +1750,16 @@ static void cdcncm_notify_worker(FAR void *arg)
   FAR struct cdcncm_driver_s *self = arg;
   int ret;
 
-  while (self->notify != NCM_NOTIFY_NONE)
+  ret = cdcncm_notify(self);
+  if (ret > 0)
     {
-      ret = cdcncm_notify(self);
-      if (ret > 0)
-        {
-          FAR struct usbdev_req_s *notifyreq = self->notifyreq;
+      FAR struct usbdev_req_s *notifyreq = self->notifyreq;
 
-          notifyreq->len   = ret;
-          notifyreq->flags = USBDEV_REQFLAGS_NULLPKT;
+      notifyreq->len   = ret;
+      notifyreq->flags = USBDEV_REQFLAGS_NULLPKT;
 
-          EP_SUBMIT(self->epint, notifyreq);
-        }
+      EP_SUBMIT(self->epint, notifyreq);
     }
-
-  /* After the NIC information is synchronized, subsequent notifications
-   * are all related to the mbim control
-   */
-
-  self->notify = NCM_NOTIFY_RESPONSE_AVAILABLE;
 }
 
 /****************************************************************************
@@ -2399,7 +2425,7 @@ static int cdcncm_bind(FAR struct usbdevclass_driver_s *driver,
       goto error;
     }
 
-  self->notifyreq->callback = cdcncm_wrcomplete;
+  self->notifyreq->callback = cdcncm_intcomplete;
 
   /* Pre-allocate read requests. The buffer size is NTB_DEFAULT_IN_SIZE. */
 
