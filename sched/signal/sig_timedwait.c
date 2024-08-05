@@ -257,6 +257,11 @@ int nxsig_clockwait(int clockid, int flags,
   clock_t expect;
   clock_t stop;
 
+  if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
+    {
+      return -EINVAL;
+    }
+
   /* If rqtp is zero, yield CPU and return
    * Notice: The behavior of sleep(0) is not defined in POSIX, so there are
    * different implementations:
@@ -304,7 +309,8 @@ int nxsig_clockwait(int clockid, int flags,
           expect += clock_systime_ticks();
         }
 
-      wd_start_absolute(&rtcb->waitdog, expect, nxsig_timeout, (wdparm_t)rtcb);
+      wd_start_absolute(&rtcb->waitdog, expect,
+                        nxsig_timeout, (wdparm_t)rtcb);
     }
 
   /* Remove the tcb task from the ready-to-run list. */
