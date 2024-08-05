@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <sched.h>
 #include <nuttx/clock.h>
+#include <nuttx/arch.h>
 #include <nuttx/power/pm_runtime.h>
 #include <sched/sched.h>
 
