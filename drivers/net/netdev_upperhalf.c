@@ -264,7 +264,16 @@ netdev_upper_alloc(FAR struct netdev_lowerhalf_s *dev)
 
 static inline bool netdev_upper_can_tx(FAR struct netdev_upperhalf_s *upper)
 {
-  return netdev_lower_quota_load(upper->lower, NETPKT_TX) > 0;
+  FAR struct netdev_lowerhalf_s *lower = upper->lower;
+  int quota = netdev_lower_quota_load(lower, NETPKT_TX);
+
+  if (quota <= 0 && lower->ops->reclaim)
+    {
+      lower->ops->reclaim(lower);
+      quota = netdev_lower_quota_load(lower, NETPKT_TX);
+    }
+
+  return quota > 0;
 }
 
 /****************************************************************************

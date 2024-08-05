@@ -168,6 +168,10 @@ struct netdev_ops_s
   int (*ioctl)(FAR struct netdev_lowerhalf_s *dev, int cmd,
                unsigned long arg);
 #endif
+
+  /* reclaim - try to reclaim packets sent by netdev. */
+
+  void (*reclaim)(FAR struct netdev_lowerhalf_s *dev);
 };
 
 /* This structure is a set of wireless handlers, leave unsupported operations
