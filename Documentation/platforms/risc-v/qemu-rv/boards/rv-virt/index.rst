@@ -260,7 +260,7 @@ Similar to the `nsh64`_ configuration, but with User LEDs support for 64-bit RIS
 leds64_rust
 -----------
 
-Similar to the `leds64`_ configuration, but with `leds_rust` example enabled.
+Similar to the `leds64`_ configuration, but with ``leds_rust`` example enabled.
 
 netnsh
 ------
