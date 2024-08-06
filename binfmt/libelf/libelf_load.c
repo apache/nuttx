@@ -191,15 +191,6 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
     {
       FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
-      /* SHF_ALLOC indicates that the section requires memory during
-       * execution.
-       */
-
-      if ((shdr->sh_flags & SHF_ALLOC) == 0)
-        {
-          continue;
-        }
-
       /* SHF_WRITE indicates that the section address space is write-
        * able
        */
@@ -215,6 +206,18 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
       else
         {
           pptr = &text;
+        }
+
+      /* SHF_ALLOC indicates that the section requires memory during
+       * execution.
+       */
+
+      if ((shdr->sh_flags & SHF_ALLOC) == 0)
+        {
+          /* Set the VMA regardless, some relocations might depend on this */
+
+          shdr->sh_addr = (uintptr_t)*pptr;
+          continue;
         }
 
       if (*pptr == NULL)
