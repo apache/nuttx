@@ -66,4 +66,3 @@ ifeq ($(CONFIG_TLSR82_SOFT_FPU),y)
 endif
 
 CFLAGS += -Darm_fullcontextrestore=tc32_fullcontextrestore
-CFLAGS += -Darm_switchcontext=tc32_switchcontext

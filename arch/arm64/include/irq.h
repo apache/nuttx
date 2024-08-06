@@ -34,6 +34,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <arch/syscall.h>
 #endif
 
 /* Include NuttX-specific IRQ definitions */
@@ -422,6 +423,15 @@ static inline_function void up_set_current_regs(uint64_t *regs)
 {
   __asm__ volatile ("msr " "tpidr_el1" ", %0" : : "r" (regs));
 }
+
+#define up_switch_context(tcb, rtcb)                              \
+  do {                                                            \
+    if (!up_interrupt_context())                                  \
+      {                                                           \
+        sys_call2(SYS_switch_context, (uintptr_t)&rtcb->xcp.regs, \
+                  (uintptr_t)tcb->xcp.regs);                      \
+      }                                                           \
+  } while (0)
 
 /****************************************************************************
  * Name: up_interrupt_context

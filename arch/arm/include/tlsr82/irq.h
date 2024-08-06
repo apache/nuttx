@@ -312,6 +312,14 @@ static inline_function bool up_interrupt_context(void)
   return ret;
 }
 
+#define up_switch_context(tcb, rtcb)                        \
+  do {                                                      \
+    if (!up_interrupt_context())                            \
+      {                                                     \
+        tc32_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs); \
+      }                                                     \
+  } while (0)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

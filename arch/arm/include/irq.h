@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #ifndef __ASSEMBLY__
 #  include <stdbool.h>
+#  include <arch/syscall.h>
 #endif
 
 /****************************************************************************
@@ -75,6 +76,17 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+#ifndef up_switch_context
+#define up_switch_context(tcb, rtcb)                              \
+  do {                                                            \
+    if (!up_interrupt_context())                                  \
+      {                                                           \
+        sys_call2(SYS_switch_context, (uintptr_t)&rtcb->xcp.regs, \
+                  (uintptr_t)tcb->xcp.regs);                      \
+      }                                                           \
+  } while (0)
+#endif
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

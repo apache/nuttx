@@ -38,7 +38,6 @@ set(SRCS
     arm_releasestack.c
     arm_registerdump.c
     arm_stackframe.c
-    arm_switchcontext.c
     arm_usestack.c
     arm_fork.c
     ${ARCH_TOOLCHAIN_PATH}/fork.S)

@@ -119,9 +119,6 @@
     } \
   while (1)
 
-#define arm64_switchcontext(saveregs, restoreregs) \
-  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
