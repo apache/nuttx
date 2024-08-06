@@ -42,7 +42,6 @@
   container_of(ivshmem_get_driver(dev), struct rptun_ivshmem_dev_s, drv)
 
 #define RPTUN_IVSHMEM_SHMEM_BAR   2
-#define RPTUN_IVSHMEM_READY       1
 #define RPTUN_IVSHMEM_WDOG_DELAY  MSEC2TICK(1)
 
 /****************************************************************************
@@ -54,8 +53,6 @@ struct rptun_ivshmem_mem_s
   volatile uint64_t  basem;
   volatile uint32_t  seqs;
   volatile uint32_t  seqm;
-  volatile uint32_t  cmds;
-  volatile uint32_t  cmdm;
   volatile uint32_t  reserved;
   volatile uint32_t  rsc_size;
   struct rptun_rsc_s rsc;
@@ -155,12 +152,12 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 
       /* Wait untils salve is ready */
 
-      while (priv->shmem->cmds != RPTUN_IVSHMEM_READY)
+      while (RPTUN_GET_CMD(priv->shmem->rsc.cmd_slave) != RPTUN_CMD_READY)
         {
           usleep(1000);
         }
 
-      priv->shmem->cmds  = 0;
+      priv->shmem->rsc.cmd_slave = 0;
       priv->shmem->basem = (uint64_t)(uintptr_t)priv->shmem;
     }
   else
@@ -192,10 +189,9 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->config.r2h_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
       rsc->config.h2r_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
       rsc->cmd_master               = 0;
-      rsc->cmd_slave                = 0;
 
       priv->shmem->rsc_size         = sizeof(struct rptun_rsc_s);
-      priv->shmem->cmds             = RPTUN_IVSHMEM_READY;
+      priv->shmem->rsc.cmd_slave    = RPTUN_CMD_READY;
 
       /* Wait untils master is ready, salve need use master base to
        * initialize addrenv.
