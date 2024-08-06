@@ -79,7 +79,11 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_mutexattr_gettype.c
     pthread_mutexattr_setrobust.c
     pthread_mutexattr_getrobust.c
+    pthread_mutexattr_setprioceiling.c
+    pthread_mutexattr_getprioceiling.c
     pthread_mutex_lock.c
+    pthread_mutex_setprioceiling.c
+    pthread_mutex_getprioceiling.c
     pthread_once.c
     pthread_yield.c
     pthread_atfork.c

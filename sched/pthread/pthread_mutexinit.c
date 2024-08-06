@@ -55,62 +55,61 @@
 int pthread_mutex_init(FAR pthread_mutex_t *mutex,
                        FAR const pthread_mutexattr_t *attr)
 {
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-  uint8_t type = PTHREAD_MUTEX_DEFAULT;
-#endif
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-#ifdef CONFIG_PTHREAD_MUTEX_DEFAULT_UNSAFE
-  uint8_t flags = 0;
-#else
-  uint8_t flags = _PTHREAD_MFLAGS_ROBUST;
-#endif
-#endif
-  int ret = OK;
   int status;
 
   sinfo("mutex=%p attr=%p\n", mutex, attr);
 
   if (!mutex)
     {
-      ret = EINVAL;
+      return EINVAL;
     }
-  else
+
+  /* Initialize the mutex like a semaphore with initial count = 1 */
+
+  status = mutex_init(&mutex->mutex);
+  if (status < 0)
     {
-      /* Were attributes specified?  If so, use them */
+      return -status;
+    }
 
-      if (attr)
-        {
+  /* Were attributes specified?  If so, use them */
+
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-          type    = attr->type;
+      mutex->type  = attr ? attr->type : PTHREAD_MUTEX_DEFAULT;
 #endif
-#ifdef CONFIG_PTHREAD_MUTEX_BOTH
-          flags  = attr->robust == PTHREAD_MUTEX_ROBUST ?
-                   _PTHREAD_MFLAGS_ROBUST : 0;
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      mutex->flink = NULL;
+#  ifdef CONFIG_PTHREAD_MUTEX_BOTH
+      mutex->flags = attr && attr->robust == PTHREAD_MUTEX_ROBUST ?
+                     _PTHREAD_MFLAGS_ROBUST : 0;
+#  else
+      mutex->flags = 0;
+#  endif
 #endif
-        }
 
-      /* Initialize the mutex like a semaphore with initial count = 1 */
-
-      status = mutex_init(&mutex->mutex);
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
+  if (attr)
+    {
+      status = mutex_set_protocol(&mutex->mutex, attr->proto);
       if (status < 0)
         {
-          ret = -status;
+          mutex_destroy(&mutex->mutex);
+          return -status;
         }
 
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      /* Initial internal fields of the mutex */
-
-      mutex->flink = NULL;
-      mutex->flags = flags;
-#endif
-
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      /* Set up attributes unique to the mutex type */
-
-      mutex->type  = type;
-#endif
+#  ifdef CONFIG_PRIORITY_PROTECT
+      if (attr->proto == PTHREAD_PRIO_PROTECT)
+        {
+          status = mutex_setprioceiling(&mutex->mutex, attr->ceiling, NULL);
+          if (status < 0)
+            {
+              mutex_destroy(&mutex->mutex);
+              return -status;
+            }
+        }
+#  endif
     }
+#endif
 
-  sinfo("Returning %d\n", ret);
-  return ret;
+  return 0;
 }
