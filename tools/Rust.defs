@@ -45,23 +45,28 @@ ifeq ($(CONFIG_ARCH_SIM),y)
     RUSTFLAGS += --target $(LLVM_ARCHTYPE)-apple-$(LLVM_ABITYPE)
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
-  # Traget triple is riscv[32|64][isa]-unknown-none-elf
+  # Target triple is riscv[32|64][isa]-unknown-none-elf
+  # "imafdc" becomes "gc"
 
-  RUST_ARCHTYPE = $(LLVM_ARCHTYPE)i
-  ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
-    RUST_ARCHTYPE := $(RUST_ARCHTYPE)m
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
-    RUST_ARCHTYPE := $(RUST_ARCHTYPE)a
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_F),y)
-    RUST_ARCHTYPE := $(RUST_ARCHTYPE)f
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_D),y)
-    RUST_ARCHTYPE := $(RUST_ARCHTYPE)d
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
-    RUST_ARCHTYPE := $(RUST_ARCHTYPE)c
+  ifeq ($(CONFIG_ARCH_RV_ISA_M)$(CONFIG_ARCH_RV_ISA_A)$(CONFIG_ARCH_FPU)$(CONFIG_ARCH_DPFPU)$(CONFIG_ARCH_RV_ISA_C),yyyyy)
+    RUST_ARCHTYPE = $(LLVM_ARCHTYPE)gc
+  else
+    RUST_ARCHTYPE = $(LLVM_ARCHTYPE)i
+    ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
+      RUST_ARCHTYPE := $(RUST_ARCHTYPE)m
+    endif
+    ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
+      RUST_ARCHTYPE := $(RUST_ARCHTYPE)a
+    endif
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      RUST_ARCHTYPE := $(RUST_ARCHTYPE)f
+    endif
+    ifeq ($(CONFIG_ARCH_DPFPU),y)
+      RUST_ARCHTYPE := $(RUST_ARCHTYPE)d
+    endif
+    ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
+      RUST_ARCHTYPE := $(RUST_ARCHTYPE)c
+    endif
   endif
 
   RUSTFLAGS += --target $(RUST_ARCHTYPE)-unknown-none-elf

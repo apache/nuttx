@@ -46,23 +46,28 @@ ifeq ($(CONFIG_ARCH_SIM),y)
     DFLAGS += -mtriple=$(LLVM_ARCHTYPE)-apple-$(LLVM_ABITYPE)
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
-  # Traget triple is riscv[32|64][isa]-unknown-none-elf
+  # Target triple is riscv[32|64][isa]-unknown-none-elf
+  # "imafdc" becomes "gc"
 
-  D_ARCHTYPE = $(LLVM_ARCHTYPE)i
-  ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)m
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)a
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_F),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)f
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_D),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)d
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)c
+  ifeq ($(CONFIG_ARCH_RV_ISA_M)$(CONFIG_ARCH_RV_ISA_A)$(CONFIG_ARCH_FPU)$(CONFIG_ARCH_DPFPU)$(CONFIG_ARCH_RV_ISA_C),yyyyy)
+    D_ARCHTYPE = $(LLVM_ARCHTYPE)gc
+  else
+    D_ARCHTYPE = $(LLVM_ARCHTYPE)i
+    ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
+      D_ARCHTYPE := $(D_ARCHTYPE)m
+    endif
+    ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
+      D_ARCHTYPE := $(D_ARCHTYPE)a
+    endif
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      D_ARCHTYPE := $(D_ARCHTYPE)f
+    endif
+    ifeq ($(CONFIG_ARCH_DPFPU),y)
+      D_ARCHTYPE := $(D_ARCHTYPE)d
+    endif
+    ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
+      D_ARCHTYPE := $(D_ARCHTYPE)c
+    endif
   endif
 
   DFLAGS += -mtriple=$(D_ARCHTYPE)-unknown-none-elf
