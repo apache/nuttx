@@ -820,7 +820,7 @@ def main(args):
 
     # Reuse address so we don't have to wait for socket to be
     # close before we can bind to the port again
-    gdbserver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    gdbserver.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
     try:
         gdbserver.bind(("", args.port))
