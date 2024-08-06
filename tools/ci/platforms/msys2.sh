@@ -181,6 +181,7 @@ rust() {
     # Install targets supported from NuttX
     "$CARGO_HOME"/bin/rustup target add thumbv6m-none-eabi
     "$CARGO_HOME"/bin/rustup target add thumbv7m-none-eabi
+    "$CARGO_HOME"/bin/rustup target add riscv64gc-unknown-none-elf
     rm rustup-init.exe
   fi
   command rustc --version
