@@ -46,28 +46,18 @@ ifeq ($(CONFIG_ARCH_SIM),y)
     DFLAGS += -mtriple=$(LLVM_ARCHTYPE)-apple-$(LLVM_ABITYPE)
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
-  # Traget triple is riscv[32|64][isa]-unknown-none-elf
+  # Target triple is riscv[32|64]-unknown-none-elf
+  DFLAGS += -mtriple=$(LLVM_ARCHTYPE)-unknown-none-elf
+  DFLAGS += -mattr=+m,+a,+f,+d,+c
 
-  D_ARCHTYPE = $(LLVM_ARCHTYPE)i
-  ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)m
+  # Handle ABI and CPU
+  ifeq ($(CONFIG_ARCH_RV32),y)
+    DFLAGS += -mcpu=generic-rv32
+    DFLAGS += -mabi=ilp32d
+  else ifeq ($(CONFIG_ARCH_RV64),y)
+    DFLAGS += -mcpu=generic-rv64
+    DFLAGS += -mabi=lp64d
   endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)a
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_F),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)f
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_D),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)d
-  endif
-  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
-    D_ARCHTYPE := $(D_ARCHTYPE)c
-  endif
-
-  DFLAGS += -mtriple=$(D_ARCHTYPE)-unknown-none-elf
-  DFLAGS += -mattr=+m,+a,+f,+d,+c -mabi=ilp32d
-  DFLAGS += -mcpu=generic-rv32
 else
   # For arm, but there are some other archs not support yet,
   # such as xtensa, x86 bare metal, etc.
