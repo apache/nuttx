@@ -69,16 +69,6 @@
 #  define CONFIG_DESIGNATED_INITIALIZERS 1
 #endif
 
-/* ISO C/C++11 atomic types support */
-
-#undef CONFIG_HAVE_ATOMICS
-
-#if ((defined(__cplusplus) && __cplusplus >= 201103L) || \
-     (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)) && \
-    !defined(__STDC_NO_ATOMICS__)
-#  define CONFIG_HAVE_ATOMICS
-#endif
-
 /* C++ support */
 
 #undef CONFIG_HAVE_CXX14
