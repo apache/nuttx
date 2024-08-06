@@ -279,8 +279,11 @@ typedef struct pthread_cond_s pthread_cond_t;
 struct pthread_mutexattr_s
 {
   uint8_t pshared : 1;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   uint8_t proto   : 2;  /* See PTHREAD_PRIO_* definitions */
+#endif
+#ifdef CONFIG_PRIORITY_PROTECT
+  uint8_t ceiling;      /* Priority ceiling */
 #endif
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type    : 2;  /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
@@ -612,6 +615,14 @@ int pthread_mutexattr_getrobust(FAR const pthread_mutexattr_t *attr,
                                 FAR int *robust);
 int pthread_mutexattr_setrobust(FAR pthread_mutexattr_t *attr,
                                 int robust);
+int pthread_mutexattr_getprioceiling(FAR const pthread_mutexattr_t *attr,
+                                     FAR int *prioceiling);
+int pthread_mutexattr_setprioceiling(FAR pthread_mutexattr_t *attr,
+                                     int prioceiling);
+int pthread_mutex_getprioceiling(FAR const pthread_mutex_t *mutex,
+                                 FAR int *prioceiling);
+int pthread_mutex_setprioceiling(FAR pthread_mutex_t *mutex,
+                                 int prioceiling, FAR int *old_ceiling);
 
 /* The following routines create, delete, lock and unlock mutexes. */
 

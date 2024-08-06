@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_mutexattr_setprotocol.c
+ * libs/libc/pthread/pthread_mutex_setprioceiling.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,69 +23,52 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mutex.h>
 
 #include <pthread.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutexattr_setprotocol
+ * Name: pthread_mutex_setprioceiling
  *
  * Description:
- *    Set mutex protocol attribute.
+ *   Set the priority ceiling of a mutex.
  *
  * Input Parameters:
- *    attr     - A pointer to the mutex attributes to be modified
- *    protocol - The new protocol to use
+ *   mutex - The mutex in which to set the mutex priority ceiling.
+ *   prioceiling - The mutex priority ceiling value to set.
+ *   old_ceiling - Location to return the mutex ceiling priority set before.
  *
  * Returned Value:
- *   0 if successful.  Otherwise, an error code.
+ *   0, indicating the mutex priority ceiling was successfully set, or
+ *   EINVAL, indicating 'mutex' or 'old_ceiling' is NULL, or 'prioceiling'
+ *   is out of range.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
-                                  int protocol)
+int pthread_mutex_setprioceiling(FAR pthread_mutex_t *mutex,
+                                 int prioceiling, FAR int *old_ceiling)
 {
-  linfo("attr=%p protocol=%d\n", attr, protocol);
-  DEBUGASSERT(attr != NULL);
+  int ret = EINVAL;
 
-  if (protocol >= PTHREAD_PRIO_NONE && protocol <= PTHREAD_PRIO_PROTECT)
-    {
-      switch (protocol)
-        {
-          case PTHREAD_PRIO_NONE:
-#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
-            attr->proto = PTHREAD_PRIO_INHERIT;
-#endif
-            break;
-
-          case PTHREAD_PRIO_INHERIT:
-#ifdef CONFIG_PRIORITY_INHERITANCE
-            attr->proto = PTHREAD_PRIO_INHERIT;
-            break;
-#else
-            return ENOTSUP;
-#endif /* CONFIG_PRIORITY_INHERITANCE */
-
-          case PTHREAD_PRIO_PROTECT:
 #ifdef CONFIG_PRIORITY_PROTECT
-            attr->proto = PTHREAD_PRIO_PROTECT;
-            break;
-#else
-            return ENOTSUP;
-#endif /* CONFIG_PRIORITY_PROTECT */
-
-          default:
-            return ENOTSUP;
-        }
-
-      return OK;
+  ret = pthread_mutex_lock(mutex);
+  if (ret != OK)
+    {
+      return ret;
     }
 
-  return EINVAL;
+#  ifdef CONFIG_PTHREAD_MUTEX_TYPES
+  ret = -nxrmutex_setprioceiling(&mutex->mutex, prioceiling, old_ceiling);
+#  else
+  ret = -nxmutex_setprioceiling(&mutex->mutex, prioceiling, old_ceiling);
+#  endif
+  pthread_mutex_unlock(mutex);
+#endif
+  return ret;
 }

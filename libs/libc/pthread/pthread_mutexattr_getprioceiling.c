@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/pthread/pthread_mutexattr_setprotocol.c
+ * libs/libc/pthread/pthread_mutexattr_getprioceiling.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,69 +23,41 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <pthread.h>
-#include <assert.h>
 #include <errno.h>
-#include <debug.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pthread_mutexattr_setprotocol
+ * Name: pthread_mutexattr_getprioceiling
  *
  * Description:
- *    Set mutex protocol attribute.
+ *   Return the mutex ceiling priority from the mutex attributes.
  *
  * Input Parameters:
- *    attr     - A pointer to the mutex attributes to be modified
- *    protocol - The new protocol to use
+ *   attr - The mutex attributes to query
+ *   prioceiling - Location to return the mutex ceiling priority
  *
  * Returned Value:
- *   0 if successful.  Otherwise, an error code.
+ *   0, if the mutex type was successfully return in 'prioceiling', or
+ *   EINVAL, if any NULL pointers provided.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
-                                  int protocol)
+int pthread_mutexattr_getprioceiling(FAR const pthread_mutexattr_t *attr,
+                                     FAR int *prioceiling)
 {
-  linfo("attr=%p protocol=%d\n", attr, protocol);
-  DEBUGASSERT(attr != NULL);
-
-  if (protocol >= PTHREAD_PRIO_NONE && protocol <= PTHREAD_PRIO_PROTECT)
-    {
-      switch (protocol)
-        {
-          case PTHREAD_PRIO_NONE:
-#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
-            attr->proto = PTHREAD_PRIO_INHERIT;
-#endif
-            break;
-
-          case PTHREAD_PRIO_INHERIT:
-#ifdef CONFIG_PRIORITY_INHERITANCE
-            attr->proto = PTHREAD_PRIO_INHERIT;
-            break;
-#else
-            return ENOTSUP;
-#endif /* CONFIG_PRIORITY_INHERITANCE */
-
-          case PTHREAD_PRIO_PROTECT:
 #ifdef CONFIG_PRIORITY_PROTECT
-            attr->proto = PTHREAD_PRIO_PROTECT;
-            break;
-#else
-            return ENOTSUP;
-#endif /* CONFIG_PRIORITY_PROTECT */
-
-          default:
-            return ENOTSUP;
-        }
-
+  if (attr != NULL && prioceiling != NULL)
+    {
+      *prioceiling = attr->ceiling;
       return OK;
     }
+#endif
 
   return EINVAL;
 }
