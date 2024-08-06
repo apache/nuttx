@@ -34,9 +34,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_RPTUN_STOP      0x1
-#define SIM_RPTUN_MASK      0xffff
-#define SIM_RPTUN_SHIFT     16
 #define SIM_RPTUN_WORK_DELAY 1
 
 /* Status byte for master/slave to report progress */
@@ -54,8 +51,6 @@ struct sim_rptun_shmem_s
   volatile uint64_t         base;
   volatile uint32_t         seqs;
   volatile uint32_t         seqm;
-  volatile uint32_t         cmds;
-  volatile uint32_t         cmdm;
   volatile uint32_t         boots;
   volatile uint32_t         bootm;
   struct rptun_rsc_s        rsc;
@@ -238,11 +233,11 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
   struct sim_rptun_dev_s *priv = container_of(dev,
                               struct sim_rptun_dev_s, rptun);
 
-  /* Don't send SIM_RPTUN_STOP when slave recovery */
+  /* Don't send RPTUN_CMD_STOP when slave recovery */
 
   if (priv->shmem->boots & SIM_RPTUN_STATUS_OK)
     {
-      priv->shmem->cmdm = SIM_RPTUN_STOP << SIM_RPTUN_SHIFT;
+      priv->shmem->rsc.cmd_master = RPTUN_CMD(RPTUN_CMD_STOP, 0);
     }
 
   if ((priv->master & SIM_RPTUN_BOOT) && priv->pid > 0)
@@ -293,12 +288,13 @@ static int sim_rptun_register_callback(struct rptun_dev_s *dev,
 
 static void sim_rptun_check_cmd(struct sim_rptun_dev_s *priv)
 {
-  unsigned int cmd = priv->master ? priv->shmem->cmds : priv->shmem->cmdm;
+  unsigned int cmd = priv->master ? priv->shmem->rsc.cmd_slave :
+                     priv->shmem->rsc.cmd_master;
 
-  switch ((cmd >> SIM_RPTUN_SHIFT) & SIM_RPTUN_MASK)
+  switch (RPTUN_GET_CMD(cmd))
     {
-      case SIM_RPTUN_STOP:
-        host_abort(cmd & SIM_RPTUN_MASK);
+      case RPTUN_CMD_STOP:
+        host_abort(RPTUN_GET_CMD_VAL(cmd));
         break;
 
       default:

@@ -54,8 +54,6 @@ struct rpmsg_virtio_ivshmem_mem_s
   volatile uint64_t         basem;
   volatile uint32_t         seqs;
   volatile uint32_t         seqm;
-  volatile uint32_t         cmds;
-  volatile uint32_t         cmdm;
   struct rpmsg_virtio_rsc_s rsc;
 };
 

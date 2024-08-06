@@ -54,8 +54,6 @@
 
 #define RPTUN_TIMEOUT_MS            20
 
-#define RPTUN_CMD_PANIC             0x1
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -388,7 +386,7 @@ static void rptun_command(FAR struct rptun_priv_s *priv)
       rsc->cmd_master = 0;
     }
 
-  switch (cmd)
+  switch (RPTUN_GET_CMD(cmd))
     {
       case RPTUN_CMD_PANIC:
         PANIC();
@@ -690,11 +688,11 @@ static void rptun_panic(FAR struct rpmsg_s *rpmsg)
 
   if (RPTUN_IS_MASTER(priv->dev))
     {
-      rsc->cmd_master = RPTUN_CMD_PANIC;
+      rsc->cmd_master = RPTUN_CMD(RPTUN_CMD_PANIC, 0);
     }
   else
     {
-      rsc->cmd_slave = RPTUN_CMD_PANIC;
+      rsc->cmd_slave = RPTUN_CMD(RPTUN_CMD_PANIC, 0);
     }
 
   rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);

@@ -47,8 +47,6 @@ struct sim_rpmsg_virtio_shmem_s
   volatile uintptr_t        base;
   volatile unsigned int     seqs;
   volatile unsigned int     seqm;
-  volatile unsigned int     cmds;
-  volatile unsigned int     cmdm;
   volatile unsigned int     boots;
   volatile unsigned int     bootm;
   struct rpmsg_virtio_rsc_s rsc;
