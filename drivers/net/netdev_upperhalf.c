@@ -73,6 +73,12 @@ struct netdev_upperhalf_s
 #else
   struct work_s work;
 #endif
+
+  /* TX queue for re-queueing replies */
+
+#if CONFIG_IOB_NCHAINS > 0
+  struct iob_queue_s txq;
+#endif
 };
 
 /****************************************************************************
@@ -279,7 +285,7 @@ static inline bool netdev_upper_can_tx(FAR struct netdev_upperhalf_s *upper)
  *
  * Returned Value:
  *   Negated errno value - Error number that occurs.
- *   OK                  - Driver can send more, continue the poll.
+ *   NETDEV_TX_CONTINUE  - Driver can send more, continue the poll.
  *
  * Assumptions:
  *   Called with the network locked.
@@ -330,6 +336,44 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: netdev_upper_tx
+ *
+ * Description:
+ *   Do the actual transmission of packets, including pre-queued packets and
+ *   packets from the network stack.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   Negated errno value - Error number that occurs.
+ *   NETDEV_TX_CONTINUE  - Driver can send more, continue the poll.
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+static int netdev_upper_tx(FAR struct net_driver_s *dev)
+{
+#if CONFIG_IOB_NCHAINS > 0
+  FAR struct netdev_upperhalf_s *upper = dev->d_private;
+
+  if (!IOB_QEMPTY(&upper->txq))
+    {
+      /* Put the packet back to the device */
+
+      netdev_iob_replace(dev, iob_remove_queue(&upper->txq));
+      return netdev_upper_txpoll(dev);
+    }
+#endif
+
+  /* No more TX packets in queue, poll the net stack to get more packets */
+
+  return devif_poll(dev, netdev_upper_txpoll);
+}
+
+/****************************************************************************
  * Name: netdev_upper_txavail_work
  *
  * Description:
@@ -353,9 +397,61 @@ static void netdev_upper_txavail_work(FAR struct netdev_upperhalf_s *upper)
     {
       DEBUGASSERT(dev->d_buf == NULL); /* Make sure: IOB only. */
       while (netdev_upper_can_tx(upper) &&
-             devif_poll(dev, netdev_upper_txpoll) == NETDEV_TX_CONTINUE);
+             netdev_upper_tx(dev) == NETDEV_TX_CONTINUE);
     }
 }
+
+/****************************************************************************
+ * Name: netdev_upper_queue_tx
+ *
+ * Description:
+ *   Queue a TX packet to the upper half for sending later.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NET_LOOPBACK) || defined(CONFIG_NET_ETHERNET) || \
+    defined(CONFIG_DRIVERS_IEEE80211) || defined(CONFIG_NET_MBIM)
+static void netdev_upper_queue_tx(FAR struct net_driver_s *dev)
+{
+#if CONFIG_IOB_NCHAINS > 0
+  FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  int ret;
+
+  if ((ret = iob_tryadd_queue(dev->d_iob, &upper->txq)) >= 0)
+    {
+      netdev_iob_clear(dev);
+    }
+  else
+    {
+      nwarn("WARNING: Failed to queue TX packet, dropping: %d\n", ret);
+    }
+#else
+  /* Fall back to send the packet directly if we don't have IOB queue. */
+
+  netdev_upper_txpoll(dev);
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: eth_input
+ *
+ * Description:
+ *   Handle L2 packet input.
+ *
+ * Input Parameters:
+ *   dev - Reference to the NuttX network driver state structure
+ *
+ * Assumptions:
+ *   Called with the network locked.
+ *
+ ****************************************************************************/
 
 #if defined(CONFIG_NET_LOOPBACK) || defined(CONFIG_NET_ETHERNET) || \
     defined(CONFIG_DRIVERS_IEEE80211)
@@ -432,9 +528,11 @@ static void eth_input(FAR struct net_driver_s *dev)
 
   if (dev->d_len > 0)
     {
-      /* And send the packet */
+      /* And queue the packet for sending later.
+       * Note: RX is tried before TX, so we don't need to call txavail here.
+       */
 
-      netdev_upper_txpoll(dev);
+      netdev_upper_queue_tx(dev);
     }
 }
 #endif
@@ -495,9 +593,11 @@ static void ip_input(FAR struct net_driver_s *dev)
 
   if (dev->d_len > 0)
     {
-      /* And send the packet */
+      /* And queue the packet for sending later.
+       * Note: RX is tried before TX, so we don't need to call txavail here.
+       */
 
-      netdev_upper_txpoll(dev);
+      netdev_upper_queue_tx(dev);
     }
 }
 #endif
@@ -1147,6 +1247,10 @@ int netdev_lower_unregister(FAR struct netdev_lowerhalf_s *dev)
 
   nxsem_destroy(&upper->sem);
   nxsem_destroy(&upper->sem_exit);
+#endif
+
+#if CONFIG_IOB_NCHAINS > 0
+  iob_free_queue(&upper->txq);
 #endif
 
   kmm_free(upper);
