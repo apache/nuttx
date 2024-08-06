@@ -108,10 +108,10 @@ def mempool_foreach(pool):
             gdb.Value(entry).cast(gdb.lookup_type("char").pointer()) - nblk * blocksize
         )
         while nblk > 0:
+            nblk -= 1
             bufaddr = gdb.Value(base + nblk * blocksize + pool["blocksize"])
             buf = bufaddr.cast(gdb.lookup_type("struct mempool_backtrace_s").pointer())
             yield buf
-            nblk -= 1
 
 
 class Nxmemdump(gdb.Command):
