@@ -2609,11 +2609,15 @@ static int cdcncm_setup(FAR struct usbdevclass_driver_s *driver,
               {
                 case 0x0000:
                   self->parseropts = &g_ndp16_opts;
+                  self->ndpsign = self->isncm ? self->parseropts->ndpsign :
+                                                CDC_MBIM_NDP16_NOCRC_SIGN;
                   uinfo("NCM16 selected\n");
                   ret = 0;
                   break;
                 case 0x0001:
                   self->parseropts = &g_ndp32_opts;
+                  self->ndpsign = self->isncm ? self->parseropts->ndpsign :
+                                                CDC_MBIM_NDP32_NOCRC_SIGN;
                   uinfo("NCM32 selected\n");
                   ret = 0;
                   break;
