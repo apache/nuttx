@@ -61,7 +61,7 @@ def restore_regs():
         if i >= tcbinfo["regs_num"]:
             break
 
-        gdb.execute("set $%s=%d" % (reg.name, int(saved_regs[i])))
+        gdb.execute(f"set ${reg.name}={saved_regs[i]}")
         i += 1
 
     saved_regs = None
@@ -91,7 +91,7 @@ class Nxsetregs(gdb.Command):
         arg = args.split(" ")
 
         if arg[0] != "":
-            regs = gdb.parse_and_eval("%s" % arg[0]).cast(
+            regs = gdb.parse_and_eval(f"{arg[0]}").cast(
                 gdb.lookup_type("char").pointer()
             )
         else:
@@ -115,7 +115,7 @@ class Nxsetregs(gdb.Command):
                 value = gdb.Value(regs + tcbinfo["reg_off"]["p"][i]).cast(
                     gdb.lookup_type("uintptr_t").pointer()
                 )[0]
-                gdb.execute("set $%s = 0x%x" % (reg.name, value))
+                gdb.execute(f"set ${reg.name} = {value}")
 
             i += 1
 
@@ -138,51 +138,49 @@ class Nxinfothreads(gdb.Command):
             gdb.write("%-5s %-4s %-4s %-21s %-80s %-30s\n" % ("Index", "Tid", "Pid", "Thread", "Info", "Frame"))
 
         for i in range(0, npidhash):
-            if pidhash[i] == 0:
+            tcb = pidhash[i]
+            if not tcb:
                 continue
 
-            pid = pidhash[i]["group"]["tg_pid"]
-            tid = pidhash[i]["pid"]
+            pid = tcb["group"]["tg_pid"]
+            tid = tcb["pid"]
 
-            if pidhash[i]["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING"):
-                index = "*%s" % i
-                pc = utils.get_register_byname(utils.get_arch_pc_name(), tcb=None)
+            if tcb["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING"):
+                index = f"*{i}"
+                pc = utils.get_pc()
             else:
-                index = " %s" % i
-                pc = utils.get_register_byname(utils.get_arch_pc_name(), tcb=pidhash[i])
+                index = f" {i}"
+                pc = utils.get_pc(tcb=tcb)
 
-            thread = "Thread 0x%x" % pidhash[i]
+            thread = f"Thread {hex(tcb)}"
 
-            statename = statenames[pidhash[i]["task_state"]].string()
-            if statename == "Running":
-                statename = "\x1b[32;1m%s\x1b[m" % statename
-            else:
-                statename = "\x1b[33;1m%s\x1b[m" % statename
+            statename = statenames[tcb["task_state"]].string()
+            statename = f'\x1b{"[32;1m" if statename == "Running" else "[33;1m"}{statename}\x1b[m'
 
-            if pidhash[i]["task_state"] == gdb.parse_and_eval("TSTATE_WAIT_SEM"):
-                mutex = pidhash[i]["waitobj"].cast(gdb.lookup_type("sem_t").pointer())
+            if tcb["task_state"] == gdb.parse_and_eval("TSTATE_WAIT_SEM"):
+                mutex = tcb["waitobj"].cast(gdb.lookup_type("sem_t").pointer())
                 if mutex["flags"] & SEM_TYPE_MUTEX:
-                    mutex = pidhash[i]["waitobj"].cast(gdb.lookup_type("mutex_t").pointer())
-                    statename = "Waiting,Mutex:%d" % (mutex["holder"])
+                    mutex = tcb["waitobj"].cast(gdb.lookup_type("mutex_t").pointer())
+                    statename = f"Waiting,Mutex:{mutex['holder']}"
 
             try:
                 """Maybe tcb not have name member, or name is not utf-8"""
                 info = "(Name: \x1b[31;1m%s\x1b[m, State: %s, Priority: %d, Stack: %d)" % (
-                    pidhash[i]["name"].string(),
+                    tcb["name"].string(),
                     statename,
-                    pidhash[i]["sched_priority"],
-                    pidhash[i]["adj_stack_size"],
+                    tcb["sched_priority"],
+                    tcb["adj_stack_size"],
                 )
             except gdb.error and UnicodeDecodeError:
                 info = "(Name: Not utf-8, State: %s, Priority: %d, Stack: %d)" % (
                     statename,
-                    pidhash[i]["sched_priority"],
-                    pidhash[i]["adj_stack_size"],
+                    tcb["sched_priority"],
+                    tcb["adj_stack_size"],
                 )
 
             line = gdb.find_pc_line(pc)
             if line.symtab:
-                func = gdb.execute("info symbol %d " % pc, to_string=True)
+                func = gdb.execute(f"info symbol {pc} ", to_string=True)
                 frame = "\x1b[34;1m0x%x\x1b[\t\x1b[33;1m%s\x1b[m at %s:%d" % (
                     pc,
                     func.split()[0] + "()",
@@ -193,7 +191,7 @@ class Nxinfothreads(gdb.Command):
                 frame = "No symbol with pc"
 
             if utils.is_target_smp():
-                cpu = "%d" % pidhash[i]["cpu"]
+                cpu = f"{tcb['cpu']}"
                 gdb.write(
                     "%-5s %-4s %-4s %-4s %-21s %-80s %-30s\n" % (index, tid, pid, cpu, thread, info, frame)
                 )
@@ -224,16 +222,16 @@ class Nxthread(gdb.Command):
                     if pidhash[i] == 0:
                         continue
                     try:
-                        gdb.write("Thread %d %s\n" % (i, pidhash[i]["name"].string()))
+                        gdb.write(f"Thread {i} {pidhash[i]['name'].string()}\n")
                     except gdb.error and UnicodeDecodeError:
-                        gdb.write("Thread %d\n" % (i))
+                        gdb.write(f"Thread {i}\n")
 
-                    gdb.execute("nxsetregs g_pidhash[%d]->xcp.regs" % i)
+                    gdb.execute(f"nxsetregs g_pidhash[{i}]->xcp.regs")
                     cmd_arg = ""
                     for cmd in arg[2:]:
                         cmd_arg += cmd + " "
 
-                    gdb.execute("%s\n" % cmd_arg)
+                    gdb.execute(f"{cmd_arg}\n")
                     restore_regs()
             else:
                 threadlist = []
@@ -256,14 +254,12 @@ class Nxthread(gdb.Command):
                             continue
 
                         try:
-                            gdb.write(
-                                "Thread %d %s\n" % (i, pidhash[i]["name"].string())
-                            )
+                            gdb.write(f"Thread {i} {pidhash[i]['name'].string()}\n")
                         except gdb.error and UnicodeDecodeError:
-                            gdb.write("Thread %d\n" % (i))
+                            gdb.write(f"Thread {i}\n")
 
-                        gdb.execute("nxsetregs g_pidhash[%d]->xcp.regs" % i)
-                        gdb.execute("%s\n" % cmd)
+                        gdb.execute(f"nxsetregs g_pidhash[{i}]->xcp.regs")
+                        gdb.execute(f"{cmd}\n")
                         restore_regs()
 
         else:
@@ -273,7 +269,7 @@ class Nxthread(gdb.Command):
                 else:
                     gdb.execute("nxsetregs g_pidhash[%s]->xcp.regs" % arg[0])
             else:
-                gdb.write("Invalid thread id %s\n" % arg[0])
+                gdb.write(f"Invalid thread id {arg[0]}\n")
 
 
 class Nxcontinue(gdb.Command):
@@ -366,7 +362,7 @@ class Ps(gdb.Command):
             int(tcb["stack_base_ptr"]),
             int(tcb["stack_alloc_ptr"]),
             int(tcb["adj_stack_size"]),
-            utils.get_register_byname("sp", tcb),
+            utils.get_sp(tcb),
             4,)
 
         stacksz = st._stack_size

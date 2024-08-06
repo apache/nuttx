@@ -31,7 +31,7 @@ python_dir = os.path.dirname(python_dir)
 
 sys.path.insert(1, python_dir)
 # Search the python dir for all .py files, and source each
-py_files = glob.glob("%s/*.py" % python_dir)
+py_files = glob.glob(f"{python_dir}/*.py")
 py_files.remove(os.path.abspath(__file__))
 
 gdb.execute("set pagination off")
@@ -39,8 +39,8 @@ gdb.write("set pagination off\n")
 gdb.execute("set python print-stack full")
 gdb.write("set python print-stack full\n")
 for py_file in py_files:
-    gdb.execute("source %s" % py_file)
-    gdb.write("source %s\n" % py_file)
+    gdb.execute(f"source {py_file}")
+    gdb.write(f"source {py_file}\n")
 
 gdb.execute('handle SIGUSR1 "nostop" "pass" "noprint"')
 gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')

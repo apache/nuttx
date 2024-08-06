@@ -119,9 +119,9 @@ def fetch_stacks():
     for tcb in utils.get_tcbs():
         if tcb["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING") \
                 and not utils.in_interrupt_context():
-            sp = utils.get_register_byname(utils.get_arch_sp_name(), tcb=None)
+            sp = utils.get_sp()
         else:
-            sp = utils.get_register_byname(utils.get_arch_sp_name(), tcb=tcb)
+            sp = utils.get_sp(tcb=tcb)
 
         try:
             stacks[int(tcb["pid"])] = Stack(
