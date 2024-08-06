@@ -30,13 +30,10 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/atomic.h>
 
 #include <net/if.h>
 #include <netinet/in.h>
-
-#ifdef CONFIG_HAVE_ATOMICS
-#  include <stdatomic.h>
-#endif
 
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
@@ -120,12 +117,7 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
-#ifdef CONFIG_HAVE_ATOMICS
   atomic_int quota[NETPKT_TYPENUM];
-#else
-  int quota[NETPKT_TYPENUM];
-  spinlock_t lock;
-#endif
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.
