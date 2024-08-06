@@ -57,12 +57,14 @@ void up_idle(void)
 #ifdef CONFIG_PM
   static enum pm_state_e state = PM_NORMAL;
   enum pm_state_e newstate;
+#endif
   irqstate_t flags;
-
-  /* Fake some power management stuff for testing purposes */
 
   flags = enter_critical_section();
   sched_lock();
+
+#ifdef CONFIG_PM
+  /* Fake some power management stuff for testing purposes */
 
   newstate = pm_checkstate(PM_IDLE_DOMAIN);
   if (newstate != state)
@@ -83,8 +85,8 @@ void up_idle(void)
 
 #ifdef CONFIG_PM
   pm_changestate(PM_IDLE_DOMAIN, PM_RESTORE);
+#endif
 
   sched_unlock();
   leave_critical_section(flags);
-#endif
 }
