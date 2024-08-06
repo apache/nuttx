@@ -199,7 +199,7 @@ __cpu0_start:
 	mov		r0, #0
 	mcr		CP15_BPIALL(r0)		/* Invalidate entire branch prediction array */
 	mcr		CP15_ICIALLU(r0)	/* Invalidate I-cache */
-	mov		r0, CP15_CACHE_INVALIDATE
+	mov		r1, CP15_CACHE_INVALIDATE
 	bl		cp15_dcache_op_level
 	isb
 
