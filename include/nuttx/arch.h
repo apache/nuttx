@@ -439,7 +439,9 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
  *
  ****************************************************************************/
 
+#ifndef up_switch_context
 void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb);
+#endif
 
 /****************************************************************************
  * Name: up_exit

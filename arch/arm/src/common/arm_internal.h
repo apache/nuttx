@@ -153,14 +153,6 @@
 extern void arm_fullcontextrestore(uint32_t *restoreregs);
 #endif
 
-#ifndef arm_switchcontext
-#  define arm_switchcontext(saveregs, restoreregs) \
-    sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs);
-#else
-extern void arm_switchcontext(uint32_t **saveregs,
-                              uint32_t *restoreregs);
-#endif
-
 /* Redefine the linker symbols as armlink style */
 
 #ifdef CONFIG_ARM_TOOLCHAIN_ARMCLANG
