@@ -27,6 +27,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/video/v4l2_m2m.h>
+#include <nuttx/wqueue.h>
 
 #include "sim_openh264dec.h"
 #include "sim_internal.h"
