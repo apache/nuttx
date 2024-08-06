@@ -86,42 +86,6 @@ struct netdev_upperhalf_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: quota_fetch_inc/dec
- *
- * Description:
- *   Fetch the quota and add/sub one to it.  It works like atomic_fetch_xxx,
- *   just because currently we don't have atomic on some platform.  We may
- *   switch to atomic later.
- *
- ****************************************************************************/
-
-static int quota_fetch_inc(FAR struct netdev_lowerhalf_s *lower,
-                           enum netpkt_type_e type)
-{
-#ifndef CONFIG_HAVE_ATOMICS
-  irqstate_t flags = spin_lock_irqsave(&lower->lock);
-  int ret = lower->quota[type]++;
-  spin_unlock_irqrestore(&lower->lock, flags);
-  return ret;
-#else
-  return atomic_fetch_add(&lower->quota[type], 1);
-#endif
-}
-
-static int quota_fetch_dec(FAR struct netdev_lowerhalf_s *lower,
-                           enum netpkt_type_e type)
-{
-#ifndef CONFIG_HAVE_ATOMICS
-  irqstate_t flags = spin_lock_irqsave(&lower->lock);
-  int ret = lower->quota[type]--;
-  spin_unlock_irqrestore(&lower->lock, flags);
-  return ret;
-#else
-  return atomic_fetch_sub(&lower->quota[type], 1);
-#endif
-}
-
-/****************************************************************************
  * Name: quota_is_valid
  *
  * Description:
@@ -183,7 +147,7 @@ static FAR netpkt_t *netpkt_get(FAR struct net_driver_s *dev,
    * cases will be limited by netdev_upper_can_tx and seldom reaches here.
    */
 
-  if (quota_fetch_dec(upper->lower, type) <= 0)
+  if (atomic_fetch_sub(&upper->lower->quota[type], 1) <= 0)
     {
       nwarn("WARNING: Allowing temperarily exceeding quota of %s.\n",
             dev->d_ifname);
@@ -215,7 +179,7 @@ static void netpkt_put(FAR struct net_driver_s *dev, FAR netpkt_t *pkt,
    *       but we don't want these changes.
    */
 
-  quota_fetch_inc(upper->lower, type);
+  atomic_fetch_add(&upper->lower->quota[type], 1);
   netdev_iob_release(dev);
   dev->d_iob = pkt;
   dev->d_len = netpkt_getdatalen(upper->lower, pkt);
@@ -1204,9 +1168,6 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       return -ENOMEM;
     }
 
-#ifndef CONFIG_HAVE_ATOMICS
-  spin_initialize(&dev->lock, SP_UNLOCKED);
-#endif
   dev->netdev.d_ifup    = netdev_upper_ifup;
   dev->netdev.d_ifdown  = netdev_upper_ifdown;
   dev->netdev.d_txavail = netdev_upper_txavail;
@@ -1375,14 +1336,7 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 int netdev_lower_quota_load(FAR struct netdev_lowerhalf_s *dev,
                             enum netpkt_type_e type)
 {
-#ifndef CONFIG_HAVE_ATOMICS
-  irqstate_t flags = spin_lock_irqsave(&dev->lock);
-  int ret = dev->quota[type];
-  spin_unlock_irqrestore(&dev->lock, flags);
-  return ret;
-#else
   return atomic_load(&dev->quota[type]);
-#endif
 }
 
 /****************************************************************************
@@ -1405,16 +1359,16 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 {
   FAR netpkt_t *pkt;
 
-  if (quota_fetch_dec(dev, type) <= 0)
+  if (atomic_fetch_sub(&dev->quota[type], 1) <= 0)
     {
-      quota_fetch_inc(dev, type);
+      atomic_fetch_add(&dev->quota[type], 1);
       return NULL;
     }
 
   pkt = iob_tryalloc(false);
   if (pkt == NULL)
     {
-      quota_fetch_inc(dev, type);
+      atomic_fetch_add(&dev->quota[type], 1);
       return NULL;
     }
 
@@ -1438,7 +1392,7 @@ FAR netpkt_t *netpkt_alloc(FAR struct netdev_lowerhalf_s *dev,
 void netpkt_free(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
                  enum netpkt_type_e type)
 {
-  quota_fetch_inc(dev, type);
+  atomic_fetch_add(&dev->quota[type], 1);
   iob_free_chain(pkt);
 }
 
