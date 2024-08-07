@@ -31,6 +31,7 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/irq.h>
+#include <nuttx/wdog.h>
 
 #include "sched/sched.h"
 
@@ -61,6 +62,11 @@
       CONFIG_SCHED_CPULOAD_TIMECONSTANT * \
       CPULOAD_TICKSPERSEC)
 
+/* The sampling period in system timer ticks */
+
+#define CPULOAD_SAMPLING_PERIOD \
+     (TICK_PER_SEC / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -79,6 +85,34 @@
  */
 
 volatile clock_t g_cpuload_total;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cpuload_callback
+ *
+ * Description:
+ *   This is the callback function that will be invoked when the watchdog
+ *   timer expires.
+ *
+ * Input Parameters:
+ *   argc - the argument passed with the timer when the timer was started.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_CPULOAD_SYSCLK
+static void cpuload_callback(wdparm_t arg)
+{
+  FAR struct wdog_s *wdog = (FAR struct wdog_s *)arg;
+  nxsched_process_cpuload_ticks(CPULOAD_SAMPLING_PERIOD);
+  wd_start(wdog, CPULOAD_SAMPLING_PERIOD, cpuload_callback, arg);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -221,3 +255,26 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
   leave_critical_section(flags);
   return ret;
 }
+
+/****************************************************************************
+ * Name: cpuload_init
+ *
+ * Description:
+ *   Initialize the CPU load measurement logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_CPULOAD_SYSCLK
+void cpuload_init(void)
+{
+  static struct wdog_s g_cpuload_wdog;
+  wd_start(&g_cpuload_wdog, CPULOAD_SAMPLING_PERIOD, cpuload_callback,
+           (wdparm_t)&g_cpuload_wdog);
+}
+#endif
