@@ -852,3 +852,63 @@ class Memmap(gdb.Command):
 Memdump()
 Memleak()
 Memmap()
+
+
+class Memfrag(gdb.Command):
+    def __init__(self):
+        super(Memfrag, self).__init__("memfrag", gdb.COMMAND_USER)
+
+    def parse_arguments(self, argv):
+        parser = argparse.ArgumentParser(description="memfrag command")
+        parser.add_argument(
+            "-d", "--detail", action="store_true", help="Output details"
+        )
+        if argv[0] == '':
+            argv = None
+        try:
+            args = parser.parse_args(argv)
+        except SystemExit:
+            return None
+        return args.detail
+
+    def freeinfo(self):
+        info = []
+        heap = gdb.parse_and_eval("g_mmheap")
+        for node in mm_foreach(heap):
+            if node["size"] & MM_ALLOC_BIT == 0:
+                freenode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+                info.append(
+                    {
+                        "addr": int(freenode),
+                        "size": int(mm_nodesize(node["size"])),
+                    }
+                )
+        return info
+
+    def invoke(self, args, from_tty):
+        detail = self.parse_arguments(args.split(" "))
+        info = self.freeinfo()
+
+        info = sorted(info, key=lambda item: item["size"], reverse=True)
+        if detail:
+            for node in info:
+                gdb.write(f"addr: {node['addr']}, size: {node['size']}\n")
+
+        heapsize = gdb.parse_and_eval("*g_mmheap")["mm_heapsize"]
+        freesize = sum([node["size"] for node in info])
+        remaining = freesize
+        fragrate = 0
+
+        for node in info:
+            fragrate += (1 - (node["size"] / remaining)) * (node["size"] / freesize)
+            remaining -= node["size"]
+
+        fragrate = fragrate * 1000
+        gdb.write(f"memory fragmentation rate: {fragrate:.2f}\n")
+        gdb.write(
+            f"heap size: {heapsize}, free size: {freesize}, uordblks:"
+            f"{info.__len__()} largest block: {info[0]['size']} \n"
+        )
+
+
+Memfrag()
