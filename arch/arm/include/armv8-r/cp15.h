@@ -88,6 +88,8 @@
 #define CP15_AIDR(r)       _CP15(1, r, c0, c0, 7)   /* Auxiliary ID Register */
 #define CP15_CSSELR(r)     _CP15(2, r, c0, c0, 0)   /* Cache Size Selection Register */
 
+#define CP15_HSCTLR(r)     _CP15(4, r, c1, c0, 0)   /* Hyp System Control Register */
+#define CP15_HACTLR(r)     _CP15(4, r, c1, c0, 1)   /* Hyp Auxiliary Control Register */
 #define CP15_SCTLR(r)      _CP15(0, r, c1, c0, 0)   /* System Control Register */
 #define CP15_ACTLR(r)      _CP15(0, r, c1, c0, 1)   /* Auxiliary Control Register */
 #define CP15_CPACR(r)      _CP15(0, r, c1, c0, 2)   /* Coprocessor Access Control Register */
