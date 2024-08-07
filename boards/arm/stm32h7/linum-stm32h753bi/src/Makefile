@@ -58,6 +58,10 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += stm32_usbmsc.c
 endif
 
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CSRCS += stm32_qencoder.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif

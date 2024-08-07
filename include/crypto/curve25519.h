@@ -20,6 +20,12 @@
 #ifndef __INCLUDE_CRYPTO_CURVE25519_H
 #define __INCLUDE_CRYPTO_CURVE25519_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <stdlib.h>
+
 #define CURVE25519_KEY_SIZE 32
 
 int curve25519(uint8_t out[CURVE25519_KEY_SIZE],

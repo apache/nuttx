@@ -351,6 +351,12 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   endif
 endif
 
+# Debug --whole-archive
+
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
+endif
+
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
@@ -405,3 +411,16 @@ include $(TOPDIR)/tools/Zig.defs
 # Rust toolchain
 
 include $(TOPDIR)/tools/Rust.defs
+
+# LDC (LLVM D Compiler) toolchain
+
+include $(TOPDIR)/tools/D.defs
+
+# Shared library build flags
+
+SHCCFLAGS = -fPIC -fPIE -fvisibility=default
+SHLDFLAGS = -shared -Bsymbolic -Bdynamic -G
+
+ifeq ($(CONFIG_SIM_M32),y)
+  SHLDFLAGS += -melf_i386
+endif

@@ -907,6 +907,7 @@ struct fat_file_s
   off_t    ff_startcluster;        /* Start cluster of file on media */
   off_t    ff_currentsector;       /* Current sector being operated on */
   off_t    ff_cachesector;         /* Current sector in the file buffer */
+  off_t    ff_pos;                 /* Current position in the file */
   uint8_t *ff_buffer;              /* File buffer (for partial sector accesses) */
 };
 

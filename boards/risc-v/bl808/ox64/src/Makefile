@@ -22,6 +22,6 @@ include $(TOPDIR)/Make.defs
 
 RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
-CSRCS = bl808_appinit.c
+CSRCS = bl808_appinit.c bl808_autoleds.c bl808_userleds.c
 
 include $(TOPDIR)/boards/Board.mk

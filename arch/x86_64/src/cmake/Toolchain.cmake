@@ -85,38 +85,39 @@ if(CONFIG_DEBUG_LINK_MAP)
   add_link_options(-Wl,--cref -Wl,-Map=nuttx.map)
 endif()
 
-set(ARCHCFLAGS
-    "-Wstrict-prototypes -fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas"
-)
-set(ARCHCXXFLAGS
-    "-fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas")
+add_compile_options(
+  -fno-common
+  -Wall
+  -Wshadow
+  -Wundef
+  -Wno-attributes
+  -Wno-unknown-pragmas
+  $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
+
+if(CONFIG_CXX_STANDARD)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
+endif()
 
 if(NOT CONFIG_LIBCXXTOOLCHAIN)
-  set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -nostdinc++")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
 endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)
-  string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+                      $<$<COMPILE_LANGUAGE:CXX>:-fcheck-new>)
 endif()
 
 if(NOT CONFIG_CXX_RTTI)
-  string(APPEND ARCHCXXFLAGS " -fno-rtti")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
-if(NOT "${CMAKE_C_FLAGS}" STREQUAL "")
-  string(REGEX MATCH "${ARCHCFLAGS}" EXISTS_FLAGS "${CMAKE_C_FLAGS}")
+if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
+  add_link_options(-Wl,--gc-sections)
+  add_compile_options(-ffunction-sections -fdata-sections)
 endif()
 
-if(NOT EXISTS_FLAGS)
-  set(CMAKE_ASM_FLAGS
-      "${CMAKE_ASM_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_C_FLAGS
-      "${CMAKE_C_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} ${ARCHCXXFLAGS}"
-      CACHE STRING "" FORCE)
+if(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE)
+  add_link_options(-Wl,--whole-archive)
 endif()
 
 if(CONFIG_ARCH_INTEL64_HAVE_RDRAND)
@@ -141,4 +142,44 @@ endif()
 
 if(CONFIG_ARCH_X86_64_SSE4A)
   add_compile_options(-msse4a)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX)
+  add_compile_options(-mavx)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512)
+  add_compile_options(-mavx512f)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512PF)
+  add_compile_options(-mavx512pf)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512ER)
+  add_compile_options(-mavx512er)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512CD)
+  add_compile_options(-mavx512cd)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512VL)
+  add_compile_options(-mavx512vl)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512BW)
+  add_compile_options(-mavx512bw)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512DQ)
+  add_compile_options(-mavx512dq)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512IFMA)
+  add_compile_options(-mavx512ifma)
+endif()
+
+if(CONFIG_ARCH_X86_64_AVX512VBMI)
+  add_compile_options(-mavx512vbmi)
 endif()

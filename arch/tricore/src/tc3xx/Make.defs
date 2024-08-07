@@ -27,6 +27,8 @@ CHIP_CSRCS += tc3xx_serial.c
 
 VPATH += tc3xx
 
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+
 tc3xx_libc$(OBJEXT): tc3xx_libc.c
 	$(call COMPILE, $<, $@)
 
@@ -34,6 +36,19 @@ libc_fpu$(LIBEXT): tc3xx_libc$(OBJEXT)
 	$(call ARCHIVE, $@, $<)
 
 EXTRA_LIBS += libc_fpu$(LIBEXT)
+
+else
+
+tc3xx_dummy$(OBJEXT): tc3xx_dummy.c
+	$(call COMPILE, $<, $@)
+
+libos$(LIBEXT): tc3xx_dummy$(OBJEXT)
+	$(call ARCHIVE, $@, $<)
+
+EXTRA_LIBS += libos$(LIBEXT)
+
+endif
+
 LIBPATHS   += $(CURDIR)
 
 TC397_UNPACK  = tc397

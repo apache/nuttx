@@ -22,9 +22,9 @@ TARGET_ZIP =
 SGDIR      = segger
 
 ifeq ($(CONFIG_SEGGER_RTT),y)
-  CSRCS += segger/RTT/RTT/SEGGER_RTT.c
+  CSRCS += segger/SystemView/SEGGER/SEGGER_RTT.c
 
-  CFLAGS += -Wno-shadow -Wno-array-bounds
+  CFLAGS += -Wno-shadow -Wno-pointer-to-int-cast
 
   ifneq ($(CONFIG_SEGGER_RTT_SECTION),"")
     CFLAGS += ${DEFINE_PREFIX}SEGGER_RTT_SECTION=CONFIG_SEGGER_RTT_SECTION
@@ -35,26 +35,11 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
   endif
 
   CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)config
-  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)RTT$(DELIM)RTT
 
   ifeq ($(CONFIG_ARCH_ARMV7M),y)
     AFLAGS += ${INCDIR_PREFIX}segger$(DELIM)config
-    ASRCS += segger/RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S
+    ASRCS += segger/SystemView/SEGGER/SEGGER_RTT_ASM_ARMv7M.S
   endif
-
-  RTT_VERSION ?= 7.54
-
-# Download and unpack tarball if no git repo found
-ifeq ($(wildcard $(SGDIR)/RTT/.git),)
-$(SGDIR)/RTT.zip:
-	$(call DOWNLOAD,https://github.com/SEGGERMicro/RTT/archive/refs/tags,V$(RTT_VERSION).zip,$(SGDIR)/RTT.zip)
-	$(Q) unzip -o $(SGDIR)/RTT.zip -d $(SGDIR)
-	$(Q) mv $(SGDIR)/RTT-$(RTT_VERSION) $(SGDIR)/RTT
-	$(Q) patch -p0 < segger/0001-segger-RTT-include-the-SEGGER_RTT_Conf.h-from-custom.patch
-
-TARGET_ZIP += $(SGDIR)/RTT.zip
-endif
-
 endif
 
 ifeq ($(CONFIG_STREAM_RTT),y)
@@ -75,22 +60,25 @@ endif
 
 ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
   CSRCS += segger/note_sysview.c
-  CSRCS += segger/SystemView/SYSVIEW/SEGGER_SYSVIEW.c
+  CSRCS += segger/SystemView/SEGGER/SEGGER_SYSVIEW.c
 
   CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
-  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)SystemView$(DELIM)SEGGER
-  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)SystemView$(DELIM)SYSVIEW
+endif
 
-  SYSVIEW_VERSION ?= 3.30
+# Common settings for RTT and SYSTEMVIEW
+ifneq ($(CONFIG_SEGGER_RTT)$(CONFIG_SEGGER_SYSVIEW),)
+  CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)SystemView$(DELIM)SEGGER
+
+  SYSVIEW_VERSION ?= 354
+  SYSVIEW_ZIP = SystemView_Src_V$(SYSVIEW_VERSION).zip
 
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard $(SGDIR)/SystemView/.git),)
-$(SGDIR)/SystemView.zip:
-	$(call DOWNLOAD,https://github.com/SEGGERMicro/SystemView/archive/refs/tags,V$(SYSVIEW_VERSION).zip,$(SGDIR)/SystemView.zip)
-	$(Q) unzip -o $(SGDIR)/SystemView.zip -d $(SGDIR)
-	$(Q) mv $(SGDIR)/SystemView-$(SYSVIEW_VERSION) $(SGDIR)/SystemView
+TARGET_ZIP = $(SGDIR)/$(SYSVIEW_ZIP)
 
-TARGET_ZIP += $(SGDIR)/SystemView.zip
+$(SGDIR)/$(SYSVIEW_ZIP):
+	$(call DOWNLOAD,https://www.segger.com/downloads/systemview,$(SYSVIEW_ZIP),$(TARGET_ZIP))
+	$(Q) unzip -o $(TARGET_ZIP) -d $(SGDIR)/SystemView
 endif
 
 endif
@@ -100,8 +88,5 @@ context:: $(TARGET_ZIP)
 distclean::
 ifeq ($(wildcard $(SGDIR)/SystemView/.git),)
 	$(call DELDIR, $(SGDIR)/SystemView)
-endif
-ifeq ($(wildcard $(SGDIR)/RTT/.git),)
-	$(call DELDIR, $(SGDIR)/RTT)
 endif
 	$(call DELFILE, $(TARGET_ZIP))

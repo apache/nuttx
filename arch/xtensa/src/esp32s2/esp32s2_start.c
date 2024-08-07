@@ -31,10 +31,9 @@
 #include <nuttx/irq.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 
 #include "hardware/esp32s2_cache_memory.h"
-#include "hardware/esp32s2_extmem.h"
 #include "rom/esp32s2_libc_stubs.h"
 #include "esp32s2_clockconfig.h"
 #include "esp32s2_region.h"
@@ -43,6 +42,19 @@
 #include "esp32s2_lowputc.h"
 #include "esp32s2_wdt.h"
 #include "esp32s2_rtc.h"
+#include "espressif/esp_loader.h"
+
+#include "soc/extmem_reg.h"
+#include "hal/mmu_hal.h"
+#include "hal/mmu_types.h"
+#include "hal/cache_types.h"
+#include "hal/cache_ll.h"
+#include "hal/cache_hal.h"
+#include "rom/spi_flash.h"
+
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+#  include "bootloader_init.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,20 +66,17 @@
 #  define showprogress(c)
 #endif
 
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
+#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
+#  ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
+#    define PRIMARY_SLOT_OFFSET   CONFIG_ESP32S2_OTA_PRIMARY_SLOT_OFFSET
+#  else
+     /* Force offset to the beginning of the whole image */
 
-#define PRIMARY_SLOT_OFFSET   CONFIG_ESP32S2_OTA_PRIMARY_SLOT_OFFSET
-
-#define HDR_ATTR              __attribute__((section(".entry_addr"))) \
+#    define PRIMARY_SLOT_OFFSET   0x0000
+#  endif
+#  define HDR_ATTR              __attribute__((section(".entry_addr"))) \
                                 __attribute__((used))
-
-/* Cache MMU block size */
-
-#define MMU_BLOCK_SIZE        0x00010000  /* 64 KB */
-
-/* Cache MMU address mask (MMU tables ignore bits which are zero) */
-
-#define MMU_FLASH_MASK        (~(MMU_BLOCK_SIZE - 1))
 
 #endif
 
@@ -75,7 +84,8 @@
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
+#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 extern uint8_t _image_irom_vma[];
 extern uint8_t _image_irom_lma[];
 extern uint8_t _image_irom_size[];
@@ -120,11 +130,9 @@ typedef enum
  * ROM Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
+#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 extern int ets_printf(const char *fmt, ...) printf_like(1, 2);
-extern int cache_ibus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
-                              uint32_t paddr, uint32_t psize, uint32_t num,
-                              uint32_t fixed);
 #endif
 
 extern uint32_t cache_suspend_icache(void);
@@ -146,7 +154,8 @@ extern void cache_enable_dcache(uint32_t autoload);
  * Private Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
+#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 noreturn_function void __start(void);
 #endif
 
@@ -154,7 +163,8 @@ noreturn_function void __start(void);
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
+#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
+    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
 HDR_ATTR static void (*_entry_point)(void) = __start;
 #endif
 
@@ -296,6 +306,7 @@ static void IRAM_ATTR configure_cpu_caches(void)
 
 static void noreturn_function IRAM_ATTR __esp32s2_start(void)
 {
+#ifndef CONFIG_ESPRESSIF_SIMPLE_BOOT
   uint32_t sp;
 
   /* Make sure that normal interrupts are disabled.  This is really only an
@@ -315,9 +326,11 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
   sp = (uint32_t)g_idlestack + IDLETHREAD_STACKSIZE;
   __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
+#ifndef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
   /* Make page 0 access raise an exception */
 
   esp32s2_region_protection();
+#endif
 
   /* Move CPU0 exception vectors to IRAM */
 
@@ -331,6 +344,7 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
     {
       *dest++ = 0;
     }
+#endif
 
   /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
    * related issues in application. Hence disable that as we are about to
@@ -395,111 +409,6 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
 }
 
 /****************************************************************************
- * Name: calc_mmu_pages
- *
- * Description:
- *   Calculate the number of cache pages to map.
- *
- * Input Parameters:
- *   size  - Size of data to map
- *   vaddr - Virtual address where data will be mapped
- *
- * Returned Value:
- *   Number of cache MMU pages required to do the mapping.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
-static inline uint32_t calc_mmu_pages(uint32_t size, uint32_t vaddr)
-{
-  return (size + (vaddr - (vaddr & MMU_FLASH_MASK)) + MMU_BLOCK_SIZE - 1) /
-    MMU_BLOCK_SIZE;
-}
-#endif
-
-/****************************************************************************
- * Name: map_rom_segments
- *
- * Description:
- *   Configure the MMU and Cache peripherals for accessing ROM code and data.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
-static int map_rom_segments(void)
-{
-  uint32_t rc = 0;
-  uint32_t regval;
-  uint32_t drom_lma_aligned;
-  uint32_t drom_vma_aligned;
-  uint32_t drom_page_count;
-  uint32_t irom_lma_aligned;
-  uint32_t irom_vma_aligned;
-  uint32_t irom_page_count;
-
-  size_t partition_offset = PRIMARY_SLOT_OFFSET;
-  uint32_t app_irom_lma = partition_offset + (uint32_t)_image_irom_lma;
-  uint32_t app_irom_size = (uint32_t)_image_irom_size;
-  uint32_t app_irom_vma = (uint32_t)_image_irom_vma;
-  uint32_t app_drom_lma = partition_offset + (uint32_t)_image_drom_lma;
-  uint32_t app_drom_size = (uint32_t)_image_drom_size;
-  uint32_t app_drom_vma = (uint32_t)_image_drom_vma;
-
-  uint32_t autoload = cache_suspend_icache();
-  cache_invalidate_icache_all();
-
-  /* Clear the MMU entries that are already set up, so the new app only has
-   * the mappings it creates.
-   */
-
-  for (size_t i = 0; i < FLASH_MMU_TABLE_SIZE; i++)
-    {
-      FLASH_MMU_TABLE[i] = MMU_TABLE_INVALID_VAL;
-    }
-
-  drom_lma_aligned = app_drom_lma & MMU_FLASH_MASK;
-  drom_vma_aligned = app_drom_vma & MMU_FLASH_MASK;
-  drom_page_count = calc_mmu_pages(app_drom_size, app_drom_vma);
-  rc = cache_ibus_mmu_set(MMU_ACCESS_FLASH, drom_vma_aligned,
-                           drom_lma_aligned, 64, (int)drom_page_count, 0);
-
-  irom_lma_aligned = app_irom_lma & MMU_FLASH_MASK;
-  irom_vma_aligned = app_irom_vma & MMU_FLASH_MASK;
-  irom_page_count = calc_mmu_pages(app_irom_size, app_irom_vma);
-
-  if (app_irom_lma + app_irom_size > IRAM1_ADDRESS_LOW)
-    {
-      rc |= cache_ibus_mmu_set(MMU_ACCESS_FLASH, IRAM0_ADDRESS_LOW, 0, 64,
-                               64, 1);
-      rc |= cache_ibus_mmu_set(MMU_ACCESS_FLASH, IRAM1_ADDRESS_LOW, 0, 64,
-                               64, 1);
-
-      regval  = getreg32(EXTMEM_PRO_ICACHE_CTRL1_REG);
-      regval &= ~(EXTMEM_PRO_ICACHE_MASK_IRAM1);
-      putreg32(regval, EXTMEM_PRO_ICACHE_CTRL1_REG);
-    }
-
-  rc |= cache_ibus_mmu_set(MMU_ACCESS_FLASH, irom_vma_aligned,
-                           irom_lma_aligned, 64, (int)irom_page_count, 0);
-
-  regval  = getreg32(EXTMEM_PRO_ICACHE_CTRL1_REG);
-  regval &= ~(EXTMEM_PRO_ICACHE_MASK_IRAM0 |
-              EXTMEM_PRO_ICACHE_MASK_DROM0);
-  putreg32(regval, EXTMEM_PRO_ICACHE_CTRL1_REG);
-
-  cache_resume_icache(autoload);
-
-  return (int)rc;
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -512,10 +421,32 @@ static int map_rom_segments(void)
  *
  ****************************************************************************/
 
-void IRAM_ATTR __start(void)
+noreturn_function void IRAM_ATTR __start(void)
 {
-#ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
-  if (map_rom_segments() != 0)
+#if defined(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT) || \
+    defined(CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  size_t partition_offset = PRIMARY_SLOT_OFFSET;
+  uint32_t app_irom_start = partition_offset + (uint32_t)_image_irom_lma;
+  uint32_t app_irom_size  = (uint32_t)_image_irom_size;
+  uint32_t app_irom_vaddr = (uint32_t)_image_irom_vma;
+  uint32_t app_drom_start = partition_offset + (uint32_t)_image_drom_lma;
+  uint32_t app_drom_size  = (uint32_t)_image_drom_size;
+  uint32_t app_drom_vaddr = (uint32_t)_image_drom_vma;
+
+#  ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  /* Move CPU0 exception vectors to IRAM */
+
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (_init_start));
+
+  if (bootloader_init() != 0)
+    {
+      ets_printf("Hardware init failed, aborting\n");
+      while (true);
+    }
+#  endif
+
+  if (map_rom_segments(app_drom_start, app_drom_vaddr, app_drom_size,
+                       app_irom_start, app_irom_vaddr, app_irom_size) != 0)
     {
       ets_printf("Failed to setup XIP, aborting\n");
       while (true);

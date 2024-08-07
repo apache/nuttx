@@ -314,6 +314,13 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
           buffer    += copysize;
           buflen    -= copysize;
 
+          /* Trigger reclamation of delay list otherwise they will be
+           * counted as used, which often confuses people like memory
+           * leakages. see pull/12817 for more information.
+           */
+
+          mm_free_delaylist(entry->heap);
+
           /* Show heap information */
 
           info      = mm_mallinfo(entry->heap);

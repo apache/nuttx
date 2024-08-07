@@ -23,16 +23,10 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_K230),y)
-ifeq ($(CONFIG_BUILD_KERNEL),y)
 ifeq ($(CONFIG_NUTTSBI),y)
-  ifeq ($(CONFIG_RPTUN),y)
-    LDSCRIPT = ld-rptun.script
-  else
-    LDSCRIPT = ld-nuttsbi.script
-  endif
-else
+  LDSCRIPT = ld-nuttsbi.script
+else ifeq ($(CONFIG_BUILD_KERNEL),y)
   LDSCRIPT = ld-kernel.script
-endif
 else ifeq ($(CONFIG_BUILD_PROTECTED),y)
   LDSCRIPT = ld-protected.script
 else

@@ -44,7 +44,7 @@
 struct tricore_systimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
-  void                      *tbase;
+  volatile void              *tbase;
   uint64_t                   freq;
   uint64_t                   alarm;
   oneshot_callback_t         callback;
@@ -307,7 +307,7 @@ static int tricore_systimer_interrupt(int irq, void *context, void *arg)
  ****************************************************************************/
 
 struct oneshot_lowerhalf_s *
-tricore_systimer_initialize(void *tbase, int irq, uint64_t freq)
+tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
 {
   struct tricore_systimer_lowerhalf_s *priv = &g_systimer_lower;
 

@@ -311,6 +311,11 @@
 #define CSR_SCONTEXT        0x5a8 /* Supervisor Context */
 #define CSR_HCONTEXT        0x5aa /* Hypervisor Context */
 
+/* In tcontrol register */
+
+#define CSR_TCONTROL_MTE   (0x1 << 3) /* M-mode trigger enable */
+#define CSR_TCONTROL_MPTE  (0x1 << 7) /* M-mode previous trigger enable */
+
 /* Debug interface CSRs */
 
 #define CSR_DCSR            0x7b0 /* Debug Control and Status */
@@ -327,6 +332,88 @@
 #define CSR_VL              0xc20 /* Vector Length */
 #define CSR_VTYPE           0xc21 /* Vector Data Type */
 #define CSR_VLENB           0xc22 /* Vector Length in Bytes (VLEN/8) */
+
+/* Indirect CSR Access CSRs */
+
+#define CSR_MISELECT        0x350 /* Machine indirect register select */
+#define CSR_MIREG           0x351 /* Machine indirect register alias */
+#define CSR_MIREG2          0x352 /* Machine indirect register alias 2 */
+#define CSR_MIREG3          0x353 /* Machine indirect register alias 3 */
+#define CSR_MIREG4          0x355 /* Machine indirect register alias 4 */
+#define CSR_MIREG5          0x356 /* Machine indirect register alias 5 */
+#define CSR_MIREG6          0x357 /* Machine indirect register alias 6 */
+
+#define CSR_SISELECT        0x150 /* Supervisor indirect register select */
+#define CSR_SIREG           0x151 /* Supervisor indirect register alias */
+#define CSR_SIREG2          0x152 /* Supervisor indirect register alias 2 */
+#define CSR_SIREG3          0x153 /* Supervisor indirect register alias 3 */
+#define CSR_SIREG4          0x155 /* Supervisor indirect register alias 4 */
+#define CSR_SIREG5          0x156 /* Supervisor indirect register alias 5 */
+#define CSR_SIREG6          0x157 /* Supervisor indirect register alias 6 */
+
+#define CSR_VSISELECT       0x250 /* Virtual supervisor indirect register select */
+#define CSR_VSIREG          0x251 /* Virtual supervisor indirect register alias */
+#define CSR_VSIREG2         0x252 /* Virtual supervisor indirect register alias 2 */
+#define CSR_VSIREG3         0x253 /* Virtual supervisor indirect register alias 3 */
+#define CSR_VSIREG4         0x255 /* Virtual supervisor indirect register alias 4 */
+#define CSR_VSIREG5         0x256 /* Virtual supervisor indirect register alias 5 */
+#define CSR_VSIREG6         0x257 /* Virtual supervisor indirect register alias 6 */
+
+/* CLIC CSRs */
+
+#define CSR_MTVT            0x307 /* Trap-handler vector table base address */
+#define CSR_MNXTI           0x345 /* Interrupt handler address and enable modifier */
+#define CSR_MINTSTATUS      0xfb1 /* Current interrupt levels */
+#define CSR_MINTTHRESH      0x347 /* Interrupt-level threshold */
+#define CSR_MSCRATCHCSW     0x348 /* Conditional scratch swap on priv mode change */
+#define CSR_MSCRATCHCSWL    0x349 /* Conditional scratch swap on level change */
+
+#define CSR_STVT            0x107 /* Trap-handler vector table base address */
+#define CSR_SNXTI           0x145 /* Interrupt handler address and enable modifier */
+#define CSR_SINTSTATUS      0xdb1 /* Current interrupt levels */
+#define CSR_SINTTHRESH      0x147 /* Interrupt-level threshold */
+#define CSR_SSCRATCHCSW     0x148 /* Conditional scratch swap on priv mode change */
+#define CSR_SSCRATCHCSWL    0x149 /* Conditional scratch swap on level change */
+
+#define CSR_UTVT            0x007 /* Trap-handler vector table base address */
+#define CSR_UNXTI           0x045 /* Interrupt handler address and enable modifier */
+#define CSR_UINTSTATUS      0xcb1 /* Current interrupt levels */
+#define CSR_UINTTHRESH      0x047 /* Interrupt-level threshold */
+#define CSR_USCRATCHCSWL    0x049 /* Conditional scratch swap on level change */
+
+/* CLIC Indirect CSRs */
+
+#define MISELECT_CLICCFG     0x14a0 /* MIREG */
+#define MISELECT_CLICINTCTL  0x1000 /* MIREG */
+#define MISELECT_CLICINTATTR 0x1000 /* MIREG2 */
+#define MISELECT_CLICINTIP   0x1400 /* MIREG */
+#define MISELECT_CLICINTIE   0x1400 /* MIREG2 */
+#define MISELECT_CLICINTTRIG 0x1480 /* MIREG */
+
+/* AIA Machine-Level CSRs */
+
+#define CSR_MTOPEI          0x35c /* Machine top external interrupt */
+#define CSR_MTOPI           0xfb0 /* Machine top interrupt */
+#define CSR_MVIEN           0x308 /* Machine virtual interrupt enables */
+#define CSR_MVIP            0x309 /* Machine virtual interrupt-pending bits */
+
+/* AIA Machine-Level CSRs (High-Half) */
+
+#define CSR_MIDELEGH        0x313
+#define CSR_MIEH            0x314
+#define CSR_MVIENH          0x318
+#define CSR_MVIPH           0x319
+#define CSR_MIPH            0x354
+
+/* AIA Supervisor-Level CSRs */
+
+#define CSR_STOPEI          0x15c /* Supervisor top external interrupt */
+#define CSR_STOPI           0xdb0 /* Supervisor top interrupt */
+
+/* AIA Supervisor-Level CSRs (High-Half) */
+
+#define CSR_SIEH            0x114
+#define CSR_SIPH            0x154
 
 /* In mstatus register */
 
@@ -491,6 +578,161 @@
 #define COUNTEREN_HPM29    (0x1 << 29)
 #define COUNTEREN_HPM30    (0x1 << 30)
 #define COUNTEREN_HPM31    (0x1 << 31)
+
+/* In topi/topei register */
+
+#define TOPI_IID_SHIFT      16
+#define TOPI_IPRIO_BITS     8
+#define TOPEI_ID_SHIFT      16
+
+/* In iselect register (AIA) */
+
+#define ISELECT_IPRIO0        0x30
+#define ISELECT_IPRIO1        0x31
+#define ISELECT_IPRIO2        0x32
+#define ISELECT_IPRIO3        0x33
+#define ISELECT_IPRIO4        0x34
+#define ISELECT_IPRIO5        0x35
+#define ISELECT_IPRIO6        0x36
+#define ISELECT_IPRIO7        0x37
+#define ISELECT_IPRIO8        0x38
+#define ISELECT_IPRIO9        0x39
+#define ISELECT_IPRIO10       0x3a
+#define ISELECT_IPRIO11       0x3b
+#define ISELECT_IPRIO12       0x3c
+#define ISELECT_IPRIO13       0x3d
+#define ISELECT_IPRIO14       0x3e
+#define ISELECT_IPRIO15       0x3f
+#define ISELECT_EIDELIVERY    0x70
+#define ISELECT_EITHRESHOLD   0x72
+#define ISELECT_EIP0          0x80
+#define ISELECT_EIP1          0x81
+#define ISELECT_EIP2          0x82
+#define ISELECT_EIP3          0x83
+#define ISELECT_EIP4          0x84
+#define ISELECT_EIP5          0x85
+#define ISELECT_EIP6          0x86
+#define ISELECT_EIP7          0x87
+#define ISELECT_EIP8          0x88
+#define ISELECT_EIP9          0x89
+#define ISELECT_EIP10         0x8a
+#define ISELECT_EIP11         0x8b
+#define ISELECT_EIP12         0x8c
+#define ISELECT_EIP13         0x8d
+#define ISELECT_EIP14         0x8e
+#define ISELECT_EIP15         0x8f
+#define ISELECT_EIP16         0x90
+#define ISELECT_EIP17         0x91
+#define ISELECT_EIP18         0x92
+#define ISELECT_EIP19         0x93
+#define ISELECT_EIP20         0x94
+#define ISELECT_EIP21         0x95
+#define ISELECT_EIP22         0x96
+#define ISELECT_EIP23         0x97
+#define ISELECT_EIP24         0x98
+#define ISELECT_EIP25         0x99
+#define ISELECT_EIP26         0x9a
+#define ISELECT_EIP27         0x9b
+#define ISELECT_EIP28         0x9c
+#define ISELECT_EIP29         0x9d
+#define ISELECT_EIP30         0x9e
+#define ISELECT_EIP31         0x9f
+#define ISELECT_EIP32         0xa0
+#define ISELECT_EIP33         0xa1
+#define ISELECT_EIP34         0xa2
+#define ISELECT_EIP35         0xa3
+#define ISELECT_EIP36         0xa4
+#define ISELECT_EIP37         0xa5
+#define ISELECT_EIP38         0xa6
+#define ISELECT_EIP39         0xa7
+#define ISELECT_EIP40         0xa8
+#define ISELECT_EIP41         0xa9
+#define ISELECT_EIP42         0xaa
+#define ISELECT_EIP43         0xab
+#define ISELECT_EIP44         0xac
+#define ISELECT_EIP45         0xad
+#define ISELECT_EIP46         0xae
+#define ISELECT_EIP47         0xaf
+#define ISELECT_EIP48         0xb0
+#define ISELECT_EIP49         0xb1
+#define ISELECT_EIP50         0xb2
+#define ISELECT_EIP51         0xb3
+#define ISELECT_EIP52         0xb4
+#define ISELECT_EIP53         0xb5
+#define ISELECT_EIP54         0xb6
+#define ISELECT_EIP55         0xb7
+#define ISELECT_EIP56         0xb8
+#define ISELECT_EIP57         0xb9
+#define ISELECT_EIP58         0xba
+#define ISELECT_EIP59         0xbb
+#define ISELECT_EIP60         0xbc
+#define ISELECT_EIP61         0xbd
+#define ISELECT_EIP62         0xbe
+#define ISELECT_EIP63         0xbf
+#define ISELECT_EIE0          0xc0
+#define ISELECT_EIE1          0xc1
+#define ISELECT_EIE2          0xc2
+#define ISELECT_EIE3          0xc3
+#define ISELECT_EIE4          0xc4
+#define ISELECT_EIE5          0xc5
+#define ISELECT_EIE6          0xc6
+#define ISELECT_EIE7          0xc7
+#define ISELECT_EIE8          0xc8
+#define ISELECT_EIE9          0xc9
+#define ISELECT_EIE10         0xca
+#define ISELECT_EIE11         0xcb
+#define ISELECT_EIE12         0xcc
+#define ISELECT_EIE13         0xcd
+#define ISELECT_EIE14         0xce
+#define ISELECT_EIE15         0xcf
+#define ISELECT_EIE16         0xd0
+#define ISELECT_EIE17         0xd1
+#define ISELECT_EIE18         0xd2
+#define ISELECT_EIE19         0xd3
+#define ISELECT_EIE20         0xd4
+#define ISELECT_EIE21         0xd5
+#define ISELECT_EIE22         0xd6
+#define ISELECT_EIE23         0xd7
+#define ISELECT_EIE24         0xd8
+#define ISELECT_EIE25         0xd9
+#define ISELECT_EIE26         0xda
+#define ISELECT_EIE27         0xdb
+#define ISELECT_EIE28         0xdc
+#define ISELECT_EIE29         0xdd
+#define ISELECT_EIE30         0xde
+#define ISELECT_EIE31         0xdf
+#define ISELECT_EIE32         0xe0
+#define ISELECT_EIE33         0xe1
+#define ISELECT_EIE34         0xe2
+#define ISELECT_EIE35         0xe3
+#define ISELECT_EIE36         0xe4
+#define ISELECT_EIE37         0xe5
+#define ISELECT_EIE38         0xe6
+#define ISELECT_EIE39         0xe7
+#define ISELECT_EIE40         0xe8
+#define ISELECT_EIE41         0xe9
+#define ISELECT_EIE42         0xea
+#define ISELECT_EIE43         0xeb
+#define ISELECT_EIE44         0xec
+#define ISELECT_EIE45         0xed
+#define ISELECT_EIE46         0xee
+#define ISELECT_EIE47         0xef
+#define ISELECT_EIE48         0xf0
+#define ISELECT_EIE49         0xf1
+#define ISELECT_EIE50         0xf2
+#define ISELECT_EIE51         0xf3
+#define ISELECT_EIE52         0xf4
+#define ISELECT_EIE53         0xf5
+#define ISELECT_EIE54         0xf6
+#define ISELECT_EIE55         0xf7
+#define ISELECT_EIE56         0xf8
+#define ISELECT_EIE57         0xf9
+#define ISELECT_EIE58         0xfa
+#define ISELECT_EIE59         0xfb
+#define ISELECT_EIE60         0xfc
+#define ISELECT_EIE61         0xfd
+#define ISELECT_EIE62         0xfe
+#define ISELECT_EIE63         0xff
 
 /****************************************************************************
  * Public Types

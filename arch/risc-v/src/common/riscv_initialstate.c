@@ -131,7 +131,7 @@ void up_initial_state(struct tcb_s *tcb)
     }
 #endif
 
-  xcp->regs = (uintptr_t *)(topstack - XCPTCONTEXT_SIZE);
+  xcp->regs = (uintreg_t *)(topstack - XCPTCONTEXT_SIZE);
   memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
 
   /* Save the initial stack pointer.  Hmmm.. the stack is set to the very

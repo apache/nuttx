@@ -155,7 +155,7 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
 #if CONFIG_NXTK_BORDERWIDTH > 2
   frame.pt2.y = frame.pt1.y;
   nxtk_drawframeside(fwnd, &frame, bounds, g_bordercolor3);
-  frame.pt1.y ++;
+  frame.pt1.y++;
 #endif
 
   /* Draw the central part */

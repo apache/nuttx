@@ -29,8 +29,11 @@
 #include <nuttx/serial/uart_16550.h>
 #include <arch/board/board.h>
 
+#include <debug.h>
 #include "riscv_internal.h"
 #include "chip.h"
+
+#include "qemu_rv_userspace.h"
 
 #ifdef CONFIG_BUILD_KERNEL
 #  include "qemu_rv_mm_init.h"
@@ -43,6 +46,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_NUTTSBI_LATE_INIT
+#  define NAPOT_RWX     (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
+#  define NAPOT_RW      (PMPCFG_A_NAPOT | PMPCFG_R | PMPCFG_W)
+#  define SIZE_HALF     (UINT32_C(1) << 31)
+#endif
 
 #ifdef CONFIG_DEBUG_FEATURES
 #define showprogress(c) up_putc(c)
@@ -58,7 +67,7 @@
  * Extern Function Declarations
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ARCH_USE_S_MODE
 extern void __start(void);
 #endif
 
@@ -80,7 +89,28 @@ static void qemu_rv_clear_bss(void)
     }
 }
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
+static void qemu_rv_copy_data(void)
+{
+  const uint32_t *src;
+  uint32_t *dest;
+
+  /* Move the initialized data from their temporary holding spot at FLASH
+   * into the correct place in SRAM.  The correct place in SRAM is given
+   * by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
+    {
+      *dest++ = *src++;
+    }
+}
+#endif
+
+#ifdef CONFIG_ARCH_USE_S_MODE
 static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
 {
   int i;
@@ -92,7 +122,11 @@ static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
           continue;
         }
 
+#ifndef CONFIG_NUTTSBI
       riscv_sbi_boot_secondary(i, (uintptr_t)&__start, dtb);
+#else
+      sinfo("TBD\n");
+#endif
     }
 }
 #endif
@@ -101,7 +135,7 @@ static void qemu_boot_secondary(int mhartid, uintptr_t dtb)
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ARCH_USE_S_MODE
 static bool boot_secondary = false;
 #endif
 
@@ -119,7 +153,7 @@ static bool boot_secondary = false;
 
 void qemu_rv_start(int mhartid, const char *dtb)
 {
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_ARCH_USE_S_MODE
   /* Boot other cores */
 
   if (!boot_secondary)
@@ -140,6 +174,10 @@ void qemu_rv_start(int mhartid, const char *dtb)
 
   qemu_rv_clear_bss();
 
+#ifdef CONFIG_BUILD_PROTECTED
+  qemu_rv_copy_data();
+#endif
+
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   riscv_percpu_add_hart(mhartid);
 #endif
@@ -159,6 +197,17 @@ void qemu_rv_start(int mhartid, const char *dtb)
   /* Do board initialization */
 
   showprogress('C');
+
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  qemu_rv_userspace();
+  showprogress('D');
+#endif
 
 #ifdef CONFIG_BUILD_KERNEL
   /* Setup page tables for kernel and enable MMU */
@@ -184,10 +233,24 @@ cpux:
 
 void riscv_earlyserialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_earlyserialinit();
+#endif
 }
 
 void riscv_serialinit(void)
 {
+#ifdef CONFIG_16550_UART
   u16550_serialinit();
+#endif
 }
+
+#ifdef CONFIG_NUTTSBI_LATE_INIT
+void sbi_late_initialize(void)
+{
+  /* QEMU 6.2 doesn't support 0 size, so we do it explicitly here */
+
+  riscv_append_pmp_region(NAPOT_RW, 0, SIZE_HALF);
+  riscv_append_pmp_region(NAPOT_RWX, SIZE_HALF, SIZE_HALF);
+}
+#endif

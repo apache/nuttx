@@ -30,12 +30,12 @@ ENTRYPT = $(patsubst "%",%,$(CONFIG_INIT_ENTRYPOINT))
 # is appropriate for the host OS
 
 USER_LIBPATHS = $(addprefix -L,$(call CONVERT_PATH,$(addprefix $(TOPDIR)$(DELIM),$(dir $(USERLIBS)))))
-USER_LDSCRIPT = -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)ld-userland.script)
+USER_LDSCRIPT = $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)ld-userland.script)
 USER_HEXFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.hex)
 USER_SRECFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.srec)
 USER_BINFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.bin)
 
-USER_LDFLAGS = -melf64lriscv --undefined=$(ENTRYPT) --entry=$(ENTRYPT) $(USER_LDSCRIPT)
+USER_LDFLAGS = -melf64lriscv --undefined=$(ENTRYPT) --entry=$(ENTRYPT) -T $(addsuffix .tmp,$(USER_LDSCRIPT))
 USER_LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(USERLIBS))))
 USER_LIBGCC = "${shell "$(CC)" $(ARCHCPUFLAGS) -print-libgcc-file-name}"
 
@@ -47,19 +47,22 @@ OBJS  = $(COBJS)
 
 # Targets:
 
-all: $(TOPDIR)$(DELIM)nuttx_user.elf $(TOPDIR)$(DELIM)User.map
-.PHONY: nuttx_user.elf depend clean distclean
+all: $(TOPDIR)$(DELIM)nuttx_user $(TOPDIR)$(DELIM)User.map
+.PHONY: nuttx_user depend clean distclean
 
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
+$(addsuffix .tmp,$(USER_LDSCRIPT)): $(USER_LDSCRIPT)
+	$(call PREPROCESS,$(patsubst %.tmp,%,$@),$@)
+
 # Create the nuttx_user.elf file containing all of the user-mode code
 
-nuttx_user.elf: $(OBJS)
+nuttx_user: $(OBJS) $(addsuffix .tmp,$(USER_LDSCRIPT))
 	$(Q) $(LD) -o $@ $(USER_LDFLAGS) $(USER_LIBPATHS) $(OBJS) --start-group $(USER_LDLIBS) --end-group $(USER_LIBGCC)
 
-$(TOPDIR)$(DELIM)nuttx_user.elf: nuttx_user.elf
-	@echo "LD: nuttx_user.elf"
+$(TOPDIR)$(DELIM)nuttx_user: nuttx_user
+	@echo "LD: nuttx_user"
 	$(Q) cp -a $^ $(TOPDIR)$(DELIM)$^
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 	@echo "CP: nuttx_user.hex"
@@ -74,17 +77,17 @@ ifeq ($(CONFIG_RAW_BINARY),y)
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $^ $(USER_BINFILE)
 endif
 
-$(TOPDIR)$(DELIM)User.map: nuttx_user.elf
+$(TOPDIR)$(DELIM)User.map: nuttx_user
 	@echo "MK: User.map"
 	$(Q) $(NM) -n $^ >$(TOPDIR)$(DELIM)User.map
-	$(Q) $(CROSSDEV)size $^
 
 .depend:
 
 depend: .depend
 
 clean:
-	$(call DELFILE, nuttx_user.elf)
+	$(call DELFILE, nuttx_user)
+	$(call DELFILE, $(addsuffix .tmp,$(USER_LDSCRIPT)))
 	$(call DELFILE, "$(TOPDIR)$(DELIM)nuttx_user.*")
 	$(call DELFILE, "$(TOPDIR)$(DELIM)User.map")
 	$(call CLEAN)

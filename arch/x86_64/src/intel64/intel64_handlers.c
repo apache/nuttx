@@ -68,8 +68,8 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
    * Nested interrupts are not supported.
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(up_current_regs() == NULL);
+  up_set_current_regs(regs);
 
   /* Deliver the IRQ */
 
@@ -82,7 +82,7 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
    * returning from the interrupt.
    */
 
-  if (regs != g_current_regs)
+  if (regs != up_current_regs())
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -100,6 +100,10 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
        */
 
       g_running_tasks[this_cpu()] = this_task();
+
+      /* Restore the cpu lock */
+
+      restore_critical_section();
     }
 
   /* If a context switch occurred while processing the interrupt then
@@ -108,13 +112,13 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint64_t *)g_current_regs;
+  regs = (uint64_t *)up_current_regs();
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  g_current_regs = NULL;
+  up_set_current_regs(NULL);
   return regs;
 }
 #endif
@@ -145,8 +149,8 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
   return regs;
 #else
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(up_current_regs() == NULL);
+  up_set_current_regs(regs);
 
   switch (irq)
     {
@@ -174,13 +178,13 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
 
   /* Maybe we need a context switch */
 
-  regs = (uint64_t *)g_current_regs;
+  regs = (uint64_t *)up_current_regs();
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  g_current_regs = NULL;
+  up_set_current_regs(NULL);
   return regs;
 #endif
 }

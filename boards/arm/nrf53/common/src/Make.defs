@@ -36,6 +36,22 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
   CSRCS += nrf53_reset.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMI270),y)
+  CSRCS += nrf53_bmi270.c
+endif
+
+ifeq ($(CONFIG_SENSORS_ADXL362),y)
+  CSRCS += nrf53_adxl362.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BH1749NUC),y)
+  CSRCS += nrf53_bh1749nuc.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMM150),y)
+  CSRCS += nrf53_bmm150.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

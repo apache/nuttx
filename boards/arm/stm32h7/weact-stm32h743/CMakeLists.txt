@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32h7/nucleo-h743zi/CMakeLists.txt
+# boards/arm/stm32h7/weact-stm32h743/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for

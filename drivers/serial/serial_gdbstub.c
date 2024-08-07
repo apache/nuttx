@@ -77,7 +77,7 @@ static int uart_gdbstub_panic_callback(FAR struct notifier_block *nb,
          "target-charset ASCII\" -ex \"target remote /dev/ttyUSB0\"\n");
 
   gdb_console_message(uart_gdbstub->state, "Enter panic gdbstub mode!\n");
-  gdb_process(uart_gdbstub->state, GDBSTUB_STOPREASON_CTRLC, NULL);
+  gdb_process(uart_gdbstub->state, GDB_STOPREASON_CTRLC, NULL);
   return 0;
 }
 
@@ -94,7 +94,7 @@ static int uart_gdbstub_ctrlc(FAR struct uart_dev_s *dev,
                               FAR unsigned int *status)
 {
   uart_disablerxint(dev);
-  gdb_process(g_uart_gdbstub->state, GDBSTUB_STOPREASON_CTRLC, NULL);
+  gdb_process(g_uart_gdbstub->state, GDB_STOPREASON_CTRLC, NULL);
   uart_enablerxint(dev);
   return 0;
 }

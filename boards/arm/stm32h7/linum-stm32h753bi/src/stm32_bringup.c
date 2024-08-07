@@ -138,6 +138,15 @@ int stm32_bringup(void)
   struct rtc_lowerhalf_s *lower;
 #endif
 
+#ifdef CONFIG_STM32H7_RMII
+  /* Reset Ethernet PHY */
+
+  stm32_configgpio(GPIO_ETH_RESET);
+  stm32_gpiowrite(GPIO_ETH_RESET, 0);
+  usleep(50000);
+  stm32_gpiowrite(GPIO_ETH_RESET, 1);
+#endif
+
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
 
@@ -255,6 +264,19 @@ int stm32_bringup(void)
   mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
   mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
   usbdev_rndis_initialize(mac);
+#endif
+
+#if defined(CONFIG_SENSORS_QENCODER)
+  /* Initialize and register the qencoder driver */
+
+  ret = board_qencoder_initialize(0, LINUMSTM32H753BI_QETIMER);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
   return OK;

@@ -39,6 +39,7 @@
 #include <nuttx/serial/tioctl.h>
 
 #include "hardware/bl808_uart.h"
+#include "hardware/bl808_glb.h"
 #include "riscv_internal.h"
 #include "chip.h"
 #include "bl808_serial.h"
@@ -47,7 +48,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#define CONSOLE_DEV g_uart0port /* UART0 is console */
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#define CONSOLE_DEV g_uart1port /* UART1 is console */
+#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
+#define CONSOLE_DEV g_uart2port /* UART2 is console */
+#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
 #define CONSOLE_DEV g_uart3port /* UART3 is console */
+#endif
 
 /****************************************************************************
  * Private Types
@@ -114,8 +123,160 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
+static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
+static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+
+static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
+static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+
+static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
+static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
+
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
+
+/* UART port structs */
+
+static struct bl808_uart_s g_uart0priv =
+{
+  .irq = BL808_IRQ_UART0,
+  .config =
+    {
+      .idx       = 0,
+      .baud      = CONFIG_UART0_BAUD,
+      .parity    = CONFIG_UART0_PARITY,
+      .data_bits = CONFIG_UART0_BITS,
+      .stop_bits = CONFIG_UART0_2STOP,
+
+#ifdef CONFIG_UART0_IFLOWCONTROL
+      .iflow_ctl = CONFIG_UART0_IFLOWCONTROL,
+#else
+      .iflow_ctl = 0,
+#endif
+
+#ifdef CONFIG_UART0_OFLOWCONTROL
+      .oflow_ctl = CONFIG_UART0_OFLOWCONTROL,
+#else
+      .oflow_ctl = 0,
+#endif
+    },
+};
+
+static uart_dev_t g_uart0port =
+{
+#ifdef CONFIG_UART0_SERIAL_CONSOLE
+  .isconsole = 1,
+#else
+  .isconsole = 0,
+#endif
+
+  .recv =
+    {
+      .size   = CONFIG_UART0_RXBUFSIZE,
+      .buffer = g_uart0rxbuffer,
+    },
+  .xmit =
+    {
+      .size   = CONFIG_UART0_TXBUFSIZE,
+      .buffer = g_uart0txbuffer,
+    },
+  .ops  = &g_uart_ops,
+  .priv = (void *)&g_uart0priv,
+};
+
+static struct bl808_uart_s g_uart1priv =
+{
+  .irq = BL808_IRQ_UART1,
+  .config =
+    {
+      .idx       = 1,
+      .baud      = CONFIG_UART1_BAUD,
+      .parity    = CONFIG_UART1_PARITY,
+      .data_bits = CONFIG_UART1_BITS,
+      .stop_bits = CONFIG_UART1_2STOP,
+
+#ifdef CONFIG_UART1_IFLOWCONTROL
+      .iflow_ctl = CONFIG_UART1_IFLOWCONTROL,
+#else
+      .iflow_ctl = 0,
+#endif
+
+#ifdef CONFIG_UART1_OFLOWCONTROL
+      .oflow_ctl = CONFIG_UART1_OFLOWCONTROL,
+#else
+      .oflow_ctl = 0,
+#endif
+    },
+};
+
+static uart_dev_t g_uart1port =
+{
+#ifdef CONFIG_UART1_SERIAL_CONSOLE
+  .isconsole = 1,
+#else
+  .isconsole = 0,
+#endif
+
+  .recv =
+    {
+      .size   = CONFIG_UART1_RXBUFSIZE,
+      .buffer = g_uart1rxbuffer,
+    },
+  .xmit =
+    {
+      .size   = CONFIG_UART1_TXBUFSIZE,
+      .buffer = g_uart1txbuffer,
+    },
+  .ops  = &g_uart_ops,
+  .priv = (void *)&g_uart1priv,
+};
+
+static struct bl808_uart_s g_uart2priv =
+{
+  .irq = BL808_IRQ_UART2,
+  .config =
+    {
+      .idx       = 2,
+      .baud      = CONFIG_UART2_BAUD,
+      .parity    = CONFIG_UART2_PARITY,
+      .data_bits = CONFIG_UART2_BITS,
+      .stop_bits = CONFIG_UART2_2STOP,
+
+#ifdef CONFIG_UART2_IFLOWCONTROL
+      .iflow_ctl = CONFIG_UART2_IFLOWCONTROL,
+#else
+      .iflow_ctl = 0,
+#endif
+
+#ifdef CONFIG_UART2_OFLOWCONTROL
+      .oflow_ctl = CONFIG_UART2_OFLOWCONTROL,
+#else
+      .oflow_ctl = 0,
+#endif
+    },
+};
+
+static uart_dev_t g_uart2port =
+{
+#ifdef CONFIG_UART2_SERIAL_CONSOLE
+  .isconsole = 1,
+#else
+  .isconsole = 0,
+#endif
+
+  .recv =
+    {
+      .size   = CONFIG_UART2_RXBUFSIZE,
+      .buffer = g_uart2rxbuffer,
+    },
+  .xmit =
+    {
+      .size   = CONFIG_UART2_TXBUFSIZE,
+      .buffer = g_uart2txbuffer,
+    },
+  .ops  = &g_uart_ops,
+  .priv = (void *)&g_uart2priv,
+};
 
 static struct bl808_uart_s g_uart3priv =
 {
@@ -144,7 +305,12 @@ static struct bl808_uart_s g_uart3priv =
 
 static uart_dev_t g_uart3port =
 {
+#ifdef CONFIG_UART3_SERIAL_CONSOLE
   .isconsole = 1,
+#else
+  .isconsole = 0,
+#endif
+
   .recv =
     {
       .size   = CONFIG_UART3_RXBUFSIZE,
@@ -161,7 +327,10 @@ static uart_dev_t g_uart3port =
 
 static struct uart_dev_s *const g_uart_devs[] =
 {
-  [0] = &g_uart3port,
+  [0] = &g_uart0port,
+  [1] = &g_uart1port,
+  [2] = &g_uart2port,
+  [3] = &g_uart3port
 };
 
 /****************************************************************************
@@ -233,7 +402,74 @@ static int __uart_interrupt(int irq, void *context, void *arg)
 
 static void bl808_uart_configure(const struct uart_config_s *config)
 {
-  /* Assume that U-Boot Bootloader has already configured the UART */
+  uint8_t uart_idx = config->idx;
+
+  /* UTX_CONFIG */
+
+  uint32_t tmp_val = getreg32(BL808_UART_UTX_CONFIG(uart_idx));
+
+  tmp_val &= ~UART_UTX_CONFIG_CR_BIT_CNT_P_MASK;
+  if (config->stop_bits)
+    {
+      tmp_val |= 3 << UART_UTX_CONFIG_CR_BIT_CNT_P_SHIFT;
+    }
+  else
+    {
+      tmp_val |= 1 << UART_UTX_CONFIG_CR_BIT_CNT_P_SHIFT;
+    }
+
+  tmp_val &= ~UART_UTX_CONFIG_CR_BIT_CNT_D_MASK;
+  tmp_val |= config->data_bits << UART_UTX_CONFIG_CR_BIT_CNT_D_SHIFT;
+
+  switch (config->parity)
+    {
+    case 0:
+      tmp_val &= ~UART_UTX_CONFIG_CR_PRT_EN;
+      break;
+
+    case 1:
+      tmp_val |= UART_UTX_CONFIG_CR_PRT_EN;
+      tmp_val |= UART_UTX_CONFIG_CR_PRT_SEL;
+      break;
+
+    case 2:
+      tmp_val |= UART_UTX_CONFIG_CR_PRT_EN;
+      tmp_val &= ~UART_UTX_CONFIG_CR_PRT_SEL;
+      break;
+    }
+
+  tmp_val |= UART_UTX_CONFIG_CR_FRM_EN;
+
+  if (config->oflow_ctl)
+    {
+      tmp_val |= UART_UTX_CONFIG_CR_CTS_EN;
+    }
+  else
+    {
+      tmp_val &= ~UART_UTX_CONFIG_CR_CTS_EN;
+    }
+
+  tmp_val |= UART_UTX_CONFIG_CR_EN;
+  putreg32(tmp_val, BL808_UART_UTX_CONFIG(uart_idx));
+
+  /* URX CONFIG */
+
+  tmp_val = getreg32(BL808_UART_URX_CONFIG(uart_idx));
+  tmp_val |= UART_URX_CONFIG_CR_EN;
+  putreg32(tmp_val, BL808_UART_URX_CONFIG(uart_idx));
+
+  /* BIT PRD (baud rate) */
+
+  uint16_t div = BL808_UART_CLK / config->baud - 1;
+  tmp_val = getreg32(BL808_UART_BIT_PRD(uart_idx));
+  tmp_val = div | (div << 16);
+  putreg32(tmp_val, BL808_UART_BIT_PRD(uart_idx));
+
+  /* FIFO CONFIG 1 */
+
+  tmp_val = getreg32(BL808_UART_FIFO_CONFIG_1(uart_idx));
+  tmp_val |= 1 << UART_FIFO_CONFIG_1_TX_TH_SHIFT;
+  putreg32(tmp_val, BL808_UART_FIFO_CONFIG_1(uart_idx));
 }
 
 /****************************************************************************
@@ -770,7 +1006,8 @@ void bl808_serialinit(void)
 
 int up_putc(int ch)
 {
-  struct uart_dev_s *priv = CONSOLE_DEV.priv;
+  struct bl808_uart_s *priv = CONSOLE_DEV.priv;
+  uint8_t uart_idx = priv->config.idx;
   irqstate_t flags = enter_critical_section();
 
   /* Check for LF */
@@ -779,10 +1016,17 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      bl808_send(priv, '\r');
+      while ((getreg32(BL808_UART_FIFO_CONFIG_1(uart_idx)) &
+            UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
+
+      putreg32('\r', BL808_UART_FIFO_WDATA(uart_idx));
     }
 
-  bl808_send(priv, ch);
+  while ((getreg32(BL808_UART_FIFO_CONFIG_1(uart_idx)) &
+            UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
+
+  putreg32(ch, BL808_UART_FIFO_WDATA(uart_idx));
+
   leave_critical_section(flags);
   return ch;
 }

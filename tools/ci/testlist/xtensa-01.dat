@@ -1,0 +1,4 @@
+/xtensa/esp32
+
+# We do not set ESPTOOL_BINDIR in this build
+-esp32-devkitc:qemu-openeth

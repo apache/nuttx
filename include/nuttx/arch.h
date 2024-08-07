@@ -214,6 +214,18 @@ pid_t up_fork(void);
 void up_initialize(void);
 
 /****************************************************************************
+ * Name: up_systempoweroff
+ *
+ * Description:
+ *   The function up_systempoweroff() will power down the MCU.  Optional!
+ *   Availability of this function is dependent upon the architecture
+ *   support.
+ *
+ ****************************************************************************/
+
+void up_systempoweroff(void) noreturn_function;
+
+/****************************************************************************
  * Name: up_systemreset
  *
  * Description:
@@ -482,6 +494,14 @@ void up_dump_register(FAR void *regs);
  *
  * Returned Value:
  *   up_backtrace() returns the number of addresses returned in buffer
+ *
+ * Assumptions:
+ *   Have to make sure tcb keep safe during function executing, it means
+ *   1. Tcb have to be self or not-running.  In SMP case, the running task
+ *      PC & SP cannot be backtrace, as whose get from tcb is not the newest.
+ *   2. Tcb have to keep not be freed.  In task exiting case, have to
+ *      make sure the tcb get from pid and up_backtrace in one critical
+ *      section procedure.
  *
  ****************************************************************************/
 
@@ -782,6 +802,50 @@ bool up_textheap_heapmember(FAR void *p);
 #endif
 
 /****************************************************************************
+ * Name: up_textheap_data_address
+ *
+ * Description:
+ *   If an instruction bus address is specified, return the corresponding
+ *   data bus address. Otherwise, return the given address as it is.
+ *
+ *   For some platforms, up_textheap_memalign() might return memory regions
+ *   with separate instruction/data bus mappings. In that case,
+ *   up_textheap_memalign() returns the address of the instruction bus
+ *   mapping.
+ *   The instruction bus mapping might provide only limited data access.
+ *   (For example, only read-only, word-aligned access.)
+ *   You can use up_textheap_data_address() to query the corresponding data
+ *   bus mapping.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#if defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+FAR void *up_textheap_data_address(FAR void *p);
+#else
+#define up_textheap_data_address(p) ((FAR void *)p)
+#endif
+#endif
+
+/****************************************************************************
+ * Name: up_textheap_data_sync
+ *
+ * Description:
+ *   Ensure modifications made on the data bus addresses (the addresses
+ *   returned by up_textheap_data_address) fully visible on the corresponding
+ *   instruction bus addresses.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+#if defined(CONFIG_ARCH_HAVE_TEXT_HEAP_SEPARATE_DATA_ADDRESS)
+void up_textheap_data_sync(void);
+#else
+#define up_textheap_data_sync() do {} while (0)
+#endif
+#endif
+
+/****************************************************************************
  * Name: up_dataheap_memalign
  *
  * Description:
@@ -821,13 +885,19 @@ bool up_dataheap_heapmember(FAR void *p);
  * Name: up_copy_section
  *
  * Description:
- *   Copy section from general temporary buffer(src) to special addr(dest).
+ *   This function copies a section from a general temporary buffer (src) to
+ *   a specific address (dest). This is typically used in architectures that
+ *   require specific handling of memory sections.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the destination where the data needs to be copied.
+ *   src  - A pointer to the source from where the data needs to be copied.
+ *   n    - The number of bytes to be copied from src to dest.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
-
 #if defined(CONFIG_ARCH_USE_COPY_SECTION)
 int up_copy_section(FAR void *dest, FAR const void *src, size_t n);
 #endif
@@ -2500,7 +2570,7 @@ void nxsched_alarm_tick_expiration(clock_t ticks);
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_CPULOAD_EXTCLK
-void nxsched_process_cpuload_ticks(uint32_t ticks);
+void nxsched_process_cpuload_ticks(clock_t ticks);
 #  define nxsched_process_cpuload() nxsched_process_cpuload_ticks(1)
 #endif
 
@@ -2903,7 +2973,7 @@ bool up_fpucmp(FAR const void *saveregs1, FAR const void *saveregs2);
 #ifdef CONFIG_ARCH_HAVE_DEBUG
 
 /****************************************************************************
- * Name: up_debugpoint
+ * Name: up_debugpoint_add
  *
  * Description:
  *   Add a debugpoint.

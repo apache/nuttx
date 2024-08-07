@@ -38,16 +38,18 @@
   /* Exported Symbols */
 
   .section .text
+#ifndef CONFIG_NUTTSBI
   .global __start
 
 __start:
+#else
+  .global __start_s
+
+__start_s:
+#endif
 
   /* Preserve a1 as it contains the pointer to DTB */
-  /* Load mhartid (cpuid) */
-
-#ifndef CONFIG_BUILD_KERNEL
-  csrr a0, CSR_MHARTID
-#endif
+  /* Preserve a0 as it has mhartid */
 
   /* Load the number of CPUs that the kernel supports */
   li   t1, CONFIG_SMP_NCPUS

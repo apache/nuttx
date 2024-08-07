@@ -43,6 +43,8 @@
 #  define FLASH_SIZE 0x1000000
 #endif
 
+#define SRAM1_IRAM_LEN 0xa000
+
 MEMORY
 {
 #ifdef CONFIG_ESP32_APP_FORMAT_MCUBOOT
@@ -58,6 +60,17 @@ MEMORY
   metadata (RX) :        org = CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE, len = 0x20
   ROM (RX) :             org = ORIGIN(metadata) + LENGTH(metadata),
                          len = FLASH_SIZE - ORIGIN(ROM)
+
+#elif defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
+  /* The 0x20 offset is a convenience for the app binary image generation.
+   * Flash cache has 64KB pages. The .bin file which is flashed to the chip
+   * has a 0x18 byte file header, and each segment has a 0x08 byte segment
+   * header. Setting this offset makes it simple to meet the flash cache MMU's
+   * constraint that (paddr % 64KB == vaddr % 64KB).
+   */
+
+  ROM (RX) :             org = 0x20,
+                         len = FLASH_SIZE - ORIGIN(ROM)
 #endif
 
   /* Below values assume the flash cache is on, and have the blocks this
@@ -68,7 +81,7 @@ MEMORY
 
   /* IRAM for PRO cpu. Not sure if happy with this, this is MMU area... */
 
-  iram0_0_seg (RX) :     org = 0x40080000, len = 0x20000
+  iram0_0_seg (RX) :     org = 0x40080000, len = 0x20000 + SRAM1_IRAM_LEN
 
   /* Flash mapped instruction data. */
 
@@ -152,13 +165,18 @@ MEMORY
   REGION_ALIAS("default_code_seg", irom0_0_seg);
 #endif /* CONFIG_ESP32_RUN_IRAM */
 
+_sram1_iram_start = 0x400a0000;
+_sram1_iram_len = ( _iram_text_end > _sram1_iram_start) ? (_iram_text_end - _sram1_iram_start) : 0;
+
 /* Heap ends at top of dram0_0_seg */
 
-_eheap = 0x40000000 - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM;
+_eheap = (_iram_text_end > _sram1_iram_start) ?
+  ALIGN(0x40000000 - _sram1_iram_len - 3, 4) - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM :
+  0x40000000 - CONFIG_ESP32_TRACEMEM_RESERVE_DRAM;
 
 /* IRAM heap ends at top of dram0_0_seg */
 
-_eiramheap = 0x400a0000;
+_eiramheap = (_iram_text_end > _sram1_iram_start) ? ALIGN(_iram_text_end, 4) : 0x400a0000;
 
 /* Mark the end of the RTC heap (top of the RTC region) */
 

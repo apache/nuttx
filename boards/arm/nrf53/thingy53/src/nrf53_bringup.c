@@ -67,8 +67,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NRF53_TIMER (0)
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -259,6 +257,16 @@ int nrf53_bringup(void)
       syslog(LOG_ERR, "ERROR: nrf53_rgbled_init failed: %d\n", ret);
     }
 #endif
+
+  /* Initialize on-board sensors */
+
+  ret = nrf53_sensors_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize sensors: %d\n",
+             ret);
+    }
 
   UNUSED(ret);
   return OK;

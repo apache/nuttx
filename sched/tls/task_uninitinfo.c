@@ -26,6 +26,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>
+#include <nuttx/lib/lib.h>
 
 #include "tls.h"
 

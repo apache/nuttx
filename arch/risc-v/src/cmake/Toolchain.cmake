@@ -26,6 +26,7 @@ set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
 if(CONFIG_RISCV_TOOLCHAIN_GNU_RV32
    OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64
+   OR CONFIG_RISCV_TOOLCHAIN_GNU_RV64ILP32
    OR CONFIG_RISCV_TOOLCHAIN_CLANG)
   if(NOT CONFIG_RISCV_TOOLCHAIN)
     set(CONFIG_RISCV_TOOLCHAIN GNU_RVG)
@@ -150,43 +151,56 @@ if(CONFIG_ARCH_COVERAGE)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 
-set(ARCHCFLAGS
-    "-Wstrict-prototypes -fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas"
-)
-set(ARCHCXXFLAGS
-    "-fno-common -Wall -Wshadow -Wundef -Wno-attributes -Wno-unknown-pragmas")
+add_compile_options(
+  -fno-common
+  -Wall
+  -Wshadow
+  -Wundef
+  -Wno-attributes
+  -Wno-unknown-pragmas
+  $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
 
 if(NOT CONFIG_LIBCXXTOOLCHAIN)
-  set(ARCHCXXFLAGS "${ARCHCXXFLAGS} -nostdinc++")
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
 endif()
 
 if(NOT ${CONFIG_ARCH_TOOLCHAIN_CLANG})
-  string(APPEND ARCHCFLAGS " -Wno-psabi")
-  string(APPEND ARCHCXXFLAGS " -Wno-psabi")
+  add_compile_options(-Wno-psabi)
 endif()
 
-if(${CONFIG_CXX_STANDARD})
-  string(APPEND ARCHCXXFLAGS " -std=${CONFIG_CXX_STANDARD}")
+if(CONFIG_CXX_STANDARD)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=${CONFIG_CXX_STANDARD}>)
 endif()
 
-if(NOT ${CONFIG_CXX_EXCEPTION})
-  string(APPEND ARCHCXXFLAGS " -fno-exceptions -fcheck-new")
+if(NOT CONFIG_CXX_EXCEPTION)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+                      $<$<COMPILE_LANGUAGE:CXX>:-fcheck-new>)
 endif()
 
-if(NOT ${CONFIG_CXX_RTTI})
-  string(APPEND ARCHCXXFLAGS " -fno-rtti")
+if(NOT CONFIG_CXX_RTTI)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
 if(CONFIG_ARCH_RV32)
   add_link_options(-Wl,-melf32lriscv)
 elseif(CONFIG_ARCH_RV64)
   add_compile_options(-mcmodel=medany)
-  add_link_options(-Wl,-melf64lriscv)
+  if(CONFIG_ARCH_RV64ILP32)
+    add_link_options(-Wl,-melf32lriscv)
+  else()
+    add_link_options(-Wl,-melf64lriscv)
+  endif()
 endif()
 
 if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
   add_link_options(-Wl,--gc-sections)
   add_compile_options(-ffunction-sections -fdata-sections)
+endif()
+
+# Debug --whole-archive
+
+if(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE)
+  add_link_options(-Wl,--whole-archive)
 endif()
 
 add_link_options(-nostdlib)
@@ -200,24 +214,8 @@ if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(-g)
 endif()
 
-if(NOT "${CMAKE_C_FLAGS}" STREQUAL "")
-  string(REGEX MATCH "${ARCHCFLAGS}" EXISTS_FLAGS "${CMAKE_C_FLAGS}")
-endif()
-
-if(NOT EXISTS_FLAGS)
-  set(CMAKE_ASM_FLAGS
-      "${CMAKE_ASM_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_C_FLAGS
-      "${CMAKE_C_FLAGS} ${ARCHCFLAGS}"
-      CACHE STRING "" FORCE)
-  set(CMAKE_CXX_FLAGS
-      "${CMAKE_CXX_FLAGS} ${ARCHCXXFLAGS}"
-      CACHE STRING "" FORCE)
-endif()
-
 # Generic GNU RVG toolchain
-if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
+if(CONFIG_RISCV_TOOLCHAIN STREQUAL GNU_RVG)
 
   set(ARCHCPUEXTFLAGS i)
 
@@ -281,7 +279,11 @@ if(${CONFIG_RISCV_TOOLCHAIN} STREQUAL GNU_RVG)
     set(LLVM_ARCHTYPE "riscv32")
   elseif(CONFIG_ARCH_RV64)
     set(ARCHTYPE "rv64")
-    set(ARCHABITYPE "lp64")
+    if(CONFIG_ARCH_RV64ILP32)
+      set(ARCHABITYPE "ilp32")
+    else()
+      set(ARCHABITYPE "lp64")
+    endif()
     set(LLVM_ARCHTYPE "riscv64")
   endif()
 

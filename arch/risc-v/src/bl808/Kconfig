@@ -7,10 +7,231 @@ comment "BL808 Configuration Options"
 
 menu "BL808 Peripheral Support"
 
+config BL808_GPADC
+	bool "GPADC"
+	default n
+
+menu "BL808 GPADC Options"
+	depends on BL808_GPADC
+
+choice BL808_GPADC_RES
+	prompt "GPADC Resolution"
+	default BL808_GPADC_RES_12
+	depends on BL808_GPADC
+
+config BL808_GPADC_RES_12
+	bool "12 bits"
+
+config BL808_GPADC_RES_14
+	bool "14 bits"
+
+config BL808_GPADC_RES_16
+	bool "16 bits"
+
+endchoice
+
+config BL808_GPADC_NCHANNELS
+	int "Number of channels"
+	default 12
+	range 1 12
+
+comment "Channel scanning order - set the channel number for each scanning position"
+comment "Only positions smaller than the number of channels will be used."
+comment "Channel codes:"
+comment "0-11: External channels"
+comment "12 or 13: DAC output A or B"
+comment "16: VREF"
+comment "18: VBAT\/2"
+comment "23: GND"
+
+config BL808_GPADC_SCAN_ORD0
+	int "Position 0"
+	default 0
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD1
+	int "Position 1"
+	default 1
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD2
+	int "Position 2"
+	default 2
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD3
+	int "Position 3"
+	default 3
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD4
+	int "Position 4"
+	default 4
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD5
+	int "Position 5"
+	default 5
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD6
+	int "Position 6"
+	default 6
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD7
+	int "Position 7"
+	default 7
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD8
+	int "Position 8"
+	default 8
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD9
+	int "Position 9"
+	default 9
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD10
+	int "Position 10"
+	default 10
+	range 0 23
+
+config BL808_GPADC_SCAN_ORD11
+	int "Position 11"
+	default 11
+	range 0 23
+
+endmenu
+
+config BL808_UART0
+	bool "UART 0"
+	default n
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config BL808_UART1
+	bool "UART 1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config BL808_UART2
+	bool "UART 2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
 config BL808_UART3
 	bool "UART 3"
 	default n
 	select UART3_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
+
+menuconfig BL808_SPI0
+	bool "SPI 0"
+	default n
+	select SPI
+
+if BL808_SPI0
+
+config BL808_SPI0_DEG_ENABLE
+	bool "Deglitch enable"
+	default y
+
+config BL808_SPI0_CONT_ENABLE
+	bool "Continuous transfer mode"
+	default y
+
+config BL808_SPI0_BYTE_INV
+	bool "Invert byte transfer order"
+	default n
+
+config BL808_SPI0_BIT_INV
+	bool "Invert bit transfer order"
+	default n
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_SPI0_MISO
+	int "MISO Pin"
+	default 14
+	range 0 45
+
+config BL808_SPI0_MOSI
+	int "MOSI Pin"
+	default 13
+	range 0 45
+
+config BL808_SPI0_SCLK
+	int "SCLK Pin"
+	default 15
+	range 0 45
+
+config BL808_SPI0_SS
+	int "SS Pin"
+	default 12
+	range 0 45
+
+endif
+
+menuconfig BL808_SPI1
+	bool "SPI 1"
+	default n
+	select SPI
+
+if BL808_SPI1
+
+config BL808_SPI1_DEG_ENABLE
+	bool "Deglitch enable"
+	default y
+
+config BL808_SPI1_CONT_ENABLE
+	bool "Continuous transfer mode"
+	default y
+
+config BL808_SPI1_BYTE_INV
+	bool "Invert byte transfer order"
+	default n
+
+config BL808_SPI1_BIT_INV
+	bool "Invert bit transfer order"
+	default n
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_SPI1_MISO
+	int "MISO Pin"
+	default 14
+	range 0 45
+
+config BL808_SPI1_MOSI
+	int "MOSI Pin"
+	default 13
+	range 0 45
+
+config BL808_SPI1_SCLK
+	int "SCLK Pin"
+	default 15
+	range 0 45
+
+config BL808_SPI1_SS
+	int "SS Pin"
+	default 12
+	range 0 45
+
+endif
+
+config BL808_TIMERS
+	bool "Timers"
+	default n
+	select TIMER
+
+config BL808_WDT
+	bool "Watchdog Timers"
+	default n
+	select WATCHDOG
 
 endmenu

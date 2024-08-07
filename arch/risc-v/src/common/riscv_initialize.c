@@ -32,7 +32,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
+volatile uintreg_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Private Functions

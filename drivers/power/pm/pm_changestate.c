@@ -40,6 +40,96 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: pm_stats
+ *
+ * Description:
+ *   Statistic when domain on state change events.
+ *
+ * Input Parameters:
+ *   dom      - Identifies the target domain for Statistic
+ *   curstate - Identifies the current PM state
+ *   newstate - Identifies the new PM state
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_PM_PROCFS
+static void pm_stats(FAR struct pm_domain_s *dom, int curstate, int newstate)
+{
+  struct timespec now;
+  struct timespec ts;
+
+  clock_systime_timespec(&now);
+  ts = now;
+  clock_timespec_subtract(&ts, &dom->start, &ts);
+
+  /* Update start */
+
+  dom->start = now;
+
+  if (newstate == PM_RESTORE)
+    {
+      /* Wakeup from WFI */
+
+      clock_timespec_add(&ts, &dom->sleep[curstate], &dom->sleep[curstate]);
+      dom->in_sleep = false;
+    }
+  else
+    {
+      /* Sleep to WFI */
+
+      clock_timespec_add(&ts, &dom->wake[curstate], &dom->wake[curstate]);
+      dom->in_sleep = true;
+    }
+}
+
+/****************************************************************************
+ * Name: pm_stats_preparefail
+ *
+ * Description:
+ *   Statistic the domain on drivers prepare failed.
+ *
+ * Input Parameters:
+ *   domain   - Identifies the target domain for Statistic
+ *   callback - The prepare failed callback
+ *   newstate - The target new state to prepare
+ *   ret      - The driver prepare failed returned value
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void pm_stats_preparefail(int domain,
+                                 FAR struct pm_callback_s *callback,
+                                 int newstate, int ret)
+{
+  struct timespec ts;
+  FAR struct pm_preparefail_s *pf = &callback->preparefail;
+
+  if (pf->state != PM_RESTORE)
+    {
+      clock_systime_timespec(&ts);
+      clock_timespec_subtract(&ts, &pf->start, &ts);
+      clock_timespec_add(&ts, &pf->duration[pf->state],
+                         &pf->duration[pf->state]);
+      pf->state = PM_RESTORE;
+    }
+
+  if (ret < 0)
+    {
+      clock_systime_timespec(&pf->start);
+      pf->state = newstate;
+    }
+}
+
+#else
+#  define pm_stats(dom, curstate, newstate)
+#  define pm_stats_preparefail(domain, callback, newstate, ret)
+#endif
+
+/****************************************************************************
  * Name: pm_prepall
  *
  * Description:
@@ -48,6 +138,7 @@
  * Input Parameters:
  *   domain   - Identifies the domain of the new PM state
  *   newstate - Identifies the new PM state
+ *   restore  - Indicate currently in revert the preceding prepare stage.
  *
  * Returned Value:
  *   0 (OK) means that the callback function for all registered drivers
@@ -60,27 +151,34 @@
  *
  ****************************************************************************/
 
-static int pm_prepall(int domain, enum pm_state_e newstate)
+static int pm_prepall(int domain, enum pm_state_e newstate, bool restore)
 {
+  FAR struct pm_domain_s *pdom;
+  FAR struct pm_callback_s *cb;
   FAR dq_entry_t *entry;
   int ret = OK;
 
-  if (newstate <= g_pmglobals.domain[domain].state)
+  pdom = &g_pmdomains[domain];
+  if (newstate <= pdom->state)
     {
       /* Visit each registered callback structure in normal order. */
 
-      for (entry = dq_peek(&g_pmglobals.registry);
+      for (entry = dq_peek(&pdom->registry);
            entry && ret == OK;
            entry = dq_next(entry))
         {
           /* Is the prepare callback supported? */
 
-          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          cb = (FAR struct pm_callback_s *)entry;
           if (cb->prepare)
             {
               /* Yes.. prepare the driver */
 
               ret = cb->prepare(cb, domain, newstate);
+              if (!restore)
+                {
+                  pm_stats_preparefail(domain, cb, newstate, ret);
+                }
             }
         }
     }
@@ -88,18 +186,22 @@ static int pm_prepall(int domain, enum pm_state_e newstate)
     {
       /* Visit each registered callback structure in reverse order. */
 
-      for (entry = dq_tail(&g_pmglobals.registry);
+      for (entry = dq_tail(&pdom->registry);
            entry && ret == OK;
            entry = dq_prev(entry))
         {
           /* Is the prepare callback supported? */
 
-          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          cb = (FAR struct pm_callback_s *)entry;
           if (cb->prepare)
             {
               /* Yes.. prepare the driver */
 
               ret = cb->prepare(cb, domain, newstate);
+              if (!restore)
+                {
+                  pm_stats_preparefail(domain, cb, newstate, ret);
+                }
             }
         }
     }
@@ -128,18 +230,21 @@ static int pm_prepall(int domain, enum pm_state_e newstate)
 
 static inline void pm_changeall(int domain, enum pm_state_e newstate)
 {
+  FAR struct pm_domain_s *pdom;
+  FAR struct pm_callback_s *cb;
   FAR dq_entry_t *entry;
 
-  if (newstate <= g_pmglobals.domain[domain].state)
+  pdom = &g_pmdomains[domain];
+  if (newstate <= pdom->state)
     {
       /* Visit each registered callback structure in normal order. */
 
-      for (entry = dq_peek(&g_pmglobals.registry);
+      for (entry = dq_peek(&pdom->registry);
            entry; entry = dq_next(entry))
         {
           /* Is the notification callback supported? */
 
-          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          cb = (FAR struct pm_callback_s *)entry;
           if (cb->notify)
             {
               /* Yes.. notify the driver */
@@ -152,12 +257,12 @@ static inline void pm_changeall(int domain, enum pm_state_e newstate)
     {
       /* Visit each registered callback structure in reverse order. */
 
-      for (entry = dq_tail(&g_pmglobals.registry);
+      for (entry = dq_tail(&pdom->registry);
            entry; entry = dq_prev(entry))
         {
           /* Is the notification callback supported? */
 
-          FAR struct pm_callback_s *cb = (FAR struct pm_callback_s *)entry;
+          cb = (FAR struct pm_callback_s *)entry;
           if (cb->notify)
             {
               /* Yes.. notify the driver */
@@ -167,35 +272,6 @@ static inline void pm_changeall(int domain, enum pm_state_e newstate)
         }
     }
 }
-
-#ifdef CONFIG_PM_PROCFS
-static void pm_stats(FAR struct pm_domain_s *dom, int curstate, int newstate)
-{
-  struct timespec ts;
-
-  clock_systime_timespec(&ts);
-  clock_timespec_subtract(&ts, &dom->start, &ts);
-
-  if (newstate == PM_RESTORE)
-    {
-      /* Wakeup from WFI */
-
-      clock_timespec_add(&ts, &dom->sleep[curstate], &dom->sleep[curstate]);
-    }
-  else
-    {
-      /* Sleep to WFI */
-
-      clock_timespec_add(&ts, &dom->wake[curstate], &dom->wake[curstate]);
-    }
-
-  /* Update start */
-
-  clock_systime_timespec(&dom->start);
-}
-#else
-#  define pm_stats(dom, curstate, newstate)
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -250,38 +326,41 @@ int pm_changestate(int domain, enum pm_state_e newstate)
        * drivers may refuse the state state change.
        */
 
-      ret = pm_prepall(domain, newstate);
+      ret = pm_prepall(domain, newstate, false);
       if (ret != OK)
         {
           /* One or more drivers is not ready for this state change.
            * Revert to the preceding state.
            */
 
-          newstate = g_pmglobals.domain[domain].state;
-          pm_prepall(domain, newstate);
+          newstate = g_pmdomains[domain].state;
+          pm_prepall(domain, newstate, true);
         }
     }
 
   /* Statistics */
 
-  pm_stats(&g_pmglobals.domain[domain],
-           g_pmglobals.domain[domain].state, newstate);
+  pm_stats(&g_pmdomains[domain],
+           g_pmdomains[domain].state, newstate);
 
   /* All drivers have agreed to the state change (or, one or more have
    * disagreed and the state has been reverted).  Set the new state.
    */
 
   pm_changeall(domain, newstate);
-  if (newstate != PM_RESTORE)
-    {
-      g_pmglobals.domain[domain].state = newstate;
-    }
 
   /* Notify governor of (possible) state change */
 
-  if (g_pmglobals.domain[domain].governor->statechanged)
+  if (g_pmdomains[domain].governor->statechanged)
     {
-      g_pmglobals.domain[domain].governor->statechanged(domain, newstate);
+      g_pmdomains[domain].governor->statechanged(domain, newstate);
+    }
+
+  /* Domain state update after statechanged done */
+
+  if (newstate != PM_RESTORE)
+    {
+      g_pmdomains[domain].state = newstate;
     }
 
   /* Restore the interrupt state */
@@ -307,7 +386,7 @@ int pm_changestate(int domain, enum pm_state_e newstate)
 enum pm_state_e pm_querystate(int domain)
 {
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  return g_pmglobals.domain[domain].state;
+  return g_pmdomains[domain].state;
 }
 
 #endif /* CONFIG_PM */

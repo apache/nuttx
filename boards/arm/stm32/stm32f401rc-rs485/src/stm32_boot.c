@@ -57,6 +57,16 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
+
+  /* Configure SPI chip selects if
+   * 1) SPI is not disabled, and
+   * 2) the weak function stm32_spidev_initialize() has been brought into
+   * the link.
+   */
+
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
+  stm32_spidev_initialize();
+#endif
 }
 
 /****************************************************************************

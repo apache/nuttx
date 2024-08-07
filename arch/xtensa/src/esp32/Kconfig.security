@@ -20,9 +20,6 @@ config ESP32_SECURE_BOOT
 
 if ESP32_SECURE_BOOT
 
-comment "Secure Boot support requires building the bootloader from source (ESP32_BOOTLOADER_BUILD_FROM_SOURCE)"
-	depends on !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
-
 config ESP32_SECURE_BOOT_BUILD_SIGNED_BINARIES
 	bool "Sign binaries during build"
 	default y
@@ -116,9 +113,6 @@ config ESP32_SECURE_FLASH_ENC_ENABLED
 		before enabling.
 
 if ESP32_SECURE_FLASH_ENC_ENABLED
-
-comment "Flash Encryption support requires building the bootloader from source (ESP32_BOOTLOADER_BUILD_FROM_SOURCE)"
-	depends on !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
 
 choice ESP32_SECURE_FLASH_ENCRYPTION_MODE
 	bool "Enable usage mode"

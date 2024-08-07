@@ -30,7 +30,6 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/ascii.h>
 #include <nuttx/gdbstub.h>
@@ -68,6 +67,15 @@ struct gdb_state_s
   uint8_t running_regs[XCPTCONTEXT_SIZE]; /* Registers of running thread */
   size_t size;                            /* Size of registers */
   uintptr_t registers[0];                 /* Registers of other threads */
+};
+
+struct gdb_debugpoint_s
+{
+  int type;
+  FAR void *addr;
+  size_t size;
+  debug_callback_t callback;
+  FAR void *arg;
 };
 
 typedef CODE ssize_t (*gdb_format_func_t)(FAR void *buf, size_t buf_len,
@@ -782,6 +790,39 @@ static int gdb_send_ok_packet(FAR struct gdb_state_s *state)
 }
 
 /****************************************************************************
+ * Name: gdb_send_signal_packet
+ *
+ * Description:
+ *   Send a signal packet (S AA).
+ *
+ * Input Parameters:
+ *   state   - The pointer to the GDB state structure.
+ *   signal  - The signal to send.
+ *
+ * Returned Value:
+ *   Zero on success.
+ *   Negative value on error.
+ *
+ ****************************************************************************/
+
+static int gdb_send_signal_packet(FAR struct gdb_state_s *state,
+                                  unsigned char signal)
+{
+  int ret;
+
+  state->pkt_buf[0] = 'S';
+  ret = gdb_bin2hex(&state->pkt_buf[1], sizeof(state->pkt_buf) - 1,
+                    &signal, 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  state->pkt_len = 1 + ret;
+  return gdb_send_packet(state);
+}
+
+/****************************************************************************
  * Name: gdb_send_error_packet
  *
  * Description:
@@ -1316,6 +1357,7 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
  *   Negative value on error.
  *
  * Note : Comand Format: Hg<id>
+ *                       Hc-<id>
  *        Rsponse Format: OK
  ****************************************************************************/
 
@@ -1325,12 +1367,19 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
   uintptr_t pid;
   int ret;
 
-  if (state->pkt_buf[1] != 'g')
+  if (state->pkt_buf[1] == 'g')
+    {
+      state->pkt_next += 2;
+    }
+  else if  (state->pkt_buf[1] == 'c')
+    {
+      state->pkt_next += 3;
+    }
+  else
     {
       return -EINVAL;
     }
 
-  state->pkt_next += 2;
   ret = gdb_expect_integer(state, &pid);
   if (ret < 0)
     {
@@ -1381,32 +1430,32 @@ static int gdb_send_stop(FAR struct gdb_state_s *state, int stopreason,
 retry:
   switch (stopreason)
     {
-      case GDBSTUB_STOPREASON_WATCHPOINT_RO:
+      case GDB_STOPREASON_WATCHPOINT_RO:
         ret = sprintf(state->pkt_buf, "T05thread:%x;rwatch:%" PRIxPTR ";",
                       state->pid + 1, (uintptr_t)stopaddr);
         break;
-      case GDBSTUB_STOPREASON_WATCHPOINT_WO:
+      case GDB_STOPREASON_WATCHPOINT_WO:
         ret = sprintf(state->pkt_buf, "T05thread:%x;awatch:%" PRIxPTR ";",
                       state->pid + 1, (uintptr_t)stopaddr);
         break;
-      case GDBSTUB_STOPREASON_WATCHPOINT_RW:
+      case GDB_STOPREASON_WATCHPOINT_RW:
         ret = sprintf(state->pkt_buf, "T05thread:%x;watch:%" PRIxPTR ";",
                       state->pid + 1, (uintptr_t)stopaddr);
         break;
-      case GDBSTUB_STOPREASON_BREAKPOINT:
+      case GDB_STOPREASON_BREAKPOINT:
         ret = sprintf(state->pkt_buf, "T05thread:%x;hwbreak:;",
                       state->pid + 1);
         break;
-      case GDBSTUB_STOPREASON_STEPPOINT:
-        if (state->last_stopreason == GDBSTUB_STOPREASON_WATCHPOINT_RW ||
-            state->last_stopreason == GDBSTUB_STOPREASON_WATCHPOINT_WO)
+      case GDB_STOPREASON_STEPPOINT:
+        if (state->last_stopreason == GDB_STOPREASON_WATCHPOINT_RW ||
+            state->last_stopreason == GDB_STOPREASON_WATCHPOINT_WO)
           {
             stopreason = state->last_stopreason;
             stopaddr = state->last_stopaddr;
             goto retry;
           }
 
-      case GDBSTUB_STOPREASON_CTRLC:
+      case GDB_STOPREASON_CTRLC:
       default:
         ret = sprintf(state->pkt_buf, "T05thread:%d;", state->pid + 1);
     }
@@ -1422,36 +1471,68 @@ retry:
 
 #ifdef CONFIG_ARCH_HAVE_DEBUG
 
+#ifdef CONFIG_SMP
+
 /****************************************************************************
- * Name: gdbstub_debugpoint_callback
+ * Name: gdb_smp_debugpoint_add
+ *
+ * Description:
+ *  Add debug point to all cpu.
+ *
+ ****************************************************************************/
+
+static int gdb_smp_debugpoint_add(FAR void *arg)
+{
+  FAR struct gdb_debugpoint_s *point = arg;
+  return up_debugpoint_add(point->type, point->addr, point->size,
+                           point->callback, point->arg);
+}
+
+/****************************************************************************
+ * Name: gdb_smp_debugpoint_remove
+ *
+ * Description:
+ *  Remove debug point to all cpu.
+ *
+ ****************************************************************************/
+
+static int gdb_smp_debugpoint_remove(FAR void *arg)
+{
+  FAR struct gdb_debugpoint_s *point = arg;
+  return up_debugpoint_remove(point->type, point->addr, point->size);
+}
+#endif
+
+/****************************************************************************
+ * Name: gdb_debugpoint_callback
  *
  * Description:
  *  The debugpoint callback is used by GDB to request.
  *
  ****************************************************************************/
 
-static void gdbstub_debugpoint_callback(int type, FAR void *addr,
-                                        size_t size, FAR void *arg)
+static void gdb_debugpoint_callback(int type, FAR void *addr,
+                                    size_t size, FAR void *arg)
 {
   int stopreason;
 
   switch (type)
     {
       case DEBUGPOINT_BREAKPOINT:
-        stopreason = GDBSTUB_STOPREASON_BREAKPOINT;
+        stopreason = GDB_STOPREASON_BREAKPOINT;
         break;
       case DEBUGPOINT_WATCHPOINT_RO:
-        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_RO;
+        stopreason = GDB_STOPREASON_WATCHPOINT_RO;
         break;
       case DEBUGPOINT_WATCHPOINT_WO:
-        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_WO;
+        stopreason = GDB_STOPREASON_WATCHPOINT_WO;
         break;
       case DEBUGPOINT_WATCHPOINT_RW:
-        stopreason = GDBSTUB_STOPREASON_WATCHPOINT_RW;
+        stopreason = GDB_STOPREASON_WATCHPOINT_RW;
         break;
       case DEBUGPOINT_STEPPOINT:
-        stopreason = GDBSTUB_STOPREASON_STEPPOINT;
-        up_debugpoint_remove(DEBUGPOINT_STEPPOINT, NULL, 0);
+        stopreason = GDB_STOPREASON_STEPPOINT;
+        gdb_debugpoint_remove(GDB_STOPREASON_STEPPOINT, NULL, 0);
         break;
       default:
         return;
@@ -1547,12 +1628,12 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
 
   if (enable)
     {
-      ret = up_debugpoint_add(type, (FAR void *)addr, size,
-                              gdbstub_debugpoint_callback, state);
+      ret = gdb_debugpoint_add(type, (FAR void *)addr, size,
+                               gdb_debugpoint_callback, state);
     }
   else
     {
-      ret = up_debugpoint_remove(type, (FAR void *)addr, size);
+      ret = gdb_debugpoint_remove(type, (FAR void *)addr, size);
     }
 
   if (ret < 0)
@@ -1583,8 +1664,8 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
 
 static int gdb_step(FAR struct gdb_state_s *state)
 {
-  int ret = up_debugpoint_add(DEBUGPOINT_STEPPOINT, NULL, 0,
-                              gdbstub_debugpoint_callback, state);
+  int ret = gdb_debugpoint_add(GDB_STOPREASON_STEPPOINT, NULL, 0,
+                               gdb_debugpoint_callback, state);
 
   if (ret < 0)
     {
@@ -1628,6 +1709,50 @@ extern const struct tcbinfo_s g_tcbinfo;
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+
+/****************************************************************************
+ * Name: gdbstub_debugpoint_add
+ ****************************************************************************/
+
+int gdb_debugpoint_add(int type, FAR void *addr, size_t size,
+                       debug_callback_t callback, FAR void *arg)
+{
+#ifdef CONFIG_SMP
+  struct gdb_debugpoint_s point;
+  point.type = type;
+  point.addr = addr;
+  point.size = size;
+  point.callback = callback;
+  point.arg = arg;
+  return nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
+                          gdb_smp_debugpoint_add, &point, true);
+#else
+  return up_debugpoint_add(type, addr, size, callback, arg);
+#endif
+}
+
+/****************************************************************************
+ * Name: gdb_debugpoint_remove
+ ****************************************************************************/
+
+int gdb_debugpoint_remove(int type, FAR void *addr, size_t size)
+{
+#ifdef CONFIG_SMP
+  struct gdb_debugpoint_s point;
+  point.type = type;
+  point.addr = addr;
+  point.size = size;
+
+  retrun nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
+                          gdb_smp_debugpoint_remove, &point, true);
+#else
+  return up_debugpoint_remove(type, addr, size);
+#endif
+}
+
+#endif
 
 /****************************************************************************
  * Name: gdb_state_init
@@ -1744,7 +1869,7 @@ int gdb_process(FAR struct gdb_state_s *state, int stopreason,
 {
   int ret;
 
-  if (stopreason != GDBSTUB_STOPREASON_NONE)
+  if (stopreason != GDB_STOPREASON_NONE)
     {
       gdb_send_stop(state, stopreason, stopaddr);
     }
@@ -1756,7 +1881,7 @@ int gdb_process(FAR struct gdb_state_s *state, int stopreason,
       switch (state->pkt_buf[0])
         {
           case '?': /* gdbserial status */
-            ret = gdb_send_stop(state, stopreason, stopaddr);
+            ret = gdb_send_signal_packet(state, 0x00);
             break;
           case 'g': /* Read registers */
             ret = gdb_read_registers(state);

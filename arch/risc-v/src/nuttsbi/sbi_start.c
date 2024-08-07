@@ -33,6 +33,12 @@
 #include "sbi_internal.h"
 
 /****************************************************************************
+ * Preprocecssor definitions
+ ****************************************************************************/
+
+#define NAPOT_RWX   (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -107,19 +113,19 @@ void sbi_start(void)
   WRITE_CSR(CSR_MCOUNTEREN, UINT32_C(~0));
   WRITE_CSR(CSR_SCOUNTEREN, UINT32_C(~0));
 
-#ifdef CONFIG_NUTTSBI_LATE_INIT
-  /* Do device specific initialization as needed */
-
-  sbi_late_initialize();
-#endif
-
   /* Set program counter to __start_s */
 
   WRITE_CSR(CSR_MEPC, __start_s);
 
-  /* Open everything for PMP */
+#ifdef CONFIG_NUTTSBI_LATE_INIT
+  /* Do device specific handling */
 
-  riscv_append_pmp_region(PMPCFG_A_NAPOT | PMPCFG_RWX_MASK, 0, -1);
+  sbi_late_initialize();
+#else
+  /* Open everything for PMP, may fail if no empty entry left */
+
+  DEBUGASSERT(riscv_append_pmp_region(NAPOT_RWX, 0, 0) == 0);
+#endif
 
   /* Then jump to the S-mode start function */
 

@@ -491,8 +491,8 @@
 /* CMSE extention */
 
 #  ifdef CONFIG_ARCH_HAVE_TRUSTZONE
-#    define cmse_nonsecure_entry __attribute__((cmse_nonsecure_entry))
-#    define cmse_nonsecure_call __attribute__((cmse_nonsecure_call))
+#    define tz_nonsecure_entry __attribute__((cmse_nonsecure_entry))
+#    define tz_nonsecure_call  __attribute__((cmse_nonsecure_call))
 #  endif
 
 /* SDCC-specific definitions ************************************************/
@@ -579,6 +579,7 @@
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
 #  define realloc_like(a)
+#  define realloc_like2(a, b)
 
 #  define format_like(a)
 #  define printf_like(a, b)
@@ -722,6 +723,7 @@
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
 #  define realloc_like(a)
+#  define realloc_like2(a, b)
 #  define format_like(a)
 #  define printf_like(a, b)
 #  define syslog_like(a, b)
@@ -835,6 +837,7 @@
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
 #  define realloc_like(a)
+#  define realloc_like2(a, b)
 #  define format_like(a)
 #  define printf_like(a, b)
 #  define syslog_like(a, b)
@@ -927,6 +930,7 @@
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
 #  define realloc_like(a)
+#  define realloc_like2(a, b)
 #  define format_like(a)
 #  define printf_like(a, b)
 #  define syslog_like(a, b)
@@ -989,7 +993,8 @@
 #  define end_packed_struct             __attribute__((packed))
 #  define reentrant_function
 #  define naked_function
-#  define always_inline_function        __attribute__((always_inline))
+#  define always_inline_function        __attribute__((always_inline,no_instrument_function))
+#  define inline_function               __attribute__((always_inline)) inline
 #  define noinline_function             __attribute__((noinline))
 #  define noinstrument_function
 #  define nooptimiziation_function      __attribute__((optimize(0)))
@@ -1006,6 +1011,7 @@
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
 #  define realloc_like(a)
+#  define realloc_like2(a, b)
 #  define format_like(a)
 #  define printf_like(a, b)
 #  define syslog_like(a, b)
@@ -1073,6 +1079,7 @@
 #  define malloc_like1(a)
 #  define malloc_like2(a, b)
 #  define realloc_like(a)
+#  define realloc_like2(a, b)
 #  define format_like(a)
 #  define printf_like(a, b)
 #  define syslog_like(a, b)

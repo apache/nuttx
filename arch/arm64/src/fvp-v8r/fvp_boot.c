@@ -121,35 +121,6 @@ void arm64_el_init(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_cpu_index
- *
- * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- *   If TLS is enabled, then the RTOS can get this information from the TLS
- *   info structure.  Otherwise, the MCU-specific logic must provide some
- *   mechanism to provide the CPU index.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- ****************************************************************************/
-
-int up_cpu_index(void)
-{
-  /* Read the Multiprocessor Affinity Register (MPIDR)
-   * And return the CPU ID field
-   */
-
-  return MPID_TO_CORE(GET_MPIDR(), 0);
-}
-
-/****************************************************************************
  * Name: arm64_get_mpid
  *
  * Description:
@@ -175,7 +146,7 @@ uint64_t arm64_get_mpid(int cpu)
 
 int arm64_get_cpuid(uint64_t mpid)
 {
-  return MPID_TO_CORE(mpid, 0);
+  return MPID_TO_CORE(mpid);
 }
 
 #endif /* CONFIG_SMP */
@@ -194,7 +165,7 @@ void arm64_chip_boot(void)
 
   arm64_mpu_init(true);
 
-#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_HAVE_PCSI)
+#if defined(CONFIG_ARM64_PSCI)
   arm64_psci_init("smc");
 #endif
 

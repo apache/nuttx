@@ -97,6 +97,8 @@ static struct esp_hr_timer_context_s g_hr_timer_context =
   .toutsem = SEM_INITIALIZER(0),
 };
 
+static bool g_hr_timer_initialized;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -118,7 +120,7 @@ static struct esp_hr_timer_context_s g_hr_timer_context =
  *
  ****************************************************************************/
 
-static int esp_hr_timer_thread(int argc, char *argv[])
+IRAM_ATTR static int esp_hr_timer_thread(int argc, char *argv[])
 {
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
@@ -311,8 +313,8 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
-                        struct esp_hr_timer_s **timer_handle)
+int IRAM_ATTR esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
+                                  struct esp_hr_timer_s **timer_handle)
 {
   struct esp_hr_timer_s *timer;
 
@@ -351,9 +353,9 @@ int esp_hr_timer_create(const struct esp_hr_timer_args_s *args,
  *
  ****************************************************************************/
 
-void esp_hr_timer_start(struct esp_hr_timer_s *timer,
-                        uint64_t timeout,
-                        bool repeat)
+void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
+                                  uint64_t timeout,
+                                  bool repeat)
 {
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
   bool inserted = false;
@@ -436,7 +438,7 @@ void esp_hr_timer_start(struct esp_hr_timer_s *timer,
  *
  ****************************************************************************/
 
-void esp_hr_timer_stop(struct esp_hr_timer_s *timer)
+void IRAM_ATTR esp_hr_timer_stop(struct esp_hr_timer_s *timer)
 {
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
@@ -490,6 +492,23 @@ void esp_hr_timer_stop(struct esp_hr_timer_s *timer)
                                             next_timer->alarm);
             }
         }
+    }
+  else if (timer->state == HR_TIMER_TIMEOUT)
+    {
+      /* If the timer is in the timeout list, remove it from the list,
+       * execute its callback function and set its state to idle.
+       */
+
+      DEBUGASSERT(!list_is_empty(&priv->toutlist));
+
+      list_delete(&timer->list);
+      timer->state = HR_TIMER_IDLE;
+
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+      timer->callback(timer->arg);
+
+      flags = spin_lock_irqsave(&priv->lock);
     }
 
   spin_unlock_irqrestore(&priv->lock, flags);
@@ -649,7 +668,6 @@ void IRAM_ATTR esp_hr_timer_calibration(uint64_t time_us)
 
 int esp_hr_timer_init(void)
 {
-  static bool g_hr_timer_initialized = false;
   struct esp_hr_timer_context_s *priv;
   int pid;
 

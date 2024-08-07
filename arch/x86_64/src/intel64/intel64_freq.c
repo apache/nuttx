@@ -38,7 +38,7 @@
  * Public Data
  ****************************************************************************/
 
-extern unsigned long g_x86_64_timer_freq;
+unsigned long g_x86_64_timer_freq;
 
 /****************************************************************************
  * Public Functions
@@ -72,7 +72,7 @@ extern unsigned long g_x86_64_timer_freq;
 void x86_64_timer_calibrate_freq(void)
 {
 #ifdef CONFIG_ARCH_INTEL64_TSC_DEADLINE
-
+#  if CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ == 0
   unsigned long crystal_freq;
   unsigned long numerator;
   unsigned long denominator;
@@ -84,13 +84,15 @@ void x86_64_timer_calibrate_freq(void)
 
   if (numerator == 0 || denominator == 0 || crystal_freq == 0)
     {
-      g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
+      PANIC();
     }
   else
     {
       g_x86_64_timer_freq = crystal_freq / denominator * numerator;
     }
-
+#  else
+  g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
+#  endif
 #elif defined(CONFIG_ARCH_INTEL64_TSC)
   g_x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000L;
 #endif

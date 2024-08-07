@@ -52,11 +52,15 @@
 #define FLS2(n)  ((n) & 0x2        ?  1 + FLS1 ((n) >>  1) : FLS1 (n))
 #define FLS1(n)  ((n) & 0x1        ?  1 : 0)
 
+/* Checks if an integer is power of two at compile time */
+
+#define IS_POWER_OF_2(n)           ((n) > 0 && ((n) & (n - 1)) == 0)
+
 /* Returns round up and round down value of log2(n). Note: it can be used at
  * compile time.
  */
 
-#define LOG2_CEIL(n)  ((n) & (n - 1) ? FLS(n) : FLS(n) - 1)
+#define LOG2_CEIL(n)  (IS_POWER_OF_2(n) ? FLS(n) - 1 : FLS(n))
 #define LOG2_FLOOR(n) (FLS(n) - 1)
 
 /****************************************************************************

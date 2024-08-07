@@ -205,11 +205,18 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 7c4fae7ebc5342b19cab03511bfa277176bba377
+	ESP_HAL_3RDPARTY_VERSION = 8e8e62cf6a7ae8a9659b91706024cab38af29118
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
 	ESP_HAL_3RDPARTY_URL = https://github.com/espressif/esp-hal-3rdparty.git
+endif
+
+ifndef DISABLE_GIT_DEPTH
+ifndef GIT_DEPTH
+	GIT_DEPTH=1
+endif
+	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
 chip/$(ESP_HAL_3RDPARTY_REPO):
@@ -222,6 +229,10 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 
 CFLAGS += -Wno-undef -Wno-unused-variable
 CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
+
+# Enable strict volatile bitfield access
+
+CFLAGS += -fstrict-volatile-bitfields
 
 AFLAGS += $(CFLAGS)
 
@@ -238,7 +249,7 @@ include common/espressif/Make.defs
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
 ifeq ($(CONFIG_ESP32S3_WIRELESS),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
-	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init --depth=1 components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls reset --quiet --hard
 	$(Q) echo "Applying patches..."
 	$(Q) cd chip/$(ESP_HAL_3RDPARTY_REPO)/components/mbedtls/mbedtls && git apply ../../../nuttx/patches/components/mbedtls/mbedtls/*.patch

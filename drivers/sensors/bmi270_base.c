@@ -30,7 +30,7 @@
  * Public Data
  ****************************************************************************/
 
-/* BMI270 configuration file - provided by BOSH */
+/* BMI270 configuration file - provided by BOSCH */
 
 const uint8_t g_bmi270_config_file[] =
 {

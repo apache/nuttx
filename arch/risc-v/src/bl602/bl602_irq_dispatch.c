@@ -41,7 +41,7 @@
  * riscv_dispatch_irq
  ****************************************************************************/
 
-void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintreg_t *regs)
 {
   int irq  = vector & 0x3ff; /* E24 [9:0] */
 

@@ -62,8 +62,16 @@ SECTIONS
   .flash.rodata :
   {
     _srodata = ABSOLUTE(.);
-    *(EXCLUDE_FILE (esp32s2_start.*) .rodata)
-    *(EXCLUDE_FILE (esp32s2_start.*) .rodata.*)
+    *(EXCLUDE_FILE (esp32s2_start.* esp32s2_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s2_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata)
+    *(EXCLUDE_FILE (esp32s2_start.* esp32s2_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s2_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata.*)
 
     *(.srodata.*)
 
@@ -161,6 +169,14 @@ SECTIONS
 
     *(.iram1 .iram1.*)
     esp32s2_start.*(.literal .text .literal.* .text.*)
+    esp32s2_region.*(.text .text.* .literal .literal.*)
+
+    *libarch.a:*esp_loader.*(.text .text.* .literal .literal.*)
+    *libarch.a:esp32s2_spiflash.*(.literal .text .literal.* .text.*)
+    *libarch.a:*cache_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
 
     /* align + add 16B for CPU dummy speculative instr. fetch */
 
@@ -233,6 +249,15 @@ SECTIONS
     KEEP (*(.jcr))
     *(.dram1 .dram1.*)
     esp32s2_start.*(.rodata .rodata.*)
+    esp32s2_region.*(.rodata .rodata.*)
+
+    *libarch.a:*esp_loader.*(.rodata .rodata.*)
+    *libarch.a:esp32s2_spiflash.*(.rodata .rodata.*)
+    *libarch.a:*cache_hal.*(.rodata .rodata.*)
+    *libarch.a:*uart_hal.*(.rodata .rodata.*)
+    *libarch.a:*mpu_hal.*(.rodata .rodata.*)
+    *libarch.a:*mmu_hal.*(.rodata .rodata.*)
+
     _edata = ABSOLUTE(.);
     . = ALIGN(4);
 
@@ -254,7 +279,7 @@ SECTIONS
   _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
 
   /* The alignment of the ".flash.text" output section is forced to
-   * 0x0000FFFF (64KB) to ensure that it will be allocated at the beginning
+   * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
    * of the next available Flash block.
    * This is required to meet the following constraint from the external
    * flash MMU:
@@ -264,7 +289,7 @@ SECTIONS
    * be equal.
    */
 
-  .flash_text_dummy (NOLOAD) : ALIGN(0x0000FFFF)
+  .flash_text_dummy (NOLOAD) : ALIGN(0x00010000)
   {
     /* This section is required to skip .flash.rodata area because irom0_0_seg
      * and drom0_0_seg reflect the same address space on different buses.
@@ -273,7 +298,7 @@ SECTIONS
     . = SIZEOF(.flash.rodata);
   } >irom0_0_seg
 
-  .flash.text : ALIGN(0x0000FFFF)
+  .flash.text : ALIGN(0x00010000)
   {
     _stext = .;
 
@@ -307,7 +332,7 @@ SECTIONS
   .rtc.bss (NOLOAD) :
   {
     *(.rtc.bss)
-  } >rtc_data_seg
+  } >rtc_slow_seg
 
   .rtc.data :
   {
@@ -318,5 +343,5 @@ SECTIONS
 
     . = ALIGN (4);
     _srtcheap = ABSOLUTE(.);
-  } >rtc_data_seg AT>ROM
+  } >rtc_slow_seg AT>ROM
 }

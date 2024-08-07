@@ -184,7 +184,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
                         IP_PROTO_TCP,
                         netdev_ipv6_srcaddr(dev, conn->u.ipv6.laddr),
                         conn->u.ipv6.raddr,
-                        conn->sconn.ttl, conn->sconn.s_tclass);
+                        conn->sconn.s_ttl, conn->sconn.s_tclass);
 
       /* Calculate TCP checksum. */
 
@@ -204,7 +204,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
       ninfo("do IPv4 IP header build!\n");
       ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_TCP,
                         &dev->d_ipaddr, &conn->u.ipv4.raddr,
-                        conn->sconn.ttl, conn->sconn.s_tos, NULL);
+                        conn->sconn.s_ttl, conn->sconn.s_tos, NULL);
 
       /* Calculate TCP checksum. */
 
@@ -481,7 +481,7 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                         IP_PROTO_TCP,
                         netdev_ipv6_srcaddr(dev, ipv6->destipaddr),
                         ipv6->srcipaddr,
-                        conn ? conn->sconn.ttl : IP_TTL_DEFAULT,
+                        conn ? conn->sconn.s_ttl : IP_TTL_DEFAULT,
                         conn ? conn->sconn.s_tos : 0);
       tcp->tcpchksum = 0;
       tcp->tcpchksum = ~tcp_ipv6_chksum(dev);
@@ -497,7 +497,7 @@ void tcp_reset(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
       ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_TCP,
                         &dev->d_ipaddr, (FAR in_addr_t *)ipv4->srcipaddr,
-                        conn ? conn->sconn.ttl : IP_TTL_DEFAULT,
+                        conn ? conn->sconn.s_ttl : IP_TTL_DEFAULT,
                         conn ? conn->sconn.s_tos : 0, NULL);
 
       tcp->tcpchksum = 0;

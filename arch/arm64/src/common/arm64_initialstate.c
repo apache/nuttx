@@ -74,9 +74,13 @@ void arm64_new_task(struct tcb_s * tcb)
   memset(pinitctx, 0, sizeof(struct regs_context));
   pinitctx->elr       = (uint64_t)tcb->start;
 
-  /* Keep using SP_EL1 */
+  /* Keep using SP_EL1 or SP_EL3 */
 
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
+  pinitctx->spsr      = SPSR_MODE_EL3H;
+#else
   pinitctx->spsr      = SPSR_MODE_EL1H;
+#endif
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   pinitctx->spsr       |= (DAIF_IRQ_BIT | DAIF_FIQ_BIT);

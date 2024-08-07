@@ -29,18 +29,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_RV64)
-#define _PRI32PREFIX
-#define _PRI64PREFIX "l"
-#define _PRIPTRPREFIX "l"
-#define _SCN32PREFIX
-#define _SCN64PREFIX "l"
-#define _SCNPTRPREFIX "l"
-#define INT32_C(x)  x
-#define INT64_C(x)  x ## l
-#define UINT32_C(x) x ## u
-#define UINT64_C(x) x ## ul
-#else /* defined(CONFIG_ARCH_RV64) */
+#if defined(CONFIG_ARCH_RV64ILP32) || defined(CONFIG_ARCH_RV32)
 #define _PRI32PREFIX "l"
 #define _PRI64PREFIX "ll"
 #define _PRIPTRPREFIX
@@ -51,7 +40,18 @@
 #define INT64_C(x)  x ## ll
 #define UINT32_C(x) x ## ul
 #define UINT64_C(x) x ## ull
-#endif /* defined(CONFIG_ARCH_RV64) */
+#elif defined(CONFIG_ARCH_RV64)
+#define _PRI32PREFIX
+#define _PRI64PREFIX "l"
+#define _PRIPTRPREFIX "l"
+#define _SCN32PREFIX
+#define _SCN64PREFIX "l"
+#define _SCNPTRPREFIX "l"
+#define INT32_C(x)  x
+#define INT64_C(x)  x ## l
+#define UINT32_C(x) x ## u
+#define UINT64_C(x) x ## ul
+#endif
 
 #define PRId8       "d"
 #define PRId16      "d"
@@ -135,5 +135,13 @@
 
 #define UINT8_C(x)  x
 #define UINT16_C(x) x
+
+/* Format output with register width and hex */
+
+#ifdef CONFIG_ARCH_RV32
+#  define PRIxREG "08"  PRIx32
+#else
+#  define PRIxREG "016" PRIx64
+#endif
 
 #endif /* __ARCH_RISCV_INCLUDE_INTTYPES_H */

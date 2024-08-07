@@ -137,13 +137,23 @@ This configuration is focused on low level, command-line driver testing.
 Built-in applications are supported, but none are enabled.
 Serial Console is enabled on UART3 at 2 Mbps.
 
-Peripheral Support
-==================
+adc
+---
 
-NuttX for Ox64 supports these peripherals:
+This configuration enables support for the general purpose ADC and the adc example app.
+By default, the ADC will scan external channels 3, 4, 6, 7 and 9 (GPIO pins 11, 6, 12,
+13 and 18). Serial Console is enabled on UART3 at 2 Mbps.
 
-======================== ======= =====
-Peripheral               Support NOTES
-======================== ======= =====
-UART                     Yes
-======================== ======= =====
+spi
+---
+
+This configuration enables support for SPI0 and spitool.
+By default, GPIO14 is MISO, 13 is MOSI, 15 is SCLK and 12 is SS.
+Serial Console is enabled on UART3 at 2 Mbps.
+
+timer
+-----
+
+This configuration enables support for general purpose and watchdog timers,
+as well as the timer and watchdog examples.
+Serial Console is enabled on UART3 at 2 Mbps.

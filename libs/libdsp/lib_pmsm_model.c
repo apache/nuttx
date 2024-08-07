@@ -109,9 +109,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
 #include <dsp.h>
 #include <string.h>
 

@@ -37,6 +37,7 @@
 
 #include "esp_gpio.h"
 #include "esp_irq.h"
+#include "esp_rtc_gpio.h"
 
 #include "esp_attr.h"
 #include "esp_bit_defs.h"
@@ -68,6 +69,7 @@
 #define CPUINT_FREE(cpuint)           ((cpuint).val = 0)
 #define CPUINT_ISENABLED(cpuint)      ((cpuint).cpuint_en == 1)
 #define CPUINT_ISASSIGNED(cpuint)     ((cpuint).assigned == 1)
+#define CPUINT_ISRESERVED(cpuint)     ((cpuint).reserved0 == 1)
 #define CPUINT_ISFREE(cpuint)         (!CPUINT_ISASSIGNED(cpuint))
 
 /* CPU interrupts can be detached from any interrupt source by setting the
@@ -113,7 +115,8 @@ static volatile uint8_t g_irq_map[NR_IRQS];
  * devices.
  */
 
-static uint32_t g_cpuint_freelist = ESP_CPUINT_PERIPHSET;
+static uint32_t g_cpuint_freelist = ESP_CPUINT_PERIPHSET & \
+                                    ~ESP_WIRELESS_RESERVE_INT;
 
 /* This bitmask has an 1 if the int should be disabled
  * when the flash is disabled.
@@ -200,8 +203,7 @@ static int esp_cpuint_alloc(int irq)
 
   DEBUGASSERT(CPUINT_ISFREE(g_cpuint_map[cpuint]));
 
-  CPUINT_ASSIGN(g_cpuint_map[cpuint], irq);
-  g_irq_map[irq] = cpuint;
+  esp_set_irq(irq, cpuint);
 
   return cpuint;
 }
@@ -318,6 +320,10 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ESPRESSIF_GPIO_IRQ
   esp_gpioirqinitialize();
 #endif
+
+  /* Initialize RTCIO interrupt support */
+
+  esp_rtcioirqinitialize();
 
   /* Attach the common interrupt handler */
 
@@ -547,7 +553,7 @@ void esp_teardown_irq(int source, int cpuint)
  *
  ****************************************************************************/
 
-IRAM_ATTR uintptr_t *riscv_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
+IRAM_ATTR void *riscv_dispatch_irq(uintreg_t mcause, uintreg_t *regs)
 {
   int irq;
   bool is_irq = (RISCV_IRQ_BIT & mcause) != 0;
@@ -679,4 +685,50 @@ void IRAM_ATTR esp_intr_noniram_enable(void)
   non_iram_int_disabled_flag[cpu] = false;
   esp_cpu_intr_enable(non_iram_ints);
   leave_critical_section(irqstate);
+}
+
+/****************************************************************************
+ * Name:  esp_get_irq
+ *
+ * Description:
+ *   This function returns the IRQ associated with a CPU interrupt
+ *
+ * Input Parameters:
+ *   cpuint - The CPU interrupt associated to the IRQ
+ *
+ * Returned Value:
+ *   The IRQ associated with such CPU interrupt or CPUINT_UNASSIGNED if
+ *   IRQ is not yet assigned to a CPU interrupt.
+ *
+ ****************************************************************************/
+
+int esp_get_irq(int cpuint)
+{
+  return CPUINT_GETIRQ(g_cpuint_map[cpuint]);
+}
+
+/****************************************************************************
+ * Name:  esp_set_irq
+ *
+ * Description:
+ *   This function assigns a CPU interrupt to a specific IRQ number. It
+ *   updates the mapping between IRQ numbers and CPU interrupts, allowing
+ *   the system to correctly route hardware interrupts to the appropriate
+ *   handlers. Please note that this function is intended to be used only
+ *   when a CPU interrupt is already assigned to an IRQ number. Otherwise,
+ *   please check esp_setup_irq.
+ *
+ * Input Parameters:
+ *   irq    - The IRQ number to be associated with the CPU interrupt.
+ *   cpuint - The CPU interrupt to be associated with the IRQ number.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_set_irq(int irq, int cpuint)
+{
+  CPUINT_ASSIGN(g_cpuint_map[cpuint], irq);
+  g_irq_map[irq] = cpuint;
 }

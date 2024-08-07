@@ -36,6 +36,7 @@ BOOTLOADER_CONFIG  = $(BOOTLOADER_DIR)/bootloader.conf
 MCUBOOT_SRCDIR     = $(BOOTLOADER_DIR)/mcuboot
 MCUBOOT_ESPDIR     = $(MCUBOOT_SRCDIR)/boot/espressif
 MCUBOOT_URL        = https://github.com/mcu-tools/mcuboot
+MCUBOOT_TOOLCHAIN  = $(TOPDIR)/tools/esp32s3/mcuboot_toolchain_esp32s3.cmake
 
 $(BOOTLOADER_DIR):
 	$(Q) mkdir -p $(BOOTLOADER_DIR) &>/dev/null
@@ -96,7 +97,7 @@ BOOTLOADER_BIN        = $(TOPDIR)/mcuboot-esp32s3.bin
 $(MCUBOOT_SRCDIR): $(BOOTLOADER_DIR)
 	$(Q) echo "Cloning MCUboot"
 	$(Q) git clone --quiet $(MCUBOOT_URL) $(MCUBOOT_SRCDIR)
-	$(Q) git -C "$(MCUBOOT_SRCDIR)" checkout --quiet $(CONFIG_ESP32S2_MCUBOOT_VERSION)
+	$(Q) git -C "$(MCUBOOT_SRCDIR)" checkout --quiet $(CONFIG_ESP32S3_MCUBOOT_VERSION)
 	$(Q) git -C "$(MCUBOOT_SRCDIR)" submodule --quiet update --init --recursive ext/mbedtls
 
 $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_CONFIG)
@@ -105,7 +106,8 @@ $(BOOTLOADER_BIN): chip/$(ESP_HAL_3RDPARTY_REPO) $(MCUBOOT_SRCDIR) $(BOOTLOADER_
 		-c esp32s3 \
 		-f $(BOOTLOADER_CONFIG) \
 		-p $(BOOTLOADER_DIR) \
-		-e $(HALDIR)
+		-e $(HALDIR) \
+		-d $(MCUBOOT_TOOLCHAIN)
 	$(call COPYFILE, $(BOOTLOADER_DIR)/$(BOOTLOADER_OUTDIR)/mcuboot-esp32s3.bin, $(TOPDIR))
 
 bootloader: $(BOOTLOADER_CONFIG) $(BOOTLOADER_BIN)

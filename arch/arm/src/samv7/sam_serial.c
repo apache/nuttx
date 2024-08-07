@@ -2261,7 +2261,6 @@ static void sam_dma_txint(struct uart_dev_s *dev, bool enable)
 static void sam_dma_txavailable(struct uart_dev_s *dev)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
-  int rv;
 
   /* Only send when the DMA is idle */
 

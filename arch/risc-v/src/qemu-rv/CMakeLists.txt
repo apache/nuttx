@@ -31,6 +31,8 @@ list(
 
 if(CONFIG_BUILD_KERNEL)
   list(APPEND SRCS qemu_rv_mm_init.c)
+elseif(CONFIG_BUILD_PROTECTED)
+  list(APPEND SRCS qemu_rv_userspace.c)
 endif()
 
 if(CONFIG_MM_PGALLOC)

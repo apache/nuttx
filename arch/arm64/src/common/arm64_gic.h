@@ -263,22 +263,32 @@
 
 #define IRQ_DEFAULT_PRIORITY        0xa0
 
-#define GIC_IRQ_SGI0              0
-#define GIC_IRQ_SGI1              1
-#define GIC_IRQ_SGI2              2
-#define GIC_IRQ_SGI3              3
-#define GIC_IRQ_SGI4              4
-#define GIC_IRQ_SGI5              5
-#define GIC_IRQ_SGI6              6
-#define GIC_IRQ_SGI7              7
-#define GIC_IRQ_SGI8              8
-#define GIC_IRQ_SGI9              9
-#define GIC_IRQ_SGI10            10
-#define GIC_IRQ_SGI11            11
-#define GIC_IRQ_SGI12            12
-#define GIC_IRQ_SGI13            13
-#define GIC_IRQ_SGI14            14
-#define GIC_IRQ_SGI15            15
+#define GIC_IRQ_SGI0                0
+#define GIC_IRQ_SGI1                1
+#define GIC_IRQ_SGI2                2
+#define GIC_IRQ_SGI3                3
+#define GIC_IRQ_SGI4                4
+#define GIC_IRQ_SGI5                5
+#define GIC_IRQ_SGI6                6
+#define GIC_IRQ_SGI7                7
+#define GIC_IRQ_SGI8                8
+#define GIC_IRQ_SGI9                9
+#define GIC_IRQ_SGI10               10
+#define GIC_IRQ_SGI11               11
+#define GIC_IRQ_SGI12               12
+#define GIC_IRQ_SGI13               13
+#define GIC_IRQ_SGI14               14
+#define GIC_IRQ_SGI15               15
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI9
+#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI10
+#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI11
+#else
+#  define GIC_SMP_CPUSTART          GIC_IRQ_SGI1
+#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI2
+#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI3
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

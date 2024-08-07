@@ -39,7 +39,7 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS xmc4_userspace.c xmc4_mpuinit.c)
 endif()
 
-if(CONFIG_ECAT)
+if(CONFIG_XMC4_ECAT)
   list(APPEND SRCS xmc4_ecat.c)
 endif()
 
@@ -49,6 +49,14 @@ endif()
 
 if(CONFIG_XMC4_USCI_SPI)
   list(APPEND SRCS xmc4_spi.c)
+endif()
+
+if(CONFIG_XMC4_USCI_I2C)
+  list(APPEND SRCS xmc4_i2c.c)
+endif()
+
+if(CONFIG_XMC4_PWM)
+  list(APPEND SRCS xmc4_pwm.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

@@ -151,7 +151,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 22804823777dbbb7f43925b7729b3a32331aa7cd
+	ESP_HAL_3RDPARTY_VERSION = 8e8e62cf6a7ae8a9659b91706024cab38af29118
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -167,6 +167,10 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 # Silent preprocessor warnings
 
 CFLAGS += -Wno-undef -Wno-unused-variable
+
+# Enable strict volatile bitfield access
+
+CFLAGS += -fstrict-volatile-bitfields
 
 CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 

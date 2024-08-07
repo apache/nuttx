@@ -46,6 +46,7 @@
 /nuttx
 /nuttx-*
 /nuttx.*
+/nuttx_user*
 /staging
 /tags
 /TAGS
@@ -65,3 +66,4 @@ tools/gdb/__pycache__
 /build
 .ccls-cache
 compile_commands.json
+imx9-sdimage.img

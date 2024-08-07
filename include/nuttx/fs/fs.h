@@ -37,10 +37,10 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
-#include <nuttx/spinlock.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/spawn.h>
 #include <nuttx/queue.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -475,6 +475,10 @@ struct file
 #ifdef CONFIG_FDCHECK
   uint8_t           f_tag_fdcheck; /* File owner fdcheck tag, init to 0 */
 #endif
+
+#if CONFIG_FS_BACKTRACE > 0
+  FAR void         *f_backtrace[CONFIG_FS_BACKTRACE]; /* Backtrace to while file opens */
+#endif
 };
 
 /* This defines a two layer array of files indexed by the file descriptor.
@@ -486,7 +490,6 @@ struct file
 
 struct filelist
 {
-  spinlock_t        fl_lock;    /* Manage access to the file list */
   uint8_t           fl_rows;    /* The number of rows of fl_files array */
   FAR struct file **fl_files;   /* The pointer of two layer file descriptors array */
 
@@ -856,6 +859,16 @@ int nx_umount2(FAR const char *target, unsigned int flags);
  ****************************************************************************/
 
 void files_initlist(FAR struct filelist *list);
+
+/****************************************************************************
+ * Name: files_dumplist
+ *
+ * Description:
+ *   Dump the list of files.
+ *
+ ****************************************************************************/
+
+void files_dumplist(FAR struct filelist *list);
 
 /****************************************************************************
  * Name: files_releaselist

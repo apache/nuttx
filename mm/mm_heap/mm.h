@@ -261,7 +261,8 @@ struct mm_heap_s
 
   /* The is a multiple mempool of the heap */
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  size_t                         mm_threshold;
   FAR struct mempool_multiple_s *mm_mpool;
 #endif
 

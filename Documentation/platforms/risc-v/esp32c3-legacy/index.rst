@@ -90,7 +90,7 @@ Building and flashing
 
 First make sure that ``esptool.py`` is installed.  This tool is used to convert
 the ELF to a compatible ESP32 image and to flash the image into the board.
-It can be installed with: ``pip install esptool``.
+It can be installed with: ``pip install esptool==4.8.dev4``.
 
 Configure the NuttX project: ``./tools/configure.sh esp32c3-devkit:nsh``
 Run ``make`` to build the project.  Note that the conversion mentioned above is
@@ -259,7 +259,7 @@ Now you can design an update and confirm agent to your application. Check the `M
 `MCUboot Espressif port documentation <https://docs.mcuboot.com/readme-espressif.html>`_ for
 more information on how to apply MCUboot. Also check some `notes about the NuttX MCUboot port <https://github.com/mcu-tools/mcuboot/blob/main/docs/readme-nuttx.md>`_,
 the `MCUboot porting guide <https://github.com/mcu-tools/mcuboot/blob/main/docs/PORTING.md>`_ and some
-`examples of MCUboot applied in Nuttx applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
+`examples of MCUboot applied in NuttX applications <https://github.com/apache/nuttx-apps/tree/master/examples/mcuboot>`_.
 
 After you developed an application which implements all desired functions, you need to flash it into the primary image slot
 of the device (it will automatically be in the confirmed state, you can learn more about image

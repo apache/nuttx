@@ -282,13 +282,12 @@ static void sja1000_reset(struct can_dev_s *dev)
       sja1000_putreg(priv, SJA1000_MODE_REG, 0);
     }
 
-  /* Abort transmission, release RX buffer and clear overrun.
+  /* Abort transmission and clear overrun.
    * Command register can only be modified when in Operation Mode.
    */
 
-  sja1000_putreg(priv, SJA1000_CMD_REG, SJA1000_ABORT_TX_M
-                                               | SJA1000_RELEASE_BUF_M
-                                               | SJA1000_CLR_OVERRUN_M);
+  sja1000_putreg(priv,
+      SJA1000_CMD_REG, SJA1000_ABORT_TX_M | SJA1000_CLR_OVERRUN_M);
 
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
   spin_unlock_irqrestore(&priv->lock, flags);

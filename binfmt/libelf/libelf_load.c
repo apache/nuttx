@@ -96,7 +96,11 @@ static void elf_elfsize(FAR struct elf_loadinfo_s *loadinfo)
            * able
            */
 
-          if ((shdr->sh_flags & SHF_WRITE) != 0)
+          if ((shdr->sh_flags & SHF_WRITE) != 0
+#ifdef CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+              || (shdr->sh_flags & SHF_EXECINSTR) == 0
+#endif
+              )
             {
               datasize = _ALIGN_UP(datasize, shdr->sh_addralign);
               datasize += ELF_ALIGNUP(shdr->sh_size);
@@ -187,26 +191,33 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
     {
       FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
-      /* SHF_ALLOC indicates that the section requires memory during
-       * execution.
-       */
-
-      if ((shdr->sh_flags & SHF_ALLOC) == 0)
-        {
-          continue;
-        }
-
       /* SHF_WRITE indicates that the section address space is write-
        * able
        */
 
-      if ((shdr->sh_flags & SHF_WRITE) != 0)
+      if ((shdr->sh_flags & SHF_WRITE) != 0
+#ifdef CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+          || (shdr->sh_flags & SHF_EXECINSTR) == 0
+#endif
+          )
         {
           pptr = &data;
         }
       else
         {
           pptr = &text;
+        }
+
+      /* SHF_ALLOC indicates that the section requires memory during
+       * execution.
+       */
+
+      if ((shdr->sh_flags & SHF_ALLOC) == 0)
+        {
+          /* Set the VMA regardless, some relocations might depend on this */
+
+          shdr->sh_addr = (uintptr_t)*pptr;
+          continue;
         }
 
       if (*pptr == NULL)

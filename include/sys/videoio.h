@@ -777,15 +777,15 @@ typedef struct v4l2_plane v4l2_plane_t;
 
 struct v4l2_buffer
 {
-  uint16_t             index;     /* Buffer id */
-  uint16_t             type;      /* enum #v4l2_buf_type */
+  uint32_t             index;     /* Buffer id */
+  uint32_t             type;      /* enum #v4l2_buf_type */
   uint32_t             bytesused; /* Driver sets the image size */
-  uint16_t             flags;     /* Buffer flags. */
-  uint16_t             field;     /* The field order of the image */
+  uint32_t             flags;     /* Buffer flags. */
+  uint32_t             field;     /* The field order of the image */
   struct timeval       timestamp; /* Frame timestamp */
   struct v4l2_timecode timecode;  /* Frame timecode */
-  uint16_t             sequence;  /* Frame sequence number */
-  uint16_t             memory;    /* enum #v4l2_memory */
+  uint32_t             sequence;  /* Frame sequence number */
+  uint32_t             memory;    /* enum #v4l2_memory */
   union
   {
     uint32_t           offset;
@@ -899,8 +899,8 @@ struct v4l2_frmivalenum
 
 struct v4l2_pix_format
 {
-  uint16_t  width;              /* Image width in pixels */
-  uint16_t  height;             /* Image height in pixels */
+  uint32_t  width;              /* Image width in pixels */
+  uint32_t  height;             /* Image height in pixels */
   uint32_t  pixelformat;        /* The pixel format or type of compression. */
   uint32_t  field;              /* enum #v4l2_field */
   uint32_t  bytesperline;       /* For padding, zero if unused */

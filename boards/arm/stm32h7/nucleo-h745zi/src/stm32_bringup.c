@@ -39,6 +39,10 @@
 #  include <nuttx/serial/uart_rpmsg.h>
 #endif
 
+#ifdef CONFIG_SYSTEMTICK_HOOK
+#include <semaphore.h>
+#endif
+
 #include "nucleo-h745zi.h"
 
 /****************************************************************************
@@ -227,3 +231,13 @@ int stm32_bringup(void)
 
   return OK;
 }
+
+#ifdef CONFIG_SYSTEMTICK_HOOK
+
+sem_t g_waitsem;
+
+void board_timerhook(void)
+{
+  (void)sem_post(&g_waitsem);
+}
+#endif

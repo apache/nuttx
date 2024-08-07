@@ -1612,7 +1612,7 @@ psram_enable(int mode, int vaddrmode)   /* psram init */
         }
     }
 
-  assert(mode < PSRAM_CACHE_MAX && "we don't support any other mode.");
+  ASSERT(mode < PSRAM_CACHE_MAX && "we don't support any other mode.");
   s_psram_mode = mode;
 
   putreg32(0x1, SPI_EXT3_REG(0));

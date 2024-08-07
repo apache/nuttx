@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <malloc.h>
+#include <execinfo.h>
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 #  include <time.h>
@@ -1265,8 +1266,14 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   totalsize = 0;
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-7s %-4s %-9s %s\n",
-                               "FD", "OFLAGS", "TYPE", "POS", "PATH");
+                               "\n%-3s %-7s %-4s %-9s %-14s %s\n",
+                               "FD", "OFLAGS", "TYPE", "POS", "PATH",
+#if CONFIG_FS_BACKTRACE > 0
+                               "BACKTRACE"
+#else
+                               ""
+#endif
+                               );
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1298,10 +1305,21 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
         }
 
       linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                   "%-3d %-7d %-4x %-9ld %s\n",
+                                   "%-3d %-7d %-4x %-9ld %-14s ",
                                    i, filep->f_oflags,
                                    INODE_GET_TYPE(filep->f_inode),
                                    (long)filep->f_pos, path);
+      if (linesize < STATUS_LINELEN)
+        {
+#if CONFIG_FS_BACKTRACE > 0
+          linesize += backtrace_format(procfile->line + linesize,
+                                       STATUS_LINELEN - linesize,
+                                       filep->f_backtrace,
+                                       CONFIG_FS_BACKTRACE);
+#endif
+          procfile->line[linesize - 2] = '\n';
+        }
+
       copysize   = procfs_memcpy(procfile->line, linesize,
                                  buffer, remaining, &offset);
 

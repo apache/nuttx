@@ -46,8 +46,8 @@
  *   ARM DDI 0406C.c (ID051414)
  */
 
-#ifndef __ARCH_ARM_SRC_ARMV7_R_CP15_CACHEOPS_H
-#define __ARCH_ARM_SRC_ARMV7_R_CP15_CACHEOPS_H
+#ifndef __ARCH_ARM_SRC_ARMV8_R_CP15_CACHEOPS_H
+#define __ARCH_ARM_SRC_ARMV8_R_CP15_CACHEOPS_H
 
 /****************************************************************************
  * Included Files
@@ -1135,4 +1135,4 @@ uint32_t cp15_cache_linesize(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_ARMV7_R_CP15_CACHEOPS_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_R_CP15_CACHEOPS_H */

@@ -41,7 +41,7 @@
 #include <arch/xtensa/core_macros.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "hardware/wdev_reg.h"
 #include "esp32s2_clockconfig.h"
 

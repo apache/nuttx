@@ -107,13 +107,13 @@ static inline int dlremove(FAR void *handle)
 
       modp->modinfo.uninitializer = NULL;
 
-  /* Call any .fini_array entries in reverse order */
+      /* Call any .fini_array entries in reverse order */
 
-  array = (void (**)(void)) modp->finiarr;
-  for (i = (modp->nfini - 1); i >= 0; i--)
-    {
-      array[i]();
-    }
+      array = (void (**)(void))modp->finiarr;
+      for (i = (modp->nfini - 1); i >= 0; i--)
+        {
+          array[i]();
+        }
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
       modp->initializer           = NULL;

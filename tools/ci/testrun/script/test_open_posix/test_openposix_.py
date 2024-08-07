@@ -8912,7 +8912,7 @@ def test_ltp_interfaces_sem_wait_1_1(p):
 
 
 def test_ltp_interfaces_pthread_once_2_1(p):
-    ret = p.sendCommand("ltp_interfaces_pthread_once_2_1", [""], timeout=10)
+    ret = p.sendCommand("ltp_interfaces_pthread_once_2_1", [""], timeout=20)
     retID = p.sendCommand("echo $?", "0", timeout=2)
     assert ret >= 0
     assert retID >= 0

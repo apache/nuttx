@@ -20,8 +20,13 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
+ifeq ($(CONFIG_VIDEO_FB),y)
+ifeq ($(CONFIG_LCD_SSD1306),y)
+  CSRCS += stm32_lcd_ssd1306.c
+endif
+endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -33,6 +38,9 @@ endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += stm32_reset.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

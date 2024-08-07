@@ -140,7 +140,7 @@
  */
 
 #define ARMPLL_CFG  PLL_CFG(IMX9_ARMPLL_BASE, false, PLL_PARMS(1, 2, 141, 0, 0))
-#define DRAMPLL_CFG PLL_CFG(IMX9_DRAMPLL_BASE, true, PLL_PARMS(1, 2, 155, 1, 2))
+#define DRAMPLL_CFG PLL_CFG(IMX9_DRAMPLL_BASE, true, PLL_PARMS(1, 4, 155, 1, 2))
 
 #define PLL_CFGS \
   { \

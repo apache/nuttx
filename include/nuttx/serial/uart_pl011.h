@@ -41,5 +41,14 @@ void pl011_earlyserialinit(void);
 
 void pl011_serialinit(void);
 
+#ifdef CONFIG_UART_PL011_PLATFORMIF
+/* If needed, implement platform specific process such as enabling pl011
+ * to reduce power consumption.
+ */
+
+int pl011_platform_setup(uint32_t base);
+int pl011_platform_shutdown(uint32_t base);
+#endif  /* CONFIG_UART_PL011_PLATFORMIF */
+
 #endif  /* CONFIG_UART_PL011 */
 #endif /* __INCLUDE_NUTTX_SERIAL_UART_PL011_H */

@@ -32,6 +32,7 @@
 
 #include <netpacket/netlink.h>
 #include <nuttx/queue.h>
+#include <nuttx/net/icmpv6.h>
 #include <nuttx/net/netlink.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
@@ -46,6 +47,9 @@
 #ifndef CONFIG_NETLINK_ROUTE
 #  define netlink_device_notify(dev)
 #  define netlink_device_notify_ipaddr(dev, type, domain, addr, preflen)
+#  define netlink_route_notify(route, type, domain)
+#  define netlink_neigh_notify(neigh, type, domain)
+#  define netlink_ipv6_prefix_notify(dev, type, pinfo)
 #endif
 
 #ifdef CONFIG_NET_NETLINK
@@ -511,6 +515,59 @@ void netlink_device_notify(FAR struct net_driver_s *dev);
 void netlink_device_notify_ipaddr(FAR struct net_driver_s *dev,
                                   int type, int domain,
                                   FAR const void *addr, uint8_t preflen);
+
+/****************************************************************************
+ * Name: netlink_route_notify
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_NETFILTER protocol.
+ *
+ * Input Parameters:
+ *   route  - The route entry
+ *   type   - The type of the message, RTM_*ROUTE
+ *   domain - The domain of the message
+ *
+ ****************************************************************************/
+
+#if defined CONFIG_NETLINK_DISABLE_GETROUTE
+# define netlink_route_notify(route, type, domain)
+#else
+void netlink_route_notify(FAR const void *route, int type, int domain);
+#endif
+
+/****************************************************************************
+ * Name: netlink_neigh_notify()
+ *
+ * Description:
+ *   Perform the neigh broadcast for the NETLINK_ROUTE protocol.
+ *
+ * Input Parameters:
+ *   neigh  - The ARP entry or neighbour entry
+ *   type   - The type of the message, RTM_*NEIGH
+ *   domain - The domain of the message
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
+#  define netlink_neigh_notify(neigh, type, domain)
+#else
+void netlink_neigh_notify(FAR const void *neigh, int type, int domain);
+#endif
+
+/****************************************************************************
+ * Name: netlink_ipv6_prefix_notify()
+ *
+ * Description:
+ *   Perform the RA prefix for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETLINK_DISABLE_NEWPREFIX) || !defined(CONFIG_NET_IPv6)
+#  define netlink_ipv6_prefix_notify(dev, type, pinfo)
+#else
+void netlink_ipv6_prefix_notify(FAR struct net_driver_s *dev, int type,
+                                FAR const struct icmpv6_prefixinfo_s *pinfo);
+#endif
 
 /****************************************************************************
  * Name: nla_next

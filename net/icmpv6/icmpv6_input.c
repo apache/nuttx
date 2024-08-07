@@ -36,6 +36,7 @@
 #include <nuttx/net/dns.h>
 
 #include "devif/devif.h"
+#include "netlink/netlink.h"
 #include "neighbor/neighbor.h"
 #include "utils/utils.h"
 #include "icmpv6/icmpv6.h"
@@ -450,6 +451,8 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                       {
                          icmpv6_setaddresses(dev, ipv6->srcipaddr,
                                     prefixopt->prefix, prefixopt->preflen);
+                        netlink_ipv6_prefix_notify(dev, RTM_NEWPREFIX,
+                                                   prefixopt);
                       }
 
                       /* Notify any waiting threads */

@@ -456,6 +456,7 @@ void iob_free_queue_qentry(FAR struct iob_s *iob,
 
 #if CONFIG_IOB_NCHAINS > 0
 unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
+unsigned int iob_get_queue_entry_count(FAR struct iob_queue_s *queue);
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************

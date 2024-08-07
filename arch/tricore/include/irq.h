@@ -115,7 +115,11 @@ void up_irq_enable(void);
 
 noinstrument_function static inline uintptr_t up_getsp(void)
 {
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   return (uintptr_t)__get_sp();
+#else
+  return __builtin_frame_address(0);
+#endif
 }
 
 /****************************************************************************

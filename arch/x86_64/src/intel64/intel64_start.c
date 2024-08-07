@@ -33,6 +33,7 @@
 
 #include "x86_64_internal.h"
 
+#include "intel64_cpu.h"
 #include "intel64_lowsetup.h"
 
 /****************************************************************************
@@ -129,6 +130,8 @@ void __nxstart(void)
 {
   uint64_t *dest = NULL;
 
+  /* This is only for BSP core. AP cores are handled by x86_64_ap_boot() */
+
   /* Do some checking on CPU compatibilities at the top of this function.
    * BSS cleanup can be optimized with vector instructions, so we need to
    * enable SSE at this point.
@@ -161,6 +164,10 @@ void __nxstart(void)
   acpi_init(g_acpi_rsdp);
 #endif
 
+  /* Initialize CPU data (BSP and APs) */
+
+  x86_64_cpu_init();
+
   /* perform board-specific initializations */
 
   x86_64_boardinitialize();
@@ -171,11 +178,17 @@ void __nxstart(void)
   x86_64_earlyserialinit();
 #endif
 
+  /* Configure timer */
+
   x86_64_timer_calibrate_freq();
 
 #ifdef CONFIG_LIB_SYSCALL
   enable_syscall();
 #endif
+
+  /* Store CPU IDs */
+
+  x86_64_cpu_priv_set(0);
 
   /* Start NuttX */
 

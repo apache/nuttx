@@ -89,6 +89,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_DEBUG
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -118,6 +119,7 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select LIBC_ARCH_STRNLEN
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
+	select ARCH_HAVE_DEBUG
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -231,12 +233,14 @@ config ARCH_CHIP_QEMU_RV
 	select ARCH_HAVE_MPU
 	select ARCH_MMU_TYPE_SV39 if ARCH_CHIP_QEMU_RV64
 	select ARCH_MMU_TYPE_SV32 if ARCH_CHIP_QEMU_RV32
+	select NUTTSBI_LATE_INIT if NUTTSBI
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_S_MODE
 	select ARCH_HAVE_ELF_EXECUTABLE
 	select ONESHOT
 	select ALARM_ARCH
+	select ARCH_HAVE_DEBUG
 	---help---
 		QEMU Generic RV32/RV64 processor
 
@@ -322,6 +326,25 @@ config ARCH_CHIP_K230
 	---help---
 		Kendryte K230 SoC (RV64GCV and RV64GCVX C908 cores).
 
+config ARCH_CHIP_SG2000
+	bool "SOPHGO SG2000"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MPU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_HAVE_S_MODE
+	select ONESHOT
+	select ALARM_ARCH
+	---help---
+		SOPHGO SG2000 SoC.
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -337,7 +360,12 @@ config ARCH_RV32
 config ARCH_RV64
 	bool
 	default n
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !ARCH_RV64ILP32
+
+config ARCH_RV64ILP32
+	bool
+	depends on ARCH_RV64
+	default n
 
 config ARCH_RV_ISA_M
 	bool
@@ -447,6 +475,7 @@ config ARCH_CHIP
 	default "jh7110"                if ARCH_CHIP_JH7110
 	default "bl808"                 if ARCH_CHIP_BL808
 	default "k230"                  if ARCH_CHIP_K230
+	default "sg2000"                if ARCH_CHIP_SG2000
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -491,7 +520,7 @@ config RISCV_MISALIGNED_HANDLER
 
 config RISCV_PERCPU_SCRATCH
 	bool "Enable Scratch-based Per-CPU storage"
-	default n
+	default y if LIB_SYSCALL
 	---help---
 		In some special chipsets, multiple CPUs may be bundled in one hardware
 		thread cluster, which results in hartid and cpuindex not being exactly
@@ -511,9 +540,9 @@ config RISCV_PERCPU_SCRATCH
 #
 
 config ARCH_USE_S_MODE
-	bool "Run the NuttX kernel in S-mode"
+	bool "Run NuttX in S-mode"
 	default n
-	depends on ARCH_HAVE_S_MODE && BUILD_KERNEL && ARCH_USE_MMU
+	depends on ARCH_HAVE_S_MODE
 	select RISCV_PERCPU_SCRATCH
 	---help---
 		Most of the RISC-V implementations run in M-mode (flat addressing)
@@ -524,6 +553,30 @@ config ARCH_RV_EXT_SSTC
 	bool "Enable RISC-V SSTC extension support"
 	default n
 	depends on ARCH_USE_S_MODE
+
+config ARCH_RV_HAVE_APLIC
+	bool "Enable RISC-V Advanced Platform-Level Interrupt Controller support"
+	default n
+	---help---
+		Instead of PLIC, RISC-V also defines Advanced Platform-Level Interrupt
+		Controller (APLIC) to provide flexible interrupt control. This device
+		is not backward compatible with PLIC.
+
+config ARCH_RV_EXT_AIA
+	bool "Enable RISC-V SxAIA support"
+	default n
+	---help---
+		Advanced Interrupt Architecture defines necessary features that
+		impact the ISA at a hart. This should not be selected if the
+		target does not support SxAIA for the operating mode of NuttX.
+
+if ARCH_RV_EXT_AIA
+
+config ARCH_RV_HAVE_IMSIC
+	bool "Enable RISC-V AIA Incoming Message Controller support"
+	default n
+
+endif # ARCH_RV_EXT_AIA
 
 choice
 	prompt "Toolchain Selection"
@@ -546,6 +599,14 @@ config RISCV_TOOLCHAIN_GNU_RV32
 config RISCV_TOOLCHAIN_CLANG
 	bool "LLVM Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
+
+config RISCV_TOOLCHAIN_GNU_RV64ILP32
+	bool "Generic GNU RV64ILP32 toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	select ARCH_RV64ILP32
+	---help---
+		This option work with Ruyisdk toolchain (GCC 13 or newer)
+		configured for riscv64-unknown-elf.
 
 endchoice # Toolchain Selection
 
@@ -644,5 +705,8 @@ source "arch/risc-v/src/bl808/Kconfig"
 endif
 if ARCH_CHIP_K230
 source "arch/risc-v/src/k230/Kconfig"
+endif
+if ARCH_CHIP_SG2000
+source "arch/risc-v/src/sg2000/Kconfig"
 endif
 endif # ARCH_RISCV

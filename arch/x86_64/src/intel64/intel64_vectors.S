@@ -729,12 +729,18 @@ isr_common:
 	mov     %fs, %ax      /* Lower 16-bits of rax. */
 	pushq   %rax          /* Save the data segment descriptor */
 
-	/* align to 16-bytes boundary */
-	leaq    -8(%rsp), %rsp
+	/* Align to 64-bytes boundary */
+	leaq    -(XMMAREA_REG_ALIGN * 8)(%rsp), %rsp
 
-	/* save xmm registers */
-	leaq    -512(%rsp), %rsp
+	/* Save xmm registers */
+	leaq    -XCPTCONTEXT_XMM_AREA_SIZE(%rsp), %rsp
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
 	fxsaveq (%rsp)
+#else
+	movl $XSAVE_STATE_COMPONENTS, %eax
+	xor     %edx, %edx
+	xsave   (%rsp)
+#endif
 
 	/* The current value of the SP points to the beginning of the state save
 	 * structure.  Save that in RDI as the input parameter to isr_handler.
@@ -786,12 +792,18 @@ irq_common:
 	mov     %fs, %ax      /* Lower 16-bits of rax. */
 	pushq   %rax          /* Save the data segment descriptor */
 
-	/* align to 16-bytes boundary */
-	leaq    -8(%rsp), %rsp
+	/* Align to 64-bytes boundary */
+	leaq    -(XMMAREA_REG_ALIGN * 8)(%rsp), %rsp
 
-	/* save xmm registers */
-	leaq    -512(%rsp), %rsp
+	/* Save xmm registers */
+	leaq    -XCPTCONTEXT_XMM_AREA_SIZE(%rsp), %rsp
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
 	fxsaveq (%rsp)
+#else
+	movl    $XSAVE_STATE_COMPONENTS, %eax
+	xor     %edx, %edx
+	xsave   (%rsp)
+#endif
 
 	/* The current value of the SP points to the beginning of the state save
 	 * structure.  Save that in RDI as the input parameter to irq_handler.
@@ -811,20 +823,28 @@ irq_common:
 	je      .Lnoswitch
 
 	/* A context swith will be performed. EAX holds the address of the new
-   * register save structure.
+	 * register save structure.
 	 *
 	 * Jump to x86_64_fullcontextrestore().  We perform a call here, but that function
 	 * never returns.  The address of the new register save block is the argument
 	 * to the x86_64_fullcontextrestore().
-	*/
+	 */
 
 	mov     %rax, %rdi
 	call    x86_64_fullcontextrestore
 
 .Lnoswitch:
+#ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
 	fxrstorq (%rsp)
-	leaq    512(%rsp), %rsp
-	leaq    8(%rsp), %rsp
+#else
+	movl $XSAVE_STATE_COMPONENTS, %eax
+	xor     %edx, %edx
+	xrstor  (%rsp)
+#endif
+	leaq    XCPTCONTEXT_XMM_AREA_SIZE(%rsp), %rsp
+
+	/* Align to 64-bytes boundary */
+	leaq    (XMMAREA_REG_ALIGN * 8)(%rsp), %rsp
 
 	popq    %rax
 	mov     %fs, %ax

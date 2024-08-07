@@ -36,6 +36,55 @@
 #include "riscv_ipi.h"
 #include "chip.h"
 
+#include "hardware/bl808_m0ic.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: m0ic_interrupt
+ *
+ * Description:
+ *   Interrupt handler for M0 interrupt controller. Reads status registers
+ *   to find source, and dispatches the appropriate handler.
+ *
+ ****************************************************************************/
+
+static int __m0ic_interrupt(int irq, void *context, void *arg)
+{
+  uint32_t status_0 = getreg32(BL808_M0IC_STATUS(0));
+  uint32_t status_1 = getreg32(BL808_M0IC_STATUS(1));
+
+  /* Check status_0 for interrupt source */
+
+  int m0_extirq = ffs(status_0) - 1;
+  if (m0_extirq < 0)
+    {
+      /* Source not in status_0. Check status_1 */
+
+      m0_extirq = ffs(status_1) + 32 - 1;
+      if (m0_extirq < 32)
+        {
+          /* Interrupt goes off on startup without any
+           * status bits set. When this happens, just return.
+           */
+
+          return OK;
+        }
+    }
+
+  int irqn = m0_extirq + BL808_IRQ_NUM_BASE
+    + BL808_M0_IRQ_OFFSET + RISCV_IRQ_SEXT;
+
+  irq_dispatch(irqn, NULL);
+
+  putreg32(status_0, BL808_M0IC_CLEAR(0));
+  putreg32(status_1, BL808_M0IC_CLEAR(1));
+
+  return OK;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -130,12 +179,20 @@ void up_disable_irq(int irq)
     {
       extirq = irq - RISCV_IRQ_EXT;
 
-      /* Clear enable bit for the irq */
-
-      if (0 <= extirq && extirq <= 63)
+      if (0 <= extirq && extirq <= BL808_D0_MAX_EXTIRQ)
         {
+          /* Clear enable bit for the irq */
+
           modifyreg32(BL808_PLIC_ENABLE1 + (4 * (extirq / 32)),
                       1 << (extirq % 32), 0);
+        }
+      else if ((BL808_D0_MAX_EXTIRQ + 1) <= extirq
+               && extirq <= (BL808_M0_MAX_EXTIRQ
+                             + BL808_M0_IRQ_OFFSET))
+        {
+          int m0_extirq = extirq - BL808_M0_IRQ_OFFSET - BL808_IRQ_NUM_BASE;
+          modifyreg32(BL808_M0IC_MASK(m0_extirq / 32),
+                      0, 1 << (m0_extirq % 32));
         }
       else
         {
@@ -172,12 +229,20 @@ void up_enable_irq(int irq)
     {
       extirq = irq - RISCV_IRQ_EXT;
 
-      /* Set enable bit for the irq */
-
-      if (0 <= extirq && extirq <= 63)
+      if (0 <= extirq && extirq <= BL808_D0_MAX_EXTIRQ)
         {
+          /* Set enable bit for the irq */
+
           modifyreg32(BL808_PLIC_ENABLE1 + (4 * (extirq / 32)),
                       0, 1 << (extirq % 32));
+        }
+      else if ((BL808_D0_MAX_EXTIRQ + 1) <= extirq
+               && extirq <= (BL808_M0_MAX_EXTIRQ
+                             + BL808_M0_IRQ_OFFSET))
+        {
+          int m0_extirq = extirq - BL808_M0_IRQ_OFFSET - BL808_IRQ_NUM_BASE;
+          modifyreg32(BL808_M0IC_MASK(m0_extirq / 32),
+                      1 << (m0_extirq % 32), 0);
         }
       else
         {
@@ -197,6 +262,28 @@ irqstate_t up_irq_enable(void)
   /* Read and enable global interrupts (sie) in sstatus */
 
   oldstat = READ_AND_SET_CSR(CSR_STATUS, STATUS_IE);
+
+  /* Enable IRQs from M0IC */
+
+  /* First, clear interrupts */
+
+  putreg32(0xffffffff, BL808_M0IC_CLEAR(0));
+  putreg32(0xffffffff, BL808_M0IC_CLEAR(1));
+
+  /* Mask all sources */
+
+  putreg32(0xffffffff, BL808_M0IC_MASK(0));
+  putreg32(0xffffffff, BL808_M0IC_MASK(1));
+
+  int ret = irq_attach(BL808_IRQ_M0IC, __m0ic_interrupt, NULL);
+  if (ret == OK)
+    {
+      up_enable_irq(BL808_IRQ_M0IC);
+    }
+  else
+    {
+      PANIC();
+    }
 
   return oldstat;
 }

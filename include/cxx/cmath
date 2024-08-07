@@ -30,6 +30,12 @@
 
 #include <math.h>
 
+#undef signbit
+#undef fpclassify
+#undef isfinite
+#undef isinf
+#undef isnan
+
 //***************************************************************************
 // Namespace
 //***************************************************************************
@@ -48,15 +54,18 @@ namespace std
   using ::cosf;
   using ::coshf;
   using ::expf;
+  using ::expm1f;
   using ::fabsf;
   using ::floorf;
   using ::fmodf;
   using ::frexpf;
   using ::ldexpf;
   using ::logf;
+  using ::log1pf;
   using ::log10f;
   using ::log2f;
   using ::modff;
+  using ::rintf;
   using ::roundf;
   using ::powf;
   using ::sinf;
@@ -66,6 +75,29 @@ namespace std
   using ::tanhf;
   using ::gamma;
   using ::lgamma;
+
+  constexpr bool
+  signbit(float __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr int 
+  fpclassify(float __x)
+  { return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL,
+				FP_SUBNORMAL, FP_ZERO, __x); }
+
+  constexpr bool
+  isfinite(float __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(float __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(float __x)
+  { return __builtin_isnan(__x); }
+
+
 #endif
 
 #ifdef CONFIG_HAVE_DOUBLE
@@ -77,15 +109,18 @@ namespace std
   using ::cos;
   using ::cosh;
   using ::exp;
+  using ::expm1f;
   using ::fabs;
   using ::floor;
   using ::fmod;
   using ::frexp;
   using ::ldexp;
   using ::log;
+  using ::log1p;
   using ::log10;
   using ::log2;
   using ::modf;
+  using ::rint;
   using ::round;
   using ::pow;
   using ::sin;
@@ -93,6 +128,28 @@ namespace std
   using ::sqrt;
   using ::tan;
   using ::tanh;
+
+  constexpr bool
+  signbit(double __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr int 
+  fpclassify(double __x)
+  { return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL,
+		FP_SUBNORMAL, FP_ZERO, __x); }
+
+  constexpr bool
+  isfinite(double __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(double __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(double __x)
+  { return __builtin_isnan(__x); }
+
 #endif
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
@@ -110,6 +167,7 @@ namespace std
   using ::frexpl;
   using ::ldexpl;
   using ::logl;
+  using ::log1pl;
   using ::log10l;
   using ::log2l;
   using ::modfl;
@@ -120,6 +178,28 @@ namespace std
   using ::sqrtl;
   using ::tanl;
   using ::tanhl;
+
+  constexpr bool
+  signbit(long double __x)
+  { return __builtin_signbit(__x); }
+
+  constexpr int 
+  fpclassify(long double __x)
+  { return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL,
+		FP_SUBNORMAL, FP_ZERO, __x); }
+
+  constexpr bool
+  isfinite(long double __x)
+  { return __builtin_isfinite(__x); }
+
+  constexpr bool
+  isinf(long double __x)
+  { return __builtin_isinf(__x); }
+
+  constexpr bool
+  isnan(long double __x)
+  { return __builtin_isnan(__x); }
+
 #endif
 
 }

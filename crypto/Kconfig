@@ -63,7 +63,7 @@ config CRYPTO_SW_AES
 		aes_cypher() per include/nuttx/crypto/crypto.h.
 
 config CRYPTO_RANDOM_POOL
-	bool "Entropy pool and strong randon number generator"
+	bool "Entropy pool and strong random number generator"
 	default n
 	---help---
 		Entropy pool gathers environmental noise from device drivers,

@@ -119,6 +119,17 @@ RUN mkdir gcc-aarch64-none-elf && \
   | tar -C gcc-aarch64-none-elf --strip-components 1 -xJ
 
 ###############################################################################
+# Build image for tool required by AVR32 builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-avr32
+# Download the prebuilt AVR32 GCC toolchain
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq \
+  git
+# Clone Main Repository
+RUN mkdir -p gcc-avr32-gnu && \
+  git clone --depth 1 https://github.com/ramangopalan/avr32-gnu-toolchain-linux_x86 gcc-avr32-gnu
+
+###############################################################################
 # Build image for tool required by Pinguino builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-pinguino
@@ -260,14 +271,14 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libssl-dev
 
 RUN mkdir -p cmake && \
-    curl -s -L wget https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
-    | tar -C cmake --strip-components=1 -xz && \
-    cd cmake && ./bootstrap && make && make install && rm -rf cmake
+  curl -s -L wget https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
+  | tar -C cmake --strip-components=1 -xz && \
+  cd cmake && ./bootstrap && make && make install && rm -rf cmake
 
 RUN dpkg --add-architecture i386
 # This is used for the final images so make sure to not store apt cache
 # Note: xtensa-esp32-elf-gdb is linked to libpython2.7
-RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -qq --no-install-recommends \
+RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get install -y -qq --no-install-recommends \
   -o APT::Immediate-Configure=0 \
   avr-libc \
   ccache \
@@ -306,6 +317,8 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   unzip \
   wget \
   xxd \
+  file \
+  tclsh \
   && rm -rf /var/lib/apt/lists/*
 
 # Set GCC-12 as Default compiler
@@ -333,7 +346,7 @@ RUN pip3 install cmake-format
 RUN pip3 install cvt2utf
 # Install pytest
 RUN pip3 install cxxfilt
-RUN pip3 install esptool
+RUN pip3 install esptool==4.8.dev4
 RUN pip3 install imgtool
 RUN pip3 install kconfiglib
 RUN pip3 install pexpect==4.8.0
@@ -380,6 +393,10 @@ ENV PATH="/tools/gcc-arm-none-eabi/bin:$PATH"
 # ARM64 toolchain
 COPY --from=nuttx-toolchain-arm64 /tools/gcc-aarch64-none-elf/ gcc-aarch64-none-elf/
 ENV PATH="/tools/gcc-aarch64-none-elf/bin:$PATH"
+
+# AVR32 toolchain
+COPY --from=nuttx-toolchain-avr32 /tools/gcc-avr32-gnu/ gcc-avr32-gnu/
+ENV PATH="/tools/gcc-avr32-gnu/bin:$PATH"
 
 # MIPS toolchain
 COPY --from=nuttx-toolchain-pinguino /tools/pinguino-compilers/p32/ pinguino-compilers/p32/
@@ -436,6 +453,8 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/arm-none-eabi-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/avr-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/avr-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/avr32-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/avr32-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/cc && \
   ln -sf `which ccache` /tools/ccache/bin/c++ && \
   ln -sf `which ccache` /tools/ccache/bin/clang && \

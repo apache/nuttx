@@ -20,3 +20,12 @@
 
 include common/Make.defs
 include common/espressif/Make.defs
+
+# Wireless interfaces.
+
+ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
+CHIP_CSRCS += esp_coex_adapter.c esp_wifi_adapter.c
+EXTRA_LIBS += -lcore -lnet80211 -lpp
+endif
+
+CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING

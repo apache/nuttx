@@ -47,6 +47,17 @@ config ARMV7A_HAVE_L2CC
 		Selected by the configuration tool if the architecture supports any
 		kind of L2 cache.
 
+config ARMV7A_SMP_BUSY_WAIT
+	bool "Busy wait when SMP boot"
+	default n
+	depends on SMP
+	---help---
+		Enables busy wait when SMP boot
+
+config ARMV7A_SMP_BUSY_WAIT_FLAG_ADDR
+	hex "Busy wait flag address"
+	depends on ARMV7A_SMP_BUSY_WAIT
+
 config ARMV7A_HAVE_L2CC_PL310
 	bool
 	default n

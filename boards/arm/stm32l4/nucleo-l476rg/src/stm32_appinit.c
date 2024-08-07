@@ -52,7 +52,11 @@
 #include "stm32l4_i2c.h"
 
 #ifdef CONFIG_SENSORS_BMP280
-#  include "stm32_bmp280.h"
+#include "stm32_bmp280.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MPU9250
+#include "stm32_mpu9250.h"
 #endif
 
 /****************************************************************************
@@ -437,7 +441,6 @@ int board_app_initialize(uintptr_t arg)
   /* Try to register BMP280 device in I2C1 */
 
   ret = board_bmp280_initialize(0, 1);
-
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP280 driver: %d\n", ret);
@@ -445,6 +448,20 @@ int board_app_initialize(uintptr_t arg)
   else
     {
       syslog(LOG_ERR, "Initialized BMP280 driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MPU9250
+  /* Try to register MPU9250 device in I2C1 */
+
+  ret = board_mpu9250_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MPU9250 driver: %d\n", ret);
+    }
+  else
+    {
+      syslog(LOG_INFO, "Initialized MPU9250 driver: %d\n", ret);
     }
 #endif
 

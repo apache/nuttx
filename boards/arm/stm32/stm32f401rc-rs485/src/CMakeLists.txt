@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32/smt32f401rc-rs485/src/CMakeLists.txt
+# boards/arm/stm32/stm32f401rc-rs485/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -30,6 +30,9 @@ endif()
 
 if(CONFIG_BOARDCTL)
   list(APPEND SRCS stm32_appinit.c)
+  if(CONFIG_BOARDCTL_RESET)
+    list(APPEND SRCS stm32_reset.c)
+  endif()
 endif()
 
 if(CONFIG_ARCH_BUTTONS)

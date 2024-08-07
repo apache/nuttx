@@ -54,6 +54,10 @@ CHIP_CSRCS += s32k1xx_lpi2c.c
 CHIP_CSRCS += s32k1xx_lpi2c_slave.c
 endif
 
+ifeq ($(CONFIG_S32K1XX_FLEXIO_I2C),y)
+CHIP_CSRCS += s32k1xx_flexio_i2c.c
+endif
+
 ifeq ($(CONFIG_S32K1XX_LPSPI),y)
 CHIP_CSRCS += s32k1xx_lpspi.c
 endif

@@ -40,17 +40,17 @@
 
 /* PCI config common registers */
 
-#define	PCI_CONFIG_VENDOR           0x00
-#define	PCI_CONFIG_DEVICE           0x02
-#define	PCI_CONFIG_COMMAND          0x04
-#define	PCI_CONFIG_REV_ID           0x08
-#define	PCI_CONFIG_PROG_IF          0x09
-#define	PCI_CONFIG_SUBCLASS         0x0A
-#define	PCI_CONFIG_CLASS            0x0B
-#define	PCI_CONFIG_CACHE_LINE_SIZE  0x0C
-#define	PCI_CONFIG_LATENCY_TIMER    0x0D
-#define	PCI_CONFIG_HEADER_TYPE      0x0E
-#define	PCI_CONFIG_BIST             0x0F
+#define PCI_CONFIG_VENDOR           0x00
+#define PCI_CONFIG_DEVICE           0x02
+#define PCI_CONFIG_COMMAND          0x04
+#define PCI_CONFIG_REV_ID           0x08
+#define PCI_CONFIG_PROG_IF          0x09
+#define PCI_CONFIG_SUBCLASS         0x0A
+#define PCI_CONFIG_CLASS            0x0B
+#define PCI_CONFIG_CACHE_LINE_SIZE  0x0C
+#define PCI_CONFIG_LATENCY_TIMER    0x0D
+#define PCI_CONFIG_HEADER_TYPE      0x0E
+#define PCI_CONFIG_BIST             0x0F
 
 /* PCI config header types */
 

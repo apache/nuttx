@@ -153,7 +153,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb;
   FAR dq_queue_t *tasklist;
-  bool switched;
   bool doswitch;
   int task_state;
   int cpu;
@@ -206,7 +205,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
    * situation.
    */
 
-  me = this_cpu();
   if ((nxsched_islocked_global()) &&
       task_state != TSTATE_TASK_ASSIGNED)
     {
@@ -239,6 +237,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        * will need to stop that CPU.
        */
 
+      me = this_cpu();
       if (cpu != me)
         {
           DEBUGVERIFY(up_cpu_pause(cpu));
@@ -249,14 +248,14 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        */
 
       tasklist = list_assignedtasks(cpu);
-      switched = nxsched_add_prioritized(btcb, tasklist);
+      doswitch = nxsched_add_prioritized(btcb, tasklist);
 
       /* If the selected task list was the g_assignedtasks[] list and if the
        * new tasks is the highest priority (RUNNING) task, then a context
        * switch will occur.
        */
 
-      if (switched)
+      if (doswitch)
         {
           FAR struct tcb_s *next;
 
@@ -278,13 +277,11 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
           if (btcb->lockcount > 0)
             {
-              spin_setbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                          &g_cpu_schedlock);
+              g_cpu_lockset |= (1 << cpu);
             }
           else
             {
-              spin_clrbit(&g_cpu_lockset, cpu, &g_cpu_locksetlock,
-                          &g_cpu_schedlock);
+              g_cpu_lockset &= ~(1 << cpu);
             }
 
           /* NOTE: If the task runs on another CPU(cpu), adjusting global IRQ
@@ -332,8 +329,6 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
               nxsched_add_prioritized(next, tasklist);
             }
-
-          doswitch = true;
         }
       else
         {

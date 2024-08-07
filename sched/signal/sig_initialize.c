@@ -34,6 +34,18 @@
 #include "signal/signal.h"
 
 /****************************************************************************
+ * Private Type Definitions
+ ****************************************************************************/
+
+struct sigpool_s
+{
+  sigq_t sigq[NUM_PENDING_ACTIONS +
+              CONFIG_SIG_PREALLOC_IRQ_ACTIONS];
+  sigpendq_t sigpendq[NUM_SIGNALS_PENDING +
+                      CONFIG_SIG_PREALLOC_IRQ_ACTIONS];
+};
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -67,6 +79,14 @@ sq_queue_t  g_sigpendingsignal;
  */
 
 sq_queue_t  g_sigpendingirqsignal;
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This is a pool of pre-allocated signal structures buffers */
+
+static struct sigpool_s g_sigpool;
 
 /****************************************************************************
  * Private Functions
@@ -134,7 +154,7 @@ static void *nxsig_init_pendingsignalblock(FAR sq_queue_t *siglist,
 
 void nxsig_initialize(void)
 {
-  FAR void *sigpool;
+  FAR void *sigpool = &g_sigpool;
 
   sched_trace_begin();
 
@@ -145,16 +165,6 @@ void nxsig_initialize(void)
   sq_init(&g_sigpendingirqaction);
   sq_init(&g_sigpendingsignal);
   sq_init(&g_sigpendingirqsignal);
-
-  /* Add a block of signal structures to each list */
-
-  sigpool =
-    kmm_malloc(sizeof(sigq_t) *
-               (NUM_PENDING_ACTIONS + CONFIG_SIG_PREALLOC_IRQ_ACTIONS)
-               + sizeof(sigpendq_t) *
-                 (NUM_SIGNALS_PENDING + CONFIG_SIG_PREALLOC_IRQ_ACTIONS));
-
-  DEBUGASSERT(sigpool != NULL);
 
   sigpool = nxsig_init_block(&g_sigpendingaction, sigpool,
                              NUM_PENDING_ACTIONS, SIG_ALLOC_FIXED);

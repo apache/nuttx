@@ -126,6 +126,26 @@
 #  endif
 #endif
 
+/* When the SoC supports SMPS we currently support 2 configurations:
+ * Direct SMP Supply OR LDO only supply.
+ *
+ * When the Soc does not supports SMPS we support only the LDO supply.
+ */
+
+#ifdef CONFIG_STM32H7_HAVE_SMPS
+#  define STM32_PWR_CR3_MASK  ~(STM32_PWR_CR3_BYPASS      | \
+                              STM32_PWR_CR3_LDOEN         | \
+                              STM32_PWR_CR3_SDEN          | \
+                              STM32_PWR_CR3_SMPSEXTHP     | \
+                              STM32_PWR_CR3_SMPSLEVEL_MASK)
+
+#  define STM32_PWR_CR3_SELECTION STM32_PWR_CR3_SDEN
+#else
+#  define STM32_PWR_CR3_MASK  0xffffffff
+#  define STM32_PWR_CR3_SELECTION (STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_SCUEN)
+
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -854,17 +874,10 @@ void stm32_stdclockconfig(void)
        * N.B. The system shall be power cycled before writing a new value.
        */
 
-#if defined(CONFIG_STM32H7_PWR_DIRECT_SMPS_SUPPLY)
       regval = getreg32(STM32_PWR_CR3);
-      regval &= ~(STM32_PWR_CR3_BYPASS | STM32_PWR_CR3_LDOEN |
-          STM32_PWR_CR3_SMPSEXTHP | STM32_PWR_CR3_SMPSLEVEL_MASK);
-      regval |= STM32_PWR_CR3_SCUEN;
+      regval &= STM32_PWR_CR3_MASK;
+      regval |= STM32_PWR_CR3_SELECTION;
       putreg32(regval, STM32_PWR_CR3);
-#else
-      regval = getreg32(STM32_PWR_CR3);
-      regval |= STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_SCUEN;
-      putreg32(regval, STM32_PWR_CR3);
-#endif
 
       /* Set the voltage output scale */
 
@@ -978,6 +991,23 @@ void stm32_stdclockconfig(void)
       regval = getreg32(STM32_RCC_D2CCIP2R);
       regval &= ~RCC_D2CCIP2R_USBSEL_MASK;
       regval |= STM32_RCC_D2CCIP2R_USBSRC;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
+      /* Configure USART2, 3, 4, 5, 7, and 8 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART234578_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART234578SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART234578_SEL;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
+
+      /* Configure USART1 and 6 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART16_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART16SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART16_SEL;
       putreg32(regval, STM32_RCC_D2CCIP2R);
 #endif
 

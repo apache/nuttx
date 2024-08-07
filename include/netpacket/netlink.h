@@ -704,6 +704,36 @@ struct rtmsg
   uint32_t rtm_flags;
 };
 
+/* Structures used in prefix information. */
+
+struct prefixmsg
+{
+  uint8_t  prefix_family;
+  uint8_t  prefix_pad1;
+  uint16_t prefix_pad2;
+  int32_t  prefix_ifindex;
+  uint8_t  prefix_type;
+  uint8_t  prefix_len;
+  uint8_t  prefix_flags;
+  uint8_t  prefix_pad3;
+};
+
+enum
+{
+  PREFIX_UNSPEC,
+  PREFIX_ADDRESS,
+  PREFIX_CACHEINFO,
+  __PREFIX_MAX
+};
+
+#define PREFIX_MAX (__PREFIX_MAX - 1)
+
+struct prefix_cacheinfo
+{
+  uint32_t preferred_time;
+  uint32_t valid_time;
+};
+
 /* <------- NLA_HDRLEN ------> <-- NLA_ALIGN(payload)-->
  * +---------------------+- - -+- - - - - - - - - -+- - -+
  * |        Header       | Pad |     Payload       | Pad |

@@ -73,5 +73,5 @@ int imx9_i2c_initialize(void)
     }
 #endif
 
-  return OK;
+  return ret;
 }

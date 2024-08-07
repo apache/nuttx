@@ -49,6 +49,11 @@ static uint8_t g_port_vlan_config[] =
   CONFIG_NET_KSZ9477_PORT_VLAN_SGMII
 };
 
+static uint8_t g_port_mirror_config[7] =
+{
+  0
+};
+
 #endif
 
 /****************************************************************************
@@ -101,7 +106,6 @@ static int ksz9477_reg_read32(uint16_t reg, uint32_t *data)
   return ret;
 }
 
-#if 0  /* Enable when needed */
 static int ksz9477_reg_write8(uint16_t reg, uint8_t data)
 {
   struct ksz9477_transfer_s write_msg;
@@ -110,7 +114,6 @@ static int ksz9477_reg_write8(uint16_t reg, uint8_t data)
   write_msg.data = data;
   return ksz9477_write(&write_msg);
 }
-#endif
 
 static int ksz9477_reg_write32(uint16_t reg, uint32_t data)
 {
@@ -297,6 +300,36 @@ int ksz9477_configure_port_vlan(ksz9477_port_t port, uint8_t disable,
 
   g_port_vlan_config[port - KSZ9477_PORT_PHY1] &= ~disable;
   g_port_vlan_config[port - KSZ9477_PORT_PHY1] |= enable;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: ksz9477_configure_port_mirroring
+ *
+ * Description:
+ *   Configures the port mirroring and snooping.
+ *   The change will become effective next time when the switch is
+ *   initialized.
+ *
+ * Input Parameters:
+ *   port: The port being configured (1-7)
+ *   config: Bitmask to enable/disable rx/tx mirroring, sniffer port.
+ *           See header file or Port Mirroring Control Register
+ *           from datasheet for further details.
+ *
+ * Returned Value:
+ *   OK or negative error number
+ *
+ ****************************************************************************/
+
+int ksz9477_configure_port_mirroring(ksz9477_port_t port, uint8_t config)
+{
+  if (port < KSZ9477_PORT_PHY1 || port > KSZ9477_PORT_SGMII)
+    {
+      return -EINVAL;
+    }
+
+  g_port_mirror_config[port - KSZ9477_PORT_PHY1] = config;
 
   return OK;
 }
@@ -376,6 +409,19 @@ int ksz9477_init(ksz9477_port_t master_port)
       ret = ksz9477_reg_write32(
               KSZ9477_Q_MGMT_PORT_CONTROL1(KSZ9477_PORT_PHY1 + i),
               g_port_vlan_config[i]);
+    }
+
+#endif
+
+#ifdef CONFIG_NET_KSZ9477_PORT_SNIFF
+
+  /* Configure the port mirroring and snooping for each port */
+
+  for (i = 0; ret == OK && i < 7; i++)
+    {
+      ret = ksz9477_reg_write8(
+              KSZ9477_PORT_MIRROR_CONTROL(KSZ9477_PORT_PHY1 + i),
+              g_port_mirror_config[i]);
     }
 
 #endif

@@ -18,17 +18,7 @@
  *
  ****************************************************************************/
 
-/* NOTE:  This shares memory layout with ld-userland.script */
-
-MEMORY
-{
-  kflash (rx)  : ORIGIN = 0x8000000, LENGTH = 256K /* w/ cache */
-  uflash (rx)  : ORIGIN = 0x8040000, LENGTH = 256K /* w/ cache */
-
-  ksram (rwx)  : ORIGIN = 0x8200000, LENGTH = 1024K /* w/ cache */
-  usram (rwx)  : ORIGIN = 0x8300000, LENGTH = 1024K /* w/ cache */
-}
-
+#include "ld-protected.mem"
 
 OUTPUT_ARCH("riscv")
 

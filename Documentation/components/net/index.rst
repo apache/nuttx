@@ -8,10 +8,12 @@ Network Support
   sixlowpan.rst
   socketcan.rst
   pkt.rst
+  ipfilter.rst
   nat.rst
   netdev.rst
   netdriver.rst
   netguardsize.rst
+  netlink.rst
   slip.rst
   wqueuedeadlocks.rst
 

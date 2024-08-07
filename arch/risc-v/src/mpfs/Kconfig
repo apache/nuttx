@@ -52,7 +52,8 @@ config MPFS_BOARD_PMP
 	default n
 	---help---
 		If true, the board must provide "mpfs_board_pmp_setup" for PMP
-		configuration. If false, set ALL memory accessible for every
+		configuration and "mpfs_board_pmp_error" for PMP error handling.
+		If false, set ALL memory accessible for every
 		configured HART. Only the bootloader should do this.
 
 config MPFS_OPENSBI

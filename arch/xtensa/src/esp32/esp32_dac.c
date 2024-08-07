@@ -25,6 +25,7 @@
 #include "xtensa.h"
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/analog/dac.h>
 #include <debug.h>
 #include "esp32_dac.h"

@@ -27,4 +27,5 @@ HEAD_ASRC = bl808_head.S
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = bl808_start.c bl808_irq_dispatch.c bl808_irq.c
 CHIP_CSRCS += bl808_timerisr.c bl808_allocateheap.c
-CHIP_CSRCS += bl808_mm_init.c bl808_pgalloc.c bl808_serial.c
+CHIP_CSRCS += bl808_gpio.c bl808_mm_init.c bl808_pgalloc.c bl808_serial.c
+CHIP_CSRCS += bl808_gpadc.c bl808_spi.c bl808_timer.c bl808_wdt.c

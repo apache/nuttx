@@ -174,18 +174,14 @@ arm_vectorirq:
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
+	mov	r4, sp			/* Save the SP in a preserved register */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	/* Call arm_decodeirq() on the interrupt stack */
 
 	ldr	sp, .Lirqstacktop	/* SP = interrupt stack top */
-	str	r0, [sp, #-4]!		/* Save the xcp address at SP-4 then update SP */
-	bl	arm_decodeirq		/* Call the handler */
-	ldr	sp, [sp]		/* Restore the user stack pointer */
 #else
 	/* Call arm_decodeirq() on the user stack */
-
-	mov		r4, sp		/* Save the SP in a preserved register */
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
@@ -199,11 +195,10 @@ arm_vectorirq:
 	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
-
+#endif
 	bic	sp, sp, #7		/* Force 8-byte alignment */
 	bl	arm_decodeirq		/* Call the handler */
 	mov	sp, r4			/* Restore the possibly unaligned stack pointer */
-#endif
 
 #ifdef CONFIG_ARCH_FPU
 	/* Restore the state of the floating point registers. */
@@ -216,6 +211,8 @@ arm_vectorirq:
 
 	mov	r4, #(PSR_MODE_IRQ | PSR_I_BIT)
 	msr	cpsr_c, r4		/* Switch back IRQ mode */
+
+	mov	sp, r0			/* regs returned by arm_decodeirq */
 
 	/* Restore the CPSR, SYS mode registers and return */
 
@@ -314,6 +311,7 @@ arm_vectorsvc:
 
 	mov	r4, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, r4		/* Switch back SVC mode */
+	mov	sp, r0			/* regs returned by arm_syscall */
 
 	/* Restore the CPSR, SYS mode registers and return */
 

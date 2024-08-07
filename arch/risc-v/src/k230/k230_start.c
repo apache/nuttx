@@ -117,12 +117,13 @@ void k230_start(int mhartid, const char *dtb)
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
       riscv_percpu_add_hart(mhartid);
-#else
+#endif
+#ifndef CONFIG_BUILD_KERNEL
       k230_copy_init_data();
 #endif
     }
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_ARCH_USE_S_MODE
     k230_hart_init();
 #endif
 

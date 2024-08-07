@@ -36,6 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 
@@ -310,16 +311,19 @@ static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 #ifdef HAVE_UART0
 static struct xmc4_dev_s g_uart0priv =
 {
-  .uartbase       = XMC4_USIC0_CH0_BASE,
-  .channel        = (uint8_t)USIC0_CHAN0,
-  .irq            = XMC4_IRQ_USIC0_SR0,
-  .config         =
+  .uartbase         = XMC4_USIC0_CH0_BASE,
+  .channel          = (uint8_t)USIC0_CHAN0,
+  .irq              = XMC4_IRQ_USIC0_SR0,
+  .config           =
   {
-    .baud         = CONFIG_UART0_BAUD,
-    .dx           = BOARD_UART0_DX,
-    .parity       = CONFIG_UART0_PARITY,
-    .nbits        = CONFIG_UART0_BITS,
-    .stop2        = CONFIG_UART0_2STOP,
+    .baud           = CONFIG_UART0_BAUD,
+    .dx             = BOARD_UART0_DX,
+    .parity         = CONFIG_UART0_PARITY,
+    .nbits          = CONFIG_UART0_BITS,
+    .stop2          = CONFIG_UART0_2STOP,
+    .startbufferptr = 0,
+    .txbuffersize   = CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE,
+    .rxbuffersize   = CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE,
   }
 };
 
@@ -345,16 +349,20 @@ static uart_dev_t g_uart0port =
 #ifdef HAVE_UART1
 static struct xmc4_dev_s g_uart1priv =
 {
-  .uartbase       = XMC4_USIC0_CH1_BASE,
-  .channel        = (uint8_t)USIC0_CHAN1,
-  .irq            = XMC4_IRQ_USIC0_SR1,
-  .config         =
+  .uartbase         = XMC4_USIC0_CH1_BASE,
+  .channel          = (uint8_t)USIC0_CHAN1,
+  .irq              = XMC4_IRQ_USIC0_SR1,
+  .config           =
   {
-    .baud         = CONFIG_UART1_BAUD,
-    .dx           = BOARD_UART1_DX,
-    .parity       = CONFIG_UART1_PARITY,
-    .nbits        = CONFIG_UART1_BITS,
-    .stop2        = CONFIG_UART1_2STOP,
+    .baud           = CONFIG_UART1_BAUD,
+    .dx             = BOARD_UART1_DX,
+    .parity         = CONFIG_UART1_PARITY,
+    .nbits          = CONFIG_UART1_BITS,
+    .stop2          = CONFIG_UART1_2STOP,
+    .startbufferptr = CONFIG_XMC4_USIC0_CHAN0_TX_BUFFER_SIZE
+                    + CONFIG_XMC4_USIC0_CHAN0_RX_BUFFER_SIZE,
+    .txbuffersize   = CONFIG_XMC4_USIC0_CHAN1_TX_BUFFER_SIZE,
+    .rxbuffersize   = CONFIG_XMC4_USIC0_CHAN1_RX_BUFFER_SIZE,
   }
 };
 
@@ -380,16 +388,19 @@ static uart_dev_t g_uart1port =
 #ifdef HAVE_UART2
 static struct xmc4_dev_s g_uart2priv =
 {
-  .uartbase       = XMC4_USIC1_CH0_BASE,
-  .channel        = (uint8_t)USIC1_CHAN0,
-  .irq            = XMC4_IRQ_USIC1_SR0,
-  .config         =
+  .uartbase         = XMC4_USIC1_CH0_BASE,
+  .channel          = (uint8_t)USIC1_CHAN0,
+  .irq              = XMC4_IRQ_USIC1_SR0,
+  .config           =
   {
-    .baud         = CONFIG_UART2_BAUD,
-    .dx           = BOARD_UART2_DX,
-    .parity       = CONFIG_UART2_PARITY,
-    .nbits        = CONFIG_UART2_BITS,
-    .stop2        = CONFIG_UART2_2STOP,
+    .baud           = CONFIG_UART2_BAUD,
+    .dx             = BOARD_UART2_DX,
+    .parity         = CONFIG_UART2_PARITY,
+    .nbits          = CONFIG_UART2_BITS,
+    .stop2          = CONFIG_UART2_2STOP,
+    .startbufferptr = 0,
+    .txbuffersize   = CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE,
+    .rxbuffersize   = CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE,
   }
 };
 
@@ -415,16 +426,20 @@ static uart_dev_t g_uart2port =
 #ifdef HAVE_UART3
 static struct xmc4_dev_s g_uart3priv =
 {
-  .uartbase       = XMC4_USIC1_CH1_BASE,
-  .channel        = (uint8_t)USIC1_CHAN1,
-  .irq            = XMC4_IRQ_USIC1_SR1,
-  .config         =
+  .uartbase         = XMC4_USIC1_CH1_BASE,
+  .channel          = (uint8_t)USIC1_CHAN1,
+  .irq              = XMC4_IRQ_USIC1_SR1,
+  .config           =
   {
-    .baud         = CONFIG_UART3_BAUD,
-    .dx           = BOARD_UART3_DX,
-    .parity       = CONFIG_UART3_PARITY,
-    .nbits        = CONFIG_UART3_BITS,
-    .stop2        = CONFIG_UART3_2STOP,
+    .baud           = CONFIG_UART3_BAUD,
+    .dx             = BOARD_UART3_DX,
+    .parity         = CONFIG_UART3_PARITY,
+    .nbits          = CONFIG_UART3_BITS,
+    .stop2          = CONFIG_UART3_2STOP,
+    .startbufferptr = CONFIG_XMC4_USIC1_CHAN0_TX_BUFFER_SIZE
+                    + CONFIG_XMC4_USIC1_CHAN0_RX_BUFFER_SIZE,
+    .txbuffersize   = CONFIG_XMC4_USIC1_CHAN1_TX_BUFFER_SIZE,
+    .rxbuffersize   = CONFIG_XMC4_USIC1_CHAN1_RX_BUFFER_SIZE,
   }
 };
 
@@ -450,16 +465,19 @@ static uart_dev_t g_uart3port =
 #ifdef HAVE_UART4
 static struct xmc4_dev_s g_uart4priv =
 {
-  .uartbase       = XMC4_USIC2_CH0_BASE,
-  .channel        = (uint8_t)USIC2_CHAN0,
-  .irq            = XMC4_IRQ_USIC2_SR0,
-  .config         =
+  .uartbase         = XMC4_USIC2_CH0_BASE,
+  .channel          = (uint8_t)USIC2_CHAN0,
+  .irq              = XMC4_IRQ_USIC2_SR0,
+  .config           =
   {
-    .baud         = CONFIG_UART4_BAUD,
-    .dx           = BOARD_UART4_DX,
-    .parity       = CONFIG_UART4_PARITY,
-    .nbits        = CONFIG_UART4_BITS,
-    .stop2        = CONFIG_UART4_2STOP,
+    .baud           = CONFIG_UART4_BAUD,
+    .dx             = BOARD_UART4_DX,
+    .parity         = CONFIG_UART4_PARITY,
+    .nbits          = CONFIG_UART4_BITS,
+    .stop2          = CONFIG_UART4_2STOP,
+    .startbufferptr = 0,
+    .txbuffersize   = CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE,
+    .rxbuffersize   = CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE,
   }
 };
 
@@ -485,16 +503,20 @@ static uart_dev_t g_uart4port =
 #ifdef HAVE_UART5
 static struct xmc4_dev_s g_uart5priv =
 {
-  .uartbase       = XMC4_USIC2_CH1_BASE,
-  .channel        = (uint8_t)USIC2_CHAN1,
-  .irq            = XMC4_IRQ_USIC2_SR1,
-  .config         =
+  .uartbase         = XMC4_USIC2_CH1_BASE,
+  .channel          = (uint8_t)USIC2_CHAN1,
+  .irq              = XMC4_IRQ_USIC2_SR1,
+  .config           =
   {
-    .baud         = CONFIG_UART5_BAUD,
-    .dx           = BOARD_UART5_DX,
-    .parity       = CONFIG_UART5_PARITY,
-    .nbits        = CONFIG_UART5_BITS,
-    .stop2        = CONFIG_UART5_2STOP,
+    .baud           = CONFIG_UART5_BAUD,
+    .dx             = BOARD_UART5_DX,
+    .parity         = CONFIG_UART5_PARITY,
+    .nbits          = CONFIG_UART5_BITS,
+    .stop2          = CONFIG_UART5_2STOP,
+    .startbufferptr = CONFIG_XMC4_USIC2_CHAN0_TX_BUFFER_SIZE
+                    + CONFIG_XMC4_USIC2_CHAN0_RX_BUFFER_SIZE,
+    .txbuffersize   = CONFIG_XMC4_USIC2_CHAN1_TX_BUFFER_SIZE,
+    .rxbuffersize   = CONFIG_XMC4_USIC2_CHAN1_RX_BUFFER_SIZE,
   }
 };
 

@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdlib.h>
-#include <nuttx/tls.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -33,12 +33,18 @@
 
 /****************************************************************************
  * Name: getprogname
+ *
+ * Note that previous impl returns address in the stack of main thread when
+ * used from a pthread, that is dangerous as main thread may end earlier.
  ****************************************************************************/
 
 FAR const char *getprogname(void)
 {
-  FAR struct task_info_s *info;
+  struct stackinfo_s si;
+  FAR struct tls_info_s *ti = tls_get_info();
+  uintptr_t ret = ti ? (uintptr_t)ti + ti->tl_size : 0;
+  int rc = nxsched_get_stackinfo(0, &si);
 
-  info = task_get_info();
-  return info->ta_argv[0];
+  return (rc >= 0 && ret && ((uintptr_t)si.stack_base_ptr) > ret) ?
+           ((FAR char **)ret)[0] : NULL;
 }

@@ -204,6 +204,7 @@ noinline_function void arm_initialize_stack(void)
       "mrs %1, msplim\n"
       "msr psplim, %1\n"
 #endif
+      "isb sy\n"
 
       /* Select PSP */
 
@@ -219,6 +220,7 @@ noinline_function void arm_initialize_stack(void)
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
       "msr msplim, %2\n"
 #endif
+      "isb sy\n"
       :
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
       : "r" (stack), "r" (temp), "r" (stacklim)

@@ -54,14 +54,14 @@ static void pm_waklock_cb(wdparm_t arg)
 #ifdef CONFIG_PM_PROCFS
 static void pm_wakelock_stats_rm(FAR struct pm_wakelock_s *wakelock)
 {
-  FAR struct pm_domain_s *pdom = &g_pmglobals.domain[wakelock->domain];
+  FAR struct pm_domain_s *pdom = &g_pmdomains[wakelock->domain];
 
   dq_rem(&wakelock->fsnode, &pdom->wakelockall);
 }
 
 static void pm_wakelock_stats(FAR struct pm_wakelock_s *wakelock, bool stay)
 {
-  FAR struct pm_domain_s *pdom = &g_pmglobals.domain[wakelock->domain];
+  FAR struct pm_domain_s *pdom = &g_pmdomains[wakelock->domain];
   struct timespec ts;
 
   if (stay)
@@ -121,9 +121,9 @@ void pm_activity(int domain, int priority)
 {
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
 
-  if (g_pmglobals.domain[domain].governor->activity)
+  if (g_pmdomains[domain].governor->activity)
     {
-      g_pmglobals.domain[domain].governor->activity(domain, priority);
+      g_pmdomains[domain].governor->activity(domain, priority);
     }
 
   pm_auto_updatestate(domain);
@@ -301,11 +301,11 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
   /* Get a convenience pointer to minimize all of the indexing */
 
   domain = wakelock->domain;
-  pdom   = &g_pmglobals.domain[domain];
+  pdom   = &g_pmdomains[domain];
   dq     = &pdom->wakelock[wakelock->state];
   wdog   = &wakelock->wdog;
 
-  flags = pm_domain_lock(domain);
+  flags = spin_lock_irqsave(&pdom->lock);
 
   if (wakelock->count > 0)
     {
@@ -316,7 +316,7 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
   wd_cancel(wdog);
   pm_wakelock_stats_rm(wakelock);
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
 }
 
 /****************************************************************************
@@ -350,10 +350,10 @@ void pm_wakelock_stay(FAR struct pm_wakelock_s *wakelock)
   /* Get a convenience pointer to minimize all of the indexing */
 
   domain = wakelock->domain;
-  pdom   = &g_pmglobals.domain[domain];
+  pdom   = &g_pmdomains[domain];
   dq     = &pdom->wakelock[wakelock->state];
 
-  flags = pm_domain_lock(domain);
+  flags = spin_lock_irqsave(&pdom->lock);
 
   DEBUGASSERT(wakelock->count < UINT32_MAX);
   if (wakelock->count++ == 0)
@@ -362,7 +362,7 @@ void pm_wakelock_stay(FAR struct pm_wakelock_s *wakelock)
       pm_wakelock_stats(wakelock, true);
     }
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
 
   pm_auto_updatestate(domain);
 }
@@ -397,10 +397,10 @@ void pm_wakelock_relax(FAR struct pm_wakelock_s *wakelock)
   /* Get a convenience pointer to minimize all of the indexing */
 
   domain = wakelock->domain;
-  pdom   = &g_pmglobals.domain[domain];
+  pdom   = &g_pmdomains[domain];
   dq     = &pdom->wakelock[wakelock->state];
 
-  flags = pm_domain_lock(domain);
+  flags = spin_lock_irqsave(&pdom->lock);
 
   DEBUGASSERT(wakelock->count > 0);
   if (--wakelock->count == 0)
@@ -409,7 +409,7 @@ void pm_wakelock_relax(FAR struct pm_wakelock_s *wakelock)
       pm_wakelock_stats(wakelock, false);
     }
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
 
   pm_auto_updatestate(domain);
 }
@@ -448,11 +448,11 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
   /* Get a convenience pointer to minimize all of the indexing */
 
   domain = wakelock->domain;
-  pdom   = &g_pmglobals.domain[domain];
+  pdom   = &g_pmdomains[domain];
   dq     = &pdom->wakelock[wakelock->state];
   wdog   = &wakelock->wdog;
 
-  flags = pm_domain_lock(domain);
+  flags  = spin_lock_irqsave(&pdom->lock);
 
   if (!WDOG_ISACTIVE(wdog))
     {
@@ -469,7 +469,7 @@ void pm_wakelock_staytimeout(FAR struct pm_wakelock_s *wakelock, int ms)
       wd_start(wdog, MSEC2TICK(ms), pm_waklock_cb, (wdparm_t)wakelock);
     }
 
-  pm_domain_unlock(domain, flags);
+  spin_unlock_irqrestore(&pdom->lock, flags);
 
   pm_auto_updatestate(domain);
 }

@@ -40,8 +40,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BMM150_I2C_FREQ          400000
-
 #define BMM150_CHIPID_VAL        0x32
 
 #define BMM150_CHIPID            0x40
@@ -712,7 +710,7 @@ int bmm150_register_uorb(int devno, FAR struct bmm150_config_s *config)
 
   dev->config.i2c  = config->i2c;
   dev->config.addr = config->addr;
-  dev->freq        = BMM150_I2C_FREQ;
+  dev->freq        = CONFIG_BMM150_I2C_FREQUENCY;
 
   /*  Register sensor */
 

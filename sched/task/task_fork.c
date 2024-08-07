@@ -96,6 +96,7 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
   FAR struct tcb_s *ptcb = this_task();
   FAR struct tcb_s *parent;
   FAR struct task_tcb_s *child;
+  FAR char **argv;
   size_t stack_size;
   uint8_t ttype;
   int priority;
@@ -144,6 +145,19 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   child->cmn.flags |= TCB_FLAG_FREE_TCB;
 
+#if defined(CONFIG_ARCH_ADDRENV)
+  /* Join the parent address environment (REVISIT: vfork() only) */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ret = addrenv_join(parent, &child->cmn);
+      if (ret < 0)
+        {
+          goto errout_with_tcb;
+        }
+    }
+#endif
+
   /* Initialize the task join */
 
   nxtask_joininit(&child->cmn);
@@ -183,6 +197,19 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
       goto errout_with_tcb;
     }
 
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
+  /* Allocate the kernel stack */
+
+  if (ttype != TCB_FLAG_TTYPE_KERNEL)
+    {
+      ret = up_addrenv_kstackalloc(&child->cmn);
+      if (ret < 0)
+        {
+          goto errout_with_tcb;
+        }
+    }
+#endif
+
   /* Setup thread local storage */
 
   ret = tls_dup_info(&child->cmn, parent);
@@ -211,8 +238,8 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   /* Setup to pass parameters to the new task */
 
-  ret = nxtask_setup_arguments(child, parent->group->tg_info->ta_argv[0],
-                               &parent->group->tg_info->ta_argv[1]);
+  argv = nxsched_get_stackargs(parent);
+  ret = nxtask_setup_arguments(child, argv[0], &argv[1]);
   if (ret < OK)
     {
       goto errout_with_tcb;

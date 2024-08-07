@@ -251,7 +251,7 @@ static void esp_twai_reset(struct can_dev_s *dev)
   flags = enter_critical_section();
 
   ret = twai_hal_init(&priv->ctx, &hal_config);
-  assert(ret);
+  ASSERT(ret);
   twai_hal_configure(&priv->ctx, &priv->t_config, &f_config,
                      TWAI_DEFAULT_INTERRUPTS, 0);
 

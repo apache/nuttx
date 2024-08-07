@@ -112,7 +112,11 @@ static void modlib_elfsize(FAR struct mod_loadinfo_s *loadinfo)
                * able
                */
 
-              if ((shdr->sh_flags & SHF_WRITE) != 0)
+              if ((shdr->sh_flags & SHF_WRITE) != 0
+#ifdef CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+                  || (shdr->sh_flags & SHF_EXECINSTR) == 0
+#endif
+                  )
                 {
                   datasize = _ALIGN_UP(datasize, shdr->sh_addralign);
                   datasize += ELF_ALIGNUP(shdr->sh_size);
@@ -214,7 +218,11 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
            * able
            */
 
-          if ((shdr->sh_flags & SHF_WRITE) != 0)
+          if ((shdr->sh_flags & SHF_WRITE) != 0
+#ifdef CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+              || (shdr->sh_flags & SHF_EXECINSTR) == 0
+#endif
+              )
             {
               pptr = &data;
             }

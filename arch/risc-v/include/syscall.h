@@ -77,15 +77,6 @@
 
 #define SYS_switch_context        (2)
 
-#ifdef CONFIG_LIB_SYSCALL
-/* SYS call 3:
- *
- * void riscv_syscall_return(void);
- */
-
-#define SYS_syscall_return        (3)
-#endif /* CONFIG_LIB_SYSCALL */
-
 #ifndef CONFIG_BUILD_FLAT
 /* SYS call 4:
  *

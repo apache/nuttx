@@ -36,6 +36,9 @@
 #if defined(CONFIG_STM32_STM32F33XX)
 #  include "hardware/stm32f33xxx_hrtim.h"
 #  include "hardware/stm32f33xxx_rcc.h"
+#elif defined(CONFIG_STM32_STM32G47XX)
+#  include "hardware/stm32g47xxx_hrtim.h"
+#  include "hardware/stm32g4xxxx_rcc.h"
 #else
 #  error
 #endif
@@ -178,11 +181,11 @@
 #    error "Clock system must be set to PLL"
 #  endif
 #else
-#  error "Not supported yet: system freezes when no PLL selected."
 #  define HRTIM_HAVE_CLK_FROM_APB2 1
 #  if STM32_RCC_CFGR_PPRE2 == RCC_CFGR_PPRE2_HCLK
 #      define HRTIM_MAIN_CLOCK STM32_PCLK2_FREQUENCY
 #  else
+#      error "Not supported yet."
 #      define HRTIM_MAIN_CLOCK 2*STM32_PCLK2_FREQUENCY
 #  endif
 #endif

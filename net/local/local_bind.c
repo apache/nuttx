@@ -61,7 +61,6 @@ int psock_local_bind(FAR struct socket *psock,
 
   /* Save the address family */
 
-  conn->lc_proto = psock->s_type;
   conn->lc_instance_id = -1;
 
   /* Now determine the type of the Unix domain socket by comparing the size

@@ -21,10 +21,19 @@
 include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+APPSDIR     = $(TOPDIR)$(DELIM)$(CONFIG_APPS_DIR)
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
 INCLUDES += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
+
+ifeq ($(CONFIG_VIDEOUTILS_OPENH264),y)
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/videoutils/openh264/openh264/codec/api
+endif
+
+ifeq ($(CONFIG_VIDEOUTILS_LIBX264),y)
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/videoutils/x264/x264
+endif
 
 CPPFLAGS += $(INCLUDES)
 CFLAGS += $(INCLUDES)
@@ -250,6 +259,17 @@ ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
   STDLIBS += -lv4l2
 endif
 
+ifeq ($(CONFIG_SIM_VIDEO_DECODER),y)
+  CSRCS += sim_decoder.c
+  CSRCS += sim_openh264dec.c
+endif
+
+ifeq ($(CONFIG_SIM_VIDEO_ENCODER),y)
+  CSRCS += sim_encoder.c
+  CSRCS += sim_x264encoder.c
+  CFLAGS += -D_STDINT_H
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 NUTTXOBJS = $(AOBJS) $(COBJS)
@@ -401,6 +421,9 @@ ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
 	$(Q) sed -i 's/\s*\.interp\s*:\s*{\s*\*(\.interp)\s*}/  \
 	            .kasan.global : {KEEP(*(.data..LASAN0)) KEEP (*(.data.rel.local..LASAN0)) }\n  \
 	            .interp : {*(.interp)}/g' nuttx.ld
+endif
+ifneq ($(CONFIG_SIM_CUSTOM_DATA_SECTION),"")
+	$(Q) sed -i '/\.data *:/i $(subst ",, $(CONFIG_SIM_CUSTOM_DATA_SECTION))' nuttx.ld
 endif
 ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
 	$(if $(CONFIG_HAVE_CXX),\

@@ -210,6 +210,39 @@ int can_setsockopt(FAR struct socket *psock, int level, int option,
         break;
 #endif
 
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      case SO_RCVBUF:
+        {
+          int buffersize;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          buffersize = *(FAR int *)value;
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+#if CONFIG_NET_MAX_RECV_BUFSIZE > 0
+          buffersize = MIN(buffersize, CONFIG_NET_MAX_RECV_BUFSIZE);
+#endif
+
+          conn->recv_buffnum = (buffersize + CONFIG_IOB_BUFSIZE - 1)
+                              / CONFIG_IOB_BUFSIZE;
+
+          break;
+        }
+#endif
+
       default:
         nerr("ERROR: Unrecognized CAN option: %d\n", option);
         ret = -ENOPROTOOPT;

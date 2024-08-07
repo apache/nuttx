@@ -169,6 +169,10 @@
 #  include "esp32_board_rmt.h"
 #endif
 
+#ifdef CONFIG_ESP_MCPWM
+#  include "esp32_board_mcpwm.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -282,6 +286,22 @@ int esp32_bringup(void)
       syslog(LOG_ERR, "ERROR: esp32_pwm_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESP32_LEDC */
+
+#ifdef CONFIG_ESP_MCPWM_CAPTURE
+  ret = board_capture_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_capture_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_MCPWM_MOTOR_BDC
+  ret = board_motor_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_motor_initialize failed: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_SENSORS_MAX6675
   ret = board_max6675_initialize(0, 2);

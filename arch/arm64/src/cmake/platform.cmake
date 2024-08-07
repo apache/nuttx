@@ -1,5 +1,5 @@
 # ##############################################################################
-# ./arch/arm64/src/cmake/platform.cmake
+# arch/arm64/src/cmake/platform.cmake
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,17 +17,32 @@
 # the License.
 #
 # ##############################################################################
-get_directory_property(NUTTX_EXTRA_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
-                                                   COMPILE_OPTIONS)
+get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
+                                                     COMPILE_OPTIONS)
+
+set(NUTTX_EXTRA_FLAGS "")
+foreach(FLAG ${TOOLCHAIN_DIR_FLAGS})
+  if(NOT FLAG MATCHES "^\\$<.*>$")
+    list(APPEND NUTTX_EXTRA_FLAGS ${FLAG})
+  else()
+    string(REGEX MATCH "\\$<\\$<COMPILE_LANGUAGE:C>:(.*)>" matched ${FLAG})
+    if(matched)
+      list(APPEND NUTTX_EXTRA_FLAGS ${CMAKE_MATCH_1})
+    endif()
+  endif()
+endforeach()
+
+separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
+
 execute_process(
-  COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${NUTTX_EXTRA_FLAGS}
+  COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
           --print-libgcc-file-name
   OUTPUT_STRIP_TRAILING_WHITESPACE
   OUTPUT_VARIABLE extra_library)
 list(APPEND EXTRA_LIB ${extra_library})
 if(NOT CONFIG_LIBM)
   execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${NUTTX_EXTRA_FLAGS}
+    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
             --print-file-name=libm.a
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
@@ -35,7 +50,7 @@ if(NOT CONFIG_LIBM)
 endif()
 if(CONFIG_LIBSUPCXX)
   execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${NUTTX_EXTRA_FLAGS}
+    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
             --print-file-name=libsupc++.a
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
@@ -43,12 +58,13 @@ if(CONFIG_LIBSUPCXX)
 endif()
 if(CONFIG_ARCH_COVERAGE)
   execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${NUTTX_EXTRA_FLAGS}
+    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
             --print-file-name=libgcov.a
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
   list(APPEND EXTRA_LIB ${extra_library})
 endif()
-set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${EXTRA_LIB})
-separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
+
+nuttx_add_extra_library(${EXTRA_LIB})
+
 set(PREPROCES ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)

@@ -37,6 +37,7 @@
 #  include <IfxCpu_reg.h>
 #  include <Ifx_Ssw_Compilers.h>
 #  include <Tricore/Compilers/Compilers.h>
+#  include <IfxCpu_Intrinsics.h>
 #endif
 
 /****************************************************************************
@@ -182,11 +183,20 @@ extern uintptr_t        __ISTACK0[];
 
 /* These symbols are setup by the linker script. */
 
+#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
 extern uintptr_t        _lc_gb_data[]; /* Start of .data */
 extern uintptr_t        _lc_ge_data[]; /* End+1 of .data */
 #define _sdata          _lc_gb_data
 #define _edata          _lc_ge_data
 #define _eheap          __USTACK0_END
+#else
+extern uintptr_t        __HEAP[];      /* End+1 of .data */
+extern uintptr_t        __A0_MEM[];    /* End+1 of .data */
+#define _sdata          LCF_DSPR0_START
+#define _edata          __A0_MEM
+#define _eheap          __USTACK0_END
+#endif
+
 #endif
 
 /****************************************************************************
@@ -240,7 +250,7 @@ void tricore_earlyserialinit(void);
 /* System Timer *************************************************************/
 
 struct oneshot_lowerhalf_s *
-tricore_systimer_initialize(void *tbase, int irq, uint64_t freq);
+tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq);
 
 /* Debug ********************************************************************/
 

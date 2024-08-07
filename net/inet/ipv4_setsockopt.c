@@ -221,7 +221,7 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
           else
             {
               conn = psock->s_conn;
-              conn->ttl = ttl;
+              conn->s_ttl = ttl;
               ret = OK;
             }
         }

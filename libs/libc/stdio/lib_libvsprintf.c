@@ -389,7 +389,23 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
           if (c == 'z' || c == 't')
             {
-              switch (sizeof(size_t))
+              if (sizeof(size_t) == sizeof(unsigned short))
+                {
+                  c = 'h';
+                }
+              else if (sizeof(size_t) == sizeof(unsigned long))
+                {
+                  c = 'l';
+                }
+#if defined(CONFIG_HAVE_LONG_LONG) && ULLONG_MAX != ULONG_MAX
+              else if (sizeof(size_t) == sizeof(unsigned long long))
+                {
+                  c = 'l';
+                  flags |= FL_LONG;
+                  flags &= ~FL_SHORT;
+                }
+#endif
+              else
                 {
                   /* The only known cases that the default will be hit are
                    * (1) the eZ80 which has sizeof(size_t) = 3 which is the
@@ -398,26 +414,10 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                    * is not enabled and sizeof(size_t) is equal to
                    * sizeof(unsigned long long).  This latter case is an
                    * error.
+                   * Treat as integer with no size qualifier.
                    */
 
-                  default:
-                    continue;  /* Treat as integer with no size qualifier. */
-
-                  case sizeof(unsigned short):
-                    c = 'h';
-                    break;
-
-#if defined(CONFIG_HAVE_LONG_LONG) && ULLONG_MAX != ULONG_MAX
-                  case sizeof(unsigned long long):
-                    c = 'l';
-                    flags |= FL_LONG;
-                    flags &= ~FL_SHORT;
-                    break;
-#else
-                  case sizeof(unsigned long):
-                    c = 'l';
-                    break;
-#endif
+                  continue;
                 }
             }
 

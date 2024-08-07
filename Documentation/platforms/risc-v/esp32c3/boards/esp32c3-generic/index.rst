@@ -53,6 +53,17 @@ All of the configurations presented below can be tested by running the following
 Where <config_name> is the name of board configuration you want to use, i.e.: nsh, buttons, wifi...
 Then use a serial console terminal like ``picocom`` configured to 115200 8N1.
 
+bmp180
+------
+
+This configuration enables the use of the BMP180 pressure sensor over I2C.
+You can check that the sensor is working by using the ``bmp180`` application::
+
+    nsh> bmp180
+    Pressure value = 91531
+    Pressure value = 91526
+    Pressure value = 91525
+
 coremark
 --------
 
@@ -83,6 +94,14 @@ We can use the interrupt pin to send a signal when the interrupt fires::
 
 The pin is configured as a rising edge interrupt, so after issuing the
 above command, connect it to 3.3V.
+
+i2c
+---
+
+This configuration can be used to scan and manipulate I2C devices.
+You can scan for all I2C devices using the following command::
+
+    nsh> i2c dev 0x00 0x7f
 
 nsh
 ---
@@ -150,6 +169,17 @@ You can set an alarm, check its progress and receive a notification after it exp
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
 
+spi
+--------
+
+This configuration enables the support for the SPI driver.
+You can test it by connecting MOSI and MISO pins which are GPIO7 and GPIO2
+by default to each other and running the ``spi`` example::
+
+    nsh> spi exch -b 2 "AB"
+    Sending:	AB
+    Received:	AB
+
 spiflash
 --------
 
@@ -161,6 +191,26 @@ Once booted you can use the following commands to mount the file system::
 
     nsh> mksmartfs /dev/smart0
     nsh> mount -t smartfs /dev/smart0 /mnt
+
+sta_softap
+----------
+
+With this configuration you can run these commands to be able
+to connect your smartphone or laptop to your board::
+
+  nsh> ifup wlan1
+  nsh> dhcpd_start wlan1
+  nsh> wapi psk wlan1 mypasswd 3
+  nsh> wapi essid wlan1 nuttxap 1
+
+In this case, you are creating the access point ``nuttxapp`` in your board and to
+connect to it on your smartphone you will be required to type the password ``mypasswd``
+using WPA2.
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi SoftAP Mode <esp32_wi-fi_softap>`
+  for more information.
+
+The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
 
 timer
 -----
@@ -220,3 +270,29 @@ To test it, just run the following command::
     nsh> wdog -i /dev/watchdogX
 
 Where X is the watchdog instance.
+
+To test the XTWDT(/dev/watchdog3) an interrupt handler needs to be
+implemented because XTWDT does not have system reset feature. To implement
+an interrupt handler `WDIOC_CAPTURE` command can be used. When interrupt
+rises, XTAL32K clock can be restored with `WDIOC_RSTCLK` command.
+
+wifi
+----
+
+Enables Wi-Fi support. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+Or if you don't want to keep it saved in the firmware you can do it
+at runtime::
+
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+.. tip:: Please refer to :ref:`ESP32 Wi-Fi Station Mode <esp32_wi-fi_sta>`
+  for more information.

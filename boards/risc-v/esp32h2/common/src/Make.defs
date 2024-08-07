@@ -28,12 +28,36 @@ ifeq ($(CONFIG_ESP_RMT),y)
   CSRCS += esp_board_rmt.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SPI),y)
+  CSRCS += esp_board_spi.c
+endif
+
+ifeq ($(CONFIG_SPI_DRIVER),y)
+  CSRCS += esp_board_spidev.c
+endif
+
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+  CSRCS += esp_board_spislavedev.c
+endif
+
+ifeq ($(CONFIG_I2C_DRIVER),y)
+  CSRCS += esp_board_i2c.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
   CSRCS += esp_board_spiflash.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_TWAI),y)
   CSRCS += esp_board_twai.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BMP180),y)
+  CSRCS += esp_board_bmp180.c
+endif
+
+ifeq ($(CONFIG_ESP_MCPWM),y)
+  CSRCS += esp_board_mcpwm.c
 endif
 
 DEPPATH += --dep-path src

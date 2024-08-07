@@ -89,11 +89,29 @@ $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), 
 EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
 
-LIBPATH_OPT = --library-directory=
-SCRIPT_OPT = --lsl-file=
-LIBRARY_OPT = -l
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+  LIBPATH_OPT = --library-directory=
+  SCRIPT_OPT = --lsl-file=
+  LIBRARY_OPT = -l
+else
+  LDFLAGS := $(addprefix -Xlinker ,$(LDFLAGS))
+  LDFLAGS += $(CFLAGS)
 
-LDFLAGS += $(addprefix $(SCRIPT_OPT),$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
+  LIBPATH_OPT = -L
+  SCRIPT_OPT  = -T
+  LIBRARY_OPT = -l
+endif
+
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+  LDFLAGS += $(addprefix $(SCRIPT_OPT),$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
+else
+  ARCHSCRIPT := $(call CONVERT_PATH,$(ARCHSCRIPT))
+  LDFLAGS += $(addprefix $(SCRIPT_OPT),$(addsuffix .tmp,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
+
+  LDSTARTGROUP ?= -Wl,--start-group
+  LDENDGROUP   ?= -Wl,--end-group
+endif
+
 LIBPATHS += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
@@ -145,7 +163,16 @@ define LINK_ALLSYMS
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),)
+$(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
+	$(call PREPROCESS, $(patsubst %.tmp,%,$@), $@)
+endif
+
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
 nuttx$(EXEEXT): $(HEAD_COBJ) board$(DELIM)libboard$(LIBEXT) $(ARCHSCRIPT) $(EXTRA_LIBS)
+else
+nuttx$(EXEEXT): $(HEAD_COBJ) board$(DELIM)libboard$(LIBEXT) $(EXTRA_LIBS) $(addsuffix .tmp,$(ARCHSCRIPT))
+endif
 	$(Q) echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
@@ -163,6 +190,9 @@ ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)$(DELIM)System.map
+endif
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),)
+	$(Q) $(call DELFILE, $(addsuffix .tmp,$(ARCHSCRIPT)))
 endif
 
 # This is part of the top-level export target

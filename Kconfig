@@ -447,6 +447,22 @@ config DFU_PID
 	hex "PID to use for DFU image"
 
 endif # DFU_BINARY
+
+config OUTPUT_STRIP_PATHS
+	bool "Strip absolute paths from binaries"
+	default y
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Cmake build provide absolute paths to compile files. If __FILE__
+		macros are used in the source code(ASSERT), the binary will contain
+		many invalid paths.
+		This saves some memory, stops exposing build systems locations in binaries,
+		make failure logs more deterministic and most importantly makes builds more
+		failure logs more deterministic and most importantly makes builds more
+		deterministic.
+		Debuggers usually have a path mapping feature to ensure the files are
+		still found.
+
 endmenu # Binary Output Formats
 
 menu "Customize Header Files"
@@ -2432,6 +2448,44 @@ config DEBUG_OPTLEVEL
 		This string represents the custom optimization level that will be
 		used if DEBUG_CUSTOMOPT.
 
+choice
+	prompt "Link Time Optimization (LTO)"
+	default LTO_NONE
+	---help---
+		This option enables Link Time Optimization (LTO), which allows the
+		compiler to optimize binaries globally.
+
+		If unsure, select LTO_NONE. Note that LTO is very resource-intensive
+		so it's disabled by default.
+
+config LTO_NONE
+	bool "None"
+	---help---
+		Build the kernel normally, without Link Time Optimization (LTO).
+
+config LTO_FULL
+	bool "GNU Full LTO (EXPERIMENTAL)"
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Link time optimization is implemented as a GCC front end for a bytecode
+		bytecode representation of GIMPLE that is emitted in special sections
+		of .o files. Currently, LTO support is enabled in most ELF-based systems,
+		as well as darwin, cygwin and mingw systems.
+
+config LTO_THIN
+	bool "Clang ThinLTO (EXPERIMENTAL)"
+	depends on ARCH_TOOLCHAIN_CLANG
+	---help---
+		This option enables Clang's ThinLTO, which allows for parallel
+		optimization and faster incremental compiles compared to the
+		CONFIG_LTO_FULL option. More information can be found
+		from Clang's documentation:
+
+		https://clang.llvm.org/docs/ThinLTO.html
+
+		If unsure, say Y.
+endchoice
+
 config DEBUG_OPT_UNUSED_SECTIONS
 	bool "Optimization to eliminate the unused input sections"
 	default y
@@ -2444,6 +2498,14 @@ config DEBUG_OPT_UNUSED_SECTIONS
 		Enable this option to optimization the unused input sections with the
 		linker by compiling with " -ffunction-sections -fdata-sections ", and
 		linking with " --gc-sections ".
+
+config DEBUG_LINK_WHOLE_ARCHIVE
+	bool "Force every object to be included in the resulting shared library."
+	default n
+	depends on DEBUG_OPT_UNUSED_SECTIONS
+	---help---
+		Selecting this option will pass "--whole-archive" to ld
+		when linking NuttX ELF.
 
 config DEBUG_LINK_MAP
 	bool "Generate link map file"

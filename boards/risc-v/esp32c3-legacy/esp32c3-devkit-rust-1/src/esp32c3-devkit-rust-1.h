@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit-rust-1/src/esp32c3-devkit-rust-1.h
+ * boards/risc-v/esp32c3-legacy/esp32c3-devkit-rust-1/src/esp32c3-devkit-rust-1.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

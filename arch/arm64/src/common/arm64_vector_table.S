@@ -69,8 +69,13 @@
     stp    x30, \xreg0,  [sp, #8 * REG_X30]
 
     /* ELR and SPSR */
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
+    mrs    \xreg0, elr_el3
+    mrs    \xreg1, spsr_el3
+#else
     mrs    \xreg0, elr_el1
     mrs    \xreg1, spsr_el1
+#endif
     stp    \xreg0, \xreg1,  [sp, #8 * REG_ELR]
 
     /* increment exception depth */
@@ -246,8 +251,13 @@ arm64_exit_exc_fpu_done:
     /* restore spsr and elr at el1*/
 
     ldp    x0, x1,   [sp, #8 * REG_ELR]
+#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
+    msr    elr_el3,   x0
+    msr    spsr_el3,  x1
+#else
     msr    elr_el1,   x0
     msr    spsr_el1,  x1
+#endif
 
     /* decrement exception depth */
 

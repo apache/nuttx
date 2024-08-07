@@ -192,6 +192,10 @@ include $(TOPDIR)/tools/Zig.defs
 
 include $(TOPDIR)/tools/Rust.defs
 
+# LDC (LLVM D Compiler) toolchain
+
+include $(TOPDIR)/tools/D.defs
+
 CFLAGS := $(ARCHOPTIMIZATION) $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXFLAGS := $(ARCHOPTIMIZATION) $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
@@ -242,7 +246,7 @@ CMODULEFLAGS += -fno-stack-protector
 
 LDMODULEFLAGS = -r -e module_initialize --gc-sections
 LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
-SHMODULEFLAGS = -Bsymbolic -G -Bdynamic
+SHMODULEFLAGS = -shared -Bsymbolic -G -Bdynamic
 
 # NuttX modules are ELF binaries.
 # Non-ELF platforms like macOS need to use a separate ELF toolchain.
@@ -278,6 +282,15 @@ else
   # which is more convenient for debugging.
   LDFLAGS += -Wl,-Ttext-segment=0x400000
 endif
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  ifeq ($(CONFIG_HOST_MACOS),)
+    LDFLAGS += -Wl,-Map=$(TOPDIR)/nuttx.map
+  endif
+endif
+
+SHCCFLAGS = -fPIC -fPIE -fvisibility=default
+SHMODULEFLAGS = -shared -Bsymbolic -Bdynamic -G
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
   ifeq ($(CONFIG_HOST_MACOS),)

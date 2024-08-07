@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_NRF91_NONSECURE_BOOT
-typedef void cmse_nonsecure_call nsfunc(void);
+typedef void tz_nonsecure_call nsfunc(void);
 #endif
 
 /* This structure represents the first two entries on NVIC vector table */
@@ -202,6 +202,16 @@ int board_boot_image(const char *path, uint32_t hdr_size)
   __asm__ __volatile__("\tmsr msp_ns, %0\n" : : "r" (vt.spr));
 
   ARM_ISB();
+
+  /* Check if reset is valid */
+
+  if (vt.reset == 0xffffffff)
+    {
+      syslog(LOG_ERR, "Not found image to boot!");
+      PANIC();
+    }
+
+  syslog(LOG_INFO, "Jump to 0x%" PRIx32 "\n", vt.reset);
 
   /* Jump to non-secure entry point */
 

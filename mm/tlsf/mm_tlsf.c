@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <execinfo.h>
 #include <sched.h>
 #include <stdio.h>
 #include <string.h>
@@ -47,13 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if UINTPTR_MAX <= UINT32_MAX
-#  define MM_PTR_FMT_WIDTH 11
-#elif UINTPTR_MAX <= UINT64_MAX
-#  define MM_PTR_FMT_WIDTH 19
-#endif
-
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
 #  define MEMPOOL_NPOOLS (CONFIG_MM_HEAP_MEMPOOL_THRESHOLD / tlsf_align_size())
 #endif
 
@@ -99,7 +94,8 @@ struct mm_heap_s
 
   /* The is a multiple mempool of the heap */
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  size_t                         mm_threshold;
   FAR struct mempool_multiple_s *mm_mpool;
 #endif
 
@@ -257,7 +253,7 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
   return ret;
 }
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0 && CONFIG_MM_BACKTRACE >= 0
+#if defined(CONFIG_MM_HEAP_MEMPOOL) && CONFIG_MM_BACKTRACE >= 0
 
 /****************************************************************************
  * Name: mempool_memalign
@@ -443,7 +439,7 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 #if CONFIG_MM_BACKTRACE < 0
       if (dump->pid == PID_MM_ALLOC)
         {
-          syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
+          syslog(LOG_INFO, "%12zu%*p\n", size, BACKTRACE_PTR_FMT_WIDTH, ptr);
         }
 #elif CONFIG_MM_BACKTRACE == 0
       FAR struct memdump_backtrace_s *buf =
@@ -455,7 +451,7 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
           buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
         {
           syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
-                 buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH, ptr);
+                 buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH, ptr);
         }
 #else
       FAR struct memdump_backtrace_s *buf =
@@ -466,26 +462,19 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
            MM_DUMP_LEAK(dump->pid, buf->pid)) &&
           buf->seqno >= dump->seqmin && buf->seqno <= dump->seqmax)
         {
-          char tmp[CONFIG_MM_BACKTRACE * MM_PTR_FMT_WIDTH + 1] = "";
+          char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
+          backtrace_format(tmp, sizeof(tmp), buf->backtrace,
+                           CONFIG_MM_BACKTRACE);
 
-          FAR const char *format = " %0*p";
-          int i;
-
-          for (i = 0; i < CONFIG_MM_BACKTRACE && buf->backtrace[i]; i++)
-            {
-              snprintf(tmp + i * MM_PTR_FMT_WIDTH,
-                       sizeof(tmp) - i * MM_PTR_FMT_WIDTH,
-                       format, MM_PTR_FMT_WIDTH - 1, buf->backtrace[i]);
-            }
-
-          syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
-                 buf->pid, size, buf->seqno, MM_PTR_FMT_WIDTH, ptr, tmp);
+          syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
+                 buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH,
+                 ptr, tmp);
         }
 #endif
     }
   else if (dump->pid == PID_MM_FREE)
     {
-      syslog(LOG_INFO, "%12zu%*p\n", size, MM_PTR_FMT_WIDTH, ptr);
+      syslog(LOG_INFO, "%12zu%*p\n", size, BACKTRACE_PTR_FMT_WIDTH, ptr);
     }
 }
 
@@ -771,10 +760,13 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
 
   DEBUGASSERT(mm_heapmember(heap, mem));
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return;
+      if (mempool_multiple_free(heap->mm_mpool, mem) >= 0)
+        {
+          return;
+        }
     }
 #endif
 
@@ -861,10 +853,6 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
                                     FAR void *heapstart, size_t heapsize)
 {
   FAR struct mm_heap_s *heap;
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  size_t poolsize[MEMPOOL_NPOOLS];
-  int i;
-#endif
 
   minfo("Heap: name=%s start=%p size=%zu\n", name, heapstart, heapsize);
 
@@ -904,23 +892,62 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 #endif
 #endif
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  for (i = 0; i < MEMPOOL_NPOOLS; i++)
-    {
-      poolsize[i] = (i + 1) * tlsf_align_size();
-    }
+  return heap;
+}
 
-  heap->mm_mpool = mempool_multiple_init(name, poolsize, MEMPOOL_NPOOLS,
-                              (mempool_multiple_alloc_t)mempool_memalign,
-                              (mempool_multiple_alloc_size_t)mm_malloc_size,
-                              (mempool_multiple_free_t)mm_free, heap,
-                              CONFIG_MM_HEAP_MEMPOOL_CHUNK_SIZE,
-                              CONFIG_MM_HEAP_MEMPOOL_EXPAND_SIZE,
-                              CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE);
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+FAR struct mm_heap_s *
+mm_initialize_pool(FAR const char *name,
+                   FAR void *heap_start, size_t heap_size,
+                   FAR const struct mempool_init_s *init)
+{
+  FAR struct mm_heap_s *heap;
+
+#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD > 0
+  size_t poolsize[MEMPOOL_NPOOLS];
+  struct mempool_init_s def;
+
+  if (init == NULL)
+    {
+      /* Initialize the multiple mempool default parameter */
+
+      int i;
+
+      for (i = 0; i < MEMPOOL_NPOOLS; i++)
+        {
+          poolsize[i] = (i + 1) * tlsf_align_size();
+        }
+
+      def.poolsize        = poolsize;
+      def.npools          = MEMPOOL_NPOOLS;
+      def.threshold       = CONFIG_MM_HEAP_MEMPOOL_THRESHOLD;
+      def.chunksize       = CONFIG_MM_HEAP_MEMPOOL_CHUNK_SIZE;
+      def.expandsize      = CONFIG_MM_HEAP_MEMPOOL_EXPAND_SIZE;
+      def.dict_expendsize = CONFIG_MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE;
+
+      init = &def;
+    }
 #endif
+
+  heap = mm_initialize(name, heap_start, heap_size);
+
+  /* Initialize the multiple mempool in heap */
+
+  if (init != NULL && init->poolsize != NULL && init->npools != 0)
+    {
+      heap->mm_threshold = init->threshold;
+      heap->mm_mpool     = mempool_multiple_init(name, init->poolsize,
+                               init->npools,
+                               (mempool_multiple_alloc_t)mempool_memalign,
+                               (mempool_multiple_alloc_size_t)mm_malloc_size,
+                               (mempool_multiple_free_t)mm_free, heap,
+                               init->chunksize, init->expandsize,
+                               init->dict_expendsize);
+    }
 
   return heap;
 }
+#endif
 
 /****************************************************************************
  * Name: mm_mallinfo
@@ -933,7 +960,7 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
 {
   struct mallinfo info;
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
   struct mallinfo poolinfo;
 #endif
 #if CONFIG_MM_REGIONS > 1
@@ -963,7 +990,7 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
   info.uordblks = info.arena - info.fordblks;
   info.usmblks  = heap->mm_maxused;
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
   poolinfo = mempool_multiple_mallinfo(heap->mm_mpool);
 
   info.uordblks -= poolinfo.fordblks;
@@ -988,7 +1015,7 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
 #define region 0
 #endif
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
   info = mempool_multiple_info_task(heap->mm_mpool, task);
 #endif
 
@@ -1035,19 +1062,21 @@ void mm_memdump(FAR struct mm_heap_s *heap,
     {
       syslog(LOG_INFO, "Dump all used memory node info:\n");
 #if CONFIG_MM_BACKTRACE < 0
-      syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
+      syslog(LOG_INFO, "%12s%*s\n", "Size", BACKTRACE_PTR_FMT_WIDTH,
+             "Address");
 #else
       syslog(LOG_INFO, "%6s%12s%12s%*s %s\n", "PID", "Size", "Sequence",
-                        MM_PTR_FMT_WIDTH, "Address", "Backtrace");
+                        BACKTRACE_PTR_FMT_WIDTH, "Address", "Backtrace");
 #endif
     }
   else
     {
       syslog(LOG_INFO, "Dump all free memory node info:\n");
-      syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
+      syslog(LOG_INFO, "%12s%*s\n", "Size", BACKTRACE_PTR_FMT_WIDTH,
+             "Address");
     }
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
   mempool_multiple_memdump(heap->mm_mpool, dump);
 #endif
 
@@ -1073,11 +1102,14 @@ void mm_memdump(FAR struct mm_heap_s *heap,
 
 size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ssize_t size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
-  if (size >= 0)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return size;
+      ssize_t size = mempool_multiple_alloc_size(heap->mm_mpool, mem);
+      if (size >= 0)
+        {
+          return size;
+        }
     }
 #endif
 
@@ -1110,11 +1142,14 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       size = 1;
     }
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ret = mempool_multiple_alloc(heap->mm_mpool, size);
-  if (ret != NULL)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return ret;
+      ret = mempool_multiple_alloc(heap->mm_mpool, size);
+      if (ret != NULL)
+        {
+          return ret;
+        }
     }
 #endif
 
@@ -1184,11 +1219,14 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 {
   FAR void *ret;
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  ret = mempool_multiple_memalign(heap->mm_mpool, alignment, size);
-  if (ret != NULL)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return ret;
+      ret = mempool_multiple_memalign(heap->mm_mpool, alignment, size);
+      if (ret != NULL)
+        {
+          return ret;
+        }
     }
 #endif
 
@@ -1280,21 +1318,24 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       size = 1;
     }
 
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
-  newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
-  if (newmem != NULL)
+#ifdef CONFIG_MM_HEAP_MEMPOOL
+  if (heap->mm_mpool)
     {
-      return newmem;
-    }
-  else if (size <= CONFIG_MM_HEAP_MEMPOOL_THRESHOLD ||
-           mempool_multiple_alloc_size(heap->mm_mpool, oldmem) >= 0)
-    {
-      newmem = mm_malloc(heap, size);
-      if (newmem != 0)
+      newmem = mempool_multiple_realloc(heap->mm_mpool, oldmem, size);
+      if (newmem != NULL)
         {
-          memcpy(newmem, oldmem, size);
-          mm_free(heap, oldmem);
           return newmem;
+        }
+      else if (size <= heap->mm_threshold ||
+               mempool_multiple_alloc_size(heap->mm_mpool, oldmem) >= 0)
+        {
+          newmem = mm_malloc(heap, size);
+          if (newmem != 0)
+            {
+              memcpy(newmem, oldmem, size);
+              mm_free(heap, oldmem);
+              return newmem;
+            }
         }
     }
 #endif
@@ -1374,7 +1415,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
 void mm_uninitialize(FAR struct mm_heap_s *heap)
 {
-#if CONFIG_MM_HEAP_MEMPOOL_THRESHOLD != 0
+#ifdef CONFIG_MM_HEAP_MEMPOOL
   mempool_multiple_deinit(heap->mm_mpool);
 #endif
 
@@ -1405,4 +1446,20 @@ FAR void *mm_zalloc(FAR struct mm_heap_s *heap, size_t size)
     }
 
   return alloc;
+}
+
+/****************************************************************************
+ * Name: mm_free_delaylist
+ *
+ * Description:
+ *   force freeing the delaylist of this heap.
+ *
+ ****************************************************************************/
+
+void mm_free_delaylist(FAR struct mm_heap_s *heap)
+{
+  if (heap)
+    {
+       free_delaylist(heap, true);
+    }
 }

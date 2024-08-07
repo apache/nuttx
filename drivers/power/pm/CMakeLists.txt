@@ -43,6 +43,12 @@ if(CONFIG_PM)
 
   # Governor implementations
 
+  if(CONFIG_PM_GOVERNOR_STABILITY)
+
+    list(APPEND SRCS stability_governor.c)
+
+  endif()
+
   if(CONFIG_PM_GOVERNOR_ACTIVITY)
 
     list(APPEND SRCS activity_governor.c)

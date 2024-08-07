@@ -54,6 +54,10 @@
 #  define OFF_MAX INT32_MAX
 #endif
 
+#define ROUND_DOWN(a, b)        ((a) & ~((b) - 1))
+#define ROUND_UP(a, b)          (((a) + (b) - 1) & ~((b) - 1))
+#define DIV_ROUND_UP(a, b)      (ROUND_UP(a, b) / (b))
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -471,6 +475,271 @@ static int fat_close(FAR struct file *filep)
 }
 
 /****************************************************************************
+ * Name: fat_zero_cluster
+
+ * Description:
+ *   Zero the data in a cluster. Use to zero the data in the gap between EOF
+ *   and the write offset.
+ *
+ * Input Parameters:
+ *   fs      - A reference to the fat volume object instance
+ *   cluster - Cluster index to be zeroed
+ *   start   - The starting position in the cluster
+ *   end     - The ending position in the cluster
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int fat_zero_cluster(FAR struct fat_mountpt_s *fs, int cluster,
+                            int start, int end)
+{
+  FAR uint8_t *buf;
+  int zero_len = fs->fs_hwsectorsize - (start & (fs->fs_hwsectorsize - 1));
+  off_t i;
+  off_t sector = fat_cluster2sector(fs, cluster);
+  off_t start_sec = sector + start / fs->fs_hwsectorsize;
+  off_t end_sec = sector + DIV_ROUND_UP(end, fs->fs_hwsectorsize);
+  int ret;
+
+  buf = kmm_malloc(fs->fs_hwsectorsize);
+  if (!buf)
+    {
+      return -ENOMEM;
+    }
+
+  if (zero_len)
+    {
+      ret = fat_hwread(fs, buf, start_sec, 1);
+      if (ret < 0)
+        {
+          goto out;
+        }
+
+      memset(buf + fs->fs_hwsectorsize - zero_len, 0, zero_len);
+
+      ret = fat_hwwrite(fs, buf, start_sec, 1);
+      if (ret < 0)
+        {
+          goto out;
+        }
+
+      start_sec++;
+    }
+
+  memset(buf, 0, fs->fs_hwsectorsize - zero_len);
+
+  for (i = start_sec; i < end_sec; i++)
+    {
+      ret = fat_hwwrite(fs, buf, i, 1);
+      if (ret < 0)
+        {
+          goto out;
+        }
+    }
+
+  ret = OK;
+
+out:
+  kmm_free(buf);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fat_get_sectors
+ *
+ * Description:
+ *   Get the sector index where ->f_pos is located. This function will
+ *   allocate new clusters if get sectors for writing and ->f_pos is out of
+ *   EOF and zero the data in the gap between EOF and the write offset.
+ *
+ * Input Parameters:
+ *   fs      - A reference to the file
+ *   read    - True if get sectors for reading
+ *
+ * Output:
+ *   ->ff_currentsector    - the sector index where ->f_pos is located
+ *   ->ff_currentcluster   - the cluster index where ->f_pos is located
+ *   ->ff_sectorsincluster - sectors remaining in cluster
+ *   ->ff_startcluster     - the first cluster of the file when writing an
+ *                           empty file
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int fat_get_sectors(FAR struct file *filep, bool read)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct fat_mountpt_s *fs = inode->i_private;
+  FAR struct fat_file_s *ff = filep->f_priv;
+  int i;
+  int num_clu;
+  int new_num_clu;
+  int num_traversed;
+  int cluster;
+  int ret;
+  int zero_start;
+  int zero_end;
+  int clu_size = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
+
+  num_clu = DIV_ROUND_UP(ff->ff_size, clu_size);
+  new_num_clu = DIV_ROUND_UP(filep->f_pos + 1, clu_size);
+
+  if (ff->ff_startcluster == 0)
+    {
+      /* empty file */
+
+      cluster = 0;
+      num_traversed = 0;
+    }
+  else if (ff->ff_currentcluster >= 2 &&
+           ff->ff_currentcluster < fs->fs_nclusters + 2 &&
+           ff->ff_pos <= filep->f_pos)
+    {
+      /* fatchain is traversed but not reach filep->f_pos */
+
+      cluster = ff->ff_currentcluster;
+      num_traversed = ff->ff_pos / clu_size + 1;
+    }
+  else
+    {
+      /* Traverse the FATchain from the first cluster of the file */
+
+      cluster = ff->ff_startcluster;
+      num_traversed = 1;
+    }
+
+  /* Traverse the existing chain */
+
+  for (i = num_traversed; i < num_clu && i < new_num_clu; i++)
+    {
+      cluster = fat_getcluster(fs, cluster);
+
+      /* The chain is broken */
+
+      if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
+        {
+          return -EIO;
+        }
+    }
+
+  if (read)
+    {
+      goto out;
+    }
+
+  /* The 3 areas should be zeroed.
+   *
+   *      cluster             cluster+1..N        cluster+2..N+1
+   * +-------------------+------------------+---------------------+
+   * |        |    (1)   |      (2)         | (3) |        |      |
+   * +-------------------+------------------+---------------------+
+   *          ^                                   ^
+   *          ff_size                             f_pos
+   */
+
+  /* zero area (1) */
+
+  if (i == num_clu && filep->f_pos > ff->ff_size && ff->ff_size)
+    {
+      zero_start = ff->ff_size & (clu_size - 1);
+
+      if (num_clu == new_num_clu)
+        {
+          zero_end = filep->f_pos & (clu_size - 1);
+        }
+      else
+        {
+          zero_end = clu_size;
+        }
+
+      fat_ffcacheinvalidate(fs, ff);
+
+      ret = fat_zero_cluster(fs, cluster, zero_start, zero_end);
+      if (ret)
+        {
+          return ret;
+        }
+    }
+
+  /* Append new clusters for writing */
+
+  for (; i < new_num_clu - 1; i++)
+    {
+      cluster = fat_extendchain(fs, cluster);
+
+      if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
+        {
+          return -EIO;
+        }
+
+      /* zero area (2) */
+
+      ret = fat_zero_cluster(fs, cluster, 0, clu_size);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      if (ff->ff_startcluster == 0)
+        {
+          ff->ff_startcluster = cluster;
+        }
+    }
+
+  if (i == new_num_clu - 1)
+    {
+      cluster = fat_extendchain(fs, cluster);
+
+      if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
+        {
+          return -EIO;
+        }
+
+      /* zero area (3) */
+
+      zero_end = filep->f_pos & (clu_size -1);
+      if (zero_end)
+        {
+          ret = fat_zero_cluster(fs, cluster, 0, zero_end);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+
+      if (ff->ff_startcluster == 0)
+        {
+          ff->ff_startcluster = cluster;
+        }
+    }
+
+  if (filep->f_pos > ff->ff_size)
+    {
+      ff->ff_size = filep->f_pos;
+    }
+
+out:
+  ff->ff_currentcluster = cluster;
+
+  ret = fat_currentsector(fs, ff, filep->f_pos);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ff->ff_pos = ROUND_DOWN(filep->f_pos, clu_size);
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: fat_read
  ****************************************************************************/
 
@@ -483,7 +752,6 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
   unsigned int bytesread;
   unsigned int readsize;
   size_t bytesleft;
-  int32_t cluster;
   FAR uint8_t *userbuffer = (FAR uint8_t *)buffer;
   int sectorindex;
   int ret;
@@ -535,31 +803,28 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
       goto errout_with_lock;
     }
 
-  /* Get the number of bytes left in the file */
+  /* Check that the file position is not past the end of the file */
 
-  bytesleft = ff->ff_size - filep->f_pos;
-
-  /* Truncate read count so that it does not exceed the number of bytes left
-   * in the file.
-   */
-
-  if (buflen > bytesleft)
+  if (filep->f_pos > ff->ff_size)
     {
-      buflen = bytesleft;
+      /* Return EOF */
+
+      ret = 0;
+      goto errout_with_lock;
     }
-
-  /* Get the first sector to read from. */
-
-  if (!ff->ff_currentsector)
+  else
     {
-      /* The current sector can be determined from the current cluster and
-       * the file offset.
+      /* Get the number of bytes left in the file */
+
+      bytesleft = ff->ff_size - filep->f_pos;
+
+      /* Truncate read count so that it does not exceed the number of bytes
+       * left in the file.
        */
 
-      ret = fat_currentsector(fs, ff, filep->f_pos);
-      if (ret < 0)
+      if (buflen > bytesleft)
         {
-          goto errout_with_lock;
+          buflen = bytesleft;
         }
     }
 
@@ -575,26 +840,10 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
     {
       bytesread  = 0;
 
-      /* Check if the current read stream has incremented to the next
-       * cluster boundary
-       */
-
-      if (ff->ff_sectorsincluster < 1)
+      ret = fat_get_sectors(filep, true);
+      if (ret < 0)
         {
-          /* Find the next cluster in the FAT. */
-
-          cluster = fat_getcluster(fs, ff->ff_currentcluster);
-          if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
-            {
-              ret = -EINVAL; /* Not the right error */
-              goto errout_with_lock;
-            }
-
-          /* Setup to read the first sector from the new cluster */
-
-          ff->ff_currentcluster   = cluster;
-          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
-          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
+          goto errout_with_lock;
         }
 
 #ifdef CONFIG_FAT_DIRECT_RETRY /* Warning avoidance */
@@ -721,7 +970,6 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct inode *inode;
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_file_s *ff;
-  int32_t cluster;
   unsigned int byteswritten;
   unsigned int writesize;
   FAR uint8_t *userbuffer = (FAR uint8_t *)buffer;
@@ -781,32 +1029,6 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
       goto errout_with_lock;
     }
 
-  /* Get the first sector to write to. */
-
-  if (!ff->ff_currentsector)
-    {
-      /* Has the starting cluster been defined? */
-
-      if (ff->ff_startcluster == 0)
-        {
-          /* No.. we have to create a new cluster chain */
-
-          ff->ff_startcluster     = fat_createchain(fs);
-          ff->ff_currentcluster   = ff->ff_startcluster;
-          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-        }
-
-      /* The current sector can then be determined from the current cluster
-       * and the file offset.
-       */
-
-      ret = fat_currentsector(fs, ff, filep->f_pos);
-      if (ret < 0)
-        {
-          goto errout_with_lock;
-        }
-    }
-
   /* Loop until either (1) all data has been transferred, or (2) an
    * error occurs.  We assume we start with the current sector in
    * cache (ff_currentsector)
@@ -817,36 +1039,10 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
 
   while (buflen > 0)
     {
-      /* Check if the current write stream has incremented to the next
-       * cluster boundary
-       */
-
-      if (ff->ff_sectorsincluster < 1)
+      ret = fat_get_sectors(filep, false);
+      if (ret < 0)
         {
-          /* Extend the current cluster by one (unless lseek was used to
-           * move the file position back from the end of the file)
-           */
-
-          cluster = fat_extendchain(fs, ff->ff_currentcluster);
-
-          /* Verify the cluster number */
-
-          if (cluster < 0)
-            {
-              ret = cluster;
-              goto errout_with_lock;
-            }
-          else if (cluster < 2 || cluster >= fs->fs_nclusters + 2)
-            {
-              ret = -ENOSPC;
-              goto errout_with_lock;
-            }
-
-          /* Setup to write the first sector from the new cluster */
-
-          ff->ff_currentcluster   = cluster;
-          ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-          ff->ff_currentsector    = fat_cluster2sector(fs, cluster);
+          goto errout_with_lock;
         }
 
 #ifdef CONFIG_FAT_DIRECT_RETRY /* Warning avoidance */
@@ -995,13 +1191,13 @@ fat_write_restart:
       byteswritten += writesize;
       buflen       -= writesize;
       sectorindex   = filep->f_pos & SEC_NDXMASK(fs);
-    }
 
-  /* The transfer has completed without error.  Update the file size */
+      /* Update the file size */
 
-  if (filep->f_pos > ff->ff_size)
-    {
-      ff->ff_size = filep->f_pos;
+      if (filep->f_pos > ff->ff_size)
+        {
+          ff->ff_size = filep->f_pos;
+        }
     }
 
   nxmutex_unlock(&fs->fs_lock);
@@ -1021,9 +1217,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
   FAR struct inode *inode;
   FAR struct fat_mountpt_s *fs;
   FAR struct fat_file_s *ff;
-  int32_t cluster;
   off_t position;
-  unsigned int clustersize;
   int ret;
 
   /* Sanity checks */
@@ -1070,6 +1264,13 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
           return -EINVAL;
     }
 
+  /* Invalid arguments are entered, returns an error. */
+
+  if (position < 0)
+    {
+      return -EINVAL;
+    }
+
   /* Special case:  We are seeking to the current position.  This would
    * happen normally with ftell() which does lseek(fd, 0, SEEK_CUR) but can
    * also happen in other situation such as when SEEK_SET is used to assure
@@ -1107,158 +1308,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
       goto errout_with_lock;
     }
 
-  /* Attempts to set the position beyond the end of file will
-   * work if the file is open for write access.
-   */
-
-  if (position > ff->ff_size && (ff->ff_oflags & O_WROK) == 0)
-    {
-      /* Otherwise, the position is limited to the file size */
-
-      position = ff->ff_size;
-    }
-
-  /* Set file position to the beginning of the file (first cluster,
-   * first sector in cluster)
-   */
-
-  filep->f_pos            = 0;
-  ff->ff_sectorsincluster = fs->fs_fatsecperclus;
-
-  /* Get the start cluster of the file */
-
-  cluster = ff->ff_startcluster;
-
-  /* Create a new cluster chain if the file does not have one (and
-   * if we are seeking beyond zero
-   */
-
-  if (!cluster && position > 0)
-    {
-      cluster = fat_createchain(fs);
-      if (cluster < 0)
-        {
-          ret = cluster;
-          goto errout_with_lock;
-        }
-
-      ff->ff_startcluster = cluster;
-    }
-
-  /* Move file position if necessary */
-
-  if (cluster)
-    {
-      /* If the file has a cluster chain, follow it to the
-       * requested position.
-       */
-
-      clustersize = fs->fs_fatsecperclus * fs->fs_hwsectorsize;
-      for (; ; )
-        {
-          /* Skip over clusters prior to the one containing
-           * the requested position.
-           */
-
-          ff->ff_currentcluster = cluster;
-          if (position < clustersize)
-            {
-              break;
-            }
-
-          /* Extend the cluster chain if write in enabled.  NOTE:
-           * this is not consistent with the lseek description:
-           * "The  lseek() function allows the file offset to be
-           * set beyond the end of the file (but this does not
-           * change the size of the file).  If data is later written
-           * at  this  point, subsequent reads of the data in the
-           * gap (a "hole") return null bytes ('\0') until data
-           * is actually written into the gap."
-           */
-
-          if ((ff->ff_oflags & O_WROK) != 0)
-            {
-              /* Extend the cluster chain (fat_extendchain
-               * will follow the existing chain or add new
-               * clusters as needed.
-               */
-
-              cluster = fat_extendchain(fs, cluster);
-            }
-          else
-            {
-              /* Otherwise we can only follow the existing chain */
-
-              cluster = fat_getcluster(fs, cluster);
-            }
-
-          if (cluster < 0)
-            {
-              /* An error occurred getting the cluster */
-
-              ret = cluster;
-              goto errout_with_lock;
-            }
-
-          /* Zero means that there is no further clusters available
-           * in the chain.
-           */
-
-          if (cluster == 0)
-            {
-              /* At the position to the current location and
-               * break out.
-               */
-
-              position = clustersize;
-              break;
-            }
-
-          if (cluster >= fs->fs_nclusters + 2)
-            {
-              ret = -ENOSPC;
-              goto errout_with_lock;
-            }
-
-          /* Otherwise, update the position and continue looking */
-
-          filep->f_pos += clustersize;
-          position     -= clustersize;
-        }
-
-      /* We get here after we have found the sector containing
-       * the requested position.
-       *
-       * Save the new file position
-       */
-
-      filep->f_pos += position;
-
-      /* Then get the current sector from the cluster and the offset
-       * into the cluster from the position
-       */
-
-      fat_currentsector(fs, ff, filep->f_pos);
-
-      /* Load the sector corresponding to the position */
-
-      if ((position & SEC_NDXMASK(fs)) != 0)
-        {
-          ret = fat_ffcacheread(fs, ff, ff->ff_currentsector);
-          if (ret < 0)
-            {
-              goto errout_with_lock;
-            }
-        }
-    }
-
-  /* If we extended the size of the file, then mark the file as modified. */
-
-  if ((ff->ff_oflags & O_WROK) != 0 &&  filep->f_pos > ff->ff_size)
-    {
-      ff->ff_size    = filep->f_pos;
-      ff->ff_bflags |= FFBUFF_MODIFIED;
-    }
+  filep->f_pos = position;
 
   nxmutex_unlock(&fs->fs_lock);
   return OK;

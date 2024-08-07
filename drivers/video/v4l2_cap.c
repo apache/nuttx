@@ -2132,8 +2132,7 @@ static int capture_reqbufs(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR capture_mng_t *cmng = inode->i_private;
   FAR capture_type_inf_t *type_inf;
-  struct imgdata_s *imgdata = cmng->imgdata;
-
+  struct imgdata_s *imgdata;
   irqstate_t flags;
   int ret = OK;
 
@@ -2142,6 +2141,7 @@ static int capture_reqbufs(FAR struct file *filep,
       return -EINVAL;
     }
 
+  imgdata  = cmng->imgdata;
   type_inf = get_capture_type_inf(cmng, reqbufs->type);
   if (type_inf == NULL)
     {
@@ -2379,10 +2379,9 @@ static int capture_dqbuf(FAR struct file *filep,
            * Therefore, Check cause.
            */
 
-          if (type_inf->wait_capture.waitend_cause == WAITEND_CAUSE_DQCANCEL)
-            {
-              return -ECANCELED;
-            }
+          DEBUGASSERT(type_inf->wait_capture.waitend_cause ==
+                      WAITEND_CAUSE_DQCANCEL);
+          return -ECANCELED;
         }
 
       type_inf->wait_capture.done_container = NULL;
@@ -2907,7 +2906,7 @@ static int capture_s_selection(FAR struct file *filep,
   FAR capture_type_inf_t *type_inf;
   uint32_t p_u32[IMGSENSOR_CLIP_NELEM];
   imgsensor_value_t val;
-  int32_t id;
+  uint32_t id;
   int ret;
 
   if (cmng == NULL || clip == NULL)
@@ -3715,8 +3714,6 @@ static int capture_unlink(FAR struct inode *inode)
       cmng->unlinked = true;
       nxmutex_unlock(&cmng->lock_open_num);
     }
-
-  nxmutex_destroy(&cmng->lock_open_num);
 
   return OK;
 }

@@ -144,6 +144,13 @@
 #define PIN_LPI2C0_SDA    PIN_LPI2C0_SDA_2   /* PTA2 */
 #define PIN_LPI2C0_SCL    PIN_LPI2C0_SCL_2   /* PTA3 */
 
+/* I2C Alternative mode using FlexIO, conflicts with LPI2C0 */
+
+#define FLEXIO_I2C0_SDA     4
+#define FLEXIO_I2C0_SCL     5
+#define PIN_FLEXIO_I2C0_SDA PIN_FXIO_D4_2    /* PTA2 */
+#define PIN_FLEXIO_I2C0_SCL PIN_FXIO_D5_2    /* PTA3 */
+
 /* CAN selections ***********************************************************/
 
 /* TJA1153/TJA1443/TJA1463 CAN transceiver  (CAN0) */

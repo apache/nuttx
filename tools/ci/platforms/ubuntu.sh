@@ -84,7 +84,7 @@ arm64_gcc_toolchain() {
 
 avr_gcc_toolchain() {
   if ! type avr-gcc > /dev/null 2>&1; then
-    sudo apt-get install -y binutils-avr gcc-avr avr-libc 
+    sudo apt-get install -y binutils-avr gcc-avr avr-libc
   fi
 
   command avr-gcc --version
@@ -196,7 +196,7 @@ python_tools() {
     CodeChecker \
     cvt2utf \
     cxxfilt \
-    esptool \
+    esptool==4.8.dev4 \
     imgtool \
     kconfiglib \
     pexpect==4.8.0 \
@@ -378,7 +378,7 @@ wasi_sdk() {
     wasibasefile=wasi-sdk-19.0-linux
     wasmbasefile=wamrc-1.1.2-x86_64-ubuntu-20.04
     cd "${NUTTXTOOLS}"
-    mkdir wamrc
+    mkdir -p wamrc
 
     # Download the latest WASI-enabled WebAssembly C/C++ toolchain prebuilt by WASM
     wget --quiet https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/${wasibasefile}.tar.gz

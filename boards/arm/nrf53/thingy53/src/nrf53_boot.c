@@ -29,7 +29,6 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "arm_internal.h"
 #include "thingy53.h"
 
 /****************************************************************************
@@ -53,6 +52,12 @@ void nrf53_board_initialize(void)
 
 #ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
+#endif
+
+#ifdef CONFIG_NRF53_SPI_MASTER
+  /* Configure SPI chip selects */
+
+  nrf53_spidev_initialize();
 #endif
 }
 

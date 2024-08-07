@@ -1374,6 +1374,33 @@ and 32-bit modules.
 This has apps/examples/sotest enabled.
 This configuration is intended for 64-bit host OS.
 
+sqlite
+-------
+
+This configuration is used to test sqlite. Since hostfs does not support
+FIOC_FILEPATH, it cannot currently be used in hostfs.
+
+Basic usage example::
+
+    nsh> cd tmp
+    nsh> sqlite3 test.db
+    SQLite version 3.45.1 2024-01-30 16:01:20
+    Enter ".help" for usage hints.
+    sqlite>
+    CREATE TABLE COMPANY(
+      ID INT PRIMARY KEY     sqlite> (x1...> NOT NULL,
+      NAME           TEXT    NOT NULL,
+      AGE            (x1...> (x1...> INT     NOT NULL,
+      ADDRESS        CHAR(50),
+      SALARY         (x1...> (x1...> REAL
+    );(x1...>
+    sqlite> .quit
+    sqlite>
+    nsh>
+    nsh> ls -l
+    /tmp:
+    -rwxrwxrwx       12288 test.db
+
 tcploop
 -------
 
@@ -1682,7 +1709,7 @@ This is a configuration with sim usbdev support.
   Then you can use commands such as adb shell, adb push, adb pull as normal.
 
     2> Run RNDIS:
-  
+
   NuttX enter command::
 
       $ conn 0

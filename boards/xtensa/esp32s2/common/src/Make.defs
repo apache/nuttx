@@ -72,6 +72,15 @@ ifeq ($(CONFIG_ESP_RMT),y)
   CSRCS += esp32s2_board_rmt.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_TWAI)$(CONFIG_ARCH_BUTTONS),y)
+  CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
+  CHIPHALDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)esp-hal-3rdparty
+  CFLAGS += -Wno-undef
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)nuttx$(DELIM)$(CHIP_SERIES)$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)esp_common$(DELIM)include
+  CFLAGS += ${INCDIR_PREFIX}$(CHIPHALDIR)$(DELIM)components$(DELIM)soc$(DELIM)$(CHIP_SERIES)$(DELIM)include
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

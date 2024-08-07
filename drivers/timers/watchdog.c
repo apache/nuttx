@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/nuttx.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -213,8 +214,11 @@ static void watchdog_automonitor_worker(FAR void *arg)
 static void watchdog_automonitor_idle(FAR struct pm_callback_s *cb,
                                       int domain, enum pm_state_e pmstate)
 {
-  FAR struct watchdog_upperhalf_s *upper = (FAR void *)cb;
-  FAR struct watchdog_lowerhalf_s *lower = upper->lower;
+  FAR struct watchdog_upperhalf_s *upper;
+  FAR struct watchdog_lowerhalf_s *lower;
+
+  upper = container_of(cb, struct watchdog_upperhalf_s, idle);
+  lower = upper->lower;
 
   if (domain == PM_IDLE_DOMAIN &&
       pmstate != PM_RESTORE && upper->monitor)

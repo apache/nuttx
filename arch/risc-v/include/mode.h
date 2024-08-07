@@ -45,6 +45,12 @@
 #  define CSR_TVAL          CSR_STVAL        /* Trap value register */
 #  define CSR_TVEC          CSR_STVEC        /* Trap vector base addr register */
 #  define CSR_ENVCFG        CSR_SENVCFG      /* Env configuration register */
+#  define CSR_IEH           CSR_SIEH
+#  define CSR_ISELECT       CSR_SISELECT     /* Indirect select register */
+#  define CSR_IREG          CSR_SIREG        /* Indirect alias register */
+#  define CSR_IPH           CSR_SIPH
+#  define CSR_TOPEI         CSR_STOPEI       /* Top external interrupt register */
+#  define CSR_TOPI          CSR_STOPI        /* Top interrupt register */
 
 /* In status register */
 
@@ -88,6 +94,12 @@
 #  define CSR_TVAL          CSR_MTVAL        /* Trap value register */
 #  define CSR_TVEC          CSR_MTVEC        /* Trap vector base addr register */
 #  define CSR_ENVCFG        CSR_MENVCFG      /* Env configuration register */
+#  define CSR_IEH           CSR_MIEH
+#  define CSR_ISELECT       CSR_MISELECT     /* Indirect select register */
+#  define CSR_IREG          CSR_MIREG        /* Indirect alias register */
+#  define CSR_IPH           CSR_MIPH
+#  define CSR_TOPEI         CSR_MTOPEI       /* Top external interrupt register */
+#  define CSR_TOPI          CSR_MTOPI        /* Top interrupt register */
 
 /* In status register */
 

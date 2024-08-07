@@ -138,11 +138,19 @@ endif
 
 LDFLAGS += -nostdlib
 
+SHMODULEFLAGS = -Bsymbolic -G -Bdynamic --entry=__start
+
 # Optimization of unused sections
 
 ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
   LDFLAGS          += --gc-sections
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# Debug --whole-archive
+
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
 endif
 
 # Debug link map

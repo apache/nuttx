@@ -34,6 +34,7 @@
 
 #include <arch/irq.h>
 
+#include "netlink/netlink.h"
 #include "route/ramroute.h"
 #include "route/route.h"
 
@@ -86,6 +87,8 @@ int net_addroute_ipv4(in_addr_t target, in_addr_t netmask, in_addr_t router)
   ramroute_ipv4_addlast((FAR struct net_route_ipv4_entry_s *)route,
                         &g_ipv4_routes);
   net_unlock();
+
+  netlink_route_notify(route, RTM_NEWROUTE, AF_INET);
   return OK;
 }
 #endif
@@ -121,6 +124,8 @@ int net_addroute_ipv6(net_ipv6addr_t target, net_ipv6addr_t netmask,
   ramroute_ipv6_addlast((FAR struct net_route_ipv6_entry_s *)route,
                         &g_ipv6_routes);
   net_unlock();
+
+  netlink_route_notify(route, RTM_NEWROUTE, AF_INET6);
   return OK;
 }
 #endif

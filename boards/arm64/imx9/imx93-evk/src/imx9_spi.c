@@ -158,5 +158,5 @@ int imx9_spi_initialize(void)
     }
 #endif /* CONFIG_SPI_DRIVER */
 
-  return OK;
+  return ret;
 }

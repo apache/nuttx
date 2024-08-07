@@ -29,6 +29,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/spinlock.h>
 
 #include "xtensa.h"
 #include "esp32s3_pm.h"

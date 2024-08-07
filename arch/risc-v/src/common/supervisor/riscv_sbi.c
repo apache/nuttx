@@ -31,6 +31,7 @@
 
 #include <stdint.h>
 
+#include "riscv_sbi.h"
 #include "riscv_internal.h"
 
 #ifdef CONFIG_NUTTSBI
@@ -41,10 +42,10 @@
  * Private Functions
  ****************************************************************************/
 
-static inline uintptr_t sbi_ecall(unsigned int extid, unsigned int fid,
-                                  uintptr_t parm0, uintptr_t parm1,
-                                  uintptr_t parm2, uintptr_t parm3,
-                                  uintptr_t parm4, uintptr_t parm5)
+static inline sbiret_t sbi_ecall(unsigned int extid, unsigned int fid,
+                                 uintreg_t parm0, uintreg_t parm1,
+                                 uintreg_t parm2, uintreg_t parm3,
+                                 uintreg_t parm4, uintreg_t parm5)
 {
   register long r0 asm("a0") = (long)(parm0);
   register long r1 asm("a1") = (long)(parm1);
@@ -54,6 +55,7 @@ static inline uintptr_t sbi_ecall(unsigned int extid, unsigned int fid,
   register long r5 asm("a5") = (long)(parm5);
   register long r6 asm("a6") = (long)(fid);
   register long r7 asm("a7") = (long)(extid);
+  sbiret_t ret;
 
   asm volatile
     (
@@ -63,23 +65,34 @@ static inline uintptr_t sbi_ecall(unsigned int extid, unsigned int fid,
      : "memory"
      );
 
-  return r1;
+  ret.error = r0;
+  ret.value = (uintreg_t)r1;
+
+  return ret;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: riscv_sbi_set_timer
- *
- * Description:
- *   Set new compare match value for timer
- *
- * Input Parameters:
- *   stime_value - Value to set
- *
- ****************************************************************************/
+int sbi_err_map_errno(intreg_t err)
+{
+  switch (err)
+  {
+    case SBI_SUCCESS:
+      return 0;
+    case SBI_ERR_DENIED:
+      return -EPERM;
+    case SBI_ERR_INVALID_PARAM:
+      return -EINVAL;
+    case SBI_ERR_INVALID_ADDRESS:
+      return -EFAULT;
+    case SBI_ERR_NOT_SUPPORTED:
+    case SBI_ERR_FAILED:
+    default:
+      return -ENOTSUP;
+  };
+}
 
 void riscv_sbi_set_timer(uint64_t stime_value)
 {
@@ -92,22 +105,17 @@ void riscv_sbi_set_timer(uint64_t stime_value)
 #endif
 }
 
-/****************************************************************************
- * Name: riscv_sbi_get_time
- *
- * Description:
- *   Get value of mtime
- *
- * Return:
- *   Value of mtime
- *
- ****************************************************************************/
-
 uint64_t riscv_sbi_get_time(void)
 {
 #ifdef CONFIG_NUTTSBI
-  return sbi_ecall(SBI_EXT_FIRMWARE, SBI_EXT_FIRMWARE_GET_MTIME, 0, 0,
-                   0, 0, 0, 0);
+  sbiret_t ret = sbi_ecall(SBI_EXT_FIRMWARE, SBI_EXT_FIRMWARE_GET_MTIME,
+                           0, 0, 0, 0, 0, 0);
+
+#  ifdef CONFIG_ARCH_RV64
+  return ret.error;
+#  else
+  return (((uint64_t)ret.value << 32) | ret.error);
+#  endif
 #elif defined(CONFIG_ARCH_RV64)
   return READ_CSR(CSR_TIME);
 #else
@@ -125,23 +133,37 @@ uint64_t riscv_sbi_get_time(void)
 #endif
 }
 
-uintptr_t riscv_sbi_send_ipi(uint32_t hmask, uintptr_t hbase)
+void riscv_sbi_send_ipi(uintreg_t hmask, uintreg_t hbase)
 {
-  return sbi_ecall(SBI_EXT_IPI, SBI_EXT_IPI_SEND_IPI,
-                   hmask, hbase, 0, 0, 0, 0);
+  sbi_ecall(SBI_EXT_IPI, SBI_EXT_IPI_SEND_IPI,
+            hmask, hbase, 0, 0, 0, 0);
 }
 
 #ifndef CONFIG_NUTTSBI
-uintptr_t riscv_sbi_system_reset(uint32_t type, uint32_t reason)
+int riscv_sbi_boot_secondary(uintreg_t hartid, uintreg_t addr,
+                                  uintreg_t a1)
 {
-  return sbi_ecall(SBI_EXT_SRST, SBI_EXT_SRST_SYS_RESET,
-                   type, reason, 0, 0, 0, 0);
+  sbiret_t ret = sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_START,
+                           hartid, addr, a1, 0, 0, 0);
+
+  if (ret.error < 0)
+    {
+      return sbi_err_map_errno(ret.error);
+    }
+
+  return 0;
 }
 
-uintptr_t riscv_sbi_boot_secondary(uint32_t hartid, uintptr_t addr,
-                                   uintptr_t a1)
+int riscv_sbi_system_reset(uint32_t type, uint32_t reason)
 {
-  return sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_START,
-                   hartid, addr, a1, 0, 0, 0);
+  sbiret_t ret = sbi_ecall(SBI_EXT_SRST, SBI_EXT_SRST_SYS_RESET,
+                           type, reason, 0, 0, 0, 0);
+
+  if (ret.error < 0)
+    {
+      return sbi_err_map_errno(ret.error);
+    }
+
+  return 0;
 }
 #endif /* CONFIG_NUTTSBI */

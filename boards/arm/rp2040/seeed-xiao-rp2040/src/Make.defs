@@ -28,6 +28,12 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += rp2040_gpio.c
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += rp2040_autoleds.c
+else
+CSRCS += rp2040_userleds.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

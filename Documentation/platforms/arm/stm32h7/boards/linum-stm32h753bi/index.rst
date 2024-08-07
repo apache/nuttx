@@ -259,7 +259,7 @@ The LINUM-STM32H753BI has a external SDRAM with 16Mbits connected to FMC periphe
   =========== =====
   FMC         PINS
   =========== =====
-  FMC_A0      PF0
+  FMC_A0      PJ12
   FMC_A1      PF1
   FMC_A2      PF2
   FMC_A3      PF3
@@ -720,3 +720,70 @@ After that check if your PC recognized the usb driver::
     [27228.147377] FAT-fs (sda1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
 
 **OBS:** This example disable the macro CONFIG_STM32H7_SDMMC_IDMA, for more information read the file: arch/arm/stm32h7/stm32_sdmmc.c
+
+netnsh
+------
+
+This configuration is focused on network testing using the ethernet periferal::
+
+    $ nsh> ifconfig
+      eth0	Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP mtu 1486
+        inet addr:192.168.1.6 DRaddr:192.168.1.1 Mask:255.255.255.0
+
+                  IPv4   TCP   UDP  ICMP
+      Received     01b9  0025  0194  0000
+      Dropped      0000  0000  0000  0000
+        IPv4        VHL: 0000   Frg: 0000
+        Checksum   0000  0000  0000  ----
+        TCP         ACK: 0000   SYN: 0000
+                    RST: 0000  0000
+        Type       0000  ----  ----  0000
+      Sent         0028  0025  0003  0000
+        Rexmit     ----  0000  ----  ----
+
+      nsh> ping google.com
+      PING 142.251.129.110 56 bytes of data
+      56 bytes from 142.251.129.110: icmp_seq=0 time=10.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=1 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=2 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=3 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=4 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=5 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=6 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=7 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=8 time=0.0 ms
+      56 bytes from 142.251.129.110: icmp_seq=9 time=0.0 ms
+      10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+      rtt min/avg/max/mdev = 0.000/1.000/10.000/3.000 ms
+
+qencoder
+--------
+
+Configures and enables TIM5 on CH1(PA0) and CH2(PH11) to handle Quadrature Encoder::
+
+    nsh> qe
+    qe_main: Hardware initialized. Opening the encoder device: /dev/qe0
+    qe_main: Number of samples: 0
+    qe_main:   1. 1
+    qe_main:   2. 2
+    qe_main:   3. 3
+    qe_main:   4. 2
+    qe_main:   5. 1
+
+sdram
+--------
+
+This configuration uses the FMC peripheral to connect to external SDRAM with 8 MB and add it to the nuttx heap.
+
+To test the sdram use the command **ramtest**::
+
+    nsh> free
+                    total       used       free    maxused    maxfree  nused  nfree
+          Umem:    9397168       5488    9391680       5880    8388592     28      5
+    nsh> ramtest -w -a 0xc0000000 -s 8388608
+    RAMTest: Marching ones: c0000000 8388608
+    RAMTest: Marching zeroes: c0000000 8388608
+    RAMTest: Pattern test: c0000000 8388608 55555555 aaaaaaaa
+    RAMTest: Pattern test: c0000000 8388608 66666666 99999999
+    RAMTest: Pattern test: c0000000 8388608 33333333 cccccccc
+    RAMTest: Address-in-address test: c0000000 8388608

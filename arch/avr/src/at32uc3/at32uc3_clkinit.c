@@ -212,11 +212,13 @@ static inline void up_enableosc1(void)
 #ifdef AVR32_CLOCK_PLL0
 static inline void up_enablepll0(void)
 {
+  uint32_t regval;
+
   /* Setup PLL0 */
 
   regval = (AVR32_PLL0_DIV << PM_PLL_PLLDIV_SHIFT) |
            (AVR32_PLL0_MUL << PM_PLL_PLLMUL_SHIFT) |
-           (16 << PM_PLL_PLLCOUNT_SHIFT)
+           (16 << PM_PLL_PLLCOUNT_SHIFT);
 
   /* Select PLL0/1 oscillator */
 
@@ -229,7 +231,7 @@ static inline void up_enablepll0(void)
   /* Set PLL0 options */
 
   regval = getreg32(AVR32_PM_PLL0);
-  regval &= ~PM_PLL_PLLOPT_MASK
+  regval &= ~PM_PLL_PLLOPT_MASK;
 #if AVR32_PLL0_FREQ < 160000000
   regval |= PM_PLL_PLLOPT_VCO;
 #endif
@@ -239,13 +241,13 @@ static inline void up_enablepll0(void)
 #if AVR32_PLL0_WBWM != 0
   regval |= PM_PLL_PLLOPT_WBWDIS;
 #endif
-  putreg32(regval, AVR32_PM_PLL0)
+  putreg32(regval, AVR32_PM_PLL0);
 
   /* Enable PLL0 */
 
   regval = getreg32(AVR32_PM_PLL0);
   regval |= PM_PLL_PLLEN;
-  putreg32(regval, AVR32_PM_PLL0)
+  putreg32(regval, AVR32_PM_PLL0);
 
   /* Wait for PLL0 locked. */
 
@@ -268,7 +270,7 @@ static inline void up_enablepll1(void)
 
   regval = (AVR32_PLL1_DIV << PM_PLL_PLLDIV_SHIFT) |
            (AVR32_PLL1_MUL << PM_PLL_PLLMUL_SHIFT) |
-           (16 << PM_PLL_PLLCOUNT_SHIFT)
+           (16 << PM_PLL_PLLCOUNT_SHIFT);
 
   /* Select PLL0/1 oscillator */
 
@@ -281,7 +283,7 @@ static inline void up_enablepll1(void)
   /* Set PLL1 options */
 
   regval = getreg32(AVR32_PM_PLL1);
-  regval &= ~PM_PLL_PLLOPT_MASK
+  regval &= ~PM_PLL_PLLOPT_MASK;
 #if AVR32_PLL1_FREQ < 160000000
   regval |= PM_PLL_PLLOPT_VCO;
 #endif
@@ -291,13 +293,13 @@ static inline void up_enablepll1(void)
 #if AVR32_PLL1_WBWM != 0
   regval |= PM_PLL_PLLOPT_WBWDIS;
 #endif
-  putreg32(regval, AVR32_PM_PLL1)
+  putreg32(regval, AVR32_PM_PLL1);
 
   /* Enable PLL1 */
 
   regval = getreg32(AVR32_PM_PLL1);
   regval |= PM_PLL_PLLEN;
-  putreg32(regval, AVR32_PM_PLL1)
+  putreg32(regval, AVR32_PM_PLL1);
 
   /* Wait for PLL1 locked. */
 
@@ -319,22 +321,22 @@ static inline void up_clksel(void)
 
 #if AVR32_CKSEL_CPUDIV != 0
   regval |= PM_CKSEL_CPUDIV;
-  regval |= (AVR32_CKSEL_CPUDIV << PM_CKSEL_CPUSEL_SHIFT)
+  regval |= (AVR32_CKSEL_CPUDIV << PM_CKSEL_CPUSEL_SHIFT);
 #endif
 
 #if AVR32_CKSEL_HSBDIV != 0
   regval |= PM_CKSEL_HSBDIV;
-  regval |= (AVR32_CKSEL_HSBDIV << PM_CKSEL_HSBSEL_SHIFT)
+  regval |= (AVR32_CKSEL_HSBDIV << PM_CKSEL_HSBSEL_SHIFT);
 #endif
 
 #if AVR32_CKSEL_PBADIV != 0
   regval |= PM_CKSEL_PBADIV;
-  regval |= (AVR32_CKSEL_PBADIV << PM_CKSEL_PBASEL_SHIFT)
+  regval |= (AVR32_CKSEL_PBADIV << PM_CKSEL_PBASEL_SHIFT);
 #endif
 
 #if AVR32_CKSEL_PBBDIV != 0
   regval |= PM_CKSEL_PBBDIV;
-  regval |= (AVR32_CKSEL_PBBDIV << PM_CKSEL_PBBSEL_SHIFT)
+  regval |= (AVR32_CKSEL_PBBDIV << PM_CKSEL_PBBSEL_SHIFT);
 #endif
 
   putreg32(regval, AVR32_PM_CKSEL);
@@ -411,13 +413,13 @@ static inline void up_usbclock(void)
   u_avr32_pm_gcctrl.GCCTRL.diven  = diven;
   u_avr32_pm_gcctrl.GCCTRL.div    = div;
 #endif
-  putreg32(regval, AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB))
+  putreg32(regval, AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB));
 
   /* Enable USB GCLK */
 
-  regval = getreg32(AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB))
+  regval = getreg32(AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB));
   regval |= PM_GCCTRL_CEN;
-  putreg32(regval, AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB))
+  putreg32(regval, AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB));
 }
 #endif
 

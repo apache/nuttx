@@ -587,6 +587,15 @@ static int pl011_irq_tx_complete(FAR const struct pl011_uart_port_s *sport)
   return config->uart->fr & PL011_FR_TXFE;
 }
 
+static int pl011_irq_tx_ready(const struct pl011_uart_port_s *sport)
+{
+  const struct pl011_config *config = &sport->config;
+
+  /* check for TX FIFO not full */
+
+  return ((config->uart->fr & PL011_FR_TXFF) == 0);
+}
+
 static int pl011_irq_rx_ready(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
@@ -621,7 +630,7 @@ static bool pl011_txready(FAR struct uart_dev_s *dev)
     }
 
   return (config->uart->imsc & PL011_IMSC_TXIM) &&
-         pl011_irq_tx_complete(sport);
+         pl011_irq_tx_ready(sport);
 }
 
 /***************************************************************************
@@ -753,9 +762,9 @@ static int pl011_receive(FAR struct uart_dev_s *dev,
 
   rx = config->uart->dr;
 
-  *status = 0;
+  *status = rx & 0xf00;
 
-  return rx;
+  return rx & 0xff;
 }
 
 /***************************************************************************
@@ -894,8 +903,19 @@ static int pl011_attach(FAR struct uart_dev_s *dev)
 
 static void pl011_shutdown(FAR struct uart_dev_s *dev)
 {
+#ifdef CONFIG_UART_PL011_PLATFORMIF
+  struct pl011_uart_port_s  *sport  = (struct pl011_uart_port_s *)dev->priv;
+  const struct pl011_config *config = &sport->config;
+
+  /* If needed, implement platform specific process such as disabling pl011
+   * to reduce power consumption.
+   */
+
+  pl011_platform_shutdown((uint32_t)config->uart);
+#else
   UNUSED(dev);
   sinfo("%s: call unexpected\n", __func__);
+#endif
 }
 
 static int pl011_setup(FAR struct uart_dev_s *dev)
@@ -906,6 +926,14 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
   int                            ret;
   uint32_t                       lcrh;
   irqstate_t                     i_flags;
+
+#ifdef CONFIG_UART_PL011_PLATFORMIF
+  /* If needed, implement platform specific process such as enabling pl011
+   * to reduce power consumption.
+   */
+
+  pl011_platform_setup((uint32_t)config->uart);
+#endif
 
   i_flags = up_irq_save();
 

@@ -32,6 +32,7 @@
 #  include <nuttx/arch.h>
 #  include <sys/types.h>
 #  include <stdint.h>
+#  include <syscall.h>
 #endif
 
 #include "arm64_arch.h"
@@ -116,6 +117,18 @@
 #  define SMP_STACK_WORDS   (SMP_STACK_SIZE >> 2)
 #endif
 
+/* Context switching */
+
+#define arm64_fullcontextrestore(restoreregs) \
+  do \
+    { \
+      sys_call1(SYS_restore_context, (uintptr_t)restoreregs); \
+    } \
+  while (1)
+
+#define arm64_switchcontext(saveregs, restoreregs) \
+  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -152,7 +165,7 @@ extern "C"
     EXTERN char sym[n][size]
 
 #define STACK_PTR_TO_FRAME(type, ptr) \
-    (type *)((uintptr_t)(ptr) - sizeof(type))
+    (type *)STACK_ALIGN_DOWN((uintptr_t)(ptr) - sizeof(type))
 
 #define INTSTACK_SIZE        (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
@@ -266,11 +279,6 @@ int arm64_psci_init(const char *method);
 
 void __start(void);
 void arm64_secondary_start(void);
-
-/* Context switching */
-
-void arm64_fullcontextrestore(uint64_t *restoreregs) noreturn_function;
-void arm64_switchcontext(uint64_t **saveregs, uint64_t *restoreregs);
 
 /* Signal handling **********************************************************/
 

@@ -43,45 +43,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Vector Table Offset Register (VECTAB).  This mask seems to vary among
- * ARMv7-M implementations.  It may need to be redefined in some
- * architecture-specific header file. By default, the base address of the
- * new vector table must be aligned to the size of the vector table extended
- * to the next larger power of 2.
- */
-
-#ifndef NVIC_VECTAB_TBLOFF_MASK
-#  if ARMV7M_VECTAB_SIZE > 512
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff000)
-#  elif ARMV7M_VECTAB_SIZE > 256
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffff800)
-#  elif ARMV7M_VECTAB_SIZE > 128
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffffc00)
-#  elif ARMV7M_VECTAB_SIZE > 64
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xfffffe00)
-#  elif ARMV7M_VECTAB_SIZE > 32
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffff00)
-#  else
-#    define NVIC_VECTAB_TBLOFF_MASK     (0xffffff80)
-#  endif
-#endif
-
-/* Alignment ****************************************************************/
-
-/* Per the ARMv7M Architecture reference manual, the NVIC vector table
- * requires 7-bit address alignment (i.e, bits 0-6 of the address of the
- * vector table must be zero).  In this case alignment to a 128 byte address
- * boundary is sufficient.
- *
- * Some parts, such as the LPC17xx/LPC40xx family, require alignment to a 256
- * byte address boundary.  Any other unusual alignment requirements for the
- * vector can be specified for a given architecture be redefining
- * NVIC_VECTAB_TBLOFF_MASK in the chip-specific chip.h header file for the
- * appropriate mask.
- */
-
-#define RAMVEC_ALIGN ((~NVIC_VECTAB_TBLOFF_MASK & 0xffff) + 1)
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -99,7 +60,7 @@
  */
 
 up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
-  locate_data(".ram_vectors") aligned_data(RAMVEC_ALIGN);
+  locate_data(".ram_vectors") aligned_data(VECTOR_ALIGN);
 
 /****************************************************************************
  * Public Functions

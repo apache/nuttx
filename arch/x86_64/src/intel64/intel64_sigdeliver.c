@@ -54,13 +54,27 @@
 void x86_64_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
-  sig_deliver_t sighandler;
-  uint64_t regs_area[XCPTCONTEXT_REGS + 2];
+  uint64_t regs_area[XCPTCONTEXT_REGS + 8];
   uint64_t *regs;
 
-  /* Align regs to 16 byte boundary for SSE instructions. */
+#ifdef CONFIG_SMP
+  /* In the SMP case, we must terminate the critical section while the signal
+   * handler executes, but we also need to restore the irqcount when the
+   * we resume the main thread of the task.
+   */
 
-  regs = (uint64_t *)(((uint64_t)(regs_area) + 15) & (~(uint64_t)15));
+  int16_t saved_irqcount;
+#endif
+
+  board_autoled_on(LED_SIGNAL);
+
+  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+
+  /* Align regs to 64 byte boundary for XSAVE */
+
+  regs = (uint64_t *)(((uint64_t)(regs_area) + 63) & (~(uint64_t)63));
 
   /* Save the real return state on the stack ASAP before any chance we went
    * sleeping and break the register profile.  We entered this function with
@@ -70,17 +84,24 @@ void x86_64_sigdeliver(void)
 
   x86_64_copystate(regs, rtcb->xcp.regs);
 
-  /* grab on a copy of the signal hander function pointer before any
-   * possibility to be switched out.
+#ifdef CONFIG_SMP
+  /* In the SMP case, up_schedule_sigaction(0) will have incremented
+   * 'irqcount' in order to force us into a critical section.  Save the
+   * pre-incremented irqcount.
    */
 
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
-  sighandler = rtcb->xcp.sigdeliver;
+  saved_irqcount = rtcb->irqcount;
+  DEBUGASSERT(saved_irqcount >= 0);
 
-  board_autoled_on(LED_SIGNAL);
+  /* Now we need call leave_critical_section() repeatedly to get the irqcount
+   * to zero, freeing all global spinlocks that enforce the critical section.
+   */
 
-  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
+  while (rtcb->irqcount > 0)
+    {
+      leave_critical_section((uint8_t)regs[REG_RFLAGS]);
+    }
+#endif /* CONFIG_SMP */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
@@ -92,7 +113,7 @@ void x86_64_sigdeliver(void)
 
   /* Deliver the signals */
 
-  sighandler(rtcb);
+  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -100,7 +121,12 @@ void x86_64_sigdeliver(void)
    */
 
   sinfo("Resuming\n");
+
+#ifdef CONFIG_SMP
+  enter_critical_section();
+#else
   up_irq_save();
+#endif
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is
@@ -116,6 +142,22 @@ void x86_64_sigdeliver(void)
   regs[REG_RSP]        = rtcb->xcp.saved_rsp;
   regs[REG_RFLAGS]     = rtcb->xcp.saved_rflags;
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+
+#ifdef CONFIG_SMP
+  /* Restore the saved 'irqcount' and recover the critical section
+   * spinlocks.
+   *
+   * REVISIT:  irqcount should be one from the above call to
+   * enter_critical_section().  Could the saved_irqcount be zero?  That
+   * would be a problem.
+   */
+
+  DEBUGASSERT(rtcb->irqcount == 1);
+  while (rtcb->irqcount < saved_irqcount)
+    {
+      enter_critical_section();
+    }
+#endif
 
   /* Then restore the correct state for this thread of execution. */
 

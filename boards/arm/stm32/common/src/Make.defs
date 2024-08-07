@@ -124,6 +124,14 @@ ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += stm32_max31855.c
 endif
 
+ifeq ($(CONFIG_LCD_MAX7219),y)
+  CSRCS += stm32_max7219_matrix.c
+endif
+
+ifeq ($(CONFIG_CL_MFRC522),y)
+  CSRCS += stm32_mfrc522.c
+endif
+
 ifeq ($(CONFIG_LIS3DSH),y)
   CSRCS += stm32_lis3dsh.c
 endif
@@ -138,6 +146,10 @@ endif
 
 ifeq ($(CONFIG_BOARD_STM32_IHM16M1),y)
   CSRCS += stm32_ihm16m1.c
+endif
+
+ifeq ($(CONFIG_STEPPER_DRV8825),y)
+  CSRCS += stm32_drv8825.c
 endif
 
 DEPPATH += --dep-path src

@@ -634,17 +634,17 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
     {
       /* Make sure that the connection is marked as uninitialized */
 
-      conn->sconn.ttl = IP_TTL_DEFAULT;
-      conn->flags     = 0;
+      conn->sconn.s_ttl = IP_TTL_DEFAULT;
+      conn->flags       = 0;
 #if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
-      conn->domain    = domain;
+      conn->domain      = domain;
 #endif
-      conn->lport     = 0;
+      conn->lport       = 0;
 #if CONFIG_NET_RECV_BUFSIZE > 0
-      conn->rcvbufs   = CONFIG_NET_RECV_BUFSIZE;
+      conn->rcvbufs     = CONFIG_NET_RECV_BUFSIZE;
 #endif
 #if CONFIG_NET_SEND_BUFSIZE > 0
-      conn->sndbufs   = CONFIG_NET_SEND_BUFSIZE;
+      conn->sndbufs     = CONFIG_NET_SEND_BUFSIZE;
 
       nxsem_init(&conn->sndsem, 0, 0);
 #endif
@@ -816,6 +816,10 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     }
 #endif
 
+  /* Interrupts must be disabled while access the UDP connection list */
+
+  net_lock();
+
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
   if (conn->domain == PF_INET)
@@ -928,10 +932,6 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     }
   else
     {
-      /* Interrupts must be disabled while access the UDP connection list */
-
-      net_lock();
-
       /* Is any other UDP connection already bound to this address
        * and port ?
        */
@@ -958,10 +958,9 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
         {
           ret         = -EADDRINUSE;
         }
-
-      net_unlock();
     }
 
+  net_unlock();
   return ret;
 }
 

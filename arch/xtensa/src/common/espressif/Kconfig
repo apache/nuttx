@@ -7,3 +7,27 @@ config ESP_RMT
 		an infrared transceiver. However, due to the flexibility of its data
 		format, RMT can be extended to a versatile and general-purpose
 		transceiver, transmitting or receiving many other types of signals.
+
+config ESP_MCPWM
+	bool "Motor Control PWM (MCPWM)"
+	default n
+	depends on ARCH_CHIP_ESP32 || ARCH_CHIP_ESP32S3
+	---help---
+		Enable support for timer capture and motor control using
+		the Motor Control PWM peripheral.
+
+config ESPRESSIF_TEMP
+	bool "Internal Temperature Sensor"
+	default n
+	depends on ARCH_CHIP_ESP32S2 || ARCH_CHIP_ESP32S3
+	---help---
+		A built-in sensor used to measure the chip's internal temperature.
+
+menu "Internal Temperature Sensor Configuration"
+	depends on ESPRESSIF_TEMP
+
+config ESPRESSIF_TEMP_PATH
+	string "Internal Temperature Sensor Path"
+	default "dev/temp"
+
+endmenu # ESPRESSIF_TEMP

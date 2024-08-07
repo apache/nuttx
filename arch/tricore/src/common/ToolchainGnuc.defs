@@ -1,0 +1,192 @@
+############################################################################
+# arch/tricore/src/common/ToolchainGnuc.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+#
+# Supported toolchains
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   FPU options, etc.
+#  ARCHOPTIMIZATION The optimization level that results in
+#                   reliable code generation.
+#
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ARCHOPTIMIZATION += -Os
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -fno-strict-aliasing
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  ARCHOPTIMIZATION += -fomit-frame-pointer
+endif
+
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
+endif
+
+ifeq ($(CONFIG_STACK_USAGE),y)
+  ARCHOPTIMIZATION += -fstack-usage
+endif
+
+ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
+  ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
+endif
+
+ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
+  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_ALL),y)
+  ARCHOPTIMIZATION += $(CONFIG_MM_UBSAN_OPTION)
+endif
+
+ifeq ($(CONFIG_MM_UBSAN_TRAP_ON_ERROR),y)
+  ARCHOPTIMIZATION += -fsanitize-undefined-trap-on-error
+endif
+
+ifeq ($(CONFIG_MM_KASAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
+endif
+
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+  ARCHOPTIMIZATION += --param asan-globals=1
+endif
+
+ifeq ($(CONFIG_MM_KASAN_DISABLE_READS_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-reads=0
+endif
+
+ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-writes=0
+endif
+
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
+# Link Time Optimization
+
+ifeq ($(CONFIG_LTO_THIN),y)
+  ARCHOPTIMIZATION += -flto=thin
+else ifeq ($(CONFIG_LTO_FULL),y)
+  ARCHOPTIMIZATION += -flto
+  ARCHOPTIMIZATION += -fuse-linker-plugin
+endif
+
+# Default toolchain
+
+CC      = $(CROSSDEV)tricore-elf-gcc
+CXX     = $(CROSSDEV)tricore-elf-g++
+CPP     = $(CROSSDEV)tricore-elf-gcc -E -P -x c
+LD      = $(CROSSDEV)tricore-elf-gcc
+STRIP   = $(CROSSDEV)tricore-elf-strip --strip-unneeded
+AR      = $(CROSSDEV)tricore-elf-gcc-ar rcs
+NM      = $(CROSSDEV)tricore-elf-gcc-nm
+OBJCOPY = $(CROSSDEV)tricore-elf-objcopy
+OBJDUMP = $(CROSSDEV)tricore-elf-objdump
+
+ARCHOPTIMIZATION += -fno-builtin
+
+# Architecture flags
+
+ARCHCFLAGS += -Wstrict-prototypes -Wno-attributes -Wno-unknown-pragmas
+ARCHCXXFLAGS += -Wno-attributes -Wno-unknown-pragmas
+
+# When all C++ code is built using GCC 7.1 or a higher version,
+# we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
+# Refer to : https://stackoverflow.com/questions/48149323/what-does-the-gcc-warning-project-parameter-passing-for-x-changed-in-gcc-7-1-m
+
+ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  ARCHCXXFLAGS += -nostdinc++
+endif
+
+ifneq ($(CONFIG_CXX_STANDARD),)
+  ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+endif
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
+ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
+
+LDFLAGS += -nostdlib
+
+# Optimization of unused sections
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
+# Debug --whole-archive
+
+ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
+  LDFLAGS += --whole-archive
+endif
+
+# Debug link map
+
+ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
+  LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION += -g
+endif
+
+LDFLAGS += --no-warn-rwx-segments
+
+# Add the builtin library
+
+COMPILER_RT_LIB = $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name)
+
+EXTRA_LIBS += $(COMPILER_RT_LIB)
+
+ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
+endif
+
+ifeq ($(CONFIG_LIBSUPCXX),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
+endif
+
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
+endif
+
+ifeq ($(CONFIG_LIBCXXTOOLCHAIN),y)
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libstdc++.a))
+endif

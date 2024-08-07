@@ -957,93 +957,93 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info)
 {
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
+#ifdef CONFIG_PWM_MULTICHAN
   uint32_t regval;
 
-#ifdef CONFIG_PWM_MULTICHAN
-      for (int i = 0; i < PWM_NCHANNELS; i++)
+  for (int i = 0; i < PWM_NCHANNELS; i++)
+    {
+      int8_t index = info->channels[i].channel;
+
+      /* Break the loop if all following channels are not configured */
+
+      if (index == -1)
         {
-          int8_t index = info->channels[i].channel;
+          break;
+        }
 
-          /* Break the loop if all following channels are not configured */
+      /* Configure the module freq only if is set to be used */
 
-          if (index == -1)
-            {
-              break;
-            }
+      if (index > 0 && (index - 1) < priv->channels_num)
+        {
+          /* Set the frequency and enable PWM output for each channel */
 
-          /* Configure the module freq only if is set to be used */
-
-          if (index > 0 && (index - 1) < priv->channels_num)
-            {
-              /* Set the frequency and enable PWM output for each channel */
-
-              pwm_set_freq(dev, priv->channels[index - 1].channel,
-                           info->frequency);
+          pwm_set_freq(dev, priv->channels[index - 1].channel,
+                        info->frequency);
 #ifdef CONFIG_PWM_DEADTIME
-              pwm_set_deadtime(dev, priv->channels[index - 1].channel,
-                               info->channels[i].dead_time_a,
-                               info->channels[i].dead_time_b,
-                               info->channels[i].duty);
+          pwm_set_deadtime(dev, priv->channels[index - 1].channel,
+                            info->channels[i].dead_time_a,
+                            info->channels[i].dead_time_b,
+                            info->channels[i].duty);
 #endif
-              pwm_set_polarity(dev, priv->channels[index - 1].channel,
-                               info->channels[i].cpol,
-                               info->channels[i].dcpol);
-              pwm_set_output(dev, priv->channels[index - 1].channel,
-                             info->channels[i].duty);
+          pwm_set_polarity(dev, priv->channels[index - 1].channel,
+                            info->channels[i].cpol,
+                            info->channels[i].dcpol);
+          pwm_set_output(dev, priv->channels[index - 1].channel,
+                          info->channels[i].duty);
 #ifdef CONFIG_PWM_OVERWRITE
-              if (info->channels[i].ch_outp_ovrwr)
-                {
-                  regval = pwm_getreg(priv, SAMV7_PWM_OOV);
-                  regval &= ~(info->channels[i].ch_outp_ovrwr_val
-                      << priv->channels[i].channel);
-                  pwm_putreg(priv, SAMV7_PWM_OOV, regval);
+          if (info->channels[i].ch_outp_ovrwr)
+            {
+              regval = pwm_getreg(priv, SAMV7_PWM_OOV);
+              regval &= ~(info->channels[i].ch_outp_ovrwr_val
+                  << priv->channels[i].channel);
+              pwm_putreg(priv, SAMV7_PWM_OOV, regval);
 
-                  regval = (1 << priv->channels[i].channel);
-                  pwm_putreg(priv, SAMV7_PWM_OSS, regval);
-                }
-              else
-                {
-                  /* Release overwrite of channel */
-
-                  regval = (1 << priv->channels[i].channel);
-                  pwm_putreg(priv, SAMV7_PWM_OSC, regval);
-                }
-#endif
+              regval = (1 << priv->channels[i].channel);
+              pwm_putreg(priv, SAMV7_PWM_OSS, regval);
             }
+          else
+            {
+              /* Release overwrite of channel */
+
+              regval = (1 << priv->channels[i].channel);
+              pwm_putreg(priv, SAMV7_PWM_OSC, regval);
+            }
+#endif
         }
+    }
 
-      /* Perform the update of synchronized PWM channels */
+  /* Perform the update of synchronized PWM channels */
 
-      if (priv->sync)
-        {
-          regval = SCUC_UPDULOCK;
+  if (priv->sync)
+    {
+      regval = SCUC_UPDULOCK;
 
-          /* Enable the Channel 0 if synchronous channels are used.
-           * Channel 0's counter is used by all synchronous channels and
-           * enabling CH0 results in enabling all synchronous channels.
-           *
-           * Enable the CH0 here after all setting all channel parameters,
-           * because setting polarity configurations requires disabled
-           * channels.
-           */
+      /* Enable the Channel 0 if synchronous channels are used.
+       * Channel 0's counter is used by all synchronous channels and
+       * enabling CH0 results in enabling all synchronous channels.
+       *
+       * Enable the CH0 here after all setting all channel parameters,
+       * because setting polarity configurations requires disabled
+       * channels.
+       */
 
-          pwm_putreg(priv, SAMV7_PWM_ENA, CHID_SEL(1));
-          pwm_putreg(priv, SAMV7_PWM_SCUC, regval);
-        }
+      pwm_putreg(priv, SAMV7_PWM_ENA, CHID_SEL(1));
+      pwm_putreg(priv, SAMV7_PWM_SCUC, regval);
+    }
 #else
-      /* Set the frequency and enable PWM output just for first channel */
+  /* Set the frequency and enable PWM output just for first channel */
 
-      pwm_set_freq(dev, priv->channels[0].channel, info->frequency);
+  pwm_set_freq(dev, priv->channels[0].channel, info->frequency);
 #ifdef CONFIG_PWM_DEADTIME
-      pwm_set_deadtime(dev, priv->channels[0].channel,
-                       info->dead_time_a, info->dead_time_b);
+  pwm_set_deadtime(dev, priv->channels[0].channel,
+                    info->dead_time_a, info->dead_time_b);
 #endif
-      pwm_set_polarity(dev, priv->channels[0].channel,
-                       info->cpol, info->dcpol);
-      pwm_set_output(dev, priv->channels[0].channel, info->duty);
+  pwm_set_polarity(dev, priv->channels[0].channel,
+                    info->cpol, info->dcpol);
+  pwm_set_output(dev, priv->channels[0].channel, info->duty);
 #endif
 
-      pwm_set_comparison(dev);
+  pwm_set_comparison(dev);
 
   return OK;
 }

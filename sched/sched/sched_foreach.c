@@ -64,13 +64,13 @@ void nxsched_foreach(nxsched_foreach_t handler, FAR void *arg)
 
   flags = enter_critical_section();
   sched_lock();
-  for (ndx = 0; ndx < nxsched_npidhash(); ndx++)
+  for (ndx = 0; ndx < g_npidhash; ndx++)
     {
       /* This test and the function call must be atomic */
 
-      if (nxsched_pidhash()[ndx])
+      if (g_pidhash[ndx])
         {
-          handler(nxsched_pidhash()[ndx], arg);
+          handler(g_pidhash[ndx], arg);
         }
     }
 

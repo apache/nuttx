@@ -43,7 +43,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
+#ifdef CONFIG_ROUTE_IPv4_CACHEROUTE
 #  define IPv4_ROUTER entry.router
 #else
 #  define IPv4_ROUTER router

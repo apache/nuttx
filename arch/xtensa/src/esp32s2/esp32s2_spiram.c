@@ -35,13 +35,15 @@
 #include <nuttx/spinlock.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "esp32s2_psram.h"
 #include "esp32s2_spiram.h"
 #include "hardware/esp32s2_soc.h"
 #include "hardware/esp32s2_cache_memory.h"
-#include "hardware/esp32s2_extmem.h"
 #include "hardware/esp32s2_iomux.h"
+
+#include "soc/extmem_reg.h"
+#include "soc/ext_mem_defs.h"
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -144,7 +146,7 @@ int mmu_map_psram(uint32_t start_paddr, uint32_t end_paddr,
 
   /* should be MMU page aligned */
 
-  assert((start_paddr % MMU_PAGE_SIZE) == 0);
+  ASSERT((start_paddr % MMU_PAGE_SIZE) == 0);
 
   uint32_t start_vaddr = DPORT_CACHE_ADDRESS_LOW;
   uint32_t end_vaddr = start_vaddr + map_length;
@@ -156,7 +158,7 @@ int mmu_map_psram(uint32_t start_paddr, uint32_t end_paddr,
   cache_bus_mask |= (end_vaddr >= DRAM1_ADDRESS_HIGH) ?
                     EXTMEM_PRO_DCACHE_MASK_DRAM0 : 0;
 
-  assert(end_vaddr <= DRAM0_CACHE_ADDRESS_HIGH);
+  ASSERT(end_vaddr <= DRAM0_CACHE_ADDRESS_HIGH);
 
   minfo("start_paddr is %x, map_length is %xB, %d pages",
         start_paddr, map_length, BYTES_TO_MMU_PAGE(map_length));

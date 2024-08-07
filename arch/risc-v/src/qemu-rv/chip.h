@@ -34,6 +34,7 @@
 #include "hardware/qemu_rv_clint.h"
 #include "hardware/qemu_rv_memorymap.h"
 #include "hardware/qemu_rv_plic.h"
+#include "hardware/qemu_rv_aplic.h"
 
 #include "riscv_internal.h"
 #include "riscv_percpu.h"

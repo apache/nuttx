@@ -41,7 +41,7 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "xtensa.h"
-#include "xtensa_attr.h"
+#include "esp_attr.h"
 #include "hardware/esp32s2_spi_mem_reg.h"
 #include "rom/esp32s2_spiflash.h"
 #include "rom/esp32s2_opi_flash.h"
@@ -156,7 +156,7 @@
                       buffer, size,                         \
                       NULL, 0,                              \
                       0,                                    \
-                      true) 
+                      true)
 
 #  define READ_DATA_FROM_FLASH(addr, buffer, size)          \
     esp32s2_spi_trans(READ_CMD(addr), 8,                    \
@@ -164,7 +164,7 @@
                       NULL, 0,                              \
                       buffer, size,                         \
                       READ_DUMMY(addr),                     \
-                      false) 
+                      false)
 
 /****************************************************************************
  * Private Types

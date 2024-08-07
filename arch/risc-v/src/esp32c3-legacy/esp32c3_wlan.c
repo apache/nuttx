@@ -146,7 +146,7 @@ struct wlan_priv_s
 
 /* Reference count of register Wi-Fi handler */
 
-static uint8_t g_callback_register_ref = 0;
+static uint8_t g_callback_register_ref;
 
 static struct wlan_priv_s g_wlan_priv[ESP32C3_WLAN_DEVS];
 
@@ -1383,7 +1383,7 @@ int esp32c3_wlan_sta_set_linkstatus(bool linkstatus)
 {
   struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
 
-  if (linkstatus == true)
+  if (linkstatus)
     {
       netdev_carrier_on(&priv->dev);
     }

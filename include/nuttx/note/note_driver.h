@@ -112,6 +112,25 @@ struct note_driver_s
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 
+#ifdef CONFIG_DRIVERS_NOTE
+
+/****************************************************************************
+ * Name: note_early_initialize
+ *
+ * Description:
+ *   Early register sched note related drivers that do not rely on system
+ *   features like mm.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success. A negative errno value is returned on a failure.
+ *
+ ****************************************************************************/
+
+int note_early_initialize(void);
+
 /****************************************************************************
  * Name: note_initialize
  *
@@ -123,11 +142,10 @@ struct note_driver_s
  *   None.
  *
  * Returned Value:
- *   Zero on succress. A negated errno value is returned on a failure.
+ *   Zero on success. A negative errno value is returned on a failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DRIVERS_NOTE
 int note_initialize(void);
 #endif
 

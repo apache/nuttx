@@ -27,16 +27,21 @@
 #include <sys/types.h>
 #include <string.h>
 #include <assert.h>
+#include <execinfo.h>
 #include <sched.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <debug.h>
+#include <stdio.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/cancelpt.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/mutex.h>
 #include <nuttx/sched.h>
 #include <nuttx/spawn.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_FDSAN
 #  include <android/fdsan.h>
@@ -62,11 +67,11 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   FAR struct file *filep;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&list->fl_lock);
+  flags = spin_lock_irqsave(NULL);
 
   filep = &list->fl_files[l1][l2];
 
-  spin_unlock_irqrestore(&list->fl_lock, flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   return filep;
 }
@@ -121,7 +126,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
     }
   while (++i < row);
 
-  flags = spin_lock_irqsave(&list->fl_lock);
+  flags = spin_lock_irqsave(NULL);
 
   /* To avoid race condition, if the file list is updated by other threads
    * and list rows is greater or equal than temp list,
@@ -130,7 +135,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   if (orig_rows != list->fl_rows && list->fl_rows >= row)
     {
-      spin_unlock_irqrestore(&list->fl_lock, flags);
+      spin_unlock_irqrestore(NULL, flags);
 
       for (j = orig_rows; j < i; j++)
         {
@@ -152,7 +157,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
   list->fl_files = files;
   list->fl_rows = row;
 
-  spin_unlock_irqrestore(&list->fl_lock, flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   if (tmp != NULL && tmp != &list->fl_prefile)
     {
@@ -308,6 +313,67 @@ void files_initlist(FAR struct filelist *list)
 }
 
 /****************************************************************************
+ * Name: files_dumplist
+ *
+ * Description:
+ *   Dump the list of files.
+ *
+ ****************************************************************************/
+
+void files_dumplist(FAR struct filelist *list)
+{
+  int count = files_countlist(list);
+  int i;
+
+  syslog(LOG_INFO, "%-4s%-4s%-8s%-5s%-10s%-14s"
+#if CONFIG_FS_BACKTRACE > 0
+        " BACKTRACE"
+#endif
+        "\n",
+        "PID", "FD", "FLAGS", "TYPE", "POS", "PATH"
+        );
+
+  for (i = 0; i < count; i++)
+    {
+      FAR struct file *filep = files_fget(list, i);
+      char path[PATH_MAX];
+
+#if CONFIG_FS_BACKTRACE > 0
+      char buf[BACKTRACE_BUFFER_SIZE(CONFIG_FS_BACKTRACE)];
+#endif
+
+      /* Is there an inode associated with the file descriptor? */
+
+      if (filep == NULL || filep->f_inode == NULL)
+        {
+          continue;
+        }
+
+      if (file_ioctl(filep, FIOC_FILEPATH, path) < 0)
+        {
+          path[0] = '\0';
+        }
+
+#if CONFIG_FS_BACKTRACE > 0
+      backtrace_format(buf, sizeof(buf), filep->f_backtrace,
+                       CONFIG_FS_BACKTRACE);
+#endif
+
+      syslog(LOG_INFO, "%-4d%-4d%-8d%-5x%-10ld%-14s"
+#if CONFIG_FS_BACKTRACE > 0
+            " %s"
+#endif
+            "\n", getpid(), i, filep->f_oflags,
+            INODE_GET_TYPE(filep->f_inode),
+            (long)filep->f_pos, path
+#if CONFIG_FS_BACKTRACE > 0
+            , buf
+#endif
+            );
+    }
+}
+
+/****************************************************************************
  * Name: files_releaselist
  *
  * Description:
@@ -419,13 +485,13 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
 
   /* Find free file */
 
-  flags = spin_lock_irqsave(&list->fl_lock);
+  flags = spin_lock_irqsave(NULL);
 
   for (; ; i++, j = 0)
     {
       if (i >= list->fl_rows)
         {
-          spin_unlock_irqrestore(&list->fl_lock, flags);
+          spin_unlock_irqrestore(NULL, flags);
 
           ret = files_extend(list, i + 1);
           if (ret < 0)
@@ -433,7 +499,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               return ret;
             }
 
-          flags = spin_lock_irqsave(&list->fl_lock);
+          flags = spin_lock_irqsave(NULL);
         }
 
       do
@@ -453,12 +519,14 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
     }
 
 found:
-  spin_unlock_irqrestore(&list->fl_lock, flags);
+  spin_unlock_irqrestore(NULL, flags);
 
   if (addref)
     {
       inode_addref(inode);
     }
+
+  FS_ADD_BACKTRACE(filep);
 
 #ifdef CONFIG_FDCHECK
   return fdcheck_protect(i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j);

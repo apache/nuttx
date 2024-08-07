@@ -45,10 +45,19 @@ set(SRCS
     intel64_lowsetup.c
     intel64_serial.c
     intel64_rng.c
-    intel64_check_capability.c)
+    intel64_check_capability.c
+    intel64_cpu.c)
+
+if(CONFIG_MM_PGALLOC)
+  list(APPEND SRCS intel64_pgalloc.c)
+endif()
 
 if(CONFIG_ARCH_HAVE_TESTSET)
   list(APPEND SRCS intel64_testset.S)
+endif()
+
+if(CONFIG_SMP)
+  list(APPEND SRCS intel64_cpuidlestack.c intel64_cpupause.c intel64_cpustart.c)
 endif()
 
 if(CONFIG_MULTBOOT2_FB_TERM)
@@ -65,6 +74,10 @@ endif()
 
 if(CONFIG_INTEL64_HPET)
   list(APPEND SRCS intel64_hpet.c)
+endif()
+
+if(CONFIG_ARCH_INTEL64_HPET_ALARM)
+  list(APPEND SRCS intel64_hpet_alarm.c)
 endif()
 
 if(CONFIG_INTEL64_ONESHOT)

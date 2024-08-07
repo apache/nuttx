@@ -84,8 +84,8 @@ typedef struct sbi_scratch_holder_s sbi_scratch_holder_t;
 
 extern const uint8_t __mpfs_nuttx_start[];
 extern const uint8_t __mpfs_nuttx_end[];
-extern const uint8_t _ssbi_ddr[];
-extern const uint8_t _esbi_ddr[];
+extern const uint8_t _ssbi_ram[];
+extern const uint8_t _esbi_ram[];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -479,9 +479,9 @@ static void mpfs_opensbi_scratch_setup(uint32_t hartid)
    * them so that OpenSBI has no chance override then.
    */
 
-  g_scratches[hartid].scratch.fw_start = (unsigned long)_ssbi_ddr;
-  g_scratches[hartid].scratch.fw_size  = (unsigned long)_esbi_ddr -
-                                         (unsigned long)_ssbi_ddr;
+  g_scratches[hartid].scratch.fw_start = (unsigned long)_ssbi_ram;
+  g_scratches[hartid].scratch.fw_size  = (unsigned long)_esbi_ram -
+                                         (unsigned long)_ssbi_ram;
 
   g_scratches[hartid].scratch.fw_rw_offset =
       (unsigned long)g_scratches[hartid].scratch.fw_size;

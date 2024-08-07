@@ -30,8 +30,6 @@
 #include <nuttx/can/can.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-
 #include "esp32s2_twai.h"
 
 #ifdef CONFIG_CAN

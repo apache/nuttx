@@ -319,6 +319,11 @@ static int lan9250_rmmac(FAR struct net_driver_s *dev,
                          FAR const uint8_t *mac);
 #endif
 
+#ifdef CONFIG_NETDEV_IOCTL
+static int lan9250_ioctl(FAR struct net_driver_s *dev, int cmd,
+                         unsigned long arg);
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -2323,6 +2328,79 @@ static int lan9250_rmmac(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: lan9250_ioctl
+ *
+ * Description:
+ *   Handle network IOCTL commands directed to this device.
+ *
+ * Parameters:
+ *   dev - Reference to the NuttX driver state structure
+ *   cmd - The IOCTL command
+ *   arg - The argument for the IOCTL command
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_IOCTL
+static int lan9250_ioctl(FAR struct net_driver_s *dev, int cmd,
+                         unsigned long arg)
+{
+  FAR struct lan9250_driver_s *priv =
+        (FAR struct lan9250_driver_s *)dev->d_private;
+  int ret = OK;
+
+  /* Lock the SPI bus so that we have exclusive access */
+
+  lan9250_lock_spi(priv);
+
+  /* Decode and dispatch the driver-specific IOCTL command */
+
+  switch (cmd)
+    {
+#ifdef CONFIG_NETDEV_PHY_IOCTL
+      case SIOCGMIIPHY: /* Get MII PHY address */
+        {
+          struct mii_ioctl_data_s *req =
+                    (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->phy_id = 0;
+        }
+        break;
+
+      case SIOCGMIIREG: /* Get register from MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+                    (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          req->val_out = lan9250_get_phyreg(priv, req->reg_num);
+        }
+        break;
+
+      case SIOCSMIIREG: /* Set register in MII PHY */
+        {
+          struct mii_ioctl_data_s *req =
+                    (struct mii_ioctl_data_s *)((uintptr_t)arg);
+          lan9250_set_phyreg(priv, req->reg_num, req->val_in);
+        }
+        break;
+#endif /* CONFIG_NETDEV_PHY_IOCTL */
+
+    default:
+      nerr("ERROR: Unrecognized IOCTL command: %d\n", cmd);
+      ret = -ENOTTY; /* Special return value for this case */
+    }
+
+  /* Un-lock the SPI bus */
+
+  lan9250_unlock_spi(priv);
+  return ret;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2368,6 +2446,9 @@ int lan9250_initialize(
   dev->d_addmac  = lan9250_addmac;
   dev->d_rmmac   = lan9250_rmmac;
 #endif
+#ifdef CONFIG_NETDEV_IOCTL
+  dev->d_ioctl   = lan9250_ioctl;             /* Handle network IOCTL commands */
+#endif
   dev->d_private = priv;
 
 #ifdef CONFIG_LAN9250_SPI
@@ -2397,4 +2478,44 @@ int lan9250_initialize(
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   return netdev_register(dev, NET_LL_ETHERNET);
+}
+
+/****************************************************************************
+ * Function: lan9250_uninitialize
+ *
+ * Description:
+ *   Un-initialize the Ethernet driver
+ *
+ * Input Parameters:
+ *   lower - The MCU-specific interrupt used to control low-level MCU
+ *           functions (i.e., LAN9250 GPIO interrupts).
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int lan9250_uninitialize(FAR const struct lan9250_lower_s *lower)
+{
+  FAR struct lan9250_driver_s *priv = &g_lan9250;
+  FAR struct net_driver_s *dev = &priv->dev;
+
+  int ret = netdev_unregister(dev); /* No such interface yet */
+  if (ret < 0)
+    {
+      nerr("ERROR: netdev_unregister failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Detach the interrupt to the driver */
+
+  if (lower->attach(lower, NULL, NULL) < 0)
+    {
+      nerr("ERROR: irq_detach failed: %d\n", ret);
+      return -EAGAIN;
+    }
+
+  return OK;
 }
