@@ -414,7 +414,7 @@ class Ps(gdb.Command):
         used = st.max_usage()
         filled = "{0:.2%}".format(st.max_usage() / st._stack_size)
 
-        cpu = tcb["cpu"] if get_macro("CONFIG_SMP") else 0
+        cpu = int(tcb["cpu"]) if get_macro("CONFIG_SMP") else 0
 
         # For a task we need to display its cmdline arguments, while for a thread we display
         # pointers to its entry and argument
@@ -510,9 +510,21 @@ gdb.write(
     "\x1b[31;1m if use thread command, please don't use 'step', use 's' instead !!!\x1b[m\n"
 )
 
-Nxsetregs()
-Nxinfothreads()
-Nxthread()
-Nxcontinue()
-Nxstep()
-Ps()
+
+def register_commands():
+    Nxsetregs()
+    Ps()
+
+    # Disable thread commands for core dump and gdb-stub.
+    # In which case the recogoized threads count is less or equal to the number of cpus
+    ncpus = utils.get_symbol_value("CONFIG_SMP_NCPUS")
+    nthreads = len(gdb.selected_inferior().threads())
+    if nthreads <= ncpus:
+        Nxsetregs()
+        Nxinfothreads()
+        Nxthread()
+        Nxcontinue()
+        Nxstep()
+
+
+register_commands()
