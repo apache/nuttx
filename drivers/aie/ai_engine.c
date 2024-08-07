@@ -35,23 +35,12 @@
  * Private Type Definitions
  ****************************************************************************/
 
-enum aie_state_e
-{
-  AIE_STATE_NOP = 0,
-  AIE_STATE_INITED,
-  AIE_STATE_FEEDED,
-  AIE_STATE_INFERENCED,
-};
-
 /* This structure describes the state of the upper half driver */
 
 struct aie_upperhalf_s
 {
   FAR struct aie_lowerhalf_s *lower;  /* The handle of lower half driver */
-  volatile enum aie_state_e  state;   /* The device state */
   mutex_t                    lock;    /* Mutual exclusion */
-  uint8_t                    crefs;   /* The number of times the engine
-                                       * has been opend. */
 };
 
 /****************************************************************************
@@ -87,52 +76,37 @@ static const struct file_operations g_aie_ops =
  * Name: aie_open
  *
  * Description:
- *   A open method to increase the crefs.
+ *   A open method to open the ai engine.
  *
  ****************************************************************************/
 
 static int aie_open(FAR struct file *filep)
 {
-  FAR struct inode              *inode = filep->f_inode;
-  FAR struct aie_upperhalf_s    *upper = inode->i_private;
-  int                            ret;
+  FAR struct inode           *inode = filep->f_inode;
+  FAR struct aie_upperhalf_s *upper = inode->i_private;
+  FAR struct aie_lowerhalf_s *lower;
 
   DEBUGASSERT(upper != NULL);
-  ret = nxmutex_lock(&upper->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  lower = upper->lower;
+  DEBUGASSERT(lower != NULL);
 
-  if (upper->crefs == 0)
-    {
-      upper->crefs++;
-      ret = OK;
-    }
-  else
-    {
-      ret = -EBUSY;
-    }
-
-  nxmutex_unlock(&upper->lock);
-
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
  * Name: aie_close
  *
  * Description:
- *   A close method to decrease the crefs.
+ *   A close method to close the ai engine.
  *
  ****************************************************************************/
 
 static int aie_close(FAR struct file *filep)
 {
-  FAR struct inode              *inode = filep->f_inode;
-  FAR struct aie_upperhalf_s    *upper = inode->i_private;
-  FAR struct aie_lowerhalf_s    *lower = NULL;
-  int                            ret;
+  FAR struct inode           *inode = filep->f_inode;
+  FAR struct aie_upperhalf_s *upper = inode->i_private;
+  FAR struct aie_lowerhalf_s *lower;
+  int                         ret;
 
   DEBUGASSERT(upper != NULL);
   lower = upper->lower;
@@ -144,23 +118,15 @@ static int aie_close(FAR struct file *filep)
       return ret;
     }
 
-  if (upper->crefs == 1)
+  ret = (int)(intptr_t)filep->f_priv;
+  if (ret > 0)
     {
-      ret = lower->ops->deinit(lower, filep);
-      if (ret == OK)
-        {
-          upper->state = AIE_STATE_NOP;
-          upper->crefs--;
-        }
-    }
-  else
-    {
-      ret = OK;
+      lower->ops->deinit(lower, ret);
     }
 
   nxmutex_unlock(&upper->lock);
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -174,10 +140,10 @@ static int aie_close(FAR struct file *filep)
 
 static int aie_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode              *inode = filep->f_inode;
-  FAR struct aie_upperhalf_s    *upper = inode->i_private;
-  FAR struct aie_lowerhalf_s    *lower = NULL;
-  int                            ret;
+  FAR struct inode           *inode = filep->f_inode;
+  FAR struct aie_upperhalf_s *upper = inode->i_private;
+  FAR struct aie_lowerhalf_s *lower = NULL;
+  int                         ret;
 
   DEBUGASSERT(upper != NULL);
   lower = upper->lower;
@@ -193,66 +159,38 @@ static int aie_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      case AIE_CMD_INIT:
-        ret = lower->ops->init(lower, filep, arg);
-        if (ret != OK)
+      case AIE_CMD_LOAD:
+        ret = (int)(intptr_t)filep->f_priv;
+        if (ret > 0)
           {
-            break;
+            ret = -EINVAL; /* Double load is not allowed */
           }
-
-        if (lower->workspace_len)
+        else
           {
-            lower->workspace = kmm_malloc(lower->workspace_len);
-            if (!lower->workspace)
+            ret = lower->ops->init(lower, arg /* model */);
+            if (ret > 0)
               {
-                ret = -ENOMEM;
-                break;
+                filep->f_priv = (void *)(intptr_t)ret;
+                ret = OK;
               }
           }
-
-        upper->state = AIE_STATE_INITED;
         break;
 
       case AIE_CMD_FEED_INPUT:
-        if (upper->state == AIE_STATE_INITED ||
-            upper->state == AIE_STATE_INFERENCED)
-          {
-            lower->input = (uintptr_t)arg;
-            ret = lower->ops->feed_input(lower, filep);
-            if (ret == OK)
-              {
-                upper->state = AIE_STATE_FEEDED;
-              }
-          }
-        else
-          {
-            ret = -EPERM;
-          }
+        ret = lower->ops->feed_input(lower, (int)(intptr_t)filep->f_priv,
+                                     arg /* input */);
         break;
 
       case AIE_CMD_GET_OUTPUT:
-        if (upper->state == AIE_STATE_FEEDED)
-          {
-            lower->output = (uintptr_t)arg;
-            ret = lower->ops->get_output(lower, filep);
-            if (ret == OK)
-              {
-                upper->state = AIE_STATE_INFERENCED;
-              }
-          }
-        else
-          {
-            ret = -EPERM;
-          }
+        ret = lower->ops->get_output(lower, (int)(intptr_t)filep->f_priv,
+                                     arg /* output */);
         break;
 
       default:
-
-        /* Lowerhalf driver process other cmd. */
-
         if (lower->ops->control)
           {
-            ret = lower->ops->control(lower, filep, cmd, arg);
+            ret = lower->ops->control(lower, (int)(intptr_t)filep->f_priv,
+                                      cmd, arg);
           }
         else
           {
@@ -281,8 +219,8 @@ static int aie_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 int aie_register(FAR const char *path,
                  FAR struct aie_lowerhalf_s *lower)
 {
-  FAR struct aie_upperhalf_s  *upper = NULL;
-  int                          ret   = -ENOMEM;
+  FAR struct aie_upperhalf_s *upper = NULL;
+  int                         ret   = -ENOMEM;
 
   DEBUGASSERT(path);
 
@@ -298,11 +236,7 @@ int aie_register(FAR const char *path,
 
   /* Initialize the aie device structure */
 
-  upper->lower   = lower;
-  upper->state   = AIE_STATE_NOP;
-  upper->crefs   = 0;
-  lower->priv    = upper;
-
+  upper->lower = lower;
   nxmutex_init(&upper->lock);
 
   /* Register the aie device */

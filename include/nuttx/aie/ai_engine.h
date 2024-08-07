@@ -39,7 +39,7 @@
 
 enum aie_cmd_e
 {
-  AIE_CMD_INIT = 0,
+  AIE_CMD_LOAD = 0,
   AIE_CMD_FEED_INPUT,
   AIE_CMD_GET_OUTPUT
 };
@@ -51,25 +51,17 @@ enum aie_cmd_e
 struct aie_lowerhalf_s;
 struct aie_ops_s
 {
-  /* Common routes */
+  CODE int (*init)(FAR struct aie_lowerhalf_s *lower, uintptr_t model);
 
-  CODE int (*init)(FAR struct aie_lowerhalf_s *lower,
-                   FAR struct file *filep,
-                   uintptr_t bin_model);
+  CODE int (*deinit)(FAR struct aie_lowerhalf_s *lower, int id);
 
-  CODE int (*feed_input)(FAR struct aie_lowerhalf_s *lower,
-                         FAR struct file *filep);
+  CODE int (*feed_input)(FAR struct aie_lowerhalf_s *lower, int id,
+                         uintptr_t input);
 
-  CODE int (*get_output)(FAR struct aie_lowerhalf_s *lower,
-                         FAR struct file *filep);
+  CODE int (*get_output)(FAR struct aie_lowerhalf_s *lower, int id,
+                         uintptr_t output);
 
-  CODE int (*deinit)(FAR struct aie_lowerhalf_s *lower,
-                     FAR struct file *filep);
-
-  /* Custom route */
-
-  CODE int (*control)(FAR struct aie_lowerhalf_s *lower,
-                      FAR struct file *filep,
+  CODE int (*control)(FAR struct aie_lowerhalf_s *lower, int id,
                       int cmd, unsigned long arg);
 };
 
@@ -81,17 +73,11 @@ struct aie_ops_s
 
 struct aie_lowerhalf_s
 {
-  /* The private opaque pointer to be passed to upper-layer */
+  /* The heading fields of this struct must be as follow. */
 
-  FAR void                       *priv;
-  FAR const struct aie_ops_s     *ops;           /* Lower half operations */
-  const void                     *bin_model;     /* The model address */
-  const void                     *input;         /* The input buffer */
-  void                           *output;        /* The output buffer */
-  void                           *workspace;     /* Workspace free to use */
-  size_t                         workspace_len;  /* Length of workspace.
-                                                  * >0: need the workspace
-                                                  *  0: no need */
+  FAR const struct aie_ops_s *ops;
+
+  /* The custom AI Engine may include additional fields after here. */
 };
 
 /****************************************************************************
