@@ -20,11 +20,19 @@
 
 import argparse
 import bisect
+import math
 import time
 
 import gdb
 from lists import sq_for_every, sq_queue
 from utils import get_long_type, get_symbol_value, read_ulong
+
+try:
+    import numpy as np
+    from matplotlib import pyplot as plt
+except ImportError:
+    print("Please install matplotlib and numpy to use this command")
+    print("pip install matplotlib numpy")
 
 MM_ALLOC_BIT = 0x1
 MM_PREVFREE_BIT = 0x2
@@ -798,3 +806,61 @@ have {i} some backtrace leak, total leak memory is {int(leaksize)} bytes\n"
 
 
 Memleak()
+
+
+class Memmap(gdb.Command):
+    def __init__(self):
+        super(Memmap, self).__init__("memmap", gdb.COMMAND_USER)
+
+    def save_memory_map(self, mallinfo, output_file):
+        mallinfo = sorted(mallinfo, key=lambda item: item["addr"])
+        start = mallinfo[0]["addr"]
+        size = mallinfo[-1]["addr"] - start
+
+        order = math.ceil(size**0.5)
+        img = np.zeros([order, order])
+
+        for node in mallinfo:
+            addr = node["addr"]
+            size = node["size"]
+            start_index = addr - start
+            end_index = start_index + size
+            img.flat[start_index:end_index] = 1 + math.log2(node["sequence"] + 1)
+
+        plt.imsave(output_file, img, cmap=plt.get_cmap("Greens"))
+
+    def allocinfo(self):
+        info = []
+        heap = gdb.parse_and_eval("g_mmheap")
+        for node in mm_foreach(heap):
+            if node["size"] & MM_ALLOC_BIT != 0:
+                allocnode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+                info.append(
+                    {
+                        "addr": int(allocnode),
+                        "size": int(mm_nodesize(node["size"])),
+                        "sequence": int(node["seqno"]),
+                    }
+                )
+        return info
+
+    def parse_arguments(self, argv):
+        parser = argparse.ArgumentParser(description="memdump command")
+        parser.add_argument(
+            "-o", "--output", type=str, default="memmap", help="img output file"
+        )
+        if argv[0] == '':
+            argv = None
+        try:
+            args = parser.parse_args(argv)
+        except SystemExit:
+            return None
+        return args.output
+
+    def invoke(self, args, from_tty):
+        output_file = self.parse_arguments(args.split(" "))
+        meminfo = self.allocinfo()
+        self.save_memory_map(meminfo, output_file + ".png")
+
+
+Memmap()
