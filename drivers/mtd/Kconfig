@@ -202,6 +202,13 @@ config MTD_WRITE_ALIGN_SIZE
 	---help---
 		align size will be one of 1,2,4,8,16
 
+config MTD_BLOCKSIZE_MULTIPLE
+	int "Set NVS blocksize multiple"
+	default 1
+	depends on MTD_CONFIG_FAIL_SAFE
+	---help---
+		The size of a multiple of blocksize compared to erasize
+
 endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
