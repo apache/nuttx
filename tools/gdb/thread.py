@@ -61,7 +61,7 @@ def restore_regs():
         if i >= tcbinfo["regs_num"]:
             break
 
-        gdb.execute(f"set ${reg.name}={saved_regs[i]}")
+        gdb.execute(f"set ${reg.name}={int(saved_regs[i])}")
         i += 1
 
     saved_regs = None
