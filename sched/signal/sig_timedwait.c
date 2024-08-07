@@ -254,7 +254,7 @@ int nxsig_clockwait(int clockid, int flags,
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t iflags;
-  clock_t expect;
+  clock_t expect = 0;
   clock_t stop;
 
   if (rqtp && (rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000))
@@ -302,15 +302,22 @@ int nxsig_clockwait(int clockid, int flags,
     {
       /* Start the watchdog timer */
 
-      expect = clock_time2ticks(rqtp);
-
       if ((flags & TIMER_ABSTIME) == 0)
         {
-          expect += clock_systime_ticks();
+          expect = clock_systime_ticks() + clock_time2ticks(rqtp);
+          wd_start_abstick(&rtcb->waitdog, expect,
+                           nxsig_timeout, (uintptr_t)rtcb);
         }
-
-      wd_start_absolute(&rtcb->waitdog, expect,
-                        nxsig_timeout, (wdparm_t)rtcb);
+      else if (clockid == CLOCK_REALTIME)
+        {
+          wd_start_realtime(&rtcb->waitdog, rqtp,
+                            nxsig_timeout, (uintptr_t)rtcb);
+        }
+      else
+        {
+          wd_start_abstime(&rtcb->waitdog, rqtp,
+                           nxsig_timeout, (uintptr_t)rtcb);
+        }
     }
 
   /* Remove the tcb task from the ready-to-run list. */
@@ -336,7 +343,7 @@ int nxsig_clockwait(int clockid, int flags,
 
   leave_critical_section(iflags);
 
-  if (rqtp && rmtp)
+  if (rqtp && rmtp && expect)
     {
       clock_ticks2time(rmtp, expect > stop ? expect - stop : 0);
     }
