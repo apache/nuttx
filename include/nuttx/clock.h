@@ -493,6 +493,28 @@ EXTERN volatile clock_t g_system_ticks;
   while (0)
 
 /****************************************************************************
+ * Name: clock_realtime2absticks
+ *
+ * Description:
+ *   Convert real time to monotonic ticks.
+ *
+ * Input Parameters:
+ *   mono - Return the converted time here.
+ *   abstime - Convert this absolute time to ticks
+ *
+ * Returned Value:
+ *   OK (0) on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Interrupts should be disabled so that the time is not changing during
+ *   the calculation
+ *
+ ****************************************************************************/
+
+int clock_realtime2absticks(FAR const struct timespec *reltime,
+                            FAR clock_t *absticks);
+
+/****************************************************************************
  * Name: clock_compare
  *
  * Description:
