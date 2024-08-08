@@ -110,6 +110,8 @@ static FAR struct circbuf_s *fb_get_panbuf(FAR struct fb_chardev_s *fb,
 static int     fb_add_paninfo(FAR struct fb_chardev_s *fb,
                               FAR const union fb_paninfo_u *info,
                               int overlay);
+static int     fb_clear_paninfo(FAR struct fb_chardev_s *fb,
+                                int overlay);
 static int     fb_open(FAR struct file *filep);
 static int     fb_close(FAR struct file *filep);
 static ssize_t fb_read(FAR struct file *filep, FAR char *buffer,
@@ -215,6 +217,39 @@ static int fb_add_paninfo(FAR struct fb_chardev_s *fb,
 
   leave_critical_section(flags);
   return ret <= 0 ? -ENOSPC : OK;
+}
+
+/****************************************************************************
+ * Name: fb_clear_paninfo
+ ****************************************************************************/
+
+static int fb_clear_paninfo(FAR struct fb_chardev_s *fb,
+                            int overlay)
+{
+  FAR struct circbuf_s *panbuf;
+  irqstate_t flags;
+
+  DEBUGASSERT(fb != NULL);
+
+  panbuf = fb_get_panbuf(fb, overlay);
+  if (panbuf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Disable the interrupt when writing to the queue to
+   * prevent it from being modified by the interrupted
+   * thread during the writing process.
+   */
+
+  flags = enter_critical_section();
+
+  circbuf_reset(panbuf);
+
+  /* Re-enable interrupts */
+
+  leave_critical_section(flags);
+  return OK;
 }
 
 /****************************************************************************
@@ -858,6 +893,12 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
 
           ret = fb_add_paninfo(fb, &paninfo, FB_NO_OVERLAY);
+        }
+        break;
+
+      case FBIOPAN_CLEAR:
+        {
+          ret = fb_clear_paninfo(fb, (int)arg);
         }
         break;
 

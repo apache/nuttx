@@ -301,15 +301,19 @@
                                                * Argument: read-only struct
                                                *           fb_planeinfo_s* */
 
-#define FBIOSET_VSYNCOFFSET   _FBIOC(0x0019)  /* Set VSync offset in usec
+#define FBIOPAN_CLEAR         _FBIOC(0x0019)  /* Pan clear */
+                                              /* Argument: read-only
+                                               *           unsigned long */
+
+#define FBIOSET_VSYNCOFFSET   _FBIOC(0x001a)  /* Set VSync offset in usec
                                                * Argument:             int */
 
 /* Linux Support ************************************************************/
 
-#define FBIOGET_VSCREENINFO   _FBIOC(0x001a)  /* Get video variable info */
+#define FBIOGET_VSCREENINFO   _FBIOC(0x001b)  /* Get video variable info */
                                               /* Argument: writable struct
                                                *           fb_var_screeninfo */
-#define FBIOGET_FSCREENINFO   _FBIOC(0x001b)  /* Get video fix info */
+#define FBIOGET_FSCREENINFO   _FBIOC(0x001c)  /* Get video fix info */
                                               /* Argument: writable struct
                                                *           fb_fix_screeninfo */
 
