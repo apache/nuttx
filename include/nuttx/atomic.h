@@ -33,6 +33,7 @@ extern "C++"
 
 #    define ATOMIC_VAR_INIT(value) (value)
 
+  using std::memory_order;
   using std::atomic_bool;
   using std::atomic_char;
   using std::atomic_schar;
@@ -56,6 +57,10 @@ extern "C++"
   using std::atomic_compare_exchange_strong_explicit;
   using std::atomic_compare_exchange_weak;
   using std::atomic_compare_exchange_weak_explicit;
+  using std::atomic_flag_test_and_set;
+  using std::atomic_flag_test_and_set_explicit;
+  using std::atomic_flag_clear;
+  using std::atomic_flag_clear_explicit;
   using std::atomic_fetch_add;
   using std::atomic_fetch_add_explicit;
   using std::atomic_fetch_sub;
@@ -67,7 +72,9 @@ extern "C++"
   using std::atomic_fetch_xor;
   using std::atomic_fetch_xor_explicit;
 }
-#  elif __has_include(<stdatomic.h>)
+#  elif __has_include(<stdatomic.h>) && \
+        ((defined(__cplusplus) && __cplusplus >= 201103L) || \
+         (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L))
 #    if !(__clang__) && defined(__cplusplus)
 #      define _Atomic
 #    endif
