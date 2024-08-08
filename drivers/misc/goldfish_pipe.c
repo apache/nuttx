@@ -117,11 +117,6 @@
 #define goldfish_pipe_putreg32(v, x)          (*(FAR volatile uint32_t *)(x) = (v))
 #define goldfish_pipe_getreg32(x)             (*(FAR volatile uint32_t *)(x))
 
-#define goldfish_pipe_getupper32(n)           ((uint32_t)(((n) >> 16) >> 16))
-#define goldfish_pipe_getlower32(n)           ((uint32_t)(n))
-
-#define BIT(nr) (1 << (nr))
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -288,7 +283,7 @@ static ssize_t goldfish_pipe_transfer_one(FAR struct goldfish_pipe_s *pipe,
       return ret;
     }
 
-  pipe->command.rw_params.ptrs[0] = (uintptr_t)buffer;
+  pipe->command.rw_params.ptrs[0] = up_addrenv_va_to_pa(buffer);
   pipe->command.rw_params.sizes[0] = buflen;
   pipe->command.rw_params.buffers_count = 1;
 
@@ -487,7 +482,7 @@ static int goldfish_pipe_open(FAR struct file *filep)
 
   /* Now tell the emulator we're opening a new pipe. */
 
-  dev->open_params.command_buffer_ptr = (uintptr_t)&pipe->command;
+  dev->open_params.command_buffer_ptr = up_addrenv_va_to_pa(&pipe->command);
   dev->open_params.rw_params_max_count = GOLDFISH_PIPE_MAX_COMMAND_BUFFERS;
 
   ret = goldfish_pipe_command_locked(pipe, GOLDFISH_PIPE_CMD_OPEN);
@@ -612,8 +607,9 @@ static int goldfish_pipe_interrupt(int irq, FAR void *context, FAR void *arg)
 static void goldfish_pipe_write_addr(FAR void *addr,
                                      FAR void *portl, FAR void *porth)
 {
-  goldfish_pipe_putreg32(goldfish_pipe_getupper32((uintptr_t)addr), porth);
-  goldfish_pipe_putreg32(goldfish_pipe_getlower32((uintptr_t)addr), portl);
+  uintptr_t paddr = up_addrenv_va_to_pa(addr);
+  goldfish_pipe_putreg32((paddr >> 16) >> 16, porth);
+  goldfish_pipe_putreg32(paddr, portl);
 }
 
 /****************************************************************************
