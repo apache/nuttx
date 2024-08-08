@@ -157,7 +157,11 @@ static void   ctz_copyidxptrs(FAR const struct mfs_sb_s * const sb,
 
 static mfs_t ctz_idx_nptrs(const mfs_t idx)
 {
-  return idx == 0 ? 0 : mfs_ctz(idx) + 1;
+  mfs_t ret;
+
+  ret = (idx == 0) ? 0 : mfs_ctz(idx) + 1;
+  finfo("Number of pointers for %u index is %u.", idx, ret);
+  return ret;
 }
 
 /****************************************************************************
@@ -179,17 +183,29 @@ static mfs_t ctz_idx_nptrs(const mfs_t idx)
 static void ctz_off2loc(FAR const struct mfs_sb_s * const sb, mfs_t off,
                         FAR mfs_t *idx, FAR mfs_t *pgoff)
 {
-  const mfs_t den = MFS_PGSZ(sb) - 8;
-  if (off < MFS_PGSZ(sb))
+  const mfs_t wb = sizeof(mfs_t);
+  const mfs_t den = MFS_PGSZ(sb) - 2 * wb;
+
+  if (off < den)
     {
       *idx = 0;
       *pgoff = off;
       return;
     }
 
-  *idx   = floor((off - 4 * (__builtin_popcount((off / den) - 1) + 2))
-           / den);
-  *pgoff = off - den * (*idx) - 4 * __builtin_popcount(*idx);
+  if (idx != NULL)
+    {
+      *idx   = (off - wb * (__builtin_popcount((off / den) - 1) + 2)) / den;
+    }
+
+  if (pgoff != NULL)
+    {
+      *pgoff = off - den * (*idx) - wb * __builtin_popcount(*idx)
+              - (ctz_idx_nptrs(*idx) * wb);
+    }
+
+  finfo("Offset %u. Calculated index %u and page offset %u.", off, *idx,
+        *pgoff);
 }
 
 /****************************************************************************
@@ -210,7 +226,11 @@ static void ctz_off2loc(FAR const struct mfs_sb_s * const sb, mfs_t off,
 static mfs_t ctz_blkdatasz(FAR const struct mfs_sb_s * const sb,
                            const mfs_t idx)
 {
-  return MFS_PGSZ(sb) - (ctz_idx_nptrs(idx) * MFS_LOGPGSZ(sb));
+  mfs_t ret;
+
+  ret = MFS_PGSZ(sb) - (ctz_idx_nptrs(idx) * MFS_LOGPGSZ(sb));
+  finfo("Block data size for index %u is %u.", idx, ret);
+  return ret;
 }
 
 /****************************************************************************
@@ -261,6 +281,11 @@ static mfs_t ctz_travel(FAR const struct mfs_sb_s * const sb, mfs_t idx_src,
       mfs_read_page(sb, buf, 4, pg, MFS_PGSZ(sb) - (4 * pow));
       mfs_deser_mfs(buf, &pg);
       idx -= (1 << pow);
+
+      if (pg == 0)
+        {
+          return 0;
+        }
     }
 
   if (idx == idx_dest)
@@ -278,7 +303,15 @@ static mfs_t ctz_travel(FAR const struct mfs_sb_s * const sb, mfs_t idx_src,
       mfs_deser_mfs(buf, &pg);
       idx  -= (1 << pow);
       diff -= (1 << pow);
+
+      if (pg == 0)
+        {
+          return 0;
+        }
     }
+
+  finfo("Travel from index %u at page %u to index %u at page %u.", idx_src,
+        pg_src, idx_dest, pg);
 
   return pg;
 }
@@ -299,11 +332,11 @@ static mfs_t ctz_travel(FAR const struct mfs_sb_s * const sb, mfs_t idx_src,
  *   buffer, then write the data to the flash.
  *
  * Input Parameters:
- *   sb    - Superblock instance of the device.
- *   ctz   - CTZ list to use as a reference.
- *   idx   - Index of the block who's supposed pointers are to be copied.
- *   buf   - Buffer representing the entire CTZ block where pointers are
- *           copied to.
+ *   sb  - Superblock instance of the device.
+ *   ctz - CTZ list to use as a reference.
+ *   idx - Index of the block who's supposed pointers are to be copied.
+ *   buf - Buffer representing the entire CTZ block where pointers are
+ *         copied to.
  *
  * Assumptions/Limitations:
  *   This assumes `idx` is not more than `ctz->idx_e + 1`.
@@ -330,11 +363,18 @@ static void ctz_copyidxptrs(FAR const struct mfs_sb_s * const sb,
 
   if (idx != ctz.idx_e + 1)
     {
+      /* We travel to the second last "known" CTZ block. */
+
       ctz.pg_e  = ctz_travel(sb, ctz.idx_e, ctz.pg_e, idx - 1);
       ctz.idx_e = idx - 1;
     }
 
   buf += MFS_PGSZ(sb); /* Go to buf + pg_sz */
+
+  DEBUGASSERT(idx == ctz.idx_e + 1);
+
+  finfo("Copying %u pointers for CTZ (%u, %u) at index %u.", n_ptrs,
+        ctz.idx_e, ctz.pg_e, idx);
 
   for (i = 0; i < n_ptrs; i++)
     {
@@ -355,6 +395,8 @@ static void ctz_copyidxptrs(FAR const struct mfs_sb_s * const sb,
 
       buf -= MFS_CTZ_PTRSZ;
       mfs_ser_mfs(prev_pg, buf);
+
+      finfo("Copied %u page number to %uth pointer.", prev_pg, i);
     }
 }
 
@@ -362,70 +404,123 @@ static void ctz_copyidxptrs(FAR const struct mfs_sb_s * const sb,
  * Public Functions
  ****************************************************************************/
 
-int mfs_ctz_rdfromoff(FAR struct mfs_sb_s * const sb, mfs_t data_off,
-                      FAR struct mfs_path_s * const path, const mfs_t depth,
-                      FAR char *buf, mfs_t buflen)
+int mfs_ctz_rdfromoff(FAR const struct mfs_sb_s * const sb,
+                      const struct mfs_ctz_s ctz, mfs_t data_off,
+                      mfs_t len, FAR char * buf)
 {
-  int              ret  = OK;
-  mfs_t            sz;
-  mfs_t            pg;
-  mfs_t            idx;
-  mfs_t            off;
-  struct mfs_ctz_s ctz;
+  int   ret       = OK;
+  mfs_t i;
+  mfs_t rd_sz;
+  mfs_t cur_pg;
+  mfs_t cur_idx;
+  mfs_t cur_pgoff;
+  mfs_t end_idx;
+  mfs_t end_pgoff;
+  mfs_t pg_rd_sz;
 
-  /* Get updated location from the journal */
+  ctz_off2loc(sb, data_off + len, &cur_idx, &cur_pgoff);
+  ctz_off2loc(sb, data_off, &end_idx, &end_pgoff);
 
-  finfo("Journal upd!");
-  DEBUGASSERT(depth > 0);
-  mfs_jrnl_updatepath(sb, path, depth);
-  ctz = path[depth - 1].ctz;
-
-  ctz_off2loc(sb, data_off, &idx, &off);
-
-  /* TODO: Make the traversal in reverse direction. It would cause
-   * a lot less traversals.
-   */
-
-  while (idx <= ctz.idx_e && off - data_off < buflen)
+  if (ctz.idx_e < cur_idx || ctz.idx_e < end_idx)
     {
-      sz = ctz_blkdatasz(sb, idx);
-      pg = ctz_travel(sb, ctz.idx_e, ctz.pg_e, idx);
-
-      ret = mfs_read_page(sb, buf, sz, pg, off);
-      if (predict_false(ret < 0))
-        {
-          return ret;
-        }
-
-      off = 0;
-      idx++;
-      buf += sz;
+      goto errout;
     }
 
+  cur_pg   = ctz_travel(sb, ctz.idx_e, ctz.pg_e, cur_idx);
+  rd_sz    = 0;
+
+  if (predict_false(cur_pg == 0))
+    {
+      goto errout;
+    }
+
+  /* O(n) read by reading in reverse. */
+
+  if (cur_idx != end_idx)
+    {
+      for (i = cur_idx; i >= end_idx; i--)
+        {
+          if (predict_false(i == cur_idx))
+            {
+              pg_rd_sz  = cur_pgoff;
+              ret       = mfs_read_page(sb, buf - pg_rd_sz, pg_rd_sz, cur_pg,
+                                        0);
+              cur_pgoff = 0;
+            }
+          else if (predict_false(i == end_idx))
+            {
+              pg_rd_sz = ctz_blkdatasz(sb, i) - end_pgoff;
+              ret      = mfs_read_page(sb, buf - pg_rd_sz, pg_rd_sz, cur_pg,
+                                       end_pgoff);
+            }
+          else
+            {
+              pg_rd_sz = ctz_blkdatasz(sb, i);
+              ret      = mfs_read_page(sb, buf - pg_rd_sz, pg_rd_sz, cur_pg,
+                                      0);
+            }
+
+          if (predict_false(ret == 0))
+            {
+              ret = -EINVAL;
+              goto errout;
+            }
+
+          buf -= pg_rd_sz;
+        }
+
+      cur_pg = ctz_travel(sb, cur_idx, cur_pg, cur_idx - 1);
+
+      if (predict_false(cur_pg == 0))
+        {
+          ret = -EINVAL;
+          goto errout;
+        }
+    }
+  else
+    {
+      ret = mfs_read_page(sb, buf, len, cur_pg, end_pgoff);
+
+      if (predict_false(ret == 0))
+        {
+          ret = -EINVAL;
+          goto errout;
+        }
+    }
+
+errout:
   return ret;
 }
 
-int mfs_ctz_nwrtooff(FAR struct mfs_sb_s * const sb,
-                     FAR struct mfs_node_s *node,
-                     FAR struct mfs_path_s * const path, const mfs_t depth,
-                     const mfs_t ctz_sz, FAR struct mfs_ctz_s *new_ctz)
+int mfs_ctz_wrtnode(FAR struct mfs_sb_s * const sb,
+                    FAR const struct mfs_node_s * const node)
 {
-  int                    ret       = OK;
-  bool                   del;
-  mfs_t                  pg;
-  mfs_t                  sz;
-  mfs_t                  inc;
-  mfs_t                  idx;
-  mfs_t                  bytes;
-  mfs_t                  pgoff;
-  mfs_t                  itr_min;
-  mfs_t                  itr_max;
-  mfs_t                  neg_off; /* Negative offset due to delete. */
-  FAR char               *buf      = NULL;
-  const mfs_t            range_min = node->range_min;
-  const mfs_t            range_max = node->range_max;
+  int                    ret        = OK;
+  bool                   written    = false;
+  mfs_t                  prev;
+  mfs_t                  rem_sz;
+  mfs_t                  new_pg;
+  mfs_t                  cur_pg;
+  mfs_t                  cur_idx;
+  mfs_t                  cur_pgoff;
+  mfs_t                  lower;
+  mfs_t                  upper;
+  mfs_t                  upper_og;
+  mfs_t                  lower_upd;
+  mfs_t                  upper_upd;
+  mfs_t                  del_bytes;
+  FAR char               *buf       = NULL;
+  FAR char               *tmp       = NULL;
   struct mfs_ctz_s       ctz;
-  FAR struct mfs_delta_s *delta    = NULL;
+  FAR struct mfs_delta_s *delta;
+
+  /* Traverse common CTZ blocks. */
+
+  ctz_off2loc(sb, node->range_min, &cur_idx, &cur_pgoff);
+  ctz    = node->path[node->depth - 1].ctz;
+  cur_pg = ctz_travel(sb, ctz.idx_e, ctz.pg_e, cur_idx);
+
+  /* So, till cur_idx - 1, the CTZ blocks are common. */
 
   buf = kmm_zalloc(MFS_PGSZ(sb));
   if (predict_false(buf == NULL))
@@ -434,337 +529,132 @@ int mfs_ctz_nwrtooff(FAR struct mfs_sb_s * const sb,
       goto errout;
     }
 
-  /* CoW of items in block before range_min */
+  /* Initially, there might be some offset in cur_idx CTZ blocks that is
+   * unmodified as well.
+   */
 
-  ctz_off2loc(sb, range_min, &idx, &pgoff);
-  DEBUGASSERT(depth > 0);
-  pg = ctz_travel(sb, path[depth - 1].ctz.idx_e, path[depth - 1].ctz.pg_e,
-                  idx);
-  if (predict_false(pg == 0))
+  tmp = buf;
+  mfs_read_page(sb, tmp, cur_pgoff, cur_pg, 0);
+  tmp += cur_pgoff;
+
+  /* Modifications. */
+
+  prev      = 0;
+  rem_sz    = node->sz;
+  lower     = node->range_min;
+  del_bytes = 0;
+
+  /* [lower, upper) range. Two pointer approach. Window gets narrower
+   * for every delete falling inside it.
+   */
+
+  while (rem_sz > 0)
     {
-      ret = -EINVAL;
-      goto errout_with_buf;
-    }
-
-  ctz.idx_e = idx - 1;
-  ctz.pg_e  = pg;
-  mfs_read_page(sb, buf, pgoff, pg, pgoff);
-
-  /* Updates */
-
-  bytes   = range_min;
-  itr_max = range_min;
-  neg_off = 0;
-  del     = false;
-
-  while (bytes < range_max)
-    {
-      if (!del)
-        {
-          memset(buf, 0, MFS_PGSZ(sb));
-          sz = ctz_blkdatasz(sb, ctz.idx_e + 1);
-          itr_min = itr_max;
-          itr_max += sz;
-          ctz_copyidxptrs(sb, ctz, ctz.idx_e + 1, buf);
-        }
-      else
-        {
-          inc = itr_max - itr_min;
-          itr_min = itr_max;
-          itr_min = sz - inc;
-        }
-
-      del = false;
-      mfs_ctz_rdfromoff(sb, itr_min + neg_off, path, depth, buf + pgoff, sz);
+      upper    = MIN(prev + lower + ctz_blkdatasz(sb, cur_idx), rem_sz);
+      upper_og = upper;
 
       list_for_every_entry(&node->delta, delta, struct mfs_delta_s, list)
         {
-          if (delta->off + delta->n_b <= itr_min || itr_max <= delta->off)
-            {
-              /* Out of range */
-
-              continue;
-            }
-
-          inc = MIN(itr_max, delta->off + delta->n_b) - delta->off;
-
-          if (delta->upd != NULL)
-            {
-              /* Update */
-
-              memcpy(buf + pgoff + (delta->off - itr_min), delta->upd, inc);
-            }
-          else
+          if (delta->upd == NULL)
             {
               /* Delete */
 
-              memmove(buf + pgoff + (delta->off - itr_min),
-                      buf + pgoff + (delta->off - itr_min) + inc,
-                      itr_max - (delta->off + inc));
-              itr_max -= inc;
-              neg_off += inc;
-              del     = true;
+              lower_upd = MAX(lower, delta->off);
+              upper_upd = MIN(upper, delta->off + delta->n_b);
+
+              if (lower_upd >= upper_upd)
+                {
+                  /* Skip this delta. */
+
+                  continue;
+                }
+              else
+                {
+                  del_bytes += upper_upd - lower_upd;
+                  memmove(tmp + lower_upd, tmp + upper_upd,
+                          upper - upper_upd);
+                  upper -= upper_upd;
+                }
+            }
+          else
+            {
+              /* Update */
+
+              ret = mfs_ctz_rdfromoff(sb, ctz, lower, upper - lower,
+                                          tmp);
+              if (predict_false(ret < 0))
+                {
+                  goto errout_with_buf;
+                }
             }
         }
 
-      bytes += itr_max - itr_min;
+      /* rem_sz check for final write. */
 
-      if (!del)
+      if (upper == upper_og || rem_sz == upper - lower)
         {
-          pgoff    = 0;
-          pg = mfs_ba_getpg(sb);
-          if (pg == 0)
+          prev = 0;
+
+          /* Time to write a page for new CTZ list. */
+
+          new_pg = mfs_ba_getpg(sb);
+          if (predict_false(new_pg == 0))
             {
               ret = -ENOSPC;
               goto errout_with_buf;
             }
 
-          mfs_write_page(sb, buf, MFS_PGSZ(sb), pg, 0);
-          ctz.pg_e = pg;
-          ctz.idx_e++;
+          ctz_copyidxptrs(sb, ctz, cur_idx, buf);
+          ret = mfs_write_page(sb, buf, MFS_PGSZ(sb), new_pg, 0);
+          if (predict_false(ret == 0))
+            {
+              ret = -EINVAL;
+              goto errout_with_buf;
+            }
+
+          memset(buf, 0, MFS_PGSZ(sb));
+          tmp = buf;
+          cur_idx++;
+
+          written = true;
         }
       else
         {
-          pgoff += itr_max - itr_min;
+          tmp += upper - lower;
+
+          written = false;
         }
+
+      prev    = upper - lower;
+      rem_sz -= upper - lower;
+      lower   = upper;
     }
 
-  /* Copy rest of the file. */
+  DEBUGASSERT(written);
 
-  if (del)
+  /* TODO: Need to verify for cases where the delete extends outside, etc. */
+
+  /* Write log. */
+
+  ctz.idx_e = cur_idx;
+  ctz.pg_e  = new_pg;
+  ret = mfs_jrnl_wrlog(sb, *node, ctz, node->sz);
+  if (predict_false(ret < 0))
     {
-      mfs_ctz_rdfromoff(sb, itr_max + neg_off, path, depth, buf + pgoff,
-                        sz - pgoff);
-      pg = mfs_ba_getpg(sb);
-      if (pg == 0)
+      goto errout_with_buf;
+    }
+
+  if (MFS_JRNL(sb).log_cblkidx >= MFS_JRNL_LIM(sb))
+    {
+      ret = mfs_jrnl_flush(sb);
+      if (predict_false(ret < 0))
         {
-          ret = -ENOSPC;
           goto errout_with_buf;
         }
-
-      mfs_write_page(sb, buf, MFS_PGSZ(sb), pg, 0);
-      ctz.pg_e = pg;
-      ctz.idx_e++;
-      itr_max += sz - pgoff;
-      pgoff   = 0;
     }
-
-  while (bytes < ctz_sz)
-    {
-      sz = ctz_blkdatasz(sb, ctz.idx_e + 1);
-      mfs_ctz_rdfromoff(sb, itr_max + neg_off, path, depth, buf,
-                        MIN(MFS_PGSZ(sb), ctz_sz - bytes));
-      pg = mfs_ba_getpg(sb);
-      if (pg == 0)
-        {
-          ret = -ENOSPC;
-          goto errout_with_buf;
-        }
-
-      mfs_write_page(sb, buf, MFS_PGSZ(sb), pg, 0);
-      bytes += MIN(MFS_PGSZ(sb), ctz_sz - bytes);
-    }
-
-  /* TODO: Check for cases where delete, but no further data at the end.
-   * , which might cause an infinite loop.
-   */
 
 errout_with_buf:
   kmm_free(buf);
-
-errout:
-  return ret;
-}
-
-int mfs_ctz_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
-                    mfs_t o_bytes, const mfs_t n_bytes,
-                    mfs_t o_ctz_sz, FAR struct mfs_path_s * const path,
-                    const mfs_t depth, FAR const char *buf,
-                    FAR struct mfs_ctz_s *ctz)
-{
-  int              ret            = OK;
-  bool             partial;
-  mfs_t            partial_bytes; /* Bytes partially filled. */
-  mfs_t            pg;
-  mfs_t            off;
-  mfs_t            idx;
-  mfs_t            bytes;
-  mfs_t            o_pg;
-  mfs_t            o_off;
-  mfs_t            o_idx;
-  mfs_t            o_rembytes;
-  mfs_t            o_data_off;
-  mfs_t            n_pg;
-  mfs_t            n_data_off;
-  mfs_t            ctz_blk_datasz;
-  FAR char         *data;
-  struct mfs_ctz_s o_ctz;
-  struct mfs_ctz_s n_ctz;
-
-  data = kmm_zalloc(MFS_PGSZ(sb));
-  if (predict_false(data == NULL))
-    {
-      ret = -ENOMEM;
-      goto errout;
-    }
-
-  /* Get updated location from the journal. */
-
-  DEBUGASSERT(depth > 0);
-  mfs_jrnl_updatepath(sb, path, depth);
-  o_ctz = path[depth - 1].ctz;
-
-  /* TODO: Make the traversal in reverse direction. It would cause
-   * a lot less traversals.
-   */
-
-  ctz_off2loc(sb, data_off, &idx, &off);
-
-  /* Reach the common part. */
-
-  if (idx != 0 && off != 0)
-    {
-      pg = ctz_travel(sb, o_ctz.idx_e, o_ctz.pg_e, idx - 1);
-      n_ctz.idx_e = idx - 1;
-      n_ctz.pg_e  = pg;
-    }
-  else
-    {
-      pg = o_ctz.pg_e;
-      n_ctz.idx_e = 0;
-      n_ctz.pg_e  = pg;
-      finfo("CTZ: %u %u %u", pg, n_ctz.idx_e, n_ctz.pg_e);
-    }
-
-  /* Add new data from buf. */
-
-  partial    = false;
-  o_rembytes = o_ctz_sz - (data_off + o_bytes);
-  bytes      = data_off;
-  if (n_bytes != 0)
-    {
-      while (bytes < data_off + n_bytes)
-        {
-          n_pg = mfs_ba_getpg(sb);
-          if (n_pg)
-            {
-              ret = -ENOSPC;
-              goto errout_with_data;
-            }
-
-          ctz_copyidxptrs(sb, n_ctz, idx, data); /* Handles idx == 0. */
-          ctz_blk_datasz = ctz_blkdatasz(sb, idx);
-
-          if (predict_false(off != 0))
-            {
-              /* This happens at max for the first iteration of the loop. */
-
-              mfs_read_page(sb, data, off,
-                            ctz_travel(sb, o_ctz.idx_e, o_ctz.pg_e, idx), 0);
-              bytes += off;
-            }
-
-          memcpy(data + off, buf + bytes,
-                MIN(ctz_blk_datasz - off, n_bytes - bytes));
-          if (n_bytes - bytes < ctz_blk_datasz - off && o_rembytes != 0)
-            {
-              partial = true;
-              partial_bytes = n_bytes - bytes;
-            }
-          else
-            {
-              bytes += ctz_blk_datasz - off;
-            }
-
-          if (predict_false(off != 0))
-            {
-              /* This happens at max for the first iteration of the loop. */
-
-              off = 0;
-            }
-
-          if (predict_true(!partial))
-            {
-              mfs_write_page(sb, data, MFS_PGSZ(sb), n_pg, 0);
-              n_ctz.idx_e = idx;
-              n_ctz.pg_e  = pg;
-            }
-          else
-            {
-              /* In this case, we have a situation where there is still
-               * some empty area left in the page, and there is some data
-               * that is waiting to be fit in there, so we won't write it
-               * to the flash JUST yet. We'll fill in the rest of the data
-               * and THEN write it.
-               *
-               * It's okay to leave the loop as this case will happen, if at
-               * all, on the last iteration of the loop.
-               */
-
-              n_ctz.idx_e = idx;
-              n_ctz.pg_e  = pg;
-              break;
-            }
-
-          idx++;
-
-          memset(data, 0, MFS_PGSZ(sb));
-        }
-    }
-
-  o_data_off = data_off + o_bytes;
-  n_data_off = data_off + n_bytes;
-
-  /* Completing partially filled data, if present. */
-
-  if (partial)
-    {
-      ctz_off2loc(sb, o_data_off, &o_idx, &o_off);
-      o_pg = ctz_travel(sb, o_ctz.idx_e, o_ctz.pg_e, o_idx);
-      mfs_read_page(sb, data + partial_bytes,
-                    ctz_blkdatasz(sb, n_ctz.idx_e) - partial_bytes, o_pg,
-                    o_off);
-      mfs_write_page(sb, data, MFS_PGSZ(sb), n_ctz.pg_e, 0);
-
-      o_data_off    += partial_bytes;
-      n_data_off    += partial_bytes;
-      partial_bytes = 0;
-      partial       = false;
-    }
-
-  /* Adding old bytes in. */
-
-  while (o_data_off < o_ctz_sz)
-    {
-      memset(data, 0, MFS_PGSZ(sb));
-
-      pg = mfs_ba_getpg(sb);
-      if (predict_false(pg == 0))
-        {
-          ret = -ENOSPC;
-          goto errout_with_data;
-        }
-
-      ctz_blk_datasz = ctz_blkdatasz(sb, n_ctz.idx_e + 1);
-      ctz_copyidxptrs(sb, n_ctz, n_ctz.idx_e + 1, data);
-
-      mfs_ctz_rdfromoff(sb, o_data_off, path, depth, data, ctz_blk_datasz);
-      mfs_write_page(sb, data, MFS_PGSZ(sb), pg, 0);
-
-      n_ctz.idx_e++;
-      n_ctz.pg_e = pg;
-
-      o_data_off += ctz_blk_datasz;
-    }
-
-  mfs_jrnl_newlog(sb, path, depth, n_ctz);
-
-  /* path is not updated to point to the new ctz. This is upto the caller. */
-
-  *ctz = n_ctz;
-
-errout_with_data:
-  kmm_free(data);
 
 errout:
   return ret;

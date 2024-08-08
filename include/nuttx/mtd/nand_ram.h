@@ -43,14 +43,14 @@
 
 #define NAND_RAM_SIZE                 NAND_RAM_MB(CONFIG_MTD_NAND_RAM_SIZE)
 
-#define NAND_RAM_LOG_PAGES_PER_BLOCK  ((uint32_t) 7)
-#define NAND_RAM_PAGE_SIZE            ((uint32_t) (1 << 9)) /* 512 B */
-#define NAND_RAM_SPARE_SIZE           ((uint32_t) (1 << 4)) /* 16 B */
+#define NAND_RAM_LOG_PAGES_PER_BLOCK  ((uint32_t) 4)
+#define NAND_RAM_PAGE_SIZE            ((uint32_t) (1 << 7))
+#define NAND_RAM_SPARE_SIZE           ((uint32_t) (1 << 3))
+#define NAND_RAM_BLOCK_SIZE           ((uint32_t) ((1 << NAND_RAM_LOG_PAGES_PER_BLOCK) * NAND_RAM_PAGE_SIZE))
 #define NAND_RAM_N_PAGES              ((uint32_t) NAND_RAM_SIZE / NAND_RAM_PAGE_SIZE)
 #define NAND_RAM_TOTAL_PAGE_SIZE      ((uint32_t) (NAND_RAM_PAGE_SIZE + NAND_RAM_SPARE_SIZE))
-#define NAND_RAM_PAGES_PER_BLOCK      ((uint32_t) (NAND_RAM_BLOCK_SIZE / NAND_RAM_PAGE_SIZE))
-#define NAND_RAM_N_BLOCKS             ((uint32_t) (NAND_RAM_N_PAGES / NAND_RAM_PAGES_PER_BLOCK))
-#define NAND_RAM_BLOCK_SIZE           ((uint32_t) ((1 << NAND_RAM_LOG_PAGES_PER_BLOCK) * NAND_RAM_PAGE_SIZE))
+#define NAND_RAM_PAGES_PER_BLOCK      ((uint32_t) (1 << (NAND_RAM_LOG_PAGES_PER_BLOCK)))
+#define NAND_RAM_N_BLOCKS             ((uint32_t) (NAND_RAM_SIZE / (NAND_RAM_PAGES_PER_BLOCK * NAND_RAM_PAGE_SIZE)))
 
 #define NAND_RAM_PAGE_WRITTEN         0
 #define NAND_RAM_PAGE_FREE            1
