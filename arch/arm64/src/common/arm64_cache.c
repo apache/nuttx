@@ -519,6 +519,17 @@ void up_clean_dcache_all(void)
 void up_enable_dcache(void)
 {
   uint64_t value = read_sysreg(sctlr_el1);
+
+  /* Check if the D-Cache is enabled */
+
+  if ((value & SCTLR_C_BIT) != 0)
+    {
+      return;
+    }
+
+  up_invalidate_dcache_all();
+
+  value = read_sysreg(sctlr_el1);
   write_sysreg((value | SCTLR_C_BIT), sctlr_el1);
   ARM64_ISB();
 }

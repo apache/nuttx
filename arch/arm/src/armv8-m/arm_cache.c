@@ -496,12 +496,12 @@ void up_enable_dcache(void)
   uint32_t sets;
   uint32_t ways;
 
-  /* If dcache is already enabled, disable it first. */
+  /* If dcache is already enabled, return. */
 
   ccr = getreg32(NVIC_CFGCON);
   if ((ccr & NVIC_CFGCON_DC) != 0)
     {
-      up_disable_dcache();
+      return;
     }
 
   /* Get the characteristics of the D-Cache */

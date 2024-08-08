@@ -117,6 +117,21 @@ static size_t x86_64_cache_size(int leaf)
 }
 
 /****************************************************************************
+ * Name: x86_64_is_cache_enabled
+ ****************************************************************************/
+
+static int x86_64_is_cache_enabled(void)
+{
+  unsigned long cr0;
+
+  asm volatile("\t mov %%cr0, %0\n"
+               : "=r" (cr0)
+               :: "memory");
+
+  return (cr0 & 0x60000000) == 0;
+}
+
+/****************************************************************************
  * Name: x86_64_cache_enable
  ****************************************************************************/
 
@@ -358,6 +373,14 @@ size_t up_get_dcache_size(void)
 #ifdef CONFIG_ARCH_DCACHE
 void up_enable_dcache(void)
 {
+  /* Check if the D-Cache is enabled */
+
+  if (x86_64_is_cache_enabled())
+    {
+      return;
+    }
+
+  up_invalidate_dcache_all();
   x86_64_cache_enable();
 }
 #endif /* CONFIG_ARCH_DCACHE */
