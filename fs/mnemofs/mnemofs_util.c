@@ -92,6 +92,8 @@ uint8_t mfs_arrhash(FAR const char *arr, ssize_t len)
   ssize_t r = len - 1;
   uint16_t hash = 0;
 
+  /* TODO: Change the array checksum to be 16 bit long. */
+
   while (l <= r)
     {
       hash += arr[l] * arr[r] * (l + 1) * (r + 1);
@@ -103,6 +105,27 @@ uint8_t mfs_arrhash(FAR const char *arr, ssize_t len)
   finfo("Hash calculated for size %ld to be %d.", len, hash % (1 << 8));
 
   return hash % (1 << 8);
+}
+
+uint16_t mfs_hash(FAR const char *arr, ssize_t len)
+{
+  ssize_t l = 0;
+  ssize_t r = len - 1;
+  uint32_t hash = 0;
+
+  /* TODO: Change the array checksum to be 16 bit long. */
+
+  while (l <= r)
+    {
+      hash += arr[l] * arr[r] * (l + 1) * (r + 1);
+      l++;
+      r--;
+      hash %= (1 << MFS_HASHSZ);
+    }
+
+  finfo("Hash calculated for size %ld to be %u.", len, hash);
+
+  return hash;
 }
 
 FAR char *mfs_ser_8(const uint8_t n, FAR char * const out)
@@ -189,6 +212,28 @@ FAR const char *mfs_deser_ctz(FAR const char * const in,
   return i;
 }
 
+FAR char *mfs_ser_path(FAR const struct mfs_path_s * const x,
+                      FAR char * const out)
+{
+  char *o = out;
+
+  o = mfs_ser_ctz(&x->ctz, o);
+  o = mfs_ser_mfs(x->off, o);
+  o = mfs_ser_mfs(x->sz, o);
+  return o;
+}
+
+FAR const char *mfs_deser_path(FAR const char * const in,
+                               FAR struct mfs_path_s * const x)
+{
+  const char *i = in;
+
+  i = mfs_deser_ctz(i, &x->ctz);
+  i = mfs_deser_mfs(i, &x->off);
+  i = mfs_deser_mfs(i, &x->sz);
+  return i;
+}
+
 FAR char *mfs_ser_timespec(FAR const struct timespec * const x,
                            FAR char * const out)
 {
@@ -224,4 +269,17 @@ mfs_t mfs_v2n(mfs_t n)
 mfs_t mfs_set_msb(mfs_t n)
 {
   return 31 - mfs_clz(n);
+}
+
+bool mfs_ctz_eq(FAR const struct mfs_ctz_s * const a,
+                FAR const struct mfs_ctz_s * const b)
+{
+  return a->idx_e == b->idx_e && a->pg_e == b->pg_e;
+}
+
+bool mfs_path_eq(FAR const struct mfs_path_s * const a,
+                 FAR const struct mfs_path_s * const b)
+{
+  return mfs_ctz_eq(&a->ctz, &b->ctz) && (a->off == b->off)
+         && (a->sz == b->sz);
 }
