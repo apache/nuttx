@@ -120,8 +120,8 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
           timer->pt_overrun++;
         }
 
-      wd_start_absolute(&timer->pt_wdog, timer->pt_expected,
-                        timer_timeout, itimer);
+      wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
+                       timer_timeout, itimer);
     }
 }
 
@@ -322,8 +322,8 @@ int timer_settime(timer_t timerid, int flags,
 
   /* Then start the watchdog */
 
-  ret = wd_start_absolute(&timer->pt_wdog, timer->pt_expected,
-                          timer_timeout, (wdparm_t)timer);
+  ret = wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
+                         timer_timeout, (wdparm_t)timer);
 
   if (ret < 0)
     {

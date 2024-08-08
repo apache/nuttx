@@ -212,7 +212,7 @@ void wd_insert(FAR struct wdog_s *wdog, clock_t expired,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_start_absolute
+ * Name: wd_start_abstick
  *
  * Description:
  *   This function adds a watchdog timer to the active timer queue.  The
@@ -247,8 +247,8 @@ void wd_insert(FAR struct wdog_s *wdog, clock_t expired,
  *
  ****************************************************************************/
 
-int wd_start_absolute(FAR struct wdog_s *wdog, clock_t ticks,
-                      wdentry_t wdentry, wdparm_t arg)
+int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
+                     wdentry_t wdentry, wdparm_t arg)
 {
   irqstate_t flags;
   bool reassess = false;
@@ -278,7 +278,7 @@ int wd_start_absolute(FAR struct wdog_s *wdog, clock_t ticks,
   ticks++;
 
   /* NOTE:  There is a race condition here... the caller may receive
-   * the watchdog between the time that wd_start_absolute is called and
+   * the watchdog between the time that wd_start_abstick is called and
    * the critical section is established.
    */
 
@@ -368,8 +368,8 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
       return -EINVAL;
     }
 
-  return wd_start_absolute(wdog, clock_systime_ticks() + delay,
-                           wdentry, arg);
+  return wd_start_abstick(wdog, clock_systime_ticks() + delay,
+                          wdentry, arg);
 }
 
 /****************************************************************************
