@@ -96,7 +96,7 @@ ifeq ($(CONFIG_DUMP_ON_EXIT),y)
 CSRCS += sched_dumponexit.c
 endif
 
-ifeq ($(CONFIG_SMP_CALL),y)
+ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_smp.c
 endif
 
