@@ -477,10 +477,8 @@ def in_interrupt_context(cpuid=0):
 
 
 def get_arch_sp_name():
-    if is_target_arch("arm"):
+    if is_target_arch("arm") or is_target_arch("aarch64"):
         # arm and arm variants
-        return "sp"
-    if is_target_arch("aarch64"):
         return "sp"
     elif is_target_arch("i386", exact=True):
         return "esp"
@@ -492,10 +490,8 @@ def get_arch_sp_name():
 
 
 def get_arch_pc_name():
-    if is_target_arch("arm"):
+    if is_target_arch("arm") or is_target_arch("aarch64"):
         # arm and arm variants
-        return "pc"
-    if is_target_arch("aarch64"):
         return "pc"
     elif is_target_arch("i386", exact=True):
         return "eip"
