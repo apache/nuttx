@@ -118,6 +118,14 @@
 
 #define LINUMSTM32H753BI_QETIMER 5
 
+/* LCD */
+
+#define GPIO_LCD_DISP      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTI|GPIO_PIN7)
+
+#define GPIO_LCD_BL        (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                            GPIO_OUTPUT_SET|GPIO_PORTH|GPIO_PIN6)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
