@@ -432,6 +432,15 @@ void up_flush_dcache_all(void)
 
 void up_enable_dcache(void)
 {
+  /* Check if the D-Cache is enabled */
+
+  if (cp15_dcache_is_enabled())
+    {
+      return;
+    }
+
+  up_invalidate_dcache_all();
+
   cp15_enable_dcache();
   l2cc_enable();
 }

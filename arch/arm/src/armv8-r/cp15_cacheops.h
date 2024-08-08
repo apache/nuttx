@@ -559,6 +559,25 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
+ * Name: cp15_dcache_is_enabled
+ *
+ * Description:
+ *   Check if L1 D Cache is enabled
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   true if L1 D Cache is enabled, false otherwise
+ *
+ ****************************************************************************/
+
+static inline int cp15_dcache_is_enabled(void)
+{
+  return (CP15_GET(SCTLR) & SCTLR_C) != 0;
+}
+
+/****************************************************************************
  * Name: cp15_enable_dcache
  *
  * Description:

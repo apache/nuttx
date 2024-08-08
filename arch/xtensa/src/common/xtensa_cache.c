@@ -346,6 +346,15 @@ void up_enable_dcache(void)
 
   __asm__ __volatile__ ("rsr %0, memctl\n" : "=r"(memctl) :);
 
+  /* Check if the D-Cache is enabled */
+
+  if ((memctl & MEMCTL_INV_EN) != 0)
+    {
+      return;
+    }
+
+  up_invalidate_dcache_all();
+
   /* set ways allocatable & ways use */
 
   memctl = memctl & ~(MEMCTL_DCWA_MASK | MEMCTL_DCWU_MASK);
