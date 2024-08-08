@@ -83,11 +83,13 @@ static int IRAM_ATTR esp32_fromcpu_interrupt(int fromcpu)
 
 int IRAM_ATTR esp32_fromcpu0_interrupt(int irq, void *context, void *arg)
 {
+  nxsched_smp_call_handler(irq, context, arg);
   return esp32_fromcpu_interrupt(0);
 }
 
 int IRAM_ATTR esp32_fromcpu1_interrupt(int irq, void *context, void *arg)
 {
+  nxsched_smp_call_handler(irq, context, arg);
   return esp32_fromcpu_interrupt(1);
 }
 

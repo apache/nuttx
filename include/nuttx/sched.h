@@ -779,7 +779,7 @@ typedef CODE void (*nxsched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
 /* This is the callback type used by nxsched_smp_call() */
 
-#ifdef CONFIG_SMP_CALL
+#ifdef CONFIG_SMP
 typedef CODE int (*nxsched_smp_call_t)(FAR void *arg);
 #endif
 
@@ -1623,7 +1623,7 @@ void nxsched_dumponexit(void);
 #  define nxsched_dumponexit()
 #endif /* CONFIG_DUMP_ON_EXIT */
 
-#ifdef CONFIG_SMP_CALL
+#ifdef CONFIG_SMP
 /****************************************************************************
  * Name: nxsched_smp_call_handler
  *

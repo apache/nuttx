@@ -1735,7 +1735,7 @@ void up_secure_irq(int irq, bool secure);
 # define up_secure_irq(i, s)
 #endif
 
-#ifdef CONFIG_SMP_CALL
+#ifdef CONFIG_SMP
 /****************************************************************************
  * Name: up_send_smp_call
  *
