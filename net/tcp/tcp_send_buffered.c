@@ -1447,7 +1447,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           info.tc_conn = conn;
           info.tc_cb   = conn->sndcb;
           info.tc_sem  = &conn->snd_sem;
-          info.tc_free = false;
           tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
           ret = net_sem_timedwait_uninterruptible(&conn->snd_sem,

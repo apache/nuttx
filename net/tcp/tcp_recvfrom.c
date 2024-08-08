@@ -778,7 +778,6 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           info.tc_conn = conn;
           info.tc_cb   = state.ir_cb;
           info.tc_sem  = &state.ir_sem;
-          info.tc_free = false;
           tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
           /* Wait for either the receive to complete or for an error/timeout

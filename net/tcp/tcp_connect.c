@@ -375,7 +375,6 @@ int psock_tcp_connect(FAR struct socket *psock,
               info.tc_conn = conn;
               info.tc_cb = state.tc_cb;
               info.tc_sem = &state.tc_sem;
-              info.tc_free = true;
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
               /* Wait for either the connect to complete or for an
