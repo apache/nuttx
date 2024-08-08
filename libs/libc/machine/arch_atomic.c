@@ -98,6 +98,21 @@
     return ret;                                                               \
   }
 
+#define FLAG_TEST_AND_SET(n, type)                                           \
+                                                                             \
+  type weak_function __atomic_flags_test_and_set##n (FAR volatile void *ptr, \
+                                                     int memorder)           \
+  {                                                                          \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                           \
+    FAR type *tmp = (FAR type *)ptr;                                         \
+    type ret = *tmp;                                                         \
+                                                                             \
+    *(FAR type *)ptr = 1;                                                    \
+                                                                             \
+    spin_unlock_irqrestore(NULL, irqstate);                                  \
+    return ret;                                                              \
+  }
+
 #define FETCH_ADD(n, type)                                             \
                                                                        \
   type weak_function __atomic_fetch_add_##n (FAR volatile void *ptr,   \
@@ -395,6 +410,30 @@ CMP_EXCHANGE(4, uint32_t)
  ****************************************************************************/
 
 CMP_EXCHANGE(8, uint64_t)
+
+/****************************************************************************
+ * Name: __atomic_flag_test_and_set_1
+ ****************************************************************************/
+
+FLAG_TEST_AND_SET(1, uint8_t)
+
+/****************************************************************************
+ * Name: __atomic_flag_test_and_set_2
+ ****************************************************************************/
+
+FLAG_TEST_AND_SET(2, uint16_t)
+
+/****************************************************************************
+ * Name: __atomic_flag_test_and_set_4
+ ****************************************************************************/
+
+FLAG_TEST_AND_SET(4, uint32_t)
+
+/****************************************************************************
+ * Name: __atomic_flag_test_and_set_8
+ ****************************************************************************/
+
+FLAG_TEST_AND_SET(8, uint64_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_add_1
