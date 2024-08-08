@@ -228,6 +228,8 @@ int s698pm_pause_handler(int irq, void *c, void *arg)
 {
   int cpu = this_cpu();
 
+  nxsched_smp_call_handler(irq, c, arg);
+
   /* Clear IPI (Inter-Processor-Interrupt) */
 
   putreg32(1 << S698PM_IPI_VECTOR, S698PM_IRQREG_ICLEAR);
@@ -259,6 +261,62 @@ int s698pm_pause_handler(int irq, void *c, void *arg)
 }
 
 /****************************************************************************
+ * Name: up_cpu_pause_async
+ *
+ * Description:
+ *   pause task execution on the CPU
+ *   check whether there are tasks delivered to specified cpu
+ *   and try to run them.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section;
+ *
+ ****************************************************************************/
+
+inline_function int up_cpu_pause_async(int cpu)
+{
+  uintptr_t regaddr;
+
+  /* Execute Pause IRQ to CPU(cpu) */
+
+  regaddr = (uintptr_t)S698PM_IRQREG_P0_FORCE + (4 * cpu);
+  putreg32(1 << S698PM_IPI_VECTOR, regaddr);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  int cpu;
+
+  for (; cpuset != 0; cpuset &= ~(1 << cpu))
+    {
+      cpu = ffs(cpuset) - 1;
+      up_cpu_pause_async(cpu);
+    }
+}
+
+/****************************************************************************
  * Name: up_cpu_pause
  *
  * Description:
@@ -280,8 +338,6 @@ int s698pm_pause_handler(int irq, void *c, void *arg)
 
 int up_cpu_pause(int cpu)
 {
-  uintptr_t regaddr;
-
   sinfo("cpu=%d\n", cpu);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
@@ -308,8 +364,7 @@ int up_cpu_pause(int cpu)
 
   /* Execute Pause IRQ to CPU(cpu) */
 
-  regaddr = (uintptr_t)S698PM_IRQREG_P0_FORCE + (4 * cpu);
-  putreg32(1 << S698PM_IPI_VECTOR, regaddr);
+  up_cpu_pause_async(cpu);
 
   /* Wait for the other CPU to unlock g_cpu_paused meaning that
    * it is fully paused and ready for up_cpu_resume();

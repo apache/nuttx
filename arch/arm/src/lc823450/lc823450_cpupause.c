@@ -238,6 +238,8 @@ int lc823450_pause_handler(int irq, void *c, void *arg)
 {
   int cpu = this_cpu();
 
+  nxsched_smp_call_handler(irq, c, arg);
+
   /* Clear : Pause IRQ */
 
   if (irq == LC823450_IRQ_CTXM3_01)
@@ -275,6 +277,66 @@ int lc823450_pause_handler(int irq, void *c, void *arg)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_cpu_pause_async
+ *
+ * Description:
+ *   pause task execution on the CPU
+ *   check whether there are tasks delivered to specified cpu
+ *   and try to run them.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section;
+ *
+ ****************************************************************************/
+
+inline_function int up_cpu_pause_async(int cpu)
+{
+  /* Execute Pause IRQ to CPU(cpu) */
+
+  if (cpu == 1)
+    {
+      putreg32(IPIREG_INTISR0_1, IPIREG);
+    }
+  else
+    {
+      putreg32(IPIREG_INTISR1_1, IPIREG);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  int cpu;
+
+  for (; cpuset != 0; cpuset &= ~(1 << cpu))
+    {
+      cpu = ffs(cpuset) - 1;
+      up_cpu_pause_async(cpu);
+    }
 }
 
 /****************************************************************************
@@ -325,14 +387,7 @@ int up_cpu_pause(int cpu)
 
   /* Execute Pause IRQ to CPU(cpu) */
 
-  if (cpu == 1)
-    {
-      putreg32(IPIREG_INTISR0_1, IPIREG);
-    }
-  else
-    {
-      putreg32(IPIREG_INTISR1_1, IPIREG);
-    }
+  up_cpu_pause_async(cpu);
 
   /* Wait for the other CPU to unlock g_cpu_paused meaning that
    * it is fully paused and ready for up_cpu_resume();

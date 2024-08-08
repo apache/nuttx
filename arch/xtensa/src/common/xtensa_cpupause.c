@@ -245,6 +245,31 @@ void xtensa_pause_handler(void)
 }
 
 /****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  int cpu;
+
+  for (; cpuset != 0; cpuset &= ~(1 << cpu))
+    {
+      cpu = ffs(cpuset) - 1;
+      xtensa_intercpu_interrupt(cpu, CPU_INTCODE_PAUSE);
+    }
+}
+
+/****************************************************************************
  * Name: up_cpu_pause
  *
  * Description:

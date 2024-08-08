@@ -251,6 +251,7 @@ void sim_sigdeliver(void);
 void host_cpu0_start(void);
 int host_cpu_start(int cpu, void *stack, size_t size);
 void host_send_ipi(int cpu);
+void host_send_func_call_ipi(int cpu);
 #endif
 
 /* sim_smpsignal.c **********************************************************/
@@ -258,6 +259,7 @@ void host_send_ipi(int cpu);
 #ifdef CONFIG_SMP
 void host_cpu_started(void);
 int sim_init_ipi(int irq);
+int sim_init_func_call_ipi(int irq);
 #endif
 
 /* sim_oneshot.c ************************************************************/

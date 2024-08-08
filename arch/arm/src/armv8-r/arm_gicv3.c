@@ -569,11 +569,8 @@ static void gicv3_dist_init(void)
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
-
-#  ifdef CONFIG_SMP_CALL
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
                          nxsched_smp_call_handler, NULL));
-#  endif
 #endif
 }
 
@@ -845,7 +842,21 @@ void arm_gic_secondary_init(void)
   arm_gic_init();
 }
 
-#  ifdef CONFIG_SMP_CALL
+#  ifdef CONFIG_SMP
+/***************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ***************************************************************************/
+
 void up_send_smp_call(cpu_set_t cpuset)
 {
   up_trigger_irq(GIC_SMP_CPUCALL, cpuset);

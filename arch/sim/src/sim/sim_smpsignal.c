@@ -447,3 +447,44 @@ int up_cpu_resume(int cpu)
 
   return OK;
 }
+
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Name: sim_init_func_call_ipi
+ *
+ * Description:
+ *   Attach the CPU function call request interrupt to the NuttX logic.
+ *
+ * Input Parameters:
+ *   irq - the SIGUSR2 interrupt number
+ *
+ * Returned Value:
+ *   On success returns OK (0), otherwise a negative value.
+ ****************************************************************************/
+
+int sim_init_func_call_ipi(int irq)
+{
+  up_enable_irq(irq);
+  return irq_attach(irq, nxsched_smp_call_handler, NULL);
+}
+
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Notify the cpuset cpus handler function calls.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  int cpu;
+
+  for (; cpuset != 0; cpuset &= ~(1 << cpu))
+    {
+      cpu = ffs(cpuset) - 1;
+      host_send_func_call_ipi(cpu);
+    }
+}
+#endif
