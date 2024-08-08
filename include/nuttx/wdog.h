@@ -138,7 +138,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
              wdentry_t wdentry, wdparm_t arg);
 
 /****************************************************************************
- * Name: wd_start_absolute
+ * Name: wd_start_abstick
  *
  * Description:
  *   This function adds a watchdog timer to the active timer queue.  The
@@ -173,8 +173,8 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
  *
  ****************************************************************************/
 
-int wd_start_absolute(FAR struct wdog_s *wdog, clock_t ticks,
-                      wdentry_t wdentry, wdparm_t arg);
+int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
+                     wdentry_t wdentry, wdparm_t arg);
 
 /****************************************************************************
  * Name: wd_cancel
