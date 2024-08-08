@@ -23,7 +23,9 @@
 import re
 
 import gdb
-from macros import fetch_macro_info, try_expand
+from macros import fetch_macro_info
+
+g_symbol_cache = {}
 
 
 class CachedType:
@@ -132,17 +134,53 @@ def gdb_eval_or_none(expresssion):
         return None
 
 
-def get_symbol_value(name):
+def get_symbol_value(name, locspec="nx_start", cacheable=True):
     """Return the value of a symbol value etc: Variable, Marco"""
+    global g_symbol_cache
 
-    expr = None
+    # If there is a current stack frame, GDB uses the macros in scope at that frame’s source code line.
+    # Otherwise, GDB uses the macros in scope at the current listing location.
+    # Reference: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Macros.html#Macros
+    if not gdb.selected_frame():
+        gdb.execute(f"list {locspec}", to_string=True)
+        return gdb_eval_or_none(name)
 
-    try:
-        gdb.execute("set $_%s = %s" % (name, name))
-        expr = "$_%s" % (name)
-    except gdb.error:
-        expr = try_expand(name, macroctx.macro_map)
-    return gdb_eval_or_none(expr)
+    # Try current frame
+    value = gdb_eval_or_none(name)
+    if value:
+        return value
+
+    # Check if the symbol is already cached
+    if cacheable and (name, locspec) in g_symbol_cache:
+        return g_symbol_cache[(name, locspec)]
+
+    # There's current frame and no definition found. We need second inferior without a valid frame
+    # in order to use the list command to set the scope.
+    if len(gdb.inferiors()) == 1:
+        gdb.execute(
+            f"add-inferior -exec {gdb.objfiles()[0].filename} -no-connection",
+            to_string=True,
+        )
+        g_symbol_cache = {}
+
+    suppressed = "on" in gdb.execute("show suppress-cli-notifications", to_string=True)
+    if not suppressed:
+        # Disable notifications
+        gdb.execute("set suppress-cli-notifications on")
+
+    # Switch to inferior 2 and set the scope firstly
+    gdb.execute("inferior 2", to_string=True)
+    gdb.execute(f"list {locspec}", to_string=True)
+    value = gdb_eval_or_none(name)
+    if cacheable:
+        g_symbol_cache[(name, locspec)] = value
+
+    # Switch back to inferior 1
+    gdb.execute("inferior 1", to_string=True)
+
+    if not suppressed:
+        gdb.execute("set suppress-cli-notifications off")
+    return value
 
 
 def hexdump(address, size):
