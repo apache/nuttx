@@ -442,8 +442,7 @@ struct tcp_callback_s
 {
   FAR struct tcp_conn_s *tc_conn;
   FAR struct devif_callback_s *tc_cb;
-  sem_t *tc_sem;
-  bool tc_free;
+  FAR sem_t *tc_sem;
 };
 
 /****************************************************************************
