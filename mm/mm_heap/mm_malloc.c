@@ -381,6 +381,16 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       mwarn("Dump leak memory(thread exit, but memory not free):\n");
       dump.pid = PID_MM_LEAK;
       mm_memdump(heap, &dump);
+#    ifdef CONFIG_MM_HEAP_MEMPOOL
+      mwarn("Dump block used by mempool expand/trunk:\n");
+      dump.pid = PID_MM_MEMPOOL;
+      mm_memdump(heap, &dump);
+#    endif
+#    if CONFIG_MM_BACKTRACE >= 0
+      mwarn("Dump allocated orphan nodes. (neighbor of free nodes):\n");
+      dump.pid = PID_MM_ORPHAN;
+      mm_memdump(heap, &dump);
+#    endif
 #  endif
 #endif
 #ifdef CONFIG_MM_PANIC_ON_FAILURE
