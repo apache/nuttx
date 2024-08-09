@@ -56,21 +56,21 @@ void arm64_init_signal_process(struct tcb_s *tcb, struct regs_context *regs)
   struct regs_context  *pctx = (regs != NULL) ? regs :
   (struct regs_context *)tcb->xcp.regs;
   struct regs_context  *psigctx;
-  char *stack_ptr = (char *)pctx->sp_elx - sizeof(struct regs_context);
+  char *stack_ptr    = (char *)pctx->sp_elx - sizeof(struct regs_context);
 
 #ifdef CONFIG_ARCH_FPU
   struct fpu_reg      *pfpuctx;
-  pfpuctx      = STACK_PTR_TO_FRAME(struct fpu_reg, stack_ptr);
-  tcb->xcp.fpu_regs   = (uint64_t *)pfpuctx;
+  pfpuctx            = STACK_PTR_TO_FRAME(struct fpu_reg, stack_ptr);
+  tcb->xcp.fpu_regs  = (uint64_t *)pfpuctx;
 
   /* set fpu context */
 
   arm64_init_fpu(tcb);
-  stack_ptr  = (char *)pfpuctx;
+  stack_ptr          = (char *)pfpuctx;
 #endif
-  psigctx      = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
+  psigctx            = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
   memset(psigctx, 0, sizeof(struct regs_context));
-  psigctx->elr           = (uint64_t)arm64_sigdeliver;
+  psigctx->elr       = (uint64_t)arm64_sigdeliver;
 
   /* Keep using SP_EL1 */
 
@@ -80,7 +80,11 @@ void arm64_init_signal_process(struct tcb_s *tcb, struct regs_context *regs)
   psigctx->spsr      = SPSR_MODE_EL1H | DAIF_FIQ_BIT | DAIF_IRQ_BIT;
 #endif
   psigctx->sp_elx    = (uint64_t)stack_ptr;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  psigctx->sp_el0    = (uint64_t)pctx->sp_el0;
+#else
   psigctx->sp_el0    = (uint64_t)psigctx;
+#endif
   psigctx->exe_depth = 1;
   psigctx->tpidr_el0 = (uint64_t)tcb;
   psigctx->tpidr_el1 = (uint64_t)tcb;
