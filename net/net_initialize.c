@@ -168,6 +168,12 @@ void net_initialize(void)
 
   usrsock_initialize();
 #endif
+
+#ifdef CONFIG_NETUTILS_IPTLITE
+  /* Initialize the iptlite packet filter modules */
+
+  nflite_initialize();
+#endif
 }
 
 #endif /* CONFIG_NET */
