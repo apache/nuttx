@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 
 #include "inode/inode.h"
@@ -69,6 +70,8 @@ static ssize_t v9fs_vfs_write(FAR struct file *filep,
                               FAR const char *buffer, size_t buflen);
 static off_t v9fs_vfs_seek(FAR struct file *filep, off_t offset,
                            int whence);
+static int v9fs_vfs_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 static int v9fs_vfs_sync(FAR struct file *filep);
 static int v9fs_vfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int v9fs_vfs_fstat(FAR const struct file *filep,
@@ -118,7 +121,7 @@ const struct mountpt_operations g_v9fs_operations =
   v9fs_vfs_read,                /* read */
   v9fs_vfs_write,               /* write */
   v9fs_vfs_seek,                /* seek */
-  NULL,                         /* ioctl */
+  v9fs_vfs_ioctl,               /* ioctl */
   NULL,                         /* mmap */
   v9fs_vfs_truncate,            /* truncate */
   NULL,                         /* poll */
@@ -369,6 +372,29 @@ static off_t v9fs_vfs_seek(FAR struct file *filep, off_t offset, int whence)
     }
 
   nxmutex_unlock(&file->lock);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: v9fs_vfs_ioctl
+ ****************************************************************************/
+
+static int v9fs_vfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct v9fs_vfs_file_s *file;
+  FAR struct v9fs_client_s *client;
+  int ret = -ENOTTY;
+
+  client = filep->f_inode->i_private;
+  file = filep->f_priv;
+
+  if (cmd == FIOC_FILEPATH)
+    {
+      FAR char *ptr = (FAR char *)((uintptr_t)arg);
+      inode_getpath(filep->f_inode, ptr, PATH_MAX);
+      ret = v9fs_client_getname(client, file->fid, ptr);
+    }
+
   return ret;
 }
 
