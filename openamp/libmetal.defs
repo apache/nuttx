@@ -56,6 +56,10 @@ CSRCS += libmetal/lib/log.c
 CSRCS += libmetal/lib/shmem.c
 CSRCS += libmetal/lib/version.c
 
+ifeq ($(CONFIG_OPENAMP_CACHE),y)
+  CFLAGS += -DMETAL_CACHE
+endif
+
 CFLAGS += -DMETAL_INTERNAL
 
 LIBMETAL_HDRS_SEDEXP := \

@@ -74,6 +74,10 @@ set(MACHINE ${CONFIG_ARCH})
 set(CMAKE_SYSTEM_NAME NuttX)
 set(WITH_DOC OFF)
 
+if(CONFIG_OPENAMP_CACHE)
+  add_compile_definitions(METAL_CACHE)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libmetal
                  ${CMAKE_CURRENT_BINARY_DIR}/libmetal EXCLUDE_FROM_ALL)
 
