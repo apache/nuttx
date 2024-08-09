@@ -26,7 +26,6 @@
 
 #include "arm_fork.h"
 
-	.syntax	unified
 	.file	"fork.S"
 
 /****************************************************************************
@@ -78,7 +77,11 @@
  ****************************************************************************/
 
 	.globl	up_fork
+#ifdef __ghs__
+	.type	up_fork, $function
+#else
 	.type	up_fork, function
+#endif
 
 up_fork:
 	/* Create a stack frame */

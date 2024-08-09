@@ -236,6 +236,19 @@ static inline uint32_t getcontrol(void)
   return 0;
 }
 
+static inline_function uint32_t up_getsp(void)
+{
+  register uint32_t sp;
+
+  __asm__ __volatile__
+  (
+    "tmov %0, sp\n"
+    : "=r" (sp)
+  );
+
+  return sp;
+}
+
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************

@@ -28,8 +28,12 @@
 	.file	"arm_saveusercontext.S"
 
 	.text
+#ifdef __ghs__
+	.thumb2
+#else
 	.syntax	unified
 	.thumb
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -52,7 +56,11 @@
 
 	.globl	up_saveusercontext
 	.globl	up_saveusercontext
+#ifdef __ghs__
+	.type	up_saveusercontext, $function
+#else
 	.type	up_saveusercontext, %function
+#endif
 
 up_saveusercontext:
 

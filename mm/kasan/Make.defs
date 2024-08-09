@@ -26,7 +26,7 @@ CSRCS += kasan.c
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   CFLAGS += -fno-sanitize=kernel-address
-  ifeq ($(CONFIG_LTO_NONE),n)
+  ifneq ($(CONFIG_LTO_NONE),y)
     CFLAGS += -fno-lto
   endif
 endif

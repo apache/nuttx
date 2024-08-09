@@ -508,6 +508,19 @@ static inline void setcontrol(uint32_t control)
       : "memory");
 }
 
+static inline_function uint32_t up_getsp(void)
+{
+  uint32_t sp;
+
+  __asm__ __volatile__
+  (
+    "mov %0, sp\n"
+    : "=r" (sp)
+  );
+
+  return sp;
+}
+
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************

@@ -66,8 +66,6 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#define up_getsp() (uintptr_t)__builtin_frame_address(0)
-
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
