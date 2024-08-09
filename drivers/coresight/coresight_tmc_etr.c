@@ -30,6 +30,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/cache.h>
+#include <nuttx/irq.h>
 
 #include <nuttx/coresight/coresight_tmc.h>
 
