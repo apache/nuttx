@@ -265,6 +265,13 @@
 #define TRCRSCTLRN_GROUP_MASK         GENMASK(19, 16)
 #define TRCRSCTLRN_SELECT_MASK        GENMASK(15, 0)
 
+#define TRFCR_ELX_TS_SHIFT            5
+#define TRFCR_ELX_TS_VIRTUAL          ((0x1UL) << TRFCR_ELX_TS_SHIFT)
+#define TRFCR_EL2_CX                  BIT(3)
+#define TRFCR_ELX_E1TRE               BIT(1)
+#define TRFCR_ELX_E0TRE               BIT(0)
+#define CURRENTEL_EL2                 (2 << 2)
+
 /* TRCDEVARCH Bit field definitions
  * Bits[31:21]  - ARCHITECT = Always Arm Ltd.
  *                * Bits[31:28] = 0x4
@@ -279,14 +286,20 @@
  *                * Bits[11:0] = 0xA13, architecture part number for ETM.
  */
 
-#define ETM4_DEVARCH_REVISION_SHIFT         16
-#define ETM4_DEVARCH_REVISION_MASK          GENMASK(19, 16)
-#define ETM4_DEVARCH_REVISION(x) \
-        (((x) & ETM4_DEVARCH_REVISION_MASK) >> ETM4_DEVARCH_REVISION_SHIFT)
-#define ETM4_DEVARCH_ARCHID_ARCH_VER_SHIFT  12
-#define ETM4_DEVARCH_ARCHID_ARCH_VER_MASK   GENMASK(15, 12)
-#define ETM4_DEVARCH_ARCHID_ARCH_VER(x) \
-        (((x) & ETM4_DEVARCH_ARCHID_ARCH_VER_MASK) >> ETM4_DEVARCH_ARCHID_ARCH_VER_SHIFT)
+#define TRCDEVARCH_REVISION_SHIFT           16
+#define TRCDEVARCH_REVISION_MASK            GENMASK(19, 16)
+#define TRCDEVARCH_REVISION(x) \
+        (((x) & TRCDEVARCH_REVISION_MASK) >> TRCDEVARCH_REVISION_SHIFT)
+
+#define TRCDEVARCH_ARCHID_ARCH_VER_SHIFT    12
+#define TRCDEVARCH_ARCHID_ARCH_VER_MASK     GENMASK(15, 12)
+#define TRCDEVARCH_ARCHID_ARCH_VER(x) \
+        (((x) & TRCDEVARCH_ARCHID_ARCH_VER_MASK) >> TRCDEVARCH_ARCHID_ARCH_VER_SHIFT)
+
+#define ID_AA64DFR0_EL1_TRACEFILT_SHIFT     40
+#define ID_AA64DFR0_EL1_TRACEFILT_MASK      GENMASK(43, 40)
+#define ID_AA64DFR0_EL1_TRACEFILT(x) \
+        (((x) & ID_AA64DFR0_EL1_TRACEFILT_MASK) >> ID_AA64DFR0_EL1_TRACEFILT_SHIFT)
 
 #define TRCSTATR_IDLE_BIT                   BIT(0)
 #define TRCSTATR_PMSTABLE_BIT               BIT(1)
@@ -642,8 +655,24 @@ static void etm4_sysreg_write(uint64_t val, uint32_t offset, bool bit_64)
 
 static inline uint8_t etm4_devarch_to_arch(uint32_t devarch)
 {
-  return ETM4_ARCH_VERSION(ETM4_DEVARCH_ARCHID_ARCH_VER(devarch),
-         ETM4_DEVARCH_REVISION(devarch));
+  return ETM4_ARCH_VERSION(TRCDEVARCH_ARCHID_ARCH_VER(devarch),
+         TRCDEVARCH_REVISION(devarch));
+}
+
+/****************************************************************************
+ * Name: etm4_is_in_el2
+ *
+ * Description:
+ *   Check if the current execution level is EL2.
+ *
+ * Returned Value:
+ *   Returns true if the current execution level is EL2, false otherwise.
+ *
+ ****************************************************************************/
+
+static inline bool etm4_is_in_el2(void)
+{
+  return read_sysreg(currentel) == CURRENTEL_EL2;
 }
 
 /****************************************************************************
@@ -1127,6 +1156,44 @@ static void etm4_disable(FAR struct coresight_dev_s *csdev)
 }
 
 /****************************************************************************
+ * Name: etm4_enable_trace_filtering
+ *
+ * Description:
+ *   Configure trace filtering for the ETMv4 device if supported by the CPU.
+ *
+ * Input Parameters:
+ *   etmdev - Pointer to the coresight ETM4 device structure.
+ *
+ ****************************************************************************/
+
+static void etm4_enable_trace_filtering(struct coresight_etm4_dev_s *etmdev)
+{
+  uint64_t dfr0 = read_sysreg(id_aa64dfr0_el1);
+
+  if (!ID_AA64DFR0_EL1_TRACEFILT(dfr0))
+    {
+      cserr("Trace Filter feature is not support");
+      return;
+    }
+
+  /* If the CPU supports v8.4 SelfHosted Tracing, enable
+   * tracing at the kernel EL1 and EL0, forcing to use the
+   * virtual time as the timestamp.
+   */
+
+  etmdev->trfcr = TRFCR_ELX_TS_VIRTUAL | TRFCR_ELX_E1TRE | TRFCR_ELX_E0TRE;
+
+  /* If we are running at EL2, allow tracing the CONTEXTIDR_EL2. */
+
+  if (etm4_is_in_el2())
+    {
+      etmdev->trfcr |= TRFCR_EL2_CX;
+    }
+
+  write_sysreg(etmdev->trfcr, trfcr_el1);
+}
+
+/****************************************************************************
  * Name: etm4_init_arch_data
  *
  * Description:
@@ -1212,6 +1279,7 @@ static void etm4_init_arch_data(FAR struct coresight_etm4_dev_s *etmdev)
   etmdev->nrseqstate = BMVAL(etmidr, 25, 27);
   etmdev->nr_cntr = BMVAL(etmidr, 28, 30);
   etm4_lock(etmdev);
+  etm4_enable_trace_filtering(etmdev);
 }
 
 /****************************************************************************
