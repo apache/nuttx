@@ -81,7 +81,10 @@ int file_close_without_clear(FAR struct file *filep)
 
       /* And release the inode */
 
-      inode_release(inode);
+      if (ret >= 0)
+        {
+          inode_release(inode);
+        }
     }
 
   return ret;
