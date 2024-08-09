@@ -36,6 +36,7 @@
 #include <nuttx/binfmt/elf.h>
 
 #include "libelf/libelf.h"
+#include "binfmt.h"
 
 #ifdef CONFIG_ELF
 
@@ -296,6 +297,19 @@ static int elf_loadbinary(FAR struct binary_s *binp,
       ret = -ENOEXEC;
       goto errout_with_load;
     }
+
+#ifdef CONFIG_LOADABLE_MODULE_DEBUG
+  loadinfo.filename = strdup(filename);
+  binp->filename = strdup(filename);
+  if (!(loadable_module_create(filename, (void *)loadinfo.textalloc,
+                                 (void *)loadinfo.dataalloc)))
+    {
+      berr("load module create failed, module name is %s in debug mode\n",
+         filename);
+      ret = -ENOEXEC;
+      goto errout_with_load;
+    }
+#endif
 
   /* Return the load information */
 

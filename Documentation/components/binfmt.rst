@@ -349,6 +349,83 @@ Symbol Table Function Interfaces
     A reference to the symbol table entry if an entry with the matching
     value is found; ``NULL`` is returned if the entry is not found.
 
+Debugging of ELF module
+=======================
+
+To implement ELF module debugging in NuttX, the GDB JIT (Just-In-Time) interface is utilized. This interface resembles that of a dynamic loader. The JIT compiler communicates with GDB by writing data to a global variable and invoking a specific symbol's function. When GDB attaches to the program, it reads a linked list of symbol files from the global variable to locate existing code and sets breakpoints in functions to monitor additional code.
+Based on the aforementioned principle, during ELF file loading, file-related information (filename, text address, data address) is written. This information is communicated to the PC-side GDB through __loadable_module_register_code function. The PC-side GDB debugs the ELF program by setting breakpoints.
+
+CONFIG
+------
+
+.. code-block:: c
+
+    CONFIG_ELF=y
+    CONFIG_LOADABLE_MODULE_DEBUG=y
+    CONFIG_LOADABLE_MODULE_DESCRIPTOR_COUNT=7 (default value)
+
+Symbol Table Header Files
+-------------------------
+
+The export interface to the ELF Module load/unload in debug mode is described in the header file
+``include/nuttx/binfmt/binfmt.h``.
+A brief summary of the data structurs (data type) and interfaces prototyped are listed below.
+
+ELF Module Data Type in Debug Mode
+----------------------------------
+
+.. c:enum:: loadable_module_actions_t
+
+  Describes the registered status of an ELF module in debug mode.
+
+  .. code-block:: c
+
+    typedef enum
+    {
+        LOADABLE_MODULE_NOACTION = 0,
+        LOADABLE_MODULE_REGISTER_FN,  /* A ELF is registered */
+        LOADABLE_MODULE_UNREGISTER_FN /* A ELF is unregistered */
+    } loadable_module_actions_t;
+
+ELF Module Data Structures in Debug Mode
+----------------------------------------
+
+.. c:struct:: loadable_module_descriptor
+
+  Describe some information about an ELF module in debug mode.
+
+  .. code-block:: c
+
+    struct loadable_module_descriptor
+    {
+      uint32_t action_flag;     /* Whether ELF is loaded with registered flags by loadable_module_actions_t enum type*/
+      const char *symfile_name; /* A pointer to the ELF Module file name string */
+      void *text_addr;          /* A pointer to the text address segment of the ELF file */
+      void *data_addr;          /* A pointer to the data address segment of the ELF file */
+    };
+
+
+ELF Module Interfaces in Debug Mode
+-----------------------------------
+
+The implementation of the ELF module loading/unloading interface in debug mode is described in the c file
+``binfmt/binfmt_debug.c``.
+
+.. c:function:: bool loadable_module_create(const char *symfile_name, void *text_addr,
+                            void *data_addr);
+
+  This function is used to create a loadable module by providing the necessary information such as the ELF symbol file name and the addresses of its text and data segments.
+
+  :return:
+    The function returns a boolean value (true or false) indicating whether the creation of the loadable module was successful.
+
+.. c:function:: void loadable_module_destroy(const char *symfile_name);
+
+  This function is used to destroy a loadable module identified by its symbol file name, performing any necessary cleanup operations.
+
+  :return:
+    NULL
+
 Configuration Variables
 =======================
 

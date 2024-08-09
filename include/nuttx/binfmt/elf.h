@@ -90,6 +90,10 @@ struct elf_loadinfo_s
   gid_t              filegid;    /* Gid of the file system */
   int                filemode;   /* Mode of the file system */
 
+#ifdef CONFIG_LOADABLE_MODULE_DEBUG
+  FAR const char    *filename;   /* Save the file name when ELF file was loaded */
+#endif
+
   Elf_Ehdr           ehdr;       /* Buffered ELF file header */
   FAR Elf_Phdr      *phdr;       /* Buffered ELF program headers */
   FAR Elf_Shdr      *shdr;       /* Buffered ELF section headers */

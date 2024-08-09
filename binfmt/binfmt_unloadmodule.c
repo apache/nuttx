@@ -139,6 +139,13 @@ int unload_module(FAR struct binary_s *binp)
             }
         }
 
+#ifdef CONFIG_LOADABLE_MODULE_DEBUG
+  if (binp->filename != NULL)
+    {
+      loadable_module_destroy(binp->filename);
+    }
+#endif
+
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
       /* Execute C++ destructors */
 

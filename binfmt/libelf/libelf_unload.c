@@ -96,5 +96,12 @@ int elf_unload(FAR struct elf_loadinfo_s *loadinfo)
   loadinfo->ndtors    = 0;
 #endif
 
+#ifdef CONFIG_LOADABLE_MODULE_DEBUG
+  if (loadinfo->filename != NULL)
+    {
+      loadable_module_destroy(loadinfo->filename);
+    }
+#endif
+
   return OK;
 }

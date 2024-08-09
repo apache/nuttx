@@ -53,6 +53,12 @@ ifeq ($(CONFIG_NXFLAT),y)
 CSRCS += nxflat.c
 endif
 
+# Load Module Debug Mode interfaces
+
+ifeq ($(CONFIG_LOADABLE_MODULE_DEBUG),y)
+CSRCS += binfmt_debug.c
+endif
+
 # Add configured binary modules
 
 include libnxflat/Make.defs

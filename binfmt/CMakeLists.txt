@@ -56,6 +56,10 @@ if(CONFIG_NXFLAT)
   list(APPEND SRCS nxflat.c)
 endif()
 
+if(CONFIG_LOADABLE_MODULE_DEBUG)
+  list(APPEND SRCS binfmt_debug.c)
+endif()
+
 # Builtin application interfaces
 
 if(CONFIG_BUILTIN)

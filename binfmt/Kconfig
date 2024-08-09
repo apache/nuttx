@@ -58,6 +58,18 @@ config ELF
 if ELF
 source "binfmt/libelf/Kconfig"
 endif
+
+config LOADABLE_MODULE_DESCRIPTOR_COUNT
+    int "count of loadable module descriptor"
+	default 4
+	depends on LOADABLE_MODULE_DEBUG
+
+config LOADABLE_MODULE_DEBUG
+	bool "Enable load module debug mode"
+	default n
+	---help---
+		Enable support for the load module debug mode. Default: n
+
 endif
 
 config BINFMT_CONSTRUCTORS

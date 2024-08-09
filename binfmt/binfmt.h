@@ -241,6 +241,23 @@ int builtin_initialize(void);
 void builtin_uninitialize(void);
 #endif
 
+#ifdef CONFIG_LOADABLE_MODULE_DEBUG
+typedef enum
+{
+    LOADABLE_MODULE_NOACTION = 0,
+    LOADABLE_MODULE_REGISTER_FN,
+    LOADABLE_MODULE_UNREGISTER_FN
+} loadable_module_actions_t;
+
+struct loadable_module_descriptor
+{
+    uint32_t action_flag;
+    const char *symfile_name;
+    void *text_addr;
+    void *data_addr;
+};
+#endif
+
 #ifdef CONFIG_ELF
 /****************************************************************************
  * Name: elf_initialize

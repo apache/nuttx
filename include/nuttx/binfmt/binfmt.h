@@ -112,6 +112,10 @@ struct binary_s
   /* Unload module callback */
 
   CODE int (*unload)(FAR struct binary_s *bin);
+
+#ifdef CONFIG_LOADABLE_MODULE_DEBUG
+  FAR const char *filename;            /* Save file name for ELF module debug mode */
+#endif
 };
 
 /* This describes one binary format handler */
@@ -403,6 +407,36 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 
 #ifdef CONFIG_BINFMT_LOADABLE
 int binfmt_exit(FAR struct binary_s *bin);
+#endif
+
+#ifdef CONFIG_LOADABLE_MODULE_DEBUG
+
+/****************************************************************************
+ * Name: loadable_module_create
+ *
+ * Description:
+ *   Create the loadable moudle on debug mode.
+ *
+ * Returned Value:
+ *   Zero (NULL) indicates that the creation failed，or it's show success.
+ *
+ ****************************************************************************/
+
+bool loadable_module_create(const char *symfile_name, void *text_addr,
+                            void *data_addr);
+
+/****************************************************************************
+ * Name: loadable_module_destroy
+ *
+ * Description:
+ *   Destroy the loadable module on debug mode.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void loadable_module_destroy(const char *symfile_name);
 #endif
 
 #undef EXTERN
