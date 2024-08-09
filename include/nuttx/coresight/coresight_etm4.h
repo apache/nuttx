@@ -111,6 +111,7 @@ struct coresight_etm4_dev_s
   uint8_t ns_ex_level;         /* In non-secure state, indicates whether instruction tracing is supported for the corresponding Exception level */
   uint8_t q_support;           /* Q element support characteristics */
   uint16_t ccitmin;            /* minimum value that can be programmed in */
+  uint64_t trfcr;              /* If the CPU supports FEAT_TRF, set TRFCR_ELx to enable tracing at all levels; otherwise, set it to 0 */
   bool os_unlock;              /* True if access to management registers is allowed */
   bool instrp0;                /* Tracing of load and store instructions as P0 elements is supported */
   bool trcbb;                  /* Indicates if the trace unit supports branch broadcast tracing */
