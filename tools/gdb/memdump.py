@@ -44,6 +44,13 @@ PID_MM_ALLOC = -3
 PID_MM_LEAK = -2
 PID_MM_MEMPOOL = -1
 
+mm_allocnode_type = gdb.lookup_type("struct mm_allocnode_s")
+sizeof_size_t = gdb.lookup_type("size_t").sizeof
+mempool_backtrace_type = gdb.lookup_type("struct mempool_backtrace_s")
+
+CONFIG_MM_BACKTRACE = get_symbol_value("CONFIG_MM_BACKTRACE")
+CONFIG_MM_DFAULT_ALIGNMENT = get_symbol_value("CONFIG_MM_DFAULT_ALIGNMENT")
+
 
 def align_up(size, align) -> int:
     """Align the size to the specified alignment"""
@@ -57,26 +64,24 @@ def mm_nodesize(size) -> int:
 
 def mm_foreach(heap):
     """Iterate over a heap, yielding each node"""
-    node = gdb.Value(heap["mm_heapstart"][0]).cast(
-        gdb.lookup_type("struct mm_allocnode_s").pointer()
-    )
+    nregions = get_symbol_value("CONFIG_MM_REGIONS")
+    heapstart = heap["mm_heapstart"]
+    heapend = heap["mm_heapend"]
 
-    for region in range(0, get_symbol_value("CONFIG_MM_REGIONS")):
-        while 1:
+    for region in range(0, nregions):
+        start = heapstart[region]
+        end = heapend[region]
+        node = start
+        while node <= end:
             yield node
-            next = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
-            next = gdb.Value(next + mm_nodesize(node["size"])).cast(
-                gdb.lookup_type("struct mm_allocnode_s").pointer()
-            )
-
-            if next >= heap["mm_heapend"][region] or next == node:
-                break
+            next = int(node) + mm_nodesize(node["size"])
+            next = gdb.Value(next).cast(mm_allocnode_type.pointer())
             node = next
 
 
 def mm_dumpnode(node, count, align, simple, detail, alive):
     if node["size"] & MM_ALLOC_BIT != 0:
-        charnode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+        charnode = int(node)
         if not alive:
             # if pid is not alive put a red asterisk.
             gdb.write("\x1b[33;1m*\x1b[m")
@@ -91,7 +96,7 @@ def mm_dumpnode(node, count, align, simple, detail, alive):
                 mm_nodesize(node["size"]),
                 node["seqno"],
                 align,
-                (int)(charnode + gdb.lookup_type("struct mm_allocnode_s").sizeof),
+                charnode + mm_allocnode_type.sizeof,
             )
         )
 
@@ -126,13 +131,13 @@ def mm_dumpnode(node, count, align, simple, detail, alive):
                     )
 
     else:
-        charnode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+        charnode = int(node)
         gdb.write(
             "%12u%#*x"
             % (
                 mm_nodesize(node["size"]),
                 align,
-                (int)(charnode + gdb.lookup_type("struct mm_allocnode_s").sizeof),
+                charnode + mm_allocnode_type.sizeof,
             )
         )
 
@@ -151,17 +156,14 @@ def mempool_multiple_foreach(mpool):
 def mempool_realblocksize(pool):
     """Return the real block size of a mempool"""
 
-    if get_symbol_value("CONFIG_MM_DFAULT_ALIGNMENT") is None:
-        mempool_align = 2 * gdb.lookup_type("size_t").sizeof
+    if CONFIG_MM_DFAULT_ALIGNMENT:
+        mempool_align = CONFIG_MM_DFAULT_ALIGNMENT
     else:
-        mempool_align = get_symbol_value("CONFIG_MM_DFAULT_ALIGNMENT")
+        mempool_align = 2 * sizeof_size_t
 
-    if mempool_align == 0:
-        mempool_align = 2 * gdb.lookup_type("size_t").sizeof
-
-    if get_symbol_value("CONFIG_MM_BACKTRACE") >= 0:
+    if CONFIG_MM_BACKTRACE >= 0:
         return align_up(
-            pool["blocksize"] + gdb.lookup_type("struct mempool_backtrace_s").sizeof,
+            pool["blocksize"] + mempool_backtrace_type.sizeof,
             mempool_align,
         )
     else:
@@ -204,25 +206,25 @@ def get_count(element):
 def mempool_foreach(pool):
     """Iterate over all block in a mempool"""
 
+    sq_entry_type = gdb.lookup_type("sq_entry_t")
+
     blocksize = mempool_realblocksize(pool)
     if pool["ibase"] != 0:
         nblk = pool["interruptsize"] / blocksize
         while nblk > 0:
             bufaddr = gdb.Value(pool["ibase"] + nblk * blocksize + pool["blocksize"])
-            buf = bufaddr.cast(gdb.lookup_type("struct mempool_backtrace_s").pointer())
+            buf = bufaddr.cast(mempool_backtrace_type.pointer())
             yield buf
             nblk -= 1
 
     entry = sq_queue.get_type().pointer()
     for entry in sq_for_every(pool["equeue"], entry):
-        nblk = (pool["expandsize"] - gdb.lookup_type("sq_entry_t").sizeof) / blocksize
-        base = (
-            gdb.Value(entry).cast(gdb.lookup_type("char").pointer()) - nblk * blocksize
-        )
+        nblk = (pool["expandsize"] - sq_entry_type.sizeof) / blocksize
+        base = int(entry) - nblk * blocksize
         while nblk > 0:
             nblk -= 1
             bufaddr = gdb.Value(base + nblk * blocksize + pool["blocksize"])
-            buf = bufaddr.cast(gdb.lookup_type("struct mempool_backtrace_s").pointer())
+            buf = bufaddr.cast(mempool_backtrace_type.pointer())
             yield buf
 
 
@@ -280,11 +282,11 @@ def mempool_dumpbuf(buf, blksize, count, align, simple, detail, alive):
     gdb.write("\n")
 
 
-class Nxmemdump(gdb.Command):
+class Memdump(gdb.Command):
     """Dump the heap and mempool memory"""
 
     def __init__(self):
-        super(Nxmemdump, self).__init__("memdump", gdb.COMMAND_USER)
+        super(Memdump, self).__init__("memdump", gdb.COMMAND_USER)
 
     def check_alive(self, pid):
         return self.pidhash[pid & self.npidhash - 1] != 0
@@ -311,9 +313,7 @@ class Nxmemdump(gdb.Command):
                         and (buf["seqno"] >= seqmin and buf["seqno"] < seqmax)
                         and buf["magic"] == MEMPOOL_MAGIC_ALLOC
                     ):
-                        charnode = gdb.Value(buf).cast(
-                            gdb.lookup_type("char").pointer()
-                        )
+                        charnode = int(buf)
                         if detail:
                             mempool_dumpbuf(
                                 buf,
@@ -329,10 +329,9 @@ class Nxmemdump(gdb.Command):
                                 buf, pool["blocksize"], self.backtrace_dict
                             )
                         if address and (
-                            address < int(charnode)
-                            and address >= (int)(charnode - pool["blocksize"])
+                            address < charnode
+                            and address >= charnode - pool["blocksize"]
                         ):
-
                             mempool_dumpbuf(
                                 buf,
                                 pool["blocksize"],
@@ -401,13 +400,10 @@ class Nxmemdump(gdb.Command):
                             node, mm_nodesize(node["size"]), self.backtrace_dict
                         )
 
-                    charnode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+                    charnode = int(node)
                     if address and (
-                        address < int(charnode + node["size"])
-                        and address
-                        >= (int)(
-                            charnode + gdb.lookup_type("struct mm_allocnode_s").sizeof
-                        )
+                        address < charnode + node["size"]
+                        and address >= charnode + mm_allocnode_type.sizeof
                     ):
                         mm_dumpnode(
                             node,
@@ -448,10 +444,7 @@ class Nxmemdump(gdb.Command):
 
             output.sort(key=get_count, reverse=True)
             for node in output:
-                if (
-                    node["node"].type
-                    == gdb.lookup_type("struct mm_allocnode_s").pointer()
-                ):
+                if node["node"].type == mm_allocnode_type.pointer():
                     mm_dumpnode(
                         node["node"],
                         node["count"],
@@ -519,7 +512,7 @@ class Nxmemdump(gdb.Command):
         }
 
     def invoke(self, args, from_tty):
-        if gdb.lookup_type("size_t").sizeof == 4:
+        if sizeof_size_t == 4:
             self.align = 11
         else:
             self.align = 19
@@ -536,7 +529,7 @@ class Nxmemdump(gdb.Command):
             pid = PID_MM_FREE
         elif arg["pid"]:
             pid = arg["pid"]
-        if get_symbol_value("CONFIG_MM_BACKTRACE") <= 0:
+        if CONFIG_MM_BACKTRACE <= 0:
             arg["detail"] = True
 
         self.aordblks = 0
@@ -549,9 +542,6 @@ class Nxmemdump(gdb.Command):
         )
 
 
-Nxmemdump()
-
-
 class Memleak(gdb.Command):
     """Memleak check"""
 
@@ -562,28 +552,41 @@ class Memleak(gdb.Command):
         return self.pidhash[pid & self.npidhash - 1] != 0
 
     def next_ptr(self):
-
-        inf = gdb.inferiors()[0]
+        inf = gdb.selected_inferior()
         heap = gdb.parse_and_eval("g_mmheap")
-        start = []
-        end = []
         longsize = get_long_type().sizeof
         region = get_symbol_value("CONFIG_MM_REGIONS")
+        regions = []
 
         for i in range(0, region):
-            start.append(int(gdb.Value(heap["mm_heapstart"][i])))
-            end.append(int(gdb.Value(heap["mm_heapend"][i])))
+            start = int(heap["mm_heapstart"][i])
+            end = int(heap["mm_heapend"][i])
+            mem = inf.read_memory(start, end - start)
+            regions.append({"start": start, "end": end, "mem": mem})
 
-        # Serach in global variables
-        sdata = gdb.parse_and_eval("(uintptr_t)&_sdata")
-        ebss = gdb.parse_and_eval("(uintptr_t)&_ebss")
+        # Search global variables
+        sdata = int(gdb.parse_and_eval("(uintptr_t)&_sdata"))
+        ebss = int(gdb.parse_and_eval("(uintptr_t)&_ebss"))
+        global_size = (ebss - sdata) // longsize * longsize
         gdb.write(f"Searching in global variables {hex(sdata)} ~ {hex(ebss)}\n")
-        mem = inf.read_memory(int(sdata), int(ebss) - int(sdata))
+        global_mem = inf.read_memory(sdata, global_size)
+
+        def read_memory(addr, size):
+            # check global variable
+            if addr >= sdata and addr + size <= ebss:
+                return global_mem[addr - sdata : addr - sdata + size]
+
+            for region in regions:
+                start = region["start"]
+                end = region["end"]
+                if addr >= start and addr + size <= end:
+                    return region["mem"][addr - start : addr - start + size]
+
         i = 0
-        while i < int(ebss) - int(sdata):
-            ptr = read_ulong(mem[i : i + longsize].tobytes(), 0)
-            for j in range(0, region):
-                if ptr >= start[j] and ptr < end[j]:
+        while i < global_size:
+            ptr = read_ulong(global_mem, i)
+            for region in regions:
+                if ptr >= region["start"] and ptr < region["end"]:
                     yield ptr
                     break
 
@@ -592,29 +595,26 @@ class Memleak(gdb.Command):
         gdb.write("Searching in grey memory\n")
         for node in self.grey_list:
             addr = node["addr"]
-            mem = inf.read_memory(addr, node["size"])
+            mem = read_memory(addr, node["size"])
             i = 0
             while i < node["size"]:
-                ptr = read_ulong(mem[i : i + longsize].tobytes(), 0)
-                for j in range(0, region):
-                    if ptr >= start[j] and ptr < end[j]:
+                ptr = read_ulong(mem, i)
+                for region in regions:
+                    if ptr >= region["start"] and ptr < region["end"]:
                         yield ptr
                         break
                 i = i + longsize
 
     def collect_white_dict(self):
         white_dict = {}
-        allocnode_size = gdb.lookup_type("struct mm_allocnode_s").sizeof
+        allocnode_size = mm_allocnode_type.sizeof
 
         # collect all user malloc ptr
 
         heap = gdb.parse_and_eval("g_mmheap")
         for node in mm_foreach(heap):
             if node["size"] & MM_ALLOC_BIT != 0 and node["pid"] != PID_MM_MEMPOOL:
-                addr = (
-                    gdb.Value(node).cast(gdb.lookup_type("char").pointer())
-                    + allocnode_size
-                )
+                addr = int(node) + allocnode_size
 
                 node_dict = {}
                 node_dict["node"] = node
@@ -626,10 +626,7 @@ class Memleak(gdb.Command):
             for pool in mempool_multiple_foreach(heap["mm_mpool"]):
                 for buf in mempool_foreach(pool):
                     if buf["magic"] == MEMPOOL_MAGIC_ALLOC:
-                        addr = (
-                            gdb.Value(buf).cast(gdb.lookup_type("char").pointer())
-                            - pool["blocksize"]
-                        )
+                        addr = int(buf) - pool["blocksize"]
 
                         buf_dict = {}
                         buf_dict["node"] = buf
@@ -666,7 +663,7 @@ class Memleak(gdb.Command):
         return {"simple": args.simple, "detail": args.detail}
 
     def invoke(self, args, from_tty):
-        if gdb.lookup_type("size_t").sizeof == 4:
+        if sizeof_size_t == 4:
             align = 11
         else:
             align = 19
@@ -676,34 +673,30 @@ class Memleak(gdb.Command):
         if arg is None:
             return
 
-        if get_symbol_value("CONFIG_MM_BACKTRACE") <= 0:
+        if CONFIG_MM_BACKTRACE <= 0:
             gdb.write("Better use CONFIG_MM_BACKTRACE=16 or 8 get more information\n")
 
+        start = last = time.time()
         white_dict = self.collect_white_dict()
 
         self.grey_list = []
         gdb.write("Searching for leaked memory, please wait a moment\n")
-        start = time.time()
+        last = time.time()
 
         sorted_keys = sorted(white_dict.keys())
-
         for ptr in self.next_ptr():
             # Find a closest addres in white_dict
             pos = bisect.bisect_right(sorted_keys, ptr)
             if pos == 0:
                 continue
             grey_key = sorted_keys[pos - 1]
-            if (
-                grey_key in white_dict.keys()
-                and ptr < grey_key + white_dict[grey_key]["size"]
-            ):
+            if grey_key in white_dict and ptr < grey_key + white_dict[grey_key]["size"]:
                 self.grey_list.append(white_dict[grey_key])
                 del white_dict[grey_key]
 
         # All white node is leak
 
-        end = time.time()
-        gdb.write(f"Search all memory use {(end - start):.2f} seconds\n")
+        gdb.write(f"Search all memory use {(time.time() - last):.2f} seconds\n")
 
         gdb.write("\n")
         if len(white_dict) == 0:
@@ -712,7 +705,7 @@ class Memleak(gdb.Command):
 
         gdb.write("Leak catch!, use '\x1b[33;1m*\x1b[m' mark pid is not exist:\n")
 
-        if get_symbol_value("CONFIG_MM_BACKTRACE") > 0 and arg["detail"] is False:
+        if CONFIG_MM_BACKTRACE > 0 and not arg["detail"]:
             gdb.write("%6s" % ("CNT"))
 
         gdb.write(
@@ -723,7 +716,7 @@ class Memleak(gdb.Command):
         self.npidhash = gdb.parse_and_eval("g_npidhash")
         self.pidhash = gdb.parse_and_eval("g_pidhash")
 
-        if get_symbol_value("CONFIG_MM_BACKTRACE") > 0 and arg["detail"] is False:
+        if CONFIG_MM_BACKTRACE > 0 and not arg["detail"]:
 
             # Filter same backtrace
 
@@ -743,10 +736,7 @@ class Memleak(gdb.Command):
 
             i = 0
             for node in leaklist:
-                if (
-                    node["node"].type
-                    == gdb.lookup_type("struct mm_allocnode_s").pointer()
-                ):
+                if node["node"].type == mm_allocnode_type.pointer():
                     mm_dumpnode(
                         node["node"],
                         node["count"],
@@ -776,10 +766,7 @@ have {i} some backtrace leak, total leak memory is {int(leaksize)} bytes\n"
         else:
             leaksize = 0
             for node in white_dict.values():
-                if (
-                    node["node"].type
-                    == gdb.lookup_type("struct mm_allocnode_s").pointer()
-                ):
+                if node["node"].type == mm_allocnode_type.pointer():
                     mm_dumpnode(
                         node["node"],
                         1,
@@ -804,8 +791,7 @@ have {i} some backtrace leak, total leak memory is {int(leaksize)} bytes\n"
                 f"Alloc {len(white_dict)} count, total leak memory is {int(leaksize)} bytes\n"
             )
 
-
-Memleak()
+        gdb.write(f"Finished in {(time.time() - start):.2f} seconds\n")
 
 
 class Memmap(gdb.Command):
@@ -849,7 +835,7 @@ class Memmap(gdb.Command):
         parser.add_argument(
             "-o", "--output", type=str, default="memmap", help="img output file"
         )
-        if argv[0] == '':
+        if argv[0] == "":
             argv = None
         try:
             args = parser.parse_args(argv)
@@ -863,4 +849,6 @@ class Memmap(gdb.Command):
         self.save_memory_map(meminfo, output_file + ".png")
 
 
+Memdump()
+Memleak()
 Memmap()
