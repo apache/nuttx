@@ -8,4 +8,36 @@ menuconfig PCI
 	default n
 	---help---
 		Enables support for the PCI bus.
-		Backend bust be provided by per-arch or per-board implementation.
+		Backend must be provided by per-arch or per-board implementation.
+
+if PCI
+
+config PCI_ASSIGN_ALL_BUSES
+	bool "Assign resource to all buses"
+	default !ARCH_X86 && !ARCH_X86_64
+	---help---
+		Assign resources to all buses. This is required for some
+		platforms that have multiple PCI buses.
+
+config PCI_QEMU_TEST
+	bool "Driver for QEMU PCI test device"
+	default n
+	---help---
+		Driver for QEMU PCI test device
+
+config PCI_QEMU_EDU
+	bool "Driver for QEMU EDU test device"
+	default n
+	---help---
+		Driver for QEMU EDU test device
+
+config PCI_UIO_IVSHMEM
+	bool "Enable uio ivshmem driver support"
+	default n
+	---help---
+		When this option is enabled, char ivshmem driver will register
+		char device with name: "/dev/uioX" to the VFS, then
+		application can open this device and use `mmap()` to get the
+		share memory provided by ivshmem device.
+
+endif # PCI

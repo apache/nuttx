@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/virt/qemu_pci.h
+ * include/nuttx/pci/pci_qemu_edu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIRT_QEMU_PCI_H
-#define __INCLUDE_NUTTX_VIRT_QEMU_PCI_H
+#ifndef __INCLUDE_NUTTX_PCI_PCI_QEMU_EDU_H
+#define __INCLUDE_NUTTX_PCI_PCI_QEMU_EDU_H
 
 /****************************************************************************
  * Included Files
@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#ifdef CONFIG_PCI_QEMU_EDU
 
 /****************************************************************************
  * Public Function Prototypes
@@ -41,17 +41,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_VIRT_QEMU_PCI_TEST
-extern const struct pci_dev_type_s g_pci_type_qemu_pci_test;
-#endif
+/****************************************************************************
+ * Name: pci_register_qemu_edu_driver
+ *
+ * Description:
+ *   register a pci driver
+ *
+ ****************************************************************************/
 
-#ifdef CONFIG_VIRT_QEMU_EDU
-extern const struct pci_dev_type_s g_pci_type_qemu_edu;
-#endif
+int pci_register_qemu_edu_driver(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_VIRT_QEMU_PCI_H */
+#endif /* CONFIG_PCI_QEMU_EDU */
+#endif /* __INCLUDE_NUTTX_PCI_PCI_QEMU_EDU_H */

@@ -1,5 +1,5 @@
 # ##############################################################################
-# drivers/rptun/CMakeLists.txt
+# drivers/pci/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -17,15 +17,23 @@
 # the License.
 #
 # ##############################################################################
-if(CONFIG_RPTUN)
-  set(SRCS)
 
-  list(APPEND SRCS rptun.c)
+if(CONFIG_PCI)
 
-  if(CONFIG_RPTUN_IVSHMEM)
-    list(APPEND SRCS rptun_ivshmem.c)
+  set(SRCS pci.c pci_ecam.c pci_drivers.c)
+
+  if(CONFIG_PCI_QEMU_TEST)
+    list(APPEND SRCS pci_qemu_test.c)
   endif()
 
-  target_include_directories(drivers PRIVATE ${NUTTX_DIR}/openamp/open-amp/lib)
+  if(CONFIG_PCI_QEMU_EDU)
+    list(APPEND SRCS pci_qemu_edu.c)
+  endif()
+
+  if(CONFIG_PCI_UIO_IVSHMEM)
+    list(APPEND SRCS pci_uio_ivshmem.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
+
 endif()

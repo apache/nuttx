@@ -62,6 +62,18 @@ static const struct arm_mmu_region g_mmu_regions[] =
   MMU_REGION_FLAT_ENTRY("DRAM0_S0",
                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_CFG",
+                        CONFIG_PCI_CFG_BASEADDR, CONFIG_PCI_CFG_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_MEM",
+                        CONFIG_PCI_MEM_BASEADDR, CONFIG_PCI_MEM_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("PCI_IO",
+                        CONFIG_PCI_IO_BASEADDR, CONFIG_PCI_IO_SIZE,
+                        MT_NORMAL | MT_RW | MT_SECURE),
 };
 
 const struct arm_mmu_config g_mmu_config =
