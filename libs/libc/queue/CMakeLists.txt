@@ -18,15 +18,4 @@
 #
 # ##############################################################################
 
-target_sources(
-  c
-  PRIVATE sq_addafter.c
-          sq_remlast.c
-          sq_remfirst.c
-          sq_remafter.c
-          sq_count.c
-          dq_addafter.c
-          dq_remlast.c
-          dq_remfirst.c
-          dq_remafter.c
-          dq_count.c)
+target_sources(c PRIVATE queue.c)
