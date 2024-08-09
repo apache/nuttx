@@ -31,6 +31,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/list.h>
+#include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/pci/pci_regs.h>
 
