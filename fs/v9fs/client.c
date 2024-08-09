@@ -368,6 +368,7 @@ struct v9fs_fid_s
 {
   uint32_t iounit;
   uint32_t refcount;
+  char relpath[1];
 };
 
 /****************************************************************************
@@ -481,12 +482,15 @@ static uint32_t v9fs_map_open_flags(int flags)
  * v9fs_fid_create
  ****************************************************************************/
 
-static int v9fs_fid_create(FAR struct v9fs_client_s *client)
+static int v9fs_fid_create(FAR struct v9fs_client_s *client,
+                           FAR const char *relpath)
 {
   FAR struct v9fs_fid_s *fid;
+  size_t len;
   int ret;
 
-  fid = kmm_zalloc(sizeof(struct v9fs_fid_s));
+  len = strlen(relpath);
+  fid = kmm_zalloc(sizeof(struct v9fs_fid_s) + len);
   if (fid == NULL)
     {
       return -ENOMEM;
@@ -498,6 +502,7 @@ static int v9fs_fid_create(FAR struct v9fs_client_s *client)
   nxmutex_unlock(&client->lock);
   if (ret >= 0)
     {
+      memcpy(fid->relpath, relpath, len + 1);
       return ret;
     }
 
@@ -626,7 +631,7 @@ static int v9fs_client_attach(FAR struct v9fs_client_s *client, uint32_t fid,
    * size[4] Rattach tag[2] qid[13]
    */
 
-  ret = v9fs_fid_create(client);
+  ret = v9fs_fid_create(client, "");
   if (ret < 0)
     {
       return ret;
@@ -1420,6 +1425,28 @@ int v9fs_client_open(FAR struct v9fs_client_s *client,
 }
 
 /****************************************************************************
+ * v9fs_client_getname
+ ****************************************************************************/
+
+int v9fs_client_getname(FAR struct v9fs_client_s *client, uint32_t fid,
+                        FAR char *path)
+{
+  FAR struct v9fs_fid_s *fidp;
+
+  nxmutex_lock(&client->lock);
+  fidp = idr_find(client->fids, fid);
+  if (fidp == NULL)
+    {
+      nxmutex_unlock(&client->lock);
+      return -ENOENT;
+    }
+
+  strlcat(path, fidp->relpath, PATH_MAX);
+  nxmutex_unlock(&client->lock);
+  return 0;
+}
+
+/****************************************************************************
  * v9fs_client_walk
  ****************************************************************************/
 
@@ -1496,7 +1523,7 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
       return -ENOMEM;
     }
 
-  newfid = v9fs_fid_create(client);
+  newfid = v9fs_fid_create(client, path);
   if (newfid < 0)
     {
       goto err;
