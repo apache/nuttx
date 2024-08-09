@@ -80,6 +80,9 @@ extern "C++"
 #    endif
 #    include <stdbool.h>
 #    include <stdatomic.h>
+#    ifndef ATOMIC_VAR_INIT
+#      define ATOMIC_VAR_INIT(value) (value)
+#    endif
 #  else
 #    include <nuttx/lib/stdatomic.h>
 #  endif
