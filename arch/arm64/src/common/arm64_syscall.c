@@ -43,54 +43,10 @@
 #include "signal/signal.h"
 
 /****************************************************************************
- * Private Functions
+ * Private Types
  ****************************************************************************/
 
-/****************************************************************************
- * Name: dispatch_syscall
- *
- * Description:
- *   Call the stub function corresponding to the system call.  NOTE the non-
- *   standard parameter passing:
- *
- *     x0 = SYS_ call number
- *     x1 = parm0
- *     x2 = parm1
- *     x3 = parm2
- *     x4 = parm3
- *     x5 = parm4
- *     x6 = parm5
- *
- *   The values of X4-X5 may be preserved in the proxy called by the user
- *   code if they are used (but otherwise will not be).
- *
- *   WARNING: There are hard-coded values in this logic!
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIB_SYSCALL
-static void dispatch_syscall(void) naked_function;
-static void dispatch_syscall(void)
-{
-  __asm__ __volatile__
-  (
-    " sub sp, sp, #16\n"           /* Create a stack frame to hold 3 parms + lr */
-    " str r4, [sp, #0]\n"          /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"          /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
-    " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
-    " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
-    " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this SYSCALL */
-    " blx ip\n"                    /* Call the stub (modifies lr) */
-    " ldr lr, [sp, #12]\n"         /* Restore lr */
-    " add sp, sp, #16\n"           /* Destroy the stack frame */
-    " mov r2, r0\n"                /* R2=Save return value in R2 */
-    " mov r0, %0\n"                /* R0=SYS_syscall_return */
-    " svc %1\n"::"i"(SYS_syscall_return),
-                 "i"(SYS_syscall)  /* Return from the SYSCALL */
-  );
-}
-#endif
+typedef uintptr_t (*syscall_t)(unsigned int, ...);
 
 /****************************************************************************
  * Private Functions
@@ -111,9 +67,86 @@ static void  arm64_dump_syscall(const char *tag, uint64_t cmd,
           f_regs->regs[REG_X6], f_regs->regs[REG_X7]);
 }
 
+#ifdef CONFIG_LIB_SYSCALL
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: dispatch_syscall
+ *
+ * Description:
+ *   Call the stub function corresponding to the system call.  NOTE the non-
+ *   standard parameter passing:
+ *
+ *     R0 = SYS_ call number
+ *     R1 = parm0
+ *     R2 = parm1
+ *     R3 = parm2
+ *     R4 = parm3
+ *     R5 = parm4
+ *     R6 = parm5
+ *     R7 = context (aka SP)
+ *
+ ****************************************************************************/
+
+uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
+                           uintptr_t parm2, uintptr_t parm3,
+                           uintptr_t parm4, uintptr_t parm5,
+                           uintptr_t parm6, void *context)
+{
+  struct tcb_s *rtcb         = this_task();
+  register long x0 asm("x0") = (long)(nbr);
+  register long x1 asm("x1") = (long)(parm1);
+  register long x2 asm("x2") = (long)(parm2);
+  register long x3 asm("x3") = (long)(parm3);
+  register long x4 asm("x4") = (long)(parm4);
+  register long x5 asm("x5") = (long)(parm5);
+  register long x6 asm("x6") = (long)(parm6);
+  syscall_t do_syscall;
+  uintptr_t ret;
+
+  /* Valid system call ? */
+
+  if (x0 > SYS_maxsyscall)
+    {
+      /* Nope, get out */
+
+      return -ENOSYS;
+    }
+
+  /* Set the user register context to TCB */
+
+  rtcb->xcp.regs = context;
+
+  /* Indicate that we are in a syscall handler */
+
+  rtcb->flags |= TCB_FLAG_SYSCALL;
+
+  /* Offset a0 to account for the reserved syscalls */
+
+  x0 -= CONFIG_SYS_RESERVED;
+
+  /* Find the system call from the lookup table */
+
+  do_syscall = (syscall_t)g_stublookup[x0];
+
+  /* Run the system call, save return value locally */
+
+  ret = do_syscall(x0, x1, x2, x3, x4, x5, x6);
+
+  /* System call is now done */
+
+  rtcb->flags &= ~TCB_FLAG_SYSCALL;
+
+  /* Unmask any pending signals now */
+
+  nxsig_unmask_pendingsignal();
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: arm64_syscall_switch
@@ -245,6 +278,9 @@ int arm64_syscall(uint64_t *regs)
 {
   uint64_t             cmd;
   struct regs_context *f_regs;
+#ifdef CONFIG_BUILD_KERNEL
+  uint64_t             spsr;
+#endif
 
   /* Nested interrupts are not supported */
 
@@ -260,138 +296,6 @@ int arm64_syscall(uint64_t *regs)
 
   switch (cmd)
     {
-      /* R0=SYS_syscall_return:  This a SYSCALL return command:
-       *
-       *   void arm_syscall_return(void);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_syscall_return
-       *
-       * We need to restore the saved return address and return in
-       * unprivileged thread mode.
-       */
-
-#ifdef CONFIG_LIB_SYSCALL
-      case SYS_syscall_return:
-        {
-          struct tcb_s *rtcb = nxsched_self();
-          int index = (int)rtcb->xcp.nsyscalls - 1;
-
-          /* Make sure that there is a saved SYSCALL return address. */
-
-          DEBUGASSERT(index >= 0);
-
-          /* Setup to return to the saved SYSCALL return address in
-           * the original mode.
-           */
-
-          regs[REG_PC]        = rtcb->xcp.syscall[index].sysreturn;
-#ifdef CONFIG_BUILD_KERNEL
-          regs[REG_CPSR]      = rtcb->xcp.syscall[index].cpsr;
-#endif
-          /* The return value must be in R0-R1.  dispatch_syscall()
-           * temporarily moved the value for R0 into R2.
-           */
-
-          regs[REG_R0]         = regs[REG_R2];
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
-          /* If this is the outermost SYSCALL and if there is a saved user
-           * stack pointer, then restore the user stack pointer on this
-           * final return to user code.
-           */
-
-          if (index == 0 && rtcb->xcp.ustkptr != NULL)
-            {
-              regs[REG_SP]      = (uint64_t)rtcb->xcp.ustkptr;
-              rtcb->xcp.ustkptr = NULL;
-            }
-#endif
-
-          /* Save the new SYSCALL nesting level */
-
-          rtcb->xcp.nsyscalls   = index;
-
-          /* Handle any signal actions that were deferred while processing
-           * the system call.
-           */
-
-          rtcb->flags          &= ~TCB_FLAG_SYSCALL;
-          (void)nxsig_unmask_pendingsignal();
-        }
-        break;
-#endif
-
-      /* R0=SYS_task_start:  This a user task start
-       *
-       *   void up_task_start(main_t taskentry, int argc, char *argv[])
-       *     noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_task_start
-       *   R1 = taskentry
-       *   R2 = argc
-       *   R3 = argv
-       */
-
-#ifdef CONFIG_BUILD_KERNEL
-      case SYS_task_start:
-        {
-          /* Set up to return to the user-space _start function in
-           * unprivileged mode.  We need:
-           *
-           *   R0   = argc
-           *   R1   = argv
-           *   PC   = taskentry
-           *   CSPR = user mode
-           */
-
-          regs[REG_PC]   = regs[REG_R1];
-          regs[REG_R0]   = regs[REG_R2];
-          regs[REG_R1]   = regs[REG_R3];
-
-          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = cpsr | PSR_MODE_USR;
-        }
-        break;
-#endif
-
-      /* R0=SYS_pthread_start:  This a user pthread start
-       *
-       *   void up_pthread_start(pthread_startroutine_t entrypt,
-       *                         pthread_addr_t arg) noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_pthread_start
-       *   R1 = entrypt
-       *   R2 = arg
-       */
-
-#if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
-      case SYS_pthread_start:
-        {
-          /* Set up to enter the user-space pthread start-up function in
-           * unprivileged mode. We need:
-           *
-           *   R0   = entrypt
-           *   R1   = arg
-           *   PC   = startup
-           *   CSPR = user mode
-           */
-
-          regs[REG_PC]   = regs[REG_R1];
-          regs[REG_R0]   = regs[REG_R2];
-          regs[REG_R1]   = regs[REG_R3];
-
-          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = cpsr | PSR_MODE_USR;
-        }
-        break;
-#endif
-
 #ifdef CONFIG_BUILD_KERNEL
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
@@ -414,24 +318,24 @@ int arm64_syscall(uint64_t *regs)
           /* Remember the caller's return address */
 
           DEBUGASSERT(rtcb->xcp.sigreturn == 0);
-          rtcb->xcp.sigreturn  = regs[REG_PC];
+          rtcb->xcp.sigreturn  = regs[REG_ELR];
 
           /* Set up to return to the user-space trampoline function in
            * unprivileged mode.
            */
 
-          regs[REG_PC]   = (uint64_t)ARCH_DATA_RESERVE->ar_sigtramp;
-          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = cpsr | PSR_MODE_USR;
+          regs[REG_ELR]  = (uint64_t)ARCH_DATA_RESERVE->ar_sigtramp;
+          spsr           = regs[REG_SPSR] & ~SPSR_MODE_MASK;
+          regs[REG_SPSR] = spsr | SPSR_MODE_EL0T;
 
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s signal_handler.
            */
 
-          regs[REG_R0]   = regs[REG_R1]; /* sighand */
-          regs[REG_R1]   = regs[REG_R2]; /* signal */
-          regs[REG_R2]   = regs[REG_R3]; /* info */
-          regs[REG_R3]   = regs[REG_R4]; /* ucontext */
+          regs[REG_X0]   = regs[REG_X1]; /* sighand */
+          regs[REG_X1]   = regs[REG_X2]; /* signal */
+          regs[REG_X2]   = regs[REG_X3]; /* info */
+          regs[REG_X3]   = regs[REG_X4]; /* ucontext */
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
           /* If we are signalling a user process, then we must be operating
@@ -445,29 +349,16 @@ int arm64_syscall(uint64_t *regs)
             {
               uint64_t usp;
 
-              DEBUGASSERT(rtcb->xcp.kstkptr == NULL);
-
-              /* Copy "info" into user stack */
-
-              if (rtcb->xcp.sigdeliver)
-                {
-                  usp = rtcb->xcp.saved_regs[REG_SP];
-                }
-              else
-                {
-                  usp = rtcb->xcp.regs[REG_SP];
-                }
-
               /* Create a frame for info and copy the kernel info */
 
-              usp = usp - sizeof(siginfo_t);
-              memcpy((void *)usp, (void *)regs[REG_R2], sizeof(siginfo_t));
+              rtcb->xcp.ustkptr = (uintptr_t *)read_sysreg(sp_el0);
+              usp = (uintptr_t)rtcb->xcp.ustkptr - sizeof(siginfo_t);
+              memcpy((void *)usp, (void *)regs[REG_X2], sizeof(siginfo_t));
 
               /* Now set the updated SP and user copy of "info" to R2 */
 
-              rtcb->xcp.kstkptr = (uint64_t *)regs[REG_SP];
-              regs[REG_SP]      = usp;
-              regs[REG_R2]      = usp;
+              write_sysreg(usp, sp_el0);
+              regs[REG_X2] = usp;
             }
 #endif
         }
@@ -492,98 +383,24 @@ int arm64_syscall(uint64_t *regs)
 
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
 
-          regs[REG_PC]         = rtcb->xcp.sigreturn;
-          cpsr                 = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR]       = cpsr | PSR_MODE_SVC;
+          regs[REG_ELR]        = rtcb->xcp.sigreturn;
+          spsr                 = regs[REG_SPSR] & ~SPSR_MODE_MASK;
+          regs[REG_SPSR]       = spsr | SPSR_MODE_EL1H;
           rtcb->xcp.sigreturn  = 0;
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-          /* We must enter here be using the user stack.  We need to switch
-           * to back to the kernel user stack before returning to the kernel
-           * mode signal trampoline.
-           */
+          /* Restore the original user SP, destroying the signal frame */
 
-          if (rtcb->xcp.kstack != NULL)
-            {
-              DEBUGASSERT(rtcb->xcp.kstkptr != NULL);
-
-              regs[REG_SP]      = (uint64_t)rtcb->xcp.kstkptr;
-              rtcb->xcp.kstkptr = NULL;
-            }
+          write_sysreg(rtcb->xcp.ustkptr, sp_el0);
 #endif
         }
         break;
 #endif
-
-      /* This is not an architecture-specific system call.  If NuttX is built
-       * as a standalone kernel with a system call interface, then all of the
-       * additional system calls must be handled as in the default case.
-       */
 
       default:
-        {
-#ifdef CONFIG_LIB_SYSCALL
-          struct tcb_s *rtcb = nxsched_self();
-          int index = rtcb->xcp.nsyscalls;
 
-          /* Verify that the SYS call number is within range */
-
-          DEBUGASSERT(cmd >= CONFIG_SYS_RESERVED && cmd < SYS_maxsyscall);
-
-          /* Make sure that there is a no saved SYSCALL return address.  We
-           * cannot yet handle nested system calls.
-           */
-
-          DEBUGASSERT(index < CONFIG_SYS_NNEST);
-
-          /* Setup to return to dispatch_syscall in privileged mode. */
-
-          rtcb->xcp.syscall[index].sysreturn = regs[REG_PC];
-#ifdef CONFIG_BUILD_KERNEL
-          rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
-#endif
-
-          regs[REG_PC]   = (uint64_t)dispatch_syscall;
-#ifdef CONFIG_BUILD_KERNEL
-          cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = cpsr | PSR_MODE_SVC;
-#endif
-          /* Offset R0 to account for the reserved values */
-
-          regs[REG_R0]  -= CONFIG_SYS_RESERVED;
-
-          /* Indicate that we are in a syscall handler. */
-
-          rtcb->flags   |= TCB_FLAG_SYSCALL;
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
-          /* If this is the first SYSCALL and if there is an allocated
-           * kernel stack, then switch to the kernel stack.
-           */
-
-          if (index == 0 && rtcb->xcp.kstack != NULL)
-            {
-              rtcb->xcp.ustkptr = (uint64_t *)regs[REG_SP];
-              if (rtcb->xcp.kstkptr != NULL)
-                {
-                  regs[REG_SP]  = (uint64_t)rtcb->xcp.kstkptr;
-                }
-              else
-                {
-                  regs[REG_SP]  = (uint64_t)rtcb->xcp.kstack +
-                                  ARCH_KERNEL_STACKSIZE;
-                }
-            }
-#endif
-
-          /* Save the new SYSCALL nesting level */
-
-          rtcb->xcp.nsyscalls   = index + 1;
-#else
-          svcerr("ERROR: Bad SYS call: 0x%" PRIx64 "\n", cmd);
-#endif
-        }
-        break;
+          DEBUGPANIC();
+          break;
     }
 
   return 0;
