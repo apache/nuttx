@@ -56,6 +56,22 @@
 
 .endm
 
+.macro enable_irq
+#ifdef CONFIG_ARM64_DECODEFIQ
+    msr daifclr, #3
+#else
+    msr daifclr, #2
+#endif
+.endm
+
+.macro disable_irq
+#ifdef CONFIG_ARM64_DECODEFIQ
+    msr daifset, #3
+#else
+    msr daifset, #2
+#endif
+.endm
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -132,7 +148,7 @@ SECTION_FUNC(text, arm64_context_switch)
     ldp    x0, x1, [sp], #16
 #endif
 
-    /* Save the current SP_EL0 */
+    /* Save the current SP_ELx */
     add    x4, sp, #8 * XCPTCONTEXT_GP_REGS
     str    x4, [x1, #8 * REG_SP_ELX]
 
@@ -214,6 +230,30 @@ SECTION_FUNC(text, arm64_sync_exc)
 
     bne    exc_handle
 
+#ifdef CONFIG_LIB_SYSCALL
+    /* Handle user system calls separately */
+
+    cmp    x0, #CONFIG_SYS_RESERVED
+    blt    reserved_syscall
+
+    /* Call dispatch_syscall() on the kernel stack with interrupts enabled */
+
+    enable_irq
+    mov    x7, sp /* x7 = context */
+    bl     dispatch_syscall
+    disable_irq
+
+    /* Save the return value into the user context */
+
+    str    x0, [sp, #8 * REG_X0]
+
+    /* Return from exception */
+
+    b      arm64_exit_exception
+
+reserved_syscall:
+#endif
+
     /* x0 = syscall_cmd
      * if ( x0 <= SYS_switch_context ) {
      *     call context_switch
@@ -252,10 +292,6 @@ SECTION_FUNC(text, arm64_sync_exc)
     /* Call arm64_syscall() on the user stack */
 
     bl    arm64_syscall        /* Call the handler */
-
-    /* Save the return value into the */
-
-    str    x0, [sp, #8 * REG_X0]
 
     /* Return from exception */
 

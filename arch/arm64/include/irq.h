@@ -247,6 +247,12 @@ extern "C"
 EXTERN volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
 #define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
 struct xcptcontext
 {
   /* The following function pointer is non-zero if there are pending signals
@@ -308,10 +314,11 @@ struct xcptcontext
 
   uintptr_t *ustkptr;  /* Saved user stack pointer */
   uintptr_t *kstack;   /* Allocate base of the (aligned) kernel stack */
-  uintptr_t *kstkptr;  /* Saved kernel stack pointer */
 #  endif
 #endif
 };
+
+#endif /* __ASSEMBLY__ */
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *

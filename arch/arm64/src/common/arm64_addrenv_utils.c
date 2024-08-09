@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/common/addrenv.h
+ * arch/arm64/src/common/arm64_addrenv_utils.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,50 +18,26 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_COMMON_ADDRENV_H
-#define __ARCH_ARM64_SRC_COMMON_ADDRENV_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
+#include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
+#include <nuttx/irq.h>
+#include <nuttx/pgalloc.h>
+#include <nuttx/sched.h>
 
-#include "arm64_internal.h"
+#include "barriers.h"
+#include "pgalloc.h"
+#include "arm64_mmu.h"
 
-#ifdef CONFIG_ARCH_ADDRENV
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Aligned size of the kernel stack */
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
-#  define ARCH_KERNEL_STACKSIZE STACK_ALIGN_UP(CONFIG_ARCH_KERNEL_STACKSIZE)
-#endif
-
-/* Base address for address environment */
-
-#if CONFIG_ARCH_TEXT_VBASE != 0
-#  define ARCH_ADDRENV_VBASE    (CONFIG_ARCH_TEXT_VBASE)
-#else
-#  define ARCH_ADDRENV_VBASE    (CONFIG_ARCH_DATA_VBASE)
-#endif
-
-/* Maximum user address environment size */
-
-#define ARCH_ADDRENV_MAX_SIZE   (0x40000000)
-
-/* User address environment end */
-
-#define ARCH_ADDRENV_VEND       (ARCH_ADDRENV_VBASE + ARCH_ADDRENV_MAX_SIZE - 1)
+#ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -81,7 +57,54 @@
  *
  ****************************************************************************/
 
-uintptr_t arm64_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr);
+uintptr_t arm64_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
+{
+  uintptr_t paddr;
+  uintptr_t ptprev;
+  uint32_t  ptlevel;
+  uint32_t  flags;
+
+  /* Get the current level MAX_LEVELS-1 entry corresponding to this vaddr */
+
+  ptlevel = ARCH_SPGTS;
+  ptprev  = arm64_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
+  if (!ptprev)
+    {
+      /* Something is very wrong */
+
+      return 0;
+    }
+
+  /* Find the physical address of the final level page table */
+
+  paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
+  if (!paddr)
+    {
+      /* No page table has been allocated... allocate one now */
+
+      paddr = mm_pgalloc(1);
+      if (paddr)
+        {
+          /* Determine page table flags */
+
+          if (arm64_uservaddr(vaddr))
+            {
+              flags = MMU_UPGT_FLAGS;
+            }
+          else
+            {
+              flags = MMU_KPGT_FLAGS;
+            }
+
+          /* Wipe the page and assign it */
+
+          arm64_pgwipe(paddr);
+          mmu_ln_setentry(ptlevel, ptprev, paddr, vaddr, flags);
+        }
+    }
+
+  return paddr;
+}
 
 /****************************************************************************
  * Name: arm64_map_pages
@@ -105,7 +128,35 @@ uintptr_t arm64_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr);
  ****************************************************************************/
 
 int arm64_map_pages(arch_addrenv_t *addrenv, uintptr_t *pages,
-                    unsigned int npages, uintptr_t vaddr, uint64_t prot);
+                    unsigned int npages, uintptr_t vaddr, uint64_t prot)
+{
+  uintptr_t ptlast;
+  uintptr_t ptlevel;
+  uintptr_t paddr;
+
+  ptlevel = MMU_PGT_LEVELS;
+
+  /* Add the references to pages[] into the caller's address environment */
+
+  for (; npages > 0; npages--)
+    {
+      /* Get the address of the last level page table */
+
+      ptlast = arm64_pgvaddr(arm64_get_pgtable(addrenv, vaddr));
+      if (!ptlast)
+        {
+          return -ENOMEM;
+        }
+
+      /* Then add the reference */
+
+      paddr = *pages++;
+      mmu_ln_setentry(ptlevel, ptlast, paddr, vaddr, prot);
+      vaddr += MM_PGSIZE;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: arm64_unmap_pages
@@ -126,7 +177,43 @@ int arm64_map_pages(arch_addrenv_t *addrenv, uintptr_t *pages,
  ****************************************************************************/
 
 int arm64_unmap_pages(arch_addrenv_t *addrenv, uintptr_t vaddr,
-                      unsigned int npages);
+                      unsigned int npages)
+{
+  uintptr_t ptlast;
+  uintptr_t ptprev;
+  uintptr_t ptlevel;
+  uintptr_t paddr;
 
-#endif /* CONFIG_ARCH_ADDRENV */
-#endif /* __ARCH_ARM64_SRC_COMMON_ADDRENV_H */
+  ptprev  = arm64_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
+  if (!ptprev)
+    {
+      /* Something is very wrong */
+
+      return -EFAULT;
+    }
+
+  ptlevel = ARCH_SPGTS;
+
+  /* Remove the references from the caller's address environment */
+
+  for (; npages > 0; npages--)
+    {
+      /* Get the current final level entry corresponding to this vaddr */
+
+      paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
+      ptlast = arm64_pgvaddr(paddr);
+      if (!ptlast)
+        {
+          return -EFAULT;
+        }
+
+      /* Then wipe the reference */
+
+      mmu_ln_clear(ptlevel + 1, ptlast, vaddr);
+      vaddr += MM_PGSIZE;
+    }
+
+  return OK;
+}
+
+#endif /* CONFIG_BUILD_KERNEL */
