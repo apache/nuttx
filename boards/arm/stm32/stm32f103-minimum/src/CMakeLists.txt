@@ -79,10 +79,6 @@ if(CONFIG_CAN_MCP2515)
   list(APPEND SRCS stm32_mcp2515.c)
 endif()
 
-if(CONFIG_CL_MFRC522)
-  list(APPEND SRCS stm32_mfrc522.c)
-endif()
-
 if(CONFIG_LCD_MAX7219)
   list(APPEND SRCS stm32_max7219.c)
 endif()
