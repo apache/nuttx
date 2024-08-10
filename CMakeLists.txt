@@ -46,6 +46,11 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
   cmake_policy(SET CMP0135 NEW)
 endif()
 
+if(POLICY CMP0169)
+  # allow to call FetchContent_Populate directly
+  cmake_policy(SET CMP0169 OLD)
+endif()
+
 # Basic CMake configuration ##################################################
 
 set(CMAKE_CXX_EXTENSIONS OFF)
