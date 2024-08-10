@@ -27,7 +27,7 @@ MEMORY
     /* 256Kb FLASH */
 
   kflash (rx)      : ORIGIN = 0x00000000, LENGTH = 124K
-  uflash (rx)      : ORIGIN = 0x00020000, LENGTH = 132K
+  uflash (rx)      : ORIGIN = 0x0001f000, LENGTH = 132K
   xflash (rx)      : ORIGIN = 0x00040000, LENGTH = 0K
 
     /* 64Kb of contiguous SRAM */
