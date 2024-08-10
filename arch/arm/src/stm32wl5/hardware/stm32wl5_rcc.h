@@ -276,7 +276,7 @@
 
 #define RCC_PLLCFG_PLLP_SHIFT            (17)      /* Bit 17-21: Main PLL div factor for PLLPCLK */
 #define RCC_PLLCFG_PLLP_MASK             (0x1f << RCC_PLLCFG_PLLP_SHIFT)
-#  define RCC_PLLCFG_PLLP                (((n)-1) << RCC_PLLCFG_PLLP_SHIFT) /* 2..32 */
+#define RCC_PLLCFG_PLLP(n)               (((n)-1) << RCC_PLLCFG_PLLP_SHIFT) /* 2..32 */
 
 #define RCC_PLLCFG_PLLQEN                (1 << 24) /* Bit 24: Main PLL PLLQCLK output enable */
 
