@@ -87,12 +87,20 @@
 #  define CONFIG_HAVE_CXX14 1
 #endif
 
+/* Green Hills Software definitions *****************************************/
+
+#if defined(__ghs__)
+
+#  define __extension__
+
+#endif
+
 /* GCC-specific definitions *************************************************/
 
 #ifdef __GNUC__
 
 /* Built-ins */
-#  if __GNUC__ >= 4
+#  if __GNUC__ >= 4 && !defined(__ghs__)
 #    define CONFIG_HAVE_BUILTIN_BSWAP16 1
 #    define CONFIG_HAVE_BUILTIN_BSWAP32 1
 #    define CONFIG_HAVE_BUILTIN_BSWAP64 1
