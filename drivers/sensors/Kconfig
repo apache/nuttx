@@ -379,6 +379,23 @@ config SENSORS_BMP280
 
 if SENSORS_BMP280
 
+choice
+	prompt "I2C Address"
+	default BMP280_I2C_ADDR_76
+
+config BMP280_I2C_ADDR_76
+	bool "0x76"
+	---help---
+		Default address.
+		If SDO pin is pulled to GND, use 0x76
+
+config BMP280_I2C_ADDR_77
+	bool "0x77"
+	---help---
+		If SDO pin is pulled to VDDIO, use 0x77
+
+endchoice # I2C Address
+
 config BMP280_I2C_FREQUENCY
 	int "BMP280 I2C frequency"
 	default 400000

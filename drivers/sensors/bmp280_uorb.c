@@ -42,7 +42,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef  CONFIG_BMP280_I2C_ADDR_76
 #define BMP280_ADDR         0x76
+#else
+#define BMP280_ADDR         0x77
+#endif
 #define BMP280_FREQ         CONFIG_BMP280_I2C_FREQUENCY
 #define DEVID               0x58
 
