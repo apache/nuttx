@@ -35,6 +35,7 @@
 #include <sched.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
