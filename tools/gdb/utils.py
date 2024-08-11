@@ -141,9 +141,12 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
     # If there is a current stack frame, GDB uses the macros in scope at that frame’s source code line.
     # Otherwise, GDB uses the macros in scope at the current listing location.
     # Reference: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Macros.html#Macros
-    if not gdb.selected_frame():
-        gdb.execute(f"list {locspec}", to_string=True)
-        return gdb_eval_or_none(name)
+    try:
+        if not gdb.selected_frame():
+            gdb.execute(f"list {locspec}", to_string=True)
+            return gdb_eval_or_none(name)
+    except gdb.error:
+        pass
 
     # Try current frame
     value = gdb_eval_or_none(name)
