@@ -561,8 +561,7 @@ class Memleak(gdb.Command):
         for i in range(0, region):
             start = int(heap["mm_heapstart"][i])
             end = int(heap["mm_heapend"][i])
-            mem = inf.read_memory(start, end - start)
-            regions.append({"start": start, "end": end, "mem": mem})
+            regions.append({"start": start, "end": end})
 
         # Search global variables
         sdata = int(gdb.parse_and_eval("(uintptr_t)&_sdata"))
@@ -570,18 +569,6 @@ class Memleak(gdb.Command):
         global_size = (ebss - sdata) // longsize * longsize
         gdb.write(f"Searching in global variables {hex(sdata)} ~ {hex(ebss)}\n")
         global_mem = inf.read_memory(sdata, global_size)
-
-        def read_memory(addr, size):
-            # check global variable
-            if addr >= sdata and addr + size <= ebss:
-                return global_mem[addr - sdata : addr - sdata + size]
-
-            for region in regions:
-                start = region["start"]
-                end = region["end"]
-                if addr >= start and addr + size <= end:
-                    return region["mem"][addr - start : addr - start + size]
-
         i = 0
         while i < global_size:
             ptr = read_ulong(global_mem, i)
@@ -595,7 +582,7 @@ class Memleak(gdb.Command):
         gdb.write("Searching in grey memory\n")
         for node in self.grey_list:
             addr = node["addr"]
-            mem = read_memory(addr, node["size"])
+            mem = inf.read_memory(addr, node["size"])
             i = 0
             while i < node["size"]:
                 ptr = read_ulong(mem, i)
@@ -863,7 +850,7 @@ class Memfrag(gdb.Command):
         parser.add_argument(
             "-d", "--detail", action="store_true", help="Output details"
         )
-        if argv[0] == '':
+        if argv[0] == "":
             argv = None
         try:
             args = parser.parse_args(argv)
