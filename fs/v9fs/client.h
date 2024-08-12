@@ -32,6 +32,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
+#include <sys/uio.h>
 
 /****************************************************************************
  * Type Definitions
