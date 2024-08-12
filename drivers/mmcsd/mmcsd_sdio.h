@@ -59,6 +59,7 @@
 #define MMC_CMD6_MODE_WRITE_BYTE    (0x03)  /* Set target to value */
 
 #define EXT_CSD_BUS_WIDTH           183     /* WO */
+#define EXT_CSD_HS_TIMING           185     /* R/W */
 
 /* EXT_CSD_BUS_WIDTH */
 #define EXT_CSD_BUS_WIDTH_1         (0x00)  /* Card is in 1 bit mode */
@@ -69,6 +70,16 @@
 
 #define MMC_CMD6_BUSWIDTH(width)    (MMC_CMD6_VALUE(width) | \
                                      MMC_CMD6_INDEX(EXT_CSD_BUS_WIDTH) | \
+                                     MMC_CMD6_MODE(MMC_CMD6_MODE_WRITE_BYTE))
+
+/* EXT_CSD_HS_TIMING */
+#define EXT_CSD_HS_TIMING_BC        0
+#define EXT_CSD_HS_TIMING_HS        1
+#define EXT_CSD_HS_TIMING_HS200     2
+#define EXT_CSD_HS_TIMING_HS400     3
+
+#define MMC_CMD6_HS_TIMING(timing)  (MMC_CMD6_VALUE(timing) | \
+                                     MMC_CMD6_INDEX(EXT_CSD_HS_TIMING) | \
                                      MMC_CMD6_MODE(MMC_CMD6_MODE_WRITE_BYTE))
 
 /* CMD8 Argument:

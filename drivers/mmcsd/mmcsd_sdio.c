@@ -2583,6 +2583,20 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 #ifdef CONFIG_MMCSD_MMCSUPPORT
   else
     {
+      if (priv->caps & SDIO_CAPS_MMC_HS_MODE)
+        {
+          mmcsd_sendcmdpoll(priv, MMCSD_CMD6,
+                            MMC_CMD6_HS_TIMING(EXT_CSD_HS_TIMING_HS));
+          ret = mmcsd_recv_r1(priv, MMCSD_CMD6);
+          if (ret != OK)
+            {
+              ferr("ERROR: (MMCSD_CMD6) Setting MMC speed mode: %d\n", ret);
+              return ret;
+            }
+
+          priv->mode = EXT_CSD_HS_TIMING_HS;
+        }
+
       SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
     }
 #endif /* #ifdef CONFIG_MMCSD_MMCSUPPORT */
