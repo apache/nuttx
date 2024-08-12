@@ -78,6 +78,13 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
 
   DEBUGASSERT(cpusetsize == sizeof(cpu_set_t) && mask != NULL);
 
+  /* Make sure that affinity mask is valid */
+
+  if (*mask == 0)
+    {
+      return -EINVAL;
+    }
+
   /* Verify that the PID corresponds to a real task */
 
   if (!pid)
