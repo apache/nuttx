@@ -2522,8 +2522,7 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
        */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD6,
-                        MMCSD_CMD6_MODE_WRITE_BYTE | MMCSD_CMD6_BUSWIDTH_RW |
-                        MMCSD_CMD6_BUS_WIDTH_4);
+                        MMC_CMD6_BUSWIDTH(EXT_CSD_BUS_WIDTH_4));
       ret = mmcsd_recv_r1(priv, MMCSD_CMD6);
 
       if (ret != OK)
