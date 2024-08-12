@@ -1003,3 +1003,16 @@ void up_send_smp_call(cpu_set_t cpuset)
 }
 #  endif
 #endif
+
+/***************************************************************************
+ * Name: up_get_legacy_irq
+ *
+ * Description:
+ *   Reserve vector for legacy
+ *
+ ***************************************************************************/
+
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
+{
+  return -ENOTSUP;
+}
