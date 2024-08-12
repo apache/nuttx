@@ -1353,7 +1353,7 @@ static int pci_enable_msix(FAR struct pci_device_s *dev, FAR int *irq,
       pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_LOWER_ADDR, mar);
 
       pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_UPPER_ADDR,
-                           (mar >> 32));
+                           ((uint64_t)mar >> 32));
 
       /* Write Message Data Register */
 
