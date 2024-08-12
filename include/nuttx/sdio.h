@@ -479,6 +479,7 @@
 #define SDIO_CAPS_4BIT            0x08 /* Bit 3=1: Supports 4 bit operation */
 #define SDIO_CAPS_8BIT            0x10 /* Bit 4=1: Supports 8 bit operation */
 #define SDIO_CAPS_4BIT_ONLY       0x20 /* Bit 5=1: Supports 4-bit only operation */
+#define SDIO_CAPS_MMC_HS_MODE     0x40 /* Bit 6=1: Supports eMMC high speed mode */
 
 /****************************************************************************
  * Name: SDIO_STATUS
