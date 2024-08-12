@@ -166,7 +166,9 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
         )
         g_symbol_cache = {}
 
-    suppressed = "on" in gdb.execute("show suppress-cli-notifications", to_string=True)
+    suppressed = "is on" in gdb.execute(
+        "show suppress-cli-notifications", to_string=True
+    )
     if not suppressed:
         # Disable notifications
         gdb.execute("set suppress-cli-notifications on")
