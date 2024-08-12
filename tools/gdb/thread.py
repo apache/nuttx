@@ -504,8 +504,8 @@ def register_commands():
     Ps()
 
     # Disable thread commands for core dump and gdb-stub.
-    # In which case the recogoized threads count is less or equal to the number of cpus
-    ncpus = utils.get_symbol_value("CONFIG_SMP_NCPUS")
+    # In which case the recognized threads count is less or equal to the number of cpus
+    ncpus = utils.get_symbol_value("CONFIG_SMP_NCPUS") or 1
     nthreads = len(gdb.selected_inferior().threads())
     if nthreads <= ncpus:
         Nxsetregs()
