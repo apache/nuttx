@@ -70,7 +70,7 @@ SECTIONS
 
     *(.iram1)
     *(.iram1.*)
-#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
 
     *libarch.a:*brownout.*(.text .text.* .literal .literal.*)
@@ -136,12 +136,6 @@ SECTIONS
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
     *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
-#else
-    *libarch.a:*cache_hal.*(.text .text.* .literal .literal.*)
-    *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
-    *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
-    *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
-#endif
 
     esp_head.*(.literal .text .literal.* .text.*)
     esp_start.*(.literal .text .literal.* .text.*)
@@ -210,7 +204,7 @@ SECTIONS
     *(.jcr)
     *(.dram1)
     *(.dram1.*)
-#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+
     *libsched.a:irq_dispatch.*(.rodata .rodata.*)
 
     *libarch.a:*brownout.*(.rodata .rodata.*)
@@ -276,12 +270,6 @@ SECTIONS
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:esp_spiflash.*(.rodata .rodata.*)
-#else
-    *libarch.a:*cache_hal.*(.rodata .rodata.*)
-    *libarch.a:*mpu_hal.*(.rodata .rodata.*)
-    *libarch.a:*mmu_hal.*(.rodata .rodata.*)
-    *libarch.a:esp_spiflash.*(.rodata .rodata.*)
-#endif
 
     esp_head.*(.rodata .rodata.*)
     esp_start.*(.rodata .rodata.*)

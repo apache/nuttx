@@ -170,7 +170,7 @@ config ESPRESSIF_BOOTLOADER_MCUBOOT
 config ESPRESSIF_MCUBOOT_VERSION
 	string "MCUboot version"
 	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
-	default "9c99326b9756dbcc35b524636d99ed5f3e6cb29b"
+	default "12906fdeff4d46752fe3c7f211a7a2fbbc8b7318"
 
 choice ESPRESSIF_ESPTOOL_TARGET_SLOT
 	prompt "Target slot for image flashing"
