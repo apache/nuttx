@@ -705,7 +705,8 @@ static void esp_spi_dma_exchange(struct esp_spi_priv_s *priv,
           spi_ll_enable_miso(priv->ctx->hw, false);
         }
 
-      spi_ll_master_user_start(priv->ctx->hw);
+      spi_ll_apply_config(priv->ctx->hw);
+      spi_ll_user_start(priv->ctx->hw);
 
       esp_spi_sem_waitdone(priv);
       bytes -= n;

@@ -54,8 +54,9 @@
 #include "spi_flash_mmap.h"
 #include "rom/cache.h"
 
-#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #include "bootloader_init.h"
+
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
 #include "bootloader_flash_priv.h"
 #include "esp_rom_uart.h"
 #include "esp_rom_sys.h"
@@ -404,6 +405,8 @@ void __esp_start(void)
       ets_printf("Hardware init failed, aborting\n");
       while (true);
     }
+#else
+  bootloader_clear_bss_section();
 #endif
 
 #if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
@@ -475,15 +478,6 @@ void __esp_start(void)
 
   showprogress('A');
 
-  /* Clear .bss. We'll do this inline (vs. calling memset) just to be
-   * certain that there are no issues with the state of global variables.
-   */
-
-  for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
-    {
-      *dest++ = 0;
-    }
-
   /* Setup the syscall table needed by the ROM code */
 
   esp_setup_syscall_table();
@@ -497,9 +491,7 @@ void __esp_start(void)
 
   wdt_hal_context_t rwdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
   wdt_hal_write_protect_disable(&rwdt_ctx);
-#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) && defined(CONFIG_ESPRESSIF_ESP32H2)
   wdt_hal_set_flashboot_en(&rwdt_ctx, false);
-#endif
   wdt_hal_disable(&rwdt_ctx);
   wdt_hal_write_protect_enable(&rwdt_ctx);
 
