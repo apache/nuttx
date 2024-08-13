@@ -31,6 +31,8 @@ MM_PREVFREE_BIT = 0x2
 MM_MASK_BIT = MM_ALLOC_BIT | MM_PREVFREE_BIT
 MEMPOOL_MAGIC_ALLOC = 0x55555555
 
+PID_MM_ORPHAN = -6
+PID_MM_BIGGEST = -5
 PID_MM_FREE = -4
 PID_MM_ALLOC = -3
 PID_MM_LEAK = -2
@@ -52,6 +54,16 @@ def align_up(size, align) -> int:
 def mm_nodesize(size) -> int:
     """Return the real size of a memory node"""
     return size & ~MM_MASK_BIT
+
+
+def mm_node_is_alloc(size) -> bool:
+    """Return node is allocated according to recorded size"""
+    return size & MM_ALLOC_BIT != 0
+
+
+def mm_prevnode_is_free(size) -> bool:
+    """Return prevnode is free according to recorded size"""
+    return size & MM_PREVFREE_BIT != 0
 
 
 def mm_foreach(heap):
@@ -274,6 +286,56 @@ def mempool_dumpbuf(buf, blksize, count, align, simple, detail, alive):
     gdb.write("\n")
 
 
+class HeapNode:
+    def __init__(self, gdb_node, nextfree=False):
+        self.gdb_node = gdb_node
+
+        record_size = gdb_node["size"]
+
+        if hasattr(gdb_node, "seqno"):
+            seqno = gdb_node["seqno"]
+        else:
+            seqno = 0
+
+        if hasattr(gdb_node, "pid"):
+            node_pid = gdb_node["pid"]
+        else:
+            node_pid = 0
+
+        self.size = mm_nodesize(record_size)
+        self.alloc = mm_node_is_alloc(record_size)
+        self.seqno = seqno
+        self.pid = node_pid
+        self.base = int(gdb_node)
+        self.prevfree = mm_prevnode_is_free(record_size)
+        self.nextfree = nextfree
+
+    def __lt__(self, other):
+        return self.size < other.size
+
+    def inside_sequence(self, seqmin, seqmax):
+        return self.seqno >= seqmin and self.seqno <= seqmax
+
+    def contains_address(self, address):
+        return address >= self.base and address < self.base + self.size
+
+    def is_orphan(self):
+        return self.prevfree or self.nextfree
+
+    def dump(self, detail, simple, align, check_alive, backtrace_dict):
+        if detail:
+            mm_dumpnode(
+                self.gdb_node,
+                1,
+                align,
+                simple,
+                detail,
+                check_alive(self.pid),
+            )
+        else:
+            backtrace_dict = record_backtrace(self.gdb_node, self.size, backtrace_dict)
+
+
 class Memdump(gdb.Command):
     """Dump the heap and mempool memory"""
 
@@ -348,86 +410,100 @@ class Memdump(gdb.Command):
                         self.uordblks += pool["blocksize"]
         return False
 
-    def memdump(self, pid, seqmin, seqmax, address, simple, detail):
-        """Dump the heap memory"""
-        if pid >= PID_MM_ALLOC:
-            gdb.write(
-                "Dump all used memory node info, use '\x1b[33;1m*\x1b[m' mark pid is not exist:\n"
-            )
-            if not detail:
-                gdb.write("%6s" % ("CNT"))
+    def memnode_dump(self, node):
+        self.aordblks += 1
+        self.uordblks += node.size
+        node.dump(
+            detail=self.detail,
+            simple=self.simple,
+            align=self.align,
+            check_alive=self.check_alive,
+            backtrace_dict=self.backtrace_dict,
+        )
 
-            gdb.write(
-                "%6s%12s%12s%*s %s\n"
-                % ("PID", "Size", "Sequence", self.align, "Address", "Callstack")
-            )
-        else:
-            gdb.write("Dump all free memory node info:\n")
-            gdb.write("%12s%*s\n" % ("Size", self.align, "Address"))
+    def memdump(self, pid, seqmin, seqmax, address, simple, detail, biggest_top=30):
+        """Dump the heap memory"""
+
+        self.simple = simple
+        self.detail = detail
+
+        alloc_node = []
+        free_node = []
 
         heap = gdb.parse_and_eval("g_mmheap")
+        prev_node = None
+
+        for gdb_node in mm_foreach(heap):
+            node = HeapNode(gdb_node)
+
+            if prev_node:
+                prev_node.nextfree = not node.alloc
+
+            prev_node = node
+
+            if not node.inside_sequence(seqmin, seqmax):
+                continue
+
+            if address:
+                if node.contains_address(address):
+                    gdb.write(
+                        "\nThe address 0x%x found belongs to"
+                        "the memory node with base address 0x%x\n"
+                        % (address, node.base)
+                    )
+                    print_node = "p *(struct mm_allocnode_s *)0x%x" % (node.base)
+                    gdb.write(print_node + "\n")
+                    gdb.execute(print_node)
+                    return
+
+            if node.alloc:
+                alloc_node.append(node)
+            else:
+                free_node.append(node)
+
         if heap.type.has_key("mm_mpool"):
             if self.mempool_dump(
                 heap["mm_mpool"], pid, seqmin, seqmax, address, simple, detail
             ):
                 return
 
-        for node in mm_foreach(heap):
-            if node["size"] & MM_ALLOC_BIT != 0:
-                if (
-                    pid == node["pid"]
-                    or (pid == PID_MM_ALLOC and node["pid"] != PID_MM_MEMPOOL)
-                ) and (node["seqno"] >= seqmin and node["seqno"] < seqmax):
-                    if detail:
-                        mm_dumpnode(
-                            node,
-                            1,
-                            self.align,
-                            simple,
-                            detail,
-                            self.check_alive(node["pid"]),
-                        )
-                    else:
-                        self.backtrace_dict = record_backtrace(
-                            node, mm_nodesize(node["size"]), self.backtrace_dict
-                        )
+        title_dict = {
+            PID_MM_ALLOC: "Dump all used memory node info, use '\x1b[33;1m*\x1b[m' mark pid is not exist:\n",
+            PID_MM_FREE: "Dump all free memory node info:\n",
+            PID_MM_BIGGEST: f"Dump biggest allocated top {biggest_top}\n",
+            PID_MM_ORPHAN: "Dump allocated orphan nodes\n",
+        }
 
-                    charnode = int(node)
-                    if address and (
-                        address < charnode + node["size"]
-                        and address >= charnode + mm_allocnode_type.sizeof
-                    ):
-                        mm_dumpnode(
-                            node,
-                            1,
-                            self.align,
-                            simple,
-                            detail,
-                            self.check_alive(node["pid"]),
-                        )
-                        gdb.write(
-                            "\nThe address 0x%x found belongs to"
-                            "the memory node with base address 0x%x\n"
-                            % (address, charnode)
-                        )
-                        print_node = "p *(struct mm_allocnode_s *)0x%x" % (charnode)
-                        gdb.write(print_node + "\n")
-                        gdb.execute(print_node)
-                        return
-                    self.aordblks += 1
-                    self.uordblks += mm_nodesize(node["size"])
-            else:
-                if pid == PID_MM_FREE:
-                    mm_dumpnode(
-                        node,
-                        1,
-                        self.align,
-                        simple,
-                        detail,
-                        self.check_alive(node["pid"]),
-                    )
-                    self.aordblks += 1
-                    self.uordblks += mm_nodesize(node["size"])
+        if pid in title_dict.keys():
+            title = title_dict[pid]
+        elif pid >= 0:
+            title = title_dict[PID_MM_ALLOC]
+        else:
+            title = "Dump unspecific\n"
+
+        gdb.write(title)
+        if not detail:
+            gdb.write("%6s" % ("CNT"))
+        gdb.write(
+            "%6s%12s%12s%8s%8s%8s\n"
+            % ("PID", "Size", "Sequence", str(self.align), "Address", "Callstack")
+        )
+
+        if pid == PID_MM_FREE:
+            self.detail = True
+            for node in free_node:
+                self.memnode_dump(node)
+        elif pid == PID_MM_ALLOC:
+            for node in alloc_node:
+                self.memnode_dump(node)
+        elif pid == PID_MM_BIGGEST:
+            sorted_alloc = sorted(alloc_node)[-biggest_top:]
+            for node in sorted_alloc:
+                self.memnode_dump(node)
+        elif pid == PID_MM_ORPHAN:
+            for node in alloc_node:
+                if node.is_orphan:
+                    self.memnode_dump(node)
 
         if not detail:
             output = []
@@ -470,6 +546,11 @@ class Memdump(gdb.Command):
         parser.add_argument("-x", "--max", type=str, help="Maximum value")
         parser.add_argument("--used", action="store_true", help="Used flag")
         parser.add_argument("--free", action="store_true", help="Free flag")
+        parser.add_argument("--biggest", action="store_true", help="biggest allocated")
+        parser.add_argument("--top", type=str, help="biggest top n, default 30")
+        parser.add_argument(
+            "--orphan", action="store_true", help="orphan allocated(neighbor of free)"
+        )
         parser.add_argument(
             "-d",
             "--detail",
@@ -501,6 +582,9 @@ class Memdump(gdb.Command):
             "addr": int(args.addr, 0) if args.addr else None,
             "simple": args.simple,
             "detail": args.detail,
+            "biggest": args.biggest,
+            "orphan": args.orphan,
+            "top": int(args.top) if args.top else 30,
         }
 
     def invoke(self, args, from_tty):
@@ -519,6 +603,10 @@ class Memdump(gdb.Command):
             pid = PID_MM_ALLOC
         elif arg["free"]:
             pid = PID_MM_FREE
+        elif arg["biggest"]:
+            pid = PID_MM_BIGGEST
+        elif arg["orphan"]:
+            pid = PID_MM_ORPHAN
         elif arg["pid"]:
             pid = arg["pid"]
         if CONFIG_MM_BACKTRACE <= 0:
@@ -530,7 +618,13 @@ class Memdump(gdb.Command):
         self.npidhash = gdb.parse_and_eval("g_npidhash")
         self.pidhash = gdb.parse_and_eval("g_pidhash")
         self.memdump(
-            pid, arg["seqmin"], arg["seqmax"], arg["addr"], arg["simple"], arg["detail"]
+            pid,
+            arg["seqmin"],
+            arg["seqmax"],
+            arg["addr"],
+            arg["simple"],
+            arg["detail"],
+            arg["top"],
         )
 
 
