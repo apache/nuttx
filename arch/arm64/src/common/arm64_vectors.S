@@ -187,18 +187,18 @@ SECTION_FUNC(text, arm64_sync_exc)
     /* checking the EC value to see which exception need to be handle */
 
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
-    mrs    x0, esr_el3
+    mrs    x9, esr_el3
 #else
-    mrs    x0, esr_el1
+    mrs    x9, esr_el1
 #endif
-    lsr    x1, x0, #26
+    lsr    x10, x9, #26
 
 #ifdef CONFIG_ARCH_FPU
     /* fpu trap */
 
-    cmp    x1, #0x07 /*Access to SIMD or floating-point */
+    cmp    x10, #0x07 /* Access to SIMD or floating-point */
     bne    1f
-    mov    x0, sp
+    mov    x0, sp     /* x0 = context */
     bl     arm64_fpu_trap
 
     /* when the fpu trap is handled */
@@ -208,7 +208,7 @@ SECTION_FUNC(text, arm64_sync_exc)
 #endif
     /* 0x15 = SVC system call */
 
-    cmp    x1, #0x15
+    cmp    x10, #0x15
 
     /* if this is a svc call ?*/
 
@@ -248,6 +248,7 @@ SECTION_FUNC(text, arm64_sync_exc)
      */
 
     mov    x0, sp /* x0 = reg frame */
+
     /* Call arm64_syscall() on the user stack */
 
     bl    arm64_syscall        /* Call the handler */

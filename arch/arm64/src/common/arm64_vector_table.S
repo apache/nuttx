@@ -143,7 +143,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
     /* Current EL with SP0 / Synchronous */
 
     .align 7
-    arm64_enter_exception x0, x1
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Current EL with SP0 / IRQ */
@@ -167,7 +167,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
     /* Current EL with SPx / Synchronous */
 
     .align 7
-    arm64_enter_exception x0, x1
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Current EL with SPx / IRQ */
@@ -191,7 +191,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
     /* Lower EL using AArch64 / Synchronous */
 
     .align 7
-    arm64_enter_exception x0, x1
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Lower EL using AArch64 / IRQ */
