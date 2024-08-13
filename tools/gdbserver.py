@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# tools/minidumpserver.py
+# tools/gdbserver.py
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -986,7 +986,7 @@ def arg_parser():
     parser.add_argument(
         "-g",
         "--gdb",
-        help="provided a custom GDB path, automatically start GDB session and exit minidumpserver when exit GDB. ",
+        help="provided a custom GDB path, automatically start GDB session and exit gdbserver when exit GDB. ",
         type=str,
     )
     parser.add_argument(
