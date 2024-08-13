@@ -287,11 +287,9 @@ class DumpELFFile:
                     store = True
                     desc = "text"
                 elif (flags & SHF_WRITE_ALLOC) == SHF_WRITE_ALLOC:
-                    # Data section
-                    #
-                    # Running app changes the content so no need
-                    # to store
-                    pass
+                    # Data or Rodata section, rodata store in ram in some case
+                    store = True
+                    desc = "data or rodata"
                 elif (flags & SHF_ALLOC) == SHF_ALLOC:
                     # Read only data section
                     store = True
@@ -466,23 +464,66 @@ class RawMemoryFile:
         return self.__memories
 
 
+class CoreDumpFile:
+    def __init__(self, coredump):
+        self.__memories = list()
+
+        if coredump is None:
+            return
+
+        with open(coredump, "rb") as f:
+            elffile = ELFFile(f)
+            for segment in elffile.iter_segments():
+                if segment["p_type"] != "PT_LOAD":
+                    continue
+                logger.debug(f"Segment Flags: {segment['p_flags']}")
+                logger.debug(
+                    f"Segment Offset: {segment['p_offset']}",
+                )
+                logger.debug(f"Segment Virtual Address: {hex(segment['p_vaddr'])}")
+                logger.debug(f"Segment Physical Address: {hex(segment['p_paddr'])}")
+                logger.debug(f"Segment File Size:{segment['p_filesz']}")
+                logger.debug(f"Segment Memory Size:{segment['p_memsz']}")
+                logger.debug(f"Segment Alignment:{segment['p_align']}")
+                logger.debug("=" * 40)
+                f.seek(segment["p_offset"], 0)
+                data = f.read(segment["p_filesz"])
+                self.__memories.append(
+                    pack_memory(
+                        segment["p_paddr"], segment["p_paddr"] + len(data), data
+                    )
+                )
+            else:
+                logger.debug("This CoreDump does not have program headers.")
+
+    def get_memories(self):
+        return self.__memories
+
+
 class GDBStub:
     def __init__(
-        self, logfile: DumpLogFile, elffile: DumpELFFile, rawfile: RawMemoryFile
+        self,
+        logfile: DumpLogFile,
+        elffile: DumpELFFile,
+        rawfile: RawMemoryFile,
+        coredump: CoreDumpFile,
     ):
         self.registers = logfile.registers
         self.elffile = elffile
         self.socket = None
         self.gdb_signal = GDB_SIGNAL_DEFAULT
+
+        # new list oreder is coredump, rawfile, logfile, elffile
+
         self.mem_regions = (
-            self.elffile.get_memories()
-            + logfile.get_memories()
+            coredump.get_memories()
             + rawfile.get_memories()
+            + logfile.get_memories()
+            + self.elffile.get_memories()
         )
         self.reg_digits = elffile.xlen() // 4
         self.reg_fmt = "<I" if elffile.xlen() <= 32 else "<Q"
 
-        self.mem_regions.sort(key=lambda x: x["start"])
         self.threadinfo = []
         self.current_thread = 0
         try:
@@ -623,16 +664,9 @@ class GDBStub:
         self.put_gdb_packet(b"OK")
 
     def get_mem_region(self, addr):
-        left = 0
-        right = len(self.mem_regions) - 1
-        while left <= right:
-            mid = (left + right) // 2
-            if self.mem_regions[mid]["start"] <= addr <= self.mem_regions[mid]["end"]:
-                return self.mem_regions[mid]
-            elif addr < self.mem_regions[mid]["start"]:
-                right = mid - 1
-            else:
-                left = mid + 1
+        for mem in self.mem_regions:
+            if mem["start"] <= addr <= mem["end"]:
+                return mem
 
         return None
 
@@ -903,6 +937,14 @@ def arg_parser():
         nargs="*",
         help="rawfile is a binary file, args format like ram.bin:0x10000 ...",
     )
+
+    parser.add_argument(
+        "-c",
+        "--coredump",
+        nargs="?",
+        help="coredump file, will prase memory in this file",
+    )
+
     parser.add_argument(
         "--debug",
         action="store_true",
@@ -978,8 +1020,8 @@ def main(args):
             logger.error(f"Cannot find file {args.logfile}, exiting...")
             sys.exit(1)
 
-    if not args.rawfile and not args.logfile:
-        logger.error("Must have a input file log or rawfile, exiting...")
+    if not args.rawfile and not args.logfile and not args.coredump:
+        logger.error("Must have a input file log or rawfile or coredump, exiting...")
         sys.exit(1)
 
     config_log(args.debug)
@@ -1009,7 +1051,9 @@ def main(args):
         elf.parse_addr2line(args.arch, args.addr2line, log.stack_data)
 
     raw = RawMemoryFile(args.rawfile)
-    gdb_stub = GDBStub(log, elf, raw)
+    coredump = CoreDumpFile(args.coredump)
+    gdb_stub = GDBStub(log, elf, raw, coredump)
+
     gdbserver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # Reuse address so we don't have to wait for socket to be
