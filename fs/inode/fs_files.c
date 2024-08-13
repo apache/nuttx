@@ -591,12 +591,18 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
           filep = &list->fl_files[i][j];
           if (filep->f_inode == NULL)
             {
-              filep->f_oflags = oflags;
-              filep->f_pos    = pos;
-              filep->f_inode  = inode;
-              filep->f_priv   = priv;
+              filep->f_oflags      = oflags;
+              filep->f_pos         = pos;
+              filep->f_inode       = inode;
+              filep->f_priv        = priv;
 #ifdef CONFIG_FS_REFCOUNT
-              filep->f_refs   = 1;
+              filep->f_refs        = 1;
+#endif
+#ifdef CONFIG_FDSAN
+              filep->f_tag_fdsan   = 0;
+#endif
+#ifdef CONFIG_FDCHECK
+              filep->f_tag_fdcheck = 0;
 #endif
 
               goto found;
