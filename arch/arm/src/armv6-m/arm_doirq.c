@@ -74,8 +74,18 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
     }
   else
     {
+      /* Set current regs for crash dump */
+
+      up_set_current_regs(regs);
+
+      /* Dispatch irq */
+
       tcb->xcp.regs = regs;
       irq_dispatch(irq, regs);
+
+      /* Clear current regs */
+
+      up_set_current_regs(NULL);
     }
 
   /* If a context switch occurred while processing the interrupt then
