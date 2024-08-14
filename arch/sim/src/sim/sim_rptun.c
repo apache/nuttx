@@ -102,6 +102,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
                                  struct sim_rptun_dev_s, rptun);
+  struct rptun_cmd_s *cmd;
 
   priv->shmem = host_allocshmem(priv->shmemname,
                                 sizeof(*priv->shmem));
@@ -110,12 +111,15 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       return NULL;
     }
 
+  cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
+
   priv->raddrenv[0].da   = 0;
   priv->raddrenv[0].size = sizeof(*priv->shmem);
 
   if (priv->master)
     {
       struct rptun_rsc_s *rsc = &priv->shmem->rsc;
+
       memset(priv->shmem->buf, 0, sizeof(priv->shmem->buf));
       memset(rsc, 0, sizeof(struct rptun_rsc_s));
 
@@ -142,9 +146,8 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.notifyid    = RSC_NOTIFY_ID_ANY;
       rsc->config.r2h_buf_size      = 0x800;
       rsc->config.h2r_buf_size      = 0x800;
-      rsc->cmd_master               = 0;
-      rsc->cmd_slave                = 0;
 
+      cmd->cmd_slave                = 0;
       priv->shmem->base             = (uintptr_t)priv->shmem;
 
       /* The master notifies its slave when it starts again */
@@ -173,6 +176,8 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
         {
           usleep(1000);
         }
+
+      cmd->cmd_master       = 0;
 
       priv->raddrenv[0].pa  = (uintptr_t)priv->shmem->base;
 
@@ -232,12 +237,13 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
                               struct sim_rptun_dev_s, rptun);
+  struct rptun_cmd_s *cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
 
   /* Don't send RPTUN_CMD_STOP when slave recovery */
 
   if (priv->shmem->boots & SIM_RPTUN_STATUS_OK)
     {
-      priv->shmem->rsc.cmd_master = RPTUN_CMD(RPTUN_CMD_STOP, 0);
+      cmd->cmd_master = RPTUN_CMD(RPTUN_CMD_STOP, 0);
     }
 
   if ((priv->master & SIM_RPTUN_BOOT) && priv->pid > 0)
@@ -288,8 +294,8 @@ static int sim_rptun_register_callback(struct rptun_dev_s *dev,
 
 static void sim_rptun_check_cmd(struct sim_rptun_dev_s *priv)
 {
-  unsigned int cmd = priv->master ? priv->shmem->rsc.cmd_slave :
-                     priv->shmem->rsc.cmd_master;
+  struct rptun_cmd_s *rcmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
+  uint32_t cmd = priv->master ? rcmd->cmd_slave : rcmd->cmd_master;
 
   switch (RPTUN_GET_CMD(cmd))
     {
