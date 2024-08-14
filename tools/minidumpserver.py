@@ -314,7 +314,13 @@ class DumpELFFile:
             if symbol["st_info"]["type"] != "STT_OBJECT":
                 continue
 
-            if symbol.name in ("g_tcbinfo", "g_pidhash", "g_npidhash"):
+            if symbol.name in (
+                "g_tcbinfo",
+                "g_pidhash",
+                "g_npidhash",
+                "g_last_regs",
+                "g_running_tasks",
+            ):
                 self.symbol[symbol.name] = symbol
                 logger.debug(
                     f"name:{symbol.name} size:{symbol['st_size']} value:{hex(symbol['st_value'])}"
@@ -493,8 +499,6 @@ class CoreDumpFile:
                         segment["p_paddr"], segment["p_paddr"] + len(data), data
                     )
                 )
-            else:
-                logger.debug("This CoreDump does not have program headers.")
 
     def get_memories(self):
         return self.__memories
@@ -528,8 +532,19 @@ class GDBStub:
         self.current_thread = 0
         try:
             self.parse_thread()
+            logger.debug(f"Have {len(self.threadinfo)} threads to debug.")
+            if len(self.threadinfo) == 0:
+                logger.critical(
+                    "Check if your coredump or raw file matches the ELF file"
+                )
+                sys.exit(1)
+
         except TypeError:
-            pass
+            if not self.registers:
+                logger.critical(
+                    "Logfile, coredump, or rawfile do not contain register. Please check if the files are correct."
+                )
+                sys.exit(1)
 
     def get_gdb_packet(self):
         socket = self.socket
@@ -619,7 +634,10 @@ class GDBStub:
         else:
             for thread in self.threadinfo:
                 if thread["tcb"]["pid"] == self.current_thread:
-                    put_register_packet(thread["gdb_regs"])
+                    if thread["tcb"]["tcbptr"] in self.running_tasks.keys():
+                        put_register_packet(self.running_tasks[thread["tcb"]["tcbptr"]])
+                    else:
+                        put_register_packet(thread["gdb_regs"])
                     break
 
     def handle_register_single_read_packet(self, pkt):
@@ -639,7 +657,12 @@ class GDBStub:
         else:
             for thread in self.threadinfo:
                 if thread["tcb"]["pid"] == self.current_thread:
-                    put_one_register_packet(thread["gdb_regs"])
+                    if thread["tcb"]["tcbptr"] in self.running_tasks.keys():
+                        put_one_register_packet(
+                            self.running_tasks[thread["tcb"]["tcbptr"]]
+                        )
+                    else:
+                        put_one_register_packet(thread["gdb_regs"])
                     break
 
     def handle_register_group_write_packet(self):
@@ -665,7 +688,7 @@ class GDBStub:
 
     def get_mem_region(self, addr):
         for mem in self.mem_regions:
-            if mem["start"] <= addr <= mem["end"]:
+            if mem["start"] <= addr < mem["end"]:
                 return mem
 
         return None
@@ -766,12 +789,15 @@ class GDBStub:
             "<I",
         )
         npidhash = int(unpacked_data[0])
+        logger.debug(f"g_npidhash is {hex(npidhash)}")
+
         unpacked_data = unpack_data(
             self.elffile.symbol["g_pidhash"]["st_value"],
             self.elffile.symbol["g_pidhash"]["st_size"],
             "<I",
         )
         pidhash = int(unpacked_data[0])
+        logger.debug(f"g_pidhash is {hex(pidhash)}")
 
         tcbptr_list = []
         for i in range(0, npidhash):
@@ -788,6 +814,7 @@ class GDBStub:
                 unpack_data(tcbptr + tcbinfo["stack_size_off"], 4, "<I")[0]
             )
             tcb["regs"] = int(unpack_data(tcbptr + tcbinfo["regs_off"], 4, "<I")[0])
+            tcb["tcbptr"] = tcbptr
             i = 0
             tcb["name"] = ""
             while True:
@@ -799,23 +826,39 @@ class GDBStub:
 
             return tcb
 
-        def parse_tcb_regs_to_gdb(tcb):
-            regs = []
+        def parse_regs_to_gdb(regs):
+            gdb_regs = []
             for i in range(0, tcbinfo["regs_num"]):
                 reg_off = int(unpack_data(tcbinfo["reg_off"] + i * 2, 2, "<H")[0])
                 if reg_off == UINT16_MAX:
-                    regs.append(b"x")
+                    gdb_regs.append(b"x")
                 else:
-                    regs.append(int(unpack_data(tcb["regs"] + reg_off, 4, "<I")[0]))
-            return regs
+                    gdb_regs.append(int(unpack_data(regs + reg_off, 4, "<I")[0]))
+            return gdb_regs
+
+        self.cpunum = self.elffile.symbol["g_running_tasks"]["st_size"] // 4
+        logger.debug(f"Have {self.cpunum} cpu")
+        unpacked_data = unpack_data(
+            self.elffile.symbol["g_running_tasks"]["st_value"],
+            self.elffile.symbol["g_running_tasks"]["st_size"],
+            f"<{self.cpunum}I",
+        )
+
+        self.running_tasks = {}
+        last_regs_size = self.elffile.symbol["g_last_regs"]["st_size"] // self.cpunum
+        logger.debug(f"last_regs_size is {last_regs_size}")
+        for i in range(0, self.cpunum):
+            self.running_tasks[int(unpacked_data[i])] = parse_regs_to_gdb(
+                self.elffile.symbol["g_last_regs"]["st_value"] + i * last_regs_size
+            )
 
         for tcbptr in tcbptr_list:
             if tcbptr == 0:
-                break
+                continue
             thread_dict = {}
             tcb = parse_tcb(tcbptr)
             thread_dict["tcb"] = tcb
-            thread_dict["gdb_regs"] = parse_tcb_regs_to_gdb(tcb)
+            thread_dict["gdb_regs"] = parse_regs_to_gdb(tcb["regs"])
             self.threadinfo.append(thread_dict)
 
     def handle_general_query_packet(self, pkt):
