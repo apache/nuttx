@@ -57,7 +57,7 @@ class Stack(object):
             gdb.write("An overflow detected, dumping the stack:\n")
 
             ptr_4bytes = gdb.Value(self._stack_base).cast(
-                gdb.lookup_type("unsigned int").pointer()
+                utils.lookup_type("unsigned int").pointer()
             )
 
             for i in range(0, self._stack_size // 4):
@@ -80,7 +80,7 @@ class Stack(object):
 
     def check_max_usage(self):
         ptr_4bytes = gdb.Value(self._stack_base).cast(
-            gdb.lookup_type("unsigned int").pointer()
+            utils.lookup_type("unsigned int").pointer()
         )
 
         spare = 0

@@ -26,30 +26,26 @@ import gdb
 from macros import fetch_macro_info
 
 g_symbol_cache = {}
+g_type_cache = {}
 
 
-class CachedType:
-    """Cache a type object, so that we can reconnect to the new_objfile event"""
+def lookup_type(name, block=None) -> gdb.Type:
+    """Return the type object of a type name"""
+    global g_type_cache
 
-    def __init__(self, name):
-        self._type = None
-        self._name = name
+    key = (name, block)
+    if key not in g_type_cache:
+        try:
+            g_type_cache[key] = (
+                gdb.lookup_type(name, block=block) if block else gdb.lookup_type(name)
+            )
+        except gdb.error:
+            g_type_cache[key] = None
 
-    def _new_objfile_handler(self, event):
-        self._type = None
-        gdb.events.new_objfile.disconnect(self._new_objfile_handler)
-
-    def get_type(self):
-        if self._type is None:
-            self._type = gdb.lookup_type(self._name)
-            if self._type is None:
-                raise gdb.GdbError("cannot resolve type '{0}'".format(self._name))
-            if hasattr(gdb, "events") and hasattr(gdb.events, "new_objfile"):
-                gdb.events.new_objfile.connect(self._new_objfile_handler)
-        return self._type
+    return g_type_cache[key]
 
 
-long_type = CachedType("long")
+long_type = lookup_type("long")
 
 
 class MacroCtx:
@@ -93,7 +89,7 @@ else:
 def get_long_type():
     """Return the cached long type object"""
     global long_type
-    return long_type.get_type()
+    return long_type
 
 
 def offset_of(typeobj, field):
