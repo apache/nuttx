@@ -372,18 +372,18 @@ static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
 
 static void rptun_command(FAR struct rptun_priv_s *priv)
 {
-  FAR struct rptun_rsc_s *rsc = priv->rproc.rsc_table;
+  FAR struct rptun_cmd_s *rptun_cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
   uint32_t cmd;
 
   if (RPTUN_IS_MASTER(priv->dev))
     {
-      cmd = rsc->cmd_slave;
-      rsc->cmd_slave = 0;
+      cmd = rptun_cmd->cmd_slave;
+      rptun_cmd->cmd_slave = 0;
     }
   else
     {
-      cmd = rsc->cmd_master;
-      rsc->cmd_master = 0;
+      cmd = rptun_cmd->cmd_master;
+      rptun_cmd->cmd_master = 0;
     }
 
   switch (RPTUN_GET_CMD(cmd))
@@ -678,7 +678,7 @@ static int rptun_ioctl(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg)
 static void rptun_panic(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
-  FAR struct rptun_rsc_s *rsc = priv->rproc.rsc_table;
+  FAR struct rptun_cmd_s *cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
 
   if (priv->dev->ops->panic != NULL)
     {
@@ -688,11 +688,11 @@ static void rptun_panic(FAR struct rpmsg_s *rpmsg)
 
   if (RPTUN_IS_MASTER(priv->dev))
     {
-      rsc->cmd_master = RPTUN_CMD(RPTUN_CMD_PANIC, 0);
+      cmd->cmd_master = RPTUN_CMD(RPTUN_CMD_PANIC, 0);
     }
   else
     {
-      rsc->cmd_slave = RPTUN_CMD(RPTUN_CMD_PANIC, 0);
+      cmd->cmd_slave = RPTUN_CMD(RPTUN_CMD_PANIC, 0);
     }
 
   rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);

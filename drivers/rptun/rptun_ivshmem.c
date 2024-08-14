@@ -142,6 +142,7 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_ivshmem_dev_s *priv =
     (FAR struct rptun_ivshmem_dev_s *)dev;
+  FAR struct rptun_cmd_s *cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
 
   priv->raddrenv[0].da   = 0;
   priv->raddrenv[0].size = priv->shmem_size;
@@ -152,18 +153,17 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 
       /* Wait untils salve is ready */
 
-      while (RPTUN_GET_CMD(priv->shmem->rsc.cmd_slave) != RPTUN_CMD_READY)
+      while (RPTUN_GET_CMD(cmd->cmd_slave) != RPTUN_CMD_READY)
         {
           usleep(1000);
         }
 
-      priv->shmem->rsc.cmd_slave = 0;
+      cmd->cmd_slave = 0;
       priv->shmem->basem = (uint64_t)(uintptr_t)priv->shmem;
     }
   else
     {
       FAR struct rptun_rsc_s *rsc = &priv->shmem->rsc;
-
       memset(priv->shmem, 0, priv->shmem_size);
 
       rsc->rsc_tbl_hdr.ver          = 1;
@@ -188,10 +188,10 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rpmsg_vring1.notifyid    = RSC_NOTIFY_ID_ANY;
       rsc->config.r2h_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
       rsc->config.h2r_buf_size      = CONFIG_RPTUN_IVSHMEM_BUFFSIZE;
-      rsc->cmd_master               = 0;
 
       priv->shmem->rsc_size         = sizeof(struct rptun_rsc_s);
-      priv->shmem->rsc.cmd_slave    = RPTUN_CMD_READY;
+      cmd->cmd_master               = 0;
+      cmd->cmd_slave                = RPTUN_CMD(RPTUN_CMD_READY, 0);
 
       /* Wait untils master is ready, salve need use master base to
        * initialize addrenv.

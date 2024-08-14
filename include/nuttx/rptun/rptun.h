@@ -57,6 +57,9 @@
 #define RPTUN_GET_CMD(c)      ((c) >> RPTUN_CMD_SHIFT)
 #define RPTUN_GET_CMD_VAL(c)  ((c) & RPTUN_CMD_MASK)
 
+#define RPTUN_RSC2CMD(r)      \
+  ((FAR struct rptun_cmd_s *)&((FAR struct resource_table *)(r))->reserved[0])
+
 #ifdef CONFIG_OPENAMP_CACHE
 #  define RPTUN_INVALIDATE(x) metal_cache_invalidate(&x, sizeof(x))
 #else
@@ -337,6 +340,12 @@ struct rptun_addrenv_s
   size_t    size;
 };
 
+begin_packed_struct struct rptun_cmd_s
+{
+  uint32_t cmd_master;
+  uint32_t cmd_slave;
+} end_packed_struct;
+
 struct aligned_data(8) rptun_rsc_s
 {
   struct resource_table    rsc_tbl_hdr;
@@ -346,8 +355,6 @@ struct aligned_data(8) rptun_rsc_s
   struct fw_rsc_vdev_vring rpmsg_vring0;
   struct fw_rsc_vdev_vring rpmsg_vring1;
   struct fw_rsc_config     config;
-  uint32_t                 cmd_master;
-  uint32_t                 cmd_slave;
 };
 
 struct rptun_dev_s;
