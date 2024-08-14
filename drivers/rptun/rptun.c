@@ -38,7 +38,6 @@
 #include <nuttx/kthread.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
-#include <nuttx/power/pm.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/semaphore.h>
 #include <metal/utilities.h>
@@ -68,10 +67,6 @@ struct rptun_priv_s
   sem_t                        semrx;
   pid_t                        tid;
   uint16_t                     headrx;
-#ifdef CONFIG_RPTUN_PM
-  struct pm_wakelock_s         wakelock;
-  struct wdog_s                wdog;
-#endif
 };
 
 struct rptun_store_s
@@ -210,107 +205,6 @@ static void rptun_wakeup_tx(FAR struct rptun_priv_s *priv)
     }
 }
 
-#ifdef CONFIG_RPTUN_PM
-
-#ifdef CONFIG_RPTUN_PM_AUTORELAX
-static void rptun_pm_callback(wdparm_t arg)
-{
-  FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)arg;
-
-  if (priv->rproc.state != RPROC_RUNNING)
-    {
-      return;
-    }
-
-  if (rptun_buffer_nused(&priv->rvdev, false))
-    {
-      rptun_wakeup_tx(priv);
-
-      wd_start(&priv->wdog, MSEC2TICK(RPTUN_TIMEOUT_MS),
-               rptun_pm_callback, (wdparm_t)priv);
-    }
-  else
-    {
-      pm_wakelock_relax(&priv->wakelock);
-    }
-}
-#endif
-
-static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
-                                   bool stay)
-{
-  irqstate_t flags;
-  int count;
-
-  flags = enter_critical_section();
-
-  count = pm_wakelock_staycount(&priv->wakelock);
-  if (stay && count == 0)
-    {
-      pm_wakelock_stay(&priv->wakelock);
-#ifdef CONFIG_RPTUN_PM_AUTORELAX
-      wd_start(&priv->wdog, MSEC2TICK(RPTUN_TIMEOUT_MS),
-               rptun_pm_callback, (wdparm_t)priv);
-#endif
-    }
-
-#ifndef CONFIG_RPTUN_PM_AUTORELAX
-  if (!stay && count > 0 && rptun_buffer_nused(&priv->rvdev, false) == 0)
-    {
-      pm_wakelock_relax(&priv->wakelock);
-    }
-#endif
-
-  leave_critical_section(flags);
-}
-
-static inline bool rptun_available_rx(FAR struct rptun_priv_s *priv)
-{
-  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct virtqueue *rvq = rvdev->rvq;
-
-  if (priv->rproc.state != RPROC_RUNNING)
-    {
-      return false;
-    }
-
-  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
-    {
-      return priv->headrx != rvq->vq_used_cons_idx;
-    }
-  else
-    {
-      return priv->headrx != rvq->vq_available_idx;
-    }
-}
-
-#else
-#  define rptun_pm_action(priv, stay)
-#  define rptun_available_rx(priv) true
-#endif
-
-static inline void rptun_update_rx(FAR struct rptun_priv_s *priv)
-{
-  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct virtqueue *rvq = rvdev->rvq;
-
-  if (priv->rproc.state != RPROC_RUNNING)
-    {
-      return;
-    }
-
-  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
-    {
-      RPTUN_INVALIDATE(rvq->vq_ring.used->idx);
-      priv->headrx = rvq->vq_ring.used->idx;
-    }
-  else
-    {
-      RPTUN_INVALIDATE(rvq->vq_ring.avail->idx);
-      priv->headrx = rvq->vq_ring.avail->idx;
-    }
-}
-
 static void rptun_start_worker(FAR void *arg)
 {
   FAR struct rptun_priv_s *priv = arg;
@@ -325,10 +219,7 @@ static void rptun_worker(FAR void *arg)
 {
   FAR struct rptun_priv_s *priv = arg;
 
-  if (rptun_available_rx(priv))
-    {
-      remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
-    }
+  remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
 
 static int rptun_thread(int argc, FAR char *argv[])
@@ -408,7 +299,6 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
   if (vqid == RPTUN_NOTIFY_ALL ||
       vqid == vdev->vrings_info[rvq->vq_queue_index].notifyid)
     {
-      rptun_update_rx(priv);
       rptun_wakeup_rx(priv);
     }
 
@@ -416,7 +306,6 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
       vqid == vdev->vrings_info[svq->vq_queue_index].notifyid)
     {
       rptun_wakeup_tx(priv);
-      rptun_pm_action(priv, false);
     }
 
   return OK;
@@ -477,15 +366,6 @@ static int rptun_stop(FAR struct remoteproc *rproc)
 static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
-  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
-  FAR struct virtio_device *vdev = rvdev->vdev;
-  FAR struct virtqueue *svq = rvdev->svq;
-
-  if (priv->rproc.state == RPROC_RUNNING &&
-      id == vdev->vrings_info[svq->vq_queue_index].notifyid)
-    {
-      rptun_pm_action(priv, true);
-    }
 
   RPTUN_NOTIFY(priv->dev, id);
   return 0;
@@ -939,7 +819,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
 
-  rptun_update_rx(priv);
   rptun_wakeup_rx(priv);
 
   /* Broadcast device_created to all registers */
