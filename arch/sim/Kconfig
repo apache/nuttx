@@ -408,11 +408,11 @@ config SIM_FBWIDTH
 
 config SIM_FBBPP
 	int "Pixel depth in bits"
-	default 8
+	default 32
 	---help---
 		Pixel depth in bits.  Valid choices are 4, 8, 16, 24, or 32.
 		If you use the X11 display emulation, the selected BPP must match the BPP
-		of your graphics hardware (probably 32 bits).  Default: 8
+		of your graphics hardware (probably 32 bits).  Default: 32
 
 config SIM_FRAMEBUFFER_COUNT
 	int "Framebuffer count"
