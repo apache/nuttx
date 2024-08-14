@@ -113,6 +113,10 @@
                           (SPI_IS_MOSI_IOMUX) &&                \
                           (SPI_IS_MISO_IOMUX)
 
+/* SPI default frequency (limited by clock divider) */
+
+#define SPI_DEFAULT_FREQ  (400000)
+
 /* SPI default width */
 
 #define SPI_DEFAULT_WIDTH (8)
@@ -270,9 +274,9 @@ static spi_hal_timing_param_t timing_param =
 #else
     .use_gpio = 1,
 #endif
-    .duty_cycle = 0,
+    .duty_cycle = 128,
     .clk_src_hz = 0,
-    .expected_freq = 0,
+    .expected_freq = SPI_DEFAULT_FREQ,
 };
 
 static const struct esp_spi_config_s esp_spi2_config =
@@ -485,7 +489,7 @@ static uint32_t esp_spi_setfrequency(struct spi_dev_s *dev,
     }
 
   spi_hal_cal_clock_conf(priv->timing_param,
-                         NULL,
+                         (int *)&(priv->timing_param->clk_src_hz),
                          &(priv->dev_cfg->timing_conf));
 
   priv->timing_param->expected_freq = frequency;
@@ -718,16 +722,14 @@ static uint32_t esp_spi_poll_send(struct esp_spi_priv_s *priv, uint32_t wd)
       0
     };
 
-  spi_hal_setup_device(priv->ctx, priv->dev_cfg);
-
   trans.tx_bitlen = priv->nbits;
   trans.rx_bitlen = priv->nbits;
   trans.rcv_buffer = (uint8_t *)&val;
   trans.send_buffer = (uint8_t *)&wd;
   trans.cs_keep_active = priv->dev_cfg->cs_hold;
-  trans.line_mode.data_lines = 2;
-  trans.line_mode.addr_lines = 1;
-  trans.line_mode.cmd_lines = 1;
+  trans.line_mode.data_lines = 1;
+  trans.line_mode.addr_lines = 0;
+  trans.line_mode.cmd_lines = 0;
   priv->ctx->trans_config = trans;
 
   spi_ll_set_mosi_bitlen(priv->ctx->hw, priv->nbits);
@@ -800,12 +802,10 @@ static void esp_spi_poll_exchange(struct esp_spi_priv_s *priv,
       0
     };
 
-  spi_hal_setup_device(priv->ctx, priv->dev_cfg);
-
   trans.cs_keep_active = priv->dev_cfg->cs_hold;
-  trans.line_mode.data_lines = 2;
-  trans.line_mode.addr_lines = 1;
-  trans.line_mode.cmd_lines = 1;
+  trans.line_mode.data_lines = 1;
+  trans.line_mode.addr_lines = 0;
+  trans.line_mode.cmd_lines = 0;
 
   while (bytes_remaining != 0)
     {
@@ -822,7 +822,7 @@ static void esp_spi_poll_exchange(struct esp_spi_priv_s *priv,
       priv->ctx->trans_config = trans;
 
       spi_hal_prepare_data(priv->ctx, priv->dev_cfg, &trans);
-      spi_ll_set_mosi_bitlen(priv->ctx->hw, (transfer_size * 8));
+      spi_hal_setup_trans(priv->ctx, priv->dev_cfg, &trans);
       spi_hal_user_start(priv->ctx);
 
       while (!spi_hal_usr_is_done(priv->ctx));
@@ -1077,6 +1077,9 @@ static void esp_spi_init(struct spi_dev_s *dev)
 #endif
 
   priv->dev_cfg->timing_conf.clock_source = SPI_CLK_SRC_DEFAULT;
+  esp_clk_tree_src_get_freq_hz(priv->dev_cfg->timing_conf.clock_source,
+                               0,
+                               &priv->timing_param->clk_src_hz);
 
   esp_spi_setfrequency(dev, priv->timing_param->expected_freq);
   esp_spi_setbits(dev, config->width);
