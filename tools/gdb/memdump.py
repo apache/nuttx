@@ -759,8 +759,11 @@ class Memleak(gdb.Command):
         if arg is None:
             return
 
-        if CONFIG_MM_BACKTRACE <= 0:
-            gdb.write("Better use CONFIG_MM_BACKTRACE=16 or 8 get more information\n")
+        if CONFIG_MM_BACKTRACE < 0:
+            gdb.write("Need to set CONFIG_MM_BACKTRACE to 8 or 16 better.\n")
+            return
+        elif CONFIG_MM_BACKTRACE == 0:
+            gdb.write("CONFIG_MM_BACKTRACE is 0, no backtrace available\n")
 
         start = last = time.time()
         white_dict = self.collect_white_dict()
