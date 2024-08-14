@@ -47,6 +47,10 @@
 #  define ELF_PAGESIZE    1024
 #endif
 
+#ifdef CONFIG_BOARD_COREDUMP_BLKDEV
+#  define CONFIG_BOARD_COREDUMP_DEV
+#endif
+
 #define PROGRAM_ALIGNMENT 64
 
 #define ROUNDUP(x, y)     ((x + (y - 1)) / (y)) * (y)
@@ -87,8 +91,7 @@ static struct lib_hexdumpstream_s g_hexstream;
 #endif
 
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
-static struct lib_blkoutstream_s  g_blockstream;
-static unsigned char *g_blockinfo;
+static struct lib_blkoutstream_s g_devstream;
 #endif
 
 #ifdef CONFIG_BOARD_MEMORY_RANGE
@@ -670,77 +673,73 @@ static void coredump_dump_syslog(pid_t pid)
 #endif
 
 /****************************************************************************
- * Name: coredump_dump_blkdev
+ * Name: coredump_dump_dev
  *
  * Description:
- *   Save coredump to block device.
+ *   Save coredump to storage device.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_COREDUMP_BLKDEV
-static void coredump_dump_blkdev(pid_t pid)
+#ifdef CONFIG_BOARD_COREDUMP_DEV
+static void coredump_dump_dev(pid_t pid)
 {
-  FAR void *stream = &g_blockstream;
-  FAR struct coredump_info_s *info;
-  blkcnt_t nsectors;
+  FAR void *stream = &g_devstream;
+  struct coredump_info_s info;
   int ret;
 
-  if (g_blockstream.inode == NULL)
+  if (g_devstream.inode == NULL)
     {
       _alert("Coredump device not found\n");
       return;
     }
 
-  nsectors = (sizeof(struct coredump_info_s) +
-              g_blockstream.geo.geo_sectorsize - 1) /
-             g_blockstream.geo.geo_sectorsize;
-
-  ret = g_blockstream.inode->u.i_bops->read(g_blockstream.inode,
-           g_blockinfo, g_blockstream.geo.geo_nsectors - nsectors, nsectors);
-  if (ret < 0)
-    {
-      _alert("Coredump information read fail\n");
-      return;
-    }
-
-  info = (FAR struct coredump_info_s *)g_blockinfo;
-
 #ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-  lib_lzfoutstream(&g_lzfstream,
-                   (FAR struct lib_outstream_s *)&g_blockstream);
+  lib_lzfoutstream(&g_lzfstream, stream);
   stream = &g_lzfstream;
 #endif
-
   ret = coredump(g_regions, stream, pid);
   if (ret < 0)
     {
-      _alert("Coredump fail\n");
+      _alert("Coredump fail %d\n", ret);
       return;
     }
 
-  info->magic = COREDUMP_MAGIC;
-  info->size  = g_blockstream.common.nput;
-  clock_gettime(CLOCK_REALTIME, &info->time);
-  uname(&info->name);
-  ret = g_blockstream.inode->u.i_bops->write(g_blockstream.inode,
-      (FAR void *)info, g_blockstream.geo.geo_nsectors - nsectors, nsectors);
+  info.magic = COREDUMP_MAGIC;
+  info.size  = g_devstream.common.nput;
+  clock_gettime(CLOCK_REALTIME, &info.time);
+  uname(&info.name);
+
+  ret = lib_stream_seek(&g_devstream, -(off_t)sizeof(info), SEEK_END);
   if (ret < 0)
     {
-      _alert("Coredump information write fail\n");
+      _alert("Coredump info seek fail %d\n", ret);
       return;
     }
 
-  /* Close block device directly, make sure all data write to block device */
+  if (info.size > ret)
+    {
+      _alert("Coredump no enough space for info\n");
+      return;
+    }
 
-  ret = g_blockstream.inode->u.i_bops->close(g_blockstream.inode);
+  ret = lib_stream_puts(&g_devstream, &info, sizeof(info));
   if (ret < 0)
     {
-      _alert("Coredump information close fail\n");
+      _alert("Coredump information write fail %d\n", ret);
       return;
     }
 
-  _alert("Finish coredump, write %d bytes to %s\n",
-         info->size, CONFIG_BOARD_COREDUMP_BLKDEV_PATH);
+  /* Flush to ensure outstream write all data to storage device */
+
+  ret = lib_stream_flush(&g_devstream);
+  if (ret < 0)
+    {
+      _alert("Coredump flush fail %d\n", ret);
+      return;
+    }
+
+  _alert("Finish coredump, write %zu bytes to %s\n",
+         info.size, CONFIG_BOARD_COREDUMP_DEVPATH);
 }
 #endif
 
@@ -859,7 +858,6 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size,
 
 int coredump_initialize(void)
 {
-  blkcnt_t nsectors;
   int ret = 0;
 
 #ifdef CONFIG_BOARD_MEMORY_RANGE
@@ -867,29 +865,15 @@ int coredump_initialize(void)
 #endif
 
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
-  ret = lib_blkoutstream_open(&g_blockstream,
-                              CONFIG_BOARD_COREDUMP_BLKDEV_PATH);
+  ret = lib_blkoutstream_open(&g_devstream,
+                              CONFIG_BOARD_COREDUMP_DEVPATH);
   if (ret < 0)
     {
-      _alert("%s Coredump device not found\n",
-             CONFIG_BOARD_COREDUMP_BLKDEV_PATH);
-      return ret;
-    }
-
-  nsectors = (sizeof(struct coredump_info_s) +
-              g_blockstream.geo.geo_sectorsize - 1) /
-             g_blockstream.geo.geo_sectorsize;
-
-  g_blockinfo = kmm_malloc(g_blockstream.geo.geo_sectorsize * nsectors);
-  if (g_blockinfo == NULL)
-    {
-      _alert("Coredump device memory alloc fail\n");
-      lib_blkoutstream_close(&g_blockstream);
-      return -ENOMEM;
+      _alert("%s Coredump device not found %d\n",
+             CONFIG_BOARD_COREDUMP_DEVPATH, ret);
     }
 #endif
 
-  UNUSED(nsectors);
   return ret;
 }
 
@@ -910,8 +894,8 @@ void coredump_dump(pid_t pid)
   coredump_dump_syslog(pid);
 #endif
 
-#ifdef CONFIG_BOARD_COREDUMP_BLKDEV
-  coredump_dump_blkdev(pid);
+#ifdef CONFIG_BOARD_COREDUMP_DEV
+  coredump_dump_dev(pid);
 #endif
 }
 
