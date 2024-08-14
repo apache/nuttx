@@ -73,6 +73,14 @@
 #  include <nuttx/net/mld.h>
 #endif
 
+#ifndef CONFIG_NETDEV_STATISTICS_LOG_PERIOD
+#  define CONFIG_NETDEV_STATISTICS_LOG_PERIOD 0
+#endif
+
+#if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
+#  include <nuttx/wqueue.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -112,7 +120,26 @@
        } \
      while (0)
 
-#  define NETDEV_RXPACKETS(dev)   _NETDEV_STATISTIC(dev,rx_packets)
+#  if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
+#    define NETDEV_STATISTICS_WORK LPWORK
+#    define _NETDEV_STATISTIC_LOG(dev,name) \
+       do \
+         { \
+           _NETDEV_STATISTIC(dev,name); \
+           if (work_available(&(dev)->d_statistics.logwork)) \
+             { \
+               work_queue(NETDEV_STATISTICS_WORK, \
+                          &(dev)->d_statistics.logwork, \
+                          netdev_statistics_log, (dev), \
+                          SEC2TICK(CONFIG_NETDEV_STATISTICS_LOG_PERIOD)); \
+             } \
+         } \
+       while (0)
+#  else
+#    define _NETDEV_STATISTIC_LOG(dev,name) _NETDEV_STATISTIC(dev,name)
+#  endif
+
+#  define NETDEV_RXPACKETS(dev)   _NETDEV_STATISTIC_LOG(dev,rx_packets)
 #  define NETDEV_RXFRAGMENTS(dev) _NETDEV_STATISTIC(dev,rx_fragments)
 #  define NETDEV_RXERRORS(dev)    _NETDEV_ERROR(dev,rx_errors)
 #  ifdef CONFIG_NET_IPv4
@@ -132,7 +159,7 @@
 #  endif
 #  define NETDEV_RXDROPPED(dev)   _NETDEV_STATISTIC(dev,rx_dropped)
 
-#  define NETDEV_TXPACKETS(dev)   _NETDEV_STATISTIC(dev,tx_packets)
+#  define NETDEV_TXPACKETS(dev)   _NETDEV_STATISTIC_LOG(dev,tx_packets)
 #  define NETDEV_TXDONE(dev)      _NETDEV_STATISTIC(dev,tx_done)
 #  define NETDEV_TXERRORS(dev)    _NETDEV_ERROR(dev,tx_errors)
 #  define NETDEV_TXTIMEOUTS(dev)  _NETDEV_ERROR(dev,tx_timeouts)
@@ -219,6 +246,10 @@ struct netdev_statistics_s
   /* Other status */
 
   uint32_t errors;         /* Total number of errors */
+
+#if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
+  struct work_s logwork;   /* For periodic log work */
+#endif
 };
 #endif
 
@@ -1194,6 +1225,22 @@ netdev_ipv6_lookup(FAR struct net_driver_s *dev, const net_ipv6addr_t addr,
 #ifdef CONFIG_NET_IPv6
 int netdev_ipv6_foreach(FAR struct net_driver_s *dev,
                         devif_ipv6_callback_t callback, FAR void *arg);
+#endif
+
+/****************************************************************************
+ * Name: netdev_statistics_log
+ *
+ * Description:
+ *   The actual implementation of the network statistics logging.  Log
+ *   network statistics at regular intervals.
+ *
+ * Input Parameters:
+ *   arg - The pointer to the network device
+ *
+ ****************************************************************************/
+
+#if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
+void netdev_statistics_log(FAR void *arg);
 #endif
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_H */
