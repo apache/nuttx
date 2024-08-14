@@ -38,6 +38,10 @@ ifeq ($(CONFIG_NET_IPv6),y)
 NETDEV_CSRCS += netdev_ipv6.c
 endif
 
+ifeq ($(CONFIG_NETDEV_STATISTICS),y)
+NETDEV_CSRCS += netdev_stats.c
+endif
+
 # Include netdev build support
 
 DEPPATH += --dep-path netdev
