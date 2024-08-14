@@ -131,6 +131,14 @@ config NETDEV_STATISTICS
 		Enable to collect statistics from the network drivers (if supported
 		by the network driver).
 
+config NETDEV_STATISTICS_LOG_PERIOD
+	int "Network device statistics log period"
+	default 0
+	depends on NETDEV_STATISTICS && DEBUG_FEATURES
+	---help---
+		Period in seconds to log network device statistics.  Zero means
+		disable logging.
+
 config NET_DUMPPACKET
 	bool "Enable packet dumping"
 	depends on DEBUG_FEATURES

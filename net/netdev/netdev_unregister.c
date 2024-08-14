@@ -150,6 +150,10 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 #endif
       net_unlock();
 
+#if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
+      work_cancel_sync(NETDEV_STATISTICS_WORK, &dev->d_statistics.logwork);
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
       ninfo("Unregistered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",
             dev->d_mac.ether.ether_addr_octet[0],
