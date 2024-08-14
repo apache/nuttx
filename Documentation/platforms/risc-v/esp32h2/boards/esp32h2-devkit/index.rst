@@ -214,7 +214,7 @@ spi
 --------
 
 This configuration enables the support for the SPI driver.
-You can test it by connecting MOSI and MISO pins which are GPIO7 and GPIO2
+You can test it by connecting MOSI and MISO pins which are GPIO5 and GPIO0
 by default to each other and running the ``spi`` example::
 
     nsh> spi exch -b 2 "AB"
