@@ -33,9 +33,9 @@
 
 struct deadlock_info_s
 {
-  FAR pid_t *pid;
-  size_t count;
-  size_t found;
+  FAR pid_t *holders;
+  size_t arraylen;
+  size_t holdercnt;
 };
 
 /****************************************************************************
@@ -43,7 +43,7 @@ struct deadlock_info_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: waitmutex
+ * Name: getmutex
  ****************************************************************************/
 
 static FAR mutex_t *getmutex(FAR struct tcb_s *tcb)
@@ -83,47 +83,57 @@ static void collect_deadlock(FAR struct tcb_s *tcb, FAR void *arg)
       return;
     }
 
-  for (index = 0; index < info->found; index++)
+  /* Check previous deadlock holder list. */
+
+  for (index = 0; index < info->holdercnt; index++)
     {
-      if (info->pid[index] == tcb->pid)
+      if (info->holders[index] == tcb->pid)
         {
           return;
         }
     }
 
-  for (index = info->found; index < info->count; index++)
+  /* Append the holders for this tcb to list. */
+
+  for (index = info->holdercnt; index < info->arraylen; index++)
     {
-      pid_t next;
+      pid_t holder;
       size_t i;
 
-      next = mutex->holder;
-      if (next == NXMUTEX_NO_HOLDER)
+      holder = mutex->holder;
+      if (holder == NXMUTEX_NO_HOLDER)
         {
           break;
         }
 
-      for (i = info->found; i < index; i++)
+      /* Check if this holder is already held. */
+
+      for (i = info->holdercnt; i < index; i++)
         {
-          if (info->pid[i] == next)
+          if (info->holders[i] == holder)
             {
-              info->found = index;
+              info->holdercnt = index;
               return;
             }
         }
 
-      info->pid[index] = tcb->pid;
-      tcb = nxsched_get_tcb(next);
+      /* Add holder to list and continue to holder's holder. */
+
+      info->holders[index] = tcb->pid;
+      tcb = nxsched_get_tcb(holder);
       mutex = getmutex(tcb);
       if (mutex == NULL)
         {
+          /* If this holder isn't waiting for mutex, it's over. */
+
           break;
         }
     }
 
-  /* if we not find deadlock, clear the pid array */
+  /* If no deadlock, clear the holders of this tcb. */
 
-  memset(&info->pid[info->found], 0,
-         (info->count - info->found) * sizeof(pid_t));
+  memset(&info->holders[info->holdercnt], 0,
+         (info->arraylen - info->holdercnt) * sizeof(pid_t));
 }
 
 /****************************************************************************
@@ -149,9 +159,9 @@ size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count)
 {
   struct deadlock_info_s info;
 
-  info.pid = pid;
-  info.count = count;
-  info.found = 0;
+  info.holders = pid;
+  info.arraylen = count;
+  info.holdercnt = 0;
   nxsched_foreach(collect_deadlock, &info);
-  return info.found;
+  return info.holdercnt;
 }
