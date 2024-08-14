@@ -9,6 +9,8 @@ config CXD32_UART0
 	bool "UART0"
 	default y
 	select UART0_SERIALDRIVER
+	select UART0_SERIAL_CONSOLE
+	select UART0_PL011
 	select ARCH_HAVE_SERIAL_TERMIOS
 	---help---
 		UART0 must be used as console device at CXD32xx.

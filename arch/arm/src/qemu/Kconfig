@@ -37,5 +37,36 @@ config ARCH_CHIP_QEMU_TRUSTZONE
 		The default is off. And this config can enable/disable
 		TrustZone in qemu chip.
 
+#####################################################################
+#  UART Configuration
+#####################################################################
+
+config UART1_PL011
+    bool "UART1_PL011"
+    default y
+    ---help---
+        UART1 PL011 interface.
+
+if UART1_PL011
+
+config UART1_BASE
+    hex "UART1 base address"
+    default 0x9000000
+
+config UART1_IRQ
+    int "UART1 IRQ number"
+    default 33
+
+config UART1_CLK_FREQ
+	int "PL011 UART1 clock frequency"
+	default 24000000
+
+config UART1_SERIAL_CONSOLE
+    bool "UART1 as console"
+    default y
+    ---help---
+        Use UART1 as the console device.
+
+endif # UART_PL011
 
 endif # ARCH_CHIP_QEMU_ARM

@@ -29,6 +29,68 @@
 #ifdef CONFIG_UART_PL011
 
 /***************************************************************************
+ * Pre-processor Definitions
+ ***************************************************************************/
+
+#if defined(CONFIG_UART1_SERIAL_CONSOLE)
+#define CONSOLE_DEV g_uart1port
+#endif // defined(CONFIG_UART1_SERIAL_CONSOLE)
+
+#if defined(CONFIG_UART1_PL011)
+#define TTYS1_DEV g_uart1port
+#endif // defined(CONFIG_UART1_PL011)
+
+/***************************************************************************
+ * Private Data
+ ***************************************************************************/
+
+/* IO buffers */
+#if defined(CONFIG_UART1_PL011)
+static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
+static char g_uart1txbuffer[CONFIG_UART1_RXBUFSIZE];
+#endif // defined(CONFIG_UART1_PL011)
+
+/* UART devices */
+
+#if defined(CONFIG_UART1_PL011)
+
+static struct pl011_uart_port_s g_uart1priv =
+{
+    .data =
+        {
+            .baud_rate = CONFIG_UART1_BAUD,
+            .sbsa = false,
+        },
+
+    .config =
+        {
+            .uart = (void *)CONFIG_UART1_BASE,
+            .sys_clk_freq = CONFIG_UART1_CLK_FREQ,
+        },
+
+    .irq_num = CONFIG_UART1_IRQ,
+};
+
+static struct uart_dev_s g_uart1port =
+{
+    .recv =
+        {
+            .size = CONFIG_UART1_RXBUFSIZE,
+            .buffer = g_uart1rxbuffer,
+        },
+
+    .xmit =
+        {
+            .size = CONFIG_UART1_TXBUFSIZE,
+            .buffer = g_uart1txbuffer,
+        },
+
+    .priv = &g_uart1priv,
+};
+
+#endif // defined(CONFIG_UART_PL011)
+
+/***************************************************************************
  * Public Functions
  ***************************************************************************/
 
@@ -46,7 +108,11 @@ void arm_earlyserialinit(void)
    * when they are first opened.
    */
 
-  pl011_earlyserialinit();
+#if defined(CONSOLE_DEV)
+  CONSOLE_DEV.isconsole = true;
+  pl011_init_ops(&CONSOLE_DEV);
+  CONSOLE_DEV.ops->setup(&CONSOLE_DEV);
+#endif
 }
 
 /***************************************************************************
@@ -59,7 +125,40 @@ void arm_earlyserialinit(void)
 
 void arm_serialinit(void)
 {
-  pl011_serialinit();
+#if defined(CONSOLE_DEV)
+  pl011_uart_register("/dev/console", &CONSOLE_DEV);
+#endif
+#if defined(TTYS1_DEV)
+  pl011_uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
 }
+
+/***************************************************************************
+ * Name: up_putc
+ *
+ * Description:
+ *   Provide priority, low-level access to support OS debug writes
+ *
+ ***************************************************************************/
+
+#if defined(CONSOLE_DEV)
+int up_putc(int ch)
+{
+  FAR struct uart_dev_s *dev = &CONSOLE_DEV;
+
+  /* Check for LF */
+
+  if (ch == '\n')
+    {
+      /* Add CR */
+
+      dev->ops->send(dev, '\r');
+    }
+
+  dev->ops->send(dev, ch);
+
+  return ch;
+}
+#endif
 
 #endif /* CONFIG_UART_PL011 */

@@ -56,6 +56,14 @@ void arm_boot(void)
 
   qemu_setupmappings();
 
+#ifdef USE_EARLYSERIALINIT
+  /* Perform early serial initialization if we are going to use the serial
+   * driver.
+   */
+
+  arm_earlyserialinit();
+#endif
+
   arm_fpuconfig();
 
 #if defined(CONFIG_ARCH_HAVE_PSCI)
@@ -64,14 +72,6 @@ void arm_boot(void)
 
 #ifdef CONFIG_DEVICE_TREE
   fdt_register((const char *)0x40000000);
-#endif
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm_earlyserialinit();
 #endif
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
