@@ -73,5 +73,6 @@ FAR char **nxsched_get_stackargs(FAR struct tcb_s *tcb)
 {
   /* The args data follows the TLS data */
 
-  return (FAR char**)(tcb->stack_alloc_ptr + nxsched_get_tls(tcb)->tl_size);
+  return (FAR char**)((FAR char *)tcb->stack_alloc_ptr +
+                                  nxsched_get_tls(tcb)->tl_size);
 }
