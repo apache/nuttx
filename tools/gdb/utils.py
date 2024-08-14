@@ -1,8 +1,6 @@
 ############################################################################
 # tools/gdb/utils.py
 #
-# SPDX-License-Identifier: Apache-2.0
-#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -23,7 +21,6 @@
 import re
 
 import gdb
-from macros import fetch_macro_info
 
 g_symbol_cache = {}
 g_type_cache = {}
@@ -46,42 +43,6 @@ def lookup_type(name, block=None) -> gdb.Type:
 
 
 long_type = lookup_type("long")
-
-
-class MacroCtx:
-    """
-    This is a singleton class wich only initializes once to
-    cache a context of macro definition which can be queried later
-    TODO: we only deal with single ELF at the moment for simplicity
-    If you load more object files while debugging, only the first one gets loaded
-    will be used to retrieve macro information
-    """
-
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "instance"):
-            cls.instance = super(MacroCtx, cls).__new__(cls)
-        return cls.instance
-
-    def __init__(self, filename):
-        self._macro_map = {}
-        self._file = filename
-
-        self._macro_map = fetch_macro_info(filename)
-
-    @property
-    def macro_map(self):
-        return self._macro_map
-
-    @property
-    def objfile(self):
-        return self._file
-
-
-if len(gdb.objfiles()) > 0:
-    macroctx = MacroCtx(gdb.objfiles()[0].filename)
-else:
-    raise gdb.GdbError("An executable file must be provided")
-
 
 # Common Helper Functions
 
@@ -237,6 +198,14 @@ class Hexdump(gdb.Command):
 Hexdump()
 
 
+def nitems(array):
+    array_type = array.type
+    element_type = array_type.target()
+    element_size = element_type.sizeof
+    array_size = array_type.sizeof // element_size
+    return array_size
+
+
 # Machine Specific Helper Functions
 
 
@@ -248,7 +217,7 @@ target_endianness = None
 def get_target_endianness():
     """Return the endianness of the target"""
     global target_endianness
-    if target_endianness is None:
+    if not target_endianness:
         endian = gdb.execute("show endian", to_string=True)
         if "little endian" in endian:
             target_endianness = LITTLE_ENDIAN
@@ -267,38 +236,63 @@ def read_memoryview(inf, start, length):
     return memoryview(m)
 
 
-def read_u16(buffer, offset):
-    """Read a 16-bit unsigned integer from a buffer"""
-    buffer_val = buffer[offset : offset + 2]
-    value = [0, 0]
+try:
+    # For some prebuilt GDB, the python builtin module `struct` is not available
+    import struct
 
-    if type(buffer_val[0]) is str:
-        value[0] = ord(buffer_val[0])
-        value[1] = ord(buffer_val[1])
-    else:
-        value[0] = buffer_val[0]
-        value[1] = buffer_val[1]
+    def read_u16(buffer, offset):
+        """Read a 16-bit unsigned integer from a buffer"""
+        if get_target_endianness() == LITTLE_ENDIAN:
+            return struct.unpack_from("<H", buffer, offset)[0]
+        else:
+            return struct.unpack_from(">H", buffer, offset)[0]
 
-    if get_target_endianness() == LITTLE_ENDIAN:
-        return value[0] + (value[1] << 8)
-    else:
-        return value[1] + (value[0] << 8)
+    def read_u32(buffer, offset):
+        """Read a 32-bit unsigned integer from a buffer"""
+        if get_target_endianness() == LITTLE_ENDIAN:
+            return struct.unpack_from("<I", buffer, offset)[0]
+        else:
+            return struct.unpack_from(">I", buffer, offset)[0]
 
+    def read_u64(buffer, offset):
+        """Read a 64-bit unsigned integer from a buffer"""
+        if get_target_endianness() == LITTLE_ENDIAN:
+            return struct.unpack_from("<Q", buffer, offset)[0]
+        else:
+            return struct.unpack_from(">Q", buffer, offset)[0]
 
-def read_u32(buffer, offset):
-    """Read a 32-bit unsigned integer from a buffer"""
-    if get_target_endianness() == LITTLE_ENDIAN:
-        return read_u16(buffer, offset) + (read_u16(buffer, offset + 2) << 16)
-    else:
-        return read_u16(buffer, offset + 2) + (read_u16(buffer, offset) << 16)
+except ModuleNotFoundError:
 
+    def read_u16(buffer, offset):
+        """Read a 16-bit unsigned integer from a buffer"""
+        buffer_val = buffer[offset : offset + 2]
+        value = [0, 0]
 
-def read_u64(buffer, offset):
-    """Read a 64-bit unsigned integer from a buffer"""
-    if get_target_endianness() == LITTLE_ENDIAN:
-        return read_u32(buffer, offset) + (read_u32(buffer, offset + 4) << 32)
-    else:
-        return read_u32(buffer, offset + 4) + (read_u32(buffer, offset) << 32)
+        if type(buffer_val[0]) is str:
+            value[0] = ord(buffer_val[0])
+            value[1] = ord(buffer_val[1])
+        else:
+            value[0] = buffer_val[0]
+            value[1] = buffer_val[1]
+
+        if get_target_endianness() == LITTLE_ENDIAN:
+            return value[0] + (value[1] << 8)
+        else:
+            return value[1] + (value[0] << 8)
+
+    def read_u32(buffer, offset):
+        """Read a 32-bit unsigned integer from a buffer"""
+        if get_target_endianness() == LITTLE_ENDIAN:
+            return read_u16(buffer, offset) + (read_u16(buffer, offset + 2) << 16)
+        else:
+            return read_u16(buffer, offset + 2) + (read_u16(buffer, offset) << 16)
+
+    def read_u64(buffer, offset):
+        """Read a 64-bit unsigned integer from a buffer"""
+        if get_target_endianness() == LITTLE_ENDIAN:
+            return read_u32(buffer, offset) + (read_u32(buffer, offset + 4) << 32)
+        else:
+            return read_u32(buffer, offset + 4) + (read_u32(buffer, offset) << 32)
 
 
 def read_ulong(buffer, offset):
@@ -365,29 +359,37 @@ def in_interrupt_context(cpuid=0):
         # TODO: figure out a more proper way to detect if
         # we are in an interrupt context
         g_current_regs = gdb_eval_or_none("g_current_regs")
-        return not g_current_regs[cpuid]
+        return not g_current_regs or not g_current_regs[cpuid]
 
 
 def get_arch_sp_name():
-    if is_target_arch("arm", exact=True):
+    if is_target_arch("arm"):
+        # arm and arm variants
+        return "sp"
+    if is_target_arch("aarch64"):
         return "sp"
     elif is_target_arch("i386", exact=True):
         return "esp"
     elif is_target_arch("i386:x86-64", exact=True):
         return "rsp"
     else:
-        raise gdb.GdbError("Not implemented yet")
+        # Default to use sp, add more archs if needed
+        return "sp"
 
 
 def get_arch_pc_name():
-    if is_target_arch("arm", exact=True):
+    if is_target_arch("arm"):
+        # arm and arm variants
+        return "pc"
+    if is_target_arch("aarch64"):
         return "pc"
     elif is_target_arch("i386", exact=True):
         return "eip"
     elif is_target_arch("i386:x86-64", exact=True):
         return "rip"
     else:
-        raise gdb.GdbError("Not implemented yet")
+        # Default to use pc, add more archs if needed
+        return "pc"
 
 
 def get_register_byname(regname, tcb=None):
@@ -414,6 +416,14 @@ def get_register_byname(regname, tcb=None):
     )[0]
 
     return int(value)
+
+
+def get_sp(tcb=None):
+    return get_register_byname(get_arch_sp_name(), tcb)
+
+
+def get_pc(tcb=None):
+    return get_register_byname(get_arch_pc_name(), tcb)
 
 
 def get_tcbs():
