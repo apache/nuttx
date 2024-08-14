@@ -78,10 +78,22 @@
 #  define ESP_IRQ_SPI2     ESP_IRQ_GSPI2
 #endif
 
+#if defined(CONFIG_ARCH_CHIP_ESP32C3_GENERIC)
 #define SPI2_IOMUX_MISOPIN  2
 #define SPI2_IOMUX_MOSIPIN  7
 #define SPI2_IOMUX_CLKPIN   6
 #define SPI2_IOMUX_CSPIN    10
+#elif defined(CONFIG_ARCH_CHIP_ESP32C6)
+#define SPI2_IOMUX_MISOPIN  2
+#define SPI2_IOMUX_MOSIPIN  7
+#define SPI2_IOMUX_CLKPIN   6
+#define SPI2_IOMUX_CSPIN    16
+#elif defined(CONFIG_ARCH_CHIP_ESP32H2)
+#define SPI2_IOMUX_MISOPIN  0
+#define SPI2_IOMUX_MOSIPIN  5
+#define SPI2_IOMUX_CLKPIN   4
+#define SPI2_IOMUX_CSPIN    1
+#endif
 
 /* Check if Chip-Select pin will be controlled via software */
 

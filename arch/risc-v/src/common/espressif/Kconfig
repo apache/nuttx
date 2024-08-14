@@ -947,22 +947,27 @@ config ESPRESSIF_SPI2_SLAVE_BUFSIZE
 
 config ESPRESSIF_SPI2_CSPIN
 	int "SPI2 CS Pin"
-	default 10
+	default 10 if ARCH_CHIP_ESP32C3_GENERIC
+	default 16 if ARCH_CHIP_ESP32C6
+	default 1 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 config ESPRESSIF_SPI2_CLKPIN
 	int "SPI2 CLK Pin"
-	default 6
+	default 6 if !ARCH_CHIP_ESP32H2
+	default 4 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 config ESPRESSIF_SPI2_MOSIPIN
 	int "SPI2 MOSI Pin"
-	default 7
+	default 7 if !ARCH_CHIP_ESP32H2
+	default 5 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 config ESPRESSIF_SPI2_MISOPIN
 	int "SPI2 MISO Pin"
-	default 2
+	default 2 if !ARCH_CHIP_ESP32H2
+	default 0 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 endif # ESPRESSIF_SPI2
