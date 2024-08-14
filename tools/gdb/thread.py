@@ -113,18 +113,23 @@ class SetRegs(gdb.Command):
         tcbinfo = gdb.parse_and_eval("g_tcbinfo")
         save_regs()
         arch = gdb.selected_frame().architecture()
+
+        regoffset = [
+            int(tcbinfo["reg_off"]["p"][i])
+            for i in range(tcbinfo["regs_num"])
+            if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
+        ]
+
         i = 0
         for reg in arch.registers():
-            if i >= tcbinfo["regs_num"]:
+            if i >= len(regoffset):
                 return
 
             gdb.execute("select-frame 0")
-            if tcbinfo["reg_off"]["p"][i] != UINT16_MAX:
-                value = gdb.Value(regs + tcbinfo["reg_off"]["p"][i]).cast(
-                    utils.lookup_type("uintptr_t").pointer()
-                )[0]
-                gdb.execute(f"set ${reg.name} = {value}")
-
+            value = gdb.Value(regs + regoffset[i]).cast(
+                utils.lookup_type("uintptr_t").pointer()
+            )[0]
+            gdb.execute(f"set ${reg.name} = {value}")
             i += 1
 
 
