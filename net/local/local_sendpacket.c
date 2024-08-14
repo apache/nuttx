@@ -136,7 +136,7 @@ int local_send_preamble(FAR struct local_conn_s *conn,
       len16 += iov->iov_len;
     }
 
-  if (len16 > LOCAL_SEND_LIMIT)
+  if (len16 > conn->lc_sndsize - sizeof(uint32_t))
     {
       nerr("ERROR: Packet is too big: %d\n", len16);
       return -EMSGSIZE;

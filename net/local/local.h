@@ -49,8 +49,6 @@
 #define LOCAL_NPOLLWAITERS 2
 #define LOCAL_NCONTROLFDS  4
 
-#define LOCAL_SEND_LIMIT   (CONFIG_DEV_FIFO_SIZE - sizeof(uint16_t))
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -122,6 +120,8 @@ struct local_conn_s
   char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
   int32_t lc_instance_id;        /* Connection instance ID for stream
                                   * server<->client connection pair */
+  uint32_t lc_sndsize;           /* Send buffer size */
+  uint32_t lc_rcvsize;           /* Receive buffer size */
 
   FAR struct local_conn_s *
                         lc_peer; /* Peer connection instance */
@@ -558,7 +558,8 @@ int local_getaddr(FAR struct local_conn_s *conn, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int local_create_fifos(FAR struct local_conn_s *conn);
+int local_create_fifos(FAR struct local_conn_s *conn,
+                       uint32_t cssize, uint32_t scsize);
 
 /****************************************************************************
  * Name: local_create_halfduplex
@@ -570,7 +571,7 @@ int local_create_fifos(FAR struct local_conn_s *conn);
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
 int local_create_halfduplex(FAR struct local_conn_s *conn,
-                            FAR const char *path);
+                            FAR const char *path, uint32_t bufsize);
 #endif
 
 /****************************************************************************

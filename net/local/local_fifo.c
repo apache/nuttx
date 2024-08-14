@@ -166,7 +166,7 @@ static bool local_fifo_exists(FAR const char *path)
  *
  ****************************************************************************/
 
-static int local_create_fifo(FAR const char *path)
+static int local_create_fifo(FAR const char *path, uint32_t bufsize)
 {
   int ret;
 
@@ -174,7 +174,7 @@ static int local_create_fifo(FAR const char *path)
 
   if (!local_fifo_exists(path))
     {
-      ret = nx_mkfifo(path, 0644, CONFIG_DEV_FIFO_SIZE);
+      ret = nx_mkfifo(path, 0644, bufsize);
       if (ret < 0)
         {
           nerr("ERROR: Failed to create FIFO %s: %d\n", path, ret);
@@ -422,7 +422,8 @@ int local_set_pollthreshold(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-int local_create_fifos(FAR struct local_conn_s *conn)
+int local_create_fifos(FAR struct local_conn_s *conn,
+                       uint32_t cssize, uint32_t scsize)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
@@ -430,13 +431,13 @@ int local_create_fifos(FAR struct local_conn_s *conn)
   /* Create the client-to-server FIFO if it does not already exist. */
 
   local_cs_name(conn, path);
-  ret = local_create_fifo(path);
+  ret = local_create_fifo(path, cssize);
   if (ret >= 0)
     {
       /* Create the server-to-client FIFO if it does not already exist. */
 
       local_sc_name(conn, path);
-      ret = local_create_fifo(path);
+      ret = local_create_fifo(path, scsize);
     }
 
   return ret;
@@ -452,14 +453,14 @@ int local_create_fifos(FAR struct local_conn_s *conn)
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
 int local_create_halfduplex(FAR struct local_conn_s *conn,
-                            FAR const char *path)
+                            FAR const char *path, uint32_t bufsize)
 {
   char fullpath[LOCAL_FULLPATH_LEN];
 
   /* Create the half duplex FIFO if it does not already exist. */
 
   local_hd_name(path, fullpath);
-  return local_create_fifo(fullpath);
+  return local_create_fifo(fullpath, bufsize);
 }
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 

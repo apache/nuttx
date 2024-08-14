@@ -34,6 +34,7 @@
 #include <debug.h>
 
 #include <netinet/in.h>
+#include <sys/param.h>
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
@@ -545,6 +546,8 @@ static int local_getpeername(FAR struct socket *psock,
 static int local_getsockopt(FAR struct socket *psock, int level, int option,
                             FAR void *value, FAR socklen_t *value_len)
 {
+  FAR struct local_conn_s *conn = psock->s_conn;
+
   DEBUGASSERT(psock->s_domain == PF_LOCAL);
 
   if (level == SOL_SOCKET)
@@ -554,7 +557,6 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
 #ifdef CONFIG_NET_LOCAL_SCM
           case SO_PEERCRED:
             {
-              FAR struct local_conn_s *conn = psock->s_conn;
               if (*value_len != sizeof(struct ucred))
                 {
                   return -EINVAL;
@@ -572,7 +574,36 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
                   return -EINVAL;
                 }
 
-              *(FAR int *)value = LOCAL_SEND_LIMIT;
+              if (psock->s_type == SOCK_STREAM)
+                {
+                  *(FAR int *)value = conn->lc_sndsize;
+                }
+              else
+                {
+                  *(FAR int *)value = conn->lc_sndsize -
+                                      sizeof(uint32_t) -
+                                      UNIX_PATH_MAX;
+                }
+              return OK;
+            }
+
+          case SO_RCVBUF:
+            {
+              if (*value_len != sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              if (psock->s_type == SOCK_STREAM)
+                {
+                  *(FAR int *)value = conn->lc_rcvsize;
+                }
+              else
+                {
+                  *(FAR int *)value = conn->lc_rcvsize -
+                                      sizeof(uint32_t) -
+                                      UNIX_PATH_MAX;
+                }
               return OK;
             }
         }
@@ -606,6 +637,46 @@ static int local_getsockopt(FAR struct socket *psock, int level, int option,
 static int local_setsockopt(FAR struct socket *psock, int level, int option,
                             FAR const void *value, socklen_t value_len)
 {
+  FAR struct local_conn_s *conn = psock->s_conn;
+
+  DEBUGASSERT(psock->s_domain == PF_LOCAL);
+
+  if (level == SOL_SOCKET)
+    {
+      switch (option)
+        {
+          case SO_SNDBUF:
+            {
+              if (psock->s_type == SOCK_STREAM)
+                {
+                  conn->lc_sndsize = *(FAR const int *)value;
+                }
+              else
+                {
+                  conn->lc_sndsize = *(FAR const int *)value +
+                                     sizeof(uint32_t) +
+                                     UNIX_PATH_MAX;
+                }
+              return OK;
+            }
+
+          case SO_RCVBUF:
+            {
+              if (psock->s_type == SOCK_STREAM)
+                {
+                  conn->lc_rcvsize = *(FAR const int *)value;
+                }
+              else
+                {
+                  conn->lc_rcvsize = *(FAR const int *)value +
+                                     sizeof(uint32_t) +
+                                     UNIX_PATH_MAX;
+                }
+              return OK;
+            }
+        }
+    }
+
   return -ENOPROTOOPT;
 }
 
@@ -902,7 +973,9 @@ static int local_socketpair(FAR struct socket *psocks[2])
 
   /* Create the FIFOs needed for the connection */
 
-  ret = local_create_fifos(conns[0]);
+  ret = local_create_fifos(conns[0],
+          MIN(conns[0]->lc_sndsize, conns[1]->lc_rcvsize),
+          MIN(conns[0]->lc_rcvsize, conns[1]->lc_sndsize));
   if (ret < 0)
     {
       goto errout;

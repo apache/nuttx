@@ -335,7 +335,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
    * REVISIT:  Or should be just make sure that it already exists?
    */
 
-  ret = local_create_halfduplex(conn, unaddr->sun_path);
+  ret = local_create_halfduplex(conn, unaddr->sun_path, conn->lc_sndsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to create FIFO for %s: %zd\n",
