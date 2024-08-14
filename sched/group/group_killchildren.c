@@ -68,7 +68,7 @@ static int group_kill_children_handler(pid_t pid, FAR void *arg)
 
   if (pid != (pid_t)((uintptr_t)arg))
     {
-      pthread_kill(pid, SIGTERM);
+      tkill(pid, SIGTERM);
     }
 
   return OK;
