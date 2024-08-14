@@ -27,13 +27,6 @@ import gdb
 from lists import sq_for_every, sq_queue_type
 from utils import get_long_type, get_symbol_value, lookup_type, read_ulong
 
-try:
-    import numpy as np
-    from matplotlib import pyplot as plt
-except ImportError:
-    print("Please install matplotlib and numpy to use this command")
-    print("pip install matplotlib numpy")
-
 MM_ALLOC_BIT = 0x1
 MM_PREVFREE_BIT = 0x2
 MM_MASK_BIT = MM_ALLOC_BIT | MM_PREVFREE_BIT
@@ -784,6 +777,27 @@ have {i} some backtrace leak, total leak memory is {int(leaksize)} bytes\n"
 class Memmap(gdb.Command):
     def __init__(self):
         super(Memmap, self).__init__("memmap", gdb.COMMAND_USER)
+        self.initialized = False
+
+    def init_once(self) -> bool:
+        """
+        Return True if all prerequisites are met and perform one-time initialization.
+        """
+        if self.initialized:
+            return True
+
+        try:
+            import numpy as np
+            from matplotlib import pyplot as plt
+        except ImportError:
+            print("Please install matplotlib and numpy to use this command")
+            print("pip install matplotlib numpy")
+            return False
+
+        self.np = np
+        self.plt = plt
+        self.initialized = True
+        return True
 
     def save_memory_map(self, mallinfo, output_file):
         mallinfo = sorted(mallinfo, key=lambda item: item["addr"])
@@ -791,7 +805,7 @@ class Memmap(gdb.Command):
         size = mallinfo[-1]["addr"] - start
 
         order = math.ceil(size**0.5)
-        img = np.zeros([order, order])
+        img = self.np.zeros([order, order])
 
         for node in mallinfo:
             addr = node["addr"]
@@ -800,7 +814,7 @@ class Memmap(gdb.Command):
             end_index = start_index + size
             img.flat[start_index:end_index] = 1 + math.log2(node["sequence"] + 1)
 
-        plt.imsave(output_file, img, cmap=plt.get_cmap("Greens"))
+        self.plt.imsave(output_file, img, cmap=self.plt.get_cmap("Greens"))
 
     def allocinfo(self):
         info = []
@@ -831,14 +845,11 @@ class Memmap(gdb.Command):
         return args.output
 
     def invoke(self, args, from_tty):
+        if not self.init_once():
+            return
         output_file = self.parse_arguments(args.split(" "))
         meminfo = self.allocinfo()
         self.save_memory_map(meminfo, output_file + ".png")
-
-
-Memdump()
-Memleak()
-Memmap()
 
 
 class Memfrag(gdb.Command):
@@ -899,3 +910,6 @@ class Memfrag(gdb.Command):
 
 
 Memfrag()
+Memdump()
+Memleak()
+Memmap()
