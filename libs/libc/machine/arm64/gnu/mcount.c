@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/sys/gmon.h
+ * libs/libc/machine/arm64/gnu/mcount.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,47 +18,46 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_SYS_GMON_H
-#define __INCLUDE_SYS_GMON_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/compiler.h>
-#include <stdint.h>
+#include <sys/gmon.h>
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+static inline noinstrument_function void *strip_pac(void *p)
 {
-#else
-#define EXTERN extern
-#endif
+  register void *ra asm ("x30") = (p);
+  asm ("hint 7 // xpaclri" : "+r"(ra));
+  return ra;
+}
 
-/* Start/stop profiling */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-void moncontrol(int mode);
-
-/* Set up data structures and start profiling. */
-
-void monstartup(unsigned long lowpc, unsigned long highpc);
-
-/* Clean up profiling and write out gmon.out. */
-
-void _mcleanup(void);
+/****************************************************************************
+ * Name: _mcount
+ *
+ * Description:
+ *   This is the ARM64 mcount function.  It is called by the profiling
+ *   logic to record the call.
+ *
+ * Input Parameters:
+ *   frompc - The address of the calling instruction
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
 noinstrument_function
-void mcount_internal(uintptr_t frompc, uintptr_t selfpc);
-
-#undef EXTERN
-#if defined(__cplusplus)
+void _mcount(void *frompc)
+{
+  mcount_internal((uintptr_t)strip_pac(frompc),
+                  (uintptr_t)return_address(0));
 }
-#endif
 
-#endif /* __INCLUDE_SYS_GMON_H */
