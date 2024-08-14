@@ -20,7 +20,6 @@
 
 import argparse
 import bisect
-import math
 import time
 
 import gdb
@@ -794,8 +793,15 @@ class Memmap(gdb.Command):
             print("pip install matplotlib numpy")
             return False
 
+        try:
+            import math as math
+        except ImportError:
+            print("Please consider to use gdb-multiarch")
+            return False
+
         self.np = np
         self.plt = plt
+        self.math = math
         self.initialized = True
         return True
 
@@ -804,7 +810,7 @@ class Memmap(gdb.Command):
         start = mallinfo[0]["addr"]
         size = mallinfo[-1]["addr"] - start
 
-        order = math.ceil(size**0.5)
+        order = self.math.ceil(size**0.5)
         img = self.np.zeros([order, order])
 
         for node in mallinfo:
@@ -812,7 +818,7 @@ class Memmap(gdb.Command):
             size = node["size"]
             start_index = addr - start
             end_index = start_index + size
-            img.flat[start_index:end_index] = 1 + math.log2(node["sequence"] + 1)
+            img.flat[start_index:end_index] = 1 + self.math.log2(node["sequence"] + 1)
 
         self.plt.imsave(output_file, img, cmap=self.plt.get_cmap("Greens"))
 
