@@ -29,6 +29,8 @@
 *.dds
 *.su
 *.pyc
+*.mapfile
+*.SystemMap
 *~
 .depend
 /.config
