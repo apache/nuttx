@@ -218,12 +218,12 @@ def dq_check(dq):
     gdb.write("dq_queue is consistent: {} node(s)\n".format(nb))
 
 
-class Nxlistcheck(gdb.Command):
+class ListCheck(gdb.Command):
     """Verify a list consistency"""
 
     def __init__(self):
-        super(Nxlistcheck, self).__init__(
-            "listcheck", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
+        super(ListCheck, self).__init__(
+            "list_check", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
         )
 
     def invoke(self, arg, from_tty):
@@ -240,23 +240,22 @@ class Nxlistcheck(gdb.Command):
             raise gdb.GdbError("Invalid argument type: {}".format(obj.type))
 
 
-Nxlistcheck()
-
-
-class Nxlistforentry(gdb.Command):
+class ListForEveryEntry(gdb.Command):
     """Dump list members for a given list"""
 
     def __init__(self):
-        super(Nxlistforentry, self).__init__(
-            "listforentry", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
+        super(ListForEveryEntry, self).__init__(
+            "list_for_every_entry", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
         )
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
 
         if len(argv) != 3:
-            gdb.write("listforentry takes three arguments" "head, type, member\n")
-            gdb.write("eg: listforentry &g_list 'struct type' 'node '\n")
+            gdb.write(
+                "list_for_every_entry takes three arguments" "head, type, member\n"
+            )
+            gdb.write("eg: list_for_every_entry &g_list 'struct type' 'node '\n")
             return
 
         i = 0
@@ -268,4 +267,5 @@ class Nxlistforentry(gdb.Command):
             i += 1
 
 
-Nxlistforentry()
+ListCheck()
+ListForEveryEntry()
