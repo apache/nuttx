@@ -304,6 +304,6 @@ void riscv_exception_attach(void)
 #ifdef CONFIG_SMP
   irq_attach(RISCV_IRQ_SOFT, riscv_pause_handler, NULL);
 #else
-  irq_attach(RISCV_IRQ_MSOFT, riscv_exception, NULL);
+  irq_attach(RISCV_IRQ_SOFT, riscv_exception, NULL);
 #endif
 }
