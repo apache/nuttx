@@ -23,16 +23,16 @@
 import gdb
 import utils
 
-list_node = utils.CachedType("struct list_node")
-sq_queue = utils.CachedType("sq_queue_t")
-dq_queue = utils.CachedType("dq_queue_t")
+list_node_type = utils.lookup_type("struct list_node")
+sq_queue_type = utils.lookup_type("sq_queue_t")
+dq_queue_type = utils.lookup_type("dq_queue_t")
 
 
 def list_for_each(head):
     """Iterate over a list"""
-    if head.type == list_node.get_type().pointer():
+    if head.type == list_node_type.pointer():
         head = head.dereference()
-    elif head.type != list_node.get_type():
+    elif head.type != list_node_type:
         raise TypeError("Must be struct list_node not {}".format(head.type))
 
     if head["next"] == 0:
@@ -59,9 +59,9 @@ def list_check(head):
     """Check the consistency of a list"""
     nb = 0
 
-    if head.type == list_node.get_type().pointer():
+    if head.type == list_node_type.pointer():
         head = head.dereference()
-    elif head.type != list_node.get_type():
+    elif head.type != list_node_type:
         raise gdb.GdbError("argument must be of type (struct list_node [*])")
     c = head
     try:
@@ -123,9 +123,9 @@ def list_check(head):
 
 def sq_for_every(sq, entry):
     """Iterate over a singly linked list"""
-    if sq.type == sq_queue.get_type().pointer():
+    if sq.type == sq_queue_type.pointer():
         sq = sq.dereference()
-    elif sq.type != sq_queue.get_type():
+    elif sq.type != sq_queue_type:
         gdb.write("Must be struct sq_queue not {}".format(sq.type))
         return
 
@@ -141,9 +141,9 @@ def sq_for_every(sq, entry):
 
 def sq_is_empty(sq):
     """Check if a singly linked list is empty"""
-    if sq.type == sq_queue.get_type().pointer():
+    if sq.type == sq_queue_type.pointer():
         sq = sq.dereference()
-    elif sq.type != sq_queue.get_type():
+    elif sq.type != sq_queue_type:
         return False
 
     if sq["head"] == 0:
@@ -155,9 +155,9 @@ def sq_is_empty(sq):
 def sq_check(sq):
     """Check the consistency of a singly linked list"""
     nb = 0
-    if sq.type == sq_queue.get_type().pointer():
+    if sq.type == sq_queue_type.pointer():
         sq = sq.dereference()
-    elif sq.type != sq_queue.get_type():
+    elif sq.type != sq_queue_type:
         gdb.write("Must be struct sq_queue not {}".format(sq.type))
         return
 
@@ -179,9 +179,9 @@ def sq_check(sq):
 
 def dq_for_every(dq, entry):
     """Iterate over a doubly linked list"""
-    if dq.type == dq_queue.get_type().pointer():
+    if dq.type == dq_queue_type.pointer():
         dq = dq.dereference()
-    elif dq.type != dq_queue.get_type():
+    elif dq.type != dq_queue_type:
         gdb.write("Must be struct dq_queue not {}".format(dq.type))
         return
 
@@ -197,9 +197,9 @@ def dq_for_every(dq, entry):
 def dq_check(dq):
     """Check the consistency of a doubly linked list"""
     nb = 0
-    if dq.type == dq_queue.get_type().pointer():
+    if dq.type == dq_queue_type.pointer():
         dq = dq.dereference()
-    elif dq.type != dq_queue.get_type():
+    elif dq.type != dq_queue_type:
         gdb.write("Must be struct dq_queue not {}".format(dq.type))
         return
 
@@ -232,9 +232,9 @@ class Nxlistcheck(gdb.Command):
             raise gdb.GdbError("nx-list-check takes one argument")
 
         obj = gdb.parse_and_eval(argv[0])
-        if obj.type == list_node.get_type().pointer():
+        if obj.type == list_node_type.pointer():
             list_check(obj)
-        elif obj.type == sq_queue.get_type().pointer():
+        elif obj.type == sq_queue_type.pointer():
             sq_check(obj)
         else:
             raise gdb.GdbError("Invalid argument type: {}".format(obj.type))

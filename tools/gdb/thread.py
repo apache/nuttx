@@ -93,12 +93,12 @@ class Nxsetregs(gdb.Command):
 
         if arg[0] != "":
             regs = gdb.parse_and_eval(f"{arg[0]}").cast(
-                gdb.lookup_type("char").pointer()
+                utils.lookup_type("char").pointer()
             )
         else:
             gdb.execute("set $_current_regs=tcbinfo_current_regs()")
             current_regs = gdb.parse_and_eval("$_current_regs")
-            regs = current_regs.cast(gdb.lookup_type("char").pointer())
+            regs = current_regs.cast(utils.lookup_type("char").pointer())
 
         if regs == 0:
             gdb.write("regs is NULL\n")
@@ -114,7 +114,7 @@ class Nxsetregs(gdb.Command):
             gdb.execute("select-frame 0")
             if tcbinfo["reg_off"]["p"][i] != UINT16_MAX:
                 value = gdb.Value(regs + tcbinfo["reg_off"]["p"][i]).cast(
-                    gdb.lookup_type("uintptr_t").pointer()
+                    utils.lookup_type("uintptr_t").pointer()
                 )[0]
                 gdb.execute(f"set ${reg.name} = {value}")
 
@@ -162,9 +162,9 @@ class Nxinfothreads(gdb.Command):
             statename = f'\x1b{"[32;1m" if statename == "Running" else "[33;1m"}{statename}\x1b[m'
 
             if tcb["task_state"] == gdb.parse_and_eval("TSTATE_WAIT_SEM"):
-                mutex = tcb["waitobj"].cast(gdb.lookup_type("sem_t").pointer())
+                mutex = tcb["waitobj"].cast(utils.lookup_type("sem_t").pointer())
                 if mutex["flags"] & SEM_TYPE_MUTEX:
-                    mutex = tcb["waitobj"].cast(gdb.lookup_type("mutex_t").pointer())
+                    mutex = tcb["waitobj"].cast(utils.lookup_type("mutex_t").pointer())
                     statename = f"Waiting,Mutex:{mutex['holder']}"
 
             try:

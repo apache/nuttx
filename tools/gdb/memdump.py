@@ -24,8 +24,8 @@ import math
 import time
 
 import gdb
-from lists import sq_for_every, sq_queue
-from utils import get_long_type, get_symbol_value, read_ulong
+from lists import sq_for_every, sq_queue_type
+from utils import get_long_type, get_symbol_value, lookup_type, read_ulong
 
 try:
     import numpy as np
@@ -44,9 +44,9 @@ PID_MM_ALLOC = -3
 PID_MM_LEAK = -2
 PID_MM_MEMPOOL = -1
 
-mm_allocnode_type = gdb.lookup_type("struct mm_allocnode_s")
-sizeof_size_t = gdb.lookup_type("size_t").sizeof
-mempool_backtrace_type = gdb.lookup_type("struct mempool_backtrace_s")
+mm_allocnode_type = lookup_type("struct mm_allocnode_s")
+sizeof_size_t = lookup_type("size_t").sizeof
+mempool_backtrace_type = lookup_type("struct mempool_backtrace_s")
 
 CONFIG_MM_BACKTRACE = get_symbol_value("CONFIG_MM_BACKTRACE")
 CONFIG_MM_DFAULT_ALIGNMENT = get_symbol_value("CONFIG_MM_DFAULT_ALIGNMENT")
@@ -206,7 +206,7 @@ def get_count(element):
 def mempool_foreach(pool):
     """Iterate over all block in a mempool"""
 
-    sq_entry_type = gdb.lookup_type("sq_entry_t")
+    sq_entry_type = lookup_type("sq_entry_t")
 
     blocksize = mempool_realblocksize(pool)
     if pool["ibase"] != 0:
@@ -217,7 +217,7 @@ def mempool_foreach(pool):
             yield buf
             nblk -= 1
 
-    entry = sq_queue.get_type().pointer()
+    entry = sq_queue_type.pointer()
     for entry in sq_for_every(pool["equeue"], entry):
         nblk = (pool["expandsize"] - sq_entry_type.sizeof) / blocksize
         base = int(entry) - nblk * blocksize
@@ -229,7 +229,7 @@ def mempool_foreach(pool):
 
 
 def mempool_dumpbuf(buf, blksize, count, align, simple, detail, alive):
-    charnode = gdb.Value(buf).cast(gdb.lookup_type("char").pointer())
+    charnode = gdb.Value(buf).cast(lookup_type("char").pointer())
 
     if not alive:
         # if pid is not alive put a red asterisk.
@@ -295,7 +295,7 @@ class Memdump(gdb.Command):
         """Dump the mempool memory"""
         for pool in mempool_multiple_foreach(mpool):
             if pid == PID_MM_FREE:
-                entry = sq_queue.get_type().pointer()
+                entry = sq_queue_type.pointer()
 
                 for entry in sq_for_every(pool["queue"], entry):
                     gdb.write("%12u%#*x\n" % (pool["blocksize"], self.align, entry))
@@ -807,7 +807,7 @@ class Memmap(gdb.Command):
         heap = gdb.parse_and_eval("g_mmheap")
         for node in mm_foreach(heap):
             if node["size"] & MM_ALLOC_BIT != 0:
-                allocnode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+                allocnode = gdb.Value(node).cast(lookup_type("char").pointer())
                 info.append(
                     {
                         "addr": int(allocnode),
@@ -863,7 +863,7 @@ class Memfrag(gdb.Command):
         heap = gdb.parse_and_eval("g_mmheap")
         for node in mm_foreach(heap):
             if node["size"] & MM_ALLOC_BIT == 0:
-                freenode = gdb.Value(node).cast(gdb.lookup_type("char").pointer())
+                freenode = gdb.Value(node).cast(lookup_type("char").pointer())
                 info.append(
                     {
                         "addr": int(freenode),
