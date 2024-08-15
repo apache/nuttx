@@ -43,6 +43,7 @@
 
 #define CONFIG_GICD_BASE           0x8000000
 #define CONFIG_GICR_BASE           0x8010000
+#define CONFIG_GICM_BASE           0x8020000
 
 #elif CONFIG_ARM64_GIC_VERSION == 3 || CONFIG_ARM64_GIC_VERSION == 4
 
