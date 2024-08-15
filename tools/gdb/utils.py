@@ -145,6 +145,16 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
     return value
 
 
+def import_check(module, name="", errmsg=""):
+    try:
+        module = __import__(module, fromlist=[name])
+    except ImportError:
+        gdb.write(errmsg if errmsg else f"Error to import {module}\n")
+        return None
+
+    return getattr(module, name) if name else module
+
+
 def hexdump(address, size):
     inf = gdb.inferiors()[0]
     mem = inf.read_memory(address, size)
