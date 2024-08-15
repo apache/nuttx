@@ -60,9 +60,11 @@ static char g_syslog_rpmsg_buf[4096];
 
 void arm_boot(void)
 {
+#ifdef CONFIG_ARCH_PERF_EVENTS
   /* Perf init */
 
   up_perf_init(0);
+#endif
 
   /* Set the page table for section */
 
