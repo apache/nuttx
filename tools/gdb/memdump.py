@@ -651,20 +651,26 @@ class Memleak(gdb.Command):
             regions.append({"start": start, "end": end})
 
         # Search global variables
-        sdata = int(gdb.parse_and_eval("(uintptr_t)&_sdata"))
-        ebss = int(gdb.parse_and_eval("(uintptr_t)&_ebss"))
-        global_size = (ebss - sdata) // longsize * longsize
-        gdb.write(f"Searching in global variables {hex(sdata)} ~ {hex(ebss)}\n")
-        global_mem = inf.read_memory(sdata, global_size)
-        i = 0
-        while i < global_size:
-            ptr = read_ulong(global_mem, i)
-            for region in regions:
-                if ptr >= region["start"] and ptr < region["end"]:
-                    yield ptr
-                    break
+        for objfile in gdb.objfiles():
+            gdb.write(f"Searching global symbol in: {objfile.filename}\n")
+            elf = self.elf.load_from_path(objfile.filename)
+            symtab = elf.get_section_by_name(".symtab")
+            for symbol in symtab.iter_symbols():
+                if symbol["st_info"]["type"] != "STT_OBJECT":
+                    continue
 
-            i = i + longsize
+                if symbol["st_size"] < longsize:
+                    continue
+
+                global_size = symbol["st_size"] // longsize * longsize
+                global_mem = inf.read_memory(symbol["st_value"], global_size)
+                while global_size:
+                    global_size = global_size - longsize
+                    ptr = read_ulong(global_mem, global_size)
+                    for region in regions:
+                        if ptr >= region["start"] and ptr < region["end"]:
+                            yield ptr
+                            break
 
         gdb.write("Searching in grey memory\n")
         for node in self.grey_list:
@@ -737,6 +743,12 @@ class Memleak(gdb.Command):
         return {"simple": args.simple, "detail": args.detail}
 
     def invoke(self, args, from_tty):
+        self.elf = utils.import_check(
+            "elftools.elf.elffile", "ELFFile", "Plase pip install pyelftools\n"
+        )
+        if not self.elf:
+            return
+
         if sizeof_size_t == 4:
             align = 11
         else:
