@@ -148,6 +148,16 @@ Getting Started
      -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.0 \
      -mon chardev=con,mode=readline -kernel ./nuttx
 
+  3.5 Single Core /w kernel mode (GICv3)
+   Configuring NuttX and compile:
+   $ ./tools/configure.sh -l qemu-armv8a:knsh
+   $ make
+   Running with qemu
+   $ qemu-system-aarch64 -semihosting -cpu cortex-a53 -nographic \
+     -machine virt,virtualization=on,gic-version=3 \
+     -net none -chardev stdio,id=con,mux=on -serial chardev:con \
+     -mon chardev=con,mode=readline -kernel ./nuttx
+
 Status
 ======
 
