@@ -186,15 +186,15 @@ static FAR const char *deser_mn(FAR const char * const in,
 
 int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
 {
-  int             ret            = OK;
-  mfs_t           i              = 0;
+  int             ret          = OK;
+  mfs_t           i            = 0;
   mfs_t           mblk1;
   mfs_t           mblk2;
   mfs_t           jrnl_blk_tmp;
-  bool            found          = false;
+  bool            found        = false;
   uint8_t         hash;
   struct mfs_mn_s mn;
-  const mfs_t     sz             = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
+  const mfs_t     sz           = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
   char            buftmp[4];
   char            buf[sz + 1];
 
@@ -265,14 +265,14 @@ errout:
 
 int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
 {
-  int              ret          = OK;
+  int              ret         = OK;
   mfs_t            pg;
   mfs_t            mblk1;
   mfs_t            mblk2;
   struct mfs_mn_s  mn;
-  const mfs_t      sz           = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
-  char             buf[sz + 1];
   struct timespec  ts;
+  const mfs_t      sz          = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
+  char             buf[sz + 1];
 
   clock_gettime(CLOCK_REALTIME, &ts);
 

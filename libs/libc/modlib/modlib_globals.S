@@ -16,7 +16,11 @@
 	.type	SYMBOL(\ep), "object"
 	.endm
 	.macro SIZE ep
+#  if defined(__ghs__)
+	.size	SYMBOL(ep), . - SYMBOL(ep)
+#  else
 	.size	SYMBOL(\ep), . - SYMBOL(\ep)
+#  endif
 	.endm
 #else
 #  define SYMBOL(s) _##s

@@ -691,3 +691,22 @@ at 13.56 MHz and ISO/IEC 14443 A/MIFARE and NTAG.
 
 .. figure:: mfrc522_image.jpg
    :align: center
+
+bmp280
+------
+
+Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) and enables BMP280 Digital Pressure Sensor.
+BMP280 has an I2C address that can be configure by SDO. Connecting SDO to GND results in slave
+address 0x76, connection it to VDD results in slave address 0x77. This can be configured by enabling BMP280_I2C_ADDR_76 or BMP280_I2C_ADDR_77. This configuration uses I2C1 and slave address 0x77.
+
+NSH commands::
+
+       NuttShell (NSH) NuttX-12.6.0-RC1
+       nsh> bmp280
+       Absolute pressure [hPa] = 911.400024
+       Temperature [C] = 26.110001
+       nsh> bmp280
+       Absolute pressure [hPa] = 932.650024
+       Temperature [C] = 24.490000
+       
+There is a known issue where every time the sensor is initialized, the first measurement is wrong, please check https://github.com/apache/nuttx/issues/12421 for the latest updates on this issue.

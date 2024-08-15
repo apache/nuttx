@@ -162,7 +162,7 @@ int arm_hardfault(int irq, void *context, void *arg)
 
   hfalert("PANIC!!! Hard Fault!:");
   hfalert("\tIRQ: %d regs: %p\n", irq, context);
-  hfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08"
+  hfalert("\tBASEPRI: %08" PRIx8 " PRIMASK: %08" PRIx8 " IPSR: %08"
           PRIx32 " CONTROL: %08" PRIx32 "\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
   hfalert("\tCFSR: %08" PRIx32 " HFSR: %08" PRIx32 " DFSR: %08"

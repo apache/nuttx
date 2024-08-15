@@ -120,25 +120,25 @@ static ssize_t mnemofs_write(FAR struct file *filep, FAR const char *buffer,
 static off_t   mnemofs_seek(FAR struct file *filep, off_t offset,
                             int whence);
 static int     mnemofs_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
+                             unsigned long arg);
 static int     mnemofs_truncate(FAR struct file *filep, off_t length);
 
 static int     mnemofs_sync(FAR struct file *filep);
 static int     mnemofs_dup(FAR const struct file *oldp,
-                          FAR struct file *newp);
+                           FAR struct file *newp);
 static int     mnemofs_fstat(FAR const struct file *filep,
-                            FAR struct stat *buf);
+                             FAR struct stat *buf);
 
 static int     mnemofs_opendir(FAR struct inode *mountpt,
-                              FAR const char *relpath,
-                              FAR struct fs_dirent_s **dir);
+                               FAR const char *relpath,
+                               FAR struct fs_dirent_s **dir);
 static int     mnemofs_closedir(FAR struct inode *mountpt,
                                 FAR struct fs_dirent_s *dir);
 static int     mnemofs_readdir(FAR struct inode *mountpt,
-                              FAR struct fs_dirent_s *dir,
-                              FAR struct dirent *entry);
+                               FAR struct fs_dirent_s *dir,
+                               FAR struct dirent *entry);
 static int     mnemofs_rewinddir(FAR struct inode *mountpt,
-                                FAR struct fs_dirent_s *dir);
+                                 FAR struct fs_dirent_s *dir);
 
 static int     mnemofs_bind(FAR struct inode *driver, FAR const void *data,
                             FAR void** handle);
@@ -151,9 +151,9 @@ static int     mnemofs_statfs(FAR struct inode *mountpt,
 static int     mnemofs_unlink(FAR struct inode *mountpt,
                               FAR const char *relpath);
 static int     mnemofs_mkdir(FAR struct inode *mountpt,
-                            FAR const char *relpath, mode_t mode);
+                             FAR const char *relpath, mode_t mode);
 static int     mnemofs_rmdir(FAR struct inode *mountpt,
-                            FAR const char *relpath);
+                             FAR const char *relpath);
 static int     mnemofs_rename(FAR struct inode *mountpt,
                               FAR const char *oldrelpath,
                               FAR const char *newrelpath);
@@ -250,11 +250,11 @@ const struct mountpt_operations g_mnemofs_operations =
 static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
                         int oflags, mode_t mode)
 {
-  int                     ret     = OK;
-  int                     flags;
-  struct mfs_pitr_s       pitr;
+  int                      ret    = OK;
+  int                      flags;
   FAR const char          *child  = NULL;
   FAR struct inode        *inode;
+  struct mfs_pitr_s        pitr;
   FAR struct mfs_sb_s     *sb;
   FAR struct mfs_ofd_s    *f;
   FAR struct mfs_ocom_s   *fcom;
@@ -298,7 +298,7 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
   /* Check creation flags. */
 
   flags = mfs_get_patharr(sb, relpath, &f->com->path, &f->com->depth);
-  if ((flags & MFS_NEXIST) != 0)
+  if ((flags & MFS_EXIST) == 0)
     {
       if ((flags & MFS_P_ISDIR) != 0)
         {
@@ -307,8 +307,10 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
               /* Add direntry to parent's directory file. */
 
               f->com->new_ent = true;
+
               mfs_pitr_init(sb, f->com->path, f->com->depth, &pitr, true);
               child = mfs_path2childname(relpath);
+              finfo("Child is: %s.", child);
               mfs_pitr_appendnew(sb, f->com->path, f->com->depth, &pitr,
                                 child, mode);
               mfs_pitr_free(&pitr);
@@ -347,7 +349,7 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
   /* TODO: Update mtime and atime. */
 
   mfs_pitr_init(sb, f->com->path, f->com->depth, &pitr, true);
-  mfs_pitr_readdirent(sb, &pitr, &dirent);
+  mfs_pitr_readdirent(sb, f->com->path, &pitr, &dirent);
 
   if (dirent != NULL)
     {
@@ -367,7 +369,7 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
 
   mfs_pitr_free(&pitr);
 
-  finfo("Direntry is read and processed.");
+  finfo("Direntry processing done.");
 
   /* Check Offset flags. */
 
@@ -378,8 +380,7 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
        * then it's truncated. Else, the truncate flag is ignored.
        */
 
-      ret = mfs_lru_del(sb, 0, f->com->sz, f->com->sz, f->com->path,
-                        f->com->depth);
+      ret = mfs_lru_del(sb, 0, f->com->sz, f->com->path, f->com->depth);
       if (predict_false(ret < 0))
         {
           finfo("Error while truncating file. Ret: %d.", ret);
@@ -392,8 +393,7 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
       f->com->off = f->com->sz;
     }
 
-  finfo("Offset flags are set.");
-
+  finfo("[TMP1] %p %p", &sb->of, &f->list);
   list_add_tail(&sb->of, &f->list);
   filep->f_priv = f;
 
@@ -446,7 +446,7 @@ errout:
 
 static int mnemofs_close(FAR struct file *filep)
 {
-  int                  ret    = OK;
+  int                   ret   = OK;
   FAR struct inode     *inode;
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
@@ -471,7 +471,7 @@ static int mnemofs_close(FAR struct file *filep)
 
   /* Flushing in-memory data to on-flash journal. */
 
-  ret   = mfs_lru_ctzflush(sb, f->com->path, f->com->depth, f->com->sz);
+  ret   = mfs_lru_ctzflush(sb, f->com->path, f->com->depth);
   if (predict_false(ret < 0))
     {
       finfo("Error while flushing file. Ret: %d.", ret);
@@ -480,17 +480,18 @@ static int mnemofs_close(FAR struct file *filep)
 
   f->com->refcount--;
 
-  if (predict_true(f->com->refcount != 0))
+  if (f->com->refcount == 0)
     {
       kmm_free(f->com->path);
       kmm_free(f->com);
-      kmm_free(f);
 
       finfo("Refcount is 0, open file structure freed.");
     }
 
   list_delete(&f->list);
+  kmm_free(f);
   filep->f_priv = NULL;
+
   finfo("File entry removed from the open files list.");
 
 errout_with_lock:
@@ -530,7 +531,7 @@ errout:
 static ssize_t mnemofs_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
-  int                  ret    = 0;
+  int                   ret   = 0;
   FAR struct inode     *inode;
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
@@ -643,8 +644,8 @@ static ssize_t mnemofs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Write data to CTZ at the current offset. */
 
-  ret = mfs_lru_wr(sb, f->com->off, buflen, f->com->sz, f->com->path,
-                  f->com->depth, buffer);
+  ret = mfs_lru_wr(sb, f->com->off, buflen, f->com->path, f->com->depth,
+                  buffer);
   if (ret < 0)
     {
       goto errout_with_lock;
@@ -693,8 +694,8 @@ errout:
 
 static off_t mnemofs_seek(FAR struct file *filep, off_t offset, int whence)
 {
-  int                  ret    = OK;
-  mfs_t                pos;
+  int                   ret   = OK;
+  mfs_t                 pos;
   FAR struct inode     *inode;
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
@@ -782,7 +783,7 @@ errout:
 
 static int mnemofs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  int                 ret     = OK;
+  int                  ret   = OK;
   FAR struct inode    *inode;
   FAR struct inode    *drv;
   FAR struct mfs_sb_s *sb;
@@ -844,7 +845,7 @@ errout:
 
 static int mnemofs_truncate(FAR struct file *filep, off_t length)
 {
-  int                  ret    = OK;
+  int                   ret   = OK;
   FAR struct inode     *inode;
   FAR struct mfs_sb_s  *sb;
   FAR struct mfs_ofd_s *f;
@@ -869,8 +870,8 @@ static int mnemofs_truncate(FAR struct file *filep, off_t length)
 
   if (length < f->com->sz)
     {
-      ret = mfs_lru_del(sb, length, f->com->sz - length, f->com->sz,
-                        f->com->path, f->com->depth);
+      ret = mfs_lru_del(sb, length, f->com->sz - length, f->com->path,
+                        f->com->depth);
       if (predict_false(ret < 0))
         {
           finfo("Error during truncate. Ret: %d.", ret);
@@ -932,7 +933,7 @@ static int mnemofs_sync(FAR struct file *filep)
   f     = filep->f_priv;
   DEBUGASSERT(f != NULL);
 
-  ret   = mfs_lru_ctzflush(sb, f->com->path, f->com->depth, f->com->sz);
+  ret   = mfs_lru_ctzflush(sb, f->com->path, f->com->depth);
 
   nxmutex_unlock(&MFS_LOCK(sb));
   finfo("Lock released.");
@@ -966,7 +967,7 @@ errout:
 
 static int mnemofs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
-  int                   ret    = OK;
+  int                    ret   = OK;
   FAR struct inode      *inode;
   FAR struct mfs_sb_s   *sb;
   FAR struct mfs_ofd_s  *of;
@@ -1055,8 +1056,8 @@ errout:
 
 static int mnemofs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
-  int                      ret     = OK;
-  struct mfs_pitr_s        pitr;
+  int                       ret    = OK;
+  struct mfs_pitr_s         pitr;
   FAR struct inode         *inode;
   FAR struct mfs_sb_s      *sb;
   FAR struct mfs_ofd_s     *f;
@@ -1081,9 +1082,10 @@ static int mnemofs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   DEBUGASSERT(f != NULL);
 
   mfs_pitr_init(sb, f->com->path, f->com->depth, &pitr, true);
-  mfs_pitr_adv_tochild(&pitr, f->com->path, f->com->depth);
-  mfs_pitr_readdirent(sb, &pitr, &dirent);
+  mfs_pitr_adv_tochild(&pitr, f->com->path);
+  mfs_pitr_readdirent(sb, f->com->path, &pitr, &dirent);
   mfs_pitr_free(&pitr);
+
   DEBUGASSERT(dirent != NULL);
 
   buf->st_mode    = dirent->mode;
@@ -1169,11 +1171,17 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
       goto errout_with_lock;
     }
 
+  ret = mfs_lru_updatedinfo(sb, path, depth);
+  if (predict_false(ret < 0))
+    {
+      goto errout_with_path;
+    }
+
   pitr     = kmm_zalloc(sizeof(*pitr));
   if (predict_false(pitr == NULL))
     {
       ret  = -ENOMEM;
-      goto errout_with_lock;
+      goto errout_with_path;
     }
 
   fsdirent = kmm_zalloc(sizeof(*fsdirent));
@@ -1183,7 +1191,12 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
       goto errout_with_pitr;
     }
 
-  mfs_pitr_init(sb, path, depth, pitr, false);
+  ret = mfs_pitr_init(sb, path, depth, pitr, false);
+  if (predict_false(ret < 0))
+    {
+      finfo("Failed PITR initialization.");
+      goto errout_with_fsdirent;
+    }
 
   fsdirent->idx   = 0;
   fsdirent->path  = path;
@@ -1199,8 +1212,14 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
   finfo("Lock released.");
   return ret;
 
+errout_with_fsdirent:
+  kmm_free(fsdirent);
+
 errout_with_pitr:
   kmm_free(pitr);
+
+errout_with_path:
+  mfs_free_patharr(path);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
@@ -1271,8 +1290,8 @@ static int mnemofs_readdir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir,
                           FAR struct dirent *entry)
 {
-  int ret = OK;
-  FAR struct mfs_sb_s *sb;
+  int                      ret      = OK;
+  FAR struct mfs_sb_s     *sb;
   FAR struct mfs_dirent_s *dirent;
   FAR struct mfs_fsdirent *fsdirent = (FAR struct mfs_fsdirent *) dir;
 
@@ -1311,13 +1330,19 @@ static int mnemofs_readdir(FAR struct inode *mountpt,
 
   /* Regular direntries from here. */
 
-  /* Here lies the `unlink` and `rmdir` bug, as sync can only update the
-   * current CTZ.
+  /* TODO: Need to think why *exactly* below line is needed. The LRU node
+   * seems to contain wrong size during opendir, but updating it here
+   * updates it to correct size, even though this updatedinfo is also
+   * called in opendir?
    */
 
-  /* mfs_pitr_sync(sb, fsdirent->pitr, fsdirent->path, fsdirent->depth); */
+  ret = mfs_lru_updatedinfo(sb, fsdirent->path, fsdirent->depth);
+  if (predict_false(ret < 0))
+    {
+      goto errout_with_lock;
+    }
 
-  mfs_pitr_readdirent(sb, fsdirent->pitr, &dirent);
+  ret = mfs_pitr_readdirent(sb, fsdirent->path, fsdirent->pitr, &dirent);
   if (predict_false(ret < 0))
     {
       goto errout_with_lock;
@@ -1333,10 +1358,13 @@ static int mnemofs_readdir(FAR struct inode *mountpt,
     }
 
   memset(entry->d_name, 0, NAME_MAX + 1);
-  memcpy(entry->d_name, dirent->name, NAME_MAX);
+  memcpy(entry->d_name, dirent->name, dirent->namelen);
   entry->d_type = (S_ISDIR(dirent->mode) ? DTYPE_DIRECTORY: DTYPE_FILE);
 
-  mfs_pitr_adv(sb, fsdirent->pitr);
+  finfo("Size of direntry %u, current off %u.", MFS_DIRENTSZ(dirent),
+        fsdirent->pitr->c_off);
+
+  mfs_pitr_adv_bydirent(fsdirent->pitr, dirent);
   mfs_free_dirent(dirent);
 
 errout_with_lock:
@@ -1370,7 +1398,7 @@ errout:
 static int mnemofs_rewinddir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
-  int ret = OK;
+  int                  ret      = OK;
   FAR struct mfs_sb_s *sb;
   struct mfs_fsdirent *fsdirent = (struct mfs_fsdirent *) dir;
 
@@ -1502,6 +1530,8 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
   sb->log_pg_sz     = log2(sb->pg_sz);
   sb->log_pg_in_blk = log2(sb->pg_in_blk);
   sb->log_n_blks    = log2(MFS_NBLKS(sb));
+
+  list_initialize(&sb->of);
 
   sb->rw_buf        = kmm_zalloc(MFS_PGSZ(sb));
   if (predict_false(sb->rw_buf == NULL))
@@ -1762,11 +1792,10 @@ errout:
 static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
                         mode_t mode)
 {
-  int                   ret    = OK;
-  int                   flags;
-  mfs_t                 depth;
-  FAR const char        *child;
-  struct mfs_pitr_s     pitr;
+  int                    ret   = OK;
+  int                    flags;
+  mfs_t                  depth;
+  struct mfs_pitr_s      pitr;
   FAR struct mfs_sb_s   *sb;
   FAR struct mfs_path_s *path;
 
@@ -1787,7 +1816,14 @@ static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   finfo("Lock acquired.");
 
   flags = mfs_get_patharr(sb, relpath, &path, &depth);
-  if ((flags & MFS_NEXIST) ==  0)
+  if ((flags & MFS_EXIST) != 0)
+    {
+      finfo("File exists.");
+
+      ret = -EEXIST;
+      goto errout_with_path;
+    }
+  else
     {
       if ((flags & MFS_P_EXIST) != 0)
         {
@@ -1800,29 +1836,25 @@ static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
           else
             {
               ret = -ENOTDIR;
-              goto errout_with_lock;
+              goto errout_with_path;
             }
         }
       else
         {
           ret = -ENOENT;
-          goto errout_with_lock;
+          goto errout_with_path;
         }
     }
-  else
-    {
-      ret = -EEXIST;
-      goto errout_with_lock;
-    }
 
+  memset(&path[depth - 1], 0, sizeof(struct mfs_path_s));
   mfs_pitr_init(sb, path, depth, &pitr, true);
 
-  child = relpath;
-  finfo("Mode %x", mode);
-  ret = mfs_pitr_appendnew(sb, path, depth, &pitr, child, mode);
+  /* The last incomplete direntry will be added by mfs_pitr_appendnew. */
+
+  ret = mfs_pitr_appendnew(sb, path, depth, &pitr, relpath, mode);
   if (predict_false(ret < 0))
     {
-      goto errout_with_pitr;
+      goto errout_with_path;
     }
 
   mfs_pitr_free(&pitr);
@@ -1837,10 +1869,11 @@ static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   finfo("Mnemofs mkdir exited with ret %d.", ret);
   return ret;
 
-errout_with_pitr:
+errout_with_path:
+  mfs_free_patharr(path);
+
   mfs_pitr_free(&pitr);
 
-errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
   finfo("Lock released.");
 
@@ -1869,10 +1902,10 @@ errout:
 
 static int mnemofs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
-  int                   ret    = OK;
-  int                   flags;
-  mfs_t                 depth;
-  struct mfs_pitr_s     pitr;
+  int                    ret   = OK;
+  int                    flags;
+  mfs_t                  depth;
+  struct mfs_pitr_s      pitr;
   FAR struct mfs_sb_s   *sb;
   FAR struct mfs_path_s *path;
 
@@ -1898,9 +1931,9 @@ static int mnemofs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
     }
 
   mfs_pitr_init(sb, path, depth, &pitr, true);
-  mfs_pitr_adv_tochild(&pitr, path, depth);
+  mfs_pitr_adv_tochild(&pitr, path);
 
-  if (!mfs_obj_isempty(sb, &pitr))
+  if (!mfs_obj_isempty(sb, path, &pitr))
     {
       ret = -ENOTEMPTY;
       goto errout_with_pitr;
@@ -1948,16 +1981,16 @@ static int mnemofs_rename(FAR struct inode *mountpt,
                           FAR const char *oldrelpath,
                           FAR const char *newrelpath)
 {
-  int                     ret      = OK;
-  int                     oflags;
-  int                     nflags;
-  bool                    nexists;
-  bool                    odir     = false;
-  bool                    ndir     = false;
-  mfs_t                   odepth;
-  mfs_t                   ndepth;
-  struct mfs_pitr_s       opitr;
-  struct mfs_pitr_s       npitr;
+  int                      ret     = OK;
+  int                      oflags;
+  int                      nflags;
+  bool                     nexists;
+  bool                     odir    = false;
+  bool                     ndir    = false;
+  mfs_t                    odepth;
+  mfs_t                    ndepth;
+  struct mfs_pitr_s        opitr;
+  struct mfs_pitr_s        npitr;
   FAR struct mfs_sb_s     *sb;
   FAR struct mfs_path_s   *opath;
   FAR struct mfs_path_s   *npath;
@@ -1978,7 +2011,7 @@ static int mnemofs_rename(FAR struct inode *mountpt,
   finfo("Lock acquired.");
 
   oflags = mfs_get_patharr(sb, oldrelpath, &opath, &odepth);
-  if ((oflags & MFS_NEXIST) != 0)
+  if ((oflags & MFS_EXIST) == 0)
     {
       ret = -ENOENT;
       goto errout_with_opath;
@@ -1991,9 +2024,9 @@ static int mnemofs_rename(FAR struct inode *mountpt,
       goto errout_with_npath;
     }
 
-  odir    = ((oflags & MFS_ISDIR)  != 0);
-  ndir    = ((nflags & MFS_ISDIR)  != 0);
-  nexists = ((nflags & MFS_NEXIST) == 0);
+  odir    = ((oflags & MFS_ISDIR) != 0);
+  ndir    = ((nflags & MFS_ISDIR) != 0);
+  nexists = ((nflags & MFS_EXIST) != 0);
 
   if (nexists && odir && !ndir)
     {
@@ -2016,11 +2049,11 @@ static int mnemofs_rename(FAR struct inode *mountpt,
 
   if (nexists)
     {
-      mfs_pitr_adv_tochild(&opitr, opath, odepth);
-      mfs_pitr_adv_tochild(&npitr, npath, ndepth);
+      mfs_pitr_adv_tochild(&opitr, opath);
+      mfs_pitr_adv_tochild(&npitr, npath);
 
-      mfs_pitr_readdirent(sb, &opitr, &odirent);
-      if (ndir && !mfs_obj_isempty(sb, &npitr))
+      mfs_pitr_readdirent(sb, opath, &opitr, &odirent);
+      if (ndir && !mfs_obj_isempty(sb, npath, &npitr))
         {
           ret = -ENOTEMPTY;
           goto errout_with_pitr;
@@ -2031,7 +2064,7 @@ static int mnemofs_rename(FAR struct inode *mountpt,
       mfs_pitr_rm(sb, npath, ndepth);
     }
 
-  mfs_pitr_adv_tochild(&npitr, npath, ndepth);
+  mfs_pitr_adv_tochild(&npitr, npath);
 
   mfs_pitr_appenddirent(sb, npath, ndepth, &npitr, odirent);
   mfs_pitr_rmdirent(sb, opath, odepth, &opitr, odirent);
@@ -2086,7 +2119,7 @@ static int mnemofs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct mfs_path_s   *path;
   FAR struct mfs_dirent_s *dirent   = NULL;
 
-  finfo("Mnemofs stat for path %s.", relpath);
+  finfo("Mnemofs stat for path \"%s\".", relpath);
 
   DEBUGASSERT(mountpt != NULL);
   sb  = mountpt->i_private;
@@ -2101,26 +2134,33 @@ static int mnemofs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   finfo("Lock acquired.");
 
   ret_flags = mfs_get_patharr(sb, relpath, &path, &depth);
-  if (ret_flags & MFS_NEXIST)
+  if ((ret_flags & MFS_EXIST) == 0)
     {
       ret = -ENOENT;
-      goto errout_with_lock;
+      goto errout_with_path;
     }
 
-  finfo("Got path array. Depth %u for path \"%s\"", depth, relpath);
+  finfo("Got path array. Depth %u for path \"%s\". Return flags %u.", depth,
+        relpath, ret_flags);
 
-  mfs_pitr_init(sb, path, depth, &pitr, true);
-  mfs_pitr_adv_tochild(&pitr, path, depth);
-
-  ret = mfs_pitr_readdirent(sb, &pitr, &dirent);
+  ret = mfs_lru_updatedinfo(sb, path, depth);
   if (predict_false(ret < 0))
     {
-      goto errout_with_lock;
+      goto errout_with_path;
+    }
+
+  mfs_pitr_init(sb, path, depth, &pitr, true);
+  mfs_pitr_adv_tochild(&pitr, path);
+
+  ret = mfs_pitr_readdirent(sb, path, &pitr, &dirent);
+  if (predict_false(ret < 0))
+    {
+      goto errout_with_path;
     }
   else if (dirent == NULL)
     {
       ret = -ENOENT;
-      goto errout_with_lock;
+      goto errout_with_path;
     }
 
   finfo("Read stats.");
@@ -2136,13 +2176,14 @@ static int mnemofs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   mfs_free_dirent(dirent);
   mfs_pitr_free(&pitr);
+
+errout_with_path:
   mfs_free_patharr(path);
 
-errout_with_lock:
   finfo("Lock released.");
   nxmutex_unlock(&MFS_LOCK(sb));
 
 errout:
-  finfo("ret %d", ret);
+  finfo("Ret %d", ret);
   return ret;
 }

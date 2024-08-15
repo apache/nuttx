@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/supervisor/riscv_sbi.c
+ * arch/risc-v/src/common/riscv_sbi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

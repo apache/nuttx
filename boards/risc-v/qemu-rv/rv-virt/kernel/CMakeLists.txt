@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/risc-v/src/common/supervisor/CMakeLists.txt
+# boards/risc-v/qemu-rv/rv-virt/kernel/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,11 +18,4 @@
 #
 # ##############################################################################
 
-if(CONFIG_ARCH_USE_S_MODE)
-  set(SRCS)
-
-  list(APPEND SRCS riscv_syscall.S riscv_perform_syscall.c riscv_sbi.c)
-
-  target_sources(arch PRIVATE ${SRCS})
-
-endif()
+target_sources(nuttx_user PRIVATE rv_virt_userspace.c)

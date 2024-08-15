@@ -31,15 +31,15 @@
 
 /* ARMv7-A memory barriers */
 
-#define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
 #define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
 #define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
+#define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
 #define arm_nop()  __asm__ __volatile__ ("nop\n")
 #define arm_sev()  __asm__ __volatile__ ("sev\n")
 
 #define ARM_DSB()  arm_dsb(15)
-#define ARM_ISB()  arm_isb(15)
 #define ARM_DMB()  arm_dmb(15)
+#define ARM_ISB()  arm_isb()
 #define ARM_NOP()  arm_nop()
 #define ARM_SEV()  arm_sev()
 

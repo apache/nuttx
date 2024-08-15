@@ -24,6 +24,37 @@ config I2C_SLAVE
 	bool "I2C Slave"
 	default n
 
+menu "I2C Slave Support"
+
+config I2C_SLAVE_DRIVER
+	bool "I2C Slave driver"
+	default n
+	---help---
+		Enable I2C Slave driver
+
+config I2C_SLAVE_READBUFSIZE
+	int "I2C Slave driver read buffer size"
+	default 32
+	depends on I2C_SLAVE_DRIVER
+	---help---
+		I2C Slave read buffer size
+
+config I2C_SLAVE_WRITEBUFSIZE
+	int "I2C Slave driver write buffer size"
+	default 32
+	depends on I2C_SLAVE_DRIVER
+	---help---
+		I2C Slave write buffer size
+
+config I2C_SLAVE_NPOLLWAITERS
+	int "Number of i2c slave poll waiters"
+	default 1
+	depends on I2C_SLAVE_DRIVER
+	---help---
+		Number of waiters to i2c slave poll
+
+endmenu # I2C Slave Support
+
 config I2C_POLLED
 	bool "Polled I2C (no interrupts)"
 	default n

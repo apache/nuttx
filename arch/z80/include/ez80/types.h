@@ -90,6 +90,9 @@ typedef __WCHAR_TYPE__     _wchar_t;
 typedef int                _wchar_t;
 #endif
 
+typedef int                _wint_t;
+typedef int                _wctype_t;
+
 /* A pointer is 2 or 3 bytes, depending upon if the ez80 is in z80
  * compatibility mode or not
  *

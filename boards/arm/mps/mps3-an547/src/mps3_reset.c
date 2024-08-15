@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/misc/coredump.h
+ * boards/arm/mps/mps3-an547/src/mps3_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,41 +18,45 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_MISC_COREDUMP_H
-#define __SCHED_MISC_COREDUMP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <unistd.h>
+#include <nuttx/config.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+
+#ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: coredump_initialize
+ * Name: board_reset
  *
  * Description:
- *   Initialize the coredump facility.  Called once and only from
- *   nx_start_application.
- *
- ****************************************************************************/
-
-int coredump_initialize(void);
-
-/****************************************************************************
- * Name: coredump_dump
- *
- * Description:
- *   Do coredump of the task specified by pid.
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
  *
  * Input Parameters:
- *   pid - The task/thread ID of the thread to dump
+ *   status - Status information provided with the reset event.  This
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
+ *
+ * Returned Value:
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value int this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-void coredump_dump(pid_t pid);
+int board_reset(int status)
+{
+  up_systemreset();
+  return 0;
+}
 
-#endif /* __SCHED_MISC_COREDUMP_H */
+#endif /* CONFIG_BOARDCTL_RESET */

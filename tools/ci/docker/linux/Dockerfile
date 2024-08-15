@@ -66,7 +66,8 @@ ENV RUSTUP_HOME=$RUST_HOME/rustup
 RUN mkdir -p $CARGO_HOME \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
   && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
-  && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+  && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi \
+  && $CARGO_HOME/bin/rustup target add riscv64gc-unknown-none-elf
 
 RUN mkdir /tools/gn -p \
   && cd /tools/gn \

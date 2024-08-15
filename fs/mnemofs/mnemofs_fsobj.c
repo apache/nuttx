@@ -63,6 +63,7 @@
  ****************************************************************************/
 
 #include <nuttx/kmalloc.h>
+#include <sys/param.h>
 #include <sys/stat.h>
 
 #include "mnemofs.h"
@@ -81,14 +82,26 @@
 
 static mfs_t      nobjs_in_path(FAR const char * relpath);
 static const char *next_child(FAR const char *relpath);
+static const char *last_child(FAR const char *relpath);
 static FAR char   *mfs_ser_dirent(FAR const struct mfs_dirent_s * const x,
                                   FAR char * const out);
 static FAR const char *mfs_deser_dirent(FAR const char * const in,
                                         FAR struct mfs_dirent_s * const x);
 
+static int search_ctz_by_name(FAR const struct mfs_sb_s * const sb,
+                              FAR struct mfs_path_s * const path,
+                              const mfs_t depth, FAR const char * const name,
+                              const mfs_t namelen, FAR mfs_t *off,
+                              FAR struct mfs_dirent_s **dirent);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+const struct mfs_path_s empty_fsobj =
+{
+  0
+};
 
 /****************************************************************************
  * Public Data
@@ -117,6 +130,14 @@ static mfs_t nobjs_in_path(FAR const char *relpath)
 {
   mfs_t count;
 
+  /* If mount point is "/hi", then operations on "/hi/bye" and "/hi/hello/a"
+   * give respective relpaths as "bye" and "hello/a". Since mnemofs counts
+   * the root as 1 FS object, these respectively contain 2 and 3 FS objects
+   * in the path. The last FS object might be a file or a directory, but
+   * everything else is a directory. The number of FS objects in the path
+   * is the depth of the FS object the path refers to.
+   */
+
   if (*relpath == 0)
     {
       return 1;
@@ -124,7 +145,7 @@ static mfs_t nobjs_in_path(FAR const char *relpath)
 
   count = 2;
 
-  while (*relpath == 0)
+  while (*relpath != 0)
     {
       if (*relpath == '/')
         {
@@ -138,7 +159,7 @@ static mfs_t nobjs_in_path(FAR const char *relpath)
 }
 
 /****************************************************************************
- * Name: nobjs_in_path
+ * Name: next_child
  *
  * Description:
  *   Give the pointer to next child that appears in the path.
@@ -164,7 +185,38 @@ static const char *next_child(FAR const char *relpath)
       relpath++;
     }
 
-  return NULL;
+  return relpath;
+}
+
+/****************************************************************************
+ * Name: next_child
+ *
+ * Description:
+ *   Give the pointer to next child that appears in the path.
+ *
+ * Input Parameters:
+ *   relpath   - Relative Path.
+ *
+ * Returned Value:
+ *   The pointer to the next child. This is not allocated, but points to the
+ *   inside relpath itself.
+ *
+ ****************************************************************************/
+
+static const char *last_child(FAR const char *relpath)
+{
+  const mfs_t len = strlen(relpath);
+  mfs_t i;
+
+  for (i = len - 1; i > 0; i--)
+    {
+      if (relpath[i - 1] == '/')
+        {
+          return relpath + i;
+        }
+    }
+
+  return relpath;
 }
 
 /****************************************************************************
@@ -187,9 +239,9 @@ static FAR char *mfs_ser_dirent(FAR const struct mfs_dirent_s * const x,
 {
   FAR char *o = out;
 
-  o = mfs_ser_8(x->name_hash, o);
+  o = mfs_ser_16(x->name_hash, o);
+  o = mfs_ser_16(x->mode, o);
   o = mfs_ser_mfs(x->sz, o);
-  o = mfs_ser_mfs((mfs_t) x->mode, o);
   o = mfs_ser_timespec(&x->st_atim, o);
   o = mfs_ser_timespec(&x->st_mtim, o);
   o = mfs_ser_timespec(&x->st_ctim, o);
@@ -220,9 +272,9 @@ static FAR const char *mfs_deser_dirent(FAR const char * const in,
 {
   FAR const char *i = in;
 
-  i = mfs_deser_8(i, &x->name_hash);
+  i = mfs_deser_16(i, &x->name_hash);
+  i = mfs_deser_16(i, &x->mode);
   i = mfs_deser_mfs(i, &x->sz);
-  i = mfs_deser_mfs(i, (mfs_t *) &x->mode);
   i = mfs_deser_timespec(i, &x->st_atim);
   i = mfs_deser_timespec(i, &x->st_mtim);
   i = mfs_deser_timespec(i, &x->st_ctim);
@@ -263,8 +315,7 @@ mfs_t mfs_get_fsz(FAR struct mfs_sb_s * const sb,
     }
   else if (depth == 1)
     {
-      sz = MFS_MN(sb).root_sz;
-      mfs_lru_updatedsz(sb, path, depth, &sz);
+      sz = MFS_MN(sb).root_sz; /* Updated size. */
 
 /* Journal updated to the root creates a new master node entry. TODO
  * this and moving of the journal.
@@ -277,353 +328,17 @@ mfs_t mfs_get_fsz(FAR struct mfs_sb_s * const sb,
   return path[depth - 1].sz;
 }
 
-int mfs_get_patharr(FAR struct mfs_sb_s *const sb,
-                    FAR const char *relpath, FAR struct mfs_path_s **path,
-                    FAR mfs_t *depth)
-{
-  int                     ret;
-  bool                    found;
-  bool                    isfile;
-  mfs_t                   sz;
-  mfs_t                   idx;
-  uint8_t                 hash;
-  const mfs_t             len     = nobjs_in_path(relpath);
-  FAR const char          *next;
-  struct mfs_pitr_s       pitr;
-  FAR struct mfs_dirent_s *dirent;
-
-  ret     = 0;
-  idx     = 0;
-  isfile  = false;
-  found   = true;
-
-  *path = kmm_zalloc(len * sizeof(struct mfs_ctz_s));
-  if (predict_false(*path == NULL))
-    {
-      return -ENOMEM;
-    }
-
-  *depth           = len;
-  (*path)[idx].ctz = MFS_MN(sb).root_ctz;
-  (*path)[idx].off = 0;
-  (*path)[idx].sz  = mfs_get_fsz(sb, *path, 1);
-
-  finfo("Path \"%s\" depth %u.", relpath, len);
-
-  if (len == 1)
-    {
-      ret |= MFS_P_EXIST | MFS_P_ISDIR | MFS_ISDIR;
-      goto errout;
-    }
-  else if (len == 2)
-    {
-      ret |= MFS_P_EXIST | MFS_P_ISDIR;
-    }
-
-  for (idx = 1; idx < len; idx++)
-    {
-      mfs_pitr_init(sb, *path, idx - 1, &pitr, false);
-
-      if (predict_false(idx == 1))
-        {
-          next = relpath;
-        }
-      else
-        {
-          next  = next_child(relpath);
-        }
-
-      sz    = next - relpath;
-      hash  = mfs_arrhash(relpath, sz);
-
-      for (; ; )
-        {
-          mfs_pitr_readdirent(sb, &pitr, &dirent);
-          if (predict_false(dirent == NULL))
-            {
-              found = false;
-              ret |= MFS_NEXIST;
-              break;
-            }
-
-          if (dirent->name_hash == hash &&
-              !strncmp(dirent->name, relpath, sz))
-            {
-              (*path)[idx - 1].ctz = dirent->ctz;
-              (*path)[idx - 1].off = pitr.c_off;
-              (*path)[idx - 1].sz  = dirent->sz;
-
-              mfs_free_dirent(dirent);
-
-              if (len >= 2 && idx == len - 2)
-                {
-                  ret |= MFS_P_EXIST;
-                  ret |= (S_ISDIR(dirent->mode) ? MFS_P_ISDIR :
-                                                (MFS_FINPATH | MFS_NEXIST));
-                }
-              else if (idx == len - 1)
-                {
-                  ret |= (S_ISDIR(dirent->mode) ? MFS_ISDIR : MFS_ISFILE);
-                }
-              else
-                {
-                  ret |= (S_ISDIR(dirent->mode) ? 0 :
-                                                (MFS_FINPATH | MFS_NEXIST));
-                }
-
-              break;
-            }
-
-          if (!S_ISDIR(dirent->mode))
-            {
-              isfile = true;
-            }
-
-          mfs_pitr_adv_dirent(&pitr, dirent);
-
-          mfs_free_dirent(dirent);
-
-          if (isfile)
-            {
-              /* At max, only the last element is allowed to be a file. */
-
-              break;
-            }
-        }
-
-      mfs_pitr_free(&pitr);
-
-      if (!found)
-        {
-          break;
-        }
-
-      relpath = next;
-      finfo("Next path \"%s\"", relpath);
-    }
-
-errout:
-  finfo("Path array for \"%s\", returned flags: %u.", relpath, ret);
-  return ret;
-}
-
-void mfs_free_patharr(FAR struct mfs_path_s *path)
-{
-  kmm_free(path);
-}
-
 bool mfs_obj_isempty(FAR struct mfs_sb_s * const sb,
+                     FAR struct mfs_path_s *path,
                      FAR struct mfs_pitr_s * const pitr)
 {
+  bool                     ret;
   FAR struct mfs_dirent_s *dirent = NULL;
-  bool ret;
 
-  mfs_pitr_readdirent(sb, pitr, &dirent);
+  mfs_pitr_readdirent(sb, path, pitr, &dirent);
   ret = (dirent->sz == 0);
   mfs_free_dirent(dirent);
 
-  return ret;
-}
-
-void mfs_pitr_init(FAR struct mfs_sb_s * const sb,
-                   FAR const struct mfs_path_s * const path,
-                   const mfs_t depth, FAR struct mfs_pitr_s *pitr,
-                   bool child)
-{
-  const uint8_t diff = child ? 1 : 0;
-  mfs_t p_depth;
-
-  if (predict_false(depth < diff))
-    {
-      return;
-    }
-
-  p_depth = depth - diff;
-
-  if (p_depth == 0)
-    {
-      /* Master Node */
-
-      pitr->sz = 0;
-      memset(&pitr->p, 0, sizeof(pitr->p));
-    }
-  else
-    {
-      pitr->p.ctz = path[p_depth - 1].ctz;
-      pitr->sz    = path[p_depth - 1].sz;
-    }
-
-  pitr->depth = p_depth;
-  pitr->c_off  = 0;
-
-  finfo("Pitr initialized for parent CTZ at (%u, %u) at"
-        " depth %u for file size %u.",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->depth, pitr->sz);
-}
-
-void mfs_pitr_free(FAR struct mfs_pitr_s * const pitr)
-{
-  finfo("Pitr for CTZ (%u, %u) at depth %u freed.",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->depth);
-
-  memset(pitr, 0, sizeof(*pitr));
-}
-
-void mfs_pitr_adv(FAR struct mfs_sb_s * const sb,
-                  FAR struct mfs_pitr_s * const pitr)
-{
-  FAR struct mfs_dirent_s *dirent;
-
-  mfs_pitr_readdirent(sb, pitr, &dirent);
-  mfs_pitr_adv_dirent(pitr, dirent);
-  mfs_free_dirent(dirent);
-
-  finfo("Pitr for CTZ (%u, %u) advanced to offset %u.",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->c_off);
-}
-
-void mfs_pitr_adv_dirent(FAR struct mfs_pitr_s * const pitr,
-                         FAR const struct mfs_dirent_s * const dirent)
-{
-  pitr->c_off += MFS_DIRENTSZ(dirent);
-
-  finfo("Pitr for CTZ (%u, %u) advanced to offset %u using dirent.",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->c_off);
-}
-
-void mfs_pitr_adv_off(FAR struct mfs_pitr_s * const pitr,
-                      const mfs_t off)
-{
-  pitr->c_off += off;
-
-  finfo("Pitr for CTZ (%u, %u) advanced to offset %u by offset %u.",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->c_off, off);
-}
-
-void mfs_pitr_adv_tochild(FAR struct mfs_pitr_s * const pitr,
-                          FAR const struct mfs_path_s * const path,
-                          const mfs_t depth)
-{
-  if (pitr->depth == 0)
-    {
-      return;
-    }
-
-  pitr->c_off = path[depth - 1].off;
-
-  finfo("Pitr for CTZ (%u, %u) at depth %u advanced to offset %u.",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, depth, path[depth - 1].off);
-}
-
-void mfs_pitr_reset(FAR struct mfs_pitr_s * const pitr)
-{
-  pitr->c_off = 0;
-
-  finfo("Pitr for CTZ (%u, %u) reset.",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
-}
-
-void mfs_pitr_sync(FAR struct mfs_sb_s * const sb,
-                   FAR struct mfs_pitr_s * const pitr,
-                   FAR const struct mfs_path_s * const path,
-                   const mfs_t depth)
-{
-  finfo("Pitr for CTZ (%u, %u) syncing...",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
-
-  /* TODO: mfs_jrnl_updatectz(sb, &pitr->p.ctz, pitr->depth); */
-
-  pitr->sz = mfs_get_fsz(sb, path, depth - 1);
-
-  DEBUGASSERT(depth == pitr->depth);
-
-  finfo("New location is (%u, %u).",
-        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
-}
-
-int mfs_pitr_readdirent(FAR struct mfs_sb_s * const sb,
-                        FAR struct mfs_pitr_s * const pitr,
-                        FAR struct mfs_dirent_s **dirent)
-{
-  int                   ret               = OK;
-  mfs_t                 sz                = 0;
-  const mfs_t           len               = sizeof(struct mfs_dirent_s)
-                                            + NAME_MAX + 1;
-  char                  dirent_data[len];
-  struct mfs_dirent_s   *dirent_rd        = NULL;
-
-  /* No harm in reading more. The namelen will stop all the included
-   * unnecessary characters during deserialization, and if there are none,
-   * the rest will be just empty.
-   */
-
-  memset(dirent_data, 0, len);
-
-  *dirent = NULL;
-
-  dirent_rd = kmm_zalloc(len);
-  if (predict_false(dirent_rd == NULL))
-    {
-      goto errout;
-    }
-
-  if (pitr->depth == 0)
-    {
-      dirent_rd->ctz       = MFS_MN(sb).root_ctz;
-      dirent_rd->mode      = MFS_MN(sb).root_mode;
-      dirent_rd->st_atim   = MFS_MN(sb).root_st_atim;
-      dirent_rd->st_ctim   = MFS_MN(sb).root_st_ctim;
-      dirent_rd->st_mtim   = MFS_MN(sb).root_st_mtim;
-      dirent_rd->mode      = MFS_MN(sb).root_mode;
-      dirent_rd->sz        = MFS_MN(sb).root_sz;
-      dirent_rd->namelen   = 1;
-      dirent_rd->name_hash = 0;
-
-      memcpy(dirent_rd->name, "", 2);
-    }
-  else
-    {
-      mfs_lru_rdfromoff(sb, pitr->c_off, &pitr->p, pitr->depth,
-                        dirent_data, len);
-      mfs_deser_dirent(dirent_data, dirent_rd);
-
-      finfo("Got direntry with name %s", dirent_rd->name);
-    }
-
-  sz = MFS_DIRENTSZ(dirent_rd);
-  if (dirent_rd->namelen == 0)
-    {
-      /* Not found direntry. */
-
-      goto errout_with_dirent_rd;
-    }
-
-  *dirent = kmm_zalloc(sz);
-  if (predict_false(*dirent == NULL))
-    {
-      ret = -ENOMEM;
-      goto errout_with_dirent_rd;
-    }
-
-  memcpy(*dirent, dirent_rd, sz);
-
-errout_with_dirent_rd:
-  kmm_free(dirent_rd);
-
-  if (ret < 0)
-    {
-      finfo("Direntry could not be allocated.");
-    }
-  else if (*dirent == NULL)
-    {
-      finfo("No direntry found.");
-    }
-  else
-    {
-      finfo("Reading direntry done for %s.", (*dirent)->name);
-    }
-
-errout:
   return ret;
 }
 
@@ -652,9 +367,7 @@ bool mfs_searchfopen(FAR const struct mfs_sb_s * const sb,
        * open.
        */
 
-      if (ofd->com->path[depth - 1].off       == path[depth - 1].off &&
-          ofd->com->path[depth - 1].ctz.pg_e  == path[depth - 1].ctz.pg_e &&
-          ofd->com->path[depth - 1].ctz.idx_e == path[depth - 1].ctz.idx_e)
+      if (mfs_path_eq(&ofd->com->path[depth - 1], &path[depth - 1]))
         {
           return true;
         }
@@ -663,106 +376,21 @@ bool mfs_searchfopen(FAR const struct mfs_sb_s * const sb,
   return false;
 }
 
-int mfs_pitr_appendnew(FAR struct mfs_sb_s * const sb,
-                       FAR struct mfs_path_s * const path,
-                       const mfs_t depth,
-                       FAR const struct mfs_pitr_s * const pitr,
-                       FAR const char * const child_name,
-                       const mode_t mode)
-{
-  int                 ret     = OK;
-  mfs_t               len;
-  mfs_t               pg;
-  struct mfs_dirent_s *dirent = NULL;
-  struct timespec     ts;
-
-  len    = strlen(child_name);
-
-  dirent = kmm_zalloc(sizeof(*dirent) + len);
-  if (predict_false(dirent == NULL))
-    {
-      return -ENOMEM;
-    }
-
-  clock_gettime(CLOCK_REALTIME, &ts);
-
-  /* TODO: Confirm if creation for directory in VFS gives true for
-   * S_ISDIR().
-   */
-
-  pg     = mfs_ba_getpg(sb);
-  if (predict_false(pg == 0))
-    {
-      return -ENOSPC;
-    }
-
-  dirent->sz        = 0;
-  dirent->mode      = mode;
-  dirent->ctz.pg_e  = pg;
-  dirent->ctz.idx_e = 0;
-  dirent->st_atim   = ts;
-  dirent->st_mtim   = ts;
-  dirent->st_ctim   = ts;
-  dirent->namelen   = len;
-  strncpy(dirent->name, child_name, len);
-
-  ret    = mfs_pitr_appenddirent(sb, path, depth, pitr, dirent);
-  finfo("New direntry %p with name \"%s\" appended to CTZ (%u, %u) "
-        "at offset %u depth %u.",
-        dirent, dirent->name, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e,
-        pitr->c_off, pitr->depth);
-
-  mfs_free_dirent(dirent);
-
-  return ret;
-}
-
-int mfs_pitr_appenddirent(FAR struct mfs_sb_s * const sb,
-                          FAR struct mfs_path_s * const path,
-                          const mfs_t depth,
-                          FAR const struct mfs_pitr_s * const pitr,
-                          FAR const struct mfs_dirent_s * const dirent)
-{
-  int                     ret               = OK;
-  const mfs_t             len               = MFS_DIRENTSZ(dirent);
-  char                    dirent_data[len];
-  struct mfs_pitr_s       p_pitr;
-  FAR struct mfs_dirent_s *p_dirent         = NULL;
-
-  memset(dirent_data, 0, len);
-  mfs_ser_dirent(dirent, dirent_data);
-
-  mfs_pitr_init(sb, path, depth - 1, &p_pitr, true);
-  mfs_pitr_adv_tochild(&p_pitr, path, depth - 1);
-  mfs_pitr_readdirent(sb, &p_pitr, &p_dirent);
-
-  ret = mfs_lru_wr(sb, p_dirent->sz, len, p_dirent->sz, path, depth - 1,
-                  dirent_data);
-
-  mfs_free_dirent(p_dirent);
-  mfs_pitr_free(&p_pitr);
-
-  finfo("Appended direntry for \"%s\" at depth %u.", dirent->name, depth);
-
-  return ret;
-}
-
 int mfs_pitr_rmdirent(FAR struct mfs_sb_s * const sb,
                       FAR struct mfs_path_s * const path,
                       const mfs_t depth,
                       FAR struct mfs_pitr_s * const pitr,
                       FAR const struct mfs_dirent_s * const dirent)
 {
+  int                      ret      = OK;
+  struct mfs_pitr_s        p_pitr;
   FAR struct mfs_dirent_s *p_dirent = NULL;
-  struct mfs_pitr_s p_pitr;
-  int ret = OK;
 
   mfs_pitr_init(sb, path, depth - 1, &p_pitr, true);
-  mfs_pitr_adv_tochild(&p_pitr, path, depth - 1);
-  mfs_pitr_readdirent(sb, &p_pitr, &p_dirent);
+  mfs_pitr_adv_tochild(&p_pitr, path);
+  mfs_pitr_readdirent(sb, path, &p_pitr, &p_dirent);
 
-  ret = mfs_lru_del(sb, pitr->c_off, MFS_DIRENTSZ(dirent), p_dirent->sz,
-                    path, depth);
+  ret = mfs_lru_del(sb, pitr->c_off, MFS_DIRENTSZ(dirent), path, depth);
 
   mfs_free_dirent(p_dirent);
   mfs_pitr_free(&p_pitr);
@@ -774,15 +402,543 @@ int mfs_pitr_rm(FAR struct mfs_sb_s * const sb,
                 FAR struct mfs_path_s * const path,
                 const mfs_t depth)
 {
-  int                     ret     = OK;
-  struct mfs_pitr_s       pitr;
+  int                      ret    = OK;
+  struct mfs_pitr_s        pitr;
   FAR struct mfs_dirent_s *dirent = NULL;
 
   mfs_pitr_init(sb, path, depth, &pitr, true);
-  mfs_pitr_readdirent(sb, &pitr, &dirent);
+  mfs_pitr_readdirent(sb, path, &pitr, &dirent);
   ret = mfs_pitr_rmdirent(sb, path, depth, &pitr, dirent);
   mfs_free_dirent(dirent);
   mfs_pitr_free(&pitr);
 
+  return ret;
+}
+
+int mfs_pitr_init(FAR const struct mfs_sb_s * const sb,
+                  FAR const struct mfs_path_s * const path,
+                  const mfs_t depth, FAR struct mfs_pitr_s * const pitr,
+                  bool child)
+{
+  /* Ensure updated CTZ location from the journal before this. */
+
+  int         ret     = OK;
+  const int   diff    = child ? 1 : 0;
+  const mfs_t p_depth = depth - diff;
+
+  if (predict_false(depth < diff))
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  pitr->c_off = 0;
+  pitr->depth = p_depth;
+
+  if (predict_true(p_depth != 0))
+    {
+      pitr->p = path[p_depth - 1];
+    }
+  else
+    {
+      /* 0 or gabage value is fine for master node, not required. */
+
+      pitr->p.ctz.idx_e = 0;
+      pitr->p.ctz.pg_e  = 0;
+      pitr->p.off       = 0;
+      pitr->p.sz        = 1; /* For 1 traversal to get root. */
+    }
+
+  finfo("Pitr initialized at depth %u, with CTZ (%u, %u) and size %u.",
+        p_depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->p.sz);
+
+errout:
+  return ret;
+}
+
+void mfs_pitr_free(FAR const struct mfs_pitr_s * const pitr)
+{
+  finfo("Pitr at depth %u with CTZ (%u, %u) freed.",
+        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
+}
+
+void mfs_pitr_adv_off(FAR struct mfs_pitr_s * const pitr,
+                      const mfs_t off)
+{
+  pitr->c_off += off;
+
+  finfo("Pitr at depth %u with CTZ (%u, %u) advanced by %u to %u offset.",
+        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, off, pitr->c_off);
+}
+
+void mfs_pitr_adv_bydirent(FAR struct mfs_pitr_s * const pitr,
+                           FAR const struct mfs_dirent_s * const dirent)
+{
+  mfs_pitr_adv_off(pitr, MFS_DIRENTSZ(dirent));
+
+  finfo("Pitr at depth %u with CTZ (%u, %u) advanced by %u to %u offset.",
+        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e,
+        MFS_DIRENTSZ(dirent), pitr->c_off);
+}
+
+void mfs_pitr_adv_tochild(FAR struct mfs_pitr_s * const pitr,
+                          FAR const struct mfs_path_s * const path)
+{
+  /* (pitr->depth + 1) - 1 is the child's index. */
+
+  pitr->c_off = path[pitr->depth].off;
+
+  finfo("Pitr at depth %u with CTZ (%u, %u) advanced to %u offset.",
+        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->c_off);
+}
+
+int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
+                        FAR struct mfs_path_s *path,
+                        FAR struct mfs_pitr_s * const pitr,
+                        FAR struct mfs_dirent_s **dirent)
+{
+  int                      ret      = OK;
+  mfs_t                    sz;
+  const mfs_t              len      = sizeof(struct mfs_dirent_s) \
+                                      + NAME_MAX + 1;
+  char                     rd[len];
+  FAR struct mfs_dirent_s *d        = NULL;
+  FAR struct mfs_dirent_s *tmp      = NULL;
+
+  if (dirent == NULL)
+    {
+      return ret;
+    }
+
+  *dirent = NULL;
+  memset(rd, 0, len);
+
+  d = kmm_zalloc(len);
+  if (predict_false(d == NULL))
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+  else if (pitr->c_off >= pitr->p.sz)
+    {
+      goto errout_with_d;
+    }
+  else if (pitr->depth == 0)
+    {
+      d->name[0]   = 0;
+      d->namelen   = 0;
+      d->ctz       = MFS_MN(sb).root_ctz;
+      d->mode      = MFS_MN(sb).root_mode;
+      d->name_hash = mfs_hash(d->name, d->namelen);
+      d->st_atim   = MFS_MN(sb).root_st_atim;
+      d->st_ctim   = MFS_MN(sb).root_st_ctim;
+      d->st_mtim   = MFS_MN(sb).root_st_mtim;
+      d->sz        = MFS_MN(sb).root_sz;
+
+      pitr->c_off  = 1; /* To prevent infinite loop. */
+    }
+  else
+    {
+      ret = mfs_lru_rdfromoff(sb, pitr->c_off, path, pitr->depth, rd, len);
+      if (predict_false(ret < 0))
+        {
+          goto errout_with_d;
+        }
+
+      mfs_deser_dirent(rd, d);
+    }
+
+  sz  = MFS_DIRENTSZ(d);
+  tmp = kmm_realloc(d, sz);
+  if (predict_true(tmp != NULL))
+    {
+      d = tmp;
+    }
+
+  *dirent = d;
+  DEBUGASSERT(pitr->depth == 0 || strcmp(d->name, ""));
+  finfo("Read direntry at %u offset, %u depth for CTZ (%u, %u). " \
+        "Direntry name: \"%s\" with name length %u.",
+        pitr->c_off, pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e,
+        d->name, d->namelen);
+
+  return ret;
+
+errout_with_d:
+  kmm_free(d);
+
+  if (ret < 0)
+    {
+      finfo("Direntry could not be allocated.");
+    }
+  else if (*dirent == NULL)
+    {
+      finfo("No direntry found.");
+    }
+
+errout:
+  return ret;
+}
+
+int mfs_pitr_adv(FAR struct mfs_sb_s * const sb,
+                 FAR struct mfs_path_s *path,
+                 FAR struct mfs_pitr_s * const pitr)
+{
+  int ret = OK;
+  FAR struct mfs_dirent_s *dirent;
+
+  ret = mfs_pitr_readdirent(sb, path, pitr, &dirent);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  mfs_pitr_adv_bydirent(pitr, dirent);
+  mfs_free_dirent(dirent);
+
+  finfo("Pitr for CTZ (%u, %u) advanced to offset %u.",
+        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->c_off);
+
+errout:
+  return ret;
+}
+
+static int search_ctz_by_name(FAR const struct mfs_sb_s * const sb,
+                              FAR struct mfs_path_s * const path,
+                              const mfs_t depth, FAR const char * const name,
+                              const mfs_t namelen, FAR mfs_t *off,
+                              FAR struct mfs_dirent_s **dirent)
+{
+  /* NOTE: depth is of the parent here. */
+
+  /* Applies LRU updates. */
+
+  int ret = OK;
+  uint16_t name_hash;
+  struct mfs_pitr_s pitr;
+  FAR struct mfs_dirent_s *nd;
+  bool found = false;
+
+  *dirent = NULL;
+
+  if (depth == 0)
+    {
+      DEBUGASSERT(namelen == 0);
+
+      nd = kmm_zalloc(sizeof(struct mfs_dirent_s));
+      if (predict_false(nd == NULL))
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+
+      *off          = 0;
+      nd->namelen   = namelen;
+      nd->ctz       = MFS_MN(sb).root_ctz;
+      nd->mode      = MFS_MN(sb).root_mode;
+      nd->name_hash = mfs_hash(nd->name, nd->namelen);
+      nd->st_atim   = MFS_MN(sb).root_st_atim;
+      nd->st_ctim   = MFS_MN(sb).root_st_ctim;
+      nd->st_mtim   = MFS_MN(sb).root_st_mtim;
+      nd->sz        = MFS_MN(sb).root_sz;
+
+      *dirent = nd;
+      goto errout;
+    }
+
+  name_hash = mfs_hash(name, namelen);
+
+  ret = mfs_lru_updatedinfo(sb, path, depth);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  ret = mfs_pitr_init(sb, path, depth, &pitr, false);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  for (; ; )
+    {
+      /* Readdirent takes care of LRU updates. */
+
+      ret = mfs_pitr_readdirent(sb, path, &pitr, &nd);
+      if (predict_false(ret < 0 || nd == NULL))
+        {
+          ret = -ENONET;
+          goto errout;
+        }
+
+      if (nd->name_hash == name_hash &&
+          !strncmp(nd->name, name, MIN(nd->namelen, namelen)))
+        {
+          found           = true;
+          path[depth].sz  = nd->sz;
+          path[depth].ctz = nd->ctz;
+          path[depth].off = pitr.c_off;
+          *off            = pitr.c_off;
+          break;
+        }
+
+      mfs_pitr_adv_bydirent(&pitr, nd);
+      mfs_free_dirent(nd);
+    }
+
+errout:
+  if (found)
+    {
+      finfo("Searched \"%.*s\" direntry inside CTZ (%u, %u) at depth %u,"
+            " size %u.", namelen, name, path[depth - 1].ctz.idx_e,
+            path[depth - 1].ctz.pg_e, depth, path[depth - 1].sz);
+      *dirent = nd;
+    }
+  else
+    {
+      ret = -ENOENT;
+      finfo("Can not find requested direntry in parent. Ret: %d.", ret);
+    }
+
+  return ret;
+}
+
+int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
+                    FAR const char * relpath, FAR struct mfs_path_s **path,
+                    FAR mfs_t *depth)
+{
+  int                      ret       = OK;
+  int                      ret_flags = 0;
+  mfs_t                    i;
+  mfs_t                    sz;
+  mfs_t                    off;
+  mfs_t                    n_objs;
+  mfs_t                    name_len;
+  FAR const char          *cur       = NULL;
+  FAR const char          *next      = NULL;
+  struct mfs_ctz_s         ctz;
+  FAR struct mfs_path_s   *np        = NULL;
+  FAR struct mfs_dirent_s *dirent    = NULL;
+
+  *path  = NULL;
+  n_objs = nobjs_in_path(relpath);
+  np     = kmm_zalloc(n_objs * sizeof(struct mfs_path_s));
+  if (predict_false(np == NULL))
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  ctz       = MFS_MN(sb).root_ctz;
+  sz        = MFS_MN(sb).root_sz;
+  np[0].sz  = sz;
+  np[0].ctz = ctz;
+  np[0].off = 0;
+  cur       = relpath;
+  next      = next_child(cur);
+  name_len  = *next == 0 ? next - cur : next - cur - 1;
+
+  if (predict_false(n_objs == 1))
+    {
+      ret_flags |= MFS_ISDIR | MFS_EXIST;
+
+      /* This will not go into the loop. */
+    }
+  else if (predict_false(n_objs == 2))
+    {
+      ret_flags |= MFS_P_EXIST | MFS_P_ISDIR;
+    }
+
+  /* MFS_MN(sb).root_* is always up to date, no need for journal update. */
+
+  for (i = 1; i < n_objs; i++)
+    {
+      /* np[i] is the fs object at depth i + 1. */
+
+      /* Need to update journal for every level in the path as, for eg., the
+       * child can be deleted, etc. Same goes for LRU, which is taken care of
+       * by search_ctz_by_name function.
+       */
+
+      ret = search_ctz_by_name(sb, np, i, cur, name_len, &off, &dirent);
+      if (predict_false(ret < 0))
+        {
+          goto errout_with_ret_flags;
+        }
+
+      if (i < n_objs - 2 && !S_ISDIR(dirent->mode))
+        {
+          ret_flags |= MFS_FINPATH;
+          goto errout_with_ret_flags;
+        }
+      else if (i == n_objs - 2)
+        {
+          ret_flags |= MFS_P_EXIST;
+          if (S_ISDIR(dirent->mode))
+            {
+              ret_flags |= MFS_P_ISDIR;
+            }
+          else
+            {
+              ret_flags |= MFS_FINPATH;
+              goto errout_with_ret_flags;
+            }
+        }
+      else /* if (i == n_objs - 1) */
+        {
+          ret_flags |= MFS_EXIST;
+          if (S_ISDIR(dirent->mode))
+            {
+              ret_flags |= MFS_ISDIR;
+            }
+          else
+            {
+              ret_flags |= MFS_ISFILE;
+            }
+        }
+
+      np[i].ctz = dirent->ctz;
+      np[i].off = off;
+      np[i].sz  = dirent->sz;
+
+      ctz       = dirent->ctz;
+
+      mfs_free_dirent(dirent);
+
+      cur       = next;
+      next      = next_child(cur);
+      name_len  = *next == 0 ? next - cur : next - cur - 1;
+    }
+
+  ret    = ret_flags;
+  *depth = n_objs;
+  *path  = np;
+
+  finfo("Got path array with flags %u, depth %u.", ret, n_objs);
+  return ret;
+
+errout_with_ret_flags:
+  ret    = ret_flags;
+  *depth = n_objs;
+  *path  = np;
+
+  /* mfs_free_patharr(np) : All callers will free np (ie. path) when done
+   * with it.
+   */
+
+errout:
+  finfo("Got path array with flags %u, depth %u.", ret, n_objs);
+  return ret;
+}
+
+void mfs_free_patharr(FAR struct mfs_path_s *path)
+{
+  kmm_free(path);
+}
+
+void mfs_pitr_reset(FAR struct mfs_pitr_s * const pitr)
+{
+  pitr->c_off = 0;
+
+  finfo("Pitr for CTZ (%u, %u) reset.",
+        pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
+}
+
+int mfs_pitr_appenddirent(FAR struct mfs_sb_s * const sb,
+                          FAR struct mfs_path_s * const path,
+                          const mfs_t depth,
+                          FAR struct mfs_pitr_s * const pitr,
+                          FAR const struct mfs_dirent_s * const dirent)
+{
+  /* Depth is depth of the child to be appended. */
+
+  int         ret     = OK;
+  const mfs_t len     = MFS_DIRENTSZ(dirent);
+  char        wd[len];
+
+  if (pitr->depth == 0)
+    {
+      /* Root is the only child of the master node. */
+
+      ret = -EINVAL;
+      goto errout;
+    }
+
+  /* TOFO: If the parent directory is newly formed (ie. size is 0), then
+   * allocate space for it. This can be done better. Just allocate page when
+   * its created and added first to LRU, and then add a check to ensure it
+   * doesn't get re-allocated when written. A field like "new" would be
+   * helpful in the  LRU node for this.
+   */
+
+  memset(wd, 0, len);
+
+  mfs_ser_dirent(dirent, wd);
+  ret = mfs_lru_wr(sb, pitr->p.sz, len, path, pitr->depth, wd);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+errout:
+  return ret;
+}
+
+int mfs_pitr_appendnew(FAR struct mfs_sb_s * const sb,
+                       FAR struct mfs_path_s * const path, const mfs_t depth,
+                       FAR struct mfs_pitr_s * const pitr,
+                       FAR const char * const relpath, const mode_t mode)
+{
+  /* Depth is depth of the child to be appended. */
+
+  int                      ret = OK;
+  struct timespec          ts;
+  FAR const char          *cur  = last_child(relpath);
+  FAR const char          *next = next_child(cur);
+  FAR struct mfs_dirent_s *d = NULL;
+  const mfs_t              len = *next == 0 ? next - cur : next - cur - 1;
+
+  DEBUGASSERT(depth > 0);
+
+  d = kmm_zalloc(sizeof(struct mfs_dirent_s) + len);
+  if (predict_false(d == NULL))
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  clock_gettime(CLOCK_REALTIME, &ts);
+
+  d->ctz       = empty_fsobj.ctz;
+  d->mode      = mode;
+  d->st_atim   = ts;
+  d->st_mtim   = ts;
+  d->st_ctim   = ts;
+  d->namelen   = len;
+  strncpy(d->name, cur, d->namelen);
+  d->name_hash = mfs_hash(d->name, d->namelen);
+  d->sz        = 0;
+
+  /* Add the new direntry in this path. */
+
+  path[depth - 1].ctz = d->ctz;
+  path[depth - 1].off = pitr->p.sz;
+  path[depth - 1].sz  = d->sz;
+
+  ret = mfs_pitr_appenddirent(sb, path, depth, pitr, d);
+  if (predict_false(ret < 0))
+    {
+      goto errout_with_d;
+    }
+
+  finfo("Direntry appended to Pitr with %u depth, and CTZ (%u, %u). " \
+        "Direntry name: \"%.*s\" with name length %u at offset %u.",
+        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, d->namelen,
+        d->name, d->namelen, path[depth - 1].off);
+
+errout_with_d:
+  mfs_free_dirent(d);
+
+errout:
   return ret;
 }

@@ -73,6 +73,9 @@ typedef __WCHAR_TYPE__     _wchar_t;
 typedef int                _wchar_t;
 #endif
 
+typedef int                _wint_t;
+typedef int                _wctype_t;
+
 /* A (near) size is 2 bytes */
 
 #if defined(__SIZE_TYPE__)

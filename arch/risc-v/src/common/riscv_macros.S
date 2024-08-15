@@ -362,6 +362,9 @@
   REGLOAD \out, RISCV_PERCPU_HARTID(\out)
 #else
   csrr    \out, CSR_MHARTID
+#  if CONFIG_ARCH_RV_HARTID_BASE > 0
+  add    \out, \out, - CONFIG_ARCH_RV_HARTID_BASE
+#  endif
 #endif
 .endm
 

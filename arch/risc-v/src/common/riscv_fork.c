@@ -308,7 +308,7 @@ pid_t riscv_fork(const struct fork_s *context)
 #endif
   child->cmn.xcp.regs[REG_SP]   = newsp;        /* Stack pointer */
 #ifdef RISCV_SAVE_GP
-  child->cmn.xcp.regs[REG_GP]   = newsp;        /* Global pointer */
+  child->cmn.xcp.regs[REG_GP]   = context->gp;  /* Global pointer */
 #endif
 #ifdef CONFIG_ARCH_FPU
   fregs                         = riscv_fpuregs(&child->cmn);

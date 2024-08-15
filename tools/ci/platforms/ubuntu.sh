@@ -230,6 +230,7 @@ rust() {
     # Install targets supported from NuttX
     rustup target add thumbv6m-none-eabi
     rustup target add thumbv7m-none-eabi
+    rustup target add riscv64gc-unknown-none-elf
   fi
 
   command rustc --version

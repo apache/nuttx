@@ -18,8 +18,6 @@
 #
 # ##############################################################################
 
-set(SRCS arch_elf.c)
-
 if(CONFIG_ARCH_TOOLCHAIN_GNU)
   set(ARCH_TOOLCHAIN_DIR gnu)
 endif()
@@ -46,6 +44,10 @@ endif()
 
 if(CONFIG_ARMV7A_STRLEN)
   list(APPEND SRCS ${ARCH_TOOLCHAIN_DIR}/arch_strlen.S)
+endif()
+
+if(CONFIG_LIBC_ARCH_ELF)
+  list(APPEND SRCS arch_elf.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})

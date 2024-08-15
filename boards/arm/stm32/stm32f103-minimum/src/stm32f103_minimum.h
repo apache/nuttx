@@ -372,17 +372,5 @@ int stm32_hyt271initialize(int devno);
 int stm32_ds18b20initialize(int devno);
 #endif
 
-/****************************************************************************
- * Name: stm32_mfrc522initialize
- *
- * Description:
- *   Function used to initialize the MFRC522 RFID Transceiver
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CL_MFRC522
-int stm32_mfrc522initialize(const char *devpath);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_STM32F103_MINIMUM_SRC_STM32F103_MINIMUM_H */

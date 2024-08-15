@@ -849,16 +849,7 @@ NOTES:
 
            apps/examples/hello.
 
-  2. This version has password protection enabled.  Here is the login info::
-
-           USERNAME:  admin
-           PASSWORD:  Administrator
-
-     The encrypted password is retained in /etc/passwd.  I am sure that
-     you will find this annoying.  You can disable the password protection
-     by de-selecting CONFIG_NSH_CONSOLE_LOGIN=y.
-
-  3. This configuration has BINFS enabled so that the builtin applications can
+  2. This configuration has BINFS enabled so that the builtin applications can
      be made visible in the file system.  Because of that, the builtin
      applications do not work as other examples.
 
@@ -1807,6 +1798,21 @@ This is a configuration with sim usbhost support.
    Run sim usbhost with root mode, run sim usbdev or plug-in cdcacm usb device.
    Then you can use /dev/ttyACM to transfer data.
 
+login
+-----
+
+This is a configuration with login password protection for nuttx shell.
+
+NOTES:
+
+  This config has password protection enabled.  Here is the login info::
+
+           USERNAME:  admin
+           PASSWORD:  Administrator
+
+  The encrypted password is retained in /etc/passwd.  I am sure that
+  you will find this annoying.  You can disable the password protection
+  by de-selecting CONFIG_NSH_CONSOLE_LOGIN=y.
 
 README.txt
 ==========

@@ -31,12 +31,12 @@
 
 /* ARMv6-M memory barriers */
 
-#define arm_isb(n) __asm__ __volatile__ ("isb " #n : : : "memory")
-#define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
-#define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
+#define arm_dsb()  __asm__ __volatile__ ("dsb " : : : "memory")
+#define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
+#define arm_dmb()  __asm__ __volatile__ ("dmb " : : : "memory")
 
-#define ARM_DSB()  arm_dsb(15)
-#define ARM_ISB()  arm_isb(15)
-#define ARM_DMB()  arm_dmb(15)
+#define ARM_DSB()  arm_dsb()
+#define ARM_ISB()  arm_isb()
+#define ARM_DMB()  arm_dmb()
 
 #endif /* __ARCH_ARM_SRC_ARMV6_M_BARRIERS_H */

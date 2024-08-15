@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f103-minimum/src/stm32_mfrc522.c
+ * include/nuttx/coredump.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,69 +18,52 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_COREDUMP_H
+#define __INCLUDE_NUTTX_COREDUMP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/spi/spi.h>
-#include <nuttx/contactless/mfrc522.h>
-
-#include "stm32.h"
-#include "stm32_spi.h"
-#include "stm32f103_minimum.h"
-
-#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI1) && defined(CONFIG_CL_MFRC522)
+#include <nuttx/memoryregion.h>
+#include <unistd.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define MFRC522_SPI_PORTNO 1   /* On SPI1 */
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_mfrc522initialize
+ * Name: coredump_set_memory_region
  *
  * Description:
- *   Initialize and register the MFRC522 RFID driver.
- *
- * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Set do coredump memory region.
  *
  ****************************************************************************/
 
-int stm32_mfrc522initialize(const char *devpath)
-{
-  struct spi_dev_s *spi;
-  int ret;
+int coredump_set_memory_region(FAR struct memory_region_s *region);
 
-  spi = stm32_spibus_initialize(MFRC522_SPI_PORTNO);
+/****************************************************************************
+ * Name: coredump_initialize
+ *
+ * Description:
+ *   Initialize the coredump facility.  Called once and only from
+ *   nx_start_application.
+ *
+ ****************************************************************************/
 
-  if (!spi)
-    {
-      return -ENODEV;
-    }
+int coredump_initialize(void);
 
-  /* Then register the MFRC522 */
+/****************************************************************************
+ * Name: coredump_dump
+ *
+ * Description:
+ *   Do coredump of the task specified by pid.
+ *
+ * Input Parameters:
+ *   pid - The task/thread ID of the thread to dump
+ *
+ ****************************************************************************/
 
-  ret = mfrc522_register(devpath, spi);
-  if (ret < 0)
-    {
-      snerr("ERROR: Error registering MFRC522\n");
-    }
+void coredump_dump(pid_t pid);
 
-  return ret;
-}
-
-#endif /* CONFIG_SPI && CONFIG_MFRC522 */
+#endif /* __INCLUDE_NUTTX_COREDUMP_H */

@@ -2,7 +2,7 @@
 ``spi`` SPI Tool
 ================
 
-The I2C tool provides a way to debug SPI related problems. This README file will
+The SPI Tool provides a way to debug SPI related problems. This README file will
 provide usage information for the SPI tools.
 
 Contents
@@ -29,10 +29,10 @@ Contents
   * ``set``
   * ``verf``
 
-- I2C Build Configuration
+- SPI Build Configuration
 
   * NuttX Configuration Requirements
-  * I2C Tool Configuration Options
+  * SPI Tool Configuration Options
 
 System Requirements
 -------------------
@@ -71,7 +71,7 @@ or::
 
   nsh> spi ?
 
-Here is an example of the help output. I shows the general form of the command
+Here is an example of the help output. It shows the general form of the command
 line, the various SPI commands supported with their unique command line options,
 and a more detailed summary of the command SPI command options::
 
@@ -95,8 +95,8 @@ and a more detailed summary of the command SPI command options::
 **Notes**:
 
 - An environment variable like $PATH may be used for any argument.
-- Arguments are _sticky_. For example, once the SPI address is specified, that
-  address will be re-used until it is changed.
+- Arguments are _sticky_. For example, once the SPI bus is specified, that
+  bus will be re-used until it is changed.
 
 **Warning**:
 
@@ -117,7 +117,7 @@ SPI operation. Those arguments vary from command to command as described below.
 However, there is also a core set of common ``OPTIONS`` supported by all commands.
 So perhaps a better representation of the general SPI command would be::
 
-  i2c <cmd> [OPTIONS] [arguments]
+  spi <cmd> [OPTIONS] [arguments]
 
 Where ``[OPTIONS]`` represents the common options and and arguments represent the
 operation-specific arguments.
@@ -146,7 +146,7 @@ Environment Variables
 variables. Environment variables must be preceded with the special character
 ``$``. For example, ``PWD`` is the variable that holds the current working directory
 and so ``$PWD`` could be used as a command line argument. The use of environment
-variables on the I2C tools command is really only useful if you wish to write
+variables on the SPI tools command is really only useful if you wish to write
 NSH scripts to execute a longer, more complex series of SPI commands.
 
 Common Option Summary
@@ -187,7 +187,7 @@ Common Option Summary
 
   Various SPI devices support different data widths. This option is untested.
 
-- ``[-f freq]`` I2C frequency. Default: ``4000000`` Current: ``4000000``
+- ``[-f freq]`` SPI frequency. Default: ``4000000`` Current: ``4000000``
 
   The ``[-f freq]`` sets the frequency of the SPI device. The default is very
   conservative.
@@ -212,7 +212,9 @@ Exchange data: ``exch [OPTIONS] <Optional TX Data>``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This command triggers an SPI transfer, returning the data back from the far end.
-As an example (with MOSI looped back to MISO)::
+
+As an example you can exchange (send and receive) 4 bytes (-x 4) on SPI2 (-b 2) using the command below with the ``loopback`` approach.
+This approach requires that you connect the MOSI pin directly to the MISO pin (NOTE: SCLK and CS are not directly involved, but you still can see the clock and chip select waveforms if you decide to use an oscilloscope or more properly a logic analyzer to analyze these pins)::
 
   nsh> spi exch -b 2 -x 4 aabbccdd
 
@@ -221,7 +223,7 @@ As an example (with MOSI looped back to MISO)::
 Note that the ``TX Data`` are always specified in hex, and are always two digits
 each, case insensitive.
 
-I2C Build Configuration
+SPI Build Configuration
 -----------------------
 
 NuttX Configuration Requirements
@@ -241,7 +243,7 @@ The SPI tools requires the following in your NuttX configuration:
      CONFIG_SPI_DRIVER=y
 
    The SPI tool will then use the SPI character driver to access the SPI bus.
-   These devices will reside at ``/dev/spiN`` where ``N`` is the I2C bus number.
+   These devices will reside at ``/dev/spiN`` where ``N`` is the SPI bus number.
 
    **Note**: The SPI driver ``ioctl`` interface is defined in
    ``include/nuttx/spi/spi.h``.

@@ -317,7 +317,7 @@ void local_free(FAR struct local_conn_s *conn)
 
 void local_addref(FAR struct local_conn_s *conn)
 {
-  DEBUGASSERT(conn->lc_crefs >= 0 && conn->lc_crefs < 255);
+  DEBUGASSERT(conn->lc_crefs < 255);
   conn->lc_crefs++;
 }
 

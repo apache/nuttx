@@ -91,7 +91,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BMAP_GET(bmap, idx, off) ((bmap)[(idx)] & (1 << (off)))
+#define BMAP_GET(bmap, idx, off) (((bmap)[(idx)] & (1 << (off))) != 0)
 #define BMAP_SET(bmap, idx, off) ((bmap)[(idx)] |= (1 << (off)))
 #define DEL_ARR_BLK(sb, blk)     (MFS_BA((sb)).k_del[(blk) * sizeof(size_t)])
 #define DEL_ARR_PG(sb, pg)       (DEL_ARR_BLK(sb, MFS_PG2BLK((sb), (pg))))
@@ -134,14 +134,8 @@ static int         is_blk_writeable(FAR struct mfs_sb_s * const sb,
  *   idx - Populated later with the index of page in MFS_BA(sb).bmap_upgs
  *   off - Populated later with the offset of page in MFS_BA(sb).bmap_upgs
  *
- * Returned Value:
- *   MFS_BLK_BAD      - If the block of the page is a bad block.
- *   MFS_PG_USED      - If the page is being used.
- *   MFS_BLK_ERASABLE - If page can be allocated, but block needs erase.
- *   MFS_PG_FREE      - If the page is free.
- *
  * Assumptions/Limitations:
- *   Does not check validity of the page number.
+ *   Does not check validity of the index.
  *
  ****************************************************************************/
 
@@ -503,13 +497,28 @@ void mfs_ba_pgmarkdel(FAR struct mfs_sb_s * const sb, mfs_t pg)
 
 void mfs_ba_blkmarkdel(FAR struct mfs_sb_s * const sb, mfs_t blk)
 {
-  mfs_erase_blk(sb, blk);
-  DEL_ARR_BLK(sb, blk) = 0;
+  DEL_ARR_BLK(sb, blk) = MFS_PGINBLK(sb);
 }
 
-void mfs_ba_delmarked(FAR struct mfs_sb_s * const sb)
+int mfs_ba_delmarked(FAR struct mfs_sb_s * const sb)
 {
-  /* TODO */
+  int   ret = OK;
+  mfs_t i;
+
+  for (i = 1; i < MFS_NBLKS(sb); i++)
+    {
+      if (DEL_ARR_BLK(sb, i) == MFS_PGINBLK(sb))
+        {
+          ret = mfs_erase_blk(sb, i);
+
+          if (ret != OK)
+            {
+              return ret;
+            }
+        }
+    }
+
+  return ret;
 }
 
 /* Mark a page as being used. Used by master node during initial format and
@@ -517,15 +526,16 @@ void mfs_ba_delmarked(FAR struct mfs_sb_s * const sb)
 
 void mfs_ba_markusedpg(FAR struct mfs_sb_s * const sb, mfs_t pg)
 {
-  mfs_t idx;
+  mfs_t   idx;
   uint8_t off;
+
   pg2bmap(pg, &idx, &off);
   BMAP_SET(MFS_BA(sb).bmap_upgs, idx, off); /* Set as used */
 }
 
 void mfs_ba_markusedblk(FAR struct mfs_sb_s * const sb, mfs_t blk)
 {
-  mfs_t i = 0;
+  mfs_t i  = 0;
   mfs_t pg = MFS_BLK2PG(sb, blk);
 
   for (i = 0; i < MFS_PGINBLK(sb); i++)

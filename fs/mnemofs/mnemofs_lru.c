@@ -93,15 +93,22 @@ enum
  * Private Function Prototypes
  ****************************************************************************/
 
-static void lru_nodesearch(FAR struct mfs_sb_s * const sb,
+static void lru_nodesearch(FAR const struct mfs_sb_s * const sb,
                            FAR const struct mfs_path_s * const path,
                            const mfs_t depth, FAR struct mfs_node_s **node);
 static bool lru_islrufull(FAR struct mfs_sb_s * const sb);
 static bool lru_isnodefull(FAR struct mfs_node_s *node);
-static int lru_nodeflush(FAR struct mfs_sb_s * const sb,
+static int  lru_nodeflush(FAR struct mfs_sb_s * const sb,
+                          FAR struct mfs_path_s * const path,
+                          const mfs_t depth, FAR struct mfs_node_s *node,
+                          bool clean_node);
+static int  lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
+                        mfs_t bytes, int op,
+                        FAR struct mfs_path_s * const path,
+                        const mfs_t depth, FAR const char *buf);
+static int  lru_updatesz(FAR struct mfs_sb_s * sb,
                          FAR struct mfs_path_s * const path,
-                         const mfs_t depth, const mfs_t ctz_sz,
-                         FAR struct mfs_node_s *node, bool clean_node);
+                         const mfs_t depth, const mfs_t new_sz);
 
 /****************************************************************************
  * Private Data
@@ -129,58 +136,69 @@ static int lru_nodeflush(FAR struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-static void lru_nodesearch(FAR struct mfs_sb_s * const sb,
+static void lru_nodesearch(FAR const struct mfs_sb_s * const sb,
                            FAR const struct mfs_path_s * const path,
                            const mfs_t depth, FAR struct mfs_node_s **node)
 {
-  bool                  found;
-  mfs_t                 i;
+  bool                   found = false;
+  mfs_t                  i;
   FAR struct mfs_node_s *n;
 
   *node = NULL;
+
   list_for_every_entry(&MFS_LRU(sb), n, struct mfs_node_s, list)
     {
-      if (n == NULL)
-        {
-          break;
-        }
+      /* We need this loop to specifically check the parents in case these
+       * entries are all new, and have not been allocated any pages for
+       * being stored in the flash. Also we know that the root (depth 1) will
+       * be at least common in their paths.
+       */
 
-      found = true;
+      DEBUGASSERT(depth > 0);
+
       if (n->depth != depth)
         {
           continue;
         }
 
-      if (depth != 0)
+      found = true;
+      for (i = n->depth; i >= 1 && found; i--)
         {
-          for (i = depth - 1; i + 1 > 0; i--) /* i + 1 prevents underflow. */
+          if (path[i - 1].ctz.idx_e == 0 && path[i - 1].ctz.pg_e == 0 &&
+              mfs_ctz_eq(&n->path[i - 1].ctz, &path[i - 1].ctz) &&
+              n->path[i - 1].off == path[i - 1].off)
             {
-              if (n->path[i].off       == path[i].off &&
-                  n->path[i].ctz.idx_e == path[i].ctz.idx_e &&
-                  n->path[i].ctz.pg_e  == path[i].ctz.pg_e)
-                {
-                  /* OK */
-                }
-              else
-                {
-                  found = false;
-                  break;
-                }
+              /* OK */
+            }
+          else if (path[i - 1].ctz.pg_e != 0 &&
+                  mfs_ctz_eq(&n->path[i - 1].ctz, &path[i - 1].ctz))
+            {
+              /* OK */
+            }
+          else
+            {
+              found = false;
             }
         }
 
       if (found)
         {
-          finfo("Node search ended with match of node %p at depth %u"
-                " for CTZ of %u original size with range [%u, %u).", n,
-                n->depth, n->sz, n->range_min, n->range_max);
           *node = n;
-          return;
+          break;
         }
     }
 
-  *node = NULL;
-  finfo("Node search ended without match.");
+  if (found)
+    {
+      finfo("Node search ended with match of node %p at depth %u"
+            " for CTZ of %u size with range [%u, %u).", n, n->depth, n->sz,
+            n->range_min, n->range_max);
+    }
+  else
+    {
+      finfo("Node search ended without match.");
+      *node = NULL;
+    }
 }
 
 /****************************************************************************
@@ -190,7 +208,7 @@ static void lru_nodesearch(FAR struct mfs_sb_s * const sb,
  *   Check whether the number of nodes in the LRU has reaches its limit.
  *
  * Input Parameters:
- *   sb    - Superblock instance of the device.
+ *   sb - Superblock instance of the device.
  *
  * Returned Value:
  *  true   - LRU is full
@@ -223,6 +241,17 @@ static bool lru_isnodefull(FAR struct mfs_node_s *node)
   return node->n_list == CONFIG_MNEMOFS_NLRUDELTA;
 }
 
+/****************************************************************************
+ * Name: lru_free_delta
+ *
+ * Description:
+ *   Free a node's delta.
+ *
+ * Input Parameters:
+ *   delta - LRU delta.
+ *
+ ****************************************************************************/
+
 static void lru_free_delta(FAR struct mfs_delta_s *delta)
 {
   kmm_free(delta->upd);
@@ -252,10 +281,10 @@ static void lru_free_delta(FAR struct mfs_delta_s *delta)
 
 static int lru_nodeflush(FAR struct mfs_sb_s * const sb,
                          FAR struct mfs_path_s * const path,
-                         const mfs_t depth, const mfs_t ctz_sz,
-                         FAR struct mfs_node_s *node, bool clean_node)
+                         const mfs_t depth, FAR struct mfs_node_s *node,
+                         bool clean_node)
 {
-  int                    ret    = OK;
+  int                     ret   = OK;
   FAR struct mfs_delta_s *delta = NULL;
   FAR struct mfs_delta_s *tmp   = NULL;
 
@@ -264,8 +293,9 @@ static int lru_nodeflush(FAR struct mfs_sb_s * const sb,
       return -ENOMEM;
     }
 
-  ret = mfs_ctz_nwrtooff(sb, node, path, depth, ctz_sz,
-                        &path[depth - 1].ctz);
+  /* TODO: Implement effct of clean_node. */
+
+  ret = mfs_ctz_wrtnode(sb, node);
   if (predict_false(ret < 0))
     {
       goto errout;
@@ -289,13 +319,36 @@ errout:
   return ret;
 }
 
-static int lru_wrtooff(FAR struct mfs_sb_s * const sb,
-                       const mfs_t data_off, mfs_t bytes, mfs_t ctz_sz,
-                       int op, FAR struct mfs_path_s * const path,
-                       const mfs_t depth, FAR const char *buf)
+/****************************************************************************
+ * Name: lru_wrtooff
+ *
+ * Description:
+ *   Write to offset in LRU.
+ *
+ * Input Parameters:
+ *   sb       - Superblock instance of the device.
+ *   data_off - Offset into the data in the CTZ skip list.
+ *   bytes    - Number of bytes to write.
+ *   ctz_sz   - Size of the CTZ skip list.
+ *   op       - Operation (MFS_LRU_UPD or MFS_LRU_DEL).
+ *   path     - CTZ representation of the path.
+ *   depth    - Depth of path.
+ *   buf      - Buffer containing data.
+ *
+ * Returned Value:
+ *  0   - OK
+ *  < 0 - Error
+ *
+ ****************************************************************************/
+
+static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
+                       mfs_t bytes, int op,
+                       FAR struct mfs_path_s * const path, const mfs_t depth,
+                       FAR const char *buf)
 {
-  int                    ret        = OK;
-  bool                   found      = true;
+  int                     ret       = OK;
+  bool                    found     = true;
+  mfs_t                   old_sz;
   FAR struct mfs_node_s  *node      = NULL;
   FAR struct mfs_node_s  *last_node = NULL;
   FAR struct mfs_delta_s *delta     = NULL;
@@ -304,14 +357,23 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb,
 
   if (node == NULL)
     {
-      node = kmm_zalloc(sizeof(*node) + (depth * sizeof(struct mfs_path_s)));
+      node = kmm_zalloc(sizeof(*node));
       if (predict_false(node == NULL))
         {
+          found = false;
           ret = -ENOMEM;
           goto errout;
         }
 
-      node->sz        = ctz_sz;
+      node->path = kmm_zalloc(depth * sizeof(struct mfs_path_s));
+      if (predict_false(node->path == NULL))
+        {
+          found = false;
+          ret = -ENOMEM;
+          goto errout_with_node;
+        }
+
+      node->sz        = path[depth - 1].sz;
       node->depth     = depth;
       node->n_list    = 0;
       node->range_max = 0;
@@ -320,7 +382,7 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb,
       memcpy(node->path, path, depth * sizeof(struct mfs_path_s));
       found = false;
 
-      finfo("Node not found, allocated, ready to be inserted into LRU.");
+      finfo("Node not found. Allocated at %p.", node);
     }
 
   if (!found)
@@ -345,7 +407,7 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb,
     {
       /* Node flush writes to the flash and journal. */
 
-      ret = lru_nodeflush(sb, path, depth, ctz_sz, node, false);
+      ret = lru_nodeflush(sb, path, depth, node, false);
       if (predict_false(ret < 0))
         {
           goto errout_with_node;
@@ -373,7 +435,8 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb,
           goto errout_with_delta;
         }
 
-      finfo("Delta is of the update type, has %u bytes of updates." , bytes);
+      finfo("Delta is of the update type, has %u bytes at offset %u.",
+            bytes, data_off);
     }
 
   delta->n_b = bytes;
@@ -385,23 +448,133 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb,
     }
 
   node->n_list++;
-  node->range_min = MIN(node->range_min, data_off);
-  node->range_max = MAX(node->range_max, data_off + bytes);
+  node->range_min                = MIN(node->range_min, data_off);
+  node->range_max                = MAX(node->range_max, data_off + bytes);
 
-  finfo("Delta attached to node. Now there are %lu nodes and the node has"
-        " %lu deltas. Node with range [%u, %u).", list_length(&MFS_LRU(sb)),
-        list_length(&node->delta), node->range_min, node->range_max);
+  old_sz                         = node->sz;
+  node->sz                       = MAX(node->range_max, path[depth - 1].sz);
+  node->path[node->depth - 1].sz = node->sz;
+
+  if (old_sz != node->sz)
+    {
+      ret = lru_updatesz(sb, node->path, node->depth, node->sz);
+      if (predict_false(ret < 0))
+        {
+          goto errout_with_delta;
+        }
+    }
+
+  finfo("Delta attached to node %p. Now there are %lu nodes and the node has"
+        " %lu deltas. Node with range [%u, %u).", node,
+        list_length(&MFS_LRU(sb)), list_length(&node->delta),
+        node->range_min, node->range_max);
 
   return ret;
 
 errout_with_delta:
+  list_delete(&delta->list);
   kmm_free(delta);
 
 errout_with_node:
   if (!found && node != NULL)
     {
+      list_delete(&node->list);
       kmm_free(node);
     }
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lru_updatesz
+ *
+ * Description:
+ *   Updates size of an fs object in its parent.
+ *
+ * Input Parameters:
+ *   sb     - Superblock instance of the device.
+ *   path   - CTZ representation of the path.
+ *   depth  - Depth of path.
+ *   new_sz - New size
+ *
+ * Returned Value:
+ *  0   - OK
+ *  < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   Adds an entry for the target's parent to update the child's size, and
+ *   updates the size in path of everyone that has this child.
+ *
+ ****************************************************************************/
+
+static int lru_updatesz(FAR struct mfs_sb_s * sb,
+                        FAR struct mfs_path_s * const path,
+                        const mfs_t depth, const mfs_t new_sz)
+{
+  int ret = OK;
+  struct mfs_node_s *n = NULL;
+  mfs_t i;
+  bool found;
+  char buf[sizeof(mfs_t)];
+
+  DEBUGASSERT(depth > 0);
+
+  list_for_every_entry(&MFS_LRU(sb), n, struct mfs_node_s, list)
+    {
+      if (n->depth < depth)
+        {
+          continue;
+        }
+
+      found = false;
+      for (i = depth; i >= 1; i--)
+        {
+          if (path[i - 1].ctz.idx_e == 0 && path[i - 1].ctz.pg_e == 0 &&
+              mfs_ctz_eq(&n->path[i - 1].ctz, &path[i - 1].ctz) &&
+              n->path[i - 1].off == path[i - 1].off)
+            {
+              found = true;
+            }
+          else if (path[i - 1].ctz.pg_e != 0 &&
+                  mfs_ctz_eq(&n->path[i - 1].ctz, &path[i - 1].ctz))
+            {
+              found = true;
+            }
+          else
+            {
+              break;
+            }
+        }
+
+      if (found)
+        {
+          n->path[depth - 1].sz = new_sz;
+        }
+    }
+
+  if (depth == 1)
+    {
+      MFS_MN(sb).root_sz = new_sz;
+      goto errout;
+    }
+
+  memset(buf, 0, sizeof(mfs_t));
+  mfs_ser_mfs(new_sz, buf);
+
+  /* This function will be used by mfs_lru_wr itself, but given that if
+   * there is no change in size, this won't cause an infinite loop, this
+   * should be fine.
+   */
+
+  ret = mfs_lru_wr(sb, path[depth - 2].off + offsetof(struct mfs_dirent_s,
+                   sz), sizeof(mfs_t), path, depth, buf);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  path[depth - 1].sz = new_sz;
 
 errout:
   return ret;
@@ -412,8 +585,7 @@ errout:
  ****************************************************************************/
 
 int mfs_lru_ctzflush(FAR struct mfs_sb_s * const sb,
-                     FAR struct mfs_path_s * const path, const mfs_t depth,
-                     const mfs_t ctz_sz)
+                     FAR struct mfs_path_s * const path, const mfs_t depth)
 {
   struct mfs_node_s *node = NULL;
 
@@ -423,111 +595,21 @@ int mfs_lru_ctzflush(FAR struct mfs_sb_s * const sb,
       return OK;
     }
 
-  return lru_nodeflush(sb, path, depth, ctz_sz, node, true);
+  return lru_nodeflush(sb, path, depth, node, true);
 }
 
 int mfs_lru_del(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
-                mfs_t bytes, mfs_t ctz_sz,
-                FAR struct mfs_path_s * const path, const mfs_t depth)
+                mfs_t bytes, FAR struct mfs_path_s * const path,
+                const mfs_t depth)
 {
-  return lru_wrtooff(sb, data_off, bytes, ctz_sz, MFS_LRU_DEL, path, depth,
-                    NULL);
+  return lru_wrtooff(sb, data_off, bytes, MFS_LRU_DEL, path, depth, NULL);
 }
 
 int mfs_lru_wr(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
-               mfs_t bytes, mfs_t ctz_sz, FAR struct mfs_path_s * const path,
+               mfs_t bytes, FAR struct mfs_path_s * const path,
                const mfs_t depth, FAR const char *buf)
 {
-  return lru_wrtooff(sb, data_off, bytes, ctz_sz, MFS_LRU_UPD, path, depth,
-                    buf);
-}
-
-int mfs_lru_rdfromoff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
-                      FAR struct mfs_path_s * const path, const mfs_t depth,
-                      FAR char *buf, const mfs_t buflen)
-{
-  int                    ret = OK;
-  mfs_t                  s;
-  mfs_t                  e;
-  mfs_t                  end;
-  mfs_t                  start;
-  mfs_t                  del_b;
-  FAR struct mfs_node_s  *node      = NULL;
-  FAR struct mfs_delta_s *delta     = NULL;
-
-  finfo("Reading from offset %u, %u bytes", data_off, buflen);
-
-  ret = mfs_ctz_rdfromoff(sb, data_off, path, depth, buf, buflen);
-  if (predict_false(ret < 0))
-    {
-      goto errout;
-    }
-
-  lru_nodesearch(sb, path, depth, &node);
-  if (node == NULL)
-    {
-      goto errout;
-    }
-
-  start = data_off;
-  end   = data_off + buflen;
-  del_b = 0;
-
-  do
-    {
-      list_for_every_entry(&node->delta, delta, struct mfs_delta_s, list)
-        {
-          if (delta->upd)
-            {
-              s = MAX(delta->off, start);
-              e = MIN(delta->off + delta->n_b, end);
-
-              if (s >= e)
-                {
-                  continue;
-                }
-
-              memcpy(buf + (s - data_off), delta->upd + (s - delta->off),
-                    e - s);
-            }
-          else
-            {
-              s = MAX(delta->off, start);
-              e = MIN(delta->off + delta->n_b, end);
-
-              if (s >= end)
-                {
-                  continue;
-                }
-
-              if (e <= start)
-                {
-                  del_b += delta->n_b;
-                  s = data_off + delta->n_b;
-                  e = end;
-                  memmove(buf, buf + delta->n_b,
-                          buflen - delta->n_b);
-                  e = data_off + buflen - delta->n_b;
-                }
-              else
-                {
-                  del_b += e - s;
-                  memmove(buf + s, buf + e, buflen - (e - s));
-                  e = data_off + buflen - (e - s);
-                }
-            }
-
-          start = s;
-          end   = e;
-        }
-
-      start = end;
-      end   = data_off + buflen;
-    }
-  while (start != end);
-
-errout:
-  return ret;
+  return lru_wrtooff(sb, data_off, bytes, MFS_LRU_UPD, path, depth, buf);
 }
 
 void mfs_lru_init(FAR struct mfs_sb_s * const sb)
@@ -538,53 +620,187 @@ void mfs_lru_init(FAR struct mfs_sb_s * const sb)
   finfo("LRU Initialized\n");
 }
 
-void mfs_lru_updatedsz(FAR struct mfs_sb_s * const sb,
-                       FAR const struct mfs_path_s * const path,
-                       const mfs_t depth, mfs_t *n_sz)
+int mfs_lru_rdfromoff(FAR const struct mfs_sb_s * const sb,
+                      const mfs_t data_off,
+                      FAR struct mfs_path_s * const path, const mfs_t depth,
+                      FAR char *buf, const mfs_t buflen)
 {
-  mfs_t                  o_sz;
-  FAR struct mfs_node_s  *node  = NULL;
-  FAR struct mfs_delta_s *delta = NULL;
+  /* Requires updated path from the journal. */
 
-  if (depth == 0)
-    {
-      /* Master node */
-
-      o_sz = 0;
-    }
-
-  if (depth == 1)
-    {
-      /* Root node. */
-
-      o_sz = MFS_MN(sb).root_sz;
-    }
-  else
-    {
-      o_sz = path[depth - 1].sz;
-    }
-
-  *n_sz = o_sz;
+  int                     ret       = OK;
+  mfs_t                   upper;
+  mfs_t                   lower;
+  mfs_t                   rem_sz;
+  mfs_t                   upper_og;
+  mfs_t                   upper_upd;
+  mfs_t                   lower_upd;
+  FAR char               *tmp;
+  struct mfs_ctz_s        ctz;
+  FAR struct mfs_node_s  *node      = NULL;
+  FAR struct mfs_delta_s *delta     = NULL;
 
   lru_nodesearch(sb, path, depth, &node);
   if (node == NULL)
     {
-      finfo("No updates for file size, with depth %u.", depth);
-      return;
+      goto errout;
     }
 
-  list_for_every_entry(&node->delta, delta, struct mfs_delta_s, list)
+  /* Node is NOT supposed to be freed by the caller, it's a reference to
+   * the actual node in the LRU and freeing it could break the entire LRU.
+   */
+
+  tmp      = buf;
+  ctz      = node->path[node->depth - 1].ctz;
+  lower    = data_off;
+  upper_og = lower + buflen;
+  upper    = upper_og;
+  rem_sz   = buflen;
+
+  while (rem_sz > 0)
     {
-      finfo("depth %u %u %u %p", depth, delta->n_b, delta->off, delta->upd);
-      if (delta->upd == NULL)
+      mfs_ctz_rdfromoff(sb, ctz, lower, rem_sz, tmp);
+
+      list_for_every_entry(&node->delta, delta, struct mfs_delta_s, list)
         {
-          *n_sz -= MIN((*n_sz) - delta->off, delta->n_b);
+          if (delta->upd == NULL)
+            {
+              /* Delete */
+
+              lower_upd = MAX(lower, delta->off);
+              upper_upd = MIN(upper, delta->off + delta->n_b);
+
+              if (lower_upd >= upper_upd)
+                {
+                  /* Outside range */
+                }
+              else
+                {
+                  memmove(tmp + (lower - lower_upd),
+                          tmp + (upper_upd - lower), upper - upper_upd);
+
+                  upper -= (upper_upd - lower_upd);
+                }
+            }
+          else
+            {
+              /* Update */
+
+              lower_upd = MAX(lower, delta->off);
+              upper_upd = MIN(upper, delta->off + delta->n_b);
+
+              if (lower_upd >= upper_upd)
+                {
+                  /* Outside range */
+                }
+              else
+                {
+                  memcpy(tmp + (lower_upd - lower),
+                         delta->upd + (lower_upd - delta->off),
+                         upper_upd - lower_upd);
+                }
+            }
         }
-      else
+
+      tmp    += upper - lower;
+      rem_sz -= upper - lower;
+      lower   = upper;
+      upper   = upper_og;
+    }
+
+errout:
+  return ret;
+}
+
+int mfs_lru_updatedinfo(FAR const struct mfs_sb_s * const sb,
+                        FAR struct mfs_path_s * const path,
+                        const mfs_t depth)
+{
+  int                    ret  = OK;
+  bool                   found;
+  mfs_t                  i;
+  FAR struct mfs_node_s *node = NULL;
+
+  DEBUGASSERT(depth > 0);
+
+  list_for_every_entry(&MFS_LRU(sb), node, struct mfs_node_s, list)
+    {
+      /* TODO: When a directory is newly created, and still in the LRU, its
+       * CTZ is (0, 0), and this can match others as well if at same depth,
+       * so, in these cases, match the parents, and so on up.
+       */
+
+      DEBUGASSERT(node->depth > 0);
+
+      if (node->depth > depth)
         {
-          *n_sz = MAX(*n_sz, delta->off + delta->n_b);
+          continue;
+        }
+
+      /* We need this loop to specifically check the parents in case these
+       * entries are all new, and have not been allocated any pages for
+       * being stored in the flash. Also we know that the root (depth 1) will
+       * be at least common in their paths.
+       */
+
+      found = true;
+      for (i = node->depth; i >= 1 && found; i--)
+        {
+          if (path[i - 1].ctz.idx_e == 0 && path[i - 1].ctz.pg_e == 0 &&
+              mfs_ctz_eq(&node->path[i - 1].ctz, &path[i - 1].ctz) &&
+              node->path[i - 1].off == path[i - 1].off)
+            {
+              /* OK */
+            }
+          else if (path[i - 1].ctz.pg_e != 0 &&
+                  mfs_ctz_eq(&node->path[i - 1].ctz, &path[i - 1].ctz))
+            {
+              /* OK */
+            }
+          else
+            {
+              found = false;
+            }
+        }
+
+      if (found)
+        {
+          path[node->depth - 1].sz = node->path[node->depth - 1].sz;
         }
     }
 
-  finfo("Updated file size is %u with depth %u.", *n_sz, depth);
+  return ret;
+}
+
+int mfs_lru_updatectz(FAR struct mfs_sb_s * sb,
+                      FAR struct mfs_path_s * const path, const mfs_t depth,
+                      const struct mfs_ctz_s new_ctz)
+{
+  int                    ret                            = OK;
+  char                   buf[sizeof(struct mfs_ctz_s)];
+  FAR struct mfs_node_s *node                           = NULL;
+
+  list_for_every_entry(&MFS_LRU(sb), node, struct mfs_node_s, list)
+    {
+      if (node->depth >= depth &&
+          mfs_ctz_eq(&node->path[depth - 1].ctz, &path[depth - 1].ctz) &&
+          node->path[depth - 1].sz == path[depth - 1].sz)
+        {
+          node->path[depth - 1].ctz = new_ctz;
+        }
+    }
+
+  memset(buf, 0, sizeof(struct mfs_ctz_s));
+  mfs_ser_ctz(&new_ctz, buf);
+
+  ret = mfs_lru_wr(sb, path[depth - 1].off + offsetof(struct mfs_dirent_s,
+                   ctz), sizeof(struct mfs_ctz_s), path, depth, buf);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  path[depth - 1].ctz = new_ctz;
+
+errout:
+  return ret;
 }

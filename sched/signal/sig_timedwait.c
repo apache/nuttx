@@ -250,7 +250,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   irqstate_t flags;
   sclock_t waitticks;
   bool switch_needed;
-  siginfo_t sinfo;
+  siginfo_t unbinfo;
   int ret;
 
   DEBUGASSERT(set != NULL);
@@ -318,7 +318,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
         }
 #endif
 
-      rtcb->sigunbinfo = (info == NULL) ? &sinfo : info;
+      rtcb->sigunbinfo = (info == NULL) ? &unbinfo : info;
 
       /* Check if we should wait for the timeout */
 
