@@ -568,7 +568,8 @@ int goldfish_gpu_fb_register(int display)
   snprintf(arg1, 32, "%p", fb);
   argv[0] = arg1;
   argv[1] = NULL;
-  pid = kthread_create("goldfish_gpu_fb_thread", SCHED_PRIORITY_DEFAULT,
+  pid = kthread_create("goldfish_gpu_fb_thread",
+                       CONFIG_GOLDFISH_GPU_FB_PRIORITY,
                        CONFIG_DEFAULT_TASK_STACKSIZE,
                        goldfish_gpu_fb_vsync_thread, argv);
   if (pid < 0)

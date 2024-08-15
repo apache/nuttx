@@ -72,6 +72,11 @@ config GOLDFISH_GPU_FB
 	depends on VIDEO_FB
 	default n
 
+config GOLDFISH_GPU_FB_PRIORITY
+	int "Goldfish GPU Framebuffer vsync task priority"
+	depends on GOLDFISH_GPU_FB
+	default 100
+
 config GOLDFISH_FB_VIDEO_MODE
 	bool "Goldfish Framebuffer display mode"
 	depends on GOLDFISH_FB
