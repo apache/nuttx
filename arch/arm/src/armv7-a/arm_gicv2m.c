@@ -137,26 +137,3 @@ int up_connect_irq(int *irq, int num,
   *mdr = *irq;
   return 0;
 }
-
-/****************************************************************************
- * Name: up_get_legacy_irq
- *
- * Description:
- *   Reserve vector for legacy
- *
- ****************************************************************************/
-
-int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
-{
-#if CONFIG_ARMV7A_GICV2_LEGACY_IRQ0 >= 0
-  uint8_t slot;
-  uint8_t tmp;
-
-  UNUSED(line);
-  slot = PCI_SLOT(devfn);
-  tmp = (pin - 1 + slot) % 4;
-  return CONFIG_ARMV7A_GICV2_LEGACY_IRQ0 + tmp;
-#else
-  return -ENOTSUP;
-#endif
-}
