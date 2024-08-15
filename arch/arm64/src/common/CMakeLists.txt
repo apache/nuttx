@@ -52,6 +52,9 @@ endif()
 
 if(CONFIG_ARM64_GIC_VERSION EQUAL 2)
   list(APPEND SRCS arm64_gicv2.c)
+  if(CONFIG_ARM64_GICV2M)
+    list(APPEND SRCS arm64_gicv2m.c)
+  endif()
 endif()
 
 if(CONFIG_ARCH_HAVE_MMU)

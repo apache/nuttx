@@ -315,6 +315,17 @@ config ARM64_GIC_EOIMODE
 		Enable GICC_CTLR.EOImode, this will separates the priority drop and interrupt
 		deactivation operations.
 
+config ARM64_GICV2M
+	bool "gicv2m support message irq"
+	depends on PCI_MSIX
+	default n
+
+config ARM64_GICV2_LEGACY_IRQ0
+	int "pci legacy irq0 default val"
+	default 35
+	---help---
+		qemu pci legacy irq0 val, not support if val < 0
+
 endif
 
 config ARM64_SEMIHOSTING_HOSTFS
