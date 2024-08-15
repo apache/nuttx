@@ -115,10 +115,6 @@ static void arm64_smp_init_top(void)
 {
   struct tcb_s *tcb = current_task(this_cpu());
 
-  /* Init idle task to percpu reg */
-
-  up_update_task(tcb);
-
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
@@ -226,6 +222,12 @@ int up_cpu_start(int cpu)
 
 void arm64_boot_secondary_c_routine(void)
 {
+  struct tcb_s *tcb = current_task(this_cpu());
+
+  /* Init idle task to percpu reg */
+
+  up_update_task(tcb);
+
 #ifdef CONFIG_ARCH_HAVE_MPU
   arm64_mpu_init(false);
 #endif
