@@ -1555,6 +1555,7 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
             }
 
           name_len = strlen(start);
+          end = start + name_len - 1;
         }
       else
         {
