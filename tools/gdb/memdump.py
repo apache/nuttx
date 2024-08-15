@@ -23,6 +23,7 @@ import bisect
 import time
 
 import gdb
+import utils
 from lists import sq_for_every, sq_queue_type
 from utils import get_long_type, get_symbol_value, lookup_type, read_ulong
 
@@ -870,34 +871,6 @@ have {i} some backtrace leak, total leak memory is {int(leaksize)} bytes\n"
 class Memmap(gdb.Command):
     def __init__(self):
         super(Memmap, self).__init__("memmap", gdb.COMMAND_USER)
-        self.initialized = False
-
-    def init_once(self) -> bool:
-        """
-        Return True if all prerequisites are met and perform one-time initialization.
-        """
-        if self.initialized:
-            return True
-
-        try:
-            import numpy as np
-            from matplotlib import pyplot as plt
-        except ImportError:
-            print("Please install matplotlib and numpy to use this command")
-            print("pip install matplotlib numpy")
-            return False
-
-        try:
-            import math as math
-        except ImportError:
-            print("Please consider to use gdb-multiarch")
-            return False
-
-        self.np = np
-        self.plt = plt
-        self.math = math
-        self.initialized = True
-        return True
 
     def save_memory_map(self, mallinfo, output_file):
         mallinfo = sorted(mallinfo, key=lambda item: item["addr"])
@@ -945,8 +918,14 @@ class Memmap(gdb.Command):
         return args.output
 
     def invoke(self, args, from_tty):
-        if not self.init_once():
+        self.np = utils.import_check("numpy", errmsg="Please pip install numpy\n")
+        self.plt = utils.import_check(
+            "matplotlib", "pyplot", errmsg="Please pip install matplotlib\n"
+        )
+        self.math = utils.import_check("math")
+        if not self.np or not self.plt or not self.math:
             return
+
         output_file = self.parse_arguments(args.split(" "))
         meminfo = self.allocinfo()
         self.save_memory_map(meminfo, output_file + ".png")
