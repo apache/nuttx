@@ -65,6 +65,9 @@ endif
 
 ifeq ($(CONFIG_ARM64_GIC_VERSION),2)
 CMN_CSRCS += arm64_gicv2.c
+ifeq ($(CONFIG_ARM64_GICV2M),y)
+CMN_CSRCS += arm64_gicv2m.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MMU),y)
