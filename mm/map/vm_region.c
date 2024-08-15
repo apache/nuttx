@@ -128,8 +128,10 @@ FAR void *vm_map_region(uintptr_t paddr, size_t size)
   return (FAR void *)((uintptr_t)vaddr + (MM_PGMASK & paddr));
 
 error:
-  if (i)   /* undo alway mapped pages */
+  if (i)
     {
+      /* Undo alway mapped pages */
+
       up_shmdt((uintptr_t)vaddr, i);
     }
 
