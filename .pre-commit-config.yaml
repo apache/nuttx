@@ -1,0 +1,19 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: check-added-large-files
+-   repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+    -   id: cmake-format
+        args: [--check]
+        files: CMakeLists.txt
+-   repo: local
+    hooks:
+    -   id: nxstyle
+        name: nxstyle
+        language: script
+        entry: ./tools/checkpatch.sh -f
