@@ -939,7 +939,7 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
                 SPI_FWRITE_DUAL_M |
                 SPI_FWRITE_OCT_M |
                 SPI_FWRITE_QUAD_M);
-  user_reg |= SPI_USR_COMMAND_M | SPI_USR_ADDR_M;
+  user_reg |= SPI_USR_COMMAND_M;
 
   /* Set command bits and value, and command is always needed */
 
@@ -953,11 +953,16 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
 
   /* Set address bits and value */
 
-  user1_reg &= ~SPI_USR_ADDR_BITLEN_M;
-  user1_reg |= (meminfo->addrlen * 8 - 1) << SPI_USR_ADDR_BITLEN_S;
+  if (meminfo->addrlen)
+    {
+      user_reg |= SPI_USR_ADDR_M;
 
-  regval = meminfo->addr << (32 - meminfo->addrlen * 8);
-  putreg32(regval, SPI_ADDR_REG(id));
+      user1_reg &= ~SPI_USR_ADDR_BITLEN_M;
+      user1_reg |= (meminfo->addrlen * 8 - 1) << SPI_USR_ADDR_BITLEN_S;
+
+      regval = meminfo->addr << (32 - meminfo->addrlen * 8);
+      putreg32(regval, SPI_ADDR_REG(id));
+    }
 
   /* Set dummy */
 
