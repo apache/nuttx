@@ -127,7 +127,7 @@
 
 /* SPI default frequency (limited by clock divider) */
 
-#define SPI_DEFAULT_FREQ  (400000)
+#define SPI_DEFAULT_FREQ  (4000000)
 
 /* SPI default width */
 
@@ -500,14 +500,19 @@ static uint32_t esp_spi_setfrequency(struct spi_dev_s *dev,
       return priv->timing_param->clk_src_hz;
     }
 
+  priv->timing_param->expected_freq = frequency;
+
+  esp_clk_tree_src_get_freq_hz(SPI_CLK_SRC_DEFAULT,
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_APPROX,
+                               &priv->timing_param->clk_src_hz);
+
   spi_hal_cal_clock_conf(priv->timing_param,
                          (int *)&(priv->timing_param->clk_src_hz),
                          &(priv->dev_cfg->timing_conf));
+  spi_hal_setup_device(priv->ctx, priv->dev_cfg);
 
-  priv->timing_param->expected_freq = frequency;
   spiinfo("frequency=%" PRIu32 ", actual=%" PRIu32 "\n",
-          priv->timing_param->expected_freq,
-          priv->timing_param->clk_src_hz);
+          priv->timing_param->expected_freq, priv->timing_param->clk_src_hz);
 
   return priv->timing_param->clk_src_hz;
 }
@@ -1090,14 +1095,12 @@ static void esp_spi_init(struct spi_dev_s *dev)
 
   priv->dev_cfg->timing_conf.clock_source = SPI_CLK_SRC_DEFAULT;
   esp_clk_tree_src_get_freq_hz(priv->dev_cfg->timing_conf.clock_source,
-                               0,
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_APPROX,
                                &priv->timing_param->clk_src_hz);
 
-  esp_spi_setfrequency(dev, priv->timing_param->expected_freq);
   esp_spi_setbits(dev, config->width);
   esp_spi_setmode(dev, priv->dev_cfg->mode);
-
-  spi_hal_setup_device(priv->ctx, priv->dev_cfg);
+  esp_spi_setfrequency(dev, priv->timing_param->expected_freq);
 }
 
 /****************************************************************************
