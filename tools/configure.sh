@@ -242,7 +242,7 @@ echo "  Copy files"
 ln -sf ${src_makedefs} ${dest_makedefs} || \
   { echo "Failed to symlink ${src_makedefs}" ; exit 8 ; }
 ${TOPDIR}/tools/process_config.sh -I ${configpath}/../../common/configs \
-  -I ${configpath}/../common -o ${dest_config} ${src_config}
+  -I ${configpath}/../common -I ${configpath} -o ${dest_config} ${src_config}
 install -m 644 ${src_config} "${backup_config}" || \
   { echo "Failed to backup ${src_config}" ; exit 10 ; }
 
