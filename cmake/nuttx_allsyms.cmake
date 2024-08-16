@@ -84,8 +84,10 @@ macro(define_allsyms_link_target inter_target dep_target allsyms_file)
       PRIVATE $<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_COMPILE_OPTIONS>)
     target_link_options(${inter_target} PRIVATE
                         $<TARGET_PROPERTY:nuttx,LINK_OPTIONS>)
-    target_link_libraries(${inter_target}
-                          PRIVATE $<TARGET_PROPERTY:nuttx,LINK_LIBRARIES>)
+    target_link_libraries(
+      ${inter_target}
+      PRIVATE $<TARGET_GENEX_EVAL:nuttx,$<TARGET_PROPERTY:nuttx,LINK_LIBRARIES>>
+    )
   endif()
 endmacro()
 

@@ -107,6 +107,8 @@ elseif(CONFIG_LTO_FULL)
   endif()
 endif()
 
+set(NO_LTO "-fno-lto")
+
 # override the ARCHIVE command
 set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_RANLIB_COMMAND "<CMAKE_RANLIB> <TARGET>")

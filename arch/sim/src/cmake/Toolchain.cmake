@@ -29,6 +29,8 @@ endif()
 
 add_compile_options(-fno-common)
 
+set(NO_LTO "-fno-lto")
+
 if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
