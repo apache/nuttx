@@ -55,51 +55,52 @@
 
 /* Pre-requisites */
 
-#ifndef CONFIG_MM_PGALLOC
-#  error CONFIG_MM_PGALLOC not defined
-#endif
+#ifdef CONFIG_ARCH_USE_MMU
+#  ifndef CONFIG_MM_PGALLOC
+#    error CONFIG_MM_PGALLOC not defined
+#  endif
 
-#ifndef CONFIG_MM_PGSIZE
-#  error CONFIG_MM_PGSIZE not defined
-#endif
+#  ifndef CONFIG_MM_PGSIZE
+#    error CONFIG_MM_PGSIZE not defined
+#  endif
 
 /* .text region */
 
-#ifndef CONFIG_ARCH_TEXT_VBASE
-#  error CONFIG_ARCH_TEXT_VBASE not defined
-#  define CONFIG_ARCH_TEXT_VBASE 0
-#endif
+#  ifndef CONFIG_ARCH_TEXT_VBASE
+#    error CONFIG_ARCH_TEXT_VBASE not defined
+#    define CONFIG_ARCH_TEXT_VBASE 0
+#  endif
 
-#if (CONFIG_ARCH_TEXT_VBASE & CONFIG_MM_MASK) != 0
-#  error CONFIG_ARCH_TEXT_VBASE not aligned to page boundary
-#endif
+#  if (CONFIG_ARCH_TEXT_VBASE & CONFIG_MM_MASK) != 0
+#    error CONFIG_ARCH_TEXT_VBASE not aligned to page boundary
+#  endif
 
-#ifndef CONFIG_ARCH_TEXT_NPAGES
-#  warning CONFIG_ARCH_TEXT_NPAGES not defined
-#  define CONFIG_ARCH_TEXT_NPAGES 1
-#endif
+#  ifndef CONFIG_ARCH_TEXT_NPAGES
+#    warning CONFIG_ARCH_TEXT_NPAGES not defined
+#    define CONFIG_ARCH_TEXT_NPAGES 1
+#  endif
 
-#define ARCH_TEXT_SIZE  (CONFIG_ARCH_TEXT_NPAGES * CONFIG_MM_PGSIZE)
-#define ARCH_TEXT_VEND  (CONFIG_ARCH_TEXT_VBASE + ARCH_TEXT_SIZE)
+#  define ARCH_TEXT_SIZE  (CONFIG_ARCH_TEXT_NPAGES * CONFIG_MM_PGSIZE)
+#  define ARCH_TEXT_VEND  (CONFIG_ARCH_TEXT_VBASE + ARCH_TEXT_SIZE)
 
 /* .bss/.data region */
 
-#ifndef CONFIG_ARCH_DATA_VBASE
-#  error CONFIG_ARCH_DATA_VBASE not defined
-#  define CONFIG_ARCH_DATA_VBASE ARCH_TEXT_VEND
-#endif
+#  ifndef CONFIG_ARCH_DATA_VBASE
+#    error CONFIG_ARCH_DATA_VBASE not defined
+#    define CONFIG_ARCH_DATA_VBASE ARCH_TEXT_VEND
+#  endif
 
-#if (CONFIG_ARCH_DATA_VBASE & CONFIG_MM_MASK) != 0
-#  error CONFIG_ARCH_DATA_VBASE not aligned to page boundary
-#endif
+#  if (CONFIG_ARCH_DATA_VBASE & CONFIG_MM_MASK) != 0
+#    error CONFIG_ARCH_DATA_VBASE not aligned to page boundary
+#  endif
 
-#ifndef CONFIG_ARCH_DATA_NPAGES
-#  warning CONFIG_ARCH_DATA_NPAGES not defined
-#  define CONFIG_ARCH_DATA_NPAGES 1
-#endif
+#  ifndef CONFIG_ARCH_DATA_NPAGES
+#    warning CONFIG_ARCH_DATA_NPAGES not defined
+#    define CONFIG_ARCH_DATA_NPAGES 1
+#  endif
 
-#define ARCH_DATA_SIZE  (CONFIG_ARCH_DATA_NPAGES * CONFIG_MM_PGSIZE)
-#define ARCH_DATA_VEND  (CONFIG_ARCH_DATA_VBASE + ARCH_DATA_SIZE)
+#  define ARCH_DATA_SIZE  (CONFIG_ARCH_DATA_NPAGES * CONFIG_MM_PGSIZE)
+#  define ARCH_DATA_VEND  (CONFIG_ARCH_DATA_VBASE + ARCH_DATA_SIZE)
 
 /* Reserved .bss/.data region.  In the kernel build (CONFIG_BUILD_KERNEL),
  * the region at the beginning of the .bss/.data region is reserved for use
@@ -123,130 +124,133 @@
 
 /* Heap region */
 
-#ifndef CONFIG_ARCH_HEAP_VBASE
-#  error CONFIG_ARCH_HEAP_VBASE not defined
-#  define CONFIG_ARCH_HEAP_VBASE ARCH_DATA_VEND
-#endif
+#  ifndef CONFIG_ARCH_HEAP_VBASE
+#    error CONFIG_ARCH_HEAP_VBASE not defined
+#    define CONFIG_ARCH_HEAP_VBASE ARCH_DATA_VEND
+#  endif
 
-#if (CONFIG_ARCH_HEAP_VBASE & CONFIG_MM_MASK) != 0
-#  error CONFIG_ARCH_HEAP_VBASE not aligned to page boundary
-#endif
+#  if (CONFIG_ARCH_HEAP_VBASE & CONFIG_MM_MASK) != 0
+#    error CONFIG_ARCH_HEAP_VBASE not aligned to page boundary
+#  endif
 
-#ifndef CONFIG_ARCH_HEAP_NPAGES
-#  warning CONFIG_ARCH_HEAP_NPAGES not defined
-#  define CONFIG_ARCH_HEAP_NPAGES 1
-#endif
+#  ifndef CONFIG_ARCH_HEAP_NPAGES
+#    warning CONFIG_ARCH_HEAP_NPAGES not defined
+#    define CONFIG_ARCH_HEAP_NPAGES 1
+#  endif
 
-#define ARCH_HEAP_SIZE  (CONFIG_ARCH_HEAP_NPAGES * CONFIG_MM_PGSIZE)
-#define ARCH_HEAP_VEND  (CONFIG_ARCH_HEAP_VBASE + ARCH_HEAP_SIZE)
+#  define ARCH_HEAP_SIZE  (CONFIG_ARCH_HEAP_NPAGES * CONFIG_MM_PGSIZE)
+#  define ARCH_HEAP_VEND  (CONFIG_ARCH_HEAP_VBASE + ARCH_HEAP_SIZE)
 
-#ifdef CONFIG_ARCH_STACK_DYNAMIC
+#  ifdef CONFIG_ARCH_STACK_DYNAMIC
   /* User stack region */
 
-#  ifndef CONFIG_ARCH_STACK_VBASE
-#    error CONFIG_ARCH_STACK_VBASE not defined
-#    define CONFIG_ARCH_STACK_VBASE ARCH_HEAP_VEND
-#  endif
+#    ifndef CONFIG_ARCH_STACK_VBASE
+#      error CONFIG_ARCH_STACK_VBASE not defined
+#      define CONFIG_ARCH_STACK_VBASE ARCH_HEAP_VEND
+#    endif
 
-#  if (CONFIG_ARCH_STACK_VBASE & CONFIG_MM_MASK) != 0
-#    error CONFIG_ARCH_STACK_VBASE not aligned to page boundary
-#  endif
+#    if (CONFIG_ARCH_STACK_VBASE & CONFIG_MM_MASK) != 0
+#      error CONFIG_ARCH_STACK_VBASE not aligned to page boundary
+#    endif
 
-#  ifndef CONFIG_ARCH_STACK_NPAGES
-#    warning CONFIG_ARCH_STACK_NPAGES not defined
-#    define CONFIG_ARCH_STACK_NPAGES 1
-#  endif
+#    ifndef CONFIG_ARCH_STACK_NPAGES
+#      warning CONFIG_ARCH_STACK_NPAGES not defined
+#      define CONFIG_ARCH_STACK_NPAGES 1
+#    endif
 
-#  define ARCH_STACK_SIZE (CONFIG_ARCH_STACK_NPAGES * CONFIG_MM_PGSIZE)
-#  define ARCH_STACK_VEND (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
+#    define ARCH_STACK_SIZE (CONFIG_ARCH_STACK_NPAGES * CONFIG_MM_PGSIZE)
+#    define ARCH_STACK_VEND (CONFIG_ARCH_STACK_VBASE + ARCH_STACK_SIZE)
 
-#ifdef CONFIG_ARCH_KERNEL_STACK
+#  ifdef CONFIG_ARCH_KERNEL_STACK
 /* Kernel stack */
 
-#  ifndef CONFIG_ARCH_KERNEL_STACKSIZE
-#    define CONFIG_ARCH_KERNEL_STACKSIZE 1568
+#    ifndef CONFIG_ARCH_KERNEL_STACKSIZE
+#      define CONFIG_ARCH_KERNEL_STACKSIZE 1568
+#    endif
 #  endif
-#endif
 
   /* A single page scratch region used for temporary mappings */
 
-#  define __ARCH_SHM_VBASE ARCH_STACK_VEND
-#else
+#    define __ARCH_SHM_VBASE ARCH_STACK_VEND
+#  else
   /* A single page scratch region used for temporary mappings */
 
-#  define __ARCH_SHM_VBASE ARCH_HEAP_VEND
-#endif
+#    define __ARCH_SHM_VBASE ARCH_HEAP_VEND
+#  endif
 
 /* Shared memory regions */
 
-#ifdef CONFIG_ARCH_VMA_MAPPING
-#  ifndef CONFIG_ARCH_SHM_VBASE
-#    error CONFIG_ARCH_SHM_VBASE not defined
-#    define CONFIG_ARCH_SHM_VBASE __ARCH_SHM_VBASE
+#  ifdef CONFIG_ARCH_VMA_MAPPING
+#    ifndef CONFIG_ARCH_SHM_VBASE
+#      error CONFIG_ARCH_SHM_VBASE not defined
+#      define CONFIG_ARCH_SHM_VBASE __ARCH_SHM_VBASE
+#    endif
+
+#    if (CONFIG_ARCH_SHM_VBASE & CONFIG_MM_MASK) != 0
+#      error CONFIG_ARCH_SHM_VBASE not aligned to page boundary
+#    endif
+
+#    ifndef CONFIG_ARCH_SHM_MAXREGIONS
+#      warning CONFIG_ARCH_SHM_MAXREGIONS not defined
+#      define CONFIG_ARCH_SHM_MAXREGIONS 1
+#    endif
+
+#    ifndef CONFIG_ARCH_SHM_NPAGES
+#      warning CONFIG_ARCH_SHM_NPAGES not defined
+#      define CONFIG_ARCH_SHM_NPAGES 1
+#    endif
+
+#    define ARCH_SHM_SIZE       (CONFIG_ARCH_SHM_NPAGES * CONFIG_MM_PGSIZE)
+#    define ARCH_SHM_VEND       (CONFIG_ARCH_SHM_VBASE + ARCH_SHM_SIZE - 1)
+
+#    define ARCH_SCRATCH_VBASE   ARCH_SHM_VEND
+#  else
+#    define ARCH_SCRATCH_VBASE   __ARCH_SHM_VBASE
 #  endif
 
-#  if (CONFIG_ARCH_SHM_VBASE & CONFIG_MM_MASK) != 0
-#    error CONFIG_ARCH_SHM_VBASE not aligned to page boundary
+#  ifdef CONFIG_MM_KMAP
+#    ifndef CONFIG_ARCH_KMAP_VBASE
+#      error CONFIG_ARCH_KMAP_VBASE not defined
+#    endif
+
+#    if (CONFIG_ARCH_KMAP_VBASE & CONFIG_MM_MASK) != 0
+#      error CONFIG_ARCH_KMAP_VBASE not aligned to page boundary
+#    endif
+
+#    ifndef CONFIG_ARCH_KMAP_NPAGES
+#      error CONFIG_ARCH_KMAP_NPAGES not defined
+#    endif
+
+#    define ARCH_KMAP_SIZE       (CONFIG_ARCH_KMAP_NPAGES * CONFIG_MM_PGSIZE)
+#    define ARCH_KMAP_VEND       (CONFIG_ARCH_KMAP_VBASE + ARCH_KMAP_SIZE - 1)
 #  endif
-
-#  ifndef CONFIG_ARCH_SHM_MAXREGIONS
-#    warning CONFIG_ARCH_SHM_MAXREGIONS not defined
-#    define CONFIG_ARCH_SHM_MAXREGIONS 1
-#  endif
-
-#  ifndef CONFIG_ARCH_SHM_NPAGES
-#    warning CONFIG_ARCH_SHM_NPAGES not defined
-#    define CONFIG_ARCH_SHM_NPAGES 1
-#  endif
-
-#  define ARCH_SHM_SIZE       (CONFIG_ARCH_SHM_NPAGES * CONFIG_MM_PGSIZE)
-#  define ARCH_SHM_VEND       (CONFIG_ARCH_SHM_VBASE + ARCH_SHM_SIZE - 1)
-
-#  define ARCH_SCRATCH_VBASE   ARCH_SHM_VEND
-#else
-#  define ARCH_SCRATCH_VBASE   __ARCH_SHM_VBASE
-#endif
-
-#ifdef CONFIG_MM_KMAP
-#  ifndef CONFIG_ARCH_KMAP_VBASE
-#    error CONFIG_ARCH_KMAP_VBASE not defined
-#  endif
-
-#  if (CONFIG_ARCH_KMAP_VBASE & CONFIG_MM_MASK) != 0
-#    error CONFIG_ARCH_KMAP_VBASE not aligned to page boundary
-#  endif
-
-#  ifndef CONFIG_ARCH_KMAP_NPAGES
-#    error CONFIG_ARCH_KMAP_NPAGES not defined
-#  endif
-
-#  define ARCH_KMAP_SIZE       (CONFIG_ARCH_KMAP_NPAGES * CONFIG_MM_PGSIZE)
-#  define ARCH_KMAP_VEND       (CONFIG_ARCH_KMAP_VBASE + ARCH_KMAP_SIZE - 1)
-#endif
 
 /* There is no need to use the scratch memory region if the page pool memory
  * is statically mapped.
  */
 
-#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+#  ifdef CONFIG_ARCH_PGPOOL_MAPPING
 
-#  ifndef CONFIG_ARCH_PGPOOL_PBASE
-#    error CONFIG_ARCH_PGPOOL_PBASE not defined
+#    ifndef CONFIG_ARCH_PGPOOL_PBASE
+#      error CONFIG_ARCH_PGPOOL_PBASE not defined
+#    endif
+
+#    ifndef CONFIG_ARCH_PGPOOL_VBASE
+#      error CONFIG_ARCH_PGPOOL_VBASE not defined
+#    endif
+
+#    ifndef CONFIG_ARCH_PGPOOL_SIZE
+#      error CONFIG_ARCH_PGPOOL_SIZE not defined
+#    endif
+
+#    define CONFIG_ARCH_PGPOOL_PEND \
+       (CONFIG_ARCH_PGPOOL_PBASE + CONFIG_ARCH_PGPOOL_SIZE)
+#    define CONFIG_ARCH_PGPOOL_VEND \
+       (CONFIG_ARCH_PGPOOL_VBASE + CONFIG_ARCH_PGPOOL_SIZE)
+
 #  endif
-
-#  ifndef CONFIG_ARCH_PGPOOL_VBASE
-#    error CONFIG_ARCH_PGPOOL_VBASE not defined
-#  endif
-
-#  ifndef CONFIG_ARCH_PGPOOL_SIZE
-#    error CONFIG_ARCH_PGPOOL_SIZE not defined
-#  endif
-
-#  define CONFIG_ARCH_PGPOOL_PEND \
-     (CONFIG_ARCH_PGPOOL_PBASE + CONFIG_ARCH_PGPOOL_SIZE)
-#  define CONFIG_ARCH_PGPOOL_VEND \
-     (CONFIG_ARCH_PGPOOL_VBASE + CONFIG_ARCH_PGPOOL_SIZE)
-
+#else
+#  define ARCH_HEAP_SIZE CONFIG_ELF_STACKSIZE
 #endif
 
 #ifndef __ASSEMBLY__
