@@ -38,8 +38,56 @@
 #include "sched/sched.h"
 
 /****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+struct reprioritize_arg_s
+{
+  pid_t pid;
+  cpu_set_t saved_affinity;
+  uint16_t saved_flags;
+  int  sched_priority;
+  bool need_restore;
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static int reprioritize_handler(FAR void *cookie)
+{
+  FAR struct reprioritize_arg_s *arg = cookie;
+  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  tcb = nxsched_get_tcb(arg->pid);
+
+  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
+      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  if (arg->need_restore)
+    {
+      tcb->affinity = arg->saved_affinity;
+      tcb->flags = arg->saved_flags;
+    }
+
+  if (nxsched_reprioritize_rtr(tcb, arg->sched_priority))
+    {
+      up_switch_context(this_task(), rtcb);
+    }
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: nxsched_nexttcb
@@ -175,6 +223,34 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
         {
           /* A context switch will occur. */
 
+#ifdef CONFIG_SMP
+          if (tcb->cpu != this_cpu() &&
+              tcb->task_state == TSTATE_TASK_RUNNING)
+            {
+              struct reprioritize_arg_s arg;
+
+              if ((tcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+                {
+                  arg.pid = tcb->pid;
+                  arg.need_restore = false;
+                }
+              else
+                {
+                  arg.pid = tcb->pid;
+                  arg.saved_flags = tcb->flags;
+                  arg.saved_affinity = tcb->affinity;
+                  arg.need_restore = true;
+
+                  tcb->flags |= TCB_FLAG_CPU_LOCKED;
+                  CPU_SET(tcb->cpu, &tcb->affinity);
+                }
+
+              arg.sched_priority = sched_priority;
+              nxsched_smp_call_single(tcb->cpu, reprioritize_handler,
+                                      &arg, true);
+            }
+          else
+#endif
           if (nxsched_reprioritize_rtr(tcb, sched_priority))
             {
               up_switch_context(this_task(), rtcb);
