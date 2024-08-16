@@ -139,8 +139,6 @@ static int arm_arch_timer_compare_isr(int irq, void *regs, void *arg)
   struct arm_oneshot_lowerhalf_s *priv =
     (struct arm_oneshot_lowerhalf_s *)arg;
 
-  arm_arch_timer_set_irq_mask(true);
-
   if (priv->callback)
     {
       /* Then perform the callback */
@@ -255,6 +253,11 @@ static int arm_tick_start(struct oneshot_lowerhalf_s *lower,
 
   arm_arch_timer_set_compare(arm_arch_timer_count() +
                                priv->cycle_per_tick * ticks);
+
+  /* Try to unmask the timer irq in timer controller
+   * in case of arm_tick_cancel is called.
+   */
+
   arm_arch_timer_set_irq_mask(false);
 
   return OK;
@@ -345,14 +348,6 @@ static struct oneshot_lowerhalf_s *arm_oneshot_initialize(void)
   irq_attach(ARM_ARCH_TIMER_IRQ,
              arm_arch_timer_compare_isr, priv);
 
-  /* Enable int */
-
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
-
-  /* Start timer */
-
-  arm_arch_timer_enable(true);
-
   tmrinfo("oneshot_initialize ok %p \n", &priv->lh);
 
   return &priv->lh;
@@ -380,6 +375,8 @@ void up_timer_initialize(void)
           __func__, freq / 1000000, (freq / 10000) % 100);
 
   up_alarm_set_lowerhalf(arm_oneshot_initialize());
+  up_enable_irq(ARM_ARCH_TIMER_IRQ);
+  arm_arch_timer_enable(true);
 }
 
 #ifdef CONFIG_SMP
