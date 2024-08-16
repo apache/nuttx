@@ -396,6 +396,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake)
 set(CMAKE_TOOLCHAIN_FILE
     "${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake/Toolchain.cmake")
 
+# include common toolchain setting
+include(nuttx_toolchain)
+
 # Define project #############################################################
 # This triggers configuration
 
@@ -466,15 +469,6 @@ else()
     nuttx PRIVATE $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_COMPILE_OPTIONS>>)
 endif()
 
-# Compiler options TODO: move elsewhere
-
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.9)
-    # force color for gcc > 4.9
-    add_compile_options(-fdiagnostics-color=always)
-  endif()
-endif()
-
 if(MSVC)
   add_compile_options(
     -W2
@@ -491,21 +485,6 @@ elseif(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
     -Wall $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes> -Wshadow -Wundef
     # system wide options
     $<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
-endif()
-
-if(NOT CONFIG_LIBCXXTOOLCHAIN)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
-else()
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D_STDLIB_H_>)
-endif()
-
-if(NOT CONFIG_CXX_EXCEPTION)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
-                      $<$<COMPILE_LANGUAGE:CXX>:-fcheck-new>)
-endif()
-
-if(CONFIG_STACK_CANARIES)
-  add_compile_options(-fstack-protector-all)
 endif()
 
 if(CONFIG_NDEBUG)
@@ -529,6 +508,8 @@ if(NOT MSVC)
 endif()
 
 add_definitions(-D__NuttX__)
+
+add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-D__ASSEMBLY__>)
 
 set_property(
   TARGET nuttx
@@ -593,16 +574,12 @@ endif()
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
 # Pre-compile linker script
-if(DEFINED PREPROCESS)
+if(NOT CONFIG_ARCH_SIM)
   get_filename_component(LD_SCRIPT_NAME ${ldscript} NAME)
   set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
 
-  add_custom_command(
-    OUTPUT ${LD_SCRIPT_TMP}
-    DEPENDS ${ldscript}
-    COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_CHIP_ABS_DIR}
-            ${ldscript} > ${LD_SCRIPT_TMP}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  nuttx_generate_preproces_target(SOURCE_FILE ${ldscript} TARGET_FILE
+                                  ${LD_SCRIPT_TMP})
 
   add_custom_target(ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
   add_dependencies(nuttx ldscript_tmp)
@@ -638,14 +615,18 @@ set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs}
                ${nuttx_extra_libs})
 
 if(NOT CONFIG_ARCH_SIM)
-
   # TODO: nostart/nodefault not applicable to nuttx toolchain
   if(CONFIG_ARCH_TOOLCHAIN_TASKING)
     target_link_libraries(nuttx PRIVATE --lsl-file=${ldscript} ${nuttx_libs})
   else()
     target_link_libraries(
-      nuttx PRIVATE ${NUTTX_EXTRA_FLAGS} -T${ldscript} -Wl,--start-group
-                    ${nuttx_libs} -Wl,--end-group)
+      nuttx
+      PRIVATE ${NUTTX_EXTRA_FLAGS}
+              -T
+              ${ldscript}
+              $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
+              ${nuttx_libs}
+              $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--end-group>)
   endif()
 
   # generate binary outputs in different formats (.bin, .hex, etc)
@@ -750,48 +731,55 @@ if(CONFIG_BUILD_PROTECTED)
 
   get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
 
+  get_property(nuttx_user_extra_libs GLOBAL PROPERTY NUTTX_USER_EXTRA_LIBRARIES)
+
   get_property(user_ldscript GLOBAL PROPERTY LD_SCRIPT_USER)
 
-  if(DEFINED PREPROCESS)
-    get_filename_component(LD_SCRIPT_NAME ${user_ldscript} NAME)
-    set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
-    add_custom_command(
-      OUTPUT ${LD_SCRIPT_TMP}
-      DEPENDS ${user_ldscript}
-      COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include
-              -I${NUTTX_CHIP_ABS_DIR} ${user_ldscript} > ${LD_SCRIPT_TMP}
-      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    add_custom_target(user_ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
-    add_dependencies(nuttx_user user_ldscript_tmp)
-    set(user_ldscript ${LD_SCRIPT_TMP})
+  # Pre-compile linker script
+  get_filename_component(LD_SCRIPT_USER_NAME ${user_ldscript} NAME)
+  set(LD_SCRIPT_USER_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
+  nuttx_generate_preproces_target(SOURCE_FILE ${user_ldscript} TARGET_FILE
+                                  ${LD_SCRIPT_USER_TMP})
+  add_custom_target(user_ldscript_tmp DEPENDS ${LD_SCRIPT_USER_TMP})
+  add_dependencies(nuttx_user user_ldscript_tmp)
+  set(user_ldscript ${LD_SCRIPT_USER_TMP})
+
+  # reset link options that don't fit userspace
+  get_target_property(nuttx_user_LINK_OPTIONS nuttx_user LINK_OPTIONS)
+  list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,--cref")
+  list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,-Map=nuttx.map")
+  if(CONFIG_ARCH_TOOLCHAIN_GHS)
+    list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-entry=__start")
+    list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-map=nuttx.map")
+    list(APPEND nuttx_user_LINK_OPTIONS "-map=nuttx_user.map")
+  else()
+    list(REMOVE_ITEM nuttx_user_LINK_OPTIONS "-Wl,--entry=__start")
+    list(APPEND nuttx_user_LINK_OPTIONS "-Wl,-Map=nuttx_user.map")
   endif()
 
-  list(TRANSFORM user_ldscript PREPEND "-T")
+  set_target_properties(nuttx_user PROPERTIES LINK_OPTIONS
+                                              "${nuttx_user_LINK_OPTIONS}")
 
-  execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAGS} ${NUTTX_EXTRA_FLAGS}
-            --print-libgcc-file-name
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    OUTPUT_VARIABLE nuttx_user_libgcc)
-
-  # reset link options for userspace to prevent sections from being accidentally
-  # deleted
-  set_target_properties(nuttx_user PROPERTIES LINK_OPTIONS "")
-
-  target_link_options(
-    nuttx_user PRIVATE -nostartfiles -nodefaultlibs
-    -Wl,--entry=${CONFIG_INIT_ENTRYPOINT}
-    -Wl,--undefined=${CONFIG_INIT_ENTRYPOINT})
+  if(CONFIG_ARCH_TOOLCHAIN_GHS)
+    target_link_options(nuttx_user PRIVATE -nostartfiles -minlib
+                        -entry=${CONFIG_INIT_ENTRYPOINT})
+  else()
+    target_link_options(
+      nuttx_user PRIVATE -nostartfiles -nodefaultlibs
+      -Wl,--entry=${CONFIG_INIT_ENTRYPOINT}
+      -Wl,--undefined=${CONFIG_INIT_ENTRYPOINT})
+  endif()
 
   target_link_libraries(
     nuttx_user
-    PRIVATE ${user_ldscript}
-            $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--start-group>
+    PRIVATE -T
+            ${user_ldscript}
+            $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--start-group>
             ${nuttx_system_libs}
             ${nuttx_apps_libs}
-            ${nuttx_user_libgcc}
+            ${nuttx_user_extra_libs}
             $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
-            $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group>)
+            $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--end-group>)
 
   target_include_directories(
     nuttx_user SYSTEM
