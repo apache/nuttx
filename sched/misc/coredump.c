@@ -836,6 +836,8 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size)
   region[count - 1].end = (uintptr_t)ptr + size;
   region[count - 1].flags = 0;
   region[count].start = 0;
+  region[count].end = 0;
+  region[count].flags = 0;
 
   g_regions = region;
   return 0;
