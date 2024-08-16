@@ -768,7 +768,8 @@ int coredump_set_memory_region(FAR const struct memory_region_s *region)
  *
  ****************************************************************************/
 
-int coredump_add_memory_region(FAR const void *ptr, size_t size)
+int coredump_add_memory_region(FAR const void *ptr, size_t size,
+                               uint32_t flags)
 {
   FAR struct memory_region_s *region;
   size_t count = 1; /* 1 for end flag */
@@ -838,7 +839,7 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size)
 
   region[count - 1].start = (uintptr_t)ptr;
   region[count - 1].end = (uintptr_t)ptr + size;
-  region[count - 1].flags = 0;
+  region[count - 1].flags = flags;
   region[count].start = 0;
   region[count].end = 0;
   region[count].flags = 0;
