@@ -40,7 +40,7 @@
 import os
 import re
 import subprocess
-import tempfile
+import time
 
 PUNCTUATORS = [
     "\[",
@@ -128,35 +128,39 @@ def fetch_macro_info(file):
     # it's broken on some GDB distribution :(, I haven't
     # found a solution to it.
 
-    with tempfile.NamedTemporaryFile(delete=False) as f1:
+    cache = os.path.splitext(file)[0] + ".macro"
+    if not os.path.isfile(cache):
+        start = time.time()
+        with open(cache, "w") as f:
+            # # os.system(f"readelf -wm {file} > {output}")
+            process = subprocess.Popen(
+                f"readelf -wm {file}", shell=True, stdout=f, stderr=subprocess.STDOUT
+            )
 
-        # # os.system(f"readelf -wm {file} > {output}")
-        process = subprocess.Popen(
-            f"readelf -wm {file}", shell=True, stdout=f1, stderr=subprocess.STDOUT
-        )
+            process.communicate()
+            errcode = process.returncode
 
-        process.communicate()
-        errcode = process.returncode
+            f.close()
 
-        f1.close()
+            if errcode != 0:
+                return {}
+        print(f"readelf took {time.time() - start:.1f} seconds")
 
-        if errcode != 0:
-            return {}
+    p = re.compile(".*macro[ ]*:[ ]*([\S]+\(.*?\)|[\w]+)[ ]*(.*)")
+    macros = {}
 
-        p = re.compile(".*macro[ ]*:[ ]*([\S]+\(.*?\)|[\w]+)[ ]*(.*)")
-        macros = {}
+    start = time.time()
+    with open(cache, "r") as f2:
+        for line in f2.readlines():
+            if not line.startswith(" DW_MACRO_define") and not line.startswith(
+                " DW_MACRO_undef"
+            ):
+                continue
 
-        with open(f1.name, "rb") as f2:
-            for line in f2.readlines():
-                line = line.decode("utf-8")
-                if not line.startswith(" DW_MACRO_define") and not line.startswith(
-                    " DW_MACRO_undef"
-                ):
-                    continue
+            if not parse_macro(line, macros, p):
+                print(f"Failed to parse {line}")
 
-                if not parse_macro(line, macros, p):
-                    print(f"Failed to parse {line}")
-
+    print(f"Parse macro took {time.time() - start:.1f} seconds")
     return macros
 
 

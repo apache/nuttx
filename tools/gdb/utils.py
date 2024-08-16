@@ -25,8 +25,11 @@ from typing import List
 
 import gdb
 
+from macros import fetch_macro_info, try_expand
+
 g_symbol_cache = {}
 g_type_cache = {}
+g_macro_ctx = None
 
 
 def backtrace(addresses: List[gdb.Value]) -> List[str]:
@@ -102,6 +105,35 @@ class ContainerOf(gdb.Function):
 ContainerOf()
 
 
+class MacroCtx:
+    """
+    This is a singleton class which only initializes once to
+    cache a context of macro definition which can be queried later
+    TODO: we only deal with single ELF at the moment for simplicity
+    If you load more object files while debugging, only the first one gets loaded
+    will be used to retrieve macro information
+    """
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(MacroCtx, cls).__new__(cls)
+        return cls.instance
+
+    def __init__(self, filename):
+        self._macro_map = {}
+        self._file = filename
+
+        self._macro_map = fetch_macro_info(filename)
+
+    @property
+    def macro_map(self):
+        return self._macro_map
+
+    @property
+    def objfile(self):
+        return self._file
+
+
 def gdb_eval_or_none(expresssion):
     """Evaluate an expression and return None if it fails"""
     try:
@@ -158,6 +190,19 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
     gdb.execute("inferior 2", to_string=True)
     gdb.execute(f"list {locspec}", to_string=True)
     value = gdb_eval_or_none(name)
+    if not value:
+        # Try to expand macro by reading elf
+        global g_macro_ctx
+        if not g_macro_ctx:
+            gdb.write("No macro context found, trying to load from ELF\n")
+            if len(gdb.objfiles()) > 0:
+                g_macro_ctx = MacroCtx(gdb.objfiles()[0].filename)
+            else:
+                raise gdb.GdbError("An executable file must be provided")
+
+        expr = try_expand(name, g_macro_ctx.macro_map)
+        value = gdb_eval_or_none(expr)
+
     if cacheable:
         g_symbol_cache[(name, locspec)] = value
 
