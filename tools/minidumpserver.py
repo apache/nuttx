@@ -217,14 +217,14 @@ reg_table = {
 # make sure the a0-a15 can be remapped to the correct register
 reg_fix_value = {
     "esp32s3": {
-        "WINDOWBASE": 0,
-        "WINDOWSTART": 1,
-        "PS": 0x40000,
+        "WINDOWBASE": (0, 69),
+        "WINDOWSTART": (1, 70),
+        "PS": (0x40000, 73),
     },
     "xtensa": {
-        "WINDOWBASE": 0,
-        "WINDOWSTART": 1,
-        "PS": 0x40000,
+        "WINDOWBASE": (0, 584),
+        "WINDOWSTART": (1, 585),
+        "PS": (0x40000, 742),
     },
     "riscv": {
         "ZERO": 0,
@@ -382,7 +382,7 @@ class DumpLogFile:
         if arch in reg_fix_value:
             for reg_name, reg_vals in reg_fix_value[arch].items():
                 reg_index = self.reg_table[reg_name]
-                self.registers[reg_index] = reg_vals
+                self.registers[reg_index] = reg_vals[0]
 
     def _parse_stack(self, line, start, data):
         line = str_get_after(line, "stack_dump:")
@@ -511,11 +511,13 @@ class GDBStub:
         elffile: DumpELFFile,
         rawfile: RawMemoryFile,
         coredump: CoreDumpFile,
+        arch: str,
     ):
         self.registers = logfile.registers
         self.elffile = elffile
         self.socket = None
         self.gdb_signal = GDB_SIGNAL_DEFAULT
+        self.arch = arch
 
         # new list oreder is coredump, rawfile, logfile, elffile
 
@@ -538,6 +540,10 @@ class GDBStub:
                     "Check if your coredump or raw file matches the ELF file"
                 )
                 sys.exit(1)
+
+            if arch in reg_fix_value.keys():
+                self.regfix = True
+                logger.info(f"Current arch is {arch}, need reg index fix.")
 
         except TypeError:
             if not self.registers:
@@ -645,9 +651,26 @@ class GDBStub:
 
         def put_one_register_packet(regs):
 
+            regval = None
             reg = int(pkt[1:].decode("utf8"), 16)
-            if reg < len(regs) and regs[reg] != b"x":
-                bval = struct.pack(self.reg_fmt, regs[reg])
+            if self.regfix:
+                for reg_name, reg_vals in reg_fix_value[self.arch].items():
+                    if reg == reg_vals[1]:
+                        logger.debug(f"{reg_name} fix to {reg_vals[0]}")
+                        regval = reg_vals[0]
+
+                if regval is None:
+                    # tcbinfo index to gdb index
+                    reg_gdb_index = list(reg_table[self.arch].values())
+                    if reg in reg_gdb_index:
+                        reg = reg_gdb_index.index(reg)
+                        regval = regs[reg]
+
+            elif reg < len(regs) and regs[reg] != b"x":
+                regval = regs[reg]
+
+            if regval is not None:
+                bval = struct.pack(self.reg_fmt, regval)
                 self.put_gdb_packet(binascii.hexlify(bval))
             else:
                 self.put_gdb_packet(b"x" * self.reg_digits)
@@ -1098,7 +1121,7 @@ def main(args):
 
     raw = RawMemoryFile(args.rawfile)
     coredump = CoreDumpFile(args.coredump)
-    gdb_stub = GDBStub(log, elf, raw, coredump)
+    gdb_stub = GDBStub(log, elf, raw, coredump, args.arch)
 
     gdbserver = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
