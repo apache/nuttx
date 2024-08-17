@@ -286,8 +286,8 @@ static void lru_free_delta(FAR struct mfs_delta_s *delta)
  *             (false).
  *
  * Returned Value:
- *  0   - OK
- *  < 0 - Error
+ *   0   - OK
+ *   < 0 - Error
  *
  ****************************************************************************/
 
