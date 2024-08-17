@@ -53,6 +53,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/param.h>
+
 #include "mnemofs.h"
 
 /****************************************************************************
@@ -118,10 +120,10 @@ ssize_t mfs_write_page(FAR const struct mfs_sb_s * const sb,
       return -EINVAL;
     }
 
-  mempcpy(MFS_RWBUF(sb) + pgoff, data, datalen);
+  memcpy(MFS_RWBUF(sb) + pgoff, data, MIN(datalen, MFS_PGSZ(sb) - pgoff));
 
   ret = MTD_BWRITE(MFS_MTD(sb), page, 1, MFS_RWBUF(sb));
-  if (ret < 0)
+  if (predict_false(ret < 0))
     {
       goto errout_with_reset;
     }
@@ -144,12 +146,12 @@ ssize_t mfs_read_page(FAR const struct mfs_sb_s * const sb,
     }
 
   ret = MTD_BREAD(MFS_MTD(sb), page, 1, MFS_RWBUF(sb));
-  if (ret < 0)
+  if (predict_false(ret < 0))
     {
       goto errout_with_reset;
     }
 
-  memcpy(data, MFS_RWBUF(sb) + pgoff, datalen);
+  memcpy(data, MFS_RWBUF(sb) + pgoff, MIN(datalen, MFS_PGSZ(sb) - pgoff));
 
 errout_with_reset:
   memset(MFS_RWBUF(sb), 0, MFS_PGSZ(sb));

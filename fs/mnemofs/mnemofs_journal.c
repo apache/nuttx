@@ -483,13 +483,13 @@ errout:
   return ret;
 }
 
-int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t blk1, mfs_t blk2)
+int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, FAR mfs_t *blk1,
+                 FAR mfs_t *blk2, FAR mfs_t *jrnl_blk)
 {
   int      i;
   int      ret        = OK;
   mfs_t    sz;
   mfs_t    pg;
-  mfs_t    mn;
   mfs_t    blk;
   mfs_t    n_pgs;
   mfs_t    rem_sz;
@@ -509,26 +509,26 @@ int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t blk1, mfs_t blk2)
       goto errout;
     }
 
-  if (blk1 == 0 && blk2 == 0)
+  if (*blk1 == 0 && *blk2 == 0)
     {
-      blk1 = mfs_ba_getblk(sb);
+      *blk1 = mfs_ba_getblk(sb);
       if (predict_false(blk1 == 0))
         {
           ret = -ENOSPC;
           goto errout_with_buf;
         }
 
-      finfo("Allocated Master Block 1: %d.", blk1);
+      finfo("Allocated Master Block 1: %d.", *blk1);
 
-      blk2 = mfs_ba_getblk(sb);
+      *blk2 = mfs_ba_getblk(sb);
       if (predict_false(blk2 == 0))
         {
           ret = -ENOSPC;
           goto errout_with_buf;
         }
 
-      finfo("Allocated Master Block 1: %d.", blk2);
-      finfo("New locations for Master Blocks %d & %d.", blk1, blk2);
+      finfo("Allocated Master Block 1: %d.", *blk2);
+      finfo("New locations for Master Blocks %d & %d.", *blk1, *blk2);
     }
 
   tmp = buf;
@@ -548,8 +548,8 @@ int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t blk1, mfs_t blk2)
       finfo("Allocated Journal Block %d at Block %d.", i, alloc_blk);
     }
 
-  tmp = mfs_ser_mfs(blk1, tmp);
-  tmp = mfs_ser_mfs(blk2, tmp);
+  tmp = mfs_ser_mfs(*blk1, tmp);
+  tmp = mfs_ser_mfs(*blk2, tmp);
 
   finfo("All Journal Blocks allocated.");
 
@@ -576,26 +576,15 @@ int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t blk1, mfs_t blk2)
   finfo("Written magic sequence, size and journal array into the journal.");
 
   MFS_JRNL(sb).n_logs        = 0;
+  MFS_JRNL(sb).n_blks        = CONFIG_MNEMOFS_JOURNAL_NBLKS;
   MFS_JRNL(sb).log_cpg       = pg;
   MFS_JRNL(sb).log_cblkidx   = 0;
   MFS_JRNL(sb).log_spg       = MFS_JRNL(sb).log_cpg;
   MFS_JRNL(sb).log_sblkidx   = MFS_JRNL(sb).log_cblkidx;
   MFS_JRNL(sb).jrnlarr_pg    = MFS_BLK2PG(sb, blk);
   MFS_JRNL(sb).jrnlarr_pgoff = MFS_JRNL_SUFFIXSZ;
-  MFS_JRNL(sb).n_blks        = CONFIG_MNEMOFS_JOURNAL_NBLKS;
-  MFS_JRNL(sb).mblk1         = blk1;
-  MFS_JRNL(sb).mblk2         = blk2;
-
-  /* Master node */
-
-  mn = mfs_mn_fmt(sb, blk);
-  if (predict_false(mn == 0))
-    {
-      ret = -ENOSPC;
-      goto errout_with_buf;
-    }
-
-  /* TODO: Write master node's location in blk1, blk2. */
+  MFS_JRNL(sb).mblk1         = *blk1;
+  MFS_JRNL(sb).mblk2         = *blk2;
 
 errout_with_buf:
   kmm_free(buf);
@@ -659,7 +648,7 @@ int mfs_jrnl_updatedinfo(FAR const struct mfs_sb_s * const sb,
   mfs_t                 blkidx;
   mfs_t                 counter     = 0;
   mfs_t                 pg_in_block;
-  struct jrnl_log_s tmplog;
+  struct jrnl_log_s     tmplog;
 
   /* TODO: Allow optional filling of updated timestamps, etc. */
 
@@ -707,19 +696,19 @@ errout:
 }
 
 int mfs_jrnl_wrlog(FAR struct mfs_sb_s * const sb,
-                   const struct mfs_node_s node,
+                   FAR const struct mfs_node_s *node,
                    const struct mfs_ctz_s loc_new, const mfs_t sz_new)
 {
-  int          ret      = OK;
-  mfs_t        i;
-  mfs_t        n_pgs;
-  mfs_t        wr_sz;
-  mfs_t        jrnl_pg;
-  mfs_t        jrnl_blk;
-  FAR char    *buf      = NULL;
-  FAR char    *tmp      = NULL;
-  const mfs_t  log_sz   = sizeof(mfs_t) + MFS_LOGSZ(node.depth);
-  struct jrnl_log_s log;
+  int                ret      = OK;
+  mfs_t              i;
+  mfs_t              n_pgs;
+  mfs_t              wr_sz;
+  mfs_t              jrnl_pg;
+  mfs_t              jrnl_blk;
+  FAR char          *buf      = NULL;
+  FAR char          *tmp      = NULL;
+  const mfs_t        log_sz   = sizeof(mfs_t) + MFS_LOGSZ(node->depth);
+  struct jrnl_log_s  log;
 
   buf = kmm_zalloc(log_sz); /* For size before log. */
   if (predict_false(buf == NULL))
@@ -730,16 +719,16 @@ int mfs_jrnl_wrlog(FAR struct mfs_sb_s * const sb,
 
   /* Serialize */
 
-  log.depth       = node.depth;
-  log.sz_new      = node.depth;
+  log.depth       = node->depth;
+  log.sz_new      = sz_new;
   log.loc_new     = loc_new;
-  log.st_mtim_new = node.st_mtim;
-  log.st_atim_new = node.st_atim;
-  log.st_ctim_new = node.st_ctim;
-  log.path        = node.path;    /* Fine as temporarily usage. */
+  log.st_mtim_new = node->st_mtim;
+  log.st_atim_new = node->st_atim;
+  log.st_ctim_new = node->st_ctim;
+  log.path        = node->path;    /* Fine as temporarily usage. */
 
   tmp = buf;
-  tmp = mfs_ser_mfs(log_sz - sizeof(mfs_t), tmp);
+  tmp = mfs_ser_mfs(log_sz - sizeof(mfs_t), tmp); /* First 4 bytes have sz */
   tmp = ser_log(&log, tmp);
 
   /* Store */
@@ -820,7 +809,200 @@ errout:
 
 int mfs_jrnl_flush(FAR struct mfs_sb_s * const sb)
 {
-  /* TODO */
+  /* When a file or a directory is deleted.
+   *
+   * It will be modified to an entry in the LRU which details the deletion
+   * of all bytes from the child... as in, offset 0, deleted bytes is the
+   * size of the file.
+   *
+   * The new "location" can be used as (0, 0) to signify a deletion, even in
+   * its journal log.
+   *
+   * Also ensure if the size gets updated to 0.
+   *
+   * Then the flush operation problem will be solved for removal of files or
+   * directories.
+   *
+   * Move operation will not empty the child, but only the parent from the
+   * old parent.
+   */
 
-  return OK;
+  /* Time complexity is going to be horrendous. Hint: O(n^2). HOWEVER, as
+   * littlefs points out....if n is constant, it's essentially a O(k), or
+   * O(1) :D
+   */
+
+  /* TODO: Need to consider how the LRU and Journal interact with each other
+   * for newly created fs object's entries.
+   */
+
+  /* We're using updatectz to update the LRU inside the journal. Think
+   * about how that might affect the iteration attempts.
+   */
+
+  int                      ret           = OK;
+  mfs_t                    blkidx        = MFS_JRNL(sb).log_sblkidx;
+  mfs_t                    log_itr       = 0;
+  mfs_t                    pg_in_blk     = MFS_JRNL(sb).log_spg \
+                                           % MFS_PGINBLK(sb);
+  mfs_t                    tmp_blkidx;
+  mfs_t                    tmp_pg_in_blk;
+  mfs_t                    mn_blk1;
+  mfs_t                    mn_blk2;
+  mfs_t                    i;
+  mfs_t                    jrnl_blk;
+  mfs_t                    blk;
+  struct jrnl_log_s        log;
+  struct jrnl_log_s        tmp_log;
+  FAR struct mfs_path_s   *path          = NULL;
+  struct mfs_jrnl_state_s  j_state;
+  struct mfs_mn_s          mn_state;
+
+  while (log_itr < MFS_JRNL(sb).n_logs)
+    {
+      ret = jrnl_rdlog(sb, &blkidx, &pg_in_blk, &log);
+      if (predict_false(ret < 0))
+        {
+          DEBUGASSERT(ret != -ENOSPC); /* While condition is sufficient. */
+          goto errout;
+        }
+
+      if (log.loc_new.pg_e == 0 && log.loc_new.idx_e == 0)
+        {
+          /* Entry is deleted, do not bother with it. */
+
+          break;
+        }
+
+      tmp_blkidx    = blkidx;
+      tmp_pg_in_blk = pg_in_blk;
+
+      path = kmm_zalloc(log.depth * sizeof(struct mfs_path_s));
+      if (predict_false(path == NULL))
+        {
+          goto errout;
+        }
+
+      memcpy(path, log.path, log.depth * sizeof(struct mfs_path_s));
+      path[log.depth - 1].ctz = log.loc_new;
+
+      for (; ; )
+        {
+          ret = jrnl_rdlog(sb, &tmp_blkidx, &tmp_pg_in_blk, &tmp_log);
+          if (ret == -ENOSPC)
+            {
+              break;
+            }
+          else if (predict_false(ret < 0))
+            {
+              jrnl_log_free(&log);
+              goto errout;
+            }
+
+          if (tmp_log.depth > log.depth)
+            {
+              jrnl_log_free(&tmp_log);
+              continue;
+            }
+
+          if (!mfs_path_eq(&path[tmp_log.depth - 1],
+                          &tmp_log.path[tmp_log.depth - 1]))
+            {
+              jrnl_log_free(&tmp_log);
+              continue;
+            }
+
+          path[tmp_log.depth - 1] = tmp_log.path[tmp_log.depth - 1];
+
+          if (tmp_log.loc_new.pg_e == 0 && tmp_log.loc_new.idx_e == 0)
+            {
+              /* Entry is deleted, do not bother with it. */
+
+              break;
+            }
+        }
+
+      if (log.depth == 1)
+        {
+          MFS_MN(sb).root_ctz = path[log.depth - 1].ctz;
+          MFS_MN(sb).root_sz  = path[log.depth - 1].sz;
+
+          /* TODO: Other parameters. */
+        }
+      else
+        {
+          ret = mfs_lru_updatectz(sb, path, log.depth,
+                                  path[log.depth - 1].ctz,
+                                  path[log.depth - 1].sz);
+          if (predict_false(ret < 0))
+            {
+              mfs_free_patharr(path);
+              jrnl_log_free(&log);
+              goto errout;
+            }
+        }
+
+      mfs_free_patharr(path);
+      jrnl_log_free(&log);
+    }
+
+  if (MFS_MN(sb).mblk_idx == MFS_PGINBLK(sb))
+    {
+      mn_blk1 = 0;
+      mn_blk2 = 0;
+    }
+  else
+    {
+      /* FUTURE TODO: Save the two block numbers in master node structure to
+       * be faster.
+       */
+
+      mn_blk1 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
+      mn_blk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
+    }
+
+  /* Reallocate journal. */
+
+  j_state  = MFS_JRNL(sb);
+  mn_state = MFS_MN(sb);
+
+  ret = mfs_jrnl_fmt(sb, &mn_blk1, &mn_blk2, &jrnl_blk);
+  if (predict_false(ret < 0))
+    {
+      MFS_JRNL(sb) = j_state;
+      goto errout;
+    }
+
+  /* Write master node entry. */
+
+  ret = mfs_mn_sync(sb, &path[0], mn_blk1, mn_blk2, jrnl_blk);
+  if (predict_false(ret < 0))
+    {
+      MFS_MN(sb) = mn_state;
+      goto errout;
+    }
+
+  /* Mark all old blocks of journal (and master blocks) as deletable. */
+
+  for (i = 0; i < MFS_JRNL(sb).n_blks + 2; i++)
+    {
+      blk = mfs_jrnl_blkidx2blk(sb, i);
+      mfs_ba_blkmarkdel(sb, blk);
+    }
+
+  /* Delete outdated blocks. */
+
+  ret = mfs_ba_delmarked(sb);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+errout:
+  return ret;
+}
+
+bool mfs_jrnl_isempty(FAR const struct mfs_sb_s * const sb)
+{
+  return MFS_JRNL(sb).n_logs == 0;
 }

@@ -97,11 +97,12 @@ static void lru_nodesearch(FAR const struct mfs_sb_s * const sb,
                            FAR const struct mfs_path_s * const path,
                            const mfs_t depth, FAR struct mfs_node_s **node);
 static bool lru_islrufull(FAR struct mfs_sb_s * const sb);
-static bool lru_isnodefull(FAR struct mfs_node_s *node);
+static bool lru_isnodefull(FAR struct mfs_sb_s * const sb,
+                           FAR struct mfs_node_s *node);
 static int  lru_nodeflush(FAR struct mfs_sb_s * const sb,
                           FAR struct mfs_path_s * const path,
                           const mfs_t depth, FAR struct mfs_node_s *node,
-                          bool clean_node);
+                          bool rm_node);
 static int  lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
                         mfs_t bytes, int op,
                         FAR struct mfs_path_s * const path,
@@ -109,6 +110,7 @@ static int  lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
 static int  lru_updatesz(FAR struct mfs_sb_s * sb,
                          FAR struct mfs_path_s * const path,
                          const mfs_t depth, const mfs_t new_sz);
+static void lru_node_free(FAR struct mfs_node_s *node);
 
 /****************************************************************************
  * Private Data
@@ -214,11 +216,15 @@ static void lru_nodesearch(FAR const struct mfs_sb_s * const sb,
  *  true   - LRU is full
  *  false  - LRU is not full.
  *
+ * Assumptions/Limitations:
+ *   When the journal is being flushed, LRU memory limiters will be turned
+ *   off.
+ *
  ****************************************************************************/
 
 static bool lru_islrufull(FAR struct mfs_sb_s * const sb)
 {
-  return sb->n_lru == CONFIG_MNEMOFS_NLRU;
+  return !MFS_FLUSH(sb) && list_length(&MFS_LRU(sb)) == CONFIG_MNEMOFS_NLRU;
 }
 
 /****************************************************************************
@@ -234,11 +240,16 @@ static bool lru_islrufull(FAR struct mfs_sb_s * const sb)
  *  true   - LRU node is full
  *  false  - LRU node is not full.
  *
+ * Assumptions/Limitations:
+ *   When the journal is being flushed, LRU memory limiters will be turned
+ *   off.
+ *
  ****************************************************************************/
 
-static bool lru_isnodefull(FAR struct mfs_node_s *node)
+static bool lru_isnodefull(FAR struct mfs_sb_s * const sb,
+                           FAR struct mfs_node_s *node)
 {
-  return node->n_list == CONFIG_MNEMOFS_NLRUDELTA;
+  return !MFS_FLUSH(sb) && node->n_list == CONFIG_MNEMOFS_NLRUDELTA;
 }
 
 /****************************************************************************
@@ -263,15 +274,16 @@ static void lru_free_delta(FAR struct mfs_delta_s *delta)
  *
  * Description:
  *   Clear out the deltas in a node by writing them to the flash, and adding
- *   a log about it to the journal.
+ *   a log about it to the journal. Does not flush the journal, and assumes
+ *   enough space is in the journal to handle a log.
  *
  * Input Parameters:
- *   sb          - Superblock instance of the device.
- *   path        - CTZ representation of the relpath.
- *   depth       - Depth of `path`.
- *   node        - LRU node to flush.
- *   clean_node  - To remove node out of LRU (true), or just clear the
- *                 deltas (false).
+ *   sb      - Superblock instance of the device.
+ *   path    - CTZ representation of the relpath.
+ *   depth   - Depth of `path`.
+ *   node    - LRU node to flush.
+ *   rm_node - To remove node out of LRU (true), or just clear the deltas
+ *             (false).
  *
  * Returned Value:
  *  0   - OK
@@ -282,37 +294,57 @@ static void lru_free_delta(FAR struct mfs_delta_s *delta)
 static int lru_nodeflush(FAR struct mfs_sb_s * const sb,
                          FAR struct mfs_path_s * const path,
                          const mfs_t depth, FAR struct mfs_node_s *node,
-                         bool clean_node)
+                         bool rm_node)
 {
   int                     ret   = OK;
+  struct mfs_ctz_s        loc;
   FAR struct mfs_delta_s *delta = NULL;
   FAR struct mfs_delta_s *tmp   = NULL;
 
   if (predict_false(node == NULL))
     {
-      return -ENOMEM;
+      return -EINVAL;
     }
 
-  /* TODO: Implement effct of clean_node. */
-
-  ret = mfs_ctz_wrtnode(sb, node);
+  ret = mfs_ctz_wrtnode(sb, node, &loc);
   if (predict_false(ret < 0))
     {
       goto errout;
     }
 
-  /* Reset node stats. */
-
-  node->range_max = 0;
-  node->range_min = UINT32_MAX;
-
   /* Free deltas after flush. */
 
-  list_for_every_entry_safe(&node->list, delta, tmp, struct mfs_delta_s,
+  finfo("Removing Deltas.");
+
+  list_for_every_entry_safe(&node->delta, delta, tmp, struct mfs_delta_s,
                             list)
     {
       list_delete_init(&delta->list);
       lru_free_delta(delta);
+    }
+
+  if (rm_node)
+    {
+      finfo("Deleting node. Old size: %u.", list_length(&MFS_LRU(sb)));
+      list_delete_init(&node->list);
+      finfo("Deleted node. New size: %u.", list_length(&MFS_LRU(sb)));
+    }
+  else
+    {
+      /* Reset node stats. */
+
+      finfo("Resetting node.");
+      memset(node, 0, sizeof(struct mfs_node_s));
+      node->range_min = UINT32_MAX;
+    }
+
+  finfo("Updating CTZ in parent.");
+  ret = mfs_lru_updatectz(sb, node->path, node->depth, loc, node->sz);
+
+  if (rm_node)
+    {
+      finfo("Freeing node.");
+      lru_node_free(node);
     }
 
 errout:
@@ -352,6 +384,8 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
   FAR struct mfs_node_s  *node      = NULL;
   FAR struct mfs_node_s  *last_node = NULL;
   FAR struct mfs_delta_s *delta     = NULL;
+
+  DEBUGASSERT(depth > 0);
 
   lru_nodesearch(sb, path, depth, &node);
 
@@ -394,20 +428,24 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
                                         struct mfs_node_s, list);
           list_delete_init(&last_node->list);
           list_add_tail(&MFS_LRU(sb), &node->list);
-          finfo("LRU flushing node complete, now only %u nodes", sb->n_lru);
+          finfo("LRU flushing node complete, now only %u nodes",
+                list_length(&MFS_LRU(sb)));
         }
       else
         {
           list_add_tail(&MFS_LRU(sb), &node->list);
-          sb->n_lru++;
-          finfo("Node inserted into LRU, and it now %u node(s).", sb->n_lru);
+          finfo("Node inserted into LRU, and it now %u node(s).",
+                list_length(&MFS_LRU(sb)));
         }
     }
-  else if (found && lru_isnodefull(node))
+  else if (found && lru_isnodefull(sb, node))
     {
-      /* Node flush writes to the flash and journal. */
+      /* This can be optimized further if needed, but for now, for saftey of
+       * the data, I think it's better to flush the entire thing. It won't
+       * flush ALL of it, just, whatever's required.
+       */
 
-      ret = lru_nodeflush(sb, path, depth, node, false);
+      ret = mnemofs_flush(sb);
       if (predict_false(ret < 0))
         {
           goto errout_with_node;
@@ -563,12 +601,13 @@ static int lru_updatesz(FAR struct mfs_sb_s * sb,
   mfs_ser_mfs(new_sz, buf);
 
   /* This function will be used by mfs_lru_wr itself, but given that if
-   * there is no change in size, this won't cause an infinite loop, this
-   * should be fine.
+   * there is no change in size, this won't cause an infinite loop (or, in
+   * reality, a recursion till it reaches the top of the tree), this should
+   * be fine.
    */
 
   ret = mfs_lru_wr(sb, path[depth - 2].off + offsetof(struct mfs_dirent_s,
-                   sz), sizeof(mfs_t), path, depth, buf);
+                   sz), sizeof(mfs_t), path, depth - 1, buf);
   if (predict_false(ret < 0))
     {
       goto errout;
@@ -580,22 +619,220 @@ errout:
   return ret;
 }
 
+static void lru_node_free(FAR struct mfs_node_s *node)
+{
+  mfs_free_patharr(node->path);
+  kmm_free(node);
+}
+
+static bool lru_sort_cmp(FAR struct mfs_node_s * const node,
+                         FAR struct mfs_node_s * const pivot)
+{
+  return node->depth < pivot->depth;
+}
+
+static void lru_sort(FAR struct mfs_sb_s * const sb,
+                     FAR struct list_node *left,
+                     FAR struct list_node *right)
+{
+  FAR struct mfs_node_s *node   = NULL;
+  FAR struct mfs_node_s *next   = NULL;
+  FAR struct mfs_node_s *pivot  = NULL;
+  FAR struct list_node  *aend   = NULL; /* After end. */
+  FAR struct list_node  *bfirst = NULL; /* Before first. */
+
+  if (left == right)
+    {
+      return;
+    }
+
+  /* If left or right is NULL, it means that refers to MFS_LRU(sb). */
+
+  aend   = right->next;
+  bfirst = left->prev;
+
+  node  = list_container_of(left, struct mfs_node_s, list);
+  pivot = list_container_of(right, struct mfs_node_s, list);
+
+  if (node->list.next == &pivot->list)
+    {
+      /* Only two items in the window...node and pivot, so insertion sort. */
+
+      if (lru_sort_cmp(node, pivot))
+        {
+          /* Add node after the pivot. */
+
+          list_delete_init(&node->list);
+          list_add_after(&pivot->list, &node->list);
+
+          DEBUGASSERT(pivot->list.prev == bfirst);
+        }
+
+      DEBUGASSERT(!lru_sort_cmp(node, pivot));
+
+      return;
+    }
+
+  list_for_every_entry_safe_from(&MFS_LRU(sb), node, next, struct mfs_node_s,
+                                 list)
+    {
+      if (node == pivot)
+        {
+          break;
+        }
+
+      if (lru_sort_cmp(node, pivot))
+        {
+          /* Add node after the pivot. */
+
+          list_delete_init(&node->list);
+          list_add_after(&pivot->list, &node->list);
+        }
+    }
+
+  if (bfirst->next != &pivot->list)
+    {
+      lru_sort(sb, bfirst->next, pivot->list.prev);
+    }
+
+  if (aend->prev != &pivot->list)
+    {
+      lru_sort(sb, pivot->list.next, aend->prev);
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int mfs_lru_ctzflush(FAR struct mfs_sb_s * const sb,
-                     FAR struct mfs_path_s * const path, const mfs_t depth)
+int mfs_lru_flush(FAR struct mfs_sb_s * const sb)
 {
-  struct mfs_node_s *node = NULL;
+  int                    ret  = OK;
+  FAR struct mfs_node_s *tmp  = NULL;
+  FAR struct mfs_node_s *tmp2 = NULL;
+  FAR struct mfs_node_s *node = NULL;
+  FAR struct mfs_node_s *next = NULL;
 
-  lru_nodesearch(sb, path, depth, &node);
-  if (node == NULL)
+/* Modified quick sort in linked lists. What is wanted is like inverted
+ * topological sort, but all the files (no children) are at the front,
+ * their depths don't matter. BUT, when it comes to directories, they need
+ * to be sorted in a decreasing order of their depths to reduce updates due
+ * to CoW. This will trickle up to the root, such that the root will be the
+ * last to get updated, and then the master node.
+ *
+ * However, since passing the mode all the way requires a lot of change, and
+ * is a redundant piece of information in most cases, the quick sort can
+ * simply be done on the basis of depth, and this adventure can be left as a
+ * TOOD.
+ *
+ * This involves recursion, but given the LRU size is a constant, the depth
+ * of recursion will be log2(n). For an LRU size of even 128 (which is quite
+ * big), the stack depth for this will be 7.
+ */
+
+  finfo("Sorting the LRU. No. of nodes: %u.", list_length(&MFS_LRU(sb)));
+
+  lru_sort(sb, MFS_LRU(sb).next, MFS_LRU(sb).prev);
+  MFS_FLUSH(sb) = true;
+
+  list_for_every_entry_safe(&MFS_LRU(sb), node, next, struct mfs_node_s,
+                            list)
     {
-      return OK;
+      finfo("Current node depth: %u.", node->depth);
+
+      if (node->depth != 1)
+        {
+          finfo("Checking for parent.");
+
+          /* Ensuring parent is either present, or inserted into the LRU.
+           * No need of doing this before removing current node from LRU,
+           * however, this allows us to possibly skip allocating path again
+           * after freeing the current node.
+           */
+
+          /* We can not rely on normal LRU node insertions, as they will
+           * not be inserted in a sorted manner, and would need the entire
+           * LRU to be sorted again, so we insert it manually.
+           */
+
+          lru_nodesearch(sb, node->path, node->depth - 1, &tmp);
+
+          if (tmp == NULL)
+            {
+              finfo("Adding parent to LRU");
+
+              tmp = kmm_zalloc(sizeof(struct mfs_node_s));
+              if (predict_false(tmp == NULL))
+                {
+                  ret = -ENOMEM;
+                  goto errout;
+                }
+
+              tmp->range_max = 0;
+              tmp->range_min = UINT32_MAX;
+
+              /* TODO: Time fields. in tmp. */
+
+              tmp->depth = node->depth - 1;
+              tmp->path  = kmm_zalloc((node->depth - 1)
+                                      * sizeof(struct mfs_path_s));
+              if (predict_false(tmp->path == NULL))
+                {
+                  ret = -ENOMEM;
+                  goto errout_with_tmp;
+                }
+
+              memcpy(tmp->path, node->path,
+                    sizeof(struct mfs_path_s) * tmp->depth);
+              list_initialize(&tmp->list);
+              list_initialize(&tmp->delta);
+
+              /* Insert into sorted. */
+
+              list_for_every_entry(&MFS_LRU(sb), tmp2, struct mfs_node_s,
+                                    list)
+                {
+                  if (!lru_sort_cmp(tmp, tmp2))
+                    {
+                      list_add_before(&tmp2->list, &tmp->list);
+
+                      if (tmp2->list.prev == &node->list)
+                        {
+                          next = tmp2;
+                        }
+
+                        break;
+                    }
+                }
+            }
+          else
+            {
+              finfo("Parent already in LRU.");
+            }
+        }
+      else
+        {
+          finfo("Root node from LRU.");
+        }
+
+      /* Parent gets updated inside the LRU in the function below. */
+
+      finfo("Flushing node.");
+      ret = lru_nodeflush(sb, node->path, node->depth, node, true);
+      if (predict_true(ret < 0))
+        {
+          goto errout;
+        }
     }
 
-  return lru_nodeflush(sb, path, depth, node, true);
+  return ret;
+
+errout_with_tmp:
+  lru_node_free(node);
+
+errout:
+  MFS_FLUSH(sb) = false;
+  return ret;
 }
 
 int mfs_lru_del(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
@@ -615,7 +852,6 @@ int mfs_lru_wr(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
 void mfs_lru_init(FAR struct mfs_sb_s * const sb)
 {
   list_initialize(&MFS_LRU(sb));
-  sb->n_lru = 0;
 
   finfo("LRU Initialized\n");
 }
@@ -639,22 +875,23 @@ int mfs_lru_rdfromoff(FAR const struct mfs_sb_s * const sb,
   FAR struct mfs_node_s  *node      = NULL;
   FAR struct mfs_delta_s *delta     = NULL;
 
-  lru_nodesearch(sb, path, depth, &node);
-  if (node == NULL)
-    {
-      goto errout;
-    }
-
   /* Node is NOT supposed to be freed by the caller, it's a reference to
    * the actual node in the LRU and freeing it could break the entire LRU.
    */
 
   tmp      = buf;
-  ctz      = node->path[node->depth - 1].ctz;
+  ctz      = path[depth - 1].ctz;
   lower    = data_off;
   upper_og = lower + buflen;
   upper    = upper_og;
   rem_sz   = buflen;
+
+  lru_nodesearch(sb, path, depth, &node);
+  if (node == NULL)
+    {
+      mfs_ctz_rdfromoff(sb, ctz, 0, buflen, tmp);
+      goto errout;
+    }
 
   while (rem_sz > 0)
     {
@@ -773,34 +1010,57 @@ int mfs_lru_updatedinfo(FAR const struct mfs_sb_s * const sb,
 
 int mfs_lru_updatectz(FAR struct mfs_sb_s * sb,
                       FAR struct mfs_path_s * const path, const mfs_t depth,
-                      const struct mfs_ctz_s new_ctz)
+                      const struct mfs_ctz_s new_ctz, mfs_t new_sz)
 {
   int                    ret                            = OK;
   char                   buf[sizeof(struct mfs_ctz_s)];
   FAR struct mfs_node_s *node                           = NULL;
 
+  /* TODO: Other attributes like time stamps to be updated as well. */
+
   list_for_every_entry(&MFS_LRU(sb), node, struct mfs_node_s, list)
     {
       if (node->depth >= depth &&
-          mfs_ctz_eq(&node->path[depth - 1].ctz, &path[depth - 1].ctz) &&
-          node->path[depth - 1].sz == path[depth - 1].sz)
+          mfs_ctz_eq(&node->path[depth - 1].ctz, &path[depth - 1].ctz))
         {
           node->path[depth - 1].ctz = new_ctz;
+          node->path[depth - 1].sz  = path[depth - 1].sz;
         }
     }
 
+  if (depth == 1)
+    {
+      MFS_MN(sb).root_sz  = new_sz;
+      MFS_MN(sb).root_ctz = new_ctz;
+
+      goto errout;
+    }
+
+  /* Write to LRU. */
+
   memset(buf, 0, sizeof(struct mfs_ctz_s));
   mfs_ser_ctz(&new_ctz, buf);
-
   ret = mfs_lru_wr(sb, path[depth - 1].off + offsetof(struct mfs_dirent_s,
-                   ctz), sizeof(struct mfs_ctz_s), path, depth, buf);
+                   ctz), sizeof(struct mfs_ctz_s), path, depth - 1, buf);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  ret = lru_updatesz(sb, path, depth, new_sz);
   if (predict_false(ret < 0))
     {
       goto errout;
     }
 
   path[depth - 1].ctz = new_ctz;
+  path[depth - 1].sz  = new_sz;
 
 errout:
   return ret;
+}
+
+bool mfs_lru_isempty(FAR struct mfs_sb_s * const sb)
+{
+  return list_length(&MFS_LRU(sb)) == 0;
 }

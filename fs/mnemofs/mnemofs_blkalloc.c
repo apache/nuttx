@@ -236,11 +236,11 @@ static int is_pg_writeable(FAR struct mfs_sb_s * const sb, mfs_t pg,
 
 static int is_blk_writeable(FAR struct mfs_sb_s * const sb, const mfs_t blk)
 {
-  mfs_t idx;
+  int     blkbad_status;
+  mfs_t   i;
+  mfs_t   pg            = MFS_BLK2PG(sb, blk);
+  mfs_t   idx;
   uint8_t off;
-  mfs_t pg = MFS_BLK2PG(sb, blk);
-  mfs_t i;
-  int blkbad_status;
 
   /* Bad block check. */
 
@@ -279,15 +279,15 @@ static int is_blk_writeable(FAR struct mfs_sb_s * const sb, const mfs_t blk)
  * Public Functions
  ****************************************************************************/
 
-int mfs_ba_init(FAR struct mfs_sb_s * const sb)
+int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
 {
   int     ret  = OK;
   uint8_t log;
 
-/* We need at least 5 blocks, as one is occupied by superblock, at least
- * one for the journal, 2 for journal's master blocks, and at least one for
- * actual data.
- */
+  /* We need at least 5 blocks, as one is occupied by superblock, at least
+   * one for the journal, 2 for journal's master blocks, and at least one for
+   * actual data.
+   */
 
   if (MFS_NBLKS(sb) < 5)
     {
@@ -326,14 +326,39 @@ int mfs_ba_init(FAR struct mfs_sb_s * const sb)
       goto errout_with_k_del;
     }
 
-  /* TODO: Fill MFS_BA(sb).bmap_upgs after tree traversal. */
-
   finfo("mnemofs: Block Allocator initialized, starting at page %d.\n",
         MFS_BLK2PG(sb, MFS_BA(sb).s_blk));
   return ret;
 
 errout_with_k_del:
   kmm_free(MFS_BA(sb).k_del);
+
+errout:
+  return ret;
+}
+
+int mfs_ba_init(FAR struct mfs_sb_s * const sb)
+{
+  /* TODO: Ensure journal and master node are initialized before this. */
+
+  int ret = OK;
+
+  ret = mfs_ba_fmt(sb);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  /* Traverse the FS tree. */
+
+  ret = mfs_pitr_traversefs(sb, MFS_MN(sb).root_ctz, MFS_ISDIR);
+  if (predict_false(ret < 0))
+    {
+      goto errout_with_ba;
+    }
+
+errout_with_ba:
+  mfs_ba_free(sb);
 
 errout:
   return ret;
