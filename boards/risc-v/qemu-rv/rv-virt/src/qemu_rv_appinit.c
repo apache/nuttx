@@ -38,6 +38,7 @@
 
 #include "hardware/qemu_rv_memorymap.h"
 #include "qemu_rv_memorymap.h"
+#include "qemu_rv_rptun.h"
 
 #include "riscv_internal.h"
 #include "romfs.h"
@@ -137,6 +138,10 @@ int board_app_initialize(uintptr_t arg)
 #ifndef CONFIG_BOARD_EARLY_INITIALIZE
   qemu_virtio_register_mmio_devices();
 #endif
+#endif
+
+#ifdef CONFIG_RPTUN
+  qemu_rptun_init();
 #endif
 
   return OK;
