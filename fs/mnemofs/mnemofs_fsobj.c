@@ -1054,7 +1054,7 @@ int mfs_pitr_traversefs(FAR struct mfs_sb_s * sb, const struct mfs_ctz_s ctz,
   path[0].ctz = MFS_MN(sb).root_ctz;
   path[0].sz  = MFS_MN(sb).root_sz;
 
-  ret = pitr_traverse(sb, path, 0, &capacity);
+  ret = pitr_traverse(sb, path, 1, &capacity);
 
   mfs_free_patharr(path);
 

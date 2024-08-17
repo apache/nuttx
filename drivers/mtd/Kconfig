@@ -313,16 +313,18 @@ config MTD_NAND_RAM_STATUS
 	int "Log status of virtual NAND Flash."
 	depends on MTD_NAND_RAM_DEBUG
 	default 3
-	range 1 8
+	range 1 10
 	---help---
-		1 - Log every instruction.
-		2 - Log every 5 instructions.
-		3 - Log every 10 instructions.
-		4 - Log every 50 instructions.
-		5 - Log every 100 instructions.
-		6 - Log every 500 instructions.
-		7 - Log every 1000 instructions.
-		8 - Log every 5000 instructions.
+		1  - Log every instruction.
+		2  - Log every 5 instructions.
+		3  - Log every 10 instructions.
+		4  - Log every 50 instructions.
+		5  - Log every 100 instructions.
+		6  - Log every 500 instructions.
+		7  - Log every 1000 instructions.
+		8  - Log every 5000 instructions.
+		9  - Log every 10000 instructions.
+		10 - Log every 50000 instructions.
 
 endif #MTD_NAND_RAM
 
