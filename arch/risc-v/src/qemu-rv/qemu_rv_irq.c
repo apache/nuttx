@@ -37,6 +37,30 @@
 #include "riscv_aia.h"
 #include "chip.h"
 
+#ifdef CONFIG_RPTUN
+#include "qemu_rv_rptun.h"
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_RPTUN
+static int qemu_ipi_handler(int mcause, FAR void *regs, FAR void *args)
+{
+  /* Clear IPI (Inter-Processor-Interrupt) */
+
+  riscv_ipi_clear(up_cpu_index());
+
+#ifdef CONFIG_SMP
+  riscv_pause_handler(mcause, regs, args);
+#endif
+
+  qemu_rptun_ipi();
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -106,7 +130,13 @@ void up_irqinitialize(void)
 
   riscv_exception_attach();
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_RPTUN
+  /* Replace default IRQ_SOFT handler */
+
+  irq_attach(RISCV_IRQ_SOFT, qemu_ipi_handler, NULL);
+#endif
+
+#if defined(CONFIG_SMP) || defined(CONFIG_RPTUN)
   /* Clear IPI for CPU0 */
 
   riscv_ipi_clear(0);
