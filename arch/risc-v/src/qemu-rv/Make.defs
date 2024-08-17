@@ -38,3 +38,7 @@ endif
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += qemu_rv_userspace.c
 endif
+
+ifeq ($(CONFIG_RPTUN),y)
+CHIP_CSRCS += qemu_rv_rptun.c
+endif
