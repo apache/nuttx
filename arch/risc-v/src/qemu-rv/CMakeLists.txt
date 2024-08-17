@@ -43,4 +43,8 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS qemu_rv_userspace.c)
 endif()
 
+if(CONFIG_RPTUN)
+  list(APPEND SRCS qemu_rv_rptun.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
