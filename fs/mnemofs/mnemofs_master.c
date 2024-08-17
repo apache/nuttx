@@ -100,7 +100,7 @@
 static FAR char       *ser_mn(const struct mfs_mn_s mn,
                               FAR char * const out);
 static FAR const char *deser_mn(FAR const char * const in,
-                                FAR struct mfs_mn_s *mn, FAR uint8_t *hash);
+                                FAR struct mfs_mn_s *mn, FAR uint16_t *hash);
 
 /****************************************************************************
  * Private Data
@@ -141,7 +141,9 @@ static FAR char *ser_mn(const struct mfs_mn_s mn, FAR char * const out)
   tmp = mfs_ser_ctz(&mn.root_ctz, tmp);
   tmp = mfs_ser_mfs(mn.root_sz, tmp);
   tmp = mfs_ser_timespec(&mn.ts, tmp);
-  tmp = mfs_ser_8(mfs_arrhash(out, tmp - out), tmp);
+  tmp = mfs_ser_16(mfs_hash(out, tmp - out), tmp);
+
+  /* TODO: Update this, and the make a macro for size of MN. */
 
   return tmp;
 }
@@ -166,7 +168,7 @@ static FAR char *ser_mn(const struct mfs_mn_s mn, FAR char * const out)
  ****************************************************************************/
 
 static FAR const char *deser_mn(FAR const char * const in,
-                                FAR struct mfs_mn_s *mn, FAR uint8_t *hash)
+                                FAR struct mfs_mn_s *mn, FAR uint16_t *hash)
 {
   FAR const char *tmp = in;
 
@@ -175,7 +177,9 @@ static FAR const char *deser_mn(FAR const char * const in,
   tmp = mfs_deser_ctz(tmp, &mn->root_ctz);
   tmp = mfs_deser_mfs(tmp, &mn->root_sz);
   tmp = mfs_deser_timespec(tmp, &mn->ts);
-  tmp = mfs_deser_8(tmp, hash);
+  tmp = mfs_deser_16(tmp, hash);
+
+  /* TODO: Update this, and the make a macro for size of MN. */
 
   return tmp;
 }
@@ -192,15 +196,14 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
   mfs_t           mblk2;
   mfs_t           jrnl_blk_tmp;
   bool            found        = false;
-  uint8_t         hash;
+  uint16_t        hash;
   struct mfs_mn_s mn;
   const mfs_t     sz           = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
   char            buftmp[4];
   char            buf[sz + 1];
 
-  mblk1 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
-  mblk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
-
+  mblk1       = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
+  mblk2       = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
   mn.jrnl_blk = mn.jrnl_blk;
   mn.mblk_idx = 0;
   mn.pg       = MFS_BLK2PG(sb, mblk1);
@@ -238,7 +241,6 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
     }
   else
     {
-      mn.mblk_idx--;
       mn.pg--;
     }
 
@@ -247,7 +249,7 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
   /* Deserialize. */
 
   deser_mn(buf, &mn, &hash);
-  if (hash != mfs_arrhash(buf, sz))
+  if (hash != mfs_hash(buf, sz))
     {
       ret = -EINVAL;
       goto errout;
@@ -263,12 +265,11 @@ errout:
   return ret;
 }
 
-int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
+int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t mblk1,
+               const mfs_t mblk2, const mfs_t jrnl_blk)
 {
   int              ret         = OK;
   mfs_t            pg;
-  mfs_t            mblk1;
-  mfs_t            mblk2;
   struct mfs_mn_s  mn;
   struct timespec  ts;
   const mfs_t      sz          = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
@@ -277,9 +278,6 @@ int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
   clock_gettime(CLOCK_REALTIME, &ts);
 
   memset(buf, 0, sz + 1);
-
-  mblk1 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
-  mblk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
 
   pg = mfs_ba_getpg(sb);
   if (predict_false(pg == 0))
@@ -318,6 +316,7 @@ int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
       goto errout;
     }
 
+  mn.mblk_idx = 1;
   MFS_MN(sb) = mn;
   finfo("Master node written. Now at page %d, timestamp %lld.%.9ld.",
         MFS_MN(sb).pg, (long long)MFS_MN(sb).ts.tv_sec,
@@ -346,9 +345,9 @@ int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
   mblk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
   mn    = MFS_MN(sb);
 
-  mn.root_ctz    = root;
+  mn.root_ctz = root;
   mn.root_sz = root_sz;
-  mn.mblk_idx++;
+  mn.mblk_idx++; /* TODO */
   mn.pg++;
 
   ser_mn(mn, buf);
@@ -359,6 +358,58 @@ int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
       goto errout;
     }
 
+  MFS_MN(sb) = mn;
+
+errout:
+  return ret;
+}
+
+int mfs_mn_sync(FAR struct mfs_sb_s *sb,
+                FAR struct mfs_path_s * const new_loc,
+                const mfs_t blk1, const mfs_t blk2, const mfs_t jrnl_blk)
+{
+  int              ret         = OK;
+  struct timespec  ts;
+  struct mfs_mn_s  mn;
+  const mfs_t      sz          = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
+  char             buf[sz + 1];
+
+  mn = MFS_MN(sb);
+
+  clock_gettime(CLOCK_REALTIME, &ts);
+
+  if (mn.mblk_idx == MFS_PGINBLK(sb))
+    {
+      /* New blocks have been already allocated by the journal. */
+
+      mn.mblk_idx = 0;
+      mn.pg       = MFS_BLK2PG(sb, blk1);
+    }
+
+  mn.ts        = ts;
+  mn.root_sz   = new_loc->sz;
+  mn.root_ctz  = new_loc->ctz;
+  mn.root_mode = 0777 | S_IFDIR;
+
+  /* TODO: Root timestamps. */
+
+  /* Serialize. */
+
+  ser_mn(mn, buf);
+
+  ret = mfs_write_page(sb, buf, sz, MFS_BLK2PG(sb, blk1) + mn.mblk_idx, 0);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  ret = mfs_write_page(sb, buf, sz, MFS_BLK2PG(sb, blk2) + mn.mblk_idx, 0);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  mn.mblk_idx++;
   MFS_MN(sb) = mn;
 
 errout:

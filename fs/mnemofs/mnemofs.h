@@ -86,14 +86,17 @@
 #define MFS_RWBUF(sb)              ((sb)->rw_buf)
 #define MFS_BA(sb)                 ((sb)->ba_state)
 #define MFS_NBLKS(sb)              ((sb)->n_blks)
+#define MFS_OFILES(sb)             ((sb)->of)
+#define MFS_FLUSH(sb)              ((sb)->flush)
 #define MFS_NPGS(sb)               (MFS_NBLKS(sb) * MFS_PGINBLK(sb))
 
 #define MFS_HASHSZ                 16
 #define MFS_CTZ_SZ(l)              ((l)->sz)
-#define MFS_DIRENTSZ(dirent)       ((mfs_t) (sizeof(struct mfs_dirent_s) \
-                                    + (dirent)->namelen))
+#define MFS_DIRENTSZ(dirent)       ((2 * 2) + 4 + (16 * 3) + 8 + 1 \
+                                    + (dirent)->namelen)
 
-#define MFS_JRNL_LIM(sb)           (MFS_JRNL(sb).n_blks) /* TODO: 50-75% */
+#define MFS_JRNL_LIM(sb)           (MFS_JRNL(sb).n_blks / 2)
+#define MFS_TRAVERSE_INITSZ        8
 
 /****************************************************************************
  * Public Types
@@ -149,7 +152,7 @@ struct mfs_mn_s
 {
   mfs_t            pg;            /* Only mblk1's pg will be used here. */
   mfs_t            jrnl_blk;      /* Start of journal. */
-  mfs_t            mblk_idx;
+  mfs_t            mblk_idx;      /* Index for next MN entry inside blk. */
   struct mfs_ctz_s root_ctz;
   mfs_t            root_sz;
   struct timespec  ts;
@@ -170,7 +173,7 @@ struct mfs_jrnl_state_s
   mfs_t    log_sblkidx;   /* First jrnl blk index. TODO: jrnlarr > 1 blk. */
   mfs_t    jrnlarr_pg;
   mfs_t    jrnlarr_pgoff;
-  uint16_t n_blks;
+  uint16_t n_blks;        /* TODO: Does not include the master node. */
 };
 
 struct mfs_sb_s
@@ -185,15 +188,14 @@ struct mfs_sb_s
   uint8_t                 log_blk_sz;
   mfs_t                   n_blks;
   uint8_t                 log_n_blks;
-  mfs_t                   n_lru;
   uint16_t                pg_in_blk;
   uint8_t                 log_pg_in_blk;
-  uint8_t                 j_nblks;
   struct mfs_mn_s         mn;            /* Master Node */
   struct mfs_jrnl_state_s j_state;       /* Journal State */
   struct mfs_ba_state_s   ba_state;      /* Block Allocator State */
   struct list_node        lru;
   struct list_node        of;            /* open files. */
+  bool                    flush;
 };
 
 /* This is for *dir VFS methods. */
@@ -417,6 +419,10 @@ static inline mfs_t mfs_popcnt(mfs_t x)
  * Public Function Prototypes
  ****************************************************************************/
 
+/* mnemofs.c */
+
+int mnemofs_flush(FAR struct mfs_sb_s *sb);
+
 /* mnemofs_journal.c */
 
 /****************************************************************************
@@ -459,7 +465,8 @@ int mfs_jrnl_init(FAR struct mfs_sb_s * const sb, mfs_t blk);
  *
  ****************************************************************************/
 
-int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t blk1, mfs_t blk2);
+int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t *blk1, mfs_t *blk2,
+                 FAR mfs_t *jrnl_blk);
 
 /****************************************************************************
  * Name: mfs_jrnl_free
@@ -551,7 +558,7 @@ int mfs_jrnl_updatedinfo(FAR const struct mfs_sb_s * const sb,
  ****************************************************************************/
 
 int mfs_jrnl_wrlog(FAR struct mfs_sb_s * const sb,
-                   const struct mfs_node_s node,
+                   FAR const struct mfs_node_s *node,
                    const struct mfs_ctz_s loc_new, const mfs_t sz_new);
 
 /****************************************************************************
@@ -572,7 +579,40 @@ int mfs_jrnl_wrlog(FAR struct mfs_sb_s * const sb,
 
 int mfs_jrnl_flush(FAR struct mfs_sb_s * const sb);
 
+/****************************************************************************
+ * Name: mfs_jrnl_isempty
+ *
+ * Description:
+ *   Check if the journal is empty.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *
+ * Returned Value:
+ *   True is the journal is empty, false otherwise.
+ *
+ ****************************************************************************/
+
+bool mfs_jrnl_isempty(FAR const struct mfs_sb_s * const sb);
+
 /* mnemofs_blkalloc.c */
+
+/****************************************************************************
+ * Name: mfs_ba_init
+ *
+ * Description:
+ *   Formats and initializes the block allocator.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *
+ * Returned Value:
+ *   0        - OK
+ *   -ENOMEM  - No memory left.
+ *
+ ****************************************************************************/
+
+int mfs_ba_fmt(FAR struct mfs_sb_s * const sb);
 
 /****************************************************************************
  * Name: mfs_ba_init
@@ -1172,7 +1212,7 @@ int mfs_ctz_rdfromoff(FAR const struct mfs_sb_s * const sb,
                           mfs_t len, FAR char * buf);
 
 /****************************************************************************
- * Name: mfs_ctz_wrtnode_new
+ * Name: mfs_ctz_wrtnode
  *
  * Description:
  *   Write an LRU node to the flash. It also adds a log of it to the journal.
@@ -1192,7 +1232,37 @@ int mfs_ctz_rdfromoff(FAR const struct mfs_sb_s * const sb,
  ****************************************************************************/
 
 int mfs_ctz_wrtnode(FAR struct mfs_sb_s * const sb,
-                        const struct mfs_node_s * const node);
+                    FAR const struct mfs_node_s * const node,
+                    FAR struct mfs_ctz_s *new_loc);
+
+/****************************************************************************
+ * Name: mfs_ctz_travel
+ *
+ * Description:
+ *   From CTZ block at page `pg_src` and index `idx_src`, give the page
+ *   number of index `idx_dest`.
+ *
+ *   The source is preferably the last CTZ block in the CTZ list, but it can
+ *   realistically be any CTZ block in the CTZ list whos position is known.
+ *   However, `idx_dest <= idx_src` has to be followed. Takes O(log(n))
+ *   complexity to travel.
+ *
+ * Input Parameters:
+ *   sb       - Superblock instance of the device.
+ *   idx_src  - Index of the source ctz block.
+ *   pg_src   - Page number of the source ctz block.
+ *   idx_dest - Index of the destination ctz block.
+ *
+ * Returned Value:
+ *   The page number corresponding to `idx_dest`.
+ *
+ * Assumptions/Limitations:
+ *   `idx_dest <= idx_src`.
+ *
+ ****************************************************************************/
+
+mfs_t mfs_ctz_travel(FAR const struct mfs_sb_s * const sb,
+                     mfs_t idx_src, mfs_t pg_src, mfs_t idx_dest);
 
 /* mnemofs_lru.c */
 
@@ -1325,7 +1395,10 @@ int mfs_lru_updatedinfo(FAR const struct mfs_sb_s * const sb,
 
 int mfs_lru_updatectz(FAR struct mfs_sb_s * sb,
                       FAR struct mfs_path_s * const path, const mfs_t depth,
-                      const struct mfs_ctz_s new_ctz);
+                      const struct mfs_ctz_s new_ctz, mfs_t new_sz);
+
+bool mfs_lru_isempty(FAR struct mfs_sb_s * const sb);
+int mfs_lru_flush(FAR struct mfs_sb_s * const sb);
 
 /* mnemofs_master.c */
 
@@ -1369,7 +1442,8 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
  *
  ****************************************************************************/
 
-int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
+int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t blk1,
+               const mfs_t blk2, const mfs_t jrnl_blk);
 
 /****************************************************************************
  * Name: mfs_mn_move
@@ -1393,6 +1467,10 @@ int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
 
 int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
                 const mfs_t root_sz);
+
+int mfs_mn_sync(FAR struct mfs_sb_s *sb,
+                FAR struct mfs_path_s * const new_loc,
+                const mfs_t blk1, const mfs_t blk2, const mfs_t jrnl_blk);
 
 /* mnemofs_fsobj.c */
 
@@ -1817,7 +1895,10 @@ int mfs_pitr_rmdirent(FAR struct mfs_sb_s * const sb,
 
 int mfs_pitr_rm(FAR struct mfs_sb_s * const sb,
                 FAR struct mfs_path_s * const path,
-                const mfs_t depth);
+                const mfs_t depth, bool rm_child);
+
+int mfs_pitr_traversefs(FAR struct mfs_sb_s * sb, const struct mfs_ctz_s ctz,
+                        int type);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -85,6 +85,7 @@ static const char *next_child(FAR const char *relpath);
 static const char *last_child(FAR const char *relpath);
 static FAR char   *mfs_ser_dirent(FAR const struct mfs_dirent_s * const x,
                                   FAR char * const out);
+
 static FAR const char *mfs_deser_dirent(FAR const char * const in,
                                         FAR struct mfs_dirent_s * const x);
 
@@ -285,11 +286,87 @@ static FAR const char *mfs_deser_dirent(FAR const char * const in,
   return i;
 }
 
+int pitr_traverse(FAR struct mfs_sb_s *sb, FAR struct mfs_path_s *path,
+                  mfs_t depth, FAR mfs_t *cap)
+{
+  int                      ret    = OK;
+  mfs_t                    i;
+  mfs_t                    pg;
+  struct mfs_pitr_s        pitr;
+  struct mfs_ctz_s         ctz;
+  FAR struct mfs_dirent_s *dirent = NULL;
+
+  /* TODO: Double traversal can be made faster into a single traversal. */
+
+  ctz = path[depth - 1].ctz;
+
+  if (ctz.idx_e == 0 && ctz.pg_e == 0)
+    {
+      /* Not a valid one. TODO: Does this happens? */
+
+      goto errout;
+    }
+
+  for (i = ctz.idx_e; i > 0; i--)
+    {
+      mfs_ba_markusedpg(sb, pg);
+
+      pg = mfs_ctz_travel(sb, i, pg, i - 1);
+      if (pg == 0)
+        {
+          break;
+        }
+    }
+
+  memset(path + depth, 0, *cap - depth);
+
+  if (depth == *cap)
+    {
+      *cap = (*cap * 3) / 2; /* Don't want to double it for memory. */
+
+      path = kmm_realloc(path, (*cap) * sizeof(struct mfs_path_s));
+      if (predict_false(path == NULL))
+        {
+          ret = -ENOMEM;
+          goto errout;
+        }
+    }
+
+  mfs_pitr_init(sb, path, depth, &pitr, true);
+
+  while (true)
+    {
+      mfs_pitr_readdirent(sb, path, &pitr, &dirent);
+      if (dirent == NULL)
+        {
+          break;
+        }
+
+      if (S_ISDIR(dirent->mode))
+        {
+          path[(depth + 1) - 1].ctz = dirent->ctz;
+
+          ret = pitr_traverse(sb, path, depth + 1, cap);
+          if (predict_false(ret < 0))
+            {
+              mfs_free_dirent(dirent);
+              goto errout;
+            }
+        }
+
+      mfs_pitr_adv_bydirent(&pitr, dirent);
+      mfs_free_dirent(dirent);
+    }
+
+errout:
+  return ret;
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR const char * mfs_path2childname(FAR const char *relpath)
+FAR const char *mfs_path2childname(FAR const char *relpath)
 {
   FAR const char *last = relpath + strlen(relpath) - 1;
 
@@ -317,9 +394,9 @@ mfs_t mfs_get_fsz(FAR struct mfs_sb_s * const sb,
     {
       sz = MFS_MN(sb).root_sz; /* Updated size. */
 
-/* Journal updated to the root creates a new master node entry. TODO
- * this and moving of the journal.
- */
+      /* Journal updated to the root creates a new master node entry. TODO
+       * this and moving of the journal.
+       */
 
       finfo("File size got as %u for root.", sz);
       return sz;
@@ -362,11 +439,6 @@ bool mfs_searchfopen(FAR const struct mfs_sb_s * const sb,
           continue;
         }
 
-      /* TODO: Ensure when an LRU's delta is flushed to the journal, the
-       * new location is updated in the LRU AND the open files, if it is
-       * open.
-       */
-
       if (mfs_path_eq(&ofd->com->path[depth - 1], &path[depth - 1]))
         {
           return true;
@@ -400,7 +472,7 @@ int mfs_pitr_rmdirent(FAR struct mfs_sb_s * const sb,
 
 int mfs_pitr_rm(FAR struct mfs_sb_s * const sb,
                 FAR struct mfs_path_s * const path,
-                const mfs_t depth)
+                const mfs_t depth, bool rm_child)
 {
   int                      ret    = OK;
   struct mfs_pitr_s        pitr;
@@ -408,7 +480,23 @@ int mfs_pitr_rm(FAR struct mfs_sb_s * const sb,
 
   mfs_pitr_init(sb, path, depth, &pitr, true);
   mfs_pitr_readdirent(sb, path, &pitr, &dirent);
+
   ret = mfs_pitr_rmdirent(sb, path, depth, &pitr, dirent);
+  if (predict_false(ret < 0))
+    {
+      goto errout;
+    }
+
+  if (rm_child)
+    {
+      ret = mfs_lru_del(sb, 0, path[depth - 1].sz, path, depth);
+      if (predict_false(ret < 0))
+        {
+          goto errout;
+        }
+    }
+
+errout:
   mfs_free_dirent(dirent);
   mfs_pitr_free(&pitr);
 
@@ -558,9 +646,9 @@ int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
   *dirent = d;
   DEBUGASSERT(pitr->depth == 0 || strcmp(d->name, ""));
   finfo("Read direntry at %u offset, %u depth for CTZ (%u, %u). " \
-        "Direntry name: \"%s\" with name length %u.",
+        "Direntry name: \"%.*s\" with name length %u and size %u.",
         pitr->c_off, pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e,
-        d->name, d->namelen);
+        d->namelen, d->name, d->namelen, d->sz);
 
   return ret;
 
@@ -584,7 +672,7 @@ int mfs_pitr_adv(FAR struct mfs_sb_s * const sb,
                  FAR struct mfs_path_s *path,
                  FAR struct mfs_pitr_s * const pitr)
 {
-  int ret = OK;
+  int                      ret    = OK;
   FAR struct mfs_dirent_s *dirent;
 
   ret = mfs_pitr_readdirent(sb, path, pitr, &dirent);
@@ -613,11 +701,11 @@ static int search_ctz_by_name(FAR const struct mfs_sb_s * const sb,
 
   /* Applies LRU updates. */
 
-  int ret = OK;
-  uint16_t name_hash;
-  struct mfs_pitr_s pitr;
+  int                      ret        = OK;
+  bool                     found      = false;
+  uint16_t                 name_hash;
+  struct mfs_pitr_s        pitr;
   FAR struct mfs_dirent_s *nd;
-  bool found = false;
 
   *dirent = NULL;
 
@@ -864,7 +952,7 @@ int mfs_pitr_appenddirent(FAR struct mfs_sb_s * const sb,
       goto errout;
     }
 
-  /* TOFO: If the parent directory is newly formed (ie. size is 0), then
+  /* TODO: If the parent directory is newly formed (ie. size is 0), then
    * allocate space for it. This can be done better. Just allocate page when
    * its created and added first to LRU, and then add a check to ensure it
    * doesn't get re-allocated when written. A field like "new" would be
@@ -891,12 +979,12 @@ int mfs_pitr_appendnew(FAR struct mfs_sb_s * const sb,
 {
   /* Depth is depth of the child to be appended. */
 
-  int                      ret = OK;
-  struct timespec          ts;
+  int                      ret  = OK;
   FAR const char          *cur  = last_child(relpath);
   FAR const char          *next = next_child(cur);
-  FAR struct mfs_dirent_s *d = NULL;
-  const mfs_t              len = *next == 0 ? next - cur : next - cur - 1;
+  const mfs_t              len  = *next == 0 ? next - cur : next - cur - 1;
+  struct timespec          ts;
+  FAR struct mfs_dirent_s *d    = NULL;
 
   DEBUGASSERT(depth > 0);
 
@@ -938,6 +1026,37 @@ int mfs_pitr_appendnew(FAR struct mfs_sb_s * const sb,
 
 errout_with_d:
   mfs_free_dirent(d);
+
+errout:
+  return ret;
+}
+
+/* Only for initialization of the block allocator. */
+
+int mfs_pitr_traversefs(FAR struct mfs_sb_s * sb, const struct mfs_ctz_s ctz,
+                        int type)
+{
+  /* type takes in MFS_ISFILE & MFS_ISDIR. */
+
+  int                    ret      = OK;
+  mfs_t                  capacity;
+  FAR struct mfs_path_s *path     = NULL;
+
+  capacity = MFS_TRAVERSE_INITSZ;
+  path = kmm_zalloc(capacity * sizeof(struct mfs_path_s));
+  if (predict_false(path == NULL))
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  path[0].off = 0;
+  path[0].ctz = MFS_MN(sb).root_ctz;
+  path[0].sz  = MFS_MN(sb).root_sz;
+
+  ret = pitr_traverse(sb, path, 0, &capacity);
+
+  mfs_free_patharr(path);
 
 errout:
   return ret;
