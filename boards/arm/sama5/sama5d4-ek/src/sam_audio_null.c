@@ -100,7 +100,7 @@ int sam_audio_null_initialize(int minor)
       /* Get a null audio interface
        */
 
-      nullaudio = audio_null_initialize();
+      nullaudio = audio_null_initialize(true);
       if (!nullaudio)
         {
           auderr("ERROR: Failed to get the NULL audio interface\n");
