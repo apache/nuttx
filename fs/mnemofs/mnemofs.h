@@ -164,6 +164,7 @@ struct mfs_mn_s
 
 struct mfs_jrnl_state_s
 {
+  mfs_t    jrnl_start;
   mfs_t    mblk1;
   mfs_t    mblk2;
   mfs_t    n_logs;
@@ -594,6 +595,27 @@ int mfs_jrnl_flush(FAR struct mfs_sb_s * const sb);
  ****************************************************************************/
 
 bool mfs_jrnl_isempty(FAR const struct mfs_sb_s * const sb);
+
+struct mfs_jrnl_log_s
+{
+  /* A field denoting the size of the below elements is added here on-flash.
+   */
+
+  mfs_t                  depth;
+  mfs_t                  sz_new;
+  struct mfs_ctz_s       loc_new;
+  struct timespec        st_mtim_new;
+  struct timespec        st_atim_new;
+  struct timespec        st_ctim_new;
+  FAR struct mfs_path_s *path;
+  uint16_t               hash;
+};
+
+int mfs_jrnl_rdlog(FAR const struct mfs_sb_s *const sb,
+                      FAR mfs_t *blkidx, FAR mfs_t *pg_in_blk,
+                      FAR struct mfs_jrnl_log_s *log);
+
+void mfs_jrnl_log_free(FAR const struct mfs_jrnl_log_s * const log);
 
 /* mnemofs_blkalloc.c */
 
