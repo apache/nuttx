@@ -50,6 +50,8 @@
 #define NAND_RAM_STATUS_6      500
 #define NAND_RAM_STATUS_7      1000
 #define NAND_RAM_STATUS_8      5000
+#define NAND_RAM_STATUS_9      10000
+#define NAND_RAM_STATUS_10     50000
 
 #if CONFIG_MTD_NAND_RAM_DEBUG_LEVEL == 1
 #define NAND_RAM_DEBUG_LEVEL   NAND_RAM_DEBUG_1
@@ -75,6 +77,10 @@
 #define NAND_RAM_STATUS_LEVEL  NAND_RAM_STATUS_7
 #elif CONFIG_MTD_NAND_RAM_STATUS == 8
 #define NAND_RAM_STATUS_LEVEL  NAND_RAM_STATUS_8
+#elif CONFIG_MTD_NAND_RAM_STATUS == 9
+#define NAND_RAM_STATUS_LEVEL  NAND_RAM_STATUS_9
+#elif CONFIG_MTD_NAND_RAM_STATUS == 10
+#define NAND_RAM_STATUS_LEVEL  NAND_RAM_STATUS_10
 #endif /* CONFIG_MTD_NAND_RAM_STATUS */
 
 #define NAND_RAM_LOG(str, ...)                                    \
@@ -101,7 +107,7 @@
 
 struct nand_ram_data_s
 {
-  uint8_t page[NAND_RAM_PAGE_SIZE / 8];
+  uint8_t page[NAND_RAM_PAGE_SIZE];
 };
 
 /* 512 B page spare scheme */

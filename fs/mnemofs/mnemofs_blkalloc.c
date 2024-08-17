@@ -311,7 +311,7 @@ int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
   /* MFS_BA(sb).k_del_elemsz = ((log + 7) & (-8)) / 8; */
 
   MFS_BA(sb).k_del = kmm_zalloc(sizeof(size_t) * MFS_NBLKS(sb));
-  if (!MFS_BA(sb).k_del)
+  if (predict_false(MFS_BA(sb).k_del == NULL))
     {
       ret = -ENOMEM;
       goto errout;
@@ -320,11 +320,13 @@ int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
   MFS_BA(sb).n_bmap_upgs = MFS_UPPER8(MFS_NPGS(sb));
 
   MFS_BA(sb).bmap_upgs = kmm_zalloc(MFS_BA(sb).n_bmap_upgs);
-  if (!MFS_BA(sb).bmap_upgs)
+  if (predict_false(MFS_BA(sb).bmap_upgs == NULL))
     {
       ret = -ENOMEM;
       goto errout_with_k_del;
     }
+
+  /* TODO: Do not start from journal blocks. */
 
   finfo("mnemofs: Block Allocator initialized, starting at page %d.\n",
         MFS_BLK2PG(sb, MFS_BA(sb).s_blk));
@@ -356,6 +358,8 @@ int mfs_ba_init(FAR struct mfs_sb_s * const sb)
     {
       goto errout_with_ba;
     }
+
+  return ret;
 
 errout_with_ba:
   mfs_ba_free(sb);

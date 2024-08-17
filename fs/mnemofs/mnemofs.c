@@ -1578,21 +1578,39 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
             {
               /* Found journal first block. */
 
-              mfs_jrnl_init(sb, i);
+              ret = mfs_jrnl_init(sb, i);
+              if (predict_false(ret < 0))
+                {
+                  goto errout_with_rwbuf;
+                }
+
+              finfo("Journal initialized.");
+
+              ret = mfs_mn_init(sb, i);
+              if (predict_false(ret < 0))
+                {
+                  goto errout_with_rwbuf;
+                }
+
+              finfo("Master Node initialized.");
+
+              break;
             }
         }
 
       if (predict_false(sb->mn.pg == 0))
         {
           format = true;
+          memset(&MFS_JRNL(sb), 0, sizeof(struct mfs_jrnl_state_s));
+          memset(&MFS_MN(sb), 0, sizeof(struct mfs_mn_s));
           finfo("Device needs to formatted.\n");
         }
       else
         {
           finfo("Device already formatted.\n");
 
-          mfs_ba_init(sb);
           mfs_lru_init(sb);
+          mfs_ba_init(sb);
         }
     }
 
@@ -1613,13 +1631,13 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
       ret = mfs_jrnl_fmt(sb, &mnblk1, &mnblk2, &jrnl_blk);
       if (predict_false(ret < 0))
         {
-          goto errout_with_sb;
+          goto errout_with_rwbuf;
         }
 
       ret = mfs_mn_fmt(sb, mnblk1, mnblk2, jrnl_blk);
       if (predict_false(ret < 0))
         {
-          goto errout_with_sb;
+          goto errout_with_rwbuf;
         }
 
       finfo("Device formatted.\n");
@@ -1631,6 +1649,9 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
   nxmutex_unlock(&MFS_LOCK(sb));
   finfo("Lock released.");
   return ret;
+
+errout_with_rwbuf:
+  kmm_free(sb->rw_buf);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
@@ -1677,6 +1698,7 @@ static int mnemofs_unbind(FAR void *handle, FAR struct inode **driver,
   mfs_jrnl_free(sb);
   mfs_ba_free(sb);
 
+  kmm_free(sb->rw_buf);
   kmm_free(sb);
 
   finfo("Successfully unmounted mnemofs!");
@@ -2216,7 +2238,7 @@ errout_with_path:
   nxmutex_unlock(&MFS_LOCK(sb));
 
 errout:
-  finfo("Ret %d", ret);
+  finfo("Ret %d.", ret);
   return ret;
 }
 
