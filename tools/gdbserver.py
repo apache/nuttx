@@ -230,6 +230,9 @@ reg_fix_value = {
     },
     "riscv": {
         "ZERO": 0,
+        "WINDOWBASE": (0, 584),
+        "WINDOWSTART": (1, 585),
+        "PS": (0x40000, 742),
     },
 }
 
@@ -653,8 +656,9 @@ class GDBStub:
 
         def put_one_register_packet(regs):
 
-            regval = None
             reg = int(pkt[1:].decode("utf8"), 16)
+            regval = None
+
             if self.regfix:
                 for reg_name, reg_vals in reg_fix_value[self.arch].items():
                     if reg == reg_vals[1]:
@@ -1119,7 +1123,6 @@ def main(args):
         else:
             logger.error("Architecture unknown, exiting...")
             sys.exit(2)
-        elf.parse_addr2line(args.arch, args.addr2line, log.stack_data)
 
     raw = RawMemoryFile(args.rawfile)
     coredump = CoreDumpFile(args.coredump)
