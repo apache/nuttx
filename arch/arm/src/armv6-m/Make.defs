@@ -29,7 +29,7 @@ CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_svcall.c
 CMN_CSRCS += arm_systemreset.c arm_tcbinfo.c arm_vectors.c
 CMN_CSRCS += arm_trigger_irq.c
 
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
+ifneq ($(filter y,$(CONFIG_DEBUG_FEATURES)$(CONFIG_ARM_COREDUMP_REGION)),)
   CMN_CSRCS += arm_dumpnvic.c
 endif
 

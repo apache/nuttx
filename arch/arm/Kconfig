@@ -1288,6 +1288,13 @@ config ARM_MPU_EARLY_RESET
 
 		Note: This can be used without MPU Support enabled.
 
+config ARM_COREDUMP_REGION
+	bool "Add coredump region"
+	depends on COREDUMP
+	default n
+	---help---
+		Add coredump region includes nvic and mpu for cortex-M.
+
 config ARCH_HAVE_LOWVECTORS
 	bool
 

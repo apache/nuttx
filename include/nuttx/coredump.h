@@ -32,6 +32,7 @@
 
 #include <nuttx/streams.h>
 #include <nuttx/memoryregion.h>
+#include <nuttx/elf.h>
 
 /****************************************************************************
  * Pre-processor Definitions
