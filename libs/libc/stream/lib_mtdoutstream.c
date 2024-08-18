@@ -295,7 +295,7 @@ int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
   if (node->u.i_mtd->write == NULL)
 #endif
     {
-      stream->cache = lib_zalloc(stream->geo.erasesize);
+      stream->cache = lib_malloc(stream->geo.erasesize);
       if (stream->cache == NULL)
         {
           close_mtddriver(node);

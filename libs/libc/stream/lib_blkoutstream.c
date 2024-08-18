@@ -104,6 +104,11 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
         }
       else if (remain < sectorsize)
         {
+          /* Set content to all 0 before caching,
+           * so no random content will be flushed
+           */
+
+          memset(stream->cache, 0, sectorsize);
           memcpy(stream->cache, ptr, remain);
           self->nput += remain;
           remain      = 0;
