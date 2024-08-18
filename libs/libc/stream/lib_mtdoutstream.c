@@ -51,6 +51,7 @@ static int mtdoutstream_flush(FAR struct lib_outstream_s *self)
 {
   FAR struct lib_mtdoutstream_s *stream =
     (FAR struct lib_mtdoutstream_s *)self;
+  FAR struct inode *inode = stream->inode;
   size_t erasesize = stream->geo.erasesize;
   size_t nblkpererase = erasesize / stream->geo.blocksize;
   int ret = OK;
@@ -60,17 +61,18 @@ static int mtdoutstream_flush(FAR struct lib_outstream_s *self)
 #ifdef CONFIG_MTD_BYTE_WRITE
       /* if byte write, flush won't be needed */
 
-      if (stream->inode->u.i_mtd->write == NULL)
+      if (inode->u.i_mtd->write == NULL)
 #endif
         {
-          ret = MTD_ERASE(stream->inode->u.i_mtd, self->nput / erasesize, 1);
+          size_t sblock = self->nput / erasesize;
+
+          ret = MTD_ERASE(inode->u.i_mtd, sblock, 1);
           if (ret < 0)
             {
               return ret;
             }
 
-          ret = MTD_BWRITE(stream->inode->u.i_mtd,
-                           self->nput / erasesize * nblkpererase,
+          ret = MTD_BWRITE(inode->u.i_mtd, sblock * nblkpererase,
                            nblkpererase, stream->cache);
         }
     }
@@ -87,10 +89,10 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
 {
   FAR struct lib_mtdoutstream_s *stream =
     (FAR struct lib_mtdoutstream_s *)self;
-  size_t erasesize = stream->geo.erasesize;
-  size_t nblkpererase = erasesize / stream->geo.blocksize;
   FAR struct inode *inode = stream->inode;
   FAR const unsigned char *ptr = buf;
+  size_t erasesize = stream->geo.erasesize;
+  size_t nblkpererase = erasesize / stream->geo.blocksize;
   size_t remain = len;
   int ret;
 
@@ -100,7 +102,7 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
     }
 
 #ifdef CONFIG_MTD_BYTE_WRITE
-  if (stream->inode->u.i_mtd->write != NULL)
+  if (inode->u.i_mtd->write != NULL)
     {
       if (self->nput % erasesize == 0)
         {
@@ -166,20 +168,19 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
               self->nput += remain;
               remain      = 0;
             }
-          else if (remain >= erasesize)
+          else
             {
-              size_t copyin = (remain / erasesize) * erasesize;
+              size_t nblock = remain / erasesize;
+              size_t copyin = nblock * erasesize;
 
-              ret = MTD_ERASE(inode->u.i_mtd, sblock,
-                              remain / erasesize);
+              ret = MTD_ERASE(inode->u.i_mtd, sblock, nblock);
               if (ret < 0)
                 {
                   return ret;
                 }
 
               ret = MTD_BWRITE(inode->u.i_mtd, sblock * nblkpererase,
-                               remain / erasesize * nblkpererase,
-                               ptr);
+                               nblock * nblkpererase, ptr);
               if (ret < 0)
                 {
                   return ret;
