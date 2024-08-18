@@ -78,7 +78,7 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
 
   while (remain > 0)
     {
-      size_t sblock = self->nput / sectorsize;
+      size_t sector = self->nput / sectorsize;
       size_t offset = self->nput % sectorsize;
 
       if (offset > 0)
@@ -93,28 +93,27 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
           self->nput += copyin;
           remain     -= copyin;
 
-          if (offset == stream->geo.geo_sectorsize)
+          if (offset == sectorsize)
             {
-              ret = inode->u.i_bops->write(inode, stream->cache, sblock, 1);
+              ret = inode->u.i_bops->write(inode, stream->cache, sector, 1);
               if (ret < 0)
                 {
                   return ret;
                 }
             }
         }
-      else if (remain < stream->geo.geo_sectorsize)
+      else if (remain < sectorsize)
         {
           memcpy(stream->cache, ptr, remain);
           self->nput += remain;
           remain      = 0;
         }
-      else if (remain >= stream->geo.geo_sectorsize)
+      else if (remain >= sectorsize)
         {
-          size_t copyin = (remain / stream->geo.geo_sectorsize) *
-                                    stream->geo.geo_sectorsize;
+          size_t copyin = (remain / sectorsize) * sectorsize;
 
-          ret = inode->u.i_bops->write(inode, ptr, sblock,
-                                       remain / stream->geo.geo_sectorsize);
+          ret = inode->u.i_bops->write(inode, ptr, sector,
+                                       remain / sectorsize);
           if (ret < 0)
             {
               return ret;
