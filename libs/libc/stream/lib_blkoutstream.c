@@ -108,12 +108,12 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
           self->nput += remain;
           remain      = 0;
         }
-      else if (remain >= sectorsize)
+      else
         {
-          size_t copyin = (remain / sectorsize) * sectorsize;
+          size_t nsector = remain / sectorsize;
+          size_t copyin = nsector * sectorsize;
 
-          ret = inode->u.i_bops->write(inode, ptr, sector,
-                                       remain / sectorsize);
+          ret = inode->u.i_bops->write(inode, ptr, sector, nsector);
           if (ret < 0)
             {
               return ret;
