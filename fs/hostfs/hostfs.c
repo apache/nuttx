@@ -246,6 +246,7 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s  *hf;
   char path[HOSTFS_MAX_PATH];
+  size_t len;
   int ret;
 
   /* Sanity checks */
@@ -271,7 +272,8 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate memory for the open file */
 
-  hf = kmm_malloc(sizeof(*hf) + strlen(relpath));
+  len = strlen(relpath);
+  hf = kmm_malloc(sizeof(*hf) + len);
   if (hf == NULL)
     {
       ret = -ENOMEM;
@@ -323,7 +325,7 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
   hf->fnext = fs->fs_head;
   hf->crefs = 1;
   hf->oflags = oflags;
-  strcpy(hf->relpath, relpath);
+  memcpy(hf->relpath, relpath, len + 1);
   fs->fs_head = hf;
 
   ret = OK;
