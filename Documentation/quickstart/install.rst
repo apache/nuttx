@@ -24,11 +24,11 @@ First, install the following set of system dependencies according to your Operat
 
       $ sudo apt install \
       $ bison flex gettext texinfo libncurses5-dev libncursesw5-dev xxd \
-      $ gperf automake libtool pkg-config build-essential gperf genromfs \
+      $ git gperf automake libtool pkg-config build-essential gperf genromfs \
       $ libgmp-dev libmpc-dev libmpfr-dev libisl-dev binutils-dev libelf-dev \
-      $ libexpat-dev gcc-multilib g++-multilib picocom u-boot-tools util-linux
+      $ libexpat1-dev gcc-multilib g++-multilib picocom u-boot-tools util-linux
 
-  .. tab:: Linux (Fdora / RPM based)
+  .. tab:: Linux (Fedora / RPM based)
 
     Run the following command to install packages:
 
@@ -36,7 +36,7 @@ First, install the following set of system dependencies according to your Operat
 
       $ sudo dnf install \
       $ bison flex gettext texinfo ncurses-devel ncurses ncurses-compat-libs \
-      $ gperf automake libtool pkgconfig @development-tools gperf genromfs \
+      $ git gperf automake libtool pkgconfig @development-tools gperf genromfs \
       $ gmp-devel mpfr-devel libmpc-devel isl-devel binutils-devel elfutils-libelf-devel \
       $ expat-devel gcc-c++ g++ picocom uboot-tools util-linux
 
@@ -118,7 +118,7 @@ package or you will have to build it from source, which is available in the
 NuttX also supports `kconfiglib <https://github.com/ulfalizer/Kconfiglib>`_ by
 default, which is a Kconfig tool implemented in Python 2/3. Compared with
 ``kconfig-frontends``, kconfiglib provides NuttX with the possibility of
-multi-platform support(configure NuttX in Winodws native/Visual Studio), and also
+multi-platform support(configure NuttX in Windows native/Visual Studio), and also
 ``kconfiglib`` has a stronger Kconfig syntax check, this will help developers to avoid
 some Kconfig syntax errors.  Install kconfiglib via following command:
 
