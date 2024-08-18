@@ -102,10 +102,9 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
 #ifdef CONFIG_MTD_BYTE_WRITE
   if (stream->inode->u.i_mtd->write != NULL)
     {
-      if (self->nput % stream->geo.erasesize == 0)
+      if (self->nput % erasesize == 0)
         {
-          ret = MTD_ERASE(inode->u.i_mtd,
-                          self->nput / stream->geo.erasesize, 1);
+          ret = MTD_ERASE(inode->u.i_mtd, self->nput / erasesize, 1);
           if (ret < 0)
             {
               return ret;
@@ -162,7 +161,7 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
                * so no random content will be flushed
                */
 
-              memset(stream->cache, 0, stream->geo.erasesize);
+              memset(stream->cache, 0, erasesize);
               memcpy(stream->cache, ptr, remain);
               self->nput += remain;
               remain      = 0;
