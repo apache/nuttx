@@ -3463,16 +3463,16 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
       return -ENODEV;
     }
 
+  /* Set ID mode clocking (<400KHz) */
+
+  SDIO_CLOCK(priv->dev, CLOCK_IDMODE);
+
   /* For eMMC, Send CMD0 with argument 0xf0f0f0f0 as per JEDEC v4.41
    * for pre-idle. No effect for SD.
    */
 
   mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0xf0f0f0f0);
   nxsig_usleep(MMCSD_IDLE_DELAY);
-
-  /* Set ID mode clocking (<400KHz) */
-
-  SDIO_CLOCK(priv->dev, CLOCK_IDMODE);
 
   /* After power up at least 74 clock cycles are required prior to starting
    * bus communication
