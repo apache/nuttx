@@ -36,6 +36,7 @@
 #include "arm_internal.h"
 #include "exc_return.h"
 #include "nvic.h"
+#include "psr.h"
 
 /****************************************************************************
  * Public Functions
@@ -44,6 +45,16 @@
 void exception_direct(void)
 {
   int irq = getipsr();
+
+#ifdef CONFIG_ARCH_FPU
+  __asm__ __volatile__
+    (
+      "mov r0, %0\n"
+      "vmsr fpscr, r0\n"
+      :
+      : "i" (ARMV8M_FPSCR_LTPSIZE_NONE)
+    );
+#endif
 
   arm_ack_irq(irq);
   irq_dispatch(irq, NULL);
