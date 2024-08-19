@@ -331,7 +331,7 @@ static void goldfish_drivers_register(FAR struct goldfish_events_s *events)
       if (getreg32(events->base + GOLDFISH_EVENTS_LEN))
         {
           touch_register(&(events->touchlower),
-                         "/dev/touch0",
+                         "/dev/input0",
                          CONFIG_INPUT_GOLDFISH_NBUFFER);
         }
     }
