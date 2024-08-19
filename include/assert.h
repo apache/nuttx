@@ -152,7 +152,9 @@
 #  endif
 #endif
 
-#define COMPILE_TIME_ASSERT(x) static_assert(x, "compile time assert failed")
+#ifndef COMPILE_TIME_ASSERT
+#  define COMPILE_TIME_ASSERT(x) static_assert(x, "compile time assert failed")
+#endif
 
 /* Force a compilation error if condition is true, but also produce a
  * result (of value 0 and type int), so the expression can be used
