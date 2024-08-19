@@ -41,7 +41,6 @@
 #define CAN_EFF_FLAG 0x80000000  /* EFF/SFF is set in the MSB */
 #define CAN_RTR_FLAG 0x40000000  /* Remote transmission request */
 #define CAN_ERR_FLAG 0x20000000  /* Error message frame */
-#define CAN_EVT_FLAG 0x10000000  /* Lower_half use this flags to report state switch event */
 
 /* Valid bits in CAN ID for frame formats */
 
@@ -86,6 +85,20 @@
 #define CANFD_BRS 0x01 /* Bit rate switch (second bitrate for payload data) */
 #define CANFD_ESI 0x02 /* Error state indicator of the transmitting node */
 #define CANFD_FDF 0x04 /* Mark CAN FD for dual use of struct canfd_frame */
+
+/* Bit flags on can_frame.flags
+ * Use can_frame.flags to identify other special frame.
+ * CANFD_FLAGS_BITS: Lower 8 bits of canfd_frame.flags are reserved for CANFD
+ *                   flags
+ * CAN_TCF_FLAG:     TxConfirmation message frame. Lower_half use this flag
+ *                   to confirm frame-transmit
+ * CAN_EVT_FLAG:     Event message frame. Lower_half use this flag to report
+ *                   state switch event
+ */
+
+#define CANFD_FLAGS_BITS  8
+#define CAN_TCF_FLAG      (1 << (CANFD_FLAGS_BITS))
+#define CAN_EVT_FLAG      (1 << (CANFD_FLAGS_BITS + 1))
 
 #define CAN_INV_FILTER 0x20000000u /* To be set in can_filter.can_id */
 
@@ -263,40 +276,37 @@ typedef uint32_t can_err_mask_t;
  * can_dlc: frame payload length in byte (0 .. 8) aka data length code
  *          N.B. the DLC field from ISO 11898-1 Chapter 8.4.2.3 has a 1:1
  *          mapping of the 'data length code' to the real payload length
- * __pad:   padding
- * __res0:  reserved / padding
+ * flags:   higher 8 bits are special frame flag bits
  * __res1:  reserved / padding
  * data:    CAN frame payload (up to 8 byte)
  */
 
-struct can_frame
+begin_packed_struct struct can_frame
 {
-  canid_t can_id;   /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-  uint8_t  can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
-  uint8_t  __pad;   /* padding */
-  uint8_t  __res0;  /* reserved / padding */
-  uint8_t  __res1;  /* reserved / padding */
+  canid_t  can_id;   /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t  can_dlc;  /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+  uint16_t flags;    /* additional flags for special frame */
+  uint8_t  __res1;   /* reserved / padding */
   uint8_t  data[CAN_MAX_DLEN];
-};
+} end_packed_struct;
 
 /* struct canfd_frame - CAN flexible data rate frame structure
  * can_id: CAN ID of the frame and CAN_*_FLAG flags, see canid_t definition
  * len:    frame payload length in byte (0 .. CANFD_MAX_DLEN)
- * flags:  additional flags for CAN FD
- * __res0: reserved / padding
+ * flags:  lower 8 bits are CANFD flags, higher 8 bits are special frame
+ *         flags
  * __res1: reserved / padding
  * data:   CAN FD frame payload (up to CANFD_MAX_DLEN byte)
  */
 
-struct canfd_frame
+begin_packed_struct struct canfd_frame
 {
-  canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-  uint8_t len;     /* frame payload length in byte */
-  uint8_t flags;   /* additional flags for CAN FD */
-  uint8_t __res0;  /* reserved / padding */
-  uint8_t __res1;  /* reserved / padding */
-  uint8_t data[CANFD_MAX_DLEN];
-};
+  canid_t  can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t  len;     /* frame payload length in byte */
+  uint16_t flags;   /* additional flags for CAN FD and special frame */
+  uint8_t  __res1;  /* reserved / padding */
+  uint8_t  data[CANFD_MAX_DLEN];
+} end_packed_struct;
 
 /* The sockaddr structure for CAN sockets
  *
