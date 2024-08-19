@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/fdt.h>
@@ -76,7 +77,7 @@ int fdt_virtio_mmio_devices_register(FAR const void *fdt, int irqbase)
         }
 
       ret = virtio_register_mmio_device((FAR void *)addr, irqnum);
-      if (ret < 0)
+      if (ret < 0 && ret != -ENODEV)
         {
           return ret;
         }
