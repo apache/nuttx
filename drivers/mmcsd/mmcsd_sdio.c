@@ -4084,6 +4084,24 @@ static void mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv)
   SDIO_RESET(priv->dev);
 }
 
+static const char *mmc_get_mode_name(uint8_t mode)
+{
+  switch (mode)
+    {
+      case EXT_CSD_HS_TIMING_BC:
+          return "backwards compatibility";
+      case EXT_CSD_HS_TIMING_HS:
+          return "high speed";
+      case EXT_CSD_HS_TIMING_HS200:
+          return "HS200";
+      case EXT_CSD_HS_TIMING_HS400:
+          return "HS400";
+      default:
+          ferr("Unknown mode: %u\n", mode);
+          return "Unknown";
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -4186,6 +4204,11 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 #ifdef CONFIG_MMCSD_PROCFS
   mmcsd_initialize_procfs();
 #endif
+
+  finfo("MMC: %s %" PRIu64 "KB %s %s mode\n", devname,
+         ((uint64_t)priv->nblocks << priv->blockshift) >> 10,
+         priv->widebus ? "4-bits" : "1-bit",
+         mmc_get_mode_name(priv->mode));
 
   return OK;
 
