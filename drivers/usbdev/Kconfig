@@ -432,6 +432,8 @@ menuconfig CDCACM
 	bool "USB Modem (CDC/ACM) support"
 	default n
 	select SERIAL_REMOVABLE
+	select SERIAL_TXDMA
+	select SERIAL_RXDMA
 	---help---
 		Enables USB Modem (CDC/ACM) support
 

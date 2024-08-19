@@ -226,6 +226,8 @@ static ssize_t cdcuart_recvbuf(FAR struct uart_dev_s *dev,
 static bool    cdcuart_txready(FAR struct uart_dev_s *dev);
 static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
                                FAR const void *buf, size_t len);
+static void    cdcuart_dmasend(FAR struct uart_dev_s *dev);
+static void    cdcuart_dmareceive(FAR struct uart_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -263,16 +265,10 @@ static const struct uart_ops_s g_uartops =
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   cdcuart_rxflowcontrol, /* rxflowcontrol */
 #endif
-#ifdef CONFIG_SERIAL_TXDMA
-  NULL,                  /* dmasend */
-#endif
-#ifdef CONFIG_SERIAL_RXDMA
-  NULL,                  /* dmareceive */
+  cdcuart_dmasend,       /* dmasend */
+  cdcuart_dmareceive,    /* dmareceive */
   NULL,                  /* dmarxfree */
-#endif
-#ifdef CONFIG_SERIAL_TXDMA
   NULL,                  /* dmatxavail */
-#endif
   NULL,                  /* send */
   cdcuart_txint,         /* txinit */
   cdcuart_txready,       /* txready */
@@ -389,7 +385,10 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
         priv->serdev.xmit.head, priv->serdev.xmit.tail,
         priv->nwrq, sq_empty(&priv->txfree));
 
-  uart_xmitchars(&priv->serdev);
+  if (!sq_empty(&priv->txfree))
+    {
+      uart_xmitchars_dma(&priv->serdev);
+    }
 
   priv->issending = false;
 
@@ -545,7 +544,10 @@ static int cdcacm_release_rxpending(FAR struct cdcacm_dev_s *priv)
 
       ret = OK;
 
-      uart_recvchars(&priv->serdev);
+      if (!sq_empty(&priv->rxpending))
+        {
+          uart_recvchars_dma(&priv->serdev);
+        }
     }
 
   /* Restart the RX failsafe timer if there are RX packets in
@@ -2683,6 +2685,116 @@ static int cdcuart_release(FAR struct uart_dev_s *dev)
   wd_cancel(&priv->rxfailsafe);
   kmm_free(priv);
   return OK;
+}
+
+/****************************************************************************
+ * Name: cdcuart_dmasend
+ *
+ * Description:
+ *   Set up to transfer bytes from the TX circular buffer.
+ *
+ ****************************************************************************/
+
+static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
+{
+  FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
+  FAR struct cdcacm_dev_s *priv = dev->priv;
+  FAR struct usbdev_ep_s *ep = priv->epbulkin;
+  FAR struct cdcacm_wrreq_s *wrcontainer;
+  FAR struct usbdev_req_s *req;
+  size_t nbytes;
+  size_t reqlen;
+  int ret;
+
+  /* Get the maximum number of bytes that will fit into one bulk IN request */
+
+  reqlen = MAX(CONFIG_CDCACM_BULKIN_REQLEN, ep->maxpacket);
+
+  /* Peek at the request in the container at the head of the list */
+
+  wrcontainer = (FAR struct cdcacm_wrreq_s *)sq_remfirst(&priv->txfree);
+  req = wrcontainer->req;
+  priv->nwrq--;
+
+  /* Fill the request with serial TX data */
+
+  nbytes = MIN(reqlen, xfer->length);
+  memcpy(req->buf, xfer->buffer, nbytes);
+  req->len = nbytes;
+
+  nbytes = MIN(reqlen - nbytes, xfer->nlength);
+  memcpy(req->buf + req->len, xfer->nbuffer, nbytes);
+  req->len += nbytes;
+  xfer->nbytes = req->len;
+
+  uart_xmitchars_done(dev);
+
+  /* Then submit the request to the endpoint */
+
+  req->priv  = wrcontainer;
+  req->flags = USBDEV_REQFLAGS_NULLPKT;
+  ret        = EP_SUBMIT(ep, req);
+  if (ret < 0)
+    {
+      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_SUBMITFAIL),
+               (uint16_t)-ret);
+    }
+}
+
+/****************************************************************************
+ * Name: cdcuart_dmareceive
+ *
+ * Description:
+ *   Set up to receive bytes into the RX circular buffer.
+ *
+ ****************************************************************************/
+
+static void cdcuart_dmareceive(FAR struct uart_dev_s *dev)
+{
+  FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
+  FAR struct cdcacm_dev_s *priv = dev->priv;
+  FAR struct cdcacm_rdreq_s *rdcontainer;
+  FAR struct usbdev_req_s *req;
+  FAR uint8_t *reqbuf;
+  size_t nbytes = 0;
+  size_t reqlen;
+
+  /* Process each packet in the priv->rxpending list */
+
+  rdcontainer = (FAR struct cdcacm_rdreq_s *)
+    sq_peek(&priv->rxpending);
+  DEBUGASSERT(rdcontainer != NULL);
+
+  req = rdcontainer->req;
+  DEBUGASSERT(req != NULL);
+
+  reqbuf = &req->buf[rdcontainer->offset];
+  reqlen = req->xfrd - rdcontainer->offset;
+
+  nbytes = MIN(reqlen, xfer->length);
+  memcpy(xfer->buffer, reqbuf, nbytes);
+  rdcontainer->offset += nbytes;
+  xfer->nbytes = nbytes;
+
+  if (xfer->nbuffer)
+    {
+      nbytes = MIN(reqlen - nbytes, xfer->nlength);
+      memcpy(xfer->nbuffer, reqbuf + xfer->nbytes, nbytes);
+      rdcontainer->offset += nbytes;
+      xfer->nbytes += nbytes;
+    }
+
+  uart_recvchars_done(dev);
+
+  /* The entire packet was processed and may be removed from the
+   * pending RX list.
+   */
+
+  if (rdcontainer->offset >= rdcontainer->req->xfrd)
+    {
+      sq_remfirst(&priv->rxpending);
+      cdcacm_requeue_rdrequest(priv, rdcontainer);
+    }
 }
 
 /****************************************************************************
