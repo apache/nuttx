@@ -1392,7 +1392,10 @@ void sched_note_string_ip(uint32_t tag, uintptr_t ip, FAR const char *buf)
             }
 
           note_common(tcb, &note->nst_cmn, length, NOTE_DUMP_STRING);
-          memcpy(note->nst_data, buf, length - sizeof(struct note_string_s));
+          if (buf != NULL)
+            {
+              memcpy(note->nst_data, buf, length - sizeof(struct note_string_s));
+            }
           data[length - 1] = '\0';
           note->nst_ip = ip;
         }
