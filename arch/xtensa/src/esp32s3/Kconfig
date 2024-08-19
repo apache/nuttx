@@ -2491,6 +2491,59 @@ config ESP32S3_LCD_REGDEBUG
 
 endmenu
 
+menu "SD/MMC Configuration"
+
+config ESP32S3_SDMMC
+	bool "SD/MMC driver"
+	select ARCH_HAVE_SDIO
+	select MMCSD
+	select MMCSD_SDIO
+	select SDIO_BLOCKSETUP
+	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
+	select ESP32S3_SDMMC_DMA
+	default n
+
+config ESP32S3_SDMMC_DMA
+	bool "Support DMA for SD/MMC"
+	depends on ESP32S3_SDMMC
+	select SDIO_DMA
+	default y
+
+config ESP32S3_SDMMC_CMD
+	int "CMD GPIO"
+	depends on ESP32S3_SDMMC
+	default 41
+
+config ESP32S3_SDMMC_CLK
+	int "CLK GPIO"
+	depends on ESP32S3_SDMMC
+	default 39
+
+config ESP32S3_SDMMC_D0
+	int "D0 GPIO"
+	depends on ESP32S3_SDMMC
+	default 40
+
+config ESP32S3_SDMMC_D1
+	int "D1 GPIO"
+	depends on ESP32S3_SDMMC
+	depends on !SDIO_WIDTH_D1_ONLY
+	default 16
+
+config ESP32S3_SDMMC_D2
+	int "D2 GPIO"
+	depends on ESP32S3_SDMMC
+	depends on !SDIO_WIDTH_D1_ONLY
+	default 8
+
+config ESP32S3_SDMMC_D3
+	int "D3 GPIO"
+	depends on ESP32S3_SDMMC
+	depends on !SDIO_WIDTH_D1_ONLY
+	default 42
+endmenu
+
 menu "Bootloader and Image Configuration"
 
 config ESPRESSIF_SIMPLE_BOOT

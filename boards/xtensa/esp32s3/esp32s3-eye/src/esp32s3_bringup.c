@@ -79,6 +79,10 @@
 #  include <nuttx/lcd/lcd_dev.h>
 #endif
 
+#ifdef CONFIG_ESP32S3_SDMMC
+#include "esp32s3_board_sdmmc.h"
+#endif
+
 #include "esp32s3-eye.h"
 
 /****************************************************************************
@@ -241,6 +245,14 @@ int esp32s3_bringup(void)
     }
 #endif
 
+#endif
+
+#ifdef CONFIG_ESP32S3_SDMMC
+  ret = board_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDMMC: %d\n", ret);
+    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

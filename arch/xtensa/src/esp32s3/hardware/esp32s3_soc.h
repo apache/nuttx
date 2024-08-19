@@ -101,6 +101,19 @@
  * Name: esp32s3_sp_dram
  *
  * Description:
+ *   Check if the pointer is dma capable.
+ *
+ ****************************************************************************/
+
+static inline bool IRAM_ATTR esp32s3_ptr_dma_capable(const void *p)
+{
+    return (intptr_t)p >= SOC_DMA_LOW && (intptr_t)p < SOC_DMA_HIGH;
+}
+
+/****************************************************************************
+ * Name: esp32s3_sp_dram
+ *
+ * Description:
  *   Check if the stack pointer is in DRAM.
  *
  ****************************************************************************/
