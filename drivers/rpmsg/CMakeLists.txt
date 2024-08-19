@@ -47,8 +47,8 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_port_uart.c)
   endif()
 
-  if(CONFIG_RPMSG_VIRTIO)
-    list(APPEND SRCS rpmsg_virtio.c)
+  if(CONFIG_RPMSG_VIRTIO_LITE)
+    list(APPEND SRCS rpmsg_virtio_lite.c)
   endif()
 
   if(CONFIG_RPMSG_VIRTIO_IVSHMEM)

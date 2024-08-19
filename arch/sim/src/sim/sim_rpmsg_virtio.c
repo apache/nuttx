@@ -29,7 +29,7 @@
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
-#include <nuttx/rpmsg/rpmsg_virtio.h>
+#include <nuttx/rpmsg/rpmsg_virtio_lite.h>
 #include <nuttx/wdog.h>
 
 #include "sim_internal.h"
@@ -46,18 +46,18 @@
 
 struct sim_rpmsg_virtio_shmem_s
 {
-  volatile uintptr_t        base;
-  volatile unsigned int     seqs;
-  volatile unsigned int     seqm;
-  volatile unsigned int     boots;
-  volatile unsigned int     bootm;
-  struct rpmsg_virtio_rsc_s rsc;
-  char                      buf[0x10000];
+  volatile uintptr_t             base;
+  volatile unsigned int          seqs;
+  volatile unsigned int          seqm;
+  volatile unsigned int          boots;
+  volatile unsigned int          bootm;
+  struct rpmsg_virtio_lite_rsc_s rsc;
+  char                           buf[0x10000];
 };
 
 struct sim_rpmsg_virtio_dev_s
 {
-  struct rpmsg_virtio_s           dev;
+  struct rpmsg_virtio_lite_s      dev;
   rpmsg_virtio_callback_t         callback;
   void                            *arg;
   int                             master;
@@ -76,7 +76,8 @@ struct sim_rpmsg_virtio_dev_s
  * Private Functions
  ****************************************************************************/
 
-static const char *sim_rpmsg_virtio_get_cpuname(struct rpmsg_virtio_s *dev)
+static const char *
+sim_rpmsg_virtio_get_cpuname(struct rpmsg_virtio_lite_s *dev)
 {
   struct sim_rpmsg_virtio_dev_s *priv =
     container_of(dev, struct sim_rpmsg_virtio_dev_s, dev);
@@ -84,13 +85,13 @@ static const char *sim_rpmsg_virtio_get_cpuname(struct rpmsg_virtio_s *dev)
   return priv->cpuname;
 }
 
-static struct rpmsg_virtio_rsc_s *
-sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
+static struct rpmsg_virtio_lite_rsc_s *
+sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_lite_s *dev)
 {
   struct sim_rpmsg_virtio_dev_s *priv =
     container_of(dev, struct sim_rpmsg_virtio_dev_s, dev);
-  struct rpmsg_virtio_rsc_s *rsc;
-  struct rpmsg_virtio_cmd_s *cmd;
+  struct rpmsg_virtio_lite_rsc_s *rsc;
+  struct rpmsg_virtio_lite_cmd_s *cmd;
 
   priv->shmem = host_allocshmem(priv->shmemname, sizeof(*priv->shmem));
   if (!priv->shmem)
@@ -141,7 +142,7 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
   return rsc;
 }
 
-static int sim_rpmsg_virtio_is_master(struct rpmsg_virtio_s *dev)
+static int sim_rpmsg_virtio_is_master(struct rpmsg_virtio_lite_s *dev)
 {
   struct sim_rpmsg_virtio_dev_s *priv =
     container_of(dev, struct sim_rpmsg_virtio_dev_s, dev);
@@ -150,7 +151,7 @@ static int sim_rpmsg_virtio_is_master(struct rpmsg_virtio_s *dev)
 }
 
 static int
-sim_rpmsg_virtio_register_callback(struct rpmsg_virtio_s *dev,
+sim_rpmsg_virtio_register_callback(struct rpmsg_virtio_lite_s *dev,
                                    rpmsg_virtio_callback_t callback,
                                    void *arg)
 {
@@ -184,7 +185,7 @@ static void sim_rpmsg_virtio_work(wdparm_t arg)
 
       if (should_notify && dev->callback != NULL)
         {
-          dev->callback(dev->arg, RPMSG_VIRTIO_NOTIFY_ALL);
+          dev->callback(dev->arg, RPMSG_VIRTIO_LITE_NOTIFY_ALL);
         }
     }
 
@@ -192,7 +193,8 @@ static void sim_rpmsg_virtio_work(wdparm_t arg)
            sim_rpmsg_virtio_work, (wdparm_t)dev);
 }
 
-static int sim_rpmsg_virtio_notify(struct rpmsg_virtio_s *dev, uint32_t vqid)
+static int sim_rpmsg_virtio_notify(struct rpmsg_virtio_lite_s *dev,
+                                   uint32_t vqid)
 {
   struct sim_rpmsg_virtio_dev_s *priv =
     container_of(dev, struct sim_rpmsg_virtio_dev_s, dev);
@@ -213,7 +215,7 @@ static int sim_rpmsg_virtio_notify(struct rpmsg_virtio_s *dev, uint32_t vqid)
  * Private Data
  ****************************************************************************/
 
-static const struct rpmsg_virtio_ops_s g_sim_rpmsg_virtio_ops =
+static const struct rpmsg_virtio_lite_ops_s g_sim_rpmsg_virtio_ops =
 {
   .get_cpuname       = sim_rpmsg_virtio_get_cpuname,
   .get_resource      = sim_rpmsg_virtio_get_resource,
@@ -243,7 +245,7 @@ int sim_rpmsg_virtio_init(const char *shmemname, const char *cpuname,
   strlcpy(priv->cpuname, cpuname, RPMSG_NAME_SIZE);
   strlcpy(priv->shmemname, shmemname, RPMSG_NAME_SIZE);
 
-  ret = rpmsg_virtio_initialize(&priv->dev);
+  ret = rpmsg_virtio_lite_initialize(&priv->dev);
   if (ret < 0)
     {
       kmm_free(priv);

@@ -485,7 +485,7 @@ int sim_bringup(void)
 #  endif
 #endif
 
-#ifdef CONFIG_RPMSG_VIRTIO
+#ifdef CONFIG_RPMSG_VIRTIO_LITE
 #  ifdef CONFIG_SIM_RPMSG_MASTER
   sim_rpmsg_virtio_init("server-proxy", "proxy", true);
 #  else

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/rpmsg/rpmsg_virtio.h
+ * include/nuttx/rpmsg/rpmsg_virtio_lite.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RPMSG_RPMSG_VIRTIO_H
-#define __INCLUDE_NUTTX_RPMSG_RPMSG_VIRTIO_H
+#ifndef __INCLUDE_NUTTX_RPMSG_RPMSG_VIRTIO_LITE_H
+#define __INCLUDE_NUTTX_RPMSG_RPMSG_VIRTIO_LITE_H
 
 /****************************************************************************
  * Included Files
@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_RPMSG_VIRTIO
+#ifdef CONFIG_RPMSG_VIRTIO_LITE
 
 #include <nuttx/rpmsg/rpmsg.h>
 #include <openamp/rpmsg_virtio.h>
@@ -39,24 +39,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_NOTIFY_ALL UINT32_MAX
+#define RPMSG_VIRTIO_LITE_NOTIFY_ALL UINT32_MAX
 
-#define RPMSG_VIRTIO_CMD_PANIC  0x1
-#define RPMSG_VIRTIO_CMD_MASK   0xffff
-#define RPMSG_VIRTIO_CMD_SHIFT  16
+#define RPMSG_VIRTIO_LITE_CMD_PANIC  0x1
+#define RPMSG_VIRTIO_LITE_CMD_MASK   0xffff
+#define RPMSG_VIRTIO_LITE_CMD_SHIFT  16
 
-#define RPMSG_VIRTIO_CMD(c,v)   (((c) << RPMSG_VIRTIO_CMD_SHIFT) | \
-                                 ((v) & RPMSG_VIRTIO_CMD_MASK))
-#define RPMSG_VIRTIO_GET_CMD(c) ((c) >> RPMSG_VIRTIO_CMD_SHIFT)
+#define RPMSG_VIRTIO_LITE_CMD(c,v)   (((c) << RPMSG_VIRTIO_LITE_CMD_SHIFT) | \
+                                      ((v) & RPMSG_VIRTIO_LITE_CMD_MASK))
+#define RPMSG_VIRTIO_LITE_GET_CMD(c) ((c) >> RPMSG_VIRTIO_LITE_CMD_SHIFT)
 
-#define RPMSG_VIRTIO_RSC2CMD(r) \
-  ((FAR struct rpmsg_virtio_cmd_s *) \
-  &((FAR struct resource_table *)(r))->reserved[0])
+#define RPMSG_VIRTIO_LITE_RSC2CMD(r) \
+  ((FAR struct rpmsg_virtio_lite_cmd_s *) \
+   &((FAR struct resource_table *)(r))->reserved[0])
 
 /* Access macros ************************************************************/
 
 /****************************************************************************
- * Name: RPMSG_VIRTIO_GET_LOCAL_CPUNAME
+ * Name: RPMSG_VIRTIO_LITE_GET_LOCAL_CPUNAME
  *
  * Description:
  *   Get remote cpu name
@@ -69,11 +69,11 @@
  *
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_GET_LOCAL_CPUNAME(d) \
+#define RPMSG_VIRTIO_LITE_GET_LOCAL_CPUNAME(d) \
   ((d)->ops->get_local_cpuname ? (d)->ops->get_local_cpuname(d) : "")
 
 /****************************************************************************
- * Name: RPMSG_VIRTIO_GET_CPUNAME
+ * Name: RPMSG_VIRTIO_LITE_GET_CPUNAME
  *
  * Description:
  *   Get remote cpu name
@@ -86,11 +86,11 @@
  *
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_GET_CPUNAME(d) \
+#define RPMSG_VIRTIO_LITE_GET_CPUNAME(d) \
   ((d)->ops->get_cpuname ? (d)->ops->get_cpuname(d) : "")
 
 /****************************************************************************
- * Name: RPMSG_VIRTIO_GET_RESOURCE
+ * Name: RPMSG_VIRTIO_LITE_GET_RESOURCE
  *
  * Description:
  *   Get rpmsg virtio resource
@@ -103,11 +103,11 @@
  *
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_GET_RESOURCE(d) \
+#define RPMSG_VIRTIO_LITE_GET_RESOURCE(d) \
   ((d)->ops->get_resource ? (d)->ops->get_resource(d) : NULL)
 
 /****************************************************************************
- * Name: RPMSG_VIRTIO_IS_MASTER
+ * Name: RPMSG_VIRTIO_LITE_IS_MASTER
  *
  * Description:
  *   Is master or not
@@ -120,11 +120,11 @@
  *
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_IS_MASTER(d) \
+#define RPMSG_VIRTIO_LITE_IS_MASTER(d) \
   ((d)->ops->is_master ? (d)->ops->is_master(d) : false)
 
 /****************************************************************************
- * Name: RPMSG_VIRTIO_REGISTER_CALLBACK
+ * Name: RPMSG_VIRTIO_LITE_REGISTER_CALLBACK
  *
  * Description:
  *   Attach to receive a callback when something is received on RPTUN
@@ -139,11 +139,11 @@
  *
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_REGISTER_CALLBACK(d,c,a) \
+#define RPMSG_VIRTIO_LITE_REGISTER_CALLBACK(d,c,a) \
   ((d)->ops->register_callback ? (d)->ops->register_callback(d,c,a) : -ENOSYS)
 
 /****************************************************************************
- * Name: RPMSG_VIRTIO_NOTIFY
+ * Name: RPMSG_VIRTIO_LITE_NOTIFY
  *
  * Description:
  *   Notify remote core there is a message to get.
@@ -157,7 +157,7 @@
  *
  ****************************************************************************/
 
-#define RPMSG_VIRTIO_NOTIFY(d,v) \
+#define RPMSG_VIRTIO_LITE_NOTIFY(d,v) \
   ((d)->ops->notify ? (d)->ops->notify(d,v) : -ENOSYS)
 
 /****************************************************************************
@@ -166,13 +166,13 @@
 
 typedef CODE int (*rpmsg_virtio_callback_t)(FAR void *arg, uint32_t vqid);
 
-begin_packed_struct struct rpmsg_virtio_cmd_s
+begin_packed_struct struct rpmsg_virtio_lite_cmd_s
 {
   uint32_t cmd_master;
   uint32_t cmd_slave;
 } end_packed_struct;
 
-struct aligned_data(8) rpmsg_virtio_rsc_s
+struct aligned_data(8) rpmsg_virtio_lite_rsc_s
 {
   struct resource_table    rsc_tbl_hdr;
   uint32_t                 offset[2];
@@ -183,23 +183,24 @@ struct aligned_data(8) rpmsg_virtio_rsc_s
   struct fw_rsc_config     config;
 };
 
-struct rpmsg_virtio_s;
-struct rpmsg_virtio_ops_s
+struct rpmsg_virtio_lite_s;
+struct rpmsg_virtio_lite_ops_s
 {
-  CODE FAR const char *(*get_local_cpuname)(FAR struct rpmsg_virtio_s *dev);
-  CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_virtio_s *dev);
-  CODE FAR struct rpmsg_virtio_rsc_s *
-  (*get_resource)(FAR struct rpmsg_virtio_s *dev);
-  CODE int (*is_master)(FAR struct rpmsg_virtio_s *dev);
-  CODE int (*notify)(FAR struct rpmsg_virtio_s *dev, uint32_t vqid);
-  CODE int (*register_callback)(FAR struct rpmsg_virtio_s *dev,
+  CODE FAR const char *
+  (*get_local_cpuname)(FAR struct rpmsg_virtio_lite_s *dev);
+  CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_virtio_lite_s *dev);
+  CODE FAR struct rpmsg_virtio_lite_rsc_s *
+  (*get_resource)(FAR struct rpmsg_virtio_lite_s *dev);
+  CODE int (*is_master)(FAR struct rpmsg_virtio_lite_s *dev);
+  CODE int (*notify)(FAR struct rpmsg_virtio_lite_s *dev, uint32_t vqid);
+  CODE int (*register_callback)(FAR struct rpmsg_virtio_lite_s *dev,
                                 rpmsg_virtio_callback_t callback,
                                 FAR void *arg);
 };
 
-struct rpmsg_virtio_s
+struct rpmsg_virtio_lite_s
 {
-  FAR const struct rpmsg_virtio_ops_s *ops;
+  FAR const struct rpmsg_virtio_lite_ops_s *ops;
 };
 
 /****************************************************************************
@@ -214,12 +215,12 @@ extern "C"
 #define EXTERN extern
 #endif
 
-int rpmsg_virtio_initialize(FAR struct rpmsg_virtio_s *dev);
+int rpmsg_virtio_lite_initialize(FAR struct rpmsg_virtio_lite_s *dev);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_RPTUN */
+#endif /* CONFIG_RPMSG_VIRTIO_LITE */
 
-#endif /* __INCLUDE_NUTTX_RPMSG_RPMSG_VIRTIO_H */
+#endif /* __INCLUDE_NUTTX_RPMSG_RPMSG_VIRTIO_LITE_H */
