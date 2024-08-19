@@ -30,6 +30,14 @@ CSRCS += $(if $(wildcard romfs_boot.c), romfs_boot.c, romfs_stub.c)
 endif
 endif
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += qemu_rv_autoleds.c
+endif
+
+ifeq ($(CONFIG_USERLED),y)
+CSRCS += qemu_rv_userleds.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
 
 # don't use single-colon targets as they may coflict with those included ones.

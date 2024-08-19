@@ -64,6 +64,17 @@ static int intel64_start(struct oneshot_lowerhalf_s *lower,
                        const struct timespec *ts);
 static int intel64_cancel(struct oneshot_lowerhalf_s *lower,
                         struct timespec *ts);
+static int intel64_current(struct oneshot_lowerhalf_s *lower,
+                           struct timespec *ts);
+static int intel64_tick_max_delay(struct oneshot_lowerhalf_s *lower,
+                                  clock_t *ticks);
+static int intel64_tick_start(struct oneshot_lowerhalf_s *lower,
+                              oneshot_callback_t callback, void *arg,
+                              clock_t ticks);
+static int intel64_tick_cancel(struct oneshot_lowerhalf_s *lower,
+                               clock_t *ticks);
+static int intel64_tick_current(struct oneshot_lowerhalf_s *lower,
+                                clock_t *ticks);
 
 /****************************************************************************
  * Private Data
@@ -73,9 +84,14 @@ static int intel64_cancel(struct oneshot_lowerhalf_s *lower,
 
 static const struct oneshot_operations_s g_oneshot_ops =
 {
-  .max_delay = intel64_max_delay,
-  .start     = intel64_start,
-  .cancel    = intel64_cancel,
+  .max_delay      = intel64_max_delay,
+  .start          = intel64_start,
+  .cancel         = intel64_cancel,
+  .current        = intel64_current,
+  .tick_max_delay = intel64_tick_max_delay,
+  .tick_start     = intel64_tick_start,
+  .tick_cancel    = intel64_tick_cancel,
+  .tick_current   = intel64_tick_current,
 };
 
 static spinlock_t g_oneshotlow_spin;
@@ -264,6 +280,178 @@ static int intel64_cancel(struct oneshot_lowerhalf_s *lower,
     {
       tmrerr("ERROR: intel64_oneshot_cancel failed\n");
     }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: intel64_current
+ *
+ * Description:
+ *  Get the current time.
+ *
+ * Input Parameters:
+ *   lower   Caller allocated instance of the oneshot state structure.  This
+ *           structure must have been previously initialized via a call to
+ *           oneshot_initialize();
+ *   ticks   The location in which to return the current time.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success, a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int intel64_current(struct oneshot_lowerhalf_s *lower,
+                           struct timespec *ts)
+{
+  struct intel64_oneshot_lowerhalf_s *priv =
+    (struct intel64_oneshot_lowerhalf_s *)lower;
+  uint64_t current_us;
+
+  DEBUGASSERT(priv != NULL && ts != NULL);
+
+  intel64_oneshot_current(&priv->oneshot, &current_us);
+  ts->tv_sec  = current_us / USEC_PER_SEC;
+  current_us  = current_us - ts->tv_sec * USEC_PER_SEC;
+  ts->tv_nsec = current_us * NSEC_PER_USEC;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: intel64_tick_max_delay
+ *
+ * Description:
+ *   Determine the maximum delay of the one-shot timer (in microseconds)
+ *
+ * Input Parameters:
+ *   lower   An instance of the lower-half oneshot state structure.  This
+ *           structure must have been previously initialized via a call to
+ *           oneshot_initialize();
+ *   ticks   The location in which to return the maximum delay.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static int intel64_tick_max_delay(struct oneshot_lowerhalf_s *lower,
+                                  clock_t *ticks)
+{
+  struct timespec ts;
+  int             ret;
+
+  ret = intel64_max_delay(lower, &ts);
+
+  /* Convert time to ticks */
+
+  clock_time2ticks(&ts, (sclock_t *)ticks);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: intel64_tick_start
+ *
+ * Description:
+ *   Start the oneshot timer
+ *
+ * Input Parameters:
+ *   lower    An instance of the lower-half oneshot state structure.  This
+ *            structure must have been previously initialized via a call to
+ *            oneshot_initialize();
+ *   handler  The function to call when when the oneshot timer expires.
+ *   arg      An opaque argument that will accompany the callback.
+ *   ticks    Provides the duration of the one shot timer.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static int intel64_tick_start(struct oneshot_lowerhalf_s *lower,
+                              oneshot_callback_t callback, void *arg,
+                              clock_t ticks)
+{
+  struct timespec ts;
+
+  /* Convert ticks to time */
+
+  clock_ticks2time(ticks, &ts);
+
+  return intel64_start(lower, callback, arg, &ts);
+}
+
+/****************************************************************************
+ * Name: intel64_tick_cancel
+ *
+ * Description:
+ *   Cancel the oneshot timer and return the time remaining on the timer.
+ *
+ *   NOTE: This function may execute at a high rate with no timer running (as
+ *   when pre-emption is enabled and disabled).
+ *
+ * Input Parameters:
+ *   lower   Caller allocated instance of the oneshot state structure.  This
+ *           structure must have been previously initialized via a call to
+ *           oneshot_initialize();
+ *   ticks   The location in which to return the time remaining on the
+ *           oneshot timer.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A call to up_timer_cancel() when
+ *   the timer is not active should also return success; a negated errno
+ *   value is returned on any failure.
+ *
+ ****************************************************************************/
+
+static int intel64_tick_cancel(struct oneshot_lowerhalf_s *lower,
+                               clock_t *ticks)
+{
+  struct timespec ts;
+  int             ret;
+
+  ret = intel64_cancel(lower, &ts);
+
+  /* Convert time to ticks */
+
+  clock_time2ticks(&ts, (sclock_t *)ticks);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: intel64_tick_current
+ *
+ * Description:
+ *  Get the current time.
+ *
+ * Input Parameters:
+ *   lower   Caller allocated instance of the oneshot state structure.  This
+ *           structure must have been previously initialized via a call to
+ *           oneshot_initialize();
+ *   ticks   The location in which to return the current time.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success, a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int intel64_tick_current(struct oneshot_lowerhalf_s *lower,
+                                clock_t *ticks)
+{
+  struct timespec ts;
+  int             ret;
+
+  ret = intel64_current(lower, &ts);
+
+  /* Convert time to ticks */
+
+  clock_time2ticks(&ts, (sclock_t *)ticks);
 
   return ret;
 }

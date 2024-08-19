@@ -142,7 +142,7 @@ static int goldfish_gps_activate(FAR struct gps_lowerhalf_s *gps,
 static int goldfish_gps_thread(int argc, FAR char** argv)
 {
   FAR struct goldfish_gps_s *priv = (FAR struct goldfish_gps_s *)
-                                ((uintptr_t)strtoul(argv[1], NULL, 0));
+                                ((uintptr_t)strtoul(argv[1], NULL, 16));
   ssize_t len;
   char buf[256];
 

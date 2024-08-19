@@ -293,22 +293,6 @@ void esp32s3_dma_set_ext_memblk(int chan, bool tx,
 
 void esp32s3_dma_init(void);
 
-/****************************************************************************
- * Name: esp32s3_dma_deinit
- *
- * Description:
- *   Deinitialize DMA driver.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void esp32s3_dma_deinit(void);
-
 #ifdef __cplusplus
 }
 #endif

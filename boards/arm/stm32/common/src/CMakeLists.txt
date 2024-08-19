@@ -24,6 +24,10 @@ if(CONFIG_SENSORS_BMP180)
   list(APPEND SRCS stm32_bmp180.c)
 endif()
 
+if(CONFIG_SENSORS_BMP280)
+  list(APPEND SRCS stm32_bmp280.c)
+endif()
+
 if(CONFIG_LEDS_APA102)
   list(APPEND SRCS stm32_apa102.c)
 endif()
@@ -118,6 +122,10 @@ endif()
 
 if(CONFIG_LCD_MAX7219)
   list(APPEND SRCS stm32_max7219_matrix.c)
+endif()
+
+if(CONFIG_CL_MFRC522)
+  list(APPEND SRCS stm32_mfrc522.c)
 endif()
 
 if(CONFIG_LIS3DSH)

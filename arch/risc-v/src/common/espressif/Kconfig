@@ -442,6 +442,12 @@ config ESP_RMT
 		format, RMT can be extended to a versatile and general-purpose
 		transceiver, transmitting or receiving many other types of signals.
 
+config ESPRESSIF_TEMP
+	bool "Internal Temperature Sensor"
+	default n
+	---help---
+		A built-in sensor used to measure the chip's internal temperature.
+
 config ESP_WIRELESS
 	bool
 	default n
@@ -901,6 +907,29 @@ config ESPRESSIF_SPI_UDCS
 
 if ESPRESSIF_SPI2
 
+config ESPRESSIF_SPI2_DMA
+	bool "SPI2 use GDMA"
+	default n
+	depends on ESPRESSIF_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
+
+config ESPRESSIF_SPI2_DMADESC_NUM
+	int "SPI2 Master GDMA maximum number of descriptors"
+	default 2
+	depends on ESPRESSIF_SPI2_DMA
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a GDMA transfer.
+
+config ESPRESSIF_SPI2_DMATHRESHOLD
+	int "SPI2 GDMA threshold"
+	default 64
+	depends on ESPRESSIF_SPI2_DMA
+	---help---
+		When SPI GDMA is enabled, GDMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
 config ESPRESSIF_SPI2_SLAVE
 	bool "SPI2 Slave mode"
 	default n
@@ -918,22 +947,27 @@ config ESPRESSIF_SPI2_SLAVE_BUFSIZE
 
 config ESPRESSIF_SPI2_CSPIN
 	int "SPI2 CS Pin"
-	default 10
+	default 10 if ARCH_CHIP_ESP32C3_GENERIC
+	default 16 if ARCH_CHIP_ESP32C6
+	default 1 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 config ESPRESSIF_SPI2_CLKPIN
 	int "SPI2 CLK Pin"
-	default 6
+	default 6 if !ARCH_CHIP_ESP32H2
+	default 4 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 config ESPRESSIF_SPI2_MOSIPIN
 	int "SPI2 MOSI Pin"
-	default 7
+	default 7 if !ARCH_CHIP_ESP32H2
+	default 5 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 config ESPRESSIF_SPI2_MISOPIN
 	int "SPI2 MISO Pin"
-	default 2
+	default 2 if !ARCH_CHIP_ESP32H2
+	default 0 if ARCH_CHIP_ESP32H2
 	range 0 21
 
 endif # ESPRESSIF_SPI2
@@ -1280,8 +1314,104 @@ config ESPRESSIF_I2CTIMEOMS
 	default 500
 
 endmenu # I2C configuration
+
 menu "MCPWM Configuration"
 	depends on ESP_MCPWM
+
+config ESP_MCPWM_MOTOR
+	bool "MCPWM Motor Support"
+	default n
+
+menu "MCPWM Motor Configuration"
+	depends on ESP_MCPWM_MOTOR
+
+config ESP_MCPWM_MOTOR_BDC
+	bool "Brushed DC Motor Control"
+	depends on ESP_MCPWM
+	depends on ESP_MCPWM_MOTOR
+	select MOTOR
+	select MOTOR_UPPER
+	select MOTOR_UPPER_HAVE_SPEED
+	default n
+	---help---
+		Enables the use of the MCPWM submodule for control of brushed DC
+		motor.
+
+if ESP_MCPWM_MOTOR_BDC
+
+config ESP_MCPWM_MOTOR_CH0
+	bool "Motor Control Channel 0"
+	default n
+	---help---
+		Enables motor control on channel 0.
+
+if ESP_MCPWM_MOTOR_CH0
+
+config ESP_MCPWM_MOTOR_CH0_PWMA_GPIO
+	int "Output Pin PWM_A"
+	default 20 if ESPRESSIF_ESP32C6
+	default 10 if ESPRESSIF_ESP32H2
+	---help---
+		Output pin assigned to channel 0 PWM output PWM_A.
+
+config ESP_MCPWM_MOTOR_CH0_PWMB_GPIO
+	int "Output Pin PWM_B"
+	default 21 if ESPRESSIF_ESP32C6
+	default 11 if ESPRESSIF_ESP32H2
+	---help---
+		Output pin assigned to channel 0 PWM output PWM_B.
+
+config ESP_MCPWM_MOTOR_CH0_PWM_FREQ
+	int "PWM output frequency for channel 0 [Hz]"
+	default 1000
+	---help---
+		Select PWM frequency for channel 0.
+		Minimum is 25 Hz and maximum is 3000 Hz.
+
+config ESP_MCPMW_MOTOR_CH0_FAULT
+	bool "Enable fault for channel 0"
+	default n
+	---help---
+		Enables the use of a fault pin to quickly stop the motor when
+		a GPIO pin pulled high.
+
+if ESP_MCPMW_MOTOR_CH0_FAULT
+
+config ESP_MCPMW_MOTOR_CH0_FAULT_GPIO
+	int "GPIO Pin for fault detection"
+	default 9
+	---help---
+		Input pin assigned to channel 0 fault indicator.
+
+endif # ESP_MCPMW_MOTOR_CH0_FAULT
+
+endif # ESP_MCPWM_MOTOR_CH0
+
+config ESP_MCPWM_MOTOR_CH1
+	bool "Motor Control Channel 1"
+	default n
+	---help---
+		Enables motor control on channel 1.
+
+if ESP_MCPWM_MOTOR_CH1
+
+config ESP_MCPWM_MOTOR_CH1_PWMA_GPIO
+	int "Output Pin CH1 PWM_A"
+	default 15
+	---help---
+		Output pin assigned to channel 1 PWM output PWM_A.
+
+config ESP_MCPWM_MOTOR_CH1_PWMB_GPIO
+	int "Output Pin CH1 PWM_B"
+	default 16
+	---help---
+		Output pin assigned to channel 1 PWM output PWM_B.
+
+endif # ESP_MCPWM_MOTOR_CH1
+
+endif # ESP_MCPWM_MOTOR_BDC
+
+endmenu # MCPWM Motor Settings
 
 config ESP_MCPWM_CAPTURE
 	bool "MCPWM Capture Submodule"
@@ -1342,6 +1472,15 @@ config ESP_MCPWM_CAPTURE_CH2_GPIO
 endif # ESP_MCPWM_CAPTURE_CH2
 
 endif # ESP_MCPWM_CAPTURE
+
+config ESP_MCPWM_TEST_LOOPBACK
+	bool "MCPWM loopback test mode"
+	depends on EXPERIMENTAL
+	default n
+	---help---
+		This enables a lower-half driver-specific loopback test
+		mode that attaches a capture device to the PWM output on
+		motor tests.
 
 endmenu # MCPWM Configuration
 
@@ -1406,5 +1545,14 @@ config ESPRESSIF_BROWNOUT_DET_LVL
 	default 7 if ESPRESSIF_BROWNOUT_DET_LVL_SEL_7
 
 endmenu # ESPRESSIF_BROWNOUT_DET
+
+menu "Internal Temperature Sensor Configuration"
+	depends on ESPRESSIF_TEMP
+
+config ESPRESSIF_TEMP_PATH
+	string "Internal Temperature Sensor Path"
+	default "dev/temp"
+
+endmenu # ESPRESSIF_TEMP
 
 endif # ARCH_CHIP_ESPRESSIF

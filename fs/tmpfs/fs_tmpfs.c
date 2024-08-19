@@ -1605,7 +1605,15 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Handle attempts to write beyond the end of the file */
 
-  startpos = filep->f_pos;
+  if ((filep->f_oflags & O_APPEND) != 0)
+    {
+      startpos = tfo->tfo_size;
+    }
+  else
+    {
+      startpos = filep->f_pos;
+    }
+
   nwritten = buflen;
   endpos   = startpos + buflen;
 
@@ -1625,12 +1633,13 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
   if (tfo->tfo_data != NULL)
     {
       memcpy(&tfo->tfo_data[startpos], buffer, nwritten);
-      filep->f_pos += nwritten;
     }
   else
     {
       DEBUGASSERT(tfo->tfo_size == 0 && nwritten == 0);
     }
+
+  filep->f_pos = endpos;
 
   /* Release the lock on the file */
 

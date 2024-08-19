@@ -34,6 +34,7 @@
   /* Exported Symbols */
 
   .global exception_common
+  .global return_from_exception
   .global __start
 
   .section .text
@@ -154,6 +155,8 @@ exception_common:
   /* Call interrupt handler in C */
 
   jal  x1, rv32m1_dispatch_irq
+
+return_from_exception:
 
   /* If context switch is needed, return a new sp */
 

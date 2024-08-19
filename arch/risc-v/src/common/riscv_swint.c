@@ -48,15 +48,73 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_SYSCALL
-#  define TCB_FLAGS_OFFSET offsetof(struct tcb_s, flags)
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 #ifdef CONFIG_LIB_SYSCALL
+
+/****************************************************************************
+ * Name: do_syscall
+ *
+ * Description:
+ *   Call the stub function corresponding to the system call.  NOTE the non-
+ *   standard parameter passing:
+ *
+ *     A0 = SYS_ call number
+ *     A1 = parm0
+ *     A2 = parm1
+ *     A3 = parm2
+ *     A4 = parm3
+ *     A5 = parm4
+ *     A6 = parm5
+ *
+ * Note:
+ *   Do not allow the compiler to inline this function, as it does a jump to
+ *   another procedure which can clobber any register and the compiler will
+ *   not understand it happens.
+ *
+ ****************************************************************************/
+
+static uintptr_t do_syscall(unsigned int nbr, uintptr_t parm1,
+                            uintptr_t parm2, uintptr_t parm3,
+                            uintptr_t parm4, uintptr_t parm5,
+                            uintptr_t parm6) noinline_function;
+static uintptr_t do_syscall(unsigned int nbr, uintptr_t parm1,
+                            uintptr_t parm2, uintptr_t parm3,
+                            uintptr_t parm4, uintptr_t parm5,
+                            uintptr_t parm6)
+{
+  register long a0 asm("a0") = (long)(nbr);
+  register long a1 asm("a1") = (long)(parm1);
+  register long a2 asm("a2") = (long)(parm2);
+  register long a3 asm("a3") = (long)(parm3);
+  register long a4 asm("a4") = (long)(parm4);
+  register long a5 asm("a5") = (long)(parm5);
+  register long a6 asm("a6") = (long)(parm6);
+
+  asm volatile
+    (
+     "la   t0, g_stublookup\n" /* t0=The base of the stub lookup table */
+#ifdef CONFIG_ARCH_RV32
+     "slli a0, a0, 2\n"        /* a0=Offset for the stub lookup table */
+#else
+     "slli a0, a0, 3\n"        /* a0=Offset for the stub lookup table */
+#endif
+     "add  t0, t0, a0\n"       /* t0=The address in the table */
+     REGLOAD " t0, 0(t0)\n"    /* t0=The address of the stub for this syscall */
+     "jalr ra, t0\n"           /* Call the stub (modifies ra) */
+     : "+r"(a0)
+     : "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5), "r"(a6)
+     : "t0", "ra", "memory"
+  );
+
+  return a0;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: dispatch_syscall
@@ -72,13 +130,14 @@
  *     A4 = parm3
  *     A5 = parm4
  *     A6 = parm5
+ *     A7 = context (aka SP)
  *
  ****************************************************************************/
 
 uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
                            uintptr_t parm2, uintptr_t parm3,
                            uintptr_t parm4, uintptr_t parm5,
-                           uintptr_t parm6)
+                           uintptr_t parm6, void *context)
 {
   register long a0 asm("a0") = (long)(nbr);
   register long a1 asm("a1") = (long)(parm1);
@@ -87,7 +146,7 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
   register long a4 asm("a4") = (long)(parm4);
   register long a5 asm("a5") = (long)(parm5);
   register long a6 asm("a6") = (long)(parm6);
-
+  register struct tcb_s *rtcb asm("tp");
   uintptr_t ret;
 
   /* Valid system call ? */
@@ -99,37 +158,25 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
       return -ENOSYS;
     }
 
-  /* ra gets clobbered below, but it does not matter */
+  /* Set the user register context to TCB */
 
-  asm volatile
-    (
-     REGLOAD " t0, %1(tp)\n"                /* Load tcb->flags */
-     "ori  t0, t0, %2\n"                    /* tcb->flags |= TCB_FLAG_SYSCALL */
-     REGSTORE " t0, %1(tp)\n"
-     "addi a0, a0, -%3\n"                   /* Offset a0 to account for the reserved syscalls */
-     "la   t0, g_stublookup\n"              /* t0=The base of the stub lookup table */
-#ifdef CONFIG_ARCH_RV32
-     "slli a0, a0, 2\n"                     /* a0=Offset for the stub lookup table */
-#else
-     "slli a0, a0, 3\n"                     /* a0=Offset for the stub lookup table */
-#endif
-     "add  t0, t0, a0\n"                    /* t0=The address in the table */
-     REGLOAD " t0, 0(t0)\n"                 /* t0=The address of the stub for this syscall */
-     "jalr ra, t0\n"                        /* Call the stub (modifies ra) */
-     REGLOAD " t0, %1(tp)\n"                /* Load tcb->flags */
-     "andi  t0, t0, ~%2\n"                  /* tcb->flags &= ~TCB_FLAG_SYSCALL */
-     REGSTORE " t0, %1(tp)\n"
-     : "+r"(a0)
-     : "i"(TCB_FLAGS_OFFSET),
-       "i"(TCB_FLAG_SYSCALL),
-       "i"(CONFIG_SYS_RESERVED),
-       "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5), "r"(a6)
-     : "t0", "memory"
-  );
+  rtcb->xcp.regs = context;
 
-  /* a0 gets clobbered below, save it locally here */
+  /* Indicate that we are in a syscall handler */
 
-  ret = a0;
+  rtcb->flags |= TCB_FLAG_SYSCALL;
+
+  /* Offset a0 to account for the reserved syscalls */
+
+  a0 -= CONFIG_SYS_RESERVED;
+
+  /* Run the system call, save return value locally */
+
+  ret = do_syscall(a0, a1, a2, a3, a4, a5, a6);
+
+  /* System call is now done */
+
+  rtcb->flags &= ~TCB_FLAG_SYSCALL;
 
   /* Unmask any pending signals now */
 
@@ -138,10 +185,6 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
   return ret;
 }
 #endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: riscv_swint

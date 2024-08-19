@@ -75,7 +75,7 @@ struct epoll_head_s
   struct list_node      oneshot;  /* The oneshot list, store all the epoll
                                    * node notified after epoll_wait and with
                                    * EPOLLONESHOT events, these oneshot epoll
-                                   * nodes can be reset by epoll_ctl (Move
+                                   * nodes can be reset by epoll_ctl (move
                                    * from oneshot list to the setup list).
                                    */
   struct list_node      free;     /* The free list, store all the freed epoll
@@ -535,21 +535,20 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
              */
 
             extend = kmm_zalloc(sizeof(*extend) +
-                                sizeof(epoll_node_t) * eph->size);
+                                2 * sizeof(epoll_node_t) * eph->size);
             if (extend == NULL)
               {
                 ret = -ENOMEM;
                 goto err;
               }
 
+            eph->size *= 2;
             list_add_tail(&eph->extend, extend);
             epn = (FAR epoll_node_t *)(extend + 1);
             for (i = 0; i < eph->size; i++)
               {
                 list_add_tail(&eph->free, &epn[i].node);
               }
-
-            eph->size += eph->size;
           }
 
         epn = container_of(list_remove_head(&eph->free), epoll_node_t, node);
@@ -733,18 +732,7 @@ retry:
     }
   else if (timeout > 0)
     {
-      clock_t ticks;
-#if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
-    defined(CONFIG_HAVE_LONG_LONG)
-      ticks = (((unsigned long long)timeout * USEC_PER_MSEC) +
-                (USEC_PER_TICK - 1)) /
-              USEC_PER_TICK;
-#else
-      ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) /
-              MSEC_PER_TICK;
-#endif
-
-      ret = nxsem_tickwait(&eph->sem, ticks);
+      ret = nxsem_tickwait(&eph->sem, MSEC2TICK(timeout));
     }
   else
     {
@@ -812,18 +800,7 @@ retry:
     }
   else if (timeout > 0)
     {
-      clock_t ticks;
-#if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
-    defined(CONFIG_HAVE_LONG_LONG)
-      ticks = (((unsigned long long)timeout * USEC_PER_MSEC) +
-                (USEC_PER_TICK - 1)) /
-              USEC_PER_TICK;
-#else
-      ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) /
-              MSEC_PER_TICK;
-#endif
-
-      ret = nxsem_tickwait(&eph->sem, ticks);
+      ret = nxsem_tickwait(&eph->sem, MSEC2TICK(timeout));
     }
   else
     {

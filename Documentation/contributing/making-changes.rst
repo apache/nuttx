@@ -206,6 +206,47 @@ squash before submitting the Pull Request:
 
    Here's `GitHub's instructions for creating a Pull Request <https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request>`_.
 
+   It is important to include an informative commit title and a commit message.
+
+   In the commit title please include the subsystem/area related to your contribution,
+   followed by a descriptive message. Some examples:
+
+    Adding or fixing a platform
+
+    .. code-block:: bash
+
+       arch/arm/stm32/: Add arch support for stm32 platform
+
+       This patch adds initial support for stm32 platform. Please read
+       the documentation included for more details how to wire the display.
+
+       Signed-off-by: Your Name <you@whoareyou.com>
+
+    Adding or fixing a board
+
+    .. code-block:: bash
+
+       arm/stm32f4discover: Add board initialization for SSD1306 OLED Display
+
+       This patch adds support to use the display SSD1306 on I2C1, please read
+       the documentation included for more details how to wire the display.
+
+       Signed-off-by: Your Name <you@whoareyou.com>
+
+   Another example, submitting a commit to fix an issue in the fictional sensor xyz123:
+
+    .. code-block:: bash
+
+       sensors/xyz123: Fix a pressure conversion resolution issue
+
+       I found an issue in the XYZ123 sensor when converting the
+       pressure. The raw value should be divided by 4.25 instead
+       of 4.52.
+
+       Signed-off-by: Your Name <you@whoareyou.com>
+
+   You can search in the github commit history for more examples.
+
 #. Get Pull Request feedback and implement changes
 
    Get suggestions for improvements from reviewers, make changes, and push them to the branch. Once the reviewers are

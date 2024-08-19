@@ -328,7 +328,7 @@ int nand_wrapper_isbad(FAR struct mtd_dev_s *dev, off_t block)
 
   nxmutex_lock(&nand_wrapper_dev_mut);
   nand_wrapper_ins_i++;
-  NAND_WRAPPER_LOG("[UPPER %lu | %s] Blocks: %d\n",
+  NAND_WRAPPER_LOG("[UPPER %lu | %s] Block: %d\n",
                     nand_wrapper_ins_i, "isbad", block);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.isbad);
 
@@ -336,8 +336,8 @@ int nand_wrapper_isbad(FAR struct mtd_dev_s *dev, off_t block)
 
   if (ret >= 0)
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done\n",
-                        nand_wrapper_ins_i, "isbad");
+      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done %d\n",
+                        nand_wrapper_ins_i, "isbad", ret);
     }
   else
     {

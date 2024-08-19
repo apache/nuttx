@@ -59,8 +59,8 @@
  *
  */
 
-#define SP_DSB(n) __asm__ __volatile__ ("fence")
-#define SP_DMB(n) __asm__ __volatile__ ("fence")
+#define SP_DSB() __asm__ __volatile__ ("fence")
+#define SP_DMB() __asm__ __volatile__ ("fence")
 
 /****************************************************************************
  * Public Types

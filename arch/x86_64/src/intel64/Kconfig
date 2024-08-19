@@ -68,6 +68,14 @@ config ARCH_INTEL64_TSC
 	---help---
 		Select to enable the use of TSC APIC timer of x86_64
 
+config ARCH_INTEL64_HPET_ALARM
+	bool "HPET timer alarm support"
+	depends on ALARM_ARCH
+	---help---
+		With this option you can enable ALARM_ARCH features that works on top of
+		the HPET timer instance. This is an alternative method to TSC timer to
+		provide the system clock.
+
 endchoice # System Timer Source
 
 if ARCH_INTEL64_TSC_DEADLINE
@@ -107,6 +115,11 @@ config INTEL64_HPET_BASE
 	---help---
 		Configure base address for HPET. In the future, we can get this address from
 		the ACPI table if ACPI support is enabled.
+
+config ARCH_INTEL64_HPET_ALARM_CHAN
+	int "HPET timer alarm channel"
+	depends on ARCH_INTEL64_HPET_ALARM
+	default 0
 
 config INTEL64_HPET_CHANNELS
 	int "HPET timer supported channels"

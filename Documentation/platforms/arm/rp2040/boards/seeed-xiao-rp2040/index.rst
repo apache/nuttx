@@ -90,6 +90,15 @@ nsh
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
 
+userled
+---
+
+This is an nsh configuration with added support for user LEDs.
+
+usbnsh
+------
+
+Basic NuttShell configuration (console enabled in USB Port, at 115200 bps).
 
 README.txt
 ==========

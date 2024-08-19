@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/uio.h>
+#include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
@@ -174,6 +175,7 @@ static int rpmsgfs_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       (FAR struct rpmsgfs_cookie_s *)(uintptr_t)header->cookie;
   FAR struct rpmsgfs_ioctl_s *rsp = data;
 
+  cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
       memcpy(cookie->data, (FAR void *)(uintptr_t)rsp->buf, rsp->arglen);
@@ -391,6 +393,10 @@ static ssize_t rpmsgfs_ioctl_arglen(int cmd)
       case FIONWRITE:
       case FIONREAD:
         return sizeof(int);
+      case FIOC_SETLK:
+      case FIOC_GETLK:
+      case FIOC_SETLKW:
+        return sizeof(struct flock);
       default:
         return -ENOTTY;
     }
@@ -575,6 +581,7 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
   FAR struct rpmsgfs_ioctl_s *msg;
   uint32_t space;
   size_t len;
+  int ret;
 
   if (arglen < 0)
     {
@@ -582,27 +589,39 @@ int rpmsgfs_client_ioctl(FAR void *handle, int fd,
     }
 
   len = sizeof(*msg) + arglen;
-  msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
-  if (msg == NULL)
+
+  while (1)
     {
-      return -ENOMEM;
+      msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
+      if (msg == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      DEBUGASSERT(len <= space);
+
+      msg->fd      = fd;
+      msg->request = request == FIOC_SETLKW ? FIOC_SETLK : request;
+      msg->arg     = arg;
+      msg->arglen  = arglen;
+
+      if (arglen > 0)
+        {
+          memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
+        }
+
+      ret = rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, false,
+                              (FAR struct rpmsgfs_header_s *)msg, len,
+                              arglen > 0 ? (FAR void *)arg : NULL);
+      if (request != FIOC_SETLKW || ret != -EAGAIN)
+        {
+          break;
+        }
+
+      usleep(20000);
     }
 
-  DEBUGASSERT(len <= space);
-
-  msg->fd      = fd;
-  msg->request = request;
-  msg->arg     = arg;
-  msg->arglen  = arglen;
-
-  if (arglen > 0)
-    {
-      memcpy(msg->buf, (FAR void *)(uintptr_t)arg, arglen);
-    }
-
-  return rpmsgfs_send_recv(handle, RPMSGFS_IOCTL, false,
-                           (FAR struct rpmsgfs_header_s *)msg, len,
-                           arglen > 0 ? (FAR void *)arg : NULL);
+  return ret;
 }
 
 void rpmsgfs_client_sync(FAR void *handle, int fd)

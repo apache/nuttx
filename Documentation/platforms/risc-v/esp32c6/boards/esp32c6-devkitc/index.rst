@@ -105,15 +105,15 @@ capture
 The capture configuration enables the capture driver and the capture example, allowing
 the user to measure duty cycle and frequency of a signal. Default pin is GPIO 18 with
 an internal pull-up resistor enabled. When connecting a 50 Hz pulse with 50% duty cycle,
-the following output is expected:
+the following output is expected::
 
-nsh> cap
-cap_main: Hardware initialized. Opening the capture device: /dev/capture0
-cap_main: Number of samples: 0
-pwm duty cycle: 50 % 
-pwm frequence: 50 Hz 
-pwm duty cycle: 50 % 
-pwm frequence: 50 Hz 
+    nsh> cap
+    cap_main: Hardware initialized. Opening the capture device: /dev/capture0
+    cap_main: Number of samples: 0
+    pwm duty cycle: 50 % 
+    pwm frequence: 50 Hz 
+    pwm duty cycle: 50 % 
+    pwm frequence: 50 Hz 
 
 coremark
 --------
@@ -153,6 +153,18 @@ This configuration can be used to scan and manipulate I2C devices.
 You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
+
+motor
+-------
+
+The motor configuration enables the MCPWM peripheral with support to brushed DC motor
+control.
+
+It creates a ``/dev/motor0`` device with speed and direction control capabilities
+by using two GPIOs (GPIO21 and GPIO22) for PWM output. PWM frequency is configurable
+from 25 Hz to 3 kHz, however it defaults to 1 kHz.
+There is also support for an optional fault GPIO (defaults to GPIO9), which can be used
+for quick motor braking. All GPIOs are configurable in ``menuconfig``.
 
 mcuboot_nsh
 --------------------

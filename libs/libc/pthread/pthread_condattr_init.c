@@ -61,6 +61,7 @@ int pthread_condattr_init(FAR pthread_condattr_t *attr)
   else
     {
       attr->clockid = CLOCK_REALTIME;
+      attr->pshared = PTHREAD_PROCESS_PRIVATE;
     }
 
   linfo("Returning %d\n", ret);

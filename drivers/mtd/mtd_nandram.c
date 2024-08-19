@@ -25,6 +25,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
 #include <stddef.h>
 
 #include <nuttx/compiler.h>
@@ -89,8 +90,8 @@
 
 #else
 
-#define NAND_RAM_LOG
-#define NAND_RAM_STATUS_LOG
+#define NAND_RAM_LOG(str, ...)
+#define NAND_RAM_STATUS_LOG(str, ...)
 
 #endif /* CONFIG_MTD_NAND_RAM_DEBUG */
 
@@ -197,10 +198,12 @@ static void nand_ram_storage_status(void)
 
 static inline void nand_ram_status(void)
 {
+#ifdef CONFIG_MTD_NAND_RAM_DEBUG
   if (nand_ram_ins_i % NAND_RAM_STATUS_LEVEL == 0)
     {
       nand_ram_storage_status();
     }
+#endif
 }
 
 /****************************************************************************
@@ -292,7 +295,7 @@ int nand_ram_eraseblock(FAR struct nand_raw_s *raw, off_t block)
   for (i = start_page; i < end_page; i++)
     {
       nand_ram_flash_spare[i].n_erase++;
-      nand_ram_flash_spare[i].free = 1;
+      nand_ram_flash_spare[i].free = NAND_RAM_PAGE_FREE;
     }
 
   NAND_RAM_LOG("[LOWER %lu | %s] Done\n", nand_ram_ins_i, "eraseblock");
@@ -328,11 +331,10 @@ int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
   struct nand_ram_data_s  *read_page_data;
   struct nand_ram_spare_s *read_page_spare;
 
+  ret             = OK;
   read_page       = (block << NAND_RAM_LOG_PAGES_PER_BLOCK) + page;
   read_page_data  = nand_ram_flash_data + read_page;
   read_page_spare = nand_ram_flash_spare + read_page;
-
-  ret = OK;
 
   nxmutex_lock(&nand_ram_dev_mut);
   nand_ram_ins_i++;
@@ -353,12 +355,20 @@ int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
 
   if (data != NULL)
     {
-      memcpy(data, (const void *)read_page_data, NAND_RAM_PAGE_SIZE);
+      if (nand_ram_flash_spare[read_page].free == NAND_RAM_PAGE_FREE)
+        {
+          memset(data, 0, NAND_RAM_PAGE_SIZE);
+        }
+      else
+        {
+          memcpy(data, (const void *)read_page_data->page,
+                 NAND_RAM_PAGE_SIZE);
+        }
     }
 
   if (spare != NULL)
     {
-      memcpy(spare, (const void *)read_page_spare, NAND_RAM_PAGE_SIZE);
+      memcpy(spare, (const void *)read_page_spare, NAND_RAM_SPARE_SIZE);
     }
 
   NAND_RAM_LOG("[LOWER %lu | %s] Done\n", nand_ram_ins_i, "rawread");
@@ -397,11 +407,10 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
   struct nand_ram_data_s  *write_page_data;
   struct nand_ram_spare_s *write_page_spare;
 
+  ret               = OK;
   write_page        = (block << NAND_RAM_LOG_PAGES_PER_BLOCK) + page;
   write_page_data   = nand_ram_flash_data + write_page;
   write_page_spare  = nand_ram_flash_spare + write_page;
-
-  ret = OK;
 
   nxmutex_lock(&nand_ram_dev_mut);
   nand_ram_ins_i++;
@@ -419,15 +428,17 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
     }
 
   nand_ram_flash_spare[write_page].n_write++;
+  nand_ram_flash_spare[write_page].free = NAND_RAM_PAGE_WRITTEN;
 
+  memset((void *)write_page_data->page, 0, NAND_RAM_PAGE_SIZE);
   if (data != NULL)
     {
-      memcpy((void *)write_page_data, data, NAND_RAM_PAGE_SIZE);
+      memcpy((void *)write_page_data->page, data, NAND_RAM_PAGE_SIZE);
     }
 
   if (spare != NULL)
     {
-      memcpy((void *)write_page_spare, data, NAND_RAM_PAGE_SIZE);
+      memcpy((void *)write_page_spare, data, NAND_RAM_SPARE_SIZE);
     }
 
   NAND_RAM_LOG("[LOWER %lu | %s] Done\n", nand_ram_ins_i, "rawwrite");

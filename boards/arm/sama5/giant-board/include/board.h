@@ -32,21 +32,6 @@
 #  include <nuttx/irq.h>
 #endif
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Clocking *****************************************************************/
-
-/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
- * These definitions will configure operational clocking.
- */
-
-/* On-board crystal frequencies */
-
-#define BOARD_MAINOSC_FREQUENCY    (24000000)  /* MAINOSC: 12MHz crystal on-board */
-#define BOARD_SLOWCLK_FREQUENCY    (32768)     /* Slow Clock: 32.768KHz */
-
 #if defined(CONFIG_SAMA5_BOOT_SDRAM)
 /* When booting from SDRAM, NuttX is loaded in SDRAM by an intermediate
  * bootloader.
@@ -72,6 +57,21 @@
 #  include <arch/board/board_492mhz.h>
 
 #endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
+/* After power-on reset, the SAMA5 device is running on a 12MHz internal RC.
+ * These definitions will configure operational clocking.
+ */
+
+/* On-board crystal frequencies */
+
+#define BOARD_MAINOSC_FREQUENCY    (24000000)  /* MAINOSC: 12MHz crystal on-board */
+#define BOARD_SLOWCLK_FREQUENCY    (32768)     /* Slow Clock: 32.768KHz */
 
 /* LED definitions **********************************************************/
 

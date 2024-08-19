@@ -76,6 +76,10 @@ if(CONFIG_INTEL64_HPET)
   list(APPEND SRCS intel64_hpet.c)
 endif()
 
+if(CONFIG_ARCH_INTEL64_HPET_ALARM)
+  list(APPEND SRCS intel64_hpet_alarm.c)
+endif()
+
 if(CONFIG_INTEL64_ONESHOT)
   list(APPEND SRCS intel64_oneshot.c intel64_oneshot_lower.c)
 endif()

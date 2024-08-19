@@ -46,6 +46,11 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
   cmake_policy(SET CMP0135 NEW)
 endif()
 
+if(POLICY CMP0169)
+  # allow to call FetchContent_Populate directly
+  cmake_policy(SET CMP0169 OLD)
+endif()
+
 # Basic CMake configuration ##################################################
 
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -637,8 +642,8 @@ if(NOT CONFIG_ARCH_SIM)
 
   # TODO: nostart/nodefault not applicable to nuttx toolchain
   target_link_libraries(
-    nuttx PRIVATE -T${ldscript} -Wl,--start-group ${nuttx_libs}
-                  ${nuttx_extra_libs} -Wl,--end-group)
+    nuttx PRIVATE ${NUTTX_EXTRA_FLAGS} -T${ldscript} -Wl,--start-group
+                  ${nuttx_libs} ${nuttx_extra_libs} -Wl,--end-group)
 
   # generate binary outputs in different formats (.bin, .hex, etc)
   nuttx_generate_outputs(nuttx)
@@ -770,6 +775,21 @@ if(CONFIG_BUILD_PROTECTED)
   get_property(nuttx_apps_libs GLOBAL PROPERTY NUTTX_APPS_LIBRARIES)
 
   get_property(user_ldscript GLOBAL PROPERTY LD_SCRIPT_USER)
+
+  if(DEFINED PREPROCES)
+    get_filename_component(LD_SCRIPT_NAME ${user_ldscript} NAME)
+    set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
+    add_custom_command(
+      OUTPUT ${LD_SCRIPT_TMP}
+      DEPENDS ${user_ldscript}
+      COMMAND ${PREPROCES} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_CHIP_ABS_DIR}
+              ${user_ldscript} > ${LD_SCRIPT_TMP}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    add_custom_target(user_ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
+    add_dependencies(nuttx_user user_ldscript_tmp)
+    set(user_ldscript ${LD_SCRIPT_TMP})
+  endif()
+
   list(TRANSFORM user_ldscript PREPEND "-T")
 
   execute_process(
@@ -796,6 +816,11 @@ if(CONFIG_BUILD_PROTECTED)
             ${nuttx_user_libgcc}
             $<$<BOOL:${CONFIG_HAVE_CXX}>:supc++>
             $<$<NOT:$<BOOL:${APPLE}>>:-Wl,--end-group>)
+
+  target_include_directories(
+    nuttx_user SYSTEM
+    PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
+            ${CMAKE_BINARY_DIR}/include_arch)
 
   add_custom_command(
     OUTPUT User.map

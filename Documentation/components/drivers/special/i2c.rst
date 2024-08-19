@@ -21,3 +21,11 @@ I2C Device Drivers
 
 -  **Examples**: ``arch/z80/src/ez80/ez80_i2c.c``,
    ``arch/z80/src/z8/z8_i2c.c``, etc.
+
+-  ``struct i2c_slaveops_s``. Each I2C slave device driver must implement
+   an instance of ``struct i2c_slaveops_s``. That structure defines a call
+   table with the following methods:
+
+-  **Binding I2C Slave Drivers**. I2C slave drivers are normally directly
+   accessed by user code, We can read and write to device nodes using posix
+   interfaces.

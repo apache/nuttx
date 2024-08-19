@@ -756,7 +756,14 @@ int esp32s3_partition_init(void)
       mtd_priv->mtd.ioctl  = esp32s3_part_ioctl;
       mtd_priv->mtd.read   = esp32s3_part_read;
       mtd_priv->mtd.write  = esp32s3_part_write;
-      mtd_priv->mtd.name   = label;
+      mtd_priv->mtd.name   = strdup(label);
+      if (!mtd_priv->mtd.name)
+        {
+          ferr("ERROR: Failed to allocate MTD name\n");
+          kmm_free(mtd_priv);
+          ret = -ENOSPC;
+          goto errout_with_mtd;
+        }
 
       mtd_priv->part_mtd = mtd_partition(&mtd_priv->mtd,
                                          info->offset / geo.blocksize,
@@ -764,6 +771,7 @@ int esp32s3_partition_init(void)
       if (!mtd_priv->part_mtd)
         {
           ferr("ERROR: Failed to create MTD partition\n");
+          lib_free(mtd_priv->mtd.name);
           kmm_free(mtd_priv);
           ret = -ENOSPC;
           goto errout_with_mtd;
@@ -773,6 +781,7 @@ int esp32s3_partition_init(void)
       if (ret < 0)
         {
           ferr("ERROR: Failed to register MTD @ %s\n", path);
+          lib_free(mtd_priv->mtd.name);
           kmm_free(mtd_priv);
           goto errout_with_mtd;
         }

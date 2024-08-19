@@ -233,6 +233,7 @@ struct esp32_emac_s
  ****************************************************************************/
 
 static struct esp32_emac_s s_esp32_emac;
+static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -564,7 +565,7 @@ static int emac_config(void)
   /* Hardware reset PHY chip */
 
   esp32_gpiowrite(EMAC_PHYRST_PIN, false);
-  nxsig_usleep(50);
+  up_udelay(50);
   esp32_gpiowrite(EMAC_PHYRST_PIN, true);
 #endif
 
@@ -597,7 +598,7 @@ static int emac_config(void)
           break;
         }
 
-      nxsig_usleep(10);
+      up_udelay(10);
     }
 
   if (i >= EMAC_RESET_TO)
@@ -942,7 +943,7 @@ static int emac_read_phy(uint16_t dev_addr,
 
   for (i = 0; i < EMAC_READPHY_TO; i++)
     {
-      nxsig_usleep(100);
+      up_udelay(100);
 
       val = emac_get_reg(EMAC_MAR_OFFSET);
       if (!(val & EMAC_PIB))
@@ -1004,7 +1005,7 @@ static int emac_write_phy(uint16_t dev_addr,
 
   for (i = 0; i < EMAC_WRITEPHY_TO; i++)
     {
-      nxsig_usleep(100);
+      up_udelay(100);
 
       val = emac_get_reg(EMAC_MAR_OFFSET);
       if (!(val & EMAC_PIB))
@@ -1047,7 +1048,7 @@ static int emac_wait_linkup(struct esp32_emac_s *priv)
 
   for (i = 0; i < EMAC_WAITLINK_TO; i++)
     {
-      nxsig_usleep(10);
+      up_udelay(10);
 
       ret = emac_read_phy(EMAC_PHY_ADDR, MII_MSR, &val);
       if (ret != 0)
@@ -1184,7 +1185,7 @@ static int emac_init_phy(struct esp32_emac_s *priv)
 
   for (i = 0; i < EMAC_RSTPHY_TO; i++)
     {
-      nxsig_usleep(100);
+      up_udelay(100);
 
       ret = emac_read_phy(EMAC_PHY_ADDR, MII_MCR, &val);
       if (ret != 0)
@@ -1947,10 +1948,15 @@ static int emac_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 #ifdef CONFIG_NETDEV_IOCTL
 static int emac_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-#if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-  struct esp32_emacmac_s *priv = NET2PRIV(dev);
-#endif
   int ret;
+
+  /* Get exclusive access to the device structures */
+
+  ret = nxmutex_lock(&g_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   switch (cmd)
     {
@@ -2003,6 +2009,7 @@ static int emac_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         break;
     }
 
+  nxmutex_unlock(&g_lock);
   return ret;
 }
 #endif /* CONFIG_NETDEV_IOCTL */

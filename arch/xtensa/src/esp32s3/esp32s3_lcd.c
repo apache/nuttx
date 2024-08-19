@@ -246,7 +246,7 @@ static int esp32s3_lcd_base_updatearea(struct fb_vtable_s *vtable,
 
 /* Initialization ***********************************************************/
 
-static void esp32s3_lcd_dmasetup(void);
+static int esp32s3_lcd_dmasetup(void);
 static void esp32s3_lcd_gpio_config(void);
 static void esp32s3_lcd_disable(void);
 static void esp32s3_lcd_enable(void);
@@ -638,19 +638,22 @@ static int IRAM_ATTR lcd_interrupt(int irq, void *context, void *arg)
  *   None
  *
  * Returned Value:
- *   None
+ *   Zero on success; a negated errno on failure
  *
  ****************************************************************************/
 
-static void esp32s3_lcd_dmasetup(void)
+static int esp32s3_lcd_dmasetup(void)
 {
   struct esp32s3_lcd_s *priv = &g_lcd_priv;
 
-  esp32s3_dma_init();
-
   priv->dma_channel = esp32s3_dma_request(ESP32S3_DMA_PERIPH_LCDCAM,
                                           10, 1, true);
-  DEBUGASSERT(priv->dma_channel >= 0);
+  if (priv->dma_channel < 0)
+    {
+      spierr("Failed to allocate GDMA channel\n");
+      return ERROR;
+    }
+
   esp32s3_dma_set_ext_memblk(priv->dma_channel,
                              true,
                              ESP32S3_DMA_EXT_MEMBLK_64B);
@@ -669,6 +672,8 @@ static void esp32s3_lcd_dmasetup(void)
                         ESP32S3_LCD_FB_SIZE,
                         true, priv->dma_channel);
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -758,11 +763,11 @@ static void esp32s3_lcd_enableclk(void)
  *   None
  *
  * Returned Value:
- *   None
+ *   OK on success; A negated errno value on failure.
  *
  ****************************************************************************/
 
-static void esp32s3_lcd_config(void)
+static int esp32s3_lcd_config(void)
 {
   uint32_t regval;
   irqstate_t flags;
@@ -830,7 +835,10 @@ static void esp32s3_lcd_config(void)
 
   /* Set GDMA */
 
-  esp32s3_lcd_dmasetup();
+  if (esp32s3_lcd_dmasetup() != OK)
+    {
+      return ERROR;
+    }
 
   /* Configure interrupt */
 
@@ -851,6 +859,8 @@ static void esp32s3_lcd_config(void)
   spin_unlock_irqrestore(&priv->lock, flags);
 
   up_enable_irq(ESP32S3_IRQ_LCD_CAM);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -965,7 +975,10 @@ int up_fbinitialize(int display)
 
   /* Configure LCD controller */
 
-  esp32s3_lcd_config();
+  if (esp32s3_lcd_config() != OK)
+    {
+      return ERROR;
+    }
 
   /* And turn the LCD on */
 

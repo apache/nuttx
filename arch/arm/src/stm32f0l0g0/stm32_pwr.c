@@ -25,10 +25,6 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 /* This file is only a thin shell that includes the proper PWR implementation
  * according to the selected MCU family.
  */
@@ -38,3 +34,7 @@
 #else
 #  include "stm32f0l0_pwr.c"
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/

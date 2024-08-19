@@ -123,10 +123,6 @@
 #  undef CONFIG_ESP32S3_I2S_DUMPBUFFERS
 #endif
 
-#ifndef CONFIG_ESP32S3_I2S_MAXINFLIGHT
-#  define CONFIG_ESP32S3_I2S_MAXINFLIGHT 4
-#endif
-
 #define I2S_GPIO_UNUSED -1      /* For signals which are not used */
 
 /****************************************************************************
@@ -3053,10 +3049,6 @@ static int i2s_dma_setup(struct esp32s3_i2s_s *priv)
   int ret;
   int i2s_dma_dev;
 
-  /* Initialize GDMA controller */
-
-  esp32s3_dma_init();
-
   if (priv->config->port == 0)
     {
       i2s_dma_dev = ESP32S3_DMA_PERIPH_I2S0;
@@ -3072,7 +3064,6 @@ static int i2s_dma_setup(struct esp32s3_i2s_s *priv)
   if (priv->dma_channel < 0)
     {
       i2serr("Failed to allocate GDMA channel\n");
-
       return ERROR;
     }
 
@@ -3171,10 +3162,6 @@ struct i2s_dev_s *esp32s3_i2sbus_initialize(int port)
         return NULL;
     }
 
-  flags = spin_lock_irqsave(&priv->slock);
-
-  i2s_configure(priv);
-
   /* Allocate buffer containers */
 
   ret = i2s_buf_initialize(priv);
@@ -3182,6 +3169,10 @@ struct i2s_dev_s *esp32s3_i2sbus_initialize(int port)
     {
       goto err;
     }
+
+  flags = spin_lock_irqsave(&priv->slock);
+
+  i2s_configure(priv);
 
   ret = i2s_dma_setup(priv);
   if (ret < 0)

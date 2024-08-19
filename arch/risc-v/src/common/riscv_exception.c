@@ -287,12 +287,7 @@ void riscv_exception_attach(void)
 
   irq_attach(RISCV_IRQ_ECALLS, riscv_exception, NULL);
   irq_attach(RISCV_IRQ_ECALLH, riscv_exception, NULL);
-
-#ifndef CONFIG_ARCH_USE_S_MODE
-  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
-#else
   irq_attach(RISCV_IRQ_ECALLM, riscv_exception, NULL);
-#endif
 
   irq_attach(RISCV_IRQ_INSTRUCTIONPF, riscv_exception, NULL);
 
@@ -309,6 +304,6 @@ void riscv_exception_attach(void)
 #ifdef CONFIG_SMP
   irq_attach(RISCV_IRQ_SOFT, riscv_pause_handler, NULL);
 #else
-  irq_attach(RISCV_IRQ_MSOFT, riscv_exception, NULL);
+  irq_attach(RISCV_IRQ_SOFT, riscv_exception, NULL);
 #endif
 }

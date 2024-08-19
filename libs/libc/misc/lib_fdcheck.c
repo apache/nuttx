@@ -102,6 +102,8 @@ int fdcheck_protect(int fd)
   DEBUGASSERT(ret >= 0);
   if (tag == 0)
     {
+      uint8_t fdcheck_tag;
+
       irqstate_t flags = spin_lock_irqsave(&g_fdcheck_lock);
       if ((++g_fdcheck_tag & TAG_MASK) == 0)
         {
@@ -110,9 +112,11 @@ int fdcheck_protect(int fd)
 
       g_fdcheck_tag &= TAG_MASK;
       protect_fd |= g_fdcheck_tag << TAG_SHIFT;
-      ret = ioctl(fd, FIOC_SETTAG_FDCHECK, &g_fdcheck_tag);
-      DEBUGASSERT(ret == 0);
+      fdcheck_tag = g_fdcheck_tag;
       spin_unlock_irqrestore(&g_fdcheck_lock, flags);
+
+      ret = ioctl(fd, FIOC_SETTAG_FDCHECK, &fdcheck_tag);
+      DEBUGASSERT(ret == 0);
     }
   else
     {

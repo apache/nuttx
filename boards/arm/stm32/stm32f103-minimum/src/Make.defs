@@ -81,10 +81,6 @@ ifeq ($(CONFIG_CAN_MCP2515),y)
   CSRCS += stm32_mcp2515.c
 endif
 
-ifeq ($(CONFIG_CL_MFRC522),y)
-  CSRCS += stm32_mfrc522.c
-endif
-
 ifeq ($(CONFIG_LCD_MAX7219),y)
   CSRCS += stm32_max7219.c
 endif

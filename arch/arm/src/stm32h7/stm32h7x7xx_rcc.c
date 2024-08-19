@@ -993,6 +993,23 @@ void stm32_stdclockconfig(void)
       regval |= STM32_RCC_D2CCIP2R_USBSRC;
       putreg32(regval, STM32_RCC_D2CCIP2R);
 #endif
+      /* Configure USART2, 3, 4, 5, 7, and 8 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART234578_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART234578SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART234578_SEL;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
+
+      /* Configure USART1 and 6 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART16_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART16SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART16_SEL;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
 
       /* Configure ADC source clock */
 

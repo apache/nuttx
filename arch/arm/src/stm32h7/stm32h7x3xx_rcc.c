@@ -148,12 +148,18 @@
 
 #  if defined(CONFIG_STM32H7_PWR_DIRECT_SMPS_SUPPLY)
 #    define STM32_PWR_CR3_SELECTION STM32_PWR_CR3_SDEN
+#  elif defined(CONFIG_STM32H7_PWR_EXTERNAL_SOURCE_SUPPLY)
+#    define STM32_PWR_CR3_SELECTION STM32_PWR_CR3_BYPASS
 #  else
 #    define STM32_PWR_CR3_SELECTION STM32_PWR_CR3_LDOEN
 #  endif
 #else
 #  define STM32_PWR_CR3_MASK  0xffffffff
-#  define STM32_PWR_CR3_SELECTION (STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_SCUEN)
+#  if defined(CONFIG_STM32H7_PWR_EXTERNAL_SOURCE_SUPPLY)
+#    define STM32_PWR_CR3_SELECTION (STM32_PWR_CR3_BYPASS | STM32_PWR_CR3_SCUEN)
+#  else
+#    define STM32_PWR_CR3_SELECTION (STM32_PWR_CR3_LDOEN | STM32_PWR_CR3_SCUEN)
+#  endif
 
 #endif
 
@@ -1021,6 +1027,24 @@ void stm32_stdclockconfig(void)
       regval = getreg32(STM32_RCC_D2CCIP2R);
       regval &= ~RCC_D2CCIP2R_USBSEL_MASK;
       regval |= STM32_RCC_D2CCIP2R_USBSRC;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
+
+      /* Configure USART2, 3, 4, 5, 7, and 8 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART234578_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART234578SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART234578_SEL;
+      putreg32(regval, STM32_RCC_D2CCIP2R);
+#endif
+
+      /* Configure USART1 and 6 kernel clock source selection */
+
+#if defined(STM32_RCC_D2CCIP2R_USART16_SEL)
+      regval = getreg32(STM32_RCC_D2CCIP2R);
+      regval &= ~RCC_D2CCIP2R_USART16SEL_MASK;
+      regval |= STM32_RCC_D2CCIP2R_USART16_SEL;
       putreg32(regval, STM32_RCC_D2CCIP2R);
 #endif
 

@@ -384,10 +384,12 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
  *
  ****************************************************************************/
 
-static int smbus_sbd_callback(void *arg, size_t rx_len)
+static int smbus_sbd_callback(void *arg, i2c_slave_complete_t state,
+                              size_t rx_len)
 {
   struct smbus_sbd_dev_s *dev;
   int buffer_length;
+  int ret = OK;
   int i;
 
   /* Retrieve the pointer to the SMBus SBD slave device struct */
@@ -726,8 +728,15 @@ static int smbus_sbd_callback(void *arg, size_t rx_len)
    * request has been received.
    */
 
-  return I2CS_WRITE(dev->i2c_slave_dev, (const uint8_t *)dev->write_buffer,
-                    buffer_length);
+  ret = I2CS_WRITE(dev->i2c_slave_dev, (const uint8_t *)dev->write_buffer,
+                   buffer_length);
+  if (ret >= 0)
+    {
+      dev->i2c_slave_dev->callback(dev->i2c_slave_dev->callback_arg,
+                                   I2CS_TX_COMPLETE, buffer_length);
+    }
+
+  return ret;
 }
 
 /****************************************************************************

@@ -495,6 +495,14 @@ void up_dump_register(FAR void *regs);
  * Returned Value:
  *   up_backtrace() returns the number of addresses returned in buffer
  *
+ * Assumptions:
+ *   Have to make sure tcb keep safe during function executing, it means
+ *   1. Tcb have to be self or not-running.  In SMP case, the running task
+ *      PC & SP cannot be backtrace, as whose get from tcb is not the newest.
+ *   2. Tcb have to keep not be freed.  In task exiting case, have to
+ *      make sure the tcb get from pid and up_backtrace in one critical
+ *      section procedure.
+ *
  ****************************************************************************/
 
 int up_backtrace(FAR struct tcb_s *tcb,
@@ -877,13 +885,19 @@ bool up_dataheap_heapmember(FAR void *p);
  * Name: up_copy_section
  *
  * Description:
- *   Copy section from general temporary buffer(src) to special addr(dest).
+ *   This function copies a section from a general temporary buffer (src) to
+ *   a specific address (dest). This is typically used in architectures that
+ *   require specific handling of memory sections.
+ *
+ * Input Parameters:
+ *   dest - A pointer to the destination where the data needs to be copied.
+ *   src  - A pointer to the source from where the data needs to be copied.
+ *   n    - The number of bytes to be copied from src to dest.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
-
 #if defined(CONFIG_ARCH_USE_COPY_SECTION)
 int up_copy_section(FAR void *dest, FAR const void *src, size_t n);
 #endif
@@ -2959,7 +2973,7 @@ bool up_fpucmp(FAR const void *saveregs1, FAR const void *saveregs2);
 #ifdef CONFIG_ARCH_HAVE_DEBUG
 
 /****************************************************************************
- * Name: up_debugpoint
+ * Name: up_debugpoint_add
  *
  * Description:
  *   Add a debugpoint.

@@ -20,9 +20,8 @@
 
 include common/Make.defs
 
-# Specify our HEAD assembly file.  This will be linked as
-# the first object file, so it will appear at address 0
-HEAD_ASRC = qemu_rv_head.S
+# use CHIP_ASRCS for both Nutt and standard SBI implementations
+CHIP_ASRCS = qemu_rv_head.S
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = qemu_rv_start.c qemu_rv_irq_dispatch.c qemu_rv_irq.c
@@ -34,4 +33,12 @@ endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += qemu_rv_pgalloc.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += qemu_rv_userspace.c
+endif
+
+ifeq ($(CONFIG_RPTUN),y)
+CHIP_CSRCS += qemu_rv_rptun.c
 endif

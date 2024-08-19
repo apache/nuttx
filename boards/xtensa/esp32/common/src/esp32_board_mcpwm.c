@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/motor/motor.h>
 #include <nuttx/timers/capture.h>
 
 #include <arch/board/board.h>
@@ -39,9 +40,58 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_ESP_MCPMW_MOTOR_CH0_FAULT
+#  define MCPWM_FAULT_GPIO CONFIG_ESP_MCPMW_MOTOR_CH0_FAULT_GPIO
+#else
+#  define MCPWM_FAULT_GPIO 0
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_motor_initialize
+ *
+ * Description:
+ *   Initialize MCPWM peripheral for motor control and register the motor
+ *   driver.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP_MCPWM_MOTOR_BDC
+int board_motor_initialize(void)
+{
+  int ret;
+  struct motor_lowerhalf_s *motor;
+
+  motor = esp_motor_bdc_initialize(0,
+                                   CONFIG_ESP_MCPWM_MOTOR_CH0_PWM_FREQ,
+                                   CONFIG_ESP_MCPWM_MOTOR_CH0_PWMA_GPIO,
+                                   CONFIG_ESP_MCPWM_MOTOR_CH0_PWMB_GPIO,
+                                   MCPWM_FAULT_GPIO);
+  if (!motor)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to start MCPWM BDC Motor: CH0\n");
+      return -ENODEV;
+    }
+
+  ret = motor_register("/dev/motor0", motor);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: motor_register failed: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: board_capture_initialize

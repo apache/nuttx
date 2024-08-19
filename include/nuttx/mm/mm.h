@@ -263,6 +263,8 @@ void kmm_addregion(FAR void *heapstart, size_t heapsize);
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size) malloc_like1(2);
 
+void mm_free_delaylist(FAR struct mm_heap_s *heap);
+
 /* Functions contained in kmm_malloc.c **************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP

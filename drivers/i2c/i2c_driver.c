@@ -37,8 +37,6 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mutex.h>
 
-#ifdef CONFIG_I2C_DRIVER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -137,13 +135,25 @@ static int i2cdrvr_open(FAR struct file *filep)
       return ret;
     }
 
+  /* I2c master initialize */
+
+  if (priv->i2c->ops->setup != NULL && priv->crefs == 0)
+    {
+      ret = I2C_SETUP(priv->i2c);
+      if (ret < 0)
+        {
+          goto out;
+        }
+    }
+
   /* Increment the count of open references on the driver */
 
   priv->crefs++;
   DEBUGASSERT(priv->crefs > 0);
 
+out:
   nxmutex_unlock(&priv->lock);
-  return OK;
+  return ret;
 }
 #endif
 
@@ -173,6 +183,17 @@ static int i2cdrvr_close(FAR struct file *filep)
       return ret;
     }
 
+  /* I2c master uninitialize */
+
+  if (priv->i2c->ops->shutdown != NULL && priv->crefs == 1)
+    {
+      ret = I2C_SHUTDOWN(priv->i2c);
+      if (ret < 0)
+        {
+          goto out;
+        }
+    }
+
   /* Decrement the count of open references on the driver */
 
   DEBUGASSERT(priv->crefs > 0);
@@ -189,8 +210,9 @@ static int i2cdrvr_close(FAR struct file *filep)
       return OK;
     }
 
+out:
   nxmutex_unlock(&priv->lock);
-  return OK;
+  return ret;
 }
 #endif
 
@@ -408,4 +430,3 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
   return -ENOMEM;
 }
 
-#endif /* CONFIG_I2C_DRIVER */

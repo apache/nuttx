@@ -36,8 +36,6 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/i2c/tca9548a.h>
 
-#ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
-
 #ifndef CONFIG_TCA9548A_I2C_FREQUENCY
 #  define CONFIG_TCA9548A_I2C_FREQUENCY    400000
 #endif
@@ -409,4 +407,3 @@ FAR struct tca9548a_dev_s *
   return priv;
 }
 
-#endif /* CONFIG_I2CMULTIPLEXER_TCA9548A */

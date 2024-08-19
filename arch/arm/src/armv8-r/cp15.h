@@ -66,6 +66,7 @@
 #define CP15_CTR(r)        _CP15(0, r, c0, c0, 1)   /* Cache Type Register */
 #define CP15_TCMTR(r)      _CP15(0, r, c0, c0, 2)   /* TCM Type Register */
 #define CP15_MPUIR(r)      _CP15(0, r, c0, c0, 4)   /* MPU Type Register */
+#define CP15_HMPUIR(r)     _CP15(4, r, c0, c0, 4)   /* Hyp MPU Type Register */
 #define CP15_MPIDR(r)      _CP15(0, r, c0, c0, 5)   /* Multiprocessor Affinity Register */
 #define CP15_REVIDR(r)     _CP15(0, r, c0, c0, 6)   /* Revision ID register (Cortex-A9) */
 #define CP15_MID_PFR0(r)   _CP15(0, r, c0, c1, 0)   /* Processor Feature Register 0 */
@@ -107,6 +108,9 @@
 #  define CP15_IRACR(r)    _CP15(0, r, c6, c1, 5)   /* Instruction Region Access Control Register */
 #endif
 #define CP15_RGNR(r)       _CP15(0, r, c6, c2, 0)   /* MPU Region Number Register */
+#define CP15_PRSELR(r)     _CP15(0, r, c6, c2, 1)   /* Protection Region Selection Register */
+#define CP15_PRBAR(r)      _CP15(0, r, c6, c3, 0)   /* Protection Region Base Address Register */
+#define CP15_PRLAR(r)      _CP15(0, r, c6, c3, 1)   /* Protection Region Limit Address Register */
 
 #define CP15_ICIALLUIS(r)  _CP15(0, r, c7, c1, 0)   /* Cache Operations Registers */
 #define CP15_BPIALLIS(r)   _CP15(0, r, c7, c1, 6)
@@ -140,6 +144,11 @@
 #define CP15_PMUSERENR(r)  _CP15(0, r, c9, c14, 0)  /* User Enable Register */
 #define CP15_PMINTENSET(r) _CP15(0, r, c9, c14, 1)  /* Interrupt Enable Set Register */
 #define CP15_PMINTENCLR(r) _CP15(0, r, c9, c14, 2)  /* Interrupt Enable Clear Register */
+
+#define CP15_MAIR0(r)       _CP15(0, r, c10, c2, 0)  /* Memory Attribute Indirection Registers 0 */
+#define CP15_MAIR1(r)       _CP15(0, r, c10, c2, 1)  /* Memory Attribute Indirection Registers 1 */
+#define CP15_HMAIR0(r)      _CP15(4, r, c10, c2, 0)  /* Hyp Memory Attribute Indirection Registers 0 */
+#define CP15_HMAIR1(r)      _CP15(4, r, c10, c2, 1)  /* Hyp Memory Attribute Indirection Registers 1 */
 
 #define CP15_VBAR(r)       _CP15(0, r, c12, c0, 0)  /* Vector Base Address Register */
 #define CP15_HVBAR(r)      _CP15(4, r, c12, c0, 0)  /* Hypervisor Vector Base Address Register */

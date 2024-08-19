@@ -1320,7 +1320,11 @@ config W25_SECTOR512
 	default n
 
 config W25_SLOWREAD
-	bool
+	bool "Enable slow read mode"
+	default n
+
+config W25_DEBUG
+	bool "Enable syslog W25 specific syslog traces"
 	default n
 
 endif # MTD_W25

@@ -24,6 +24,10 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += stm32_bmp180.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+  CSRCS += stm32_bmp280.c
+endif
+
 ifeq ($(CONFIG_SENSORS_MS56XX),y)
   CSRCS += stm32_ms5611.c
 endif
@@ -126,6 +130,10 @@ endif
 
 ifeq ($(CONFIG_LCD_MAX7219),y)
   CSRCS += stm32_max7219_matrix.c
+endif
+
+ifeq ($(CONFIG_CL_MFRC522),y)
+  CSRCS += stm32_mfrc522.c
 endif
 
 ifeq ($(CONFIG_LIS3DSH),y)

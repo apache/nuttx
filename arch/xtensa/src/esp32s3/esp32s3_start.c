@@ -40,6 +40,7 @@
 #include "esp32s3_rtc.h"
 #include "esp32s3_spiram.h"
 #include "esp32s3_wdt.h"
+#include "esp32s3_dma.h"
 #ifdef CONFIG_BUILD_PROTECTED
 #  include "esp32s3_userspace.h"
 #endif
@@ -408,6 +409,12 @@ noinstrument_function void noreturn_function IRAM_ATTR __esp32s3_start(void)
   /* Setup the syscall table needed by the ROM code */
 
   esp_setup_syscall_table();
+
+#if defined(CONFIG_ESP32S3_DMA)
+  /* Initialize GDMA controller */
+
+  esp32s3_dma_init();
+#endif
 
   /* Initialize onboard resources */
 

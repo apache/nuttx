@@ -1187,7 +1187,10 @@ static int spiffs_fstat(FAR const struct file *filep, FAR struct stat *buf)
     }
 
   spiffs_unlock_volume(fs);
-  return spiffs_map_errno(ret);
+
+  ret = spiffs_map_errno(ret);
+
+  return ret >= 0 ? OK : ret;
 }
 
 /****************************************************************************
@@ -1929,7 +1932,8 @@ static int spiffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
 errout_with_lock:
   spiffs_unlock_volume(fs);
-  return spiffs_map_errno(ret);
+  ret = spiffs_map_errno(ret);
+  return ret >= 0 ? OK : ret;
 }
 
 /****************************************************************************

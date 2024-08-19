@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
+# CONFIG_SERIAL_RTT_CONSOLE is not set
 CONFIG_ARCH="sim"
 CONFIG_ARCH_BOARD="sim"
 CONFIG_ARCH_BOARD_SIM=y

@@ -23,6 +23,7 @@ ifeq ($(CONFIG_LIBC_DLFCN),y)
 # Add the dlfcn.h files to the build
 
 CSRCS += lib_dlopen.c lib_dlclose.c lib_dlsym.c lib_dlerror.c lib_dlsymtab.c
+CSRCS += lib_dladdr.c
 
 # Add the dlfcn.h directory to the build
 

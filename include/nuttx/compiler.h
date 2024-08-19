@@ -887,7 +887,7 @@
 
 /* Pre-processor */
 
-#  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+#  undef CONFIG_CPP_HAVE_VARARGS /* No variable argument macros */
 
 /* Intriniscs */
 
@@ -936,6 +936,8 @@
 #  define syslog_like(a, b)
 #  define scanf_like(a, b)
 #  define strftime_like(a)
+#  define object_size(o, t) ((size_t)-1)
+#  define typeof __typeof__
 
 #  define FAR
 #  define NEAR

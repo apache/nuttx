@@ -86,11 +86,17 @@
 #define MFS_RWBUF(sb)              ((sb)->rw_buf)
 #define MFS_BA(sb)                 ((sb)->ba_state)
 #define MFS_NBLKS(sb)              ((sb)->n_blks)
+#define MFS_OFILES(sb)             ((sb)->of)
+#define MFS_FLUSH(sb)              ((sb)->flush)
 #define MFS_NPGS(sb)               (MFS_NBLKS(sb) * MFS_PGINBLK(sb))
 
+#define MFS_HASHSZ                 16
 #define MFS_CTZ_SZ(l)              ((l)->sz)
-#define MFS_DIRENTSZ(dirent)       (sizeof(struct mfs_dirent_s) \
+#define MFS_DIRENTSZ(dirent)       ((2 * 2) + 4 + (16 * 3) + 8 + 1 \
                                     + (dirent)->namelen)
+
+#define MFS_JRNL_LIM(sb)           (MFS_JRNL(sb).n_blks / 2)
+#define MFS_TRAVERSE_INITSZ        8
 
 /****************************************************************************
  * Public Types
@@ -112,7 +118,7 @@ enum MFS_PATH_FLAGS
 {
   MFS_ISDIR   = (1 << 0),  /* Path is a directory. */
   MFS_ISFILE  = (1 << 1),  /* Path is a file. */
-  MFS_NEXIST  = (1 << 2),  /* Path No Exist */
+  MFS_EXIST   = (1 << 2),  /* Path Exists */
   MFS_FINPATH = (1 << 3),  /* File in midele of path before bottom most
                             * child. Not reachable.
                             */
@@ -146,7 +152,7 @@ struct mfs_mn_s
 {
   mfs_t            pg;            /* Only mblk1's pg will be used here. */
   mfs_t            jrnl_blk;      /* Start of journal. */
-  mfs_t            mblk_idx;
+  mfs_t            mblk_idx;      /* Index for next MN entry inside blk. */
   struct mfs_ctz_s root_ctz;
   mfs_t            root_sz;
   struct timespec  ts;
@@ -167,7 +173,7 @@ struct mfs_jrnl_state_s
   mfs_t    log_sblkidx;   /* First jrnl blk index. TODO: jrnlarr > 1 blk. */
   mfs_t    jrnlarr_pg;
   mfs_t    jrnlarr_pgoff;
-  uint16_t n_blks;
+  uint16_t n_blks;        /* TODO: Does not include the master node. */
 };
 
 struct mfs_sb_s
@@ -182,15 +188,14 @@ struct mfs_sb_s
   uint8_t                 log_blk_sz;
   mfs_t                   n_blks;
   uint8_t                 log_n_blks;
-  mfs_t                   n_lru;
   uint16_t                pg_in_blk;
   uint8_t                 log_pg_in_blk;
-  uint8_t                 j_nblks;
   struct mfs_mn_s         mn;            /* Master Node */
   struct mfs_jrnl_state_s j_state;       /* Journal State */
   struct mfs_ba_state_s   ba_state;      /* Block Allocator State */
   struct list_node        lru;
   struct list_node        of;            /* open files. */
+  bool                    flush;
 };
 
 /* This is for *dir VFS methods. */
@@ -227,7 +232,10 @@ struct mfs_node_s
   mfs_t                 sz;
   mfs_t                 range_min;
   mfs_t                 range_max;
-  FAR struct mfs_path_s path[];
+  struct timespec       st_mtim;
+  struct timespec       st_atim;
+  struct timespec       st_ctim;
+  FAR struct mfs_path_s *path;
 };
 
 /* Common Part Open File Descriptor */
@@ -253,9 +261,9 @@ struct mfs_ofd_s
 
 struct mfs_dirent_s
 {
-  uint8_t          name_hash;  /* Should be at start to improve efficiency. */
-  mfs_t            sz;
+  uint16_t         name_hash;  /* Should be at start to improve efficiency. */
   uint16_t         mode;
+  mfs_t            sz;
   struct timespec  st_atim;    /* Time of last access */
   struct timespec  st_mtim;    /* Time of last modification */
   struct timespec  st_ctim;    /* Time of last status change */
@@ -271,8 +279,11 @@ struct mfs_pitr_s
   struct mfs_path_s p;     /* Parent representation */
   mfs_t             depth;
   mfs_t             c_off; /* Current offset. */
-  mfs_t             sz;    /* Parent's size. */
 };
+
+/* TODO: depth >= 1 */
+
+/* IMP TODO: sizeof(x) != size of buffer required to store it. Need to fix. */
 
 /****************************************************************************
  * Public Data
@@ -408,56 +419,11 @@ static inline mfs_t mfs_popcnt(mfs_t x)
  * Public Function Prototypes
  ****************************************************************************/
 
+/* mnemofs.c */
+
+int mnemofs_flush(FAR struct mfs_sb_s *sb);
+
 /* mnemofs_journal.c */
-
-/****************************************************************************
- * Name: mfs_jrnl_newlog
- *
- * Description:
- *   Add a new log to the journal.
- *
- * Input Parameters:
- *   sb      - Superblock instance of the device.
- *   path    - CTZ representation of the relpath.
- *   depth   - Length of path.
- *   new_ctz - The updated location.
- *
- * Returned Value:
- *   0   - OK
- *   < 0 - Error
- *
- * Assumptions/Limitations:
- *   Assumes the CTZ list to be updated is `path[depth - 1].ctz`.
- *
- ****************************************************************************/
-
-int mfs_jrnl_newlog(FAR struct mfs_sb_s * const sb,
-                    FAR const struct mfs_path_s * const path,
-                    const mfs_t depth, const struct mfs_ctz_s new_ctz);
-
-/****************************************************************************
- * Name: mfs_jrnl_updatepath
- *
- * Description:
- *   Updates the path of a CTZ list by applies all changes from the journal.
- *
- * Input Parameters:
- *   sb      - Superblock instance of the device.
- *   path    - CTZ representation of the relpath.
- *   depth   - Length of path.
- *
- * Returned Value:
- *   0   - OK
- *   < 0 - Error
- *
- * Assumptions/Limitations:
- *   Assumes the CTZ list to be updated is `path[depth - 1].ctz`.
- *
- ****************************************************************************/
-
-int mfs_jrnl_updatepath(FAR const struct mfs_sb_s * const sb,
-                        FAR struct mfs_path_s * const path,
-                        const mfs_t depth);
 
 /****************************************************************************
  * Name: mfs_jrnl_init
@@ -499,7 +465,21 @@ int mfs_jrnl_init(FAR struct mfs_sb_s * const sb, mfs_t blk);
  *
  ****************************************************************************/
 
-int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t blk1, mfs_t blk2);
+int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, mfs_t *blk1, mfs_t *blk2,
+                 FAR mfs_t *jrnl_blk);
+
+/****************************************************************************
+ * Name: mfs_jrnl_free
+ *
+ * Description:
+ *   Free the journal.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *
+ ****************************************************************************/
+
+void mfs_jrnl_free(FAR struct mfs_sb_s * const sb);
 
 /****************************************************************************
  * Name: mfs_jrnl_blkidx2blk
@@ -525,19 +505,114 @@ mfs_t mfs_jrnl_blkidx2blk(FAR const struct mfs_sb_s * const sb,
                           const mfs_t blk_idx);
 
 /****************************************************************************
- * Name: mfs_jrnl_free
+ * Name: mfs_jrnl_updatedinfo
  *
  * Description:
- *   Free the journal.
+ *   Update the path information from the journal.
+ *
+ * Input Parameters:
+ *   sb    - Superblock instance of the device.
+ *   path  - "Base state" path.
+ *   depth - Path depth.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   This applies updates over data that is already gathered from the data
+ *   section of the flash. The data section is the "base state" over which
+ *   the updates in the journal are applied.
+ *
+ ****************************************************************************/
+
+int mfs_jrnl_updatedinfo(FAR const struct mfs_sb_s * const sb,
+                         FAR struct mfs_path_s * const path,
+                         const mfs_t depth);
+
+/****************************************************************************
+ * Name: mfs_jrnl_wrlog
+ *
+ * Description:
+ *   Write a log for LRU node when its popped from the LRU.
+ *
+ * Input Parameters:
+ *   sb      - Superblock instance of the device.
+ *   node    - LRU node.
+ *   loc_new - New location of the CTZ skip list.
+ *   sz_new  - New size of the CTZ skip list.
+ *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   When a node from LRU is flushed, it's written to the data in any space
+ *   that is available according to the block allocator, and the new location
+ *   is recorded as a log along with the old location. Any log of this same
+ *   CTZ skip list in the journal will use this "snapshot" of the location,
+ *   ie. the updated path will be used until another log of the same CTZ
+ *   skip list is stored, after which the path will be updated again, and
+ *   so on.
+ *
+ ****************************************************************************/
+
+int mfs_jrnl_wrlog(FAR struct mfs_sb_s * const sb,
+                   FAR const struct mfs_node_s *node,
+                   const struct mfs_ctz_s loc_new, const mfs_t sz_new);
+
+/****************************************************************************
+ * Name: mfs_jrnl_flush
+ *
+ * Description:
+ *   Flush the entire journal. This is the entry point of the entire flush
+ *   operation and includes messing with the master node as well.
  *
  * Input Parameters:
  *   sb - Superblock instance of the device.
  *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
  ****************************************************************************/
 
-void mfs_jrnl_free(FAR struct mfs_sb_s * const sb);
+int mfs_jrnl_flush(FAR struct mfs_sb_s * const sb);
+
+/****************************************************************************
+ * Name: mfs_jrnl_isempty
+ *
+ * Description:
+ *   Check if the journal is empty.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *
+ * Returned Value:
+ *   True is the journal is empty, false otherwise.
+ *
+ ****************************************************************************/
+
+bool mfs_jrnl_isempty(FAR const struct mfs_sb_s * const sb);
 
 /* mnemofs_blkalloc.c */
+
+/****************************************************************************
+ * Name: mfs_ba_init
+ *
+ * Description:
+ *   Formats and initializes the block allocator.
+ *
+ * Input Parameters:
+ *   sb - Superblock instance of the device.
+ *
+ * Returned Value:
+ *   0        - OK
+ *   -ENOMEM  - No memory left.
+ *
+ ****************************************************************************/
+
+int mfs_ba_fmt(FAR struct mfs_sb_s * const sb);
 
 /****************************************************************************
  * Name: mfs_ba_init
@@ -639,12 +714,16 @@ void mfs_ba_blkmarkdel(FAR struct mfs_sb_s * const sb, mfs_t blk);
  * Input Parameters:
  *   sb  - Superblock instance of the device.
  *
+ * Returned Value:
+ *   0   - OK
+ *   < 0 - Error
+ *
  * Assumptions/Limitations:
  *   This assumes a locked environment when called.
  *
  ****************************************************************************/
 
-void mfs_ba_delmarked(FAR struct mfs_sb_s * const sb);
+int mfs_ba_delmarked(FAR struct mfs_sb_s * const sb);
 
 /****************************************************************************
  * Name: mfs_ba_markusedpg
@@ -847,6 +926,10 @@ int mfs_erase_nblks(FAR const struct mfs_sb_s * const sb, const off_t blk,
 
 uint8_t mfs_arrhash(FAR const char *arr, ssize_t len);
 
+/* TODO: Put below in place of above. */
+
+uint16_t mfs_hash(FAR const char *arr, ssize_t len);
+
 /****************************************************************************
  * Name: mfs_ser_8
  *
@@ -990,6 +1073,12 @@ FAR char *mfs_ser_ctz(FAR const struct mfs_ctz_s * const x,
 FAR const char *mfs_deser_ctz(FAR const char * const in,
                               FAR struct mfs_ctz_s * const x);
 
+FAR char *mfs_ser_path(FAR const struct mfs_path_s * const x,
+                      FAR char * const out);
+
+FAR const char *mfs_deser_path(FAR const char * const in,
+                               FAR struct mfs_path_s * const x);
+
 /****************************************************************************
  * Name: mfs_ser_timespec
  *
@@ -1080,7 +1169,7 @@ mfs_t mfs_v2n(mfs_t n);
  * Name: mfs_set_msb
  *
  * Description:
- *   Set the least significant of the most significant unset bits.
+ *   The mosr significant set bit location.
  *
  * Input Parameters:
  *   n   - Number.
@@ -1092,145 +1181,90 @@ mfs_t mfs_v2n(mfs_t n);
 
 mfs_t mfs_set_msb(mfs_t n);
 
+bool mfs_ctz_eq(FAR const struct mfs_ctz_s * const a,
+                FAR const struct mfs_ctz_s * const b);
+
+bool mfs_path_eq(FAR const struct mfs_path_s * const a,
+                 FAR const struct mfs_path_s * const b);
+
 /* mnemofs_ctz.c */
 
 /****************************************************************************
- * Name: mfs_ctz_rdfromoff
+ * Name: mfs_ctz_rdfromoff_new
  *
  * Description:
- *   Read data from data offset in a CTZ list. This includes updates from the
- *   journal. The ctz list is taken as the last element in the path, got
- *   using `path[depth - 1]`.
+ *   Read from a specific offset into the data in a CTZ file. New version.
  *
  * Input Parameters:
  *   sb       - Superblock instance of the device.
- *   data_off - Data offset into the CTZ list.
- *   path     - CTZ representation of the relpath.
- *   depth    - Depth of the path.
- *   buf      - Buffer will be populated with the contents.
- *   buflen   - Length of `buf`.
- *
- * Returned Value:
- *   0   - OK
- *   < 0 - Error
+ *   ctz      - CTZ list.
+ *   data_off - Offset into the data.
+ *   len      - Length of the buffer.
+ *   buf      - Buffer to store read contents.
  *
  * Assumptions/Limitations:
- *   This updates the value of path to reflect the latest location.
+ *   The CTZ list provided should be the updated location from the journal.
  *
  ****************************************************************************/
 
-int mfs_ctz_rdfromoff(FAR struct mfs_sb_s * const sb, mfs_t data_off,
-                      FAR struct mfs_path_s * const path, const mfs_t depth,
-                      FAR char *buf, mfs_t buflen);
+int mfs_ctz_rdfromoff(FAR const struct mfs_sb_s * const sb,
+                          const struct mfs_ctz_s ctz, mfs_t data_off,
+                          mfs_t len, FAR char * buf);
 
 /****************************************************************************
- * Name: mfs_ctz_wrtooff
+ * Name: mfs_ctz_wrtnode
  *
  * Description:
- *   Replace `o_bytes` of data from CTZ list with `n_bytes` of data from
- *   `buf` at CTZ data offset `data_off`.
+ *   Write an LRU node to the flash. It also adds a log of it to the journal.
  *
- *   In mnemofs, the CTZ lists are all stored in a Copy On Write manner.
- *   Hence to update a CTZ list, the common CTZ blocks will be kept as it is,
- *   then in the CTZ block containing `data_off`, the bytes appearing before
- *   `data_off` (which remain unchanged) will be copied to the new CTZ block
- *   then `n_bytes` of content from `buf` will follow, and then the data from
- *   `data_off + o_bytes` will follow (both these will be copied to new
- *   CTZ blocks as well due to Copy On Write).
+ * Input Parameters:
+ *   sb   - Superblock instance of the device.
+ *   node - LRU node
  *
- *   The new location will be written to the journal upon success as well.
+ * Assumptions/Limitations:
+ *   - Assumes path is updated by journal. This will also write corresponding
+ *     journal log.
+ *
+ *   - This is the most computationally heavy part of the entire file system
+ *     from a human POV, and one of the most for MCU or computer (as init
+ *     methods are heavier).
+ *
+ ****************************************************************************/
+
+int mfs_ctz_wrtnode(FAR struct mfs_sb_s * const sb,
+                    FAR const struct mfs_node_s * const node,
+                    FAR struct mfs_ctz_s *new_loc);
+
+/****************************************************************************
+ * Name: mfs_ctz_travel
+ *
+ * Description:
+ *   From CTZ block at page `pg_src` and index `idx_src`, give the page
+ *   number of index `idx_dest`.
+ *
+ *   The source is preferably the last CTZ block in the CTZ list, but it can
+ *   realistically be any CTZ block in the CTZ list whos position is known.
+ *   However, `idx_dest <= idx_src` has to be followed. Takes O(log(n))
+ *   complexity to travel.
  *
  * Input Parameters:
  *   sb       - Superblock instance of the device.
- *   data_off - Data offset into the CTZ list.
- *   o_bytes  - Number of bytes in old CTZ list from `data_off` that will be
- *              replaced.
- *   n_bytes  - Number of bytes in new CTZ list from `data_off` that will be
- *              replacing `o_bytes`.
- *   o_ctz_sz - The size in bytes of the old CTZ list.
- *   path     - CTZ representation of the relpath.
- *   depth    - Depth of the path.
- *   buf      - Buffer that contains the data to be replaced in CTZ list.
- *   ctz      - CTZ list to be updated with the new position.
+ *   idx_src  - Index of the source ctz block.
+ *   pg_src   - Page number of the source ctz block.
+ *   idx_dest - Index of the destination ctz block.
  *
  * Returned Value:
- *   0   - OK
- *   < 0 - Error
+ *   The page number corresponding to `idx_dest`.
  *
  * Assumptions/Limitations:
- *   This updates the value of path to reflect the latest location.s
+ *   `idx_dest <= idx_src`.
  *
  ****************************************************************************/
 
-int mfs_ctz_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
-                    mfs_t o_bytes, const mfs_t n_bytes,
-                    mfs_t o_ctz_sz, FAR struct mfs_path_s * const path,
-                    const mfs_t depth, FAR const char *buf,
-                    FAR struct mfs_ctz_s *ctz);
-
-/****************************************************************************
- * Name: mfs_ctz_nwrtooff
- *
- * Description:
- *   Write deltas of an LRU node to flash.
- *
- * Input Parameters:
- *   sb      - Superblock instance of the device.
- *   node    - LRU Node.
- *   path    - CTZ representation of the relpath.
- *   depth   - Depth of path.
- *   ctz_sz  - Number of bytes in the data of the CTZ list.
- *   new_ctz - New CTZ location
- *
- ****************************************************************************/
-
-int mfs_ctz_nwrtooff(FAR struct mfs_sb_s * const sb,
-                     FAR struct mfs_node_s *node,
-                     FAR struct mfs_path_s * const path, const mfs_t depth,
-                     const mfs_t ctz_sz, FAR struct mfs_ctz_s *new_ctz);
+mfs_t mfs_ctz_travel(FAR const struct mfs_sb_s * const sb,
+                     mfs_t idx_src, mfs_t pg_src, mfs_t idx_dest);
 
 /* mnemofs_lru.c */
-
-/****************************************************************************
- * Name: mfs_lru_del
- *
- * Description:
- *   Delete instruction to LRU.
- *
- * Input Parameters:
- *   sb     - Superblock instance of the device.
- *   off    - Offset into the data.
- *   bytes  - Number of bytes to delete.
- *   ctz_sz - Number of bytes in the data of the CTZ list.
- *   path   - CTZ representation of the relpath.
- *   depth  - Depth of path.
- *
- ****************************************************************************/
-
-int mfs_lru_del(FAR struct mfs_sb_s * const sb, const mfs_t off,
-                mfs_t bytes, mfs_t ctz_sz,
-                FAR struct mfs_path_s * const path, const mfs_t depth);
-
-/****************************************************************************
- * Name: mfs_lru_wr
- *
- * Description:
- *   Write to LRU
- *
- * Input Parameters:
- *   sb       - Superblock instance of the device.
- *   data_off - Offset into the data.
- *   bytes    - Number of bytes to delete.
- *   ctz_sz   - Number of bytes in the data of the CTZ list.
- *   path     - CTZ representation of the relpath.
- *   depth    - Depth of path.
- *   buf      - Buffer.
- *
- ****************************************************************************/
-
-int mfs_lru_wr(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
-              mfs_t bytes, mfs_t ctz_sz, FAR struct mfs_path_s * const path,
-              const mfs_t depth, FAR const char *buf);
 
 /****************************************************************************
  * Name: mfs_lru_ctzflush
@@ -1242,13 +1276,63 @@ int mfs_lru_wr(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
  *   sb       - Superblock instance of the device.
  *   path     - CTZ representation of the relpath.
  *   depth    - Depth of path.
- *   ctz_sz   - Size of the CTZ file.
  *
  ****************************************************************************/
 
 int mfs_lru_ctzflush(FAR struct mfs_sb_s * const sb,
-                    FAR struct mfs_path_s * const path, const mfs_t depth,
-                    const mfs_t ctz_sz);
+                     FAR struct mfs_path_s * const path, const mfs_t depth);
+
+/****************************************************************************
+ * Name: mfs_lru_del
+ *
+ * Description:
+ *   Delete instruction to LRU.
+ *
+ * Input Parameters:
+ *   sb     - Superblock instance of the device.
+ *   off    - Offset into the data.
+ *   bytes  - Number of bytes to delete.
+ *   path   - CTZ representation of the relpath.
+ *   depth  - Depth of path.
+ *
+ ****************************************************************************/
+
+int mfs_lru_del(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
+                mfs_t bytes, FAR struct mfs_path_s * const path,
+                const mfs_t depth);
+
+/****************************************************************************
+ * Name: mfs_lru_wr
+ *
+ * Description:
+ *   Write to LRU
+ *
+ * Input Parameters:
+ *   sb       - Superblock instance of the device.
+ *   data_off - Offset into the data.
+ *   bytes    - Number of bytes to delete.
+ *   path     - CTZ representation of the relpath.
+ *   depth    - Depth of path.
+ *   buf      - Buffer.
+ *
+ ****************************************************************************/
+
+int mfs_lru_wr(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
+               mfs_t bytes, FAR struct mfs_path_s * const path,
+               const mfs_t depth, FAR const char *buf);
+
+/****************************************************************************
+ * Name: mfs_lru_init
+ *
+ * Description:
+ *   Initialize LRU.
+ *
+ * Input Parameters:
+ *   sb    - Superblock instance of the device.
+ *
+ ****************************************************************************/
+
+void mfs_lru_init(FAR struct mfs_sb_s * const sb);
 
 /****************************************************************************
  * Name: mfs_lru_rdfromoff
@@ -1266,40 +1350,55 @@ int mfs_lru_ctzflush(FAR struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-int mfs_lru_rdfromoff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
+int mfs_lru_rdfromoff(FAR const struct mfs_sb_s * const sb,
+                      const mfs_t data_off,
                       FAR struct mfs_path_s * const path, const mfs_t depth,
                       FAR char *buf, const mfs_t buflen);
 
 /****************************************************************************
- * Name: mfs_lru_init
+ * Name: mfs_lru_updatedinfo
  *
  * Description:
- *   Initialize LRU.
+ *   Update information of the path.
  *
  * Input Parameters:
- *   sb    - Superblock instance of the device.
+ *   sb       - Superblock instance of the device.
+ *   path     - CTZ representation of the relpath.
+ *   depth    - Depth of path.
+ *
+ * Assumptions/Limitations:
+ *   The will update path.
  *
  ****************************************************************************/
 
-void mfs_lru_init(FAR struct mfs_sb_s * const sb);
+int mfs_lru_updatedinfo(FAR const struct mfs_sb_s * const sb,
+                        FAR struct mfs_path_s * const path,
+                        const mfs_t depth);
 
 /****************************************************************************
- * Name: mfs_lru_updatedsz
+ * Name: mfs_lru_updatectz
  *
  * Description:
- *   Update size of a CTZ list.
+ *   Update CTZ location of an fs object.
  *
  * Input Parameters:
- *   sb    - Superblock instance of the device.
- *   path  - CTZ representation of the relpath.
- *   depth - Depth of path.
- *   n_sz  - New size.
+ *   sb       - Superblock instance of the device.
+ *   path     - Old CTZ representation of the relpath.
+ *   depth    - Depth of path.
+ *   new_ctz  - New CTZ location.
+ *
+ * Assumptions/Limitations:
+ *   The update the CTZ portion of the direntry in the parent.
+ *   This updates the path as well.
  *
  ****************************************************************************/
 
-void mfs_lru_updatedsz(FAR struct mfs_sb_s * const sb,
-                      FAR const struct mfs_path_s * const path,
-                      const mfs_t depth, mfs_t *n_sz);
+int mfs_lru_updatectz(FAR struct mfs_sb_s * sb,
+                      FAR struct mfs_path_s * const path, const mfs_t depth,
+                      const struct mfs_ctz_s new_ctz, mfs_t new_sz);
+
+bool mfs_lru_isempty(FAR struct mfs_sb_s * const sb);
+int mfs_lru_flush(FAR struct mfs_sb_s * const sb);
 
 /* mnemofs_master.c */
 
@@ -1343,7 +1442,8 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
  *
  ****************************************************************************/
 
-int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
+int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t blk1,
+               const mfs_t blk2, const mfs_t jrnl_blk);
 
 /****************************************************************************
  * Name: mfs_mn_move
@@ -1367,6 +1467,10 @@ int mfs_mn_fmt(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk);
 
 int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
                 const mfs_t root_sz);
+
+int mfs_mn_sync(FAR struct mfs_sb_s *sb,
+                FAR struct mfs_path_s * const new_loc,
+                const mfs_t blk1, const mfs_t blk2, const mfs_t jrnl_blk);
 
 /* mnemofs_fsobj.c */
 
@@ -1436,8 +1540,8 @@ mfs_t mfs_get_fsz(FAR struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-int mfs_get_patharr(FAR struct mfs_sb_s *const sb,
-                    FAR const char *relpath, FAR struct mfs_path_s **path,
+int mfs_get_patharr(FAR const struct mfs_sb_s * const sb,
+                    FAR const char * relpath, FAR struct mfs_path_s **path,
                     FAR mfs_t *depth);
 
 /****************************************************************************
@@ -1472,7 +1576,8 @@ void mfs_free_patharr(FAR struct mfs_path_s *path);
  ****************************************************************************/
 
 bool mfs_obj_isempty(FAR struct mfs_sb_s * const sb,
-                      FAR struct mfs_pitr_s * const pitr);
+                     FAR struct mfs_path_s *path,
+                     FAR struct mfs_pitr_s * const pitr);
 
 /****************************************************************************
  * Name: mfs_pitr_init
@@ -1509,9 +1614,9 @@ bool mfs_obj_isempty(FAR struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-void mfs_pitr_init(FAR struct mfs_sb_s * const sb,
+int mfs_pitr_init(FAR const struct mfs_sb_s * const sb,
                   FAR const struct mfs_path_s * const path,
-                  const mfs_t depth, FAR struct mfs_pitr_s *pitr,
+                  const mfs_t depth, FAR struct mfs_pitr_s * const pitr,
                   bool child);
 
 /****************************************************************************
@@ -1529,7 +1634,7 @@ void mfs_pitr_init(FAR struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-void mfs_pitr_free(FAR struct mfs_pitr_s * const pitr);
+void mfs_pitr_free(FAR const struct mfs_pitr_s * const pitr);
 
 /****************************************************************************
  * Name: mfs_pitr_adv
@@ -1547,11 +1652,12 @@ void mfs_pitr_free(FAR struct mfs_pitr_s * const pitr);
  *
  ****************************************************************************/
 
-void mfs_pitr_adv(FAR struct mfs_sb_s * const sb,
-                  FAR struct mfs_pitr_s * const pitr);
+int mfs_pitr_adv(FAR struct mfs_sb_s * const sb,
+                 FAR struct mfs_path_s *path,
+                 FAR struct mfs_pitr_s * const pitr);
 
 /****************************************************************************
- * Name: mfs_pitr_adv_dirent
+ * Name: mfs_pitr_adv_bydirent
  *
  * Description:
  *   Advance a pitr to the next direntry by using current direntry.
@@ -1567,8 +1673,8 @@ void mfs_pitr_adv(FAR struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-void mfs_pitr_adv_dirent(FAR struct mfs_pitr_s * const pitr,
-                        FAR const struct mfs_dirent_s * const dirent);
+void mfs_pitr_adv_bydirent(FAR struct mfs_pitr_s * const pitr,
+                           FAR const struct mfs_dirent_s * const dirent);
 
 /****************************************************************************
  * Name: mfs_pitr_adv_off
@@ -1598,7 +1704,6 @@ void mfs_pitr_adv_off(FAR struct mfs_pitr_s * const pitr,
  * Input Parameters:
  *   pitr   - Parent iterator.
  *   path   - CTZ representation of the relpath
- *   depth  - Depth of path.
  *
  * Assumptions/Limitations:
  *  This assumes that the pitr is initialized for the immediate parent of the
@@ -1607,8 +1712,7 @@ void mfs_pitr_adv_off(FAR struct mfs_pitr_s * const pitr,
  ****************************************************************************/
 
 void mfs_pitr_adv_tochild(FAR struct mfs_pitr_s * const pitr,
-                          FAR const struct mfs_path_s * const path,
-                          const mfs_t depth);
+                          FAR const struct mfs_path_s * const path);
 
 /****************************************************************************
  * Name: mfs_pitr_reset
@@ -1622,30 +1726,6 @@ void mfs_pitr_adv_tochild(FAR struct mfs_pitr_s * const pitr,
  ****************************************************************************/
 
 void mfs_pitr_reset(FAR struct mfs_pitr_s * const pitr);
-
-/****************************************************************************
- * Name: mfs_pitr_sync
- *
- * Description:
- *   Sync a pitr.
- *
- *   In mnemofs, when moving between locked contexts, it may happen that a
- *   a CTZ is moved to some place is between. This updates the location by
- *   reading the journal to check for any related logs in the journal.
- *   Updates contained in the LRU do not update the location of a CTZ list.
- *
- * Input Parameters:
- *   sb    - Superblock instance of the device.
- *   pitr  - Parent iterator.
- *   path   - CTZ representation of the relpath
- *   depth  - Depth of path.
- *
- ****************************************************************************/
-
-void mfs_pitr_sync(FAR struct mfs_sb_s * const sb,
-                    FAR struct mfs_pitr_s * const pitr,
-                    FAR const struct mfs_path_s * const path,
-                    const mfs_t depth);
 
 /****************************************************************************
  * Name: mfs_pitr_readdirent
@@ -1667,7 +1747,8 @@ void mfs_pitr_sync(FAR struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-int mfs_pitr_readdirent(FAR struct mfs_sb_s * const sb,
+int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
+                        FAR struct mfs_path_s *path,
                         FAR struct mfs_pitr_s * const pitr,
                         FAR struct mfs_dirent_s **dirent);
 
@@ -1734,7 +1815,7 @@ bool mfs_searchfopen(FAR const struct mfs_sb_s * const sb,
 int mfs_pitr_appenddirent(FAR struct mfs_sb_s * const sb,
                           FAR struct mfs_path_s * const path,
                           const mfs_t depth,
-                          FAR const struct mfs_pitr_s * const pitr,
+                          FAR struct mfs_pitr_s * const pitr,
                           FAR const struct mfs_dirent_s * const dirent);
 
 /****************************************************************************
@@ -1745,24 +1826,27 @@ int mfs_pitr_appenddirent(FAR struct mfs_sb_s * const sb,
  *   initialized in pitr. This creates the direntry.
  *
  * Input Parameters:
- *   sb     - Superblock instance of the device.
- *   path   - CTZ representation of the relpath.
- *   depth  - Depth of path.
- *   pitr   - Parent Iterator.
- *   dirent - Directory entry to be added.
- *   mode   - Mode of the file/directory.
+ *   sb      - Superblock instance of the device.
+ *   path    - CTZ representation of the relpath.
+ *   depth   - Depth of path.
+ *   pitr    - Parent Iterator.
+ *   relpath - Relative path of the fs object.
+ *   mode    - Mode of the file/directory.
  *
  * Returned Value:
  *   0   - OK
  *   < 0 - Error
  *
+ * Assumptions/Limitations:
+ *  This assumes that the fs object desired to be appended appears at the
+ *  end of the entire relpath.
+ *
  ****************************************************************************/
 
 int mfs_pitr_appendnew(FAR struct mfs_sb_s * const sb,
-                      FAR struct mfs_path_s * const path,
-                      const mfs_t depth,
-                      FAR const struct mfs_pitr_s * const pitr,
-                      FAR const char * const child_name, const mode_t mode);
+                       FAR struct mfs_path_s * const path, const mfs_t depth,
+                       FAR struct mfs_pitr_s * const pitr,
+                       FAR const char * const relpath, const mode_t mode);
 
 /****************************************************************************
  * Name: mfs_pitr_rmdirent
@@ -1811,7 +1895,10 @@ int mfs_pitr_rmdirent(FAR struct mfs_sb_s * const sb,
 
 int mfs_pitr_rm(FAR struct mfs_sb_s * const sb,
                 FAR struct mfs_path_s * const path,
-                const mfs_t depth);
+                const mfs_t depth, bool rm_child);
+
+int mfs_pitr_traversefs(FAR struct mfs_sb_s * sb, const struct mfs_ctz_s ctz,
+                        int type);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -31,6 +31,7 @@
 #include <assert.h>
 
 #include "inode/inode.h"
+#include "lock.h"
 
 /****************************************************************************
  * Private Functions
@@ -106,6 +107,29 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
         if (ret == -ENOTTY && !INODE_IS_MOUNTPT(inode))
           {
             ret = inode_getpath(inode, (FAR char *)(uintptr_t)arg, PATH_MAX);
+          }
+        break;
+
+      case FIOC_GETLK:
+        if (ret == -ENOTTY)
+          {
+            ret = file_getlk(filep, (FAR struct flock *)(uintptr_t)arg);
+          }
+        break;
+
+      case FIOC_SETLK:
+        if (ret == -ENOTTY)
+          {
+            ret = file_setlk(filep, (FAR struct flock *)(uintptr_t)arg,
+                             true);
+          }
+        break;
+
+      case FIOC_SETLKW:
+        if (ret == -ENOTTY)
+          {
+            ret = file_setlk(filep, (FAR struct flock *)(uintptr_t)arg,
+                             false);
           }
         break;
 

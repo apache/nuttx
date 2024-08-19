@@ -25,6 +25,11 @@ Delta DFU      No
 Modem Trace    No
 =============  ========= ===============
 
+At this point there is no application that would configure and enable the modem
+automatically at the boot, so it has to be done manually via AT commands on ``/dev/modem``.
+
+IMPORTANT: modem firmware works only in TZ non-secure environment.
+
 Peripheral Support
 ==================
 

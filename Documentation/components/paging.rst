@@ -65,7 +65,7 @@ allocates a physical page and maps it to the virtual memory space that
 triggered the page fault exception and then resumes execution from the same
 point where the page fault first occurred.
 
-:ref:`knsh32_paging` simulates a device with 4MiB physical memory with 8MiB
+:ref:`knsh_paging` simulates a device with 4MiB physical memory with 8MiB
 of virtual heap memory allocated for each process. This is possible by
 enabling on-demand paging.
 

@@ -197,6 +197,38 @@ static inline void putreg64(uint64_t v, const volatile uintreg_t a)
      __asm__ __volatile__("csrc " __STR(reg) ", %0" :: "rK"(bits)); \
   })
 
+#define SWAP_CSR(reg, val) \
+  ({ \
+     uintptr_t regval; \
+     __asm__ __volatile__("csrrw %0, " __STR(reg) ", %1" : "=r"(regval) \
+                                                         : "rK"(val)); \
+     regval; \
+  })
+
+#define WRITE_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     WRITE_CSR(CSR_IREG, val); \
+  })
+
+#define READ_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     READ_CSR(CSR_IREG, val); \
+  })
+
+#define SET_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     SET_CSR(CSR_IREG, val); \
+  })
+
+#define CLEAR_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     CLEAR_CSR(CSR_IREG, val); \
+  })
+
 #define riscv_append_pmp_region(a, b, s) \
   riscv_config_pmp_region(riscv_next_free_pmp_region(), a, b, s)
 

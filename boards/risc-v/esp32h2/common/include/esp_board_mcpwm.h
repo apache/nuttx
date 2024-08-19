@@ -43,7 +43,24 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESP_MCPWM_CAPTURE
+/****************************************************************************
+ * Name: board_motor_initialize
+ *
+ * Description:
+ *   Initialize MCPWM peripheral for motor control and register the motor
+ *   driver.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP_MCPWM_MOTOR
+int board_motor_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: board_capture_initialize
@@ -59,9 +76,10 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ESP_MCPWM_CAPTURE
 int board_capture_initialize(void);
+#endif
 
-#endif /* CONFIG_ESP_MCPWM_CAPTURE */
 #undef EXTERN
 #ifdef __cplusplus
 }

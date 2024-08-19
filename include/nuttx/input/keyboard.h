@@ -89,6 +89,12 @@ int keyboard_register(FAR struct keyboard_lowerhalf_s *lower,
 int keyboard_unregister(FAR struct keyboard_lowerhalf_s *lower,
                         FAR const char *path);
 
+/****************************************************************************
+ * Name: keyboard_translate_virtio_code
+ ****************************************************************************/
+
+uint32_t keyboard_translate_virtio_code(uint16_t keycode);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

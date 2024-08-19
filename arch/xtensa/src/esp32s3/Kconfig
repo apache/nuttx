@@ -16,7 +16,29 @@ config ARCH_CHIP_ESP32S3WROOM1N4
 	select ESP32S3_FLASH_4M
 	select ARCH_HAVE_I2CRESET
 	---help---
-		Generic module with an embedded ESP32-S3. This chip comes with 4MB SPI Flash
+		Generic module with an embedded ESP32-S3.
+
+		This chip comes with 4MB SPI Flash (quad).
+
+config ARCH_CHIP_ESP32S3WROOM1N8R8
+	bool "ESP32-S3-WROOM-1-N8R8"
+	select ESP32S3_FLASH_8M
+	select ESP32S3_PSRAM_8M
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 8MB SPI Flash (quad) and 8MB PSRAM (octal).
+
+config ARCH_CHIP_ESP32S3WROOM1N16R8
+	bool "ESP32-S3-WROOM-1-N16R8"
+	select ESP32S3_FLASH_16M
+	select ESP32S3_PSRAM_8M
+	select ARCH_HAVE_I2CRESET
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 16MB SPI Flash (quad) and 8MB PSRAM (octal).
 
 config ARCH_CHIP_ESP32S3WROOM2N16R8V
 	bool "ESP32-S3-WROOM-2-N16R8V"
@@ -26,8 +48,7 @@ config ARCH_CHIP_ESP32S3WROOM2N16R8V
 	---help---
 		Generic module with an embedded ESP32-S3.
 
-		Note: depending on the modules, WROOM2 has 16MB flash
-		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
+		This module comes with 16MB SPI Flash (octal) and 8MB PSRAM (octal).
 
 config ARCH_CHIP_ESP32S3WROOM2N32R8V
 	bool "ESP32-S3-WROOM-2-N32R8V"
@@ -37,22 +58,23 @@ config ARCH_CHIP_ESP32S3WROOM2N32R8V
 	---help---
 		Generic module with an embedded ESP32-S3.
 
-		Note: depending on the modules, WROOM2 has 16MB flash
-		(ESP32-S3-WROOM-2-N16R8V) or 32MB flash. (ESP32-S3-WROOM-2-N32R8V)
+		This module comes with 32MB SPI Flash (octal) and 8MB PSRAM (octal).
 
 config ARCH_CHIP_ESP32S3MINI1N8
 	bool "ESP32-S3-MINI-1-N8"
 	select ESP32S3_FLASH_8M
 	select ARCH_HAVE_I2CRESET
 	---help---
-		Generic ESP32S3-Mini Module with 8MB of Flash
+		Generic module with an embedded ESP32-S3.
+
+		This module comes with 8MB SPI Flash (quad).
 
 config ARCH_CHIP_ESP32S3CUSTOM
 	bool "ESP32-S3-Custom-Module"
 	select ARCH_HAVE_I2CRESET
 	---help---
 		Generic module with an embedded ESP32-S3. Chip Flash Size should be selected
-		under SPI FLash Menu. 
+		under SPI Flash Menu.
 
 
 endchoice # ESP32-S3 Chip Selection
@@ -321,6 +343,15 @@ config ESP32S3_I2S
 		See the Board Selection menu to configure the pins used by I2S.
 
 if ESP32S3_I2S
+
+config ESP32S3_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 4
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueued before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
 
 config ESP32S3_I2S0
 	bool "I2S 0"
@@ -1892,7 +1923,7 @@ config ESP32S3_SPI_FLASH_USE_32BIT_ADDRESS
 		if select the option, it will force to use source code instead
 		of functions in ROM, so that SPI flash driver can access full
 		32-bit address.
-		
+
 choice ESP32S3_FLASH_SIZE
 	prompt "ESP32S3 Custom Module Flash Size"
 	depends on ARCH_CHIP_ESP32S3CUSTOM
@@ -2120,6 +2151,99 @@ endmenu # LEDC configuration
 menu "MCPWM Configuration"
 	depends on ESP_MCPWM
 
+config ESP_MCPWM_MOTOR
+	bool "MCPWM Motor Support"
+	default n
+
+menu "MCPWM Motor Configuration"
+	depends on ESP_MCPWM_MOTOR
+
+config ESP_MCPWM_MOTOR_BDC
+	bool "Brushed DC Motor Control"
+	depends on ESP_MCPWM
+	depends on ESP_MCPWM_MOTOR
+	select MOTOR
+	select MOTOR_UPPER
+	select MOTOR_UPPER_HAVE_SPEED
+	default n
+	---help---
+		Enables the use of the MCPWM submodule for control of brushed DC
+		motor.
+
+if ESP_MCPWM_MOTOR_BDC
+
+config ESP_MCPWM_MOTOR_CH0
+	bool "Motor Control Channel 0"
+	default n
+	---help---
+		Enables motor control on channel 0.
+
+if ESP_MCPWM_MOTOR_CH0
+
+config ESP_MCPWM_MOTOR_CH0_PWMA_GPIO
+	int "Output Pin PWM_A"
+	default 15
+	---help---
+		Output pin assigned to channel 0 PWM output PWM_A.
+
+config ESP_MCPWM_MOTOR_CH0_PWMB_GPIO
+	int "Output Pin PWM_B"
+	default 16
+	---help---
+		Output pin assigned to channel 0 PWM output PWM_B.
+
+config ESP_MCPWM_MOTOR_CH0_PWM_FREQ
+	int "PWM output frequency for channel 0 [Hz]"
+	default 1000
+	---help---
+		Select PWM frequency for channel 0.
+		Minimum is 25 Hz and maximum is 3000 Hz.
+
+config ESP_MCPMW_MOTOR_CH0_FAULT
+	bool "Enable fault for channel 0"
+	default n
+	---help---
+		Enables the use of a fault pin to quickly stop the motor when
+		a GPIO pin pulled high.
+
+if ESP_MCPMW_MOTOR_CH0_FAULT
+
+config ESP_MCPMW_MOTOR_CH0_FAULT_GPIO
+	int "GPIO Pin for fault detection"
+	default 10
+	---help---
+		Input pin assigned to channel 0 fault indicator.
+
+endif # ESP_MCPMW_MOTOR_CH0_FAULT
+
+endif # ESP_MCPWM_MOTOR_CH0
+
+config ESP_MCPWM_MOTOR_CH1
+	bool "Motor Control Channel 1"
+	default n
+	---help---
+		Enables motor control on channel 1.
+
+if ESP_MCPWM_MOTOR_CH1
+
+config ESP_MCPWM_MOTOR_CH1_PWMA_GPIO
+	int "Output Pin CH1 PWM_A"
+	default 15
+	---help---
+		Output pin assigned to channel 1 PWM output PWM_A.
+
+config ESP_MCPWM_MOTOR_CH1_PWMB_GPIO
+	int "Output Pin CH1 PWM_B"
+	default 16
+	---help---
+		Output pin assigned to channel 1 PWM output PWM_B.
+
+endif # ESP_MCPWM_MOTOR_CH1
+
+endif # ESP_MCPWM_MOTOR_BDC
+
+endmenu # MCPWM Motor Settings
+
 config ESP_MCPWM_CAPTURE
 	bool "MCPWM Capture Submodule"
 	depends on ESP_MCPWM
@@ -2179,6 +2303,15 @@ config ESP_MCPWM_CAPTURE_CH2_GPIO
 endif # ESP_MCPWM_CAPTURE_CH2
 
 endif # ESP_MCPWM_CAPTURE
+
+config ESP_MCPWM_TEST_LOOPBACK
+	bool "MCPWM loopback test mode"
+	depends on EXPERIMENTAL
+	default n
+	---help---
+		This enables a lower-half driver-specific loopback test
+		mode that attaches a capture device to the PWM output on
+		motor tests.
 
 endmenu # MCPWM Configuration
 

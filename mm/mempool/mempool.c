@@ -198,7 +198,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
 }
 
 /****************************************************************************
- * Name: mempool_alloc
+ * Name: mempool_allocate
  *
  * Description:
  *   Allocate an block from a specific memory pool.
@@ -214,7 +214,7 @@ int mempool_init(FAR struct mempool_s *pool, FAR const char *name)
  *
  ****************************************************************************/
 
-FAR void *mempool_alloc(FAR struct mempool_s *pool)
+FAR void *mempool_allocate(FAR struct mempool_s *pool)
 {
   FAR sq_entry_t *blk;
   irqstate_t flags;
@@ -285,7 +285,7 @@ out_with_lock:
 }
 
 /****************************************************************************
- * Name: mempool_free
+ * Name: mempool_release
  *
  * Description:
  *   Release a memory block to the pool.
@@ -295,7 +295,7 @@ out_with_lock:
  *   blk  - The pointer of memory block.
  ****************************************************************************/
 
-void mempool_free(FAR struct mempool_s *pool, FAR void *blk)
+void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
 {
   irqstate_t flags = spin_lock_irqsave(&pool->lock);
   size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);

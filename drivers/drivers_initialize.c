@@ -50,6 +50,21 @@
 #include <nuttx/drivers/optee.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Check if only one console device is selected.
+ * If you get this errro, search your .config file for CONSOLE_XXX_CONSOLE
+ * options and remove what is not needed.
+ */
+
+#if (defined(CONFIG_LWL_CONSOLE) + defined(CONFIG_SERIAL_CONSOLE) + \
+     defined(CONFIG_CDCACM_CONSOLE) + defined(CONFIG_PL2303_CONSOLE) + \
+     defined(CONFIG_SERIAL_RTT_CONSOLE) + defined(CONFIG_RPMSG_UART_CONSOLE)) > 1
+#  error More than one console driver selected. Check your configuration !
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

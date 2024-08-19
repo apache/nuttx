@@ -426,8 +426,6 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
         }
       else if (timeout > 0)
         {
-          clock_t ticks;
-
           /* "Implementations may place limitations on the granularity of
            * timeout intervals. If the requested timeout interval requires
            * a finer granularity than the implementation supports, the
@@ -437,16 +435,6 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            * Round timeout up to next full tick.
            */
 
-#if (MSEC_PER_TICK * USEC_PER_MSEC) != USEC_PER_TICK && \
-    defined(CONFIG_HAVE_LONG_LONG)
-          ticks = (((unsigned long long)timeout * USEC_PER_MSEC) +
-                   (USEC_PER_TICK - 1)) /
-                  USEC_PER_TICK;
-#else
-          ticks = ((unsigned int)timeout + (MSEC_PER_TICK - 1)) /
-                  MSEC_PER_TICK;
-#endif
-
           /* Either wait for either a poll event(s), for a signal to occur,
            * or for the specified timeout to elapse with no event.
            *
@@ -455,7 +443,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
            * will return immediately.
            */
 
-          ret = nxsem_tickwait(&sem, ticks);
+          ret = nxsem_tickwait(&sem, MSEC2TICK(timeout));
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

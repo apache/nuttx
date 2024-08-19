@@ -30,6 +30,10 @@ if(CONFIG_I2C)
     list(APPEND SRCS i2c_bitbang.c)
   endif()
 
+  if(CONFIG_I2C_SLAVE_DRIVER)
+    list(APPEND SRCS i2c_slave_driver.c)
+  endif()
+
   # Include the selected I2C multiplexer drivers
 
   if(CONFIG_I2CMULTIPLEXER_PCA9540BDP)

@@ -240,7 +240,7 @@ void __start(void)
   arm_stack_check_init();
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_FPU
+#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU (if available) */
 
   arm_fpuconfig();
