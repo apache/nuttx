@@ -415,7 +415,7 @@ int sim_rptun_init(const char *shmemname, const char *cpuname, int master);
 
 /* sim_rpmsg_virtio.c *******************************************************/
 
-#ifdef CONFIG_RPMSG_VIRTIO
+#ifdef CONFIG_RPMSG_VIRTIO_LITE
 int sim_rpmsg_virtio_init(const char *shmemname, const char *cpuname,
                           bool master);
 #endif

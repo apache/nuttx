@@ -107,32 +107,50 @@ config RPMSG_PORT_UART_DEBUG
 
 endif # RPMSG_PORT_UART
 
-config RPMSG_VIRTIO
+config RPMSG_VIRTIO_LITE
 	bool "rpmsg virtio transport support"
 	default n
 	select RPMSG
 
-if RPMSG_VIRTIO
+if RPMSG_VIRTIO_LITE
 
-config RPMSG_VIRTIO_PRIORITY
-	int "rpmsg virtio rx thread priority"
+config RPMSG_VIRTIO_LITE_PRIORITY
+	int "rpmsg virtio lite rx thread priority"
 	default 224
 
-config RPMSG_VIRTIO_STACKSIZE
-	int "rpmsg virtio rx thread stack size"
+config RPMSG_VIRTIO_LITE_STACKSIZE
+	int "rpmsg virtio lite rx thread stack size"
 	default DEFAULT_TASK_STACKSIZE
 
 config RPMSG_VIRTIO_IVSHMEM
-	bool "rpmsg virtio ivshmem support"
+	bool "rpmsg virtio lite ivshmem support"
 	default n
 	depends on PCI_IVSHMEM
 	---help---
 		This is rpmsg virtio driver based on pci ivshmem.
 
+config RPMSG_VIRTIO_LITE_PM
+	bool "rpmsg virtio lite power management"
+	depends on PM
+	default n
+	---help---
+		If TX/RX buffer is supplied and powered by each CPU.
+		And when one CPU in DEEP sleep, then it's buffer will
+		goto RAM-retention mode, can't access from another CPU.
+		So, we provide this method to resolve this.
+
+config RPMSG_VIRTIO_LITE_PM_AUTORELAX
+	bool "rpmsg virtio lite pm autorelax"
+	depends on RPMSG_VIRTIO_LITE_PM
+	default y
+	---help---
+		use wd_timer to auto relax pm
+
+
 if RPMSG_VIRTIO_IVSHMEM
 
 config RPMSG_VIRTIO_IVSHMEM_NAME
-	string "rpmsg virtio ivshmem name"
+	string "rpmsg virtio lite ivshmem name"
 	---help---
 		Using this config to custom the rpmsg virtio ivshmem id, cpuname and role,
 		using ";" to split the names.
@@ -141,14 +159,14 @@ config RPMSG_VIRTIO_IVSHMEM_NAME
 		with remote cpu ids: "0","1", names: "cpu1", "cpu2", and roles: "master", "slave"
 
 config RPMSG_VIRTIO_IVSHMEM_BUFFSIZE
-	int "rpmsg virtio ivshmem rpmsg buffer size"
+	int "rpmsg virtio lite ivshmem rpmsg buffer size"
 	default 2048
 	---help---
 		The rpmsg buffer size in share memory, the RX and TX buffer size
 		are same for now.
 
 config RPMSG_VIRTIO_IVSHMEM_BUFFNUM
-	int "rpmsg virtio ivshmem rpmsg buffer number"
+	int "rpmsg virtio lite ivshmem rpmsg buffer number"
 	default 8
 	---help---
 		The rpmsg virtio buffer number in share memory, the RX and TX buffer number

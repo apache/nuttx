@@ -254,7 +254,7 @@ ifeq ($(CONFIG_SIM_LIBUSB),y)
 endif
 endif
 
-ifeq ($(CONFIG_RPMSG_VIRTIO),y)
+ifeq ($(CONFIG_RPMSG_VIRTIO_LITE),y)
   CSRCS += sim_rpmsg_virtio.c
 endif
 
