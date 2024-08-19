@@ -16,7 +16,6 @@ config ARCH_CHIP_IMX93
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv3
 	select ARCH_CORTEX_A55
-	select ARM64_HAVE_PSCI if !IMX9_BOOTLOADER
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_RESET
 
@@ -46,6 +45,15 @@ config IMX9_FLEXIO_PWM
 	bool
 	select PWM_MULTICHAN
 	default n
+
+config IMX9_HAVE_ATF_FIRMWARE
+	bool "ARM ATF services support in bootloader"
+	default y
+	select ARM64_HAVE_PSCI
+	---help---
+		Configure this n if using Nuttx bootloader that does not
+		implemet EL3 services, by default this is y when using uboot as
+		a booloader
 
 config IMX9_BOOTLOADER
 	bool "Bootloader"
