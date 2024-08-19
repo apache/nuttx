@@ -323,3 +323,16 @@ else ifeq ($(CONFIG_HOST_MACOS),)
   ARCHPICFLAGS += -no-pie
   LDFLAGS += -Wl,-no-pie
 endif
+
+define POSTBUILD
+	$(Q)echo "Pac SIM with dynamic libs..";
+	@ rm -rf sim-pac;
+	@ mkdir -p sim-pac/libs;
+	@ cp nuttx sim-pac/nuttx;
+	@ ldd sim-pac/nuttx | grep "=> /" | awk '{print $$3}' | xargs -I '{}' cp -v '{}' sim-pac/libs;
+	@ readelf -l nuttx | grep "program interpreter" | awk -F':' '{print $$2}'| cut -d"]" -f1 | xargs -I '{}' cp -v '{}' sim-pac;
+	@ cp $(TOPDIR)/tools/simlaunch.sh sim-pac;
+	@ tar -czf nuttx.tgz sim-pac;
+	$(Q)echo "SIM elf with dynamic libs archive in nuttx.tgz"
+	@ rm -rf sim-pac;
+endef
