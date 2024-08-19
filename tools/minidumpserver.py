@@ -1003,7 +1003,10 @@ def config_log(debug):
     else:
         logger.setLevel(logging.INFO)
 
-    logging.basicConfig(format="[%(levelname)s][%(name)s] %(message)s")
+    logging.basicConfig(
+        format="[%(levelname)s][%(asctime)s][%(lineno)d] %(message)s",
+        datefmt="%H:%M:%S",
+    )
 
 
 def auto_parse_log_file(logfile):
