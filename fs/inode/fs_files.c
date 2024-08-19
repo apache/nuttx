@@ -132,6 +132,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   if (CONFIG_NFILE_DESCRIPTORS_PER_BLOCK * orig_rows > OPEN_MAX)
     {
+      files_dumplist(list);
       return -EMFILE;
     }
 
