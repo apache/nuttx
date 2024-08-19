@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/stdarg.h
+ * arch/arm/src/common/ghs/lib_dummy.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,34 +18,34 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_STDARG_H
-#define __ARCH_ARM_INCLUDE_STDARG_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifdef __ghs__
-#  include <ansi/stdarg.h>
-#else
+#include <nuttx/config.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Pre-processor Prototypes
+ * Public Functions
  ****************************************************************************/
 
-/* This should work with any modern gcc (newer than 3.4 or so) */
+/* The following functions is needed by libmath that introduced by default
+ * in the Greenhills toolchain, in nuttx we do not really need these
+ * function, so add dummy implementation here to avoid the link error
+ */
 
-#define va_start(v,l)   __builtin_va_start(v,l)
-#define va_end(v)       __builtin_va_end(v)
-#define va_arg(v,l)     __builtin_va_arg(v,l)
-#define va_copy(d,s)    __builtin_va_copy(d,s)
+void __gh_long_long_printf(void)
+{
+}
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+void __gh_float_printf(void)
+{
+}
 
-typedef __builtin_va_list va_list;
+void __gh_fputs_stdout(void)
+{
+}
 
-#endif
-
-#endif /* __ARCH_ARM_INCLUDE_STDARG_H */
+void exp2(void)
+{
+}

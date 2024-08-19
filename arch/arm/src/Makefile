@@ -154,6 +154,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_IAR),y)
   VPATH += common$(DELIM)iar
 else # ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
   VPATH += common$(DELIM)gnu
+  VPATH += common$(DELIM)ghs
 endif
 
 all: $(HEAD_OBJ) $(BIN)
