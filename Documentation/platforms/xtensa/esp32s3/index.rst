@@ -184,7 +184,7 @@ RMT          No
 RNG          No
 RSA          No
 RTC          Yes
-SD/MMC       No
+SD/MMC       Yes
 SDIO         No
 SHA          No
 SPI          Yes

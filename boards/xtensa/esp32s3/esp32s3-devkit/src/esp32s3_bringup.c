@@ -109,6 +109,10 @@
 #include "esp32s3_board_spidev.h"
 #endif
 
+#ifdef CONFIG_ESP32S3_SDMMC
+#include "esp32s3_board_sdmmc.h"
+#endif
+
 #ifdef CONFIG_ESP32S3_AES_ACCELERATOR
 #  include "esp32s3_aes.h"
 #endif
@@ -461,6 +465,14 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI ethernet LAN9250.\n");
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_SDMMC
+  ret = board_sdmmc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SDMMC: %d\n", ret);
     }
 #endif
 
