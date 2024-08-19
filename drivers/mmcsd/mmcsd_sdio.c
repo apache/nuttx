@@ -1251,7 +1251,13 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
 
       /* Do not hog the CPU */
 
+#ifdef CONFIG_MMCSD_CHECK_READY_STATUS_WITHOUT_SLEEP
+      /* Use sched_yield when tick is big to avoid low writing speed */
+
+      sched_yield();
+#else
       nxsig_usleep(1000);
+#endif
 
       /* We are still in the programming state. Calculate the elapsed
        * time... we can't stay in this loop forever!
