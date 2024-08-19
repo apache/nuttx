@@ -177,6 +177,19 @@ config MMCSD_BLOCK_WDATADELAY
 		Some hardware needs to configure this delay to write one data block, because
 		the hardware needs more time for wear leveling and bad block management.
 
+config MMCSD_CHECK_READY_STATUS_WITHOUT_SLEEP
+	bool "No sleep in ready-check function."
+	default n
+	---help---
+		Since nxsig_usleep returns at the tick after the next tick, when
+		CONFIG_USEC_PER_TICK is big, the real sleep time is much more than
+		desired in mmcsd_transferready(). As a result, write speed is
+		affected seriously.
+
+		When this configuration is enabled, the sleep in mmcsd_transferready
+		will be skipped. However, CPU will be hogged by the process during
+		this period of writing time.
+
 endif
 
 endif # MMCSD
