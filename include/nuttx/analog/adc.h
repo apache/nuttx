@@ -140,9 +140,9 @@ struct adc_fifo_s
   uint16_t     af_head;                  /* Index to the head [IN] index in the circular buffer */
   uint16_t     af_tail;                  /* Index to the tail [OUT] index in the circular buffer */
                                          /* Circular buffer of ADC messages */
-  uint8_t      af_channel[CONFIG_ADC_FIFOSIZE];
-  int32_t      af_data[CONFIG_ADC_FIFOSIZE];
-  struct adc_msg_s af_buffer[CONFIG_ADC_FIFOSIZE];
+  FAR uint8_t  *af_channel;
+  FAR uint32_t *af_data;
+  uint16_t     af_fifosize;
 };
 
 /* This structure defines all of the operations provided by the architecture

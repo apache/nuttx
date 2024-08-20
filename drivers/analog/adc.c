@@ -40,6 +40,7 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/random.h>
+#include <nuttx/kmalloc.h>
 
 #include <nuttx/irq.h>
 
@@ -312,13 +313,13 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
           size_t count;
           size_t used;
 
-          used = (fifo->af_tail - fifo->af_head + CONFIG_ADC_FIFOSIZE)
-                  % CONFIG_ADC_FIFOSIZE;
+          used = (fifo->af_tail - fifo->af_head + fifo->af_fifosize)
+                  % fifo->af_fifosize;
           count = MIN(used, buflen / msglen);
 
           /* Check if flipping is required and memcopy */
 
-          first = MIN(CONFIG_ADC_FIFOSIZE - fifo->af_head, count);
+          first = MIN(fifo->af_fifosize - fifo->af_head, count);
           second = count - first;
           memcpy(buffer, &fifo->af_data[fifo->af_head], first * 4);
 
@@ -327,7 +328,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
               memcpy(&buffer[4 * first], &fifo->af_data[0], second * 4);
             }
 
-          fifo->af_head = (fifo->af_head + count) % CONFIG_ADC_FIFOSIZE;
+          fifo->af_head = (fifo->af_head + count) % fifo->af_fifosize;
           nread = count * msglen;
         }
       else
@@ -394,7 +395,7 @@ static ssize_t adc_read(FAR struct file *filep, FAR char *buffer,
 
               /* Increment the head of the circular message buffer */
 
-              if (++fifo->af_head >= CONFIG_ADC_FIFOSIZE)
+              if (++fifo->af_head >= fifo->af_fifosize)
                 {
                   fifo->af_head = 0;
                 }
@@ -484,7 +485,7 @@ static int adc_receive(FAR struct adc_dev_s *dev, uint8_t ch, int32_t data)
    */
 
   nexttail = fifo->af_tail + 1;
-  if (nexttail >= CONFIG_ADC_FIFOSIZE)
+  if (nexttail >= fifo->af_fifosize)
     {
       nexttail = 0;
     }
@@ -528,17 +529,17 @@ static int adc_receive_batch(FAR struct adc_dev_s *dev,
    * enqueue read data.
    */
 
-  used = (fifo->af_tail - fifo->af_head + CONFIG_ADC_FIFOSIZE)
-          % CONFIG_ADC_FIFOSIZE;
+  used = (fifo->af_tail - fifo->af_head + fifo->af_fifosize)
+          % fifo->af_fifosize;
 
-  if (used + count >= CONFIG_ADC_FIFOSIZE)
+  if (used + count >= fifo->af_fifosize)
     {
       return -ENOMEM;
     }
 
   /* Check if flipping is required and memcopy */
 
-  first = MIN(count, CONFIG_ADC_FIFOSIZE - fifo->af_tail);
+  first = MIN(count, fifo->af_fifosize - fifo->af_tail);
   second = count - first;
 
   memcpy(&fifo->af_data[fifo->af_tail], data,
@@ -560,7 +561,7 @@ static int adc_receive_batch(FAR struct adc_dev_s *dev,
         }
     }
 
-  fifo->af_tail = (fifo->af_tail + count) % CONFIG_ADC_FIFOSIZE;
+  fifo->af_tail = (fifo->af_tail + count) % fifo->af_fifosize;
 
   adc_notify(dev);
 
@@ -711,7 +712,7 @@ static int adc_samples_on_read(FAR struct adc_dev_s *dev)
     {
       /* Increment return value by the size of FIFO */
 
-      ret += CONFIG_ADC_FIFOSIZE;
+      ret += fifo->af_fifosize;
     }
 
   return ret;
@@ -728,6 +729,7 @@ static int adc_samples_on_read(FAR struct adc_dev_s *dev)
 int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 {
   FAR struct adc_fifo_s *fifo = &dev->ad_recv;
+  uint16_t fifosize;
   int ret;
 
   DEBUGASSERT(path != NULL && dev != NULL);
@@ -756,18 +758,46 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
   DEBUGASSERT(dev->ad_ops->ao_reset != NULL);
   dev->ad_ops->ao_reset(dev);
 
+  /* Malloc for af_channale and af_data */
+
+  fifosize = fifo->af_fifosize;
+  if (fifosize == 0)
+    {
+      fifo->af_fifosize = CONFIG_ADC_FIFOSIZE;
+      fifo->af_channel = kmm_malloc(fifo->af_fifosize);
+
+      if (fifo->af_channel == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      fifo->af_data = kmm_malloc(fifo->af_fifosize * 4);
+
+      if (fifo->af_data == NULL)
+        {
+          kmm_free(fifo->af_channel);
+          return -ENOMEM;
+        }
+    }
+
   /* Register the ADC character driver */
 
   ret = register_driver(path, &g_adc_fops, 0444, dev);
   if (ret < 0)
     {
+      if (fifosize == 0)
+        {
+          kmm_free(fifo->af_channel);
+          kmm_free(fifo->af_data);
+        }
+
       nxsem_destroy(&dev->ad_recv.af_sem);
       nxmutex_destroy(&dev->ad_closelock);
     }
 
   /* Initialize the af_channale */
 
-  memset(&fifo->af_channel[0], 0, CONFIG_ADC_FIFOSIZE);
+  memset(&fifo->af_channel[0], 0, fifo->af_fifosize);
 
   return ret;
 }
