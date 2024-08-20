@@ -51,6 +51,10 @@
 
 #define SEM_FAILED                NULL
 
+#ifndef CONFIG_SEM_PREALLOCHOLDERS
+#  define CONFIG_SEM_PREALLOCHOLDERS 0
+#endif
+
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
