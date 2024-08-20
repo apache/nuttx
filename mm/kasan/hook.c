@@ -173,10 +173,12 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
       return;
     }
 
+#ifndef CONFIG_MM_KASAN_DISABLE_NULL_POINTER_CHECK
   if (addr == NULL)
     {
       kasan_report(addr, size, is_write, return_address);
     }
+#endif
 
   if (kasan_is_poisoned(addr, size))
     {
