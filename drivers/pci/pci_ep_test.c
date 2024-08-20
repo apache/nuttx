@@ -610,6 +610,15 @@ static int pci_ep_test_alloc_irq(FAR struct pci_ep_test_s *test,
     }
 
   test->irq_type = irq_type;
+  if (irq_type >= PCI_EP_TEST_IRQ_TYPE_MSI)
+    {
+      ret = pci_connect_irq(pdev, &test->irq, 1);
+      if (ret < 0)
+        {
+          pcierr("Failed to connect MSI %d\n", ret);
+          return ret;
+        }
+    }
 
   ret = irq_attach(test->irq, pci_ep_test_handler, test);
   if (ret >= 0)
@@ -728,7 +737,6 @@ static int pci_ep_test_ioctl(FAR struct file *filep,
         break;
 
       default:
-        pcierr("Unspported cmd!!! \n");
         break;
     }
 
@@ -766,6 +774,7 @@ static int pci_ep_test_probe(FAR struct pci_device_s *dev)
     }
 
   test->pdev = dev;
+  test->alignment = sizeof(uint32_t);
 
   nxsem_init(&test->irq_raise, 0, 0);
   nxmutex_init(&test->mutex);
