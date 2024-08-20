@@ -365,7 +365,10 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         if (!rpspi->connected)
           {
             rpmsg_port_unregister(&rpspi->port);
-            rpmsg_port_spi_connect(rpspi);
+
+            /* Trigger a transmission for reconnection */
+
+            IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
           }
         else
           {
