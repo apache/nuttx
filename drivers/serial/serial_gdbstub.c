@@ -78,7 +78,7 @@ static void uart_gdbstub_attach(FAR struct uart_gdbstub_s *uart_gdbstub,
 
   uart_setup(dev);
   uart_attach(dev);
-  uart_enablerxint(dev);
+  uart_disablerxint(dev);
 }
 
 /****************************************************************************
@@ -128,13 +128,36 @@ static int uart_gdbstub_panic_callback(FAR struct notifier_block *nb,
       if (uart_gdbstub->console == uart_gdbstub->dev &&
           uart_gdbstub->org_ops != NULL)
         {
-          ch = uart_gdbstub->org_ops->receive(uart_gdbstub->console,
-                                              &status);
+          if (uart_gdbstub->org_ops->recvbuf)
+            {
+              if (uart_gdbstub->org_ops->rxavailable(uart_gdbstub->console))
+                {
+                  uart_gdbstub->org_ops->recvbuf(uart_gdbstub->console,
+                                                 &ch, 1);
+                }
+            }
+          else
+            {
+              ch = uart_gdbstub->org_ops->receive(uart_gdbstub->console,
+                                                  &status);
+            }
         }
       else
         {
-          ch = uart_gdbstub->console->ops->receive(uart_gdbstub->console,
-                                                   &status);
+          if (uart_gdbstub->console->ops->recvbuf)
+            {
+              if (uart_gdbstub->console->ops->rxavailable(
+                                              uart_gdbstub->console))
+                {
+                  uart_gdbstub->console->ops->recvbuf(uart_gdbstub->console,
+                                                      &ch, 1);
+                }
+            }
+          else
+            {
+              ch = uart_gdbstub->console->ops->receive(uart_gdbstub->console,
+                                                       &status);
+            }
         }
 
       if (ch == 'Y' || ch == 'y')
@@ -163,7 +186,7 @@ static int uart_gdbstub_panic_callback(FAR struct notifier_block *nb,
          "target-charset ASCII\" -ex \"target remote /dev/ttyUSB0\"\n");
 
   syslog_flush();
-  gdb_process(uart_gdbstub->state, GDB_STOPREASON_CTRLC, NULL);
+  gdb_process(uart_gdbstub->state, GDB_STOPREASON_NONE, NULL);
   return 0;
 }
 
@@ -206,7 +229,14 @@ static ssize_t uart_gdbstub_receive(FAR void *priv, FAR void *buf,
     {
       if (uart_gdbstub->org_ops->rxavailable(dev))
         {
-          ptr[i++] = uart_gdbstub->org_ops->receive(dev, &state);
+          if (uart_gdbstub->org_ops->recvbuf)
+            {
+              i += uart_gdbstub->org_ops->recvbuf(dev, ptr + i, len - i);
+            }
+          else
+            {
+              ptr[i++] = uart_gdbstub->org_ops->receive(dev, &state);
+            }
         }
     }
 
@@ -231,9 +261,18 @@ static ssize_t uart_gdbstub_send(FAR void *priv, FAR void *buf, size_t len)
     {
       if (uart_gdbstub->org_ops->txready(dev))
         {
-          uart_gdbstub->org_ops->send(dev, ((FAR char *)buf)[i++]);
+          if (uart_gdbstub->org_ops->sendbuf)
+            {
+              i += uart_gdbstub->org_ops->sendbuf(dev, buf + i, len - i);
+            }
+          else
+            {
+              uart_gdbstub->org_ops->send(dev, ((FAR char *)buf)[i++]);
+            }
         }
     }
+
+  while (!uart_gdbstub->org_ops->txempty(dev));
 
   return len;
 }
