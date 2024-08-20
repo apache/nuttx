@@ -1,13 +1,13 @@
-==============
-minidumpserver
-==============
+=========
+gdbserver
+=========
 
 Introduction
 ============
 
 This tool can utilize a crash log on a PC to simulate a set of GDB server functionalities,
 enabling the use of GDB to debug the context of a NuttX crash.
-The script directory is located in ``tools/minidumpserver.py``.
+The script directory is located in ``tools/gdbserver.py``.
 
 Usage
 =====
@@ -16,21 +16,31 @@ We can use ``-h`` to get help information:
 
 .. code-block:: bash
 
-   $ usage: minidumpserver.py [-h] -e ELFFILE -l LOGFILE [-a {arm,arm-a,arm-t,riscv,esp32s3,xtensa}] [-p PORT] [--debug]
+   $ usage: gdbserver.py [-h] -e ELFFILE [-l LOGFILE] [-a {arm,arm-a,arm-t,riscv,esp32s3,xtensa}] [-p PORT] [-g GDB] [-i [INIT_CMD]]
+                    [-r [RAWFILE ...]] [-c [COREDUMP]] [--debug]
 
-   options:
-     -h, --help            show this help message and exit
-     -e ELFFILE, --elffile ELFFILE
-                           elffile
-     -l LOGFILE, --logfile LOGFILE
-                           logfile
-     -a {arm,arm-a,arm-t,riscv,esp32s3,xtensa}, --arch {arm,arm-a,arm-t,riscv,esp32s3,xtensa}
-                           select architecture, if not use this options, The architecture will be inferred from the logfile
-     -p PORT, --port PORT  gdbport
-     --debug
+    options:
+      -h, --help            show this help message and exit
+      -e ELFFILE, --elffile ELFFILE
+                            elffile
+      -l LOGFILE, --logfile LOGFILE
+                            logfile
+      -a {arm,arm-a,arm-t,riscv,esp32s3,xtensa}, --arch {arm,arm-a,arm-t,riscv,esp32s3,xtensa}
+                            Only use if can't be learnt from ELFFILE.
+      -p PORT, --port PORT  gdbport
+      -g GDB, --gdb GDB     provided a custom GDB path, automatically start GDB session and exit gdbserver when exit GDB.
+      -i [INIT_CMD], --init-cmd [INIT_CMD]
+                            provided a custom GDB init command, automatically start GDB sessions and input what you provide. if you don't
+                            provide any command, it will use default command [-ex 'bt full' -ex 'info reg' -ex 'display /40i $pc-40'].
+      -r [RAWFILE ...], --rawfile [RAWFILE ...]
+                            rawfile is a binary file, args format like ram.bin:0x10000 ...
+      -c [COREDUMP], --coredump [COREDUMP]
+                            coredump file, will prase memory in this file
+      --debug               if enabled, it will show more logs.
 
-Example
-=======
+
+Log Example
+===========
 1. Use ./tools/configure.sh esp32s3-devkit:nsh and disable `CONFIG_NSH_DISABLE_MW`.
 2. `make -j`
 3. Flash image to esp32s3-devkit.
@@ -67,7 +77,7 @@ Example
     stack_dump: 0x3fc8b860: 00000000 3fc8b890 00000000 00000000 3fc8b0c0 00000002 00000000 3fc8ad98
     stack_dump: 0x3fc8b880: 00000000 3fc8b8b0 00000000 00000000 00000000 00000000 00000000 00000000
 
-7. Run `./tools/minidumpserver.py -e nuttx -l crash.log -p 1234 -a esp32s3`
+7. Run `./tools/gdbserver.py -e nuttx -l crash.log -p 1234 -a esp32s3`
 8. Run `xtensa-esp32s3-elf-gdb nuttx -ex "target remote 127.0.0.1:1234"`
 
 .. code-block:: bash
@@ -107,6 +117,32 @@ Example
         at sched/task_startup.c:70
     #9  0x420019dc in nxtask_start () at task/task_start.c:134
     (gdb)
+
+Raw file Example
+================
+1. If you obtain the memory file from your board, you can also use gdbserver.py to reconstruct the scene.
+   The most common way to get the raw file is to use the dump memory command
+   in GDB to dump the memory and save it as a file.
+
+2. Run `./tools/gdbserver.py -e nuttx -r rawfile:0x1000 -a arm`
+3. Run gdb with target remote.
+
+Coredump Example
+================
+1. If you have a coredump, you also can run `./tools/gdbserver.py -e nuttx -c coredump -a arm`
+2. Run gdb with target remote.
+
+The benefit of this approach is that in a multi-core AMP system,
+a single coredump might contain memory information from other cores.
+By analyzing this coredump along with the corresponding ELF files from
+the other cores, you can reconstruct the crash site of those other cores.
+
+Thread awarenes
+===============
+
+`gdbserver.py` implements thread debugging based on `g_pidhash`, `g_npidhash`,
+and `g_tcbinfo` in NuttX. If the log, raw file, or coredump you provide can read these variables,
+it means you can use thread-related commands in GDB, such as `info thread` or `thread`
 
 How to add new architecture
 ===========================
