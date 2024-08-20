@@ -895,6 +895,7 @@ int bcmf_bus_sdio_active(FAR struct bcmf_dev_s *priv, bool active)
 exit_uninit_hw:
   sbus->ready = false;
   bcmf_hwuninitialize(sbus);
+  sbus->tx_seq = 0;
 
   return ret;
 }

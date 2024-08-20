@@ -58,7 +58,7 @@
 /* Interrupt pins.
  */
 
-#define GPIO_IRQPIN1  14
+#define GPIO_IRQPIN1  7
 
 /****************************************************************************
  * Private Types

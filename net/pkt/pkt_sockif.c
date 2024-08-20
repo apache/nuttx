@@ -168,7 +168,7 @@ static int pkt_setup(FAR struct socket *psock)
 
 static sockcaps_t pkt_sockcaps(FAR struct socket *psock)
 {
-  return 0;
+  return SOCKCAP_NONBLOCKING;
 }
 
 /****************************************************************************

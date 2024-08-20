@@ -35,8 +35,8 @@ config DRIVERS_VIRTIO_GPU
 
 config DRIVERS_VIRTIO_INPUT
 	bool "Virtio input support"
+	depends on INPUT && INPUT_TOUCHSCREEN && INPUT_KEYBOARD && INPUT_MOUSE
 	default n
-	depends on INPUT
 
 config DRIVERS_VIRTIO_NET
 	bool "Virtio network support"

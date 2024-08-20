@@ -548,6 +548,72 @@
 #define GPIO_TIM5_CH1IN  GPIO_TIM5_CH1IN_1 /* PA0 */
 #define GPIO_TIM5_CH2IN  GPIO_TIM5_CH2IN_2 /* PH11 */
 
+/* LTDC */
+
+#define GPIO_LTDC_R0     (GPIO_LTDC_R0_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R1     (GPIO_LTDC_R1_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R2     (GPIO_LTDC_R2_4 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R3     (GPIO_LTDC_R3_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R4     (GPIO_LTDC_R4_4 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R5     (GPIO_LTDC_R5_4 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R6     (GPIO_LTDC_R6_4 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R7     (GPIO_LTDC_R7_3 | GPIO_SPEED_100MHz)
+
+#define GPIO_LTDC_G0     (GPIO_LTDC_G0_2 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G1     (GPIO_LTDC_G1_2 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G2     (GPIO_LTDC_G2_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G3     (GPIO_LTDC_G3_4 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G4     (GPIO_LTDC_G4_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G5     (GPIO_LTDC_G5_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G6     (GPIO_LTDC_G6_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G7     (GPIO_LTDC_G7_3 | GPIO_SPEED_100MHz)
+
+#define GPIO_LTDC_B0     (GPIO_LTDC_B0_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B1     (GPIO_LTDC_B1_2 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B2     (GPIO_LTDC_B2_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B3     (GPIO_LTDC_B3_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B4     (GPIO_LTDC_B4_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B5     (GPIO_LTDC_B5_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B6     (GPIO_LTDC_B6_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B7     (GPIO_LTDC_B7_3 | GPIO_SPEED_100MHz)
+
+#define GPIO_LTDC_VSYNC  (GPIO_LTDC_VSYNC_2 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_HSYNC  (GPIO_LTDC_HSYNC_2 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_DE     (GPIO_LTDC_DE_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_CLK    (GPIO_LTDC_CLK_3 | GPIO_SPEED_100MHz)
+
+/* LCD definitions **********************************************************/
+
+#define BOARD_LTDC_WIDTH                1024
+#define BOARD_LTDC_HEIGHT               600
+
+#define BOARD_LTDC_OUTPUT_BPP           16
+#define BOARD_LTDC_HFP                  160
+#define BOARD_LTDC_HBP                  160
+#define BOARD_LTDC_VFP                  1
+#define BOARD_LTDC_VBP                  23
+#define BOARD_LTDC_HSYNC                0
+#define BOARD_LTDC_VSYNC                0
+
+#define BOARD_LTDC_PLLSAIN              192
+#define BOARD_LTDC_PLLSAIR              5
+
+/* Pixel Clock Polarity */
+
+#define BOARD_LTDC_GCR_PCPOL            0 /* !LTDC_GCR_PCPOL */
+
+/* Data Enable Polarity */
+
+#define BOARD_LTDC_GCR_DEPOL            0 /* !LTDC_GCR_DEPOL */
+
+/* Vertical Sync Polarity */
+
+#define BOARD_LTDC_GCR_VSPOL            0 /* !LTDC_GCR_VSPOL */
+
+/* Horizontal Sync Polarity */
+
+#define BOARD_LTDC_GCR_HSPOL            0 /* !LTDC_GCR_HSPOL */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

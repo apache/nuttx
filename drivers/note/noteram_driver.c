@@ -956,7 +956,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       {
         FAR struct note_binary_s *nbi = (FAR struct note_binary_s *)p;
         char c = note->nc_type == NOTE_DUMP_BEGIN ? 'B' : 'E';
-        int len = note->nc_length - sizeof(struct note_binary_s);
+        int len = note->nc_length - SIZEOF_NOTE_EVENT(0);
         uintptr_t ip;
 
         ip = nbi->nbi_ip;
