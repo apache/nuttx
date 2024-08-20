@@ -22,7 +22,7 @@ Guides
   nestedinterrupts.rst
   cortexmhardfaults.rst
   coredump.rst
-  minidumpserver.rst
+  gdbserver.rst
   gdbwithpython.rst
   ofloader.rst
   testingtcpip.rst
