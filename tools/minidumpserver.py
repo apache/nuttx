@@ -699,11 +699,10 @@ def auto_parse_log_file(logfile):
         start = False
         for line in f.readlines():
             line = line.strip()
-            if (
-                "up_dump_register" in line
-                or "dump_stack" in line
-                or "stack_dump" in line
-            ):
+            if len(line) == 0:
+                continue
+
+            if "up_dump_register" in line or "stack" in line:
                 start = True
             else:
                 if start:

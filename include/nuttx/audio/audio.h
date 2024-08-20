@@ -114,6 +114,7 @@
 #define AUDIOIOC_SETPARAMTER        _AUDIOIOC(18)
 #define AUDIOIOC_GETLATENCY         _AUDIOIOC(19)
 #define AUDIOIOC_FLUSH              _AUDIOIOC(20)
+#define AUDIOIOC_GETPOSITION        _AUDIOIOC(21)
 
 /* Audio Device Types *******************************************************/
 

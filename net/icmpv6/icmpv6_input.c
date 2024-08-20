@@ -480,7 +480,6 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     struct sockaddr_in6 addr;
                     int nservers;
                     int ret;
-                    int i;
 
                     if (rdnss->optlen < 3)
                       {
@@ -497,15 +496,13 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     servers  = (FAR struct in6_addr *)rdnss->servers;
                     nservers = (rdnss->optlen - 1) / 2;
 
-                    /* Set the IPv6 DNS server address */
-
-                    memset(&addr, 0, sizeof(addr));
-                    addr.sin6_family = AF_INET6;
-
-                    for (i = 0; i < CONFIG_NETDB_DNSSERVER_NAMESERVERS &&
-                         i < nservers; i++)
+                    if (nservers > 0)
                       {
-                        net_ipv6addr_copy(&addr.sin6_addr, servers + i);
+                        /* Set the IPv6 DNS server address */
+
+                        memset(&addr, 0, sizeof(addr));
+                        addr.sin6_family = AF_INET6;
+                        net_ipv6addr_copy(&addr.sin6_addr, servers);
                         ret = dns_add_nameserver(
                                           (FAR const struct sockaddr *)&addr,
                                           sizeof(struct sockaddr_in6));

@@ -76,8 +76,8 @@ SECTIONS
     {
       _sctors = . ;
       KEEP (*(.ctors))       /* Old ABI:  Unallocated */
-      KEEP (*(.init_array))  /* New ABI:  Allocated */
-      KEEP (*(SORT(.init_array.*)))
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
       _ectors = . ;
     }
 

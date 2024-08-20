@@ -9,7 +9,8 @@ NuttX follows a specific coding style which needs to be followed at all times
 a contribution to be accepted. Please read this document before working on
 new code so that you can follow the style from the start. To check your code
 for conformance to the coding style, you should use the `nxstyle <#nxstyle>`_
-tool included under ``tools/`` in the main NuttX repository.
+tool included under ``tools/`` in the main NuttX repository, or enable the
+pre-commit functionality described in `pre-commit <#precommit>`__.
 
 *******************
 General Conventions
@@ -2370,6 +2371,58 @@ names begin with a capital letter identifying what is being named:
  *Enumerations Names*
    Enumerations begin with an upper case '**E**'. For example,
    ``EMyEnumeration``. The suffix ``_e`` is never used.
+
+.. _precommit:
+
+******************
+Using Pre-Commit
+******************
+You can use the `pre-commit <https://pre-commit.com/>`_ tool to check
+for style issues automatically. This is a 3rd party, Python based
+tool that simplifies linter checks and runs automatically when you
+commit modifications.
+
+The tool uses the `.pre-commit-config.yaml` file on the root NuttX
+directory as reference.
+
+Installing
+=============
+Follow the installation guide on `pre-commit <https://pre-commit.com/>`_
+website. If you can't install directly with pip, consider using
+`snap <https://snapcraft.io/install/pre-commit/ubuntu>`_ or `apt`.
+Then, enter the NuttX repository and run: ``pre-commit install``.
+
+Using
+========
+When committing changes, the tool should run automatically.
+Each check should show "Passed", otherwise the commit will not happen.
+If any test fails, you should: fix the errors, then ``git add`` and ``git commit``
+again.
+
+Example terminal output:
+
+.. code-block:: console
+
+ user@machine:~/nuttxspace/nuttx$ git commit -m "Testing pre-commit"
+ fix end of files.........................................................Passed
+ trim trailing whitespace.................................................Passed
+ check for added large files..............................................Passed
+ nxstyle..................................................................Passed
+ [feature/example_wifi 8394e9f3cf] Testing pre-commit
+ 1 file changed, 1 insertion(+)
+
+It is possible to manually run the tool without a commit, just checking all
+files in a directory. Simply run: ``pre-commit run --files drivers/i2c/*``
+
+Hooks
+========
+The following hooks are enabled in `.pre-commit-config.yaml`:
+
+-  **end-of-file-fixer:** adds an empty line at the end of the file.
+-  **trailing-whitespace:** finds and removes white spaces at the end of lines.
+-  **check-added-large-files:** verifies if large files were added to the commit.
+-  **cmake-format:** check the style of CMakeLists files.
+-  **nxstyle:** check for the NuttX style (nxstyle). Currently runs the entire ``checkpatch.sh`` script.
 
 .. _appndxa:
 
