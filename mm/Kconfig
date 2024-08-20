@@ -288,6 +288,12 @@ config MM_KASAN_ALL
 		to check. Enabling this option will get image size increased
 		and performance decreased significantly.
 
+config MM_KASAN_DISABLE_NULL_POINTER_CHECK
+	bool "Disable null pointer access check"
+	default n
+	---help---
+		This option enables KASan check null pointer access.
+
 config MM_KASAN_DISABLE_READS_CHECK
 	bool "Disable reads check"
 	depends on MM_KASAN
