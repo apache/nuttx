@@ -1295,7 +1295,9 @@ static int validate_frame_setting(FAR capture_mng_t *cmng,
 
 static size_t get_bufsize(FAR video_format_t *vf)
 {
-  size_t ret = vf->width * vf->height;
+  uint32_t width  = vf->width;
+  uint32_t height = vf->height;
+  size_t ret = width * height;
 
   switch (vf->pixelformat)
     {
