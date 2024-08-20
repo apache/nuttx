@@ -38,6 +38,13 @@
 #include <nuttx/elf.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define OPCODE_MOV    0x8b
+#define OPCODE_LEA    0x8d
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -174,6 +181,26 @@ int up_relocateadd(const Elf64_Rela *rel, const Elf64_Sym *sym,
 
         *(uint32_t *)addr = value;
         break;
+#ifdef CONFIG_ARCH_ADDRENV
+      case R_X86_64_REX_GOTPCRELX:
+
+        /* Handle like R_X86_64_PC32 but with load offset */
+
+        value = (sym->st_value + rel->r_addend - addr +
+                 CONFIG_ARCH_TEXT_VBASE);
+
+        /* Convert MOV to LEA - other relocations not suported */
+
+        if (*(uint8_t *)(addr - 2) != OPCODE_MOV)
+          {
+            berr("ERROR: not supported REX_GOTPCRELX relocation\n");
+            return -EINVAL;
+          }
+
+        *(uint8_t *)(addr - 2) = OPCODE_LEA;
+        *(uint32_t *)(addr)    = value;
+        break;
+#endif
       default:
         berr("ERROR: Unsupported relocation: %d\n", relotype);
         return -EINVAL;
