@@ -30,6 +30,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include <nuttx/arch.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -192,6 +194,28 @@ void kasan_start(void);
  ****************************************************************************/
 
 void kasan_stop(void);
+
+/****************************************************************************
+ * Name: kasan_debugpoint
+ *
+ * Description:
+ *   Monitor the memory range for invalid access check
+ *
+ * Input Parameters:
+ *   type - DEBUGPOINT_NONE         : remove
+ *          DEBUGPOINT_WATCHPOINT_RO: read
+ *          DEBUGPOINT_WATCHPOINT_WO: write
+ *          DEBUGPOINT_WATCHPOINT_RW: read/write
+ *   addr - range start address
+ *   size - range size
+ *
+ * Returned Value:
+ *   If the setting is successful, it returns 0, otherwise it
+ *   returns an error code.
+ *
+ ****************************************************************************/
+
+int kasan_debugpoint(int type, FAR void *addr, size_t size);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -264,6 +264,11 @@ choice
 	prompt "KAsan Mode"
 	default MM_KASAN_GENERIC
 
+config MM_KASAN_NONE
+	bool "KAsan disable"
+	---help---
+		Disable KASan check
+
 config MM_KASAN_GENERIC
 	bool "KAsan generic mode"
 	---help---
@@ -287,6 +292,12 @@ config MM_KASAN_ALL
 		"-fsanitize=kernel-address" for the files/directories you want
 		to check. Enabling this option will get image size increased
 		and performance decreased significantly.
+
+config MM_KASAN_WATCHPOINT
+	int "Kasan watchpoint maximum number"
+	default 0
+	---help---
+		The maximum number of watchpoints that can be set by KASan.
 
 config MM_KASAN_DISABLE_NULL_POINTER_CHECK
 	bool "Disable null pointer access check"

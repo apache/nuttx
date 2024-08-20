@@ -83,11 +83,32 @@
 #  define MM_KASAN_DISABLE_WRITE_PANIC 0
 #endif
 
+#ifdef CONFIG_MM_KASAN_WATCHPOINT
+#  define MM_KASAN_WATCHPOINT CONFIG_MM_KASAN_WATCHPOINT
+#else
+#  define MM_KASAN_WATCHPOINT 0
+#endif
+
 #define KASAN_INIT_VALUE 0xdeadcafe
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct kasan_watchpoint_s
+{
+  FAR void *addr;
+  size_t size;
+  int type;
+};
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#if MM_KASAN_WATCHPOINT > 0
+static struct kasan_watchpoint_s g_watchpoint[MM_KASAN_WATCHPOINT];
+#endif
 
 static uint32_t g_region_init;
 
@@ -164,6 +185,37 @@ static void kasan_report(FAR const void *addr, size_t size,
   leave_critical_section(flags);
 }
 
+#if MM_KASAN_WATCHPOINT > 0
+static void kasan_check_watchpoint(FAR const void *addr, size_t size,
+                                   bool is_write,
+                                   FAR void *return_address)
+{
+  int i;
+
+  for (i = 0; i < MM_KASAN_WATCHPOINT; i++)
+    {
+      FAR struct kasan_watchpoint_s *watchpoint = &g_watchpoint[i];
+
+      if (watchpoint->type == DEBUGPOINT_NONE)
+        {
+          break;
+        }
+
+      if (addr + size <= watchpoint->addr ||
+          addr > watchpoint->addr + watchpoint->size)
+        {
+          continue;
+        }
+
+      if ((is_write && (watchpoint->type & DEBUGPOINT_WATCHPOINT_WO)) ||
+          (!is_write && (watchpoint->type & DEBUGPOINT_WATCHPOINT_RO)))
+        {
+          kasan_report(addr, size, is_write, return_address);
+        }
+    }
+}
+#endif
+
 static inline void kasan_check_report(FAR const void *addr, size_t size,
                                       bool is_write,
                                       FAR void *return_address)
@@ -180,10 +232,16 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
     }
 #endif
 
+#ifndef CONFIG_MM_KASAN_NONE
   if (kasan_is_poisoned(addr, size))
     {
       kasan_report(addr, size, is_write, return_address);
     }
+#endif
+
+#if MM_KASAN_WATCHPOINT > 0
+  kasan_check_watchpoint(addr, size, is_write, return_address);
+#endif
 }
 
 /****************************************************************************
@@ -199,6 +257,72 @@ void kasan_stop(void)
 {
   g_region_init = 0;
 }
+
+/****************************************************************************
+ * Name: kasan_debugpoint
+ *
+ * Description:
+ *   Monitor the memory range for invalid access check
+ *
+ * Input Parameters:
+ *   type - DEBUGPOINT_NONE         : remove
+ *          DEBUGPOINT_WATCHPOINT_RO: read
+ *          DEBUGPOINT_WATCHPOINT_WO: write
+ *          DEBUGPOINT_WATCHPOINT_RW: read/write
+ *   addr - range start address
+ *   size - range size
+ *
+ * Returned Value:
+ *   If the setting is successful, it returns 0, otherwise it
+ *   returns an error code.
+ *
+ ****************************************************************************/
+
+#if MM_KASAN_WATCHPOINT > 0
+int kasan_debugpoint(int type, FAR void *addr, size_t size)
+{
+  FAR struct kasan_watchpoint_s *watchpoint;
+  int i;
+  int j;
+
+  if (addr == NULL || size == 0)
+    {
+      return -EINVAL;
+    }
+
+  for (i = 0; i < MM_KASAN_WATCHPOINT; i++)
+    {
+      watchpoint = &g_watchpoint[i];
+      if (watchpoint->type == DEBUGPOINT_NONE || watchpoint->addr == addr)
+        {
+          if (type != DEBUGPOINT_NONE)
+            {
+              watchpoint->addr = addr;
+              watchpoint->size = size;
+              watchpoint->type = type;
+              return 0;
+            }
+
+          for (j = MM_KASAN_WATCHPOINT - 1; j > i; j--)
+            {
+              if (g_watchpoint[j].type != DEBUGPOINT_NONE)
+                {
+                  watchpoint->addr = g_watchpoint[j].addr;
+                  watchpoint->size = g_watchpoint[j].size;
+                  watchpoint->type = g_watchpoint[j].type;
+                  watchpoint = &g_watchpoint[j];
+                  break;
+                }
+            }
+
+          watchpoint->type = DEBUGPOINT_NONE;
+          return 0;
+        }
+    }
+
+  return -ENOMEM;
+}
+#endif
 
 void __asan_before_dynamic_init(FAR const void *module_name)
 {
