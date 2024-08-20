@@ -156,7 +156,7 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
     {
       case 0:
       case 16:
-        asm volatile("fnclex":::"memory");
+        __asm__ volatile("fnclex":::"memory");
         nxsig_kill(this_task()->pid, SIGFPE);
         break;
 

@@ -112,10 +112,10 @@ void up_initial_state(struct tcb_s *tcb)
 #else
   /* Initialize XSAVE region with a valid state */
 
-  asm volatile("xsave %0"
-               : "=m" (*xcp->regs)
-               : "a" (XSAVE_STATE_COMPONENTS), "d" (0)
-               : "memory");
+  __asm__ volatile("xsave %0"
+                   : "=m" (*xcp->regs)
+                   : "a" (XSAVE_STATE_COMPONENTS), "d" (0)
+                   : "memory");
 #endif
 
   /* Save the initial stack pointer... the value of the stackpointer before
