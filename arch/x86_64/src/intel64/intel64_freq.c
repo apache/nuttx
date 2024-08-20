@@ -77,10 +77,11 @@ void x86_64_timer_calibrate_freq(void)
   unsigned long numerator;
   unsigned long denominator;
 
-  asm volatile("cpuid"
-      : "=c" (crystal_freq), "=b" (numerator), "=a" (denominator)
-      : "a" (X86_64_CPUID_TSC)
-      : "rdx", "memory");
+  __asm__ volatile("cpuid"
+                   : "=c" (crystal_freq), "=b" (numerator),
+                     "=a" (denominator)
+                   : "a" (X86_64_CPUID_TSC)
+                   : "rdx", "memory");
 
   if (numerator == 0 || denominator == 0 || crystal_freq == 0)
     {

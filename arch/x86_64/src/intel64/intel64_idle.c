@@ -66,7 +66,7 @@ void up_idle(void)
 
   sched_process_timer();
 #else
-  asm volatile("hlt");
+  __asm__ volatile("hlt");
 #endif
 }
 #endif

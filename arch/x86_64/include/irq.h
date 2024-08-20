@@ -100,7 +100,7 @@ static inline_function int up_cpu_index(void)
 {
   int cpu;
 
-  asm volatile(
+  __asm__ volatile(
     "\tmovl %%gs:(%c1), %0\n"
     : "=r" (cpu)
     : "i" (offsetof(struct intel64_cpu_s, id))
@@ -119,17 +119,17 @@ static inline_function int up_cpu_index(void)
 static inline_function uint64_t *up_current_regs(void)
 {
   uint64_t *regs;
-  asm volatile("movq %%gs:(%c1), %0"
-               : "=rm" (regs)
-               : "i" (offsetof(struct intel64_cpu_s, current_regs)));
+  __asm__ volatile("movq %%gs:(%c1), %0"
+                   : "=rm" (regs)
+                   : "i" (offsetof(struct intel64_cpu_s, current_regs)));
   return regs;
 }
 
 static inline_function void up_set_current_regs(uint64_t *regs)
 {
-  asm volatile("movq %0, %%gs:(%c1)"
-               :: "r" (regs), "i" (offsetof(struct intel64_cpu_s,
-                                            current_regs)));
+  __asm__ volatile("movq %0, %%gs:(%c1)"
+                   :: "r" (regs), "i" (offsetof(struct intel64_cpu_s,
+                                                current_regs)));
 }
 
 /****************************************************************************

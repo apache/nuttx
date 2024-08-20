@@ -43,7 +43,7 @@
 
 static inline void x86_64_wbindv(void)
 {
-  asm volatile("wbinvd" : : : "memory");
+  __asm__ volatile("wbinvd" : : : "memory");
 }
 
 /****************************************************************************
@@ -52,7 +52,7 @@ static inline void x86_64_wbindv(void)
 
 static inline void x86_64_wbnoinvd(void)
 {
-  asm volatile("wbnoinvd" : : : "memory");
+  __asm__ volatile("wbnoinvd" : : : "memory");
 }
 
 /****************************************************************************
@@ -61,7 +61,7 @@ static inline void x86_64_wbnoinvd(void)
 
 static inline void x86_64_invd(void)
 {
-  asm volatile("invd" : : : "memory");
+  __asm__ volatile("invd" : : : "memory");
 }
 
 /****************************************************************************
@@ -79,9 +79,9 @@ static size_t x86_64_cache_linesize(void)
   unsigned long ebx = 0;
 
   eax = 1;
-  asm volatile("cpuid\n\t"
-               : "=b" (ebx)
-               : "a" (eax));
+  __asm__ volatile("cpuid\n\t"
+                   : "=b" (ebx)
+                   : "a" (eax));
 
   return ((ebx >> 8) & 0xff) * 8;
 #else
@@ -104,9 +104,9 @@ static size_t x86_64_cache_size(int leaf)
 
   eax = 4;
   ecx = leaf;
-  asm volatile("cpuid"
-               : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
-               : "a"(eax), "c"(ecx));
+  __asm__ volatile("cpuid"
+                   : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                   : "a"(eax), "c"(ecx));
 
   /* (Ways + 1) * (Partitions + 1) * (Line_Size + 1) * (Sets + 1) */
 
@@ -124,11 +124,11 @@ static void x86_64_cache_enable(void)
 {
   /* Clear "Not-write through" (NW) and "Cache disable" (CD) bits */
 
-  asm volatile("\t mov %%cr0, %%rax\n"
-               "\t mov $0x9fffffff, %%rbx\n"
-               "\t and %%rbx, %%rax\n"
-               "\t mov %%rax, %%cr0\n"
-               ::: "memory", "rax", "rbx");
+  __asm__ volatile("\t mov %%cr0, %%rax\n"
+                   "\t mov $0x9fffffff, %%rbx\n"
+                   "\t and %%rbx, %%rax\n"
+                   "\t mov %%rax, %%cr0\n"
+                   ::: "memory", "rax", "rbx");
 }
 
 /****************************************************************************
@@ -139,13 +139,13 @@ static void x86_64_cache_disable(void)
 {
   /* Set "Not-write through" (NW) and "Cache disable" (CD) bits */
 
-  asm volatile("\t mov %%cr0, %%rax\n"
-               "\t mov $0x9fffffff, %%rbx \n"
-               "\t and %%rbx, %%rax \n"
-               "\t mov $0x60000000, %%rbx\n"
-               "\t or %%rbx, %%rax\n"
-               "\t mov %%rax, %%cr0\n"
-               :::"memory", "rax", "rbx");
+  __asm__ volatile("\t mov %%cr0, %%rax\n"
+                   "\t mov $0x9fffffff, %%rbx \n"
+                   "\t and %%rbx, %%rax \n"
+                   "\t mov $0x60000000, %%rbx\n"
+                   "\t or %%rbx, %%rax\n"
+                   "\t mov %%rax, %%cr0\n"
+                   :::"memory", "rax", "rbx");
 
   /* And flush all caches */
 
@@ -452,11 +452,11 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 
   start &= ~(lsize - 1);
 
-  asm volatile("mfence" : : : "memory");
+  __asm__ volatile("mfence" : : : "memory");
 
   do
     {
-      asm volatile("\tclwb %0;\n" : "+m" (start));
+     __asm__ volatile("\tclwb %0;\n" : "+m" (start));
 
       /* Increment the address by the size of one cache line. */
 
@@ -464,7 +464,7 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
     }
   while (start < end);
 
-  asm volatile("mfence" : : : "memory");
+  __asm__ volatile("mfence" : : : "memory");
 #else
   x86_64_wbnoinvd();
 #endif
@@ -516,11 +516,11 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 
   start &= ~(lsize - 1);
 
-  asm volatile("mfence" : : : "memory");
+  __asm__ volatile("mfence" : : : "memory");
 
   do
     {
-      asm volatile("\tclflush %0;\n" : "+m" (start));
+      __asm__ volatile("\tclflush %0;\n" : "+m" (start));
 
       /* Increment the address by the size of one cache line. */
 
@@ -528,7 +528,7 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
     }
   while (start < end);
 
-  asm volatile("mfence" : : : "memory");
+  __asm__ volatile("mfence" : : : "memory");
 }
 #endif /* CONFIG_ARCH_DCACHE */
 

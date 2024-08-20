@@ -101,7 +101,7 @@ void up_mask_tmr(void)
 
   /* Required when using TSC deadline mode. */
 
-  asm volatile("mfence" : : : "memory");
+  __asm__ volatile("mfence" : : : "memory");
 }
 
 void up_unmask_tmr(void)
@@ -116,7 +116,7 @@ void up_unmask_tmr(void)
 
   /* Required when using TSC deadline mode. */
 
-  asm volatile("mfence" : : : "memory");
+  __asm__ volatile("mfence" : : : "memory");
 }
 
 #ifndef CONFIG_SCHED_TICKLESS_ALARM

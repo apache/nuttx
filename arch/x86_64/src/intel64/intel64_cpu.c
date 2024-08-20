@@ -95,7 +95,8 @@ static void x86_64_cpu_tss_load(int cpu)
 
   addr = X86_GDT_ISTL_SEL_NUM * 8 + 16 * cpu;
 
-  asm volatile ("mov %0, %%ax; ltr %%ax":: "m"(addr) : "memory", "rax");
+  __asm__ volatile ("mov %0, %%ax; ltr %%ax"
+                    :: "m"(addr) : "memory", "rax");
 }
 
 /****************************************************************************
@@ -189,7 +190,8 @@ struct tss_s *x86_64_cpu_tss_now_get(void)
 
   /* Get TSS associated with this CPU */
 
-  asm volatile ("str %%ax; mov %%ax, %0": "=rm"(seg) :: "memory", "rax");
+  __asm__ volatile ("str %%ax; mov %%ax, %0": "=rm"(seg)
+                    :: "memory", "rax");
 
   /* This is BSP if TSS not configured yet */
 
