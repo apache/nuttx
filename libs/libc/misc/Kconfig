@@ -120,3 +120,9 @@ config LIBC_MAX_PATHBUFFER
 	---help---
 		This value is the maximum size of the buffer that will hold the full
 		file path.
+
+config LIBC_PATHBUFFER_MALLOC
+	bool "Enable malloc pathbuffer"
+	default y
+	---help---
+		Enable malloc path buffer from the heap when pathbuffer is insufficient.
