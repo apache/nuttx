@@ -103,7 +103,14 @@ void arm64_el_init(void)
 #if (CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3)
   /* At EL3, cntfrq_el0 is uninitialized. It must be set. */
 
-  write_sysreg(CONFIG_BOOTLOADER_SYS_CLOCK, cntfrq_el0);
+  uint32_t freq;
+
+  /* Read Frequency ID0 (24MHz) and write it to arm core */
+
+  freq = getreg32(IMX9_SYS_CTR_CONTROL_BASE + SYS_CTR_CNTFID0);
+  write_sysreg(freq, cntfrq_el0);
+  modifyreg32(IMX9_SYS_CTR_CONTROL_BASE + SYS_CTR_CNTCR, SC_CNTCR_FREQ1,
+              SC_CNTCR_FREQ0 | SC_CNTCR_ENABLE | SC_CNTCR_HDBG);
 #endif
 }
 
