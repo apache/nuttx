@@ -55,9 +55,7 @@ int remove(FAR const char *path)
    * more frequently the necessary action.
    */
 
-  if (unlink(path) != 0     && /* If it is indeed a directory...  */
-      (get_errno() != EPERM || /* ...try to remove it.  */
-       rmdir(path) != 0))
+  if (unlink(path) != 0 && (get_errno() != EISDIR || rmdir(path) != 0))
     {
       /* Cannot remove the object for whatever reason. */
 

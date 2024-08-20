@@ -165,12 +165,20 @@ virtio_input_send_mouse_event(FAR struct virtio_input_priv *priv,
               {
                 priv->mousesample.buttons |= MOUSE_BUTTON_1;
               }
+            else
+              {
+                priv->mousesample.buttons &= ~MOUSE_BUTTON_1;
+              }
             break;
 
           case BTN_RIGHT:
             if (event->value)
               {
                 priv->mousesample.buttons |= MOUSE_BUTTON_2;
+              }
+            else
+              {
+                priv->mousesample.buttons &= ~MOUSE_BUTTON_2;
               }
             break;
 
@@ -179,13 +187,18 @@ virtio_input_send_mouse_event(FAR struct virtio_input_priv *priv,
               {
                 priv->mousesample.buttons |= MOUSE_BUTTON_3;
               }
+            else
+              {
+                priv->mousesample.buttons &= ~MOUSE_BUTTON_3;
+              }
             break;
         }
     }
   else if (event->type == EV_SYN && event->code == SYN_REPORT)
     {
       mouse_event(priv->mouselower.priv, &priv->mousesample);
-      memset(&priv->mousesample, 0, sizeof(priv->mousesample));
+      priv->mousesample.x = 0;
+      priv->mousesample.y = 0;
     }
 }
 
@@ -242,7 +255,7 @@ static void virtio_input_worker(FAR void *arg)
   while ((evt = (FAR struct virtio_input_event *)
          virtqueue_get_buffer(vq, &len, NULL)) != NULL)
     {
-      vrtinfo("virtio_input_worker (type,code,value) - (%d,%d,%d).\n",
+      vrtinfo("virtio_input_worker (type,code,value)-(%d,%d,%" PRIu32 ").\n",
               evt->type, evt->code, evt->value);
 
       priv->eventhandler(priv, evt);
@@ -319,7 +332,7 @@ static void virtio_input_register(FAR struct virtio_input_priv *priv)
   if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_ABS))
     {
       priv->touchlower.maxpoint = 1;
-      snprintf(priv->name, NAME_MAX, "/dev/virtinput%d",
+      snprintf(priv->name, NAME_MAX, "/dev/input%d",
                g_virtio_touch_idx++);
       touch_register(&(priv->touchlower),
                      priv->name,
@@ -328,7 +341,7 @@ static void virtio_input_register(FAR struct virtio_input_priv *priv)
     }
   else if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_REL))
     {
-      snprintf(priv->name, NAME_MAX, "/dev/virtmouse%d",
+      snprintf(priv->name, NAME_MAX, "/dev/mouse%d",
                g_virtio_mouse_idx++);
       mouse_register(&(priv->mouselower),
                      priv->name,
@@ -337,7 +350,7 @@ static void virtio_input_register(FAR struct virtio_input_priv *priv)
     }
   else if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_KEY))
     {
-      snprintf(priv->name, NAME_MAX, "/dev/virtkbd%d",
+      snprintf(priv->name, NAME_MAX, "/dev/kbd%d",
                g_virtio_keyboard_idx++);
       keyboard_register(&(priv->keyboardlower),
                         priv->name,

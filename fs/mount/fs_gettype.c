@@ -153,6 +153,12 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf)
         break;
 #endif
 
+#ifdef CONFIG_FS_V9FS
+      case V9FS_MAGIC:
+        fstype = "v9fs";
+        break;
+#endif
+
       default:
         fstype = "Unrecognized";
         break;
