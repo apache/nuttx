@@ -90,9 +90,13 @@
 #  define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6  */
 #endif
 
-/* USART2: Connected to STLInk Debug via PA2(TX), PA3(RX) */
+/* USART2: Connected to STLInk Debug via PA2(TX), PA15(RX) */
 
-#define GPIO_USART2_RX   GPIO_USART2_RX_1    /* PA3 */
+#if defined(CONFIG_ARCH_BOARD_USART2_RX_PA3)
+#  define GPIO_USART2_RX   GPIO_USART2_RX_1  /* PA3 */
+#elif defined(CONFIG_ARCH_BOARD_USART2_RX_PA15)
+#  define GPIO_USART2_RX   GPIO_USART2_RX_2  /* PA15 */
+#endif
 #define GPIO_USART2_TX   GPIO_USART2_TX_1    /* PA2 */
 #define GPIO_USART2_RTS  GPIO_USART2_RTS_2
 #define GPIO_USART2_CTS  GPIO_USART2_CTS_2
