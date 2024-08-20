@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <sys/sysinfo.h>
+#include <sys/types.h>
 
 /****************************************************************************
  * Public Functions
@@ -50,11 +51,7 @@
 
 int get_nprocs_conf(void)
 {
-#ifdef CONFIG_SMP_NCPUS
   return CONFIG_SMP_NCPUS;
-#else
-  return 1;
-#endif
 }
 
 /****************************************************************************
@@ -78,9 +75,5 @@ int get_nprocs_conf(void)
 
 int get_nprocs(void)
 {
-#ifdef CONFIG_SMP_NCPUS
   return CONFIG_SMP_NCPUS;
-#else
-  return 1;
-#endif
 }
