@@ -196,11 +196,5 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
         }
     }
 
-  if (*(fmt - 2) != '\n')
-    {
-      lib_stream_putc(s, '\n');
-      ret++;
-    }
-
   return ret;
 }
