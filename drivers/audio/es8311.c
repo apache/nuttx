@@ -802,6 +802,8 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
   DEBUGASSERT(caps && caps->ac_len >= sizeof(struct audio_caps_s));
   audinfo("getcaps: type=%d ac_type=%d\n", type, caps->ac_type);
 
+  uint16_t *ptr;
+
   /* Fill in the caller's structure based on requested info */
 
   caps->ac_format.hw  = 0;
@@ -845,11 +847,11 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* 8kHz is hardware dependent */
 
-              caps->ac_controls.b[0] =
+              ptr  = (uint16_t *)caps->ac_controls.b;
+              *ptr =
                 AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
                 AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              caps->ac_controls.b[1] = 0;
               break;
          }
 
@@ -863,11 +865,11 @@ static int es8311_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
           {
               /* Report supported input sample rates */
 
-              caps->ac_controls.b[0] =
+              ptr  = (uint16_t *)caps->ac_controls.b;
+              *ptr =
                 AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
                 AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              caps->ac_controls.b[1] = 0;
               break;
          }
 
