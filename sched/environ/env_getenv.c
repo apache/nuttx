@@ -49,7 +49,7 @@
  *   name - The name of the variable to find.
  *
  * Returned Value:
- *   The value of the valiable (read-only) or NULL on failure
+ *   The value of the variable (read-only) or NULL on failure
  *
  * Assumptions:
  *   Not called from an interrupt handler
