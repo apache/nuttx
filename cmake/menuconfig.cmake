@@ -74,6 +74,24 @@ add_custom_target(
           ${NUTTX_DEFCONFIG}
   WORKING_DIRECTORY ${NUTTX_DIR})
 
+add_custom_target(
+  oldconfig
+  COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} oldconfig
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+          ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
+                                                     # config
+  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
+  WORKING_DIRECTORY ${NUTTX_DIR})
+
+add_custom_target(
+  olddefconfig
+  COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} olddefconfig
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+          ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
+                                                     # config
+  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
+  WORKING_DIRECTORY ${NUTTX_DIR})
+
 # utility target to restore .config from board's defconfig
 add_custom_target(
   resetconfig
