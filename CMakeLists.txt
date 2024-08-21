@@ -528,11 +528,13 @@ endif()
 # failure logs more deterministic and most importantly makes builds more
 # deterministic. Debuggers usually have a path mapping feature to ensure the
 # files are still found.
-if(CONFIG_OUTPUT_STRIP_PATHS)
-  add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
-  add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
-  add_compile_options(-fmacro-prefix-map=${NUTTX_BOARD_ABS_DIR}=)
-  add_compile_options(-fmacro-prefix-map=${NUTTX_CHIP_ABS_DIR}=)
+if(NOT MSVC)
+  if(CONFIG_OUTPUT_STRIP_PATHS)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_BOARD_ABS_DIR}=)
+    add_compile_options(-fmacro-prefix-map=${NUTTX_CHIP_ABS_DIR}=)
+  endif()
 endif()
 
 add_definitions(-D__NuttX__)
