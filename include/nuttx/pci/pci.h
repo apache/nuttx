@@ -316,7 +316,8 @@ struct pci_ops_s
 
   /* Allocate interrupt for MSI/MSI-X */
 
-  CODE int (*alloc_irq)(FAR struct pci_bus_s *bus, FAR int *irq, int num);
+  CODE int (*alloc_irq)(FAR struct pci_bus_s *bus, uint32_t devfn,
+                        FAR int *irq, int num);
 
   CODE void (*release_irq)(FAR struct pci_bus_s *bus, FAR int *irq, int num);
 

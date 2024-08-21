@@ -117,7 +117,7 @@ int arm64_gic_v2m_initialize(void)
   return 0;
 }
 
-int up_alloc_irq_msi(FAR int *num)
+int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
 {
   irqstate_t flags;
   int offset;
@@ -125,18 +125,19 @@ int up_alloc_irq_msi(FAR int *num)
   int i;
 
   flags = spin_lock_irqsave(&g_v2m.lock);
-  offset = bitmap_find_free_region(g_v2m.spi_bitmap, g_v2m.spi_number, *num);
+  offset = bitmap_find_free_region(g_v2m.spi_bitmap, g_v2m.spi_number, num);
   spin_unlock_irqrestore(&g_v2m.lock, flags);
   irq = g_v2m.spi_start + offset;
-  for (i = 0; i < *num; i++)
+  for (i = 0; i < num; i++)
     {
       arm64_gicv_irq_trigger(i + irq, true);
+      pirq[i] = irq + i;
     }
 
-  return irq;
+  return num;
 }
 
-void up_release_irq_msi(FAR int *irq, int num)
+void up_release_irq_msi(int *irq, int num)
 {
   irqstate_t flags;
 
@@ -145,8 +146,8 @@ void up_release_irq_msi(FAR int *irq, int num)
   spin_unlock_irqrestore(&g_v2m.lock, flags);
 }
 
-int up_connect_irq(FAR int *irq, int num,
-                   FAR uintptr_t *mar, FAR uint32_t *mdr)
+int up_connect_irq(const int *irq, int num,
+                   uintptr_t *mar, uint32_t *mdr)
 {
   *mar = GIC_V2MSETSPI;
   *mdr = *irq;

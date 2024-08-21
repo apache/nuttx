@@ -1787,7 +1787,7 @@ int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
   if (dev->bus->ctrl->ops->alloc_irq)
     {
-      return dev->bus->ctrl->ops->alloc_irq(dev->bus, irq, num);
+      return dev->bus->ctrl->ops->alloc_irq(dev->bus, dev->devfn, irq, num);
     }
 
   return -ENOTSUP;
