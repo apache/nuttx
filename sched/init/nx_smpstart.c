@@ -51,7 +51,7 @@
  *   This is the common start-up logic for the IDLE task for CPUs 1 through
  *   (CONFIG_SMP_NCPUS-1).  Having a start-up function such as this for the
  *   IDLE is not really an architectural necessity.  It is used only for
- *   symmetry with now other threads are started (see nxtask_start() and
+ *   symmetry with how other threads are started (see nxtask_start() and
  *   pthread_start()).
  *
  * Input Parameters:
