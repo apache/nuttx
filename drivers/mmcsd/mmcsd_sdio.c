@@ -98,18 +98,22 @@
 
 #define MMCSD_CAPACITY(b, s)    ((s) >= 10 ? (b) << ((s) - 10) : (b) >> (10 - (s)))
 
-#define MMCSD_USLEEP(usec) \
-  do \
-  { \
-    if (up_interrupt_context()) \
-      { \
-        up_udelay(usec); \
-      } \
-    else \
-      { \
-        nxsig_usleep(usec); \
-      } \
-  } while (0)
+#ifdef CONFIG_BOARD_COREDUMP_BLKDEV
+#  define MMCSD_USLEEP(usec) \
+    do \
+    { \
+      if (up_interrupt_context()) \
+        { \
+          up_udelay(usec); \
+        } \
+      else \
+        { \
+          nxsig_usleep(usec); \
+        } \
+    } while (0)
+#else
+#  define MMCSD_USLEEP(usec) nxsig_usleep(usec)
+#endif
 
 /****************************************************************************
  * Private Types
