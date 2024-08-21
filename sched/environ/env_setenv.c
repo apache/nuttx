@@ -47,7 +47,7 @@
  *
  * Description:
  *   The setenv() function adds the variable name to the environment with the
- *   specified 'value' if the varialbe 'name" does not exist. If the 'name'
+ *   specified 'value' if the variable 'name" does not exist. If the 'name'
  *   does exist in the environment, then its value is changed to 'value' if
  *   'overwrite' is non-zero; if 'overwrite' is zero, then the value of name
  *   unaltered.
