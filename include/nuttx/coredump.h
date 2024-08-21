@@ -51,10 +51,10 @@
 
 struct coredump_info_s
 {
-  uint32_t       magic;
-  struct utsname name;
-  time_t         time;
-  size_t         size;
+  uint32_t        magic;
+  struct utsname  name;
+  struct timespec time;
+  size_t          size;
 };
 
 /****************************************************************************
