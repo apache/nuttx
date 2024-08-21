@@ -21,7 +21,6 @@
 
 set(SRCS
     lib_strftime.c
-    lib_strptime.c
     lib_calendar2utc.c
     lib_daysbeforemonth.c
     lib_gettimeofday.c
