@@ -106,7 +106,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
       if (is_irqchain(ndx, isr))
         {
           ret = irqchain_attach(ndx, isr, arg);
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(NULL, flags);
           return ret;
         }
 #endif
