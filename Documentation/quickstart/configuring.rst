@@ -105,6 +105,10 @@ If you know exactly which configuration symbol you want to change, you can use t
    $ kconfig-tweak --enable CONFIG_DEBUG_NET
    $ make olddefconfig
 
+.. note::
+
+   If you are :doc:`compiling with CMake <compiling_cmake>`, you will need to run all of the commands above inside of the build directory, and use ``cmake --build . -t olddefconfig`` instead of ``make olddefconfig``.
+
 This is also useful to script configuration changes that you perform often:
 
 .. code-block:: bash
@@ -125,6 +129,10 @@ This is also useful to script configuration changes that you perform often:
    kconfig-tweak --disable CONFIG_DEBUG_NOOPT
    kconfig-tweak --disable CONFIG_SYSLOG_TIMESTAMP
    make oldconfig
+
+.. note::
+
+   If you are :doc:`compiling with CMake <compiling_cmake>`, you will need to run all of the commands above inside of the build directory, and use ``cmake --build . -t oldconfig`` instead of ``make oldconfig``.
 
 Reference configuration
 =======================
