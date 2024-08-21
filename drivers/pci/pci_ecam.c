@@ -66,8 +66,8 @@ static int pci_ecam_get_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
                             uint8_t line, uint8_t pin);
 
 #ifdef CONFIG_PCI_MSIX
-static int pci_ecam_alloc_irq(FAR struct pci_bus_s *bus, FAR int *irq,
-                              int num);
+static int pci_ecam_alloc_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
+                              FAR int *irq, int num);
 
 static void pci_ecam_release_irq(FAR struct pci_bus_s *bus, FAR int *irq,
                                  int num);
@@ -391,11 +391,10 @@ static int pci_ecam_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
 }
 
 #ifdef CONFIG_PCI_MSIX
-static int pci_ecam_alloc_irq(FAR struct pci_bus_s *bus, FAR int *irq,
-                              int num)
+static int pci_ecam_alloc_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
+                              FAR int *irq, int num)
 {
-  *irq = up_alloc_irq_msi(&num);
-  return num;
+  return up_alloc_irq_msi(bus->ctrl->busno, devfn, irq, num);
 }
 
 static void pci_ecam_release_irq(FAR struct pci_bus_s *bus, FAR int *irq,

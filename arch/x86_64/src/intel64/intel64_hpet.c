@@ -465,9 +465,8 @@ static void intel64_hpet_fsb(struct intel64_hpet_s *hpet)
     {
       /* Allocate MSI vector */
 
-      vect = 1;
-      irq = up_alloc_irq_msi(&vect);
-      if (irq < 0 && vect != 1)
+      vect = up_alloc_irq_msi(0, 0, &irq, 1);
+      if (vect != 1)
         {
           tmrerr("failed to allocate MSI for timer %d\n", i);
           ASSERT(0);

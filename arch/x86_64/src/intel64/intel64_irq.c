@@ -648,7 +648,7 @@ int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
  *
  ****************************************************************************/
 
-int up_alloc_irq_msi(int *num)
+int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
 {
   irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
   int        irq   = 0;
@@ -656,12 +656,12 @@ int up_alloc_irq_msi(int *num)
 
   /* Limit requested number of vectors */
 
-  if (g_msi_now + *num > IRQ255)
+  if (g_msi_now + num > IRQ255)
     {
-      *num = IRQ255 - g_msi_now;
+      num = IRQ255 - g_msi_now;
     }
 
-  if (*num <= 0)
+  if (num <= 0)
     {
       spin_unlock_irqrestore(&g_irq_spin, flags);
 
@@ -671,19 +671,20 @@ int up_alloc_irq_msi(int *num)
     }
 
   irq = g_msi_now;
-  g_msi_now += *num;
+  g_msi_now += num;
 
   /* Mark IRQs as MSI/MSI-X */
 
-  for (i = 0; i < *num; i++)
+  for (i = 0; i < num; i++)
     {
       ASSERT(g_irq_priv[irq + i].busy == 0);
       g_irq_priv[irq + i].msi = true;
+      pirq[i] = irq + i;
     }
 
   spin_unlock_irqrestore(&g_irq_spin, flags);
 
-  return irq;
+  return num;
 }
 
 /****************************************************************************
@@ -717,8 +718,7 @@ void up_release_irq_msi(int *irq, int num)
  *
  ****************************************************************************/
 
-int up_connect_irq(FAR int *irq, int num,
-                   FAR uintptr_t *mar, FAR uint32_t *mdr)
+int up_connect_irq(const int *irq, int num, uintptr_t *mar, uint32_t *mdr)
 {
   UNUSED(num);
 

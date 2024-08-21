@@ -3084,7 +3084,8 @@ int up_debugpoint_remove(int type, FAR void *addr, size_t size);
  *  Allocate interrupts for MSI/MSI-X vector.
  *
  * Input Parameters:
- *   bus - Bus that PCI device resides
+ *   busno - Bus num that PCI device resides
+ *   devfn - Device and function number
  *   irq - allocated vectors array
  *   num - number of vectors to allocate
  *
@@ -3094,7 +3095,7 @@ int up_debugpoint_remove(int type, FAR void *addr, size_t size);
  *
  ****************************************************************************/
 
-int up_alloc_irq_msi(FAR int *num);
+int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, FAR int *irq, int num);
 
 /****************************************************************************
  * Name: up_release_irq_msi
@@ -3121,7 +3122,6 @@ void up_release_irq_msi(FAR int *irq, int num);
  *  Connect interrupt for MSI/MSI-X.
  *
  * Input Parameters:
- *   bus - Bus that PCI device resides
  *   irq - vectors array
  *   num - number of vectors in array
  *   mar - returned value for Message Address Register
@@ -3132,7 +3132,7 @@ void up_release_irq_msi(FAR int *irq, int num);
  *
  ****************************************************************************/
 
-int up_connect_irq(FAR int *irq, int num,
+int up_connect_irq(FAR const int *irq, int num,
                    FAR uintptr_t *mar, FAR uint32_t *mdr);
 
 /****************************************************************************
