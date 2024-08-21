@@ -39,8 +39,8 @@
 
 struct pathbuffer_s
 {
-  mutex_t lock;         /* Lock for the buffer */
-  int free_bitmap;      /* Bitmap of free buffer */
+  mutex_t lock;             /* Lock for the buffer */
+  unsigned int free_bitmap; /* Bitmap of free buffer */
   char buffer[CONFIG_LIBC_MAX_PATHBUFFER][PATH_MAX];
 };
 
