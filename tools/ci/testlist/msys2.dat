@@ -10,3 +10,6 @@
 # ARM64
 
 /arm64/qemu/qemu-armv8a/configs/nsh_smp
+
+# Boards build by CMake
+CMake,nucleo-l152re:nsh
