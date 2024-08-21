@@ -34,6 +34,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ERRATA_MOD1_REGS 7
+#define ERRATA_MOD9_REGS 13
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -57,6 +60,13 @@ static uint8_t g_port_mirror_config[7] =
 };
 
 #endif
+
+struct errata
+{
+  uint8_t dev;
+  uint16_t reg;
+  uint16_t value;
+};
 
 /****************************************************************************
  * Private Functions
@@ -126,7 +136,6 @@ static int ksz9477_reg_write32(uint16_t reg, uint32_t data)
   return ksz9477_write(&write_msg);
 }
 
-#if 0  /* Enable when needed */
 static int ksz9477_reg_write16(uint16_t reg, uint16_t data)
 {
   int ret;
@@ -177,7 +186,6 @@ static int ksz9477_reg_write16(uint16_t reg, uint16_t data)
 
   return ksz9477_write(&write_msg);
 }
-#endif
 
 static int ksz9477_sgmii_read_indirect(uint32_t address, uint16_t *value,
                                        unsigned len)
@@ -208,6 +216,260 @@ static int ksz9477_sgmii_write_indirect(uint32_t address, uint16_t *value,
     {
       data = *value++;
       ret = ksz9477_reg_write32(KSZ9477_SGMII_PORT_DATA, data);
+    }
+
+  return ret;
+}
+
+static int ksz9477_mmd_read_indirect(ksz9477_port_t port, uint16_t dev,
+                                     uint16_t reg, uint16_t *value,
+                                     uint16_t len)
+{
+  int ret;
+
+  /* Set up MMD device address */
+
+  ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_SETUP(port),
+                            KSZ9477_MMD_OP_MODE_REGISTER | dev);
+  if (ret != OK)
+    {
+      goto out;
+    }
+
+  /* Select register */
+
+  ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_DATA(port), reg);
+  if (ret != OK)
+    {
+      goto out;
+    }
+
+  /* Set MMD operation mode */
+
+  if (len <= 1)
+    {
+      /* no post increment */
+
+      ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_SETUP(port),
+                                KSZ9477_MMD_OP_MODE_NO_INCREMENT | dev);
+      if (ret != OK)
+        {
+          goto out;
+        }
+    }
+  else
+    {
+      /* post increment on reads and writes */
+
+      ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_SETUP(port),
+                                KSZ9477_MMD_OP_MODE_RW_INCREMENT | dev);
+      if (ret != OK)
+        {
+          goto out;
+        }
+    }
+
+  /* Read value */
+
+  while (len-- && ret == OK)
+    {
+      ret = ksz9477_reg_read16(KSZ9477_PHY_MMD_DATA(port), value);
+      value++;
+    }
+
+out:
+
+  return ret;
+}
+
+static int ksz9477_mmd_write_indirect(ksz9477_port_t port, uint8_t dev,
+                                      uint16_t reg, const uint16_t *value,
+                                      uint16_t len)
+{
+  int ret;
+
+  /* Set up MMD device address */
+
+  ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_SETUP(port),
+                            KSZ9477_MMD_OP_MODE_REGISTER | dev);
+  if (ret != OK)
+    {
+      goto out;
+    }
+
+  /* Select register */
+
+  ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_DATA(port), reg);
+  if (ret != OK)
+    {
+      goto out;
+    }
+
+  /* Set MMD operation mode */
+
+  if (len <= 1)
+    {
+      /* no post increment */
+
+      ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_SETUP(port),
+                                KSZ9477_MMD_OP_MODE_NO_INCREMENT | dev);
+      if (ret != OK)
+        {
+          goto out;
+        }
+    }
+  else
+    {
+      /* post increment on reads and writes */
+
+      ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_SETUP(port),
+                                KSZ9477_MMD_OP_MODE_RW_INCREMENT | dev);
+      if (ret != OK)
+        {
+          goto out;
+        }
+    }
+
+  /* Write value */
+
+  while (len-- && ret == OK)
+    {
+      ret = ksz9477_reg_write16(KSZ9477_PHY_MMD_DATA(port), *value);
+      value++;
+    }
+
+out:
+
+  return ret;
+}
+
+static int ksz9477_custom_error_fixes(ksz9477_port_t port)
+{
+  int ret = OK;
+  int j;
+  uint16_t regval16;
+  const struct errata err1[] = {
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xce, 0x0100},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xcc, 0x0ff0},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xca, 0x0141},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xcb, 0x0fcf},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xc8, 0x0010},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xd9, 0x0100},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xc9, 0x0280},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x8f, 0x6032},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x9d, 0x248c},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x75, 0x0060},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0xd3, 0x7777},
+  };
+
+  const struct errata err2[] = {
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x0, 0x9400},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x4, 0x00e2},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x6, 0x3100},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x9, 0xe01c},
+  };
+
+  const struct errata err3[] = {
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x79, 0x010a},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x7a, 0x00ed},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x7b, 0x00d3},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x7c, 0x00bc},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x7d, 0x00a8},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x7e, 0x0096},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x7f, 0x0085},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x80, 0x0077},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x81, 0x006a},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x82, 0x005e},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x83, 0x0054},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x84, 0x004b},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x85, 0x0043},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x86, 0x003c},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x87, 0x0035},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x88, 0x002f},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x89, 0x002a},
+    {KSZ9477_MMD_DEV_SIGNAL_QUALITY, 0x8a, 0x0026},
+  };
+
+  struct errata mod9[] = {
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x13, 0x6eff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x14, 0xe6ff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x15, 0x6eff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x16, 0xe6ff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x17, 0x00ff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x18, 0x43ff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x19, 0xc3ff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x1a, 0x6fff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x1b, 0x07ff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x1c, 0x0fff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x1d, 0xe7ff},
+    {KSZ9477_MMD_DEV_QUIET_WIRE, 0x1e, 0xefff},
+  };
+
+  /* First turn off autoneg */
+
+  ret = ksz9477_reg_write16(KSZ9477_PHY_CONTROL(port), 0x2100);
+
+  if (ret != OK)
+    {
+      nerr("PHY Control register write failure, ret %d\n", ret);
+      return ret ? ret : -EINVAL;
+    }
+
+  /* Set Remote Loopback register */
+
+  ret = ksz9477_reg_write16(KSZ9477_PHY_REMOTE_LP(port), 0x00f0);
+  if (ret != OK)
+    {
+      nerr("PHY Remote Loopback register write failure, ret %d\n", ret);
+      return ret ? ret : -EINVAL;
+    }
+
+  /* Needed configurations for MMD Signal Quality */
+
+  for (j = 0; ret == OK && j < 11; j++)
+    {
+      ret = ksz9477_mmd_write_indirect(port, err1[j].dev, err1[j].reg,
+                                       &(err1[j].value), 1);
+    }
+
+  /* Needed configurations for MMD Quiet-WIRE */
+
+  for (j = 0; ret == OK && j < 4; j++)
+    {
+      ret = ksz9477_mmd_write_indirect(port, err2[j].dev, err2[j].reg,
+                                       &(err2[j].value), 1);
+    }
+
+  /* More configurations for MMD Signal Quality */
+
+  for (j = 0x0; ret == OK && j < 18; j++)
+    {
+      ret = ksz9477_mmd_write_indirect(port, err3[j].dev, err3[j].reg,
+                                       &(err3[j].value), 1);
+    }
+
+  /* Module 9: Set various registers to get correct supply current values */
+
+  for (j = 0; ret == OK && j < 12; j++)
+    {
+      ret = ksz9477_mmd_write_indirect(port, mod9[j].dev, mod9[j].reg,
+                                       &(mod9[j].value), 1);
+    }
+
+  /* Disable EEE */
+
+  regval16 = 0x0;
+  ret = ksz9477_mmd_write_indirect(port, KSZ9477_MMD_DEV_EEE_ADVERTISEMENT,
+                                   0x3c, &regval16, 1);
+
+  /* Turn on autoneg */
+
+  ret = ksz9477_reg_write16(KSZ9477_PHY_CONTROL(port), 0x1140);
+
+  if (ret != OK)
+    {
+      nerr("PHY Control register write failure, ret %d\n", ret);
+      return ret ? ret : -EINVAL;
     }
 
   return ret;
@@ -376,6 +638,34 @@ int ksz9477_init(ksz9477_port_t master_port)
       nerr("SGMII port access failure, id %x, ret %d\n", regval32, ret);
       return ret ? ret : -EINVAL;
     }
+
+  /* Check that indirect access to PHY MMD works.
+   * Default value of MMD EEE ADVERTISEMENT REGISTER is 0x6
+   */
+
+  ret = ksz9477_mmd_read_indirect(KSZ9477_PORT_PHY1,
+                                  KSZ9477_MMD_DEV_EEE_ADVERTISEMENT,
+                                  0x3c, &regval16, 1);
+  if (ret != OK || regval16 != 0x6)
+    {
+      nerr("MMD access failure, ret %d\n", ret);
+      return ret ? ret : -EINVAL;
+    }
+
+  /* Handle some erratas */
+
+  for (i = KSZ9477_PORT_PHY1; i <= KSZ9477_PORT_PHY5; i++)
+    {
+      ret = ksz9477_custom_error_fixes(i);
+    }
+
+  if (ret != OK)
+    {
+      nerr("Errata handling failure, ret %d\n", ret);
+      return ret ? ret : -EINVAL;
+    }
+
+  /* Set up SGMII port */
 
   if (master_port == KSZ9477_PORT_SGMII)
     {

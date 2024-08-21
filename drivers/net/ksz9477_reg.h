@@ -61,6 +61,11 @@
 #define KSZ9477_PHY_CONTROL(p)             KSZ9477_PORT_REG(p, 0x100)
 #define KSZ9477_PHY_STATUS(p)              KSZ9477_PORT_REG(p, 0x102)
 
+#define KSZ9477_PHY_MMD_SETUP(p)           KSZ9477_PORT_REG(p, 0x11A)
+#define KSZ9477_PHY_MMD_DATA(p)            KSZ9477_PORT_REG(p, 0x11C)
+
+#define KSZ9477_PHY_REMOTE_LP(p)           KSZ9477_PORT_REG(p, 0x122)
+
 /* Note! Unlike in data sheet, the indirect data register reads and
  * writes must be done with 32-bit accesses and the address is
  * 0x204
@@ -119,6 +124,21 @@
 #define SGMII_AUTONEG_CONTROL_PCS_SGMII    (2 << 1)
 #define SGMII_AUTONEG_CONTROL_TC_MASTER    (1 << 3)
 #define SGMII_AUTONEG_CONTROL_LINK_STATUS  (1 << 4)
+
+/* MMD device addresses */
+
+#define KSZ9477_MMD_DEV_SIGNAL_QUALITY     0x1
+#define KSZ9477_MMD_DEV_LED_MODE           0x2
+#define KSZ9477_MMD_DEV_EEE_ADVERTISEMENT  0x7
+#define KSZ9477_MMD_DEV_QUIET_WIRE         0x1C
+
+/* MMD operation modes */
+
+#define KSZ9477_MMD_OP_MODE_SHIFT          14
+#define KSZ9477_MMD_OP_MODE_REGISTER       (0 << KSZ9477_MMD_OP_MODE_SHIFT)
+#define KSZ9477_MMD_OP_MODE_NO_INCREMENT   (1 << KSZ9477_MMD_OP_MODE_SHIFT)
+#define KSZ9477_MMD_OP_MODE_RW_INCREMENT   (2 << KSZ9477_MMD_OP_MODE_SHIFT)
+#define KSZ9477_MMD_OP_MODE_W_INCREMENT    (3 << KSZ9477_MMD_OP_MODE_SHIFT)
 
 /* Port Mirroring Control Register */
 
