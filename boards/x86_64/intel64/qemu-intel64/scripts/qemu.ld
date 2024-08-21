@@ -67,7 +67,8 @@ SECTIONS
         _etext = ABSOLUTE(.);
     }
 
-    .rodata ALIGN(0x1000) : AT ( (LOADADDR (.text) + SIZEOF (.text) + 0xFFF) & 0xFFFFFFFFFFFFF000 )
+
+    .rodata ALIGN(0x1000) :
     {
         _srodata = ABSOLUTE(.);
         *(.rodata .rodata.*)
@@ -83,7 +84,7 @@ SECTIONS
         _erodata = ABSOLUTE(.);
     }
 
-    .data ALIGN(0x1000) : AT ( (LOADADDR (.rodata) + SIZEOF (.rodata) + 0xFFF) & 0xFFFFFFFFFFFFF000 )
+    .data ALIGN(0x1000) :
     {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
@@ -93,7 +94,7 @@ SECTIONS
         _edata = ABSOLUTE(.);
     }
 
-    .bss ALIGN(0x1000) : AT ( (LOADADDR (.data) + SIZEOF (.data) + 0xFFF) & 0xFFFFFFFFFFFFF000 )
+    .bss ALIGN(0x1000) :
     {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
