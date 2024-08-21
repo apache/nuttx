@@ -198,20 +198,13 @@ set(ENV{DRIVERS_PLATFORM_DIR} dummy) # TODO
 
 set(ENV{HOST_LINUX} n)
 set(ENV{HOST_MACOS} n)
+set(ENV{HOST_BSD} n)
 set(ENV{HOST_WINDOWS} n)
 set(ENV{HOST_OTHER} n)
 
-if(APPLE)
-  set(ENV{HOST_MACOS} y)
-elseif(WIN32)
-  set(ENV{HOST_WINDOWS} y)
-elseif(UNIX)
-  set(ENV{HOST_LINUX} y)
-  set(LINUX TRUE)
-else()
-  set(ENV{HOST_OTHER} y)
-  set(OTHER_OS TRUE)
-endif()
+# We define host
+include(nuttx_sethost)
+nuttx_sethost()
 
 include(nuttx_parse_function_args)
 include(nuttx_add_subdirectory)
@@ -411,6 +404,7 @@ set(CMAKE_TOOLCHAIN_FILE
 # This triggers configuration
 
 project(NuttX LANGUAGES C CXX ASM)
+
 if(WIN32)
   enable_language(ASM_MASM)
 endif()
@@ -484,7 +478,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   endif()
 endif()
 
-if(WIN32)
+if(MSVC)
   add_compile_options(
     -W2
     -wd4116 # unnamed type definition in parentheses

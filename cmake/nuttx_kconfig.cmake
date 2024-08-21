@@ -156,3 +156,10 @@ function(nuttx_generate_kconfig)
     file(APPEND ${KCONFIG_OUTPUT_FILE} "endmenu # ${MENUDESC}\n")
   endif()
 endfunction()
+
+function(nuttx_setconfig)
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} setconfig ${ARGN}
+    WORKING_DIRECTORY ${NUTTX_DIR}
+    OUTPUT_QUIET ERROR_QUIET)
+endfunction()
