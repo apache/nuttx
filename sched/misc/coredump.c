@@ -720,7 +720,7 @@ static void coredump_dump_blkdev(pid_t pid)
 
   info->magic = COREDUMP_MAGIC;
   info->size  = g_blockstream.common.nput;
-  info->time  = time(NULL);
+  clock_gettime(CLOCK_REALTIME, &info->time);
   uname(&info->name);
   ret = g_blockstream.inode->u.i_bops->write(g_blockstream.inode,
       (FAR void *)info, g_blockstream.geo.geo_nsectors - nsectors, nsectors);
