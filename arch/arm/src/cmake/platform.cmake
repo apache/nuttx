@@ -87,7 +87,12 @@ if(NOT EXISTS ${extra_library} AND CONFIG_ARCH_TOOLCHAIN_CLANG)
     OUTPUT_VARIABLE extra_library)
 endif()
 
-list(APPEND EXTRA_LIB ${extra_library})
+if(CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS|CYGWIN|Windows")
+  cmake_path(GET extra_library FILENAME extra_filename_library)
+  list(APPEND EXTRA_LIB -l:${extra_filename_library})
+else()
+  list(APPEND EXTRA_LIB ${extra_library})
+endif()
 
 if(NOT CONFIG_LIBM)
   execute_process(
@@ -95,7 +100,13 @@ if(NOT CONFIG_LIBM)
             --print-file-name=libm.a
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
-  list(APPEND EXTRA_LIB ${extra_library})
+
+  if(CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS|CYGWIN|Windows")
+    cmake_path(GET extra_library FILENAME extra_filename_library)
+    list(APPEND EXTRA_LIB -l:${extra_filename_library})
+  else()
+    list(APPEND EXTRA_LIB ${extra_library})
+  endif()
 endif()
 
 if(CONFIG_LIBSUPCXX)
@@ -104,7 +115,12 @@ if(CONFIG_LIBSUPCXX)
             --print-file-name=libsupc++.a
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
-  list(APPEND EXTRA_LIB ${extra_library})
+  if(CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS|CYGWIN|Windows")
+    cmake_path(GET extra_library FILENAME extra_filename_library)
+    list(APPEND EXTRA_LIB -l:${extra_filename_library})
+  else()
+    list(APPEND EXTRA_LIB ${extra_library})
+  endif()
 endif()
 
 if(CONFIG_ARCH_COVERAGE)
@@ -113,7 +129,12 @@ if(CONFIG_ARCH_COVERAGE)
             --print-file-name=libgcov.a
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
-  list(APPEND EXTRA_LIB ${extra_library})
+  if(CMAKE_HOST_SYSTEM_NAME MATCHES "MSYS|CYGWIN|Windows")
+    cmake_path(GET extra_library FILENAME extra_filename_library)
+    list(APPEND EXTRA_LIB -l:${extra_filename_library})
+  else()
+    list(APPEND EXTRA_LIB ${extra_library})
+  endif()
 endif()
 
 nuttx_add_extra_library(${EXTRA_LIB})
