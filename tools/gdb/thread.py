@@ -448,11 +448,18 @@ class Ps(gdb.Command):
             ptcb = cast2ptr(tcb, "struct pthread_tcb_s")
             arg = ptcb["arg"]
             cmd = " ".join((name, hex(entry), hex(arg)))
+        elif tcb["pid"] < get_macro("CONFIG_SMP_NCPUS"):
+            # This must be the Idle Tasks, hence we just get its name
+            cmd = name
         else:
-            argv = tcb["group"]["tg_info"]["ta_argv"] + 1
-
+            # For tasks other than pthreads, hence need to get its command line
+            # arguments from
+            argv = (
+                tcb["stack_alloc_ptr"]
+                + cast2ptr(tcb["stack_alloc_ptr"], "struct tls_info_s")["tl_size"]
+            )
             args = []
-            parg = argv
+            parg = argv.cast(gdb.lookup_type("char").pointer().pointer()) + 1
             while parg.dereference():
                 args.append(parg.dereference().string())
                 parg += 1
