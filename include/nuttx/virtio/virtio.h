@@ -29,31 +29,13 @@
 
 #include <stdint.h>
 
-#include <nuttx/compiler.h>
 #include <nuttx/list.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/virtio/virtio-config.h>
 
 #ifdef CONFIG_DRIVERS_VIRTIO
 
 #include <openamp/open_amp.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Virtio common feature bits */
-
-#define VIRTIO_F_ANY_LAYOUT   27
-
-/* Virtio helper functions */
-
-#define virtio_read_config_member(vdev, structname, member, ptr) \
-      virtio_read_config((vdev), offsetof(structname, member), \
-                         (ptr), sizeof(*(ptr)));
-
-#define virtio_write_config_member(vdev, structname, member, ptr) \
-      virtio_write_config((vdev), offsetof(structname, member), \
-                          (ptr), sizeof(*(ptr)));
 
 /****************************************************************************
  * Public Type Definitions
