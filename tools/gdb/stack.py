@@ -47,7 +47,18 @@ class Stack(object):
 
     def _sanity_check(self):
         # do some basic sanity checking to make sure we have a sane stack object
-        if self._stack_base < self._stack_alloc or not self._stack_size:
+        if (
+            self._stack_base < self._stack_alloc
+            or not self._stack_size
+            or self._cur_sp <= self._stack_base
+            or self._cur_sp > self._stack_base + self._stack_size
+        ):
+
+            gdb.write(
+                f"base: {self._stack_base}, \
+                size: {self._stack_size}, sp: {self._cur_sp}\n"
+            )
+
             raise gdb.GdbError("Inconsistant stack size...Maybe memory corruption?")
 
         # TODO: check if stack ptr is located at a sane address range!
@@ -145,7 +156,10 @@ def fetch_stacks():
             )
 
         except gdb.GdbError as e:
-            gdb.write(f"Failed to construct stack object for tcb: {e}")
+            pid = tcb["pid"]
+            gdb.write(
+                f"Failed to construction stack object for tcb {pid} due to: {e}\n"
+            )
 
     return stacks
 
