@@ -381,6 +381,25 @@ define COMPILED
 	$(ECHO_END)
 endef
 
+# COMPILESWIFT - Default macro to compile one Swift file
+# Example: $(call COMPILESWIFT, in-file, out-file)
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   SWIFTC - The command to invoke the Swift compiler
+#   SWIFTFLAGS - Options to pass to the Swift compiler
+#
+# '<filename>.swift_SWIFTFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.swift. The same
+# applies mutatis mutandis.
+
+define COMPILESWIFT
+	$(ECHO_BEGIN)"SWIFTC: $1 "
+	$(Q) $(SWIFTC) -c $(SWIFTFLAGS) $($(strip $1)_SWIFTFLAGS) $1 -o $2
+	$(ECHO_END)
+endef
+
 # ASSEMBLE - Default macro to assemble one assembly language file
 # Example: $(call ASSEMBLE, in-file, out-file)
 #
