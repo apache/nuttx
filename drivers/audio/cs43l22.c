@@ -522,8 +522,6 @@ static int cs43l22_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
   DEBUGASSERT(caps && caps->ac_len >= sizeof(struct audio_caps_s));
   audinfo("type=%d ac_type=%d\n", type, caps->ac_type);
 
-  uint16_t *ptr;
-
   /* Fill in the caller's structure based on requested info */
 
   caps->ac_format.hw  = 0;
@@ -582,8 +580,7 @@ static int cs43l22_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              ptr  = (FAR uint16_t *)caps->ac_controls.b;
-              *ptr =
+              caps->ac_controls.hw[0] =
                 AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
                 AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
                 AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
