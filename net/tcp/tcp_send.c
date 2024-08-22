@@ -55,6 +55,7 @@
 #include <nuttx/net/netstats.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/tcp.h>
+#include <nuttx/wqueue.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -146,6 +147,12 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     }
   else
     {
+      if (work_available(&conn->work) && conn->tx_unacked != 0)
+        {
+          conn->timeout = false;
+          tcp_update_retrantimer(conn, conn->rto);
+        }
+
       /* Update the TCP received window based on I/O buffer availability */
 
       uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
