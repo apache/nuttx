@@ -200,16 +200,9 @@ int nxsem_post(FAR sem_t *sem)
           nxsem_restore_baseprio(stcb, sem);
 #endif
         }
-
-      if (proto == SEM_PRIO_PROTECT)
+      else if (proto == SEM_PRIO_PROTECT)
         {
-#ifdef CONFIG_PRIORITY_PROTECT
-          if (sem->saved > 0)
-            {
-              nxsched_set_priority(this_task(), sem->saved);
-              sem->saved = 0;
-            }
-#endif
+          nxsem_protect_post(sem);
         }
 
       sched_unlock();
