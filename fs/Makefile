@@ -38,6 +38,7 @@ include semaphore/Make.defs
 include mqueue/Make.defs
 include shm/Make.defs
 include socket/Make.defs
+include event/Make.defs
 
 # Additional files required is mount-able file systems are supported
 
