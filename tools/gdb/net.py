@@ -18,8 +18,78 @@
 #
 ############################################################################
 
+import socket
+
 import gdb
 import utils
+from lists import dq_for_every, sq_for_every
+
+NET_IPv4 = utils.get_symbol_value("CONFIG_NET_IPv4")
+NET_IPv6 = utils.get_symbol_value("CONFIG_NET_IPv6")
+
+# NuttX's AF_INET and AF_INET6 have same value as Linux's
+AF_INET = socket.AF_INET
+AF_INET6 = socket.AF_INET6
+
+
+def ntohs(val):
+    """Convert a 16-bit value from network byte order to host byte order"""
+
+    if utils.get_target_endianness() == utils.BIG_ENDIAN:
+        return val
+    return utils.swap16(val)
+
+
+def get_ip_port(conn):
+    """Get the IP address and port of a network connection"""
+
+    domain = utils.get_field(conn, "domain", AF_INET if NET_IPv4 else AF_INET6)
+    ip_binding = conn["u"]["ipv4" if domain == AF_INET else "ipv6"]
+    lport = ntohs(conn["lport"])
+    rport = ntohs(conn["rport"])
+    laddr = inet_ntop(domain, ip_binding["laddr"])
+    raddr = inet_ntop(domain, ip_binding["raddr"])
+    return laddr, lport, raddr, rport
+
+
+def inet_ntop(domain, addr):
+    """Convert a network address to a string"""
+
+    addr_len = 16 if domain == AF_INET6 else 4
+    return socket.inet_ntop(domain, utils.get_bytes(addr, addr_len))
+
+
+def socket_for_each_entry(proto):
+    """Iterate over a dq of socket structs, usage:
+    for conn in socket_for_each_entry("icmp"):
+        readahead = conn["readahead"]
+    """
+
+    sock_gdbtype = gdb.lookup_type("struct socket_conn_s").pointer()
+    conn_gdbtype = gdb.lookup_type("struct %s_conn_s" % proto).pointer()
+
+    for node in dq_for_every(
+        gdb.parse_and_eval("g_active_%s_connections" % proto), None
+    ):
+        yield utils.container_of(
+            utils.container_of(
+                node, sock_gdbtype, "node"
+            ),  # struct socket_conn_s::dq_entry_t node
+            conn_gdbtype,
+            "sconn",
+        )  # udp_conn_s::socket_conn_s sconn
+
+
+def wrbuffer_inqueue_size(queue=None, protocol="tcp"):
+    """Calculate the total size of all iob in the write queue of a udp connection"""
+
+    total = 0
+    if queue:
+        wrb_gdbtype = gdb.lookup_type("struct %s_wrbuffer_s" % protocol).pointer()
+        for entry in sq_for_every(queue, None):
+            entry = utils.container_of(entry, wrb_gdbtype, "wb_node")
+            total += entry["wb_iob"]["io_pktlen"]
+    return total
 
 
 class NetStats(gdb.Command):
@@ -83,12 +153,36 @@ class NetStats(gdb.Command):
         except gdb.error as e:
             gdb.write("Failed to get Net Stats: %s\n" % e)
 
+    def udp_stats(self):
+        try:
+            gdb.write(
+                "UDP Conn: %4s %11s %11s %21s %21s\n"
+                % ("flg", "txbuf", "rxbuf", "local_address", "remote_address")
+            )
+            for idx, conn in enumerate(socket_for_each_entry("udp")):
+                flags = conn["sconn"]["s_flags"]
+                txbuf = utils.get_field(conn, "sndbufs", -1)
+                rxbuf = utils.get_field(conn, "rcvbufs", -1)
+                txsz = wrbuffer_inqueue_size(utils.get_field(conn, "write_q"), "udp")
+                rxsz = conn["readahead"]["io_pktlen"] if conn["readahead"] else 0
+                laddr, lport, raddr, rport = get_ip_port(conn)
+
+                gdb.write(
+                    "%-4d      %4x %5d/%-5d %5d/%-5d %15s:%-5d %15s:%-5d\n"
+                    % (idx, flags, txsz, txbuf, rxsz, rxbuf, laddr, lport, raddr, rport)
+                )
+        except gdb.error as e:
+            gdb.write("Failed to get UDP stats: %s\n" % e)
+
     def invoke(self, args, from_tty):
         if utils.get_symbol_value("CONFIG_MM_IOB"):
             self.iob_stats()
             gdb.write("\n")
         if utils.get_symbol_value("CONFIG_NET_STATISTICS"):
             self.pkt_stats()
+            gdb.write("\n")
+        if utils.get_symbol_value("CONFIG_NET_UDP"):
+            self.udp_stats()
             gdb.write("\n")
 
 
