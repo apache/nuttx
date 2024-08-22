@@ -283,6 +283,20 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
 
   return ret;
 }
+
+int weak_function up_timer_gettime(struct timespec *ts)
+{
+  int ret = -EAGAIN;
+
+  if (g_timer.lower != NULL)
+    {
+      ts->tv_sec  = current_usec() / USEC_PER_SEC;
+      ts->tv_nsec = (current_usec() % USEC_PER_SEC) * NSEC_PER_USEC;
+      ret = OK;
+    }
+
+  return ret;
+}
 #endif
 
 /****************************************************************************

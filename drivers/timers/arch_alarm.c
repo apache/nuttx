@@ -241,6 +241,18 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
 
   return ret;
 }
+
+int weak_function up_timer_gettime(struct timespec *ts)
+{
+  int ret = -EAGAIN;
+
+  if (g_oneshot_lower != NULL)
+    {
+      ret = ONESHOT_CURRENT(g_oneshot_lower, ts);
+    }
+
+  return ret;
+}
 #endif
 
 /****************************************************************************
