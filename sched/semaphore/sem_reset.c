@@ -60,6 +60,7 @@
 int nxsem_reset(FAR sem_t *sem, int16_t count)
 {
   irqstate_t flags;
+  int32_t semcount;
 
   DEBUGASSERT(sem != NULL && count >= 0);
 
@@ -80,7 +81,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
    * out counts to any waiting threads.
    */
 
-  while (sem->semcount < 0 && count > 0)
+  while (atomic_read(NXSEM_COUNT(sem)) < 0 && count > 0)
     {
       /* Give out one counting, waking up one of the waiting threads
        * and, perhaps, kicking off a lot of priority inheritance
@@ -98,10 +99,15 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
    * value of sem->semcount is already correct in this case.
    */
 
-  if (sem->semcount >= 0)
+  semcount = atomic_read(NXSEM_COUNT(sem));
+  do
     {
-      sem->semcount = count;
+      if (semcount < 0)
+        {
+          break;
+        }
     }
+  while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &semcount, count));
 
   /* Allow any pending context switches to occur now */
 

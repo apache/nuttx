@@ -39,6 +39,75 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsem_trywait_slow
+ *
+ * Description:
+ *   This function locks the specified semaphore in slow mode.
+ *
+ * Input Parameters:
+ *   sem - the semaphore descriptor
+ *
+ * Returned Value:
+ *
+ *     EINVAL - Invalid attempt to get the semaphore
+ *     EAGAIN - The semaphore is not available.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int nxsem_trywait_slow(FAR sem_t *sem)
+{
+  FAR struct tcb_s *rtcb;
+  irqstate_t flags;
+  int32_t semcount;
+  int ret;
+
+  /* The following operations must be performed with interrupts disabled
+   * because sem_post() may be called from an interrupt handler.
+   */
+
+  flags = enter_critical_section();
+  rtcb = this_task();
+
+  /* If the semaphore is available, give it to the requesting task */
+
+  semcount = atomic_read(NXSEM_COUNT(sem));
+  do
+    {
+      if (semcount <= 0)
+        {
+          leave_critical_section(flags);
+          return -EAGAIN;
+        }
+    }
+  while (!atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem),
+                                     &semcount, semcount - 1));
+
+  /* It is, let the task take the semaphore */
+
+  ret = nxsem_protect_wait(sem);
+  if (ret < 0)
+    {
+      atomic_fetch_add(NXSEM_COUNT(sem), 1);
+      leave_critical_section(flags);
+      return ret;
+    }
+
+  nxsem_add_holder(sem);
+  rtcb->waitobj = NULL;
+
+  /* Interrupts may now be enabled. */
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -68,49 +137,28 @@
 
 int nxsem_trywait(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  int ret;
-
   /* This API should not be called from the idleloop */
 
   DEBUGASSERT(sem != NULL);
   DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
               up_interrupt_context());
 
-  /* The following operations must be performed with interrupts disabled
-   * because sem_post() may be called from an interrupt handler.
+  /* If this is a mutex, we can try to get the mutex in fast mode,
+   * else try to get it in slow mode.
    */
 
-  flags = enter_critical_section();
-
-  /* If the semaphore is available, give it to the requesting task */
-
-  if (sem->semcount > 0)
+#if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
+  if (sem->flags & SEM_TYPE_MUTEX)
     {
-      /* It is, let the task take the semaphore */
-
-      ret = nxsem_protect_wait(sem);
-      if (ret < 0)
+      int32_t old = 1;
+      if (atomic_try_cmpxchg_acquire(NXSEM_COUNT(sem), &old, 0))
         {
-          leave_critical_section(flags);
-          return ret;
+          return OK;
         }
 
-      sem->semcount--;
-      nxsem_add_holder(sem);
-      rtcb->waitobj = NULL;
-      ret = OK;
+      return -EAGAIN;
     }
-  else
-    {
-      /* Semaphore is not available */
+#endif
 
-      ret = -EAGAIN;
-    }
-
-  /* Interrupts may now be enabled. */
-
-  leave_critical_section(flags);
-  return ret;
+  return nxsem_trywait_slow(sem);
 }

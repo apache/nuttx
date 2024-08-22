@@ -70,7 +70,7 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
 
   /* Initialize the semaphore count */
 
-  sem->semcount = (int16_t)value;
+  sem->semcount = (int32_t)value;
 
   /* Initialize semaphore wait list */
 
