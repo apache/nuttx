@@ -375,6 +375,7 @@ static void touch_event_notify(FAR struct touch_openpriv_s  *openpriv,
 {
   int semcount;
 
+  nxmutex_lock(&openpriv->lock);
   circbuf_overwrite(&openpriv->circbuf, sample,
                     SIZEOF_TOUCH_SAMPLE_S(sample->npoints));
 
@@ -385,6 +386,7 @@ static void touch_event_notify(FAR struct touch_openpriv_s  *openpriv,
     }
 
   poll_notify(&openpriv->fds, 1, POLLIN);
+  nxmutex_unlock(&openpriv->lock);
 }
 
 /****************************************************************************
