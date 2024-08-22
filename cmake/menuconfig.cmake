@@ -81,7 +81,8 @@ add_custom_target(
           ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
                                                      # config
   COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
-  WORKING_DIRECTORY ${NUTTX_DIR})
+  WORKING_DIRECTORY ${NUTTX_DIR}
+  USES_TERMINAL) # stdin access required to prompt for new config keys
 
 add_custom_target(
   olddefconfig
