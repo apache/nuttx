@@ -315,6 +315,7 @@ config SIM_SOUND_ALSA
 	bool "alsa support on sim"
 	depends on HOST_LINUX
 	depends on AUDIOUTILS_LIBMAD
+	depends on AUDIOUTILS_LAME
 
 endchoice
 
