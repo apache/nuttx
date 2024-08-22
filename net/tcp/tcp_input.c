@@ -1028,6 +1028,7 @@ found:
     {
       uint32_t unackseq;
       uint32_t ackseq;
+      int timeout;
 
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
@@ -1137,9 +1138,20 @@ found:
 
       flags |= TCP_ACKDATA;
 
+      /* Check if no packet need to retransmission, clear timer. */
+
+      if (conn->tx_unacked == 0 && conn->tcpstateflags == TCP_ESTABLISHED)
+        {
+          timeout = 0;
+        }
+      else
+        {
+          timeout = conn->rto;
+        }
+
       /* Reset the retransmission timer. */
 
-      tcp_update_retrantimer(conn, conn->rto);
+      tcp_update_retrantimer(conn, timeout);
     }
 
   /* Check if the sequence number of the incoming packet is what we are
@@ -1211,10 +1223,6 @@ found:
           /* Window updated, set the acknowledged flag. */
 
           flags |= TCP_ACKDATA;
-
-          /* Reset the retransmission timer. */
-
-          tcp_update_retrantimer(conn, conn->rto);
         }
     }
 
