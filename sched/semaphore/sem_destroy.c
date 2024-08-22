@@ -60,6 +60,8 @@
 
 int nxsem_destroy(FAR sem_t *sem)
 {
+  int32_t old;
+
   DEBUGASSERT(sem != NULL);
 
   /* There is really no particular action that we need
@@ -72,10 +74,15 @@ int nxsem_destroy(FAR sem_t *sem)
    * leave the count unchanged but still return OK.
    */
 
-  if (sem->semcount >= 0)
+  old = atomic_read(NXSEM_COUNT(sem));
+  do
     {
-      sem->semcount = 1;
+      if (old < 0)
+        {
+          break;
+        }
     }
+  while (!atomic_try_cmpxchg_release(NXSEM_COUNT(sem), &old, 1));
 
   /* Release holders of the semaphore */
 
