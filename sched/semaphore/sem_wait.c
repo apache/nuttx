@@ -94,21 +94,12 @@ int nxsem_wait(FAR sem_t *sem)
     {
       /* It is, let the task take the semaphore. */
 
-#ifdef CONFIG_PRIORITY_PROTECT
-      if ((sem->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT)
+      ret = nxsem_protect_wait(sem);
+      if (ret < 0)
         {
-          if (rtcb->sched_priority <= sem->ceiling)
-            {
-              sem->saved = rtcb->sched_priority;
-              rtcb->sched_priority = sem->ceiling;
-            }
-          else
-            {
-              leave_critical_section_nonirq(flags);
-              return -EINVAL;
-            }
+          leave_critical_section_nonirq(flags);
+          return ret;
         }
-#endif
 
       sem->semcount--;
       nxsem_add_holder(sem);

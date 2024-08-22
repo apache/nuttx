@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/semaphore/sem_trywait.c
+ * sched/semaphore/sem_protect.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,31 +25,32 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <sched.h>
-#include <assert.h>
 #include <errno.h>
-
-#include <nuttx/init.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
+
+#ifdef CONFIG_PRIORITY_PROTECT
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_trywait
+ * Name: nxsem_protect_wait
  *
  * Description:
- *   This function locks the specified semaphore only if the semaphore is
- *   currently not locked.  In either case, the call returns without
- *   blocking.
+ *   This function attempts to lock the protected semaphore, set the
+ *   holder tcb priority to ceiling priority.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
  *
  * Input Parameters:
- *   sem - the semaphore descriptor
+ *   sem - Semaphore descriptor.
  *
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
@@ -57,58 +58,59 @@
  *   returned on success.  A negated errno value is returned on failure.
  *   Possible returned errors:
  *
- *     EINVAL - Invalid attempt to get the semaphore
- *     EAGAIN - The semaphore is not available.
- *
- * Assumptions:
+ *   - EINVAL:  Invalid attempt to get the semaphore
  *
  ****************************************************************************/
 
-int nxsem_trywait(FAR sem_t *sem)
+int nxsem_protect_wait(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  int ret;
-
-  /* This API should not be called from the idleloop */
-
-  DEBUGASSERT(sem != NULL);
-  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask() ||
-              up_interrupt_context());
-
-  /* The following operations must be performed with interrupts disabled
-   * because sem_post() may be called from an interrupt handler.
-   */
-
-  flags = enter_critical_section();
-
-  /* If the semaphore is available, give it to the requesting task */
-
-  if (sem->semcount > 0)
+  if ((sem->flags & SEM_PRIO_MASK) == SEM_PRIO_PROTECT)
     {
-      /* It is, let the task take the semaphore */
+      FAR struct tcb_s *rtcb = this_task();
 
-      ret = nxsem_protect_wait(sem);
-      if (ret < 0)
+      if (rtcb->sched_priority > sem->ceiling)
         {
-          leave_critical_section(flags);
-          return ret;
+          return -EINVAL;
         }
 
-      sem->semcount--;
-      nxsem_add_holder(sem);
-      rtcb->waitobj = NULL;
-      ret = OK;
-    }
-  else
-    {
-      /* Semaphore is not available */
-
-      ret = -EAGAIN;
+      sem->saved = rtcb->sched_priority;
+      rtcb->sched_priority = sem->ceiling;
     }
 
-  /* Interrupts may now be enabled. */
-
-  leave_critical_section(flags);
-  return ret;
+  return OK;
 }
+
+/****************************************************************************
+ * Name: nxsem_protect_post
+ *
+ * Description:
+ *   This function attempts to unlock the protected semaphore, restore the
+ *   holder tcb priority.
+ *
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   sem_wait except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *   Possible returned errors:
+ *
+ ****************************************************************************/
+
+void nxsem_protect_post(FAR sem_t *sem)
+{
+  if (sem->saved > 0)
+    {
+      nxsched_set_priority(this_task(), sem->saved);
+      sem->saved = 0;
+    }
+}
+
+#endif /* CONFIG_PRIORITY_PROTECT */

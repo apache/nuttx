@@ -28,6 +28,10 @@ ifeq ($(CONFIG_PRIORITY_INHERITANCE),y)
 CSRCS += sem_initialize.c sem_holder.c sem_setprotocol.c
 endif
 
+ifeq ($(CONFIG_PRIORITY_PROTECT),y)
+CSRCS += sem_protect.c
+endif
+
 # Include semaphore build support
 
 DEPPATH += --dep-path semaphore
