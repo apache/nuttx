@@ -177,6 +177,16 @@ def get_field(val, key, default=None):
         return default
 
 
+def get_bytes(val, size):
+    """Convert a gdb value to a bytes object"""
+    try:
+        return val.bytes[:size]
+    except AttributeError:  # Sometimes we don't have gdb.Value.bytes
+        inf = gdb.inferiors()[0]
+        mem = inf.read_memory(val.address, size)
+        return mem.tobytes()
+
+
 def import_check(module, name="", errmsg=""):
     try:
         module = __import__(module, fromlist=[name])
@@ -343,6 +353,23 @@ def read_ulong(buffer, offset):
         return read_u64(buffer, offset)
     else:
         return read_u32(buffer, offset)
+
+
+def bswap(val, size):
+    """Reverses the byte order in a gdb.Value or int value of size bytes"""
+    return int.from_bytes(int(val).to_bytes(size, byteorder="little"), byteorder="big")
+
+
+def swap16(val):
+    return bswap(val, 2)
+
+
+def swap32(val):
+    return bswap(val, 4)
+
+
+def swap64(val):
+    return bswap(val, 8)
 
 
 target_arch = None
