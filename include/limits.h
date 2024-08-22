@@ -194,7 +194,7 @@
 /* Required for POSIX semaphores */
 
 #define _POSIX_SEM_NSEMS_MAX  INT_MAX
-#define _POSIX_SEM_VALUE_MAX  0x7fff
+#define _POSIX_SEM_VALUE_MAX  INT_MAX
 
 /* Numerical limits.  These values may be increased from the POSIX minimum
  * values above or made indeterminate
