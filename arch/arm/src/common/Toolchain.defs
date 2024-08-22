@@ -416,6 +416,10 @@ include $(TOPDIR)/tools/Rust.defs
 
 include $(TOPDIR)/tools/D.defs
 
+# Swift 6 toolchain
+
+include $(TOPDIR)/tools/Swift.defs
+
 # Shared library build flags
 
 SHCCFLAGS = -fPIC -fPIE -fvisibility=default
