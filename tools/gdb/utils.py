@@ -152,6 +152,14 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
     return value
 
 
+def get_field(val, key, default=None):
+    """Get a field from a gdb.Value, return default if key not found"""
+    try:
+        return val[key] if val else default
+    except gdb.error:
+        return default
+
+
 def import_check(module, name="", errmsg=""):
     try:
         module = __import__(module, fromlist=[name])
