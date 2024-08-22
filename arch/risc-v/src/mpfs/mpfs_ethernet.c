@@ -3368,6 +3368,17 @@ static int mpfs_phyinit(struct mpfs_ethmac_s *priv)
 {
   int ret = -EINVAL;
 
+#ifdef CONFIG_MPFS_PHYINIT
+  /* Perform any necessary, board-specific PHY initialization */
+
+  ret = mpfs_phy_boardinitialize(priv->intf);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef ETH_HAS_MDIO_PHY
 
   /* Configure PHY clocking */
@@ -3518,30 +3529,10 @@ static int mpfs_ethconfig(struct mpfs_ethmac_s *priv)
 
   ninfo("Entry\n");
 
-#ifdef CONFIG_MPFS_PHYINIT
-  /* Perform any necessary, board-specific PHY initialization */
-
-  ret = mpfs_phy_boardinitialize(priv->intf);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
-      return ret;
-    }
-#endif
-
   /* Reset the Ethernet block */
 
   ninfo("Reset the Ethernet block\n");
   mpfs_ethreset(priv);
-
-  /* Initialize the PHY */
-
-  ninfo("Initialize the PHY\n");
-  ret = mpfs_phyinit(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
   /* Initialize the MAC and DMA */
 
