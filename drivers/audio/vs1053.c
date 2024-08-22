@@ -564,8 +564,6 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
   DEBUGASSERT(caps->ac_len >= sizeof(struct audio_caps_s));
 
-  uint16_t *ptr;
-
   /* Fill in the caller's structure based on requested info */
 
   caps->ac_format.hw  = 0;
@@ -649,14 +647,13 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
               /* Report the Sample rates we support */
 
-              ptr  = (FAR uint16_t *)caps->ac_controls.b;
-              *ptr = AUDIO_SAMP_RATE_8K  |
-                     AUDIO_SAMP_RATE_11K |
-                     AUDIO_SAMP_RATE_16K |
-                     AUDIO_SAMP_RATE_22K |
-                     AUDIO_SAMP_RATE_32K |
-                     AUDIO_SAMP_RATE_44K |
-                     AUDIO_SAMP_RATE_48K;
+              caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K  |
+                                        AUDIO_SAMP_RATE_11K |
+                                        AUDIO_SAMP_RATE_16K |
+                                        AUDIO_SAMP_RATE_22K |
+                                        AUDIO_SAMP_RATE_32K |
+                                        AUDIO_SAMP_RATE_44K |
+                                        AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
