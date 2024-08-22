@@ -31,9 +31,16 @@
 #include <nuttx/compiler.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sched.h>
+#include <nuttx/atomic.h>
 
 #include <stdint.h>
 #include <stdbool.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NXSEM_COUNT(s) ((FAR atomic_short *)&(s)->semcount)
 
 /****************************************************************************
  * Public Function Prototypes
