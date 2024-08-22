@@ -137,6 +137,7 @@ config FS_REFCOUNT
 source "fs/vfs/Kconfig"
 source "fs/aio/Kconfig"
 source "fs/semaphore/Kconfig"
+source "fs/event/Kconfig"
 source "fs/mqueue/Kconfig"
 source "fs/shm/Kconfig"
 source "fs/mmap/Kconfig"
