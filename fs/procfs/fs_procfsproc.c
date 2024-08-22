@@ -1571,6 +1571,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct proc_file_s *procfile;
   FAR struct tcb_s *tcb;
+  irqstate_t flags;
   ssize_t ret;
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
@@ -1582,9 +1583,11 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 
   /* Verify that the thread is still valid */
 
+  flags = enter_critical_section();
   tcb = nxsched_get_tcb(procfile->pid);
   if (tcb == NULL)
     {
+      leave_critical_section(flags);
       ferr("ERROR: PID %d is not valid\n", procfile->pid);
       return -ENODEV;
     }
@@ -1643,6 +1646,8 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
       ret = -EINVAL;
       break;
     }
+
+  leave_critical_section(flags);
 
   /* Update the file offset */
 
