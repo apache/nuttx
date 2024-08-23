@@ -247,6 +247,20 @@ rust() {
   command rustc --version
 }
 
+dlang() {
+  if ! type ldc2 > /dev/null 2>&1; then
+    brew install ldc
+  fi
+
+  command ldc2 --version | head -n 5
+}
+
+zig() {
+  brew install zig
+
+  command zig cc --version
+}
+
 xtensa_esp32_gcc_toolchain() {
   add_path "${NUTTXTOOLS}"/xtensa-esp32-elf/bin
 
@@ -334,7 +348,7 @@ install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust xtensa_esp32_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
+  install="arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
 
   mkdir -p "${NUTTXTOOLS}"/homebrew
   export HOMEBREW_CACHE=${NUTTXTOOLS}/homebrew
