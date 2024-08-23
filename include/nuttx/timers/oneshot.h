@@ -229,6 +229,10 @@ struct oneshot_lowerhalf_s
 
   FAR const struct oneshot_operations_s *ops;
 
+#ifndef CONFIG_SCHED_TICKLESS
+  clock_t current_tick;
+#endif
+
   /* Private lower half data may follow */
 };
 
