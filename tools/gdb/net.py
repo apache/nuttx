@@ -103,7 +103,14 @@ def tcp_ofoseg_bufsize(conn):
 
 
 class NetStats(gdb.Command):
-    """Network statistics"""
+    """Network statistics
+    Usage: netstats [iob|pkt|tcp|udp|all]
+
+    Examples: netstats - Show all stats
+              netstats all - Show all stats
+              netstats iob - Show IOB stats
+              netstats tcp udp - Show both TCP and UDP stats
+    """
 
     def __init__(self):
         super(NetStats, self).__init__("netstats", gdb.COMMAND_USER)
@@ -223,16 +230,21 @@ class NetStats(gdb.Command):
             gdb.write("Failed to get UDP stats: %s\n" % e)
 
     def invoke(self, args, from_tty):
-        if utils.get_symbol_value("CONFIG_MM_IOB"):
+        # Parse the arguments in a simple way
+        if not args or "all" in args:
+            args = "iob pkt tcp udp"
+
+        # Call the corresponding function
+        if utils.get_symbol_value("CONFIG_MM_IOB") and "iob" in args:
             self.iob_stats()
             gdb.write("\n")
-        if utils.get_symbol_value("CONFIG_NET_STATISTICS"):
+        if utils.get_symbol_value("CONFIG_NET_STATISTICS") and "pkt" in args:
             self.pkt_stats()
             gdb.write("\n")
-        if utils.get_symbol_value("CONFIG_NET_TCP"):
+        if utils.get_symbol_value("CONFIG_NET_TCP") and "tcp" in args:
             self.tcp_stats()
             gdb.write("\n")
-        if utils.get_symbol_value("CONFIG_NET_UDP"):
+        if utils.get_symbol_value("CONFIG_NET_UDP") and "udp" in args:
             self.udp_stats()
             gdb.write("\n")
 
