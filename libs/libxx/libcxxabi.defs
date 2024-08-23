@@ -28,6 +28,8 @@ libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
 libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) tar -xf libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src libcxxabi
+	$(Q) patch -p0 < 0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch
+	$(Q) patch -p0 < 0002-libcxxabi-fix-compilation-errors.patch
 	$(Q) touch $@
 endif
 
