@@ -18,7 +18,8 @@
 #
 # ##############################################################################
 
-set(SRCS qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c)
+set(SRCS qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c
+         qemu_idle.c)
 
 if(CONFIG_SMP)
   list(APPEND SRCS qemu_cpuboot.c)
