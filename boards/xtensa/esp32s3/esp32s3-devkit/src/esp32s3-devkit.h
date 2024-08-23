@@ -230,6 +230,7 @@ int esp32s3_pwm_setup(void);
 int esp32s3_twai_setup(void);
 #endif
 
+#ifdef CONFIG_NET_LAN9250
 /****************************************************************************
  * Name: esp32s3_lan9250_initialize
  *
@@ -247,8 +248,25 @@ int esp32s3_twai_setup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_LAN9250
 int esp32s3_lan9250_initialize(int port);
+
+/****************************************************************************
+ * Name: esp32s3_lan9250_uninitialize
+ *
+ * Description:
+ *   This function is called by platform-specific setup logic to uninitialize
+ *   the LAN9250 device. This function will unregister the network device.
+ *
+ * Input Parameters:
+ *   port - The SPI port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int esp32s3_lan9250_uninitialize(int port);
 #endif
 
 #endif /* __ASSEMBLY__ */
