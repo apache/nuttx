@@ -114,7 +114,7 @@ typedef uint8_t spinlock_t;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_HAVE_TESTSET) && defined(CONFIG_SMP) \
+#if defined(CONFIG_ARCH_HAVE_TESTSET) \
     && !defined(CONFIG_ARCH_CHIP_LC823450) \
     && !defined(CONFIG_ARCH_CHIP_CXD56XX) \
     && !defined(CONFIG_ARCH_CHIP_RP2040)
