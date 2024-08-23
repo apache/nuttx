@@ -904,6 +904,40 @@ from the FIFO, enabling using NuttX as a RTP receiver for audio applications.
 
 This is particularly useful to stream uncompressed audio through Wi-Fi to remote speakers.
 
+sdmmc
+-----
+
+Based on nsh. Support for sdmmc driver is enabled with following settings:
+
+Enable sdmmc driver::
+
+    CONFIG_ESP32S3_SDMMC=y
+
+GPIO definitions::
+
+    CONFIG_ESP32S3_SDMMC_CMD=7
+    CONFIG_ESP32S3_SDMMC_CLK=15
+    CONFIG_ESP32S3_SDMMC_D0=4
+
+ESP32-S3-Korvo-2's MicroSD supports only one data port::
+
+    CONFIG_SDIO_WIDTH_D1_ONLY=y
+
+Multiblock limitation due to hardware::
+
+    CONFIG_MMCSD_MULTIBLOCK_LIMIT=128
+
+Use sched_yield instead of usleep due to long tick time::
+
+    CONFIG_MMCSD_CHECK_READY_STATUS_WITHOUT_SLEEP=y
+
+Format and mount the SD/MMC device with following commands::
+
+    mkfatfs -F 32 -r /mnt /dev/mmcsd1
+    mount -t vfat /dev/mmcsd1 /mnt
+
+FAT filesystem is enabled in the default configuration. Other filesystems may also work.
+
 **Connect to your Network**
 
 Connect the ESP32-S3-Korvo-2 board to your network to be able to receive RTP packets::
