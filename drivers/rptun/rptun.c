@@ -1022,7 +1022,13 @@ static int rptun_store_open(FAR void *store_,
 
   *img_data = store->buf;
 
-  return file_read(&store->file, store->buf, len);
+  ret = file_read(&store->file, store->buf, len);
+  if (ret < 0)
+    {
+      file_close(&store->file);
+    }
+
+  return ret;
 }
 
 static void rptun_store_close(FAR void *store_)
