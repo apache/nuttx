@@ -243,6 +243,26 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
           ret = file_ioctl(filep, FIOC_FILEPATH, va_arg(ap, FAR char *));
         }
 
+        break;
+      case F_SETPIPE_SZ:
+        /* Modify the capacity of the pipe to arg bytes, but not larger than
+         * CONFIG_DEV_PIPE_MAXSIZE.
+         */
+
+        {
+          ret = file_ioctl(filep, PIPEIOC_SETSIZE, va_arg(ap, int));
+        }
+
+        break;
+      case F_GETPIPE_SZ:
+
+        /* Return the capacity of the pipe */
+
+        {
+          ret = file_ioctl(filep, PIPEIOC_GETSIZE);
+        }
+
+        break;
       default:
         break;
     }
