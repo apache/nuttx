@@ -36,6 +36,7 @@ See include/nuttx/mtd/mtd.h for additional information.
 
    -  ``MTDIOC_GEOMETRY``: Get MTD geometry
    -  ``MTDIOC_BULKERASE``: Erase the entire device
+   -  ``MTDIOC_ISBAD``: Check if a block is bad
 
    is provided via a single ``ioctl`` method (see
    ``include/nuttx/fs/ioctl.h``):
