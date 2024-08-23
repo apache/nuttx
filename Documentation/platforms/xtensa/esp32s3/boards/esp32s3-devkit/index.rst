@@ -520,6 +520,54 @@ You can set an alarm, check its progress and receive a notification after it exp
     Alarm 0 is active with 10 seconds to expiration
     nsh> alarm_daemon: alarm 0 received
 
+sdmmc
+-----
+
+Based on nsh. Support for sdmmc driver is enabled with following settings:
+
+Enable sdmmc driver::
+
+    CONFIG_ESP32S3_SDMMC=y
+
+Default GPIO definitions::
+
+    CONFIG_ESP32S3_SDMMC_CMD=41
+    CONFIG_ESP32S3_SDMMC_CLK=39
+    CONFIG_ESP32S3_SDMMC_D0=40
+    CONFIG_ESP32S3_SDMMC_D1=16
+    CONFIG_ESP32S3_SDMMC_D2=8
+    CONFIG_ESP32S3_SDMMC_D3=42
+
+Multiblock limitation due to hardware::
+
+    CONFIG_MMCSD_MULTIBLOCK_LIMIT=128
+
+Use sched_yield instead of usleep due to long tick time::
+
+    CONFIG_MMCSD_CHECK_READY_STATUS_WITHOUT_SLEEP=y
+
+This configuration has been verified with an adapter (1.27 to 2.54mm T-type
+adapter, CN10P2) and an `external emmc module <https://semiconductor.samsung.com/jp/estorage/emmc/emmc-5-1/klm8g1getf-b041/>`_.
+
+Besides the connections to 3v3 and GND of ESP32S3 DevKit, pins of the adapter
+used in the verification are connected to ESP32S3 DevKit as following::
+
+    adapter pin           ESP32S3 GPIO
+        11      ===CMD==>       41
+        12      ===CLK==>       39
+        1       ===D0===>       40
+        2       ===D1===>       16
+        3       ===D2===>       8
+        4       ===D3===>       42
+
+Format and mount the SD/MMC device with following commands::
+
+    mkfatfs -F 32 -r /mnt /dev/mmcsd1
+    mount -t vfat /dev/mmcsd1 /mnt
+
+FAT filesystem is enabled in the default configuration. Other filesystems may
+also work.
+
 smp
 ---
 
