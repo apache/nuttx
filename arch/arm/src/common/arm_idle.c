@@ -56,8 +56,6 @@ void up_idle(void)
 
   /* Sleep until an interrupt occurs to save power */
 
-#if 0
-  asm("WFI");  /* For example */
-#endif
+  asm("WFI");
 #endif
 }
