@@ -272,6 +272,7 @@ struct devif_callback_s
   FAR devif_callback_event_t event;
   FAR void *priv;
   uint16_t flags;
+  uint8_t free_flags;
 };
 
 /****************************************************************************
