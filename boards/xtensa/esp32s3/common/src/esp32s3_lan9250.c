@@ -62,6 +62,12 @@ static void lan9250_getmac(const struct lan9250_lower_s *lower,
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_LAN9250_SPI
+  static struct spi_dev_s *g_dev;
+#else
+  static struct qspi_dev_s *g_dev;
+#endif
+
 static struct lan9250_lower_s g_lan9250_lower =
 {
   .attach  = lan9250_attach,
@@ -207,33 +213,78 @@ static void lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
 int esp32s3_lan9250_initialize(int port)
 {
   int ret;
-#ifdef CONFIG_LAN9250_SPI
-  struct spi_dev_s *dev;
-#else
-  struct qspi_dev_s *dev;
-#endif
 
   esp32s3_configgpio(LAN9250_IRQ, INPUT_FUNCTION_2 | PULLUP);
   esp32s3_configgpio(LAN9250_RST, OUTPUT_FUNCTION_2 | PULLUP);
 
 #ifdef CONFIG_LAN9250_SPI
-  dev = esp32s3_spibus_initialize(port);
-  if (!dev)
+  g_dev = esp32s3_spibus_initialize(port);
+  if (!g_dev)
     {
       nerr("ERROR: Failed to initialize SPI port %d\n", port);
       return -ENODEV;
     }
 #else
-  dev = esp32s3_qspibus_initialize(port);
-  if (!dev)
+  g_dev = esp32s3_qspibus_initialize(port);
+  if (!g_dev)
     {
       nerr("ERROR: Failed to initialize QSPI port %d\n", port);
       return -ENODEV;
     }
 #endif
 
-  ret = lan9250_initialize(dev, &g_lan9250_lower);
+  ret = lan9250_initialize(g_dev, &g_lan9250_lower);
   if (ret != 0)
+    {
+      nerr("ERROR: Failed to initialize LAN9250 ret=%d\n", ret);
+      return ret;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: esp32s3_lan9250_uninitialize
+ *
+ * Description:
+ *   This function is called by platform-specific setup logic to uninitialize
+ *   the LAN9250 device. This function will unregister the network device.
+ *
+ * Input Parameters:
+ *   port - The SPI port used for the device
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int esp32s3_lan9250_uninitialize(int port)
+{
+  int ret;
+  int irq;
+
+  irq = ESP32S3_PIN2IRQ(LAN9250_IRQ);
+  esp32s3_gpioirqdisable(irq);
+
+#ifdef CONFIG_LAN9250_SPI
+  ret = esp32s3_spibus_uninitialize((struct spi_dev_s *)g_dev);
+  if (ret != OK)
+    {
+      nerr("ERROR: Failed to uninitialize SPI port %d\n", port);
+      return ret;
+    }
+#else
+  ret = esp32s3_qspibus_uninitialize((struct qspi_dev_s *)g_dev);
+  if (ret != OK)
+    {
+      nerr("ERROR: Failed to uninitialize QSPI port %d\n", port);
+      return ret;
+    }
+#endif
+
+  ret = lan9250_uninitialize(&g_lan9250_lower);
+  if (ret != OK)
     {
       nerr("ERROR: Failed to initialize LAN9250 ret=%d\n", ret);
       return ret;
