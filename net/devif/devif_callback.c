@@ -42,6 +42,13 @@
 #include "devif/devif.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define DEVIF_CB_DONT_FREE  (1 << 0)
+#define DEVIF_CB_PEND_FREE  (1 << 1)
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -90,35 +97,6 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
         }
 #endif
 
-      /* Remove the callback structure from the device notification list if
-       * it is supposed to be in the device notification list.
-       */
-
-      if (dev != NULL)
-        {
-          /* Find the callback structure in the device event list */
-
-          for (prev = NULL, curr = dev->d_devcb;
-               curr != NULL && curr != cb;
-               prev = curr, curr = curr->nxtdev)
-            {
-            }
-
-          /* Remove the structure from the device event list */
-
-          if (curr != NULL)
-            {
-              if (prev)
-                {
-                  prev->nxtdev = cb->nxtdev;
-                }
-              else
-                {
-                  dev->d_devcb = cb->nxtdev;
-                }
-            }
-        }
-
       /* Remove the callback structure from the data notification list if
        * it is supposed to be in the data notification list.
        */
@@ -164,6 +142,48 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 
               DEBUGASSERT(list_tail);
               *list_tail = prev;
+            }
+        }
+
+      /* check if the callback structure has DEVIF_CB_DONT_FREE,it indicates
+       * the callback can't be free immediately,setting DEVIF_CB_PEND_FREE
+       * flag with the callback,it indicates the callback will be free
+       * finally
+       */
+
+      if (cb->free_flags & DEVIF_CB_DONT_FREE)
+        {
+          cb->free_flags |= DEVIF_CB_PEND_FREE;
+          net_unlock();
+          return;
+        }
+
+      /* Remove the callback structure from the device notification list if
+       * it is supposed to be in the device notification list.
+       */
+
+      if (dev != NULL)
+        {
+          /* Find the callback structure in the device event list */
+
+          for (prev = NULL, curr = dev->d_devcb;
+               curr != NULL && curr != cb;
+               prev = curr, curr = curr->nxtdev)
+            {
+            }
+
+          /* Remove the structure from the device event list */
+
+          if (curr != NULL)
+            {
+              if (prev)
+                {
+                  prev->nxtdev = cb->nxtdev;
+                }
+              else
+                {
+                  dev->d_devcb = cb->nxtdev;
+                }
             }
         }
 
@@ -574,12 +594,26 @@ uint16_t devif_dev_event(FAR struct net_driver_s *dev, uint16_t flags)
 
       if (cb->event != NULL && devif_event_trigger(flags, cb->flags))
         {
+          cb->free_flags |= DEVIF_CB_DONT_FREE;
+
           /* Yes.. perform the callback.  Actions perform by the callback
            * may delete the current list entry or add a new list entry to
            * beginning of the list (which will be ignored on this pass)
            */
 
           flags = cb->event(dev, cb->priv, flags);
+          cb->free_flags &= ~DEVIF_CB_DONT_FREE;
+
+          /* update the next callback to prevent previously recorded the
+           * next callback from being deleted
+           */
+
+          next = cb->nxtdev;
+          if ((cb->free_flags & DEVIF_CB_PEND_FREE) != 0)
+            {
+              cb->free_flags &= ~DEVIF_CB_PEND_FREE;
+              devif_callback_free(dev, cb, NULL, NULL);
+            }
         }
     }
 
