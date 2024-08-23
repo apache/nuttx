@@ -92,6 +92,16 @@ def wrbuffer_inqueue_size(queue=None, protocol="tcp"):
     return total
 
 
+def tcp_ofoseg_bufsize(conn):
+    """Calculate the pending size of out-of-order buffer of a tcp connection"""
+
+    total = 0
+    if utils.get_symbol_value("CONFIG_NET_TCP_OUT_OF_ORDER"):
+        for i in range(conn["nofosegs"]):
+            total += conn["ofosegs"][i]["data"]["io_pktlen"]
+    return total
+
+
 class NetStats(gdb.Command):
     """Network statistics"""
 
@@ -153,6 +163,44 @@ class NetStats(gdb.Command):
         except gdb.error as e:
             gdb.write("Failed to get Net Stats: %s\n" % e)
 
+    def tcp_stats(self):
+        try:
+            gdb.write(
+                "TCP Conn: %3s %3s %3s %3s %4s %3s"
+                % ("st", "flg", "ref", "tmr", "uack", "nrt")
+            )
+            gdb.write(
+                " %11s %11s+%-5s %21s %21s\n"
+                % ("txbuf", "rxbuf", "ofo", "local_address", "remote_address")
+            )
+            for idx, conn in enumerate(socket_for_each_entry("tcp")):
+                state = conn["tcpstateflags"]
+                flags = conn["sconn"]["s_flags"]
+                ref = conn["crefs"]
+                timer = conn["timer"]
+                unacked = conn["tx_unacked"]
+                nrtx = conn["nrtx"]
+
+                txbuf = utils.get_field(conn, "snd_bufs", -1)
+                rxbuf = utils.get_field(conn, "rcv_bufs", -1)
+                txsz = wrbuffer_inqueue_size(
+                    utils.get_field(conn, "unacked_q"), "tcp"
+                ) + wrbuffer_inqueue_size(utils.get_field(conn, "write_q"), "tcp")
+                rxsz = conn["readahead"]["io_pktlen"] if conn["readahead"] else 0
+                ofosz = tcp_ofoseg_bufsize(conn)
+                laddr, lport, raddr, rport = get_ip_port(conn)
+
+                gdb.write(
+                    "%-4d      %3x %3x %3d %3d %4d %3d"
+                    % (idx, state, flags, ref, timer, unacked, nrtx)
+                )
+                gdb.write(
+                    " %5d/%-5d %5d/%-5d+%-5d %15s:%-5d %15s:%-5d\n"
+                    % (txsz, txbuf, rxsz, rxbuf, ofosz, laddr, lport, raddr, rport)
+                )
+        except gdb.error as e:
+            gdb.write("Failed to get TCP stats: %s\n" % e)
+
     def udp_stats(self):
         try:
             gdb.write(
@@ -180,6 +228,9 @@ class NetStats(gdb.Command):
             gdb.write("\n")
         if utils.get_symbol_value("CONFIG_NET_STATISTICS"):
             self.pkt_stats()
+            gdb.write("\n")
+        if utils.get_symbol_value("CONFIG_NET_TCP"):
+            self.tcp_stats()
             gdb.write("\n")
         if utils.get_symbol_value("CONFIG_NET_UDP"):
             self.udp_stats()
