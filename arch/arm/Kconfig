@@ -657,6 +657,7 @@ config ARCH_CHIP_QEMU_ARM
 	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
+	select ARCH_IDLE_CUSTOM
 	---help---
 		QEMU virt platform (ARMv7a)
 
