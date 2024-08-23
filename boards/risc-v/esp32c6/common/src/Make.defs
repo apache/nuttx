@@ -64,6 +64,10 @@ ifeq ($(CONFIG_ESP_MCPWM),y)
   CSRCS += esp_board_mcpwm.c
 endif
 
+ifeq ($(CONFIG_CL_MFRC522),y)
+  CSRCS += esp_board_mfrc522.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
