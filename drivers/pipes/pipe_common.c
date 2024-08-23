@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/param.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -846,6 +847,32 @@ int pipecommon_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = circbuf_peekat(&dev->d_buffer,
                                dev->d_buffer.tail + peek->offset,
                                peek->buf, peek->size);
+        }
+        break;
+
+      case PIPEIOC_SETSIZE:
+        {
+          size_t size = (size_t)arg;
+          if (size == 0)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          size = MIN(size, CONFIG_DEV_PIPE_MAXSIZE);
+          ret = circbuf_resize(&dev->d_buffer, size);
+          if (ret != 0)
+            {
+              break;
+            }
+
+          dev->d_bufsize = size;
+        }
+        break;
+
+      case PIPEIOC_GETSIZE:
+        {
+          ret = dev->d_bufsize;
         }
         break;
 

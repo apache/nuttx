@@ -484,6 +484,14 @@
                                                * IN: pipe_peek_s
                                                * OUT: Length of data */
 
+#define PIPEIOC_SETSIZE     _PIPEIOC(0x0005)  /* Pipe get size interface
+                                               * IN: size_t
+                                               * OUT: None */
+
+#define PIPEIOC_GETSIZE     _PIPEIOC(0x0006)  /* Pipe get size interface
+                                               * IN: None
+                                               * OUT: int */
+
 /* RTC driver ioctl definitions *********************************************/
 
 /* (see nuttx/include/rtc.h */
