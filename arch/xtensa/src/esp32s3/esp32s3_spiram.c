@@ -608,7 +608,7 @@ int IRAM_ATTR esp_spiram_init(void)
       merr("Expected %dMB chip but found %dMB chip. Bailing out..",
            (CONFIG_ESP32S3_SPIRAM_SIZE / 1024 / 1024),
            (psram_physical_size / 1024 / 1024));
-      return ;
+      return;
     }
 #endif
 

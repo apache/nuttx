@@ -1640,7 +1640,7 @@ static void emac_dopoll(struct esp32_emac_s *priv)
         {
           /* never reach */
 
-          return ;
+          return;
         }
 
       dev->d_len = EMAC_BUF_LEN;

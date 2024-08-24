@@ -98,7 +98,7 @@ void bt_coex_handle_cmd_complete_evt(uint16_t opcode, uint16_t cause,
       if (total_len <= 1)
         {
           printf("bt_coex_handle_cmd_complete_evt: not report to wifi");
-          return ;
+          return;
         }
 
       rltk_coex_mailbox_to_wifi(p, total_len);
