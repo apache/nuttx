@@ -126,8 +126,6 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass);
 
 static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
-                                     FAR char *devname);
 
 /* Worker thread actions */
 
@@ -324,12 +322,6 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
           leave_critical_section(flags);
         }
     }
-}
-
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
-                                     FAR char *devname)
-{
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devchar);
 }
 
 /****************************************************************************
