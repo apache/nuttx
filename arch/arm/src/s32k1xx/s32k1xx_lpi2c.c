@@ -872,8 +872,8 @@ static void s32k1xx_lpi2c_traceevent(struct s32k1xx_lpi2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 

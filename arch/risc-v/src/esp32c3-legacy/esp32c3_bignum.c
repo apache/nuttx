@@ -1032,7 +1032,7 @@ static void mpi_bigendian_to_host(uint32_t * const p, size_t limbs)
   uint32_t *cur_limb_right;
   if (limbs == 0)
     {
-      return ;
+      return;
     }
 
   /* Traverse limbs and
@@ -1255,7 +1255,7 @@ void esp32c3_mpi_free(struct esp32c3_mpi_s *X)
 {
   if (X == NULL)
     {
-      return ;
+      return;
     }
 
   if (X->p != NULL)

@@ -1032,7 +1032,7 @@ int esp_himem_init(void)
 
   /* Catch double init */
 
-  /* Looks weird; last arg is empty so it expands to 'return ;' */
+  /* Looks weird; last arg is empty so it expands to 'return;' */
 
   HIMEM_CHECK(g_ram_descriptor != NULL, "already initialized", 0);
 
