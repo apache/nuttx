@@ -2433,6 +2433,38 @@ config DEBUG_RPMSG_INFO
 
 endif # DEBUG_RPMSG
 
+config DEBUG_RPTUN
+	bool "Rptun Debug Features"
+	default n
+	depends on RPTUN
+	---help---
+		Enable rptun debug features.
+
+if DEBUG_RPTUN
+
+config DEBUG_RPTUN_ERROR
+	bool "Rptun Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable rptun error output to SYSLOG.
+
+config DEBUG_RPTUN_WARN
+	bool "Rptun Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable rptun warning output to SYSLOG.
+
+config DEBUG_RPTUN_INFO
+	bool "Rptun Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable rptun informational output to SYSLOG.
+
+endif # DEBUG_RPTUN
+
 config DEBUG_CORESIGHT
 	bool "Coresight Debug Features"
 	default n
