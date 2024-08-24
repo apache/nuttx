@@ -330,7 +330,7 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             (FAR enum gpio_pintype_e *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
-          *ptr = (FAR enum gpio_pintype_e)dev->gp_pintype;
+          *ptr = (enum gpio_pintype_e)dev->gp_pintype;
           ret = OK;
         }
         break;
