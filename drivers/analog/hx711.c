@@ -946,7 +946,7 @@ int hx711_register(unsigned char minor, FAR struct hx711_lower_s *lower)
       return -ENOMEM;
     }
 
-  snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, minor);
+  snprintf(devname, sizeof(devname), DEVNAME_FMT, minor);
   ret = register_driver(devname, &g_hx711_fops, 0666, dev);
   if (ret)
     {

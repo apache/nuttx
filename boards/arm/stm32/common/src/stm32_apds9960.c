@@ -154,7 +154,7 @@ int board_apds9960_initialize(int devno, int busno)
 
   /* Then register the gesture sensor */
 
-  snprintf(devpath, 12, "/dev/gest%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/gest%d", devno);
   ret = apds9960_register(devpath, &g_apds9960config.config);
   if (ret < 0)
     {

@@ -78,7 +78,7 @@ int board_mlx90614_initialize(int devno, int busno)
 
   /* Then register the Infrared Thermometer sensor */
 
-  snprintf(devpath, 12, "/dev/therm%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/therm%d", devno);
   ret = mlx90614_register(devpath, i2c, MLX90614_ADDRESS);
   if (ret < 0)
     {

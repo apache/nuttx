@@ -107,7 +107,7 @@ int board_lis3dsh_initialize(int devno, int busno)
     }
   else
     {
-      snprintf(devpath, 12, "/dev/acc%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/acc%d", devno);
       ret = lis3dsh_register(devpath, spi, &acc0_config);
     }
 

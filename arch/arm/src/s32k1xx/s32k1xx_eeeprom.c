@@ -403,7 +403,7 @@ int s32k1xx_eeeprom_register(int minor, uint32_t size)
 
       /* Create a eeeprom device name */
 
-      snprintf(devname, 16, "/dev/eeeprom%d", minor);
+      snprintf(devname, sizeof(devname), "/dev/eeeprom%d", minor);
 
       /* Inode private data is a reference to the eeeprom device structure */
 
