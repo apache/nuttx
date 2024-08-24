@@ -153,7 +153,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
           /* The semaphore does not exist and O_CREAT is not set */
 
           ret = -ENOENT;
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Create the semaphore.  First we have to extract the additional
@@ -171,7 +171,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
       if (value > SEM_VALUE_MAX)
         {
           ret = -EINVAL;
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Create an inode in the pseudo-filesystem at this path.  The new
@@ -184,7 +184,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
 
       if (ret < 0)
         {
-          goto errout_with_lock;
+          goto errout_with_search;
         }
 
       /* Allocate the semaphore structure (using the appropriate allocator
@@ -226,7 +226,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
 errout_with_inode:
   inode_release(inode);
 
-errout_with_lock:
+errout_with_search:
   RELEASE_SEARCH(&desc);
   return ret;
 }
