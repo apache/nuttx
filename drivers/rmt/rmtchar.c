@@ -317,7 +317,7 @@ int rmtchar_register(FAR struct rmt_dev_s *rmt)
 
       /* Create the character device name */
 
-      snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, priv->minor);
+      snprintf(devname, sizeof(devname), DEVNAME_FMT, priv->minor);
       ret = register_driver(devname, &g_rmt_channel_fops, 0666, priv);
       if (ret < 0)
         {

@@ -559,7 +559,7 @@ int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
       return -ENOMEM;
     }
 
-  snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, bus);
+  snprintf(devname, sizeof(devname), DEVNAME_FMT, bus);
   ret = register_driver(devname, &g_i2cslavefops, 0666, priv);
   if (ret < 0)
     {

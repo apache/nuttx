@@ -2074,7 +2074,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
 
   /* Create a MMC/SD device name */
 
-  snprintf(devname, 16, "/dev/mmcsd%d", minor);
+  snprintf(devname, sizeof(devname), "/dev/mmcsd%d", minor);
 
   /* Register the driver, even on a failure condition.  A
    * card may be inserted later, for example.

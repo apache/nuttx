@@ -789,7 +789,7 @@ int lc823450_mtd_uninitialize(uint32_t devno)
       return -ENODEV;
     }
 
-  snprintf(devname, 16, "/dev/mtdblock%" PRId32, devno);
+  snprintf(devname, sizeof(devname), "/dev/mtdblock%" PRId32, devno);
 
 #ifdef CONFIG_MTD_REGISTRATION
   mtd_unregister(g_mtdmaster[ch]);

@@ -63,7 +63,7 @@ int board_hall3ph_initialize(int devno, int pha, int phb, int phc)
 
   /* Initialize a Hall effect sensor interface. */
 
-  snprintf(devpath, 12, "/dev/hall%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/hall%d", devno);
 
   ret = stm32_hall3ph_initialize(devpath, &cfg);
   if (ret < 0)

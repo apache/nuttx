@@ -96,7 +96,8 @@ static FAR char *unique_blkdev(void)
       /* Construct the full device number */
 
       devno &= 0xffffff;
-      snprintf(devbuf, 16, "/dev/tmpb%06lx", (unsigned long)devno);
+      snprintf(devbuf, sizeof(devbuf), "/dev/tmpb%06lx",
+               (unsigned long)devno);
 
       /* Make sure that file name is not in use */
 

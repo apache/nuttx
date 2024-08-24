@@ -1645,11 +1645,11 @@ int fb_register_device(int display, int plane,
 
   if (nplanes < 2)
     {
-      snprintf(devname, 16, "/dev/fb%d", display);
+      snprintf(devname, sizeof(devname), "/dev/fb%d", display);
     }
   else
     {
-      snprintf(devname, 16, "/dev/fb%d.%d", display, plane);
+      snprintf(devname, sizeof(devname), "/dev/fb%d.%d", display, plane);
     }
 
   ret = register_driver(devname, &g_fb_fops, 0666, fb);

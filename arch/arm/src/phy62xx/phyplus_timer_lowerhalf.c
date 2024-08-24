@@ -596,10 +596,7 @@ static int phyplus_getstatus(struct timer_lowerhalf_s *lower,
 int phyplus_timer_register(struct phyplus_timer_param_s
                            *phyplus_timer_param)
 {
-  const char *fmt;
   char devname[16];
-
-  fmt = "/dev/timer%u";
 
   if ((phyplus_timer_param->timer_idx < 1) ||
       (phyplus_timer_param->timer_idx > 6))
@@ -607,7 +604,8 @@ int phyplus_timer_register(struct phyplus_timer_param_s
       return -ENODEV;
     }
 
-  snprintf(devname, 16, fmt, (unsigned int)phyplus_timer_param->timer_idx);
+  snprintf(devname, sizeof(devname), "/dev/timer%u",
+           phyplus_timer_param->timer_idx);
   return phyplus_timer_initialize(devname, phyplus_timer_param->timer_idx);
 }
 

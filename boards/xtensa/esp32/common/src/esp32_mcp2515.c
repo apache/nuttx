@@ -242,7 +242,7 @@ int board_mcp2515_initialize(int devno)
 
       /* Create the '/dev/canX' name based on 'devno' */
 
-      snprintf(devpath, 10, "/dev/can%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/can%d", devno);
 
       /* Register the CAN driver at "/dev/can0" */
 

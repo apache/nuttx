@@ -82,7 +82,7 @@ int board_i2sdev_initialize(int port)
       return  -ENODEV;
     }
 
-  snprintf(devname, 12, "pcm%d", port);
+  snprintf(devname, sizeof(devname), "pcm%d", port);
 
   ret = audio_register(devname, pcm);
 

@@ -96,7 +96,7 @@ int board_sht3x_initialize(int devno, int busno)
     {
       /* Then try to register the sensor in I2C Bus */
 
-      snprintf(devpath, 12, "/dev/temp%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/temp%d", devno);
       ret = sht3x_register(devpath, i2c, SHT3X_I2CADDR);
       if (ret < 0)
         {

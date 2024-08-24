@@ -855,7 +855,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
 
   /* Create the character device name */
 
-  snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, minor);
+  snprintf(devname, sizeof(devname), DEVNAME_FMT, minor);
 
   /* Register the mac character driver */
 
