@@ -177,7 +177,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   uintptr_t vaddr;
   uint32_t  ptlevel;
   uintptr_t satp;
-  uint32_t mmuflags;
+  uint32_t  mmuflags;
 
   _info("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
         ", MTVAL: %" PRIxREG "\n",
@@ -213,7 +213,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   satp    = READ_CSR(CSR_SATP);
   ptprev  = riscv_pgvaddr(mmu_satp_to_paddr(satp));
   ptlevel = ARCH_SPGTS;
-  paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
+  paddr   = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
   if (!paddr)
     {
       /* Nothing yet, allocate one page for final level page table */
