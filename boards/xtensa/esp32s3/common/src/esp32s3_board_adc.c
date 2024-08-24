@@ -59,7 +59,7 @@ static int board_adc_register(int channel)
 {
   int ret;
   char devname[12];
-  FAR struct adc_dev_s *adcdev;
+  struct adc_dev_s *adcdev;
 
   adcdev = kmm_malloc(sizeof(struct adc_dev_s));
   if (adcdev == NULL)

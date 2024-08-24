@@ -216,7 +216,7 @@ int board_power_off(int status)
 #if defined(CONFIG_BUILD_KERNEL) && ! defined(CONFIG_NUTTSBI)
   riscv_sbi_system_reset(SBI_SRST_TYPE_SHUTDOWN, SBI_SRST_REASON_NONE);
 #else
-  *(FAR volatile uint32_t *)QEMU_RV_RESET_BASE = QEMU_RV_RESET_DONE;
+  *(volatile uint32_t *)QEMU_RV_RESET_BASE = QEMU_RV_RESET_DONE;
 #endif
 
   UNUSED(status);

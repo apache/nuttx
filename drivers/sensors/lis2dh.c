@@ -86,7 +86,7 @@ struct lis2dh_dev_s
   FAR struct i2c_master_s    *i2c;         /* I2C interface */
   uint8_t                    addr;         /* I2C address */
   FAR struct lis2dh_config_s *config;      /* Platform specific configuration */
-  struct lis2dh_setup        *setup;       /* User defined device operation mode setup */
+  FAR struct lis2dh_setup    *setup;       /* User defined device operation mode setup */
   struct lis2dh_vector_s     vector_data;  /* Latest read data read from lis2dh */
   int                        scale;        /* Full scale in milliG */
   mutex_t                    devlock;      /* Manages exclusive access to this structure */
@@ -97,7 +97,7 @@ struct lis2dh_dev_s
 #else
   volatile bool              int_pending;  /* Interrupt received but data not read, yet */
 #endif
-  struct pollfd              *fds[CONFIG_LIS2DH_NPOLLWAITERS];
+  FAR struct pollfd          *fds[CONFIG_LIS2DH_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -628,13 +628,13 @@ static int lis2dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   case SNIOC_READ_TEMP:
     {
-      ret = lis2dh_read_temp(priv, (int16_t *)arg);
+      ret = lis2dh_read_temp(priv, (FAR int16_t *)arg);
     }
     break;
 
   case SNIOC_WHO_AM_I:
     {
-      ret = lis2dh_who_am_i(priv, (uint8_t *)arg);
+      ret = lis2dh_who_am_i(priv, (FAR uint8_t *)arg);
     }
     break;
 
@@ -722,7 +722,7 @@ static int lis2dh_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */
@@ -1376,7 +1376,7 @@ static unsigned int lis2dh_get_fifo_readings(FAR struct lis2dh_dev_s *priv,
       struct lis2dh_vector_s sample;
     }
 
-    *buf = (void *)&res->measurements[res->header.meas_count];
+    *buf = (FAR void *)&res->measurements[res->header.meas_count];
 
   bool xy_axis_fixup = priv->setup->xy_axis_fixup;
   size_t buflen = readcount * 6;
@@ -1391,7 +1391,7 @@ static unsigned int lis2dh_get_fifo_readings(FAR struct lis2dh_dev_s *priv,
     }
 
   if (lis2dh_access(priv, ST_LIS2DH_OUT_X_L_REG,
-                   (void *)buf, buflen) != buflen)
+                    (FAR void *)buf, buflen) != buflen)
     {
       lis2dh_dbg("lis2dh: Failed to read FIFO (%d bytes, %d samples)\n",
                  buflen, readcount);
@@ -1401,7 +1401,7 @@ static unsigned int lis2dh_get_fifo_readings(FAR struct lis2dh_dev_s *priv,
 
   /* Add something to entropy pool. */
 
-  up_rngaddentropy(RND_SRC_SENSOR, (void *)buf, buflen / 4);
+  up_rngaddentropy(RND_SRC_SENSOR, (FAR void *)buf, buflen / 4);
 
   /* Convert raw values to mG */
 

@@ -565,7 +565,7 @@ static ssize_t adxl372_dvr_read(FAR void *instance, FAR char *buffer,
 
   DEBUGASSERT(priv != NULL);
 
-  adxl372_read_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
+  adxl372_read_registerblk(priv, priv->seek_address, (FAR uint8_t *)buffer,
                           buflen);
 
   /* Permute accelerometer data out fields */
@@ -602,7 +602,7 @@ static ssize_t adxl372_dvr_write(FAR void *instance,
       return -EROFS;
     }
 
-  adxl372_write_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
+  adxl372_write_registerblk(priv, priv->seek_address, (FAR uint8_t *)buffer,
                             buflen);
 
   return buflen;
@@ -877,7 +877,7 @@ int adxl372_register(FAR const char *devpath,
 
   priv->flink         = g_adxl372_list;
   g_adxl372_list      = priv;
-  config->leaf_handle = (void *) priv;
+  config->leaf_handle = (FAR void *)priv;
   config->sc_ops      = &g_adxl372_dops;
 
   return OK;

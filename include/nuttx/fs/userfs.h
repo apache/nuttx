@@ -357,7 +357,7 @@ struct userfs_fstat_response_s
 {
   uint8_t resp;             /* Must be USERFS_RESP_FSTAT */
   int ret;                  /* Result of the operation */
-  FAR struct stat buf;      /* Returned file system status */
+  struct stat buf;          /* Returned file system status */
 };
 
 struct userfs_truncate_request_s
@@ -507,7 +507,7 @@ struct userfs_stat_response_s
 {
   uint8_t resp;             /* Must be USERFS_RESP_STAT */
   int ret;                  /* Result of the operation */
-  FAR struct stat buf;      /* Returned status of the directory entry */
+  struct stat buf;          /* Returned status of the directory entry */
 };
 
 struct userfs_destroy_request_s

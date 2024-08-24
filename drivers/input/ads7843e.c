@@ -105,7 +105,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer,
                              size_t len);
 static int  ads7843e_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
-static int  ads7843e_poll(FAR struct file *filep, struct pollfd *fds,
+static int  ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
                           bool setup);
 
 /****************************************************************************
@@ -1050,7 +1050,7 @@ static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

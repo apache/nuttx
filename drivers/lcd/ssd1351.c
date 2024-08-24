@@ -825,7 +825,7 @@ static int ssd1351_getplaneinfo(FAR struct lcd_dev_s *dev,
 
   pinfo->putrun = ssd1351_putrun;
   pinfo->getrun = ssd1351_getrun;
-  pinfo->buffer = (uint8_t *)priv->runbuffer;
+  pinfo->buffer = (FAR uint8_t *)priv->runbuffer;
   pinfo->bpp    = SSD1351_BPP;
   pinfo->dev    = dev;
 

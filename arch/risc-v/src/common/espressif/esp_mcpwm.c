@@ -154,13 +154,13 @@ struct mcpwm_motor_lowerhalf_s
 {
   /* The following block is part of the upper-half device struct */
 
-  FAR const struct motor_ops_s *ops;    /* Arch-specific operations */
-  uint8_t                      opmode;  /* Motor operation mode */
-  uint8_t                      opflags; /* Motor operation flags */
-  struct motor_limits_s        limits;  /* Motor absolute limits */
-  struct motor_params_s        param;   /* Motor settings */
-  struct motor_state_s         state;   /* Motor state */
-  FAR void                     *priv;   /* Private data */
+  const struct motor_ops_s *ops;    /* Arch-specific operations */
+  uint8_t                  opmode;  /* Motor operation mode */
+  uint8_t                  opflags; /* Motor operation flags */
+  struct motor_limits_s    limits;  /* Motor absolute limits */
+  struct motor_params_s    param;   /* Motor settings */
+  struct motor_state_s     state;   /* Motor state */
+  void                     *priv;   /* Private data */
 
   /* The following is private to the ESP MCPWM driver */
 

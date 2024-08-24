@@ -176,7 +176,7 @@ struct usbhost_state_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-  struct pollfd *fds[CONFIG_XBOXCONTROLLER_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_XBOXCONTROLLER_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -202,7 +202,7 @@ static void usbhost_destroy(FAR void *arg);
 /* Polling support */
 
 static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
-static int usbhost_xboxcontroller_poll(int argc, char *argv[]);
+static int usbhost_xboxcontroller_poll(int argc, FAR char *argv[]);
 
 /* Helpers for usbhost_connect() */
 
@@ -213,8 +213,8 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv);
 
 /* (Little Endian) Data helpers */
 
-static inline uint16_t usbhost_getle16(const uint8_t *val);
-static inline void usbhost_putle16(uint8_t *dest, uint16_t val);
+static inline uint16_t usbhost_getle16(FAR const uint8_t *val);
+static inline void usbhost_putle16(FAR uint8_t *dest, uint16_t val);
 
 /* Transfer descriptor memory management */
 
@@ -540,7 +540,7 @@ static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
  *
  ****************************************************************************/
 
-static int usbhost_xboxcontroller_poll(int argc, char *argv[])
+static int usbhost_xboxcontroller_poll(int argc, FAR char *argv[])
 {
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
@@ -791,18 +791,18 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
                                     XBOX_BUTTON_STICK_RIGHT_INDEX,
                                     XBOX_BUTTON_STICK_RIGHT_MASK);
 
-                  priv->rpt.trigger_left =
-                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
-                  priv->rpt.trigger_right =
-                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
-                  priv->rpt.stick_left_x =
-                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
-                  priv->rpt.stick_left_y =
-                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
-                  priv->rpt.stick_right_x =
-                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
-                  priv->rpt.stick_right_y =
-                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
+                  priv->rpt.trigger_left = ((FAR int16_t *)
+                      (priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
+                  priv->rpt.trigger_right = ((FAR int16_t *)
+                      (priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
+                  priv->rpt.stick_left_x = ((FAR int16_t *)
+                      (priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
+                  priv->rpt.stick_left_y = ((FAR int16_t *)
+                      (priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
+                  priv->rpt.stick_right_x = ((FAR int16_t *)
+                      (priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
+                  priv->rpt.stick_right_y = ((FAR int16_t *)
+                      (priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
 
                   priv->valid = true;
 
@@ -1381,7 +1381,7 @@ errout:
  *
  ****************************************************************************/
 
-static inline uint16_t usbhost_getle16(const uint8_t *val)
+static inline uint16_t usbhost_getle16(FAR const uint8_t *val)
 {
   return (uint16_t)val[1] << 8 | (uint16_t)val[0];
 }
@@ -1401,7 +1401,7 @@ static inline uint16_t usbhost_getle16(const uint8_t *val)
  *
  ****************************************************************************/
 
-static void usbhost_putle16(uint8_t *dest, uint16_t val)
+static void usbhost_putle16(FAR uint8_t *dest, uint16_t val)
 {
   dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
   dest[1] = val >> 8;

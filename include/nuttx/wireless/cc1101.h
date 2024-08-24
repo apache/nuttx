@@ -426,7 +426,7 @@ EXTERN const struct c1101_rfsettings_s
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR int cc1101_init2(FAR struct cc1101_dev_s *dev);
+int cc1101_init2(FAR struct cc1101_dev_s *dev);
 
 /****************************************************************************
  * Initialize Chipcon CC1101 Chip.

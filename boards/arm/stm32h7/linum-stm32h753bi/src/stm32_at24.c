@@ -57,7 +57,7 @@
 
 int stm32_at24_init(char *path)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   static bool initialized = false;
   int ret;
 

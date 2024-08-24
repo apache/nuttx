@@ -465,7 +465,7 @@ int bcmf_bus_setup_interrupts(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Configure gpio interrupt pin */
 
-  bcmf_board_setup_oob_irq(sbus->minor, bcmf_oob_irq, (void *)sbus);
+  bcmf_board_setup_oob_irq(sbus->minor, bcmf_oob_irq, (FAR void *)sbus);
 
   /* Enable function 2 interrupt */
 

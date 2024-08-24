@@ -157,7 +157,7 @@ struct stmpe811_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-  struct pollfd *fds[CONFIG_STMPE811_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_STMPE811_NPOLLWAITERS];
 #endif
 
   /* Fields that may be disabled to save size of GPIO support is not used */

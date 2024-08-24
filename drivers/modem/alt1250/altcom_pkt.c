@@ -60,7 +60,7 @@ static uint16_t calc_checksum_v1(FAR uint8_t *ptr, uint16_t len)
 
   for (i = 0; i < (len & 0xfffe); i += sizeof(uint16_t))
     {
-      calctmp = *((uint16_t *)(ptr + i));
+      calctmp = *((FAR uint16_t *)(ptr + i));
       ret += ntohs(calctmp);
     }
 
@@ -221,7 +221,7 @@ static bool is_header_ok(FAR struct altcom_cmdhdr_s *hdr)
 
   if (hdr->ver == ALTCOM_VER1)
     {
-      checksum = calc_checksum_v1((uint8_t *)hdr,
+      checksum = calc_checksum_v1((FAR uint8_t *)hdr,
         sizeof(struct altcom_cmdhdr_s) - sizeof(hdr->v1_checksum));
       if (ntohs(hdr->v1_checksum) == checksum)
         {
@@ -246,7 +246,7 @@ static bool is_header_ok(FAR struct altcom_cmdhdr_s *hdr)
     }
   else if (hdr->ver == ALTCOM_VER4)
     {
-      checksum = calc_checksum_v4((uint8_t *)hdr,
+      checksum = calc_checksum_v4((FAR uint8_t *)hdr,
         sizeof(struct altcom_cmdhdr_s) - sizeof(hdr->v4_hdr_cksum) -
         sizeof(hdr->v4_data_cksum));
       if (ntohs(hdr->v4_hdr_cksum) == checksum)
@@ -315,7 +315,7 @@ FAR void *altcom_make_poweron_cmd_v1(int *sz)
   set_header_top(hdr, ALTCOM_VER1, ALTCOM_CMDID_POWER_ON_V1);
   hdr->v1_options = htons(ALTCOM_CMDOPT_CHECKSUM_EN);
   hdr->v1_checksum =
-    htons(calc_checksum_v1((uint8_t *)hdr,
+    htons(calc_checksum_v1((FAR uint8_t *)hdr,
           sizeof(struct altcom_cmdhdr_s) - 2));
 
   footer->reserve = 0;
@@ -337,7 +337,7 @@ FAR void *altcom_make_poweron_cmd_v4(int *sz)
   struct altcom_cmdhdr_s *hdr = (struct altcom_cmdhdr_s *)g_poweron_cmd;
 
   set_header_top(hdr, ALTCOM_VER4, ALTCOM_CMDID_POWER_ON_V4);
-  hdr->v4_hdr_cksum = htons(calc_checksum_v4((uint8_t *)hdr,
+  hdr->v4_hdr_cksum = htons(calc_checksum_v4((FAR uint8_t *)hdr,
         sizeof(struct altcom_cmdhdr_s)-4));
   hdr->v4_data_cksum = htons(calc_checksum_v4(&hdr->payload[0], 0));
 
@@ -410,7 +410,7 @@ uint16_t altcom_make_header(FAR struct altcom_cmdhdr_s *hdr,
 
       hdr->v1_options = htons(ALTCOM_CMDOPT_CHECKSUM_EN);
       hdr->v1_checksum =
-        htons(calc_checksum_v1((uint8_t *)hdr,
+        htons(calc_checksum_v1((FAR uint8_t *)hdr,
           sizeof(struct altcom_cmdhdr_s) - 2));
 
       footer->reserve = 0;
@@ -420,7 +420,7 @@ uint16_t altcom_make_header(FAR struct altcom_cmdhdr_s *hdr,
     }
   else if (ver == ALTCOM_VER4)
     {
-      hdr->v4_hdr_cksum = htons(calc_checksum_v4((uint8_t *)hdr,
+      hdr->v4_hdr_cksum = htons(calc_checksum_v4((FAR uint8_t *)hdr,
         sizeof(struct altcom_cmdhdr_s)-4));
       hdr->v4_data_cksum = htons(calc_checksum_v4(&hdr->payload[0], sz));
     }

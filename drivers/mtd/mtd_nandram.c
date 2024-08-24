@@ -436,15 +436,15 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
   nand_ram_flash_spare[write_page].n_write++;
   nand_ram_flash_spare[write_page].free = NAND_RAM_PAGE_WRITTEN;
 
-  memset((void *)write_page_data->page, 0, NAND_RAM_PAGE_SIZE);
+  memset((FAR void *)write_page_data->page, 0, NAND_RAM_PAGE_SIZE);
   if (data != NULL)
     {
-      memcpy((void *)write_page_data->page, data, NAND_RAM_PAGE_SIZE);
+      memcpy((FAR void *)write_page_data->page, data, NAND_RAM_PAGE_SIZE);
     }
 
   if (spare != NULL)
     {
-      memcpy((void *)write_page_spare, data, NAND_RAM_SPARE_SIZE);
+      memcpy((FAR void *)write_page_spare, data, NAND_RAM_SPARE_SIZE);
     }
 
   NAND_RAM_LOG("[LOWER %lu | %s] Done\n", nand_ram_ins_i, "rawwrite");

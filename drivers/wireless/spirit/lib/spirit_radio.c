@@ -1239,7 +1239,7 @@ int32_t spirit_radio_get_foffset(FAR struct spirit_library_s *spirit)
       offtmp &= 0x0fff;
     }
 
-  fcoffset = *((int16_t *)(&offtmp));
+  fcoffset = *((FAR int16_t *)(&offtmp));
 
   /* Calculates the frequency offset and return it */
 

@@ -154,7 +154,7 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
        * is really required given the directories' path name.
        */
 
-      dsize = (size_t)(&d->d_name[strlen(d->d_name) + 1] - (char *)d);
+      dsize = (size_t)(&d->d_name[strlen(d->d_name) + 1] - (FAR char *)d);
       dnew = lib_malloc(dsize);
       if (!dnew)
         {

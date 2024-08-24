@@ -244,8 +244,8 @@ errout:
 FAR static char *ser_log(FAR const struct mfs_jrnl_log_s * const x,
                          FAR char * const out)
 {
-  char *o = out;
-  mfs_t i = 0;
+  FAR char *o = out;
+  mfs_t i;
 
   o = mfs_ser_mfs(x->depth, o);
   o = mfs_ser_mfs(x->sz_new, o);
@@ -285,8 +285,8 @@ FAR static char *ser_log(FAR const struct mfs_jrnl_log_s * const x,
 FAR static const char *deser_log(FAR const char * const in,
                                  FAR struct mfs_jrnl_log_s * const x)
 {
-  mfs_t       k = 0;
-  const char *i = in;
+  FAR const char *i = in;
+  mfs_t k;
 
   i = mfs_deser_mfs(i, &x->depth);
   i = mfs_deser_mfs(i, &x->sz_new);
@@ -428,9 +428,9 @@ int mfs_jrnl_fmt(FAR struct mfs_sb_s * const sb, FAR mfs_t *blk1,
 
   /* Write magic sequence, size of jrnlarr, and then the jrnlarr. */
 
-  sz    = MFS_JRNL_SUFFIXSZ + ((CONFIG_MNEMOFS_JOURNAL_NBLKS + 2) * 4);
+  sz = MFS_JRNL_SUFFIXSZ + ((CONFIG_MNEMOFS_JOURNAL_NBLKS + 2) * 4);
 
-  buf   = kmm_zalloc(sz);
+  buf = kmm_zalloc(sz);
   if (predict_false(buf == NULL))
     {
       ret = -ENOMEM;
@@ -528,7 +528,7 @@ void mfs_jrnl_free(FAR struct mfs_sb_s * const sb)
 mfs_t mfs_jrnl_blkidx2blk(FAR const struct mfs_sb_s * const sb,
                           const mfs_t blk_idx)
 {
-  int   ret    = OK;
+  int   ret = OK;
   mfs_t pg;
   mfs_t idx;
   mfs_t blk;

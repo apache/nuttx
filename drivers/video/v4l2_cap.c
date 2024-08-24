@@ -126,7 +126,7 @@ struct capture_scene_params_s
   int32_t blue;
   int32_t gamma;
   uint32_t gamma_curve_sz;
-  uint8_t *gamma_curve;
+  FAR uint8_t *gamma_curve;
   int32_t ev;
   bool    hflip_video;
   bool    vflip_video;
@@ -159,7 +159,7 @@ typedef struct capture_scene_params_s capture_scene_params_t;
 struct capture_parameter_name_s
 {
   uint32_t id;
-  const char *name;
+  FAR const char *name;
 };
 
 typedef struct capture_parameter_name_s capture_parameter_name_t;

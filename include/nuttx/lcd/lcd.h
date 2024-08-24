@@ -81,8 +81,9 @@ struct lcd_planeinfo_s
    *            (range: 0 < npixels <= xres-col)
    */
 
-  int (*putrun)(FAR struct lcd_dev_s *dev, fb_coord_t row, fb_coord_t col,
-                FAR const uint8_t *buffer, size_t npixels);
+  CODE int (*putrun)(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                     fb_coord_t col, FAR const uint8_t *buffer,
+                     size_t npixels);
 
   /* This method can be used to write a rectangular area to the LCD:
    *
@@ -103,10 +104,10 @@ struct lcd_planeinfo_s
    * used.
    */
 
-  int (*putarea)(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
-                 fb_coord_t row_end, fb_coord_t col_start,
-                 fb_coord_t col_end, FAR const uint8_t *buffer,
-                 fb_coord_t stride);
+  CODE int (*putarea)(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
+                      fb_coord_t row_end, fb_coord_t col_start,
+                      fb_coord_t col_end, FAR const uint8_t *buffer,
+                      fb_coord_t stride);
 
   /* This method can be used to read a partial raster line from the LCD:
    *
@@ -119,8 +120,8 @@ struct lcd_planeinfo_s
    *            (range: 0 < npixels <= xres-col)
    */
 
-  int (*getrun)(FAR struct lcd_dev_s *dev, fb_coord_t row,
-                fb_coord_t col, FAR uint8_t *buffer, size_t npixels);
+  CODE int (*getrun)(FAR struct lcd_dev_s *dev, fb_coord_t row,
+                     fb_coord_t col, FAR uint8_t *buffer, size_t npixels);
 
   /* This method can be used to read a rectangular area from the LCD:
    *
@@ -138,10 +139,10 @@ struct lcd_planeinfo_s
    * used.
    */
 
-  int (*getarea)(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
-                 fb_coord_t row_end, fb_coord_t col_start,
-                 fb_coord_t col_end, FAR uint8_t *buffer,
-                 fb_coord_t stride);
+  CODE int (*getarea)(FAR struct lcd_dev_s *dev, fb_coord_t row_start,
+                      fb_coord_t row_end, fb_coord_t col_start,
+                      fb_coord_t col_end, FAR uint8_t *buffer,
+                      fb_coord_t stride);
 
   /* This method can be used to redraw display's content.
    *
@@ -156,7 +157,7 @@ struct lcd_planeinfo_s
    * implemented.
    */
 
-  int (*redraw)(FAR struct lcd_dev_s *dev);
+  CODE int (*redraw)(FAR struct lcd_dev_s *dev);
 
   /* Plane color characteristics ********************************************/
 
@@ -198,10 +199,10 @@ struct lcd_dev_s
    * configuration of each LCD color plane.
    */
 
-  int (*getvideoinfo)(FAR struct lcd_dev_s *dev,
-         FAR struct fb_videoinfo_s *vinfo);
-  int (*getplaneinfo)(FAR struct lcd_dev_s *dev, unsigned int planeno,
-         FAR struct lcd_planeinfo_s *pinfo);
+  CODE int (*getvideoinfo)(FAR struct lcd_dev_s *dev,
+                           FAR struct fb_videoinfo_s *vinfo);
+  CODE int (*getplaneinfo)(FAR struct lcd_dev_s *dev, unsigned int planeno,
+                           FAR struct lcd_planeinfo_s *pinfo);
 
   /* LCD RGB Mapping ********************************************************/
 
@@ -210,9 +211,9 @@ struct lcd_dev_s
    */
 
 #ifdef CONFIG_FB_CMAP
-  int (*getcmap)(FAR struct lcd_dev_s *dev, FAR struct fb_cmap_s *cmap);
-  int (*putcmap)(FAR struct lcd_dev_s *dev,
-         FAR const struct fb_cmap_s *cmap);
+  CODE int (*getcmap)(FAR struct lcd_dev_s *dev, FAR struct fb_cmap_s *cmap);
+  CODE int (*putcmap)(FAR struct lcd_dev_s *dev,
+                      FAR const struct fb_cmap_s *cmap);
 #endif
 
   /* Cursor Controls ********************************************************/
@@ -222,10 +223,10 @@ struct lcd_dev_s
    */
 
 #ifdef CONFIG_FB_HWCURSOR
-  int (*getcursor)(FAR struct lcd_dev_s *dev,
-        FAR struct fb_cursorattrib_s *attrib);
-  int (*setcursor)(FAR struct lcd_dev_s *dev,
-        FAR struct fb_setcursor_s *settings);
+  CODE int (*getcursor)(FAR struct lcd_dev_s *dev,
+                        FAR struct fb_cursorattrib_s *attrib);
+  CODE int (*setcursor)(FAR struct lcd_dev_s *dev,
+                        FAR struct fb_setcursor_s *settings);
 #endif
 
   /* LCD Specific Controls **************************************************/
@@ -235,44 +236,44 @@ struct lcd_dev_s
    * setting.
    */
 
-  int (*getpower)(struct lcd_dev_s *dev);
+  CODE int (*getpower)(struct lcd_dev_s *dev);
 
   /* Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWER: full
    * on).  On backlit LCDs, this setting may correspond to the backlight
    * setting.
    */
 
-  int (*setpower)(struct lcd_dev_s *dev, int power);
+  CODE int (*setpower)(struct lcd_dev_s *dev, int power);
 
   /* Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST) */
 
-  int (*getcontrast)(struct lcd_dev_s *dev);
+  CODE int (*getcontrast)(struct lcd_dev_s *dev);
 
   /* Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST) */
 
-  int (*setcontrast)(struct lcd_dev_s *dev, unsigned int contrast);
+  CODE int (*setcontrast)(struct lcd_dev_s *dev, unsigned int contrast);
 
   /* Set LCD panel frame rate (0: disable refresh) */
 
-  int (*setframerate)(struct lcd_dev_s *dev, int rate);
+  CODE int (*setframerate)(struct lcd_dev_s *dev, int rate);
 
   /* Get LCD panel frame rate (0: disable refresh) */
 
-  int (*getframerate)(struct lcd_dev_s *dev);
+  CODE int (*getframerate)(struct lcd_dev_s *dev);
 
   /* Get LCD panel area alignment */
 
-  int (*getareaalign)(FAR struct lcd_dev_s *dev,
-                      FAR struct lcddev_area_align_s *align);
+  CODE int (*getareaalign)(FAR struct lcd_dev_s *dev,
+                           FAR struct lcddev_area_align_s *align);
 
   /* Passthrough unknown ioctl commands. */
 
-  int (*ioctl)(FAR struct lcd_dev_s *dev, int cmd, unsigned long arg);
+  CODE int (*ioctl)(FAR struct lcd_dev_s *dev, int cmd, unsigned long arg);
 
   /* open/close window. */
 
-  int (*open)(FAR struct lcd_dev_s *dev);
-  int (*close)(FAR struct lcd_dev_s *dev);
+  CODE int (*open)(FAR struct lcd_dev_s *dev);
+  CODE int (*close)(FAR struct lcd_dev_s *dev);
 };
 
 /****************************************************************************

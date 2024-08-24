@@ -277,7 +277,7 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
     }
   else
     {
-      regs = (uintptr_t *)tcb->xcp.regs;
+      regs = (FAR uintptr_t *)tcb->xcp.regs;
     }
 
   if (regs != NULL)
@@ -290,8 +290,8 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
             }
           else
             {
-              status.pr_regs[i] =
-                *(uintptr_t *)((uint8_t *)regs + g_tcbinfo.reg_off.p[i]);
+              status.pr_regs[i] = *(FAR uintptr_t *)
+                  ((FAR uint8_t *)regs + g_tcbinfo.reg_off.p[i]);
             }
         }
     }

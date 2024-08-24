@@ -55,14 +55,14 @@ struct part_struct_s
 static int     part_open(FAR struct inode *inode);
 static int     part_close(FAR struct inode *inode);
 static ssize_t part_read(FAR struct inode *inode, FAR unsigned char *buffer,
-                 blkcnt_t start_sector, unsigned int nsectors);
+                         blkcnt_t start_sector, unsigned int nsectors);
 static ssize_t part_write(FAR struct inode *inode,
-                 FAR const unsigned char *buffer, blkcnt_t start_sector,
-                 unsigned int nsectors);
+                          FAR const unsigned char *buffer,
+                          blkcnt_t start_sector, unsigned int nsectors);
 static int     part_geometry(FAR struct inode *inode,
-                 FAR struct geometry *geometry);
+                             FAR struct geometry *geometry);
 static int     part_ioctl(FAR struct inode *inode, int cmd,
-                 unsigned long arg);
+                          unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     part_unlink(FAR struct inode *inode);
 #endif
@@ -139,7 +139,7 @@ static int part_close(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-static ssize_t part_read(FAR struct inode *inode, unsigned char *buffer,
+static ssize_t part_read(FAR struct inode *inode, FAR unsigned char *buffer,
                          blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct part_struct_s *dev = inode->i_private;
@@ -186,7 +186,8 @@ static ssize_t part_write(FAR struct inode *inode,
  *
  ****************************************************************************/
 
-static int part_geometry(FAR struct inode *inode, struct geometry *geometry)
+static int part_geometry(FAR struct inode *inode,
+                         FAR struct geometry *geometry)
 {
   FAR struct part_struct_s *dev = inode->i_private;
   FAR struct inode *parent = dev->parent;
@@ -210,7 +211,7 @@ static int part_geometry(FAR struct inode *inode, struct geometry *geometry)
 
 static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 {
-  FAR uintptr_t ptr_arg = (uintptr_t)arg;
+  uintptr_t ptr_arg = (uintptr_t)arg;
   FAR struct part_struct_s *dev = inode->i_private;
   FAR struct inode *parent = dev->parent;
   int ret = -ENOTTY;

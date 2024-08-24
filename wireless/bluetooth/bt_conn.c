@@ -294,7 +294,7 @@ void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
 
         /* First packet */
 
-        hdr = (void *)buf->data;
+        hdr = (FAR void *)buf->data;
         len = BT_LE162HOST(hdr->len);
 
         wlinfo("First, len %u final %u\n", buf->len, len);
@@ -367,7 +367,7 @@ void bt_conn_receive(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf,
         return;
     }
 
-  hdr = (void *)buf->data;
+  hdr = (FAR void *)buf->data;
   len = BT_LE162HOST(hdr->len);
 
   if (sizeof(*hdr) + len != buf->len)

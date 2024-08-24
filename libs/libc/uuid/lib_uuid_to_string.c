@@ -41,7 +41,7 @@
  *
  ****************************************************************************/
 
-void uuid_to_string(const uuid_t *u, char **s, uint32_t *status)
+void uuid_to_string(FAR const uuid_t *u, FAR char **s, FAR uint32_t *status)
 {
   static const uuid_t nil;
   int c;

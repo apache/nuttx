@@ -996,7 +996,7 @@ static int icjx_interrupt(int irq, FAR void *context, FAR void *arg)
 
   DEBUGASSERT(work_available(&priv->work));
   DEBUGVERIFY(work_queue(HPWORK, &priv->work, icjx_interrupt_worker,
-                        (void *)priv, 0));
+                         (FAR void *)priv, 0));
 
   return OK;
 }

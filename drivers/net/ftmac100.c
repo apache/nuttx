@@ -135,8 +135,8 @@
 
 #define INT_MASK_ALL_DISABLED 0
 
-#define putreg32(v, x) (*(volatile uint32_t*)(x) = (v))
-#define getreg32(x) (*(uint32_t *)(x))
+#define putreg32(v, x) (*(FAR volatile uint32_t*)(x) = (v))
+#define getreg32(x) (*(FAR volatile uint32_t *)(x))
 
 /****************************************************************************
  * Private Types
@@ -190,7 +190,7 @@ static struct ftmac100_driver_s g_ftmac100[CONFIG_FTMAC100_NINTERFACES]
 /* Common TX logic */
 
 static int  ftmac100_transmit(FAR struct ftmac100_driver_s *priv);
-static int  ftmac100_txpoll(struct net_driver_s *dev);
+static int  ftmac100_txpoll(FAR struct net_driver_s *dev);
 
 /* Interrupt handling */
 
@@ -337,7 +337,7 @@ static int ftmac100_transmit(FAR struct ftmac100_driver_s *priv)
  *
  ****************************************************************************/
 
-static int ftmac100_txpoll(struct net_driver_s *dev)
+static int ftmac100_txpoll(FAR struct net_driver_s *dev)
 {
   FAR struct ftmac100_driver_s *priv =
     (FAR struct ftmac100_driver_s *)dev->d_private;
@@ -620,7 +620,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
         }
 
       len = FTMAC100_RXDES0_RFL(rxdes->rxdes0);
-      data = (uint8_t *)rxdes->rxdes2;
+      data = (FAR uint8_t *)rxdes->rxdes2;
 
       ninfo ("RX buffer %d (%08x), %x received (%d)\n",
              priv->rx_pointer, data, len,

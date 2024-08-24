@@ -165,7 +165,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
 
           for (i = 0; i < loadinfo->ndtors; i++)
             {
-              FAR uintptr_t *ptr = (uintptr_t *)
+              FAR uintptr_t *ptr = (FAR uintptr_t *)
                   ((FAR void *)(&loadinfo->dtors)[i]);
 
               binfo("dtor %d: "

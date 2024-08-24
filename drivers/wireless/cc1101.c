@@ -932,7 +932,7 @@ void cc1101_setpacketctrl(struct cc1101_dev_s *dev)
  *
  ****************************************************************************/
 
-FAR int cc1101_init2(FAR struct cc1101_dev_s *dev)
+int cc1101_init2(FAR struct cc1101_dev_s *dev)
 {
   int ret;
 

@@ -214,31 +214,29 @@ typedef enum i2c_slave_complete_e
 
 /* The callback function */
 
-typedef int (i2c_slave_callback_t)(FAR void *arg, i2c_slave_complete_t state,
-                                   size_t len);
+typedef CODE int (i2c_slave_callback_t)(FAR void *arg,
+                                        i2c_slave_complete_t state,
+                                        size_t len);
 
 /* The I2C vtable */
 
 struct i2c_slave_s;
 struct i2c_slaveops_s
 {
-  int (*setownaddress)(FAR struct i2c_slave_s *dev,
-                       int                     addr,
-                       int                     nbits);
+  CODE int (*setownaddress)(FAR struct i2c_slave_s *dev, int addr,
+                            int nbits);
 
-  int (*write)(FAR struct i2c_slave_s *dev,
-               FAR const uint8_t      *buffer,
-               int                     buflen);
+  CODE int (*write)(FAR struct i2c_slave_s *dev, FAR const uint8_t *buffer,
+                    int buflen);
 
-  int (*read)(FAR struct i2c_slave_s *dev,
-              FAR uint8_t            *buffer,
-              int                     buflen);
+  CODE int (*read)(FAR struct i2c_slave_s *dev, FAR uint8_t *buffer,
+                   int buflen);
 
-  int (*registercallback)(FAR struct i2c_slave_s *dev,
-                          i2c_slave_callback_t   *callback,
-                          FAR void               *arg);
-  int (*setup)(FAR struct i2c_slave_s *dev);
-  int (*shutdown)(FAR struct i2c_slave_s *dev);
+  CODE int (*registercallback)(FAR struct i2c_slave_s *dev,
+                               FAR i2c_slave_callback_t *callback,
+                               FAR void *arg);
+  CODE int (*setup)(FAR struct i2c_slave_s *dev);
+  CODE int (*shutdown)(FAR struct i2c_slave_s *dev);
 };
 
 /* I2C private data.  This structure only defines the initial fields of the
@@ -248,7 +246,7 @@ struct i2c_slaveops_s
 
 struct i2c_slave_s
 {
-  const struct i2c_slaveops_s *ops; /* I2C vtable */
+  FAR const struct i2c_slaveops_s *ops; /* I2C vtable */
 };
 
 /****************************************************************************
