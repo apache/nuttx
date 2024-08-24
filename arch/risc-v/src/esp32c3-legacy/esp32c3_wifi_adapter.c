@@ -932,7 +932,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
 
   if (g_wifi_irq_bind)
     {
-      return ;
+      return;
     }
 
   adapter = kmm_malloc(sizeof(struct irq_adpt));

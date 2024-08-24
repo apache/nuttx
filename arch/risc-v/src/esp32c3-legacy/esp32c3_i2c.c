@@ -621,7 +621,7 @@ static void esp32c3_i2c_init_clock(struct esp32c3_i2c_priv_s *priv,
 {
   if (bus_freq == priv->clk_freq)
     {
-      return ;
+      return;
     }
 
   uint32_t reg_value = 0;
@@ -1245,8 +1245,8 @@ static void esp32c3_i2c_traceevent(struct esp32c3_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 

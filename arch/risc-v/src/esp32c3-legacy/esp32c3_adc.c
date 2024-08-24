@@ -570,7 +570,7 @@ static void adc_read_work(struct adc_dev_s *dev)
   if (ret < 0)
     {
       aerr("Failed to lock ret=%d\n", ret);
-      return ;
+      return;
     }
 
   adc_samplecfg(priv->channel);
