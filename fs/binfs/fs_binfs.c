@@ -58,11 +58,11 @@ struct binfs_dir_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     binfs_open(FAR struct file *filep, const char *relpath,
+static int     binfs_open(FAR struct file *filep, FAR const char *relpath,
                           int oflags, mode_t mode);
 static int     binfs_close(FAR struct file *filep);
 static ssize_t binfs_read(FAR struct file *filep,
-                          char *buffer, size_t buflen);
+                          FAR char *buffer, size_t buflen);
 static int     binfs_ioctl(FAR struct file *filep,
                            int cmd, unsigned long arg);
 
@@ -191,7 +191,7 @@ static int binfs_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t binfs_read(FAR struct file *filep,
-                          char *buffer, size_t buflen)
+                          FAR char *buffer, size_t buflen)
 {
   /* Reading is not supported.  Just return end-of-file */
 
@@ -466,8 +466,8 @@ static int binfs_statfs(struct inode *mountpt, struct statfs *buf)
  *
  ****************************************************************************/
 
-static int binfs_stat(struct inode *mountpt,
-                      const char *relpath, struct stat *buf)
+static int binfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
+                      FAR struct stat *buf)
 {
   finfo("Entry\n");
   int index;

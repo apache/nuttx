@@ -482,13 +482,13 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
           flags &= ~(FL_LONG | FL_REPD_TYPE);
 
 #ifdef CONFIG_HAVE_LONG_LONG
-          if (sizeof(void *) == sizeof(unsigned long long))
+          if (sizeof(FAR void *) == sizeof(unsigned long long))
             {
               flags |= (FL_LONG | FL_REPD_TYPE);
             }
           else
 #endif
-          if (sizeof(void *) == sizeof(unsigned long))
+          if (sizeof(FAR void *) == sizeof(unsigned long))
             {
               flags |= FL_LONG;
             }

@@ -139,12 +139,12 @@ void imx9_dma_free(void *memory, size_t size)
 }
 
 #ifdef CONFIG_FAT_DMAMEMORY
-FAR void *fat_dma_alloc(size_t size)
+void *fat_dma_alloc(size_t size)
 {
   return imx9_dma_alloc(size);
 }
 
-void fat_dma_free(FAR void *memory, size_t size)
+void fat_dma_free(void *memory, size_t size)
 {
   imx9_dma_free(memory, size);
 }

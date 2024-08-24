@@ -347,7 +347,7 @@ static int bcmf_gspi_thread_isr(int isr, FAR void *context, FAR void *arg)
  * Name: bcmf_gspi_thread
  ****************************************************************************/
 
-static int bcmf_gspi_thread(int argc, char **argv)
+static int bcmf_gspi_thread(int argc, FAR char **argv)
 {
   FAR struct bcmf_dev_s *priv;
   FAR bcmf_gspi_dev_t   *gbus;
@@ -544,7 +544,10 @@ static int bcmf_gspi_init_device(FAR bcmf_gspi_dev_t *gbus)
           return ret;
         }
 
-      if (REV16(buffer[0]) == CYW_REG_TEST_RO_PATTERN) break;
+      if (REV16(buffer[0]) == CYW_REG_TEST_RO_PATTERN)
+        {
+          break;
+        }
     }
 
   if (i == BCMF_GSPI_READY_TRYS)

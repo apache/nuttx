@@ -40,11 +40,11 @@
  ****************************************************************************/
 
 #ifndef putreg32
-#define putreg32(v, x) (*(volatile uint32_t *)(x) = (v))
+#define putreg32(v, x) (*(FAR volatile uint32_t *)(x) = (v))
 #endif
 
 #ifndef getreg32
-#define getreg32(x) (*(uint32_t *)(x))
+#define getreg32(x) (*(FAR volatile uint32_t *)(x))
 #endif
 
 /****************************************************************************

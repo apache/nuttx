@@ -322,7 +322,7 @@ struct uart_dev_s
   /* Driver interface */
 
   FAR const struct uart_ops_s *ops;  /* Arch-specific operations */
-  FAR void            *priv;         /* Used by the arch-specific logic */
+  FAR void                    *priv; /* Used by the arch-specific logic */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
@@ -335,7 +335,7 @@ struct uart_dev_s
   uint8_t timeout;                   /* c_cc[VTIME] */
 #endif
 
-  struct pollfd *fds[CONFIG_SERIAL_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_SERIAL_NPOLLWAITERS];
 };
 
 typedef struct uart_dev_s uart_dev_t;
@@ -529,7 +529,8 @@ void uart_reset_sem(FAR uart_dev_t *dev);
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
-int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size);
+int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf,
+                       size_t size);
 #endif
 
 /****************************************************************************

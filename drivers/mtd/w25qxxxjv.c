@@ -392,11 +392,11 @@ static int w25qxxxjv_get_die_from_addr(FAR struct w25qxxxjv_dev_s *priv,
                                        off_t addr);
 static int  w25qxxxjv_readid(FAR struct w25qxxxjv_dev_s *priv);
 static int  w25qxxxjv_protect(FAR struct w25qxxxjv_dev_s *priv,
-              off_t startblock, size_t nblocks);
+                              off_t startblock, size_t nblocks);
 static int  w25qxxxjv_unprotect(FAR struct w25qxxxjv_dev_s *priv,
-              off_t startblock, size_t nblocks);
+                                off_t startblock, size_t nblocks);
 static bool w25qxxxjv_isprotected(FAR struct w25qxxxjv_dev_s *priv,
-              uint8_t status, off_t address);
+                                  uint8_t status, off_t address);
 static int  w25qxxxjv_erase_sector(FAR struct w25qxxxjv_dev_s *priv,
                                    off_t offset);
 static int  w25qxxxjv_erase_chip(FAR struct w25qxxxjv_dev_s *priv);
@@ -1098,7 +1098,7 @@ static int w25qxxxjv_write_page(FAR struct w25qxxxjv_dev_s *priv,
       /* Set up varying parts of the transfer description */
 
       meminfo.addr   = address;
-      meminfo.buffer = (void *)buffer;
+      meminfo.buffer = (FAR void *)buffer;
 
       /* Write one page */
 

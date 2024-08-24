@@ -56,11 +56,11 @@ struct auth_hash
   uint16_t authsize;
   uint16_t ctxsize;
   uint16_t blocksize;
-  CODE void (*init) (FAR void *);
-  CODE void (*setkey) (FAR void *, FAR const uint8_t *, uint16_t);
-  CODE void (*reinit) (FAR void *, FAR const uint8_t *, uint16_t);
-  CODE int  (*update) (FAR void *, FAR const uint8_t *, size_t);
-  CODE void (*final) (FAR uint8_t *, FAR void *);
+  CODE void (*init)(FAR void *);
+  CODE void (*setkey)(FAR void *, FAR const uint8_t *, uint16_t);
+  CODE void (*reinit)(FAR void *, FAR const uint8_t *, uint16_t);
+  CODE int  (*update)(FAR void *, FAR const uint8_t *, size_t);
+  CODE void (*final)(FAR uint8_t *, FAR void *);
 };
 
 struct enc_xform
@@ -72,10 +72,10 @@ struct enc_xform
   uint16_t minkey;
   uint16_t maxkey;
   uint16_t ctxsize;
-  CODE void (*encrypt) (caddr_t, FAR uint8_t *);
-  CODE void (*decrypt) (caddr_t, FAR uint8_t *);
-  CODE int  (*setkey) (void *, FAR uint8_t *, int len);
-  CODE void (*reinit) (caddr_t, FAR uint8_t *);
+  CODE void (*encrypt)(caddr_t, FAR uint8_t *);
+  CODE void (*decrypt)(caddr_t, FAR uint8_t *);
+  CODE int  (*setkey)(FAR void *, FAR uint8_t *, int len);
+  CODE void (*reinit)(caddr_t, FAR uint8_t *);
 };
 
 struct comp_algo

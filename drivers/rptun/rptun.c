@@ -1011,7 +1011,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   nxsem_init(&priv->semtx, 0, 0);
   nxsem_init(&priv->semrx, 0, 0);
   snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
-  argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
+  argv[0] = (FAR void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
 

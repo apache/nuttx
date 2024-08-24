@@ -585,9 +585,9 @@ struct audio_lowerhalf_s *audio_dma_initialize(struct dma_dev_s *dma_dev,
   audio_dma->fifo_width = fifo_width;
 
   if (audio_dma->playback)
-    audio_dma->dst_addr = up_addrenv_va_to_pa((void *)fifo_addr);
+    audio_dma->dst_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
   else
-    audio_dma->src_addr = up_addrenv_va_to_pa((void *)fifo_addr);
+    audio_dma->src_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
 
   audio_dma->buffer_size = CONFIG_AUDIO_BUFFER_NUMBYTES;
   audio_dma->buffer_num  = CONFIG_AUDIO_NUM_BUFFERS;

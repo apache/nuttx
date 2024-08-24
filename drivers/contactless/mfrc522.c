@@ -98,7 +98,7 @@ int mfrc522_picc_select(FAR struct mfrc522_dev_s *dev,
 #if 0 /* TODO */
 /* IRQ Handling */
 
-static int mfrc522_irqhandler(FAR int irq, FAR void *context, FAR void *dev);
+static int mfrc522_irqhandler(int irq, FAR void *context, FAR void *dev);
 static inline int mfrc522_attachirq(FAR struct mfrc522_dev_s *dev,
                                     xcpt_t isr);
 #endif

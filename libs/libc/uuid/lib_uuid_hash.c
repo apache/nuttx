@@ -39,7 +39,7 @@
  *
  ****************************************************************************/
 
-uint16_t uuid_hash(const uuid_t *u, uint32_t *status)
+uint16_t uuid_hash(FAR const uuid_t *u, FAR uint32_t *status)
 {
   if (status)
     {

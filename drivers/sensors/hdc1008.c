@@ -799,7 +799,7 @@ static int hdc1008_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = hdc1008_getreg(priv, HDC1008_REG_CONFIGURATION, &reg);
           if (ret >= 0)
             {
-              *(uint16_t *)arg = reg;
+              *(FAR uint16_t *)arg = reg;
             }
 
           hdc1008_dbg("read config ret: %d\n", ret);

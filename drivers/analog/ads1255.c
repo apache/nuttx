@@ -457,7 +457,7 @@ static void adc_worker(FAR void *arg)
       /* Perform the data received callback */
 
       DEBUGASSERT(priv->cb->au_receive != NULL);
-      priv->cb->au_receive(&g_adcdev, priv->channel, *(int32_t *)buf);
+      priv->cb->au_receive(&g_adcdev, priv->channel, *(FAR int32_t *)buf);
     }
 
   /* Re-enable ADC interrupts */
@@ -473,7 +473,7 @@ static void adc_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context, FAR void *arg)
+static int adc_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct ads1255_dev_s *priv =
     (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;

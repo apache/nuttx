@@ -198,7 +198,7 @@ static int ltr308_get_reg24(FAR struct ltr308_dev_s *priv, uint8_t regaddr,
   *val = 0;
   for (i = 0; i < 3; i++, regaddr++)
     {
-      ret = ltr308_get_reg8(priv, regaddr, ((uint8_t *)val) + i);
+      ret = ltr308_get_reg8(priv, regaddr, ((FAR uint8_t *)val) + i);
       if (ret < 0)
         {
           return ret;

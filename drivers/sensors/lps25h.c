@@ -115,13 +115,13 @@
 
 struct lps25h_dev_s
 {
-  struct i2c_master_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint8_t addr;
   bool irqenabled;
   volatile bool int_pending;
   mutex_t devlock;
   sem_t waitsem;
-  lps25h_config_t *config;
+  FAR lps25h_config_t *config;
 };
 
 enum LPS25H_RES_CONF_AVG_PRES
@@ -258,7 +258,7 @@ static int lps25h_do_transfer(FAR struct lps25h_dev_s *dev,
   return ret;
 }
 
-static int lps25h_write_reg8(struct lps25h_dev_s *dev, uint8_t reg_addr,
+static int lps25h_write_reg8(FAR struct lps25h_dev_s *dev, uint8_t reg_addr,
                              const uint8_t value)
 {
   struct i2c_msg_s msgv[2] =
@@ -274,7 +274,7 @@ static int lps25h_write_reg8(struct lps25h_dev_s *dev, uint8_t reg_addr,
       .frequency = CONFIG_LPS25H_I2C_FREQUENCY,
       .addr      = dev->addr,
       .flags     = I2C_M_NOSTART,
-      .buffer    = (void *)&value,
+      .buffer    = (FAR void *)&value,
       .length    = 1
     }
   };
@@ -677,7 +677,7 @@ static int lps25h_read_temper(FAR struct lps25h_dev_s *dev,
   return ret;
 }
 
-static int lps25h_who_am_i(struct lps25h_dev_s *dev,
+static int lps25h_who_am_i(FAR struct lps25h_dev_s *dev,
                            lps25h_who_am_i_data * who_am_i_data)
 {
   uint8_t who_addr = LPS25H_WHO_AM_I;

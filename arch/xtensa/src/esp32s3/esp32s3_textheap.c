@@ -191,7 +191,7 @@ bool up_textheap_heapmember(void *p)
  *
  ****************************************************************************/
 
-FAR void *up_textheap_data_address(FAR void *p)
+void *up_textheap_data_address(void *p)
 {
   uintptr_t addr = (uintptr_t)p;
   if (SOC_DIRAM_IRAM_LOW <= addr && addr < SOC_DIRAM_IRAM_HIGH)
@@ -206,7 +206,7 @@ FAR void *up_textheap_data_address(FAR void *p)
       addr -= EXTRAM_D_I_BUS_OFFSET;
     }
 
-  return (FAR void *)addr;
+  return (void *)addr;
 }
 
 /****************************************************************************
@@ -251,7 +251,7 @@ IRAM_ATTR void up_textheap_data_sync(void)
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_USE_COPY_SECTION)
-int up_copy_section(FAR void *dest, FAR const void *src, size_t n)
+int up_copy_section(void *dest, const void *src, size_t n)
 {
   memcpy(up_textheap_data_address(dest), src, n);
 

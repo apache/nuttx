@@ -505,7 +505,7 @@ struct filelist
    */
 
   FAR struct file  *fl_prefile;
-  FAR struct file   fl_prefiles[CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
+  struct file       fl_prefiles[CONFIG_NFILE_DESCRIPTORS_PER_BLOCK];
 };
 
 /* The following structure defines the list of files used for standard C I/O.

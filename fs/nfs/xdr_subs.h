@@ -71,24 +71,24 @@
 
 #define fxdr_nfsv3time(f, t) \
 { \
-  (t)->tv_sec = ntohl(((struct nfsv3_time *)(f))->nfsv3_sec); \
-  (t)->tv_nsec = ntohl(((struct nfsv3_time *)(f))->nfsv3_nsec); \
+  (t)->tv_sec = ntohl(((FAR struct nfsv3_time *)(f))->nfsv3_sec); \
+  (t)->tv_nsec = ntohl(((FAR struct nfsv3_time *)(f))->nfsv3_nsec); \
 }
 
 #define txdr_nfsv3time(f, t) \
 { \
-  ((struct nfsv3_time *)(t))->nfsv3_sec = htonl((f)->tv_sec); \
-  ((struct nfsv3_time *)(t))->nfsv3_nsec = htonl((f)->tv_nsec); \
+  ((FAR struct nfsv3_time *)(t))->nfsv3_sec = htonl((f)->tv_sec); \
+  ((FAR struct nfsv3_time *)(t))->nfsv3_nsec = htonl((f)->tv_nsec); \
 }
 
 #define fxdr_hyper(f) \
-  ((((uint64_t)ntohl(((uint32_t *)(f))[0])) << 32) |  \
-   (uint64_t)(ntohl(((uint32_t *)(f))[1])))
+  ((((uint64_t)ntohl(((FAR uint32_t *)(f))[0])) << 32) |  \
+   (uint64_t)(ntohl(((FAR uint32_t *)(f))[1])))
 
 #define txdr_hyper(f, t) \
 { \
-  ((uint32_t *)(t))[0] = htonl((uint32_t)((f) >> 32));    \
-  ((uint32_t *)(t))[1] = htonl((uint32_t)((f) & 0xffffffff));  \
+  ((FAR uint32_t *)(t))[0] = htonl((uint32_t)((f) >> 32));    \
+  ((FAR uint32_t *)(t))[1] = htonl((uint32_t)((f) & 0xffffffff));  \
 }
 
 /* Macros for dealing with byte data saved in uint32_t aligned memory */

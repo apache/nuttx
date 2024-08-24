@@ -897,7 +897,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case FIONWRITE:
         {
-          *(uint8_t *)arg = dev->cd_xmit.tx_tail;
+          *(FAR uint8_t *)arg = dev->cd_xmit.tx_tail;
         }
         break;
 
@@ -905,7 +905,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case FIONREAD:
         {
-          *(uint8_t *)arg = reader->fifo.rx_tail;
+          *(FAR uint8_t *)arg = reader->fifo.rx_tail;
         }
         break;
 

@@ -75,7 +75,7 @@ struct hcsr04_dev_s
   int time_start_pulse;
   int time_finish_pulse;
   volatile bool rising;
-  struct pollfd *fds[CONFIG_HCSR04_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_HCSR04_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -341,7 +341,7 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

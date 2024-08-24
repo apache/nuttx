@@ -39,7 +39,7 @@
 #ifdef CONFIG_I2C
 void gd32_i2c_initialize(void)
 {
-  FAR struct i2c_master_s *i2c;
+  struct i2c_master_s *i2c;
   int ret;
   i2cinfo("Initialize I2c\n");
 

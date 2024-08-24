@@ -433,7 +433,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent_s *host,
 
 #ifdef CONFIG_NETDB_DNSCLIENT
 static int lib_dns_query(FAR const char *hostname,
-                         FAR union dns_addr_u *addr, int *naddr)
+                         FAR union dns_addr_u *addr, FAR int *naddr)
 {
   /* Perform the query to get the IP address */
 

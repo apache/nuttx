@@ -542,10 +542,10 @@ static inline int __mpu_read_imu(FAR struct mpu_dev_s *dev,
 {
   if (dev->fifo_enabled)
     {
-      return __mpu_read_reg(dev, FIFO_R_W, (uint8_t *)buf, sizeof(*buf));
+      return __mpu_read_reg(dev, FIFO_R_W, (FAR uint8_t *)buf, sizeof(*buf));
     }
 
-  return __mpu_read_reg(dev, ACCEL_XOUT_H, (uint8_t *)buf, sizeof(*buf));
+  return __mpu_read_reg(dev, ACCEL_XOUT_H, (FAR uint8_t *)buf, sizeof(*buf));
 }
 
 /* __mpu_read_pwr_mgmt_1()
@@ -950,7 +950,7 @@ static ssize_t mpu_read(FAR struct file *filep, FAR char *buf, size_t len)
 
   if (send_len)
     {
-      memcpy(buf, ((uint8_t *)&dev->buf) + dev->bufpos, send_len);
+      memcpy(buf, ((FAR uint8_t *)&dev->buf) + dev->bufpos, send_len);
     }
 
   /* Move the cursor, to mark them as sent. */

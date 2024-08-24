@@ -336,7 +336,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_AVERAGE:
         {
-          unsigned *ptr = (unsigned *)((uintptr_t)arg);
+          FAR unsigned *ptr = (FAR unsigned *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -349,7 +349,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_CHANNEL:
         {
-          char *ptr = (char *)((uintptr_t)arg);
+          FAR char *ptr = (FAR char *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -362,7 +362,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_GAIN:
         {
-          unsigned char *ptr = (unsigned char *)((uintptr_t)arg);
+          FAR unsigned char *ptr = (FAR unsigned char *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -375,7 +375,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_GET_VAL_PER_UNIT:
         {
-          unsigned *ptr = (unsigned *)((uintptr_t)arg);
+          FAR unsigned *ptr = (FAR unsigned *)((uintptr_t)arg);
           if (ptr == NULL)
             {
               ret = -EINVAL;
@@ -388,7 +388,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_TARE:
         {
-          float *precision = (float *)((uintptr_t)arg);
+          FAR float *precision = (FAR float *)((uintptr_t)arg);
           if (precision == NULL)
             {
               ret = -EINVAL;
@@ -401,7 +401,7 @@ static int hx711_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case HX711_SET_SIGN:
         {
-          int *sign = (int *)((uintptr_t)arg);
+          FAR int *sign = (FAR int *)((uintptr_t)arg);
           if (sign == NULL || (*sign != 1 && *sign != -1))
             {
               ret = EINVAL;

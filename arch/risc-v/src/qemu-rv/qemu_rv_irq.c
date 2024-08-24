@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_RPTUN
-static int qemu_ipi_handler(int mcause, FAR void *regs, FAR void *args)
+static int qemu_ipi_handler(int mcause, void *regs, void *args)
 {
   /* Clear IPI (Inter-Processor-Interrupt) */
 

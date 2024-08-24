@@ -324,7 +324,7 @@ static inline void ee25xx_unlock(FAR struct spi_dev_s *dev)
  * Name: ee25xx_sendcmd
  *
  * Description: Send command and address as one transaction to take advantage
- * of possible faster DMA transfers. Sending byte per byte is FAR FAR slower.
+ * of possible faster DMA transfers. Sending byte per byte is far far slower.
  *
  ****************************************************************************/
 

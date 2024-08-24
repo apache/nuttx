@@ -620,7 +620,7 @@ static int lsm9ds1_thread(int argc, FAR char **argv)
       if (accel->enabled)
         {
           ret = lsm9ds1_readreg(&accel->base,
-                                LSM9DS1_OUT_X_L_XL, (uint8_t *)adata, 6);
+                                LSM9DS1_OUT_X_L_XL, (FAR uint8_t *)adata, 6);
           lsm9ds1_accel_data(accel, adata);
         }
 
@@ -629,7 +629,7 @@ static int lsm9ds1_thread(int argc, FAR char **argv)
       if (gyro->enabled)
         {
           ret = lsm9ds1_readreg(&gyro->base,
-                                LSM9DS1_OUT_X_L_G, (uint8_t *)gdata, 6);
+                                LSM9DS1_OUT_X_L_G, (FAR uint8_t *)gdata, 6);
           lsm9ds1_gyro_data(gyro, gdata);
         }
 
@@ -638,7 +638,7 @@ static int lsm9ds1_thread(int argc, FAR char **argv)
       if (mag->enabled)
         {
           ret = lsm9ds1_readreg(&mag->base,
-                                LSM9DS1_OUT_X_L_M, (uint8_t *)mdata, 6);
+                                LSM9DS1_OUT_X_L_M, (FAR uint8_t *)mdata, 6);
           lsm9ds1_mag_data(mag, mdata);
         }
 

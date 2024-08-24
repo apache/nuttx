@@ -289,7 +289,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
 #ifdef CONFIG_DEBUG_GRAPHICS
       if (!slot)

@@ -344,7 +344,7 @@ static void gt911_event(struct gt911_dev_s *dev)
  *
  ****************************************************************************/
 
-static void gt911_worker(FAR void *arg)
+static void gt911_worker(void *arg)
 {
   int ret;
   struct gt911_dev_s *dev = (struct gt911_dev_s *)arg;

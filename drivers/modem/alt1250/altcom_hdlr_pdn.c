@@ -578,7 +578,7 @@ int32_t altcom_repnet_pkt_parse(FAR struct alt1250_dev_s *dev,
 
           /* parse IPv4 DNS address */
 
-          if (*(uint32_t *)in->dnsaddrv4 != 0)
+          if (*(FAR uint32_t *)in->dnsaddrv4 != 0)
             {
               FAR struct sockaddr_in *v4addr =
                 (FAR struct sockaddr_in *)&dnsaddrs[0];
@@ -592,10 +592,10 @@ int32_t altcom_repnet_pkt_parse(FAR struct alt1250_dev_s *dev,
 
           /* parse IPv6 DNS address */
 
-          if (!((*(uint32_t *)&in->dnsaddrv6[0] == 0) &&
-               (*(uint32_t *)&in->dnsaddrv6[4] == 0) &&
-               (*(uint32_t *)&in->dnsaddrv6[8] == 0) &&
-               (*(uint32_t *)&in->dnsaddrv6[12] == 0)))
+          if (!((*(FAR uint32_t *)&in->dnsaddrv6[0] == 0) &&
+               (*(FAR uint32_t *)&in->dnsaddrv6[4] == 0) &&
+               (*(FAR uint32_t *)&in->dnsaddrv6[8] == 0) &&
+               (*(FAR uint32_t *)&in->dnsaddrv6[12] == 0)))
             {
               FAR struct sockaddr_in6 *v6addr =
                 (FAR struct sockaddr_in6 *)&dnsaddrs[*ndnsaddrs];

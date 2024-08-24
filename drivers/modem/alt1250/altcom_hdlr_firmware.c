@@ -82,7 +82,7 @@ int32_t altcom_injectimage_pkt_compose(FAR void **arg, size_t arglen,
 {
   int32_t size = 0;
 
-  FAR uint8_t *sending_data = (uint8_t *)arg[0];
+  FAR uint8_t *sending_data = (FAR uint8_t *)arg[0];
   int len = *(int *)arg[1];
   bool mode = *(bool *)arg[2];
 

@@ -130,7 +130,7 @@ struct ft5x06_dev_s
    * retained in the f_priv field of the 'struct file'.
    */
 
-  struct pollfd *fds[CONFIG_FT5X06_NPOLLWAITERS];
+  FAR struct pollfd *fds[CONFIG_FT5X06_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -159,7 +159,7 @@ static ssize_t ft5x06_read(FAR struct file *filep, FAR char *buffer,
                            size_t len);
 static int  ft5x06_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
-static int  ft5x06_poll(FAR struct file *filep, struct pollfd *fds,
+static int  ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
 
 /****************************************************************************
@@ -1029,7 +1029,7 @@ static int ft5x06_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
       DEBUGASSERT(slot != NULL);
 
       /* Remove all memory of the poll setup */

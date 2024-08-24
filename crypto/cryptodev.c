@@ -110,7 +110,7 @@ static ssize_t cryptof_write(FAR struct file *filep,
 static int cryptof_ioctl(FAR struct file *filep,
                          int cmd, unsigned long arg);
 static int cryptof_poll(FAR struct file *filep,
-                        struct pollfd *fds, bool setup);
+                        FAR struct pollfd *fds, bool setup);
 static int cryptof_open(FAR struct file *filep);
 static int cryptof_close(FAR struct file *filep);
 
@@ -682,7 +682,7 @@ fail:
 /* ARGSUSED */
 
 static int cryptof_poll(FAR struct file *filep,
-                        struct pollfd *fds, bool setup)
+                        FAR struct pollfd *fds, bool setup)
 {
   return 0;
 }

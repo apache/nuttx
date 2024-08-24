@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
+int bchlib_setup(FAR const char *blkdev, bool readonly, FAR void **handle)
 {
   FAR struct bchlib_s *bch;
   struct geometry geo;

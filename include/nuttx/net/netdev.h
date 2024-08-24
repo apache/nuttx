@@ -512,16 +512,16 @@ struct net_driver_s
 
   /* Driver callbacks */
 
-  int (*d_ifup)(FAR struct net_driver_s *dev);
-  int (*d_ifdown)(FAR struct net_driver_s *dev);
-  int (*d_txavail)(FAR struct net_driver_s *dev);
+  CODE int (*d_ifup)(FAR struct net_driver_s *dev);
+  CODE int (*d_ifdown)(FAR struct net_driver_s *dev);
+  CODE int (*d_txavail)(FAR struct net_driver_s *dev);
 #ifdef CONFIG_NET_MCASTGROUP
-  int (*d_addmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
-  int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+  CODE int (*d_addmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
+  CODE int (*d_rmmac)(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  int (*d_ioctl)(FAR struct net_driver_s *dev, int cmd,
-                 unsigned long arg);
+  CODE int (*d_ioctl)(FAR struct net_driver_s *dev, int cmd,
+                      unsigned long arg);
 #endif
 
   /* Drivers may attached device-specific, private information */

@@ -186,7 +186,7 @@ size_t lzf_compress(FAR const void *const in_data,
 #ifdef CONFIG_LIBC_LZF_ALIGN
           && ((ref[1] << 8) | ref[0]) == ((ip[1] << 8) | ip[0])
 #else
-          && *(uint16_t *)ref == *(uint16_t *)ip
+          && *(FAR uint16_t *)ref == *(FAR uint16_t *)ip
 #endif
         )
         {
