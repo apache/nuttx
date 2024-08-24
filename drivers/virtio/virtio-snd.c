@@ -1141,11 +1141,11 @@ virtio_snd_register_audio_driver(FAR struct virtio_snd_s *priv)
       switch (priv->info[i].direction)
         {
           case VIRTIO_SND_D_OUTPUT:
-            snprintf(devname, 32, "pcm%dp", tx_minor++);
+            snprintf(devname, sizeof(devname), "pcm%dp", tx_minor++);
             break;
 
           case VIRTIO_SND_D_INPUT:
-            snprintf(devname, 32, "pcm%dc", rx_minor++);
+            snprintf(devname, sizeof(devname), "pcm%dc", rx_minor++);
             break;
         }
 

@@ -131,7 +131,7 @@ int esp32s2_cs4344_initialize(void)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm0");
+      snprintf(devname, sizeof(devname), "pcm0");
 
       /* Finally, we can register the PCM/CS4344/I2S audio device.
        *

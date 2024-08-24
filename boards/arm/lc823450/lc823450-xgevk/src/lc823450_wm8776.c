@@ -108,7 +108,7 @@ int lc823450_wm8776initialize(int minor)
       return  -ENODEV;
     }
 
-  snprintf(devname, 12, "pcm%d",  minor);
+  snprintf(devname, sizeof(devname), "pcm%d",  minor);
 
   ret = audio_register(devname, pcm);
 

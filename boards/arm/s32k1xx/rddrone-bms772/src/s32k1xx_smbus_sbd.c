@@ -770,7 +770,7 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
 {
   irqstate_t flags;
   struct smbus_sbd_dev_s *smbus_sbd_dev;
-  char dev_name[24];
+  char devname[24];
   int ret;
 
   /* Make sure the initialization is not interrupted */
@@ -789,13 +789,13 @@ int smbus_sbd_initialize(int minor, struct i2c_slave_s *i2c_slave_dev)
     {
       /* Create the device name string */
 
-      snprintf(dev_name, 24, "/dev/smbus-sbd%d", minor);
+      snprintf(devname, sizeof(devname), "/dev/smbus-sbd%d", minor);
 
       /* Register the driver.  The associated private data is a reference to
        * the SMBus Smart Battery Data slave device structure.
        */
 
-      ret = register_driver(dev_name, &g_smbus_sbd_fops, 0, smbus_sbd_dev);
+      ret = register_driver(devname, &g_smbus_sbd_fops, 0, smbus_sbd_dev);
       if (ret < 0)
         {
           ferr("register_driver failed: %d\n", -ret);

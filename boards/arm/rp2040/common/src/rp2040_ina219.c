@@ -92,7 +92,7 @@ int board_ina219_initialize(int busno)
 
   /* Then register the sensor */
 
-  snprintf(devpath, 14, "/dev/voltamp%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/voltamp%d", devno);
   ret = ina219_register(devpath, i2c, 0x40, 100000, 0x00);
   if (ret < 0)
     {

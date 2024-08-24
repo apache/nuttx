@@ -3311,8 +3311,9 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev,
 
   for (x = 2; x < 8; x++)
     {
-      snprintf(dev->rwbuffer, 18, "/dev/smart%dd%d", dev->minor, x);
-      unregister_blockdriver(dev->rwbuffer);
+      char devname[18];
+      snprintf(devname, sizeof(devname), "/dev/smart%dd%d", dev->minor, x);
+      unregister_blockdriver(devname);
     }
 #endif
 
@@ -6162,6 +6163,8 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd,
     smart_zalloc(NULL, sizeof(struct smart_struct_s), "Dev struct");
   if (dev)
     {
+      char devname[18];
+
       /* Initialize the SMART device structure */
 
       dev->mtd = mtd;
@@ -6241,11 +6244,12 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd,
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
       if (partname != NULL)
         {
-          snprintf(dev->rwbuffer, 18, "/dev/smart%d%sd1", minor, partname);
+          snprintf(devname, sizeof(devname), "/dev/smart%d%sd1", minor,
+                   partname);
         }
       else
         {
-          snprintf(dev->rwbuffer, 18, "/dev/smart%dd1", minor);
+          snprintf(devname, sizeof(devname), "/dev/smart%dd1", minor);
         }
 
       /* Inode private data is a reference to a struct containing
@@ -6265,21 +6269,22 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd,
 
       rootdirdev->dev = dev;
       rootdirdev->rootdirnum = 0;
-      ret = register_blockdriver(dev->rwbuffer, &g_bops, 0, rootdirdev);
+      ret = register_blockdriver(devname, &g_bops, 0, rootdirdev);
 
 #else
       if (partname != NULL)
         {
-          snprintf(dev->rwbuffer, 18, "/dev/smart%d%s", minor, partname);
+          snprintf(devname, sizeof(devname), "/dev/smart%d%s", minor,
+                   partname);
         }
       else
         {
-          snprintf(dev->rwbuffer, 18, "/dev/smart%d", minor);
+          snprintf(devname, sizeof(devname), "/dev/smart%d", minor);
         }
 
       /* Inode private data is a reference to the SMART device structure */
 
-      ret = register_blockdriver(dev->rwbuffer, &g_bops, 0, dev);
+      ret = register_blockdriver(devname, &g_bops, 0, dev);
 #endif
 
       if (ret < 0)

@@ -125,7 +125,7 @@ int stm32_w25initialize(int minor)
 
   /* Mount the file system at /mnt/w25 */
 
-  snprintf(devname, 12, "/mnt/w25%c", 'a' + minor);
+  snprintf(devname, sizeof(devname), "/mnt/w25%c", 'a' + minor);
   ret = nx_mount(NULL, devname, "nxffs", 0, NULL);
   if (ret < 0)
     {

@@ -75,7 +75,7 @@ void nxterm_unregister(FAR struct nxterm_state_s *priv)
 
   /* Unregister the driver */
 
-  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, priv->minor);
+  snprintf(devname, sizeof(devname), NX_DEVNAME_FORMAT, priv->minor);
   unregister_driver(devname);
 
   /* Free the private data structure */

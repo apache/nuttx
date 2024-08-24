@@ -419,7 +419,7 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
 
       /* Create the character device name */
 
-      snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, minor);
+      snprintf(devname, sizeof(devname), DEVNAME_FMT, minor);
       ret = register_driver(devname, &g_i2schar_fops, 0666, priv);
       if (ret < 0)
         {

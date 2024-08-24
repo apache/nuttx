@@ -98,7 +98,7 @@ int board_nunchuck_initialize(int devno, int busno)
 
   /* Register the joystick device as /dev/nunchuck0 */
 
-  snprintf(devpath, 15, "/dev/nunchuck%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/nunchuck%d", devno);
   iinfo("Initialize joystick driver: %s\n", devpath);
 
   ret = nunchuck_register(devpath, i2c);

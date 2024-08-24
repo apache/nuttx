@@ -103,7 +103,8 @@ static FAR char *unique_chardev(void)
       /* Construct the full device number */
 
       devno &= 0xffffff;
-      snprintf(devbuf, 16, "/dev/tmpc%06lx", (unsigned long)devno);
+      snprintf(devbuf, sizeof(devbuf), "/dev/tmpc%06lx",
+               (unsigned long)devno);
 
       /* Make sure that file name is not in use */
 

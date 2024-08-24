@@ -78,7 +78,7 @@ int posix_openpt(int oflag)
       char devname[16];
       int fd;
 
-      snprintf(devname, 16, "/dev/pty%d", minor);
+      snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
       fd = open(devname, oflag);
       if (fd < 0)
         {
