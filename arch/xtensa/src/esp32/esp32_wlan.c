@@ -979,7 +979,7 @@ static void wlan_dopoll(struct wlan_priv_s *priv)
   pktbuf = wlan_alloc_buffer(priv);
   if (!pktbuf)
     {
-      return ;
+      return;
     }
 
   dev->d_buf = pktbuf->buffer;
