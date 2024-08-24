@@ -586,7 +586,7 @@ int up_prioritize_irq(int irq, int priority)
 
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  uint32_t cpu = 0;
+  uint32_t cpu;
 
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
     {
