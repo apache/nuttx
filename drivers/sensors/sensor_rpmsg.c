@@ -251,9 +251,6 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
 static int sensor_rpmsg_ioctlack_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv);
-static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
-                                       FAR struct sensor_rpmsg_stub_s *stub,
-                                       bool flushed);
 
 /****************************************************************************
  * Private Data
@@ -515,6 +512,43 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
   return proxy;
 }
 
+static
+void sensor_rpmsg_push_event_persist(FAR struct sensor_rpmsg_dev_s *dev,
+                                     FAR struct sensor_rpmsg_stub_s *stub)
+{
+  FAR struct sensor_rpmsg_cell_s *cell;
+  FAR struct sensor_rpmsg_data_s *msg;
+  FAR struct sensor_rpmsg_ept_s *sre;
+  uint32_t space;
+  int ret;
+
+  sre = container_of(stub->ept, struct sensor_rpmsg_ept_s, ept);
+  msg = rpmsg_get_tx_payload_buffer(&sre->ept, &space, true);
+  if (!msg)
+    {
+      snerr("ERROR: push event persist get buffer failed:%s\n",
+            rpmsg_get_cpuname(sre->ept.rdev));
+      return;
+    }
+
+  msg->command = SENSOR_RPMSG_PUBLISH;
+  cell = (FAR struct sensor_rpmsg_cell_s *)(msg + 1);
+  ret = file_read(&stub->file, cell->data, space - sizeof(*msg) -
+                  sizeof(*cell));
+  if (ret > 0)
+    {
+      cell->len     = ret;
+      cell->cookie  = stub->cookie;
+      cell->nbuffer = dev->lower.nbuffer;
+      rpmsg_send_nocopy(&sre->ept, msg, sizeof(*msg) +
+                        ((sizeof(*cell) + ret + 0x7) & ~0x7));
+    }
+  else
+    {
+      rpmsg_release_tx_buffer(&sre->ept, msg);
+    }
+}
+
 static FAR struct sensor_rpmsg_stub_s *
 sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
                         FAR struct rpmsg_endpoint *ept,
@@ -559,7 +593,7 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
 
   if (dev->lower.persist)
     {
-      sensor_rpmsg_push_event_one(dev, stub, false);
+      sensor_rpmsg_push_event_persist(dev, stub);
     }
 
   sensor_rpmsg_unlock(dev);
