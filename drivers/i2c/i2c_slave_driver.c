@@ -426,7 +426,7 @@ static int i2c_slave_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
   else if (fds->priv != NULL)
     {
-      struct pollfd **slot = fds->priv;
+      FAR struct pollfd **slot = fds->priv;
       *slot     = NULL;
       fds->priv = NULL;
     }

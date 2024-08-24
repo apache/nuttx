@@ -110,8 +110,8 @@ static void esp_temp_sensor_register(struct esp_temp_priv_s *priv);
 static int esp_temperature_sensor_install(struct esp_temp_priv_s *priv,
   struct esp_temp_sensor_config_t cfg);
 static void esp_temperature_sensor_uninstall(struct esp_temp_priv_s *priv);
-static int esp_temperature_sensor_get_celsius(FAR struct file *filep,
-                                              FAR char *buffer,
+static int esp_temperature_sensor_get_celsius(struct file *filep,
+                                              char *buffer,
                                               size_t buflen);
 
 /****************************************************************************
@@ -444,14 +444,14 @@ static void esp_temperature_sensor_uninstall(struct esp_temp_priv_s *priv)
  *
  ****************************************************************************/
 
-static int esp_temperature_sensor_get_celsius(FAR struct file *filep,
-                                              FAR char *buffer,
+static int esp_temperature_sensor_get_celsius(struct file *filep,
+                                              char *buffer,
                                               size_t buflen)
 {
   uint32_t tsens_out;
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct esp_temp_priv_s *priv  = inode->i_private;
-  FAR int *out = (FAR int *) buffer;
+  struct inode *inode = filep->f_inode;
+  struct esp_temp_priv_s *priv = inode->i_private;
+  int *out = (int *)buffer;
 
   nxmutex_lock(&priv->lock);
   if (priv == NULL)

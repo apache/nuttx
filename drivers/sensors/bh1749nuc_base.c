@@ -92,7 +92,7 @@ uint16_t bh1749nuc_read16(FAR struct bh1749nuc_dev_s *priv, uint8_t regaddr)
   msg[1].frequency = priv->freq;
   msg[1].addr      = priv->addr;
   msg[1].flags     = I2C_M_READ;
-  msg[1].buffer    = (uint8_t *)&regval;
+  msg[1].buffer    = (FAR uint8_t *)&regval;
   msg[1].length    = 2;
 
   ret = I2C_TRANSFER(priv->i2c, msg, 2);

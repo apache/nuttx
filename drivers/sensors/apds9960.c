@@ -1023,7 +1023,7 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
             {
               bytes_read = fifo_level * 4;
               ret = apds9960_i2c_read(priv, APDS9960_GFIFO_U,
-                                      (uint8_t *) fifo_data, bytes_read);
+                                      (FAR uint8_t *)fifo_data, bytes_read);
               if (ret < 0)
                 {
                   snerr("ERROR: Failed to read APDS9960_GFIFO_U!\n");

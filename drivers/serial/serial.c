@@ -123,7 +123,7 @@ static int     uart_unlink(FAR struct inode *inode);
 #ifdef CONFIG_TTY_LAUNCH_ENTRY
 /* Lanch program entry, this must be supplied by the application. */
 
-int CONFIG_TTY_LAUNCH_ENTRYPOINT(int argc, char *argv[]);
+int CONFIG_TTY_LAUNCH_ENTRYPOINT(int argc, FAR char *argv[]);
 #endif
 
 /****************************************************************************
@@ -714,7 +714,10 @@ static int uart_close(FAR struct file *filep)
 
   flags = enter_critical_section();  /* Disable interrupts */
   uart_detach(dev);                  /* Detach interrupts */
-  if (!dev->isconsole)               /* Check for the serial console UART */
+
+  /* Check for the serial console UART */
+
+  if (!dev->isconsole)
     {
       uart_shutdown(dev);            /* Disable the UART */
     }
@@ -2053,7 +2056,7 @@ void uart_reset_sem(FAR uart_dev_t *dev)
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
-int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size)
+int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
 {
   size_t i;
 

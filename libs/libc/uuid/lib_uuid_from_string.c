@@ -42,7 +42,7 @@
  *
  ****************************************************************************/
 
-void uuid_from_string(const char *s, uuid_t *u, uint32_t *status)
+void uuid_from_string(FAR const char *s, FAR uuid_t *u, FAR uint32_t *status)
 {
   int n;
 

@@ -420,10 +420,10 @@ begin_packed_struct struct spiffs_page_objndx_s
 
 /* callback func for object lookup visitor */
 
-typedef int (*spiffs_callback_t)(FAR struct spiffs_s *fs, int16_t objid,
-                                 int16_t blkndx, int entry,
-                                 FAR const void *user_const,
-                                 FAR void *user_var);
+typedef CODE int (*spiffs_callback_t)(FAR struct spiffs_s *fs, int16_t objid,
+                                      int16_t blkndx, int entry,
+                                      FAR const void *user_const,
+                                      FAR void *user_var);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -436,7 +436,7 @@ int     spiffs_phys_cpy(FAR struct spiffs_s *fs,
 int     spiffs_foreach_objlu(FAR struct spiffs_s *fs, int16_t starting_block,
           int starting_lu_entry, uint8_t flags, int16_t objid,
           spiffs_callback_t v, FAR const void *user_const,
-          FAR void *user_var, FAR int16_t *blkndx, int *lu_entry);
+          FAR void *user_var, FAR int16_t *blkndx, FAR int *lu_entry);
 int     spiffs_erase_block(FAR struct spiffs_s *fs, int16_t blkndx);
 int     spiffs_objlu_scan(FAR struct spiffs_s *fs);
 int     spiffs_objlu_find_free_objid(FAR struct spiffs_s *fs,

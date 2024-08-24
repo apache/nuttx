@@ -4102,21 +4102,21 @@ static void mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv)
   SDIO_RESET(priv->dev);
 }
 
-static const char *mmc_get_mode_name(uint8_t mode)
+static FAR const char *mmc_get_mode_name(uint8_t mode)
 {
   switch (mode)
     {
       case EXT_CSD_HS_TIMING_BC:
-          return "backwards compatibility";
+        return "backwards compatibility";
       case EXT_CSD_HS_TIMING_HS:
-          return "high speed";
+        return "high speed";
       case EXT_CSD_HS_TIMING_HS200:
-          return "HS200";
+        return "HS200";
       case EXT_CSD_HS_TIMING_HS400:
-          return "HS400";
+        return "HS400";
       default:
-          ferr("Unknown mode: %u\n", mode);
-          return "Unknown";
+        ferr("Unknown mode: %u\n", mode);
+        return "Unknown";
     }
 }
 

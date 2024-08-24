@@ -526,7 +526,7 @@ static int bmi270_thread(int argc, FAR char **argv)
 
       /* Get data */
 
-      bmi270_getregs(&gyro->base, BMI270_DATA_8, (uint8_t *)data, 12);
+      bmi270_getregs(&gyro->base, BMI270_DATA_8, (FAR uint8_t *)data, 12);
 
       /* Read accel */
 

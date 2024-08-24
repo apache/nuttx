@@ -126,7 +126,7 @@ __attribute__((packed));
  * Private Function Prototypes
  ****************************************************************************/
 
-static void tt21100_worker(FAR void *arg);
+static void tt21100_worker(void *arg);
 
 /****************************************************************************
  * Private Data
@@ -244,7 +244,7 @@ static void tt21100_event(struct tt21100_dev_s *dev)
  *
  ****************************************************************************/
 
-static void tt21100_worker(FAR void *arg)
+static void tt21100_worker(void *arg)
 {
   int ret;
   struct i2c_msg_s msg;

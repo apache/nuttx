@@ -53,7 +53,7 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
 
   if (needlelen == 0)
     {
-      return (void *)haystack;
+      return (FAR void *)haystack;
     }
 
   if (needlelen > haystacklen)
@@ -68,7 +68,7 @@ FAR void *memmem(FAR const void *haystack, size_t haystacklen,
         {
           if (++y == needlelen)
             {
-              return (void *)(h + i);
+              return (FAR void *)(h + i);
             }
         }
     }

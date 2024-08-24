@@ -121,23 +121,23 @@ struct ee24xx_dev_s
 {
   /* Bus management */
 
-  struct i2c_master_s *i2c;      /* I2C device where the EEPROM is attached */
-  uint32_t             freq;     /* I2C bus speed */
-  uint8_t              addr;     /* 7-bit unshifted I2C device address */
+  FAR struct i2c_master_s *i2c;      /* I2C device where the EEPROM is attached */
+  uint32_t                 freq;     /* I2C bus speed */
+  uint8_t                  addr;     /* 7-bit unshifted I2C device address */
 
   /* Driver management */
 
-  mutex_t              lock;     /* file write access serialization */
-  uint8_t              refs;     /* Nr of times the device has been opened */
-  bool                 readonly; /* Flags */
+  mutex_t                  lock;     /* file write access serialization */
+  uint8_t                  refs;     /* Nr of times the device has been opened */
+  bool                     readonly; /* Flags */
 
   /* Expanded from geometry */
 
-  uint32_t             size;       /* total bytes in device */
-  uint16_t             pgsize;     /* write block size, in bytes */
-  uint16_t             addrlen;    /* number of bytes in data addresses */
-  uint16_t             haddrbits;  /* Number of bits in high address part */
-  uint16_t             haddrshift; /* bit-shift of high address part */
+  uint32_t                 size;       /* total bytes in device */
+  uint16_t                 pgsize;     /* write block size, in bytes */
+  uint16_t                 addrlen;    /* number of bytes in data addresses */
+  uint16_t                 haddrbits;  /* Number of bits in high address part */
+  uint16_t                 haddrshift; /* bit-shift of high address part */
 };
 
 /****************************************************************************
@@ -322,7 +322,7 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
   msgs[1].frequency = msgs[0].frequency;
   msgs[1].addr      = msgs[0].addr;
   msgs[1].flags     = I2C_M_NOSTART;
-  msgs[1].buffer    = (uint8_t *)buffer;
+  msgs[1].buffer    = (FAR uint8_t *)buffer;
   msgs[1].length    = len;
 
   return I2C_TRANSFER(eedev->i2c, msgs, 2);
@@ -543,7 +543,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   msgs[1].frequency = msgs[0].frequency;
   msgs[1].addr      = msgs[0].addr;
   msgs[1].flags     = I2C_M_READ;
-  msgs[1].buffer    = (uint8_t *)buffer;
+  msgs[1].buffer    = (FAR uint8_t *)buffer;
   msgs[1].length    = len;
 
   ret = I2C_TRANSFER(eedev->i2c, msgs, 2);
@@ -618,7 +618,7 @@ static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
   msgs[1].frequency = msgs[0].frequency;
   msgs[1].addr      = msgs[0].addr;
   msgs[1].flags     = I2C_M_READ;
-  msgs[1].buffer    = (uint8_t *)buffer;
+  msgs[1].buffer    = (FAR uint8_t *)buffer;
   msgs[1].length    = len;
 
   ret = I2C_TRANSFER(eedev->i2c, msgs, 2);

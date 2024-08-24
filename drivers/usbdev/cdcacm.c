@@ -1818,7 +1818,9 @@ static int cdcacm_setup(FAR struct usbdevclass_driver_s *driver,
                  * with the setup command.
                  */
 
-                if (dataout && len <= SIZEOF_CDC_LINECODING) /* REVISIT */
+                /* REVISIT */
+
+                if (dataout && len <= SIZEOF_CDC_LINECODING)
                   {
                     memcpy(&priv->linecoding,
                            dataout, SIZEOF_CDC_LINECODING);

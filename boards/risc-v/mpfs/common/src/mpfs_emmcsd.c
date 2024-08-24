@@ -42,7 +42,7 @@ static struct sdio_dev_s *g_sdio_dev;
  * Private Functions
  ****************************************************************************/
 
-static void partition_handler(FAR struct partition_s *part, FAR void *arg)
+static void partition_handler(struct partition_s *part, void *arg)
 {
   unsigned partition = *(int *)arg;
   char devname[] = "/dev/mmcsd0p0";

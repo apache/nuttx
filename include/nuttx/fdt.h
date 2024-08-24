@@ -133,7 +133,7 @@ int fdt_get_irq(FAR const void *fdt, int nodeoffset,
  ****************************************************************************/
 
 int fdt_get_irq_by_path(FAR const void *fdt, int offset,
-                        const char *path, int irqbase);
+                        FAR const char *path, int irqbase);
 
 /****************************************************************************
  * Name: fdt_get_parent_address_cells
@@ -210,7 +210,7 @@ uintptr_t fdt_ld_by_cells(FAR const void *value, int cells);
  ****************************************************************************/
 
 uintptr_t fdt_get_reg_base_by_name(FAR const void *fdt, int offset,
-                                   const char *reg_name);
+                                   FAR const char *reg_name);
 
 /****************************************************************************
  * Name: fdt_get_reg_base
@@ -304,7 +304,7 @@ bool fdt_device_is_available(FAR const void * fdt, int offset);
  *
  ****************************************************************************/
 
-const char *fdt_get_node_label(FAR const void *fdt, int offset);
+FAR const char *fdt_get_node_label(FAR const void *fdt, int offset);
 
 /****************************************************************************
  * Name: fdt_get_clock_frequency

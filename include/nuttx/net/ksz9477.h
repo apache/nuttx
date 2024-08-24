@@ -85,7 +85,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_NET_KSZ9477_I2C
-int ksz9477_i2c_init(struct i2c_master_s *i2c_bus,
+int ksz9477_i2c_init(FAR struct i2c_master_s *i2c_bus,
                      ksz9477_port_t master_port);
 #else
 #  error Only I2c interface currently supported

@@ -144,7 +144,7 @@ struct local_conn_s
    * socket events.
    */
 
-  struct pollfd *lc_event_fds[LOCAL_NPOLLWAITERS];
+  FAR struct pollfd *lc_event_fds[LOCAL_NPOLLWAITERS];
   struct pollfd lc_inout_fds[2*LOCAL_NPOLLWAITERS];
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected

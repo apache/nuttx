@@ -169,7 +169,7 @@ int32_t altcom_sendatcmd_pkt_parse(FAR struct alt1250_dev_s *dev,
                                    size_t arglen, FAR uint64_t *bitmap)
 {
   FAR char *respbuff = (FAR char *)arg[0];
-  FAR int respbufflen = (int)arg[1];
+  int respbufflen = (int)arg[1];
   FAR int *resplen = (FAR int *)arg[2];
 
   if (respbufflen < pktsz)

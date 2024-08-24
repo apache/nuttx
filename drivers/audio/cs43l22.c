@@ -582,7 +582,7 @@ static int cs43l22_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              ptr  = (uint16_t *)caps->ac_controls.b;
+              ptr  = (FAR uint16_t *)caps->ac_controls.b;
               *ptr =
                 AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
                 AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |

@@ -144,7 +144,7 @@ static int usbmonitor_tracecallback(struct usbtrace_s *trace, void *arg)
 }
 #endif
 
-static int usbmonitor_daemon(int argc, char **argv)
+static int usbmonitor_daemon(int argc, FAR char **argv)
 {
   uinfo("Running: %d\n", g_usbmonitor.pid);
 

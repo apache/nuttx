@@ -919,7 +919,7 @@ FAR struct i2c_master_s *
     }
 
   nxrmutex_unlock(&master->devlock);
-  return (struct i2c_master_s *)inst;
+  return (FAR struct i2c_master_s *)inst;
 }
 
 /****************************************************************************

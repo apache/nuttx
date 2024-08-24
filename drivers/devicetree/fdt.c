@@ -80,7 +80,7 @@ int fdt_get_irq(FAR const void *fdt, int nodeoffset,
 }
 
 int fdt_get_irq_by_path(FAR const void *fdt, int offset,
-                        const char *path, int irqbase)
+                        FAR const char *path, int irqbase)
 {
   return fdt_get_irq(fdt, fdt_path_offset(fdt, path), offset, irqbase);
 }
@@ -124,7 +124,7 @@ uintptr_t fdt_ld_by_cells(FAR const void *value, int cells)
 }
 
 uintptr_t fdt_get_reg_base_by_name(FAR const void *fdt, int offset,
-                                   const char *reg_name)
+                                   FAR const char *reg_name)
 {
   uintptr_t addr = 0;
 
@@ -184,7 +184,7 @@ uintptr_t fdt_get_reg_base_by_path(FAR const void *fdt, FAR const char *path)
 
 bool fdt_device_is_available(FAR const void *fdt, int node)
 {
-  const char *status = fdt_getprop(fdt, node, "status", NULL);
+  FAR const char *status = fdt_getprop(fdt, node, "status", NULL);
   if (!status)
     {
       return true;
@@ -198,7 +198,7 @@ bool fdt_device_is_available(FAR const void *fdt, int node)
   return false;
 }
 
-const char *fdt_get_node_label(FAR const void *fdt, int node)
+FAR const char *fdt_get_node_label(FAR const void *fdt, int node)
 {
   int symbols_offset;
   int property_offset;
