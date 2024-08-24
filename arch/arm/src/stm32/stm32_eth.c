@@ -4304,7 +4304,7 @@ int up_rtc_initialize(void)
  *
  ****************************************************************************/
 
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
   uint64_t timestamp;
   timestamp = stm32_eth_ptp_gettime();
@@ -4340,7 +4340,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int up_rtc_settime(const struct timespec *tp)
 {
   struct timespec ptptime;
   uint64_t timestamp;

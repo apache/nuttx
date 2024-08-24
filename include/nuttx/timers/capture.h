@@ -72,7 +72,7 @@ struct cap_ops_s
   /* Get the result pwm capture edges value */
 
   CODE int (*getedges)(FAR struct cap_lowerhalf_s *lower,
-                      FAR uint32_t *edges);
+                       FAR uint32_t *edges);
 };
 
 /* This structure provides the publicly visible representation of the

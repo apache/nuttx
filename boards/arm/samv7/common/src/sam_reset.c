@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BOARDCTL_RESET_CAUSE
-int board_reset_cause(FAR struct boardioc_reset_cause_s *cause)
+int board_reset_cause(struct boardioc_reset_cause_s *cause)
 {
   int rst_cause;
 

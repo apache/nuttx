@@ -242,7 +242,7 @@ uint16_t wm8994_readreg(FAR struct wm8994_dev_s *priv, uint16_t regaddr)
       msg[0].frequency = priv->lower->frequency;
       msg[0].addr      = priv->lower->address;
       msg[0].flags     = 0;
-      msg[0].buffer    = (uint8_t *)&buffer;
+      msg[0].buffer    = (FAR uint8_t *)&buffer;
       msg[0].length    = 2;
 
       /* Followed by the read data */
@@ -716,7 +716,7 @@ static int wm8994_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              ptr  = (uint16_t *)caps->ac_controls.b;
+              ptr  = (FAR uint16_t *)caps->ac_controls.b;
               *ptr =
                 AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
                 AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |

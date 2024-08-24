@@ -854,7 +854,7 @@ static int ms58xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_OVERSAMPLING:
         ret = ms58xx_setosr(priv, (uint16_t)arg);
-        sninfo("osr: %04x ret: %d\n", *(uint16_t *)arg, ret);
+        sninfo("osr: %04x ret: %d\n", *(FAR uint16_t *)arg, ret);
         break;
 
       /* Unrecognized commands */

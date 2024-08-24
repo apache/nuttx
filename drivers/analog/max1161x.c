@@ -267,7 +267,7 @@ static int max1161x_readchannel(FAR struct max1161x_dev_s *priv,
       i2cmsg[2].flags = I2C_M_READ;
 
       uint16_t buf;
-      i2cmsg[2].buffer = (uint8_t *)(&buf);
+      i2cmsg[2].buffer = (FAR uint8_t *)(&buf);
       i2cmsg[2].length = sizeof(buf);
       ret = I2C_TRANSFER(priv->i2c, i2cmsg, 3);
       if (ret < 0)

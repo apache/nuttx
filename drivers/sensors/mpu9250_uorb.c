@@ -924,7 +924,8 @@ static inline int mpu9250_modify_reg(FAR struct mpu9250_dev_s *dev,
 static inline int mpu9250_read_imu(FAR struct mpu9250_dev_s *dev,
                                    FAR struct sensor_data_s *buf)
 {
-  return mpu9250_read_reg(dev, ACCEL_XOUT_H, (uint8_t *) buf, sizeof(*buf));
+  return mpu9250_read_reg(dev, ACCEL_XOUT_H, (FAR uint8_t *)buf,
+                          sizeof(*buf));
 }
 
 /* mpu9250_read_pwr_mgmt_1()
@@ -941,7 +942,7 @@ static inline uint8_t mpu9250_read_pwr_mgmt_1(FAR struct mpu9250_dev_s *dev)
 }
 
 static inline int mpu9250_write_signal_reset(FAR struct mpu9250_dev_s *dev,
-                                                  uint8_t val)
+                                             uint8_t val)
 {
   return mpu9250_write_reg(dev, SIGNAL_PATH_RESET, &val, sizeof(val));
 }

@@ -1263,7 +1263,7 @@ static int lan91c111_ioctl(FAR struct net_driver_s *dev, int cmd,
                            unsigned long arg)
 {
   FAR struct lan91c111_driver_s *priv = dev->d_private;
-  struct mii_ioctl_data_s *req = (void *)arg;
+  FAR struct mii_ioctl_data_s *req = (FAR void *)arg;
   int ret = OK;
 
   net_lock();

@@ -101,30 +101,30 @@ struct mount_info_s
 /* Helpers */
 
 static void    mount_sprintf(FAR struct mount_info_s *info,
-                 FAR const char *fmt, ...) printf_like(2, 3);
+                             FAR const char *fmt, ...) printf_like(2, 3);
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MOUNT
 static int     mount_entry(FAR const char *mountpoint,
-                 FAR struct statfs *statbuf, FAR void *arg);
+                           FAR struct statfs *statbuf, FAR void *arg);
 #endif
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_BLOCKS
 static int     blocks_entry(FAR const char *mountpoint,
-                 FAR struct statfs *statbuf, FAR void *arg);
+                            FAR struct statfs *statbuf, FAR void *arg);
 #endif
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
 static int     usage_entry(FAR const char *mountpoint,
-                 FAR struct statfs *statbuf, FAR void *arg);
+                           FAR struct statfs *statbuf, FAR void *arg);
 #endif
 
 /* File system methods */
 
 static int     mount_open(FAR struct file *filep, FAR const char *relpath,
-                 int oflags, mode_t mode);
+                          int oflags, mode_t mode);
 static int     mount_close(FAR struct file *filep);
 static ssize_t mount_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                          size_t buflen);
 
 static int     mount_dup(FAR const struct file *oldp,
-                 FAR struct file *newp);
+                         FAR struct file *newp);
 
 static int     mount_stat(FAR const char *relpath, FAR struct stat *buf);
 
@@ -563,7 +563,7 @@ static int mount_dup(FAR const struct file *oldp, FAR struct file *newp)
  *
  ****************************************************************************/
 
-static int mount_stat(const char *relpath, struct stat *buf)
+static int mount_stat(FAR const char *relpath, FAR struct stat *buf)
 {
   memset(buf, 0, sizeof(struct stat));
   buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;

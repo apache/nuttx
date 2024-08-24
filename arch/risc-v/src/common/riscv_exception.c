@@ -97,7 +97,7 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
 int riscv_exception(int mcause, void *regs, void *args)
 {
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
 #endif
   uintreg_t cause = mcause & RISCV_IRQ_MASK;
 

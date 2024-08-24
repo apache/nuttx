@@ -585,7 +585,7 @@ FAR const struct usb_qualdesc_s *usbmsc_getqualdesc(void);
  *
  ****************************************************************************/
 
-int usbmsc_scsi_main(int argc, char *argv[]);
+int usbmsc_scsi_main(int argc, FAR char *argv[]);
 
 /****************************************************************************
  * Name: usbmsc_setconfig

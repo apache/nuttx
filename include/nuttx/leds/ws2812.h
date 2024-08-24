@@ -94,7 +94,7 @@ struct ws2812_dev_s
                         FAR char        *data,
                         size_t           len);
 
-  void                  *private;    /* Private data for opened device */
+  FAR void              *private;    /* Private data for opened device */
   uint32_t               clock;
   mutex_t                lock;
   int                    port;

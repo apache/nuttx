@@ -368,7 +368,7 @@ int ksz9477_init(ksz9477_port_t master_port)
   /* Check that the SGMII block is alive and indirect accesses work */
 
   ret = ksz9477_sgmii_read_indirect(KSZ9477_SGMII_ID1,
-                                    (uint16_t *)&regval32, 2);
+                                    (FAR uint16_t *)&regval32, 2);
   if (ret != OK || regval32 != SGMII_PHY_ID)
     {
       nerr("SGMII port access failure, id %x, ret %d\n", regval32, ret);

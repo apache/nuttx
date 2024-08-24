@@ -147,7 +147,7 @@ int vm_unmap_region(FAR void *vaddr, size_t size)
 
   DEBUGASSERT(size && vaddr);
   size += ((uintptr_t)vaddr & MM_PGMASK);
-  vaddr = (void *)MM_PGALIGNDOWN(vaddr);
+  vaddr = (FAR void *)MM_PGALIGNDOWN(vaddr);
   ret = up_shmdt((uintptr_t)vaddr, MM_NPAGES(size));
   vm_release_region(get_current_mm(), vaddr, size);
   return ret;

@@ -137,7 +137,7 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
 
   /* Return read sample */
 
-  buffer = (FAR char *) &priv->sample;
+  buffer = (FAR char *)&priv->sample;
 
   nxmutex_unlock(&priv->lock);
   return sizeof(struct xen1210_sample_s);

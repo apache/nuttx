@@ -301,7 +301,7 @@ void mm_free(struct mm_heap_s *heap, void *mem)
  *
  ****************************************************************************/
 
-void mm_free_delaylist(FAR struct mm_heap_s *heap)
+void mm_free_delaylist(struct mm_heap_s *heap)
 {
   if (heap)
     {

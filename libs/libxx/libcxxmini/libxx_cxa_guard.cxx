@@ -66,7 +66,7 @@ extern "C"
 #ifdef __ARM_EABI__
     return !(*g & 1);
 #else
-    return !*(char *)g;
+    return !*(FAR char *)g;
 #endif
   }
 
@@ -79,7 +79,7 @@ extern "C"
 #ifdef __ARM_EABI__
     *g = 1;
 #else
-    *(char *)g = 1;
+    *(FAR char *)g = 1;
 #endif
   }
 

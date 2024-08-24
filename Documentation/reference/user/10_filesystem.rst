@@ -67,11 +67,11 @@ Driver Operations
 .. c:function:: int     dup(int fd);
 .. c:function:: int     dup2(int fd1, int fd2);
 .. c:function:: off_t   lseek(int fd, off_t offset, int whence);
-.. c:function:: ssize_t pread(int fd, void *buf, size_t nbytes, off_t offset);
-.. c:function:: ssize_t pwrite(int fd, const void *buf, size_t nbytes, off_t offset);
+.. c:function:: ssize_t pread(int fd, FAR void *buf, size_t nbytes, off_t offset);
+.. c:function:: ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 .. c:function:: ssize_t read(int fd, void *buf, size_t nbytes);
-.. c:function:: int     unlink(const char *path);
-.. c:function:: ssize_t write(int fd, const void *buf, size_t nbytes);
+.. c:function:: int     unlink(FAR const char *path);
+.. c:function:: ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 
 ``sys/ioctl.h``
 ---------------
@@ -81,7 +81,7 @@ Driver Operations
 ``poll.h``
 ----------
 
-.. c:function:: int poll(struct pollfd *fds, nfds_t nfds, int timeout)
+.. c:function:: int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
 
   Waits for one of a set of file descriptors
   to become ready to perform I/O. If none of the events requested (and no

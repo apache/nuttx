@@ -164,7 +164,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 
           for (i = 0; i < loadinfo->nctors; i++)
             {
-              FAR uintptr_t *ptr = (uintptr_t *)
+              FAR uintptr_t *ptr = (FAR uintptr_t *)
                    ((FAR void *)(&loadinfo->ctors)[i]);
 
               binfo("ctor %d: "

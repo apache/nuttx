@@ -200,10 +200,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = memlcd_putrun,           /* Put a run into lcd memory */
-  .getrun = memlcd_getrun,           /* Get a run from lcd memory */
-  .buffer = (uint8_t *) g_runbuffer, /* Run scratch buffer */
-  .bpp = MEMLCD_BPP,                 /* Bits-per-pixel */
+  .putrun = memlcd_putrun,              /* Put a run into lcd memory */
+  .getrun = memlcd_getrun,              /* Get a run from lcd memory */
+  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp = MEMLCD_BPP,                    /* Bits-per-pixel */
 };
 
 /* This is the oled driver instance (only a single device is supported
@@ -244,21 +244,21 @@ static struct memlcd_dev_s g_memlcddev =
  *
  ****************************************************************************/
 
-static inline void __set_bit(int nr, uint8_t * addr)
+static inline void __set_bit(int nr, uint8_t *addr)
 {
   uint8_t mask = BIT_BYTE_MASK(nr);
-  uint8_t *p = ((uint8_t *) addr) + BIT_BYTE(nr);
+  uint8_t *p = ((FAR uint8_t *)addr) + BIT_BYTE(nr);
   *p |= mask;
 }
 
-static inline void __clear_bit(int nr, uint8_t * addr)
+static inline void __clear_bit(int nr, uint8_t *addr)
 {
   uint8_t mask = BIT_BYTE_MASK(nr);
-  uint8_t *p = ((uint8_t *) addr) + BIT_BYTE(nr);
+  uint8_t *p = ((FAR uint8_t *)addr) + BIT_BYTE(nr);
   *p &= ~mask;
 }
 
-static inline int __test_bit(int nr, const volatile uint8_t * addr)
+static inline int __test_bit(int nr, const volatile uint8_t *addr)
 {
   return 1 & (addr[BIT_BYTE(nr)] >> (nr & (BITS_PER_BYTE - 1)));
 }

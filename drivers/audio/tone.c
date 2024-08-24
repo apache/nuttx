@@ -127,8 +127,8 @@ static const uint16_t g_notes_freq[84] =
 
 /* Global variable used by the tone generator */
 
-static const char *g_tune;
-static const char *g_next;
+static FAR const char *g_tune;
+static FAR const char *g_next;
 static uint8_t g_tempo;
 static uint8_t g_note_mode;
 static uint32_t g_note_length;

@@ -136,8 +136,8 @@ struct netdev_lowerhalf_s
 
 struct netdev_ops_s
 {
-  int (*ifup)(FAR struct netdev_lowerhalf_s *dev);
-  int (*ifdown)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*ifup)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*ifdown)(FAR struct netdev_lowerhalf_s *dev);
 
   /* transmit - Try to send a packet, non-blocking, own the netpkt and
    *            need to call netpkt_free to free it sometime later.
@@ -148,27 +148,30 @@ struct netdev_ops_s
    *       will be recycled by upper half.
    */
 
-  int (*transmit)(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt);
+  CODE int (*transmit)(FAR struct netdev_lowerhalf_s *dev,
+                       FAR netpkt_t *pkt);
 
   /* receive - Try to receive a packet, non-blocking
    *   Returned Value:
    *     A netpkt contains the packet, or NULL if no more packets.
    */
 
-  FAR netpkt_t *(*receive)(FAR struct netdev_lowerhalf_s *dev);
+  CODE FAR netpkt_t *(*receive)(FAR struct netdev_lowerhalf_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
-  int (*addmac)(FAR struct netdev_lowerhalf_s *dev, FAR const uint8_t *mac);
-  int (*rmmac)(FAR struct netdev_lowerhalf_s *dev, FAR const uint8_t *mac);
+  CODE int (*addmac)(FAR struct netdev_lowerhalf_s *dev,
+                     FAR const uint8_t *mac);
+  CODE int (*rmmac)(FAR struct netdev_lowerhalf_s *dev,
+                    FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  int (*ioctl)(FAR struct netdev_lowerhalf_s *dev, int cmd,
-               unsigned long arg);
+  CODE int (*ioctl)(FAR struct netdev_lowerhalf_s *dev, int cmd,
+                    unsigned long arg);
 #endif
 
   /* reclaim - try to reclaim packets sent by netdev. */
 
-  void (*reclaim)(FAR struct netdev_lowerhalf_s *dev);
+  CODE void (*reclaim)(FAR struct netdev_lowerhalf_s *dev);
 };
 
 /* This structure is a set of wireless handlers, leave unsupported operations
@@ -176,17 +179,17 @@ struct netdev_ops_s
  */
 
 #ifdef CONFIG_NETDEV_WIRELESS_HANDLER
-typedef int (*iw_handler_rw)(FAR struct netdev_lowerhalf_s *dev,
-                             FAR struct iwreq *iwr, bool set);
-typedef int (*iw_handler_ro)(FAR struct netdev_lowerhalf_s *dev,
-                             FAR struct iwreq *iwr);
+typedef CODE int (*iw_handler_rw)(FAR struct netdev_lowerhalf_s *dev,
+                                 FAR struct iwreq *iwr, bool set);
+typedef CODE int (*iw_handler_ro)(FAR struct netdev_lowerhalf_s *dev,
+                                 FAR struct iwreq *iwr);
 
 struct wireless_ops_s
 {
   /* Connect / disconnect operation, should exist if essid or bssid exists */
 
-  int (*connect)(FAR struct netdev_lowerhalf_s *dev);
-  int (*disconnect)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*connect)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*disconnect)(FAR struct netdev_lowerhalf_s *dev);
 
   /* The following attributes need both set and get. */
 

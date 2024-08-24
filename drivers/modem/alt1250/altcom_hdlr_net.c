@@ -207,7 +207,7 @@ static void altcombs_set_cellinfo_v4(
         {
           m_err("cmd_cellinfo->mnc error\n");
         }
-      else if (strlen((const char *)cmd_cellinfo->cgid) >
+      else if (strlen((FAR const char *)cmd_cellinfo->cgid) >
        APICMD_CELLINFO_GCID_MAX)
         {
           m_err("cmd_cellinfo->cgid error\n");

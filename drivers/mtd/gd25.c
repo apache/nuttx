@@ -497,7 +497,7 @@ static bool gd25_is_erased(FAR struct gd25_dev_s *priv, off_t address,
     {
       /* Check if all bytes of page is in erased state. */
 
-      gd25_byteread(priv, (uint8_t *)buf, address, GD25_PAGE_SIZE);
+      gd25_byteread(priv, (FAR uint8_t *)buf, address, GD25_PAGE_SIZE);
 
       for (i = 0; i < GD25_PAGE_SIZE / sizeof(uint32_t); i++)
         {

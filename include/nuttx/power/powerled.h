@@ -156,7 +156,7 @@ struct powerled_ops_s
   /* Set powerled parameters */
 
   CODE int (*params_set)(FAR struct powerled_dev_s *dev,
-                         struct powerled_params_s *param);
+                         FAR struct powerled_params_s *param);
 
   /* Set powerled operation mode */
 

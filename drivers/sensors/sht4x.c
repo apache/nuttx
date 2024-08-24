@@ -564,7 +564,10 @@ static ssize_t sht4x_read(FAR struct file *filep, FAR char *buffer,
 
   /* If file position is non-zero, then we're at the end of file. */
 
-  if (filep->f_pos > 0) return 0;
+  if (filep->f_pos > 0)
+    {
+      return 0;
+    }
 
   /* Get exclusive access */
 
@@ -605,7 +608,10 @@ static ssize_t sht4x_read(FAR struct file *filep, FAR char *buffer,
 
   length = snprintf(buffer, buflen, "%ld m" SHT4X_TEMP_UNIT ", %d %%RH\n",
                     data.temp, data.hum / 100);
-  if (length > buflen) length = buflen;
+  if (length > buflen)
+    {
+      length = buflen;
+    }
 
   filep->f_pos += length;
   nxmutex_unlock(&priv->devlock);
@@ -664,15 +670,15 @@ static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         union sht4x_serialno_t serialno;
         err = sht4x_cmd(priv, SHT4X_READ_SERIAL, 10, &serialno.halves.msb,
                         &serialno.halves.lsb);
-        *((uint32_t *)(arg)) = serialno.full;
+        *((FAR uint32_t *)(arg)) = serialno.full;
       }
       break;
 
     case SNIOC_READ_RAW_DATA:
       err = sht4x_cmd(priv, g_precision_read[priv->precision],
                       g_measurement_times[priv->precision],
-                      &((struct sht4x_raw_data_s *)(arg))->raw_temp,
-                      &((struct sht4x_raw_data_s *)(arg))->raw_hum);
+                      &((FAR struct sht4x_raw_data_s *)(arg))->raw_temp,
+                      &((FAR struct sht4x_raw_data_s *)(arg))->raw_hum);
       break;
 
     case SNIOC_MEASURE:
@@ -684,8 +690,9 @@ static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         err = sht4x_cmd(priv, g_precision_read[priv->precision],
                         g_measurement_times[priv->precision],
                         &raw_t, &raw_h);
-        ((struct sht4x_conv_data_s *)(arg))->temp = sht4x_calc_temp(raw_t);
-        ((struct sht4x_conv_data_s *)(arg))->hum = sht4x_calc_hum(raw_h);
+        ((FAR struct sht4x_conv_data_s *)(arg))->temp =
+            sht4x_calc_temp(raw_t);
+        ((FAR struct sht4x_conv_data_s *)(arg))->hum = sht4x_calc_hum(raw_h);
       }
       break;
 
@@ -704,13 +711,14 @@ static int sht4x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         /* Caller must pass heater option in the temperature argument. */
 
-        uint16_t raw_t = ((struct sht4x_conv_data_s *)(arg))->temp;
+        uint16_t raw_t = ((FAR struct sht4x_conv_data_s *)(arg))->temp;
         uint16_t raw_h;
 
         err = sht4x_cmd(priv, g_heat_cmds[raw_t], g_heat_times[raw_t],
                         &raw_t, &raw_h);
-        ((struct sht4x_conv_data_s *)(arg))->temp = sht4x_calc_temp(raw_t);
-        ((struct sht4x_conv_data_s *)(arg))->hum = sht4x_calc_hum(raw_h);
+        ((FAR struct sht4x_conv_data_s *)(arg))->temp =
+            sht4x_calc_temp(raw_t);
+        ((FAR struct sht4x_conv_data_s *)(arg))->hum = sht4x_calc_hum(raw_h);
         clock_systime_timespec(&priv->last_heat); /* Update last heat time. */
       }
       break;

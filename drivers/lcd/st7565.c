@@ -262,10 +262,10 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun  = st7565_putrun,           /* Put a run into LCD memory */
-  .getrun  = st7565_getrun,           /* Get a run from LCD memory */
-  .buffer  = (uint8_t *) g_runbuffer, /* Run scratch buffer */
-  .bpp     = ST7565_BPP,              /* Bits-per-pixel */
+  .putrun  = st7565_putrun,              /* Put a run into LCD memory */
+  .getrun  = st7565_getrun,              /* Get a run from LCD memory */
+  .buffer  = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp     = ST7565_BPP,                 /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
