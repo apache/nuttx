@@ -296,7 +296,7 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass);
 static int  usbhost_devno_alloc(FAR struct usbhost_cdcacm_s *priv);
 static void usbhost_devno_free(FAR struct usbhost_cdcacm_s *priv);
 static inline void usbhost_mkdevname(FAR struct usbhost_cdcacm_s *priv,
-              FAR char *devname);
+                                     FAR char *devname);
 
 /* CDC/ACM request helpers */
 
