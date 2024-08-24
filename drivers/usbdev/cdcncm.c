@@ -2901,7 +2901,7 @@ static int cdcmbim_classobject(int minor,
 #ifdef CONFIG_NETDEV_IFINDEX
       index = self->ncmdriver.dev.netdev.d_ifindex;
 #endif
-      snprintf(devname, CDC_MBIM_DEVNAMELEN, CDC_MBIM_DEVFORMAT, index);
+      snprintf(devname, sizeof(devname), CDC_MBIM_DEVFORMAT, index);
       ret = register_driver(devname, &g_usbdevfops, 0666, self);
       if (ret < 0)
         {

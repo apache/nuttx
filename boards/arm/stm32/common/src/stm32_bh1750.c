@@ -76,7 +76,7 @@ int board_bh1750_initialize(int devno, int busno)
 
   /* Then register the ambient light sensor */
 
-  snprintf(devpath, 12, "/dev/light%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/light%d", devno);
   ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
   if (ret < 0)
     {

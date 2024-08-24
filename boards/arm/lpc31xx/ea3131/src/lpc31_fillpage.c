@@ -256,7 +256,8 @@ static inline void lpc31_initsrc(void)
 
       /* Now mount the file system */
 
-      snprintf(devname, 16, "/dev/mmcsd%d", CONFIG_EA3131_PAGING_MINOR);
+      snprintf(devname, sizeof(devname), "/dev/mmcsd%d",
+               CONFIG_EA3131_PAGING_MINOR);
       ret = nx_mount(devname, CONFIG_EA3131_PAGING_MOUNTPT, "vfat",
                      MS_RDONLY, NULL);
       DEBUGASSERT(ret == OK);

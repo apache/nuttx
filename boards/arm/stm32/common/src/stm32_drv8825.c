@@ -190,7 +190,7 @@ int board_drv8825_initialize(int devno)
 
     drv8825_initialize();
 
-    snprintf(devname, 15, "/dev/stepper%d", devno);
+    snprintf(devname, sizeof(devname), "/dev/stepper%d", devno);
 
     ret = drv8825_register(devname, &g_drv8825_ops);
 

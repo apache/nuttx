@@ -72,7 +72,7 @@ int board_mpl115a_initialize(int devno, int busno)
 
   /* Then register the barometer sensor */
 
-  snprintf(devpath, 12, "/dev/press%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/press%d", devno);
   ret = mpl115a_register(devpath, spi);
   if (ret < 0)
     {

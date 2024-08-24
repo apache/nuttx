@@ -69,7 +69,7 @@ int board_max31855_initialize(int devno, int busno)
 
   /* Then register the temperature sensor */
 
-  snprintf(devpath, 12, "/dev/temp%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/temp%d", devno);
   ret = max31855_register(devpath, spi, devno);
   if (ret < 0)
     {
