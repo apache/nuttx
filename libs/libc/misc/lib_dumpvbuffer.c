@@ -97,7 +97,7 @@ static void lib_dumpvfile_handler(FAR void *arg, FAR const char *fmt,
                                   ...)
 {
   va_list ap;
-  int *fd = (int *)arg;
+  FAR int *fd = (FAR int *)arg;
 
   va_start(ap, fmt);
   vdprintf(*fd, fmt, ap);

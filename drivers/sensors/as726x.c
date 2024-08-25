@@ -141,7 +141,7 @@ static float as726x_getcalibrated(FAR struct as726x_dev_s *priv,
   colourdata |= ((uint32_t) byte2 << (8 * 1));
   colourdata |= ((uint32_t) byte3 << (8 * 0));
 
-  return *((float *)(&colourdata));
+  return *((FAR float *)(&colourdata));
 }
 
 /****************************************************************************

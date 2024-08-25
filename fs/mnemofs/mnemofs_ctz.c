@@ -123,7 +123,7 @@ static void   ctz_off2loc(FAR const struct mfs_sb_s * const sb, mfs_t off,
 static mfs_t  ctz_blkdatasz(FAR const struct mfs_sb_s * const sb,
                             const mfs_t idx);
 static void   ctz_copyidxptrs(FAR const struct mfs_sb_s * const sb,
-                              FAR struct mfs_ctz_s ctz, const mfs_t idx,
+                              struct mfs_ctz_s ctz, const mfs_t idx,
                               FAR char *buf);
 
 /****************************************************************************
@@ -259,7 +259,7 @@ static mfs_t ctz_blkdatasz(FAR const struct mfs_sb_s * const sb,
  ****************************************************************************/
 
 static void ctz_copyidxptrs(FAR const struct mfs_sb_s * const sb,
-                            FAR struct mfs_ctz_s ctz, const mfs_t idx,
+                            struct mfs_ctz_s ctz, const mfs_t idx,
                             FAR char *buf)
 {
   mfs_t i;

@@ -258,7 +258,7 @@ static inline void __clear_bit(int nr, uint8_t *addr)
   *p &= ~mask;
 }
 
-static inline int __test_bit(int nr, const volatile uint8_t *addr)
+static inline int __test_bit(int nr, FAR const volatile uint8_t *addr)
 {
   return 1 & (addr[BIT_BYTE(nr)] >> (nr & (BITS_PER_BYTE - 1)));
 }

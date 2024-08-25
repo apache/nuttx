@@ -42,7 +42,7 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 
 nooptimiziation_function
-void sincosl(long double x, long double *s, long double *c)
+void sincosl(long double x, FAR long double *s, FAR long double *c)
 {
   *s = sinl(x);
   *c = cosl(x);
