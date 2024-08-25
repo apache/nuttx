@@ -22,7 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
 #include <math.h>
@@ -31,7 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
-float nanf(const char *tagp)
+float nanf(FAR const char *tagp)
 {
   return (float)NAN;
 }

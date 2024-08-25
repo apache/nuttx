@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-long double nanl(const char *tagp)
+long double nanl(FAR const char *tagp)
 {
   return (long double)NAN;
 }

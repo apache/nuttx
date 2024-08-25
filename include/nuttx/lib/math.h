@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 /* If CONFIG_ARCH_MATH_H is defined, then the top-level Makefile will copy
  * this header file to include/math.h where it will become the system math.h
@@ -225,12 +226,12 @@ double      fabs  (double x);
 long double fabsl (long double x);
 #endif
 
-float       modff (float x, float *iptr);
+float       modff (float x, FAR float *iptr);
 #ifdef CONFIG_HAVE_DOUBLE
-double      modf  (double x, double *iptr);
+double      modf  (double x, FAR double *iptr);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-long double modfl (long double x, long double *iptr);
+long double modfl (long double x, FAR long double *iptr);
 #endif
 
 float       fmodf (float x, float div);
@@ -388,22 +389,22 @@ double      ldexp (double x, int n);
 long double ldexpl(long double x, int n);
 #endif
 
-float       frexpf(float x, int *exp);
+float       frexpf(float x, FAR int *exp);
 #ifdef CONFIG_HAVE_DOUBLE
-double      frexp (double x, int *exp);
+double      frexp (double x, FAR int *exp);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-long double frexpl(long double x, int *exp);
+long double frexpl(long double x, FAR int *exp);
 #endif
 
 /* Trigonometric Functions **************************************************/
 
-void        sincosf(float, float *, float *);
+void        sincosf(float, FAR float *, FAR float *);
 #ifdef CONFIG_HAVE_DOUBLE
-void        sincos(double, double *, double *);
+void        sincos(double, FAR double *, FAR double *);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-void        sincosl(long double, long double *, long double *);
+void        sincosl(long double, FAR long double *, FAR long double *);
 #endif
 
 float       sinf  (float x);
@@ -545,12 +546,12 @@ double      trunc (double x);
 long double truncl (long double x);
 #endif
 
-float       nanf(const char *tagp);
+float       nanf(FAR const char *tagp);
 #ifdef CONFIG_HAVE_DOUBLE
-double      nan(const char *tagp);
+double      nan(FAR const char *tagp);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-long double nanl(const char *tagp);
+long double nanl(FAR const char *tagp);
 #endif
 
 float       nearbyintf(float x);

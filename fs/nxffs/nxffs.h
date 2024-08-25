@@ -691,7 +691,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block);
  *
  ****************************************************************************/
 
-int nxffs_validblock(struct nxffs_volume_s *volume, off_t *block);
+int nxffs_validblock(FAR struct nxffs_volume_s *volume, FAR off_t *block);
 
 /****************************************************************************
  * Name: nxffs_blockstats

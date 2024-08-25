@@ -468,7 +468,7 @@ static void elf_emit_memory(FAR struct elf_dumpinfo_s *cinfo, int memsegs)
 
 static void elf_emit_tcb_phdr(FAR struct elf_dumpinfo_s *cinfo,
                               FAR struct tcb_s *tcb,
-                              FAR Elf_Phdr *phdr, off_t *offset)
+                              FAR Elf_Phdr *phdr, FAR off_t *offset)
 {
   uintptr_t sp;
 
