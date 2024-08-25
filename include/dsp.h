@@ -522,7 +522,7 @@ void phase_angle_update(FAR struct phase_angle_f32_s *angle, float val);
 void svm3_init(FAR struct svm3_state_f32_s *s);
 void svm3(FAR struct svm3_state_f32_s *s, FAR ab_frame_f32_t *ab);
 void svm3_current_correct(FAR struct svm3_state_f32_s *s,
-                          float *c0, float *c1, float *c2);
+                          FAR float *c0, FAR float *c1, FAR float *c2);
 
 /* Field Oriented Control */
 

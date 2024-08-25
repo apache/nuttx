@@ -42,7 +42,7 @@
 #ifdef CONFIG_HAVE_DOUBLE
 
 nooptimiziation_function
-void sincos(double x, double *s, double *c)
+void sincos(double x, FAR double *s, FAR double *c)
 {
   *s = sin(x);
   *c = cos(x);

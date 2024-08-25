@@ -270,7 +270,7 @@ struct mfs_dirent_s
   struct timespec  st_ctim;    /* Time of last status change */
   struct mfs_ctz_s ctz;
   uint8_t          namelen;
-  FAR char         name[];
+  char             name[];
 };
 
 /* Parent iterator */
@@ -320,7 +320,7 @@ extern "C"
  ****************************************************************************/
 
 static mfs_t inline mfs_blkremsz(FAR const struct mfs_sb_s * const sb,
-                                  mfs_t pg, mfs_t pgoff)
+                                 mfs_t pg, mfs_t pgoff)
 {
   return MFS_BLKSZ(sb) - (MFS_PG2BLKPGOFF(sb, pg) * sb->pg_sz + pgoff);
 }

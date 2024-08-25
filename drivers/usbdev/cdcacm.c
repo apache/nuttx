@@ -2435,7 +2435,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         leave_critical_section(flags);
 
-        *(int *)arg = count;
+        *(FAR int *)arg = count;
         ret = 0;
       }
       break;
@@ -2461,7 +2461,7 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         leave_critical_section(flags);
 
-        *(int *)arg = count;
+        *(FAR int *)arg = count;
         ret = 0;
       }
       break;

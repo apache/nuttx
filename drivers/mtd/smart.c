@@ -3231,7 +3231,7 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev,
 #ifdef CONFIG_SMART_CRC_8
   sectorheader->crc8 = smart_calc_sector_crc(dev);
 #elif defined(CONFIG_SMART_CRC_16)
-  *((uint16_t *)sectorheader->crc16) = smart_calc_sector_crc(dev);
+  *((FAR uint16_t *)sectorheader->crc16) = smart_calc_sector_crc(dev);
 #elif defined(CONFIG_SMART_CRC_32)
   *((FAR uint32_t *)sectorheader->crc32) = smart_calc_sector_crc(dev);
 #endif
@@ -3393,7 +3393,7 @@ static int smart_relocate_sector(FAR struct smart_struct_s *dev,
 #ifdef CONFIG_SMART_CRC_8
   header->crc8 = smart_calc_sector_crc(dev);
 #elif defined(CONFIG_SMART_CRC_16)
-  *((uint16_t *)header->crc16) = smart_calc_sector_crc(dev);
+  *((FAR uint16_t *)header->crc16) = smart_calc_sector_crc(dev);
 #elif defined(CONFIG_SMART_CRC_32)
   *((FAR uint32_t *)header->crc32) = smart_calc_sector_crc(dev);
 #endif
@@ -4818,7 +4818,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
 #ifdef CONFIG_SMART_CRC_8
   header->crc8 = smart_calc_sector_crc(dev);
 #elif defined(CONFIG_SMART_CRC_16)
-  *((uint16_t *)header->crc16) = smart_calc_sector_crc(dev);
+  *((FAR uint16_t *)header->crc16) = smart_calc_sector_crc(dev);
 #elif defined(CONFIG_SMART_CRC_32)
   *((FAR uint32_t *)header->crc32) = smart_calc_sector_crc(dev);
 #endif

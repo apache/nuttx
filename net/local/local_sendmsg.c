@@ -75,9 +75,9 @@ static int local_sendctl(FAR struct local_conn_s *conn,
   FAR struct local_conn_s *peer;
   FAR struct file *filep2;
   FAR struct file *filep;
-  struct cmsghdr *cmsg;
+  FAR struct cmsghdr *cmsg;
   int count = 0;
-  int *fds;
+  FAR int *fds;
   int ret;
   int i = 0;
 
@@ -98,7 +98,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
           goto fail;
         }
 
-      fds = (int *)CMSG_DATA(cmsg);
+      fds = (FAR int *)CMSG_DATA(cmsg);
       count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
 
       if (count + peer->lc_cfpcount >= LOCAL_NCONTROLFDS)

@@ -262,7 +262,7 @@
 #define CMSG_NXTHDR(mhdr, cmsg) cmsg_nxthdr((mhdr), (cmsg))
 
 #define CMSG_ALIGN(len) \
-  (((len)+sizeof(long)-1) & ~(sizeof(long)-1))
+  (((len) + sizeof(long) - 1) & ~(sizeof(long) - 1))
 #define CMSG_DATA(cmsg) \
   ((FAR void *)((FAR char *)(cmsg) + CMSG_ALIGN(sizeof(struct cmsghdr))))
 #define CMSG_SPACE(len) \

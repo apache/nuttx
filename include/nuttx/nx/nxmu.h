@@ -435,7 +435,7 @@ struct nxsvrmsg_getrectangle_s
   unsigned int plane;              /* The plane number to read */
   FAR uint8_t *dest;               /* Memory location in which to store the graphics data */
   unsigned int deststride;         /* Width of the destination memory in bytes */
-  sem_t *sem_done;                 /* Semaphore to report when command is done. */
+  FAR sem_t *sem_done;             /* Semaphore to report when command is done. */
 };
 
 /* Fill a trapezoidal region in the window with a color */

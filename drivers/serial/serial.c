@@ -1779,7 +1779,7 @@ static void uart_launch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
   if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_FILEPATH))
 #endif
     {
-      *(int *)arg = 1;
+      *(FAR int *)arg = 1;
     }
 }
 
