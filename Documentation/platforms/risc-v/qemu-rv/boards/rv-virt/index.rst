@@ -262,6 +262,11 @@ leds64_rust
 
 Similar to the `leds64`_ configuration, but with ``leds_rust`` example enabled.
 
+leds64_zig
+-----------
+
+Similar to the `leds64`_ configuration, but with ``leds_zig`` example enabled.
+
 netnsh
 ------
 
