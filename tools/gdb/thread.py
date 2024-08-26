@@ -31,10 +31,13 @@ UINT16_MAX = 0xFFFF
 SEM_TYPE_MUTEX = 4
 
 saved_regs = None
+regoffset = None
 
 
 def save_regs():
     global saved_regs
+    global regoffset
+
     tcbinfo = gdb.parse_and_eval("g_tcbinfo")
 
     if saved_regs:
@@ -42,25 +45,41 @@ def save_regs():
     arch = gdb.selected_frame().architecture()
     saved_regs = []
     i = 0
+
+    if not regoffset:
+        regoffset = [
+            int(tcbinfo["reg_off"]["p"][i])
+            for i in range(tcbinfo["regs_num"])
+            if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
+        ]
+
     for reg in arch.registers():
-        if i >= tcbinfo["regs_num"]:
+        if i >= len(regoffset):
             break
 
-        saved_regs.append(gdb.parse_and_eval("$%s" % reg.name))
+        ret = gdb.parse_and_eval("$%s" % reg.name)
+        saved_regs.append(ret)
         i += 1
 
 
 def restore_regs():
     tcbinfo = gdb.parse_and_eval("g_tcbinfo")
     global saved_regs
+    global regoffset
 
     if not saved_regs:
         return
 
     arch = gdb.selected_frame().architecture()
     i = 0
+
+    regoffset = [
+        int(tcbinfo["reg_off"]["p"][i])
+        for i in range(tcbinfo["regs_num"])
+        if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
+    ]
     for reg in arch.registers():
-        if i >= tcbinfo["regs_num"]:
+        if i >= len(regoffset):
             break
 
         gdb.execute(f"set ${reg.name}={int(saved_regs[i])}")
@@ -84,6 +103,8 @@ class SetRegs(gdb.Command):
         super(SetRegs, self).__init__("setregs", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
+        global regoffset
+
         parser = argparse.ArgumentParser(
             description="Set registers to the specified values"
         )
@@ -116,11 +137,12 @@ class SetRegs(gdb.Command):
         save_regs()
         arch = gdb.selected_frame().architecture()
 
-        regoffset = [
-            int(tcbinfo["reg_off"]["p"][i])
-            for i in range(tcbinfo["regs_num"])
-            if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
-        ]
+        if not regoffset:
+            regoffset = [
+                int(tcbinfo["reg_off"]["p"][i])
+                for i in range(tcbinfo["regs_num"])
+                if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
+            ]
 
         i = 0
         for reg in arch.registers():
