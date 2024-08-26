@@ -143,7 +143,6 @@
 #endif
 
 #define SDCARD_CMDDONE_STA      (SDMMC_INT_CDONE)
-#define SDCARD_RESPDONE_STA     (0)
 
 #define SDCARD_CMDDONE_MASK     (SDMMC_INT_CDONE)
 #define SDCARD_RESPDONE_MASK    (SDMMC_INT_CDONE | SDCARD_INT_RESPERR)
@@ -521,8 +520,6 @@ static int esp32s3_ciu_sendcmd(uint32_t cmd, uint32_t arg)
 {
   clock_t watchtime;
 
-  DEBUGASSERT((esp32s3_getreg(ESP32S3_SDMMC_CMD) & SDMMC_CMD_STARTCMD) == 0);
-
   watchtime = clock_systime_ticks();
 
   while ((esp32s3_getreg(ESP32S3_SDMMC_CMD) & SDMMC_CMD_STARTCMD) != 0)
@@ -543,8 +540,6 @@ static int esp32s3_ciu_sendcmd(uint32_t cmd, uint32_t arg)
   esp32s3_putreg(cmd, ESP32S3_SDMMC_CMD);
 
   mcinfo("cmd=0x%x arg=0x%x\n", cmd, arg);
-
-  /* Poll until command is accepted by the CIU, or we timeout */
 
   return 0;
 }
@@ -1991,16 +1986,17 @@ static int esp32s3_cancel(struct sdio_dev_s *dev)
 
 static int esp32s3_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 {
+  int ret = OK;
   volatile int32_t timeout;
   clock_t watchtime;
-  uint32_t events;
 
   mcinfo("cmd=%04x\n", cmd);
 
   switch (cmd & MMCSD_RESPONSE_MASK)
     {
     case MMCSD_NO_RESPONSE:
-      events  = SDCARD_CMDDONE_STA;
+    case MMCSD_R3_RESPONSE:
+    case MMCSD_R7_RESPONSE:
       timeout = SDCARD_CMDTIMEOUT;
       break;
 
@@ -2010,48 +2006,41 @@ static int esp32s3_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
     case MMCSD_R4_RESPONSE:
     case MMCSD_R5_RESPONSE:
     case MMCSD_R6_RESPONSE:
-      events  = (SDCARD_CMDDONE_STA | SDCARD_RESPDONE_STA);
       timeout = SDCARD_LONGTIMEOUT;
-      break;
-
-    case MMCSD_R3_RESPONSE:
-    case MMCSD_R7_RESPONSE:
-      events  = (SDCARD_CMDDONE_STA | SDCARD_RESPDONE_STA);
-      timeout = SDCARD_CMDTIMEOUT;
       break;
 
     default:
       return -EINVAL;
     }
 
-  /* Then wait for the response (or timeout or error) */
-
   watchtime = clock_systime_ticks();
-  while ((esp32s3_getreg(ESP32S3_SDMMC_RINTSTS) & events) != events)
+
+  /* We should wait for CMDDONE, even if there is a response error. */
+
+  while ((esp32s3_getreg(ESP32S3_SDMMC_RINTSTS) & SDMMC_INT_CDONE) == 0)
     {
       if (clock_systime_ticks() - watchtime > timeout)
         {
-          mcerr("ERROR: Timeout cmd: %04x events: %04x STA: %08x "
-                "RINTSTS: %08x\n",
-                cmd, events, esp32s3_getreg(ESP32S3_SDMMC_STATUS),
+          mcerr("ERROR: Timeout cmd: %04x STA: %08x RINTSTS: %08x\n",
+                cmd, esp32s3_getreg(ESP32S3_SDMMC_STATUS),
                 esp32s3_getreg(ESP32S3_SDMMC_RINTSTS));
 
-          return -ETIMEDOUT;
-        }
-      else if ((esp32s3_getreg(ESP32S3_SDMMC_RINTSTS) & SDCARD_INT_RESPERR)
-               != 0)
-        {
-          mcerr("ERROR: SDMMC failure cmd: %04x events: %04x STA: %08x "
-                "RINTSTS: %08x\n",
-                cmd, events, esp32s3_getreg(ESP32S3_SDMMC_STATUS),
-                esp32s3_getreg(ESP32S3_SDMMC_RINTSTS));
-
-          return -EIO;
+          ret = -ETIMEDOUT;
         }
     }
 
+  /* Check if there is a response error. */
+
+  if (esp32s3_getreg(ESP32S3_SDMMC_RINTSTS) & SDCARD_INT_RESPERR)
+    {
+      mcerr("ERROR: SDMMC failure cmd: %04x STA: %08x RINTSTS: %08x\n",
+            cmd, esp32s3_getreg(ESP32S3_SDMMC_STATUS),
+            esp32s3_getreg(ESP32S3_SDMMC_RINTSTS));
+      ret = -EIO;
+    }
+
   esp32s3_putreg(SDCARD_CMDDONE_CLEAR, ESP32S3_SDMMC_RINTSTS);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
