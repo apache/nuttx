@@ -29,13 +29,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
+
 #include <math.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-float frexpf(float x, int *exponent)
+float frexpf(float x, FAR int *exponent)
 {
   float res;
 

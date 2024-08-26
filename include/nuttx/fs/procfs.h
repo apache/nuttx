@@ -44,23 +44,21 @@ struct procfs_operations
    * information to manage privileges.
    */
 
-  int     (*open)(FAR struct file *filep, FAR const char *relpath,
-                  int oflags, mode_t mode);
+  CODE int     (*open)(FAR struct file *filep, FAR const char *relpath,
+                       int oflags, mode_t mode);
 
   /* The following methods must be identical in signature and position
    * because the struct file_operations and struct mountpt_operations are
    * treated like unions.
    */
 
-  int     (*close)(FAR struct file *filep);
-  ssize_t (*read)(FAR struct file *filep,
-                  FAR char *buffer,
-                  size_t buflen);
-  ssize_t (*write)(FAR struct file *filep,
-                   FAR const char *buffer,
-                   size_t buflen);
-  int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
-                  bool setup);
+  CODE int     (*close)(FAR struct file *filep);
+  CODE ssize_t (*read)(FAR struct file *filep, FAR char *buffer,
+                       size_t buflen);
+  CODE ssize_t (*write)(FAR struct file *filep, FAR const char *buffer,
+                        size_t buflen);
+  CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
+                       bool setup);
 
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted
@@ -69,20 +67,20 @@ struct procfs_operations
    * Additional open-file-specific procfs operations:
    */
 
-  int     (*dup)(FAR const struct file *oldp,
-                 FAR struct file *newp);
+  CODE int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
 
   /* Directory operations */
 
-  int     (*opendir)(FAR const char *relpath,
-                     FAR struct fs_dirent_s **dir);
-  int     (*closedir)(FAR struct fs_dirent_s *dir);
-  int     (*readdir)(FAR struct fs_dirent_s *dir, FAR struct dirent *entry);
-  int     (*rewinddir)(FAR struct fs_dirent_s *dir);
+  CODE int     (*opendir)(FAR const char *relpath,
+                          FAR struct fs_dirent_s **dir);
+  CODE int     (*closedir)(FAR struct fs_dirent_s *dir);
+  CODE int     (*readdir)(FAR struct fs_dirent_s *dir,
+                          FAR struct dirent *entry);
+  CODE int     (*rewinddir)(FAR struct fs_dirent_s *dir);
 
   /* Operations on paths */
 
-  int     (*stat)(FAR const char *relpath, FAR struct stat *buf);
+  CODE int     (*stat)(FAR const char *relpath, FAR struct stat *buf);
 };
 
 /* Procfs handler prototypes ************************************************/
@@ -135,7 +133,7 @@ struct procfs_meminfo_entry_s
 {
   FAR const char *name;
   FAR struct mm_heap_s *heap;
-  struct procfs_meminfo_entry_s *next;
+  FAR struct procfs_meminfo_entry_s *next;
 #if CONFIG_MM_BACKTRACE >= 0
 
   /* This is dynamic control flag whether to turn on backtrace in the heap,
@@ -202,7 +200,7 @@ extern "C"
 
 size_t procfs_memcpy(FAR const char *src, size_t srclen,
                      FAR char *dest, size_t destlen,
-                     off_t *offset);
+                     FAR off_t *offset);
 
 /****************************************************************************
  * Name: procfs_snprintf

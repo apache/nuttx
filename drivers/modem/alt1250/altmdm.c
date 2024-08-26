@@ -917,7 +917,7 @@ static altmdm_state_t process_state_v1set(uint32_t event,
                                           altmdm_state_t state)
 {
   int len;
-  void *pkt;
+  FAR void *pkt;
 
   pkt = altcom_make_poweron_cmd_v1(&len);
   set_vp(VP_TRYV1);
@@ -934,7 +934,7 @@ static altmdm_state_t process_state_v4set(uint32_t event,
                                           altmdm_state_t state)
 {
   int len;
-  void *pkt;
+  FAR void *pkt;
 
   pkt = altcom_make_poweron_cmd_v4(&len);
   set_vp(VP_TRYV4);
@@ -962,7 +962,7 @@ static altmdm_state_t process_state_sleepset(uint32_t event,
 static altmdm_state_t process_state_txprepare(uint32_t event,
                                               altmdm_state_t state)
 {
-  void *buff;
+  FAR void *buff;
   int len;
 
   nxsem_wait_uninterruptible(&g_altmdm_dev.lock_txreq);
@@ -1217,7 +1217,7 @@ static altmdm_state_t process_state_gotrx(uint32_t event,
                                           altmdm_state_t state)
 {
   enum version_phase_e vp;
-  void *rcv_data;
+  FAR void *rcv_data;
 
   state = ALTMDM_STATE_DECIDEDELAY;
 
@@ -1232,7 +1232,7 @@ static altmdm_state_t process_state_gotrx(uint32_t event,
       vp = get_vp();
       if (vp == VP_TRYV1)
         {
-          if (altcom_is_v1pkt_ok((struct altcom_cmdhdr_s *)rcv_data))
+          if (altcom_is_v1pkt_ok((FAR struct altcom_cmdhdr_s *)rcv_data))
             {
               set_vp(VP_V1);
               set_return_code(ALTMDM_RETURN_RESET_V1);
@@ -1244,7 +1244,7 @@ static altmdm_state_t process_state_gotrx(uint32_t event,
             }
         }
       else if ((vp == VP_TRYV4)
-          && altcom_is_v4pkt_ok((struct altcom_cmdhdr_s *)rcv_data))
+          && altcom_is_v4pkt_ok((FAR struct altcom_cmdhdr_s *)rcv_data))
         {
           set_vp(VP_V4);
           set_return_code(ALTMDM_RETURN_RESET_V4);

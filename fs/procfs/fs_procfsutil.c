@@ -91,7 +91,7 @@
 
 size_t procfs_memcpy(FAR const char *src, size_t srclen,
                      FAR char *dest, size_t destlen,
-                     off_t *offset)
+                     FAR off_t *offset)
 {
   size_t copysize;
   size_t lnoffset;
