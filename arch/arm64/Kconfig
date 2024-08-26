@@ -97,6 +97,7 @@ config ARCH_CHIP_IMX9
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		NXP i.MX9 (ARMv8.2a) applications processors
 
