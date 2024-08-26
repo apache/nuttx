@@ -432,15 +432,6 @@ struct sensor_accel         /* Type: Accerometer */
   float temperature;        /* Temperature in degrees celsius */
 };
 
-struct sensor_gyro          /* Type: Gyroscope */
-{
-  uint64_t timestamp;       /* Units is microseconds */
-  float x;                  /* Axis X in rad/s */
-  float y;                  /* Axis Y in rad/s */
-  float z;                  /* Axis Z in rad/s */
-  float temperature;        /* Temperature in degrees celsius */
-};
-
 struct sensor_mag           /* Type: Magnetic Field */
 {
   uint64_t timestamp;       /* Units is microseconds */
@@ -451,17 +442,19 @@ struct sensor_mag           /* Type: Magnetic Field */
   int32_t status;           /* Status of calibration */
 };
 
-struct sensor_baro          /* Type: Barometer */
+struct sensor_uv            /* Type: Ultraviolet Light */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float pressure;           /* pressure measurement in millibar or hpa */
-  float temperature;        /* Temperature in degrees celsius */
+  float uvi;                /* the value range is 0 - 15 */
 };
 
-struct sensor_prox          /* Type: proximity */
+struct sensor_gyro          /* Type: Gyroscope */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float proximity;          /* distance to the nearest object in centimeters */
+  float x;                  /* Axis X in rad/s */
+  float y;                  /* Axis Y in rad/s */
+  float z;                  /* Axis Z in rad/s */
+  float temperature;        /* Temperature in degrees celsius */
 };
 
 struct sensor_light         /* Type: Light */
@@ -471,16 +464,23 @@ struct sensor_light         /* Type: Light */
   float ir;                 /* in SI lux units */
 };
 
-struct sensor_humi          /* Type: Relative Humidity */
+struct sensor_baro          /* Type: Barometer */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float humidity;           /* in percent  */
+  float pressure;           /* pressure measurement in millibar or hpa */
+  float temperature;        /* Temperature in degrees celsius */
 };
 
-struct sensor_temp          /* Type: Ambient Temperature */
+struct sensor_noise         /* Type: Noise Loudness */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float temperature;        /* Temperature in degrees celsius */
+  float db;                 /* in SI units db */
+};
+
+struct sensor_prox          /* Type: proximity */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float proximity;          /* distance to the nearest object in centimeters */
 };
 
 struct sensor_rgb           /* Type: RGB */
@@ -503,16 +503,16 @@ struct sensor_ir            /* Type: Infrared Ray */
   float ir;                 /* in SI units lux */
 };
 
-struct sensor_uv            /* Type: Ultraviolet Light */
+struct sensor_humi          /* Type: Relative Humidity */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float uvi;                /* the value range is 0 - 15 */
+  float humidity;           /* in percent  */
 };
 
-struct sensor_noise         /* Type: Noise Loudness */
+struct sensor_temp          /* Type: Ambient Temperature */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float db;                 /* in SI units db */
+  float temperature;        /* Temperature in degrees celsius */
 };
 
 struct sensor_pm25          /* Type: PM25 */
@@ -521,16 +521,16 @@ struct sensor_pm25          /* Type: PM25 */
   float pm25;               /* in SI units ug/m^3 */
 };
 
-struct sensor_pm10          /* Type: PM10 */
-{
-  uint64_t timestamp;       /* Units is microseconds */
-  float pm10;               /* in SI units ug/m^3 */
-};
-
 struct sensor_pm1p0         /* Type: PM1P0 */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float pm1p0;              /* in SI units ug/m^3 */
+};
+
+struct sensor_pm10          /* Type: PM10 */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float pm10;               /* in SI units ug/m^3 */
 };
 
 struct sensor_co2           /* Type: CO2 */
@@ -557,22 +557,27 @@ struct sensor_ph            /* Type: PH */
   float ph;                 /* PH = 7.0 neutral, PH < 7.0 acidic, PH > 7.0 alkaline */
 };
 
-struct sensor_dust          /* Type: DUST */
-{
-  uint64_t timestamp;       /* Units is microseconds */
-  float dust;               /* is SI units ug/m^3 */
-};
-
 struct sensor_hrate         /* Type: Heart Rate */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float bpm;                /* is SI units BPM */
 };
 
-struct sensor_hbeat         /* Type: Heart Beat */
+struct sensor_dust          /* Type: DUST */
 {
   uint64_t timestamp;       /* Units is microseconds */
-  float beat;               /* Units is times/minutes */
+  float dust;               /* is SI units ug/m^3 */
+};
+
+struct sensor_wake_gesture  /* Type: Wake gesture */
+{
+  uint64_t timestamp;                /* Units is microseconds */
+
+  /* wake gesture event, 0: sleep, 1: wake,
+   * others: Uncalibrated status value.
+   */
+
+  uint32_t event;
 };
 
 struct sensor_ecg           /* Type: ECG */
@@ -610,6 +615,32 @@ struct sensor_ots           /* Type: OTS */
   uint64_t timestamp;       /* Unit is microseconds */
   int32_t x;                /* Axis X in counts */
   int32_t y;                /* Axis Y in counts */
+};
+
+struct sensor_gas           /* Type: Gas */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float gas_resistance;     /* Gas resistance in kOhm */
+};
+
+struct sensor_cap           /* Type: Capacitance */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  int32_t status;           /* Detection status */
+  int32_t rawdata[4];       /* in SI units pF */
+};
+
+struct sensor_hbeat         /* Type: Heart Beat */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+  float beat;               /* Units is times/minutes */
+};
+
+struct sensor_force         /* Type: Force */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  float force;              /* Force value, units is N */
+  int32_t event;            /* Force event */
 };
 
 struct sensor_gnss          /* Type: GNSS */
@@ -694,35 +725,186 @@ struct sensor_gnss_satellite
   info[SENSOR_GNSS_SAT_INFO_MAX];
 };
 
-struct sensor_wake_gesture  /* Type: Wake gesture */
+struct sensor_gnss_measurement
 {
-  uint64_t timestamp;                /* Units is microseconds */
-
-  /* wake gesture event, 0: sleep, 1: wake,
-   * others: Uncalibrated status value.
+  /* Indicating what fields are valid.
+   * See SENSOR_GNSS_MEASUREMENT_HAS_*.
    */
 
-  uint32_t event;
+  uint32_t flags;
+
+  /* Space vehicle ID. */
+
+  int32_t  svid;
+
+  /* Constellation of the given SV, see GNSS_CONSTELLATION_*. */
+
+  uint32_t constellation;
+
+  /* Offset between clock and time at which the measurement was taken in
+   * nanoseconds.
+   */
+
+  float    time_offset_ns;
+
+  /* The received GNSS Time-of-Week at the measurement time, in
+   * nanoseconds.
+   */
+
+  int64_t  received_sv_time_in_ns;
+  int64_t  received_sv_time_uncertainty_in_ns;
+
+  /* GNSS measurement state, see SENSOR_GNSS_MEASUREMENT_STATE_*. */
+
+  uint32_t state;
+
+  /* dBHz, Carrier-to-noise density. */
+
+  float    c_n0_dbhz;
+
+  /* Pseudorange rate(m/s) at the timestamp. */
+
+  float    pseudorange_rate_mps;
+  float    pseudorange_rate_uncertainty_mps;
+
+  /* Accumulated delta range. */
+
+  uint32_t accumulated_delta_range_state;
+  float    accumulated_delta_range_m;
+  float    accumulated_delta_range_uncertainty_m;
+
+  /* Carrier related between the satellite and the receiver.
+   * flags:
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_CYCLES
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY
+   */
+
+  float    carrier_frequency_hz;
+  int64_t  carrier_cycles;
+  float    carrier_phase;
+  float    carrier_phase_uncertainty;
+
+  uint32_t multipath_indicator;
+
+  /* dBHz, Signal to noise ratio of satellite C/N0.
+   * flags: SENSOR_GNSS_MEASUREMENT_HAS_SNR
+   */
+
+  uint32_t snr;
 };
 
-struct sensor_cap           /* Type: Capacitance */
+struct sensor_gnss_clock
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  int32_t status;           /* Detection status */
-  int32_t rawdata[4];       /* in SI units pF */
+  /* Indicating what fields are valid.
+   * See SENSOR_GNSS_CLOCK_HAS_*.
+   */
+
+  uint32_t flags;
+
+  /* Leap second data.
+   * flags: SENSOR_GNSS_CLOCK_HAS_LEAP_SECOND
+   */
+
+  int32_t  leap_second;
+
+  /* The GNSS receiver internal local hardware clock value.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_TIME_UNCERTAINTY
+   */
+
+  int64_t  time_ns;
+  float    time_uncertainty_ns;
+
+  /* Discontinuities in the HW clock. */
+
+  uint32_t hw_clock_discontinuity_count;
+
+  /* The difference between hardware clock ('time' field) inside
+   * GPS receiver and the true GPS time since 0000Z, January 6, 1980, in
+   * nanoseconds.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_FULL_BIAS
+   *   SENSOR_GNSS_CLOCK_HAS_BIAS
+   *   SENSOR_GNSS_CLOCK_HAS_BIAS_UNCERTAINTY
+   */
+
+  int64_t  full_bias_ns;
+  float    bias_ns;             /* Sub-nanosecond bias */
+  float    bias_uncertainty_ns;
+
+  /* The clock's drift in nanoseconds (per second).
+   * A positive value means that the frequency is higher than
+   * the nominal frequency.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_DRIFT
+   *   SENSOR_GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY
+   */
+
+  float    drift_nsps;
+  float    drift_uncertainty_nsps;
 };
 
-struct sensor_gas           /* Type: Gas */
+/* GNSS Geofence events */
+
+struct sensor_gnss_geofence_event
 {
-  uint64_t timestamp;       /* Units is microseconds */
-  float gas_resistance;     /* Gas resistance in kOhm */
+  /* Type of events
+   * Fields below are optional according to this `type`,
+   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_EVENT.
+   *
+   * Mandatory:
+   *   |Fields \ Type |TRANSITION |STATUS |ADD |REMOVE |PAUSE |RESUME |
+   *   |--------------|:---------:|:-----:|:--:|:-----:|:----:|:-----:|
+   *   |geofence_id   |     v     |       | v  |    v  |   v  |   v   |
+   *   |transition    |     v     |       |    |       |      |       |
+   *   |location      |     v     |   v   |    |       |      |       |
+   *   |timestamp     |     v     |       |    |       |      |       |
+   *   |status        |           |   v   | v  |    v  |   v  |   v   |
+   */
+
+  int32_t            type;
+
+  int32_t            geofence_id; /* Id of the geofence. */
+  struct sensor_gnss location;    /* Location. */
+
+  /* Milliseconds when the transition was detected since January 1, 1970 */
+
+  int64_t            timestamp;
+  int32_t            status;      /* Status of Geofence operation/event. */
+  int32_t            transition;  /* See SENSOR_GNSS_GEOFENCE_TRANS_*. */
 };
 
-struct sensor_force         /* Type: Force */
+/* GNSS Geofence parameters */
+
+struct sensor_gnss_geofence_param
 {
-  uint64_t timestamp;       /* Unit is microseconds */
-  float force;              /* Force value, units is N */
-  int32_t event;            /* Force event */
+  /* Type of events
+   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_PARAM.
+   *
+   * Mandatory:
+   *   |Fields \ Type |ADD |REMOVE |PAUSE |RESUME |
+   *   |--------------|:--:|:-----:|:----:|:-----:|
+   *   |geofence_id   | v  |   v   |  v   |   v   |
+   *   |transition    | v  |       |      |   v   |
+   *   |latitude      | v  |       |      |       |
+   *   |longitude     | v  |       |      |       |
+   *   |radius_meters | v  |       |      |       |
+   */
+
+  int32_t            type;
+
+  int32_t            geofence_id;
+  float              latitude;
+  float              longitude;
+  float              radius_meters;
+
+  /* Which transitions to monitor.
+   * Available: see SENSOR_GNSS_GEOFENCE_TRANS_*.
+   */
+
+  int32_t            transition;
 };
 
 /* This structure describes the state for the sensor device */
@@ -838,188 +1020,6 @@ struct sensor_device_info_s
   /* Vendor of the hardware part. */
 
   char          vendor[SENSOR_INFO_NAME_SIZE];
-};
-
-struct sensor_gnss_clock
-{
-  /* Indicating what fields are valid.
-   * See SENSOR_GNSS_CLOCK_HAS_*.
-   */
-
-  uint32_t flags;
-
-  /* Leap second data.
-   * flags: SENSOR_GNSS_CLOCK_HAS_LEAP_SECOND
-   */
-
-  int32_t  leap_second;
-
-  /* The GNSS receiver internal local hardware clock value.
-   * flags:
-   *   SENSOR_GNSS_CLOCK_HAS_TIME_UNCERTAINTY
-   */
-
-  int64_t  time_ns;
-  float    time_uncertainty_ns;
-
-  /* Discontinuities in the HW clock. */
-
-  uint32_t hw_clock_discontinuity_count;
-
-  /* The difference between hardware clock ('time' field) inside
-   * GPS receiver and the true GPS time since 0000Z, January 6, 1980, in
-   * nanoseconds.
-   * flags:
-   *   SENSOR_GNSS_CLOCK_HAS_FULL_BIAS
-   *   SENSOR_GNSS_CLOCK_HAS_BIAS
-   *   SENSOR_GNSS_CLOCK_HAS_BIAS_UNCERTAINTY
-   */
-
-  int64_t  full_bias_ns;
-  float    bias_ns;             /* Sub-nanosecond bias */
-  float    bias_uncertainty_ns;
-
-  /* The clock's drift in nanoseconds (per second).
-   * A positive value means that the frequency is higher than
-   * the nominal frequency.
-   * flags:
-   *   SENSOR_GNSS_CLOCK_HAS_DRIFT
-   *   SENSOR_GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY
-   */
-
-  float    drift_nsps;
-  float    drift_uncertainty_nsps;
-};
-
-struct sensor_gnss_measurement
-{
-  /* Indicating what fields are valid.
-   * See SENSOR_GNSS_MEASUREMENT_HAS_*.
-   */
-
-  uint32_t flags;
-
-  /* Space vehicle ID. */
-
-  int32_t  svid;
-
-  /* Constellation of the given SV, see GNSS_CONSTELLATION_*. */
-
-  uint32_t constellation;
-
-  /* Offset between clock and time at which the measurement was taken in
-   * nanoseconds.
-   */
-
-  float    time_offset_ns;
-
-  /* The received GNSS Time-of-Week at the measurement time, in
-   * nanoseconds.
-   */
-
-  int64_t  received_sv_time_in_ns;
-  int64_t  received_sv_time_uncertainty_in_ns;
-
-  /* GNSS measurement state, see SENSOR_GNSS_MEASUREMENT_STATE_*. */
-
-  uint32_t state;
-
-  /* dBHz, Carrier-to-noise density. */
-
-  float    c_n0_dbhz;
-
-  /* Pseudorange rate(m/s) at the timestamp. */
-
-  float    pseudorange_rate_mps;
-  float    pseudorange_rate_uncertainty_mps;
-
-  /* Accumulated delta range. */
-
-  uint32_t accumulated_delta_range_state;
-  float    accumulated_delta_range_m;
-  float    accumulated_delta_range_uncertainty_m;
-
-  /* Carrier related between the satellite and the receiver.
-   * flags:
-   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_CYCLES
-   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY
-   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE
-   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY
-   */
-
-  float    carrier_frequency_hz;
-  int64_t  carrier_cycles;
-  float    carrier_phase;
-  float    carrier_phase_uncertainty;
-
-  uint32_t multipath_indicator;
-
-  /* dBHz, Signal to noise ratio of satellite C/N0.
-   * flags: SENSOR_GNSS_MEASUREMENT_HAS_SNR
-   */
-
-  uint32_t snr;
-};
-
-/* GNSS Geofence parameters */
-
-struct sensor_gnss_geofence_param
-{
-  /* Type of events
-   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_PARAM.
-   *
-   * Mandatory:
-   *   |Fields \ Type |ADD |REMOVE |PAUSE |RESUME |
-   *   |--------------|:--:|:-----:|:----:|:-----:|
-   *   |geofence_id   | v  |   v   |  v   |   v   |
-   *   |transition    | v  |       |      |   v   |
-   *   |latitude      | v  |       |      |       |
-   *   |longitude     | v  |       |      |       |
-   *   |radius_meters | v  |       |      |       |
-   */
-
-  int32_t            type;
-
-  int32_t            geofence_id;
-  float              latitude;
-  float              longitude;
-  float              radius_meters;
-
-  /* Which transitions to monitor.
-   * Available: see SENSOR_GNSS_GEOFENCE_TRANS_*.
-   */
-
-  int32_t            transition;
-};
-
-/* GNSS Geofence events */
-
-struct sensor_gnss_geofence_event
-{
-  /* Type of events
-   * Fields below are optional according to this `type`,
-   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_EVENT.
-   *
-   * Mandatory:
-   *   |Fields \ Type |TRANSITION |STATUS |ADD |REMOVE |PAUSE |RESUME |
-   *   |--------------|:---------:|:-----:|:--:|:-----:|:----:|:-----:|
-   *   |geofence_id   |     v     |       | v  |    v  |   v  |   v   |
-   *   |transition    |     v     |       |    |       |      |       |
-   *   |location      |     v     |   v   |    |       |      |       |
-   *   |timestamp     |     v     |       |    |       |      |       |
-   *   |status        |           |   v   | v  |    v  |   v  |   v   |
-   */
-
-  int32_t            type;
-
-  int32_t            geofence_id; /* Id of the geofence. */
-  struct sensor_gnss location;    /* Location. */
-
-  /* Milliseconds when the transition was detected since January 1, 1970 */
-
-  int64_t            timestamp;
-  int32_t            status;      /* Status of Geofence operation/event. */
-  int32_t            transition;  /* See SENSOR_GNSS_GEOFENCE_TRANS_*. */
 };
 
 #endif /* __INCLUDE_NUTTX_SENSORS_SENSOR_H */
