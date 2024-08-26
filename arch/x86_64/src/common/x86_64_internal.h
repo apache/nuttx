@@ -306,6 +306,11 @@ size_t x86_64_stack_check(void *stackbase, size_t nbytes);
 void x86_64_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+/* TLB shootdown */
+
+int x86_64_tlb_handler(int irq, void *c, void *arg);
+void x86_64_tlb_shootdown(void);
+
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_X86_64_SRC_COMMON_UP_INTERNAL_H */

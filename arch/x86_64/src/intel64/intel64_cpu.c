@@ -423,4 +423,10 @@ void x86_64_cpu_priv_set(uint8_t cpu)
 
   write_msr(MSR_FMASK, X86_64_RFLAGS_IF | X86_64_RFLAGS_DF);
 #endif
+
+#ifdef CONFIG_SMP
+  /* Attach TLB shootdown handler */
+
+  irq_attach(SMP_IPI_TLBSHOOTDOWN_IRQ, x86_64_tlb_handler, NULL);
+#endif
 }
