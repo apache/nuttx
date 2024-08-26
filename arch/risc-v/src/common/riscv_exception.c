@@ -177,7 +177,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   uintptr_t vaddr;
   uint32_t  ptlevel;
   uintptr_t satp;
-  uint32_t  mmuflags;
+  uint64_t  mmuflags;
 
   _info("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
         ", MTVAL: %" PRIxREG "\n",
