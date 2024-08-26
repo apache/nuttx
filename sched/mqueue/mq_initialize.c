@@ -28,10 +28,20 @@
 
 #include <stdint.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/trace.h>
 
 #include "mqueue/mqueue.h"
 #include "mqueue/msg.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MQUEUE
+#  define MQ_BLOCK_SIZE \
+    ALIGN_UP(MQ_MSG_SIZE(MQ_MAX_BYTES), sizeof(void *))
+#endif
 
 /****************************************************************************
  * Private Type Definitions
@@ -40,8 +50,9 @@
 struct msgpool_s
 {
 #ifndef CONFIG_DISABLE_MQUEUE
-  struct mqueue_msg_s mqueue[CONFIG_PREALLOC_MQ_MSGS +
-                             CONFIG_PREALLOC_MQ_IRQ_MSGS];
+  uint8_t mqueue[MQ_BLOCK_SIZE *
+                 (CONFIG_PREALLOC_MQ_MSGS +
+                  CONFIG_PREALLOC_MQ_IRQ_MSGS)];
 #endif
 #ifndef CONFIG_DISABLE_MQUEUE_SYSV
   struct msgbuf_s msgbuf[CONFIG_PREALLOC_MQ_MSGS];
@@ -94,18 +105,22 @@ static struct msgpool_s g_msgpool;
 
 #ifndef CONFIG_DISABLE_MQUEUE
 static FAR void * mq_msgblockinit(FAR struct list_node *list,
-                                  FAR struct mqueue_msg_s *mqmsgblock,
+                                  FAR uint8_t *block,
                                   uint16_t nmsgs, uint8_t alloc_type)
 {
+  FAR struct mqueue_msg_s *mqmsgblock;
   int i;
+
   for (i = 0; i < nmsgs; i++)
     {
+      mqmsgblock = (FAR struct mqueue_msg_s *)block;
+
       mqmsgblock->type = alloc_type;
       list_add_tail(list, &mqmsgblock->node);
-      mqmsgblock++;
+      block += MQ_BLOCK_SIZE;
     }
 
-  return mqmsgblock;
+  return block;
 }
 #endif
 
