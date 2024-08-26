@@ -359,6 +359,10 @@
 
 #define IRQ_MSI_START      IRQ32
 
+/* Use IRQ17 for TLB shootdown */
+
+#define SMP_IPI_TLBSHOOTDOWN_IRQ  IRQ17
+
 /* Common register save structure created by up_saveusercontext() and by
  * ISR/IRQ interrupt processing.
  */
