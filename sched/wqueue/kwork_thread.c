@@ -79,6 +79,7 @@
 #if defined(CONFIG_SCHED_HPWORK)
 /* The state of the kernel mode, high priority work queue(s). */
 
+#undef g_hpwork
 struct hp_wqueue_s g_hpwork =
 {
   {NULL, NULL},
@@ -87,11 +88,14 @@ struct hp_wqueue_s g_hpwork =
   CONFIG_SCHED_HPNTHREADS,
 };
 
+#define g_hpwork this_cpu_var(g_hpwork)
+
 #endif /* CONFIG_SCHED_HPWORK */
 
 #if defined(CONFIG_SCHED_LPWORK)
 /* The state of the kernel mode, low priority work queue(s). */
 
+#undef g_lpwork
 struct lp_wqueue_s g_lpwork =
 {
   {NULL, NULL},
@@ -99,6 +103,7 @@ struct lp_wqueue_s g_lpwork =
   SEM_INITIALIZER(0),
   CONFIG_SCHED_LPNTHREADS,
 };
+#define g_lpwork this_cpu_var(g_lpwork)
 
 #endif /* CONFIG_SCHED_LPWORK */
 

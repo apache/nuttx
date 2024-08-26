@@ -650,7 +650,7 @@ void _assert(FAR const char *filename, int linenum,
          name.release, name.version, name.machine);
 
   _alert("Assertion failed %s: at file: %s:%d task"
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
          "(CPU%d)"
 #endif
          ": "
@@ -661,8 +661,8 @@ void _assert(FAR const char *filename, int linenum,
          "%p\n",
          msg ? msg : "",
          filename ? filename : "", linenum,
-#ifdef CONFIG_SMP
-         this_cpu(),
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
+         up_cpu_index(),
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
          rtcb->name,

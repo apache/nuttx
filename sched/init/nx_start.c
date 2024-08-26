@@ -90,7 +90,9 @@
  * task, is always the IDLE task.
  */
 
+#undef g_readytorun
 dq_queue_t g_readytorun;
+#define g_readytorun this_cpu_var(g_readytorun)
 
 /* In order to support SMP, the function of the g_readytorun list changes,
  * The g_readytorun is still used but in the SMP case it will contain only:
@@ -130,7 +132,9 @@ dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
  * It is valid only when up_interrupt_context() returns true.
  */
 
+#undef g_running_tasks
 FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+#define g_running_tasks this_cpu_var(g_running_tasks)
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the
@@ -138,16 +142,22 @@ FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  * currently active task has disabled pre-emption.
  */
 
+#undef g_pendingtasks
 dq_queue_t g_pendingtasks;
+#define g_pendingtasks this_cpu_var(g_pendingtasks)
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
+#undef g_waitingforsignal
 dq_queue_t g_waitingforsignal;
+#define g_waitingforsignal this_cpu_var(g_waitingforsignal)
 
 #ifdef CONFIG_LEGACY_PAGING
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
+#undef g_waitingforfill
 dq_queue_t g_waitingforfill;
+#define g_waitingforfill this_cpu_var(g_waitingforfill)
 #endif
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
@@ -155,18 +165,24 @@ dq_queue_t g_waitingforfill;
  * via SIGSTOP or SIGTSTP
  */
 
+#undef g_stoppedtasks
 dq_queue_t g_stoppedtasks;
+#define g_stoppedtasks this_cpu_var(g_stoppedtasks)
 #endif
 
 /* This list of all tasks that have been initialized, but not yet
  * activated. NOTE:  This is the only list that is not prioritized.
  */
 
+#undef g_inactivetasks
 dq_queue_t g_inactivetasks;
+#define g_inactivetasks this_cpu_var(g_inactivetasks)
 
 /* This is the value of the last process ID assigned to a task */
 
+#undef g_lastpid
 volatile pid_t g_lastpid;
+#define g_lastpid this_cpu_var(g_lastpid)
 
 /* The following hash table is used for two things:
  *
@@ -175,8 +191,12 @@ volatile pid_t g_lastpid;
  * 2. Is used to quickly map a process ID into a TCB.
  */
 
+#undef g_pidhash
 FAR struct tcb_s **g_pidhash;
+#define g_pidhash this_cpu_var(g_pidhash)
+#undef g_npidhash
 volatile int g_npidhash;
+#define g_npidhash this_cpu_var(g_npidhash)
 
 /* This is a table of task lists.  This table is indexed by the task state
  * enumeration type (tstate_t) and provides a pointer to the associated
@@ -185,14 +205,18 @@ volatile int g_npidhash;
  * ordered list or not.
  */
 
+#undef g_tasklisttable
 struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+#define g_tasklisttable this_cpu_var(g_tasklisttable)
 
 /* This is the current initialization state.  The level of initialization
  * is only important early in the start-up sequence when certain OS or
  * hardware resources may not yet be available to the kernel logic.
  */
 
-uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+#undef g_nx_initstate
+volatile uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+#define g_nx_initstate this_cpu_var(g_nx_initstate)
 
 /****************************************************************************
  * Private Data
@@ -207,10 +231,11 @@ uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
  */
 
 static struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+#define g_idletcb this_cpu_var(g_idletcb)
 
 /* This is the name of the idle task */
 
-#if CONFIG_TASK_NAME_SIZE > 0 && !defined(CONFIG_SMP)
+#if CONFIG_TASK_NAME_SIZE > 0 && (!defined(CONFIG_SMP) && !defined(CONFIG_BMP))
 static const char g_idlename[] = "Idle_Task";
 #endif
 
@@ -403,8 +428,11 @@ static void idle_task_initialize(void)
 #if CONFIG_TASK_NAME_SIZE > 0
       /* Set the IDLE task name */
 
-#  ifdef CONFIG_SMP
+#  if defined(CONFIG_SMP)
       snprintf(tcb->name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE", i);
+#  elif defined(CONFIG_BMP)
+      snprintf(tcb->name, CONFIG_TASK_NAME_SIZE, "CPU%d IDLE",
+               up_cpu_index());
 #  else
       strlcpy(tcb->name, g_idlename, CONFIG_TASK_NAME_SIZE);
 #  endif
@@ -448,7 +476,11 @@ static void idle_group_initialize(void)
     {
       tcb = &g_idletcb[i];
 
+#ifdef CONFIG_BMP
+      hashndx = PIDHASH(0);
+#else
       hashndx = PIDHASH(i);
+#endif
       g_pidhash[hashndx] = tcb;
 
       /* Allocate the IDLE group */

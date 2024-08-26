@@ -150,6 +150,7 @@ extern "C"
 #endif
 
 EXTERN FAR struct inode *g_root_inode;
+#define g_root_inode this_cpu_var(g_root_inode)
 
 /****************************************************************************
  * Public Function Prototypes

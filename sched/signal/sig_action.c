@@ -59,10 +59,13 @@
  ****************************************************************************/
 
 static spinlock_t g_sigaction_spin;
+#define g_sigaction_spin this_cpu_var(g_sigaction_spin)
 
 #if CONFIG_SIG_PREALLOC_ACTIONS > 0
 static sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
+#define g_sigactions this_cpu_var(g_sigactions)
 static bool       g_sigactions_used = false;
+#define g_sigactions_used this_cpu_var(g_sigactions_used)
 #endif
 
 /****************************************************************************

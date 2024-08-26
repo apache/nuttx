@@ -72,6 +72,7 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
 
 #if defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC)
 static mutex_t g_lowputs_lock = NXMUTEX_INITIALIZER;
+#define g_lowputs_lock this_cpu_var(g_lowputs_lock)
 #endif
 
 #if defined(CONFIG_RAMLOG_SYSLOG)

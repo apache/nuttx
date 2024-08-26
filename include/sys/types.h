@@ -70,6 +70,22 @@
 #  define CONFIG_SMP_NCPUS 1
 #endif
 
+#ifndef CONFIG_BMP_NCPUS
+#  define CONFIG_BMP_NCPUS 1
+#endif
+
+#ifdef CONFIG_SMP
+#  define CONFIG_NR_CPUS CONFIG_SMP_NCPUS
+#elif defined(CONFIG_BMP)
+#  define CONFIG_NR_CPUS CONFIG_BMP_NCPUS
+#else
+#  define CONFIG_NR_CPUS 1
+#endif
+
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
+#  define CONFIG_MP 1
+#endif
+
 /* Scheduling Priorities.
  *
  * NOTES:

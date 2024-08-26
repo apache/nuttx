@@ -116,12 +116,14 @@ struct lp_wqueue_s
 /* The state of the kernel mode, high priority work queue. */
 
 extern struct hp_wqueue_s g_hpwork;
+#define g_hpwork          this_cpu_var(g_hpwork)
 #endif
 
 #ifdef CONFIG_SCHED_LPWORK
 /* The state of the kernel mode, low priority work queue(s). */
 
 extern struct lp_wqueue_s g_lpwork;
+#define g_lpwork          this_cpu_var(g_lpwork)
 #endif
 
 /****************************************************************************

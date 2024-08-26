@@ -62,6 +62,9 @@ typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
 static struct semholder_s g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS];
 static FAR struct semholder_s *g_freeholders;
+
+#define g_holderalloc this_cpu_var(g_holderalloc)
+#define g_freeholders this_cpu_var(g_freeholders)
 #endif
 
 /****************************************************************************

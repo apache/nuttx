@@ -272,18 +272,26 @@ static const struct uart_ops_s g_uart_ops =
 #ifdef CONFIG_UART0_PL011
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+#define g_uart0rxbuffer this_cpu_var(g_uart0rxbuffer)
+#define g_uart0txbuffer this_cpu_var(g_uart0txbuffer)
 #endif
 #ifdef CONFIG_UART1_PL011
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+#define g_uart1rxbuffer this_cpu_var(g_uart1rxbuffer)
+#define g_uart1txbuffer this_cpu_var(g_uart1txbuffer)
 #endif
 #ifdef CONFIG_UART2_PL011
 static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
+#define g_uart2rxbuffer this_cpu_var(g_uart2rxbuffer)
+#define g_uart2txbuffer this_cpu_var(g_uart2txbuffer)
 #endif
 #ifdef CONFIG_UART3_PL011
 static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
+#define g_uart3rxbuffer this_cpu_var(g_uart3rxbuffer)
+#define g_uart3txbuffer this_cpu_var(g_uart3txbuffer)
 #endif
 
 /* This describes the state of the uart0 port. */
@@ -314,18 +322,17 @@ static struct uart_dev_s g_uart0port =
   .recv =
     {
       .size   = CONFIG_UART0_RXBUFSIZE,
-      .buffer = g_uart0rxbuffer,
     },
 
   .xmit =
     {
       .size   = CONFIG_UART0_TXBUFSIZE,
-      .buffer = g_uart0txbuffer,
     },
 
   .ops  = &g_uart_ops,
   .priv = &g_uart0priv,
 };
+#define g_uart0port this_cpu_var(g_uart0port)
 
 #endif /* CONFIG_UART0_PL011 */
 
@@ -357,18 +364,17 @@ static struct uart_dev_s g_uart1port =
   .recv =
     {
       .size   = CONFIG_UART1_RXBUFSIZE,
-      .buffer = g_uart1rxbuffer,
     },
 
   .xmit =
     {
       .size   = CONFIG_UART1_TXBUFSIZE,
-      .buffer = g_uart1txbuffer,
     },
 
   .ops  = &g_uart_ops,
   .priv = &g_uart1priv,
 };
+#define g_uart1port this_cpu_var(g_uart1port)
 
 #endif /* CONFIG_UART1_PL011 */
 
@@ -400,18 +406,17 @@ static struct uart_dev_s g_uart2port =
   .recv =
     {
       .size   = CONFIG_UART2_RXBUFSIZE,
-      .buffer = g_uart2rxbuffer,
     },
 
   .xmit =
     {
       .size   = CONFIG_UART2_TXBUFSIZE,
-      .buffer = g_uart2txbuffer,
     },
 
   .ops  = &g_uart_ops,
   .priv = &g_uart2priv,
 };
+#define g_uart2port this_cpu_var(g_uart2port)
 
 #endif /* CONFIG_UART2_PL011 */
 
@@ -443,18 +448,17 @@ static struct uart_dev_s g_uart3port =
   .recv =
     {
       .size   = CONFIG_UART3_RXBUFSIZE,
-      .buffer = g_uart3rxbuffer,
     },
 
   .xmit =
     {
       .size   = CONFIG_UART3_TXBUFSIZE,
-      .buffer = g_uart3txbuffer,
     },
 
   .ops  = &g_uart_ops,
   .priv = &g_uart3priv,
 };
+#define g_uart3port this_cpu_var(g_uart3port)
 
 #endif /* CONFIG_UART3_PL011 */
 
@@ -1005,6 +1009,27 @@ void pl011_earlyserialinit(void)
   /* Enable the console UART.  The other UARTs will be initialized if and
    * when they are first opened.
    */
+
+#ifdef CONFIG_UART0_PL011
+  g_uart0port.recv.buffer = g_uart0rxbuffer;
+  g_uart0port.xmit.buffer = g_uart0txbuffer;
+#endif
+
+#ifdef CONFIG_UART1_PL011
+  g_uart1port.recv.buffer = g_uart1rxbuffer;
+  g_uart1port.xmit.buffer = g_uart1txbuffer;
+#endif
+
+#ifdef CONFIG_UART2_PL011
+  g_uart2port.recv.buffer = g_uart2rxbuffer;
+  g_uart2port.xmit.buffer = g_uart2txbuffer;
+#endif
+
+#ifdef CONFIG_UART3_PL011
+  g_uart3port.recv.buffer = g_uart3rxbuffer;
+  g_uart3port.xmit.buffer = g_uart3txbuffer;
+#endif
+
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
   pl011_setup(&CONSOLE_DEV);

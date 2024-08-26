@@ -51,7 +51,9 @@ static FAR const char *_inode_getcwd(void);
  * Public Data
  ****************************************************************************/
 
+#undef g_root_inode
 FAR struct inode *g_root_inode = NULL;
+#define g_root_inode this_cpu_var(g_root_inode)
 
 /****************************************************************************
  * Private Functions

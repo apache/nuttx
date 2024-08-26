@@ -64,6 +64,7 @@ static struct notifier_block g_sync_nb =
 {
   sync_reboot_handler
 };
+#define g_sync_nb this_cpu_var(g_sync_nb)
 
 /****************************************************************************
  * Public Functions
