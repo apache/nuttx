@@ -431,7 +431,7 @@ ENV PATH="/tools/ldc2/ldc2-1.39.0-linux-x86_64/bin:$PATH"
 
 # Pull in the swift 6.0 toolchain
 # COPY --from=nuttx-tools /tools/swift/ /tools/swift/
-# ENV PATH="/tools/swift/swift-6.0-DEVELOPMENT-SNAPSHOT-2024-08-22-a/bin:$PATH"
+# ENV PATH="/tools/swift/swift-6.0-DEVELOPMENT-SNAPSHOT-2024-08-22-a/usr/bin:$PATH"
 
 # ARM clang toolchain
 COPY --from=nuttx-toolchain-arm /tools/clang-arm-none-eabi/ clang-arm-none-eabi/
