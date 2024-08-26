@@ -46,6 +46,22 @@
 #define PTE_A                   (1 << 6) /* Page has been accessed */
 #define PTE_D                   (1 << 7) /* Page is dirty */
 
+/* T-Head MMU needs Text and Data to be Shareable, Bufferable, Cacheable */
+
+#ifdef CONFIG_ARCH_MMU_EXT_THEAD
+#  define PTE_SEC         (1UL << 59) /* Security */
+#  define PTE_SHARE       (1UL << 60) /* Shareable */
+#  define PTE_BUF         (1UL << 61) /* Bufferable */
+#  define PTE_CACHE       (1UL << 62) /* Cacheable */
+#  define PTE_SO          (1UL << 63) /* Strong Order */
+
+#  define EXT_UTEXT_FLAGS (PTE_SHARE | PTE_BUF | PTE_CACHE)
+#  define EXT_UDATA_FLAGS (PTE_SHARE | PTE_BUF | PTE_CACHE)
+#else
+#  define EXT_UTEXT_FLAGS (0)
+#  define EXT_UDATA_FLAGS (0)
+#endif
+
 /* Check if leaf PTE entry or not (if X/W/R are set it is) */
 
 #define PTE_LEAF_MASK           (7 << 1)
@@ -56,8 +72,8 @@
 
 /* Flags for user FLASH (RX) and user RAM (RW) */
 
-#define MMU_UTEXT_FLAGS         (PTE_R | PTE_X | PTE_U)
-#define MMU_UDATA_FLAGS         (PTE_R | PTE_W | PTE_U)
+#define MMU_UTEXT_FLAGS         (PTE_R | PTE_X | PTE_U | EXT_UTEXT_FLAGS)
+#define MMU_UDATA_FLAGS         (PTE_R | PTE_W | PTE_U | EXT_UDATA_FLAGS)
 
 /* I/O region flags */
 
