@@ -687,7 +687,7 @@ int local_open_receiver(FAR struct local_conn_s *conn, bool nonblock)
            */
 
           ret = local_set_pollinthreshold(&conn->lc_infile,
-                                          2 * sizeof(uint16_t));
+                                          2 * sizeof(lc_size_t));
         }
     }
 
@@ -730,7 +730,7 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
            */
 
           ret = local_set_polloutthreshold(&conn->lc_outfile,
-                                           2 * sizeof(uint16_t));
+                                           2 * sizeof(lc_size_t));
         }
     }
 

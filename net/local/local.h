@@ -49,6 +49,14 @@
 #define LOCAL_NPOLLWAITERS 2
 #define LOCAL_NCONTROLFDS  4
 
+#if CONFIG_DEV_PIPE_MAXSIZE > 65535
+typedef uint32_t lc_size_t;  /* 32-bit index */
+#elif CONFIG_DEV_PIPE_MAXSIZE > 255
+typedef uint16_t lc_size_t;  /* 16-bit index */
+#else
+typedef uint8_t lc_size_t;   /*  8-bit index */
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -120,8 +128,7 @@ struct local_conn_s
   char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
   int32_t lc_instance_id;        /* Connection instance ID for stream
                                   * server<->client connection pair */
-  uint32_t lc_sndsize;           /* Send buffer size */
-  uint32_t lc_rcvsize;           /* Receive buffer size */
+  lc_size_t lc_rcvsize;          /* Receive buffer size */
 
   FAR struct local_conn_s *
                         lc_peer; /* Peer connection instance */
@@ -456,7 +463,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 int local_send_preamble(FAR struct local_conn_s *conn,
                         FAR struct file *filep,
                         FAR const struct iovec *buf,
-                        size_t len);
+                        size_t len, size_t rcvsize);
 
 /****************************************************************************
  * Name: local_send_packet

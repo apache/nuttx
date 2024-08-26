@@ -88,9 +88,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
 
   /* Create the FIFOs needed for the connection */
 
-  ret = local_create_fifos(client,
-          MIN(client->lc_sndsize, server->lc_rcvsize),
-          MIN(client->lc_rcvsize, server->lc_sndsize));
+  ret = local_create_fifos(client, server->lc_rcvsize, client->lc_rcvsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to create FIFOs for %s: %d\n",

@@ -114,43 +114,45 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
 int local_send_preamble(FAR struct local_conn_s *conn,
                         FAR struct file *filep,
                         FAR const struct iovec *buf,
-                        size_t len)
+                        size_t len, size_t rcvsize)
 {
   FAR const struct iovec *end = buf + len;
   FAR const struct iovec *iov;
   int ret;
-  uint16_t len16 = strlen(conn->lc_path);
+  lc_size_t pathlen;
+  lc_size_t pktlen;
 
-  ret = local_fifo_write(&conn->lc_outfile, (FAR const uint8_t *)&len16,
-                         sizeof(uint16_t));
-  if (ret != sizeof(uint16_t))
+  /* Send the packet length */
+
+  for (pktlen = 0, iov = buf; iov != end; iov++)
+    {
+      pktlen += iov->iov_len;
+    }
+
+  if (pktlen > rcvsize - sizeof(lc_size_t))
+    {
+      nerr("ERROR: Packet is too big: %d\n", pktlen);
+      return -EMSGSIZE;
+    }
+
+  pathlen = strlen(conn->lc_path);
+  ret = local_fifo_write(&conn->lc_outfile, (FAR const uint8_t *)&pathlen,
+                         sizeof(lc_size_t));
+  if (ret != sizeof(lc_size_t))
     {
       nerr("ERROR: local send path length failed ret: %d\n", ret);
       return ret;
     }
 
-  /* Send the packet length */
-
-  for (len16 = 0, iov = buf; iov != end; iov++)
-    {
-      len16 += iov->iov_len;
-    }
-
-  if (len16 > conn->lc_sndsize - sizeof(uint32_t))
-    {
-      nerr("ERROR: Packet is too big: %d\n", len16);
-      return -EMSGSIZE;
-    }
-
-  ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
-                        sizeof(uint16_t));
-  if (ret != sizeof(uint16_t))
+  ret = local_fifo_write(filep, (FAR const uint8_t *)&pktlen,
+                         sizeof(lc_size_t));
+  if (ret != sizeof(lc_size_t))
     {
       return ret;
     }
 
   return local_fifo_write(&conn->lc_outfile, (uint8_t *)conn->lc_path,
-                          strlen(conn->lc_path));
+                          pathlen);
 }
 
 /****************************************************************************
@@ -176,9 +178,9 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
   FAR const struct iovec *end = buf + len;
   FAR const struct iovec *iov;
   int ret = -EINVAL;
-  uint16_t len16;
+  lc_size_t sendlen;
 
-  for (len16 = 0, iov = buf; iov != end; iov++)
+  for (sendlen = 0, iov = buf; iov != end; iov++)
     {
       ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
       if (ret < 0)
@@ -193,7 +195,7 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
 
       if (ret > 0)
         {
-          len16 += ret;
+          sendlen += ret;
           if (ret != iov->iov_len)
             {
               break;
@@ -201,5 +203,5 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
         }
     }
 
-  return len16 > 0 ? len16 : ret;
+  return sendlen > 0 ? sendlen : ret;
 }
