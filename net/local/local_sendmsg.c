@@ -261,6 +261,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = psock->s_conn;
+  FAR struct local_conn_s *server;
   FAR const struct sockaddr_un *unaddr = (FAR const struct sockaddr_un *)to;
   ssize_t ret;
 
@@ -307,7 +308,9 @@ static ssize_t local_sendto(FAR struct socket *psock,
     }
 
   net_lock();
-  if (local_findconn(conn, unaddr) == NULL)
+
+  server = local_findconn(conn, unaddr);
+  if (server == NULL)
     {
       net_unlock();
       nerr("ERROR: No such file or directory\n");
@@ -335,7 +338,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
    * REVISIT:  Or should be just make sure that it already exists?
    */
 
-  ret = local_create_halfduplex(conn, unaddr->sun_path, conn->lc_sndsize);
+  ret = local_create_halfduplex(conn, unaddr->sun_path, server->lc_rcvsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to create FIFO for %s: %zd\n",
@@ -358,7 +361,8 @@ static ssize_t local_sendto(FAR struct socket *psock,
 
   /* Send the preamble */
 
-  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len);
+  ret = local_send_preamble(conn, &conn->lc_outfile, buf, len,
+                            server->lc_rcvsize);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the preamble: %zd\n", ret);
