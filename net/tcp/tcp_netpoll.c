@@ -238,6 +238,28 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
         }
     }
 
+  /* If a network device is already associated with this connection but
+   * either the device pointer is not valid anymore or the interface is not
+   * up, report the condition immediately and wake up the waiter:
+   *
+   * - Set per-connection socket error to ENETDOWN so that the application
+   *   can retrieve the cause via getsockopt(SO_ERROR).
+   * - Notify poll() with POLLERR|POLLHUP to return without arming any
+   *   further TCP callbacks.
+   *
+   * Rationale: there is no point in registering poll callbacks when the
+   * underlying interface is down. This mirrors the error paths elsewhere in
+   * the TCP stack and provides a prompt, deterministic wake-up.
+   */
+
+  if (conn->dev &&
+      !(netdev_verify(conn->dev) && IFF_IS_UP(conn->dev->d_flags)))
+    {
+      _SO_CONN_SETERRNO(conn, ENETDOWN);
+      eventset |= POLLERR | POLLHUP;
+      goto notify;
+    }
+
   /* Allocate a TCP/IP callback structure */
 
   cb = tcp_callback_alloc(conn);
@@ -355,6 +377,13 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
     }
 
   /* Check if any requested events are already in effect */
+
+notify:
+
+  /* At this point, eventset contains any immediate conditions discovered
+   * during setup (e.g., data already available, write possible, or an early
+   * error such as ENETDOWN above). Propagate these to the poller now.
+   */
 
   poll_notify(&fds, 1, eventset);
 
