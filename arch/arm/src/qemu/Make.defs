@@ -24,6 +24,6 @@ include armv7-a/Make.defs
 CHIP_CSRCS  = qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c
 CHIP_CSRCS += qemu_idle.c
 
-ifeq ($(CONFIG_SMP),y)
+ifeq ($(CONFIG_SMP)$(CONFIG_BMP),y)
   CHIP_CSRCS += qemu_cpuboot.c
 endif

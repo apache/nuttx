@@ -37,8 +37,8 @@
 #define MPCORE_ICC_OFFSET     0x10000
 
 #define PGTABLE_SIZE          0x00004000
-#define PGTABLE_BASE_PADDR    (CONFIG_RAM_START + CONFIG_RAM_SIZE - PGTABLE_SIZE * CONFIG_SMP_NCPUS)
-#define PGTABLE_BASE_VADDR    (CONFIG_RAM_START + CONFIG_RAM_SIZE - PGTABLE_SIZE * CONFIG_SMP_NCPUS)
+#define PGTABLE_BASE_PADDR    (CONFIG_RAM_START + CONFIG_RAM_SIZE - PGTABLE_SIZE * CONFIG_NR_CPUS)
+#define PGTABLE_BASE_VADDR    (CONFIG_RAM_START + CONFIG_RAM_SIZE - PGTABLE_SIZE * CONFIG_NR_CPUS)
 
 #undef CONFIG_RAM_END
 #define CONFIG_RAM_END        PGTABLE_BASE_PADDR
@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if (defined(CONFIG_SMP) || defined(CONFIG_BMP)) && CONFIG_ARCH_INTERRUPTSTACK > 7
   .macro  cpuindex, index
   mrc  p15, 0, \index, c0, c0, 5  /* Read the MPIDR */
   and  \index, \index, #3         /* Bits 0-1=CPU ID */
@@ -83,7 +83,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if (defined(CONFIG_SMP) || defined(CONFIG_BMP)) && CONFIG_ARCH_INTERRUPTSTACK > 7
   .macro  setirqstack, tmp1, tmp2
   mrc  p15, 0, \tmp1, c0, c0, 5  /* tmp1=MPIDR */
   and  \tmp1, \tmp1, #3          /* Bits 0-1=CPU ID */
@@ -103,7 +103,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+#if (defined(CONFIG_SMP) || defined(CONFIG_BMP)) && CONFIG_ARCH_INTERRUPTSTACK > 7
   .macro  setfiqstack, tmp1, tmp2
   mrc  p15, 0, \tmp1, c0, c0, 5  /* tmp1=MPIDR */
   and  \tmp1, \tmp1, #3          /* Bits 0-1=CPU ID */
