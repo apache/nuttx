@@ -136,10 +136,11 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds,
  ****************************************************************************/
 
 static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
-                                FAR int *count, int ret)
+                                FAR int *count)
 {
   unsigned int i;
   int status = OK;
+  int ret = OK;
 
   /* Process each descriptor in the list */
 
@@ -185,7 +186,7 @@ static void poll_cleanup(FAR void *arg)
   FAR struct pollfd_s *fdsinfo = (FAR struct pollfd_s *)arg;
   int count;
 
-  poll_teardown(fdsinfo->fds, fdsinfo->nfds, &count, OK);
+  poll_teardown(fdsinfo->fds, fdsinfo->nfds, &count);
 }
 
 /****************************************************************************
@@ -521,7 +522,7 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
        * Preserve ret, if negative, since it holds the result of the wait.
        */
 
-      ret2 = poll_teardown(kfds, nfds, &count, ret);
+      ret2 = poll_teardown(kfds, nfds, &count);
       if (ret2 < 0 && ret >= 0)
         {
           ret = ret2;
