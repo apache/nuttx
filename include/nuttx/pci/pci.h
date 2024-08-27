@@ -742,4 +742,14 @@ int pci_bus_write_config_word(FAR struct pci_bus_s *bus, unsigned int devfn,
 int pci_bus_write_config_dword(FAR struct pci_bus_s *bus, unsigned int devfn,
                                int where, uint32_t val);
 
+/****************************************************************************
+ * Name: pci_register_drivers
+ *
+ * Description:
+ *   Register all the pci drivers to pci bus
+ *
+ ****************************************************************************/
+
+int pci_register_drivers(void);
+
 #endif /* __INCLUDE_NUTTX_PCI_PCI_H */
