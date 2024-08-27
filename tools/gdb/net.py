@@ -68,9 +68,7 @@ def socket_for_each_entry(proto):
     sock_gdbtype = gdb.lookup_type("struct socket_conn_s").pointer()
     conn_gdbtype = gdb.lookup_type("struct %s_conn_s" % proto).pointer()
 
-    for node in dq_for_every(
-        gdb.parse_and_eval("g_active_%s_connections" % proto), None
-    ):
+    for node in dq_for_every(gdb.parse_and_eval("g_active_%s_connections" % proto)):
         yield utils.container_of(
             utils.container_of(
                 node, sock_gdbtype, "node"
@@ -86,7 +84,7 @@ def wrbuffer_inqueue_size(queue=None, protocol="tcp"):
     total = 0
     if queue:
         wrb_gdbtype = gdb.lookup_type("struct %s_wrbuffer_s" % protocol).pointer()
-        for entry in sq_for_every(queue, None):
+        for entry in sq_for_every(queue):
             entry = utils.container_of(entry, wrb_gdbtype, "wb_node")
             total += entry["wb_iob"]["io_pktlen"]
     return total
