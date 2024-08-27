@@ -90,9 +90,7 @@ SECTIONS
     *libarch.a:*esp_rom_spiflash.*(.literal .text .literal.* .text.*)
     *libarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
 
-#ifdef CONFIG_ESP32S3_BLE
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
-#endif
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
 

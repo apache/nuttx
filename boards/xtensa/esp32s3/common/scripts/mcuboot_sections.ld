@@ -198,9 +198,7 @@ SECTIONS
     *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
 
-#ifdef CONFIG_ESP32S3_BLE
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
-#endif
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
 
