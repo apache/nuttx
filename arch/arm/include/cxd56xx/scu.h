@@ -443,7 +443,7 @@ int seq_setinstruction(struct seq_s *seq, const uint16_t *inst,
  * param [in] seq      : Sequencer instance
  * param [in] sample   : Bytes per sample
  * param [in] offset   : Start offset of sampling data
- * param [in] elemsize : Bytes of 1 element in sample
+ * param [in] elemsize : Number of vector elements - 1 (e.g. 3 axis = 2)
  * param [in] swapbyte : Enable/Disable byte swapping
  *
  * return  OK(0) is success. negative value is failure.

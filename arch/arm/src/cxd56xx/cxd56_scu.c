@@ -777,8 +777,8 @@ static void seq_setbus(int sid, int bustype)
  *   sid    - Sequencer ID
  *   start  - Sensor data start offset in sequencer picked
  *   bps    - Bytes per sample
- *   swap   - Wwap bytes
- *   elem   - Number of elements in sample
+ *   swap   - Swap bytes
+ *   elem   - Number of vector elements - 1 in sample
  *
  ****************************************************************************/
 
@@ -789,6 +789,7 @@ static void seq_setdataformat(int sid, int start,
   val = start & 0xf;
   val |= (bps & 0xf) << 4;
   val |= (swap & 0x1) << 16;
+  val |= (start & 0xf) << 24;
   val |= (elem & 0x3) << 28;
   putreg32(val, SCUSEQ_OUT_FORMAT(sid));
 }
@@ -2814,7 +2815,7 @@ int seq_setinstruction(struct seq_s *seq, const uint16_t *inst,
  *   seq      - An instance of sequencer
  *   sample   - Size of sample (e.g. 16 bit 3 axis data = 6)
  *   offset   - Start offset of sampling data
- *   elemsize - Size of 1 element (e.g. 16 bit 3 axis data = 2)
+ *   elemsize - Number of vector elements - 1 (e.g. 3 axis = 2)
  *   swapbyte - Enable/Disable byte swapping if available
  *
  ****************************************************************************/
@@ -2823,6 +2824,9 @@ void seq_setsample(struct seq_s *seq, uint8_t sample, uint8_t offset,
                    uint8_t elemsize, bool swapbyte)
 {
   DEBUGASSERT(seq);
+  DEBUGASSERT(sample > 0 && sample <= 16);
+  DEBUGASSERT(offset >= 0 && offset < 15);
+  DEBUGASSERT(elemsize >= 0 && elemsize < 3);
 
   seq->sample = sample;
 
