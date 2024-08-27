@@ -313,10 +313,10 @@ void pm_wakelock_uninit(FAR struct pm_wakelock_s *wakelock)
     }
 
   wakelock->count = 0;
-  wd_cancel(wdog);
   pm_wakelock_stats_rm(wakelock);
 
   spin_unlock_irqrestore(&pdom->lock, flags);
+  wd_cancel(wdog);
 }
 
 /****************************************************************************
