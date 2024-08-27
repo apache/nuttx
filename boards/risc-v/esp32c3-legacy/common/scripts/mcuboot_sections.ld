@@ -294,7 +294,9 @@ SECTIONS
   .rtc.data :
   {
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
 
    /* Whatever is left from the RTC memory is used as a special heap. */
 
