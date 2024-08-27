@@ -501,7 +501,7 @@ class CoreDumpFile:
                 data = f.read(segment["p_filesz"])
                 self.__memories.append(
                     pack_memory(
-                        segment["p_paddr"], segment["p_paddr"] + len(data), data
+                        segment["p_vaddr"], segment["p_vaddr"] + len(data), data
                     )
                 )
 
