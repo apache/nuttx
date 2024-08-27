@@ -261,7 +261,9 @@ SECTIONS
   .rtc.data :
   {
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
   } >lp_ram_seg
 
   /* This section holds RTC data that should have fixed addresses.

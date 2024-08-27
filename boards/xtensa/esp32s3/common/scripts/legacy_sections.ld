@@ -386,10 +386,20 @@ SECTIONS
     _iram_end = ABSOLUTE(.);
   } >iram0_0_seg
 
+  /* RTC BSS section. */
+
+  .rtc.bss (NOLOAD) :
+  {
+    *(.rtc.bss)
+  } >rtc_slow_seg
+
   .rtc.data :
   {
+    . = ALIGN(4);
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
 
    /* Whatever is left from the RTC memory is used as a special heap. */
 
