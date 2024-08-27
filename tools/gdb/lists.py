@@ -121,8 +121,8 @@ def list_check(head):
             return
 
 
-def sq_for_every(sq, entry):
-    """Iterate over a singly linked list"""
+def sq_for_every(sq, entry=None):
+    """Iterate over a singly linked list from the head or specified entry"""
     if sq.type == sq_queue_type.pointer():
         sq = sq.dereference()
     elif sq.type != sq_queue_type:
@@ -132,7 +132,8 @@ def sq_for_every(sq, entry):
     if sq["head"] == 0:
         return
 
-    entry = sq["head"].dereference()
+    if not entry:
+        entry = sq["head"].dereference()
 
     while entry.address:
         yield entry.address
@@ -177,7 +178,7 @@ def sq_check(sq):
     gdb.write("sq_queue is consistent: {} node(s)\n".format(nb))
 
 
-def dq_for_every(dq, entry):
+def dq_for_every(dq, entry=None):
     """Iterate over a doubly linked list"""
     if dq.type == dq_queue_type.pointer():
         dq = dq.dereference()
@@ -188,7 +189,9 @@ def dq_for_every(dq, entry):
     if dq["head"] == 0:
         return
 
-    entry = dq["head"].dereference()
+    if not entry:
+        entry = dq["head"].dereference()
+
     while entry.address:
         yield entry.address
         entry = entry["flink"].dereference()
