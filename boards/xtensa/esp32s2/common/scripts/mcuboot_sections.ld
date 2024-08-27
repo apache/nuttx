@@ -178,6 +178,8 @@ SECTIONS
     *libarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
 
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+
     /* align + add 16B for CPU dummy speculative instr. fetch */
 
     . = ALIGN(4) + 16;

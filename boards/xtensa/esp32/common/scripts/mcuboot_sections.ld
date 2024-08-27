@@ -174,6 +174,9 @@ SECTIONS
     *libarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_loader.*(.text .text.* .literal .literal.*)
+
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+
     *(.wifirxiram .wifirxiram.*)
     *(.wifirxiram .wifi0iram.*)
     *(.wifislpiram .wifislpiram.*)
