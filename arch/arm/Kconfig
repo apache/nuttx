@@ -635,6 +635,7 @@ config ARCH_CHIP_CXD56XX
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDIO if MMCSD
 	select ARCH_HAVE_MATH_H
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Sony CXD56XX (ARM Cortex-M4) architectures
 
