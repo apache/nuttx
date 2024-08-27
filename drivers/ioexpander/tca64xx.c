@@ -346,7 +346,7 @@ static int tca64_putreg(struct tca64_dev_s *priv, uint8_t regaddr,
   else
     {
       gpioinfo("claddr=%02x, regaddr=%02x, regval=%02x\n",
-               priv->config->address, regaddr, regval);
+               priv->config->address, regaddr, *regval);
       return OK;
     }
 }
@@ -1346,7 +1346,6 @@ tca64_initialize(FAR struct i2c_master_s *i2c,
                  FAR struct tca64_config_s *config)
 {
   FAR struct tca64_dev_s *priv;
-  int ret;
 
 #ifdef CONFIG_TCA64XX_MULTIPLE
   /* Allocate the device state structure */
@@ -1379,7 +1378,7 @@ tca64_initialize(FAR struct i2c_master_s *i2c,
 #ifdef CONFIG_TCA64XX_INT_POLL
   /* Set up a timer to poll for missed interrupts */
 
-  ret = wd_start(&priv->wdog, TCA64XX_POLLDELAY,
+  int ret = wd_start(&priv->wdog, TCA64XX_POLLDELAY,
                  tca64_poll_expiry, (wdparm_t)priv);
   if (ret < 0)
     {
