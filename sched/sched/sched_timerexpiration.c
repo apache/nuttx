@@ -562,31 +562,20 @@ void nxsched_reassess_timer(void)
   clock_t ticks;
   clock_t elapsed;
 
-#ifdef CONFIG_SCHED_TICKLESS_ALARM
-  /* Cancel the alarm and get the current time */
+  /* Cancel the timer and get the current time */
 
+#ifdef CONFIG_SCHED_TICKLESS_ALARM
   up_alarm_tick_cancel(&ticks);
+#else
+  up_timer_gettick(&ticks);
+  up_timer_tick_cancel(&elapsed);
+  DEBUGASSERT(elapsed <= g_timer_interval);
+#endif
 
   /* Convert this to the elapsed time and update clock tickbase */
 
   elapsed = ticks - g_timer_tick;
   g_timer_tick = ticks;
-#else
-  /* Cancel the timer and get the current time */
-
-  up_timer_gettick(&ticks);
-  up_timer_tick_cancel(&elapsed);
-  DEBUGASSERT(elapsed <= g_timer_interval);
-
-  /* Handle the partial timer.  This will reassess all timer conditions and
-   * re-start the interval timer with the correct delay.  Context switches
-   * are not permitted in this case because we are not certain of the
-   * calling conditions.
-   */
-
-  ticks += g_timer_interval - elapsed;
-  g_timer_tick = ticks;
-#endif
 
   /* Process the timer ticks and start next timer */
 
