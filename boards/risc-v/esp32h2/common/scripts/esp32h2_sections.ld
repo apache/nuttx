@@ -137,6 +137,8 @@ SECTIONS
     *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
     *libarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
 
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+
     esp_head.*(.literal .text .literal.* .text.*)
     esp_start.*(.literal .text .literal.* .text.*)
 
