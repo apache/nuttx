@@ -184,8 +184,8 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
 
   memcpy(&raddr, rpc->rc_name, sizeof(raddr));
 
+  memset(&laddr, 0, sizeof(laddr));
   laddr.ss_family = raddr.ss_family;
-  memset(laddr.ss_data, 0, sizeof(laddr.ss_data));
 
   if (raddr.ss_family == AF_INET6)
     {
