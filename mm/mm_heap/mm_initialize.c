@@ -203,7 +203,8 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   heap->mm_curused += 2 * MM_SIZEOF_ALLOCNODE;
   mm_unlock(heap);
 
-  sched_note_heap(NOTE_HEAP_ADD, heap, heapstart, heapsize);
+  sched_note_heap(NOTE_HEAP_ADD, heap, heapstart, heapsize,
+                  heap->mm_curused);
 }
 
 /****************************************************************************
@@ -371,7 +372,7 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
       kasan_unregister(heap->mm_heapstart[i]);
       sched_note_heap(NOTE_HEAP_REMOVE, heap, heap->mm_heapstart[i],
                       (uintptr_t)heap->mm_heapend[i] -
-                      (uintptr_t)heap->mm_heapstart[i]);
+                      (uintptr_t)heap->mm_heapstart[i], heap->mm_curused);
     }
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)

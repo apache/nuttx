@@ -92,8 +92,8 @@
 #define note_irqhandler(drv, irq, handler, enter)                            \
   ((drv)->ops->irqhandler &&                                                 \
   ((drv)->ops->irqhandler(drv, irq, handler, enter), true))
-#define note_heap(drv, alloc, data, mem, size)                               \
-  ((drv)->ops->heap && ((drv)->ops->heap(drv, alloc, data, mem, size), true))
+#define note_heap(drv, event, data, mem, size, used)                         \
+  ((drv)->ops->heap && ((drv)->ops->heap(drv, event, data, mem, size, used), true))
 #define note_string(drv, ip, buf)                                            \
   ((drv)->ops->string && ((drv)->ops->string(drv, ip, buf), true))
 #define note_event(drv, ip, event, buf, len)                                 \
@@ -1356,7 +1356,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
 void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
-                     size_t size)
+                     size_t size, size_t used)
 {
   FAR struct note_driver_s **driver;
   struct note_heap_s note;
@@ -1372,7 +1372,7 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
 
   for (driver = g_note_drivers; *driver; driver++)
     {
-      if (note_heap(*driver, event, heap, mem, size))
+      if (note_heap(*driver, event, heap, mem, size, used))
         {
           continue;
         }
@@ -1389,6 +1389,7 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
           note.heap = heap;
           note.mem = mem;
           note.size = size;
+          note.used = used;
         }
 
       /* Add the note to circular buffer */
