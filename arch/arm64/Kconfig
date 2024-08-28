@@ -56,7 +56,6 @@ config ARCH_CHIP_QEMU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TEXT_HEAP
 	select ARM64_HAVE_PSCI
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		QEMU virt platform (ARMv8a)
 
@@ -71,7 +70,6 @@ config ARCH_CHIP_GOLDFISH
 	select ARCH_HAVE_RESET
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARM64_HAVE_PSCI
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		Android GoldFish platform for NuttX (ARMv8a),
 		based on ARM virt board
@@ -97,7 +95,6 @@ config ARCH_CHIP_IMX9
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_NEED_ADDRENV_MAPPING
-	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		NXP i.MX9 (ARMv8.2a) applications processors
 
