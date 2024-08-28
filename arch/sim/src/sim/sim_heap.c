@@ -186,7 +186,7 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay)
       int size = host_mallocsize(mem);
       atomic_fetch_sub(&heap->aordblks, 1);
       atomic_fetch_sub(&heap->uordblks, size);
-      sched_note_heap(NOTE_HEAP_FREE, heap, mem, size);
+      sched_note_heap(NOTE_HEAP_FREE, heap, mem, size, 0);
       host_free(mem);
     }
 }
@@ -230,7 +230,7 @@ struct mm_heap_s *mm_initialize(const char *name,
   procfs_register_meminfo(&heap->mm_procfs);
 #endif
 
-  sched_note_heap(NOTE_HEAP_ADD, heap, heap_start, heap_size);
+  sched_note_heap(NOTE_HEAP_ADD, heap, heap_start, heap_size, 0);
   return heap;
 }
 
@@ -252,9 +252,7 @@ struct mm_heap_s *mm_initialize(const char *name,
 
 void mm_uninitialize(struct mm_heap_s *heap)
 {
-  sched_note_heap(NOTE_HEAP_REMOVE, heap, heap_start,
-                  (uintptr_t)heap->mm_heapend[0] -
-                  (uintptr_t)heap->mm_heapstart[0]);
+  sched_note_heap(NOTE_HEAP_REMOVE, heap, NULL, 0, 0);
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   procfs_unregister_meminfo(&heap->mm_procfs);
@@ -393,10 +391,10 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
     {
       if (oldmem != NULL)
         {
-          sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize);
+          sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize, 0);
         }
 
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, newsize);
+      sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, newsize, 0);
     }
 
   do
@@ -488,7 +486,7 @@ void *mm_memalign(struct mm_heap_s *heap, size_t alignment, size_t size)
     }
 
   size = host_mallocsize(mem);
-  sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, size);
+  sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, size, 0);
   atomic_fetch_add(&heap->aordblks, 1);
   atomic_fetch_add(&heap->uordblks, size);
   usmblks = atomic_load(&heap->usmblks);

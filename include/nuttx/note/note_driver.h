@@ -93,7 +93,8 @@ struct note_driver_ops_s
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
   CODE void (*heap)(FAR struct note_driver_s *drv, uint8_t event,
-                    FAR void *heap, FAR void *mem, size_t size);
+                    FAR void *heap, FAR void *mem, size_t size,
+                    size_t curused);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
   CODE void (*string)(FAR struct note_driver_s *drv, uintptr_t ip,

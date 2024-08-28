@@ -304,12 +304,19 @@ static const char *g_white_content_list[] =
    * drivers/segger/note_sysview.c
    */
 
-  "SEGGER_SYSVIEW",
-  "TaskID",
-  "sName",
+  "DataType",
+  "Offset",
   "Prio",
+  "pU32_Value",
+  "RangeMax",
+  "RangeMin",
+  "SEGGER_SYSVIEW",
+  "ScalingFactor",
+  "sName",
+  "sUnit",
   "StackBase",
   "StackSize",
+  "TaskID",
 
   /* Ref:
    * drivers/segger/syslog_rtt.c
