@@ -383,8 +383,10 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_maxused = heap->mm_curused;
         }
 
-      sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize);
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize);
+      sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize,
+                      heap->mm_curused - newsize);
+      sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
+                      heap->mm_curused);
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
