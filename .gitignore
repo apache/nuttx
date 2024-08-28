@@ -28,6 +28,8 @@
 *.ddc
 *.dds
 *.su
+*.mapfile
+*.SystemMap
 *~
 .depend
 /.config
