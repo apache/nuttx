@@ -392,6 +392,7 @@ struct note_heap_s
   FAR void *heap;
   FAR void *mem;
   size_t size;
+  size_t used;
 };
 
 struct note_string_s
@@ -558,9 +559,9 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
 void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
-                     size_t size);
+                     size_t size, size_t used);
 #else
-#  define sched_note_heap(e,h,m,s)
+#  define sched_note_heap(e,h,m,s,c)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP

@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <stddef.h>
+#include <stdio.h>
 #include <syslog.h>
 
 #include <nuttx/clock.h>
@@ -76,7 +77,7 @@ static void note_sysview_syscall_leave(FAR struct note_driver_s *drv,
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
 static void note_sysview_heap(FAR struct note_driver_s *drv,
                               uint8_t event, FAR void *heap, FAR void *mem,
-                              size_t size);
+                              size_t size, size_t curused);
 #endif
 
 /****************************************************************************
@@ -330,19 +331,55 @@ static void note_sysview_syscall_leave(FAR struct note_driver_s *drv,
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
 static void note_sysview_heap(FAR struct note_driver_s *drv,
                               uint8_t event, FAR void *heap, FAR void *mem,
-                              size_t size)
+                              size_t size, size_t curused)
 {
   switch (event)
     {
       case NOTE_HEAP_ALLOC:
-        SEGGER_SYSVIEW_HeapAlloc(heap, mem, size);
-        break;
       case NOTE_HEAP_FREE:
-        SEGGER_SYSVIEW_HeapFree(heap, mem);
-        break;
+        {
+          U32 value = (U32)curused;
+          const SEGGER_SYSVIEW_DATA_SAMPLE data =
+            {
+              .ID = (U32)(uintptr_t)heap,
+              .pU32_Value = &value,
+            };
+
+          SEGGER_SYSVIEW_SampleData(&data);
+          if (event == NOTE_HEAP_ALLOC)
+            {
+              SEGGER_SYSVIEW_HeapAlloc(heap, mem, size);
+            }
+          else
+            {
+              SEGGER_SYSVIEW_HeapFree(heap, mem);
+            }
+
+          break;
+        }
+
       case NOTE_HEAP_ADD:
-        SEGGER_SYSVIEW_HeapDefine(heap, mem, size, 0);
-        break;
+        {
+          char name[32];
+          SEGGER_SYSVIEW_DATA_REGISTER data =
+            {
+              .ID = (U32)(uintptr_t)heap,
+              .DataType = SEGGER_SYSVIEW_TYPE_U32,
+              .Offset = 0,
+              .RangeMin = 0,
+              .RangeMax = 0,
+              .ScalingFactor = 1.f,
+              .sUnit = "B",
+              .sName = name,
+            };
+
+          snprintf(name, sizeof(name), "Heap%p", heap);
+
+          SEGGER_SYSVIEW_RegisterData(&data);
+          SEGGER_SYSVIEW_HeapDefine(heap, mem, size, 0);
+          break;
+        }
+
       default:
         break;
     }
