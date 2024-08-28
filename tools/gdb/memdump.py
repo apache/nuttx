@@ -295,14 +295,14 @@ class HeapNode:
 
         record_size = gdb_node["size"]
 
-        if hasattr(gdb_node, "seqno"):
+        try:
             seqno = gdb_node["seqno"]
-        else:
+        except gdb.error:
             seqno = 0
 
-        if hasattr(gdb_node, "pid"):
+        try:
             node_pid = gdb_node["pid"]
-        else:
+        except gdb.error:
             node_pid = 0
 
         self.size = mm_nodesize(record_size)
@@ -424,6 +424,34 @@ class Memdump(gdb.Command):
             backtrace_dict=self.backtrace_dict,
         )
 
+    def memdump_tail(self, detail, simple):
+        if not detail:
+            output = [v for v in self.backtrace_dict.values()]
+            output.sort(key=get_count, reverse=True)
+            for node in output:
+                if node["node"].type == mm_allocnode_type.pointer():
+                    mm_dumpnode(
+                        node["node"],
+                        node["count"],
+                        self.align,
+                        simple,
+                        detail,
+                        self.check_alive(node["pid"]),
+                    )
+                else:
+                    mempool_dumpbuf(
+                        node["node"],
+                        node["size"],
+                        node["count"],
+                        self.align,
+                        simple,
+                        detail,
+                        self.check_alive(node["pid"]),
+                    )
+
+        gdb.write("%12s%12s\n" % ("Total Blks", "Total Size"))
+        gdb.write("%12d%12d\n" % (self.aordblks, self.uordblks))
+
     def memdump(self, pid, seqmin, seqmax, address, simple, detail, biggest_top=30):
         """Dump the heap memory"""
 
@@ -472,6 +500,7 @@ class Memdump(gdb.Command):
 
         title_dict = {
             PID_MM_ALLOC: "Dump all used memory node info, use '\x1b[33;1m*\x1b[m' mark pid does not exist:\n",
+            PID_MM_MEMPOOL: "Dump mempool:\n",
             PID_MM_FREE: "Dump all free memory node info:\n",
             PID_MM_BIGGEST: f"Dump biggest allocated top {biggest_top}\n",
             PID_MM_ORPHAN: "Dump allocated orphan nodes\n",
@@ -505,45 +534,21 @@ class Memdump(gdb.Command):
                 self.memnode_dump(node)
         elif pid == PID_MM_ORPHAN:
             for node in alloc_node:
-                if node.is_orphan:
+                if node.is_orphan():
+                    self.memnode_dump(node)
+        elif pid == PID_MM_MEMPOOL or pid >= 0:
+            for node in alloc_node:
+                if node.pid == pid:
                     self.memnode_dump(node)
 
-        if not detail:
-            output = []
-            for node in self.backtrace_dict.values():
-                output.append(node)
-
-            output.sort(key=get_count, reverse=True)
-            for node in output:
-                if node["node"].type == mm_allocnode_type.pointer():
-                    mm_dumpnode(
-                        node["node"],
-                        node["count"],
-                        self.align,
-                        simple,
-                        detail,
-                        self.check_alive(node["pid"]),
-                    )
-                else:
-                    mempool_dumpbuf(
-                        node["node"],
-                        node["size"],
-                        node["count"],
-                        self.align,
-                        simple,
-                        detail,
-                        self.check_alive(node["pid"]),
-                    )
-
-        gdb.write("%12s%12s\n" % ("Total Blks", "Total Size"))
-        gdb.write("%12d%12d\n" % (self.aordblks, self.uordblks))
+        self.memdump_tail(detail, simple)
 
     def complete(self, text, word):
         return gdb.COMPLETE_SYMBOL
 
     def parse_arguments(self, argv):
         parser = argparse.ArgumentParser(description="memdump command")
-        parser.add_argument("-p", "--pid", type=str, help="Thread PID")
+        parser.add_argument("-p", "--pid", type=str, help="Thread PID, -1 for mempool")
         parser.add_argument("-a", "--addr", type=str, help="Query memory address")
         parser.add_argument("-i", "--min", type=str, help="Minimum value")
         parser.add_argument("-x", "--max", type=str, help="Maximum value")
