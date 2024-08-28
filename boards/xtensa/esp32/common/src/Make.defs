@@ -64,6 +64,10 @@ ifeq ($(CONFIG_SPI_DRIVER),y)
   CSRCS += esp32_board_spidev.c
 endif
 
+ifeq ($(CONFIG_SPI_SLAVE_DRIVER),y)
+  CSRCS += esp32_board_spislavedev.c
+endif
+
 ifeq ($(CONFIG_ESP32_SPIFLASH),y)
   CSRCS += esp32_board_spiflash.c
 endif
