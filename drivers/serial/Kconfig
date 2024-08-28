@@ -316,6 +316,13 @@ config TTY_FORCE_PANIC_CHAR
 	---help---
 		Use Ctrl-? 0x1F inputs to determine whether panic system
 
+config TTY_FORCE_PANIC_REPEAT_COUNT
+	int "TTY force crash repeat count"
+	default 1
+	depends on TTY_FORCE_PANIC
+	---help---
+		Repeat how many times the panic char to determine whether panic system
+
 config TTY_SIGINT
 	bool "Support SIGINT"
 	default n

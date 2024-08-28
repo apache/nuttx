@@ -310,6 +310,10 @@ struct uart_dev_s
   pid_t                pid;          /* Thread PID to receive signals (-1 if none) */
 #endif
 
+#ifdef CONFIG_TTY_FORCE_PANIC
+  int                  panic_count;
+#endif
+
   /* Terminal control flags */
 
   tcflag_t             tc_iflag;     /* Input modes */
