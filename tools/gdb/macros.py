@@ -39,7 +39,6 @@
 
 import os
 import re
-import subprocess
 import time
 
 PUNCTUATORS = [
@@ -131,19 +130,7 @@ def fetch_macro_info(file):
     cache = os.path.splitext(file)[0] + ".macro"
     if not os.path.isfile(cache):
         start = time.time()
-        with open(cache, "w") as f:
-            # # os.system(f"readelf -wm {file} > {output}")
-            process = subprocess.Popen(
-                f"readelf -wm {file}", shell=True, stdout=f, stderr=subprocess.STDOUT
-            )
-
-            process.communicate()
-            errcode = process.returncode
-
-            f.close()
-
-            if errcode != 0:
-                return {}
+        os.system(f"readelf -wm {file} > {cache}")
         print(f"readelf took {time.time() - start:.1f} seconds")
 
     p = re.compile(".*macro[ ]*:[ ]*([\S]+\(.*?\)|[\w]+)[ ]*(.*)")
