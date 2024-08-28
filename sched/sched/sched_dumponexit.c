@@ -57,8 +57,8 @@ static void dumphandler(FAR struct tcb_s *tcb, FAR void *arg)
 
   syslog(LOG_INFO, "tcb=%p name=%s, pid:%d, priority=%d state=%d "
          "stack_alloc_ptr: %p, adj_stack_size: %zu\n",
-         tcb, tcb->name, tcb->pid, tcb->sched_priority, tcb->task_state,
-         tcb->stack_alloc_ptr, tcb->adj_stack_size);
+         tcb, get_task_name(tcb), tcb->pid, tcb->sched_priority,
+         tcb->task_state, tcb->stack_alloc_ptr, tcb->adj_stack_size);
 
   filelist = &tcb->group->tg_filelist;
   files_dumplist(filelist);

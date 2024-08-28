@@ -1804,9 +1804,9 @@ static int uart_unlink(FAR struct inode *inode)
 static void uart_launch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #ifdef CONFIG_TTY_LAUNCH_ENTRY
-  if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_ENTRYNAME))
+  if (!strcmp(get_task_name(tcb), CONFIG_TTY_LAUNCH_ENTRYNAME))
 #else
-  if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_FILEPATH))
+  if (!strcmp(get_task_name(tcb), CONFIG_TTY_LAUNCH_FILEPATH))
 #endif
     {
       *(FAR int *)arg = 1;

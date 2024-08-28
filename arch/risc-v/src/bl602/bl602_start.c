@@ -99,28 +99,21 @@ __cyg_profile_func_enter(void *this_fn, void *call_site)
 
   if (sp < stack_base)
     {
-#if CONFIG_TASK_NAME_SIZE > 0
       struct tcb_s *rtcb;
-#endif
+
       __asm volatile("csrc mstatus, 8");
       __asm__("li s11, 0");
 
-#if CONFIG_TASK_NAME_SIZE > 0
       /* get current task */
 
       rtcb = running_task();
 
       syslog(LOG_EMERG,
              "task %s stack overflow detected! base:0x%x >= sp:0x%x\n",
-             rtcb->name,
+             get_task_name(rtcb),
              stack_base,
              sp);
-#else
-      syslog(LOG_EMERG,
-             "stack overflow detected! base:0x%x >= sp:0x%x\n",
-             stack_base,
-             sp);
-#endif
+
       /* PANIC(); */
 
       while (1)

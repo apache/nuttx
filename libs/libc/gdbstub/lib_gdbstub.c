@@ -1251,17 +1251,10 @@ static int gdb_query(FAR struct gdb_state_s *state)
         }
 
       nxsched_get_stateinfo(tcb, thread_state, sizeof(thread_state));
-#if CONFIG_TASK_NAME_SIZE > 0
       snprintf(thread_info, sizeof(thread_info),
                "Name: %s, State: %s, Priority: %d, Stack: %zu",
-                tcb->name, thread_state, tcb->sched_priority,
+                get_task_name(tcb), thread_state, tcb->sched_priority,
                 tcb->adj_stack_size);
-#else
-      snprintf(thread_info, sizeof(thread_info),
-               "State: %s, Priority: %d, Stack: %zu",
-               thread_state, tcb->sched_priority,
-               tcb->adj_stack_size);
-#endif
 
       ret = gdb_bin2hex(state->pkt_buf, sizeof(state->pkt_buf),
                         thread_info, strlen(thread_info));
@@ -1968,4 +1961,3 @@ out:
   state->last_stopaddr = stopaddr;
   return ret;
 }
-

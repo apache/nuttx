@@ -91,11 +91,7 @@ int nxtask_exit(void)
   dtcb = this_task();
 #endif
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  sinfo("%s pid=%d,TCB=%p\n", dtcb->name,
-#else
-  sinfo("pid=%d,TCB=%p\n",
-#endif  
+  sinfo("%s pid=%d,TCB=%p\n", get_task_name(dtcb),
         dtcb->pid, dtcb);
 
   /* Update scheduler parameters */

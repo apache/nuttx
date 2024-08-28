@@ -486,11 +486,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
 
   /* Show the task name */
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  name       = tcb->name;
-#else
-  name       = "<noname>";
-#endif
+  name       = get_task_name(tcb);
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                "%-12s%.18s\n", "Name:", name);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
@@ -670,11 +666,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
 
   /* Show the task name */
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  name       = tcb->name;
-#else
-  name       = "<noname>";
-#endif
+  name       = get_task_name(tcb);
   linesize   = strlen(name);
   memcpy(procfile->line, name, linesize);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
