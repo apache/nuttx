@@ -415,11 +415,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 #ifndef CONFIG_SCHED_CPULOAD_NONE
          , intpart, fracpart
 #endif
-#if CONFIG_TASK_NAME_SIZE > 0
-         , tcb->name
-#else
-         , "<noname>"
-#endif
+         , get_task_name(tcb)
          , args
         );
 }
@@ -630,18 +626,14 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
                              FAR const char *filename, int linenum,
                              FAR const char *msg, FAR void *regs)
 {
-#if CONFIG_TASK_NAME_SIZE > 0
   FAR struct tcb_s *ptcb = NULL;
-#endif
   struct utsname name;
 
-#if CONFIG_TASK_NAME_SIZE > 0
   if (rtcb->group &&
       (rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       ptcb = nxsched_get_tcb(rtcb->group->tg_pid);
     }
-#endif
 
   uname(&name);
   _alert("Current Version: %s %s %s %s %s\n",
@@ -653,20 +645,16 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
          "(CPU%d)"
 #endif
          ": "
-#if CONFIG_TASK_NAME_SIZE > 0
          "%s "
          "process: %s "
-#endif
          "%p\n",
          msg ? msg : "",
          filename ? filename : "", linenum,
 #ifdef CONFIG_SMP
          this_cpu(),
 #endif
-#if CONFIG_TASK_NAME_SIZE > 0
-         rtcb->name,
-         ptcb ? ptcb->name : "Kernel",
-#endif
+         get_task_name(rtcb),
+         ptcb ? get_task_name(ptcb) : "Kernel",
          rtcb->entry.main);
 
   /* Dump current CPU registers, running task stack and backtrace. */

@@ -75,11 +75,8 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 
   syslog_flush();
 
-#if CONFIG_TASK_NAME_SIZE > 0
-  _alert("Unhandled Exception %d task: %s\n", xptcode, running_task()->name);
-#else
-  _alert("Unhandled Exception %d\n", xptcode);
-#endif
+  _alert("Unhandled Exception %d task: %s\n", xptcode,
+         get_task_name(running_task()));
 
   PANIC_WITH_REGS("panic", regs);  /* Should not return */
   for (; ; );
@@ -177,12 +174,8 @@ void xtensa_user_panic(int exccause, uint32_t *regs)
 
   syslog_flush();
 
-#if CONFIG_TASK_NAME_SIZE > 0
   _alert("User Exception: EXCCAUSE=%04x task: %s\n",
-         exccause, running_task()->name);
-#else
-  _alert("User Exception: EXCCAUSE=%04x\n", exccause);
-#endif
+         exccause, get_task_name(running_task()));
 
   PANIC_WITH_REGS("user panic", regs); /* Should not return */
   for (; ; );

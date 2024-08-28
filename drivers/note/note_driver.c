@@ -2007,4 +2007,3 @@ int note_driver_register(FAR struct note_driver_s *driver)
 
   return -ENOMEM;
 }
-

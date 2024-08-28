@@ -222,6 +222,14 @@
 
 #define get_current_mm()             (get_group_mm(nxsched_self()->group))
 
+/* Get task name from tcb */
+
+#if CONFIG_TASK_NAME_SIZE > 0
+#  define get_task_name(tcb)         ((tcb)->name)
+#else
+#  define get_task_name(tcb)         "<noname>"
+#endif
+
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
  */
