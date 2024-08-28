@@ -39,6 +39,9 @@
 #include "hardware/esp32s2_systimer.h"
 #include "hardware/esp32s2_tim.h"
 
+#include "soc/periph_defs.h"
+#include "esp_private/periph_ctrl.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1252,6 +1255,15 @@ struct esp32s2_tim_dev_s *esp32s2_tim_init(int timer)
           break;
         }
 #endif
+    }
+
+  if (tim->gid == GROUP0)
+    {
+      periph_module_enable(PERIPH_TIMG0_MODULE);
+    }
+  else
+    {
+      periph_module_enable(PERIPH_TIMG1_MODULE);
     }
 
   /* Verify if it is in use */
