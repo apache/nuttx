@@ -1,0 +1,13 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIBRUST
+	bool "Rust Runtime Compatibility Checking"
+	default y
+	depends on SYSTEM_TIME64 && FS_LARGEFILE && !SMALL_MEMORY
+	---help---
+		This option enables building and linking with Rust language support.
+		Currently, it only do static checking for the compatibility of structs
+		between Rust and C side.
