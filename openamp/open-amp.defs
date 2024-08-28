@@ -44,6 +44,10 @@ else
   CFLAGS += -DVIRTIO_DRIVER_SUPPORT=0
 endif
 
+ifeq ($(CONFIG_OPENAMP_RPMSG_TRACE),y)
+  CFLAGS += -DRPMSG_TRACE
+endif
+
 CSRCS += open-amp/lib/remoteproc/elf_loader.c
 CSRCS += open-amp/lib/remoteproc/remoteproc.c
 CSRCS += open-amp/lib/remoteproc/remoteproc_virtio.c
