@@ -113,3 +113,7 @@ target_include_directories(
   open_amp-static PRIVATE $<TARGET_PROPERTY:metal-static,INCLUDE_DIRECTORIES>)
 
 nuttx_add_external_library(open_amp-static MODE KERNEL)
+
+if(CONFIG_OPENAMP_RPMSG_TRACE)
+  target_compile_options(openamp PRIVATE -DRPMSG_TRACE)
+endif()

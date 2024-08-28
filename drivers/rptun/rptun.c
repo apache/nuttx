@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <execinfo.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -56,6 +57,12 @@
  * Private Types
  ****************************************************************************/
 
+struct rptun_trace_s
+{
+  FAR void *hdr;
+  FAR void *backtrace[16];
+};
+
 struct rptun_priv_s
 {
   struct rpmsg_s               rpmsg;
@@ -64,6 +71,7 @@ struct rptun_priv_s
   struct remoteproc            rproc;
   struct rpmsg_virtio_shm_pool pool[2];
   sem_t                        semtx;
+  FAR struct rptun_trace_s     *traces;
   sem_t                        semrx;
   pid_t                        tid;
   uint16_t                     headrx;
@@ -128,6 +136,20 @@ static void rptun_panic(FAR struct rpmsg_s *rpmsg);
 static void rptun_dump(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg);
+#ifdef CONFIG_OPENAMP_RPMSG_TRACE
+static void rptun_trace_init(FAR struct rptun_priv_s *priv);
+static void rptun_trace_uninit(FAR struct rptun_priv_s *priv);
+static void rptun_trace_get_tx_buffer(FAR struct rpmsg_device *rdev,
+                                      FAR void *hdr);
+static void rptun_trace_release_tx_buffer(FAR struct rpmsg_device *rdev,
+                                          FAR void *hdr);
+static void rptun_dump_trace(FAR struct rpmsg_virtio_device *rvdev);
+
+#else
+#  define rptun_trace_init(priv)
+#  define rptun_trace_uninit(priv)
+#  define rptun_dump_trace(rvdev);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -722,6 +744,8 @@ static void rptun_dump(FAR struct rpmsg_s *rpmsg)
       metal_mutex_acquire(&rdev->lock);
     }
 
+  rptun_dump_trace(rvdev);
+
   metal_log(METAL_LOG_EMERGENCY,
             "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
             rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
@@ -918,6 +942,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       return ret;
     }
 
+  rptun_trace_init(priv);
   priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
   priv->rvdev.notify_wait_cb = rptun_notify_wait;
 
@@ -981,6 +1006,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc, bool stop_ns)
   /* Remote proc stop and shutdown */
 
   remoteproc_shutdown(rproc);
+  rptun_trace_uninit(priv);
 
   return OK;
 }
@@ -1112,6 +1138,130 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 
   return da;
 }
+
+#ifdef CONFIG_OPENAMP_RPMSG_TRACE
+static void *rptun_get_priv_by_rdev(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_virtio_device *rvdev;
+  FAR struct virtio_device *vdev;
+  FAR struct remoteproc_virtio *rpvdev;
+  FAR struct remoteproc *rproc;
+
+  if (!rdev)
+    {
+      return NULL;
+    }
+
+  rvdev = metal_container_of(rdev, struct rpmsg_virtio_device, rdev);
+  vdev  = rvdev->vdev;
+  if (!vdev)
+    {
+      return NULL;
+    }
+
+  rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
+  rproc  = rpvdev->priv;
+  if (!rproc)
+    {
+      return NULL;
+    }
+
+  return rproc->priv;
+}
+
+static void rptun_trace_init(FAR struct rptun_priv_s *priv)
+{
+  int txnum = priv->rvdev.svq->vq_nentries;
+
+  priv->traces = kmm_zalloc(sizeof(*priv->traces) * txnum);
+  DEBUGASSERT(priv->traces != NULL);
+
+  priv->rvdev.rdev.trace.get_tx_buffer = rptun_trace_get_tx_buffer;
+  priv->rvdev.rdev.trace.release_tx_buffer = rptun_trace_release_tx_buffer;
+}
+
+static void rptun_trace_uninit(FAR struct rptun_priv_s *priv)
+{
+  priv->rvdev.rdev.trace.get_tx_buffer = NULL;
+  priv->rvdev.rdev.trace.release_tx_buffer = NULL;
+
+  kmm_free(priv->traces);
+}
+
+static void rptun_trace_get_tx_buffer(FAR struct rpmsg_device *rdev,
+                                      FAR void *hdr)
+{
+  FAR struct rptun_priv_s *priv = rptun_get_priv_by_rdev(rdev);
+  int txnum = priv->rvdev.svq->vq_nentries;
+  int i;
+
+  for (i = 0; i < txnum; i++)
+    {
+      if (priv->traces[i].hdr == NULL)
+        {
+          break;
+        }
+    }
+
+  if (i >= txnum)
+    {
+      metal_log(METAL_LOG_EMERGENCY, "Not find empty buffer i=%d num=%d\n",
+                i, txnum);
+      PANIC();
+    }
+
+  priv->traces[i].hdr = hdr;
+  backtrace(priv->traces[i].backtrace, 16);
+}
+
+static void rptun_trace_release_tx_buffer(FAR struct rpmsg_device *rdev,
+                                          FAR void *hdr)
+{
+  FAR struct rptun_priv_s *priv = rptun_get_priv_by_rdev(rdev);
+  int txnum = priv->rvdev.svq->vq_nentries;
+  int i;
+  int j;
+
+  for (i = 0; i < txnum; i++)
+    {
+      if (priv->traces[i].hdr == hdr)
+        {
+          break;
+        }
+    }
+
+  if (i >= txnum)
+    {
+      metal_log(METAL_LOG_EMERGENCY, "Not find tx buffer i=%d num=%d\n",
+                i, txnum);
+      PANIC();
+    }
+
+  priv->traces[i].hdr = NULL;
+
+  for (j = 0; j < 16; j++)
+    {
+      priv->traces[i].backtrace[j] = NULL;
+    }
+}
+
+static void rptun_dump_trace(FAR struct rpmsg_virtio_device *rvdev)
+{
+  FAR struct rptun_priv_s *priv = rptun_get_priv_by_rdev(&rvdev->rdev);
+  char backtrace[256];
+  int txnum = rvdev->svq->vq_nentries;
+  int i;
+
+  metal_log(METAL_LOG_EMERGENCY, "Dump not released tx buffer:\n");
+  for (i = 0; i < txnum; i++)
+    {
+      backtrace_format(backtrace, sizeof(backtrace),
+                       priv->traces[i].backtrace, 16);
+      metal_log(METAL_LOG_EMERGENCY, "hdr: %p backtrace: %s\n",
+                priv->traces[i].hdr, backtrace);
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
