@@ -624,7 +624,7 @@ static void noteram_dump_init_context(FAR struct noteram_dump_context_s *ctx)
  * Name: get_task_name
  ****************************************************************************/
 
-static FAR const char *get_task_name(pid_t pid)
+static const char *get_taskname(pid_t pid)
 {
   FAR const char *taskname;
 
@@ -658,7 +658,7 @@ static int noteram_dump_header(FAR struct lib_outstream_s *s,
 #endif
 
   ret = lib_sprintf(s, "%8s-%-3u [%d] %3" PRIu32 ".%09" PRIu32 ": ",
-                    get_task_name(pid), get_pid(pid), cpu, sec, nsec);
+                    get_taskname(pid), get_pid(pid), cpu, sec, nsec);
   return ret;
 }
 
@@ -694,9 +694,9 @@ static int noteram_dump_sched_switch(FAR struct lib_outstream_s *s,
   ret = lib_sprintf(s, "sched_switch: prev_comm=%s prev_pid=%u "
                     "prev_prio=%u prev_state=%c ==> "
                     "next_comm=%s next_pid=%u next_prio=%u\n",
-                    get_task_name(current_pid), get_pid(current_pid),
+                    get_taskname(current_pid), get_pid(current_pid),
                     current_priority, get_task_state(cctx->current_state),
-                    get_task_name(next_pid), get_pid(next_pid),
+                    get_taskname(next_pid), get_pid(next_pid),
                     next_priority);
 
   cctx->current_pid = cctx->next_pid;
@@ -740,7 +740,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         ret += noteram_dump_header(s, note, ctx);
         ret += lib_sprintf(s, "sched_wakeup_new: comm=%s pid=%d "
                            "target_cpu=%d\n",
-                           get_task_name(pid), get_pid(pid), cpu);
+                           get_taskname(pid), get_pid(pid), cpu);
       }
       break;
 
@@ -794,7 +794,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
             ret += noteram_dump_header(s, note, ctx);
             ret += lib_sprintf(s, "sched_waking: comm=%s "
                                "pid=%d target_cpu=%d\n",
-                               get_task_name(cctx->next_pid),
+                               get_taskname(cctx->next_pid),
                                get_pid(cctx->next_pid), cpu);
             cctx->pendingswitch = true;
           }

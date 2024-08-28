@@ -153,6 +153,7 @@ config SYSLOG_PRIORITY
 config SYSLOG_PROCESS_NAME
 	bool "Prepend process name to syslog message"
 	default n
+	depends on TASK_NAME_SIZE > 0
 	---help---
 		Prepend Process name to syslog message.
 
