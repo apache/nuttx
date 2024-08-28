@@ -1914,6 +1914,10 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
   dev->pid = INVALID_PROCESS_ID;
 #endif
 
+#ifdef CONFIG_TTY_FORCE_PANIC
+  dev->panic_count = 0;
+#endif
+
   /* If this UART is a serial console */
 
   if (dev->isconsole)
@@ -2128,8 +2132,16 @@ int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
 #ifdef CONFIG_TTY_FORCE_PANIC
       if (buf[i] == CONFIG_TTY_FORCE_PANIC_CHAR)
         {
-          PANIC_WITH_REGS("Force panic by user.", NULL);
+          if (++dev->panic_count >= CONFIG_TTY_FORCE_PANIC_REPEAT_COUNT)
+            {
+              PANIC_WITH_REGS("Force panic by user.", NULL);
+            }
+
           return 0;
+        }
+      else
+        {
+          dev->panic_count = 0;
         }
 #endif
 
