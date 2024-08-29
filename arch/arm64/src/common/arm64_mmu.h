@@ -223,11 +223,11 @@
 
 /* Flags for user page tables */
 
-#define MMU_UPGT_FLAGS              (0)
+#define MMU_UPGT_FLAGS              (PTE_TABLE_DESC)
 
 /* Flags for normal memory region */
 
-#define MMU_MT_NORMAL_FLAGS         (PTE_BLOCK_DESC_INNER_SHARE | PTE_BLOCK_DESC_MEMTYPE(MT_NORMAL))
+#define MMU_MT_NORMAL_FLAGS         (PTE_PAGE_DESC | PTE_BLOCK_DESC_AF | PTE_BLOCK_DESC_INNER_SHARE | PTE_BLOCK_DESC_MEMTYPE(MT_NORMAL))
 
 /* Flags for user FLASH (RX) and user RAM (RW) */
 
@@ -240,7 +240,7 @@
 
 /* Flags for kernel page tables */
 
-#define MMU_KPGT_FLAGS              (0)
+#define MMU_KPGT_FLAGS              (PTE_TABLE_DESC)
 
 /* Kernel FLASH and RAM are mapped globally */
 
