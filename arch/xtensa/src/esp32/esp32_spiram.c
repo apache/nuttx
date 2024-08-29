@@ -247,7 +247,7 @@ void IRAM_ATTR esp_spiram_init_cache(void)
 
 #ifdef CONFIG_SMP
   regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
-  regval &= ~(1 << DPORT_APP_CACHE_MASK_DRAM1);
+  regval &= ~DPORT_APP_CACHE_MASK_DRAM1;
   putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
   cache_sram_mmu_set(1, 0, SOC_EXTRAM_DATA_LOW, 0, 32, 128);
 #endif
