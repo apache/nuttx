@@ -2985,7 +2985,7 @@ static int imx9_dmapreflight(struct sdio_dev_s *dev,
   /* DMA must be possible to the buffer and it must be word (4 bytes) aligned
    */
 
-  if (buffer != priv->rxbuffer && ((uintptr_t)buffer & 3) != 0)
+  if (((uintptr_t)buffer & 3) != 0)
     {
       mcerr("non word aligned buffer:%p\n", buffer);
       return -EFAULT;
@@ -3039,11 +3039,12 @@ static int imx9_dmarecvsetup(struct sdio_dev_s *dev,
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
 
-#if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
-  /* Normaly imx9_dmapreflight is called prior to imx9_dmarecvsetup
-   * except for the case where the CSR read is done at initalization
+#if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT) && \
+   !defined(CONFIG_ARM64_DCACHE_DISABLE)
+  /* Normally imx9_dmapreflight is called prior to imx9_dmarecvsetup
+   * except for the case where the CSR read is done at initialization.
    *
-   * With a total read  size of less then priv->rxbuffer we can
+   * With a total read size of less then priv->rxbuffer we can
    * handle the unaligned case herein, using the rxbuffer.
    *
    * Any other case is a fault.
