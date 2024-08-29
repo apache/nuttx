@@ -40,4 +40,11 @@ ifeq ($(CONFIG_ESPRESSIF_TEMP),y)
 CHIP_CSRCS += esp_temperature_sensor.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
+CHIP_CSRCS += esp_spiflash.c
+ifeq ($(CONFIG_ESPRESSIF_MTD),y)
+CHIP_CSRCS += esp_spiflash_mtd.c
+endif
+endif
+
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include

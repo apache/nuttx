@@ -222,7 +222,7 @@ extern void rom_i2c_writereg_mask(uint8_t block, uint8_t host_id,
  * 2. running with 80MHz Flash frequency
  */
 
-#ifdef CONFIG_ESP32S2_FLASH_FREQ_80M
+#ifdef CONFIG_ESPRESSIF_FLASH_FREQ_80M
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V25
 #else
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V10

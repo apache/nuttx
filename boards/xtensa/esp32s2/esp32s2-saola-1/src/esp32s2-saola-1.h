@@ -102,7 +102,7 @@ int esp32s2_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S2_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
 int board_spiflash_init(void);
 #endif
 
