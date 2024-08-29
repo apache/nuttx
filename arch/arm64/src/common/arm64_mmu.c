@@ -707,10 +707,6 @@ void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
 
   index = XLAT_TABLE_VA_IDX(vaddr, ptlevel);
 
-  /* Setup the page descriptor and access flag */
-
-  mmuflags |= PTE_PAGE_DESC | PTE_BLOCK_DESC_AF;
-
   /* Save it */
 
   lntable[index] = (paddr | mmuflags);
