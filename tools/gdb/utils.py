@@ -24,7 +24,6 @@ import re
 from typing import List
 
 import gdb
-
 from macros import fetch_macro_info, try_expand
 
 g_symbol_cache = {}
@@ -543,3 +542,22 @@ def get_tcbs():
     npidhash = gdb.parse_and_eval("g_npidhash")
 
     return [pidhash[i] for i in range(0, npidhash) if pidhash[i]]
+
+
+def get_tcb(pid):
+    """get tcb from pid"""
+    g_pidhash = gdb.parse_and_eval("g_pidhash")
+    g_npidhash = gdb.parse_and_eval("g_npidhash")
+    tcb = g_pidhash[pid & (g_npidhash - 1)]
+    if not tcb or pid != tcb["pid"]:
+        return None
+
+    return tcb
+
+
+def get_task_name(tcb):
+    try:
+        name = tcb["name"].cast(gdb.lookup_type("char").pointer())
+        return name.string()
+    except gdb.error:
+        return ""
