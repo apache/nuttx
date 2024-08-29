@@ -216,7 +216,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
 
   systimer_ll_clear_alarm_int(priv->hal.dev, SYSTIMER_ALARM_ESPTIMER);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* Check if there is a timer running */
 
@@ -286,7 +286,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -576,7 +576,7 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
 
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   if (timer->state == HR_TIMER_READY)
     {
@@ -603,7 +603,7 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
     }
 
 exit:
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
