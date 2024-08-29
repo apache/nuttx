@@ -2070,7 +2070,6 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   struct inode        *inode  = filep->f_inode;
   struct cdcacm_dev_s *priv   = inode->i_private;
-  FAR uart_dev_t      *serdev = &priv->serdev;
   int                  ret    = OK;
 
   switch (cmd)
@@ -2280,86 +2279,6 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 #endif
-
-    /* Get the number of bytes that may be read from the RX buffer (without
-     * waiting)
-     */
-
-    case FIONREAD:
-      {
-        int count;
-        irqstate_t flags = enter_critical_section();
-
-        /* Determine the number of bytes available in the RX buffer. */
-
-        if (serdev->recv.tail <= serdev->recv.head)
-          {
-            count = serdev->recv.head - serdev->recv.tail;
-          }
-        else
-          {
-            count = serdev->recv.size -
-                    (serdev->recv.tail - serdev->recv.head);
-          }
-
-        leave_critical_section(flags);
-
-        *(FAR int *)arg = count;
-        ret = 0;
-      }
-      break;
-
-    /* Get the number of bytes that have been written to the TX buffer. */
-
-    case FIONWRITE:
-      {
-        int count;
-        irqstate_t flags = enter_critical_section();
-
-        /* Determine the number of bytes waiting in the TX buffer. */
-
-        if (serdev->xmit.tail <= serdev->xmit.head)
-          {
-            count = serdev->xmit.head - serdev->xmit.tail;
-          }
-        else
-          {
-            count = serdev->xmit.size -
-                    (serdev->xmit.tail - serdev->xmit.head);
-          }
-
-        leave_critical_section(flags);
-
-        *(FAR int *)arg = count;
-        ret = 0;
-      }
-      break;
-
-    /* Get the number of free bytes in the TX buffer */
-
-    case FIONSPACE:
-      {
-        int count;
-        irqstate_t flags = enter_critical_section();
-
-        /* Determine the number of bytes free in the TX buffer */
-
-        if (serdev->xmit.head < serdev->xmit.tail)
-          {
-            count = serdev->xmit.tail - serdev->xmit.head - 1;
-          }
-        else
-          {
-            count = serdev->xmit.size -
-                    (serdev->xmit.head - serdev->xmit.tail) - 1;
-          }
-
-        leave_critical_section(flags);
-
-        *(FAR int *)arg = count;
-        ret = 0;
-      }
-      break;
 
     default:
       ret = -ENOTTY;
