@@ -86,7 +86,7 @@ To halt the board:
 .. code-block::
 
   (gdb) mon halt
-  
+
 To set a breakpoint:
 
 .. code-block::
@@ -104,7 +104,7 @@ and to finally start nuttx:
   208	  sched_getparam(0, &param);
   (gdb) continue
   Continuing.
-  
+
 .. tip::
 
   You can abbreviate ``gdb`` commands: ``info b`` is a shortcut for
@@ -130,8 +130,8 @@ opencd. By default, it assumes:
 
   * ``CONFIG_DISABLE_MQUEUE=y``
   * ``CONFIG_LEGACY_PAGING=n``
-  
-If you need these options to be set differently, you will have to edit ``./src/rtos/nuttx_header.h`` from ``openocd``, 
+
+If you need these options to be set differently, you will have to edit ``./src/rtos/nuttx_header.h`` from ``openocd``,
 change the corresponding settings and then rebuild it.
 
 Finally, to enable NuttX integration, you need to supply an additional ``openocd`` argument:
@@ -139,7 +139,7 @@ Finally, to enable NuttX integration, you need to supply an additional ``openocd
 .. code-block:: console
 
   $ openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c '$_TARGETNAME configure -rtos nuttx'
-  
+
 Since ``openocd`` also needs to know the memory layout of certain datastructures, you need to have ``gdb``
 run the following commands once the ``nuttx`` binary is loaded:
 
@@ -150,7 +150,7 @@ run the following commands once the ``nuttx`` binary is loaded:
   eval "monitor nuttx.state_offset %d", &((struct tcb_s *)(0))->task_state
   eval "monitor nuttx.name_offset %d", &((struct tcb_s *)(0))->name
   eval "monitor nuttx.name_size %d", sizeof(((struct tcb_s *)(0))->name)
-  
+
 One way to do this is to define a gdb `hook` function that will be called when running ``file`` command:
 
 .. code-block::
@@ -162,7 +162,7 @@ One way to do this is to define a gdb `hook` function that will be called when r
     eval "monitor nuttx.name_offset %d", &((struct tcb_s *)(0))->name
     eval "monitor nuttx.name_size %d", sizeof(((struct tcb_s *)(0))->name)
   end
-  
+
 You will see that ``openocd`` has received the memory offsets in its output:
 
 .. code-block::
@@ -196,10 +196,10 @@ You will see that ``openocd`` has received the memory offsets in its output:
   Info : state_offset: 26
   Info : name_offset: 208
   Info : name_size: 32
-  target halted due to debug-request, current mode: Thread 
+  target halted due to debug-request, current mode: Thread
   xPSR: 0x01000000 pc: 0x000000dc msp: 0x20000cf0
   target halted due to debug-request, current mode: Thread xPSR: 0x01000000 pc: 0x000000dc msp: 0x20000cf0
-  
+
 .. note:: You will probably see the ``Error: No symbols for NuttX`` error appear once at startup. This is OK
   unless you see it every time you step the debugger. In this case, it would mean you did not enable debug symbols.
 
@@ -208,8 +208,8 @@ Now, You can now inspect threads:
 .. code-block::
 
   (gdb) info threads
-    Id   Target Id         Frame 
-  * 1    Remote target     nx_start_application () at init/nx_bringup.c:261  
+    Id   Target Id         Frame
+  * 1    Remote target     nx_start_application () at init/nx_bringup.c:261
   (gdb) info registers
   r0             0x0                 0
   r1             0x2f                47
@@ -260,6 +260,13 @@ the prefix is arm-ebai-none-.
   Id   Thread                Info                                                                             Frame
   *0   Thread 0x20000398     (Name: Idle Task, State: Running, Priority: 0, Stack: 1000)                      0x80001ac __start() at chip/stm32_start.c:111
   1    Thread 0x10000188     (Name: nsh_main, State: Waiting,Semaphore, Priority: 100, Stack: 2000)           0x800aa06 sys_call2() at /home/ajh/work/vela_all/nuttx/include/arch/syscall.h:187
+
+.. code-block::
+
+  (gdb) (gdb) nxgcore -r 0x40200000,0x48000000,0x07
+  Saved corefile nuttx.core
+  Please run gdbserver.py to parse nuttx.core
+
 
 The python script has extended many commands like ``thread <id>`` ,
 ``thread apply <all|id list> cmd``, ``nxsetargs`` etc.
