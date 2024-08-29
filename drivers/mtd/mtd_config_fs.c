@@ -62,7 +62,7 @@
  * so we make a buffer to do compare or move.
  */
 
-#define NVS_BUFFER_SIZE                 32
+#define NVS_BUFFER_SIZE                 MAX(NVS_ALIGN_UP(32), NVS_ALIGN_SIZE)
 
 /* If data is written after last ate, and power loss happens,
  * we need to find a clean offset by skipping dirty data.
