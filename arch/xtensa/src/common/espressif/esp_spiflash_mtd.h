@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_spiflash.h
+ * arch/xtensa/src/common/espressif/esp_spiflash_mtd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_SPIFLASH_H
-#define __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_SPIFLASH_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_SPIFLASH_MTD_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_SPIFLASH_MTD_H
 
 /****************************************************************************
  * Included Files
@@ -47,43 +47,38 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: spi_flash_read_encrypted
+ * Name: esp_spiflash_mtd
  *
  * Description:
+ *   Get SPI Flash MTD.
  *
- *   Read data from Encrypted Flash.
- *
- *   If flash encryption is enabled, this function will transparently
- *   decrypt data as it is read.
- *   If flash encryption is not enabled, this function behaves the same as
- *   spi_flash_read().
- *
- *   See esp_flash_encryption_enabled() for a function to check if flash
- *   encryption is enabled.
- *
- * Parameters:
- *   addr   - source address of the data in Flash.
- *   buffer - pointer to the destination buffer
- *   size   - length of data
- *
- * Returned Values: esp_err_t
- *
- ****************************************************************************/
-
-int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size);
-
-/****************************************************************************
- * Name: esp32s2_spiflash_init
- *
- * Description:
- *   Initialize ESP32-S3 SPI flash driver.
+ * Input Parameters:
+ *   None
  *
  * Returned Value:
- *   OK if success or a negative value if fail.
+ *   SPI Flash MTD pointer.
  *
  ****************************************************************************/
 
-int esp32s2_spiflash_init(void);
+struct mtd_dev_s *esp_spiflash_mtd(void);
+
+/****************************************************************************
+ * Name: esp_spiflash_alloc_mtdpart
+ *
+ * Description:
+ *   Allocate an MTD partition from the SPI Flash.
+ *
+ * Input Parameters:
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
+ *
+ * Returned Value:
+ *   SPI Flash MTD data pointer if success or NULL if fail.
+ *
+ ****************************************************************************/
+
+struct mtd_dev_s *esp_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+                                             uint32_t mtd_size);
 
 #ifdef __cplusplus
 }
@@ -91,4 +86,4 @@ int esp32s2_spiflash_init(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_SPIFLASH_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_SPIFLASH_MTD_H */
