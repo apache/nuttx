@@ -18,8 +18,7 @@
 #
 # ##############################################################################
 
-# menuconfig target this triggers a reconfiguration (TODO: do only if config
-# changes)
+# menuconfig target this triggers a reconfiguration
 
 set(KCONFIG_ENV
     "KCONFIG_CONFIG=${CMAKE_BINARY_DIR}/.config"
@@ -45,10 +44,6 @@ endif()
 add_custom_target(
   menuconfig
   COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} ${MENUCONFIG}
-  COMMAND ${CMAKE_COMMAND} -E remove -f
-          ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
-                                                     # config
-  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
   WORKING_DIRECTORY ${NUTTX_DIR}
   USES_TERMINAL)
 
@@ -57,10 +52,6 @@ add_custom_target(
 add_custom_target(
   qconfig
   COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} guiconfig
-  COMMAND ${CMAKE_COMMAND} -E remove -f
-          ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
-                                                     # config
-  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
   WORKING_DIRECTORY ${NUTTX_DIR}
   USES_TERMINAL)
 
@@ -77,20 +68,12 @@ add_custom_target(
 add_custom_target(
   oldconfig
   COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} oldconfig
-  COMMAND ${CMAKE_COMMAND} -E remove -f
-          ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
-                                                     # config
-  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
   WORKING_DIRECTORY ${NUTTX_DIR}
   USES_TERMINAL) # stdin access required to prompt for new config keys
 
 add_custom_target(
   olddefconfig
   COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} olddefconfig
-  COMMAND ${CMAKE_COMMAND} -E remove -f
-          ${CMAKE_BINARY_DIR}/include/nuttx/config.h # invalidate existing
-                                                     # config
-  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
   WORKING_DIRECTORY ${NUTTX_DIR})
 
 # utility target to restore .config from board's defconfig
@@ -101,5 +84,4 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} olddefconfig
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/.config
           ${CMAKE_BINARY_DIR}/.config.orig
-  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
   WORKING_DIRECTORY ${NUTTX_DIR})

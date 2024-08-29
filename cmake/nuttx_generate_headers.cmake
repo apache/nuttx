@@ -28,7 +28,6 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/nuttx)
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/nuttx)
 endif()
 
-include(nuttx_mkconfig)
 include(nuttx_mkversion)
 
 # Setup symbolic link generation
@@ -136,6 +135,18 @@ if(CONFIG_ARCH_SETJMP_H)
 else()
   file(REMOVE ${CMAKE_BINARY_DIR}/include/setjmp.h)
 endif()
+
+# Generate config.h. This is done through add_custom_command rather than
+# include(nuttx_mkconfig) to be able to mark .config as a dependency of
+# config.h. Otherwise, changes in .config would not cause config.h to be
+# re-generated during incremental builds.
+
+add_custom_command(
+  OUTPUT ${CMAKE_BINARY_DIR}/include/nuttx/config.h
+  COMMAND
+    ${CMAKE_COMMAND} -D NUTTX_DIR=${NUTTX_DIR} -D NUTTX_BOARD=${NUTTX_BOARD} -D
+    NUTTX_CONFIG=${NUTTX_CONFIG} -P ${NUTTX_DIR}/cmake/nuttx_mkconfig.cmake
+  DEPENDS ${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/.config.orig)
 
 # Add final context target that ties together all of the above The context
 # target is invoked on each target build to assure that NuttX is properly

@@ -18,27 +18,24 @@
 #
 # ##############################################################################
 
+# !!! READ BEFORE CHANGING THIS FILE !!!
+#
+# This file is not included by the rest of the CMake configuration, but it is
+# instead invoked separately through `cmake -P`.
+#
+# This means most variables, functions and macros defined in the rest of the
+# CMake configuration are NOT available here. To add missing modules, add the
+# include() declarations below. To add missing variables, change the command
+# execution in nuttx_generate_headers.cmake to add -D flags.
+
+set(CMAKE_MODULE_PATH "${NUTTX_DIR}/cmake")
+include(nuttx_kconfig)
+
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config)
   return()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config.prev)
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/.config
-            ${CMAKE_BINARY_DIR}/.config.prev
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-endif()
-
-execute_process(
-  COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_BINARY_DIR}/.config
-          ${CMAKE_BINARY_DIR}/.config.prev
-  RESULT_VARIABLE COMPARE_RESULT
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-
 set(CONFIG_H ${CMAKE_BINARY_DIR}/include/nuttx/config.h)
-if(COMPARE_RESULT EQUAL 0 AND EXISTS ${CONFIG_H})
-  return()
-endif()
 
 set(BASE_DEFCONFIG "${NUTTX_BOARD}/${NUTTX_CONFIG}")
 execute_process(
