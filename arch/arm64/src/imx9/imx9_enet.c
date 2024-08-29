@@ -64,6 +64,7 @@
 #include "imx9_iomuxc.h"
 #include "hardware/imx9_ccm.h"
 #include "hardware/imx9_pinmux.h"
+#include "hardware/imx9_blk_ctrl.h"
 
 #ifdef CONFIG_IMX9_ENET
 
@@ -423,7 +424,7 @@ static inline uint32_t imx9_enet_getreg32(struct imx9_driver_s *priv,
 }
 
 /****************************************************************************
- * Name: imx9_enet_putreg32
+ * Name: imx9_enet_modifyreg32
  *
  * Description:
  *   Atomically modify the specified bits in a memory mapped register
@@ -3091,6 +3092,14 @@ int imx9_netinitialize(int intf)
   /* Enet ref clock to 25 MHz */
 
   imx9_ccm_configure_root_clock(CCM_CR_ENETREFPHY, SYS_PLL1PFD0DIV2, 20);
+
+  /* Enet TX / ref clock direction */
+
+#ifdef CONFIG_IMX9_ENET1_TX_CLOCK_IS_INPUT
+  modifyreg32(IMX9_WAKUPMIX_ENET_CLK_SEL, WAKEUPMIX_ENET1_TX_CLK_SEL, 0);
+#else
+  modifyreg32(IMX9_WAKUPMIX_ENET_CLK_SEL, 0, WAKEUPMIX_ENET1_TX_CLK_SEL);
+#endif
 
   /* Enable the ENET clock */
 

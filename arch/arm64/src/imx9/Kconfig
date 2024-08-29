@@ -959,6 +959,16 @@ config IMX9_ENET1_RGMII
 
 endchoice
 
+config IMX9_ENET1_TX_CLOCK_IS_INPUT
+	bool "ENET1 TX clock is input"
+	default y if IMX9_ENET1_RMII
+	default n if IMX9_ENET1_RGMII
+	---help---
+		The ethernet TX clock can be either driven by the PHY, in
+		which case it is input to the MAC. Or it can be driven by
+		the MAC, in which case it is output. Typical configuration is
+		input for RMII and output for RGMII.
+
 config IMX9_ENET1_PHY_AUTONEG
 	bool "ENET1 PHY autonegotiation enable"
 	default y
