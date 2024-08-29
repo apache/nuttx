@@ -199,15 +199,15 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
   if (cpu_no == 0)
     {
       regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
-      regval &= ~DPORT_PRO_CMMU_SRAM_PAGE_MODE;
-      regval |= mask_s;
+      regval &= ~DPORT_PRO_CMMU_SRAM_PAGE_MODE_M;
+      regval |= mask_s << DPORT_PRO_CMMU_SRAM_PAGE_MODE_S;
       putreg32(regval, DPORT_PRO_CACHE_CTRL1_REG);
     }
   else
     {
       regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
-      regval &= ~DPORT_APP_CMMU_SRAM_PAGE_MODE;
-      regval |= mask_s;
+      regval &= ~DPORT_APP_CMMU_SRAM_PAGE_MODE_M;
+      regval |= mask_s << DPORT_APP_CMMU_SRAM_PAGE_MODE_S;
       putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
     }
 
