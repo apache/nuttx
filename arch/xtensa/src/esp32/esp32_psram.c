@@ -605,8 +605,6 @@ static void IRAM_ATTR
    * 0 -->32k, (accord with the settings in cache_sram_mmu_set)
    */
 
-  /* get into unknown exception if not comment */
-
   regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
   regval &= ~(DPORT_PRO_CMMU_SRAM_PAGE_MODE <<
               DPORT_PRO_CMMU_SRAM_PAGE_MODE_S);
