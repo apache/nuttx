@@ -38,6 +38,18 @@
 
 #define RPMSG_VIRTIO_NOTIFY_ALL UINT32_MAX
 
+#define RPMSG_VIRTIO_CMD_PANIC  0x1
+#define RPMSG_VIRTIO_CMD_MASK   0xffff
+#define RPMSG_VIRTIO_CMD_SHIFT  16
+
+#define RPMSG_VIRTIO_CMD(c,v)   (((c) << RPMSG_VIRTIO_CMD_SHIFT) | \
+                                 ((v) & RPMSG_VIRTIO_CMD_MASK))
+#define RPMSG_VIRTIO_GET_CMD(c) ((c) >> RPMSG_VIRTIO_CMD_SHIFT)
+
+#define RPMSG_VIRTIO_RSC2CMD(r) \
+  ((FAR struct rpmsg_virtio_cmd_s *) \
+  &((FAR struct resource_table *)(r))->reserved[0])
+
 /* Access macros ************************************************************/
 
 /****************************************************************************
@@ -151,6 +163,12 @@
 
 typedef CODE int (*rpmsg_virtio_callback_t)(FAR void *arg, uint32_t vqid);
 
+begin_packed_struct struct rpmsg_virtio_cmd_s
+{
+  uint32_t cmd_master;
+  uint32_t cmd_slave;
+} end_packed_struct;
+
 struct aligned_data(8) rpmsg_virtio_rsc_s
 {
   struct resource_table    rsc_tbl_hdr;
@@ -160,8 +178,6 @@ struct aligned_data(8) rpmsg_virtio_rsc_s
   struct fw_rsc_vdev_vring rpmsg_vring0;
   struct fw_rsc_vdev_vring rpmsg_vring1;
   struct fw_rsc_config     config;
-  uint32_t                 cmd_master;
-  uint32_t                 cmd_slave;
 };
 
 struct rpmsg_virtio_s;
