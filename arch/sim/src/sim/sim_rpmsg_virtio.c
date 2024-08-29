@@ -88,6 +88,7 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
   struct sim_rpmsg_virtio_dev_s *priv =
     container_of(dev, struct sim_rpmsg_virtio_dev_s, dev);
   struct rpmsg_virtio_rsc_s *rsc;
+  struct rpmsg_virtio_cmd_s *cmd;
 
   priv->shmem = host_allocshmem(priv->shmemname, sizeof(*priv->shmem));
   if (!priv->shmem)
@@ -96,6 +97,7 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
     }
 
   rsc = &priv->shmem->rsc;
+  cmd = RPMSG_VIRTIO_RSC2CMD(rsc);
 
   if (priv->master)
     {
@@ -113,8 +115,7 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
       rsc->rpmsg_vring1.num         = 8;
       rsc->config.r2h_buf_size      = 2048;
       rsc->config.h2r_buf_size      = 2048;
-      rsc->cmd_master               = 0;
-      rsc->cmd_slave                = 0;
+      cmd->cmd_slave                = 0;
 
       priv->shmem->base = (uintptr_t)priv->shmem;
     }
@@ -127,6 +128,7 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_s *dev)
           usleep(1000);
         }
 
+      cmd->cmd_master       = 0;
       priv->addrenv[0].va   = (uintptr_t)priv->shmem;
       priv->addrenv[0].pa   = priv->shmem->base;
       priv->addrenv[0].size = sizeof(*priv->shmem);
