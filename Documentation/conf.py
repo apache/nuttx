@@ -53,7 +53,7 @@ version = release = "latest"
 # ones.
 extensions = [
     "sphinx_rtd_theme",
-    "m2r2",
+    "myst_parser",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
