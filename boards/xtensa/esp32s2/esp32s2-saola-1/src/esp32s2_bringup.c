@@ -167,7 +167,7 @@ int esp32s2_bringup(void)
     }
 #endif /* CONFIG_ESP32S2_LEDC */
 
-#ifdef CONFIG_ESP32S2_SPIFLASH
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
   ret = board_spiflash_init();
   if (ret)
     {

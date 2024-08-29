@@ -74,18 +74,6 @@ CHIP_CSRCS += esp32s2_spi_slave.c
 endif
 endif
 
-#ifeq ($(CONFIG_ESP32S2_SPIFLASH),y)
-#CHIP_CSRCS += esp32s2_spicache.c
-#CHIP_CSRCS += esp32s2_spiflash.c
-#endif
-
-ifeq ($(CONFIG_ESP32S2_SPIFLASH),y)
-CHIP_CSRCS += esp32s2_spiflash.c
-ifeq ($(CONFIG_ESP32S2_MTD),y)
-CHIP_CSRCS += esp32s2_spiflash_mtd.c
-endif
-endif
-
 ifeq ($(CONFIG_ESP32S2_PARTITION_TABLE),y)
 CHIP_CSRCS += esp32_partition.c
 endif
@@ -151,7 +139,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 51770f0c97201401b535d833a30c5c0cb7df4edd
+	ESP_HAL_3RDPARTY_VERSION = 3986249ef8f567bf542bc35ab283ef488f9fd8e2
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
