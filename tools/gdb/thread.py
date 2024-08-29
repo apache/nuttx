@@ -161,7 +161,7 @@ class Nxinfothreads(gdb.Command):
     """Display information of all threads"""
 
     def __init__(self):
-        super(Nxinfothreads, self).__init__("info threads", gdb.COMMAND_USER)
+        super(Nxinfothreads, self).__init__("info nxthreads", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         npidhash = gdb.parse_and_eval("g_npidhash")
@@ -252,7 +252,7 @@ class Nxthread(gdb.Command):
     """Switch to a specified thread"""
 
     def __init__(self):
-        super(Nxthread, self).__init__("thread", gdb.COMMAND_USER)
+        super(Nxthread, self).__init__("nxthread", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         npidhash = gdb.parse_and_eval("g_npidhash")
@@ -551,17 +551,20 @@ class Ps(gdb.Command):
 def register_commands():
     SetRegs()
     Ps()
+    Nxinfothreads()
+    Nxthread()
+    Nxcontinue()
+    Nxstep()
 
-    # Disable thread commands for core dump and gdb-stub.
-    # In which case the recognized threads count is less or equal to the number of cpus
+    # Use custom command for thread if current target does not support it.
+    # The recognized threads count is less than or equal to the number of CPUs in this case.
+    # For coredump and gdb-stub, use native thread commands.
     ncpus = utils.get_symbol_value("CONFIG_SMP_NCPUS") or 1
     nthreads = len(gdb.selected_inferior().threads())
     if nthreads <= ncpus:
-        SetRegs()
-        Nxinfothreads()
-        Nxthread()
-        Nxcontinue()
-        Nxstep()
+        # Native threads command is not available, override the threads command
+        gdb.execute("define info threads\n info nxthreads \n end\n")
+        gdb.execute("define thread\n nxthread \n end\n")
 
         # We can't use a user command to rename continue it will recursion
         gdb.execute("define c\n nxcontinue \n end\n")
