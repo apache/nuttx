@@ -190,6 +190,16 @@
 #  define PSRAM_SPICLKEN      DPORT_SPI01_CLK_EN
 #endif
 
+/* Let's to assume SPIFLASH SPEED == SPIRAM SPEED for now */
+
+#if defined(CONFIG_ESP32_SPIRAM_SPEED_40M)
+#  define PSRAM_CS_HOLD_TIME 0
+#elif defined(CONFIG_ESP32_SPIRAM_SPEED_80M)
+#  define PSRAM_CS_HOLD_TIME 1
+#else
+#  error "FLASH speed can only be equal to or higher than SRAM speed while SRAM is enabled!"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1260,8 +1270,8 @@ void psram_set_cs_timing(psram_spi_num_t spi_num, psram_clk_mode_t clk_mode)
 
       /* Set cs time. */
 
-      SET_PERI_REG_BITS(SPI_CTRL2_REG(spi_num), SPI_HOLD_TIME_V, 1,
-                        SPI_HOLD_TIME_S);
+      SET_PERI_REG_BITS(SPI_CTRL2_REG(spi_num), SPI_HOLD_TIME_V,
+                        PSRAM_CS_HOLD_TIME, SPI_HOLD_TIME_S);
       SET_PERI_REG_BITS(SPI_CTRL2_REG(spi_num), SPI_SETUP_TIME_V, 0,
                         SPI_SETUP_TIME_S);
     }
