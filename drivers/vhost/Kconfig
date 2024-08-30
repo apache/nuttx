@@ -33,6 +33,23 @@ config DRIVERS_VHOST_I2C
 		one NuttX instance export an I2C bus to a remote VirtIO I2C frontend,
 		the native-VirtIO counterpart of the RPMSG I2C server.
 
+config DRIVERS_VHOST_BLK
+	bool "Virtual Host Blk Device Support"
+	default n
+	select DRIVERS_VHOST
+
+if DRIVERS_VHOST_BLK
+
+config DRIVERS_VHOST_BLK_PRIORITY
+	int "vhost blk thread priority"
+	default 224
+
+config DRIVERS_VHOST_BLK_STACKSIZE
+	int "vhost blk stack size"
+	default 4096
+
+endif # DRIVERS_VHOST_BLK
+
 config DRIVERS_VHOST_RNG
 	bool "Virtual Host Rng Device Support"
 	default n
