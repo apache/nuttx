@@ -160,6 +160,6 @@ endfunction()
 function(nuttx_setconfig)
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} setconfig ${ARGN}
-    WORKING_DIRECTORY ${NUTTX_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     OUTPUT_QUIET ERROR_QUIET)
 endfunction()
