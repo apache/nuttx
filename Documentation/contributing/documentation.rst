@@ -31,6 +31,7 @@ go into ``Documentation`` directory. Then,
 
     .. code-block:: console
 
+      $ cd Documentation/
       $ make html
 
     The resulting HTMLs will end up under ``_build/html``. You can open your browser at the root with:
