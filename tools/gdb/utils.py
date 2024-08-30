@@ -21,7 +21,8 @@
 ############################################################################
 
 import re
-from typing import List
+import shlex
+from typing import List, Tuple, Union
 
 import gdb
 from macros import fetch_macro_info, try_expand
@@ -31,13 +32,19 @@ g_type_cache = {}
 g_macro_ctx = None
 
 
-def backtrace(addresses: List[gdb.Value]) -> List[str]:
+def backtrace(addresses: List[Union[gdb.Value, int]]) -> List[Tuple[int, str, str]]:
     """Convert addresses to backtrace"""
     backtrace = []
 
     for addr in addresses:
         if not addr:
             break
+
+        if type(addr) is int:
+            addr = gdb.Value(addr)
+
+        if addr.type.code is not gdb.TYPE_CODE_PTR:
+            addr = addr.cast(gdb.lookup_type("void").pointer())
 
         func = addr.format_string(symbols=True, address=False)
         sym = gdb.find_pc_line(int(addr))
@@ -292,6 +299,47 @@ class Hexdump(gdb.Command):
 
 
 Hexdump()
+
+
+class Addr2Line(gdb.Command):
+    """Convert addresses or expressions
+
+    Usage: addr2line address1 address2 expression1
+    Example: addr2line 0x1234 0x5678
+             addr2line "0x1234 + pointer->abc" &var var->field function_name var
+             addr2line $pc $r1 "$r2 + var"
+             addr2line [24/08/29 20:51:02] [CPU1] [209] [ap] sched_dumpstack: backtrace| 0: 0x402cd484 0x4028357e
+    """
+
+    def __init__(self):
+        super(Addr2Line, self).__init__("addr2line", gdb.COMMAND_USER)
+
+    def invoke(self, args, from_tty):
+        if not args:
+            gdb.write(Addr2Line.__doc__ + "\n")
+            return
+
+        addresses = []
+        for arg in shlex.split(args):
+            if is_decimal(arg):
+                addresses.append(int(arg))
+            elif is_hexadecimal(arg):
+                addresses.append(int(arg, 16))
+            else:
+                try:
+                    var = gdb.parse_and_eval(f"{arg}")
+                    addresses.append(var)
+                except gdb.error as e:
+                    gdb.write(f"Ignore {arg}: {e}\n")
+
+        backtraces = backtrace(addresses)
+        formatter = "{:<20} {:<32} {}\n"
+        gdb.write(formatter.format("Address", "Symbol", "Source"))
+        for addr, func, source in backtraces:
+            gdb.write(formatter.format(hex(addr), func, source))
+
+
+Addr2Line()
 
 
 def nitems(array):
