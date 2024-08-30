@@ -1764,7 +1764,7 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                 case USB_DESC_TYPE_CONFIG:
                   {
                     ret = usbclass_mkcfgdesc(ctrlreq->buf,
-                                             dev->speed, ctrl->req);
+                                             dev->speed, ctrl->value[1]);
                   }
                   break;
 
