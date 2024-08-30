@@ -12,3 +12,4 @@
 /arm/stm32/stm3220g-eval,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
 /arm/stm32/stm3240g-eval,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+-stm3240g-eval:knxwm
