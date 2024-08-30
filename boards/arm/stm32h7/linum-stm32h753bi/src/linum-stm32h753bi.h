@@ -38,12 +38,12 @@
 
 /* LED of board */
 
-#define GPIO_LD1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTG | GPIO_PIN2)
-#define GPIO_LD2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTG | GPIO_PIN3)
-#define GPIO_LD3       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                        GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN2)
+#define GPIO_LD1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN2)
+#define GPIO_LD2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN3)
+#define GPIO_LD3       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz | \
+                        GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN2)
 
 #define GPIO_LED_RED     GPIO_LD1
 #define GPIO_LED_GREEN   GPIO_LD2
@@ -92,9 +92,9 @@
 #  undef HAVE_SDIO
 #endif
 
-#define GPIO_SDIO_NCD     (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTG | GPIO_PIN7) /* PG7 */
-#define GPIO_SD1_PWR_EN_N (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
-                           GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN7)                     /* PD7 */
+#define GPIO_SDIO_NCD     (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTG|GPIO_PIN7) /* PG7 */
+#define GPIO_SD1_PWR_EN_N (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                           GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN7)                 /* PD7 */
 
 #define SDIO_SLOTNO        0
 #define SDIO_MINOR         0
@@ -108,8 +108,8 @@
  * PI4  Reset PHY pin
  */
 
-#define GPIO_ETH_RESET    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_100MHz |\
-                           GPIO_OUTPUT_CLEAR | GPIO_PORTI | GPIO_PIN4)  /* PI4 */
+#define GPIO_ETH_RESET    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_100MHz|\
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTI|GPIO_PIN4)       /* PI4 */
 
 /* Quadrature Encoder
  *
@@ -210,6 +210,19 @@ int stm32_at24_init(char *path);
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
 #endif
+
+/****************************************************************************
+ * Name: stm32_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32H7_SPI
+void stm32_spidev_initialize(void);
+#endif
+
 /****************************************************************************
  * Name: stm32_n25qxxx_setup
  *
@@ -231,5 +244,23 @@ int stm32_w25qxxx_setup(void);
  ****************************************************************************/
 
 int board_qencoder_initialize(int devno, int timerno);
+
+/****************************************************************************
+ * Name: stm32_mfrc522initialize
+ *
+ * Description:
+ *   Initialize and register the MFRC522 RFID driver.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the driver to register. E.g., "/dev/rfid0"
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CL_MFRC522
+int stm32_mfrc522initialize(const char *devpath);
+#endif
 
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */
