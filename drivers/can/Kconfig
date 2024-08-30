@@ -33,6 +33,14 @@ config CAN_ERRORS
 		bit will be set in the CAN message and the following message payload
 		will include a more detailed description of certain errors.
 
+config CAN_TIMESTAMP
+	bool "CAN timestamp reporting"
+	default n
+	---help---
+		Support CAN timestamp reporting. if this option is selected then
+		CAN timestamp reporting is enabled. in the CAN message the ch_ts
+		member variable will record the timestamp of each frame.
+
 config CAN_FD
 	bool "CAN FD"
 	default n
