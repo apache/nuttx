@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -60,6 +60,10 @@ endif
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
+endif
+
+ifeq ($(CONFIG_CL_MFRC522),y)
+  CSRCS += stm32_mfrc522.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
