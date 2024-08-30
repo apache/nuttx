@@ -50,6 +50,8 @@ def register_commands(event):
         gdb.execute(f"source {py_file}")
         gdb.write(f"source {py_file}\n")
 
+    utils = __import__("utils")
+    utils.check_version()
     gdb.execute('handle SIGUSR1 "nostop" "pass" "noprint"')
     gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')
 

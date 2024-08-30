@@ -149,6 +149,20 @@ def gdb_eval_or_none(expresssion):
         return None
 
 
+def suppress_cli_notifications(suppress):
+
+    try:
+        suppressed = "is on" in gdb.execute(
+            "show suppress-cli-notifications", to_string=True
+        )
+        if suppress != suppressed:
+            gdb.execute(f"set suppress-cli-notifications {'on' if suppress else 'off'}")
+
+        return suppressed
+    except gdb.error:
+        return True
+
+
 def get_symbol_value(name, locspec="nx_start", cacheable=True):
     """Return the value of a symbol value etc: Variable, Marco"""
     global g_symbol_cache
@@ -181,17 +195,7 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
         )
         g_symbol_cache = {}
 
-    try:
-        suppressed = "is on" in gdb.execute(
-            "show suppress-cli-notifications", to_string=True
-        )
-    except gdb.error:
-        # Treat as suppressed if the command is not available
-        suppressed = True
-
-    if not suppressed:
-        # Disable notifications
-        gdb.execute("set suppress-cli-notifications on")
+    state = suppress_cli_notifications(True)
 
     # Switch to inferior 2 and set the scope firstly
     gdb.execute("inferior 2", to_string=True)
@@ -215,9 +219,7 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
 
     # Switch back to inferior 1
     gdb.execute("inferior 1", to_string=True)
-
-    if not suppressed:
-        gdb.execute("set suppress-cli-notifications off")
+    suppress_cli_notifications(state)
     return value
 
 
@@ -633,3 +635,32 @@ def get_task_name(tcb):
         return name.string()
     except gdb.error:
         return ""
+
+
+def check_version():
+    """Check the elf and memory version"""
+    if len(gdb.inferiors()) == 1:
+        gdb.execute(
+            f"add-inferior -exec {gdb.objfiles()[0].filename} -no-connection",
+            to_string=True,
+        )
+
+    state = suppress_cli_notifications(True)
+    gdb.execute("inferior 1", to_string=True)
+    try:
+        mem_version = gdb.execute("p g_version", to_string=True).split("=")[1]
+    except gdb.error:
+        gdb.write("No symbol g_version found in memory, skipping version check\n")
+        suppress_cli_notifications(state)
+        return
+
+    gdb.execute("inferior 2", to_string=True)
+    elf_version = gdb.execute("p g_version", to_string=True).split("=")[1]
+    if mem_version != elf_version:
+        gdb.write(f"\x1b[31;1mMemory version:{mem_version}")
+        gdb.write(f"ELF version:   {elf_version}")
+        gdb.write("Warning version not matched, please check!\x1b[m\n")
+    else:
+        gdb.write(f"Build version: {mem_version}\n")
+
+    suppress_cli_notifications(state)
