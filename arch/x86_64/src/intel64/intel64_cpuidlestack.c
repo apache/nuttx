@@ -88,7 +88,8 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 
   /* Get the top of the stack */
 
-  stack_alloc          = (uintptr_t)g_idle_topstack[cpu];
+  stack_alloc          = (uintptr_t)g_idle_topstack[cpu] -
+                         CONFIG_IDLETHREAD_STACKSIZE;
   tcb->adj_stack_size  = stack_size - 8;
   tcb->stack_alloc_ptr = (void *)stack_alloc;
   tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
