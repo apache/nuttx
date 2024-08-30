@@ -787,3 +787,29 @@ To test the sdram use the command **ramtest**::
     RAMTest: Pattern test: c0000000 8388608 66666666 99999999
     RAMTest: Pattern test: c0000000 8388608 33333333 cccccccc
     RAMTest: Address-in-address test: c0000000 8388608
+
+mfrc522
+--------
+
+Configures the board to use the SPI4 and enables RFID driver with MFRC522::
+
+    nsh> ls /dev/
+    /dev:
+    console
+    null
+    rfid0
+    rtc0
+    ttyS0
+    nsh> rfid_readuid
+    Trying to READ: Card is not present!
+    Trying to READ: Card is not present!
+    Trying to READ: RFID CARD UID = 0x3DB3F169
+
+  ======== =====
+  MFRC522  PINS
+  ======== =====
+  SCK      PE2
+  MISO     PE5
+  MOSI     PE6
+  CS       PE4
+  ======== =====
