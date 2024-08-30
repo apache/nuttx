@@ -69,6 +69,13 @@
 #endif
 
 /****************************************************************************
+ * ROM Function Prototypes
+ ****************************************************************************/
+
+extern void cache_flush(int cpu);
+extern void cache_read_enable(int cpu);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -238,6 +245,8 @@ void IRAM_ATTR esp_spiram_init_cache(void)
   /* Flush and enable icache for APP CPU */
 
 #ifdef CONFIG_SMP
+  cache_flush(APP_CPU_NUM);
+  cache_read_enable(APP_CPU_NUM);
   regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
   regval &= ~(1 << DPORT_APP_CACHE_MASK_DRAM1);
   putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
