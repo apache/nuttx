@@ -218,6 +218,10 @@ void igmp_grpfree(FAR struct net_driver_s *dev,
 
   wd_cancel(&group->wdog);
 
+  /* Cancel the workqueue */
+
+  work_cancel_sync(LPWORK, &group->work);
+
   /* Remove the group structure from the group list in the device structure */
 
   sq_rem((FAR sq_entry_t *)group, &dev->d_igmp_grplist);
