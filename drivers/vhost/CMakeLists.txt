@@ -25,6 +25,10 @@ if(CONFIG_DRIVERS_VHOST)
   list(APPEND SRCS vhost.c)
 endif()
 
+if(CONFIG_DRIVERS_VHOST_BLK)
+  list(APPEND SRCS vhost-blk.c)
+endif()
+
 if(CONFIG_DRIVERS_VHOST_RNG)
   list(APPEND SRCS vhost-rng.c)
 endif()

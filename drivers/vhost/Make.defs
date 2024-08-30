@@ -26,6 +26,10 @@ ifeq ($(CONFIG_DRIVERS_VHOST),y)
   CSRCS += vhost.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VHOST_BLK),y)
+  CSRCS += vhost-blk.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_VHOST_RNG),y)
   CSRCS += vhost-rng.c
 endif
