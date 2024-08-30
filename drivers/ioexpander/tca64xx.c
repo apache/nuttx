@@ -233,7 +233,7 @@ static uint8_t tca64_output_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
 static uint8_t tca64_polarity_reg(FAR struct tca64_dev_s *priv, uint8_t pin)
 {
   FAR const struct tca64_part_s *part = tca64_getpart(priv);
-  uint8_t reg = part->tp_output;
+  uint8_t reg = part->tp_polarity;
 
   DEBUGASSERT(pin <= part->tp_ngpios);
   return reg + (pin >> 3);
