@@ -35,6 +35,7 @@
 #  include "vhost-net.h"
 #endif
 
+#include "vhost-blk.h"
 #include "vhost-can.h"
 #include "vhost-i2c.h"
 #include "vhost-rng.h"
@@ -518,6 +519,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_net_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_BLK
+  ret = vhost_register_blk_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_blk_driver failed, ret=%d\n", ret);
     }
 #endif
 

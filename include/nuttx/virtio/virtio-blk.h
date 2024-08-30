@@ -25,7 +25,10 @@
  * Included Files
  ****************************************************************************/
 
+#include <limits.h>
 #include <stdint.h>
+
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -56,6 +59,8 @@
 
 #define VIRTIO_BLK_SECTOR_BITS      9
 #define VIRTIO_BLK_SECTOR_SIZE      (1UL << VIRTIO_BLK_SECTOR_BITS)
+
+#define VIRTIO_BLK_PATH_SIZE        PATH_MAX
 
 /****************************************************************************
  * Public Type Definitions
@@ -103,6 +108,12 @@ begin_packed_struct struct virtio_blk_config_s
   uint32_t max_secure_erase_sectors;
   uint32_t max_secure_erase_seg;
   uint32_t secure_erase_sector_alignment;
+} end_packed_struct;
+
+begin_packed_struct struct vhost_blk_config_s
+{
+  struct virtio_blk_config_s config;
+  char path[VIRTIO_BLK_PATH_SIZE];
 } end_packed_struct;
 
 /****************************************************************************
