@@ -392,6 +392,10 @@ ap_start:
 	add     %rax, %rbx
 	mov     (%rbx),   %rsp
 
+	/* Move initial RSP below IDLE TCB regs */
+	sub     $XCPTCONTEXT_SIZE, %rsp
+	and     $(~XCPTCONTEXT_SIZE), %rsp
+
 	/* Jump to ap_start routine */
 	movabs  $x86_64_ap_boot,   %rbx
 	jmp     *%rbx
