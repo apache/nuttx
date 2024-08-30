@@ -630,7 +630,11 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
 {
   if (GIC_IS_SPI(irq))
     {
-      arm_gic_write_irouter(cpuset, irq);
+      /* Only support interrupt routing mode 0,
+       * so routing to the first cpu in cpuset.
+       */
+
+      arm_gic_write_irouter(ffs(cpuset) - 1, irq);
     }
 }
 
