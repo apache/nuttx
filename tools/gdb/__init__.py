@@ -34,13 +34,27 @@ sys.path.insert(1, python_dir)
 py_files = glob.glob(f"{python_dir}/*.py")
 py_files.remove(os.path.abspath(__file__))
 
-gdb.execute("set pagination off")
-gdb.write("set pagination off\n")
-gdb.execute("set python print-stack full")
-gdb.write("set python print-stack full\n")
-for py_file in py_files:
-    gdb.execute(f"source {py_file}")
-    gdb.write(f"source {py_file}\n")
 
-gdb.execute('handle SIGUSR1 "nostop" "pass" "noprint"')
-gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')
+def register_commands(event):
+    if getattr(register_commands, "registered", False):
+        return
+
+    register_commands.registered = True
+
+    gdb.write("Registering NuttX GDB commands...\n")
+    gdb.execute("set pagination off")
+    gdb.write("set pagination off\n")
+    gdb.execute("set python print-stack full")
+    gdb.write("set python print-stack full\n")
+    for py_file in py_files:
+        gdb.execute(f"source {py_file}")
+        gdb.write(f"source {py_file}\n")
+
+    gdb.execute('handle SIGUSR1 "nostop" "pass" "noprint"')
+    gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')
+
+
+if len(gdb.objfiles()) == 0:
+    gdb.events.new_objfile.connect(register_commands)
+else:
+    register_commands(None)
