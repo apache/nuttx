@@ -18,18 +18,19 @@
 #
 ############################################################################
 
-import socket
-
 import gdb
 import utils
 from lists import dq_for_every, sq_for_every
 
+socket = utils.import_check(
+    "socket", errmsg="No socket module found, please try gdb-multiarch instead."
+)
+
 NET_IPv4 = utils.get_symbol_value("CONFIG_NET_IPv4")
 NET_IPv6 = utils.get_symbol_value("CONFIG_NET_IPv6")
 
-# NuttX's AF_INET and AF_INET6 have same value as Linux's
-AF_INET = socket.AF_INET
-AF_INET6 = socket.AF_INET6
+AF_INET = utils.get_symbol_value("AF_INET")
+AF_INET6 = utils.get_symbol_value("AF_INET6")
 
 
 def ntohs(val):
@@ -247,5 +248,5 @@ class NetStats(gdb.Command):
             gdb.write("\n")
 
 
-if utils.get_symbol_value("CONFIG_NET"):
+if utils.get_symbol_value("CONFIG_NET") and socket:
     NetStats()
