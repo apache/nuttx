@@ -242,7 +242,7 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
 # Download the latest RISCV GCC toolchain prebuilt by xPack
 RUN mkdir -p riscv-none-elf-gcc && \
   curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz" \
-  | tar -C riscv-none-elf-gcc --strip-components=1 -xz
+  | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
 # Build image for tool required by SPARC builds
@@ -411,6 +411,7 @@ WORKDIR /tools
 # Pull in the tools we just built for nuttx
 COPY --from=nuttx-tools /tools/bloaty/ bloaty/
 ENV PATH="/tools/bloaty/bin:$PATH"
+
 COPY --from=nuttx-tools /tools/kconfig-frontends/ kconfig-frontends/
 ENV PATH="/tools/kconfig-frontends/bin:$PATH"
 
@@ -524,6 +525,7 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-g++
+
 ENV PATH="/tools/ccache/bin:$PATH"
 
 CMD [ "/bin/bash" ]
