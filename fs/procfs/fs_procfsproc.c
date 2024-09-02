@@ -155,7 +155,7 @@ struct proc_envinfo_s
  * Private Data
  ****************************************************************************/
 
-static FAR const char *g_policy[4] =
+static FAR const char * const g_policy[4] =
 {
   "SCHED_FIFO", "SCHED_RR", "SCHED_SPORADIC"
 };
