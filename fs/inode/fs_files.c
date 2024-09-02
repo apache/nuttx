@@ -71,6 +71,7 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   flags = spin_lock_irqsave(NULL);
 
   filep = &list->fl_files[l1][l2];
+#ifdef CONFIG_FS_REFCOUNT
   if (filep->f_inode != NULL)
     {
       /* When the reference count is zero but the inode has not yet been
@@ -99,6 +100,12 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
       filep->f_refs = 2;
       *new = true;
     }
+#else
+  if (filep->f_inode == NULL && new == NULL)
+    {
+      filep = NULL;
+    }
+#endif
 
   spin_unlock_irqrestore(NULL, flags);
   return filep;
@@ -583,7 +590,9 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               filep->f_pos    = pos;
               filep->f_inode  = inode;
               filep->f_priv   = priv;
+#ifdef CONFIG_FS_REFCOUNT
               filep->f_refs   = 1;
+#endif
 
               goto found;
             }
@@ -799,6 +808,7 @@ int fs_getfilep(int fd, FAR struct file **filep)
  *            file' instance.
  ****************************************************************************/
 
+#ifdef CONFIG_FS_REFCOUNT
 int fs_putfilep(FAR struct file *filep)
 {
   irqstate_t flags;
@@ -825,6 +835,7 @@ int fs_putfilep(FAR struct file *filep)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: nx_dup2_from_tcb
@@ -969,6 +980,8 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
       return -EBADF;
     }
 
+#ifdef CONFIG_FS_REFCOUNT
+
   /* files_fget will increase the reference count, there call fs_putfilep
    * reduce reference count.
    */
@@ -978,6 +991,9 @@ int nx_close_from_tcb(FAR struct tcb_s *tcb, int fd)
   /* Undo the last reference count from file_allocate_from_tcb */
 
   return fs_putfilep(filep);
+#else
+  return file_close(filep);
+#endif
 }
 
 /****************************************************************************
