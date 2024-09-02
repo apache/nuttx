@@ -102,7 +102,7 @@ uint8_t mfs_arrhash(FAR const char *arr, ssize_t len)
       hash %= (1 << 8);
     }
 
-  finfo("Hash calculated for size %ld to be %d.", len, hash % (1 << 8));
+  finfo("Hash calculated for size %zd to be %d.", len, hash % (1 << 8));
 
   return hash % (1 << 8);
 }
@@ -123,7 +123,7 @@ uint16_t mfs_hash(FAR const char *arr, ssize_t len)
       hash %= (1 << MFS_HASHSZ);
     }
 
-  finfo("Hash calculated for size %ld to be %u.", len, hash);
+  finfo("Hash calculated for size %zd to be %" PRIi32, len, hash);
 
   return hash;
 }
