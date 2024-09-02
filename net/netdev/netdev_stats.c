@@ -57,11 +57,11 @@ void netdev_statistics_log(FAR void *arg)
   FAR struct net_driver_s *dev = arg;
   FAR struct netdev_statistics_s *stats = &dev->d_statistics;
 
-  stats_log("%s:T%" PRIu32 "/%" PRIu32 ",R"
+  stats_log("%s:T%" PRIu32 "/%" PRIu32 "(%" PRIu64 "B)" ",R"
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
             "(%" PRIu32 "+%" PRIu32 ")/"
 #endif
-            "%" PRIu32
+            "%" PRIu32 "(%" PRIu64 "B)"
 #ifdef CONFIG_NET_TCP
             " TCP:T%" PRIu16 ",R%" PRIu16 ",D%" PRIu16
 #endif
@@ -75,11 +75,12 @@ void netdev_statistics_log(FAR void *arg)
             " ICMP6:T%" PRIu16 ",R%" PRIu16 ",D%" PRIu16
 #endif
             "\n",
-            dev->d_ifname, stats->tx_done, stats->tx_packets
+            dev->d_ifname,
+            stats->tx_done, stats->tx_packets, stats->tx_bytes
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
             , stats->rx_ipv4, stats->rx_ipv6
 #endif
-            , stats->rx_packets
+            , stats->rx_packets, stats->rx_bytes
 #ifdef CONFIG_NET_TCP
             , g_netstats.tcp.sent, g_netstats.tcp.recv, g_netstats.tcp.drop
 #endif
