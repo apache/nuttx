@@ -193,8 +193,8 @@ static void lru_nodesearch(FAR const struct mfs_sb_s * const sb,
   if (found)
     {
       finfo("Node search ended with match of node %p at depth %u"
-            " for CTZ of %u size with range [%u, %u).", n, n->depth, n->sz,
-            n->range_min, n->range_max);
+            " for CTZ of %" PRIu32 " size with range [%" PRIu32 ", %" PRIi32
+            ").", n, n->depth, n->sz, n->range_min, n->range_max);
     }
   else
     {
@@ -325,9 +325,9 @@ static int lru_nodeflush(FAR struct mfs_sb_s * const sb,
 
   if (rm_node)
     {
-      finfo("Deleting node. Old size: %u.", list_length(&MFS_LRU(sb)));
+      finfo("Deleting node. Old size: %zu.", list_length(&MFS_LRU(sb)));
       list_delete_init(&node->list);
-      finfo("Deleted node. New size: %u.", list_length(&MFS_LRU(sb)));
+      finfo("Deleted node. New size: %zu.", list_length(&MFS_LRU(sb)));
     }
   else
     {
@@ -428,13 +428,13 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
                                         struct mfs_node_s, list);
           list_delete_init(&last_node->list);
           list_add_tail(&MFS_LRU(sb), &node->list);
-          finfo("LRU flushing node complete, now only %u nodes",
+          finfo("LRU flushing node complete, now only %zu nodes",
                 list_length(&MFS_LRU(sb)));
         }
       else
         {
           list_add_tail(&MFS_LRU(sb), &node->list);
-          finfo("Node inserted into LRU, and it now %u node(s).",
+          finfo("Node inserted into LRU, and it now %zu node(s).",
                 list_length(&MFS_LRU(sb)));
         }
     }
@@ -502,10 +502,10 @@ static int lru_wrtooff(FAR struct mfs_sb_s * const sb, const mfs_t data_off,
         }
     }
 
-  finfo("Delta attached to node %p. Now there are %lu nodes and the node has"
-        " %lu deltas. Node with range [%u, %u).", node,
-        list_length(&MFS_LRU(sb)), list_length(&node->delta),
-        node->range_min, node->range_max);
+  finfo("Delta attached to node %p. Now there are %zu nodes and the"
+        " node has %zu deltas. Node with range [%" PRIu32 ", %"
+        PRIu32 ").", node, list_length(&MFS_LRU(sb)),
+        list_length(&node->delta), node->range_min, node->range_max);
 
   return ret;
 
@@ -730,7 +730,7 @@ int mfs_lru_flush(FAR struct mfs_sb_s * const sb)
  * big), the stack depth for this will be 7.
  */
 
-  finfo("Sorting the LRU. No. of nodes: %u.", list_length(&MFS_LRU(sb)));
+  finfo("Sorting the LRU. No. of nodes: %zu", list_length(&MFS_LRU(sb)));
 
   lru_sort(sb, MFS_LRU(sb).next, MFS_LRU(sb).prev);
   MFS_FLUSH(sb) = true;

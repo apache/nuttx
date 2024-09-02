@@ -626,7 +626,6 @@ int mfs_jrnl_wrlog(FAR struct mfs_sb_s * const sb,
 {
   int                    ret      = OK;
   mfs_t                  jrnl_pg;
-  mfs_t                  jrnl_blk;
   FAR char              *buf      = NULL;
   FAR char              *tmp      = NULL;
   const mfs_t            log_sz   = sizeof(mfs_t) + MFS_LOGSZ(node->depth);
@@ -655,7 +654,6 @@ int mfs_jrnl_wrlog(FAR struct mfs_sb_s * const sb,
 
   /* Store */
 
-  jrnl_blk = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).log_cblkidx);
   jrnl_pg  = MFS_JRNL(sb).log_cpg;
 
   /* TODO: It assumes it takes only one page per log. */

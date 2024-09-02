@@ -193,8 +193,8 @@ static void nand_ram_storage_status(void)
       bad = (nand_ram_flash_spare[i].bad != NAND_RAM_BLOCK_GOOD);
 
       NAND_RAM_STATUS_LOG(
-        "Block %3d, Page %6d, Bad: %1d |"
-        " Reads: %6d, Writes: %6d, Erases: %6d\n",
+        "Block %3" PRIi32 ", Page %6" PRIi32 ", Bad: %1" PRIi32 " |"
+        " Reads: %6" PRIi32 ", Writes: %6" PRIi32 ", Erases: %6" PRIi32 "\n",
         i >> NAND_RAM_LOG_PAGES_PER_BLOCK, i, bad,
         reads, writes, erases);
     }
@@ -289,9 +289,9 @@ int nand_ram_eraseblock(FAR struct nand_raw_s *raw, off_t block)
   nand_ram_ins_i++;
 
   NAND_RAM_LOG(
-    "[LOWER %lu | %s] Block %d, Start Page: %d, Last Page: %d",
-    nand_ram_ins_i, "eraseblock", block, start_page, end_page - 1
-  );
+    "[LOWER %" PRIu64 " | %s] Block %" PRIi32 ", Start Page: %" PRIi32
+    ", Last Page: %" PRIi32, nand_ram_ins_i, "eraseblock", block, start_page,
+    end_page - 1);
   nand_ram_status();
 
   /* [start_page, end_page) is cleared (all bits are set) */
@@ -304,7 +304,8 @@ int nand_ram_eraseblock(FAR struct nand_raw_s *raw, off_t block)
       nand_ram_flash_spare[i].free = NAND_RAM_PAGE_FREE;
     }
 
-  NAND_RAM_LOG("[LOWER %lu | %s] Done\n", nand_ram_ins_i, "eraseblock");
+  NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Done\n", nand_ram_ins_i,
+               "eraseblock");
 
   nxmutex_unlock(&nand_ram_dev_mut);
 
@@ -345,14 +346,14 @@ int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
   nxmutex_lock(&nand_ram_dev_mut);
   nand_ram_ins_i++;
 
-  NAND_RAM_LOG("[LOWER %lu | %s] Page %d\n",
+  NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Page %" PRIi32 "\n",
               nand_ram_ins_i, "rawread", read_page);
   nand_ram_status();
 
   if (nand_ram_flash_spare[read_page].bad != NAND_RAM_BLOCK_GOOD)
     {
       ret = -EFAULT;
-      NAND_RAM_LOG("[LOWER %lu | %s] Failed: %s\n",
+      NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Failed: %s\n",
                     nand_ram_ins_i, "rawread", EFAULT_STR);
       goto errout;
     }
@@ -377,7 +378,7 @@ int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
       memcpy(spare, (const void *)read_page_spare, NAND_RAM_SPARE_SIZE);
     }
 
-  NAND_RAM_LOG("[LOWER %lu | %s] Done\n", nand_ram_ins_i, "rawread");
+  NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Done\n", nand_ram_ins_i, "rawread");
 
 errout:
   nxmutex_unlock(&nand_ram_dev_mut);
@@ -421,14 +422,14 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
   nxmutex_lock(&nand_ram_dev_mut);
   nand_ram_ins_i++;
 
-  NAND_RAM_LOG("[LOWER %lu | %s] Page %d\n",
+  NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Page %" PRIi32 "\n",
                 nand_ram_ins_i, "rawwrite", write_page);
   nand_ram_status();
 
   if (nand_ram_flash_spare[write_page].free != NAND_RAM_PAGE_FREE)
     {
       ret = -EACCES;
-      NAND_RAM_LOG("[LOWER %lu | %s] Failed: %s\n",
+      NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Failed: %s\n",
                     nand_ram_ins_i, "rawwrite", EACCES_STR);
       goto errout;
     }
@@ -447,7 +448,8 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
       memcpy((FAR void *)write_page_spare, data, NAND_RAM_SPARE_SIZE);
     }
 
-  NAND_RAM_LOG("[LOWER %lu | %s] Done\n", nand_ram_ins_i, "rawwrite");
+  NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Done\n", nand_ram_ins_i,
+               "rawwrite");
 
 errout:
   nxmutex_unlock(&nand_ram_dev_mut);
