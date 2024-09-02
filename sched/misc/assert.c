@@ -93,7 +93,7 @@
 
 static uintptr_t
 g_last_regs[XCPTCONTEXT_REGS] aligned_data(XCPTCONTEXT_ALIGN);
-static FAR const char *g_policy[4] =
+static FAR const char * const g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
 };
