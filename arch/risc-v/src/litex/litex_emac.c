@@ -551,11 +551,11 @@ static int litex_transmit(struct litex_emac_s *priv)
 
 static void litex_receive(struct litex_emac_s *priv)
 {
+  priv->dev.d_len = getreg16(LITEX_ETHMAC_SRAM_WRITER_LENGTH);
+
   /* Update statistics */
 
   NETDEV_RXPACKETS(&priv->dev);
-
-  priv->dev.d_len = getreg16(LITEX_ETHMAC_SRAM_WRITER_LENGTH);
 
   if (priv->dev.d_len == 0 || priv->dev.d_len > ETHMAC_SLOT_SIZE)
     {

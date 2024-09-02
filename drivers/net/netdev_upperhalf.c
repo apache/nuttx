@@ -606,8 +606,6 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
 
   while ((pkt = lower->ops->receive(lower)) != NULL)
     {
-      NETDEV_RXPACKETS(dev);
-
       if (!IFF_IS_UP(dev->d_flags))
         {
           /* Interface down, drop frame */
@@ -618,6 +616,7 @@ static void netdev_upper_rxpoll_work(FAR struct netdev_upperhalf_s *upper)
         }
 
       netpkt_put(dev, pkt, NETPKT_RX);
+      NETDEV_RXPACKETS(dev);
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */

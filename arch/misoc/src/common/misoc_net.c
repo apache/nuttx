@@ -194,7 +194,7 @@ static int misoc_net_transmit(struct misoc_net_driver_s *priv)
 
   /* Increment statistics */
 
-  NETDEV_TXPACKETS(priv->misoc_net_dev);
+  NETDEV_TXPACKETS(&priv->misoc_net_dev);
 
   /* Send the packet: address=priv->misoc_net_dev.d_buf,
    * length=priv->misoc_net_dev.d_len
@@ -353,6 +353,7 @@ static void misoc_net_receive(struct misoc_net_driver_s *priv)
 
       priv->misoc_net_dev.d_len = rxlen;
 
+      NETDEV_RXPACKETS(&priv->misoc_net_dev);
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */
 
@@ -452,7 +453,7 @@ static void misoc_net_txdone(struct misoc_net_driver_s *priv)
 {
   /* Check for errors and update statistics */
 
-  NETDEV_TXDONE(priv->misoc_net_dev);
+  NETDEV_TXDONE(&priv->misoc_net_dev);
 
   /* Check if there are pending transmissions */
 
@@ -598,7 +599,7 @@ static void misoc_net_txtimeout_work(void *arg)
   /* Increment statistics and dump debug info */
 
   net_lock();
-  NETDEV_TXTIMEOUTS(priv->misoc_net_dev);
+  NETDEV_TXTIMEOUTS(&priv->misoc_net_dev);
 
   /* Then reset the hardware */
 
