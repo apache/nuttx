@@ -32,6 +32,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/list.h>
+#include <nuttx/virtio/virtio-config.h>
 #include <openamp/open_amp.h>
 
 /****************************************************************************
@@ -52,6 +53,12 @@
 #define vhost_get_features      virtio_get_features
 #define vhost_read_config       virtio_read_config
 #define vhost_write_config      virtio_write_config
+
+/* Vhost helper functions */
+
+#define vhost_has_feature         virtio_has_feature
+#define vhost_read_config_member  virtio_read_config_member
+#define vhost_write_config_member virtio_write_config_member
 
 /* Wrapper the struct vhost_device to struct virtio_device */
 
