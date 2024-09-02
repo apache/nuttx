@@ -70,6 +70,10 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
  * Private Data
  ****************************************************************************/
 
+#if defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC)
+static mutex_t g_lowputs_lock = NXMUTEX_INITIALIZER;
+#endif
+
 #if defined(CONFIG_RAMLOG_SYSLOG)
 static const struct syslog_channel_ops_s g_ramlog_channel_ops =
 {
@@ -236,13 +240,11 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
                                     FAR const char *buffer, size_t buflen)
 {
 #if defined(CONFIG_ARCH_LOWPUTC)
-  static mutex_t lock = NXMUTEX_INITIALIZER;
-
-  nxmutex_lock(&lock);
+  nxmutex_lock(&g_lowputs_lock);
 
   up_nputs(buffer, buflen);
 
-  nxmutex_unlock(&lock);
+  nxmutex_unlock(&g_lowputs_lock);
 #endif
 
   UNUSED(channel);
