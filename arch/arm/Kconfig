@@ -441,6 +441,23 @@ config ARCH_CHIP_STM32
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
 
+config ARCH_CHIP_CSK6
+	bool "STMicro STM6 6001A/6011B/6012"
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV8M_HAVE_STACKCHECK
+	select ARCH_HAVE_ADJTIME
+	select ARCH_CORTEXM33
+	---help---
+		LISTEANAI CSK6architectures (ARM Cortex-M33).		
+
 config ARCH_CHIP_STM32F0
 	bool "STMicro STM32 F0"
 	select ARCH_CORTEXM0
@@ -1116,6 +1133,7 @@ config ARCH_CHIP
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 	default "at32"		if ARCH_CHIP_AT32
 	default "cxd32xx"	if ARCH_CHIP_CXD32XX
+	default "csk6"		if ARCH_CHIP_CSK6
 
 config ARM_THUMB
 	bool "Thumb Mode"

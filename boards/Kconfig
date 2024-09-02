@@ -2586,6 +2586,12 @@ config ARCH_BOARD_STM32F4_DISCOVERY
 	---help---
 		STMicro STM32F4-Discovery board based on the STMicro STM32F407VGT6 MCU.
 
+config ARCH_BOARD_CSK6011A_NANO
+	bool "Listenai csk6011a-nano board"
+	depends on ARCH_CHIP_CSK6
+	---help---
+		Listenai csk6011a-nano board based on the listenai csk6011a MCU.
+
 config ARCH_BOARD_STM32F411E_DISCO
 	bool "STMicro STM32F411E-Discovery board"
 	depends on ARCH_CHIP_STM32F411VE
@@ -3534,6 +3540,7 @@ config ARCH_BOARD
 	default "hpm6360evk"                if ARCH_BOARD_HPM6360EVK
 	default "hpm6750evk2"               if ARCH_BOARD_HPM6750EVK2
 	default "at32f437-mini"             if ARCH_BOARD_AT32F437_MINI
+	default "csk6011a-nano"             if ARCH_BOARD_CSK6011A_NANO
 
 comment "Common Board Options"
 
@@ -4525,6 +4532,9 @@ source "boards/risc-v/hpm6750/hpm6750evk2/Kconfig"
 endif
 if ARCH_BOARD_AT32F437_MINI
 source "boards/arm/at32/at32f437-mini/Kconfig"
+endif
+if ARCH_BOARD_CSK6011A_NANO
+source "boards/arm/csk6/csk6011a-nano/Kconfig"
 endif
 
 comment "Board-Common Options"
