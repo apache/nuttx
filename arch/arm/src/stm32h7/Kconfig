@@ -1782,6 +1782,14 @@ config STM32H7_USART_SINGLEWIRE
 		Enable single wire UART support.  The option enables support for the
 		TIOCSSINGLEWIRE ioctl in the STM32H7 serial driver.
 
+config STM32H7_USART_SMARTCARD
+	bool "Smartcard Support"
+	default n
+	depends on STM32H7_USART
+	---help---
+		Enable Smartcard USART support.  The option enables support for the
+		TIOCSSMARTCARD ioctl in the STM32H7 serial driver.
+
 config STM32H7_USART_INVERT
 	bool "Signal Invert Support"
 	default n
