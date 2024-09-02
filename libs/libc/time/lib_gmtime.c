@@ -31,6 +31,12 @@
 #include <nuttx/clock.h>
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static struct tm g_gmtime;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -44,8 +50,7 @@
 
 FAR struct tm *gmtime(FAR const time_t *timep)
 {
-  static struct tm tm;
-  return gmtime_r(timep, &tm);
+  return gmtime_r(timep, &g_gmtime);
 }
 
 FAR struct tm *localtime(FAR const time_t *timep)
