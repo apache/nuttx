@@ -46,6 +46,6 @@ void __gh_fputs_stdout(void)
 {
 }
 
-void exp2(void)
+void __gh_set_errno(int errno)
 {
 }
