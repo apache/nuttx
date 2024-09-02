@@ -140,12 +140,12 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-arm
 # Download the latest ARM clang toolchain prebuilt by ARM
 RUN mkdir -p clang-arm-none-eabi && \
   curl -s -L  "https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/LLVMEmbeddedToolchainForArm-17.0.1-Linux-x86_64.tar.xz" \
-  | tar -C clang-arm-none-eabi --strip-components=1 -xJ
+  | tar -C clang-arm-none-eabi --strip-components 1 -xJ
 
 # Download the latest ARM GCC toolchain prebuilt by ARM
 RUN mkdir -p gcc-arm-none-eabi && \
   curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi.tar.xz" \
-  | tar -C gcc-arm-none-eabi --strip-components=1 -xJ
+  | tar -C gcc-arm-none-eabi --strip-components 1 -xJ
 
 ###############################################################################
 # Build image for tool required by ARM64 builds
@@ -154,7 +154,7 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-arm64
 # Download the latest ARM64 GCC toolchain prebuilt by ARM
 RUN mkdir gcc-aarch64-none-elf && \
   curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/arm-gnu-toolchain-13.2.Rel1-x86_64-aarch64-none-elf.tar.xz" \
-  | tar -C gcc-aarch64-none-elf --strip-components=1 -xJ
+  | tar -C gcc-aarch64-none-elf --strip-components 1 -xJ
 
 ###############################################################################
 # Build image for tool required by AVR32 builds
@@ -251,7 +251,7 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-sparc
 # Download the SPARC GCC toolchain prebuilt by Gaisler
 RUN mkdir -p sparc-gaisler-elf-gcc && \
   curl -s -L "https://www.gaisler.com/anonftp/bcc2/bin/bcc-2.1.0-gcc-linux64.tar.xz" \
-  | tar -C sparc-gaisler-elf-gcc --strip-components=1 -xJ
+  | tar -C sparc-gaisler-elf-gcc --strip-components 1 -xJ
 
 ###############################################################################
 # Build image for tool required by ESP32 builds
@@ -260,15 +260,15 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
 # Download the latest ESP32 GCC toolchain prebuilt by Espressif
 RUN mkdir -p xtensa-esp32-elf-gcc && \
   curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-  | tar -C xtensa-esp32-elf-gcc --strip-components=1 -xJ
+  | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xJ
 
 RUN mkdir -p xtensa-esp32s2-elf-gcc && \
   curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s2-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-  | tar -C xtensa-esp32s2-elf-gcc --strip-components=1 -xJ
+  | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xJ
 
 RUN mkdir -p xtensa-esp32s3-elf-gcc && \
   curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/xtensa-esp32s3-elf-12.2.0_20230208-x86_64-linux-gnu.tar.xz" \
-  | tar -C xtensa-esp32s3-elf-gcc --strip-components=1 -xJ
+  | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xJ
 
 RUN echo "ESP Binaries: 2022/01/26"
 RUN mkdir -p /tools/blobs && cd /tools/blobs \
@@ -288,7 +288,7 @@ FROM nuttx-toolchain-base AS nuttx-toolchain-wasm
 # Download the latest WASI-enabled WebAssembly C/C++ toolchain prebuilt by WASM
 RUN mkdir -p wasi-sdk && \
   curl -s -L  "https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-19/wasi-sdk-19.0-linux.tar.gz" \
-  | tar -C wasi-sdk --strip-components=1 -xz
+  | tar -C wasi-sdk --strip-components 1 -xz
 
 # Download the latest "wamrc" AOT compiler prebuilt by WAMR
 RUN mkdir -p wamrc && \
