@@ -282,7 +282,6 @@ static int is_blk_writeable(FAR struct mfs_sb_s * const sb, const mfs_t blk)
 int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
 {
   int     ret  = OK;
-  uint8_t log;
 
   /* We need at least 5 blocks, as one is occupied by superblock, at least
    * one for the journal, 2 for journal's master blocks, and at least one for
@@ -305,8 +304,6 @@ int mfs_ba_fmt(FAR struct mfs_sb_s * const sb)
     }
 
   MFS_BA(sb).c_pg = MFS_BLK2PG(sb, MFS_BA(sb).s_blk);
-
-  log = ceil(log2(MFS_NBLKS(sb)));
 
   /* MFS_BA(sb).k_del_elemsz = ((log + 7) & (-8)) / 8; */
 

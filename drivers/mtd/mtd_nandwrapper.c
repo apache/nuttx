@@ -107,7 +107,7 @@ static mutex_t  nand_wrapper_dev_mut;
  ****************************************************************************/
 
 int nand_wrapper_erase(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks)
+                       size_t nblocks)
 {
   int ret;
   FAR struct nand_wrapper_dev_s *nand_dev;
@@ -116,20 +116,21 @@ int nand_wrapper_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   nxmutex_lock(&nand_wrapper_dev_mut);
   nand_wrapper_ins_i++;
-  NAND_WRAPPER_LOG("[UPPER %lu | %s] Startblock: %d, N Blocks: %ld\n",
-                    nand_wrapper_ins_i, "erase", startblock, nblocks);
+  NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Startblock: %" PRIi32
+                   ", N Blocks: %zu\n", nand_wrapper_ins_i, "erase",
+                   startblock, nblocks);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.erase);
 
   ret = nand_dev->under.mtd.erase(dev, startblock, nblocks);
 
   if (ret >= 0)
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Done\n",
                         nand_wrapper_ins_i, "erase");
     }
   else
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Failed: %d!\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Failed: %" PRIi32 "!\n",
                         nand_wrapper_ins_i, "erase", ret);
     }
 
@@ -160,7 +161,7 @@ int nand_wrapper_erase(FAR struct mtd_dev_s *dev, off_t startblock,
  ****************************************************************************/
 
 ssize_t nand_wrapper_bread(FAR struct mtd_dev_s *dev, off_t startpage,
-                      size_t npages, FAR uint8_t *buffer)
+                           size_t npages, FAR uint8_t *buffer)
 {
   int ret;
   FAR struct nand_wrapper_dev_s *nand_dev;
@@ -169,8 +170,8 @@ ssize_t nand_wrapper_bread(FAR struct mtd_dev_s *dev, off_t startpage,
 
   nxmutex_lock(&nand_wrapper_dev_mut);
   nand_wrapper_ins_i++;
-  NAND_WRAPPER_LOG("[UPPER %lu | %s] "
-                    "Startblock: %d, N Pages: %ld, Buffer: %p\n",
+  NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] "
+                    "Startblock: %" PRIi32 ", N Pages: %zu, Buffer: %p\n",
                     nand_wrapper_ins_i, "bread", startpage, npages, buffer);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.bread);
 
@@ -178,12 +179,12 @@ ssize_t nand_wrapper_bread(FAR struct mtd_dev_s *dev, off_t startpage,
 
   if (ret >= 0)
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Done\n",
                         nand_wrapper_ins_i, "bread");
     }
   else
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Failed: %d!\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Failed: %" PRIi32 "!\n",
                         nand_wrapper_ins_i, "bread", ret);
     }
 
@@ -216,7 +217,7 @@ ssize_t nand_wrapper_bread(FAR struct mtd_dev_s *dev, off_t startpage,
  ****************************************************************************/
 
 ssize_t nand_wrapper_bwrite(FAR struct mtd_dev_s *dev, off_t startpage,
-                        size_t npages, FAR const uint8_t *buffer)
+                            size_t npages, FAR const uint8_t *buffer)
 {
   int ret;
   FAR struct nand_wrapper_dev_s *nand_dev;
@@ -225,8 +226,8 @@ ssize_t nand_wrapper_bwrite(FAR struct mtd_dev_s *dev, off_t startpage,
 
   nxmutex_lock(&nand_wrapper_dev_mut);
   nand_wrapper_ins_i++;
-  NAND_WRAPPER_LOG("[UPPER %lu | %s] "
-                    "Startblock: %d, N Pages: %ld, Buffer: %p \n",
+  NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] "
+                    "Startblock: %" PRIi32 ", N Pages: %zu, Buffer: %p\n",
                     nand_wrapper_ins_i, "bwrite", startpage, npages, buffer);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.bwrite);
 
@@ -234,12 +235,12 @@ ssize_t nand_wrapper_bwrite(FAR struct mtd_dev_s *dev, off_t startpage,
 
   if (ret >= 0)
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Done\n",
                         nand_wrapper_ins_i, "bwrite");
     }
   else
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Failed: %d!\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Failed: %" PRIi32 "!\n",
                         nand_wrapper_ins_i, "bwrite", ret);
     }
 
@@ -269,7 +270,7 @@ ssize_t nand_wrapper_bwrite(FAR struct mtd_dev_s *dev, off_t startpage,
  ****************************************************************************/
 
 int nand_wrapper_ioctl(FAR struct mtd_dev_s *dev, int cmd,
-                            unsigned long arg)
+                       unsigned long arg)
 {
   int ret;
   FAR struct nand_wrapper_dev_s *nand_dev;
@@ -278,20 +279,20 @@ int nand_wrapper_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 
   nxmutex_lock(&nand_wrapper_dev_mut);
   nand_wrapper_ins_i++;
-  NAND_WRAPPER_LOG("[UPPER %lu | %s] Command: %d, Arg : %ld\n",
-                    nand_wrapper_ins_i, "ioctl", cmd, arg);
+  NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Command: %" PRIi32
+                   ", Arg : %zu\n", nand_wrapper_ins_i, "ioctl", cmd, arg);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.ioctl);
 
   ret = nand_dev->under.mtd.ioctl(dev, cmd, arg);
 
   if (ret >= 0)
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Done\n",
                         nand_wrapper_ins_i, "ioctl");
     }
   else
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Failed: %d!\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Failed: %" PRIi32 "!\n",
                         nand_wrapper_ins_i, "ioctl", ret);
     }
 
@@ -328,7 +329,7 @@ int nand_wrapper_isbad(FAR struct mtd_dev_s *dev, off_t block)
 
   nxmutex_lock(&nand_wrapper_dev_mut);
   nand_wrapper_ins_i++;
-  NAND_WRAPPER_LOG("[UPPER %lu | %s] Block: %d\n",
+  NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Block: %" PRIi32 "\n",
                     nand_wrapper_ins_i, "isbad", block);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.isbad);
 
@@ -336,12 +337,12 @@ int nand_wrapper_isbad(FAR struct mtd_dev_s *dev, off_t block)
 
   if (ret >= 0)
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done %d\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Done %" PRIi32 "\n",
                         nand_wrapper_ins_i, "isbad", ret);
     }
   else
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Failed: %d!\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Failed: %" PRIi32 "!\n",
                         nand_wrapper_ins_i, "isbad", ret);
     }
 
@@ -378,7 +379,7 @@ int nand_wrapper_markbad(FAR struct mtd_dev_s *dev, off_t block)
 
   nxmutex_lock(&nand_wrapper_dev_mut);
   nand_wrapper_ins_i++;
-  NAND_WRAPPER_LOG("[UPPER %lu | %s] Blocks: %d\n",
+  NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Blocks: %" PRIi32 "\n",
                     nand_wrapper_ins_i, "markbad", block);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.markbad);
 
@@ -386,12 +387,12 @@ int nand_wrapper_markbad(FAR struct mtd_dev_s *dev, off_t block)
 
   if (ret >= 0)
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Done\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Done\n",
                         nand_wrapper_ins_i, "markbad");
     }
   else
     {
-      NAND_WRAPPER_LOG("[UPPER %lu | %s] Failed: %d!\n",
+      NAND_WRAPPER_LOG("[UPPER %" PRIu64 " | %s] Failed: %" PRIi32 "!\n",
                         nand_wrapper_ins_i, "markbad", ret);
     }
 
