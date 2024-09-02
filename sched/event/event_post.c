@@ -150,12 +150,12 @@ int nxevent_post(FAR nxevent_t *event, nxevent_mask_t events,
             }
         }
 
-      sched_unlock();
-
       if (clear)
         {
           event->events &= ~clear;
         }
+
+      sched_unlock();
     }
 
   leave_critical_section(flags);
