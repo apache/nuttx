@@ -119,6 +119,13 @@ config FS_HEAPSIZE
 		Support for shm/tmpfs/fs_pseudofile.c ram based fs memory.
 		default 0 to use kmm directly. independent heap disabled
 
+config FS_REFCOUNT
+	bool "File reference count"
+	default !DEFAULT_SMALL
+	---help---
+		Enable will Records the number of filep references. The file is
+		actually closed when the count reaches 0
+
 source "fs/vfs/Kconfig"
 source "fs/aio/Kconfig"
 source "fs/semaphore/Kconfig"
