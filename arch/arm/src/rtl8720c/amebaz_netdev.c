@@ -107,12 +107,12 @@ void amebaz_netdev_notify_receive(struct amebaz_dev_s *priv,
       return;
     }
 
-  NETDEV_RXPACKETS(&priv->dev);
   net_lock();
   oldbuf = priv->dev.d_buf;
   hdr = (struct eth_hdr_s *)skb->data;
   priv->dev.d_buf = (void *)skb->data;
   priv->dev.d_len = len;
+  NETDEV_RXPACKETS(&priv->dev);
 #ifdef CONFIG_NET_PKT
   pkt_input(&priv->dev);
 #endif
