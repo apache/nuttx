@@ -238,8 +238,6 @@ void arm_gic_irq_enable(unsigned int intid)
   uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
   uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
 
-  putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
-
   /* Affinity routing is enabled for Non-secure state (GICD_CTLR.ARE_NS
    * is set to '1' when GIC distributor is initialized) ,so need to set
    * SPI's affinity, now set it to be the PE on which it is enabled.
@@ -249,6 +247,8 @@ void arm_gic_irq_enable(unsigned int intid)
     {
       arm_gic_write_irouter(up_cpu_index(), intid);
     }
+
+  putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
 }
 
 void arm_gic_irq_disable(unsigned int intid)
