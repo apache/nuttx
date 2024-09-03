@@ -602,6 +602,13 @@ int cryptodev_key(FAR struct crypt_kop *kop)
           }
 
         return -EINVAL;
+      case CRK_DH_MAKE_PUBLIC:
+        if (in == 2 && out == 2)
+          {
+            break;
+          }
+
+        return -EINVAL;
       case CRK_RSA_PKCS15_VERIFY:
         if (in == 5 && out == 0)
           {
