@@ -253,12 +253,13 @@ struct crypt_kop
 #define CRK_MOD_EXP_CRT            1
 #define CRK_DSA_SIGN               2
 #define CRK_DSA_VERIFY             3
-#define CRK_DH_COMPUTE_KEY         4
-#define CRK_RSA_PKCS15_VERIFY      5
-#define CRK_ECDSA_SECP256R1_SIGN   6
-#define CRK_ECDSA_SECP256R1_VERIFY 7
-#define CRK_ECDSA_SECP256R1_GENKEY 8
-#define CRK_ALGORITHM_MAX          8 /* Keep updated */
+#define CRK_DH_MAKE_PUBLIC         4
+#define CRK_DH_COMPUTE_KEY         5
+#define CRK_RSA_PKCS15_VERIFY      6
+#define CRK_ECDSA_SECP256R1_SIGN   7
+#define CRK_ECDSA_SECP256R1_VERIFY 8
+#define CRK_ECDSA_SECP256R1_GENKEY 9
+#define CRK_ALGORITHM_MAX          9 /* Keep updated */
 
 #define CRF_MOD_EXP                (1 << CRK_MOD_EXP)
 #define CRF_MOD_EXP_CRT            (1 << CRK_MOD_EXP_CRT)
