@@ -47,6 +47,10 @@ list(
   arm_perf.c
   cp15_cacheops.c)
 
+if(CONFIG_SMP OR CONFIG_BMP)
+  list(APPEND SRCS arm_cpuhead.S arm_cpuindex.c arm_cpuidlestack.c)
+endif()
+
 if(CONFIG_ARCH_FPU)
   list(APPEND SRCS arm_fpucmp.c arm_fpuconfig.S)
 endif()

@@ -67,7 +67,8 @@
 
 /* Redistributor base addresses for each core */
 
-static unsigned long gic_rdists[CONFIG_SMP_NCPUS];
+static unsigned long g_gic_rdists[CONFIG_SMP_NCPUS];
+#define g_gic_rdists this_cpu_var(g_gic_rdists)
 
 /***************************************************************************
  * Private Functions
@@ -101,7 +102,7 @@ static inline int sys_test_bit(unsigned long addr, unsigned int bit)
 
 static inline unsigned long gic_get_rdist(void)
 {
-  return gic_rdists[this_cpu()];
+  return g_gic_rdists[this_cpu()];
 }
 
 static inline uint32_t read_gicd_wait_rwp(void)
@@ -801,9 +802,9 @@ static void arm_gic_init(void)
   uint8_t   cpu;
   int       err;
 
-  cpu             = this_cpu();
-  gic_rdists[cpu] = CONFIG_GICR_BASE +
-                    up_cpu_index() * CONFIG_GICR_OFFSET;
+  cpu               = this_cpu();
+  g_gic_rdists[cpu] = CONFIG_GICR_BASE +
+                      up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)
@@ -825,21 +826,24 @@ int arm_gic_initialize(void)
 {
   int err;
 
-  err = gic_validate_dist_version();
-  if (err)
+  if (up_cpu_index() == 0)
     {
-      sinfo("no distributor detected, giving up ret=%d\n", err);
-      return err;
-    }
+      err = gic_validate_dist_version();
+      if (err)
+        {
+          sinfo("no distributor detected, giving up ret=%d\n", err);
+          return err;
+        }
 
-  gicv3_dist_init();
+      gicv3_dist_init();
+    }
 
   arm_gic_init();
 
   return 0;
 }
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 void arm_gic_secondary_init(void)
 {
   arm_gic_init();
