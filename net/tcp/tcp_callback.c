@@ -437,8 +437,10 @@ void tcp_callback_cleanup(FAR void *arg)
 {
   FAR struct tcp_callback_s *cb = (FAR struct tcp_callback_s *)arg;
 
+  net_lock();
   nerr("ERROR: pthread is being canceled, need to cleanup cb\n");
-  tcp_callback_free(cb->tc_conn, cb->tc_cb);
+  tcp_callback_free(cb->tc_conn, *(cb->tc_cb));
   nxsem_destroy(cb->tc_sem);
+  net_unlock();
 }
 #endif /* NET_TCP_HAVE_STACK */
