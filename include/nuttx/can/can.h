@@ -438,11 +438,6 @@
 #define CAN_FILTER_DUAL           1  /* Dual address match */
 #define CAN_FILTER_RANGE          2  /* Match a range of addresses */
 
-/* CAN bit timing support ***************************************************/
-
-#define CAN_BITTIMING_NOMINAL     0  /* Specifies nominal bittiming */
-#define CAN_BITTIMING_DATA        1  /* Specifies data bittiming */
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -549,7 +544,7 @@ struct can_rxfifo_s
   sem_t         rx_sem;
 
 #ifdef CONFIG_CAN_ERRORS
-  bool          rx_overflow;             /* Indicates the RX FIFO overflow event */
+  uint8_t       rx_error;                /* Flags to indicate internal device errors */
 #endif
   uint8_t       rx_head;                 /* Index to the head [IN] in the circular buffer */
   uint8_t       rx_tail;                 /* Index to the tail [OUT] in the circular buffer */
@@ -666,9 +661,6 @@ struct can_dev_s
   uint8_t              cd_crefs;         /* References counts on number of opens */
   uint8_t              cd_npendrtr;      /* Number of pending RTR messages */
   volatile uint8_t     cd_ntxwaiters;    /* Number of threads waiting to enqueue a message */
-#ifdef CONFIG_CAN_ERRORS
-  uint8_t              cd_error;         /* Flags to indicate internal device errors */
-#endif
   struct list_node     cd_readers;       /* List of readers */
   mutex_t              cd_closelock;     /* Locks out new opens while close is in progress */
   mutex_t              cd_polllock;      /* Manages exclusive access to cd_fds[] */
@@ -718,13 +710,6 @@ struct canioc_rtr_s
 
 struct canioc_bittiming_s
 {
-#ifdef CONFIG_CAN_FD
-  uint8_t               type;            /* Nominal/Data bit timing. This is
-                                          * used to specify which bit timing
-                                          * should be set/obtained. Applies
-                                          * only if CAN FD is configured.
-                                          */
-#endif
   uint32_t              bt_baud;         /* Bit rate = 1 / bit time */
   uint8_t               bt_tseg1;        /* TSEG1 in time quanta */
   uint8_t               bt_tseg2;        /* TSEG2 in time quanta */
@@ -945,46 +930,6 @@ int can_txdone(FAR struct can_dev_s *dev);
 #ifdef CONFIG_CAN_TXREADY
 int can_txready(FAR struct can_dev_s *dev);
 #endif
-
-/****************************************************************************
- * Name: can_bytes2dlc
- *
- * Description:
- *   In the CAN FD format, the coding of the DLC differs from the standard
- *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
- *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
- *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
- *   in the range 12 to 64.
- *
- * Input Parameters:
- *   nbytes - the byte count to convert to a DLC value
- *
- * Returned Value:
- *   The encoded DLC value corresponding to at least that number of bytes.
- *
- ****************************************************************************/
-
-uint8_t can_bytes2dlc(uint8_t nbytes);
-
-/****************************************************************************
- * Name: can_dlc2bytes
- *
- * Description:
- *   In the CAN FD format, the coding of the DLC differs from the standard
- *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
- *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
- *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
- *   in the range 12 to 64.
- *
- * Input Parameters:
- *   dlc    - the DLC value to convert to a byte count
- *
- * Returned Value:
- *   The number of bytes corresponding to the DLC value.
- *
- ****************************************************************************/
-
-uint8_t can_dlc2bytes(uint8_t dlc);
 
 #undef EXTERN
 #if defined(__cplusplus)
