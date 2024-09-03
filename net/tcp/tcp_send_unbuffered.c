@@ -611,7 +611,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
                */
 
               info.tc_conn = conn;
-              info.tc_cb   = state.snd_cb;
+              info.tc_cb   = &state.snd_cb;
               info.tc_sem  = &state.snd_sem;
               tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
 
