@@ -459,7 +459,7 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
   in_addr_t srcipaddr;
   FAR struct net_driver_s *fwddev;
   int ret;
-#ifdef CONFIG_NET_ICMP
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
   int icmp_reply_type;
   int icmp_reply_code;
 #endif /* CONFIG_NET_ICMP */
@@ -526,7 +526,7 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
 drop:
   ipv4_dropstats(ipv4);
 
-#ifdef CONFIG_NET_ICMP
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
   /* Reply ICMP to the sender for particular errors. */
 
   switch (ret)
@@ -554,7 +554,7 @@ drop:
   dev->d_len = 0;
   return ret;
 
-#ifdef CONFIG_NET_ICMP
+#if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
 reply:
 #  ifdef CONFIG_NET_NAT44
   /* Before we reply ICMP, call NAT outbound to try to translate destination
