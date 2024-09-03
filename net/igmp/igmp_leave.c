@@ -166,7 +166,7 @@ int igmp_leavegroup(struct net_driver_s *dev,
 
       /* Send a leave if the flag is set according to the state diagram */
 
-      if (IS_LASTREPORT(group->flags))
+      if (IFF_IS_UP(dev->d_flags) && IS_LASTREPORT(group->flags))
         {
           ninfo("Schedule Leave Group message\n");
           IGMP_STATINCR(g_netstats.igmp.leave_sched);
