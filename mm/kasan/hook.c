@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/mm/kasan.h>
+#include <nuttx/compiler.h>
 #include <nuttx/irq.h>
 
 #include <assert.h>
@@ -204,7 +205,7 @@ static void kasan_check_watchpoint(FAR const void *addr, size_t size,
     {
       FAR struct kasan_watchpoint_s *watchpoint = &g_watchpoint[i];
 
-      if (watchpoint->type == DEBUGPOINT_NONE)
+      if (predict_false(watchpoint->type == DEBUGPOINT_NONE))
         {
           break;
         }
@@ -228,20 +229,20 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
                                       bool is_write,
                                       FAR void *return_address)
 {
-  if (size == 0 || g_region_init != KASAN_INIT_VALUE)
+  if (predict_false(size == 0 || g_region_init != KASAN_INIT_VALUE))
     {
       return;
     }
 
 #ifndef CONFIG_MM_KASAN_DISABLE_NULL_POINTER_CHECK
-  if (addr == NULL)
+  if (predict_false(addr == NULL))
     {
       kasan_report(addr, size, is_write, return_address);
     }
 #endif
 
 #ifndef CONFIG_MM_KASAN_NONE
-  if (kasan_is_poisoned(addr, size))
+  if (predict_false(kasan_is_poisoned(addr, size)))
     {
       kasan_report(addr, size, is_write, return_address);
     }
