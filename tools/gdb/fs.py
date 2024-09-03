@@ -117,7 +117,7 @@ class Fdinfo(gdb.Command):
         output = []
         if CONFIG_FS_BACKTRACE:
             backtrace = utils.backtrace(
-                [file["f_backtrace"][i] for i in range(CONFIG_FS_BACKTRACE)]
+                file["f_backtrace"][i] for i in range(CONFIG_FS_BACKTRACE)
             )
 
             backtrace = [
