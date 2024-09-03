@@ -751,6 +751,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
       start = res->start;
       res->start += size;
 #else
+      UNUSED(res);
       uint32_t tmp;
 
       pci_read_config_dword(dev, base_address_0, &tmp);
