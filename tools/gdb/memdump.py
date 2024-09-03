@@ -989,7 +989,7 @@ class Memfrag(gdb.Command):
                 gdb.write(f"addr: {node['addr']}, size: {node['size']}\n")
 
         heapsize = gdb.parse_and_eval("*g_mmheap")["mm_heapsize"]
-        freesize = sum([node["size"] for node in info])
+        freesize = sum(node["size"] for node in info)
         remaining = freesize
         fragrate = 0
 

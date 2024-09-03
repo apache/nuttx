@@ -412,10 +412,8 @@ class Ps(gdb.Command):
 
         sigmask = "{0:#0{1}x}".format(
             sum(
-                [
-                    int(tcb["sigprocmask"]["_elem"][i] << i)
-                    for i in range(get_macro("_SIGSET_NELEM"))
-                ]
+                int(tcb["sigprocmask"]["_elem"][i] << i)
+                for i in range(get_macro("_SIGSET_NELEM"))
             ),
             get_macro("_SIGSET_NELEM") * 8 + 2,
         )[
