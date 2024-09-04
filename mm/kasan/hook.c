@@ -31,6 +31,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifdef CONFIG_MM_KASAN_GENERIC
+#  include "generic.c"
+#elif defined(CONFIG_MM_KASAN_SW_TAGS)
+#  include "sw_tags.c"
+#else
+#  define kasan_is_poisoned(addr, size) false
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

@@ -26,6 +26,7 @@
 
 #include <nuttx/nuttx.h>
 #include <nuttx/mm/kasan.h>
+#include <nuttx/compiler.h>
 #include <nuttx/spinlock.h>
 
 #include <assert.h>
@@ -91,9 +92,9 @@ extern const unsigned char g_globals_region[];
  * Private Functions
  ****************************************************************************/
 
-static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
-                                          FAR unsigned int *bit,
-                                          FAR size_t *align)
+static inline_function FAR uintptr_t *
+kasan_mem_to_shadow(FAR const void *ptr, size_t size,
+                    FAR unsigned int *bit, FAR size_t *align)
 {
   FAR struct kasan_region_s *region;
   uintptr_t addr = (uintptr_t)ptr;
@@ -129,6 +130,57 @@ static FAR uintptr_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size,
 #endif
 
   return NULL;
+}
+
+static inline_function bool
+kasan_is_poisoned(FAR const void *addr, size_t size)
+{
+  FAR uintptr_t *p;
+  unsigned int bit;
+  unsigned int nbit;
+  uintptr_t mask;
+  size_t align;
+
+  p = kasan_mem_to_shadow(addr, size, &bit, &align);
+  if (p == NULL)
+    {
+      return false;
+    }
+
+  if (size <= align)
+    {
+      return ((*p >> bit) & 1);
+    }
+
+  nbit = KASAN_BITS_PER_WORD - bit % KASAN_BITS_PER_WORD;
+  mask = KASAN_FIRST_WORD_MASK(bit);
+  size = ALIGN_UP(size, align);
+  size /= align;
+
+  while (size >= nbit)
+    {
+      if ((*p++ & mask) != 0)
+        {
+          return true;
+        }
+
+      bit  += nbit;
+      size -= nbit;
+
+      nbit = KASAN_BITS_PER_WORD;
+      mask = UINTPTR_MAX;
+    }
+
+  if (size)
+    {
+      mask &= KASAN_LAST_WORD_MASK(bit + size);
+      if ((*p & mask) != 0)
+        {
+          return true;
+        }
+    }
+
+  return false;
 }
 
 static void kasan_set_poison(FAR const void *addr, size_t size,
@@ -193,56 +245,6 @@ static void kasan_set_poison(FAR const void *addr, size_t size,
 FAR void *kasan_reset_tag(FAR const void *addr)
 {
   return (FAR void *)addr;
-}
-
-bool kasan_is_poisoned(FAR const void *addr, size_t size)
-{
-  FAR uintptr_t *p;
-  unsigned int bit;
-  unsigned int nbit;
-  uintptr_t mask;
-  size_t align;
-
-  p = kasan_mem_to_shadow(addr, size, &bit, &align);
-  if (p == NULL)
-    {
-      return false;
-    }
-
-  if (size <= align)
-    {
-      return ((*p >> bit) & 1);
-    }
-
-  nbit = KASAN_BITS_PER_WORD - bit % KASAN_BITS_PER_WORD;
-  mask = KASAN_FIRST_WORD_MASK(bit);
-  size = ALIGN_UP(size, align);
-  size /= align;
-
-  while (size >= nbit)
-    {
-      if ((*p++ & mask) != 0)
-        {
-          return true;
-        }
-
-      bit  += nbit;
-      size -= nbit;
-
-      nbit = KASAN_BITS_PER_WORD;
-      mask = UINTPTR_MAX;
-    }
-
-  if (size)
-    {
-      mask &= KASAN_LAST_WORD_MASK(bit + size);
-      if ((*p & mask) != 0)
-        {
-          return true;
-        }
-    }
-
-  return false;
 }
 
 void kasan_poison(FAR const void *addr, size_t size)
