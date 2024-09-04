@@ -271,6 +271,10 @@ int up_addrenv_kmap_pages(void **pages, unsigned int npages, uintptr_t vaddr,
 
   mask &= ~PTE_BLOCK_DESC_NG;
 
+  /* Also, revoke user execute access */
+
+  mask |= PTE_BLOCK_DESC_UXN;
+
   /* Let arm64_map_pages do the work */
 
   return arm64_map_pages(addrenv, (uintptr_t *)pages, npages, vaddr, mask);
