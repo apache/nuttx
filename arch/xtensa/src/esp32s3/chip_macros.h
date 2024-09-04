@@ -104,10 +104,33 @@
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
     .macro setintstack tmp1 tmp2
-    getcoreid \tmp1                   /* tmp1 = Core ID (0 or 1) */
-    movi  \tmp2, g_cpu_intstack_top   /* tmp2 = Array of stack pointers */
-    addx4 \tmp2, \tmp1, \tmp2         /* tmp2 = tmp2 + (tmp1 << 2) */
-    l32i  a1, \tmp2, 0                /* a1   = *tmp2 */
+    getcoreid \tmp1                     /* tmp1 = Core ID (0 or 1) */
+    movi  \tmp2, g_cpu_intstack_top     /* tmp2 = Array of stack pointers */
+    addx4 \tmp2, \tmp1, \tmp2           /* tmp2 = tmp2 + (tmp1 << 2) */
+    l32i  \tmp1, \tmp2, 0               /* Load the top of the interrupt stack for this core */
+
+  /* tmp1 represents the top of the interrupt stack for this core
+   * If a1 >= tmp1, sp is outside the interrupt stack boundaries.
+   */
+
+    l32i    \tmp2, \tmp2, 0             /* Load the top of the interrupt stack for this core */
+    sub     \tmp2, a1, \tmp2
+    movgez  a1, \tmp1, \tmp2
+
+  /* If a1 < (tmp1 - INTSTACK_SIZE), sp is outside the interrupt stack
+   * boundaries.
+   */
+
+    movi    \tmp2, CONFIG_ARCH_INTERRUPTSTACK
+    sub     \tmp2, \tmp1, \tmp2
+    sub     \tmp2, a1, \tmp2
+    movltz  a1, \tmp1, \tmp2
+
+  /* If neither movltz and movgez moved the top of the interrupt stack to
+   * a1, it means that the stack pointer was already pointing to the
+   * interrupt stack and no action is required.
+   */
+
     .endm
 #endif
 

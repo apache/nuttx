@@ -250,7 +250,7 @@ noinstrument_function static inline void xtensa_setps(uint32_t ps)
 
 /* Return the current value of the stack pointer */
 
-static inline uint32_t up_getsp(void)
+static inline_function uint32_t up_getsp(void)
 {
   register uint32_t sp;
 
