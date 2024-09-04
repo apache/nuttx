@@ -309,7 +309,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   libssl-dev
 
 RUN mkdir -p cmake && \
-  curl -s -L wget https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
+  curl -s -L https://cmake.org/files/v3.26/cmake-3.26.0.tar.gz \
   | tar -C cmake --strip-components=1 -xz \
   && cd cmake && ./bootstrap && make && make install && rm -rf cmake
 
