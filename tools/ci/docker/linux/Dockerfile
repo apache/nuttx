@@ -498,7 +498,10 @@ ENV ZAP_INSTALL_PATH=/tools/zap_release
 ENV ZAP_DEVELOPMENT_PATH=/tools/zap
 
 # Configure ccache
-RUN mkdir -p /tools/ccache/bin && \
+# use `/ccache` as cachedir for all users
+RUN mkdir -p /ccache && \
+  chmod 666 /ccache && \
+  mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/aarch64-none-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/aarch64-none-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/arm-none-eabi-gcc && \
@@ -527,5 +530,6 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-g++
 
 ENV PATH="/tools/ccache/bin:$PATH"
+ENV CCACHE_DIR="/ccache"
 
 CMD [ "/bin/bash" ]
