@@ -24,12 +24,10 @@ set(SRCS hook.c)
 if(CONFIG_MM_KASAN)
   list(APPEND FLAGS -fno-builtin)
   if(CONFIG_MM_KASAN_GENERIC)
-    list(APPEND SRCS generic.c)
     list(APPEND FLAGS -fno-sanitize=kernel-address)
   endif()
 
   if(CONFIG_MM_KASAN_SW_TAGS)
-    list(APPEND SRCS sw_tags.c)
     list(APPEND FLAGS -fno-sanitize=kernel-hwaddress)
   endif()
 

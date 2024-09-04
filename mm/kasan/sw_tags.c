@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/mm/kasan.h>
+#include <nuttx/compiler.h>
 #include <nuttx/spinlock.h>
 
 #include <assert.h>
@@ -74,7 +75,8 @@ static FAR struct kasan_region_s *g_region;
  * Private Functions
  ****************************************************************************/
 
-static FAR uint8_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size)
+static inline_function FAR uint8_t *
+kasan_mem_to_shadow(FAR const void *ptr, size_t size)
 {
   FAR struct kasan_region_s *region;
   uintptr_t addr;
@@ -92,6 +94,31 @@ static FAR uint8_t *kasan_mem_to_shadow(FAR const void *ptr, size_t size)
     }
 
   return NULL;
+}
+
+static inline_function bool
+kasan_is_poisoned(FAR const void *addr, size_t size)
+{
+  FAR uint8_t *p;
+  uint8_t tag;
+
+  tag = kasan_get_tag(addr);
+  p = kasan_mem_to_shadow(addr, size);
+  if (p == NULL)
+    {
+      return false;
+    }
+
+  size = KASAN_SHADOW_SIZE(size);
+  while (size--)
+    {
+      if (p[size] != tag)
+        {
+          return true;
+        }
+    }
+
+  return false;
 }
 
 static void kasan_set_poison(FAR const void *addr,
@@ -125,30 +152,6 @@ FAR void *kasan_reset_tag(FAR const void *addr)
 {
   return (FAR void *)
          (((uint64_t)(addr)) & ~((uint64_t)0xff << KASAN_TAG_SHIFT));
-}
-
-bool kasan_is_poisoned(FAR const void *addr, size_t size)
-{
-  FAR uint8_t *p;
-  uint8_t tag;
-
-  tag = kasan_get_tag(addr);
-  p = kasan_mem_to_shadow(addr, size);
-  if (p == NULL)
-    {
-      return false;
-    }
-
-  size = KASAN_SHADOW_SIZE(size);
-  while (size--)
-    {
-      if (p[size] != tag)
-        {
-          return true;
-        }
-    }
-
-  return false;
 }
 
 void kasan_poison(FAR const void *addr, size_t size)

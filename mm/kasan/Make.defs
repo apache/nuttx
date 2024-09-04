@@ -27,12 +27,10 @@ ifeq ($(CONFIG_MM_KASAN),y)
   ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
 
     ifeq ($(CONFIG_MM_KASAN_GENERIC),y)
-      CSRCS += generic.c
       CFLAGS += -fno-sanitize=kernel-address
     endif
 
     ifeq ($(CONFIG_MM_KASAN_SW_TAGS),y)
-      CSRCS += sw_tags.c
       CFLAGS += -fno-sanitize=kernel-hwaddress
     endif
 

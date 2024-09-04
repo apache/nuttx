@@ -39,7 +39,6 @@
 #define kasan_init_early() kasan_stop()
 
 #ifndef CONFIG_MM_KASAN
-#  define kasan_is_poisoned(addr, size) false
 #  define kasan_poison(addr, size)
 #  define kasan_unpoison(addr, size) addr
 #  define kasan_register(addr, size)
@@ -58,23 +57,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-/****************************************************************************
- * Name: kasan_is_poisoned
- *
- * Description:
- *   Check if the memory range is poisoned
- *
- * Input Parameters:
- *   addr - range start address
- *   size - range size
- *
- * Returned Value:
- *   true if the memory range is poisoned, false otherwise.
- *
- ****************************************************************************/
-
-bool kasan_is_poisoned(FAR const void *addr, size_t size);
 
 /****************************************************************************
  * Name: kasan_poison
