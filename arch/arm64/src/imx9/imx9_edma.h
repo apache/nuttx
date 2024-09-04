@@ -337,7 +337,7 @@ void imx9_dmach_free(DMACH_HANDLE handle);
  *
  ****************************************************************************/
 
-int imx9_dmach_xfrsetup(DMACH_HANDLE *handle,
+int imx9_dmach_xfrsetup(DMACH_HANDLE handle,
                         const struct imx9_edma_xfrconfig_s *config);
 
 /****************************************************************************
@@ -429,7 +429,7 @@ void imx9_dmach_stop(DMACH_HANDLE handle);
  *
  ****************************************************************************/
 
-unsigned int imx9_dmach_getcount(DMACH_HANDLE *handle);
+unsigned int imx9_dmach_getcount(DMACH_HANDLE handle);
 
 /****************************************************************************
  * Name: imx9_dmach_idle
