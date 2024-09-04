@@ -557,6 +557,13 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
   struct mpfs_pwmtimer_s *priv = (struct mpfs_pwmtimer_s *)dev;
 
   pwminfo("PWMID%u\n", priv->pwmid);
+
+  /* Make sure that frequency is zero and channels has been disabled */
+
+  priv->frequency = 0;
+  pwm_putreg(priv, MPFS_COREPWM_PWM_ENABLE_0_7_OFFSET,  0x00);
+  pwm_putreg(priv, MPFS_COREPWM_PWM_ENABLE_8_15_OFFSET, 0x00);
+
   pwm_dumpregs(priv, "Initially");
 
   return OK;
