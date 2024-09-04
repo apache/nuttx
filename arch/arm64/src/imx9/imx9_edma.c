@@ -1070,7 +1070,7 @@ void imx9_dmach_free(DMACH_HANDLE handle)
  *
  ****************************************************************************/
 
-int imx9_dmach_xfrsetup(DMACH_HANDLE *handle,
+int imx9_dmach_xfrsetup(DMACH_HANDLE handle,
                         const struct imx9_edma_xfrconfig_s *config)
 {
   struct imx9_dmach_s *dmach = (struct imx9_dmach_s *)handle;
@@ -1336,7 +1336,7 @@ void imx9_dmach_stop(DMACH_HANDLE handle)
  *
  ****************************************************************************/
 
-unsigned int imx9_dmach_getcount(DMACH_HANDLE *handle)
+unsigned int imx9_dmach_getcount(DMACH_HANDLE handle)
 {
   struct imx9_dmach_s *dmach = (struct imx9_dmach_s *)handle;
   uintptr_t base = IMX9_EDMA_TCD(dmach->base, dmach->chan);
