@@ -208,6 +208,10 @@ static int copy_kernel_mappings(arch_addrenv_t *addrenv)
 
   memcpy((void *)user_mappings, (void *)g_kernel_mappings, MMU_PAGE_SIZE);
 
+  /* Update with memory by flushing the cache */
+
+  up_flush_dcache(user_mappings, user_mappings + MMU_PAGE_SIZE);
+
   return OK;
 }
 
@@ -737,7 +741,9 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
 
 int up_addrenv_coherent(const arch_addrenv_t *addrenv)
 {
-  /* Nothing needs to be done */
+  /* Invalidate I-Cache */
+
+  up_invalidate_icache_all();
 
   return OK;
 }
