@@ -29,6 +29,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/init.h>
 #include <arch/irq.h>
 
 #include "arm_internal.h"
@@ -40,22 +41,22 @@
 #include "barriers.h"
 #include "arm_cpu_psci.h"
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const start_t g_cpu_boot[CONFIG_SMP_NCPUS] =
+static const start_t g_cpu_boot[CONFIG_NR_CPUS] =
 {
   0,
-#if CONFIG_SMP_NCPUS > 1
+#if CONFIG_NR_CPUS > 1
   __cpu1_start,
 #endif
-#if CONFIG_SMP_NCPUS > 2
+#if CONFIG_NR_CPUS > 2
   __cpu2_start,
 #endif
-#if CONFIG_SMP_NCPUS > 3
+#if CONFIG_NR_CPUS > 3
   __cpu3_start
 #endif
 };
@@ -89,7 +90,7 @@ void qemu_cpu_enable(void)
 {
   int cpu;
 
-  for (cpu = 1; cpu < CONFIG_SMP_NCPUS; cpu++)
+  for (cpu = 1; cpu < CONFIG_NR_CPUS; cpu++)
     {
       /* Then enable the CPU */
 
@@ -164,9 +165,16 @@ void arm_cpu_boot(int cpu)
    * the configured NuttX IDLE task.
    */
 
+#ifdef CONFIG_BMP
+#  undef g_nx_initstate
+  while (g_nx_initstate != OSINIT_IDLELOOP);
+
+  nx_start();
+#else
   for (; ; )
     {
       asm("WFI");
     }
+#endif
 }
-#endif /* CONFIG_SMP */
+#endif /* CONFIG_SMP || CONFIG_BMP */

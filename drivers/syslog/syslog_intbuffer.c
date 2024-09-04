@@ -63,6 +63,7 @@ struct g_syslog_intbuffer_s
  ****************************************************************************/
 
 static struct g_syslog_intbuffer_s g_syslog_intbuffer;
+#define g_syslog_intbuffer this_cpu_var(g_syslog_intbuffer)
 
 /****************************************************************************
  * Private Data

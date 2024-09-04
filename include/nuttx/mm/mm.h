@@ -207,6 +207,7 @@ extern unsigned long g_mm_seqno;
 /* Otherwise, the user heap data structures are in common .bss */
 
 EXTERN FAR struct mm_heap_s *g_mmheap;
+#define g_mmheap this_cpu_var(g_mmheap)
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP

@@ -36,13 +36,17 @@
  ****************************************************************************/
 
 static uint8_t             g_nmsgq; /* The number of groups of msgs array */
+#define g_nmsgq            this_cpu_var(g_nmsgq)
 static FAR struct msgq_s **g_msgqs; /* The pointer of two layer file descriptors array */
+#define g_msgqs            this_cpu_var(g_msgqs)
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
+#undef g_msgfreelist
 struct list_node g_msgfreelist;
+#define g_msgfreelist      this_cpu_var(g_msgfreelist)
 
 /****************************************************************************
  * Private Functions

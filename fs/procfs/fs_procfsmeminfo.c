@@ -149,7 +149,8 @@ const struct procfs_operations g_memdump_operations =
 };
 #endif
 
-static FAR struct procfs_meminfo_entry_s *g_procfs_meminfo = NULL;
+static FAR struct procfs_meminfo_entry_s *g_procfs_meminfo;
+#define g_procfs_meminfo this_cpu_var(g_procfs_meminfo)
 
 /****************************************************************************
  * Private Functions

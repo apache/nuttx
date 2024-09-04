@@ -67,7 +67,7 @@
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_assignedtasks(cpu)->head)
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
-#  define this_task()            (current_task(up_cpu_index()))
+#  define this_task()            (current_task(this_cpu()))
 #endif
 
 #define is_idle_task(t)          ((t)->pid < CONFIG_SMP_NCPUS)
@@ -77,7 +77,7 @@
  */
 
 #define running_task() \
-  (up_interrupt_context() ? g_running_tasks[up_cpu_index()] : this_task())
+  (up_interrupt_context() ? g_running_tasks[this_cpu()] : this_task())
 
 /* List attribute flags */
 
@@ -153,6 +153,7 @@ struct tasklist_s
  */
 
 extern dq_queue_t g_readytorun;
+#define g_readytorun this_cpu_var(g_readytorun)
 
 #ifdef CONFIG_SMP
 /* In order to support SMP, the function of the g_readytorun list changes,
@@ -193,6 +194,7 @@ extern dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
  */
 
 extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
+#define g_running_tasks this_cpu_var(g_running_tasks)
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the
@@ -201,15 +203,18 @@ extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
  */
 
 extern dq_queue_t g_pendingtasks;
+#define g_pendingtasks this_cpu_var(g_pendingtasks)
 
 /* This is the list of all tasks that are blocked waiting for a signal */
 
 extern dq_queue_t g_waitingforsignal;
+#define g_waitingforsignal this_cpu_var(g_waitingforsignal)
 
 /* This is the list of all tasks that are blocking waiting for a page fill */
 
 #ifdef CONFIG_LEGACY_PAGING
 extern dq_queue_t g_waitingforfill;
+#define g_waitingforfill this_cpu_var(g_waitingforfill)
 #endif
 
 /* This is the list of all tasks that have been stopped
@@ -218,6 +223,7 @@ extern dq_queue_t g_waitingforfill;
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
 extern dq_queue_t g_stoppedtasks;
+#define g_stoppedtasks this_cpu_var(g_stoppedtasks)
 #endif
 
 /* This the list of all tasks that have been initialized, but not yet
@@ -225,10 +231,12 @@ extern dq_queue_t g_stoppedtasks;
  */
 
 extern dq_queue_t g_inactivetasks;
+#define g_inactivetasks this_cpu_var(g_inactivetasks)
 
 /* This is the value of the last process ID assigned to a task */
 
 extern volatile pid_t g_lastpid;
+#define g_lastpid this_cpu_var(g_lastpid)
 
 /* The following hash table is used for two things:
  *
@@ -238,7 +246,9 @@ extern volatile pid_t g_lastpid;
  */
 
 extern FAR struct tcb_s **g_pidhash;
+#define g_pidhash this_cpu_var(g_pidhash)
 extern volatile int g_npidhash;
+#define g_npidhash this_cpu_var(g_npidhash)
 
 /* This is a table of task lists.  This table is indexed by the task stat
  * enumeration type (tstate_t) and provides a pointer to the associated
@@ -248,6 +258,7 @@ extern volatile int g_npidhash;
  */
 
 extern struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
+#define g_tasklisttable this_cpu_var(g_tasklisttable)
 
 #ifndef CONFIG_SCHED_CPULOAD_NONE
 /* This is the total number of clock tick counts.  Essentially the
@@ -255,6 +266,7 @@ extern struct tasklist_s g_tasklisttable[NUM_TASK_STATES];
  */
 
 extern volatile clock_t g_cpuload_total;
+#define g_cpuload_total this_cpu_var(g_cpuload_total)
 #endif
 
 /* Declared in sched_lock.c *************************************************/

@@ -47,11 +47,9 @@
 
 /* This is the interrupt vector table */
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
-#else
-struct irq_info_s g_irqvector[NR_IRQS];
-#endif
+#undef g_irqvector
+struct irq_info_s g_irqvector[TAB_SIZE];
+#define g_irqvector this_cpu_var(g_irqvector)
 
 /****************************************************************************
  * Public Functions

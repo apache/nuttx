@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+
 #include "arm.h"
 #include "cp15.h"
 #include "cp15_cacheops.h"
@@ -137,26 +139,24 @@ __start:
 	mrc		CP15_MPIDR(r0)
 	and		r0, r0, #0x3
 	cmp		r0, #0
-#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS > 1
 	beq		__cpu0_start
 	wfe
 	cmp		r0, #1
+#if (defined(CONFIG_SMP) || defined(CONFIG_BMP)) && CONFIG_NR_CPUS > 1
 	beq		__cpu1_start
-#  if CONFIG_SMP_NCPUS > 2
+#  if CONFIG_NR_CPUS > 2
 	cmp		r0, #2
 	beq		__cpu2_start
 #  endif
-#  if CONFIG_SMP_NCPUS > 3
+#  if CONFIG_NR_CPUS > 3
 	cmp		r0, #3
 	beq		__cpu3_start
 #  endif
-#  if CONFIG_SMP_NCPUS > 4
+#  if CONFIG_NR_CPUS > 4
 	cmp		r0, #4
 	beq		__cpu4_start
 #  endif
-
-#else
-	beq		__cpu0_start
+#endif
 
 __cpux_wfi:
 
@@ -165,8 +165,6 @@ __cpux_wfi:
 	dsb		sy
 	wfi
 	b		__cpux_wfi
-
-#endif
 
 __cpu0_start:
 

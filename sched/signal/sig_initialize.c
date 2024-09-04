@@ -53,32 +53,42 @@ struct sigpool_s
  * action structures.
  */
 
+#undef g_sigfreeaction
 sq_queue_t  g_sigfreeaction;
+#define g_sigfreeaction this_cpu_var(g_sigfreeaction)
 
 /* The g_sigpendingaction data structure is a list of available pending
  * signal action structures.
  */
 
+#undef g_sigpendingaction
 sq_queue_t  g_sigpendingaction;
+#define g_sigpendingaction this_cpu_var(g_sigpendingaction)
 
 /* The g_sigpendingirqaction is a list of available pending signal actions
  * that are reserved for use by interrupt handlers.
  */
 
+#undef g_sigpendingirqaction
 sq_queue_t  g_sigpendingirqaction;
+#define g_sigpendingirqaction this_cpu_var(g_sigpendingirqaction)
 
 /* The g_sigpendingsignal data structure is a list of available pending
  * signal structures.
  */
 
+#undef g_sigpendingsignal
 sq_queue_t  g_sigpendingsignal;
+#define g_sigpendingsignal this_cpu_var(g_sigpendingsignal)
 
 /* The g_sigpendingirqsignal data structure is a list of available
  * pending signal structures that are reserved for use by interrupt
  * handlers.
  */
 
+#undef g_sigpendingirqsignal
 sq_queue_t  g_sigpendingirqsignal;
+#define g_sigpendingirqsignal this_cpu_var(g_sigpendingirqsignal)
 
 /****************************************************************************
  * Private Data
@@ -87,6 +97,7 @@ sq_queue_t  g_sigpendingirqsignal;
 /* This is a pool of pre-allocated signal structures buffers */
 
 static struct sigpool_s g_sigpool;
+#define g_sigpool this_cpu_var(g_sigpool)
 
 /****************************************************************************
  * Private Functions

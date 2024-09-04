@@ -1124,6 +1124,21 @@
 #  undef CONFIG_FS_LARGEFILE
 #endif
 
+/* These are macros to access the current CPU and the current task on a CPU.
+ * These macros are intended to support a future SMP implementation.
+ */
+
+#ifndef __ASSEMBLY__
+extern unsigned long g_cpu_data_size;
+
+#ifdef CONFIG_BMP
+#  define this_cpu_var(s) (*(__typeof__(s) *)((unsigned long)&(s) + g_cpu_data_size * up_cpu_index()))
+#else
+#  define this_cpu_var(s) (s)
+#endif
+
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

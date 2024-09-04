@@ -76,7 +76,9 @@
  * each would have a load of 25% of the total.
  */
 
+#undef g_cpuload_total
 volatile clock_t g_cpuload_total;
+#define g_cpuload_total this_cpu_var(g_cpuload_total)
 
 /****************************************************************************
  * Public Functions

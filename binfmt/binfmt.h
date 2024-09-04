@@ -53,6 +53,7 @@ extern "C"
  */
 
 EXTERN FAR struct binfmt_s *g_binfmts;
+#define g_binfmts this_cpu_var(g_binfmts)
 
 /****************************************************************************
  * Public Function Prototypes

@@ -37,6 +37,7 @@
  * this linked list are removed and the function is called.
  */
 
+#undef g_wdactivelist
 sq_queue_t g_wdactivelist;
 
 /* This is wdog tickbase, for wd_gettime() may called many times

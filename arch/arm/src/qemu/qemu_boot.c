@@ -35,6 +35,14 @@
 #endif
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_BMP
+unsigned long g_cpu_data_size;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -48,6 +56,13 @@
 
 void arm_boot(void)
 {
+  /* Bound Multi-Processing init */
+
+#ifdef CONFIG_BMP
+  int i;
+  g_cpu_data_size = (uintptr_t)g_idle_topstack - (uintptr_t)_sdata;
+#endif
+
   /* Perf init */
 
   up_perf_init(0);
@@ -58,6 +73,14 @@ void arm_boot(void)
 
   arm_fpuconfig();
 
+#ifdef USE_EARLYSERIALINIT
+  /* Perform early serial initialization if we are going to use the serial
+   * driver.
+   */
+
+  arm_earlyserialinit();
+#endif
+
 #if defined(CONFIG_ARCH_HAVE_PSCI)
   arm_psci_init("hvc");
 #endif
@@ -66,12 +89,12 @@ void arm_boot(void)
   fdt_register((const char *)0x40000000);
 #endif
 
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm_earlyserialinit();
+#ifdef CONFIG_BMP
+  for (i = 1; i < CONFIG_BMP_NCPUS; i++)
+    {
+      memcpy((void *)((uintptr_t)_sdata + g_cpu_data_size * i),
+             _sdata, g_cpu_data_size);
+    }
 #endif
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution

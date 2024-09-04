@@ -53,6 +53,7 @@ static struct binfmt_s g_builtin_binfmt =
   builtin_loadbinary, /* load */
   NULL,               /* unload */
 };
+#define g_builtin_binfmt this_cpu_var(g_builtin_binfmt)
 
 /****************************************************************************
  * Private Functions

@@ -169,7 +169,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  endif
 #endif
 
-#if defined(CONFIG_SMP)
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
                              "[CPU%d] "
 #endif
 
@@ -214,7 +214,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  endif
 #endif
 
-#if defined(CONFIG_SMP)
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
                              , up_cpu_index()
 #endif
 

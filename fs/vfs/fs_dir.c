@@ -84,6 +84,7 @@ static struct inode g_dir_inode =
   0,
   { &g_dir_fileops },
 };
+#define g_dir_inode this_cpu_var(g_dir_inode)
 
 /****************************************************************************
  * Private Functions

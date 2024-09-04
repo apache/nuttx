@@ -4814,8 +4814,9 @@ config BOARDCTL_TESTSET
 
 config BOARDCTL_IRQ_AFFINITY
 	bool "Set an IRQ affinity to CPUs by software"
+	default y if BMP
 	default n
-	depends on SMP
+	depends on SMP || BMP
 	---help---
 		Enables support for Set an IRQ affinity to CPUs by software.
 

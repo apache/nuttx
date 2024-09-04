@@ -344,9 +344,15 @@ config IRQCOUNT
 	bool
 	default n
 
+choice
+	prompt "Support Multi-Processing"
+	default SP
+
+config SP
+	bool "Single Processing as default"
+
 config SMP
 	bool "Symmetric Multi-Processing (SMP)"
-	default n
 	depends on ARCH_HAVE_MULTICPU
 	depends on ARCH_HAVE_TESTSET
 	depends on ARCH_INTERRUPTSTACK != 0
@@ -366,6 +372,42 @@ config SMP
 
 		CPU0 IRQ handler use thread0's stack, but thread0 may switch to CPU1, that
 		will caused IRQ handler stack corruption.
+
+config BMP
+	bool "Bound Multi-Processing (BMP)"
+	depends on ARCH_HAVE_MULTICPU
+	depends on ARCH_HAVE_TESTSET
+	depends on ARCH_INTERRUPTSTACK != 0
+	select SPINLOCK
+	---help---
+	  Enables support for Bound Multi-Processing (BMP) on a multi-CPU
+	  platform. Bound multiprocessing provides the scheduling control
+	  of an asymmetric multiprocessing model, while preserving the
+	  hardware abstraction and management of symmetric multiprocessing.
+
+	  BMP is similar to SMP, but you can specify which processors a thread
+	  can run on. You can use both SMP and BMP on the same system, allowing
+	  some threads to migrate from one processor to another, while other
+	  threads are restricted to one or more processors.
+
+	  As with SMP, a single copy of the OS maintains an overall view of all
+	  system resources, allowing them to be dynamically allocated and shared
+	  among applications. But, during application initialization, a setting
+	  determined by the system designer forces all of an application's threads
+	  to execute only on a specified CPU.
+
+	  Compared to full, floating SMP operation, this approach offers several
+	  advantages:
+
+	  1. It eliminates the cache thrashing that can reduce performance in an SMP
+	  system by allowing applications that share the same data set to run
+	  exclusively on the same CPU.
+	  2. It offers simpler application debugging than SMP since all execution
+	  threads within an application run on a single CPU.
+	  3. It helps legacy applications that use poor techniques for synchronizing
+	  shared data to run correctly, again by letting them run on a single CPU.
+
+endchoice
 
 if SMP
 
@@ -396,6 +438,29 @@ config SMP_CALL
 		Enable to support SMP function call.
 
 endif # SMP
+
+if BMP
+
+config BMP_NCPUS
+	int "Number of CPUs"
+	default 4
+	range 1 32
+	---help---
+		This value identifies the number of CPUs supported by the processor
+		that will be used for BMP.
+
+		If CONFIG_DEBUG_FEATURES is enabled, then the value one is permitted
+		for CONFIG_BMP_NCPUS.  This is not normally a valid setting for an
+		BMP configuration.  However, running the BMP logic in a single CPU
+		configuration is useful during certain testing.
+
+config BMP_CALL
+	bool "Support BMP function call"
+	default n
+	---help---
+		Enable to support BMP function call.
+
+endif # BMP
 
 choice
 	prompt "Initialization Task"

@@ -1690,7 +1690,7 @@ void up_disable_irq(int irq);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) || defined(CONFIG_BMP)
 void up_affinity_irq(int irq, cpu_set_t cpuset);
 #endif
 

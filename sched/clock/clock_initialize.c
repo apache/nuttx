@@ -48,11 +48,13 @@
  ****************************************************************************/
 
 #ifndef CONFIG_SCHED_TICKLESS
+#undef g_system_ticks
 #ifdef CONFIG_SYSTEM_TIME64
 volatile uint64_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 #else
 volatile uint32_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 #endif
+#define g_system_ticks this_cpu_var(g_system_ticks)
 #endif
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING

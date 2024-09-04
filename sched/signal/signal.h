@@ -109,30 +109,35 @@ typedef struct sigq_s sigq_t;
  */
 
 extern sq_queue_t  g_sigfreeaction;
+#define g_sigfreeaction this_cpu_var(g_sigfreeaction)
 
 /* The g_sigpendingaction data structure is a list of available pending
  * signal action structures.
  */
 
 extern sq_queue_t  g_sigpendingaction;
+#define g_sigpendingaction this_cpu_var(g_sigpendingaction)
 
 /* The g_sigpendingirqaction is a list of available pending signal actions
  * that are reserved for use by interrupt handlers.
  */
 
 extern sq_queue_t  g_sigpendingirqaction;
+#define g_sigpendingirqaction this_cpu_var(g_sigpendingirqaction)
 
 /* The g_sigpendingsignal data structure is a list of available pending
  * signal structures.
  */
 
 extern sq_queue_t  g_sigpendingsignal;
+#define g_sigpendingsignal this_cpu_var(g_sigpendingsignal)
 
 /* The g_sigpendingirqsignal data structure is a list of available pending
  * signal structures that are reserved for use by interrupt handlers.
  */
 
 extern sq_queue_t  g_sigpendingirqsignal;
+#define g_sigpendingirqsignal this_cpu_var(g_sigpendingirqsignal)
 
 /****************************************************************************
  * Public Function Prototypes

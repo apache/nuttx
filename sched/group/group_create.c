@@ -44,6 +44,7 @@
  ****************************************************************************/
 
 static struct task_group_s  g_kthread_group;   /* Shared among kthreads     */
+#define g_kthread_group this_cpu_var(g_kthread_group)
 
 /****************************************************************************
  * Private Functions

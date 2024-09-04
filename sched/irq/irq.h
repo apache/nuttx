@@ -95,6 +95,7 @@ extern struct irq_info_s g_irqvector[CONFIG_ARCH_NUSER_INTERRUPTS];
 #else
 extern struct irq_info_s g_irqvector[NR_IRQS];
 #endif
+#define g_irqvector this_cpu_var(g_irqvector)
 
 /* This is the interrupt vector mapping table.  This must be provided by
  * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define

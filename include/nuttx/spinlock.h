@@ -151,7 +151,7 @@ extern volatile spinlock_t g_irq_spin;
 
 /* Handles nested calls to spin_lock_irqsave and spin_unlock_irqrestore */
 
-extern volatile uint8_t g_irq_spin_count[CONFIG_SMP_NCPUS];
+extern volatile uint8_t g_irq_spin_count[CONFIG_NR_CPUS];
 
 /****************************************************************************
  * Name: up_testset
