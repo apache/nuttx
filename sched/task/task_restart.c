@@ -267,6 +267,35 @@ static int nxtask_restart(pid_t pid)
     }
 #endif /* CONFIG_SMP */
 
+  /* Reset critmon info */
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
+  tcb->run_max             = 0;
+  tcb->run_time            = 0;
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+  tcb->preemp_start        = 0;
+  tcb->preemp_max          = 0;
+  tcb->preemp_caller       = NULL;
+  tcb->preemp_max_caller   = NULL;
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+  tcb->crit_start          = 0;
+  tcb->crit_max            = 0;
+  tcb->crit_caller         = NULL;
+  tcb->crit_max_caller     = NULL;
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+  tcb->busywait_start      = 0;
+  tcb->busywait_max        = 0;
+  tcb->busywait_total      = 0;
+  tcb->busywait_caller     = NULL;
+  tcb->busywait_max_caller = NULL;
+#endif
+
   nxtask_reset_task(tcb, true);
   leave_critical_section(flags);
 
