@@ -51,7 +51,21 @@ config RPMSG_PORT_SPI_SLAVE
 	---help---
 		Rpmsg SPI Slave Port driver used for cross chip communication.
 
-if RPMSG_PORT_SPI || RPMSG_PORT_SPI_SLAVE
+config RPMSG_PORT_DBGSPI
+	bool "Rpmsg Debug SPI Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg Debug SPI Port driver used for cross chip communication.
+
+config RPMSG_PORT_DBGSPI_SLAVE
+	bool "Rpmsg Debug SPI Slave Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg SPI Debug Slave Port driver used for cross chip communication.
+
+if RPMSG_PORT_SPI || RPMSG_PORT_SPI_SLAVE || RPMSG_PORT_DBGSPI || RPMSG_PORT_DBGSPI_SLAVE
 
 config RPMSG_PORT_SPI_THREAD_PRIORITY
 	int "Rpmsg SPI Port Thread Priority"

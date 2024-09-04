@@ -41,6 +41,14 @@ if(CONFIG_RPMSG)
     list(APPEND SRCS rpmsg_port_spi_slave.c)
   endif()
 
+  if(CONFIG_RPMSG_PORT_DBGSPI)
+    list(APPEND SRCS rpmsg_port_dbgspi.c)
+  endif()
+
+  if(CONFIG_RPMSG_PORT_DBGSPI_SLAVE)
+    list(APPEND SRCS rpmsg_port_dbgspi_slave.c)
+  endif()
+
   if(CONFIG_RPMSG_PORT_UART)
     list(APPEND SRCS rpmsg_port_uart.c)
   endif()

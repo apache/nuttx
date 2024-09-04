@@ -45,6 +45,14 @@ ifeq ($(CONFIG_RPMSG_PORT_SPI_SLAVE),y)
 CSRCS += rpmsg_port_spi_slave.c
 endif
 
+ifeq ($(CONFIG_RPMSG_PORT_DBGSPI),y)
+CSRCS += rpmsg_port_dbgspi.c
+endif
+
+ifeq ($(CONFIG_RPMSG_PORT_DBGSPI_SLAVE),y)
+CSRCS += rpmsg_port_dbgspi_slave.c
+endif
+
 ifeq ($(CONFIG_RPMSG_PORT_UART),y)
 CSRCS += rpmsg_port_uart.c
 endif
