@@ -97,7 +97,7 @@
 #  define MM_KASAN_WATCHPOINT 0
 #endif
 
-#define KASAN_INIT_VALUE 0xdeadcafe
+#define KASAN_INIT_VALUE 0xcafe
 
 /****************************************************************************
  * Private Types
