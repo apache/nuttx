@@ -98,7 +98,7 @@ double log(double x)
           iter = 0;
         }
 
-      if (relax_factor > 1.0)
+      if (iter == 0)
         {
           epsilon *= relax_factor;
         }
