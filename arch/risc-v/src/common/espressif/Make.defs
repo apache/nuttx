@@ -174,13 +174,17 @@ ifeq ($(CONFIG_ESP_WIRELESS),y)
 endif
 
 context:: chip/$(ESP_HAL_3RDPARTY_REPO)
-	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/include/soc/gpio_sig_map.h,../include/chip/)
-	$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/$(CHIP_SERIES)/include/irq.h,../include/chip/)
+	$(eval COMMIT_ID := $(shell git -C chip/$(ESP_HAL_3RDPARTY_REPO) rev-parse HEAD))
+	$(if $(filter-out $(COMMIT_ID),$(ESP_HAL_3RDPARTY_VERSION)), \
+		$(info Commit id mismatch. Expected: $(ESP_HAL_3RDPARTY_VERSION), Found: $(COMMIT_ID)) \
+		$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO)) \
+		$(error Removing chip/$(ESP_HAL_3RDPARTY_REPO), please try build again), \
+		$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/components/soc/$(CHIP_SERIES)/include/soc/gpio_sig_map.h,../include/chip/) \
+		$(call COPYFILE,chip/$(ESP_HAL_3RDPARTY_REPO)/nuttx/$(CHIP_SERIES)/include/irq.h,../include/chip/))
 
 distclean::
 	$(call DELFILE,../include/chip/gpio_sig_map.h)
 	$(call DELFILE,../include/chip/irq.h)
-	$(call DELDIR,chip/$(ESP_HAL_3RDPARTY_REPO))
 
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif
 INCLUDES += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)common$(DELIM)espressif$(DELIM)platform_include
