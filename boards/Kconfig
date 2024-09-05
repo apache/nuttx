@@ -1950,6 +1950,15 @@ config ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 		This is a port to the Adafruit QT Py RP2040 board.
 		Support is derived from Raspberry Pi Pico support.
 
+config ARCH_BOARD_RASPBERRYPI_PICO_2
+	bool "Raspberry Pi Pico 2 board (not Pico, not W)"
+	depends on ARCH_CHIP_RP23XX
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is a port to the Raspberry Pi Pico 2 board.
+
 config ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
 	bool "Waveshare RP2040 LCD 1.28 board"
 	depends on ARCH_CHIP_RP2040
@@ -3451,6 +3460,7 @@ config ARCH_BOARD
 	default "adafruit-kb2040"           if ARCH_BOARD_ADAFRUIT_KB2040
 	default "adafruit-qt-py-rp2040"     if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "waveshare-rp2040-lcd-1.28" if ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
+	default "raspberrypi-pico-2"        if ARCH_BOARD_RASPBERRYPI_PICO_2
 	default "w5500-evb-pico"            if ARCH_BOARD_W5500_EVB_PICO
         default "waveshare-rp2040-zero"     if ARCH_BOARD_WAVESHARE_RP2040_ZERO
 	default "rx65n"                     if ARCH_BOARD_RX65N
@@ -3916,6 +3926,9 @@ source "boards/arm/rp2040/adafruit-qt-py-rp2040/Kconfig"
 endif
 if ARCH_BOARD_WAVESHARE_RP2040_ZERO
 source "boards/arm/rp2040/waveshare-rp2040-zero/Kconfig"
+endif
+if ARCH_BOARD_RASPBERRYPI_PICO_2
+source "boards/arm/rp23xx/raspberrypi-pico-2/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"
@@ -4649,6 +4662,9 @@ source "boards/arm/stm32f0l0g0/common/Kconfig"
 endif
 if ARCH_CHIP_RP2040
 source "boards/arm/rp2040/common/Kconfig"
+endif
+if ARCH_CHIP_RP23XX
+source "boards/arm/rp23xx/common/Kconfig"
 endif
 if ARCH_CHIP_NRF52
 source "boards/arm/nrf52/common/Kconfig"
