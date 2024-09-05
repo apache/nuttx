@@ -86,7 +86,7 @@ static int stdoutstream_puts(FAR struct lib_outstream_s *self,
 
   do
     {
-      result = fwrite(buffer, len, 1, stream->handle);
+      result = fwrite(buffer, 1, len, stream->handle);
       if (result >= 0)
         {
           self->nput += result;
