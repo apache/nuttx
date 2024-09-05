@@ -50,6 +50,8 @@
 #  define GDB_ASSERT() do {} while (0)
 #endif
 
+#define BUFSIZE CONFIG_LIB_GDBSTUB_PKTSIZE
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -66,7 +68,7 @@ struct gdb_state_s
   FAR void *last_stopaddr;                /* Last stop address */
   pid_t pid;                              /* Gdb current thread */
   FAR char *pkt_next;                     /* Pointer to next byte in packet */
-  char pkt_buf[1024];                     /* Packet buffer */
+  char pkt_buf[BUFSIZE];                  /* Packet buffer */
   size_t pkt_len;                         /* Packet send and receive length */
   uint8_t running_regs[XCPTCONTEXT_SIZE]; /* Registers of running thread */
   size_t size;                            /* Size of registers */
