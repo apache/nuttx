@@ -545,6 +545,13 @@ static void elf_emit_memory(FAR struct elf_dumpinfo_s *cinfo, int memsegs)
         }
       else
         {
+          /* Skip the Non-Write segment because it's unnecessary. */
+
+          if ((cinfo->regions[i].flags & PF_W) == 0)
+            {
+              continue;
+            }
+
           elf_emit(cinfo, (FAR void *)cinfo->regions[i].start,
                    cinfo->regions[i].end - cinfo->regions[i].start);
         }
