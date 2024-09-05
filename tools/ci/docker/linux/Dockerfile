@@ -40,6 +40,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   ninja-build \
   nodejs \
   npm \
+  subversion \
   unzip
 
 RUN mkdir -p /tools
