@@ -66,8 +66,8 @@ key_t ftok(FAR const char *pathname, int proj_id)
     {
       /* Directory not exist, let's create one for caller */
 
-      mkdir(fullpath, S_IRWXU);
-      if (stat(fullpath, &st) < 0)
+      if (mkdir(fullpath, S_IRWXU) < 0 ||
+          stat(fullpath, &st) < 0)
         {
           return (key_t)-1;
         }
