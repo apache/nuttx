@@ -1954,8 +1954,6 @@ config ARCH_BOARD_RASPBERRYPI_PICO_2
 	bool "Raspberry Pi Pico 2 board (not Pico, not W)"
 	depends on ARCH_CHIP_RP23XX
 	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is a port to the Raspberry Pi Pico 2 board.
 
