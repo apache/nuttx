@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/arm/src/armv7-m/CMakeLists.txt
+# arch/arm/src/arm/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,52 +18,28 @@
 #
 # ##############################################################################
 
-# TODO: do not use config to detect this
+set(SRCS arm_head.S)
 
-set(SRCS
-    arm_exception.S
-    arm_saveusercontext.S
-    arm_busfault.c
-    arm_dbgmonitor.c
-    arm_cache.c
-    arm_cpuinfo.c
-    arm_doirq.c
-    arm_hardfault.c
-    arm_initialstate.c
-    arm_itm.c
-    arm_memfault.c
-    arm_perf.c
-    arm_schedulesigaction.c
-    arm_sigdeliver.c
-    arm_svcall.c
-    arm_systemreset.c
-    arm_tcbinfo.c
-    arm_trigger_irq.c
-    arm_usagefault.c
-    arm_vectors.c)
+list(
+  APPEND
+  SRCS
+  arm_dataabort.c
+  arm_doirq.c
+  arm_initialstate.c
+  arm_prefetchabort.c
+  arm_schedulesigaction.c
+  arm_sigdeliver.c
+  arm_syscall.c
+  arm_tcbinfo.c
+  arm_undefinedinsn.c
+  arm_cache.S
+  arm_vectors.S
+  arm_vectortab.S
+  arm_saveusercontext.S)
 
-if(CONFIG_ARMV7M_SYSTICK)
-  list(APPEND SRCS arm_systick.c)
-endif()
-
-if(CONFIG_ARMV7M_ITMSYSLOG)
-  list(APPEND SRCS arm_itm_syslog.c)
-endif()
-
-if(CONFIG_ARMV7M_STACKCHECK)
-  list(APPEND SRCS arm_stackcheck.c)
-endif()
-
-if(CONFIG_ARCH_FPU)
-  list(APPEND SRCS arm_fpuconfig.c arm_fpucmp.c)
-endif()
-
-if(CONFIG_ARCH_RAMVECTORS)
-  list(APPEND SRCS arm_ramvec_initialize.c arm_ramvec_attach.c)
-endif()
-
-if(CONFIG_ARM_MPU OR CONFIG_ARM_MPU_EARLY_RESET)
-  list(APPEND SRCS arm_mpu.c)
+if(CONFIG_PAGING)
+  list(APPEND SRCS arm_pginitialize.c arm_checkmapping.c arm_allocpage.c
+       arm_va2pte.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
