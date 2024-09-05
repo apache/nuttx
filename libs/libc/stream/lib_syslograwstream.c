@@ -260,6 +260,7 @@ void lib_syslograwstream_open(FAR struct lib_syslograwstream_s *stream)
   stream->common.putc  = syslograwstream_putc;
   stream->common.puts  = syslograwstream_puts;
   stream->common.nput  = 0;
+  stream->last_ch      = '\0';
 
 #ifdef CONFIG_SYSLOG_BUFFER
   stream->common.flush = syslograwstream_flush;
