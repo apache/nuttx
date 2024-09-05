@@ -353,6 +353,19 @@ config ARCH_CHIP_RP2040
 	---help---
 		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
 
+config ARCH_CHIP_RP23XX
+	bool "Raspberry Pi RP23XX"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_I2CRESET
+	select ARM_HAVE_WFE_SEV
+	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_BOARD_COMMON
+	---help---
+		Raspberry Pi RP23XX architectures (ARM dual Cortex-M33 or RISC-V).
+
 config ARCH_CHIP_S32K1XX
 	bool "NXP S32K1XX"
 	select ARCH_HAVE_MPU
@@ -1129,6 +1142,7 @@ config ARCH_CHIP
 	default "nrf91"		if ARCH_CHIP_NRF91
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "rp2040"	if ARCH_CHIP_RP2040
+	default "rp23xx"	if ARCH_CHIP_RP23XX
 	default "s32k1xx"	if ARCH_CHIP_S32K1XX
 	default "s32k3xx"	if ARCH_CHIP_S32K3XX
 	default "sama5"		if ARCH_CHIP_SAMA5
@@ -1581,6 +1595,9 @@ source "arch/arm/src/nuc1xx/Kconfig"
 endif
 if ARCH_CHIP_RP2040
 source "arch/arm/src/rp2040/Kconfig"
+endif
+if ARCH_CHIP_RP23XX
+source "arch/arm/src/rp23xx/Kconfig"
 endif
 if ARCH_CHIP_SAMA5
 source "arch/arm/src/sama5/Kconfig"
