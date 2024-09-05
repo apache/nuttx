@@ -159,7 +159,7 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
               if ((filep->f_oflags & O_APPEND) != 0)
                 {
-                  file_seek(filep, 0, SEEK_END);
+                  ret = file_seek(filep, 0, SEEK_END);
                 }
             }
         }
