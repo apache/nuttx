@@ -133,6 +133,20 @@ config LIBC_PATHBUFFER_MALLOC
 	---help---
 		Enable malloc path buffer from the heap when pathbuffer is insufficient.
 
+config LIBC_BACKTRACE_BUFFSIZE
+	int "The size of backtrace record buffer"
+	depends on SCHED_BACKTRACE
+	default 0
+	---help---
+		The size of the backtrace buffer.
+
+config LIBC_BACKTRACE_DEPTH
+	int "The depth of backtrace"
+	depends on LIBC_BACKTRACE_BUFFSIZE > 0
+	default 8
+	---help---
+		The depth of the backtrace buffer.
+
 config LIBC_MUTEX_BACKTRACE
 	int "The depth of mutex backtrace"
 	default 0
