@@ -94,7 +94,7 @@ float logf(float x)
           iter = 0;
         }
 
-      if (iter == 0)
+      if (relax_factor > 1.0F)
         {
           epsilon *= relax_factor;
         }
