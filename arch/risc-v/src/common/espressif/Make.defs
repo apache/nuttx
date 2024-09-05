@@ -77,6 +77,10 @@ ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
 	CHIP_CSRCS += esp_ledc.c
 endif
 
+ifeq ($(CONFIG_ESP_PCNT_AS_QE),y)
+	CHIP_CSRCS += esp_qencoder.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_USBSERIAL),y)
 	CHIP_CSRCS += esp_usbserial.c
 endif

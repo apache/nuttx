@@ -486,6 +486,223 @@ config ESP_MCPWM
 		Enable support for timer capture and motor control using
 		the Motor Control PWM peripheral.
 
+config ESP_PCNT
+	bool "Pulse Counter (PCNT / QE) Module"
+	default n
+	depends on ESPRESSIF_ESP32H2 || ESPRESSIF_ESP32C6
+	---help---
+		Pulse Counter is currently used to implement Quadrature
+		Encoder.
+
+menu "Pulse Counter (PCNT) Configuration"
+	depends on ESP_PCNT
+
+config ESP_PCNT_AS_QE
+	bool
+	default n
+
+config ESP_PCNT_U0
+	bool "Enable PCNT Unit 0"
+	default n
+
+if ESP_PCNT_U0
+
+config ESP_PCNT_U0_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U0_CH0_EDGE_PIN
+	int "PCNT_U0 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U0_CH0_LEVEL_PIN
+	int "PCNT_U0 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U0_QE
+
+config ESP_PCNT_U0_CH1_EDGE_PIN
+	int "PCNT_U0 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U0_QE
+
+config ESP_PCNT_U0_CH1_LEVEL_PIN
+	int "PCNT_U0 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U0_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U0_FILTER_EN
+
+config ESP_PCNT_U0_FILTER_THRES
+	int "PCNT_U0 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U0_FILTER_EN
+
+endif # ESP_PCNT_U0
+
+config ESP_PCNT_U1
+	bool "Enable PCNT Unit 1"
+	default n
+
+if ESP_PCNT_U1
+
+config ESP_PCNT_U1_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U1_CH0_EDGE_PIN
+	int "PCNT_U1 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U1_CH0_LEVEL_PIN
+	int "PCNT_U1 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U1_QE
+
+config ESP_PCNT_U1_CH1_EDGE_PIN
+	int "PCNT_U1 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U1_QE
+
+config ESP_PCNT_U1_CH1_LEVEL_PIN
+	int "PCNT_U1 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U1_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U1_FILTER_EN
+
+config ESP_PCNT_U1_FILTER_THRES
+	int "PCNT_U1 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U1_FILTER_EN
+
+endif # ESP_PCNT_U1
+
+config ESP_PCNT_U2
+	bool "Enable PCNT Unit 2"
+	default n
+
+if ESP_PCNT_U2
+
+config ESP_PCNT_U2_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U2_CH0_EDGE_PIN
+	int "PCNT_U2 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U2_CH0_LEVEL_PIN
+	int "PCNT_U2 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U2_QE
+
+config ESP_PCNT_U2_CH1_EDGE_PIN
+	int "PCNT_U2 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U2_QE
+
+config ESP_PCNT_U2_CH1_LEVEL_PIN
+	int "PCNT_U2 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U2_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U2_FILTER_EN
+
+config ESP_PCNT_U2_FILTER_THRES
+	int "PCNT_U2 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U2_FILTER_EN
+
+endif # ESP_PCNT_U2
+
+config ESP_PCNT_U3
+	bool "Enable PCNT Unit 3"
+	default n
+
+if ESP_PCNT_U3
+
+config ESP_PCNT_U3_QE
+	bool "Use this PCNT Unit as Quadrature Encoder"
+	default y
+	select ESP_PCNT_AS_QE
+
+config ESP_PCNT_U3_CH0_EDGE_PIN
+	int "PCNT_U3 CH0 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+
+config ESP_PCNT_U3_CH0_LEVEL_PIN
+	int "PCNT_U3 CH0 Level/Control Pin Number"
+	default 4
+	range -1 39
+	depends on !ESP_PCNT_U3_QE
+
+config ESP_PCNT_U3_CH1_EDGE_PIN
+	int "PCNT_U3 CH1 Edge/Pulse Pin Number"
+	default 0
+	range -1 39
+	depends on !ESP_PCNT_U3_QE
+
+config ESP_PCNT_U3_CH1_LEVEL_PIN
+	int "PCNT_U3 CH1 Level/Control Pin Number"
+	default 4
+	range -1 39
+
+config ESP_PCNT_U3_FILTER_EN
+	bool "Enable Glitch Filter for this PCNT Unit"
+	default n
+
+if ESP_PCNT_U3_FILTER_EN
+
+config ESP_PCNT_U3_FILTER_THRES
+	int "PCNT_U3 Filter Threshold value"
+	default 5
+	---help---
+		If a pulse is shorter than this number of APB_CLK clock cycles
+		then it will not be considered as a valid pulse.
+
+endif # ESP_PCNT_U3_FILTER_EN
+
+endif # ESP_PCNT_U3
+
+endmenu # ESP_PCNT
+
 endmenu # Peripheral Support
 
 menu "Wi-Fi Configuration"
