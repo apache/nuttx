@@ -19,12 +19,12 @@
 ############################################################################
 
 import argparse
+import enum
 
 import gdb
 import utils
 
 FSNODEFLAG_TYPE_MASK = utils.get_symbol_value("FSNODEFLAG_TYPE_MASK")
-FSNODEFLAG_TYPE_MOUNTPT = utils.get_symbol_value("FSNODEFLAG_TYPE_MOUNTPT")
 
 CONFIG_PSEUDOFS_FILE = utils.get_symbol_value("CONFIG_PSEUDOFS_FILE")
 CONFIG_PSEUDOFS_ATTRIBUTES = utils.get_symbol_value("CONFIG_PSEUDOFS_ATTRIBUTES")
@@ -33,6 +33,35 @@ CONFIG_FS_BACKTRACE = utils.get_symbol_value("CONFIG_FS_BACKTRACE")
 CONFIG_NFILE_DESCRIPTORS_PER_BLOCK = int(
     utils.get_symbol_value("CONFIG_NFILE_DESCRIPTORS_PER_BLOCK")
 )
+CONFIG_FS_SHMFS = utils.get_symbol_value("CONFIG_FS_SHMFS")
+
+
+class InodeType(enum.Enum):
+    # define   FSNODEFLAG_TYPE_PSEUDODIR  0x00000000 /*   Pseudo dir (default)   */
+    # define   FSNODEFLAG_TYPE_DRIVER     0x00000001 /*   Character driver       */
+    # define   FSNODEFLAG_TYPE_BLOCK      0x00000002 /*   Block driver           */
+    # define   FSNODEFLAG_TYPE_MOUNTPT    0x00000003 /*   Mount point            */
+    # define   FSNODEFLAG_TYPE_NAMEDSEM   0x00000004 /*   Named semaphore        */
+    # define   FSNODEFLAG_TYPE_MQUEUE     0x00000005 /*   Message Queue          */
+    # define   FSNODEFLAG_TYPE_SHM        0x00000006 /*   Shared memory region   */
+    # define   FSNODEFLAG_TYPE_MTD        0x00000007 /*   Named MTD driver       */
+    # define   FSNODEFLAG_TYPE_SOFTLINK   0x00000008 /*   Soft link              */
+    # define   FSNODEFLAG_TYPE_SOCKET     0x00000009 /*   Socket                 */
+    # define   FSNODEFLAG_TYPE_PIPE       0x0000000a /*   Pipe                   */
+    # define   FSNODEFLAG_TYPE_NAMEDEVENT 0x0000000b /*   Named event group      */
+    PSEUDODIR = 0
+    DRIVER = 1
+    BLOCK = 2
+    MOUNTPT = 3
+    NAMEDSEM = 4
+    MQUEUE = 5
+    SHM = 6
+    MTD = 7
+    SOFTLINK = 8
+    SOCKET = 9
+    PIPE = 10
+    NAMEDEVENT = 11
+    UNKNOWN = 12
 
 
 def get_inode_name(inode):
@@ -53,6 +82,19 @@ def inode_getpath(inode):
         return inode_getpath(inode["i_parent"]) + "/" + name
 
     return name
+
+
+def inode_gettype(inode) -> InodeType:
+    if not inode:
+        return InodeType.UNKNOWN
+
+    type = int(inode["i_flags"] & FSNODEFLAG_TYPE_MASK)
+
+    # check if it's a valid type in InodeType
+    if type in [e.value for e in InodeType]:
+        return InodeType(type)
+
+    return InodeType.UNKNOWN
 
 
 def get_file(tcb, fd):
@@ -183,7 +225,7 @@ class Mount(gdb.Command):
         super(Mount, self).__init__("mount", gdb.COMMAND_USER)
 
     def mountpt_filter(self, node, path):
-        if node["i_flags"] & FSNODEFLAG_TYPE_MASK == FSNODEFLAG_TYPE_MOUNTPT:
+        if inode_gettype(node) == InodeType.MOUNTPT:
             statfs = node["u"]["i_mops"]["statfs"]
             funcname = gdb.block_for_pc(int(statfs)).function.print_name
             fstype = funcname.split("_")[0]
@@ -295,9 +337,31 @@ class ForeachInode(gdb.Command):
         self.print_inode_info(arg["root_inode"], 1, "")
 
 
+class InfoShmfs(gdb.Command):
+    """Show share memory usage"""
+
+    def __init__(self):
+        super(InfoShmfs, self).__init__("info shm", gdb.COMMAND_USER)
+
+    def shm_filter(self, node, path):
+        if inode_gettype(node) != InodeType.SHM:
+            return
+
+        obj = node["i_private"].cast(gdb.lookup_type("struct shmfs_object_s").pointer())
+        length = obj["length"]
+        paddr = obj["paddr"]
+        print(f"  {path} memsize: {length}, paddr: {paddr}")
+
+    def invoke(self, args, from_tty):
+        foreach_inode(self.shm_filter)
+
+
 Fdinfo()
 
 if not utils.get_symbol_value("CONFIG_DISABLE_MOUNTPOINT"):
     Mount()
 
 ForeachInode()
+
+if CONFIG_FS_SHMFS:
+    InfoShmfs()
