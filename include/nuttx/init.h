@@ -38,6 +38,7 @@
  * initialization.
  */
 
+#define OSINIT_TASK_READY()      (g_nx_initstate >= OSINIT_TASKLISTS)
 #define OSINIT_MM_READY()        (g_nx_initstate >= OSINIT_MEMORY)
 #define OSINIT_HW_READY()        (g_nx_initstate >= OSINIT_HARDWARE)
 #define OSINIT_OS_READY()        (g_nx_initstate >= OSINIT_OSREADY)
