@@ -52,6 +52,9 @@
  * Private Data
  ************************************************************************************************/
 
+#ifdef CONFIG_LIBC_CRC32_SLOW
+#  define LIBC_CRC32_POLY 0xedb88320
+#else
 static const uint32_t crc32_tab[] =
 {
   0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -87,6 +90,7 @@ static const uint32_t crc32_tab[] =
   0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
   0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
+#endif
 
 /************************************************************************************************
  * Public Functions
@@ -103,11 +107,29 @@ static const uint32_t crc32_tab[] =
 uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val)
 {
   size_t i;
-
+#ifdef CONFIG_LIBC_CRC32_SLOW
+  for (i = 0; i < len; i++)
+    {
+      size_t j;
+      crc32val ^= src[i];
+      for (j = 0; j < 8; j++)
+        {
+          if (crc32val & 1)
+            {
+              crc32val = (crc32val >> 1) ^ LIBC_CRC32_POLY;
+            }
+          else
+            {
+              crc32val = crc32val >> 1;
+            }
+        }
+    }
+#else
   for (i = 0; i < len; i++)
     {
       crc32val = crc32_tab[(crc32val & 0xff) ^ src[i]] ^ (crc32val >> 8);
     }
+#endif
 
   return crc32val;
 }
