@@ -437,7 +437,7 @@ EXTERN volatile clock_t g_system_ticks;
           _nsec += NSEC_PER_SEC; \
           _sec--; \
         } \
-      if ((int64_t)_sec < 0) \
+      if ((sclock_t)_sec < 0) \
         { \
           _sec = 0; \
           _nsec = 0; \
