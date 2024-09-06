@@ -164,9 +164,6 @@ loader_gdt_ptr:
 
 	.size   __reset_entry, . - __reset_entry
 
-bsp_done:
-	.long   0
-
 #ifdef CONFIG_SMP
 /****************************************************************************
  * Name: __ap_entry
@@ -477,6 +474,9 @@ __enable_pcid:
 
 	.section ".loader.data", "ax"
 
+bsp_done:
+	.long   0
+
 	/* TSS (IST) for 64 bit long mode will be filled in up_irq. */
 	.align(16)
 g_ist64_low:
@@ -539,3 +539,17 @@ g_pt_low:
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 	.fill   X86_NUM_PAGE_ENTRY * X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+
+#ifdef CONFIG_ARCH_PVHBOOT
+	/* PVH Header with pvh_start_addr = start32 */
+	.pushsection .note.nuttx, "a", @note
+	.align 4
+	.long 2f - 1f
+	.long 4f - 3f
+	.long 18
+	1:.asciz "nuttx"
+	2:.align 4
+	3:.long start32
+	4:.align 4
+	.popsection
+#endif
