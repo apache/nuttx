@@ -432,7 +432,7 @@ int xtensa_swint(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SYSCALL Return: Context switch!\n");
-      up_dump_register(CURRENT_REGS);
+      up_dump_register((void *)CURRENT_REGS);
     }
   else
     {
