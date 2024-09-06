@@ -148,7 +148,13 @@ static inline void arm_gic_write_irouter(uint64_t val, unsigned int intid)
 {
   unsigned long addr = IROUTER(GET_DIST_BASE(intid), intid);
 
-  putreg64(val, addr);
+  /* Use two putreg32 instead of one putreg64, because when the neon option
+   * is enabled, the compiler may optimize putreg64 to the neon vstr
+   * instruction, which will cause a data abort.
+   */
+
+  putreg32((uint32_t)val, addr);
+  putreg32((uint32_t)(val >> 32) , addr + 4);
 }
 
 void arm_gic_irq_set_priority(unsigned int intid, unsigned int prio,
@@ -773,7 +779,13 @@ static int gic_validate_redist_version(void)
       return -ENODEV;
     }
 
-  typer           = getreg64(redist_base + GICR_TYPER);
+  /* In AArch32, use 32bits accesses GICR_TYPER, in case that nuttx
+   * run as vm, and hypervisor doesn't emulation strd.
+   * Just like linux and zephyr.
+   */
+
+  typer           = getreg32(redist_base + GICR_TYPER);
+  typer          |= (uint64_t)getreg32(redist_base + GICR_TYPER + 4) << 32;
   has_vlpis      &= !!(typer & GICR_TYPER_VLPIS);
   has_direct_lpi &= !!(typer & GICR_TYPER_DIRECTLPIS);
   ppi_nr          = MIN(GICR_TYPER_NR_PPIS(typer), ppi_nr);
