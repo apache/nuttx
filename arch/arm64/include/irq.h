@@ -220,6 +220,14 @@
 #define XCPTCONTEXT_REGS    (XCPTCONTEXT_GP_REGS + XCPTCONTEXT_FPU_REGS)
 #define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 
+#ifdef CONFIG_ARM64_DECODEFIQ
+#  define IRQ_DAIF_MASK (3)
+#else
+#  define IRQ_DAIF_MASK (2)
+#endif
+
+#define IRQ_SPSR_MASK (IRQ_DAIF_MASK << 6)
+
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
@@ -349,13 +357,9 @@ static inline irqstate_t up_irq_save(void)
   __asm__ __volatile__
     (
       "mrs %0, daif\n"
-#ifdef CONFIG_ARM64_DECODEFIQ
-      "msr daifset, #3\n"
-#else
-      "msr daifset, #2\n"
-#endif
+      "msr daifset, %1\n"
       : "=r" (flags)
-      :
+      : "i" (IRQ_DAIF_MASK)
       : "memory"
     );
 
@@ -371,13 +375,9 @@ static inline irqstate_t up_irq_enable(void)
   __asm__ __volatile__
     (
       "mrs %0, daif\n"
-#ifdef CONFIG_ARM64_DECODEFIQ
-      "msr daifclr, #3\n"
-#else
-      "msr daifclr, #2\n"
-#endif
+      "msr daifclr, %1\n"
       : "=r" (flags)
-      :
+      : "i" (IRQ_DAIF_MASK)
       : "memory"
     );
   return flags;
