@@ -43,7 +43,7 @@
  * todo: might need to adjust the double floating point version too.
  */
 
-#define LOGF_MAX_ITER         10
+#define LOGF_MAX_ITER         400
 #define LOGF_RELAX_MULTIPLIER 2.0F
 
 /****************************************************************************
