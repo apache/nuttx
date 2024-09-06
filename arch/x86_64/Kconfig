@@ -124,4 +124,10 @@ config MULTBOOT2_FB_TERM
 
 endif # ARCH_MULTIBOOT2
 
+config ARCH_PVHBOOT
+	bool "Append Xen PVH ELF Note"
+	default y
+	---help---
+		This allow x86 QEMU -kernel boot.
+
 endif # ARCH_X86_64
