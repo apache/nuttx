@@ -347,85 +347,6 @@ static void mallinfo_task_handler(FAR void *ptr, size_t size, int used,
 }
 
 /****************************************************************************
- * Name: mm_lock
- *
- * Description:
- *   Take the MM mutex. This may be called from the OS in certain conditions
- *   when it is impossible to wait on a mutex:
- *     1.The idle process performs the memory corruption check.
- *     2.The task/thread free the memory in the exiting process.
- *
- * Input Parameters:
- *   heap  - heap instance want to take mutex
- *
- * Returned Value:
- *   0 if the lock can be taken, otherwise negative errno.
- *
- ****************************************************************************/
-
-static int mm_lock(FAR struct mm_heap_s *heap)
-{
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  /* Check current environment */
-
-  if (up_interrupt_context())
-    {
-#if !defined(CONFIG_SMP)
-      /* Check the mutex value, if held by someone, then return false.
-       * Or, touch the heap internal data directly.
-       */
-
-      return nxmutex_is_locked(&heap->mm_lock) ? -EAGAIN : 0;
-#else
-      /* Can't take mutex in SMP interrupt handler */
-
-      return -EAGAIN;
-#endif
-    }
-  else
-#endif
-
-  /* _SCHED_GETTID() returns the task ID of the task at the head of the
-   * ready-to-run task list.  mm_lock() may be called during context
-   * switches.  There are certain situations during context switching when
-   * the OS data structures are in flux and then can't be freed immediately
-   * (e.g. the running thread stack).
-   *
-   * This is handled by _SCHED_GETTID() to return the special value
-   * -ESRCH to indicate this special situation.
-   */
-
-  if (_SCHED_GETTID() < 0)
-    {
-      return -ESRCH;
-    }
-  else
-    {
-      return nxmutex_lock(&heap->mm_lock);
-    }
-}
-
-/****************************************************************************
- * Name: mm_unlock
- *
- * Description:
- *   Release the MM mutex when it is not longer needed.
- *
- ****************************************************************************/
-
-static void mm_unlock(FAR struct mm_heap_s *heap)
-{
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
-  if (up_interrupt_context())
-    {
-      return;
-    }
-#endif
-
-  DEBUGVERIFY(nxmutex_unlock(&heap->mm_lock));
-}
-
-/****************************************************************************
  * Name: memdump_handler
  ****************************************************************************/
 
@@ -489,37 +410,48 @@ static void memdump_handler(FAR void *ptr, size_t size, int used,
 static void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
                          bool delay)
 {
-  if (mm_lock(heap) == 0)
+  irqstate_t flags;
+
+  if (_SCHED_GETTID() < 0)
     {
+      /* _SCHED_GETTID() returns the task ID of the task at the head of the
+       * ready-to-run task list.  mm_lock() may be called during context
+       * switches.  There are certain situations during context switching
+       * when the OS data structures are in flux and then can't be freed
+       * immediately (e.g. the running thread stack).
+       *
+       * This is handled by _SCHED_GETTID() to return the special value
+       * -ESRCH to indicate this special situation.
+       */
+
+      add_delaylist(heap, mem);
+      return;
+    }
+
+  flags = spin_lock_irqsave(&heap->mm_lock);
+
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
-      memset(mem, MM_FREE_MAGIC, mm_malloc_size(heap, mem));
+  memset(mem, MM_FREE_MAGIC, mm_malloc_size(heap, mem));
 #endif
 
-      kasan_poison(mem, mm_malloc_size(heap, mem));
+  kasan_poison(mem, mm_malloc_size(heap, mem));
 
-      /* Update heap statistics */
+  /* Update heap statistics */
 
-      heap->mm_curused -= mm_malloc_size(heap, mem);
+  heap->mm_curused -= mm_malloc_size(heap, mem);
 
-      /* Pass, return to the tlsf pool */
+  /* Pass, return to the tlsf pool */
 
-      if (delay)
-        {
-          add_delaylist(heap, mem);
-        }
-      else
-        {
-          tlsf_free(heap->mm_tlsf, mem);
-        }
-
-      mm_unlock(heap);
+  if (delay)
+    {
+      add_delaylist(heap, mem);
     }
   else
     {
-      /* Add to the delay list(see the comment in mm_lock) */
-
-      add_delaylist(heap, mem);
+      tlsf_free(heap->mm_tlsf, mem);
     }
+
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 }
 
 /****************************************************************************
@@ -547,6 +479,7 @@ static void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
 void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                   size_t heapsize)
 {
+  irqstate_t flags;
 #if CONFIG_MM_REGIONS > 1
   int idx;
 
@@ -574,7 +507,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   kasan_register(heapstart, &heapsize);
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
 
   minfo("Region %d: base=%p size=%zu\n", idx + 1, heapstart, heapsize);
 
@@ -596,7 +529,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   /* Add memory to the tlsf pool */
 
   tlsf_add_pool(heap->mm_tlsf, heapstart, heapsize);
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 }
 
 /****************************************************************************
@@ -660,6 +593,7 @@ FAR void *mm_calloc(FAR struct mm_heap_s *heap, size_t n, size_t elem_size)
 
 void mm_checkcorruption(FAR struct mm_heap_s *heap)
 {
+  irqstate_t flags;
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
@@ -674,10 +608,12 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
     {
       /* Retake the mutex for each region to reduce latencies */
 
-      if (mm_lock(heap) < 0)
+      if (_SCHED_GETTID() < 0)
         {
           return;
         }
+
+      flags = spin_lock_irqsave(&heap->mm_lock);
 
       /* Check tlsf control block in the first pass */
 
@@ -692,7 +628,7 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
 
       /* Release the mutex */
 
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
     }
 #undef region
 }
@@ -711,6 +647,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
                int region)
 {
   size_t oldsize;
+  irqstate_t flags;
 
   /* Make sure that we were passed valid parameters */
 
@@ -723,7 +660,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   /* Take the memory manager mutex */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
 
   /* Extend the tlsf pool */
 
@@ -735,7 +672,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   heap->mm_heapsize += size;
   heap->mm_heapend[region] += size;
 
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 }
 
 /****************************************************************************
@@ -960,6 +897,7 @@ mm_initialize_pool(FAR const char *name,
 struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
 {
   struct mallinfo info;
+  irqstate_t flags;
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   struct mallinfo poolinfo;
 #endif
@@ -979,10 +917,10 @@ struct mallinfo mm_mallinfo(FAR struct mm_heap_s *heap)
     {
       /* Retake the mutex for each region to reduce latencies */
 
-      DEBUGVERIFY(mm_lock(heap));
+      flags = spin_lock_irqsave(&heap->mm_lock);
       tlsf_walk_pool(heap->mm_heapstart[region],
                      mallinfo_handler, &info);
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
     }
 #undef region
 
@@ -1004,6 +942,7 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
                                       FAR const struct malltask *task)
 {
   struct mm_mallinfo_handler_s handle;
+  irqstate_t flags;
   struct mallinfo_task info =
     {
       0, 0
@@ -1027,10 +966,10 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
     {
       /* Retake the mutex for each region to reduce latencies */
 
-      DEBUGVERIFY(mm_lock(heap));
+      flags = spin_lock_irqsave(&heap->mm_lock);
       tlsf_walk_pool(heap->mm_heapstart[region],
                      mallinfo_task_handler, &handle);
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
     }
 #undef region
 
@@ -1051,6 +990,7 @@ struct mallinfo_task mm_mallinfo_task(FAR struct mm_heap_s *heap,
 void mm_memdump(FAR struct mm_heap_s *heap,
                 FAR const struct mm_memdump_s *dump)
 {
+  irqstate_t flags;
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
@@ -1084,10 +1024,10 @@ void mm_memdump(FAR struct mm_heap_s *heap,
   for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
-      DEBUGVERIFY(mm_lock(heap));
+      flags = spin_lock_irqsave(&heap->mm_lock);
       tlsf_walk_pool(heap->mm_heapstart[region],
                      memdump_handler, (FAR void *)dump);
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
     }
 #undef region
 
@@ -1133,6 +1073,7 @@ size_t mm_malloc_size(FAR struct mm_heap_s *heap, FAR void *mem)
 
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
+  irqstate_t flags;
   FAR void *ret;
 
   /* In case of zero-length allocations allocate the minimum size object */
@@ -1159,7 +1100,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* Allocate from the tlsf pool */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
 #if CONFIG_MM_BACKTRACE >= 0
   ret = tlsf_malloc(heap->mm_tlsf, size +
                     sizeof(struct memdump_backtrace_s));
@@ -1173,7 +1114,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
       heap->mm_maxused = heap->mm_curused;
     }
 
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 
   if (ret)
     {
@@ -1217,6 +1158,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
                       size_t size)
 {
+  irqstate_t flags;
   FAR void *ret;
 
 #ifdef CONFIG_MM_HEAP_MEMPOOL
@@ -1236,7 +1178,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Allocate from the tlsf pool */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
 #if CONFIG_MM_BACKTRACE >= 0
   ret = tlsf_memalign(heap->mm_tlsf, alignment, size +
                       sizeof(struct memdump_backtrace_s));
@@ -1250,7 +1192,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       heap->mm_maxused = heap->mm_curused;
     }
 
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 
   if (ret)
     {
@@ -1300,6 +1242,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size)
 {
+  irqstate_t flags;
   FAR void *newmem;
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
@@ -1359,7 +1302,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Allocate from the tlsf pool */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
   heap->mm_curused -= mm_malloc_size(heap, oldmem);
 #if CONFIG_MM_BACKTRACE >= 0
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size +
@@ -1374,7 +1317,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       heap->mm_maxused = heap->mm_curused;
     }
 
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 
 #if CONFIG_MM_BACKTRACE >= 0
   if (newmem)

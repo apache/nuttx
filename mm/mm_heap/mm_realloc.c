@@ -68,6 +68,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   FAR struct mm_allocnode_s *oldnode;
   FAR struct mm_freenode_s  *prev = NULL;
   FAR struct mm_freenode_s  *next;
+  irqstate_t flags;
   size_t newsize;
   size_t oldsize;
   size_t prevsize = 0;
@@ -133,7 +134,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
   DEBUGASSERT(MM_NODE_IS_ALLOC(oldnode));
 
   /* Check if this is a request to reduce the size of the allocation. */
@@ -155,7 +156,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
       /* Then return the original address */
 
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
       MM_ADD_BACKTRACE(heap, oldnode);
 
       return oldmem;
@@ -380,7 +381,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_maxused = heap->mm_curused;
         }
 
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
       kasan_unpoison(newmem, mm_malloc_size(heap, newmem));
@@ -406,7 +407,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        * leave the original memory in place.
        */
 
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
       newmem = mm_malloc(heap, size);
       if (newmem)
         {

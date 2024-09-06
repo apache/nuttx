@@ -83,10 +83,11 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
+  irqstate_t flags;
   size_t nodesize;
   size_t prevsize;
 
-  if (mm_lock(heap) < 0)
+  if (_SCHED_GETTID() < 0)
     {
       /* Meet -ESRCH return, which means we are in situations
        * during context switching(See mm_lock() & gettid()).
@@ -97,6 +98,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
       return;
     }
 
+  flags = spin_lock_irqsave(&heap->mm_lock);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
   memset(mem, MM_FREE_MAGIC, mm_malloc_size(heap, mem));
 #endif
@@ -105,7 +107,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
 
   if (delay)
     {
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
       add_delaylist(heap, mem);
       return;
     }
@@ -200,7 +202,7 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
   /* Add the merged node to the nodelist */
 
   mm_addfreechunk(heap, node);
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 }
 
 /****************************************************************************

@@ -56,6 +56,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   FAR struct mm_allocnode_s *newnode;
   uintptr_t blockstart;
   uintptr_t blockend;
+  irqstate_t flags;
 
   /* Make sure that we were passed valid parameters */
 
@@ -77,7 +78,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
   /* Take the memory manager mutex */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
 
   /* Get the terminal node in the old heap.  The block to extend must
    * immediately follow this node.
@@ -109,7 +110,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
   /* Finally, increase the total heap size accordingly */
 
   heap->mm_heapsize += size;
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 
   /* Finally "free" the new block of memory where the old terminal node was
    * located.

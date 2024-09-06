@@ -24,7 +24,6 @@ if(CONFIG_MM_DEFAULT_MANAGER)
 
   set(SRCS
       mm_initialize.c
-      mm_lock.c
       mm_addfreechunk.c
       mm_size2ndx.c
       mm_malloc_size.c

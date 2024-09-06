@@ -219,9 +219,9 @@ struct mm_delaynode_s
 
 struct mm_heap_s
 {
-  /* Mutex for controling access to this heap */
+  /* Spinlock for controling access to this heap */
 
-  mutex_t mm_lock;
+  spinlock_t mm_lock;
 
   /* This is the size of the heap provided to mm */
 
@@ -279,11 +279,6 @@ typedef CODE void (*mm_node_handler_t)(FAR struct mm_allocnode_s *node,
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/* Functions contained in mm_lock.c *****************************************/
-
-int mm_lock(FAR struct mm_heap_s *heap);
-void mm_unlock(FAR struct mm_heap_s *heap);
 
 /* Functions contained in mm_shrinkchunk.c **********************************/
 

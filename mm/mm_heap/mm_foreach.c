@@ -48,7 +48,9 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 {
   FAR struct mm_allocnode_s *node;
   FAR struct mm_allocnode_s *prev;
+  irqstate_t flags;
   size_t nodesize;
+
 #if CONFIG_MM_REGIONS > 1
   int region;
 #else
@@ -69,11 +71,12 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
        * Retake the mutex for each region to reduce latencies
        */
 
-      if (mm_lock(heap) < 0)
+      if (_SCHED_GETTID() < 0)
         {
           return;
         }
 
+      flags = spin_lock_irqsave(&heap->mm_lock);
       for (node = heap->mm_heapstart[region];
            node < heap->mm_heapend[region];
            node = (FAR struct mm_allocnode_s *)((FAR char *)node + nodesize))
@@ -96,7 +99,7 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
       DEBUGASSERT(node == heap->mm_heapend[region]);
       handler(node, arg);
 
-      mm_unlock(heap);
+      spin_unlock_irqrestore(&heap->mm_lock, flags);
     }
 #undef region
 }

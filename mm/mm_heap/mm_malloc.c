@@ -167,6 +167,7 @@ void mm_free_delaylist(FAR struct mm_heap_s *heap)
 FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 {
   FAR struct mm_freenode_s *node;
+  irqstate_t flags;
   size_t alignsize;
   size_t nodesize;
   FAR void *ret = NULL;
@@ -209,7 +210,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   /* We need to hold the MM mutex while we muck with the nodelist. */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
 
   /* Convert the request size into a nodelist index */
 
@@ -317,7 +318,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
 
   DEBUGASSERT(ret == NULL || mm_heapmember(heap, ret));
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 
   if (ret)
     {

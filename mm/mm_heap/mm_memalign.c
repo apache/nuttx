@@ -54,6 +54,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   FAR struct mm_allocnode_s *node;
   uintptr_t rawchunk;
   uintptr_t alignedchunk;
+  irqstate_t flags;
   size_t mask;
   size_t allocsize;
   size_t newsize;
@@ -142,7 +143,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * nodelist.
    */
 
-  DEBUGVERIFY(mm_lock(heap));
+  flags = spin_lock_irqsave(&heap->mm_lock);
 
   /* Get the node associated with the allocation and the next node after
    * the allocation.
@@ -271,7 +272,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       heap->mm_maxused = heap->mm_curused;
     }
 
-  mm_unlock(heap);
+  spin_unlock_irqrestore(&heap->mm_lock, flags);
 
   MM_ADD_BACKTRACE(heap, node);
 
