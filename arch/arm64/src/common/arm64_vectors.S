@@ -56,22 +56,6 @@
 
 .endm
 
-.macro enable_irq
-#ifdef CONFIG_ARM64_DECODEFIQ
-    msr daifclr, #3
-#else
-    msr daifclr, #2
-#endif
-.endm
-
-.macro disable_irq
-#ifdef CONFIG_ARM64_DECODEFIQ
-    msr daifset, #3
-#else
-    msr daifset, #2
-#endif
-.endm
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -238,9 +222,9 @@ SECTION_FUNC(text, arm64_sync_exc)
 
     /* Call dispatch_syscall() on the kernel stack with interrupts enabled */
 
-    enable_irq
+    msr    daifclr, #IRQ_DAIF_MASK /* Re-enable interrupts */
     bl     dispatch_syscall
-    disable_irq
+    msr    daifset, #IRQ_DAIF_MASK /* Disable interrupts */
 
     /* Save the return value into the user context */
 
