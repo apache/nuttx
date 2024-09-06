@@ -46,7 +46,7 @@
  * todo: might need to adjust the double floating point version too.
  */
 
-#define LOG_MAX_ITER         10
+#define LOG_MAX_ITER         400
 #define LOG_RELAX_MULTIPLIER 2.0
 
 /****************************************************************************
