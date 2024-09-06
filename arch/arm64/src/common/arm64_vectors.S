@@ -239,7 +239,6 @@ SECTION_FUNC(text, arm64_sync_exc)
     /* Call dispatch_syscall() on the kernel stack with interrupts enabled */
 
     enable_irq
-    mov    x7, sp /* x7 = context */
     bl     dispatch_syscall
     disable_irq
 
