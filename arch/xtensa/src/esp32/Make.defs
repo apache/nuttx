@@ -42,6 +42,9 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += esp32_userspace.c
+ifeq ($(CONFIG_ESP32_PID),y)
+CHIP_CSRCS += esp32_userspace_pid.c
+endif
 endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
