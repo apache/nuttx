@@ -457,9 +457,9 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
   /* Make sure that the device is in the UP state */
 
-  if ((state.st_dev->d_flags & IFF_UP) == 0)
+  if (IFF_IS_RUNNING(state.st_dev->d_flags) == 0)
     {
-      nwarn("WARNING: device is DOWN\n");
+      nwarn("WARNING: device is not running\n");
       return -EHOSTUNREACH;
     }
 
