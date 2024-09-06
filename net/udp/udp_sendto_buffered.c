@@ -284,9 +284,9 @@ static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 
   /* Make sure that the device is in the UP state */
 
-  if ((dev->d_flags & IFF_UP) == 0)
+  if (IFF_IS_RUNNING(dev->d_flags) == 0)
     {
-      nwarn("WARNING: device is DOWN\n");
+      nwarn("WARNING: device is not RUNNING\n");
       return -EHOSTUNREACH;
     }
 
