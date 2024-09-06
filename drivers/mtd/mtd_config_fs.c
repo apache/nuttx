@@ -227,13 +227,53 @@ static int nvs_flash_wrt(FAR struct nvs_fs *fs, uint32_t addr,
   offset = fs->blocksize * (addr >> ADDR_BLOCK_SHIFT);
   offset += addr & ADDR_OFFS_MASK;
 
+#ifdef CONFIG_MTD_BYTE_WRITE
   ret = MTD_WRITE(fs->mtd, offset, len, data);
-  if (ret < 0)
+#else
+  ret = MTD_BWRITE(fs->mtd, offset / fs->progsize, len / fs->progsize, data);
+#endif
+
+  return ret < 0 ? ret : 0;
+}
+
+/****************************************************************************
+ * Name: nvs_flash_brd
+ ****************************************************************************/
+
+static int nvs_flash_brd(FAR struct nvs_fs *fs, off_t offset,
+                         FAR void *data, size_t len)
+{
+  int ret;
+
+#ifdef CONFIG_MTD_BYTE_WRITE
+  ret = MTD_READ(fs->mtd, offset, len, data);
+#else
+  ret = MTD_BREAD(fs->mtd, offset / fs->progsize, len / fs->progsize, data);
+#endif
+  if (ret == -EBADMSG)
     {
-      return ret;
+      /* ECC fail first time
+       * try again to avoid transient electronic interference
+       */
+
+#ifdef CONFIG_MTD_BYTE_WRITE
+      ret = MTD_READ(fs->mtd, offset, len, data);
+#else
+      ret = MTD_BREAD(fs->mtd, offset / fs->progsize, len / fs->progsize,
+                      data);
+#endif
+      if (ret == -EBADMSG)
+        {
+          /* ECC fail second time
+           * fill ~erasestate to trigger recovery process
+           */
+
+          memset(data, ~fs->erasestate, len);
+          ret = 0;
+        }
     }
 
-  return OK;
+  return ret < 0 ? ret : 0;
 }
 
 /****************************************************************************
@@ -247,32 +287,67 @@ static int nvs_flash_wrt(FAR struct nvs_fs *fs, uint32_t addr,
 static int nvs_flash_rd(FAR struct nvs_fs *fs, uint32_t addr,
                         FAR void *data, size_t len)
 {
+#ifdef CONFIG_MTD_BYTE_WRITE
   off_t offset;
-  int ret;
 
   offset = fs->blocksize * (addr >> ADDR_BLOCK_SHIFT);
   offset += addr & ADDR_OFFS_MASK;
 
-  ret = MTD_READ(fs->mtd, offset, len, data);
-  if (ret == -EBADMSG)
+  return nvs_flash_brd(fs, offset, data, len);
+#else
+  uint8_t buf[fs->progsize];
+  size_t bytes_to_rd;
+  off_t begin_padding;
+  off_t offset;
+  int ret;
+
+  offset = fs->blocksize * (addr >> ADDR_BLOCK_SHIFT) +
+           (addr & ADDR_OFFS_MASK);
+  begin_padding = offset % fs->progsize;
+
+  if (begin_padding > 0)
     {
-      /* ECC fail first time
-       * try again to avoid transient electronic interference
-       */
-
-      ret = MTD_READ(fs->mtd, offset, len, data);
-      if (ret == -EBADMSG)
+      offset -= begin_padding;
+      bytes_to_rd = MIN(fs->progsize - begin_padding, len);
+      ret = nvs_flash_brd(fs, offset, buf, fs->progsize);
+      if (ret < 0)
         {
-          /* ECC fail second time
-           * fill ~erasestate to trigger recovery process
-           */
-
-          memset(data, ~fs->erasestate, len);
-          ret = 0;
+          return ret;
         }
+
+      memcpy(data, buf + begin_padding, bytes_to_rd);
+      offset += fs->progsize;
+      data += bytes_to_rd;
+      len -= bytes_to_rd;
     }
 
-  return ret < 0 ? ret : 0;
+  if (len >= fs->progsize)
+    {
+      bytes_to_rd = len / fs->progsize * fs->progsize;
+      ret = nvs_flash_brd(fs, offset, data, bytes_to_rd);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      offset += bytes_to_rd;
+      data += bytes_to_rd;
+      len -= bytes_to_rd;
+    }
+
+  if (len > 0)
+    {
+      ret = nvs_flash_brd(fs, offset, buf, fs->progsize);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      memcpy(data, buf, len);
+    }
+
+  return 0;
+#endif
 }
 
 /****************************************************************************
