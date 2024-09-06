@@ -222,7 +222,13 @@ SECTION_FUNC(text, arm64_sync_exc)
 
     /* Call dispatch_syscall() on the kernel stack with interrupts enabled */
 
+    mrs    x10, spsr_el1
+    and    x10, x10, #IRQ_SPSR_MASK
+    cmp    x10, xzr
+    bne    1f
     msr    daifclr, #IRQ_DAIF_MASK /* Re-enable interrupts */
+
+1:
     bl     dispatch_syscall
     msr    daifset, #IRQ_DAIF_MASK /* Disable interrupts */
 
