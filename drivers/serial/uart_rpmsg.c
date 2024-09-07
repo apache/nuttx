@@ -384,9 +384,11 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
     {
       /* Get write-cmd, there are some data, we need receive them */
 
+      nxmutex_lock(&dev->recv.lock);
       priv->recv_data = data;
       uart_recvchars_dma(dev);
       priv->recv_data = NULL;
+      nxmutex_unlock(&dev->recv.lock);
 
       header->response = 1;
       rpmsg_send(ept, msg, sizeof(*msg));
