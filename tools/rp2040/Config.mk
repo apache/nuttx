@@ -29,8 +29,7 @@ ifdef PICO_SDK_PATH
 define POSTBUILD
 	$(Q)echo "Generating: nuttx.uf2"; \
 
-	+$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)rp2040 -f Makefile.host
-	tools$(DELIM)rp2040$(DELIM)elf2uf2$(HOSTEXEEXT) nuttx nuttx.uf2;
+	picotool$(HOSTEXEEXT) uf2 convert --quiet -t elf nuttx nuttx.uf2;
 	$(Q)([ $$? -eq 0 ] && echo nuttx.uf2 >> nuttx.manifest && echo "Done.")
 endef
 else
