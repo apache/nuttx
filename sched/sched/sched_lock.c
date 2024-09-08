@@ -195,6 +195,7 @@ int sched_lock(void)
 
   if (rtcb != NULL && !up_interrupt_context())
     {
+      irqstate_t flags = enter_critical_section();
       /* Catch attempts to increment the lockcount beyond the range of the
        * integer type.
        */
@@ -223,6 +224,8 @@ int sched_lock(void)
 #endif
         }
 #endif
+
+      leave_critical_section(flags);
     }
 
   return OK;
