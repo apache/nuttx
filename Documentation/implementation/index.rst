@@ -11,3 +11,4 @@ Implementation Details
    interrupt_controls.rst
    preemption_latency.rst
    bottomhalf_interrupt.rst
+   simulation.rst
