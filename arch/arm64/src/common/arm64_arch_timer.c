@@ -70,8 +70,11 @@ struct arm64_oneshot_lowerhalf_s
   void *arg;                          /* Argument that is passed to the handler */
   uint64_t cycle_per_tick;            /* cycle per tick */
   oneshot_callback_t callback;        /* Internal handler that receives callback */
-  bool running;                       /* True: timer is running */
   bool init[CONFIG_SMP_NCPUS];        /* True: timer is init */
+
+  /* which cpu timer is running, -1 indicate timer stoppd */
+
+  int running;
 };
 
 /****************************************************************************
@@ -157,7 +160,7 @@ static int arm64_arch_timer_compare_isr(int irq, void *regs, void *arg)
 
   arm64_arch_timer_set_irq_mask(true);
 
-  if (priv->callback && priv->running)
+  if (priv->callback && priv->running == this_cpu())
     {
       /* Then perform the callback */
 
@@ -228,7 +231,7 @@ static int arm64_tick_cancel(struct oneshot_lowerhalf_s *lower,
 
   /* Disable int */
 
-  priv->running = false;
+  priv->running = -1;
   arm64_arch_timer_set_irq_mask(true);
 
   return OK;
@@ -281,7 +284,7 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
       priv->init[this_cpu()] = true;
     }
 
-  priv->running = true;
+  priv->running = this_cpu();
 
   next_cycle =
     arm64_arch_timer_count() / priv->cycle_per_tick * priv->cycle_per_tick +
@@ -374,6 +377,7 @@ struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
   /* Initialize the lower-half driver structure */
 
   priv->lh.ops = &g_oneshot_ops;
+  priv->running = -1;
   priv->cycle_per_tick = arm64_arch_timer_get_cntfrq() / TICK_PER_SEC;
   tmrinfo("cycle_per_tick %" PRIu64 "\n", priv->cycle_per_tick);
 
