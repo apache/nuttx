@@ -72,138 +72,129 @@
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
-  DEBUGASSERT(tcb != NULL && sigdeliver != NULL);
+  sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb,
+        this_task(), up_current_regs());
 
-  /* Refuse to handle nested signal actions */
+  /* First, handle some special cases when the signal is being delivered
+   * to task that is currently executing on any CPU.
+   */
 
-  if (tcb->sigdeliver == NULL)
+  if (tcb->task_state == TSTATE_TASK_RUNNING)
     {
-      tcb->sigdeliver = sigdeliver;
+      uint8_t me  = this_cpu();
+#ifdef CONFIG_SMP
+      uint8_t cpu = tcb->cpu;
+#else
+      uint8_t cpu = 0;
+#endif
 
-      /* First, handle some special cases when the signal is being delivered
-       * to task that is currently executing on any CPU.
+      /* CASE 1:  We are not in an interrupt handler and a task is
+       * signaling itself for some reason.
        */
 
-      sinfo("rtcb=%p current_regs=%p\n", this_task(), up_current_regs());
-
-      if (tcb->task_state == TSTATE_TASK_RUNNING)
+      if (cpu == me && !up_current_regs())
         {
-          uint8_t me  = this_cpu();
-#ifdef CONFIG_SMP
-          uint8_t cpu = tcb->cpu;
-#else
-          uint8_t cpu = 0;
-#endif
+          /* In this case just deliver the signal now. */
 
-          /* CASE 1:  We are not in an interrupt handler and a task is
-           * signaling itself for some reason.
-           */
-
-          if (cpu == me && !up_current_regs())
-            {
-              /* In this case just deliver the signal now. */
-
-              sigdeliver(tcb);
-              tcb->sigdeliver = NULL;
-            }
-
-          /* CASE 2:  The task that needs to receive the signal is running.
-           * This could happen if the task is running on another CPU OR if
-           * we are in an interrupt handler and the task is running on this
-           * CPU.  In the former case, we will have to PAUSE the other CPU
-           * first.  But in either case, we will have to modify the return
-           * state as well as the state in the TCB.
-           */
-
-          else
-            {
-#ifdef CONFIG_SMP
-              /* If we signaling a task running on the other CPU, we have
-               * to PAUSE the other CPU.
-               */
-
-              if (cpu != me)
-                {
-                  /* Pause the CPU */
-
-                  up_cpu_pause(cpu);
-                }
-
-              /* Now tcb on the other CPU can be accessed safely */
-#endif
-
-              /* Save the current register context location */
-
-              tcb->xcp.saved_regs = up_current_regs();
-
-              /* Duplicate the register context.  These will be
-               * restored by the signal trampoline after the signal has been
-               * delivered.
-               */
-
-              up_current_regs() -= XCPTCONTEXT_REGS;
-              memcpy(up_current_regs(), up_current_regs() +
-                     XCPTCONTEXT_REGS, XCPTCONTEXT_SIZE);
-
-              up_current_regs()[REG_SP]  = (uint32_t)up_current_regs();
-
-              /* Then set up to vector to the trampoline with interrupts
-               * unchanged.  We must already be in privileged thread mode
-               * to be here.
-               */
-
-              up_current_regs()[REG_PC]  = (uint32_t)ceva_sigdeliver;
-#ifdef REG_OM
-              up_current_regs()[REG_OM] &= ~REG_OM_MASK;
-              up_current_regs()[REG_OM] |=  REG_OM_KERNEL;
-#endif
-
-#ifdef CONFIG_SMP
-              /* RESUME the other CPU if it was PAUSED */
-
-              if (cpu != me)
-                {
-                  up_cpu_resume(cpu);
-                }
-#endif
-            }
+          (tcb->sigdeliver)(tcb);
+          tcb->sigdeliver = NULL;
         }
 
-      /* Otherwise, we are (1) signaling a task is not running from an
-       * interrupt handler or (2) we are not in an interrupt handler and the
-       * running task is signaling some other non-running task.
+      /* CASE 2:  The task that needs to receive the signal is running.
+       * This could happen if the task is running on another CPU OR if
+       * we are in an interrupt handler and the task is running on this
+       * CPU.  In the former case, we will have to PAUSE the other CPU
+       * first.  But in either case, we will have to modify the return
+       * state as well as the state in the TCB.
        */
 
       else
         {
+#ifdef CONFIG_SMP
+          /* If we signaling a task running on the other CPU, we have
+           * to PAUSE the other CPU.
+           */
+
+          if (cpu != me)
+            {
+              /* Pause the CPU */
+
+              up_cpu_pause(cpu);
+            }
+
+          /* Now tcb on the other CPU can be accessed safely */
+#endif
+
           /* Save the current register context location */
 
-          tcb->xcp.saved_regs = tcb->xcp.regs;
+          tcb->xcp.saved_regs = up_current_regs();
 
-          /* Duplicate the register context.  These will be restored
-           * by the signal trampoline after the signal has been delivered.
+          /* Duplicate the register context.  These will be
+           * restored by the signal trampoline after the signal has been
+           * delivered.
            */
 
-          tcb->xcp.regs -= XCPTCONTEXT_REGS;
-          memcpy(tcb->xcp.regs, tcb->xcp.regs +
-                 XCPTCONTEXT_REGS, XCPTCONTEXT_SIZE);
+          up_current_regs() -= XCPTCONTEXT_REGS;
+          memcpy(up_current_regs(), up_current_regs() +
+                  XCPTCONTEXT_REGS, XCPTCONTEXT_SIZE);
 
-          tcb->xcp.regs[REG_SP]  = (uint32_t)tcb->xcp.regs;
+          up_current_regs()[REG_SP]  = (uint32_t)up_current_regs();
 
           /* Then set up to vector to the trampoline with interrupts
-           * unchanged.  We must already be in privileged thread mode to be
-           * here.
+           * unchanged.  We must already be in privileged thread mode
+           * to be here.
            */
 
-          tcb->xcp.regs[REG_PC]  = (uint32_t)ceva_sigdeliver;
+          up_current_regs()[REG_PC]  = (uint32_t)ceva_sigdeliver;
 #ifdef REG_OM
-          tcb->xcp.regs[REG_OM] &= ~REG_OM_MASK;
-          tcb->xcp.regs[REG_OM] |=  REG_OM_KERNEL;
+          up_current_regs()[REG_OM] &= ~REG_OM_MASK;
+          up_current_regs()[REG_OM] |=  REG_OM_KERNEL;
+#endif
+
+#ifdef CONFIG_SMP
+          /* RESUME the other CPU if it was PAUSED */
+
+          if (cpu != me)
+            {
+              up_cpu_resume(cpu);
+            }
 #endif
         }
+    }
+
+  /* Otherwise, we are (1) signaling a task is not running from an
+   * interrupt handler or (2) we are not in an interrupt handler and the
+   * running task is signaling some other non-running task.
+   */
+
+  else
+    {
+      /* Save the current register context location */
+
+      tcb->xcp.saved_regs = tcb->xcp.regs;
+
+      /* Duplicate the register context.  These will be restored
+       * by the signal trampoline after the signal has been delivered.
+       */
+
+      tcb->xcp.regs -= XCPTCONTEXT_REGS;
+      memcpy(tcb->xcp.regs, tcb->xcp.regs +
+             XCPTCONTEXT_REGS, XCPTCONTEXT_SIZE);
+
+      tcb->xcp.regs[REG_SP]  = (uint32_t)tcb->xcp.regs;
+
+      /* Then set up to vector to the trampoline with interrupts
+       * unchanged.  We must already be in privileged thread mode to be
+       * here.
+       */
+
+      tcb->xcp.regs[REG_PC]  = (uint32_t)ceva_sigdeliver;
+#ifdef REG_OM
+      tcb->xcp.regs[REG_OM] &= ~REG_OM_MASK;
+      tcb->xcp.regs[REG_OM] |=  REG_OM_KERNEL;
+#endif
     }
 }
 

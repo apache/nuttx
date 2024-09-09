@@ -545,7 +545,7 @@ int up_backtrace(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
+void up_schedule_sigaction(FAR struct tcb_s *tcb);
 
 /****************************************************************************
  * Name: up_task_start
