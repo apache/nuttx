@@ -98,18 +98,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
     }
   else
     {
-#ifdef CONFIG_SMP
-      int cpu = tcb->cpu;
-      int me  = this_cpu();
-
-      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-        {
-          /* Pause the CPU */
-
-          up_cpu_pause(cpu);
-        }
-#endif
-
       /* Save the context registers.  These will be restored by the
        * signal trampoline after the signals have been delivered.
        *
@@ -151,15 +139,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 #endif
 #ifndef CONFIG_BUILD_FLAT
       xtensa_raiseprivilege(tcb->xcp.regs);
-#endif
-
-#ifdef CONFIG_SMP
-      /* RESUME the other CPU if it was PAUSED */
-
-      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-        {
-          up_cpu_resume(cpu);
-        }
 #endif
     }
 }

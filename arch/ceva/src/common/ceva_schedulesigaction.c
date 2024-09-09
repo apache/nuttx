@@ -112,21 +112,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
       else
         {
-#ifdef CONFIG_SMP
-          /* If we signaling a task running on the other CPU, we have
-           * to PAUSE the other CPU.
-           */
-
-          if (cpu != me)
-            {
-              /* Pause the CPU */
-
-              up_cpu_pause(cpu);
-            }
-
-          /* Now tcb on the other CPU can be accessed safely */
-#endif
-
           /* Save the current register context location */
 
           tcb->xcp.saved_regs = up_current_regs();
@@ -151,15 +136,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 #ifdef REG_OM
           up_current_regs()[REG_OM] &= ~REG_OM_MASK;
           up_current_regs()[REG_OM] |=  REG_OM_KERNEL;
-#endif
-
-#ifdef CONFIG_SMP
-          /* RESUME the other CPU if it was PAUSED */
-
-          if (cpu != me)
-            {
-              up_cpu_resume(cpu);
-            }
 #endif
         }
     }

@@ -204,79 +204,32 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
       else
         {
-          /* If we signaling a task running on the other CPU, we have
-           * to PAUSE the other CPU.
+          /* tcb is running on the same CPU */
+
+          /* Save registers that must be protected while the signal
+           * handler runs. These will be restored by the signal
+           * trampoline after the signal(s) have been delivered.
            */
 
-          if (cpu != me)
-            {
-              /* Pause the CPU */
+          tcb->xcp.saved_pc     = up_current_regs()[REG_PC];
+          tcb->xcp.saved_npc    = up_current_regs()[REG_NPC];
+          tcb->xcp.saved_status = up_current_regs()[REG_PSR];
 
-              up_cpu_pause(cpu);
-
-              /* Now tcb on the other CPU can be accessed safely */
-
-              /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be
-               * restored by the signal trampoline after the signal has
-               * been delivered.
-               */
-
-              tcb->xcp.saved_pc     = tcb->xcp.regs[REG_PC];
-              tcb->xcp.saved_npc    = tcb->xcp.regs[REG_NPC];
-              tcb->xcp.saved_status = tcb->xcp.regs[REG_PSR];
-
-              /* Then set up vector to the trampoline with interrupts
-               * disabled.  We must already be in privileged thread mode
-               * to be here.
-               */
-
-              tcb->xcp.regs[REG_PC]  = (uint32_t)sparc_sigdeliver;
-              tcb->xcp.regs[REG_NPC] = (uint32_t)sparc_sigdeliver + 4;
-              tcb->xcp.regs[REG_PSR] |= SPARC_PSR_ET_MASK;
-            }
-          else
-            {
-              /* tcb is running on the same CPU */
-
-              /* Save registers that must be protected while the signal
-               * handler runs. These will be restored by the signal
-               * trampoline after the signal(s) have been delivered.
-               */
-
-              tcb->xcp.saved_pc     = up_current_regs()[REG_PC];
-              tcb->xcp.saved_npc    = up_current_regs()[REG_NPC];
-              tcb->xcp.saved_status = up_current_regs()[REG_PSR];
-
-              /* Then set up vector to the trampoline with interrupts
-               * disabled.  The kernel-space trampoline must run in
-               * privileged thread mode.
-               */
-
-              up_current_regs()[REG_PC]  = (uint32_t)sparc_sigdeliver;
-              up_current_regs()[REG_NPC] = (uint32_t)sparc_sigdeliver
-                                            + 4;
-              up_current_regs()[REG_PSR] |= SPARC_PSR_ET_MASK;
-
-              /* And make sure that the saved context in the TCB is the
-               * same as the interrupt return context.
-               */
-
-              sparc_savestate(tcb->xcp.regs);
-            }
-
-          /* NOTE: If the task runs on another CPU(cpu), adjusting
-           * global IRQ controls will be done in the pause handler
-           * on the CPU(cpu) by taking a critical section.
-           * If the task is scheduled on this CPU(me), do nothing
-           * because this CPU already took a critical section
+          /* Then set up vector to the trampoline with interrupts
+           * disabled.  The kernel-space trampoline must run in
+           * privileged thread mode.
            */
 
-          /* RESUME the other CPU if it was PAUSED */
+          up_current_regs()[REG_PC]  = (uint32_t)sparc_sigdeliver;
+          up_current_regs()[REG_NPC] = (uint32_t)sparc_sigdeliver
+                                        + 4;
+          up_current_regs()[REG_PSR] |= SPARC_PSR_ET_MASK;
 
-          if (cpu != me)
-            {
-              up_cpu_resume(cpu);
-            }
+          /* And make sure that the saved context in the TCB is the
+           * same as the interrupt return context.
+           */
+
+          sparc_savestate(tcb->xcp.regs);
         }
     }
 

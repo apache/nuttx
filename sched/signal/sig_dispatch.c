@@ -47,8 +47,55 @@
 #include "mqueue/mqueue.h"
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct sig_arg_s
+{
+  pid_t pid;
+  cpu_set_t saved_affinity;
+  uint16_t saved_flags;
+  bool need_restore;
+};
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static int sig_handler(FAR void *cookie)
+{
+  FAR struct sig_arg_s *arg = cookie;
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  tcb = nxsched_get_tcb(arg->pid);
+
+  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
+      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      /* There is no TCB with this pid or, if there is, it is not a task. */
+
+      leave_critical_section(flags);
+      return -ESRCH;
+    }
+
+  if (arg->need_restore)
+    {
+      tcb->affinity = arg->saved_affinity;
+      tcb->flags = arg->saved_flags;
+    }
+
+  if (tcb->sigdeliver)
+    {
+      up_schedule_sigaction(tcb);
+    }
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: nxsig_queue_action
@@ -117,8 +164,39 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
 
           if (!stcb->sigdeliver)
             {
+#ifdef CONFIG_SMP
+              int cpu = stcb->cpu;
+              int me  = this_cpu();
+
               stcb->sigdeliver = nxsig_deliver;
-              up_schedule_sigaction(stcb);
+              if (cpu != me && stcb->task_state == TSTATE_TASK_RUNNING)
+                {
+                  struct sig_arg_s arg;
+
+                  if ((stcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
+                    {
+                      arg.need_restore   = false;
+                    }
+                  else
+                    {
+                      arg.saved_flags    = stcb->flags;
+                      arg.saved_affinity = stcb->affinity;
+                      arg.need_restore   = true;
+
+                      stcb->flags        |= TCB_FLAG_CPU_LOCKED;
+                      CPU_SET(stcb->cpu, &stcb->affinity);
+                    }
+
+                  arg.pid = stcb->pid;
+                  nxsched_smp_call_single(stcb->cpu, sig_handler, &arg,
+                                          true);
+                }
+              else
+#endif
+                {
+                  stcb->sigdeliver = nxsig_deliver;
+                  up_schedule_sigaction(stcb);
+                }
             }
 
           leave_critical_section(flags);

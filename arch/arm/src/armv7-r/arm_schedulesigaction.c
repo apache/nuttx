@@ -95,22 +95,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
     }
   else
     {
-      /* If we signaling a task running on the other CPU, we have
-       * to PAUSE the other CPU.
-       */
-
-#ifdef CONFIG_SMP
-      int cpu = tcb->cpu;
-      int me  = this_cpu();
-
-      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-        {
-          /* Pause the CPU */
-
-          up_cpu_pause(cpu);
-        }
-#endif
-
       /* Save the return lr and cpsr and one scratch register.  These
        * will be restored by the signal trampoline after the signals
        * have been delivered.
@@ -141,15 +125,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
       tcb->xcp.regs[REG_CPSR]  = (PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT);
 #ifdef CONFIG_ARM_THUMB
       tcb->xcp.regs[REG_CPSR] |= PSR_T_BIT;
-#endif
-
-#ifdef CONFIG_SMP
-      /* RESUME the other CPU if it was PAUSED */
-
-      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-        {
-          up_cpu_resume(cpu);
-        }
 #endif
     }
 }
