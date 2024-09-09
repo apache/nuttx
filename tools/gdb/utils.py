@@ -249,6 +249,7 @@ def import_check(module, name="", errmsg=""):
 
 
 def hexdump(address, size):
+    address = int(address)
     inf = gdb.inferiors()[0]
     mem = inf.read_memory(address, size)
     bytes = mem.tobytes()
@@ -272,6 +273,21 @@ def is_hexadecimal(s):
     return re.fullmatch(r"0[xX][0-9a-fA-F]+|[0-9a-fA-F]+", s) is not None
 
 
+def parse_arg(arg: str) -> Union[gdb.Value, int]:
+    """Parse an argument to a gdb.Value or int, return None if failed"""
+
+    if is_decimal(arg):
+        return int(arg)
+
+    if is_hexadecimal(arg):
+        return int(arg, 16)
+
+    try:
+        return gdb.parse_and_eval(f"{arg}")
+    except gdb.error:
+        return None
+
+
 class Hexdump(gdb.Command):
     """hexdump address/symbol <size>"""
 
@@ -279,22 +295,17 @@ class Hexdump(gdb.Command):
         super(Hexdump, self).__init__("hexdump", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
-        argv = args.split(" ")
-        address = 0
-        size = 0
-        if argv[0] == "":
+        args = shlex.split(args)
+        if not args or len(args) < 1:
             gdb.write("Usage: hexdump address/symbol <size>\n")
             return
 
-        if is_decimal(argv[0]) or is_hexadecimal(argv[0]):
-            address = int(argv[0], 0)
-            size = int(argv[1], 0)
-        else:
-            var = gdb.parse_and_eval(f"{argv[0]}")
-            address = int(var.address)
-            size = int(var.type.sizeof)
-            gdb.write(f"{argv[0]} {hex(address)} {int(size)}\n")
+        address = parse_arg(args[0])
+        size = parse_arg(args[1]) if len(args) > 1 else None
+        if not size:
+            size = address.type.sizeof if isinstance(address, gdb.Value) else 128
 
+        print(f"Dumping {size} bytes from {hex(address)}")
         hexdump(address, size)
 
 
@@ -321,16 +332,12 @@ class Addr2Line(gdb.Command):
 
         addresses = []
         for arg in shlex.split(args):
-            if is_decimal(arg):
-                addresses.append(int(arg))
-            elif is_hexadecimal(arg):
-                addresses.append(int(arg, 16))
-            else:
-                try:
-                    var = gdb.parse_and_eval(f"{arg}")
-                    addresses.append(var)
-                except gdb.error as e:
-                    gdb.write(f"Ignore {arg}: {e}\n")
+            v = parse_arg(arg)
+            if not v:
+                gdb.write(f'Ignore "{arg}"\n')
+                continue
+
+            addresses.append(v)
 
         backtraces = backtrace(addresses)
         formatter = "{:<20} {:<32} {}\n"
