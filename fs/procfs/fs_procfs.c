@@ -81,7 +81,7 @@ extern const struct procfs_operations g_mount_operations;
 extern const struct procfs_operations g_net_operations;
 extern const struct procfs_operations g_netroute_operations;
 extern const struct procfs_operations g_part_operations;
-extern const struct procfs_operations g_smartfs_operations;
+extern const struct procfs_operations g_smartfs_procfs_operations;
 
 /****************************************************************************
  * Private Types
@@ -130,7 +130,7 @@ static const struct procfs_entry_s g_procfs_entries[] =
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
-  { "fs/smartfs**", &g_smartfs_operations,  PROCFS_UNKOWN_TYPE },
+  { "fs/smartfs**", &g_smartfs_procfs_operations,  PROCFS_UNKOWN_TYPE },
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_USAGE
