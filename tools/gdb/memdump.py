@@ -584,7 +584,7 @@ class Memdump(gdb.Command):
             "seqmax": int(args.max, 0) if args.max else 0xFFFFFFFF,
             "used": args.used,
             "free": args.free,
-            "addr": int(args.addr, 0) if args.addr else None,
+            "addr": int(utils.parse_arg(args.addr)) if args.addr else None,
             "simple": args.simple,
             "detail": args.detail,
             "biggest": args.biggest,
