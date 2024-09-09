@@ -1,10 +1,11 @@
 --- ./littlefs/littlefs/lfs_util.h	2022-11-11 03:32:30.000000000 +1100
 +++ ./littlefs/littlefs/lfs_util.h	2023-04-21 12:25:27.987084276 +1000
-@@ -28,6 +28,7 @@
+@@ -28,6 +28,8 @@
 
  #ifndef LFS_NO_MALLOC
  #include <stdlib.h>
 +#include <nuttx/mm/mm.h>
++#include "fs_heap.h"
  #endif
  #ifndef LFS_NO_ASSERT
  #include <assert.h>
@@ -13,7 +14,7 @@
  static inline void *lfs_malloc(size_t size) {
  #ifndef LFS_NO_MALLOC
 -    return malloc(size);
-+    return kmm_malloc(size);
++    return fs_heap_malloc(size);
  #else
      (void)size;
      return NULL;
@@ -22,7 +23,7 @@
  static inline void lfs_free(void *p) {
  #ifndef LFS_NO_MALLOC
 -    free(p);
-+    kmm_free(p);
++    fs_heap_free(p);
  #else
      (void)p;
  #endif

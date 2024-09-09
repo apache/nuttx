@@ -39,6 +39,7 @@
 #include <nuttx/fs/ioctl.h>
 
 #include "fs_romfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -418,7 +419,7 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
   int ret;
 
   nsize = strlen(name);
-  nodeinfo = kmm_zalloc(sizeof(struct romfs_nodeinfo_s) + nsize);
+  nodeinfo = fs_heap_zalloc(sizeof(struct romfs_nodeinfo_s) + nsize);
   if (nodeinfo == NULL)
     {
       return -ENOMEM;
@@ -461,8 +462,8 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
             {
               FAR void *tmp;
 
-              tmp = kmm_realloc(nodeinfo->rn_child, (num + NODEINFO_NINCR) *
-                                sizeof(*nodeinfo->rn_child));
+              tmp = fs_heap_realloc(nodeinfo->rn_child,
+                    (num + NODEINFO_NINCR) * sizeof(*nodeinfo->rn_child));
               if (tmp == NULL)
                 {
                   return -ENOMEM;
@@ -680,7 +681,7 @@ int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
 
   /* Allocate the device cache buffer for normal sector accesses */
 
-  rm->rm_buffer = kmm_malloc(rm->rm_hwsectorsize);
+  rm->rm_buffer = fs_heap_malloc(rm->rm_hwsectorsize);
   if (!rm->rm_buffer)
     {
       return -ENOMEM;
@@ -791,7 +792,8 @@ int romfs_fileconfigure(FAR struct romfs_mountpt_s *rm,
 
       /* Create a file buffer to support partial sector accesses */
 
-      rf->rf_buffer = kmm_malloc(rm->rm_hwsectorsize * rf->rf_ncachesector);
+      rf->rf_buffer = fs_heap_malloc(rm->rm_hwsectorsize *
+                      rf->rf_ncachesector);
       if (!rf->rf_buffer)
         {
           return -ENOMEM;
@@ -865,10 +867,10 @@ void romfs_freenode(FAR struct romfs_nodeinfo_s *nodeinfo)
           romfs_freenode(nodeinfo->rn_child[i]);
         }
 
-      kmm_free(nodeinfo->rn_child);
+      fs_heap_free(nodeinfo->rn_child);
     }
 
-  kmm_free(nodeinfo);
+  fs_heap_free(nodeinfo);
 }
 #endif
 

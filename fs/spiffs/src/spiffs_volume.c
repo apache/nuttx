@@ -54,6 +54,7 @@
 
 #include <nuttx/kmalloc.h>
 
+#include "fs_heap.h"
 #include "spiffs.h"
 #include "spiffs_core.h"
 #include "spiffs_cache.h"
@@ -489,5 +490,5 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs,
 
   /* Then free the file object itself (which contains the lock we hold) */
 
-  kmm_free(fobj);
+  fs_heap_free(fobj);
 }

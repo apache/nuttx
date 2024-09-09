@@ -27,6 +27,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "partition.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -91,7 +92,7 @@ int parse_ptable_partition(FAR struct partition_state_s *state,
 
   /* Allocate one erase block memory */
 
-  ptable = kmm_malloc(state->erasesize);
+  ptable = fs_heap_malloc(state->erasesize);
   if (ptable == NULL)
     {
       return -ENOMEM;
@@ -149,6 +150,6 @@ int parse_ptable_partition(FAR struct partition_state_s *state,
     }
 
 out:
-  kmm_free(ptable);
+  fs_heap_free(ptable);
   return ret;
 }

@@ -67,7 +67,7 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
    * memory in user heap
    */
 
-  object = kmm_zalloc(sizeof(struct shmfs_object_s));
+  object = fs_heap_zalloc(sizeof(struct shmfs_object_s));
   if (object)
     {
       object->paddr = kumm_zalloc(length);
@@ -87,7 +87,7 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
   FAR void **pages;
   size_t n_pages = MM_NPAGES(length);
 
-  object = kmm_zalloc(sizeof(struct shmfs_object_s) +
+  object = fs_heap_zalloc(sizeof(struct shmfs_object_s) +
                       (n_pages - 1) * sizeof(object->paddr));
 
   if (object)

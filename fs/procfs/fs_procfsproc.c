@@ -57,6 +57,8 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/queue.h>
 
+#include "fs_heap.h"
+
 #if !defined(CONFIG_SCHED_CPULOAD_NONE) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
 #endif
@@ -904,7 +906,7 @@ static ssize_t proc_heap(FAR struct proc_file_s *procfile,
 #ifdef CONFIG_MM_KERNEL_HEAP
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
     {
-      info = kmm_mallinfo_task(&task);
+      info = fs_heap_mallinfo_task(&task);
     }
   else
 #endif
@@ -1530,7 +1532,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the task and node selection */
 
   procfile = (FAR struct proc_file_s *)
-    kmm_zalloc(sizeof(struct proc_file_s));
+    fs_heap_zalloc(sizeof(struct proc_file_s));
   if (procfile == NULL)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -1563,7 +1565,7 @@ static int proc_close(FAR struct file *filep)
 
   /* Release the file container structure */
 
-  kmm_free(procfile);
+  fs_heap_free(procfile);
   filep->f_priv = NULL;
   return OK;
 }
@@ -1726,7 +1728,7 @@ static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and node selection */
 
-  newfile = kmm_malloc(sizeof(struct proc_file_s));
+  newfile = fs_heap_malloc(sizeof(struct proc_file_s));
   if (newfile == NULL)
     {
       ferr("ERROR: Failed to allocate file container\n");
@@ -1815,11 +1817,11 @@ static int proc_opendir(FAR const char *relpath,
     }
 
   /* Allocate the directory structure.  Note that the index and procentry
-   * pointer are implicitly nullified by kmm_zalloc().  Only the remaining,
-   * non-zero entries will need be initialized.
+   * pointer are implicitly nullified by fs_heap_zalloc().
+   * Only the remaining, non-zero entries will need be initialized.
    */
 
-  procdir = kmm_zalloc(sizeof(struct proc_dir_s));
+  procdir = fs_heap_zalloc(sizeof(struct proc_dir_s));
   if (procdir == NULL)
     {
       ferr("ERROR: Failed to allocate the directory structure\n");
@@ -1839,7 +1841,7 @@ static int proc_opendir(FAR const char *relpath,
       if (node == NULL)
         {
           ferr("ERROR: Invalid path \"%s\"\n", relpath);
-          kmm_free(procdir);
+          fs_heap_free(procdir);
           return -ENOENT;
         }
 
@@ -1848,7 +1850,7 @@ static int proc_opendir(FAR const char *relpath,
       if (!DIRENT_ISDIRECTORY(node->dtype))
         {
           ferr("ERROR: Path \"%s\" is not a directory\n", relpath);
-          kmm_free(procdir);
+          fs_heap_free(procdir);
           return -ENOTDIR;
         }
 
@@ -1882,7 +1884,7 @@ static int proc_opendir(FAR const char *relpath,
 static int proc_closedir(FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir != NULL);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return OK;
 }
 

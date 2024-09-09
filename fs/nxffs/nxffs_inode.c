@@ -35,6 +35,7 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Functions
@@ -108,7 +109,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   /* Allocate memory to hold the variable-length file name */
 
   namlen = inode.namlen;
-  entry->name = kmm_malloc(namlen + 1);
+  entry->name = fs_heap_malloc(namlen + 1);
   if (!entry->name)
     {
       ferr("ERROR: Failed to allocate name, namlen: %d\n", namlen);
@@ -197,8 +198,8 @@ errout:
  *   to dispose of that memory when the inode entry is no longer needed.
  *
  *   Note that the nxffs_entry_s containing structure is not freed.  The
- *   caller may call kmm_free upon return of this function if necessary to
- *   free the entry container.
+ *   caller may call fs_heap_free upon return of this function if necessary
+ *   to free the entry container.
  *
  * Input Parameters:
  *   entry  - The entry to be freed.
