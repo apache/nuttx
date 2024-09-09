@@ -132,7 +132,7 @@ void hdestroy(void)
 
 FAR ENTRY *hsearch(ENTRY item, ACTION action)
 {
-  FAR ENTRY *retval;
+  FAR ENTRY *retval = NULL;
 
   hsearch_r(item, action, &retval, &g_htab);
 
