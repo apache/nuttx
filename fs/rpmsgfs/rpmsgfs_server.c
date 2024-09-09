@@ -37,6 +37,7 @@
 #include <nuttx/rptun/openamp.h>
 
 #include "rpmsgfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -191,7 +192,7 @@ static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
         }
     }
 
-  tmp = kmm_realloc(priv->files, sizeof(FAR struct file *) * (i + 1));
+  tmp = fs_heap_realloc(priv->files, sizeof(FAR struct file *) * (i + 1));
   DEBUGASSERT(tmp);
   if (tmp == NULL)
     {
@@ -199,12 +200,12 @@ static int rpmsgfs_attach_file(FAR struct rpmsgfs_server_s *priv,
       goto out;
     }
 
-  tmp[i] = kmm_zalloc(sizeof(struct file) *
+  tmp[i] = fs_heap_zalloc(sizeof(struct file) *
                       CONFIG_NFILE_DESCRIPTORS_PER_BLOCK);
   DEBUGASSERT(tmp[i]);
   if (tmp[i] == NULL)
     {
-      kmm_free(tmp);
+      fs_heap_free(tmp);
       ret = -ENFILE;
       goto out;
     }
@@ -276,7 +277,7 @@ static int rpmsgfs_attach_dir(FAR struct rpmsgfs_server_s *priv,
         }
     }
 
-  tmp = kmm_realloc(priv->dirs, sizeof(FAR void *) *
+  tmp = fs_heap_realloc(priv->dirs, sizeof(FAR void *) *
                     (priv->dir_nums + CONFIG_NFILE_DESCRIPTORS_PER_BLOCK));
   DEBUGASSERT(tmp);
   if (tmp == NULL)
@@ -905,7 +906,7 @@ static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
   FAR struct rpmsgfs_server_s *priv;
   int ret;
 
-  priv = kmm_zalloc(sizeof(*priv));
+  priv = fs_heap_zalloc(sizeof(*priv));
   if (!priv)
     {
       return;
@@ -920,7 +921,7 @@ static void rpmsgfs_ns_bind(FAR struct rpmsg_device *rdev,
   if (ret)
     {
       nxmutex_destroy(&priv->lock);
-      kmm_free(priv);
+      fs_heap_free(priv);
     }
 }
 
@@ -940,7 +941,7 @@ static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept)
             }
         }
 
-      kmm_free(priv->files[i]);
+      fs_heap_free(priv->files[i]);
     }
 
   for (i = 0; i < priv->dir_nums; i++)
@@ -954,9 +955,9 @@ static void rpmsgfs_ns_unbind(FAR struct rpmsg_endpoint *ept)
   rpmsg_destroy_ept(&priv->ept);
   nxmutex_destroy(&priv->lock);
 
-  kmm_free(priv->files);
-  kmm_free(priv->dirs);
-  kmm_free(priv);
+  fs_heap_free(priv->files);
+  fs_heap_free(priv->dirs);
+  fs_heap_free(priv);
 }
 
 static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,

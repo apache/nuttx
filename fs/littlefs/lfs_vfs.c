@@ -40,6 +40,7 @@
 #include "inode/inode.h"
 #include "littlefs/lfs.h"
 #include "littlefs/lfs_util.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -298,7 +299,7 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate memory for the open file */
 
-  priv = kmm_malloc(sizeof(*priv));
+  priv = fs_heap_malloc(sizeof(*priv));
   if (priv == NULL)
     {
       return -ENOMEM;
@@ -361,7 +362,7 @@ errout_with_file:
 errout:
   nxmutex_unlock(&fs->lock);
 errlock:
-  kmm_free(priv);
+  fs_heap_free(priv);
   return ret;
 }
 
@@ -398,7 +399,7 @@ static int littlefs_close(FAR struct file *filep)
   nxmutex_unlock(&fs->lock);
   if (priv->refs <= 0)
     {
-      kmm_free(priv);
+      fs_heap_free(priv);
     }
 
   return ret;
@@ -780,7 +781,7 @@ static int littlefs_opendir(FAR struct inode *mountpt,
 
   /* Allocate memory for the open directory */
 
-  ldir = kmm_malloc(sizeof(*ldir));
+  ldir = fs_heap_malloc(sizeof(*ldir));
   if (ldir == NULL)
     {
       return -ENOMEM;
@@ -809,7 +810,7 @@ static int littlefs_opendir(FAR struct inode *mountpt,
 errout:
   nxmutex_unlock(&fs->lock);
 errlock:
-  kmm_free(ldir);
+  fs_heap_free(ldir);
   return ret;
 }
 
@@ -843,7 +844,7 @@ static int littlefs_closedir(FAR struct inode *mountpt,
   lfs_dir_close(&fs->lfs, &ldir->dir);
   nxmutex_unlock(&fs->lock);
 
-  kmm_free(ldir);
+  fs_heap_free(ldir);
   return OK;
 }
 
@@ -1070,7 +1071,7 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  fs = kmm_zalloc(sizeof(*fs));
+  fs = fs_heap_zalloc(sizeof(*fs));
   if (!fs)
     {
       ret = -ENOMEM;
@@ -1200,7 +1201,7 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
 
 errout_with_fs:
   nxmutex_destroy(&fs->lock);
-  kmm_free(fs);
+  fs_heap_free(fs);
 errout_with_block:
   if (INODE_IS_BLOCK(driver) && driver->u.i_bops->close)
     {
@@ -1259,7 +1260,7 @@ static int littlefs_unbind(FAR void *handle, FAR struct inode **driver,
       /* Release the mountpoint private data */
 
       nxmutex_destroy(&fs->lock);
-      kmm_free(fs);
+      fs_heap_free(fs);
     }
 
   return ret;

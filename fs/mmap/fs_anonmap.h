@@ -42,7 +42,7 @@
  *
  * Input Parameters:
  *   map     Input struct containing user request
- *   kernel  kmm_zalloc or kumm_zalloc
+ *   kernel  fs_heap_zalloc or kumm_zalloc
  *
  * Returned Value:
  *   On success returns 0. Otherwise negated errno is returned appropriately.

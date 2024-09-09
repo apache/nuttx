@@ -43,6 +43,8 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 
+#include "fs_heap.h"
+
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
 
@@ -143,7 +145,7 @@ static int version_open(FAR struct file *filep, FAR const char *relpath,
   /* Allocate a container to hold the file attributes */
 
   attr = (FAR struct version_file_s *)
-    kmm_zalloc(sizeof(struct version_file_s));
+    fs_heap_zalloc(sizeof(struct version_file_s));
 
   if (attr == NULL)
     {
@@ -172,7 +174,7 @@ static int version_close(FAR struct file *filep)
 
   /* Release the file attributes structure */
 
-  kmm_free(attr);
+  fs_heap_free(attr);
   filep->f_priv = NULL;
   return OK;
 }
@@ -246,7 +248,7 @@ static int version_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* Allocate a new container to hold the task and attribute selection */
 
   newattr = (FAR struct version_file_s *)
-    kmm_malloc(sizeof(struct version_file_s));
+    fs_heap_malloc(sizeof(struct version_file_s));
 
   if (!newattr)
     {

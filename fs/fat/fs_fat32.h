@@ -35,6 +35,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 
+#include "fs_heap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -845,8 +847,8 @@
 #  define fat_io_alloc(s)  fat_dma_alloc(s)
 #  define fat_io_free(m,s) fat_dma_free(m,s)
 #else
-#  define fat_io_alloc(s)  kmm_malloc(s)
-#  define fat_io_free(m,s) kmm_free(m)
+#  define fat_io_alloc(s)  fs_heap_malloc(s)
+#  define fat_io_free(m,s) fs_heap_free(m)
 #endif
 
 /****************************************************************************

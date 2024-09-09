@@ -97,6 +97,7 @@
 #include <sys/statfs.h>
 
 #include "mnemofs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -272,14 +273,14 @@ static int mnemofs_open(FAR struct file *filep, FAR const char *relpath,
 
   finfo("Lock Acquired.");
 
-  f     = kmm_zalloc(sizeof(*f));
+  f     = fs_heap_zalloc(sizeof(*f));
   if (predict_false(f == NULL))
     {
       ret = -ENOMEM;
       goto errout_with_lock;
     }
 
-  fcom  = kmm_zalloc(sizeof(*fcom));
+  fcom  = fs_heap_zalloc(sizeof(*fcom));
   if (predict_false(fcom == NULL))
     {
       ret = -ENOMEM;
@@ -405,10 +406,10 @@ errout_with_dirent:
     }
 
 errout_with_fcom:
-  kmm_free(fcom);
+  fs_heap_free(fcom);
 
 errout_with_f:
-  kmm_free(f);
+  fs_heap_free(f);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
@@ -478,8 +479,8 @@ static int mnemofs_close(FAR struct file *filep)
           goto errout_with_lock;
         }
 
-      kmm_free(f->com->path);
-      kmm_free(f->com);
+      fs_heap_free(f->com->path);
+      fs_heap_free(f->com);
 
       finfo("Open file structure freed.");
 
@@ -492,7 +493,7 @@ static int mnemofs_close(FAR struct file *filep)
 
 errout_with_fcom:
   list_delete(&f->list);
-  kmm_free(f);
+  fs_heap_free(f);
   filep->f_priv = NULL;
 
   finfo("File entry removed from the open files list.");
@@ -1005,7 +1006,7 @@ static int mnemofs_dup(FAR const struct file *oldp, FAR struct file *newp)
   of    = oldp->f_priv;
   DEBUGASSERT(of != NULL);
 
-  nf    = kmm_zalloc(sizeof(*nf));
+  nf    = fs_heap_zalloc(sizeof(*nf));
   if (predict_false(nf == NULL))
     {
       finfo("No memory left.");
@@ -1037,7 +1038,7 @@ static int mnemofs_dup(FAR const struct file *oldp, FAR struct file *newp)
   return ret;
 
 errout_with_nf:
-  kmm_free(nf);
+  fs_heap_free(nf);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
@@ -1192,14 +1193,14 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
       goto errout_with_path;
     }
 
-  pitr     = kmm_zalloc(sizeof(*pitr));
+  pitr     = fs_heap_zalloc(sizeof(*pitr));
   if (predict_false(pitr == NULL))
     {
       ret  = -ENOMEM;
       goto errout_with_path;
     }
 
-  fsdirent = kmm_zalloc(sizeof(*fsdirent));
+  fsdirent = fs_heap_zalloc(sizeof(*fsdirent));
   if (predict_false(fsdirent == NULL))
     {
       ret  = -ENOMEM;
@@ -1228,10 +1229,10 @@ static int mnemofs_opendir(FAR struct inode *mountpt,
   return ret;
 
 errout_with_fsdirent:
-  kmm_free(fsdirent);
+  fs_heap_free(fsdirent);
 
 errout_with_pitr:
-  kmm_free(pitr);
+  fs_heap_free(pitr);
 
 errout_with_path:
   mfs_free_patharr(path);
@@ -1270,8 +1271,8 @@ static int mnemofs_closedir(FAR struct inode *mountpt,
 
   mfs_free_patharr(fsdirent->path);
   mfs_pitr_free(fsdirent->pitr);
-  kmm_free(fsdirent->pitr);
-  kmm_free(fsdirent);
+  fs_heap_free(fsdirent->pitr);
+  fs_heap_free(fsdirent);
   return OK;
 }
 
@@ -1492,7 +1493,7 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
   memset(buf, 0, 8);
 
-  sb = kmm_zalloc(sizeof(*sb));
+  sb = fs_heap_zalloc(sizeof(*sb));
   if (!sb)
     {
       ret = -ENOMEM;
@@ -1552,7 +1553,7 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
   list_initialize(&MFS_OFILES(sb));
 
-  sb->rw_buf        = kmm_zalloc(MFS_PGSZ(sb));
+  sb->rw_buf        = fs_heap_zalloc(MFS_PGSZ(sb));
   if (predict_false(sb->rw_buf == NULL))
     {
       goto errout_with_lock;
@@ -1653,14 +1654,14 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
   return ret;
 
 errout_with_rwbuf:
-  kmm_free(sb->rw_buf);
+  fs_heap_free(sb->rw_buf);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
   finfo("Lock released.");
 
 errout_with_sb:
-  kmm_free(sb);
+  fs_heap_free(sb);
 
 errout:
   finfo("Mnemofs bind exited with %d.", ret);
@@ -1700,8 +1701,8 @@ static int mnemofs_unbind(FAR void *handle, FAR struct inode **driver,
   mfs_jrnl_free(sb);
   mfs_ba_free(sb);
 
-  kmm_free(sb->rw_buf);
-  kmm_free(sb);
+  fs_heap_free(sb->rw_buf);
+  fs_heap_free(sb);
 
   finfo("Successfully unmounted mnemofs!");
   return OK;

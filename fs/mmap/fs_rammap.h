@@ -81,7 +81,7 @@ enum mm_map_type_e
  *   length  The length of the mapping.  For exception #1 above, this length
  *           ignored:  The entire underlying media is always accessible.
  *   offset  The offset into the file to map
- *   type    kmm_zalloc or kumm_zalloc or xip_base
+ *   type    fs_heap_zalloc or kumm_zalloc or xip_base
  *
  * Returned Value:
  *   On success rammmap returns 0. Otherwise errno is returned appropriately.
