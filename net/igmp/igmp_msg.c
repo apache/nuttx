@@ -77,8 +77,14 @@ int igmp_schedmsg(FAR struct igmp_group_s *group, uint8_t msgid)
 {
   FAR struct net_driver_s *dev;
 
-  DEBUGASSERT(group != NULL && !IS_SCHEDMSG(group->flags));
+  DEBUGASSERT(group != NULL);
   DEBUGASSERT(group->ifindex > 0);
+
+  if (IS_SCHEDMSG(group->flags))
+    {
+      nerr("ERROR: The group %u is busy\n", group->ifindex);
+      return -EBUSY;
+    }
 
   /* Get the device instance associated with the interface index of the
    * group
