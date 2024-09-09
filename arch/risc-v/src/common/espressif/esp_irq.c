@@ -115,8 +115,7 @@ static volatile uint8_t g_irq_map[NR_IRQS];
  * devices.
  */
 
-static uint32_t g_cpuint_freelist = ESP_CPUINT_PERIPHSET & \
-                                    ~ESP_WIRELESS_RESERVE_INT;
+static uint32_t g_cpuint_freelist = ESP_CPUINT_PERIPHSET;
 
 /* This bitmask has an 1 if the int should be disabled
  * when the flash is disabled.
