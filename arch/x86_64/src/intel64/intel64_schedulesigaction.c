@@ -157,6 +157,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        */
 
       tcb->xcp.regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
+      tcb->xcp.regs[REG_RIP]    = tcb->xcp.regs[REG_RIP] - 8;
       tcb->xcp.regs[REG_RFLAGS] = 0;
     }
 }
@@ -202,76 +203,30 @@ void up_schedule_sigaction(struct tcb_s *tcb)
 
       else
         {
-          /* If we signaling a task running on the other CPU, we have
-           * to PAUSE the other CPU.
+          /* tcb is running on the same CPU */
+
+          /* Save the return lr and cpsr and one scratch register.
+           * These will be restored by the signal trampoline after
+           * the signals have been delivered.
            */
 
-          if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-            {
-              /* Pause the CPU */
+          tcb->xcp.saved_rip         = up_current_regs()[REG_RIP];
+          tcb->xcp.saved_rsp         = up_current_regs()[REG_RSP];
+          tcb->xcp.saved_rflags      = up_current_regs()[REG_RFLAGS];
 
-              up_cpu_pause(cpu);
-
-              /* Now tcb on the other CPU can be accessed safely */
-
-              /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be
-               * restored by the signal trampoline after the signal has
-               * been delivered.
-               */
-
-              tcb->xcp.saved_rip        = tcb->xcp.regs[REG_RIP];
-              tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
-              tcb->xcp.saved_rflags     = tcb->xcp.regs[REG_RFLAGS];
-
-              /* Then set up to vector to the trampoline with interrupts
-               * disabled
-               */
-
-              tcb->xcp.regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
-              tcb->xcp.regs[REG_RSP]    = tcb->xcp.regs[REG_RSP] - 8;
-              tcb->xcp.regs[REG_RFLAGS] = 0;
-            }
-          else
-            {
-              /* tcb is running on the same CPU */
-
-              /* Save the return lr and cpsr and one scratch register.
-               * These will be restored by the signal trampoline after
-               * the signals have been delivered.
-               */
-
-              tcb->xcp.saved_rip         = up_current_regs()[REG_RIP];
-              tcb->xcp.saved_rsp         = up_current_regs()[REG_RSP];
-              tcb->xcp.saved_rflags      = up_current_regs()[REG_RFLAGS];
-
-              /* Then set up to vector to the trampoline with interrupts
-               * disabled
-               */
-
-              up_current_regs()[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
-              up_current_regs()[REG_RSP]    = up_current_regs()[REG_RSP] - 8;
-              up_current_regs()[REG_RFLAGS] = 0;
-
-              /* And make sure that the saved context in the TCB
-               * is the same as the interrupt return context.
-               */
-
-              x86_64_savestate(tcb->xcp.regs);
-            }
-
-          /* NOTE: If the task runs on another CPU(cpu), adjusting
-           * global IRQ controls will be done in the pause handler
-           * on the CPU(cpu) by taking a critical section.
-           * If the task is scheduled on this CPU(me), do nothing
-           * because this CPU already took a critical section
+          /* Then set up to vector to the trampoline with interrupts
+           * disabled
            */
 
-          /* RESUME the other CPU if it was PAUSED */
+          up_current_regs()[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
+          up_current_regs()[REG_RIP]    = up_current_regs()[REG_RIP] - 8;
+          up_current_regs()[REG_RFLAGS] = 0;
 
-          if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-            {
-              up_cpu_resume(cpu);
-            }
+          /* And make sure that the saved context in the TCB
+           * is the same as the interrupt return context.
+           */
+
+          x86_64_savestate(tcb->xcp.regs);
         }
     }
 
