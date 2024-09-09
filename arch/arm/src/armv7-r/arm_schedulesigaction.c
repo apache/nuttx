@@ -75,90 +75,81 @@
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
+  sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb, this_task(),
+        this_task()->xcp.regs);
 
-  /* Refuse to handle nested signal actions */
+  /* First, handle some special cases when the signal is
+   * being delivered to the currently executing task.
+   */
 
-  if (!tcb->sigdeliver)
+  if (tcb == this_task() && !up_interrupt_context())
     {
-      tcb->sigdeliver = sigdeliver;
-
-      /* First, handle some special cases when the signal is being delivered
-       * to task that is currently executing on any CPU.
+      /* In this case just deliver the signal now.
+       * REVISIT:  Signal handler will run in a critical section!
        */
 
-      sinfo("rtcb=%p current_regs=%p\n", this_task(),
-            this_task()->xcp.regs);
-
-      if (tcb == this_task() && !up_interrupt_context())
-        {
-          /* In this case just deliver the signal now.
-           * REVISIT:  Signal handler will run in a critical section!
-           */
-
-          sigdeliver(tcb);
-          tcb->sigdeliver = NULL;
-        }
-      else
-        {
-          /* If we signaling a task running on the other CPU, we have
-           * to PAUSE the other CPU.
-           */
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
+    }
+  else
+    {
+      /* If we signaling a task running on the other CPU, we have
+       * to PAUSE the other CPU.
+       */
 
 #ifdef CONFIG_SMP
-          int cpu = tcb->cpu;
-          int me  = this_cpu();
+      int cpu = tcb->cpu;
+      int me  = this_cpu();
 
-          if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-            {
-              /* Pause the CPU */
+      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          /* Pause the CPU */
 
-              up_cpu_pause(cpu);
-            }
+          up_cpu_pause(cpu);
+        }
 #endif
 
-          /* Save the return lr and cpsr and one scratch register.  These
-           * will be restored by the signal trampoline after the signals
-           * have been delivered.
-           */
+      /* Save the return lr and cpsr and one scratch register.  These
+       * will be restored by the signal trampoline after the signals
+       * have been delivered.
+       */
 
-          /* Save the current register context location */
+      /* Save the current register context location */
 
-          tcb->xcp.saved_regs      = tcb->xcp.regs;
+      tcb->xcp.saved_regs      = tcb->xcp.regs;
 
-          /* Duplicate the register context.  These will be
-           * restored by the signal trampoline after the signal has been
-           * delivered.
-           */
+      /* Duplicate the register context.  These will be
+       * restored by the signal trampoline after the signal has been
+       * delivered.
+       */
 
-          tcb->xcp.regs            = (void *)
-                                     ((uint32_t)tcb->xcp.regs -
-                                                XCPTCONTEXT_SIZE);
-          memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
+      tcb->xcp.regs            = (void *)
+                                 ((uint32_t)tcb->xcp.regs -
+                                            XCPTCONTEXT_SIZE);
+      memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
 
-          tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs +
-                                               XCPTCONTEXT_SIZE;
+      tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs +
+                                           XCPTCONTEXT_SIZE;
 
-          /* Then set up to vector to the trampoline with interrupts
-           * disabled
-           */
+      /* Then set up to vector to the trampoline with interrupts
+       * disabled
+       */
 
-          tcb->xcp.regs[REG_PC]    = (uint32_t)arm_sigdeliver;
-          tcb->xcp.regs[REG_CPSR]  = (PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT);
+      tcb->xcp.regs[REG_PC]    = (uint32_t)arm_sigdeliver;
+      tcb->xcp.regs[REG_CPSR]  = (PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT);
 #ifdef CONFIG_ARM_THUMB
-          tcb->xcp.regs[REG_CPSR] |= PSR_T_BIT;
+      tcb->xcp.regs[REG_CPSR] |= PSR_T_BIT;
 #endif
 
 #ifdef CONFIG_SMP
-          /* RESUME the other CPU if it was PAUSED */
+      /* RESUME the other CPU if it was PAUSED */
 
-          if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-            {
-              up_cpu_resume(cpu);
-            }
-#endif
+      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          up_cpu_resume(cpu);
         }
+#endif
     }
 }
