@@ -37,6 +37,7 @@
 
 #include "notify/notify.h"
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

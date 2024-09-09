@@ -32,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "partition.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -205,7 +206,7 @@ gpt_alloc_verify_entries(FAR struct partition_state_s *state,
     }
 
   blk = (size + (state->blocksize - 1)) / state->blocksize;
-  pte = kmm_zalloc(blk * state->blocksize);
+  pte = fs_heap_zalloc(blk * state->blocksize);
   if (!pte)
     {
       return NULL;
@@ -216,7 +217,7 @@ gpt_alloc_verify_entries(FAR struct partition_state_s *state,
   ret = read_partition_block(state, pte, from, blk);
   if (ret < 0)
     {
-      kmm_free(pte);
+      fs_heap_free(pte);
       ferr("Read ptr from block failed:%d.\n", ret);
       return NULL;
     }
@@ -227,7 +228,7 @@ gpt_alloc_verify_entries(FAR struct partition_state_s *state,
   if (crc != le32toh(gpt->partition_entry_array_crc32))
     {
       ferr("GUID Partitition Entry Array CRC check failed.\n");
-      kmm_free(pte);
+      fs_heap_free(pte);
       return NULL;
     }
 
@@ -399,7 +400,7 @@ int parse_gpt_partition(FAR struct partition_state_s *state,
 
   count = (sizeof(struct gpt_ptable_s) + (state->blocksize - 1)) /
           state->blocksize;
-  ptbl = kmm_malloc(count * state->blocksize);
+  ptbl = fs_heap_malloc(count * state->blocksize);
   if (!ptbl)
     {
       return -ENOMEM;
@@ -485,8 +486,8 @@ int parse_gpt_partition(FAR struct partition_state_s *state,
       handler(&pentry, arg);
     }
 
-  kmm_free(ptes);
+  fs_heap_free(ptes);
 err:
-  kmm_free(ptbl);
+  fs_heap_free(ptbl);
   return ret;
 }

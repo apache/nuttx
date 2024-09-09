@@ -42,6 +42,7 @@
 #include <nuttx/fs/ioctl.h>
 
 #include "fs_romfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -250,7 +251,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   len = strlen(relpath);
-  rf = kmm_zalloc(sizeof(struct romfs_file_s) + len);
+  rf = fs_heap_zalloc(sizeof(struct romfs_file_s) + len);
   if (!rf)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -272,7 +273,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   if (ret < 0)
     {
       ferr("ERROR: Failed to locate start of file data: %d\n", ret);
-      kmm_free(rf);
+      fs_heap_free(rf);
       goto errout_with_lock;
     }
 
@@ -282,7 +283,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   if (ret < 0)
     {
       ferr("ERROR: Failed configure buffering: %d\n", ret);
-      kmm_free(rf);
+      fs_heap_free(rf);
       goto errout_with_lock;
     }
 
@@ -342,12 +343,12 @@ static int romfs_close(FAR struct file *filep)
 
   if (!rm->rm_xipbase && rf->rf_buffer)
     {
-      kmm_free(rf->rf_buffer);
+      fs_heap_free(rf->rf_buffer);
     }
 
   /* Then free the file structure itself. */
 
-  kmm_free(rf);
+  fs_heap_free(rf);
   filep->f_priv = NULL;
   return ret;
 }
@@ -687,7 +688,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    */
 
   len   = strlen(oldrf->rf_path);
-  newrf = kmm_malloc(sizeof(struct romfs_file_s) + len);
+  newrf = fs_heap_malloc(sizeof(struct romfs_file_s) + len);
   if (!newrf)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -707,7 +708,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   ret = romfs_fileconfigure(rm, newrf);
   if (ret < 0)
     {
-      kmm_free(newrf);
+      fs_heap_free(newrf);
       ferr("ERROR: Failed configure buffering: %d\n", ret);
       goto errout_with_lock;
     }
@@ -799,7 +800,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   rm = mountpt->i_private;
 
-  rdir = kmm_zalloc(sizeof(*rdir));
+  rdir = fs_heap_zalloc(sizeof(*rdir));
   if (rdir == NULL)
     {
       return -ENOMEM;
@@ -858,7 +859,7 @@ errout_with_lock:
   nxrmutex_unlock(&rm->rm_lock);
 
 errout_with_rdir:
-  kmm_free(rdir);
+  fs_heap_free(rdir);
   return ret;
 }
 
@@ -873,7 +874,7 @@ static int romfs_closedir(FAR struct inode *mountpt,
                           FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return 0;
 }
 
@@ -1084,7 +1085,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  rm = kmm_zalloc(sizeof(struct romfs_mountpt_s));
+  rm = fs_heap_zalloc(sizeof(struct romfs_mountpt_s));
   if (!rm)
     {
       ferr("ERROR: Failed to allocate mountpoint structure\n");
@@ -1127,12 +1128,12 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 errout_with_buffer:
   if (!rm->rm_xipbase)
     {
-      kmm_free(rm->rm_buffer);
+      fs_heap_free(rm->rm_buffer);
     }
 
 errout:
   nxrmutex_destroy(&rm->rm_lock);
-  kmm_free(rm);
+  fs_heap_free(rm);
   return ret;
 }
 
@@ -1210,14 +1211,14 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
       if (!rm->rm_xipbase && rm->rm_buffer)
         {
-          kmm_free(rm->rm_buffer);
+          fs_heap_free(rm->rm_buffer);
         }
 
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
       romfs_freenode(rm->rm_root);
 #endif
       nxrmutex_destroy(&rm->rm_lock);
-      kmm_free(rm);
+      fs_heap_free(rm);
       return OK;
     }
 

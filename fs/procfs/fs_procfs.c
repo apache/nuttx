@@ -48,6 +48,7 @@
 
 #include "mount/mount.h"
 #include "sched/sched.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * External Definitions
@@ -463,7 +464,7 @@ static int procfs_close(FAR struct file *filep)
     }
   else
     {
-      kmm_free(attr);
+      fs_heap_free(attr);
     }
 
   filep->f_priv = NULL;
@@ -651,7 +652,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 #endif
 
       level0 = (FAR struct procfs_level0_s *)
-         kmm_zalloc(sizeof(struct procfs_level0_s) + sizeof(pid_t) * num) ;
+      fs_heap_zalloc(sizeof(struct procfs_level0_s) + sizeof(pid_t) * num);
       if (!level0)
         {
           ferr("ERROR: Failed to allocate the level0 directory structure\n");
@@ -737,7 +738,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                */
 
               level1 = (FAR struct procfs_level1_s *)
-                 kmm_zalloc(sizeof(struct procfs_level1_s));
+                 fs_heap_zalloc(sizeof(struct procfs_level1_s));
               if (!level1)
                 {
                   ferr("ERROR: Failed to allocate the level0 directory "
@@ -778,7 +779,7 @@ static int procfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(mountpt && dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return OK;
 }
 
@@ -1175,7 +1176,7 @@ int procfs_initialize(void)
       /* No.. allocate a modifiable list of entries */
 
       g_procfs_entries = (FAR struct procfs_entry_s *)
-        kmm_malloc(sizeof(g_base_entries));
+        fs_heap_malloc(sizeof(g_base_entries));
       if (g_procfs_entries == NULL)
         {
           return -ENOMEM;
@@ -1241,7 +1242,7 @@ int procfs_register(FAR const struct procfs_entry_s *entry)
   newsize  = newcount * sizeof(struct procfs_entry_s);
 
   newtable = (FAR struct procfs_entry_s *)
-    kmm_realloc(g_procfs_entries, newsize);
+    fs_heap_realloc(g_procfs_entries, newsize);
   if (newtable != NULL)
     {
       /* Copy the new entry at the end of the reallocated table */
