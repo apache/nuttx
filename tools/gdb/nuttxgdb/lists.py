@@ -1,5 +1,5 @@
 ############################################################################
-# tools/gdb/lists.py
+# tools/gdb/nuttxgdb/lists.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,7 +23,8 @@
 import argparse
 
 import gdb
-import utils
+
+from . import utils
 
 list_node_type = utils.lookup_type("struct list_node")
 sq_queue_type = utils.lookup_type("sq_queue_t")

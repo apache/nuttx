@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+version = "0.0.1"
+name = 'nuttxgdb'
+description = 'NuttX RTOS GDB extensions'
+readme = "README.md"
+license = { file = 'LICENSE' }
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = ["matplotlib", "numpy", "pyelftools"]
+requires-python = ">=3.8"
+
+[tool.setuptools.package-dir]
+nuttxgdb = "nuttxgdb"

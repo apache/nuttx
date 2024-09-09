@@ -1,5 +1,5 @@
 ############################################################################
-# tools/gdb/macros.py
+# tools/gdb/nuttxgdb/macros.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #

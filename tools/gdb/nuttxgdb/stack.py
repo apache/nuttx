@@ -1,5 +1,5 @@
 ############################################################################
-# tools/gdb/stack.py
+# tools/gdb/nuttxgdb/stack.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,7 +23,8 @@
 import traceback
 
 import gdb
-import utils
+
+from . import utils
 
 STACK_COLORATION_PATTERN = utils.get_symbol_value(
     "STACK_COLOR", locspec="up_create_stack"
@@ -217,6 +218,3 @@ class StackUsage(gdb.Command):
                 continue
 
             self.format_print(pid, stack)
-
-
-StackUsage()

@@ -1,5 +1,7 @@
 ############################################################################
-# tools/gdb/fs.py
+# tools/gdb/nuttxgdb/fs.py
+#
+# SPDX-License-Identifier: Apache-2.0
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +24,8 @@ import argparse
 import enum
 
 import gdb
-import utils
+
+from . import utils
 
 FSNODEFLAG_TYPE_MASK = utils.get_symbol_value("FSNODEFLAG_TYPE_MASK")
 
@@ -220,7 +223,8 @@ class Fdinfo(gdb.Command):
 
 class Mount(gdb.Command):
     def __init__(self):
-        super().__init__("mount", gdb.COMMAND_USER)
+        if not utils.get_symbol_value("CONFIG_DISABLE_MOUNTPOINT"):
+            super().__init__("mount", gdb.COMMAND_USER)
 
     def mountpt_filter(self, node, path):
         if inode_gettype(node) == InodeType.MOUNTPT:
@@ -339,7 +343,8 @@ class InfoShmfs(gdb.Command):
     """Show share memory usage"""
 
     def __init__(self):
-        super().__init__("info shm", gdb.COMMAND_USER)
+        if CONFIG_FS_SHMFS:
+            super().__init__("info shm", gdb.COMMAND_USER)
 
     def shm_filter(self, node, path):
         if inode_gettype(node) != InodeType.SHM:
@@ -352,14 +357,3 @@ class InfoShmfs(gdb.Command):
 
     def invoke(self, args, from_tty):
         foreach_inode(self.shm_filter)
-
-
-Fdinfo()
-
-if not utils.get_symbol_value("CONFIG_DISABLE_MOUNTPOINT"):
-    Mount()
-
-ForeachInode()
-
-if CONFIG_FS_SHMFS:
-    InfoShmfs()

@@ -1,5 +1,5 @@
 ############################################################################
-# tools/gdb/__init__.py
+# tools/gdb/nuttxgdb/__init__.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,19 +20,17 @@
 #
 ############################################################################
 
-import glob
-import os
-import sys
+import importlib
+from os import listdir, path
 
 import gdb
 
-python_dir = os.path.abspath(__file__)
-python_dir = os.path.dirname(python_dir)
+here = path.dirname(path.abspath(__file__))
 
-sys.path.insert(1, python_dir)
-# Search the python dir for all .py files, and source each
-py_files = glob.glob(f"{python_dir}/*.py")
-py_files.remove(os.path.abspath(__file__))
+# Scan dir to get all modules available
+modules = [
+    path.splitext(path.basename(f))[0] for f in listdir(here) if f.endswith(".py")
+]
 
 
 def register_commands(event):
@@ -41,19 +39,28 @@ def register_commands(event):
 
     register_commands.registered = True
 
-    gdb.write("Registering NuttX GDB commands...\n")
+    gdb.write(f"Registering NuttX GDB commands from {here}\n")
     gdb.execute("set pagination off")
     gdb.write("set pagination off\n")
     gdb.execute("set python print-stack full")
     gdb.write("set python print-stack full\n")
-    for py_file in py_files:
-        gdb.execute(f"source {py_file}")
-        gdb.write(f"source {py_file}\n")
-
-    utils = __import__("utils")
-    utils.check_version()
     gdb.execute('handle SIGUSR1 "nostop" "pass" "noprint"')
     gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')
+
+    # Register all modules
+    for m in modules:
+        if m == "__init__":
+            continue
+
+        module = importlib.import_module(f"{__package__}.{m}")
+
+        # Get all classes inherited from gdb.Command
+        for c in module.__dict__.values():
+            if isinstance(c, type) and issubclass(c, gdb.Command):
+                c()
+
+    utils = importlib.import_module(f"{__package__}.utils")
+    utils.check_version()
 
 
 if len(gdb.objfiles()) == 0:
