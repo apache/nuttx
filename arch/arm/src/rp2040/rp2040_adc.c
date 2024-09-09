@@ -40,7 +40,7 @@
  *
  *    -------------
  *
- *    This lower-half supports multiple drivers (/dev/adc0, /dav/dca1, etc.)
+ *    This lower-half supports multiple drivers (/dev/adc0, /dev/adc1, etc.)
  *    that each may read data from any of the ADC ports.  The driver reads
  *    whichever ADC ports are needed by ANY of ther drivers in strict
  *    round-robin fashion, passing the converted values to the drivers that
