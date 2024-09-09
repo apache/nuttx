@@ -1,9 +1,9 @@
 /****************************************************************************
  * crypto/ecb_enc.c
- * $OpenBSD: ecb_enc.c,v 1.6 2015/12/10 21:00:51 naddy Exp $
- * lib/des/ecb_enc.c
- * Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
- * All rights reserved.
+ *
+ * SPDX-License-Identifier: SSLeay-standalone
+ * SPDX-FileCopyrightText: Copyright (C) 1995 Eric Young (eay@mincom.oz.au)
+ * SPDX-FileCopyrightText: Eric Young (eay@mincom.oz.au).
  *
  * This file is part of an SSL implementation written
  * by Eric Young (eay@mincom.oz.au).
