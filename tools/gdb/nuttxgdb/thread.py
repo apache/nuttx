@@ -616,6 +616,8 @@ class Ps(gdb.Command):
 
 
 class DeadLock(gdb.Command):
+    """Detect and report if threads have deadlock."""
+
     def __init__(self):
         super().__init__("deadlock", gdb.COMMAND_USER)
 
@@ -638,9 +640,12 @@ class DeadLock(gdb.Command):
         self.holders.append(holder)
         return self.has_deadlock(holder)
 
-    def invoke(self, args, from_tty):
+    def collect(self, tcbs):
+        """Collect the deadlock information"""
+
         detected = []
-        for tcb in utils.get_tcbs():
+        collected = []
+        for tcb in tcbs:
             self.holders = []  # Holders for this tcb
             pid = tcb["pid"]
             if pid in detected or not self.has_deadlock(tcb["pid"]):
@@ -649,13 +654,28 @@ class DeadLock(gdb.Command):
             # Deadlock detected
             detected.append(pid)
             detected.extend(self.holders)
-            gdb.write(f'Thread {pid} "{utils.get_task_name(tcb)}" has deadlocked!\n')
+            collected.append((pid, self.holders))
 
-            gdb.write(f"  holders: {pid}->")
-            gdb.write("->".join(str(pid) for pid in self.holders))
-            gdb.write("\n")
+        return collected
 
-        if not detected:
+    def diagnose(self, *args, **kwargs):
+        collected = self.collect(utils.get_tcbs())
+
+        return {
+            "title": "Deadlock Report",
+            "summary": f"{'No' if not collected else len(collected)} deadlocks",
+            "command": "deadlock",
+            "deadlocks": {int(pid): [i for i in h] for pid, h in collected},
+        }
+
+    def invoke(self, args, from_tty):
+        collected = self.collect(utils.get_tcbs())
+        if not collected:
             gdb.write("No deadlock detected.")
+            return
 
-        gdb.write("\n")
+        for pid, holders in collected:
+            gdb.write(f'Thread {pid} "{utils.get_task_name(pid)}" has deadlocked!\n')
+            gdb.write(f"  holders: {pid}->")
+            gdb.write("->".join(str(pid) for pid in holders))
+            gdb.write("\n")

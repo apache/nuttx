@@ -21,16 +21,11 @@
 ############################################################################
 
 import importlib
-from os import listdir, path
+from os import path
 
 import gdb
 
 here = path.dirname(path.abspath(__file__))
-
-# Scan dir to get all modules available
-modules = [
-    path.splitext(path.basename(f))[0] for f in listdir(here) if f.endswith(".py")
-]
 
 
 def register_commands(event):
@@ -53,6 +48,10 @@ def register_commands(event):
             if isinstance(c, type) and issubclass(c, gdb.Command):
                 c()
 
+    # import utils module
+    utils = importlib.import_module(f"{__package__}.utils")
+    modules = utils.gather_modules(here)
+
     # Register prefix commands firstly
     init_gdb_commands("prefix")
     modules.remove("prefix")
@@ -62,7 +61,6 @@ def register_commands(event):
     for m in modules:
         init_gdb_commands(m)
 
-    utils = importlib.import_module(f"{__package__}.utils")
     utils.check_version()
 
 
