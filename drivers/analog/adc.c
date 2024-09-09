@@ -793,6 +793,7 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 
       nxsem_destroy(&dev->ad_recv.af_sem);
       nxmutex_destroy(&dev->ad_closelock);
+      return ret;
     }
 
   /* Initialize the af_channale */
