@@ -71,27 +71,15 @@
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  irqstate_t flags;
-
   /* We don't have to anything complex for the simulated target */
 
-  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
+  sinfo("tcb=%p\n", tcb);
 
-  /* Make sure that interrupts are disabled */
-
-  flags = enter_critical_section();
-
-  if (tcb->sigdeliver == NULL)
+  if (tcb == this_task())
     {
-      tcb->sigdeliver = sigdeliver;
-      if (tcb == this_task())
-        {
-          sigdeliver(tcb);
-          tcb->sigdeliver = NULL;
-        }
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
     }
-
-  leave_critical_section(flags);
 }

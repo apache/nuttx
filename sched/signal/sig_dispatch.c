@@ -115,7 +115,12 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
            * up_schedule_sigaction()
            */
 
-          up_schedule_sigaction(stcb, nxsig_deliver);
+          if (!stcb->sigdeliver)
+            {
+              stcb->sigdeliver = nxsig_deliver;
+              up_schedule_sigaction(stcb);
+            }
+
           leave_critical_section(flags);
         }
     }

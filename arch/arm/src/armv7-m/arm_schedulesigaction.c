@@ -79,107 +79,97 @@
  *
  ****************************************************************************/
 
-void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
+void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  sinfo("tcb=%p sigdeliver=%p\n", tcb, sigdeliver);
-  DEBUGASSERT(tcb != NULL && sigdeliver != NULL);
+  sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb, this_task(),
+        this_task()->xcp.regs);
 
-  /* Refuse to handle nested signal actions */
+  /* First, handle some special cases when the signal is
+   * being delivered to the currently executing task.
+   */
 
-  if (tcb->sigdeliver == NULL)
+  if (tcb == this_task() && !up_interrupt_context())
     {
-      tcb->sigdeliver = sigdeliver;
-
-      /* First, handle some special cases when the signal is being delivered
-       * to the currently executing task.
+      /* In this case just deliver the signal now.
+       * REVISIT:  Signal handle will run in a critical section!
        */
 
-      sinfo("rtcb=%p current_regs=%p\n", this_task(),
-            this_task()->xcp.regs);
+      (tcb->sigdeliver)(tcb);
+      tcb->sigdeliver = NULL;
+    }
+  else
+    {
+      /* CASE 2:  The task that needs to receive the signal is running.
+       * This could happen if the task is running on another CPU OR if
+       * we are in an interrupt handler and the task is running on this
+       * CPU.  In the former case, we will have to PAUSE the other CPU
+       * first.  But in either case, we will have to modify the return
+       * state as well as the state in the TCB.
+       */
 
-      if (tcb == this_task() && !up_interrupt_context())
-        {
-          /* In this case just deliver the signal now.
-           * REVISIT:  Signal handle will run in a critical section!
-           */
-
-          sigdeliver(tcb);
-          tcb->sigdeliver = NULL;
-        }
-      else
-        {
-          /* CASE 2:  The task that needs to receive the signal is running.
-           * This could happen if the task is running on another CPU OR if
-           * we are in an interrupt handler and the task is running on this
-           * CPU.  In the former case, we will have to PAUSE the other CPU
-           * first.  But in either case, we will have to modify the return
-           * state as well as the state in the TCB.
-           */
-
-          /* If we signaling a task running on the other CPU, we have
-           * to PAUSE the other CPU.
-           */
+      /* If we signaling a task running on the other CPU, we have
+       * to PAUSE the other CPU.
+       */
 
 #ifdef CONFIG_SMP
-          int cpu = tcb->cpu;
-          int me  = this_cpu();
+      int cpu = tcb->cpu;
+      int me  = this_cpu();
 
-          if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-            {
-              /* Pause the CPU */
+      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          /* Pause the CPU */
 
-              up_cpu_pause(cpu);
-            }
+          up_cpu_pause(cpu);
+        }
 #endif
 
-          /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
-           * registers (and perhaps also the LR).  These will be restored
-           * by the signal trampoline after the signal has been delivered.
-           */
+      /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
+       * registers (and perhaps also the LR).  These will be restored
+       * by the signal trampoline after the signal has been delivered.
+       */
 
-          /* Save the current register context location */
+      /* Save the current register context location */
 
-          tcb->xcp.saved_regs           = tcb->xcp.regs;
+      tcb->xcp.saved_regs           = tcb->xcp.regs;
 
-          /* Duplicate the register context.  These will be
-           * restored by the signal trampoline after the signal has been
-           * delivered.
-           */
+      /* Duplicate the register context.  These will be
+       * restored by the signal trampoline after the signal has been
+       * delivered.
+       */
 
-          tcb->xcp.regs                 = (void *)
-                                          ((uint32_t)tcb->xcp.regs -
-                                                     XCPTCONTEXT_SIZE);
-          memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
+      tcb->xcp.regs                 = (void *)
+                                      ((uint32_t)tcb->xcp.regs -
+                                                 XCPTCONTEXT_SIZE);
+      memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
 
-          tcb->xcp.regs[REG_SP]         = (uint32_t)tcb->xcp.regs +
-                                                    XCPTCONTEXT_SIZE;
+      tcb->xcp.regs[REG_SP]         = (uint32_t)tcb->xcp.regs +
+                                                XCPTCONTEXT_SIZE;
 
-          /* Then set up to vector to the trampoline with interrupts
-           * disabled.  We must already be in privileged thread mode to be
-           * here.
-           */
+      /* Then set up to vector to the trampoline with interrupts
+       * disabled.  We must already be in privileged thread mode to be
+       * here.
+       */
 
-          tcb->xcp.regs[REG_PC]         = (uint32_t)arm_sigdeliver;
+      tcb->xcp.regs[REG_PC]         = (uint32_t)arm_sigdeliver;
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-          tcb->xcp.regs[REG_BASEPRI]    = NVIC_SYSH_DISABLE_PRIORITY;
+      tcb->xcp.regs[REG_BASEPRI]    = NVIC_SYSH_DISABLE_PRIORITY;
 #else
-          tcb->xcp.regs[REG_PRIMASK]    = 1;
+      tcb->xcp.regs[REG_PRIMASK]    = 1;
 #endif
-          tcb->xcp.regs[REG_XPSR]       = ARMV7M_XPSR_T;
+      tcb->xcp.regs[REG_XPSR]       = ARMV7M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
-          tcb->xcp.regs[REG_LR]         = EXC_RETURN_THREAD;
-          tcb->xcp.regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
-          tcb->xcp.regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
+      tcb->xcp.regs[REG_LR]         = EXC_RETURN_THREAD;
+      tcb->xcp.regs[REG_EXC_RETURN] = EXC_RETURN_THREAD;
+      tcb->xcp.regs[REG_CONTROL]    = getcontrol() & ~CONTROL_NPRIV;
 #endif
 
 #ifdef CONFIG_SMP
-          /* RESUME the other CPU if it was PAUSED */
+      /* RESUME the other CPU if it was PAUSED */
 
-          if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
-            {
-              up_cpu_resume(cpu);
-            }
-#endif
+      if (cpu != me && tcb->task_state == TSTATE_TASK_RUNNING)
+        {
+          up_cpu_resume(cpu);
         }
+#endif
     }
 }
