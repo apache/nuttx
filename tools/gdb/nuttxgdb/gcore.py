@@ -1,5 +1,5 @@
 ############################################################################
-# tools/gdb/gcore.py
+# tools/gdb/nuttxgdb/gcore.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,7 +25,8 @@ import os
 import shutil
 
 import gdb
-import utils
+
+from . import utils
 
 
 def create_file_with_size(filename, size):
@@ -133,6 +134,3 @@ class NXGcore(gdb.Command):
         tmpfile.close()
 
         print(f"Please run gdbserver.py to parse {corefile}")
-
-
-NXGcore()

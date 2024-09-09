@@ -1,5 +1,5 @@
 ############################################################################
-# tools/gdb/utils.py
+# tools/gdb/nuttxgdb/utils.py
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,7 +25,8 @@ import shlex
 from typing import List, Tuple, Union
 
 import gdb
-from macros import fetch_macro_info, try_expand
+
+from .macros import fetch_macro_info, try_expand
 
 g_symbol_cache = {}
 g_type_cache = {}
@@ -291,90 +292,6 @@ def parse_arg(arg: str) -> Union[gdb.Value, int]:
         return gdb.parse_and_eval(f"{arg}")
     except gdb.error:
         return None
-
-
-class Hexdump(gdb.Command):
-    """hexdump address/symbol <size>"""
-
-    def __init__(self):
-        super().__init__("hexdump", gdb.COMMAND_USER)
-
-    def invoke(self, args, from_tty):
-        args = shlex.split(args)
-        if not args or len(args) < 1:
-            gdb.write("Usage: hexdump address/symbol <size>\n")
-            return
-
-        address = parse_arg(args[0])
-        size = parse_arg(args[1]) if len(args) > 1 else None
-        if not size:
-            size = address.type.sizeof if isinstance(address, gdb.Value) else 128
-
-        print(f"Dumping {size} bytes from {hex(address)}")
-        hexdump(address, size)
-
-
-Hexdump()
-
-
-class Addr2Line(gdb.Command):
-    """Convert addresses or expressions
-
-    Usage: addr2line address1 address2 expression1
-    Example: addr2line 0x1234 0x5678
-             addr2line "0x1234 + pointer->abc" &var var->field function_name var
-             addr2line $pc $r1 "$r2 + var"
-             addr2line [24/08/29 20:51:02] [CPU1] [209] [ap] sched_dumpstack: backtrace| 0: 0x402cd484 0x4028357e
-    """
-
-    def __init__(self):
-        super().__init__("addr2line", gdb.COMMAND_USER)
-
-    def invoke(self, args, from_tty):
-        if not args:
-            gdb.write(Addr2Line.__doc__ + "\n")
-            return
-
-        addresses = []
-        for arg in shlex.split(args):
-            v = parse_arg(arg)
-            if not v:
-                gdb.write(f'Ignore "{arg}"\n')
-                continue
-
-            addresses.append(v)
-
-        backtraces = backtrace(addresses)
-        formatter = "{:<20} {:<32} {}\n"
-        gdb.write(formatter.format("Address", "Symbol", "Source"))
-        for addr, func, source in backtraces:
-            gdb.write(formatter.format(hex(addr), func, source))
-
-
-Addr2Line()
-
-
-class Profile(gdb.Command):
-    """Profile a gdb command
-
-    Usage: profile <gdb command>
-    """
-
-    def __init__(self):
-        self.cProfile = import_check(
-            "cProfile", errmsg="cProfile module not found, try gdb-multiarch.\n"
-        )
-        if not self.cProfile:
-            return
-
-        super().__init__("profile", gdb.COMMAND_USER)
-
-    def invoke(self, args, from_tty):
-
-        self.cProfile.run(f"gdb.execute('{args}')", sort="cumulative")
-
-
-Profile()
 
 
 def nitems(array):
@@ -681,3 +598,86 @@ def check_version():
 
     switch_inferior(1)  # Switch back
     suppress_cli_notifications(state)
+
+
+class Hexdump(gdb.Command):
+    """hexdump address/symbol <size>"""
+
+    def __init__(self):
+        super().__init__("hexdump", gdb.COMMAND_USER)
+
+    def invoke(self, args, from_tty):
+        argv = args.split(" ")
+        address = 0
+        size = 0
+        if argv[0] == "":
+            gdb.write("Usage: hexdump address/symbol <size>\n")
+            return
+
+        if is_decimal(argv[0]) or is_hexadecimal(argv[0]):
+            address = int(argv[0], 0)
+            size = int(argv[1], 0)
+        else:
+            var = gdb.parse_and_eval(f"{argv[0]}")
+            address = int(var.address)
+            size = int(var.type.sizeof)
+            gdb.write(f"{argv[0]} {hex(address)} {int(size)}\n")
+
+        hexdump(address, size)
+
+
+class Addr2Line(gdb.Command):
+    """Convert addresses or expressions
+
+    Usage: addr2line address1 address2 expression1
+    Example: addr2line 0x1234 0x5678
+             addr2line "0x1234 + pointer->abc" &var var->field function_name var
+             addr2line $pc $r1 "$r2 + var"
+             addr2line [24/08/29 20:51:02] [CPU1] [209] [ap] sched_dumpstack: backtrace| 0: 0x402cd484 0x4028357e
+    """
+
+    def __init__(self):
+        super().__init__("addr2line", gdb.COMMAND_USER)
+
+    def invoke(self, args, from_tty):
+        if not args:
+            gdb.write(Addr2Line.__doc__ + "\n")
+            return
+
+        addresses = []
+        for arg in shlex.split(args):
+            if is_decimal(arg):
+                addresses.append(int(arg))
+            elif is_hexadecimal(arg):
+                addresses.append(int(arg, 16))
+            else:
+                try:
+                    var = gdb.parse_and_eval(f"{arg}")
+                    addresses.append(var)
+                except gdb.error as e:
+                    gdb.write(f"Ignore {arg}: {e}\n")
+
+        backtraces = backtrace(addresses)
+        formatter = "{:<20} {:<32} {}\n"
+        gdb.write(formatter.format("Address", "Symbol", "Source"))
+        for addr, func, source in backtraces:
+            gdb.write(formatter.format(hex(addr), func, source))
+
+
+class Profile(gdb.Command):
+    """Profile a gdb command
+
+    Usage: profile <gdb command>
+    """
+
+    def __init__(self):
+        self.cProfile = import_check(
+            "cProfile", errmsg="cProfile module not found, try gdb-multiarch.\n"
+        )
+        if not self.cProfile:
+            return
+
+        super().__init__("profile", gdb.COMMAND_USER)
+
+    def invoke(self, args, from_tty):
+        self.cProfile.run(f"gdb.execute('{args}')", sort="cumulative")

@@ -1,5 +1,7 @@
 ############################################################################
-# tools/gdb/dmesg.py
+# tools/gdb/gdbinit.py
+#
+# SPDX-License-Identifier: Apache-2.0
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +20,16 @@
 #
 ############################################################################
 
-import gdb
-import utils
+import sys
+from os import path
 
-CONFIG_RAMLOG_SYSLOG = utils.get_symbol_value("CONFIG_RAMLOG_SYSLOG")
+here = path.dirname(path.abspath(__file__))
 
+if __name__ == "__main__":
+    if here not in sys.path:
+        sys.path.insert(0, here)
 
-class Dmesg(gdb.Command):
-    def __init__(self):
-        super().__init__("dmesg", gdb.COMMAND_USER)
+    if "nuttxgdb" in sys.modules:
+        del sys.modules["nuttxgdb"]
 
-    def invoke(self, args, from_tty):
-        sysdev = utils.gdb_eval_or_none("g_sysdev")
-        if not sysdev:
-            gdb.write("RAM log not available.\n")
-            return
-
-        rl_head = sysdev["rl_header"]
-        rl_bufsize = sysdev["rl_bufsize"]
-        gdb.write("Ramlog have %d bytes to show\n" % rl_bufsize)
-
-        inf = gdb.selected_inferior()
-        buf = inf.read_memory(rl_head["rl_buffer"], rl_bufsize)
-        clean_data = bytes(buf).replace(b"\x00", "␀".encode("utf-8"))
-        gdb.write(clean_data.decode("utf-8"))
-        gdb.write("\n")
-
-
-if CONFIG_RAMLOG_SYSLOG:
-    Dmesg()
+    import nuttxgdb  # noqa: F401
