@@ -1,10 +1,9 @@
 /****************************************************************************
  * crypto/curve25519.c
- * $OpenBSD: curve25519.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
  *
- * Copyright (C) 2018-2020 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights
- * Reserved.
- * Copyright (C) 2015-2016 The fiat-crypto Authors.
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2018-2020 Jason A. Donenfeld <Jason@zx2c4.com>.
+ * SPDX-FileCopyrightText: 2015-2016 The fiat-crypto Authors.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +23,7 @@
  * generated, it has been tweaked to be suitable for use in the kernel.
  * It is optimized for 32-bit machines and machines that cannot work
  * efficiently with 128-bit integer types.
+ *
  ****************************************************************************/
 
 /****************************************************************************
