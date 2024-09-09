@@ -38,7 +38,12 @@ static FAR struct mm_heap_s *g_fs_heap;
 
 void fs_heap_initialize(void)
 {
+#ifdef FS_HEAPBUF_SECTION
+  static uint8_t buf[CONFIG_FS_HEAPSIZE] locate_data(FS_HEAPBUF_SECTION);
+#else
   FAR void *buf = kmm_malloc(CONFIG_FS_HEAPSIZE);
+#endif
+
   DEBUGASSERT(buf != NULL);
   g_fs_heap = mm_initialize("heapfs", buf, CONFIG_FS_HEAPSIZE);
 }
@@ -46,6 +51,11 @@ void fs_heap_initialize(void)
 FAR void *fs_heap_zalloc(size_t size)
 {
   return mm_zalloc(g_fs_heap, size);
+}
+
+FAR void *fs_heap_malloc(size_t size)
+{
+  return mm_malloc(g_fs_heap, size);
 }
 
 size_t fs_heap_malloc_size(FAR void *mem)

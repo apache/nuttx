@@ -35,6 +35,7 @@
 #include <nuttx/semaphore.h>
 
 #include "rpmsgfs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -730,7 +731,7 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
       return -EINVAL;
     }
 
-  priv = kmm_zalloc(sizeof(struct rpmsgfs_s));
+  priv = fs_heap_zalloc(sizeof(struct rpmsgfs_s));
   if (!priv)
     {
       return -ENOMEM;
@@ -744,7 +745,7 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
                                 NULL);
   if (ret < 0)
     {
-      kmm_free(priv);
+      fs_heap_free(priv);
       return ret;
     }
 
@@ -765,7 +766,7 @@ int rpmsgfs_client_unbind(FAR void *handle)
                             NULL);
 
   nxsem_destroy(&priv->wait);
-  kmm_free(priv);
+  fs_heap_free(priv);
   return 0;
 }
 

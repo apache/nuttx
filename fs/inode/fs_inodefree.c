@@ -31,6 +31,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Public Functions
@@ -69,10 +70,10 @@ void inode_free(FAR struct inode *node)
 
       if (INODE_IS_SOFTLINK(node) && node->u.i_link != NULL)
         {
-          kmm_free(node->u.i_link);
+          fs_heap_free(node->u.i_link);
         }
 #endif
 
-      kmm_free(node);
+      fs_heap_free(node);
     }
 }

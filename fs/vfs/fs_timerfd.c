@@ -39,6 +39,7 @@
 
 #include "clock/clock.h"
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -139,7 +140,7 @@ static FAR struct timerfd_priv_s *timerfd_allocdev(void)
   FAR struct timerfd_priv_s *dev;
 
   dev = (FAR struct timerfd_priv_s *)
-    kmm_zalloc(sizeof(struct timerfd_priv_s));
+    fs_heap_zalloc(sizeof(struct timerfd_priv_s));
   if (dev)
     {
       /* Initialize the private structure */
@@ -157,7 +158,7 @@ static void timerfd_destroy(FAR struct timerfd_priv_s *dev)
   wd_cancel(&dev->wdog);
   nxmutex_unlock(&dev->lock);
   nxmutex_destroy(&dev->lock);
-  kmm_free(dev);
+  fs_heap_free(dev);
 }
 
 static int timerfd_open(FAR struct file *filep)

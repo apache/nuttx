@@ -38,6 +38,7 @@
 #include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Data
@@ -490,7 +491,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   memset(wrfile, 0, sizeof(struct nxffs_wrfile_s));
 #else
   wrfile = (FAR struct nxffs_wrfile_s *)
-           kmm_zalloc(sizeof(struct nxffs_wrfile_s));
+           fs_heap_zalloc(sizeof(struct nxffs_wrfile_s));
   if (!wrfile)
     {
       ret = -ENOMEM;
@@ -657,7 +658,7 @@ errout_with_name:
   lib_free(wrfile->ofile.entry.name);
 errout_with_ofile:
 #ifndef CONFIG_NXFFS_PREALLOCATED
-  kmm_free(wrfile);
+  fs_heap_free(wrfile);
 #endif
 
 errout_with_lock:
@@ -726,7 +727,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       /* Not already open.. create a new open structure */
 
       ofile = (FAR struct nxffs_ofile_s *)
-              kmm_zalloc(sizeof(struct nxffs_ofile_s));
+              fs_heap_zalloc(sizeof(struct nxffs_ofile_s));
       if (!ofile)
         {
           ferr("ERROR: ofile allocation failed\n");
@@ -761,7 +762,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
   return OK;
 
 errout_with_ofile:
-  kmm_free(ofile);
+  fs_heap_free(ofile);
 errout_with_lock:
   nxmutex_unlock(&volume->lock);
 errout:
@@ -832,7 +833,7 @@ static inline void nxffs_freeofile(FAR struct nxffs_volume_s *volume,
   if ((FAR struct nxffs_wrfile_s *)ofile != &g_wrfile)
 #endif
     {
-      kmm_free(ofile);
+      fs_heap_free(ofile);
     }
 }
 

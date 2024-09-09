@@ -73,6 +73,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "fs_heap.h"
+
 #include "nfs.h"
 #include "rpc.h"
 #include "nfs_proto.h"
@@ -663,7 +665,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Pre-allocate the file private data to describe the opened file. */
 
-  np = kmm_zalloc(sizeof(struct nfsnode));
+  np = fs_heap_zalloc(sizeof(struct nfsnode));
   if (!np)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -673,7 +675,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   ret = nxmutex_lock(&nmp->nm_lock);
   if (ret < 0)
     {
-      kmm_free(np);
+      fs_heap_free(np);
       return ret;
     }
 
@@ -744,7 +746,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
 errout_with_lock:
   if (np)
     {
-      kmm_free(np);
+      fs_heap_free(np);
     }
 
   nxmutex_unlock(&nmp->nm_lock);
@@ -837,7 +839,7 @@ static int nfs_close(FAR struct file *filep)
 
               /* Then deallocate the file structure and return success */
 
-              kmm_free(np);
+              fs_heap_free(np);
               ret = OK;
               break;
             }
@@ -1497,7 +1499,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* Recover our private data from the inode instance */
 
   nmp = mountpt->i_private;
-  ndir = kmm_zalloc(sizeof(*ndir));
+  ndir = fs_heap_zalloc(sizeof(*ndir));
   if (ndir == NULL)
     {
       return -ENOMEM;
@@ -1543,7 +1545,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 errout_with_lock:
   nxmutex_unlock(&nmp->nm_lock);
 errout_with_ndir:
-  kmm_free(ndir);
+  fs_heap_free(ndir);
   return ret;
 }
 
@@ -1562,7 +1564,7 @@ static int nfs_closedir(FAR struct inode *mountpt,
                         FAR struct fs_dirent_s *dir)
 {
   DEBUGASSERT(dir);
-  kmm_free(dir);
+  fs_heap_free(dir);
   return 0;
 }
 
@@ -2077,7 +2079,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  nmp = kmm_zalloc(SIZEOF_nfsmount(buflen));
+  nmp = fs_heap_zalloc(SIZEOF_nfsmount(buflen));
   if (!nmp)
     {
       ferr("ERROR: Failed to allocate mountpoint structure\n");
@@ -2117,7 +2119,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the rpc state structure */
 
-  rpc = kmm_zalloc(sizeof(struct rpcclnt));
+  rpc = fs_heap_zalloc(sizeof(struct rpcclnt));
   if (!rpc)
     {
       ferr("ERROR: Failed to allocate rpc structure\n");
@@ -2169,13 +2171,13 @@ bad:
   if (nmp->nm_rpcclnt)
     {
       rpcclnt_disconnect(nmp->nm_rpcclnt);
-      kmm_free(nmp->nm_rpcclnt);
+      fs_heap_free(nmp->nm_rpcclnt);
     }
 
   /* Free connection-related resources */
 
   nxmutex_destroy(&nmp->nm_lock);
-  kmm_free(nmp);
+  fs_heap_free(nmp);
 
   return ret;
 }
@@ -2233,8 +2235,8 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   /* And free any allocated resources */
 
   nxmutex_destroy(&nmp->nm_lock);
-  kmm_free(nmp->nm_rpcclnt);
-  kmm_free(nmp);
+  fs_heap_free(nmp->nm_rpcclnt);
+  fs_heap_free(nmp);
 
   return OK;
 

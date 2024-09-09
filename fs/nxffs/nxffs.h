@@ -555,8 +555,8 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve);
  *   to dispose of that memory when the inode entry is no longer needed.
  *
  *   Note that the nxffs_entry_s containing structure is not freed.  The
- *   caller may call kmm_free upon return of this function if necessary to
- *   free the entry container.
+ *   caller may call fs_heap_free upon return of this function if necessary
+ *   to free the entry container.
  *
  * Input Parameters:
  *   entry  - The entry to be freed.

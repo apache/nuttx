@@ -36,12 +36,14 @@
 #if defined(CONFIG_FS_HEAPSIZE) && CONFIG_FS_HEAPSIZE > 0
 void      fs_heap_initialize(void);
 FAR void *fs_heap_zalloc(size_t size);
+FAR void *fs_heap_malloc(size_t size);
 size_t    fs_heap_malloc_size(FAR void *mem);
 FAR void *fs_heap_realloc(FAR void *oldmem, size_t size);
 void      fs_heap_free(FAR void *mem);
 #else
 #  define fs_heap_initialize()
 #  define fs_heap_zalloc       kmm_zalloc
+#  define fs_heap_malloc       kmm_malloc
 #  define fs_heap_malloc_size  kmm_malloc_size
 #  define fs_heap_realloc      kmm_realloc
 #  define fs_heap_free         kmm_free

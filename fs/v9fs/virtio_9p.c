@@ -29,6 +29,7 @@
 #include <nuttx/virtio/virtio.h>
 
 #include "client.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -109,7 +110,7 @@ static int virtio_9p_create(FAR struct v9fs_transport_s **transport,
   start += 4;
   end = strchr(start, ',');
   length = end ? end - start + 1 : strlen(start) + 1;
-  priv = kmm_zalloc(sizeof(struct virtio_9p_priv_s) + length);
+  priv = fs_heap_zalloc(sizeof(struct virtio_9p_priv_s) + length);
   if (priv == NULL)
     {
       return -ENOMEM;
@@ -125,7 +126,7 @@ static int virtio_9p_create(FAR struct v9fs_transport_s **transport,
   ret = virtio_register_driver(&priv->vdrv);
   if (ret < 0)
     {
-      kmm_free(priv);
+      fs_heap_free(priv);
     }
 
   return ret;
@@ -140,7 +141,7 @@ static void virtio_9p_destroy(FAR struct v9fs_transport_s *transport)
   FAR struct virtio_9p_priv_s *priv =
             container_of(transport, struct virtio_9p_priv_s, transport);
   virtio_unregister_driver(&priv->vdrv);
-  kmm_free(priv);
+  fs_heap_free(priv);
 }
 
 /****************************************************************************

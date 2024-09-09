@@ -41,6 +41,7 @@
 
 #include "inode/inode.h"
 #include "sched/sched.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -210,7 +211,7 @@ inotify_alloc_event(int wd, uint32_t mask, uint32_t cookie,
       len = ROUND_UP(strlen(name) + 1, sizeof(struct inotify_event));
     }
 
-  event = kmm_malloc(sizeof(struct inotify_event_s) + len);
+  event = fs_heap_malloc(sizeof(struct inotify_event_s) + len);
   if (event == NULL)
     {
       return NULL;
@@ -308,7 +309,7 @@ inotify_remove_watch_no_event(FAR struct inotify_watch_s *watch)
   list_delete(&watch->d_node);
   list_delete(&watch->l_node);
   inotify_sub_count(watch->mask);
-  kmm_free(watch);
+  fs_heap_free(watch);
 
   if (list_is_empty(&list->watches))
     {
@@ -347,7 +348,7 @@ static void inotify_remove_event(FAR struct inotify_device_s *dev,
   list_delete(&event->node);
   dev->event_size -= sizeof(struct inotify_event) + event->event.len;
   dev->event_count--;
-  kmm_free(event);
+  fs_heap_free(event);
 }
 
 /****************************************************************************
@@ -362,7 +363,7 @@ static FAR struct inotify_device_s *inotify_alloc_device(void)
 {
   FAR struct inotify_device_s *dev;
 
-  dev = kmm_zalloc(sizeof(struct inotify_device_s));
+  dev = fs_heap_zalloc(sizeof(struct inotify_device_s));
   if (dev == NULL)
     {
       return dev;
@@ -584,7 +585,7 @@ static int inotify_close(FAR struct file *filep)
   nxmutex_unlock(&g_inotify.lock);
   nxmutex_destroy(&dev->lock);
   nxsem_destroy(&dev->sem);
-  kmm_free(dev);
+  fs_heap_free(dev);
   return OK;
 }
 
@@ -653,7 +654,7 @@ inotify_alloc_watch(FAR struct inotify_device_s *dev,
 {
   FAR struct inotify_watch_s *watch;
 
-  watch = kmm_zalloc(sizeof(struct inotify_watch_s));
+  watch = fs_heap_zalloc(sizeof(struct inotify_watch_s));
   if (watch == NULL)
     {
       return NULL;
@@ -738,7 +739,7 @@ inotify_alloc_watch_list(FAR const char *path)
   FAR ENTRY *result;
   ENTRY item;
 
-  list = kmm_zalloc(sizeof(struct inotify_watch_list_s));
+  list = fs_heap_zalloc(sizeof(struct inotify_watch_list_s));
   if (list == NULL)
     {
       return NULL;
@@ -748,7 +749,7 @@ inotify_alloc_watch_list(FAR const char *path)
   list->path = strdup(path);
   if (list->path == NULL)
     {
-      kmm_free(list);
+      fs_heap_free(list);
       return NULL;
     }
 
@@ -757,7 +758,7 @@ inotify_alloc_watch_list(FAR const char *path)
   if (hsearch_r(item, ENTER, &result, &g_inotify.hash) == 0)
     {
       lib_free(list->path);
-      kmm_free(list);
+      fs_heap_free(list);
       return NULL;
     }
 
@@ -1019,10 +1020,10 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
 
 static void notify_free_entry(FAR ENTRY *entry)
 {
-  /* Key is alloced by lib_malloc, value is alloced by kmm_malloc */
+  /* Key is alloced by lib_malloc, value is alloced by fs_heap_malloc */
 
   lib_free(entry->key);
-  kmm_free(entry->data);
+  fs_heap_free(entry->data);
 }
 
 /****************************************************************************
@@ -1262,7 +1263,7 @@ int inotify_init1(int flags)
 exit_with_dev:
   nxmutex_destroy(&dev->lock);
   nxsem_destroy(&dev->sem);
-  kmm_free(dev);
+  fs_heap_free(dev);
 exit_set_errno:
   set_errno(-ret);
   return ERROR;
