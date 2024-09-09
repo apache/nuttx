@@ -56,6 +56,11 @@ struct arm_timer_lowerhalf_s
   uint32_t                   freq;      /* Timer working clock frequency(Hz) */
   oneshot_callback_t         callback;  /* Current user interrupt callback */
   void                       *arg;      /* Argument passed to upper half callback */
+  bool init[CONFIG_SMP_NCPUS];          /* True: timer is init */
+
+  /* which cpu timer is running, -1 indicate timer stoppd */
+
+  int running;
 };
 
 /****************************************************************************
@@ -156,10 +161,7 @@ static inline uint64_t sec_to_count(uint32_t sec, uint32_t freq)
 static int arm_timer_maxdelay(struct oneshot_lowerhalf_s *lower_,
                               struct timespec *ts)
 {
-  struct arm_timer_lowerhalf_s *lower =
-    (struct arm_timer_lowerhalf_s *)lower_;
-
-  uint64_t maxnsec = nsec_from_count(UINT64_MAX, lower->freq);
+  uint64_t maxnsec = nsec_from_count(UINT64_MAX, arm_timer_get_freq());
 
   ts->tv_sec  = maxnsec / NSEC_PER_SEC;
   ts->tv_nsec = maxnsec % NSEC_PER_SEC;
@@ -182,8 +184,31 @@ static int arm_timer_start(struct oneshot_lowerhalf_s *lower_,
   lower->callback = callback;
   lower->arg      = arg;
 
-  count = sec_to_count(ts->tv_sec, lower->freq) +
-          nsec_to_count(ts->tv_nsec, lower->freq);
+  if (!lower->init[this_cpu()])
+    {
+      if (lower->freq)
+        {
+          arm_timer_set_freq(lower->freq);
+        }
+
+      /* Enable timer */
+
+      ctrl = arm_timer_get_ctrl();
+      ctrl |= ARM_TIMER_CTRL_ENABLE | ARM_TIMER_CTRL_INT_MASK;
+      arm_timer_set_ctrl(ctrl);
+#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
+      up_enable_irq(GIC_IRQ_STM);
+#else
+      up_enable_irq(GIC_IRQ_PTM);
+#endif
+
+      lower->init[this_cpu()] = true;
+    }
+
+  lower->running = this_cpu();
+
+  count = sec_to_count(ts->tv_sec, arm_timer_get_freq()) +
+          nsec_to_count(ts->tv_nsec, arm_timer_get_freq());
   arm_timer_set_cval(arm_timer_get_count() + count);
 
   ctrl = arm_timer_get_ctrl();
@@ -205,8 +230,9 @@ static int arm_timer_cancel(struct oneshot_lowerhalf_s *lower_,
 
   flags = up_irq_save();
 
-  lower->callback  = NULL;
-  lower->arg       = NULL;
+  lower->callback = NULL;
+  lower->arg      = NULL;
+  lower->running  = -1;
 
   ctrl = arm_timer_get_ctrl();
   ctrl |= ARM_TIMER_CTRL_INT_MASK;
@@ -220,10 +246,8 @@ static int arm_timer_cancel(struct oneshot_lowerhalf_s *lower_,
 static int arm_timer_current(struct oneshot_lowerhalf_s *lower_,
                              struct timespec *ts)
 {
-  struct arm_timer_lowerhalf_s *lower =
-    (struct arm_timer_lowerhalf_s *)lower_;
-
-  uint64_t nsec = nsec_from_count(arm_timer_get_count(), lower->freq);
+  uint64_t nsec = nsec_from_count(arm_timer_get_count(),
+                                  arm_timer_get_freq());
 
   ts->tv_sec  = nsec / NSEC_PER_SEC;
   ts->tv_nsec = nsec % NSEC_PER_SEC;
@@ -241,7 +265,7 @@ static int arm_timer_interrupt(int irq, void *context, void *arg)
 
   arm_timer_set_ctrl(arm_timer_get_ctrl() | ARM_TIMER_CTRL_INT_MASK);
 
-  if (lower->callback != NULL)
+  if (lower->callback != NULL && lower->running == this_cpu())
     {
       callback        = lower->callback;
       cbarg           = lower->arg;
@@ -269,7 +293,6 @@ uint32_t arm_timer_get_freq(void)
 struct oneshot_lowerhalf_s *arm_timer_initialize(unsigned int freq)
 {
   struct arm_timer_lowerhalf_s *lower;
-  uint32_t ctrl;
 
   lower = kmm_zalloc(sizeof(*lower));
   if (lower == NULL)
@@ -277,30 +300,14 @@ struct oneshot_lowerhalf_s *arm_timer_initialize(unsigned int freq)
       return NULL;
     }
 
-  if (freq == 0)
-    {
-      freq = arm_timer_get_freq();
-    }
-  else
-    {
-      arm_timer_set_freq(freq);
-    }
-
-  lower->lh.ops = &g_arm_timer_ops;
-  lower->freq   = freq;
-
-  /* Enable timer, but disable interrupt */
-
-  ctrl = arm_timer_get_ctrl();
-  ctrl |= ARM_TIMER_CTRL_ENABLE | ARM_TIMER_CTRL_INT_MASK;
-  arm_timer_set_ctrl(ctrl);
+  lower->lh.ops  = &g_arm_timer_ops;
+  lower->freq    = freq;
+  lower->running = -1;
 
 #if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   irq_attach(GIC_IRQ_STM, arm_timer_interrupt, lower);
-  up_enable_irq(GIC_IRQ_STM);
 #else
   irq_attach(GIC_IRQ_PTM, arm_timer_interrupt, lower);
-  up_enable_irq(GIC_IRQ_PTM);
 #endif
 
   return (struct oneshot_lowerhalf_s *)lower;
