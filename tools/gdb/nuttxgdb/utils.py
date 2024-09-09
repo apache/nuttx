@@ -20,6 +20,9 @@
 #
 ############################################################################
 
+import importlib
+import json
+import os
 import re
 import shlex
 from typing import List, Tuple, Union
@@ -598,6 +601,39 @@ def check_version():
 
     switch_inferior(1)  # Switch back
     suppress_cli_notifications(state)
+
+
+def gather_modules(dir=None) -> List[str]:
+    dir = os.path.normpath(dir) if dir else os.path.dirname(__file__)
+    return [
+        os.path.splitext(os.path.basename(f))[0]
+        for f in os.listdir(dir)
+        if f.endswith(".py")
+    ]
+
+
+def gather_gdbcommands(modules=None, path=None) -> List[gdb.Command]:
+    modules = modules or gather_modules(path)
+    commands = []
+    for m in modules:
+        module = importlib.import_module(f"{__package__}.{m}")
+        for c in module.__dict__.values():
+            if isinstance(c, type) and issubclass(c, gdb.Command):
+                commands.append(c)
+    return commands
+
+
+def jsonify(obj, indent=None):
+    if not obj:
+        return "{}"
+
+    def dumper(obj):
+        try:
+            return str(obj) if isinstance(obj, gdb.Value) else obj.toJSON()
+        except Exception:
+            return obj.__dict__
+
+    return json.dumps(obj, default=dumper, indent=indent)
 
 
 class Hexdump(gdb.Command):

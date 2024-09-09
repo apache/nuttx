@@ -762,6 +762,14 @@ class Memleak(gdb.Command):
 
         return {"simple": args.simple, "detail": args.detail}
 
+    def diagnose(self, *args, **kwargs):
+        output = gdb.execute("memleak", to_string=True)
+        return {
+            "title": "Memory Leak Report",
+            "command": "memleak",
+            "details": output,
+        }
+
     def invoke(self, args, from_tty):
         if sizeof_size_t == 4:
             align = 11
