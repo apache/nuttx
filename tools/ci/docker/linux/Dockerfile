@@ -40,7 +40,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   ninja-build \
   nodejs \
   npm \
-  subversion \
   unzip
 
 RUN mkdir -p /tools
@@ -357,6 +356,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   wget \
   xxd \
   file \
+  subversion \
   tclsh \
   && rm -rf /var/lib/apt/lists/*
 
