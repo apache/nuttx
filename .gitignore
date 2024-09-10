@@ -75,3 +75,4 @@ imx9-sdimage.img
 kwarning
 SAVEMake.defs
 SAVEconfig
+.aider*
