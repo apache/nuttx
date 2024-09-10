@@ -2,6 +2,9 @@
 ############################################################################
 # tools/ide_exporter.py
 #
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#
 #   Copyright (C) 2016 Kha Vo. All rights reserved.
 #   Author: Kha Vo <canhkha@gmail.com>
 #
