@@ -108,6 +108,10 @@ void arm64_new_task(struct tcb_s * tcb)
   pinitctx->tpidr_el1 = (uint64_t)tcb;
 
   tcb->xcp.regs       = (uint64_t *)pinitctx;
+
+#ifndef CONFIG_BUILD_FLAT
+  tcb->xcp.initregs   = tcb->xcp.regs;
+#endif
 }
 
 /****************************************************************************
