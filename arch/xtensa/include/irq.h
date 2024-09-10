@@ -156,6 +156,8 @@
 
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
+#define up_irq_is_disabled(flags) (((flags) & XCHAL_IRQ_LEVEL) != 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

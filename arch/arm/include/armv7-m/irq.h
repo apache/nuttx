@@ -190,6 +190,12 @@
 #define CONTROL_SPSEL       (1 << 1) /* Bit 1: Stack-pointer select */
 #define CONTROL_NPRIV       (1 << 0) /* Bit 0: Not privileged */
 
+#ifdef CONFIG_ARMV7M_USEBASEPRI
+#  define up_irq_is_disabled(flags) ((flags) == NVIC_SYSH_DISABLE_PRIORITY)
+#else
+#  define up_irq_is_disabled(flags) ((flags) != 0)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

@@ -52,23 +52,6 @@
 #define BIT_MASK(n)     (BIT(n) - 1)
 #define BIT64_MASK(n)   (BIT64(n) - 1ULL)
 
-#define DAIFSET_FIQ_BIT     BIT(0)
-#define DAIFSET_IRQ_BIT     BIT(1)
-#define DAIFSET_ABT_BIT     BIT(2)
-#define DAIFSET_DBG_BIT     BIT(3)
-
-#define DAIFCLR_FIQ_BIT     BIT(0)
-#define DAIFCLR_IRQ_BIT     BIT(1)
-#define DAIFCLR_ABT_BIT     BIT(2)
-#define DAIFCLR_DBG_BIT     BIT(3)
-
-#define DAIF_FIQ_BIT        BIT(6)
-#define DAIF_IRQ_BIT        BIT(7)
-#define DAIF_ABT_BIT        BIT(8)
-#define DAIF_DBG_BIT        BIT(9)
-
-#define DAIF_MASK           (0xf << 6)
-
 /* Arm® Architecture Registers Armv8, for Armv8-A architecture profile
  * ( DDI 0595, ID121321 ), defined:
  *

@@ -26,6 +26,7 @@
 #include <nuttx/config.h>
 
 #include <arch/chip/chip.h>
+#include <arch/irq.h>
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_macro.inc"
