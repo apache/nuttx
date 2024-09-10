@@ -168,6 +168,10 @@ static void work_notifier_worker(FAR void *arg)
 
   flags = enter_critical_section();
 
+  /* Remove the notification from the pending list */
+
+  dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+
   /* Put the notification to the free list */
 
   dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
@@ -298,13 +302,18 @@ void work_notifier_teardown(int key)
   notifier = work_notifier_find(key);
   if (notifier != NULL)
     {
-      /* Found it!  Remove the notification from the pending list */
+      /* Cancel the work, this may be waiting */
 
-      dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+      if (work_cancel_sync(notifier->info.qid, &notifier->work) != 1)
+        {
+          /* Remove the notification from the pending list */
 
-      /* Put the notification to the free list */
+          dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
 
-      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+          /* Put the notification to the free list */
+
+          dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+        }
     }
 
   leave_critical_section(flags);
@@ -373,9 +382,9 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
       if (info->evtype == evtype && info->qualifier == qualifier)
         {
-          /* Yes.. Remove the notification from the pending list */
+          /* Mark the notification as no longer pending */
 
-          dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+          info->qualifier = NULL;
 
           /* Schedule the work.  The entire notifier entry is passed as an
            * argument to the work function because that function is
