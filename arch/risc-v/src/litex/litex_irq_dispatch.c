@@ -47,7 +47,7 @@
  * riscv_dispatch_irq
  ****************************************************************************/
 
-void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintreg_t *regs)
 {
 #ifdef CONFIG_LITEX_CORE_VEXRISCV_SMP
   int irq = (vector & 0x3f);
