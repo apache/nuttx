@@ -354,6 +354,10 @@ static inline void riscv_restorecontext(struct tcb_s *tcb)
 #endif
 }
 
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+void riscv_initial_extctx_state(struct tcb_s *tcb);
+#endif
+
 /* RISC-V PMP Config ********************************************************/
 
 int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,

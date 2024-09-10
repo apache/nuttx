@@ -495,7 +495,6 @@ config ARCH_CHIP
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
 	default n
-	depends on RV32M1_OPENISA_TOOLCHAIN
 	---help---
 		RISC-V could be customized with extensions. Some Integer Context
 		Registers have to be saved and restored when Contexts switch.
