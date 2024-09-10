@@ -280,6 +280,9 @@ struct xcptcontext
   /* task stack reg context */
 
   uint64_t *regs;
+#ifndef CONFIG_BUILD_FLAT
+  uint64_t *initregs;
+#endif
 
   /* task context, for signal process */
 
