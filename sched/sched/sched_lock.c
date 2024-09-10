@@ -47,6 +47,31 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name:  sched_lock_wo_note
+ *
+ * Description:
+ *   This function disables context switching.
+ *   It does not perform instrumentation logic.
+ *
+ ****************************************************************************/
+
+void sched_lock_wo_note(void)
+{
+  FAR struct tcb_s *tcb;
+
+  if (up_interrupt_context())
+    {
+      return;
+    }
+
+  tcb = this_task();
+  if (tcb != NULL)
+    {
+      tcb->lockcount++;
+    }
+}
+
+/****************************************************************************
  * Name:  sched_lock
  *
  * Description:
@@ -64,112 +89,31 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-
-int sched_lock(void)
+void sched_lock(void)
 {
-  FAR struct tcb_s *rtcb;
+#if (CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0) ||\
+    defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION)
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
 
-  /* If the CPU supports suppression of interprocessor interrupts, then
-   * simple disabling interrupts will provide sufficient protection for
-   * the following operation.
-   */
-
-  rtcb = this_task();
-
-  /* Check for some special cases:  (1) rtcb may be NULL only during early
-   * boot-up phases, and (2) sched_lock() should have no effect if called
-   * from the interrupt level.
-   */
-
-  if (rtcb != NULL && !up_interrupt_context())
+  if (up_interrupt_context())
     {
-      irqstate_t flags;
-
-      /* Catch attempts to increment the lockcount beyond the range of the
-       * integer type.
-       */
-
-      DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
-
-      flags = enter_critical_section();
-
-      /* A counter is used to support locking.  This allows nested lock
-       * operations on this thread
-       */
-
-      rtcb->lockcount++;
-
-      /* Check if we just acquired the lock */
-
-      if (rtcb->lockcount == 1)
-        {
-          /* Note that we have pre-emption locked */
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-          nxsched_critmon_preemption(rtcb, true, return_address(0));
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_preemption(rtcb, true);
-#endif
-        }
-
-      /* Move any tasks in the ready-to-run list to the pending task list
-       * where they will not be available to run until the scheduler is
-       * unlocked and nxsched_merge_pending() is called.
-       */
-
-      nxsched_merge_prioritized(list_readytorun(),
-                                list_pendingtasks(),
-                                TSTATE_TASK_PENDING);
-
-      leave_critical_section(flags);
+      return;
     }
 
-  return OK;
-}
-
-#else /* CONFIG_SMP */
-
-int sched_lock(void)
-{
-  FAR struct tcb_s *rtcb = this_task();
-
-  /* Check for some special cases:  (1) rtcb may be NULL only during early
-   * boot-up phases, and (2) sched_lock() should have no effect if called
-   * from the interrupt level.
-   */
-
-  if (rtcb != NULL && !up_interrupt_context())
+  tcb = this_task();
+  if (tcb != NULL)
     {
-      /* Catch attempts to increment the lockcount beyond the range of the
-       * integer type.
-       */
-
-      DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
-
-      /* A counter is used to support locking.  This allows nested lock
-       * operations on this thread (on any CPU)
-       */
-
-      rtcb->lockcount++;
-
-      /* Check if we just acquired the lock */
-
-      if (rtcb->lockcount == 1)
+      tcb->lockcount++;
+      if (tcb->lockcount == 1)
         {
-          /* Note that we have pre-emption locked */
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-          nxsched_critmon_preemption(rtcb, true, return_address(0));
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_preemption(rtcb, true);
-#endif
+          flags = enter_critical_section_wo_note();
+          nxsched_critmon_preemption(tcb, true, return_address(0));
+          sched_note_preemption(tcb, true);
+          leave_critical_section_wo_note(flags);
         }
     }
-
-  return OK;
+#else
+  sched_lock_wo_note();
+#endif
 }
-
-#endif /* CONFIG_SMP */
