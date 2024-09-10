@@ -42,29 +42,6 @@
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: work_qcancel
- *
- * Description:
- *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be requeued by calling
- *   work_queue() again.
- *
- * Input Parameters:
- *   wqueue  - The work queue to use
- *   sync    - true: synchronous cancel
- *             false: asynchronous cancel
- *   work    - The previously queued work structure to cancel
- *
- * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
- *
- *   -ENOENT - There is no such work queued.
- *   -EINVAL - An invalid work queue was specified
- *
- ****************************************************************************/
-
 static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
                         FAR struct work_s *work)
 {
@@ -110,7 +87,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
               wqueue->worker[wndx].pid != nxsched_gettid())
             {
               nxsem_wait_uninterruptible(&wqueue->worker[wndx].wait);
-              ret = OK;
+              ret = 1;
               break;
             }
         }
@@ -170,8 +147,10 @@ int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue,
  *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
+ *   Zero means the work was successfully cancelled.
+ *   One means the work was not cancelled because it is currently being
+ *   processed by work thread, but wait for it to finish.
+ *   A negated errno value is returned on any failure:
  *
  *   -ENOENT - There is no such work queued.
  *   -EINVAL - An invalid work queue was specified
