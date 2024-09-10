@@ -163,4 +163,10 @@ void up_initial_state(struct tcb_s *tcb)
 
   regval = riscv_get_newintctx();
   xcp->regs[REG_INT_CTX] = regval;
+
+  /* Initialize the state of the extended context */
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+  riscv_initial_extctx_state(tcb);
+#endif
 }
