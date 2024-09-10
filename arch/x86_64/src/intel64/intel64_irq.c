@@ -48,7 +48,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IRQ_MSI_START        IRQ32
 #define X86_64_MAR_DEST      0xfee00000
 #define X86_64_MDR_TYPE      0x4000
 
