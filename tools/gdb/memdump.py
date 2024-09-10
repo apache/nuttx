@@ -354,12 +354,12 @@ class Memdump(gdb.Command):
                 for entry in sq_for_every(pool["queue"]):
                     gdb.write("%12u%#*x\n" % (pool["blocksize"], self.align, entry))
                     self.aordblks += 1
-                    self.uordblks += pool["blocksize"]
+                    self.uordblks += mempool_realblocksize(pool)
 
                 for entry in sq_for_every(pool["iqueue"]):
                     gdb.write("%12u%#*x\n" % (pool["blocksize"], self.align, entry))
                     self.aordblks += 1
-                    self.uordblks += pool["blocksize"]
+                    self.uordblks += mempool_realblocksize(pool)
             else:
                 for buf in mempool_foreach(pool):
                     if (
@@ -407,7 +407,7 @@ class Memdump(gdb.Command):
                             gdb.execute(print_node)
                             return True
                         self.aordblks += 1
-                        self.uordblks += pool["blocksize"]
+                        self.uordblks += mempool_realblocksize(pool)
         return False
 
     def memnode_dump(self, node):
@@ -457,6 +457,7 @@ class Memdump(gdb.Command):
 
         alloc_node = []
         free_node = []
+        mempool_node = []
 
         heap = gdb.parse_and_eval("g_mmheap")
         prev_node = None
@@ -484,7 +485,9 @@ class Memdump(gdb.Command):
                     gdb.execute(print_node)
                     return
 
-            if node.alloc:
+            if node.pid == PID_MM_MEMPOOL:
+                mempool_node.append(node)
+            elif node.alloc:
                 alloc_node.append(node)
             else:
                 free_node.append(node)
@@ -533,7 +536,10 @@ class Memdump(gdb.Command):
             for node in alloc_node:
                 if node.is_orphan():
                     self.memnode_dump(node)
-        elif pid == PID_MM_MEMPOOL or pid >= 0:
+        elif pid == PID_MM_MEMPOOL:
+            for node in mempool_node:
+                self.memnode_dump(node)
+        elif pid >= 0:
             for node in alloc_node:
                 if node.pid == pid:
                     self.memnode_dump(node)
