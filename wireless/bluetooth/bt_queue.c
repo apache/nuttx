@@ -1,6 +1,7 @@
 /****************************************************************************
  * wireless/bluetooth/bt_queue.c
- * Inter-thread buffer queue management
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
