@@ -58,8 +58,8 @@ void renesas_sigdeliver(void)
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
   /* Save the return state on the stack. */
 
@@ -75,7 +75,7 @@ void renesas_sigdeliver(void)
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)sig_rtcb->xcp.sigdeliver)(rtcb);
+  (sig_rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -95,10 +95,10 @@ void renesas_sigdeliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_PC]         = rtcb->xcp.saved_pc[0];
-  regs[REG_PC + 1]     = rtcb->xcp.saved_pc[1];
-  regs[REG_FLG]        = rtcb->xcp.saved_flg;
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  regs[REG_PC]     = rtcb->xcp.saved_pc[0];
+  regs[REG_PC + 1] = rtcb->xcp.saved_pc[1];
+  regs[REG_FLG]    = rtcb->xcp.saved_flg;
+  rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of
    * execution.

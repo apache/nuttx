@@ -59,8 +59,8 @@ void x86_sigdeliver(void)
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
   /* Save the return state on the stack. */
 
@@ -76,7 +76,7 @@ void x86_sigdeliver(void)
 
   /* Deliver the signals */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  (rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -96,9 +96,9 @@ void x86_sigdeliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_EIP]        = rtcb->xcp.saved_eip;
-  regs[REG_EFLAGS]     = rtcb->xcp.saved_eflags;
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  regs[REG_EIP]    = rtcb->xcp.saved_eip;
+  regs[REG_EFLAGS] = rtcb->xcp.saved_eflags;
+  rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of execution. */
 
