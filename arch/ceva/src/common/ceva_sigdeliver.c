@@ -62,16 +62,16 @@ void ceva_sigdeliver(void)
   int saved_errno = rtcb->pterrno;
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
   /* Get a local copy of the sigdeliver function pointer. We do this so that
    * we can nullify the sigdeliver function pointer in the TCB and accept
    * more signal deliveries while processing the current pending signals.
    */
 
-  sigdeliver           = (sig_deliver_t)rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
+  sigdeliver       = rtcb->sigdeliver;
+  rtcb->sigdeliver = NULL;
 
   /* Deliver the signal */
 
