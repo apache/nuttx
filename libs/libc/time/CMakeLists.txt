@@ -44,4 +44,8 @@ else()
   list(APPEND SRCS lib_timegm.c lib_gmtime.c lib_gmtimer.c)
 endif()
 
+if(CONFIG_ALLOW_MIT_COMPONENTS)
+  list(APPEND SRCS lib_strptime.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})

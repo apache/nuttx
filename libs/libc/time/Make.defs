@@ -34,6 +34,10 @@ else
 CSRCS += lib_timegm.c lib_gmtime.c lib_gmtimer.c
 endif
 
+ifdef CONFIG_ALLOW_MIT_COMPONENTS
+CSRCS += lib_strptime.c
+endif
+
 # Add the time directory to the build
 
 DEPPATH += --dep-path time
