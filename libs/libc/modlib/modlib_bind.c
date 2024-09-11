@@ -607,7 +607,7 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
 
   /* Assume DT_RELA to get maximum size required */
 
-  rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rela));
+  rels = lib_zalloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rela));
   if (!rels)
     {
       berr("Failed to allocate memory for elf relocation rels\n");
@@ -774,7 +774,10 @@ static int modlib_relocatedyn(FAR struct module_s *modp,
             }
           else
             {
-              Elf_Sym dynsym;
+              Elf_Sym dynsym =
+                {
+                  0
+                };
 
               addr = rel->r_offset - loadinfo->datasec + loadinfo->datastart;
 
