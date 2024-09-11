@@ -181,7 +181,7 @@ static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
     {
       data->ip = ip;
       data->sample_flags |= PERF_SAMPLE_IP;
-      size += sizeof(ip);
+      size += sizeof(data->ip);
     }
 
   if (sample_type & PERF_SAMPLE_ID)
