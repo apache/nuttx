@@ -69,8 +69,8 @@ void x86_64_sigdeliver(void)
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
   /* Align regs to 64 byte boundary for XSAVE */
 
@@ -113,7 +113,7 @@ void x86_64_sigdeliver(void)
 
   /* Deliver the signals */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  (rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -138,10 +138,10 @@ void x86_64_sigdeliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_RIP]        = rtcb->xcp.saved_rip;
-  regs[REG_RSP]        = rtcb->xcp.saved_rsp;
-  regs[REG_RFLAGS]     = rtcb->xcp.saved_rflags;
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  regs[REG_RIP]    = rtcb->xcp.saved_rip;
+  regs[REG_RSP]    = rtcb->xcp.saved_rsp;
+  regs[REG_RFLAGS] = rtcb->xcp.saved_rflags;
+  rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section

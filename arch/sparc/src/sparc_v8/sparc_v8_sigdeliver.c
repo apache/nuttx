@@ -77,8 +77,8 @@ void sparc_sigdeliver(void)
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
+        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
+  DEBUGASSERT(rtcb->sigdeliver != NULL);
 
   /* Save the return state on the stack. */
 
@@ -114,7 +114,7 @@ retry:
 
   /* Deliver the signal */
 
-  ((sig_deliver_t)rtcb->xcp.sigdeliver)(rtcb);
+  (rtcb->sigdeliver)(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -163,10 +163,10 @@ retry:
    * could be modified by a hostile program.
    */
 
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_NPC]        = rtcb->xcp.saved_npc;
-  regs[REG_PSR]        = rtcb->xcp.saved_status;
-  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+  regs[REG_PC]     = rtcb->xcp.saved_pc;
+  regs[REG_NPC]    = rtcb->xcp.saved_npc;
+  regs[REG_PSR]    = rtcb->xcp.saved_status;
+  rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
 #ifdef CONFIG_SMP
   /* Restore the saved 'irqcount' and recover the critical section
