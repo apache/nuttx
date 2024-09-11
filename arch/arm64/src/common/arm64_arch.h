@@ -265,23 +265,6 @@
 
 #define CONFIG_MAX_XLAT_TABLES      10
 
-/* Virtual address space size
- * Allows choosing one of multiple possible virtual address
- * space sizes. The level of translation table is determined by
- * a combination of page size and virtual address space size.
- *
- * The choice could be: 32, 36, 42, 48
- */
-
-#define CONFIG_ARM64_VA_BITS        48
-/* Physical address space size
- * Choose the maximum physical address range that the kernel will support.
- *
- * The choice could be: 32, 36, 42, 48
- */
-
-#define CONFIG_ARM64_PA_BITS        48
-
 #define L1_CACHE_SHIFT              (6)
 #define L1_CACHE_BYTES              BIT(L1_CACHE_SHIFT)
 
