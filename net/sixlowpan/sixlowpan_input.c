@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_input.c
- * 6LoWPAN implementation (RFC 4944 and RFC 6282)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2017, Gregory Nutt, all rights reserved
  *   Author: Gregory Nutt <gnutt@nuttx.org>

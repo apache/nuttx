@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_input.c
- * Handling incoming TCP input
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2014, 2017-2019, 2020 Gregory Nutt. All rights
  *     reserved.

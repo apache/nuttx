@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/udp/udp_devpoll.c
- * Network device poll for the availability of UDP TX data
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
