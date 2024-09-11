@@ -344,6 +344,24 @@ config ARM64_ICACHE_DISABLE
 	bool "Disable ICACHE at __start"
 	default n
 
+config ARM64_VA_BITS
+	int "Virtual address space size"
+	default 48
+	---help---
+		Allows choosing one of multiple possible virtual address
+		space sizes. The level of translation table is determined by
+		a combination of page size and virtual address space size.
+
+		The choice could be: 32, 36, 42, 48
+
+config ARM64_PA_BITS
+	int "Physical address space size"
+	default 48
+	---help---
+		Choose the maximum physical address range that the kernel will support.
+
+		The choice could be: 32, 36, 42, 48
+
 if ARCH_CHIP_A64
 source "arch/arm64/src/a64/Kconfig"
 endif
