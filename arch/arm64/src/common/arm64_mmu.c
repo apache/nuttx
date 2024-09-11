@@ -82,7 +82,7 @@
 #define XLAT_TABLE_SIZE                 (1U << XLAT_TABLE_SIZE_SHIFT)
 
 #define XLAT_TABLE_ENTRY_SIZE_SHIFT     3U /* Each table entry is 8 bytes */
-#define XLAT_TABLE_LEVEL_MAX            MMU_PGT_LEVELS
+#define XLAT_TABLE_LEVEL_MAX            MMU_PGT_LEVEL_MAX
 
 #define XLAT_TABLE_ENTRIES_SHIFT \
   (XLAT_TABLE_SIZE_SHIFT - XLAT_TABLE_ENTRY_SIZE_SHIFT)
@@ -207,6 +207,7 @@ static const struct arm_mmu_config g_mmu_nxrt_config =
 
 static const size_t g_pgt_sizes[] =
 {
+  MMU_L0_PAGE_SIZE,
   MMU_L1_PAGE_SIZE,
   MMU_L2_PAGE_SIZE,
   MMU_L3_PAGE_SIZE
@@ -709,7 +710,8 @@ void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
   uintptr_t *lntable = (uintptr_t *)lnvaddr;
   uint32_t   index;
 
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
   /* Calculate index for lntable */
 
@@ -735,7 +737,8 @@ uintptr_t mmu_ln_getentry(uint32_t ptlevel, uintptr_t lnvaddr,
   uintptr_t *lntable = (uintptr_t *)lnvaddr;
   uint32_t  index;
 
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
   index = XLAT_TABLE_VA_IDX(vaddr, ptlevel);
 
@@ -753,7 +756,8 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
   uintptr_t *lntable = (uintptr_t *)lnvaddr;
   uint32_t  index;
 
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
   index = XLAT_TABLE_VA_IDX(vaddr, ptlevel);
 
@@ -771,7 +775,8 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
 
 size_t mmu_get_region_size(uint32_t ptlevel)
 {
-  DEBUGASSERT(ptlevel > 0 && ptlevel <= XLAT_TABLE_LEVEL_MAX);
+  DEBUGASSERT(ptlevel >= XLAT_TABLE_BASE_LEVEL &&
+              ptlevel <= XLAT_TABLE_LEVEL_MAX);
 
-  return g_pgt_sizes[ptlevel - 1];
+  return g_pgt_sizes[ptlevel];
 }
