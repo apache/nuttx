@@ -1174,6 +1174,27 @@ found:
       seq = tcp_getsequence(tcp->seqno);
       rcvseq = tcp_getsequence(conn->rcvseq);
 
+      /* According to RFC793, Section 3.4, Page 33.
+       * In the SYN_SENT state, if receive a ACK without SYN,
+       * we should reset the connection and retransmit the SYN.
+       */
+
+      if (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_SENT) &&
+          ((tcp->flags & TCP_SYN) == 0 && (tcp->flags & TCP_ACK) != 0))
+        {
+          /* Send the RST to close the half-open connection. */
+
+          tcp_reset(dev, conn);
+
+          /* Retransmit the SYN as soon as possible in order to establish
+           * the tcp connection.
+           */
+
+          tcp_update_retrantimer(conn, 1);
+
+          return;
+        }
+
       if (seq != rcvseq)
         {
           /* Trim the head of the segment */
