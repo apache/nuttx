@@ -90,7 +90,7 @@ uintptr_t up_addrenv_find_page(arch_addrenv_t *addrenv, uintptr_t vaddr)
 
   /* Make table walk to find the page */
 
-  for (ptlevel = 1, lnvaddr = pgdir; ptlevel < MMU_PGT_LEVELS; ptlevel++)
+  for (ptlevel = 1, lnvaddr = pgdir; ptlevel < MMU_PGT_LEVEL_MAX; ptlevel++)
     {
       paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, lnvaddr, vaddr));
       lnvaddr = arm64_pgvaddr(paddr);

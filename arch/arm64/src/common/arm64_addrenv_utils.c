@@ -134,7 +134,7 @@ int arm64_map_pages(arch_addrenv_t *addrenv, uintptr_t *pages,
   uintptr_t ptlevel;
   uintptr_t paddr;
 
-  ptlevel = MMU_PGT_LEVELS;
+  ptlevel = MMU_PGT_LEVEL_MAX;
 
   /* Add the references to pages[] into the caller's address environment */
 

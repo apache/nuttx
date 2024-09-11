@@ -239,13 +239,15 @@
 
 /* Amount of page table levels */
 
-#define MMU_PGT_LEVELS              (3U)
+#define MMU_PGT_LEVELS              (4U)
+#define MMU_PGT_LEVEL_MAX           (3U) /* Levels go from 0-3 */
 
 /* Page sizes per page table level */
 
-#define MMU_L1_PAGE_SIZE            (0x40000000) /* 1G */
-#define MMU_L2_PAGE_SIZE            (0x200000)   /* 2M */
-#define MMU_L3_PAGE_SIZE            (0x1000)     /* 4K */
+#define MMU_L0_PAGE_SIZE            (0x8000000000) /* 512G */
+#define MMU_L1_PAGE_SIZE            (0x40000000)   /* 1G */
+#define MMU_L2_PAGE_SIZE            (0x200000)     /* 2M */
+#define MMU_L3_PAGE_SIZE            (0x1000)       /* 4K */
 
 /* Flags for user page tables */
 
