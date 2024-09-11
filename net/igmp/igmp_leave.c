@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/igmp/igmp_leave.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (C) 2010-2011, 2014, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *

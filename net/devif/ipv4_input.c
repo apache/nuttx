@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/devif/ipv4_input.c
- * Device driver IPv4 packet receipt interface
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009, 2013-2015, 2018-2019 Gregory Nutt. All rights
  *     reserved.

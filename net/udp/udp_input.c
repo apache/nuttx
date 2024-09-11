@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/udp/udp_input.c
- * Handling incoming UDP input
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009, 2011, 2018-2019 Gregory Nutt. All rights
  *     reserved.

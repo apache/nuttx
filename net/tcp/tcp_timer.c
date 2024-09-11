@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_timer.c
- * Poll for the availability of TCP TX data
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2010, 2015-2016, 2018, 2020 Gregory Nutt. All rights
  *     reserved.

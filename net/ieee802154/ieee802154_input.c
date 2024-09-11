@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/ieee802154/ieee802154_input.c
- * Handle incoming IEEE 802.15.4 frame input
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
