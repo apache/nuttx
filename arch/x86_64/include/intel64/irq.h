@@ -487,12 +487,6 @@ enum ioapic_trigger_mode
 
 struct xcptcontext
 {
-  /* The following function pointer is non-zero if there are pending signals
-   * to be processed.
-   */
-
-  void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* These are saved copies of instruction pointer and EFLAGS used during
    * signal processing.
    */

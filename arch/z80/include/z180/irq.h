@@ -173,12 +173,6 @@ struct xcptcontext
 
   chipreg_t regs[XCPTCONTEXT_REGS];
 
-  /* The following function pointer is non-zero if there
-   * are pending signals to be processed.
-   */
-
-  CODE void *sigdeliver; /* Actual type is sig_deliver_t */
-
   /* The following retains that state during signal execution
    *
    * REVISIT:  Because there is only one copy of these save areas,

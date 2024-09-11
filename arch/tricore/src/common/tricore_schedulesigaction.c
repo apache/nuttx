@@ -80,9 +80,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   /* Refuse to handle nested signal actions */
 
-  if (tcb->xcp.sigdeliver == NULL)
+  if (tcb->sigdeliver == NULL)
     {
-      tcb->xcp.sigdeliver = sigdeliver;
+      tcb->sigdeliver = sigdeliver;
 
       /* First, handle some special cases when the signal is
        * being delivered to the currently executing task.
@@ -99,7 +99,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* In this case just deliver the signal now. */
 
               sigdeliver(tcb);
-              tcb->xcp.sigdeliver = NULL;
+              tcb->sigdeliver = NULL;
             }
 
           /* CASE 2:  We are in an interrupt handler AND the

@@ -51,7 +51,6 @@
 
 struct xcptcontext
 {
-  void *sigdeliver; /* Actual type is sig_deliver_t */
   jmp_buf regs;
 };
 
