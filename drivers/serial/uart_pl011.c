@@ -661,6 +661,8 @@ static void pl011_send(FAR struct uart_dev_s *dev, int ch)
   FAR struct pl011_uart_port_s  *sport  = dev->priv;
   FAR const struct pl011_config *config = &sport->config;
 
+  while (!pl011_irq_tx_ready(sport));
+
   config->uart->dr = ch;
 }
 
