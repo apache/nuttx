@@ -52,12 +52,12 @@
  *
  ****************************************************************************/
 
-uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset)
+uart_datawidth_t uart_getreg(struct u16550_s *priv, unsigned int offset)
 {
-  return inb(base + offset);
+  return inb(priv->uartbase + offset);
 }
 
-void uart_putreg(uart_addrwidth_t base, unsigned int offset,
+void uart_putreg(struct u16550_s *priv, unsigned int offset,
                  uart_datawidth_t value)
 {
   /* Intel x86 platform require OUT2 of MCR being set
@@ -69,7 +69,7 @@ void uart_putreg(uart_addrwidth_t base, unsigned int offset,
       value |= UART_MCR_OUT2;
     }
 
-  outb(value, base + offset);
+  outb(value, priv->uartbase + offset);
 }
 
 #else /* USE_SERIALDRIVER */
