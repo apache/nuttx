@@ -293,6 +293,10 @@ config MM_KASAN_ALL
 		to check. Enabling this option will get image size increased
 		and performance decreased significantly.
 
+config MM_KASAN_REGIONS
+	int "Kasan region count"
+	default 8
+
 config MM_KASAN_WATCHPOINT
 	int "Kasan watchpoint maximum number"
 	default 0
