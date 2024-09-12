@@ -2066,15 +2066,84 @@ int pci_dev_register(void)
   return register_driver("/dev/pci", &g_pci_fops, 0666, NULL);
 }
 
+/****************************************************************************
+ * Name: pci_bus_read_config_xxx
+ *
+ * Description:
+ *  Read pci device config space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device to belong to
+ *   devfn - The PCI device number and function number
+ *   where - The register address
+ *   val   - The data buf
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_READ_CONFIG(byte, uint8_t, 1)
 PCI_BUS_READ_CONFIG(word, uint16_t, 2)
 PCI_BUS_READ_CONFIG(dword, uint32_t, 4)
+
+/****************************************************************************
+ * Name: pci_bus_write_config_xxx
+ *
+ * Description:
+ *  Write pci device config space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device to belong to
+ *   devfn - The PCI device number and function number
+ *   where - The register address
+ *   val   - The data
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_WRITE_CONFIG(byte, uint8_t, 1)
 PCI_BUS_WRITE_CONFIG(word, uint16_t, 2)
 PCI_BUS_WRITE_CONFIG(dword, uint32_t, 4)
+
+/****************************************************************************
+ * Name: pci_bus_read_io_xxx
+ *
+ * Description:
+ *  Read pci device io space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   where - The address to read
+ *   val   - The data buffer
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_READ_IO(byte, uint8_t, 1)
 PCI_BUS_READ_IO(word, uint16_t, 2)
 PCI_BUS_READ_IO(dword, uint32_t, 4)
+
+/****************************************************************************
+ * Name: pci_bus_write_io_xxx
+ *
+ * Description:
+ *  Write pci device io space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   where - The address to write
+ *   val   - The data
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_WRITE_IO(byte, uint8_t, 1)
 PCI_BUS_WRITE_IO(word, uint16_t, 2)
 PCI_BUS_WRITE_IO(dword, uint32_t, 4)
