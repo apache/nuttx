@@ -22,6 +22,7 @@ Guides
   nestedinterrupts.rst
   cortexmhardfaults.rst
   coredump.rst
+  coresight.rst
   gdbserver.rst
   gdbwithpython.rst
   ofloader.rst
