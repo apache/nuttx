@@ -2939,8 +2939,6 @@ int up_debugpoint_remove(int type, FAR void *addr, size_t size);
 
 #endif
 
-#ifdef CONFIG_PCI
-
 /****************************************************************************
  * Name: up_alloc_irq_msi
  *
@@ -2978,6 +2976,8 @@ int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, FAR int *irq, int num);
  ****************************************************************************/
 
 void up_release_irq_msi(FAR int *irq, int num);
+
+#ifdef CONFIG_PCI
 
 /****************************************************************************
  * Name: up_connect_irq
