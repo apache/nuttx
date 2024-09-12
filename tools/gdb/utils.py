@@ -20,6 +20,7 @@
 #
 ############################################################################
 
+import cProfile
 import re
 import shlex
 from typing import List, Tuple, Union
@@ -347,6 +348,22 @@ class Addr2Line(gdb.Command):
 
 
 Addr2Line()
+
+
+class Profile(gdb.Command):
+    """Profile a gdb command
+
+    Usage: profile <gdb command>
+    """
+
+    def __init__(self):
+        super(Profile, self).__init__("profile", gdb.COMMAND_USER)
+
+    def invoke(self, args, from_tty):
+        cProfile.run(f"gdb.execute('{args}')", sort="cumulative")
+
+
+Profile()
 
 
 def nitems(array):
