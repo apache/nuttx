@@ -194,6 +194,16 @@ To test it, just execute the ``pwm`` application::
     pwm_main: starting output with frequency: 10000 duty: 00008000
     pwm_main: stopping output
 
+qencoder
+---
+
+This configuration demostrates the use of Quadrature Encoder connected to pins
+GPIO10 and GPIO11. You can start measurement of pulses using the following
+command (by default, it will open ``\dev\qe0`` device and print 20 samples
+using 1 second delay)::
+
+    nsh> qe
+
 rmt
 ---
 
