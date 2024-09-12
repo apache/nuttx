@@ -32,10 +32,8 @@ if(NOT CONFIG_DISABLE_MQUEUE)
     APPEND
     SRCS
     mq_send.c
-    mq_timedsend.c
     mq_sndinternal.c
     mq_receive.c
-    mq_timedreceive.c
     mq_rcvinternal.c
     mq_msgfree.c
     mq_msgqalloc.c
