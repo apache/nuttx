@@ -23,6 +23,12 @@
 # search. If the manual of the newly supported toolchain is different, you can
 # override these methods in the toolchain
 
+# Support CMake to define additional configuration options
+
+if(EXTRA_FLAGS)
+  add_compile_options(${EXTRA_FLAGS})
+endif()
+
 # ~~~
 # nuttx_generate_preproces_target
 #
