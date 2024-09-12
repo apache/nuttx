@@ -196,24 +196,20 @@ def long_to_bytestring(bitwides, endian, value: int) -> str:
 def create_kasan_file(config: Config, region_list=[]):
     region: KASanRegion = None
     with open(config.outpath, "w") as file:
-        file.write("const unsigned char\ng_globals_region[] = {\n")
+
+        # Write the kasan region array
         for i in range(len(region_list)):
+            file.write("static const unsigned char\nglobals_region%d[] = {\n" % (i))
             region = region_list[i]
 
             # Fill the array of regions
             # The filling order is as follows, from mm/kasan/generic.c
-            # The data set to 0 is assigned by the program body
-            # 1. FAR struct kasan_region_s *next;
-            #   This type will be used to record the size of the shadow area
+            # This type will be used to record the size of the shadow area
             # to facilitate the program to traverse the array.
             # 2. uintptr_t                  begin;
             # 3. uintptr_t                  end;
             # 4. uintptr_t                  shadow[1];
 
-            file.write(
-                "%s\n"
-                % (long_to_bytestring(config.bitwides, config.endian, region.size))
-            )
             file.write(
                 "%s\n"
                 % (long_to_bytestring(config.bitwides, config.endian, region.start))
@@ -228,9 +224,13 @@ def create_kasan_file(config: Config, region_list=[]):
                     file.write("\n")
                 file.write("0x%02x, " % (region.shadow[j]))
 
-            file.write("\n")
-        file.write("0x00, 0x00, 0x00, 0x00,0x00, 0x00,0x00, 0x00\n")
-        file.write("\n};")
+            file.write("\n};")
+
+        # Record kasan region pointer location
+        file.write("\nconst unsigned long g_global_region[] = {\n")
+        for i in range(len(region_list)):
+            file.write("\n(const unsigned long)&globals_region%d," % (i))
+        file.write("0x00\n};")
 
 
 # Error extraction section processing to enable the program to compile successfully
