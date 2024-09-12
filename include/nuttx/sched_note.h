@@ -168,8 +168,8 @@
 
 /* Set the type of each parameter */
 
-#define NOTE_PRINTF_TYPE(arg, index) + ((NOTE_PRINTF_ARG_TYPE(arg) << (index) * 2))
-#define NOTE_PRINTF_TYPES(...)       FOREACH_ARG(NOTE_PRINTF_TYPE, ##__VA_ARGS__)
+#define NOTE_PRINTF_TYPE(_, arg, index) + ((NOTE_PRINTF_ARG_TYPE(arg) << (index) * 2))
+#define NOTE_PRINTF_TYPES(...)          FOREACH_ARG(NOTE_PRINTF_TYPE, _, ##__VA_ARGS__)
 
 /* Using macro expansion to calculate the expression of tag, tag will
  * be a constant at compile time, which will reduce the number of
