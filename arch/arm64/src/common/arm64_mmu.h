@@ -628,6 +628,28 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
 
 size_t mmu_get_region_size(uint32_t ptlevel);
 
+/****************************************************************************
+ * Name: mmu_get_base_pgt_level
+ *
+ * Description:
+ *   Get the base translation table level. The ARM64 MMU implementation
+ *   optimizes the amount of translation table levels in use, based on the
+ *   configured virtual address range (CONFIG_ARM64_VA_BITS).
+ *
+ *   Table indices range from 0...3 and the lowest table indices are dropped
+ *   as needed. If CONFIG_ARM64_VA_BITS >= 40, all 4 translation table levels
+ *   are needed.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   The base translation table level.
+ *
+ ****************************************************************************/
+
+uintptr_t mmu_get_base_pgt_level(void);
+
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM64_SRC_COMMON_ARM64_MMU_H */

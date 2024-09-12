@@ -787,3 +787,8 @@ size_t mmu_get_region_size(uint32_t ptlevel)
 
   return g_pgt_sizes[ptlevel];
 }
+
+uintptr_t mmu_get_base_pgt_level(void)
+{
+  return XLAT_TABLE_BASE_LEVEL;
+}
