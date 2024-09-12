@@ -83,6 +83,9 @@ def mm_foreach(heap):
             yield node
             next = int(node) + mm_nodesize(node["size"])
             next = gdb.Value(next).cast(mm_allocnode_type.pointer())
+            if node == next:
+                gdb.write(f"Error: maybe have memory fault on {hex(node)}\n")
+                break
             node = next
 
 
@@ -460,6 +463,12 @@ class Memdump(gdb.Command):
         mempool_node = []
 
         heap = gdb.parse_and_eval("g_mmheap")
+        if heap.type.has_key("mm_mpool"):
+            if self.mempool_dump(
+                heap["mm_mpool"], pid, seqmin, seqmax, address, simple, detail
+            ):
+                return
+
         prev_node = None
 
         for gdb_node in mm_foreach(heap):
@@ -491,12 +500,6 @@ class Memdump(gdb.Command):
                 alloc_node.append(node)
             else:
                 free_node.append(node)
-
-        if heap.type.has_key("mm_mpool"):
-            if self.mempool_dump(
-                heap["mm_mpool"], pid, seqmin, seqmax, address, simple, detail
-            ):
-                return
 
         title_dict = {
             PID_MM_ALLOC: "Dump all used memory node info, use '\x1b[33;1m*\x1b[m' mark pid does not exist:\n",
