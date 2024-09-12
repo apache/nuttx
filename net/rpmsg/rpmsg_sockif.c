@@ -123,6 +123,10 @@ struct rpmsg_socket_conn_s
 
   struct ucred                   cred;
 
+  /* Recvbuf size */
+
+  uint32_t                       recvsize;
+
   /* Flow control, descript send side */
 
   uint32_t                       sendsize;
@@ -173,6 +177,10 @@ static int        rpmsg_socket_getsockopt(FAR struct socket *psock,
                                           int level, int option,
                                           FAR void *value,
                                           FAR socklen_t *value_len);
+static int        rpmsg_socket_setsockopt(FAR struct socket *psock,
+                                          int level, int option,
+                                          FAR const void *value,
+                                          socklen_t value_len);
 #endif
 
 /****************************************************************************
@@ -199,7 +207,7 @@ const struct sock_intf_s g_rpmsg_sockif =
   NULL                      /* si_shutdown */
 #ifdef CONFIG_NET_SOCKOPTS
   , rpmsg_socket_getsockopt /* si_getsockopt */
-  , NULL                    /* si_setsockopt */
+  , rpmsg_socket_setsockopt /* si_setsockopt */
 #endif
 };
 
@@ -257,6 +265,7 @@ static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
   nxsem_init(&conn->sendsem, 0, 0);
   nxsem_init(&conn->recvsem, 0, 0);
 
+  conn->recvsize = CONFIG_NET_RPMSG_RXBUF_SIZE;
   conn->crefs = 1;
   return conn;
 }
@@ -542,7 +551,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       return;
     }
 
-  ret = circbuf_resize(&new->recvbuf, CONFIG_NET_RPMSG_RXBUF_SIZE);
+  ret = circbuf_resize(&new->recvbuf, server->recvsize);
   if (ret < 0)
     {
       rpmsg_socket_free(new);
@@ -715,7 +724,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   int ret;
 
-  ret = circbuf_resize(&conn->recvbuf, CONFIG_NET_RPMSG_RXBUF_SIZE);
+  ret = circbuf_resize(&conn->recvbuf, conn->recvsize);
   if (ret < 0)
     {
       return ret;
@@ -1421,18 +1430,73 @@ static int rpmsg_socket_getsockopt(FAR struct socket *psock, int level,
                                    int option, FAR void *value,
                                    FAR socklen_t *value_len)
 {
-  if (level == SOL_SOCKET && option == SO_PEERCRED)
+  FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
+
+  if (level == SOL_SOCKET)
     {
-      FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
-      if (*value_len != sizeof(struct ucred))
+      switch (option)
+        {
+          case SO_PEERCRED:
+            {
+              if (!value || *value_len != sizeof(struct ucred))
+                {
+                  return -EINVAL;
+                }
+
+              memcpy(value, &conn->cred, sizeof(struct ucred));
+              return OK;
+            }
+
+          case SO_RCVBUF:
+            {
+              if (*value_len != sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              *(FAR int *)value = conn->recvsize;
+              return OK;
+            }
+
+          case SO_SNDBUF:
+            {
+              if (*value_len != sizeof(int))
+                {
+                  return -EINVAL;
+                }
+
+              *(FAR int *)value = conn->sendsize;
+              return OK;
+            }
+        }
+    }
+
+  return -ENOPROTOOPT;
+}
+
+static int rpmsg_socket_setsockopt(FAR struct socket *psock, int level,
+                                   int option, FAR const void *value,
+                                   socklen_t value_len)
+{
+  FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
+
+  if (level == SOL_SOCKET && option == SO_RCVBUF)
+    {
+      if (value_len < sizeof(int))
         {
           return -EINVAL;
         }
 
-      memcpy(value, &conn->cred, sizeof(struct ucred));
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
+        {
+          return -EISCONN;
+        }
+
+      conn->recvsize = *(FAR const int *)value;
       return OK;
     }
 
   return -ENOPROTOOPT;
 }
+
 #endif
