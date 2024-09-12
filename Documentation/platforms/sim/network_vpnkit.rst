@@ -8,37 +8,45 @@ as well.
 Configuration
 -------------
 
+.. code-block:: bash
+
     CONFIG_SIM_NETDEV=y
     CONFIG_SIM_NETDEV_TAP is not set
     CONFIG_SIM_NETDEV_VPNKIT=y
     CONFIG_SIM_NETDEV_VPNKIT_PATH="/tmp/vpnkit-nuttx"
 
-You can use the sim:vpnkit configuration, which includes the above
+You can use the ``sim:vpnkit`` configuration, which includes the above
 settings.
+
+.. code-block:: bash
 
     ./tools/configure.sh sim:vpnkit
 
 VPNKit setup
 ------------
 
-See https://github.com/moby/vpnkit for build instructions.
+See `https://github.com/moby/vpnkit` for build instructions.
 
 If you have Docker Desktop for Mac installed on your machine,
 you can find a vpnkit binary at:
+
+.. code-block:: bash
 
     /Applications/Docker.app/Contents/Resources/bin/com.docker.vpnkit
 
 A docker image containing a static Linux binary is also available:
 
-    https://hub.docker.com/r/djs55/vpnkit
+`https://hub.docker.com/r/djs55/vpnkit`
 
 How to run
 ----------
 
 You can use it as the following:
 
+.. code-block:: bash
+
     % vpnkit --ethernet /tmp/vpnkit-nuttx &
     % ./nuttx
 
-NuttX's CONFIG_SIM_NETDEV_VPNKIT_PATH should match vpnkit's
---ethernet option.
+NuttX's ``CONFIG_SIM_NETDEV_VPNKIT_PATH`` should match vpnkit's
+``--ethernet`` option.
