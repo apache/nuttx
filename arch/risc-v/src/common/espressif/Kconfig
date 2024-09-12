@@ -1200,6 +1200,19 @@ config ESPRESSIF_SPI_TEST_MODE
 
 endmenu # SPI configuration
 
+menu "Interrupt Configuration"
+
+config ESPRESSIF_IRAM_ISR_DEBUG
+	bool "Enable debugging of the IRAM-enabled interrupts"
+	default n
+	---help---
+		This option enables keeping track of the IRAM-enabled interrupts by
+		registering its execution when non-IRAM interrupts are disabled. It
+		keeps track of the IRQ executed and register how many times since
+		boot it was executed. Generally used for testing.
+
+endmenu
+
 menu "SPI Flash Configuration"
 
 choice ESPRESSIF_FLASH_MODE

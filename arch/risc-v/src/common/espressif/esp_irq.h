@@ -45,6 +45,15 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/* CPU interrupt flags.
+ * esp_setup_irq() will check bit 1 for IRAM requirement and
+ * bit 0 for trigger type.
+ *
+ * OR'ed values of irq_trigger_e and irq_iram_e define interrupt type.
+ *      | IRAM | TRIGGER |
+ * Bits |   1  |    0    |
+ */
+
 /* CPU interrupt trigger types */
 
 typedef enum irq_trigger_e
@@ -52,6 +61,14 @@ typedef enum irq_trigger_e
   ESP_IRQ_TRIGGER_LEVEL    = 0, /* Level-triggered interrupts */
   ESP_IRQ_TRIGGER_EDGE     = 1, /* Edge-triggered interrupts */
 } irq_trigger_t;
+
+/* CPU interrupt IRAM enabled */
+
+typedef enum irq_iram_e
+{
+  ESP_IRQ_NON_IRAM    = (0 << 1), /* Non-IRAM interrupt */
+  ESP_IRQ_IRAM        = (1 << 1), /* IRAM interrupt */
+} irq_iram_t;
 
 /* CPU interrupt priority levels */
 
@@ -119,7 +136,7 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
  *
  ****************************************************************************/
 
-int esp_setup_irq(int source, irq_priority_t priority, irq_trigger_t type);
+int esp_setup_irq(int source, irq_priority_t priority, int type);
 
 /****************************************************************************
  * Name: esp_teardown_irq
@@ -212,6 +229,73 @@ int esp_get_irq(int cpuint);
  ****************************************************************************/
 
 void esp_set_irq(int irq, int cpuint);
+
+/****************************************************************************
+ * Name:  esp_irq_set_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a IRAM-enabled ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp_irq_set_iram_isr(int irq);
+
+/****************************************************************************
+ * Name:  esp32s3_irq_unset_iram_isr
+ *
+ * Description:
+ *   Set the ISR associated to an IRQ as a non-IRAM ISR.
+ *
+ * Input Parameters:
+ *   irq - The associated IRQ to set
+ *
+ * Returned Value:
+ *   OK on success; A negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int esp_irq_unset_iram_isr(int irq);
+
+/****************************************************************************
+ * Name:  esp_irq_noniram_status
+ *
+ * Description:
+ *   Get the current status of non-IRAM interrupts on a specific CPU core
+ *
+ * Input Parameters:
+ *   cpu - The CPU to check the non-IRAM interrupts state
+ *
+ * Returned Value:
+ *   true if non-IRAM interrupts are enabled, false otherwise.
+ *
+ ****************************************************************************/
+
+bool esp_irq_noniram_status(int cpu);
+
+/****************************************************************************
+ * Name:  esp_get_iram_interrupt_records
+ *
+ * Description:
+ *   This function copies the vector that keeps track of the IRQs that ran
+ *   when non-IRAM interrupts were disabled.
+ *
+ * Input Parameters:
+ *
+ *   irq_count - A previously allocated pointer to store the counter of the
+ *               interrupts that ran when non-IRAM interrupts were disabled.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_get_iram_interrupt_records(uint64_t *irq_count);
 
 #undef EXTERN
 #if defined(__cplusplus)
