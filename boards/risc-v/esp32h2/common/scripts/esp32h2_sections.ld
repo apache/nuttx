@@ -73,6 +73,8 @@ SECTIONS
 
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
 
+    *libarch.a:*(.text.esprv_intc_int_get_type .literal.esprv_intc_int_get_type)
+    *libarch.a:*riscv_doirq.*(.text .text.* .literal .literal.*)
     *libarch.a:*brownout.*(.text .text.* .literal .literal.*)
     *libarch.a:*cpu.*(.text .text.* .literal .literal.*)
     *libarch.a:*gpio_hal.*(.text .text.* .literal .literal.*)
@@ -209,6 +211,8 @@ SECTIONS
 
     *libsched.a:irq_dispatch.*(.rodata .rodata.*)
 
+    *libarch.a:*(.rodata.esprv_intc_int_get_type)
+    *libarch.a:*riscv_doirq.*(.rodata .rodata.*)
     *libarch.a:*brownout.*(.rodata .rodata.*)
     *libarch.a:*cpu.*(.rodata .rodata.*)
     *libarch.a:*gpio_hal.*(.rodata .rodata.*)
