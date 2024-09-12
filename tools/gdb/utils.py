@@ -148,8 +148,8 @@ def gdb_eval_or_none(expresssion):
         return None
 
 
-def suppress_cli_notifications(suppress):
-
+def suppress_cli_notifications(suppress=True):
+    """Suppress(default behavior) or unsuppress GDB CLI notifications"""
     try:
         suppressed = "is on" in gdb.execute(
             "show suppress-cli-notifications", to_string=True
@@ -643,16 +643,23 @@ def get_task_name(tcb):
         return ""
 
 
-def check_version():
-    """Check the elf and memory version"""
+def switch_inferior(inferior):
+    state = suppress_cli_notifications(True)
+
     if len(gdb.inferiors()) == 1:
         gdb.execute(
             f"add-inferior -exec {gdb.objfiles()[0].filename} -no-connection",
             to_string=True,
         )
 
-    state = suppress_cli_notifications(True)
-    gdb.execute("inferior 1", to_string=True)
+    gdb.execute(f"inferior {inferior}", to_string=True)
+    return state
+
+
+def check_version():
+    """Check the elf and memory version"""
+    state = suppress_cli_notifications()
+    switch_inferior(1)
     try:
         mem_version = gdb.execute("p g_version", to_string=True).split("=")[1]
     except gdb.error:
@@ -660,7 +667,7 @@ def check_version():
         suppress_cli_notifications(state)
         return
 
-    gdb.execute("inferior 2", to_string=True)
+    switch_inferior(2)
     elf_version = gdb.execute("p g_version", to_string=True).split("=")[1]
     if mem_version != elf_version:
         gdb.write(f"\x1b[31;1mMemory version:{mem_version}")
@@ -669,5 +676,5 @@ def check_version():
     else:
         gdb.write(f"Build version: {mem_version}\n")
 
-    gdb.execute("inferior 1", to_string=True)
+    switch_inferior(1)  # Switch back
     suppress_cli_notifications(state)

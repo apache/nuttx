@@ -21,6 +21,7 @@
 ############################################################################
 
 import argparse
+import re
 from enum import Enum, auto
 
 import gdb
@@ -29,63 +30,129 @@ from stack import Stack
 
 UINT16_MAX = 0xFFFF
 SEM_TYPE_MUTEX = 4
-
-saved_regs = None
-regoffset = None
+TSTATE_TASK_RUNNING = utils.get_symbol_value("TSTATE_TASK_RUNNING")
 
 
-def save_regs():
-    global saved_regs
-    global regoffset
-
-    tcbinfo = gdb.parse_and_eval("g_tcbinfo")
-
-    if saved_regs:
-        return
-    arch = gdb.selected_frame().architecture()
-    saved_regs = []
-    i = 0
-
-    if not regoffset:
-        regoffset = [
-            int(tcbinfo["reg_off"]["p"][i])
-            for i in range(tcbinfo["regs_num"])
-            if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
-        ]
-
-    for reg in arch.registers():
-        if i >= len(regoffset):
-            break
-
-        ret = gdb.parse_and_eval("$%s" % reg.name)
-        saved_regs.append(ret)
-        i += 1
-
-
-def restore_regs():
-    tcbinfo = gdb.parse_and_eval("g_tcbinfo")
-    global saved_regs
-    global regoffset
-
-    if not saved_regs:
-        return
-
-    arch = gdb.selected_frame().architecture()
-    i = 0
-
-    regoffset = [
-        int(tcbinfo["reg_off"]["p"][i])
-        for i in range(tcbinfo["regs_num"])
-        if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
-    ]
-    for reg in arch.registers():
-        if i >= len(regoffset):
-            break
-
-        gdb.execute(f"set ${reg.name}={int(saved_regs[i])}")
-        i += 1
-
+class Registers:
     saved_regs = None
+    reginfo = None
+
+    def __init__(self):
+        if not Registers.reginfo:
+            reginfo = {}
+
+            # Switch to second inferior to get the original remote-register layout
+            state = utils.suppress_cli_notifications(True)
+            utils.switch_inferior(2)
+            arch = gdb.selected_inferior().architecture()
+            registers = arch.registers()
+
+            natural_size = gdb.lookup_type("long").sizeof
+            tcb_info = gdb.parse_and_eval("g_tcbinfo")
+            reg_off = tcb_info["reg_off"]["p"]  # Register offsets in tcbinfo
+            packet_size = tcb_info["regs_num"] * natural_size
+
+            lines = gdb.execute("maint print remote-registers", to_string=True)
+            for line in lines.splitlines()[1:]:
+                if not line:
+                    continue
+
+                # Name         Nr  Rel Offset    Size  Type            Rmt Nr  g/G Offset
+                match = re.match(
+                    r"\s(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)(?:\s+(\d+)\s+(\d+))?",
+                    line,
+                )
+                if not match:
+                    continue
+
+                name, _, _, _, size, _, rmt_nr, offset = match.groups()
+
+                # We only need those registers that have a remote register
+                if rmt_nr is None:
+                    continue
+
+                rmt_nr = int(rmt_nr)
+                offset = int(offset)
+                size = int(size)
+
+                # We only have limited number of registers in packet
+                if offset + size > packet_size:
+                    continue
+
+                index = offset // natural_size
+                tcb_reg_off = int(reg_off[index])
+                if tcb_reg_off == UINT16_MAX:
+                    # This register is not saved in tcb context
+                    continue
+
+                reginfo[name] = {
+                    "rmt_nr": rmt_nr,  # The register number in remote-registers, Aka the one we saved in g_tcbinfo.
+                    "tcb_reg_off": tcb_reg_off,
+                    "desc": registers.find(
+                        name
+                    ),  # Register descriptor. It's faster for frame.read_register
+                }
+
+            Registers.reginfo = reginfo
+            utils.switch_inferior(1)  # Switch back
+            utils.suppress_cli_notifications(state)
+
+    def load(self, regs):
+        """Load registers from context register address"""
+        regs = int(regs)
+        for name, info in Registers.reginfo.items():
+            addr = regs + info["tcb_reg_off"]
+            # value = *(uintptr_t *)addr
+            value = (
+                gdb.Value(addr)
+                .cast(utils.lookup_type("uintptr_t").pointer())
+                .dereference()
+            )
+            gdb.execute(f"set ${name}={int(value)}")
+
+    def switch(self, pid):
+        """Switch to the specified thread"""
+        tcb = utils.get_tcb(pid)
+        if not tcb:
+            gdb.write(f"Thread {pid} not found\n")
+            return
+
+        if tcb["task_state"] == TSTATE_TASK_RUNNING:
+            # If the thread is running, then register is not in context but saved temporarily
+            self.restore()
+            return
+
+        # Save current if this is the running thread, which is the case we never saved it before
+        if not self.saved_regs:
+            self.save()
+
+        self.load(tcb["xcp"]["regs"])
+
+    def save(self):
+        """Save current registers"""
+        if Registers.saved_regs:
+            # Already saved
+            return
+
+        registers = {}
+        frame = gdb.newest_frame()
+        for name, info in Registers.reginfo.items():
+            value = frame.read_register(info["desc"])
+            registers[name] = value
+
+        Registers.saved_regs = registers
+
+    def restore(self):
+        if not Registers.saved_regs:
+            return
+
+        for name, value in Registers.saved_regs.items():
+            gdb.execute(f"set ${name}={int(value)}")
+
+        Registers.saved_regs = None
+
+
+g_registers = Registers()
 
 
 class SetRegs(gdb.Command):
@@ -103,8 +170,6 @@ class SetRegs(gdb.Command):
         super().__init__("setregs", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
-        global regoffset
-
         parser = argparse.ArgumentParser(
             description="Set registers to the specified values"
         )
@@ -133,28 +198,8 @@ class SetRegs(gdb.Command):
             gdb.write("regs is NULL\n")
             return
 
-        tcbinfo = gdb.parse_and_eval("g_tcbinfo")
-        save_regs()
-        arch = gdb.selected_frame().architecture()
-
-        if not regoffset:
-            regoffset = [
-                int(tcbinfo["reg_off"]["p"][i])
-                for i in range(tcbinfo["regs_num"])
-                if tcbinfo["reg_off"]["p"][i] != UINT16_MAX
-            ]
-
-        i = 0
-        for reg in arch.registers():
-            if i >= len(regoffset):
-                return
-
-            gdb.execute("select-frame 0")
-            value = gdb.Value(regs + regoffset[i]).cast(
-                utils.lookup_type("uintptr_t").pointer()
-            )[0]
-            gdb.execute(f"set ${reg.name} = {value}")
-            i += 1
+        g_registers.save()
+        g_registers.load(regs)
 
 
 class Nxinfothreads(gdb.Command):
@@ -283,7 +328,7 @@ class Nxthread(gdb.Command):
                         cmd_arg += cmd + " "
 
                     gdb.execute(f"{cmd_arg}\n")
-                    restore_regs()
+                    g_registers.restore()
             else:
                 threadlist = []
                 i = 0
@@ -311,14 +356,14 @@ class Nxthread(gdb.Command):
 
                         gdb.execute(f"setregs g_pidhash[{i}]->xcp.regs")
                         gdb.execute(f"{cmd}\n")
-                        restore_regs()
+                        g_registers.restore()
 
         else:
             if arg[0].isnumeric() and pidhash[int(arg[0])] != 0:
                 if pidhash[int(arg[0])]["task_state"] == gdb.parse_and_eval(
                     "TSTATE_TASK_RUNNING"
                 ):
-                    restore_regs()
+                    g_registers.restore()
                 else:
                     gdb.execute("setregs g_pidhash[%s]->xcp.regs" % arg[0])
             else:
@@ -332,7 +377,7 @@ class Nxcontinue(gdb.Command):
         super().__init__("nxcontinue", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
-        restore_regs()
+        g_registers.restore()
         gdb.execute("continue")
 
 
@@ -343,7 +388,7 @@ class Nxstep(gdb.Command):
         super().__init__("nxstep", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
-        restore_regs()
+        g_registers.restore()
         gdb.execute("step")
 
 
