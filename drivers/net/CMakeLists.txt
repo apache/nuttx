@@ -83,6 +83,10 @@ if(CONFIG_NET)
     list(APPEND SRCS e1000.c)
   endif()
 
+  if(CONFIG_NET_IGC)
+    list(APPEND SRCS igc.c)
+  endif()
+
   if(CONFIG_ARCH_PHY_INTERRUPT)
     list(APPEND SRCS phy_notify.c)
   endif()
