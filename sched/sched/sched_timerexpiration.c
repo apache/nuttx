@@ -347,26 +347,23 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
   nxsched_process_cpuload_ticks(elapsed);
 #endif
 
-  /* Process watchdogs */
-
-  tmp = wd_timer(ticks, noswitches);
-  if (tmp > 0)
-    {
-      rettime = tmp;
-    }
-
   /* Check for operations specific to scheduling policy of the currently
    * active task.
    */
 
   tmp = nxsched_process_scheduler(ticks, elapsed, noswitches);
+  if (tmp > 0)
+    {
+      rettime = tmp;
+    }
 
-#if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
+  /* Process watchdogs */
+
+  tmp = wd_timer(ticks, noswitches);
   if (tmp > 0 && (rettime == 0 || tmp < rettime))
     {
       rettime = tmp;
     }
-#endif
 
   return rettime;
 }
