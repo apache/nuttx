@@ -68,6 +68,10 @@ ifeq ($(CONFIG_CL_MFRC522),y)
   CSRCS += esp_board_mfrc522.c
 endif
 
+ifeq ($(CONFIG_ESP_PCNT),y)
+  CSRCS += esp_board_qencoder.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
