@@ -1,7 +1,8 @@
-README.txt
-==========
+=================
+MPS2 AN500 Board
+=================
 
-This board configuration will use QEMU to emulate generic ARM v8-M series
+This board configuration will use QEMU to emulate generic ARM v7-M series
 hardware platform and provides support for these devices:
 
  - ARM Generic Timer
@@ -21,12 +22,12 @@ Getting Started
 ===============
 
 1. Configuring and running
-  1.1 Single Core
+
    Configuring NuttX and compile:
-   $ ./tools/configure.sh -l mps3-an547:nsh
+   $ ./tools/configure.sh -l mps2-an500:nsh
    $ make
    Running with qemu
-   $ qemu-system-arm -M mps3-an547 -nographic -kernel nuttx.bin
+   $ qemu-system-arm -M mps2-an500 -nographic -kernel nuttx.bin
 
 Debugging with QEMU
 ===================
@@ -40,7 +41,7 @@ The nuttx ELF image can be debugged with QEMU.
 
 2. Run QEMU(at shell terminal 1)
 
-   $ qemu-system-arm -M mps3-an547 -nographic -kernel nuttx.bin -S -s
+   $ qemu-system-arm -M mps2-an500 -nographic -kernel nuttx.bin -S -s
 
 3. Run gdb with TUI, connect to QEMU, load nuttx and continue (at shell terminal 2)
 
