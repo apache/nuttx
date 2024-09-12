@@ -25,10 +25,11 @@ you assign an IP that is already in use on your network, your host won't be
 able to see it until the simulation is stopped.  The host route will force all
 traffic destined for that IP to be sent to the tap interface.
 
-NOTE:  If you configure an IP address that is not on the same subnet as your
-       host, additional manual setup will be required. A helper script,
-       `tools/simhostroute.sh` is provided that can do this setup on Linux.
-       On Windows or macOS using host route mode is not recommended.
+.. note::
+   If you configure an IP address that is not on the same subnet as your
+   host, additional manual setup will be required. A helper script,
+   `tools/simhostroute.sh` is provided that can do this setup on Linux.
+   On Windows or macOS using host route mode is not recommended.
 
 Recent versions of Linux require setting kernel capabilities to allow the nuttx
 executable access to the tap network driver. You can see more about the tun/tap
@@ -41,6 +42,8 @@ configuration.
 
 To compile:
 
+.. code-block:: bash
+
     $ cp boards/sim/sim/sim/configs/tcpblaster/defconfig .config
     $ make menuconfig  # optional, to adjust configuration
     $ make clean; make
@@ -48,6 +51,8 @@ To compile:
 You can do the following after compiling the NuttX simulator:
 
 On Linux:
+
+.. code-block:: bash
 
     $ # necessary on recent Linux distributions
     $ sudo setcap cap_net_admin+ep ./nuttx
@@ -59,12 +64,16 @@ On Linux:
 
 On the NuttX Simulator:
 
+.. code-block:: bash
+
     nsh> # replace or omit dns if needed, IPv6 line is optional
     nsh> ifconfig eth0 inet6 fc00::2/112 dns 2001:4860:4860::8888
     nsh> ifconfig eth0 10.0.1.2 dns 8.8.8.8
     nsh> ifup eth0
 
 On Linux:
+
+.. code-block:: bash
 
     $ # is nuttx up?
     $ ping 10.0.1.2
@@ -84,6 +93,8 @@ To create the bridge, first install the bridge utilities package for your
 platform (the net-tools RPM in RedHat, for example).  Then execute a
 command like the following:
 
+.. code-block:: bash
+
   # ip link add nuttx0 type bridge
 
 This will create the nuttx0 bridge.  Once created, the bridge may be used by
@@ -99,6 +110,8 @@ gateway you assign to the simulator) and add a network route.  Note
 that the subnet chosen should not already be in use.  For example, if
 you want to use the 172.26.23.0/24 subnet for your simluations, you
 would do something like the following:
+
+.. code-block:: bash
 
   # ip link add nuttx0 type bridge
   # ifconfig nuttx0 172.26.23.1/24
@@ -119,6 +132,8 @@ with NuttX.  For example, if you have a secondary eth1 interface on your host,
 you can simply connect it to the network you want your simulations to access,
 and run the following command:
 
+.. code-block:: bash
+
   # ip link set eth1 master nuttx0
 
 From that point on, your simulations will be directly connected to the same
@@ -128,6 +143,8 @@ an IP address in this case.
 If you only have a single interface, you can configure your system so that eth0
 (or other primary interface) is on the bridge.  To do this, you would execute
 commands like the following from the system console:
+
+.. code-block:: bash
 
   # ip link add nuttx0 type bridge
   # ip link set eth0 master nuttx0
