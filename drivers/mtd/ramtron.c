@@ -328,7 +328,7 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
     0x05,                         /* id1 */
     0x09,                         /* id2 */
     32L * 1024L,                  /* size */
-    3,                            /* addr_len */
+    2,                            /* addr_len */
     25000000                      /* speed */
 #ifdef CONFIG_RAMTRON_CHUNKING
     , false,                      /* chunked */
