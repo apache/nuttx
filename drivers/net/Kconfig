@@ -801,4 +801,23 @@ config NET_E1000_82574L
 
 endif # NET_E1000
 
+menuconfig NET_IGC
+	bool "Intel IGC support"
+	default n
+	depends on PCI && PCI_MSIX
+	---help---
+		Enable IGC PCI Ethernet driver.
+
+if NET_IGC
+
+config NET_IGC_RXSPARE
+	int "Intel IGC spare RX buffers"
+	default 8
+
+config NET_IGC_I225LM
+	bool "Intel I225LM"
+	default n
+
+endif # NET_IGC
+
 endif # NETDEVICES
