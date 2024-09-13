@@ -61,9 +61,9 @@ extern "C"
  ****************************************************************************/
 
 /* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
+ * register storage structure.  If is non-NULL only during interrupt
  * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
+ * g_current_regs for portability.
  */
 
 /* For the case of architectures with multiple CPUs, then there must be one
@@ -71,7 +71,6 @@ extern "C"
  */
 
 EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /****************************************************************************
  * Public Function Prototypes
@@ -149,6 +148,20 @@ noinstrument_function static inline void up_irq_restore(irqstate_t flags)
 }
 
 /****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline_function uintptr_t *up_current_regs(void)
+{
+  return (uintptr_t *)g_current_regs[up_cpu_index()];
+}
+
+static inline_function void up_set_current_regs(uintptr_t *regs)
+{
+  g_current_regs[up_cpu_index()] = regs;
+}
+
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
@@ -158,13 +171,13 @@ noinstrument_function static inline void up_irq_restore(irqstate_t flags)
  ****************************************************************************/
 
 noinstrument_function
-static inline bool up_interrupt_context(void)
+static inline_function bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();
 #endif
 
-  bool ret = CURRENT_REGS != NULL;
+  bool ret = up_current_regs() != NULL;
 
 #ifdef CONFIG_SMP
   up_irq_restore(flags);

@@ -146,15 +146,16 @@ int tms570_esm_initialize(void)
 
 int tms570_esm_interrupt(int irq, void *context, void *arg)
 {
-  /* Save the saved processor context in CURRENT_REGS where it can be
+  /* Save the saved processor context in current_regs where it can be
    * accessed for register dumps and possibly context switching.
    */
 
-  CURRENT_REGS = (uint32_t *)context;
+  up_set_current_regs((uint32_t *)context);
 
   /* Crash -- possibly showing diagnostic debug information. */
 
-  _err("ERROR: ESM Interrupt. PC: %08" PRIx32 "\n", CURRENT_REGS[REG_PC]);
+  _err("ERROR: ESM Interrupt. PC: %08" PRIx32 "\n",
+       up_current_regs()[REG_PC]);
   PANIC();
   return OK; /* To keep the compiler happy */
 }

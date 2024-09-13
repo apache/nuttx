@@ -58,7 +58,7 @@
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
   err("ERROR: Unexpected IRQ\n");
   PANIC();
   return NULL;
@@ -67,13 +67,13 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   int irq;
 
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
+   * current_regs is also used to manage interrupt level context switches.
    *
    * Nested interrupts are not supported.
    */
 
-  DEBUGASSERT(CURRENT_REGS == NULL);
-  CURRENT_REGS = regs;
+  DEBUGASSERT(up_current_regs() == NULL);
+  up_set_current_regs(regs);
 
   /* Loop while there are pending interrupts to be processed */
 
@@ -102,13 +102,13 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
 #ifdef CONFIG_ARCH_ADDRENV
           /* Check for a context switch.  If a context switch occurred, then
-           * CURRENT_REGS will have a different value than it did on entry.
+           * current_regs will have a different value than it did on entry.
            * If an interrupt level context switch has occurred, then
            * establish the correct address environment before returning
            * from the interrupt.
            */
 
-          if (regs != CURRENT_REGS)
+          if (regs != up_current_regs())
             {
               /* Make sure that the address environment for the previously
                * running task is closed down gracefully (data caches dump,
@@ -123,11 +123,11 @@ uint32_t *arm_decodeirq(uint32_t *regs)
     }
   while (irq < NR_IRQS);
 
-  /* Set CURRENT_REGS to NULL to indicate that we are no longer in
+  /* Set current_regs to NULL to indicate that we are no longer in
    * an interrupt handler.
    */
 
-  CURRENT_REGS = NULL;
+  up_set_current_regs(NULL);
   return NULL;  /* Return not used in this architecture */
 #endif
 }

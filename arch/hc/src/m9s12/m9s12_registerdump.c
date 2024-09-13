@@ -52,7 +52,7 @@ uintptr_t up_getusrsp(void *regs)
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uint8_t *regs = dumpregs ? dumpregs : (uint8_t *)g_current_regs;
+  volatile uint8_t *regs = dumpregs ? dumpregs : up_current_regs();
 
   _alert("A:%02x B:%02x X:%02x%02x Y:%02x%02x PC:%02x%02x CCR:%02x\n",
          regs[REG_A],  regs[REG_B],  regs[REG_XH],  regs[REG_XL],

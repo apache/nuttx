@@ -84,9 +84,9 @@
 
 /* Macros for portability */
 
-#define IN_INTERRUPT             (g_current_regs != NULL)
-#define SAVE_IRQCONTEXT(tcb)     z16_copystate((tcb)->xcp.regs, (FAR chipreg_t*)g_current_regs)
-#define SET_IRQCONTEXT(tcb)      do { g_current_regs = (tcb)->xcp.regs; } while (0)
+#define IN_INTERRUPT             (up_current_regs() != NULL)
+#define SAVE_IRQCONTEXT(tcb)     z16_copystate((tcb)->xcp.regs, up_current_regs())
+#define SET_IRQCONTEXT(tcb)      up_set_current_regs((tcb)->xcp.regs)
 #define SAVE_USERCONTEXT(tcb)    up_saveusercontext((tcb)->xcp.regs)
 #define RESTORE_USERCONTEXT(tcb) z16_restoreusercontext((tcb)->xcp.regs)
 #define SIGNAL_RETURN(regs)      z16_restoreusercontext(regs)

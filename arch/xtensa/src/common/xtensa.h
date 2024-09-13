@@ -107,8 +107,8 @@
  * only a reference stored in TCB.
  */
 
-#define xtensa_savestate(regs)    ((regs) = (uint32_t *)CURRENT_REGS)
-#define xtensa_restorestate(regs) (CURRENT_REGS = (regs))
+#define xtensa_savestate(regs)    ((regs) = up_current_regs())
+#define xtensa_restorestate(regs) up_set_current_regs(regs)
 
 /* Context switching via system calls ***************************************/
 

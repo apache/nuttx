@@ -65,7 +65,7 @@
 
 void xtensa_panic(int xptcode, uint32_t *regs)
 {
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
 
@@ -167,7 +167,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 
 void xtensa_user_panic(int exccause, uint32_t *regs)
 {
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
 

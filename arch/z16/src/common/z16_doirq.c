@@ -74,8 +74,8 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
        * interrupt level context switches.
        */
 
-      savestate    = (FAR chipreg_t *)g_current_regs;
-      g_current_regs = regs;
+      savestate = up_current_regs();
+      up_set_current_regs(regs);
 
       /* Acknowledge the interrupt */
 
@@ -85,7 +85,7 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
 
       irq_dispatch(irq, regs);
 
-      if (regs != g_current_regs)
+      if (regs != up_current_regs())
         {
           /* Record the new "running" task when context switch occurred.
            * g_running_tasks[] is only used by assertion logic for reporting
@@ -100,8 +100,8 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
        * if we are returning from a nested interrupt.
        */
 
-      ret          = g_current_regs;
-      g_current_regs = savestate;
+      ret = up_current_regs();
+      up_set_current_regs(savestate);
     }
 
   board_autoled_off(LED_INIRQ);
