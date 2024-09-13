@@ -76,10 +76,10 @@ void uuid_create(FAR uuid_t *u, FAR uint32_t *status)
 {
   int ret;
 
-  ret = uuid_getrandom(u, sizeof(uuid_t), 0);
+  ret = uuid_getrandom(u, sizeof(uuid_t), GRND_RANDOM);
   if (ret < 0)
     {
-      ret = uuid_getrandom(u, sizeof(uuid_t), GRND_RANDOM);
+      ret = uuid_getrandom(u, sizeof(uuid_t), 0);
     }
 
   if (ret < 0)
