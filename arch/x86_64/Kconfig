@@ -106,6 +106,13 @@ config ARCH_CHIP
 
 endif # ARCH_INTEL64
 
+config ARCH_MULTIBOOT1
+	bool "Enable ELF32/Multiboot1"
+	default n
+	---help---
+		This enables generating `nuttx32` and allows x86 QEMU
+		`-kernel` boot in multiboot1 protocol.
+
 config ARCH_MULTIBOOT2
 	bool "Append multiboot2 header"
 	default y
@@ -128,6 +135,6 @@ config ARCH_PVHBOOT
 	bool "Append Xen PVH ELF Note"
 	default y
 	---help---
-		This allow x86 QEMU -kernel boot.
+		This allows x86 QEMU `-kernel` boot in PVH protocol.
 
 endif # ARCH_X86_64
