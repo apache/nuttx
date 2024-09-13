@@ -53,8 +53,8 @@ uint32_t *lm32_doirq(int irq, uint32_t *regs)
    * Nested interrupts are not supported
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(up_current_regs() == NULL);
+  up_set_current_regs(regs);
 
   /* Disable further occurrences of this interrupt (until the interrupt
    * sources have been clear by the driver).
@@ -73,12 +73,12 @@ uint32_t *lm32_doirq(int irq, uint32_t *regs)
    * returning from the interrupt.
    */
 
-  if (regs != g_current_regs)
+  if (regs != up_current_regs())
     {
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)g_current_regs);
+      up_restorefpu(up_current_regs());
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -105,13 +105,13 @@ uint32_t *lm32_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *)g_current_regs;
+  regs = up_current_regs();
 
   /* Set g_current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  g_current_regs = NULL;
+  up_set_current_regs(NULL);
 
   /* Unmask the last interrupt (global interrupts are still disabled) */
 

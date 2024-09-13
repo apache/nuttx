@@ -162,7 +162,7 @@ uint32_t *pic32mz_exception(uint32_t *regs)
    * contents.
    */
 
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
   PANIC_WITH_REGS("panic", regs);
   return regs; /* Won't get here */
 }

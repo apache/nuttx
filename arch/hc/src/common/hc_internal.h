@@ -95,8 +95,8 @@
  * a referenced is passed to get the state from the TCB.
  */
 
-#define hc_savestate(regs)    hc_copystate(regs, (uint8_t*)g_current_regs)
-#define hc_restorestate(regs) (g_current_regs = regs)
+#define hc_savestate(regs)    hc_copystate(regs, up_current_regs())
+#define hc_restorestate(regs) up_set_current_regs(regs)
 
 /****************************************************************************
  * Public Types

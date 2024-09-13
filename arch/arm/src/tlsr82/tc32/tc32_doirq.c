@@ -64,17 +64,17 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   /* Nested interrupts are not supported in this implementation.  If you
    * want to implement nested interrupts, you would have to (1) change the
-   * way that CURRENT_REGS is handled and (2) the design associated with
+   * way that current_regs is handled and (2) the design associated with
    * CONFIG_ARCH_INTERRUPTSTACK.
    */
 
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
+   * current_regs is also used to manage interrupt level context switches.
    */
 
-  if (CURRENT_REGS == NULL)
+  if (up_current_regs() == NULL)
     {
-      CURRENT_REGS = regs;
+      up_set_current_regs(regs);
       regs         = NULL;
     }
 
@@ -84,10 +84,10 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   /* Deliver the IRQ */
 
-  irq_dispatch(irq, (uint32_t *)CURRENT_REGS);
+  irq_dispatch(irq, up_current_regs());
 
   /* If a context switch occurred while processing the interrupt then
-   * CURRENT_REGS may have change value.  If we return any value different
+   * current_regs may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
@@ -96,14 +96,14 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
     {
       /* Restore the cpu lock */
 
-      if (regs != CURRENT_REGS)
+      if (regs != up_current_regs())
         {
-          regs = (uint32_t *)CURRENT_REGS;
+          regs = up_current_regs();
         }
 
-      /* Update the CURRENT_REGS to NULL. */
+      /* Update the current_regs to NULL. */
 
-      CURRENT_REGS = NULL;
+      up_set_current_regs(NULL);
     }
 #endif
 

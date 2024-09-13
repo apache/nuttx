@@ -147,7 +147,7 @@ int up_backtrace(struct tcb_s *tcb,
 #endif /* CONFIG_ARCH_INTERRUPTSTACK > 7 */
           if (ret < size)
             {
-              p_regs = (struct regs_context *)CURRENT_REGS;
+              p_regs = (struct regs_context *)up_current_regs();
               ret += backtrace(rtcb->stack_base_ptr,
                                rtcb->stack_base_ptr + rtcb->adj_stack_size,
                                (void *)p_regs->regs[REG_X29],
