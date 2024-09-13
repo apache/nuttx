@@ -42,6 +42,7 @@
 /.config\ *
 /.cproject
 /.gdbinit
+/.gdb_history
 /.project
 /.version
 /_SAVED_APPS_config
