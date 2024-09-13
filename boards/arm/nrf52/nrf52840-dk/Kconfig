@@ -9,4 +9,11 @@ config NRF52840DK_HIGHPRI
 	bool "High priority interrupt test"
 	default n
 
+config NRF52840DK_BTNLEDS_GPIO
+	bool "Export board LEDS and BUTTONS as GPIO"
+	default n
+	depends on !ARCH_LEDS && !ARCH_BUTTONS && GPIO_LOWER_HALF && DEV_GPIO
+	---help---
+		Export board LEDS and buttons as GPIOs.
+
 endif
