@@ -157,6 +157,36 @@ restore_new:
     ret
 
 /****************************************************************************
+ * Function: arm64_jump_to_user
+ *
+ * Description:
+ *  Routine to jump to user space, called when a user process is started and
+ *  the kernel is ready to give control to the user task in user space.
+ *
+ * arm64_jump_to_user(entry, x0, x1, regs)
+ *     entry: process entry point
+ *     x0:    parameter 0 for process
+ *     x1:    parameter 1 for process
+ *     regs:  integer register save area to use
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_BUILD_FLAT
+GTEXT(arm64_jump_to_user)
+SECTION_FUNC(text, arm64_jump_to_user)
+    msr daifset, #IRQ_DAIF_MASK
+    mov sp,  x3
+    str x0,  [sp, #8 * REG_ELR]
+    str x1,  [sp, #8 * REG_X0]
+    str x2,  [sp, #8 * REG_X1]
+    mrs x0,  spsr_el1
+    and x0,  x0, #~SPSR_MODE_MASK
+    #orr x0, x0, #SPSR_MODE_EL0T # EL0T=0x00, out of range for orr
+    str x0,  [sp, #8 * REG_SPSR]
+    b arm64_exit_exception
+#endif
+
+/****************************************************************************
  * Function: arm64_sync_exc
  *
  * Description:
