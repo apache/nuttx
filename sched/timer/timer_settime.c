@@ -98,6 +98,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
 {
   clock_t ticks;
   sclock_t delay;
+  sclock_t frame;
 
   /* If this is a repetitive timer, then restart the watchdog */
 
@@ -106,19 +107,24 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
       /* Check whether next expected time is reached */
 
       ticks = clock_systime_ticks();
-      timer->pt_overrun = 0;
+      delay = ticks - timer->pt_expected;
 
-      for (; ; )
-        {
-          timer->pt_expected += timer->pt_delay;
-          delay               = timer->pt_expected - ticks;
-          if (delay > 0)
-            {
-              break;
-            }
+      /* Calculate the number of timer overruns and the next expected tick.
+       * The next expired tick frame can be computed as align up:
+       * frame <- (elapsed_ticks + pt_delay) / pt_delay
+       * For instance:
+       *  |   pt_delay   |   pt_delay   |   pt_delay   | ... |
+       *  ^ pt_expected                    ^ ticks     ^ next pt_expected
+       * In this case, frame equals 3.
+       * Then, pt_overrun <- frame - 1 and
+       * the next pt_expected <- pt_expected + frame * pt_delay.
+       * Assumption of correctness:
+       * (delay + timer->pt_delay) should not overflow.
+       */
 
-          timer->pt_overrun++;
-        }
+      frame = (delay + timer->pt_delay) / timer->pt_delay;
+      timer->pt_overrun = frame - 1;
+      timer->pt_expected += frame * timer->pt_delay;
 
       wd_start_abstick(&timer->pt_wdog, timer->pt_expected,
                        timer_timeout, itimer);
