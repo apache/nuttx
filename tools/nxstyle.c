@@ -349,6 +349,8 @@ static const char *g_white_content_list[] =
   "__asan_storeN",
   "__asan_loadN_noabort",
   "__asan_storeN_noabort",
+  "__hwasan_loadN_noabort",
+  "__hwasan_storeN_noabort",
 
   /* Ref:
    * tools/jlink-nuttx.c
