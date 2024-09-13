@@ -65,12 +65,6 @@
 
 void up_task_start(main_t taskentry, int argc, char *argv[])
 {
-  uint64_t *regs = this_task()->xcp.initregs;
-
-  /* This must be performed atomically, the C-section ends upon user entry */
-
-  enter_critical_section();
-
   /* Set up to return to the user-space _start function in
    * unprivileged mode.  We need:
    *
@@ -80,24 +74,8 @@ void up_task_start(main_t taskentry, int argc, char *argv[])
    *   SPSR = user mode
    */
 
-  regs[REG_ELR]  = (uint64_t)taskentry;
-  regs[REG_X0]   = (uint64_t)argc;
-  regs[REG_X1]   = (uint64_t)argv;
-  regs[REG_SPSR] = (regs[REG_SPSR] & ~SPSR_MODE_MASK) | SPSR_MODE_EL0T;
-
-  /* Fully unwind the kernel stack and drop to user space */
-
-  asm
-  (
-    "mov x0, %0\n" /* Get context registers */
-    "mov sp, x0\n" /* Stack pointer = context */
-    "b arm64_exit_exception\n"
-    :
-    : "r" (regs)
-    : "x0", "memory"
-  );
-
-  PANIC();
+  arm64_jump_to_user((uint64_t)taskentry, (uint64_t)argc, (uint64_t)argv,
+                     this_task()->xcp.initregs);
 }
 
 #endif /* !CONFIG_BUILD_FLAT */
