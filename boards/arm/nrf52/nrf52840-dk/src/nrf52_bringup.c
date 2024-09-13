@@ -173,6 +173,15 @@ int nrf52_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_NRF52840DK_BTNLEDS_GPIO
+  ret = nrf52_gpioleds_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: nrf52_gpioleds_initialize() failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
 
