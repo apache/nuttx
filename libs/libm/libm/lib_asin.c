@@ -1,10 +1,9 @@
 /****************************************************************************
  * libs/libm/libm/lib_asin.c
  *
- * This file is a part of NuttX:
- *
- *   Copyright (C) 2012, 2015-2016 Gregory Nutt. All rights reserved.
- *   Ported by: Darcy Gong
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: Copyright (C) 2015-2016 Gregory Nutt.
+ * SPDX-FileContributor: Ported by: Darcy Gong
  *
  * It derives from the Rhombus OS math library by Nick Johnson which has
  * a compatible, MIT-style license:
