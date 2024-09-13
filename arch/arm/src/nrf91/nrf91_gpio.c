@@ -401,7 +401,14 @@ bool nrf91_gpio_read(nrf91_pinset_t pinset)
 
   /* Get register address */
 
-  offset = nrf91_gpio_regget(port, NRF91_GPIO_IN_OFFSET);
+  if ((pinset & GPIO_FUNC_MASK) == GPIO_OUTPUT)
+    {
+      offset = nrf91_gpio_regget(port, NRF91_GPIO_OUTSET_OFFSET);
+    }
+  else
+    {
+      offset = nrf91_gpio_regget(port, NRF91_GPIO_IN_OFFSET);
+    }
 
   /* Get register value */
 
