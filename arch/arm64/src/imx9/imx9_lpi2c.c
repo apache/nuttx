@@ -1576,7 +1576,7 @@ static int imx9_lpi2c_isr_process(struct imx9_lpi2c_priv_s *priv)
 
   /* Check if there are received bytes */
 
-  else if ((status & LPI2C_MSR_RDF) != 0)
+  else if ((status & LPI2C_MSR_RDF) != 0 && priv->dcnt > 0)
     {
       imx9_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
