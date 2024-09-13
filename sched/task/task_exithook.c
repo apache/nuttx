@@ -448,6 +448,12 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
   irqstate_t flags = enter_critical_section();
 #endif
 
+  /* Disable the scheduling function to prevent other tasks from
+   * being deleted after they are awakened
+   */
+
+  sched_lock();
+
   /* Send the SIGCHLD signal to the parent task group */
 
   nxtask_signalparent(tcb, status);
@@ -455,6 +461,8 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
   /* Wakeup any tasks waiting for this task to exit */
 
   nxtask_exitwakeup(tcb, status);
+
+  sched_unlock();
 
   /* Leave the task group.  Perhaps discarding any un-reaped child
    * status (no zombies here!)
