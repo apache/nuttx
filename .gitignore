@@ -49,6 +49,7 @@
 /defconfig
 /Make.defs
 /nuttx
+/nuttx32
 /nuttx-*
 /nuttx.*
 /nuttx_user*
