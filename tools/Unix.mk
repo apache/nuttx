@@ -657,7 +657,9 @@ define kconfig_tweak_disable
 	kconfig-tweak --file $1 -u $2
 endef
 else
-  KCONFIG_WARNING  = 2> >(tee kwarning) | cat && if [ -s kwarning ]; \
+  OVERWRITE_WARNING = "set more than once"
+  KCONFIG_WARNING   = 2> >(grep -v ${OVERWRITE_WARNING} | tee kwarning) | \
+                                                  cat && if [ -s kwarning ]; \
                                                   then rm kwarning; \
                                                   exit 1; \
                                                  else \
