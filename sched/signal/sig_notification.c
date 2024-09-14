@@ -134,16 +134,18 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       memcpy(&info.si_value, &event->sigev_value, sizeof(union sigval));
 
-      /* Used only by POSIX timer. Notice that it is UNSAFE, unless
-       * we GUARANTEE that event->sigev_notify_thread_id is valid.
+      /* Used only by POSIX timer. Before the notification, we should
+       * validate the tid and make sure that the notified thread is
+       * in same process with current thread.
        */
 
       if (event->sigev_notify & SIGEV_THREAD_ID)
         {
-          rtcb = nxsched_get_tcb(event->sigev_notify_thread_id);
-          if (rtcb != NULL)
+          FAR struct tcb_s *ptcb;
+          ptcb = nxsched_get_tcb(event->sigev_notify_thread_id);
+          if (ptcb != NULL && ptcb->group == rtcb->group)
             {
-              return nxsig_tcbdispatch(rtcb, &info);
+              return nxsig_tcbdispatch(ptcb, &info);
             }
           else
             {
