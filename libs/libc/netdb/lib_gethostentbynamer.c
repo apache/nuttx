@@ -42,8 +42,6 @@
 #include "netdb/lib_dns.h"
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -789,4 +787,3 @@ int gethostentbyname_r(FAR const char *name,
   return ERROR;
 }
 
-#endif /* CONFIG_LIBC_NETDB */
