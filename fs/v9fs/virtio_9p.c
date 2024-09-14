@@ -221,7 +221,7 @@ static int virtio_9p_probe(FAR struct virtio_device *vdev)
   int ret;
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
-  virtio_negotiate_features(vdev, 1 << VIRTIO_9P_MOUNT_TAG);
+  virtio_negotiate_features(vdev, 1 << VIRTIO_9P_MOUNT_TAG, NULL);
   virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
 
   if (!virtio_has_feature(vdev, VIRTIO_9P_MOUNT_TAG))
@@ -243,7 +243,7 @@ static int virtio_9p_probe(FAR struct virtio_device *vdev)
 
   vqname[0] = "virtio_9p_vq";
   callback[0] = virtio_9p_done;
-  ret = virtio_create_virtqueues(vdev, 0, 1, vqname, callback);
+  ret = virtio_create_virtqueues(vdev, 0, 1, vqname, callback, NULL);
   if (ret < 0)
     {
       vrterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);
