@@ -285,6 +285,8 @@ class ListCheck(gdb.Command):
             list_check(obj)
         elif obj.type == sq_queue_type.pointer():
             sq_check(obj)
+        elif obj.type == dq_queue_type.pointer():
+            dq_check(obj)
         else:
             raise gdb.GdbError("Invalid argument type: {}".format(obj.type))
 
