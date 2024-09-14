@@ -53,10 +53,9 @@
 
 struct work_notifier_entry_s
 {
-  /* This must appear at the beginning of the structure.  A reference to
-   * the struct work_notifier_entry_s instance must be cast-compatible with
-   * struct dq_entry_s.
-   */
+  struct dq_entry_s entry;
+
+  /* The work structure */
 
   struct work_s work;           /* Used for scheduling the work */
 
@@ -170,11 +169,11 @@ static void work_notifier_worker(FAR void *arg)
 
   /* Remove the notification from the pending list */
 
-  dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+  dq_rem(&notifier->entry, &g_notifier_pending);
 
   /* Put the notification to the free list */
 
-  dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+  dq_addlast(&notifier->entry, &g_notifier_free);
 
   leave_critical_section(flags);
 }
@@ -259,7 +258,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
        * notifications executed in a saner order?
        */
 
-      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_pending);
+      dq_addlast(&notifier->entry, &g_notifier_pending);
       ret = notifier->key;
 
       leave_critical_section(flags);
@@ -308,11 +307,11 @@ void work_notifier_teardown(int key)
         {
           /* Remove the notification from the pending list */
 
-          dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+          dq_rem(&notifier->entry, &g_notifier_pending);
 
           /* Put the notification to the free list */
 
-          dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+          dq_addlast(&notifier->entry, &g_notifier_free);
         }
     }
 
