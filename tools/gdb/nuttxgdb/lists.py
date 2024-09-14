@@ -214,13 +214,25 @@ def sq_check(sq):
         gdb.write("sq_queue head is empty {}\n".format(sq.address))
         return
 
+    nodes = set()
     entry = sq["head"].dereference()
     try:
         while entry.address:
             nb += 1
+            if int(entry.address) in nodes:
+                gdb.write("sq_queue is circular: {}\n".format(entry.address))
+                return
+            nodes.add(int(entry.address))
             entry = entry["flink"].dereference()
     except gdb.MemoryError:
         gdb.write("entry address is unaccessible {}\n".format(entry.address))
+        return
+
+    if int(sq["tail"]) not in nodes:
+        gdb.write("sq_queue tail is not in the list {}\n".format(sq["tail"]))
+        return
+    if sq["tail"]["flink"] != 0:
+        gdb.write("sq_queue tail->flink is not null {}\n".format(sq["tail"]))
         return
 
     gdb.write("sq_queue is consistent: {} node(s)\n".format(nb))
@@ -257,13 +269,26 @@ def dq_check(dq):
     if dq["head"] == 0:
         gdb.write("dq_queue head is empty {}\n".format(dq.address))
         return
+
+    nodes = set()
     entry = dq["head"].dereference()
     try:
         while entry.address:
             nb += 1
+            if int(entry.address) in nodes:
+                gdb.write("dq_queue is circular: {}\n".format(entry.address))
+                return
+            nodes.add(int(entry.address))
             entry = entry["flink"].dereference()
     except gdb.MemoryError:
         gdb.write("entry address is unaccessible {}\n".format(entry.address))
+        return
+
+    if int(dq["tail"]) not in nodes:
+        gdb.write("dq_queue tail is not in the list {}\n".format(dq["tail"]))
+        return
+    if dq["tail"]["flink"] != 0:
+        gdb.write("dq_queue tail->flink is not null {}\n".format(dq["tail"]))
         return
 
     gdb.write("dq_queue is consistent: {} node(s)\n".format(nb))
