@@ -131,7 +131,7 @@ static struct inode g_inotify_inode =
   NULL,
   NULL,
   NULL,
-  ATOMIC_VAR_INIT(1),
+  1,
   FSNODEFLAG_TYPE_DRIVER,
   {
     &g_inotify_fops
