@@ -28,6 +28,7 @@
 #include <nuttx/input/ff.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
