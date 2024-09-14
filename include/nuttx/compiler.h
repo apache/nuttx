@@ -374,6 +374,15 @@
 #    undef  CONFIG_PTR_IS_NOT_INT
 
 #  elif defined(__AVR__)
+
+#    if defined(__AVR_2_BYTE_PC__) || defined(__AVR_3_BYTE_PC__)
+/* 2-byte 3-byte PC does not support returnaddress */
+
+#      undef return_address
+#      define return_address(x) 0
+
+#    endif
+
 #    if defined(CONFIG_AVR_HAS_MEMX_PTR)
 /* I-space access qualifiers needed by Harvard architecture */
 
