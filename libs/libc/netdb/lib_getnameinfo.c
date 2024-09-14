@@ -33,8 +33,6 @@
 
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -197,4 +195,3 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
   return OK;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

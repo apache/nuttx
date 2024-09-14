@@ -34,8 +34,6 @@
 
 #include "lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -100,4 +98,3 @@ int getservbyport_r(int port, FAR const char *proto,
   return ENOENT;
 }
 
-#endif /* CONFIG_LIBC_NETDB */
