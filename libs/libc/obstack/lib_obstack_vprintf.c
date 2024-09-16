@@ -104,6 +104,5 @@ int obstack_vprintf(FAR struct obstack *h, FAR const char *fmt, va_list ap)
       return ERROR;
     }
 
-  obstack_1grow(h, '\0');
   return nbytes;
 }
