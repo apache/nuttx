@@ -225,9 +225,7 @@ class ListCheck(gdb.Command):
     """Verify a list consistency"""
 
     def __init__(self):
-        super(ListCheck, self).__init__(
-            "list_check", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
-        )
+        super().__init__("list_check", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION)
 
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
@@ -247,7 +245,7 @@ class ForeachListEntry(gdb.Command):
     """Dump list members for a given list"""
 
     def __init__(self):
-        super(ForeachListEntry, self).__init__(
+        super().__init__(
             "foreach_list_entry", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
         )
 

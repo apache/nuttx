@@ -168,7 +168,7 @@ class StackUsage(gdb.Command):
     """Display the stack usage of each thread, similar to cat /proc/<pid>/stack"""
 
     def __init__(self):
-        super(StackUsage, self).__init__("stack-usage", gdb.COMMAND_USER)
+        super().__init__("stack-usage", gdb.COMMAND_USER)
         self._stacks = []
         # format template
         self._fmt = (
