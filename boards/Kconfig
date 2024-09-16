@@ -463,6 +463,14 @@ config ARCH_BOARD_ESP32S3_LCD_EV
 			1. ESP32-S3-LCD-EV-Board with 480x480 LCD
 			2. ESP32-S3-LCD-EV-Board with 800x480 LCD
 
+config ARCH_BOARD_ESP32S3_LHCBIT
+	bool "ESP32-S3 LHCBit"
+	depends on ARCH_CHIP_ESP32S3WROOM1N16R8
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		The ESP32-S3 LHCBit features the ESP32-S3 CPU with dual Xtensa LX7 cores.
+
 config ARCH_BOARD_ESP32S3_BOX
 	bool "Espressif ESP32-S3-BOX"
 	depends on ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM
@@ -3257,6 +3265,7 @@ config ARCH_BOARD
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
+	default "esp32s3-lhcbit"            if ARCH_BOARD_ESP32S3_LHCBIT
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32s3-korvo-2"           if ARCH_BOARD_ESP32S3_KORVO_2
 	default "esp32c6-devkitc"           if ARCH_BOARD_ESP32C6_DEVKITC
@@ -4406,6 +4415,9 @@ source "boards/xtensa/esp32s3/esp32s3-meadow/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_LCD_EV
 source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_LHCBIT
+source "boards/xtensa/esp32s3/esp32s3-lhcbit/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_BOX
 source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
