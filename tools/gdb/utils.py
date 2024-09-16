@@ -81,15 +81,18 @@ def get_long_type():
     return long_type
 
 
-def offset_of(typeobj, field):
+def offset_of(typeobj: gdb.Type, field: str) -> Union[int, None]:
     """Return the offset of a field in a structure"""
-    element = gdb.Value(0).cast(typeobj)
-    return int(str(element[field].address).split()[0], 16)
+    for f in typeobj.fields():
+        if f.name == field:
+            return f.bitpos // 8 if f.bitpos is not None else None
+
+    return None
 
 
-def container_of(ptr, typeobj, member):
+def container_of(ptr: gdb.Value, typeobj: gdb.Type, member: str) -> gdb.Value:
     """Return pointer to containing data structure"""
-    return (ptr.cast(get_long_type()) - offset_of(typeobj, member)).cast(typeobj)
+    return gdb.Value(ptr.address - offset_of(typeobj, member)).cast(typeobj.pointer())
 
 
 class ContainerOf(gdb.Function):
