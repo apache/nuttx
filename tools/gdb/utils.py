@@ -100,7 +100,7 @@ class ContainerOf(gdb.Function):
     Note that TYPE and ELEMENT have to be quoted as strings."""
 
     def __init__(self):
-        super(ContainerOf, self).__init__("container_of")
+        super().__init__("container_of")
 
     def invoke(self, ptr, typename, elementname):
         return container_of(
@@ -294,7 +294,7 @@ class Hexdump(gdb.Command):
     """hexdump address/symbol <size>"""
 
     def __init__(self):
-        super(Hexdump, self).__init__("hexdump", gdb.COMMAND_USER)
+        super().__init__("hexdump", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         args = shlex.split(args)
@@ -325,7 +325,7 @@ class Addr2Line(gdb.Command):
     """
 
     def __init__(self):
-        super(Addr2Line, self).__init__("addr2line", gdb.COMMAND_USER)
+        super().__init__("addr2line", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         if not args:
@@ -364,7 +364,7 @@ class Profile(gdb.Command):
         if not self.cProfile:
             return
 
-        super(Profile, self).__init__("profile", gdb.COMMAND_USER)
+        super().__init__("profile", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
 

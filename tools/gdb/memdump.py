@@ -345,7 +345,7 @@ class Memdump(gdb.Command):
     """Dump the heap and mempool memory"""
 
     def __init__(self):
-        super(Memdump, self).__init__("memdump", gdb.COMMAND_USER)
+        super().__init__("memdump", gdb.COMMAND_USER)
 
     def check_alive(self, pid):
         return self.pidhash[pid & self.npidhash - 1] != 0
@@ -652,7 +652,7 @@ class Memleak(gdb.Command):
         if not self.elf:
             return
 
-        super(Memleak, self).__init__("memleak", gdb.COMMAND_USER)
+        super().__init__("memleak", gdb.COMMAND_USER)
 
     def check_alive(self, pid):
         return self.pidhash[pid & self.npidhash - 1] != 0
@@ -906,7 +906,7 @@ class Memmap(gdb.Command):
         if not self.np or not self.plt or not self.math:
             return
 
-        super(Memmap, self).__init__("memmap", gdb.COMMAND_USER)
+        super().__init__("memmap", gdb.COMMAND_USER)
 
     def save_memory_map(self, mallinfo, output_file):
         mallinfo = sorted(mallinfo, key=lambda item: item["addr"])
@@ -961,7 +961,7 @@ class Memmap(gdb.Command):
 
 class Memfrag(gdb.Command):
     def __init__(self):
-        super(Memfrag, self).__init__("memfrag", gdb.COMMAND_USER)
+        super().__init__("memfrag", gdb.COMMAND_USER)
 
     def parse_arguments(self, argv):
         parser = argparse.ArgumentParser(description="memfrag command")

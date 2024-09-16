@@ -100,7 +100,7 @@ class SetRegs(gdb.Command):
     """
 
     def __init__(self):
-        super(SetRegs, self).__init__("setregs", gdb.COMMAND_USER)
+        super().__init__("setregs", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
         global regoffset
@@ -161,7 +161,7 @@ class Nxinfothreads(gdb.Command):
     """Display information of all threads"""
 
     def __init__(self):
-        super(Nxinfothreads, self).__init__("info nxthreads", gdb.COMMAND_USER)
+        super().__init__("info nxthreads", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         npidhash = gdb.parse_and_eval("g_npidhash")
@@ -252,7 +252,7 @@ class Nxthread(gdb.Command):
     """Switch to a specified thread"""
 
     def __init__(self):
-        super(Nxthread, self).__init__("nxthread", gdb.COMMAND_USER)
+        super().__init__("nxthread", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         npidhash = gdb.parse_and_eval("g_npidhash")
@@ -329,7 +329,7 @@ class Nxcontinue(gdb.Command):
     """Restore the registers and continue the execution"""
 
     def __init__(self):
-        super(Nxcontinue, self).__init__("nxcontinue", gdb.COMMAND_USER)
+        super().__init__("nxcontinue", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         restore_regs()
@@ -340,7 +340,7 @@ class Nxstep(gdb.Command):
     """Restore the registers and step the execution"""
 
     def __init__(self):
-        super(Nxstep, self).__init__("nxstep", gdb.COMMAND_USER)
+        super().__init__("nxstep", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         restore_regs()
@@ -382,7 +382,7 @@ class TaskState(Enum):
 
 class Ps(gdb.Command):
     def __init__(self):
-        super(Ps, self).__init__("ps", gdb.COMMAND_USER)
+        super().__init__("ps", gdb.COMMAND_USER)
         self._fmt_wxl = "{0: <{width}}"
         # By default we align to the right, whcih respects the nuttx foramt
         self._fmt_wx = "{0: >{width}}"
@@ -550,7 +550,7 @@ class Ps(gdb.Command):
 
 class DeadLock(gdb.Command):
     def __init__(self):
-        super(DeadLock, self).__init__("deadlock", gdb.COMMAND_USER)
+        super().__init__("deadlock", gdb.COMMAND_USER)
 
     def has_deadlock(self, pid):
         """Check if the thread has a deadlock"""

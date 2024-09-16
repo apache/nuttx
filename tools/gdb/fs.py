@@ -145,9 +145,7 @@ class Fdinfo(gdb.Command):
     """Dump fd info information of process"""
 
     def __init__(self):
-        super(Fdinfo, self).__init__(
-            "fdinfo", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION
-        )
+        super().__init__("fdinfo", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION)
 
     def print_file_info(self, fd, file, formatter):
         backtrace_formatter = "{0:<5} {1:<36} {2}"
@@ -222,7 +220,7 @@ class Fdinfo(gdb.Command):
 
 class Mount(gdb.Command):
     def __init__(self):
-        super(Mount, self).__init__("mount", gdb.COMMAND_USER)
+        super().__init__("mount", gdb.COMMAND_USER)
 
     def mountpt_filter(self, node, path):
         if inode_gettype(node) == InodeType.MOUNTPT:
@@ -239,7 +237,7 @@ class ForeachInode(gdb.Command):
     """Dump each inode info"""
 
     def __init__(self):
-        super(ForeachInode, self).__init__("foreach_inode", gdb.COMMAND_USER)
+        super().__init__("foreach_inode", gdb.COMMAND_USER)
         self.level = 4096
 
     def get_root_inode(self, addr_or_expr):
@@ -341,7 +339,7 @@ class InfoShmfs(gdb.Command):
     """Show share memory usage"""
 
     def __init__(self):
-        super(InfoShmfs, self).__init__("info shm", gdb.COMMAND_USER)
+        super().__init__("info shm", gdb.COMMAND_USER)
 
     def shm_filter(self, node, path):
         if inode_gettype(node) != InodeType.SHM:

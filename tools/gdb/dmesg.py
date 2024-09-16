@@ -26,7 +26,7 @@ CONFIG_RAMLOG_SYSLOG = utils.get_symbol_value("CONFIG_RAMLOG_SYSLOG")
 
 class Dmesg(gdb.Command):
     def __init__(self):
-        super(Dmesg, self).__init__("dmesg", gdb.COMMAND_USER)
+        super().__init__("dmesg", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         sysdev = utils.gdb_eval_or_none("g_sysdev")

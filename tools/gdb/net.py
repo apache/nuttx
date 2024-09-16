@@ -112,7 +112,7 @@ class NetStats(gdb.Command):
     """
 
     def __init__(self):
-        super(NetStats, self).__init__("netstats", gdb.COMMAND_USER)
+        super().__init__("netstats", gdb.COMMAND_USER)
 
     def iob_stats(self):
         try:
