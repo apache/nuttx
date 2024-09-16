@@ -50,11 +50,19 @@ Installation
   $ cd pico-sdk
   $ git submodule update --init --recursive lib/cyw43-driver
 
-2. Set PICO_SDK_PATH environment variable
+2. Download and install picotool
+
+  Instructions can be found here: https://github.com/raspberrypi/picotool
+
+  If you are on Arch Linux, you can install the picotool through the AUR:
+  $ yay -S picotool
+
+
+3. Set PICO_SDK_PATH environment variable
 
   $ export PICO_SDK_PATH=<absolute_path_to_pico-sdk_directory>
 
-3. Configure and build NuttX
+4. Configure and build NuttX
 
   $ git clone https://github.com/apache/nuttx.git nuttx
   $ git clone https://github.com/apache/nuttx-apps.git apps
@@ -63,12 +71,12 @@ Installation
   $ ./tools/configure.sh raspberrypi-pico:nsh
   $ make V=1
 
-4. Connect Raspberry Pi Pico board to USB port while pressing BOOTSEL.
+5. Connect Raspberry Pi Pico board to USB port while pressing BOOTSEL.
    The board will be detected as USB Mass Storage Device.
    Then copy "nuttx.uf2" into the device.
    (Same manner as the standard Pico SDK applications installation.)
 
-5. To access the console, GPIO 0 and 1 pins must be connected to the
+6. To access the console, GPIO 0 and 1 pins must be connected to the
    device such as USB-serial converter.
 
    `usbnsh` configuration provides the console access by USB CDC/ACM serial
