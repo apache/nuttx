@@ -663,4 +663,5 @@ def check_version():
     else:
         gdb.write(f"Build version: {mem_version}\n")
 
+    gdb.execute("inferior 1", to_string=True)
     suppress_cli_notifications(state)
