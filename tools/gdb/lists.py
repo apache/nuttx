@@ -20,6 +20,8 @@
 #
 ############################################################################
 
+import argparse
+
 import gdb
 import utils
 
@@ -28,31 +30,95 @@ sq_queue_type = utils.lookup_type("sq_queue_t")
 dq_queue_type = utils.lookup_type("dq_queue_t")
 
 
-def list_for_each(head):
-    """Iterate over a list"""
-    if head.type == list_node_type.pointer():
-        head = head.dereference()
-    elif head.type != list_node_type:
-        raise TypeError("Must be struct list_node not {}".format(head.type))
+class NxList:
+    def __init__(self, list, container_type=None, member=None, reverse=False):
+        """Initialize the list iterator. Optionally specify the container type and member name."""
 
-    if head["next"] == 0:
-        gdb.write(
-            "list_for_each: Uninitialized list '{}' treated as empty\n".format(
-                head.address
-            )
+        if not list:
+            raise ValueError("The head cannot be None.\n")
+
+        if list.type.code != gdb.TYPE_CODE_PTR:
+            list = list.address  # Make sure list is a pointer.
+
+        if container_type and not member:
+            raise ValueError("Must specify the member name in container.\n")
+
+        self.list = list
+        self.reverse = reverse
+        self.container_type = container_type
+        self.member = member
+        self.current = self._get_first()
+
+    def _get_first(self):
+        """Get the initial node based on the direction of traversal."""
+
+        prev = self.list["prev"]
+        next = self.list["next"]
+
+        first = prev if self.reverse else next
+        return first if first and first != self.list else None
+
+    def _get_next(self, node):
+        #   for(node = (list)->next; node != (list); node = node->next)
+        return node["next"] if node["next"] != self.list else None
+
+    def _get_prev(self, node):
+        #   for(node = (list)->next; node != (list); node = node->prev)
+        return node["prev"] if node["prev"] != self.list else None
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.current is None:
+            raise StopIteration
+
+        node = self.current
+        self.current = self._get_prev(node) if self.reverse else self._get_next(node)
+        return (
+            utils.container_of(node, self.container_type, self.member)
+            if self.container_type
+            else node
         )
-        return
-
-    node = head["next"].dereference()
-    while node.address != head.address:
-        yield node.address
-        node = node["next"].dereference()
 
 
-def list_for_each_entry(head, gdbtype, member):
-    """Iterate over a list of structs"""
-    for node in list_for_each(head):
-        yield utils.container_of(node, gdbtype, member)
+class NxSQueue(NxList):
+    def __init__(self, list, container_type=None, member=None, reverse=False):
+        """Initialize the singly linked list iterator. Optionally specify the container type and member name."""
+        if reverse:
+            raise ValueError(
+                "Reverse iteration is not supported for singly linked lists.\n"
+            )
+        super().__init__(list, container_type, member, reverse)
+
+    def _get_first(self):
+        #   for ((p) = (q)->head; (p) != NULL; (p) = (p)->flink)
+        return self.list["head"] or None
+
+    def _get_next(self, node):
+        # if not node["flink"], then return None, to indicate end of list
+        return node["flink"] or None
+
+
+class NxDQueue(NxList):
+    def __init__(self, list, container_type=None, member=None, reverse=False):
+        """Initialize the doubly linked list iterator. Optionally specify the container type and member name."""
+        super().__init__(list, container_type, member, reverse)
+
+    def _get_first(self):
+        head = self.list["head"]
+        tail = self.list["tail"]
+
+        first = head if not self.reverse else tail
+        return first or None
+
+    def _get_next(self, node):
+        #   for ((p) = (q)->head; (p) != NULL; (p) = (p)->flink)
+        return node["flink"] or None
+
+    def _get_prev(self, node):
+        #   for ((p) = (q)->tail; (p) != NULL; (p) = (p)->blink)
+        return node["blink"] or None
 
 
 def list_check(head):
@@ -119,25 +185,6 @@ def list_check(head):
         if c == head:
             gdb.write("list is consistent: {} node(s)\n".format(nb))
             return
-
-
-def sq_for_every(sq, entry=None):
-    """Iterate over a singly linked list from the head or specified entry"""
-    if sq.type == sq_queue_type.pointer():
-        sq = sq.dereference()
-    elif sq.type != sq_queue_type:
-        gdb.write("Must be struct sq_queue not {}".format(sq.type))
-        return
-
-    if sq["head"] == 0:
-        return
-
-    if not entry:
-        entry = sq["head"].dereference()
-
-    while entry.address:
-        yield entry.address
-        entry = entry["flink"].dereference()
 
 
 def sq_is_empty(sq):
@@ -252,21 +299,20 @@ class ForeachListEntry(gdb.Command):
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
 
-        if len(argv) != 3:
-            gdb.write(
-                "list_for_every_entry takes three arguments" "head, type, member\n"
-            )
-            gdb.write("eg: list_for_every_entry &g_list 'struct type' 'node '\n")
+        parser = argparse.ArgumentParser(description="Iterate the items in list")
+        parser.add_argument("head", type=str, help="List head")
+        parser.add_argument("type", type=str, help="Container type")
+        parser.add_argument("member", type=str, help="Member name in container")
+        try:
+            args = parser.parse_args(argv)
+        except SystemExit:
+            gdb.write("Invalid arguments\n")
             return
 
-        i = 0
-        for entry in list_for_each_entry(
-            gdb.parse_and_eval(argv[0]), gdb.lookup_type(argv[1]).pointer(), argv[2]
-        ):
-            gdb.write(f"{i}: ({argv[1]} *){entry}\n")
-            gdb.execute(f"print *({argv[1]} *){entry}")
-            i += 1
-
-
-ListCheck()
-ForeachListEntry()
+        pointer = gdb.parse_and_eval(args.head)
+        container_type = gdb.lookup_type(args.type)
+        member = args.member
+        list = NxList(pointer, container_type, member)
+        for i, entry in enumerate(list):
+            entry = entry.dereference()
+            gdb.write(f"{i}: {entry.format_string(styling=True)}\n")

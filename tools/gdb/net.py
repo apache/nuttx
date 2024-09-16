@@ -20,7 +20,7 @@
 
 import gdb
 import utils
-from lists import dq_for_every, sq_for_every
+from lists import NxDQueue, NxSQueue
 
 socket = utils.import_check(
     "socket", errmsg="No socket module found, please try gdb-multiarch instead.\n"
@@ -66,29 +66,25 @@ def socket_for_each_entry(proto):
         readahead = conn["readahead"]
     """
 
-    sock_gdbtype = gdb.lookup_type("struct socket_conn_s").pointer()
-    conn_gdbtype = gdb.lookup_type("struct %s_conn_s" % proto).pointer()
-
-    for node in dq_for_every(gdb.parse_and_eval("g_active_%s_connections" % proto)):
+    g_active_connections = gdb.parse_and_eval("g_active_%s_connections" % proto)
+    for node in NxDQueue(g_active_connections, "struct socket_conn_s", "node"):
+        # udp_conn_s::socket_conn_s sconn
         yield utils.container_of(
-            utils.container_of(
-                node, sock_gdbtype, "node"
-            ),  # struct socket_conn_s::dq_entry_t node
-            conn_gdbtype,
+            node,
+            "struct %s_conn_s" % proto,
             "sconn",
-        )  # udp_conn_s::socket_conn_s sconn
+        )
 
 
 def wrbuffer_inqueue_size(queue=None, protocol="tcp"):
     """Calculate the total size of all iob in the write queue of a udp connection"""
 
-    total = 0
-    if queue:
-        wrb_gdbtype = gdb.lookup_type("struct %s_wrbuffer_s" % protocol).pointer()
-        for entry in sq_for_every(queue):
-            entry = utils.container_of(entry, wrb_gdbtype, "wb_node")
-            total += entry["wb_iob"]["io_pktlen"]
-    return total
+    if not queue:
+        return 0
+
+    type = "struct %s_wrbuffer_s" % protocol
+    node = "wb_node"
+    return sum(entry["wb_iob"]["io_pktlen"] for entry in NxSQueue(queue, type, node))
 
 
 def tcp_ofoseg_bufsize(conn):
