@@ -164,6 +164,8 @@ static int     mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv);
 #endif
 static int     mmcsd_setblocklen(FAR struct mmcsd_state_s *priv,
                                  uint32_t blocklen);
+static int     mmcsd_setblockcount(FAR struct mmcsd_state_s *priv,
+                                   uint32_t nblocks);
 static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
                                 FAR uint8_t *buffer, off_t startblock);
 #if MMCSD_MULTIBLOCK_LIMIT != 1
@@ -973,13 +975,16 @@ static void mmcsd_decode_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
    *   DATA_STATE_AFTER_ERASE 55:55 1-bit erase status
    *   SD_SECURITY            54:52 3-bit SD security support level
    *   SD_BUS_WIDTHS          51:48 4-bit bus width indicator
-   *   Reserved               47:32 16-bit SD reserved space
+   *   Reserved               47:34 14-bit SD reserved space
+   *   CMD_SUPPORT            33:32 2-bit command supported (bit33 for cmd23)
    */
 
 #ifdef CONFIG_ENDIAN_BIG  /* Card transfers SCR in big-endian order */
   priv->buswidth     = (scr[0] >> 16) & 15;
+  priv->cmd23support =  scr[0]        & 2;
 #else
-  priv->buswidth     = (scr[0] >> 8) & 15;
+  priv->buswidth     = (scr[0] >> 8)  & 15;
+  priv->cmd23support = (scr[0] >> 24) & 2;
 #endif
 
 #ifdef CONFIG_DEBUG_FS_INFO
@@ -1404,6 +1409,29 @@ static int mmcsd_setblocklen(FAR struct mmcsd_state_s *priv,
 }
 
 /****************************************************************************
+ * Name: mmcsd_setblockcount
+ *
+ * Description:
+ *   Set the block counts.
+ *
+ ****************************************************************************/
+
+static int mmcsd_setblockcount(FAR struct mmcsd_state_s *priv,
+                               uint32_t nblocks)
+{
+  int ret;
+
+  mmcsd_sendcmdpoll(priv, MMCSD_CMD23, nblocks);
+  ret = mmcsd_recv_r1(priv, MMCSD_CMD23);
+  if (ret != OK)
+    {
+      ferr("ERROR: mmcsd_recv_r1 for CMD23 failed: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: mmcsd_readsingle
  *
  * Description:
@@ -1642,6 +1670,19 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
       SDIO_RECVSETUP(priv->dev, buffer, nbytes);
     }
 
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+  if (IS_MMC(priv->type) || (IS_SD(priv->type) && priv->cmd23support))
+#else
+  if (IS_SD(priv->type) && priv->cmd23support)
+#endif
+    {
+      ret = mmcsd_setblockcount(priv, nblocks);
+      if (ret != OK)
+        {
+          return ret;
+        }
+    }
+
   /* Send CMD18, READ_MULT_BLOCK: Read a block of the size selected by
    * the mmcsd_setblocklen() and verify that good R1 status is returned
    */
@@ -1664,13 +1705,16 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
       return ret;
     }
 
-  /* Send STOP_TRANSMISSION */
-
-  ret = mmcsd_stoptransmission(priv);
-
-  if (ret != OK)
+  if (IS_SD(priv->type) && !priv->cmd23support)
     {
-      ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
+      /* Send STOP_TRANSMISSION */
+
+      ret = mmcsd_stoptransmission(priv);
+
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
+        }
     }
 
   /* On success, return the number of blocks read */
@@ -1963,6 +2007,19 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
         }
     }
 
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+  if (IS_MMC(priv->type) || (IS_SD(priv->type) && priv->cmd23support))
+#else
+  if (IS_SD(priv->type) && priv->cmd23support)
+#endif
+    {
+      ret = mmcsd_setblockcount(priv, nblocks);
+      if (ret != OK)
+        {
+          return ret;
+        }
+    }
+
   /* If Controller does not need DMA setup before the write then send CMD25
    * now.
    */
@@ -1995,7 +2052,7 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       ret = SDIO_DMASENDSETUP(priv->dev, buffer, nbytes);
       if (ret != OK)
         {
-          finfo("SDIO_DMASENDSETUP: error %d\n", ret);
+          ferr("SDIO_DMASENDSETUP: error %d\n", ret);
           SDIO_CANCEL(priv->dev);
           return ret;
         }
@@ -2038,18 +2095,28 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
        */
     }
 
-  /* Send STOP_TRANSMISSION */
-
-  ret = mmcsd_stoptransmission(priv);
-  if (evret != OK)
+  if (IS_SD(priv->type) && !priv->cmd23support)
     {
-      return evret;
+      /* Send STOP_TRANSMISSION */
+
+      ret = mmcsd_stoptransmission(priv);
+      if (evret != OK)
+        {
+          return evret;
+        }
+
+      if (ret != OK)
+        {
+          ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
+          return ret;
+        }
     }
-
-  if (ret != OK)
+  else
     {
-      ferr("ERROR: mmcsd_stoptransmission failed: %d\n", ret);
-      return ret;
+      if (evret != OK)
+        {
+          return evret;
+        }
     }
 
   /* Flag that a write transfer is pending that we will have to check for
