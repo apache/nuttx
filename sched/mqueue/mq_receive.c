@@ -98,7 +98,7 @@ ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
    * because messages can be sent from interrupt level.
    */
 
-  flags = enter_critical_section_nonirq();
+  flags = enter_critical_section();
 
   /* Get the message from the message queue */
 
@@ -116,7 +116,7 @@ ssize_t file_mq_receive(FAR struct file *mq, FAR char *msg, size_t msglen,
       ret = nxmq_do_receive(msgq, mqmsg, msg, prio);
     }
 
-  leave_critical_section_nonirq(flags);
+  leave_critical_section(flags);
 
   return ret;
 }

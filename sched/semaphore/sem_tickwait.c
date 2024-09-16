@@ -82,7 +82,7 @@ int nxsem_tickwait(FAR sem_t *sem, uint32_t delay)
    * enabled while we are blocked waiting for the semaphore.
    */
 
-  flags = enter_critical_section_nonirq();
+  flags = enter_critical_section();
 
   /* Try to take the semaphore without waiting. */
 
@@ -120,7 +120,7 @@ int nxsem_tickwait(FAR sem_t *sem, uint32_t delay)
   /* We can now restore interrupts */
 
 out:
-  leave_critical_section_nonirq(flags);
+  leave_critical_section(flags);
   return ret;
 }
 
