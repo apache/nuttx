@@ -20,7 +20,6 @@
 #
 ############################################################################
 
-import cProfile
 import re
 import shlex
 from typing import List, Tuple, Union
@@ -359,10 +358,17 @@ class Profile(gdb.Command):
     """
 
     def __init__(self):
+        self.cProfile = import_check(
+            "cProfile", errmsg="cProfile module not found, try gdb-multiarch.\n"
+        )
+        if not self.cProfile:
+            return
+
         super(Profile, self).__init__("profile", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
-        cProfile.run(f"gdb.execute('{args}')", sort="cumulative")
+
+        self.cProfile.run(f"gdb.execute('{args}')", sort="cumulative")
 
 
 Profile()
