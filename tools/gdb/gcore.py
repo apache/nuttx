@@ -23,7 +23,6 @@
 import argparse
 import os
 import shutil
-import tempfile
 
 import gdb
 import utils
@@ -53,6 +52,14 @@ def parse_args(args):
 
 class NXGcore(gdb.Command):
     def __init__(self):
+        self.tempfile = utils.import_check(
+            "tempfile",
+            errmsg="No tempfile module found, please try gdb-multiarch instead.\n",
+        )
+
+        if not self.tempfile:
+            return
+
         super(NXGcore, self).__init__("nxgcore", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
@@ -63,7 +70,7 @@ class NXGcore(gdb.Command):
 
         objfile = gdb.current_progspace().objfiles()[0]
         elffile = objfile.filename
-        tmpfile = tempfile.NamedTemporaryFile(suffix=".elf")
+        tmpfile = self.tempfile.NamedTemporaryFile(suffix=".elf")
 
         # Create temporary ELF file with sections for each memory region
 

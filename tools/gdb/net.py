@@ -23,7 +23,7 @@ import utils
 from lists import dq_for_every, sq_for_every
 
 socket = utils.import_check(
-    "socket", errmsg="No socket module found, please try gdb-multiarch instead."
+    "socket", errmsg="No socket module found, please try gdb-multiarch instead.\n"
 )
 
 NET_IPv4 = utils.get_symbol_value("CONFIG_NET_IPv4")

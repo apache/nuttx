@@ -646,6 +646,12 @@ class Memleak(gdb.Command):
     """Memleak check"""
 
     def __init__(self):
+        self.elf = utils.import_check(
+            "elftools.elf.elffile", "ELFFile", "Plase pip install pyelftools\n"
+        )
+        if not self.elf:
+            return
+
         super(Memleak, self).__init__("memleak", gdb.COMMAND_USER)
 
     def check_alive(self, pid):
@@ -756,12 +762,6 @@ class Memleak(gdb.Command):
         return {"simple": args.simple, "detail": args.detail}
 
     def invoke(self, args, from_tty):
-        self.elf = utils.import_check(
-            "elftools.elf.elffile", "ELFFile", "Plase pip install pyelftools\n"
-        )
-        if not self.elf:
-            return
-
         if sizeof_size_t == 4:
             align = 11
         else:
@@ -898,6 +898,14 @@ have {i} some backtrace leak, total leak memory is {int(leaksize)} bytes\n"
 
 class Memmap(gdb.Command):
     def __init__(self):
+        self.np = utils.import_check("numpy", errmsg="Please pip install numpy\n")
+        self.plt = utils.import_check(
+            "matplotlib", "pyplot", errmsg="Please pip install matplotlib\n"
+        )
+        self.math = utils.import_check("math")
+        if not self.np or not self.plt or not self.math:
+            return
+
         super(Memmap, self).__init__("memmap", gdb.COMMAND_USER)
 
     def save_memory_map(self, mallinfo, output_file):
@@ -946,14 +954,6 @@ class Memmap(gdb.Command):
         return args.output
 
     def invoke(self, args, from_tty):
-        self.np = utils.import_check("numpy", errmsg="Please pip install numpy\n")
-        self.plt = utils.import_check(
-            "matplotlib", "pyplot", errmsg="Please pip install matplotlib\n"
-        )
-        self.math = utils.import_check("math")
-        if not self.np or not self.plt or not self.math:
-            return
-
         output_file = self.parse_arguments(args.split(" "))
         meminfo = self.allocinfo()
         self.save_memory_map(meminfo, output_file + ".png")
