@@ -1398,6 +1398,8 @@ int close_mtddriver(FAR struct inode *pinode);
  ****************************************************************************/
 
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
+ssize_t file_readv(FAR struct file *filep, FAR const struct iovec *iov,
+                   int iovcnt);
 
 /****************************************************************************
  * Name: nx_read
@@ -1421,6 +1423,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
  ****************************************************************************/
 
 ssize_t nx_read(int fd, FAR void *buf, size_t nbytes);
+ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
  * Name: file_write
