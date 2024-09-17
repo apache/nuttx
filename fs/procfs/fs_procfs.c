@@ -280,6 +280,8 @@ const struct mountpt_operations g_procfs_operations =
   NULL,              /* mmap */
   NULL,              /* truncate */
   procfs_poll,       /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   NULL,              /* sync */
   procfs_dup,        /* dup */
