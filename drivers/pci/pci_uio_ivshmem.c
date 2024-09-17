@@ -120,7 +120,9 @@ static const struct file_operations g_uio_ivshmem_fops =
   NULL,              /* ioctl */
   uio_ivshmem_mmap,  /* mmap */
   NULL,              /* truncate */
-  uio_ivshmem_poll   /* poll */
+  uio_ivshmem_poll,  /* poll */
+  NULL,              /* readv */
+  NULL               /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL             /* unlink */
 #endif

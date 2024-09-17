@@ -136,7 +136,9 @@ static const struct file_operations g_pty_fops =
   pty_ioctl,     /* ioctl */
   NULL,          /* mmap */
   NULL,          /* truncate */
-  pty_poll       /* poll */
+  pty_poll,      /* poll */
+  NULL,          /* readv */
+  NULL           /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , pty_unlink   /* unlink */
 #endif

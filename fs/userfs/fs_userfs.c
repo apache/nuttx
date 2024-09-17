@@ -165,6 +165,8 @@ const struct mountpt_operations g_userfs_operations =
   NULL,              /* mmap */
   userfs_truncate,   /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   userfs_sync,       /* sync */
   userfs_dup,        /* dup */

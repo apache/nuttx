@@ -109,12 +109,12 @@ static int proxy_fstat(FAR struct file *filep, FAR struct inode *inode,
         {
           memset(buf, 0, sizeof(struct stat));
           buf->st_mode = S_IFBLK;
-          if (inode->u.i_ops->read)
+          if (inode->u.i_ops->readv || inode->u.i_ops->read)
             {
               buf->st_mode |= S_IROTH | S_IRGRP | S_IRUSR;
             }
 
-          if (inode->u.i_ops->write)
+          if (inode->u.i_ops->writev || inode->u.i_ops->read)
             {
               buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
             }

@@ -145,6 +145,8 @@ const struct mountpt_operations g_spiffs_operations =
   NULL,              /* mmap */
   spiffs_truncate,   /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   spiffs_sync,       /* sync */
   spiffs_dup,        /* dup */
