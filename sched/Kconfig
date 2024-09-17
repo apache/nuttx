@@ -1979,7 +1979,7 @@ config PID_INITIAL_COUNT
 config SCHED_EVENTS
 	bool "Schedule Event objects"
 	default n
-	help
-	  This option enables event objects. Threads may wait on event
-	  objects for specific events, but both threads and ISRs may deliver
-	  events to event objects.
+	---help---
+		This option enables event objects. Threads may wait on event
+		objects for specific events, but both threads and ISRs may deliver
+		events to event objects.
