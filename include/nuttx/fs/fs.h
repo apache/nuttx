@@ -1453,6 +1453,8 @@ ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt);
 
 ssize_t file_write(FAR struct file *filep, FAR const void *buf,
                    size_t nbytes);
+ssize_t file_writev(FAR struct file *filep, FAR const struct iovec *iov,
+                    int iovcnt);
 
 /****************************************************************************
  * Name: nx_write
@@ -1480,6 +1482,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
  ****************************************************************************/
 
 ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes);
+ssize_t nx_writev(int fd, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
  * Name: file_pread
