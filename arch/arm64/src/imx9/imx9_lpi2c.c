@@ -2089,6 +2089,24 @@ static int imx9_lpi2c_transfer(struct i2c_master_s *dev,
       ret = -ETIMEDOUT;
       i2cerr("ERROR: Timed out: MSR: status: 0x0%" PRIx32 "\n",
              priv->status);
+
+      /* Stop the ongoing transfer and clear the FIFOs */
+
+      imx9_lpi2c_stop_transfer(priv);
+
+      imx9_lpi2c_modifyreg(priv, IMX9_LPI2C_MCR_OFFSET, 0,
+                           LPI2C_MCR_RTF | LPI2C_MCR_RRF);
+
+      /* Clear any errors */
+
+      imx9_lpi2c_putreg(priv, IMX9_LPI2C_MSR_OFFSET, LPI2C_MSR_ERROR_MASK);
+
+      /* Reset the semaphore. There is a race between interrupts and
+       * sem_waitdone, and the semaphore is anyhow posted one extra time in
+       * imx9_lpi2c_stop_transfer above
+       */
+
+      nxsem_reset(&priv->sem_isr, 0);
     }
 
   /* Check for error status conditions */
@@ -2115,7 +2133,7 @@ static int imx9_lpi2c_transfer(struct i2c_master_s *dev,
         {
           /* FIFO Error */
 
-          i2cerr("Transfer without start condition\n");
+          i2cerr("FIFO error\n");
           ret = -EINVAL;
         }
     }
