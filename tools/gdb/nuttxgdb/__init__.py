@@ -47,17 +47,20 @@ def register_commands(event):
     gdb.execute('handle SIGUSR1 "nostop" "pass" "noprint"')
     gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')
 
-    # Register all modules
-    for m in modules:
-        if m == "__init__":
-            continue
-
+    def init_gdb_commands(m: str):
         module = importlib.import_module(f"{__package__}.{m}")
-
-        # Get all classes inherited from gdb.Command
         for c in module.__dict__.values():
             if isinstance(c, type) and issubclass(c, gdb.Command):
                 c()
+
+    # Register prefix commands firstly
+    init_gdb_commands("prefix")
+    modules.remove("prefix")
+    modules.remove("__init__")
+
+    # Register all other modules
+    for m in modules:
+        init_gdb_commands(m)
 
     utils = importlib.import_module(f"{__package__}.utils")
     utils.check_version()
