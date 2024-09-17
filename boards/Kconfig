@@ -1112,9 +1112,9 @@ config ARCH_BOARD_MIZAR32A
 	depends on ARCH_CHIP_AT32UC3A0512
 	select ARCH_HAVE_LEDS
 	---help---
-                This is a port of NuttX for the Mizar32-A board designed by SimpleMachines,
-                Italy. The board is based on the AT32UC3A0512 MCU and uses avr32-gcc
-                version 4.4.7 for its build on GNU/Linux.
+		This is a port of NuttX for the Mizar32-A board designed by SimpleMachines,
+		Italy. The board is based on the AT32UC3A0512 MCU and uses avr32-gcc
+		version 4.4.7 for its build on GNU/Linux.
 
 config ARCH_BOARD_MOTEINO_MEGA
 	bool "LowPowerLab MoteinoMEGA"

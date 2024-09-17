@@ -13,8 +13,8 @@ config FS_V9FS
 if FS_V9FS
 
 config V9FS_DEFAULT_MSIZE
-  int "V9FS Default message max size"
-  default 65536
+	int "V9FS Default message max size"
+	default 65536
 
 config V9FS_VIRTIO_9P
 	bool "Virtio 9P support"
