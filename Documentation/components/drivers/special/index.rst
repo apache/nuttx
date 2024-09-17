@@ -29,6 +29,7 @@ following section.
   dma.rst
   framebuffer.rst
   i2c.rst
+  i3c.rst
   ioexpander.rst
   lcd.rst
   mtd.rst
