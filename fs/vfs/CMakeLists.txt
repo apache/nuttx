@@ -42,6 +42,7 @@ set(SRCS
     fs_stat.c
     fs_sendfile.c
     fs_statfs.c
+    fs_uio.c
     fs_unlink.c
     fs_write.c
     fs_dir.c

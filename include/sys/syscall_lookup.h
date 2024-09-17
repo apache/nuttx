@@ -200,6 +200,8 @@ SYSCALL_LOOKUP(close,                      1)
 SYSCALL_LOOKUP(ioctl,                      3)
 SYSCALL_LOOKUP(read,                       3)
 SYSCALL_LOOKUP(write,                      3)
+SYSCALL_LOOKUP(readv,                      3)
+SYSCALL_LOOKUP(writev,                     3)
 SYSCALL_LOOKUP(pread,                      4)
 SYSCALL_LOOKUP(pwrite,                     4)
 #ifdef CONFIG_FS_AIO

@@ -173,7 +173,9 @@ static const struct file_operations g_tda19988_fops =
   tda19988_ioctl,    /* ioctl */
   NULL,              /* mmap */
   NULL,              /* truncate */
-  tda19988_poll      /* poll */
+  tda19988_poll,     /* poll */
+  NULL,              /* readv */
+  NULL               /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , tda19988_unlink  /* unlink */
 #endif

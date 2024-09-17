@@ -351,6 +351,8 @@ static const struct file_operations g_capture_fops =
   capture_mmap,               /* mmap */
   NULL,                       /* truncate */
   capture_poll,               /* poll */
+  NULL,                       /* readv */
+  NULL,                       /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   capture_unlink,             /* unlink */
 #endif

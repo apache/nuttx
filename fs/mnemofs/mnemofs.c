@@ -188,6 +188,8 @@ const struct mountpt_operations g_mnemofs_operations =
   NULL,              /* mmap */
   mnemofs_truncate,  /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   mnemofs_sync,      /* sync */
   mnemofs_dup,       /* dup */

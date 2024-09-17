@@ -165,6 +165,8 @@ const struct mountpt_operations g_rpmsgfs_operations =
   NULL,                  /* mmap */
   rpmsgfs_truncate,      /* truncate */
   NULL,                  /* poll */
+  NULL,                  /* readv */
+  NULL,                  /* writev */
 
   rpmsgfs_sync,          /* sync */
   rpmsgfs_dup,           /* dup */

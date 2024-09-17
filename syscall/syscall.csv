@@ -128,6 +128,7 @@
 "putenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","int","FAR const char *"
 "pwrite","unistd.h","","ssize_t","int","FAR const void *","size_t","off_t"
 "read","unistd.h","","ssize_t","int","FAR void *","size_t"
+"readv","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"
 "readlink","unistd.h","defined(CONFIG_PSEUDOFS_SOFTLINKS)","ssize_t","FAR const char *","FAR char *","size_t"
 "recv","sys/socket.h","defined(CONFIG_NET)","ssize_t","int","FAR void *","size_t","int"
 "recvfrom","sys/socket.h","defined(CONFIG_NET)","ssize_t","int","FAR void*","size_t","int","FAR struct sockaddr*","FAR socklen_t*"
@@ -208,3 +209,4 @@
 "waitid","sys/wait.h","defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_SCHED_HAVE_PARENT)","int","idtype_t","id_t"," FAR siginfo_t *","int"
 "waitpid","sys/wait.h","defined(CONFIG_SCHED_WAITPID)","pid_t","pid_t","FAR int *","int"
 "write","unistd.h","","ssize_t","int","FAR const void *","size_t"
+"writev","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"
