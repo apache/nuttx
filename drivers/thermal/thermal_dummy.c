@@ -22,9 +22,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
 #include <nuttx/cpufreq.h>
+#endif
 #include <nuttx/thermal.h>
 
+#include <debug.h>
 #include <sys/param.h>
 
 /****************************************************************************
@@ -50,6 +54,7 @@ struct dummy_cooling_device_s
   unsigned int max_state;
 };
 
+#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
 struct dummy_cpufreq_driver_s
 {
   struct cpufreq_driver driver;
@@ -57,6 +62,7 @@ struct dummy_cpufreq_driver_s
   size_t table_len;
   struct cpufreq_frequency_table current;
 };
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
