@@ -108,6 +108,11 @@ Subdirectories of ``nuttx/drivers``
 
   I2S drivers and support logic.
 
+
+* ``i3c/`` :doc:`special/i3c`
+
+  I3C drivers and support logic.
+
 * ``input/`` :doc:`character/input/index`
 
   This directory holds implementations of human input device (HID) drivers.
