@@ -296,7 +296,10 @@
                                                       /* Bits 7-3 Reserved */
 #define LPI2C_MCFG0_CIRFIFO                 (1 << 8)  /* Circular FIFO Enable Bit */
 #define LPI2C_MCFG0_RDMO                    (1 << 9)  /* Receive Data Match Only Bit */
-                                                      /* Bits 31-10 Reserved */
+                                                      /* Bits 15-10 Reserved */
+#define LPI2C_MCFG0_RELAX                   (1 << 16) /* Relaxed Mode */
+#define LPI2C_MCFG0_ABORT                   (1 << 17) /* Abort Transfer */
+                                                      /* Bits 31-18 Reserved */
 
 /* LPI2C Master Config Register 1  */
 
