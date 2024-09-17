@@ -403,6 +403,14 @@ config ARCH_RV_VECTOR_BYTE_LENGTH
 
 endif
 
+config ARCH_RV_MACHINE_ISA_1_13
+	bool "Machine ISA Version 1.13 or later"
+	default n
+	---help---
+		Indicates support for Machine ISA Version 1.13 or later.
+		This version defined hardware error and software check exception codes,
+		which extend the range of exception codes from 0 ~ 15 to 0 ~ 19.
+
 config ARCH_RV_ISA_ZICSR_ZIFENCEI
 	bool
 	default y

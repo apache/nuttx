@@ -65,16 +65,10 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
   "Load page fault",
   "Reserved",
   "Store/AMO page fault",
-#if RISCV_MAX_EXCEPTION > 15
+#ifdef CONFIG_ARCH_RV_MACHINE_ISA_1_13
   "Reserved",
-#endif
-#if RISCV_MAX_EXCEPTION > 16
   "Reserved",
-#endif
-#if RISCV_MAX_EXCEPTION > 17
   "Software check",
-#endif
-#if RISCV_MAX_EXCEPTION > 18
   "Hardware error",
 #endif
 #ifdef RISCV_CUSTOM_EXCEPTION_REASONS
