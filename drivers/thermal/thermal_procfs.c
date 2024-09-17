@@ -316,9 +316,8 @@ int thermal_zone_procfs_register(FAR struct thermal_zone_device_s *zdev)
   FAR struct thermal_procfs_s *p;
 
   p = kmm_zalloc(sizeof(struct thermal_procfs_s));
-  if (!p)
+  if (p == NULL)
     {
-      nxmutex_unlock(&g_thermal_procfs_lock);
       return -ENOMEM;
     }
 
