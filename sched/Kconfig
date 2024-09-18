@@ -1595,6 +1595,13 @@ config SIG_EVTHREAD
 		different mechanism would need to be development to support this
 		feature on the PROTECTED or KERNEL build.
 
+		This option also enables sigev_notify_thread_id support.
+		As for SIGEV_SIGNAL, but the signal is targeted at the thread whose
+		ID is given in sigev_notify_thread_id, which must be a thread in
+		the same process as the caller.  The sigev_notify_thread_id field
+		specifies a kernel thread ID, that is, the value returned by clone(2)
+		or gettid(2).  This flag is intended only for use by threading libraries.
+
 config SIG_EVTHREAD_HPWORK
 	bool "SIGEV_EVTHREAD use HPWORK"
 	default n

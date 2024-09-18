@@ -342,10 +342,9 @@ typedef struct sigevent
   uint8_t      sigev_notify; /* Notification method: SIGEV_SIGNAL, SIGEV_NONE, or SIGEV_THREAD */
   uint8_t      sigev_signo;  /* Notification signal */
   union sigval sigev_value;  /* Data passed with notification */
-
+#ifdef CONFIG_SIG_EVTHREAD
   union
     {
-#ifdef CONFIG_SIG_EVTHREAD
       struct
         {
           /* Notification function */
@@ -356,14 +355,16 @@ typedef struct sigevent
 
           FAR struct pthread_attr_s *_attribute;
         } _sigev_thread;
-#endif
+
       pid_t _tid; /* ID of thread to signal */
     } _sigev_un;
-} sigevent_t;
 
-#define sigev_notify_function   _sigev_un._sigev_thread._function
-#define sigev_notify_attributes _sigev_un._sigev_thread._attribute
-#define sigev_notify_thread_id  _sigev_un._tid
+#  define sigev_notify_function   _sigev_un._sigev_thread._function
+#  define sigev_notify_attributes _sigev_un._sigev_thread._attribute
+#  define sigev_notify_thread_id  _sigev_un._tid
+
+#endif
+} sigevent_t;
 
 /* The following types is used to pass parameters to/from signal handlers */
 

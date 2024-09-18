@@ -112,7 +112,9 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
   if (event->sigev_notify & SIGEV_SIGNAL)
     {
+#if defined(CONFIG_SCHED_HAVE_PARENT) || defined(CONFIG_SIG_EVTHREAD)
       FAR struct tcb_s *rtcb = this_task();
+#endif
       siginfo_t info;
 
       /* Yes.. Create the siginfo structure */
@@ -133,6 +135,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       memcpy(&info.si_value, &event->sigev_value, sizeof(union sigval));
 
+#ifdef CONFIG_SIG_EVTHREAD
       /* Used only by POSIX timer. Notice that it is UNSAFE, unless
        * we GUARANTEE that event->sigev_notify_thread_id is valid.
        */
@@ -149,6 +152,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
               return -ENOENT;
             }
         }
+#endif
 
       /* Send the signal */
 

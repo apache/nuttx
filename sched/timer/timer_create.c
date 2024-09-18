@@ -191,6 +191,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
 
   if (evp)
     {
+#ifdef CONFIG_SIG_EVTHREAD
       FAR struct tcb_s *ntcb;
 
       /* Check the SIGEV_THREAD_ID and validate the tid */
@@ -209,6 +210,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
               return ERROR;
             }
         }
+#endif
 
       /* Yes, copy the entire struct sigevent content */
 
