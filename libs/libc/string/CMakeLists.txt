@@ -30,7 +30,6 @@ set(SRCS
     lib_isbasedigit.c
     lib_memccpy.c
     lib_memrchr.c
-    lib_memmem.c
     lib_popcount.c
     lib_popcountl.c
     lib_popcountll.c
@@ -117,6 +116,10 @@ endif()
 
 if(NOT CONFIG_LIBC_ARCH_STRNLEN)
   list(APPEND SRCS lib_strnlen.c)
+endif()
+
+if(CONFIG_ALLOW_MIT_COMPONENTS)
+  list(APPEND SRCS lib_memmem.c)
 endif()
 
 if(CONFIG_LIBC_LOCALE)
