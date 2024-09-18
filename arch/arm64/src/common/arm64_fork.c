@@ -59,8 +59,6 @@ void arm64_fork_fpureg_save(struct fork_s *context)
 {
   irqstate_t flags;
 
-  arm64_fpu_disable();
-
   /* Take a snapshot of the thread fpu reg context right now */
 
   flags = enter_critical_section();
@@ -69,7 +67,6 @@ void arm64_fork_fpureg_save(struct fork_s *context)
   ARM64_DSB();
 
   leave_critical_section(flags);
-  arm64_fpu_enable();
 }
 
 #endif
