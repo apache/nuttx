@@ -439,7 +439,7 @@ err:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_openeth_initialize
+ * Name: xtensa_openeth_initialize
  *
  * Description:
  *   Initialize the openeth driver
@@ -452,7 +452,7 @@ err:
  *
  ****************************************************************************/
 
-int esp32_openeth_initialize(void)
+int xtensa_openeth_initialize(void)
 {
   int ret;
   struct openeth_priv_s *priv = &g_openeth;
