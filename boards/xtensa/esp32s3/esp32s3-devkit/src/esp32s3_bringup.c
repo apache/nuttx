@@ -438,6 +438,14 @@ int esp32s3_bringup(void)
 
 #endif
 
+#ifdef CONFIG_ESP32S3_OPENETH
+  ret = esp_openeth_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Open ETH ethernet.\n");
+    }
+#endif
+
 #ifdef CONFIG_DEV_GPIO
   ret = esp32s3_gpio_init();
   if (ret < 0)
