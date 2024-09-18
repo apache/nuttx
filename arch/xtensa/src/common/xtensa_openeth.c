@@ -30,20 +30,40 @@
 #include <netinet/if_ether.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 
+#if defined(CONFIG_ESP32_OPENETH)
 #include "hardware/esp32_soc.h"
 #include "esp32_irq.h"
-
-#ifdef CONFIG_ESP32_OPENETH
+#elif defined(CONFIG_ESP32S3_OPENETH)
+#include "hardware/esp32s3_soc.h"
+#include "esp32s3_irq.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(CONFIG_ESP32_OPENETH)
+#define OPENETH_PERIPH_MAC ESP32_PERIPH_EMAC
+#define OPENETH_CPUINT_LEVEL ESP32_CPUINT_LEVEL
+#define OPENETH_IRQ_MAC ESP32_IRQ_EMAC
+#define OPENETH_SETUP_IRQ esp32_setup_irq
+#elif defined(CONFIG_ESP32S3_OPENETH)
+#define OPENETH_PERIPH_MAC ESP32S3_PERIPH_MAC
+#define OPENETH_CPUINT_LEVEL ESP32S3_CPUINT_LEVEL
+#define OPENETH_IRQ_MAC ESP32S3_IRQ_MAC
+#define OPENETH_SETUP_IRQ esp32s3_setup_irq
+#endif
+
 /* These are the register definitions for the OpenCores Ethernet MAC. */
 
 /* DMA buffers configuration */
 #define DMA_BUF_SIZE 1600
+#if defined(CONFIG_ESP32_OPENETH)
 #define RX_BUF_COUNT CONFIG_ESP32_OPENETH_DMA_RX_BUFFER_NUM
+#elif defined(CONFIG_ESP32S3_OPENETH)
+#define RX_BUF_COUNT CONFIG_ESP32S3_OPENETH_DMA_RX_BUFFER_NUM
+#endif
+
 /* Only need 1 TX buf because packets are transmitted immediately */
 #define TX_BUF_COUNT 1
 
@@ -512,8 +532,8 @@ int xtensa_openeth_initialize(void)
 
   /* Setup interrupts */
 
-  priv->cpuint = esp32_setup_irq(0, ESP32_PERIPH_EMAC,
-                                 1, ESP32_CPUINT_LEVEL);
+  priv->cpuint = OPENETH_SETUP_IRQ(0, OPENETH_PERIPH_MAC,
+                                 1, OPENETH_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       nerr("ERROR: Failed allocate interrupt\n");
@@ -531,7 +551,7 @@ int xtensa_openeth_initialize(void)
 
   /* Attach the interrupt */
 
-  ret = irq_attach(ESP32_IRQ_EMAC, openeth_isr_handler, priv);
+  ret = irq_attach(OPENETH_IRQ_MAC, openeth_isr_handler, priv);
 
   /* Register the device with the OS so that socket IOCTLs can be
    * performed.
@@ -552,5 +572,3 @@ err:
   nerr("Failed initializing ret = %d", ret);
   abort();
 }
-
-#endif /* CONFIG_ESP32_OPENETH */
