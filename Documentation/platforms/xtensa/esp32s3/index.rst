@@ -317,6 +317,31 @@ possible to track the root cause of the crash. Saving this output to a file and 
 The above output shows the backtrace of the tasks. By checking it, it is possible to track the
 functions that were being executed when the crash occurred.
 
+Using QEMU
+==========
+
+Get or build QEMU from `here <https://github.com/espressif/qemu/wiki>`__. The minimum supported version is 9.0.0.
+
+Enable the ``ESP32S3_QEMU_IMAGE`` config found in :menuselection:`Board Selection --> ESP32S3 binary image for QEMU`.
+
+Enable ``ESP32S3_APP_FORMAT_LEGACY``.
+
+Build and generate the QEMU image::
+
+ $ make bootloader
+ $ make ESPTOOL_BINDIR=.
+
+A QEMU-compatible ``nuttx.merged.bin`` binary image will be created. It can be run as::
+
+ $ qemu-system-xtensa -nographic -machine esp32s3 -drive file=nuttx.merged.bin,if=mtd,format=raw
+
+QEMU Networking
+---------------
+
+Networking is possible using the openeth MAC driver. Enable ``ESP32S3_OPENETH`` option and set the nic in QEMU:
+
+ $ qemu-system-xtensa -nographic -machine esp32s3 -drive file=nuttx.merged.bin,if=mtd,format=raw -nic user,model=open_eth
+
 Peripheral Support
 ==================
 
