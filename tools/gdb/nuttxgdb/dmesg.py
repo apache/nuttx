@@ -43,7 +43,6 @@ class Dmesg(gdb.Command):
         gdb.write("Ramlog have %d bytes to show\n" % rl_bufsize)
 
         inf = gdb.selected_inferior()
-        buf = inf.read_memory(rl_head["rl_buffer"], rl_bufsize)
-        clean_data = bytes(buf).replace(b"\x00", "␀".encode("utf-8"))
-        gdb.write(clean_data.decode("utf-8"))
+        buf = bytes(inf.read_memory(rl_head["rl_buffer"], rl_bufsize))
+        gdb.write(buf.decode("utf-8", errors="replace"))
         gdb.write("\n")
