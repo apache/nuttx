@@ -704,54 +704,21 @@ enum perf_event_type_e
   PERF_RECORD_MAX,      /* non-ABI */
 };
 
+/* sample data need match linux perf, element align with uint64_t */
+
 struct perf_sample_data_s
 {
-/* Fields set by perf_sample_data_init() unconditionally,
- *  group so as to minimize the cachelines touched.
- */
-
   uint64_t sample_flags;
-  uint64_t period;
   uint64_t dyn_size;
 
-/* Fields commonly set by __perf_event_header__init_id(),
- *  group so as to minimize the cachelines touched.
- */
-
-  uint64_t type;
   struct
   {
     pid_t pid;
     pid_t tid;
   } tid_entry;
-  uint64_t time;
+
   uint64_t id;
-  struct
-  {
-    uint32_t cpu;
-    uint32_t reserved;
-  } cpu_entry;
-
-/* The other fields, optionally {set,used} by
- *  perf_{prepare,output}_sample().
- */
-
   uint64_t ip;
-  struct perf_callchain_entry *callchain;
-  struct perf_raw_record *raw;
-  struct perf_branch_stack *br_stack;
-  uint64_t *br_stack_cntr;
-  uint64_t txn;
-
-  uint64_t stack_user_size;
-
-  uint64_t stream_id;
-  uint64_t cgroup;
-  uint64_t addr;
-  uint64_t phys_addr;
-  uint64_t data_page_size;
-  uint64_t code_page_size;
-  uint64_t aux_size;
 };
 
 struct perf_event_header_s

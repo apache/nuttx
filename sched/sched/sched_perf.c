@@ -168,7 +168,6 @@ static void perf_sample_data_init(FAR struct perf_sample_data_s *data,
                                   uint64_t period)
 {
   data->sample_flags = PERF_SAMPLE_PERIOD;
-  data->period = period;
 }
 
 static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
@@ -190,6 +189,12 @@ static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
       data->id = event->id;
       data->sample_flags |= PERF_SAMPLE_ID;
       size += sizeof(event->id);
+    }
+
+  if (sample_type & PERF_SAMPLE_CALLCHAIN)
+    {
+      data->sample_flags |= PERF_SAMPLE_CALLCHAIN;
+      size += sizeof(uint64_t) * (PERF_MAX_BACKTRACE + 1);
     }
 
   if (sample_type & PERF_SAMPLE_TID)
@@ -223,12 +228,37 @@ static uint16_t perf_prepare_sample(FAR struct perf_sample_data_s *data,
   return size;
 }
 
+static void perf_buffer_release_space(FAR struct perf_event_s *event,
+                                      size_t size)
+{
+  size_t space = circbuf_space(&(event->buf->rb));
+
+  if (space < circbuf_size(&(event->buf->rb)) / 5 && event->pfd)
+    {
+      poll_notify(&event->pfd, 1, POLLIN);
+    }
+
+  while (space < size)
+    {
+      struct perf_event_header_s remove_header;
+
+      circbuf_peek(&(event->buf->rb), &remove_header,
+                    sizeof(struct perf_event_header_s));
+      circbuf_readcommit(&(event->buf->rb), remove_header.size);
+      space = circbuf_space(&(event->buf->rb));
+    }
+}
+
 static void perf_output_sample(FAR struct perf_event_header_s *header,
                                FAR struct perf_sample_data_s *data,
                                FAR struct perf_event_s *event)
 {
   uint64_t sample_type = data->sample_flags;
+  size_t pos;
 
+  perf_buffer_release_space(event, header->size);
+  pos = event->buf->rb.head % event->buf->rb.size +
+                      offsetof(struct perf_event_header_s, size);
   circbuf_overwrite(&(event->buf->rb), header,
                     sizeof(struct perf_event_header_s));
 
@@ -247,6 +277,48 @@ static void perf_output_sample(FAR struct perf_event_header_s *header,
     {
       circbuf_overwrite(&(event->buf->rb), &data->id, sizeof(data->id));
     }
+
+  if (sample_type & PERF_SAMPLE_CALLCHAIN)
+    {
+      FAR uint64_t *ptr;
+      FAR uint64_t *next_ptr;
+      size_t remain_len;
+      size_t off;
+      size_t size;
+      int nr;
+
+      ptr = circbuf_get_writeptr(&(event->buf->rb), &size);
+      off = event->buf->rb.head % event->buf->rb.size;
+      remain_len = event->buf->rb.size - off;
+
+      if (remain_len >= (1 + PERF_MAX_BACKTRACE * sizeof(uint64_t)) ||
+          remain_len == 8)
+        {
+          next_ptr = (remain_len == 8) ? event->buf->rb.base : (ptr + 1);
+          nr = sched_backtrace(_SCHED_GETTID(), (FAR void **)next_ptr,
+                           PERF_MAX_BACKTRACE, FLAME_GRAPH_SKIP);
+        }
+      else
+        {
+          int remain_size = remain_len / sizeof(uint64_t) - 1;
+
+          nr = sched_backtrace(_SCHED_GETTID(), (FAR void **)(ptr + 1),
+                                remain_size, FLAME_GRAPH_SKIP);
+
+          if (nr == remain_size)
+            {
+              next_ptr = event->buf->rb.base;
+              nr += sched_backtrace(_SCHED_GETTID(), (FAR void **)next_ptr,
+                  PERF_MAX_BACKTRACE - remain_size, FLAME_GRAPH_SKIP + nr);
+            }
+        }
+
+      *ptr = nr;
+      *(uint16_t *)(event->buf->rb.base + pos) -=
+                        (PERF_MAX_BACKTRACE - nr) * sizeof(uint64_t);
+
+      circbuf_writecommit(&(event->buf->rb), (nr + 1) * sizeof(uint64_t));
+    }
 }
 
 static int perf_event_data_overflow(FAR struct perf_event_s *event,
@@ -254,36 +326,21 @@ static int perf_event_data_overflow(FAR struct perf_event_s *event,
                                     uintptr_t ip)
 {
   struct perf_event_header_s header;
-  size_t space;
+  irqstate_t flags;
 
   if (!event->buf)
     {
       return -ENOMEM;
     }
 
-  space = circbuf_space(&(event->buf->rb));
   event->count++;
   header.size = perf_prepare_sample(data, event, ip);
   header.misc = PERF_RECORD_MISC_USER;
   header.type = PERF_RECORD_SAMPLE;
 
-  if (space < circbuf_size(&(event->buf->rb)) / 5 && event->pfd)
-    {
-      poll_notify(&event->pfd, 1, POLLIN);
-    }
-
-  while (space < header.size)
-    {
-      struct perf_event_header_s remove_header;
-
-      circbuf_peek(&(event->buf->rb), &remove_header,
-                    sizeof(struct perf_event_header_s));
-      circbuf_readcommit(&(event->buf->rb), remove_header.size);
-      space = circbuf_space(&(event->buf->rb));
-    }
-
+  flags = spin_lock_irqsave(&event->buf->lock);
   perf_output_sample(&header, data, event);
-
+  spin_unlock_irqrestore(&event->buf->lock, flags);
   return 0;
 }
 
