@@ -12,6 +12,13 @@ config ESP32S3_MERGE_BINS
 		This is only useful when the path to binary files (e.g. bootloader)
 		is provided via the ESPTOOL_BINDIR variable.
 
+config ESP32S3_QEMU_IMAGE
+	bool "ESP32S3 binary image for QEMU"
+	default n
+	select ESP32S3_MERGE_BINS
+	---help---
+		Create a binary flash image used for QEMU.
+
 config ESP32S3_SPEED_UP_ISR
 	bool "Speed up ISR"
 	default n
