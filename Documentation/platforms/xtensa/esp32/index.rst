@@ -627,25 +627,30 @@ Please check for usage examples using the :doc:`ESP32 DevKitC </platforms/xtensa
 Using QEMU
 ==========
 
-First follow the instructions `here <https://github.com/espressif/qemu/wiki>`__ to build QEMU.
+Get or build QEMU from `here <https://github.com/espressif/qemu/wiki>`__.
 
 Enable the ``ESP32_QEMU_IMAGE`` config found in :menuselection:`Board Selection --> ESP32 binary image for QEMU`.
 
-Download the bootloader and the partition table from https://github.com/espressif/esp-nuttx-bootloader/releases
-and place them in a directory, say ``../esp-bins``.
+Enable ``ESP32_APP_FORMAT_LEGACY``.
 
 Build and generate the QEMU image::
 
- $ make ESPTOOL_BINDIR=../esp-bins
+ $ make bootloader
+ $ make ESPTOOL_BINDIR=.
 
 A QEMU-compatible ``nuttx.merged.bin`` binary image will be created. It can be run as::
 
  $ qemu-system-xtensa -nographic -machine esp32 -drive file=nuttx.merged.bin,if=mtd,format=raw
 
+QEMU for ESP32 does not correctly define the chip revision as v3.0 so you have two options:
+
+- #define ``ESP32_IGNORE_CHIP_REVISION_CHECK`` in ``arch/xtensa/src/esp32/esp32_start.c``
+- Emulate the efuse as described `here <https://github.com/espressif/esp-toolchain-docs/blob/main/qemu/esp32/README.md#emulating-esp32-eco3>`__.
+
 QEMU Networking
 ---------------
 
-Networking is possible using the openeth MAC driver. Enable ``ESP32_OPENETH`` option and set the nic in QEMU:
+Networking is possible using the openeth MAC driver. Enable ``ESP32_OPENETH`` option and set the nic in QEMU::
 
  $ qemu-system-xtensa -nographic -machine esp32 -drive file=nuttx.merged.bin,if=mtd,format=raw -nic user,model=open_eth
 
