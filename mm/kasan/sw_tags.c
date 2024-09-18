@@ -106,7 +106,7 @@ kasan_is_poisoned(FAR const void *addr, size_t size)
   p = kasan_mem_to_shadow(addr, size);
   if (p == NULL)
     {
-      return false;
+      return kasan_global_is_poisoned(addr, size);
     }
 
   size = KASAN_SHADOW_SIZE(size);
