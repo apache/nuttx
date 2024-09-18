@@ -11,6 +11,7 @@ divided in three classes:
   character/index.rst
   block/index.rst
   special/index.rst
+  thermal/index.rst
 
 .. note::
   Device driver support depends on the *in-memory*, *pseudo*
