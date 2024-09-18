@@ -603,6 +603,38 @@ def check_version():
     suppress_cli_notifications(state)
 
 
+def get_task_tls(tid, key):
+    """get task tls from tid and key"""
+    tcb = get_tcb(tid)
+    if not tcb:
+        return None
+
+    try:
+        stack_alloc_ptr = tcb["stack_alloc_ptr"].cast(
+            lookup_type("struct tls_info_s").pointer()
+        )
+        tls_value = stack_alloc_ptr["tl_task"]["ta_telem"][int(key)]
+        return tls_value.cast(lookup_type("uintptr_t").pointer())
+    except gdb.error:
+        return None
+
+
+def get_thread_tls(pid, key):
+    """get thread tls from pid and key"""
+    tcb = get_tcb(pid)
+    if not tcb:
+        return None
+
+    try:
+        stack_alloc_ptr = tcb["stack_alloc_ptr"].cast(
+            lookup_type("struct tls_info_s").pointer()
+        )
+        tls_value = stack_alloc_ptr["tl_elem"][int(key)]
+        return tls_value.cast(lookup_type("uintptr_t").pointer())
+    except gdb.error:
+        return None
+
+
 def gather_modules(dir=None) -> List[str]:
     dir = os.path.normpath(dir) if dir else os.path.dirname(__file__)
     return [
