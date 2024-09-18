@@ -245,7 +245,7 @@ int board_ws2812_initialize(
  *
  ****************************************************************************/
 #ifdef CONFIG_ESP32_OPENETH
-int esp32_openeth_initialize(void);
+int esp_openeth_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

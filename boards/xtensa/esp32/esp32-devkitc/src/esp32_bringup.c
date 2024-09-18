@@ -362,7 +362,7 @@ int esp32_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32_OPENETH
-  ret = esp32_openeth_initialize();
+  ret = esp_openeth_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize Open ETH ethernet.\n");
