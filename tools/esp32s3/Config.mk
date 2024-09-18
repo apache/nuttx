@@ -127,7 +127,13 @@ define MERGEBIN
 		echo "Missing Flash memory size configuration for the ESP32-S3 chip."; \
 		exit 1; \
 	fi
-	esptool.py -c esp32s3 merge_bin --output nuttx.merged.bin $(ESPTOOL_FLASH_OPTS) $(ESPTOOL_BINS)
+	$(eval ESPTOOL_MERGEBIN_OPTS :=                                              \
+		$(if $(CONFIG_ESP32S3_QEMU_IMAGE),                                         \
+			--fill-flash-size $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ), \
+			$(ESPTOOL_FLASH_OPTS)                                                \
+		)                                                                        \
+	)
+	esptool.py -c esp32s3 merge_bin --output nuttx.merged.bin $(ESPTOOL_MERGEBIN_OPTS) $(ESPTOOL_BINS)
 	$(Q) echo nuttx.merged.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.merged.bin"
 endef
