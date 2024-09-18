@@ -1111,8 +1111,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   return OK;
 
 err_thread:
-  nxsem_destroy(&priv->semtx);
-  nxsem_destroy(&priv->semrx);
   rpmsg_unregister(name, &priv->rpmsg);
 
 err_driver:
