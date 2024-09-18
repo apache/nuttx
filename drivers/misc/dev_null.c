@@ -32,16 +32,19 @@
 
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/uio.h>
 #include <nuttx/drivers/drivers.h>
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen);
-static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen);
+static ssize_t devnull_readv(FAR struct file *filep,
+                             FAR const struct iovec *iov,
+                             int iovcnt);
+static ssize_t devnull_writev(FAR struct file *filep,
+                              FAR const struct iovec *iov,
+                              int iovcnt);
 static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
 
@@ -51,15 +54,17 @@ static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_devnull_fops =
 {
-  NULL,          /* open */
-  NULL,          /* close */
-  devnull_read,  /* read */
-  devnull_write, /* write */
-  NULL,          /* seek */
-  NULL,          /* ioctl */
-  NULL,          /* mmap */
-  NULL,          /* truncate */
-  devnull_poll   /* poll */
+  NULL,           /* open */
+  NULL,           /* close */
+  NULL,           /* read */
+  NULL,           /* writev */
+  NULL,           /* seek */
+  NULL,           /* ioctl */
+  NULL,           /* mmap */
+  NULL,           /* truncate */
+  devnull_poll,   /* poll */
+  devnull_readv,  /* readv */
+  devnull_writev  /* writev */
 };
 
 /****************************************************************************
@@ -70,12 +75,13 @@ static const struct file_operations g_devnull_fops =
  * Name: devnull_read
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
-                            size_t len)
+static ssize_t devnull_readv(FAR struct file *filep,
+                             FAR const struct iovec *iov,
+                             int iovcnt)
 {
   UNUSED(filep);
-  UNUSED(buffer);
-  UNUSED(len);
+  UNUSED(iov);
+  UNUSED(iovcnt);
 
   return 0; /* Return EOF */
 }
@@ -84,13 +90,13 @@ static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
  * Name: devnull_write
  ****************************************************************************/
 
-static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t len)
+static ssize_t devnull_writev(FAR struct file *filep,
+                              FAR const struct iovec *iov,
+                              int iovcnt)
 {
   UNUSED(filep);
-  UNUSED(buffer);
 
-  return len; /* Say that everything was written */
+  return iovec_total_len(iov, iovcnt); /* Say that everything was written */
 }
 
 /****************************************************************************
