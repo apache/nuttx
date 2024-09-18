@@ -206,6 +206,10 @@ endif
 CHIP_CSRCS += esp32s3_pm.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_OPENETH),y)
+CHIP_CSRCS += esp_openeth.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
