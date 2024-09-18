@@ -372,6 +372,7 @@ void files_initlist(FAR struct filelist *list)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_DUMP_ON_EXIT
 void files_dumplist(FAR struct filelist *list)
 {
   int count = files_countlist(list);
@@ -424,6 +425,7 @@ void files_dumplist(FAR struct filelist *list)
             );
     }
 }
+#endif
 
 /****************************************************************************
  * Name: files_getlist
