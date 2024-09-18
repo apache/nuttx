@@ -1485,9 +1485,10 @@ static int imx9_lpi2c_isr_process(struct imx9_lpi2c_priv_s *priv)
 
   /* Ignore NACK on RX last byte - this is normal */
 
-  if ((status & LPI2C_MSR_NDF) != 0 && (priv->flags & I2C_M_READ) != 0 &&
-      priv->dcnt == 1)
+  if ((status & (LPI2C_MSR_RDF | LPI2C_MSR_NDF)) ==
+      (LPI2C_MSR_RDF | LPI2C_MSR_NDF) && priv->dcnt == 1)
     {
+      imx9_lpi2c_putreg(priv, IMX9_LPI2C_MSR_OFFSET, LPI2C_MSR_NDF);
       status &= ~LPI2C_MSR_NDF;
     }
 
