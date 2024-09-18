@@ -52,8 +52,6 @@ class Registers:
             # Switch to second inferior to get the original remote-register layout
             state = utils.suppress_cli_notifications(True)
             utils.switch_inferior(2)
-            arch = gdb.selected_inferior().architecture()
-            registers = arch.registers()
 
             natural_size = gdb.lookup_type("long").sizeof
             tcb_info = gdb.parse_and_eval("g_tcbinfo")
@@ -306,9 +304,10 @@ class Nxthread(gdb.Command):
     """Switch to a specified thread"""
 
     def __init__(self):
-        super().__init__("nxthread", gdb.COMMAND_USER)
         if not is_thread_command_supported():
-            gdb.execute("define thread\n nxthread \n end\n")
+            super().__init__("thread", gdb.COMMAND_USER)
+        else:
+            super().__init__("nxthread", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
         npidhash = gdb.parse_and_eval("g_npidhash")
