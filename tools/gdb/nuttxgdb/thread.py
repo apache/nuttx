@@ -94,9 +94,6 @@ class Registers:
                 reginfo[name] = {
                     "rmt_nr": rmt_nr,  # The register number in remote-registers, Aka the one we saved in g_tcbinfo.
                     "tcb_reg_off": tcb_reg_off,
-                    "desc": registers.find(
-                        name
-                    ),  # Register descriptor. It's faster for frame.read_register
                 }
 
             Registers.reginfo = reginfo
@@ -142,8 +139,8 @@ class Registers:
 
         registers = {}
         frame = gdb.newest_frame()
-        for name, info in Registers.reginfo.items():
-            value = frame.read_register(info["desc"])
+        for name, _ in Registers.reginfo.items():
+            value = frame.read_register(name)
             registers[name] = value
 
         Registers.saved_regs = registers
