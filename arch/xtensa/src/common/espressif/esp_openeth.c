@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32/esp32_openeth.c
+ * arch/xtensa/src/common/espressif/esp_openeth.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -439,7 +439,7 @@ err:
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32_openeth_initialize
+ * Name: esp_openeth_initialize
  *
  * Description:
  *   Initialize the openeth driver
@@ -452,7 +452,7 @@ err:
  *
  ****************************************************************************/
 
-int esp32_openeth_initialize(void)
+int esp_openeth_initialize(void)
 {
   int ret;
   struct openeth_priv_s *priv = &g_openeth;

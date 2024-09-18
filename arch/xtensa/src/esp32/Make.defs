@@ -205,7 +205,7 @@ endif
 endif
 
 ifeq ($(CONFIG_ESP32_OPENETH),y)
-CHIP_CSRCS += esp32_openeth.c
+CHIP_CSRCS += esp_openeth.c
 endif
 
 #############################################################################
