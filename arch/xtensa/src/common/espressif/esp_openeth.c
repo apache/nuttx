@@ -30,10 +30,7 @@
 #include <netinet/if_ether.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 
-#include "hardware/esp32_soc.h"
-#include "esp32_irq.h"
-
-#ifdef CONFIG_ESP32_OPENETH
+#include <chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,7 +40,7 @@
 
 /* DMA buffers configuration */
 #define DMA_BUF_SIZE 1600
-#define RX_BUF_COUNT CONFIG_ESP32_OPENETH_DMA_RX_BUFFER_NUM
+
 /* Only need 1 TX buf because packets are transmitted immediately */
 #define TX_BUF_COUNT 1
 
@@ -462,8 +459,9 @@ int esp_openeth_initialize(void)
 
   if (REG_READ(OPENETH_MODER_REG) != OPENETH_MODER_DEFAULT)
     {
-      nerr("CONFIG_ESP32_OPENETH should only be used when running in QEMU.");
-      nerr("When running the app on the ESP32, use ESP32 EMAC instead.");
+      nerr("Openeth should only be used when running in QEMU.");
+      nerr("When running the app on the real hardware,"
+           "use the real MAC instead.");
       abort();
     }
 
@@ -512,8 +510,8 @@ int esp_openeth_initialize(void)
 
   /* Setup interrupts */
 
-  priv->cpuint = esp32_setup_irq(0, ESP32_PERIPH_EMAC,
-                                 1, ESP32_CPUINT_LEVEL);
+  priv->cpuint = OPENETH_SETUP_IRQ(0, OPENETH_PERIPH_MAC,
+                                 1, OPENETH_CPUINT_LEVEL);
   if (priv->cpuint < 0)
     {
       nerr("ERROR: Failed allocate interrupt\n");
@@ -531,7 +529,7 @@ int esp_openeth_initialize(void)
 
   /* Attach the interrupt */
 
-  ret = irq_attach(ESP32_IRQ_EMAC, openeth_isr_handler, priv);
+  ret = irq_attach(OPENETH_IRQ_MAC, openeth_isr_handler, priv);
 
   /* Register the device with the OS so that socket IOCTLs can be
    * performed.
@@ -552,5 +550,3 @@ err:
   nerr("Failed initializing ret = %d", ret);
   abort();
 }
-
-#endif /* CONFIG_ESP32_OPENETH */

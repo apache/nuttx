@@ -1658,6 +1658,27 @@ config ESP32S3_WIFI_LISTEN_INTERVAL
 
 endmenu # ESP32S3_WIFI
 
+config ESP32S3_OPENETH
+	bool "Opencores Ethernet MAC"
+	default n
+	depends on !ESP32S3_WIFI
+	select NET
+	select SCHED_WORKQUEUE
+	---help---
+		Enable ESP32S3 ethernet opencores support for use with QEMU.
+		Disable this if you are using the real device.
+
+if ESP32S3_OPENETH
+
+config ESP32S3_OPENETH_DMA_RX_BUFFER_NUM
+	int "Number of Ethernet DMA Rx buffers"
+	range 1 64
+	default 4
+	---help---
+		Number of DMA receive buffers, each buffer is 1600 bytes.
+
+endif # ESP32S3_OPENETH
+
 menu "BLE Configuration"
 	depends on ESP32S3_BLE
 
