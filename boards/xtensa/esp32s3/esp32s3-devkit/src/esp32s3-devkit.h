@@ -269,5 +269,9 @@ int esp32s3_lan9250_initialize(int port);
 int esp32s3_lan9250_uninitialize(int port);
 #endif
 
+#ifdef CONFIG_ESP32S3_OPENETH
+int esp_openeth_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H */
