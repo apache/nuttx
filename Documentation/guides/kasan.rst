@@ -143,4 +143,3 @@ If you want the module you are writing to not be inserted by the compiler,
 you can add the option 'CFLAGS += -fno-sanitize=kernel-address' to a single module.
 If it is a file, you can write it this way,
 special_file.o: CFLAGS = -fno-sanitize=kernel-address
-or : special_file.o: CFLAGS = -fno-sanitize=kernel-hwaddress

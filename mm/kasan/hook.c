@@ -32,6 +32,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifdef CONFIG_MM_KASAN_GLOBAL
+#  include "global.c"
+#else
+#  define kasan_global_is_poisoned(addr, size) false
+#endif
+
 #ifdef CONFIG_MM_KASAN_GENERIC
 #  include "generic.c"
 #elif defined(CONFIG_MM_KASAN_SW_TAGS)
@@ -66,16 +72,6 @@
     kasan_check_report(addr, size, false, return_address(0)); \
   } \
   void __asan_store##size(FAR void *addr) \
-  { \
-    kasan_check_report(addr, size, true, return_address(0)); \
-  }
-
-#define DEFINE_HWASAN_LOAD_STORE(size) \
-  void __hwasan_load##size##_noabort(void *addr) \
-  { \
-    kasan_check_report(addr, size, false, return_address(0)); \
-  } \
-  void __hwasan_store##size##_noabort(void *addr) \
   { \
     kasan_check_report(addr, size, true, return_address(0)); \
   }
@@ -403,21 +399,3 @@ DEFINE_ASAN_LOAD_STORE(2)
 DEFINE_ASAN_LOAD_STORE(4)
 DEFINE_ASAN_LOAD_STORE(8)
 DEFINE_ASAN_LOAD_STORE(16)
-
-/* Soft tags KASan will instrument the following functions */
-
-void __hwasan_loadN_noabort(FAR void *addr, size_t size)
-{
-  kasan_check_report(addr, size, false, return_address(0));
-}
-
-void __hwasan_storeN_noabort(FAR void *addr, size_t size)
-{
-  kasan_check_report(addr, size, true, return_address(0));
-}
-
-DEFINE_HWASAN_LOAD_STORE(1)
-DEFINE_HWASAN_LOAD_STORE(2)
-DEFINE_HWASAN_LOAD_STORE(4)
-DEFINE_HWASAN_LOAD_STORE(8)
-DEFINE_HWASAN_LOAD_STORE(16)

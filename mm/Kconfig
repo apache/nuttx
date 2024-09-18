@@ -328,7 +328,7 @@ config MM_KASAN_DISABLE_WRITES_CHECK
 
 config MM_KASAN_GLOBAL
 	bool "Enable global data check"
-	depends on MM_KASAN_GENERIC
+	depends on MM_KASAN_ALL
 	default n
 	---help---
 		This option enables KASan global data check.
