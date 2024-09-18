@@ -129,10 +129,16 @@ config FS_HEAPBUF_SECTION
 
 config FS_REFCOUNT
 	bool "File reference count"
-	default !DEFAULT_SMALL
+	default !DISABLE_PTHREAD
 	---help---
 		Enable will Records the number of filep references. The file is
 		actually closed when the count reaches 0
+
+		Note that this option will ensure the safety of access to the file
+		system from multi-tasks (thread A blocking rw(fd), then thread B close(fd)),
+		the disadvantage is that it will increase the amount of code-size,
+		there is no need to enable this option if the application could ensure
+		he file operations are safe.
 
 source "fs/vfs/Kconfig"
 source "fs/aio/Kconfig"
