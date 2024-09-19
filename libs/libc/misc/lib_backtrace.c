@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_execinfo.c
+ * libs/libc/misc/lib_backtrace.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
