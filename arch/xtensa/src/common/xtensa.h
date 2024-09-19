@@ -234,7 +234,7 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs);
 
 #ifdef CONFIG_SMP
 int xtensa_intercpu_interrupt(int tocpu, int intcode);
-void xtensa_pause_handler(void);
+void xtensa_pause_handler(int irq, void *context, void *arg);
 #endif
 
 /* Signals */
