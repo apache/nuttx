@@ -47,7 +47,7 @@ struct bmp180_dev_uorb_s
 
   struct sensor_lowerhalf_s lower; /* Lower half sensor driver. */
   struct work_s work;              /* Interrupt handler worker. */
-  unsigned long interval;          /* Sensor acquisition interval. */
+  uint32_t interval;               /* Sensor acquisition interval. */
   struct bmp180_dev_s dev;
 };
 /****************************************************************************
@@ -57,7 +57,7 @@ struct bmp180_dev_uorb_s
 static void bmp180_worker(FAR void *arg);
 static int bmp180_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us);
+                               FAR uint32_t *period_us);
 static int bmp180_activate(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep,
                            bool enable);
@@ -101,7 +101,7 @@ static const struct sensor_ops_s g_bmp180_ops =
 
 static int bmp180_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us)
+                               FAR uint32_t *period_us)
 {
   FAR struct bmp180_dev_uorb_s *priv = (FAR struct bmp180_dev_uorb_s *)lower;
 

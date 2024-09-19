@@ -96,7 +96,7 @@ struct ms56xx_dev_s
   enum ms56xx_model_e      model;     /* Model of MS56XX */
   uint32_t                 freq;      /* Bus Frequency I2C/SPI */
   struct ms56xx_calib_s    calib;     /* Calib. params from ROM */
-  unsigned long            interval;  /* Polling interval */
+  uint32_t                 interval;  /* Polling interval */
   bool                     enabled;   /* Enable/Disable MS56XX */
   sem_t                    run;       /* Locks measure cycle */
   mutex_t                  lock;      /* Manages exclusive to device */
@@ -125,7 +125,7 @@ static unsigned long ms56xx_curtime(void);
 
 static int ms56xx_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us);
+                               FAR uint32_t *period_us);
 static int ms56xx_activate(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep, bool enable);
 
@@ -614,7 +614,7 @@ static uint32_t ms56xx_compensate_press(FAR struct ms56xx_dev_s *priv,
 
 static int ms56xx_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us)
+                               FAR uint32_t *period_us)
 {
   FAR struct ms56xx_dev_s *priv = container_of(lower,
                                                FAR struct ms56xx_dev_s,

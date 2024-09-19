@@ -60,7 +60,7 @@ struct bh1749nuc_sensor_s
   int                                gain;
   FAR struct bh1749nuc_sensor_dev_s *dev;
 #ifdef CONFIG_SENSORS_BH1749NUC_POLL
-  unsigned long                      interval;
+  uint32_t                           interval;
   uint64_t                           last_update;
 #endif
   bool                               enabled;
@@ -93,7 +93,7 @@ static int bh1749nuc_fetch(FAR struct sensor_lowerhalf_s *lower,
 #endif
 static int bh1749nuc_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                   FAR struct file *filep,
-                                  FAR unsigned long *period_us);
+                                  FAR uint32_t *period_us);
 static int bh1749nuc_control(FAR struct sensor_lowerhalf_s *lower,
                              FAR struct file *filep,
                              int cmd, unsigned long arg);
@@ -301,7 +301,7 @@ static int bh1749nuc_control(FAR struct sensor_lowerhalf_s *lower,
 
 static int bh1749nuc_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                   FAR struct file *filep,
-                                  FAR unsigned long *interval)
+                                  FAR uint32_t *interval)
 {
 #ifdef CONFIG_SENSORS_BH1749NUC_POLL
   FAR struct bh1749nuc_sensor_s *priv = NULL;
