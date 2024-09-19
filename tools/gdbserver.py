@@ -525,6 +525,8 @@ class GDBStub:
         self.socket = None
         self.gdb_signal = GDB_SIGNAL_DEFAULT
         self.arch = arch
+        self.reg_fmt = "<I" if elffile.xlen() <= 32 else "<Q"
+        self.reg_digits = elffile.xlen() // 4
 
         # new list oreder is coredump, rawfile, logfile, elffile
 
@@ -539,6 +541,7 @@ class GDBStub:
 
         self.threadinfo = []
         self.current_thread = 0
+        self.regfix = False
         if elffile.load_symbol:
             try:
                 self.parse_thread()
@@ -634,11 +637,12 @@ class GDBStub:
     def handle_register_group_read_packet(self):
 
         def put_register_packet(regs):
+            reg_fmt = self.reg_fmt
             pkt = b""
 
             for reg in regs:
                 if reg != b"x":
-                    bval = struct.pack(self.reg_fmt, reg)
+                    bval = struct.pack(reg_fmt, reg)
                     pkt += binascii.hexlify(bval)
                 else:
                     # Register not in coredump -> unknown value
