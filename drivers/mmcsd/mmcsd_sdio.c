@@ -164,8 +164,10 @@ static int     mmcsd_stoptransmission(FAR struct mmcsd_state_s *priv);
 #endif
 static int     mmcsd_setblocklen(FAR struct mmcsd_state_s *priv,
                                  uint32_t blocklen);
+#if MMCSD_MULTIBLOCK_LIMIT != 1
 static int     mmcsd_setblockcount(FAR struct mmcsd_state_s *priv,
                                    uint32_t nblocks);
+#endif
 static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
                                 FAR uint8_t *buffer, off_t startblock);
 #if MMCSD_MULTIBLOCK_LIMIT != 1
@@ -1408,6 +1410,7 @@ static int mmcsd_setblocklen(FAR struct mmcsd_state_s *priv,
   return ret;
 }
 
+#if MMCSD_MULTIBLOCK_LIMIT != 1
 /****************************************************************************
  * Name: mmcsd_setblockcount
  *
@@ -1430,6 +1433,7 @@ static int mmcsd_setblockcount(FAR struct mmcsd_state_s *priv,
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: mmcsd_readsingle
