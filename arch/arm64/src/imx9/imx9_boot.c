@@ -40,6 +40,8 @@
 
 #include "imx9_boot.h"
 #include "imx9_clockconfig.h"
+#include "imx9_ccm.h"
+#include "imx9_trdc.h"
 #include "imx9_serial.h"
 #include "imx9_gpio.h"
 #include "imx9_lowputc.h"
@@ -59,9 +61,11 @@ static const struct arm_mmu_region g_mmu_regions[] =
                         CONFIG_RAMBANK1_ADDR, CONFIG_RAMBANK1_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
 
+#ifndef CONFIG_IMX9_DDR_TRAINING /* OCRAM set at arm64_mmu.c */
   MMU_REGION_FLAT_ENTRY("OCRAM",
                         CONFIG_OCRAM_BASE_ADDR, CONFIG_OCRAM_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
+#endif
 
   MMU_REGION_FLAT_ENTRY("FSPI_PERIPHERAL",
                         CONFIG_FSPI_PER_BASEADDR, CONFIG_FSPI_PER_SIZE,
@@ -112,14 +116,19 @@ void arm64_chip_boot(void)
 {
 #ifdef CONFIG_IMX9_BOOTLOADER
   imx9_mix_powerup();
+
+  /* Before DDR init we need to initialize clocks and trdc */
+
+  imx9_ccm_clock_init();
+
+  imx9_trdc_init();
+
+  imx9_clockconfig();
+
 #endif
   /* MAP IO and DRAM, enable MMU. */
 
   arm64_mmu_init(true);
-
-  /* Initialize system clocks to some sensible state */
-
-  imx9_clockconfig();
 
   /* Do UART early initialization & pin muxing */
 
