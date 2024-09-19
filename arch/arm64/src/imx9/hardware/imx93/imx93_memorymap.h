@@ -105,6 +105,7 @@
 #define IMX9_MU1__MUB_BASE                 (0x44230000UL)
 #define IMX9_MU2__MUB_BASE                 (0x42440000UL)
 #define IMX9_S3MUA_BASE                    (0x47520000UL)
+#define IMX9_TRDC_BASE                     (0x49010000UL)
 #define IMX9_NPU_BASE                      (0x4A900000UL)
 #define IMX9_OCOTP_BASE                    (0x47518000UL)
 #define IMX9_OCRAM_MECC1_BASE              (0x490A0000UL)
