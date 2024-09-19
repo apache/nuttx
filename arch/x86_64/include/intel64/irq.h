@@ -352,8 +352,8 @@
 
 /* Use IRQ24 IRQ25 for SMP */
 
-#define SMP_IPI_IRQ        IRQ24
-#define SMP_IPI_ASYNC_IRQ  IRQ25
+#define SMP_IPI_CALL_IRQ   IRQ24
+#define SMP_IPI_SCHED_IRQ  IRQ25
 
 /* Use IRQ32 and above for MSI */
 

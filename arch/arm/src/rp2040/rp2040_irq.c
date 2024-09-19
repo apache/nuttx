@@ -276,7 +276,7 @@ void up_disable_irq(int irq)
   DEBUGASSERT((unsigned)irq < NR_IRQS);
 
 #ifdef CONFIG_SMP
-  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SIO_IRQ_PROC1 &&
+  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SMP_CALL_PROC1 &&
       this_cpu() != 0)
     {
       /* Must be handled by Core 0 */
@@ -324,7 +324,7 @@ void up_enable_irq(int irq)
   DEBUGASSERT((unsigned)irq < NR_IRQS);
 
 #ifdef CONFIG_SMP
-  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SIO_IRQ_PROC1 &&
+  if (irq >= RP2040_IRQ_EXTINT && irq != RP2040_SMP_CALL_PROC1 &&
       this_cpu() != 0)
     {
       /* Must be handled by Core 0 */

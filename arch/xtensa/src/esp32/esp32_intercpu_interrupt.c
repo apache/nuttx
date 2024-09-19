@@ -63,9 +63,9 @@ static int IRAM_ATTR esp32_fromcpu_interrupt(int irq, void *context,
                              DPORT_CPU_INTR_FROM_CPU_1_REG;
   putreg32(0, regaddr);
 
-  /* Call pause handler */
+  /* Smp call handler */
 
-  xtensa_pause_handler(irq, context, arg);
+  xtensa_smp_call_handler(irq, context, arg);
 
   return OK;
 }

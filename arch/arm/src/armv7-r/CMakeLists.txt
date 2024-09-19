@@ -71,7 +71,7 @@ if(CONFIG_SMP)
     SRCS
     arm_cpuhead.S
     arm_cpustart.c
-    arm_cpupause.c
+    arm_smpcall.c
     arm_cpuidlestack.c
     arm_scu.c)
 endif()

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/lc823450/lc823450_cpupause.c
+ * arch/x86_64/src/intel64/intel64_smpcall.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,23 +30,15 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <arch/irq.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
-#include "arm_internal.h"
-#include "lc823450_intc.h"
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#if 0
-#define DPRINTF(fmt, args...) llinfo(fmt, ##args)
-#else
-#define DPRINTF(fmt, args...) do {} while (0)
-#endif
+#include "x86_64_internal.h"
 
 /****************************************************************************
  * Public Data
@@ -57,45 +49,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lc823450_pause_handler
+ * Name: x86_64_smp_call_handler
  *
  * Description:
- *   Inter-CPU interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt handler inputs
- *
- * Returned Value:
- *   Should always return OK
+ *   This is the handler for SMP_CALL.
  *
  ****************************************************************************/
 
-int lc823450_pause_handler(int irq, void *c, void *arg)
+int x86_64_smp_call_handler(int irq, void *c, void *arg)
 {
+  struct tcb_s *tcb;
   int cpu = this_cpu();
 
+  tcb = current_task(cpu);
+  x86_64_savestate(tcb->xcp.regs);
   nxsched_smp_call_handler(irq, c, arg);
-
-  /* Clear : Pause IRQ */
-
-  if (irq == LC823450_IRQ_CTXM3_01)
-    {
-      DPRINTF("CPU0 -> CPU1\n");
-      putreg32(IPICLR_INTISR0_CLR_1, IPICLR);
-    }
-  else
-    {
-      DPRINTF("CPU1 -> CPU0\n");
-      putreg32(IPICLR_INTISR1_CLR_1, IPICLR);
-    }
-
-  nxsched_process_delivered(cpu);
+  tcb = current_task(cpu);
+  x86_64_restorestate(tcb->xcp.regs);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: x86_64_smp_sched_handler
+ *
+ * Description:
+ *   This is the handler for smp.
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It porcess g_delivertasks
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   Standard interrupt handling
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int x86_64_smp_sched_handler(int irq, void *c, void *arg)
+{
+  struct tcb_s *tcb;
+  int cpu = this_cpu();
+
+  tcb = current_task(cpu);
+  nxsched_suspend_scheduler(tcb);
+  x86_64_savestate(tcb->xcp.regs);
+  nxsched_process_delivered(cpu);
+  tcb = current_task(cpu);
+  nxsched_resume_scheduler(tcb);
+  x86_64_restorestate(tcb->xcp.regs);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -113,18 +125,14 @@ int lc823450_pause_handler(int irq, void *c, void *arg)
  *
  ****************************************************************************/
 
-inline_function int up_cpu_pause_async(int cpu)
+int up_send_smp_sched(int cpu)
 {
-  /* Execute Pause IRQ to CPU(cpu) */
+  cpu_set_t cpuset;
 
-  if (cpu == 1)
-    {
-      putreg32(IPIREG_INTISR0_1, IPIREG);
-    }
-  else
-    {
-      putreg32(IPIREG_INTISR1_1, IPIREG);
-    }
+  CPU_ZERO(&cpuset);
+  CPU_SET(cpu, &cpuset);
+
+  up_trigger_irq(SMP_IPI_SCHED_IRQ, cpuset);
 
   return OK;
 }
@@ -145,11 +153,5 @@ inline_function int up_cpu_pause_async(int cpu)
 
 void up_send_smp_call(cpu_set_t cpuset)
 {
-  int cpu;
-
-  for (; cpuset != 0; cpuset &= ~(1 << cpu))
-    {
-      cpu = ffs(cpuset) - 1;
-      up_cpu_pause_async(cpu);
-    }
+  up_trigger_irq(SMP_IPI_CALL_IRQ, cpuset);
 }
