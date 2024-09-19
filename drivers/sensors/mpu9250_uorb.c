@@ -374,9 +374,11 @@ static const struct sensor_ops_s g_mpu9250_ops =
   mpu9250_set_interval, /* set_interval */
   NULL,                 /* batch */
   NULL,                 /* fetch */
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   mpu9250_control       /* control */
 };
 

@@ -129,9 +129,11 @@ static const struct sensor_ops_s g_sensor_ops =
 #else
   .fetch        = lsm9ds1_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   .control      = lsm9ds1_control
 };
 

@@ -105,9 +105,11 @@ static const struct sensor_ops_s g_adxl372_accel_ops =
 #else
   adxl372_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL                  /* get_info */
   NULL                  /* control */
 };
 

@@ -114,9 +114,11 @@ static const struct sensor_ops_s g_bh1749nuc_sensor_ops =
 #else
   bh1749nuc_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   bh1749nuc_control
 };
 

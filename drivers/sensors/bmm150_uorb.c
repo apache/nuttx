@@ -180,9 +180,11 @@ static const struct sensor_ops_s g_bmm150_sensor_ops =
 #else
   bmm150_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   NULL,                 /* control */
 };
 
