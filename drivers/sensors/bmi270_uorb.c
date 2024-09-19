@@ -126,9 +126,11 @@ static const struct sensor_ops_s g_sensor_ops =
 #else
   bmi270_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   bmi270_control
 };
 

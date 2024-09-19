@@ -422,9 +422,11 @@ static const struct sensor_ops_s g_sensor_ops =
   NULL,             /* set_interval */
   NULL,             /* batch */
   NULL,             /* fetch */
+  NULL,             /* flush */
   NULL,             /* selftest */
   NULL,             /* set_calibvalue */
   bme680_calibrate, /* calibrate */
+  NULL,             /* get_info */
   bme680_control    /* control */
 };
 
