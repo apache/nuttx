@@ -158,7 +158,7 @@
 #define CXD56_IRQ_SPH13         (CXD56_IRQ_EXTINT+93)  /* SPH13 IRQ number */
 #define CXD56_IRQ_SPH14         (CXD56_IRQ_EXTINT+94)  /* SPH14 IRQ number */
 #define CXD56_IRQ_SPH15         (CXD56_IRQ_EXTINT+95)  /* SPH15 IRQ number */
-#define CXD56_IRQ_SW_INT        (CXD56_IRQ_EXTINT+96)  /* SW_INT IRQ number */
+#define CXD56_IRQ_SMP_CALL      (CXD56_IRQ_EXTINT+96)  /* SMP_CALL IRQ number */
 #define CXD56_IRQ_TIMER0        (CXD56_IRQ_EXTINT+97)  /* TIMER0 IRQ number */
 #define CXD56_IRQ_TIMER1        (CXD56_IRQ_EXTINT+98)  /* TIMER1 IRQ number */
 #define CXD56_IRQ_TIMER2        (CXD56_IRQ_EXTINT+99)  /* TIMER2 IRQ number */

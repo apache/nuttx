@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 volatile static spinlock_t g_cpu1_boot;
-extern int arm_pause_handler(int irq, void *c, void *arg);
+extern int sam4cm_smp_call_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Public Functions
@@ -108,8 +108,8 @@ static void cpu1_boot(void)
       /* Enable : write-only */
 
       putreg32(0x1, SAM_IPC1_IECR);
-      irq_attach(SAM_IRQ_IPC1, arm_pause_handler, NULL);
-      up_enable_irq(SAM_IRQ_IPC1);
+      irq_attach(SAM_IRQ_SMP_CALL1, sam4cm_smp_call_handler, NULL);
+      up_enable_irq(SAM_IRQ_SMP_CALL1);
     }
 
   spin_unlock(&g_cpu1_boot);
@@ -218,8 +218,8 @@ int up_cpu_start(int cpu)
   sam_ipc0_enableclk();
   putreg32(0x1, SAM_IPC0_ICCR); /* clear : write-only */
   putreg32(0x1, SAM_IPC0_IECR); /* enable : write-only */
-  irq_attach(SAM_IRQ_IPC0, arm_pause_handler, NULL);
-  up_enable_irq(SAM_IRQ_IPC0);
+  irq_attach(SAM_IRQ_SMP_CALL0, sam4cm_smp_call_handler, NULL);
+  up_enable_irq(SAM_IRQ_SMP_CALL0);
 
   spin_lock(&g_cpu1_boot);
 

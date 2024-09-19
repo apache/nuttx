@@ -219,9 +219,8 @@ void arm_gic0_initialize(void)
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUSTART, arm_start_handler, NULL));
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE_ASYNC,
-                         arm_pause_async_handler, NULL));
-  DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL, nxsched_smp_call_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_SCHED, arm_smp_sched_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CALL, nxsched_smp_call_handler, NULL));
 #endif
 
   arm_gic_dump("Exit arm_gic0_initialize", true, 0);
@@ -753,27 +752,6 @@ void arm_cpu_sgi(int sgi, unsigned int cpuset)
 
   putreg32(regval, GIC_ICDSGIR);
 }
-
-#ifdef CONFIG_SMP
-/****************************************************************************
- * Name: up_send_smp_call
- *
- * Description:
- *   Send smp call to target cpu.
- *
- * Input Parameters:
- *   cpuset - The set of CPUs to receive the SGI.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void up_send_smp_call(cpu_set_t cpuset)
-{
-  up_trigger_irq(GIC_SMP_CPUCALL, cpuset);
-}
-#endif
 
 /****************************************************************************
  * Name: up_get_legacy_irq

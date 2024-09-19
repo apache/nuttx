@@ -1748,18 +1748,6 @@ void up_secure_irq(int irq, bool secure);
 # define up_secure_irq(i, s)
 #endif
 
-#ifdef CONFIG_SMP
-/****************************************************************************
- * Name: up_send_smp_call
- *
- * Description:
- *   Send smp call to target cpu
- *
- ****************************************************************************/
-
-void up_send_smp_call(cpu_set_t cpuset);
-#endif
-
 /****************************************************************************
  * Name: up_secure_irq_all
  *
@@ -2292,8 +2280,9 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size);
 int up_cpu_start(int cpu);
 #endif
 
+#ifdef CONFIG_SMP
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -2311,8 +2300,17 @@ int up_cpu_start(int cpu);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-int up_cpu_pause_async(int cpu);
+int up_send_smp_sched(int cpu);
+
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset);
 #endif
 
 /****************************************************************************

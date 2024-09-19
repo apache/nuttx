@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/riscv_cpupause.c
+ * arch/sparc/src/s698pm/s698pm_smpcall.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,8 +35,7 @@
 #include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
-#include "riscv_internal.h"
-#include "riscv_ipi.h"
+#include "sparc_internal.h"
 #include "chip.h"
 
 /****************************************************************************
@@ -48,41 +47,34 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_pause_handler
+ * Name: s698pm_smp_call_handler
  *
  * Description:
- *   Inter-CPU interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt handler inputs
- *
- * Returned Value:
- *   Should always return OK
+ *   This is the handler for SMP_CALL.
  *
  ****************************************************************************/
 
-int riscv_pause_handler(int irq, void *c, void *arg)
+int s698pm_smp_call_handler(int irq, void *c, void *arg)
 {
   struct tcb_s *tcb;
   int cpu = this_cpu();
 
-  nxsched_smp_call_handler(irq, c, arg);
-
   /* Clear IPI (Inter-Processor-Interrupt) */
 
-  riscv_ipi_clear(cpu);
+  putreg32(1 << S698PM_IPI_VECTOR, S698PM_IRQREG_ICLEAR);
 
   tcb = current_task(cpu);
-  riscv_savecontext(tcb);
+  sparc_savestate(tcb->xcp.regs);
+  nxsched_smp_call_handler(irq, c, arg);
   nxsched_process_delivered(cpu);
   tcb = current_task(cpu);
-  riscv_restorecontext(tcb);
+  sparc_restorestate(tcb->xcp.regs);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -100,11 +92,14 @@ int riscv_pause_handler(int irq, void *c, void *arg)
  *
  ****************************************************************************/
 
-inline_function int up_cpu_pause_async(int cpu)
+int up_send_smp_sched(int cpu)
 {
+  uintptr_t regaddr;
+
   /* Execute Pause IRQ to CPU(cpu) */
 
-  riscv_ipi_send(cpu);
+  regaddr = (uintptr_t)S698PM_IRQREG_P0_FORCE + (4 * cpu);
+  putreg32(1 << S698PM_IPI_VECTOR, regaddr);
 
   return OK;
 }
@@ -130,7 +125,6 @@ void up_send_smp_call(cpu_set_t cpuset)
   for (; cpuset != 0; cpuset &= ~(1 << cpu))
     {
       cpu = ffs(cpuset) - 1;
-      riscv_ipi_send(cpu);
+      up_send_smp_sched(cpu);
     }
 }
-
