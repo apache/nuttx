@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
-#include <nuttx/nuttx.h>
+#include <nuttx/macro.h>
 
 #include <string.h>
 

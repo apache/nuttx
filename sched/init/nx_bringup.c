@@ -36,7 +36,7 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/init.h>
-#include <nuttx/nuttx.h>
+#include <nuttx/macro.h>
 #include <nuttx/symtab.h>
 #include <nuttx/trace.h>
 #include <nuttx/wqueue.h>
