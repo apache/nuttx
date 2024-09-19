@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/arm_cpupause.c
+ * arch/arm/src/lc823450/lc823450_smpcall.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,20 +26,30 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <debug.h>
+#include <string.h>
+#include <stdio.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
-#include "arm_internal.h"
-#include "gic.h"
 #include "sched/sched.h"
-
-#ifdef CONFIG_SMP
+#include "arm_internal.h"
+#include "lc823450_intc.h"
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if 0
+#define DPRINTF(fmt, args...) llinfo(fmt, ##args)
+#else
+#define DPRINTF(fmt, args...) do {} while (0)
+#endif
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -47,35 +57,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_pause_async_handler
+ * Name: lc823450_smp_call_handler
  *
  * Description:
- *   This is the handler for async pause.
- *
- *   1. It saves the current task state at the head of the current assigned
- *      task list.
- *   2. It porcess g_delivertasks
- *   3. Returns from interrupt, restoring the state of the new task at the
- *      head of the ready to run list.
- *
- * Input Parameters:
- *   Standard interrupt handling
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
+ *   This is the handler for SMP_CALL.
  *
  ****************************************************************************/
 
-int arm_pause_async_handler(int irq, void *context, void *arg)
+int lc823450_smp_call_handler(int irq, void *c, void *arg)
 {
   int cpu = this_cpu();
 
+  nxsched_smp_call_handler(irq, c, arg);
+
+  /* Clear : Pause IRQ */
+
+  if (irq == LC823450_IRQ_SMP_CALL_01)
+    {
+      DPRINTF("CPU0 -> CPU1\n");
+      putreg32(IPICLR_INTISR0_CLR_1, IPICLR);
+    }
+  else
+    {
+      DPRINTF("CPU1 -> CPU0\n");
+      putreg32(IPICLR_INTISR1_CLR_1, IPICLR);
+    }
+
   nxsched_process_delivered(cpu);
+
   return OK;
 }
 
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -93,11 +107,43 @@ int arm_pause_async_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-inline_function int up_cpu_pause_async(int cpu)
+int up_send_smp_sched(int cpu)
 {
-  arm_cpu_sgi(GIC_SMP_CPUPAUSE_ASYNC, (1 << cpu));
+  /* Execute Pause IRQ to CPU(cpu) */
+
+  if (cpu == 1)
+    {
+      putreg32(IPIREG_INTISR0_1, IPIREG);
+    }
+  else
+    {
+      putreg32(IPIREG_INTISR1_1, IPIREG);
+    }
 
   return OK;
 }
 
-#endif /* CONFIG_SMP */
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  int cpu;
+
+  for (; cpuset != 0; cpuset &= ~(1 << cpu))
+    {
+      cpu = ffs(cpuset) - 1;
+      up_send_smp_sched(cpu);
+    }
+}

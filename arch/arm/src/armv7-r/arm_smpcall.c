@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/common/arm64_cpupause.c
+ * arch/arm/src/armv7-r/arm_smpcall.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,16 +26,17 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
-#include "arm64_internal.h"
-#include "arm64_gic.h"
+#include "arm_internal.h"
+#include "gic.h"
 #include "sched/sched.h"
+
+#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Private Data
@@ -46,10 +47,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm64_pause_async_handler
+ * Name: arm_smp_sched_handler
  *
  * Description:
- *   This is the handler for async pause.
+ *   This is the handler for sched.
  *
  *   1. It saves the current task state at the head of the current assigned
  *      task list.
@@ -65,17 +66,16 @@
  *
  ****************************************************************************/
 
-int arm64_pause_async_handler(int irq, void *context, void *arg)
+int arm_smp_sched_handler(int irq, void *context, void *arg)
 {
   int cpu = this_cpu();
 
   nxsched_process_delivered(cpu);
-
   return OK;
 }
 
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -93,11 +93,30 @@ int arm64_pause_async_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-inline_function int up_cpu_pause_async(int cpu)
+int up_send_smp_sched(int cpu)
 {
-  /* Execute SGI2 */
-
-  arm64_gic_raise_sgi(GIC_SMP_CPUPAUSE_ASYNC, (1 << cpu));
+  arm_cpu_sgi(GIC_SMP_SCHED, (1 << cpu));
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  up_trigger_irq(GIC_SMP_CALL, cpuset);
+}
+
+#endif /* CONFIG_SMP */

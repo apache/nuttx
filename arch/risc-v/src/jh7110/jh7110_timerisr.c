@@ -79,7 +79,7 @@ static int jh7110_ssoft_interrupt(int irq, void *context, void *arg)
     {
       /* We assume IPI has been issued */
 
-      riscv_pause_handler(irq, context, arg);
+      riscv_smp_call_handler(irq, context, arg);
     }
 #endif
 

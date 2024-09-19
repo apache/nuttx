@@ -608,14 +608,12 @@
 
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI9
-#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI10
-#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI11
-#  define GIC_SMP_CPUPAUSE_ASYNC GIC_IRQ_SGI12
+#  define GIC_SMP_CALL           GIC_IRQ_SGI10
+#  define GIC_SMP_SCHED          GIC_IRQ_SGI11
 #else
 #  define GIC_SMP_CPUSTART       GIC_IRQ_SGI1
-#  define GIC_SMP_CPUPAUSE       GIC_IRQ_SGI2
-#  define GIC_SMP_CPUCALL        GIC_IRQ_SGI3
-#  define GIC_SMP_CPUPAUSE_ASYNC GIC_IRQ_SGI4
+#  define GIC_SMP_CALL           GIC_IRQ_SGI2
+#  define GIC_SMP_SCHED          GIC_IRQ_SGI3
 #endif
 
 /****************************************************************************
@@ -806,10 +804,10 @@ int arm_start_handler(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************
- * Name: arm_pause_async_handler
+ * Name: arm_smp_sched_handler
  *
  * Description:
- *   This is the handler for async pause.
+ *   This is the handler for sched.
  *
  *   1. It saves the current task state at the head of the current assigned
  *      task list.
@@ -826,7 +824,7 @@ int arm_start_handler(int irq, void *context, void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-int arm_pause_async_handler(int irq, void *context, void *arg);
+int arm_smp_sched_handler(int irq, void *context, void *arg);
 #endif
 
 /****************************************************************************

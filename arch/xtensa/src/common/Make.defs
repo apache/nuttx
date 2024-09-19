@@ -53,7 +53,7 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CMN_CSRCS += xtensa_cpupause.c
+  CMN_CSRCS += xtensa_smpcall.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

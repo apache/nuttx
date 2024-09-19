@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sparc/src/s698pm/s698pm_cpupause.c
+ * arch/xtensa/src/common/xtensa_smpcall.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,20 +26,19 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <debug.h>
-#include <string.h>
-#include <stdio.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
+#include "xtensa.h"
 #include "sched/sched.h"
-#include "sparc_internal.h"
-#include "chip.h"
+
+#ifdef CONFIG_SMP
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -47,40 +46,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s698pm_pause_handler
+ * Name: xtensa_smp_call_handler
  *
  * Description:
- *   Inter-CPU interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt handler inputs
- *
- * Returned Value:
- *   Should always return OK
+ *   This is the handler for smp.
  *
  ****************************************************************************/
 
-int s698pm_pause_handler(int irq, void *c, void *arg)
+void xtensa_smp_call_handler(int irq, void *context, void *arg)
 {
-  struct tcb_s *tcb;
-  int cpu = this_cpu();
-
-  /* Clear IPI (Inter-Processor-Interrupt) */
-
-  putreg32(1 << S698PM_IPI_VECTOR, S698PM_IRQREG_ICLEAR);
-
-  tcb = current_task(cpu);
-  sparc_savestate(tcb->xcp.regs);
-  nxsched_smp_call_handler(irq, c, arg);
-  nxsched_process_delivered(cpu);
-  tcb = current_task(cpu);
-  sparc_restorestate(tcb->xcp.regs);
-
-  return OK;
+  nxsched_smp_call_handler(irq, context, arg);
+  nxsched_process_delivered(this_cpu());
 }
 
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -98,14 +78,11 @@ int s698pm_pause_handler(int irq, void *c, void *arg)
  *
  ****************************************************************************/
 
-inline_function int up_cpu_pause_async(int cpu)
+int up_send_smp_sched(int cpu)
 {
-  uintptr_t regaddr;
+  /* Execute the intercpu interrupt */
 
-  /* Execute Pause IRQ to CPU(cpu) */
-
-  regaddr = (uintptr_t)S698PM_IRQREG_P0_FORCE + (4 * cpu);
-  putreg32(1 << S698PM_IPI_VECTOR, regaddr);
+  xtensa_intercpu_interrupt(cpu, CPU_INTCODE_PAUSE);
 
   return OK;
 }
@@ -131,6 +108,8 @@ void up_send_smp_call(cpu_set_t cpuset)
   for (; cpuset != 0; cpuset &= ~(1 << cpu))
     {
       cpu = ffs(cpuset) - 1;
-      up_cpu_pause_async(cpu);
+      up_send_smp_sched(cpu);
     }
 }
+
+#endif /* CONFIG_SMP */

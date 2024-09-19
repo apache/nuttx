@@ -60,23 +60,14 @@ static int sim_smp_call_handler(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: sim_cpupause_handler
+ * Name: sim_smp_sched_handler
  *
  * Description:
- *   This is the SIGUSR signal handler.  It implements the core logic of
- *   up_cpu_pause() on the thread of execution the simulated CPU.
- *
- * Input Parameters:
- *   irq - the interrupt number
- *   context  - not used
- *   arg      - not used
- *
- * Returned Value:
- *   In case of success OK (0) is returned otherwise a negative value.
+ *   This is the handler for smp.
  *
  ****************************************************************************/
 
-static int sim_cpupause_handler(int irq, void *context, void *arg)
+static int sim_smp_sched_handler(int irq, void *context, void *arg)
 {
   struct tcb_s *tcb;
   int cpu = this_cpu();
@@ -173,11 +164,11 @@ int up_cpu_start(int cpu)
 int sim_init_ipi(int irq)
 {
   up_enable_irq(irq);
-  return irq_attach(irq, sim_cpupause_handler, NULL);
+  return irq_attach(irq, sim_smp_sched_handler, NULL);
 }
 
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -195,7 +186,7 @@ int sim_init_ipi(int irq)
  *
  ****************************************************************************/
 
-inline_function int up_cpu_pause_async(int cpu)
+int up_send_smp_sched(int cpu)
 {
   /* Generate IRQ for CPU(cpu) */
 

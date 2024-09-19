@@ -311,14 +311,12 @@
 
 #ifdef CONFIG_ARCH_TRUSTZONE_SECURE
 #  define GIC_SMP_CPUSTART          GIC_IRQ_SGI9
-#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI10
-#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI11
-#  define GIC_SMP_CPUPAUSE_ASYNC    GIC_IRQ_SGI12
+#  define GIC_SMP_CALL              GIC_IRQ_SGI10
+#  define GIC_SMP_SCHED             GIC_IRQ_SGI11
 #else
 #  define GIC_SMP_CPUSTART          GIC_IRQ_SGI1
-#  define GIC_SMP_CPUPAUSE          GIC_IRQ_SGI2
-#  define GIC_SMP_CPUCALL           GIC_IRQ_SGI3
-#  define GIC_SMP_CPUPAUSE_ASYNC    GIC_IRQ_SGI4
+#  define GIC_SMP_CALL              GIC_IRQ_SGI2
+#  define GIC_SMP_SCHED             GIC_IRQ_SGI3
 #endif
 
 /****************************************************************************
@@ -335,7 +333,7 @@ int arm_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 
 #ifdef CONFIG_SMP
 
-int arm_pause_async_handler(int irq, void *context, void *arg);
+int arm_smp_sched_handler(int irq, void *context, void *arg);
 void arm_gic_secondary_init(void);
 
 #endif

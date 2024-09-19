@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/cxd56_cpupause.c
+ * arch/arm/src/sam34/sam4cm_smpcall.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,7 +36,7 @@
 
 #include "sched/sched.h"
 #include "arm_internal.h"
-#include "hardware/cxd5602_memorymap.h"
+#include "hardware/sam4cm_ipc.h"
 
 #ifdef CONFIG_SMP
 
@@ -50,109 +50,50 @@
 #  define DPRINTF(fmt, args...) do {} while (0)
 #endif
 
-#define CXD56_CPU_P2_INT        (CXD56_SWINT_BASE + 0x8)  /* for APP_DSP0 */
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static volatile int g_irq_to_handle[CONFIG_SMP_NCPUS][2];
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: handle_irqreq
- *
- * Description:
- *   If an irq handling request is found on cpu, call up_enable_irq() or
- *   up_disable_irq(), then return true.
- *
- * Input Parameters:
- *   cpu - The index of the CPU to be queried
- *
- * Returned Value:
- *   true  = an irq handling request is found
- *   false = no irq handling request is found
- *
- ****************************************************************************/
-
-static bool handle_irqreq(int cpu)
-{
-  int i;
-  bool handled = false;
-
-  /* Check both cases */
-
-  for (i = 0; i < 2; i++)
-    {
-      int irqreq = g_irq_to_handle[cpu][i];
-
-      if (irqreq)
-        {
-          /* Clear g_irq_to_handle[cpu][i] */
-
-          g_irq_to_handle[cpu][i] = 0;
-
-          if (0 == i)
-            {
-              up_enable_irq(irqreq);
-            }
-          else
-            {
-              up_disable_irq(irqreq);
-            }
-
-          handled = true;
-
-          break;
-        }
-    }
-
-  return handled;
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_pause_handler
+ * Name: sam4cm_smp_call_handler
  *
  * Description:
- *   Inter-CPU interrupt handler
- *
- * Input Parameters:
- *   Standard interrupt handler inputs
- *
- * Returned Value:
- *   Should always return OK
+ *   This is the handler for SMP_CALL.
  *
  ****************************************************************************/
 
-int arm_pause_handler(int irq, void *c, void *arg)
+int sam4cm_smp_call_handler(int irq, void *c, void *arg)
 {
   int cpu = this_cpu();
-  int ret = OK;
-
-  handle_irqreq(cpu);
 
   nxsched_smp_call_handler(irq, c, arg);
 
-  DPRINTF("cpu%d will be paused\n", cpu);
+  /* Clear : Pause IRQ */
 
-  /* Clear SW_INT for APP_DSP(cpu) */
+  /* IPC Interrupt Clear Command Register (write-only) */
 
-  putreg32(0, CXD56_CPU_P2_INT + (4 * cpu));
+  if (1 == cpu)
+    {
+      DPRINTF("CPU0 -> CPU1\n");
+      putreg32(0x1, SAM_IPC1_ICCR);
+    }
+  else
+    {
+      DPRINTF("CPU1 -> CPU0\n");
+      putreg32(0x1, SAM_IPC0_ICCR);
+    }
 
   nxsched_process_delivered(cpu);
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
- * Name: up_cpu_pause_async
+ * Name: up_send_smp_sched
  *
  * Description:
  *   pause task execution on the CPU
@@ -170,11 +111,20 @@ int arm_pause_handler(int irq, void *c, void *arg)
  *
  ****************************************************************************/
 
-inline_function int up_cpu_pause_async(int cpu)
+int up_send_smp_sched(int cpu)
 {
-  /* Generate IRQ for CPU(cpu) */
+  /* Execute Pause IRQ to CPU(cpu) */
 
-  putreg32(1, CXD56_CPU_P2_INT + (4 * cpu));
+  /* Set IPC Interrupt (IRQ0) (write-only) */
+
+  if (cpu == 1)
+    {
+      putreg32(0x1, SAM_IPC1_ISCR);
+    }
+  else
+    {
+      putreg32(0x1, SAM_IPC0_ISCR);
+    }
 
   return OK;
 }
@@ -200,38 +150,8 @@ void up_send_smp_call(cpu_set_t cpuset)
   for (; cpuset != 0; cpuset &= ~(1 << cpu))
     {
       cpu = ffs(cpuset) - 1;
-      up_cpu_pause_async(cpu);
+      up_send_smp_sched(cpu);
     }
-}
-
-/****************************************************************************
- * Name: up_send_irqreq()
- *
- * Description:
- *   Send up_enable_irq() / up_disable_irq() request to the specified cpu
- *
- *   This function is called from up_enable_irq() or up_disable_irq()
- *   to be handled on specified CPU. Locking protocol in the sequence is
- *   the same as up_pause_cpu() plus up_resume_cpu().
- *
- * Input Parameters:
- *   idx - The request index (0: enable, 1: disable)
- *   irq - The IRQ number to be handled
- *   cpu - The index of the CPU which will handle the request
- *
- ****************************************************************************/
-
-void up_send_irqreq(int idx, int irq, int cpu)
-{
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
-
-  /* Set irq for the cpu */
-
-  g_irq_to_handle[cpu][idx] = irq;
-
-  /* Generate IRQ for CPU(cpu) */
-
-  putreg32(1, CXD56_CPU_P2_INT + (4 * cpu));
 }
 
 #endif /* CONFIG_SMP */
