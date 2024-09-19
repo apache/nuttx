@@ -68,7 +68,7 @@ struct bmi270_sensor_s
   FAR void                  *dev;
   bool                       enabled;
 #ifdef CONFIG_SENSORS_BMI270_POLL
-  unsigned long              interval;
+  uint32_t                   interval;
 #endif
   struct bmi270_dev_s        base;
 };
@@ -93,7 +93,7 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *period_us);
+                               FAR uint32_t *period_us);
 #ifndef CONFIG_SENSORS_BMI270_POLL
 static int bmi270_fetch(FAR struct sensor_lowerhalf_s *lower,
                         FAR struct file *filep,
@@ -209,7 +209,7 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR struct file *filep,
-                               FAR unsigned long *interval)
+                               FAR uint32_t *interval)
 {
 #ifdef CONFIG_SENSORS_BMI270_POLL
   FAR struct bmi270_sensor_s *priv = NULL;
@@ -224,7 +224,7 @@ static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
 #ifndef CONFIG_SENSORS_BMI270_POLL
 /****************************************************************************
- * Name: bmi270_set_interval
+ * Name: bmi270_fetch
  ****************************************************************************/
 
 static int bmi270_fetch(FAR struct sensor_lowerhalf_s *lower,
