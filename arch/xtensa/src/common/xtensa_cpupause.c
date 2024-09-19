@@ -208,10 +208,12 @@ int up_cpu_paused_restore(void)
  *
  ****************************************************************************/
 
-void xtensa_pause_handler(void)
+void xtensa_pause_handler(int irq, void *context, void *arg)
 {
   struct tcb_s *tcb;
   int cpu = this_cpu();
+
+  nxsched_smp_call_handler(irq, context, arg);
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the
