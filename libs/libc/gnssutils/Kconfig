@@ -12,3 +12,9 @@ config GNSSUTILS_MINMEA_LIB
 		NOTE: This library depends on having some version of math.h
 		at include/nuttx.  There are some different ways to accomplish
 		this.  See the discussion in the top-level nuttx/README.txt file.
+
+config GNSSUTILS_MINMEA_LIB_EXTEND_LOR_LSQ
+	bool "Enable extended sentnce LOR LSQ"
+	default n
+	---help---
+		Enable vendor extended sentnce "LOR LSQ" for the MINMEA NMEA library.
