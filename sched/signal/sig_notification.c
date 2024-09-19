@@ -112,8 +112,8 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
   if (event->sigev_notify & SIGEV_SIGNAL)
     {
-      FAR struct tcb_s *rtcb = this_task();
       siginfo_t info;
+      bool      thread = false;
 
       /* Yes.. Create the siginfo structure */
 
@@ -121,7 +121,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
       info.si_code   = code;
       info.si_errno  = OK;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      info.si_pid    = rtcb->pid;
+      info.si_pid    = this_task()->pid;
       info.si_status = OK;
 #endif
       info.si_user   = NULL;
@@ -134,28 +134,17 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       memcpy(&info.si_value, &event->sigev_value, sizeof(union sigval));
 
-      /* Used only by POSIX timer. Before the notification, we should
-       * validate the tid and make sure that the notified thread is
-       * in same process with current thread.
-       */
+      /* SIGEV_THREAD_ID currently used only by POSIX timer. */
 
       if (event->sigev_notify & SIGEV_THREAD_ID)
         {
-          FAR struct tcb_s *ptcb;
-          ptcb = nxsched_get_tcb(event->sigev_notify_thread_id);
-          if (ptcb != NULL && ptcb->group == rtcb->group)
-            {
-              return nxsig_tcbdispatch(ptcb, &info);
-            }
-          else
-            {
-              return -ENOENT;
-            }
+          thread = true;
+          pid = event->sigev_notify_thread_id;
         }
 
       /* Send the signal */
 
-      return nxsig_dispatch(pid, &info);
+      return nxsig_dispatch(pid, &info, thread);
     }
 
 #ifdef CONFIG_SIG_EVTHREAD
