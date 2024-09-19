@@ -34,7 +34,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stddef.h>
-#  include <nuttx/nuttx.h>
+#  include <nuttx/macro.h>
 #endif
 
 /****************************************************************************
