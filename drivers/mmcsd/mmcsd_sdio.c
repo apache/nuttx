@@ -981,10 +981,10 @@ static void mmcsd_decode_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 
 #ifdef CONFIG_ENDIAN_BIG  /* Card transfers SCR in big-endian order */
   priv->buswidth     = (scr[0] >> 16) & 15;
-  priv->cmd23support =  scr[0]        & 2;
+  priv->cmd23support = (scr[0] >> 1)  & 1;
 #else
   priv->buswidth     = (scr[0] >> 8)  & 15;
-  priv->cmd23support = (scr[0] >> 24) & 2;
+  priv->cmd23support = (scr[0] >> 25) & 1;
 #endif
 
 #ifdef CONFIG_DEBUG_FS_INFO
