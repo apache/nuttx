@@ -27,15 +27,17 @@ SECTIONS
   . = TEXT_ADDR;
 
   /* where the global variable out-of-bounds detection information located */
+
 #ifdef CONFIG_MM_KASAN_GLOBAL
-  .kasan.unused :
-  {
+  .kasan.unused : {
     *(.data..LASANLOC*)
   }
-  .kasan.global :
-  {
+  .kasan.global : {
     KEEP (*(.data..LASAN0))
     KEEP (*(.data.rel.local..LASAN0))
+  }
+  .kasan.shadows : {
+    *(.kasan.shadows)
   }
 #endif
 
@@ -60,7 +62,7 @@ SECTIONS
       _etext = . ;
     }
 
-    .init_section :
+  .init_section :
     {
       _sinit = ABSOLUTE(.);
       KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
@@ -78,17 +80,19 @@ SECTIONS
       _erodata = . ;
     }
 
-  .tdata : {
+  .tdata :
+    {
       _stdata = ABSOLUTE(.);
       *(.tdata .tdata.* .gnu.linkonce.td.*);
       _etdata = ABSOLUTE(.);
-  }
+    }
 
-  .tbss : {
+  .tbss :
+    {
       _stbss = ABSOLUTE(.);
       *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
       _etbss = ABSOLUTE(.);
-  }
+    }
 
   _eronly = ABSOLUTE(.);
 
@@ -116,18 +120,18 @@ SECTIONS
       _ebss = . ;
     }
 
-    /* Stabs debugging sections.    */
+  /* Stabs debugging sections.    */
 
-    .stab 0 : { *(.stab) }
-    .stabstr 0 : { *(.stabstr) }
-    .stab.excl 0 : { *(.stab.excl) }
-    .stab.exclstr 0 : { *(.stab.exclstr) }
-    .stab.index 0 : { *(.stab.index) }
-    .stab.indexstr 0 : { *(.stab.indexstr) }
-    .comment 0 : { *(.comment) }
-    .debug_abbrev 0 : { *(.debug_abbrev) }
-    .debug_info 0 : { *(.debug_info) }
-    .debug_line 0 : { *(.debug_line) }
-    .debug_pubnames 0 : { *(.debug_pubnames) }
-    .debug_aranges 0 : { *(.debug_aranges) }
+  .stab 0 : { *(.stab) }
+  .stabstr 0 : { *(.stabstr) }
+  .stab.excl 0 : { *(.stab.excl) }
+  .stab.exclstr 0 : { *(.stab.exclstr) }
+  .stab.index 0 : { *(.stab.index) }
+  .stab.indexstr 0 : { *(.stab.indexstr) }
+  .comment 0 : { *(.comment) }
+  .debug_abbrev 0 : { *(.debug_abbrev) }
+  .debug_info 0 : { *(.debug_info) }
+  .debug_line 0 : { *(.debug_line) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_aranges 0 : { *(.debug_aranges) }
 }
