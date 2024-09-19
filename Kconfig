@@ -275,6 +275,7 @@ config BASE_DEFCONFIG
 
 config MODULES
 	bool
+	option modules
 	---help---
 		Automatically selected if KERNEL build is selected.
 		This selection marks the implementation of Kconfig
