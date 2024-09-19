@@ -30,7 +30,6 @@
 #include "arm_timer.h"
 #include "barriers.h"
 #include "gic.h"
-#include "cp15.h"
 
 /****************************************************************************
  * Pre-processor Definitions

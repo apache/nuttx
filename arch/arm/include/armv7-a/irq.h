@@ -36,6 +36,8 @@
 #  include <stdint.h>
 #endif
 
+#include <arch/armv7-a/cp15.h>
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
@@ -457,11 +459,7 @@ static inline_function int up_cpu_index(void)
 
   /* Read the Multiprocessor Affinity Register (MPIDR) */
 
-  __asm__ __volatile__
-  (
-    "mrc " "p15, " "0" ", %0, " "c0" ", " "c0" ", " "5" "\n"
-    : "=r"(mpidr)
-  );
+  mpidr = CP15_GET(MPIDR);
 
   /* And return the CPU ID field */
 
@@ -500,23 +498,13 @@ static inline_function uint32_t up_getsp(void)
 noinstrument_function
 static inline_function uint32_t *up_current_regs(void)
 {
-  uint32_t *regs;
-  __asm__ __volatile__
-  (
-    "mrc " "p15, " "0" ", %0, " "c13" ", " "c0" ", " "4" "\n"
-    : "=r"(regs)
-  );
-  return regs;
+  return (uint32_t *)CP15_GET(TPIDRPRW);
 }
 
 noinstrument_function
 static inline_function void up_set_current_regs(uint32_t *regs)
 {
-  __asm__ __volatile__
-  (
-    "mcr " "p15, " "0" ", %0, " "c13" ", " "c0" ", " "4" "\n"
-    :: "r"(regs)
-  );
+  CP15_SET(TPIDRPRW, regs);
 }
 
 noinstrument_function
