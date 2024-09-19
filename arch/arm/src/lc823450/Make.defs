@@ -92,7 +92,7 @@ endif
 ifeq ($(CONFIG_SMP), y)
 CHIP_CSRCS += lc823450_cpuidlestack.c
 CHIP_CSRCS += lc823450_cpuindex.c
-CHIP_CSRCS += lc823450_cpupause.c
+CHIP_CSRCS += lc823450_smpcall.c
 CHIP_CSRCS += lc823450_cpustart.c
 CHIP_CSRCS += lc823450_testset.c
 CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))

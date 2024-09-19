@@ -470,7 +470,7 @@ void up_enable_irq(int irq)
 
       /* EXTINT needs to be handled on CPU0 to avoid deadlock */
 
-      if (irq > CXD56_IRQ_EXTINT && irq != CXD56_IRQ_SW_INT && 0 != cpu)
+      if (irq > CXD56_IRQ_EXTINT && irq != CXD56_IRQ_SMP_CALL && 0 != cpu)
         {
           up_send_irqreq(0, irq, 0);
           return;

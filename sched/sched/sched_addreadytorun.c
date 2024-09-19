@@ -233,7 +233,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
               g_delivertasks[cpu] = btcb;
               btcb->cpu = cpu;
               btcb->task_state = TSTATE_TASK_ASSIGNED;
-              up_cpu_pause_async(cpu);
+              up_send_smp_sched(cpu);
             }
           else
             {

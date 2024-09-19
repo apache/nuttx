@@ -67,7 +67,7 @@
 
 volatile static spinlock_t g_core1_boot;
 
-extern int arm_pause_handler(int irq, void *c, void *arg);
+extern int rp2040_smp_call_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Private Functions
@@ -151,8 +151,8 @@ static void core1_boot(void)
 
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP2040_SIO_IRQ_PROC1, arm_pause_handler, NULL);
-  up_enable_irq(RP2040_SIO_IRQ_PROC1);
+  irq_attach(RP2040_SMP_CALL_PROC1, rp2040_smp_call_handler, NULL);
+  up_enable_irq(RP2040_SMP_CALL_PROC1);
 
   spin_unlock(&g_core1_boot);
 
@@ -247,8 +247,8 @@ int up_cpu_start(int cpu)
 
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP2040_SIO_IRQ_PROC0, arm_pause_handler, NULL);
-  up_enable_irq(RP2040_SIO_IRQ_PROC0);
+  irq_attach(RP2040_SMP_CALL_PROC0, rp2040_smp_call_handler, NULL);
+  up_enable_irq(RP2040_SMP_CALL_PROC0);
 
   spin_lock(&g_core1_boot);
 

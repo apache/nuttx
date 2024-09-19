@@ -71,7 +71,7 @@ endif()
 
 if(CONFIG_SMP)
   list(APPEND SRCS arm64_cpuidlestack.c arm64_cpustart.c)
-  list(APPEND SRCS arm64_cpupause.c)
+  list(APPEND SRCS arm64_smpcall.c)
 endif()
 
 if(CONFIG_BUILD_KERNEL)
