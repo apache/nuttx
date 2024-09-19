@@ -26,12 +26,13 @@
 
 #include <stdint.h>
 
+#include <arch/irq.h>
+
 #include "arm_internal.h"
 #include "cp15_cacheops.h"
 #include "barriers.h"
 #include "sctlr.h"
 #include "scu.h"
-#include "cp15.h"
 
 /****************************************************************************
  * Public Functions
