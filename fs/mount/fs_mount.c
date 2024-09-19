@@ -400,33 +400,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
           goto errout_with_lock;
         }
     }
-  else
 #endif
-
-  /* Insert a dummy node -- we need to hold the inode semaphore
-   * to do this because we will have a momentarily bad structure.
-   * NOTE that the new inode will be created with an initial reference
-   * count of zero.
-   */
-
-    {
-      ret = inode_reserve(target, 0777, &mountpt_inode);
-      if (ret < 0)
-        {
-          /* inode_reserve can fail for a couple of reasons, but the most
-           * likely one is that the inode already exists. inode_reserve may
-           * return:
-           *
-           *  -EINVAL - 'path' is invalid for this operation
-           *  -EEXIST - An inode already exists at 'path'
-           *  -ENOMEM - Failed to allocate in-memory resources for the
-           *            operation
-           */
-
-          ferr("ERROR: Failed to reserve inode for target %s\n", target);
-          goto errout_with_lock;
-        }
-    }
 
   /* Bind the block driver to an instance of the file system.  The file
    * system returns a reference to some opaque, fs-dependent structure
@@ -439,7 +413,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
       ferr("ERROR: Filesystem does not support bind\n");
       ret = -EINVAL;
-      goto errout_with_mountpt;
+      goto errout_with_lock;
     }
 
   /* Increment reference count for the reference we pass to the file system */
@@ -481,7 +455,33 @@ int nx_mount(FAR const char *source, FAR const char *target,
         }
 #endif
 
-      goto errout_with_mountpt;
+      goto errout_with_lock;
+    }
+
+  /* Insert a dummy node -- we need to hold the inode semaphore
+   * to do this because we will have a momentarily bad structure.
+   * NOTE that the new inode will be created with an initial reference
+   * count of zero.
+   */
+
+  if (mountpt_inode == NULL)
+    {
+      ret = inode_reserve(target, 0777, &mountpt_inode);
+      if (ret < 0)
+        {
+          /* inode_reserve can fail for a couple of reasons, but the most
+           * likely one is that the inode already exists. inode_reserve may
+           * return:
+           *
+           *  -EINVAL - 'path' is invalid for this operation
+           *  -EEXIST - An inode already exists at 'path'
+           *  -ENOMEM - Failed to allocate in-memory resources for the
+           *            operation
+           */
+
+          ferr("ERROR: Failed to reserve inode for target %s\n", target);
+          goto errout_with_bind;
+        }
     }
 
   /* We have it, now populate it with driver specific information. */
@@ -517,8 +517,12 @@ int nx_mount(FAR const char *source, FAR const char *target,
 
   /* A lot of goto's!  But they make the error handling much simpler */
 
-errout_with_mountpt:
-  inode_remove(target);
+errout_with_bind:
+  if (mops->unbind != NULL)
+    {
+      mops->unbind(fshandle, &drvr_inode, 0);
+    }
+
 errout_with_lock:
   inode_unlock();
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
