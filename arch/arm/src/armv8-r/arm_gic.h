@@ -30,6 +30,7 @@
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 
+#include "arm_internal.h"
 #include "arm.h"
 
 /****************************************************************************
@@ -350,7 +351,10 @@ void arm_gic_secondary_init(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-uint64_t arm_get_mpid(int cpu);
+static inline uint64_t arm_get_mpid(int cpu)
+{
+  return CORE_TO_MPID(cpu, 0);
+}
 #else
 #  define arm_get_mpid(cpu) GET_MPIDR()
 #endif /* CONFIG_SMP */
