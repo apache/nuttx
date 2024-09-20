@@ -104,6 +104,7 @@ SECTIONS
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
     *libsched.a:*sched_get_stackinfo.*(.literal .text .literal.* .text.*)
+    *libsched.a:stack_record.*(.literal .text .literal.* .text.*)
 
 #ifdef CONFIG_ESP32S3_SPEED_UP_ISR
     *libarch.a:xtensa_switchcontext.*(.literal.up_switch_context .text.up_switch_context)
