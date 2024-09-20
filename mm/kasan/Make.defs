@@ -24,21 +24,18 @@ CSRCS += hook.c
 
 ifeq ($(CONFIG_MM_KASAN),y)
 
-  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-
-    ifeq ($(CONFIG_MM_KASAN_GENERIC),y)
-      CFLAGS += -fno-sanitize=kernel-address
-    endif
-
-    ifeq ($(CONFIG_MM_KASAN_SW_TAGS),y)
-      CFLAGS += -fno-sanitize=kernel-hwaddress
-    endif
-
-    ifeq ($(CONFIG_LTO_NONE),n)
-      CFLAGS += -fno-lto
-    endif
-
+  ifeq ($(CONFIG_MM_KASAN_GENERIC),y)
+    CFLAGS += -fno-sanitize=kernel-address
   endif
+
+  ifeq ($(CONFIG_MM_KASAN_SW_TAGS),y)
+    CFLAGS += -fno-sanitize=kernel-hwaddress
+  endif
+
+  ifeq ($(CONFIG_LTO_NONE),n)
+    CFLAGS += -fno-lto
+  endif
+
 endif
 
 CFLAGS += -fno-builtin
