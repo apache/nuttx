@@ -66,7 +66,7 @@ struct lan9250_lower_s
    * driver will not read the MAC from the CPU.
    */
 
-  CODE void (*getmac)(FAR const struct lan9250_lower_s *lower,
+  CODE int (*getmac)(FAR const struct lan9250_lower_s *lower,
                       FAR uint8_t *mac);
 };
 
