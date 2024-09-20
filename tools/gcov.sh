@@ -81,10 +81,10 @@ if [ "$files" == "0" ] ;then
 fi
 
 # Generate coverage text report
-lcov -c -d ${GCOV_DIR}/data -o coverage.info --rc lcov_branch_coverage=1 ${GCOV_TOOL}
+lcov -c -d ${GCOV_DIR}/data -o coverage.info --rc lcov_branch_coverage=1 ${GCOV_TOOL} --ignore-errors gcov
 
 # Generate coverage page report
-genhtml --branch-coverage -o result coverage.info
+genhtml --branch-coverage -o result coverage.info --ignore-errors source
 
 if [ $? -ne 0 ]; then
     echo "Failed to generate coverage file"
