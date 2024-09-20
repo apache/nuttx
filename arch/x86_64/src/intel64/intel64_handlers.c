@@ -175,7 +175,7 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
                "with error code %" PRId64 ":\n",
                irq, regs[REG_ERRCODE]);
 
-        up_dump_register(regs);
+        PANIC_WITH_REGS("panic", regs);
 
         up_trash_cpu();
         break;
