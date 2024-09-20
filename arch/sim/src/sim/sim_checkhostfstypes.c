@@ -63,6 +63,7 @@
 /* dirent */
 
 STATIC_ASSERT_FILED(nuttx_dirent_s, dirent, d_type);
+STATIC_ASSERT_FILED(nuttx_dirent_s, dirent, d_ino);
 STATIC_ASSERT_FILED(nuttx_dirent_s, dirent, d_name);
 
 STATIC_ASSERT(sizeof(struct nuttx_dirent_s) == sizeof(struct dirent));

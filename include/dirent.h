@@ -111,6 +111,7 @@
 struct dirent
 {
   uint8_t  d_type;                /* Type of file */
+  ino_t    d_ino;                 /* File serial number, not implemented */
   char     d_name[NAME_MAX + 1];  /* File name */
 };
 

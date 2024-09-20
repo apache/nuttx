@@ -464,6 +464,7 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode = dir->fd_root;
 #endif
+  FAR struct dirent *dirent = (FAR struct dirent *)buffer;
   int ret;
 
   /* Verify that we were provided with a valid directory structure */
@@ -480,15 +481,14 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
 #ifndef CONFIG_DISABLE_MOUNTPOINT
   if (INODE_IS_MOUNTPT(inode))
     {
-      ret = inode->u.i_mops->readdir(inode, dir,
-                                     (FAR struct dirent *)buffer);
+      ret = inode->u.i_mops->readdir(inode, dir, dirent);
     }
   else
 #endif
     {
       /* The node is part of the root pseudo file system */
 
-      ret = read_pseudodir(dir, (FAR struct dirent *)buffer);
+      ret = read_pseudodir(dir, dirent);
     }
 
   /* ret < 0 is an error. Special case: ret = -ENOENT is end of file */
@@ -503,6 +503,9 @@ static ssize_t dir_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
+  /* REVISIT: Should we use i_ino for the d_ino field? */
+
+  dirent->d_ino = dir->fd_root->i_ino;
   filep->f_pos++;
   return sizeof(struct dirent);
 }
