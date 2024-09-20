@@ -15,9 +15,13 @@ config ARCH_CHIP_IMX93
 	bool "i.MX9 Application Processor"
 	select ARCH_HAVE_MULTICPU
 	select ARMV8A_HAVE_GICv3
-	select ARCH_CORTEX_A55
+	select ARCH_CORTEX_A55 if !IMX9_BOOTLOADER
+	select ARCH_CORTEX_A53 if IMX9_BOOTLOADER
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_RESET
+	---help---
+		EL3/OCRAM is a bad combination for atomic instructions, they don't work.
+		Instead, use A53 that will have no atomic instruction set available.
 
 endchoice # i.MX9 Chip Selection
 
@@ -58,6 +62,7 @@ config IMX9_HAVE_ATF_FIRMWARE
 config IMX9_BOOTLOADER
 	bool "Bootloader"
 	select ARM64_DECODEFIQ
+	select IMX9_DDR_TRAINING
 	default n
 	---help---
 		Configure NuttX as the bootloader. NuttX will be compiled
@@ -70,6 +75,13 @@ config BOOTLOADER_SYS_CLOCK
 	---help---
 		If the sysclk is set to a certain value, this should be it.
 		The value is used by the timer interrupt infrastructure.
+
+config IMX9_DDR_TRAINING
+	bool "DDR Training"
+	depends on IMX9_BOOTLOADER
+	default n
+	---help---
+		Perform DDR training to prepare the external memory for use.
 
 menu "i.MX9 Peripheral Selection"
 
