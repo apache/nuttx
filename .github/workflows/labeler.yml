@@ -27,6 +27,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Assign labels based on paths
+        uses: actions/labeler@main
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          sync-labels: true
+
       - name: Assign labels based on the PR's size
         uses: codelytv/pr-size-labeler@v1.10.0
         with:
