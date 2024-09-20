@@ -29,9 +29,6 @@ from elftools.elf.elffile import ELFFile
 
 debug = False
 
-# N-byte aligned shadow area 1 bit
-KASAN_GLOBAL_ALIGN = 32
-
 # The maximum gap that two data segments can tolerate
 KASAN_MAX_DATA_GAP = 1 << 16
 
@@ -68,10 +65,11 @@ KASAN_GLOBAL_STRUCT_64 = Struct(
 
 # Global configuration information
 class Config:
-    def __init__(self, outpath, elf, ldscript):
+    def __init__(self, outpath, elf, ldscript, align):
         self.outpath = outpath
         self.elf = elf
         self.ldscript = ldscript
+        self.align = align
 
         if self.elf is None or os.path.exists(self.elf) is False:
             self.elf = None
@@ -97,43 +95,73 @@ class Config:
 
 
 class KASanRegion:
-    def __init__(self, start, end) -> None:
+    def __init__(self, start, end, align, endian, bitwides) -> None:
         self.start = start
         self.end = end
-        self.size = int((end - start) // KASAN_GLOBAL_ALIGN // 8) + 1
-        self.shadow = bytearray(b"\x00" * self.size)
+        self.align = align
+        self.endian = endian
+        self.bitwides = bitwides
+        self.size = int((end - start) // self.align // self.bitwides) + 1
+        self.__shadow = [0] * self.size
 
-    def mark_bit(self, index, nbits):
-        self.shadow[index] |= 1 << nbits
+    def shadow(self) -> bytearray:
+        ret = bytearray()
+        for i in self.__shadow:
+            for j in range(self.bitwides // 8):
+                if self.endian == "little":
+                    ret.append((i >> (j * 8)) & 0xFF)
+                else:
+                    ret.append((i >> ((self.bitwides // 8 - j - 1) * 8)) & 0xFF)
+        return ret
+
+    def mark_bit(self, index, nbit, nbits):
+        for i in range(nbits):
+            self.__shadow[index] |= 1 << nbit
+            nbit += 1
+            if nbit == self.bitwides:
+                index += 1
+                nbit = 0
 
     def poison(self, dict):
         dict_size = dict["size"]
-        if dict_size % 32:
-            dict_size = int((dict_size + 31) // 32) * 32
+        if dict_size % self.align:
+            dict_size = int((dict_size + self.align - 1) // self.align) * self.align
 
-        distance = (dict["beg"] + dict_size - self.start) // KASAN_GLOBAL_ALIGN
-        index = int(distance // 8)
-        nbits = distance % 8
+        distance = (dict["beg"] + dict_size - self.start) // self.align
+
+        # Index of the marked shadow area
+        index = int(distance // self.bitwides)
+
+        # The X-th bit of the specific byte marked
+        nbit = distance % self.bitwides
+
+        # Number of digits to be marked
+        nbits = (dict["size_with_redzone"] - dict_size) // self.align
+
         if debug:
             print(
-                "regin: %08x addr: %08x size: %d bits: %d || poison index: %d nbits: %d"
+                "regin: %08x addr: %08x size: %d bits: %d || poison index: %d nbit: %d nbits: %d"
                 % (
                     self.start,
                     dict["beg"],
                     dict["size"],
-                    int(dict["size_with_redzone"] // KASAN_GLOBAL_ALIGN),
+                    int(dict["size_with_redzone"] // self.align),
                     index,
+                    nbit,
                     nbits,
                 )
             )
 
         # Using 32bytes: with 1bit alignment,
         # only one bit of inaccessible area exists for each pair of global variables.
-        self.mark_bit(index, nbits)
+        self.mark_bit(index, nbit, nbits)
 
 
 class KASanInfo:
-    def __init__(self) -> None:
+    def __init__(self, align, endian, bitwides) -> None:
+        self.align = align
+        self.endian = endian
+        self.bitwides = bitwides
         # Record the starting position of the merged data block
         self.data_sections = []
         # Record the kasan region corresponding to each data block
@@ -158,13 +186,15 @@ class KASanInfo:
             end = i[1]
             if debug:
                 print("KAsan Shadow Block: %08x ---- %08x" % (start, end))
-            self.regions.append(KASanRegion(start, end))
+            self.regions.append(
+                KASanRegion(start, end, self.align, self.endian, self.bitwides)
+            )
 
     def mark_shadow(self, dict):
         for i in self.regions:
             start = i.start
             end = i.end
-            if start <= dict["beg"] and dict["beg"] <= end:
+            if start <= dict["beg"] and dict["beg"] + dict["size_with_redzone"] <= end:
                 i.poison(dict)
                 break
 
@@ -227,10 +257,11 @@ def create_kasan_file(config: Config, region_list=[]):
                 % (long_to_bytestring(config.bitwides, config.endian, region.end))
             )
 
-            for j in range(len(region.shadow)):
+            shadow = region.shadow()
+            for j in range(len(shadow)):
                 if j % 8 == 0:
                     file.write("\n")
-                file.write("0x%02x, " % (region.shadow[j]))
+                file.write("0x%02x, " % (shadow[j]))
 
             file.write("\n};")
 
@@ -253,6 +284,7 @@ def parse_args() -> Config:
     global debug
     parser = argparse.ArgumentParser(description="Build kasan global variable region")
     parser.add_argument("-o", "--outpath", help="outpath")
+    parser.add_argument("-a", "--align", default=32, type=int, help="alignment")
     parser.add_argument("-d", "--ldscript", help="ld script path(Only support sim)")
     parser.add_argument("-e", "--elffile", help="elffile")
     parser.add_argument(
@@ -264,10 +296,11 @@ def parse_args() -> Config:
 
     args = parser.parse_args()
     debug = args.debug
-    return Config(args.outpath, args.elffile, args.ldscript)
+    return Config(args.outpath, args.elffile, args.ldscript, args.align)
 
 
 def main():
+
     config = parse_args()
     if config.elf is None:
         handle_error(config)
@@ -298,7 +331,7 @@ def main():
     dict_list = sorted(dict_list, key=lambda item: item["beg"])
 
     # Merge all global variables to obtain several segments of the distribution range
-    kasan = KASanInfo()
+    kasan = KASanInfo(config.align, config.endian, config.bitwides)
     for i in dict_list:
         kasan.merge_ranges(i)
 

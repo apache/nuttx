@@ -40,8 +40,6 @@
 #define KASAN_GLOBAL_LAST_WORD_MASK(end) \
   (UINTPTR_MAX >> (-(end) & (KASAN_BITS_PER_WORD - 1)))
 
-#define KASAN_GLOBAL_SHADOW_SCALE (32)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -77,7 +75,7 @@ kasan_global_mem_to_shadow(FAR const void *ptr, size_t size,
         {
           DEBUGASSERT(addr + size <= g_global_region[i]->end);
           addr -= g_global_region[i]->begin;
-          addr /= KASAN_GLOBAL_SHADOW_SCALE;
+          addr /= CONFIG_MM_KASAN_GLOBAL_ALIGN;
           *bit  = addr % KASAN_BITS_PER_WORD;
           return (FAR uintptr_t *)
                  &g_global_region[i]->shadow[addr / KASAN_BITS_PER_WORD];
@@ -101,15 +99,15 @@ kasan_global_is_poisoned(FAR const void *addr, size_t size)
       return false;
     }
 
-  if (size <= KASAN_GLOBAL_SHADOW_SCALE)
+  if (size <= CONFIG_MM_KASAN_GLOBAL_ALIGN)
     {
       return ((*p >> bit) & 1);
     }
 
   nbit = KASAN_BITS_PER_WORD - bit % KASAN_BITS_PER_WORD;
   mask = KASAN_GLOBAL_FIRST_WORD_MASK(bit);
-  size = ALIGN_UP(size, KASAN_GLOBAL_SHADOW_SCALE);
-  size /= KASAN_GLOBAL_SHADOW_SCALE;
+  size = ALIGN_UP(size, CONFIG_MM_KASAN_GLOBAL_ALIGN);
+  size /= CONFIG_MM_KASAN_GLOBAL_ALIGN;
 
   while (size >= nbit)
     {
