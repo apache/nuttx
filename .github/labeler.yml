@@ -1,0 +1,200 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+# add arch labels
+
+"Arch: arm":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/arm/**'
+
+"Arch: arm64":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/arm64/**'
+
+"Arch: avr":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/avr/**'
+
+"Arch: ceva":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/ceva/**'
+
+"Arch: hc":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/hc/**'
+
+"Arch: mips":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/mips/**'
+
+"Arch: openrisc":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/or1k/**'
+
+"Arch: renesas":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/renesas/**'
+
+"Arch: risc-v":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/risc-v/**'
+
+"Arch: simulator":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/sim/**'
+
+"Arch: sparc":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/sparc/**'
+
+"Arch: tricore":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/tricore/**'
+
+"Arch: x86":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/x86/**'
+
+"Arch: x86_64":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/x86_64/**'
+
+"Arch: xtensa":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/xtensa/**'
+
+"Arch: z16":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/z16/**'
+
+"Arch: z80":
+  - changed-files:
+      - any-glob-to-any-file: 'arch/z80/**'
+
+# add area labels
+
+"Area: Audio":
+  - changed-files:
+      - any-glob-to-any-file: 'audio/**'
+      - any-glob-to-any-file: 'drivers/audio/**'
+      - any-glob-to-any-file: 'include/nuttx/audio/**'
+
+"Area: Binfmt":
+  - changed-files:
+      - any-glob-to-any-file: 'binfmt/**'
+      - any-glob-to-any-file: 'include/nuttx/binfmt/**'
+
+"Area: Bluetooth":
+  - changed-files:
+      - any-glob-to-any-file: 'wireless/bluetooth/**'
+      - any-glob-to-any-file: 'nuttx/drivers/wireless/bluetooth/**'
+      - any-glob-to-any-file: 'include/nuttx/wireless/bluetooth/**'
+
+"Area: Board support":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/**'
+
+"Area: Build system":
+  - changed-files:
+      - any-glob-to-any-file: 'Makefile'
+      - any-glob-to-any-file: 'CMakeLists.txt'
+      - any-glob-to-any-file: 'cmake/**'
+      - any-glob-to-any-file: 'tools/*.mk'
+
+"Area: CI":
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+      - any-glob-to-any-file: 'tools/ci/**'
+
+"Area: Crypto":
+  - changed-files:
+      - any-glob-to-any-file: 'crypto/**'
+      - any-glob-to-any-file: 'drivers/crypto/**'
+      - any-glob-to-any-file: 'include/crypto/**'
+      - any-glob-to-any-file: 'include/nuttx/crypto/**'
+
+"Area: Documentation":
+  - changed-files:
+      - any-glob-to-any-file: 'Documentation/**'
+      - any-glob-to-any-file: 'README.md'
+      - any-glob-to-any-file: 'ReleaseNotes'
+      - any-glob-to-any-file: 'CONTRIBUTING.md'
+      - any-glob-to-any-file: 'INVIOLABLES.md'
+
+"Area: File System":
+  - changed-files:
+      - any-glob-to-any-file: 'fs/**'
+      - any-glob-to-any-file: 'include/nuttx/fs/**'
+
+"Area: Github Actions":
+  - changed-files:
+      - any-glob-to-any-file: '.github/actions/**'
+
+"Area: Graphics":
+  - changed-files:
+      - any-glob-to-any-file: 'graphics/**'
+      - any-glob-to-any-file: 'drivers/lcd/**'
+      - any-glob-to-any-file: 'include/nuttx/lcd/**'
+
+"Area: Memory Management":
+  - changed-files:
+      - any-glob-to-any-file: 'mm/**'
+      - any-glob-to-any-file: 'include/nuttx/mm/**'
+
+"Area: Networking":
+  - changed-files:
+      - any-glob-to-any-file: 'net/**'
+      - any-glob-to-any-file: 'drivers/net/**'
+      - any-glob-to-any-file: 'include/nuttx/net/**'
+
+"Area: OS Components":
+  - changed-files:
+      - any-glob-to-any-file: 'sched/**'
+      - any-glob-to-any-file: 'syscall/**'
+      - any-glob-to-any-file: 'libs/**'
+
+"Area: PCI":
+  - changed-files:
+      - any-glob-to-any-file: 'drivers/pci/**'
+      - any-glob-to-any-file: 'include/nuttx/pci/**'
+
+"Area: Sensors":
+  - changed-files:
+      - any-glob-to-any-file: 'drivers/sensors/**'
+      - any-glob-to-any-file: 'include/nuttx/sensors/**'
+      - any-glob-to-any-file: 'include/nuttx/uorb.h'
+
+"Area: Tooling":
+  - changed-files:
+      - any-glob-to-any-file: 'tools/**'
+
+"Area: USB":
+  - changed-files:
+      - any-glob-to-any-file: 'drivers/usbdev/**'
+      - any-glob-to-any-file: 'drivers/usbhost/**'
+      - any-glob-to-any-file: 'drivers/usbmisc/**'
+      - any-glob-to-any-file: 'drivers/usbmonitor/**'
+      - any-glob-to-any-file: 'include/nuttx/usb/**'
+
+"Area: Video":
+  - changed-files:
+      - any-glob-to-any-file: 'video/**'
+      - any-glob-to-any-file: 'drivers/video/**'
+      - any-glob-to-any-file: 'include/nuttx/video/**'
