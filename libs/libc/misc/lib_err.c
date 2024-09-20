@@ -55,30 +55,38 @@ do                         \
 
 void vwarn(FAR const char *fmt, va_list ap)
 {
+#ifdef CONFIG_LIBC_PRINT_EXTENSION
   int error = get_errno();
   struct va_format vaf;
 
-#ifdef va_copy
+#  ifdef va_copy
   va_list copy;
 
   va_copy(copy, ap);
 
   vaf.fmt = fmt;
   vaf.va  = &copy;
-#else
+#  else
   vaf.fmt = fmt;
   vaf.va  = &ap;
-#endif
+#  endif
 
-#ifdef CONFIG_FILE_STREAM
+#  ifdef CONFIG_FILE_STREAM
   fprintf(stderr, "%d: %pV: %s\n", _SCHED_GETTID(), &vaf, strerror(error));
-#else
+#  else
   dprintf(STDERR_FILENO, "%d: %pV: %s\n", _SCHED_GETTID(),
                                           &vaf, strerror(error));
-#endif
+#  endif
 
-#ifdef va_copy
+#  ifdef va_copy
   va_end(copy);
+#  endif
+#else
+#  ifdef CONFIG_FILE_STREAM
+  vfprintf(stderr, fmt, ap);
+#  else
+  vdprintf(STDERR_FILENO, fmt, ap);
+#  endif
 #endif
 }
 
@@ -88,28 +96,36 @@ void vwarn(FAR const char *fmt, va_list ap)
 
 void vwarnx(FAR const char *fmt, va_list ap)
 {
+#ifdef CONFIG_LIBC_PRINT_EXTENSION
   struct va_format vaf;
 
-#ifdef va_copy
+#  ifdef va_copy
   va_list copy;
 
   va_copy(copy, ap);
 
   vaf.fmt = fmt;
   vaf.va  = &copy;
-#else
+#  else
   vaf.fmt = fmt;
   vaf.va  = &ap;
-#endif
+#  endif
 
-#ifdef CONFIG_FILE_STREAM
+#  ifdef CONFIG_FILE_STREAM
   fprintf(stderr, "%d: %pV\n", _SCHED_GETTID(), &vaf);
-#else
+#  else
   dprintf(STDERR_FILENO, "%d: %pV\n", _SCHED_GETTID(), &vaf);
-#endif
+#  endif
 
-#ifdef va_copy
+#  ifdef va_copy
   va_end(copy);
+#  endif
+#else
+#  ifdef CONFIG_FILE_STREAM
+  vfprintf(stderr, fmt, ap);
+#  else
+  vdprintf(STDERR_FILENO, fmt, ap);
+#  endif
 #endif
 }
 
