@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-int strcoll(const char *a, const char *b)
+int strcoll(FAR const char *a, FAR const char *b)
 {
   return strcmp(a, b);
 }
