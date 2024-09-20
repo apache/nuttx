@@ -20,6 +20,10 @@
 
 include common/Make.defs
 
+ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
+  include imx9/ddr/Make.defs
+endif
+
 # i.MX9-specific C source files
 
 CHIP_CSRCS  = imx9_boot.c imx9_ccm.c imx9_clockconfig.c imx9_gpio.c
@@ -78,8 +82,12 @@ ifeq ($(CONFIG_IMX9_FLEXSPI_NOR), y)
 endif
 
 ifeq ($(CONFIG_IMX9_BOOTLOADER), y)
- CHIP_CSRCS += imx9_system_ctl.c
- CHIP_CSRCS += imx9_trdc.c
+  CHIP_CSRCS += imx9_system_ctl.c
+  CHIP_CSRCS += imx9_trdc.c
+endif
+
+ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
+  CHIP_CSRCS += $(DDR_CSRCS)
 endif
 
 ifeq ($(CONFIG_IMX9_FLEXCAN), y)
