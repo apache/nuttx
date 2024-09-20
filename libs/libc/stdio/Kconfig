@@ -106,4 +106,10 @@ config LIBC_SCANSET
 	---help---
 		Add scanset support to sscanf().
 
+config LIBC_PRINT_EXTENSION
+	bool
+	default n
+	---help---
+		Enables vsprintf supports using "%p*" to print.
+
 endmenu #Standard C I/O

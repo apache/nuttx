@@ -5,6 +5,7 @@
 
 config ALLSYMS
 	bool "Load all symbols for debugging"
+	select LIBC_PRINT_EXTENSION
 	default n
 	---help---
 		Say Y here to let the nuttx print out symbolic crash information and
