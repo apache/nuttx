@@ -765,19 +765,23 @@ static void coredump_dump_dev(pid_t pid)
 #endif
 
 /****************************************************************************
- * Name: coredump_set_memory_region
+ * Name: coredump_initialize_memory_region
  *
  * Description:
- *   Set do coredump memory region.
+ *   initialize the memory region with board memory range specified in config
  *
  ****************************************************************************/
 
-int coredump_set_memory_region(FAR const struct memory_region_s *region)
+static int coredump_initialize_memory_region(void)
 {
-  /* Not free g_regions, because allow call this fun when crash */
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+  if (g_regions == NULL)
+    {
+      g_regions = g_memory_region;
+    }
+#endif
 
-  g_regions = region;
-  return 0;
+  return OK;
 }
 
 /****************************************************************************
@@ -793,6 +797,13 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size,
 {
   FAR struct memory_region_s *region;
   size_t count = 1; /* 1 for end flag */
+  int ret;
+
+  ret = coredump_initialize_memory_region();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   if (g_regions != NULL)
     {
@@ -881,9 +892,11 @@ int coredump_initialize(void)
 {
   int ret = 0;
 
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-  g_regions = g_memory_region;
-#endif
+  ret = coredump_initialize_memory_region();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
   ret = lib_blkoutstream_open(&g_devstream,

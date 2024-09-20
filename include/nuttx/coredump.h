@@ -60,16 +60,6 @@ struct coredump_info_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: coredump_set_memory_region
- *
- * Description:
- *   Set do coredump memory region.
- *
- ****************************************************************************/
-
-int coredump_set_memory_region(FAR const struct memory_region_s *region);
-
-/****************************************************************************
  * Name: coredump_add_memory_region
  *
  * Description:
