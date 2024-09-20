@@ -752,7 +752,7 @@ config NRF91_MODEM_NBIOT
 
 config NRF91_MODEM_GNSS
 	bool "Modem GNSS support"
-	depends on SENSORS_GPS
+	depends on SENSORS_GNSS
 	default y
 
 config NRF91_MODEM_PREFERENCE
