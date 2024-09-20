@@ -619,6 +619,7 @@ int ksz9477_init(ksz9477_port_t master_port)
   int i;
   uint16_t regval16;
   uint32_t regval32;
+  uint16_t backup;
 
   /* Read the ID registers */
 
@@ -640,15 +641,58 @@ int ksz9477_init(ksz9477_port_t master_port)
     }
 
   /* Check that indirect access to PHY MMD works.
-   * Default value of MMD EEE ADVERTISEMENT REGISTER is 0x6
+   * Write LED mode to single-LED mode and verify access by
+   * reading back the value.
    */
 
+  /* 1. Read and backup the current LED MODE value */
+
   ret = ksz9477_mmd_read_indirect(KSZ9477_PORT_PHY1,
-                                  KSZ9477_MMD_DEV_EEE_ADVERTISEMENT,
-                                  0x3c, &regval16, 1);
-  if (ret != OK || regval16 != 0x6)
+                                  KSZ9477_MMD_DEV_LED_MODE,
+                                  0x00, &backup, 1);
+
+  if (ret != OK)
     {
-      nerr("MMD access failure, ret %d\n", ret);
+      nerr("MMD access failure. Failed to read LED_MODE "
+           "register value: ret %d\n", ret);
+      return ret ? ret : -EINVAL;
+    }
+
+  /* 2. Set LED mode to sigle-LED mode */
+
+  regval16 = 0x10;
+  ret = ksz9477_mmd_write_indirect(KSZ9477_PORT_PHY1,
+                                   KSZ9477_MMD_DEV_LED_MODE,
+                                   0x00, &regval16, 1);
+  if (ret != OK)
+    {
+      nerr("MMD access failure. Failed write 0x%04x to "
+           "LED_MODE register: ret %d\n", regval16, ret);
+      return ret ? ret : -EINVAL;
+    }
+
+  /* 3. Verify read returns Single-LED mode (0x10) */
+
+  ret = ksz9477_mmd_read_indirect(KSZ9477_PORT_PHY1,
+                                  KSZ9477_MMD_DEV_LED_MODE,
+                                  0x00, &regval16, 1);
+
+  if (ret != OK || regval16 != 0x10)
+    {
+      nerr("MMD access failure. Failed to verify LED_MODE "
+           "register value 0x10: ret %d, regval %04x\n", ret, regval16);
+      return ret ? ret : -EINVAL;
+    }
+
+  /* 4. Set back to default value from backup */
+
+  ret = ksz9477_mmd_write_indirect(KSZ9477_PORT_PHY1,
+                                   KSZ9477_MMD_DEV_LED_MODE,
+                                   0x00, &backup, 1);
+  if (ret != OK)
+    {
+      nerr("MMD access failure. Failed to write 0x%04x to "
+           "LED_MODE register: ret %d\n", backup, ret);
       return ret ? ret : -EINVAL;
     }
 
