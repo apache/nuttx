@@ -102,6 +102,7 @@ SECTIONS
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
     *libsched.a:spinlock.*(.literal .text .literal.* .text.*)
+    *libsched.a:stack_record.*(.literal .text .literal.* .text.*)
 
     *libc.a:*lib_instrument.*(.literal .text .literal.* .text.*)
 
