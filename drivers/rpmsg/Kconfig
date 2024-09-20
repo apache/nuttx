@@ -21,6 +21,10 @@ config RPMSG_PING
 		This is for debugging & profiling, create ping rpmsg
 		channel, user can use it to get send/recv speed & latency.
 
+config RPMSG_TEST
+	bool "rpmsg test support"
+	default n
+
 endif # RPMSG
 
 config RPMSG_ROUTER
