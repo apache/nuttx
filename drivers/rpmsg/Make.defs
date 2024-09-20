@@ -30,6 +30,10 @@ ifeq ($(CONFIG_RPMSG_PING),y)
 CSRCS += rpmsg_ping.c
 endif
 
+ifeq ($(CONFIG_RPMSG_TEST),y)
+CSRCS += rpmsg_test.c
+endif
+
 ifeq ($(CONFIG_RPMSG_ROUTER),y)
 CSRCS += rpmsg_router_hub.c rpmsg_router_edge.c
 endif

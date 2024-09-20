@@ -42,6 +42,7 @@
 #define RPMSGIOC_PANIC              _RPMSGIOC(1)
 #define RPMSGIOC_DUMP               _RPMSGIOC(2)
 #define RPMSGIOC_PING               _RPMSGIOC(3)
+#define RPMSGIOC_TEST               _RPMSGIOC(4)
 
 #define RPMSG_SIGNAL_RUNNING        TIOCM_CD
 
@@ -58,6 +59,9 @@ struct rpmsg_s
   FAR const struct rpmsg_ops_s *ops;
 #ifdef CONFIG_RPMSG_PING
   struct rpmsg_endpoint        ping;
+#endif
+#ifdef CONFIG_RPMSG_TEST
+  struct rpmsg_endpoint        test;
 #endif
   struct rpmsg_device          rdev[0];
 };
