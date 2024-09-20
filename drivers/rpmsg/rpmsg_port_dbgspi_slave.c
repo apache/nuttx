@@ -97,6 +97,7 @@ struct rpmsg_port_spi_s
 
   FAR struct rpmsg_port_header_s *txhdr;
   FAR struct rpmsg_port_header_s *rxhdr;
+  FAR struct rpmsg_port_header_s *sndhdr;
 
   rpmsg_port_rx_cb_t             rxcb;
   uint16_t                       status;
@@ -211,16 +212,16 @@ static void rpmsg_port_spi_send(FAR struct rpmsg_port_spi_s *rpspi)
       txhdr->cmd = RPMSG_PORT_SPI_CMD_AVAIL;
     }
 
-  txhdr->avail = rpmsg_port_queue_navail(&rpspi->port.rxq);
+  rpspi->rxavail = rpmsg_port_queue_navail(&rpspi->port.rxq);
+  txhdr->avail = rpspi->rxavail > 1 ? rpspi->rxavail - 1 : 0;
   txhdr->crc = rpmsg_port_spi_crc16(txhdr);
+  rpspi->sndhdr = txhdr;
 
   rpmsginfo("send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
 
   SPIS_CTRLR_ENQUEUE(rpspi->spictrlr, txhdr,
                      BYTES2WORDS(rpspi, rpspi->cmdhdr->len));
   IOEXP_WRITEPIN(rpspi->rioe, rpspi->sreq, 1);
-
-  rpspi->rxavail = txhdr->avail;
 }
 
 /****************************************************************************
@@ -412,6 +413,15 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       rpspi->rxhdr = rpmsg_port_queue_get_available_buffer(
         &rpspi->port.rxq, false);
       DEBUGASSERT(rpspi->rxhdr != NULL);
+
+      if (atomic_load(&rpspi->transferring))
+        {
+          rpspi->rxavail = rpmsg_port_queue_navail(&rpspi->port.rxq);
+          rpspi->sndhdr->avail =
+            rpspi->rxavail > 1 ? rpspi->rxavail - 1 : 0;
+          SPIS_CTRLR_ENQUEUE(rpspi->spictrlr, rpspi->sndhdr,
+                             BYTES2WORDS(rpspi, rpspi->cmdhdr->len));
+        }
     }
 
 out_recv:
