@@ -742,7 +742,12 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
 
 #if defined(CONFIG_BOARD_COREDUMP_SYSLOG) || \
     defined(CONFIG_BOARD_COREDUMP_BLKDEV)
-      /* Dump core information */
+
+  /* Flush previous SYSLOG data before possible long time coredump */
+
+  syslog_flush();
+
+  /* Dump core information */
 
 #  ifdef CONFIG_BOARD_COREDUMP_FULL
   coredump_dump(INVALID_PROCESS_ID);
