@@ -18,6 +18,8 @@
 #
 ############################################################################
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
 # The start-up, "head", file. May be either a .S or a .c file.
 
 HEAD_ASRC   = esp_head.S
@@ -77,6 +79,10 @@ ifeq ($(CONFIG_ESPRESSIF_LEDC),y)
 	CHIP_CSRCS += esp_ledc.c
 endif
 
+ifeq ($(CONFIG_ESP_PCNT_AS_QE),y)
+	CHIP_CSRCS += esp_qencoder.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_USBSERIAL),y)
 	CHIP_CSRCS += esp_usbserial.c
 endif
@@ -130,7 +136,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 8e8e62cf6a7ae8a9659b91706024cab38af29118
+	ESP_HAL_3RDPARTY_VERSION = 20690e67695f0a8170a19ec99e2e9a13b620e94d
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -144,9 +150,20 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+ifeq ($(STORAGETMP),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 ifeq ($(CONFIG_ESP_WIRELESS),y)
@@ -161,7 +178,7 @@ include common$(DELIM)espressif$(DELIM)Bootloader.mk
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
 
 # Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
 

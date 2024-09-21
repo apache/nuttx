@@ -76,7 +76,6 @@
 #endif
 
 #if defined(SOCKET_CAN)
-#  include <nuttx/can.h>
 #  include <nuttx/net/netdev.h>
 #  include <nuttx/net/can.h>
 #  include <nuttx/wqueue.h>

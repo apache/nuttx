@@ -168,6 +168,21 @@
                                  MPU_MAIR_OUTER_RA | MPU_MAIR_OUTER_WA | \
                                  MPU_MAIR_INNER_NT | MPU_MAIR_INNER_WB | \
                                  MPU_MAIR_INNER_RA | MPU_MAIR_INNER_WA)
+struct mpu_region_s
+{
+  /* Region Base Address */
+
+  uintptr_t base;
+
+  /* Region Size */
+
+  size_t size;
+
+  /* Region Attributes */
+
+  uint32_t flags1;
+  uint32_t flags2;
+};
 
 /****************************************************************************
  * Name: mpu_reset
@@ -216,14 +231,93 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: mpu_allocregion
+ *
+ * Description:
+ *   Allocate the next region
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The index of the allocated region.
+ *
+ ****************************************************************************/
+
+unsigned int mpu_allocregion(void);
+
+/****************************************************************************
+ * Name: mpu_freeregion
+ *
+ * Description:
+ *   Free target region.
+ *
+ * Input Parameters:
+ *  region - The index of the region to be freed.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpu_freeregion(unsigned int region);
+
+/****************************************************************************
  * Name: mpu_control
  *
  * Description:
  *   Configure and enable (or disable) the MPU
  *
+ * Input Parameters:
+ *   enable     - Flag indicating whether to enable the MPU.
+ *   hfnmiena   - Flag indicating whether to enable the MPU during hard
+ *                fult, NMI, and FAULTMAS.
+ *   privdefena - Flag indicating whether to enable privileged access to
+ *                the default memory map.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void mpu_control(bool enable, bool hfnmiena, bool privdefena);
+
+/****************************************************************************
+ * Name: mpu_dump_region
+ *
+ * Description:
+ *   Dump the region that has been used.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mpu_dump_region(void);
+
+/****************************************************************************
+ * Name: mpu_modify_region
+ *
+ * Description:
+ *   Modify a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   region - The index of the MPU region to modify.
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mpu_modify_region(unsigned int region, uintptr_t base, size_t size,
+                       uint32_t flags1, uint32_t flags2);
 
 /****************************************************************************
  * Name: mpu_configure_region
@@ -231,10 +325,41 @@ void mpu_control(bool enable, bool hfnmiena, bool privdefena);
  * Description:
  *   Configure a region for privileged, strongly ordered memory
  *
+ * Input Parameters:
+ *   base   - The base address of the region.
+ *   size   - The size of the region.
+ *   flags1 - Additional flags for the region.
+ *   flags2 - Additional flags for the region.
+ *
+ * Returned Value:
+ *   The region number allocated for the configured region.
+ *
  ****************************************************************************/
 
-void mpu_configure_region(uintptr_t base, size_t size,
-                          uint32_t flags1, uint32_t flags2);
+unsigned int mpu_configure_region(uintptr_t base, size_t size,
+                                  uint32_t flags1, uint32_t flags2);
+
+/****************************************************************************
+ * Name: mpu_initialize
+ *
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ * Input Parameters:
+ *   table      - MPU initialization table.
+ *   count      - Initialize the number of entries in the region table.
+ *   hfnmiena   - A boolean indicating whether the MPU should enable the
+ *                HFNMIENA bit.
+ *   privdefena - A boolean indicating whether the MPU should enable the
+ *                PRIVDEFENA bit.
+ *
+ * Returned Value:
+ *   NULL.
+ *
+ ****************************************************************************/
+
+void mpu_initialize(const struct mpu_region_s *table, size_t count,
+                    bool hfnmiena, bool privdefena);
 
 /****************************************************************************
  * Inline Functions
@@ -271,14 +396,11 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_stronglyordered(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_AP_RWNO, \
-                           MPU_RLAR_STRONGLY_ORDER | \
-                           MPU_RLAR_PXN); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_AP_RWNO, \
+                       MPU_RLAR_STRONGLY_ORDER | \
+                       MPU_RLAR_PXN)
 
 /****************************************************************************
  * Name: mpu_user_flash
@@ -289,13 +411,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_flash(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_AP_RORO, \
-                           MPU_RLAR_WRITE_BACK); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_AP_RORO, \
+                       MPU_RLAR_WRITE_BACK)
 
 /****************************************************************************
  * Name: mpu_priv_flash
@@ -306,13 +425,10 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_flash(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_AP_RONO, \
-                           MPU_RLAR_WRITE_BACK); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_AP_RONO, \
+                       MPU_RLAR_WRITE_BACK)
 
 /****************************************************************************
  * Name: mpu_user_intsram
@@ -323,15 +439,12 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_intsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_XN | \
-                           MPU_RBAR_AP_RWRW, \
-                           MPU_RLAR_NONCACHEABLE | \
-                           MPU_RLAR_PXN); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_XN | \
+                       MPU_RBAR_AP_RWRW, \
+                       MPU_RLAR_NONCACHEABLE | \
+                       MPU_RLAR_PXN)
 
 /****************************************************************************
  * Name: mpu_priv_intsram
@@ -342,14 +455,11 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_intsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_AP_RWNO, \
-                           MPU_RLAR_NONCACHEABLE | \
-                           MPU_RLAR_PXN); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_AP_RWNO, \
+                       MPU_RLAR_NONCACHEABLE | \
+                       MPU_RLAR_PXN)
 
 /****************************************************************************
  * Name: mpu_priv_shmem
@@ -359,16 +469,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
  *
  ****************************************************************************/
 
-#define mpu_priv_shmem(base, size)                  \
-  do                                                \
-    {                                               \
-      /* The configure the region */                \
-      mpu_configure_region(base, size,              \
-                           MPU_RBAR_AP_RWNO,        \
-                           MPU_RLAR_NONCACHEABLE |  \
-                           MPU_RBAR_SH_INNER |      \
-                           MPU_RLAR_PXN);           \
-    } while (0)
+#define mpu_priv_shmem(base, size) \
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_AP_RWNO, \
+                       MPU_RLAR_NONCACHEABLE | \
+                       MPU_RBAR_SH_INNER | \
+                       MPU_RLAR_PXN)
 
 /****************************************************************************
  * Name: mpu_user_extsram
@@ -379,16 +486,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_extsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_XN | \
-                           MPU_RBAR_AP_RWRW | \
-                           MPU_RBAR_SH_OUTER, \
-                           MPU_RLAR_WRITE_BACK | \
-                           MPU_RLAR_PXN); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_XN | \
+                       MPU_RBAR_AP_RWRW | \
+                       MPU_RBAR_SH_OUTER, \
+                       MPU_RLAR_WRITE_BACK | \
+                       MPU_RLAR_PXN)
 
 /****************************************************************************
  * Name: mpu_priv_extsram
@@ -399,15 +503,12 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_priv_extsram(base, size) \
-  do \
-    { \
-      /* The configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_AP_RWNO | \
-                           MPU_RBAR_SH_OUTER, \
-                           MPU_RLAR_WRITE_BACK | \
-                           MPU_RLAR_PXN); \
-    } while (0)
+  /* The configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_AP_RWNO | \
+                       MPU_RBAR_SH_OUTER, \
+                       MPU_RLAR_WRITE_BACK | \
+                       MPU_RLAR_PXN)
 
 /****************************************************************************
  * Name: mpu_peripheral
@@ -418,14 +519,11 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_peripheral(base, size) \
-  do \
-    { \
-      /* Then configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_AP_RWNO, \
-                           MPU_RLAR_DEVICE | \
-                           MPU_RLAR_PXN); \
-    } while (0)
+  /* Then configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_AP_RWNO, \
+                       MPU_RLAR_DEVICE | \
+                       MPU_RLAR_PXN)
 
 /****************************************************************************
  * Name: mpu_user_peripheral
@@ -436,15 +534,12 @@ void mpu_configure_region(uintptr_t base, size_t size,
  ****************************************************************************/
 
 #define mpu_user_peripheral(base, size) \
-  do \
-    { \
-      /* Then configure the region */ \
-      mpu_configure_region(base, size, \
-                           MPU_RBAR_XN | \
-                           MPU_RBAR_AP_RWRW, \
-                           MPU_RLAR_DEVICE | \
-                           MPU_RLAR_PXN); \
-    } while (0)
+  /* Then configure the region */ \
+  mpu_configure_region(base, size, \
+                       MPU_RBAR_XN | \
+                       MPU_RBAR_AP_RWRW, \
+                       MPU_RLAR_DEVICE | \
+                       MPU_RLAR_PXN)
 
 #undef EXTERN
 #if defined(__cplusplus)

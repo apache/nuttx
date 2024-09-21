@@ -176,9 +176,6 @@ else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 $(BOOTLOADER_SRCDIR):
 	$(Q) git clone $(BOOTLOADER_URL) $(BOOTLOADER_SRCDIR) -b $(BOOTLOADER_VERSION)
 	$(Q) git -C $(BOOTLOADER_SRCDIR) submodule update --init esp-idf
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-	$(Q) git -C $(BOOTLOADER_SRCDIR)/esp-idf apply -v $(BOOTLOADER_DIR)/0001-esp32-Connect-Xtensa-Instruction-RAM1-to-Cache.patch
-endif
 
 bootloader: $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader binaries"

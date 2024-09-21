@@ -59,13 +59,13 @@ static int drv8825_fault(void);
 
 static struct drv8825_ops_s g_drv8825_ops =
 {
-    drv8825_initialize,    /* initialize */
-    drv8825_step,          /* step */
-    drv8825_direction,     /* direction */
-    drv8825_microstepping, /* microstepping */
-    drv8825_enable,        /* enable */
-    drv8825_idle,          /* idle */
-    drv8825_fault          /* fault */
+  drv8825_initialize,    /* initialize */
+  drv8825_step,          /* step */
+  drv8825_direction,     /* direction */
+  drv8825_microstepping, /* microstepping */
+  drv8825_enable,        /* enable */
+  drv8825_idle,          /* idle */
+  drv8825_fault          /* fault */
 };
 
 /****************************************************************************
@@ -82,13 +82,13 @@ static struct drv8825_ops_s g_drv8825_ops =
 
 static void drv8825_initialize(void)
 {
-    stm32_configgpio(GPIO_DIR);
-    stm32_configgpio(GPIO_STEP);
-    stm32_configgpio(GPIO_SLEEP);
-    stm32_configgpio(GPIO_M1);
-    stm32_configgpio(GPIO_M2);
-    stm32_configgpio(GPIO_M3);
-    stm32_configgpio(GPIO_RESET);
+  stm32_configgpio(GPIO_DIR);
+  stm32_configgpio(GPIO_STEP);
+  stm32_configgpio(GPIO_SLEEP);
+  stm32_configgpio(GPIO_M1);
+  stm32_configgpio(GPIO_M2);
+  stm32_configgpio(GPIO_M3);
+  stm32_configgpio(GPIO_RESET);
 }
 
 /****************************************************************************
@@ -101,7 +101,7 @@ static void drv8825_initialize(void)
 
 static void drv8825_step(int level)
 {
-    stm32_gpiowrite(GPIO_STEP, (bool)level);
+  stm32_gpiowrite(GPIO_STEP, (bool)level);
 }
 
 /****************************************************************************
@@ -114,7 +114,7 @@ static void drv8825_step(int level)
 
 static void drv8825_direction(int level)
 {
-    stm32_gpiowrite(GPIO_DIR, (bool)level);
+  stm32_gpiowrite(GPIO_DIR, (bool)level);
 }
 
 /****************************************************************************
@@ -127,9 +127,9 @@ static void drv8825_direction(int level)
 
 static void drv8825_microstepping(int ms1, int ms2, int ms3)
 {
-    stm32_gpiowrite(GPIO_M1, (bool)ms1);
-    stm32_gpiowrite(GPIO_M2, (bool)ms2);
-    stm32_gpiowrite(GPIO_M3, (bool)ms3);
+  stm32_gpiowrite(GPIO_M1, (bool)ms1);
+  stm32_gpiowrite(GPIO_M2, (bool)ms2);
+  stm32_gpiowrite(GPIO_M3, (bool)ms3);
 }
 
 /****************************************************************************
@@ -142,7 +142,7 @@ static void drv8825_microstepping(int ms1, int ms2, int ms3)
 
 static void drv8825_enable(int level)
 {
-    stm32_gpiowrite(GPIO_RESET, (bool)level);
+  stm32_gpiowrite(GPIO_RESET, (bool)level);
 }
 
 /****************************************************************************
@@ -155,7 +155,7 @@ static void drv8825_enable(int level)
 
 static void drv8825_idle(int level)
 {
-    stm32_gpiowrite(GPIO_SLEEP, !level);
+  stm32_gpiowrite(GPIO_SLEEP, !level);
 }
 
 /****************************************************************************
@@ -185,14 +185,11 @@ static int drv8825_fault(void)
 
 int board_drv8825_initialize(int devno)
 {
-    int ret;
-    char devname[15];
+  char devname[15];
 
-    drv8825_initialize();
+  drv8825_initialize();
 
-    snprintf(devname, 15, "/dev/stepper%d", devno);
+  snprintf(devname, sizeof(devname), "/dev/stepper%d", devno);
 
-    ret = drv8825_register(devname, &g_drv8825_ops);
-
-  return ret;
+  return drv8825_register(devname, &g_drv8825_ops);
 }

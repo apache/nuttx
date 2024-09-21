@@ -18,7 +18,7 @@
 #
 # ##############################################################################
 
-if(CONFIG_LIB_USRWORK)
+if(CONFIG_LIBC_USRWORK)
   target_sources(c PRIVATE work_usrthread.c work_queue.c work_cancel.c
                            work_signal.c work_lock.c)
 endif()

@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/ieee802154/ieee802154_callback.c
- * Forward events to waiting PF_IEEE802154 sockets.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

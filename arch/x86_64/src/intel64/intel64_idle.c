@@ -64,9 +64,27 @@ void up_idle(void)
    * "fake" timer interrupts. Hopefully, something will wake up.
    */
 
-  sched_process_timer();
+  nxsched_process_timer();
+#elif defined(CONFIG_ARCH_X86_64_IDLE_NOP)
+  asm volatile("nop");
+#elif defined(CONFIG_ARCH_X86_64_IDLE_MWAIT_ECX)
+  /* Dummy value to make MONITOR/MWAIT work */
+
+  int dummy;
+
+  /* MONITOR eax, ecx, edx */
+
+  asm volatile(".byte 0x0f, 0x01, 0xc8" ::
+                "a"(&dummy), "c"(0), "d"(0));
+
+  /* We enable sub C-state here and wait for interrupts */
+
+  /* MWAIT eax, ecx */
+
+  asm volatile(".byte 0x0f, 0x01, 0xc9" ::
+                "a"(0), "c"(CONFIG_ARCH_X86_64_IDLE_MWAIT_ECX));
 #else
-  asm volatile("hlt");
+  __asm__ volatile("hlt");
 #endif
 }
 #endif

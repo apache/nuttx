@@ -143,7 +143,7 @@ int board_dhtxx_initialize(int devno)
       return -ENODEV;
     }
 
-  snprintf(devpath, 12, "/dev/hum%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/hum%d", devno);
   ret = dhtxx_register(devpath, &g_dhtxx_config);
   if (ret < 0)
     {

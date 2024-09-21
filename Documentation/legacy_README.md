@@ -96,7 +96,8 @@ Get help using NuttX or contribute to the project on our mailing lists:
 
 ## Reporting Security Issues
 
-Found a vulnerability? See our security policy [here](.github/SECURITY.md).
+Found a vulnerability? See our security policy
+[here](https://github.com/apache/nuttx/blob/master/.github/SECURITY.md).
 
 ## Issue Tracker
 

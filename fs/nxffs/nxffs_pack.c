@@ -251,7 +251,7 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
 
 static inline int nxffs_startpos(FAR struct nxffs_volume_s *volume,
                                  FAR struct nxffs_pack_s *pack,
-                                 off_t *froffset)
+                                 FAR off_t *froffset)
 {
   struct nxffs_blkentry_s blkentry;
   off_t offset = *froffset;

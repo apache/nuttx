@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/signal/sig_nanosleep.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -172,7 +174,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
        * wait.
        */
 
-      clock_time2ticks(rqtp, &ticks);
+      ticks = clock_time2ticks(rqtp);
 
       /* Get the number of ticks that we actually waited */
 
@@ -192,7 +194,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
           remaining = (clock_t)ticks - elapsed;
         }
 
-      clock_ticks2time((sclock_t)remaining, rmtp);
+      clock_ticks2time(rmtp, remaining);
     }
 
   leave_critical_section(flags);

@@ -131,7 +131,9 @@ struct arg_s
 #ifdef CONFIG_HAVE_LONG_LONG
     unsigned long long ull;
 #endif
+#ifdef CONFIG_HAVE_DOUBLE
     double d;
+#endif
     FAR char *cp;
   } value;
 };
@@ -480,13 +482,13 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
           flags &= ~(FL_LONG | FL_REPD_TYPE);
 
 #ifdef CONFIG_HAVE_LONG_LONG
-          if (sizeof(void *) == sizeof(unsigned long long))
+          if (sizeof(FAR void *) == sizeof(unsigned long long))
             {
               flags |= (FL_LONG | FL_REPD_TYPE);
             }
           else
 #endif
-          if (sizeof(void *) == sizeof(unsigned long))
+          if (sizeof(FAR void *) == sizeof(unsigned long))
             {
               flags |= FL_LONG;
             }
@@ -1350,9 +1352,11 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
           arglist[i].value.u = va_arg(ap, unsigned int);
           break;
 
+#ifdef CONFIG_HAVE_DOUBLE
         case TYPE_DOUBLE:
           arglist[i].value.d = va_arg(ap, double);
           break;
+#endif
 
         case TYPE_CHAR_POINTER:
           arglist[i].value.cp = va_arg(ap, FAR char *);

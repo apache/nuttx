@@ -2,6 +2,8 @@
 
 rem tools/configure.bat
 rem
+rem SPDX-License-Identifier: Apache-2.0
+rem
 rem Licensed to the Apache Software Foundation (ASF) under one or more
 rem  contributor license agreements.  See the NOTICE file distributed with
 rem  this work for additional information regarding copyright ownership.  The
@@ -100,7 +102,7 @@ rem Check if we have to build configure.exe
 if exist configure.exe goto :HaveConfigureExe
 
 set cc=mingw32-gcc.exe
-set cflags=-Wall -Wstrict-prototypes -Wshadow -g -pipe -I. -DCONFIG_WINDOWS_NATIVE=y
+set cflags=-Wall -Wstrict-prototypes -Wshadow -g -I. -DCONFIG_WINDOWS_NATIVE=y
 echo %cc% %cflags% -o configure.exe configure.c cfgparser.c
 %cc% %cflags% -o configure.exe configure.c cfgparser.c
 if errorlevel 1 (

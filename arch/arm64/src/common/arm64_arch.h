@@ -263,25 +263,7 @@
  *  to these memory regions.
  */
 
-#define CONFIG_MAX_XLAT_TABLES      7
-
-/* Virtual address space size
- * Allows choosing one of multiple possible virtual address
- * space sizes. The level of translation table is determined by
- * a combination of page size and virtual address space size.
- *
- * The choice could be: 32, 36, 42, 48
- */
-
-#define CONFIG_ARM64_VA_BITS        36
-
-/* Physical address space size
- * Choose the maximum physical address range that the kernel will support.
- *
- * The choice could be: 32, 36, 42, 48
- */
-
-#define CONFIG_ARM64_PA_BITS        36
+#define CONFIG_MAX_XLAT_TABLES      10
 
 #define L1_CACHE_SHIFT              (6)
 #define L1_CACHE_BYTES              BIT(L1_CACHE_SHIFT)
@@ -317,8 +299,6 @@ struct regs_context
   uint64_t  spsr;
   uint64_t  sp_el0;
   uint64_t  exe_depth;
-  uint64_t  tpidr_el0;
-  uint64_t  tpidr_el1;
 };
 
 /****************************************************************************
@@ -467,24 +447,16 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 /****************************************************************************
  * Name:
  *   arch_get_exception_depth
- *   arch_get_current_tcb
  *
  * Description:
  *   tpidrro_el0 is used to record exception depth, it's used for fpu trap
  * happened at exception context (like IRQ).
- *   tpidr_el1 is used to record TCB at present, it's used for fpu and task
- * switch propose
  *
  ****************************************************************************/
 
 static inline int arch_get_exception_depth(void)
 {
   return read_sysreg(tpidrro_el0);
-}
-
-static inline uint64_t arch_get_current_tcb(void)
-{
-  return read_sysreg(tpidr_el1);
 }
 
 void arch_cpu_idle(void);

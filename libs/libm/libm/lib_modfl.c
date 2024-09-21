@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-long double modfl(long double x, long double *iptr)
+long double modfl(long double x, FAR long double *iptr)
 {
   if (fabsl(x) >= 4503599627370496.0)
     {

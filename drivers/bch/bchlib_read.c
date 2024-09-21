@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
+ssize_t bchlib_read(FAR void *handle, FAR char *buffer, off_t offset,
                     size_t len)
 {
   FAR struct bchlib_s *bch = (FAR struct bchlib_s *)handle;

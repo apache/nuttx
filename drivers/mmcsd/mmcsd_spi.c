@@ -156,46 +156,52 @@ static void     mmcsd_unlock(FAR struct mmcsd_slot_s *slot);
 
 static int      mmcsd_waitready(FAR struct mmcsd_slot_s *slot);
 static uint32_t mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
-                  const struct mmcsd_cmdinfo_s *cmd, uint32_t arg);
+                              FAR const struct mmcsd_cmdinfo_s *cmd,
+                              uint32_t arg);
 static void     mmcsd_setblklen(FAR struct mmcsd_slot_s *slot,
-                  uint32_t length);
-static uint32_t mmcsd_nsac(FAR struct mmcsd_slot_s *slot, uint8_t *csd,
-                  uint32_t frequency);
-static uint32_t mmcsd_taac(FAR struct mmcsd_slot_s *slot, uint8_t *csd);
-static void     mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd);
+                                uint32_t length);
+static uint32_t mmcsd_nsac(FAR struct mmcsd_slot_s *slot, FAR uint8_t *csd,
+                           uint32_t frequency);
+static uint32_t mmcsd_taac(FAR struct mmcsd_slot_s *slot, FAR uint8_t *csd);
+static void     mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot,
+                                FAR uint8_t *csd);
 static void     mmcsd_checkwrprotect(FAR struct mmcsd_slot_s *slot,
-                  uint8_t *csd);
+                                     FAR uint8_t *csd);
 static int      mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot,
-                  uint8_t *buffer, const struct mmcsd_cmdinfo_s *cmd);
+                                  FAR uint8_t *buffer,
+                                  FAR const struct mmcsd_cmdinfo_s *cmd);
 
 #define mmcsd_getcsd(slot, csd) mmcsd_getcardinfo(slot, csd, &g_cmd9);
 #define mmcsd_getcid(slot, cid) mmcsd_getcardinfo(slot, cid, &g_cmd10);
 
 static int      mmcsd_recvblock(FAR struct mmcsd_slot_s *slot,
-                 uint8_t *buffer, int nbytes);
+                                FAR uint8_t *buffer, int nbytes);
 #if !defined(CONFIG_MMCSD_READONLY)
 static int      mmcsd_xmitblock(FAR struct mmcsd_slot_s *slot,
-                 const uint8_t *buffer, int nbytes, uint8_t token);
+                                FAR const uint8_t *buffer, int nbytes,
+                                uint8_t token);
 #endif
 
 /* Block driver interfaces **************************************************/
 
 static int       mmcsd_open(FAR struct inode *inode);
 static int       mmcsd_close(FAR struct inode *inode);
-static ssize_t   mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
-                   blkcnt_t start_sector, unsigned int nsectors);
+static ssize_t   mmcsd_read(FAR struct inode *inode,
+                            FAR unsigned char *buffer,
+                            blkcnt_t start_sector, unsigned int nsectors);
 #if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t   mmcsd_write(FAR struct inode *inode,
-                   const unsigned char *buffer, blkcnt_t start_sector,
-                   unsigned int nsectors);
+                             FAR const unsigned char *buffer,
+                             blkcnt_t start_sector,
+                             unsigned int nsectors);
 #endif
 static int       mmcsd_geometry(FAR struct inode *inode,
-                    struct geometry *geometry);
+                                FAR struct geometry *geometry);
 
 /* Initialization ***********************************************************/
 
 static int      mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot);
-static void     mmcsd_mediachanged(void *arg);
+static void     mmcsd_mediachanged(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -659,7 +665,7 @@ static void mmcsd_setblklen(FAR struct mmcsd_slot_s *slot, uint32_t length)
  *
  ****************************************************************************/
 
-static uint32_t mmcsd_nsac(FAR struct mmcsd_slot_s *slot, uint8_t *csd,
+static uint32_t mmcsd_nsac(FAR struct mmcsd_slot_s *slot, FAR uint8_t *csd,
                            uint32_t frequency)
 {
   /* NSAC is 8-bits wide and is in units of 100 clock cycles.  Therefore,
@@ -678,7 +684,7 @@ static uint32_t mmcsd_nsac(FAR struct mmcsd_slot_s *slot, uint8_t *csd,
  *
  ****************************************************************************/
 
-static uint32_t mmcsd_taac(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
+static uint32_t mmcsd_taac(FAR struct mmcsd_slot_s *slot, FAR uint8_t *csd)
 {
   int tundx;
 
@@ -718,7 +724,7 @@ static uint32_t mmcsd_taac(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
  *
  ****************************************************************************/
 
-static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
+static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, FAR uint8_t *csd)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   uint32_t maxfrequency;
@@ -879,7 +885,8 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
  *
  ****************************************************************************/
 
-static void mmcsd_checkwrprotect(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
+static void mmcsd_checkwrprotect(FAR struct mmcsd_slot_s *slot,
+                                 FAR uint8_t *csd)
 {
   FAR struct spi_dev_s *spi = slot->spi;
 
@@ -911,8 +918,9 @@ static void mmcsd_checkwrprotect(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
  *
  ****************************************************************************/
 
-static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
-                             const struct mmcsd_cmdinfo_s *cmd)
+static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot,
+                             FAR uint8_t *buffer,
+                             FAR const struct mmcsd_cmdinfo_s *cmd)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   uint32_t result;
@@ -973,8 +981,8 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
-                           int nbytes)
+static int mmcsd_recvblock(FAR struct mmcsd_slot_s *slot,
+                           FAR uint8_t *buffer, int nbytes)
 {
   FAR struct spi_dev_s *spi = slot->spi;
   clock_t start;
@@ -1157,7 +1165,7 @@ static int mmcsd_close(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
+static ssize_t mmcsd_read(FAR struct inode *inode, FAR unsigned char *buffer,
                           blkcnt_t start_sector, unsigned int nsectors)
 {
   FAR struct mmcsd_slot_s *slot;
@@ -1165,9 +1173,9 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   FAR unsigned char *restore = buffer;
   int retry_count = 0;
   size_t nbytes;
-  off_t  offset;
+  off_t offset;
   uint8_t response;
-  int    i;
+  int i;
   int ret;
 
   finfo("start_sector=%" PRIuOFF " nsectors=%u\n", start_sector, nsectors);
@@ -1348,7 +1356,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   FAR const unsigned char *restore = buffer;
   int retry_count = 0;
   size_t nbytes;
-  off_t  offset;
+  off_t offset;
   uint8_t response;
   int i;
   int ret;
@@ -1552,7 +1560,8 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
+static int mmcsd_geometry(FAR struct inode *inode,
+                          FAR struct geometry *geometry)
 {
   FAR struct mmcsd_slot_s *slot;
   FAR struct spi_dev_s *spi;
@@ -1937,7 +1946,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
  *
  ****************************************************************************/
 
-static void mmcsd_mediachanged(void *arg)
+static void mmcsd_mediachanged(FAR void *arg)
 {
   FAR struct mmcsd_slot_s *slot = (FAR struct mmcsd_slot_s *)arg;
   FAR struct spi_dev_s *spi;
@@ -2074,7 +2083,7 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
 
   /* Create a MMC/SD device name */
 
-  snprintf(devname, 16, "/dev/mmcsd%d", minor);
+  snprintf(devname, sizeof(devname), "/dev/mmcsd%d", minor);
 
   /* Register the driver, even on a failure condition.  A
    * card may be inserted later, for example.

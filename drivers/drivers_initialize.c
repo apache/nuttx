@@ -36,8 +36,10 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/note/note_driver.h>
+#include <nuttx/pci/pci.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/power/regulator.h>
+#include <nuttx/reset/reset-controller.h>
 #include <nuttx/segger/rtt.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/serial/pty.h>
@@ -129,6 +131,10 @@ void drivers_initialize(void)
   devzero_register();   /* Standard /dev/zero */
 #endif
 
+#ifdef CONFIG_DEV_MEM
+  devmem_register();
+#endif
+
 #if defined(CONFIG_DEV_LOOP)
   loop_register();      /* Standard /dev/loop */
 #endif
@@ -147,6 +153,10 @@ void drivers_initialize(void)
 
 #if defined(CONFIG_REGULATOR_RPMSG)
   regulator_rpmsg_server_init();
+#endif
+
+#if defined(CONFIG_RESET_RPMSG)
+  reset_rpmsg_server_init();
 #endif
 
   /* Initialize the serial device driver */
@@ -247,6 +257,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_MTD_LOOP
   mtd_loop_register();
+#endif
+
+#if defined(CONFIG_PCI) && !defined(CONFIG_PCI_LATE_DRIVERS_REGISTER)
+  pci_register_drivers();
 #endif
 
 #ifdef CONFIG_DRIVERS_VIRTIO

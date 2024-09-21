@@ -40,7 +40,7 @@
  *
  ****************************************************************************/
 
-void uuid_create_nil(uuid_t *u, uint32_t *status)
+void uuid_create_nil(FAR uuid_t *u, FAR uint32_t *status)
 {
   memset(u, 0, sizeof(*u));
 

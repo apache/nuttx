@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/umm_heap/umm_realloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -94,6 +96,11 @@ FAR void *realloc(FAR void *oldmem, size_t size)
   if (ret == NULL)
     {
       set_errno(ENOMEM);
+    }
+  else
+    {
+      mm_notify_pressure(mm_heapfree(USR_HEAP),
+                         mm_heapfree_largest(USR_HEAP));
     }
 
   return ret;

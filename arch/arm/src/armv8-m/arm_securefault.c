@@ -112,16 +112,15 @@ int arm_securefault(int irq, void *context, void *arg)
       sfalert("\tLazy state error\n");
     }
 
-  /* clear SFSR sticky bits */
-
-  putreg32(0xff, SAU_SFSR);
-
 #ifdef CONFIG_DEBUG_SECUREFAULT
   if (arm_gen_nonsecurefault(irq, context))
     {
+      putreg32(0xff, SAU_SFSR);
       return OK;
     }
 #endif
+
+  putreg32(0xff, SAU_SFSR);
 
   up_irq_save();
   PANIC_WITH_REGS("panic", context);

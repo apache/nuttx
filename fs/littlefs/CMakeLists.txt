@@ -52,4 +52,9 @@ if(CONFIG_FS_LITTLEFS)
                             ${CMAKE_CURRENT_LIST_DIR}/littlefs/lfs_util.c)
 
   target_include_directories(fs PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+  if(CONFIG_TRACE_LITTLEFS_FS)
+    set_source_files_properties(lfs_vfs.c PROPERTIES COMPILE_FLAGS
+                                                     -finstrument-functions)
+  endif()
 endif()

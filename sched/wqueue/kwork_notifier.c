@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/wqueue/kwork_notifier.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -51,10 +53,9 @@
 
 struct work_notifier_entry_s
 {
-  /* This must appear at the beginning of the structure.  A reference to
-   * the struct work_notifier_entry_s instance must be cast-compatible with
-   * struct dq_entry_s.
-   */
+  struct dq_entry_s entry;
+
+  /* The work structure */
 
   struct work_s work;           /* Used for scheduling the work */
 
@@ -166,9 +167,13 @@ static void work_notifier_worker(FAR void *arg)
 
   flags = enter_critical_section();
 
+  /* Remove the notification from the pending list */
+
+  dq_rem(&notifier->entry, &g_notifier_pending);
+
   /* Put the notification to the free list */
 
-  dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+  dq_addlast(&notifier->entry, &g_notifier_free);
 
   leave_critical_section(flags);
 }
@@ -253,7 +258,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
        * notifications executed in a saner order?
        */
 
-      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_pending);
+      dq_addlast(&notifier->entry, &g_notifier_pending);
       ret = notifier->key;
 
       leave_critical_section(flags);
@@ -296,13 +301,18 @@ void work_notifier_teardown(int key)
   notifier = work_notifier_find(key);
   if (notifier != NULL)
     {
-      /* Found it!  Remove the notification from the pending list */
+      /* Cancel the work, this may be waiting */
 
-      dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+      if (work_cancel_sync(notifier->info.qid, &notifier->work) != 1)
+        {
+          /* Remove the notification from the pending list */
 
-      /* Put the notification to the free list */
+          dq_rem(&notifier->entry, &g_notifier_pending);
 
-      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+          /* Put the notification to the free list */
+
+          dq_addlast(&notifier->entry, &g_notifier_free);
+        }
     }
 
   leave_critical_section(flags);
@@ -342,6 +352,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
    */
 
   flags = enter_critical_section();
+  sched_lock();
 
   /* Process the notification at the head of the pending list until the
    * pending list is empty
@@ -370,9 +381,9 @@ void work_notifier_signal(enum work_evtype_e evtype,
 
       if (info->evtype == evtype && info->qualifier == qualifier)
         {
-          /* Yes.. Remove the notification from the pending list */
+          /* Mark the notification as no longer pending */
 
-          dq_rem((FAR dq_entry_t *)notifier, &g_notifier_pending);
+          info->qualifier = NULL;
 
           /* Schedule the work.  The entire notifier entry is passed as an
            * argument to the work function because that function is
@@ -384,6 +395,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
         }
     }
 
+  sched_unlock();
   leave_critical_section(flags);
 }
 

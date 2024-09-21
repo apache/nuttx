@@ -75,3 +75,7 @@ endif
 ifeq ($(CONFIG_IMX9_FLEXSPI_NOR), y)
   CHIP_CSRCS += imx9_flexspi_nor.c
 endif
+
+ifeq ($(CONFIG_IMX9_BOOTLOADER), y)
+  CHIP_CSRCS += imx9_system_ctl.c
+endif

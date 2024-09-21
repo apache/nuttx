@@ -59,7 +59,7 @@ static int board_adc_register(int channel)
 {
   int ret;
   char devname[12];
-  FAR struct adc_dev_s *adcdev;
+  struct adc_dev_s *adcdev;
 
   adcdev = kmm_malloc(sizeof(struct adc_dev_s));
   if (adcdev == NULL)
@@ -70,7 +70,7 @@ static int board_adc_register(int channel)
 
   memset(adcdev, 0, sizeof(struct adc_dev_s));
   esp32s3_adc_init(channel, adcdev);
-  snprintf(devname, 12, "/dev/adc%d", channel);
+  snprintf(devname, sizeof(devname), "/dev/adc%d", channel);
 
   /* Register the ADC driver at "/dev/adcx_x" */
 

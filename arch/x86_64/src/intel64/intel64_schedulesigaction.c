@@ -110,7 +110,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * Hmmm... there looks like a latent bug here: The following logic
            * would fail in the strange case where we are in an interrupt
            * handler, the thread is signalling itself, but a context switch
-           * to another task has occurred so that CURRENT_REGS does not
+           * to another task has occurred so that current_regs does not
            * refer to the thread of this_task()!
            */
 
@@ -184,7 +184,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * to task that is currently executing on any CPU.
        */
 
-      sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n", this_task(),
+      sinfo("rtcb=0x%p current_regs=0x%p\n", this_task(),
             up_current_regs());
 
       if (tcb->task_state == TSTATE_TASK_RUNNING)
@@ -225,12 +225,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   /* Pause the CPU */
 
                   up_cpu_pause(cpu);
-
-                  /* Wait while the pause request is pending */
-
-                  while (up_cpu_pausereq(cpu))
-                    {
-                    }
 
                   /* Now tcb on the other CPU can be accessed safely */
 

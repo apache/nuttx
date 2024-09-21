@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/can/can_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -369,14 +371,15 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                           FAR void *pvpriv, uint16_t flags)
 {
   struct can_recvfrom_s *pstate = pvpriv;
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) || defined(CONFIG_NET_TIMESTAMP)
-  struct can_conn_s *conn = pstate->pr_conn;
-#endif
 
   /* 'priv' might be null in some race conditions (?) */
 
   if (pstate)
     {
+#if defined(CONFIG_NET_CANPROTO_OPTIONS) || defined(CONFIG_NET_TIMESTAMP)
+      struct can_conn_s *conn = pstate->pr_conn;
+#endif
+
       if ((flags & CAN_NEWDATA) != 0)
         {
           /* If a new packet is available, check receive filters

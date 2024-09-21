@@ -138,17 +138,8 @@
 
 /* WPA2 : PMKSA cache management */
 
-#define SIOCSIWPMKSA        _WLIOC(0x0036)  /* PMKSA cache operation */
-
-/* Country code extension */
-
-#define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Set country code */
-#define SIOCGIWCOUNTRY      _WLIOC(0x0038)  /* Get country code */
-
-/* WIFI / BT coexist type */
-
-#define SIOCSIWPTAPRIO      _WLIOC(0x0039)  /* Set PTA priority type */
-#define SIOCGIWPTAPRIO      _WLIOC(0x003a)  /* Get PTA priority type */
+#define SIOCSIWPMKSA        _WLIOC(0x0036)  /* set PMKSA cache */
+#define SIOCGIWPMKSA        _WLIOC(0x0037)  /* get PMKSA cache */
 
 /* -------------------- DEV PRIVATE IOCTL LIST -------------------- */
 
@@ -159,6 +150,27 @@
  */
 
 #define SIOCIWFIRSTPRIV     _WLIOC(0x00e0)
+
+/* DTIM extension */
+
+#define SIOCSIWDTIM         (SIOCIWFIRSTPRIV + 0)       /* Set DTIM interval time */
+#define SIOCGIWDTIM         (SIOCIWFIRSTPRIV + 1)       /* Get DTIM interval time */
+
+/* power save mode extension */
+
+#define SIOCSIWPWSAVE       (SIOCIWFIRSTPRIV + 2)       /* Set power save mode */
+#define SIOCGIWPWSAVE       (SIOCIWFIRSTPRIV + 3)       /* Get power save mode */
+
+/* Country code extension */
+
+#define SIOCSIWCOUNTRY      (SIOCIWFIRSTPRIV + 4)       /* Set country code */
+#define SIOCGIWCOUNTRY      (SIOCIWFIRSTPRIV + 5)       /* Get country code */
+
+/* WIFI / BT coexist type */
+
+#define SIOCSIWPTAPRIO      (SIOCIWFIRSTPRIV + 6)       /* Set PTA priority type */
+#define SIOCGIWPTAPRIO      (SIOCIWFIRSTPRIV + 7)       /* Get PTA priority type */
+
 #define SIOCIWLASTPRIV      _WLIOC(0x00ff)
 
 /* ------------------------- IOCTL STUFF ------------------------- */

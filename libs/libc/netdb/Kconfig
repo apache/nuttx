@@ -33,14 +33,29 @@ config NETDB_BUFSIZE
 	depends on LIBC_NETDB
 	default 256
 
-config NETDB_MAX_IPADDR
-	int "Max number of IP addresses per host"
+if NET_IPv4
+
+config NETDB_MAX_IPv4ADDR
+	int "Max number of IPv4 addresses per host"
 	depends on LIBC_NETDB
-	default 2 if NET_IPv4 && NET_IPv6
 	default 1
 	---help---
-		This setting determines the maximum number of IP addresses
+		This setting determines the maximum number of IPv4 addresses
 		stored to the name resolution cache for a given host.
+
+endif # NET_IPv4
+
+if NET_IPv6
+
+config NETDB_MAX_IPv6ADDR
+	int "Max number of IPv6 addresses per host"
+	depends on LIBC_NETDB
+	default 1
+	---help---
+		This setting determines the maximum number of IPv6 addresses
+		stored to the name resolution cache for a given host.
+
+endif # NET_IPv6
 
 menuconfig NETDB_HOSTFILE
 	bool "Network host file support"
@@ -179,7 +194,6 @@ endif # NETDB_RESOLVCONF
 config NETDB_DNSSERVER_NAMESERVERS
 	int "Max number of configured nameservers"
 	default 1
-	depends on !NETDB_RESOLVCONF
 	---help---
 		This setting determines how many nameservers there can be
 		in use concurrently.

@@ -81,18 +81,14 @@
 /* Samplerates field is split into low and high byte */
 
 #ifdef CONFIG_AUDIO_CXD56_SRC
-#define CXD56_SUPP_RATES_L  (AUDIO_SAMP_RATE_8K  | AUDIO_SAMP_RATE_11K | \
-                             AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K | \
-                             AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K | \
-                             AUDIO_SAMP_RATE_48K)
-#define CXD56_SUPP_RATES_H  ((AUDIO_SAMP_RATE_96K  | AUDIO_SAMP_RATE_128K | \
-                              AUDIO_SAMP_RATE_192K) >> 8)
-#define CXD56_SUPP_RATES    (CXD56_SUPP_RATES_L | CXD56_SUPP_RATES_H)
+#define CXD56_SUPP_RATES  (AUDIO_SAMP_RATE_8K   | AUDIO_SAMP_RATE_11K | \
+                           AUDIO_SAMP_RATE_16K  | AUDIO_SAMP_RATE_22K | \
+                           AUDIO_SAMP_RATE_32K  | AUDIO_SAMP_RATE_44K | \
+                           AUDIO_SAMP_RATE_48K  | AUDIO_SAMP_RATE_96K | \
+                           AUDIO_SAMP_RATE_128K | AUDIO_SAMP_RATE_192K)
 #else
 /* No sample rate converter, only support system rate of 48kHz */
-#define CXD56_SUPP_RATES_L  AUDIO_SAMP_RATE_48K
-#define CXD56_SUPP_RATES_H  0x0
-#define CXD56_SUPP_RATES    (CXD56_SUPP_RATES_L | CXD56_SUPP_RATES_H)
+#define CXD56_SUPP_RATES  AUDIO_SAMP_RATE_48K
 #endif
 
 /* Mic setting definitions */
@@ -2631,8 +2627,7 @@ static int cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
 
               /* Report supported output sample rates */
 
-              caps->ac_controls.b[0] = CXD56_SUPP_RATES_L;
-              caps->ac_controls.b[1] = CXD56_SUPP_RATES_H;
+              caps->ac_controls.hw[0] = CXD56_SUPP_RATES;
               break;
 
             default:
@@ -2652,8 +2647,7 @@ static int cxd56_getcaps(struct audio_lowerhalf_s *lower, int type,
 
               /* Report supported input sample rates */
 
-              caps->ac_controls.b[0] = CXD56_SUPP_RATES_L;
-              caps->ac_controls.b[1] = CXD56_SUPP_RATES_H;
+              caps->ac_controls.hw[0] = CXD56_SUPP_RATES;
               break;
 
             default:

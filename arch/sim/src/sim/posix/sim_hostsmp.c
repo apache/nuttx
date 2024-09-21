@@ -263,3 +263,15 @@ void host_send_ipi(int cpu)
 {
   pthread_kill(g_cpu_thread[cpu], SIGUSR1);
 }
+
+#ifdef CONFIG_SMP
+
+/****************************************************************************
+ * Name: host_send_func_call_ipi(int cpu)
+ ****************************************************************************/
+
+void host_send_func_call_ipi(int cpu)
+{
+  pthread_kill(g_cpu_thread[cpu], SIGUSR2);
+}
+#endif

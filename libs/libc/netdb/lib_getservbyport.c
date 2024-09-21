@@ -26,8 +26,6 @@
 
 #include <netdb.h>
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -46,4 +44,3 @@ FAR struct servent *getservbyport(int port, FAR const char *proto)
   return (ret != OK) ? NULL : res;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

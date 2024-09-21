@@ -42,7 +42,8 @@
 #define RPMSG_PING_SEND             1
 #define RPMSG_PING_SEND_CHECK       2
 #define RPMSG_PING_SEND_NOACK       3
-#define RPMSG_PING_ACK              4
+#define RPMSG_PING_SEND_ACK         4
+#define RPMSG_PING_ACK              5
 #define RPMSG_PING_CHECK_DATA       0xee
 
 /****************************************************************************
@@ -83,7 +84,8 @@ static int rpmsg_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
         {
           if (msg->data[i] != RPMSG_PING_CHECK_DATA)
             {
-              syslog(LOG_ERR, "rptun ping remote receive data error!\n");
+              syslog(LOG_ERR, "receive data error at %zu of %zu\n",
+                     i, data_len);
               break;
             }
 
@@ -92,6 +94,11 @@ static int rpmsg_ping_ept_cb(FAR struct rpmsg_endpoint *ept,
 
       msg->cmd = RPMSG_PING_ACK;
       rpmsg_send(ept, msg, len);
+    }
+  else if (msg->cmd == RPMSG_PING_SEND_ACK)
+    {
+      msg->cmd = RPMSG_PING_ACK;
+      rpmsg_send(ept, msg, sizeof(*msg));
     }
   else if (msg->cmd == RPMSG_PING_ACK)
     {
@@ -122,7 +129,19 @@ static int rpmsg_ping_once(FAR struct rpmsg_endpoint *ept,
     {
       sem_t sem;
 
-      msg->cmd = (ack == 1)? RPMSG_PING_SEND : RPMSG_PING_SEND_CHECK;
+      if (ack == 1)
+        {
+          msg->cmd = RPMSG_PING_SEND;
+        }
+      else if (ack == 2)
+        {
+          msg->cmd = RPMSG_PING_SEND_CHECK;
+        }
+      else
+        {
+          msg->cmd = RPMSG_PING_SEND_ACK;
+        }
+
       msg->len    = len;
       msg->cookie = (uintptr_t)&sem;
 
@@ -215,7 +234,10 @@ int rpmsg_ping(FAR struct rpmsg_endpoint *ept,
       max    = MAX(max, tm);
       total += tm;
 
-      nxsig_usleep(ping->sleep * USEC_PER_MSEC);
+      if (ping->sleep > 0)
+        {
+          nxsig_usleep(ping->sleep * USEC_PER_MSEC);
+        }
     }
 
   syslog(LOG_INFO, "ping times: %d\n", ping->times);

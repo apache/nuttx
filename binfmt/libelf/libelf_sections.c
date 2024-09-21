@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/libelf/libelf_sections.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -204,7 +206,7 @@ int elf_loadphdrs(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold a working copy of the program header table */
 
-  loadinfo->phdr = (FAR FAR Elf_Phdr *)kmm_malloc(phdrsize);
+  loadinfo->phdr = (FAR Elf_Phdr *)kmm_malloc(phdrsize);
   if (!loadinfo->phdr)
     {
       berr("Failed to allocate the program header table. Size: %ld\n",

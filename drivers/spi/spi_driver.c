@@ -369,7 +369,7 @@ int spi_register(FAR struct spi_dev_s *spi, int bus)
 
       /* Create the character device name */
 
-      snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, bus);
+      snprintf(devname, sizeof(devname), DEVNAME_FMT, bus);
       ret = register_driver(devname, &g_spidrvr_fops, 0666, priv);
       if (ret < 0)
         {

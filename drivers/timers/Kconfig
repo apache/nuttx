@@ -388,6 +388,13 @@ config RTC_RPMSG_SERVER_NAME
 		The proc name of RTC server. Client requests time from
 		specified name of remote proc.
 
+config RTC_RPMSG_SYNC_BASETIME
+	bool "Update g_basetime from rpmsg."
+	default n
+	depends on !RTC_RPMSG_SERVER && !CLOCK_TIMEKEEPING
+	---help---
+		Prevent g_basetime differences in multi-core situations.
+
 endif # RTC
 
 menuconfig WATCHDOG

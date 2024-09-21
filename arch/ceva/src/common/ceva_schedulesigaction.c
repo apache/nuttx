@@ -87,7 +87,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * to task that is currently executing on any CPU.
        */
 
-      sinfo("rtcb=%p CURRENT_REGS=%p\n", this_task(), CURRENT_REGS);
+      sinfo("rtcb=%p current_regs=%p\n", this_task(), up_current_regs());
 
       if (tcb->task_state == TSTATE_TASK_RUNNING)
         {
@@ -102,7 +102,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * signaling itself for some reason.
            */
 
-          if (cpu == me && !CURRENT_REGS)
+          if (cpu == me && !up_current_regs())
             {
               /* In this case just deliver the signal now. */
 
@@ -130,12 +130,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   /* Pause the CPU */
 
                   up_cpu_pause(cpu);
-
-                  /* Wait while the pause request is pending */
-
-                  while (up_cpu_pausereq(cpu))
-                    {
-                    }
                 }
 
               /* Now tcb on the other CPU can be accessed safely */
@@ -143,28 +137,28 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               /* Save the current register context location */
 
-              tcb->xcp.saved_regs = g_current_regs[cpu];
+              tcb->xcp.saved_regs = up_current_regs();
 
               /* Duplicate the register context.  These will be
                * restored by the signal trampoline after the signal has been
                * delivered.
                */
 
-              g_current_regs[cpu] -= XCPTCONTEXT_REGS;
-              memcpy(g_current_regs[cpu], g_current_regs[cpu] +
+              up_current_regs() -= XCPTCONTEXT_REGS;
+              memcpy(up_current_regs(), up_current_regs() +
                      XCPTCONTEXT_REGS, XCPTCONTEXT_SIZE);
 
-              g_current_regs[cpu][REG_SP]  = (uint32_t)g_current_regs[cpu];
+              up_current_regs()[REG_SP]  = (uint32_t)up_current_regs();
 
               /* Then set up to vector to the trampoline with interrupts
                * unchanged.  We must already be in privileged thread mode
                * to be here.
                */
 
-              g_current_regs[cpu][REG_PC]  = (uint32_t)ceva_sigdeliver;
+              up_current_regs()[REG_PC]  = (uint32_t)ceva_sigdeliver;
 #ifdef REG_OM
-              g_current_regs[cpu][REG_OM] &= ~REG_OM_MASK;
-              g_current_regs[cpu][REG_OM] |=  REG_OM_KERNEL;
+              up_current_regs()[REG_OM] &= ~REG_OM_MASK;
+              up_current_regs()[REG_OM] |=  REG_OM_KERNEL;
 #endif
 
 #ifdef CONFIG_SMP

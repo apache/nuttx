@@ -1,6 +1,8 @@
 ############################################################################
 # sched/sched/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -92,11 +94,11 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_backtrace.c
 endif
 
-ifeq ($(CONFIG_DUMP_ON_EXIT),y)
+ifeq ($(CONFIG_SCHED_DUMP_ON_EXIT),y)
 CSRCS += sched_dumponexit.c
 endif
 
-ifeq ($(CONFIG_SMP_CALL),y)
+ifeq ($(CONFIG_SMP),y)
 CSRCS += sched_smp.c
 endif
 

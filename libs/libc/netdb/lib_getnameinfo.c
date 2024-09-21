@@ -33,8 +33,6 @@
 
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -53,7 +51,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
   int ret;
 
   if (addr && addr->sa_family == AF_INET &&
-      addrlen == sizeof(struct sockaddr_in))
+      addrlen >= sizeof(struct sockaddr_in))
     {
       FAR const struct sockaddr_in *sa_in;
 
@@ -197,4 +195,3 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
   return OK;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

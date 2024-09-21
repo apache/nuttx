@@ -557,7 +557,8 @@ static ssize_t mnemofs_read(FAR struct file *filep, FAR char *buffer,
   f     = filep->f_priv;
   DEBUGASSERT(f != NULL);
 
-  finfo("Mnemofs read %lu bytes from %u offset", buflen, f->com->off);
+  finfo("Mnemofs read %zu bytes from %" PRIu32 " offset", buflen,
+        f->com->off);
 
   /* Check if allowed to read. */
 
@@ -579,7 +580,7 @@ static ssize_t mnemofs_read(FAR struct file *filep, FAR char *buffer,
                           buffer, buflen);
   if (ret < 0)
     {
-      finfo("Error while reading. Ret: %d.", ret);
+      finfo("Error while reading. Ret: %zd.", ret);
       goto errout_with_lock;
     }
 
@@ -593,7 +594,7 @@ errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
 
 errout:
-  finfo("Mnemofs read exited with %d.", ret);
+  finfo("Mnemofs read exited with %zd.", ret);
   return ret;
 }
 
@@ -642,7 +643,8 @@ static ssize_t mnemofs_write(FAR struct file *filep, FAR const char *buffer,
   f     = filep->f_priv;
   DEBUGASSERT(f != NULL);
 
-  finfo("Mnemofs write %lu bytes at offset %u.", buflen, f->com->off);
+  finfo("Mnemofs write %zu bytes at offset %" PRIu32, buflen,
+        f->com->off);
 
   /* Check if allowed to write. */
 
@@ -674,7 +676,7 @@ errout_with_lock:
   finfo("Lock released.");
 
 errout:
-  finfo("Mnemofs write exited with %d.", ret);
+  finfo("Mnemofs write exited with %zd.", ret);
   return ret;
 }
 
@@ -800,7 +802,7 @@ static int mnemofs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode    *drv;
   FAR struct mfs_sb_s *sb;
 
-  finfo("Mnemofs ioctl with cmd %u and arg %ld", cmd, arg);
+  finfo("Mnemofs ioctl with cmd %" PRIu32 "and arg %zu.", cmd, arg);
 
   inode = filep->f_inode;
   sb    = inode->i_private;
@@ -1578,21 +1580,39 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
             {
               /* Found journal first block. */
 
-              mfs_jrnl_init(sb, i);
+              ret = mfs_jrnl_init(sb, i);
+              if (predict_false(ret < 0))
+                {
+                  goto errout_with_rwbuf;
+                }
+
+              finfo("Journal initialized.");
+
+              ret = mfs_mn_init(sb, i);
+              if (predict_false(ret < 0))
+                {
+                  goto errout_with_rwbuf;
+                }
+
+              finfo("Master Node initialized.");
+
+              break;
             }
         }
 
       if (predict_false(sb->mn.pg == 0))
         {
           format = true;
+          memset(&MFS_JRNL(sb), 0, sizeof(struct mfs_jrnl_state_s));
+          memset(&MFS_MN(sb), 0, sizeof(struct mfs_mn_s));
           finfo("Device needs to formatted.\n");
         }
       else
         {
           finfo("Device already formatted.\n");
 
-          mfs_ba_init(sb);
           mfs_lru_init(sb);
+          mfs_ba_init(sb);
         }
     }
 
@@ -1613,13 +1633,13 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
       ret = mfs_jrnl_fmt(sb, &mnblk1, &mnblk2, &jrnl_blk);
       if (predict_false(ret < 0))
         {
-          goto errout_with_sb;
+          goto errout_with_rwbuf;
         }
 
       ret = mfs_mn_fmt(sb, mnblk1, mnblk2, jrnl_blk);
       if (predict_false(ret < 0))
         {
-          goto errout_with_sb;
+          goto errout_with_rwbuf;
         }
 
       finfo("Device formatted.\n");
@@ -1631,6 +1651,9 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
   nxmutex_unlock(&MFS_LOCK(sb));
   finfo("Lock released.");
   return ret;
+
+errout_with_rwbuf:
+  kmm_free(sb->rw_buf);
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
@@ -1677,6 +1700,7 @@ static int mnemofs_unbind(FAR void *handle, FAR struct inode **driver,
   mfs_jrnl_free(sb);
   mfs_ba_free(sb);
 
+  kmm_free(sb->rw_buf);
   kmm_free(sb);
 
   finfo("Successfully unmounted mnemofs!");
@@ -2216,7 +2240,7 @@ errout_with_path:
   nxmutex_unlock(&MFS_LOCK(sb));
 
 errout:
-  finfo("Ret %d", ret);
+  finfo("Ret %d.", ret);
   return ret;
 }
 

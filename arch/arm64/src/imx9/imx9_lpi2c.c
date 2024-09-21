@@ -209,7 +209,7 @@ struct imx9_lpi2c_priv_s
 #endif
   volatile uint8_t intstate;   /* Interrupt handshake (see enum imx9_intstate_e) */
 
-  uint8_t msgc;                /* Message count */
+  int8_t msgc;                 /* Message count */
   struct i2c_msg_s *msgv;      /* Message list */
   uint8_t *ptr;                /* Current message buffer */
   uint32_t frequency;          /* Current I2C frequency */
@@ -807,95 +807,21 @@ static uint32_t imx9_lpi2c_toticks(int msgc, struct i2c_msg_s *msgs)
 static inline int
 imx9_lpi2c_sem_waitdone(struct imx9_lpi2c_priv_s *priv)
 {
-  irqstate_t flags;
-  uint32_t regval;
   int ret;
 
-  flags = enter_critical_section();
-
-#ifdef CONFIG_IMX9_LPI2C_DMA
-  if (priv->rxdma == NULL && priv->txdma == NULL)
-    {
-#endif
-      /* Clear the TX and RX FIFOs */
-
-      imx9_lpi2c_modifyreg(priv, IMX9_LPI2C_MCR_OFFSET, 0,
-                           LPI2C_MCR_RTF | LPI2C_MCR_RRF);
-
-      /* Enable Interrupts when master mode */
-
-      if (priv->config->mode == LPI2C_MASTER)
-        {
-          if ((priv->flags & I2C_M_READ) != 0)
-            {
-              regval = LPI2C_MIER_TDIE | LPI2C_MIER_RDIE |
-                       LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
-                       LPI2C_MIER_SDIE;
-              imx9_lpi2c_putreg(priv, IMX9_LPI2C_MIER_OFFSET, regval);
-            }
-          else
-            {
-              regval = LPI2C_MIER_TDIE | LPI2C_MIER_NDIE |
-                       LPI2C_MIER_ALIE | LPI2C_MIER_SDIE;
-              imx9_lpi2c_putreg(priv, IMX9_LPI2C_MIER_OFFSET, regval);
-            }
-        }
-
-#ifdef CONFIG_I2C_SLAVE
-      /* Enable Interrupts when slave mode */
-
-      else
-        {
-          /* REVISIT: Slave mode has not been implemented */
-        }
-#endif
-
-#ifdef CONFIG_IMX9_LPI2C_DMA
-    }
-#endif
-
-  do
-    {
-      /* Wait until either the transfer is complete or the timeout expires */
-
 #ifdef CONFIG_IMX9_LPI2C_DYNTIMEO
-      ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                       imx9_lpi2c_toticks(priv->msgc, priv->msgv));
+  ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
+                                       imx9_lpi2c_toticks(priv->msgc,
+                                                          priv->msgv));
 #else
-      ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                                           CONFIG_IMX9_LPI2C_TIMEOTICKS);
+  ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
+                                       CONFIG_IMX9_LPI2C_TIMEOTICKS);
 #endif
-      if (ret < 0)
-        {
-          /* Break out of the loop on irrecoverable errors.  This would
-           * include timeouts and mystery errors reported by
-           * nxsem_tickwait_uninterruptible.
-           */
-
-          break;
-        }
-    }
-
-  /* Loop until the interrupt level transfer is complete. */
-
-  while (priv->intstate != INTSTATE_DONE);
 
   /* Set the interrupt state back to IDLE */
 
   priv->intstate = INTSTATE_IDLE;
 
-  /* Disable I2C interrupts */
-
-  if (priv->config->mode == LPI2C_MASTER)
-    {
-      imx9_lpi2c_putreg(priv, IMX9_LPI2C_MIER_OFFSET, 0);
-    }
-  else
-    {
-      imx9_lpi2c_putreg(priv, IMX9_LPI2C_SIER_OFFSET, 0);
-    }
-
-  leave_critical_section(flags);
   return ret;
 }
 #else
@@ -943,97 +869,6 @@ imx9_lpi2c_sem_waitdone(struct imx9_lpi2c_priv_s *priv)
   return ret;
 }
 #endif
-
-/****************************************************************************
- * Name: imx9_lpi2c_sem_waitstop
- *
- * Description:
- *   Wait for a STOP to complete
- *
- ****************************************************************************/
-
-static inline void
-imx9_lpi2c_sem_waitstop(struct imx9_lpi2c_priv_s *priv)
-{
-  clock_t start;
-  clock_t elapsed;
-  clock_t timeout;
-  uint32_t regval;
-
-  /* Select a timeout */
-
-#ifdef CONFIG_IMX9_LPI2C_DYNTIMEO
-  timeout = USEC2TICK(CONFIG_IMX9_LPI2C_DYNTIMEO_STARTSTOP);
-#else
-  timeout = CONFIG_IMX9_LPI2C_TIMEOTICKS;
-#endif
-
-  /* Wait as stop might still be in progress; but stop might also
-   * be set because of a timeout error: "The [STOP] bit is set and
-   * cleared by software, cleared by hardware when a Stop condition is
-   * detected, set by hardware when a timeout error is detected."
-   */
-
-  start = clock_systime_ticks();
-  do
-    {
-      /* Calculate the elapsed time */
-
-      elapsed = clock_systime_ticks() - start;
-
-      /* Check for STOP condition */
-
-      if (priv->config->mode == LPI2C_MASTER)
-        {
-          regval = imx9_lpi2c_getreg(priv, IMX9_LPI2C_MSR_OFFSET);
-          if ((regval & LPI2C_MSR_SDF) == LPI2C_MSR_SDF)
-            {
-              return;
-            }
-        }
-
-      /* Enable Interrupts when slave mode */
-
-      else
-        {
-          regval = imx9_lpi2c_getreg(priv, IMX9_LPI2C_SSR_OFFSET);
-          if ((regval & LPI2C_SSR_SDF) == LPI2C_SSR_SDF)
-            {
-              return;
-            }
-        }
-
-      /* Check for NACK error */
-
-      if (priv->config->mode == LPI2C_MASTER)
-        {
-          regval = imx9_lpi2c_getreg(priv, IMX9_LPI2C_MSR_OFFSET);
-          if ((regval & LPI2C_MSR_NDF) == LPI2C_MSR_NDF)
-            {
-              return;
-            }
-        }
-
-#ifdef CONFIG_I2C_SLAVE
-      /* Enable Interrupts when slave mode */
-
-      else
-        {
-          /* REVISIT: Slave mode has not been implemented */
-        }
-#endif
-    }
-
-  /* Loop until the stop is complete or a timeout occurs. */
-
-  while (elapsed < timeout);
-
-  /* If we get here then a timeout occurred with the STOP condition
-   * still pending.
-   */
-
-  i2cinfo("Timeout with Status Register: %" PRIx32 "\n", regval);
-}
 
 /****************************************************************************
  * Name: imx9_rxdma_callback
@@ -1192,8 +1027,8 @@ static void imx9_lpi2c_traceevent(struct imx9_lpi2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -1380,8 +1215,6 @@ static inline void imx9_lpi2c_sendstart(struct imx9_lpi2c_priv_s *priv,
   uint32_t status = 0;
   uint8_t addr;
 
-  /* Generate START condition and send the address */
-
   /* Disable AUTOSTOP and turn NAK Ignore off */
 
   imx9_lpi2c_modifyreg(priv, IMX9_LPI2C_MCFGR1_OFFSET,
@@ -1412,6 +1245,8 @@ static inline void imx9_lpi2c_sendstart(struct imx9_lpi2c_priv_s *priv,
       addr = I2C_WRITEADDR8(address);
     }
 
+  /* Generate START condition and send the address */
+
   imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET,
                     (LPI2C_MTDR_CMD_START | LPI2C_MTDR_DATA(addr)));
 }
@@ -1426,6 +1261,7 @@ static inline void imx9_lpi2c_sendstart(struct imx9_lpi2c_priv_s *priv,
 
 static inline void imx9_lpi2c_sendstop(struct imx9_lpi2c_priv_s *priv)
 {
+  imx9_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
   imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET, LPI2C_MTDR_CMD_STOP);
 }
 
@@ -1455,6 +1291,118 @@ static inline uint32_t
 imx9_lpi2c_getenabledints(struct imx9_lpi2c_priv_s *priv)
 {
   return imx9_lpi2c_getreg(priv, IMX9_LPI2C_MIER_OFFSET);
+}
+
+/****************************************************************************
+ * Name: imx9_lpi2c_start_message
+ *
+ * Description:
+ *  Start send or receive a new message in interrupt mode
+ *
+ ****************************************************************************/
+
+static int imx9_lpi2c_start_message(struct imx9_lpi2c_priv_s *priv)
+{
+  uint32_t irq_config = (LPI2C_MIER_EPIE | LPI2C_MIER_SDIE |
+                         LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
+                         LPI2C_MIER_FEIE);
+
+  priv->ptr   = priv->msgv->buffer;
+  priv->dcnt  = priv->msgv->length;
+  priv->flags = priv->msgv->flags;
+
+  /* Enable RX interrupt before sending START in order not to miss it */
+
+  if ((priv->flags & I2C_M_READ) != 0)
+    {
+      irq_config |= LPI2C_MIER_RDIE;
+    }
+
+  imx9_lpi2c_putreg(priv, IMX9_LPI2C_MIER_OFFSET, irq_config);
+
+  /* Send start + address unless M_NOSTART is defined */
+
+  if ((priv->flags & I2C_M_NOSTART) == 0)
+    {
+      imx9_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
+                            priv->msgc);
+      imx9_lpi2c_sendstart(priv, priv->msgv->addr);
+    }
+  else
+    {
+      imx9_lpi2c_traceevent(priv, I2CEVENT_NOSTART, priv->msgc);
+
+      if ((priv->flags & I2C_M_READ) == 0)
+        {
+          /* We didn't send start, send the first byte to trigger TX IRQs */
+
+          imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET,
+                            LPI2C_MTDR_CMD_TXD |
+                            LPI2C_MTDR_DATA(*priv->ptr++));
+          priv->dcnt--;
+        }
+    }
+
+  /* Enable TX interrupt after sending the first byte - before sending
+   * anything the FIFO count is at 0, so the TX interrupt would trigger
+   * right away
+   */
+
+  if ((priv->flags & I2C_M_READ) == 0)
+    {
+      irq_config |= LPI2C_MIER_TDIE;
+      imx9_lpi2c_putreg(priv, IMX9_LPI2C_MIER_OFFSET, irq_config);
+    }
+  else
+    {
+      /* Set LPI2C in read mode */
+
+      imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET,
+                        LPI2C_MTDR_CMD_RXD |
+                        LPI2C_MTDR_DATA((priv->dcnt - 1)));
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: imx9_lpi2c_stop_transfer
+ *
+ * Description:
+ *  Stop an ongoing transfer amd signal the waiting thread
+ *
+ ****************************************************************************/
+
+static int imx9_lpi2c_stop_transfer(struct imx9_lpi2c_priv_s *priv)
+{
+  /* Mark that there are mo more messages to transfer */
+
+  priv->ptr = NULL;
+  priv->msgc = 0;
+  priv->dcnt = 0;
+
+#ifndef CONFIG_I2C_POLLED
+
+  /* Disable interrupts */
+
+  imx9_lpi2c_modifyreg(priv, IMX9_LPI2C_MIER_OFFSET,
+                       LPI2C_MIER_TDIE | LPI2C_MIER_RDIE |
+                       LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
+                       LPI2C_MIER_SDIE | LPI2C_MIER_EPIE, 0);
+
+  /* Inform the thread that transfer is complete
+   * and wake it up
+   */
+
+  if (priv->intstate == INTSTATE_WAITING)
+    {
+      nxsem_post(&priv->sem_isr);
+    }
+#endif
+
+  priv->intstate = INTSTATE_DONE;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1505,7 +1453,7 @@ static int imx9_lpi2c_isr_process(struct imx9_lpi2c_priv_s *priv)
 
           priv->msgv = NULL;
           priv->msgc = 0;
-          priv->dcnt = -1;
+          priv->dcnt = 0;
 
           if (priv->intstate == INTSTATE_WAITING)
             {
@@ -1531,223 +1479,130 @@ static int imx9_lpi2c_isr_process(struct imx9_lpi2c_priv_s *priv)
     }
 
 #endif
+
   /* Check for new trace setup */
 
   imx9_lpi2c_tracenew(priv, status);
 
-  if ((status & LPI2C_MSR_LIMITED_ERROR_MASK) == 0)
+  /* Check for errors */
+
+  /* Ignore NACK on RX last byte - this is normal */
+
+  if ((status & LPI2C_MSR_NDF) != 0 && (priv->flags & I2C_M_READ) != 0 &&
+      priv->dcnt == 1)
     {
-      /* Check if there is more bytes to send */
-
-      if (((priv->flags & I2C_M_READ) == 0) &&
-               (status & LPI2C_MSR_TDF) != 0)
-        {
-          if (priv->dcnt > 0)
-            {
-              imx9_lpi2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
-              imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET,
-                                LPI2C_MTDR_CMD_TXD |
-                                LPI2C_MTDR_DATA(*priv->ptr++));
-              priv->dcnt--;
-
-              /* Last byte of last message? */
-
-              if ((priv->msgc <= 0) && (priv->dcnt == 0))
-                {
-                  if ((priv->flags & I2C_M_NOSTOP) == 0)
-                    {
-                      imx9_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
-
-                      /* Do this once */
-
-                      priv->flags |= I2C_M_NOSTOP;
-                      imx9_lpi2c_sendstop(priv);
-                    }
-                }
-            }
-        }
-
-      /* Check if there is more bytes to read */
-
-      else if (((priv->flags & I2C_M_READ) != 0) &&
-               (status & LPI2C_MSR_RDF) != 0)
-        {
-          /* Read a byte, if dcnt goes < 0, read dummy bytes to ack ISRs */
-
-          if (priv->dcnt > 0)
-            {
-              imx9_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
-
-              /* No interrupts or context switches should occur in the
-               * following sequence. Otherwise, additional bytes may be
-               * sent by the device.
-               */
-
-    #ifdef CONFIG_I2C_POLLED
-              irqstate_t flags = enter_critical_section();
-    #endif
-
-              /* Receive a byte */
-
-              *priv->ptr++ = imx9_lpi2c_getreg(priv,
-                                               IMX9_LPI2C_MRDR_OFFSET) &
-                                               LPI2C_MRDR_DATA_MASK;
-              priv->dcnt--;
-
-    #ifdef CONFIG_I2C_POLLED
-              leave_critical_section(flags);
-    #endif
-              /* Last byte of last message? */
-
-              if ((priv->msgc <= 0) && (priv->dcnt == 0))
-                {
-                  if ((priv->flags & I2C_M_NOSTOP) == 0)
-                    {
-                      imx9_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
-
-                      /* Do this once */
-
-                      priv->flags |= I2C_M_NOSTOP;
-                      imx9_lpi2c_sendstop(priv);
-                    }
-                }
-            }
-          else
-            {
-              /* Read and discard data */
-
-              imx9_lpi2c_getreg(priv, IMX9_LPI2C_MRDR_OFFSET);
-            }
-        }
-
-      /* Start the first or next message */
-
-      if (priv->dcnt <= 0 && (status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF)) == 0)
-        {
-          if (priv->msgc > 0 && priv->msgv != NULL)
-            {
-              priv->ptr   = priv->msgv->buffer;
-              priv->dcnt  = priv->msgv->length;
-              priv->flags = priv->msgv->flags;
-
-              if ((priv->flags & I2C_M_NOSTART) == 0)
-                {
-                  imx9_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
-                                        priv->msgc);
-
-                  /* Do this once */
-
-                  priv->flags |= I2C_M_NOSTART;
-
-                  imx9_lpi2c_sendstart(priv, priv->msgv->addr);
-                }
-              else
-                {
-                  imx9_lpi2c_traceevent(priv, I2CEVENT_NOSTART, priv->msgc);
-                }
-
-              priv->msgv++;
-              priv->msgc--;
-
-              if ((priv->flags & I2C_M_READ) != 0)
-                {
-#ifndef CONFIG_I2C_POLLED
-                  /* Stop TX interrupt */
-
-                  imx9_lpi2c_modifyreg(priv, IMX9_LPI2C_MIER_OFFSET,
-                                       LPI2C_MIER_TDIE, LPI2C_MIER_RDIE);
-#endif
-                  /* Set LPI2C in read mode */
-
-                  imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET,
-                                    LPI2C_MTDR_CMD_RXD |
-                                    LPI2C_MTDR_DATA((priv->dcnt - 1)));
-                }
-              else
-                {
-                  /* Send the first byte from tx buffer */
-
-                  imx9_lpi2c_traceevent(priv, I2CEVENT_SENDBYTE,
-                                        priv->dcnt);
-                  imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET,
-                                    LPI2C_MTDR_CMD_TXD |
-                                    LPI2C_MTDR_DATA(*priv->ptr++));
-                  priv->dcnt--;
-
-                  /* Last byte of last message? */
-
-                  if ((priv->msgc <= 0) && (priv->dcnt == 0))
-                    {
-                      if ((priv->flags & I2C_M_NOSTOP) == 0)
-                        {
-                          imx9_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
-
-                          /* Do this once */
-
-                          priv->flags |= I2C_M_NOSTOP;
-                          imx9_lpi2c_sendstop(priv);
-                        }
-                    }
-                }
-            }
-        }
+      status &= ~LPI2C_MSR_NDF;
     }
-  else
+
+  /* Handle rest of the errors */
+
+  if ((status & LPI2C_MSR_ERROR_MASK) != 0)
     {
       imx9_lpi2c_traceevent(priv, I2CEVENT_ERROR, 0);
 
-      priv->status = status;
+      /* Clear the TX and RX FIFOs */
 
-      if ((priv->flags & I2C_M_NOSTOP) == 0)
-        {
-          imx9_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
-
-          /* Do this once */
-
-          priv->flags |= I2C_M_NOSTOP;
-          imx9_lpi2c_sendstop(priv);
-        }
+      imx9_lpi2c_modifyreg(priv, IMX9_LPI2C_MCR_OFFSET, 0,
+                           LPI2C_MCR_RTF | LPI2C_MCR_RRF);
 
       /* Clear the error */
 
       imx9_lpi2c_putreg(priv, IMX9_LPI2C_MSR_OFFSET,
-                        (status & (LPI2C_MSR_NDF | LPI2C_MSR_ALF |
-                                   LPI2C_MSR_FEF | LPI2C_MSR_EPF)));
+                        status & LPI2C_MSR_ERROR_MASK);
+
+      priv->status = status;
+      priv->msgc = 0;
+      priv->dcnt = 0;
+
+      /* If there is no stop condition on the bus after clearing the error,
+       * send stop. Otherwise stop the transfer now.
+       */
+
+      status = imx9_lpi2c_getstatus(priv);
+      if ((status & LPI2C_MSR_SDF) == 0)
+        {
+          imx9_lpi2c_sendstop(priv);
+        }
+      else
+        {
+          imx9_lpi2c_stop_transfer(priv);
+        }
+
+      return OK;
     }
 
-  /* Check for endof packet or Stop */
+  /* Check for end of packet or stop */
 
-  if ((status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF)) != 0)
+  if (status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF))
     {
-      /* Reset either or both */
+      /* Reset them both */
 
-      imx9_lpi2c_putreg(priv, IMX9_LPI2C_MSR_OFFSET, status &
-                         (LPI2C_MSR_EPF | LPI2C_MSR_SDF));
+      imx9_lpi2c_putreg(priv, IMX9_LPI2C_MSR_OFFSET,
+                        status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF));
 
-      /* Was it both End of packet and Stop */
+      /* Process more messages or signal the thread */
 
-      if ((status & (LPI2C_MSR_EPF | LPI2C_MSR_SDF)) ==
-          (LPI2C_MSR_EPF | LPI2C_MSR_SDF))
+      if (priv->msgc > 1)
         {
-#ifndef CONFIG_I2C_POLLED
-          if (priv->intstate == INTSTATE_WAITING)
-            {
-              /* inform the thread that transfer is complete
-               * and wake it up
-               */
-
-              priv->intstate = INTSTATE_DONE;
-
-              imx9_lpi2c_modifyreg(priv, IMX9_LPI2C_MIER_OFFSET,
-                                   LPI2C_MIER_TDIE | LPI2C_MIER_RDIE |
-                                   LPI2C_MIER_NDIE | LPI2C_MIER_ALIE |
-                                   LPI2C_MIER_SDIE | LPI2C_MIER_EPIE, 0);
-              nxsem_post(&priv->sem_isr);
-            }
-#else
-          priv->intstate = INTSTATE_DONE;
-#endif
+          priv->msgc--;
+          priv->msgv++;
+          imx9_lpi2c_start_message(priv);
         }
+      else
+        {
+          imx9_lpi2c_stop_transfer(priv);
+        }
+
+      return OK;
+    }
+
+  /* Check if there are bytes to send */
+
+  if ((priv->flags & I2C_M_READ) == 0 && (status & LPI2C_MSR_TDF) != 0)
+    {
+      if (priv->dcnt > 0)
+        {
+          imx9_lpi2c_traceevent(priv, I2CEVENT_SENDBYTE, priv->dcnt);
+          imx9_lpi2c_putreg(priv, IMX9_LPI2C_MTDR_OFFSET,
+                            LPI2C_MTDR_CMD_TXD |
+                            LPI2C_MTDR_DATA(*priv->ptr++));
+          priv->dcnt--;
+        }
+      else if ((priv->flags & I2C_M_NOSTOP) == 0)
+        {
+          imx9_lpi2c_sendstop(priv);
+        }
+    }
+
+  /* Check if there are received bytes */
+
+  else if ((status & LPI2C_MSR_RDF) != 0 && priv->dcnt > 0)
+    {
+      imx9_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
+
+      /* No interrupts or context switches should occur in the
+       * following sequence. Otherwise, additional bytes may be
+       * sent by the device.
+       */
+
+#ifdef CONFIG_I2C_POLLED
+      irqstate_t flags = enter_critical_section();
+#endif
+
+      /* Receive a byte */
+
+      *priv->ptr++ = imx9_lpi2c_getreg(priv, IMX9_LPI2C_MRDR_OFFSET) &
+        LPI2C_MRDR_DATA_MASK;
+
+      priv->dcnt--;
+      if (priv->dcnt == 0 && (priv->flags & I2C_M_NOSTOP) == 0)
+        {
+          imx9_lpi2c_sendstop(priv);
+        }
+
+#ifdef CONFIG_I2C_POLLED
+      leave_critical_section(flags);
+#endif
     }
 
   return OK;
@@ -2194,11 +2049,6 @@ static int imx9_lpi2c_transfer(struct i2c_master_s *dev,
 
   priv->status = 0;
 
-  /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
-   * are currently disabled but will be temporarily re-enabled below when
-   * nxsem_tickwait_uninterruptible() sleeps.
-   */
-
   priv->intstate = INTSTATE_WAITING;
 
   /* Wait for an ISR, if there was a timeout, fetch latest status to get
@@ -2210,7 +2060,11 @@ static int imx9_lpi2c_transfer(struct i2c_master_s *dev,
     {
       imx9_lpi2c_dma_transfer(priv);
     }
+  else
 #endif
+    {
+      imx9_lpi2c_start_message(priv);
+    }
 
   if (imx9_lpi2c_sem_waitdone(priv) < 0)
     {
@@ -2235,7 +2089,7 @@ static int imx9_lpi2c_transfer(struct i2c_master_s *dev,
 
   else if ((priv->status & LPI2C_MSR_ERROR_MASK) != 0)
     {
-      /* I2C_SR1_ERRORMASK is the 'OR' of the following individual bits: */
+      /* LPI2C_MSR_ERROR_MASK is the 'OR' of the following individual bits: */
 
       if (priv->status & LPI2C_MSR_ALF)
         {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/irq/irq_csection.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -380,8 +382,8 @@ try_again_in_irq:
 
           /* Note that we have entered the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_csection(rtcb, true);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+          nxsched_critmon_csection(rtcb, true, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, true);
@@ -420,8 +422,8 @@ irqstate_t enter_critical_section(void)
         {
           /* Note that we have entered the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_csection(rtcb, true);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+          nxsched_critmon_csection(rtcb, true, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, true);
@@ -521,8 +523,8 @@ void leave_critical_section(irqstate_t flags)
         {
           /* No.. Note that we have left the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_csection(rtcb, false);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+          nxsched_critmon_csection(rtcb, false, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, false);
@@ -575,8 +577,8 @@ void leave_critical_section(irqstate_t flags)
         {
           /* Note that we have left the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_csection(rtcb, false);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+          nxsched_critmon_csection(rtcb, false, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, false);
@@ -589,47 +591,4 @@ void leave_critical_section(irqstate_t flags)
   up_irq_restore(flags);
 }
 #endif
-
-/****************************************************************************
- * Name: restore_critical_section
- *
- * Description:
- *   Restore the critical_section
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-void restore_critical_section(void)
-{
-  /* NOTE: The following logic for adjusting global IRQ controls were
-   * derived from nxsched_add_readytorun() and sched_removedreadytorun()
-   * Here, we only handles clearing logic to defer unlocking IRQ lock
-   * followed by context switching.
-   */
-
-  FAR struct tcb_s *tcb;
-  int me = this_cpu();
-
-  /* Adjust global IRQ controls.  If irqcount is greater than zero,
-   * then this task/this CPU holds the IRQ lock
-   */
-
-  tcb = current_task(me);
-  DEBUGASSERT(g_cpu_nestcount[me] <= 0);
-  if (tcb->irqcount <= 0)
-    {
-      if ((g_cpu_irqset & (1 << me)) != 0)
-        {
-          cpu_irqlock_clear();
-        }
-    }
-}
-#endif /* CONFIG_SMP */
-
 #endif /* CONFIG_IRQCOUNT */

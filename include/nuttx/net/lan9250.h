@@ -56,17 +56,18 @@
 
 struct lan9250_lower_s
 {
-  int  (*attach)(FAR const struct lan9250_lower_s *lower, xcpt_t handler,
-                 FAR void *arg);
-  void (*enable)(FAR const struct lan9250_lower_s *lower);
-  void (*disable)(FAR const struct lan9250_lower_s *lower);
+  CODE int  (*attach)(FAR const struct lan9250_lower_s *lower,
+                      xcpt_t handler, FAR void *arg);
+  CODE void (*enable)(FAR const struct lan9250_lower_s *lower);
+  CODE void (*disable)(FAR const struct lan9250_lower_s *lower);
 
   /* This function is optional and used to get a specific MAC address from
    * a MCU-specific implementation. If this function is NULL, the LAN9250
    * driver will not read the MAC from the CPU.
    */
 
-  void (*getmac)(FAR const struct lan9250_lower_s *lower, FAR uint8_t *mac);
+  CODE void (*getmac)(FAR const struct lan9250_lower_s *lower,
+                      FAR uint8_t *mac);
 };
 
 /****************************************************************************

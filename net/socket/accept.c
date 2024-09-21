@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/socket/accept.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -243,6 +245,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
 {
   FAR struct socket *psock = NULL;
   FAR struct socket *newsock;
+  FAR struct file *filep;
   int oflags = O_RDWR;
   int errcode;
   int newfd;
@@ -260,7 +263,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
 
   /* Get the underlying socket structure */
 
-  ret = sockfd_socket(sockfd, &psock);
+  ret = sockfd_socket(sockfd, &filep, &psock);
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
@@ -274,7 +277,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
   if (newsock == NULL)
     {
       errcode = ENOMEM;
-      goto errout;
+      goto errout_with_filep;
     }
 
   ret = psock_accept(psock, addr, addrlen, newsock, flags);
@@ -305,6 +308,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout_with_psock;
     }
 
+  fs_putfilep(filep);
   leave_cancellation_point();
   return newfd;
 
@@ -313,6 +317,9 @@ errout_with_psock:
 
 errout_with_alloc:
   kmm_free(newsock);
+
+errout_with_filep:
+  fs_putfilep(filep);
 
 errout:
   leave_cancellation_point();

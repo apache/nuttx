@@ -750,7 +750,7 @@ static int phyplus_stub_ioctl(struct file *filep, int cmd,
 int phyplus_stub_register(void)
 {
   char devname[16];
-  snprintf(devname, 16, "/dev/phyplus");
+  snprintf(devname, sizeof(devname), "/dev/phyplus");
   return register_driver(devname, &g_stub_drvrops, 0666, NULL);
 }
 
@@ -772,7 +772,7 @@ int phyplus_stub_register(void)
 void phyplus_stub_unregister(void)
 {
   char devname[16];
-  snprintf(devname, 16, "/dev/phyplus");
+  snprintf(devname, sizeof(devname), "/dev/phyplus");
   unregister_driver(devname);
 }
 

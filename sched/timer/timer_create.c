@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/timer/timer_create.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 
+#include "sched/sched.h"
 #include "timer/timer.h"
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
@@ -156,6 +159,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid)
 {
   FAR struct posix_timer_s *ret;
+  FAR struct tcb_s *tcb = this_task();
 
   /* Sanity checks. */
 
@@ -179,13 +183,33 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
 
   ret->pt_clock = clockid;
   ret->pt_crefs = 1;
-  ret->pt_owner = nxsched_getpid();
+  ret->pt_owner = tcb->pid;
   ret->pt_delay = 0;
+  ret->pt_expected = 0;
 
   /* Was a struct sigevent provided? */
 
   if (evp)
     {
+      FAR struct tcb_s *ntcb;
+
+      /* Check the SIGEV_THREAD_ID and validate the tid */
+
+      if (evp->sigev_notify & SIGEV_THREAD_ID)
+        {
+          /* Make sure that the notified thread is
+           * in same process with current thread.
+           */
+
+          ntcb = nxsched_get_tcb(evp->sigev_notify_thread_id);
+
+          if (ntcb == NULL || tcb->group != ntcb->group)
+            {
+              set_errno(EINVAL);
+              return ERROR;
+            }
+        }
+
       /* Yes, copy the entire struct sigevent content */
 
       memcpy(&ret->pt_event, evp, sizeof(struct sigevent));

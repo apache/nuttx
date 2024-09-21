@@ -1,6 +1,8 @@
 # ##############################################################################
 # net/netdev/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -44,6 +46,14 @@ endif()
 
 if(CONFIG_NET_IPv6)
   list(APPEND SRCS netdev_ipv6.c)
+endif()
+
+if(CONFIG_NETDEV_STATISTICS)
+  list(APPEND SRCS netdev_stats.c)
+endif()
+
+if(CONFIG_NETDEV_RSS)
+  list(APPEND SRCS netdev_notify_recvcpu.c)
 endif()
 
 target_sources(net PRIVATE ${SRCS})

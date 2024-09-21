@@ -275,7 +275,7 @@
 #  define MSR_X2APIC_ICR_OTHERS        0x000c0000  /* Send to all APICs, excluding self. */
 #  define MSR_X2APIC_ICR_BUSY          0x00001000
 #  define MSR_X2APIC_ICR_FIXED         0x00000000
-#  define MSR_X2APIC_DESTINATION(d)    ((d) << 32ul)
+#  define MSR_X2APIC_DESTINATION(d)    ((d) << 32)
 #define MSR_X2APIC_LVTT         0x832
 #  define MSR_X2APIC_LVTT_X1           0x0000000B  /* divide counts by 1 */
 #  define MSR_X2APIC_LVTT_PERIODIC     0x00020000  /* Periodic */

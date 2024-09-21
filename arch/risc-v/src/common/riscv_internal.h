@@ -85,13 +85,6 @@
 /* Interrupt Stack macros */
 #define INT_STACK_SIZE  (STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK))
 
-/* In the RISC-V model, the state is saved in stack,
- * only a reference stored in TCB.
- */
-
-#define riscv_savestate(regs) (regs = (uintreg_t *)CURRENT_REGS)
-#define riscv_restorestate(regs) (CURRENT_REGS = regs)
-
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
  * assumed.
@@ -322,8 +315,6 @@ static inline uintptr_t *riscv_vpuregs(struct tcb_s *tcb)
 
 static inline void riscv_savecontext(struct tcb_s *tcb)
 {
-  tcb->xcp.regs = (uintreg_t *)CURRENT_REGS;
-
 #ifdef CONFIG_ARCH_FPU
   /* Save current process FPU state to TCB */
 
@@ -339,8 +330,6 @@ static inline void riscv_savecontext(struct tcb_s *tcb)
 
 static inline void riscv_restorecontext(struct tcb_s *tcb)
 {
-  CURRENT_REGS = (uintreg_t *)tcb->xcp.regs;
-
 #ifdef CONFIG_ARCH_FPU
   /* Restore FPU state for next process */
 
@@ -353,6 +342,10 @@ static inline void riscv_restorecontext(struct tcb_s *tcb)
   riscv_restorevpu(tcb->xcp.regs, riscv_vpuregs(tcb));
 #endif
 }
+
+#ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
+void riscv_initial_extctx_state(struct tcb_s *tcb);
+#endif
 
 /* RISC-V PMP Config ********************************************************/
 

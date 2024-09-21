@@ -48,6 +48,10 @@ config ESP32S2_DEFAULT_CPU_FREQ_MHZ
 	default 160 if ESP32S2_DEFAULT_CPU_FREQ_160
 	default 240 if ESP32S2_DEFAULT_CPU_FREQ_240
 
+config ESPRESSIF_NUM_CPUS
+	int
+	default 1
+
 menu "Cache Configuration"
 
 choice ESP32S2_INSTRUCTION_CACHE_SIZE
@@ -355,10 +359,6 @@ config ESP32S2_SPI3
 	default n
 	select ESP32S2_SPI
 	select SPI
-
-config ESP32S2_SPIFLASH
-	bool "SPI Flash"
-	default n
 
 config ESP32S2_SPIRAM
 	bool "SPI RAM Support"
@@ -849,119 +849,6 @@ config ESP32S2_TWAI_REGDEBUG
 
 endmenu #ESP32S2_TWAI
 
-menu "SPI Flash Configuration"
-
-choice ESP32S2_FLASH_MODE
-	prompt "SPI Flash mode"
-	default ESP32S2_FLASH_MODE_DIO
-	---help---
-		These options control how many I/O pins are used for communication
-		with the attached SPI Flash chip.
-		The option selected here is then used by esptool when flashing.
-
-config ESP32S2_FLASH_MODE_DIO
-	bool "Dual IO (DIO)"
-
-config ESP32S2_FLASH_MODE_DOUT
-	bool "Dual Output (DOUT)"
-
-config ESP32S2_FLASH_MODE_QIO
-	bool "Quad IO (QIO)"
-
-config ESP32S2_FLASH_MODE_QOUT
-	bool "Quad Output (QOUT)"
-
-endchoice # ESP32S2_FLASH_MODE
-
-choice ESP32S2_FLASH_FREQ
-	prompt "SPI Flash frequency"
-	default ESP32S2_FLASH_FREQ_40M
-	---help---
-		SPI Flash frequency.
-
-config ESP32S2_FLASH_FREQ_80M
-	bool "80 MHz"
-
-config ESP32S2_FLASH_FREQ_40M
-	bool "40 MHz"
-
-config ESP32S2_FLASH_FREQ_26M
-	bool "26 MHz"
-
-config ESP32S2_FLASH_FREQ_20M
-	bool "20 MHz"
-
-endchoice # ESP32S2_FLASH_FREQ
-
-if ESP32S2_HAVE_OTA_PARTITION
-
-comment "Application Image OTA Update support"
-
-config ESP32S2_OTA_PRIMARY_SLOT_OFFSET
-	hex "Application image primary slot offset"
-	default 0x10000
-
-config ESP32S2_OTA_PRIMARY_SLOT_DEVPATH
-	string "Application image primary slot device path"
-	default "/dev/ota0"
-
-config ESP32S2_OTA_SECONDARY_SLOT_OFFSET
-	hex "Application image secondary slot offset"
-	default 0x110000
-
-config ESP32S2_OTA_SECONDARY_SLOT_DEVPATH
-	string "Application image secondary slot device path"
-	default "/dev/ota1"
-
-config ESP32S2_OTA_SLOT_SIZE
-	hex "Application image slot size (in bytes)"
-	default 0x100000
-
-config ESP32S2_OTA_SCRATCH_OFFSET
-	hex "Scratch partition offset"
-	default 0x210000
-
-config ESP32S2_OTA_SCRATCH_SIZE
-	hex "Scratch partition size"
-	default 0x40000
-
-config ESP32S2_OTA_SCRATCH_DEVPATH
-	string "Scratch partition device path"
-	default "/dev/otascratch"
-
-endif
-
-if ESP32S2_SPIFLASH
-
-comment "General storage MTD configuration"
-
-config ESP32S2_MTD
-	bool "MTD driver"
-	default y
-	select MTD
-	select MTD_BYTE_WRITE
-	select MTD_PARTITION
-	---help---
-		Initialize an MTD driver for the ESP32-S2 SPI Flash, which will
-		add an entry at /dev for application access from userspace.
-
-config ESP32S2_SPIFLASH_MTD_BLKSIZE
-	int "Storage MTD block size"
-	default 256
-	depends on ESP32S2_MTD
-
-config ESP32S2_STORAGE_MTD_DEBUG
-	bool "Storage MTD Debug"
-	default n
-	depends on ESP32S2_MTD && DEBUG_FS_INFO
-	---help---
-		If this option is enabled, Storage MTD driver read and write functions
-		will output input parameters and return values (if applicable).
-
-endif # ESP32S2_SPIFLASH
-
-endmenu # SPI Flash Configuration
-
 menu "SPI RAM Configuration"
 	depends on ESP32S2_SPIRAM
 
@@ -1216,10 +1103,6 @@ config ESP32S2_LEDC_CHANNEL7_PIN
 
 endmenu # LEDC configuration
 
-config ESP32S2_HAVE_OTA_PARTITION
-	bool
-	default n
-
 menu "Bootloader and Image Configuration"
 
 config ESPRESSIF_SIMPLE_BOOT
@@ -1231,14 +1114,14 @@ config ESP32S2_APP_FORMAT_MCUBOOT
 	bool "Enable MCUboot-bootable format"
 	depends on !MCUBOOT_BOOTLOADER
 	default n
-	select ESP32S2_HAVE_OTA_PARTITION
+	select ESPRESSIF_HAVE_OTA_PARTITION
 	---help---
 		Enables the Espressif port of MCUboot to be used as 2nd stage bootloader.
 
 choice
 	prompt "Target slot for image flashing"
 	default ESP32S2_ESPTOOL_TARGET_PRIMARY
-	depends on ESP32S2_HAVE_OTA_PARTITION
+	depends on ESPRESSIF_HAVE_OTA_PARTITION
 	---help---
 		Slot to which ESPTOOL will flash the generated binary image.
 

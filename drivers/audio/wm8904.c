@@ -1016,7 +1016,7 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls.b[0] =
+              caps->ac_controls.hw[0] =
                 AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
                 AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
                 AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |

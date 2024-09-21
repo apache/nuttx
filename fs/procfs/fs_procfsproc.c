@@ -155,7 +155,7 @@ struct proc_envinfo_s
  * Private Data
  ****************************************************************************/
 
-static FAR const char *g_policy[4] =
+static FAR const char * const g_policy[4] =
 {
   "SCHED_FIFO", "SCHED_RR", "SCHED_SPORADIC"
 };
@@ -775,6 +775,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Convert the for maximum time pre-emption disabled */
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
   if (tcb->premp_max > 0)
     {
       perf_convert(tcb->premp_max, &maxtime);
@@ -791,9 +792,10 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Generate output for maximum time pre-emption disabled */
 
-  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu %p,",
                              (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+                             (unsigned long)maxtime.tv_nsec,
+                             tcb->premp_max_caller);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -805,9 +807,11 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
     {
       return totalsize;
     }
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPT >= 0 */
 
   /* Convert and generate output for maximum time in a critical section */
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
   if (tcb->crit_max > 0)
     {
       perf_convert(tcb->crit_max, &maxtime);
@@ -824,9 +828,10 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Generate output for maximum time in a critical section */
 
-  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu %p,",
                              (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+                             (unsigned long)maxtime.tv_nsec,
+                             tcb->crit_max_caller);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -838,9 +843,10 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
     {
       return totalsize;
     }
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
 
   /* Convert and generate output for maximum time thread running */
-
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   if (tcb->run_max > 0)
     {
       perf_convert(tcb->run_max, &maxtime);
@@ -870,6 +876,8 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
                            &offset);
 
   totalsize += copysize;
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0 */
+
   return totalsize;
 }
 #endif
@@ -1040,6 +1048,24 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
+#ifdef CONFIG_STACK_COLORATION
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Show the stack size */
+
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
+                               "StackUsed:", (long)up_check_tcbstack(tcb));
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                             &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+#endif
+
 #if CONFIG_SCHED_STACK_RECORD > 0
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%zu\n",
                               "StackMax: ",
@@ -1061,12 +1087,13 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
   buffer    += copysize;
   remaining -= copysize;
 
-  for (i = tcb->level_deepest - 1; i > 0; i--)
+  for (i = tcb->level_deepest - 1; i >= 0; i--)
     {
       linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                  "%-12zu%-pS\n",
-                                 tcb->stackrecord_sp_deepest[i - 1] -
-                                 tcb->stackrecord_sp_deepest[i],
+                                 (i ? tcb->stackrecord_sp_deepest[i - 1] :
+                                  tcb->stack_base_ptr + tcb->adj_stack_size)
+                                 - tcb->stackrecord_sp_deepest[i],
                                  tcb->stackrecord_pc_deepest[i]);
       copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                                &offset);
@@ -1088,24 +1115,6 @@ static ssize_t proc_stack(FAR struct proc_file_s *procfile,
       buffer    += copysize;
       remaining -= copysize;
     }
-#endif
-
-#ifdef CONFIG_STACK_COLORATION
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Show the stack size */
-
-  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
-                               "StackUsed:", (long)up_check_tcbstack(tcb));
-  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
-                             &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
 #endif
 
   return totalsize;
@@ -1294,7 +1303,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
       /* Is there an inode associated with the file descriptor? */
 
-      if (filep->f_inode == NULL)
+      if (filep == NULL)
         {
           continue;
         }
@@ -1320,6 +1329,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
           procfile->line[linesize - 2] = '\n';
         }
 
+      fs_putfilep(filep);
       copysize   = procfs_memcpy(procfile->line, linesize,
                                  buffer, remaining, &offset);
 

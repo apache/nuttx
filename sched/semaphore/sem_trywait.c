@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_trywait.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -87,6 +89,13 @@ int nxsem_trywait(FAR sem_t *sem)
   if (sem->semcount > 0)
     {
       /* It is, let the task take the semaphore */
+
+      ret = nxsem_protect_wait(sem);
+      if (ret < 0)
+        {
+          leave_critical_section(flags);
+          return ret;
+        }
 
       sem->semcount--;
       nxsem_add_holder(sem);

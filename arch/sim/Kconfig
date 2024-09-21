@@ -70,7 +70,7 @@ config SIM_CYGWIN_DECORATED
 config SIM_ASAN
 	bool "Address Sanitizer"
 	default n
-	depends on MM_CUSTOMIZE_MANAGER && FRAME_POINTER
+	depends on !MM_KASAN && MM_CUSTOMIZE_MANAGER && FRAME_POINTER
 	---help---
 		AddressSanitizer (ASan) is a fast compiler-based tool for detecting memory
 		bugs in native code.
@@ -78,7 +78,7 @@ config SIM_ASAN
 config SIM_UBSAN
 	bool "Undefined Behaviour Sanitizer"
 	default n
-	depends on FRAME_POINTER
+	depends on !MM_UBSAN && FRAME_POINTER
 	---help---
 		Compile-time instrumentation is used to detect various undefined behaviours
 		at runtime.
@@ -314,20 +314,40 @@ choice
 config SIM_SOUND_ALSA
 	bool "alsa support on sim"
 	depends on HOST_LINUX
+	depends on AUDIOUTILS_LIBMAD
+	depends on AUDIOUTILS_LAME
 
 endchoice
 
 endif
 
+config SIM_OFFLOAD_NUM_BUFFERS
+	int "Number of offload buffers for audio processing"
+	default 2
+	---help---
+		Specifies the number of offload buffers to allocate for audio processing.
+		If Driver Specified buffer sizes is enabled (below), then the
+		low-level drivers will have the opportunity to override this
+		value.
+
+config SIM_OFFLOAD_BUFFER_NUMBYTES
+	int "Size of each offload buffer for audio processing"
+	default 32767
+	---help---
+		Specifies the allocation size for each offload buffer
+		If Driver Specified buffer sizes is enabled (below), then the
+		low-level drivers will have the opportunity to override this
+		value.
+
 config SIM_CAMERA
-	bool "Simulated video support"
+	bool "Simulated camera support"
 	depends on VIDEO
 	default y
 
 if SIM_CAMERA
 
 choice
-	prompt "Simulated video device type"
+	prompt "Simulated camera device type"
 	default SIM_CAMERA_V4L2
 
 config SIM_CAMERA_V4L2
@@ -336,8 +356,8 @@ config SIM_CAMERA_V4L2
 
 endchoice
 
-config HOST_VIDEO_DEV_PATH
-	string "Host video device path"
+config HOST_CAMERA_DEV_PATH
+	string "Host camera device path"
 	default "/dev/video0"
 
 config SIM_CAMERA_DEV_PATH
@@ -421,6 +441,16 @@ config SIM_FRAMEBUFFER_COUNT
 	---help---
 		Framebuffer count.
 		Simulated frambuffer count.  Default: 2
+
+config SIM_FB_INTERVAL_LINE
+	int "The line between non-consecutive framebuffers"
+	depends on SIM_FRAMEBUFFER && SIM_FRAMEBUFFER_COUNT > 1
+	default 0
+	---help---
+		When SIM_FB_INTERVAL_LINE = 0, the framebuffers are consecutive.
+		When SIM_FB_INTERVAL_LINE > 0, the first buffer is not consecutive with
+		the second buffer, and the interval between discontinuous buffers is
+		SIM_FB_INTERVAL_LINE * stride.  Default: 0
 
 endmenu
 

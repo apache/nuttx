@@ -48,7 +48,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_LONG_DOUBLE
 long double wcstold(FAR const wchar_t *nptr, FAR wchar_t **endptr)
 {
   return strtold((FAR const char *)nptr, (FAR char **)endptr);
 }
+#endif

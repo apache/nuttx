@@ -968,51 +968,59 @@ struct sdio_dev_s
   mutex_t mutex; /* Assures mutually exclusive access to the slot */
 
 #ifdef CONFIG_SDIO_MUXBUS
-  int   (*lock)(FAR struct sdio_dev_s *dev, bool lock);
+  CODE int   (*lock)(FAR struct sdio_dev_s *dev, bool lock);
 #endif
 
   /* Initialization/setup */
 
-  void  (*reset)(FAR struct sdio_dev_s *dev);
-  sdio_capset_t (*capabilities)(FAR struct sdio_dev_s *dev);
-  sdio_statset_t (*status)(FAR struct sdio_dev_s *dev);
-  void  (*widebus)(FAR struct sdio_dev_s *dev, bool enable);
-  void  (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);
-  int   (*attach)(FAR struct sdio_dev_s *dev);
+  CODE void  (*reset)(FAR struct sdio_dev_s *dev);
+  CODE sdio_capset_t (*capabilities)(FAR struct sdio_dev_s *dev);
+  CODE sdio_statset_t (*status)(FAR struct sdio_dev_s *dev);
+  CODE void  (*widebus)(FAR struct sdio_dev_s *dev, bool enable);
+  CODE void  (*clock)(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate);
+  CODE int   (*attach)(FAR struct sdio_dev_s *dev);
 
   /* Command/Status/Data Transfer */
 
-  int   (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg);
+  CODE int   (*sendcmd)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        uint32_t arg);
 #ifdef CONFIG_SDIO_BLOCKSETUP
-  void  (*blocksetup)(FAR struct sdio_dev_s *dev, unsigned int blocklen,
-          unsigned int nblocks);
+  CODE void  (*blocksetup)(FAR struct sdio_dev_s *dev, unsigned int blocklen,
+                           unsigned int nblocks);
 #endif
-  int   (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-          size_t nbytes);
-  int   (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
-          size_t nbytes);
-  int   (*cancel)(FAR struct sdio_dev_s *dev);
+  CODE int   (*recvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+                          size_t nbytes);
+  CODE int   (*sendsetup)(FAR struct sdio_dev_s *dev,
+                          FAR const uint8_t *buffer, size_t nbytes);
+  CODE int   (*cancel)(FAR struct sdio_dev_s *dev);
 
-  int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32_t cmd);
-  int   (*recv_r1)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R1);
-  int   (*recv_r2)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t R2[4]);
-  int   (*recv_r3)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R3);
-  int   (*recv_r4)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R4);
-  int   (*recv_r5)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R5);
-  int   (*recv_r6)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R6);
-  int   (*recv_r7)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R7);
+  CODE int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32_t cmd);
+  CODE int   (*recv_r1)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        FAR uint32_t *R1);
+  CODE int   (*recv_r2)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        FAR uint32_t R2[4]);
+  CODE int   (*recv_r3)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        FAR uint32_t *R3);
+  CODE int   (*recv_r4)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        FAR uint32_t *R4);
+  CODE int   (*recv_r5)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        FAR uint32_t *R5);
+  CODE int   (*recv_r6)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        FAR uint32_t *R6);
+  CODE int   (*recv_r7)(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                        FAR uint32_t *R7);
 
   /* Event/Callback support */
 
-  void  (*waitenable)(FAR struct sdio_dev_s *dev, sdio_eventset_t eventset,
-          uint32_t timeout);
-  sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev);
-  void  (*callbackenable)(FAR struct sdio_dev_s *dev,
-          sdio_eventset_t eventset);
+  CODE void  (*waitenable)(FAR struct sdio_dev_s *dev,
+                           sdio_eventset_t eventset, uint32_t timeout);
+  CODE sdio_eventset_t (*eventwait)(FAR struct sdio_dev_s *dev);
+  CODE void  (*callbackenable)(FAR struct sdio_dev_s *dev,
+                               sdio_eventset_t eventset);
 
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
-  int   (*registercallback)(FAR struct sdio_dev_s *dev,
-          worker_t callback, void *arg);
+  CODE int   (*registercallback)(FAR struct sdio_dev_s *dev,
+                                 worker_t callback, FAR void *arg);
 #endif
 
   /* DMA.  CONFIG_SDIO_DMA should be set if the driver supports BOTH DMA
@@ -1022,15 +1030,16 @@ struct sdio_dev_s
 
 #ifdef CONFIG_SDIO_DMA
 #ifdef CONFIG_ARCH_HAVE_SDIO_PREFLIGHT
-  int   (*dmapreflight)(FAR struct sdio_dev_s *dev,
-          FAR const uint8_t *buffer, size_t buflen);
+  CODE int   (*dmapreflight)(FAR struct sdio_dev_s *dev,
+                             FAR const uint8_t *buffer, size_t buflen);
 #endif
-  int   (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-          size_t buflen);
-  int   (*dmasendsetup)(FAR struct sdio_dev_s *dev,
-          FAR const uint8_t *buffer, size_t buflen);
+  CODE int   (*dmarecvsetup)(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+                             size_t buflen);
+  CODE int   (*dmasendsetup)(FAR struct sdio_dev_s *dev,
+                             FAR const uint8_t *buffer, size_t buflen);
 #endif /* CONFIG_SDIO_DMA */
-  void  (*gotextcsd)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer);
+  CODE void  (*gotextcsd)(FAR struct sdio_dev_s *dev,
+                          FAR const uint8_t *buffer);
 };
 
 /****************************************************************************

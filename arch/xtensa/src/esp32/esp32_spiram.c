@@ -86,8 +86,8 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
   uint32_t regval;
 #ifdef CONFIG_SMP
   int cpu_to_stop = 0;
-  bool smp_start = OSINIT_OS_READY();
 #endif
+  const bool os_ready = OSINIT_OS_READY();
   unsigned int i;
   unsigned int shift;
   unsigned int mask_s;
@@ -169,16 +169,20 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
    * the flash guards to make sure the cache is disabled.
    */
 
-  flags = enter_critical_section();
+  flags = 0; /* suppress GCC warning */
+  if (os_ready)
+    {
+      flags = enter_critical_section();
+    }
 
 #ifdef CONFIG_SMP
   /* The other CPU might be accessing the cache at the same time, just by
    * using variables in external RAM.
    */
 
-  if (smp_start)
+  if (os_ready)
     {
-      cpu_to_stop = up_cpu_index() == 1 ? 0 : 1;
+      cpu_to_stop = this_cpu() == 1 ? 0 : 1;
       up_cpu_pause(cpu_to_stop);
     }
 
@@ -199,15 +203,15 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
   if (cpu_no == 0)
     {
       regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
-      regval &= ~DPORT_PRO_CMMU_SRAM_PAGE_MODE;
-      regval |= mask_s;
+      regval &= ~DPORT_PRO_CMMU_SRAM_PAGE_MODE_M;
+      regval |= mask_s << DPORT_PRO_CMMU_SRAM_PAGE_MODE_S;
       putreg32(regval, DPORT_PRO_CACHE_CTRL1_REG);
     }
   else
     {
       regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
-      regval &= ~DPORT_APP_CMMU_SRAM_PAGE_MODE;
-      regval |= mask_s;
+      regval &= ~DPORT_APP_CMMU_SRAM_PAGE_MODE_M;
+      regval |= mask_s << DPORT_APP_CMMU_SRAM_PAGE_MODE_S;
       putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
     }
 
@@ -215,13 +219,17 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
 #ifdef CONFIG_SMP
   spi_enable_cache(1);
 
-  if (smp_start)
+  if (os_ready)
     {
       up_cpu_resume(cpu_to_stop);
     }
 #endif
 
-  leave_critical_section(flags);
+  if (os_ready)
+    {
+      leave_critical_section(flags);
+    }
+
   return 0;
 }
 
@@ -239,7 +247,7 @@ void IRAM_ATTR esp_spiram_init_cache(void)
 
 #ifdef CONFIG_SMP
   regval  = getreg32(DPORT_APP_CACHE_CTRL1_REG);
-  regval &= ~(1 << DPORT_APP_CACHE_MASK_DRAM1);
+  regval &= ~DPORT_APP_CACHE_MASK_DRAM1;
   putreg32(regval, DPORT_APP_CACHE_CTRL1_REG);
   cache_sram_mmu_set(1, 0, SOC_EXTRAM_DATA_LOW, 0, 32, 128);
 #endif

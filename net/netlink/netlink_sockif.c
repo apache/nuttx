@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netlink/netlink_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -672,6 +674,7 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct netlink_response_s *entry;
   FAR struct socket_conn_s *conn;
+  int ret = OK;
 
   DEBUGASSERT(from == NULL ||
               (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
@@ -692,13 +695,15 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
           return -EAGAIN;
         }
 
-      /* Wait for the response.  This should always succeed. */
+      /* Wait for the response. */
 
-      entry = netlink_get_response(psock->s_conn);
-      DEBUGASSERT(entry != NULL);
+      ret = netlink_get_response(psock->s_conn, &entry);
+
+      /* If interrupted by signals, return errno */
+
       if (entry == NULL)
         {
-          return -EPIPE;
+          return ret;
         }
     }
 

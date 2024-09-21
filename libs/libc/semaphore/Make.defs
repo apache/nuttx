@@ -28,6 +28,10 @@ ifeq ($(CONFIG_FS_NAMED_SEMAPHORES),y)
 CSRCS += sem_open.c sem_close.c sem_unlink.c
 endif
 
+ifeq ($(CONFIG_PRIORITY_PROTECT),y)
+CSRCS += sem_getprioceiling.c sem_setprioceiling.c
+endif
+
 # Add the semaphore directory to the build
 
 DEPPATH += --dep-path semaphore

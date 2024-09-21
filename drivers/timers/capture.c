@@ -304,6 +304,18 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* CAPIOC_EDGES - Get the pwm edges from the capture.
+       * Argument: int32_t pointer to the location to return the edges.
+       */
+
+      case CAPIOC_EDGES:
+        {
+          FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
+          DEBUGASSERT(lower->ops->getedges != NULL && ptr);
+          ret = lower->ops->getedges(lower, ptr);
+        }
+        break;
+
       /* Any unrecognized IOCTL commands might be platform-specific ioctl
        * commands
        */

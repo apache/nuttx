@@ -83,7 +83,7 @@ struct phyplus_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int phyplus_timer_handler(int irq, void * context, void * arg);
+static int phyplus_timer_handler(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -97,7 +97,7 @@ static void phyplus_setcallback(struct timer_lowerhalf_s *lower,
                                 tccb_t callback, void *arg);
 
 /* static int phyplus_ioctl(struct timer_lowerhalf_s *lower, int cmd,
- *                           unsigned long arg);
+ *                          unsigned long arg);
  */
 
 /****************************************************************************
@@ -194,9 +194,9 @@ static struct phyplus_lowerhalf_s g_tim6_lowerhalf =
  *
  ****************************************************************************/
 
-static int phyplus_timer_handler(int irq, void * context, void * arg)
+static int phyplus_timer_handler(int irq, void *context, void *arg)
 {
-  struct phyplus_lowerhalf_s *lower = (struct phyplus_lowerhalf_s *) arg;
+  struct phyplus_lowerhalf_s *lower = (struct phyplus_lowerhalf_s *)arg;
 
   /* PHYPLUS_TIM_ACKINT(lower->tim); */
 
@@ -311,7 +311,7 @@ static int phyplus_stop(struct timer_lowerhalf_s *lower)
  ****************************************************************************/
 
 static int phyplus_settimeout(struct timer_lowerhalf_s *lower,
-                            uint32_t timeout)
+                              uint32_t timeout)
 {
   struct phyplus_lowerhalf_s *priv =
       (struct phyplus_lowerhalf_s *)lower;
@@ -593,13 +593,9 @@ static int phyplus_getstatus(struct timer_lowerhalf_s *lower,
   return OK;
 }
 
-int phyplus_timer_register(struct phyplus_timer_param_s
-                           *phyplus_timer_param)
+int phyplus_timer_register(struct phyplus_timer_param_s *phyplus_timer_param)
 {
-  const char *fmt;
   char devname[16];
-
-  fmt = "/dev/timer%u";
 
   if ((phyplus_timer_param->timer_idx < 1) ||
       (phyplus_timer_param->timer_idx > 6))
@@ -607,12 +603,12 @@ int phyplus_timer_register(struct phyplus_timer_param_s
       return -ENODEV;
     }
 
-  snprintf(devname, 16, fmt, (unsigned int)phyplus_timer_param->timer_idx);
+  snprintf(devname, sizeof(devname), "/dev/timer%u",
+           phyplus_timer_param->timer_idx);
   return phyplus_timer_initialize(devname, phyplus_timer_param->timer_idx);
 }
 
-int phyplus_timer_ungister(struct phyplus_timer_param_s
-                           *phyplus_timer_param)
+int phyplus_timer_ungister(struct phyplus_timer_param_s *phyplus_timer_param)
 {
   return 0;
 }

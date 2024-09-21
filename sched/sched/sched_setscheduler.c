@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_setscheduler.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -190,8 +192,8 @@ int nxsched_set_scheduler(pid_t pid, int policy,
 
           /* Convert timespec values to system clock ticks */
 
-          clock_time2ticks(&param->sched_ss_repl_period, &repl_ticks);
-          clock_time2ticks(&param->sched_ss_init_budget, &budget_ticks);
+          repl_ticks = clock_time2ticks(&param->sched_ss_repl_period);
+          budget_ticks = clock_time2ticks(&param->sched_ss_init_budget);
 
           /* Avoid zero/negative times */
 

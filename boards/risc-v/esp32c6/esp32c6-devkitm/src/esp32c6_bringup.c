@@ -77,7 +77,7 @@
 #endif
 
 #ifdef CONFIG_ESPRESSIF_WIFI_BT_COEXIST
-#  include "esp_coexist_internal.h"
+#  include "private/esp_coexist_internal.h"
 #endif
 
 #ifdef CONFIG_ESPRESSIF_WIFI
@@ -87,6 +87,10 @@
 #ifdef CONFIG_SPI_SLAVE_DRIVER
 #  include "espressif/esp_spi.h"
 #  include "esp_board_spislavedev.h"
+#endif
+
+#ifdef CONFIG_CL_MFRC522
+  #include "esp_board_mfrc522.h"
 #endif
 
 #include "esp32c6-devkitm.h"
@@ -335,6 +339,14 @@ int esp_bringup(void)
       syslog(LOG_ERR, "ERROR: board_ledc_setup() failed: %d\n", ret);
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
+
+#ifdef CONFIG_CL_MFRC522
+  ret = board_mfrc522_initialize("/dev/rfid0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_mfrc522_initialize() failed: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

@@ -54,6 +54,7 @@
 #define O_CLOEXEC   (1 << 10)       /* Close on execute */
 #define O_DIRECTORY (1 << 11)       /* Must be a directory */
 #define O_NOFOLLOW  (1 << 12)       /* Don't follow links */
+#define O_LARGEFILE (1 << 13)       /* Large File */
 #define O_NOATIME   (1 << 18)       /* Don't update the file last access time */
 
 /* Unsupported, but required open flags */
@@ -102,6 +103,8 @@
 #define F_ADD_SEALS     16 /* Add the bit-mask argument arg to the set of seals of the inode */
 #define F_GET_SEALS     17 /* Get (as the function result) the current set of seals of the inode */
 #define F_DUPFD_CLOEXEC 18 /* Duplicate file descriptor with close-on-exit set.  */
+#define F_SETPIPE_SZ    19 /* Modify the capacity of the pipe to arg bytes, but not larger than CONFIG_DEV_PIPE_MAXSIZE */
+#define F_GETPIPE_SZ    20 /* Return the capacity of the pipe */
 
 /* For posix fcntl() and lockf() */
 

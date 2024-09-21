@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/group/group_leave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,7 +98,7 @@ group_release(FAR struct task_group_s *group, uint8_t ttype)
 
   /* Free resources held by the file descriptor list */
 
-  files_releaselist(&group->tg_filelist);
+  files_putlist(&group->tg_filelist);
 
 #ifndef CONFIG_DISABLE_ENVIRON
   /* Release all shared environment variables */

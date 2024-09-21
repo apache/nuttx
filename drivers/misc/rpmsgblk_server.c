@@ -220,7 +220,8 @@ static int rpmsgblk_read_handler(FAR struct rpmsg_endpoint *ept,
           nsectors = msg->nsectors - read;
         }
 
-      ret = server->bops->read(server->blknode, (unsigned char *)rsp->buf,
+      ret = server->bops->read(server->blknode,
+                               (FAR unsigned char *)rsp->buf,
                                msg->startsector, nsectors);
       rsp->header.result = ret;
       rpmsg_send_nocopy(ept, rsp, (ret < 0 ? 0 : ret * msg->sectorsize) +
@@ -312,6 +313,125 @@ static int rpmsgblk_geometry_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 /****************************************************************************
+ * Name: rpmsgblk_mmc_cmd_handler
+ ****************************************************************************/
+
+static int rpmsgblk_mmc_cmd_handler(FAR struct rpmsg_endpoint *ept,
+                                    FAR struct rpmsgblk_ioctl_s *msg)
+{
+  FAR struct rpmsgblk_server_s *server = ept->priv;
+  FAR struct mmc_ioc_cmd *ioc =
+    (FAR struct mmc_ioc_cmd *)(uintptr_t)msg->buf;
+  FAR struct rpmsgblk_ioctl_s *rsp;
+  FAR struct mmc_ioc_cmd *ioc_rsp;
+  size_t rsplen;
+  size_t arglen;
+  uint32_t space;
+
+  arglen = sizeof(struct mmc_ioc_cmd);
+  if (!ioc->write_flag)
+    {
+      arglen += ioc->blksz * ioc->blocks;
+    }
+
+  rsplen = sizeof(*rsp) + arglen - 1;
+  rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
+  if (msg == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  DEBUGASSERT(space >= rsplen);
+
+  memcpy(rsp, msg, sizeof(*rsp) + sizeof(struct mmc_ioc_cmd) - 1);
+  rsp->arglen = arglen;
+  ioc_rsp = (FAR struct mmc_ioc_cmd *)(uintptr_t)rsp->buf;
+
+  if (ioc_rsp->write_flag)
+    {
+      ioc_rsp->data_ptr = (uint64_t)(uintptr_t)(msg->buf + sizeof(*ioc_rsp));
+    }
+  else
+    {
+      ioc_rsp->data_ptr = (uint64_t)(uintptr_t)(rsp->buf + sizeof(*ioc_rsp));
+    }
+
+  rsp->header.result = server->bops->ioctl(server->blknode, rsp->request,
+                                           (unsigned long)rsp->buf);
+
+  return rpmsg_send_nocopy(ept, rsp, rsplen);
+}
+
+/****************************************************************************
+ * Name: rpmsgblk_mmc_cmd_handler
+ ****************************************************************************/
+
+static int rpmsgblk_mmc_multi_cmd_handler(FAR struct rpmsg_endpoint *ept,
+                                          FAR struct rpmsgblk_ioctl_s *msg)
+{
+  FAR struct rpmsgblk_server_s *server = ept->priv;
+  FAR struct mmc_ioc_multi_cmd *mioc =
+    (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)msg->buf;
+  FAR struct rpmsgblk_ioctl_s *rsp;
+  FAR struct mmc_ioc_multi_cmd *mioc_rsp;
+  size_t rsplen;
+  size_t arglen;
+  size_t off;
+  size_t rsp_off;
+  uint32_t space;
+  uint64_t i;
+
+  arglen = sizeof(struct mmc_ioc_multi_cmd) +
+           mioc->num_of_cmds * sizeof(struct mmc_ioc_cmd);
+  for (i = 0; i < mioc->num_of_cmds; i++)
+    {
+      if (!mioc->cmds[i].write_flag)
+        {
+          arglen += mioc->cmds[i].blksz * mioc->cmds[i].blocks;
+        }
+    }
+
+  rsplen = sizeof(*rsp) + arglen - 1;
+  rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
+  if (msg == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  DEBUGASSERT(space >= rsplen);
+
+  off = sizeof(struct mmc_ioc_multi_cmd) +
+        mioc->num_of_cmds * sizeof(struct mmc_ioc_cmd);
+
+  /* Consist of the rsp msg */
+
+  memcpy(rsp, msg, sizeof(*rsp) + off - 1);
+  rsp->arglen = arglen;
+  mioc_rsp = (FAR struct mmc_ioc_multi_cmd *)(uintptr_t)rsp->buf;
+  rsp_off = off;
+  for (i = 0; i < mioc_rsp->num_of_cmds; i++)
+    {
+      if (mioc_rsp->cmds[i].write_flag)
+        {
+          mioc_rsp->cmds[i].data_ptr = (uint64_t)(uintptr_t)
+                                       (msg->buf + off);
+          off += mioc_rsp->cmds[i].blksz * mioc_rsp->cmds[i].blocks;
+        }
+      else
+        {
+          mioc_rsp->cmds[i].data_ptr = (uint64_t)(uintptr_t)
+                                       (rsp->buf + rsp_off);
+          rsp_off += mioc_rsp->cmds[i].blksz * mioc_rsp->cmds[i].blocks;
+        }
+    }
+
+  rsp->header.result = server->bops->ioctl(server->blknode, rsp->request,
+                                           (unsigned long)rsp->buf);
+
+  return rpmsg_send_nocopy(ept, rsp, rsplen);
+}
+
+/****************************************************************************
  * Name: rpmsgblk_ioctl_handler
  ****************************************************************************/
 
@@ -333,17 +453,10 @@ static int rpmsgblk_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   switch (msg->request)
     {
       case MMC_IOC_CMD:
-        {
-          FAR struct mmc_ioc_cmd *ioc =
-            (FAR struct mmc_ioc_cmd *)(uintptr_t)msg->buf;
+        return rpmsgblk_mmc_cmd_handler(ept, data);
 
-          if (ioc->data_ptr)
-            {
-              ioc->data_ptr = (uint64_t)(uintptr_t)
-                              ((FAR uint8_t *)ioc + sizeof(*ioc));
-            }
-        }
-        break;
+      case MMC_IOC_MULTI_CMD:
+        return rpmsgblk_mmc_multi_cmd_handler(ept, data);
 
       default:
         break;

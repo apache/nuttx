@@ -340,6 +340,18 @@ config PREALLOC_IRQCHAIN
 
 endif # IRQCHAIN
 
+config IRQ_NWORKS
+	int "Max num of active irq wqueue"
+	default 8
+	---help---
+		The max num of active irq wqueue.
+
+config IRQ_WORK_STACKSIZE
+	int "The default stack size for isr wqueue"
+	default DEFAULT_TASK_STACKSIZE
+	---help---
+		The default stack size for isr wqueue.
+
 config IRQCOUNT
 	bool
 	default n
@@ -388,12 +400,6 @@ config SMP_DEFAULT_CPUSET
 	---help---
 		Set the Default CPU bits. The way to use the unset CPU is to call the
 		sched_setaffinity function to bind a task to the CPU. bit0 means CPU0.
-
-config SMP_CALL
-	bool "Support SMP function call"
-	default n
-	---help---
-		Enable to support SMP function call.
 
 endif # SMP
 
@@ -787,6 +793,12 @@ config SCHED_DUMP_LEAK
 		are printed using syslog. This helps catch any memory allocated by the
 		task that remains unreleased when the task exits.
 
+config SCHED_DUMP_ON_EXIT
+	bool "Dump all tasks state on exit"
+	default n
+	---help---
+		Dump all tasks state on exit()
+
 config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
@@ -878,20 +890,6 @@ config PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
 
 endchoice # Default pthread mutex protocol
 
-config PTHREAD_CLEANUP_STACKSIZE
-	int "pthread cleanup stack size"
-	default 0
-	range 0 255
-	---help---
-		The maximum number of cleanup actions that may be pushed by
-		pthread_cleanup_push().
-		if 0 disable the interfaces pthread_cleanup_push() and pthread_cleanup_pop().
-		This setting will increase the size of EVERY
-		pthread task control block by about n * CONFIG_PTHREAD_CLEANUP_STACKSIZE
-		where n is the size of a pointer, 2 * sizeof(uintptr_t), this would be
-		8 for a CPU with 32-bit addressing and 4 for a CPU with 16-bit
-		addressing.
-
 config CANCELLATION_POINTS
 	bool "Cancellation points"
 	default n
@@ -949,7 +947,7 @@ config SCHED_CRITMONITOR_MAXTIME_THREAD
 
 config SCHED_CRITMONITOR_MAXTIME_WQUEUE
 	int "WORK queue max execution time"
-	default SCHED_CRITMONITOR_MAXTIME_THREAD
+	default -1
 	---help---
 		Worker execution time should be smaller than
 		SCHED_CRITMONITOR_MAXTIME_WQUEUE, or system will give a warning.
@@ -1070,7 +1068,7 @@ config SCHED_CPULOAD_EXTCLK
 
 config SCHED_CPULOAD_CRITMONITOR
 	bool "Use critical monitor"
-	depends on SCHED_CRITMONITOR
+	depends on SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
 	---help---
 		Use the perfcounter in the core of the chip as a counter, no need to
 		use an external timer. Need to depend on SCHED_CRITMONITOR.
@@ -1429,6 +1427,13 @@ config SEM_PREALLOCHOLDERS
 		than two threads participate using a counting semaphore.
 
 endif # PRIORITY_INHERITANCE
+
+config PRIORITY_PROTECT
+	bool "Enable priority protect"
+	default n
+	---help---
+		When a thread locks a mutex it inherits the priority ceiling of the
+		mutex, which is defined by the application as a mutex attribute.
 
 menu "RTOS hooks"
 
@@ -1976,3 +1981,11 @@ config PID_INITIAL_COUNT
 		can still expand when needed. It is rounded up to power of
 		two by current implementation. If the number of threads in
 		your system is known at design time, setting this to it.
+
+config SCHED_EVENTS
+	bool "Schedule Event objects"
+	default n
+	---help---
+		This option enables event objects. Threads may wait on event
+		objects for specific events, but both threads and ISRs may deliver
+		events to event objects.

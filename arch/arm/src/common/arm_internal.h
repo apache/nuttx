@@ -98,8 +98,8 @@
 
 /* Macros to handle saving and restoring interrupt state. */
 
-#define arm_savestate(regs)    (regs = (uint32_t *)CURRENT_REGS)
-#define arm_restorestate(regs) (CURRENT_REGS = regs)
+#define arm_savestate(regs)    (regs = up_current_regs())
+#define arm_restorestate(regs) up_set_current_regs(regs)
 
 /* Toolchain dependent, linker defined section addresses */
 

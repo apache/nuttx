@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/timer/timer_getoverrun.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,9 +77,18 @@
 
 int timer_getoverrun(timer_t timerid)
 {
-  UNUSED(timerid);
-  set_errno(EINVAL);
-  return ERROR;
+  FAR struct posix_timer_s *timer = timer_gethandle(timerid);
+  int ret;
+
+  if (!timer)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  ret = timer->pt_overrun;
+
+  return ret > DELAYTIMER_MAX ? DELAYTIMER_MAX : ret;
 }
 
 #endif /* CONFIG_DISABLE_POSIX_TIMERS */

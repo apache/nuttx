@@ -33,7 +33,7 @@
 	.endm
 #endif
 
-#if __SIZEOF_POINTER__ == 8
+#if defined(__SIZEOF_POINTER__ ) && __SIZEOF_POINTER__ == 8
 	.macro globalEntry index, ep
 	.quad	.l\index
 	.quad	\ep

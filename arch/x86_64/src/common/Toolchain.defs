@@ -32,6 +32,10 @@ ARCHCPUFLAGS = -fPIC -fno-stack-protector -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 
+ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_CET),y)
+  ARCHOPTIMIZATION += -fcf-protection=none
+endif
+
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.
 
@@ -120,7 +124,8 @@ ifeq ($(CONFIG_ARCH_X86_64_AVX512VBMI),y)
   ARCHCPUFLAGS += -mavx512vbmi
 endif
 
-CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+
+CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 

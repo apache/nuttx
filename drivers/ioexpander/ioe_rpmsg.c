@@ -402,7 +402,7 @@ static int ioe_rpmsg_option_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct ioe_rpmsg_server_s *priv = priv_;
 
   msg->header.result = IOEXP_SETOPTION(priv->ioe, msg->pin, msg->opt,
-                                       (void *)(uintptr_t)msg->val);
+                                       (FAR void *)(uintptr_t)msg->val);
 
   return rpmsg_send(ept, msg, len);
 }

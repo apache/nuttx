@@ -12,3 +12,5 @@ The following Simulator/Emulators are supported:
    :glob:
 
    */*
+   network_linux
+   network_vpnkit

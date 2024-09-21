@@ -53,6 +53,20 @@ BIN  = libarch$(LIBEXT)
 
 # Override in Make.defs if linker is not 'ld'
 
+$(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), \
+  $(foreach elib,$(EXTRA_LIBS), \
+    $(if $(filter $(notdir $(elib)),$(lib)), \
+      $(eval NAMEFULL_LIBS+=$(elib)), \
+      $(if $(filter $(notdir $(elib)),$(patsubst lib%$(LIBEXT),-l%,$(lib))), \
+        $(eval NAMESPEC_LIBS+=$(elib)) \
+       ) \
+     ) \
+   ) \
+ )
+
+EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
+EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
+
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
 
@@ -118,6 +132,13 @@ ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > $(TOPDIR)/System.map
+endif
+
+ifeq ($(CONFIG_ARCH_MULTIBOOT1),y)
+	@echo "Generating: nuttx32 in ELF32/multiboot1"
+	$(Q) $(OBJCOPY) -R .realmode -R.note.* -O binary $(NUTTX) $(NUTTX).bin \
+	&& $(CC) -m32 -no-pie -nostdlib common/multiboot1.S \
+			-T common/multiboot1.ld -o $(NUTTX)32
 endif
 
 # This is part of the top-level export target

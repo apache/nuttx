@@ -248,6 +248,7 @@ SYSCALL_LOOKUP(fchown,                     3)
 SYSCALL_LOOKUP(utimens,                    2)
 SYSCALL_LOOKUP(lutimens,                   2)
 SYSCALL_LOOKUP(futimens,                   2)
+SYSCALL_LOOKUP(msync,                      3)
 SYSCALL_LOOKUP(munmap,                     2)
 
 #if defined(CONFIG_PSEUDOFS_SOFTLINKS)
@@ -284,6 +285,15 @@ SYSCALL_LOOKUP(munmap,                     2)
 #ifdef CONFIG_FS_SHMFS
   SYSCALL_LOOKUP(shm_open,                 3)
   SYSCALL_LOOKUP(shm_unlink,               1)
+#endif
+
+/* The following are defined if the file system notify is enabled */
+
+#ifdef CONFIG_FS_NOTIFY
+  SYSCALL_LOOKUP(inotify_add_watch,        3)
+  SYSCALL_LOOKUP(inotify_init,             0)
+  SYSCALL_LOOKUP(inotify_init1,            1)
+  SYSCALL_LOOKUP(inotify_rm_watch,         2)
 #endif
 
 /* The following are defined if pthreads are enabled */
@@ -373,7 +383,6 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(arc4random_buf,           2)
 #endif
 
-SYSCALL_LOOKUP(getrandom,                  3)
 SYSCALL_LOOKUP(nanosleep,                  2)
 
 /* I/O event notification facility */

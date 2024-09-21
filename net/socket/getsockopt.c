@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/socket/getsockopt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,8 @@
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "socket/socket.h"
 #include "utils/utils.h"
@@ -346,17 +350,19 @@ int getsockopt(int sockfd, int level, int option,
                void *value, socklen_t *value_len)
 {
   FAR struct socket *psock;
+  FAR struct file *filep;
   int ret;
 
   /* Get the underlying socket structure */
 
-  ret = sockfd_socket(sockfd, &psock);
+  ret = sockfd_socket(sockfd, &filep, &psock);
 
   /* Then let psock_getsockopt() do all of the work */
 
   if (ret == OK)
     {
       ret = psock_getsockopt(psock, level, option, value, value_len);
+      fs_putfilep(filep);
     }
 
   if (ret < 0)

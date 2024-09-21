@@ -90,6 +90,8 @@
     } \
   while (0)
 
+#define list_is_head(list, item) ((list)->next == (item))
+#define list_is_tail(list, item) ((list)->prev == (item))
 #define list_peek_head(list) ((list)->next != (list) ? (list)->next : NULL)
 #define list_peek_tail(list) ((list)->prev != (list) ? (list)->prev : NULL)
 

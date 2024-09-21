@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_setaffinity.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,6 +79,13 @@ int nxsched_set_affinity(pid_t pid, size_t cpusetsize,
   int ret = OK;
 
   DEBUGASSERT(cpusetsize == sizeof(cpu_set_t) && mask != NULL);
+
+  /* Make sure that affinity mask is valid */
+
+  if (*mask == 0)
+    {
+      return -EINVAL;
+    }
 
   /* Verify that the PID corresponds to a real task */
 

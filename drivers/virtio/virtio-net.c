@@ -160,6 +160,7 @@ static int virtio_net_rmmac(FAR struct netdev_lowerhalf_s *dev,
 static int virtio_net_ioctl(FAR struct netdev_lowerhalf_s *dev,
                             int cmd, unsigned long arg);
 #endif
+static void virtio_net_txfree(FAR struct netdev_lowerhalf_s *dev);
 
 static int  virtio_net_probe(FAR struct virtio_device *vdev);
 static void virtio_net_remove(FAR struct virtio_device *vdev);
@@ -189,7 +190,12 @@ static const struct netdev_ops_s g_virtio_net_ops =
 #ifdef CONFIG_NETDEV_IOCTL
   virtio_net_ioctl,
 #endif
+  virtio_net_txfree
 };
+
+#ifdef CONFIG_DRIVERS_WIFI_SIM
+static uint8_t g_netdev_num = 0;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -460,14 +466,6 @@ static netpkt_t *virtio_net_recv(FAR struct netdev_lowerhalf_s *dev)
 
       virtqueue_enable_cb(vq);
 
-      /* We do transmit after recv, now it's time to free TX buffer.
-       * Depends on upper-half order (Call TX after RX).
-       *
-       * TODO: Find a better way to free TX buffer.
-       */
-
-      virtio_net_txfree((FAR struct netdev_lowerhalf_s *)priv);
-
       vrtinfo("get NULL buffer\n");
       return NULL;
     }
@@ -657,18 +655,27 @@ static int virtio_net_probe(FAR struct virtio_device *vdev)
   netdev->ops = &g_virtio_net_ops;
 
 #ifdef CONFIG_DRIVERS_WIFI_SIM
-  ret = wifi_sim_init(&priv->lower);
-  if (ret < 0)
+  /* If the WiFi interfaces has reached the setting value,
+   * no more WiFi interfaces will be created.
+   */
+
+  if (g_netdev_num < CONFIG_WIFI_SIM_NUMBER)
     {
-      goto err_with_virtqueues;
+      ret = wifi_sim_init(&priv->lower);
+      if (ret < 0)
+        {
+          goto err_with_virtqueues;
+        }
     }
+
 #endif
 
   /* Register the net deivce */
 
   ret = netdev_lower_register(netdev,
 #ifdef CONFIG_DRIVERS_WIFI_SIM
-                              NET_LL_IEEE80211
+                              g_netdev_num++ < CONFIG_WIFI_SIM_NUMBER ?
+                              NET_LL_IEEE80211 : NET_LL_ETHERNET
 #else
                               NET_LL_ETHERNET
 #endif
@@ -678,6 +685,7 @@ static int virtio_net_probe(FAR struct virtio_device *vdev)
       vrterr("netdev_lower_register failed, ret=%d\n", ret);
 #ifdef CONFIG_DRIVERS_WIFI_SIM
       wifi_sim_remove(&priv->lower);
+      g_netdev_num--;
 #endif
       goto err_with_virtqueues;
     }
@@ -706,6 +714,7 @@ static void virtio_net_remove(FAR struct virtio_device *vdev)
   virtio_reset_device(vdev);
   virtio_delete_virtqueues(vdev);
 #ifdef CONFIG_DRIVERS_WIFI_SIM
+  g_netdev_num--;
   wifi_sim_remove(&priv->lower);
 #endif
   kmm_free(priv);

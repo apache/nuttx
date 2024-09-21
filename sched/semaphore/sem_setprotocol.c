@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_setprotocol.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,10 +92,13 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
         break;
 
       case SEM_PRIO_PROTECT:
-
+#ifdef CONFIG_PRIORITY_PROTECT
+        break;
+#else
         /* Not yet supported */
 
         return -ENOTSUP;
+#endif
 
       default:
         return -EINVAL;

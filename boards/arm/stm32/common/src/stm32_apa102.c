@@ -93,7 +93,7 @@ int board_apa102_initialize(int devno, int spino)
 
   /* Register the APA102 Driver at the specified location. */
 
-  snprintf(devpath, 13, "/dev/leddrv%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/leddrv%d", devno);
   ret = apa102_register(devpath, spi);
   if (ret < 0)
     {

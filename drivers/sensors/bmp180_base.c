@@ -122,7 +122,7 @@ uint16_t bmp180_getreg16(FAR struct bmp180_dev_s *priv, uint8_t regaddr)
 
   /* Read register */
 
-  ret = i2c_read(priv->i2c, &config, (uint8_t *)&regval, 2);
+  ret = i2c_read(priv->i2c, &config, (FAR uint8_t *)&regval, 2);
   if (ret < 0)
     {
       snerr("ERROR: i2c_read failed: %d\n", ret);
@@ -165,7 +165,7 @@ void bmp180_putreg8(FAR struct bmp180_dev_s *priv, uint8_t regaddr,
 
   /* Write the register address and value */
 
-  ret = i2c_write(priv->i2c, &config, (uint8_t *) &data, 2);
+  ret = i2c_write(priv->i2c, &config, (FAR uint8_t *)&data, 2);
   if (ret < 0)
     {
       snerr("ERROR: i2c_write failed: %d\n", ret);

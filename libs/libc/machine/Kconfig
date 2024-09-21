@@ -44,10 +44,6 @@ config ARCH_ROMGETC
 # Default settings for C library functions that may be replaced with
 # architecture-specific versions.
 
-config LIBC_ARCH_ATOMIC
-	bool
-	default n
-
 config LIBC_ARCH_MEMCHR
 	bool
 	default n

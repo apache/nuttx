@@ -193,11 +193,15 @@ struct usbdev_devdescs_s
 struct usbdev_epinfo_s
 {
   struct usb_epdesc_s desc;
+  uint16_t            reqnum;
   uint16_t            fssize;
 #ifdef CONFIG_USBDEV_DUALSPEED
   uint16_t            hssize;
 #endif
-  uint16_t            reqnum;
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  uint16_t            sssize;
+  struct usb_ss_epcompdesc_s compdesc;
+#endif
 };
 
 /* usbdev_devinfo_s - describes the low level bindings of an usb device */
@@ -219,15 +223,9 @@ struct usbdev_devinfo_s
 struct usbdevclass_driver_s;
 struct composite_devdesc_s
 {
-#ifdef CONFIG_USBDEV_DUALSPEED
   CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
                              FAR struct usbdev_devinfo_s *devinfo,
                              uint8_t speed, uint8_t type);
-#else
-  CODE int16_t (*mkconfdesc)(FAR uint8_t *buf,
-                             FAR struct usbdev_devinfo_s *devinfo);
-#endif
-
   CODE int (*mkstrdesc)(uint8_t id, FAR struct usb_strdesc_s *strdesc);
   CODE int (*classobject)(int minor,
                           FAR struct usbdev_devinfo_s *devinfo,
@@ -253,11 +251,11 @@ struct composite_devdesc_s
 struct usbdev_ep_s;
 struct usbdev_req_s
 {
-  uint8_t *buf;    /* Call: Buffer used for data; Return: Unchanged */
-  uint8_t  flags;  /* See USBDEV_REQFLAGS_* definitions */
-  uint16_t len;    /* Call: Total length of data in buf; Return: Unchanged */
-  uint16_t xfrd;   /* Call: zero; Return: Bytes transferred so far */
-  int16_t  result; /* Call: zero; Return: Result of transfer (O or -errno) */
+  FAR uint8_t *buf; /* Call: Buffer used for data; Return: Unchanged */
+  uint8_t  flags;   /* See USBDEV_REQFLAGS_* definitions */
+  size_t len;       /* Call: Total length of data in buf; Return: Unchanged */
+  size_t xfrd;      /* Call: zero; Return: Bytes transferred so far */
+  int16_t  result;  /* Call: zero; Return: Result of transfer (O or -errno) */
 
   /* Callback when the transfer completes */
 
@@ -273,14 +271,14 @@ struct usbdev_epops_s
   /* Configure/enable and disable endpoint */
 
   CODE int (*configure)(FAR struct usbdev_ep_s *ep,
-          FAR const struct usb_epdesc_s *desc, bool last);
+                        FAR const struct usb_epdesc_s *desc, bool last);
   CODE int (*disable)(FAR struct usbdev_ep_s *ep);
 
   /* Allocate and free I/O requests */
 
   CODE FAR struct usbdev_req_s *(*allocreq)(FAR struct usbdev_ep_s *ep);
   CODE void (*freereq)(FAR struct usbdev_ep_s *ep,
-          FAR struct usbdev_req_s *req);
+                       FAR struct usbdev_req_s *req);
 
   /* Allocate and free I/O buffers */
 
@@ -292,9 +290,9 @@ struct usbdev_epops_s
   /* Submit and cancel I/O requests */
 
   CODE int (*submit)(FAR struct usbdev_ep_s *ep,
-          FAR struct usbdev_req_s *req);
+                     FAR struct usbdev_req_s *req);
   CODE int (*cancel)(FAR struct usbdev_ep_s *ep,
-          FAR struct usbdev_req_s *req);
+                     FAR struct usbdev_req_s *req);
 
   /* Stall or resume an endpoint */
 
@@ -320,7 +318,8 @@ struct usbdev_ops_s
   /* Allocate and free endpoints */
 
   CODE FAR struct usbdev_ep_s *(*allocep)(FAR struct usbdev_s *dev,
-          uint8_t epphy, bool in, uint8_t eptype);
+                                          uint8_t epphy, bool in,
+                                          uint8_t eptype);
   CODE void (*freeep)(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep);
 
   /* Get the frame number from the last SOF */
@@ -352,18 +351,19 @@ struct usbdev_s
 struct usbdevclass_driverops_s
 {
   CODE int  (*bind)(FAR struct usbdevclass_driver_s *driver,
-          FAR struct usbdev_s *dev);
+                    FAR struct usbdev_s *dev);
   CODE void (*unbind)(FAR struct usbdevclass_driver_s *driver,
-          FAR struct usbdev_s *dev);
+                      FAR struct usbdev_s *dev);
   CODE int  (*setup)(FAR struct usbdevclass_driver_s *driver,
-          FAR struct usbdev_s *dev, FAR const struct usb_ctrlreq_s *ctrl,
-          FAR uint8_t *dataout, size_t outlen);
+                     FAR struct usbdev_s *dev,
+                     FAR const struct usb_ctrlreq_s *ctrl,
+                     FAR uint8_t *dataout, size_t outlen);
   CODE void (*disconnect)(FAR struct usbdevclass_driver_s *driver,
-          FAR struct usbdev_s *dev);
+                          FAR struct usbdev_s *dev);
   CODE void (*suspend)(FAR struct usbdevclass_driver_s *driver,
-          FAR struct usbdev_s *dev);
+                       FAR struct usbdev_s *dev);
   CODE void (*resume)(FAR struct usbdevclass_driver_s *driver,
-          FAR struct usbdev_s *dev);
+                      FAR struct usbdev_s *dev);
 };
 
 struct usbdevclass_driver_s
@@ -398,7 +398,7 @@ extern "C"
  ****************************************************************************/
 
 FAR struct usbdev_req_s *usbdev_allocreq(FAR struct usbdev_ep_s *ep,
-                                         uint16_t len);
+                                         size_t len);
 
 /****************************************************************************
  * Name: usbdev_freereq
@@ -412,6 +412,20 @@ void usbdev_freereq(FAR struct usbdev_ep_s *ep,
                     FAR struct usbdev_req_s *req);
 
 /****************************************************************************
+ * Name: usbdev_copy_devdesc
+ *
+ * Description:
+ *   Copies the requested device Description into the dest buffer given.
+ *   Returns the number of Bytes filled in (USB_SIZEOF_DEVDESC).
+ *   This function is provided by various classes.
+ *
+ ****************************************************************************/
+
+int usbdev_copy_devdesc(FAR void *dest,
+                        FAR const struct usb_devdesc_s *src,
+                        uint8_t speed);
+
+/****************************************************************************
  * Name: usbdev_copy_epdesc
  *
  * Description:
@@ -421,9 +435,9 @@ void usbdev_freereq(FAR struct usbdev_ep_s *ep,
  *
  ****************************************************************************/
 
-void usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
-                        uint8_t epno, bool hispeed,
-                        FAR const struct usbdev_epinfo_s *epinfo);
+int usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
+                       uint8_t epno, uint8_t speed,
+                       FAR const struct usbdev_epinfo_s *epinfo);
 
 /****************************************************************************
  * Name: usbdevclass_register

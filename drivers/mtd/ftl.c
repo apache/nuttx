@@ -215,6 +215,18 @@ static int ftl_open(FAR struct inode *inode)
   DEBUGASSERT(inode->i_private);
   dev = inode->i_private;
 
+  if (dev->refs == 0)
+    {
+      /* Allocate one, in-memory erase block buffer */
+
+      dev->eblock = kmm_malloc(dev->geo.erasesize);
+      if (!dev->eblock)
+        {
+          ferr("ERROR: Failed to allocate an erase block buffer\n");
+          return -ENOMEM;
+        }
+    }
+
   dev->refs++;
   return OK;
 }
@@ -237,17 +249,20 @@ static int ftl_close(FAR struct inode *inode)
   rwb_flush(&dev->rwb);
 #endif
 
-  if (--dev->refs == 0 && dev->unlinked)
+  if (--dev->refs == 0)
     {
-#ifdef FTL_HAVE_RWBUFFER
-      rwb_uninitialize(&dev->rwb);
-#endif
       if (dev->eblock)
         {
           kmm_free(dev->eblock);
         }
 
-      kmm_free(dev);
+      if (dev->unlinked)
+        {
+#ifdef FTL_HAVE_RWBUFFER
+          rwb_uninitialize(&dev->rwb);
+#endif
+          kmm_free(dev);
+        }
     }
 
   return OK;
@@ -287,6 +302,7 @@ static ssize_t ftl_mtd_bread(FAR struct ftl_struct_s *dev, off_t startblock,
     {
       off_t startphysicalblock;
       off_t starteraseblock;
+      off_t offset;
       size_t count;
 
       starteraseblock = startblock / dev->blkper;
@@ -296,11 +312,12 @@ static ssize_t ftl_mtd_bread(FAR struct ftl_struct_s *dev, off_t startblock,
           break;
         }
 
+      offset = startblock & mask;
       count = ftl_get_cblock(dev, starteraseblock,
-                             (nblocks + mask) / dev->blkper);
-      count = MIN(count * dev->blkper, nblocks);
+                             (offset + nblocks + mask) / dev->blkper);
+      count = MIN(count * dev->blkper - offset, nblocks);
       startphysicalblock = dev->lptable[starteraseblock] *
-                           dev->blkper + (startblock & mask);
+                           dev->blkper + offset;
       ret = MTD_BREAD(dev->mtd, startphysicalblock, count, buffer);
       if (ret == count || ret == -EUCLEAN)
         {
@@ -459,18 +476,6 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-static int ftl_alloc_eblock(FAR struct ftl_struct_s *dev)
-{
-  if (dev->eblock == NULL)
-    {
-      /* Allocate one, in-memory erase block buffer */
-
-      dev->eblock = kmm_malloc(dev->geo.erasesize);
-    }
-
-  return dev->eblock != NULL ? OK : -ENOMEM;
-}
-
 static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                          off_t startblock, size_t nblocks)
 {
@@ -501,13 +506,6 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       /* Check if the write is shorter than to the end of the erase block */
 
       bool short_write = (remaining < (alignedblock - startblock));
-
-      ret = ftl_alloc_eblock(dev);
-      if (ret < 0)
-        {
-          ferr("ERROR: Failed to allocate an erase block buffer\n");
-          return ret;
-        }
 
       /* Read the full erase block into the buffer */
 
@@ -602,13 +600,6 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
 
   if (remaining > 0)
     {
-      ret = ftl_alloc_eblock(dev);
-      if (ret < 0)
-        {
-          ferr("ERROR: Failed to allocate an erase block buffer\n");
-          return ret;
-        }
-
       /* Read the full erase block into the buffer */
 
       nxfrd = ftl_mtd_bread(dev, alignedblock, dev->blkper, dev->eblock);
@@ -765,10 +756,6 @@ static int ftl_unlink(FAR struct inode *inode)
 #ifdef FTL_HAVE_RWBUFFER
       rwb_uninitialize(&dev->rwb);
 #endif
-      if (dev->eblock)
-        {
-          kmm_free(dev->eblock);
-        }
 
       kmm_free(dev);
     }

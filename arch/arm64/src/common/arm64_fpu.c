@@ -348,7 +348,7 @@ void arm64_fpu_trap(struct regs_context *regs)
     }
   else
     {
-      owner = (struct tcb_s *)arch_get_current_tcb();
+      owner = running_task();
     }
 
   /* restore our context */
@@ -363,7 +363,7 @@ void arm64_fpu_trap(struct regs_context *regs)
 
 void arm64_fpu_context_restore(void)
 {
-  struct tcb_s *new_tcb = (struct tcb_s *)arch_get_current_tcb();
+  struct tcb_s *new_tcb = running_task();
 
   arm64_fpu_access_trap_disable();
 
@@ -384,7 +384,7 @@ void arm64_fpu_context_restore(void)
 #ifdef CONFIG_SMP
 void arm64_fpu_context_save(void)
 {
-  struct tcb_s *tcb = (struct tcb_s *)arch_get_current_tcb();
+  struct tcb_s *tcb = running_task();
 
   if (tcb == g_cpu_fpu_ctx[this_cpu()].fpu_owner)
     {

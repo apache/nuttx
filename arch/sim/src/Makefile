@@ -35,6 +35,14 @@ ifeq ($(CONFIG_VIDEOUTILS_LIBX264),y)
 INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/videoutils/x264/x264
 endif
 
+ifeq ($(CONFIG_VIDEOUTILS_LIBMAD),y)
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/libmad/libmad
+endif
+
+ifeq ($(CONFIG_VIDEOUTILS_LAME),y)
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/lame/lame
+endif
+
 CPPFLAGS += $(INCLUDES)
 CFLAGS += $(INCLUDES)
 CXXFLAGS += $(INCLUDES)
@@ -94,7 +102,7 @@ DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 CFLAGS += -fvisibility=default
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe \
+   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ \
    -fvisibility=default
 
 HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)
@@ -241,6 +249,10 @@ ifeq ($(CONFIG_SIM_LIBUSB),y)
 endif
 endif
 
+ifeq ($(CONFIG_RPMSG_VIRTIO),y)
+  CSRCS += sim_rpmsg_virtio.c
+endif
+
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += sim_rptun.c
 endif
@@ -249,8 +261,6 @@ ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   CSRCS += sim_alsa.c
   CSRCS += sim_offload.c
   STDLIBS += -lasound
-  STDLIBS += -lmad
-  STDLIBS += -lmp3lame
 endif
 
 ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
@@ -389,7 +399,7 @@ define LINK_ALLSYMS_KASAN
 		$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 		$(Q) $(call DELFILE, allsyms.tmp))
 	$(if $(CONFIG_MM_KASAN_GLOBAL),
-	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp
+	$(Q) $(TOPDIR)/tools/kasan_global.py -e $(NUTTX) -o kasan_globals.tmp -a $(CONFIG_MM_KASAN_GLOBAL_ALIGN)
 	$(Q) $(call COMPILE, kasan_globals.tmp, kasan_globals$(OBJEXT) -fno-sanitize=kernel-address, -x c)
 	$(Q) $(call DELFILE, kasan_globals.tmp))
 	$(if $(CONFIG_HAVE_CXX),\

@@ -141,7 +141,7 @@ int stm32_cs4344_initialize(int minor)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d",  minor);
+      snprintf(devname, sizeof(devname), "pcm%d",  minor);
 
       /* Finally, we can register the PCM/CS4344/I2S audio device.
        *

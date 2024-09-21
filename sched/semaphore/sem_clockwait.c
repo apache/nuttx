@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/semaphore/sem_clockwait.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,7 +95,6 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   sclock_t ticks;
-  int status;
   int ret = ERROR;
 
   DEBUGASSERT(sem != NULL && abstime != NULL);
@@ -138,21 +139,13 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
    * value on failure.
    */
 
-  status = clock_abstime2ticks(clockid, abstime, &ticks);
+  clock_abstime2ticks(clockid, abstime, &ticks);
 
   /* If the time has already expired return immediately. */
 
-  if (status == OK && ticks <= 0)
+  if (ticks <= 0)
     {
       ret = -ETIMEDOUT;
-      goto out;
-    }
-
-  /* Handle any time-related errors */
-
-  if (status != OK)
-    {
-      ret = -status;
       goto out;
     }
 

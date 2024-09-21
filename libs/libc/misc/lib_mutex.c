@@ -150,6 +150,24 @@ bool nxmutex_is_hold(FAR mutex_t *mutex)
 }
 
 /****************************************************************************
+ * Name: nxmutex_get_holder
+ *
+ * Description:
+ *   This function get the holder of the mutex referenced by 'mutex'.
+ *
+ * Parameters:
+ *   mutex - mutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+int nxmutex_get_holder(FAR mutex_t *mutex)
+{
+  return mutex->holder;
+}
+
+/****************************************************************************
  * Name: nxmutex_is_locked
  *
  * Description:
@@ -241,7 +259,6 @@ int nxmutex_trylock(FAR mutex_t *mutex)
 {
   int ret;
 
-  DEBUGASSERT(!nxmutex_is_hold(mutex));
   ret = nxsem_trywait(&mutex->sem);
   if (ret < 0)
     {
@@ -249,6 +266,59 @@ int nxmutex_trylock(FAR mutex_t *mutex)
     }
 
   mutex->holder = _SCHED_GETTID();
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxmutex_clocklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   mutex   - Mutex object
+ *   clockid - The clock to be used as the time base
+ *   abstime - The absolute time when the mutex lock timed out
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxmutex_clocklock(FAR mutex_t *mutex, clockid_t clockid,
+                      FAR const struct timespec *abstime)
+{
+  int ret;
+
+  /* Wait until we get the lock or until the timeout expires */
+
+  do
+    {
+      if (abstime)
+        {
+          ret = nxsem_clockwait(&mutex->sem, clockid, abstime);
+        }
+      else
+        {
+          ret = nxsem_wait(&mutex->sem);
+        }
+    }
+  while (ret == -EINTR || ret == -ECANCELED);
+
+  if (ret >= 0)
+    {
+      mutex->holder = _SCHED_GETTID();
+    }
+
   return ret;
 }
 
@@ -278,29 +348,17 @@ int nxmutex_trylock(FAR mutex_t *mutex)
 
 int nxmutex_timedlock(FAR mutex_t *mutex, unsigned int timeout)
 {
-  int ret;
   struct timespec now;
   struct timespec delay;
   struct timespec rqtp;
 
   clock_gettime(CLOCK_MONOTONIC, &now);
-  clock_ticks2time(MSEC2TICK(timeout), &delay);
+  clock_ticks2time(&delay, MSEC2TICK(timeout));
   clock_timespec_add(&now, &delay, &rqtp);
 
   /* Wait until we get the lock or until the timeout expires */
 
-  do
-    {
-      ret = nxsem_clockwait(&mutex->sem, CLOCK_MONOTONIC, &rqtp);
-    }
-  while (ret == -EINTR || ret == -ECANCELED);
-
-  if (ret >= 0)
-    {
-      mutex->holder = _SCHED_GETTID();
-    }
-
-  return ret;
+  return nxmutex_clocklock(mutex, CLOCK_MONOTONIC, &rqtp);
 }
 
 /****************************************************************************
@@ -383,7 +441,7 @@ void nxmutex_reset(FAR mutex_t *mutex)
  *
  ****************************************************************************/
 
-int nxmutex_breaklock(FAR mutex_t *mutex, FAR bool *locked)
+int nxmutex_breaklock(FAR mutex_t *mutex, FAR unsigned int *locked)
 {
   int ret = OK;
 
@@ -417,10 +475,82 @@ int nxmutex_breaklock(FAR mutex_t *mutex, FAR bool *locked)
  *
  ****************************************************************************/
 
-int nxmutex_restorelock(FAR mutex_t *mutex, bool locked)
+int nxmutex_restorelock(FAR mutex_t *mutex, unsigned int locked)
 {
   return locked ? nxmutex_lock(mutex) : OK;
 }
+
+/****************************************************************************
+ * Name: nxmutex_set_protocol
+ *
+ * Description:
+ *   This function attempts to set the priority protocol of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   protocol     - mutex protocol value to set.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+int nxmutex_set_protocol(FAR mutex_t *mutex, int protocol)
+{
+  return nxsem_set_protocol(&mutex->sem, protocol);
+}
+
+/****************************************************************************
+ * Name: nxmutex_getprioceiling
+ *
+ * Description:
+ *   This function attempts to get the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - location to return the mutex priority ceiling.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_PROTECT
+int nxmutex_getprioceiling(FAR const mutex_t *mutex, FAR int *prioceiling)
+{
+  return nxsem_getprioceiling(&mutex->sem, prioceiling);
+}
+#endif
+
+/****************************************************************************
+ * Name: nxmutex_setprioceiling
+ *
+ * Description:
+ *   This function attempts to set the priority ceiling of a mutex.
+ *
+ * Parameters:
+ *   mutex        - mutex descriptor.
+ *   prioceiling  - mutex priority ceiling value to set.
+ *   old_ceiling  - location to return the mutex ceiling priority set before.
+ *
+ * Return Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PRIORITY_PROTECT
+int nxmutex_setprioceiling(FAR mutex_t *mutex, int prioceiling,
+                           FAR int *old_ceiling)
+{
+  return nxsem_setprioceiling(&mutex->sem, prioceiling, old_ceiling);
+}
+#endif
 
 /****************************************************************************
  * Name: nxrmutex_init
@@ -493,6 +623,43 @@ int nxrmutex_destroy(FAR rmutex_t *rmutex)
 bool nxrmutex_is_hold(FAR rmutex_t *rmutex)
 {
   return nxmutex_is_hold(&rmutex->mutex);
+}
+
+/****************************************************************************
+ * Name: nxrmutex_is_recursive
+ *
+ * Description:
+ *   This function check whether the recursive mutex is recursive
+ *
+ * Parameters:
+ *   rmutex - Recursive mutex descriptor.
+ *
+ * Return Value:
+ *  If rmutex has returned to True recursively, otherwise returns false.
+ *
+ ****************************************************************************/
+
+bool nxrmutex_is_recursive(FAR rmutex_t *rmutex)
+{
+  return rmutex->count > 1;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_get_holder
+ *
+ * Description:
+ *   This function get the holder of the mutex referenced by 'mutex'.
+ *
+ * Parameters:
+ *   rmutex - Rmutex descriptor.
+ *
+ * Return Value:
+ *
+ ****************************************************************************/
+
+int nxrmutex_get_holder(FAR rmutex_t *rmutex)
+{
+  return nxmutex_get_holder(&rmutex->mutex);
 }
 
 /****************************************************************************
@@ -581,6 +748,50 @@ int nxrmutex_trylock(FAR rmutex_t *rmutex)
   if (!nxrmutex_is_hold(rmutex))
     {
       ret = nxmutex_trylock(&rmutex->mutex);
+    }
+
+  if (ret >= 0)
+    {
+      DEBUGASSERT(rmutex->count < UINT_MAX);
+      ++rmutex->count;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxrmutex_clocklock
+ *
+ * Description:
+ *   This function attempts to lock the mutex referenced by 'mutex'.  If the
+ *   mutex value is (<=) zero, then the calling task will not return until it
+ *   successfully acquires the lock or timed out
+ *
+ * Input Parameters:
+ *   rmutex  - Rmutex object
+ *   clockid - The clock to be used as the time base
+ *   abstime - The absolute time when the mutex lock timed out
+ *
+ * Returned Value:
+ *   OK        The mutex successfully acquires
+ *   EINVAL    The mutex argument does not refer to a valid mutex.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The mutex could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+int nxrmutex_clocklock(FAR rmutex_t *rmutex, clockid_t clockid,
+                       FAR const struct timespec *abstime)
+{
+  int ret = OK;
+
+  if (!nxrmutex_is_hold(rmutex))
+    {
+      ret = nxmutex_clocklock(&rmutex->mutex, clockid, abstime);
     }
 
   if (ret >= 0)

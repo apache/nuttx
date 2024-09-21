@@ -1702,7 +1702,7 @@ struct ft80x_registers_s
 
 struct ft80x_fade_s
 {
-  uint8_t duty ;   /* Terminal backlight duty as a percentage (0-100) */
+  uint8_t duty;    /* Terminal backlight duty as a percentage (0-100) */
   uint16_t delay;  /* Total number of milliseconds for the fade (10-16700) */
 };
 

@@ -1,6 +1,8 @@
 /********************************************************************************
  * tools/nxstyle.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -347,6 +349,8 @@ static const char *g_white_content_list[] =
   "__asan_storeN",
   "__asan_loadN_noabort",
   "__asan_storeN_noabort",
+  "__hwasan_loadN_noabort",
+  "__hwasan_storeN_noabort",
 
   /* Ref:
    * tools/jlink-nuttx.c
@@ -451,6 +455,7 @@ static const char *g_white_content_list[] =
   "AsyncBoth",
   "CurrentTime",
   "XUnmapWindow",
+  "XFree",
 
   /* Ref:
    * nuttx/arch/sim/src/sim_hostdecoder.*
@@ -1224,6 +1229,7 @@ int main(int argc, char **argv, char **envp)
   bswitch        = false;       /* True: Within a switch statement */
   bstring        = false;       /* True: Within a string */
   bexternc       = false;       /* True: Within 'extern "C"' */
+  bif            = false;       /* True: This line is beginning of a 'if' statement */
   ppline         = PPLINE_NONE; /* > 0: The next line the continuation of a
                                  * pre-processor command */
   rhcomment      = 0;           /* Indentation of Comment to the right of code
@@ -1257,7 +1263,6 @@ int main(int argc, char **argv, char **envp)
       bstatm       = false;    /* True: This line is beginning of a
                                 * statement */
       bfor         = false;    /* REVISIT: Implies for() is all on one line */
-      bif          = false;    /* True: This line is beginning of a 'if' statement */
 
       /* If we are not in a comment, then this certainly is not a right-hand
        * comment.
@@ -2259,6 +2264,13 @@ int main(int argc, char **argv, char **envp)
                         }
                     }
 
+                  /* Allow comments on the same line as the if statement */
+
+                  if (bif == true)
+                    {
+                      bif = false;
+                    }
+
                   n++;
                   continue;
                 }
@@ -2629,9 +2641,11 @@ int main(int argc, char **argv, char **envp)
                         ERROR("Space precedes right parenthesis", lineno, n);
                       }
 
-                    if (bif == true && pnest == 0 && line[n + 1] != '\n')
+                    /* Unset bif if last parenthesis is closed */
+
+                    if (bif == true && pnest == 0)
                       {
-                        ERROR("If statement followed by garbage", lineno, n);
+                        bif = false;
                       }
                   }
                   break;
@@ -3104,7 +3118,16 @@ int main(int argc, char **argv, char **envp)
           if (m > 1 && isspace((int)line[m - 1]) &&
               line[m - 1] != '\n' && line[m - 1] != '\r')
             {
-               ERROR("Dangling whitespace at the end of line", lineno, m);
+              /* Report warning on if statement only is pnest is 0
+               * This takes into consideration the multiline if statement.
+               */
+
+              if (bif == true && pnest == 0)
+                {
+                  WARN("If statement followed by garbage", lineno, n);
+                }
+
+              ERROR("Dangling whitespace at the end of line", lineno, m);
             }
 
           /* The line width is determined by the location of the final

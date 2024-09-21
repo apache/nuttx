@@ -34,6 +34,7 @@
 
 #include "inode/inode.h"
 #include "mqueue/mqueue.h"
+#include "notify/notify.h"
 
 /****************************************************************************
  * Private Functions
@@ -149,8 +150,8 @@ int file_mq_unlink(FAR const char *mq_name)
     }
 
   /* Remove the old inode from the tree.  Because we hold a reference count
-   * on the inode, it will not be deleted now.  This will set the
-   * FSNODEFLAG_DELETED bit in the inode flags.
+   * on the inode, it will not be deleted now. This will put reference of
+   * inode.
    */
 
   ret = inode_remove(fullpath);
@@ -173,6 +174,9 @@ int file_mq_unlink(FAR const char *mq_name)
   inode_unlock();
   mq_inode_release(inode);
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  notify_unlink(fullpath);
+#endif
   return OK;
 
 errout_with_lock:

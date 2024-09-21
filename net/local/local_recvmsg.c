@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/local/local_recvmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,7 +58,8 @@
  ****************************************************************************/
 
 static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
-                           FAR size_t *readlen, int flags, bool once)
+                           size_t offset, FAR size_t *readlen,
+                           int flags, bool once)
 {
   FAR struct local_conn_s *conn = psock->s_conn;
   int ret;
@@ -66,6 +69,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
       struct pipe_peek_s peek =
         {
           buf,
+          offset,
           *readlen
         };
 
@@ -108,11 +112,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
         }
       else
         {
-          if (ret == -EAGAIN)
-            {
-              nwarn("WARNING: Failed to read packet: %d\n", ret);
-            }
-          else
+          if (ret != -EAGAIN)
             {
               nerr("ERROR: Failed to read packet: %d\n", ret);
             }
@@ -270,7 +270,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Read the packet */
 
-  ret = psock_fifo_read(psock, buf, &readlen, flags, true);
+  ret = psock_fifo_read(psock, buf, 0, &readlen, flags, true);
   if (ret < 0)
     {
       return ret;
@@ -290,6 +290,56 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   return readlen;
 }
 #endif /* CONFIG_NET_LOCAL_STREAM */
+
+/****************************************************************************
+ * Name: psock_fifo_discard
+ *
+ * Description:
+ *   psock_fifo_discard() discard buffer from a local socket.
+ *
+ * Input Parameters:
+ *   psock      A pointer to a NuttX-specific, internal socket structure
+ *   len        Remaining length of buffer
+ *   flags      Receive flags
+ *
+ * Returned Value:
+ *   On success, returns OK.  Otherwise, on errors, errno is returned
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+static int psock_fifo_discard(FAR struct socket *psock, size_t len,
+                              int flags)
+{
+  uint8_t bitbucket[256];
+  size_t tmplen;
+  int ret;
+
+  if (flags & MSG_PEEK)
+    {
+      return OK;
+    }
+
+  while (len > 0)
+    {
+      /* Read 256 bytes into the bit bucket */
+
+      tmplen = MIN(len, sizeof(bitbucket));
+      ret = psock_fifo_read(psock, bitbucket, 0, &tmplen, flags, false);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to get bitbucket : ret %d\n", ret);
+          return ret;
+        }
+
+      /* Adjust the number of bytes len to be read from the packet */
+
+      DEBUGASSERT(tmplen <= len);
+      len -= tmplen;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: psock_dgram_recvfrom
@@ -312,7 +362,6 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_LOCAL_DGRAM
 static inline ssize_t
 psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                      int flags, FAR struct sockaddr *from,
@@ -320,14 +369,12 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 {
   FAR struct local_conn_s *conn = psock->s_conn;
   size_t readlen;
+  size_t pathlen;
   bool bclose = false;
-  int ret = 0;
-
-  /* We keep packet sizes in a uint16_t, so there is a upper limit to the
-   * 'len' that can be supported.
-   */
-
-  DEBUGASSERT(len <= UINT16_MAX);
+  lc_size_t addrlen;
+  lc_size_t pktlen;
+  int offset = 0;
+  int ret;
 
   /* Verify that this is a bound, un-connected peer socket */
 
@@ -346,7 +393,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that half duplex FIFO has been created */
 
-      ret = local_create_halfduplex(conn, conn->lc_path);
+      ret = local_create_halfduplex(conn, conn->lc_path, conn->lc_rcvsize);
       if (ret < 0)
         {
           nerr("ERROR: Failed to create FIFO for %s: %d\n",
@@ -366,33 +413,65 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
         }
     }
 
+  readlen = sizeof(addrlen);
+  ret = psock_fifo_read(psock, &addrlen, offset, &readlen, flags, false);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to get path length: ret %d\n", ret);
+      return ret;
+    }
+
   /* Sync to the start of the next packet in the stream and get the size of
    * the next packet.
    */
 
-  if (conn->pktlen <= 0)
+  readlen = sizeof(pktlen);
+  offset += sizeof(addrlen);
+  ret = psock_fifo_read(psock, &pktlen, offset, &readlen, flags, false);
+  if (ret < 0)
     {
-      ret = local_sync(&conn->lc_infile);
+      nerr("ERROR: Failed to get packet length: ret %d\n", ret);
+      goto errout_with_infd;
+    }
+
+  readlen = addrlen;
+  offset += sizeof(pktlen);
+
+  if (from && fromlen && *fromlen)
+    {
+      pathlen = MIN(*fromlen - 1, readlen);
+      ret = psock_fifo_read(psock, from->sa_data, offset,
+                            &pathlen, flags, false);
       if (ret < 0)
         {
-          nerr("ERROR: Failed to get packet length: %d\n", ret);
-          goto errout_with_infd;
-        }
-      else if (ret > UINT16_MAX)
-        {
-          nerr("ERROR: Packet is too big: %d\n", ret);
+          nerr("ERROR: Failed to get path : ret %d\n", ret);
           goto errout_with_infd;
         }
 
-      conn->pktlen = ret;
+      from->sa_family = AF_LOCAL;
+      from->sa_data[pathlen] = '\0';
+      *fromlen = pathlen;
+      readlen -= pathlen;
+    }
+
+  if (readlen)
+    {
+      ret = psock_fifo_discard(psock, readlen, flags);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to discard redunance address: ret %d\n", ret);
+          goto errout_with_infd;
+        }
     }
 
   /* Read the packet */
 
-  readlen = MIN(conn->pktlen, len);
-  ret     = psock_fifo_read(psock, buf, &readlen, flags, false);
+  readlen = MIN(pktlen, len);
+  offset += addrlen;
+  ret     = psock_fifo_read(psock, buf, offset, &readlen, flags, false);
   if (ret < 0)
     {
+      nerr("ERROR: Failed to get packet : ret %d\n", ret);
       goto errout_with_infd;
     }
 
@@ -400,55 +479,10 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * of the packet to the bit bucket.
    */
 
-  if (flags & MSG_PEEK)
+  DEBUGASSERT(readlen <= pktlen);
+  if (readlen < pktlen)
     {
-      goto skip_flush;
-    }
-
-  DEBUGASSERT(readlen <= conn->pktlen);
-  if (readlen < conn->pktlen)
-    {
-      uint8_t bitbucket[32];
-      uint16_t remaining;
-      size_t tmplen;
-
-      remaining = conn->pktlen - readlen;
-      do
-        {
-          /* Read 32 bytes into the bit bucket */
-
-          tmplen = MIN(remaining, 32);
-          ret = psock_fifo_read(psock, bitbucket, &tmplen, flags, false);
-          if (ret < 0)
-            {
-              goto errout_with_infd;
-            }
-
-          /* Adjust the number of bytes remaining to be read from the
-           * packet
-           */
-
-          DEBUGASSERT(tmplen <= remaining);
-          remaining -= tmplen;
-        }
-      while (remaining > 0);
-    }
-
-  /* The fifo has been read and the pktlen needs to be cleared */
-
-  conn->pktlen = 0;
-
-skip_flush:
-
-  /* Return the address family */
-
-  if (from)
-    {
-      ret = local_getaddr(conn, from, fromlen);
-      if (ret < 0)
-        {
-          return ret;
-        }
+      ret = psock_fifo_discard(psock, pktlen - readlen, flags);
     }
 
 errout_with_infd:

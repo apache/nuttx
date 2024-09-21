@@ -115,7 +115,7 @@ int board_tone_initialize(int devno)
 
       /* Register the Audio Tone driver at "/dev/tone0" */
 
-      snprintf(devpath, 12, "/dev/tone%d", devno);
+      snprintf(devpath, sizeof(devpath), "/dev/tone%d", devno);
       ret = tone_register(devpath, tone, oneshot);
       if (ret < 0)
         {

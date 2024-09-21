@@ -52,15 +52,15 @@
  *
  ****************************************************************************/
 
-uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset)
+uart_datawidth_t uart_getreg(struct u16550_s *priv, unsigned int offset)
 {
-  return inb(base + offset);
+  return inb(priv->uartbase + offset);
 }
 
-void uart_putreg(uart_addrwidth_t base,
+void uart_putreg(struct u16550_s *priv,
                  unsigned int offset, uart_datawidth_t value)
 {
-  outb(value, base + offset);
+  outb(value, priv->uartbase + offset);
 }
 
 #else /* USE_SERIALDRIVER */

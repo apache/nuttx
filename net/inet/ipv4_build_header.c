@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/inet/ipv4_build_header.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -99,7 +101,10 @@ uint16_t ipv4_build_header(FAR struct ipv4_hdr_s *ipv4, uint16_t total_len,
   /* Calculate IP checksum. */
 
   ipv4->ipchksum    = 0;
+
+#ifdef CONFIG_NET_IPV4_CHECKSUMS
   ipv4->ipchksum    = ~ipv4_chksum(ipv4);
+#endif
 
   ninfo("IPv4 Packet: ipid:%d, length: %d\n", g_ipid, total_len);
 

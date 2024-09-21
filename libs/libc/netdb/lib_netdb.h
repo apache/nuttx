@@ -56,9 +56,16 @@
 #  define CONFIG_NETDB_BUFSIZE 128
 #endif
 
-#ifndef CONFIG_NETDB_MAX_IPADDR
-#  define CONFIG_NETDB_MAX_IPADDR 1
+#ifndef CONFIG_NETDB_MAX_IPv4ADDR
+#  define CONFIG_NETDB_MAX_IPv4ADDR 1
 #endif
+
+#ifndef CONFIG_NETDB_MAX_IPv6ADDR
+#  define CONFIG_NETDB_MAX_IPv6ADDR 1
+#endif
+
+#define CONFIG_NETDB_MAX_IPADDR (CONFIG_NETDB_MAX_IPv4ADDR + \
+                                 CONFIG_NETDB_MAX_IPv6ADDR)
 
 /****************************************************************************
  * Public Types

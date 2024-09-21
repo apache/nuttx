@@ -143,7 +143,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
     /* Current EL with SP0 / Synchronous */
 
     .align 7
-    arm64_enter_exception x0, x1
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Current EL with SP0 / IRQ */
@@ -167,7 +167,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
     /* Current EL with SPx / Synchronous */
 
     .align 7
-    arm64_enter_exception x0, x1
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Current EL with SPx / IRQ */
@@ -191,7 +191,7 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
     /* Lower EL using AArch64 / Synchronous */
 
     .align 7
-    arm64_enter_exception x0, x1
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Lower EL using AArch64 / IRQ */
@@ -266,8 +266,6 @@ arm64_exit_exc_fpu_done:
     sub    x0, x0, x1
     msr    tpidrro_el0, x0
 
-    ldp    x30, x0,  [sp, #8 * REG_X30]
-    sub    x0,  x0, #8 * XCPTCONTEXT_GP_REGS
     ldp    x0,  x1,  [sp, #8 * REG_X0]
     ldp    x2,  x3,  [sp, #8 * REG_X2]
     ldp    x4,  x5,  [sp, #8 * REG_X4]
@@ -283,6 +281,7 @@ arm64_exit_exc_fpu_done:
     ldp    x24, x25, [sp, #8 * REG_X24]
     ldp    x26, x27, [sp, #8 * REG_X26]
     ldp    x28, x29, [sp, #8 * REG_X28]
+    ldp    x30, xzr, [sp, #8 * REG_X30]
 
     add    sp, sp, #8 * XCPTCONTEXT_GP_REGS
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_free.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,9 +32,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Private Functions

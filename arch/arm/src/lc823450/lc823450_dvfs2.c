@@ -433,7 +433,7 @@ void lc823450_dvfs_get_idletime(uint64_t idletime[])
   memcpy(idletime, g_idle_totaltime, sizeof(g_idle_totaltime));
 
 #if CONFIG_SMP_NCPUS == 2
-  int me = up_cpu_index();
+  int me = this_cpu();
 
   if (0 == _dvfs_another_cpu_state(me))
     {
@@ -504,7 +504,7 @@ void lc823450_dvfs_enter_idle(void)
 {
   irqstate_t flags = spin_lock_irqsave(NULL);
 
-  int me = up_cpu_index();
+  int me = this_cpu();
 
   /* Update my state first : 0 (idle) */
 
@@ -554,7 +554,7 @@ void lc823450_dvfs_exit_idle(int irq)
 {
   irqstate_t flags = spin_lock_irqsave(NULL);
 
-  int me = up_cpu_index();
+  int me = this_cpu();
   uint64_t d;
   uint64_t now;
 

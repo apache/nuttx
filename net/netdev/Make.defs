@@ -1,6 +1,8 @@
 ############################################################################
 # net/netdev/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,14 @@ endif
 
 ifeq ($(CONFIG_NET_IPv6),y)
 NETDEV_CSRCS += netdev_ipv6.c
+endif
+
+ifeq ($(CONFIG_NETDEV_STATISTICS),y)
+NETDEV_CSRCS += netdev_stats.c
+endif
+
+ifeq ($(CONFIG_NETDEV_RSS),y)
+NETDEV_CSRCS += netdev_notify_recvcpu.c
 endif
 
 # Include netdev build support

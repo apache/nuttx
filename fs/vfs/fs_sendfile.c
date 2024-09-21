@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
-                        off_t *offset, size_t count)
+                        FAR off_t *offset, size_t count)
 {
   FAR uint8_t *iobuffer;
   FAR uint8_t *wrbuffer;
@@ -243,7 +243,7 @@ static ssize_t copyfile(FAR struct file *outfile, FAR struct file *infile,
  ****************************************************************************/
 
 ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
-                      off_t *offset, size_t count)
+                      FAR off_t *offset, size_t count)
 {
   if (count == 0)
     {
@@ -327,7 +327,7 @@ ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
  *
  ****************************************************************************/
 
-ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
+ssize_t sendfile(int outfd, int infd, FAR off_t *offset, size_t count)
 {
   FAR struct file *outfile;
   FAR struct file *infile;
@@ -342,10 +342,13 @@ ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
   ret = fs_getfilep(infd, &infile);
   if (ret < 0)
     {
+      fs_putfilep(outfile);
       goto errout;
     }
 
   ret = file_sendfile(outfile, infile, offset, count);
+  fs_putfilep(outfile);
+  fs_putfilep(infile);
   if (ret < 0)
     {
       goto errout;

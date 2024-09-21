@@ -29,11 +29,11 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS sensor_rpmsg.c)
   endif()
 
-  if(CONFIG_SENSORS_GPS)
+  if(CONFIG_SENSORS_GNSS)
     set_source_files_properties(
-      gps_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
-      PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/libs/libc/gpsutils)
-    list(APPEND SRCS gps_uorb.c)
+      gnss_uorb.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
+      PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/libs/libc/gnssutils)
+    list(APPEND SRCS gnss_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_WTGAHRS2)
@@ -44,8 +44,12 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS fakesensor_uorb.c)
   endif()
 
-  if(CONFIG_SENSORS_GOLDFISH_GPS)
-    list(APPEND SRCS goldfish_gps_uorb.c)
+  if(CONFIG_SENSORS_GOLDFISH_GNSS)
+    list(APPEND SRCS goldfish_gnss_uorb.c)
+  endif()
+
+  if(CONFIG_SENSORS_GOLDFISH_SENSOR)
+    list(APPEND SRCS goldfish_sensor_uorb.c)
   endif()
 
   if(CONFIG_SENSORS_HCSR04)
@@ -88,6 +92,10 @@ if(CONFIG_SENSORS)
 
     if(CONFIG_SENSORS_APDS9960)
       list(APPEND SRCS apds9960.c)
+    endif()
+
+    if(CONFIG_SENSORS_APDS9922)
+      list(APPEND SRCS apds9922.c)
     endif()
 
     if(CONFIG_SENSORS_AK09912)
@@ -151,6 +159,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS adxl345_i2c.c)
     endif()
 
+    if(CONFIG_SENSORS_BH1749NUC)
+      list(APPEND SRCS bh1749nuc.c)
+    endif()
+
     if(CONFIG_SENSORS_BH1750FVI)
       list(APPEND SRCS bh1750fvi.c)
     endif()
@@ -169,7 +181,13 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_BMP180)
-      list(APPEND SRCS bmp180.c)
+      list(APPEND SRCS bmp180_base.c)
+      if(CONFIG_SENSORS_BMP180_UORB)
+        list(APPEND SRCS bmp180_uorb.c)
+      else()
+        list(APPEND SRCS bmp180.c)
+      endif()
+
     endif()
 
     if(CONFIG_SENSORS_BMP280)
@@ -282,6 +300,10 @@ if(CONFIG_SENSORS)
 
     if(CONFIG_SENSORS_BMM150)
       list(APPEND SRCS bmm150_uorb.c)
+    endif()
+
+    if(CONFIG_SENSORS_AMG88XX)
+      list(APPEND SRCS amg88xx.c)
     endif()
 
   endif() # CONFIG_I2C

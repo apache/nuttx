@@ -145,12 +145,10 @@
 #define REG_SPSR            (33)
 #define REG_SP_EL0          (34)
 #define REG_EXE_DEPTH       (35)
-#define REG_TPIDR_EL0       (36)
-#define REG_TPIDR_EL1       (37)
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
-#define XCPTCONTEXT_GP_REGS (38)
+#define XCPTCONTEXT_GP_REGS (36)
 #define XCPTCONTEXT_GP_SIZE (8 * XCPTCONTEXT_GP_REGS)
 
 #ifdef CONFIG_ARCH_FPU
@@ -220,6 +218,14 @@
 #define XCPTCONTEXT_REGS    (XCPTCONTEXT_GP_REGS + XCPTCONTEXT_FPU_REGS)
 #define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 
+#ifdef CONFIG_ARM64_DECODEFIQ
+#  define IRQ_DAIF_MASK (3)
+#else
+#  define IRQ_DAIF_MASK (2)
+#endif
+
+#define IRQ_SPSR_MASK (IRQ_DAIF_MASK << 6)
+
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
@@ -233,19 +239,6 @@ extern "C"
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  It is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the macro
- * CURRENT_REGS for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-EXTERN volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
-#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 struct xcptcontext
 {
@@ -266,6 +259,9 @@ struct xcptcontext
   /* task stack reg context */
 
   uint64_t *regs;
+#ifndef CONFIG_BUILD_FLAT
+  uint64_t *initregs;
+#endif
 
   /* task context, for signal process */
 
@@ -308,7 +304,6 @@ struct xcptcontext
 
   uintptr_t *ustkptr;  /* Saved user stack pointer */
   uintptr_t *kstack;   /* Allocate base of the (aligned) kernel stack */
-  uintptr_t *kstkptr;  /* Saved kernel stack pointer */
 #  endif
 #endif
 };
@@ -342,13 +337,9 @@ static inline irqstate_t up_irq_save(void)
   __asm__ __volatile__
     (
       "mrs %0, daif\n"
-#ifdef CONFIG_ARM64_DECODEFIQ
-      "msr daifset, #3\n"
-#else
-      "msr daifset, #2\n"
-#endif
+      "msr daifset, %1\n"
       : "=r" (flags)
-      :
+      : "i" (IRQ_DAIF_MASK)
       : "memory"
     );
 
@@ -364,13 +355,9 @@ static inline irqstate_t up_irq_enable(void)
   __asm__ __volatile__
     (
       "mrs %0, daif\n"
-#ifdef CONFIG_ARM64_DECODEFIQ
-      "msr daifclr, #3\n"
-#else
-      "msr daifclr, #2\n"
-#endif
+      "msr daifclr, %1\n"
       : "=r" (flags)
-      :
+      : "i" (IRQ_DAIF_MASK)
       : "memory"
     );
   return flags;
@@ -410,6 +397,33 @@ static inline void up_irq_restore(irqstate_t flags)
 #endif
 
 /****************************************************************************
+ * Name:
+ *   up_current_regs/up_set_current_regs
+ *
+ * Description:
+ *   We use the following code to manipulate the tpidr_el1 register,
+ *   which exists uniquely for each CPU and is primarily designed to store
+ *   current thread information. Currently, we leverage it to store interrupt
+ *   information, with plans to further optimize its use for storing both
+ *   thread and interrupt information in the future.
+ *
+ ****************************************************************************/
+
+noinstrument_function
+static inline_function uint64_t *up_current_regs(void)
+{
+  uint64_t *regs;
+  __asm__ volatile ("mrs %0, " "tpidr_el1" : "=r" (regs));
+  return regs;
+}
+
+noinstrument_function
+static inline_function void up_set_current_regs(uint64_t *regs)
+{
+  __asm__ volatile ("msr " "tpidr_el1" ", %0" : : "r" (regs));
+}
+
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description: Return true is we are currently executing in
@@ -419,17 +433,7 @@ static inline void up_irq_restore(irqstate_t flags)
 
 static inline bool up_interrupt_context(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-#endif
-
-  bool ret = (CURRENT_REGS != NULL);
-
-#ifdef CONFIG_SMP
-  up_irq_restore(flags);
-#endif
-
-  return ret;
+  return up_current_regs() != NULL;
 }
 
 #undef EXTERN

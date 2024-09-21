@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # tools/configure.sh
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,14 +23,16 @@ set -e
 
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
+WSDIR=`cd "${TOPDIR}/.." && pwd -P`
 MAKECMD="make"
 USAGE="
 
-USAGE: ${0} [-E] [-e] [-l|m|c|g|n|B] [-L [boardname]] [-a <app-dir>] <board-selection> [make-opts]
+USAGE: ${0} [-E] [-e] [-S] [-l|m|c|g|n|B] [-L [boardname]] [-a <app-dir>] <board-selection> [make-opts]
 
 Where:
   -E enforces distclean if already configured.
   -e performs distclean if configuration changed.
+  -S adds the nxtmpdir folder for third-party packages.
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -68,6 +72,7 @@ unset appdir
 unset host
 unset enforce_distclean
 unset distclean
+unset store_nxtmpdir
 
 function dumpcfgs
 {
@@ -119,6 +124,9 @@ while [ ! -z "$1" ]; do
     shift
     dumpcfgs $1
     exit 0
+    ;;
+  -S )
+    store_nxtmpdir=y
     ;;
   *)
     boardconfig=$1
@@ -215,6 +223,19 @@ if [ -r ${dest_config} ]; then
   fi
 fi
 
+if [ "X${store_nxtmpdir}" = "Xy" ]; then
+  if [ ! -d "${WSDIR}/nxtmpdir" ]; then
+    mkdir -p "${WSDIR}/nxtmpdir"
+    echo "Folder ${WSDIR}/nxtmpdir created."
+  fi
+else
+  if [ -d "${WSDIR}/nxtmpdir" ]; then
+    rm -rf "${WSDIR}/nxtmpdir"
+    echo "Folder ${WSDIR}/nxtmpdir clean."
+  fi
+fi
+
+
 # Okay... Everything looks good.  Setup the configuration
 
 echo "  Copy files"
@@ -287,8 +308,8 @@ if [ -z "${appdir}" ]; then
     if [ -d "${TOPDIR}/../apps-${CONFIG_VERSION_STRING}" ]; then
       appdir="../apps-${CONFIG_VERSION_STRING}"
     else
-        echo "ERROR: Could not find the path to the appdir"
-        exit 7
+      echo "ERROR: Could not find the path to the appdir"
+      exit 7
     fi
   fi
 fi

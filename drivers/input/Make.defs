@@ -28,6 +28,18 @@ ifeq ($(CONFIG_INPUT_TOUCHSCREEN),y)
 CSRCS += touchscreen_upper.c
 endif
 
+ifeq ($(CONFIG_INPUT_FF),y)
+  CSRCS += ff_upper.c
+endif
+
+ifeq ($(CONFIG_FF_DUMMY),y)
+  CSRCS += ff_dummy.c
+endif
+
+ifeq ($(CONFIG_FF_AW86225),y)
+  CSRCS += aw86225.c
+endif
+
 ifeq ($(CONFIG_INPUT_MOUSE),y)
   CSRCS += mouse_upper.c
 endif

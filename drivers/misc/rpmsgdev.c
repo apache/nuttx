@@ -693,7 +693,7 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                            msglen, arglen > 0 ? (FAR void *)arg : NULL);
   if (cmd == FIONBIO && ret >= 0)
     {
-      int *nonblock = (FAR int *)(uintptr_t)arg;
+      FAR int *nonblock = (FAR int *)(uintptr_t)arg;
       priv->nonblock = *nonblock;
     }
 

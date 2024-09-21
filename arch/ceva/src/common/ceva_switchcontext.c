@@ -75,13 +75,13 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (CURRENT_REGS)
+  if (up_current_regs())
     {
       /* Yes, then we have to do things differently.
-       * Just copy the CURRENT_REGS into the OLD rtcb.
+       * Just copy the current_regs into the OLD rtcb.
        */
 
-      rtcb->xcp.regs = CURRENT_REGS;
+      rtcb->xcp.regs = up_current_regs();
 
       /* Update scheduler parameters */
 
@@ -89,7 +89,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       /* Then switch contexts */
 
-      CURRENT_REGS = tcb->xcp.regs;
+      up_set_current_regs(tcb->xcp.regs);
     }
 
   /* No, then we will need to perform the user context switch */

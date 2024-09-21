@@ -901,6 +901,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 {
   FAR struct telnet_dev_s *priv;
   FAR struct socket *psock;
+  FAR struct file *filep;
   int ret;
 
   /* Allocate instance data for this driver */
@@ -931,7 +932,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
    * instance resided in the daemon's task group`).
    */
 
-  ret = sockfd_socket(session->ts_sd, &psock);
+  ret = sockfd_socket(session->ts_sd, &filep, &psock);
   if (ret != OK)
     {
       nerr("ERROR: Failed to convert sd=%d to a socket structure\n",
@@ -940,6 +941,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
     }
 
   ret = psock_dup2(psock, &priv->td_psock);
+  fs_putfilep(filep);
   if (ret < 0)
     {
       nerr("ERROR: psock_dup2 failed: %d\n", ret);

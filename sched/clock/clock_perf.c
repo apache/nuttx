@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_perf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -188,7 +190,7 @@ clock_t perf_gettime(void)
 
 void perf_convert(clock_t elapsed, FAR struct timespec *ts)
 {
-  clock_ticks2time(elapsed, ts);
+  clock_ticks2time(ts, elapsed);
 }
 
 /****************************************************************************

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_removereadytorun.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,10 +29,10 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include <nuttx/queue.h>
 #include <nuttx/sched_note.h>
 
 #include "irq/irq.h"
+#include "sched/queue.h"
 #include "sched/sched.h"
 
 /****************************************************************************
@@ -188,7 +190,48 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
        * or the g_assignedtasks[cpu] list.
        */
 
-      dq_rem((FAR dq_entry_t *)rtcb, tasklist);
+      dq_rem_head((FAR dq_entry_t *)rtcb, tasklist);
+
+      /* Find the highest priority non-running tasks in the g_assignedtasks
+       * list of other CPUs, and also non-idle tasks, place them in the
+       * g_readytorun list. so as to find the task with the highest priority,
+       * globally
+       */
+
+      for (int i = 0; i < CONFIG_SMP_NCPUS; i++)
+        {
+          if (i == cpu)
+            {
+              /* The highest priority task of the current
+               * CPU has been found, which is nxttcb.
+               */
+
+              continue;
+            }
+
+          for (rtrtcb = (FAR struct tcb_s *)g_assignedtasks[i].head;
+                    !is_idle_task(rtrtcb); rtrtcb = rtrtcb->flink)
+            {
+              if (rtrtcb->task_state != TSTATE_TASK_RUNNING &&
+                  CPU_ISSET(cpu, &rtrtcb->affinity))
+                {
+                  /* We have found the task with the highest priority whose
+                   * CPU index is i. Since this task must be between the two
+                   * tasks, we can use the dq_rem_mid macro to delete it.
+                   */
+
+                  dq_rem_mid(rtrtcb);
+                  rtrtcb->task_state = TSTATE_TASK_READYTORUN;
+
+                  /* Add rtrtcb to g_readytorun to find
+                   * the task with the highest global priority
+                   */
+
+                  nxsched_add_prioritized(rtrtcb, &g_readytorun);
+                  break;
+                }
+            }
+        }
 
       /* Which task will go at the head of the list?  It will be either the
        * next tcb in the assigned task list (nxttcb) or a TCB in the
@@ -219,7 +262,7 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb, bool merge)
            */
 
           dq_rem((FAR dq_entry_t *)rtrtcb, list_readytorun());
-          dq_addfirst((FAR dq_entry_t *)rtrtcb, tasklist);
+          dq_addfirst_nonempty((FAR dq_entry_t *)rtrtcb, tasklist);
 
           rtrtcb->cpu = cpu;
           nxttcb = rtrtcb;

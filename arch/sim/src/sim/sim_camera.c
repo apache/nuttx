@@ -92,7 +92,7 @@ static int sim_camera_data_start_capture(struct imgdata_s *data,
 static int sim_camera_data_stop_capture(struct imgdata_s *data);
 static int sim_camera_data_set_buf(struct imgdata_s *data,
                                    uint8_t nr_datafmts,
-                                   FAR imgdata_format_t *datafmts,
+                                   imgdata_format_t *datafmts,
                                    uint8_t *addr, uint32_t size);
 
 /****************************************************************************
@@ -233,7 +233,7 @@ static int sim_camera_data_init(struct imgdata_s *data)
 {
   sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
 
-  priv->vdev = host_video_init(CONFIG_HOST_VIDEO_DEV_PATH);
+  priv->vdev = host_video_init(CONFIG_HOST_CAMERA_DEV_PATH);
   if (priv->vdev == NULL)
     {
       return -ENODEV;
@@ -261,7 +261,7 @@ static int sim_camera_data_validate_buf(uint8_t *addr, uint32_t size)
 
 static int sim_camera_data_set_buf(struct imgdata_s *data,
                                    uint8_t nr_datafmts,
-                                   FAR imgdata_format_t *datafmts,
+                                   imgdata_format_t *datafmts,
                                    uint8_t *addr, uint32_t size)
 {
   sim_camera_priv_t *priv = (sim_camera_priv_t *)data;

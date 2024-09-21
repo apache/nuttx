@@ -56,11 +56,11 @@
 
 #define swapcode(TYPE, parmi, parmj, n) \
   { \
-    long i = (n) / sizeof (TYPE); \
-    register TYPE *pi = (TYPE *)(parmi); \
-    register TYPE *pj = (TYPE *)(parmj); \
+    long i = (n) / sizeof(TYPE); \
+    register FAR TYPE *pi = (FAR TYPE *)(parmi); \
+    register FAR TYPE *pj = (FAR TYPE *)(parmj); \
     do { \
-      register TYPE  t = *pi; \
+      register TYPE t = *pi; \
       *pi++ = *pj; \
       *pj++ = t; \
     } while (--i > 0); \
@@ -73,9 +73,9 @@
 #define swap(a, b) \
   if (swaptype == 0) \
     { \
-      long t = *(long *)(a); \
-      *(long *)(a) = *(long *)(b); \
-      *(long *)(b) = t; \
+      long t = *(FAR long *)(a); \
+      *(FAR long *)(a) = *(FAR long *)(b); \
+      *(FAR long *)(b) = t; \
     } \
   else \
     { \

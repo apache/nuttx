@@ -47,6 +47,7 @@
 
 struct rpmsg_s
 {
+  bool                         init;
   struct metal_list            bind;
   rmutex_t                     lock;
   struct metal_list            node;
@@ -73,6 +74,7 @@ struct rpmsg_ops_s
   CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
   CODE void (*panic)(FAR struct rpmsg_s *rpmsg);
   CODE void (*dump)(FAR struct rpmsg_s *rpmsg);
+  CODE FAR const char *(*get_local_cpuname)(FAR struct rpmsg_s *rpmsg);
   CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
   CODE int (*get_tx_buffer_size)(FAR struct rpmsg_s *rpmsg);
   CODE int (*get_rx_buffer_size)(FAR struct rpmsg_s *rpmsg);
@@ -102,6 +104,7 @@ extern "C"
 int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 
+FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev);
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev);
 
 int rpmsg_get_tx_buffer_size(FAR struct rpmsg_device *rdev);

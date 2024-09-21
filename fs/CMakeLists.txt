@@ -17,7 +17,7 @@
 # the License.
 #
 # ##############################################################################
-nuttx_add_kernel_library(fs fs_initialize.c)
+nuttx_add_kernel_library(fs fs_initialize.c fs_heap.c)
 nuttx_add_subdirectory()
 target_include_directories(fs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                       ${NUTTX_DIR}/sched)

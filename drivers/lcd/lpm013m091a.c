@@ -132,7 +132,7 @@ static const struct lcd_planeinfo_s g_planeinfo =
 #ifndef CONFIG_LCD_NOGETRUN
   .getrun = lpm013m091a_getrun,           /* Get a run from lcd memory */
 #endif
-  .buffer = (uint8_t *) g_runbuffer,      /* Run scratch buffer */
+  .buffer = (FAR uint8_t *)g_runbuffer,   /* Run scratch buffer */
   .bpp = LPM013M091A_BPP,                 /* Bits-per-pixel */
 };
 

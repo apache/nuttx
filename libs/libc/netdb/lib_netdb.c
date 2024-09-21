@@ -28,8 +28,6 @@
 
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -93,4 +91,3 @@ bool convert_hostent(FAR const struct hostent_s *in,
   return j != 0;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

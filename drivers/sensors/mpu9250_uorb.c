@@ -318,7 +318,7 @@ struct mpu9250_sensor_s
   bool                      enabled;
   float                     scale;
   float                     adj[3];
-  unsigned long             interval;
+  uint32_t                  interval;
   FAR void  *dev; /* The pointer to common device data of mpu9250 */
 };
 
@@ -340,7 +340,7 @@ struct mpu9250_dev_s
 
 static int mpu9250_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us);
+                                FAR uint32_t *period_us);
 static int mpu9250_activate(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep, bool enable);
 static int mpu9250_control(FAR struct sensor_lowerhalf_s *lower,
@@ -374,9 +374,11 @@ static const struct sensor_ops_s g_mpu9250_ops =
   mpu9250_set_interval, /* set_interval */
   NULL,                 /* batch */
   NULL,                 /* fetch */
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   mpu9250_control       /* control */
 };
 
@@ -432,7 +434,7 @@ static int mpu9250_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int mpu9250_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *interval)
+                                FAR uint32_t *interval)
 {
   FAR struct mpu9250_sensor_s *priv = (FAR struct mpu9250_sensor_s *)lower;
 
@@ -924,7 +926,8 @@ static inline int mpu9250_modify_reg(FAR struct mpu9250_dev_s *dev,
 static inline int mpu9250_read_imu(FAR struct mpu9250_dev_s *dev,
                                    FAR struct sensor_data_s *buf)
 {
-  return mpu9250_read_reg(dev, ACCEL_XOUT_H, (uint8_t *) buf, sizeof(*buf));
+  return mpu9250_read_reg(dev, ACCEL_XOUT_H, (FAR uint8_t *)buf,
+                          sizeof(*buf));
 }
 
 /* mpu9250_read_pwr_mgmt_1()
@@ -941,7 +944,7 @@ static inline uint8_t mpu9250_read_pwr_mgmt_1(FAR struct mpu9250_dev_s *dev)
 }
 
 static inline int mpu9250_write_signal_reset(FAR struct mpu9250_dev_s *dev,
-                                                  uint8_t val)
+                                             uint8_t val)
 {
   return mpu9250_write_reg(dev, SIGNAL_PATH_RESET, &val, sizeof(val));
 }

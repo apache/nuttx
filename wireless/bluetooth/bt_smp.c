@@ -1,6 +1,8 @@
 /****************************************************************************
  * wireless/bluetooth/bt_smp.c
  *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  *   Copyright (c) 2016, Intel Corporation
  *   All rights reserved.
  *
@@ -132,68 +134,70 @@ struct bt_smphandlers_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static const char *h(FAR const void *buf, size_t len);
+static FAR const char *h(FAR const void *buf, size_t len);
 static void     xor_128(FAR const struct uint128_s *p,
-                  FAR const struct uint128_s *q, FAR struct uint128_s *r);
-static int     le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
-                  uint8_t enc_data[16]);
+                        FAR const struct uint128_s *q,
+                        FAR struct uint128_s *r);
+static int     le_encrypt(FAR const uint8_t key[16],
+                          FAR const uint8_t plaintext[16],
+                          FAR uint8_t enc_data[16]);
 static int     le_rand(FAR void *buf, size_t len);
 static int     smp_ah(FAR const uint8_t irk[16], FAR const uint8_t r[3],
-                  FAR uint8_t out[3]);
+                      FAR uint8_t out[3]);
 static int     smp_c1(FAR const uint8_t k[16], FAR const uint8_t r[16],
-                  FAR const uint8_t preq[7], FAR const uint8_t pres[7],
-                  FAR const bt_addr_le_t *ia, FAR const bt_addr_le_t *ra,
-                  FAR uint8_t enc_data[16]);
-static int     smp_s1(const uint8_t k[16], const uint8_t r1[16],
-                  const uint8_t r2[16], uint8_t out[16]);
+                      FAR const uint8_t preq[7], FAR const uint8_t pres[7],
+                      FAR const bt_addr_le_t *ia, FAR const bt_addr_le_t *ra,
+                      FAR uint8_t enc_data[16]);
+static int     smp_s1(FAR const uint8_t k[16], FAR const uint8_t r1[16],
+                      FAR const uint8_t r2[16], FAR uint8_t out[16]);
 static FAR struct bt_buf_s *bt_smp_create_pdu(FAR struct bt_conn_s *conn,
-                  uint8_t op, size_t len);
+                                              uint8_t op, size_t len);
 static void    send_err_rsp(FAR struct bt_conn_s *conn, uint8_t reason);
 static int     smp_init(struct bt_smp_s *smp);
 static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                               FAR struct bt_buf_s *buf);
 static uint8_t smp_pairing_rsp(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                               FAR struct bt_buf_s *buf);
 static uint8_t smp_send_pairing_random(FAR struct bt_conn_s *conn);
 static uint8_t smp_pairing_confirm(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                   FAR struct bt_buf_s *buf);
 static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                  FAR struct bt_buf_s *buf);
 static uint8_t smp_pairing_failed(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                  FAR struct bt_buf_s *buf);
 static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn);
 static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                FAR struct bt_buf_s *buf);
 static uint8_t smp_master_ident(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                FAR struct bt_buf_s *buf);
 static uint8_t smp_ident_info(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                              FAR struct bt_buf_s *buf);
 static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                   FAR struct bt_buf_s *buf);
 static uint8_t smp_security_request(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf);
+                                    FAR struct bt_buf_s *buf);
 static void    bt_smp_receive(FAR struct bt_conn_s *conn,
-                  FAR struct bt_buf_s *buf, FAR void *context,
-                  uint16_t cid);
+                              FAR struct bt_buf_s *buf, FAR void *context,
+                              uint16_t cid);
 static void    bt_smp_connected(FAR struct bt_conn_s *conn,
-                  FAR void *context, uint16_t cid);
+                                FAR void *context, uint16_t cid);
 static void    bt_smp_disconnected(FAR struct bt_conn_s *conn,
-                  FAR void *context, uint16_t cid);
-static void    bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn,
-                  FAR void *context, uint16_t cid);
+                                   FAR void *context, uint16_t cid);
+static void    bt_smp_encrypt_change(FAR struct bt_conn_s *conn,
+                                     FAR void *context, uint16_t cid);
 #ifdef CONFIG_BLUETOOTH_SMP_SELFTEST
 static void    swap_buf(FAR const uint8_t *src, FAR uint8_t *dst,
-                  uint16_t len);
+                        uint16_t len);
 static void    swap_in_place(FAR uint8_t * buf, uint16_t len);
 static int     cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
-                  FAR uint8_t *k2);
+                           FAR uint8_t *k2);
 static void    add_pad(FAR const uint8_t *in, FAR unsigned char *out,
-                  int len);
-static int     bt_smp_aes_cmac(const uint8_t *key, const uint8_t *in,
-                  size_t len, uint8_t *out);
+                       int len);
+static int     bt_smp_aes_cmac(const uint8_t *key, FAR const uint8_t *in,
+                               size_t len, uint8_t *out);
 static int     aes_test(FAR const char *prefix, FAR const uint8_t *key,
-                  FAR const uint8_t *m, uint16_t len,
-                  FAR const uint8_t *mac);
+                        FAR const uint8_t *m, uint16_t len,
+                        FAR const uint8_t *mac);
 static int     smp_aes_cmac_test(void);
 static int     smp_self_test(void);
 #else
@@ -315,7 +319,7 @@ static const uint8_t g_mac4[] =
  * in a single syslog call.
  */
 
-static const char *h(FAR const void *buf, size_t len)
+static FAR const char *h(FAR const void *buf, size_t len)
 {
   static const char hex[] = "0123456789abcdef";
   static char hexbufs[4][129];
@@ -352,8 +356,9 @@ static void xor_128(FAR const struct uint128_s *p,
   r->b = p->b ^ q->b;
 }
 
-static int le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
-                      uint8_t enc_data[16])
+static int le_encrypt(FAR const uint8_t key[16],
+                      FAR const uint8_t plaintext[16],
+                      FAR uint8_t enc_data[16])
 {
   FAR struct bt_hci_cp_le_encrypt_s *cp;
   FAR struct bt_hci_rp_le_encrypt_s *rp;
@@ -379,7 +384,7 @@ static int le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
       return err;
     }
 
-  rp = (void *)rsp->data;
+  rp = (FAR void *)rsp->data;
   memcpy(enc_data, rp->enc_data, sizeof(rp->enc_data));
   bt_buf_release(rsp);
 
@@ -501,8 +506,8 @@ static int smp_c1(FAR const uint8_t k[16], FAR const uint8_t r[16],
   return le_encrypt(k, enc_data, enc_data);
 }
 
-static int smp_s1(const uint8_t k[16], const uint8_t r1[16],
-                  const uint8_t r2[16], uint8_t out[16])
+static int smp_s1(FAR const uint8_t k[16], FAR const uint8_t r1[16],
+                  FAR const uint8_t r2[16], FAR uint8_t out[16])
 {
   /* The most significant 64-bits of r1 are discarded to generate r1' and the
    * most significant 64-bits of r2 are discarded to generate r2'. r1' is
@@ -574,7 +579,7 @@ static int smp_init(struct bt_smp_s *smp)
 static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
                                FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_pairing_s *req = (void *)buf->data;
+  FAR struct bt_smp_pairing_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_pairing_s *rsp;
   FAR struct bt_buf_s *rsp_buf;
   FAR struct bt_smp_s *smp = conn->smp;
@@ -680,7 +685,7 @@ static uint8_t smp_send_pairing_confirm(FAR struct bt_conn_s *conn)
 static uint8_t smp_pairing_rsp(FAR struct bt_conn_s *conn,
                                FAR struct bt_buf_s *buf)
 {
-  struct bt_smp_pairing_s *rsp = (void *)buf->data;
+  struct bt_smp_pairing_s *rsp = (FAR void *)buf->data;
   struct bt_smp_s *smp = conn->smp;
 
   wlinfo("\n");
@@ -727,7 +732,7 @@ static uint8_t smp_send_pairing_random(FAR struct bt_conn_s *conn)
 static uint8_t smp_pairing_confirm(FAR struct bt_conn_s *conn,
                                    FAR struct bt_buf_s *buf)
 {
-  struct bt_smp_pairing_confirm_s *req = (void *)buf->data;
+  struct bt_smp_pairing_confirm_s *req = (FAR void *)buf->data;
   struct bt_smp_s *smp = conn->smp;
 
   wlinfo("\n");
@@ -747,7 +752,7 @@ static uint8_t smp_pairing_confirm(FAR struct bt_conn_s *conn,
 static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
                                   FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_pairing_random_s *req = (void *)buf->data;
+  FAR struct bt_smp_pairing_random_s *req = (FAR void *)buf->data;
   FAR const bt_addr_le_t *ra;
   FAR const bt_addr_le_t *ia;
   FAR struct bt_smp_s *smp = conn->smp;
@@ -839,8 +844,8 @@ static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
 static uint8_t smp_pairing_failed(FAR struct bt_conn_s *conn,
                                   FAR struct bt_buf_s *buf)
 {
-  struct bt_smp_pairing_fail_s *req = (void *)buf->data;
-  struct bt_smp_s *smp = conn->smp;
+  FAR struct bt_smp_pairing_fail_s *req = (FAR void *)buf->data;
+  FAR struct bt_smp_s *smp = conn->smp;
 
   wlerr("ERROR: reason 0x%x\n", req->reason);
   UNUSED(req);
@@ -884,8 +889,8 @@ static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
 
   if (smp->local_dist & BT_SMP_DIST_ENC_KEY)
     {
-      struct bt_smp_encrypt_info_s *info;
-      struct bt_smp_master_ident_s *ident;
+      FAR struct bt_smp_encrypt_info_s *info;
+      FAR struct bt_smp_master_ident_s *ident;
 
       bt_keys_add_type(keys, BT_KEYS_SLAVE_LTK);
 
@@ -925,7 +930,7 @@ static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
 static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
                                 FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_encrypt_info_s *req = (void *)buf->data;
+  FAR struct bt_smp_encrypt_info_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_s *smp = conn->smp;
   FAR struct bt_keys_s *keys;
 
@@ -949,7 +954,7 @@ static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
 static uint8_t smp_master_ident(FAR struct bt_conn_s *conn,
                                 FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_master_ident_s *req = (void *)buf->data;
+  FAR struct bt_smp_master_ident_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_s *smp = conn->smp;
   FAR struct bt_keys_s *keys;
 
@@ -1012,7 +1017,7 @@ static uint8_t smp_ident_info(FAR struct bt_conn_s *conn,
 static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
                                    FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_smp_ident_addr_info_s *req = (void *)buf->data;
+  FAR struct bt_smp_ident_addr_info_s *req = (FAR void *)buf->data;
   FAR struct bt_smp_s *smp = conn->smp;
   FAR struct bt_keys_s *keys;
 
@@ -1192,7 +1197,7 @@ static void bt_smp_connected(FAR struct bt_conn_s *conn, FAR void *context,
 static void bt_smp_disconnected(FAR struct bt_conn_s *conn,
                                 FAR void *context, uint16_t cid)
 {
-  struct bt_smp_s *smp = conn->smp;
+  FAR struct bt_smp_s *smp = conn->smp;
 
   if (!smp)
     {
@@ -1205,10 +1210,10 @@ static void bt_smp_disconnected(FAR struct bt_conn_s *conn,
   memset(smp, 0, sizeof(*smp));
 }
 
-static void bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn,
+static void bt_smp_encrypt_change(FAR struct bt_conn_s *conn,
                                   FAR void *context, uint16_t cid)
 {
-  struct bt_smp_s *smp = conn->smp;
+  FAR struct bt_smp_s *smp = conn->smp;
 
   wlinfo("conn %p handle %u encrypt 0x%02x\n", conn, conn->handle,
          conn->encrypt);
@@ -1257,7 +1262,7 @@ static void swap_buf(FAR const uint8_t *src, FAR uint8_t *dst, uint16_t len)
     }
 }
 
-static void swap_in_place(FAR uint8_t * buf, uint16_t len)
+static void swap_in_place(FAR uint8_t *buf, uint16_t len)
 {
   int i;
   int j;
@@ -1305,7 +1310,7 @@ static int cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
     0
    };
 
-  uint8_t *tmp = zero;
+  FAR uint8_t *tmp = zero;
   uint8_t l[16];
   int err;
 
@@ -1349,7 +1354,7 @@ static int cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
     {
       array_shift(k1, k2);
       xor_128((FAR struct uint128_s *)k2,
-              (struct uint128_s *FAR)rb,
+              (FAR struct uint128_s *)rb,
               (FAR struct uint128_s *)k2);
     }
 
@@ -1470,7 +1475,7 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
 
       xor_128((FAR struct uint128_s *)x,
               (FAR struct uint128_s *)&in[i * 16],
-              (FAR struct uint128_s *) y);
+              (FAR struct uint128_s *)y);
 
       swap_in_place(y, 16);
 
@@ -1502,8 +1507,9 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
   return err;
 }
 
-static int aes_test(const char *prefix, const uint8_t *key, const uint8_t *m,
-                    uint16_t len, const uint8_t * mac)
+static int aes_test(FAR const char *prefix, FAR  const uint8_t *key,
+                    FAR const uint8_t *m, uint16_t len,
+                    FAR const uint8_t * mac)
 {
   uint8_t out[16];
 
@@ -1593,7 +1599,7 @@ int bt_smp_initialize(void)
 
 int bt_smp_send_security_req(FAR struct bt_conn_s *conn)
 {
-  struct bt_smp_security_request_s *req;
+  FAR struct bt_smp_security_request_s *req;
   FAR struct bt_buf_s *req_buf;
 
   wlinfo("\n");

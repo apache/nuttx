@@ -27,6 +27,7 @@
 #include <signal.h>
 #include <assert.h>
 #include <errno.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Public Functions
@@ -101,9 +102,9 @@ int usleep(useconds_t usec)
     {
       /* Let clock_nanosleep() do all of the work. */
 
-      sec          = usec / 1000000;
+      sec          = USEC2SEC(usec);
       rqtp.tv_sec  = sec;
-      rqtp.tv_nsec = (usec - (sec * 1000000)) * 1000;
+      rqtp.tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
       ret = clock_nanosleep(CLOCK_REALTIME, 0, &rqtp, NULL);
     }

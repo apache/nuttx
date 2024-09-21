@@ -273,14 +273,18 @@ config BASE_DEFCONFIG
 		current configuration. It is useful for getting the current configuration
 		on runtime.
 
-config BUILD_LOADABLE
+config MODULES
 	bool
 	option modules
 	---help---
 		Automatically selected if KERNEL build is selected.
-		This selection only effects the behavior of the 'make export'
-		target and currently has no effect unless you wish to build
-		loadable applications in a FLAT build.
+		This selection marks the implementation of Kconfig
+		to enable the module build function, and is used to
+		enable 'm' in the triate state. Its semantics are
+		consistent with Kernel. This selection also effects
+		the behavior of the 'make export' target and currently
+		has no effect unless you wish to build loadable applications
+		in a FLAT build.
 
 choice
 	prompt "Memory organization"
@@ -312,8 +316,8 @@ config BUILD_PROTECTED
 config BUILD_KERNEL
 	bool "NuttX kernel build"
 	depends on ARCH_USE_MMU && ARCH_ADDRENV
-	select BUILD_LOADABLE
 	select LIB_SYSCALL
+	select MODULES
 	---help---
 		Builds NuttX as a separately compiled kernel.  No applications are
 		built.  All user applications must reside in a file system where
@@ -2284,6 +2288,39 @@ config DEBUG_RPMSG_INFO
 		Enable RPMSG driver informational output to SYSLOG.
 
 endif # DEBUG_RPMSG
+
+config DEBUG_CORESIGHT
+	bool "Coresight Debug Features"
+	default n
+	depends on CORESIGHT
+	---help---
+		Enable coresight debug features.
+
+if DEBUG_CORESIGHT
+
+config DEBUG_CORESIGHT_ERROR
+	bool "Coresight Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable coresight driver error output to SYSLOG.
+
+config DEBUG_CORESIGHT_WARN
+	bool "Coresight Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable coresight warning output to SYSLOG.
+
+config DEBUG_CORESIGHT_INFO
+	bool "Coresight Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable coresight driver informational output to SYSLOG.
+
+endif # DEBUG_CORESIGHT
+
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
@@ -2389,6 +2426,24 @@ config TRACE_DRIVERS
 config TRACE_FS
 	bool "Enable tracepoints in fs"
 	default n
+
+if TRACE_FS
+menu "Trace Fs Support"
+
+config TRACE_LITTLEFS_FS
+	bool "Enable tracepoints in littlefs"
+	default n
+
+config TRACE_ROMFS_FS
+	bool "Enable tracepoints in romfs"
+	default n
+
+config TRACE_RPMSGFS_FS
+	bool "Enable tracepoints in rpmsgfs"
+	default n
+
+endmenu # Trace Fs Support
+endif
 
 config TRACE_GRAPHICS
 	bool "Enable tracepoints in graphics"

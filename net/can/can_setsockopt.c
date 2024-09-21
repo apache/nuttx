@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/can/can_setsockopt.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -30,8 +32,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <netpacket/can.h>
-
 #include <nuttx/net/net.h>
 #include <nuttx/net/can.h>
 
@@ -53,7 +53,7 @@
  *   'option' argument to the value pointed to by the 'value' argument for
  *   the socket specified by the 'psock' argument.
  *
- *   See <netinet/can.h> for the a complete list of values of CAN protocol
+ *   See <nuttx/can.h> for the a complete list of values of CAN protocol
  *   options.
  *
  * Input Parameters:

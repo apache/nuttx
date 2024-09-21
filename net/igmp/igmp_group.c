@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/igmp/igmp_group.c
- * IGMP group data structure management logic
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2010, 2013-2014, 2016, 2018 Gregory Nutt.
  *   All rights reserved.

@@ -78,7 +78,7 @@
 
 /* Redistributor base addresses for each core */
 
-static unsigned long gic_rdists[CONFIG_SMP_NCPUS];
+static unsigned long g_gic_rdists[CONFIG_SMP_NCPUS];
 
 /***************************************************************************
  * Private Functions
@@ -112,7 +112,7 @@ static inline int sys_test_bit(unsigned long addr, unsigned int bit)
 
 static inline unsigned long gic_get_rdist(void)
 {
-  return gic_rdists[this_cpu()];
+  return g_gic_rdists[this_cpu()];
 }
 
 static inline uint32_t read_gicd_wait_rwp(void)
@@ -249,8 +249,6 @@ void arm64_gic_irq_enable(unsigned int intid)
   uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
   uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
 
-  putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
-
   /* Affinity routing is enabled for Non-secure state (GICD_CTLR.ARE_NS
    * is set to '1' when GIC distributor is initialized) ,so need to set
    * SPI's affinity, now set it to be the PE on which it is enabled.
@@ -260,6 +258,8 @@ void arm64_gic_irq_enable(unsigned int intid)
     {
       arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
     }
+
+  putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
 }
 
 void arm64_gic_irq_disable(unsigned int intid)
@@ -656,11 +656,8 @@ static void gicv3_dist_init(void)
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
-
-#  ifdef CONFIG_SMP_CALL
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
                          nxsched_smp_call_handler, NULL));
-#  endif
 #endif
 }
 
@@ -940,9 +937,9 @@ static void arm64_gic_init(void)
   uint8_t   cpu;
   int       err;
 
-  cpu             = this_cpu();
-  gic_rdists[cpu] = CONFIG_GICR_BASE +
-                    up_cpu_index() * CONFIG_GICR_OFFSET;
+  cpu               = this_cpu();
+  g_gic_rdists[cpu] = CONFIG_GICR_BASE +
+                      up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)
@@ -957,9 +954,7 @@ static void arm64_gic_init(void)
 
 #ifdef CONFIG_SMP
   up_enable_irq(GIC_SMP_CPUPAUSE);
-#  ifdef CONFIG_SMP_CALL
   up_enable_irq(GIC_SMP_CPUCALL);
-#  endif
 #endif
 }
 
@@ -987,7 +982,21 @@ void arm64_gic_secondary_init(void)
   arm64_gic_init();
 }
 
-#  ifdef CONFIG_SMP_CALL
+#  ifdef CONFIG_SMP
+/***************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ***************************************************************************/
+
 void up_send_smp_call(cpu_set_t cpuset)
 {
   up_trigger_irq(GIC_SMP_CPUCALL, cpuset);

@@ -57,6 +57,9 @@
  * CONFIG_CDCACM_EPBULKOUT_HSSIZE
  *   Max package size for the bulk OUT endpoint if high speed mode.
  *   Default 512.
+  * CONFIG_CDCACM_EPBULKOUT_SSSIZE
+ *   Max package size for the bulk OUT endpoint if super speed mode.
+ *   Default 1024.
  * CONFIG_CDCACM_EPBULKIN
  *   The logical 7-bit address of a hardware endpoint that supports
  *   bulk IN operation.  Default: 2
@@ -66,6 +69,9 @@
  * CONFIG_CDCACM_EPBULKIN_HSSIZE
  *   Max package size for the bulk IN endpoint if high speed mode.
  *   Default 512.
+ * CONFIG_CDCACM_EPBULKIN_SSSIZE
+ *   Max package size for the bulk IN endpoint if super speed mode.
+ *   Default 1024.
  * CONFIG_CDCACM_NWRREQS and CONFIG_CDCACM_NRDREQS
  *   The number of write/read requests that can be in flight.
  *   CONFIG_CDCACM_NWRREQS includes write requests used for both the
@@ -146,6 +152,10 @@
 #  define CONFIG_CDCACM_EPBULKIN_HSSIZE 512
 #endif
 
+#ifndef CONFIG_CDCACM_EPBULKIN_SSSIZE
+#  define CONFIG_CDCACM_EPBULKIN_SSSIZE 1024
+#endif
+
 #ifndef CONFIG_CDCACM_BULKIN_REQLEN
 #  ifdef CONFIG_USBDEV_DUALSPEED
 #    define CONFIG_CDCACM_BULKIN_REQLEN (3 * CONFIG_CDCACM_EPBULKIN_FSSIZE / 2)
@@ -174,6 +184,10 @@
 
 #ifndef CONFIG_CDCACM_EPBULKOUT_HSSIZE
 #  define CONFIG_CDCACM_EPBULKOUT_HSSIZE 512
+#endif
+
+#ifndef CONFIG_CDCACM_EPBULKOUT_SSSIZE
+#  define CONFIG_CDCACM_EPBULKOUT_SSSIZE 1024
 #endif
 
 /* Number of requests in the write queue.  This includes write requests used

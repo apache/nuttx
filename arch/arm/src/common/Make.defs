@@ -75,12 +75,6 @@ endif
 
 CMN_ASRCS += fork.S
 
-ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
-  ifeq ($(CONFIG_ARCH_ARMV6M),)
-    CMN_ASRCS += arm_testset.S
-  endif
-endif
-
 ifeq ($(CONFIG_ARCH_HAVE_FETCHADD),y)
   CMN_ASRCS += arm_fetchadd.S
 endif

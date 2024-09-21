@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/devif/ipv4_input.c
- * Device driver IPv4 packet receipt interface
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2009, 2013-2015, 2018-2019 Gregory Nutt. All rights
  *     reserved.
@@ -381,6 +382,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
     }
 #endif
 
+#ifdef CONFIG_NET_IPV4_CHECKSUMS
   if (ipv4_chksum(IPv4BUF) != 0xffff)
     {
       /* Compute and check the IP header checksum. */
@@ -392,6 +394,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
       nwarn("WARNING: Bad IP checksum\n");
       goto drop;
     }
+#endif
 
 #ifdef CONFIG_NET_IPFILTER
   if (ipv4_filter_in(dev) != IPFILTER_TARGET_ACCEPT)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/timer/timer.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -56,7 +58,9 @@ struct posix_timer_s
   uint8_t          pt_flags;       /* See PT_FLAGS_* definitions */
   uint8_t          pt_crefs;       /* Reference count */
   pid_t            pt_owner;       /* Creator of timer */
-  int              pt_delay;       /* If non-zero, used to reset repetitive timers */
+  int              pt_overrun;     /* Overrun time */
+  sclock_t         pt_delay;       /* If non-zero, used to reset repetitive timers */
+  clock_t          pt_expected;    /* Expected absolute time */
   struct wdog_s    pt_wdog;        /* The watchdog that provides the timing */
   struct sigevent  pt_event;       /* Notification information */
   struct sigwork_s pt_work;

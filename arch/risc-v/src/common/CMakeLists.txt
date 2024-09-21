@@ -33,7 +33,6 @@ list(APPEND SRCS riscv_releasestack.c riscv_schedulesigaction.c
      riscv_sigdeliver.c)
 list(APPEND SRCS riscv_stackframe.c riscv_tcbinfo.c riscv_swint.c)
 list(APPEND SRCS riscv_switchcontext.c riscv_usestack.c)
-list(APPEND SRCS riscv_syscall.S riscv_perform_syscall.c)
 
 if(NOT CONFIG_ALARM_ARCH)
   if(NOT CONFIG_TIMER_ARCH)
@@ -85,10 +84,6 @@ if(CONFIG_ARCH_RV_ISA_V)
   list(APPEND SRCS riscv_vpu.S)
 endif()
 
-if(CONFIG_ARCH_RV_ISA_A)
-  list(APPEND SRCS riscv_testset.S)
-endif()
-
 if(CONFIG_ARCH_RV_HAVE_APLIC)
   list(APPEND SRCS riscv_aplic.c)
 endif()
@@ -123,7 +118,7 @@ if(CONFIG_RISCV_PERCPU_SCRATCH)
 endif()
 
 if(CONFIG_ARCH_USE_S_MODE)
-  list(APPEND SRCS riscv_sbi.c)
+  add_subdirectory(supervisor)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})

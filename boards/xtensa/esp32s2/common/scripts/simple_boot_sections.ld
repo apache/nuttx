@@ -18,6 +18,8 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /* Default entry point: */
 
 ENTRY(__start);
@@ -132,6 +134,15 @@ SECTIONS
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_noos.*(.text .text.* .literal .literal.*)
     *libarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
+
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
+    *(.wifirxiram .wifirxiram.*)
+    *(.wifi0iram  .wifi0iram.*)
+    *(.wifiorslpiram .wifiorslpiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(.wifislprxiram .wifislprxiram.*)
+    *(.phyiram .phyiram.*)
+    *(.wifiextrairam .wifiextrairam.*)
 
     /* align + add 16B for CPU dummy speculative instr. fetch */
 
@@ -310,6 +321,14 @@ SECTIONS
     *(.rodata)
     *(.rodata.*)
 
+#ifdef CONFIG_ESPRESSIF_WIRELESS
+    *(.rodata_wlog_verbose.*)
+    *(.rodata_wlog_debug.*)
+    *(.rodata_wlog_info.*)
+    *(.rodata_wlog_warning.*)
+    *(.rodata_wlog_error.*)
+#endif
+
     *(.irom1.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.gnu.linkonce.r.*)
     *(.rodata1)
@@ -417,8 +436,11 @@ SECTIONS
 
   .rtc.data :
   {
+    . = ALIGN(4);
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
 
    /* Whatever is left from the RTC memory is used as a special heap. */
 

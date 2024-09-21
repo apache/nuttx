@@ -662,12 +662,15 @@ static void i2c_init_clock(struct esp32s3_i2c_priv_s *priv,
 
   /* According to the Technical Reference Manual, the following timings must
    * be subtracted by 1.
-   * Moreover, the frequency calculation also shows that we must subtract 3
-   * to the total SCL.
+   * However, according to the practical measurement and some hardware
+   * behaviour, if wait_high_period and scl_high minus one. The SCL frequency
+   * would be a little higher than expected. Therefore, the solution here is
+   * not to minus scl_high as well as scl_wait_high, and the frequency will
+   * be absolutely accurate to all frequency to some extent.
    */
 
   scl_low       = half_cycle;
-  putreg32(scl_low - 1 - 2, I2C_SCL_LOW_PERIOD_REG(priv->id));
+  putreg32(scl_low - 1, I2C_SCL_LOW_PERIOD_REG(priv->id));
 
   /* By default, scl_wait_high must be less than scl_high.
    * A time compensation is needed for when the bus frequency is higher
@@ -678,8 +681,8 @@ static void i2c_init_clock(struct esp32s3_i2c_priv_s *priv,
                                         (half_cycle / 5 * 4 + 4);
   scl_wait_high = half_cycle - scl_high;
 
-  reg_value     = VALUE_TO_FIELD(scl_high - 1 - 1, I2C_SCL_HIGH_PERIOD);
-  reg_value    |= VALUE_TO_FIELD(scl_wait_high - 1 - 1,
+  reg_value     = VALUE_TO_FIELD(scl_high, I2C_SCL_HIGH_PERIOD);
+  reg_value    |= VALUE_TO_FIELD(scl_wait_high,
                                  I2C_SCL_WAIT_HIGH_PERIOD);
   putreg32(reg_value, I2C_SCL_HIGH_PERIOD_REG(priv->id));
 
@@ -1297,8 +1300,8 @@ static void i2c_traceevent(struct esp32s3_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -1567,7 +1570,7 @@ struct i2c_master_s *esp32s3_i2cbus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, config->periph,
                                    1, ESP32S3_CPUINT_LEVEL);
   if (priv->cpuint < 0)

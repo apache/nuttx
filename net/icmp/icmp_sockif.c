@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmp/icmp_sockif.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -254,6 +256,7 @@ static int icmp_close(FAR struct socket *psock)
 {
   FAR struct icmp_conn_s *conn;
 
+  net_lock();
   conn = psock->s_conn;
 
   /* Is this the last reference to the connection structure (there could be\
@@ -280,6 +283,7 @@ static int icmp_close(FAR struct socket *psock)
       conn->crefs--;
     }
 
+  net_unlock();
   return OK;
 }
 

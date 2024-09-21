@@ -1,6 +1,8 @@
 /****************************************************************************
  * tools/incdir.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -68,7 +70,8 @@ enum compiler_e
   COMPILER_MINGW,
   COMPILER_SDCC,
   COMPILER_ZDSII,
-  COMPILER_TASKING
+  COMPILER_TASKING,
+  COMPILER_GHS
 };
 
 /****************************************************************************
@@ -190,6 +193,11 @@ static enum compiler_e get_compiler(char *ccname)
   else if (strstr(ccname, "sdcc") != NULL)
     {
       return COMPILER_SDCC;
+    }
+  else if (strstr(ccname, "ccarm") != NULL ||
+           strstr(ccname, "cxarm") != NULL)
+    {
+      return COMPILER_GHS;
     }
   else if (strstr(ccname, "mingw") != NULL)
     {
@@ -352,7 +360,8 @@ int main(int argc, char **argv, char **envp)
       wintool = true;
 #endif
     }
-  else if (compiler == COMPILER_SDCC || compiler == COMPILER_TASKING)
+  else if (compiler == COMPILER_SDCC || compiler == COMPILER_TASKING ||
+           compiler == COMPILER_GHS)
     {
       cmdarg = "-I";
     }

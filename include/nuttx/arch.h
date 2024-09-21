@@ -1735,7 +1735,7 @@ void up_secure_irq(int irq, bool secure);
 # define up_secure_irq(i, s)
 #endif
 
-#ifdef CONFIG_SMP_CALL
+#ifdef CONFIG_SMP
 /****************************************************************************
  * Name: up_send_smp_call
  *
@@ -2547,6 +2547,22 @@ void nxsched_timer_expiration(void);
 void nxsched_alarm_expiration(FAR const struct timespec *ts);
 void nxsched_alarm_tick_expiration(clock_t ticks);
 #endif
+
+/****************************************************************************
+ * Name:  nxsched_get_next_expired
+ *
+ * Description:
+ *   Get the time remaining until the next timer expiration.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   The time remaining until the next timer expiration.
+ *
+ ****************************************************************************/
+
+clock_t nxsched_get_next_expired(void);
 
 /****************************************************************************
  * Name: nxsched_process_cpuload_ticks

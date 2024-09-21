@@ -28,6 +28,8 @@ libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
 libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) tar -xf libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src libcxxabi
+	$(Q) patch -p0 < 0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch
+	$(Q) patch -p0 < 0002-libcxxabi-fix-compilation-errors.patch
 	$(Q) touch $@
 endif
 
@@ -47,6 +49,14 @@ endif
 ifeq ($(CONFIG_LIBCXXABI), y)
 CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
 CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/include
+
+# Disable dynamic type checking when enabling libcxxabi
+# It results in a recursive call:
+# cxxabiv1::__dynamic_case -> is_equal -> __ubsan::checkDynamic -> cxxabiv1::__dynamic_case
+
+ifneq ($(CONFIG_SIM_UBSAN)${CONFIG_MM_UBSAN},)
+CXXFLAGS += -fno-sanitize=vptr
+endif
 endif
 
 # C++ABI files
@@ -57,11 +67,15 @@ CPPSRCS += stdlib_exception.cpp stdlib_new_delete.cpp stdlib_stdexcept.cpp stdli
 # Internal files
 CPPSRCS += abort_message.cpp fallback_malloc.cpp private_typeinfo.cpp
 
-ifeq ($(CONFIG_CXX_EXCEPTION), y)
-CXXFLAGS += ${DEFINE_PREFIX}LIBCXXABI_ENABLE_EXCEPTIONS
+# Always compile libcxxabi with exception
 CPPSRCS += cxa_exception.cpp cxa_personality.cpp
-else
-CPPSRCS += cxa_noexception.cpp
+CXXFLAGS += -fexceptions
+
+# Fix compilation error on ARM32:
+# libcxxabi/src/cxa_personality.cpp:594:22: error: '_URC_FATAL_PHASE1_ERROR' was not declared in this scope
+#   594 |     results.reason = _URC_FATAL_PHASE1_ERROR;
+ifeq ($(CONFIG_ARCH_ARM),y)
+CXXFLAGS += -D_URC_FATAL_PHASE2_ERROR=_URC_FAILURE -D_URC_FATAL_PHASE1_ERROR=_URC_FAILURE
 endif
 
 # RTTI is required for building the libcxxabi library

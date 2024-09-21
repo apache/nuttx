@@ -57,8 +57,9 @@
 #define CDC_SUBCLASS_CAPI       0x05 /* CAPI Control Model */
 #define CDC_SUBCLASS_ECM        0x06 /* Ethernet Networking Control Model */
 #define CDC_SUBCLASS_ATM        0x07 /* ATM Networking Control Model */
-                                     /* 0x08-0x0d Reserved (future use) */
-#define CDC_SUBCLASS_MBIM       0x0e /* MBIM Control Model */
+                                     /* 0x08-0x0c Reserved (future use) */
+#define CDC_SUBCLASS_NCM        0x0d /* Network Control Model */
+#define CDC_SUBCLASS_MBIM       0x0e /* Mobile Broadband Interface Model */
                                      /* 0x0f-0x7f Reserved (future use) */
                                      /* 0x80-0xfe Reserved (vendor specific) */
 
@@ -85,7 +86,8 @@
 
 #define CDC_DATA_PROTO_NONE     0x00 /* No class specific protocol required */
                                      /* 0x01-0x2f Reserved (future use) */
-#define CDC_DATA_PROTO_NTB      0x02 /* Network Transfer Block protocol */
+#define CDC_DATA_PROTO_NCMNTB   0x01 /* NCM Network Transfer Block protocol */
+#define CDC_DATA_PROTO_MBIMNTB  0x02 /* MBIM Network Transfer Block protocol */
 #define CDC_DATA_PROTO_ISDN     0x30 /* Physical interface protocol for ISDN BRI */
 #define CDC_DATA_PROTO_HDLC     0x31 /* HDLC */
 #define CDC_DATA_PROTO_TRANSP   0x32 /* Transparent */
@@ -328,6 +330,31 @@
                                       */
 #define ECM_SPEED_CHANGE        ATM_SPEED_CHANGE
 
+/* Table 14: Requests, Networking Control Model */
+
+#define NCM_GET_NTB_PARAMETERS  0x80
+#define NCM_SET_NTB_FORMAT      0x84
+#define NCM_GET_NTB_INPUT_SIZE  0x85
+#define NCM_SET_NTB_INPUT_SIZE  0x86
+#define NCM_SET_CRC_MODE        0x8a
+
+/* Table 15: Notifications, Networking Control Model */
+
+#define NCM_NETWORK_CONNECTION  ECM_NETWORK_CONNECTION
+#define NCM_RESPONSE_AVAILABLE  ECM_RESPONSE_AVAILABLE
+#define NCM_SPEED_CHANGE        ECM_SPEED_CHANGE
+
+/* Table 16: Requests, Mobile Broadband Interface Model */
+
+#define MBIM_SEND_COMMAND       ECM_SEND_COMMAND
+#define MBIM_GET_RESPONSE       ECM_GET_RESPONSE
+
+/* Table 17: Notifications, Networking Control Model */
+
+#define MBIM_NETWORK_CONNECTION NCM_NETWORK_CONNECTION
+#define MBIM_RESPONSE_AVAILABLE NCM_RESPONSE_AVAILABLE
+#define MBIM_SPEED_CHANGE       NCM_SPEED_CHANGE
+
 /* Descriptors ***************************************************************/
 
 /* Table 25: bDescriptor SubType in Functional Descriptors */
@@ -352,8 +379,9 @@
 #define CDC_DSUBTYPE_CAPI       0x0e /* CAPI Control Management Functional Descriptor */
 #define CDC_DSUBTYPE_ECM        0x0f /* Ethernet Networking Functional Descriptor */
 #define CDC_DSUBTYPE_ATM        0x10 /* ATM Networking Functional Descriptor */
+#define CDC_DSUBTYPE_NCM        0x1a /* Networking Functional Descriptor */
 #define CDC_DSUBTYPE_MBIM       0x1b /* MBIM Functional Descriptor */
-                                     /* 0x11-0xff Reserved (future use) */
+                                     /* 0x11-0x19 and 0x1c-0xff Reserved (future use) */
 
 /* Table 42: Ethernet Statistics Capabilities */
 
@@ -879,6 +907,42 @@ struct cdc_ecm_funcdesc_s
 };
 
 #define SIZEOF_ECM_FUNCDESC 13
+
+/* Table 42: NCM Control Model Functional Descriptor */
+
+struct cdc_ncm_funcdesc_s
+{
+  uint8_t size;       /* bLength, Size of this descriptor */
+  uint8_t type;       /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
+  uint8_t subtype;    /* bDescriptorSubType, CDC_DSUBTYPE_NCM as defined in
+                       * Table 25.
+                       */
+  uint8_t version[2]; /* bcdNcmVersion, the NCM version 0x0100 */
+  uint8_t netcaps;    /* bmNetworkCapabilities, The NCM net types the device
+                       * supports.
+                       */
+};
+
+#define SIZEOF_NCM_FUNCDESC 6
+
+struct cdc_mbim_funcdesc_s
+{
+  uint8_t size;       /* bLength, Size of this descriptor */
+  uint8_t type;       /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
+  uint8_t subtype;    /* bDescriptorSubType, CDC_DSUBTYPE_NCM as defined in
+                       * Table 25.
+                       */
+  uint8_t version[2]; /* bcdNcmVersion, the NCM version 0x0100 */
+  uint8_t maxctrlmsg[2];
+  uint8_t numfilter;
+  uint8_t maxfiltersize;
+  uint8_t maxsegmentsize[2];
+  uint8_t netcaps;    /* bmNetworkCapabilities, The NCM net types the device
+                       * supports.
+                       */
+};
+
+#define SIZEOF_MBIM_FUNCDESC 12
 
 /* Table 43: ATM Networking Functional Descriptor */
 

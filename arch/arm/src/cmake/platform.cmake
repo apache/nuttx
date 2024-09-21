@@ -95,6 +95,7 @@ if(NOT CONFIG_LIBM)
             --print-file-name=libm.a
     OUTPUT_STRIP_TRAILING_WHITESPACE
     OUTPUT_VARIABLE extra_library)
+
   list(APPEND EXTRA_LIB ${extra_library})
 endif()
 

@@ -69,7 +69,8 @@ wint_t fgetwc_unlocked(FAR FILE *f)
 
   while (l == -2)
     {
-      b = c = getc_unlocked(f);
+      c = getc_unlocked(f);
+      b = (char)c;
       if (c < 0)
         {
           if (!mbsinit(&st))

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,7 +69,7 @@
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_assignedtasks(cpu)->head)
 #else
 #  define current_task(cpu)      ((FAR struct tcb_s *)list_readytorun()->head)
-#  define this_task()            (current_task(up_cpu_index()))
+#  define this_task()            (current_task(this_cpu()))
 #endif
 
 #define is_idle_task(t)          ((t)->pid < CONFIG_SMP_NCPUS)
@@ -77,7 +79,7 @@
  */
 
 #define running_task() \
-  (up_interrupt_context() ? g_running_tasks[up_cpu_index()] : this_task())
+  (up_interrupt_context() ? g_running_tasks[this_cpu()] : this_task())
 
 /* List attribute flags */
 
@@ -103,6 +105,30 @@
 #else
 #  define TLIST_HEAD(t)          __TLIST_HEAD(t)
 #  define TLIST_BLOCKED(t)       __TLIST_HEAD(t)
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG -1
 #endif
 
 #ifdef CONFIG_SCHED_CRITMONITOR_MAXTIME_PANIC
@@ -194,6 +220,16 @@ extern dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
 
 extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
 
+/* This is an array of task control block (TCB) for the IDLE thread of each
+ * CPU.  For the non-SMP case, this is a a single TCB; For the SMP case,
+ * there is one TCB per CPU.  NOTE: The system boots on CPU0 into the IDLE
+ * task.  The IDLE task later starts the other CPUs and spawns the user
+ * initialization task.  That user initialization task is responsible for
+ * bringing up the rest of the system.
+ */
+
+extern struct tcb_s g_idletcb[CONFIG_SMP_NCPUS];
+
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the
  * currently active task at the head of the g_readytorun list, and (2) the
@@ -281,6 +317,16 @@ extern volatile clock_t g_cpuload_total;
 
 extern volatile cpu_set_t g_cpu_lockset;
 
+/* This is the spinlock that enforces critical sections when interrupts are
+ * disabled.
+ */
+
+extern volatile spinlock_t g_cpu_irqlock;
+
+/* Used to keep track of which CPU(s) hold the IRQ lock. */
+
+extern volatile cpu_set_t g_cpu_irqset;
+
 /* Used to lock tasklist to prevent from concurrent access */
 
 extern volatile spinlock_t g_cpu_tasklistlock;
@@ -320,12 +366,8 @@ int  nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 /* Support for tickless operation */
 
 #ifdef CONFIG_SCHED_TICKLESS
-unsigned int nxsched_cancel_timer(void);
-void nxsched_resume_timer(void);
 void nxsched_reassess_timer(void);
 #else
-#  define nxsched_cancel_timer() (0)
-#  define nxsched_resume_timer()
 #  define nxsched_reassess_timer()
 #endif
 
@@ -400,10 +442,18 @@ void nxsched_process_cpuload_ticks(clock_t ticks);
 /* Critical section monitor */
 
 #ifdef CONFIG_SCHED_CRITMONITOR
-void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state);
-void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state);
 void nxsched_resume_critmon(FAR struct tcb_s *tcb);
 void nxsched_suspend_critmon(FAR struct tcb_s *tcb);
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
+                                FAR void *caller);
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state,
+                              FAR void *caller);
 #endif
 
 /* TCB operations */

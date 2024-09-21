@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_mutextimedlock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,27 +80,24 @@
 int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
                             FAR const struct timespec *abs_timeout)
 {
-  pid_t mypid = nxsched_gettid();
   int ret = EINVAL;
-  irqstate_t flags;
 
   sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
 
   if (mutex != NULL)
     {
-      /* Make sure the semaphore is stable while we make the following
-       * checks.  This all needs to be one atomic action.
-       */
-
-      flags = enter_critical_section();
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      pid_t pid = mutex_get_holder(&mutex->mutex);
+#endif
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* All mutex types except for NORMAL (and DEFAULT) will return
        * an error if the caller does not hold the mutex.
        */
 
-      if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid == mypid)
+      if (mutex->type != PTHREAD_MUTEX_NORMAL &&
+          mutex_is_hold(&mutex->mutex))
         {
           /* Yes... Is this a recursive mutex? */
 
@@ -108,15 +107,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
                * success.
                */
 
-              if (mutex->nlocks < INT16_MAX)
-                {
-                  mutex->nlocks++;
-                  ret = OK;
-                }
-              else
-                {
-                  ret = EOVERFLOW;
-                }
+              ret = pthread_mutex_take(mutex, abs_timeout);
             }
           else
             {
@@ -148,26 +139,26 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* Include check if this is a NORMAL mutex and that it is robust */
 
-      if (mutex->pid > 0 &&
+      if (pid > 0 &&
           ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 ||
            mutex->type != PTHREAD_MUTEX_NORMAL) &&
-          nxsched_get_tcb(mutex->pid) == NULL)
+          nxsched_get_tcb(pid) == NULL)
 
 #else /* CONFIG_PTHREAD_MUTEX_TYPES */
       /* This can only be a NORMAL mutex.  Include check if it is robust */
 
-      if (mutex->pid > 0 &&
+      if (pid > 0 &&
           (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
-          nxsched_get_tcb(mutex->pid) == NULL)
+          nxsched_get_tcb(pid) == NULL)
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 #else /* CONFIG_PTHREAD_MUTEX_ROBUST */
       /* This mutex is always robust, whatever type it is. */
 
-      if (mutex->pid > 0 && nxsched_get_tcb(mutex->pid) == NULL)
+      if (pid > 0 && nxsched_get_tcb(pid) == NULL)
 #endif
         {
-          DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
+          DEBUGASSERT(pid != 0); /* < 0: available, >0 owned, ==0 error */
           DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
 
           /* A thread holds the mutex, but there is no such thread.  POSIX
@@ -189,21 +180,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
            */
 
           ret = pthread_mutex_take(mutex, abs_timeout);
-
-          /* If we successfully obtained the semaphore, then indicate
-           * that we own it.
-           */
-
-          if (ret == OK)
-            {
-              mutex->pid    = mypid;
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-              mutex->nlocks = 1;
-#endif
-            }
         }
-
-      leave_critical_section(flags);
     }
 
   sinfo("Returning %d\n", ret);

@@ -652,7 +652,7 @@ static bool w25_is_erased(struct w25_dev_s *priv, off_t address, off_t size)
     {
       /* Check if all bytes of page is in erased state. */
 
-      w25_byteread(priv, (unsigned char *)buf, address, W25_PAGE_SIZE);
+      w25_byteread(priv, (FAR unsigned char *)buf, address, W25_PAGE_SIZE);
 
       for (i = 0; i < W25_PAGE_SIZE / sizeof(uint32_t); i++)
         {

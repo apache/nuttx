@@ -122,7 +122,7 @@ void up_timer_initialize(void)
 
   write_msr(MSR_X2APIC_LVTT, vector);
 
-  asm volatile("mfence" : : : "memory");
+  __asm__ volatile("mfence" : : : "memory");
 
   apic_timer_set(NS_PER_MSEC);
 }

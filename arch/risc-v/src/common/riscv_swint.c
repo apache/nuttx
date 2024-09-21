@@ -40,6 +40,7 @@
 #  include <syscall.h>
 #endif
 
+#include "sched/sched.h"
 #include "signal/signal.h"
 #include "riscv_internal.h"
 #include "addrenv.h"
@@ -198,8 +199,7 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 int riscv_swint(int irq, void *context, void *arg)
 {
   uintreg_t *regs = (uintreg_t *)context;
-
-  DEBUGASSERT(regs && regs == CURRENT_REGS);
+  uintreg_t *new_regs = regs;
 
   /* Software interrupt 0 is invoked with REG_A0 (REG_X10) = system call
    * command and REG_A1-6 = variable number of
@@ -224,11 +224,6 @@ int riscv_swint(int irq, void *context, void *arg)
        *
        *   A0 = SYS_restore_context
        *   A1 = next
-       *
-       * In this case, we simply need to set CURRENT_REGS to restore register
-       * area referenced in the saved A1. context == CURRENT_REGS is the
-       * normal exception return.  By setting CURRENT_REGS = context[A1], we
-       * force the return to the saved context referenced in $a1.
        */
 
       case SYS_restore_context:
@@ -236,6 +231,7 @@ int riscv_swint(int irq, void *context, void *arg)
           struct tcb_s *next = (struct tcb_s *)(uintptr_t)regs[REG_A1];
 
           DEBUGASSERT(regs[REG_A1] != 0);
+          new_regs = next->xcp.regs;
           riscv_restorecontext(next);
         }
         break;
@@ -252,9 +248,7 @@ int riscv_swint(int irq, void *context, void *arg)
        *   A2 = next
        *
        * In this case, we save the context registers to the save register
-       * area referenced by the saved contents of R5 and then set
-       * CURRENT_REGS to the save register area referenced by the saved
-       * contents of R6.
+       * area referenced by the saved contents of R5.
        */
 
       case SYS_switch_context:
@@ -263,7 +257,9 @@ int riscv_swint(int irq, void *context, void *arg)
           struct tcb_s *next = (struct tcb_s *)(uintptr_t)regs[REG_A2];
 
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
+          prev->xcp.regs = regs;
           riscv_savecontext(prev);
+          new_regs = next->xcp.regs;
           riscv_restorecontext(next);
         }
         break;
@@ -291,7 +287,7 @@ int riscv_swint(int irq, void *context, void *arg)
 #ifdef CONFIG_ARCH_KERNEL_STACK
           /* Set the user stack pointer as we are about to return to user */
 
-          struct tcb_s *tcb  = nxsched_self();
+          struct tcb_s *tcb  = this_task();
           regs[REG_SP]       = (uintptr_t)tcb->xcp.ustkptr;
           tcb->xcp.ustkptr   = NULL;
 #endif
@@ -337,7 +333,7 @@ int riscv_swint(int irq, void *context, void *arg)
 #ifdef CONFIG_ARCH_KERNEL_STACK
           /* Set the user stack pointer as we are about to return to user */
 
-          struct tcb_s *tcb  = nxsched_self();
+          struct tcb_s *tcb  = this_task();
           regs[REG_SP]       = (uintptr_t)tcb->xcp.ustkptr;
           tcb->xcp.ustkptr   = NULL;
 #endif
@@ -372,7 +368,7 @@ int riscv_swint(int irq, void *context, void *arg)
 #ifndef CONFIG_BUILD_FLAT
       case SYS_signal_handler:
         {
-          struct tcb_s *rtcb   = nxsched_self();
+          struct tcb_s *rtcb   = this_task();
 
           /* Remember the caller's return address */
 
@@ -449,7 +445,7 @@ int riscv_swint(int irq, void *context, void *arg)
 #ifndef CONFIG_BUILD_FLAT
       case SYS_signal_handler_return:
         {
-          struct tcb_s *rtcb   = nxsched_self();
+          struct tcb_s *rtcb   = this_task();
 
           /* Set up to return to the kernel-mode signal dispatching logic. */
 
@@ -477,7 +473,6 @@ int riscv_swint(int irq, void *context, void *arg)
 #endif
 
       default:
-
         DEBUGPANIC();
         break;
     }
@@ -487,16 +482,21 @@ int riscv_swint(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != CURRENT_REGS)
+  if (regs != new_regs)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      up_dump_register(CURRENT_REGS);
+      up_dump_register(new_regs);
     }
   else
     {
       svcinfo("SWInt Return: %" PRIxPTR "\n", regs[REG_A0]);
     }
 #endif
+
+  if (regs != new_regs)
+    {
+      restore_critical_section(this_task(), this_cpu());
+    }
 
   return OK;
 }

@@ -159,11 +159,10 @@ ice40_get_status(struct ice40_dev_s *dev)
  *
  ****************************************************************************/
 
-FAR struct ice40_dev_s *
-esp32c3_ice40_initialize(const uint16_t cdone_gpio,
-                          const uint16_t crst_gpio,
-                          const uint16_t cs_gpio,
-                          const uint16_t spi_port)
+struct ice40_dev_s *esp32c3_ice40_initialize(const uint16_t cdone_gpio,
+                                             const uint16_t crst_gpio,
+                                             const uint16_t cs_gpio,
+                                             const uint16_t spi_port)
 {
   struct esp32c3_ice40_dev_s *ice40_ptr;
 

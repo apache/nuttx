@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_autoconfig.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -437,9 +439,12 @@ got_lladdr:
           nerr("ERROR: Failed send neighbor advertisement: %d\n", senderr);
         }
 
-      /* No off-link communications; No router address. */
+      if (ret != -EADDRNOTAVAIL)
+        {
+          /* No off-link communications; No router address. */
 
-      net_ipv6addr_copy(dev->d_ipv6draddr, g_ipv6_unspecaddr);
+          net_ipv6addr_copy(dev->d_ipv6draddr, g_ipv6_unspecaddr);
+        }
     }
 
   /* 5. Router Direction: The router provides direction to the node on how

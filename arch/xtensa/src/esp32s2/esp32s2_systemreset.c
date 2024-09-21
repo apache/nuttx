@@ -31,10 +31,91 @@
 
 #include "xtensa.h"
 #include "hardware/esp32s2_rtccntl.h"
+#include "esp32s2_systemreset.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Each handler allows setting a callback function which is called in case
+ * of a system reset, for whatever reason.
+ */
+
+#define SHUTDOWN_HANDLERS_NO 4
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s2_register_shutdown_handler
+ *
+ * Description:
+ *   This function allows you to register a handler that gets invoked before
+ *   the application is restarted.
+ *
+ * Input Parameters:
+ *   handler - Function to execute on restart
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp32s2_register_shutdown_handler(shutdown_handler_t handler)
+{
+  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
+    {
+      if (shutdown_handlers[i] == handler)
+        {
+          return -EEXIST;
+        }
+      else if (shutdown_handlers[i] == NULL)
+        {
+          shutdown_handlers[i] = handler;
+          return OK;
+        }
+    }
+
+  return -ENOMEM;
+}
+
+/****************************************************************************
+ * Name: esp32s2_unregister_shutdown_handler
+ *
+ * Description:
+ *   This function allows you to unregister a handler which was previously
+ *   registered using up_register_shutdown_handler function.
+ *
+ * Input Parameters:
+ *   handler - Function to execute on restart
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp32s2_unregister_shutdown_handler(shutdown_handler_t handler)
+{
+  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
+    {
+      if (shutdown_handlers[i] == handler)
+        {
+          shutdown_handlers[i] = NULL;
+          return OK;
+        }
+    }
+
+  return -EINVAL;
+}
 
 /****************************************************************************
  * Name: up_systemreset

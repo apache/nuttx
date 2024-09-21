@@ -1906,7 +1906,7 @@ static int rx65n_wrrequest(uint8_t epno, struct rx65n_usbdev_s *priv,
     }
 
   epno = USB_EPNO(privep->ep.eplog);
-  uinfo("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("epno=%d req=%p: len=%zu xfrd=%zu nullpkt=%d\n",
         epno, privreq, privreq->req.len, privreq->req.xfrd,
         privep->txnullpkt);
 
@@ -2007,7 +2007,7 @@ static int rx65n_rdrequest(uint8_t epno, struct rx65n_usbdev_s *priv,
       return OK;
     }
 
-  uinfo("len=%d xfrd=%d nullpkt=%d\n",
+  uinfo("len=%zu xfrd=%zu nullpkt=%d\n",
         privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   usbtrace(TRACE_READ(privep->epphy), privreq->req.xfrd);

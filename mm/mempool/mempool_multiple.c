@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mempool/mempool_multiple.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -315,6 +317,15 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
     }
 
   addr = (FAR void *)ALIGN_DOWN(blk, mpool->expandsize);
+  if (blk == addr)
+    {
+      /* It is not a memory block allocated by mempool
+       * Because the blk is need not aligned with the expandsize
+       * in head memory.
+       */
+
+      return NULL;
+    }
 
   index = *(FAR size_t *)addr;
   if (index >= mpool->dict_used)
@@ -332,6 +343,24 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
     }
 
   return &mpool->dict[row][col];
+}
+
+/****************************************************************************
+ * Name: mempool_multiple_check
+ *
+ * Description:
+ *   Check the blk is in the pool
+ *
+ * Input Parameters:
+ *   mpool - The handle of the multiple memory pool to be used.
+ *   blk   - The pointer of memory block.
+ *
+ ****************************************************************************/
+
+static void mempool_multiple_check(FAR struct mempool_s *pool,
+                                   FAR void *blk)
+{
+  assert(mempool_multiple_get_dict(pool->priv, blk));
 }
 
 /****************************************************************************
@@ -439,6 +468,8 @@ mempool_multiple_init(FAR const char *name,
       pools[i].priv = mpool;
       pools[i].alloc = mempool_multiple_alloc_callback;
       pools[i].free = mempool_multiple_free_callback;
+      pools[i].check = mempool_multiple_check;
+
       ret = mempool_init(pools + i, name);
       if (ret < 0)
         {
@@ -725,6 +756,12 @@ mempool_multiple_mallinfo(FAR struct mempool_multiple_s *mpool)
   struct mallinfo info;
   size_t i;
 
+  if (mpool == NULL)
+    {
+      memset(&info, 0, sizeof(struct mallinfo));
+      return info;
+    }
+
   memset(&info, 0, sizeof(struct mallinfo));
 
   nxrmutex_lock(&mpool->lock);
@@ -809,6 +846,11 @@ void mempool_multiple_memdump(FAR struct mempool_multiple_s *mpool,
 {
   size_t i;
 
+  if (mpool == NULL)
+    {
+      return;
+    }
+
   for (i = 0; i < mpool->npools; i++)
     {
       mempool_memdump(mpool->pools + i, dump);
@@ -830,7 +872,10 @@ void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
 {
   size_t i;
 
-  DEBUGASSERT(mpool != NULL);
+  if (mpool == NULL)
+    {
+      return;
+    }
 
   for (i = 0; i < mpool->npools; i++)
     {
@@ -852,5 +897,5 @@ void mempool_multiple_deinit(FAR struct mempool_multiple_s *mpool)
   mempool_multiple_free_chunk(mpool, mpool->dict);
   mempool_multiple_free_chunk(mpool, mpool->pools);
   nxrmutex_destroy(&mpool->lock);
-  mpool->free(mpool, mpool);
+  mpool->free(mpool->arg, mpool);
 }

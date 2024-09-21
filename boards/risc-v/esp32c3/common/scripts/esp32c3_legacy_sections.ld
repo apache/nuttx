@@ -48,6 +48,7 @@ SECTIONS
     *libarch.a:uart_hal_iram.*(.text .text.* .literal .literal.*)
     *libarch.a:wdt_hal_iram.*(.text .text.* .literal .literal.*)
     *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
+    *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
   } >iram0_0_seg
 
   /* This section is required to skip .iram0.text area because iram0_0_seg
@@ -265,7 +266,9 @@ SECTIONS
   .rtc.data :
   {
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
   } >rtc_iram_seg
 
   /* This section holds RTC data that should have fixed addresses.

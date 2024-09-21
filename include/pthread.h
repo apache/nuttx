@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>    /* Default settings */
 #include <nuttx/compiler.h>  /* Compiler settings, noreturn_function */
+#include <nuttx/mutex.h>
 
 #include <sys/types.h>       /* Needed for general types */
 #include <stdint.h>          /* C99 fixed width integer types */
@@ -34,7 +35,6 @@
 #include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
 #include <time.h>            /* Needed for struct timespec */
-#include <semaphore.h>       /* For sem_t and SEM_PRIO_* defines */
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 /* The architecture specific spinlock.h header file must provide the
@@ -279,8 +279,11 @@ typedef struct pthread_cond_s pthread_cond_t;
 struct pthread_mutexattr_s
 {
   uint8_t pshared : 1;  /* PTHREAD_PROCESS_PRIVATE or PTHREAD_PROCESS_SHARED */
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   uint8_t proto   : 2;  /* See PTHREAD_PRIO_* definitions */
+#endif
+#ifdef CONFIG_PRIORITY_PROTECT
+  uint8_t ceiling;      /* Priority ceiling */
 #endif
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type    : 2;  /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
@@ -301,18 +304,16 @@ struct pthread_mutex_s
   /* Supports a singly linked list */
 
   FAR struct pthread_mutex_s *flink;
+  uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
 #endif
 
   /* Payload */
 
-  sem_t sem;        /* Semaphore underlying the implementation of the mutex */
-  pid_t pid;        /* ID of the holder of the mutex */
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-  uint8_t flags;    /* See _PTHREAD_MFLAGS_* */
-#endif
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
   uint8_t type;     /* Type of the mutex.  See PTHREAD_MUTEX_* definitions */
-  int16_t nlocks;   /* The number of recursive locks held */
+  rmutex_t mutex;   /* Mutex underlying the implementation of the mutex */
+#else
+  mutex_t mutex;    /* Mutex underlying the implementation of the mutex */
 #endif
 };
 
@@ -330,24 +331,24 @@ typedef struct pthread_mutex_s pthread_mutex_t;
 #endif
 
 #if defined(CONFIG_PTHREAD_MUTEX_TYPES) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-#  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1, \
-                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
-                                     PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_MUTEX_INITIALIZER {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_DEFAULT, \
+                                     NXRMUTEX_INITIALIZER}
 #  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
-                                     {NULL, SEM_INITIALIZER(1), -1, \
-                                     __PTHREAD_MUTEX_DEFAULT_FLAGS, \
-                                     PTHREAD_MUTEX_RECURSIVE, 0}
+                                    {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS, \
+                                     PTHREAD_MUTEX_RECURSIVE, \
+                                     NXRMUTEX_INITIALIZER,}
 #elif defined(CONFIG_PTHREAD_MUTEX_TYPES)
-#  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1, \
-                                     PTHREAD_MUTEX_DEFAULT, 0}
+#  define PTHREAD_MUTEX_INITIALIZER {PTHREAD_MUTEX_DEFAULT, \
+                                     NXRMUTEX_INITIALIZER,}
 #  define PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP \
-                                     {SEM_INITIALIZER(1), -1, \
-                                     PTHREAD_MUTEX_RECURSIVE, 0}
+                                    {PTHREAD_MUTEX_RECURSIVE, \
+                                     NXRMUTEX_INITIALIZER}
 #elif !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
-#  define PTHREAD_MUTEX_INITIALIZER {NULL, SEM_INITIALIZER(1), -1,\
-                                     __PTHREAD_MUTEX_DEFAULT_FLAGS}
+#  define PTHREAD_MUTEX_INITIALIZER {NULL, __PTHREAD_MUTEX_DEFAULT_FLAGS,\
+                                     NXMUTEX_INITIALIZER}
 #else
-#  define PTHREAD_MUTEX_INITIALIZER {SEM_INITIALIZER(1), -1}
+#  define PTHREAD_MUTEX_INITIALIZER {NXMUTEX_INITIALIZER}
 #endif
 
 struct pthread_barrierattr_s
@@ -428,11 +429,9 @@ typedef FAR struct pthread_spinlock_s pthread_spinlock_t;
 #  endif
 #endif /* CONFIG_PTHREAD_SPINLOCKS */
 
-#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
 /* This type describes the pthread cleanup callback (non-standard) */
 
 typedef CODE void (*pthread_cleanup_t)(FAR void *arg);
-#endif
 
 /* Forward references */
 
@@ -544,9 +543,12 @@ void pthread_testcancel(void);
  * is canceled.
  */
 
-#if defined(CONFIG_PTHREAD_CLEANUP_STACKSIZE) && CONFIG_PTHREAD_CLEANUP_STACKSIZE > 0
+#if CONFIG_TLS_NCLEANUP > 0
 void pthread_cleanup_pop(int execute);
 void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg);
+#else
+#  define pthread_cleanup_pop(execute) ((void)(execute))
+#  define pthread_cleanup_push(routine,arg) ((void)(routine), (void)(arg))
 #endif
 
 /* A thread can await termination of another thread and retrieve the return
@@ -585,6 +587,9 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
                            FAR const cpu_set_t *cpuset);
 int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize,
                            FAR cpu_set_t *cpuset);
+#else
+#define pthread_setaffinity_np(...) (-ENOSYS)
+#define pthread_getaffinity_np(...) (-ENOSYS)
 #endif
 
 /* Thread-specific Data Interfaces */
@@ -614,6 +619,14 @@ int pthread_mutexattr_getrobust(FAR const pthread_mutexattr_t *attr,
                                 FAR int *robust);
 int pthread_mutexattr_setrobust(FAR pthread_mutexattr_t *attr,
                                 int robust);
+int pthread_mutexattr_getprioceiling(FAR const pthread_mutexattr_t *attr,
+                                     FAR int *prioceiling);
+int pthread_mutexattr_setprioceiling(FAR pthread_mutexattr_t *attr,
+                                     int prioceiling);
+int pthread_mutex_getprioceiling(FAR const pthread_mutex_t *mutex,
+                                 FAR int *prioceiling);
+int pthread_mutex_setprioceiling(FAR pthread_mutex_t *mutex,
+                                 int prioceiling, FAR int *old_ceiling);
 
 /* The following routines create, delete, lock and unlock mutexes. */
 

@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/nuttx_kconfig.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -155,4 +157,11 @@ function(nuttx_generate_kconfig)
   if(MENUDESC)
     file(APPEND ${KCONFIG_OUTPUT_FILE} "endmenu # ${MENUDESC}\n")
   endif()
+endfunction()
+
+function(nuttx_setconfig)
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} setconfig ${ARGN}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    OUTPUT_QUIET ERROR_QUIET)
 endfunction()

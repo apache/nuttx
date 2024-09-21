@@ -119,7 +119,7 @@ int up_cpu_paused_save(void)
   sched_note_cpu_paused(tcb);
 #endif
 
-  /* Save the current context at CURRENT_REGS into the TCB at the head
+  /* Save the current context at current_regs into the TCB at the head
    * of the assigned task list for this CPU.
    */
 
@@ -234,7 +234,9 @@ int up_cpu_paused_restore(void)
 
 int up_pause_handler(int irq, void *c, void *arg)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
+
+  nxsched_smp_call_handler(irq, c, arg);
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2
@@ -291,6 +293,25 @@ inline_function int up_cpu_async_pause(int cpu)
   up_trigger_irq(SMP_IPI_IRQ, cpuset);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  up_trigger_irq(SMP_IPI_IRQ, cpuset);
 }
 
 /****************************************************************************

@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include "inode/inode.h"
+#include "notify/notify.h"
 #include "shm/shmfs.h"
 
 /****************************************************************************
@@ -136,7 +137,7 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
       INODE_SET_SHM(inode);
       inode->u.i_ops = &g_shmfs_operations;
       inode->i_private = NULL;
-      inode->i_crefs = 1;
+      inode->i_crefs++;
     }
 
   /* Associate the inode with a file structure */
@@ -149,6 +150,13 @@ errout_with_sem:
   inode_unlock();
 errout_with_search:
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  if (ret >= 0)
+    {
+      notify_open(fullpath, oflags);
+    }
+#endif
+
   return ret;
 }
 

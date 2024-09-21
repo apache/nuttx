@@ -40,6 +40,10 @@
 #define SHM_RDONLY 0x01 /* Attach read-only (else read-write) */
 #define SHM_RND    0x02 /* Round attach address to SHMLBA */
 
+#define SHM_R       0x03 /* or S_IRUGO */
+#define SHM_W       0x04 /* or S_IWUGO */
+#define SHM_HUGETLB 0x05 /* segment will use huge TLB pages */
+
 /* Segment low boundary address multiple */
 
 #ifdef CONFIG_SHM_SHMLBA

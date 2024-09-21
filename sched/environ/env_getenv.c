@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/environ/env_getenv.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,7 +51,7 @@
  *   name - The name of the variable to find.
  *
  * Returned Value:
- *   The value of the valiable (read-only) or NULL on failure
+ *   The value of the variable (read-only) or NULL on failure
  *
  * Assumptions:
  *   Not called from an interrupt handler

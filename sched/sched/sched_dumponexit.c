@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_dumponexit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,7 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_ON_EXIT
 
 /****************************************************************************
  * Private Functions
@@ -82,4 +84,4 @@ void nxsched_dumponexit(void)
   nxsched_foreach(dumphandler, NULL);
 }
 
-#endif /* CONFIG_DUMP_ON_EXIT */
+#endif /* CONFIG_SCHED_DUMP_ON_EXIT */

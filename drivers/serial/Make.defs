@@ -75,6 +75,12 @@ ifeq ($(CONFIG_RAM_UART),y)
   CSRCS += uart_ram.c
 endif
 
+# UART PCI drivers
+
+ifeq ($(CONFIG_16550_PCI_UART),y)
+  CSRCS += uart_pci_16550.c
+endif
+
 # Include serial build support
 
 DEPPATH += --dep-path serial

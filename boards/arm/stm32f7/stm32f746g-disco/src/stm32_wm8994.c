@@ -286,7 +286,7 @@ int stm32_wm8994_initialize(int minor)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d", minor);
+      snprintf(devname, sizeof(devname), "pcm%d", minor);
 
       /* Finally, we can register the ADAU1961/I2C/I2S audio device. */
 

@@ -49,7 +49,7 @@
 /* Configuration ************************************************************/
 
 #if defined(CONFIG_LPUART1_SERIAL_CONSOLE)
-#  define IMX9_CONSOLE_DEVOFF   0
+#  define IMX9_CONSOLE_DEVNUM   0
 #  define IMX9_CONSOLE_BASE     IMX9_LPUART1_BASE
 #  define IMX9_CONSOLE_BAUD     CONFIG_LPUART1_BAUD
 #  define IMX9_CONSOLE_BITS     CONFIG_LPUART1_BITS
@@ -201,14 +201,14 @@ void imx9_lowsetup(void)
    * control is enabled.
    */
 
-  imx9_iomux_configure(LPUART4_RX);
-  imx9_iomux_configure(LPUART4_TX);
+  imx9_iomux_configure(MUX_LPUART4_RX);
+  imx9_iomux_configure(MUX_LPUART4_TX);
 #ifdef CONFIG_LPUART4_OFLOWCONTROL
-  imx9_iomux_configure(LPUART4_CTS);
+  imx9_iomux_configure(MUX_LPUART4_CTS);
 #endif
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART4_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART4_IFLOWCONTROL)))
-  imx9_iomux_configure(LPUART4_RTS);
+  imx9_iomux_configure(MUX_LPUART4_RTS);
 #endif
 #endif
 
@@ -283,7 +283,7 @@ void imx9_lowsetup(void)
 #ifdef IMX9_CONSOLE_BASE
   /* Configure the serial console for initial, non-interrupt driver mode */
 
-  imx9_lpuart_configure(IMX9_CONSOLE_BASE, IMX9_CONSOLE_DEVOFF,
+  imx9_lpuart_configure(IMX9_CONSOLE_BASE, IMX9_CONSOLE_DEVNUM,
                         &g_console_config);
 #endif
 

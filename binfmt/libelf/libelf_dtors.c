@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/libelf/libelf_dtors.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -165,7 +167,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
 
           for (i = 0; i < loadinfo->ndtors; i++)
             {
-              FAR uintptr_t *ptr = (uintptr_t *)
+              FAR uintptr_t *ptr = (FAR uintptr_t *)
                   ((FAR void *)(&loadinfo->dtors)[i]);
 
               binfo("dtor %d: "

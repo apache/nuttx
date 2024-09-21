@@ -209,6 +209,7 @@ void arm_addrenv_destroy_region(uintptr_t **list, unsigned int listlen,
           /* And free the L2 page table itself */
 
           mm_pgfree((uintptr_t)list[i], 1);
+          list[i] = NULL;
         }
     }
 }

@@ -271,7 +271,6 @@ static void tun_pollnotify(FAR struct tun_device_s *priv,
 
 static void tun_fd_transmit(FAR struct tun_device_s *priv)
 {
-  NETDEV_TXPACKETS(&priv->dev);
   tun_pollnotify(priv, POLLIN);
 }
 
@@ -307,6 +306,7 @@ static int tun_txpoll(FAR struct net_driver_s *dev)
 
   DEBUGASSERT(priv->read_buf == NULL);
 
+  NETDEV_TXPACKETS(dev);
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the tap */
 
@@ -1265,6 +1265,24 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
 
       strlcpy(ifr->ifr_name, priv->dev.d_ifname, IFNAMSIZ);
+
+      return OK;
+    }
+  else if (cmd == TUNSETCARRIER)
+    {
+      if (priv == NULL || arg == 0)
+        {
+          return -EINVAL;
+        }
+
+      if (*(FAR int *)((uintptr_t)arg))
+        {
+          netdev_carrier_on(&priv->dev);
+        }
+      else
+        {
+          netdev_carrier_off(&priv->dev);
+        }
 
       return OK;
     }

@@ -30,7 +30,7 @@
 #include <string.h>
 #include <time.h>
 
-#include <nuttx/sensors/gps.h>
+#include <nuttx/sensors/gnss.h>
 #include <nuttx/sensors/sensor.h>
 
 #include "nrf_modem.h"
@@ -42,8 +42,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SENSORS_GPS
-#  error nRF91 GNSS driver needs CONFIG_SENSORS_GPS
+#ifndef CONFIG_SENSORS_GNSS
+#  error nRF91 GNSS driver needs CONFIG_SENSORS_GNSS
 #endif
 
 /* NMEA and AGPS not supported yet */
@@ -79,7 +79,7 @@ struct nrf91_gnss_s
 {
   /* lower must be first element */
 
-  struct gps_lowerhalf_s                lower;
+  struct gnss_lowerhalf_s               lower;
   bool                                  running;
   bool                                  singlefix;
   int                                   notime_cntr;
@@ -111,15 +111,15 @@ struct nrf91_gnss_s
 
 /* GPS operations */
 
-static int nrf91_gnss_activate(struct gps_lowerhalf_s *lower,
+static int nrf91_gnss_activate(struct gnss_lowerhalf_s *lower,
                                struct file *filep, bool enable);
-static int nrf91_gnss_set_interval(struct gps_lowerhalf_s *lower,
+static int nrf91_gnss_set_interval(struct gnss_lowerhalf_s *lower,
                                    struct file *filep,
                                    unsigned long *period_us);
-static int nrf91_gnss_control(struct gps_lowerhalf_s *lower,
+static int nrf91_gnss_control(struct gnss_lowerhalf_s *lower,
                               struct file *filep,
                               int cmd, unsigned long arg);
-static ssize_t nrf91_gnss_inject_data(struct gps_lowerhalf_s *lower,
+static ssize_t nrf91_gnss_inject_data(struct gnss_lowerhalf_s *lower,
                                       struct file *filep,
                                       const void *buffer, size_t buflen);
 
@@ -139,7 +139,7 @@ static int nrf91_gnss_thread(int argc, char** argv);
  * Private Data
  ****************************************************************************/
 
-static const struct gps_ops_s g_nrf91_gnss_ops =
+static const struct gnss_ops_s g_nrf91_gnss_ops =
 {
   .activate     = nrf91_gnss_activate,
   .set_interval = nrf91_gnss_set_interval,
@@ -268,7 +268,7 @@ errout:
  * Name: nrf91_gnss_activate
  ****************************************************************************/
 
-static int nrf91_gnss_activate(struct gps_lowerhalf_s *lower,
+static int nrf91_gnss_activate(struct gnss_lowerhalf_s *lower,
                                struct file *filep, bool enable)
 {
   struct nrf91_gnss_s *priv = (struct nrf91_gnss_s *)lower;
@@ -280,7 +280,7 @@ static int nrf91_gnss_activate(struct gps_lowerhalf_s *lower,
  * Name: nrf91_gnss_set_interval
  ****************************************************************************/
 
-static int nrf91_gnss_set_interval(struct gps_lowerhalf_s *lower,
+static int nrf91_gnss_set_interval(struct gnss_lowerhalf_s *lower,
                                    struct file *filep,
                                    unsigned long *period_us)
 {
@@ -345,7 +345,7 @@ static int nrf91_gnss_set_interval(struct gps_lowerhalf_s *lower,
  * Name: nrf91_gnss_control
  ****************************************************************************/
 
-static int nrf91_gnss_control(struct gps_lowerhalf_s *lower,
+static int nrf91_gnss_control(struct gnss_lowerhalf_s *lower,
                               struct file *filep,
                               int cmd, unsigned long arg)
 {
@@ -358,7 +358,7 @@ static int nrf91_gnss_control(struct gps_lowerhalf_s *lower,
  * Name: nrf91_gnss_inject_data
  ****************************************************************************/
 
-static ssize_t nrf91_gnss_inject_data(struct gps_lowerhalf_s *lower,
+static ssize_t nrf91_gnss_inject_data(struct gnss_lowerhalf_s *lower,
                                       struct file *filep,
                                       const void *buffer, size_t buflen)
 {
@@ -400,14 +400,14 @@ static void nrf91_gnss_boost_prio(struct nrf91_gnss_s *priv)
 
 static void nrf91_gnss_pvt_event(struct nrf91_gnss_s *priv)
 {
-  struct sensor_gps           gps;
-  struct sensor_gps_satellite sat;
-  struct tm                   tm;
-  uint64_t                    timestamp;
-  int                         i    = 0;
-  int                         j    = 0;
-  int                         sv   = 0;
-  int                         used = 0;
+  struct sensor_gnss           gps;
+  struct sensor_gnss_satellite sat;
+  struct tm                    tm;
+  uint64_t                     timestamp;
+  int                          i    = 0;
+  int                          j    = 0;
+  int                          sv   = 0;
+  int                          used = 0;
 
   timestamp = sensor_get_timestamp();
 
@@ -417,7 +417,7 @@ static void nrf91_gnss_pvt_event(struct nrf91_gnss_s *priv)
         {
           sv += 1;
 
-          if (j < SENSOR_GPS_SAT_INFO_MAX)
+          if (j < SENSOR_GNSS_SAT_INFO_MAX)
             {
               sat.info[j].svid      = priv->pvt.sv[i].sv;
               sat.info[j].elevation = priv->pvt.sv[i].elevation;
@@ -445,8 +445,8 @@ static void nrf91_gnss_pvt_event(struct nrf91_gnss_s *priv)
 
       priv->lower.push_event(priv->lower.priv,
                              &sat,
-                             sizeof(struct sensor_gps_satellite),
-                             SENSOR_TYPE_GPS_SATELLITE);
+                             sizeof(struct sensor_gnss_satellite),
+                             SENSOR_TYPE_GNSS_SATELLITE);
     }
 
   if (priv->pvt.flags & NRF_MODEM_GNSS_PVT_FLAG_FIX_VALID)
@@ -480,8 +480,8 @@ static void nrf91_gnss_pvt_event(struct nrf91_gnss_s *priv)
 
       priv->lower.push_event(priv->lower.priv,
                              &gps,
-                             sizeof(struct sensor_gps),
-                             SENSOR_TYPE_GPS);
+                             sizeof(struct sensor_gnss),
+                             SENSOR_TYPE_GNSS);
     }
 
   if (priv->pvt.flags & NRF_MODEM_GNSS_PVT_FLAG_SLEEP_BETWEEN_PVT)
@@ -728,5 +728,5 @@ int nrf91_gnss_register(int devno, uint32_t batch_number)
 
   g_nrf91_gnss.lower.ops = &g_nrf91_gnss_ops;
 
-  return gps_register(&g_nrf91_gnss.lower, devno, batch_number);
+  return gnss_register(&g_nrf91_gnss.lower, devno, batch_number);
 }

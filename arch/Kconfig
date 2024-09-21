@@ -38,6 +38,7 @@ config ARCH_ARM64
 	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_PERF_EVENTS
 	select ONESHOT
+	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	---help---
 		The ARM64 architectures
 
@@ -137,6 +138,7 @@ config ARCH_X86_64
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_CUSTOMOPT
+	select PCI_LATE_DRIVERS_REGISTER if PCI
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ARCH_TOOLCHAIN_GNU
 	---help---
@@ -284,6 +286,11 @@ config ARCH_TOOLCHAIN_CLANG
 
 config ARCH_TOOLCHAIN_TASKING
 	bool
+	default n
+
+config ARCH_TOOLCHAIN_GHS
+	bool
+	select ARCH_TOOLCHAIN_GNU
 	default n
 
 config ARCH_GNU_NO_WEAKFUNCTIONS
@@ -1039,12 +1046,6 @@ config ARCH_STACKDUMP_MAX_LENGTH
 	depends on ARCH_STACKDUMP
 	default 0
 
-config DUMP_ON_EXIT
-	bool "Dump all tasks state on exit"
-	default n
-	---help---
-		Dump all tasks state on exit()
-
 config ARCH_USBDUMP
 	bool "Dump USB trace data"
 	default n
@@ -1151,6 +1152,13 @@ config ARCH_MINIMAL_VECTORTABLE
 		interrupt vector table at index 24.  if g_irqmap[42] ==
 		IRQMAPPED_MAX, then hardware interrupt vector 42 is not used and
 		if it occurs will result in an unexpected interrupt crash.
+
+config ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+	bool "Dynaminc Minimal RAM usage for vector table"
+	default n
+	depends on ARCH_MINIMAL_VECTORTABLE
+	---help---
+		Use a minimum amount of RAM for the vector table.
 
 config ARCH_NUSER_INTERRUPTS
 	int "Number of interrupts"

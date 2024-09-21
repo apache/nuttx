@@ -118,20 +118,21 @@
  *
  * Reference link:
  * https://pubs.opengroup.org/onlinepubs/009695399/basedefs/assert.h.html
- *
- * ASSERT/VERIFY is a non-standard interface, implemented using internal
- *
  */
 
 #ifdef NDEBUG
 #  define assert(f) ((void)0)
-#  define ASSERT(f) ((void)(1 || (f)))
-#  define VERIFY(f) ((void)(1 || (f)))
 #else
 #  define assert(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
-#  define ASSERT(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
-#  define VERIFY(f) _VERIFY(f, __ASSERT_FILE__, __ASSERT_LINE__)
 #endif
+
+/* ASSERT/VERIFY are NuttX-specific APIs.
+ * They are always enabled, regardless of NDEBUG/CONFIG_DEBUG_ASSERTIONS.
+ * The argument is evaluated exactly once.
+ */
+
+#define ASSERT(f) _ASSERT(f, __ASSERT_FILE__, __ASSERT_LINE__)
+#define VERIFY(f) _VERIFY(f, __ASSERT_FILE__, __ASSERT_LINE__)
 
 /* Suppress 3rd party library redefine _assert/__assert */
 

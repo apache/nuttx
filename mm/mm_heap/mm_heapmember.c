@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_heapmember.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
 
@@ -54,6 +57,7 @@
 
 bool mm_heapmember(FAR struct mm_heap_s *heap, FAR void *mem)
 {
+  mem = kasan_reset_tag(mem);
 #if CONFIG_MM_REGIONS > 1
   int i;
 

@@ -393,6 +393,8 @@ static ssize_t rpmsgfs_ioctl_arglen(int cmd)
       case FIONWRITE:
       case FIONREAD:
         return sizeof(int);
+      case FIOC_FILEPATH:
+        return PATH_MAX;
       case FIOC_SETLK:
       case FIOC_GETLK:
       case FIOC_SETLKW:
@@ -973,8 +975,24 @@ int rpmsgfs_client_chstat(FAR void *handle, FAR const char *path,
 
   DEBUGASSERT(len <= space);
 
-  msg->flags = flags;
-  memcpy(&msg->buf, buf, sizeof(*buf));
+  msg->flags         = flags;
+  msg->buf.dev       = buf->st_dev;
+  msg->buf.ino       = buf->st_ino;
+  msg->buf.mode      = buf->st_mode;
+  msg->buf.nlink     = buf->st_nlink;
+  msg->buf.uid       = buf->st_uid;
+  msg->buf.gid       = buf->st_gid;
+  msg->buf.rdev      = buf->st_rdev;
+  msg->buf.size      = buf->st_size;
+  msg->buf.atim_sec  = buf->st_atim.tv_sec;
+  msg->buf.atim_nsec = buf->st_atim.tv_nsec;
+  msg->buf.mtim_sec  = buf->st_mtim.tv_sec;
+  msg->buf.mtim_nsec = buf->st_mtim.tv_nsec;
+  msg->buf.ctim_sec  = buf->st_ctim.tv_sec;
+  msg->buf.ctim_nsec = buf->st_ctim.tv_nsec;
+  msg->buf.blksize   = buf->st_blksize;
+  msg->buf.blocks    = buf->st_blocks;
+
   strlcpy(msg->pathname, path, space - sizeof(*msg));
 
   return rpmsgfs_send_recv(priv, RPMSGFS_CHSTAT, false,

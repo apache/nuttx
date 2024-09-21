@@ -95,7 +95,7 @@ uintmax_t strtoumax(FAR const char *nptr, FAR char **endptr, int base)
 
       if (endptr)
         {
-          *endptr = (char *)nptr;
+          *endptr = (FAR char *)nptr;
         }
     }
 

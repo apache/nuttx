@@ -37,14 +37,16 @@
 
 #include "inode/inode.h"
 #include "fs_rammap.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static int file_munmap_(FAR void *start, size_t length, bool kernel)
+static int file_munmap_(FAR void *start, size_t length,
+                        enum mm_map_type_e type)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct tcb_s *tcb = this_task();
   FAR struct task_group_s *group = tcb->group;
   FAR struct mm_map_entry_s *entry = NULL;
   FAR struct mm_map_s *mm = get_current_mm();
@@ -99,7 +101,7 @@ unlock:
 
 int file_munmap(FAR void *start, size_t length)
 {
-  return file_munmap_(start, length, true);
+  return file_munmap_(start, length, MAP_KERNEL);
 }
 
 /****************************************************************************
@@ -118,19 +120,19 @@ int file_munmap(FAR void *start, size_t length)
  *   1. mmap() is the API that is used to support direct access to random
  *     access media under the following very restrictive conditions:
  *
- *     a. The filesystem impelements the mmap file operation.  Any file
+ *     a. The filesystem implements the mmap file operation.  Any file
  *        system that maps files contiguously on the media should support
  *        this ioctl. (vs. file system that scatter files over the media
  *        in non-contiguous sectors).  As of this writing, ROMFS is the
  *        only file system that meets this requirement.
  *     b. The underlying block driver supports the BIOC_XIPBASE ioctl
  *        command that maps the underlying media to a randomly accessible
- *        address. At  present, only the RAM/ROM disk driver does this.
+ *        address. At present, only the RAM/ROM disk driver does this.
  *
- *     munmap() is still not required in this first case.  In this first
- *     The mapped address is a static address in the MCUs address space
- *     does not need to be munmapped.  Support for munmap() in this case
- *     provided by the simple definition in sys/mman.h:
+ *     munmap() is still not required in this first case. The mapped address
+ *     is a static address in the MCUs address space does not need to be
+ *     munmapped.  Support for munmap() in this case provided by the simple
+ *     definition in sys/mman.h:
  *
  *        #define munmap(start, length)
  *
@@ -141,10 +143,10 @@ int file_munmap(FAR void *start, size_t length)
  *
  * Input Parameters:
  *   start   The start address of the mapping to delete.  For this
- *           simplified munmap() implementation, the *must* be the start
+ *           simplified munmap() implementation, the must be the start
  *           address of the memory region (the same address returned by
  *           mmap()).
- *   length  The length region to be umapped.
+ *   length  The length region to be unmapped.
  *
  * Returned Value:
  *   On success, munmap() returns 0, on failure -1, and errno is set
@@ -156,7 +158,7 @@ int munmap(FAR void *start, size_t length)
 {
   int ret;
 
-  ret = file_munmap_(start, length, false);
+  ret = file_munmap_(start, length, MAP_USER);
   if (ret < 0)
     {
       set_errno(-ret);

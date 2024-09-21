@@ -711,7 +711,7 @@ static void tiva_adc_read(void *arg)
   ret = tiva_adc_lock(g_adcs[sse->adc], sse->num);
   if (ret < 0)
     {
-      return ;
+      return;
     }
 
   /* Get sampled data */

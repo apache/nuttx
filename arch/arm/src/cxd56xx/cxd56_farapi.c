@@ -185,7 +185,7 @@ void farapi_main(int id, void *arg, struct modulelist_s *mlist)
   int ret;
 
 #ifdef CONFIG_SMP
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
   static cpu_set_t cpuset0;
 
   if (0 != cpu)

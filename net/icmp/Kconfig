@@ -43,6 +43,12 @@ config NET_ICMP_SOCKET
 		for application level support for sending ECHO (ping) requests and
 		receiving associated ECHO replies.
 
+config NET_ICMP_CHECKSUMS
+	bool "ICMP checksums"
+	default y
+	---help---
+		Enable/disable ICMP checksum support.
+
 if NET_ICMP_SOCKET
 
 config NET_ICMP_PREALLOC_CONNS

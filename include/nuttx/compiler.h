@@ -69,16 +69,6 @@
 #  define CONFIG_DESIGNATED_INITIALIZERS 1
 #endif
 
-/* ISO C/C++11 atomic types support */
-
-#undef CONFIG_HAVE_ATOMICS
-
-#if ((defined(__cplusplus) && __cplusplus >= 201103L) || \
-     (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)) && \
-    !defined(__STDC_NO_ATOMICS__)
-#  define CONFIG_HAVE_ATOMICS
-#endif
-
 /* C++ support */
 
 #undef CONFIG_HAVE_CXX14
@@ -268,6 +258,16 @@
 
 #  define nosanitize_address __attribute__((no_sanitize_address))
 
+/* the Greenhills compiler do not support the following atttributes */
+
+#  if defined(__ghs__)
+#    undef nooptimiziation_function
+#    define nooptimiziation_function
+
+#    undef nosanitize_address
+#    define nosanitize_address
+#  endif
+
 /* The nosanitize_undefined attribute informs GCC don't sanitize it */
 
 #  define nosanitize_undefined __attribute__((no_sanitize("undefined")))
@@ -374,6 +374,15 @@
 #    undef  CONFIG_PTR_IS_NOT_INT
 
 #  elif defined(__AVR__)
+
+#    if defined(__AVR_2_BYTE_PC__) || defined(__AVR_3_BYTE_PC__)
+/* 2-byte 3-byte PC does not support returnaddress */
+
+#      undef return_address
+#      define return_address(x) 0
+
+#    endif
+
 #    if defined(CONFIG_AVR_HAS_MEMX_PTR)
 /* I-space access qualifiers needed by Harvard architecture */
 

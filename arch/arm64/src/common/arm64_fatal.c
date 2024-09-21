@@ -314,7 +314,7 @@ void arm64_fatal_error(unsigned int reason, struct regs_context * reg)
 
   sinfo("reason = %d\n", reason);
 
-  CURRENT_REGS = (uint64_t *)reg;
+  up_set_current_regs((uint64_t *)reg);
 
   if (reason != K_ERR_SPURIOUS_IRQ)
     {

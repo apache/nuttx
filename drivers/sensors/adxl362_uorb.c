@@ -107,7 +107,7 @@ struct adxl362_sensor_s
   float                      scale;
 #ifdef CONFIG_SENSORS_ADXL362_POLL
   bool                       enabled;
-  unsigned long              interval;
+  uint32_t                   interval;
   sem_t                      run;
 #endif
 };
@@ -134,7 +134,7 @@ static int adxl362_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
 static int adxl362_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us);
+                                FAR uint32_t *period_us);
 #ifndef CONFIG_SENSORS_ADXL362_POLL
 static int adxl362_fetch(FAR struct sensor_lowerhalf_s *lower,
                          FAR struct file *filep,
@@ -157,9 +157,11 @@ static const struct sensor_ops_s g_adxl362_accel_ops =
 #else
   adxl362_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   NULL,                 /* control */
 };
 
@@ -445,7 +447,7 @@ static int adxl362_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int adxl362_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us)
+                                FAR uint32_t *period_us)
 {
 #ifdef CONFIG_SENSORS_ADXL362_POLL
   FAR struct adxl362_sensor_s *priv = (FAR struct adxl362_sensor_s *)lower;
@@ -458,7 +460,7 @@ static int adxl362_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
 #ifndef CONFIG_SENSORS_ADXL362_POLL
 /****************************************************************************
- * Name: adxl362_set_interval
+ * Name: adxl362_fetch
  ****************************************************************************/
 
 static int adxl362_fetch(FAR struct sensor_lowerhalf_s *lower,

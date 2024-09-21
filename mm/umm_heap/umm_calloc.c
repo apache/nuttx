@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/umm_heap/umm_calloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -70,6 +72,18 @@ FAR void *calloc(size_t n, size_t elem_size)
 #else
   /* Use mm_calloc() because it implements the clear */
 
-  return mm_calloc(USR_HEAP, n, elem_size);
+  FAR void *mem = mm_calloc(USR_HEAP, n, elem_size);
+
+  if (mem == NULL)
+    {
+      set_errno(ENOMEM);
+    }
+  else
+    {
+      mm_notify_pressure(mm_heapfree(USR_HEAP),
+                         mm_heapfree_largest(USR_HEAP));
+    }
+
+  return mem;
 #endif
 }

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -157,7 +159,7 @@ struct tcp_hdr_s;         /* Forward reference */
 struct tcp_poll_s
 {
   FAR struct tcp_conn_s *conn;     /* Needed to handle loss of connection */
-  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct pollfd *fds;          /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
@@ -283,6 +285,9 @@ struct tcp_conn_s
 #ifdef CONFIG_NET_SOLINGER
   sclock_t ltimeout;      /* Linger timeout expiration */
 #endif
+#ifdef CONFIG_NETDEV_RSS
+  int      rcvcpu;        /* Currect cpu id */
+#endif
   /* If the TCP socket is bound to a local address, then this is
    * a reference to the device that routes traffic on the corresponding
    * network.
@@ -390,8 +395,8 @@ struct tcp_conn_s
    */
 
   FAR void *accept_private;
-  int (*accept)(FAR struct tcp_conn_s *listener,
-                FAR struct tcp_conn_s *conn);
+  CODE int (*accept)(FAR struct tcp_conn_s *listener,
+                     FAR struct tcp_conn_s *conn);
 
   /* The following is a list of poll structures of threads waiting for
    * socket events.

@@ -19,6 +19,10 @@
  ****************************************************************************/
 #include <nuttx/config.h>
 
+/* From esp-hal-3rdparty */
+#include "sdkconfig.h"
+#include "ld.common"
+
 #if CONFIG_ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 #  define ESP_BOOTLOADER_RESERVE_RTC 0
 

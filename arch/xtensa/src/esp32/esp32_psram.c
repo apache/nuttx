@@ -190,6 +190,16 @@
 #  define PSRAM_SPICLKEN      DPORT_SPI01_CLK_EN
 #endif
 
+/* Let's to assume SPIFLASH SPEED == SPIRAM SPEED for now */
+
+#if defined(CONFIG_ESP32_SPIRAM_SPEED_40M)
+#  define PSRAM_CS_HOLD_TIME 0
+#elif defined(CONFIG_ESP32_SPIRAM_SPEED_80M)
+#  define PSRAM_CS_HOLD_TIME 1
+#else
+#  error "FLASH speed can only be equal to or higher than SRAM speed while SRAM is enabled!"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -584,7 +594,7 @@ static void IRAM_ATTR
         }
     }
 
-  /* use Dram1 to visit ext sram. */
+  /* use DRAM1 to visit ext sram. */
 
   modifyreg32(DPORT_PRO_CACHE_CTRL1_REG,
               DPORT_PRO_CACHE_MASK_DRAM1 | DPORT_PRO_CACHE_MASK_OPSDRAM, 0);
@@ -592,10 +602,8 @@ static void IRAM_ATTR
   /* cache page mode :
    * 1 -->16k
    * 4 -->2k
-   * 0 -->32k,(accord with the settings in cache_sram_mmu_set)
+   * 0 -->32k, (accord with the settings in cache_sram_mmu_set)
    */
-
-  /* get into unknown exception if not comment */
 
   regval  = getreg32(DPORT_PRO_CACHE_CTRL1_REG);
   regval &= ~(DPORT_PRO_CMMU_SRAM_PAGE_MODE <<
@@ -605,8 +613,7 @@ static void IRAM_ATTR
   /* use DRAM1 to visit ext sram. */
 
   modifyreg32(DPORT_APP_CACHE_CTRL1_REG,
-              DPORT_APP_CACHE_MASK_DRAM1 |
-              DPORT_APP_CACHE_MASK_OPSDRAM, 0);
+              DPORT_APP_CACHE_MASK_DRAM1 | DPORT_APP_CACHE_MASK_OPSDRAM, 0);
 
   /* cache page mode :
    * 1 -->16k
@@ -1260,8 +1267,8 @@ void psram_set_cs_timing(psram_spi_num_t spi_num, psram_clk_mode_t clk_mode)
 
       /* Set cs time. */
 
-      SET_PERI_REG_BITS(SPI_CTRL2_REG(spi_num), SPI_HOLD_TIME_V, 1,
-                        SPI_HOLD_TIME_S);
+      SET_PERI_REG_BITS(SPI_CTRL2_REG(spi_num), SPI_HOLD_TIME_V,
+                        PSRAM_CS_HOLD_TIME, SPI_HOLD_TIME_S);
       SET_PERI_REG_BITS(SPI_CTRL2_REG(spi_num), SPI_SETUP_TIME_V, 0,
                         SPI_SETUP_TIME_S);
     }

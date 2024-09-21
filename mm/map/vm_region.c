@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/map/vm_region.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -147,7 +149,7 @@ int vm_unmap_region(FAR void *vaddr, size_t size)
 
   DEBUGASSERT(size && vaddr);
   size += ((uintptr_t)vaddr & MM_PGMASK);
-  vaddr = (void *)MM_PGALIGNDOWN(vaddr);
+  vaddr = (FAR void *)MM_PGALIGNDOWN(vaddr);
   ret = up_shmdt((uintptr_t)vaddr, MM_NPAGES(size));
   vm_release_region(get_current_mm(), vaddr, size);
   return ret;

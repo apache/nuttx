@@ -1,6 +1,8 @@
 /****************************************************************************
  * wireless/ieee802154/mac802154_device.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -855,7 +857,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
 
   /* Create the character device name */
 
-  snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, minor);
+  snprintf(devname, sizeof(devname), DEVNAME_FMT, minor);
 
   /* Register the mac character driver */
 

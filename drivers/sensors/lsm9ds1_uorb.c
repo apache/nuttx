@@ -69,7 +69,7 @@ struct lsm9ds1_sensor_s
   FAR void                  *dev;
 #ifdef CONFIG_SENSORS_LSM9DS1_POLL
   bool                       enabled;
-  unsigned long              interval;
+  uint32_t                   interval;
 #endif
   struct lsm9ds1_dev_s       base;
 };
@@ -94,7 +94,7 @@ static int lsm9ds1_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int lsm9ds1_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *period_us);
+                                FAR uint32_t *period_us);
 #ifndef CONFIG_SENSORS_LSM9DS1_POLL
 static int lsm9ds1_fetch(FAR struct sensor_lowerhalf_s *lower,
                          FAR struct file *filep,
@@ -129,9 +129,11 @@ static const struct sensor_ops_s g_sensor_ops =
 #else
   .fetch        = lsm9ds1_fetch,
 #endif
+  NULL,                 /* flush */
   NULL,                 /* selftest */
   NULL,                 /* set_calibvalue */
   NULL,                 /* calibrate */
+  NULL,                 /* get_info */
   .control      = lsm9ds1_control
 };
 
@@ -191,7 +193,7 @@ static int lsm9ds1_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static int lsm9ds1_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
-                                FAR unsigned long *interval)
+                                FAR uint32_t *interval)
 {
 #ifdef CONFIG_SENSORS_LSM9DS1_POLL
   FAR struct lsm9ds1_sensor_s *priv = NULL;
@@ -240,7 +242,7 @@ static int16_t lsm9ds1_data(int16_t data)
 
 #ifndef CONFIG_SENSORS_LSM9DS1_POLL
 /****************************************************************************
- * Name: lsm9ds1_set_interval
+ * Name: lsm9ds1_fetch
  ****************************************************************************/
 
 static int lsm9ds1_fetch(FAR struct sensor_lowerhalf_s *lower,
@@ -620,7 +622,7 @@ static int lsm9ds1_thread(int argc, FAR char **argv)
       if (accel->enabled)
         {
           ret = lsm9ds1_readreg(&accel->base,
-                                LSM9DS1_OUT_X_L_XL, (uint8_t *)adata, 6);
+                                LSM9DS1_OUT_X_L_XL, (FAR uint8_t *)adata, 6);
           lsm9ds1_accel_data(accel, adata);
         }
 
@@ -629,7 +631,7 @@ static int lsm9ds1_thread(int argc, FAR char **argv)
       if (gyro->enabled)
         {
           ret = lsm9ds1_readreg(&gyro->base,
-                                LSM9DS1_OUT_X_L_G, (uint8_t *)gdata, 6);
+                                LSM9DS1_OUT_X_L_G, (FAR uint8_t *)gdata, 6);
           lsm9ds1_gyro_data(gyro, gdata);
         }
 
@@ -638,7 +640,7 @@ static int lsm9ds1_thread(int argc, FAR char **argv)
       if (mag->enabled)
         {
           ret = lsm9ds1_readreg(&mag->base,
-                                LSM9DS1_OUT_X_L_M, (uint8_t *)mdata, 6);
+                                LSM9DS1_OUT_X_L_M, (FAR uint8_t *)mdata, 6);
           lsm9ds1_mag_data(mag, mdata);
         }
 

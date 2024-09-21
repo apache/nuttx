@@ -1,6 +1,8 @@
 /****************************************************************************
  * graphics/nxterm/nxterm_kbdin.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -289,7 +291,7 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
     {
       /* This is a request to tear down the poll. */
 
-      struct pollfd **slot = (struct pollfd **)fds->priv;
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
 
 #ifdef CONFIG_DEBUG_GRAPHICS
       if (!slot)

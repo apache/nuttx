@@ -25,6 +25,12 @@ config USBDEV_DUALSPEED
 	---help---
 		Hardware handles high and full speed operation (USB 2.0)
 
+config USBDEV_SUPERSPEED
+	bool "Enable super speed"
+	default n
+	---help---
+		Hardware handles super speed operation (USB 3.2)
+
 config USBDEV_EPBUFFER_ALIGNMENT
 	int "The usbdev ep req bffer aligned bytes"
 	default 0
@@ -312,6 +318,49 @@ config PL2303_EP0MAXPACKET
 	int "Packet and request buffer sizes"
 	default 64
 
+config PL2303_EPBULK_FSSIZE
+	int "BULK endpoints full speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the bulk endpoint if full speed mode.
+		Default 64.
+
+if USBDEV_DUALSPEED
+
+config PL2303_EPBULK_HSSIZE
+	int "BULK endpoints high speed MAXPACKET size"
+	default 512
+	---help---
+		Max package size for the bulk endpoint if high speed mode.
+		Default 512.
+
+endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config PL2303_EPBULK_SSSIZE
+	int "BULK endpoints super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk endpoint if super speed mode.
+		Default 1024.
+
+config PL2303_EPBULK_MAXBURST
+	int "BULK endpoints super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk endpoint if super speed mode.
+		Default 0.
+
+config PL2303_EPBULK_MAXSTREAM
+	int "BULK endpoints super speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
 config PL2303_NWRREQS
 	int "Number of read requests that can be in flight"
 	default 4
@@ -456,6 +505,24 @@ config CDCACM_EPINTIN_HSSIZE
 
 endif # USBDEV_DUALSPEED
 
+if USBDEV_SUPERSPEED
+
+config CDCACM_EPINTIN_SSSIZE
+	int "Interrupt IN super speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the interrupt IN endpoint if super speed mode.
+		Default 64.
+
+config CDCACM_EPINTIN_MAXBURST
+	int "Interrupt IN super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the interrupt IN endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
 if !CDCACM_COMPOSITE
 
 # In a composite device the EP-Number is configured dynamically via
@@ -480,13 +547,38 @@ config CDCACM_EPBULKOUT_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCACM_EPBULKOUT_HSSIZE
-	int "Bulk OUT out high speed MAXPACKET size"
+	int "Bulk OUT high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk OUT endpoint if high speed mode.
 		Default 512.
 
 endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config CDCACM_EPBULKOUT_SSSIZE
+	int "Bulk OUT super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk OUT endpoint if super speed mode.
+		Default 1024.
+
+config CDCACM_EPBULKOUT_MAXBURST
+	int "Bulk OUT super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+config CDCACM_EPBULKOUT_MAXSTREAM
+	int "Bulk OUT super speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
 
 if !CDCACM_COMPOSITE
 
@@ -520,6 +612,31 @@ config CDCACM_EPBULKIN_HSSIZE
 
 endif # USBDEV_DUALSPEED
 
+if USBDEV_SUPERSPEED
+
+config CDCACM_EPBULKIN_SSSIZE
+	int "Bulk IN super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk IN endpoint if super speed mode.
+		Default 1024.
+
+config CDCACM_EPBULKIN_MAXBURST
+	int "Bulk IN super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+config CDCACM_EPBULKIN_MAXSTREAM
+	int "Bulk IN super speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
 config CDCACM_NRDREQS
 	int "Number of read requests that can be in flight"
 	default 4
@@ -531,6 +648,14 @@ config CDCACM_NWRREQS
 	default 4
 	---help---
 		The number of write/read requests that can be in flight
+
+config CDCACM_BULKOUT_REQLEN
+	int "Size of one read request buffer"
+	default 512 if USBDEV_DUALSPEED
+	default 256 if !USBDEV_DUALSPEED
+	---help---
+		Read buffer size maybe larger than the maxpacket size. Increasing
+		the buffer size can effectively improve the transmission speed.
 
 config CDCACM_BULKIN_REQLEN
 	int "Size of one write request buffer"
@@ -664,13 +789,38 @@ config USBADB_EPBULKOUT_FSSIZE
 if USBDEV_DUALSPEED
 
 config USBADB_EPBULKOUT_HSSIZE
-	int "Bulk OUT out high speed MAXPACKET size"
+	int "Bulk OUT high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk OUT endpoint if high speed mode.
 		Default 512.
 
 endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config USBADB_EPBULKOUT_SSSIZE
+	int "Bulk OUT super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk OUT endpoint if super speed mode.
+		Default 1024.
+
+config USBADB_EPBULKOUT_MAXBURST
+	int "Bulk OUT super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+config USBADB_EPBULKOUT_MAXSTREAM
+	int "Bulk OUT super speed MAXBSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
 
 config USBADB_EPBULKIN_FSSIZE
 	int "Bulk IN full speed MAXPACKET size"
@@ -689,6 +839,31 @@ config USBADB_EPBULKIN_HSSIZE
 		Default 512.
 
 endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config USBADB_EPBULKIN_SSSIZE
+	int "Bulk IN super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk IN endpoint if super speed mode.
+		Default 1024.
+
+config USBADB_EPBULKIN_MAXBURST
+	int "Bulk IN super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+config USBADB_EPBULKIN_MAXSTREAM
+	int "Bulk IN super speed MAXBSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
 
 config USBADB_NRDREQS
 	int "Number of read requests that can be in flight"
@@ -1129,6 +1304,24 @@ config CDCECM_EPINTIN_HSSIZE
 
 endif # USBDEV_DUALSPEED
 
+if USBDEV_SUPERSPEED
+
+config CDCECM_EPINTIN_SSSIZE
+	int "Interrupt IN super speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the interrupt IN endpoint if super speed mode.
+		Default 64.
+
+config CDCECM_EPINTIN_MAXBURST
+	int "Interrupt IN super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the interrupt IN endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
 if !CDCECM_COMPOSITE
 
 # In a composite device the EP-Number is configured dynamically via
@@ -1153,13 +1346,38 @@ config CDCECM_EPBULKOUT_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCECM_EPBULKOUT_HSSIZE
-	int "Bulk OUT out high speed MAXPACKET size"
+	int "Bulk OUT high speed MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk OUT endpoint if high speed mode.
 		Default 512.
 
 endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config CDCECM_EPBULKOUT_SSSIZE
+	int "Bulk OUT super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk OUT endpoint if super speed mode.
+		Default 1024.
+
+config CDCECM_EPBULKOUT_MAXBURST
+	int "Bulk OUT super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+config CDCECM_EPBULKOUT_MAXSTREAM
+	int "Bulk OUT super speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
 
 if !CDCECM_COMPOSITE
 
@@ -1192,6 +1410,31 @@ config CDCECM_EPBULKIN_HSSIZE
 		Default 512.
 
 endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config CDCECM_EPBULKIN_SSSIZE
+	int "Bulk IN super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk IN endpoint if super speed mode.
+		Default 1024.
+
+config CDCECM_EPBULKIN_MAXBURST
+	int "Bulk IN super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+config CDCECM_EPBULKIN_MAXSTREAM
+	int "Bulk IN super speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
 
 if !CDCECM_COMPOSITE
 
@@ -1226,6 +1469,266 @@ config CDCECM_PRODUCTSTR
 endif # !CDCECM_COMPOSITE
 endif # CDCECM
 
+
+menuconfig NET_CDCNCM
+	bool "CDC-NCM Ethernet-over-USB"
+	default n
+	depends on SCHED_WORKQUEUE
+	depends on NETDEVICES
+	depends on NET
+	depends on NET_ETHERNET
+	---help---
+		References:
+		- "Universal Serial Bus - Communications Class - Subclass
+		   Specification for Ethernet Control Model Devices,
+		   Revision 1.2, February 9, 2007"
+
+		This option may require CONFIG_NETDEV_LATEINIT=y, otherwise the
+		power-up initialization may call the non-existent xxx_netinitialize().
+		This option is not automatically selected because it may be that
+		you have an additional network device that requires the early
+		xxx_netinitialize() call.
+
+if NET_CDCNCM
+
+config NET_CDCMBIM
+	bool "CDC-MBIM Ethernet-over-USB"
+	default n
+	---help---
+		This option may require CONFIG_NETDEV_LATEINIT=y, otherwise the
+		power-up initialization may call the non-existent xxx_netinitialize().
+		This option is not automatically selected because it may be that
+		you have an additional network device that requires the early
+		xxx_netinitialize() call.
+
+menuconfig CDCNCM_COMPOSITE
+	bool "CDC/NCM composite support"
+	default n
+	depends on USBDEV_COMPOSITE
+	---help---
+		Configure the CDC Ethernet Control Model driver as part of a
+		composite driver (only if USBDEV_COMPOSITE is also defined)
+
+if !CDCNCM_COMPOSITE
+
+# In a composite device the EP0 config comes from the composite device
+# and the EP-Number is configured dynamically via composite_initialize
+
+config CDCNCM_EP0MAXPACKET
+	int "Endpoint 0 max packet size"
+	default 64
+	---help---
+		Endpoint 0 max packet size. Default 64.
+
+config CDCNCM_EPINTIN
+	int "Interrupt IN endpoint number"
+	default 1
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		interrupt IN operation.  Default 1.
+
+endif # !CDCNCM_COMPOSITE
+
+config CDCNCM_EPINTIN_FSSIZE
+	int "Interrupt IN full speed MAXPACKET size"
+	default 16
+	---help---
+		Max package size for the interrupt IN endpoint if full speed mode.
+		Default 16.
+
+if USBDEV_DUALSPEED
+
+config CDCNCM_EPINTIN_HSSIZE
+	int "Interrupt IN high speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the interrupt IN endpoint if high speed mode.
+		Default 64.
+
+endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config CDCNCM_EPINTIN_SSSIZE
+	int "Interrupt IN super speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the interrupt IN endpoint if super speed mode.
+		Default 64.
+
+config CDCNCM_EPINTIN_MAXBURST
+	int "Interrupt IN super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the interrupt IN endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
+if !CDCNCM_COMPOSITE
+
+# In a composite device the EP-Number is configured dynamically via
+# composite_initialize
+
+config CDCNCM_EPBULKOUT
+	int "Bulk OUT endpoint number"
+	default 5
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		bulk OUT operation.  Default: 5
+
+endif # !CDCNCM_COMPOSITE
+
+config CDCNCM_EPBULKOUT_FSSIZE
+	int "Bulk OUT full speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the bulk OUT endpoint if full speed mode.
+		Default 64.
+
+if USBDEV_DUALSPEED
+
+config CDCNCM_EPBULKOUT_HSSIZE
+	int "Bulk OUT high speed MAXPACKET size"
+	default 512
+	---help---
+		Max package size for the bulk OUT endpoint if high speed mode.
+		Default 512.
+
+endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config CDCNCM_EPBULKOUT_SSSIZE
+	int "Bulk OUT super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk OUT endpoint if super speed mode.
+		Default 1024.
+
+config CDCNCM_EPBULKOUT_MAXBURST
+	int "Bulk OUT super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+config CDCNCM_EPBULKOUT_MAXSTREAM
+	int "Bulk OUT super speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk OUT endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
+if !CDCNCM_COMPOSITE
+
+# In a composite device the EP-Number is configured dynamically via
+# composite_initialize
+
+config CDCNCM_EPBULKIN
+	int "Bulk IN endpoint number"
+	default 2
+	---help---
+		The logical 7-bit address of a hardware endpoint that supports
+		bulk IN operation.  Default: 2
+
+endif # !CDCNCM_COMPOSITE
+
+config CDCNCM_EPBULKIN_FSSIZE
+	int "Bulk IN full speed MAXPACKET size"
+	default 64
+	---help---
+		Max package size for the bulk IN endpoint if full speed mode.
+		Default 64.
+
+if USBDEV_DUALSPEED
+
+config CDCNCM_EPBULKIN_HSSIZE
+	int "Bulk IN high speed MAXPACKET size"
+	default 512
+	---help---
+		Max package size for the bulk IN endpoint if high speed mode.
+		Default 512.
+
+endif # USBDEV_DUALSPEED
+
+if USBDEV_SUPERSPEED
+
+config CDCNCM_EPBULKIN_SSSIZE
+	int "Bulk IN super speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk IN endpoint if super speed mode.
+		Default 1024.
+
+config CDCNCM_EPBULKIN_MAXBURST
+	int "Bulk IN super speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+config CDCNCM_EPBULKIN_MAXSTREAM
+	int "Bulk IN super speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk IN endpoint if super speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
+if !CDCNCM_COMPOSITE
+
+# In a composite device the Vendor- and Product-ID is given by the composite
+# device
+
+config CDCNCM_VENDORID
+	hex "Vendor ID"
+	default 0x0525
+	---help---
+		The vendor ID code/string.  Default 0x0525 and "NuttX"
+		0x0525 is the Netchip vendor and should not be used in any
+		products.  This default VID was selected for compatibility with
+		the Linux CDC NCM default VID.
+
+config CDCNCM_PRODUCTID
+	hex "Product ID"
+	default 0xa4a2
+	---help---
+		The product ID code/string. Default 0xa4a2 and "CDC/NCM Ethernet"
+		0xa4a2 was selected for compatibility with the Linux CDC NCM
+		default PID.
+
+config CDCNCM_VENDORSTR
+	string "Vendor string"
+	default "NuttX"
+
+config CDCNCM_PRODUCTSTR
+	string "CDCNCM Product string"
+	default "CDC/NCM Ethernet"
+
+if NET_CDCMBIM
+
+config CDCMBIM_PRODUCTSTR
+	string "CDCMBIM Product string"
+	default "CDC/MBIM Ethernet"
+
+endif # NET_CDCMBIM
+
+endif # !CDCNCM_COMPOSITE
+
+config CDCNCM_QUOTA_TX
+	int "The drive holds the maximum quota of TX"
+	default 8
+
+config CDCNCM_QUOTA_RX
+	int "The drive holds the maximum quota of RX"
+	default 8
+
+endif # CDCNCM
+
 config USBDEV_FS
 	bool
 	default n
@@ -1246,6 +1749,12 @@ config USBDEV_FS_NPOLLWAITERS
 	default 2
 	---help---
 		Maximum number of threads that can be waiting on poll().
+
+config USBDEV_FS_NEP0REQS
+	int "Number of ep0 requests that can be in flight"
+	default 4
+	---help---
+		The number of ep0 requests that can be in flight
 
 endif #USBDEV_FS
 
@@ -1321,6 +1830,31 @@ config USBMTP_EPBULKOUT_HSSIZE
 
 endif # USBDEV_DUALSPEED
 
+if USBDEV_SUPERSPEED
+
+config USBMTP_EPBULKOUT_SSSIZE
+	int "Bulk OUT Super Speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk OUT endpoint if Super Speed mode.
+		Default 1024.
+
+config USBMTP_EPBULKOUT_MAXBURST
+	int "Bulk OUT Super Speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk OUT endpoint if Super Speed mode.
+		Default 0.
+
+config USBMTP_EPBULKOUT_MAXSTREAM
+	int "Bulk OUT Super Speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk OUT endpoint if Super Speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
 config USBMTP_EPBULKIN_FSSIZE
 	int "Bulk IN Full Speed MAXPACKET size"
 	default 64
@@ -1339,6 +1873,31 @@ config USBMTP_EPBULKIN_HSSIZE
 
 endif # USBDEV_DUALSPEED
 
+if USBDEV_SUPERSPEED
+
+config USBMTP_EPBULKIN_SSSIZE
+	int "Bulk IN Super Speed MAXPACKET size"
+	default 1024
+	---help---
+		Max package size for the bulk IN endpoint if Super Speed mode.
+		Default 1024.
+
+config USBMTP_EPBULKIN_MAXBURST
+	int "Bulk IN Super Speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the bulk IN endpoint if Super Speed mode.
+		Default 0.
+
+config USBMTP_EPBULKIN_MAXSTREAM
+	int "Bulk IN Super Speed MAXSTREAM size"
+	default 0
+	---help---
+		Max stream size for the bulk IN endpoint if Super Speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
+
 config USBMTP_EPINTIN_SIZE
 	int "Interrupt IN MAXPACKET size"
 	default 28
@@ -1350,6 +1909,17 @@ config USBMTP_EPINTIN_INTERVAL
 	default 10
 	---help---
 		The poll interval for the Interrupt IN endpoint, Default 10.
+
+if USBDEV_SUPERSPEED
+
+config USBMTP_EPINTIN_MAXBURST
+	int "Interrupt IN Super Speed MAXBURST size"
+	default 0
+	---help---
+		Max burst size for the Interrupt IN endpoint if Super Speed mode.
+		Default 0.
+
+endif # USBDEV_SUPERSPEED
 
 config USBMTP_NRDREQS
 	int "Number of read requests that can be in flight"

@@ -1668,6 +1668,8 @@ This is a configuration with sim usbdev support.
 
     conn0: adb & rndis
     conn1: cdcacm & cdcecm
+    conn2: cdcncm
+    conn3: cdcmbim
 
   You can use the sim:usbdev configuration::
 
@@ -1744,7 +1746,7 @@ This is a configuration with sim usbdev support.
       $ cat /dev/ttyACM0
       hello
 
-    3> Run CDCECM:
+    4> Run CDCECM:
 
   NuttX enter command::
 
@@ -1767,6 +1769,76 @@ This is a configuration with sim usbdev support.
               RX errors 0  dropped 0  overruns 0  frame 0
               TX packets 58  bytes 9143 (9.1 KB)
               TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+  Then you can test the network connection using the ping command or telnet.
+
+    5> Run CDCNCM:
+
+  NuttX enter command::
+
+      $ conn 2
+      $ ifconfig
+      eth0    Link encap:Ethernet HWaddr 42:67:c6:69:73:51 at UP
+              inet addr:10.0.1.2 DRaddr:10.0.1.1 Mask:255.255.255.0
+      eth1    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP
+              inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+      $ dhcpd_start eth1
+      $ ifconfig
+      eth0    Link encap:Ethernet HWaddr 42:67:c6:69:73:51 at UP
+              inet addr:10.0.1.2 DRaddr:10.0.1.1 Mask:255.255.255.0
+      eth1    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at UP
+              inet addr:10.0.0.1 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+  Host PC, you can see the network device named enx020000112233::
+
+      $ ifconfig
+      enx020000112233: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 576
+              inet 10.0.0.2  netmask 255.255.255.0  broadcast 10.0.0.255
+              ether 02:00:00:11:22:33  txqueuelen 1000  (以太网)
+              RX packets 0  bytes 0 (0.0 B)
+              RX errors 0  dropped 0  overruns 0  frame 0
+              TX packets 58  bytes 9143 (9.1 KB)
+              TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+  Then you can test the network connection using the ping command or telnet.
+
+    6> Run CDCMBIM:
+
+  NuttX enter command::
+
+      $ conn 3
+      $ ifconfig
+      eth0    Link encap:Ethernet HWaddr 42:67:c6:69:73:51 at RUNNING mtu 1500
+              inet addr:10.0.1.2 DRaddr:10.0.1.1 Mask:255.255.255.0
+      wwan0   Link encap:UNSPEC at RUNNING mtu 1200
+              inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+      $ ifconfig wwan0 10.0.0.1 netmask 255.255.255.0
+      $ ifconfig
+      eth0    Link encap:Ethernet HWaddr 42:67:c6:69:73:51 at RUNNING mtu 1500
+              inet addr:10.0.1.2 DRaddr:10.0.1.1 Mask:255.255.255.0
+      wwan0   Link encap:UNSPEC at RUNNING mtu 1200
+              inet addr:10.0.0.1 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+      $ echo -n "hello from nuttx" > /dev/cdc-wdm2
+      $ cat /dev/cdc-wdm2
+      hello from linux
+
+  Host PC, you can see the network device named wwx020000112233::
+
+      $ sudo ifconfig wwx020000112233
+      $ sudo ifconfig wwx020000112233 10.0.0.2 netmask 255.255.255.0
+      $ ifconfig
+      wwx020000112233: flags=4226<BROADCAST,NOARP,MULTICAST>  mtu 1500
+              inet 10.0.0.2  netmask 255.255.255.0  broadcast 10.0.0.255
+              ether 02:00:00:11:22:33  txqueuelen 1000  (以太网)
+              RX packets 0  bytes 0 (0.0 B)
+              RX errors 0  dropped 0  overruns 0  frame 0
+              TX packets 58  bytes 9143 (9.1 KB)
+              TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+      $ sudo cat /dev/cdc-wdm1
+      hello from nuttx
+      $ sudo bash -c "echo -n hello from linux > /dev/cdc-wdm1"
 
   Then you can test the network connection using the ping command or telnet.
 

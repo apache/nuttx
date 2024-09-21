@@ -125,6 +125,7 @@ static int rptun_ioctl(FAR struct rpmsg_s *rpmsg, int cmd,
                        unsigned long arg);
 static void rptun_panic_(FAR struct rpmsg_s *rpmsg);
 static void rptun_dump(FAR struct rpmsg_s *rpmsg);
+static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
 static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg);
 static int rptun_get_tx_buffer_size(FAR struct rpmsg_s *rpmsg);
 static int rptun_get_rx_buffer_size(FAR struct rpmsg_s *rpmsg);
@@ -162,6 +163,7 @@ static const struct rpmsg_ops_s g_rptun_rpmsg_ops =
   rptun_ioctl,
   rptun_panic_,
   rptun_dump,
+  rptun_get_local_cpuname,
   rptun_get_cpuname,
   rptun_get_tx_buffer_size,
   rptun_get_rx_buffer_size,
@@ -616,6 +618,13 @@ static void rptun_dump(FAR struct rpmsg_s *rpmsg)
 #endif
 }
 
+static FAR const char *rptun_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
+{
+  FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
+
+  return RPTUN_GET_LOCAL_CPUNAME(priv->dev);
+}
+
 static FAR const char *rptun_get_cpuname(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rptun_priv_s *priv = (FAR struct rptun_priv_s *)rpmsg;
@@ -971,33 +980,21 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 
 int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
-  struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
-  static bool onceinit = false;
   FAR char *argv[3];
-  char arg1[19];
+  char arg1[32];
   char name[32];
   int ret;
-
-  if (!onceinit)
-    {
-      ret = metal_init(&params);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      onceinit = true;
-    }
 
   priv = kmm_zalloc(sizeof(struct rptun_priv_s));
   if (priv == NULL)
     {
-      ret = -ENOMEM;
-      goto err_mem;
+      return -ENOMEM;
     }
 
   priv->dev = dev;
+  nxsem_init(&priv->semtx, 0, 0);
+  nxsem_init(&priv->semrx, 0, 0);
 
   remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
 
@@ -1008,10 +1005,8 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       goto err_driver;
     }
 
-  nxsem_init(&priv->semtx, 0, 0);
-  nxsem_init(&priv->semrx, 0, 0);
-  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
-  argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
+  snprintf(arg1, sizeof(arg1), "%p", priv);
+  argv[0] = (FAR char *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
 
@@ -1032,10 +1027,10 @@ err_thread:
   rpmsg_unregister(name, &priv->rpmsg);
 
 err_driver:
+  nxsem_destroy(&priv->semtx);
+  nxsem_destroy(&priv->semrx);
   kmm_free(priv);
 
-err_mem:
-  metal_finish();
   return ret;
 }
 

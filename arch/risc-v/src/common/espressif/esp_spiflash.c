@@ -184,7 +184,7 @@ static IRAM_ATTR void spiflash_start(void)
 
   nxmutex_lock(&s_flash_op_mutex);
   flags = enter_critical_section();
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   s_sched_suspended[cpu] = true;
 
   esp_intr_noniram_disable();
@@ -218,7 +218,7 @@ static IRAM_ATTR void spiflash_end(void)
 
   flags = enter_critical_section();
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
 
   cache_invalidate_icache_all();
   cache_resume_icache(s_flash_op_cache_state[cpu] >> 16);

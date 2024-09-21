@@ -191,20 +191,22 @@ static FAR const char *deser_mn(FAR const char * const in,
 int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
 {
   int             ret          = OK;
+  bool            found        = false;
   mfs_t           i            = 0;
   mfs_t           mblk1;
-  mfs_t           mblk2;
+  mfs_t           blkidx;
+  mfs_t           pg_in_blk;
   mfs_t           jrnl_blk_tmp;
-  bool            found        = false;
   uint16_t        hash;
   struct mfs_mn_s mn;
   const mfs_t     sz           = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
   char            buftmp[4];
   char            buf[sz + 1];
+  struct mfs_jrnl_log_s log;
 
   mblk1       = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
-  mblk2       = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
-  mn.jrnl_blk = mn.jrnl_blk;
+
+  mn.jrnl_blk = jrnl_blk;
   mn.mblk_idx = 0;
   mn.pg       = MFS_BLK2PG(sb, mblk1);
 
@@ -214,11 +216,6 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
       mfs_deser_mfs(buftmp, &jrnl_blk_tmp);
 
       if (jrnl_blk_tmp == 0)
-        {
-          break;
-        }
-
-      if (jrnl_blk_tmp != jrnl_blk)
         {
           break;
         }
@@ -245,9 +242,6 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
     }
 
   mfs_read_page(sb, buf, sz + 1, mn.pg, 0);
-
-  /* Deserialize. */
-
   deser_mn(buf, &mn, &hash);
   if (hash != mfs_hash(buf, sz))
     {
@@ -255,12 +249,49 @@ int mfs_mn_init(FAR struct mfs_sb_s * const sb, const mfs_t jrnl_blk)
       goto errout;
     }
 
+  blkidx              = MFS_JRNL(sb).log_sblkidx;
+  pg_in_blk           = MFS_JRNL(sb).log_spg % MFS_PGINBLK(sb);
+
+  while (true)
+    {
+      ret = mfs_jrnl_rdlog(sb, &blkidx, &pg_in_blk, &log);
+      if (predict_false(ret < 0 && ret != -ENOSPC))
+        {
+          goto errout;
+        }
+      else if (ret == -ENOSPC)
+        {
+          ret = OK;
+          break;
+        }
+
+      /* Assumes checking the depth is enough to check if it's empty, as
+       * theoretically there are no blocks with depth 0, as root has a
+       * depth of 1.
+       */
+
+      if (log.depth == 0)
+        {
+          DEBUGASSERT(log.path == NULL);
+          break;
+        }
+
+      if (log.depth == 1)
+        {
+          mn.root_ctz = log.loc_new;
+          mn.root_sz  = log.sz_new;
+        }
+
+      mfs_jrnl_log_free(&log);
+    }
+
   /* FUTURE TODO: Recovery in case of hash not matching, or page not
    * readable.
    */
 
-  MFS_MN(sb) = mn;
+  mn.root_mode = 0777 | S_IFDIR;
 
+  MFS_MN(sb) = mn;
 errout:
   return ret;
 }
@@ -330,8 +361,6 @@ int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
                 const mfs_t root_sz)
 {
   int             ret          = OK;
-  mfs_t           mblk1;
-  mfs_t           mblk2;
   struct mfs_mn_s mn;
   const mfs_t     sz           = sizeof(struct mfs_mn_s) - sizeof(mn.pg);
   char            buf[sz + 1];
@@ -341,9 +370,7 @@ int mfs_mn_move(FAR struct mfs_sb_s * const sb, struct mfs_ctz_s root,
       /* TODO: Move journal. Master blocks are full. */
     }
 
-  mblk1 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks);
-  mblk2 = mfs_jrnl_blkidx2blk(sb, MFS_JRNL(sb).n_blks + 1);
-  mn    = MFS_MN(sb);
+  mn = MFS_MN(sb);
 
   mn.root_ctz = root;
   mn.root_sz = root_sz;

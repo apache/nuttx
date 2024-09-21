@@ -245,7 +245,7 @@ static off_t bch_seek(FAR struct file *filep, off_t offset, int whence)
       break;
 
     case SEEK_END:
-      newpos = bch->sectsize * bch->nsectors + offset;
+      newpos = (off_t)bch->sectsize * bch->nsectors + offset;
       break;
 
     default:

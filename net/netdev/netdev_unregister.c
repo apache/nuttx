@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev_unregister.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -149,6 +151,10 @@ int netdev_unregister(FAR struct net_driver_s *dev)
       free_ifindex(dev->d_ifindex);
 #endif
       net_unlock();
+
+#if CONFIG_NETDEV_STATISTICS_LOG_PERIOD > 0
+      work_cancel_sync(NETDEV_STATISTICS_WORK, &dev->d_statistics.logwork);
+#endif
 
 #ifdef CONFIG_NET_ETHERNET
       ninfo("Unregistered MAC: %02x:%02x:%02x:%02x:%02x:%02x as dev: %s\n",

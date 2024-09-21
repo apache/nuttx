@@ -96,7 +96,7 @@
  * referenced is passed to get the state from the TCB.
  */
 
-#define x86_restorestate(regs) (g_current_regs = regs)
+#define x86_restorestate(regs) up_set_current_regs(regs)
 
 /****************************************************************************
  * Public Types

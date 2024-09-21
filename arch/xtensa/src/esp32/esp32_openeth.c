@@ -240,7 +240,7 @@ static inline void openeth_set_tx_desc_cnt(int tx_desc_cnt)
 
 static IRAM_ATTR int openeth_isr_handler(int irq, void *context, void *arg)
 {
-  FAR struct netdev_lowerhalf_s *dev = &g_openeth.dev;
+  struct netdev_lowerhalf_s *dev = &g_openeth.dev;
 
   uint32_t status = REG_READ(OPENETH_INT_SOURCE_REG);
 
@@ -261,9 +261,9 @@ static IRAM_ATTR int openeth_isr_handler(int irq, void *context, void *arg)
   return 0;
 }
 
-static FAR netpkt_t *openeth_receive(FAR struct netdev_lowerhalf_s *dev)
+static netpkt_t *openeth_receive(struct netdev_lowerhalf_s *dev)
 {
-  FAR netpkt_t *pkt = netpkt_alloc(dev, NETPKT_RX);
+  netpkt_t *pkt = netpkt_alloc(dev, NETPKT_RX);
 
   struct openeth_priv_s *priv = &g_openeth;
 
@@ -322,7 +322,7 @@ err:
  *
  ****************************************************************************/
 
-static int openeth_ifup(FAR struct netdev_lowerhalf_s *dev)
+static int openeth_ifup(struct netdev_lowerhalf_s *dev)
 {
   irqstate_t flags;
 
@@ -357,7 +357,7 @@ static int openeth_ifup(FAR struct netdev_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int openeth_ifdown(FAR struct netdev_lowerhalf_s *dev)
+static int openeth_ifdown(struct netdev_lowerhalf_s *dev)
 {
   irqstate_t flags;
 
@@ -376,10 +376,10 @@ static int openeth_ifdown(FAR struct netdev_lowerhalf_s *dev)
   return OK;
 }
 
-static int openeth_transmit(FAR struct netdev_lowerhalf_s *dev,
-                           FAR netpkt_t *pkt)
+static int openeth_transmit(struct netdev_lowerhalf_s *dev,
+                            netpkt_t *pkt)
 {
-  FAR struct openeth_priv_s *priv = (FAR struct openeth_priv_s *)dev;
+  struct openeth_priv_s *priv = (struct openeth_priv_s *)dev;
   unsigned int len = netpkt_getdatalen(dev, pkt);
 
   /*  In QEMU, there never is a TX operation in progress */
@@ -455,8 +455,8 @@ err:
 int esp32_openeth_initialize(void)
 {
   int ret;
-  FAR struct openeth_priv_s *priv = &g_openeth;
-  FAR struct netdev_lowerhalf_s *dev = &priv->dev;
+  struct openeth_priv_s *priv = &g_openeth;
+  struct netdev_lowerhalf_s *dev = &priv->dev;
 
   /* Sanity check */
 

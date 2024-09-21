@@ -39,6 +39,7 @@
 
 #include "inode/inode.h"
 #include "mqueue/mqueue.h"
+#include "notify/notify.h"
 
 /****************************************************************************
  * Private Functions Prototypes
@@ -73,7 +74,7 @@ static int nxmq_file_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
 
-  if (inode->i_crefs <= 1 && (inode->i_flags & FSNODEFLAG_DELETED))
+  if (inode->i_crefs <= 0)
     {
       FAR struct mqueue_inode_s *msgq = inode->i_private;
 
@@ -321,7 +322,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
       /* Set the initial reference count on this inode to one */
 
-      inode->i_crefs    = 1;
+      inode->i_crefs++;
 
       if (created)
         {
@@ -331,6 +332,9 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
   RELEASE_SEARCH(&desc);
   leave_critical_section(flags);
+#ifdef CONFIG_FS_NOTIFY
+  notify_open(fullpath, oflags);
+#endif
   return OK;
 
 errout_with_inode:
@@ -389,6 +393,7 @@ static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
  *  behavior of this function
  *
  * Input Parameters:
+ *   mq - address of to-be-initialized struct file instance.
  *   mq_name - Name of the queue to open
  *   oflags - open flags
  *   Optional parameters.  When the O_CREAT flag is specified, two optional
@@ -403,7 +408,7 @@ static mqd_t nxmq_vopen(FAR const char *mq_name, int oflags, va_list ap)
  * Returned Value:
  *   This is an internal OS interface and should not be used by applications.
  *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success, mqdes point to the new message queue descriptor.
+ *   returned on success, instance pointed by mq is also initialized.
  *   A negated errno value is returned on failure.
  *
  ****************************************************************************/

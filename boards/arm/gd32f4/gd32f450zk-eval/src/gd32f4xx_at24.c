@@ -73,39 +73,29 @@ int gd32_at24_wr_test(int minor)
 {
   struct i2c_master_s *i2c;
   struct mtd_dev_s *at24;
-  static bool initialized = false;
   int ret;
   ssize_t nblocks;
   uint8_t *read_buf;
 
-  /* Have we already initialized? */
+  /* Get the I2C port driver */
 
-  if (!initialized)
+  finfo("Initialize TWI%d\n", AT24_BUS);
+  i2c = gd32_i2cbus_initialize(AT24_BUS);
+  if (!i2c)
     {
-      /* No.. Get the I2C port driver */
+      ferr("ERROR: Failed to initialize TWI%d\n", AT24_BUS);
+      return -ENODEV;
+    }
 
-      finfo("Initialize TWI%d\n", AT24_BUS);
-      i2c = gd32_i2cbus_initialize(AT24_BUS);
-      if (!i2c)
-        {
-          ferr("ERROR: Failed to initialize TWI%d\n", AT24_BUS);
-          return -ENODEV;
-        }
+  /* Now bind the I2C interface to the AT24 I2C EEPROM driver */
 
-      /* Now bind the I2C interface to the AT24 I2C EEPROM driver */
-
-      finfo("Bind the AT24 EEPROM driver to TWI%d\n", AT24_BUS);
-      at24 = at24c_initialize(i2c);
-      if (!at24)
-        {
-          ferr("ERROR: Failed to bind TWI%d to the AT24 EEPROM driver\n",
-               AT24_BUS);
-          return -ENODEV;
-        }
-
-      /* Now we are initializeed */
-
-      initialized = true;
+  finfo("Bind the AT24 EEPROM driver to TWI%d\n", AT24_BUS);
+  at24 = at24c_initialize(i2c);
+  if (!at24)
+    {
+      ferr("ERROR: Failed to bind TWI%d to the AT24 EEPROM driver\n",
+           AT24_BUS);
+      return -ENODEV;
     }
 
   /* Write start block is START_BLOCK, number of block is 2 */

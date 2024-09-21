@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/utils/net_chksum.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,86 @@
 #include "utils/utils.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: checksum
+ *
+ * Description:
+ *   Calculate the raw change sum over the memory region described by
+ *   data and len.
+ *
+ * Input Parameters:
+ *   sum  - Partial calculations carried over from a previous call to
+ *          chksum().  This should be zero on the first time that check
+ *          sum is called.
+ *   data - Beginning of the data to include in the checksum.
+ *   len  - Length of the data to include in the checksum.
+ *   odd  - the flag of the Calculated data sum
+ *
+ * Returned Value:
+ *   The updated checksum value.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_ARCH_CHKSUM
+uint16_t checksum(uint16_t sum, FAR const uint8_t *data,
+                    uint16_t len, bool *odd)
+{
+  FAR const uint8_t *dataptr;
+  FAR const uint8_t *last_byte;
+  uint16_t t;
+
+  dataptr = data;
+  last_byte = data + len - 1;
+
+  if (*odd == true)
+    {
+      t = dataptr[0];
+      sum += t;
+      if (sum < t)
+        {
+          sum++; /* carry */
+        }
+
+      dataptr += 1;
+    }
+
+  while (dataptr < last_byte)
+    {
+      /* At least two more bytes */
+
+      t = ((uint16_t)dataptr[0] << 8) + dataptr[1];
+      sum += t;
+      if (sum < t)
+        {
+          sum++; /* carry */
+        }
+
+      dataptr += 2;
+    }
+
+  *odd = false;
+
+  if (dataptr == last_byte)
+    {
+      t = (dataptr[0] << 8) + 0;
+      sum += t;
+      if (sum < t)
+        {
+          sum++; /* carry */
+        }
+
+      *odd = true;
+    }
+
+  /* Return sum in host byte order. */
+
+  return sum;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -50,44 +132,13 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_ARCH_CHKSUM
 uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 {
-  FAR const uint8_t *dataptr;
-  FAR const uint8_t *last_byte;
-  uint16_t t;
+  bool odd = false;
 
-  dataptr = data;
-  last_byte = data + len - 1;
-
-  while (dataptr < last_byte)
-    {
-      /* At least two more bytes */
-
-      t = ((uint16_t)dataptr[0] << 8) + dataptr[1];
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-
-      dataptr += 2;
-    }
-
-  if (dataptr == last_byte)
-    {
-      t = (dataptr[0] << 8) + 0;
-      sum += t;
-      if (sum < t)
-        {
-          sum++; /* carry */
-        }
-    }
-
-  /* Return sum in host byte order. */
-
-  return sum;
+  return checksum(sum, data, len, &odd);
 }
+
 #endif /* CONFIG_NET_ARCH_CHKSUM */
 
 /****************************************************************************
@@ -113,6 +164,8 @@ uint16_t chksum_iob(uint16_t sum, FAR struct iob_s *iob, uint16_t offset)
 {
   /* Skip to the I/O buffer containing the data offset */
 
+  bool odd = false;
+
   while (iob != NULL && offset > iob->io_len)
     {
       offset -= iob->io_len;
@@ -125,8 +178,8 @@ uint16_t chksum_iob(uint16_t sum, FAR struct iob_s *iob, uint16_t offset)
 
   while (iob != NULL)
     {
-      sum = chksum(sum, iob->io_data + iob->io_offset + offset,
-                   iob->io_len - offset);
+      sum = checksum(sum, iob->io_data + iob->io_offset + offset,
+                      iob->io_len - offset, &odd);
       iob = iob->io_flink;
       offset = 0;
     }

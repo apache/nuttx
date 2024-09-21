@@ -110,11 +110,10 @@ int fsync(int fd)
       goto errout;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Perform the fsync operation */
 
   ret = file_fsync(filep);
+  fs_putfilep(filep);
   if (ret < 0)
     {
       goto errout;

@@ -231,7 +231,7 @@ static int copy_kernel_mappings(arch_addrenv_t *addrenv)
  ****************************************************************************/
 
 static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
-                         size_t size, uint32_t mmuflags)
+                         size_t size, uint64_t mmuflags)
 {
   uintptr_t ptlast;
   uintptr_t ptprev;

@@ -369,8 +369,9 @@ static int sim_audio_getcaps(struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K |
+             caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
                                        AUDIO_SAMP_RATE_11K |
+                                       AUDIO_SAMP_RATE_12K |
                                        AUDIO_SAMP_RATE_16K |
                                        AUDIO_SAMP_RATE_22K |
                                        AUDIO_SAMP_RATE_24K |
@@ -462,9 +463,16 @@ static int sim_audio_configure(struct audio_lowerhalf_s *dev,
         priv->sample_rate = caps->ac_controls.hw[0] |
                             (caps->ac_controls.b[3] << 16);
         priv->channels    = caps->ac_channels;
-        priv->bps         = caps->ac_controls.b[2];
-        priv->frame_size  = priv->bps / 8 * priv->channels;
 
+        /* offload mode, bps keep default value */
+
+        priv->bps = 16;
+        if (!priv->offload)
+          {
+            priv->bps = caps->ac_controls.b[2];
+          }
+
+        priv->frame_size  = priv->bps / 8 * priv->channels;
         sim_audio_config_ops(priv, caps->ac_subtype);
 
         info.samplerate = priv->sample_rate;
@@ -716,15 +724,21 @@ static int sim_audio_ioctl(struct audio_lowerhalf_s *dev, int cmd,
           struct ap_buffer_info_s *info =
               (struct ap_buffer_info_s *)arg;
 
-          info->nbuffers    = priv->nbuffers;
-          info->buffer_size = priv->buffer_size;
-
-          if (priv->ops->get_samples)
+          if (priv->offload && priv->playback)
             {
-              info->buffer_size = MAX(info->buffer_size,
+              priv->nbuffers = CONFIG_SIM_OFFLOAD_NUM_BUFFERS;
+              priv->buffer_size = CONFIG_SIM_OFFLOAD_BUFFER_NUMBYTES;
+            }
+
+          if (priv->ops && priv->ops->get_samples)
+            {
+              priv->buffer_size = MAX(priv->buffer_size,
                                       priv->ops->get_samples(priv->codec) *
                                       priv->frame_size);
             }
+
+          info->nbuffers    = priv->nbuffers;
+          info->buffer_size = priv->buffer_size;
         }
         break;
 

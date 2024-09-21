@@ -814,10 +814,12 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 
   ssize  = (1 << sshift);
 
+#ifndef CONFIG_SMP
   if ((end - start) >= ssize * (sets + 1) * (ways + 1))
     {
       return up_clean_dcache_all();
     }
+#endif
 
   start &= ~(ssize - 1);
   ARM_DSB();
@@ -967,10 +969,12 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 
   ssize  = (1 << sshift);
 
+#ifndef CONFIG_SMP
   if ((end - start) >= ssize * (sets + 1) * (ways + 1))
     {
       return up_flush_dcache_all();
     }
+#endif
 
   start &= ~(ssize - 1);
   ARM_DSB();

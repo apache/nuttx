@@ -29,6 +29,12 @@
 #include "cp15_cacheops.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define NVIC_CSSELR_IND (1 << 0)
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -44,9 +50,17 @@ static inline uint32_t ilog2(uint32_t u)
   return i;
 }
 
-static inline uint32_t cp15_cache_get_info(uint32_t *sets, uint32_t *ways)
+static inline uint32_t cp15_cache_get_info(uint32_t *sets, uint32_t *ways,
+                                           bool icache)
 {
-  uint32_t ccsidr = CP15_GET(CCSIDR);
+  uint32_t ccsidr;
+  uint32_t csselr;
+
+  csselr = CP15_GET(CSSELR);
+
+  CP15_SET(CSSELR, (csselr & ~NVIC_CSSELR_IND) | (icache & NVIC_CSSELR_IND));
+
+  ccsidr = CP15_GET(CCSIDR);
 
   if (sets)
     {
@@ -57,6 +71,8 @@ static inline uint32_t cp15_cache_get_info(uint32_t *sets, uint32_t *ways)
     {
       *ways = ((ccsidr >> 3) & 0x3ff) + 1;
     }
+
+  CP15_SET(CSSELR, csselr);   /* restore csselr */
 
   return (1 << ((ccsidr & 0x7) + 2)) * 4;
 }
@@ -93,7 +109,7 @@ static void cp15_dcache_op_mva(uintptr_t start, uintptr_t end, int op)
 {
   uint32_t line;
 
-  line = cp15_cache_get_info(NULL, NULL);
+  line = cp15_dcache_linesize();
 
   ARM_DSB();
 
@@ -158,7 +174,7 @@ void cp15_dcache_op_level(uint32_t level, int op)
 
   /* Get cache info */
 
-  line = cp15_cache_get_info(&sets, &ways);
+  line = cp15_cache_get_info(&sets, &ways, false);
 
   way_shift = 32 - ilog2(ways);
   set_shift = ilog2(line);
@@ -209,7 +225,7 @@ void cp15_invalidate_icache(uintptr_t start, uintptr_t end)
 {
   uint32_t line;
 
-  line = cp15_cache_get_info(NULL, NULL);
+  line = cp15_icache_linesize();
   start &= ~(line - 1);
 
   ARM_DSB();
@@ -259,18 +275,60 @@ void cp15_flush_dcache_all(void)
   cp15_dcache_op(CP15_CACHE_CLEANINVALIDATE);
 }
 
-uint32_t cp15_cache_size(void)
+uint32_t cp15_icache_size(void)
 {
-  uint32_t sets;
-  uint32_t ways;
-  uint32_t line;
+  static uint32_t csize;
 
-  line = cp15_cache_get_info(&sets, &ways);
+  if (csize == 0)
+    {
+      uint32_t sets;
+      uint32_t ways;
+      uint32_t line;
 
-  return sets * ways * line;
+      line = cp15_cache_get_info(&sets, &ways, true);
+      csize = sets * ways * line;
+    }
+
+  return csize;
 }
 
-uint32_t cp15_cache_linesize(void)
+uint32_t cp15_dcache_size(void)
 {
-  return cp15_cache_get_info(NULL, NULL);
+  static uint32_t csize;
+
+  if (csize == 0)
+    {
+      uint32_t sets;
+      uint32_t ways;
+      uint32_t line;
+
+      line = cp15_cache_get_info(&sets, &ways, false);
+      csize = sets * ways * line;
+    }
+
+  return csize;
+}
+
+uint32_t cp15_icache_linesize(void)
+{
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = cp15_cache_get_info(NULL, NULL, true);
+    }
+
+  return clsize;
+}
+
+uint32_t cp15_dcache_linesize(void)
+{
+  static uint32_t clsize;
+
+  if (clsize == 0)
+    {
+      clsize = cp15_cache_get_info(NULL, NULL, false);
+    }
+
+  return clsize;
 }

@@ -45,9 +45,17 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(CONFIG_FRAME_POINTER),y)
-  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+    ARCHOPTIMIZATION += -ga
+  else
+    ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  endif
 else
-  ARCHOPTIMIZATION += -fomit-frame-pointer
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHOPTIMIZATION += -noga
+  else
+    ARCHOPTIMIZATION += -fomit-frame-pointer
+  endif
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
@@ -97,7 +105,11 @@ ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
 endif
 
 ifeq ($(CONFIG_UNWINDER_ARM),y)
-  ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+    ARCHOPTIMIZATION += -gtws
+  else
+    ARCHOPTIMIZATION += -funwind-tables -fasynchronous-unwind-tables
+  endif
 endif
 
 # Link Time Optimization
@@ -150,20 +162,24 @@ endif
 ARCHCPUFLAGS += $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 
 ifeq ($(CONFIG_ARM_THUMB),y)
-  ARCHCPUFLAGS += -mthumb
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCPUFLAGS += -thumb
+  else
+    ARCHCPUFLAGS += -mthumb
 
-  # GCC Manual:
-  # -mthumb
-  # ... If you want to force assembler files to be interpreted as Thumb
-  # code, either add a `.thumb' directive to the source or pass the
-  # -mthumb option directly to the assembler by prefixing it with -Wa.
+    # GCC Manual:
+    # -mthumb
+    # ... If you want to force assembler files to be interpreted as Thumb
+    # code, either add a `.thumb' directive to the source or pass the
+    # -mthumb option directly to the assembler by prefixing it with -Wa.
 
-  ARCHCPUFLAGS += -Wa,-mthumb
+    ARCHCPUFLAGS += -Wa,-mthumb
 
-  # Outputs an implicit IT block when there is a conditional instruction
-  # without an enclosing IT block.
+    # Outputs an implicit IT block when there is a conditional instruction
+    # without an enclosing IT block.
 
-  ARCHCPUFLAGS += -Wa,-mimplicit-it=always
+    ARCHCPUFLAGS += -Wa,-mimplicit-it=always
+  endif
 endif
 
 # Clang toolchain
@@ -204,6 +220,8 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
 
     ARCHCPUFLAGS := $(TOOLCHAIN_CLANG_OPTION) $(TOOLCHAIN_CLANG_CONFIG).cfg $(ARCHCPUFLAGS)
   endif
+
+  LDFLAGS += --entry=__start
 
 # ARM Compiler Clang toolchain
 
@@ -247,6 +265,22 @@ else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
 
   LDFLAGS      += --diag_suppress=6329
 
+  LDFLAGS      += --entry=__start
+
+else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  CC       = ccarm
+  CXX      = cxarm
+  CPP      = ccarm -E -P
+  LD       = cxarm
+  STRIP    = gstrip
+  AR       = cxarm
+  NM       = gnm
+  OBJCOPY  = objcopy
+  GMEMFILE = gmemfile
+  OBJDUMP  = gdump
+
+  LDFLAGS += -entry=__start
+
 # Default toolchain
 
 else
@@ -284,6 +318,8 @@ else
     endif
   endif
 
+  LDFLAGS += --entry=__start
+
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
@@ -292,8 +328,13 @@ endif
 
 # Architecture flags
 
-ARCHCFLAGS += -Wstrict-prototypes -Wno-attributes -Wno-unknown-pragmas
-ARCHCXXFLAGS += -Wno-attributes -Wno-unknown-pragmas
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  ARCHCFLAGS += -gcc -gnu99 -preprocess_assembly_files --diag_suppress=68,111,174,222,236,257,826,1143,1721
+  ARCHCXXFLAGS += --gnu_asm --diag_suppress=540,826
+else
+  ARCHCFLAGS += -Wstrict-prototypes -Wno-attributes -Wno-unknown-pragmas
+  ARCHCXXFLAGS += -Wno-attributes -Wno-unknown-pragmas
+endif
 
 # When all C++ code is built using GCC 7.1 or a higher version,
 # we can safely disregard warnings of the type "parameter passing for X changed in GCC 7.1."
@@ -304,23 +345,37 @@ ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
 endif
 
 ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
-  ARCHCFLAGS += -Wno-psabi
-  ARCHCXXFLAGS += -Wno-psabi
+  ifneq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCFLAGS += -Wno-psabi
+    ARCHCXXFLAGS += -Wno-psabi
+  endif
 endif
 
 ifneq ($(CONFIG_CXX_STANDARD),)
-  ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCXXFLAGS += --$(CONFIG_CXX_STANDARD)
+  else
+    ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+  endif
 endif
 
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
-  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHCXXFLAGS += --no_exceptions -check=alloc
+  else
+    ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+  endif
 endif
 
 ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
-
-ARCHOPTIMIZATION += -fno-common -Wall -Wshadow -Wundef
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+ARCHOPTIMIZATION += --no_commons
+else
+ARCHOPTIMIZATION += -fno-common
+endif
+ARCHOPTIMIZATION += -Wall -Wshadow -Wundef
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHOPTIMIZATION += -nostdlib
@@ -346,8 +401,10 @@ ZIGFLAGS = -target $(ZARCH)-freestanding-$(ZEABI) $(ZARCHCPUFLAGS)
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
-    LDFLAGS          += --gc-sections
-    ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+    ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),)
+      LDFLAGS          += --gc-sections
+      ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+    endif
   endif
 endif
 
@@ -360,7 +417,9 @@ endif
 # Debug link map
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    LDFLAGS += -map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
+  else ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
     LDFLAGS += --cref -Map=$(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx.map)
   else
     LDFLAGS += --strict --map --xref --symbols --info=unused --info=veneers
@@ -369,9 +428,13 @@ ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION += -g
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
-    LDFLAGS += --debug
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),)
+    ARCHOPTIMIZATION += -g
+    ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
+      LDFLAGS += --debug
+    endif
+  else
+    ARCHOPTIMIZATION += -G -gdwarf-2
   endif
 endif
 
@@ -384,12 +447,40 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
     # then go ahead and try "--print-file-name"
     COMPILER_RT_LIB := $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
   endif
+else ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),y)
+  GHS_ROOT_PATH = $(shell which $(CC) | awk -F '/[^/]*$$' '{print $$1}')
+  COMPILER_RT_LIB := -l$(GHS_ROOT_PATH)/lib/thumb2/libarch
+  ifeq ($(CONFIG_ARCH_FPU),y)
+    ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+        COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sf
+    else ifeq ($(CONFIG_ARCH_DPFPU),y)
+        COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_fp
+    else
+        COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sd
+    endif
+  else
+    COMPILER_RT_LIB += -l$(GHS_ROOT_PATH)/lib/thumb2/libind_sf
+  endif
 endif
 
 EXTRA_LIBS += $(COMPILER_RT_LIB)
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
-  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+          EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_sf
+      else ifeq ($(CONFIG_ARCH_DPFPU),y)
+          EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_fp
+      else
+          EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_sd
+      endif
+    else
+      EXTRA_LIBS += -l$(GHS_ROOT_PATH)/lib/thumb2/libmath_sf
+    endif
+  else
+    EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
+  endif
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
@@ -415,6 +506,10 @@ include $(TOPDIR)/tools/Rust.defs
 # LDC (LLVM D Compiler) toolchain
 
 include $(TOPDIR)/tools/D.defs
+
+# Swift 6 toolchain
+
+include $(TOPDIR)/tools/Swift.defs
 
 # Shared library build flags
 

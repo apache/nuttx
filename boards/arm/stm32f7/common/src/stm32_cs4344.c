@@ -140,7 +140,7 @@ int board_cs4344_initialize(int devno, int port)
 
       /* Create a device name */
 
-      snprintf(devname, 12, "pcm%d",  devno);
+      snprintf(devname, sizeof(devname), "pcm%d",  devno);
 
       /* Finally, we can register the PCM/CS4344/I2S audio device.
        *

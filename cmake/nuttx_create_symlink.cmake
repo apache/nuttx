@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/nuttx_create_symlink.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -19,7 +21,8 @@
 # ##############################################################################
 
 function(nuttx_create_symlink old new)
-  if(IS_DIRECTORY ${old} AND WIN32)
+  if(IS_DIRECTORY ${old} AND CMAKE_HOST_SYSTEM_NAME MATCHES
+                             "MSYS|CYGWIN|Windows")
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory ${old} ${new})
   else()
     file(CREATE_LINK ${old} ${new} COPY_ON_ERROR SYMBOLIC)

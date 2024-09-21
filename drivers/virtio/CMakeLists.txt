@@ -27,6 +27,10 @@ if(CONFIG_DRIVERS_VIRTIO_MMIO)
   list(APPEND SRCS virtio-mmio.c)
 endif()
 
+if(CONFIG_DRIVERS_VIRTIO_PCI)
+  list(APPEND SRCS virtio-pci.c virtio-pci-legacy.c virtio-pci-modern.c)
+endif()
+
 if(CONFIG_DRIVERS_VIRTIO_BLK)
   list(APPEND SRCS virtio-blk.c)
 endif()

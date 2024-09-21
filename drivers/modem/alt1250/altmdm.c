@@ -109,11 +109,11 @@ typedef enum version_phase_e
 
 struct state_func_s
 {
-  int (*goto_next)(altmdm_state_t);
-  uint32_t (*wait_event)(void);
-  altmdm_state_t (*process_state)(uint32_t, altmdm_state_t);
+  CODE int (*goto_next)(altmdm_state_t);
+  CODE uint32_t (*wait_event)(void);
+  CODE altmdm_state_t (*process_state)(uint32_t, altmdm_state_t);
 #ifdef CONFIG_MODEM_ALT1250_DEBUG
-  const char *name;
+  FAR const char *name;
 #endif
 };
 
@@ -126,7 +126,7 @@ typedef struct altmdm_dev_s
   sem_t lock_counter;
   int wcounter;
   FAR struct spi_dev_s *spidev;
-  const struct alt1250_lower_s *lower;
+  FAR const struct alt1250_lower_s *lower;
   timer_t txsus_timer;
   altmdm_state_t current_state;
   altmdm_spipkt_t tx_pkt;
@@ -134,7 +134,7 @@ typedef struct altmdm_dev_s
   int rx_retcode;
   struct altmdm_event_s txdone_event;
   sem_t lock_txreq;
-  void *txreq_buff;
+  FAR void *txreq_buff;
   int txreq_size;
   int is_destroy;
   uint32_t reset_reason;
@@ -269,8 +269,8 @@ static struct altmdm_dev_s g_altmdm_dev;
  ****************************************************************************/
 
 #ifdef CONFIG_MODEM_ALT1250_DEBUG
-static void dump_current_all_status(altmdm_dev_t *dev, uint32_t evt,
-  altmdm_state_t next, int is_exit)
+static void dump_current_all_status(FAR altmdm_dev_t *dev, uint32_t evt,
+                                    altmdm_state_t next, int is_exit)
 {
   m_info("state[%s => %s], vp[%s], event out[%08lx]:cur[%08lx], "
     "wcount=%2d, txreq_buf=%s, txreq_sz=%4d, "
@@ -292,7 +292,7 @@ static int sready_isr(int irq, FAR void *context, FAR void *arg)
 }
 
 static void txsustimer_handler(int signo, FAR siginfo_t *info,
-  FAR void *uctx)
+                               FAR void *uctx)
 {
   FAR struct altmdm_dev_s *priv =
     (FAR struct altmdm_dev_s *)(info->si_value.sival_ptr);
@@ -450,7 +450,7 @@ static uint32_t waitevt_state_common(void)
 }
 
 static altmdm_state_t process_state_common(uint32_t event,
-  altmdm_state_t state)
+                                           altmdm_state_t state)
 {
   return state;
 }
@@ -474,7 +474,7 @@ static uint32_t waitevt_state_poweroff(void)
 }
 
 static altmdm_state_t process_state_poweroff(uint32_t event,
-  altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   struct timespec interval;
 
@@ -535,7 +535,7 @@ static uint32_t waitevt_state_sleep(void)
 }
 
 static altmdm_state_t process_state_sleep(uint32_t event,
-  altmdm_state_t state)
+                                          altmdm_state_t state)
 {
   /* The order of checking the events is related to processing
    * priority, so be careful when making changes.
@@ -603,7 +603,7 @@ static uint32_t waitevt_state_sleepwotx(void)
 }
 
 static altmdm_state_t process_state_sleepwotx(uint32_t event,
-  altmdm_state_t state)
+                                              altmdm_state_t state)
 {
   if (event & EVENT_DESTROY)
     {
@@ -675,7 +675,7 @@ static uint32_t waitevt_state_idle4rst(void)
 }
 
 static altmdm_state_t process_state_idle4rst(uint32_t event,
-  altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   enum version_phase_e vp;
   vp = get_vp();
@@ -735,7 +735,7 @@ static uint32_t waitevt_state_idlewto(void)
 }
 
 static altmdm_state_t process_state_idlewto(uint32_t event,
-  altmdm_state_t state)
+                                            altmdm_state_t state)
 {
   /* The order of checking the events is related to processing
    * priority, so be careful when making changes.
@@ -807,7 +807,7 @@ static uint32_t waitevt_state_idlewoto(void)
 }
 
 static altmdm_state_t process_state_idlewoto(uint32_t event,
-    altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   if (event & EVENT_DESTROY)
     {
@@ -867,7 +867,7 @@ static uint32_t waitevt_state_idlewotx(void)
 }
 
 static altmdm_state_t process_state_idlewotx(uint32_t event,
-    altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   if (event & EVENT_DESTROY)
     {
@@ -914,10 +914,10 @@ static altmdm_state_t process_state_idlewotx(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_v1set(uint32_t event,
-  altmdm_state_t state)
+                                          altmdm_state_t state)
 {
   int len;
-  void *pkt;
+  FAR void *pkt;
 
   pkt = altcom_make_poweron_cmd_v1(&len);
   set_vp(VP_TRYV1);
@@ -931,10 +931,10 @@ static altmdm_state_t process_state_v1set(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_v4set(uint32_t event,
-    altmdm_state_t state)
+                                          altmdm_state_t state)
 {
   int len;
-  void *pkt;
+  FAR void *pkt;
 
   pkt = altcom_make_poweron_cmd_v4(&len);
   set_vp(VP_TRYV4);
@@ -948,7 +948,7 @@ static altmdm_state_t process_state_v4set(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_sleepset(uint32_t event,
-  altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   altmdm_set_sleeppkt(&g_altmdm_dev.tx_pkt);
 
@@ -960,9 +960,9 @@ static altmdm_state_t process_state_sleepset(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_txprepare(uint32_t event,
-  altmdm_state_t state)
+                                              altmdm_state_t state)
 {
-  void *buff;
+  FAR void *buff;
   int len;
 
   nxsem_wait_uninterruptible(&g_altmdm_dev.lock_txreq);
@@ -980,7 +980,7 @@ static altmdm_state_t process_state_txprepare(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_txreq(uint32_t event,
-  altmdm_state_t state)
+                                          altmdm_state_t state)
 {
   g_altmdm_dev.lower->set_mready(true);
 
@@ -1019,7 +1019,7 @@ static uint32_t waitevt_state_hdrsreq(void)
 }
 
 static altmdm_state_t process_state_hdrsreq(uint32_t event,
-  altmdm_state_t state)
+                                            altmdm_state_t state)
 {
   if (event & EVENT_DESTROY)
     {
@@ -1057,7 +1057,7 @@ static altmdm_state_t process_state_hdrsreq(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_hdrtrx(uint32_t event,
-  altmdm_state_t state)
+                                           altmdm_state_t state)
 {
   altmdm_do_hdr_transaction(g_altmdm_dev.spidev, g_altmdm_dev.lower,
       &g_altmdm_dev.tx_pkt, &g_altmdm_dev.rx_pkt);
@@ -1107,7 +1107,7 @@ static altmdm_state_t process_state_hdrtrx(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_sleeppkt(uint32_t event,
-  altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   altmdm_overwrite_body_size(&g_altmdm_dev.rx_pkt, 4);
 
@@ -1126,7 +1126,7 @@ static uint32_t waitevt_state_bodysreq(void)
 }
 
 static altmdm_state_t process_state_bodysreq(uint32_t event,
-    altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   if (event & EVENT_DESTROY)
     {
@@ -1164,7 +1164,7 @@ static altmdm_state_t process_state_bodysreq(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_bodytrx(uint32_t event,
-  altmdm_state_t state)
+                                            altmdm_state_t state)
 {
   altmdm_do_body_transaction(g_altmdm_dev.spidev, g_altmdm_dev.lower,
     &g_altmdm_dev.tx_pkt, &g_altmdm_dev.rx_pkt);
@@ -1214,10 +1214,10 @@ static altmdm_state_t process_state_bodytrx(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_gotrx(uint32_t event,
-    altmdm_state_t state)
+                                          altmdm_state_t state)
 {
   enum version_phase_e vp;
-  void *rcv_data;
+  FAR void *rcv_data;
 
   state = ALTMDM_STATE_DECIDEDELAY;
 
@@ -1232,7 +1232,7 @@ static altmdm_state_t process_state_gotrx(uint32_t event,
       vp = get_vp();
       if (vp == VP_TRYV1)
         {
-          if (altcom_is_v1pkt_ok((struct altcom_cmdhdr_s *)rcv_data))
+          if (altcom_is_v1pkt_ok((FAR struct altcom_cmdhdr_s *)rcv_data))
             {
               set_vp(VP_V1);
               set_return_code(ALTMDM_RETURN_RESET_V1);
@@ -1244,7 +1244,7 @@ static altmdm_state_t process_state_gotrx(uint32_t event,
             }
         }
       else if ((vp == VP_TRYV4)
-          && altcom_is_v4pkt_ok((struct altcom_cmdhdr_s *)rcv_data))
+          && altcom_is_v4pkt_ok((FAR struct altcom_cmdhdr_s *)rcv_data))
         {
           set_vp(VP_V4);
           set_return_code(ALTMDM_RETURN_RESET_V4);
@@ -1260,7 +1260,7 @@ static altmdm_state_t process_state_gotrx(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_gotrst(uint32_t event,
-  altmdm_state_t state)
+                                           altmdm_state_t state)
 {
   if (is_vp_noreset())
     {
@@ -1298,7 +1298,7 @@ static uint32_t waitevt_state_gotsleep(void)
 }
 
 static altmdm_state_t process_state_gotsleep(uint32_t event,
-  altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   if (event & EVENT_SUSPEND)
     {
@@ -1324,7 +1324,7 @@ static altmdm_state_t process_state_gotsleep(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_backtoidle(uint32_t event,
-    altmdm_state_t state)
+                                               altmdm_state_t state)
 {
   if (is_buffer_full(&g_altmdm_dev.rx_pkt))
     {
@@ -1358,7 +1358,7 @@ static altmdm_state_t process_state_backtoidle(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_retrecv(uint32_t event,
-  altmdm_state_t state)
+                                            altmdm_state_t state)
 {
   return ALTMDM_STATE_DECIDEDELAY;
 }
@@ -1368,7 +1368,7 @@ static altmdm_state_t process_state_retrecv(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_forcerst(uint32_t event,
-  altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   force_reset();
 
@@ -1387,7 +1387,7 @@ static uint32_t waitevt_state_sleeping(void)
 }
 
 static altmdm_state_t process_state_sleeping(uint32_t event,
-    altmdm_state_t state)
+                                             altmdm_state_t state)
 {
   if (is_buffer_full(&g_altmdm_dev.rx_pkt))
     {
@@ -1418,7 +1418,7 @@ static int next_state_decidedelay(altmdm_state_t state)
 }
 
 static altmdm_state_t process_state_decidedelay(uint32_t event,
-    altmdm_state_t state)
+                                                altmdm_state_t state)
 {
   if (has_sendrequest(&g_altmdm_dev.tx_pkt) ||
       is_sleep_pkt(&g_altmdm_dev.tx_pkt))
@@ -1445,7 +1445,7 @@ static uint32_t waitevt_state_delaynext(void)
 }
 
 static altmdm_state_t process_state_delaynext(uint32_t event,
-    altmdm_state_t state)
+                                              altmdm_state_t state)
 {
   state = ALTMDM_STATE_BACKTOIDLE;
 
@@ -1457,7 +1457,7 @@ static altmdm_state_t process_state_delaynext(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_setsustimer(uint32_t event,
-    altmdm_state_t state)
+                                                altmdm_state_t state)
 {
   altmdm_timer_restart(g_altmdm_dev.txsus_timer,
     TXSUS_TIMEOUT, 0);
@@ -1470,7 +1470,7 @@ static altmdm_state_t process_state_setsustimer(uint32_t event,
  ****************************************************************************/
 
 static altmdm_state_t process_state_setsustimersleep(uint32_t event,
-    altmdm_state_t state)
+                                                     altmdm_state_t state)
 {
   altmdm_timer_restart(g_altmdm_dev.txsus_timer,
     TXSUS_TIMEOUT, 0);
@@ -1497,7 +1497,7 @@ static int next_state_destroy(altmdm_state_t state)
  ****************************************************************************/
 
 int altmdm_init(FAR struct spi_dev_s *spidev,
-  FAR const struct alt1250_lower_s *lower)
+                FAR const struct alt1250_lower_s *lower)
 {
   altmdm_event_init(&g_altmdm_dev.event);
   altmdm_event_init(&g_altmdm_dev.txdone_event);
@@ -1514,7 +1514,7 @@ int altmdm_init(FAR struct spi_dev_s *spidev,
   g_altmdm_dev.lower = lower;
 
   g_altmdm_dev.txsus_timer = altmdm_timer_start(0, 0, txsustimer_handler,
-    &g_altmdm_dev);
+                                                &g_altmdm_dev);
   g_altmdm_dev.wcounter = 0;
   g_altmdm_dev.rx_retcode = 0;
   g_altmdm_dev.txreq_buff = NULL;
@@ -1747,7 +1747,7 @@ int altmdm_write(FAR uint8_t *buff, int sz)
       if (should_wait)
         {
           ret = altmdm_event_wait(&g_altmdm_dev.txdone_event,
-              TX_DONE | TX_CANCEL, true, 0);
+                                  TX_DONE | TX_CANCEL, true, 0);
           if (ret & TX_CANCEL)
             {
               return ALTMDM_RETURN_CANCELED;
@@ -1757,7 +1757,7 @@ int altmdm_write(FAR uint8_t *buff, int sz)
   while (should_wait);
 
   ret = altmdm_event_wait(&g_altmdm_dev.txdone_event,
-      TX_DONE | TX_CANCEL, true, 0);
+                          TX_DONE | TX_CANCEL, true, 0);
 
   if (ret & TX_DONE)
     {

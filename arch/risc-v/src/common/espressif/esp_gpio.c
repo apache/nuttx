@@ -124,7 +124,7 @@ static int gpio_interrupt(int irq, void *context, void *arg)
   int i;
   uint32_t status;
   uint32_t intr_bitmask;
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   /* Read the lower GPIO interrupt status */
 
@@ -409,7 +409,7 @@ void esp_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 
   /* Enable interrupt for this pin on the current core */
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   gpio_hal_set_intr_type(&g_gpio_hal, pin, intrtype);
   gpio_hal_intr_enable_on_core(&g_gpio_hal, pin, cpu);
 

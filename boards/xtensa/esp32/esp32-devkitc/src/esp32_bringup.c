@@ -153,6 +153,11 @@
 #  include "esp32_spi.h"
 #endif
 
+#ifdef CONFIG_SPI_SLAVE_DRIVER
+#  include "esp32_spi.h"
+#  include "esp32_board_spislavedev.h"
+#endif
+
 #ifdef CONFIG_LCD_BACKPACK
 #  include "esp32_lcd_backpack.h"
 #endif
@@ -702,15 +707,22 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SPI_DRIVER
-#  ifdef CONFIG_ESP32_SPI2
+#if defined(CONFIG_ESP32_SPI2) && defined(CONFIG_SPI_DRIVER)
   ret = board_spidev_initialize(ESP32_SPI2);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d driver: %d\n",
              ESP32_SPI2, ret);
     }
-#  endif
+#endif
+
+# if defined(CONFIG_ESP32_SPI2) && defined(CONFIG_SPI_SLAVE_DRIVER)
+  ret = board_spislavedev_initialize(ESP32_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+              ESP32_SPI2, ret);
+    }
 #endif
 
 #ifdef CONFIG_WS2812

@@ -186,7 +186,7 @@ void up_initial_state(struct tcb_s *tcb)
 
 noinline_function void arm_initialize_stack(void)
 {
-  uint32_t stacklim = up_get_intstackbase(up_cpu_index());
+  uint32_t stacklim = up_get_intstackbase(this_cpu());
   uint32_t stack = stacklim + INTSTACK_SIZE;
   uint32_t temp = 0;
 

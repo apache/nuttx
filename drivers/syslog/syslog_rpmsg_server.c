@@ -259,7 +259,7 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
           unsigned int newsize = priv->nextpos + copied;
           if (newsize > priv->alloced)
             {
-              char *newbuf = kmm_realloc(priv->tmpbuf, newsize);
+              FAR char *newbuf = kmm_realloc(priv->tmpbuf, newsize);
               if (newbuf != NULL)
                 {
                   priv->tmpbuf  = newbuf;

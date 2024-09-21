@@ -45,7 +45,7 @@
 struct bmi160_odr_s
 {
   uint8_t regval;    /* the data of register */
-  unsigned long odr; /* the unit is us */
+  uint32_t odr;      /* the unit is us */
 };
 
 /* Device struct */
@@ -57,7 +57,7 @@ struct bmi160_dev_uorb_s
   struct sensor_lowerhalf_s lower;      /* Lower half sensor driver. */
 
   struct work_s work;                   /* Interrupt handler worker. */
-  unsigned long interval;               /* Sensor acquisition interval. */
+  uint32_t interval;                    /* Sensor acquisition interval. */
 
   struct bmi160_dev_s dev;
 };
@@ -77,10 +77,10 @@ static void bmi160_gyro_enable(FAR struct bmi160_dev_uorb_s *priv,
 
 static int bmi160_set_accel_interval(FAR struct sensor_lowerhalf_s *lower,
                                      FAR struct file *filep,
-                                     FAR unsigned long *period_us);
+                                     FAR uint32_t *period_us);
 static int bmi160_set_gyro_interval(FAR struct sensor_lowerhalf_s *lower,
                                     FAR struct file *filep,
-                                    FAR unsigned long *period_us);
+                                    FAR uint32_t *period_us);
 static int bmi160_accel_activate(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
                                  bool enable);
@@ -92,7 +92,7 @@ static int bmi160_gyro_activate(FAR struct sensor_lowerhalf_s *lower,
 
 static void bmi160_accel_worker(FAR void *arg);
 static void bmi160_gyro_worker(FAR void *arg);
-static int bmi160_findodr(unsigned long time,
+static int bmi160_findodr(uint32_t time,
                           FAR const struct bmi160_odr_s *odr_s,
                           int len);
 
@@ -159,7 +159,7 @@ static const struct bmi160_odr_s g_bmi160_accel_odr[] =
  *
  ****************************************************************************/
 
-static int bmi160_findodr(unsigned long time,
+static int bmi160_findodr(uint32_t time,
                           FAR const struct bmi160_odr_s *odr_s,
                           int len)
 {
@@ -304,7 +304,7 @@ static void bmi160_gyro_enable(FAR struct bmi160_dev_uorb_s *priv,
 
 static int bmi160_set_accel_interval(FAR struct sensor_lowerhalf_s *lower,
                                      FAR struct file *filep,
-                                     FAR unsigned long *period_us)
+                                     FAR uint32_t *period_us)
 {
   FAR struct bmi160_dev_uorb_s *priv = (FAR struct bmi160_dev_uorb_s *)lower;
   int num;
@@ -351,7 +351,7 @@ static int bmi160_set_accel_interval(FAR struct sensor_lowerhalf_s *lower,
 
 static int bmi160_set_gyro_interval(FAR struct sensor_lowerhalf_s *lower,
                                     FAR struct file *filep,
-                                    FAR unsigned long *period_us)
+                                    FAR uint32_t *period_us)
 {
   FAR struct bmi160_dev_uorb_s *priv = (FAR struct bmi160_dev_uorb_s *)lower;
   int num;

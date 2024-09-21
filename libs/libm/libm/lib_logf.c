@@ -43,7 +43,7 @@
  * todo: might need to adjust the double floating point version too.
  */
 
-#define LOGF_MAX_ITER         10
+#define LOGF_MAX_ITER         400
 #define LOGF_RELAX_MULTIPLIER 2.0F
 
 /****************************************************************************
@@ -60,15 +60,15 @@ float logf(float x)
   float y_old;
   float ey;
   float epsilon;
-  float relax_factor;
+  float rf; /* epsilon relax factor */
   int   iter;
 
-  y       = 0.0F;
-  y_old   = 1.0F;
+  y = 0.0F;
+  y_old = 1.0F;
   epsilon = FLT_EPSILON;
 
-  iter         = 0;
-  relax_factor = 1.0F;
+  iter = 0;
+  rf = 1.0F;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
@@ -86,17 +86,12 @@ float logf(float x)
           y = -FLT_MAX_EXP_X;
         }
 
-      epsilon = (fabsf(y) > 1.0F) ? fabsf(y) * FLT_EPSILON : FLT_EPSILON;
+      epsilon = ((fabsf(y) > rf) ? fabsf(y) : rf) * FLT_EPSILON;
 
       if (++iter >= LOGF_MAX_ITER)
         {
-          relax_factor *= LOGF_RELAX_MULTIPLIER;
+          rf *= LOGF_RELAX_MULTIPLIER;
           iter = 0;
-        }
-
-      if (relax_factor > 1.0F)
-        {
-          epsilon *= relax_factor;
         }
     }
 

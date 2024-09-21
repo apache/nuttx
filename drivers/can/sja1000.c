@@ -917,8 +917,6 @@ static void sja1000_set_acc_filter(struct sja1000_dev_s *priv,
                                    bool single_filter)
 {
   uint32_t regval;
-  uint32_t code_swapped = __builtin_bswap32(code);
-  uint32_t mask_swapped = __builtin_bswap32(mask);
 
   regval = sja1000_getreg(priv, SJA1000_MODE_REG);
   if (single_filter)
@@ -935,9 +933,9 @@ static void sja1000_set_acc_filter(struct sja1000_dev_s *priv,
   for (int i = 0; i < 4; i++)
     {
       sja1000_putreg(priv, (SJA1000_DATA_0_REG + i),
-                   ((code_swapped >> (i * 8)) & 0xff));
+                     ((code >> ((3 - i) * 8)) & 0xff));
       sja1000_putreg(priv, (SJA1000_DATA_4_REG + i),
-                   ((mask_swapped >> (i * 8)) & 0xff));
+                     ((mask >> ((3 - i) * 8)) & 0xff));
     }
 }
 

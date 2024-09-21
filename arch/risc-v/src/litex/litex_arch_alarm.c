@@ -52,5 +52,9 @@ void up_timer_initialize(void)
 
   DEBUGASSERT(lower);
 
+#ifdef CONFIG_ARCH_HAVE_PERF_EVENTS
+  up_perf_init((void *)CONFIG_LITEX_SYS_CORE_FREQ_HZ);
+#endif
+
   up_alarm_set_lowerhalf(lower);
 }

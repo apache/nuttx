@@ -155,9 +155,10 @@
 #  define MMCSD_R1_STATE_DIS        ((uint32_t)8 << MMCSD_R1_STATE_SHIFT) /* 8=Disconnect state */
 
 #define MMCSD_R1_READYFORDATA       ((uint32_t)1 << 8)     /* Buffer empty */
+#define MMCSD_R1_SWITCHERROR        ((uint32_t)1 << 7)     /* Device mode switch error */
 #define MMCSD_R1_APPCMD             ((uint32_t)1 << 5)     /* Next CMD is ACMD */
 #define MMCSD_R1_AKESEQERROR        ((uint32_t)1 << 3)     /* Authentication error */
-#define MMCSD_R1_ERRORMASK          ((uint32_t)0xfdffe008) /* Error mask */
+#define MMCSD_R1_ERRORMASK          ((uint32_t)0xfdffe088) /* Error mask */
 
 #define IS_STATE(v,s)               ((((uint32_t)v)&MMCSD_R1_STATE_MASK)==(s))
 

@@ -137,7 +137,7 @@ struct rwbuffer_s
   /* This is the state of the read-ahead buffering */
 
 #ifdef CONFIG_DRVR_READAHEAD
-  mutex_t       rhlock;          /* Enforces exclusive access to the write buffer */
+  mutex_t       rhlock;          /* Enforces exclusive access to the read-ahead buffer */
   FAR uint8_t  *rhbuffer;        /* Allocated read-ahead buffer */
   uint16_t      rhnblocks;       /* Number of blocks in read-ahead buffer */
   off_t         rhblockstart;    /* First block in read-ahead buffer */

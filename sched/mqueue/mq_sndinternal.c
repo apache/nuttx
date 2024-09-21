@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/mqueue/mq_sndinternal.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -73,7 +75,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-int nxmq_verify_send(FAR FAR struct file *mq, FAR const char *msg,
+int nxmq_verify_send(FAR struct file *mq, FAR const char *msg,
                      size_t msglen, unsigned int prio)
 {
   FAR struct inode *inode = mq->f_inode;

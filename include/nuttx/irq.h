@@ -47,6 +47,9 @@
  */
 
 #  define irq_detach(irq) irq_attach(irq, NULL, NULL)
+#  define irq_detach_wqueue(irq) irq_attach_wqueue(irq, NULL, NULL, NULL, 0)
+#  define irq_detach_thread(irq) \
+     irq_attach_thread(irq, NULL, NULL, NULL, 0, 0)
 
 /* Maximum/minimum values of IRQ integer types */
 
@@ -81,6 +84,14 @@
     } \
   while (0)
 #endif
+
+/* Interrupt was handled by this device */
+
+#define IRQ_HANDLED     0
+
+/* Handler requests to wake the handler thread */
+
+#define IRQ_WAKE_THREAD 1
 
 /****************************************************************************
  * Public Types
@@ -159,6 +170,57 @@ extern "C"
  ****************************************************************************/
 
 int irq_attach(int irq, xcpt_t isr, FAR void *arg);
+
+/****************************************************************************
+ * Name: irq_attach_thread
+ *
+ * Description:
+ *   Configure the IRQ subsystem so that IRQ number 'irq' is dispatched to
+ *   'isrthread'
+ *
+ * Input Parameters:
+ *   irq - Irq num
+ *   isr - Function to be called when the IRQ occurs, called in interrupt
+ *   context.
+ *   If isr is NULL the default handler is installed(irq_default_handler).
+ *   isrthread - called in thread context, If the isrthread is NULL,
+ *   then the ISR is being detached.
+ *   arg - privdate data
+ *   priority   - Priority of the new task
+ *   stack_size - size (in bytes) of the stack needed
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int irq_attach_thread(int irq, xcpt_t isr, xcpt_t isrthread, FAR void *arg,
+                      int priority, int stack_size);
+
+/****************************************************************************
+ * Name: irq_attach_wqueue
+ *
+ * Description:
+ *   Configure the IRQ subsystem so that IRQ number 'irq' is dispatched to
+ *   'wqueue'
+ *
+ * Input Parameters:
+ *   irq - Irq num
+ *   isr - Function to be called when the IRQ occurs, called in interrupt
+ *   context.
+ *   If isr is NULL the default handler is installed(irq_default_handler).
+ *   isrwork - called in thread context, If the isrwork is NULL,
+ *   then the ISR is being detached.
+ *   arg - privdate data
+ *   priority - isrwork pri
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int irq_attach_wqueue(int irq, xcpt_t isr, xcpt_t isrwork,
+                      FAR void *arg, int priority);
 
 #ifdef CONFIG_IRQCHAIN
 int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
@@ -246,9 +308,18 @@ void leave_critical_section(irqstate_t flags) noinstrument_function;
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-void restore_critical_section(void);
+#  define restore_critical_section(tcb, cpu) \
+   do { \
+       if (tcb->irqcount <= 0) \
+         {\
+           if ((g_cpu_irqset & (1 << cpu)) != 0) \
+             { \
+               cpu_irqlock_clear(); \
+             } \
+         } \
+    } while (0)
 #else
-#  define restore_critical_section()
+#  define restore_critical_section(tcb, cpu)
 #endif
 
 #undef EXTERN

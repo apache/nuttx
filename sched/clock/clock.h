@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,10 +80,6 @@ void clock_timer(void);
 #else
 #  define clock_timer()
 #endif
-
-int  clock_abstime2ticks(clockid_t clockid,
-                         FAR const struct timespec *abstime,
-                         FAR sclock_t *ticks);
 
 /****************************************************************************
  * perf_init

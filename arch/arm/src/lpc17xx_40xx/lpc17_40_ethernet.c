@@ -821,10 +821,6 @@ static void lpc17_40_rxdone_work(void *arg)
   fragment = false;
   while (considx != prodidx)
     {
-      /* Update statistics */
-
-      NETDEV_RXPACKETS(&priv->lp_dev);
-
       /* Get the Rx status and packet length (-4+1) */
 
       rxstat   = (uint32_t *)(LPC17_40_RXSTAT_BASE + (considx << 3));
@@ -979,6 +975,10 @@ static void lpc17_40_rxdone_work(void *arg)
               NETDEV_RXDROPPED(&priv->lp_dev);
             }
         }
+
+      /* Update statistics */
+
+      NETDEV_RXPACKETS(&priv->lp_dev);
 
       /* Bump up the consumer index and resample the producer index (which
        * might also have gotten bumped up by the hardware).

@@ -117,16 +117,19 @@ if(CONFIG_LIBM_TOOLCHAIN)
   list(APPEND STDLIBS m)
 endif()
 
+if(CONFIG_RPMSG_VIRTIO)
+  list(APPEND SRCS sim_rpmsg_vritio.c)
+endif()
+
 if(CONFIG_RPTUN)
   list(APPEND SRCS sim_rptun.c)
 endif()
 
 if(CONFIG_SIM_SOUND_ALSA)
   list(APPEND SRCS posix/sim_alsa.c)
-  list(APPEND SRCS posix/sim_offload.c)
+  list(APPEND SRCS sim_offload.c)
   list(APPEND STDLIBS asound)
   list(APPEND STDLIBS mad)
-  list(APPEND STDLIBS mp3lame)
 endif()
 
 # host sources ###############################################################

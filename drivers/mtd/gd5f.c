@@ -793,7 +793,7 @@ static int gd5f_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
       case MTDIOC_ECCSTATUS:
         {
-          uint8_t *result = (uint8_t *)arg;
+          FAR uint8_t *result = (FAR uint8_t *)arg;
           *result =
                (priv->eccstatus & GD5F_FEATURE_ECC_MASK)
                 >> GD5F_FEATURE_ECC_OFFSET;

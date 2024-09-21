@@ -36,6 +36,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "clock/clock.h"
+
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
@@ -63,8 +65,10 @@ begin_packed_struct struct rpmsg_rtc_header_s
 begin_packed_struct struct rpmsg_rtc_set_s
 {
   struct rpmsg_rtc_header_s header;
+  int64_t                   base_sec;
   int64_t                   sec;
   int32_t                   nsec;
+  int32_t                   base_nsec;
 } end_packed_struct;
 
 #define rpmsg_rtc_get_s rpmsg_rtc_set_s
@@ -300,12 +304,18 @@ static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
     case RPMSG_RTC_SYNC:
         {
           struct rpmsg_rtc_set_s *msg = data;
+
+#ifdef CONFIG_RTC_RPMSG_SYNC_BASETIME
+          g_basetime.tv_sec  = msg->base_sec;
+          g_basetime.tv_nsec = msg->base_nsec;
+#else
           struct timespec tp;
 
           tp.tv_sec  = msg->sec;
           tp.tv_nsec = msg->nsec;
 
           clock_synchronize(&tp);
+#endif
         }
       break;
 
@@ -488,7 +498,11 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
           ret = 1; /* Request the upper half skip clock synchronize */
         }
 
+      msg.base_sec = g_basetime.tv_sec;
+      msg.base_nsec = g_basetime.tv_nsec;
+
       nxmutex_lock(&server->lock);
+
       list_for_every(&server->list, node)
         {
           client = (FAR struct rpmsg_rtc_client_s *)node;
@@ -736,6 +750,9 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
     {
       msg.sec  = timegm((FAR struct tm *)&rtctime);
       msg.nsec = rtctime.tm_nsec;
+      msg.base_sec = g_basetime.tv_sec;
+      msg.base_nsec = g_basetime.tv_nsec;
+
       msg.header.command = RPMSG_RTC_SYNC;
       rpmsg_send(&client->ept, &msg, sizeof(msg));
     }

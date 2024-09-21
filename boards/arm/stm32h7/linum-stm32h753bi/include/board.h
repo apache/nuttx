@@ -95,10 +95,10 @@
  *   PLL1R = PLL1_VCO/8  = 800 MHz / 4   = 240 MHz
  */
 
-#define STM32_PLLCFG_PLL1CFG     (RCC_PLLCFGR_PLL1VCOSEL_WIDE | \
-                                  RCC_PLLCFGR_PLL1RGE_4_8_MHZ | \
-                                  RCC_PLLCFGR_DIVP1EN | \
-                                  RCC_PLLCFGR_DIVQ1EN | \
+#define STM32_PLLCFG_PLL1CFG     (RCC_PLLCFGR_PLL1VCOSEL_WIDE| \
+                                  RCC_PLLCFGR_PLL1RGE_4_8_MHZ| \
+                                  RCC_PLLCFGR_DIVP1EN| \
+                                  RCC_PLLCFGR_DIVQ1EN| \
                                   RCC_PLLCFGR_DIVR1EN)
 
 #define STM32_VCO1_FREQUENCY     ((STM32_HSE_FREQUENCY / 5) * 192)
@@ -120,11 +120,11 @@
  *   PLL2Q = PLL2_VCO/4  = 600 MHz / 40  = 15 MHz
  *   PLL2R = PLL2_VCO/8  = 600 MHz / 3   = 200 MHz
  */
-#define STM32_PLLCFG_PLL2CFG (RCC_PLLCFGR_PLL2VCOSEL_WIDE | \
-                              RCC_PLLCFGR_PLL2RGE_4_8_MHZ | \
-                              RCC_PLLCFGR_DIVP2EN | \
-                              RCC_PLLCFGR_DIVQ2EN | \
-                              RCC_PLLCFGR_DIVR2EN )
+#define STM32_PLLCFG_PLL2CFG (RCC_PLLCFGR_PLL2VCOSEL_WIDE| \
+                              RCC_PLLCFGR_PLL2RGE_4_8_MHZ| \
+                              RCC_PLLCFGR_DIVP2EN| \
+                              RCC_PLLCFGR_DIVQ2EN| \
+                              RCC_PLLCFGR_DIVR2EN)
 
 #define STM32_VCO2_FREQUENCY     ((STM32_HSE_FREQUENCY / 2) * 48)
 #define STM32_PLL2P_FREQUENCY    (STM32_VCO2_FREQUENCY / 8)
@@ -230,7 +230,7 @@
 
 /* SPI45 clock source - APB (PCLK2?) */
 
-#define STM32_RCC_D2CCIP1R_SPI45SRC  RCC_D2CCIP1R_SPI45SEL_APB
+#define STM32_RCC_D2CCIP1R_SPI45SRC  RCC_D2CCIP1R_SPI45SEL_PLL2
 
 /* SPI6 clock source - APB (PCLK4) */
 
@@ -344,21 +344,21 @@
 
 /* USART1 (Serial Console) */
 
-#define GPIO_USART1_RX   (GPIO_USART1_RX_1 | GPIO_SPEED_100MHz)  /* PB15 */
-#define GPIO_USART1_TX   (GPIO_USART1_TX_1 | GPIO_SPEED_100MHz)  /* PB14 */
+#define GPIO_USART1_RX   (GPIO_USART1_RX_1|GPIO_SPEED_100MHz)  /* PB15 */
+#define GPIO_USART1_TX   (GPIO_USART1_TX_1|GPIO_SPEED_100MHz)  /* PB14 */
 
 /* UART4 */
 
 #ifdef CONFIG_UART4_RS485
   /* Lets use for RS485 */
 
-#  define GPIO_UART4_TX        (GPIO_UART4_TX_3 | GPIO_SPEED_100MHz) /* PB9 */
-#  define GPIO_UART4_RX        (GPIO_UART4_RX_3 | GPIO_SPEED_100MHz) /* PB8 */
+#  define GPIO_UART4_TX        (GPIO_UART4_TX_3|GPIO_SPEED_100MHz) /* PB9 */
+#  define GPIO_UART4_RX        (GPIO_UART4_RX_3|GPIO_SPEED_100MHz) /* PB8 */
 
   /* RS485 DIR pin: PA15 */
 
-#  define GPIO_UART4_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_100MHz |\
-                                GPIO_OUTPUT_CLEAR | GPIO_PORTA | GPIO_PIN15)
+#  define GPIO_UART4_RS485_DIR (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_100MHz|\
+                                GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN15)
 
 #endif
 
@@ -367,39 +367,37 @@
 #ifdef CONFIG_USART6_RS485
   /* Lets use for RS485 */
 
-#  define GPIO_USART6_TX        (GPIO_USART6_TX_1 | GPIO_SPEED_100MHz) /* PC6 */
-#  define GPIO_USART6_RX        (GPIO_USART6_RX_1 | GPIO_SPEED_100MHz) /* PC7 */
+#  define GPIO_USART6_TX        (GPIO_USART6_TX_1|GPIO_SPEED_100MHz) /* PC6 */
+#  define GPIO_USART6_RX        (GPIO_USART6_RX_1|GPIO_SPEED_100MHz) /* PC7 */
 
   /* RS485 DIR pin: PG12 */
 
-#  define GPIO_USART6_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_100MHz |\
-                                 GPIO_OUTPUT_CLEAR | GPIO_PORTG | GPIO_PIN12)
+#  define GPIO_USART6_RS485_DIR (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_100MHz|\
+                                 GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN12)
 
 #endif
 
 /* OTGFS */
 
-#define GPIO_OTGFS_DM  (GPIO_OTGFS_DM_0  | GPIO_SPEED_100MHz) /* PA11 */
-#define GPIO_OTGFS_DP  (GPIO_OTGFS_DP_0  | GPIO_SPEED_100MHz) /* PA12 */
+#define GPIO_OTGFS_DM  (GPIO_OTGFS_DM_0|GPIO_SPEED_100MHz) /* PA11 */
+#define GPIO_OTGFS_DP  (GPIO_OTGFS_DP_0|GPIO_SPEED_100MHz) /* PA12 */
 
 /* SDMMC1 - Used SD Card memory */
 
-#define GPIO_SDMMC1_CK   (GPIO_SDMMC1_CK_0  | GPIO_SPEED_100MHz) /* PC12 */
-#define GPIO_SDMMC1_CMD  (GPIO_SDMMC1_CMD_0 | GPIO_SPEED_100MHz) /* PD2 */
-#define GPIO_SDMMC1_D0   (GPIO_SDMMC1_D0_0  | GPIO_SPEED_100MHz) /* PC8 */
-#define GPIO_SDMMC1_D1   (GPIO_SDMMC1_D1_0  | GPIO_SPEED_100MHz) /* PC9 */
-#define GPIO_SDMMC1_D2   (GPIO_SDMMC1_D2_0  | GPIO_SPEED_100MHz) /* PC10 */
-#define GPIO_SDMMC1_D3   (GPIO_SDMMC1_D3_0  | GPIO_SPEED_100MHz) /* PC11 */
+#define GPIO_SDMMC1_CK   (GPIO_SDMMC1_CK_0|GPIO_SPEED_100MHz)  /* PC12 */
+#define GPIO_SDMMC1_CMD  (GPIO_SDMMC1_CMD_0|GPIO_SPEED_100MHz) /* PD2 */
+#define GPIO_SDMMC1_D0   (GPIO_SDMMC1_D0_0|GPIO_SPEED_100MHz)  /* PC8 */
+#define GPIO_SDMMC1_D1   (GPIO_SDMMC1_D1_0|GPIO_SPEED_100MHz)  /* PC9 */
+#define GPIO_SDMMC1_D2   (GPIO_SDMMC1_D2_0|GPIO_SPEED_100MHz)  /* PC10 */
+#define GPIO_SDMMC1_D3   (GPIO_SDMMC1_D3_0|GPIO_SPEED_100MHz)  /* PC11 */
 
 /* I2C3 - Used by eeprom memory */
 
-#define GPIO_I2C3_SCL (GPIO_I2C3_SCL_2 | GPIO_SPEED_100MHz) /* PH7 */
-#define GPIO_I2C3_SDA (GPIO_I2C3_SDA_2 | GPIO_SPEED_100MHz) /* PH8 */
+#define GPIO_I2C3_SCL (GPIO_I2C3_SCL_2|GPIO_SPEED_100MHz) /* PH7 */
+#define GPIO_I2C3_SDA (GPIO_I2C3_SDA_2|GPIO_SPEED_100MHz) /* PH8 */
 
 /* PWM - Buzzer */
-
-#define GPIO_TIM17_CH1OUT  (GPIO_TIM17_CH1NOUT_1) /* PB7 */
-#define GPIO_TIM4_CH2OUT   (GPIO_TIM4_CH2OUT_1)   /* PB7 */
+#define GPIO_TIM4_CH2OUT   (GPIO_TIM4_CH2OUT_1|GPIO_SPEED_100MHz)   /* PB7 */
 
 /* FDCAN1 */
 
@@ -413,12 +411,21 @@
 
 /* QSPI Mapping  */
 
-#define GPIO_QSPI_CS  (GPIO_QUADSPI_BK1_NCS_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz) /* PG6 */
-#define GPIO_QSPI_IO0 (GPIO_QUADSPI_BK1_IO0_1 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz) /* PF8 */
-#define GPIO_QSPI_IO1 (GPIO_QUADSPI_BK1_IO1_1 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz) /* PF9 */
-#define GPIO_QSPI_IO2 (GPIO_QUADSPI_BK1_IO2_2 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz) /* PF7 */
-#define GPIO_QSPI_IO3 (GPIO_QUADSPI_BK1_IO3_3 | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz) /* PF6 */
-#define GPIO_QSPI_SCK (GPIO_QUADSPI_CLK_2     | GPIO_FLOAT | GPIO_PUSHPULL | GPIO_SPEED_100MHz) /* PF10 */
+#define GPIO_QSPI_CS  (GPIO_QUADSPI_BK1_NCS_2|GPIO_FLOAT|GPIO_PUSHPULL|GPIO_SPEED_100MHz) /* PG6 */
+#define GPIO_QSPI_IO0 (GPIO_QUADSPI_BK1_IO0_1|GPIO_FLOAT|GPIO_PUSHPULL|GPIO_SPEED_100MHz) /* PF8 */
+#define GPIO_QSPI_IO1 (GPIO_QUADSPI_BK1_IO1_1|GPIO_FLOAT|GPIO_PUSHPULL|GPIO_SPEED_100MHz) /* PF9 */
+#define GPIO_QSPI_IO2 (GPIO_QUADSPI_BK1_IO2_2|GPIO_FLOAT|GPIO_PUSHPULL|GPIO_SPEED_100MHz) /* PF7 */
+#define GPIO_QSPI_IO3 (GPIO_QUADSPI_BK1_IO3_3|GPIO_FLOAT|GPIO_PUSHPULL|GPIO_SPEED_100MHz) /* PF6 */
+#define GPIO_QSPI_SCK (GPIO_QUADSPI_CLK_2|GPIO_FLOAT|GPIO_PUSHPULL|GPIO_SPEED_100MHz)     /* PF10 */
+
+/* SPI4 */
+#define GPIO_SPI4_SCK  (GPIO_SPI4_SCK_2)   /* PE2 */
+#define GPIO_SPI4_MISO (GPIO_SPI4_MISO_2)  /* PE5 */
+#define GPIO_SPI4_MOSI (GPIO_SPI4_MOSI_2)  /* PE6 */
+
+/* MFRC522 */
+#define GPIO_RFID_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                        GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN4)          /* PE4 */
 
 /* Select PLL2R to source clock of QSPI */
 #define BOARD_QSPI_CLK  RCC_D1CCIPR_QSPISEL_PLL2
@@ -466,14 +473,14 @@
  *      bank 1. Note bank 2 isn't used!
  */
 
-#define BOARD_FMC_SDCR1  (FMC_SDCR_COLBITS_8  |  /* numcols = 8 bits */ \
-                          FMC_SDCR_ROWBITS_12 |  /* numrows = 12 bits */ \
-                          FMC_SDCR_WIDTH_16   |  /* width = 16 bits */ \
-                          FMC_SDCR_SDCLK_2X   |  /* sdclk = 2 hclk */ \
-                          FMC_SDCR_BANKS_4    |  /* 4 internal banks */ \
-                          FMC_SDCR_BURST_READ |  /* enable burst read */ \
-                          FMC_SDCR_RPIPE_0    |  /* rpipe = 0 hclk */ \
-                          FMC_SDCR_CASLAT_3)     /* cas latency = 3 cycles */
+#define BOARD_FMC_SDCR1  (FMC_SDCR_COLBITS_8|   /* numcols = 8 bits */ \
+                          FMC_SDCR_ROWBITS_12|  /* numrows = 12 bits */ \
+                          FMC_SDCR_WIDTH_16|    /* width = 16 bits */ \
+                          FMC_SDCR_SDCLK_2X|    /* sdclk = 2 hclk */ \
+                          FMC_SDCR_BANKS_4|     /* 4 internal banks */ \
+                          FMC_SDCR_BURST_READ|  /* enable burst read */ \
+                          FMC_SDCR_RPIPE_0|     /* rpipe = 0 hclk */ \
+                          FMC_SDCR_CASLAT_3)    /* cas latency = 3 cycles */
 
 /* BOARD_FMC_SDTR1 - Initial value for SDRAM timing registers for SDRAM
  *      bank 1.
@@ -487,61 +494,61 @@
  * FMC_SDTR_TRC  - Row to collumn delay
  */
 
-#define BOARD_FMC_SDTR1  (FMC_SDTR_TMRD(2) | /* tMRD     = 2CLK */ \
-                          FMC_SDTR_TXSR(9) | /* tXSR min = ns */ \
-                          FMC_SDTR_TRCD(8) | /* tRCD min = ns */ \
-                          FMC_SDTR_TRAS(6) | /* tRAS min = ns */ \
-                          FMC_SDTR_TWR(4)  | /* tWR      = ns */ \
-                          FMC_SDTR_TRP(2)  | /* tRP  min = ns */ \
-                          FMC_SDTR_TRC(8))   /* tRC  min = ns */ 
+#define BOARD_FMC_SDTR1  (FMC_SDTR_TMRD(2)| /* tMRD     = 2CLK */ \
+                          FMC_SDTR_TXSR(9)| /* tXSR min = ns */ \
+                          FMC_SDTR_TRCD(8)| /* tRCD min = ns */ \
+                          FMC_SDTR_TRAS(6)| /* tRAS min = ns */ \
+                          FMC_SDTR_TWR(4)|  /* tWR      = ns */ \
+                          FMC_SDTR_TRP(2)|  /* tRP  min = ns */ \
+                          FMC_SDTR_TRC(8))  /* tRC  min = ns */
 
 #define BOARD_FMC_SDRAM_REFR_CYCLES  4096
 #define BOARD_FMC_SDRAM_REFR_PERIOD  64
 #define BOARD_FMC_SDRAM_AUTOREFRESH  8
-#define BOARD_FMC_SDRAM_MODE         (FMC_SDCMR_MRD_BURST_LENGTH_1 | \
-                                      FMC_SDCMR_MRD_BURST_TYPE_SEQUENTIAL | \
-                                      FMC_SDCMR_MRD_CAS_LATENCY_3 | \
+#define BOARD_FMC_SDRAM_MODE         (FMC_SDCMR_MRD_BURST_LENGTH_1| \
+                                      FMC_SDCMR_MRD_BURST_TYPE_SEQUENTIAL| \
+                                      FMC_SDCMR_MRD_CAS_LATENCY_3| \
                                       FMC_SDCMR_MRD_WRITEBURST_MODE_SINGLE)
 
 #define BOARD_FMC_GPIO_CONFIGS \
-  (GPIO_FMC_A0_0 | GPIO_SPEED_100MHz),     /* PF0 */ \
-  (GPIO_FMC_A1_0 | GPIO_SPEED_100MHz),     /* PF1 */ \
-  (GPIO_FMC_A2_0 | GPIO_SPEED_100MHz),     /* PF2 */ \
-  (GPIO_FMC_A3_0 | GPIO_SPEED_100MHz),     /* PF3 */ \
-  (GPIO_FMC_A4_0 | GPIO_SPEED_100MHz),     /* PF4 */ \
-  (GPIO_FMC_A5_0 | GPIO_SPEED_100MHz),     /* PF5 */ \
-  (GPIO_FMC_A6_0 | GPIO_SPEED_100MHz),     /* PF12 */ \
-  (GPIO_FMC_A7_0 | GPIO_SPEED_100MHz),     /* PF13 */ \
-  (GPIO_FMC_A8_0 | GPIO_SPEED_100MHz),     /* PF14 */ \
-  (GPIO_FMC_A9_0 | GPIO_SPEED_100MHz),     /* PF15 */ \
-  (GPIO_FMC_A10_0 | GPIO_SPEED_100MHz),    /* PG0 */ \
-  (GPIO_FMC_A11_0 | GPIO_SPEED_100MHz),    /* PG1 */ \
-  (GPIO_FMC_D0_0 | GPIO_SPEED_100MHz),     /* PD14 */ \
-  (GPIO_FMC_D1_0 | GPIO_SPEED_100MHz),     /* PD15 */ \
-  (GPIO_FMC_D2_0 | GPIO_SPEED_100MHz),     /* PD0 */ \
-  (GPIO_FMC_D3_0 | GPIO_SPEED_100MHz),     /* PD1 */ \
-  (GPIO_FMC_D4_0 | GPIO_SPEED_100MHz),     /* PE7 */ \
-  (GPIO_FMC_D5_0 | GPIO_SPEED_100MHz),     /* PE8 */ \
-  (GPIO_FMC_D6_0 | GPIO_SPEED_100MHz),     /* PE9 */ \
-  (GPIO_FMC_D7_0 | GPIO_SPEED_100MHz),     /* PE10 */ \
-  (GPIO_FMC_D8_0 | GPIO_SPEED_100MHz),     /* PE11 */ \
-  (GPIO_FMC_D9_0 | GPIO_SPEED_100MHz),     /* PE12 */ \
-  (GPIO_FMC_D10_0 | GPIO_SPEED_100MHz),    /* PE13 */ \
-  (GPIO_FMC_D11_0 | GPIO_SPEED_100MHz),    /* PE14 */ \
-  (GPIO_FMC_D12_0 | GPIO_SPEED_100MHz),    /* PE15 */ \
-  (GPIO_FMC_D13_0 | GPIO_SPEED_100MHz),    /* PD8 */ \
-  (GPIO_FMC_D14_0 | GPIO_SPEED_100MHz),    /* PD9 */ \
-  (GPIO_FMC_D15_0 | GPIO_SPEED_100MHz),    /* PD10 */ \
-  (GPIO_FMC_NBL0_0 | GPIO_SPEED_100MHz),   /* PE0 */ \
-  (GPIO_FMC_NBL1_0 | GPIO_SPEED_100MHz),   /* PE1 */ \
-  (GPIO_FMC_BA0_0 | GPIO_SPEED_100MHz),    /* PG4 */ \
-  (GPIO_FMC_BA1_0 | GPIO_SPEED_100MHz),    /* PG5 */ \
-  (GPIO_FMC_SDNCAS_0 | GPIO_SPEED_100MHz), /* PG15 */ \
-  (GPIO_FMC_SDNRAS_0 | GPIO_SPEED_100MHz), /* PF11 */ \
-  (GPIO_FMC_SDNWE_2 | GPIO_SPEED_100MHz),  /* PC0 */ \
-  (GPIO_FMC_SDNE0_1 | GPIO_SPEED_100MHz),  /* PC2 */ \
-  (GPIO_FMC_SDCKE0_1 | GPIO_SPEED_100MHz), /* PC3 */ \
-  (GPIO_FMC_SDCLK_0 | GPIO_SPEED_100MHz)   /* PG8 */
+  (GPIO_FMC_A0_0|GPIO_SPEED_100MHz),     /* PF0 */ \
+  (GPIO_FMC_A1_0|GPIO_SPEED_100MHz),     /* PF1 */ \
+  (GPIO_FMC_A2_0|GPIO_SPEED_100MHz),     /* PF2 */ \
+  (GPIO_FMC_A3_0|GPIO_SPEED_100MHz),     /* PF3 */ \
+  (GPIO_FMC_A4_0|GPIO_SPEED_100MHz),     /* PF4 */ \
+  (GPIO_FMC_A5_0|GPIO_SPEED_100MHz),     /* PF5 */ \
+  (GPIO_FMC_A6_0|GPIO_SPEED_100MHz),     /* PF12 */ \
+  (GPIO_FMC_A7_0|GPIO_SPEED_100MHz),     /* PF13 */ \
+  (GPIO_FMC_A8_0|GPIO_SPEED_100MHz),     /* PF14 */ \
+  (GPIO_FMC_A9_0|GPIO_SPEED_100MHz),     /* PF15 */ \
+  (GPIO_FMC_A10_0|GPIO_SPEED_100MHz),    /* PG0 */ \
+  (GPIO_FMC_A11_0|GPIO_SPEED_100MHz),    /* PG1 */ \
+  (GPIO_FMC_D0_0|GPIO_SPEED_100MHz),     /* PD14 */ \
+  (GPIO_FMC_D1_0|GPIO_SPEED_100MHz),     /* PD15 */ \
+  (GPIO_FMC_D2_0|GPIO_SPEED_100MHz),     /* PD0 */ \
+  (GPIO_FMC_D3_0|GPIO_SPEED_100MHz),     /* PD1 */ \
+  (GPIO_FMC_D4_0|GPIO_SPEED_100MHz),     /* PE7 */ \
+  (GPIO_FMC_D5_0|GPIO_SPEED_100MHz),     /* PE8 */ \
+  (GPIO_FMC_D6_0|GPIO_SPEED_100MHz),     /* PE9 */ \
+  (GPIO_FMC_D7_0|GPIO_SPEED_100MHz),     /* PE10 */ \
+  (GPIO_FMC_D8_0|GPIO_SPEED_100MHz),     /* PE11 */ \
+  (GPIO_FMC_D9_0|GPIO_SPEED_100MHz),     /* PE12 */ \
+  (GPIO_FMC_D10_0|GPIO_SPEED_100MHz),    /* PE13 */ \
+  (GPIO_FMC_D11_0|GPIO_SPEED_100MHz),    /* PE14 */ \
+  (GPIO_FMC_D12_0|GPIO_SPEED_100MHz),    /* PE15 */ \
+  (GPIO_FMC_D13_0|GPIO_SPEED_100MHz),    /* PD8 */ \
+  (GPIO_FMC_D14_0|GPIO_SPEED_100MHz),    /* PD9 */ \
+  (GPIO_FMC_D15_0|GPIO_SPEED_100MHz),    /* PD10 */ \
+  (GPIO_FMC_NBL0_0|GPIO_SPEED_100MHz),   /* PE0 */ \
+  (GPIO_FMC_NBL1_0|GPIO_SPEED_100MHz),   /* PE1 */ \
+  (GPIO_FMC_BA0_0|GPIO_SPEED_100MHz),    /* PG4 */ \
+  (GPIO_FMC_BA1_0|GPIO_SPEED_100MHz),    /* PG5 */ \
+  (GPIO_FMC_SDNCAS_0|GPIO_SPEED_100MHz), /* PG15 */ \
+  (GPIO_FMC_SDNRAS_0|GPIO_SPEED_100MHz), /* PF11 */ \
+  (GPIO_FMC_SDNWE_2|GPIO_SPEED_100MHz),  /* PC0 */ \
+  (GPIO_FMC_SDNE0_1|GPIO_SPEED_100MHz),  /* PC2 */ \
+  (GPIO_FMC_SDCKE0_1|GPIO_SPEED_100MHz), /* PC3 */ \
+  (GPIO_FMC_SDCLK_0|GPIO_SPEED_100MHz)   /* PG8 */
 
 /* QEncoder - TIM5: CH1 and CH2 */
 
@@ -550,37 +557,37 @@
 
 /* LTDC */
 
-#define GPIO_LTDC_R0     (GPIO_LTDC_R0_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R1     (GPIO_LTDC_R1_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R2     (GPIO_LTDC_R2_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R3     (GPIO_LTDC_R3_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R4     (GPIO_LTDC_R4_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R5     (GPIO_LTDC_R5_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R6     (GPIO_LTDC_R6_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R7     (GPIO_LTDC_R7_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R0     (GPIO_LTDC_R0_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R1     (GPIO_LTDC_R1_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R2     (GPIO_LTDC_R2_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R3     (GPIO_LTDC_R3_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R4     (GPIO_LTDC_R4_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R5     (GPIO_LTDC_R5_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R6     (GPIO_LTDC_R6_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R7     (GPIO_LTDC_R7_3|GPIO_SPEED_100MHz)
 
-#define GPIO_LTDC_G0     (GPIO_LTDC_G0_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G1     (GPIO_LTDC_G1_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G2     (GPIO_LTDC_G2_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G3     (GPIO_LTDC_G3_4 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G4     (GPIO_LTDC_G4_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G5     (GPIO_LTDC_G5_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G6     (GPIO_LTDC_G6_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G7     (GPIO_LTDC_G7_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G0     (GPIO_LTDC_G0_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G1     (GPIO_LTDC_G1_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G2     (GPIO_LTDC_G2_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G3     (GPIO_LTDC_G3_4|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G4     (GPIO_LTDC_G4_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G5     (GPIO_LTDC_G5_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G6     (GPIO_LTDC_G6_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G7     (GPIO_LTDC_G7_3|GPIO_SPEED_100MHz)
 
-#define GPIO_LTDC_B0     (GPIO_LTDC_B0_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B1     (GPIO_LTDC_B1_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B2     (GPIO_LTDC_B2_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B3     (GPIO_LTDC_B3_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B4     (GPIO_LTDC_B4_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B5     (GPIO_LTDC_B5_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B6     (GPIO_LTDC_B6_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B7     (GPIO_LTDC_B7_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B0     (GPIO_LTDC_B0_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B1     (GPIO_LTDC_B1_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B2     (GPIO_LTDC_B2_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B3     (GPIO_LTDC_B3_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B4     (GPIO_LTDC_B4_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B5     (GPIO_LTDC_B5_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B6     (GPIO_LTDC_B6_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B7     (GPIO_LTDC_B7_3|GPIO_SPEED_100MHz)
 
-#define GPIO_LTDC_VSYNC  (GPIO_LTDC_VSYNC_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_HSYNC  (GPIO_LTDC_HSYNC_2 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_DE     (GPIO_LTDC_DE_3 | GPIO_SPEED_100MHz)
-#define GPIO_LTDC_CLK    (GPIO_LTDC_CLK_3 | GPIO_SPEED_100MHz)
+#define GPIO_LTDC_VSYNC  (GPIO_LTDC_VSYNC_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_HSYNC  (GPIO_LTDC_HSYNC_2|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_DE     (GPIO_LTDC_DE_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_CLK    (GPIO_LTDC_CLK_3|GPIO_SPEED_100MHz)
 
 /* LCD definitions **********************************************************/
 

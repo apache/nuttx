@@ -128,6 +128,10 @@ if(CONFIG_CL_MFRC522)
   list(APPEND SRCS stm32_mfrc522.c)
 endif()
 
+if(CONFIG_SENSORS_AMG88XX)
+  list(APPEND SRCS stm32_amg88xx.c)
+endif()
+
 if(CONFIG_LIS3DSH)
   list(APPEND SRCS stm32_lis3dsh.c)
 endif()

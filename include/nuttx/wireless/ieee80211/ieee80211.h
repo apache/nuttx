@@ -865,7 +865,7 @@ static inline bool ieee80211_is_first_frag(uint16_t seq_ctrl)
  * hdr: 802.11 header of the frame
  */
 
-static inline bool ieee80211_is_frag(struct ieee80211_hdr *hdr)
+static inline bool ieee80211_is_frag(FAR struct ieee80211_hdr *hdr)
 {
   return ieee80211_has_morefrags(hdr->frame_control) ||
     hdr->seq_ctrl & cpu_to_le16(IEEE80211_SCTL_FRAG);
@@ -2489,7 +2489,7 @@ enum ieee80211_he_highest_mcs_supported_subfield_enc
  */
 
 static inline uint8_t
-ieee80211_he_mcs_nss_size(const struct ieee80211_he_cap_elem *he_cap)
+ieee80211_he_mcs_nss_size(FAR const struct ieee80211_he_cap_elem *he_cap)
 {
   uint8_t count = 4;
 
@@ -2521,7 +2521,7 @@ ieee80211_he_mcs_nss_size(const struct ieee80211_he_cap_elem *he_cap)
  */
 
 static inline uint8_t
-ieee80211_he_ppe_size(uint8_t ppe_thres_hdr, const uint8_t *phy_cap_info)
+ieee80211_he_ppe_size(uint8_t ppe_thres_hdr, FAR const uint8_t *phy_cap_info)
 {
   uint8_t n;
 
@@ -2592,9 +2592,9 @@ struct ieee80211_he_6ghz_oper
  */
 
 static inline uint8_t
-ieee80211_he_oper_size(const uint8_t *he_oper_ie)
+ieee80211_he_oper_size(FAR const uint8_t *he_oper_ie)
 {
-  struct ieee80211_he_operation *he_oper = (void *)he_oper_ie;
+  FAR struct ieee80211_he_operation *he_oper = (FAR void *)he_oper_ie;
   uint8_t oper_len = sizeof(struct ieee80211_he_operation);
   uint32_t he_oper_params;
 
@@ -2627,10 +2627,10 @@ ieee80211_he_oper_size(const uint8_t *he_oper_ie)
  * Return: a pointer to the 6 GHz operation field, or NULL
  */
 
-static inline const struct ieee80211_he_6ghz_oper *
-ieee80211_he_6ghz_oper(const struct ieee80211_he_operation *he_oper)
+static inline FAR const struct ieee80211_he_6ghz_oper *
+ieee80211_he_6ghz_oper(FAR const struct ieee80211_he_operation *he_oper)
 {
-  const uint8_t *ret = (void *)&he_oper->optional;
+  FAR const uint8_t *ret = (FAR void *)&he_oper->optional;
   uint32_t he_oper_params;
 
   if (!he_oper)
@@ -2645,7 +2645,7 @@ ieee80211_he_6ghz_oper(const struct ieee80211_he_operation *he_oper)
   if (he_oper_params & IEEE80211_HE_OPERATION_CO_HOSTED_BSS)
     ret++;
 
-  return (void *)ret;
+  return (FAR void *)ret;
 }
 
 /* HE Spatial Reuse defines */
@@ -2665,9 +2665,9 @@ ieee80211_he_6ghz_oper(const struct ieee80211_he_operation *he_oper)
  */
 
 static inline uint8_t
-ieee80211_he_spr_size(const uint8_t *he_spr_ie)
+ieee80211_he_spr_size(FAR const uint8_t *he_spr_ie)
 {
-  struct ieee80211_he_spr *he_spr = (void *)he_spr_ie;
+  FAR struct ieee80211_he_spr *he_spr = (FAR void *)he_spr_ie;
   uint8_t spr_len = sizeof(struct ieee80211_he_spr);
   uint8_t he_spr_params;
 
@@ -3914,7 +3914,7 @@ struct ieee80211_he_6ghz_capa
  * 4 addr: 2 + 2 + 2 + 4*6 = 30
  */
 
-static inline uint8_t *ieee80211_get_qos_ctl(struct ieee80211_hdr *hdr)
+static inline uint8_t *ieee80211_get_qos_ctl(FAR struct ieee80211_hdr *hdr)
 {
   if (ieee80211_has_a4(hdr->frame_control))
     return (uint8_t *)hdr + 30;
@@ -3926,7 +3926,7 @@ static inline uint8_t *ieee80211_get_qos_ctl(struct ieee80211_hdr *hdr)
  * hdr: the frame
  */
 
-static inline uint8_t ieee80211_get_tid(struct ieee80211_hdr *hdr)
+static inline uint8_t ieee80211_get_tid(FAR struct ieee80211_hdr *hdr)
 {
   uint8_t *qc = ieee80211_get_qos_ctl(hdr);
 
@@ -3943,7 +3943,7 @@ static inline uint8_t ieee80211_get_tid(struct ieee80211_hdr *hdr)
  * field.
  */
 
-static inline uint8_t *ieee80211_get_sa(struct ieee80211_hdr *hdr)
+static inline FAR uint8_t *ieee80211_get_sa(FAR struct ieee80211_hdr *hdr)
 {
   if (ieee80211_has_a4(hdr->frame_control))
     return hdr->addr4;
@@ -3962,7 +3962,7 @@ static inline uint8_t *ieee80211_get_sa(struct ieee80211_hdr *hdr)
  * field.
  */
 
-static inline uint8_t *ieee80211_get_da(struct ieee80211_hdr *hdr)
+static inline FAR uint8_t *ieee80211_get_da(FAR struct ieee80211_hdr *hdr)
 {
   if (ieee80211_has_tods(hdr->frame_control))
     return hdr->addr3;
@@ -3975,7 +3975,8 @@ static inline uint8_t *ieee80211_get_da(struct ieee80211_hdr *hdr)
  * hdr: the frame (buffer must include at least the first octet of payload)
  */
 
-static inline bool _ieee80211_is_robust_mgmt_frame(struct ieee80211_hdr *hdr)
+static inline bool
+_ieee80211_is_robust_mgmt_frame(FAR struct ieee80211_hdr *hdr)
 {
   if (ieee80211_is_disassoc(hdr->frame_control) ||
       ieee80211_is_deauth(hdr->frame_control))

@@ -1,6 +1,8 @@
 ############################################################################
 # tools/gdb/utils.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -179,3 +181,10 @@ def is_target_smp():
         return True
     else:
         return False
+
+
+def get_symbol_value(name):
+    """Return the value of a symbol value etc: Variable, Marco"""
+
+    gdb.execute("set $_%s = %s" % (name, name))
+    return gdb.parse_and_eval("$_%s" % name)

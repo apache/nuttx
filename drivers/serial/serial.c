@@ -123,7 +123,7 @@ static int     uart_unlink(FAR struct inode *inode);
 #ifdef CONFIG_TTY_LAUNCH_ENTRY
 /* Lanch program entry, this must be supplied by the application. */
 
-int CONFIG_TTY_LAUNCH_ENTRYPOINT(int argc, char *argv[]);
+int CONFIG_TTY_LAUNCH_ENTRYPOINT(int argc, FAR char *argv[]);
 #endif
 
 /****************************************************************************
@@ -714,7 +714,10 @@ static int uart_close(FAR struct file *filep)
 
   flags = enter_critical_section();  /* Disable interrupts */
   uart_detach(dev);                  /* Detach interrupts */
-  if (!dev->isconsole)               /* Check for the serial console UART */
+
+  /* Check for the serial console UART */
+
+  if (!dev->isconsole)
     {
       uart_shutdown(dev);            /* Disable the UART */
     }
@@ -1049,14 +1052,22 @@ static ssize_t uart_read(FAR struct file *filep,
                   dev->minrecv = MIN(buflen - recvd, dev->minread - recvd);
                   if (dev->timeout)
                     {
+                      nxmutex_unlock(&dev->recv.lock);
                       ret = nxsem_tickwait(&dev->recvsem,
                                            DSEC2TICK(dev->timeout));
                     }
                   else
 #endif
                     {
+                      nxmutex_unlock(&dev->recv.lock);
                       ret = nxsem_wait(&dev->recvsem);
                     }
+
+                  nxmutex_lock(&dev->recv.lock);
+
+#ifdef CONFIG_SERIAL_TERMIOS
+                  dev->minrecv = dev->minread;
+#endif
                 }
 
               leave_critical_section(flags);
@@ -1576,6 +1587,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
               dev->timeout = termiosp->c_cc[VTIME];
               dev->minread = termiosp->c_cc[VMIN];
+              dev->minrecv = dev->minread;
 #endif
               ret = 0;
             }
@@ -1776,7 +1788,7 @@ static void uart_launch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
   if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_FILEPATH))
 #endif
     {
-      *(int *)arg = 1;
+      *(FAR int *)arg = 1;
     }
 }
 
@@ -2053,7 +2065,7 @@ void uart_reset_sem(FAR uart_dev_t *dev)
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
-int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size)
+int uart_check_special(FAR uart_dev_t *dev, FAR const char *buf, size_t size)
 {
   size_t i;
 

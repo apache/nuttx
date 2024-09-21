@@ -2650,7 +2650,7 @@ static int i2s_dma_setup(struct esp32s2_i2s_s *priv)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s2_setup_irq(priv->config->periph, 1,
                                    ESP32S2_CPUINT_LEVEL);
   if (priv->cpuint < 0)

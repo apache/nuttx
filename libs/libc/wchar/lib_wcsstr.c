@@ -39,7 +39,7 @@ static FAR wchar_t *twoway_wcsstr(FAR const wchar_t *h, FAR const wchar_t *n)
 {
   FAR const wchar_t *z;
   size_t l;
-  size_t ip;
+  ssize_t ip;
   size_t jp;
   size_t k;
   size_t p;
@@ -54,7 +54,10 @@ static FAR wchar_t *twoway_wcsstr(FAR const wchar_t *h, FAR const wchar_t *n)
 
   /* hit the end of h */
 
-  if (n[l]) return 0;
+  if (n[l])
+    {
+      return 0;
+    }
 
   /* Compute maximal suffix */
 
@@ -114,8 +117,14 @@ static FAR wchar_t *twoway_wcsstr(FAR const wchar_t *h, FAR const wchar_t *n)
         }
     }
 
-  if (ip + 1 > ms + 1) ms = ip;
-  else p = p0;
+  if (ip + 1 > ms + 1)
+    {
+      ms = ip;
+    }
+  else
+    {
+      p = p0;
+    }
 
   /* Periodic needle? */
 
@@ -150,7 +159,10 @@ static FAR wchar_t *twoway_wcsstr(FAR const wchar_t *h, FAR const wchar_t *n)
           if (z2)
             {
               z = z2;
-              if (z - h < l) return 0;
+              if (z - h < l)
+                {
+                  return 0;
+                }
             }
           else z += grow;
         }
@@ -169,7 +181,11 @@ static FAR wchar_t *twoway_wcsstr(FAR const wchar_t *h, FAR const wchar_t *n)
 
       for (k = ms + 1; k > mem && n[k - 1] == h[k - 1]; k--);
 
-      if (k <= mem) return (FAR wchar_t *)h;
+      if (k <= mem)
+        {
+          return (FAR wchar_t *)h;
+        }
+
       h += p;
       mem = mem0;
     }
@@ -200,14 +216,28 @@ FAR wchar_t *wcsstr(FAR const wchar_t *h, FAR const wchar_t *n)
 {
   /* Return immediately on empty needle or haystack */
 
-  if (!n[0]) return (FAR wchar_t *)h;
-  if (!h[0]) return 0;
+  if (!n[0])
+    {
+      return (FAR wchar_t *)h;
+    }
+
+  if (!h[0])
+    {
+      return 0;
+    }
 
   /* Use faster algorithms for short needles */
 
   h = wcschr(h, *n);
-  if (!h || !n[1]) return (FAR wchar_t *)h;
-  if (!h[1]) return 0;
+  if (!h || !n[1])
+    {
+      return (FAR wchar_t *)h;
+    }
+
+  if (!h[1])
+    {
+      return 0;
+    }
 
   return twoway_wcsstr(h, n);
 }

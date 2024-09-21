@@ -25,6 +25,7 @@ following section.
   audio.rst
   clk.rst
   devicetree.rst
+  devmem.rst
   dma.rst
   framebuffer.rst
   i2c.rst
@@ -47,6 +48,7 @@ following section.
   usrsock.rst
   mmcsd.rst
   net/index.rst
+  pinctrl.rst
   pipes.rst
   power/index.rst
   virtio.rst

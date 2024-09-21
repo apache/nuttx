@@ -238,10 +238,12 @@ pid_t arm64_fork(const struct fork_s *context)
   pforkctx->elr  = (uint64_t)context->lr;
 
   pforkctx->exe_depth       = 0;
-  pforkctx->sp_elx          = (uint64_t)pforkctx;
+  pforkctx->sp_elx          = (uint64_t)stack_ptr;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  pforkctx->sp_el0          = (uint64_t)child->cmn.xcp.ustkptr;
+#else
   pforkctx->sp_el0          = (uint64_t)pforkctx;
-  pforkctx->tpidr_el0       = (uint64_t)(&child->cmn);
-  pforkctx->tpidr_el1       = (uint64_t)(&child->cmn);
+#endif
 
   child->cmn.xcp.regs = (uint64_t *)pforkctx;
 

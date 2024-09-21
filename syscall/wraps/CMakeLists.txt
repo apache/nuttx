@@ -1,6 +1,8 @@
 # ##############################################################################
 # syscall/wraps/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -19,14 +21,15 @@
 # ##############################################################################
 nuttx_add_kernel_library(wraps)
 
-list(TRANSFORM SYSCALLS PREPEND "${CMAKE_CURRENT_BINARY_DIR}/WRAPS_")
+list(TRANSFORM SYSCALLS PREPEND "${CMAKE_CURRENT_BINARY_DIR}/WRAP_")
 
 # generate files
-execute_process(
+add_custom_command(
   OUTPUT ${SYSCALLS}
   COMMAND ${CMAKE_BINARY_DIR}/bin/mksyscall -w
           ${CMAKE_CURRENT_LIST_DIR}/../syscall.csv
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} DEPENDS nuttx_host_tools)
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS mksyscall)
 
 # TODO: SYSCALLWRAPS = syscall_wraps.ldcmd $(Q) $(CPP) $(CPPFLAGS)
 # $(SYSCALLWRAPS:.ldcmd=.h) | \ sed -e '1,/WRAPOPTSTARTS/d' -e '/^#/d' >

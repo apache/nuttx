@@ -1,6 +1,8 @@
 ############################################################################
 # sched/irq/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -19,6 +21,7 @@
 ############################################################################
 
 CSRCS += irq_initialize.c irq_attach.c irq_dispatch.c irq_unexpectedisr.c
+CSRCS += irq_attach_thread.c irq_attach_wqueue.c
 
 ifeq ($(CONFIG_SPINLOCK),y)
 CSRCS += irq_spinlock.c

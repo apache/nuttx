@@ -93,7 +93,7 @@
                            / FLASH_SECTOR_SIZE
 
 #ifdef CONFIG_SMP
-#  define OTHER_CPU (up_cpu_index() == 0 ? 1 : 0)
+#  define OTHER_CPU (this_cpu() == 0 ? 1 : 0)
 #endif
 
 /****************************************************************************

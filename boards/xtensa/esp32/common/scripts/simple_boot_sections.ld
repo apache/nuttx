@@ -147,9 +147,7 @@ SECTIONS
 
     *libc.a:lib_assert.*(.literal .text .literal.* .text.*)
     *libc.a:lib_utsname.*(.literal .text .literal.* .text.*)
-#ifdef CONFIG_ESP32_BLE
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
-#endif
 
     *libdrivers.a:syslog_flush.*(.literal .text .literal.* .text.*)
 
@@ -502,6 +500,14 @@ SECTIONS
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifi0iram.*)
+    *(.wifiextrairam .wifiextrairam.*)
+    *(EXCLUDE_FILE(*libpp.a) .wifiorslpiram EXCLUDE_FILE(*libpp.a) .wifiorslpiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifirxiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram EXCLUDE_FILE(*libnet80211.a *libpp.a) .wifislprxiram.*)
+
     . = ALIGN(4);
 
     . += 16;
@@ -529,7 +535,9 @@ SECTIONS
   .rtc.data :
   {
     *(.rtc.data)
+    *(.rtc.data.*)
     *(.rtc.rodata)
+    *(.rtc.rodata.*)
 
    /* Whatever is left from the RTC memory is used as a special heap. */
 

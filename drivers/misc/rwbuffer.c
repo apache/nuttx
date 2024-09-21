@@ -334,6 +334,8 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
         {
           return ret;
         }
+
+      nblocks = 0;
     }
 
   while (nblocks > 0)

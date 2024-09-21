@@ -111,6 +111,21 @@ config SENDFILE_BUFSIZE
 	---help---
 		Size of the I/O buffer to allocate in sendfile().  Default: 512b
 
+config FS_HEAPSIZE
+	int "Independent heap bytes used by shm/tmpfs/pseudofile"
+	default 0
+	depends on FS_SHMFS || FS_TMPFS || PSEUDOFS_FILE
+	---help---
+		Support for shm/tmpfs/fs_pseudofile.c ram based fs memory.
+		default 0 to use kmm directly. independent heap disabled
+
+config FS_REFCOUNT
+	bool "File reference count"
+	default !DEFAULT_SMALL
+	---help---
+		Enable will Records the number of filep references. The file is
+		actually closed when the count reaches 0
+
 source "fs/vfs/Kconfig"
 source "fs/aio/Kconfig"
 source "fs/semaphore/Kconfig"
@@ -118,6 +133,7 @@ source "fs/mqueue/Kconfig"
 source "fs/shm/Kconfig"
 source "fs/mmap/Kconfig"
 source "fs/partition/Kconfig"
+source "fs/notify/Kconfig"
 source "fs/fat/Kconfig"
 source "fs/nfs/Kconfig"
 source "fs/nxffs/Kconfig"

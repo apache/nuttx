@@ -828,11 +828,10 @@ static int es8388_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* 8kHz is hardware dependent */
 
-              caps->ac_controls.b[0] =
+              caps->ac_controls.hw[0] =
                 AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
                 AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              caps->ac_controls.b[1] = 0;
               break;
 
             default:
@@ -851,11 +850,10 @@ static int es8388_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report supported input sample rates */
 
-              caps->ac_controls.b[0] =
+              caps->ac_controls.hw[0] =
                 AUDIO_SAMP_RATE_11K | AUDIO_SAMP_RATE_16K |
                 AUDIO_SAMP_RATE_22K | AUDIO_SAMP_RATE_32K |
                 AUDIO_SAMP_RATE_44K | AUDIO_SAMP_RATE_48K;
-              caps->ac_controls.b[1] = 0;
               break;
 
             default:

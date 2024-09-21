@@ -55,7 +55,7 @@ static int IRAM_ATTR esp32s3_fromcpu_interrupt(int fromcpu)
   uintptr_t regaddr;
 
   DEBUGASSERT((unsigned)fromcpu < CONFIG_SMP_NCPUS);
-  DEBUGASSERT(fromcpu != up_cpu_index());
+  DEBUGASSERT(fromcpu != this_cpu());
 
   /* Clear the interrupt from the other CPU */
 
@@ -84,11 +84,13 @@ static int IRAM_ATTR esp32s3_fromcpu_interrupt(int fromcpu)
 
 int IRAM_ATTR esp32s3_fromcpu0_interrupt(int irq, void *context, void *arg)
 {
+  nxsched_smp_call_handler(irq, context, arg);
   return esp32s3_fromcpu_interrupt(0);
 }
 
 int IRAM_ATTR esp32s3_fromcpu1_interrupt(int irq, void *context, void *arg)
 {
+  nxsched_smp_call_handler(irq, context, arg);
   return esp32s3_fromcpu_interrupt(1);
 }
 
@@ -107,7 +109,7 @@ int IRAM_ATTR xtensa_intercpu_interrupt(int tocpu, int intcode)
   DEBUGASSERT((unsigned)tocpu < CONFIG_SMP_NCPUS &&
               (unsigned)intcode <= UINT8_MAX);
 
-  fromcpu = up_cpu_index();
+  fromcpu = this_cpu();
   DEBUGASSERT(fromcpu != tocpu);
 
   /* Generate an Inter-Processor Interrupt */

@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 # tools/mkfsdata.pl
 #
+# SPDX-License-Identifier: BSD-3-Clause
+#
 # Extracted from uIP which has a license that is compatible with NuttX.
 # There is no authorship, copyright, or licensing information in the
 # original file.  Possibly written by Adam Dunkels.

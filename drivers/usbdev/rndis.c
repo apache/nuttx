@@ -248,12 +248,6 @@ static void usbclass_disconnect(FAR struct usbdevclass_driver_s *driver,
 static int  usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config);
 static void usbclass_resetconfig(FAR struct rndis_dev_s *priv);
 
-/* usbclass helpers  */
-
-static int usbclass_copy_epdesc(int epid, FAR struct usb_epdesc_s *epdesc,
-                                FAR struct usbdev_devinfo_s *devinfo,
-                                bool hispeed);
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -293,111 +287,184 @@ static const struct usb_devdesc_s g_devdesc =
 };
 #endif
 
-const static struct rndis_cfgdesc_s g_rndis_cfgdesc =
+#ifndef CONFIG_RNDIS_COMPOSITE
+
+  /* Configuration descriptor */
+
+static const struct usb_cfgdesc_s g_rndis_cfgdesc =
 {
-#ifndef CONFIG_RNDIS_COMPOSITE
+  .len          = USB_SIZEOF_CFGDESC,
+  .type         = USB_DESC_TYPE_CONFIG,
+  .totallen     =
   {
-    .len          = USB_SIZEOF_CFGDESC,
-    .type         = USB_DESC_TYPE_CONFIG,
-    .totallen     =
-    {
-      0, 0
-    },
-    .ninterfaces  = RNDIS_NINTERFACES,
-    .cfgvalue     = RNDIS_CONFIGID,
-    .icfg         = 0,
-    .attr         = USB_CONFIG_ATTR_ONE | USB_CONFIG_ATTR_SELFPOWER,
-    .mxpower      = (CONFIG_USBDEV_MAXPOWER + 1) / 2
+    0, 0
   },
+  .ninterfaces  = RNDIS_NINTERFACES,
+  .cfgvalue     = RNDIS_CONFIGID,
+  .icfg         = 0,
+  .attr         = USB_CONFIG_ATTR_ONE | USB_CONFIG_ATTR_SELFPOWER,
+  .mxpower      = (CONFIG_USBDEV_MAXPOWER + 1) / 2
+};
 #elif defined(CONFIG_COMPOSITE_IAD)
-  {
-    .len          = USB_SIZEOF_IADDESC,
-    .type         = USB_DESC_TYPE_INTERFACEASSOCIATION,
-    .firstif      = 0,
-    .nifs         = RNDIS_NINTERFACES,
-    .classid      = 0xef,
-    .subclass     = 0x04,
-    .protocol     = 0x01,
-    .ifunction    = 0
-  },
+
+  /* Interface association descriptor */
+
+static const struct usb_iaddesc_s g_rndis_assoc_desc =
+{
+  .len          = USB_SIZEOF_IADDESC,
+  .type         = USB_DESC_TYPE_INTERFACEASSOCIATION,
+  .firstif      = 0,
+  .nifs         = RNDIS_NINTERFACES,
+  .classid      = 0xef,
+  .subclass     = 0x04,
+  .protocol     = 0x01,
+  .ifunction    = 0
+};
 #endif
-  {
-    .len          = USB_SIZEOF_IFDESC,
-    .type         = USB_DESC_TYPE_INTERFACE,
-    .ifno         = 0,
-    .alt          = 0,
-    .neps         = 1,
-    .classid      = USB_CLASS_CDC,
-    .subclass     = CDC_SUBCLASS_ACM,
-    .protocol     = CDC_PROTO_VENDOR,
-    .iif          = 0
-  },
-  {
-    .len          = USB_SIZEOF_EPDESC,
-    .type         = USB_DESC_TYPE_ENDPOINT,
-#ifndef CONFIG_RNDIS_COMPOSITE
-    .addr         = RNDIS_EPINTIN_ADDR,
-#endif
-    .attr         = USB_EP_ATTR_XFER_INT,
-    .mxpacketsize =
+
+  /* Communication interface descriptor */
+
+static const struct usb_ifdesc_s g_rndis_comm_ifdesc =
+{
+  .len          = USB_SIZEOF_IFDESC,
+  .type         = USB_DESC_TYPE_INTERFACE,
+  .ifno         = 0,
+  .alt          = 0,
+  .neps         = 1,
+  .classid      = USB_CLASS_CDC,
+  .subclass     = CDC_SUBCLASS_ACM,
+  .protocol     = CDC_PROTO_VENDOR,
+  .iif          = 0
+};
+
+  /* Interrupt endpoint descriptor */
+
+static const struct usbdev_epinfo_s g_rndis_epintindesc =
+{
+  .desc =
     {
-      LSBYTE(16), MSBYTE(16)
-    },
-    .interval = 1
-  },
-  {
-    .len          = USB_SIZEOF_IFDESC,
-    .type         = USB_DESC_TYPE_INTERFACE,
-    .ifno         = 1,
-    .alt          = 0,
-    .neps         = 2,
-    .classid      = USB_CLASS_CDC_DATA,
-    .subclass     = 0,
-    .protocol     = 0,
-    .iif          = 0
-  },
-  {
-    .len          = USB_SIZEOF_EPDESC,
-    .type         = USB_DESC_TYPE_ENDPOINT,
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
 #ifndef CONFIG_RNDIS_COMPOSITE
-    .addr         = RNDIS_EPBULKIN_ADDR,
-#endif
-    .attr         = USB_EP_ATTR_XFER_BULK,
-#ifdef CONFIG_USBDEV_DUALSPEED
-    .mxpacketsize =
-    {
-      LSBYTE(512), MSBYTE(512)
-    },
-    .interval     = 0
+      .addr      = RNDIS_EPINTIN_ADDR,
 #else
-    .mxpacketsize =
-    {
-      LSBYTE(64), MSBYTE(64)
+      .addr      = USB_DIR_IN,
+#endif
+      .attr      = USB_EP_ATTR_XFER_INT,
+      .interval  = 10
     },
-    .interval     = 1
-#endif
-  },
-  {
-    .len          = USB_SIZEOF_EPDESC,
-    .type         = USB_DESC_TYPE_ENDPOINT,
-#ifndef CONFIG_RNDIS_COMPOSITE
-    .addr         = RNDIS_EPBULKOUT_ADDR,
-#endif
-    .attr         = USB_EP_ATTR_XFER_BULK,
+  .reqnum        = 1,
+  .fssize        = CONFIG_RNDIS_EPINTIN_FSSIZE,
 #ifdef CONFIG_USBDEV_DUALSPEED
-    .mxpacketsize =
-    {
-      LSBYTE(512), MSBYTE(512)
-    },
-    .interval     = 0
-#else
-    .mxpacketsize =
-    {
-      LSBYTE(64), MSBYTE(64)
-    },
-    .interval     = 1
+  .hssize        = CONFIG_RNDIS_EPINTIN_HSSIZE,
 #endif
-  }
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize        = CONFIG_RNDIS_EPINTIN_HSSIZE,
+  .compdesc      =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_RNDIS_EPINTIN_MAXBURST,
+      .attr      = 0,
+      .wbytes[0] = LSBYTE((CONFIG_RNDIS_EPINTIN_MAXBURST + 1) *
+                           CONFIG_RNDIS_EPINTIN_HSSIZE),
+      .wbytes[1] = MSBYTE((CONFIG_RNDIS_EPINTIN_MAXBURST + 1) *
+                           CONFIG_RNDIS_EPINTIN_HSSIZE),
+    },
+#endif
+};
+
+  /* Data interface descriptor */
+
+static const struct usb_ifdesc_s g_rndis_data_ifdesc =
+{
+  .len          = USB_SIZEOF_IFDESC,
+  .type         = USB_DESC_TYPE_INTERFACE,
+  .ifno         = 1,
+  .alt          = 0,
+  .neps         = 2,
+  .classid      = USB_CLASS_CDC_DATA,
+  .subclass     = 0,
+  .protocol     = 0,
+  .iif          = 0
+};
+
+  /* Bulk in interface descriptor */
+
+static const struct usbdev_epinfo_s g_rndis_epbulkindesc =
+{
+  .desc =
+    {
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
+#ifndef CONFIG_RNDIS_COMPOSITE
+      .addr      = RNDIS_EPBULKIN_ADDR,
+#else
+      .addr      = USB_DIR_IN,
+#endif
+      .attr      = USB_EP_ATTR_XFER_BULK,
+#ifdef CONFIG_USBDEV_DUALSPEED
+      .interval  = 0
+#else
+      .interval  = 1
+#endif
+    },
+  .reqnum        = 1,
+  .fssize        = CONFIG_RNDIS_EPBULKIN_FSSIZE,
+#ifdef CONFIG_USBDEV_DUALSPEED
+  .hssize        = CONFIG_RNDIS_EPBULKIN_HSSIZE,
+#endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize        = CONFIG_RNDIS_EPBULKIN_SSSIZE,
+  .compdesc      =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_RNDIS_EPBULKIN_MAXBURST,
+      .attr      = CONFIG_RNDIS_EPBULKIN_MAXSTREAM,
+      .wbytes[0] = 0,
+      .wbytes[1] = 0,
+    },
+#endif
+};
+
+  /* Bulk out interface descriptor */
+
+static const struct usbdev_epinfo_s g_rndis_epbulkoutdesc =
+{
+  .desc =
+    {
+      .len       = USB_SIZEOF_EPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT,
+#ifndef CONFIG_RNDIS_COMPOSITE
+      .addr      = RNDIS_EPBULKOUT_ADDR,
+#else
+      .addr      = USB_DIR_OUT,
+#endif
+      .attr      = USB_EP_ATTR_XFER_BULK,
+#ifdef CONFIG_USBDEV_DUALSPEED
+      .interval  = 0
+#else
+      .interval  = 1
+#endif
+    },
+  .reqnum        = 1,
+  .fssize        = CONFIG_RNDIS_EPBULKOUT_FSSIZE,
+#ifdef CONFIG_USBDEV_DUALSPEED
+  .hssize        = CONFIG_RNDIS_EPBULKOUT_HSSIZE,
+#endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  .sssize        = CONFIG_RNDIS_EPBULKOUT_SSSIZE,
+  .compdesc      =
+    {
+      .len       = USB_SIZEOF_SS_EPCOMPDESC,
+      .type      = USB_DESC_TYPE_ENDPOINT_COMPANION,
+      .mxburst   = CONFIG_RNDIS_EPBULKOUT_MAXBURST,
+      .attr      = CONFIG_RNDIS_EPBULKOUT_MAXSTREAM,
+      .wbytes[0] = 0,
+      .wbytes[1] = 0,
+    },
+#endif
 };
 
 /* Default MAC address given to the host side of the interface. */
@@ -452,7 +519,7 @@ static const struct rndis_oid_value_s g_rndis_oid_values[] =
     g_rndis_supported_oids
   },
   {RNDIS_OID_GEN_MAXIMUM_FRAME_SIZE,    4, CONFIG_NET_ETH_PKTSIZE,  NULL},
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   {RNDIS_OID_GEN_LINK_SPEED,            4, 100000,              NULL},
 #else
   {RNDIS_OID_GEN_LINK_SPEED,            4, 2000000,             NULL},
@@ -1871,116 +1938,6 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 }
 
 /****************************************************************************
- * Name: usbclass_copy_epdesc
- *
- * Description:
- *   Copies the requested Endpoint Description into the buffer given.
- *   Returns the number of Bytes filled in ( sizeof(struct usb_epdesc_s) ).
- *
- ****************************************************************************/
-
-static int usbclass_copy_epdesc(int epid, FAR struct usb_epdesc_s *epdesc,
-                                FAR struct usbdev_devinfo_s *devinfo,
-                                bool hispeed)
-{
-#ifndef CONFIG_USBDEV_DUALSPEED
-    UNUSED(hispeed);
-#endif
-
-    switch (epid)
-    {
-    case RNDIS_EP_INTIN_IDX:  /* Interrupt IN endpoint */
-        {
-          epdesc->len  = USB_SIZEOF_EPDESC;         /* Descriptor length */
-          epdesc->type = USB_DESC_TYPE_ENDPOINT;    /* Descriptor type */
-          epdesc->addr = RNDIS_MKEPINTIN(devinfo);  /* Endpoint address */
-          epdesc->attr = RNDIS_EPINTIN_ATTR;        /* Endpoint attributes */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-          if (hispeed)
-            {
-              /* Maximum packet size (high speed) */
-
-              epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPINTIN_HSSIZE);
-              epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPINTIN_HSSIZE);
-            }
-          else
-#endif
-            {
-              /* Maximum packet size (full speed) */
-
-              epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPINTIN_FSSIZE);
-              epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPINTIN_FSSIZE);
-            }
-
-          epdesc->interval = 10;                       /* Interval */
-      }
-      break;
-
-    case RNDIS_EP_BULKOUT_IDX:  /* Bulk OUT endpoint */
-      {
-        epdesc->len  = USB_SIZEOF_EPDESC;           /* Descriptor length */
-        epdesc->type = USB_DESC_TYPE_ENDPOINT;      /* Descriptor type */
-        epdesc->addr = RNDIS_MKEPBULKOUT(devinfo);  /* Endpoint address */
-        epdesc->attr = RNDIS_EPOUTBULK_ATTR;        /* Endpoint attributes */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-        if (hispeed)
-          {
-            /* Maximum packet size (high speed) */
-
-            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPBULKOUT_HSSIZE);
-            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPBULKOUT_HSSIZE);
-          }
-        else
-#endif
-          {
-            /* Maximum packet size (full speed) */
-
-            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPBULKOUT_FSSIZE);
-            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPBULKOUT_FSSIZE);
-          }
-
-        epdesc->interval = 0;                       /* Interval */
-      }
-      break;
-
-    case RNDIS_EP_BULKIN_IDX:  /* Bulk IN endpoint */
-      {
-        epdesc->len  = USB_SIZEOF_EPDESC;           /* Descriptor length */
-        epdesc->type = USB_DESC_TYPE_ENDPOINT;      /* Descriptor type */
-        epdesc->addr = RNDIS_MKEPBULKIN(devinfo);   /* Endpoint address */
-        epdesc->attr = RNDIS_EPINBULK_ATTR;         /* Endpoint attributes */
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-        if (hispeed)
-          {
-            /* Maximum packet size (high speed) */
-
-            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPBULKIN_HSSIZE);
-            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPBULKIN_HSSIZE);
-          }
-        else
-#endif
-          {
-            /* Maximum packet size (full speed) */
-
-            epdesc->mxpacketsize[0] = LSBYTE(CONFIG_RNDIS_EPBULKIN_FSSIZE);
-            epdesc->mxpacketsize[1] = MSBYTE(CONFIG_RNDIS_EPBULKIN_FSSIZE);
-          }
-
-        epdesc->interval = 0;                       /* Interval */
-      }
-      break;
-
-    default:
-        return 0;
-    }
-
-  return sizeof(struct usb_epdesc_s);
-}
-
-/****************************************************************************
  * Name: usbclass_mkcfgdesc
  *
  * Description:
@@ -1988,64 +1945,124 @@ static int usbclass_copy_epdesc(int epid, FAR struct usb_epdesc_s *epdesc,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_USBDEV_DUALSPEED
 static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
                                   FAR struct usbdev_devinfo_s *devinfo,
                                   uint8_t speed, uint8_t type)
-#else
-static int16_t usbclass_mkcfgdesc(FAR uint8_t *buf,
-                                  FAR struct usbdev_devinfo_s *devinfo)
-#endif
 {
-  FAR struct rndis_cfgdesc_s *dest = (FAR struct rndis_cfgdesc_s *)buf;
-  bool hispeed = false;
-  uint16_t totallen;
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (speed == USB_SPEED_HIGH);
+  uint16_t totallen = 0;
+  uint8_t epno;
+  int ret;
 
   /* Check for switches between high and full speed */
 
-  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG)
+  if (type == USB_DESC_TYPE_OTHERSPEEDCONFIG && speed < USB_SPEED_SUPER)
     {
-      hispeed = !hispeed;
+      speed = speed == USB_SPEED_HIGH ? USB_SPEED_FULL : USB_SPEED_HIGH;
     }
-#endif
 
   /* This is the total length of the configuration (not necessarily the
    * size that we will be sending now).
    */
-
-  totallen = sizeof(g_rndis_cfgdesc);
-
-  if (dest != NULL)
-    {
-      memcpy(dest, &g_rndis_cfgdesc, totallen);
-
-      usbclass_copy_epdesc(RNDIS_EP_INTIN_IDX, &dest->epintindesc,
-                           devinfo, hispeed);
-      usbclass_copy_epdesc(RNDIS_EP_BULKIN_IDX, &dest->epbulkindesc,
-                           devinfo, hispeed);
-      usbclass_copy_epdesc(RNDIS_EP_BULKOUT_IDX, &dest->epbulkoutdesc,
-                           devinfo, hispeed);
-
 #ifndef CONFIG_RNDIS_COMPOSITE
-      /* For a stand-alone device, just fill in the total length */
-
-      dest->cfgdesc.totallen[0] = LSBYTE(totallen);
-      dest->cfgdesc.totallen[1] = MSBYTE(totallen);
-#else
-      /* For composite device, apply possible offset to the interface
-       * numbers
+  if (buf != NULL)
+    {
+      /* Configuration descriptor.
+       * If the USB serial device is configured as part of  composite device,
+       * then the configuration descriptor will be provided by the
+       * composite device logic.
        */
 
-#  ifdef CONFIG_COMPOSITE_IAD
-      dest->assoc_desc.firstif += devinfo->ifnobase;
-#  endif
-      dest->comm_ifdesc.ifno   += devinfo->ifnobase;
-      dest->data_ifdesc.ifno   += devinfo->ifnobase;
-#endif
+      FAR struct usb_cfgdesc_s *dest = (FAR struct usb_cfgdesc_s *)buf;
+      int16_t size = usbclass_mkcfgdesc(NULL, NULL, speed, type);
+
+      memcpy(buf, &g_rndis_cfgdesc, sizeof(struct usb_cfgdesc_s));
+      dest->type = type;                                     /* Descriptor type */
+      dest->totallen[0] = LSBYTE(size);                      /* LS Total length */
+      dest->totallen[1] = MSBYTE(size);                      /* MS Total length */
+
+      buf += sizeof(struct usb_cfgdesc_s);
     }
+
+  totallen += sizeof(struct usb_cfgdesc_s);
+
+#elif defined(CONFIG_COMPOSITE_IAD)
+  /* Interface association descriptor */
+
+  if (buf != NULL)
+    {
+      FAR struct usb_iaddesc_s *dest = (FAR struct usb_iaddesc_s *)buf;
+
+      memcpy(dest, &g_rndis_assoc_desc, sizeof(struct usb_iaddesc_s));
+      dest->firstif += devinfo->ifnobase;
+
+      buf += sizeof(struct usb_iaddesc_s);
+    }
+
+  totallen += sizeof(struct usb_iaddesc_s);
+#endif
+
+  if (buf != NULL)
+    {
+      FAR struct usb_ifdesc_s *dest = (FAR struct usb_ifdesc_s *)buf;
+
+      memcpy(dest, &g_rndis_comm_ifdesc, sizeof(struct usb_ifdesc_s));
+#ifdef CONFIG_RNDIS_COMPOSITE
+      dest->ifno += devinfo->ifnobase;
+#endif
+      buf += sizeof(struct usb_ifdesc_s);
+    }
+
+  totallen += sizeof(struct usb_ifdesc_s);
+
+  epno = devinfo ? devinfo->epno[RNDIS_EP_INTIN_IDX] : 0;
+  ret = usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
+                           epno,
+                           speed,
+                           &g_rndis_epintindesc);
+
+  if (buf != NULL)
+    {
+      buf += ret;
+    }
+
+  totallen += ret;
+
+  if (buf != NULL)
+    {
+      FAR struct usb_ifdesc_s *dest = (FAR struct usb_ifdesc_s *)buf;
+
+      memcpy(dest, &g_rndis_data_ifdesc, sizeof(struct usb_ifdesc_s));
+#ifdef CONFIG_RNDIS_COMPOSITE
+      dest->ifno += devinfo->ifnobase;
+#endif
+      buf += sizeof(struct usb_ifdesc_s);
+    }
+
+  totallen += sizeof(struct usb_ifdesc_s);
+
+  epno = devinfo ? devinfo->epno[RNDIS_EP_BULKIN_IDX] : 0;
+  ret = usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
+                           epno,
+                           speed,
+                           &g_rndis_epbulkindesc);
+  if (buf != NULL)
+    {
+      buf += ret;
+    }
+
+  totallen += ret;
+
+  epno = devinfo ? devinfo->epno[RNDIS_EP_BULKOUT_IDX] : 0;
+  ret = usbdev_copy_epdesc((struct usb_epdesc_s *)buf,
+                           epno,
+                           speed,
+                           &g_rndis_epbulkoutdesc);
+  if (buf != NULL)
+    {
+      buf += ret;
+    }
+
+  totallen += ret;
 
   return totallen;
 }
@@ -2064,7 +2081,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
   FAR struct rndis_dev_s *priv = ((FAR struct rndis_driver_s *)driver)->dev;
   FAR struct rndis_req_s *reqcontainer;
   irqstate_t flags;
-  uint16_t reqlen;
+  size_t reqlen;
   int ret;
   int i;
 
@@ -2158,7 +2175,32 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate read requests.  The buffer size is one full packet. */
 
-  reqlen = 64;
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  if (dev->speed == USB_SPEED_SUPER ||
+      dev->speed == USB_SPEED_SUPER_PLUS)
+    {
+      if (CONFIG_RNDIS_EPBULKOUT_MAXBURST < USB_SS_BULK_EP_MAXBURST)
+        {
+          reqlen = CONFIG_RNDIS_EPBULKOUT_SSSIZE *
+                   (CONFIG_RNDIS_EPBULKOUT_MAXBURST + 1);
+        }
+      else
+        {
+          reqlen = CONFIG_RNDIS_EPBULKOUT_SSSIZE * USB_SS_BULK_EP_MAXBURST;
+        }
+    }
+  else
+#endif
+#if defined(CONFIG_USBDEV_DUALSPEED)
+  if (dev->speed == USB_SPEED_HIGH)
+    {
+      reqlen = CONFIG_RNDIS_EPBULKOUT_HSSIZE;
+    }
+  else
+#endif
+    {
+      reqlen = CONFIG_RNDIS_EPBULKOUT_FSSIZE;
+    }
 
   if (CONFIG_RNDIS_BULKOUT_REQLEN > reqlen)
     {
@@ -2188,6 +2230,37 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
       reqlen = 0;
     }
   else
+    {
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+      if (dev->speed == USB_SPEED_SUPER ||
+          dev->speed == USB_SPEED_SUPER_PLUS)
+        {
+          if (CONFIG_RNDIS_EPBULKIN_MAXBURST < USB_SS_BULK_EP_MAXBURST)
+            {
+              reqlen = CONFIG_RNDIS_EPBULKIN_SSSIZE *
+                       (CONFIG_RNDIS_EPBULKIN_MAXBURST + 1);
+            }
+          else
+            {
+              reqlen = CONFIG_RNDIS_EPBULKIN_SSSIZE *
+                       USB_SS_BULK_EP_MAXBURST;
+            }
+        }
+      else
+    #endif
+    #if defined(CONFIG_USBDEV_DUALSPEED)
+      if (dev->speed == USB_SPEED_HIGH)
+        {
+          reqlen = CONFIG_RNDIS_EPBULKIN_HSSIZE;
+        }
+      else
+    #endif
+        {
+          reqlen = CONFIG_RNDIS_EPBULKIN_FSSIZE;
+        }
+    }
+
+  if (CONFIG_RNDIS_BULKIN_REQLEN > reqlen)
     {
       reqlen = CONFIG_RNDIS_BULKIN_REQLEN;
     }
@@ -2426,8 +2499,9 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 #ifndef CONFIG_RNDIS_COMPOSITE
                 case USB_DESC_TYPE_DEVICE:
                   {
-                    ret = USB_SIZEOF_DEVDESC;
-                    memcpy(ctrlreq->buf, &g_devdesc, ret);
+                    ret = usbdev_copy_devdesc(ctrlreq->buf,
+                                              &g_devdesc,
+                                              dev->speed);
                   }
                   break;
 #endif
@@ -2443,12 +2517,8 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
 #  endif /* CONFIG_USBDEV_DUALSPEED */
                 case USB_DESC_TYPE_CONFIG:
                   {
-#  ifdef CONFIG_USBDEV_DUALSPEED
                     ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo,
-                                             dev->speed, ctrl->req);
-#  else
-                    ret = usbclass_mkcfgdesc(ctrlreq->buf, &priv->devinfo);
-#  endif
+                                             dev->speed, ctrl->value[1]);
                   }
                   break;
 #endif
@@ -2686,8 +2756,7 @@ static void usbclass_resetconfig(FAR struct rndis_dev_s *priv)
 
 static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 {
-  struct usb_epdesc_s epdesc;
-  bool hispeed = false;
+  struct usb_ss_epdesc_s epdesc;
   int ret = 0;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -2696,10 +2765,6 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_INVALIDARG), 0);
       return -EIO;
     }
-#endif
-
-#ifdef CONFIG_USBDEV_DUALSPEED
-  hispeed = (priv->usbdev->speed == USB_SPEED_HIGH);
 #endif
 
   if (config == priv->config)
@@ -2732,8 +2797,11 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 
   /* Configure the IN interrupt endpoint */
 
-  usbclass_copy_epdesc(RNDIS_EP_INTIN_IDX, &epdesc, &priv->devinfo, hispeed);
-  ret = EP_CONFIGURE(priv->epintin, &epdesc, false);
+  usbdev_copy_epdesc(&epdesc.epdesc,
+                     priv->devinfo.epno[RNDIS_EP_INTIN_IDX],
+                     priv->usbdev->speed,
+                     &g_rndis_epintindesc);
+  ret = EP_CONFIGURE(priv->epintin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPINTINCONFIGFAIL), 0);
@@ -2744,10 +2812,11 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 
   /* Configure the IN bulk endpoint */
 
-  usbclass_copy_epdesc(RNDIS_EP_BULKIN_IDX,
-                       &epdesc, &priv->devinfo, hispeed);
-  ret = EP_CONFIGURE(priv->epbulkin, &epdesc, false);
-
+  usbdev_copy_epdesc(&epdesc.epdesc,
+                     priv->devinfo.epno[RNDIS_EP_BULKIN_IDX],
+                     priv->usbdev->speed,
+                     &g_rndis_epbulkindesc);
+  ret = EP_CONFIGURE(priv->epbulkin, &epdesc.epdesc, false);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKINCONFIGFAIL), 0);
@@ -2758,10 +2827,11 @@ static int usbclass_setconfig(FAR struct rndis_dev_s *priv, uint8_t config)
 
   /* Configure the OUT bulk endpoint */
 
-  usbclass_copy_epdesc(RNDIS_EP_BULKOUT_IDX,
-                       &epdesc, &priv->devinfo, hispeed);
-  ret = EP_CONFIGURE(priv->epbulkout, &epdesc, true);
-
+  usbdev_copy_epdesc(&epdesc.epdesc,
+                     priv->devinfo.epno[RNDIS_EP_BULKOUT_IDX],
+                     priv->usbdev->speed,
+                     &g_rndis_epbulkoutdesc);
+  ret = EP_CONFIGURE(priv->epbulkout, &epdesc.epdesc, true);
   if (ret < 0)
     {
       usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_EPBULKOUTCONFIGFAIL), 0);
@@ -2851,7 +2921,9 @@ static int usbclass_classobject(int minor,
 
   /* Initialize the USB class driver structure */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
+#if defined(CONFIG_USBDEV_SUPERSPEED)
+  drvr->drvr.speed         = USB_SPEED_SUPER;
+#elif defined(CONFIG_USBDEV_DUALSPEED)
   drvr->drvr.speed         = USB_SPEED_HIGH;
 #else
   drvr->drvr.speed         = USB_SPEED_FULL;
@@ -3014,11 +3086,8 @@ void usbdev_rndis_get_composite_devdesc(struct composite_devdesc_s *dev)
 
   /* Let the construction function calculate the size of config descriptor */
 
-#ifdef CONFIG_USBDEV_DUALSPEED
-  dev->cfgdescsize  = usbclass_mkcfgdesc(NULL, NULL, USB_SPEED_UNKNOWN, 0);
-#else
-  dev->cfgdescsize  = usbclass_mkcfgdesc(NULL, NULL);
-#endif
+  dev->cfgdescsize         = usbclass_mkcfgdesc(NULL, NULL,
+                                                USB_SPEED_UNKNOWN, 0);
 
   /* Board-specific logic must provide the device minor */
 

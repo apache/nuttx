@@ -78,7 +78,8 @@
 
 static int     nand_markblock(FAR struct nand_dev_s *nand, off_t block);
 static int     nand_checkblock(FAR struct nand_dev_s *nand, off_t block);
-#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+#if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_INFO) && \
+    defined(CONFIG_DEBUG_FS)
 static int     nand_devscan(FAR struct nand_dev_s *nand);
 #endif
 

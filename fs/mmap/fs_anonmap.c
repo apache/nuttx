@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include "fs_anonmap.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Private Functions
@@ -43,7 +44,7 @@ static int unmap_anonymous(FAR struct task_group_s *group,
                            FAR void *start,
                            size_t length)
 {
-  FAR void *newaddr;
+  FAR void *newaddr = NULL;
   off_t offset;
   bool kernel = entry->priv.i;
   int ret = OK;

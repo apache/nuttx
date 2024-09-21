@@ -289,7 +289,7 @@ int IRAM_ATTR cache_dbus_mmu_map(int vaddr, int paddr, int num)
   irqstate_t flags;
   uint32_t actual_mapped_len;
   uint32_t cache_state[CONFIG_SMP_NCPUS];
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 #ifdef CONFIG_SMP
   bool smp_start = OSINIT_OS_READY();
   int other_cpu = cpu ? 0 : 1;
@@ -608,7 +608,7 @@ int IRAM_ATTR esp_spiram_init(void)
       merr("Expected %dMB chip but found %dMB chip. Bailing out..",
            (CONFIG_ESP32S3_SPIRAM_SIZE / 1024 / 1024),
            (psram_physical_size / 1024 / 1024));
-      return ;
+      return;
     }
 #endif
 

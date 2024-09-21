@@ -216,7 +216,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
 
   systimer_ll_clear_alarm_int(priv->hal.dev, SYSTIMER_ALARM_ESPTIMER);
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   /* Check if there is a timer running */
 
@@ -286,7 +286,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 
   return OK;
 }
@@ -425,6 +425,47 @@ void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
 }
 
 /****************************************************************************
+ * Name: esp_hr_timer_start_once
+ *
+ * Description:
+ *   Start the High Resolution Timer with one shot mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_start_once(struct esp_hr_timer_s *timer, uint64_t timeout)
+{
+  esp_hr_timer_start(timer, timeout, false);
+}
+
+/****************************************************************************
+ * Name: esp_hr_timer_start_periodic
+ *
+ * Description:
+ *   Start the High Resolution Timer with periodic mode.
+ *
+ * Input Parameters:
+ *   timer         - HR Timer pointer.
+ *   timeout       - Timeout value.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
+                                 uint64_t timeout)
+{
+  esp_hr_timer_start(timer, timeout, true);
+}
+
+/****************************************************************************
  * Name: esp_hr_timer_stop
  *
  * Description:
@@ -535,7 +576,7 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
 
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
-  flags = spin_lock_irqsave(&priv->lock);
+  flags = enter_critical_section();
 
   if (timer->state == HR_TIMER_READY)
     {
@@ -562,7 +603,7 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
     }
 
 exit:
-  spin_unlock_irqrestore(&priv->lock, flags);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

@@ -139,8 +139,7 @@ extern "C"
 
 long smh_call(unsigned int nbr, void *parm);
 
-#if defined(__KERNEL__)
-
+#if defined(CONFIG_ARCH_USE_S_MODE) && defined(__KERNEL__)
 uintptr_t sys_call0(unsigned int nbr);
 uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
 uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);

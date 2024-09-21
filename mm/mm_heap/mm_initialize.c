@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,9 +31,9 @@
 #include <debug.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -355,9 +357,16 @@ mm_initialize_pool(FAR const char *name,
 
 void mm_uninitialize(FAR struct mm_heap_s *heap)
 {
+  int i;
+
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   mempool_multiple_deinit(heap->mm_mpool);
 #endif
+
+  for (i = 0; i < CONFIG_MM_REGIONS; i++)
+    {
+      kasan_unregister(heap->mm_heapstart[i]);
+    }
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
 #  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)

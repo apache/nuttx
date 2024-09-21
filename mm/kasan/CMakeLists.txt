@@ -1,6 +1,8 @@
 # ##############################################################################
 # mm/kasan/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,9 +19,16 @@
 # the License.
 #
 # ##############################################################################
+set(SRCS hook.c)
+
 if(CONFIG_MM_KASAN)
-  target_sources(mm PRIVATE kasan.c)
-  set_source_files_properties(kasan.c PROPERTIES COMPILE_FLAGS
-                                                 -fno-sanitize=kernel-address)
-  set_source_files_properties(kasan.c PROPERTIES COMPILE_FLAGS -fno-lto)
+  list(APPEND FLAGS -fno-builtin)
+  list(APPEND FLAGS -fno-sanitize=kernel-address)
+
+  if(CONFIG_LTO_NONE)
+    list(APPEND FLAGS -fno-lto)
+  endif()
 endif()
+
+target_sources(mm PRIVATE ${SRCS})
+target_compile_options(mm PRIVATE ${FLAGS})

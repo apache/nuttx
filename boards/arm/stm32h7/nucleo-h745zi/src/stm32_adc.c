@@ -142,7 +142,7 @@ int stm32_adc_setup(int adcno)
 
   if (!initialized)
     {
-      snprintf(devname, 1, "/dev/adc%d", adcno);
+      snprintf(devname, sizeof(devname), "/dev/adc%d", adcno);
 
 #endif
 #if defined(CONFIG_STM32H7_ADC1)

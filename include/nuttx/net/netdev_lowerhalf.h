@@ -30,13 +30,10 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/atomic.h>
 
 #include <net/if.h>
 #include <netinet/in.h>
-
-#ifdef CONFIG_HAVE_ATOMICS
-#  include <stdatomic.h>
-#endif
 
 #include <nuttx/net/ip.h>
 #include <nuttx/net/net.h>
@@ -46,6 +43,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD
+#  define CONFIG_NETDEV_WORK_THREAD_POLLING_PERIOD 0
+#endif
 
 /* Layout for net packet:
  *
@@ -81,6 +82,7 @@
  */
 
 typedef struct iob_s netpkt_t;
+typedef struct iob_queue_s netpkt_queue_t;
 
 enum netpkt_type_e
 {
@@ -115,12 +117,7 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
-#ifdef CONFIG_HAVE_ATOMICS
   atomic_int quota[NETPKT_TYPENUM];
-#else
-  int quota[NETPKT_TYPENUM];
-  spinlock_t lock;
-#endif
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.
@@ -139,8 +136,8 @@ struct netdev_lowerhalf_s
 
 struct netdev_ops_s
 {
-  int (*ifup)(FAR struct netdev_lowerhalf_s *dev);
-  int (*ifdown)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*ifup)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*ifdown)(FAR struct netdev_lowerhalf_s *dev);
 
   /* transmit - Try to send a packet, non-blocking, own the netpkt and
    *            need to call netpkt_free to free it sometime later.
@@ -151,23 +148,30 @@ struct netdev_ops_s
    *       will be recycled by upper half.
    */
 
-  int (*transmit)(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt);
+  CODE int (*transmit)(FAR struct netdev_lowerhalf_s *dev,
+                       FAR netpkt_t *pkt);
 
   /* receive - Try to receive a packet, non-blocking
    *   Returned Value:
    *     A netpkt contains the packet, or NULL if no more packets.
    */
 
-  FAR netpkt_t *(*receive)(FAR struct netdev_lowerhalf_s *dev);
+  CODE FAR netpkt_t *(*receive)(FAR struct netdev_lowerhalf_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
-  int (*addmac)(FAR struct netdev_lowerhalf_s *dev, FAR const uint8_t *mac);
-  int (*rmmac)(FAR struct netdev_lowerhalf_s *dev, FAR const uint8_t *mac);
+  CODE int (*addmac)(FAR struct netdev_lowerhalf_s *dev,
+                     FAR const uint8_t *mac);
+  CODE int (*rmmac)(FAR struct netdev_lowerhalf_s *dev,
+                    FAR const uint8_t *mac);
 #endif
 #ifdef CONFIG_NETDEV_IOCTL
-  int (*ioctl)(FAR struct netdev_lowerhalf_s *dev, int cmd,
-               unsigned long arg);
+  CODE int (*ioctl)(FAR struct netdev_lowerhalf_s *dev, int cmd,
+                    unsigned long arg);
 #endif
+
+  /* reclaim - try to reclaim packets sent by netdev. */
+
+  CODE void (*reclaim)(FAR struct netdev_lowerhalf_s *dev);
 };
 
 /* This structure is a set of wireless handlers, leave unsupported operations
@@ -175,17 +179,17 @@ struct netdev_ops_s
  */
 
 #ifdef CONFIG_NETDEV_WIRELESS_HANDLER
-typedef int (*iw_handler_rw)(FAR struct netdev_lowerhalf_s *dev,
-                             FAR struct iwreq *iwr, bool set);
-typedef int (*iw_handler_ro)(FAR struct netdev_lowerhalf_s *dev,
-                             FAR struct iwreq *iwr);
+typedef CODE int (*iw_handler_rw)(FAR struct netdev_lowerhalf_s *dev,
+                                 FAR struct iwreq *iwr, bool set);
+typedef CODE int (*iw_handler_ro)(FAR struct netdev_lowerhalf_s *dev,
+                                 FAR struct iwreq *iwr);
 
 struct wireless_ops_s
 {
   /* Connect / disconnect operation, should exist if essid or bssid exists */
 
-  int (*connect)(FAR struct netdev_lowerhalf_s *dev);
-  int (*disconnect)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*connect)(FAR struct netdev_lowerhalf_s *dev);
+  CODE int (*disconnect)(FAR struct netdev_lowerhalf_s *dev);
 
   /* The following attributes need both set and get. */
 
@@ -505,5 +509,56 @@ bool netpkt_is_fragmented(FAR netpkt_t *pkt);
 
 int netpkt_to_iov(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt,
                   FAR struct iovec *iov, int iovcnt);
+
+/****************************************************************************
+ * Name: netpkt_tryadd_queue
+ *
+ * Description:
+ *   Add one net packet to the end of a queue without waiting for resources
+ *   to become free.
+ *
+ * Input Parameters:
+ *   pkt   - The packet to add
+ *   queue - The queue to add the packet to
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+#define netpkt_tryadd_queue(pkt, queue) iob_tryadd_queue(pkt, queue)
+
+/****************************************************************************
+ * Name: netpkt_remove_queue
+ *
+ * Description:
+ *   Remove one net packet from the head of a queue.
+ *
+ * Input Parameters:
+ *   queue - The queue to remove the packet from
+ *
+ * Returned Value:
+ *   The packet removed from the queue.  NULL is returned if the queue is
+ *   empty.
+ *
+ ****************************************************************************/
+
+#define netpkt_remove_queue(queue) iob_remove_queue(queue)
+
+/****************************************************************************
+ * Name: netpkt_free_queue
+ *
+ * Description:
+ *   Free all net packets in a queue.
+ *
+ * Input Parameters:
+ *   queue - The queue to free
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define netpkt_free_queue(queue) iob_free_queue(queue)
 
 #endif /* __INCLUDE_NUTTX_NET_NETDEV_LOWERHALF_H */

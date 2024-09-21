@@ -103,44 +103,37 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
-void up_allocate_kheap(void **heap_start, size_t *heap_size)
-#else
+#ifndef CONFIG_BUILD_KERNEL
 void weak_function up_allocate_heap(void **heap_start, size_t *heap_size)
-#endif
 {
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Get the unaligned size and position of the user-space heap.
    * This heap begins after the user-space .bss section at an offset
    * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
-                    CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_RAM_END - ubase;
+#ifdef CONFIG_BUILD_PROTECTED
+  uintptr_t base = (uintptr_t)USERSPACE->us_bssend;
+#else
+  uintptr_t base = g_idle_topstack;
+#endif
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
+#ifdef CONFIG_ARCH_PGPOOL_PBASE
+  size_t end = CONFIG_ARCH_PGPOOL_PBASE;
+#else
+  size_t end = CONFIG_RAM_END;
+#endif
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+  base += CONFIG_MM_KERNEL_HEAPSIZE;
+#endif
 
   /* Return the user-space heap settings */
 
   board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (void *)ubase;
-  *heap_size  = usize;
-#else
-
-  /* Return the heap settings */
-
-  board_autoled_on(LED_HEAPALLOCATE);
-  *heap_start = (void *)g_idle_topstack;
-
-#ifdef CONFIG_ARCH_PGPOOL_PBASE
-  *heap_size  = CONFIG_ARCH_PGPOOL_PBASE - g_idle_topstack;
-#else
-  *heap_size  = CONFIG_RAM_END - g_idle_topstack;
-#endif
-
-#endif
+  *heap_start = (void *)base;
+  *heap_size  = end - base;
 }
+#endif
 
 /****************************************************************************
  * Name: up_allocate_kheap
@@ -153,23 +146,40 @@ void weak_function up_allocate_heap(void **heap_start, size_t *heap_size)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
-void up_allocate_kheap(void **heap_start, size_t *heap_size)
+#ifdef CONFIG_MM_KERNEL_HEAP
+void weak_function up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
-  /* Get the unaligned size and position of the user-space heap.
-   * This heap begins after the user-space .bss section at an offset
-   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+  /* Get the unaligned size and position of the kernel-space heap.
+   * This heap begins after .bss section at an offset.
+   * If not kernel build, have to work with CONFIG_MM_KERNEL_HEAPSIZE.
+   * And have to subject alignment.
    */
 
-  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend +
-                    CONFIG_MM_KERNEL_HEAPSIZE;
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
+#ifdef CONFIG_BUILD_FLAT
+  uintptr_t base = g_idle_topstack;
+  uintptr_t size = CONFIG_MM_KERNEL_HEAPSIZE;
 
-  /* Return the kernel heap settings (i.e., the part of the heap region
-   * that was not dedicated to the user heap).
-   */
+#elif defined(CONFIG_BUILD_PROTECTED)
+  uintptr_t base = (uintptr_t)USERSPACE->us_bssend;
+  uintptr_t size = CONFIG_MM_KERNEL_HEAPSIZE;
+  DEBUGASSERT(base < (uintptr_t)CONFIG_RAM_END);
 
-  *heap_start = (void *)USERSPACE->us_bssend;
-  *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
+#elif defined(CONFIG_ARCH_PGPOOL_PBASE)
+  /* CONFIG_BUILD_KERNEL && CONFIG_ARCH_PGPOOL_PBASE */
+
+  uintptr_t base = g_idle_topstack;
+  uintptr_t size = CONFIG_ARCH_PGPOOL_PBASE - g_idle_topstack;
+# else
+  /* CONFIG_BUILD_KERNEL && !CONFIG_ARCH_PGPOOL_PBASE */
+
+  uintptr_t base = g_idle_topstack;
+  uintptr_t size = CONFIG_RAM_END - ubase;
+#endif
+
+  /* Return the kernel-space heap settings */
+
+  board_autoled_on(LED_HEAPALLOCATE);
+  *heap_start = (void *)base;
+  *heap_size  = size;
 }
 #endif

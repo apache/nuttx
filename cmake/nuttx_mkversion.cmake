@@ -1,6 +1,8 @@
 # ##############################################################################
 # cmake/nuttx_mkversion.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -28,7 +30,8 @@ execute_process(
   WORKING_DIRECTORY ${NUTTX_DIR}
   ERROR_VARIABLE NUTTX_ERROR
   OUTPUT_VARIABLE NUTTX_VERSION
-  RESULT_VARIABLE VERSION_STATUS)
+  RESULT_VARIABLE VERSION_STATUS
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(${VERSION_STATUS} AND NOT ${VERSION_STATUS} EQUAL 0)
   set(NUTTX_VERSION "0.0.0")

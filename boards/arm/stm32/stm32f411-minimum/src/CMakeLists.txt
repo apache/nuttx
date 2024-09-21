@@ -28,6 +28,22 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
 endif()
 
+if(CONFIG_USERLED)
+  list(APPEND SRCS stm32_userleds.c)
+endif()
+
+if(CONFIG_ARCH_BUTTONS)
+  list(APPEND SRCS stm32_buttons.c)
+endif()
+
+if(CONFIG_PWM)
+  list(APPEND SRCS stm32_pwm.c)
+endif()
+
+if(CONFIG_RGBLED)
+  list(APPEND SRCS stm32_rgbled.c)
+endif()
+
 if(CONFIG_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()

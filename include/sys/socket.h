@@ -27,6 +27,7 @@
 
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -262,7 +263,7 @@
 #define CMSG_NXTHDR(mhdr, cmsg) cmsg_nxthdr((mhdr), (cmsg))
 
 #define CMSG_ALIGN(len) \
-  (((len)+sizeof(long)-1) & ~(sizeof(long)-1))
+  (((len) + sizeof(long) - 1) & ~(sizeof(long) - 1))
 #define CMSG_DATA(cmsg) \
   ((FAR void *)((FAR char *)(cmsg) + CMSG_ALIGN(sizeof(struct cmsghdr))))
 #define CMSG_SPACE(len) \
@@ -277,7 +278,7 @@
 #define CMSG_OK(mhdr, cmsg) ((cmsg)->cmsg_len >= sizeof(struct cmsghdr) && \
                             (cmsg)->cmsg_len <= (unsigned long) \
                             ((mhdr)->msg_controllen - \
-                             ((char *)(cmsg) - (char *)(mhdr)->msg_control)))
+                             ((FAR char *)(cmsg) - (FAR char *)(mhdr)->msg_control)))
 #define for_each_cmsghdr(cmsg, msg) \
        for (cmsg = CMSG_FIRSTHDR(msg); \
             cmsg; \
@@ -292,9 +293,13 @@
 
 /* Desired design of maximum size and alignment (see RFC2553) */
 
-#define SS_MAXSIZE      128  /* Implementation specific max size */
-#define SS_ALIGNSIZE    (sizeof(FAR struct sockaddr *))
-                             /* Implementation specific desired alignment */
+#define SS_MAXSIZE   128               /* Implementation-defined maximum size. */
+#define SS_ALIGNSIZE (sizeof(int64_t)) /* Implementation-defined desired alignment. */
+
+/* Definitions used for sockaddr_storage structure paddings design */
+#define SS_PAD1SIZE (SS_ALIGNSIZE - sizeof(sa_family_t))
+#define SS_PAD2SIZE (SS_MAXSIZE - (sizeof(sa_family_t) + \
+                     SS_PAD1SIZE + SS_ALIGNSIZE))
 
 /* Network socket control */
 
@@ -314,10 +319,22 @@
 
 struct sockaddr_storage
 {
-  sa_family_t ss_family;     /* Address family */
-  char        ss_data[SS_MAXSIZE - sizeof(sa_family_t)];
-}
-aligned_data(SS_ALIGNSIZE);  /* Force desired alignment */
+  sa_family_t ss_family;       /* Address family */
+
+  /* Following fields are implementation-defined */
+
+  struct
+  {
+    char ss_pad1[SS_PAD1SIZE]; /* 6-byte pad; this is to make implementation-defined
+                                * pad up to alignment field that follows explicit in
+                                * the data structure */
+    int64_t ss_align;          /* Field to force desired structure storage alignment */
+    char ss_pad2[SS_PAD2SIZE]; /* 112-byte pad to achieve desired size, SS_MAXSIZE
+                                * value minus size of ss_family ss_pad1, ss_align
+                                * fields is 112. */
+  }
+  ss_data[1];
+};
 
 /* The sockaddr structure is used to define a socket address which is used
  * in the bind(), connect(), getpeername(), getsockname(), recvfrom(), and
@@ -334,8 +351,8 @@ struct sockaddr
 
 struct linger
 {
-  int  l_onoff;   /* Indicates whether linger option is enabled. */
-  int  l_linger;  /* Linger time, in seconds. */
+  int l_onoff;                  /* Indicates whether linger option is enabled. */
+  int l_linger;                 /* Linger time, in seconds. */
 };
 
 struct msghdr

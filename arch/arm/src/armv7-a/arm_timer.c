@@ -27,10 +27,11 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
+#include <arch/irq.h>
+
 #include "arm_timer.h"
 #include "barriers.h"
 #include "gic.h"
-#include "cp15.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -137,7 +138,9 @@ static inline void arm_timer_set_cval(uint64_t cval)
 
 static inline uint64_t nsec_from_count(uint64_t count, uint32_t freq)
 {
-  return (uint64_t)count * NSEC_PER_SEC / freq;
+  uint64_t sec = count / freq;
+  uint64_t nsec = (count % freq) * NSEC_PER_SEC / freq;
+  return sec * NSEC_PER_SEC + nsec;
 }
 
 static inline uint64_t nsec_to_count(uint32_t nsec, uint32_t freq)

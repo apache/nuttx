@@ -169,7 +169,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       FAR char *endp;
 
       port = strtol(servname, &endp, 10);
-      if (port > 0 && port <= 65535 && *endp == '\0')
+      if (port >= 0 && port <= 65535 && *endp == '\0')
         {
           /* Force network byte order */
 

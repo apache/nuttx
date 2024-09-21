@@ -70,7 +70,6 @@ if(CONFIG_SMP)
     APPEND
     SRCS
     arm_cpuhead.S
-    arm_cpuindex.c
     arm_cpustart.c
     arm_cpupause.c
     arm_cpuidlestack.c

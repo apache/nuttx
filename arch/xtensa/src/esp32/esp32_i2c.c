@@ -620,7 +620,7 @@ static void esp32_i2c_init_clock(struct esp32_i2c_priv_s *priv,
 
   if (clk_freq == priv->clk_freq)
     {
-      return ;
+      return;
     }
 
   esp32_i2c_set_reg(priv, I2C_SCL_LOW_PERIOD_OFFSET, half_cycles);
@@ -1248,8 +1248,8 @@ static void esp32_i2c_traceevent(struct esp32_i2c_priv_s *priv,
 
       /* Initialize the new trace entry */
 
-      trace->event  = event;
-      trace->parm   = parm;
+      trace->event = event;
+      trace->parm  = parm;
 
       /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -1500,7 +1500,7 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32_setup_irq(priv->cpu, config->periph,
                                  1, ESP32_CPUINT_LEVEL);
   if (priv->cpuint < 0)

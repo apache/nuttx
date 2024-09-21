@@ -65,16 +65,10 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
   "Load page fault",
   "Reserved",
   "Store/AMO page fault",
-#if RISCV_MAX_EXCEPTION > 15
+#ifdef CONFIG_ARCH_RV_MACHINE_ISA_1_13
   "Reserved",
-#endif
-#if RISCV_MAX_EXCEPTION > 16
   "Reserved",
-#endif
-#if RISCV_MAX_EXCEPTION > 17
   "Software check",
-#endif
-#if RISCV_MAX_EXCEPTION > 18
   "Hardware error",
 #endif
 #ifdef RISCV_CUSTOM_EXCEPTION_REASONS
@@ -97,7 +91,7 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
 int riscv_exception(int mcause, void *regs, void *args)
 {
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
 #endif
   uintreg_t cause = mcause & RISCV_IRQ_MASK;
 
@@ -119,22 +113,22 @@ int riscv_exception(int mcause, void *regs, void *args)
 
       /* Return to _exit function in privileged mode with argument SIGSEGV */
 
-      CURRENT_REGS[REG_EPC] = (uintptr_t)_exit;
-      CURRENT_REGS[REG_A0] = SIGSEGV;
-      CURRENT_REGS[REG_INT_CTX] |= STATUS_PPP;
+      up_current_regs()[REG_EPC] = (uintptr_t)_exit;
+      up_current_regs()[REG_A0] = SIGSEGV;
+      up_current_regs()[REG_INT_CTX] |= STATUS_PPP;
 
       /* Continue with kernel stack in use. The frame(s) in kernel stack
        * are no longer needed, so just set it to top
        */
 
-      CURRENT_REGS[REG_SP] = (uintptr_t)tcb->xcp.ktopstk;
+      up_current_regs()[REG_SP] = (uintptr_t)tcb->xcp.ktopstk;
     }
   else
 #endif
     {
       _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
       up_irq_save();
-      CURRENT_REGS = regs;
+      up_set_current_regs(regs);
       PANIC_WITH_REGS("panic", regs);
     }
 
@@ -177,7 +171,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   uintptr_t vaddr;
   uint32_t  ptlevel;
   uintptr_t satp;
-  uint32_t mmuflags;
+  uint64_t  mmuflags;
 
   _info("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
         ", MTVAL: %" PRIxREG "\n",
@@ -206,14 +200,14 @@ int riscv_fillpage(int mcause, void *regs, void *args)
     {
       _alert("PANIC!!! virtual address not mappable: %" PRIxPTR "\n", vaddr);
       up_irq_save();
-      CURRENT_REGS = regs;
+      up_set_current_regs(regs);
       PANIC_WITH_REGS("panic", regs);
     }
 
   satp    = READ_CSR(CSR_SATP);
   ptprev  = riscv_pgvaddr(mmu_satp_to_paddr(satp));
   ptlevel = ARCH_SPGTS;
-  paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
+  paddr   = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
   if (!paddr)
     {
       /* Nothing yet, allocate one page for final level page table */
@@ -287,7 +281,12 @@ void riscv_exception_attach(void)
 
   irq_attach(RISCV_IRQ_ECALLS, riscv_exception, NULL);
   irq_attach(RISCV_IRQ_ECALLH, riscv_exception, NULL);
+
+#ifndef CONFIG_ARCH_USE_S_MODE
+  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
+#else
   irq_attach(RISCV_IRQ_ECALLM, riscv_exception, NULL);
+#endif
 
   irq_attach(RISCV_IRQ_INSTRUCTIONPF, riscv_exception, NULL);
 

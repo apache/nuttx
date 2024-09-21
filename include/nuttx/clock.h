@@ -33,6 +33,7 @@
 #include <time.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/lib/math32.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -177,11 +178,11 @@
 
 /* ?SEC2TIC rounds up */
 
-#define NSEC2TICK(nsec)       (((nsec) + (NSEC_PER_TICK - 1)) / NSEC_PER_TICK)
-#define USEC2TICK(usec)       (((usec) + (USEC_PER_TICK - 1)) / USEC_PER_TICK)
+#define NSEC2TICK(nsec)       div_const_roundup(nsec, NSEC_PER_TICK)
+#define USEC2TICK(usec)       div_const_roundup(usec, USEC_PER_TICK)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-#  define MSEC2TICK(msec)     (((msec) + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK)
+#  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
 #endif
@@ -196,14 +197,30 @@
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define TICK2MSEC(tick)     ((tick) * MSEC_PER_TICK)
 #else
-#  define TICK2MSEC(tick)     (((tick) * USEC_PER_TICK) / USEC_PER_MSEC)
+#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), USEC_PER_MSEC)
 #endif
 
 /* TIC2?SEC rounds to nearest */
 
-#define TICK2DSEC(tick)       (((tick) + (TICK_PER_DSEC / 2)) / TICK_PER_DSEC)
-#define TICK2HSEC(tick)       (((tick) + (TICK_PER_HSEC / 2)) / TICK_PER_HSEC)
-#define TICK2SEC(tick)        (((tick) + (TICK_PER_SEC / 2)) / TICK_PER_SEC)
+#define TICK2DSEC(tick)       div_const_roundnearest(tick, TICK_PER_DSEC)
+#define TICK2HSEC(tick)       div_const_roundnearest(tick, TICK_PER_HSEC)
+#define TICK2SEC(tick)        div_const_roundnearest(tick, TICK_PER_SEC)
+
+/* MSEC2SEC */
+
+#define MSEC2SEC(usec)        div_const(msec, MSEC_PER_SEC)
+
+/* USEC2SEC */
+
+#define USEC2SEC(usec)        div_const(usec, USEC_PER_SEC)
+
+/* NSEC2USEC */
+
+#define NSEC2USEC(nsec)       div_const(nsec, NSEC_PER_USEC)
+
+/* NSEC2MSEC */
+
+#define NSEC2MSEC(nsec)       div_const(nsec, NSEC_PER_MSEC)
 
 #if defined(CONFIG_DEBUG_SCHED) && defined(CONFIG_SYSTEM_TIME64) && \
     !defined(CONFIG_SCHED_TICKLESS)
@@ -325,31 +342,44 @@ EXTERN volatile clock_t g_system_ticks;
  * Public Function Prototypes
  ****************************************************************************/
 
-#define timespec_from_tick(ts, tick) \
+#define clock_ticks2time(ts, tick) \
   do \
     { \
-      clock_t _tick = (tick); \
-      (ts)->tv_sec = _tick / TICK_PER_SEC; \
+      clock_t _tick = (clock_t)(tick); \
+      (ts)->tv_sec = (time_t)div_const(_tick, TICK_PER_SEC); \
       _tick -= (clock_t)(ts)->tv_sec * TICK_PER_SEC; \
-      (ts)->tv_nsec = _tick * NSEC_PER_TICK; \
+      (ts)->tv_nsec = (long)_tick * NSEC_PER_TICK; \
     } \
   while (0)
 
-#define timespec_to_tick(ts) \
-  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + (ts)->tv_nsec / NSEC_PER_TICK)
+#define clock_time2ticks(ts) \
+  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + NSEC2TICK((ts)->tv_nsec))
 
-/****************************************************************************
- * Name: clock_timespec_compare
- *
- * Description:
- *    Return < 0 if time ts1 is before time ts2
- *    Return > 0 if time ts2 is before time ts1
- *    Return 0 if time ts1 is the same as time ts2
- *
- ****************************************************************************/
+#define clock_usec2time(ts, usec) \
+  do \
+    { \
+      uint64_t _usec = (usec); \
+      (ts)->tv_sec = (time_t)div_const(_usec, USEC_PER_SEC); \
+      _usec -= (uint64_t)(ts)->tv_sec * USEC_PER_SEC; \
+      (ts)->tv_nsec = (long)_usec * NSEC_PER_USEC; \
+    } \
+  while (0)
 
-int clock_timespec_compare(FAR const struct timespec *ts1,
-                           FAR const struct timespec *ts2);
+#define clock_time2usec(ts) \
+  ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + div_const((ts)->tv_nsec, NSEC_PER_USEC))
+
+#define clock_nsec2time(ts, nsec) \
+  do \
+    { \
+      uint64_t _nsec = (nsec); \
+      (ts)->tv_sec = (time_t)div_const(_nsec, NSEC_PER_SEC); \
+      _nsec -= (uint64_t)(ts)->tv_sec * NSEC_PER_SEC; \
+      (ts)->tv_nsec = (long)_nsec; \
+    } \
+  while (0)
+
+#define clock_time2nsec(ts) \
+  ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (ts)->tv_nsec)
 
 /****************************************************************************
  * Name:  clock_timespec_add
@@ -366,9 +396,20 @@ int clock_timespec_compare(FAR const struct timespec *ts1,
  *
  ****************************************************************************/
 
-void clock_timespec_add(FAR const struct timespec *ts1,
-                        FAR const struct timespec *ts2,
-                        FAR struct timespec *ts3);
+#define clock_timespec_add(ts1, ts2, ts3) \
+  do \
+    { \
+      time_t _sec = (ts1)->tv_sec + (ts2)->tv_sec; \
+      long _nsec = (ts1)->tv_nsec + (ts2)->tv_nsec; \
+      if (_nsec >= NSEC_PER_SEC) \
+          { \
+          _nsec -= NSEC_PER_SEC; \
+          _sec++; \
+          } \
+      (ts3)->tv_sec = _sec; \
+      (ts3)->tv_nsec = _nsec; \
+    }\
+  while (0)
 
 /****************************************************************************
  * Name:  clock_timespec_subtract
@@ -386,9 +427,133 @@ void clock_timespec_add(FAR const struct timespec *ts1,
  *
  ****************************************************************************/
 
-void clock_timespec_subtract(FAR const struct timespec *ts1,
-                             FAR const struct timespec *ts2,
-                             FAR struct timespec *ts3);
+#define clock_timespec_subtract(ts1, ts2, ts3) \
+  do \
+    { \
+      time_t _sec = (ts1)->tv_sec - (ts2)->tv_sec; \
+      long _nsec = (ts1)->tv_nsec - (ts2)->tv_nsec; \
+      if (_nsec < 0) \
+        { \
+          _nsec += NSEC_PER_SEC; \
+          _sec--; \
+        } \
+      if ((sclock_t)_sec < 0) \
+        { \
+          _sec = 0; \
+          _nsec = 0; \
+        } \
+      (ts3)->tv_sec = _sec; \
+      (ts3)->tv_nsec = _nsec; \
+    }\
+  while (0)
+
+/****************************************************************************
+ * Name: clock_timespec_compare
+ *
+ * Description:
+ *    Return < 0 if time ts1 is before time ts2
+ *    Return > 0 if time ts2 is before time ts1
+ *    Return 0 if time ts1 is the same as time ts2
+ *
+ ****************************************************************************/
+
+#define clock_timespec_compare(ts1, ts2) \
+  (((ts1)->tv_sec < (ts2)->tv_sec) ? -1 : \
+   ((ts1)->tv_sec > (ts2)->tv_sec) ? 1 : \
+   (ts1)->tv_nsec - (ts2)->tv_nsec)
+
+/****************************************************************************
+ * Name: clock_abstime2ticks
+ *
+ * Description:
+ *   Convert an absolute timespec delay to system timer ticks.
+ *
+ * Input Parameters:
+ *   clockid - The timing source to use in the conversion
+ *   abstime - Convert this absolute time to ticks
+ *   ticks - Return the converted number of ticks here.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Interrupts should be disabled so that the time is not changing during
+ *   the calculation
+ *
+ ****************************************************************************/
+
+#define clock_abstime2ticks(clockid, abstime, ticks) \
+  do \
+    { \
+      struct timespec _reltime; \
+      nxclock_gettime(clockid, &_reltime); \
+      clock_timespec_subtract(abstime, &_reltime, &_reltime); \
+      *(ticks) = clock_time2ticks(&_reltime); \
+    } \
+  while (0)
+
+/****************************************************************************
+ * Name: clock_realtime2absticks
+ *
+ * Description:
+ *   Convert real time to monotonic ticks.
+ *
+ * Input Parameters:
+ *   mono - Return the converted time here.
+ *   abstime - Convert this absolute time to ticks
+ *
+ * Returned Value:
+ *   OK (0) on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Interrupts should be disabled so that the time is not changing during
+ *   the calculation
+ *
+ ****************************************************************************/
+
+int clock_realtime2absticks(FAR const struct timespec *reltime,
+                            FAR clock_t *absticks);
+
+/****************************************************************************
+ * Name: clock_compare
+ *
+ * Description:
+ *   This function is used for check whether the expired time is reached.
+ *   It take the ticks wrap-around into consideration.
+ *
+ * Input Parameters:
+ *   tick1 - Expected time in clock ticks
+ *   tick2 - Current time in clock ticks
+ *
+ * Returned Value:
+ *   true          - Expected ticks is timeout.
+ *   false         - Otherwise.
+ *
+ * Assumptions:
+ *   The type of delay value should be sclock_t.
+ *
+ ****************************************************************************/
+
+/* clock_compare considers tick wraparound, discussed as follows:
+ * Assuming clock_t is a 64-bit data type.
+ *
+ * Case 1: If tick2 - tick1 > 2^63, it is considered expired
+ *         or expired after tick2 wraparound.
+ *
+ * Case 2: If tick2 - tick1 <= 2^63,
+ *         it is considered not expired.
+ *
+ * For bit-63 as the sign bit, we can simplify this to:
+ * (sclock_t)(tick2 - tick1) >= 0.
+ *
+ * However, this function requires an assumption to work correctly:
+ * Assumes the timer delay time does not exceed SCLOCK_MAX (2^63 - 1).
+ *
+ * The range of the delay data type sclock_t being
+ * [- (SCLOCK_MAX + 1), SCLOCK_MAX] ensures this assumption holds.
+ */
+
+#define clock_compare(tick1, tick2) ((sclock_t)((tick2) - (tick1)) >= 0)
 
 /****************************************************************************
  * Name:  clock_isleapyear
@@ -533,51 +698,6 @@ clock_t clock_systime_ticks(void);
 #endif
 
 /****************************************************************************
- * Name: clock_time2ticks
- *
- * Description:
- *   Return the given struct timespec as systime ticks.
- *
- *   NOTE:  This is an internal OS interface and should not be called from
- *   application code.
- *
- * Input Parameters:
- *   reltime - Pointer to the time presented as struct timespec
- *
- * Output Parameters:
- *   ticks - Pointer to receive the time value presented as systime ticks
- *
- * Returned Value:
- *   Always returns OK (0)
- *
- ****************************************************************************/
-
-int clock_time2ticks(FAR const struct timespec *reltime,
-                     FAR sclock_t *ticks);
-
-/****************************************************************************
- * Name: clock_ticks2time
- *
- * Description:
- *   Return the given systime ticks as a struct timespec.
- *
- *   NOTE:  This is an internal OS interface and should not be called from
- *   application code.
- *
- * Input Parameters:
- *   ticks - Time presented as systime ticks
- *
- * Output Parameters:
- *   reltime - Pointer to receive the time value presented as struct timespec
- *
- * Returned Value:
- *   Always returns OK (0)
- *
- ****************************************************************************/
-
-int clock_ticks2time(sclock_t ticks, FAR struct timespec *reltime);
-
-/****************************************************************************
  * Name: clock_systime_timespec
  *
  * Description:
@@ -680,6 +800,29 @@ void perf_convert(clock_t elapsed, FAR struct timespec *ts);
  ****************************************************************************/
 
 unsigned long perf_getfreq(void);
+
+/****************************************************************************
+ * Name: nxclock_settime
+ *
+ * Description:
+ *   Clock Functions based on POSIX APIs
+ *
+ *   CLOCK_REALTIME - POSIX demands this to be present. This is the wall
+ *   time clock.
+ *
+ ****************************************************************************/
+
+void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp);
+
+/****************************************************************************
+ * Name: nxclock_gettime
+ *
+ * Description:
+ *   Get the current value of the specified time clock.
+ *
+ ****************************************************************************/
+
+void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp);
 
 #undef EXTERN
 #ifdef __cplusplus

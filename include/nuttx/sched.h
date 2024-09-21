@@ -72,6 +72,18 @@
 #  define CONFIG_SCHED_SPORADIC_MAXREPL 3
 #endif
 
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION -1
+#endif
+
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION -1
+#endif
+
 /* Task Management Definitions **********************************************/
 
 /* Special task IDS.  Any negative PID is invalid. */
@@ -654,14 +666,24 @@ struct tcb_s
 
   /* Pre-emption monitor support ********************************************/
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-  clock_t premp_start;                   /* Time when preemption disabled   */
-  clock_t premp_max;                     /* Max time preemption disabled    */
-  clock_t crit_start;                    /* Time critical section entered   */
-  clock_t crit_max;                      /* Max time in critical section    */
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   clock_t run_start;                     /* Time when thread begin run      */
   clock_t run_max;                       /* Max time thread run             */
   clock_t run_time;                      /* Total time thread run           */
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+  clock_t premp_start;                   /* Time when preemption disabled   */
+  clock_t premp_max;                     /* Max time preemption disabled    */
+  void   *premp_caller;                  /* Caller of preemption disabled   */
+  void   *premp_max_caller;              /* Caller of max preemption        */
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+  clock_t crit_start;                    /* Time critical section entered   */
+  clock_t crit_max;                      /* Max time in critical section    */
+  void   *crit_caller;                   /* Caller of critical section      */
+  void   *crit_max_caller;               /* Caller of max critical section  */
 #endif
 
   /* State save areas *******************************************************/
@@ -779,7 +801,7 @@ typedef CODE void (*nxsched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
 /* This is the callback type used by nxsched_smp_call() */
 
-#ifdef CONFIG_SMP_CALL
+#ifdef CONFIG_SMP
 typedef CODE int (*nxsched_smp_call_t)(FAR void *arg);
 #endif
 
@@ -799,12 +821,15 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_SCHED_CRITMONITOR
 /* Maximum time with pre-emption disabled or within critical section. */
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
 EXTERN clock_t g_premp_max[CONFIG_SMP_NCPUS];
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION  >= 0 */
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
 EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
-#endif /* CONFIG_SCHED_CRITMONITOR */
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
 
 EXTERN const struct tcbinfo_s g_tcbinfo;
 
@@ -1617,13 +1642,13 @@ size_t nxsched_collect_deadlock(FAR pid_t *pid, size_t count);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_ON_EXIT
 void nxsched_dumponexit(void);
 #else
 #  define nxsched_dumponexit()
-#endif /* CONFIG_DUMP_ON_EXIT */
+#endif /* CONFIG_SCHED_DUMP_ON_EXIT */
 
-#ifdef CONFIG_SMP_CALL
+#ifdef CONFIG_SMP
 /****************************************************************************
  * Name: nxsched_smp_call_handler
  *

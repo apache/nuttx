@@ -84,6 +84,7 @@ struct mmcsd_state_s
   uint8_t mode:4;                  /* (See MMCSDMODE_* definitions) */
   uint8_t type:4;                  /* Card type (See MMCSD_CARDTYPE_* definitions) */
   uint8_t buswidth:4;              /* Bus widths supported (SD only) */
+  uint8_t cmd23support:1;          /* CMD23 supported (SD only) */
   sdio_capset_t caps;              /* SDIO driver capabilities/limitations */
   uint32_t cid[4];                 /* CID register */
   uint32_t csd[4];                 /* CSD register */

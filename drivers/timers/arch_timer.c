@@ -61,14 +61,6 @@ static struct arch_timer_s g_timer;
  * Private Functions
  ****************************************************************************/
 
-static inline void timespec_from_usec(FAR struct timespec *ts,
-                                      uint64_t microseconds)
-{
-  ts->tv_sec    = microseconds / USEC_PER_SEC;
-  microseconds -= (uint64_t)ts->tv_sec * USEC_PER_SEC;
-  ts->tv_nsec   = microseconds * NSEC_PER_USEC;
-}
-
 #ifdef CONFIG_SCHED_TICKLESS
 
 static uint32_t update_timeout(uint32_t timeout)
@@ -283,6 +275,20 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
 
   return ret;
 }
+
+int weak_function up_timer_gettime(struct timespec *ts)
+{
+  int ret = -EAGAIN;
+
+  if (g_timer.lower != NULL)
+    {
+      ts->tv_sec  = current_usec() / USEC_PER_SEC;
+      ts->tv_nsec = (current_usec() % USEC_PER_SEC) * NSEC_PER_USEC;
+      ret = OK;
+    }
+
+  return ret;
+}
 #endif
 
 /****************************************************************************
@@ -421,7 +427,7 @@ unsigned long up_perf_getfreq(void)
 void up_perf_convert(unsigned long elapsed,
                      FAR struct timespec *ts)
 {
-  timespec_from_usec(ts, elapsed);
+  clock_usec2time(ts, elapsed);
 }
 #endif /* CONFIG_ARCH_PERF_EVENTS */
 

@@ -31,6 +31,7 @@
 
 #include <nuttx/fs/fs.h>
 
+#include "notify/notify.h"
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -165,6 +166,9 @@ int rmdir(FAR const char *pathname)
 
   inode_release(inode);
   RELEASE_SEARCH(&desc);
+#ifdef CONFIG_FS_NOTIFY
+  notify_unlink(pathname);
+#endif
   return OK;
 
 errout_with_inode:

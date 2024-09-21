@@ -47,6 +47,10 @@ config ARM_TOOLCHAIN_ARMCLANG
 	bool "ARM Compiler Clang toolchain"
 	select ARCH_TOOLCHAIN_CLANG
 
+config ARM_TOOLCHAIN_GHS
+	bool "ARM Compiler Green Hills Software toolchain"
+	select ARCH_TOOLCHAIN_GHS
+
 endchoice # ARM Toolchain Selection
 
 choice
@@ -325,7 +329,6 @@ config ARCH_CHIP_RP2040
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_WFE_SEV
-	select LIBC_ARCH_ATOMIC
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_BOARD_COMMON
 	---help---
@@ -437,6 +440,23 @@ config ARCH_CHIP_STM32
 	select ARCH_HAVE_ADJTIME
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
+
+config ARCH_CHIP_CSK6
+	bool "STMicro STM6 6001A/6011B/6012"
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV8M_HAVE_STACKCHECK
+	select ARCH_HAVE_ADJTIME
+	select ARCH_CORTEXM33
+	---help---
+		LISTEANAI CSK6architectures (ARM Cortex-M33).		
 
 config ARCH_CHIP_STM32F0
 	bool "STMicro STM32 F0"
@@ -632,13 +652,13 @@ config ARCH_CHIP_CXD56XX
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_SDIO if MMCSD
 	select ARCH_HAVE_MATH_H
+	select ARCH_HAVE_I2CRESET
 	---help---
 		Sony CXD56XX (ARM Cortex-M4) architectures
 
 config ARCH_CHIP_PHY62XX
 	bool "Phyplus PHY62XX BLE"
 	select ARCH_CORTEXM0
-	select LIBC_ARCH_ATOMIC
 	---help---
 		Phyplus PHY62XX architectures (ARM Cortex-M0).
 
@@ -646,7 +666,6 @@ config ARCH_CHIP_TLSR82
 	bool "Telink TLSR82XX"
 	select ARCH_ARMV6M
 	select ARCH_HAVE_RESET
-	select LIBC_ARCH_ATOMIC
 	---help---
 		Telink tlsr82xx architectures (Customed armv6m)
 
@@ -660,6 +679,7 @@ config ARCH_CHIP_QEMU_ARM
 	select ARCH_HAVE_PSCI
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_RESET
+	select ARCH_IDLE_CUSTOM
 	---help---
 		QEMU virt platform (ARMv7a)
 
@@ -1113,6 +1133,7 @@ config ARCH_CHIP
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 	default "at32"		if ARCH_CHIP_AT32
 	default "cxd32xx"	if ARCH_CHIP_CXD32XX
+	default "csk6"		if ARCH_CHIP_CSK6
 
 config ARM_THUMB
 	bool "Thumb Mode"

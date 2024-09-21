@@ -232,6 +232,10 @@
 
 #ifndef __ASSEMBLY__
 
+/* Work queue forward declaration */
+
+struct kwork_wqueue_s;
+
 /* Defines the work callback */
 
 typedef CODE void (*worker_t)(FAR void *arg);
@@ -247,13 +251,14 @@ struct work_s
   {
     struct
     {
-      struct dq_entry_s dq; /* Implements a double linked list */
-      clock_t qtime;        /* Time work queued */
+      struct dq_entry_s dq;      /* Implements a double linked list */
+      clock_t qtime;             /* Time work queued */
     } s;
-    struct wdog_s timer;    /* Delay expiry timer */
+    struct wdog_s timer;         /* Delay expiry timer */
   } u;
-  worker_t  worker;         /* Work callback */
-  FAR void *arg;            /* Callback argument */
+  worker_t  worker;              /* Work callback */
+  FAR void *arg;                 /* Callback argument */
+  FAR struct kwork_wqueue_s *wq; /* Work queue */
 };
 
 /* This is an enumeration of the various events that may be
@@ -330,7 +335,50 @@ int work_usrstart(void);
 #endif
 
 /****************************************************************************
- * Name: work_queue
+ * Name: work_queue_create
+ *
+ * Description:
+ *   Create a new work queue. The work queue is identified by its work
+ *   queue ID, which is used to queue works to the work queue and to
+ *   perform other operations on the work queue.
+ *   This function will create a work thread pool with nthreads threads.
+ *   The work queue ID is returned on success.
+ *
+ * Input Parameters:
+ *   name       - Name of the new task
+ *   priority   - Priority of the new task
+ *   stack_size - size (in bytes) of the stack needed
+ *   nthreads   - Number of work thread should be created
+ *
+ * Returned Value:
+ *   The work queue handle returned on success.  Otherwise, NULL
+ *
+ ****************************************************************************/
+
+FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
+                                             int priority,
+                                             int stack_size, int nthreads);
+
+/****************************************************************************
+ * Name: work_queue_free
+ *
+ * Description:
+ *   Destroy a work queue. The work queue is identified by its work queue ID.
+ *   All worker threads will be destroyed and the work queue will be freed.
+ *   The work queue ID is invalid after this function returns.
+ *
+ * Input Parameters:
+ *  wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   Zero on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int work_queue_free(FAR struct kwork_wqueue_s *wqueue);
+
+/****************************************************************************
+ * Name: work_queue/work_queue_wq
  *
  * Description:
  *   Queue work to be performed at a later time.  All queued work will be
@@ -344,7 +392,8 @@ int work_usrstart(void);
  *   pending work will be canceled and lost.
  *
  * Input Parameters:
- *   qid    - The work queue ID
+ *   qid    - The work queue ID (must be HPWORK or LPWORK)
+ *   wqueue - The work queue handle
  *   work   - The work structure to queue
  *   worker - The worker callback to be invoked.  The callback will be
  *            invoked on the worker thread of execution.
@@ -360,9 +409,30 @@ int work_usrstart(void);
 
 int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, clock_t delay);
+int work_queue_wq(FAR struct kwork_wqueue_s *wqueue,
+                  FAR struct work_s *work, worker_t worker,
+                  FAR void *arg, clock_t delay);
 
 /****************************************************************************
- * Name: work_cancel
+ * Name: work_queue_pri
+ *
+ * Description: Get priority of the wqueue. We believe that all worker
+ *   threads have the same priority.
+ *
+ * Input Parameters:
+ *  wqueue - The work queue handle
+ *
+ * Returned Value:
+ *   SCHED_PRIORITY_MIN ~ SCHED_PRIORITY_MAX  on success,
+ *   a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int work_queue_priority(int qid);
+int work_queue_priority_wq(FAR struct kwork_wqueue_s *wqueue);
+
+/****************************************************************************
+ * Name: work_cancel/work_cancel_wq
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
@@ -370,7 +440,8 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  *   work_queue() again.
  *
  * Input Parameters:
- *   qid    - The work queue ID
+ *   qid    - The work queue ID (must be HPWORK or LPWORK)
+ *   wqueue - The work queue handle
  *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
@@ -382,9 +453,11 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  ****************************************************************************/
 
 int work_cancel(int qid, FAR struct work_s *work);
+int work_cancel_wq(FAR struct kwork_wqueue_s *wqueue,
+                   FAR struct work_s *work);
 
 /****************************************************************************
- * Name: work_cancel_sync
+ * Name: work_cancel_sync/work_cancel_sync_wq
  *
  * Description:
  *   Blocked cancel previously queued user-mode work.  This removes work
@@ -393,11 +466,14 @@ int work_cancel(int qid, FAR struct work_s *work);
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
+ *   wqueue - The work queue handle
  *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
- *   Zero (OK) on success, a negated errno on failure.  This error may be
- *   reported:
+ *   Zero means the work was successfully cancelled.
+ *   One means the work was not cancelled because it is currently being
+ *   processed by work thread, but wait for it to finish.
+ *   A negated errno value is returned on any failure:
  *
  *   -ENOENT - There is no such work queued.
  *   -EINVAL - An invalid work queue was specified
@@ -405,25 +481,8 @@ int work_cancel(int qid, FAR struct work_s *work);
  ****************************************************************************/
 
 int work_cancel_sync(int qid, FAR struct work_s *work);
-
-/****************************************************************************
- * Name: work_foreach
- *
- * Description:
- *   Enumerate over each work thread and provide the tid of each task to a
- *   user callback functions.
- *
- * Input Parameters:
- *   qid     - The work queue ID
- *   handler - The function to be called with the pid of each task
- *   arg     - The function callback
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void work_foreach(int qid, work_foreach_t handler, FAR void *arg);
+int work_cancel_sync_wq(FAR struct kwork_wqueue_s *wqueue,
+                        FAR struct work_s *work);
 
 /****************************************************************************
  * Name: work_available

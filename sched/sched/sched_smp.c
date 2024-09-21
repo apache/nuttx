@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_smp.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -121,6 +123,7 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
 
   call_queue = &g_smp_call_queue[cpu];
 
+  up_cpu_paused_save();
   sq_for_every_safe(call_queue, curr, next)
     {
       FAR struct smp_call_data_s *call_data =
@@ -154,6 +157,7 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
       flags = enter_critical_section();
     }
 
+  up_cpu_paused_restore();
   leave_critical_section(flags);
   return OK;
 }

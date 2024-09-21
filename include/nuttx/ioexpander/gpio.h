@@ -150,17 +150,31 @@ struct gpio_dev_s
    * driver when gpio_pin_register() is called.
    */
 
-  uint8_t gp_pintype;  /* See enum gpio_pintype_e */;
+  uint8_t gp_pintype;  /* See enum gpio_pintype_e */
+
+  /* Number of times the device has been registered by ioctl */
+
+  uint8_t register_count;
+
+  /* Number of times interrupt occured */
+
+  uintptr_t int_count;
 
   /* Writable storage used by the upper half driver */
 
+#if CONFIG_DEV_GPIO_NSIGNALS > 0
   struct gpio_signal_s gp_signals[CONFIG_DEV_GPIO_NSIGNALS];
+#endif
 
   /* Read-only pointer to GPIO device operations (also provided by the
    * lower half driver).
    */
 
   FAR const struct gpio_operations_s *gp_ops;
+
+#if CONFIG_DEV_GPIO_NPOLLWAITERS > 0
+  FAR struct pollfd *fds[CONFIG_DEV_GPIO_NPOLLWAITERS];
+#endif
 
   /* Device specific, lower-half information may follow. */
 };

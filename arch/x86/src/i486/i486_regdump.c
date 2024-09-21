@@ -49,7 +49,7 @@ uintptr_t up_getusrsp(void *regs)
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uint32_t *regs = dumpregs ? dumpregs : g_current_regs;
+  volatile uint32_t *regs = dumpregs ? dumpregs : up_current_regs();
 
   _alert(" ds:%08x irq:%08x err:%08x\n",
          regs[REG_DS], regs[REG_IRQNO], regs[REG_ERRCODE]);

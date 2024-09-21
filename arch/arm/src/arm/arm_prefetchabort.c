@@ -68,13 +68,13 @@ void arm_prefetchabort(uint32_t *regs)
 #ifdef CONFIG_LEGACY_PAGING
   uint32_t *savestate;
 
-  /* Save the saved processor context in CURRENT_REGS where it can be
+  /* Save the saved processor context in current_regs where it can be
    * accessed for register dumps and possibly context switching.
    */
 
-  savestate    = (uint32_t *)CURRENT_REGS;
+  savestate = up_current_regs();
 #endif
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
 
 #ifdef CONFIG_LEGACY_PAGING
   /* Get the (virtual) address of instruction that caused the prefetch
@@ -114,12 +114,12 @@ void arm_prefetchabort(uint32_t *regs)
 
       pg_miss();
 
-      /* Restore the previous value of CURRENT_REGS.  NULL would indicate
+      /* Restore the previous value of current_regs.  NULL would indicate
        * that we are no longer in an interrupt handler.  It will be non-NULL
        * if we are returning from a nested interrupt.
        */
 
-      CURRENT_REGS = savestate;
+      up_set_current_regs(savestate);
     }
   else
 #endif

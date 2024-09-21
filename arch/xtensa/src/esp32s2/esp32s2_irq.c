@@ -81,6 +81,12 @@
 #define ESP32S2_MAX_PRIORITY    5
 #define ESP32S2_PRIO_INDEX(p)   ((p) - ESP32S2_MIN_PRIORITY)
 
+#ifdef CONFIG_ESPRESSIF_WIFI
+#  define ESP32S2_WIFI_RESERVE_INT  (1 << ESP32S2_CPUINT_MAC)
+#else
+#  define ESP32S2_WIFI_RESERVE_INT  0
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -99,7 +105,8 @@ static uint32_t g_intenable;
  * devices.
  */
 
-static uint32_t g_cpu_freeints = ESP32S2_CPUINT_PERIPHSET;
+static uint32_t g_cpu_freeints = ESP32S2_CPUINT_PERIPHSET &
+                                 ~ESP32S2_WIFI_RESERVE_INT;
 
 /* Bitsets for each interrupt priority 1-5 */
 
@@ -287,12 +294,23 @@ void up_irqinitialize(void)
   /* Hard code special cases. */
 
   g_irqmap[XTENSA_IRQ_TIMER0] = ESP32S2_CPUINT_TIMER0;
-
   g_irqmap[XTENSA_IRQ_SWINT]  = ESP32S2_CPUINT_SOFTWARE1;
+#ifdef CONFIG_ESPRESSIF_WIFI
+  g_irqmap[ESP32S2_IRQ_MAC] = ESP32S2_CPUINT_MAC;
+  g_irqmap[ESP32S2_IRQ_PWR] = ESP32S2_CPUINT_PWR;
+#endif
 
   /* Initialize CPU interrupts */
 
   esp32s2_cpuint_initialize();
+
+  /* Reserve interrupt for some special drivers */
+
+#ifdef CONFIG_ESPRESSIF_WIFI
+  g_cpu_intmap[ESP32S2_CPUINT_MAC] = CPUINT_ASSIGN(ESP32S2_IRQ_MAC);
+  g_cpu_intmap[ESP32S2_CPUINT_PWR] = CPUINT_ASSIGN(ESP32S2_IRQ_PWR);
+  xtensa_enable_cpuint(&g_intenable, 1 << ESP32S2_CPUINT_MAC);
+#endif
 
 #ifdef CONFIG_ESP32S2_GPIO_IRQ
   /* Initialize GPIO interrupt support */
@@ -634,4 +652,3 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
 
   return regs;
 }
-

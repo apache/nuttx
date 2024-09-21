@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_removeblocked.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,7 +57,7 @@
 
 void nxsched_remove_blocked(FAR struct tcb_s *btcb)
 {
-  tstate_t task_state = btcb->task_state;
+  tstate_t task_state = (tstate_t)btcb->task_state;
 
   /* Make sure the TCB is in a valid blocked state */
 

@@ -128,6 +128,18 @@ config AUDIO_FORMAT_OGG_VORBIS
 	---help---
 		Build in support for the Open Source Ogg Vorbis format.
 
+config AUDIO_FORMAT_AMR
+	bool "AMR Format"
+	default y
+	---help---
+		Build in support for AMR Audio format.
+
+config AUDIO_FORMAT_OPUS
+	bool "OPUS Format"
+	default y
+	---help---
+		Build in support for OPUS Audio format.
+
 endmenu
 
 menu "Exclude Specific Audio Features"

@@ -90,7 +90,7 @@ int board_max6675_initialize(int devno, int busno)
 
   /* Then register the temperature sensor */
 
-  snprintf(devpath, 12, "/dev/temp%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/temp%d", devno);
   ret = max6675_register(devpath, spi);
   if (ret < 0)
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/tcp/tcp_send_buffered.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -629,6 +631,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 #endif
 #endif
                     }
+
+#ifdef CONFIG_NET_TCP_CC_NEWRENO
+                  conn->dupacks = 0;
+#endif
                 }
             }
         }
@@ -1054,11 +1060,11 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           ninfo("SEND: wrb=%p seq=%" PRIu32 " pktlen=%u sent=%u sndlen=%zu "
-                "mss=%u snd_wnd=%u seq=%" PRIu32
+                "mss=%u snd_wnd=%" PRIu32 " seq=%" PRIu32
                 " remaining_snd_wnd=%" PRIu32 "\n",
                 wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb),
                 sndlen, conn->mss,
-                conn->snd_wnd, seq, remaining_snd_wnd);
+                (uint32_t)conn->snd_wnd, seq, remaining_snd_wnd);
 
           /* The TCP stack updates sndseq on receipt of ACK *before*
            * this function is called. In that case sndseq will point

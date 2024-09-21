@@ -141,6 +141,7 @@ void up_irqinitialize(void)
   /* Register the pause handler */
 
   sim_init_ipi(SIGUSR1);
+  sim_init_func_call_ipi(SIGUSR2);
 #endif
 }
 

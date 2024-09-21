@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,7 +100,7 @@ struct udp_poll_s
 {
   FAR struct udp_conn_s *conn;     /* Needed to handle loss of connection */
   FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
-  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct pollfd *fds;          /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
 
@@ -124,7 +126,9 @@ struct udp_conn_s
   int32_t  sndbufs;       /* Maximum amount of bytes queued in send */
   sem_t    sndsem;        /* Semaphore signals send completion */
 #endif
-
+#ifdef CONFIG_NETDEV_RSS
+  int      rcvcpu;        /* Last recvfrom cpuid */
+#endif
   /* Read-ahead buffering.
    *
    *   readahead - An IOB chain where the UDP/IP read-ahead data is retained.
@@ -171,7 +175,7 @@ struct udp_wrbuffer_s
 {
   sq_entry_t wb_node;              /* Supports a singly linked list */
   struct sockaddr_storage wb_dest; /* Destination address */
-  struct iob_s *wb_iob;            /* Head of the I/O buffer chain */
+  FAR struct iob_s *wb_iob;        /* Head of the I/O buffer chain */
 };
 #endif
 

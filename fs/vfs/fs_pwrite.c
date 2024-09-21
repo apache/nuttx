@@ -144,6 +144,7 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset)
   /* Let file_pwrite do the real work */
 
   ret = file_pwrite(filep, buf, nbytes, offset);
+  fs_putfilep(filep);
   if (ret < 0)
     {
       goto errout;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/netdev/netdev.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -522,6 +524,13 @@ void netdev_ipv6_removemcastmac(FAR struct net_driver_s *dev,
 #else
 #  define netdev_ipv6_addmcastmac(dev,addr)
 #  define netdev_ipv6_removemcastmac(dev,addr)
+#endif
+
+#ifdef CONFIG_NETDEV_RSS
+void netdev_notify_recvcpu(FAR struct net_driver_s *dev,
+                           int cpu, uint8_t domain,
+                           FAR const void *src_addr, uint16_t src_port,
+                           FAR const void *dst_addr, uint16_t dst_port);
 #endif
 
 #undef EXTERN

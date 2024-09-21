@@ -11,6 +11,12 @@ config LIBC_CRC64_FAST
 	---help---
 		Enable the CRC64 lookup table to compute the CRC64 faster.
 
+config LIBC_CRC32_SLOW
+	bool "CRC32 not use table to decrease rodata size"
+	default n
+	---help---
+		Optional disable the CRC32 lookup table to decrease rodata usage.
+
 config LIBC_KBDCODEC
 	bool "Keyboard CODEC"
 	default n
@@ -112,3 +118,17 @@ config LIBC_MEM_FD_VFS_PATH
 	depends on !LIBC_MEMFD_ERROR
 	---help---
 		The relative path to where memfd will exist in the tmpfs namespace.
+
+config LIBC_MAX_PATHBUFFER
+	int "Maximum size of a temporary file path buffer array"
+	range 0 32
+	default 2
+	---help---
+		This value is the maximum size of the buffer that will hold the full
+		file path.
+
+config LIBC_PATHBUFFER_MALLOC
+	bool "Enable malloc pathbuffer"
+	default y
+	---help---
+		Enable malloc path buffer from the heap when pathbuffer is insufficient.

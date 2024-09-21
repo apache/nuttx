@@ -55,7 +55,7 @@ int board_qencoder_initialize(int devno, int timerno)
   /* Initialize a quadrature encoder interface. */
 
   sninfo("Initializing the quadrature encoder using TIM%d\n", timerno);
-  snprintf(devpath, 12, "/dev/qe%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno);
   ret = stm32_qeinitialize(devpath, timerno);
   if (ret < 0)
     {

@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/libelf/libelf_coredump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -267,7 +269,7 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
     {
       if (up_interrupt_context())
         {
-          regs = (FAR uintptr_t *)CURRENT_REGS;
+          regs = (FAR uintptr_t *)up_current_regs();
         }
       else
         {
@@ -277,7 +279,7 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
     }
   else
     {
-      regs = (uintptr_t *)tcb->xcp.regs;
+      regs = (FAR uintptr_t *)tcb->xcp.regs;
     }
 
   if (regs != NULL)
@@ -290,8 +292,8 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
             }
           else
             {
-              status.pr_regs[i] =
-                *(uintptr_t *)((uint8_t *)regs + g_tcbinfo.reg_off.p[i]);
+              status.pr_regs[i] = *(FAR uintptr_t *)
+                  ((FAR uint8_t *)regs + g_tcbinfo.reg_off.p[i]);
             }
         }
     }
@@ -468,7 +470,7 @@ static void elf_emit_memory(FAR struct elf_dumpinfo_s *cinfo, int memsegs)
 
 static void elf_emit_tcb_phdr(FAR struct elf_dumpinfo_s *cinfo,
                               FAR struct tcb_s *tcb,
-                              FAR Elf_Phdr *phdr, off_t *offset)
+                              FAR Elf_Phdr *phdr, FAR off_t *offset)
 {
   uintptr_t sp;
 

@@ -71,7 +71,8 @@
 #include "soc/soc_caps.h"
 #include "xtensa/core-macros.h"
 #include "xtensa/xtensa_api.h"
-#include "esp_coexist_internal.h"
+#include "private/esp_coexist_internal.h"
+#include "private/esp_coexist_adapter.h"
 
 #include "esp32_ble_adapter.h"
 
@@ -107,7 +108,7 @@
 #define BTDM_MODEM_WAKE_UP_DELAY            (4)  /* delay in slots of modem wake up procedure, including re-enable PHY/RF */
 
 #define OSI_FUNCS_TIME_BLOCKING             0xffffffff
-#define OSI_VERSION                         0x00010004
+#define OSI_VERSION                         0x00010005
 #define OSI_MAGIC_VALUE                     0xfadebead
 
 #ifdef CONFIG_PM
@@ -228,6 +229,7 @@ struct osi_funcs_s
   int (* _coex_version_get)(unsigned int *major,
                             unsigned int *minor,
                             unsigned int *patch);
+  void (* _patch_apply)(void);
   uint32_t _magic;
 };
 
@@ -381,6 +383,7 @@ static int coex_register_wifi_channel_change_callback_wrapper(void *cb);
 static int coex_version_get_wrapper(unsigned int *major,
                                     unsigned int *minor,
                                     unsigned int *patch);
+static void patch_apply(void);
 
 /****************************************************************************
  * Other functions
@@ -468,6 +471,8 @@ extern void btdm_controller_scan_duplicate_list_clear(void);
 /* Shutdown */
 
 extern void esp_bt_controller_shutdown(void);
+extern void sdk_config_set_bt_pll_track_enable(bool enable);
+extern void sdk_config_set_uart_flow_ctrl_enable(bool enable);
 
 extern uint8_t _bss_start_btdm[];
 extern uint8_t _bss_end_btdm[];
@@ -478,16 +483,16 @@ extern uint32_t _data_end_btdm_rom;
 
 extern uint32_t _bt_bss_start;
 extern uint32_t _bt_bss_end;
-extern uint32_t _nimble_bss_start;
-extern uint32_t _nimble_bss_end;
-extern uint32_t _btdm_bss_start;
-extern uint32_t _btdm_bss_end;
+extern uint32_t _bt_controller_bss_start;
+extern uint32_t _bt_controller_bss_end;
 extern uint32_t _bt_data_start;
 extern uint32_t _bt_data_end;
-extern uint32_t _nimble_data_start;
-extern uint32_t _nimble_data_end;
-extern uint32_t _btdm_data_start;
-extern uint32_t _btdm_data_end;
+extern uint32_t _bt_controller_data_start;
+extern uint32_t _bt_controller_data_end;
+
+extern void config_bt_funcs_reset(void);
+extern void config_ble_funcs_reset(void);
+extern void config_btdm_funcs_reset(void);
 
 /****************************************************************************
  * Private Data
@@ -560,6 +565,7 @@ static struct osi_funcs_s g_osi_funcs_ro =
   ._interrupt_l3_restore = interrupt_restore,
   ._customer_queue_create = NULL,
   ._coex_version_get = coex_version_get_wrapper,
+  ._patch_apply = patch_apply,
   ._magic = OSI_MAGIC_VALUE,
 };
 
@@ -1834,7 +1840,7 @@ static void btdm_sleep_enter_phase2_wrapper(void)
 {
   if (btdm_controller_get_sleep_mode() == BTDM_MODEM_SLEEP_MODE_ORIG)
     {
-      esp_phy_disable();
+      esp_phy_disable(PHY_MODEM_BT);
 #ifdef CONFIG_PM
       if (g_pm_lock_acquired)
         {
@@ -1845,7 +1851,7 @@ static void btdm_sleep_enter_phase2_wrapper(void)
     }
   else if (btdm_controller_get_sleep_mode() == BTDM_MODEM_SLEEP_MODE_EVED)
     {
-      esp_phy_disable();
+      esp_phy_disable(PHY_MODEM_BT);
 
       /* pause bluetooth baseband */
 
@@ -1879,7 +1885,7 @@ void btdm_sleep_exit_phase3_wrapper(void)
 
   if (btdm_controller_get_sleep_mode() == BTDM_MODEM_SLEEP_MODE_ORIG)
     {
-      esp_phy_enable();
+      esp_phy_enable(PHY_MODEM_BT);
       btdm_check_and_init_bb();
 #ifdef CONFIG_PM
       esp_timer_stop(g_btdm_slp_tmr);
@@ -1890,7 +1896,7 @@ void btdm_sleep_exit_phase3_wrapper(void)
       /* resume bluetooth baseband */
 
       periph_module_enable(PERIPH_BT_BASEBAND_MODULE);
-      esp_phy_enable();
+      esp_phy_enable(PHY_MODEM_BT);
     }
 }
 
@@ -2260,39 +2266,48 @@ static int coex_version_get_wrapper(unsigned int *major,
                                     unsigned int *patch)
 {
 #ifdef CONFIG_ESP32_WIFI_BT_COEXIST
-  const char *ver_str = coex_version_get();
+  coex_version_t version;
 
-  if (ver_str != NULL)
-    {
-      unsigned int _major = 0;
-      unsigned int _minor = 0;
-      unsigned int _patch = 0;
+  ASSERT(coex_version_get_value(&version) == ESP_OK);
 
-      if (sscanf(ver_str, "%u.%u.%u", &_major, &_minor, &_patch) != 3)
-        {
-          return -1;
-        }
+  *major = (unsigned int)version.major;
+  *minor = (unsigned int)version.minor;
+  *patch = (unsigned int)version.patch;
 
-      if (major != NULL)
-        {
-          *major = _major;
-        }
-
-      if (minor != NULL)
-        {
-          *minor = _minor;
-        }
-
-      if (patch != NULL)
-        {
-          *patch = _patch;
-        }
-
-      return 0;
-    }
+  return 0;
 #endif
 
   return -1;
+}
+
+/****************************************************************************
+ * Name: patch_apply
+ *
+ * Description:
+ *   This function resets the BTDM and BT functions based on the current
+ *   configuration. If the configuration is not set to BLE only, it resets
+ *   the BT functions. If the configuration is not set to BR/EDR only, it
+ *   resets the BLE functions.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void patch_apply(void)
+{
+  config_btdm_funcs_reset();
+
+#ifndef CONFIG_BTDM_CTRL_MODE_BLE_ONLY
+  config_bt_funcs_reset();
+#endif
+
+#ifndef CONFIG_BTDM_CTRL_MODE_BR_EDR_ONLY
+  config_ble_funcs_reset();
+#endif
 }
 
 /****************************************************************************
@@ -3046,6 +3061,12 @@ int esp32_bt_controller_init(void)
   UNUSED(set_div_ret);
 #endif
 
+#if CONFIG_BTDM_CTRL_HCI_UART_FLOW_CTRL_EN
+  sdk_config_set_uart_flow_ctrl_enable(true);
+#else
+  sdk_config_set_uart_flow_ctrl_enable(false);
+#endif
+
 #ifdef CONFIG_PM
   if ((err = esp_timer_create(&create_args, &g_btdm_slp_tmr) != OK))
     {
@@ -3154,7 +3175,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
   esp32_pm_lockacquire();
 #endif
 
-  esp_phy_enable();
+  esp_phy_enable(PHY_MODEM_BT);
 
 #ifdef CONFIG_ESP32_WIFI_BT_COEXIST
   coex_enable();
@@ -3164,6 +3185,8 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
     {
       btdm_controller_enable_sleep(true);
     }
+
+  sdk_config_set_bt_pll_track_enable(true);
 
   /* inititalize bluetooth baseband */
 
@@ -3175,7 +3198,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
 #ifdef CONFIG_ESP32_WIFI_BT_COEXIST
       coex_disable();
 #endif
-      esp_phy_disable();
+      esp_phy_disable(PHY_MODEM_BT);
 #ifdef CONFIG_PM
       if (g_btdm_allow_light_sleep == false)
         {
@@ -3189,7 +3212,7 @@ int esp32_bt_controller_enable(esp_bt_mode_t mode)
 
   g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_ENABLED;
 
-  return OK;
+  return esp_wifi_to_errno(ret);
 }
 
 /****************************************************************************
@@ -3232,7 +3255,7 @@ int esp32_bt_controller_disable(void)
   coex_disable();
 #endif
 
-  esp_phy_disable();
+  esp_phy_disable(PHY_MODEM_BT);
   g_btdm_controller_status = ESP_BT_CONTROLLER_STATUS_INITED;
 
 #ifdef CONFIG_PM

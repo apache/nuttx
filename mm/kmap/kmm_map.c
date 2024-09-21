@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/kmap/kmm_map.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,8 @@
 
 #include <sys/mman.h>
 
+#include "sched/sched.h"
+
 #if defined(CONFIG_BUILD_KERNEL)
 
 /****************************************************************************
@@ -74,7 +78,7 @@ static struct mm_map_s g_kmm_map;
 
 static int get_user_pages(FAR void **pages, size_t npages, uintptr_t vaddr)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct tcb_s *tcb = this_task();
   uintptr_t         page;
   int               i;
 
@@ -177,7 +181,7 @@ errout_with_vaddr:
 
 static FAR void *map_single_user_page(uintptr_t vaddr)
 {
-  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct tcb_s *tcb = this_task();
   uintptr_t         page;
 
   /* Find the page associated with this virtual address */

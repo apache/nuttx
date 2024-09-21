@@ -499,6 +499,14 @@ config DEV_GPIO
 		Enables a simple GPIO input/output driver to support application-
 		space testing of hardware.
 
+config DEV_GPIO_NPOLLWAITERS
+	int "Max number of polls"
+	default 1
+	depends on DEV_GPIO
+	---help---
+		The maximum number of polls that can be registered with the GPIO
+		driver
+
 config DEV_GPIO_NSIGNALS
 	int "Max number of signals"
 	default 1

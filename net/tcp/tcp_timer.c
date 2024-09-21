@@ -1,6 +1,7 @@
 /****************************************************************************
  * net/tcp/tcp_timer.c
- * Poll for the availability of TCP TX data
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
  *
  *   Copyright (C) 2007-2010, 2015-2016, 2018, 2020 Gregory Nutt. All rights
  *     reserved.
@@ -224,7 +225,7 @@ static void tcp_xmit_probe(FAR struct net_driver_s *dev,
 
 void tcp_update_timer(FAR struct tcp_conn_s *conn)
 {
-  int timeout = tcp_get_timeout(conn);
+  sclock_t timeout = tcp_get_timeout(conn);
 
   if (timeout > 0)
     {

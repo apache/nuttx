@@ -1,6 +1,7 @@
 /****************************************************************************
  * wireless/bluetooth/bt_ioctl.c
- * Bluetooth network IOCTL handler
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -777,7 +778,7 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
               params->destroy                = btnet_discover_destroy;
               params->start_handle           = btreq->btr_dstart;
               params->end_handle             = btreq->btr_dend;
-              params->p_data                 = (void *)arg;
+              params->p_data                 = (FAR void *)arg;
               btreq->btr_indx                = 0;
 
               if (btreq->btr_duuid16 == 0)

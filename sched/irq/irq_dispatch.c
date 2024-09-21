@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/irq/irq_dispatch.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -48,10 +50,6 @@
 /* CALL_VECTOR - Call the interrupt service routine attached to this
  * interrupt request
  */
-
-#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ
-#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ 0
-#endif
 
 #ifdef CONFIG_SCHED_IRQMONITOR
 #  define CALL_VECTOR(ndx, vector, irq, context, arg) \

@@ -498,6 +498,8 @@ int bcmf_wl_active(FAR struct bcmf_dev_s *priv, bool active)
       goto errout_in_sdio_active;
     }
 
+  wlinfo("set roam_off as value %"PRIu32"\n", value);
+
   /* TODO configure EAPOL version to default */
 
   out_len = 8;
@@ -628,7 +630,7 @@ void bcmf_wl_auth_event_handler(FAR struct bcmf_dev_s *priv,
       return;
     }
 
-  bcmf_hexdump((uint8_t *)event, len, (unsigned long)event);
+  bcmf_hexdump((FAR uint8_t *)event, len, (unsigned long)event);
 
   if (type == WLC_E_PSK_SUP)
     {
@@ -1716,7 +1718,7 @@ int bcmf_wl_get_channel(FAR struct bcmf_dev_s *priv, int interface)
 
   out_len = sizeof(ci);
   ret = bcmf_cdc_ioctl(priv, interface, false,
-                       WLC_GET_CHANNEL, (uint8_t *)&ci, &out_len);
+                       WLC_GET_CHANNEL, (FAR uint8_t *)&ci, &out_len);
   return ret == OK ? ci.target_channel : ret;
 }
 
@@ -2152,7 +2154,7 @@ int bcmf_wl_get_country(FAR struct bcmf_dev_s *priv, FAR struct iwreq *iwr)
   if (ret == OK)
     {
       memcpy(iwr->u.data.pointer, country, 2);
-      ((uint8_t *)iwr->u.data.pointer)[2] = '\0';
+      ((FAR uint8_t *)iwr->u.data.pointer)[2] = '\0';
     }
 
   return ret;
@@ -2245,7 +2247,7 @@ int bcmf_wl_set_pta_priority(FAR struct bcmf_dev_s *priv, uint32_t prio)
   out_len = sizeof(wl_pta_t);
   ret = bcmf_cdc_iovar_request(priv, CHIP_STA_INTERFACE, true,
                                IOVAR_STR_COEX_PARA,
-                               (uint8_t *)&pta_prio_map[prio],
+                               (FAR uint8_t *)&pta_prio_map[prio],
                                &out_len);
   if (ret == OK)
     {

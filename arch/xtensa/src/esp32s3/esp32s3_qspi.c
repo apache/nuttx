@@ -939,7 +939,7 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
                 SPI_FWRITE_DUAL_M |
                 SPI_FWRITE_OCT_M |
                 SPI_FWRITE_QUAD_M);
-  user_reg |= SPI_USR_COMMAND_M | SPI_USR_ADDR_M;
+  user_reg |= SPI_USR_COMMAND_M;
 
   /* Set command bits and value, and command is always needed */
 
@@ -953,11 +953,16 @@ static int esp32s3_qspi_memory(struct qspi_dev_s *dev,
 
   /* Set address bits and value */
 
-  user1_reg &= ~SPI_USR_ADDR_BITLEN_M;
-  user1_reg |= (meminfo->addrlen * 8 - 1) << SPI_USR_ADDR_BITLEN_S;
+  if (meminfo->addrlen)
+    {
+      user_reg |= SPI_USR_ADDR_M;
 
-  regval = meminfo->addr << (32 - meminfo->addrlen * 8);
-  putreg32(regval, SPI_ADDR_REG(id));
+      user1_reg &= ~SPI_USR_ADDR_BITLEN_M;
+      user1_reg |= (meminfo->addrlen * 8 - 1) << SPI_USR_ADDR_BITLEN_S;
+
+      regval = meminfo->addr << (32 - meminfo->addrlen * 8);
+      putreg32(regval, SPI_ADDR_REG(id));
+    }
 
   /* Set dummy */
 
@@ -1525,6 +1530,56 @@ int esp32s3_qspibus_set_attr(struct qspi_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: esp32s3_qspibus_set_delay
+ *
+ * Description:
+ *   Set timing delay for QSPI input and output data.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   din_mode   - Input mode(0~3) to delay input data
+ *   din_num    - The delay number(0~3) to input data
+ *   dout_mode  - Output mode(0,1) to delay output data
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise -1 (ERROR).
+ *
+ ****************************************************************************/
+
+int esp32s3_qspibus_set_delay(struct qspi_dev_s *dev,
+                              uint8_t din_mode,
+                              uint8_t din_num,
+                              uint8_t dout_mode)
+{
+  struct esp32s3_qspi_priv_s *priv = (struct esp32s3_qspi_priv_s *)dev;
+  uint8_t id = priv->config->id;
+
+  if ((din_mode > 3) || (din_num > 3) || (dout_mode > 1))
+    {
+      return -1;
+    }
+
+  uint32_t din_mode_reg = (din_mode << SPI_DIN0_MODE_S) |
+                          (din_mode << SPI_DIN1_MODE_S) |
+                          (din_mode << SPI_DIN2_MODE_S) |
+                          (din_mode << SPI_DIN3_MODE_S);
+  uint32_t din_num_reg = (din_num << SPI_DIN0_NUM_S) |
+                         (din_num << SPI_DIN1_NUM_S) |
+                         (din_num << SPI_DIN2_NUM_S) |
+                         (din_num << SPI_DIN3_NUM_S);
+  uint32_t dout_mode_reg = (dout_mode << SPI_DOUT0_MODE_S) |
+                           (dout_mode << SPI_DOUT1_MODE_S) |
+                           (dout_mode << SPI_DOUT2_MODE_S) |
+                           (dout_mode << SPI_DOUT3_MODE_S);
+
+  putreg32(din_mode_reg, SPI_DIN_MODE_REG(id));
+  putreg32(din_num_reg, SPI_DIN_NUM_REG(id));
+  putreg32(dout_mode_reg, SPI_DOUT_MODE_REG(id));
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: esp32s3_qspibus_initialize
  *
  * Description:
@@ -1573,7 +1628,7 @@ struct qspi_dev_s *esp32s3_qspibus_initialize(int port)
 
   /* Set up to receive peripheral interrupts on the current CPU */
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu, priv->config->periph,
                                    ESP32S3_INT_PRIO_DEF,
                                    ESP32S3_CPUINT_LEVEL);

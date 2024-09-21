@@ -70,7 +70,6 @@ int file_dup(FAR struct file *filep, int minfd, int flags)
   if (fd2 < 0)
     {
       file_close(&filep2);
-      return fd2;
     }
 
   return fd2;
@@ -97,11 +96,10 @@ int dup(int fd)
       goto err;
     }
 
-  DEBUGASSERT(filep != NULL);
-
   /* Let file_dup() do the real work */
 
   ret = file_dup(filep, 0, 0);
+  fs_putfilep(filep);
   if (ret < 0)
     {
       goto err;

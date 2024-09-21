@@ -1,0 +1,25 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_NOTIFY
+	bool "FS Notify System"
+	default n
+	---help---
+		The Fsnotify System
+
+if FS_NOTIFY
+config FS_NOTIFY_BUCKET_SIZE
+	int "Dir hash bucket size"
+	default 64
+
+config FS_NOTIFY_MAX_EVENTS
+	int "Max events in one notify device"
+	default 1024
+
+config FS_NOTIFY_FD_POLLWAITERS
+	int "Max pollwaiters in one notify devcie"
+	default 2
+
+endif # FS_NOTIFY

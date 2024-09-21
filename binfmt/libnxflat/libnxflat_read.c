@@ -1,6 +1,8 @@
 /****************************************************************************
  * binfmt/libnxflat/libnxflat_read.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -93,14 +95,14 @@ static inline void nxflat_dumpreaddata(FAR char *buffer, int buflen)
  *
  ****************************************************************************/
 
-int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
+int nxflat_read(FAR struct nxflat_loadinfo_s *loadinfo, FAR char *buffer,
                 int readsize, int offset)
 {
-  ssize_t nbytes;      /* Number of bytes read */
-  off_t   rpos;        /* Position returned by lseek */
-  char   *bufptr;      /* Next buffer location to read into */
-  int     bytesleft;   /* Number of bytes of .data left to read */
-  int     bytesread;   /* Total number of bytes read */
+  ssize_t   nbytes;      /* Number of bytes read */
+  off_t     rpos;        /* Position returned by lseek */
+  FAR char *bufptr;      /* Next buffer location to read into */
+  int       bytesleft;   /* Number of bytes of .data left to read */
+  int       bytesread;   /* Total number of bytes read */
 
   binfo("Read %d bytes from offset %d\n", readsize, offset);
 

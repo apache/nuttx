@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_abstime2ticks.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,32 +34,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: clock_timespec_compare
- *
- * Description:
- *    Return < 0 if time a is before time b
- *    Return > 0 if time b is before time a
- *    Return 0 if time a is the same as time b
- *
- ****************************************************************************/
-
-int clock_timespec_compare(FAR const struct timespec *a,
-                           FAR const struct timespec *b)
-{
-  if (a->tv_sec < b->tv_sec)
-    {
-      return -1;
-    }
-
-  if (a->tv_sec > b->tv_sec)
-    {
-      return 1;
-    }
-
-  return a->tv_nsec - b->tv_nsec;
-}
 
 /****************************************************************************
  * Name: clock_abstime2ticks
@@ -124,5 +100,42 @@ int clock_abstime2ticks(clockid_t clockid,
 
   /* Convert this relative time into clock ticks. */
 
-  return clock_time2ticks(&reltime, ticks);
+  *ticks = clock_time2ticks(&reltime);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: clock_realtime2absticks
+ *
+ * Description:
+ *   Convert real time to monotonic ticks.
+ *
+ * Input Parameters:
+ *   mono - Return the converted time here.
+ *   abstime - Convert this absolute time to ticks
+ *
+ * Returned Value:
+ *   OK (0) on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Interrupts should be disabled so that the time is not changing during
+ *   the calculation
+ *
+ ****************************************************************************/
+
+int clock_realtime2absticks(FAR const struct timespec *reltime,
+                            FAR clock_t *absticks)
+{
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+  struct timespec mono;
+
+  clock_timespec_subtract(reltime, &g_basetime, &mono);
+
+  *absticks = clock_time2ticks(&mono);
+
+  return OK;
+#else
+  return -ENOSYS;
+#endif
 }

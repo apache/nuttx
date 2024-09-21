@@ -323,7 +323,8 @@ static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Name: touch_poll
  ****************************************************************************/
 
-static int touch_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
+static int touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
+                      bool setup)
 {
   FAR struct touch_openpriv_s *openpriv = filep->f_priv;
   pollevent_t eventset = 0;
@@ -375,6 +376,7 @@ static void touch_event_notify(FAR struct touch_openpriv_s  *openpriv,
 {
   int semcount;
 
+  nxmutex_lock(&openpriv->lock);
   circbuf_overwrite(&openpriv->circbuf, sample,
                     SIZEOF_TOUCH_SAMPLE_S(sample->npoints));
 
@@ -385,6 +387,7 @@ static void touch_event_notify(FAR struct touch_openpriv_s  *openpriv,
     }
 
   poll_notify(&openpriv->fds, 1, POLLIN);
+  nxmutex_unlock(&openpriv->lock);
 }
 
 /****************************************************************************

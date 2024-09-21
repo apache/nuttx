@@ -36,9 +36,6 @@
 #define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
 #define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
 
-#define timespec_to_nsec(ts) \
-    ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (ts)->tv_nsec)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -53,14 +50,6 @@ static clock_t g_current_tick;
  * Private Functions
  ****************************************************************************/
 
-static inline void timespec_from_nsec(FAR struct timespec *ts,
-                                      uint64_t nanoseconds)
-{
-  ts->tv_sec    = nanoseconds / NSEC_PER_SEC;
-  nanoseconds -= (uint64_t)ts->tv_sec * NSEC_PER_SEC;
-  ts->tv_nsec   = nanoseconds;
-}
-
 static void udelay_accurate(useconds_t microseconds)
 {
   struct timespec now;
@@ -68,7 +57,7 @@ static void udelay_accurate(useconds_t microseconds)
   struct timespec delta;
 
   ONESHOT_CURRENT(g_oneshot_lower, &now);
-  timespec_from_nsec(&delta, (uint64_t)microseconds * NSEC_PER_USEC);
+  clock_nsec2time(&delta, (uint64_t)microseconds * NSEC_PER_USEC);
   clock_timespec_add(&now, &delta, &end);
 
   while (clock_timespec_compare(&now, &end) < 0)
@@ -241,6 +230,18 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
 
   return ret;
 }
+
+int weak_function up_timer_gettime(struct timespec *ts)
+{
+  int ret = -EAGAIN;
+
+  if (g_oneshot_lower != NULL)
+    {
+      ret = ONESHOT_CURRENT(g_oneshot_lower, ts);
+    }
+
+  return ret;
+}
 #endif
 
 /****************************************************************************
@@ -375,7 +376,7 @@ unsigned long up_perf_gettime(void)
       struct timespec ts;
 
       ONESHOT_CURRENT(g_oneshot_lower, &ts);
-      ret = timespec_to_nsec(&ts);
+      ret = clock_time2nsec(&ts);
     }
 
   return ret;
@@ -388,7 +389,7 @@ unsigned long up_perf_getfreq(void)
 
 void up_perf_convert(unsigned long elapsed, FAR struct timespec *ts)
 {
-  timespec_from_nsec(ts, elapsed);
+  clock_nsec2time(ts, elapsed);
 }
 #endif /* CONFIG_ARCH_PERF_EVENTS */
 

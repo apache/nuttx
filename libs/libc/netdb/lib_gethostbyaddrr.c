@@ -37,8 +37,6 @@
 
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -441,4 +439,3 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
   return ret;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

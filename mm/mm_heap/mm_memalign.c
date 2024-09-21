@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/mm_heap/mm_memalign.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,9 +29,9 @@
 #include <assert.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Public Functions
@@ -275,8 +277,10 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   MM_ADD_BACKTRACE(heap, node);
 
-  kasan_unpoison((FAR void *)alignedchunk,
-                 mm_malloc_size(heap, (FAR void *)alignedchunk));
+  alignedchunk = (uintptr_t)kasan_unpoison
+                    ((FAR const void *)alignedchunk,
+                    mm_malloc_size(heap,
+                                   (FAR void *)alignedchunk));
 
   DEBUGASSERT(alignedchunk % alignment == 0);
   return (FAR void *)alignedchunk;

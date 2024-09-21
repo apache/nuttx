@@ -1,6 +1,8 @@
 ############################################################################
 # tools/gdb/memdump.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,20 +23,23 @@
 import argparse
 
 import gdb
-import utils
-from lists import list_for_each_entry, sq_for_every, sq_queue
-
-mempool_backtrace = utils.CachedType("struct mempool_backtrace_s")
+from lists import sq_for_every, sq_queue
+from utils import get_symbol_value
 
 MM_ALLOC_BIT = 0x1
 MM_PREVFREE_BIT = 0x2
 MM_MASK_BIT = MM_ALLOC_BIT | MM_PREVFREE_BIT
-
+MEMPOOL_MAGIC_ALLOC = 0x55555555
 
 PID_MM_FREE = -4
 PID_MM_ALLOC = -3
 PID_MM_LEAK = -2
 PID_MM_MEMPOOL = -1
+
+
+def align_up(size, align) -> int:
+    """Align the size to the specified alignment"""
+    return (size + (align - 1)) & ~(align - 1)
 
 
 def mm_nodesize(size) -> int:
@@ -67,6 +72,48 @@ def mempool_multiple_foreach(mpool):
         i += 1
 
 
+def mempool_realblocksize(pool):
+    """Return the real block size of a mempool"""
+
+    if get_symbol_value("CONFIG_MM_DFAULT_ALIGNMENT") == 0:
+        mempool_align = 2 * gdb.lookup_type("size_t").sizeof
+    else:
+        mempool_align = get_symbol_value("CONFIG_MM_DFAULT_ALIGNMENT")
+
+    if get_symbol_value("CONFIG_MM_BACKTRACE") >= 0:
+        return align_up(
+            pool["blocksize"] + gdb.lookup_type("struct mempool_backtrace_s").sizeof,
+            mempool_align,
+        )
+    else:
+        return pool["blocksize"]
+
+
+def mempool_foreach(pool):
+    """Iterate over all block in a mempool"""
+
+    blocksize = mempool_realblocksize(pool)
+    if pool["ibase"] != 0:
+        nblk = pool["interruptsize"] / blocksize
+        while nblk > 0:
+            bufaddr = gdb.Value(pool["ibase"] + nblk * blocksize + pool["blocksize"])
+            buf = bufaddr.cast(gdb.lookup_type("struct mempool_backtrace_s").pointer())
+            yield buf
+            nblk -= 1
+
+    entry = sq_queue.get_type().pointer()
+    for entry in sq_for_every(pool["equeue"], entry):
+        nblk = (pool["expandsize"] - gdb.lookup_type("sq_entry_t").sizeof) / blocksize
+        base = (
+            gdb.Value(entry).cast(gdb.lookup_type("char").pointer()) - nblk * blocksize
+        )
+        while nblk > 0:
+            bufaddr = gdb.Value(base + nblk * blocksize + pool["blocksize"])
+            buf = bufaddr.cast(gdb.lookup_type("struct mempool_backtrace_s").pointer())
+            yield buf
+            nblk -= 1
+
+
 class Nxmemdump(gdb.Command):
     """Dump the heap and mempool memory"""
 
@@ -89,31 +136,31 @@ class Nxmemdump(gdb.Command):
                     self.aordblks += 1
                     self.uordblks += pool["blocksize"]
             else:
-                for node in list_for_each_entry(
-                    pool["alist"], mempool_backtrace.get_type().pointer(), "node"
-                ):
-                    if (pid == node["pid"] or pid == PID_MM_ALLOC) and (
-                        node["seqno"] >= seqmin and node["seqno"] < seqmax
+                for buf in mempool_foreach(pool):
+                    if (
+                        (pid == buf["pid"] or pid == PID_MM_ALLOC)
+                        and (buf["seqno"] >= seqmin and buf["seqno"] < seqmax)
+                        and buf["magic"] == MEMPOOL_MAGIC_ALLOC
                     ):
-                        charnode = gdb.Value(node).cast(
+                        charnode = gdb.Value(buf).cast(
                             gdb.lookup_type("char").pointer()
                         )
                         gdb.write(
                             "%6d%12u%12u%#*x"
                             % (
-                                node["pid"],
+                                buf["pid"],
                                 mm_nodesize(pool["blocksize"]),
-                                node["seqno"],
+                                buf["seqno"],
                                 self.align,
                                 (int)(charnode - pool["blocksize"]),
                             )
                         )
-                        if node.type.has_key("backtrace"):
-                            max = node["backtrace"].type.range()[1]
+                        if buf.type.has_key("backtrace"):
+                            max = buf["backtrace"].type.range()[1]
                             for x in range(0, max):
                                 gdb.write(" ")
                                 gdb.write(
-                                    node["backtrace"][x].format_string(
+                                    buf["backtrace"][x].format_string(
                                         raw=False, symbols=True, address=False
                                     )
                                 )

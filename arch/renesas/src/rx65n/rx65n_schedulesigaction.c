@@ -88,7 +88,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sinfo("rtcb=%p g_current_regs=%p\n", this_task(), g_current_regs);
+      sinfo("rtcb=%p current_regs=%p\n", this_task(), up_current_regs());
 
       if (tcb == this_task())
         {
@@ -96,7 +96,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * a task is signalling itself for some reason.
            */
 
-          if (!g_current_regs)
+          if (!up_current_regs())
             {
               /* In this case just deliver the signal now. */
 
@@ -117,21 +117,21 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * the signals have been delivered.
                */
 
-              tcb->xcp.saved_pc        = g_current_regs[REG_PC];
-              tcb->xcp.saved_sr        = g_current_regs[REG_PSW];
+              tcb->xcp.saved_pc = up_current_regs()[REG_PC];
+              tcb->xcp.saved_sr = up_current_regs()[REG_PSW];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              g_current_regs[REG_PC]   = (uint32_t)renesas_sigdeliver;
-              g_current_regs[REG_PSW] |= 0x00030000;
+              up_current_regs()[REG_PC]   = (uint32_t)renesas_sigdeliver;
+              up_current_regs()[REG_PSW] |= 0x00030000;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
                */
 
-              renesas_copystate(tcb->xcp.regs, (uint32_t *)g_current_regs);
+              renesas_copystate(tcb->xcp.regs, up_current_regs());
             }
         }
 

@@ -58,6 +58,10 @@
 #include "stm32_apds9960.h"
 #endif
 
+#ifdef CONFIG_CL_MFRC522
+#include "stm32_mfrc522.h"
+#endif
+
 #include "stm32f4discovery.h"
 
 /* Conditional logic in stm32f4discovery.h will determine if certain features
@@ -607,6 +611,14 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_USBADB
   usbdev_adb_initialize();
+#endif
+
+#ifdef CONFIG_CL_MFRC522
+  ret = stm32_mfrc522initialize("/dev/rfid0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
+    }
 #endif
 
   return ret;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/sched/sched_unlock.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -90,8 +92,8 @@ int sched_unlock(void)
         {
           /* Note that we no longer have pre-emption disabled. */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_preemption(rtcb, false);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+          nxsched_critmon_preemption(rtcb, false, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);
@@ -247,8 +249,8 @@ int sched_unlock(void)
         {
           /* Note that we no longer have pre-emption disabled. */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_preemption(rtcb, false);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+          nxsched_critmon_preemption(rtcb, false, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);

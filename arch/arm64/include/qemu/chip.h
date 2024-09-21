@@ -41,29 +41,38 @@
 
 #if CONFIG_ARM64_GIC_VERSION == 2
 
-#define CONFIG_GICD_BASE          0x8000000
-#define CONFIG_GICR_BASE          0x8010000
+#define CONFIG_GICD_BASE           0x8000000
+#define CONFIG_GICR_BASE           0x8010000
 
 #elif CONFIG_ARM64_GIC_VERSION == 3 || CONFIG_ARM64_GIC_VERSION == 4
 
-#define CONFIG_GICD_BASE          0x8000000
-#define CONFIG_GICR_BASE          0x80a0000
-#define CONFIG_GICR_OFFSET        0x20000
+#define CONFIG_GICD_BASE           0x8000000
+#define CONFIG_GICR_BASE           0x80a0000
+#define CONFIG_GICR_OFFSET         0x20000
 #else
 
 #error CONFIG_ARM64_GIC_VERSION should be 2, 3 or 4
 
 #endif /* CONFIG_ARM64_GIC_VERSION */
 
-#define CONFIG_RAMBANK1_ADDR      0x40000000
-#define CONFIG_RAMBANK1_SIZE      MB(128)
+#define CONFIG_RAMBANK1_ADDR       0x40000000
+#define CONFIG_RAMBANK1_SIZE       MB(128)
 
-#define CONFIG_DEVICEIO_BASEADDR  0x7000000
-#define CONFIG_DEVICEIO_SIZE      MB(512)
+#define CONFIG_DEVICEIO_BASEADDR   0x7000000
+#define CONFIG_DEVICEIO_SIZE       MB(512)
 
-#define CONFIG_LOAD_BASE          0x40280000
+#define CONFIG_PCI_CFG_BASEADDR    0x4010000000
+#define CONFIG_PCI_CFG_SIZE        MB(256)
 
-#define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
+#define CONFIG_PCI_MEM_BASEADDR    0x8000000000
+#define CONFIG_PCI_MEM_SIZE        GB(512)
+
+#define CONFIG_PCI_IO_BASEADDR     0x3eff0000
+#define CONFIG_PCI_IO_SIZE         KB(64)
+
+#define CONFIG_LOAD_BASE           0x40280000
+
+#define MPID_TO_CLUSTER_ID(mpid)   ((mpid) & ~0xff)
 
 #endif
 

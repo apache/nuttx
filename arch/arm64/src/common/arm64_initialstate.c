@@ -41,6 +41,7 @@
 #include <nuttx/power/pm.h>
 #include <arch/chip/chip.h>
 
+#include "addrenv.h"
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "chip.h"
@@ -58,6 +59,16 @@ void arm64_new_task(struct tcb_s * tcb)
 {
   uint64_t stack_ptr = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
   struct regs_context *pinitctx;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Use the process kernel stack to store context for user processes */
+
+  if (tcb->xcp.kstack)
+    {
+      tcb->xcp.ustkptr = (uintptr_t *)stack_ptr;
+      stack_ptr        = (uintptr_t)tcb->xcp.kstack + ARCH_KERNEL_STACKSIZE;
+    }
+#endif
 
 #ifdef CONFIG_ARCH_FPU
   struct fpu_reg *pfpuctx;
@@ -87,12 +98,18 @@ void arm64_new_task(struct tcb_s * tcb)
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
   pinitctx->sp_elx    = (uint64_t)stack_ptr;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  pinitctx->sp_el0    = (uint64_t)tcb->xcp.ustkptr;
+#else
   pinitctx->sp_el0    = (uint64_t)pinitctx;
+#endif
   pinitctx->exe_depth = 0;
-  pinitctx->tpidr_el0 = (uint64_t)tcb;
-  pinitctx->tpidr_el1 = (uint64_t)tcb;
 
   tcb->xcp.regs       = (uint64_t *)pinitctx;
+
+#ifndef CONFIG_BUILD_FLAT
+  tcb->xcp.initregs   = tcb->xcp.regs;
+#endif
 }
 
 /****************************************************************************
@@ -112,8 +129,15 @@ void arm64_new_task(struct tcb_s * tcb)
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  uint64_t *kstack = xcp->kstack;
+#endif
 
   memset(xcp, 0, sizeof(struct xcptcontext));
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  xcp->kstack = kstack;
+#endif
 
   if (tcb->pid == IDLE_PROCESS_ID)
     {
@@ -136,8 +160,6 @@ void up_initial_state(struct tcb_s *tcb)
        */
 
       write_sysreg(0, tpidrro_el0);
-      write_sysreg(tcb, tpidr_el1);
-      write_sysreg(tcb, tpidr_el0);
 
 #ifdef CONFIG_STACK_COLORATION
 

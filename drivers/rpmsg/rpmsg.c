@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <metal/sys.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
@@ -96,15 +97,25 @@ rpmsg_get_by_rdev(FAR struct rpmsg_device *rdev)
 static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
                             unsigned long arg)
 {
-  int ret = OK;
+  int ret = -ENOTTY;
 
   switch (cmd)
     {
       case RPMSGIOC_PANIC:
-        rpmsg->ops->panic(rpmsg);
+        if (rpmsg->ops->panic)
+          {
+            rpmsg->ops->panic(rpmsg);
+            ret = OK;
+          }
+
         break;
       case RPMSGIOC_DUMP:
-        rpmsg->ops->dump(rpmsg);
+        if (rpmsg->ops->dump)
+          {
+            rpmsg->ops->dump(rpmsg);
+            ret = OK;
+          }
+
         break;
 #ifdef CONFIG_RPMSG_PING
       case RPMSGIOC_PING:
@@ -112,7 +123,11 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
         break;
 #endif
       default:
-        ret = rpmsg->ops->ioctl(rpmsg, cmd, arg);
+        if (rpmsg->ops->ioctl)
+          {
+            ret = rpmsg->ops->ioctl(rpmsg, cmd, arg);
+          }
+
         break;
     }
 
@@ -122,7 +137,8 @@ static int rpmsg_dev_ioctl_(FAR struct rpmsg_s *rpmsg, int cmd,
 static int rpmsg_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
-  FAR struct rpmsg_s *rpmsg = filep->f_inode->i_private;
+  FAR struct rpmsg_s *rpmsg =
+    (FAR struct rpmsg_s *)filep->f_inode->i_private;
 
   return rpmsg_dev_ioctl_(rpmsg, cmd, arg);
 }
@@ -167,40 +183,40 @@ int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
   return rpmsg->ops->post(rpmsg, sem);
 }
 
-FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
+FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+  FAR const char *cpuname = NULL;
 
-  if (!rpmsg)
+  if (rpmsg == NULL)
     {
       return NULL;
     }
 
-  return rpmsg->ops->get_cpuname(rpmsg);
+  if (rpmsg->ops->get_local_cpuname)
+    {
+      cpuname = rpmsg->ops->get_local_cpuname(rpmsg);
+    }
+
+  return cpuname && cpuname[0] ? cpuname : CONFIG_RPMSG_LOCAL_CPUNAME;
+}
+
+FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
+{
+  FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
+  return rpmsg ? rpmsg->ops->get_cpuname(rpmsg) : NULL;
 }
 
 int rpmsg_get_tx_buffer_size(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
-
-  if (!rpmsg)
-    {
-      return -EINVAL;
-    }
-
-  return rpmsg->ops->get_tx_buffer_size(rpmsg);
+  return rpmsg ? rpmsg->ops->get_tx_buffer_size(rpmsg) : -EINVAL;
 }
 
 int rpmsg_get_rx_buffer_size(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
-
-  if (!rpmsg)
-    {
-      return -EINVAL;
-    }
-
-  return rpmsg->ops->get_rx_buffer_size(rpmsg);
+  return rpmsg ? rpmsg->ops->get_rx_buffer_size(rpmsg) : -EINVAL;
 }
 
 int rpmsg_register_callback(FAR void *priv,
@@ -212,10 +228,9 @@ int rpmsg_register_callback(FAR void *priv,
   FAR struct metal_list *node;
   FAR struct metal_list *bnode;
   FAR struct rpmsg_cb_s *cb;
-  FAR struct rpmsg_s *rpmsg;
 
   cb = kmm_zalloc(sizeof(struct rpmsg_cb_s));
-  if (!cb)
+  if (cb == NULL)
     {
       return -ENOMEM;
     }
@@ -227,11 +242,12 @@ int rpmsg_register_callback(FAR void *priv,
   cb->ns_bind        = ns_bind;
 
   nxrmutex_lock(&g_rpmsg_lock);
-
   metal_list_for_each(&g_rpmsg, node)
     {
-      rpmsg = metal_container_of(node, struct rpmsg_s, node);
-      if (!rpmsg->rdev->ns_unbind_cb)
+      FAR struct rpmsg_s *rpmsg =
+        metal_container_of(node, struct rpmsg_s, node);
+
+      if (!rpmsg->init)
         {
           continue;
         }
@@ -247,15 +263,14 @@ int rpmsg_register_callback(FAR void *priv,
         }
 
       DEBUGASSERT(ns_match != NULL);
+
 again:
-
       nxrmutex_lock(&rpmsg->lock);
-
       metal_list_for_each(&rpmsg->bind, bnode)
         {
-          FAR struct rpmsg_bind_s *bind;
+          FAR struct rpmsg_bind_s *bind =
+            metal_container_of(bnode, struct rpmsg_bind_s, node);
 
-          bind = metal_container_of(bnode, struct rpmsg_bind_s, node);
           if (ns_match(rpmsg->rdev, priv, bind->name, bind->dest))
             {
               metal_list_del(bnode);
@@ -286,12 +301,11 @@ void rpmsg_unregister_callback(FAR void *priv,
   FAR struct metal_list *pnode;
 
   nxrmutex_lock(&g_rpmsg_lock);
-
   metal_list_for_each(&g_rpmsg_cb, node)
     {
-      FAR struct rpmsg_cb_s *cb = NULL;
+      FAR struct rpmsg_cb_s *cb =
+        metal_container_of(node, struct rpmsg_cb_s, node);
 
-      cb = metal_container_of(node, struct rpmsg_cb_s, node);
       if (cb->priv == priv &&
           cb->device_created == device_created &&
           cb->device_destroy == device_destroy &&
@@ -300,7 +314,6 @@ void rpmsg_unregister_callback(FAR void *priv,
         {
           metal_list_del(&cb->node);
           kmm_free(cb);
-
           break;
         }
     }
@@ -309,10 +322,10 @@ void rpmsg_unregister_callback(FAR void *priv,
     {
       metal_list_for_each(&g_rpmsg, pnode)
         {
-          FAR struct rpmsg_s *rpmsg;
+          FAR struct rpmsg_s *rpmsg =
+            metal_container_of(pnode, struct rpmsg_s, node);
 
-          rpmsg = metal_container_of(pnode, struct rpmsg_s, node);
-          if (rpmsg->rdev->ns_unbind_cb)
+          if (rpmsg->init)
             {
               device_destroy(rpmsg->rdev, priv);
             }
@@ -330,12 +343,11 @@ void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
   FAR struct metal_list *node;
 
   nxrmutex_lock(&g_rpmsg_lock);
-
   metal_list_for_each(&g_rpmsg_cb, node)
     {
-      FAR struct rpmsg_cb_s *cb;
+      FAR struct rpmsg_cb_s *cb =
+        metal_container_of(node, struct rpmsg_cb_s, node);
 
-      cb = metal_container_of(node, struct rpmsg_cb_s, node);
       if (cb->ns_match && cb->ns_match(rdev, cb->priv, name, dest))
         {
           rpmsg_bind_cb_t ns_bind = cb->ns_bind;
@@ -344,7 +356,6 @@ void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
           nxrmutex_unlock(&g_rpmsg_lock);
           DEBUGASSERT(ns_bind != NULL);
           ns_bind(rdev, cb_priv, name, dest);
-
           return;
         }
     }
@@ -372,12 +383,10 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
   FAR struct metal_list *node;
 
   nxrmutex_lock(&rpmsg->lock);
-
   metal_list_for_each(&rpmsg->bind, node)
     {
-      FAR struct rpmsg_bind_s *bind;
-
-      bind = metal_container_of(node, struct rpmsg_bind_s, node);
+      FAR struct rpmsg_bind_s *bind =
+        metal_container_of(node, struct rpmsg_bind_s, node);
 
       if (bind->dest == dest && !strncmp(bind->name, name, RPMSG_NAME_SIZE))
         {
@@ -392,20 +401,21 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
 
 void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 {
-  FAR struct rpmsg_cb_s *cb;
   FAR struct metal_list *node;
 
   nxrmutex_lock(&g_rpmsg_lock);
-
   metal_list_for_each(&g_rpmsg_cb, node)
     {
-      cb = metal_container_of(node, struct rpmsg_cb_s, node);
+      FAR struct rpmsg_cb_s *cb =
+        metal_container_of(node, struct rpmsg_cb_s, node);
+
       if (cb->device_created)
         {
           cb->device_created(rpmsg->rdev, cb->priv);
         }
     }
 
+  rpmsg->init = true;
   nxrmutex_unlock(&g_rpmsg_lock);
 
 #ifdef CONFIG_RPMSG_PING
@@ -415,7 +425,6 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 
 void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 {
-  FAR struct rpmsg_cb_s *cb;
   FAR struct metal_list *node;
   FAR struct metal_list *tmp;
 
@@ -424,25 +433,25 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 #endif
 
   nxrmutex_lock(&rpmsg->lock);
-
   metal_list_for_each_safe(&rpmsg->bind, node, tmp)
     {
-      FAR struct rpmsg_bind_s *bind;
+      FAR struct rpmsg_bind_s *bind =
+        metal_container_of(node, struct rpmsg_bind_s, node);
 
-      bind = metal_container_of(node, struct rpmsg_bind_s, node);
       metal_list_del(node);
       kmm_free(bind);
     }
 
   nxrmutex_unlock(&rpmsg->lock);
 
-  nxrmutex_lock(&g_rpmsg_lock);
-
   /* Broadcast device_destroy to all registers */
 
+  nxrmutex_lock(&g_rpmsg_lock);
   metal_list_for_each(&g_rpmsg_cb, node)
     {
-      cb = metal_container_of(node, struct rpmsg_cb_s, node);
+      FAR struct rpmsg_cb_s *cb =
+        metal_container_of(node, struct rpmsg_cb_s, node);
+
       if (cb->device_destroy)
         {
           cb->device_destroy(rpmsg->rdev, cb->priv);
@@ -455,11 +464,19 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops)
 {
+  struct metal_init_params params = METAL_INIT_DEFAULTS;
   int ret;
+
+  ret = metal_init(&params);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   ret = register_driver(path, &g_rpmsg_dev_ops, 0222, rpmsg);
   if (ret < 0)
     {
+      metal_finish();
       return ret;
     }
 
@@ -483,8 +500,9 @@ void rpmsg_unregister(FAR const char *path, FAR struct rpmsg_s *rpmsg)
   nxrmutex_unlock(&g_rpmsg_lock);
 
   nxrmutex_destroy(&rpmsg->lock);
-
   unregister_driver(path);
+
+  metal_finish();
 }
 
 int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg)
@@ -492,13 +510,15 @@ int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg)
   FAR struct metal_list *node;
   int ret = OK;
 
-  nxrmutex_lock(&g_rpmsg_lock);
+  if (!up_interrupt_context())
+    {
+      nxrmutex_lock(&g_rpmsg_lock);
+    }
 
   metal_list_for_each(&g_rpmsg, node)
     {
-      FAR struct rpmsg_s *rpmsg;
-
-      rpmsg = metal_container_of(node, struct rpmsg_s, node);
+      FAR struct rpmsg_s *rpmsg =
+        metal_container_of(node, struct rpmsg_s, node);
 
       if (!cpuname || !strcmp(rpmsg_get_cpuname(rpmsg->rdev), cpuname))
         {
@@ -510,7 +530,11 @@ int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg)
         }
     }
 
-  nxrmutex_unlock(&g_rpmsg_lock);
+  if (!up_interrupt_context())
+    {
+      nxrmutex_unlock(&g_rpmsg_lock);
+    }
+
   return ret;
 }
 

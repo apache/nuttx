@@ -1996,7 +1996,7 @@ static ssize_t apds9922_als_read(FAR struct file *filep, FAR char *buffer,
       return (ssize_t)-EINVAL;
     }
 
-  ptr = (int *)buffer;
+  ptr = (FAR int *)buffer;
 
   if (priv->als < 0)
     {

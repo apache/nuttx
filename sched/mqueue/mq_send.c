@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/mqueue/mq_send.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -179,7 +181,9 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
       return ret;
     }
 
-  return file_mq_send(filep, msg, msglen, prio);
+  ret = file_mq_send(filep, msg, msglen, prio);
+  fs_putfilep(filep);
+  return ret;
 }
 
 /****************************************************************************

@@ -102,7 +102,7 @@ int up_cpu_paused_save(void)
   sched_note_cpu_paused(tcb);
 #endif
 
-  /* Save the current context at CURRENT_REGS into the TCB at the head
+  /* Save the current context at current_regs into the TCB at the head
    * of the assigned task list for this CPU.
    */
 
@@ -218,7 +218,7 @@ int up_cpu_paused_restore(void)
 
 void xtensa_pause_handler(void)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the
@@ -241,6 +241,31 @@ void xtensa_pause_handler(void)
       DEBUGVERIFY(!up_cpu_pausereq(cpu));
 
       leave_critical_section(flags);
+    }
+}
+
+/****************************************************************************
+ * Name: up_send_smp_call
+ *
+ * Description:
+ *   Send smp call to target cpu.
+ *
+ * Input Parameters:
+ *   cpuset - The set of CPUs to receive the SGI.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void up_send_smp_call(cpu_set_t cpuset)
+{
+  int cpu;
+
+  for (; cpuset != 0; cpuset &= ~(1 << cpu))
+    {
+      cpu = ffs(cpuset) - 1;
+      xtensa_intercpu_interrupt(cpu, CPU_INTCODE_PAUSE);
     }
 }
 

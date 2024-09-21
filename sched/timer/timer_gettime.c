@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/timer/timer_gettime.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -85,8 +87,8 @@ int timer_gettime(timer_t timerid, FAR struct itimerspec *value)
 
   /* Convert that to a struct timespec and return it */
 
-  clock_ticks2time(ticks, &value->it_value);
-  clock_ticks2time(timer->pt_delay, &value->it_interval);
+  clock_ticks2time(&value->it_value, ticks);
+  clock_ticks2time(&value->it_interval, timer->pt_delay);
   return OK;
 }
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * mm/tlsf/mm_tlsf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,11 +40,10 @@
 #include <nuttx/fs/procfs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/mm/mm.h>
-#include <nuttx/sched.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mempool.h>
 
 #include "tlsf/tlsf.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1182,7 +1183,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
       memdump_backtrace(heap, buf);
 #endif
-      kasan_unpoison(ret, mm_malloc_size(heap, ret));
+      ret = kasan_unpoison(ret, mm_malloc_size(heap, ret));
 
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
       memset(ret, 0xaa, nodesize);
@@ -1259,7 +1260,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
       memdump_backtrace(heap, buf);
 #endif
-      kasan_unpoison(ret, mm_malloc_size(heap, ret));
+      ret = kasan_unpoison(ret, mm_malloc_size(heap, ret));
     }
 
 #if CONFIG_MM_FREE_DELAYCOUNT_MAX > 0
@@ -1415,9 +1416,16 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
 void mm_uninitialize(FAR struct mm_heap_s *heap)
 {
+  int i;
+
 #ifdef CONFIG_MM_HEAP_MEMPOOL
   mempool_multiple_deinit(heap->mm_mpool);
 #endif
+
+  for (i = 0; i < CONFIG_MM_REGIONS; i++)
+    {
+      kasan_unregister(heap->mm_heapstart[i]);
+    }
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
 #  if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
@@ -1462,4 +1470,30 @@ void mm_free_delaylist(FAR struct mm_heap_s *heap)
     {
        free_delaylist(heap, true);
     }
+}
+
+/****************************************************************************
+ * Name: mm_heapfree
+ *
+ * Description:
+ *   Return the total free size (in bytes) in the heap
+ *
+ ****************************************************************************/
+
+size_t mm_heapfree(FAR struct mm_heap_s *heap)
+{
+  return heap->mm_heapsize - heap->mm_curused;
+}
+
+/****************************************************************************
+ * Name: mm_heapfree_largest
+ *
+ * Description:
+ *   Return the largest chunk of contiguous memory in the heap
+ *
+ ****************************************************************************/
+
+size_t mm_heapfree_largest(FAR struct mm_heap_s *heap)
+{
+  return SIZE_MAX;
 }

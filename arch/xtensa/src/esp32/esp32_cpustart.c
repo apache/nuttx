@@ -57,8 +57,6 @@ static volatile spinlock_t g_appcpu_interlock;
  * ROM function prototypes
  ****************************************************************************/
 
-extern void cache_flush(int cpu);
-extern void cache_read_enable(int cpu);
 extern void ets_set_appcpu_boot_addr(uint32_t start);
 
 /****************************************************************************
@@ -122,7 +120,7 @@ void IRAM_ATTR xtensa_appcpu_start(void)
                  XCPTCONTEXT_SIZE;
   __asm__ __volatile__("mov sp, %0\n" : : "r"(sp));
 
-  sinfo("CPU%d Started\n", up_cpu_index());
+  sinfo("CPU%d Started\n", this_cpu());
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -244,11 +242,6 @@ int up_cpu_start(int cpu)
        */
 
       spin_initialize(&g_appcpu_interlock, SP_LOCKED);
-
-      /* Flush and enable I-cache for APP CPU */
-
-      cache_flush(cpu);
-      cache_read_enable(cpu);
 
       /* Unstall the APP CPU */
 

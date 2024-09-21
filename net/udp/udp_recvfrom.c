@@ -1,6 +1,8 @@
 /****************************************************************************
  * net/udp/udp_recvfrom.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -599,6 +601,59 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
 }
 
 /****************************************************************************
+ * Name: udp_notify_recvcpu
+ *
+ * Description:
+ *   This function will check current cpu id with conn->rcvcpu, if
+ *   not same, then use netdev_notify_recvcpu to notify the new cpu id
+ *
+ * Input Parameters:
+ *   conn    - A reference to UDP connection structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   conn is not NULL.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NETDEV_RSS
+static void udp_notify_recvcpu(FAR struct udp_conn_s *conn)
+{
+  int cpu;
+
+  if (!conn)
+    {
+      return;
+    }
+
+  cpu = up_cpu_index();
+  if (cpu != conn->rcvcpu)
+    {
+      if (conn->domain == PF_INET)
+        {
+          netdev_notify_recvcpu(conn->dev, cpu, conn->domain,
+                                &(conn->u.ipv4.laddr), conn->lport,
+                                &(conn->u.ipv4.raddr), conn->rport);
+        }
+      else
+        {
+          netdev_notify_recvcpu(conn->dev, cpu, conn->domain,
+                                &(conn->u.ipv6.laddr), conn->lport,
+                                &(conn->u.ipv6.raddr), conn->rport);
+        }
+
+      conn->rcvcpu = cpu;
+    }
+
+  return;
+}
+#else
+#  define udp_notify_recvcpu(c)
+#endif /* CONFIG_NETDEV_RSS */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -715,6 +770,8 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           ret = -EBUSY;
         }
     }
+
+  udp_notify_recvcpu(conn);
 
   net_unlock();
   udp_recvfrom_uninitialize(&state);

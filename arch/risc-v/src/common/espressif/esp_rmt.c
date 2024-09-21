@@ -224,10 +224,10 @@ struct rmt_dev_lowerhalf_s
 {
   /* The following block is part of the upper-half device struct */
 
-  FAR const struct rmt_ops_s *ops;
-  FAR struct circbuf_s       *circbuf;
-  sem_t                      *recvsem;
-  int                         minor;
+  const struct rmt_ops_s *ops;
+  struct circbuf_s       *circbuf;
+  sem_t                  *recvsem;
+  int                     minor;
 
   /* The following is private to the ESP32 RMT driver */
 
@@ -338,8 +338,8 @@ static int rmt_write_items(rmt_channel_t channel,
                            bool wait_tx_done);
 static ssize_t esp_rmt_read(struct rmt_dev_s *dev, char *buffer,
                             size_t buflen);
-static ssize_t esp_rmt_write(FAR struct rmt_dev_s *dev,
-                             FAR const char *buffer,
+static ssize_t esp_rmt_write(struct rmt_dev_s *dev,
+                             const char *buffer,
                              size_t buflen);
 static struct rmt_dev_s
     *esp_rmtinitialize(struct rmt_channel_config_s config);
@@ -1076,7 +1076,7 @@ static int rmt_isr_register(int (*fn)(int, void *, void *), void *arg,
 {
   int cpuint;
   int ret;
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   DEBUGASSERT(fn);
   DEBUGASSERT(g_rmtdev_common.rmt_driver_channels == 0);

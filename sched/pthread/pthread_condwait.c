@@ -1,6 +1,8 @@
 /****************************************************************************
  * sched/pthread/pthread_condwait.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,19 +77,13 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
   /* Make sure that the caller holds the mutex */
 
-  else if (mutex->pid != nxsched_gettid())
+  else if (!mutex_is_hold(&mutex->mutex))
     {
       ret = EPERM;
     }
   else
     {
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      uint8_t mflags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      uint8_t type;
-      int16_t nlocks;
-#endif
+      unsigned int nlocks;
 
       /* Give up the mutex */
 
@@ -95,15 +91,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       flags = enter_critical_section();
       sched_lock();
-      mutex->pid = INVALID_PROCESS_ID;
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-      mflags     = mutex->flags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      type       = mutex->type;
-      nlocks     = mutex->nlocks;
-#endif
-      ret        = pthread_mutex_give(mutex);
+      ret = pthread_mutex_breaklock(mutex, &nlocks);
 
       /* Take the semaphore.  This may be awakened only be a signal (EINTR)
        * or if the thread is canceled (ECANCELED)
@@ -129,28 +117,12 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sinfo("Reacquire mutex...\n");
 
-      status = pthread_mutex_take(mutex, NULL);
+      status = pthread_mutex_restorelock(mutex, nlocks);
       if (ret == OK)
         {
           /* Report the first failure that occurs */
 
           ret = status;
-        }
-
-      /* Did we get the mutex? */
-
-      if (status == OK)
-        {
-          /* Yes.. Then initialize it properly */
-
-          mutex->pid    = nxsched_gettid();
-#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-          mutex->flags  = mflags;
-#endif
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-          mutex->type   = type;
-          mutex->nlocks = nlocks;
-#endif
         }
     }
 

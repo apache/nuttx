@@ -23,7 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "cp15.h"
+
+#include <arch/irq.h>
 
 #ifdef CONFIG_ARCH_FPU
 

@@ -92,7 +92,7 @@ int board_lm75_initialize(int devno, int busno)
 
   /* Then register the temperature sensor */
 
-  snprintf(devpath, 12, "/dev/temp%d", devno);
+  snprintf(devpath, sizeof(devpath), "/dev/temp%d", devno);
   ret = lm75_register(devpath, i2c, 0x48);
   if (ret < 0)
     {

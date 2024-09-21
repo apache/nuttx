@@ -474,7 +474,7 @@ static int read_bss_config(FAR char *buf, size_t len, FAR char *path)
   struct file filep;
   int ret;
 
-  ret = file_open(&filep, path, O_RDWR);
+  ret = file_open(&filep, path, O_RDONLY);
   if (ret < 0)
     {
       nerr("open error");
@@ -747,7 +747,7 @@ static int verify_password(FAR struct wifi_sim_s *sta,
     {
       ret = OK;
     }
-  else if (!memcmp(sta->password, bss->password, strlen(sta->password)))
+  else if (!strncmp(sta->password, bss->password, sizeof(sta->password)))
     {
       ret = OK;
     }
@@ -762,7 +762,7 @@ static int get_bss_from_file(FAR char **rbuf)
   FAR char *p;
 
   *rbuf = malloc(size * sizeof(char));
-  if (rbuf == NULL)
+  if (*rbuf == NULL)
     {
       nerr("malloc failed!\n");
       return -ENOMEM;
@@ -777,7 +777,8 @@ redo:
       if (p == NULL)
         {
           nerr("read bss faied in realloc!\n");
-          free(rbuf);
+          free(*rbuf);
+          *rbuf = NULL;
           return -ENOMEM;
         }
 
@@ -790,7 +791,7 @@ redo:
       return ret;
     }
 
-  rbuf[ret] = '\0';
+  (*rbuf)[ret] = '\0';
 
   return ret;
 }
@@ -852,6 +853,14 @@ static int wifidriver_start_connect(FAR struct wifi_sim_s *wifidev)
               memset(&wrqu, 0, sizeof(wrqu));
               memcpy(wrqu.ap_addr.sa_data, bss_info->bssid, ETH_ALEN);
               wifi_send_event(wifidev, SIOCGIWAP, &wrqu);
+
+              /* If connect the AP with the bssid, copy the essid from bss */
+
+              if (wifidev->ssid_flag == 2)
+                {
+                  memcpy(wifidev->ssid, bss_info->ssid,
+                         strlen(bss_info->ssid));
+                }
             }
           else
             {
@@ -863,7 +872,11 @@ static int wifidriver_start_connect(FAR struct wifi_sim_s *wifidev)
             }
 
 error:
-          free(bss_buf);
+          if (bss_buf)
+            {
+              free(bss_buf);
+            }
+
           if (ret != OK)
             {
               wifidev->state = WLAN_STA_STATE_INIT;
@@ -891,7 +904,6 @@ error:
 
 static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
 {
-  int ret;
   union iwreq_data wrqu;
 
   switch (wifidev->mode)
@@ -904,11 +916,12 @@ static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
 
               free(wifidev->connected_ap);
 
-              netdev_lower_carrier_off(wifidev->lower);
               memset(&wrqu, 0, sizeof(wrqu));
               wrqu.ap_addr.sa_family = ARPHRD_ETHER;
               wifi_send_event(wifidev, SIOCGIWAP, &wrqu);
             }
+
+          netdev_lower_carrier_off(wifidev->lower);
 
           if (wifidev->psk_flag == 0)
             {
@@ -917,17 +930,15 @@ static int wifidriver_start_disconnect(FAR struct wifi_sim_s *wifidev)
             }
 
           wifidev->state = WLAN_STA_STATE_INIT;
-          ret            = OK;
         }
         break;
 
       case IW_MODE_MASTER:
       default:
-        ret = -ENOSYS;
         break;
     }
 
-  return ret;
+  return OK;
 }
 
 static int wifidriver_get_mode(FAR struct wifi_sim_s *wifidev,
@@ -1029,7 +1040,7 @@ static int wifidriver_get_sensitivity(FAR struct wifi_sim_s *wifidev,
               pwrq->u.sens.value = -wifidev->connected_ap->RSSI;
             }
 
-          ninfo("get rssi is %d\n", pwrq->u.sens.value);
+          ninfo("get rssi is %" PRId32 "\n", pwrq->u.sens.value);
         }
         break;
 
@@ -1108,7 +1119,7 @@ static int wifidriver_get_freq(FAR struct wifi_sim_s *wifidev,
 int wifidriver_set_txpower(FAR struct wifi_sim_s *wifidev,
                            FAR struct iwreq *pwrq)
 {
-  int ret;
+  int ret = OK;
 
   switch (wifidev->mode)
     {
@@ -1402,7 +1413,6 @@ static int get_scan_results(FAR struct wifi_sim_s *wifidev,
 {
   int ret;
   FAR char *rbuf;
-  char bss[128];
   FAR char *p;
   FAR char *s;
   struct wifi_sim_bss_s bss_info;
@@ -1427,11 +1437,7 @@ static int get_scan_results(FAR struct wifi_sim_s *wifidev,
           p++;
         }
 
-      memset(bss, 0, sizeof(bss));
-      memcpy(bss, s, p - s + 1);
-      ninfo("%s\n", bss);
-
-      wifidriver_get_bssinfo(&bss_info, bss, strlen(bss));
+      wifidriver_get_bssinfo(&bss_info, s, p - s + 1);
       ret = copy_scan_results(scan_reqs, &bss_info);
       if (ret < 0)
         {
@@ -1680,6 +1686,8 @@ static int wifidriver_set_psk(FAR struct wifi_sim_s *wifidev,
         return -ENOSYS;
     }
 
+  wifidev->auth_alg = ext->alg;
+
   switch (wifidev->mode)
     {
       case IW_MODE_INFRA:
@@ -1706,6 +1714,42 @@ static int wifidriver_set_psk(FAR struct wifi_sim_s *wifidev,
   return ret ;
 }
 
+static int wifidriver_get_psk(FAR struct wifi_sim_s *wifidev,
+                              FAR struct iwreq *pwrq)
+{
+  FAR struct iw_encode_ext *ext;
+  int ret = OK;
+  int len;
+  int size;
+
+  ext = (FAR struct iw_encode_ext *)pwrq->u.encoding.pointer;
+  len = pwrq->u.encoding.length - sizeof(*ext);
+
+  switch (wifidev->mode)
+    {
+      case IW_MODE_INFRA:
+        size = strnlen(wifidev->password, 64);
+        if (len < size)
+        {
+          return -EINVAL;
+        }
+        else
+        {
+          ext->key_len = size;
+          memcpy(ext->key, wifidev->password, ext->key_len);
+          ext->alg = wifidev->auth_alg;
+        }
+        break;
+
+      case IW_MODE_MASTER:
+      default:
+        ret = -ENOSYS;
+        break;
+    }
+
+  return ret;
+}
+
 /* iw_ops */
 
 static int wifidriver_connect(FAR struct netdev_lowerhalf_s *dev)
@@ -1713,7 +1757,7 @@ static int wifidriver_connect(FAR struct netdev_lowerhalf_s *dev)
   int ret;
 
   ret = wifidriver_start_connect(LOWERDEV2WIFIDEV(dev));
-  if (ret >= 0)
+  if (ret == OK)
     {
       netdev_lower_carrier_on(dev);
     }
@@ -1750,10 +1794,6 @@ static int wifidriver_bssid(FAR struct netdev_lowerhalf_s *dev,
   if (set)
     {
       ret = wifidriver_set_bssid(wifidev, iwr);
-      if (ret >= 0)
-        {
-           ret = wifidriver_start_connect(wifidev);
-        }
     }
   else
     {
@@ -1772,7 +1812,7 @@ static int wifidriver_passwd(FAR struct netdev_lowerhalf_s *dev,
     }
   else
     {
-      return -ENOTTY;
+      return wifidriver_get_psk(LOWERDEV2WIFIDEV(dev), iwr);
     }
 }
 

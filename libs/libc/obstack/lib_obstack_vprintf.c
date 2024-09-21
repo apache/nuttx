@@ -54,8 +54,11 @@ static int obstack_puts(FAR struct lib_outstream_s *self,
 
 static void obstack_putc(FAR struct lib_outstream_s *self, int ch)
 {
-  char tmp = ch;
-  obstack_puts(self, &tmp, 1);
+  FAR struct obstack_stream *stream = (FAR struct obstack_stream *)self;
+
+  DEBUGASSERT(self);
+
+  obstack_1grow(stream->h, ch);
 }
 
 /****************************************************************************
@@ -93,5 +96,13 @@ int obstack_vprintf(FAR struct obstack *h, FAR const char *fmt, va_list ap)
   outstream.common.nput = 0;
   outstream.h = h;
 
-  return lib_vsprintf(&outstream.common, fmt, ap);
+  int nbytes = lib_vsprintf(&outstream.common, fmt, ap);
+
+  if (nbytes < 0)
+    {
+      obstack_free(h, obstack_finish(h));
+      return ERROR;
+    }
+
+  return nbytes;
 }

@@ -847,7 +847,7 @@ static int esp32s3_lcd_config(void)
 
   flags = spin_lock_irqsave(&priv->lock);
 
-  priv->cpu = up_cpu_index();
+  priv->cpu = this_cpu();
   priv->cpuint = esp32s3_setup_irq(priv->cpu,
                                    ESP32S3_PERIPH_LCD_CAM,
                                    ESP32S3_INT_PRIO_DEF,

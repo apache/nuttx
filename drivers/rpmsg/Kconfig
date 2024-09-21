@@ -22,3 +22,138 @@ config RPMSG_PING
 		channel, user can use it to get send/recv speed & latency.
 
 endif # RPMSG
+
+config RPMSG_ROUTER
+	bool "rpmsg router support"
+	default n
+	---help---
+		Rpmsg router driver for enabling communication
+		without physical channels.
+
+config RPMSG_PORT
+	bool
+	default n
+	select RPMSG
+	---help---
+		Rpmsg port transport layer used for cross chip communication.
+
+config RPMSG_PORT_SPI
+	bool "Rpmsg SPI Port Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg SPI Port driver used for cross chip communication.
+
+config RPMSG_PORT_SPI_SLAVE
+	bool "Rpmsg SPI Slave Port Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg SPI Slave Port driver used for cross chip communication.
+
+if RPMSG_PORT_SPI || RPMSG_PORT_SPI_SLAVE
+
+config RPMSG_PORT_SPI_THREAD_PRIORITY
+	int "Rpmsg SPI Port Thread Priority"
+	default 224
+
+config RPMSG_PORT_SPI_THREAD_STACKSIZE
+	int "Rpmsg SPI Port Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_PORT_SPI_CRC
+	bool "Rpmsg SPI Port Use CRC Check"
+	default n
+
+config RPMSG_PORT_SPI_RX_THRESHOLD
+	int "Rpmsg SPI Port Rx Buffer Threshold"
+	default 50
+	range 0 100
+
+endif # RPMSG_PORT_SPI
+
+config RPMSG_PORT_UART
+	bool "Rpmsg Uart Port Driver Support"
+	default n
+	select RPMSG_PORT
+	---help---
+		Rpmsg Uart Port driver used for cross chip communication.
+
+if RPMSG_PORT_UART
+
+config RPMSG_PORT_UART_RX_THREAD_PRIORITY
+	int "Rpmsg UART Port RX Thread Priority"
+	default 224
+
+config RPMSG_PORT_UART_RX_THREAD_STACKSIZE
+	int "Rpmsg UART Port RX Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_PORT_UART_TX_THREAD_PRIORITY
+	int "Rpmsg UART Port TX Thread Priority"
+	default 224
+
+config RPMSG_PORT_UART_TX_THREAD_STACKSIZE
+	int "Rpmsg UART Port TX Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_PORT_UART_CRC
+	bool "Rpmsg UART Port CRC Enable"
+	default n
+
+config RPMSG_PORT_UART_DEBUG
+	bool "Rpmsg UART DEBUG Enable"
+	default n
+
+endif # RPMSG_PORT_UART
+
+config RPMSG_VIRTIO
+	bool "rpmsg virtio transport support"
+	default n
+	select RPMSG
+
+if RPMSG_VIRTIO
+
+config RPMSG_VIRTIO_PRIORITY
+	int "rpmsg virtio rx thread priority"
+	default 224
+
+config RPMSG_VIRTIO_STACKSIZE
+	int "rpmsg virtio rx thread stack size"
+	default DEFAULT_TASK_STACKSIZE
+
+config RPMSG_VIRTIO_IVSHMEM
+	bool "rpmsg virtio ivshmem support"
+	default n
+	depends on PCI_IVSHMEM
+	---help---
+		This is rpmsg virtio driver based on pci ivshmem.
+
+if RPMSG_VIRTIO_IVSHMEM
+
+config RPMSG_VIRTIO_IVSHMEM_NAME
+	string "rpmsg virtio ivshmem name"
+	---help---
+		Using this config to custom the rpmsg virtio ivshmem id, cpuname and role,
+		using ";" to split the names.
+		For example, if RPMSG_VIRTIO_IVSHMEM_CPUNAME = "0:cpu1:m;1:cpu2:s" and pass
+		two ivshmem devices to the qemu, we will get two rpmsg virtio ivshmem drivers
+		with remote cpu ids: "0","1", names: "cpu1", "cpu2", and roles: "master", "slave"
+
+config RPMSG_VIRTIO_IVSHMEM_BUFFSIZE
+	int "rpmsg virtio ivshmem rpmsg buffer size"
+	default 2048
+	---help---
+		The rpmsg buffer size in share memory, the RX and TX buffer size
+		are same for now.
+
+config RPMSG_VIRTIO_IVSHMEM_BUFFNUM
+	int "rpmsg virtio ivshmem rpmsg buffer number"
+	default 8
+	---help---
+		The rpmsg virtio buffer number in share memory, the RX and TX buffer number
+		are same for now.
+
+endif
+
+endif

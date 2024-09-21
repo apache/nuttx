@@ -40,6 +40,10 @@
 # define BITS_PER_LONG (sizeof(unsigned long) * BITS_PER_BYTE)
 #endif
 
+#ifndef BITS_TO_LONGS
+#  define BITS_TO_LONGS(nr) (((nr) + BITS_PER_LONG - 1) / BITS_PER_LONG)
+#endif
+
 #ifndef BITS_PER_LONG_LONG
 # define BITS_PER_LONG_LONG (sizeof(unsigned long long) * BITS_PER_BYTE)
 #endif
@@ -69,6 +73,25 @@
          (~0ull >> (BITS_PER_LONG_LONG - 1 - (h))))
 #define GENMASK_ULL(h, l) \
         (BUILD_BUG_ON_ZERO((l) > (h)) + __GENMASK_ULL(h, l))
+
+#define BMVAL(val, lsb, msb)      (((val) & GENMASK(msb, lsb)) >> (lsb))
+
+/* Bitmap operations */
+
+#define DECLARE_BITMAP(name, bits) \
+        unsigned long name[BITS_TO_LONGS(bits)]
+
+#define __set_bit(nr, addr) \
+        (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) |= \
+        BIT_WORD_MASK(nr))
+
+#define __clear_bit(nr, addr) \
+        (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) &= \
+        ~BIT_WORD_MASK(nr))
+
+#define test_bit(nr, addr) \
+        (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) & \
+        BIT_WORD_MASK(nr))
 
 /****************************************************************************
  * Type Definitions

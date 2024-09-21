@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 docutils = "==0.18.1"
-m2r2 = "==0.3.2"
+myst-parser = "*"
 sphinx_rtd_theme = "*"
 Sphinx = "~=6.0"
 sphinx-tabs = "*"

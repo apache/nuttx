@@ -221,6 +221,7 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev);
  *
  ****************************************************************************/
 
+struct ioexpander_dev_s;
 int regulator_gpio_init(FAR struct ioexpander_dev_s *iodev,
                         FAR const struct regulator_desc_s *desc);
 

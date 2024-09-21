@@ -62,6 +62,10 @@ ifeq ($(CONFIG_NET_CDCECM),y)
   CSRCS += cdcecm.c
 endif
 
+ifeq ($(CONFIG_NET_CDCNCM),y)
+  CSRCS += cdcncm.c
+endif
+
 ifeq ($(CONFIG_USBDEV_FS),y)
   CSRCS += usbdev_fs.c
 endif

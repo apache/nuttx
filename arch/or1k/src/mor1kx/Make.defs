@@ -40,7 +40,6 @@ CMN_CSRCS  = or1k_initialize.c \
              or1k_idle.c \
              or1k_irq.c \
              or1k_nputs.c \
-             or1k_uart.c \
              or1k_timer.c \
              or1k_doirq.c \
              or1k_cpuinfo.c \

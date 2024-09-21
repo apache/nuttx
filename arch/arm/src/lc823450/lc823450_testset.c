@@ -71,7 +71,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 
   flags = up_irq_save();
 
-  val = (up_cpu_index() << 16) | 0x1;
+  val = (this_cpu() << 16) | 0x1;
 
   do
     {
@@ -90,7 +90,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 
   SP_DMB();
 
-  val = (up_cpu_index() << 16) | 0x0;
+  val = (this_cpu() << 16) | 0x0;
   putreg32(val, MUTEX_REG_MUTEX0);
 
   up_irq_restore(flags);
