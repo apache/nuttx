@@ -496,6 +496,7 @@ int riscv_swint(int irq, void *context, void *arg)
   if (regs != new_regs)
     {
       restore_critical_section(this_task(), this_cpu());
+      return SWINT_CONTEXT_SWITCH;
     }
 
   return OK;

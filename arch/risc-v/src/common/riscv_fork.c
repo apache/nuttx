@@ -108,10 +108,15 @@ pid_t riscv_fork(const struct fork_s *context)
   uintptr_t newtop;
   uintptr_t stacktop;
   uintptr_t stackutil;
+  irqstate_t flags;
 #ifdef CONFIG_SCHED_THREAD_LOCAL
   uintptr_t tp;
 #endif
   UNUSED(context);
+
+  /* parent regs may change in irq, we should disable irq here */
+
+  flags = up_irq_save();
 
   /* Allocate and initialize a TCB for the child task. */
 
@@ -163,6 +168,8 @@ pid_t riscv_fork(const struct fork_s *context)
 #ifdef CONFIG_SCHED_THREAD_LOCAL
   child->cmn.xcp.regs[REG_TP] = tp;
 #endif
+
+  up_irq_restore(flags);
 
   /* And, finally, start the child task.  On a failure, nxtask_start_fork()
    * will discard the TCB by calling nxtask_abort_fork().
