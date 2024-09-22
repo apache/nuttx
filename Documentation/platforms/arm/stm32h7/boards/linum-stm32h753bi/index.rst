@@ -813,3 +813,57 @@ Configures the board to use the SPI4 and enables RFID driver with MFRC522::
   MOSI     PE6
   CS       PE4
   ======== =====
+
+lvgl
+----
+
+Configures the board to use display of 7 inch with lvgl example.
+
+To verify if the display is functioning correctly, use the **fb** command. You should see the display change colors.::
+
+  nsh> fb
+  VideoInfo:
+        fmt: 11
+      xres: 1024
+      yres: 600
+    nplanes: 1
+  noverlays: 1
+  OverlayInfo (overlay 0):
+      fbmem: 0xc0000000
+      fblen: 1228800
+    stride: 2048
+    overlay: 0
+        bpp: 16
+      blank: 0
+  chromakey: 0x00000000
+      color: 0x00000000
+    transp: 0xff
+      mode: 0
+      area: (0,0) => (1024,600)
+      accl: 1
+  PlaneInfo (plane 0):
+      fbmem: 0xc0000000
+      fblen: 1228800
+    stride: 2048
+    display: 0
+        bpp: 16
+  Mapped FB: 0xc0000000
+  0: (  0,  0) (1024,600)
+  1: ( 93, 54) (838,492)
+  2: (186,108) (652,384)
+  3: (279,162) (466,276)
+  4: (372,216) (280,168)
+  5: (465,270) ( 94, 60)
+  Test finished
+
+Once the **fd** command work, run the lvgl exemple. ::
+
+  nsh> lvgldemo
+
+**WARNING:** This example at the moment is not working correctly yet and have a bug fix to be done.
+In the lvgl file **./apps/graphics/lvgl/lvgl/src/drivers/nuttx/lv_nuttx_fbdev.c**
+search the function **lv_nuttx_fbdev_set_file** and modify line 156 as follows:
+
+    dsc->mem_off_screen = malloc(data_size);
+    to
+    dsc->mem_off_screen = (void*)0xC00000000;
