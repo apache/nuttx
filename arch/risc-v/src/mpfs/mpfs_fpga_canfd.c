@@ -115,12 +115,6 @@
 #define CAN_RTR_FLAG            0x40000000  /* remote transmission request */
 #define CAN_ERR_FLAG            0x20000000  /* error message frame */
 
-/* Valid bits in CAN ID for frame formats */
-
-#define CAN_SFF_MASK            0x000007FF /* standard frame format (SFF) */
-#define CAN_EFF_MASK            0x1FFFFFFF /* extended frame format (EFF) */
-#define CAN_ERR_MASK            0x1FFFFFFF /* omit EFF, RTR, ERR flags */
-
 /* CAN control mode */
 
 #define CAN_CTRLMODE_LOOPBACK       0x01  /* Loopback mode */
@@ -1416,7 +1410,7 @@ static bool mpfs_can_write_txb(struct mpfs_driver_s *priv,
         }
     }
 
-  ffw |= MPFS_CANFD_FRAME_FORMAT_W_DLC & (len_to_can_dlc[cf->len] <<
+  ffw |= MPFS_CANFD_FRAME_FORMAT_W_DLC & (g_len_to_can_dlc[cf->len] <<
     MPFS_CANFD_FRAME_FORMAT_W_DLC_SHIFT);
 
   /* Populate CAN frame id word */
