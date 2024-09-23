@@ -485,7 +485,7 @@ if(MSVC)
             # data
     -wd4305 # 'context' : truncation from 'type1' to 'type2'
   )
-else()
+elseif(NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
   add_compile_options(
     # system wide warnings
     -Wall $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes> -Wshadow -Wundef
@@ -640,9 +640,13 @@ set(nuttx_libs ${nuttx_kernel_libs} ${nuttx_system_libs} ${nuttx_apps_libs}
 if(NOT CONFIG_ARCH_SIM)
 
   # TODO: nostart/nodefault not applicable to nuttx toolchain
-  target_link_libraries(
-    nuttx PRIVATE ${NUTTX_EXTRA_FLAGS} -T${ldscript} -Wl,--start-group
-                  ${nuttx_libs} -Wl,--end-group)
+  if(CONFIG_ARCH_TOOLCHAIN_TASKING)
+    target_link_libraries(nuttx PRIVATE --lsl-file=${ldscript} ${nuttx_libs})
+  else()
+    target_link_libraries(
+      nuttx PRIVATE ${NUTTX_EXTRA_FLAGS} -T${ldscript} -Wl,--start-group
+                    ${nuttx_libs} -Wl,--end-group)
+  endif()
 
   # generate binary outputs in different formats (.bin, .hex, etc)
   nuttx_generate_outputs(nuttx)
