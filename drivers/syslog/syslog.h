@@ -47,9 +47,7 @@ extern "C"
  * g_default_channel.
  */
 
-struct syslog_channel_s; /* Forward reference */
-EXTERN FAR struct syslog_channel_s *g_syslog_channel
-                                                [CONFIG_SYSLOG_MAX_CHANNELS];
+EXTERN FAR syslog_channel_t *g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -81,8 +79,8 @@ EXTERN FAR struct syslog_channel_s *g_syslog_channel
  *
  ****************************************************************************/
 
-FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
-                                                   int oflags, int mode);
+FAR syslog_channel_t *syslog_dev_initialize(FAR const char *devpath,
+                                            int oflags, int mode);
 
 /****************************************************************************
  * Name: syslog_dev_uninitialize
@@ -100,7 +98,7 @@ FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
  *
  ****************************************************************************/
 
-void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
+void syslog_dev_uninitialize(FAR syslog_channel_t *channel);
 
 /****************************************************************************
  * Name: syslog_dev_channel
@@ -127,7 +125,7 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CHAR
-FAR struct syslog_channel_s *syslog_dev_channel(void);
+FAR syslog_channel_t *syslog_dev_channel(void);
 #endif
 
 /****************************************************************************
@@ -158,7 +156,7 @@ FAR struct syslog_channel_s *syslog_dev_channel(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CONSOLE
-FAR struct syslog_channel_s *syslog_console_channel(void);
+FAR syslog_channel_t *syslog_console_channel(void);
 #endif
 
 /****************************************************************************
