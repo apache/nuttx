@@ -66,7 +66,7 @@ static uint64_t get_current(void)
     }
   else
     {
-      return getreg64(_mtime_cmp);
+      return getreg64((uintptr_t)_mtime_cmp);
     }
 #else
   return riscv_sbi_get_time();
@@ -76,7 +76,7 @@ static uint64_t get_current(void)
 static void set_next(uint64_t next)
 {
 #ifndef CONFIG_BUILD_KERNEL
-  putreg64(next, _mtime_cmp);
+  putreg64(next, (uintptr_t)_mtime_cmp);
 #else
   riscv_sbi_set_timer(next);
 #endif
