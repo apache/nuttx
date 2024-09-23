@@ -64,21 +64,15 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   PANIC();
 #else
 
-  /* Nested interrupts are not supported in this implementation.  If you
-   * want to implement nested interrupts, you would have to (1) change the
-   * way that current_regs is handled and (2) the design associated with
-   * CONFIG_ARCH_INTERRUPTSTACK.
-   */
+  /* Nested interrupts are not supported */
+
+  DEBUGASSERT(up_current_regs() == NULL);
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  if (up_current_regs() == NULL)
-    {
-      up_set_current_regs(regs);
-      regs         = NULL;
-    }
+  up_set_current_regs(regs);
 
   tcb->xcp.regs = regs;
 
@@ -97,17 +91,15 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  if (regs == NULL)
+  if (regs != tcb->xcp.regs)
     {
-      if (regs != tcb->xcp.regs)
-        {
-          regs = tcb->xcp.regs;
-        }
-
-      /* Update the current_regs to NULL. */
-
-      up_set_current_regs(NULL);
+      regs = tcb->xcp.regs;
     }
+
+  /* Update the current_regs to NULL. */
+
+  up_set_current_regs(NULL);
+
 #endif
 
   board_autoled_off(LED_INIRQ);
