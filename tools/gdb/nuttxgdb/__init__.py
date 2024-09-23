@@ -25,6 +25,12 @@ from os import path
 
 import gdb
 
+if __name__ == "__main__":
+    import sys
+
+    gdb.write("Use nuttx/tools/gdb/gdbinit.py instead")
+    sys.exit(1)
+
 here = path.dirname(path.abspath(__file__))
 
 
