@@ -28,6 +28,7 @@ from . import utils
 
 list_node_type = utils.lookup_type("struct list_node")
 sq_queue_type = utils.lookup_type("sq_queue_t")
+sq_entry_type = utils.lookup_type("sq_entry_t")
 dq_queue_type = utils.lookup_type("dq_queue_t")
 
 
@@ -201,18 +202,18 @@ def sq_is_empty(sq):
         return False
 
 
-def sq_check(sq):
+def sq_check(sq) -> int:
     """Check the consistency of a singly linked list"""
     nb = 0
     if sq.type == sq_queue_type.pointer():
         sq = sq.dereference()
     elif sq.type != sq_queue_type:
         gdb.write("Must be struct sq_queue not {}".format(sq.type))
-        return
+        return nb
 
     if sq["head"] == 0:
         gdb.write("sq_queue head is empty {}\n".format(sq.address))
-        return
+        return nb
 
     nodes = set()
     entry = sq["head"].dereference()
@@ -221,21 +222,27 @@ def sq_check(sq):
             nb += 1
             if int(entry.address) in nodes:
                 gdb.write("sq_queue is circular: {}\n".format(entry.address))
-                return
+                return nb
             nodes.add(int(entry.address))
             entry = entry["flink"].dereference()
     except gdb.MemoryError:
         gdb.write("entry address is unaccessible {}\n".format(entry.address))
-        return
+        return nb
 
     if int(sq["tail"]) not in nodes:
         gdb.write("sq_queue tail is not in the list {}\n".format(sq["tail"]))
-        return
+        return nb
     if sq["tail"]["flink"] != 0:
         gdb.write("sq_queue tail->flink is not null {}\n".format(sq["tail"]))
-        return
+        return nb
 
     gdb.write("sq_queue is consistent: {} node(s)\n".format(nb))
+    return nb
+
+
+def sq_count(sq):
+    """Count sq elements, abort if check failed"""
+    return sq_check(sq)
 
 
 def dq_for_every(dq, entry=None):
