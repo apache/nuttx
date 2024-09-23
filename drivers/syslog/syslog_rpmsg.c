@@ -338,7 +338,7 @@ static ssize_t syslog_rpmsg_file_write(FAR struct file *filep,
  * Public Functions
  ****************************************************************************/
 
-int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch)
+int syslog_rpmsg_putc(FAR syslog_channel_t *channel, int ch)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
@@ -350,7 +350,7 @@ int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch)
   return ch;
 }
 
-int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
+int syslog_rpmsg_flush(FAR syslog_channel_t *channel)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
@@ -376,7 +376,7 @@ int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
   return OK;
 }
 
-ssize_t syslog_rpmsg_write(FAR struct syslog_channel_s *channel,
+ssize_t syslog_rpmsg_write(FAR syslog_channel_t *channel,
                            FAR const char *buffer, size_t buflen)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
