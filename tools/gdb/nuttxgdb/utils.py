@@ -96,7 +96,9 @@ def offset_of(typeobj: gdb.Type, field: str) -> Union[int, None]:
 
 def container_of(ptr: gdb.Value, typeobj: gdb.Type, member: str) -> gdb.Value:
     """Return pointer to containing data structure"""
-    return gdb.Value(ptr.address - offset_of(typeobj, member)).cast(typeobj.pointer())
+    return gdb.Value(int(ptr.address) - offset_of(typeobj, member)).cast(
+        typeobj.pointer()
+    )
 
 
 class ContainerOf(gdb.Function):
