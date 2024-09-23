@@ -164,7 +164,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: syslog_channel
+ * Name: syslog_channel_register
  *
  * Description:
  *   Configure the SYSLOGging function to use the provided channel to
@@ -179,10 +179,10 @@ extern "C"
  *
  ****************************************************************************/
 
-int syslog_channel(FAR struct syslog_channel_s *channel);
+int syslog_channel_register(FAR struct syslog_channel_s *channel);
 
 /****************************************************************************
- * Name: syslog_channel_remove
+ * Name: syslog_channel_unregister
  *
  * Description:
  *   Removes an already configured SYSLOG channel from the list of used
@@ -197,7 +197,7 @@ int syslog_channel(FAR struct syslog_channel_s *channel);
  *
  ****************************************************************************/
 
-int syslog_channel_remove(FAR struct syslog_channel_s *channel);
+int syslog_channel_unregister(FAR struct syslog_channel_s *channel);
 
 /****************************************************************************
  * Name: syslog_initialize
@@ -211,11 +211,11 @@ int syslog_channel_remove(FAR struct syslog_channel_s *channel);
  *   This function performs these basic operations:
  *
  *   - Initialize the SYSLOG device
- *   - Call syslog_channel() to begin using that device.
+ *   - Call syslog_channel_register() to begin using that device.
  *
  *   If CONFIG_ARCH_SYSLOG is selected, then the architecture-specifica
  *   logic will provide its own SYSLOG device initialize which must include
- *   as a minimum a call to syslog_channel() to use the device.
+ *   as a minimum a call to syslog_channel_register() to use the device.
  *
  * Input Parameters:
  *   None
@@ -240,9 +240,10 @@ int syslog_initialize(void);
  *   SYSLOG channel.
  *
  *   This tiny function is simply a wrapper around syslog_dev_initialize()
- *   and syslog_channel().  It calls syslog_dev_initialize() to configure
- *   the character file at 'devpath then calls syslog_channel() to use that
- *   device as the SYSLOG output channel.
+ *   and syslog_channel_register().  It calls syslog_dev_initialize() to
+ *   configure the character file at 'devpath then calls
+ *   syslog_channel_register() to use that device as the SYSLOG output
+ *   channel.
  *
  *   File SYSLOG channels differ from other SYSLOG channels in that they
  *   cannot be established until after fully booting and mounting the target

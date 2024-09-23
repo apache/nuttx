@@ -272,7 +272,7 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
  *
  ****************************************************************************/
 
-int syslog_channel(FAR struct syslog_channel_s *channel)
+int syslog_channel_register(FAR struct syslog_channel_s *channel)
 {
 #if (CONFIG_SYSLOG_MAX_CHANNELS != 1)
   int i;
@@ -313,7 +313,7 @@ int syslog_channel(FAR struct syslog_channel_s *channel)
 }
 
 /****************************************************************************
- * Name: syslog_channel_remove
+ * Name: syslog_channel_unregister
  *
  * Description:
  *   Removes an already configured SYSLOG channel from the list of used
@@ -328,7 +328,7 @@ int syslog_channel(FAR struct syslog_channel_s *channel)
  *
  ****************************************************************************/
 
-int syslog_channel_remove(FAR struct syslog_channel_s *channel)
+int syslog_channel_unregister(FAR struct syslog_channel_s *channel)
 {
   int i;
 

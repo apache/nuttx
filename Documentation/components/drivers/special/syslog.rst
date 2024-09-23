@@ -149,14 +149,14 @@ defined in ``include/nuttx/syslog/syslog.h``:
   };
 
 The channel interface is instantiated by calling
-:c:func:`syslog_channel()`.
+:c:func:`syslog_channel_register()`.
 
-.. c:function:: int syslog_channel(FAR const struct syslog_channel_s *channel);
+.. c:function:: int syslog_channel_register(FAR const struct syslog_channel_s *channel);
 
   Configure the SYSLOG function to use the provided
   channel to generate SYSLOG output.
 
-  ``syslog_channel()`` is a non-standard, internal OS interface and
+  ``syslog_channel_register()`` is a non-standard, internal OS interface and
   is not available to applications. It may be called numerous times
   as necessary to change channel interfaces. By default, all system
   log output goes to console (``/dev/console``).
@@ -363,7 +363,7 @@ serial console is used and ``up_putc()`` is supported.
   device is used for a console -- such as a USB console or a Telnet
   console. The SYSLOG channel is not redirected as ``stdout`` is;
   the SYSLOG channel will stayed fixed (unless it is explicitly
-  changed via ``syslog_channel()``).
+  changed via ``syslog_channel_register()``).
 
 References: ``drivers/syslog/syslog_consolechannel.c`` and
 ``drivers/syslog/syslog_device.c``
@@ -415,9 +415,9 @@ SYSLOG file channel:
   at ``devpath`` as the SYSLOG channel.
 
   This tiny function is simply a wrapper around
-  ``syslog_dev_initialize()`` and ``syslog_channel()``. It calls
+  ``syslog_dev_initialize()`` and ``syslog_channel_register()``. It calls
   ``syslog_dev_initialize()`` to configure the character file at
-  ``devpath`` then calls ``syslog_channel()`` to use that device as
+  ``devpath`` then calls ``syslog_channel_register()`` to use that device as
   the SYSLOG output channel.
 
   File SYSLOG channels differ from other SYSLOG channels in that
