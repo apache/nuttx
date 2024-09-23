@@ -135,7 +135,7 @@ def fetch_macro_info(file):
     cache = path.join(path.dirname(path.abspath(file)), f"{hash}.macro")
     if not path.isfile(cache):
         start = time.time()
-        os.system(f"readelf -wm {file} > {cache}")
+        os.system(f'readelf -wm "{file}" > "{cache}"')
         print(f"readelf took {time.time() - start:.1f} seconds")
         print(f"Cache macro info to {cache}")
     else:

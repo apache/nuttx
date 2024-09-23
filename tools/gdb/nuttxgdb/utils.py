@@ -196,7 +196,7 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
     # in order to use the list command to set the scope.
     if len(gdb.inferiors()) == 1:
         gdb.execute(
-            f"add-inferior -exec {gdb.objfiles()[0].filename} -no-connection",
+            f'add-inferior -exec "{gdb.objfiles()[0].filename}" -no-connection',
             to_string=True,
         )
         g_symbol_cache = {}

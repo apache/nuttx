@@ -129,8 +129,8 @@ class NXGcore(gdb.Command):
             os.remove(section)
 
         gdb.execute(f"file {tmpfile.name}")
-        gdb.execute(f"gcore {corefile}")
-        gdb.execute(f"file {elffile}")
+        gdb.execute(f'gcore "{corefile}"')
+        gdb.execute(f'file "{elffile}"')
         tmpfile.close()
 
         print(f"Please run gdbserver.py to parse {corefile}")
