@@ -423,6 +423,7 @@ void files_dumplist(FAR struct filelist *list)
             , buf
 #endif
             );
+      fs_putfilep(filep);
     }
 }
 #endif
