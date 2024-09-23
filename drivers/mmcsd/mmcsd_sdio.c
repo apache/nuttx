@@ -2690,8 +2690,9 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   /* Configure the SDIO peripheral */
 
-  if ((IS_MMC(priv->type) && ((priv->caps & SDIO_CAPS_1BIT_ONLY) == 0)) &&
-      ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0))
+  if ((priv->caps & SDIO_CAPS_1BIT_ONLY) == 0 &&
+      (IS_MMC(priv->type) ||
+       (priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0))
     {
       /* JEDEC specs: A.8.3 Changing the data bus width: 'Bus testing
        * procedure' shows how mmc bus width may be detected.  This driver
