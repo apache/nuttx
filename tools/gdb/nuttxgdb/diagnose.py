@@ -70,8 +70,20 @@ class DiagnoseReport(gdb.Command):
         for clz in commands:
             if hasattr(clz, "diagnose"):
                 command = clz()
-                gdb.write(f"Run command: {clz.__name__}\n")
-                results.append(command.diagnose())
+                name = clz.__name__.lower()
+                gdb.write(f"Run command: {name}\n")
+                try:
+                    result = command.diagnose()
+                except gdb.error as e:
+                    result = {
+                        "command": name,
+                        "error": str(e),
+                    }
+
+                    gdb.write(f"Failed: {e}\n")
+
+                result.setdefault("command", name)
+                results.append(result)
 
         gdb.write(f"Write report to {reportfile}\n")
         with open(reportfile, "w") as f:
