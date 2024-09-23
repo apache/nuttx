@@ -37,9 +37,11 @@
 #
 # Currently, we are using the second method.
 
+import hashlib
 import os
 import re
 import time
+from os import path
 
 PUNCTUATORS = [
     "\[",
@@ -120,18 +122,24 @@ def parse_macro(line, macros, pattern):
 
 
 def fetch_macro_info(file):
-    if not os.path.isfile(file):
+    if not path.isfile(file):
         raise FileNotFoundError("No given ELF target found")
 
     # FIXME: we don't use subprocess here because
     # it's broken on some GDB distribution :(, I haven't
     # found a solution to it.
 
-    cache = os.path.splitext(file)[0] + ".macro"
-    if not os.path.isfile(cache):
+    with open(file, "rb") as f:
+        hash = hashlib.md5(f.read()).hexdigest()
+
+    cache = path.join(path.dirname(path.abspath(file)), f"{hash}.macro")
+    if not path.isfile(cache):
         start = time.time()
         os.system(f"readelf -wm {file} > {cache}")
         print(f"readelf took {time.time() - start:.1f} seconds")
+        print(f"Cache macro info to {cache}")
+    else:
+        print(f"Load macro info from {cache}")
 
     p = re.compile(".*macro[ ]*:[ ]*([\S]+\(.*?\)|[\w]+)[ ]*(.*)")
     macros = {}
