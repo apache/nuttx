@@ -307,6 +307,7 @@ struct smartfs_ofile_s
                                              * a seek, or more data is written that
                                              * causes the sector to change.
                                              */
+  char                        path[1];      /* The full path to the file */
 };
 
 /* This structure represents the overall mountpoint state.  An instance of
