@@ -515,14 +515,14 @@ static void rpmsgdev_server_created(FAR struct rpmsg_device *rdev,
       snprintf(buf, sizeof(buf), "%s%s", RPMSGDEV_NAME_PREFIX,
                priv->localpath);
       rpmsgdev_ns_bind(rdev, NULL, buf, RPMSG_ADDR_ANY);
-    }
 
-  rpmsg_unregister_callback(priv,
-                            rpmsgdev_server_created,
-                            NULL,
-                            NULL,
-                            NULL);
-  kmm_free(priv);
+      rpmsg_unregister_callback(priv,
+                                rpmsgdev_server_created,
+                                NULL,
+                                NULL,
+                                NULL);
+      kmm_free(priv);
+    }
 }
 
 /****************************************************************************
