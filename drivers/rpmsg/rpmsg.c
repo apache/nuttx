@@ -434,7 +434,7 @@ void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
 #endif
 
   nxrmutex_lock(&rpmsg->lock);
-  metal_list_for_each_safe(&rpmsg->bind, node, tmp)
+  metal_list_for_each_safe(&rpmsg->bind, tmp, node)
     {
       FAR struct rpmsg_bind_s *bind =
         metal_container_of(node, struct rpmsg_bind_s, node);
