@@ -2434,6 +2434,8 @@ void vsock_transport_register(FAR struct vsock_transport_s *t)
 
 int vsock_initialize(void)
 {
+  int ret = OK;
+
   g_vsock_wqueue = work_queue_create("vsock_work",
                                      CONFIG_NET_VSOCK_WORK_PRIORITY,
                                      NULL,
@@ -2444,5 +2446,21 @@ int vsock_initialize(void)
       return -ENOMEM;
     }
 
-  return OK;
+#ifdef CONFIG_NET_VSOCK_VIRTIO
+  ret = vsock_virtio_initialize();
+  if (ret < 0)
+    {
+      vrterr("ERROR: vsock_virtio_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_NET_VSOCK_VHOST
+  ret = vsock_vhost_initialize();
+  if (ret < 0)
+    {
+      vhosterr("ERROR: vsock_vhost_initialize failed, ret=%d\n", ret);
+    }
+#endif
+
+  return ret;
 }

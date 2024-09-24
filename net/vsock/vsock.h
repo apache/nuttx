@@ -128,6 +128,14 @@ bool vsock_addr_equal(FAR const struct sockaddr_vm *addr1,
 
 int vsock_initialize(void);
 
+#ifdef CONFIG_NET_VSOCK_VIRTIO
+int vsock_virtio_initialize(void);
+#endif
+
+#ifdef CONFIG_NET_VSOCK_VHOST
+int vsock_vhost_initialize(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
