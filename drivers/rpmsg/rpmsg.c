@@ -402,9 +402,10 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
 void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct metal_list *node;
+  FAR struct metal_list *tmp;
 
   nxrmutex_lock(&g_rpmsg_lock);
-  metal_list_for_each(&g_rpmsg_cb, node)
+  metal_list_for_each_safe(&g_rpmsg_cb, tmp, node)
     {
       FAR struct rpmsg_cb_s *cb =
         metal_container_of(node, struct rpmsg_cb_s, node);
