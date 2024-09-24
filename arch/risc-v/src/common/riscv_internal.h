@@ -113,50 +113,50 @@
 
 /* Use ASM as rv64ilp32 compiler generated address is limited */
 
-static inline uint8_t getreg8(const volatile uintreg_t a)
+static inline uint8_t getreg8(const volatile uintptr_t a)
 {
   uint8_t v;
   __asm__ __volatile__("lb %0, 0(%1)" : "=r" (v) : "r" (a));
   return v;
 }
 
-static inline void putreg8(uint8_t v, const volatile uintreg_t a)
+static inline void putreg8(uint8_t v, const volatile uintptr_t a)
 {
   __asm__ __volatile__("sb %0, 0(%1)" : : "r" (v), "r" (a));
 }
 
-static inline uint16_t getreg16(const volatile uintreg_t a)
+static inline uint16_t getreg16(const volatile uintptr_t a)
 {
   uint16_t v;
   __asm__ __volatile__("lh %0, 0(%1)" : "=r" (v) : "r" (a));
   return v;
 }
 
-static inline void putreg16(uint16_t v, const volatile uintreg_t a)
+static inline void putreg16(uint16_t v, const volatile uintptr_t a)
 {
   __asm__ __volatile__("sh %0, 0(%1)" : : "r" (v), "r" (a));
 }
 
-static inline uint32_t getreg32(const volatile uintreg_t a)
+static inline uint32_t getreg32(const volatile uintptr_t a)
 {
   uint32_t v;
   __asm__ __volatile__("lw %0, 0(%1)" : "=r" (v) : "r" (a));
   return v;
 }
 
-static inline void putreg32(uint32_t v, const volatile uintreg_t a)
+static inline void putreg32(uint32_t v, const volatile uintptr_t a)
 {
   __asm__ __volatile__("sw %0, 0(%1)" : : "r" (v), "r" (a));
 }
 
-static inline uint64_t getreg64(const volatile uintreg_t a)
+static inline uint64_t getreg64(const volatile uintptr_t a)
 {
   uint64_t v;
   __asm__ __volatile__("ld %0, 0(%1)" : "=r" (v) : "r" (a));
   return v;
 }
 
-static inline void putreg64(uint64_t v, const volatile uintreg_t a)
+static inline void putreg64(uint64_t v, const volatile uintptr_t a)
 {
   __asm__ __volatile__("sd %0, 0(%1)" : : "r" (v), "r" (a));
 }
@@ -247,7 +247,7 @@ extern "C"
 #ifndef __ASSEMBLY__
 /* Atomic modification of registers */
 
-void modifyreg32(uintreg_t addr, uint32_t clearbits, uint32_t setbits);
+void modifyreg32(uintptr_t addr, uint32_t clearbits, uint32_t setbits);
 
 /* Memory allocation ********************************************************/
 
