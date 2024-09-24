@@ -777,11 +777,12 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size)
 
               return 0;
             }
-          else if ((uintptr_t)ptr < region->end &&
+          else if ((uintptr_t)ptr < region->start &&
                    (uintptr_t)ptr + size >= region->end)
             {
-              /* start in region, end out of region */
+              /* start out of region, end out of region */
 
+              region->start = (uintptr_t)ptr;
               region->end = (uintptr_t)ptr + size;
               return 0;
             }
@@ -793,12 +794,11 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size)
               region->start = (uintptr_t)ptr;
               return 0;
             }
-          else if ((uintptr_t)ptr < region->start &&
+          else if ((uintptr_t)ptr < region->end &&
                    (uintptr_t)ptr + size >= region->end)
             {
-              /* start out of region, end out of region */
+              /* start in region, end out of region */
 
-              region->start = (uintptr_t)ptr;
               region->end = (uintptr_t)ptr + size;
               return 0;
             }
