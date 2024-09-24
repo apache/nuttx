@@ -286,6 +286,13 @@ _xtensa_syscall_handler:
 
 	ps_setup	1 a0
 
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
+	 */
+
+	exception_backtrace a12 1
+
 	movi	ARG1, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
 	mov		ARG2, a12							/* Argument 2: Top of stack = register save area */
 	CALL	xtensa_irq_dispatch					/* Call xtensa_int_decode */
