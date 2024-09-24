@@ -95,7 +95,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
       g_running_tasks[this_cpu()] = this_task();
 
-      __mtcr(CPU_PCXI, up_current_regs());
+      __mtcr(CPU_PCXI, (uintptr_t)up_current_regs());
       __isync();
     }
 
