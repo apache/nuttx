@@ -254,8 +254,13 @@ int strncmp(FAR const char *s1, FAR const char *s2, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s1, n);
-  __asan_loadN((FAR void *)s2, n);
+  size_t size_s1 = arch_strnlen(s1, n);
+  size_t size_s2 = arch_strnlen(s2, n);
+  size_t size;
+
+  size = size_s1 < size_s2 ? size_s1 : size_s2;
+  __asan_loadN((FAR void *)s1, size);
+  __asan_loadN((FAR void *)s2, size);
 #    endif
 #  endif
   return arch_strncmp(s1, s2, n);
