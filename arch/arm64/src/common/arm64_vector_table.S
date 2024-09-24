@@ -45,8 +45,8 @@
  *     but only save ARM64_ESF_REGS
  */
 
-.macro arm64_enter_exception
-    sub    sp, sp, #8 * XCPTCONTEXT_REGS
+.macro arm64_enter_exception xreg0, xreg1
+    sub    sp, sp, #8 * XCPTCONTEXT_GP_REGS
 
     stp    x0,  x1,  [sp, #8 * REG_X0]
     stp    x2,  x3,  [sp, #8 * REG_X2]
@@ -65,32 +65,30 @@
     stp    x28, x29, [sp, #8 * REG_X28]
 
     /* Save the current task's SP_ELx and x30 */
-    add    x0, sp, #8 * XCPTCONTEXT_REGS
-    stp    x30, x0,  [sp, #8 * REG_X30]
+    add    \xreg0, sp, #8 * XCPTCONTEXT_GP_REGS
+    stp    x30, \xreg0,  [sp, #8 * REG_X30]
 
     /* ELR and SPSR */
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
-    mrs    x0, elr_el3
-    mrs    x1, spsr_el3
+    mrs    \xreg0, elr_el3
+    mrs    \xreg1, spsr_el3
 #else
-    mrs    x0, elr_el1
-    mrs    x1, spsr_el1
+    mrs    \xreg0, elr_el1
+    mrs    \xreg1, spsr_el1
 #endif
-    stp    x0, x1,  [sp, #8 * REG_ELR]
+    stp    \xreg0, \xreg1,  [sp, #8 * REG_ELR]
 
-    /* Increment exception depth */
+    /* increment exception depth */
 
-    mrs    x0, tpidrro_el0
-    mov    x1, #1
-    add    x0, x0, x1
-    msr    tpidrro_el0, x0
+    mrs    \xreg0, tpidrro_el0
+    mov    \xreg1, #1
+    add    \xreg0, \xreg0, \xreg1
+    msr    tpidrro_el0, \xreg0
 
-    /* Save the FPU registers */
-
-    add    x0, sp, #8 * XCPTCONTEXT_GP_REGS
 #ifdef CONFIG_ARCH_FPU
-    bl     arm64_fpu_save
+    bl    arm64_fpu_enter_exception
 #endif
+
 .endm
 
 /****************************************************************************
@@ -145,97 +143,97 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
     /* Current EL with SP0 / Synchronous */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Current EL with SP0 / IRQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_irq_handler
 
     /* Current EL with SP0 / FIQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b     arm64_fiq_handler
 
     /* Current EL with SP0 / SError */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_serror_handler
 
     /* Current EL with SPx / Synchronous */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Current EL with SPx / IRQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_irq_handler
 
     /* Current EL with SPx / FIQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b     arm64_fiq_handler
 
     /* Current EL with SPx / SError */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_serror_handler
 
     /* Lower EL using AArch64 / Synchronous */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x9, x10
     b    arm64_sync_exc
 
     /* Lower EL using AArch64 / IRQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_irq_handler
 
     /* Lower EL using AArch64 / FIQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b     arm64_fiq_handler
 
     /* Lower EL using AArch64 / SError */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_serror_handler
 
     /* Lower EL using AArch32 / Synchronous */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / IRQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / FIQ */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_mode32_handler
 
     /* Lower EL using AArch32 / SError */
 
     .align 7
-    arm64_enter_exception
+    arm64_enter_exception x0, x1
     b    arm64_mode32_handler
 
 /* Restore Corruptible Registers and exception context
@@ -244,11 +242,10 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
 GTEXT(arm64_exit_exception)
 SECTION_FUNC(text, arm64_exit_exception)
-
-    mov    sp, x0
-    add    x0, x0, #8 * XCPTCONTEXT_GP_REGS
 #ifdef CONFIG_ARCH_FPU
-    bl     arm64_fpu_restore
+    bl    arm64_fpu_exit_exception
+GTEXT(arm64_exit_exc_fpu_done)
+arm64_exit_exc_fpu_done:
 #endif
 
     /* restore spsr and elr at el1*/
@@ -286,6 +283,6 @@ SECTION_FUNC(text, arm64_exit_exception)
     ldp    x28, x29, [sp, #8 * REG_X28]
     ldp    x30, xzr, [sp, #8 * REG_X30]
 
-    add    sp, sp, #8 * XCPTCONTEXT_REGS
+    add    sp, sp, #8 * XCPTCONTEXT_GP_REGS
 
     eret

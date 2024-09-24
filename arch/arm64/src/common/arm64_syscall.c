@@ -193,6 +193,7 @@ uint64_t *arm64_syscall_switch(uint64_t * regs)
            */
 
           ret_regs = (uint64_t *)f_regs->regs[REG_X1];
+          f_regs->regs[REG_X1] = 0; /* set the saveregs = 0 */
 
           DEBUGASSERT(ret_regs);
         }

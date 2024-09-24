@@ -38,6 +38,10 @@
 #include "irq/irq.h"
 #include "arm64_fatal.h"
 
+#ifdef CONFIG_ARCH_FPU
+#include "arm64_fpu.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,6 +58,16 @@ void arm64_init_signal_process(struct tcb_s *tcb, struct regs_context *regs)
   struct regs_context  *psigctx;
   char *stack_ptr    = (char *)pctx->sp_elx - sizeof(struct regs_context);
 
+#ifdef CONFIG_ARCH_FPU
+  struct fpu_reg      *pfpuctx;
+  pfpuctx            = STACK_PTR_TO_FRAME(struct fpu_reg, stack_ptr);
+  tcb->xcp.fpu_regs  = (uint64_t *)pfpuctx;
+
+  /* set fpu context */
+
+  arm64_init_fpu(tcb);
+  stack_ptr          = (char *)pfpuctx;
+#endif
   psigctx            = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
   memset(psigctx, 0, sizeof(struct regs_context));
   psigctx->elr       = (uint64_t)arm64_sigdeliver;
@@ -163,6 +177,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               /* create signal process context */
 
               tcb->xcp.saved_reg = up_current_regs();
+#ifdef CONFIG_ARCH_FPU
+              tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
+#endif
               arm64_init_signal_process(tcb,
               (struct regs_context *)up_current_regs());
 
@@ -184,6 +201,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * have been delivered.
            */
 
+#ifdef CONFIG_ARCH_FPU
+          tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
+#endif
           /* create signal process context */
 
           tcb->xcp.saved_reg = tcb->xcp.regs;
@@ -259,6 +279,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
+#ifdef CONFIG_ARCH_FPU
+                  tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
+#endif
                   /* create signal process context */
 
                   tcb->xcp.saved_reg = tcb->xcp.regs;
@@ -277,6 +300,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   /* create signal process context */
 
                   tcb->xcp.saved_reg = up_current_regs();
+#ifdef CONFIG_ARCH_FPU
+                  tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
+#endif
                   arm64_init_signal_process(tcb,
                   (struct regs_context *)up_current_regs());
 
@@ -313,6 +339,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * have been delivered.
            */
 
+#ifdef CONFIG_ARCH_FPU
+          tcb->xcp.saved_fpu_regs = tcb->xcp.fpu_regs;
+#endif
           tcb->xcp.saved_reg = tcb->xcp.regs;
 
           /* create signal process context */
