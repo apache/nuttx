@@ -345,7 +345,10 @@ if MM_KASAN_GLOBAL
 
 config MM_KASAN_GLOBAL_ALIGN
 	int "KASan global alignment"
-	default 32
+	default 1
+	---help---
+		It is recommended to use 1, 2, 4, 8, 16, 32.
+		The maximum value is 32.
 
 endif # MM_KASAN_GLOBAL
 
