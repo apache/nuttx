@@ -122,6 +122,7 @@ static ssize_t gdb_hex2bin(FAR void *buf, size_t buf_len,
                            FAR const void *data, size_t data_len);
 static ssize_t gdb_bin2bin(FAR void *buf, size_t buf_len,
                            FAR const void *data, size_t data_len);
+static size_t gdb_encode_rle(FAR void *data, size_t data_len);
 
 /* Packet creation helpers */
 
@@ -349,6 +350,8 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
       GDB_DEBUG("\n");
     }
 #endif
+
+  state->pkt_len = gdb_encode_rle(state->pkt_buf, state->pkt_len);
 
   /* Send packet data */
 
@@ -707,6 +710,102 @@ static ssize_t gdb_bin2bin(FAR void *buf, size_t buf_len,
     }
 
   return out_pos;
+}
+
+/****************************************************************************
+ * Name: gdb_count_repeat
+ *
+ * Description:
+ *   Get how many bytes are repeated in coming data.
+ *
+ * Input Parameters:
+ *   data     - The buffer containing the encoded data.
+ *   data_len - The length of the data to decode.
+ *
+ * Returned Value:
+ *     The number of bytes repeated.
+ *
+ ****************************************************************************/
+
+static size_t gdb_count_repeat(FAR const char *data, size_t data_len)
+{
+  char c = data[0];
+  size_t i = 1;
+
+  while (i < data_len && data[i] == c)
+    {
+      i++;
+    }
+
+  return i;
+}
+
+/****************************************************************************
+ * Name: gdb_encode_rle
+ *
+ * Description:
+ *   Encode data in place using GDB RLE encoding.
+ *
+ * Input Parameters:
+ *   data     - The buffer containing the encoded data.
+ *   data_len - The length of the data to decode.
+ *
+ * Returned Value:
+ *     The number of bytes written to data on success.
+ *
+ ****************************************************************************/
+
+static size_t gdb_encode_rle(FAR void *data, size_t data_len)
+{
+  static const int max_count = 127 - 29;
+  FAR char *buf = data;
+  size_t widx = 0;
+  size_t ridx = 0;
+
+  while (ridx < data_len)
+    {
+      size_t count = gdb_count_repeat(buf + ridx, data_len - ridx);
+      char c = buf[ridx];
+
+      ridx += count;
+      while (count >= max_count)
+        {
+          buf[widx++] = c;
+          buf[widx++] = '*';
+          buf[widx++] = max_count - 1 + 29;
+          count -= max_count;
+        }
+
+      if (count <= 3)
+        {
+          while (count > 0)
+            {
+              buf[widx++] = c;
+              count--;
+            }
+
+          continue;
+        }
+
+      buf[widx++] = c;
+      count--;
+      if (count + 29 == '$')
+        {
+          buf[widx++] = c;
+          buf[widx++] = c;
+          count -= 2;
+        }
+      else if (count + 29 == '#')
+        {
+          buf[widx++] = c;
+          count -= 1;
+        }
+
+      buf[widx++] = '*';
+      buf[widx++] = count + 29;
+    }
+
+  return widx;
 }
 
 /****************************************************************************
