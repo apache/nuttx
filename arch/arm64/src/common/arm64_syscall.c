@@ -53,18 +53,18 @@ typedef uintptr_t (*syscall_t)(unsigned int, ...);
  ****************************************************************************/
 
 static void  arm64_dump_syscall(const char *tag, uint64_t cmd,
-                                const uint64_t *regs)
+                                const struct regs_context * f_regs)
 {
-  svcinfo("SYSCALL %s: regs: %p cmd: %" PRId64 "\n", tag, regs, cmd);
+  svcinfo("SYSCALL %s: regs: %p cmd: %" PRId64 "\n", tag, f_regs, cmd);
 
   svcinfo("x0:  0x%-16lx  x1:  0x%lx\n",
-          regs[REG_X0], regs[REG_X1]);
+          f_regs->regs[REG_X0], f_regs->regs[REG_X1]);
   svcinfo("x2:  0x%-16lx  x3:  0x%lx\n",
-          regs[REG_X2], regs[REG_X3]);
+          f_regs->regs[REG_X2], f_regs->regs[REG_X3]);
   svcinfo("x4:  0x%-16lx  x5:  0x%lx\n",
-          regs[REG_X4], regs[REG_X5]);
+          f_regs->regs[REG_X4], f_regs->regs[REG_X5]);
   svcinfo("x6:  0x%-16lx  x7:  0x%lx\n",
-          regs[REG_X6], regs[REG_X7]);
+          f_regs->regs[REG_X6], f_regs->regs[REG_X7]);
 }
 
 #ifdef CONFIG_LIB_SYSCALL
@@ -145,32 +145,32 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 #endif
 
 /****************************************************************************
- * Name: arm64_syscall
+ * Name: arm64_syscall_switch
  *
  * Description:
  *   task switch syscall
  *
  ****************************************************************************/
 
-uint64_t *arm64_syscall(uint64_t *regs)
+uint64_t *arm64_syscall_switch(uint64_t * regs)
 {
-  uint64_t            *ret_regs = regs;
   uint64_t             cmd;
+  struct regs_context *f_regs;
+  uint64_t            *ret_regs;
   struct tcb_s        *tcb;
   int cpu;
-#ifdef CONFIG_BUILD_KERNEL
-  uint64_t             spsr;
-#endif
 
   /* Nested interrupts are not supported */
 
   DEBUGASSERT(regs);
 
+  f_regs = (struct regs_context *)regs;
+
   /* The SYSCALL command is in x0 on entry.  Parameters follow in x1..x7 */
 
-  cmd = regs[REG_X0];
+  cmd = f_regs->regs[REG_X0];
 
-  arm64_dump_syscall(__func__, cmd, regs);
+  arm64_dump_syscall(__func__, cmd, f_regs);
 
   switch (cmd)
     {
@@ -192,7 +192,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
            * set will determine the restored context.
            */
 
-          ret_regs = (uint64_t *)regs[REG_X1];
+          ret_regs = (uint64_t *)f_regs->regs[REG_X1];
 
           DEBUGASSERT(ret_regs);
         }
@@ -216,13 +216,85 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_X1] != 0 && regs[REG_X2] != 0);
-          *(uint64_t **)regs[REG_X1] = regs;
+          DEBUGASSERT(f_regs->regs[REG_X1] != 0 &&
+                      f_regs->regs[REG_X2] != 0);
+          *(uint64_t **)f_regs->regs[REG_X1] = regs;
 
-          ret_regs = (uint64_t *)regs[REG_X2];
+          ret_regs = (uint64_t *) f_regs->regs[REG_X2];
         }
         break;
 
+      default:
+        {
+          svcerr("ERROR: Bad SYS call: 0x%" PRIx64 "\n", cmd);
+          ret_regs = 0;
+          return 0;
+        }
+        break;
+    }
+
+  if ((uint64_t *)f_regs != ret_regs)
+    {
+#ifdef CONFIG_ARCH_ADDRENV
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      addrenv_switch(NULL);
+#endif
+
+      /* Record the new "running" task.  g_running_tasks[] is only used by
+       * assertion logic for reporting crashes.
+       */
+
+      cpu = this_cpu();
+      tcb = current_task(cpu);
+      g_running_tasks[cpu] = tcb;
+
+      /* Restore the cpu lock */
+
+      restore_critical_section(tcb, cpu);
+    }
+
+  return ret_regs;
+}
+
+/****************************************************************************
+ * Name: arm64_syscall
+ *
+ * Description:
+ *   SVC interrupts will vector here with insn=the SVC instruction and
+ *   xcp=the interrupt context
+ *
+ *   The handler may get the SVC number be de-referencing the return
+ *   address saved in the xcp and decoding the SVC instruction
+ *
+ ****************************************************************************/
+
+int arm64_syscall(uint64_t *regs)
+{
+  uint64_t             cmd;
+  struct regs_context *f_regs;
+#ifdef CONFIG_BUILD_KERNEL
+  uint64_t             spsr;
+#endif
+
+  /* Nested interrupts are not supported */
+
+  DEBUGASSERT(regs);
+
+  f_regs = (struct regs_context *)regs;
+
+  /* The SYSCALL command is in x0 on entry.  Parameters follow in x1..x7 */
+
+  cmd = f_regs->regs[REG_X0];
+
+  arm64_dump_syscall(__func__, cmd, f_regs);
+
+  switch (cmd)
+    {
 #ifdef CONFIG_BUILD_KERNEL
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
@@ -324,59 +396,11 @@ uint64_t *arm64_syscall(uint64_t *regs)
         break;
 #endif
 
-      /* This is not an architecture-specific system call.  If NuttX is built
-       * as a standalone kernel with a system call interface, then all of the
-       * additional system calls must be handled as in the default case.
-       */
-
       default:
-        {
-#ifdef CONFIG_LIB_SYSCALL
 
-          /* Verify that the SYS call number is within range */
-
-          DEBUGASSERT(cmd >= CONFIG_SYS_RESERVED && cmd < SYS_maxsyscall);
-
-          /* Make sure that there is a no saved SYSCALL return address.  We
-           * cannot yet handle nested system calls.
-           */
-
-          regs[REG_X0] = dispatch_syscall(regs[REG_X0], regs[REG_X1],
-                                          regs[REG_X2], regs[REG_X3],
-                                          regs[REG_X4], regs[REG_X5],
-                                          regs[REG_X6]);
-
-#else
-          svcerr("ERROR: Bad SYS call: 0x%" PRIx64 "\n", cmd);
-#endif
-        }
-        break;
+          DEBUGPANIC();
+          break;
     }
 
-  if (regs != ret_regs)
-    {
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
-       */
-
-      addrenv_switch(NULL);
-#endif
-
-      /* Record the new "running" task.  g_running_tasks[] is only used by
-       * assertion logic for reporting crashes.
-       */
-
-      cpu = this_cpu();
-      tcb = current_task(cpu);
-      g_running_tasks[cpu] = tcb;
-
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, cpu);
-    }
-
-  return ret_regs;
+  return 0;
 }
