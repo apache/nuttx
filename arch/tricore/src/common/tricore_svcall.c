@@ -120,7 +120,7 @@ void tricore_svcall(volatile void *trap)
 
       g_running_tasks[this_cpu()] = this_task();
 
-      regs[REG_UPCXI] = up_current_regs();
+      regs[REG_UPCXI] = (uintptr_t)up_current_regs();
 
       __isync();
     }
