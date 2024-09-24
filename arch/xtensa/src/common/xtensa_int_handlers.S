@@ -193,6 +193,13 @@ _xtensa_level1_handler:
 
 	call0	_xtensa_context_save
 
+	/* Overwrite the PS saved by the exception entry. */
+
+	movi	a2, ~PS_EXCM_MASK
+	l32i	a3, sp, (4 * REG_PS)
+	and	a3, a3, a2
+	s32i	a3, sp, (4 * REG_PS)
+
 	/* Save current SP before (possibly) overwriting it, it's the register save
 	 * area. This value will be used later by dispatch_c_isr to retrieve the
 	 * register save area.
@@ -213,6 +220,13 @@ _xtensa_level1_handler:
 	 */
 
 	dispatch_c_isr	1 XCHAL_INTLEVEL1_MASK a0
+
+	/* Set PS.EXCM to 1 */
+
+	movi	a3, PS_EXCM_MASK
+	l32i	a4, a2, (4 * REG_PS)
+	or	a4, a3, a4
+	s32i	a4, a2, (4 * REG_PS)
 
 	/* Restore registers in preparation to return from interrupt */
 
