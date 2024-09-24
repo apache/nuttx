@@ -62,8 +62,14 @@
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 static uint64_t *common_handler(int irq, uint64_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb;
   int cpu;
+
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * g_current_regs is also used to manage interrupt level context switches.
@@ -99,7 +105,7 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
       /* Update scheduler parameters */
 
       cpu = this_cpu();
-      nxsched_suspend_scheduler(g_running_tasks[cpu]);
+      nxsched_suspend_scheduler(*running_task);
       nxsched_resume_scheduler(this_task());
 
       /* Record the new "running" task when context switch occurred.
@@ -146,6 +152,13 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
 
 uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
+
   board_autoled_on(LED_INIRQ);
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS

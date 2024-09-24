@@ -119,6 +119,7 @@ int arm_svcall(int irq, void *context, void *arg)
 {
   struct tcb_s *tcb = this_task();
   uint32_t *regs = (uint32_t *)context;
+  uint32_t *new_regs = regs;
   uint32_t cmd;
 
   cmd = regs[REG_R0];
@@ -167,6 +168,7 @@ int arm_svcall(int irq, void *context, void *arg)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
+          new_regs = (uint32_t *)regs[REG_R1];
           tcb->xcp.regs = (uint32_t *)regs[REG_R1];
         }
         break;
@@ -191,8 +193,7 @@ int arm_svcall(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          *(uint32_t **)regs[REG_R1] = regs;
-          tcb->xcp.regs = (uint32_t *)regs[REG_R2];
+          new_regs = (uint32_t *)regs[REG_R2];
         }
         break;
 
@@ -446,12 +447,12 @@ int arm_svcall(int irq, void *context, void *arg)
    * switch.
    */
 
-  if (regs != tcb->xcp.regs)
+  if (regs != new_regs)
     {
       restore_critical_section(tcb, this_cpu());
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-      regs = (uint32_t *)tcb->xcp.regs;
+      regs = new_regs;
 
       svcinfo("SVCall Return:\n");
       svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",

@@ -1039,7 +1039,7 @@ static void gdb_get_registers(FAR struct gdb_state_s *state)
     {
       if (up_interrupt_context())
         {
-          reg = (FAR uint8_t *)up_current_regs();
+          reg = (FAR uint8_t *)running_regs();
         }
       else
         {

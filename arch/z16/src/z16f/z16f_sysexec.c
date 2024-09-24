@@ -47,7 +47,13 @@
 
 void z16f_sysexec(FAR chipreg_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   uint16_t excp;
+
+  if (*running_task != NULL)
+    {
+      z16_copystate((*running_task)->xcp.regs, regs)
+    }
 
   /* Save that register reference so that it can be used for built-in
    * diagnostics.

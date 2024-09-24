@@ -65,6 +65,13 @@
 
 void xtensa_panic(int xptcode, uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
+
   up_set_current_regs(regs);
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */

@@ -78,6 +78,8 @@ void _exit(int status)
 
   sched_resume_scheduler(tcb);
 
+  g_running_tasks[this_cpu()] = tcb;
+
   /* Then switch contexts */
 
   ceva_fullcontextrestore(tcb->xcp.regs);

@@ -82,7 +82,7 @@ class Nxsetregs(gdb.Command):
         super(Nxsetregs, self).__init__("nxsetregs", gdb.COMMAND_USER)
 
     def invoke(self, args, from_tty):
-        gdb.execute("set $_current_regs=tcbinfo_current_regs()")
+        gdb.execute("set $_current_regs=tcbinfo_running_regs()")
         current_regs = gdb.parse_and_eval("$_current_regs")
         tcbinfo = gdb.parse_and_eval("g_tcbinfo")
         arg = args.split(" ")

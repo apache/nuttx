@@ -70,11 +70,17 @@
 
 uint32_t *pic32mx_decodeirq(uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
 #ifdef CONFIG_PIC32MX_NESTED_INTERRUPTS
   uint32_t *savestate;
 #endif
   uint32_t regval;
   int irq;
+
+  if (*running_task != NULL)
+    {
+      mips_copystate((*running_task)->xcp.regs, regs);
+    }
 
   /* If the board supports LEDs, turn on an LED now to indicate that we are
    * processing an interrupt.

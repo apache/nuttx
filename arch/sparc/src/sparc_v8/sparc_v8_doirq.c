@@ -58,6 +58,13 @@
 
 uint32_t *sparc_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      trap_flush_task((*running_task)->xcp.regs, regs);
+    }
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();

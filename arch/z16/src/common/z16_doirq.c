@@ -58,7 +58,13 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
 #else
   if ((unsigned)irq < NR_IRQS)
     {
+      struct tcb_s **running_task = &g_running_tasks[this_cpu()];
       FAR chipreg_t *savestate;
+
+      if (*running_task != NULL)
+        {
+          z16_copystate((*running_task)->xcp.regs, regs)
+        }
 
       /* Nested interrupts are not supported in this implementation.  If
        * you want to implement nested interrupts, you would have to (1)

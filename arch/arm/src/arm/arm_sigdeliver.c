@@ -97,5 +97,7 @@ void arm_sigdeliver(void)
   /* Then restore the correct state for this thread of execution. */
 
   board_autoled_off(LED_SIGNAL);
+
+  g_running_tasks[this_cpu()] = NULL;
   arm_fullcontextrestore(regs);
 }

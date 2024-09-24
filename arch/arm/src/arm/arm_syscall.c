@@ -54,19 +54,23 @@
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  struct tcb_s *tcb = this_task();
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  FAR struct tcb_s *tcb = this_task();
   uint32_t cmd;
-  int cpu;
 
   /* Nested interrupts are not supported */
 
   DEBUGASSERT(up_current_regs() == NULL);
 
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
+
   /* Current regs non-zero indicates that we are processing an interrupt;
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  tcb->xcp.regs = regs;
   up_set_current_regs(regs);
 
   /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
@@ -118,11 +122,6 @@ uint32_t *arm_syscall(uint32_t *regs)
        */
 
       case SYS_switch_context:
-        {
-          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          *(uint32_t **)regs[REG_R1] = regs;
-          up_set_current_regs((uint32_t *)regs[REG_R2]);
-        }
         break;
 
       default:
@@ -134,7 +133,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
-  if (regs != tcb->xcp.regs)
+  if (*running_task != tcb)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -145,25 +144,16 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       addrenv_switch(NULL);
 #endif
-
-      /* Record the new "running" task.  g_running_tasks[] is only used by
-       * assertion logic for reporting crashes.
-       */
-
-      cpu = this_cpu();
-      tcb = current_task(cpu);
-
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(g_running_tasks[cpu]);
+      nxsched_suspend_scheduler(*running_task);
       nxsched_resume_scheduler(tcb);
 
-      g_running_tasks[cpu] = tcb;
+      *running_task = tcb;
 
       /* Restore the cpu lock */
 
-      restore_critical_section(tcb, cpu);
-      regs = up_current_regs();
+      restore_critical_section(tcb, this_cpu());
     }
 
   /* Set current_regs to NULL to indicate that we are no longer in an
