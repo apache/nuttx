@@ -59,6 +59,13 @@ uint32_t *ceva_doirq(int irq, uint32_t *regs)
     }
   else
     {
+      struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+      if (*running_task != NULL)
+        {
+          (*running_task)->xcp.regs = regs;
+        }
+
       /* Current regs non-zero indicates that we are processing an interrupt;
        * current_regs is also used to manage interrupt level context
        * switches.
@@ -80,7 +87,7 @@ uint32_t *ceva_doirq(int irq, uint32_t *regs)
         {
           /* Update scheduler parameters */
 
-          nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+          nxsched_suspend_scheduler(*running_task);
           nxsched_resume_scheduler(this_task());
 
           /* Record the new "running" task when context switch occurred.

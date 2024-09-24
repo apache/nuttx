@@ -52,10 +52,16 @@
 
 uint32_t *pic32mz_exception(uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
 #ifdef CONFIG_DEBUG_FEATURES
   uint32_t cause;
   uint32_t epc;
 #endif
+
+  if (*running_task != NULL)
+    {
+      mips_copystate((*running_task)->xcp.regs, regs);
+    }
 
   /* If the board supports LEDs, turn on an LED now to indicate that we are
    * processing an interrupt.

@@ -99,7 +99,7 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
    * returning from the interrupt.
    */
 
-  if ((*running_task) != tcb)
+  if (*running_task != tcb)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -113,7 +113,7 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+      nxsched_suspend_scheduler(*running_task);
       nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task when context switch occurred.

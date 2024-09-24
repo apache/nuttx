@@ -58,6 +58,13 @@
 
 uint32_t *renesas_doirq(int irq, uint32_t * regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      renesas_copystate((*running_task)->xcp.regs, regs);
+    }
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();

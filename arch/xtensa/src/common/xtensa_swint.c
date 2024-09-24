@@ -59,12 +59,12 @@ int xtensa_swint(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
   struct tcb_s *tcb = this_task();
+  uintptr_t *new_regs = regs;
   uint32_t cmd;
 
   DEBUGASSERT(regs != NULL);
 
   cmd = regs[REG_A2];
-  tcb->xcp.regs = regs;
 
   /* The syscall software interrupt is called with A2 = system call command
    * and A3..A9 = variable number of arguments depending on the system call.
@@ -119,6 +119,7 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A3] != 0);
+          new_regs = (uint32_t *)regs[REG_A3];
           tcb->xcp.regs = (uint32_t *)regs[REG_A3];
         }
         break;
@@ -142,9 +143,8 @@ int xtensa_swint(int irq, void *context, void *arg)
 
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
-          *(uint32_t **)regs[REG_A3] = regs;
-          tcb->xcp.regs = (uint32_t *)regs[REG_A4];
+          DEBUGASSERT(regs[REG_A4] != 0);
+          new_regs = (uint32_t *)regs[REG_A4];
         }
         break;
 
@@ -432,10 +432,10 @@ int xtensa_swint(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != tcb->xcp.regs)
+  if (regs != new_regs)
     {
       svcinfo("SYSCALL Return: Context switch!\n");
-      up_dump_register(tcb->xcp.regs);
+      up_dump_register(new_regs);
     }
   else
     {
@@ -443,7 +443,7 @@ int xtensa_swint(int irq, void *context, void *arg)
     }
 #endif
 
-  if (regs != tcb->xcp.regs)
+  if (regs != new_regs)
     {
       restore_critical_section(this_task(), this_cpu());
     }

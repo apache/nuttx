@@ -67,7 +67,13 @@ void exception_direct(void)
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
-  struct tcb_s *tcb = this_task();
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  FAR struct tcb_s *tcb;
+
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
 
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -91,13 +97,9 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 #endif
 
       up_irq_save();
-      g_running_tasks[this_cpu()]->xcp.regs = regs;
     }
   else
     {
-      /* Dispatch irq */
-
-      tcb->xcp.regs = regs;
       irq_dispatch(irq, regs);
     }
 
@@ -111,7 +113,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   /* Update scheduler parameters */
 
-  nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+  nxsched_suspend_scheduler(*running_task);
   nxsched_resume_scheduler(tcb);
 
   /* Record the new "running" task when context switch occurred.
@@ -119,7 +121,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * crashes.
    */
 
-  g_running_tasks[this_cpu()] = tcb;
+  *running_task = tcb;
   regs = tcb->xcp.regs;
 #endif
 

@@ -69,6 +69,13 @@
 
 uint32_t *pic32mz_decodeirq(uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      mips_copystate((*running_task)->xcp.regs, regs);
+    }
+
 #ifdef CONFIG_PIC32MZ_NESTED_INTERRUPTS
   uint32_t *savestate;
 #endif

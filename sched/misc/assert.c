@@ -304,7 +304,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
       /* Try to restore SP from current_regs if assert from interrupt. */
 
       tcbstack_sp = up_interrupt_context() ?
-                    up_getusrsp((FAR void *)up_current_regs()) : 0;
+                    up_getusrsp((FAR void *)running_regs()) : 0;
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
         {
           tcbstack_sp = 0;
@@ -607,7 +607,7 @@ static void dump_deadlock(void)
 
 static noreturn_function int pause_cpu_handler(FAR void *arg)
 {
-  memcpy(g_last_regs[this_cpu()], up_current_regs(), sizeof(g_last_regs[0]));
+  memcpy(g_last_regs[this_cpu()], running_regs(), sizeof(g_last_regs[0]));
   g_cpu_paused[this_cpu()] = true;
   up_flush_dcache_all();
   while (1);

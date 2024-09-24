@@ -45,6 +45,13 @@
 
 uint32_t *lm32_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      lm32_copystate((*running_task)->xcp.regs, regs);
+    }
+
   board_autoled_on(LED_INIRQ);
 
   /* Current regs non-zero indicates that we are processing an interrupt;

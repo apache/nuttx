@@ -155,5 +155,7 @@ retry:
   leave_critical_section(regs[REG_CPSR]);
   rtcb->irqcount--;
 #endif
+
+  g_running_tasks[this_cpu()] = NULL;
   arm_fullcontextrestore(regs);
 }

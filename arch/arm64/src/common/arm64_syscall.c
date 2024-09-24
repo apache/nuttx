@@ -154,13 +154,18 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
 uint64_t *arm64_syscall(uint64_t *regs)
 {
-  uint64_t            *ret_regs = regs;
-  uint64_t             cmd;
-  struct tcb_s        *tcb;
-  int cpu;
+  int cpu = this_cpu();
+  struct tcb_s **running_task = &g_running_tasks[cpu];
+  struct tcb_s *tcb = this_task();
+  uint64_t cmd;
 #ifdef CONFIG_BUILD_KERNEL
   uint64_t             spsr;
 #endif
+
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
 
   /* Nested interrupts are not supported */
 
@@ -186,17 +191,6 @@ uint64_t *arm64_syscall(uint64_t *regs)
        */
 
       case SYS_restore_context:
-        {
-          /* Replace 'regs' with the pointer to the register set in
-           * regs[REG_R1].  On return from the system call, that register
-           * set will determine the restored context.
-           */
-
-          tcb = (struct tcb_s *)regs[REG_X1];
-          ret_regs = tcb->xcp.regs;
-
-          DEBUGASSERT(ret_regs);
-        }
         break;
 
       /* x0 = SYS_switch_context:  This a switch context command:
@@ -216,15 +210,6 @@ uint64_t *arm64_syscall(uint64_t *regs)
        */
 
       case SYS_switch_context:
-        {
-          struct tcb_s *rtcb = (struct tcb_s *)regs[REG_X1];
-          tcb = (struct tcb_s *)regs[REG_X2];
-
-          DEBUGASSERT(regs[REG_X1] != 0 && regs[REG_X2] != 0);
-          rtcb->xcp.regs = regs;
-
-          ret_regs = tcb->xcp.regs;
-        }
         break;
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -331,15 +316,13 @@ uint64_t *arm64_syscall(uint64_t *regs)
       default:
         {
           svcerr("ERROR: Bad SYS call: 0x%" PRIx64 "\n", cmd);
-          ret_regs = 0;
           return 0;
         }
         break;
     }
 
-  if ((uint64_t *)regs != ret_regs)
+  if (*running_task != tcb)
     {
-      cpu = this_cpu();
       tcb = current_task(cpu);
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -354,19 +337,19 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(g_running_tasks[cpu]);
+      nxsched_suspend_scheduler(*running_task);
       nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task.  g_running_tasks[] is only used by
        * assertion logic for reporting crashes.
        */
 
-      g_running_tasks[cpu] = tcb;
+      *running_task = tcb;
 
       /* Restore the cpu lock */
 
       restore_critical_section(tcb, cpu);
     }
 
-  return ret_regs;
+  return tcb->xcp.regs;
 }

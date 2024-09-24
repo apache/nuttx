@@ -54,7 +54,7 @@ void *riscv_perform_syscall(uintreg_t *regs)
   riscv_swint(0, regs, NULL);
   tcb = this_task();
 
-  if ((*running_task) != tcb)
+  if (*running_task != tcb)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -67,7 +67,7 @@ void *riscv_perform_syscall(uintreg_t *regs)
 #endif
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+      nxsched_suspend_scheduler(*running_task);
       nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task.  g_running_tasks[] is only used by

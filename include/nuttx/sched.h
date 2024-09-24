@@ -244,6 +244,8 @@
 #  define this_cpu()                 (0)
 #endif
 
+#define running_regs()               ((void *)(g_running_tasks[this_cpu()]->xcp.regs))
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -871,6 +873,12 @@ EXTERN clock_t g_premp_max[CONFIG_SMP_NCPUS];
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
 EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
+
+/* g_running_tasks[] holds a references to the running task for each CPU.
+ * It is valid only when up_interrupt_context() returns true.
+ */
+
+EXTERN FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
 
 EXTERN const struct tcbinfo_s g_tcbinfo;
 
