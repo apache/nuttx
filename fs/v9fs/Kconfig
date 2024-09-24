@@ -21,4 +21,9 @@ config V9FS_VIRTIO_9P
 	depends on DRIVERS_VIRTIO
 	default n
 
+config V9FS_SOCKET_9P
+	bool "Socket 9P support"
+	depends on NET_TCP
+	default n
+
 endif

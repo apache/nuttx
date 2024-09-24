@@ -27,5 +27,9 @@ if(CONFIG_FS_V9FS)
     list(APPEND V9FS virtio_9p.c)
   endif()
 
+  if(CONFIG_V9FS_SOCKET_9P)
+    list(APPEND V9FS socket_9p.c)
+  endif()
+
   target_sources(fs PRIVATE ${V9FS})
 endif()
