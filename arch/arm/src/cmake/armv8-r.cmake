@@ -26,10 +26,10 @@ endif()
 
 if(CONFIG_ARCH_FPU)
 
-  if(CONFIG_ARCH_CORTEXR52 AND CONFIG_ARM_NEON)
+  if(CONFIG_ARM_NEON)
     list(APPEND PLATFORM_FLAGS -mfpu=neon-fp-armv8)
   else()
-    list(APPEND PLATFORM_FLAGS -mfpu=fpv5-sp-d16)
+    list(APPEND PLATFORM_FLAGS -mfpu=fp-armv8)
   endif()
   if(CONFIG_ARM_FPU_ABI_SOFT)
     list(APPEND PLATFORM_FLAGS -mfloat-abi=softfp)
