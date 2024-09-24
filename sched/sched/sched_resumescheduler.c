@@ -78,4 +78,4 @@ void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
 #endif
 }
 
-#endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_RESUMESCHEDULER */
+#endif /* CONFIG_SCHED_RESUMESCHEDULER */
