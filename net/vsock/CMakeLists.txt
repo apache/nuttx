@@ -22,5 +22,14 @@
 
 if(CONFIG_NET_VSOCK)
   set(SRCS vsock_sockif.c vsock_addr.c)
+
+  if(CONFIG_NET_VSOCK_VIRTIO)
+    list(APPEND SRCS vsock_virtio.c)
+  endif()
+
+  if(CONFIG_NET_VSOCK_VHOST)
+    list(APPEND SRCS vsock_vhost.c)
+  endif()
+
   target_sources(net PRIVATE ${SRCS})
 endif()
