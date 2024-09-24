@@ -127,5 +127,6 @@ void v9fs_transport_destroy(FAR struct v9fs_transport_s *transport);
 void v9fs_transport_done(FAR struct v9fs_payload_s *cookie, int ret);
 int v9fs_fid_put(FAR struct v9fs_client_s *client, uint32_t fid);
 int v9fs_fid_get(FAR struct v9fs_client_s *client, uint32_t fid);
+ssize_t v9fs_parse_size(FAR const void *buffer);
 
 #endif /* __FS_V9FS_CLIENT_H */

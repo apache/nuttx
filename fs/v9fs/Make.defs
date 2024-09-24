@@ -25,6 +25,10 @@ ifeq ($(CONFIG_FS_V9FS),y)
 
 CSRCS += client.c transport.c v9fs.c
 
+ifeq ($(CONFIG_V9FS_SOCKET_9P),y)
+  CSRCS += socket_9p.c
+endif
+
 ifeq ($(CONFIG_V9FS_VIRTIO_9P),y)
   CSRCS += virtio_9p.c
 endif
