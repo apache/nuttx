@@ -141,6 +141,6 @@ void lib_put_pathbuffer(FAR char *buffer)
   /* Free the buffer if it was dynamically allocated */
 
 #ifdef CONFIG_LIBC_PATHBUFFER_MALLOC
-  return lib_free(buffer);
+  lib_free(buffer);
 #endif
 }
