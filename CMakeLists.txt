@@ -416,8 +416,8 @@ if(CONFIG_BUILD_PROTECTED)
   nuttx_add_library_internal(nuttx_user)
 endif()
 
-if(CONFIG_ALLSYMS)
-  include(nuttx_allsyms)
+if(CONFIG_ALLSYMS OR CONFIG_MM_KASAN_GLOBAL)
+  include(nuttx_multiple_link)
 endif()
 
 add_dependencies(nuttx nuttx_context)
