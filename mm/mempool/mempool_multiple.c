@@ -170,7 +170,7 @@ mempool_multiple_alloc_chunk(FAR struct mempool_multiple_s *mpool,
           mpool->alloced += mpool->alloc_size(mpool->arg, ret);
         }
 
-      return kasan_reset_tag(ret);
+      return ret;
     }
 
   chunk = (FAR struct mpool_chunk_s *)sq_peek(&mpool->chunk_queue);
@@ -185,8 +185,6 @@ retry:
         {
           return NULL;
         }
-
-      tmp = kasan_reset_tag(tmp);
 
       mpool->alloced += mpool->alloc_size(mpool->arg, tmp);
       chunk = (FAR struct mpool_chunk_s *)(tmp + mpool->chunk_size);
@@ -319,8 +317,8 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
       return NULL;
     }
 
-  addr = (FAR void *)ALIGN_DOWN(blk, mpool->expandsize);
-  if (blk == addr)
+  addr = (FAR void *)ALIGN_DOWN((uintptr_t)blk, mpool->expandsize);
+  if (kasan_reset_tag(blk) == kasan_reset_tag(addr))
     {
       /* It is not a memory block allocated by mempool
        * Because the blk is need not aligned with the expandsize
@@ -338,9 +336,12 @@ mempool_multiple_get_dict(FAR struct mempool_multiple_s *mpool,
 
   row = index >> mpool->dict_col_num_log2;
   col = index - (row << mpool->dict_col_num_log2);
-  if (mpool->dict[row] == NULL ||
-      mpool->dict[row][col].addr != addr ||
-      (FAR char *)blk - (FAR char *)addr >= mpool->dict[row][col].size)
+
+  addr = kasan_reset_tag(addr);
+  if (kasan_reset_tag(mpool->dict[row]) == NULL ||
+      kasan_reset_tag(mpool->dict[row][col].addr) != addr ||
+      ((FAR char *)kasan_reset_tag(blk) -
+       (FAR char *)addr >= mpool->dict[row][col].size))
     {
       return NULL;
     }
@@ -596,7 +597,6 @@ FAR void *mempool_multiple_realloc(FAR struct mempool_multiple_s *mpool,
       return mempool_multiple_alloc(mpool, size);
     }
 
-  oldblk = kasan_reset_tag(oldblk);
   dict = mempool_multiple_get_dict(mpool, oldblk);
   if (dict == NULL)
     {
@@ -635,15 +635,15 @@ int mempool_multiple_free(FAR struct mempool_multiple_s *mpool,
 {
   FAR struct mpool_dict_s *dict;
 
-  blk = kasan_reset_tag(blk);
   dict = mempool_multiple_get_dict(mpool, blk);
   if (dict == NULL)
     {
       return -EINVAL;
     }
 
-  blk = (FAR char *)blk - (((FAR char *)blk -
-                           ((FAR char *)dict->addr + mpool->minpoolsize)) %
+  blk = (FAR char *)blk - (((FAR char *)kasan_reset_tag(blk) -
+                            ((FAR char *)kasan_reset_tag(dict->addr) +
+                             mpool->minpoolsize)) %
                            MEMPOOL_REALBLOCKSIZE(dict->pool));
   mempool_release(dict->pool, blk);
   return 0;
@@ -671,7 +671,6 @@ ssize_t mempool_multiple_alloc_size(FAR struct mempool_multiple_s *mpool,
 
   DEBUGASSERT(blk != NULL);
 
-  blk = kasan_reset_tag(blk);
   dict = mempool_multiple_get_dict(mpool, blk);
   if (dict == NULL)
     {
