@@ -258,7 +258,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
       ret = -ENXIO;
     }
 
-  if (ret == -EISDIR)
+  if (ret == -EISDIR && ((oflags & O_WRONLY) == 0))
     {
       ret = dir_allocate(filep, desc.relpath);
     }
