@@ -148,6 +148,10 @@ static uint16_t arp_send_eventhandler(FAR struct net_driver_s *dev,
   return flags;
 }
 
+static void arp_send_async_finish(FAR struct net_driver_s *dev, int result)
+{
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -301,9 +305,7 @@ int arp_send(in_addr_t ipaddr)
    * sending the ARP request if it is not.
    */
 
-  ret = -ETIMEDOUT; /* Assume a timeout failure */
-
-  while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES)
+  do
     {
       /* Check if the address mapping is present in the ARP table.  This
        * is only really meaningful on the first time through the loop.
@@ -312,12 +314,21 @@ int arp_send(in_addr_t ipaddr)
        * issue.
        */
 
-      if (arp_find(ipaddr, NULL, dev) >= 0)
+      ret = arp_find(ipaddr, NULL, dev);
+      if (ret >= 0)
         {
           /* We have it!  Break out with success */
 
-          ret = OK;
-          break;
+          goto out;
+        }
+      else if (ret == -ENETUNREACH)
+        {
+          /* We have failed before, simply send an asynchronous ARP request
+           * to try to update the ARP table.
+           */
+
+          arp_send_async(ipaddr, NULL);
+          goto out;
         }
 
       /* Set up the ARP response wait BEFORE we send the ARP request */
@@ -377,7 +388,7 @@ int arp_send(in_addr_t ipaddr)
         {
           /* Break out if arp_wait() fails */
 
-          break;
+          goto out;
         }
 
 timeout:
@@ -389,7 +400,15 @@ timeout:
            ip4_addr1(ipaddr), ip4_addr2(ipaddr),
            ip4_addr3(ipaddr), ip4_addr4(ipaddr));
     }
+  while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES);
 
+  /* MAC address marked with all zeros, therefore, we can quickly execute
+   * asynchronous ARP request next time.
+   */
+
+  arp_update(dev, ipaddr, NULL);
+
+out:
   nxsem_destroy(&state.snd_sem);
   arp_callback_free(dev, state.snd_cb);
 errout_with_lock:
@@ -464,7 +483,7 @@ int arp_send_async(in_addr_t ipaddr, arp_send_finish_cb_t cb)
   state->snd_cb->flags = (ARP_POLL | NETDEV_DOWN);
   state->snd_cb->priv  = (FAR void *)state;
   state->snd_cb->event = arp_send_eventhandler;
-  state->finish_cb     = cb;
+  state->finish_cb     = cb ? cb : arp_send_async_finish;
 
   /* Notify the device driver that new TX data is available. */
 
