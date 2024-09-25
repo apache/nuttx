@@ -474,7 +474,7 @@ int arm_svcall(int irq, void *context, void *arg)
 #  endif
 #endif
 
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
       restore_critical_section(this_task(), this_cpu());
     }
