@@ -593,14 +593,14 @@ endif()
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
 # Pre-compile linker script
-if(DEFINED PREPROCES)
+if(DEFINED PREPROCESS)
   get_filename_component(LD_SCRIPT_NAME ${ldscript} NAME)
   set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
 
   add_custom_command(
     OUTPUT ${LD_SCRIPT_TMP}
     DEPENDS ${ldscript}
-    COMMAND ${PREPROCES} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_CHIP_ABS_DIR}
+    COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_CHIP_ABS_DIR}
             ${ldscript} > ${LD_SCRIPT_TMP}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -752,14 +752,14 @@ if(CONFIG_BUILD_PROTECTED)
 
   get_property(user_ldscript GLOBAL PROPERTY LD_SCRIPT_USER)
 
-  if(DEFINED PREPROCES)
+  if(DEFINED PREPROCESS)
     get_filename_component(LD_SCRIPT_NAME ${user_ldscript} NAME)
     set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
     add_custom_command(
       OUTPUT ${LD_SCRIPT_TMP}
       DEPENDS ${user_ldscript}
-      COMMAND ${PREPROCES} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_CHIP_ABS_DIR}
-              ${user_ldscript} > ${LD_SCRIPT_TMP}
+      COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include
+              -I${NUTTX_CHIP_ABS_DIR} ${user_ldscript} > ${LD_SCRIPT_TMP}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     add_custom_target(user_ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
     add_dependencies(nuttx_user user_ldscript_tmp)
