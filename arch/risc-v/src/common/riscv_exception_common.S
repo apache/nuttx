@@ -207,24 +207,47 @@ handle_irq:
   .cfi_offset x2, 8               /* Toolchain not support macro, is REG_X2 * 4 */
   .cfi_offset ra, 0               /* Toolchain not support macro, is REG_EPC * 4 */
 
+#ifdef CONFIG_SCHED_BACKTRACE
+  REGLOAD    ra, REG_EPC(sp)
+  REGLOAD    s0, REG_X8(sp)
+#endif
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 
   /* Switch to interrupt stack */
 
   setintstack t0, t1
 
+  addi       sp, sp, -16
+  REGSTORE   ra, 12(sp)
+  REGSTORE   s0, 8(sp)
+  add	       s0, sp, 16
+
   /* Call interrupt handler in C */
 
   jal        x1, riscv_dispatch_irq
 
+  REGLOAD    ra, 12(sp)
+  REGLOAD    s0, 8(sp)
+  add	       sp, sp, 16
+
 #else
   /* Reserve some space for current_regs if interrupt stack disabled */
+
+  addi       sp, sp, -16
+  REGSTORE   ra, 12(sp)
+  REGSTORE   s0, 8(sp)
+  add	       s0, sp, 16
 
   addi       sp, sp, -XCPTCONTEXT_SIZE
 
   /* Call interrupt handler in C */
 
   jal        x1, riscv_dispatch_irq
+
+  REGLOAD    ra, 12(sp)
+  REGLOAD    s0, 8(sp)
+  add	sp,sp,16
 
   /* Restore sp */
 
