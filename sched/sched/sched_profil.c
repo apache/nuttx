@@ -59,9 +59,9 @@ static struct profinfo_s g_prof;
  * Private Functions
  ****************************************************************************/
 
-static void profil_timer_handler(wdparm_t arg)
+static int profil_timer_handler_cpu(FAR void *arg)
 {
-  FAR struct profinfo_s *prof = (FAR struct profinfo_s *)(uintptr_t)arg;
+  FAR struct profinfo_s *prof = (FAR struct profinfo_s *)arg;
   uintptr_t pc = up_getusrpc(NULL);
   irqstate_t flags;
 
@@ -78,6 +78,21 @@ static void profil_timer_handler(wdparm_t arg)
     }
 
   spin_unlock_irqrestore(&prof->lock, flags);
+  return OK;
+}
+
+static void profil_timer_handler(wdparm_t arg)
+{
+  FAR struct profinfo_s *prof = (FAR struct profinfo_s *)(uintptr_t)arg;
+
+#ifdef CONFIG_SMP
+  cpu_set_t cpus = (1 << CONFIG_SMP_NCPUS) - 1;
+  CPU_CLR(this_cpu(), &cpus);
+  nxsched_smp_call(cpus, profil_timer_handler_cpu,
+                   (FAR void *)arg, false);
+#endif
+
+  profil_timer_handler_cpu(prof);
   wd_start(&prof->timer, PROFTICK, profil_timer_handler, arg);
 }
 
