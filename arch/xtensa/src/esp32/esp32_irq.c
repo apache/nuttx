@@ -393,8 +393,7 @@ static int esp32_alloc_cpuint(int cpu, int priority, int type)
 
   DEBUGASSERT(priority >= ESP32_MIN_PRIORITY &&
               priority <= ESP32_MAX_PRIORITY);
-  DEBUGASSERT(type == ESP32_CPUINT_LEVEL ||
-              type == ESP32_CPUINT_EDGE);
+  DEBUGASSERT(type & ESP32_CPUINT_TRIGGER_MASK);
 
   if ((type & (ESP32_CPUINT_LEVEL | ESP32_CPUINT_EDGE)) == 0)
     {

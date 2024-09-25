@@ -45,6 +45,11 @@
 #define ESP32_CPUINT_FLAG_SHARED  (1 << 2) /* Interrupt can be shared between ISRs */
 #define ESP32_CPUINT_FLAG_IRAM    (1 << 3) /* ISR can be called if cache is disabled */
 
+/* Trigger mask useful on debug assertion */
+
+#define ESP32_CPUINT_TRIGGER_MASK (ESP32_CPUINT_FLAG_LEVEL | \
+                                   ESP32_CPUINT_FLAG_EDGE)
+
 /* Interrupt Matrix
  *
  * The Interrupt Matrix embedded in the ESP32 independently allocates
