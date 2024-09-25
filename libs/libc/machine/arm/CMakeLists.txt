@@ -46,7 +46,7 @@ elseif(CONFIG_ARCH_ARMV8M) # All ARMv8-M
   add_subdirectory(armv8-m)
 endif()
 
-if(NOT CONFIG_LIBSUPCXX)
+if(NOT CONFIG_LIBSUPCXX_TOOLCHAIN)
   list(APPEND SRCS aeabi_atexit.c)
 endif()
 

@@ -44,7 +44,7 @@ else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # All ARMv8-M
 include $(TOPDIR)/libs/libc/machine/arm/armv8-m/Make.defs
 endif
 
-ifneq ($(CONFIG_LIBSUPCXX),y)
+ifneq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
 CSRCS += aeabi_atexit.c
 endif
 
