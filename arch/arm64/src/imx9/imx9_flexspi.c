@@ -1235,9 +1235,9 @@ struct flexspi_dev_s *imx9_flexspi_initialize(int intf)
 
   imx9_ccm_gate_on(CCM_LPCG_FLEXSPI1, true);
 
-  /* Configure clock to safe 50MHz, src clock is 800Mhz */
+  /* Configure clock to safe 100MHz, src clock is 800Mhz */
 
-  imx9_ccm_configure_root_clock(CCM_CR_FLEXSPI1, SYS_PLL1PFD1, 16);
+  imx9_ccm_configure_root_clock(CCM_CR_FLEXSPI1, SYS_PLL1PFD1, 8);
 
   /* Has the FlexSPI hardware been initialized? */
 
