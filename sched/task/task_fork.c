@@ -188,6 +188,11 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
       goto errout_with_tcb;
     }
 
+  /* Set the task name */
+
+  argv = nxsched_get_stackargs(parent);
+  nxtask_setup_name(child, argv[0]);
+
   /* Allocate the stack for the TCB */
 
   stack_size = (uintptr_t)ptcb->stack_base_ptr -
@@ -240,8 +245,7 @@ FAR struct task_tcb_s *nxtask_setup_fork(start_t retaddr)
 
   /* Setup to pass parameters to the new task */
 
-  argv = nxsched_get_stackargs(parent);
-  ret = nxtask_setup_arguments(child, argv[0], &argv[1]);
+  ret = nxtask_setup_stackargs(child, argv[0], &argv[1]);
   if (ret < OK)
     {
       goto errout_with_tcb;
