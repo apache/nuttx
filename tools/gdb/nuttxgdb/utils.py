@@ -100,7 +100,7 @@ def container_of(
     """Return pointer to containing data structure"""
     if isinstance(typeobj, str):
         typeobj = lookup_type(typeobj)
-    return gdb.Value(int(ptr.address) - offset_of(typeobj, member)).cast(
+    return gdb.Value(int(ptr.dereference().address) - offset_of(typeobj, member)).cast(
         typeobj.pointer()
     )
 
