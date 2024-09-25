@@ -30,6 +30,8 @@ if __name__ == "__main__":
         sys.path.insert(0, here)
 
     if "nuttxgdb" in sys.modules:
-        del sys.modules["nuttxgdb"]
+        for key in list(sys.modules.keys()):
+            if key.startswith("nuttxgdb"):
+                del sys.modules[key]
 
     import nuttxgdb  # noqa: F401
