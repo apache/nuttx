@@ -94,8 +94,12 @@ def offset_of(typeobj: gdb.Type, field: str) -> Union[int, None]:
     return None
 
 
-def container_of(ptr: gdb.Value, typeobj: gdb.Type, member: str) -> gdb.Value:
+def container_of(
+    ptr: gdb.Value, typeobj: Union[gdb.Type, str], member: str
+) -> gdb.Value:
     """Return pointer to containing data structure"""
+    if isinstance(typeobj, str):
+        typeobj = lookup_type(typeobj)
     return gdb.Value(int(ptr.address) - offset_of(typeobj, member)).cast(
         typeobj.pointer()
     )
@@ -112,9 +116,7 @@ class ContainerOf(gdb.Function):
         super().__init__("container_of")
 
     def invoke(self, ptr, typename, elementname):
-        return container_of(
-            ptr, gdb.lookup_type(typename.string()).pointer(), elementname.string()
-        )
+        return container_of(ptr, typename.string(), elementname.string())
 
 
 ContainerOf()
