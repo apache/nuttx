@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-m/gnu/arch_memcpy.S
  *
- * Copyright (c) 2013 ARM Ltd
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

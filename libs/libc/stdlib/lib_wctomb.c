@@ -1,8 +1,7 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_wctomb.c
  *
- * This code is derived from software contributed to Berkeley by
- * Chris Torek.
+ * SPDX-License-Identifier: BSD-3-Clause-UC
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

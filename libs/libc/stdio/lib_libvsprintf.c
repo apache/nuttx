@@ -1,11 +1,11 @@
 /****************************************************************************
  * libs/libc/stdio/lib_libvsprintf.c
  *
- *   Copyright (c) 2002, Alexander Popov (sasho@vip.bg)
- *   Copyright (c) 2002,2004,2005 Joerg Wunsch
- *   Copyright (c) 2005, Helmut Wallner
- *   Copyright (c) 2007, Dmitry Xmelkov
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2002, Alexander Popov (sasho@vip.bg)
+ * SPDX-FileCopyrightText: 2002,2004,2005 Joerg Wunsch
+ * SPDX-FileCopyrightText: 2005, Helmut Wallner
+ * SPDX-FileCopyrightText: 2007, Dmitry Xmelkov
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_memmove.S
  *
- * Copyright (c) 2013, Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013, Linaro Limited, 2015 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

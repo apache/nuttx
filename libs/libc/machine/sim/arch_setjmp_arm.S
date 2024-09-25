@@ -1,8 +1,9 @@
 /****************************************************************************
  * libs/libc/machine/sim/arch_setjmp_arm.S
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Nickolay Semyonov (RPI) <snob@wolpike.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Nickolay Semyonov (RPI) <snob@wolpike.com>
  *
  * Extracted from the MUSL C-library.  The MUSL C library has a compatible
  * MIT license and is released here under the NuttX 3-clause BSD license:

@@ -1,10 +1,8 @@
 /****************************************************************************
  * libs/libc/stdlib/lib_strtold.c
- * Convert string to float and (long) double
  *
- * A pretty straight forward conversion of strtod():
- *
- *   Copyright © 2005-2020 Rich Felker, et al.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText:  Copyright © 2005-2020 Rich Felker, et al.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the

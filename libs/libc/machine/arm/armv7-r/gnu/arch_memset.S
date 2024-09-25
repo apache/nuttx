@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-r/gnu/arch_memset.S
  *
- * Copyright (C) 2013 The Android Open Source Project
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 The Android Open Source Project
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

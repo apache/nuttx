@@ -1,19 +1,12 @@
 /****************************************************************************
  * libs/libc/time/lib_localtime.c
  *
- * Re-released as part of NuttX under the 3-clause BSD license:
- *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Ported to NuttX by Max Neklyudov
- *   Style updates by Gregory Nutt
- *
- * With these notes:
- *
- *   This file is in the public domain, so clarified as of
- *   1996-06-05 by Arthur David Olson.
- *
- *   Leap second handling from Bradley White.
- *   POSIX-style TZ environment variable handling from Guy Harris.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileContributor: Ported to NuttX by Max Neklyudov
+ * SPDX-FileContributor: Guy Harris
+ * SPDX-FileContributor: Bradley White
+ * SPDX-FileContributor: Arthur David Olson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

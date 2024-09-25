@@ -1,8 +1,9 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv7-r/gnu/arch_strcmp.S
  *
- * Copyright (c) 2011 The Android Open Source Project
- * Copyright (c) 2008 ARM Ltd
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2011 The Android Open Source Project,2008 ARM Ltd
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_strcpy.S
  *
- * Copyright (c) 2013, 2014, 2015 ARM Ltd.
- *  All rights Reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013, 2014, 2015 ARM Ltd., All rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
