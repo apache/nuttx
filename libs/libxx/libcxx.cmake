@@ -73,6 +73,10 @@ set_property(
   PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/include/libcxx)
 
 add_compile_definitions(_LIBCPP_BUILDING_LIBRARY)
+if(CONFIG_LIBSUPCXX_TOOLCHAIN)
+  add_compile_definitions(__GLIBCXX__)
+endif()
+
 if(CONFIG_LIBSUPCXX)
   add_compile_definitions(__GLIBCXX__)
 endif()

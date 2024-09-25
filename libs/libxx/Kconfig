@@ -67,11 +67,11 @@ config ETL
 		Implements C++ templates such as containers, string
 		singleton math without C++ STL libraries
 
-if LIBCXX || UCLIBCXX
+if !LIBCXXMINI
 
 choice
 	prompt "C++ low level library select"
-	default LIBSUPCXX
+	default LIBSUPCXX_TOOLCHAIN
 
 config LIBCXXABI
 	bool "LLVM low level C++ Library"
@@ -81,20 +81,26 @@ config LIBCXXABI
 		Select if your use libc++abi as lower level c++ library
 
 config LIBSUPCXX
+	bool "GNU compile low level libsupc++"
+	---help---
+		Select if your compile libsupc++ and use libsupc++ as lower
+		level c++ library.
+
+config LIBSUPCXX_TOOLCHAIN
 	bool "GNU low level libsupc++"
 	---help---
-		Select if your toolchain provides libsupc++ and use libsupc++ as lower
+		Select if your toolchain provides libsupc++ and use toolchain libsupc++ as lower
 		level c++ library.
 
 endchoice
+
+endif
 
 config LIBCXXABI_VERSION
 	string "Select libcxxabi version"
 	depends on LIBCXXABI
 	default LIBCXX_VERSION if LIBCXX
 	default "17.0.6" if !LIBCXX
-
-endif
 
 config CXX_STANDARD
 	string "Language standard"
