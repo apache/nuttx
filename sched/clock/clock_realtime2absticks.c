@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_abstime2ticks.c
+ * sched/clock/clock_realtime2absticks.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -34,76 +34,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: clock_abstime2ticks
- *
- * Description:
- *   Convert an absolute timespec delay to system timer ticks.
- *
- * Input Parameters:
- *   clockid - The timing source to use in the conversion
- *   reltime - Convert this absolute time to system clock ticks.
- *   ticks - Return the converted number of ticks here.
- *
- * Returned Value:
- *   OK on success; A non-zero error number on failure
- *
- * Assumptions:
- *   Interrupts should be disabled so that the time is not changing during
- *   the calculation
- *
- ****************************************************************************/
-
-int clock_abstime2ticks(clockid_t clockid,
-                        FAR const struct timespec *abstime,
-                        FAR sclock_t *ticks)
-{
-  struct timespec currtime;
-  struct timespec reltime;
-  int             ret;
-
-  /* Convert the timespec to clock ticks.
-   * NOTE: Here we use internal knowledge
-   * that CLOCK_REALTIME is defined to be zero!
-   */
-
-  ret = clock_gettime(clockid, &currtime);
-  if (ret != OK)
-    {
-      return ret;
-    }
-
-  if (clock_timespec_compare(abstime, &currtime) < 0)
-    {
-      /* Every caller of clock_abstime2ticks check 'ticks < 0' to see if
-       * absolute time is in the past. So lets just return negative tick
-       * here.
-       */
-
-      *ticks = -1;
-      return OK;
-    }
-
-  /* The relative time to wait is the absolute time minus the current time. */
-
-  reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
-
-  /* Check if we were supposed to borrow from the seconds. */
-
-  if (reltime.tv_nsec < 0)
-    {
-      reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
-    }
-
-  /* Convert this relative time into clock ticks. */
-
-  *ticks = clock_time2ticks(&reltime);
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: clock_realtime2absticks
