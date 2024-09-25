@@ -8359,7 +8359,7 @@ def test_ltp_interfaces_pthread_attr_setschedparam_1_3(p):
 
 def test_ltp_mq_timedsend_speculative_18_2(p):
     ret = p.sendCommand(
-        "ltp_mq_timedsend_speculative_18_2", ["did not fail"], timeout=10
+        "ltp_mq_timedsend_speculative_18_2", ["did fail on invalid"], timeout=10
     )
     retID = p.sendCommand("echo $?", "0", timeout=2)
     assert ret >= 0
