@@ -60,7 +60,12 @@ def inet_ntop(domain, addr):
     """Convert a network address to a string"""
 
     addr_len = 16 if domain == AF_INET6 else 4
-    return socket.inet_ntop(domain, utils.get_bytes(addr, addr_len))
+    if socket:
+        return socket.inet_ntop(domain, utils.get_bytes(addr, addr_len))
+    else:
+        separator = "." if domain == AF_INET else ""
+        fmt = "%d" if domain == AF_INET else "%02x"
+        return separator.join([fmt % byte for byte in utils.get_bytes(addr, addr_len)])
 
 
 def socket_for_each_entry(proto):
@@ -111,7 +116,7 @@ class NetStats(gdb.Command):
     """
 
     def __init__(self):
-        if utils.get_symbol_value("CONFIG_NET") and socket:
+        if utils.get_symbol_value("CONFIG_NET"):
             super().__init__("netstats", gdb.COMMAND_USER)
 
     def iob_stats(self):
