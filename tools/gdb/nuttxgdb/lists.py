@@ -202,7 +202,7 @@ def sq_is_empty(sq):
         return False
 
 
-def sq_check(sq) -> int:
+def sq_check(sq, verbose=True) -> int:
     """Check the consistency of a singly linked list"""
     nb = 0
     if sq.type == sq_queue_type.pointer():
@@ -212,7 +212,8 @@ def sq_check(sq) -> int:
         return nb
 
     if sq["head"] == 0:
-        gdb.write("sq_queue head is empty {}\n".format(sq.address))
+        if verbose:
+            gdb.write("sq_queue head is empty {}\n".format(sq.address))
         return nb
 
     nodes = set()
@@ -236,13 +237,14 @@ def sq_check(sq) -> int:
         gdb.write("sq_queue tail->flink is not null {}\n".format(sq["tail"]))
         return nb
 
-    gdb.write("sq_queue is consistent: {} node(s)\n".format(nb))
+    if verbose:
+        gdb.write("sq_queue is consistent: {} node(s)\n".format(nb))
     return nb
 
 
-def sq_count(sq):
+def sq_count(sq) -> int:
     """Count sq elements, abort if check failed"""
-    return sq_check(sq)
+    return sq_check(sq, verbose=False)
 
 
 def dq_for_every(dq, entry=None):
