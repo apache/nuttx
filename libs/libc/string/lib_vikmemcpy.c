@@ -1,16 +1,8 @@
 /****************************************************************************
  * libs/libc/string/lib_vikmemcpy.c
  *
- * This is version of the optimized memcpy by Daniel Vik, adapted to the
- * NuttX environment.
- *
- *   Copyright (C) 1999-2010 Daniel Vik
- *
- * Adaptations include:
- * - File name change
- * - Use of types defined in stdint.h
- * - Integration with the NuttX configuration system
- * - Other cosmetic changes for consistency with NuttX coding standards
+ * SPDX-License-Identifier: Zlib
+ * SPDX-FileCopyrightText: Copyright (C) 1999-2010 Daniel Vik
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any
@@ -31,23 +23,6 @@
  *
  * 3. This notice may not be removed or altered from any source
  *    distribution.
- *
- * Description: Implementation of the standard library function memcpy.
- *              This implementation of memcpy() is ANSI-C89 compatible.
- *
- * The following configuration options can be set:
- *
- *   CONFIG_ENDIAN_BIG
- *     Uses processor with big endian addressing. Default is little endian.
- *
- *   CONFIG_MEMCPY_PRE_INC_PTRS
- *     Use pre increment of pointers. Default is post increment of pointers.
- *
- *   CONFIG_MEMCPY_INDEXED_COPY
- *     Copying data using array indexing. Using this option, disables the
- *     CONFIG_MEMCPY_PRE_INC_PTRS option.
- *
- *   CONFIG_MEMCPY_64BIT - Compiles memcpy for 64 bit architectures
  *
  ****************************************************************************/
 

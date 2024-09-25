@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm/armv8-m/gnu/arch_memset.S
  *
- * Copyright (c) 2015 ARM Ltd
- * All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 ARM Ltd,2008 The Android Open Source Project
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

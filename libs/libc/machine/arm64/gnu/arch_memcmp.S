@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_memcmp.S
  *
- * Copyright (c) 2018 Linaro Limited
- *  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Linaro Limited, 2017 ARM Ltd
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,8 +1,8 @@
 /****************************************************************************
  * libs/libc/machine/arm64/gnu/arch_strchr.S
  *
- * Copyright (c) 2014, ARM Limited
- *  All rights Reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014, ARM Limited, All rights Reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:

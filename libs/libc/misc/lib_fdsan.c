@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_fdsan.c
- * Copyright (C) 2018 The Android Open Source Project
- * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2018 The Android Open Source Project
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
