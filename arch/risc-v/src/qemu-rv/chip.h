@@ -62,7 +62,44 @@
   li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
   mul   \tmp1, \tmp0, \tmp1
   la    \tmp0, g_intstacktop
-  sub   sp, \tmp0, \tmp1
+
+  /* tmp0 = g_intstacktop - (CONFIG_ARCH_INTERRUPTSTACK * HART_ID)
+   * (high address of the interrupt stack)
+   */
+
+  sub   \tmp0, \tmp0, \tmp1
+  li    \tmp1, STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
+
+  /* tmp1 = tmp0 - CONFIG_ARCH_INTERRUPTSTACK
+   * (low address of the interrupt stack)
+   */
+
+  sub   \tmp1, \tmp0, \tmp1
+
+  /* Check if sp is below the low address of the interrupt stack
+   * (outside the interrupt stack).
+   */
+
+  blt   sp, \tmp1, 1f
+
+  /* Check if sp is above the high address of the interrupt stack
+   * (outside the interrupt stack)
+   */
+
+  bgt   sp, \tmp0, 1f
+
+  /* If sp is within the interrupt stack boundaries, no action is required */
+
+  j     2f
+
+1:
+  /* Set sp to the high address of the interrupt stack (start of the
+   * interrupt stack)
+   */
+
+  mv    sp, \tmp0
+
+2:
 .endm
 #endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
