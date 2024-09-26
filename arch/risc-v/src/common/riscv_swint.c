@@ -161,7 +161,7 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
   /* Set the user register context to TCB */
 
-  rtcb->xcp.regs = context;
+  rtcb->xcp.sregs = context;
 
   /* Indicate that we are in a syscall handler */
 
