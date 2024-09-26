@@ -35,6 +35,7 @@
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_ivshmem.h>
+#include <nuttx/virtio/virtio-vsock.h>
 #include <nuttx/wdog.h>
 
 /****************************************************************************
@@ -48,7 +49,7 @@
 #define RPTUN_IVSHMEM_SHMEM_SIZE  0x10000
 #define RPTUN_IVSHMEM_WDOG_DELAY  USEC2TICK(100)
 
-#define RPTUN_IVSHMEM_VIRTIO_NUM  3
+#define RPTUN_IVSHMEM_VIRTIO_NUM  4
 #define RPTUN_IVSHMEM_RSC_NUM     (2 * RPTUN_IVSHMEM_VIRTIO_NUM)
 
 /****************************************************************************
@@ -57,22 +58,29 @@
 
 struct aligned_data(8) rptun_ivshmem_rsc_s
 {
-  struct resource_table      hdr;
-  uint32_t                   offset[RPTUN_IVSHMEM_RSC_NUM];
-  struct fw_rsc_vdev         rng0;
-  struct fw_rsc_vdev_vring   rng0_vring;
-  struct fw_rsc_carveout     rng0_carveout;
-  char                       rng0_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
-  struct fw_rsc_vdev         rng1;
-  struct fw_rsc_vdev_vring   rng1_vring;
-  struct fw_rsc_carveout     rng1_carveout;
-  char                       rng1_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
-  struct fw_rsc_vdev         rpmsg0;
-  struct fw_rsc_vdev_vring   rpmsg0_vring0;
-  struct fw_rsc_vdev_vring   rpmsg0_vring1;
-  struct fw_rsc_config       rpmsg0_config;
-  struct fw_rsc_carveout     rpmsg0_carveout;
-  char                       rpmsg0_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+  struct resource_table        hdr;
+  uint32_t                     offset[RPTUN_IVSHMEM_RSC_NUM];
+  struct fw_rsc_vdev           rng0;
+  struct fw_rsc_vdev_vring     rng0_vring;
+  struct fw_rsc_carveout       rng0_carveout;
+  char                         rng0_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+  struct fw_rsc_vdev           rng1;
+  struct fw_rsc_vdev_vring     rng1_vring;
+  struct fw_rsc_carveout       rng1_carveout;
+  char                         rng1_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+  struct fw_rsc_vdev           rpmsg0;
+  struct fw_rsc_vdev_vring     rpmsg0_vring0;
+  struct fw_rsc_vdev_vring     rpmsg0_vring1;
+  struct fw_rsc_config         rpmsg0_config;
+  struct fw_rsc_carveout       rpmsg0_carveout;
+  char                         rpmsg0_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+  struct fw_rsc_vdev           vsock;
+  struct fw_rsc_vdev_vring     vsock_vring0;
+  struct fw_rsc_vdev_vring     vsock_vring1;
+  struct fw_rsc_vdev_vring     vsock_vring2;
+  struct virtio_vsock_config_s vsock_config;
+  struct fw_rsc_carveout       vsock_carveout;
+  char                         vsock_shm[2 * RPTUN_IVSHMEM_SHMEM_SIZE];
 };
 
 struct rptun_ivshmem_mem_s
@@ -285,6 +293,43 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
       rsc->rpmsg0_carveout.pa         = (uint32_t)METAL_BAD_PHYS;
       rsc->rpmsg0_carveout.len        = sizeof(priv->shmem->rsc.rpmsg0_shm);
       memcpy(rsc->rpmsg0_carveout.name, "vdev2buffer", 11);
+
+      /* Virtio Driver 3, VIRTIO_ID_VSOCK */
+
+      rsc->offset[6]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 vsock);
+      rsc->vsock.type                 = RSC_VDEV;
+      rsc->vsock.id                   = VIRTIO_ID_VSOCK;
+      rsc->vsock.notifyid             = RSC_NOTIFY_ID_ANY;
+      rsc->vsock.dfeatures            = 0;
+      rsc->vsock.config_len           = sizeof(struct virtio_vsock_config_s);
+      rsc->vsock.num_of_vrings        = 3;
+      rsc->vsock.reserved[0]          = VIRTIO_DEV_DRIVER;
+      rsc->vsock.reserved[1]          = 0;
+      rsc->vsock_vring0.align         = 8;
+      rsc->vsock_vring0.num           = 32;
+      rsc->vsock_vring0.notifyid      = RSC_NOTIFY_ID_ANY;
+      rsc->vsock_vring0.da            = FW_RSC_U32_ADDR_ANY;
+      rsc->vsock_vring1.align         = 8;
+      rsc->vsock_vring1.num           = 32;
+      rsc->vsock_vring1.notifyid      = RSC_NOTIFY_ID_ANY;
+      rsc->vsock_vring1.da            = FW_RSC_U32_ADDR_ANY;
+      rsc->vsock_vring2.align         = 8;
+      rsc->vsock_vring2.num           = 32;
+      rsc->vsock_vring2.notifyid      = RSC_NOTIFY_ID_ANY;
+      rsc->vsock_vring2.da            = FW_RSC_U32_ADDR_ANY;
+      rsc->vsock_config.guest_cid     = 3;
+
+      /* Virtio Vsock share memory buffer */
+
+      rsc->offset[7]                  = offsetof(struct rptun_ivshmem_rsc_s,
+                                                 vsock_carveout);
+      rsc->vsock_carveout.type        = RSC_CARVEOUT;
+      rsc->vsock_carveout.da          = offsetof(struct rptun_ivshmem_mem_s,
+                                                 rsc.vsock_shm);
+      rsc->vsock_carveout.pa          = (uint32_t)METAL_BAD_PHYS;
+      rsc->vsock_carveout.len         = sizeof(priv->shmem->rsc.vsock_shm);
+      memcpy(rsc->vsock_carveout.name, "vdev3buffer", 11);
 
       priv->shmem->rsc_size           = sizeof(struct rptun_ivshmem_rsc_s);
 
