@@ -75,6 +75,10 @@
 
 /* These are not standard but are defined for Linux compatibility */
 
+/* Maximum number of CPUs */
+
+#define CPU_SETSIZE CONFIG_SMP_NCPUS
+
 /* void CPU_ZERO(FAR cpu_set_t *set); */
 
 #define CPU_ZERO(s) do { *(s) = 0; } while (0)
