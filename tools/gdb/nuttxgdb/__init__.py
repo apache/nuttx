@@ -49,10 +49,18 @@ def register_commands(event):
     gdb.write('"handle SIGUSR1 "nostop" "pass" "noprint"\n')
 
     def init_gdb_commands(m: str):
-        module = importlib.import_module(f"{__package__}.{m}")
+        try:
+            module = importlib.import_module(f"{__package__}.{m}")
+        except Exception:
+            gdb.write(f"\x1b[31;1mIgnore module: {m}\n\x1b[m")
+            return
+
         for c in module.__dict__.values():
             if isinstance(c, type) and issubclass(c, gdb.Command):
-                c()
+                try:
+                    c()
+                except Exception:
+                    gdb.write(f"\x1b[31;1mIgnore command: {c}\n\x1b[m")
 
     # import utils module
     utils = importlib.import_module(f"{__package__}.utils")
