@@ -38,7 +38,7 @@ jobs:
       - name: Checkout apps
         uses: actions/checkout@v4
         with:
-          repository: 'tiiuae/incubator-nuttx-apps.git'
+          repository: 'tiiuae/nuttx-apps.git'
           path: 'apps'
           ref: 'master'
       - name: Install tools

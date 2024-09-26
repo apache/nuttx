@@ -13,24 +13,12 @@
 name: Build
 
 on:
-  pull_request:
-    paths-ignore:
-      - 'Documentation/**'
-      - 'tools/ci/docker/linux/**'
   push:
-    paths-ignore:
-      - 'Documentation/**'
-    branches:
-      - master
-      - 'releases/*'
-    tags:
+    branches: [master]
+  pull_request:
 
 permissions:
   contents: read
-
-concurrency:
-  group: build-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
 jobs:
   Fetch-Source:
@@ -73,7 +61,7 @@ jobs:
                 APPS_REF=$REF_NAME
                 ;;
 
-              "tiiuae/incubator-nuttx-apps" )
+              "tiiuae/nuttx-apps" )
                 # APPS
                 OS_REF=$REF_NAME
                 echo "Triggered by change in APPS"
@@ -101,7 +89,7 @@ jobs:
       - name: Checkout apps repo
         uses: actions/checkout@v4
         with:
-          repository: tiiuae/incubator-nuttx-apps
+          repository: tiiuae/nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
@@ -115,74 +103,13 @@ jobs:
           name: source-bundle
           path: sources.tar.gz
 
-  Linux:
-    needs: Fetch-Source
+  Build:
     runs-on: ubuntu-latest
-    env:
-      DOCKER_BUILDKIT: 1
-
-    strategy:
-      max-parallel: 12
-      matrix:
-        boards: [arm-12, risc-v]
-
-    steps:
-      - name: Download Source Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: source-bundle
-          path: .
-
-      - name: Extract sources
-        run: tar zxf sources.tar.gz
-
-      - name: Docker Login
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Docker Pull
-        run: docker pull ghcr.io/apache/nuttx/apache-nuttx-ci-linux
-
-      - name: Export NuttX Repo SHA
-        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
-
-      - name: Run builds
-        uses: ./sources/nuttx/.github/actions/ci-container
-        env:
-          BLOBDIR: /tools/blobs
-        with:
-          run: |
-            echo "::add-matcher::sources/nuttx/.github/gcc.json"
-            export ARTIFACTDIR=`pwd`/buildartifacts
-            git config --global --add safe.directory /github/workspace/sources/nuttx
-            git config --global --add safe.directory /github/workspace/sources/apps
-            cd sources/nuttx/tools/ci
-            if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
-                ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
-            else
-                ./cibuild.sh -c -A -N -R -S testlist/${{matrix.boards}}.dat
-            fi
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ always() }}
-        with:
-          name: linux-${{matrix.boards}}-builds
-          path: buildartifacts/
-        continue-on-error: true
-
-  macOS:
-    if: ${{ false }}  # disable for now
-    permissions:
-      contents: none
-    runs-on: macos-13
     needs: Fetch-Source
     strategy:
-      max-parallel: 2
+      fail-fast: false
       matrix:
-        boards: [macos, sim-01, sim-02]
+        boards: [ssrc-arm, ssrc-riscv]
     steps:
       - name: Download Source Artifact
         uses: actions/download-artifact@v4
@@ -193,102 +120,11 @@ jobs:
       - name: Extract sources
         run: tar zxf sources.tar.gz
 
-      - name: Restore Tools Cache
-        id: cache-tools
-        uses: actions/cache@v4
-        env:
-          cache-name: ${{ runner.os }}-cache-tools
-        with:
-          path: ./sources/tools
-          key: ${{ runner.os }}-tools-${{ hashFiles('./sources/nuttx/tools/ci/platforms/darwin.sh') }}
-
-      - name: Export NuttX Repo SHA
-        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
-
-      # Released version of Cython has issues with Python 11. Set runner to use Python 3.10
-      # https://github.com/cython/cython/issues/4500
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Run Builds
+      # cibuild.sh -i installs the tools for us
+      - name: Run builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
           export ARTIFACTDIR=`pwd`/buildartifacts
           cd sources/nuttx/tools/ci
           ./cibuild.sh -i -c -A -R testlist/${{matrix.boards}}.dat
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macos-${{matrix.boards}}-builds
-          path: buildartifacts/
-        continue-on-error: true
-
-  msys2:
-    needs: Fetch-Source
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        boards: [msys2]
-
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MSYS
-          update: false
-          install: >-
-            base-devel
-            gcc
-            gperf
-            automake
-            autoconf
-            git
-            python3
-            ncurses-devel
-            unzip
-            zip
-            tio
-            zlib-devel
-            cmake
-            ninja
-            python-pip 
-            vim
-
-      - name: pip3 install
-        run: |
-          python3 -m venv --system-site-packages /usr/local
-          pip3 install --root-user-action=ignore --no-cache-dir pyelftools cxxfilt kconfiglib
-
-      - run: git config --global core.autocrlf false
-
-      - name: Download Source Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: source-bundle
-          path: .
-
-      - name: Extract sources
-        run: tar zxf sources.tar.gz
-
-      - name: Export NuttX Repo SHA
-        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
-
-      - name: Run Builds
-        run: |
-          echo "::add-matcher::sources/nuttx/.github/gcc.json"
-          export ARTIFACTDIR=`pwd`/buildartifacts
-          git config --global --add safe.directory /github/workspace/sources/nuttx
-          git config --global --add safe.directory /github/workspace/sources/apps
-          cd sources/nuttx/tools/ci
-          ./cibuild.sh -g -i -A -C -N -R testlist/${{matrix.boards}}.dat
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: msys2-${{matrix.boards}}-builds
-          path: buildartifacts/
-        continue-on-error: true
