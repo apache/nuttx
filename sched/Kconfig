@@ -370,7 +370,7 @@ config SMP
 
 		N.B. SMP mode requires the use of ARCH_INTERRUPTSTACK:
 
-		CPU0 thread0  ->  IRQ enter -> add thread0 to block_list -> IRQ leave(crash)
+		CPU0 thread0  ->  IRQ enter -> add thread0 to block list -> IRQ leave(crash)
 		                                                        ||
 		                                                        /\
 		                                                       /  \
