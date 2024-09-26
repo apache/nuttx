@@ -1092,6 +1092,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   if (headersize > 0)
     {
       struct audio_caps_s caps;
+      memset(&caps, 0, sizeof(caps));
 
       /* Configure the lower level for the number of channels, bitrate,
        * and sample bitwidth.
