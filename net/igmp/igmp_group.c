@@ -67,6 +67,7 @@
 
 #include "devif/devif.h"
 #include "igmp/igmp.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_IGMP
 
@@ -212,6 +213,9 @@ FAR struct igmp_group_s *igmp_grpallocfind(FAR struct net_driver_s *dev,
 void igmp_grpfree(FAR struct net_driver_s *dev,
                   FAR struct igmp_group_s *group)
 {
+  unsigned int count;
+  int blresult;
+
   grpinfo("Free: %p flags: %02x\n", group, group->flags);
 
   /* Cancel the wdog */
@@ -220,7 +224,12 @@ void igmp_grpfree(FAR struct net_driver_s *dev,
 
   /* Cancel the workqueue */
 
+  blresult = net_breaklock(&count);
   work_cancel_sync(LPWORK, &group->work);
+  if (blresult >= 0)
+    {
+      net_restorelock(count);
+    }
 
   /* Remove the group structure from the group list in the device structure */
 
