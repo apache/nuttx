@@ -2302,22 +2302,44 @@ static int perf_mmap(FAR struct file *filep,
   return 0;
 }
 
-static void perf_swevent_timer_handle(wdparm_t arg)
+static int perf_swevent_timer_handle_cpu(FAR void *arg)
 {
   FAR struct perf_event_s *event = (FAR struct perf_event_s *)arg;
   struct perf_sample_data_s data;
+  irqstate_t flags;
 
   /* TODO: ISR thread cannot get pc */
 
   uintptr_t pc = up_getusrpc(NULL);
-  sclock_t period = NSEC2TICK(event->attr.sample_period);
-  irqstate_t flags;
 
   perf_sample_data_init(&data, event->attr.sample_period);
 
   flags = spin_lock_irqsave(&event->buf->lock);
   perf_event_data_overflow(event, &data, pc);
   spin_unlock_irqrestore(&event->buf->lock, flags);
+  return 0;
+}
+
+static void perf_swevent_timer_handle(wdparm_t arg)
+{
+  FAR struct perf_event_s *event = (FAR struct perf_event_s *)arg;
+  sclock_t period = NSEC2TICK(event->attr.sample_period);
+
+#ifdef CONFIG_SMP
+  int cpu = this_cpu();
+
+  if (event->cpu != -1 && event->cpu != cpu)
+    {
+       nxsched_smp_call_single(event->cpu,
+                  perf_swevent_timer_handle_cpu, event, false);
+    }
+    else
+    {
+       perf_swevent_timer_handle_cpu(event);
+    }
+#else
+    perf_swevent_timer_handle_cpu(event);
+#endif
 
   wd_start(&event->hw.waitdog, period, perf_swevent_timer_handle, arg);
 }
