@@ -157,10 +157,12 @@ void __nxstart(void)
    * so this *must be* called after enabling SSE instructions.
    */
 
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
   for (dest = (uint64_t *)_sbss; dest < (uint64_t *)_ebss; )
     {
       *dest++ = 0;
     }
+#endif
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
   /* Make sure that FS_BASE is not null */

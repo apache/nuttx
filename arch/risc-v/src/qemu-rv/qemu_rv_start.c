@@ -86,10 +86,12 @@ static void qemu_rv_clear_bss(void)
    * certain that there are no issues with the state of global variables.
    */
 
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
   for (dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
       *dest++ = 0;
     }
+#endif
 }
 
 #ifdef CONFIG_BUILD_PROTECTED
