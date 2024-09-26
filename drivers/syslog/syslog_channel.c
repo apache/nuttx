@@ -191,8 +191,11 @@ static syslog_channel_t g_default_channel =
 
 /* This is the current syslog channel in use */
 
-FAR syslog_channel_t
-*g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
+FAR syslog_channel_t *
+#ifndef CONFIG_SYSLOG_REGISTER
+const
+#endif
+g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
 {
 #if defined(CONFIG_SYSLOG_DEFAULT)
   &g_default_channel,
@@ -272,6 +275,7 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SYSLOG_REGISTER
 int syslog_channel_register(FAR syslog_channel_t *channel)
 {
 #if (CONFIG_SYSLOG_MAX_CHANNELS != 1)
@@ -369,3 +373,4 @@ int syslog_channel_unregister(FAR syslog_channel_t *channel)
 
   return -EINVAL;
 }
+#endif
