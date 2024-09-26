@@ -613,6 +613,12 @@ struct xcptcontext
 
   uintreg_t *regs;
 
+#ifdef CONFIG_LIB_SYSCALL
+  /* User integer registers upon system call entry */
+
+  uintreg_t *sregs;
+#endif
+
   /* FPU register save area */
 
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARCH_LAZYFPU)
