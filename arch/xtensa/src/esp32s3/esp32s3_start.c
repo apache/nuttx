@@ -559,10 +559,12 @@ noinstrument_function void IRAM_ATTR __start(void)
    * certain that there are no issues with the state of global variables.
    */
 
+#  ifndef CONFIG_ARCH_SKIP_ZERO_BSS
   for (uint32_t *dest = (uint32_t *)_sbss; dest < (uint32_t *)_ebss; )
     {
       *dest++ = 0;
     }
+#  endif
 #endif
 
   app_desc = esp_app_get_description();

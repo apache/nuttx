@@ -186,6 +186,7 @@ MSPI_INIT_ATTR void sys_rtc_init(const soc_reset_reason_t *rst_reas)
       )
     {
       wdt_hal_context_t rtc_wdt_ctx = RWDT_HAL_CONTEXT_DEFAULT();
+
       wdt_hal_write_protect_disable(&rtc_wdt_ctx);
       wdt_hal_disable(&rtc_wdt_ctx);
       wdt_hal_write_protect_enable(&rtc_wdt_ctx);
@@ -285,7 +286,9 @@ static noreturn_function void __esp32_start(void)
 
   /* Set .bss to zero */
 
+#  ifndef CONFIG_ARCH_SKIP_ZERO_BSS
   memset(_sbss, 0, _ebss - _sbss);
+#  endif
 
 #endif
 
@@ -360,7 +363,7 @@ static noreturn_function void __esp32_start(void)
   /* Set external memory bss section to zero */
 
 #  ifdef CONFIG_XTENSA_EXTMEM_BSS
-     memset(_sbss_extmem, 0, _ebss_extmem - _sbss_extmem);
+  memset(_sbss_extmem, 0, _ebss_extmem - _sbss_extmem);
 #  endif
 
 #endif
