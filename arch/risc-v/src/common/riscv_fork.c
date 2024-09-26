@@ -133,10 +133,12 @@ pid_t riscv_fork(const struct fork_s *context)
   DEBUGASSERT(stacktop > parent->xcp.regs[REG_SP]);
   stackutil = stacktop - parent->xcp.regs[REG_SP];
 
-  /* Copy the parent stack contents (overwrites child's SP and TP) */
+  /* Copy goes to child's user stack top */
 
   newtop = (uintptr_t)child->cmn.stack_base_ptr + child->cmn.adj_stack_size;
   newsp = newtop - stackutil;
+
+  memcpy((void *)newsp, (const void *)parent->xcp.regs[REG_SP], stackutil);
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
   /* Save child's thread pointer */
@@ -144,22 +146,34 @@ pid_t riscv_fork(const struct fork_s *context)
   tp = child->cmn.xcp.regs[REG_TP];
 #endif
 
-  /* Set up frame for context and copy the parent's user context there */
+  /* Determine the integer context save area */
 
-  memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
-         parent->xcp.regs, XCPTCONTEXT_SIZE);
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  if (child->cmn.xcp.kstack)
+    {
+      /* Set context to kernel stack */
+
+      stacktop = (uintptr_t)child->cmn.xcp.ktopstk;
+    }
+  else
+#endif
+    {
+      /* Set context to user stack */
+
+      stacktop = newsp;
+    }
+
+  /* Set the new register restore area to the new stack top */
+
+  child->cmn.xcp.regs = (void *)(stacktop - XCPTCONTEXT_SIZE);
+
+  /* Copy the parent integer context (overwrites child's SP and TP) */
+
+  memcpy(child->cmn.xcp.regs, parent->xcp.regs, XCPTCONTEXT_SIZE);
 
   /* Save FPU */
 
   riscv_savefpu(child->cmn.xcp.regs, riscv_fpuregs(&child->cmn));
-
-  /* Copy the parent stack contents */
-
-  memcpy((void *)newsp, (const void *)parent->xcp.regs[REG_SP], stackutil);
-
-  /* Set the new register restore area to the new stack top */
-
-  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
 
   /* Return 0 to child */
 
