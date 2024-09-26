@@ -85,15 +85,15 @@
 
 /* void CPU_SET(int cpu, FAR cpu_set_t *set); */
 
-#define CPU_SET(c,s) do { *(s) |= (1 << (c)); } while (0)
+#define CPU_SET(c,s) do { *(s) |= (1u << (c)); } while (0)
 
 /* void CPU_CLR(int cpu, FAR cpu_set_t *set); */
 
-#define CPU_CLR(c,s) do { *(s) &= ~(1 << (c)); } while (0)
+#define CPU_CLR(c,s) do { *(s) &= ~(1u << (c)); } while (0)
 
 /* int  CPU_ISSET(int cpu, FAR const cpu_set_t *set); */
 
-#define CPU_ISSET(c,s) ((*(s) & (1 << (c))) != 0)
+#define CPU_ISSET(c,s) ((*(s) & (1u << (c))) != 0)
 
 /* int CPU_COUNT(FAR const cpu_set_t *set); */
 
