@@ -671,6 +671,39 @@ def jsonify(obj, indent=None):
     return json.dumps(obj, default=dumper, indent=indent)
 
 
+class ArrayIterator:
+    """An iterator for gdb array or pointer."""
+
+    def __init__(self, array: gdb.Value, maxlen=None):
+        type_code = array.type.code
+        if type_code not in (gdb.TYPE_CODE_ARRAY, gdb.TYPE_CODE_PTR):
+            raise gdb.error(f"Not an array: {array}, type: {array.type}")
+
+        if type_code == gdb.TYPE_CODE_ARRAY:
+            if maxlen is None:
+                maxlen = nitems(array)
+            else:
+                maxlen = min(nitems(array), maxlen)
+
+        if maxlen is None:
+            raise gdb.error("Need to provide array length.")
+
+        self.array = array
+        self.maxlen = maxlen
+        self.index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> gdb.Value:
+        if self.index >= self.maxlen:
+            raise StopIteration
+
+        value = self.array[self.index]
+        self.index += 1
+        return value
+
+
 class Hexdump(gdb.Command):
     """hexdump address/symbol <size>"""
 

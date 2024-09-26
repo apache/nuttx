@@ -112,15 +112,13 @@ def mm_dumpnode(node, count, align, simple, detail, alive):
         )
 
         if node.type.has_key("backtrace"):
-            max = node["backtrace"].type.range()[1]
             firstrow = True
-            for x in range(0, max):
-                backtrace = int(node["backtrace"][x])
-                if backtrace == 0:
+            for backtrace in utils.ArrayIterator(node["backtrace"]):
+                if int(backtrace) == 0:
                     break
 
                 if simple:
-                    gdb.write(" %0#*x" % (align, backtrace))
+                    gdb.write(" %0#*x" % (align, int(backtrace)))
                 else:
                     if firstrow:
                         firstrow = False
@@ -132,8 +130,8 @@ def mm_dumpnode(node, count, align, simple, detail, alive):
                         "  [%0#*x] %-20s %s:%d\n"
                         % (
                             align,
-                            backtrace,
-                            node["backtrace"][x].format_string(
+                            int(backtrace),
+                            backtrace.format_string(
                                 raw=False, symbols=True, address=False
                             ),
                             gdb.find_pc_line(backtrace).symtab,
