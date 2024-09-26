@@ -31,7 +31,6 @@ set(SRCS
     intel64_releasestack.c
     intel64_rtc.c
     intel64_restore_auxstate.c
-    intel64_savestate.c
     intel64_stackframe.c
     intel64_schedulesigaction.c
     intel64_sigdeliver.c

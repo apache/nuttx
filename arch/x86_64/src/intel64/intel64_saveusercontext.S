@@ -80,13 +80,13 @@ up_saveusercontext:
 	/* Save the value of SP as will be at the time of the IRET that will
 	 * appear to be the return from this function.
 	 *
-	 *         CURRENT STACK           IRET STACK
-	 *        ------------------------------        -----------------
+	 * CURRENT STACK                IRET STACK
+	 * ---------------------        -----------------
 	 *                              RIP
 	 *                              CS
 	 *                              RFLAGS
 	 *                              RSP
-	 * ESP->Return address          SS
+	 * RSP->Return address          SS
 	 * Argument                     Alignment (16bytes)
 	 *
 	 */

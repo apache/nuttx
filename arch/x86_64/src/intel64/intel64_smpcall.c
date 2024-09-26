@@ -62,7 +62,6 @@ int x86_64_smp_call_handler(int irq, void *c, void *arg)
   int cpu = this_cpu();
 
   tcb = current_task(cpu);
-  x86_64_savestate(tcb->xcp.regs);
   nxsched_smp_call_handler(irq, c, arg);
   tcb = current_task(cpu);
   x86_64_restorestate(tcb->xcp.regs);
@@ -97,7 +96,6 @@ int x86_64_smp_sched_handler(int irq, void *c, void *arg)
 
   tcb = current_task(cpu);
   nxsched_suspend_scheduler(tcb);
-  x86_64_savestate(tcb->xcp.regs);
   nxsched_process_delivered(cpu);
   tcb = current_task(cpu);
   nxsched_resume_scheduler(tcb);
