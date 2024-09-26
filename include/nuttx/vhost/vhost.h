@@ -88,6 +88,9 @@ int vhost_register_device(FAR struct vhost_device *hdev);
 int vhost_register_driver(FAR struct vhost_driver *hdrv);
 int vhost_unregister_driver(FAR struct vhost_driver *hdrv);
 int vhost_unregister_device(FAR struct vhost_device *hdev);
+int vhost_get_vq_buffers(FAR struct virtqueue *vq,
+                         FAR struct virtqueue_buf *vb, size_t vbsize,
+                         FAR size_t *vbcnt);
 
 /****************************************************************************
  * Name: vhost_register_drivers
