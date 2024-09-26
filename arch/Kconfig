@@ -1320,6 +1320,13 @@ config ARCH_RAMFUNCS
 		so that FLASH can be reconfigured while the MCU executes out of
 		SRAM.
 
+config ARCH_SKIP_ZERO_BSS
+	bool "Skip zero bss section"
+	default n
+	---help---
+		BSS must be set to all zero if there is no external preparation.
+		But it will take a lot of boot time.
+
 config ARCH_HAVE_CUSTOM_VECTORS
 	bool
 	default n

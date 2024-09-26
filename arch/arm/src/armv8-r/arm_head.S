@@ -297,6 +297,7 @@ arm_data_initialize:
 
 	/* Zero BSS */
 
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
 	adr		r0, .Linitparms
 	ldmia		r0, {r0, r1}
 
@@ -305,6 +306,7 @@ arm_data_initialize:
 	cmp		r0, r1				/* Clear up to _bss_end_ */
 	strcc		r2, [r0], #4
 	bcc		1b
+#endif
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	/* If the .data section is in a separate, uninitialized address space,
@@ -577,6 +579,7 @@ sctlr_initialize:
 	 * end of memory.  See g_idle_topstack below.
 	 */
 
+#ifndef CONFIG_ARCH_SKIP_ZERO_BSS
 #ifdef __ghs__
 	.type	.Linitparms, $object
 #else
@@ -585,6 +588,7 @@ sctlr_initialize:
 .Linitparms:
 	.long	_sbss
 	.long	_ebss
+#endif
 
 .Lhypvectorstart:
 	.long	_hyp_vector_start
