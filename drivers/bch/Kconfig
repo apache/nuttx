@@ -28,4 +28,10 @@ config BCH_BUFFER_ALIGNMENT
 	int "Buffer aligned bytes"
 	default 0
 
+config BCH_DEVICE_READONLY
+	bool "Set BCH device readonly"
+	default n
+	---help---
+		Set bch devices read-only
+
 endif # BCH

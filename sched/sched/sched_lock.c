@@ -152,22 +152,19 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
 
       if (rtcb->lockcount == 1)
         {
           /* Note that we have pre-emption locked */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_preemption(rtcb, true);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+          nxsched_critmon_preemption(rtcb, true, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, true);
 #endif
         }
-#endif
 
       /* Move any tasks in the ready-to-run list to the pending task list
        * where they will not be available to run until the scheduler is
@@ -209,22 +206,19 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
 
       if (rtcb->lockcount == 1)
         {
           /* Note that we have pre-emption locked */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-          nxsched_critmon_preemption(rtcb, true);
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
+          nxsched_critmon_preemption(rtcb, true, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, true);
 #endif
         }
-#endif
     }
 
   return OK;

@@ -28,6 +28,36 @@ ifeq ($(CONFIG_RPMSG_PING),y)
 CSRCS += rpmsg_ping.c
 endif
 
+ifeq ($(CONFIG_RPMSG_ROUTER),y)
+CSRCS += rpmsg_router_hub.c rpmsg_router_edge.c
+endif
+
+ifeq ($(CONFIG_RPMSG_PORT),y)
+CSRCS += rpmsg_port.c
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
+endif
+
+ifeq ($(CONFIG_RPMSG_PORT_SPI),y)
+CSRCS += rpmsg_port_spi.c
+endif
+
+ifeq ($(CONFIG_RPMSG_PORT_SPI_SLAVE),y)
+CSRCS += rpmsg_port_spi_slave.c
+endif
+
+ifeq ($(CONFIG_RPMSG_PORT_UART),y)
+CSRCS += rpmsg_port_uart.c
+endif
+
+ifeq ($(CONFIG_RPMSG_VIRTIO),y)
+CSRCS += rpmsg_virtio.c
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
+endif
+
+ifeq ($(CONFIG_RPMSG_VIRTIO_IVSHMEM),y)
+CSRCS += rpmsg_virtio_ivshmem.c
+endif
+
 DEPPATH += --dep-path rpmsg
 VPATH += :rpmsg
 

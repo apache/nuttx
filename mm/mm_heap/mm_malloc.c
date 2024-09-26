@@ -32,10 +32,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/sched.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Private Functions
@@ -324,7 +324,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   if (ret)
     {
       MM_ADD_BACKTRACE(heap, node);
-      kasan_unpoison(ret, mm_malloc_size(heap, ret));
+      ret = kasan_unpoison(ret, mm_malloc_size(heap, ret));
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
       memset(ret, MM_ALLOC_MAGIC, alignsize - MM_ALLOCNODE_OVERHEAD);
 #endif

@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 
 #include <nuttx/sensors/ioctl.h>
 
@@ -123,68 +124,60 @@
 
 #define SENSOR_TYPE_IR                              11
 
-/* GPS
- * A sensor of this type returns gps data. Include latitude, longitude,
- * altitude, horizontal position accuracy, vertical position accuracy,
- * horizontal dilution of precision, vertical dilution of precision...
- */
-
-#define SENSOR_TYPE_GPS                             12
-
 /* Ultraviolet light sensor
  * This sensor can identify the UV index in ambient light help people
  * to effectively protect themselves from sunburns, cancer or eye damage.
  * This value range is 0 - 15.
  */
-#define SENSOR_TYPE_ULTRAVIOLET                     13
+#define SENSOR_TYPE_ULTRAVIOLET                     12
 
 /* Noise Loudness
  * A sensor of this type returns the loudness of noise in SI units (db)
  */
 
-#define SENSOR_TYPE_NOISE                           14
+#define SENSOR_TYPE_NOISE                           13
 
 /* PM25
  * A sensor of this type returns the content of pm2.5 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM25                            15
+#define SENSOR_TYPE_PM25                            14
 
 /* PM1P0
  * A sensor of this type returns the content of pm1.0 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM1P0                           16
+#define SENSOR_TYPE_PM1P0                           15
 
 /* PM10
  * A sensor of this type returns the content of pm10 in the air
  * This value is in SI units (ug/m^3)
  */
 
-#define SENSOR_TYPE_PM10                            17
+#define SENSOR_TYPE_PM10                            16
 
 /* CO2
  * A sensor of this type returns the content of CO2 in the air
  * This value is in units (ppm-part per million).
  */
 
-#define SENSOR_TYPE_CO2                             18
+#define SENSOR_TYPE_CO2                             17
 
 /* HCHO
  * The HCHO pollution is an important indicator of household air
  * pollution. This value is in units (ppm-part per million).
  */
 
-#define SENSOR_TYPE_HCHO                            19
+#define SENSOR_TYPE_HCHO                            18
 
 /* TVOC (total volatile organic compounds)
  * The indoor TVOC is cause indoor air pollution is one of the
  * main reasons why. This value is in units (ppb-part per billion).
  */
 
-#define SENSOR_TYPE_TVOC                            20
+#define SENSOR_TYPE_TVOC                            19
 
 /* PH
  * The acid-base degree describes the strength of the aqueous
@@ -193,21 +186,21 @@
  * pH<7 is acidic, and pH>7 is alkaline.
  */
 
-#define SENSOR_TYPE_PH                              21
+#define SENSOR_TYPE_PH                              20
 
 /* Dust
  * A sensor of this type returns the content of dust in the air
  * values is in ug/m^3.
  */
 
-#define SENSOR_TYPE_DUST                            22
+#define SENSOR_TYPE_DUST                            21
 
 /* Heart Rate
  * A sensor of this type returns the current heart rate.
  * Current heart rate is in beats per minute (BPM).
  */
 
-#define SENSOR_TYPE_HEART_RATE                      23
+#define SENSOR_TYPE_HEART_RATE                      22
 
 /* Heart Beat
  * A sensor of this type returns an event evetytime
@@ -215,7 +208,7 @@
  * to the positive peak in the QRS complex of and ECG signal.
  */
 
-#define SENSOR_TYPE_HEART_BEAT                      24
+#define SENSOR_TYPE_HEART_BEAT                      23
 
 /* ECG (Electrocardiogram)
  * A sensor of this type returns the ECG voltage in μV. Sensors may amplify
@@ -223,7 +216,7 @@
  * voltage.
  */
 
-#define SENSOR_TYPE_ECG                             25
+#define SENSOR_TYPE_ECG                             24
 
 /* PPG Dual (2-channel photoplethysmography)
  * A sensor of this type returns the 2 channels PPG measurements in ADC
@@ -234,7 +227,7 @@
  * measurements. The ADC gains are multipled on the output and affect SNR.
  */
 
-#define SENSOR_TYPE_PPGD                            26
+#define SENSOR_TYPE_PPGD                            25
 
 /* PPG Quad (4-channel photoplethysmography)
  * A sensor of this type returns the 4 channels PPG measurements in ADC
@@ -245,7 +238,7 @@
  * measurements. The ADC gains are multipled on the output and affect SNR.
  */
 
-#define SENSOR_TYPE_PPGQ                            27
+#define SENSOR_TYPE_PPGQ                            26
 
 /* Imdepance
  * A sensor of this type returns the impedance measurements. An impedance
@@ -253,7 +246,7 @@
  * imaginary part(reactance). Both of them are in uint Ohm(Ω).
  */
 
-#define SENSOR_TYPE_IMPEDANCE                       28
+#define SENSOR_TYPE_IMPEDANCE                       27
 
 /* OTS (Optical tracking sensor)
  * A sensor of this type returns the OTS measurements in counts. It
@@ -262,13 +255,7 @@
  * design flexibility into a compact device.
  */
 
-#define SENSOR_TYPE_OTS                             29
-
-/* Sensor of gps satellite
- * A sensor of this type returns the gps satellite information.
- */
-
-#define SENSOR_TYPE_GPS_SATELLITE                   30
+#define SENSOR_TYPE_OTS                             28
 
 /* Wake gesture
  * A sensor enabling waking up the device based on a device specific
@@ -277,7 +264,7 @@
  * uncalibrated topics.
  */
 
-#define SENSOR_TYPE_WAKE_GESTURE                    31
+#define SENSOR_TYPE_WAKE_GESTURE                    29
 
 /* CAP (Capacitive proximity sensor)
  * The purpose of the proximity sensing interface is to detect when a
@@ -285,14 +272,14 @@
  * is in the proximity of the system.
  */
 
-#define SENSOR_TYPE_CAP                             32
+#define SENSOR_TYPE_CAP                             30
 
 /* Gas sensor
  * This sensor measures the gas resistance, indicating the presence
  * of volatile organic compounds in the air.
  */
 
-#define SENSOR_TYPE_GAS                             33
+#define SENSOR_TYPE_GAS                             31
 
 /* Force
  * A sensor of this type measures the force on it, and additionally
@@ -302,20 +289,130 @@
  * some given threshold, a corresponding event is reported.
  */
 
-#define SENSOR_TYPE_FORCE                           34
+#define SENSOR_TYPE_FORCE                           32
+
+/* GNSS
+ * A sensor of this type returns GNSS data. Include latitude, longitude,
+ * altitude, horizontal position accuracy, vertical position accuracy,
+ * horizontal dilution of precision, vertical dilution of precision...
+ */
+
+#define SENSOR_TYPE_GNSS                            33
+
+/* Sensor of GNSS satellite
+ * A sensor of this type returns the GNSS satellite information.
+ */
+
+#define SENSOR_TYPE_GNSS_SATELLITE                  34
+
+/* GNSS Measurement */
+
+#define SENSOR_TYPE_GNSS_MEASUREMENT                35
+
+/* GNSS Clock */
+
+#define SENSOR_TYPE_GNSS_CLOCK                      36
+
+/* GNSS Geofence */
+
+#define SENSOR_TYPE_GNSS_GEOFENCE                   37
 
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           35
+#define SENSOR_TYPE_COUNT                           38
 
 /* The additional sensor open flags */
 
 #define SENSOR_REMOTE                               (1u << 31)
 #define SENSOR_PERSIST                              (1u << 30)
 
-/* GPS satellite info slots */
+/* GNSS satellite info slots */
 
-#define SENSOR_GPS_SAT_INFO_MAX                     4
+#define SENSOR_GNSS_SAT_INFO_MAX                    4
+
+/* Maximum length of sensor device information name and path name. */
+
+#define SENSOR_INFO_NAME_SIZE                       32
+
+/* Sensor event flags */
+
+#define SENSOR_EVENT_FLUSH_COMPLETE                 0x01
+
+/* GNSS Clock Flags, see `flags` of `struct sensor_gnss_clock`
+ * Refs: https://android.googlesource.com/platform/hardware/libhardware/+/
+ *       refs/heads/android14-release/include/hardware/gps.h#140
+ */
+
+#define SENSOR_GNSS_CLOCK_HAS_LEAP_SECOND                     (1 << 0)
+#define SENSOR_GNSS_CLOCK_HAS_TIME_UNCERTAINTY                (1 << 1)
+#define SENSOR_GNSS_CLOCK_HAS_FULL_BIAS                       (1 << 2)
+#define SENSOR_GNSS_CLOCK_HAS_BIAS                            (1 << 3)
+#define SENSOR_GNSS_CLOCK_HAS_BIAS_UNCERTAINTY                (1 << 4)
+#define SENSOR_GNSS_CLOCK_HAS_DRIFT                           (1 << 5)
+#define SENSOR_GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY               (1 << 6)
+
+/* GNSS Measurement Flags */
+
+#define SENSOR_GNSS_MEASUREMENT_HAS_SNR                       (1 << 0)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY         (1 << 9)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_CYCLES            (1 << 10)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE             (1 << 11)
+#define SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY (1 << 12)
+#define SENSOR_GNSS_MEASUREMENT_HAS_AUTOMATIC_GAIN_CONTROL    (1 << 13)
+
+/* GNSS Measurement States */
+
+#define SENSOR_GNSS_MEASUREMENT_STATE_UNKNOWN                 (0)
+#define SENSOR_GNSS_MEASUREMENT_STATE_CODE_LOCK               (1 << 0)
+#define SENSOR_GNSS_MEASUREMENT_STATE_BIT_SYNC                (1 << 1)
+#define SENSOR_GNSS_MEASUREMENT_STATE_SUBFRAME_SYNC           (1 << 2)
+#define SENSOR_GNSS_MEASUREMENT_STATE_TOW_DECODED             (1 << 3)
+#define SENSOR_GNSS_MEASUREMENT_STATE_MSEC_AMBIGUOUS          (1 << 4)
+#define SENSOR_GNSS_MEASUREMENT_STATE_SYMBOL_SYNC             (1 << 5)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GLO_STRING_SYNC         (1 << 6)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GLO_TOD_DECODED         (1 << 7)
+#define SENSOR_GNSS_MEASUREMENT_STATE_BDS_D2_BIT_SYNC         (1 << 8)
+#define SENSOR_GNSS_MEASUREMENT_STATE_BDS_D2_SUBFRAME_SYNC    (1 << 9)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GAL_E1BC_CODE_LOCK      (1 << 10)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GAL_E1C_2ND_CODE_LOCK   (1 << 11)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GAL_E1B_PAGE_SYNC       (1 << 12)
+#define SENSOR_GNSS_MEASUREMENT_STATE_SBAS_SYNC               (1 << 13)
+#define SENSOR_GNSS_MEASUREMENT_STATE_TOW_KNOWN               (1 << 14)
+#define SENSOR_GNSS_MEASUREMENT_STATE_GLO_TOD_KNOWN           (1 << 15)
+
+/* SENSOR_GNSS_GEOFENCE_TRANS_*:
+ * struct sensor_gnss_geofence_event -> transition
+ * Ref: android-14-release/hardware/libhardware/include/hardware/gnss-base.h
+ */
+
+#define SENSOR_GNSS_GEOFENCE_TRANS_ENTERED                    (1 << 0)
+#define SENSOR_GNSS_GEOFENCE_TRANS_EXITED                     (1 << 1)
+#define SENSOR_GNSS_GEOFENCE_TRANS_UNCERTAIN                  (1 << 2)
+
+/* SENSOR_GNSS_GEOFENCE_STATUS_*:
+ * struct sensor_gnss_geofence_event -> status
+ * Ref: android-14-release/hardware/libhardware/include/hardware/gnss-base.h
+ */
+
+#define SENSOR_GNSS_GEOFENCE_STATUS_UNAVAILABLE               (1 << 0)
+#define SENSOR_GNSS_GEOFENCE_STATUS_AVAILABLE                 (1 << 1)
+#define SENSOR_GNSS_GEOFENCE_STATUS_OPERATION_SUCCESS         (0)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_TOO_MANY_GEOFENCES  (-100)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_ID_EXISTS           (-101)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_ID_UNKNOWN          (-102)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_INVALID_TRANSITION  (-103)
+#define SENSOR_GNSS_GEOFENCE_STATUS_ERROR_GENERIC             (-149)
+
+/* SENSOR_GNSS_GEOFENCE_TYPE_*:
+ * `type` of `struct sensor_gnss_geofence_param` and
+ *           `struct sensor_gnss_geofence_event`
+ */
+#define SENSOR_GNSS_GEOFENCE_TYPE_TRANSITION                  (1 << 0)
+#define SENSOR_GNSS_GEOFENCE_TYPE_STATUS                      (1 << 1)
+#define SENSOR_GNSS_GEOFENCE_TYPE_ADD                         (1 << 2)
+#define SENSOR_GNSS_GEOFENCE_TYPE_REMOVE                      (1 << 3)
+#define SENSOR_GNSS_GEOFENCE_TYPE_PAUSE                       (1 << 4)
+#define SENSOR_GNSS_GEOFENCE_TYPE_RESUME                      (1 << 5)
 
 /****************************************************************************
  * Public Types
@@ -404,40 +501,6 @@ struct sensor_ir            /* Type: Infrared Ray */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float ir;                 /* in SI units lux */
-};
-
-struct sensor_gps           /* Type: Gps */
-{
-  uint64_t timestamp;       /* Time since system start, Units is microseconds */
-
-  /* This is the timestamp which comes from the gps module. It might be
-   * unavailable right after cold start, indicated by a value of 0,
-   * Units is microseconds
-   */
-
-  uint64_t time_utc;
-
-  float latitude;           /* Unit is degrees */
-  float longitude;          /* Unit is degrees */
-  float altitude;           /* Altitude above MSL(mean seal level), Unit is SI m */
-  float altitude_ellipsoid; /* Altitude bove Ellipsoid, Unit is SI m */
-
-  float eph;                /* GPS horizontal position accuracy (metres) */
-  float epv;                /* GPS vertical position accuracy (metres) */
-
-  float hdop;               /* Horizontal dilution of precision */
-  float pdop;               /* Position dilution of precision */
-  float vdop;               /* Vertical dilution of precision */
-
-  float ground_speed;       /* GPS ground speed, Unit is m/s */
-
-  /* Course over ground (NOT heading, but direction of movement),
-   * Unit is Si degrees
-   */
-
-  float course;
-
-  uint32_t satellites_used; /* Number of satellites used */
 };
 
 struct sensor_uv            /* Type: Ultraviolet Light */
@@ -549,11 +612,64 @@ struct sensor_ots           /* Type: OTS */
   int32_t y;                /* Axis Y in counts */
 };
 
-struct sensor_gps_satellite
+struct sensor_gnss          /* Type: GNSS */
+{
+  uint64_t timestamp;       /* Time since system start, Units is microseconds */
+
+  /* This is the timestamp which comes from the GNSS module. It might be
+   * unavailable right after cold start, indicated by a value of 0,
+   * Units is microseconds
+   */
+
+  uint64_t time_utc;
+
+  float latitude;           /* Unit is degrees */
+  float longitude;          /* Unit is degrees */
+  float altitude;           /* Altitude above MSL(mean seal level), Unit is SI m */
+  float altitude_ellipsoid; /* Altitude bove Ellipsoid, Unit is SI m */
+
+  float eph;                /* GNSS horizontal position accuracy (metres) */
+  float epv;                /* GNSS vertical position accuracy (metres) */
+
+  float hdop;               /* Horizontal dilution of precision */
+  float pdop;               /* Position dilution of precision */
+  float vdop;               /* Vertical dilution of precision */
+
+  float ground_speed;       /* GNSS ground speed, Unit is m/s */
+
+  /* Course over ground (NOT heading, but direction of movement),
+   * Unit is Si degrees
+   */
+
+  float course;
+
+  uint32_t satellites_used; /* Number of satellites used */
+};
+
+/* Ref: android14-release/hardware/libhardware/include_all/hardware/\
+ *      gnss-base.h
+ */
+
+enum sensor_gnss_constellation
+{
+  SENSOR_GNSS_CONSTELLATION_UNKNOWN = 0,
+  SENSOR_GNSS_CONSTELLATION_GPS     = 1,
+  SENSOR_GNSS_CONSTELLATION_SBAS    = 2,
+  SENSOR_GNSS_CONSTELLATION_GLONASS = 3,
+  SENSOR_GNSS_CONSTELLATION_QZSS    = 4,
+  SENSOR_GNSS_CONSTELLATION_BEIDOU  = 5,
+  SENSOR_GNSS_CONSTELLATION_GALILEO = 6,
+};
+
+struct sensor_gnss_satellite
 {
   uint64_t timestamp;       /* Time since system start, Units is microseconds */
   uint32_t count;           /* Total number of messages of satellites visible */
   uint32_t satellites;      /* Total number of satellites in view */
+
+  /* Constellation of the given svid, see SENSOR_GNSS_CONSTELLATION_*. */
+
+  uint32_t constellation;
 
   struct satellite
   {
@@ -575,7 +691,7 @@ struct sensor_gps_satellite
 
     uint32_t snr;
   }
-  info[SENSOR_GPS_SAT_INFO_MAX];
+  info[SENSOR_GNSS_SAT_INFO_MAX];
 };
 
 struct sensor_wake_gesture  /* Type: Wake gesture */
@@ -613,24 +729,24 @@ struct sensor_force         /* Type: Force */
 
 struct sensor_state_s
 {
-  unsigned long esize;         /* The element size of circular buffer */
-  unsigned long nbuffer;       /* The number of events that the circular buffer can hold */
-  unsigned long min_latency;   /* The minimum batch latency for sensor, in us */
-  unsigned long min_interval;  /* The minimum subscription interval for sensor, in us */
-  unsigned long nsubscribers;  /* The number of subcribers */
-  unsigned long nadvertisers;  /* The number of advertisers */
-  unsigned long generation;    /* The recent generation of circular buffer */
-  FAR void     *priv;          /* The pointer to private data of userspace user */
+  uint32_t esize;              /* The element size of circular buffer */
+  uint32_t nbuffer;            /* The number of events that the circular buffer can hold */
+  uint32_t min_latency;        /* The minimum batch latency for sensor, in us */
+  uint32_t min_interval;       /* The minimum subscription interval for sensor, in us */
+  uint32_t nsubscribers;       /* The number of subcribers */
+  uint32_t nadvertisers;       /* The number of advertisers */
+  uint32_t generation;         /* The recent generation of circular buffer */
+  uint64_t priv;               /* The pointer to private data of userspace user */
 };
 
 /* This structure describes the state for the sensor user */
 
 struct sensor_ustate_s
 {
-  unsigned long esize;         /* The element size of circular buffer */
-  unsigned long latency;       /* The batch latency for user, in us */
-  unsigned long interval;      /* The subscription interval for user, in us */
-  unsigned long generation;    /* The recent generation of circular buffer */
+  uint32_t esize;              /* The element size of circular buffer */
+  uint32_t latency;            /* The batch latency for user, in us */
+  uint32_t interval;           /* The subscription interval for user, in us */
+  uint64_t generation;         /* The recent generation of circular buffer */
 };
 
 /* This structure describes the register info for the user sensor */
@@ -638,15 +754,15 @@ struct sensor_ustate_s
 #ifdef CONFIG_USENSOR
 struct sensor_reginfo_s
 {
-  FAR const char *path;        /* The path of user sensor */
-  unsigned long   esize;       /* The element size of user sensor */
-  unsigned long   nbuffer;     /* The number of queue buffered elements */
+  char     path[NAME_MAX];     /* The path of user sensor */
+  uint32_t esize;              /* The element size of user sensor */
+  uint32_t nbuffer;            /* The number of queue buffered elements */
 
   /* The flag is used to indicate that the validity of sensor data
    * is persistent.
    */
 
-  bool            persist;
+  int persist;
 };
 #endif
 
@@ -654,8 +770,258 @@ struct sensor_reginfo_s
 
 struct sensor_ioctl_s
 {
-  size_t len;                  /* The length of argument of ioctl */
+  uint32_t len;                /* The length of argument of ioctl */
   char data[1];                /* The argument buf of ioctl */
+};
+
+/* This structure describes the information of the sensor device and
+ * requires the manufacturer to implement the device info function.
+ */
+
+struct sensor_device_info_s
+{
+  /* Version of the hardware part + driver. */
+
+  uint32_t      version;
+
+  /* Rough estimate of this sensor's power consumption in mA.
+   * Divide the current data by 1000 to get the real data.
+   */
+
+  uint32_t      power;
+
+  /* Maximum range of this sensor's value in SI units. */
+
+  float         max_range;
+
+  /* Smallest difference between two values reported by this sensor. */
+
+  float         resolution;
+
+  /* This value depends on the reporting mode:
+   *
+   *   continuous: minimum sample period allowed in microseconds
+   *   on-change : 0
+   *   one-shot  :-1
+   *   special   : 0, unless otherwise noted
+   */
+
+  long          min_delay;
+
+  /* This value is defined only for continuous mode and on-change sensors.
+   * it is the delay between two sensor events corresponding to the lowest
+   * frequency that this sensor supports. when lower frequencies are
+   * requested through batch()/set_interval() the events will be generated
+   * at this frequency instead. it can be used by the framework or
+   * applications to estimate when the batch FIFO may be full.
+   */
+
+  unsigned long max_delay;
+
+  /* Number of events reserved for this sensor in the batch mode FIFO.
+   * if there is a dedicated FIFO for this sensor, then this is the
+   * size of this FIFO. If the FIFO is shared with other sensors,
+   * this is the size reserved for that sensor and it can be zero.
+   */
+
+  uint32_t      fifo_reserved_event_count;
+
+  /* Maximum number of events of this sensor that could be batched.
+   * this is especially relevant when the FIFO is shared between
+   * several sensors; this value is then set to the size of that FIFO.
+   */
+
+  uint32_t      fifo_max_event_count;
+
+  /* Name of this sensor. */
+
+  char          name[SENSOR_INFO_NAME_SIZE];
+
+  /* Vendor of the hardware part. */
+
+  char          vendor[SENSOR_INFO_NAME_SIZE];
+};
+
+struct sensor_gnss_clock
+{
+  /* Indicating what fields are valid.
+   * See SENSOR_GNSS_CLOCK_HAS_*.
+   */
+
+  uint32_t flags;
+
+  /* Leap second data.
+   * flags: SENSOR_GNSS_CLOCK_HAS_LEAP_SECOND
+   */
+
+  int32_t  leap_second;
+
+  /* The GNSS receiver internal local hardware clock value.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_TIME_UNCERTAINTY
+   */
+
+  int64_t  time_ns;
+  float    time_uncertainty_ns;
+
+  /* Discontinuities in the HW clock. */
+
+  uint32_t hw_clock_discontinuity_count;
+
+  /* The difference between hardware clock ('time' field) inside
+   * GPS receiver and the true GPS time since 0000Z, January 6, 1980, in
+   * nanoseconds.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_FULL_BIAS
+   *   SENSOR_GNSS_CLOCK_HAS_BIAS
+   *   SENSOR_GNSS_CLOCK_HAS_BIAS_UNCERTAINTY
+   */
+
+  int64_t  full_bias_ns;
+  float    bias_ns;             /* Sub-nanosecond bias */
+  float    bias_uncertainty_ns;
+
+  /* The clock's drift in nanoseconds (per second).
+   * A positive value means that the frequency is higher than
+   * the nominal frequency.
+   * flags:
+   *   SENSOR_GNSS_CLOCK_HAS_DRIFT
+   *   SENSOR_GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY
+   */
+
+  float    drift_nsps;
+  float    drift_uncertainty_nsps;
+};
+
+struct sensor_gnss_measurement
+{
+  /* Indicating what fields are valid.
+   * See SENSOR_GNSS_MEASUREMENT_HAS_*.
+   */
+
+  uint32_t flags;
+
+  /* Space vehicle ID. */
+
+  int32_t  svid;
+
+  /* Constellation of the given SV, see GNSS_CONSTELLATION_*. */
+
+  uint32_t constellation;
+
+  /* Offset between clock and time at which the measurement was taken in
+   * nanoseconds.
+   */
+
+  float    time_offset_ns;
+
+  /* The received GNSS Time-of-Week at the measurement time, in
+   * nanoseconds.
+   */
+
+  int64_t  received_sv_time_in_ns;
+  int64_t  received_sv_time_uncertainty_in_ns;
+
+  /* GNSS measurement state, see SENSOR_GNSS_MEASUREMENT_STATE_*. */
+
+  uint32_t state;
+
+  /* dBHz, Carrier-to-noise density. */
+
+  float    c_n0_dbhz;
+
+  /* Pseudorange rate(m/s) at the timestamp. */
+
+  float    pseudorange_rate_mps;
+  float    pseudorange_rate_uncertainty_mps;
+
+  /* Accumulated delta range. */
+
+  uint32_t accumulated_delta_range_state;
+  float    accumulated_delta_range_m;
+  float    accumulated_delta_range_uncertainty_m;
+
+  /* Carrier related between the satellite and the receiver.
+   * flags:
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_CYCLES
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE
+   *   SENSOR_GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY
+   */
+
+  float    carrier_frequency_hz;
+  int64_t  carrier_cycles;
+  float    carrier_phase;
+  float    carrier_phase_uncertainty;
+
+  uint32_t multipath_indicator;
+
+  /* dBHz, Signal to noise ratio of satellite C/N0.
+   * flags: SENSOR_GNSS_MEASUREMENT_HAS_SNR
+   */
+
+  uint32_t snr;
+};
+
+/* GNSS Geofence parameters */
+
+struct sensor_gnss_geofence_param
+{
+  /* Type of events
+   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_PARAM.
+   *
+   * Mandatory:
+   *   |Fields \ Type |ADD |REMOVE |PAUSE |RESUME |
+   *   |--------------|:--:|:-----:|:----:|:-----:|
+   *   |geofence_id   | v  |   v   |  v   |   v   |
+   *   |transition    | v  |       |      |   v   |
+   *   |latitude      | v  |       |      |       |
+   *   |longitude     | v  |       |      |       |
+   *   |radius_meters | v  |       |      |       |
+   */
+
+  int32_t            type;
+
+  int32_t            geofence_id;
+  float              latitude;
+  float              longitude;
+  float              radius_meters;
+
+  /* Which transitions to monitor.
+   * Available: see SENSOR_GNSS_GEOFENCE_TRANS_*.
+   */
+
+  int32_t            transition;
+};
+
+/* GNSS Geofence events */
+
+struct sensor_gnss_geofence_event
+{
+  /* Type of events
+   * Fields below are optional according to this `type`,
+   * Available: see SENSOR_GNSS_GEOFENCE_TYPE_VALID_EVENT.
+   *
+   * Mandatory:
+   *   |Fields \ Type |TRANSITION |STATUS |ADD |REMOVE |PAUSE |RESUME |
+   *   |--------------|:---------:|:-----:|:--:|:-----:|:----:|:-----:|
+   *   |geofence_id   |     v     |       | v  |    v  |   v  |   v   |
+   *   |transition    |     v     |       |    |       |      |       |
+   *   |location      |     v     |   v   |    |       |      |       |
+   *   |timestamp     |     v     |       |    |       |      |       |
+   *   |status        |           |   v   | v  |    v  |   v  |   v   |
+   */
+
+  int32_t            type;
+
+  int32_t            geofence_id; /* Id of the geofence. */
+  struct sensor_gnss location;    /* Location. */
+
+  /* Milliseconds when the transition was detected since January 1, 1970 */
+
+  int64_t            timestamp;
+  int32_t            status;      /* Status of Geofence operation/event. */
+  int32_t            transition;  /* See SENSOR_GNSS_GEOFENCE_TRANS_*. */
 };
 
 #endif /* __INCLUDE_NUTTX_SENSORS_SENSOR_H */

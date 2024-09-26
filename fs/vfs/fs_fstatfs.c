@@ -57,7 +57,9 @@
 int fstatfs(int fd, FAR struct statfs *buf)
 {
   FAR struct file *filep;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR struct inode *inode;
+#endif
   int ret;
 
   DEBUGASSERT(buf != NULL);
@@ -72,23 +74,11 @@ int fstatfs(int fd, FAR struct statfs *buf)
       goto errout;
     }
 
-  DEBUGASSERT(filep != NULL);
-
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Get the inode from the file structure */
 
   inode = filep->f_inode;
-  DEBUGASSERT(inode != NULL);
 
-  /* Check if the file is open */
-
-  if (inode == NULL)
-    {
-      /* The descriptor does not refer to an open file. */
-
-      ret = -EBADF;
-    }
-  else
-#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
    */
@@ -121,6 +111,7 @@ int fstatfs(int fd, FAR struct statfs *buf)
 
   /* Check if the fstat operation was successful */
 
+  fs_putfilep(filep);
   if (ret >= 0)
     {
       /* Successfully statfs'ed the file */

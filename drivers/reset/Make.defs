@@ -24,6 +24,12 @@ ifeq ($(CONFIG_RESET),y)
 
 CSRCS += core.c
 
+ifeq ($(CONFIG_RESET_RPMSG),y)
+
+CSRCS += reset_rpmsg.c
+
+endif
+
 DEPPATH += --dep-path reset
 VPATH += :reset
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)reset

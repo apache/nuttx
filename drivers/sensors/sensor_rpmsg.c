@@ -49,10 +49,10 @@
 #define SENSOR_RPMSG_IOCTL         7
 #define SENSOR_RPMSG_IOCTL_ACK     8
 
-#define SENSOR_RPMSG_FUNCTION(name, cmd, arg1, arg2, size, wait) \
+#define SENSOR_RPMSG_FUNCTION(name, cmd, arg1, arg2, size, wait, type) \
 static int sensor_rpmsg_##name(FAR struct sensor_lowerhalf_s *lower, \
                                FAR struct file *filep, \
-                               unsigned long arg1) \
+                               type arg1) \
 { \
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv; \
   FAR struct sensor_lowerhalf_s *drv = dev->drv; \
@@ -116,6 +116,7 @@ struct sensor_rpmsg_stub_s
   FAR struct rpmsg_endpoint     *ept;
   uint64_t                       cookie;
   struct file                    file;
+  bool                           flushing;
 };
 
 /* This structure describes the proxy info about remote advertisers. */
@@ -202,10 +203,12 @@ static int sensor_rpmsg_activate(FAR struct sensor_lowerhalf_s *lower,
                                  bool enable);
 static int sensor_rpmsg_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                      FAR struct file *filep,
-                                     FAR unsigned long *period_us);
+                                     FAR uint32_t *period_us);
 static int sensor_rpmsg_batch(FAR struct sensor_lowerhalf_s *lower,
                               FAR struct file *filep,
-                              FAR unsigned long *latency_us);
+                              FAR uint32_t *latency_us);
+static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep);
 static int sensor_rpmsg_selftest(FAR struct sensor_lowerhalf_s *lower,
                                  FAR struct file *filep,
                                  unsigned long arg);
@@ -215,6 +218,9 @@ static int sensor_rpmsg_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
 static int sensor_rpmsg_calibrate(FAR struct sensor_lowerhalf_s *lower,
                                   FAR struct file *filep,
                                   unsigned long arg);
+static int sensor_rpmsg_get_info(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filep,
+                                 FAR struct sensor_device_info_s *info);
 static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
                                 int cmd, unsigned long arg);
@@ -246,7 +252,8 @@ static int sensor_rpmsg_ioctlack_handler(FAR struct rpmsg_endpoint *ept,
                                          FAR void *data, size_t len,
                                          uint32_t src, FAR void *priv);
 static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
-                                       FAR struct sensor_rpmsg_stub_s *stub);
+                                       FAR struct sensor_rpmsg_stub_s *stub,
+                                       bool flushed);
 
 /****************************************************************************
  * Private Data
@@ -259,9 +266,11 @@ static const struct sensor_ops_s g_sensor_rpmsg_ops =
   .activate       = sensor_rpmsg_activate,
   .set_interval   = sensor_rpmsg_set_interval,
   .batch          = sensor_rpmsg_batch,
+  .flush          = sensor_rpmsg_flush,
   .selftest       = sensor_rpmsg_selftest,
   .set_calibvalue = sensor_rpmsg_set_calibvalue,
   .calibrate      = sensor_rpmsg_calibrate,
+  .get_info       = sensor_rpmsg_get_info,
   .control        = sensor_rpmsg_control
 };
 
@@ -492,13 +501,13 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
 
   /* sync interval and latency */
 
-  if (state.min_interval != ULONG_MAX)
+  if (state.min_interval != UINT32_MAX)
     {
       sensor_rpmsg_ioctl(dev, SNIOC_SET_INTERVAL, state.min_interval,
                          0, false);
     }
 
-  if (state.min_latency != ULONG_MAX)
+  if (state.min_latency != UINT32_MAX)
     {
       sensor_rpmsg_ioctl(dev, SNIOC_BATCH, state.min_latency, 0, false);
     }
@@ -550,7 +559,7 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
 
   if (dev->lower.persist)
     {
-      sensor_rpmsg_push_event_one(dev, stub);
+      sensor_rpmsg_push_event_one(dev, stub, false);
     }
 
   sensor_rpmsg_unlock(dev);
@@ -685,12 +694,56 @@ static int sensor_rpmsg_activate(FAR struct sensor_lowerhalf_s *lower,
 }
 
 SENSOR_RPMSG_FUNCTION(set_interval, SNIOC_SET_INTERVAL,
-                      *interval, interval, 0, false)
-SENSOR_RPMSG_FUNCTION(batch, SNIOC_BATCH, *latency, latency, 0, false)
-SENSOR_RPMSG_FUNCTION(selftest, SNIOC_SELFTEST, arg, arg, 0, true)
+                      *interval, interval, 0, false, uint32_t)
+SENSOR_RPMSG_FUNCTION(batch, SNIOC_BATCH, *latency, latency, 0,
+                      false, uint32_t)
+SENSOR_RPMSG_FUNCTION(selftest, SNIOC_SELFTEST, arg, arg, 0,
+                      true, unsigned long)
 SENSOR_RPMSG_FUNCTION(set_calibvalue, SNIOC_SET_CALIBVALUE,
-                      arg, arg, 256, true)
-SENSOR_RPMSG_FUNCTION(calibrate, SNIOC_CALIBRATE, arg, arg, 256, true)
+                      arg, arg, 256, true, unsigned long)
+SENSOR_RPMSG_FUNCTION(calibrate, SNIOC_CALIBRATE, arg, arg, 256,
+                      true, unsigned long)
+
+static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
+                              FAR struct file *filep)
+{
+  FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
+  FAR struct sensor_lowerhalf_s *drv = dev->drv;
+  int ret = -ENOTTY;
+
+  if (drv->ops->flush)
+    {
+      ret = drv->ops->flush(drv, filep);
+    }
+  else if (!(filep->f_oflags & SENSOR_REMOTE))
+    {
+      ret = sensor_rpmsg_ioctl(dev, SNIOC_FLUSH, 0, 0, true);
+    }
+
+  return ret;
+}
+
+static int sensor_rpmsg_get_info(FAR struct sensor_lowerhalf_s *lower,
+                                 FAR struct file *filep,
+                                 FAR struct sensor_device_info_s *info)
+{
+  FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
+  FAR struct sensor_lowerhalf_s *drv = dev->drv;
+  int ret = -ENOTTY;
+
+  if (drv->ops->get_info)
+    {
+      ret = drv->ops->get_info(drv, filep, info);
+    }
+  else if (!(filep->f_oflags & SENSOR_REMOTE))
+    {
+      ret = sensor_rpmsg_ioctl(dev, SNIOC_GET_INFO,
+                               (unsigned long)(uintptr_t)info,
+                               sizeof(struct sensor_device_info_s), true);
+    }
+
+  return ret;
+}
 
 static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
                                 FAR struct file *filep,
@@ -728,7 +781,8 @@ static void sensor_rpmsg_data_worker(FAR void *arg)
 }
 
 static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
-                                        FAR struct sensor_rpmsg_stub_s *stub)
+                                        FAR struct sensor_rpmsg_stub_s *stub,
+                                        bool flushed)
 {
   FAR struct sensor_rpmsg_cell_s *cell;
   FAR struct sensor_rpmsg_ept_s *sre;
@@ -746,7 +800,7 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
       return;
     }
 
-  if (state.interval == ULONG_MAX)
+  if (state.interval == UINT32_MAX)
     {
       state.interval = 0;
     }
@@ -764,7 +818,7 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
   for (; ; )
     {
       ret = file_ioctl(&stub->file, SNIOC_UPDATED, &updated);
-      if (ret < 0 || !updated)
+      if (ret < 0 || (!updated && !flushed))
         {
           break;
         }
@@ -797,11 +851,19 @@ static void sensor_rpmsg_push_event_one(FAR struct sensor_rpmsg_dev_s *dev,
         }
 
       cell = sre->buffer + sre->written;
-      ret  = file_read(&stub->file, cell->data,
-                       sre->space - sre->written - sizeof(*cell));
-      if (ret <= 0)
+      if (flushed)
         {
-          break;
+          flushed = false;
+          stub->flushing = false;
+        }
+      else
+        {
+          ret  = file_read(&stub->file, cell->data,
+                           sre->space - sre->written - sizeof(*cell));
+          if (ret <= 0)
+            {
+              break;
+            }
         }
 
       cell->len     = ret;
@@ -865,7 +927,8 @@ static ssize_t sensor_rpmsg_push_event(FAR void *priv, FAR const void *data,
   list_for_every_entry_safe(&dev->stublist, stub, stmp,
                             struct sensor_rpmsg_stub_s, node)
     {
-      sensor_rpmsg_push_event_one(dev, stub);
+      sensor_rpmsg_push_event_one(dev, stub,
+                                  stub->flushing && bytes == 0);
     }
 
   sensor_rpmsg_unlock(dev);
@@ -986,7 +1049,7 @@ static int sensor_rpmsg_sub_handler(FAR struct rpmsg_endpoint *ept,
   int ret;
 
   dev = sensor_rpmsg_find_dev(msg->path);
-  if (!dev)
+  if (!dev || (dev->nadvertisers == 0 && !dev->lower.persist))
     {
       return 0;
     }
@@ -1069,6 +1132,8 @@ static int sensor_rpmsg_publish_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct sensor_rpmsg_data_s *msg = data;
   FAR struct sensor_rpmsg_cell_s *cell;
+  FAR struct sensor_rpmsg_stub_s *stub;
+  FAR struct sensor_rpmsg_stub_s *stmp;
   FAR struct sensor_rpmsg_dev_s *dev;
   size_t written = sizeof(*msg);
 
@@ -1091,6 +1156,22 @@ static int sensor_rpmsg_publish_handler(FAR struct rpmsg_endpoint *ept,
         }
 
       dev->push_event(dev->upper, cell->data, cell->len);
+
+      /* When the remote core publishes a message, the subscribed cores will
+       * receive the message. When the subscribed core publishes a new
+       * message, it will take away the message published by the remote core,
+       * so all stublist information needs to be updated.
+       */
+
+      sensor_rpmsg_lock(dev);
+      list_for_every_entry_safe(&dev->stublist, stub, stmp,
+                                struct sensor_rpmsg_stub_s, node)
+        {
+          file_read(&stub->file, NULL, cell->len);
+        }
+
+      sensor_rpmsg_unlock(dev);
+
       written += sizeof(*cell) + cell->len + 0x7;
       written &= ~0x7;
     }
@@ -1119,6 +1200,11 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
       if (stub->ept == ept)
         {
           msg->result = file_ioctl(&stub->file, msg->request, arg);
+          if (msg->result >= 0 && msg->request == SNIOC_FLUSH)
+            {
+              stub->flushing = true;
+            }
+
           if (msg->cookie)
             {
               msg->command = SENSOR_RPMSG_IOCTL_ACK;

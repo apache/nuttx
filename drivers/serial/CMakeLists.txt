@@ -63,4 +63,10 @@ if(CONFIG_UART_BTH4)
   list(APPEND SRCS uart_bth4.c)
 endif()
 
+# UART PCI drivers
+
+if(CONFIG_16550_PCI_UART)
+  list(APPEND SRCS uart_pci_16550.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})

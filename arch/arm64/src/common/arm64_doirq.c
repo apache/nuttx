@@ -57,28 +57,32 @@
 
 uint64_t *arm64_doirq(int irq, uint64_t * regs)
 {
+  struct tcb_s *tcb = this_task();
+
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(CURRENT_REGS == NULL);
+  DEBUGASSERT(up_current_regs() == NULL);
 
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
+   * current_regs is also used to manage interrupt level context switches.
    */
 
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
 
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+  tcb = this_task();
 
   /* Check for a context switch.  If a context switch occurred, then
-   * CURRENT_REGS will have a different value than it did on entry.  If an
+   * current_regs will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
    * point state and the establish the correct address environment before
    * returning from the interrupt.
    */
 
-  if (regs != CURRENT_REGS)
+  if (regs != tcb->xcp.regs)
     {
       /* need to do a context switch */
 
@@ -97,16 +101,15 @@ uint64_t *arm64_doirq(int irq, uint64_t * regs)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
-
-      regs = (uint64_t *)CURRENT_REGS;
+      g_running_tasks[this_cpu()] = tcb;
+      regs = tcb->xcp.regs;
     }
 
-  /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
+  /* Set current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  CURRENT_REGS = NULL;
+  up_set_current_regs(NULL);
 
   return regs;
 }

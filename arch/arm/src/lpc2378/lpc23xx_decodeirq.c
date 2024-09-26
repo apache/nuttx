@@ -56,6 +56,7 @@
 #include "arm_internal.h"
 #include "lpc2378.h"
 #include "lpc23xx_vic.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -91,9 +92,11 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
 #endif
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   err("ERROR: Unexpected IRQ\n");
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
   PANIC();
   return NULL;
 #else
@@ -118,12 +121,13 @@ static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
        uint32_t *savestate;
 
       /* Current regs non-zero indicates that we are processing an
-       * interrupt; CURRENT_REGS is also used to manage interrupt level
+       * interrupt; current_regs is also used to manage interrupt level
        * context switches.
        */
 
-      savestate    = (uint32_t *)CURRENT_REGS;
-      CURRENT_REGS = regs;
+      savestate = up_current_regs();
+      up_set_current_regs(regs);
+      tcb->xcp.regs = regs;
 
       /* Acknowledge the interrupt */
 
@@ -133,12 +137,12 @@ static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of CURRENT_REGS.
+      /* Restore the previous value of current_regs.
        * NULL would indicate that we are no longer in an interrupt handler.
        * It will be non-NULL if we are returning from a nested interrupt.
        */
 
-      CURRENT_REGS = savestate;
+      up_set_current_regs(savestate);
     }
 
   return NULL;  /* Return not used in this architecture */

@@ -597,7 +597,8 @@ int sockfd_allocate(FAR struct socket *psock, int oflags);
  ****************************************************************************/
 
 FAR struct socket *file_socket(FAR struct file *filep);
-int sockfd_socket(int sockfd, FAR struct socket **socketp);
+int sockfd_socket(int sockfd, FAR struct file **filep,
+                  FAR struct socket **socketp);
 
 /****************************************************************************
  * Name: psock_socket

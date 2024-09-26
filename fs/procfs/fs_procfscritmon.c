@@ -186,6 +186,10 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
   size_t copysize;
   size_t totalsize;
 
+  UNUSED(maxtime);
+  UNUSED(linesize);
+  UNUSED(copysize);
+
   totalsize = 0;
 
   /* Generate output for CPU Serial Number */
@@ -234,7 +238,9 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
     {
       return totalsize;
     }
+#endif
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
   /* Convert and generate output for maximum time in a critical section */
 
   if (g_crit_max[cpu] > 0)

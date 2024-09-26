@@ -89,68 +89,15 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sinfo("rtcb=%p CURRENT_REGS=%p\n", this_task(), CURRENT_REGS);
+      sinfo("rtcb=%p current_regs=%p\n", this_task(),
+            this_task()->xcp.regs);
 
-      if (tcb == this_task())
+      if (tcb == this_task() && !up_interrupt_context())
         {
-          /* CASE 1:  We are not in an interrupt handler and
-           * a task is signalling itself for some reason.
-           */
+          /* In this case just deliver the signal now. */
 
-          if (!CURRENT_REGS)
-            {
-              /* In this case just deliver the signal now. */
-
-              sigdeliver(tcb);
-              tcb->xcp.sigdeliver = NULL;
-            }
-
-          /* CASE 2:  We are in an interrupt handler AND the
-           * interrupted task is the same as the one that
-           * must receive the signal, then we will have to modify
-           * the return state as well as the state in the TCB.
-           *
-           * Hmmm... there looks like a latent bug here: The following
-           * logic would fail in the strange case where we are in an
-           * interrupt handler, the thread is signalling itself, but
-           * a context switch to another task has occurred so that
-           * CURRENT_REGS does not refer to the thread of this_task()!
-           */
-
-          else
-            {
-              /* Save the return lr and cpsr and one scratch register
-               * These will be restored by the signal trampoline after
-               * the signals have been delivered.
-               */
-
-              /* And make sure that the saved context in the TCB
-               * is the same as the interrupt return context.
-               */
-
-              arm_savestate(tcb->xcp.saved_regs);
-
-              /* Duplicate the register context.  These will be
-               * restored by the signal trampoline after the signal has been
-               * delivered.
-               */
-
-              CURRENT_REGS           = (void *)((uint32_t)CURRENT_REGS -
-                                                          XCPTCONTEXT_SIZE);
-              memcpy((uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
-                     XCPTCONTEXT_SIZE);
-
-              CURRENT_REGS[REG_SP]   = (uint32_t)CURRENT_REGS +
-                                                 XCPTCONTEXT_SIZE;
-
-              /* Then set up to vector to the trampoline with interrupts
-               * disabled
-               */
-
-              CURRENT_REGS[REG_LR]     = (uint32_t)arm_sigdeliver;
-              CURRENT_REGS[REG_CPSR]   = PSR_MODE_SVC | PSR_I_BIT;
-              CURRENT_REGS[REG_IRQ_EN] = 0;
-            }
+          sigdeliver(tcb);
+          tcb->xcp.sigdeliver = NULL;
         }
 
       /* Otherwise, we are (1) signaling a task is not running

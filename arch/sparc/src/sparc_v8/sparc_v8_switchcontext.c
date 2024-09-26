@@ -63,10 +63,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   /* Are we in an interrupt handler? */
 
-  if (CURRENT_REGS)
+  if (up_current_regs())
     {
       /* Yes, then we have to do things differently.
-       * Just copy the CURRENT_REGS into the OLD rtcb.
+       * Just copy the current_regs into the OLD rtcb.
        */
 
       sparc_savestate(rtcb->xcp.regs);

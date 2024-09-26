@@ -28,8 +28,6 @@
 
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -73,4 +71,3 @@ FAR struct hostent *gethostbyname2(FAR const char *name, int type)
   return ret == 0 ? res : NULL;
 }
 
-#endif /* CONFIG_LIBC_NETDB */

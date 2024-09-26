@@ -39,12 +39,14 @@
 #include <nuttx/pci/pci.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/power/regulator.h>
+#include <nuttx/reset/reset-controller.h>
 #include <nuttx/segger/rtt.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/serial/uart_ram.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
+#include <nuttx/thermal.h>
 #include <nuttx/trace.h>
 #include <nuttx/usrsock/usrsock_rpmsg.h>
 #include <nuttx/virtio/virtio.h>
@@ -154,6 +156,10 @@ void drivers_initialize(void)
   regulator_rpmsg_server_init();
 #endif
 
+#if defined(CONFIG_RESET_RPMSG)
+  reset_rpmsg_server_init();
+#endif
+
   /* Initialize the serial device driver */
 
 #ifdef CONFIG_RPMSG_UART
@@ -254,7 +260,7 @@ void drivers_initialize(void)
   mtd_loop_register();
 #endif
 
-#ifdef CONFIG_PCI
+#if defined(CONFIG_PCI) && !defined(CONFIG_PCI_LATE_DRIVERS_REGISTER)
   pci_register_drivers();
 #endif
 
@@ -264,6 +270,10 @@ void drivers_initialize(void)
 
 #ifndef CONFIG_DEV_OPTEE_NONE
   optee_register();
+#endif
+
+#ifdef CONFIG_THERMAL
+  thermal_init();
 #endif
 
   drivers_trace_end();

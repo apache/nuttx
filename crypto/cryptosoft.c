@@ -1155,6 +1155,33 @@ done:
   return 0;
 }
 
+int swcr_mod_exp(struct cryptkop *krp)
+{
+  uint8_t *input = (uint8_t *)krp->krp_param[0].crp_p;
+  uint8_t *exp = (uint8_t *)krp->krp_param[1].crp_p;
+  uint8_t *modulus = (uint8_t *)krp->krp_param[2].crp_p;
+  uint8_t *output = (uint8_t *)krp->krp_param[3].crp_p;
+  int input_len = krp->krp_param[0].crp_nbits / 8;
+  int exp_len = krp->krp_param[1].crp_nbits / 8;
+  int modulus_len = krp->krp_param[2].crp_nbits / 8;
+  int output_len = krp->krp_param[3].crp_nbits / 8;
+  struct bn a;
+  struct bn e;
+  struct bn n;
+  struct bn r;
+
+  bignum_init(&a);
+  bignum_init(&e);
+  bignum_init(&n);
+  bignum_init(&r);
+  memcpy(e.array, exp, exp_len);
+  memcpy(n.array, modulus, modulus_len);
+  memcpy(a.array, input, input_len);
+  pow_mod_faster(&a, &e, &n, &r);
+  memcpy(output, r.array, output_len);
+  return 0;
+}
+
 static int swcr_dh_make_public(FAR struct cryptkop *krp)
 {
   /* Curve25519 is used for testing. In fact,
@@ -1229,6 +1256,13 @@ int swcr_kprocess(struct cryptkop *krp)
 
   switch (krp->krp_op)
     {
+      case CRK_MOD_EXP:
+        if ((krp->krp_status = swcr_mod_exp(krp)) != 0)
+          {
+            goto done;
+          }
+
+        break;
       case CRK_DH_MAKE_PUBLIC:
         if ((krp->krp_status = swcr_dh_make_public(krp) != 0))
           {
@@ -1248,6 +1282,7 @@ int swcr_kprocess(struct cryptkop *krp)
           {
             goto done;
           }
+
         break;
       default:
 
@@ -1317,6 +1352,7 @@ void swcr_init(void)
   crypto_register(swcr_id, algs, swcr_newsession,
                   swcr_freesession, swcr_process);
 
+  kalgs[CRK_MOD_EXP] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_DH_MAKE_PUBLIC] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_DH_COMPUTE_KEY] = CRYPTO_ALG_FLAG_SUPPORTED;
   kalgs[CRK_RSA_PKCS15_VERIFY] = CRYPTO_ALG_FLAG_SUPPORTED;

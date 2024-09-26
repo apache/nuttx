@@ -115,7 +115,7 @@ static int uart0_open(struct file *filep)
   int stop;
   int ret;
 
-  if (inode->i_crefs > 1)
+  if (atomic_load(&inode->i_crefs) > 2)
     {
       return OK;
     }
@@ -172,7 +172,7 @@ static int uart0_close(struct file *filep)
 {
   struct inode *inode = filep->f_inode;
 
-  if (inode->i_crefs == 1)
+  if (atomic_load(&inode->i_crefs) == 2)
     {
       fw_pd_uartdisable(0);
       fw_pd_uartuninit(0);

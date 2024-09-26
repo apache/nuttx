@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/compiler.h>
 #include <nuttx/clock.h>
 #include <stdint.h>
 
@@ -138,7 +139,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
              wdentry_t wdentry, wdparm_t arg);
 
 /****************************************************************************
- * Name: wd_start_absolute
+ * Name: wd_start_abstick
  *
  * Description:
  *   This function adds a watchdog timer to the active timer queue.  The
@@ -173,8 +174,107 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
  *
  ****************************************************************************/
 
-int wd_start_absolute(FAR struct wdog_s *wdog, clock_t ticks,
-                      wdentry_t wdentry, wdparm_t arg);
+int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
+                     wdentry_t wdentry, wdparm_t arg);
+
+/****************************************************************************
+ * Name: wd_start_abstime
+ *
+ * Description:
+ *   This function adds a watchdog timer to the active timer queue.  The
+ *   specified watchdog function at 'wdentry' will be called from the
+ *   interrupt level after the specified number of ticks has reached.
+ *   Watchdog timers may be started from the interrupt level.
+ *
+ *   Watchdog timers execute in the address environment that was in effect
+ *   when wd_start() is called.
+ *
+ *   Watchdog timers execute only once.
+ *
+ *   To replace either the timeout delay or the function to be executed,
+ *   call wd_start again with the same wdog; only the most recent wdStart()
+ *   on a given watchdog ID has any effect.
+ *
+ * Input Parameters:
+ *   wdog     - Watchdog ID
+ *   abstime  - Absolute time with struct timespec
+ *   wdentry  - Function to call on timeout
+ *   arg      - Parameter to pass to wdentry.
+ *
+ *   NOTE:  The parameter must be of type wdparm_t.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
+ *
+ * Assumptions:
+ *   The watchdog routine runs in the context of the timer interrupt handler
+ *   and is subject to all ISR restrictions.
+ *
+ ****************************************************************************/
+
+#define wd_start_abstime(wdog, abstime, wdentry, arg) \
+        wd_start_abstick(wdog, clock_time2ticks(abstime), wdentry, arg)
+
+/****************************************************************************
+ * Name: wd_start_realtime
+ *
+ * Description:
+ *   This function adds a watchdog timer to the active timer queue.  The
+ *   specified watchdog function at 'wdentry' will be called from the
+ *   interrupt level after the specified number of ticks has reached.
+ *   Watchdog timers may be started from the interrupt level.
+ *
+ *   Watchdog timers execute in the address environment that was in effect
+ *   when wd_start() is called.
+ *
+ *   Watchdog timers execute only once.
+ *
+ *   To replace either the timeout delay or the function to be executed,
+ *   call wd_start again with the same wdog; only the most recent wdStart()
+ *   on a given watchdog ID has any effect.
+ *
+ * Input Parameters:
+ *   wdog     - Watchdog ID
+ *   realtime - Realtime with struct timespec
+ *   wdentry  - Function to call on timeout
+ *   arg      - Parameter to pass to wdentry.
+ *
+ *   NOTE:  The parameter must be of type wdparm_t.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return to
+ *   indicate the nature of any failure.
+ *
+ * Assumptions:
+ *   The watchdog routine runs in the context of the timer interrupt handler
+ *   and is subject to all ISR restrictions.
+ *
+ ****************************************************************************/
+
+static inline int wd_start_realtime(FAR struct wdog_s *wdog,
+                                    FAR const struct timespec *realtime,
+                                    wdentry_t wdentry,
+                                    wdparm_t arg)
+{
+#ifdef CONFIG_CLOCK_TIMEKEEPING
+  irqstate_t flags;
+  clock_t ticks;
+  int ret;
+
+  flags = enter_critical_section();
+  clock_abstime2ticks(CLOCK_REALTIME, realtime, &ticks);
+  ret = wd_start(wdog, ticks, wdentry, arg);
+  leave_critical_section(flags);
+
+  return ret;
+#else
+  clock_t absticks;
+
+  clock_realtime2absticks(realtime, &absticks);
+  return wd_start_abstick(wdog, absticks, wdentry, arg);
+#endif
+}
 
 /****************************************************************************
  * Name: wd_cancel

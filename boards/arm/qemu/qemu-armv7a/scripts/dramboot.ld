@@ -28,16 +28,18 @@ SECTIONS
   . = 0x40101000;
 
   /* where the global variable out-of-bounds detection information located */
+
 #ifdef CONFIG_MM_KASAN_GLOBAL
-  .kasan.unused :
-  {
+  .kasan.unused : {
     *(.data..LASANLOC*)
-  } > ROM
-  .kasan.global :
-  {
+  }
+  .kasan.global : {
     KEEP (*(.data..LASAN0))
     KEEP (*(.data.rel.local..LASAN0))
-  } > ROM
+  }
+  .kasan.shadows : {
+    *(.kasan.shadows)
+  }
 #endif
 
   .text : {

@@ -26,8 +26,6 @@
 
 #include <netdb.h>
 
-#ifdef CONFIG_LIBC_NETDB
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -73,4 +71,3 @@ int gethostbyname_r(FAR const char *name,
                           host, buf, buflen, result, h_errnop);
 }
 
-#endif /* CONFIG_LIBC_NETDB */

@@ -115,24 +115,28 @@ static void map_spgtables(arch_addrenv_t *addrenv, uintptr_t vaddr)
 {
   int       i;
   uintptr_t prev;
+  uintptr_t l0;
 
-  /* Start from L1, and connect until max level - 1 */
+  /* Get the base page table level and the page table associated with it */
 
-  prev = arm64_pgvaddr(addrenv->spgtables[0]);
+  l0   = mmu_get_base_pgt_level();
+  prev = arm64_pgvaddr(addrenv->spgtables[l0]);
 
-  /* Check if the mapping already exists */
+  /* Start from the base level, and connect until max level - 1 */
 
-  if (mmu_ln_getentry(1, prev, vaddr) != 0)
-    {
-      return;
-    }
-
-  /* No mapping yet, create it */
-
-  for (i = 0; i < (ARCH_SPGTS - 1); i++)
+  for (i = l0; i < (ARCH_SPGTS - 1); i++)
     {
       uintptr_t next = addrenv->spgtables[i + 1];
-      mmu_ln_setentry(i + 1, prev, next, vaddr, MMU_UPGT_FLAGS);
+
+      /* Check if the mapping already exists */
+
+      if (mmu_ln_getentry(i, prev, vaddr) == 0)
+        {
+          /* No mapping yet, create it */
+
+          mmu_ln_setentry(i, prev, next, vaddr, MMU_UPGT_FLAGS);
+        }
+
       prev = arm64_pgvaddr(next);
     }
 }
@@ -157,7 +161,7 @@ static int create_spgtables(arch_addrenv_t *addrenv)
   int       i;
   uintptr_t paddr;
 
-  for (i = 0; i < ARCH_SPGTS; i++)
+  for (i = mmu_get_base_pgt_level(); i < ARCH_SPGTS; i++)
     {
       paddr = mm_pgalloc(1);
       if (!paddr)
@@ -197,20 +201,37 @@ static int create_spgtables(arch_addrenv_t *addrenv)
 
 static int copy_kernel_mappings(arch_addrenv_t *addrenv)
 {
-  uintptr_t user_mappings = arm64_pgvaddr(addrenv->spgtables[0]);
+  uintptr_t kpgt;
+  uintptr_t upgt;
+  uintptr_t l0;
 
-  /* Copy the L1 references */
+  /* Determine the base page table level */
 
-  if (user_mappings == 0)
+  l0   = mmu_get_base_pgt_level();
+  kpgt = g_kernel_mappings;
+
+  /* Don't copy L0 references, as those encompass 512GB each */
+
+  if (l0 == 0)
+    {
+      upgt = arm64_pgvaddr(addrenv->spgtables[1]);
+      kpgt = arm64_pgvaddr(mmu_pte_to_paddr(((uintptr_t *)kpgt)[0]));
+    }
+  else
+    {
+      upgt = arm64_pgvaddr(addrenv->spgtables[l0]);
+    }
+
+  if (upgt == 0 || kpgt == 0)
     {
       return -EINVAL;
     }
 
-  memcpy((void *)user_mappings, (void *)g_kernel_mappings, MMU_PAGE_SIZE);
+  memcpy((void *)upgt, (void *)kpgt, MMU_PAGE_SIZE);
 
   /* Update with memory by flushing the cache */
 
-  up_flush_dcache(user_mappings, user_mappings + MMU_PAGE_SIZE);
+  up_flush_dcache(upgt, upgt + MMU_PAGE_SIZE);
 
   return OK;
 }
@@ -248,8 +269,8 @@ static int create_region(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
   nmapped   = 0;
   npages    = MM_NPAGES(size);
-  ptprev    = arm64_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
-  ptlevel   = ARCH_SPGTS;
+  ptlevel   = MMU_PGT_LEVEL_MAX - 1;
+  ptprev    = arm64_pgvaddr(addrenv->spgtables[ptlevel]);
 
   /* Create mappings for the lower level tables */
 
@@ -384,6 +405,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   uintptr_t textbase;
   uintptr_t database;
   uintptr_t heapbase;
+  uintptr_t l0;
 
   DEBUGASSERT(addrenv);
   DEBUGASSERT(MM_ISALIGNED(ARCH_ADDRENV_VBASE));
@@ -485,7 +507,8 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   /* Provide the ttbr0 value for context switch */
 
-  addrenv->ttbr0 = mmu_ttbr_reg(addrenv->spgtables[0], 0);
+  l0 = mmu_get_base_pgt_level();
+  addrenv->ttbr0 = mmu_ttbr_reg(addrenv->spgtables[l0], 0);
 
   /* Synchronize data and instruction pipelines */
 
@@ -532,17 +555,14 @@ int up_addrenv_destroy(arch_addrenv_t *addrenv)
   /* Things start from the beginning of the user virtual memory */
 
   vaddr  = ARCH_ADDRENV_VBASE;
-  pgsize = mmu_get_region_size(ARCH_SPGTS);
+  pgsize = mmu_get_region_size(MMU_PGT_LEVEL_MAX - 1);
 
   /* First destroy the allocated memory and the final level page table */
 
   ptprev = (uintptr_t *)arm64_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   if (ptprev)
     {
-      /* walk user space only */
-
-      i = (ARCH_SPGTS < 2) ? vaddr / pgsize : 0;
-      for (; i < ENTRIES_PER_PGT; i++, vaddr += pgsize)
+      for (i = 0; i < ENTRIES_PER_PGT; i++, vaddr += pgsize)
         {
           ptlast = (uintptr_t *)arm64_pgvaddr(mmu_pte_to_paddr(ptprev[i]));
           if (ptlast)
@@ -570,7 +590,7 @@ int up_addrenv_destroy(arch_addrenv_t *addrenv)
 
   /* Then destroy the static tables */
 
-  for (i = 0; i < ARCH_SPGTS; i++)
+  for (i = mmu_get_base_pgt_level(); i < ARCH_SPGTS; i++)
     {
       paddr = addrenv->spgtables[i];
       if (paddr)

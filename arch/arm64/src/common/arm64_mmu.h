@@ -149,6 +149,12 @@
 #define TCR_TG0_16K                 (2ULL << 14)
 #define TCR_EPD1_DISABLE            (1ULL << 23)
 
+#define TCR_AS_SHIFT                36U
+#define TCR_ASID_8                  (0ULL << TCR_AS_SHIFT)
+#define TCR_ASID_16                 (1ULL << TCR_AS_SHIFT)
+#define TCR_TBI0                    (1ULL << 37)
+#define TCR_TBI1                    (1ULL << 38)
+
 #define TCR_PS_BITS_4GB             0x0ULL
 #define TCR_PS_BITS_64GB            0x1ULL
 #define TCR_PS_BITS_1TB             0x2ULL
@@ -233,13 +239,15 @@
 
 /* Amount of page table levels */
 
-#define MMU_PGT_LEVELS              (3U)
+#define MMU_PGT_LEVELS              (4U)
+#define MMU_PGT_LEVEL_MAX           (3U) /* Levels go from 0-3 */
 
 /* Page sizes per page table level */
 
-#define MMU_L1_PAGE_SIZE            (0x40000000) /* 1G */
-#define MMU_L2_PAGE_SIZE            (0x200000)   /* 2M */
-#define MMU_L3_PAGE_SIZE            (0x1000)     /* 4K */
+#define MMU_L0_PAGE_SIZE            (0x8000000000) /* 512G */
+#define MMU_L1_PAGE_SIZE            (0x40000000)   /* 1G */
+#define MMU_L2_PAGE_SIZE            (0x200000)     /* 2M */
+#define MMU_L3_PAGE_SIZE            (0x1000)       /* 4K */
 
 /* Flags for user page tables */
 
@@ -619,6 +627,28 @@ void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
  ****************************************************************************/
 
 size_t mmu_get_region_size(uint32_t ptlevel);
+
+/****************************************************************************
+ * Name: mmu_get_base_pgt_level
+ *
+ * Description:
+ *   Get the base translation table level. The ARM64 MMU implementation
+ *   optimizes the amount of translation table levels in use, based on the
+ *   configured virtual address range (CONFIG_ARM64_VA_BITS).
+ *
+ *   Table indices range from 0...3 and the lowest table indices are dropped
+ *   as needed. If CONFIG_ARM64_VA_BITS >= 40, all 4 translation table levels
+ *   are needed.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   The base translation table level.
+ *
+ ****************************************************************************/
+
+uintptr_t mmu_get_base_pgt_level(void);
 
 #endif /* __ASSEMBLY__ */
 

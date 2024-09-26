@@ -552,6 +552,7 @@ NuttX provides support for a variety of file systems out of the box.
   unionfs.rst
   userfs.rst
   zipfs.rst
+  inotify.rst
 
 FS Categories
 -------------

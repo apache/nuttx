@@ -43,8 +43,8 @@
  * state from the TCB.
  */
 
-#define avr_savestate(regs)    avr_copystate(regs, (uint8_t*)g_current_regs)
-#define avr_restorestate(regs) (g_current_regs = regs)
+#define avr_savestate(regs)    avr_copystate(regs, up_current_regs())
+#define avr_restorestate(regs) up_set_current_regs(regs)
 
 /****************************************************************************
  * Public Types

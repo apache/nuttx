@@ -649,6 +649,14 @@ config CDCACM_NWRREQS
 	---help---
 		The number of write/read requests that can be in flight
 
+config CDCACM_BULKOUT_REQLEN
+	int "Size of one read request buffer"
+	default 512 if USBDEV_DUALSPEED
+	default 256 if !USBDEV_DUALSPEED
+	---help---
+		Read buffer size maybe larger than the maxpacket size. Increasing
+		the buffer size can effectively improve the transmission speed.
+
 config CDCACM_BULKIN_REQLEN
 	int "Size of one write request buffer"
 	default 768 if USBDEV_DUALSPEED

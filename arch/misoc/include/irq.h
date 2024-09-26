@@ -108,6 +108,16 @@ EXTERN volatile uint32_t *g_current_regs;
  * Inline functions
  ****************************************************************************/
 
+static inline_function uint32_t *up_current_regs(void)
+{
+  return (uint32_t *)g_current_regs;
+}
+
+static inline_function void up_set_current_regs(uint32_t *regs)
+{
+  g_current_regs = regs;
+}
+
 /****************************************************************************
  * Name: up_interrupt_context
  *
@@ -117,7 +127,7 @@ EXTERN volatile uint32_t *g_current_regs;
  *
  ****************************************************************************/
 
-#define up_interrupt_context() (g_current_regs != NULL)
+#define up_interrupt_context() (up_current_regs() != NULL)
 
 /****************************************************************************
  * Public Function Prototypes

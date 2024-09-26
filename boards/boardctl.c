@@ -886,6 +886,22 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_START_CPU
+      /* CMD:           BOARDIOC_START_CPU
+       * DESCRIPTION:   Start specified slave core by master core
+       * ARG:           Integer value for cpu core id.
+       * CONFIGURATION: CONFIG_BOARDCTL_START_CPU
+       * DEPENDENCIES:  Board logic must provide the
+       *                board_start_cpu() interface.
+       */
+
+      case BOARDIOC_START_CPU:
+        {
+          ret = board_start_cpu((int)arg);
+        }
+        break;
+#endif
+
        default:
          {
 #ifdef CONFIG_BOARDCTL_IOCTL

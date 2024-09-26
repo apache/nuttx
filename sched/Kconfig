@@ -793,6 +793,12 @@ config SCHED_DUMP_LEAK
 		are printed using syslog. This helps catch any memory allocated by the
 		task that remains unreleased when the task exits.
 
+config SCHED_DUMP_ON_EXIT
+	bool "Dump all tasks state on exit"
+	default n
+	---help---
+		Dump all tasks state on exit()
+
 config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
@@ -884,20 +890,6 @@ config PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
 
 endchoice # Default pthread mutex protocol
 
-config PTHREAD_CLEANUP_STACKSIZE
-	int "pthread cleanup stack size"
-	default 0
-	range 0 255
-	---help---
-		The maximum number of cleanup actions that may be pushed by
-		pthread_cleanup_push().
-		if 0 disable the interfaces pthread_cleanup_push() and pthread_cleanup_pop().
-		This setting will increase the size of EVERY
-		pthread task control block by about n * CONFIG_PTHREAD_CLEANUP_STACKSIZE
-		where n is the size of a pointer, 2 * sizeof(uintptr_t), this would be
-		8 for a CPU with 32-bit addressing and 4 for a CPU with 16-bit
-		addressing.
-
 config CANCELLATION_POINTS
 	bool "Cancellation points"
 	default n
@@ -955,7 +947,7 @@ config SCHED_CRITMONITOR_MAXTIME_THREAD
 
 config SCHED_CRITMONITOR_MAXTIME_WQUEUE
 	int "WORK queue max execution time"
-	default SCHED_CRITMONITOR_MAXTIME_THREAD
+	default -1
 	---help---
 		Worker execution time should be smaller than
 		SCHED_CRITMONITOR_MAXTIME_WQUEUE, or system will give a warning.
@@ -1076,7 +1068,7 @@ config SCHED_CPULOAD_EXTCLK
 
 config SCHED_CPULOAD_CRITMONITOR
 	bool "Use critical monitor"
-	depends on SCHED_CRITMONITOR
+	depends on SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
 	---help---
 		Use the perfcounter in the core of the chip as a counter, no need to
 		use an external timer. Need to depend on SCHED_CRITMONITOR.
@@ -1993,7 +1985,7 @@ config PID_INITIAL_COUNT
 config SCHED_EVENTS
 	bool "Schedule Event objects"
 	default n
-	help
-	  This option enables event objects. Threads may wait on event
-	  objects for specific events, but both threads and ISRs may deliver
-	  events to event objects.
+	---help---
+		This option enables event objects. Threads may wait on event
+		objects for specific events, but both threads and ISRs may deliver
+		events to event objects.

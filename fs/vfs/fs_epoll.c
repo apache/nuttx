@@ -134,14 +134,13 @@ static struct inode g_epoll_inode =
  * Private Functions
  ****************************************************************************/
 
-static FAR epoll_head_t *epoll_head_from_fd(int fd)
+static FAR epoll_head_t *epoll_head_from_fd(int fd, FAR struct file **filep)
 {
-  FAR struct file *filep;
   int ret;
 
   /* Get file pointer by file descriptor */
 
-  ret = fs_getfilep(fd, &filep);
+  ret = fs_getfilep(fd, filep);
   if (ret < 0)
     {
       set_errno(-ret);
@@ -150,13 +149,14 @@ static FAR epoll_head_t *epoll_head_from_fd(int fd)
 
   /* Check fd come from us */
 
-  if (!filep->f_inode || filep->f_inode->u.i_ops != &g_epoll_ops)
+  if ((*filep)->f_inode->u.i_ops != &g_epoll_ops)
     {
+      fs_putfilep(*filep);
       set_errno(EBADF);
       return NULL;
     }
 
-  return (FAR epoll_head_t *)filep->f_priv;
+  return (*filep)->f_priv;
 }
 
 static int epoll_do_open(FAR struct file *filep)
@@ -476,12 +476,13 @@ void epoll_close(int epfd)
 int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
 {
   FAR struct list_node *extend;
+  FAR struct file *filep;
   FAR epoll_head_t *eph;
   FAR epoll_node_t *epn;
   int ret;
   int i;
 
-  eph = epoll_head_from_fd(epfd);
+  eph = epoll_head_from_fd(epfd, &filep);
   if (eph == NULL)
     {
       return ERROR;
@@ -690,10 +691,12 @@ int epoll_ctl(int epfd, int op, int fd, FAR struct epoll_event *ev)
 
 out:
   nxmutex_unlock(&eph->lock);
+  fs_putfilep(filep);
   return OK;
 err:
   nxmutex_unlock(&eph->lock);
 err_without_lock:
+  fs_putfilep(filep);
   set_errno(-ret);
   return ERROR;
 }
@@ -705,11 +708,12 @@ err_without_lock:
 int epoll_pwait(int epfd, FAR struct epoll_event *evs,
                 int maxevents, int timeout, FAR const sigset_t *sigmask)
 {
+  FAR struct file *filep;
   FAR epoll_head_t *eph;
   sigset_t oldsigmask;
   int ret;
 
-  eph = epoll_head_from_fd(epfd);
+  eph = epoll_head_from_fd(epfd, &filep);
   if (eph == NULL)
     {
       return ERROR;
@@ -755,9 +759,11 @@ retry:
       ret = num;
     }
 
+  fs_putfilep(filep);
   return ret;
 
 err:
+  fs_putfilep(filep);
   set_errno(-ret);
   return ERROR;
 }
@@ -776,10 +782,11 @@ err:
 int epoll_wait(int epfd, FAR struct epoll_event *evs,
                int maxevents, int timeout)
 {
+  FAR struct file *filep;
   FAR epoll_head_t *eph;
   int ret;
 
-  eph = epoll_head_from_fd(epfd);
+  eph = epoll_head_from_fd(epfd, &filep);
   if (eph == NULL)
     {
       return ERROR;
@@ -822,9 +829,11 @@ retry:
       ret = num;
     }
 
+  fs_putfilep(filep);
   return ret;
 
 err:
+  fs_putfilep(filep);
   set_errno(-ret);
   return ERROR;
 }

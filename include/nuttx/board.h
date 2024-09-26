@@ -855,6 +855,21 @@ void board_init_rngseed(void);
 int board_reset_cause(FAR struct boardioc_reset_cause_s *cause);
 #endif
 
+/****************************************************************************
+ * Name: board_start_cpu
+ *
+ * Description:
+ *   This interface may be used by application specific logic to start
+ *   specified slave cpu core under the pseudo AMP case which is different
+ *   with armv7-a/armv8-a SMP. Support for this function is required by
+ *   board-level logic if CONFIG_BOARDCTL_START_CPU is selected.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_START_CPU
+int board_start_cpu(int cpuid);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

@@ -60,7 +60,7 @@ uintptr_t up_getusrsp(void *regs)
 void up_dump_register(void *dumpregs)
 {
   volatile struct regs_context *regs = dumpregs ? dumpregs :
-                              (struct regs_context *)CURRENT_REGS;
+                              (struct regs_context *)up_current_regs();
 
   _alert("stack = %p\n", regs);
   _alert("x0:   0x%-16"PRIx64"  x1:   0x%"PRIx64"\n",
@@ -101,7 +101,5 @@ void up_dump_register(void *dumpregs)
   _alert("ELR:       0x%-16"PRIx64"\n", regs->elr);
   _alert("SP_EL0:    0x%-16"PRIx64"\n", regs->sp_el0);
   _alert("SP_ELX:    0x%-16"PRIx64"\n", regs->sp_elx);
-  _alert("TPIDR_EL0: 0x%-16"PRIx64"\n", regs->tpidr_el0);
-  _alert("TPIDR_EL1: 0x%-16"PRIx64"\n", regs->tpidr_el1);
   _alert("EXE_DEPTH: 0x%-16"PRIx64"\n", regs->exe_depth);
 }

@@ -21,6 +21,25 @@
 #ifndef __ARCH_RISC_V_SRC_MPFS_HARDWARE_MPFS_MPUCFG_H
 #define __ARCH_RISC_V_SRC_MPFS_HARDWARE_MPFS_MPUCFG_H
 
+/* FIC0 (FPGA) PMP configurations - for fabric memory transfers */
+
+#define MPFS_PMPCFG_FIC0_0            (MPFS_MPUCFG_BASE + 0x00)
+#define MPFS_PMPCFG_FIC0_1            (MPFS_MPUCFG_BASE + 0x08)
+#define MPFS_PMPCFG_FIC0_2            (MPFS_MPUCFG_BASE + 0x10)
+#define MPFS_PMPCFG_FIC0_3            (MPFS_MPUCFG_BASE + 0x18)
+#define MPFS_PMPCFG_FIC0_4            (MPFS_MPUCFG_BASE + 0x20)
+#define MPFS_PMPCFG_FIC0_5            (MPFS_MPUCFG_BASE + 0x28)
+#define MPFS_PMPCFG_FIC0_6            (MPFS_MPUCFG_BASE + 0x30)
+#define MPFS_PMPCFG_FIC0_7            (MPFS_MPUCFG_BASE + 0x38)
+#define MPFS_PMPCFG_FIC0_8            (MPFS_MPUCFG_BASE + 0x40)
+#define MPFS_PMPCFG_FIC0_9            (MPFS_MPUCFG_BASE + 0x48)
+#define MPFS_PMPCFG_FIC0_10           (MPFS_MPUCFG_BASE + 0x50)
+#define MPFS_PMPCFG_FIC0_11           (MPFS_MPUCFG_BASE + 0x58)
+#define MPFS_PMPCFG_FIC0_12           (MPFS_MPUCFG_BASE + 0x60)
+#define MPFS_PMPCFG_FIC0_13           (MPFS_MPUCFG_BASE + 0x68)
+#define MPFS_PMPCFG_FIC0_14           (MPFS_MPUCFG_BASE + 0x70)
+#define MPFS_PMPCFG_FIC0_15           (MPFS_MPUCFG_BASE + 0x78)
+
 /* FIC1 (FPGA) PMP configurations - for fabric memory transfers */
 
 #define MPFS_PMPCFG_FIC1_0            (MPFS_MPUCFG_BASE + 0x100)
@@ -40,6 +59,17 @@
 #define MPFS_PMPCFG_FIC1_14           (MPFS_MPUCFG_BASE + 0x170)
 #define MPFS_PMPCFG_FIC1_15           (MPFS_MPUCFG_BASE + 0x178)
 
+/* FIC2 (FPGA) PMP configurations - for fabric memory transfers */
+
+#define MPFS_PMPCFG_FIC2_0            (MPFS_MPUCFG_BASE + 0x200)
+#define MPFS_PMPCFG_FIC2_1            (MPFS_MPUCFG_BASE + 0x208)
+#define MPFS_PMPCFG_FIC2_2            (MPFS_MPUCFG_BASE + 0x210)
+#define MPFS_PMPCFG_FIC2_3            (MPFS_MPUCFG_BASE + 0x218)
+#define MPFS_PMPCFG_FIC2_4            (MPFS_MPUCFG_BASE + 0x220)
+#define MPFS_PMPCFG_FIC2_5            (MPFS_MPUCFG_BASE + 0x228)
+#define MPFS_PMPCFG_FIC2_6            (MPFS_MPUCFG_BASE + 0x230)
+#define MPFS_PMPCFG_FIC2_7            (MPFS_MPUCFG_BASE + 0x238)
+
 /* Crpyto PMP configurations - for DMA transfers */
 
 #define MPFS_PMPCFG_CRYPTO_0          (MPFS_MPUCFG_BASE + 0x300)
@@ -53,10 +83,18 @@
 #define MPFS_PMPCFG_ETH0_1            (MPFS_MPUCFG_BASE + 0x408)
 #define MPFS_PMPCFG_ETH0_2            (MPFS_MPUCFG_BASE + 0x410)
 #define MPFS_PMPCFG_ETH0_3            (MPFS_MPUCFG_BASE + 0x418)
+#define MPFS_PMPCFG_ETH0_4            (MPFS_MPUCFG_BASE + 0x420)
+#define MPFS_PMPCFG_ETH0_5            (MPFS_MPUCFG_BASE + 0x428)
+#define MPFS_PMPCFG_ETH0_6            (MPFS_MPUCFG_BASE + 0x430)
+#define MPFS_PMPCFG_ETH0_7            (MPFS_MPUCFG_BASE + 0x438)
 #define MPFS_PMPCFG_ETH1_0            (MPFS_MPUCFG_BASE + 0x500)
 #define MPFS_PMPCFG_ETH1_1            (MPFS_MPUCFG_BASE + 0x508)
 #define MPFS_PMPCFG_ETH1_2            (MPFS_MPUCFG_BASE + 0x510)
 #define MPFS_PMPCFG_ETH1_3            (MPFS_MPUCFG_BASE + 0x518)
+#define MPFS_PMPCFG_ETH1_4            (MPFS_MPUCFG_BASE + 0x520)
+#define MPFS_PMPCFG_ETH1_5            (MPFS_MPUCFG_BASE + 0x528)
+#define MPFS_PMPCFG_ETH1_6            (MPFS_MPUCFG_BASE + 0x530)
+#define MPFS_PMPCFG_ETH1_7            (MPFS_MPUCFG_BASE + 0x528)
 
 /* USB PMP configurations - for DMA transfers */
 
@@ -71,6 +109,22 @@
 #define MPFS_PMPCFG_MMC_1             (MPFS_MPUCFG_BASE + 0x708)
 #define MPFS_PMPCFG_MMC_2             (MPFS_MPUCFG_BASE + 0x710)
 #define MPFS_PMPCFG_MMC_3             (MPFS_MPUCFG_BASE + 0x718)
+
+/* SCB PMP configurations - for DMA transfers */
+
+#define MPFS_PMPCFG_SCB_0             (MPFS_MPUCFG_BASE + 0x800)
+#define MPFS_PMPCFG_SCB_1             (MPFS_MPUCFG_BASE + 0x808)
+#define MPFS_PMPCFG_SCB_2             (MPFS_MPUCFG_BASE + 0x810)
+#define MPFS_PMPCFG_SCB_3             (MPFS_MPUCFG_BASE + 0x818)
+#define MPFS_PMPCFG_SCB_4             (MPFS_MPUCFG_BASE + 0x820)
+#define MPFS_PMPCFG_SCB_5             (MPFS_MPUCFG_BASE + 0x828)
+#define MPFS_PMPCFG_SCB_6             (MPFS_MPUCFG_BASE + 0x830)
+#define MPFS_PMPCFG_SCB_7             (MPFS_MPUCFG_BASE + 0x838)
+
+/* TRACE PMP configurations - for DMA transfers */
+
+#define MPFS_PMPCFG_TRACE_0           (MPFS_MPUCFG_BASE + 0x900)
+#define MPFS_PMPCFG_TRACE_1           (MPFS_MPUCFG_BASE + 0x908)
 
 /* DDR segments - set up by mpfs_ddr.c */
 

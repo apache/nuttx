@@ -55,8 +55,8 @@
 
 /* General Configuration Register */
 
-#define HPET_GCONF_LEGERT           (1 << 0) /* Bit 0: LegacyReplacement Route */
-#define HPET_GCONF_ENABLE           (1 << 1) /* Bit 1: Overall Enable */
+#define HPET_GCONF_ENABLE           (1 << 0) /* Bit 0: Overall Enable */
+#define HPET_GCONF_LEGERT           (1 << 1) /* Bit 1: LegacyReplacement Route */
 
 /* General Interrupt Status Register */
 
@@ -86,7 +86,7 @@
 
 #define HPET_TFSB_INT_VAL_SHIFT     (0)
 #define HPET_TFSB_INT_VAL_MASK      (0x00000000ffffffff)
-#define HPET_TFSB_INT_ADDR_SHIFT    (31)
+#define HPET_TFSB_INT_ADDR_SHIFT    (32)
 #define HPET_TFSB_INT_ADDR_MASK     (0xffffffff00000000)
 
 /* HPET register space */

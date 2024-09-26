@@ -211,28 +211,23 @@ static int riscv_mtimer_start(struct oneshot_lowerhalf_s *lower,
 {
   struct riscv_mtimer_lowerhalf_s *priv =
     (struct riscv_mtimer_lowerhalf_s *)lower;
-  uint64_t mtime = riscv_mtimer_get_mtime(priv);
-  uint64_t alarm = mtime + ts->tv_sec * priv->freq +
-                   ts->tv_nsec * priv->freq / NSEC_PER_SEC;
+  irqstate_t flags;
+  uint64_t mtime;
+  uint64_t alarm;
 
-  if (alarm < mtime)
-    {
-      priv->alarm    = UINT64_MAX;
-      priv->callback = NULL;
-      priv->arg      = NULL;
-    }
-  else
-    {
-      priv->alarm    = alarm;
-      priv->callback = callback;
-      priv->arg      = arg;
-    }
+  flags = up_irq_save();
 
-  if (!up_interrupt_context())
-    {
-      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
-    }
+  mtime = riscv_mtimer_get_mtime(priv);
+  alarm = mtime + ts->tv_sec * priv->freq +
+          ts->tv_nsec * priv->freq / NSEC_PER_SEC;
 
+  priv->alarm    = alarm;
+  priv->callback = callback;
+  priv->arg      = arg;
+
+  riscv_mtimer_set_mtimecmp(priv, priv->alarm);
+
+  up_irq_restore(flags);
   return 0;
 }
 
@@ -266,30 +261,27 @@ static int riscv_mtimer_cancel(struct oneshot_lowerhalf_s *lower,
   struct riscv_mtimer_lowerhalf_s *priv =
     (struct riscv_mtimer_lowerhalf_s *)lower;
   uint64_t mtime;
-  uint64_t alarm = priv->alarm;
+  uint64_t alarm;
+  uint64_t nsec;
+  irqstate_t flags;
 
-  priv->alarm = UINT64_MAX;
-  if (!up_interrupt_context())
-    {
-      riscv_mtimer_set_mtimecmp(priv, priv->alarm);
-    }
+  flags = up_irq_save();
+
+  alarm = priv->alarm;
 
   mtime = riscv_mtimer_get_mtime(priv);
-  if (alarm > mtime)
-    {
-      uint64_t nsec = (alarm - mtime) * NSEC_PER_SEC / priv->freq;
-      ts->tv_sec  = nsec / NSEC_PER_SEC;
-      ts->tv_nsec = nsec % NSEC_PER_SEC;
-    }
-  else
-    {
-      ts->tv_sec  = 0;
-      ts->tv_nsec = 0;
-    }
+
+  riscv_mtimer_set_mtimecmp(priv, mtime + UINT64_MAX);
+
+  nsec = (alarm - mtime) * NSEC_PER_SEC / priv->freq;
+  ts->tv_sec  = nsec / NSEC_PER_SEC;
+  ts->tv_nsec = nsec % NSEC_PER_SEC;
 
   priv->alarm    = 0;
   priv->callback = NULL;
   priv->arg      = NULL;
+
+  up_irq_restore(flags);
 
   return 0;
 }
@@ -332,14 +324,11 @@ static int riscv_mtimer_interrupt(int irq, void *context, void *arg)
 {
   struct riscv_mtimer_lowerhalf_s *priv = arg;
 
-  priv->alarm = UINT64_MAX;
-
   if (priv->callback != NULL)
     {
       priv->callback(&priv->lower, priv->arg);
     }
 
-  riscv_mtimer_set_mtimecmp(priv, priv->alarm);
   return 0;
 }
 

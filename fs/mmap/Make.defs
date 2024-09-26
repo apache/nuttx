@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-CSRCS += fs_mmap.c fs_munmap.c fs_mmisc.c
+CSRCS += fs_mmap.c fs_munmap.c fs_mmisc.c fs_msync.c
 
 ifeq ($(CONFIG_FS_RAMMAP),y)
 CSRCS += fs_rammap.c

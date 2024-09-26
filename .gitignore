@@ -42,6 +42,7 @@
 /.config\ *
 /.cproject
 /.gdbinit
+/.gdb_history
 /.project
 /.version
 /_SAVED_APPS_config
@@ -49,6 +50,7 @@
 /defconfig
 /Make.defs
 /nuttx
+/nuttx32
 /nuttx-*
 /nuttx.*
 /nuttx_user*

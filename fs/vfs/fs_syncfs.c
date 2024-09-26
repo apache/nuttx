@@ -85,8 +85,8 @@ int syncfs(int fd)
   ret = fs_getfilep(fd, &filep);
   if (ret == OK)
     {
-      DEBUGASSERT(filep != NULL);
       ret = file_syncfs(filep);
+      fs_putfilep(filep);
     }
 
   leave_cancellation_point();

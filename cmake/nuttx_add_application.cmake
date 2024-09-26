@@ -157,7 +157,7 @@ function(nuttx_add_application)
 
     # loadable build requires applying ELF flags to all applications
 
-    if(CONFIG_BUILD_LOADABLE)
+    if(CONFIG_MODULES)
       target_compile_options(
         ${TARGET}
         PRIVATE

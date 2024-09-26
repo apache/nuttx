@@ -33,9 +33,9 @@
 #include <assert.h>
 
 #include <nuttx/mm/mm.h>
+#include <nuttx/mm/kasan.h>
 
 #include "mm_heap/mm.h"
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Public Functions
@@ -385,8 +385,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       mm_unlock(heap);
       MM_ADD_BACKTRACE(heap, (FAR char *)newmem - MM_SIZEOF_ALLOCNODE);
 
-      kasan_unpoison(newmem, mm_malloc_size(heap, newmem));
-      if (newmem != oldmem)
+      newmem = kasan_unpoison(newmem, mm_malloc_size(heap, newmem));
+      if (kasan_reset_tag(newmem) != kasan_reset_tag(oldmem))
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy
            * should be safe for this.

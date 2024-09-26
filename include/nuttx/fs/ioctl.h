@@ -101,7 +101,9 @@
 #define _STEPIOBASE     (0x3d00) /* Stepper device ioctl commands */
 #define _FPGACFGBASE    (0x3e00) /* FPGA configuration ioctl commands */
 #define _FFIOCBASE      (0x3f00) /* Force feedback ioctl commands */
+#define _PINCTRLBASE    (0x4000) /* Pinctrl driver ioctl commands */
 #define _PCIBASE        (0x4100) /* Pci ioctl commands */
+#define _I3CBASE        (0x4200) /* I3C driver ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -725,12 +727,26 @@
 #define _PCIIOCVALID(c)   (_IOC_TYPE(c)==_PCIBASE)
 #define _PCIIOC(nr)       _IOC(_PCIBASE,nr)
 
+/* I3C driver ioctl definitions *********************************************/
+
+/* see nuttx/include/i3c/i3c_driver.h */
+
+#define _I3CIOCVALID(c)   (_IOC_TYPE(c)==_I3CBASE)
+#define _I3CIOC(nr)       _IOC(_I3CBASE,nr)
+
 /* Force Feedback driver command definitions ********************************/
 
 /* see nuttx/include/input/ff.h */
 
 #define _FFIOCVALID(c) (_IOC_TYPE(c)==_FFIOCBASE)
 #define _FFIOC(nr)     _IOC(_FFIOCBASE,nr)
+
+/* Pinctrl driver command definitions ***************************************/
+
+/* see nuttx/include/pinctrl/pinctrl.h */
+
+#define _PINCTRLIOCVALID(c) (_IOC_TYPE(c)==_PINCTRLBASE)
+#define _PINCTRLIOC(nr)     _IOC(_PINCTRLBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

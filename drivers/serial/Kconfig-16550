@@ -548,4 +548,10 @@ config 16550_WAIT_LCR
 		will trigger spurious interrupts when setting the LCR without
 		waiting.  Default: n
 
+config 16550_SET_MCR_OUT2
+	bool "Set MCR OUT2 bit high"
+	default n
+	---help---
+		Some platforms require OUT2 of MCR being set for interrupt to be triggered
+
 endif # 16550_UART

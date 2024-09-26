@@ -33,6 +33,7 @@ EXTRA_FLAGS="EXTRAFLAGS="
 MAKE=make
 unset testfile
 unset HOPTION
+unset STORE
 unset JOPTION
 PRINTLISTONLY=0
 GITCLEAN=0
@@ -65,7 +66,7 @@ esac
 function showusage {
   echo ""
   echo "USAGE: $progname -h [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p]"
-  echo "       [-A] [-C] [-G] [-N] [-R] [--codechecker] <testlist-file>"
+  echo "       [-A] [-C] [-G] [-N] [-R] [-S] [--codechecker] <testlist-file>"
   echo ""
   echo "Where:"
   echo "  -h will show this help test and terminate"
@@ -88,6 +89,7 @@ function showusage {
   echo "         as well."
   echo "  -N Use CMake with Ninja as the backend."
   echo "  -R execute \"run\" script in the config directories if exists."
+  echo "  -S Adds the nxtmpdir folder for third-party packages."
   echo "  --codechecker enables CodeChecker statically analyze the code."
   echo "  <testlist-file> selects the list of configurations to test.  No default"
   echo ""
@@ -144,6 +146,9 @@ while [ ! -z "$1" ]; do
     ;;
   -R )
     RUN=1
+    ;;
+  -S )
+    STORE+=" $1"
     ;;
   --codechecker )
     CODECHECKER=1
@@ -314,7 +319,7 @@ function distclean {
 # Configure for the next build
 
 function configure_default {
-  if ! ./tools/configure.sh ${HOPTION} $config ${JOPTION} 1>/dev/null; then
+  if ! ./tools/configure.sh ${HOPTION} ${STORE} $config ${JOPTION} 1>/dev/null; then
     fail=1
   fi
 

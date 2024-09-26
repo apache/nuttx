@@ -63,9 +63,11 @@
 
 struct sigwork_s
 {
+#ifdef CONFIG_SIG_EVTHREAD
   struct work_s work;           /* Work queue structure */
   union sigval value;           /* Data passed with notification */
   sigev_notify_function_t func; /* Notification function */
+#endif
 };
 
 #ifdef __cplusplus

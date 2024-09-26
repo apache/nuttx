@@ -145,6 +145,12 @@ void up_initialize(void)
   x86_64_netinitialize();
 #endif
 
+  /* Initialize the PCI bus */
+
+#ifdef CONFIG_PCI
+  x86_64_pci_init();
+#endif
+
   /* Initialize USB -- device and/or host */
 
   x86_64_usbinitialize();

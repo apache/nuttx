@@ -118,7 +118,7 @@ int up_cpu_paused_save(void)
   sched_note_cpu_paused(tcb);
 #endif
 
-  /* Save the current context at CURRENT_REGS into the TCB at the head
+  /* Save the current context at current_regs into the TCB at the head
    * of the assigned task list for this CPU.
    */
 

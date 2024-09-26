@@ -37,12 +37,28 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PCI_CFG_ADDR      0xcf8
-#define PCI_DATA_ADDR     0xcfc
-#define PCI_CFG_EN        (1 << 31)
+#define PCI_CFG_ADDR         0xcf8
+#define PCI_DATA_ADDR        0xcfc
+#define PCI_CFG_EN           (1 << 31)
 
-#define X86_64_MAR_DEST    0xfee00000
-#define X86_64_MDR_TYPE    0x4000
+#define X86_64_MAR_DEST      0xfee00000
+#define X86_64_MDR_TYPE      0x4000
+
+#define X86_64_IO_ADDR_LIMIT 0xffff
+
+#define readb(addr)          ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint8_t *)(addr)) : inb(addr))
+#define readw(addr)          ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint16_t *)(addr)) : inw(addr))
+#define readl(addr)          ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint32_t *)(addr)) : inl(addr))
+
+#define writeb(addr, val)    ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint8_t *)(addr)) = (val) : outb(val, addr))
+#define writew(addr, val)    ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint16_t *)(addr)) = (val) : outw(val, addr))
+#define writel(addr, val)    ((addr) > X86_64_IO_ADDR_LIMIT ? \
+                              *((volatile uint32_t *)(addr)) = (val) : outl(val, addr))
 
 /****************************************************************************
  * Private Functions Definitions
@@ -208,18 +224,16 @@ static int x86_64_pci_read(struct pci_bus_s *bus, unsigned int devfn,
 static int x86_64_pci_read_io(struct pci_bus_s *bus, uintptr_t addr,
                               int size, uint32_t *val)
 {
-  uint16_t portaddr = (uint16_t)addr;
-
   switch (size)
   {
     case 1:
-      *val = (uint32_t)inb(portaddr);
+      *val = readb(addr);
       break;
     case 2:
-      *val = (uint32_t)inw(portaddr);
+      *val = readw(addr);
       break;
     case 4:
-      *val = (uint32_t)inl(portaddr);
+      *val = readl(addr);
       break;
     default:
       *val = 0;
@@ -251,18 +265,16 @@ static int x86_64_pci_read_io(struct pci_bus_s *bus, uintptr_t addr,
 static int x86_64_pci_write_io(struct pci_bus_s *bus, uintptr_t addr,
                                int size, uint32_t val)
 {
-  uint16_t portaddr = (uint16_t)addr;
-
   switch (size)
   {
     case 1:
-      outb((uint8_t)val, portaddr);
+      writeb(addr, val);
       break;
     case 2:
-      outw((uint16_t)val, portaddr);
+      writew(addr, val);
       break;
     case 4:
-      outl((uint32_t)val, portaddr);
+      writel(addr, val);
       break;
     default:
       pcierr("Invalid write size %d\n", size);

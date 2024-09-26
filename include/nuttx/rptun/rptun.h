@@ -29,6 +29,7 @@
 
 #ifdef CONFIG_RPTUN
 
+#include <metal/cache.h>
 #include <nuttx/rpmsg/rpmsg.h>
 #include <openamp/remoteproc.h>
 #include <openamp/rpmsg_virtio.h>
@@ -46,7 +47,45 @@
 
 #define RPTUN_NOTIFY_ALL            (UINT32_MAX - 0)
 
+#define RPTUN_CMD_DEFAULT     0x0
+#define RPTUN_CMD_PANIC       0x1
+#define RPTUN_CMD_STOP        0x2
+#define RPTUN_CMD_READY       0x3
+#define RPTUN_CMD_RESTART     0x4
+#define RPTUN_CMD_MASK        0xffff
+#define RPTUN_CMD_SHIFT       16
+
+#define RPTUN_CMD(c,v)        (((c) << RPTUN_CMD_SHIFT) | ((v) & RPTUN_CMD_MASK))
+#define RPTUN_GET_CMD(c)      ((c) >> RPTUN_CMD_SHIFT)
+#define RPTUN_GET_CMD_VAL(c)  ((c) & RPTUN_CMD_MASK)
+
+#define RPTUN_RSC2CMD(r)      \
+  ((FAR struct rptun_cmd_s *)&((FAR struct resource_table *)(r))->reserved[0])
+
+#ifdef CONFIG_OPENAMP_CACHE
+#  define RPTUN_INVALIDATE(x) metal_cache_invalidate(&x, sizeof(x))
+#else
+#  define RPTUN_INVALIDATE(x)
+#endif
+
 /* Access macros ************************************************************/
+
+/****************************************************************************
+ * Name: RPTUN_GET_LOCAL_CPUNAME
+ *
+ * Description:
+ *   Get local cpu name
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *
+ * Returned Value:
+ *   Cpu name on success, NULL on failure.
+ *
+ ****************************************************************************/
+
+#define RPTUN_GET_LOCAL_CPUNAME(d) ((d)->ops->get_local_cpuname ? \
+                                    (d)->ops->get_local_cpuname(d) : "")
 
 /****************************************************************************
  * Name: RPTUN_GET_CPUNAME
@@ -271,7 +310,7 @@
  ****************************************************************************/
 
 #define RPTUN_RESET(d,v) ((d)->ops->reset ? \
-                          (d)->ops->reset(d,v) : -ENOSYS)
+                          (d)->ops->reset(d,v) : UNUSED(d))
 
 /****************************************************************************
  * Name: RPTUN_PANIC
@@ -288,7 +327,7 @@
  ****************************************************************************/
 
 #define RPTUN_PANIC(d) ((d)->ops->panic ? \
-                        (d)->ops->panic(d) : -ENOSYS)
+                        (d)->ops->panic(d) : UNUSED(d))
 
 /****************************************************************************
  * Public Types
@@ -303,10 +342,16 @@ struct rptun_addrenv_s
   size_t    size;
 };
 
+begin_packed_struct struct rptun_cmd_s
+{
+  uint32_t cmd_master;
+  uint32_t cmd_slave;
+} end_packed_struct;
+
 struct aligned_data(8) rptun_rsc_s
 {
   struct resource_table    rsc_tbl_hdr;
-  unsigned int             offset[2];
+  uint32_t                 offset[2];
   struct fw_rsc_trace      log_trace;
   struct fw_rsc_vdev       rpmsg_vdev;
   struct fw_rsc_vdev_vring rpmsg_vring0;
@@ -317,6 +362,7 @@ struct aligned_data(8) rptun_rsc_s
 struct rptun_dev_s;
 struct rptun_ops_s
 {
+  CODE FAR const char *(*get_local_cpuname)(FAR struct rptun_dev_s *dev);
   CODE FAR const char *(*get_cpuname)(FAR struct rptun_dev_s *dev);
   CODE FAR const char *(*get_firmware)(FAR struct rptun_dev_s *dev);
 

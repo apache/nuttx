@@ -94,7 +94,7 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_backtrace.c
 endif
 
-ifeq ($(CONFIG_DUMP_ON_EXIT),y)
+ifeq ($(CONFIG_SCHED_DUMP_ON_EXIT),y)
 CSRCS += sched_dumponexit.c
 endif
 

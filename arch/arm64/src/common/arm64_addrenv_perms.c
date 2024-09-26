@@ -70,8 +70,8 @@ static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
 
   for (vaddr = vstart; vaddr < vend; vaddr += MM_PGSIZE)
     {
-      for (ptlevel = 1, lnvaddr = l1vaddr;
-           ptlevel < MMU_PGT_LEVELS;
+      for (ptlevel = mmu_get_base_pgt_level(), lnvaddr = l1vaddr;
+           ptlevel < MMU_PGT_LEVEL_MAX;
            ptlevel++)
         {
           paddr = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, lnvaddr, vaddr));

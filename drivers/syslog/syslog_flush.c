@@ -76,7 +76,7 @@ int syslog_flush(void)
 
   for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
     {
-      FAR struct syslog_channel_s *channel = g_syslog_channel[i];
+      FAR syslog_channel_t *channel = g_syslog_channel[i];
 
       if (channel == NULL)
         {

@@ -13,7 +13,7 @@
 name: Bug report
 description: Report a bug to improve NuttX stability
 title: "[BUG] <title>"
-labels: [👀 needs triage, bug]
+labels: [👀 needs triage, "Type: bug"]
 body:
   - type: markdown
     attributes:
@@ -47,11 +47,11 @@ body:
       label: On which OS does this issue occur?
       multiple: true
       options:
-        - "[BSD]"
-        - "[Linux]"
-        - "[Mac]"
-        - "[Windows]"
-        - "[Other]"
+        - "[OS: BSD]"
+        - "[OS: Linux]"
+        - "[OS: Mac]"
+        - "[OS: Windows]"
+        - "[OS: Other]"
     validations:
       required: true
 
@@ -78,25 +78,25 @@ body:
       description: What architecture(s) are you seeing the problem on?
       multiple: true
       options:
-        - "[all]"
-        - "[arm]"
-        - "[arm64]"
-        - "[avr]"
-        - "[ceva]"
-        - "[hc]"
-        - "[mips]"
-        - "[misoc]"
-        - "[openrisc]"
-        - "[renesas]"
-        - "[risc-v]"
-        - "[simulator]"
-        - "[sparc]"
-        - "[tricore]"
-        - "[x86]"
-        - "[x86_64]"
-        - "[xtensa]"
-        - "[z16]"
-        - "[z80]"
+        - "[Arch: all]"
+        - "[Arch: arm]"
+        - "[Arch: arm64]"
+        - "[Arch: avr]"
+        - "[Arch: ceva]"
+        - "[Arch: hc]"
+        - "[Arch: mips]"
+        - "[Arch: misoc]"
+        - "[Arch: openrisc]"
+        - "[Arch: renesas]"
+        - "[Arch: risc-v]"
+        - "[Arch: simulator]"
+        - "[Arch: sparc]"
+        - "[Arch: tricore]"
+        - "[Arch: x86]"
+        - "[Arch: x86_64]"
+        - "[Arch: xtensa]"
+        - "[Arch: z16]"
+        - "[Arch: z80]"
     validations:
       required: true
 
@@ -107,25 +107,25 @@ body:
       description: What area(s) are you seeing the problem on?
       multiple: true
       options:
-        - "[Other]"
-        - "[Applications]"
-        - "[Api]"
-        - "[Board support]"
-        - "[Build System]"
-        - "[Configuring]"
-        - "[Debugging]"
-        - "[Drivers]"
-        - "[File System]"
-        - "[Installing]"
-        - "[Kconfig]"
-        - "[Kernel]"
-        - "[Memory Management]"
-        - "[Native port]"
-        - "[Networking]"
-        - "[OS Components]"
-        - "[Posix]"
-        - "[Sensors]"
-        - "[Specific Peripheral]"
+        - "[Area: Other]"
+        - "[Area: Applications]"
+        - "[Area: Api]"
+        - "[Area: Board support]"
+        - "[Area: Build System]"
+        - "[Area: Configuring]"
+        - "[Area: Debugging]"
+        - "[Area: Drivers]"
+        - "[Area: File System]"
+        - "[Area: Installing]"
+        - "[Area: Kconfig]"
+        - "[Area: Kernel]"
+        - "[Area: Memory Management]"
+        - "[Area: Native port]"
+        - "[Area: Networking]"
+        - "[Area: OS Components]"
+        - "[Area: Posix]"
+        - "[Area: Sensors]"
+        - "[Area: Specific Peripheral]"
     validations:
       required: true
 

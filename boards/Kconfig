@@ -463,6 +463,14 @@ config ARCH_BOARD_ESP32S3_LCD_EV
 			1. ESP32-S3-LCD-EV-Board with 480x480 LCD
 			2. ESP32-S3-LCD-EV-Board with 800x480 LCD
 
+config ARCH_BOARD_ESP32S3_LHCBIT
+	bool "ESP32-S3 LHCBit"
+	depends on ARCH_CHIP_ESP32S3WROOM1N16R8
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
+	---help---
+		The ESP32-S3 LHCBit features the ESP32-S3 CPU with dual Xtensa LX7 cores.
+
 config ARCH_BOARD_ESP32S3_BOX
 	bool "Espressif ESP32-S3-BOX"
 	depends on ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM
@@ -1104,9 +1112,9 @@ config ARCH_BOARD_MIZAR32A
 	depends on ARCH_CHIP_AT32UC3A0512
 	select ARCH_HAVE_LEDS
 	---help---
-                This is a port of NuttX for the Mizar32-A board designed by SimpleMachines,
-                Italy. The board is based on the AT32UC3A0512 MCU and uses avr32-gcc
-                version 4.4.7 for its build on GNU/Linux.
+		This is a port of NuttX for the Mizar32-A board designed by SimpleMachines,
+		Italy. The board is based on the AT32UC3A0512 MCU and uses avr32-gcc
+		version 4.4.7 for its build on GNU/Linux.
 
 config ARCH_BOARD_MOTEINO_MEGA
 	bool "LowPowerLab MoteinoMEGA"
@@ -3257,6 +3265,7 @@ config ARCH_BOARD
 	default "esp32s3-eye"               if ARCH_BOARD_ESP32S3_EYE
 	default "esp32s3-meadow"            if ARCH_BOARD_ESP32S3_MEADOW
 	default "esp32s3-lcd-ev"            if ARCH_BOARD_ESP32S3_LCD_EV
+	default "esp32s3-lhcbit"            if ARCH_BOARD_ESP32S3_LHCBIT
 	default "esp32s3-box"               if ARCH_BOARD_ESP32S3_BOX
 	default "esp32s3-korvo-2"           if ARCH_BOARD_ESP32S3_KORVO_2
 	default "esp32c6-devkitc"           if ARCH_BOARD_ESP32C6_DEVKITC
@@ -4407,6 +4416,9 @@ endif
 if ARCH_BOARD_ESP32S3_LCD_EV
 source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
 endif
+if ARCH_BOARD_ESP32S3_LHCBIT
+source "boards/xtensa/esp32s3/esp32s3-lhcbit/Kconfig"
+endif
 if ARCH_BOARD_ESP32S3_BOX
 source "boards/xtensa/esp32s3/esp32s3-box/Kconfig"
 endif
@@ -4827,6 +4839,14 @@ config BOARDCTL_IRQ_AFFINITY
 	depends on SMP
 	---help---
 		Enables support for Set an IRQ affinity to CPUs by software.
+
+config BOARDCTL_START_CPU
+	bool "Start slave cpu"
+	default n
+	---help---
+		Enables support for the BOARDIOC_START_CPU boardctl() command.
+		Architecture specific logic must provide the board_start_cpu()
+		interface.
 
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"

@@ -36,8 +36,6 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/mutex.h>
 
-#ifdef CONFIG_MM_SHM
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -143,5 +141,4 @@ extern struct shm_info_s g_shminfo;
 
 void shm_destroy(int shmid);
 
-#endif /* CONFIG_MM_SHM */
 #endif /* __MM_SHM_SHM_H */

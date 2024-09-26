@@ -36,6 +36,8 @@
 #  include <stdint.h>
 #endif
 
+#include <arch/armv8-r/cp15.h>
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
@@ -249,7 +251,6 @@ struct xcpt_syscall_s
  * For a total of 17 (XCPTCONTEXT_REGS)
  */
 
-#ifndef __ASSEMBLY__
 struct xcptcontext
 {
   /* The following function pointer is non-zero if there are pending signals
@@ -325,15 +326,10 @@ struct xcptcontext
 #endif
 #endif
 };
-#endif
-
-#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
@@ -363,7 +359,7 @@ static inline irqstate_t irqstate(void)
 
 /* Disable IRQs and return the previous IRQ state */
 
-static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline irqstate_t up_irq_save(void)
 {
   unsigned int cpsr;
 
@@ -423,7 +419,7 @@ static inline irqstate_t up_irq_disable(void)
 
 /* Restore saved IRQ & FIQ state */
 
-static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
@@ -458,11 +454,7 @@ static inline_function int up_cpu_index(void)
 
   /* Read the Multiprocessor Affinity Register (MPIDR) */
 
-  __asm__ __volatile__
-  (
-    "mrc " "p15, " "0" ", %0, " "c0" ", " "c0" ", " "5" "\n"
-    : "=r"(mpidr)
-  );
+  mpidr = CP15_GET(MPIDR);
 
   /* And return the CPU ID field */
 
@@ -485,13 +477,41 @@ static inline_function uint32_t up_getsp(void)
   return sp;
 }
 
-#endif /* __ASSEMBLY__ */
+/****************************************************************************
+ * Name:
+ *   up_current_regs/up_set_current_regs
+ *
+ * Description:
+ *   We use the following code to manipulate the TPIDRPRW register,
+ *   which exists uniquely for each CPU and is primarily designed to store
+ *   current thread information. Currently, we leverage it to store interrupt
+ *   information, with plans to further optimize its use for storing both
+ *   thread and interrupt information in the future.
+ *
+ ****************************************************************************/
+
+noinstrument_function
+static inline_function uint32_t *up_current_regs(void)
+{
+  return (uint32_t *)CP15_GET(TPIDRPRW);
+}
+
+noinstrument_function
+static inline_function void up_set_current_regs(uint32_t *regs)
+{
+  CP15_SET(TPIDRPRW, regs);
+}
+
+noinstrument_function
+static inline_function bool up_interrupt_context(void)
+{
+  return up_current_regs() != NULL;
+}
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -508,6 +528,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_INCLUDE_ARMV8_R_IRQ_H */

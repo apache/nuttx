@@ -115,6 +115,11 @@
 
 #define PCI_INTERRUPT_LINE                0x3c  /* 8 bits */
 #define PCI_INTERRUPT_PIN                 0x3d  /* 8 bits */
+#define  PCI_INTERRUPT_UNKNOWN            0
+#define  PCI_INTERRUPT_INTA               1
+#define  PCI_INTERRUPT_INTB               2
+#define  PCI_INTERRUPT_INTC               3
+#define  PCI_INTERRUPT_INTD               4
 #define PCI_MIN_GNT                       0x3e  /* 8 bits */
 #define PCI_MAX_LAT                       0x3f  /* 8 bits */
 

@@ -44,9 +44,9 @@ extern "C"
 void syslog_rpmsg_init_early(FAR void *buffer, size_t size);
 int syslog_rpmsg_init(void);
 
-int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch);
-int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel);
-ssize_t syslog_rpmsg_write(FAR struct syslog_channel_s *channel,
+int syslog_rpmsg_putc(FAR syslog_channel_t *channel, int ch);
+int syslog_rpmsg_flush(FAR syslog_channel_t *channel);
+ssize_t syslog_rpmsg_write(FAR syslog_channel_t *channel,
                            FAR const char *buffer, size_t buflen);
 #endif
 

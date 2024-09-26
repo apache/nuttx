@@ -1561,6 +1561,60 @@ int pci_select_bars(FAR struct pci_device_s *dev, unsigned int flags)
 }
 
 /****************************************************************************
+ * Name: pci_bus_map_region
+ *
+ * Description:
+ *   Create a virtual mapping for a address.
+ *
+ *   Using this function you will get an virtual address.
+ *   These functions hide the details if this is a MMIO or PIO address
+ *   space and will just do what you expect from them in the correct way.
+ *
+ * Input Parameters:
+ *   bus   - PCI bus
+ *   start - The address base
+ *   size  - The length of the address
+ *
+ * Returned Value:
+ *  Virtual address or zero if failed
+ ****************************************************************************/
+
+FAR void *
+pci_bus_map_region(FAR struct pci_bus_s *bus, uintptr_t start, size_t size)
+{
+  return bus->ctrl->ops->map ?
+    (FAR void *)bus->ctrl->ops->map(bus, start, start + size)
+    : (FAR void *)start;
+}
+
+/****************************************************************************
+ * Name: pci_map_bar_region
+ *
+ * Description:
+ *   Create a virtual mapping for a PCI BAR REGION.
+ *
+ *   Using this function you will get an address to your device BAR region.
+ *   These functions hide the details if this is a MMIO or PIO address
+ *   space and will just do what you expect from them in the correct way.
+ *
+ * Input Parameters:
+ *   dev - PCI device that owns the BAR
+ *   bar - BAR number
+ *   offset - BAR region offset
+ *   length - BAR region length
+ *
+ * Returned Value:
+ *  IO address or zero if failed
+ ****************************************************************************/
+
+FAR void *pci_map_bar_region(FAR struct pci_device_s *dev, int bar,
+                             uintptr_t offset, size_t length)
+{
+  uintptr_t start = pci_resource_start(dev, bar) + offset;
+  return pci_map_region(dev, start, length);
+}
+
+/****************************************************************************
  * Name: pci_map_bar
  *
  * Description:
@@ -1581,16 +1635,7 @@ int pci_select_bars(FAR struct pci_device_s *dev, unsigned int flags)
 
 FAR void *pci_map_bar(FAR struct pci_device_s *dev, int bar)
 {
-  FAR struct pci_bus_s *bus = dev->bus;
-  uintptr_t start = pci_resource_start(dev, bar);
-  uintptr_t end = pci_resource_end(dev, bar);
-
-  if (bus->ctrl->ops->map)
-    {
-      start = bus->ctrl->ops->map(bus, start, end);
-    }
-
-  return (FAR void *)start;
+  return pci_map_bar_region(dev, bar, 0, pci_resource_len(dev, bar));
 }
 
 /****************************************************************************
@@ -1839,6 +1884,7 @@ int pci_register_driver(FAR struct pci_driver_s *drv)
         {
           if (pci_match_one_device(id, dev))
             {
+              dev->id = id;
               if (drv->probe(dev) >= 0)
                 {
                   dev->drv = drv;
@@ -1927,6 +1973,7 @@ int pci_register_device(FAR struct pci_device_s *dev)
         {
           if (pci_match_one_device(id, dev))
             {
+              dev->id = id;
               if (drv->probe(dev) >= 0)
                 {
                   dev->drv = drv;
@@ -2064,15 +2111,84 @@ int pci_dev_register(void)
   return register_driver("/dev/pci", &g_pci_fops, 0666, NULL);
 }
 
+/****************************************************************************
+ * Name: pci_bus_read_config_xxx
+ *
+ * Description:
+ *  Read pci device config space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device to belong to
+ *   devfn - The PCI device number and function number
+ *   where - The register address
+ *   val   - The data buf
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_READ_CONFIG(byte, uint8_t, 1)
 PCI_BUS_READ_CONFIG(word, uint16_t, 2)
 PCI_BUS_READ_CONFIG(dword, uint32_t, 4)
+
+/****************************************************************************
+ * Name: pci_bus_write_config_xxx
+ *
+ * Description:
+ *  Write pci device config space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device to belong to
+ *   devfn - The PCI device number and function number
+ *   where - The register address
+ *   val   - The data
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_WRITE_CONFIG(byte, uint8_t, 1)
 PCI_BUS_WRITE_CONFIG(word, uint16_t, 2)
 PCI_BUS_WRITE_CONFIG(dword, uint32_t, 4)
+
+/****************************************************************************
+ * Name: pci_bus_read_io_xxx
+ *
+ * Description:
+ *  Read pci device io space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   where - The address to read
+ *   val   - The data buffer
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_READ_IO(byte, uint8_t, 1)
 PCI_BUS_READ_IO(word, uint16_t, 2)
 PCI_BUS_READ_IO(dword, uint32_t, 4)
+
+/****************************************************************************
+ * Name: pci_bus_write_io_xxx
+ *
+ * Description:
+ *  Write pci device io space
+ *
+ * Input Parameters:
+ *   bus   - The PCI device belong to
+ *   where - The address to write
+ *   val   - The data
+ *
+ * Returned Value:
+ *   Zero if success, otherwise nagative
+ *
+ ****************************************************************************/
+
 PCI_BUS_WRITE_IO(byte, uint8_t, 1)
 PCI_BUS_WRITE_IO(word, uint16_t, 2)
 PCI_BUS_WRITE_IO(dword, uint32_t, 4)

@@ -101,11 +101,12 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
         }
 
       start = MAX(src, region[i].start);
-      end = MIN(src + buflen, region[i].end);
+      end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_READ))
         {
           memcpy(buffer, (FAR const void *)start, len);
+          filep->f_pos = end;
           return len;
         }
     }
@@ -137,11 +138,12 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
         }
 
       start = MAX(dest, region[i].start);
-      end = MIN(dest + buflen, region[i].end);
+      end = MIN(start + buflen, region[i].end);
       len = end - start;
       if (len > 0 && (region[i].flags & PROT_WRITE))
         {
           memcpy((FAR void *)start, buffer, len);
+          filep->f_pos = end;
           return len;
         }
     }
@@ -216,37 +218,40 @@ int devmem_register(void)
       return -ENOMEM;
     }
 
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-  len = parse_memory_region(CONFIG_BOARD_MEMORY_RANGE, region,
-                            DEVMEM_REGION - 1);
-  if (len < 0)
+  if (CONFIG_BOARD_MEMORY_RANGE[0] != '\0')
     {
-      kmm_free(region);
-      return len;
-    }
-#endif
-
-  if (len + (4 - merge) > DEVMEM_REGION)
-    {
-      len = DEVMEM_REGION - (4 - merge);
-    }
-
-  region[len].flags = PROT_EXEC | PROT_READ;
-  region[len].start = (uintptr_t)_stext;
-  region[len++].end = (uintptr_t)_etext;
-  region[len].flags = PROT_WRITE | PROT_READ;
-  region[len].start = (uintptr_t)_sdata;
-  region[len++].end = (uintptr_t)_edata;
-
-  if (merge)
-    {
-      region[len - 1].end = (uintptr_t)_ebss;
+      len = parse_memory_region(CONFIG_BOARD_MEMORY_RANGE, region,
+                                DEVMEM_REGION - 1);
+      if (len < 0)
+        {
+          kmm_free(region);
+          return len;
+        }
     }
   else
     {
+      if (len + (4 - merge) > DEVMEM_REGION)
+        {
+          len = DEVMEM_REGION - (4 - merge);
+        }
+
+      region[len].flags = PROT_EXEC | PROT_READ;
+      region[len].start = (uintptr_t)_stext;
+      region[len++].end = (uintptr_t)_etext;
       region[len].flags = PROT_WRITE | PROT_READ;
-      region[len].start = (uintptr_t)_sbss;
-      region[len++].end = (uintptr_t)_ebss;
+      region[len].start = (uintptr_t)_sdata;
+      region[len++].end = (uintptr_t)_edata;
+
+      if (merge)
+        {
+          region[len - 1].end = (uintptr_t)_ebss;
+        }
+      else
+        {
+          region[len].flags = PROT_WRITE | PROT_READ;
+          region[len].start = (uintptr_t)_sbss;
+          region[len++].end = (uintptr_t)_ebss;
+        }
     }
 
   /* register the new MEM driver */

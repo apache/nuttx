@@ -23,6 +23,10 @@ ifeq ($(CONFIG_FS_LITTLEFS),y)
 
 CSRCS += lfs_vfs.c
 
+ifeq ($(CONFIG_TRACE_LITTLEFS_FS),y)
+littlefs/lfs_vfs.c_CFLAGS += -finstrument-functions
+endif
+
 DEPPATH += --dep-path littlefs
 VPATH += :littlefs
 

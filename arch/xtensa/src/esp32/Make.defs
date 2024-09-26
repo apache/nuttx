@@ -20,6 +20,8 @@
 
 include common/Make.defs
 
+STORAGETMP = $(if $(wildcard $(NXTMPDIR)/.*),y,)
+
 # The start-up, "head", file.  May be either a .S or a .c file.
 
 HEAD_CSRC  = esp32_start.c esp32_wdt.c
@@ -211,7 +213,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 20690e67695f0a8170a19ec99e2e9a13b620e94d
+	ESP_HAL_3RDPARTY_VERSION = b4c723a119344b4b71d69819019d55637fb570fd
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -225,15 +227,26 @@ endif
 	GIT_DEPTH_PARAMETER = --depth=$(GIT_DEPTH)
 endif
 
+ifeq ($(STORAGETMP),y)
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CHECK_COMMITSHA, $(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO),$(ESP_HAL_3RDPARTY_VERSION))
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO),$(NXTMPDIR)/$(ESP_HAL_3RDPARTY_REPO))
+endef
+else
+define CLONE_ESP_HAL_3RDPARTY_REPO
+	$(call CLONE, $(ESP_HAL_3RDPARTY_URL),chip/$(ESP_HAL_3RDPARTY_REPO))
+endef
+endif
+
 chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
-	$(Q) git clone --quiet $(ESP_HAL_3RDPARTY_URL) chip/$(ESP_HAL_3RDPARTY_REPO)
+	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable
+CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
 
 # Enable strict volatile bitfield access
 

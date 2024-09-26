@@ -68,12 +68,6 @@
 void up_pthread_start(pthread_trampoline_t startup,
                       pthread_startroutine_t entrypt, pthread_addr_t arg)
 {
-  uint64_t *regs = this_task()->xcp.initregs;
-
-  /* This must be performed atomically, the C-section ends upon user entry */
-
-  enter_critical_section();
-
   /* Set up to enter the user-space pthread start-up function in
    * unprivileged mode. We need:
    *
@@ -83,24 +77,8 @@ void up_pthread_start(pthread_trampoline_t startup,
    *   SPSR = user mode
    */
 
-  regs[REG_ELR]  = (uint64_t)startup;
-  regs[REG_X0]   = (uint64_t)entrypt;
-  regs[REG_X1]   = (uint64_t)arg;
-  regs[REG_SPSR] = (regs[REG_SPSR] & ~SPSR_MODE_MASK) | SPSR_MODE_EL0T;
-
-  /* Fully unwind the kernel stack and drop to user space */
-
-  asm
-  (
-    "mov x0, %0\n" /* Get context registers */
-    "mov sp, x0\n" /* Stack pointer = context */
-    "b arm64_exit_exception\n"
-    :
-    : "r" (regs)
-    : "x0", "memory"
-  );
-
-  PANIC();
+  arm64_jump_to_user((uint64_t)startup, (uint64_t)entrypt, (uint64_t)arg,
+                     this_task()->xcp.initregs);
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */

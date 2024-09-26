@@ -158,7 +158,7 @@ file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
    * because messages can be sent from interrupt level.
    */
 
-  flags = enter_critical_section_nonirq();
+  flags = enter_critical_section();
 
   /* Check if the message queue is empty.  If it is NOT empty, then we
    * will not need to start timer.
@@ -233,7 +233,7 @@ file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
   /* We can now restore interrupts */
 
 errout_in_critical_section:
-  leave_critical_section_nonirq(flags);
+  leave_critical_section(flags);
 
   return ret;
 }
@@ -357,7 +357,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
                           FAR const struct timespec *abstime)
 {
   FAR struct file *filep;
-  int ret;
+  ssize_t ret;
 
   ret = fs_getfilep(mqdes, &filep);
   if (ret < 0)
@@ -365,7 +365,9 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
       return ret;
     }
 
-  return file_mq_timedreceive_internal(filep, msg, msglen, prio, abstime, 0);
+  ret = file_mq_timedreceive_internal(filep, msg, msglen, prio, abstime, 0);
+  fs_putfilep(filep);
+  return ret;
 }
 
 /****************************************************************************

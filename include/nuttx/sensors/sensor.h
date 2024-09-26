@@ -270,7 +270,7 @@ struct sensor_ops_s
 
   CODE int (*set_interval)(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep,
-                           FAR unsigned long *period_us);
+                           FAR uint32_t *period_us);
 
   /**************************************************************************
    * Name: batch
@@ -316,7 +316,7 @@ struct sensor_ops_s
 
   CODE int (*batch)(FAR struct sensor_lowerhalf_s *lower,
                     FAR struct file *filep,
-                    FAR unsigned long *latency_us);
+                    FAR uint32_t *latency_us);
 
   /**************************************************************************
    * Name: fetch
@@ -351,6 +351,36 @@ struct sensor_ops_s
   CODE int (*fetch)(FAR struct sensor_lowerhalf_s *lower,
                     FAR struct file *filep,
                     FAR char *buffer, size_t buflen);
+
+  /**************************************************************************
+   * Name: flush
+   *
+   * When sensor data accumulates in the hardware buffer but does not
+   * reach the watermark, the upper-layer application can immediately push
+   * the fifo data to the upper layer circbuffer through the flush operation.
+   *
+   * The flush operation is an asynchronous operation. The lower half driver
+   * must call push event with data is NULL and len is zero when the flush
+   * action is completed, then upper half driver triggers the POLLPRI event,
+   * and update user state event to tell application the flush complete
+   * event.
+   *
+   * You can call the flush operation at any time. When the sensor is not
+   * activated, flsuh returns -EINVAL. When the sensor does not support fifo,
+   * it immediately returns the POLLPRI event, indicating that the flush
+   * is completed.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*flush)(FAR struct sensor_lowerhalf_s *lower,
+                    FAR struct file *filep);
 
   /**************************************************************************
    * Name: selftest
@@ -425,6 +455,28 @@ struct sensor_ops_s
                         unsigned long arg);
 
   /**************************************************************************
+   * Name: get_info
+   *
+   * With this method, the user can obtain information about the current
+   * device. The name and vendor information cannot exceed
+   * SENSOR_INFO_NAME_SIZE.
+   *
+   * Input Parameters:
+   *   lower   - The instance of lower half sensor driver.
+   *   filep   - The pointer of file, represents each user using sensor.
+   *   info    - Device information structure pointer.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *   -ENOTTY - The cmd don't support.
+   *
+   **************************************************************************/
+
+  CODE int (*get_info)(FAR struct sensor_lowerhalf_s *lower,
+                       FAR struct file *filep,
+                       FAR struct sensor_device_info_s *info);
+
+  /**************************************************************************
    * Name: control
    *
    * With this method, the user can set some special config for the sensor,
@@ -476,7 +528,7 @@ struct sensor_lowerhalf_s
    * struct sensor_xxx.
    */
 
-  unsigned long nbuffer;
+  uint32_t nbuffer;
 
   /* The uncalibrated use to describe whether the sensor event is
    * uncalibrated. True is uncalibrated data, false is calibrated data,
@@ -639,7 +691,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
  ****************************************************************************/
 
 int sensor_custom_register(FAR struct sensor_lowerhalf_s *dev,
-                           FAR const char *path, unsigned long esize);
+                           FAR const char *path, size_t esize);
 
 /****************************************************************************
  * Name: sensor_unregister

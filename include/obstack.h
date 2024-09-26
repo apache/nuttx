@@ -70,6 +70,7 @@
  *   Size of the single chunk.
  *
  ****************************************************************************/
+
 #define obstack_chunk_size(h) ((h)->chunk_size)
 
 /****************************************************************************
@@ -86,6 +87,7 @@
  *   Tentative starting address of the currently growing object.
  *
  ****************************************************************************/
+
 #define obstack_base(h) ((h)->object_base)
 
 /****************************************************************************
@@ -102,6 +104,7 @@
  *   Address just after the end of the currently growing object.
  *
  ****************************************************************************/
+
 #define obstack_next_free(h) ((h)->next_free)
 
 /****************************************************************************
@@ -117,11 +120,9 @@
  *   h: pointer to the handle used to grow the object.
  *   size: number of bytes
  *
- * Returned Value:
- *   The new address just after the end of the currently growing object.
- *
  ****************************************************************************/
-#define obstack_blank_fast(h, size) ((h)->next_free += (size))
+
+#define obstack_blank_fast(h, size) ((void)((h)->next_free += (size)))
 
 /****************************************************************************
  * Name: obstack_1grow_fast
@@ -135,11 +136,51 @@
  *   h: pointer to the handle used to grow the object.
  *   data: byte to be added
  *
- * Returned Value:
- *   Added byte.
+ ****************************************************************************/
+
+#define obstack_1grow_fast(h, data) ((void)(*((h)->next_free++) = (data)))
+
+/****************************************************************************
+ * Name: obstack_ptr_grow_fast
+ *
+ * Description:
+ *   Adds one pointer to the currently growing object.
+ *   There is no check if there is enough room and thus it is easy to cause
+ *   buffer overrun. Use only when you are sure that there is enough room!
+ *
+ * Input Parameters:
+ *   h: pointer to the handle used to grow the object.
+ *   ptr: pointer to be added
  *
  ****************************************************************************/
-#define obstack_1grow_fast(h, data) (*((h)->next_free++) = (data))
+
+#define obstack_ptr_grow_fast(h, ptr) \
+  do { \
+   FAR struct obstack *__o = (h); \
+   *(const void **)__o->next_free = (ptr); \
+   __o->next_free += sizeof(const void*); \
+  } while (0)
+
+/****************************************************************************
+ * Name: obstack_int_grow_fast
+ *
+ * Description:
+ *   Adds one integer to the currently growing object.
+ *   There is no check if there is enough room and thus it is easy to cause
+ *   buffer overrun. Use only when you are sure that there is enough room!
+ *
+ * Input Parameters:
+ *   h: pointer to the handle used to grow the object.
+ *   data: integer to be added
+ *
+ ****************************************************************************/
+
+#define obstack_int_grow_fast(h, data) \
+  do { \
+   FAR struct obstack *__o = (h); \
+   *(int*)__o->next_free = (data); \
+   __o->next_free += sizeof(const void*); \
+  } while (0)
 
 /****************************************************************************
  * Public Type Definitions
@@ -339,6 +380,34 @@ void obstack_grow0(FAR struct obstack *h,
  ****************************************************************************/
 
 void obstack_1grow(FAR struct obstack *h, char data);
+
+/****************************************************************************
+ * Name: obstack_ptr_grow
+ *
+ * Description:
+ *   Grow object by one pointer.
+ *
+ * Input Parameters:
+ *   h: pointer to the handle to allocated object to
+ *   ptr: pointer to be added to the growing object
+ *
+ ****************************************************************************/
+
+void obstack_ptr_grow(FAR struct obstack *h, const void *ptr);
+
+/****************************************************************************
+ * Name: obstack_int_grow
+ *
+ * Description:
+ *   Grow object by one integer.
+ *
+ * Input Parameters:
+ *   h: pointer to the handle to allocated object to
+ *   data: integer to be added to the growing object
+ *
+ ****************************************************************************/
+
+void obstack_int_grow(FAR struct obstack *h, int data);
 
 /****************************************************************************
  * Name: obstack_finish

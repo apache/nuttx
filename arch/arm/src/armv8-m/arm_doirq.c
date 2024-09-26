@@ -91,6 +91,8 @@ static inline bool arm_from_thread(uint32_t excret)
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -98,7 +100,8 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (arm_from_thread(regs[REG_EXC_RETURN]))
     {
-      CURRENT_REGS = regs;
+      tcb->xcp.regs = regs;
+      up_set_current_regs(regs);
     }
 
   /* Acknowledge the interrupt */
@@ -110,30 +113,29 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   irq_dispatch(irq, regs);
 
   /* If a context switch occurred while processing the interrupt then
-   * CURRENT_REGS may have change value.  If we return any value different
+   * current_regs may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
 
   if (arm_from_thread(regs[REG_EXC_RETURN]))
     {
-      /* Restore the cpu lock */
+      tcb = this_task();
 
-      if (regs != CURRENT_REGS)
+      if (regs != tcb->xcp.regs)
         {
           /* Record the new "running" task when context switch occurred.
            * g_running_tasks[] is only used by assertion logic for reporting
            * crashes.
            */
 
-          g_running_tasks[this_cpu()] = this_task();
-
-          regs = (uint32_t *)CURRENT_REGS;
+          g_running_tasks[this_cpu()] = tcb;
+          regs = tcb->xcp.regs;
         }
 
-      /* Update the CURRENT_REGS to NULL. */
+      /* Update the current_regs to NULL. */
 
-      CURRENT_REGS = NULL;
+      up_set_current_regs(NULL);
     }
 #endif
 

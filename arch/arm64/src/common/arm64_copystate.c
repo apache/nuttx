@@ -35,6 +35,7 @@
 #include <arch/irq.h>
 
 #include "arm64_internal.h"
+#include "sched/sched.h"
 
 #ifdef CONFIG_ARCH_FPU
 #include "arm64_fpu.h"
@@ -84,8 +85,7 @@ int arm64_syscall_save_context(uint64_t * regs)
 #ifdef CONFIG_ARCH_FPU
   uint64_t              *p_fpu;
   struct tcb_s          *rtcb;
-  struct tcb_s          *rtcb_cur =
-                           (struct tcb_s *)arch_get_current_tcb();
+  struct tcb_s          *rtcb_cur = running_task();
 #endif
 
   DEBUGASSERT(regs);

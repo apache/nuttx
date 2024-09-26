@@ -94,7 +94,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * a task is signalling itself for some reason.
            */
 
-          if (CURRENT_REGS == NULL)
+          if (up_current_regs() == NULL)
             {
               /* In this case just deliver the signal now. */
 
@@ -111,7 +111,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * logic would fail in the strange case where we are in an
            * interrupt handler, the thread is signalling itself, but
            * a context switch to another task has occurred so that
-           * CURRENT_REGS does not refer to the thread of this_task()!
+           * g_current_regs does not refer to the thread of this_task()!
            */
 
           else
@@ -127,9 +127,10 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * will borrow the process stack of the current tcb.
                */
 
-              CURRENT_REGS = tricore_alloc_csa((uintptr_t)tricore_sigdeliver,
+              up_set_current_regs(tricore_alloc_csa((uintptr_t)
+                  tricore_sigdeliver,
                   STACK_ALIGN_DOWN(up_getusrsp(tcb->xcp.regs)),
-                  PSW_IO_SUPERVISOR | PSW_CDE, true);
+                  PSW_IO_SUPERVISOR | PSW_CDE, true));
             }
         }
 

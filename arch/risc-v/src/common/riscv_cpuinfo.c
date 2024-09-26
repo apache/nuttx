@@ -64,6 +64,9 @@ ssize_t up_show_cpuinfo(char *buf, size_t buf_size, off_t file_off)
 #ifdef CONFIG_ARCH_RV_ISA_C
       procfs_sprintf(buf, buf_size, &file_off, "%s", "c");
 #endif
+#ifdef CONFIG_ARCH_RV_ISA_V
+      procfs_sprintf(buf, buf_size, &file_off, "%s", "v");
+#endif
 
       /* MMU type */
 

@@ -35,6 +35,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
+#include "sched/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -53,9 +54,11 @@
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
   err("ERROR: Unexpected IRQ\n");
   PANIC();
   return NULL;
@@ -76,12 +79,13 @@ uint32_t *arm_decodeirq(uint32_t *regs)
       uint32_t *savestate;
 
       /* Current regs non-zero indicates that we are processing an
-       * interrupt; CURRENT_REGS is also used to manage interrupt level
+       * interrupt; current_regs is also used to manage interrupt level
        * context switches.
        */
 
-      savestate     = (uint32_t *)CURRENT_REGS;
-      CURRENT_REGS = regs;
+      savestate = up_current_regs();
+      up_set_current_regs(regs);
+      tcb->xcp.regs = regs;
 
       /* Acknowledge the interrupt */
 
@@ -91,12 +95,12 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of CURRENT_REGS.
+      /* Restore the previous value of current_regs.
        *  NULL would indicate that we are no longer in an interrupt handler.
        *  It will be non-NULL if we are returning from a nested interrupt.
        */
 
-      CURRENT_REGS = savestate;
+      up_set_current_regs(savestate);
     }
 #ifdef CONFIG_DEBUG_FEATURES
   else

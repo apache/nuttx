@@ -190,12 +190,14 @@ SECTIONS
         _ebss = ABSOLUTE(.);
     } > sram
 
+#ifdef CONFIG_STM32H7_CORTEXM4_ENABLED
     .shmem :
     {
         . = ALIGN(4);
         *(.shmem);
         KEEP(*(.shmem))
     } > shmem
+#endif
 
     /* Emit the the D3 power domain section for locating BDMA data
      *

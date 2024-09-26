@@ -368,7 +368,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
    * fault.
    */
 
-  pdump->info.current_regs = (uintptr_t) g_current_regs;
+  pdump->info.current_regs = (uintptr_t)up_current_regs();
 
   /* Save Context */
 
@@ -378,17 +378,12 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
 
   pdump->info.pid = tcb->pid;
 
-  /* If  current_regs is not NULL then we are in an interrupt context
-   * and the user context is in current_regs else we are running in
-   * the users context
-   */
-
-  if (g_current_regs)
+  if (up_interrupt_context())
     {
       pdump->info.stacks.interrupt.sp = sp;
-      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT | \
+      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT |
                             INTSTACK_PRESENT);
-      memcpy((uint8_t *)pdump->info.regs, (void *)g_current_regs,
+      memcpy((uint8_t *)pdump->info.regs, up_current_regs(),
              sizeof(pdump->info.regs));
       pdump->info.stacks.user.sp = pdump->info.regs[REG_SP];
     }

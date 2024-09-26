@@ -56,12 +56,12 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
   uint32_t *savestate;
 
-  /* Save the saved processor context in CURRENT_REGS where it can be
+  /* Save the saved processor context in current_regs where it can be
    * accessed for register dumps and possibly context switching.
    */
 
-  savestate    = (uint32_t *)CURRENT_REGS;
-  CURRENT_REGS = regs;
+  savestate = up_current_regs();
+  up_set_current_regs(regs);
 
   /* Get the (virtual) address of instruction that caused the prefetch
    * abort. When the exception occurred, this address was provided in the
@@ -100,12 +100,12 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
       pg_miss();
 
-      /* Restore the previous value of CURRENT_REGS.
+      /* Restore the previous value of current_regs.
        * NULL would indicate thatwe are no longer in an interrupt handler.
        *  It will be non-NULL if we are returning from a nested interrupt.
        */
 
-      CURRENT_REGS = savestate;
+      up_set_current_regs(savestate);
     }
   else
     {
@@ -121,11 +121,11 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 
 uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
-  /* Save the saved processor context in CURRENT_REGS where it can be
+  /* Save the saved processor context in current_regs where it can be
    * accessed for register dumps and possibly context switching.
    */
 
-  CURRENT_REGS = regs;
+  up_set_current_regs(regs);
 
   /* Crash -- possibly showing diagnostic debug information. */
 

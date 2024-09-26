@@ -91,3 +91,37 @@ void obstack_1grow(FAR struct obstack *h, char data)
   obstack_make_room(h, 1);
   obstack_1grow_fast(h, data);
 }
+
+/****************************************************************************
+ * Name: obstack_ptr_grow
+ *
+ * Description:
+ *   Grow object by one pointer.
+ *
+ * Input Parameters:
+ *   h: pointer to the handle to allocated object to
+ *   ptr: pointer to be added to the growing object
+ *
+ ****************************************************************************/
+
+void obstack_ptr_grow(FAR struct obstack *h, const void *ptr)
+{
+  obstack_grow(h, &ptr, sizeof(void *));
+}
+
+/****************************************************************************
+ * Name: obstack_int_grow
+ *
+ * Description:
+ *   Grow object by one integer.
+ *
+ * Input Parameters:
+ *   h: pointer to the handle to allocated object to
+ *   data: integer to be added to the growing object
+ *
+ ****************************************************************************/
+
+void obstack_int_grow(FAR struct obstack *h, int data)
+{
+  obstack_grow(h, &data, sizeof(int));
+}

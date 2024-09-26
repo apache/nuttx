@@ -299,8 +299,6 @@ struct regs_context
   uint64_t  spsr;
   uint64_t  sp_el0;
   uint64_t  exe_depth;
-  uint64_t  tpidr_el0;
-  uint64_t  tpidr_el1;
 };
 
 /****************************************************************************
@@ -449,24 +447,16 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 /****************************************************************************
  * Name:
  *   arch_get_exception_depth
- *   arch_get_current_tcb
  *
  * Description:
  *   tpidrro_el0 is used to record exception depth, it's used for fpu trap
  * happened at exception context (like IRQ).
- *   tpidr_el1 is used to record TCB at present, it's used for fpu and task
- * switch propose
  *
  ****************************************************************************/
 
 static inline int arch_get_exception_depth(void)
 {
   return read_sysreg(tpidrro_el0);
-}
-
-static inline uint64_t arch_get_current_tcb(void)
-{
-  return read_sysreg(tpidr_el1);
 }
 
 void arch_cpu_idle(void);

@@ -31,10 +31,9 @@
 #include <syslog.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/mm/kasan.h>
 #include <nuttx/mm/mempool.h>
 #include <nuttx/sched.h>
-
-#include "kasan/kasan.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -407,7 +406,7 @@ retry:
 
   pool->nalloc++;
   spin_unlock_irqrestore(&pool->lock, flags);
-  kasan_unpoison(blk, pool->blocksize);
+  blk = kasan_unpoison(blk, pool->blocksize);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
   memset(blk, MM_ALLOC_MAGIC, pool->blocksize);
 #endif
@@ -649,7 +648,7 @@ int mempool_deinit(FAR struct mempool_s *pool)
     {
       blk = (FAR sq_entry_t *)((FAR char *)blk - count * blocksize);
 
-      kasan_unpoison(blk, count * blocksize + sizeof(sq_entry_t));
+      blk = kasan_unpoison(blk, count * blocksize + sizeof(sq_entry_t));
       pool->free(pool, blk);
       if (pool->expandsize >= blocksize + sizeof(sq_entry_t))
         {
@@ -659,8 +658,8 @@ int mempool_deinit(FAR struct mempool_s *pool)
 
   if (pool->ibase)
     {
-      kasan_unpoison(pool->ibase,
-                     pool->interruptsize / blocksize * blocksize);
+      pool->ibase = kasan_unpoison(pool->ibase,
+                      pool->interruptsize / blocksize * blocksize);
       pool->free(pool, pool->ibase);
     }
 

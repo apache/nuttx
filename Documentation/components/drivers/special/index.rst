@@ -29,6 +29,7 @@ following section.
   dma.rst
   framebuffer.rst
   i2c.rst
+  i3c.rst
   ioexpander.rst
   lcd.rst
   mtd.rst
@@ -48,6 +49,7 @@ following section.
   usrsock.rst
   mmcsd.rst
   net/index.rst
+  pinctrl.rst
   pipes.rst
   power/index.rst
   virtio.rst

@@ -53,7 +53,7 @@ uintptr_t up_getusrsp(void *regs)
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uint8_t *ptr = dumpregs ? dumpregs : (uint8_t *)g_current_regs;
+  volatile uint8_t *ptr = dumpregs ? dumpregs : up_current_regs();
 
   /* Dump the interrupt registers */
 

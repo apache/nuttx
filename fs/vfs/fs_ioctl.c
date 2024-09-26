@@ -181,7 +181,7 @@ static int file_vioctl(FAR struct file *filep, int req, va_list ap)
                                         (unsigned long)(uintptr_t)&geo);
             if (ret >= 0)
               {
-                *(FAR blksize_t *)(uintptr_t)arg = geo.geo_nsectors;
+                *(FAR blkcnt_t *)(uintptr_t)arg = geo.geo_nsectors;
               }
           }
         break;
@@ -276,6 +276,7 @@ int ioctl(int fd, int req, ...)
   ret = file_vioctl(filep, req, ap);
   va_end(ap);
 
+  fs_putfilep(filep);
   if (ret < 0)
     {
       goto err;

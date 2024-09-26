@@ -27,6 +27,7 @@
 #include <nuttx/list.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/sensors/sensor.h>
 
 /****************************************************************************
@@ -47,6 +48,12 @@ static ssize_t usensor_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
 static int usensor_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
+static int usensor_get_info(FAR struct sensor_lowerhalf_s *lower,
+                            FAR struct file *filep,
+                            FAR struct sensor_device_info_s *info);
+static int usensor_control(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
+                           int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Types
@@ -64,9 +71,10 @@ struct usensor_context_s
 
 struct usensor_lowerhalf_s
 {
-  struct list_node          node;    /* node in all usensor list */
-  struct sensor_lowerhalf_s driver;  /* The lowerhalf driver of user sensor */
-  char                      path[1]; /* The path of usensor character device */
+  struct list_node            node;    /* node in all usensor list */
+  struct sensor_lowerhalf_s   driver;  /* The lowerhalf driver of user sensor */
+  struct sensor_device_info_s info;    /* Virtual sensor information */
+  char                        path[1]; /* The path of usensor character device */
 };
 
 /****************************************************************************
@@ -88,6 +96,8 @@ static const struct file_operations g_usensor_fops =
 
 static const struct sensor_ops_s g_usensor_ops =
 {
+  .get_info       = usensor_get_info,
+  .control        = usensor_control
 };
 
 /****************************************************************************
@@ -210,6 +220,35 @@ static int usensor_ioctl(FAR struct file *filep, int cmd,
     }
 
   return ret;
+}
+
+static int usensor_get_info(FAR struct sensor_lowerhalf_s *lower,
+                            FAR struct file *filep,
+                            FAR struct sensor_device_info_s *info)
+{
+  FAR struct usensor_lowerhalf_s *ulower = container_of(lower,
+                                           struct usensor_lowerhalf_s,
+                                           node);
+
+  *info = ulower->info;
+  return 0;
+}
+
+static int usensor_control(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
+                           int cmd, unsigned long arg)
+{
+  FAR struct usensor_lowerhalf_s *ulower = container_of(lower,
+                                           struct usensor_lowerhalf_s,
+                                           node);
+
+  if (cmd == SNIOC_SET_INFO)
+    {
+      ulower->info = *(FAR struct sensor_device_info_s *)(uintptr_t)arg;
+      return 0;
+    }
+
+  return -ENOTTY;
 }
 
 /****************************************************************************

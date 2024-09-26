@@ -18,4 +18,4 @@
 #
 # ##############################################################################
 
-target_sources(c PRIVATE lib_readv.c lib_writev.c)
+target_sources(c PRIVATE lib_readv.c lib_writev.c lib_preadv.c lib_pwritev.c)

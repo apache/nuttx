@@ -35,42 +35,40 @@ include(nuttx_mkversion)
 
 # Setup symbolic link generation
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_arch/arch)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-                          ${CMAKE_BINARY_DIR}/include_arch/arch)
-endif()
-
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_apps)
   execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
                           ${CMAKE_BINARY_DIR}/include_apps)
 endif()
 
 if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch)
-  nuttx_create_symlink(${NUTTX_DIR}/arch/${CONFIG_ARCH}/include
-                       ${CMAKE_BINARY_DIR}/include/arch)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
+                          ${CMAKE_BINARY_DIR}/include/arch)
+  file(GLOB CONTENTS ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/*)
+  foreach(ARCH_INCDIR ${CONTENTS})
+    get_filename_component(SUB_ELEMENT ${ARCH_INCDIR} NAME)
+    nuttx_create_symlink(${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${SUB_ELEMENT}
+                         ${CMAKE_BINARY_DIR}/include/arch/${SUB_ELEMENT})
+  endforeach()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_arch/arch/board)
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch/board)
   if(EXISTS ${NUTTX_BOARD_DIR}/include)
     nuttx_create_symlink(${NUTTX_BOARD_DIR}/include
-                         ${CMAKE_BINARY_DIR}/include_arch/arch/board)
+                         ${CMAKE_BINARY_DIR}/include/arch/board)
   elseif(EXISTS ${NUTTX_BOARD_DIR}/../common/include)
     nuttx_create_symlink(${NUTTX_BOARD_DIR}/../common/include
-                         ${CMAKE_BINARY_DIR}/include_arch/arch/board)
+                         ${CMAKE_BINARY_DIR}/include/arch/board)
   endif()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_arch/arch/chip)
+if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch/chip)
   if(CONFIG_ARCH_CHIP_CUSTOM)
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${NUTTX_CHIP_ABS_DIR}/include
-              ${CMAKE_BINARY_DIR}/include_arch/arch/chip)
+    nuttx_create_symlink(${NUTTX_CHIP_ABS_DIR}/include
+                         ${CMAKE_BINARY_DIR}/include/arch/chip)
   else()
-    execute_process(
-      COMMAND
-        ${CMAKE_COMMAND} -E copy_directory
-        ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${CONFIG_ARCH_CHIP}
-        ${CMAKE_BINARY_DIR}/include_arch/arch/chip)
+    nuttx_create_symlink(
+      ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${CONFIG_ARCH_CHIP}
+      ${CMAKE_BINARY_DIR}/include/arch/chip)
   endif()
 endif()
 

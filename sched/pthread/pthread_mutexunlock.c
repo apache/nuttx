@@ -70,7 +70,6 @@
 int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 {
   int ret = EPERM;
-  irqstate_t flags;
 
   sinfo("mutex=%p\n", mutex);
   DEBUGASSERT(mutex != NULL);
@@ -78,12 +77,6 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
     {
       return EINVAL;
     }
-
-  /* Make sure the semaphore is stable while we make the following checks.
-   * This all needs to be one atomic action.
-   */
-
-  flags = enter_critical_section();
 
   /* The unlock operation is only performed if the mutex is actually locked.
    * EPERM *must* be returned if the mutex type is PTHREAD_MUTEX_ERRORCHECK
@@ -171,7 +164,6 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
         }
     }
 
-  leave_critical_section(flags);
   sinfo("Returning %d\n", ret);
   return ret;
 }
