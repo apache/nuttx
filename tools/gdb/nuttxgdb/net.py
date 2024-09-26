@@ -95,8 +95,10 @@ def tcp_ofoseg_bufsize(conn):
 
     total = 0
     if utils.get_symbol_value("CONFIG_NET_TCP_OUT_OF_ORDER"):
-        for i in range(conn["nofosegs"]):
-            total += conn["ofosegs"][i]["data"]["io_pktlen"]
+        total = sum(
+            seg["data"]["io_pktlen"]
+            for seg in utils.ArrayIterator(conn["ofosegs"], conn["nofosegs"])
+        )
     return total
 
 

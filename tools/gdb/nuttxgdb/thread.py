@@ -234,8 +234,7 @@ class Nxinfothreads(gdb.Command):
                 % ("Index", "Tid", "Pid", "Thread", "Info", "Frame")
             )
 
-        for i in range(0, npidhash):
-            tcb = pidhash[i]
+        for i, tcb in enumerate(utils.ArrayIterator(pidhash, npidhash)):
             if not tcb:
                 continue
 
@@ -326,11 +325,11 @@ class Nxthread(gdb.Command):
                 gdb.write("Please specify a command following the thread ID list\n")
 
             elif arg[1] == "all":
-                for i in range(0, npidhash):
-                    if pidhash[i] == 0:
+                for i, tcb in enumerate(utils.ArrayIterator(pidhash, npidhash)):
+                    if tcb == 0:
                         continue
                     try:
-                        gdb.write(f"Thread {i} {pidhash[i]['name'].string()}\n")
+                        gdb.write(f"Thread {i} {tcb['name'].string()}\n")
                     except gdb.error and UnicodeDecodeError:
                         gdb.write(f"Thread {i}\n")
 
