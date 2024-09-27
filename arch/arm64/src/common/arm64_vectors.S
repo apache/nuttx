@@ -118,16 +118,8 @@ SECTION_FUNC(text, arm64_context_switch)
     cmp    x1, #0x0
     beq    restore_new
 
-#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_SMP)
-    stp    x0, x1, [sp, #-16]!
-    stp    xzr, x30, [sp, #-16]!
-    bl     arm64_fpu_context_save
-    ldp    xzr, x30, [sp], #16
-    ldp    x0, x1, [sp], #16
-#endif
-
     /* Save the current SP_ELx */
-    add    x4, sp, #8 * XCPTCONTEXT_GP_REGS
+    add    x4, sp, #8 * XCPTCONTEXT_REGS
     str    x4, [x1, #8 * REG_SP_ELX]
 
     /* Save the current task's SP_EL0 and exception depth */
@@ -144,13 +136,7 @@ restore_new:
 
     /* retrieve new thread's SP_ELx */
     ldr    x4, [x0, #8 * REG_SP_ELX]
-    sub    sp, x4, #8 * XCPTCONTEXT_GP_REGS
-
-#ifdef CONFIG_ARCH_FPU
-    stp    xzr, x30, [sp, #-16]!
-    bl     arm64_fpu_context_restore
-    ldp    xzr, x30, [sp], #16
-#endif
+    sub    sp, x4, #8 * XCPTCONTEXT_REGS
 
     /* Return to arm64_sync_exc() or arm64_irq_handler() */
 
@@ -205,19 +191,6 @@ SECTION_FUNC(text, arm64_sync_exc)
 #endif
     lsr    x10, x9, #26
 
-#ifdef CONFIG_ARCH_FPU
-    /* fpu trap */
-
-    cmp    x10, #0x07 /* Access to SIMD or floating-point */
-    bne    1f
-    mov    x0, sp     /* x0 = context */
-    bl     arm64_fpu_trap
-
-    /* when the fpu trap is handled */
-
-    b      arm64_exit_exc_fpu_done
-1:
-#endif
     /* 0x15 = SVC system call */
 
     cmp    x10, #0x15
@@ -332,13 +305,7 @@ do_switch:
 
     bl    arm64_context_switch
 
-#ifdef CONFIG_ARCH_FPU
-    /* when the fpu trap is handled */
-
-    b    arm64_exit_exc_fpu_done
-#else
     b    arm64_exit_exception
-#endif
 
 save_context:
     arm64_exception_context_save x0 x1 sp
@@ -433,11 +400,6 @@ irq_context_switch:
      *    call arm64_context_switch(x0) to switch
      */
     bl    arm64_context_switch
-#ifdef CONFIG_ARCH_FPU
-    /* when the fpu trap is handled */
-
-    b     arm64_exit_exc_fpu_done
-#endif
 
 irq_exit:
     b     arm64_exit_exception
@@ -527,11 +489,6 @@ SECTION_FUNC(text, arm64_fiq_handler)
      *    call arm64_context_switch(x0) to switch
      */
     bl    arm64_context_switch
-#ifdef CONFIG_ARCH_FPU
-    /* when the fpu trap is handled */
-
-    b     arm64_exit_exc_fpu_done
-#endif
 fiq_exit:
     b     arm64_exit_exception
 #endif
