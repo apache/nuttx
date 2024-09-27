@@ -44,6 +44,8 @@
 
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
   PANIC();
@@ -62,15 +64,23 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   up_set_current_regs(regs);
 
+  if (irq != XTENSA_IRQ_SWINT)
+    {
+      /* we are not trigger by syscall */
+
+      tcb->xcp.regs = regs;
+    }
+
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
+  tcb = this_task();
 
   /* Check for a context switch.  If a context switch occurred, then
    * current_regs will have a different value than it did on entry.
    */
 
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -92,14 +102,8 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = this_task();
-    }
-
-  /* Restore the cpu lock */
-
-  if (regs != up_current_regs())
-    {
-      regs = up_current_regs();
+      g_running_tasks[this_cpu()] = tcb;
+      regs = tcb->xcp.regs;
     }
 
   /* Set current_regs to NULL to indicate that we are no longer in an
