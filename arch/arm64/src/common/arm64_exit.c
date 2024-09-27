@@ -67,9 +67,6 @@ void up_exit(int status)
   enter_critical_section();
 
   /* Destroy the task at the head of the ready to run list. */
-#ifdef CONFIG_ARCH_FPU
-  arm64_destory_fpu(tcb);
-#endif
 
   nxtask_exit();
 
