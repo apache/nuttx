@@ -78,6 +78,8 @@ FAR char *strptime(FAR const char *restrict s, FAR const char *restrict f,
   int relyear = 0;
   #ifdef CONFIG_LIBC_LOCALE
   FAR const char *ex;
+#endif
+#if defined(CONFIG_LIBC_LOCALE) || defined(CONFIG_LIBC_LOCALTIME)
   size_t len;
   #endif
 
@@ -398,7 +400,10 @@ FAR char *strptime(FAR const char *restrict s, FAR const char *restrict f,
               {
                 /* Skip unknown timezone abbreviations */
 
-                while ((*s | 32) - 'a' <= 'z' - 'a') s++;
+                while ((*s | 32) - 'a' <= 'z' - 'a')
+                  {
+                    s++;
+                  }
               }
 
             break;
