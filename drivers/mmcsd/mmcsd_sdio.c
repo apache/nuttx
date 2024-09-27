@@ -1047,7 +1047,7 @@ static int mmcsd_switch(FAR struct mmcsd_state_s *priv, uint32_t arg)
    * CMD6(SWITCH) to set the PARTITION_ACCESS bits in the EXT_CSD
    * register, byte[179].After that, master can use the Multiple Block
    * read and write commands (CMD23, CMD18 and CMD25) to access the
-   * RPMB partition.
+   * specified partition.
    * PARTITION_CONFIG[179](see 7.4.69)
    * Bit[2:0] : PARTITION_ACCESS (before BOOT_PARTITION_ACCESS)
    * User selects partitions to access:
@@ -1073,7 +1073,17 @@ static int mmcsd_switch(FAR struct mmcsd_state_s *priv, uint32_t arg)
    *  [2:0] Cmd Set
    */
 
+  int ret;
+
+  ret = mmcsd_transferready(priv);
+  if (ret != OK)
+    {
+      ferr("ERROR: Card not ready: %d\n", ret);
+      return ret;
+    }
+
   mmcsd_sendcmdpoll(priv, MMCSD_CMD6, arg);
+  priv->wrbusy = true;
   return mmcsd_recv_r1(priv, MMCSD_CMD6);
 }
 
@@ -2690,8 +2700,9 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
 
   /* Configure the SDIO peripheral */
 
-  if ((IS_MMC(priv->type) && ((priv->caps & SDIO_CAPS_1BIT_ONLY) == 0)) &&
-      ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0))
+  if ((priv->caps & SDIO_CAPS_1BIT_ONLY) == 0 &&
+      (IS_MMC(priv->type) ||
+       (priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0))
     {
       /* JEDEC specs: A.8.3 Changing the data bus width: 'Bus testing
        * procedure' shows how mmc bus width may be detected.  This driver

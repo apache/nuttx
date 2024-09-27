@@ -85,7 +85,7 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
                                 int cmd, unsigned long arg)
 {
   FAR struct syslog_channel_info_s *info;
-  FAR struct syslog_channel_s *channel = NULL;
+  FAR syslog_channel_t *channel = NULL;
   int i;
 
   if (arg == 0)

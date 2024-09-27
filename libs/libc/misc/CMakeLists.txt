@@ -24,6 +24,7 @@
 list(
   APPEND
   SRCS
+  lib_bitmap.c
   lib_mknod.c
   lib_umask.c
   lib_utsname.c
@@ -84,10 +85,6 @@ list(
   lib_ftok.c
   lib_err.c
   lib_instrument.c)
-
-# Add generic integer math functions
-
-list(APPEND SRCS lib_log2ceil.c lib_log2floor.c)
 
 # Keyboard driver encoder/decoder
 

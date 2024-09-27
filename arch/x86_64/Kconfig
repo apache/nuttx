@@ -49,6 +49,24 @@ config ARCH_CHIP_X86_64_CUSTOM
 
 endchoice
 
+if SCHED_BACKTRACE
+choice
+	prompt "Choose x86_64 unwinder"
+	default X86_64_UNWINDER_FRAME_POINTER
+	---help---
+		This determines which method will be used for unwinding nuttx stack
+		traces for debug.
+
+config X86_64_UNWINDER_FRAME_POINTER
+	bool "Frame pointer unwinder"
+	select FRAME_POINTER
+	---help---
+		This option enables the frame pointer unwinder for unwinding
+		nuttx stack traces.
+
+endchoice # Choose x86_64 unwinder
+endif
+
 # CPU features
 
 config ARCH_HAVE_MMX

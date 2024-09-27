@@ -141,6 +141,7 @@ config ARCH_X86_64
 	select PCI_LATE_DRIVERS_REGISTER if PCI
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ARCH_TOOLCHAIN_GNU
+	select ARCH_HAVE_BACKTRACE
 	---help---
 		x86-64 architectures.
 

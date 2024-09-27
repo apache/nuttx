@@ -116,6 +116,22 @@ int pci_register_drivers(void)
     }
 #endif
 
+#ifdef CONFIG_PCI_QEMU_EPC
+  ret = pci_register_qemu_epc_driver();
+  if (ret < 0)
+    {
+      pcierr("pci_register_qemu_ep_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PCI_EPF_TEST
+  ret = pci_register_epf_test_driver();
+  if (ret < 0)
+    {
+      pcierr("pci_register_epf_test_driver failed, ret=%d\n", ret);
+    }
+#endif
+
   /* Initialization e1000 driver */
 
 #ifdef CONFIG_NET_E1000

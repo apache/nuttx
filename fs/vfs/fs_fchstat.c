@@ -114,11 +114,6 @@ int file_fchstat(FAR struct file *filep, FAR struct stat *buf, int flags)
 
   /* Adjust and check buf and flags */
 
-  if ((flags & CH_STAT_MODE) && (buf->st_mode & ~0177777))
-    {
-      return -EINVAL;
-    }
-
   if ((flags & CH_STAT_UID) && buf->st_uid == -1)
     {
       flags &= ~CH_STAT_UID;
@@ -224,7 +219,7 @@ int fchmod(int fd, mode_t mode)
 {
   struct stat buf;
 
-  buf.st_mode = mode;
+  buf.st_mode = mode & 0777;
 
   return fchstat(fd, &buf, CH_STAT_MODE);
 }

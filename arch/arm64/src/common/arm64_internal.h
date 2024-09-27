@@ -84,13 +84,6 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
-/* If the floating point unit is present and enabled, then save the
- * floating point registers as well as normal ARM registers.
- */
-
-#define arm64_savestate(regs) (regs = up_current_regs())
-#define arm64_restorestate(regs) up_set_current_regs(regs)
-
 /* This is the value used to mark the stack for subsequent stack monitoring
  * logic.
  */
@@ -270,6 +263,8 @@ EXTERN uint8_t g_idle_topstack[];   /* End+1 of heap */
  ****************************************************************************/
 
 void arm64_new_task(struct tcb_s *tak_new);
+void arm64_jump_to_user(uint64_t entry, uint64_t x0, uint64_t x1,
+                        uint64_t *regs) noreturn_function;
 
 /* Low level initialization provided by chip logic */
 

@@ -196,6 +196,7 @@ if !ARCH_SYSLOG
 config SYSLOG_CHAR
 	bool "Log to a character device"
 	default n
+	select SYSLOG_REGISTER
 	---help---
 		Enable the generic character device for the SYSLOG. The full path to the
 		SYSLOG device is provided by SYSLOG_DEVPATH. A valid character device (or
@@ -231,6 +232,7 @@ config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
 	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT
 	depends on DEV_CONSOLE
+	select SYSLOG_REGISTER
 	---help---
 		Use the system console as a SYSLOG output device.
 
@@ -291,6 +293,7 @@ config SYSLOG_RPMSG_SERVER_CHARDEV
 menuconfig SYSLOG_FILE
 	bool "Syslog file output"
 	default n
+	select SYSLOG_REGISTER
 	---help---
 		Build in support to use a file to collect SYSLOG output.  File SYSLOG
 		channels differ from other SYSLOG channels in that they cannot be
@@ -374,5 +377,10 @@ config SYSLOG_IOCTL
 		to control the behavior of the SYSLOG device. Currently, the supported
 		commands are SYSLOGIOC_SETFILTER/SYSLOGIOC_GETCHANNELS, which can be
 		used to set the enable status of different channels
+
+config SYSLOG_REGISTER
+	bool "Register syslog channel support"
+	---help---
+		This option will support register the syslog channel dynamically.
 
 endmenu # System logging

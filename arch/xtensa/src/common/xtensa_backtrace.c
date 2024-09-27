@@ -30,14 +30,29 @@
 
 #include "sched/sched.h"
 #include "xtensa.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* When the Windowed Register Option is configured, the register-window call
+ * instructions only store the low 30 bits of the return address, enabling
+ * addressing instructions within a 1GB region. To convert the return address
+ * to a valid PC, we need to add the base address of the instruction region.
+ * The following macro is used to define the base address of the 1GB region,
+ * which may not start in 0x00000000. This macro can be overriden in
+ * `chip_memory.h` of the chip directory.
+ */
+
+#ifndef XTENSA_INSTUCTION_REGION
+#  define XTENSA_INSTUCTION_REGION 0x00000000
+#endif
+
 /* Convert return address to a valid pc  */
 
-#define MAKE_PC_FROM_RA(ra)   (uintptr_t *)((ra) & 0x3fffffff)
+#define MAKE_PC_FROM_RA(ra) \
+  (uintptr_t *)(((ra) & 0x3fffffff) | XTENSA_INSTUCTION_REGION)
 
 /****************************************************************************
  * Private Types
@@ -173,17 +188,21 @@ static int backtrace_stack(uintptr_t *base, uintptr_t *limit,
 
   while (i < size)
     {
-      ra = (uintptr_t *)*(sp - 4);
+      ra = MAKE_PC_FROM_RA((uintptr_t)(*(sp - 4)));
       sp = (uintptr_t *)*(sp - 3);
 
-      if (sp >= limit || sp < base || ra == NULL)
+      if (!(xtensa_ptr_exec(ra) && xtensa_sp_sane((uintptr_t)sp))
+#if CONFIG_ARCH_INTERRUPTSTACK < 15
+          || sp >= limit || sp < base
+#endif
+         )
         {
           break;
         }
 
       if ((*skip)-- <= 0)
         {
-          buffer[i++] = MAKE_PC_FROM_RA((uintptr_t)ra);
+          buffer[i++] = ra;
         }
     }
 
@@ -250,6 +269,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                                 (void *)up_getsp(), NULL,
                                 buffer, size, &skip);
 #else
+          xtensa_window_spill();
           ret = backtrace_stack(rtcb->stack_base_ptr,
                                 rtcb->stack_base_ptr + rtcb->adj_stack_size,
                                 (void *)up_getsp(), NULL,

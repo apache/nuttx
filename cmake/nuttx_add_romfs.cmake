@@ -20,6 +20,20 @@
 #
 # ##############################################################################
 
+function(add_board_rcsrcs)
+  set_property(
+    TARGET board
+    APPEND
+    PROPERTY BOARD_RCSRCS ${ARGN})
+endfunction()
+
+function(add_board_rcraws)
+  set_property(
+    TARGET board
+    APPEND
+    PROPERTY BOARD_RCRAWS ${ARGN})
+endfunction()
+
 # ~~~
 # nuttx_add_romfs
 #
@@ -59,34 +73,84 @@ function(nuttx_add_romfs)
     message(FATAL_ERROR "Either PATH or FILES must be specified")
   endif()
 
+  if(TARGET board)
+    get_property(
+      board_rcsrcs
+      TARGET board
+      PROPERTY BOARD_RCSRCS)
+    get_property(
+      board_rcraws
+      TARGET board
+      PROPERTY BOARD_RCRAWS)
+    list(APPEND RCSRCS ${board_rcsrcs})
+    list(APPEND RCRAWS ${board_rcraws})
+  endif()
+
+  get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
+                                                       COMPILE_OPTIONS)
+
+  set(ROMFS_CMAKE_C_FLAGS "")
+  foreach(FLAG ${TOOLCHAIN_DIR_FLAGS})
+    if(NOT FLAG MATCHES "^\\$<.*>$")
+      list(APPEND ROMFS_CMAKE_C_FLAGS ${FLAG})
+    else()
+      string(REGEX MATCH "\\$<\\$<COMPILE_LANGUAGE:C>:(.*)>" matched ${FLAG})
+      if(matched)
+        list(APPEND ROMFS_CMAKE_C_FLAGS ${CMAKE_MATCH_1})
+      endif()
+    endif()
+  endforeach()
+
   foreach(rcsrc ${RCSRCS})
-    get_filename_component(rcpath ${rcsrc} DIRECTORY)
-    separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
+    if(IS_ABSOLUTE ${rcsrc})
+      string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
+                           "${rcsrc}")
+      string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcsrc}")
+      string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
+    else()
+      set(SOURCE_ETC_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+      set(SOURCE_ETC_SUFFIX ${rcsrc})
+    endif()
+
+    get_filename_component(rcpath ${SOURCE_ETC_SUFFIX} DIRECTORY)
     add_custom_command(
-      OUTPUT ${rcsrc}
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${rcpath}
       COMMAND
-        ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c
-        -I${CMAKE_BINARY_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/${rcsrc} >
-        ${rcsrc}
-      DEPENDS nuttx_context ${CMAKE_CURRENT_SOURCE_DIR}/${rcsrc})
-    list(APPEND DEPENDS ${rcsrc})
+        ${CMAKE_C_COMPILER} ${ROMFS_CMAKE_C_FLAGS} -E -P -x c
+        -I${CMAKE_BINARY_DIR}/include ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+        > ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+      DEPENDS nuttx_context ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
+    list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
   endforeach()
 
   foreach(rcraw ${RCRAWS})
-    get_filename_component(absrcraw ${rcraw} ABSOLUTE)
-    if(IS_DIRECTORY ${absrcraw})
+
+    if(IS_ABSOLUTE ${rcraw})
+      string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
+                           "${rcraw}")
+      string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcraw}")
+      string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
+    else()
+      set(SOURCE_ETC_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+      set(SOURCE_ETC_SUFFIX ${rcraw})
+    endif()
+
+    if(IS_DIRECTORY ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
       file(
-        GLOB subdir
+        GLOB subraws
         LIST_DIRECTORIES false
-        ${rcraws} ${rcraw})
-      foreach(rcraw ${rcraws})
-        list(APPEND DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${rcraw})
-        configure_file(${rcraw} ${CMAKE_CURRENT_BINARY_DIR}/${rcraw} COPYONLY)
+        RELATIVE ${SOURCE_ETC_PREFIX}
+        ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
+      foreach(subraw ${subraws})
+        list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${subraw})
+        configure_file(${SOURCE_ETC_PREFIX}/${subraw}
+                       ${CMAKE_CURRENT_BINARY_DIR}/${subraw} COPYONLY)
       endforeach()
     else()
-      list(APPEND DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${rcraw})
-      configure_file(${rcraw} ${CMAKE_CURRENT_BINARY_DIR}/${rcraw} COPYONLY)
+      list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
+      configure_file(${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+                     ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} COPYONLY)
     endif()
   endforeach()
 

@@ -353,24 +353,18 @@ static int pseudofile_munmap(FAR struct task_group_s *group,
    * The inode is released after this call, hence checking if i_crefs <= 1.
    */
 
-  int ret = inode_lock();
-  if (ret >= 0)
+  if (inode->i_parent == NULL &&
+      atomic_load(&inode->i_crefs) <= 1)
     {
-      if (inode->i_parent == NULL &&
-          inode->i_crefs <= 1)
+      /* Delete the inode metadata */
+
+      if (inode->i_private)
         {
-          /* Delete the inode metadata */
-
-          if (inode->i_private)
-            {
-              fs_heap_free(inode->i_private);
-            }
-
-          inode->i_private = NULL;
-          ret = OK;
+          fs_heap_free(inode->i_private);
         }
 
-      inode_unlock();
+      inode->i_private = NULL;
+      ret = OK;
     }
 
   /* Unkeep the inode when unmapped, decrease refcount */
@@ -501,7 +495,6 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
       goto reserve_err;
     }
 
-  (*node)->i_crefs = 0;
   (*node)->i_flags = 1;
   (*node)->u.i_ops = &g_pseudofile_ops;
   (*node)->i_private = pf;

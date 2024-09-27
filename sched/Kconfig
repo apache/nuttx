@@ -1739,8 +1739,7 @@ config MODULE
 menu "Work queue support"
 
 config SCHED_WORKQUEUE
-#	bool "Enable worker thread"
-	bool
+	bool "Enable worker thread"
 	default n
 	---help---
 		Create dedicated "worker" threads to handle delayed or asynchronous

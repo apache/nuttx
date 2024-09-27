@@ -117,7 +117,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       nxsem_init(&conn->resp.sem, 0, 1);
-      conn->usockid = -1;
+      conn->usockid = USRSOCK_USOCKID_INVALID;
       conn->state = USRSOCK_CONN_STATE_UNINITIALIZED;
 
       /* Enqueue the connection into the active list */
@@ -344,7 +344,7 @@ void usrsock_initialize(void)
 
       /* Mark the connection closed and move it to the free list */
 
-      conn->usockid = -1;
+      conn->usockid = USRSOCK_USOCKID_INVALID;
       conn->state   = USRSOCK_CONN_STATE_UNINITIALIZED;
       dq_addlast(&conn->sconn.node, &g_free_usrsock_connections);
     }

@@ -55,11 +55,11 @@ if(CONFIG_CRYPTO)
   list(APPEND SRCS hmac.c)
   if(CONFIG_CRYPTO_RANDOM_POOL)
     list(APPEND SRCS idgen.c)
+    list(APPEND SRCS curve25519.c)
   endif()
   list(APPEND SRCS key_wrap.c)
   list(APPEND SRCS siphash.c)
   list(APPEND SRCS hmac_buff.c)
-  list(APPEND SRCS curve25519.c)
   list(APPEND SRCS bn.c)
 
   # Entropy pool random number generator

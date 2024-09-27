@@ -107,30 +107,6 @@
 #  define TLIST_BLOCKED(t)       __TLIST_HEAD(t)
 #endif
 
-#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD
-#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD -1
-#endif
-
-#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE
-#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE -1
-#endif
-
-#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION
-#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION -1
-#endif
-
-#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION
-#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION -1
-#endif
-
-#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ
-#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ -1
-#endif
-
-#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG
-#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG -1
-#endif
-
 #ifdef CONFIG_SCHED_CRITMONITOR_MAXTIME_PANIC
 #  define CRITMONITOR_PANIC(fmt, ...) \
           do \
@@ -345,6 +321,7 @@ int nxthread_create(FAR const char *name, uint8_t ttype, int priority,
 
 bool nxsched_add_readytorun(FAR struct tcb_s *rtrtcb);
 bool nxsched_remove_readytorun(FAR struct tcb_s *rtrtcb, bool merge);
+void nxsched_remove_self(FAR struct tcb_s *rtrtcb);
 bool nxsched_add_prioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list);
 void nxsched_merge_prioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
                                uint8_t task_state);

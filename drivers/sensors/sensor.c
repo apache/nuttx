@@ -161,36 +161,51 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {0,                                         NULL},
   {sizeof(struct sensor_accel),               "accel"},
   {sizeof(struct sensor_mag),                 "mag"},
+  {sizeof(struct sensor_orientation),         "orientation"},
   {sizeof(struct sensor_gyro),                "gyro"},
   {sizeof(struct sensor_light),               "light"},
   {sizeof(struct sensor_baro),                "baro"},
+  {sizeof(struct sensor_noise),               "noise"},
   {sizeof(struct sensor_prox),                "prox"},
+  {sizeof(struct sensor_rgb),                 "rgb"},
+  {sizeof(struct sensor_accel),               "linear_accel"},
+  {sizeof(struct sensor_rotation),            "rotation"},
   {sizeof(struct sensor_humi),                "humi"},
   {sizeof(struct sensor_temp),                "temp"},
-  {sizeof(struct sensor_rgb),                 "rgb"},
-  {sizeof(struct sensor_hall),                "hall"},
-  {sizeof(struct sensor_ir),                  "ir"},
-  {sizeof(struct sensor_uv),                  "uv"},
-  {sizeof(struct sensor_noise),               "noise"},
   {sizeof(struct sensor_pm25),                "pm25"},
   {sizeof(struct sensor_pm1p0),               "pm1p0"},
   {sizeof(struct sensor_pm10),                "pm10"},
-  {sizeof(struct sensor_co2),                 "co2"},
+  {sizeof(struct sensor_event),               "motion_detect"},
+  {sizeof(struct sensor_event),               "step_detector"},
+  {sizeof(struct sensor_step_counter),        "step_counter"},
+  {sizeof(struct sensor_ph),                  "ph"},
+  {sizeof(struct sensor_hrate),               "hrate"},
+  {sizeof(struct sensor_event),               "tilt_detector"},
+  {sizeof(struct sensor_event),               "wake_gesture"},
+  {sizeof(struct sensor_event),               "glance_gesture"},
+  {sizeof(struct sensor_event),               "pickup_gesture"},
+  {sizeof(struct sensor_event),               "wrist_tilt"},
+  {sizeof(struct sensor_orientation),         "device_orientation"},
+  {sizeof(struct sensor_pose_6dof),           "pose_6dof"},
+  {sizeof(struct sensor_gas),                 "gas"},
+  {sizeof(struct sensor_event),               "significant_motion"},
+  {sizeof(struct sensor_hbeat),               "hbeat"},
+  {sizeof(struct sensor_force),               "force"},
+  {sizeof(struct sensor_hall),                "hall"},
+  {sizeof(struct sensor_event),               "offbody_detector"},
+  {sizeof(struct sensor_uv),                  "uv"},
+  {sizeof(struct sensor_angle),               "hinge_angle"},
+  {sizeof(struct sensor_ir),                  "ir"},
   {sizeof(struct sensor_hcho),                "hcho"},
   {sizeof(struct sensor_tvoc),                "tvoc"},
-  {sizeof(struct sensor_ph),                  "ph"},
   {sizeof(struct sensor_dust),                "dust"},
-  {sizeof(struct sensor_hrate),               "hrate"},
-  {sizeof(struct sensor_hbeat),               "hbeat"},
   {sizeof(struct sensor_ecg),                 "ecg"},
   {sizeof(struct sensor_ppgd),                "ppgd"},
   {sizeof(struct sensor_ppgq),                "ppgq"},
   {sizeof(struct sensor_impd),                "impd"},
   {sizeof(struct sensor_ots),                 "ots"},
-  {sizeof(struct sensor_wake_gesture),        "wake_gesture"},
+  {sizeof(struct sensor_co2),                 "co2"},
   {sizeof(struct sensor_cap),                 "cap"},
-  {sizeof(struct sensor_gas),                 "gas"},
-  {sizeof(struct sensor_force),               "force"},
   {sizeof(struct sensor_gnss),                "gnss"},
   {sizeof(struct sensor_gnss_satellite),      "gnss_satellite"},
   {sizeof(struct sensor_gnss_measurement),    "gnss_measurement"},
@@ -456,9 +471,17 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
 
   if (user->state.interval == UINT32_MAX)
     {
-      ret = circbuf_peekat(&upper->buffer,
-                           user->bufferpos * upper->state.esize,
-                           buffer, len);
+      if (buffer != NULL)
+        {
+          ret = circbuf_peekat(&upper->buffer,
+                               user->bufferpos * upper->state.esize,
+                               buffer, len);
+        }
+      else
+        {
+          ret = len;
+        }
+
       user->bufferpos += nums;
       circbuf_peekat(&upper->timing,
                      (user->bufferpos - 1) * TIMING_BUF_ESIZE,
@@ -506,9 +529,17 @@ static ssize_t sensor_do_samples(FAR struct sensor_upperhalf_s *upper,
               ((user->state.generation + user->state.interval) << 1);
       if (delta >= 0)
         {
-          ret += circbuf_peekat(&upper->buffer,
-                                (pos - 1) * upper->state.esize,
-                                buffer + ret, upper->state.esize);
+          if (buffer != NULL)
+            {
+              ret += circbuf_peekat(&upper->buffer,
+                                    (pos - 1) * upper->state.esize,
+                                    buffer + ret, upper->state.esize);
+            }
+          else
+            {
+              ret += upper->state.esize;
+            }
+
           user->bufferpos = pos;
           user->state.generation += user->state.interval;
           if (ret >= len)
@@ -701,7 +732,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
   FAR struct sensor_user_s *user = filep->f_priv;
   ssize_t ret;
 
-  if (!buffer || !len)
+  if (!len)
     {
       return -EINVAL;
     }
@@ -709,6 +740,11 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
   nxrmutex_lock(&upper->lock);
   if (lower->ops->fetch)
     {
+      if (buffer == NULL)
+        {
+          return -EINVAL;
+        }
+
       if (!(filep->f_oflags & O_NONBLOCK))
         {
           nxrmutex_unlock(&upper->lock);
@@ -738,11 +774,18 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
     }
   else if (lower->persist)
     {
-      /* Persistent device can get latest old data if not updated. */
+      if (buffer == NULL)
+        {
+          ret = upper->state.esize;
+        }
+      else
+        {
+          /* Persistent device can get latest old data if not updated. */
 
-      ret = circbuf_peekat(&upper->buffer,
-                           (user->bufferpos - 1) * upper->state.esize,
-                           buffer, upper->state.esize);
+          ret = circbuf_peekat(&upper->buffer,
+                               (user->bufferpos - 1) * upper->state.esize,
+                               buffer, upper->state.esize);
+        }
     }
   else
     {

@@ -729,12 +729,22 @@ static void mpfs_sendfifo(struct mpfs_dev_s *priv)
        * come back when we're good to write again.
        */
 
-      if (priv->remaining && (!(getreg32(MPFS_EMMCSD_SRS09) &
-          MPFS_EMMCSD_SRS09_BWE)))
+      if (priv->remaining)
         {
-          modifyreg32(MPFS_EMMCSD_SRS14, 0, MPFS_EMMCSD_SRS14_BWR_IE);
+          /* Enable BWR before checking BWE bit */
+
           putreg32(MPFS_EMMCSD_SRS12_BWR, MPFS_EMMCSD_SRS12);
-          return;
+          modifyreg32(MPFS_EMMCSD_SRS14, 0, MPFS_EMMCSD_SRS14_BWR_IE);
+          if (!(getreg32(MPFS_EMMCSD_SRS09) & MPFS_EMMCSD_SRS09_BWE))
+            {
+              return;
+            }
+
+          /* There is still room for writing to buffer,
+           * disable BWR and continue.
+           */
+
+          modifyreg32(MPFS_EMMCSD_SRS14, MPFS_EMMCSD_SRS14_BWR_IE, 0);
         }
     }
 
@@ -1755,6 +1765,84 @@ static void mpfs_widebus(struct sdio_dev_s *dev, bool wide)
 /****************************************************************************
  * Name: mpfs_clock
  *
+ ****************************************************************************/
+
+static void mpfs_set_hs_8bit(struct sdio_dev_s *dev)
+{
+  struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
+  int ret;
+  uint32_t r1;
+  uint32_t rr;
+
+  /* mpfs to DDR mode */
+
+  modifyreg32(MPFS_EMMCSD_HRS06, 0x7, MPFS_EMMCSD_MODE_DDR);
+
+  /* eMMC to HS mode */
+
+  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b90100u)) == OK)
+    {
+      if ((ret == mpfs_waitresponse(dev, MMCSD_CMD6)) == OK)
+        {
+          ret = mpfs_recvshortcrc(dev, MMCSD_CMD6, &r1);
+        }
+    }
+
+  if (ret < 0)
+    {
+      mcerr("Failed to set high speed mode\n");
+      goto err;
+    }
+
+  /* While busy */
+
+  do
+    {
+      rr = getreg32(MPFS_EMMCSD_SRS09);
+    }
+  while ((rr & (1 << 20)) == 0);
+
+  /* mpfs to 8-bit mode */
+
+  modifyreg32(MPFS_EMMCSD_SRS10, 0, MPFS_EMMCSD_SRS10_EDTW);
+
+  /* eMMC to 8-bit DDR mode */
+
+  if ((ret = mpfs_sendcmd(dev, MMCSD_CMD6, 0x03b70600u)) == OK)
+    {
+      if ((ret == mpfs_waitresponse(dev, MMCSD_CMD6)) == OK)
+        {
+          ret = mpfs_recvshortcrc(dev, MMCSD_CMD6, &r1);
+        }
+    }
+
+  if (ret < 0)
+    {
+      mcerr("Failed to set 8-bit mode\n");
+      goto err;
+    }
+
+  /* While busy */
+
+  do
+    {
+      rr = getreg32(MPFS_EMMCSD_SRS09);
+    }
+  while ((rr & (1 << 20)) == 0);
+
+  return;
+
+err:
+
+  /* Reset to 1-bit legacy mode */
+
+  modifyreg32(MPFS_EMMCSD_HRS06, 0, MPFS_EMMCSD_MODE_LEGACY);
+  modifyreg32(MPFS_EMMCSD_SRS10, MPFS_EMMCSD_SRS10_EDTW, 0);
+}
+
+/****************************************************************************
+ * Name: mpfs_clock
+ *
  * Description:
  *   Enable/disable SDIO clocking. Only up to 25 Mhz is supported now. 50 Mhz
  *   may work with some cards.
@@ -1795,7 +1883,8 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
         {
           clckr = MPFS_MMC_CLOCK_200MHZ;
         }
-      else if (priv->bus_mode == MPFS_EMMCSD_MODE_SDR)
+      else if (priv->bus_mode == MPFS_EMMCSD_MODE_SDR ||
+               priv->bus_mode == MPFS_EMMCSD_MODE_DDR)
         {
           clckr = MPFS_MMC_CLOCK_50MHZ;
         }
@@ -1819,6 +1908,13 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
       clckr = MPFS_MMC_CLOCK_25MHZ;
       break;
   }
+
+  if (rate == CLOCK_MMC_TRANSFER)
+    {
+      /* eMMC: Set 8-bit data bus and correct bus mode */
+
+      mpfs_set_hs_8bit(dev);
+    }
 
   /* Set the new clock frequency */
 
@@ -2155,7 +2251,11 @@ static int mpfs_dmarecvsetup(struct sdio_dev_s *dev,
   mcinfo("Receive: %zu bytes\n", buflen);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uintptr_t)buffer & 3) == 0);
+  if (((uintptr_t)buffer & 3) != 0)
+    {
+      mcerr("Unaligned buffer: %p\n", buffer);
+      return -EFAULT;
+    }
 
   priv->buffer       = (uint32_t *)buffer;
   priv->remaining    = buflen;
@@ -2215,15 +2315,10 @@ static int mpfs_dmasendsetup(struct sdio_dev_s *dev,
   mcinfo("Send: %zu bytes\n", buflen);
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uintptr_t)buffer & 3) == 0);
-
-  /* DMA send doesn't work in 0x08xxxxxxx address range. Default to IRQ mode
-   * in this special case.
-   */
-
-  if (((uintptr_t)buffer & 0xff000000) == 0x08000000)
+  if (((uintptr_t)buffer & 3) != 0)
     {
-      return mpfs_sendsetup(dev, buffer, buflen);
+      mcerr("Unaligned buffer: %p\n", buffer);
+      return -EFAULT;
     }
 
   /* Save the source buffer information for use by the interrupt handler */

@@ -556,6 +556,10 @@ static FAR struct pci_bus_s *pci_alloc_bus(void)
   FAR struct pci_bus_s *bus;
 
   bus = kmm_zalloc(sizeof(*bus));
+  if (bus == NULL)
+    {
+      return NULL;
+    }
 
   list_initialize(&bus->node);
   list_initialize(&bus->children);
@@ -580,6 +584,10 @@ static FAR struct pci_device_s *pci_alloc_device(void)
   FAR struct pci_device_s *dev;
 
   dev = kmm_zalloc(sizeof(*dev));
+  if (dev == NULL)
+    {
+      return NULL;
+    }
 
   list_initialize(&dev->node);
   list_initialize(&dev->bus_list);
@@ -1246,7 +1254,11 @@ static int pci_enable_msix(FAR struct pci_device_s *dev, FAR int *irq,
   /* Map MSI-X table */
 
   tblend = tbladdr + tblsize * PCI_MSIX_ENTRY_SIZE;
-  tbladdr = dev->bus->ctrl->ops->map(dev->bus, tbladdr, tblend);
+
+  if (dev->bus->ctrl->ops->map)
+    {
+      tbladdr = dev->bus->ctrl->ops->map(dev->bus, tbladdr, tblend);
+    }
 
   /* Limit tblsize */
 
@@ -1561,6 +1573,60 @@ int pci_select_bars(FAR struct pci_device_s *dev, unsigned int flags)
 }
 
 /****************************************************************************
+ * Name: pci_bus_map_region
+ *
+ * Description:
+ *   Create a virtual mapping for a address.
+ *
+ *   Using this function you will get an virtual address.
+ *   These functions hide the details if this is a MMIO or PIO address
+ *   space and will just do what you expect from them in the correct way.
+ *
+ * Input Parameters:
+ *   bus   - PCI bus
+ *   start - The address base
+ *   size  - The length of the address
+ *
+ * Returned Value:
+ *  Virtual address or zero if failed
+ ****************************************************************************/
+
+FAR void *
+pci_bus_map_region(FAR struct pci_bus_s *bus, uintptr_t start, size_t size)
+{
+  return bus->ctrl->ops->map ?
+    (FAR void *)bus->ctrl->ops->map(bus, start, start + size)
+    : (FAR void *)start;
+}
+
+/****************************************************************************
+ * Name: pci_map_bar_region
+ *
+ * Description:
+ *   Create a virtual mapping for a PCI BAR REGION.
+ *
+ *   Using this function you will get an address to your device BAR region.
+ *   These functions hide the details if this is a MMIO or PIO address
+ *   space and will just do what you expect from them in the correct way.
+ *
+ * Input Parameters:
+ *   dev - PCI device that owns the BAR
+ *   bar - BAR number
+ *   offset - BAR region offset
+ *   length - BAR region length
+ *
+ * Returned Value:
+ *  IO address or zero if failed
+ ****************************************************************************/
+
+FAR void *pci_map_bar_region(FAR struct pci_device_s *dev, int bar,
+                             uintptr_t offset, size_t length)
+{
+  uintptr_t start = pci_resource_start(dev, bar) + offset;
+  return pci_map_region(dev, start, length);
+}
+
+/****************************************************************************
  * Name: pci_map_bar
  *
  * Description:
@@ -1581,16 +1647,7 @@ int pci_select_bars(FAR struct pci_device_s *dev, unsigned int flags)
 
 FAR void *pci_map_bar(FAR struct pci_device_s *dev, int bar)
 {
-  FAR struct pci_bus_s *bus = dev->bus;
-  uintptr_t start = pci_resource_start(dev, bar);
-  uintptr_t end = pci_resource_end(dev, bar);
-
-  if (bus->ctrl->ops->map)
-    {
-      start = bus->ctrl->ops->map(bus, start, end);
-    }
-
-  return (FAR void *)start;
+  return pci_map_bar_region(dev, bar, 0, pci_resource_len(dev, bar));
 }
 
 /****************************************************************************
@@ -1695,9 +1752,17 @@ bool pci_stat_line(FAR struct pci_device_s *dev)
 int pci_get_irq(FAR struct pci_device_s *dev)
 {
   uint8_t line = 0;
+  uint8_t pin = 0;
 
   pci_read_config_byte(dev, PCI_INTERRUPT_LINE, &line);
-  return dev->bus->ctrl->ops->get_irq(dev->bus, line);
+  pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin);
+
+  if (dev->bus->ctrl->ops->get_irq)
+    {
+      return dev->bus->ctrl->ops->get_irq(dev->bus, dev->devfn, line, pin);
+    }
+
+  return -ENOTSUP;
 }
 
 /****************************************************************************
@@ -1719,7 +1784,12 @@ int pci_get_irq(FAR struct pci_device_s *dev)
 
 int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
-  return dev->bus->ctrl->ops->alloc_irq(dev->bus, irq, num);
+  if (dev->bus->ctrl->ops->alloc_irq)
+    {
+      return dev->bus->ctrl->ops->alloc_irq(dev->bus, irq, num);
+    }
+
+  return -ENOTSUP;
 }
 
 /****************************************************************************
@@ -1740,7 +1810,10 @@ int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 
 void pci_release_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
-  dev->bus->ctrl->ops->release_irq(dev->bus, irq, num);
+  if (dev->bus->ctrl->ops->release_irq)
+    {
+      dev->bus->ctrl->ops->release_irq(dev->bus, irq, num);
+    }
 }
 
 /****************************************************************************
@@ -1763,6 +1836,11 @@ int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
   uint8_t msi = 0;
   uint8_t msix = 0;
+
+  if (dev->bus->ctrl->ops->connect_irq == NULL)
+    {
+      return -ENOTSUP;
+    }
 
   /* Get MSI base */
 
@@ -1999,6 +2077,11 @@ int pci_register_controller(FAR struct pci_controller_s *ctrl)
     }
 
   bus = pci_alloc_bus();
+  if (bus == NULL)
+    {
+      return -ENOMEM;
+    }
+
   bus->ctrl = ctrl;
 
   ctrl->bus = bus;

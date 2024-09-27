@@ -699,6 +699,13 @@ Configures the NuttShell (nsh) over USB Serial (check usbserial configuration) a
 BMP280 has an I2C address that can be configure by SDO. Connecting SDO to GND results in slave
 address 0x76, connection it to VDD results in slave address 0x77. This can be configured by enabling BMP280_I2C_ADDR_76 or BMP280_I2C_ADDR_77. This configuration uses I2C1 and slave address 0x77.
 
+======= =====
+SENSOR  PINS
+======= =====
+SDA     PA7
+SCK     PB8
+======= =====
+
 NSH commands::
 
        NuttShell (NSH) NuttX-12.6.0-RC1
@@ -710,3 +717,37 @@ NSH commands::
        Temperature [C] = 24.490000
        
 There is a known issue where every time the sensor is initialized, the first measurement is wrong, please check https://github.com/apache/nuttx/issues/12421 for the latest updates on this issue.
+
+lcd1602
+-------
+
+This configuration sets up the NuttShell (NSH) interface over USB Serial (refer to the usbserial
+configuration for details). It also enables I2C1 and the driver for an alphanumeric/segment LCD.
+Specifically, the setup supports a 16x2 LCD screen based on the HD44780 controller, which is
+interfaced using an I2C adapter known as the LCD Backpack, utilizing the PCF8574 chip.
+
+======= =====
+LCD     PINS
+======= =====
+SDA     PA7
+SCK     PB8
+======= =====
+
+NSH commands::
+
+       nsh> slcd "Hello NuttX"
+       Opening /dev/slcd0 for read/write access
+       Attributes:
+         rows: 2 columns: 16 nbars: 0
+         max contrast: 0 max brightness: 1
+       Clear screen
+       WRITING:
+       0000: 1b5b46                                                            .[F 
+       Set brightness to 1
+       Print [Hello NuttX]
+       WRITING:
+       0000: 1b5b471b5b30304c1b5b4548656c6c6f 204e75747458                     .[G.[00L.[EHello  NuttX
+       Test complete
+       nsh> 
+
+       

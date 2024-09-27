@@ -578,12 +578,6 @@ config MPFS_COREPWM0_BASE
 	default 0x44000000
 	depends on MPFS_COREPWM0
 
-config MPFS_COREPWM0_PWMCLK
-	int "Clock frequency of the CorePWM0 block (Hz)"
-	default 25000000
-	range 1000000 100000000
-	depends on MPFS_COREPWM0
-
 config MPFS_COREPWM0_REGWIDTH
 	int "Width of the PWM register (8, 16 or 32 bits)"
 	default 32
@@ -605,12 +599,6 @@ config MPFS_COREPWM1
 config MPFS_COREPWM1_BASE
 	hex "Base address for the instance"
 	default 0x45000000
-	depends on MPFS_COREPWM1
-
-config MPFS_COREPWM1_PWMCLK
-	int "Clock frequency of the CorePWM1 block (Hz)"
-	default 25000000
-	range 1000000 100000000
 	depends on MPFS_COREPWM1
 
 config MPFS_COREPWM1_REGWIDTH

@@ -50,6 +50,8 @@
 #define USRSOCK_EVENT_INTERNAL_MASK (USRSOCK_EVENT_CONNECT_READY | \
                                      USRSOCK_EVENT_REQ_COMPLETE)
 
+#define USRSOCK_USOCKID_INVALID     (-1)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

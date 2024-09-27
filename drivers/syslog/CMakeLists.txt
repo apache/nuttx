@@ -41,7 +41,11 @@ endif()
 
 # System logging to a character device (or file)
 
-list(APPEND SRCS syslog_device.c)
+if(CONFIG_SYSLOG_CONSOLE
+   OR CONFIG_SYSLOG_CHAR
+   OR CONFIG_SYSLOG_FILE)
+  list(APPEND SRCS syslog_device.c)
+endif()
 
 if(CONFIG_SYSLOG_CHAR)
   list(APPEND SRCS syslog_devchannel.c)

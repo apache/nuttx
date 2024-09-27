@@ -600,7 +600,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
  *
  ****************************************************************************/
 
-int nxsig_dispatch(pid_t pid, FAR siginfo_t *info)
+int nxsig_dispatch(pid_t pid, FAR siginfo_t *info, bool thread)
 {
 #ifdef HAVE_GROUP_MEMBERS
   FAR struct tcb_s *stcb;
@@ -631,16 +631,29 @@ int nxsig_dispatch(pid_t pid, FAR siginfo_t *info)
 
   if (group != NULL)
     {
-      /* Yes.. call group_signal() to send the signal to the correct group
-       * member.
-       */
+      if (thread)
+        {
+          /* Before the notification, we should validate the tid and
+           * and make sure that the notified thread is in same process
+           * with the current thread.
+           */
 
-      return group_signal(group, info);
+          if (stcb != NULL && group == this_task()->group)
+            {
+              return nxsig_tcbdispatch(stcb, info);
+            }
+        }
+      else
+        {
+          /* Yes.. call group_signal() to send the signal to the correct
+           * group member.
+           */
+
+          return group_signal(group, info);
+        }
     }
-  else
-    {
-      return -ESRCH;
-    }
+
+  return -ESRCH;
 
 #else
   FAR struct tcb_s *stcb;

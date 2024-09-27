@@ -97,6 +97,11 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
       addrenv_switch(NULL);
 #endif
 
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[cpu]);
+      nxsched_resume_scheduler(this_task());
+
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
@@ -175,7 +180,7 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
                "with error code %" PRId64 ":\n",
                irq, regs[REG_ERRCODE]);
 
-        up_dump_register(regs);
+        PANIC_WITH_REGS("panic", regs);
 
         up_trash_cpu();
         break;

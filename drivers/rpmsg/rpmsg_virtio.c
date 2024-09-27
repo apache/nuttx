@@ -45,6 +45,8 @@
 #define RPMSG_VIRTIO_TIMEOUT_MS 20
 #define RPMSG_VIRTIO_NOTIFYID   0
 
+#define RPMSG_VIRTIO_CMD_PANIC  0x1
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -69,6 +71,7 @@ struct rpmsg_virtio_priv_s
 
 static int rpmsg_virtio_wait(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
 static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem);
+static void rpmsg_virtio_panic(FAR struct rpmsg_s *rpmsg);
 static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg);
 static FAR const char *
 rpmsg_virtio_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
@@ -97,6 +100,7 @@ static const struct rpmsg_ops_s g_rpmsg_virtio_ops =
 {
   .wait               = rpmsg_virtio_wait,
   .post               = rpmsg_virtio_post,
+  .panic              = rpmsg_virtio_panic,
   .dump               = rpmsg_virtio_dump,
   .get_local_cpuname  = rpmsg_virtio_get_local_cpuname,
   .get_cpuname        = rpmsg_virtio_get_cpuname,
@@ -267,6 +271,23 @@ static int rpmsg_virtio_post(FAR struct rpmsg_s *rpmsg, FAR sem_t *sem)
   return ret;
 }
 
+static void rpmsg_virtio_panic(FAR struct rpmsg_s *rpmsg)
+{
+  FAR struct rpmsg_virtio_priv_s *priv =
+      (FAR struct rpmsg_virtio_priv_s *)rpmsg;
+
+  if (RPMSG_VIRTIO_IS_MASTER(priv->dev))
+    {
+      priv->rsc->cmd_master = RPMSG_VIRTIO_CMD_PANIC;
+    }
+  else
+    {
+      priv->rsc->cmd_slave = RPMSG_VIRTIO_CMD_PANIC;
+    }
+
+  rpmsg_virtio_notify(priv->vdev.vrings_info->vq);
+}
+
 #ifdef CONFIG_OPENAMP_DEBUG
 static int rpmsg_virtio_buffer_nused(FAR struct rpmsg_virtio_device *rvdev,
                                      bool rx)
@@ -430,12 +451,41 @@ static void rpmsg_virtio_wakeup_rx(FAR struct rpmsg_virtio_priv_s *priv)
     }
 }
 
+static void rpmsg_virtio_command(FAR struct rpmsg_virtio_priv_s *priv)
+{
+  FAR struct rpmsg_virtio_rsc_s *rsc = priv->rsc;
+  uint32_t cmd;
+
+  if (RPMSG_VIRTIO_IS_MASTER(priv->dev))
+    {
+      cmd = rsc->cmd_slave;
+      rsc->cmd_slave = 0;
+    }
+  else
+    {
+      cmd = rsc->cmd_master;
+      rsc->cmd_master = 0;
+    }
+
+  switch (cmd)
+    {
+      case RPMSG_VIRTIO_CMD_PANIC:
+        PANIC();
+        break;
+
+      default:
+        break;
+    }
+}
+
 static int rpmsg_virtio_callback(FAR void *arg, uint32_t vqid)
 {
   FAR struct rpmsg_virtio_priv_s *priv = arg;
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtio_device *vdev = rvdev->vdev;
   FAR struct virtqueue *rvq = rvdev->rvq;
+
+  rpmsg_virtio_command(priv);
 
   if (vqid == RPMSG_VIRTIO_NOTIFY_ALL ||
       vqid == vdev->vrings_info[rvq->vq_queue_index].notifyid)

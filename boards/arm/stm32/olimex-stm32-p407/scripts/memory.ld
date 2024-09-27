@@ -92,7 +92,7 @@ MEMORY
 
   /* 112Kb of contiguous SRAM */
 
-  ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 16K
-  usram (rwx)      : ORIGIN = 0x20004000, LENGTH = 16K
-  xsram (rwx)      : ORIGIN = 0x20008000, LENGTH = 80K
+  ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 8K
+  usram (rwx)      : ORIGIN = 0x20002000, LENGTH = 8K
+  xsram (rwx)      : ORIGIN = 0x20008000, LENGTH = 96K
 }

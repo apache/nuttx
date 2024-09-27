@@ -216,7 +216,7 @@ static off_t seek_pseudodir(FAR struct file *filep, off_t offset)
     {
       /* Increment the reference count on this next node */
 
-      curr->i_crefs++;
+      atomic_fetch_add(&curr->i_crefs, 1);
     }
 
   inode_unlock();
@@ -383,7 +383,7 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
     {
       /* Increment the reference count on this next node */
 
-      pdir->next->i_crefs++;
+      atomic_fetch_add(&pdir->next->i_crefs, 1);
     }
 
   inode_unlock();

@@ -201,8 +201,10 @@ function(nuttx_add_extra_library)
     # define the target name of the extra library
     string(REGEX REPLACE "[^a-zA-Z0-9]" "_" extra_target "${extra_lib}")
     # set the absolute path of the library for the import target
-    nuttx_library_import(${extra_target} ${extra_lib})
-    set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${extra_target})
+    if(NOT TARGET ${extra_target})
+      nuttx_library_import(${extra_target} ${extra_lib})
+      set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${extra_target})
+    endif()
   endforeach()
 endfunction()
 

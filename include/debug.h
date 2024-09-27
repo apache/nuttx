@@ -596,6 +596,24 @@
 #  define i2sinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_I3C_ERROR
+#  define i3cerr       _err
+#else
+#  define i3cerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_I3C_WARN
+#  define i3cwarn     _warn
+#else
+#  define i3cwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_I3C_INFO
+#  define i3cinfo     _info
+#else
+#  define i3cinfo     _none
+#endif
+
 #ifdef CONFIG_DEBUG_PWM_ERROR
 #  define pwmerr       _err
 #else
@@ -756,6 +774,24 @@
 #  define spiinfo     _info
 #else
 #  define spiinfo     _none
+#endif
+
+#ifdef CONFIG_DEBUG_THERMAL_ERROR
+#  define therr         _err
+#else
+#  define therr        _none
+#endif
+
+#ifdef CONFIG_DEBUG_THERMAL_WARN
+#  define thwarn       _warn
+#else
+#  define thwarn       _none
+#endif
+
+#ifdef CONFIG_DEBUG_THERMAL_INFO
+#  define thinfo       _info
+#else
+#  define thinfo       _none
 #endif
 
 #ifdef CONFIG_DEBUG_TIMER_ERROR
@@ -1172,6 +1208,14 @@
 #else
 #  define i2serrdumpbuffer(m,b,n)
 #  define i2sinfodumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_I3C
+#  define i3cerrdumpbuffer(m,b,n)  errdumpbuffer(m,b,n)
+#  define i3cinfodumpbuffer(m,b,n) infodumpbuffer(m,b,n)
+#else
+#  define i3cerrdumpbuffer(m,b,n)
+#  define i3cinfodumpbuffer(m,b,n)
 #endif
 
 #ifdef CONFIG_DEBUG_PWM

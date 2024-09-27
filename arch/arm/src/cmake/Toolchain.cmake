@@ -61,6 +61,8 @@ if(CONFIG_ARCH_TOOLCHAIN_CLANG)
   # https://github.com/apache/incubator-nuttx/pull/5971
 
   add_compile_options(-fno-builtin)
+  add_compile_options(-Wno-atomic-alignment)
+  add_compile_options(-Wno-atomic-alignment)
 else()
   set(TOOLCHAIN_PREFIX arm-none-eabi)
   set(CMAKE_LIBRARY_ARCHITECTURE ${TOOLCHAIN_PREFIX})
@@ -195,7 +197,10 @@ if(CONFIG_DEBUG_LINK_MAP)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
-  add_compile_options(-g)
+  add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
+  if(CONFIG_ARM_TOOLCHAIN_ARMCLANG)
+    add_link_options(-Wl,--debug)
+  endif()
 endif()
 
 add_compile_options(-Wno-attributes -Wno-unknown-pragmas

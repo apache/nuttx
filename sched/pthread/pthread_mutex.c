@@ -72,41 +72,6 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 }
 
 /****************************************************************************
- * Name: pthread_mutex_check
- *
- * Description:
- *   Verify that the mutex is not in the list of mutexes held by
- *   this pthread.
- *
- * Input Parameters:
- *  mutex - The mutex to be locked
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DEBUG_ASSERTIONS
-static void pthread_mutex_check(FAR struct pthread_mutex_s *mutex)
-{
-  FAR struct tcb_s *tcb = this_task();
-  irqstate_t flags = enter_critical_section();
-  FAR struct pthread_mutex_s *cur;
-
-  DEBUGASSERT(mutex != NULL);
-  for (cur = tcb->mhead; cur != NULL; cur = cur->flink)
-    {
-      /* The mutex should not be in the list of mutexes held by this task */
-
-      DEBUGASSERT(cur != mutex);
-    }
-
-  leave_critical_section(flags);
-}
-
-#endif
-
-/****************************************************************************
  * Name: pthread_mutex_remove
  *
  * Description:
@@ -180,6 +145,9 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
 {
   int ret = EINVAL;
 
+  /* Verify input parameters */
+
+  DEBUGASSERT(mutex != NULL);
   if (mutex != NULL)
     {
       /* Make sure that no unexpected context switches occur */
@@ -229,9 +197,6 @@ int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
 
               else if (!mutex_is_recursive(&mutex->mutex))
                 {
-#ifdef CONFIG_DEBUG_ASSERTIONS
-                  pthread_mutex_check(mutex);
-#endif
                   pthread_mutex_add(mutex);
                 }
             }

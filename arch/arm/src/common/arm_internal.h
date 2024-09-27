@@ -96,11 +96,6 @@
 
 #define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
-/* Macros to handle saving and restoring interrupt state. */
-
-#define arm_savestate(regs)    (regs = up_current_regs())
-#define arm_restorestate(regs) up_set_current_regs(regs)
-
 /* Toolchain dependent, linker defined section addresses */
 
 #if defined(__ICCARM__)

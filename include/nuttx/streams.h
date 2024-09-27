@@ -25,7 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #ifdef CONFIG_LIBC_LZF
 #include <lzf.h>
@@ -295,6 +295,12 @@ struct lib_mtdoutstream_s
   FAR unsigned char     *cache;
 };
 #endif
+
+struct va_format
+{
+  FAR const char *fmt;
+  FAR va_list *va;
+};
 
 /****************************************************************************
  * Public Data

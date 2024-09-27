@@ -11,6 +11,7 @@ divided in three classes:
   character/index.rst
   block/index.rst
   special/index.rst
+  thermal/index.rst
 
 .. note::
   Device driver support depends on the *in-memory*, *pseudo*
@@ -106,6 +107,11 @@ Subdirectories of ``nuttx/drivers``
 * ``i2s/`` :doc:`character/i2s`
 
   I2S drivers and support logic.
+
+
+* ``i3c/`` :doc:`special/i3c`
+
+  I3C drivers and support logic.
 
 * ``input/`` :doc:`character/input/index`
 

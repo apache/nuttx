@@ -107,11 +107,15 @@ static int tcp_get_timeout(FAR struct tcp_conn_s *conn)
 #ifdef CONFIG_NET_TCP_KEEPALIVE
   if (timeout == 0)
     {
-      timeout = conn->keeptimer;
+      /* The conn->keeptimer units is decisecond and the timeout
+       * units is half-seconds, therefore they need to be unified.
+       */
+
+      timeout = conn->keeptimer / DSEC_PER_HSEC;
     }
-  else if (conn->keeptimer > 0 && timeout > conn->keeptimer)
+  else if (conn->keeptimer > 0 && timeout > conn->keeptimer / DSEC_PER_HSEC)
     {
-      timeout = conn->keeptimer;
+      timeout = conn->keeptimer / DSEC_PER_HSEC;
     }
 #endif
 
@@ -699,11 +703,11 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
                * received from the remote peer?
                */
 
-              if (conn->keeptimer > hsec)
+              if (conn->keeptimer > hsec * DSEC_PER_HSEC)
                 {
                   /* Will not yet decrement to zero */
 
-                  conn->keeptimer -= hsec;
+                  conn->keeptimer -= hsec * DSEC_PER_HSEC;
                 }
               else
                 {

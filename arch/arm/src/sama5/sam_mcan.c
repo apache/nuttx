@@ -1425,7 +1425,7 @@ static void mcan_buffer_reserve(struct sam_mcan_s *priv)
   int tffl;
 #endif
   int sval;
-  int ret;
+  int ret = 0;
 
   /* Wait until we successfully get the semaphore.  EINTR is the only
    * expected 'failure' (meaning that the wait for the semaphore was

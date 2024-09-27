@@ -39,6 +39,7 @@ void *riscv_perform_syscall(uintreg_t *regs)
 {
   struct tcb_s *tcb;
   int cpu;
+  int ret;
 
   /* Set up the interrupt register set needed by swint() */
 
@@ -46,10 +47,9 @@ void *riscv_perform_syscall(uintreg_t *regs)
 
   /* Run the system call handler (swint) */
 
-  riscv_swint(0, regs, NULL);
-  tcb = this_task();
+  ret = riscv_swint(0, regs, NULL);
 
-  if (regs != tcb->xcp.regs)
+  if (ret == SWINT_CONTEXT_SWITCH)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -68,10 +68,6 @@ void *riscv_perform_syscall(uintreg_t *regs)
       cpu = this_cpu();
       tcb = current_task(cpu);
       g_running_tasks[cpu] = tcb;
-
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, cpu);
 
       /* If a context switch occurred while processing the interrupt then
        * current_regs may have change value.  If we return any value

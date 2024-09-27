@@ -160,6 +160,8 @@ struct aligned_data(8) rpmsg_virtio_rsc_s
   struct fw_rsc_vdev_vring rpmsg_vring0;
   struct fw_rsc_vdev_vring rpmsg_vring1;
   struct fw_rsc_config     config;
+  uint32_t                 cmd_master;
+  uint32_t                 cmd_slave;
 };
 
 struct rpmsg_virtio_s;

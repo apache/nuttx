@@ -54,8 +54,6 @@ struct rpmsg_virtio_ivshmem_mem_s
   volatile uint64_t         basem;
   volatile uint32_t         seqs;
   volatile uint32_t         seqm;
-  volatile uint32_t         cmds;
-  volatile uint32_t         cmdm;
   struct rpmsg_virtio_rsc_s rsc;
 };
 
@@ -148,6 +146,8 @@ rpmsg_virtio_ivshmem_get_resource(FAR struct rpmsg_virtio_s *dev)
       rsc->rpmsg_vring1.num         = CONFIG_RPMSG_VIRTIO_IVSHMEM_BUFFNUM;
       rsc->config.r2h_buf_size      = CONFIG_RPMSG_VIRTIO_IVSHMEM_BUFFSIZE;
       rsc->config.h2r_buf_size      = CONFIG_RPMSG_VIRTIO_IVSHMEM_BUFFSIZE;
+      rsc->cmd_master               = 0;
+      rsc->cmd_slave                = 0;
 
       priv->shmem->basem = (uint64_t)(uintptr_t)priv->shmem;
     }

@@ -74,3 +74,26 @@ config PCI_UIO_IVSHMEM_NPOLLWAITERS
 	depends on PCI_UIO_IVSHMEM
 
 endif # PCI
+
+menuconfig PCI_ENDPOINT
+	bool "PCI Endpoint Support"
+	default n
+	---help---
+		Enable this configuration option to support configurable PCI
+		endpoint. This should be enabled if the platform has a PCI
+		controller that can operate in endpoint mode.
+
+if PCI_ENDPOINT
+
+config PCI_QEMU_EPC
+	bool "QEMU Ep Controller Support"
+	---help---
+		Enable qemu ep controller
+
+config PCI_EPF_TEST
+	bool "PCI epf test"
+	---help---
+		pci epf test driver
+
+endif # PCI_ENDPOINT
+

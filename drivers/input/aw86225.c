@@ -2397,10 +2397,10 @@ int aw86225_initialize(FAR struct i2c_master_s *master,
   aw86225_haptic_init(aw86225);
   aw86225_ram_work_init(aw86225);
 
-  __set_bit(FF_CUSTOM, lower->ffbit);
-  __set_bit(FF_GAIN, lower->ffbit);
-  __set_bit(FF_CONSTANT, lower->ffbit);
-  __set_bit(FF_PERIODIC, lower->ffbit);
+  set_bit(FF_CUSTOM, lower->ffbit);
+  set_bit(FF_GAIN, lower->ffbit);
+  set_bit(FF_CONSTANT, lower->ffbit);
+  set_bit(FF_PERIODIC, lower->ffbit);
 
   if (aw86225->effects_count + 1 > FF_EFFECT_COUNT_MAX)
     {

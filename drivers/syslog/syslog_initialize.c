@@ -50,11 +50,11 @@
  *   This function performs these basic operations:
  *
  *   - Initialize the SYSLOG device
- *   - Call syslog_channel() to begin using that device.
+ *   - Call syslog_channel_register() to begin using that device.
  *
  *   If CONFIG_ARCH_SYSLOG is selected, then the architecture-specifica
  *   logic will provide its own SYSLOG device initialize which must include
- *   as a minimum a call to syslog_channel() to use the device.
+ *   as a minimum a call to syslog_channel_register() to use the device.
  *
  * Input Parameters:
  *  None

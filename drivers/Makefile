@@ -38,6 +38,7 @@ include math/Make.defs
 include motor/Make.defs
 include i2c/Make.defs
 include i2s/Make.defs
+include i3c/Make.defs
 include ipcc/Make.defs
 include input/Make.defs
 include ioexpander/Make.defs
@@ -63,6 +64,7 @@ include sensors/Make.defs
 include serial/Make.defs
 include spi/Make.defs
 include syslog/Make.defs
+include thermal/Make.defs
 include timers/Make.defs
 include usbdev/Make.defs
 include usbhost/Make.defs

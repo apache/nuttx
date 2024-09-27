@@ -85,7 +85,8 @@
 enum ota_img_ctrl_e
 {
   OTA_IMG_GET_BOOT        = 0xe1,
-  OTA_IMG_SET_BOOT        = 0xe2
+  OTA_IMG_SET_BOOT        = 0xe2,
+  OTA_IMG_INVALIDATE_BOOT = 0xe3,
 };
 
 /* OTA image state */
@@ -356,6 +357,53 @@ static int ota_set_bootseq(struct mtd_dev_priv_s *dev, int num)
 }
 
 /****************************************************************************
+ * Name: ota_invalidate_bootseq
+ *
+ * Description:
+ *   Invalidate boot sequence by deleting the corresponding otadata
+ *
+ * Input Parameters:
+ *   dev - Partition private MTD data
+ *   num - boot sequence buffer
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int ota_invalidate_bootseq(struct mtd_dev_priv_s *dev, int num)
+{
+  int ret;
+  int id;
+
+  finfo("INFO: num=%d\n", num);
+
+  switch (num)
+    {
+      case OTA_IMG_BOOT_OTA_0:
+      case OTA_IMG_BOOT_OTA_1:
+        {
+          id = num - 1;
+
+          ret = MTD_ERASE(dev->part_mtd, id, 1);
+          if (ret != 1)
+            {
+              ferr("ERROR: Failed to erase OTA%d data error=%d\n",
+                   id, ret);
+              return -EIO;
+            }
+        }
+
+        break;
+      default:
+        ferr("ERROR: num=%d is error\n", num);
+        return -EINVAL;
+    }
+
+    return 0;
+}
+
+/****************************************************************************
  * Name: esp32s3_part_erase
  *
  * Description:
@@ -484,7 +532,7 @@ static ssize_t esp32s3_part_bwrite(struct mtd_dev_s *dev, off_t startblock,
  * Name: esp32s3_part_ioctl
  *
  * Description:
- *   Set/Get option to/from ESP32-S3 SPI Flash MTD device data.
+ *   Set/Get/Invaliate option to/from ESP32-S3 SPI Flash MTD device data.
  *
  * Input Parameters:
  *   dev - ESP32-S3 MTD device data
@@ -524,6 +572,16 @@ static int esp32s3_part_ioctl(struct mtd_dev_s *dev, int cmd,
           if (ret < 0)
             {
               ferr("ERROR: Failed to set boot img\n");
+            }
+        }
+
+        break;
+      case OTA_IMG_INVALIDATE_BOOT:
+        {
+          ret = ota_invalidate_bootseq(mtd_priv, arg);
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to invalidate boot img\n");
             }
         }
 

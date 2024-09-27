@@ -60,9 +60,9 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SYSLOG_DEFAULT)
-static int syslog_default_putc(FAR struct syslog_channel_s *channel,
+static int syslog_default_putc(FAR syslog_channel_t *channel,
                                int ch);
-static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
                                     FAR const char *buffer, size_t buflen);
 #endif
 
@@ -83,7 +83,7 @@ static const struct syslog_channel_ops_s g_ramlog_channel_ops =
   ramlog_write
 };
 
-static struct syslog_channel_s g_ramlog_channel =
+static syslog_channel_t g_ramlog_channel =
 {
   &g_ramlog_channel_ops
 #  ifdef CONFIG_SYSLOG_IOCTL
@@ -103,7 +103,7 @@ static const struct syslog_channel_ops_s g_rpmsg_channel_ops =
   syslog_rpmsg_write
 };
 
-static struct syslog_channel_s g_rpmsg_channel =
+static syslog_channel_t g_rpmsg_channel =
 {
   &g_rpmsg_channel_ops
 #  ifdef CONFIG_SYSLOG_IOCTL
@@ -123,7 +123,7 @@ static const struct syslog_channel_ops_s g_rtt_channel_ops =
   syslog_rtt_write
 };
 
-static struct syslog_channel_s g_rtt_channel =
+static syslog_channel_t g_rtt_channel =
 {
   &g_rtt_channel_ops
 #  ifdef CONFIG_SYSLOG_IOCTL
@@ -142,7 +142,7 @@ static const struct syslog_channel_ops_s g_default_channel_ops =
   syslog_default_write
 };
 
-static struct syslog_channel_s g_default_channel =
+static syslog_channel_t g_default_channel =
 {
   &g_default_channel_ops
 #  ifdef CONFIG_SYSLOG_IOCTL
@@ -191,8 +191,11 @@ static struct syslog_channel_s g_default_channel =
 
 /* This is the current syslog channel in use */
 
-FAR struct syslog_channel_s
-*g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
+FAR syslog_channel_t *
+#ifndef CONFIG_SYSLOG_REGISTER
+const
+#endif
+g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
 {
 #if defined(CONFIG_SYSLOG_DEFAULT)
   &g_default_channel,
@@ -225,7 +228,7 @@ FAR struct syslog_channel_s
  ****************************************************************************/
 
 #if defined(CONFIG_SYSLOG_DEFAULT)
-static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
+static int syslog_default_putc(FAR syslog_channel_t *channel, int ch)
 {
   UNUSED(channel);
 
@@ -236,7 +239,7 @@ static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 #endif
 }
 
-static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
+static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
                                     FAR const char *buffer, size_t buflen)
 {
 #if defined(CONFIG_ARCH_LOWPUTC)
@@ -272,7 +275,8 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
  *
  ****************************************************************************/
 
-int syslog_channel(FAR struct syslog_channel_s *channel)
+#ifdef CONFIG_SYSLOG_REGISTER
+int syslog_channel_register(FAR syslog_channel_t *channel)
 {
 #if (CONFIG_SYSLOG_MAX_CHANNELS != 1)
   int i;
@@ -313,7 +317,7 @@ int syslog_channel(FAR struct syslog_channel_s *channel)
 }
 
 /****************************************************************************
- * Name: syslog_channel_remove
+ * Name: syslog_channel_unregister
  *
  * Description:
  *   Removes an already configured SYSLOG channel from the list of used
@@ -328,7 +332,7 @@ int syslog_channel(FAR struct syslog_channel_s *channel)
  *
  ****************************************************************************/
 
-int syslog_channel_remove(FAR struct syslog_channel_s *channel)
+int syslog_channel_unregister(FAR syslog_channel_t *channel)
 {
   int i;
 
@@ -369,3 +373,4 @@ int syslog_channel_remove(FAR struct syslog_channel_s *channel)
 
   return -EINVAL;
 }
+#endif

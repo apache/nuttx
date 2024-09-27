@@ -238,26 +238,14 @@ config XTENSA_CP_INITSET
 		is provided by CONFIG_XTENSA_CP_INITSET.  Each bit corresponds to one
 		coprocessor with the same bit layout as for the CPENABLE register.
 
-config XTENSA_DUMPBT_ON_ASSERT
-	bool "Dump backtrace on assertions"
-	default y
-	depends on DEBUG_ALERT
-	---help---
-		Enable a backtrace dump on assertions.
-
-config XTENSA_BTDEPTH
-	int "Backtrace depth"
-	default 50
-	depends on XTENSA_DUMPBT_ON_ASSERT
-	---help---
-		This is the depth of the backtrace.
-
 config XTENSA_INTBACKTRACE
-	bool "Full backtrace from interrupts"
-	default n
-	depends on XTENSA_DUMPBT_ON_ASSERT
+	bool
+	default y
+	depends on SCHED_BACKTRACE
 	---help---
-		Add necessary logic to be able to have a full backtrace from an interrupt context.
+		This is selected by default if SCHED_BACKTRACE is enabled. This option
+		is required even if an exception occurs during normal task execution
+		because the exception behaves like an interrupt handler.
 
 config XTENSA_IMEM_USE_SEPARATE_HEAP
 	bool "Use a separate heap for internal memory"

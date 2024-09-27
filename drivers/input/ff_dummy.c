@@ -120,10 +120,10 @@ int ff_dummy_initialize(int devno)
 
   /* set dummy device capabilities */
 
-  __set_bit(FF_CUSTOM, lower->ffbit);
-  __set_bit(FF_GAIN, lower->ffbit);
-  __set_bit(FF_CONSTANT, lower->ffbit);
-  __set_bit(FF_PERIODIC, lower->ffbit);
+  set_bit(FF_CUSTOM, lower->ffbit);
+  set_bit(FF_GAIN, lower->ffbit);
+  set_bit(FF_CONSTANT, lower->ffbit);
+  set_bit(FF_PERIODIC, lower->ffbit);
 
   snprintf(path, FF_DEVNAME_MAX, FF_DEVNAME_FMT, devno);
   ret = ff_register(lower, path, FF_EFFECT_COUNT_MAX);

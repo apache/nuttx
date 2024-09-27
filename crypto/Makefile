@@ -59,11 +59,11 @@ CRYPTO_CSRCS += cmac.c
 CRYPTO_CSRCS += hmac.c
 ifeq ($(CONFIG_CRYPTO_RANDOM_POOL),y)
   CRYPTO_CSRCS += idgen.c
+  CRYPTO_CSRCS += curve25519.c
 endif
 CRYPTO_CSRCS += key_wrap.c
 CRYPTO_CSRCS += siphash.c
 CRYPTO_CSRCS += hmac_buff.c
-CRYPTO_CSRCS += curve25519.c
 CRYPTO_CSRCS += bn.c
 
 # Entropy pool random number generator

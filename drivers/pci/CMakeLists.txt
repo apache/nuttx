@@ -41,3 +41,19 @@ if(CONFIG_PCI)
   target_sources(drivers PRIVATE ${SRCS})
 
 endif() # CONFIG_PCI
+
+if(CONFIG_PCI_ENDPOINT)
+
+  set(SRCS pci_epc.c pci_epc_mem.c pci_epf.c)
+
+  if(CONFIG_PCI_QEMU_EPC)
+    list(APPEND SRCS pci_qemu_epc.c)
+  endif() # CONFIG_PCI_QEMU_EPC
+
+  if(CONFIG_PCI_EPF_TEST)
+    list(APPEND SRCS pci_epf_test.c)
+  endif() # CONFIG_PCI_EPF_TEST
+
+  target_sources(drivers PRIVATE ${SRCS})
+
+endif() # CONFIG_PCI_ENDPOINT

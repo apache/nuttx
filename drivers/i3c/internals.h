@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_log2ceil.c
+ * drivers/i3c/internals.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,38 +18,32 @@
  *
  ****************************************************************************/
 
+#ifndef  __INCLUDE_NUTTX_I3C_INTERNALS_H
+#define  __INCLUDE_NUTTX_I3C_INTERNALS_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/lib/math32.h>
+#include <nuttx/i3c/master.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: log2ceil
- *
- * Description:
- *   Calculate the up-rounded power-of-two for input.
- *
- * Input Parameters:
- *   x - Argument to calculate the power-of-two from.
- *
- * Returned Value:
- *   Power-of-two for argument, rounded up.
- *
- ****************************************************************************/
+void i3c_bus_normaluse_lock(FAR struct i3c_bus *bus);
+void i3c_bus_normaluse_unlock(FAR struct i3c_bus *bus);
 
-uintptr_t log2ceil(uintptr_t x)
-{
-  uintptr_t pot = 0;
+FAR struct i3c_master_controller *
+    i3c_adapter_to_i3c_master(FAR struct i3c_master_s *i3c_master);
 
-  for (x = x - 1; x; x >>= 1)
-    {
-      pot++;
-    }
+int i3c_dev_do_priv_xfers_locked(FAR struct i3c_dev_desc *dev,
+                                 FAR struct i3c_priv_xfer *xfers,
+                                 int nxfers);
+int i3c_dev_disable_ibi_locked(FAR struct i3c_dev_desc *dev);
+int i3c_dev_enable_ibi_locked(FAR struct i3c_dev_desc *dev);
+int i3c_dev_request_ibi_locked(FAR struct i3c_dev_desc *dev,
+                               FAR const struct i3c_ibi_setup *req);
+void i3c_dev_free_ibi_locked(FAR struct i3c_dev_desc *dev);
 
-  return pot;
-}
+#endif /*  __INCLUDE_NUTTX_I3C_INTERNAL_H */

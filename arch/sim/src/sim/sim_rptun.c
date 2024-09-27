@@ -34,10 +34,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_RPTUN_STOP      0x1
-#define SIM_RPTUN_PANIC     0x2
-#define SIM_RPTUN_MASK      0xffff
-#define SIM_RPTUN_SHIFT     16
 #define SIM_RPTUN_WORK_DELAY 1
 
 /* Status byte for master/slave to report progress */
@@ -55,8 +51,6 @@ struct sim_rptun_shmem_s
   volatile uint64_t         base;
   volatile uint32_t         seqs;
   volatile uint32_t         seqm;
-  volatile uint32_t         cmds;
-  volatile uint32_t         cmdm;
   volatile uint32_t         boots;
   volatile uint32_t         bootm;
   struct rptun_rsc_s        rsc;
@@ -72,6 +66,7 @@ struct sim_rptun_dev_s
   uint32_t                  seq;
   struct sim_rptun_shmem_s *shmem;
   struct simple_addrenv_s   addrenv[2];
+  struct rptun_addrenv_s    raddrenv[2];
   char                      cpuname[RPMSG_NAME_SIZE + 1];
   char                      shmemname[RPMSG_NAME_SIZE + 1];
   pid_t                     pid;
@@ -93,25 +88,42 @@ static const char *sim_rptun_get_cpuname(struct rptun_dev_s *dev)
   return priv->cpuname;
 }
 
+static const struct rptun_addrenv_s *
+sim_rptun_get_addrenv(struct rptun_dev_s *dev)
+{
+  struct sim_rptun_dev_s *priv = container_of(dev,
+                                 struct sim_rptun_dev_s, rptun);
+
+  return &priv->raddrenv[0];
+}
+
 static struct rptun_rsc_s *
 sim_rptun_get_resource(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
                                  struct sim_rptun_dev_s, rptun);
+  struct rptun_cmd_s *cmd;
 
   priv->shmem = host_allocshmem(priv->shmemname,
                                 sizeof(*priv->shmem));
-
   if (!priv->shmem)
     {
       return NULL;
     }
 
+  cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
+
+  priv->raddrenv[0].da   = 0;
+  priv->raddrenv[0].size = sizeof(*priv->shmem);
+
   if (priv->master)
     {
       struct rptun_rsc_s *rsc = &priv->shmem->rsc;
+
       memset(priv->shmem->buf, 0, sizeof(priv->shmem->buf));
       memset(rsc, 0, sizeof(struct rptun_rsc_s));
+
+      priv->raddrenv[0].pa          = (uintptr_t)priv->shmem;
 
       rsc->rsc_tbl_hdr.ver          = 1;
       rsc->rsc_tbl_hdr.num          = 1;
@@ -135,6 +147,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->config.r2h_buf_size      = 0x800;
       rsc->config.h2r_buf_size      = 0x800;
 
+      cmd->cmd_slave                = 0;
       priv->shmem->base             = (uintptr_t)priv->shmem;
 
       /* The master notifies its slave when it starts again */
@@ -164,11 +177,15 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
           usleep(1000);
         }
 
-      priv->shmem->boots = SIM_RPTUN_STATUS_OK;
+      cmd->cmd_master       = 0;
 
-      priv->addrenv[0].va          = (uintptr_t)priv->shmem;
-      priv->addrenv[0].pa          = priv->shmem->base;
-      priv->addrenv[0].size        = sizeof(*priv->shmem);
+      priv->raddrenv[0].pa  = (uintptr_t)priv->shmem->base;
+
+      priv->shmem->boots    = SIM_RPTUN_STATUS_OK;
+
+      priv->addrenv[0].va   = (uintptr_t)priv->shmem;
+      priv->addrenv[0].pa   = priv->shmem->base;
+      priv->addrenv[0].size = sizeof(*priv->shmem);
 
       simple_addrenv_initialize(&priv->addrenv[0]);
     }
@@ -220,12 +237,13 @@ static int sim_rptun_stop(struct rptun_dev_s *dev)
 {
   struct sim_rptun_dev_s *priv = container_of(dev,
                               struct sim_rptun_dev_s, rptun);
+  struct rptun_cmd_s *cmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
 
-  /* Don't send SIM_RPTUN_STOP when slave recovery */
+  /* Don't send RPTUN_CMD_STOP when slave recovery */
 
   if (priv->shmem->boots & SIM_RPTUN_STATUS_OK)
     {
-      priv->shmem->cmdm = SIM_RPTUN_STOP << SIM_RPTUN_SHIFT;
+      cmd->cmd_master = RPTUN_CMD(RPTUN_CMD_STOP, 0);
     }
 
   if ((priv->master & SIM_RPTUN_BOOT) && priv->pid > 0)
@@ -274,33 +292,15 @@ static int sim_rptun_register_callback(struct rptun_dev_s *dev,
   return 0;
 }
 
-static void sim_rptun_panic(struct rptun_dev_s *dev)
-{
-  struct sim_rptun_dev_s *priv = container_of(dev,
-                                 struct sim_rptun_dev_s, rptun);
-
-  if (priv->master)
-    {
-      priv->shmem->cmdm = SIM_RPTUN_PANIC << SIM_RPTUN_SHIFT;
-    }
-  else
-    {
-      priv->shmem->cmds = SIM_RPTUN_PANIC << SIM_RPTUN_SHIFT;
-    }
-}
-
 static void sim_rptun_check_cmd(struct sim_rptun_dev_s *priv)
 {
-  unsigned int cmd = priv->master ? priv->shmem->cmds : priv->shmem->cmdm;
+  struct rptun_cmd_s *rcmd = RPTUN_RSC2CMD(&priv->shmem->rsc);
+  uint32_t cmd = priv->master ? rcmd->cmd_slave : rcmd->cmd_master;
 
-  switch ((cmd >> SIM_RPTUN_SHIFT) & SIM_RPTUN_MASK)
+  switch (RPTUN_GET_CMD(cmd))
     {
-      case SIM_RPTUN_STOP:
-        host_abort(cmd & SIM_RPTUN_MASK);
-        break;
-
-      case SIM_RPTUN_PANIC:
-        PANIC();
+      case RPTUN_CMD_STOP:
+        host_abort(RPTUN_GET_CMD_VAL(cmd));
         break;
 
       default:
@@ -365,6 +365,7 @@ static void sim_rptun_work(wdparm_t arg)
 static const struct rptun_ops_s g_sim_rptun_ops =
 {
   .get_cpuname       = sim_rptun_get_cpuname,
+  .get_addrenv       = sim_rptun_get_addrenv,
   .get_resource      = sim_rptun_get_resource,
   .is_autostart      = sim_rptun_is_autostart,
   .is_master         = sim_rptun_is_master,
@@ -372,7 +373,6 @@ static const struct rptun_ops_s g_sim_rptun_ops =
   .stop              = sim_rptun_stop,
   .notify            = sim_rptun_notify,
   .register_callback = sim_rptun_register_callback,
-  .panic             = sim_rptun_panic,
 };
 
 /****************************************************************************

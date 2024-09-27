@@ -74,24 +74,30 @@
 #define GENMASK_ULL(h, l) \
         (BUILD_BUG_ON_ZERO((l) > (h)) + __GENMASK_ULL(h, l))
 
-#define BMVAL(val, lsb, msb)      (((val) & GENMASK(msb, lsb)) >> (lsb))
+#define BMVAL(val, lsb, msb) (((val) & GENMASK(msb, lsb)) >> (lsb))
 
 /* Bitmap operations */
 
 #define DECLARE_BITMAP(name, bits) \
         unsigned long name[BITS_TO_LONGS(bits)]
 
-#define __set_bit(nr, addr) \
+#define BITMAP_FIRST_WORD_MASK(start) (~0ul << ((start) & (BITS_PER_LONG - 1)))
+#define BITMAP_LAST_WORD_MASK(len) (~0ul >> (-(len) & (BITS_PER_LONG - 1)))
+
+#define set_bit(nr, addr) \
         (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) |= \
         BIT_WORD_MASK(nr))
 
-#define __clear_bit(nr, addr) \
+#define clear_bit(nr, addr) \
         (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) &= \
         ~BIT_WORD_MASK(nr))
 
 #define test_bit(nr, addr) \
         (*(((FAR unsigned long *)(addr)) + BIT_WORD(nr)) & \
         BIT_WORD_MASK(nr))
+
+#define find_first_bit(addr, size) find_next_bit(addr, size, 0)
+#define find_first_zero_bit(addr, size) find_next_zero_bit(addr, size, 0)
 
 /****************************************************************************
  * Type Definitions
@@ -112,6 +118,52 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifndef __ASSEMBLER__
+unsigned long find_next_bit(FAR const unsigned long *addr,
+                            unsigned long size,
+                            unsigned long offset);
+unsigned long find_next_zero_bit(FAR const unsigned long *addr,
+                                 unsigned long size,
+                                 unsigned long offset);
+
+void bitmap_set(FAR unsigned long *bitmap,
+                unsigned long satrt,
+                unsigned long len);
+void bitmap_clear(FAR unsigned long *bitmap,
+                  unsigned long start,
+                  unsigned long len);
+
+int bitmap_allocate_region(FAR unsigned long *bitmap,
+                           unsigned long start,
+                           unsigned long len);
+#define bitmap_release_region(bitmap, start, len) \
+        bitmap_clear(bitmap, start, len)
+
+/****************************************************************************
+ * Name: bitmap_find_free_region
+ *
+ * Description:
+ *   Find a contiguous memory region
+ *
+ *   Find a region of free (zero) len in a bitmap of size and
+ *   allocate them (set them to one).
+ *
+ * Input Parameters:
+ *   bitmap - Array of unsigned longs corresponding to the bitmap
+ *   size   - Number of bits in the bitmap
+ *   len    - Region size to find
+ *
+ * Returned Value:
+ *   Return the bit offset in bitmap of the allocated region,
+ *   otherwise return size
+ ****************************************************************************/
+
+unsigned long bitmap_find_free_region(FAR unsigned long *bitmap,
+                                      unsigned long size,
+                                      unsigned long len);
+
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

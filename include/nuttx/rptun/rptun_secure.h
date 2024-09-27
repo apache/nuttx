@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_log2floor.c
+ * include/nuttx/rptun/rptun_secure.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,38 +18,53 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_RPTUN_RPTUN_SECURE_H
+#define __INCLUDE_NUTTX_RPTUN_RPTUN_SECURE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/lib/math32.h>
+#include <nuttx/config.h>
+#include <nuttx/rptun/rptun.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Name: log2floor
+ * Name: rptun_secure_init
  *
  * Description:
- *   Calculate the down-rounded (truncated) power-of-two for input.
+ *   Initializes the rptun device.
  *
  * Input Parameters:
- *   x - Argument to calculate the power-of-two from.
+ *   cpuname - Local CPU name
+ *   master - If is master
+ *   rsc - The resource for shared memory
+ *   irq_event - Interrupt ID to attach
+ *   irq_trigger - Interrupt ID to trigger
  *
  * Returned Value:
- *   Power-of-two for argument, rounded (truncated) down.
+ *   OK on success, negated errno on failure
  *
  ****************************************************************************/
 
-uintptr_t log2floor(uintptr_t x)
-{
-  uintptr_t pot = 0;
+int rptun_secure_init(FAR const char *cpuname, bool master,
+                      FAR struct rptun_rsc_s *rsc, int irq_event,
+                      int irq_trigger);
 
-  for (; x > 1; x >>= 1)
-    {
-      pot++;
-    }
-
-  return pot;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __INCLUDE_NUTTX_RPTUN_RPTUN_SECURE_H */

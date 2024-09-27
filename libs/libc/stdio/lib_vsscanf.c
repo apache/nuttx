@@ -22,13 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdio.h>
-
 #include <nuttx/streams.h>
-
-#include "libc.h"
 
 /****************************************************************************
  * Public Functions
@@ -45,7 +39,7 @@ int vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
 
   /* Initialize a memory stream to freadm from the buffer */
 
-  lib_meminstream(&meminstream, buf, LIB_BUFLEN_UNKNOWN);
+  lib_meminstream(&meminstream, buf, INT_MAX);
 
   /* Then let lib_vscanf do the real work */
 

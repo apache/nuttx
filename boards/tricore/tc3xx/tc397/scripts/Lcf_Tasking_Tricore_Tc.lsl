@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-#include "../../../include/nuttx/config.h"
+#include "include/nuttx/config.h"
 
 #define LCF_CSA0_SIZE 40k
 #define LCF_USTACK0_SIZE CONFIG_IDLETHREAD_STACKSIZE

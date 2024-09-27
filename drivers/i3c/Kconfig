@@ -1,0 +1,24 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig I3C
+	bool "I3C Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" I3C driver.
+		See include/nuttx/i3c/master.h for further I3C driver information.
+
+if I3C
+
+config I3C_DRIVER
+	bool "I3C character driver"
+	default n
+	---help---
+		Build in support for a character driver at /dev/i3c[N] that may be
+		used to perform I3C bus transfers from applications.  The intent of
+		this driver is to support I3C testing.  It is not suitable for use
+		in any real driver application.
+
+endif # I3C

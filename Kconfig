@@ -1603,6 +1603,37 @@ config DEBUG_I2S_INFO
 
 endif # DEBUG_I2S
 
+config DEBUG_I3C
+	bool "I3C Debug Features"
+	default n
+	depends on I3C
+	---help---
+		Enable I3C debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_I3C
+
+config DEBUG_I3C_ERROR
+	bool "I3C Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable I3C driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_I3C_INFO
+	bool "I3C Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable I3C driver informational output to SYSLOG.
+
+endif # DEBUG_I3C
+
 config DEBUG_PWM
 	bool "PWM Debug Features"
 	default n
@@ -1935,6 +1966,37 @@ config DEBUG_SPI_INFO
 		Enable SPI informational output to SYSLOG.
 
 endif # DEBUG_SPI
+
+config DEBUG_THERMAL
+	bool "Thermal Debug Features"
+	default n
+	---help---
+		Enable thermal debug features.
+
+if DEBUG_THERMAL
+
+config DEBUG_THERMAL_ERROR
+	bool "Thermal Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable thermal error output to SYSLOG.
+
+config DEBUG_THERMAL_WARN
+	bool "Thermal Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable thermal warning output to SYSLOG.
+
+config DEBUG_THERMAL_INFO
+	bool "Thermal Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable thermal informational output to SYSLOG.
+
+endif # DEBUG_THERMAL
 
 config DEBUG_TIMER
 	bool "Timer Debug Features"
@@ -2383,6 +2445,13 @@ config DEBUG_SYMBOLS
 	default n
 	---help---
 		Build with debug symbols (needed for use with a debugger).
+
+config DEBUG_SYMBOLS_LEVEL
+	string "Custom symbols level"
+	default "-g"
+	---help---
+		This string represents the custom symbol level that will be
+		used if DEBUG_SYMBOLS.
 
 config FRAME_POINTER
 	bool "Compile the NuttX with frame pointers"

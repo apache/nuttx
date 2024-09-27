@@ -22,8 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>
-#include "libc.h"
+#include <nuttx/streams.h>
 
 /****************************************************************************
  * Public Functions
@@ -41,7 +40,7 @@ int sprintf(FAR char *buf, FAR const IPTR char *fmt, ...)
 
   /* Initialize a memory stream to write to the buffer */
 
-  lib_memoutstream(&memoutstream, buf, LIB_BUFLEN_UNKNOWN);
+  lib_memoutstream(&memoutstream, buf, INT_MAX);
 
   /* Then let lib_vsprintf do the real work */
 

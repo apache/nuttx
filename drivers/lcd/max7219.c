@@ -431,11 +431,11 @@ static int max7219_putrun(FAR struct lcd_dev_s *dev, fb_coord_t row,
     {
       if ((*buffer & usrmask) != 0)
         {
-          __set_bit(col % 8 + i, ptr);
+          set_bit(col % 8 + i, ptr);
         }
       else
         {
-          __clear_bit(col % 8 + i, ptr);
+          clear_bit(col % 8 + i, ptr);
         }
 
 #ifdef CONFIG_LCD_PACKEDMSFIRST
