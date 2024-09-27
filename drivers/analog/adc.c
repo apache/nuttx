@@ -729,7 +729,8 @@ static int adc_samples_on_read(FAR struct adc_dev_s *dev)
 int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 {
   FAR struct adc_fifo_s *fifo = &dev->ad_recv;
-  uint16_t fifosize;
+  bool          alloc_channel = false;
+  bool             alloc_data = false;
   int ret;
 
   DEBUGASSERT(path != NULL && dev != NULL);
@@ -760,24 +761,37 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 
   /* Malloc for af_channale and af_data */
 
-  fifosize = fifo->af_fifosize;
-  if (fifosize == 0)
+  if (fifo->af_fifosize == 0)
     {
       fifo->af_fifosize = CONFIG_ADC_FIFOSIZE;
-      fifo->af_channel = kmm_malloc(fifo->af_fifosize);
+    }
 
+  if (fifo->af_channel == NULL)
+    {
+      fifo->af_channel = kmm_malloc(fifo->af_fifosize);
       if (fifo->af_channel == NULL)
         {
           return -ENOMEM;
         }
 
-      fifo->af_data = kmm_malloc(fifo->af_fifosize * 4);
+      alloc_channel = true;
+    }
 
+  if (fifo->af_data == NULL)
+    {
+      fifo->af_data = kmm_malloc(fifo->af_fifosize *
+                                 sizeof(*(fifo->af_data)));
       if (fifo->af_data == NULL)
         {
-          kmm_free(fifo->af_channel);
+          if (alloc_channel)
+            {
+              kmm_free(fifo->af_channel);
+            }
+
           return -ENOMEM;
         }
+
+      alloc_data = true;
     }
 
   /* Register the ADC character driver */
@@ -785,10 +799,14 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
   ret = register_driver(path, &g_adc_fops, 0444, dev);
   if (ret < 0)
     {
-      if (fifosize == 0)
+      if (alloc_channel)
         {
-          kmm_free(fifo->af_channel);
-          kmm_free(fifo->af_data);
+           kmm_free(fifo->af_channel);
+        }
+
+      if (alloc_data)
+        {
+           kmm_free(fifo->af_data);
         }
 
       nxsem_destroy(&dev->ad_recv.af_sem);
