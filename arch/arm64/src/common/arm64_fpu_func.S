@@ -66,10 +66,10 @@ SECTION_FUNC(text, arm64_fpu_save)
     stp    q28, q29, [x0, #(16 * FPU_REG_Q28)]
     stp    q30, q31, [x0, #(16 * FPU_REG_Q30)]
 
-    mrs    x1, fpsr
-    mrs    x2, fpcr
-    str    w1, [x0, #(16 * 32 + 0)]
-    str    w2, [x0, #(16 * 32 + 4)]
+    mrs    x10, fpsr
+    mrs    x11, fpcr
+    str    w10, [x0, #(16 * 32 + 0)]
+    str    w11, [x0, #(16 * 32 + 4)]
 
     ret
 
@@ -93,9 +93,9 @@ SECTION_FUNC(text, arm64_fpu_restore)
     ldp    q28, q29, [x0, #(16 * FPU_REG_Q28)]
     ldp    q30, q31, [x0, #(16 * FPU_REG_Q30)]
 
-    ldr    w1, [x0, #(16 * 32 + 0)]
-    ldr    w2, [x0, #(16 * 32 + 4)]
-    msr    fpsr, x1
-    msr    fpcr, x2
+    ldr    w10, [x0, #(16 * 32 + 0)]
+    ldr    w11, [x0, #(16 * 32 + 4)]
+    msr    fpsr, x10
+    msr    fpcr, x11
 
     ret
