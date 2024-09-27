@@ -54,7 +54,36 @@ config RAMLOG_POLLTHRESHOLD
 	---help---
 		When the length of circular buffer exceeds the threshold value, the poll() will
 		return POLLIN to all poll waiters.
-endif
+
+config RAMLOG_FLUSH
+	bool "RAMLOG lower flush support"
+	default n
+	depends on ARCH_LOWPUTC
+	---help---
+		RAMLOG lower flush support, this option will flush any buffered data to the SYSLOG device.
+
+if RAMLOG_FLUSH
+
+config RAMLOG_FLUSH_WORKER
+	bool "RAMLOG flush worker"
+	default n
+	depends on SCHED_WORKQUEUE
+	---help---
+		ROMLOG lower flush worker to flush the ramlog to lower half driver.
+
+if RAMLOG_FLUSH_WORKER
+
+config RAMLOG_FLUSH_WORKER_TIMEOUT_MS
+	int "RAMLOG lower flush worker timeout in milliseconds"
+	default 10
+	---help---
+		ROMLOG flush work timeout in milliseconds, default is 10.
+
+endif # RAMLOG_FLUSH_WORKER
+
+endif # RAMLOG_FLUSH
+
+endif # RAMLOG
 
 config SYSLOG_BUFFER
 	bool "Use buffered output"

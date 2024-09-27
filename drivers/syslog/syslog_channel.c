@@ -79,7 +79,11 @@ static const struct syslog_channel_ops_s g_ramlog_channel_ops =
 {
   ramlog_putc,
   ramlog_putc,
+#ifdef CONFIG_RAMLOG_FLUSH
+  ramlog_flush,
+#else
   NULL,
+#endif
   ramlog_write
 };
 

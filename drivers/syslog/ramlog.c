@@ -59,6 +59,11 @@
 
 #define RAMLOG_MAGIC_NUMBER 0x12345678
 
+#ifdef CONFIG_RAMLOG_FLUSH_WORKER_TIMEOUT_MS
+#  define RAMLOG_FLUSH_WORKER_TIMEOUT_TICKS \
+          MSEC2TICK(CONFIG_RAMLOG_FLUSH_WORKER_TIMEOUT_MS)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -98,6 +103,10 @@ struct ramlog_dev_s
 
   uint32_t                   rl_bufsize; /* Size of the Circular RAM buffer */
   struct list_node           rl_list;    /* The head of ramlog_user_s list */
+#ifdef CONFIG_RAMLOG_FLUSH_WORKER
+  struct work_s              rl_work;    /* For deferring notifications to LPWORK queue */
+  volatile uint32_t          rl_tail;    /* The tail index (where data is removed) */
+#endif
 };
 
 /****************************************************************************
@@ -235,6 +244,82 @@ static void ramlog_pollnotify(FAR struct ramlog_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: ramlog_flush_internal
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_FLUSH
+static void ramlog_flush_internal(FAR struct ramlog_dev_s *priv, bool force)
+{
+  FAR struct ramlog_header_s *header = priv->rl_header;
+  FAR const char *start;
+  FAR const char *pos;
+  irqstate_t flags;
+  uint32_t begin;
+  uint32_t end;
+
+  flags = enter_critical_section();
+
+  do
+    {
+      if (header->rl_head == priv->rl_tail)
+        {
+          break;
+        }
+
+      if (header->rl_head - priv->rl_tail > priv->rl_bufsize)
+        {
+          priv->rl_tail = header->rl_head - priv->rl_bufsize;
+        }
+
+      begin = priv->rl_tail % priv->rl_bufsize;
+      end   = header->rl_head % priv->rl_bufsize;
+
+      if (end <= begin)
+        {
+          end = priv->rl_bufsize;
+        }
+
+      start = header->rl_buffer + begin;
+      pos = start;
+
+      while (pos != (header->rl_buffer + end) && *pos++ != '\n');
+
+      up_nputs(start, pos - start);
+      priv->rl_tail += pos - start;
+    }
+  while ((header->rl_head - priv->rl_tail > CONFIG_RAMLOG_POLLTHRESHOLD)
+         || force);
+
+  leave_critical_section(flags);
+}
+#endif
+
+/****************************************************************************
+ * Name: ramlog_flush_worker
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_FLUSH_WORKER
+static void ramlog_flush_worker(FAR void *arg)
+{
+  FAR struct ramlog_dev_s *priv = arg;
+  FAR struct ramlog_header_s *header = priv->rl_header;
+  irqstate_t flags;
+
+  ramlog_flush_internal(arg, false);
+
+  flags = enter_critical_section();
+
+  if (header->rl_head != priv->rl_tail)
+    {
+      work_queue(LPWORK, &priv->rl_work, ramlog_flush_worker,
+                 (FAR void *)priv, RAMLOG_FLUSH_WORKER_TIMEOUT_TICKS);
+    }
+
+  leave_critical_section(flags);
+}
+#endif
+
+/****************************************************************************
  * Name: ramlog_copybuf
  ****************************************************************************/
 
@@ -337,28 +422,46 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
 
   if (len > 0)
     {
-      /* Lock the scheduler do NOT switch out */
-
-      if (!up_interrupt_context())
+      if (!list_is_empty(&priv->rl_list))
         {
+          /* Lock the scheduler do NOT switch out */
+
           sched_lock();
-        }
 
 #ifndef CONFIG_RAMLOG_NONBLOCKING
-      /* Are there threads waiting for read data? */
+          /* Are there threads waiting for read data? */
 
-      ramlog_readnotify(priv);
+          ramlog_readnotify(priv);
 #endif
-      /* Notify all poll/select waiters that they can read from the FIFO */
+          /* Notify all poll/select waiters that they can
+           * read from the FIFO
+           */
 
-      ramlog_pollnotify(priv);
+          ramlog_pollnotify(priv);
 
-      /* Unlock the scheduler */
+          /* Unlock the scheduler */
 
-      if (!up_interrupt_context())
-        {
           sched_unlock();
         }
+#ifdef CONFIG_RAMLOG_FLUSH_WORKER
+      else if (priv == &g_sysdev)
+        {
+          if (header->rl_head - priv->rl_tail >= CONFIG_RAMLOG_POLLTHRESHOLD)
+            {
+              work_queue(LPWORK, &priv->rl_work,
+                         ramlog_flush_worker, (FAR void *)priv, 0);
+            }
+          else
+            {
+              if (work_available(&priv->rl_work))
+                {
+                  work_queue(LPWORK, &priv->rl_work,
+                             ramlog_flush_worker, (FAR void *)priv,
+                             RAMLOG_FLUSH_WORKER_TIMEOUT_TICKS);
+                }
+            }
+        }
+#endif
     }
 
   /* We always have to return the number of bytes requested and NOT the
@@ -664,6 +767,26 @@ static int ramlog_file_close(FAR struct file *filep)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ramlog_flush
+ *
+ * Description:
+ *   This is called by system crash-handling logic.  It must flush any
+ *   buffered data to the SYSLOG device.
+ *
+ *   Interrupts are disabled at the time of the crash and this logic must
+ *   perform the flush using low-level, non-interrupt driven logic.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_FLUSH
+int ramlog_flush(FAR syslog_channel_t *channel)
+{
+  ramlog_flush_internal(&g_sysdev, true);
+  return 0;
+}
+#endif
 
 /****************************************************************************
  * Name: ramlog_register

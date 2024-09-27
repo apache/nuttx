@@ -149,6 +149,22 @@ ssize_t ramlog_write(FAR syslog_channel_t *channel,
                      FAR const char *buffer, size_t buflen);
 #endif
 
+/****************************************************************************
+ * Name: ramlog_flush
+ *
+ * Description:
+ *   This is called by system crash-handling logic.  It must flush any
+ *   buffered data to the SYSLOG device.
+ *
+ *   Interrupts are disabled at the time of the crash and this logic must
+ *   perform the flush using low-level, non-interrupt driven logic.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RAMLOG_FLUSH
+int ramlog_flush(FAR syslog_channel_t *channel);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
