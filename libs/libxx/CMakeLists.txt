@@ -32,7 +32,7 @@ if(CONFIG_HAVE_CXX)
     include(uClibc++.cmake)
   elseif(CONFIG_LIBCXX)
     include(libcxx.cmake)
-  else()
+  elseif(CONFIG_LIBCXXMINI)
     include(libcxxmini.cmake)
   endif()
 
