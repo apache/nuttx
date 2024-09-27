@@ -299,6 +299,9 @@ struct regs_context
   uint64_t  spsr;
   uint64_t  sp_el0;
   uint64_t  exe_depth;
+#ifdef CONFIG_ARCH_FPU
+  struct fpu_reg fpu_regs;
+#endif
 };
 
 /****************************************************************************

@@ -46,7 +46,7 @@
  */
 
 .macro arm64_enter_exception xreg0, xreg1
-    sub    sp, sp, #8 * XCPTCONTEXT_GP_REGS
+    sub    sp, sp, #8 * XCPTCONTEXT_REGS
 
     stp    x0,  x1,  [sp, #8 * REG_X0]
     stp    x2,  x3,  [sp, #8 * REG_X2]
@@ -65,8 +65,8 @@
     stp    x28, x29, [sp, #8 * REG_X28]
 
     /* Save the current task's SP_ELx and x30 */
-    add    \xreg0, sp, #8 * XCPTCONTEXT_GP_REGS
-    stp    x30, \xreg0,  [sp, #8 * REG_X30]
+    add    \xreg0, sp,  #8 * XCPTCONTEXT_REGS
+    stp    x30, \xreg0, [sp, #8 * REG_X30]
 
     /* ELR and SPSR */
 #if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL == 3
@@ -78,17 +78,20 @@
 #endif
     stp    \xreg0, \xreg1,  [sp, #8 * REG_ELR]
 
-    /* increment exception depth */
+    /* Increment exception depth */
 
     mrs    \xreg0, tpidrro_el0
     mov    \xreg1, #1
     add    \xreg0, \xreg0, \xreg1
     msr    tpidrro_el0, \xreg0
 
-#ifdef CONFIG_ARCH_FPU
-    bl    arm64_fpu_enter_exception
-#endif
+    /* Save the FPU registers */
 
+#ifdef CONFIG_ARCH_FPU
+    add    x0, sp, #8 * XCPTCONTEXT_GP_REGS
+    bl     arm64_fpu_save
+    ldr    x0, [sp, #8 * REG_X0]
+#endif
 .endm
 
 /****************************************************************************
@@ -243,9 +246,8 @@ SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 GTEXT(arm64_exit_exception)
 SECTION_FUNC(text, arm64_exit_exception)
 #ifdef CONFIG_ARCH_FPU
-    bl    arm64_fpu_exit_exception
-GTEXT(arm64_exit_exc_fpu_done)
-arm64_exit_exc_fpu_done:
+    add    x0, sp, #8 * XCPTCONTEXT_GP_REGS
+    bl     arm64_fpu_restore
 #endif
 
     /* restore spsr and elr at el1*/
@@ -283,6 +285,6 @@ arm64_exit_exc_fpu_done:
     ldp    x28, x29, [sp, #8 * REG_X28]
     ldp    x30, xzr, [sp, #8 * REG_X30]
 
-    add    sp, sp, #8 * XCPTCONTEXT_GP_REGS
+    add    sp, sp, #8 * XCPTCONTEXT_REGS
 
     eret
