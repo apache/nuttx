@@ -143,9 +143,11 @@ static int nrf52_nmi(int irq, void *context, void *arg)
 
 static int nrf52_pendsv(int irq, void *context, void *arg)
 {
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
   PANIC();
+#endif
   return 0;
 }
 
