@@ -69,6 +69,10 @@ void ceva_switchcontext(uint32_t **saveregs, uint32_t *restoreregs)
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
+  /* Update scheduler parameters */
+
+  sched_suspend_scheduler(rtcb);
+
   /* Are we in an interrupt handler? */
 
   if (up_current_regs())
@@ -79,6 +83,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       rtcb->xcp.regs = up_current_regs();
 
+      /* Update scheduler parameters */
+
+      sched_resume_scheduler(tcb);
+
       /* Then switch contexts */
 
       up_set_current_regs(tcb->xcp.regs);
@@ -88,6 +96,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   else
     {
+      /* Update scheduler parameters */
+
+      sched_resume_scheduler(tcb);
+
       /* Switch context to the context of the task at the head of the
        * ready to run list.
        */

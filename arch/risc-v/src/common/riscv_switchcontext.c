@@ -57,6 +57,10 @@
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
+  /* Update scheduler parameters */
+
+  nxsched_suspend_scheduler(rtcb);
+
   /* Are we in an interrupt handler? */
 
   if (up_interrupt_context())
@@ -66,6 +70,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
        */
 
       riscv_savecontext(rtcb);
+
+      /* Update scheduler parameters */
+
+      nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts.  Any necessary address environment
        * changes will be made when the interrupt returns.
@@ -78,6 +86,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   else
     {
+      /* Update scheduler parameters */
+
+      nxsched_resume_scheduler(tcb);
+
       /* Then switch contexts */
 
       riscv_switchcontext(rtcb, tcb);
