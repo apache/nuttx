@@ -162,6 +162,10 @@ retry:
   rtcb->irqcount--;
 #endif
 
+  /* g_running_tasks is not valid now */
+
+  g_running_tasks[this_cpu()] = NULL;
+
   rtcb->xcp.regs = regs;
   riscv_fullcontextrestore(rtcb);
 }
