@@ -134,336 +134,362 @@
 
 /* SVC with SYS_ call number and no parameters */
 
-static inline uintptr_t sys_call0(unsigned int nbr)
-{
 #ifdef __ghs__
-  register long reg0 = (long)(nbr);
-
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0)
-    : "memory", "r14", "r0"
-  );
+#  define sys_call0(nbr)                    \
+({                                          \
+  uintptr_t ret;                            \
+  __asm__ __volatile__                      \
+  (                                         \
+    "mov r0, %2\n\t"                        \
+    "svc %1\n\t"                            \
+    "mov %0, r0"                            \
+    : "=r"(ret)                             \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr) \
+    : "memory", "r0"                        \
+  );                                        \
+  ret;                                      \
+})
 #else
-  register long reg0 __asm__("r0") = (long)(nbr);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0)
-    : "memory", "r14"
-  );
+#  define sys_call0(nbr)                                    \
+({                                                          \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr); \
+  __asm__ __volatile__                                      \
+  (                                                         \
+    "svc %1"                                                \
+    : "=r"(reg0)                                            \
+    : "i"(SYS_syscall), "r"(reg0)                           \
+    : "memory"                                              \
+  );                                                        \
+  reg0;                                                     \
+})
 #endif
-
-  return reg0;
-}
 
 /* SVC with SYS_ call number and one parameter */
 
-static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
-{
 #ifdef __ghs__
-  register long reg0 = (long)(nbr);
-  register long reg1 = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "mov r1, %3\n\t"
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1)
-    : "memory", "r14", "r0", "r1"
-  );
+#  define sys_call1(nbr, parm1)              \
+({                                           \
+  uintptr_t ret;                             \
+  __asm__ __volatile__                       \
+  (                                          \
+    "mov r0, %2\n\t"                         \
+    "mov r1, %3\n\t"                         \
+    "svc %1\n\t"                             \
+    "mov %0, r0"                             \
+    : "=r"(ret)                              \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr), \
+      "r"((uintptr_t)parm1)                  \
+    : "memory", "r0", "r1"                   \
+  );                                         \
+  ret;                                       \
+})
 #else
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1)
-    : "memory", "r14"
-  );
+#  define sys_call1(nbr, parm1)                               \
+({                                                            \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1); \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
+  __asm__ __volatile__                                        \
+  (                                                           \
+    "svc %1"                                                  \
+    : "=r"(reg0)                                              \
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1)                  \
+    : "memory"                                                \
+  );                                                          \
+  reg0;                                                       \
+})
 #endif
-
-  return reg0;
-}
 
 /* SVC with SYS_ call number and two parameters */
 
-static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
-                                  uintptr_t parm2)
-{
 #ifdef __ghs__
-  register long reg0 = (long)nbr;
-  register long reg2 = (long)parm2;
-  register long reg1 = (long)parm1;
-
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "mov r1, %3\n\t"
-    "mov r2, %4\n\t"
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2)
-    : "memory", "r14", "r0", "r1", "r2"
-  );
+#  define sys_call2(nbr, parm1, parm2)             \
+({                                                 \
+  uintptr_t ret;                                   \
+  __asm__ __volatile__                             \
+  (                                                \
+    "mov r0, %2\n\t"                               \
+    "mov r1, %3\n\t"                               \
+    "mov r2, %4\n\t"                               \
+    "svc %1\n\t"                                   \
+    "mov %0, r0"                                   \
+    : "=r"(ret)                                    \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr),       \
+      "r"((uintptr_t)parm1), "r"((uintptr_t)parm2) \
+    : "memory", "r0", "r1", "r2"                   \
+  );                                               \
+  ret;                                             \
+})
 #else
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg2 __asm__("r2") = (long)(parm2);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2)
-    : "memory", "r14"
-  );
+#  define sys_call2(nbr, parm1, parm2)                        \
+({                                                            \
+  register uintptr_t reg2 __asm__("r2") = (uintptr_t)(parm2); \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1); \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
+  __asm__ __volatile__                                        \
+  (                                                           \
+    "svc %1"                                                  \
+    : "=r"(reg0)                                              \
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2)       \
+    : "memory"                                                \
+  );                                                          \
+  reg0;                                                       \
+})
 #endif
-
-  return reg0;
-}
 
 /* SVC with SYS_ call number and three parameters */
 
-static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
-                                  uintptr_t parm2, uintptr_t parm3)
-{
 #ifdef __ghs__
-  register long reg0 = (long)(nbr);
-  register long reg3 = (long)(parm3);
-  register long reg2 = (long)(parm2);
-  register long reg1 = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "mov r1, %3\n\t"
-    "mov r2, %4\n\t"
-    "mov r3, %5\n\t"
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2), "r"(reg3)
-    : "memory", "r14", "r0", "r1", "r2", "r3"
-  );
+#  define sys_call3(nbr, parm1, parm2, parm3)                       \
+({                                                                  \
+  uintptr_t ret;                                                    \
+  __asm__ __volatile__                                              \
+  (                                                                 \
+    "mov r0, %2\n\t"                                                \
+    "mov r1, %3\n\t"                                                \
+    "mov r2, %4\n\t"                                                \
+    "mov r3, %5\n\t"                                                \
+    "svc %1\n\t"                                                    \
+    "mov %0, r0"                                                    \
+    : "=r"(ret)                                                     \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1), \
+      "r"((uintptr_t)parm2), "r"((uintptr_t)parm3)                  \
+    : "memory", "r0", "r1", "r2", "r3"                              \
+  );                                                                \
+  ret;                                                              \
+})
 #else
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg3 __asm__("r3") = (long)(parm3);
-  register long reg2 __asm__("r2") = (long)(parm2);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2), "r"(reg3)
-    : "memory", "r14"
-  );
+#  define sys_call3(nbr, parm1, parm2, parm3)                      \
+({                                                                 \
+  register uintptr_t reg3 __asm__("r3") = (uintptr_t)(parm3);      \
+  register uintptr_t reg2 __asm__("r2") = (uintptr_t)(parm2);      \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1);      \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);        \
+  __asm__ __volatile__                                             \
+  (                                                                \
+    "svc %1"                                                       \
+    : "=r"(reg0)                                                   \
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2), "r"(reg3) \
+    : "memory"                                                     \
+  );                                                               \
+  reg0;                                                            \
+})
 #endif
-
-  return reg0;
-}
 
 /* SVC with SYS_ call number and four parameters */
 
-static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
-                                  uintptr_t parm2, uintptr_t parm3,
-                                  uintptr_t parm4)
-{
 #ifdef __ghs__
-  register long reg0 = (long)(nbr);
-  register long reg4 = (long)(parm4);
-  register long reg3 = (long)(parm3);
-  register long reg2 = (long)(parm2);
-  register long reg1 = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "mov r1, %3\n\t"
-    "mov r2, %4\n\t"
-    "mov r3, %5\n\t"
-    "mov r4, %6\n\t"
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4)
-    : "memory", "r14", "r0", "r1", "r2", "r3", "r4"
-  );
+#  define sys_call4(nbr, parm1, parm2, parm3, parm4)                      \
+({                                                                        \
+  uintptr_t ret;                                                          \
+  __asm__ __volatile__                                                    \
+  (                                                                       \
+    "push {r4}\n\t"                                                       \
+    "mov r0, %2\n\t"                                                      \
+    "mov r1, %3\n\t"                                                      \
+    "mov r2, %4\n\t"                                                      \
+    "mov r3, %5\n\t"                                                      \
+    "mov r4, %6\n\t"                                                      \
+    "svc %1\n\t"                                                          \
+    "pop {r4}\n\t"                                                        \
+    "mov %0, r0"                                                          \
+    : "=r"(ret)                                                           \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1),       \
+      "r"((uintptr_t)parm2), "r"((uintptr_t)parm3), "r"((uintptr_t)parm4) \
+    : "memory", "r0", "r1", "r2", "r3"                                    \
+  );                                                                      \
+  ret;                                                                    \
+})
 #else
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg4 __asm__("r4") = (long)(parm4);
-  register long reg3 __asm__("r3") = (long)(parm3);
-  register long reg2 __asm__("r2") = (long)(parm2);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4)
-    : "memory", "r14"
-  );
+#  define sys_call4(nbr, parm1, parm2, parm3, parm4)          \
+({                                                            \
+  register uintptr_t reg4 __asm__("r4") = (uintptr_t)(parm4); \
+  register uintptr_t reg3 __asm__("r3") = (uintptr_t)(parm3); \
+  register uintptr_t reg2 __asm__("r2") = (uintptr_t)(parm2); \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1); \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
+  __asm__ __volatile__                                        \
+  (                                                           \
+    "svc %1"                                                  \
+    : "=r"(reg0)                                              \
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),      \
+      "r"(reg3), "r"(reg4)                                    \
+    : "memory"                                                \
+  );                                                          \
+  reg0;                                                       \
+})
 #endif
-
-  return reg0;
-}
 
 /* SVC with SYS_ call number and five parameters */
 
-static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
-                                  uintptr_t parm2, uintptr_t parm3,
-                                  uintptr_t parm4, uintptr_t parm5)
-{
 #ifdef __ghs__
-  register long reg0 = (long)(nbr);
-  register long reg5 = (long)(parm5);
-  register long reg4 = (long)(parm4);
-  register long reg3 = (long)(parm3);
-  register long reg2 = (long)(parm2);
-  register long reg1 = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "mov r1, %3\n\t"
-    "mov r2, %4\n\t"
-    "mov r3, %5\n\t"
-    "mov r4, %6\n\t"
-    "mov r5, %7\n\t"
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5)
-    : "memory", "r14", "r0", "r1", "r2", "r3", "r4", "r5"
-  );
+#  define sys_call5(nbr, parm1, parm2, parm3, parm4, parm5)                \
+({                                                                         \
+  uintptr_t ret;                                                           \
+  __asm__ __volatile__                                                     \
+  (                                                                        \
+    "push {r3-r5}\n\t"                                                     \
+    "push {%7}\n\t"                                                        \
+    "push {%6}\n\t"                                                        \
+    "mov r0, %2\n\t"                                                       \
+    "mov r1, %3\n\t"                                                       \
+    "mov r2, %4\n\t"                                                       \
+    "mov r3, %5\n\t"                                                       \
+    "pop {r4-r5}\n\t"                                                      \
+    "svc %1\n\t"                                                           \
+    "pop {r3-r5}\n\t"                                                      \
+    "mov %0, r0"                                                           \
+    : "=r"(ret)                                                            \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1),        \
+      "r"((uintptr_t)parm2), "r"((uintptr_t)parm3), "r"((uintptr_t)parm4), \
+      "r"((uintptr_t)parm5)                                                \
+    : "memory", "r0", "r1", "r2"                                           \
+  );                                                                       \
+  ret;                                                                     \
+})
 #else
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg5 __asm__("r5") = (long)(parm5);
-  register long reg4 __asm__("r4") = (long)(parm4);
-  register long reg3 __asm__("r3") = (long)(parm3);
-  register long reg2 __asm__("r2") = (long)(parm2);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5)
-    : "memory", "r14"
-  );
+#  define sys_call5(nbr, parm1, parm2, parm3, parm4, parm5)   \
+({                                                            \
+  register uintptr_t reg5 __asm__("r5") = (uintptr_t)(parm5); \
+  register uintptr_t reg4 __asm__("r4") = (uintptr_t)(parm4); \
+  register uintptr_t reg3 __asm__("r3") = (uintptr_t)(parm3); \
+  register uintptr_t reg2 __asm__("r2") = (uintptr_t)(parm2); \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1); \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
+  __asm__ __volatile__                                        \
+  (                                                           \
+    "svc %1"                                                  \
+    : "=r"(reg0)                                              \
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),      \
+      "r"(reg3), "r"(reg4), "r"(reg5)                         \
+    : "memory"                                                \
+  );                                                          \
+  reg0;                                                       \
+})
 #endif
-
-  return reg0;
-}
 
 /* SVC with SYS_ call number and six parameters */
 
-static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
-                                  uintptr_t parm2, uintptr_t parm3,
-                                  uintptr_t parm4, uintptr_t parm5,
-                                  uintptr_t parm6)
-{
 #ifdef __ghs__
-  register long reg0 = (long)(nbr);
-  register long reg6 = (long)(parm6);
-  register long reg5 = (long)(parm5);
-  register long reg4 = (long)(parm4);
-  register long reg3 = (long)(parm3);
-  register long reg2 = (long)(parm2);
-  register long reg1 = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "mov r1, %3\n\t"
-    "mov r2, %4\n\t"
-    "mov r3, %5\n\t"
-    "mov r4, %6\n\t"
-    "mov r5, %7\n\t"
-    "mov r6, %8\n\t"
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
-    : "memory", "r14", "r0", "r1", "r2", "r3", "r4", "r5", "r6"
-  );
+#  define sys_call6(nbr, parm1, parm2, parm3, parm4, parm5, parm6)         \
+({                                                                         \
+  uintptr_t ret;                                                           \
+  __asm__ __volatile__                                                     \
+  (                                                                        \
+    "push {r2-r6}\n\t"                                                     \
+    "push {%8}\n\t"                                                        \
+    "push {%7}\n\t"                                                        \
+    "push {%6}\n\t"                                                        \
+    "push {%5}\n\t"                                                        \
+    "mov r0, %2\n\t"                                                       \
+    "mov r1, %3\n\t"                                                       \
+    "mov r2, %4\n\t"                                                       \
+    "pop {r3-r6}\n\t"                                                      \
+    "svc %1\n\t"                                                           \
+    "pop {r2-r6}\n\t"                                                      \
+    "mov %0, r0"                                                           \
+    : "=r"(ret)                                                            \
+    : "i"(SYS_syscall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1),        \
+      "r"((uintptr_t)parm2), "r"((uintptr_t)parm3), "r"((uintptr_t)parm4), \
+      "r"((uintptr_t)parm5), "r"((uintptr_t)parm6)                         \
+    : "memory", "r0", "r1"                                                 \
+  );                                                                       \
+  ret;                                                                     \
+})
 #else
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg6 __asm__("r6") = (long)(parm6);
-  register long reg5 __asm__("r5") = (long)(parm5);
-  register long reg4 __asm__("r4") = (long)(parm4);
-  register long reg3 __asm__("r3") = (long)(parm3);
-  register long reg2 __asm__("r2") = (long)(parm2);
-  register long reg1 __asm__("r1") = (long)(parm1);
-
-  __asm__ __volatile__
-  (
-    "svc %1"
-    : "=r"(reg0)
-    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
-      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
-    : "memory", "r14"
-  );
+#  define sys_call6(nbr, parm1, parm2, parm3, parm4, parm5, parm6) \
+({                                                                 \
+  register uintptr_t reg6 __asm__("r6") = (uintptr_t)(parm6);      \
+  register uintptr_t reg5 __asm__("r5") = (uintptr_t)(parm5);      \
+  register uintptr_t reg4 __asm__("r4") = (uintptr_t)(parm4);      \
+  register uintptr_t reg3 __asm__("r3") = (uintptr_t)(parm3);      \
+  register uintptr_t reg2 __asm__("r2") = (uintptr_t)(parm2);      \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1);      \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);        \
+  __asm__ __volatile__                                             \
+  (                                                                \
+    "svc %1"                                                       \
+    : "=r"(reg0)                                                   \
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),           \
+      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)                   \
+    : "memory"                                                     \
+  );                                                               \
+  reg0;                                                            \
+})
 #endif
-
-  return reg0;
-}
 
 /* semihosting(SMH) call with call number and one parameter */
 
-static inline long smh_call(unsigned int nbr, void *parm)
-{
 #ifdef __ghs__
-  register long reg0 = (long)(nbr);
-  register long reg1 = (long)(parm);
+#  if defined(CONFIG_ARCH_ARMV6M) || \
+      defined(CONFIG_ARCH_ARMV7M) || \
+      defined(CONFIG_ARCH_ARMV8M)
 
-  __asm__ __volatile__
-  (
-    "mov r0, %2\n\t"
-    "mov r1, %3\n\t"
-#if defined(CONFIG_ARCH_ARMV6M) || \
-    defined(CONFIG_ARCH_ARMV7M) || \
-    defined(CONFIG_ARCH_ARMV8M)
-  "bkpt %1"
+#    define smh_call(nbr, parm1)                                   \
+({                                                                 \
+  uintptr_t ret;                                                   \
+  __asm__ __volatile__                                             \
+  (                                                                \
+    "mov r0, %2\n\t"                                               \
+    "mov r1, %3\n\t"                                               \
+    "bkpt %1\n\t"                                                  \
+    "mov %0, r0"                                                   \
+    : "=r"(ret)                                                    \
+    : "i"(SYS_smhcall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1) \
+    : "memory", "r0", "r1"                                         \
+  );                                                               \
+  ret;                                                             \
+})
+#  else
+#    define smh_call(nbr, parm1)                                   \
+({                                                                 \
+  uintptr_t ret;                                                   \
+  __asm__ __volatile__                                             \
+  (                                                                \
+    "mov r0, %2\n\t"                                               \
+    "mov r1, %3\n\t"                                               \
+    "svc %1\n\t"                                                   \
+    "mov %0, r0"                                                   \
+    : "=r"(ret)                                                    \
+    : "i"(SYS_smhcall), "r"((uintptr_t)nbr), "r"((uintptr_t)parm1) \
+    : "memory", "r0", "r1"                                         \
+  );                                                               \
+  ret;                                                             \
+})
+#  endif
 #else
-  "svc %1"
-#endif
-    : "=r"(reg0)
-    : "i"(SYS_smhcall), "r"(reg0), "r"(reg1)
-    : "memory", "r14", "r0", "r1"
-  );
-#else
-  register long reg0 __asm__("r0") = (long)(nbr);
-  register long reg1 __asm__("r1") = (long)(parm);
+#  if defined(CONFIG_ARCH_ARMV6M) || \
+      defined(CONFIG_ARCH_ARMV7M) || \
+      defined(CONFIG_ARCH_ARMV8M)
 
-  __asm__ __volatile__
-  (
-#if defined(CONFIG_ARCH_ARMV6M) || \
-    defined(CONFIG_ARCH_ARMV7M) || \
-    defined(CONFIG_ARCH_ARMV8M)
-  "bkpt %1"
-#else
-  "svc %1"
+#    define smh_call(nbr, parm1)                              \
+({                                                            \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1); \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
+  __asm__ __volatile__                                        \
+  (                                                           \
+    "bkpt %1"                                                 \
+    : "=r"(reg0)                                              \
+    : "i"(SYS_smhcall), "r"(reg0), "r"(reg1)                  \
+    : "memory"                                                \
+  );                                                          \
+  reg0;                                                       \
+})
+#  else
+#    define smh_call(nbr, parm1)                              \
+({                                                            \
+  register uintptr_t reg1 __asm__("r1") = (uintptr_t)(parm1); \
+  register uintptr_t reg0 __asm__("r0") = (uintptr_t)(nbr);   \
+  __asm__ __volatile__                                        \
+  (                                                           \
+    "svc %1"                                                  \
+    : "=r"(reg0)                                              \
+    : "i"(SYS_smhcall), "r"(reg0), "r"(reg1)                  \
+    : "memory"                                                \
+  );                                                          \
+  reg0;                                                       \
+})
+#  endif
 #endif
-    : "=r"(reg0)
-    : "i"(SYS_smhcall), "r"(reg0), "r"(reg1)
-    : "memory", "r14"
-  );
-#endif
-
-  return reg0;
-}
 
 /****************************************************************************
  * Public Data
