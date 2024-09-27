@@ -54,18 +54,11 @@
 #ifdef CONFIG_RAMLOG
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define RAMLOG_MAGIC_NUMBER 0x12345678
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct ramlog_header_s
 {
-  uint32_t          rl_magic;    /* The rl_magic number for ramlog buffer init */
   volatile uint32_t rl_head;     /* The head index (where data is added,natural growth) */
   char              rl_buffer[]; /* Circular RAM buffer */
 };
@@ -90,8 +83,7 @@ struct ramlog_user_s
 struct ramlog_dev_s
 {
   /* The following is the header of the RAM buffer,
-   * Store the RAM BUFFER init rl_magic number,
-   * and read/write pointers
+   * Store the read/write pointers
    */
 
   FAR struct ramlog_header_s *rl_header;
@@ -147,24 +139,16 @@ static const struct file_operations g_ramlogfops =
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  ifdef RAMLOG_BUFFER_SECTION
-static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4]
-                       locate_data(RAMLOG_BUFFER_SECTION);
-#  else
-static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4];
+locate_data(RAMLOG_BUFFER_SECTION)
 #  endif
+static uint32_t g_sysbuffer[CONFIG_RAMLOG_BUFSIZE / 4];
 
 /* This is the device structure for the console or syslogging function.  It
  * must be statically initialized because the RAMLOG ramlog_putc function
  * could be called before the driver initialization logic executes.
  */
 
-static struct ramlog_dev_s g_sysdev =
-{
-  (FAR struct ramlog_header_s *)g_sysbuffer,            /* rl_buffer */
-  sizeof(g_sysbuffer) - sizeof(struct ramlog_header_s), /* rl_bufsize */
-  LIST_INITIAL_VALUE(g_sysdev.rl_list)                  /* rl_list */
-};
-
+static struct ramlog_dev_s g_sysdev;
 #endif
 
 /****************************************************************************
@@ -290,10 +274,16 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
   flags = enter_critical_section();
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-  if (header->rl_magic != RAMLOG_MAGIC_NUMBER && priv == &g_sysdev)
+  if (priv == &g_sysdev && header == NULL)
     {
+      priv->rl_header = (FAR void *)g_sysbuffer;
+      priv->rl_bufsize = sizeof(g_sysbuffer) -
+                         sizeof(struct ramlog_header_s);
+      list_initialize(&priv->rl_list);
+      header = priv->rl_header;
+#  ifdef RAMLOG_BUFFER_SECTION
       memset(header, 0, sizeof(g_sysbuffer));
-      header->rl_magic = RAMLOG_MAGIC_NUMBER;
+#  endif
     }
 #endif
 
