@@ -116,26 +116,34 @@ static void udelay_coarse(useconds_t microseconds)
 static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
-  clock_t now = 0;
+  clock_t now;
+  ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
 
 #ifdef CONFIG_SCHED_TICKLESS
-  ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
   nxsched_alarm_tick_expiration(now);
 #else
-  clock_t delta;
+  /* Start the next tick first, in order to minimize latency. Ideally
+   * the ONESHOT_TICK_START would also return the current tick so that
+   * the retriving the current tick and starting the new one could be done
+   * atomically w. respect to a HW timer
+   */
 
-  do
+  ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
+
+  /* It is always an error if this progresses more than 1 tick at a time.
+   * That would break any timer based on wdog; such timers might timeout
+   * early. Add a DEBUGASSERT here to catch those errors. It is not added
+   * here by default, since it would break debugging. These errors
+   * would occur due to HW timers possibly running while CPU is being halted.
+   */
+
+  /* DEBUGASSERT(now - g_current_tick <= 1); */
+
+  while (now - g_current_tick > 0)
     {
-      clock_t next;
-
+      g_current_tick++;
       nxsched_process_timer();
-      next = ++g_current_tick;
-      ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
-      delta = next - now;
     }
-  while ((sclock_t)delta <= 0);
-
-  ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, delta);
 #endif
 }
 
