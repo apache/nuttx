@@ -7,6 +7,7 @@ Implementation Details
    :caption: Contents:
    
    drivers_design.rst
+   device_drivers.rst
    processes_vs_tasks.rst
    critical_sections.rst
    interrupt_controls.rst
