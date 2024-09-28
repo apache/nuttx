@@ -279,6 +279,14 @@ config XTENSA_SEMIHOSTING_HOSTFS
 		This doesn't support some directory operations like readdir because
 		of the limitations of semihosting mechanism.
 
+config XTENSA_TARGET_ISS
+	bool "Target machine is Instruction Set Simulator"
+	default n
+	---help---
+		This setting determines whether the target is Cadence Instruction
+		Set Simulator, which might have some sepecial characteristics such
+		as how to open a file nonblock.
+
 if XTENSA_SEMIHOSTING_HOSTFS
 
 config XTENSA_SEMIHOSTING_HOSTFS_CACHE_COHERENCE

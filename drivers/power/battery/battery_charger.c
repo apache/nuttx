@@ -391,7 +391,15 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
           if (ptr)
             {
-              ret = dev->ops->get_protocol(dev, ptr);
+              if (dev->ops->get_protocol)
+                {
+                  ret = dev->ops->get_protocol(dev, ptr);
+                }
+              else
+                {
+                  *ptr = BATTERY_PROTOCOL_DEFAULT;
+                  ret = OK;
+                }
             }
         }
         break;

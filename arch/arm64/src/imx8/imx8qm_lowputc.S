@@ -84,6 +84,6 @@ SECTION_FUNC(text, arm64_earlyprintinit)
 GTEXT(arm64_lowputc)
 SECTION_FUNC(text, arm64_lowputc)
     ldr   x15, =UART1_BASE_ADDRESS
-    early_uart_ready x15, 1
+    early_uart_ready x15, 2
     early_uart_transmit x15, w0
     ret

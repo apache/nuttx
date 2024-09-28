@@ -55,7 +55,7 @@ static int lan9250_attach(const struct lan9250_lower_s *lower,
                           xcpt_t handler, void *arg);
 static void lan9250_enable(const struct lan9250_lower_s *lower);
 static void lan9250_disable(const struct lan9250_lower_s *lower);
-static void lan9250_getmac(const struct lan9250_lower_s *lower,
+static int lan9250_getmac(const struct lan9250_lower_s *lower,
                            uint8_t *mac);
 
 /****************************************************************************
@@ -175,18 +175,44 @@ static void lan9250_disable(const struct lan9250_lower_s *lower)
  *
  ****************************************************************************/
 
-static void lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
+static int lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
 {
   uint32_t regval[2];
   uint8_t *data = (uint8_t *)regval;
+  int i;
 
   regval[0] = esp32s3_efuse_read_reg(EFUSE_BLK1, 0);
   regval[1] = esp32s3_efuse_read_reg(EFUSE_BLK1, 1);
 
-  for (int i = 0; i < 6; i++)
+  for (i = 0; i < 6; i++)
     {
-      mac[i] = data[i];
+      mac[i] = data[5 - i];
     }
+
+#ifdef CONFIG_ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
+  mac[5] += 3;
+#else
+  mac[5] += 1;
+  uint8_t tmp = mac[0];
+  for (i = 0; i < 64; i++)
+    {
+      mac[0] = tmp | 0x02;
+      mac[0] ^= i << 2;
+
+      if (mac[0] != tmp)
+        {
+          break;
+        }
+    }
+
+  if (i >= 64)
+    {
+      wlerr("Failed to generate ethernet MAC\n");
+      return -1;
+    }
+#endif
+
+  return 0;
 }
 
 /****************************************************************************

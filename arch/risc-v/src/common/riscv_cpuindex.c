@@ -51,9 +51,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 int up_cpu_index(void)
 {
   return (int)riscv_mhartid();
 }
-#endif

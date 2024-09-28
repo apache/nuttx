@@ -1942,8 +1942,10 @@ void uart_datareceived(FAR uart_dev_t *dev)
 
   if (dev->isconsole)
     {
+#  if CONFIG_SERIAL_PM_ACTIVITY_PRIORITY > 0
       pm_activity(CONFIG_SERIAL_PM_ACTIVITY_DOMAIN,
                   CONFIG_SERIAL_PM_ACTIVITY_PRIORITY);
+#  endif
     }
 #endif
 }

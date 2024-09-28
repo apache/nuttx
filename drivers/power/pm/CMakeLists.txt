@@ -62,6 +62,12 @@ if(CONFIG_PM)
 
   endif()
 
+  if(CONFIG_PM_RUNTIME)
+
+    list(APPEND SRCS pm_runtime.c)
+
+  endif()
+
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})

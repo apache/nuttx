@@ -2446,6 +2446,13 @@ config DEBUG_SYMBOLS
 	---help---
 		Build with debug symbols (needed for use with a debugger).
 
+config DEBUG_SYMBOLS_LEVEL
+	string "Custom symbols level"
+	default "-g"
+	---help---
+		This string represents the custom symbol level that will be
+		used if DEBUG_SYMBOLS.
+
 config FRAME_POINTER
 	bool "Compile the NuttX with frame pointers"
 	default n

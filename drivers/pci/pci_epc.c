@@ -380,14 +380,11 @@ int pci_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
  * Description:
  *   Set the number of MSI interrupt numbers required.
  *
- *   Message Control Register for MSI:bit6-bit4:Multiple Message Enable
- *   Software writes to this field to indicate the number of allocate vectors
- *   Equal to or less than the number of requested vectors. The number of
- *   allocated vectors is aligned to a power of two. If a Function requests
- *   four vectors (indicated by a Multiple Message Capable encoding of
- *   010b), system software can allocate either four, two, or one vector
- *   by writing a 010b, 001b, or 000b to this field, respectively. When
- *   MSI Enable is Set, a Function will be allocated at least 1 vector
+ *   Message Control Register for MSI:bit3-bit1:System software reads this
+ *   field to determine the number of requested vectors. The number of
+ *   requested vectors must be aligned to a power of two (if a Function
+ *   requires three vectors, it requests four by initializing this field
+ *   to 010b).
  *
  *   Invoke to set the required number of MSI interrupts.
  *
@@ -732,7 +729,7 @@ int pci_epc_add_epf(FAR struct pci_epc_ctrl_s *epc,
   epf->funcno = funcno;
   epf->epc = epc;
 
-  list_add_tail(&epc->epf, &epf->node);
+  list_add_tail(&epc->epf, &epf->epc_node);
 
 out:
   nxmutex_unlock(&epc->lock);
@@ -798,7 +795,7 @@ void pci_epc_linkup(FAR struct pci_epc_ctrl_s *epc)
     }
 
   nxmutex_lock(&epc->lock);
-  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, node)
+  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, epc_node)
     {
       nxmutex_lock(&epf->lock);
       if (epf->event_ops && epf->event_ops->link_up)
@@ -839,7 +836,7 @@ void pci_epc_linkdown(FAR struct pci_epc_ctrl_s *epc)
     }
 
   nxmutex_lock(&epc->lock);
-  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, node)
+  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, epc_node)
     {
       nxmutex_lock(&epf->lock);
       if (epf->event_ops && epf->event_ops->link_down)
@@ -880,7 +877,7 @@ void pci_epc_init_notify(FAR struct pci_epc_ctrl_s *epc)
     }
 
   nxmutex_lock(&epc->lock);
-  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, node)
+  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, epc_node)
     {
       nxmutex_lock(&epf->lock);
       if (epf->event_ops && epf->event_ops->core_init)
@@ -921,7 +918,7 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc)
     }
 
   nxmutex_lock(&epc->lock);
-  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, node)
+  list_for_every_entry(&epc->epf, epf, struct pci_epf_device_s, epc_node)
     {
       nxmutex_lock(&epf->lock);
       if (epf->event_ops && epf->event_ops->bme)
@@ -945,13 +942,16 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc)
  *
  * Input Parameters:
  *   name        - EPC name strings
+ *   priv        - The epc priv data
  *   ops         - Function pointers for performing EPC operations
+ *
  * Returned Value:
  *   Return struct pci_epc_ctrl_s * if success, NULL if failed.
  ****************************************************************************/
 
 FAR struct pci_epc_ctrl_s *
-pci_epc_create(FAR const char *name, FAR const struct pci_epc_ops_s *ops)
+pci_epc_create(FAR const char *name, FAR void *priv,
+               FAR const struct pci_epc_ops_s *ops)
 {
   FAR struct pci_epc_ctrl_s *epc;
   size_t len;
@@ -968,6 +968,7 @@ pci_epc_create(FAR const char *name, FAR const struct pci_epc_ops_s *ops)
       return NULL;
     }
 
+  epc->priv = priv;
   memcpy(epc->name, name, len);
   nxmutex_init(&epc->lock);
   list_initialize(&epc->epf);

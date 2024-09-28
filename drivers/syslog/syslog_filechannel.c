@@ -165,9 +165,9 @@ end:
  *
  ****************************************************************************/
 
-FAR struct syslog_channel_s *syslog_file_channel(FAR const char *devpath)
+FAR syslog_channel_t *syslog_file_channel(FAR const char *devpath)
 {
-  FAR struct syslog_channel_s *file_channel;
+  FAR syslog_channel_t *file_channel;
   irqstate_t flags;
 
   /* Reset the default SYSLOG channel so that we can safely modify the

@@ -31,6 +31,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/list.h>
+#include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/pci/pci_regs.h>
 
@@ -111,6 +112,7 @@ struct pci_epf_device_id_s
  * is_bound: Indicates if bind notification to function driver has been
  *   invoked
  * event_ops: Callbacks for capturing the EPC events
+ * priv: The private data
  */
 
 struct pci_epf_device_s
@@ -127,12 +129,14 @@ struct pci_epf_device_s
   FAR struct pci_epf_driver_s *driver;
   FAR const struct pci_epf_device_id_s *id;
   struct list_node node;
+  struct list_node epc_node;
 
   /* Mutex to protect against concurrent access of pci_epf_ops_s */
 
   mutex_t lock;
   bool is_bound;
   FAR const struct pci_epc_event_ops_s *event_ops;
+  FAR void *priv;
 };
 
 /* struct pci_epf_ops_s - Set of function pointers for performing EPF
@@ -182,7 +186,7 @@ struct pci_epf_driver_s
   CODE void (*remove)(FAR struct pci_epf_device_s *epf);
 
   struct list_node node;
-  FAR struct pci_epf_ops_s *ops;
+  FAR const struct pci_epf_ops_s *ops;
   FAR const struct pci_epf_device_id_s *id_table;
 };
 

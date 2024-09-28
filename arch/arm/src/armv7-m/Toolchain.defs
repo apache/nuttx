@@ -22,11 +22,22 @@
 
 ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   TOOLCHAIN_ARM7EM   := y
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m4
-  TOOLCHAIN_MARCH    := -march=armv7e-m
-  LLVM_CPUTYPE       := cortex-m4
-  ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16
+  ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    TOOLCHAIN_MTUNE  := -cpu=cortexm4
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ifeq ($(CONFIG_ARCH_DPFPU),y)
+        TOOLCHAIN_MFLOAT := -fpu=vfpv3
+      else
+        TOOLCHAIN_MFLOAT := -fpu=vfpv3_d16
+      endif
+    endif
+  else
+    TOOLCHAIN_MTUNE    := -mtune=cortex-m4
+    TOOLCHAIN_MARCH    := -march=armv7e-m
+    LLVM_CPUTYPE       := cortex-m4
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16
+    endif
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y

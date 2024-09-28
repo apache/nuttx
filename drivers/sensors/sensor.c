@@ -161,36 +161,51 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {0,                                         NULL},
   {sizeof(struct sensor_accel),               "accel"},
   {sizeof(struct sensor_mag),                 "mag"},
+  {sizeof(struct sensor_orientation),         "orientation"},
   {sizeof(struct sensor_gyro),                "gyro"},
   {sizeof(struct sensor_light),               "light"},
   {sizeof(struct sensor_baro),                "baro"},
+  {sizeof(struct sensor_noise),               "noise"},
   {sizeof(struct sensor_prox),                "prox"},
+  {sizeof(struct sensor_rgb),                 "rgb"},
+  {sizeof(struct sensor_accel),               "linear_accel"},
+  {sizeof(struct sensor_rotation),            "rotation"},
   {sizeof(struct sensor_humi),                "humi"},
   {sizeof(struct sensor_temp),                "temp"},
-  {sizeof(struct sensor_rgb),                 "rgb"},
-  {sizeof(struct sensor_hall),                "hall"},
-  {sizeof(struct sensor_ir),                  "ir"},
-  {sizeof(struct sensor_uv),                  "uv"},
-  {sizeof(struct sensor_noise),               "noise"},
   {sizeof(struct sensor_pm25),                "pm25"},
   {sizeof(struct sensor_pm1p0),               "pm1p0"},
   {sizeof(struct sensor_pm10),                "pm10"},
-  {sizeof(struct sensor_co2),                 "co2"},
+  {sizeof(struct sensor_event),               "motion_detect"},
+  {sizeof(struct sensor_event),               "step_detector"},
+  {sizeof(struct sensor_step_counter),        "step_counter"},
+  {sizeof(struct sensor_ph),                  "ph"},
+  {sizeof(struct sensor_hrate),               "hrate"},
+  {sizeof(struct sensor_event),               "tilt_detector"},
+  {sizeof(struct sensor_event),               "wake_gesture"},
+  {sizeof(struct sensor_event),               "glance_gesture"},
+  {sizeof(struct sensor_event),               "pickup_gesture"},
+  {sizeof(struct sensor_event),               "wrist_tilt"},
+  {sizeof(struct sensor_orientation),         "device_orientation"},
+  {sizeof(struct sensor_pose_6dof),           "pose_6dof"},
+  {sizeof(struct sensor_gas),                 "gas"},
+  {sizeof(struct sensor_event),               "significant_motion"},
+  {sizeof(struct sensor_hbeat),               "hbeat"},
+  {sizeof(struct sensor_force),               "force"},
+  {sizeof(struct sensor_hall),                "hall"},
+  {sizeof(struct sensor_event),               "offbody_detector"},
+  {sizeof(struct sensor_uv),                  "uv"},
+  {sizeof(struct sensor_angle),               "hinge_angle"},
+  {sizeof(struct sensor_ir),                  "ir"},
   {sizeof(struct sensor_hcho),                "hcho"},
   {sizeof(struct sensor_tvoc),                "tvoc"},
-  {sizeof(struct sensor_ph),                  "ph"},
   {sizeof(struct sensor_dust),                "dust"},
-  {sizeof(struct sensor_hrate),               "hrate"},
-  {sizeof(struct sensor_hbeat),               "hbeat"},
   {sizeof(struct sensor_ecg),                 "ecg"},
   {sizeof(struct sensor_ppgd),                "ppgd"},
   {sizeof(struct sensor_ppgq),                "ppgq"},
   {sizeof(struct sensor_impd),                "impd"},
   {sizeof(struct sensor_ots),                 "ots"},
-  {sizeof(struct sensor_wake_gesture),        "wake_gesture"},
+  {sizeof(struct sensor_co2),                 "co2"},
   {sizeof(struct sensor_cap),                 "cap"},
-  {sizeof(struct sensor_gas),                 "gas"},
-  {sizeof(struct sensor_force),               "force"},
   {sizeof(struct sensor_gnss),                "gnss"},
   {sizeof(struct sensor_gnss_satellite),      "gnss_satellite"},
   {sizeof(struct sensor_gnss_measurement),    "gnss_measurement"},
@@ -384,7 +399,7 @@ static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
 static bool sensor_is_updated(FAR struct sensor_upperhalf_s *upper,
                               FAR struct sensor_user_s *user)
 {
-  long delta = upper->state.generation - user->state.generation;
+  long delta = (long long)upper->state.generation - user->state.generation;
 
   if (delta <= 0)
     {
@@ -416,7 +431,7 @@ static void sensor_catch_up(FAR struct sensor_upperhalf_s *upper,
   long delta;
 
   circbuf_peek(&upper->timing, &generation, TIMING_BUF_ESIZE);
-  delta = generation - user->state.generation;
+  delta = (long long)generation - user->state.generation;
   if (delta > 0)
     {
       user->bufferpos = upper->timing.tail / TIMING_BUF_ESIZE;
@@ -600,28 +615,31 @@ static int sensor_open(FAR struct file *filep)
         }
     }
 
-  if (filep->f_oflags & O_RDOK)
+  if ((filep->f_oflags & O_DIRECT) == 0)
     {
-      if (upper->state.nsubscribers == 0 && lower->ops->activate)
+      if (filep->f_oflags & O_RDOK)
         {
-          ret = lower->ops->activate(lower, filep, true);
-          if (ret < 0)
+          if (upper->state.nsubscribers == 0 && lower->ops->activate)
             {
-              goto errout_with_open;
+              ret = lower->ops->activate(lower, filep, true);
+              if (ret < 0)
+                {
+                  goto errout_with_open;
+                }
             }
+
+          user->role |= SENSOR_ROLE_RD;
+          upper->state.nsubscribers++;
         }
 
-      user->role |= SENSOR_ROLE_RD;
-      upper->state.nsubscribers++;
-    }
-
-  if (filep->f_oflags & O_WROK)
-    {
-      user->role |= SENSOR_ROLE_WR;
-      upper->state.nadvertisers++;
-      if (filep->f_oflags & SENSOR_PERSIST)
+      if (filep->f_oflags & O_WROK)
         {
-          lower->persist = true;
+          user->role |= SENSOR_ROLE_WR;
+          upper->state.nadvertisers++;
+          if (filep->f_oflags & SENSOR_PERSIST)
+            {
+              lower->persist = true;
+            }
         }
     }
 
@@ -680,18 +698,21 @@ static int sensor_close(FAR struct file *filep)
         }
     }
 
-  if (filep->f_oflags & O_RDOK)
+  if ((filep->f_oflags & O_DIRECT) == 0)
     {
-      upper->state.nsubscribers--;
-      if (upper->state.nsubscribers == 0 && lower->ops->activate)
+      if (filep->f_oflags & O_RDOK)
         {
-          lower->ops->activate(lower, filep, false);
+          upper->state.nsubscribers--;
+          if (upper->state.nsubscribers == 0 && lower->ops->activate)
+            {
+              lower->ops->activate(lower, filep, false);
+            }
         }
-    }
 
-  if (filep->f_oflags & O_WROK)
-    {
-      upper->state.nadvertisers--;
+      if (filep->f_oflags & O_WROK)
+        {
+          upper->state.nadvertisers--;
+        }
     }
 
   list_delete(&user->node);
@@ -800,8 +821,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct sensor_user_s *user = filep->f_priv;
   uint32_t arg1 = (uint32_t)arg;
   int ret = 0;
-
-  sninfo("cmd=%x arg=%08lx\n", cmd, arg);
 
   switch (cmd)
     {
@@ -935,8 +954,10 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           nxrmutex_lock(&upper->lock);
           *(FAR unsigned int *)(uintptr_t)arg = user->event;
           user->event = 0;
+          user->changed = false;
           nxrmutex_unlock(&upper->lock);
         }
+        break;
 
      case SNIOC_FLUSH:
         {
@@ -1314,7 +1335,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   if (lower == NULL)
     {
       ret = -EIO;
-      goto drv_err;
+      goto rpmsg_err;
     }
 #endif
 
@@ -1330,6 +1351,11 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 
 drv_err:
+#ifdef CONFIG_SENSORS_RPMSG
+  sensor_rpmsg_unregister(lower);
+rpmsg_err:
+#endif
+
   nxrmutex_destroy(&upper->lock);
 
   kmm_free(upper);

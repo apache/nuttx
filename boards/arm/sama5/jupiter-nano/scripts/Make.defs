@@ -62,5 +62,5 @@ LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
 #  LDFLAGS += --nostartfiles -nodefaultlibs
 #endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g
+  LDFLAGS += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
