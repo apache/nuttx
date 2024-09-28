@@ -27,8 +27,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/irq.h>
-
+#include <nuttx/arch.h>
 #include <nuttx/pci/pci.h>
 
 #include "x86_64_internal.h"
@@ -40,9 +39,6 @@
 #define PCI_CFG_ADDR         0xcf8
 #define PCI_DATA_ADDR        0xcfc
 #define PCI_CFG_EN           (1 << 31)
-
-#define X86_64_MAR_DEST      0xfee00000
-#define X86_64_MDR_TYPE      0x4000
 
 #define X86_64_IO_ADDR_LIMIT 0xffff
 
@@ -75,7 +71,8 @@ static int x86_64_pci_read_io(struct pci_bus_s *bus, uintptr_t addr,
 static int x86_64_pci_write_io(struct pci_bus_s *bus, uintptr_t addr,
                                int size, uint32_t val);
 
-static int x86_64_pci_get_irq(struct pci_bus_s *bus, uint8_t line);
+static int x86_64_pci_get_irq(struct pci_bus_s *bus, uint32_t devfn,
+                              uint8_t line, uint8_t pin);
 
 static int x86_64_pci_alloc_irq(struct pci_bus_s *bus,
                                 int *irq, int num);
@@ -319,19 +316,22 @@ static uintptr_t x86_64_pci_map(struct pci_bus_s *bus, uintptr_t start,
  *  Get interrupt number associated with a given INTx line.
  *
  * Input Parameters:
- *   bus  - Bus that PCI device resides
- *   line - activated PCI legacy interrupt line
+ *   bus   - Bus that PCI device resides
+ *   devfn - The pci device and function number
+ *   line  - Activated PCI legacy interrupt line
+ *   pin   - Intx pin number
  *
  * Returned Value:
  *   Return interrupt number associated with a given INTx
  *
  ****************************************************************************/
 
-static int x86_64_pci_get_irq(struct pci_bus_s *bus, uint8_t line)
+static int x86_64_pci_get_irq(struct pci_bus_s *bus, uint32_t devfn,
+                              uint8_t line, uint8_t pin)
 {
   UNUSED(bus);
 
-  return IRQ0 + line;
+  return up_get_legacy_irq(devfn, line, pin);
 }
 
 /****************************************************************************
@@ -416,20 +416,9 @@ static void x86_64_pci_release_irq(struct pci_bus_s *bus, int *irq, int num)
 static int x86_64_pci_connect_irq(struct pci_bus_s *bus, int *irq, int num,
                                   uintptr_t *mar, uint32_t *mdr)
 {
-  UNUSED(num);
+  UNUSED(bus);
 
-  if (mar != NULL)
-    {
-      *mar = X86_64_MAR_DEST |
-        (up_apic_cpu_id() << PCI_MSI_DATA_CPUID_SHIFT);
-    }
-
-  if (mdr != NULL)
-    {
-      *mdr = X86_64_MDR_TYPE | irq[0];
-    }
-
-  return OK;
+  return up_connect_irq(irq, num, mar, mdr);
 }
 
 /****************************************************************************

@@ -40,6 +40,8 @@ USAGE="USAGE: ${0} chip|toolchain-addr2line backtrace_file
 If the first argument contains 'addr2line', it will be used as the toolchain's addr2line tool.
 Otherwise, the script will try to identify the toolchain based on the chip name."
 
+GREP=${GREP:-grep}
+
 VALID_CHIPS=(
   "esp32"
   "esp32s2"
@@ -119,8 +121,8 @@ while read -r line; do
   fi
 
   if [[ $line =~ (\[CPU[0-9]+\]\ )?sched_dumpstack: ]]; then
-    task_id=$(echo $line | grep -oP 'backtrace\|\s*\K\d+')
-    addresses=$(echo $line | grep -oP '0x[0-9a-fA-F]+')
+    task_id=$(echo $line | ${GREP} -oP 'backtrace\|\s*\K\d+')
+    addresses=$(echo $line | ${GREP} -oP '0x[0-9a-fA-F]+')
     if $in_dump_tasks_section; then
       if [[ -n "${backtraces_after[$task_id]}" ]]; then
         backtraces_after[$task_id]="${backtraces_after[$task_id]} $addresses"

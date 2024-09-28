@@ -96,7 +96,7 @@ int board_app_initialize(uintptr_t arg)
 
   nxsig_usleep(CONFIG_CLICKER2_STM32_SYSLOG_FILE_DELAY * 1000);
 
-  struct syslog_channel_s *channel;
+  syslog_channel_t *channel;
   channel = syslog_file_channel(CONFIG_CLICKER2_STM32_SYSLOG_FILE_PATH);
   if (channel == NULL)
     {

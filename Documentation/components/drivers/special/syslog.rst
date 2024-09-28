@@ -151,7 +151,7 @@ defined in ``include/nuttx/syslog/syslog.h``:
 The channel interface is instantiated by calling
 :c:func:`syslog_channel_register()`.
 
-.. c:function:: int syslog_channel_register(FAR const struct syslog_channel_s *channel);
+.. c:function:: int syslog_channel_register(FAR syslog_channel_t *channel);
 
   Configure the SYSLOG function to use the provided
   channel to generate SYSLOG output.
@@ -408,7 +408,7 @@ mounting of the file systems.
 The interface ``syslog_file_channel()`` is used to configure the
 SYSLOG file channel:
 
-.. c:function:: FAR struct syslog_channel_s * \
+.. c:function:: FAR syslog_channel_t * \
                     syslog_file_channel(FAR const char *devpath);
 
   Configure to use a file in a mounted file system

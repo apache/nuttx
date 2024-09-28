@@ -29,6 +29,7 @@ libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) tar -xf libcxx-$(LIBCXX_VERSION).src.tar.xz \
 	         --exclude libcxx-$(LIBCXX_VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(LIBCXX_VERSION).src libcxx
+	$(Q) patch -p0 < 0001_fix_stdatomic_h_miss_typedef.patch
 	$(Q) patch -p2 < mbstate_t.patch
 	$(Q) patch -p0 < 0001-libcxx-remove-mach-time-h.patch
 	$(Q) touch $@

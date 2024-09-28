@@ -35,6 +35,8 @@ ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
 else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
   ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
     ARCHOPTIMIZATION += -Oz
+  else ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+    ARCHOPTIMIZATION += -Osize
   else
     ARCHOPTIMIZATION += -Os
   endif
@@ -431,7 +433,7 @@ endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),)
-    ARCHOPTIMIZATION += -g
+    ARCHOPTIMIZATION += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
     ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
       LDFLAGS += --debug
     endif

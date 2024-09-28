@@ -43,6 +43,7 @@
 #include <nuttx/segger/rtt.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/serial/pty.h>
+#include <nuttx/serial/uart_hostfs.h>
 #include <nuttx/serial/uart_ram.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
@@ -178,6 +179,10 @@ void drivers_initialize(void)
   lwlconsole_init();
 #elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
+#endif
+
+#ifdef CONFIG_UART_HOSTFS
+  uart_hostfs_init();
 #endif
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1

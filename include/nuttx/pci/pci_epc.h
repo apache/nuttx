@@ -131,6 +131,7 @@ struct pci_epc_ops_s
 
 /* struct pci_epc_mem_window_s - Address window of the endpoint controller
  *
+ * virt_base: Virtual base address of the PCI address window
  * phys_base: Physical base address of the PCI address window
  * size: The size of the PCI address window
  * page_size: Size of each page
@@ -138,6 +139,7 @@ struct pci_epc_ops_s
 
 struct pci_epc_mem_window_s
 {
+  FAR void *virt_base;
   uintptr_t phys_base;
   size_t size;
   size_t page_size;
@@ -145,6 +147,7 @@ struct pci_epc_mem_window_s
 
 /* struct pci_epc_mem_s - Address space of the endpoint controller
  *
+ * virt_base: Virtual base address of the PCI address window
  * phys_base: Physical base address of the PCI address window
  * size: The size of the PCI address window
  * page_size: Size of each page
@@ -155,6 +158,7 @@ struct pci_epc_mem_window_s
 
 struct pci_epc_mem_s
 {
+  FAR void *virt_base;
   uintptr_t phys_base;
   size_t size;
   size_t page_size;
@@ -177,6 +181,7 @@ struct pci_epc_mem_s
  * node: The node of epc list
  * lock: Mutex to protect pci_epc ops
  * funcno_map: Bitmap to manage physical function number
+ * priv: The private data
  * name: The current epc structure name that used to bind the epf
  */
 
@@ -193,6 +198,7 @@ struct pci_epc_ctrl_s
 
   mutex_t lock;
   unsigned long funcno_map;
+  FAR void *priv;
   char name[0];
 };
 
@@ -684,6 +690,7 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc);
  *
  * Input Parameters:
  *   name - EPC name strings
+ *   priv - The epc priv data
  *   ops  - Function pointers for performing EPC operations
  *
  * Returned Value:
@@ -691,7 +698,8 @@ void pci_epc_bme_notify(FAR struct pci_epc_ctrl_s *epc);
  ****************************************************************************/
 
 FAR struct pci_epc_ctrl_s *
-pci_epc_create(FAR const char *name, FAR const struct pci_epc_ops_s *ops);
+pci_epc_create(FAR const char *name, FAR void *priv,
+               FAR const struct pci_epc_ops_s *ops);
 
 /****************************************************************************
  * Name: pci_epc_destroy
@@ -741,7 +749,8 @@ int pci_epc_mem_multi_init(FAR struct pci_epc_ctrl_s *epc,
  *
  * Input Parameters:
  *   epc       - PCI EPC device
- *   base      - The physical base address of the PCI address window
+ *   virt      - The virtual addr
+ *   phys      - The physical base address of the PCI address window
  *   size      - The PCI window size
  *   page_size - Size of each window page
  *
@@ -749,8 +758,8 @@ int pci_epc_mem_multi_init(FAR struct pci_epc_ctrl_s *epc,
  *   0 if success, negative if failed
  ****************************************************************************/
 
-int pci_epc_mem_init(FAR struct pci_epc_ctrl_s *epc, uintptr_t base,
-                     size_t size, size_t page_size);
+int pci_epc_mem_init(FAR struct pci_epc_ctrl_s *epc, FAR void *virt,
+                     uintptr_t phys, size_t size, size_t page_size);
 
 /****************************************************************************
  * Name: pci_epc_mem_exit
@@ -780,15 +789,16 @@ void pci_epc_mem_exit(FAR struct pci_epc_ctrl_s *epc);
  * is usually done to map the remote RC address into the local system.
  *
  * Input Parameters:
- *   epc  - The EPC device on which memory has to be allocated
- *   size - The size of the address space that has to be allocated
+ *   epc   - The EPC device on which memory has to be allocated
+ *   phys  - The Physical addr
+ *   size  - The size of the address space that has to be allocated
  *
  * Returned Value:
- *   The memory address alloced if success, 0 if failed
+ *   The memory address alloced if success, NULL if failed
  ****************************************************************************/
 
-uintptr_t pci_epc_mem_alloc_addr(FAR struct pci_epc_ctrl_s *epc,
-                                 size_t size);
+FAR void *pci_epc_mem_alloc_addr(FAR struct pci_epc_ctrl_s *epc,
+                                 FAR uintptr_t *phys, size_t size);
 
 /****************************************************************************
  * Name: pci_epc_mem_free_addr

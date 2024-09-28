@@ -52,7 +52,7 @@
 #define PCI_SLOT(devfn)       (((devfn) >> 3) & 0x1f)
 #define PCI_FUNC(devfn)       ((devfn) & 0x07)
 
-#define PCI_ANY_ID (~0)
+#define PCI_ANY_ID (uint16_t)(~0)
 
 /* PCI_DEFINE_DEVICE_TABLE - macro used to describe a pci device table
  * table: device table name
@@ -207,6 +207,11 @@
 #define pci_read_mmio_dword(dev, addr, val)   \
   (*val) = *((FAR volatile uint32_t *)(addr))
 
+#define pci_map_region(dev, start, size) pci_bus_map_region((dev)->bus, start, size)
+
+#define pci_is_bridge(dev) ((dev)->hdr_type == PCI_HEADER_TYPE_BRIDGE || \
+                            (dev)->hdr_type == PCI_HEADER_TYPE_CARDBUS)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -242,8 +247,8 @@ struct pci_device_id_s
 {
   uint16_t vendor;    /* Vendor id */
   uint16_t device;    /* Device id */
-  uint32_t subvendor; /* Sub vendor id */
-  uint32_t subdevice; /* Sub device id */
+  uint16_t subvendor; /* Sub vendor id */
+  uint16_t subdevice; /* Sub device id */
   uint32_t class;     /* (Class, subclass, prog-if) triplet */
   uint32_t class_mask;
   uintptr_t driver_data;
@@ -306,7 +311,8 @@ struct pci_ops_s
 
   /* Get interrupt number associated with a given INTx line */
 
-  CODE int (*get_irq)(FAR struct pci_bus_s *bus, uint8_t line);
+  CODE int (*get_irq)(FAR struct pci_bus_s *bus, uint32_t devfn,
+                      uint8_t line, uint8_t pin);
 
   /* Allocate interrupt for MSI/MSI-X */
 
@@ -614,6 +620,51 @@ int pci_disable_device(FAR struct pci_device_s *dev);
  ****************************************************************************/
 
 int pci_select_bars(FAR struct pci_device_s *dev, unsigned int flags);
+
+/****************************************************************************
+ * Name: pci_bus_map_region
+ *
+ * Description:
+ *   Create a virtual mapping for a address.
+ *
+ *   Using this function you will get an virtual address.
+ *   These functions hide the details if this is a MMIO or PIO address
+ *   space and will just do what you expect from them in the correct way.
+ *
+ * Input Parameters:
+ *   bus   - PCI bus
+ *   start - The address base
+ *   size  - The length of the address
+ *
+ * Returned Value:
+ *  Virtual address or zero if failed
+ ****************************************************************************/
+
+FAR void *
+pci_bus_map_region(FAR struct pci_bus_s *bus, uintptr_t start, size_t size);
+
+/****************************************************************************
+ * Name: pci_map_bar_region
+ *
+ * Description:
+ *   Create a virtual mapping for a PCI BAR REGION.
+ *
+ *   Using this function you will get an address to your device BAR region.
+ *   These functions hide the details if this is a MMIO or PIO address
+ *   space and will just do what you expect from them in the correct way.
+ *
+ * Input Parameters:
+ *   dev - PCI device that owns the BAR
+ *   bar - BAR number
+ *   offset - BAR region offset
+ *   length - BAR region length
+ *
+ * Returned Value:
+ *  IO address or zero if failed
+ ****************************************************************************/
+
+FAR void *pci_map_bar_region(FAR struct pci_device_s *dev, int bar,
+                             uintptr_t offset, size_t length);
 
 /****************************************************************************
  * Name: pci_map_bar

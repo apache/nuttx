@@ -59,10 +59,6 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   int cpu;
 
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(rtcb);
-
   /* Are we in an interrupt handler? */
 
   if (up_interrupt_context())
@@ -74,10 +70,6 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
       x86_64_savestate(rtcb->xcp.regs);
 
       x86_64_restore_auxstate(tcb);
-
-      /* Update scheduler parameters */
-
-      nxsched_resume_scheduler(tcb);
 
       /* Then switch contexts.  Any necessary address environment
        * changes will be made when the interrupt returns.
@@ -94,6 +86,8 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
   else if (!up_saveusercontext(rtcb->xcp.regs))
     {
+      cpu = this_cpu();
+
       x86_64_restore_auxstate(tcb);
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -105,19 +99,20 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       addrenv_switch(tcb);
 #endif
-      /* Update scheduler parameters */
-
-      nxsched_resume_scheduler(tcb);
 
       /* Restore the cpu lock */
 
-      restore_critical_section(tcb, this_cpu());
+      restore_critical_section(tcb, cpu);
+
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[cpu]);
+      nxsched_resume_scheduler(current_task(cpu));
 
       /* Record the new "running" task.  g_running_tasks[] is only used by
        * assertion logic for reporting crashes.
        */
 
-      cpu = this_cpu();
       g_running_tasks[cpu] = current_task(cpu);
 
       /* Then switch contexts */

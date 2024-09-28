@@ -58,6 +58,7 @@
 
 uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb = this_task();
 
   board_autoled_on(LED_INIRQ);
@@ -71,9 +72,10 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
     {
       regs[REG_EPC] += 4;
     }
-  else
+
+  if (*running_task != NULL)
     {
-      tcb->xcp.regs = regs;
+      (*running_task)->xcp.regs = regs;
     }
 
   /* Current regs non-zero indicates that we are processing an interrupt;
@@ -97,7 +99,7 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
    * returning from the interrupt.
    */
 
-  if (regs != tcb->xcp.regs)
+  if ((*running_task) != tcb)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -109,20 +111,17 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
       addrenv_switch(NULL);
 #endif
 
+      /* Update scheduler parameters */
+
+      nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+      nxsched_resume_scheduler(tcb);
+
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      g_running_tasks[this_cpu()] = tcb;
-
-      /* If a context switch occurred while processing the interrupt then
-       * current_regs may have change value.  If we return any value
-       * different from the input regs, then the lower level will know
-       * that a context switch occurred during interrupt processing.
-       */
-
-      regs = tcb->xcp.regs;
+      *running_task = tcb;
     }
 
   /* Set current_regs to NULL to indicate that we are no longer in an
@@ -133,5 +132,5 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 
 #endif
   board_autoled_off(LED_INIRQ);
-  return regs;
+  return tcb->xcp.regs;
 }

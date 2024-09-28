@@ -83,3 +83,22 @@ menuconfig PCI_ENDPOINT
 		endpoint. This should be enabled if the platform has a PCI
 		controller that can operate in endpoint mode.
 
+if PCI_ENDPOINT
+
+config PCI_QEMU_EPC
+	bool "QEMU Ep Controller Support"
+	---help---
+		Enable qemu ep controller
+
+config PCI_EPF_TEST
+	bool "PCI epf test"
+	---help---
+		pci epf test driver
+
+config PCI_EP_TEST
+	bool "PCI endpoint test"
+	---help---
+		pci endpoint test driver
+
+endif # PCI_ENDPOINT
+

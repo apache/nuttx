@@ -48,6 +48,10 @@ ifeq ($(CONFIG_RPMSG_UART),y)
   CSRCS += uart_rpmsg.c
 endif
 
+ifeq ($(CONFIG_UART_HOSTFS),y)
+  CSRCS += uart_hostfs.c
+endif
+
 # Pseudo-terminal support
 
 ifeq ($(CONFIG_PSEUDOTERM),y)

@@ -161,7 +161,7 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
   /* Set the user register context to TCB */
 
-  rtcb->xcp.regs = context;
+  rtcb->xcp.sregs = context;
 
   /* Indicate that we are in a syscall handler */
 
@@ -257,7 +257,6 @@ int riscv_swint(int irq, void *context, void *arg)
           struct tcb_s *next = (struct tcb_s *)(uintptr_t)regs[REG_A2];
 
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          prev->xcp.regs = regs;
           riscv_savecontext(prev);
           new_regs = next->xcp.regs;
           riscv_restorecontext(next);
@@ -496,7 +495,6 @@ int riscv_swint(int irq, void *context, void *arg)
   if (regs != new_regs)
     {
       restore_critical_section(this_task(), this_cpu());
-      return SWINT_CONTEXT_SWITCH;
     }
 
   return OK;

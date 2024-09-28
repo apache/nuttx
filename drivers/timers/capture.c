@@ -60,8 +60,9 @@
 struct cap_upperhalf_s
 {
   uint8_t                    crefs;    /* The number of times the device has been opened */
+  uint8_t                    nchan;    /* The number of channels, only invalid for multi channels */
   mutex_t                    lock;     /* Supports mutual exclusion */
-  FAR struct cap_lowerhalf_s *lower;   /* lower-half state */
+  FAR struct cap_lowerhalf_s **lower;  /* lower-half state */
 };
 
 /****************************************************************************
@@ -135,16 +136,21 @@ static int cap_open(FAR struct file *filep)
 
   if (tmp == 1)
     {
-      FAR struct cap_lowerhalf_s *lower = upper->lower;
+      FAR struct cap_lowerhalf_s **lower = upper->lower;
+      uint8_t i;
 
-      /* Yes.. perform one time hardware initialization. */
-
-      DEBUGASSERT(lower->ops->start != NULL);
-
-      ret = lower->ops->start(lower);
-      if (ret < 0)
+      for (i = 0; i < upper->nchan; i++)
         {
-          goto errout_with_lock;
+          ret = lower[i]->ops->start(lower[i]);
+          if (ret < 0)
+            {
+              while (i-- > 0)
+                {
+                  lower[i]->ops->stop(lower[i]);
+                }
+
+              goto errout_with_lock;
+            }
         }
     }
 
@@ -192,17 +198,19 @@ static int cap_close(FAR struct file *filep)
     }
   else
     {
-      FAR struct cap_lowerhalf_s *lower = upper->lower;
+      FAR struct cap_lowerhalf_s **lower = upper->lower;
+      uint8_t i;
 
       /* There are no more references to the port */
 
       upper->crefs = 0;
 
-      /* Disable the PWM Capture device */
+      for (i = 0; i < upper->nchan; i++)
+        {
+          /* Disable the PWM Capture device */
 
-      DEBUGASSERT(lower->ops->stop != NULL);
-
-      lower->ops->stop(lower);
+          lower[i]->ops->stop(lower[i]);
+        }
     }
 
   nxmutex_unlock(&upper->lock);
@@ -257,10 +265,11 @@ static ssize_t cap_write(FAR struct file *filep,
 
 static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode          *inode = filep->f_inode;
+  FAR struct inode           *inode = filep->f_inode;
   FAR struct cap_upperhalf_s *upper;
-  FAR struct cap_lowerhalf_s *lower;
+  FAR struct cap_lowerhalf_s **lower;
   int                        ret;
+  uint8_t                    i;
 
   cpinfo("cmd: %d arg: %ld\n", cmd, arg);
   upper = inode->i_private;
@@ -287,8 +296,16 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_DUTYCYCLE:
         {
           FAR uint8_t *ptr = (FAR uint8_t *)((uintptr_t)arg);
-          DEBUGASSERT(lower->ops->getduty != NULL && ptr);
-          ret = lower->ops->getduty(lower, ptr);
+          DEBUGASSERT(ptr);
+          for (i = 0; i < upper->nchan; i++)
+            {
+              DEBUGASSERT(lower[i]->ops->getduty != NULL);
+              ret = lower[i]->ops->getduty(lower[i], &ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
         }
         break;
 
@@ -299,8 +316,16 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_FREQUENCE:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
-          DEBUGASSERT(lower->ops->getfreq != NULL && ptr);
-          ret = lower->ops->getfreq(lower, ptr);
+          DEBUGASSERT(ptr);
+          for (i = 0; i < upper->nchan; i++)
+            {
+              DEBUGASSERT(lower[i]->ops->getfreq != NULL);
+              ret = lower[i]->ops->getfreq(lower[i], &ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
         }
         break;
 
@@ -311,8 +336,49 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case CAPIOC_EDGES:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
-          DEBUGASSERT(lower->ops->getedges != NULL && ptr);
-          ret = lower->ops->getedges(lower, ptr);
+          DEBUGASSERT(ptr);
+          for (i = 0; i < upper->nchan; i++)
+            {
+              DEBUGASSERT(lower[i]->ops->getedges != NULL);
+              ret = lower[i]->ops->getedges(lower[i], &ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
+        }
+        break;
+
+      /* CAPIOC_ALL - Get the pwm duty, pulse frequence, pwm edges, from
+       * the capture.
+       * Argument: A reference to struct cap_all_s.
+       */
+
+      case CAPIOC_ALL:
+        {
+          FAR struct cap_all_s *ptr =
+                     (FAR struct cap_all_s *)((uintptr_t)arg);
+          DEBUGASSERT(ptr);
+          for (i = 0 ; i < upper->nchan ; i++)
+            {
+              ret = lower[i]->ops->getduty(lower[i], &ptr[i].duty);
+              if (ret < 0)
+                {
+                  break;
+                }
+
+              ret = lower[i]->ops->getfreq(lower[i], &ptr[i].freq);
+              if (ret < 0)
+                {
+                  break;
+                }
+
+              ret = lower[i]->ops->getedges(lower[i], &ptr[i].edges);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
         }
         break;
 
@@ -363,6 +429,35 @@ int cap_register(FAR const char *devpath, FAR struct cap_lowerhalf_s *lower)
   /* Allocate the upper-half data structure */
 
   upper = (FAR struct cap_upperhalf_s *)
+           kmm_zalloc(sizeof(struct cap_upperhalf_s) +
+                      sizeof(FAR struct cap_lowerhalf_s *));
+  if (!upper)
+    {
+      return -ENOMEM;
+    }
+
+  /* Initialize the PWM Capture device structure
+   * (it was already zeroed by kmm_zalloc())
+   */
+
+  nxmutex_init(&upper->lock);
+  upper->lower = (FAR struct cap_lowerhalf_s **)(upper + 1);
+  upper->lower[0] = lower;
+  upper->nchan = 1;
+
+  /* Register the PWM Capture device */
+
+  return register_driver(devpath, &g_capops, 0666, upper);
+}
+
+int cap_register_multiple(FAR const char *devpath,
+                          FAR struct cap_lowerhalf_s **lower, int n)
+{
+  FAR struct cap_upperhalf_s *upper;
+
+  /* Allocate the upper-half data structure */
+
+  upper = (FAR struct cap_upperhalf_s *)
            kmm_zalloc(sizeof(struct cap_upperhalf_s));
   if (!upper)
     {
@@ -375,6 +470,7 @@ int cap_register(FAR const char *devpath, FAR struct cap_lowerhalf_s *lower)
 
   nxmutex_init(&upper->lock);
   upper->lower = lower;
+  upper->nchan = n;
 
   /* Register the PWM Capture device */
 

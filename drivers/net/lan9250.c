@@ -2472,7 +2472,11 @@ int lan9250_initialize(
 
   if (lower->getmac)
     {
-      lower->getmac(lower, priv->dev.d_mac.ether.ether_addr_octet);
+      if (lower->getmac(lower, priv->dev.d_mac.ether.ether_addr_octet) < 0)
+        {
+          nerr("ERROR: Failed read MAC address\n");
+          return -EAGAIN;
+        }
     }
 
   /* Register the device with the OS so that socket IOCTLs can be performed */

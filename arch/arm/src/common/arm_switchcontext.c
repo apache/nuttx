@@ -55,27 +55,10 @@
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  /* Update scheduler parameters */
-
-  nxsched_suspend_scheduler(rtcb);
-
   /* Are we in an interrupt handler? */
 
-  if (up_interrupt_context())
+  if (!up_interrupt_context())
     {
-      /* Update scheduler parameters */
-
-      nxsched_resume_scheduler(tcb);
-    }
-
-  /* No, then we will need to perform the user context switch */
-
-  else
-    {
-      /* Update scheduler parameters */
-
-      nxsched_resume_scheduler(tcb);
-
       /* Switch context to the context of the task at the head of the
        * ready to run list.
        */
