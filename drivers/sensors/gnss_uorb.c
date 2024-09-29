@@ -591,8 +591,15 @@ static void gnss_parse(FAR struct gnss_upperhalf_s *upper,
         {
           if (*buffer != '\r' && *buffer != '\n')
             {
-              upper->parsebuffer[upper->parsenext++] = *buffer;
-              continue;
+              if (upper->parsenext + 1 < GNSS_PARSE_BUFFERSIZE)
+                {
+                  upper->parsebuffer[upper->parsenext++] = *buffer;
+                  continue;
+                }
+
+              upper->parsebuffer[upper->parsenext] = '\0';
+              snerr("NMEA buffer overflow, invalid statement:%s\n",
+                    upper->parsebuffer);
             }
 
           upper->parsebuffer[upper->parsenext] = '\0';
