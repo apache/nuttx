@@ -36,7 +36,7 @@
 #    0x400e1a2a: function_name at file.c:line
 #    0x40082912: function_name at file.c:line
 
-USAGE="USAGE: ${0} chip|toolchain-addr2line backtrace_file
+USAGE="USAGE: ${0} chip|toolchain-addr2line backtrace_file [elf_file]
 If the first argument contains 'addr2line', it will be used as the toolchain's addr2line tool.
 Otherwise, the script will try to identify the toolchain based on the chip name."
 
@@ -57,6 +57,12 @@ if [ -z "$2" ]; then
   echo "No backtrace supplied!"
   echo "$USAGE"
   exit 1
+fi
+
+elf_file="nuttx"
+
+if [ -n "$3" ]; then
+  elf_file=$3
 fi
 
 # Check if the first argument is an addr2line tool or a chip
@@ -95,9 +101,9 @@ else
   esac
 fi
 
-# Make sure the project was built
+# Make sure the elf file is accessible
 
-if [ ! -f nuttx ]; then
+if [ ! -f ${elf_file} ]; then
   echo "NuttX binaries not found!"
   exit 2
 fi
@@ -142,7 +148,7 @@ done < "$2"
 for task_id in "${!backtraces_before[@]}"; do
   echo "Backtrace for task $task_id:"
   for bt in ${backtraces_before[$task_id]}; do
-    $ADDR2LINE_TOOL -pfiaCs -e nuttx $bt
+    $ADDR2LINE_TOOL -pfiaCs -e ${elf_file} $bt
   done
   echo ""
 done
@@ -153,7 +159,7 @@ if $in_dump_tasks_section; then
   for task_id in "${!backtraces_after[@]}"; do
     echo "Backtrace for task $task_id:"
     for bt in ${backtraces_after[$task_id]}; do
-      $ADDR2LINE_TOOL -pfiaCs -e nuttx $bt
+      $ADDR2LINE_TOOL -pfiaCs -e ${elf_file} $bt
     done
     echo ""
   done
