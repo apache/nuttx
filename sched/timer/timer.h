@@ -63,7 +63,9 @@ struct posix_timer_s
   clock_t          pt_expected;    /* Expected absolute time */
   struct wdog_s    pt_wdog;        /* The watchdog that provides the timing */
   struct sigevent  pt_event;       /* Notification information */
+#ifdef CONFIG_SIG_EVTHREAD
   struct sigwork_s pt_work;
+#endif
 };
 
 /****************************************************************************

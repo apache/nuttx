@@ -65,11 +65,9 @@
 
 struct sigwork_s
 {
-#ifdef CONFIG_SIG_EVTHREAD
   struct work_s work;           /* Work queue structure */
   union sigval value;           /* Data passed with notification */
   sigev_notify_function_t func; /* Notification function */
-#endif
 };
 
 #ifdef __cplusplus
@@ -642,7 +640,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 #ifdef CONFIG_SIG_EVTHREAD
 void nxsig_cancel_notification(FAR struct sigwork_s *work);
 #else
-#  define nxsig_cancel_notification(work) (void)(work)
+#  define nxsig_cancel_notification(work)
 #endif
 
 #ifdef __cplusplus
