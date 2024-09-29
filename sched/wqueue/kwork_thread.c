@@ -230,6 +230,7 @@ static int work_thread(int argc, FAR char *argv[])
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
+ *   stack_addr - Stack buffer of the new task
  *   stack_size - size (in bytes) of the stack needed
  *   wqueue     - Work queue instance
  *
@@ -239,7 +240,7 @@ static int work_thread(int argc, FAR char *argv[])
  ****************************************************************************/
 
 static int work_thread_create(FAR const char *name, int priority,
-                              int stack_size,
+                              FAR void *stack_addr, int stack_size,
                               FAR struct kwork_wqueue_s *wqueue)
 {
   FAR char *argv[3];
@@ -264,8 +265,8 @@ static int work_thread_create(FAR const char *name, int priority,
       argv[1] = arg1;
       argv[2] = NULL;
 
-      pid = kthread_create(name, priority, stack_size,
-                           work_thread, argv);
+      pid = kthread_create_with_stack(name, priority, stack_addr, stack_size,
+                                      work_thread, argv);
 
       DEBUGASSERT(pid > 0);
       if (pid < 0)
@@ -299,8 +300,9 @@ static int work_thread_create(FAR const char *name, int priority,
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
+ *   stack_addr - Stack buffer of the new task
  *   stack_size - size (in bytes) of the stack needed
- *   nthreads    - Number of work thread should be created
+ *   nthreads   - Number of work thread should be created
  *
  * Returned Value:
  *   The work queue handle returned on success.  Otherwise, NULL
@@ -309,6 +311,7 @@ static int work_thread_create(FAR const char *name, int priority,
 
 FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
                                              int priority,
+                                             FAR void *stack_addr,
                                              int stack_size, int nthreads)
 {
   FAR struct kwork_wqueue_s *wqueue;
@@ -337,7 +340,7 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
 
   /* Create the work queue thread pool */
 
-  ret = work_thread_create(name, priority, stack_size, wqueue);
+  ret = work_thread_create(name, priority, stack_addr, stack_size, wqueue);
   if (ret < 0)
     {
       kmm_free(wqueue);
@@ -457,7 +460,7 @@ int work_start_highpri(void)
 
   sinfo("Starting high-priority kernel worker thread(s)\n");
 
-  return work_thread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
+  return work_thread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY, NULL,
                             CONFIG_SCHED_HPWORKSTACKSIZE,
                             (FAR struct kwork_wqueue_s *)&g_hpwork);
 }
@@ -485,7 +488,7 @@ int work_start_lowpri(void)
 
   sinfo("Starting low-priority kernel worker thread(s)\n");
 
-  return work_thread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
+  return work_thread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY, NULL,
                             CONFIG_SCHED_LPWORKSTACKSIZE,
                             (FAR struct kwork_wqueue_s *)&g_lpwork);
 }
