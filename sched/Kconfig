@@ -346,6 +346,11 @@ config IRQ_NWORKS
 	---help---
 		The max num of active irq wqueue.
 
+config IRQ_WORK_SECTION
+	string "The section where irq stack is located"
+	---help---
+		The section where irq stack is located.
+
 config IRQ_WORK_STACKSIZE
 	int "The default stack size for isr wqueue"
 	default DEFAULT_TASK_STACKSIZE
