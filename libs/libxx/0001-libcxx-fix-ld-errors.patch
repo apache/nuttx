@@ -1,0 +1,28 @@
+diff --git libcxx/include/ostream libcxx/include/ostream
+--- libcxx/include/ostream
++++ libcxx/include/ostream
+@@ -320,7 +320,10 @@ template <class _CharT, class _Traits>
+ basic_ostream<_CharT, _Traits>::sentry::~sentry()
+ {
+     if (__os_.rdbuf() && __os_.good() && (__os_.flags() & ios_base::unitbuf)
+-                      && !uncaught_exception())
++#ifndef _LIBCPP_HAS_NO_EXCEPTIONS
++                      && !uncaught_exception()
++#endif
++       ) 
+     {
+ #ifndef _LIBCPP_HAS_NO_EXCEPTIONS
+         try
+diff --git libcxx/src/exception.cpp libcxx/src/exception.cpp
+--- libcxx/src/exception.cpp
++++ libcxx/src/exception.cpp
+@@ -19,6 +19,9 @@
+ #if defined(_LIBCPP_ABI_MICROSOFT)
+ #include "support/runtime/exception_msvc.ipp"
+ #include "support/runtime/exception_pointer_msvc.ipp"
++#elif defined(_LIBCPPABI_VERSION) && defined(_LIBCPP_HAS_NO_EXCEPTIONS)
++#include "include/atomic_support.h"
++#include "support/runtime/exception_pointer_unimplemented.ipp"
+ #elif defined(_LIBCPPABI_VERSION)
+ #include "support/runtime/exception_libcxxabi.ipp"
+ #include "support/runtime/exception_pointer_cxxabi.ipp"
