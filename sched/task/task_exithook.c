@@ -429,10 +429,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
    * called.  If that bit is set, then just exit doing nothing more..
    */
 
-  if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
-    {
-      return;
-    }
+  DEBUGASSERT((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0);
 
   nxsched_dumponexit();
 
@@ -441,12 +438,6 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
    */
 
   nxtask_recover(tcb);
-
-  /* NOTE: signal handling needs to be done in a criticl section */
-
-#ifdef CONFIG_SMP
-  irqstate_t flags = enter_critical_section();
-#endif
 
   /* Disable the scheduling function to prevent other tasks from
    * being deleted after they are awakened
@@ -483,16 +474,5 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
     {
       umm_memdump(&dump);
     }
-#endif
-
-  /* This function can be re-entered in certain cases.  Set a flag
-   * bit in the TCB to not that we have already completed this exit
-   * processing.
-   */
-
-  tcb->flags |= TCB_FLAG_EXIT_PROCESSING;
-
-#ifdef CONFIG_SMP
-  leave_critical_section(flags);
 #endif
 }
