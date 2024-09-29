@@ -20,6 +20,7 @@
 #
 ############################################################################
 
+import argparse
 import importlib
 import json
 import os
@@ -42,7 +43,7 @@ def backtrace(addresses: List[Union[gdb.Value, int]]) -> List[Tuple[int, str, st
 
     for addr in addresses:
         if not addr:
-            break
+            continue
 
         if type(addr) is int:
             addr = gdb.Value(addr)
@@ -748,34 +749,82 @@ class Addr2Line(gdb.Command):
              addr2line "0x1234 + pointer->abc" &var var->field function_name var
              addr2line $pc $r1 "$r2 + var"
              addr2line [24/08/29 20:51:02] [CPU1] [209] [ap] sched_dumpstack: backtrace| 0: 0x402cd484 0x4028357e
+             addr2line -f crash.log
+             addr2line -f crash.log -p 123
     """
+
+    formatter = "{:<20} {:<32} {}\n"
 
     def __init__(self):
         super().__init__("addr2line", gdb.COMMAND_USER)
+
+    def print_backtrace(self, addresses, pid=None):
+        if pid:
+            gdb.write(f"\nBacktrace of {pid}\n")
+        backtraces = backtrace(addresses)
+        for addr, func, source in backtraces:
+            gdb.write(self.formatter.format(hex(addr), func, source))
 
     def invoke(self, args, from_tty):
         if not args:
             gdb.write(Addr2Line.__doc__ + "\n")
             return
 
-        addresses = []
-        for arg in shlex.split(args):
-            if is_decimal(arg):
-                addresses.append(int(arg))
-            elif is_hexadecimal(arg):
-                addresses.append(int(arg, 16))
-            else:
-                try:
-                    var = gdb.parse_and_eval(f"{arg}")
-                    addresses.append(var)
-                except gdb.error as e:
-                    gdb.write(f"Ignore {arg}: {e}\n")
+        parser = argparse.ArgumentParser(
+            description="Convert addresses or expressions to source code location"
+        )
+        parser.add_argument("-f", "--file", type=str, help="Crash log to analyze.")
+        parser.add_argument(
+            "-p",
+            "--pid",
+            type=int,
+            help="Only dump specified task backtrace from crash file.",
+        )
 
-        backtraces = backtrace(addresses)
-        formatter = "{:<20} {:<32} {}\n"
-        gdb.write(formatter.format("Address", "Symbol", "Source"))
-        for addr, func, source in backtraces:
-            gdb.write(formatter.format(hex(addr), func, source))
+        pargs = None
+        try:
+            pargs = parser.parse_args(gdb.string_to_argv(args))
+        except SystemExit:
+            pass
+
+        gdb.write(self.formatter.format("Address", "Symbol", "Source"))
+
+        if pargs and pargs.file:
+            pattern = re.compile(
+                r".*sched_dumpstack: backtrace\|\s*(\d+)\s*:\s*((?:(0x)?[0-9a-fA-F]+\s*)+)"
+            )
+            addresses = {}
+            with open(pargs.file, "r") as f:
+                for line in f:
+                    match = pattern.match(line)
+                    if not match:
+                        continue
+
+                    pid = match.group(1)
+                    if pargs.pid is not None and pargs.pid != int(pid):
+                        continue
+
+                    addresses.setdefault(pid, [])
+                    addresses[pid].extend(
+                        [int(addr, 16) for addr in match.group(2).split()]
+                    )
+
+            for pid, addr in addresses.items():
+                self.print_backtrace(addr, pid)
+        else:
+            addresses = []
+            for arg in shlex.split(args):
+                if is_decimal(arg):
+                    addresses.append(int(arg))
+                elif is_hexadecimal(arg):
+                    addresses.append(int(arg, 16))
+                else:
+                    try:
+                        var = gdb.parse_and_eval(f"{arg}")
+                        addresses.append(var)
+                    except gdb.error as e:
+                        gdb.write(f"Ignore {arg}: {e}\n")
+            self.print_backtrace(addresses)
 
 
 class Profile(gdb.Command):
