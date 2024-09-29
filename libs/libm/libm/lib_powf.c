@@ -37,11 +37,11 @@
 
 float powf(float b, float e)
 {
-  if (b > 0.0)
+  if (b > 0.0f)
     {
       return expf(e * logf(b));
     }
-  else if (b < 0.0 && e == (int)e)
+  else if (b < 0.0f && e == (int)e)
     {
       if ((int)e % 2 == 0)
         {
@@ -53,5 +53,5 @@ float powf(float b, float e)
         }
     }
 
-  return 0.0;
+  return 0.0f;
 }
