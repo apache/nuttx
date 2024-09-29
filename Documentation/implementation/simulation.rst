@@ -30,9 +30,9 @@ It is built like this:
 
     .. code-block:: console
 
-    nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
-        $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) --start-group $(RELLIBS) $(EXTRA_LIBS) --end-group
-        $(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
+        nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
+            $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) --start-group $(RELLIBS) $(EXTRA_LIBS) --end-group
+            $(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
 
 The first ``$(LD)`` builds a partially linked, relocatable object (hence, the extension ``.rel``).  This contains all of the NuttX objects.  So ``nuttx.rel`` is the entire "fish bowl" that the NuttX simulation lives.
 
@@ -106,8 +106,8 @@ I have been thinking about how to implement simulated interrupts in the simulati
 
     .. code-block:: console
 
-    bool g_in_interrupt;
-    xcpt_reg_t g_context_regs;
+        bool g_in_interrupt;
+        xcpt_reg_t g_context_regs;
 
 Simulated interrupt handling logic would set ``g_in_interrupt`` on entry and clear it on exit (perhaps it would be better to have a counter and increment it interrupt entry and decrement it on exit?).  The interrupt handler would also need to clear ``g_context_regs`` on entry.  ``up_interrupt_contest()`` would then just report the state of the boolean.
 
