@@ -47,7 +47,9 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxx)
       -p3 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
       ${CMAKE_CURRENT_LIST_DIR}/mbstate_t.patch && patch -p1 -d
       ${CMAKE_CURRENT_LIST_DIR}/libcxx <
-      ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h.patch
+      ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-remove-mach-time-h.patch && patch
+      -p1 -d ${CMAKE_CURRENT_LIST_DIR}/libcxx <
+      ${CMAKE_CURRENT_LIST_DIR}/0001-libcxx-fix-ld-errors.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 
