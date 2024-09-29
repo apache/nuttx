@@ -1197,8 +1197,74 @@ static void pci_disable_msi(FAR struct pci_device_s *dev, uint8_t msi)
 
   pci_read_config_word(dev, msi + PCI_MSI_FLAGS, &flags);
 
+  /* Write Message Address Regsiter */
+
+  pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_LO, 0);
+
+  /* Write Message Data Register */
+
+  if ((flags & PCI_MSI_FLAGS_64BIT) != 0)
+    {
+      pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_HI, 0);
+      pci_write_config_dword(dev, msi + PCI_MSI_DATA_64, 0);
+    }
+  else
+    {
+      pci_write_config_dword(dev, msi + PCI_MSI_DATA_32, 0);
+    }
+
   flags &= ~PCI_MSI_FLAGS_ENABLE;
   pci_write_config_word(dev, msi + PCI_MSI_FLAGS, flags);
+}
+
+/****************************************************************************
+ * Name: pci_disable_msix
+ *
+ * Description:
+ *  Disable MSI-X.
+ *
+ * Input Parameters:
+ *   dev  - device
+ *   msix - MSI-X base address
+ *   num  - num of msix entry
+ *
+ * Return value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void pci_disable_msix(FAR struct pci_device_s *dev, uint8_t msix,
+                             int num)
+{
+  uint16_t  flags     = 0;
+  uintptr_t tbladdr   = 0;
+  uint32_t  tbloffset = 0;
+  uint32_t  tblbar    = 0;
+  uint32_t  tbl       = 0;
+  int       i         = 0;
+
+  pci_read_config_word(dev, msix + PCI_MSIX_FLAGS, &flags);
+  pci_read_config_dword(dev, msix + PCI_MSIX_TABLE, &tbl);
+
+  tblbar = tbl & PCI_MSIX_TABLE_BIR;
+  tbladdr = pci_resource_start(dev, tblbar);
+  tbloffset = tbl & PCI_MSIX_TABLE_OFFSET;
+  tbladdr += tbloffset;
+
+  for (i = 0; i < num; i++)
+    {
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_LOWER_ADDR, 0);
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_UPPER_ADDR, 0);
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_DATA, 0);
+      pci_write_mmio_dword(dev, tbladdr + PCI_MSIX_ENTRY_VECTOR_CTRL, 0);
+
+      /* Next vector */
+
+      tbladdr += PCI_MSIX_ENTRY_SIZE;
+    }
+
+  flags &= ~PCI_MSIX_FLAGS_ENABLE;
+  pci_write_config_word(dev, msix + PCI_MSIX_FLAGS, flags);
 }
 
 /****************************************************************************
@@ -1249,7 +1315,7 @@ static int pci_enable_msix(FAR struct pci_device_s *dev, FAR int *irq,
 
   tblbar = tbl & PCI_MSIX_TABLE_BIR;
   tbladdr = pci_resource_start(dev, tblbar);
-  tbloffset = (tbl & PCI_MSIX_TABLE_OFFSET) >> PCI_MSIX_TABLE_OFFSET_SHIFT;
+  tbloffset = tbl & PCI_MSIX_TABLE_OFFSET;
   tbladdr += tbloffset;
 
   /* Map MSI-X table */
@@ -1811,6 +1877,22 @@ int pci_alloc_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 
 void pci_release_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
 {
+#ifdef CONFIG_PCI_MSIX
+  uint8_t msi = 0;
+  uint8_t msix = 0;
+
+  pci_get_msi_base(dev, &msi, &msix);
+  if (msi)
+    {
+       pci_disable_msi(dev, msi);
+    }
+
+  if (msix)
+    {
+       pci_disable_msix(dev, msix, num);
+    }
+#endif
+
   if (dev->bus->ctrl->ops->release_irq)
     {
       dev->bus->ctrl->ops->release_irq(dev->bus, irq, num);
