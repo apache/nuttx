@@ -1732,19 +1732,28 @@ static size_t spislave_qpoll(struct spi_slave_ctrlr_s *ctrlr)
 
   tmp = SPIS_DEV_RECEIVE(priv->dev, priv->rx_buffer,
                          BYTES2WORDS(priv, priv->rx_length));
-  recv_n = WORDS2BYTES(priv, tmp);
-  if (recv_n < priv->rx_length)
+  if (tmp)
     {
-      /* If the upper layer does not receive all of the data from the receive
-       * buffer, move the remaining data to the head of the buffer.
-       */
+      recv_n = WORDS2BYTES(priv, tmp);
+      if (recv_n < priv->rx_length)
+        {
+          /* If the upper layer does not receive all of the data from the
+           * receive buffer, move the remaining data to the head of the
+           * buffer.
+           */
 
-      priv->rx_length -= recv_n;
-      memmove(priv->rx_buffer, priv->rx_buffer + recv_n, priv->rx_length);
-    }
-  else
-    {
-      priv->rx_length = 0;
+          priv->rx_length -= recv_n;
+          memmove(priv->rx_buffer, priv->rx_buffer + recv_n,
+                  priv->rx_length);
+        }
+      else
+        {
+          priv->rx_length = 0;
+        }
+
+  #ifdef CONFIG_ESP32S3_SPI_DMA
+      spislave_setup_rx_dma(priv);
+  #endif
     }
 
   remaining_words = BYTES2WORDS(priv, priv->rx_length);
