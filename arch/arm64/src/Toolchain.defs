@@ -180,16 +180,8 @@ ifeq ($(CONFIG_LTO_FULL),y)
   endif
 endif
 
-# Workaround for GCC-12.2 linker warning
-
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-  ifeq ($(GCCVER),)
-    export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
-  endif
-
-  ifeq ($(GCCVER),12)
-    LDFLAGS += --no-warn-rwx-segments
-  endif
+  LDFLAGS += --no-warn-rwx-segments
 endif
 
 # Add the builtin library
