@@ -88,12 +88,12 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
       return -ECONNREFUSED;
     }
 
-  /* Create the FIFOs needed for the connection */
-
-  ret = local_create_fifos(client, server->lc_rcvsize, client->lc_rcvsize);
+  net_lock();
+  ret = local_alloc_accept(server, client, &conn);
+  net_unlock();
   if (ret < 0)
     {
-      nerr("ERROR: Failed to create FIFOs for %s: %d\n",
+      nerr("ERROR: Failed to alloc accept conn %s: %d\n",
            client->lc_path, ret);
       return ret;
     }
@@ -102,36 +102,26 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
    * prevent the server-side from blocking as well.
    */
 
-  ret = local_open_client_tx(client, nonblock);
+  ret = local_open_client_tx(client, conn, nonblock);
   if (ret < 0)
     {
       nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
            client->lc_path, ret);
-      goto errout_with_fifos;
+      goto errout_with_conn;
     }
 
   DEBUGASSERT(client->lc_outfile.f_inode != NULL);
-
-  net_lock();
-  ret = local_alloc_accept(server, client, &conn);
-  net_unlock();
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to alloc accept conn %s: %d\n",
-           client->lc_path, ret);
-      goto errout_with_outfd;
-    }
 
   client->lc_state = LOCAL_STATE_ACCEPT;
 
   /* Yes.. open the read-only FIFO */
 
-  ret = local_open_client_rx(client, nonblock);
+  ret = local_open_client_rx(client, conn, nonblock);
   if (ret < 0)
     {
       nerr("ERROR: Failed to open read-only FIFOs for %s: %d\n",
            client->lc_path, ret);
-      goto errout_with_conn;
+      goto errout_with_outfd;
     }
 
   DEBUGASSERT(client->lc_infile.f_inode != NULL);
@@ -154,18 +144,17 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
   client->lc_state = LOCAL_STATE_CONNECTED;
   return ret;
 
-errout_with_conn:
-  net_lock();
-  local_free(conn);
-  net_unlock();
-
 errout_with_outfd:
   file_close(&client->lc_outfile);
   client->lc_outfile.f_inode = NULL;
 
-errout_with_fifos:
-  local_release_fifos(client);
+errout_with_conn:
+  local_release_fifos(conn);
   client->lc_state = LOCAL_STATE_BOUND;
+  net_lock();
+  local_free(conn);
+  net_unlock();
+
   return ret;
 }
 
@@ -275,7 +264,6 @@ int psock_local_connect(FAR struct socket *psock,
 
               client->lc_type  = conn->lc_type;
               client->lc_proto = conn->lc_proto;
-              strlcpy(client->lc_path, unpath, sizeof(client->lc_path));
               client->lc_instance_id = local_generate_instance_id();
 
               /* The client is now bound to an address */

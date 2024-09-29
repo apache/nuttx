@@ -237,10 +237,10 @@ static int local_release_fifo(FAR const char *path)
 static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
                          bool nonblock)
 {
-  int oflags = nonblock ? O_RDONLY | O_NONBLOCK : O_RDONLY;
   int ret;
 
-  ret = file_open(&conn->lc_infile, path, oflags | O_CLOEXEC);
+  ret = file_open(&conn->lc_infile, path, O_RDONLY | O_NONBLOCK |
+                  O_CLOEXEC);
   if (ret < 0)
     {
       nerr("ERROR: Failed on open %s for reading: %d\n",
@@ -255,6 +255,20 @@ static int local_rx_open(FAR struct local_conn_s *conn, FAR const char *path,
        */
 
       return ret == -ENOENT ? -EFAULT : ret;
+    }
+
+  /* Clear O_NONBLOCK if it's meant to be blocking */
+
+  if (nonblock == false)
+    {
+      ret = nonblock;
+      ret = file_ioctl(&conn->lc_infile, FIONBIO, &ret);
+      if (ret < 0)
+        {
+          file_close(&conn->lc_infile);
+          conn->lc_infile.f_inode = NULL;
+          return ret;
+        }
     }
 
   return OK;
@@ -299,6 +313,8 @@ static int local_tx_open(FAR struct local_conn_s *conn, FAR const char *path,
       ret = file_ioctl(&conn->lc_outfile, FIONBIO, &ret);
       if (ret < 0)
         {
+          file_close(&conn->lc_outfile);
+          conn->lc_outfile.f_inode = NULL;
           return ret;
         }
     }
@@ -543,14 +559,15 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
  *
  ****************************************************************************/
 
-int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
+int local_open_client_rx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
 
   /* Get the server-to-client path name */
 
-  local_sc_name(client, path);
+  local_sc_name(server, path);
 
   /* Then open the file for read-only access */
 
@@ -573,14 +590,15 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock)
  *
  ****************************************************************************/
 
-int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock)
+int local_open_client_tx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock)
 {
   char path[LOCAL_FULLPATH_LEN];
   int ret;
 
   /* Get the client-to-server path name */
 
-  local_cs_name(client, path);
+  local_cs_name(server, path);
 
   /* Then open the file for write-only access */
 
