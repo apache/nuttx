@@ -90,6 +90,9 @@ list(APPEND SRCS ${SRCSTMP})
 file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/libcxx/src/ryu/*.cpp)
 list(APPEND SRCS ${SRCSTMP})
 
+set(FLAGS -Wno-attributes -Wno-deprecated-declarations -Wno-shadow
+          -Wno-sign-compare)
+
 if(NOT DEFINED GCCVER)
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
                   OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
@@ -99,43 +102,12 @@ if(NOT DEFINED GCCVER)
 endif()
 
 if(GCCVER EQUAL 12)
-  nuttx_append_source_file_properties(libcxx/src/filesystem/operations.cpp
-                                      COMPILE_FLAGS -Wno-maybe-uninitialized)
-  nuttx_append_source_file_properties(libcxx/src/locale.cpp COMPILE_FLAGS
-                                      -Wno-maybe-uninitialized)
-  nuttx_append_source_file_properties(libcxx/src/string.cpp COMPILE_FLAGS
-                                      -Wno-alloc-size-larger-than)
-  nuttx_append_source_file_properties(libcxx/src/charconv.cpp COMPILE_FLAGS
-                                      -Wno-attributes)
-  nuttx_append_source_file_properties(libcxx/src/locale.cpp COMPILE_FLAGS
-                                      -Wno-attributes)
+  list(APPEND FLAGS -Wno-maybe-uninitialized -Wno-alloc-size-larger-than)
 endif()
-
-if(GCCVER GREATER_EQUAL 12)
-  nuttx_append_source_file_properties(libcxx/src/string.cpp COMPILE_FLAGS
-                                      -Wno-deprecated-declarations)
-  nuttx_append_source_file_properties(libcxx/src/filesystem/path.cpp
-                                      COMPILE_FLAGS -Wno-shadow)
-  nuttx_append_source_file_properties(libcxx/src/ryu/d2s.cpp COMPILE_FLAGS
-                                      -Wno-maybe-uninitialized)
-endif()
-
-if(GCCVER GREATER_EQUAL 13)
-  nuttx_append_source_file_properties(libcxx/src/string.cpp COMPILE_FLAGS
-                                      -Wno-alloc-size-larger-than)
-endif()
-
-nuttx_append_source_file_properties(libcxx/src/barrier.cpp COMPILE_FLAGS
-                                    -Wno-shadow)
-nuttx_append_source_file_properties(libcxx/src/locale.cpp COMPILE_FLAGS
-                                    -Wno-shadow)
-nuttx_append_source_file_properties(libcxx/src/filesystem/operations.cpp
-                                    COMPILE_FLAGS -Wno-shadow)
-nuttx_append_source_file_properties(libcxx/src/condition_variable.cpp
-                                    COMPILE_FLAGS -Wno-sign-compare)
 
 nuttx_add_system_library(libcxx)
 target_sources(libcxx PRIVATE ${SRCS})
+target_compile_options(libcxx PRIVATE ${FLAGS})
 if(CONFIG_LIBCXXABI)
   target_include_directories(
     libcxx BEFORE PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include)
