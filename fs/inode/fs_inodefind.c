@@ -55,12 +55,7 @@ int inode_find(FAR struct inode_search_s *desc)
    * references on the node.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  inode_lock();
   ret = inode_search(desc);
   if (ret >= 0)
     {

@@ -178,12 +178,7 @@ int nxsem_open(FAR sem_t **sem, FAR const char *name, int oflags, ...)
        * inode will be created with a reference count of zero.
        */
 
-      ret = inode_lock();
-      if (ret < 0)
-        {
-          goto errout_with_lock;
-        }
-
+      inode_lock();
       ret = inode_reserve(fullpath, mode, &inode);
       inode_unlock();
 

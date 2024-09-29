@@ -178,12 +178,7 @@ next_subdir:
    * of  zero.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
+  inode_lock();
   ret = inode_reserve(newpath, 0777, &newinode);
   if (ret < 0)
     {

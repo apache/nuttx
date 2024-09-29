@@ -402,11 +402,7 @@ static int automount_findinode(FAR const char *path)
 
   /* Get exclusive access to the in-memory inode tree. */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      return ret;
-    }
+  inode_rlock();
 
   /* Find the inode */
 
@@ -440,7 +436,7 @@ static int automount_findinode(FAR const char *path)
 
   /* Relinquish our exclusive access to the inode try and return the result */
 
-  inode_unlock();
+  inode_runlock();
   RELEASE_SEARCH(&desc);
   return ret;
 }

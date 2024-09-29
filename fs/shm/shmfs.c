@@ -215,40 +215,36 @@ static int shmfs_close(FAR struct file *filep)
 static int shmfs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct shmfs_object_s *object;
-  int ret;
+  int ret = 0;
 
   if (length == 0)
     {
       return -EINVAL;
     }
 
-  ret = inode_lock();
-  if (ret >= 0)
+  inode_lock();
+  object = filep->f_inode->i_private;
+  if (!object)
     {
-      object = filep->f_inode->i_private;
-      if (!object)
+      filep->f_inode->i_private = shmfs_alloc_object(length);
+      if (!filep->f_inode->i_private)
         {
-          filep->f_inode->i_private = shmfs_alloc_object(length);
-          if (!filep->f_inode->i_private)
-            {
-              filep->f_inode->i_size = 0;
-              ret = -EFAULT;
-            }
-          else
-            {
-              filep->f_inode->i_size = length;
-            }
+          filep->f_inode->i_size = 0;
+          ret = -EFAULT;
         }
-      else if (object->length != length)
+      else
         {
-          /* This doesn't support resize */
-
-          ret = -EINVAL;
+          filep->f_inode->i_size = length;
         }
+    }
+  else if (object->length != length)
+    {
+      /* This doesn't support resize */
 
-      inode_unlock();
+      ret = -EINVAL;
     }
 
+  inode_unlock();
   return ret;
 }
 
