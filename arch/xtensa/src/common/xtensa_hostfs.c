@@ -97,6 +97,11 @@ int host_open(const char *pathname, int flags, int mode)
       simcall_flags |= SIMCALL_O_EXCL;
     }
 
+  if ((flags & O_NONBLOCK) != 0)
+    {
+      simcall_flags |= SIMCALL_O_NONBLOCK;
+    }
+
 #ifdef CONFIG_XTENSA_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
   up_clean_dcache(pathname, pathname + strlen(pathname) + 1);
 #endif

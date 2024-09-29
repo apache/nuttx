@@ -41,7 +41,7 @@ CMN_ASRCS += arm64_fork_func.S
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
 CMN_CSRCS += arm64_nputs.c arm64_copystate.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
-CMN_CSRCS += arm64_exit.c arm64_fork.c arm64_switchcontext.c
+CMN_CSRCS += arm64_exit.c arm64_fork.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
 CMN_CSRCS += arm64_getintstack.c arm64_registerdump.c
 CMN_CSRCS += arm64_perf.c arm64_tcbinfo.c
@@ -65,6 +65,9 @@ endif
 
 ifeq ($(CONFIG_ARM64_GIC_VERSION),2)
 CMN_CSRCS += arm64_gicv2.c
+ifeq ($(CONFIG_ARM64_GICV2M),y)
+CMN_CSRCS += arm64_gicv2m.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MMU),y)

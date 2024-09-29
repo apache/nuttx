@@ -212,6 +212,35 @@ int up_cpu_paused_restore(void)
 }
 
 /****************************************************************************
+ * Name: arm64_pause_async_handler
+ *
+ * Description:
+ *   This is the handler for async pause.
+ *
+ *   1. It saves the current task state at the head of the current assigned
+ *      task list.
+ *   2. It porcess g_delivertasks
+ *   3. Returns from interrupt, restoring the state of the new task at the
+ *      head of the ready to run list.
+ *
+ * Input Parameters:
+ *   Standard interrupt handling
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int arm64_pause_async_handler(int irq, void *context, void *arg)
+{
+  int cpu = this_cpu();
+
+  nxsched_process_delivered(cpu);
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: arm64_pause_handler
  *
  * Description:
@@ -263,6 +292,34 @@ int arm64_pause_handler(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
+ * Name: up_cpu_pause_async
+ *
+ * Description:
+ *   pause task execution on the CPU
+ *   check whether there are tasks delivered to specified cpu
+ *   and try to run them.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section;
+ *
+ ****************************************************************************/
+
+inline_function int up_cpu_pause_async(int cpu)
+{
+  /* Execute SGI2 */
+
+  arm64_gic_raise_sgi(GIC_SMP_CPUPAUSE_ASYNC, (1 << cpu));
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: up_cpu_pause
  *
  * Description:
@@ -284,8 +341,6 @@ int arm64_pause_handler(int irq, void *context, void *arg)
 
 int up_cpu_pause(int cpu)
 {
-  int ret;
-
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
@@ -308,23 +363,13 @@ int up_cpu_pause(int cpu)
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
 
-  /* Execute SGI2 */
+  arm64_gic_raise_sgi(GIC_SMP_CPUPAUSE, (1 << cpu));
 
-  ret = arm64_gic_raise_sgi(GIC_SMP_CPUPAUSE, (1 << cpu));
-  if (ret < 0)
-    {
-      /* What happened?  Unlock the g_cpu_wait spinlock */
+  /* Wait for the other CPU to unlock g_cpu_paused meaning that
+   * it is fully paused and ready for up_cpu_resume();
+   */
 
-      spin_unlock(&g_cpu_wait[cpu]);
-    }
-  else
-    {
-      /* Wait for the other CPU to unlock g_cpu_paused meaning that
-       * it is fully paused and ready for up_cpu_resume();
-       */
-
-      spin_lock(&g_cpu_paused[cpu]);
-    }
+  spin_lock(&g_cpu_paused[cpu]);
 
   spin_unlock(&g_cpu_paused[cpu]);
 
@@ -333,7 +378,7 @@ int up_cpu_pause(int cpu)
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

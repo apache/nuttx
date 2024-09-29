@@ -56,6 +56,7 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <sys/queue.h>
 
 /* Some initial values */
 
@@ -210,6 +211,8 @@ struct cryptop
 #define CRYPTO_F_REL 0x0004     /* Must return data in same place */
 #define CRYPTO_F_NOQUEUE 0x0008 /* Don't use crypto queue/thread */
 #define CRYPTO_F_DONE 0x0010    /* request completed */
+#define CRYPTO_F_CBIMM 0x0020   /* Do callback immediately */
+#define CRYPTO_F_CANCEL 0x0040  /* Cancel the current crypto operation */
 
   FAR void *crp_buf;               /* Data to be processed */
   FAR void *crp_opaque;            /* Opaque pointer, passed along */
@@ -245,8 +248,9 @@ struct crypt_kop
   u_int crk_status;    /* return status */
   u_short crk_iparams; /* # of input parameters */
   u_short crk_oparams; /* # of output parameters */
-  u_int crk_pad1;
+  u_int crk_flags;
   struct crparam crk_param[CRK_MAXPARAM];
+  uint32_t crk_reqid;
 };
 
 #define CRK_MOD_EXP                0
@@ -273,6 +277,7 @@ struct crypt_kop
 
 struct cryptkop
 {
+  TAILQ_ENTRY(cryptkop) krp_next;
   u_int krp_op;        /* ie. CRK_MOD_EXP or other */
   u_int krp_status;    /* return status */
   u_short krp_iparams; /* # of input parameters */
@@ -280,6 +285,10 @@ struct cryptkop
   uint32_t krp_hid;
   struct crparam krp_param[CRK_MAXPARAM]; /* kvm */
   CODE int (*krp_callback)(FAR struct cryptkop *);
+
+  FAR struct fcrypt *krp_fcr;
+  u_int krp_flags;     /* same as cryptop */
+  uint32_t krp_reqid;  /* distinguish tasks in asynchronous calling */
 };
 
 /* Crypto capabilities structure */
@@ -376,7 +385,8 @@ extern const uint8_t hmac_opad_buffer[HMAC_MAX_BLOCK_LEN];
 #define CIOCFSESSION            102
 #define CIOCCRYPT               103
 #define CIOCKEY                 104
-#define CIOCASYMFEAT            105
+#define CIOCKEYRET              105
+#define CIOCASYMFEAT            106
 
 int crypto_newsession(FAR uint64_t *, FAR struct cryptoini *, int);
 int crypto_freesession(uint64_t);

@@ -27,6 +27,8 @@ target_include_directories(arch PRIVATE ${CMAKE_SOURCE_DIR}/sched)
 
 if(CONFIG_BUILD_PROTECTED)
   nuttx_add_system_library(arch_interface)
+  file(TOUCH "${CMAKE_CURRENT_BINARY_DIR}/empty.c")
+  target_sources(arch_interface PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/empty.c")
   target_include_directories(arch_interface PRIVATE ${CMAKE_SOURCE_DIR}/sched)
 endif()
 

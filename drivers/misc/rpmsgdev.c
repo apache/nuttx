@@ -42,6 +42,7 @@
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/net/ioctl.h>
 #include <nuttx/drivers/rpmsgdev.h>
+#include <nuttx/power/battery_ioctl.h>
 
 #include "rpmsgdev.h"
 
@@ -622,10 +623,16 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd)
       case FIONSPACE:
       case FBIOSET_POWER:
       case FBIOGET_POWER:
+      case BATIOC_STATE:
         return sizeof(int);
       case TUNSETIFF:
       case TUNGETIFF:
         return sizeof(struct ifreq);
+      case FIOC_FILEPATH:
+        return PATH_MAX;
+      case BATIOC_GET_PROTOCOL:
+      case BATIOC_OPERATE:
+        return sizeof(struct batio_operate_msg_s);
       default:
         return -ENOTTY;
     }
@@ -1152,6 +1159,9 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
     {
       return -EINVAL;
     }
+
+  DEBUGASSERT(strlen(remotepath) + RPMSGDEV_NAME_PREFIX_LEN <=
+              RPMSG_NAME_SIZE);
 
   dev = kmm_zalloc(sizeof(*dev));
   if (dev == NULL)

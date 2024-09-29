@@ -26,6 +26,7 @@
  */
 
 #define PCI_STD_HEADER_SIZEOF             64
+#define PCI_STD_NUM_BARS                  6     /* Number of standard BARs */
 #define PCI_VENDOR_ID                     0x00  /* 16 bits */
 #define PCI_DEVICE_ID                     0x02  /* 16 bits */
 #define PCI_COMMAND                       0x04  /* 16 bits */
@@ -266,13 +267,13 @@
 #define  PCI_PM_CTRL_STATE_MASK           0x0003  /* Current power state (D0 to D3) */
 #define  PCI_PM_CTRL_NO_SOFT_RESET        0x0008  /* No reset for D3hot->D0 */
 #define  PCI_PM_CTRL_PME_ENABLE           0x0100  /* PME pin enable */
-#define  PCI_PM_CTRL_DATA_SEL_MASK        0x1e00  /* Data select (??) */
-#define  PCI_PM_CTRL_DATA_SCALE_MASK      0x6000  /* Data scale (??) */
+#define  PCI_PM_CTRL_DATA_SEL_MASK        0x1e00  /* Data select (/?/?) */
+#define  PCI_PM_CTRL_DATA_SCALE_MASK      0x6000  /* Data scale (/?/?) */
 #define  PCI_PM_CTRL_PME_STATUS           0x8000  /* PME pin status */
-#define PCI_PM_PPB_EXTENSIONS             6       /* PPB support extensions (??) */
-#define  PCI_PM_PPB_B2_B3                 0x40    /* Stop clock when in D3hot (??) */
-#define  PCI_PM_BPCC_ENABLE               0x80    /* Bus power/clock control enable (??) */
-#define PCI_PM_DATA_REGISTER              7       /* (??) */
+#define PCI_PM_PPB_EXTENSIONS             6       /* PPB support extensions (/?/?) */
+#define  PCI_PM_PPB_B2_B3                 0x40    /* Stop clock when in D3hot (/?/?) */
+#define  PCI_PM_BPCC_ENABLE               0x80    /* Bus power/clock control enable (/?/?) */
+#define PCI_PM_DATA_REGISTER              7       /* (/?/?) */
 #define PCI_PM_SIZEOF                     8
 
 /* AGP registers */

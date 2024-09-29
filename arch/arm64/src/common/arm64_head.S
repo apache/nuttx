@@ -122,8 +122,6 @@ real_start:
 
     msr    DAIFSet, 0xf
 #ifdef CONFIG_SMP
-
-    ldr    x0, =cpu_boot_params
     get_cpu_id x1
 
     /* The global variable cpu_boot_params is not safety to
@@ -146,17 +144,30 @@ real_start:
     cmp    x1, #0
     beq    primary_core
 
-    /* loop until our turn comes */
+    /* Wait until cpu0 notify */
 
-1:  dmb    ld
-    wfe
-    ldr    x2,  [x0, #BOOT_PARAM_MPID]
-    cmp    x1, x2
-    bne    1b
+#ifdef CONFIG_ARM64_SMP_BUSY_WAIT
+    ldr    x2, =CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR
+1:
+    ldr    x3, [x2, #0]
+    cmp    x3, #0
+    beq    1b
+#endif
 
     /* we can now load our stack pointer value and move on */
 
-    ldr    x24, [x0, #BOOT_PARAM_SP]
+    ldr    x24, =g_cpu_idlestackalloc
+
+    /* g_cpu_idlestackalloc represents a continuous
+     * stack space allocated for CPUs from 0 to n.
+     * the stack top address for each CPU based on
+     * its index,x24 is the top of the stack for CPUs 0 to n.
+     */
+1:
+    sub    x1, x1, #1
+    add    x24, x24, #(SMP_STACK_SIZE)
+    cmp    x1, #0
+    bne    1b
 
 #  ifdef CONFIG_STACK_COLORATION
     /* Write a known value to the IDLE thread stack to support stack
@@ -184,11 +195,8 @@ real_start:
     b      cpu_boot
 
 primary_core:
-    /* set primary core id */
+    ldr    x24, =g_cpu_idlestackalloc
 
-    str    x1,  [x0, #BOOT_PARAM_MPID]
-
-    ldr    x24, [x0, #BOOT_PARAM_SP]
     add    x24, x24, #(CONFIG_IDLETHREAD_STACKSIZE)
 #else
     /* In some case, we need to boot one core in a SMP system,

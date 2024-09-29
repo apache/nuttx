@@ -36,6 +36,9 @@
 
 /* Configuration ************************************************************/
 
+#define HAVE_USBDEV          1
+#define HAVE_USBHOST         1
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
@@ -44,6 +47,54 @@
 #  else
 #    define STM32_PROCFS_MOUNTPOINT "/proc"
 #  endif
+#endif
+
+/* Can't support USB host or device features if USB OTG FS is not enabled */
+
+#ifndef CONFIG_STM32H7_OTGFS
+#  undef HAVE_USBDEV
+#  undef HAVE_USBHOST
+#endif
+
+/* Can't support USB device if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#endif
+
+/* Can't support USB host is USB host is not enabled */
+
+#ifndef CONFIG_USBHOST
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#ifndef CONFIG_USBMONITOR
+#  undef HAVE_USBMONITOR
+#endif
+
+#ifndef HAVE_USBDEV
+#  undef CONFIG_USBDEV_TRACE
+#endif
+
+#ifndef HAVE_USBHOST
+#  undef CONFIG_USBHOST_TRACE
+#endif
+
+#if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
+#  undef HAVE_USBMONITOR
+#endif
+
+#if !defined(CONFIG_STM32H7_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
+#  undef HAVE_PROGMEM_CHARDEV
+#endif
+
+/* Check if we can support the RTC driver */
+
+#define HAVE_RTC_DRIVER 1
+#if !defined(CONFIG_RTC) || !defined(CONFIG_RTC_DRIVER)
+#  undef HAVE_RTC_DRIVER
 #endif
 
 /* LED

@@ -22,6 +22,10 @@ ifeq ($(CONFIG_DEVICE_TREE),y)
 
 CSRCS += fdt.c
 
+ifeq ($(CONFIG_PCI),y)
+  CSRCS += fdt_pci.c
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 
 DEPPATH += --dep-path devicetree

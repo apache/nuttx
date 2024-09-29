@@ -33,11 +33,12 @@ ifeq ($(CONFIG_UCLIBCXX),y)
 include uClibc++.defs
 else ifeq ($(CONFIG_LIBCXX),y)
 include libcxx.defs
-else
+else ifeq ($(CONFIG_LIBCXXMINI),y)
 include libcxxmini.defs
+endif
+
 ifeq ($(CONFIG_ETL),y)
 include etl.defs
-endif
 endif
 
 ifeq ($(CONFIG_LIBCXXABI),y)

@@ -364,12 +364,15 @@ static int sim_cancel(struct oneshot_lowerhalf_s *lower,
   struct timespec current;
   irqstate_t flags;
 
-  DEBUGASSERT(priv != NULL && ts != NULL);
+  DEBUGASSERT(priv != NULL);
 
   flags = enter_critical_section();
 
-  sim_timer_current(&current);
-  clock_timespec_subtract(&priv->alarm, &current, ts);
+  if (ts != NULL)
+    {
+      sim_timer_current(&current);
+      clock_timespec_subtract(&priv->alarm, &current, ts);
+    }
 
   sim_reset_alarm(&priv->alarm);
   sim_update_hosttimer();

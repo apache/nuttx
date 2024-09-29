@@ -227,6 +227,16 @@ static const char *g_white_suffix[] =
 
 static const char *g_white_content_list[] =
 {
+  /* Ref:
+   * nuttx-apps/examples/wamr_module/module_hello.c
+   * nuttx-apps/interpreters/wamr/wamr_custom_init.c
+   *
+   * They are from the WAMR project.
+   */
+
+  "NativeSymbol",
+  "RuntimeInitArgs",
+
   /* Ref:  gnu_unwind_find_exidx.c */
 
   "__EIT_entry",

@@ -1,0 +1,43 @@
+From 42694f0fba14c650abb6d6702aee74be8f4ea00f Mon Sep 17 00:00:00 2001
+From: yanghuatao <yanghuatao@xiaomi.com>
+Date: Tue, 19 Mar 2024 11:11:36 +0800
+Subject: [PATCH] nuttx/openlibm: Fix openlibm M_PI undeclared error
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+VELAPLATFO-28707
+
+CC:  socket/net_timeo.c sensors/wtgahrs2_uorb.c: In function ‘wtgahrs2_gyro_data’:
+sensors/wtgahrs2_uorb.c:229:58: error: ‘M_PI’ undeclared (first use in this function)
+  229 |   gyro.x = (short)(buffer[1] << 8 | buffer[0]) * (2000 * M_PI / 180 / 32768);
+      |                                                          ^~~~
+sensors/wtgahrs2_uorb.c:229:58: note: each undeclared identifier is reported only once for each function it appears in
+make[1]: *** [Makefile:105: wtgahrs2_uorb.o] Error 1
+make: *** [tools/LibTargets.mk:101: drivers/libdrivers.a] Error 2
+make: *** Waiting for unfinished jobs....
+
+Change-Id: I01072f562fa6306db864cf4fa7c260c09751e0d1
+Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
+---
+ include/openlibm_math.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/openlibm/openlibm/include/openlibm_math.h openlibm/openlibm/include/openlibm_math.h
+index 988e80c..4a9058a 100644
+--- a/openlibm/openlibm/include/openlibm_math.h
++++ openlibm/openlibm/include/openlibm_math.h
+@@ -153,6 +153,10 @@ typedef float  float_t;
+ typedef double double_t;
+ #endif /* __ISO_C_VISIBLE >= 1999 */
+ 
++#ifndef __BSD_VISIBLE
++#define __BSD_VISIBLE 1
++#endif
++
+ /*
+  * XOPEN/SVID
+  */
+-- 
+2.43.0
+

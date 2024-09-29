@@ -37,7 +37,7 @@ CSRCS += sched_reprioritize.c
 endif
 
 ifeq ($(CONFIG_SMP),y)
-CSRCS += sched_cpuselect.c sched_cpupause.c sched_getcpu.c
+CSRCS += sched_cpuselect.c sched_cpupause.c sched_getcpu.c sched_process_delivered.c
 CSRCS += sched_getaffinity.c sched_setaffinity.c
 endif
 

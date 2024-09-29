@@ -95,5 +95,10 @@ config PCI_EPF_TEST
 	---help---
 		pci epf test driver
 
+config PCI_EP_TEST
+	bool "PCI endpoint test"
+	---help---
+		pci endpoint test driver
+
 endif # PCI_ENDPOINT
 

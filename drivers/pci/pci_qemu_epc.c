@@ -62,9 +62,14 @@
 #define QEMU_EPC_BAR_CFG_OFF_RSV         0x04
 #define QEMU_EPC_BAR_CFG_OFF_PHYS_ADDR   0x08
 #define QEMU_EPC_BAR_CFG_OFF_SIZE        0x10
-#define QEMU_EPC_BAR_CFG_SIZE            0x18
+#define QEMU_EPC_BAR_CFG_SIZE            0x8000
+
 #define QEMU_EPC_BAR_CFG_MSI             0x40
 #define QEMU_EPC_BAR_CFG_MSIX            0x60
+
+#define QEMU_EPC_CONFIG_SPACE_SIZE       0x1000
+#define QEMU_EPC_MAX_FUNCTIONS           0x8
+#define QEMU_EPC_ALIGN_PAGE_SIZE         0x1000
 
 /****************************************************************************
  * Private Types
@@ -265,6 +270,12 @@ static void qemu_epc_bar_cfg_write64(FAR struct qemu_epc_s *qep,
   pci_write_mmio_qword(qep->pdev, qep->bar_base + offset, value);
 }
 
+static uint32_t pci_qep_func_base(FAR struct qemu_epc_s *qep,
+                                  uint8_t funcno)
+{
+  return QEMU_EPC_CONFIG_SPACE_SIZE * funcno;
+}
+
 /****************************************************************************
  * Name: qemu_epc_write_header
  *
@@ -285,17 +296,22 @@ qemu_epc_write_header(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
                       FAR struct pci_epf_header_s *hdr)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
+  uint32_t base;
 
-  qemu_epc_cfg_write16(qep, PCI_VENDOR_ID, hdr->vendorid);
-  qemu_epc_cfg_write16(qep, PCI_DEVICE_ID, hdr->deviceid);
-  qemu_epc_cfg_write8(qep, PCI_REVISION_ID, hdr->revid);
-  qemu_epc_cfg_write8(qep, PCI_CLASS_PROG, hdr->progif_code);
-  qemu_epc_cfg_write8(qep, PCI_CLASS_DEVICE, hdr->baseclass_code);
-  qemu_epc_cfg_write8(qep, PCI_CLASS_DEVICE + 1, hdr->subclass_code);
-  qemu_epc_cfg_write8(qep, PCI_CACHE_LINE_SIZE, hdr->cache_line_size);
-  qemu_epc_cfg_write8(qep, PCI_SUBSYSTEM_VENDOR_ID, hdr->subsys_vendor_id);
-  qemu_epc_cfg_write8(qep, PCI_SUBSYSTEM_ID, hdr->subsys_id);
-  qemu_epc_cfg_write8(qep, PCI_INTERRUPT_PIN, hdr->interrupt_pin);
+  base = pci_qep_func_base(qep, funcno);
+  qemu_epc_cfg_write16(qep, base + PCI_VENDOR_ID, hdr->vendorid);
+  qemu_epc_cfg_write16(qep, base + PCI_DEVICE_ID, hdr->deviceid);
+  qemu_epc_cfg_write8(qep, base + PCI_REVISION_ID, hdr->revid);
+  qemu_epc_cfg_write8(qep, base + PCI_CLASS_PROG, hdr->progif_code);
+  qemu_epc_cfg_write8(qep, base + PCI_HEADER_TYPE, 0x80);
+  qemu_epc_cfg_write8(qep, base + PCI_CLASS_DEVICE, hdr->baseclass_code);
+  qemu_epc_cfg_write8(qep, base + PCI_CLASS_DEVICE + 1, hdr->subclass_code);
+  qemu_epc_cfg_write8(qep, base + PCI_CACHE_LINE_SIZE, hdr->cache_line_size);
+  qemu_epc_cfg_write8(qep, base + PCI_SUBSYSTEM_VENDOR_ID,
+                      hdr->subsys_vendor_id);
+  qemu_epc_cfg_write8(qep, base + PCI_SUBSYSTEM_ID, hdr->subsys_id);
+  qemu_epc_cfg_write8(qep, base + PCI_INTERRUPT_PIN, hdr->interrupt_pin);
+
   return 0;
 }
 
@@ -318,16 +334,21 @@ static int qemu_epc_set_bar(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
                             FAR struct pci_epf_bar_s *bar)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
+  uint32_t base;
   uint8_t mask;
 
-  qemu_epc_bar_cfg_write8(qep, QEMU_EPC_BAR_CFG_OFF_NUMBER, bar->barno);
-  qemu_epc_bar_cfg_write64(qep, QEMU_EPC_BAR_CFG_OFF_PHYS_ADDR,
+  base = pci_qep_func_base(qep, funcno);
+  qemu_epc_bar_cfg_write8(qep, base + QEMU_EPC_BAR_CFG_OFF_NUMBER,
+                          bar->barno);
+  qemu_epc_bar_cfg_write64(qep, base + QEMU_EPC_BAR_CFG_OFF_PHYS_ADDR,
                            bar->phys_addr);
-  qemu_epc_bar_cfg_write64(qep, QEMU_EPC_BAR_CFG_OFF_SIZE, bar->size);
-  qemu_epc_bar_cfg_write8(qep, QEMU_EPC_BAR_CFG_OFF_FLAGS, bar->flags);
-  mask = qemu_epc_bar_cfg_read8(qep, QEMU_EPC_BAR_CFG_OFF_MASK)
+  qemu_epc_bar_cfg_write64(qep, base + QEMU_EPC_BAR_CFG_OFF_SIZE, bar->size);
+  qemu_epc_bar_cfg_write8(qep, base + QEMU_EPC_BAR_CFG_OFF_FLAGS,
+                          bar->flags);
+  mask = qemu_epc_bar_cfg_read8(qep, base + QEMU_EPC_BAR_CFG_OFF_MASK)
                                 | BIT(bar->barno);
-  qemu_epc_bar_cfg_write8(qep, QEMU_EPC_BAR_CFG_OFF_MASK, mask);
+  qemu_epc_bar_cfg_write8(qep, base + QEMU_EPC_BAR_CFG_OFF_MASK, mask);
+
   return 0;
 }
 
@@ -348,10 +369,13 @@ qemu_epc_clear_bar(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
                    FAR struct pci_epf_bar_s *bar)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
-  uint8_t mask = qemu_epc_bar_cfg_read8(qep, QEMU_EPC_BAR_CFG_OFF_MASK)
-                                        & ~BIT(bar->barno);
+  uint32_t base;
+  uint8_t mask;
 
-  qemu_epc_bar_cfg_write8(qep, QEMU_EPC_BAR_CFG_OFF_MASK, mask);
+  base = pci_qep_func_base(qep, funcno);
+  mask = qemu_epc_bar_cfg_read8(qep, base + QEMU_EPC_BAR_CFG_OFF_MASK)
+                                & ~BIT(bar->barno);
+  qemu_epc_bar_cfg_write8(qep, base + QEMU_EPC_BAR_CFG_OFF_MASK, mask);
 }
 
 /****************************************************************************
@@ -376,9 +400,11 @@ static int qemu_epc_map_addr(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
 {
   FAR struct qemu_epc_s *qep = epc->priv;
   uint32_t idx = 0;
+  uint32_t base;
   uint32_t mask;
 
-  mask = qemu_epc_ctl_read32(qep, QEMU_EPC_CTRL_OFF_OB_MAP_MASK);
+  base = pci_qep_func_base(qep, funcno);
+  mask = qemu_epc_ctl_read32(qep, base + QEMU_EPC_CTRL_OFF_OB_MAP_MASK);
   while (1)
     {
       if (!(mask & (1 << idx)))
@@ -392,12 +418,14 @@ static int qemu_epc_map_addr(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
         }
     }
 
-  qemu_epc_ctl_write32(qep, QEMU_EPC_CTRL_OFF_OB_IDX, idx);
-  qemu_epc_ctl_write64(qep, QEMU_EPC_CTRL_OFF_OB_MAP_PHYS, addr);
-  qemu_epc_ctl_write64(qep, QEMU_EPC_CTRL_OFF_OB_MAP_PCI, pci_addr);
-  qemu_epc_ctl_write64(qep, QEMU_EPC_CTRL_OFF_OB_MAP_SIZE, size);
-  qemu_epc_ctl_write32(qep, QEMU_EPC_CTRL_OFF_OB_MAP_MASK, mask | BIT(idx));
+  qemu_epc_ctl_write32(qep, base + QEMU_EPC_CTRL_OFF_OB_IDX, idx);
+  qemu_epc_ctl_write64(qep, base + QEMU_EPC_CTRL_OFF_OB_MAP_PHYS, addr);
+  qemu_epc_ctl_write64(qep, base + QEMU_EPC_CTRL_OFF_OB_MAP_PCI, pci_addr);
+  qemu_epc_ctl_write64(qep, base + QEMU_EPC_CTRL_OFF_OB_MAP_SIZE, size);
+  qemu_epc_ctl_write32(qep, base + QEMU_EPC_CTRL_OFF_OB_MAP_MASK,
+                       mask | BIT(idx));
   qep->ob_phys[idx] = addr;
+
   return 0;
 }
 
@@ -418,16 +446,19 @@ qemu_epc_unmap_addr(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
                     uintptr_t addr)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
+  uint32_t base;
   uint32_t mask;
   int i;
 
-  mask = qemu_epc_ctl_read32(qep, QEMU_EPC_CTRL_OFF_OB_MAP_MASK);
+  base = pci_qep_func_base(qep, funcno);
+  mask = qemu_epc_ctl_read32(qep, base + QEMU_EPC_CTRL_OFF_OB_MAP_MASK);
   for (i = 0; i < 32; i++)
     {
       if (qep->ob_phys[i] == addr)
         {
           mask &= ~BIT(i);
-          qemu_epc_ctl_write32(qep, QEMU_EPC_CTRL_OFF_OB_MAP_MASK, mask);
+          qemu_epc_ctl_write32(qep, base + QEMU_EPC_CTRL_OFF_OB_MAP_MASK,
+                               mask);
           break;
         }
     }
@@ -474,39 +505,42 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
   uint64_t pci_addr;
   uint32_t offset;
   uint32_t data;
+  uint32_t base;
 
+  base = pci_qep_func_base(qep, funcno);
   switch (type)
     {
       case PCI_EPC_IRQ_LEGACY:
-        qemu_epc_ctl_write32(qep, QEMU_EPC_CTRL_OFF_IRQ_TYPE, type);
-        qemu_epc_ctl_write32(qep, QEMU_EPC_CTRL_OFF_IRQ_NUM, interrupt_num);
+        qemu_epc_ctl_write32(qep, base + QEMU_EPC_CTRL_OFF_IRQ_TYPE, type);
+        qemu_epc_ctl_write32(qep, base + QEMU_EPC_CTRL_OFF_IRQ_NUM,
+                             interrupt_num);
         return 0;
       case PCI_EPC_IRQ_MSI:
         if (qep->msi_vaddr == NULL)
           {
-            uint16_t flags = qemu_epc_cfg_read16(qep,
-                                                 QEMU_EPC_BAR_CFG_MSI +
-                                                 PCI_MSI_FLAGS);
+            uint16_t flags =
+              qemu_epc_cfg_read16(qep, base + QEMU_EPC_BAR_CFG_MSI +
+                                  PCI_MSI_FLAGS);
             if (flags & PCI_MSI_FLAGS_64BIT)
               {
                 pci_addr =
                   qemu_epc_cfg_read64(qep,
-                                      QEMU_EPC_BAR_CFG_MSI +
+                                      base + QEMU_EPC_BAR_CFG_MSI +
                                       PCI_MSI_ADDRESS_LO);
                 qep->msi_data =
                   qemu_epc_cfg_read32(qep,
-                                      QEMU_EPC_BAR_CFG_MSI +
+                                      base + QEMU_EPC_BAR_CFG_MSI +
                                       PCI_MSI_DATA_64);
               }
             else
               {
                 pci_addr =
                   qemu_epc_cfg_read32(qep,
-                                      QEMU_EPC_BAR_CFG_MSI +
+                                      base + QEMU_EPC_BAR_CFG_MSI +
                                       PCI_MSI_ADDRESS_LO);
                 qep->msi_data =
                   qemu_epc_cfg_read32(qep,
-                                      QEMU_EPC_BAR_CFG_MSI +
+                                      base + QEMU_EPC_BAR_CFG_MSI +
                                       PCI_MSI_DATA_32);
               }
 
@@ -530,7 +564,7 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
           }
 
         data = qemu_epc_cfg_read32(qep,
-                                   QEMU_EPC_BAR_CFG_MSIX +
+                                   base + QEMU_EPC_BAR_CFG_MSIX +
                                    PCI_MSIX_TABLE);
         offset = data & PCI_MSIX_TABLE_OFFSET;
         if (qep->msix_vaddr == NULL)
@@ -621,8 +655,17 @@ static int qemu_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
   uint16_t flags;
+  uint32_t base;
 
-  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS);
+  base = pci_qep_func_base(qep, funcno);
+  flags = qemu_epc_cfg_read16(qep, base + QEMU_EPC_BAR_CFG_MSI +
+                              PCI_MSI_FLAGS);
+  if (!(flags & PCI_MSIX_FLAGS_ENABLE))
+    {
+      pcierr("msi is not enabled\n");
+      return -EINVAL;
+    }
+
   return (flags & PCI_MSI_FLAGS_QSIZE) >> PCI_MSI_FLAGS_QSIZE_SHIFT;
 }
 
@@ -646,10 +689,14 @@ static int qemu_epc_set_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
 {
   FAR struct qemu_epc_s *qep = epc->priv;
   uint16_t flags;
+  uint32_t base;
 
-  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS);
+  base = pci_qep_func_base(qep, funcno);
+  flags = qemu_epc_cfg_read16(qep, base + QEMU_EPC_BAR_CFG_MSI +
+                              PCI_MSI_FLAGS);
   flags |= (interrupts << PCI_MSI_FLAGS_QMASK_SHIFT) & PCI_MSI_FLAGS_QMASK;
-  qemu_epc_cfg_write16(qep, QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS, flags);
+  qemu_epc_cfg_write16(qep, base + QEMU_EPC_BAR_CFG_MSI + PCI_MSI_FLAGS,
+                       flags);
   return 0;
 }
 
@@ -671,8 +718,11 @@ static int qemu_epc_get_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
 {
   FAR struct qemu_epc_s *qep = epc->priv;
   uint16_t flags;
+  uint32_t base;
 
-  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_FLAGS);
+  base = pci_qep_func_base(qep, funcno);
+  flags = qemu_epc_cfg_read16(qep, base + QEMU_EPC_BAR_CFG_MSIX +
+                              PCI_MSIX_FLAGS);
   if ((flags & PCI_MSIX_FLAGS_ENABLE) == 0)
     {
       return -EINVAL;
@@ -704,15 +754,21 @@ static int qemu_epc_set_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
   FAR struct qemu_epc_s *qep = epc->priv;
   uint32_t data;
   uint16_t flags;
+  uint32_t base;
 
-  flags = qemu_epc_cfg_read16(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_FLAGS);
+  base = pci_qep_func_base(qep, funcno);
+  flags = qemu_epc_cfg_read16(qep, base + QEMU_EPC_BAR_CFG_MSIX +
+                              PCI_MSIX_FLAGS);
   flags &= ~PCI_MSIX_FLAGS_QSIZE;
   flags |= interrupts;
-  qemu_epc_cfg_write16(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_FLAGS, flags);
+  qemu_epc_cfg_write16(qep, base + QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_FLAGS,
+                       flags);
   data = offset | barno;
-  qemu_epc_cfg_write32(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_TABLE, data);
+  qemu_epc_cfg_write32(qep, base + QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_TABLE,
+                       data);
   data = (offset + (interrupts * PCI_MSIX_ENTRY_SIZE)) | barno;
-  qemu_epc_cfg_write32(qep, QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_PBA, data);
+  qemu_epc_cfg_write32(qep, base + QEMU_EPC_BAR_CFG_MSIX + PCI_MSIX_PBA,
+                       data);
 
   return 0;
 }
@@ -742,7 +798,7 @@ static int qemu_epc_probe(FAR struct pci_device_s *dev)
       goto err_free_epc;
     }
 
-  epc->max_functions = 1;
+  epc->max_functions = QEMU_EPC_MAX_FUNCTIONS;
   ret = pci_enable_device(dev);
   if (ret < 0)
     {
@@ -777,7 +833,7 @@ static int qemu_epc_probe(FAR struct pci_device_s *dev)
   phys = qemu_epc_ctl_read64(qep, QEMU_EPC_CTRL_OFF_WIN_START);
   size = qemu_epc_ctl_read64(qep, QEMU_EPC_CTRL_OFF_WIN_SIZE);
   virt = pci_map_region(dev, phys, size);
-  ret = pci_epc_mem_init(epc, virt, phys, size, PAGE_SIZE);
+  ret = pci_epc_mem_init(epc, virt, phys, size, QEMU_EPC_ALIGN_PAGE_SIZE);
   if (ret < 0)
     {
       pcierr("epc mem init error\n");

@@ -57,13 +57,15 @@ static int _regulator_do_enable_pulldown(FAR struct regulator_dev_s *rdev);
 static int _regulator_do_disable_pulldown(FAR struct regulator_dev_s *rdev);
 static irqstate_t regulator_lock(FAR mutex_t *lock);
 static void regulator_unlock(FAR mutex_t *lock, irqstate_t flags);
+static irqstate_t regulator_list_lock(void);
+static void regulator_list_unlock(irqstate_t flags);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static struct list_node g_reg_list = LIST_INITIAL_VALUE(g_reg_list);
-static mutex_t g_reg_lock          = NXMUTEX_INITIALIZER;
+static rmutex_t g_reg_lock         = NXRMUTEX_INITIALIZER;
 
 /****************************************************************************
  * Private Functions
@@ -203,11 +205,9 @@ static int regulator_check_consumers(FAR struct regulator_dev_s *rdev,
 
 static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
 {
-  irqstate_t flags;
   FAR struct regulator_dev_s *rdev;
   FAR struct regulator_dev_s *rdev_found = NULL;
 
-  flags = regulator_lock(&g_reg_lock);
   list_for_every_entry(&g_reg_list, rdev, struct regulator_dev_s, list)
     {
       if (rdev->desc->name && strcmp(rdev->desc->name, supply) == 0)
@@ -217,7 +217,6 @@ static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
         }
     }
 
-  regulator_unlock(&g_reg_lock, flags);
   return rdev_found;
 }
 
@@ -531,6 +530,26 @@ static void regulator_unlock(FAR mutex_t *lock, irqstate_t flags)
     }
 }
 
+static irqstate_t regulator_list_lock(void)
+{
+  if (!up_interrupt_context() && !sched_idletask())
+    {
+      nxrmutex_lock(&g_reg_lock);
+    }
+
+  return enter_critical_section();
+}
+
+static void regulator_list_unlock(irqstate_t flags)
+{
+  leave_critical_section(flags);
+
+  if (!up_interrupt_context() && !sched_idletask())
+    {
+      nxrmutex_unlock(&g_reg_lock);
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -561,6 +580,7 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
       return NULL;
     }
 
+  flags = regulator_list_lock();
   rdev = regulator_dev_lookup(id);
 
 #if defined(CONFIG_REGULATOR_RPMSG)
@@ -570,9 +590,21 @@ FAR struct regulator_s *regulator_get(FAR const char *id)
     }
 #endif
 
+  if (rdev && rdev->desc->supply_name && rdev->supply == NULL)
+    {
+      rdev->supply = regulator_get(rdev->desc->supply_name);
+      if (rdev->supply == NULL)
+        {
+          pwrerr("get supply %s failed \n", rdev->desc->supply_name);
+          rdev = NULL;
+        }
+    }
+
+  regulator_list_unlock(flags);
+
   if (rdev == NULL)
     {
-      pwrerr("regulator %s not found\n", id);
+      pwrerr("regulator %s not found or ready\n", id);
       return NULL;
     }
 
@@ -949,57 +981,59 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
                    FAR const struct regulator_ops_s *regulator_ops,
                    FAR void *priv)
 {
-  FAR struct regulator_dev_s *rdev;
+  FAR struct regulator_dev_s *rdev = NULL;
   irqstate_t flags;
   int ret = 0;
+
+  flags = regulator_list_lock();
 
   if (regulator_desc == NULL)
     {
       pwrerr("regulator desc is null\n");
-      return NULL;
+      goto out;
     }
 
   if (regulator_desc->name == NULL || regulator_ops == NULL)
     {
       pwrerr("regulator name or ops is null\n");
-      return NULL;
+      goto out;
     }
 
   if (regulator_dev_lookup(regulator_desc->name))
     {
       pwrerr("regulator name is registered\n");
-      return NULL;
+      goto out;
     }
 
   if (regulator_ops->get_voltage && regulator_ops->get_voltage_sel)
     {
       pwrerr("get_voltage and get_voltage_sel are both assigned\n");
-      return NULL;
+      goto out;
     }
 
   if (regulator_ops->set_voltage && regulator_ops->set_voltage_sel)
     {
       pwrerr("set_voltage and set_voltage_sel are both assigned\n");
-      return NULL;
+      goto out;
     }
 
   if (regulator_ops->get_voltage_sel && !regulator_ops->list_voltage)
     {
       pwrerr("list voltage is null\n");
-      return NULL;
+      goto out;
     }
 
   if (regulator_ops->set_voltage_sel && !regulator_ops->list_voltage)
     {
       pwrerr("list voltage is null\n");
-      return NULL;
+      goto out;
     }
 
   rdev = kmm_zalloc(sizeof(struct regulator_dev_s));
   if (rdev == NULL)
     {
       pwrerr("failed to get memory\n");
-      return NULL;
+      goto out;
     }
 
   rdev->desc = regulator_desc;
@@ -1016,7 +1050,8 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
         {
           pwrerr("failed to enable regulator\n");
           kmm_free(rdev);
-          return NULL;
+          rdev = NULL;
+          goto out;
         }
     }
   else if (!rdev->desc->boot_on && !rdev->desc->always_on
@@ -1049,10 +1084,10 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
     }
 #endif
 
-  flags = regulator_lock(&g_reg_lock);
   list_add_tail(&g_reg_list, &rdev->list);
-  regulator_unlock(&g_reg_lock, flags);
 
+out:
+  regulator_list_unlock(flags);
   return rdev;
 }
 
@@ -1074,16 +1109,16 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev)
       return;
     }
 
-  flags = regulator_lock(&g_reg_lock);
+  flags = regulator_list_lock();
   if (rdev->open_count)
     {
       pwrerr("unregister, open %" PRIu32 "\n", rdev->open_count);
-      regulator_unlock(&g_reg_lock, flags);
+      regulator_list_unlock(flags);
       return;
     }
 
   list_delete(&rdev->list);
-  regulator_unlock(&g_reg_lock, flags);
+  regulator_list_unlock(flags);
 #ifdef CONFIG_PM
   if (rdev->desc->auto_lp)
     {

@@ -259,6 +259,8 @@ int arm_pause_handler(int irq, void *c, void *arg)
       return up_cpu_paused(cpu);
     }
 
+  nxsched_process_delivered(cpu);
+
   return OK;
 }
 

@@ -35,6 +35,7 @@
 #include "sched/sched.h"
 #include "chip.h"
 #include "signal/signal.h"
+#include "sched/sched.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -57,11 +58,13 @@
 int xtensa_swint(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
+  struct tcb_s *tcb = this_task();
   uint32_t cmd;
 
-  DEBUGASSERT(regs != NULL && regs == up_current_regs());
+  DEBUGASSERT(regs != NULL);
 
   cmd = regs[REG_A2];
+  tcb->xcp.regs = regs;
 
   /* The syscall software interrupt is called with A2 = system call command
    * and A3..A9 = variable number of arguments depending on the system call.
@@ -116,7 +119,7 @@ int xtensa_swint(int irq, void *context, void *arg)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A3] != 0);
-          up_set_current_regs((uint32_t *)regs[REG_A3]);
+          tcb->xcp.regs = (uint32_t *)regs[REG_A3];
         }
         break;
 
@@ -141,7 +144,7 @@ int xtensa_swint(int irq, void *context, void *arg)
         {
           DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
           *(uint32_t **)regs[REG_A3] = regs;
-          up_set_current_regs((uint32_t *)regs[REG_A4]);
+          tcb->xcp.regs = (uint32_t *)regs[REG_A4];
         }
         break;
 
@@ -419,9 +422,9 @@ int xtensa_swint(int irq, void *context, void *arg)
         break;
     }
 
-  if ((up_current_regs()[REG_PS] & PS_EXCM_MASK) != 0)
+  if ((tcb->xcp.regs[REG_PS] & PS_EXCM_MASK) != 0)
     {
-      up_current_regs()[REG_PS] &= ~PS_EXCM_MASK;
+      tcb->xcp.regs[REG_PS] &= ~PS_EXCM_MASK;
     }
 
   /* Report what happened.  That might difficult in the case of a context
@@ -429,10 +432,10 @@ int xtensa_swint(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
       svcinfo("SYSCALL Return: Context switch!\n");
-      up_dump_register(up_current_regs());
+      up_dump_register(tcb->xcp.regs);
     }
   else
     {
@@ -440,7 +443,7 @@ int xtensa_swint(int irq, void *context, void *arg)
     }
 #endif
 
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
       restore_critical_section(this_task(), this_cpu());
     }

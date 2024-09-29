@@ -399,7 +399,7 @@ static void sensor_generate_timing(FAR struct sensor_upperhalf_s *upper,
 static bool sensor_is_updated(FAR struct sensor_upperhalf_s *upper,
                               FAR struct sensor_user_s *user)
 {
-  long delta = upper->state.generation - user->state.generation;
+  long delta = (long long)upper->state.generation - user->state.generation;
 
   if (delta <= 0)
     {
@@ -431,7 +431,7 @@ static void sensor_catch_up(FAR struct sensor_upperhalf_s *upper,
   long delta;
 
   circbuf_peek(&upper->timing, &generation, TIMING_BUF_ESIZE);
-  delta = generation - user->state.generation;
+  delta = (long long)generation - user->state.generation;
   if (delta > 0)
     {
       user->bufferpos = upper->timing.tail / TIMING_BUF_ESIZE;
@@ -615,28 +615,31 @@ static int sensor_open(FAR struct file *filep)
         }
     }
 
-  if (filep->f_oflags & O_RDOK)
+  if ((filep->f_oflags & O_DIRECT) == 0)
     {
-      if (upper->state.nsubscribers == 0 && lower->ops->activate)
+      if (filep->f_oflags & O_RDOK)
         {
-          ret = lower->ops->activate(lower, filep, true);
-          if (ret < 0)
+          if (upper->state.nsubscribers == 0 && lower->ops->activate)
             {
-              goto errout_with_open;
+              ret = lower->ops->activate(lower, filep, true);
+              if (ret < 0)
+                {
+                  goto errout_with_open;
+                }
             }
+
+          user->role |= SENSOR_ROLE_RD;
+          upper->state.nsubscribers++;
         }
 
-      user->role |= SENSOR_ROLE_RD;
-      upper->state.nsubscribers++;
-    }
-
-  if (filep->f_oflags & O_WROK)
-    {
-      user->role |= SENSOR_ROLE_WR;
-      upper->state.nadvertisers++;
-      if (filep->f_oflags & SENSOR_PERSIST)
+      if (filep->f_oflags & O_WROK)
         {
-          lower->persist = true;
+          user->role |= SENSOR_ROLE_WR;
+          upper->state.nadvertisers++;
+          if (filep->f_oflags & SENSOR_PERSIST)
+            {
+              lower->persist = true;
+            }
         }
     }
 
@@ -695,18 +698,21 @@ static int sensor_close(FAR struct file *filep)
         }
     }
 
-  if (filep->f_oflags & O_RDOK)
+  if ((filep->f_oflags & O_DIRECT) == 0)
     {
-      upper->state.nsubscribers--;
-      if (upper->state.nsubscribers == 0 && lower->ops->activate)
+      if (filep->f_oflags & O_RDOK)
         {
-          lower->ops->activate(lower, filep, false);
+          upper->state.nsubscribers--;
+          if (upper->state.nsubscribers == 0 && lower->ops->activate)
+            {
+              lower->ops->activate(lower, filep, false);
+            }
         }
-    }
 
-  if (filep->f_oflags & O_WROK)
-    {
-      upper->state.nadvertisers--;
+      if (filep->f_oflags & O_WROK)
+        {
+          upper->state.nadvertisers--;
+        }
     }
 
   list_delete(&user->node);
@@ -815,8 +821,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct sensor_user_s *user = filep->f_priv;
   uint32_t arg1 = (uint32_t)arg;
   int ret = 0;
-
-  sninfo("cmd=%x arg=%08lx\n", cmd, arg);
 
   switch (cmd)
     {
@@ -950,8 +954,10 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           nxrmutex_lock(&upper->lock);
           *(FAR unsigned int *)(uintptr_t)arg = user->event;
           user->event = 0;
+          user->changed = false;
           nxrmutex_unlock(&upper->lock);
         }
+        break;
 
      case SNIOC_FLUSH:
         {
@@ -1329,7 +1335,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   if (lower == NULL)
     {
       ret = -EIO;
-      goto drv_err;
+      goto rpmsg_err;
     }
 #endif
 
@@ -1345,6 +1351,11 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 
 drv_err:
+#ifdef CONFIG_SENSORS_RPMSG
+  sensor_rpmsg_unregister(lower);
+rpmsg_err:
+#endif
+
   nxrmutex_destroy(&upper->lock);
 
   kmm_free(upper);

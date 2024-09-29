@@ -52,7 +52,7 @@
 #define PCI_SLOT(devfn)       (((devfn) >> 3) & 0x1f)
 #define PCI_FUNC(devfn)       ((devfn) & 0x07)
 
-#define PCI_ANY_ID (~0)
+#define PCI_ANY_ID (uint16_t)(~0)
 
 /* PCI_DEFINE_DEVICE_TABLE - macro used to describe a pci device table
  * table: device table name
@@ -209,6 +209,9 @@
 
 #define pci_map_region(dev, start, size) pci_bus_map_region((dev)->bus, start, size)
 
+#define pci_is_bridge(dev) ((dev)->hdr_type == PCI_HEADER_TYPE_BRIDGE || \
+                            (dev)->hdr_type == PCI_HEADER_TYPE_CARDBUS)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -244,8 +247,8 @@ struct pci_device_id_s
 {
   uint16_t vendor;    /* Vendor id */
   uint16_t device;    /* Device id */
-  uint32_t subvendor; /* Sub vendor id */
-  uint32_t subdevice; /* Sub device id */
+  uint16_t subvendor; /* Sub vendor id */
+  uint16_t subdevice; /* Sub device id */
   uint32_t class;     /* (Class, subclass, prog-if) triplet */
   uint32_t class_mask;
   uintptr_t driver_data;

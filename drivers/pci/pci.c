@@ -689,6 +689,8 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
   pci_read_config_byte(dev, PCI_COMMAND, &cmd);
   pci_write_config_byte(dev, PCI_COMMAND,
                         cmd & ~PCI_COMMAND_IO & ~PCI_COMMAND_MEMORY);
+#else
+  uint32_t tmp;
 #endif
 
   for (bar = 0; bar < max_bar; bar++)
@@ -762,8 +764,6 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
       res->start += size;
 #else
       UNUSED(res);
-      uint32_t tmp;
-
       pci_read_config_dword(dev, base_address_0, &tmp);
       if (mask & PCI_BASE_ADDRESS_SPACE_IO)
         {
@@ -959,7 +959,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
 {
   FAR struct pci_device_s *dev;
   FAR struct pci_bus_s *child_bus;
-  uint32_t devfn;
+  unsigned int devfn;
   uint32_t l;
   uint32_t class;
   uint8_t hdr_type;
@@ -1040,7 +1040,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
           child_bus->parent_bus = bus;
 
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
-          child_bus->number = ctrl->busno++;
+          child_bus->number = bus->ctrl->busno++;
 #endif
 
           list_add_tail(&bus->children, &child_bus->node);
@@ -1135,7 +1135,7 @@ static int pci_enable_msi(FAR struct pci_device_s *dev, FAR int *irq,
     {
       mme = mmc;
       num = 1 << mme;
-      pciinfo("Limit MME to %x, num to %d\n", mmc, num);
+      pciinfo("Limit MME to %"PRIx32", num to %d\n", mmc, num);
     }
 
   /* Configure MSI (arch-specific) */
@@ -1154,7 +1154,8 @@ static int pci_enable_msi(FAR struct pci_device_s *dev, FAR int *irq,
 
   if ((flags & PCI_MSI_FLAGS_64BIT) != 0)
     {
-      pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_HI, (mar >> 32));
+      pci_write_config_dword(dev, msi + PCI_MSI_ADDRESS_HI,
+                             ((uint64_t)mar >> 32));
       pci_write_config_dword(dev, msi + PCI_MSI_DATA_64, mdr);
     }
   else
@@ -2010,12 +2011,13 @@ int pci_register_device(FAR struct pci_device_s *dev)
               if (drv->probe(dev) >= 0)
                 {
                   dev->drv = drv;
-                  break;
+                  goto out;
                 }
             }
         }
     }
 
+out:
   nxmutex_unlock(&g_pci_lock);
   return ret;
 }

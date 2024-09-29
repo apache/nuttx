@@ -133,13 +133,6 @@
 #define MODE_EL1            (0x1)
 #define MODE_EL0            (0x0)
 
-/* struct arm64_boot_params member offset for assembly code
- * struct is defined at arm64_cpustart.c
- */
-
-#define BOOT_PARAM_MPID     0
-#define BOOT_PARAM_SP       8
-
 #ifndef __ASSEMBLY__
 
 /****************************************************************************

@@ -109,10 +109,6 @@
 #define PMP_ACCESS_DENIED   (-1)    /* Access set and denied */
 #define PMP_ACCESS_FULL     (1)     /* Access set and allowed */
 
-/* Return values from riscv_swint */
-
-#define SWINT_CONTEXT_SWITCH (1)    /* Indicate we need context switch */
-
 #ifndef __ASSEMBLY__
 
 /* Use ASM as rv64ilp32 compiler generated address is limited */

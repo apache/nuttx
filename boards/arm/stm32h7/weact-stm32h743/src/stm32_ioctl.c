@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/common/arm64_switchcontext.c
+ * boards/arm/stm32h7/weact-stm32h743/src/stm32_ioctl.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,51 +24,51 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <assert.h>
-#include <debug.h>
-#include <nuttx/arch.h>
-#include <nuttx/sched.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <errno.h>
 
-#include "sched/sched.h"
-#include "group/group.h"
-#include "clock/clock.h"
-#include "arm64_internal.h"
+#include <nuttx/board.h>
+
+#include "weact-stm32h743.h"
+
+#ifdef CONFIG_BOARDCTL_IOCTL
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_switch_context
+ * Name: board_ioctl
  *
  * Description:
- *   A task is currently in the ready-to-run list but has been prepped
- *   to execute. Restore its context, and start execution.
+ *   The "landing site" for much of the boardctl() interface. Generic board-
+ *   control functions invoked via ioctl() get routed through here.
+ *
+ *   Since we don't do anything unusual at the moment, this function
+ *   accomplishes nothing except avoid a missing-function linker error if
+ *   CONFIG_BOARDCTL_IOCTL is selected.
  *
  * Input Parameters:
- *   tcb: Refers to the head task of the ready-to-run list
- *     which will be executed.
- *   rtcb: Refers to the running task which will be blocked.
+ *   cmd - IOCTL command being requested.
+ *   arg - Arguments for the IOCTL.
+ *
+ * Returned Value:
+ *   we don't yet support any boardctl IOCTLs.  This function always returns
+ *  -ENOTTY which is the standard IOCTL return value when a command is not
+ *  supported
  *
  ****************************************************************************/
 
-void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
+int board_ioctl(unsigned int cmd, uintptr_t arg)
 {
-  /* Are we in an interrupt handler? */
-
-  if (!up_interrupt_context())
+  switch (cmd)
     {
-      /* Switch context to the context of the task at the head of the
-       * ready to run list.
-       */
-
-      arm64_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
-
-      /* arm_switchcontext forces a context switch to the task at the
-       * head of the ready-to-run list.  It does not 'return' in the
-       * normal sense.  When it does return, it is because the blocked
-       * task is again ready to run and has execution priority.
-       */
+      default:
+        return -ENOTTY;
     }
+
+  return OK;
 }
+
+#endif /* CONFIG_BOARDCTL_IOCTL */

@@ -439,7 +439,9 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
  *
  ****************************************************************************/
 
+#ifndef up_switch_context
 void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb);
+#endif
 
 /****************************************************************************
  * Name: up_exit
@@ -2308,6 +2310,29 @@ int up_cpu_pause(int cpu);
 #endif
 
 /****************************************************************************
+ * Name: up_cpu_pause_async
+ *
+ * Description:
+ *   pause task execution on the CPU
+ *   check whether there are tasks delivered to specified cpu
+ *   and try to run them.
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU to be paused.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *   Called from within a critical section;
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+int up_cpu_pause_async(int cpu);
+#endif
+
+/****************************************************************************
  * Name: up_cpu_pausereq
  *
  * Description:
@@ -2408,7 +2433,7 @@ int up_cpu_paused_restore(void);
  *   state of the task at the head of the g_assignedtasks[cpu] list, and
  *   resume normal tasking.
  *
- *   This function is called after up_cpu_pause in order ot resume operation
+ *   This function is called after up_cpu_pause in order to resume operation
  *   of the CPU after modifying its g_assignedtasks[cpu] list.
  *
  * Input Parameters:

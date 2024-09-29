@@ -408,7 +408,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   return 0;
 }
 
-int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
+void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
 {
   uint64_t pre_cluster_id = UINT64_MAX;
   uint64_t curr_cluster_id;
@@ -437,8 +437,6 @@ int arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list)
     }
 
   arm64_gic_send_sgi(sgi_id, pre_cluster_id, tlist);
-
-  return 0;
 }
 
 /* Wake up GIC redistributor.
@@ -482,10 +480,6 @@ static void gicv3_cpuif_init(void)
   /* Any sgi/ppi intid ie. 0-31 will select GICR_CTRL */
 
   gic_wait_rwp(0);
-
-  /* Clear pending */
-
-  putreg32(BIT64_MASK(GIC_NUM_INTR_PER_REG), ICPENDR(base, 0));
 
   /* Configure all SGIs/PPIs as G1S or G1NS depending on Zephyr
    * is run in EL1S or EL1NS respectively.
@@ -656,6 +650,8 @@ static void gicv3_dist_init(void)
   /* Attach SGI interrupt handlers. This attaches the handler to all CPUs. */
 
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE, arm64_pause_handler, NULL));
+  DEBUGVERIFY(irq_attach(GIC_SMP_CPUPAUSE_ASYNC,
+                         arm64_pause_async_handler, NULL));
   DEBUGVERIFY(irq_attach(GIC_SMP_CPUCALL,
                          nxsched_smp_call_handler, NULL));
 #endif
@@ -954,6 +950,7 @@ static void arm64_gic_init(void)
 
 #ifdef CONFIG_SMP
   up_enable_irq(GIC_SMP_CPUPAUSE);
+  up_enable_irq(GIC_SMP_CPUPAUSE_ASYNC);
   up_enable_irq(GIC_SMP_CPUCALL);
 #endif
 }
@@ -1003,3 +1000,16 @@ void up_send_smp_call(cpu_set_t cpuset)
 }
 #  endif
 #endif
+
+/***************************************************************************
+ * Name: up_get_legacy_irq
+ *
+ * Description:
+ *   Reserve vector for legacy
+ *
+ ***************************************************************************/
+
+int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
+{
+  return -ENOTSUP;
+}

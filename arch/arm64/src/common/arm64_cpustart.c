@@ -54,34 +54,45 @@
  * Public data
  ****************************************************************************/
 
-typedef void (*arm64_cpustart_t)(void *data);
-
-struct arm64_boot_params
-{
-  uint64_t cpuid;
-  char *boot_sp;
-  arm64_cpustart_t func;
-  void *arg;
-  int cpu_num;
-  volatile long cpu_ready_flag;
-};
-
-volatile struct arm64_boot_params aligned_data(L1_CACHE_BYTES)
-cpu_boot_params =
-{
-  .cpuid   = -1,
-  .boot_sp = (char *)g_cpu_idlestackalloc[0],
-};
-
-volatile uint64_t *g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
+uint64_t *const g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
 {
   (uint64_t *)(g_interrupt_stacks[0] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 1
+  (uint64_t *)(g_interrupt_stacks[1] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 2
+  (uint64_t *)(g_interrupt_stacks[2] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 3
+  (uint64_t *)(g_interrupt_stacks[3] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 4
+  (uint64_t *)(g_interrupt_stacks[4] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 5
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 5
+#endif /* CONFIG_SMP_NCPUS > 5 */
+#endif /* CONFIG_SMP_NCPUS > 4 */
+#endif /* CONFIG_SMP_NCPUS > 3 */
+#endif /* CONFIG_SMP_NCPUS > 2 */
+#endif /* CONFIG_SMP_NCPUS > 1 */
 };
 
 #ifdef CONFIG_ARM64_DECODEFIQ
-volatile uint64_t *g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
+uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
 {
   (uint64_t *)(g_interrupt_fiq_stacks[0] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 1
+  (uint64_t *)(g_interrupt_fiq_stacks[1] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 2
+  (uint64_t *)(g_interrupt_fiq_stacks[2] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 3
+  (uint64_t *)(g_interrupt_fiq_stacks[3] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 4
+  (uint64_t *)(g_interrupt_fiq_stacks[4] + INTSTACK_SIZE),
+#if CONFIG_SMP_NCPUS > 5
+#  error This logic needs to extended for CONFIG_SMP_NCPUS > 5
+#endif /* CONFIG_SMP_NCPUS > 5 */
+#endif /* CONFIG_SMP_NCPUS > 4 */
+#endif /* CONFIG_SMP_NCPUS > 3 */
+#endif /* CONFIG_SMP_NCPUS > 2 */
+#endif /* CONFIG_SMP_NCPUS > 1 */
 };
 #endif
 
@@ -100,20 +111,7 @@ static inline void local_delay(void)
     }
 }
 
-#if defined (CONFIG_ARCH_HAVE_MMU) || defined (CONFIG_ARCH_HAVE_MPU)
-static void flush_boot_params(void)
-{
-  uintptr_t flush_start;
-  uintptr_t flush_end;
-
-  flush_start   = (uintptr_t)&cpu_boot_params;
-  flush_end     = flush_start + sizeof(cpu_boot_params);
-
-  up_flush_dcache(flush_start, flush_end);
-}
-#endif
-
-static void arm64_smp_init_top(void *arg)
+static void arm64_smp_init_top(void)
 {
   struct tcb_s *tcb = this_task();
 
@@ -139,16 +137,14 @@ static void arm64_smp_init_top(void *arg)
   write_sysreg(0, tpidrro_el0);
   UNUSED(tcb);
 
-  cpu_boot_params.cpu_ready_flag = 1;
-  SP_SEV();
-
   nx_idle_trampoline();
 }
 
-static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
-                            arm64_cpustart_t fn)
+static void arm64_start_cpu(int cpu_num)
 {
+#ifdef CONFIG_ARM64_PSCI
   uint64_t cpu_mpid = arm64_get_mpid(cpu_num);
+#endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
@@ -156,26 +152,6 @@ static void arm64_start_cpu(int cpu_num, char *stack, int stack_sz,
 
   sched_note_cpu_start(this_task(), cpu_num);
 #endif
-
-  cpu_boot_params.boot_sp   = stack;
-  cpu_boot_params.func      = fn;
-  cpu_boot_params.arg       = 0;
-  cpu_boot_params.cpu_num   = cpu_num;
-  g_cpu_int_stacktop[cpu_num] =
-            (uint64_t *)(g_interrupt_stacks[cpu_num] + INTSTACK_SIZE);
-
-#ifdef CONFIG_ARM64_DECODEFIQ
-  g_cpu_int_fiq_stacktop[cpu_num] =
-            (uint64_t *)(g_interrupt_fiq_stacks[cpu_num] + INTSTACK_SIZE);
-#endif
-
-  ARM64_DSB();
-
-  /* store mpid last as this is our synchronization point */
-
-  cpu_boot_params.cpuid = arm64_get_cpuid(cpu_mpid);
-
-  flush_boot_params();
 
 #ifdef CONFIG_ARM64_PSCI
   if (psci_cpu_on(cpu_mpid, (uint64_t)__start))
@@ -231,17 +207,13 @@ int up_cpu_start(int cpu)
   sched_note_cpu_start(this_task(), cpu);
 #endif
 
-  cpu_boot_params.cpu_ready_flag = 0;
-  arm64_start_cpu(cpu, (char *)g_cpu_idlestackalloc[cpu], SMP_STACK_SIZE,
-                  arm64_smp_init_top);
+#ifdef CONFIG_ARM64_SMP_BUSY_WAIT
+  uint32_t *address = (uint32_t *)CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR;
+  *address = 1;
+  up_flush_dcache((uintptr_t)address, sizeof(address));
+#endif
 
-  /* Waiting for this CPU to be boot complete */
-
-  while (!cpu_boot_params.cpu_ready_flag)
-    {
-      SP_WFE();
-      flush_boot_params();
-    }
+  arm64_start_cpu(cpu);
 
   return 0;
 }
@@ -250,9 +222,6 @@ int up_cpu_start(int cpu)
 
 void arm64_boot_secondary_c_routine(void)
 {
-  arm64_cpustart_t  func;
-  void              *arg;
-
 #ifdef CONFIG_ARCH_HAVE_MPU
   arm64_mpu_init(false);
 #endif
@@ -267,20 +236,6 @@ void arm64_boot_secondary_c_routine(void)
 
   up_perf_init(NULL);
 
-  func  = cpu_boot_params.func;
-  arg   = cpu_boot_params.arg;
-  ARM64_DSB();
-
-  /* Secondary core clears .func to announce its presence.
-   * Primary core is polling for this. We no longer own
-   * arm64_cpu_boot_params afterwards.
-   */
-
-  cpu_boot_params.func = NULL;
-
-  ARM64_DSB();
-  SP_SEV();
-
-  func(arg);
+  arm64_smp_init_top();
 }
 

@@ -268,6 +268,8 @@ int lc823450_pause_handler(int irq, void *c, void *arg)
       leave_critical_section(flags);
     }
 
+  nxsched_process_delivered(cpu);
+
   return OK;
 }
 
