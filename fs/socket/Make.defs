@@ -22,7 +22,7 @@
 
 ifeq ($(CONFIG_NET),y)
 
-CSRCS += socket.c accept.c
+CSRCS += socket.c accept.c socketpair.c
 
 # Include socket build support
 
