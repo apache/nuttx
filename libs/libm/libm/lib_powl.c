@@ -41,6 +41,22 @@
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long double powl(long double b, long double e)
 {
-  return expl(e * logl(b));
+  if (b > 0.0)
+    {
+      return expl(e * logl(b));
+    }
+  else if (b < 0.0 && e == (int)e)
+    {
+      if ((int)e % 2 == 0)
+        {
+          return expl(e * logl(fabsl(b)));
+        }
+      else
+        {
+          return -expl(e * logl(fabsl(b)));
+        }
+    }
+
+  return 0.0;
 }
 #endif
