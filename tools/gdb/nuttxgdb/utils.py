@@ -561,6 +561,16 @@ def get_tcb(pid):
     return tcb
 
 
+def get_tid(tcb):
+    """get tid from tcb"""
+    if not tcb:
+        return None
+    try:
+        return tcb["group"]["tg_pid"]
+    except gdb.error:
+        return None
+
+
 def get_task_name(tcb):
     try:
         name = tcb["name"].cast(gdb.lookup_type("char").pointer())
