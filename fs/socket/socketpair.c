@@ -1,7 +1,5 @@
 /****************************************************************************
- * net/socket/socketpair.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * fs/socket/socketpair.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,24 +22,28 @@
  * Included Files
  ****************************************************************************/
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
+#include <nuttx/config.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/net.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/mm/mm.h>
+
+#include <sys/socket.h>
+#include <assert.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <debug.h>
+
+#include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_socketpair
+ * Name: socketpair
  *
  * Description:
  * Create an unbound pair of connected sockets in a specified domain, of a
@@ -54,45 +56,84 @@
  *   domain   - (see sys/socket.h)
  *   type     - (see sys/socket.h)
  *   protocol - (see sys/socket.h)
- *   psocks   - The array to catch the pair descriptors
+ *   sv[2]    - The user provided array in which to catch the pair
+ *              descriptors
  *
  ****************************************************************************/
 
-int psock_socketpair(int domain, int type, int protocol,
-                     FAR struct socket *psocks[2])
+int socketpair(int domain, int type, int protocol, int sv[2])
 {
+  FAR struct socket *psocks[2];
+  int oflags = O_RDWR;
   int ret;
+  int i;
+  int j = 0;
+  int k;
 
-  /* Initialize the socket structure */
+  if (sv == NULL)
+    {
+      ret = -EINVAL;
+      goto errout;
+    }
 
-  ret = psock_socket(domain, type, protocol, psocks[0]);
+  for (k = 0; k < 2; k++)
+    {
+      psocks[k] = fs_heap_zalloc(sizeof(*psocks[k]));
+      if (psocks[k] == NULL)
+        {
+          ret = -ENOMEM;
+          goto errout_with_alloc;
+        }
+    }
+
+  ret = psock_socketpair(domain, type, protocol, psocks);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_alloc;
     }
 
-  if (psocks[0]->s_sockif->si_socketpair == NULL)
+  if (type & SOCK_CLOEXEC)
     {
-      ret = -EAFNOSUPPORT;
-      goto errsock;
+      oflags |= O_CLOEXEC;
     }
 
-  ret = psock_socket(domain, type, protocol, psocks[1]);
-  if (ret < 0)
+  if (type & SOCK_NONBLOCK)
     {
-      goto errsock;
+      oflags |= O_NONBLOCK;
     }
 
-  /* Perform socketpair process */
+  /* Allocate a socket descriptor */
 
-  ret = psocks[0]->s_sockif->si_socketpair(psocks);
-  if (ret == 0)
+  for (; j < 2; j++)
     {
-      return ret;
+      sv[j] = sockfd_allocate(psocks[j], oflags);
+      if (sv[j] < 0)
+        {
+          ret = sv[j];
+          goto errout_with_psock;
+        }
     }
 
-  psock_close(psocks[1]);
-errsock:
-  psock_close(psocks[0]);
-  return ret;
+  return OK;
+
+errout_with_psock:
+  for (i = 0; i < j; i++)
+    {
+      nx_close(sv[i]);
+    }
+
+  for (i = j; i < k; i++)
+    {
+      psock_close(psocks[i]);
+    }
+
+errout_with_alloc:
+  for (i = j; i < k; i++)
+    {
+      fs_heap_free(psocks[i]);
+    }
+
+errout:
+  set_errno(-ret);
+  return ERROR;
 }

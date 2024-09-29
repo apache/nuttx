@@ -18,5 +18,5 @@
 #
 # ##############################################################################
 if(CONFIG_NET)
-  target_sources(fs PRIVATE socket.c accept.c)
+  target_sources(fs PRIVATE socket.c accept.c socketpair.c)
 endif()
