@@ -1066,7 +1066,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
 
   /* Open the client-side write-only FIFO. */
 
-  ret = local_open_client_tx(conns[0], nonblock);
+  ret = local_open_client_tx(conns[0], conns[1], nonblock);
   if (ret < 0)
     {
       goto errout;
@@ -1090,7 +1090,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
 
   /* Open the client-side read-only FIFO */
 
-  ret = local_open_client_rx(conns[0], nonblock);
+  ret = local_open_client_rx(conns[0], conns[1], nonblock);
   if (ret < 0)
     {
       goto errout;

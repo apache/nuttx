@@ -613,7 +613,8 @@ int local_release_halfduplex(FAR struct local_conn_s *conn);
  *
  ****************************************************************************/
 
-int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock);
+int local_open_client_rx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_client_tx
@@ -623,7 +624,8 @@ int local_open_client_rx(FAR struct local_conn_s *client, bool nonblock);
  *
  ****************************************************************************/
 
-int local_open_client_tx(FAR struct local_conn_s *client, bool nonblock);
+int local_open_client_tx(FAR struct local_conn_s *client,
+                         FAR struct local_conn_s *server, bool nonblock);
 
 /****************************************************************************
  * Name: local_open_server_rx
