@@ -367,12 +367,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
       goto errout;
     }
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout_with_inode;
-    }
-
+  inode_lock();
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* Check if the inode already exists */
 
@@ -436,7 +431,7 @@ int nx_mount(FAR const char *source, FAR const char *target,
 #else
   ret = mops->bind(NULL, data, &fshandle);
 #endif
-  DEBUGVERIFY(inode_lock() >= 0);
+  inode_lock();
   if (ret < 0)
     {
       /* The inode is unhappy with the driver for some reason.  Back out

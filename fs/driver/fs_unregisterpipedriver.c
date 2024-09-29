@@ -47,18 +47,12 @@ int unregister_pipedriver(FAR const char *path)
 {
   int ret;
 
-  ret = inode_lock();
-  if (ret >= 0)
-    {
-      ret = inode_remove(path);
-      inode_unlock();
-#ifdef CONFIG_FS_NOTIFY
-      notify_unlink(path);
-#endif
-      return OK;
-    }
-
+  inode_lock();
+  ret = inode_remove(path);
   inode_unlock();
+#ifdef CONFIG_FS_NOTIFY
+  notify_unlink(path);
+#endif
   return ret;
 }
 

@@ -72,12 +72,7 @@ int register_pipedriver(FAR const char *path,
    * will have a momentarily bad structure.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      return ret;
-    }
-
+  inode_lock();
   ret = inode_reserve(path, mode, &node);
   if (ret >= 0)
     {

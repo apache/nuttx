@@ -137,12 +137,7 @@ int file_mq_unlink(FAR const char *mq_name)
    * functioning as a directory and the directory is not empty.
    */
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto errout_with_inode;
-    }
-
+  inode_lock();
   if (inode->i_child != NULL)
     {
       ret = -ENOTEMPTY;

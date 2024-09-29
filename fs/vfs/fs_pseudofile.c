@@ -484,12 +484,7 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
 
   nxmutex_init(&pf->lock);
 
-  ret = inode_lock();
-  if (ret < 0)
-    {
-      goto lock_err;
-    }
-
+  inode_lock();
   ret = inode_reserve(path, mode, node);
   if (ret < 0)
     {
@@ -508,7 +503,6 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
 
 reserve_err:
   inode_unlock();
-lock_err:
   nxmutex_destroy(&pf->lock);
   fs_heap_free(pf);
   return ret;
