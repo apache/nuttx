@@ -72,8 +72,13 @@ static void timer_timeout(wdparm_t itimer);
 
 static inline void timer_signotify(FAR struct posix_timer_s *timer)
 {
+#ifdef CONFIG_SIG_EVTHREAD
   DEBUGVERIFY(nxsig_notification(timer->pt_owner, &timer->pt_event,
                                  SI_TIMER, &timer->pt_work));
+#else
+  DEBUGVERIFY(nxsig_notification(timer->pt_owner, &timer->pt_event,
+                                 SI_TIMER, NULL));
+#endif
 }
 
 /****************************************************************************
