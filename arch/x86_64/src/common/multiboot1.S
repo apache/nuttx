@@ -20,69 +20,37 @@
 
 /* Multiboot1 NuttX Naive Loader */
 
-.set ENTRY_ADDR,        0x100000 /* NuttX Entry Address  */
-
-.set MB_FLAG_ALIGNED,   1        /* All boot modules must be loaded aligned */
-.set MB_FLAG_MEMINFO,   2        /* Boot with memory maps passing  */
-.set MB_FLAG_VIDEO,     4        /* Enable video mode  */
-
-.set MB_FLAGS,          MB_FLAG_ALIGNED | MB_FLAG_MEMINFO
-.set MB_MAGIC,          0x1BADB002
-.set MB_CHECKSUM,       -(MB_MAGIC + MB_FLAGS)
-
 .balign 16
 .code32
 
 .globl _start
 
-.section                ".multiboot", "ax"
-header:
-.align 4
-    .long               MB_MAGIC
-    .long               MB_FLAGS
-    .long               MB_CHECKSUM
-
-    .long               0       /* header_addr  */
-    .long               0       /* load_addr */
-    .long               0       /* load_end_addr */
-    .long               0       /* bss_end_addr */
-    .long               0       /* entry_addr */
-
-    .long               0       /* Video mode type */
-    .long               1024    /* Video width */
-    .long               768     /* Video height */
-    .long               32      /* Video depth */
-
-/* NuttX bin */
+/* NuttX binary with multiboot1 header */
 
 .section                ".bin" , "ax"
 bin_start:
     .incbin             "../../../nuttx.bin"
-
-.align 8
-bin_size:
-    .long               . - bin_start
-
-/* Multiboot args */
 
 multiboot_info_struct:
     .long               0
 multiboot_magic:
     .long               0
 
-.section                ".text"
+.section                ".text" , "ax"
 _start:
+
+    /* We should manually copy .realmode section */
 
     /* Saving multiboot args */
 
     movl                %ebx, multiboot_info_struct
     movl                %eax, multiboot_magic
 
-    /* memcpy(ENTRY_ADDR, bin_start, bin_size) */
+    /* memcpy(0, realmode_start, realmode_size) */
 
-    movl                (bin_size), %ecx
-    movl                $bin_start, %esi
-    movl                $ENTRY_ADDR, %edi
+    movl                (realmode_size), %ecx
+    movl                $realmode_start, %esi
+    movl                $0, %edi
 
 copy_loop:
 
@@ -94,9 +62,23 @@ copy_loop:
     inc                 %edi
     loop                copy_loop
 
-    /* Jump to ENTRY_ADDR */
+    /* Jump to bin_start + 0x30, skip the multiboot1 header */
 
     movl                (multiboot_info_struct), %ebx
     movl                (multiboot_magic), %eax
-    movl                $ENTRY_ADDR, %ecx
+    movl                $bin_start, %ecx
+    addl                $0x30, %ecx
     jmp                 *%ecx
+
+
+/* NuttX realmode section */
+
+.section                ".realmode", "ax"
+realmode_start:
+    .incbin             "../../../nuttx_realmode.bin"
+
+.align 8
+realmode_size:
+    .long               . - realmode_start
+
+
