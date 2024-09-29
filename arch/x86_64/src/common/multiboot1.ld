@@ -27,6 +27,7 @@ SECTIONS {
 		*(.multiboot)
 		*(.bin)
 		*(.text)
+		*(.realmode)
 		*(.note.gnu.*)
 	}
 }

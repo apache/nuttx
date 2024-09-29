@@ -34,6 +34,11 @@ SECTIONS
     . = 0x1M;
     _kernel_physical_start = .;
 
+    .multiboot1 : {
+        . = ALIGN(8);
+        KEEP(*(.multiboot1))
+    }
+
     .loader.text : {
         . = ALIGN(8);
         *(.loader.text)
