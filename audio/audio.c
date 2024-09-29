@@ -798,6 +798,43 @@ static inline void audio_message(FAR struct audio_upperhalf_s *upper,
 }
 
 /****************************************************************************
+ * Name: audio_ioerr
+ *
+ * Description:
+ *   Send an AUDIO_MSG_IOERR message to the client to indicate that
+ *   audio dirver have io error.  The lower-half driver initiates this
+ *   call via its callback pointer to our upper-half driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static inline void audio_ioerr(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status,
+                    FAR void *session)
+#else
+static inline void audio_ioerr(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status)
+#endif
+{
+  struct audio_msg_s msg;
+
+  audinfo("Entry\n");
+
+  /* Send io error message to the user if a message queue is registered */
+
+  if (upper->usermq != NULL)
+    {
+      msg.msg_id = AUDIO_MSG_IOERR;
+      msg.u.data = status;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      msg.session = session;
+#endif
+      file_mq_send(upper->usermq, (FAR const char *)&msg, sizeof(msg),
+                   CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+    }
+}
+
+/****************************************************************************
  * Name: audio_callback
  *
  * Description:
@@ -852,6 +889,11 @@ static void audio_callback(FAR void *handle, uint16_t reason,
 
       case AUDIO_CALLBACK_IOERR:
         {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          audio_ioerr(upper, apb, status, session);
+#else
+          audio_ioerr(upper, apb, status);
+#endif
         }
         break;
 
