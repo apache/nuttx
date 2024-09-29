@@ -244,11 +244,7 @@ void xtensa_pause_handler(void)
       leave_critical_section(flags);
     }
 
-  tcb = current_task(cpu);
-  xtensa_savestate(tcb->xcp.regs);
   nxsched_process_delivered(cpu);
-  tcb = current_task(cpu);
-  xtensa_restorestate(tcb->xcp.regs);
 }
 
 /****************************************************************************
