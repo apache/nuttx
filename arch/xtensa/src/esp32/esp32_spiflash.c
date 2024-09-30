@@ -221,9 +221,9 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 
 /* Misc. helpers */
 
-static inline void IRAM_ATTR
+inline void IRAM_ATTR
 esp32_spiflash_opstart(void);
-static inline void IRAM_ATTR
+inline void IRAM_ATTR
 esp32_spiflash_opdone(void);
 
 static bool IRAM_ATTR spiflash_pagecached(uint32_t phypage);
@@ -460,7 +460,7 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
  *
  ****************************************************************************/
 
-static void esp32_spiflash_opstart(void)
+void esp32_spiflash_opstart(void)
 {
   struct tcb_s *tcb = this_task();
   int saved_priority = tcb->sched_priority;
@@ -519,7 +519,7 @@ static void esp32_spiflash_opstart(void)
  *
  ****************************************************************************/
 
-static void esp32_spiflash_opdone(void)
+void esp32_spiflash_opdone(void)
 {
   const int cpu = this_cpu();
 #ifdef CONFIG_SMP

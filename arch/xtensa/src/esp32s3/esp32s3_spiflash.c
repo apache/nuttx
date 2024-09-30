@@ -186,8 +186,8 @@
  * Private Functions Declaration
  ****************************************************************************/
 
-static void spiflash_start(void);
-static void spiflash_end(void);
+void spiflash_start(void);
+void spiflash_end(void);
 static void spi_flash_disable_cache(void);
 static void spi_flash_restore_cache(void);
 #ifdef CONFIG_SMP
@@ -279,7 +279,7 @@ static void spiflash_resume_cache(void)
  *
  ****************************************************************************/
 
-static void spiflash_start(void)
+void spiflash_start(void)
 {
   struct tcb_s *tcb = this_task();
   int saved_priority = tcb->sched_priority;
@@ -341,7 +341,7 @@ static void spiflash_start(void)
  *
  ****************************************************************************/
 
-static void spiflash_end(void)
+void spiflash_end(void)
 {
   const int cpu = this_cpu();
 #ifdef CONFIG_SMP
