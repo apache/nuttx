@@ -50,6 +50,7 @@
 #define IXON      (1 << 10) /* Bit 10: Enable start/stop output control */
 #define IXANY     (1 << 11) /* Bit 11: Enable any character to restart output */
 #define IXOFF     (1 << 12) /* Bit 12: Enable start/stop input control */
+#define IMAXBEL   (1 << 13) /* Bit 13: Ring bell when input queue is full */
 
 /* Terminal output modes (c_oflag in the termios structure) */
 
@@ -111,6 +112,9 @@
 #define ECHONL    (1 << 6)  /* Bit 6:  Echo NL */
 #define NOFLSH    (1 << 7)  /* Bit 7:  Disable flush after interrupt or quit */
 #define TOSTOP    (1 << 8)  /* Bit 8:  Send SIGTTOU for background output */
+#define ECHOCTL   (1 << 9)  /* Bit 9:  Echo control characters as ^X */
+#define ECHOKE    (1 << 11) /* Bit 11: Visual erase for KILL */
+#define FLUSHO    (1 << 12) /* Bit 12: Flush output to terminal */
 #define IEXTEN    (1 << 15) /* Bit 15: Enable extended input character processing */
 
 /* The following are subscript names for the termios c_cc array.
@@ -148,6 +152,8 @@
 #define VSUSP     10        /* Bit 10: SUSP character */
 #define VEOL      11        /* Bit 11: EOL character (canonical mode) */
 #define NCCS      12        /* Bit 12: Size of the array c_cc for control characters */
+#define VLNEXT    15        /* Bit 15: Literal-next character */
+#define VEOL2     16        /* Bit 16: Second EOL character */
 
 /* Baud Rate Selection.  These are instances of type speed_t.  Values of
  * 38400 and below are specified by POSIX; values above 38400 are sometimes
