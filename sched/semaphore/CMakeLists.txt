@@ -32,6 +32,7 @@ set(CSRCS
     sem_post.c
     sem_recover.c
     sem_reset.c
+    sem_rw.c
     sem_waitirq.c)
 
 if(CONFIG_PRIORITY_INHERITANCE)
