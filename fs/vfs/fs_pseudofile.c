@@ -348,6 +348,7 @@ static int pseudofile_munmap(FAR struct task_group_s *group,
                              size_t length)
 {
   FAR struct inode *inode = (FAR struct inode *)map->priv.p;
+  int ret = OK;
 
   /* If the file has been unlinked previously, delete the contents.
    * The inode is released after this call, hence checking if i_crefs <= 1.
