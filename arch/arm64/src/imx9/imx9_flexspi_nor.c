@@ -429,7 +429,7 @@ static int imx9_flexspi_nor_ioctl(struct mtd_dev_s *dev,
 
 static struct flexspi_device_config_s g_flexspi_device_config =
 {
-  .flexspi_root_clk = 100000000,
+  .flexspi_root_clk = 133000000,
   .flash_size = 1024 * 64, /* size in kB */
   .cs_interval_unit = FLEXSPI_CS_INTERVAL_UNIT1_SCK_CYCLE,
   .cs_interval = 0,
@@ -743,9 +743,7 @@ static int imx9_flexspi_nor_page_program(
     .data_size = len,
   };
 
-  up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + len);
-
-  stat = FLEXSPI_TRANSFER(dev->flexspi, &transfer);
+    stat = FLEXSPI_TRANSFER(dev->flexspi, &transfer);
   if (stat != 0)
     {
       return -EIO;
@@ -843,6 +841,9 @@ static ssize_t imx9_flexspi_nor_bwrite(struct mtd_dev_s *dev,
   off_t offset = startblock << priv->subsectorshift;
 
   int i = 0;
+
+  up_clean_dcache((uintptr_t)src, (uintptr_t)src +
+                  ALIGN_UP(len, ARMV8A_DCACHE_LINESIZE));
 
   finfo("Wstartblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
