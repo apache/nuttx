@@ -1032,6 +1032,120 @@ config IMX9_ENET1_PHYINIT
 
 endmenu # IMX9_ENET
 
+config IMX9_FLEXCAN
+	bool
+	default n
+	select ARCH_HAVE_CAN_ERRORS
+	select ARCH_HAVE_NETDEV_STATISTICS
+	select CAN
+	select NET_CAN
+	select NET_CAN_HAVE_CANFD
+	select NET_CAN_HAVE_TX_DEADLINE
+
+menu "FLEXCAN Peripherals"
+
+config IMX9_FLEXCAN1
+	bool "FLEXCAN1"
+	default n
+	select IMX9_FLEXCAN
+
+config IMX9_FLEXCAN2
+	bool "FLEXCAN2"
+	default n
+	select IMX9_FLEXCAN
+
+if IMX9_FLEXCAN1 || IMX9_FLEXCAN2
+
+config IMX9_FLEXCAN_TXMB
+	int "Number of TX message buffers"
+	default 4
+	---help---
+	This defines number of TX messages buffers. Please note that
+	maximum number of all message buffers is 13 (one MB has to
+	be reserved for chip errata ERR005829).
+
+config IMX9_FLEXCAN_RXMB
+	int "Number of RX message buffers"
+	default 16
+	---help---
+	This defines number of RX messages buffers. Please note that
+	maximum number of all message buffers is 13 (one MB has to
+	be reserved for chip errata ERR005829).
+
+endif
+
+endmenu # FLEXCAN Peripherals
+
+menu "FLEXCAN1 Configuration"
+	depends on IMX9_FLEXCAN1
+
+config IMX9_FLEXCAN1_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN1_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN1_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN1_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN1_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config IMX9_FLEXCAN1_DATA_SAMPLEP
+	int "CAN FD Data phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+endmenu # IMX9_FLEXCAN1
+
+menu "FLEXCAN2 Configuration"
+	depends on IMX9_FLEXCAN2
+
+config IMX9_FLEXCAN2_BITRATE
+	int "CAN bitrate"
+	depends on !NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN2_SAMPLEP
+	int "CAN sample point"
+	depends on !NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN2_ARBI_BITRATE
+	int "CAN FD Arbitration phase bitrate"
+	depends on NET_CAN_CANFD
+	default 1000000
+
+config IMX9_FLEXCAN2_ARBI_SAMPLEP
+	int "CAN FD Arbitration phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+config IMX9_FLEXCAN2_DATA_BITRATE
+	int "CAN FD Data phase bitrate"
+	depends on NET_CAN_CANFD
+	default 4000000
+
+config IMX9_FLEXCAN2_DATA_SAMPLEP
+	int "CAN FD Data phase sample point"
+	depends on NET_CAN_CANFD
+	default 75
+
+endmenu # IMX9_FLEXCAN2
+
 endmenu # iMX Peripheral Selection
 
 endif # ARCH_CHIP_IMX9
