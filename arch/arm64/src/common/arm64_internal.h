@@ -302,8 +302,7 @@ void arm64_pginitialize(void);
 #  define arm64_pginitialize()
 #endif /* CONFIG_LEGACY_PAGING */
 
-uint64_t * arm64_syscall_switch(uint64_t *regs);
-int arm64_syscall(uint64_t *regs);
+uint64_t *arm64_syscall(uint64_t *regs);
 
 /* Low level serial output **************************************************/
 
