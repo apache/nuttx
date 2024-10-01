@@ -174,8 +174,13 @@
 
 /* Alternate function pin selections ****************************************/
 
-/* USART3 (ST LINK V3E Virtual Console) */
+/* LPUART1 (ST LINK V3E Virtual Console) */
+#define GPIO_LPUART1_TX      GPIO_LPUART1_TX_1   /* PA2 */
+#define GPIO_LPUART1_RX      GPIO_LPUART1_RX_1   /* PA3 */
+#define GPIO_LPUART1_CTS     GPIO_LPUART1_CTS_1  /* PA6 */
+#define GPIO_LPUART1_RTS     GPIO_LPUART1_RTS_1  /* PB1 */
 
+/* USART3 Pins CN7 Pins 1 and 2 */
 #define GPIO_USART3_TX     GPIO_USART3_TX_3 /* PC10 */
 #define GPIO_USART3_RX     GPIO_USART3_RX_3 /* PC11 */
 
