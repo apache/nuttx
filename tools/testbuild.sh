@@ -566,12 +566,14 @@ function dotest {
   echo $(date '+%Y-%m-%d %H:%M:%S')
   echo "------------------------------------------------------------------------------------"
   distclean
-  configure
   if [ ${skip} -ne 1 ]; then
+    configure
     build
     run
+    refresh
+  else
+    echo "  Skipping: $1"
   fi
-  refresh
 }
 
 # Perform the build test for each entry in the test list file
