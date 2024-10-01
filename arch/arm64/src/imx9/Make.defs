@@ -80,3 +80,7 @@ endif
 ifeq ($(CONFIG_IMX9_BOOTLOADER), y)
   CHIP_CSRCS += imx9_system_ctl.c
 endif
+
+ifeq ($(CONFIG_IMX9_FLEXCAN), y)
+  CHIP_CSRCS += imx9_flexcan.c
+endif
