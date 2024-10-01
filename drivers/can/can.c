@@ -147,16 +147,26 @@ static void can_txready_work(FAR void *arg)
   irqstate_t flags;
   int ret;
 
+#ifdef CONFIG_CAN_TXPRIORITY
+  caninfo("xmit unconfirmed: %d tx_list: %d\n",
+          list_length(&dev->cd_xmit.untcf_list),
+          list_length(&dev->cd_xmit.tx_list));
+#else
   caninfo("xmit head: %d queue: %d tail: %d\n",
           dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue,
           dev->cd_xmit.tx_tail);
+#endif
 
   /* Verify that the xmit FIFO is not empty.  The following operations must
    * be performed with interrupt disabled.
    */
 
   flags = enter_critical_section();
+#ifdef CONFIG_CAN_TXPRIORITY
+  if (!list_is_empty(&dev->cd_xmit.tx_list))
+#else
   if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+#endif
     {
       /* Send the next message in the FIFO. */
 
@@ -183,6 +193,104 @@ static void can_txready_work(FAR void *arg)
   leave_critical_section(flags);
 }
 #endif
+
+#ifdef CONFIG_CAN_TXPRIORITY
+/****************************************************************************
+ * Name: can_init_txlist
+ *
+ * Description:
+ *   Initial dev->cd_xmit. Insert all CAN message buffer into free list. This
+ *   function will be called when can open/close.
+ *
+ ****************************************************************************/
+
+static void can_init_txlist(FAR struct can_txlist_s *cd_xmit)
+{
+  DEBUGASSERT(cd_xmit != NULL);
+  DEBUGASSERT(CONFIG_CAN_TXFIFOSIZE > 0);
+
+  int i;
+
+  list_initialize(&cd_xmit->tx_list);
+  list_initialize(&cd_xmit->free_list);
+  list_initialize(&cd_xmit->untcf_list);
+
+  for (i = 0; i < CONFIG_CAN_TXFIFOSIZE; i++)
+    {
+      list_add_tail(&cd_xmit->free_list, &cd_xmit->tx_buffer[i].list);
+    }
+
+  return;
+}
+
+/****************************************************************************
+ * Name: __can_add_sendnode
+ *
+ * Description:
+ *   Add CAN message to tx list and prepare to send to dev.
+ *
+ ****************************************************************************/
+
+static void __can_add_sendnode(FAR struct can_txlist_s *cd_xmit,
+                                FAR struct can_msg_node_s *msg_node)
+{
+  struct can_msg_node_s *tmp_node;
+  struct can_msg_s *msg = &msg_node->msg;
+
+  list_for_every_entry(&cd_xmit->tx_list, tmp_node,
+                        struct can_msg_node_s, list)
+    {
+      if (tmp_node->msg.cm_hdr.ch_id > msg->cm_hdr.ch_id)
+        {
+          /* Prioritize tx frame based on canid */
+
+          break;
+        }
+    }
+
+  if (&tmp_node->list == &cd_xmit->tx_list)
+    {
+      /* Inserted at the end of the linked list */
+
+      list_add_tail(&cd_xmit->tx_list, &msg_node->list);
+    }
+  else
+    {
+      list_add_before(&tmp_node->list, &msg_node->list);
+    }
+
+  return;
+}
+
+/****************************************************************************
+ * Name: can_add_sendnode
+ *
+ * Description:
+ *   Get CAN message buffer from free list, copy message, then add this
+ *   message to tx list and prepare to send to dev.
+ *
+ ****************************************************************************/
+
+static int can_add_sendnode(FAR struct can_txlist_s *cd_xmit,
+                            FAR struct can_msg_s *msg, int msglen)
+{
+  struct list_node *node;
+  struct can_msg_node_s *msg_node;
+
+  node = list_remove_head(&cd_xmit->free_list);
+  if (node == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  msg_node = container_of(node, struct can_msg_node_s, list);
+  memcpy(&msg_node->msg, msg, msglen);
+
+  __can_add_sendnode(cd_xmit, msg_node);
+
+  return 0;
+}
+#endif /* CONFIG_CAN_TXPRIORITY */
 
 static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
 {
@@ -240,11 +348,15 @@ static int can_open(FAR struct file *filep)
           ret = dev_setup(dev);
           if (ret == OK)
             {
+#ifdef CONFIG_CAN_TXPRIORITY
+              can_init_txlist(&dev->cd_xmit);
+#else
               /* Mark the FIFOs empty */
 
               dev->cd_xmit.tx_head  = 0;
               dev->cd_xmit.tx_queue = 0;
               dev->cd_xmit.tx_tail  = 0;
+#endif /* CONFIG_CAN_TXPRIORITY */
 
               /* Finally, Enable the CAN RX interrupt */
 
@@ -329,7 +441,12 @@ static int can_close(FAR struct file *filep)
 
   /* Now we wait for the transmit FIFO to clear */
 
+#ifdef CONFIG_CAN_TXPRIORITY
+  while (!list_is_empty(&dev->cd_xmit.tx_list) &&
+          !list_is_empty(&dev->cd_xmit.untcf_list))
+#else
   while (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+#endif
     {
       nxsig_usleep(HALF_SECOND_USEC);
     }
@@ -502,8 +619,55 @@ return_with_irqdisabled:
 
 static int can_xmit(FAR struct can_dev_s *dev)
 {
-  int tmpndx;
   int ret = -EBUSY;
+#ifdef CONFIG_CAN_TXPRIORITY
+  struct can_msg_node_s *msg_node;
+
+  caninfo("xmit unconfirmed: %d tx_list: %d\n",
+          list_length(&dev->cd_xmit.untcf_list),
+          list_length(&dev->cd_xmit.tx_list));
+
+  if (list_is_empty(&dev->cd_xmit.tx_list))
+    {
+#ifndef CONFIG_CAN_TXREADY
+      /* We can disable CAN TX interrupts -- unless there is a H/W FIFO.  In
+       * that case, TX interrupts must stay enabled until the H/W FIFO is
+       * fully emptied.
+       */
+
+      dev_txint(dev, false);
+#endif
+      return -EIO;
+    }
+
+  while (!list_is_empty(&dev->cd_xmit.tx_list) && dev_txready(dev))
+    {
+      msg_node = list_first_entry(&dev->cd_xmit.tx_list,
+                                  struct can_msg_node_s, list);
+
+      /* Send the next message in tx list */
+
+      ret = dev_send(dev, &msg_node->msg);
+      if (ret < 0)
+        {
+          canerr("dev_send failed: %d\n", ret);
+          __can_add_sendnode(&dev->cd_xmit, msg_node);
+          break;
+        }
+      else
+        {
+          /* Remove node from tx_list */
+
+          list_delete(&msg_node->list);
+
+          /* Add to untxconfirmation list */
+
+          list_add_tail(&dev->cd_xmit.untcf_list, &msg_node->list);
+        }
+    }
+
+#else
+  int tmpndx;
 
   caninfo("xmit head: %d queue: %d tail: %d\n",
           dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
@@ -564,6 +728,7 @@ static int can_xmit(FAR struct can_dev_s *dev)
           break;
         }
     }
+#endif /* CONFIG_CAN_TXPRIORITY */
 
   /* Make sure that TX interrupts are enabled */
 
@@ -580,12 +745,16 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct can_dev_s    *dev   = inode->i_private;
+#ifdef CONFIG_CAN_TXPRIORITY
+  FAR struct can_txlist_s *list  = &dev->cd_xmit;
+#else
   FAR struct can_txfifo_s *fifo  = &dev->cd_xmit;
+  int                      nexttail;
+#endif
   FAR struct can_msg_s    *msg;
   bool                     inactive;
   ssize_t                  nsent = 0;
   irqstate_t               flags;
-  int                      nexttail;
   int                      nbytes;
   int                      msglen;
   int                      ret   = 0;
@@ -604,12 +773,13 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
   inactive = dev_txempty(dev);
 
-  /* Add the messages to the FIFO.  Ignore any trailing messages that are
+  /* Add the messages to the FIFO/LIST. Ignore any trailing messages that are
    * shorter than the minimum.
    */
 
   while (buflen - nsent >= CAN_MSGLEN(0))
     {
+#ifndef CONFIG_CAN_TXPRIORITY
       /* Check if adding this new message would over-run the drivers ability
        * to enqueue xmit data.
        */
@@ -619,14 +789,19 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
         {
           nexttail = 0;
         }
+#endif
 
       /* If the XMIT FIFO becomes full, then wait for space to become
        * available.
        */
 
+#ifdef CONFIG_CAN_TXPRIORITY
+      while (list_is_empty(&list->free_list))
+#else
       while (nexttail == fifo->tx_head)
+#endif
         {
-          /* The transmit FIFO is full  -- was non-blocking mode selected? */
+          /* The transmit FIFO/LIST is full  -- non-blocking mode selected? */
 
           if ((filep->f_oflags & O_NONBLOCK) != 0)
             {
@@ -644,7 +819,7 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           /* If the TX hardware was inactive when we started, then we will
            * have start the XMIT sequence generate the TX done interrupts
-           * needed to clear the FIFO.
+           * needed to clear the FIFO/LIST.
            */
 
           if (inactive)
@@ -656,7 +831,11 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           DEBUGASSERT(dev->cd_ntxwaiters < 255);
           dev->cd_ntxwaiters++;
+#ifdef CONFIG_CAN_TXPRIORITY
+          ret = nxsem_wait(&list->tx_sem);
+#else
           ret = nxsem_wait(&fifo->tx_sem);
+#endif
           dev->cd_ntxwaiters--;
           if (ret < 0)
             {
@@ -668,18 +847,22 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
           inactive = dev_txempty(dev);
         }
 
-      /* We get here if there is space at the end of the FIFO.  Add the new
-       * CAN message at the tail of the FIFO.
+      /* We get here if there is space at the end of the FIFO/LIST.
+       * Add the new CAN message at the tail of the FIFO/LIST.
        */
 
       msg    = (FAR struct can_msg_s *)&buffer[nsent];
       nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
       msglen = CAN_MSGLEN(nbytes);
+#ifdef CONFIG_CAN_TXPRIORITY
+      can_add_sendnode(list, msg, msglen);
+#else
       memcpy(&fifo->tx_buffer[fifo->tx_tail], msg, msglen);
 
       /* Increment the tail of the circular buffer */
 
       fifo->tx_tail = nexttail;
+#endif
 
       /* Increment the number of bytes that were sent */
 
@@ -853,9 +1036,13 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case CANIOC_OFLUSH:
         {
+#ifdef CONFIG_CAN_TXPRIORITY
+          can_init_txlist(&dev->cd_xmit);
+#else
           dev->cd_xmit.tx_head  = 0;
           dev->cd_xmit.tx_queue = 0;
           dev->cd_xmit.tx_tail  = 0;
+#endif
 
           /* invoke lower half ioctl */
 
@@ -869,9 +1056,13 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case CANIOC_IOFLUSH:
         {
+#ifdef CONFIG_CAN_TXPRIORITY
+          can_init_txlist(&dev->cd_xmit);
+#else
           dev->cd_xmit.tx_head  = 0;
           dev->cd_xmit.tx_queue = 0;
           dev->cd_xmit.tx_tail  = 0;
+#endif
           reader->fifo.rx_head = 0;
           reader->fifo.rx_tail = 0;
 
@@ -886,7 +1077,12 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case FIONWRITE:
         {
           *(FAR uint8_t *)arg = CONFIG_CAN_TXFIFOSIZE - 1 -
+#ifdef CONFIG_CAN_TXPRIORITY
+                            (list_length(&dev->cd_xmit.tx_list) +
+                            list_length(&dev->cd_xmit.untcf_list));
+#else
                             (dev->cd_xmit.tx_tail - dev->cd_xmit.tx_head);
+#endif
         }
         break;
 
@@ -929,7 +1125,9 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct can_reader_s *reader = NULL;
   pollevent_t eventset = 0;
   irqstate_t flags;
+#ifndef CONFIG_CAN_TXPRIORITY
   int ndx;
+#endif
   int ret;
   int i;
 
@@ -996,6 +1194,12 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * First, check if the xmit buffer is full.
        */
 
+#ifdef CONFIG_CAN_TXPRIORITY
+      if (!list_is_empty(&dev->cd_xmit.free_list))
+        {
+          eventset |= POLLOUT;
+        }
+#else
       ndx = dev->cd_xmit.tx_tail + 1;
       if (ndx >= CONFIG_CAN_TXFIFOSIZE)
         {
@@ -1006,6 +1210,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
         {
           eventset |= POLLOUT;
         }
+#endif /* CONFIG_CAN_TXPRIORITY */
 
       /* Check whether there are messages in the RX FIFO. */
 
@@ -1338,16 +1543,31 @@ int can_txdone(FAR struct can_dev_s *dev)
 {
   int ret = -ENOENT;
   irqstate_t flags;
+#ifdef CONFIG_CAN_TXPRIORITY
+  struct list_node *node;
 
+  caninfo("xmit unconfirmed: %d tx_list: %d\n",
+          list_length(&dev->cd_xmit.untcf_list),
+          list_length(&dev->cd_xmit.tx_list));
+#else
   caninfo("xmit head: %d queue: %d tail: %d\n",
           dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail);
+#endif
 
   flags = enter_critical_section();
 
-  /* Verify that the xmit FIFO is not empty */
+  /* Verify that the xmit FIFO/LIST is not empty */
 
+#ifdef CONFIG_CAN_TXPRIORITY
+  if (!list_is_empty(&dev->cd_xmit.untcf_list))
+#else
   if (dev->cd_xmit.tx_head != dev->cd_xmit.tx_tail)
+#endif
     {
+#ifdef CONFIG_CAN_TXPRIORITY
+      node = list_remove_head(&dev->cd_xmit.untcf_list);
+      list_add_head(&dev->cd_xmit.free_list, node);
+#else
       /* The tx_queue index is incremented each time can_xmit() queues
        * the transmission.  When can_txdone() is called, the tx_queue
        * index should always have been advanced beyond the current tx_head
@@ -1362,6 +1582,7 @@ int can_txdone(FAR struct can_dev_s *dev)
         {
           dev->cd_xmit.tx_head = 0;
         }
+#endif /* CONFIG_CAN_TXPRIORITY */
 
       /* Send the next message in the FIFO */
 
@@ -1454,9 +1675,15 @@ int can_txready(FAR struct can_dev_s *dev)
   int ret = -ENOENT;
   irqstate_t flags;
 
+#ifdef CONFIG_CAN_TXPRIORITY
+  caninfo("xmit unconfirmed: %d tx_list: %d\n",
+          list_length(&dev->cd_xmit.untcf_list),
+          list_length(&dev->cd_xmit.tx_list));
+#else
   caninfo("xmit head: %d queue: %d tail: %d waiters: %d\n",
           dev->cd_xmit.tx_head, dev->cd_xmit.tx_queue, dev->cd_xmit.tx_tail,
           dev->cd_ntxwaiters);
+#endif
 
   flags = enter_critical_section();
 

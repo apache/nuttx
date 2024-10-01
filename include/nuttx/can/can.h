@@ -568,6 +568,25 @@ struct can_rxfifo_s
   struct can_msg_s rx_buffer[CONFIG_CAN_RXFIFOSIZE];
 };
 
+#ifdef CONFIG_CAN_TXPRIORITY
+struct can_msg_node_s
+{
+  struct list_node  list;
+  struct can_msg_s  msg;
+};
+
+struct can_txlist_s
+{
+  sem_t             tx_sem;             /* Counting semaphore */
+  struct list_node  tx_list;            /* Tx list, in order of can_id. Cache the data from application */
+  struct list_node  free_list;          /* Free list */
+  struct list_node  untcf_list;         /* CAN message write to dev, but not send to bus */
+                                        /* Buffer of CAN messages. The content of
+                                         * tx_list/free_list/unctcf_list are taken from this buffer
+                                         */
+  struct can_msg_node_s tx_buffer[CONFIG_CAN_TXFIFOSIZE];
+};
+#else
 struct can_txfifo_s
 {
   sem_t         tx_sem;                  /* Counting semaphore */
@@ -577,6 +596,7 @@ struct can_txfifo_s
                                          /* Circular buffer of CAN messages */
   struct can_msg_s tx_buffer[CONFIG_CAN_TXFIFOSIZE];
 };
+#endif /* CONFIG_CAN_TXPRIORITY */
 
 /* The following structure define the logic to handle
  * one RTR message transaction
@@ -680,7 +700,11 @@ struct can_dev_s
   struct list_node     cd_readers;       /* List of readers */
   mutex_t              cd_closelock;     /* Locks out new opens while close is in progress */
   mutex_t              cd_polllock;      /* Manages exclusive access to cd_fds[] */
+#ifdef CONFIG_CAN_TXPRIORITY
+  struct can_txlist_s  cd_xmit;          /* Describes transmit LIST */
+#else
   struct can_txfifo_s  cd_xmit;          /* Describes transmit FIFO */
+#endif
 #ifdef CONFIG_CAN_TXREADY
   struct work_s        cd_work;          /* Use to manage can_txready() work */
 #endif
