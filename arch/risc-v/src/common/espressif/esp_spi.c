@@ -847,12 +847,12 @@ static void esp_spi_poll_exchange(struct esp_spi_priv_s *priv,
 
       if (rp != NULL)
         {
+          rp += transfer_size;
           spi_hal_fetch_result(priv->ctx);
         }
 
       bytes_remaining -= transfer_size;
       tp += transfer_size;
-      rp += transfer_size;
     }
 }
 
