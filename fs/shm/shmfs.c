@@ -350,24 +350,17 @@ static int shmfs_mmap(FAR struct file *filep,
 
   /* Keep the inode when mmapped, increase refcount */
 
-  ret = inode_addref(filep->f_inode);
-  if (ret >= 0)
+  inode_addref(filep->f_inode);
+  object = filep->f_inode->i_private;
+  if (object)
     {
-      object = filep->f_inode->i_private;
-      if (object)
-        {
-          ret = shmfs_map_object(object, &entry->vaddr);
-        }
-      else
-        {
-          ret = -EINVAL;
-        }
+      ret = shmfs_map_object(object, &entry->vaddr);
+    }
 
-      if (ret < 0 ||
-          (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
-        {
-          inode_release(filep->f_inode);
-        }
+  if (ret < 0 ||
+      (ret = shmfs_add_map(entry, filep->f_inode)) < 0)
+    {
+      inode_release(filep->f_inode);
     }
 
   return ret;

@@ -78,11 +78,7 @@ int file_dup3(FAR struct file *filep1, FAR struct file *filep2, int flags)
   /* Increment the reference count on the contained inode */
 
   inode = filep1->f_inode;
-  ret   = inode_addref(inode);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  inode_addref(inode);
 
   /* If there is already an inode contained in the new file structure,
    * close the file and release the inode.
