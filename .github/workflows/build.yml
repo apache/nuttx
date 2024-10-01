@@ -159,6 +159,9 @@ jobs:
           BLOBDIR: /tools/blobs
         with:
           run: |
+            #### Begin Test
+            echo ${{steps.label-the-PR.outputs.all-labels}}
+            #### End Test
             echo "::add-matcher::sources/nuttx/.github/gcc.json"
             export ARTIFACTDIR=`pwd`/buildartifacts
             git config --global --add safe.directory /github/workspace/sources/nuttx
