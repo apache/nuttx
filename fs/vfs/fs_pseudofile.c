@@ -314,29 +314,23 @@ static int pseudofile_mmap(FAR struct file *filep,
 {
   FAR struct inode *node = filep->f_inode;
   FAR struct fs_pseudofile_s *pf = node->i_private;
+  int ret = -EINVAL;
 
   /* Keep the inode when mmapped, increase refcount */
 
-  int ret = inode_addref(node);
-  if (ret >= 0)
+  inode_addref(node);
+  if (map->offset >= 0 && map->offset < node->i_size &&
+      map->length != 0 && map->offset + map->length <= node->i_size)
     {
-      if (map->offset >= 0 && map->offset < node->i_size &&
-          map->length != 0 && map->offset + map->length <= node->i_size)
-        {
-          map->vaddr = pf->content + map->offset;
-          map->munmap = pseudofile_munmap;
-          map->priv.p = (FAR void *)node;
-          ret = mm_map_add(get_current_mm(), map);
-        }
-      else
-        {
-          ret = -EINVAL;
-        }
+      map->vaddr = pf->content + map->offset;
+      map->munmap = pseudofile_munmap;
+      map->priv.p = (FAR void *)node;
+      ret = mm_map_add(get_current_mm(), map);
+    }
 
-      if (ret < 0)
-        {
-          inode_release(node);
-        }
+  if (ret < 0)
+    {
+      inode_release(node);
     }
 
   return ret;

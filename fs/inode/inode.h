@@ -392,7 +392,7 @@ int inode_remove(FAR const char *path);
  *
  ****************************************************************************/
 
-int inode_addref(FAR struct inode *inode);
+void inode_addref(FAR struct inode *inode);
 
 /****************************************************************************
  * Name: inode_release

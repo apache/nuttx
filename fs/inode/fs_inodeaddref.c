@@ -41,12 +41,10 @@
  *
  ****************************************************************************/
 
-int inode_addref(FAR struct inode *inode)
+void inode_addref(FAR struct inode *inode)
 {
   if (inode)
     {
       atomic_fetch_add(&inode->i_crefs, 1);
     }
-
-  return OK;
 }
