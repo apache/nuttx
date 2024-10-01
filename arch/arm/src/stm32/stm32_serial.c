@@ -139,9 +139,9 @@
 #  elif defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 
 #    if defined(CONFIG_USART1_RXDMA) || defined(CONFIG_USART2_RXDMA) || \
-      defined(CONFIG_USART3_RXDMA)
+      defined(CONFIG_USART3_RXDMA) || defined(CONFIG_LPUART1_RXDMA)
 #      ifndef CONFIG_STM32_DMA1
-#        error STM32 USART1/2/3 receive DMA requires CONFIG_STM32_DMA1
+#        error STM32 LPUART1 / USART1/2/3 receive DMA requires CONFIG_STM32_DMA1
 #      endif
 #    endif
 
@@ -158,6 +158,9 @@
 #    define DMAMAP_USART3_RX  DMACHAN_USART3_RX
 #    define DMAMAP_UART4_RX   DMACHAN_UART4_RX
 #    define DMAMAP_UART5_RX   DMACHAN_UART5_RX
+#    if defined(CONFIG_LPUART1_RXDMA) && defined(CONFIG_STM32_STM32G4XXX)
+#      define DMAMAP_LPUART1_RX DMAMAP_DMA12_LPUART1RX_0
+#    endif
 
 #  endif
 
@@ -292,7 +295,7 @@
 #  elif defined(CONFIG_STM32_HAVE_IP_DMA_V1)
 
 #    if defined(CONFIG_USART1_TXDMA) || defined(CONFIG_USART2_TXDMA) || \
-      defined(CONFIG_USART3_TXDMA)
+      defined(CONFIG_USART3_TXDMA) || defined(CONFIG_LPUART1_TXDMA)
 #      ifndef CONFIG_STM32_DMA1
 #        error STM32 USART1/2/3 receive DMA requires CONFIG_STM32_DMA1
 #      endif
@@ -309,6 +312,9 @@
 #    define DMAMAP_USART3_TX  DMACHAN_USART3_TX
 #    define DMAMAP_UART4_TX   DMACHAN_UART4_TX
 #    define DMAMAP_UART5_TX   DMACHAN_UART5_TX
+#    if defined(CONFIG_LPUART1_TXDMA) && defined(CONFIG_STM32_STM32G4XXX)
+#      define DMAMAP_LPUART1_TX DMAMAP_DMA12_LPUART1TX_0
+#    endif
 
 #  endif
 
@@ -482,6 +488,7 @@ struct up_dev_s
   const uint32_t    rs485_dir_gpio;     /* U[S]ART RS-485 DIR GPIO pin cfg */
   const bool        rs485_dir_polarity; /* U[S]ART RS-485 DIR TXEN polarity */
 #endif
+  const bool        islpuart;  /* Is this device a Low Power UART? */
 };
 
 /****************************************************************************
@@ -696,6 +703,14 @@ static char g_uart8rxfifo[RXDMA_BUFFER_SIZE];
 #  endif
 #endif
 
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
+static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
+#  ifdef CONFIG_LPUART1_RXDMA
+static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
+#  endif
+#endif
+
 /* This describes the state of the STM32 USART1 ports. */
 
 #ifdef CONFIG_STM32_USART1_SERIALDRIVER
@@ -728,6 +743,7 @@ static struct up_dev_s g_usart1priv =
       .priv      = &g_usart1priv,
     },
 
+  .islpuart      = false,
   .irq           = STM32_IRQ_USART1,
   .parity        = CONFIG_USART1_PARITY,
   .bits          = CONFIG_USART1_BITS,
@@ -800,6 +816,7 @@ static struct up_dev_s g_usart2priv =
       .priv      = &g_usart2priv,
     },
 
+  .islpuart      = false,
   .irq           = STM32_IRQ_USART2,
   .parity        = CONFIG_USART2_PARITY,
   .bits          = CONFIG_USART2_BITS,
@@ -868,6 +885,7 @@ static struct up_dev_s g_usart3priv =
       .priv      = &g_usart3priv,
     },
 
+  .islpuart      = false,
   .irq           = STM32_IRQ_USART3,
   .parity        = CONFIG_USART3_PARITY,
   .bits          = CONFIG_USART3_BITS,
@@ -936,6 +954,7 @@ static struct up_dev_s g_uart4priv =
       .priv      = &g_uart4priv,
     },
 
+  .islpuart      = false,
   .irq           = STM32_IRQ_UART4,
   .parity        = CONFIG_UART4_PARITY,
   .bits          = CONFIG_UART4_BITS,
@@ -1004,6 +1023,7 @@ static struct up_dev_s g_uart5priv =
       .priv     = &g_uart5priv,
     },
 
+  .islpuart       = false,
   .irq            = STM32_IRQ_UART5,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
@@ -1072,6 +1092,7 @@ static struct up_dev_s g_usart6priv =
       .priv     = &g_usart6priv,
     },
 
+  .islpuart       = false,
   .irq            = STM32_IRQ_USART6,
   .parity         = CONFIG_USART6_PARITY,
   .bits           = CONFIG_USART6_BITS,
@@ -1140,6 +1161,7 @@ static struct up_dev_s g_uart7priv =
       .priv     = &g_uart7priv,
     },
 
+  .islpuart       = false,
   .irq            = STM32_IRQ_UART7,
   .parity         = CONFIG_UART7_PARITY,
   .bits           = CONFIG_UART7_BITS,
@@ -1208,6 +1230,7 @@ static struct up_dev_s g_uart8priv =
       .priv     = &g_uart8priv,
     },
 
+  .islpuart       = false,
   .irq            = STM32_IRQ_UART8,
   .parity         = CONFIG_UART8_PARITY,
   .bits           = CONFIG_UART8_BITS,
@@ -1244,6 +1267,74 @@ static struct up_dev_s g_uart8priv =
 };
 #endif
 
+/* This describes the state of the STM32 LPUART1 ports. */
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+static struct up_dev_s g_lpuart1priv =
+{
+  .dev =
+    {
+#  if CONSOLE_LPUART == 1
+      .isconsole  = true,
+#  endif
+      .recv       =
+      {
+        .size     = CONFIG_LPUART1_RXBUFSIZE,
+        .buffer   = g_lpuart1rxbuffer,
+      },
+      .xmit       =
+      {
+        .size     = CONFIG_LPUART1_TXBUFSIZE,
+        .buffer   = g_lpuart1txbuffer,
+      },
+#  if defined(CONFIG_LPUART1_RXDMA) && defined(CONFIG_LPUART1_TXDMA)
+      .ops        = &g_uart_rxtxdma_ops,
+#  elif defined(CONFIG_LPUART1_RXDMA) && !defined(CONFIG_LPUART1_TXDMA)
+      .ops        = &g_uart_rxdma_ops,
+#  elif !defined(CONFIG_LPUART1_RXDMA) && defined(CONFIG_LPUART1_TXDMA)
+      .ops        = &g_uart_txdma_ops,
+#  else
+      .ops        = &g_uart_ops,
+#  endif
+      .priv       = &g_lpuart1priv,
+    },
+
+  .islpuart       = true,
+  .irq            = STM32_IRQ_LPUART,
+  .parity         = CONFIG_LPUART1_PARITY,
+  .bits           = CONFIG_LPUART1_BITS,
+  .stopbits2      = CONFIG_LPUART1_2STOP,
+  .baud           = CONFIG_LPUART1_BAUD,
+  .apbclock       = STM32_PCLK2_FREQUENCY,
+  .usartbase      = STM32_LPUART1_BASE,
+  .tx_gpio        = GPIO_LPUART1_TX,
+  .rx_gpio        = GPIO_LPUART1_RX,
+#  if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
+  .oflow          = true,
+  .cts_gpio       = GPIO_LPUART1_CTS,
+#  endif
+#  if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
+  .iflow          = true,
+  .rts_gpio       = GPIO_LPUART1_RTS,
+#  endif
+#  ifdef CONFIG_LPUART1_TXDMA
+  .txdma_channel  = DMAMAP_LPUART1_TX,
+#  endif
+#  ifdef CONFIG_LPUART1_RXDMA
+  .rxdma_channel  = DMAMAP_LPUART1_RX,
+  .rxfifo         = g_lpuart1rxfifo,
+#  endif
+
+#  ifdef CONFIG_LPUART1_RS485
+  .rs485_dir_gpio = GPIO_LPUART1_RS485_DIR,
+#    if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#    else
+  .rs485_dir_polarity = true,
+#    endif
+#  endif
+};
+#endif
+
 /* This table lets us iterate over the configured USARTs */
 
 static struct up_dev_s * const g_uart_devs[STM32_NUSART] =
@@ -1271,6 +1362,15 @@ static struct up_dev_s * const g_uart_devs[STM32_NUSART] =
 #endif
 #ifdef CONFIG_STM32_UART8_SERIALDRIVER
   [7] = &g_uart8priv,
+#endif
+};
+
+/* This table lets us iterate over the configured LPUARTs */
+
+static struct up_dev_s * const g_lpuart_devs[STM32_NLPUART] =
+{
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+  [0] = &g_lpuart1priv,
 #endif
 };
 
@@ -1452,52 +1552,141 @@ static void up_set_format(struct uart_dev_s *dev)
 #endif
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)|| \
     defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
-  /* This first implementation is for U[S]ARTs that support oversampling
-   * by 8 in additional to the standard oversampling by 16.
-   * With baud rate of fCK / Divider for oversampling by 16.
-   * and baud rate of  2 * fCK / Divider for oversampling by 8
-   *
-   * In case of oversampling by 8, the equation is:
-   *
-   *   baud      = 2 * fCK / usartdiv8
-   *   usartdiv8 = 2 * fCK / baud
-   */
 
-  usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
-
-  /* Baud rate for standard USART (SPI mode included):
-   *
-   * In case of oversampling by 16, the equation is:
-   *   baud       = fCK / usartdiv16
-   *   usartdiv16 = fCK / baud
-   *              = 2 * usartdiv8
-   *
-   * Use oversamply by 8 only if the divisor is small.  But what is small?
-   */
-
-  if (usartdiv8 > 100)
+#ifdef CONFIG_STM32_LPUART1
+  if (priv->islpuart == true)
     {
-      /* Use usartdiv16 */
+      /* LPUART BRR (19:00) = (256*apbclock_hz/baud_rate) */
 
-      brr  = (usartdiv8 + 1) >> 1;
+      uint32_t apbclock_whole = priv->apbclock;
+      uint32_t clock_baud_ratio = apbclock_whole / priv->baud;
+      uint32_t presc_reg = 0x0;
 
-      /* Clear oversampling by 8 to enable oversampling by 16 */
+      /* LPUART PRESC (3:0)
+       * Divide the apbclock if necessary for low baud rates
+       * 3 * baud_rate <= apbclock_whole <= 4096 * baud_rate
+       */
 
-      regval &= ~USART_CR1_OVER8;
+      if (clock_baud_ratio <= 4096)
+        {
+          presc_reg = 0x0;
+        }
+      else if (clock_baud_ratio > 4096 && clock_baud_ratio <= 8192)
+        {
+          presc_reg = 0x1;
+          apbclock_whole >>= 1;
+        }
+      else if (clock_baud_ratio > 8192 && clock_baud_ratio <= 16384)
+        {
+          presc_reg = 0x2;
+          apbclock_whole >>= 2;
+        }
+      else if (clock_baud_ratio > 16384 && clock_baud_ratio <= 24576)
+        {
+          presc_reg = 0x3;
+          apbclock_whole /= 6;
+        }
+      else if (clock_baud_ratio > 24576 && clock_baud_ratio <= 32768)
+        {
+          presc_reg = 0x4;
+          apbclock_whole >>= 3;
+        }
+      else if (clock_baud_ratio > 32768 && clock_baud_ratio <= 40960)
+        {
+          presc_reg = 0x5;
+          apbclock_whole /= 10;
+        }
+      else if (clock_baud_ratio > 40960 && clock_baud_ratio <= 49152)
+        {
+          presc_reg = 0x6;
+          apbclock_whole /= 12;
+        }
+      else if (clock_baud_ratio > 32768 && clock_baud_ratio <= 65536)
+        {
+          presc_reg = 0x7;
+          apbclock_whole >>= 4;
+        }
+      else if (clock_baud_ratio > 65536  && clock_baud_ratio <= 131072)
+        {
+          presc_reg = 0x8;
+          apbclock_whole >>= 5;
+        }
+      else if (clock_baud_ratio > 131072  && clock_baud_ratio <= 262144)
+        {
+          presc_reg = 0x9;
+          apbclock_whole >>= 6;
+        }
+      else if (clock_baud_ratio > 262144  && clock_baud_ratio <= 524288)
+        {
+          presc_reg = 0xa;
+          apbclock_whole >>= 7;
+        }
+      else
+        {
+          presc_reg = 0xb;
+          apbclock_whole >>= 8;
+        }
+
+      /* Write the PRESC register */
+
+      up_serialout(priv, STM32_USART_PRESC_OFFSET, presc_reg);
+
+      /* Set the LPUART BRR value after setting Prescaler
+       * BRR = ( (256 * apbclock_whole) + baud_rate / 2 ) / baud_rate
+       */
+
+      brr = (((uint64_t)apbclock_whole << 8) + (priv->baud >> 1)) / \
+               priv->baud;
     }
   else
+#endif /* CONFIG_STM32_LPUART1 */
     {
-      DEBUGASSERT(usartdiv8 >= 8);
+      /* This first implementation is for U[S]ARTs that support oversampling
+       * by 8 in additional to the standard oversampling by 16.
+       * With baud rate of fCK / Divider for oversampling by 16.
+       * and baud rate of  2 * fCK / Divider for oversampling by 8
+       *
+       * In case of oversampling by 8, the equation is:
+       *
+       *   baud      = 2 * fCK / usartdiv8
+       *   usartdiv8 = 2 * fCK / baud
+       */
 
-      /* Perform mysterious operations on bits 0-3 */
+      usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
 
-      brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+      /* Baud rate for standard USART (SPI mode included):
+       *
+       * In case of oversampling by 16, the equation is:
+       *   baud       = fCK / usartdiv16
+       *   usartdiv16 = fCK / baud
+       *              = 2 * usartdiv8
+       *
+       * Use oversamply by 8 only if the divisor is small. But what is small?
+       */
 
-      /* Set oversampling by 8 */
+      if (usartdiv8 > 100)
+        {
+          /* Use usartdiv16 */
 
-      regval |= USART_CR1_OVER8;
+          brr  = (usartdiv8 + 1) >> 1;
+
+          /* Clear oversampling by 8 to enable oversampling by 16 */
+
+          regval &= ~USART_CR1_OVER8;
+        }
+      else
+        {
+          DEBUGASSERT(usartdiv8 >= 8);
+
+          /* Perform mysterious operations on bits 0-3 */
+
+          brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+
+          /* Set oversampling by 8 */
+
+          regval |= USART_CR1_OVER8;
+        }
     }
-
 #else
   /* This second implementation is for U[S]ARTs that support fractional
    * dividers.
@@ -1708,6 +1897,12 @@ static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+    case STM32_LPUART1_BASE:
+      rcc_en = RCC_APB1ENR2_LPUART1EN;
+      regaddr = STM32_RCC_APB1ENR2;
+      break;
+#endif
     }
 
   /* Enable/disable APB 1/2 clock for USART */
@@ -1785,8 +1980,15 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   regval  = up_serialin(priv, STM32_USART_CR2_OFFSET);
-  regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
-              USART_CR2_CPHA | USART_CR2_LBCL | USART_CR2_LBDIE);
+  if (priv->islpuart == true)
+    {
+      regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN);
+    }
+  else
+    {
+      regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
+                  USART_CR2_CPHA | USART_CR2_LBCL | USART_CR2_LBDIE);
+    }
 
   /* Configure STOP bits */
 
@@ -1802,7 +2004,17 @@ static int up_setup(struct uart_dev_s *dev)
    */
 
   regval  = up_serialin(priv, STM32_USART_CR1_OFFSET);
-  regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
+
+#ifdef CONFIG_STM32_LPUART1
+  if (priv->islpuart == true)
+    {
+      regval &= ~(USART_CR1_TE | USART_CR1_RE | LPUART_CR1_ALLINTS);
+    }
+  else
+#endif
+    {
+      regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
+    }
 
   up_serialout(priv, STM32_USART_CR1_OFFSET, regval);
 
@@ -3194,12 +3406,22 @@ void arm_earlyserialinit(void)
         }
     }
 
+  for (i = 0; i < STM32_NLPUART; i++)
+    {
+      if (g_lpuart_devs[i])
+        {
+          up_disableusartint(g_lpuart_devs[i], NULL);
+        }
+    }
+
   /* Configure whichever one is the console */
 
 #if CONSOLE_UART > 0
   up_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
+#elif CONSOLE_LPUART > 0
+  up_setup(&g_lpuart_devs[CONSOLE_LPUART - 1]->dev);
 #endif
-#endif /* HAVE UART */
+#endif /* HAVE_UART */
 }
 #endif
 
@@ -3233,23 +3455,29 @@ void arm_serialinit(void)
   /* Register the console */
 
 #if CONSOLE_UART > 0
-  uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
+  struct uart_dev_s *dev = &g_uart_devs[CONSOLE_UART - 1]->dev;
+#elif CONSOLE_LPUART > 0
+  struct uart_dev_s *dev = &g_lpuart_devs[CONSOLE_LPUART - 1]->dev;
+#endif
+
+#if CONSOLE_UART > 0 || CONSOLE_LPUART > 0
+  uart_register("/dev/console", dev);
 
 #ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
 
-  uart_register("/dev/ttyS0", &g_uart_devs[CONSOLE_UART - 1]->dev);
+  uart_register("/dev/ttyS0", dev);
   minor = 1;
 #endif
 
 #if defined(SERIAL_HAVE_CONSOLE_RXDMA) || defined(SERIAL_HAVE_CONSOLE_TXDMA)
   /* If we need to re-initialise the console to enable DMA do that here. */
 
-  up_dma_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
+  up_dma_setup(dev);
 #endif
-#endif /* CONSOLE_UART > 0 */
+#endif /* CONSOLE_UART > 0 || CONSOLE_LPUART > 0 */
 
   /* Register all remaining USARTs */
 
@@ -3278,6 +3506,31 @@ void arm_serialinit(void)
       devname[9] = '0' + minor++;
       uart_register(devname, &g_uart_devs[i]->dev);
     }
+
+  for (i = 0; i < STM32_NLPUART; i++)
+    {
+      /* Don't create a device for non-configured ports. */
+
+      if (g_lpuart_devs[i] == 0)
+        {
+          continue;
+        }
+
+#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
+      /* Don't create a device for the console - we did that above */
+
+      if (g_lpuart_devs[i]->dev.isconsole)
+        {
+          continue;
+        }
+#endif
+
+      /* Register USARTs as devices in increasing order */
+
+      devname[9] = '0' + minor++;
+      uart_register(devname, &g_lpuart_devs[i]->dev);
+    }
+
 #endif /* HAVE UART */
 }
 
@@ -3355,6 +3608,13 @@ void stm32_serial_dma_poll(void)
     }
 #endif
 
+#ifdef CONFIG_LPUART1_RXDMA
+  if (g_lpuart1priv.rxdma != NULL)
+    {
+      up_dma_rxcallback(g_lpuart1priv.rxdma, 0, &g_lpuart1priv);
+    }
+#endif
+
   leave_critical_section(flags);
 }
 #endif
@@ -3371,6 +3631,11 @@ int up_putc(int ch)
 {
 #if CONSOLE_UART > 0
   struct up_dev_s *priv = g_uart_devs[CONSOLE_UART - 1];
+#elif CONSOLE_LPUART > 0
+  struct up_dev_s *priv = g_lpuart_devs[CONSOLE_LPUART - 1];
+#endif
+
+#if CONSOLE_UART > 0 || CONSOLE_LPUART > 0
   uint16_t ie;
 
   up_disableusartint(priv, &ie);
@@ -3402,7 +3667,7 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-#if CONSOLE_UART > 0
+#if CONSOLE_UART > 0 || CONSOLE_LPUART > 0
   /* Check for LF */
 
   if (ch == '\n')
