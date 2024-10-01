@@ -86,24 +86,53 @@ def get_long_type():
     return long_type
 
 
-def offset_of(typeobj: gdb.Type, field: str) -> Union[int, None]:
+def offset_of(typeobj: Union[gdb.Type, str], field: str) -> Union[int, None]:
     """Return the offset of a field in a structure"""
+    if type(typeobj) is str:
+        typeobj = gdb.lookup_type(typeobj)
+
+    if typeobj.code is gdb.TYPE_CODE_PTR:
+        typeobj = typeobj.target()
+
     for f in typeobj.fields():
         if f.name == field:
-            return f.bitpos // 8 if f.bitpos is not None else None
+            if f.bitpos is None:
+                break
+            return f.bitpos // 8
 
-    return None
+    raise gdb.GdbError(f"Field {field} not found in type {typeobj}")
 
 
 def container_of(
-    ptr: gdb.Value, typeobj: Union[gdb.Type, str], member: str
+    ptr: Union[gdb.Value, int], typeobj: Union[gdb.Type, str], member: str
 ) -> gdb.Value:
-    """Return pointer to containing data structure"""
+    """
+    Return a pointer to the containing data structure.
+
+    Args:
+        ptr: Pointer to the member.
+        t: Type of the container.
+        member: Name of the member in the container.
+
+    Returns:
+        gdb.Value of the container.
+
+    Example:
+        struct foo {
+            int a;
+            int b;
+        };
+        struct foo *ptr = container_of(&ptr->b, "struct foo", "b");
+    """
+
     if isinstance(typeobj, str):
-        typeobj = lookup_type(typeobj)
-    return gdb.Value(int(ptr.dereference().address) - offset_of(typeobj, member)).cast(
-        typeobj.pointer()
-    )
+        typeobj = gdb.lookup_type(typeobj).pointer()
+
+    if typeobj.code is not gdb.TYPE_CODE_PTR:
+        typeobj = typeobj.pointer()
+
+    addr = gdb.Value(ptr).cast(long_type)
+    return gdb.Value(addr - offset_of(typeobj, member)).cast(typeobj)
 
 
 class ContainerOf(gdb.Function):
