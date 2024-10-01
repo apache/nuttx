@@ -68,6 +68,8 @@
 void up_pthread_start(pthread_trampoline_t startup,
                       pthread_startroutine_t entrypt, pthread_addr_t arg)
 {
+  struct tcb_s *rtcb = this_task();
+
   /* Set up to enter the user-space pthread start-up function in
    * unprivileged mode. We need:
    *
@@ -78,7 +80,7 @@ void up_pthread_start(pthread_trampoline_t startup,
    */
 
   arm64_jump_to_user((uint64_t)startup, (uint64_t)entrypt, (uint64_t)arg,
-                     this_task()->xcp.initregs);
+                     (uint64_t)rtcb->xcp.ustkptr, rtcb->xcp.initregs);
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */

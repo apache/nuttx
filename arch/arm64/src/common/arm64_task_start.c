@@ -65,6 +65,8 @@
 
 void up_task_start(main_t taskentry, int argc, char *argv[])
 {
+  struct tcb_s *rtcb = this_task();
+
   /* Set up to return to the user-space _start function in
    * unprivileged mode.  We need:
    *
@@ -75,7 +77,7 @@ void up_task_start(main_t taskentry, int argc, char *argv[])
    */
 
   arm64_jump_to_user((uint64_t)taskentry, (uint64_t)argc, (uint64_t)argv,
-                     this_task()->xcp.initregs);
+                     (uint64_t)rtcb->xcp.ustkptr, rtcb->xcp.initregs);
 }
 
 #endif /* !CONFIG_BUILD_FLAT */
