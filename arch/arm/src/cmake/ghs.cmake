@@ -109,15 +109,15 @@ if(CONFIG_MM_KASAN_ALL)
 endif()
 
 if(CONFIG_MM_KASAN_GLOBAL)
-  add_compile_options(--param asan-globals=1)
+  add_compile_options(--param=asan-globals=1)
 endif()
 
 if(CONFIG_MM_KASAN_DISABLE_READS_CHECK)
-  add_compile_options(--param asan-instrument-reads=0)
+  add_compile_options(--param=asan-instrument-reads=0)
 endif()
 
 if(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK)
-  add_compile_options(--param asan-instrument-writes=0)
+  add_compile_options(--param=asan-instrument-writes=0)
 endif()
 
 # Instrumentation options
