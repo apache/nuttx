@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/serial/uart_16550.h
- * Serial driver for 16550 UART
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

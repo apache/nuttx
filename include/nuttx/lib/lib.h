@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/lib/lib.h
- * Non-standard, internal APIs available in lib/.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

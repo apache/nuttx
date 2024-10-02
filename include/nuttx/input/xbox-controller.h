@@ -1,8 +1,9 @@
 /****************************************************************************
  * include/nuttx/input/xbox-controller.h
  *
- *   Copyright (C) 2016 Brian Webb.
- *   Author: Brian Webb <webbbn@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016 Brian Webb.
+ * SPDX-FileContributor: Brian Webb <webbbn@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
