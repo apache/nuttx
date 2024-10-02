@@ -253,6 +253,26 @@ struct socket
   FAR const struct sock_intf_s *s_sockif;
 };
 
+struct socket_ctx_data_s
+{
+  uint8_t s_domain;  /* IP domain */
+  uint8_t s_type;    /* Protocol type */
+  uint8_t s_proto;   /* Socket Protocol */
+  uint8_t s_priv[0]; /* Private socket context */
+};
+
+/* NETDEV ioctl command:
+ *
+ * Command:      SIOCGETCONTEXT or SIOCSETCONTEXT
+ * Description:  Get or Set socket context.
+ */
+
+struct socket_context_s
+{
+  size_t ctx_size;               /* Size of socket context */
+  struct socket_ctx_data_s *ctx; /* Buffer where socket context is stored */
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
