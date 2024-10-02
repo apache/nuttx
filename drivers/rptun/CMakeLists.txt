@@ -22,6 +22,10 @@ if(CONFIG_RPTUN)
 
   list(APPEND SRCS rptun.c)
 
+  if(CONFIG_RPTUN_SECURE)
+    list(APPEND SRCS rptun_secure.c)
+  endif()
+
   if(CONFIG_RPTUN_IVSHMEM)
     list(APPEND SRCS rptun_ivshmem.c)
   endif()
