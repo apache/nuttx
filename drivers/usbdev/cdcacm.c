@@ -327,7 +327,7 @@ static ssize_t cdcuart_sendbuf(FAR struct uart_dev_s *dev,
 
   /* Get the maximum number of bytes that will fit into one bulk IN request */
 
-  reqlen = MAX(CONFIG_CDCACM_BULKIN_REQLEN, ep->maxpacket);
+  reqlen = MIN(CONFIG_CDCACM_BULKIN_REQLEN, ep->maxpacket);
 
   /* Peek at the request in the container at the head of the list */
 
@@ -500,7 +500,7 @@ static int cdcacm_requeue_rdrequest(FAR struct cdcacm_dev_s *priv,
   /* Requeue the read request */
 
   ep       = priv->epbulkout;
-  req->len = MAX(CONFIG_CDCACM_BULKOUT_REQLEN, ep->maxpacket);
+  req->len = MIN(CONFIG_CDCACM_BULKOUT_REQLEN, ep->maxpacket);
   ret      = EP_SUBMIT(ep, req);
   if (ret != OK)
     {
@@ -2664,7 +2664,7 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
 
   /* Get the maximum number of bytes that will fit into one bulk IN request */
 
-  reqlen = MAX(CONFIG_CDCACM_BULKIN_REQLEN, ep->maxpacket);
+  reqlen = MIN(CONFIG_CDCACM_BULKIN_REQLEN, ep->maxpacket);
 
   /* Peek at the request in the container at the head of the list */
 
