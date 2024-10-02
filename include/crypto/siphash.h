@@ -1,8 +1,9 @@
 /****************************************************************************
  * include/crypto/siphash.h
- * $OpenBSD: siphash.h,v 1.5 2015/02/20 11:51:03 tedu Exp $
  *
- * Copyright (c) 2013 Andre Oppermann <andre@FreeBSD.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013 Andre Oppermann <andre@FreeBSD.org>
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +29,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD$
  *
  ****************************************************************************/
 

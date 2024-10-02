@@ -1,11 +1,10 @@
 /****************************************************************************
  * include/crypto/sha2.h
- * $OpenBSD: sha2.h,v 1.5 2014/11/16 17:39:09 tedu Exp $
  *
- * FILE: sha2.h
- * AUTHOR: Aaron D. Gifford <me@aarongifford.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2000-2001, Aaron D. Gifford
+ * SPDX-FileContributor: Aaron D. Gifford <me@aarongifford.com>
  *
- * Copyright (c) 2000-2001, Aaron D. Gifford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +31,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $From: sha2.h,v 1.1 2001/11/08 00:02:01 adg Exp adg $
  ****************************************************************************/
 
 #ifndef __INCLUDE_CRYPTO_SHA2_H

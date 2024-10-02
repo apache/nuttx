@@ -1,20 +1,13 @@
 /****************************************************************************
  * include/nuttx/net/tcp.h
- * Header file for the NuttX TCP/IP stack.
  *
- * This TCP/IP stack header file contains definitions for a number of C
- * macros that are used by internal network structures, TCP/IP header
- * structures and function declarations.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2007, 2009-2010, 2012-2014 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
- *   Copyright (C) 2007, 2009-2010, 2012-2014 Gregory Nutt. All rights
- *      reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * This logic was leveraged from uIP which also has a BSD-style license:
- *
- *   Author Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2001-2003, Adam Dunkels.
- *   All rights reserved.
+ *  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,20 +1,17 @@
 /****************************************************************************
  * include/nuttx/net/sixlowpan.h
- * Header file for the 6lowpan implementation (RFC4944 and
- * draft-hui-6lowpan-hc-01)
  *
- *   Copyright (C) 2017, Gregory Nutt, all rights reserved
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017, Gregory Nutt, all rights reserved
+ * SPDX-FileCopyrightText: Copyright (c) 2008, Swedish Institute of Computer Science.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@sics.se>
+ * SPDX-FileContributor: Nicolas Tsiftes <nvt@sics.se>
+ * SPDX-FileContributor: Niclas Finne <nfi@sics.se>
+ * SPDX-FileContributor: Mathilde Durvy <mdurvy@cisco.com>
+ * SPDX-FileContributor: Julien Abeille <jabeille@cisco.com>
  *
- * Derives from Contiki:
- *
- *   Copyright (c) 2008, Swedish Institute of Computer Science.
  *   All rights reserved.
- *   Authors: Adam Dunkels <adam@sics.se>
- *            Nicolas Tsiftes <nvt@sics.se>
- *            Niclas Finne <nfi@sics.se>
- *            Mathilde Durvy <mdurvy@cisco.com>
- *            Julien Abeille <jabeille@cisco.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/crypto/rmd160.h
- * $OpenBSD: rmd160.h,v 1.5 2009/07/05 19:33:46 millert Exp $
  *
- * Copyright (c) 2001 Markus Friedl.  All rights reserved.
+ * SPDX-License-Identifier: BSD-2-Clause
+ * SPDX-FileCopyrightText: 2001 Markus Friedl.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

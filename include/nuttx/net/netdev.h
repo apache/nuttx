@@ -1,16 +1,10 @@
 /****************************************************************************
  * include/nuttx/net/netdev.h
- * Defines architecture-specific device driver interfaces to the NuttX
- * network.
  *
- *   Copyright (C) 2007, 2009, 2011-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derived largely from portions of uIP with has a similar BSD-styple
- * license:
- *
- *   Copyright (c) 2001-2003, Adam Dunkels.
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2007, 2009, 2011-2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

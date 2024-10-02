@@ -1,23 +1,11 @@
 /****************************************************************************
  * include/nuttx/net/netconfig.h
- * Configuration options for NuttX networking.
  *
- * This file is used for tweaking various configuration options for the
- * network. This is most assuring the correct default values are provided
- * and that configured options are valid.
- *
- * Note: Network configuration options the netconfig.h should not be changed,
- * but rather the per-project defconfig file.
- *
- *   Copyright (C) 2007, 2011, 2014-2015, 2017-2019 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * This logic was leveraged from uIP which also has a BSD-style license:
- *
- *   Author: Adam Dunkels <adam@dunkels.com>
- *   Copyright (c) 2001-2003, Adam Dunkels.
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2007, 2011, 2014-2015, 2017-2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -47,6 +35,10 @@
 
 #ifndef __INCLUDE_NUTTX_NET_NETCONFG_H
 #define __INCLUDE_NUTTX_NET_NETCONFG_H
+
+/* Note: Network configuration options the netconfig.h should not be changed,
+ * but rather the per-project defconfig file.
+ */
 
 /****************************************************************************
  * Included Files

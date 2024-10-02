@@ -1,16 +1,10 @@
 /****************************************************************************
  * include/nuttx/net/igmp.h
- * The definitions in this header file are intended only for internal use
- * by the NuttX network stack.
  *
- *   Copyright (C) 2010, 2012, 2014, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * The NuttX implementation of IGMP was inspired by the IGMP add-on for the
- * lwIP TCP/IP stack by Steve Reynolds:
- *
- *   Copyright (c) 2002 CITEL Technologies Ltd.
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2010, 2012, 2014, 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright (c) 2002 CITEL Technologies Ltd. All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

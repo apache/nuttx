@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/power/bq27426.h
- * Lower half driver for bq27426 battery fuel gauge.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

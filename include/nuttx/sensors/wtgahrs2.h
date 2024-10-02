@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/sensors/wtgahrs2.h
- * Driver for the Wit-Motion WTGAHRS2 accelerometer, gyroscope, magnetic,
- * angle, barometer, temperature, GNSS sensors by serial interface with host
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

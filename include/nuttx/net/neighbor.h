@@ -1,6 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/neighbor.h
- * Definitions for use with IPv6 Neighbor Table
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
