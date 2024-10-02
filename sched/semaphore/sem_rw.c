@@ -68,6 +68,17 @@ int down_read_trylock(FAR rw_semaphore_t *rwsem)
 {
   irqstate_t flags = spin_lock_irqsave(&rwsem->protected);
 
+  /* if the write lock is already held by oneself and since the write lock
+   * can be recursively held, so, this operation can be converted to a write
+   * lock to avoid deadlock.
+   */
+
+  if (rwsem->holder == _SCHED_GETTID())
+    {
+      rwsem->writer++;
+      goto out;
+    }
+
   if (rwsem->writer > 0)
     {
       spin_unlock_irqrestore(&rwsem->protected, flags);
@@ -80,6 +91,7 @@ int down_read_trylock(FAR rw_semaphore_t *rwsem)
 
   rwsem->reader++;
 
+out:
   spin_unlock_irqrestore(&rwsem->protected, flags);
 
   return 1;
@@ -104,6 +116,17 @@ void down_read(FAR rw_semaphore_t *rwsem)
 
   irqstate_t flags = spin_lock_irqsave(&rwsem->protected);
 
+  /* if the write lock is already held by oneself and since the write lock
+   * can be recursively held, so, this operation can be converted to a write
+   * lock to avoid deadlock.
+   */
+
+  if (rwsem->holder == _SCHED_GETTID())
+    {
+      rwsem->writer++;
+      goto out;
+    }
+
   while (rwsem->writer > 0)
     {
       rwsem->waiter++;
@@ -119,6 +142,7 @@ void down_read(FAR rw_semaphore_t *rwsem)
 
   rwsem->reader++;
 
+out:
   spin_unlock_irqrestore(&rwsem->protected, flags);
 }
 
@@ -137,6 +161,21 @@ void up_read(FAR rw_semaphore_t *rwsem)
 {
   irqstate_t flags = spin_lock_irqsave(&rwsem->protected);
 
+  /* when releasing a read lock and holder is oneself, the read lock is a
+   * write lock that has been converted, so it should be released according
+   * to the procedures for releasing a write lock.
+   */
+
+  if (rwsem->holder == _SCHED_GETTID())
+    {
+      if (--rwsem->writer <= 0)
+        {
+          rwsem->holder = RWSEM_NO_HOLDER;
+        }
+
+      goto out;
+    }
+
   DEBUGASSERT(rwsem->reader > 0);
 
   rwsem->reader--;
@@ -146,6 +185,7 @@ void up_read(FAR rw_semaphore_t *rwsem)
       up_wait(rwsem);
     }
 
+out:
   spin_unlock_irqrestore(&rwsem->protected, flags);
 }
 
