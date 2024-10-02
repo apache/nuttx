@@ -686,6 +686,10 @@ config LCD_ST7735_BGR
 	bool "Swap R & B channel"
 	default n
 
+config LCD_ST7735_INVCOLOR
+	bool "Invert display color"
+	default n
+
 config LCD_ST7735_BPP
 	int "Bit Per Pixel (12, 16 or 18)"
 	default 16
