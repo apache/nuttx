@@ -130,9 +130,6 @@ pid_t arm64_fork(const struct fork_s *context)
   uint64_t stackutil;
   char   *stack_ptr;
   struct regs_context  *pforkctx;
-#ifdef CONFIG_ARCH_FPU
-  struct fpu_reg       *pfpuctx;
-#endif
 
   /* Allocate and initialize a TCB for the child task. */
 
@@ -189,16 +186,6 @@ pid_t arm64_fork(const struct fork_s *context)
 
   stack_ptr = (char *)newsp;
 
-#ifdef CONFIG_ARCH_FPU
-  pfpuctx      = STACK_PTR_TO_FRAME(struct fpu_reg, stack_ptr);
-
-  child->cmn.xcp.fpu_regs = (uint64_t *)pfpuctx;
-  memcpy(pfpuctx, &context->fpu, sizeof(struct fpu_reg));
-
-  stack_ptr  = (char *)pfpuctx;
-
-#endif
-
   pforkctx      = STACK_PTR_TO_FRAME(struct regs_context, stack_ptr);
 
   pforkctx->regs[REG_X0]   = 0;
@@ -246,6 +233,10 @@ pid_t arm64_fork(const struct fork_s *context)
 #endif
 
   child->cmn.xcp.regs = (uint64_t *)pforkctx;
+
+#ifdef CONFIG_ARCH_FPU
+  memcpy(&pforkctx->fpu_regs, &context->fpu, sizeof(struct fpu_reg));
+#endif
 
   /* And, finally, start the child task.  On a failure, nxtask_start_fork()
    * will discard the TCB by calling nxtask_abort_fork().

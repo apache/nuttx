@@ -102,14 +102,15 @@ int arm64_syscall_save_context(uint64_t * regs)
 
 #ifdef CONFIG_ARCH_FPU
   rtcb      = (struct tcb_s *)f_regs->regs[REG_X1];
-  p_save += XCPTCONTEXT_GP_SIZE;
+  p_save += XCPTCONTEXT_GP_REGS;
   if (rtcb_cur == rtcb)
     {
       arch_save_fpucontext(p_save);
     }
   else
     {
-      p_fpu = (uint64_t *)rtcb->xcp.fpu_regs;
+      p_fpu = (uint64_t *)rtcb->xcp.regs;
+      p_fpu += XCPTCONTEXT_GP_REGS;
       for (i = 0; i < XCPTCONTEXT_FPU_REGS; i++)
         {
           p_save[i] = p_fpu[i];
