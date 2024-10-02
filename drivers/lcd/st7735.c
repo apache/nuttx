@@ -333,6 +333,21 @@ static void st7735_sleep(FAR struct st7735_dev_s *dev, bool sleep)
 }
 
 /****************************************************************************
+ * Name: st7735_invon
+ *
+ * Description:
+ *   Display inversion on or off.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LCD_ST7735_INVCOLOR
+static void st7735_invon(FAR struct st7735_dev_s *dev, bool on)
+{
+  st7735_sendcmd(dev, on ? ST7735_INVON : ST7735_INVOFF);
+}
+#endif
+
+/****************************************************************************
  * Name: st7735_display
  *
  * Description:
@@ -743,6 +758,9 @@ FAR struct lcd_dev_s *st7735_lcdinitialize(FAR struct spi_dev_s *spi)
   st7735_sleep(priv, false);
   st7735_bpp(priv, ST7735_BPP);
   st7735_setorientation(priv);
+#ifdef CONFIG_LCD_ST7735_INVCOLOR
+  st7735_invon(priv, true);
+#endif
   st7735_display(priv, true);
   st7735_fill(priv, 0xffff);
 
@@ -750,4 +768,3 @@ FAR struct lcd_dev_s *st7735_lcdinitialize(FAR struct spi_dev_s *spi)
 }
 
 #endif /* CONFIG_LCD_ST7735 */
-
