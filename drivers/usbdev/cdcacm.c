@@ -265,12 +265,18 @@ static const struct uart_ops_s g_uartops =
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   cdcuart_rxflowcontrol, /* rxflowcontrol */
 #endif
+#ifdef CONFIG_SERIAL_TXDMA
   cdcuart_dmasend,       /* dmasend */
+#endif
+#ifdef CONFIG_SERIAL_RXDMA
   cdcuart_dmareceive,    /* dmareceive */
   NULL,                  /* dmarxfree */
+#endif
+#ifdef CONFIG_SERIAL_TXDMA
   NULL,                  /* dmatxavail */
+#endif
   NULL,                  /* send */
-  cdcuart_txint,         /* txinit */
+  cdcuart_txint,         /* txint */
   cdcuart_txready,       /* txready */
   cdcuart_txempty,       /* txempty */
   cdcuart_release,       /* release */
