@@ -104,7 +104,7 @@ elseif(CONFIG_MM_KASAN_ALL)
 endif()
 
 if(CONFIG_MM_KASAN_GLOBAL)
-  add_compile_options(--param asan-globals=1)
+  add_compile_options(--param=asan-globals=1)
 endif()
 
 if(CONFIG_SIM_UBSAN)
