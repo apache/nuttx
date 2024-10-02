@@ -131,16 +131,83 @@ jobs:
         ]
 
     steps:
+
+      # Get the Arch for the PR: arm, arm64, risc-v, xtensa, ...
+      - name: Get arch
+        id: get-arch
+        run: |
+          # Get the Labels for the PR: "Arch: risc-v \n Size: XS"
+          pr=${{github.event.pull_request.number}}
+          if [[ "$pr" == "" ]]; then
+            exit
+          fi
+          numlabels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq '.[] | length')
+          labels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq '.labels[] | .name')
+
+          # Identify the Size and Arch Labels
+          if [[ "$labels" == *"Size: "* ]]; then
+            labels_contain_size=1
+          fi
+          if [[ "$labels" == *"Arch: arm"* ]]; then
+            arch_contains_arm_arm64=1
+          fi
+          if [[ "$labels" == *"Arch: risc-v"* ]]; then
+            arch_contains_riscv=1
+          fi
+          if [[ "$labels" == *"Arch: xtensa"* ]]; then
+            arch_contains_xtensa=1
+          fi
+
+          # We consider only PRs with 2 labels, including size
+          if [ $numlabels -ne 2 ] || [ $labels_contain_size -ne 1 ]; then
+            exit
+          fi
+          
+          # If "Arch: arm / arm64" is the only non-size label, then build other, arm-01, arm-02, ...
+          if [[ "$arch_contains_arm_arm64" == "1" ]]; then
+            if [[ "${{matrix.boards}}" == "arm"* ]] || [[ "${{matrix.boards}}" == "other"* ]]; then
+              echo Allow build: ${{matrix.boards}}
+            else
+              echo Skip build: ${{matrix.boards}}
+              echo "skip_build=1" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+          # If "Arch: risc-v" is the only non-size label, then build risc-v-01, risc-v-02
+          if [[ "$arch_contains_riscv" == "1" ]]; then
+            if [[ "${{matrix.boards}}" == "risc-v"* ]]; then
+              echo Allow build: ${{matrix.boards}}
+            else
+              echo Skip build: ${{matrix.boards}}
+              echo "skip_build=1" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+          # If "Arch: xtensa" is the only non-size label, then build xtensa-01, xtensa-02
+          if [[ "$arch_contains_xtensa" == "1" ]]; then
+            if [[ "${{matrix.boards}}" == "xtensa"* ]]; then
+              echo Allow build: ${{matrix.boards}}
+            else
+              echo Skip build: ${{matrix.boards}}
+              echo "skip_build=1" >> $GITHUB_OUTPUT
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download Source Artifact
+        if: ${{ steps.get-arch.outputs.skip_build != '1' }}
         uses: actions/download-artifact@v4
         with:
           name: source-bundle
           path: .
 
       - name: Extract sources
+        if: ${{ steps.get-arch.outputs.skip_build != '1' }}
         run: tar zxf sources.tar.gz
 
       - name: Docker Login
+        if: ${{ steps.get-arch.outputs.skip_build != '1' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -148,12 +215,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker Pull
+        if: ${{ steps.get-arch.outputs.skip_build != '1' }}
         run: docker pull ghcr.io/apache/nuttx/apache-nuttx-ci-linux
 
       - name: Export NuttX Repo SHA
+        if: ${{ steps.get-arch.outputs.skip_build != '1' }}
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
 
       - name: Run builds
+        if: ${{ steps.get-arch.outputs.skip_build != '1' }}
         uses: ./sources/nuttx/.github/actions/ci-container
         env:
           BLOBDIR: /tools/blobs
