@@ -434,6 +434,10 @@ uintptr_t riscv_mhartid(void);
 void *riscv_perform_syscall(uintreg_t *regs);
 #endif
 
+void riscv_jump_to_user(uintptr_t entry, uintreg_t a0, uintreg_t a1,
+                        uintreg_t a2, uintreg_t sp,
+                        uintreg_t *regs) noreturn_function;
+
 /* Context switching via system calls ***************************************/
 
 /* SYS call 1:

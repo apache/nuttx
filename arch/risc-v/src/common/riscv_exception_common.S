@@ -273,6 +273,42 @@ return_from_exception:
 
   ERET
 
+/****************************************************************************
+ * Function: riscv_jump_to_user
+ *
+ * Description:
+ *  Routine to jump to user space, called when a user process is started and
+ *  the kernel is ready to give control to the user task in user space.
+ *
+ * riscv_jump_to_user(entry, a0, a1, a2, sp, regs)
+ *     entry:  process entry point
+ *     a0:     parameter 0 for process
+ *     a1:     parameter 1 for process
+ *     a2:     parameter 2 for process
+ *     sp:     user stack pointer
+ *     regs:   integer register save area to use
+ *
+ ****************************************************************************/
+
+  .section EXCEPTION_SECTION
+  .global riscv_jump_to_user
+
+riscv_jump_to_user:
+
+  csrc     CSR_STATUS, STATUS_IE
+  mv       sp, a5
+  REGSTORE a0, REG_EPC(sp)
+  REGSTORE a1, REG_A0(sp)
+  REGSTORE a2, REG_A1(sp)
+  REGSTORE a3, REG_A2(sp)
+  REGSTORE a4, REG_SP(sp)
+  csrr     a0, CSR_STATUS
+  li       a1, ~STATUS_PPP
+  and      a0, a0, a1
+  REGSTORE a0, REG_INT_CTX(sp)
+  mv       a0, sp
+  tail return_from_exception
+
 /*****************************************************************************
  *  Name: g_intstackalloc and g_intstacktop
  ****************************************************************************/
