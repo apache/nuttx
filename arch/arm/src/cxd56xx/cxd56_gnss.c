@@ -2294,7 +2294,7 @@ cxd56_gnss_read_cep_file(struct file *fp, int32_t offset,
       if (offset + len > g_ceplen)
         {
           ret = -ENOENT;
-          goto _err0;
+          goto err0;
         }
 
       buf = &g_cepdata[offset];
