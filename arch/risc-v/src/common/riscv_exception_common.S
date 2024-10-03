@@ -250,9 +250,9 @@ return_from_exception:
   and        s0, s0, s1
   bnez       s0, 1f
 
-  /* Set the next task's kernel stack to the scratch area */
+  /* Set the unwound kernel stack to the scratch area */
 
-  jal        x1, riscv_current_ksp
+  addi       a0, sp, XCPTCONTEXT_SIZE
   csrr       s0, CSR_SCRATCH
   REGSTORE   a0, RISCV_PERCPU_KSP(s0)
 
