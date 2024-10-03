@@ -1,65 +1,9 @@
-.. warning:: this list is incomplete. See drivers/sensors for ar full list of
-             supported sensors
+.. warning:: This list is incomplete. See drivers/sensors for a full list of
+   supported sensors
 
 ==============
 Sensor Drivers
 ==============
-
-ADXL345
-=======
-
-Contributed by Alan Carvalho de Assis
-
-The ADXL345 accelerometer can operate in I2C or SPI mode. To operate in I2C
-mode just connect the CS pin to Vddi/o.
-
-In order to operate in SPI mode CS need to use connected to microcontroller,
-it cannot leave unconnected.
-
-In SPI mode it works with clock polarity (CPOL) = 1 and clock phase (CPHA)
-= 1.
-
-ADXL372
-=======
-
-Contributed by Bob Feretich
-
-The ADXL372 is a 200g tri-axis accelerometer that is capable of detecting
-and recording shock impact impact events. Recording trigger
-characteristics are programmed into the sensor via multiple threshold and
-duration registers.  The ADXL372 is a SPI only device that can transfer
-data at 10 MHz.  The data transfer performance of this part permits the
-sensor to be sampled "on demand" rather than periodically sampled by a
-worker task.
-
-See the description of the "Common Sensor Register Interface" below for more
-details. It also implements the "Sensor Cluster Driver Interface".
-
-LSM330_SPI
-==========
-
-Contributed by Bob Feretich
-
-The LSM330 consists of a multi-range tri-axis accelerometer and a
-multi-range tri-axis gyroscope. The tri-axis accelerometer features two
-state machines that can be firmware programmed for event detection. The
-tri-axis gyroscope features threshold and duration registers for event
-detection.
-
-This driver supports the LSM330 in SPI mode. In this mode, the LSM330
-that can transfer data at 10 MHz. The data transfer performance of
-this part permits the sensor to be sampled "on demand" rather than
-periodically sampled by a worker task. See the description of the "Common
-Sensor Register Interface" below for more details. It also implements the
-"Sensor Cluster Driver Interface".
-
-MPL115A
-=======
-
-Contributed by Alan Carvalho de Assis
-
-This driver has support only for MPL115A1 (SPI), but support to MPL115A2
-(I2C) can be added easily.
 
 Common Sensor Register Interface
 ================================
@@ -487,10 +431,10 @@ shared worker task that collects the data.
 The cluster driver close() function calls the close functions of the leaf
 drivers.
 
-ADT7320
-=======
+Implemented Drivers
+===================
 
-Contributed by Augusto Fraga Giachero
+.. toctree::
+    :glob:
 
-The ADT7320 is a SPI temperature sensor with a temperature range of
-−40°C to +150°C.
+    sensors/*
