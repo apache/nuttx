@@ -612,6 +612,9 @@ struct xcptcontext
   /* Integer register save area */
 
   uintreg_t *regs;
+#ifndef CONFIG_BUILD_FLAT
+  uintreg_t *initregs;
+#endif
 
 #ifdef CONFIG_LIB_SYSCALL
   /* User integer registers upon system call entry */

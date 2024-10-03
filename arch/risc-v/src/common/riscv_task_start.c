@@ -30,6 +30,8 @@
 
 #include "riscv_internal.h"
 
+#include "sched/sched.h"
+
 #ifndef CONFIG_BUILD_FLAT
 
 /****************************************************************************
@@ -63,12 +65,32 @@
 
 void up_task_start(main_t taskentry, int argc, char *argv[])
 {
-  /* Let sys_call3() do all of the work */
+  struct tcb_s *rtcb = this_task();
+  uintptr_t sp;
 
-  sys_call3(SYS_task_start, (uintptr_t)taskentry, (uintptr_t)argc,
-            (uintptr_t)argv);
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  sp = (uintreg_t)rtcb->xcp.ustkptr;
+#else
+  sp = (uintptr_t)rtcb->stack_base_ptr + rtcb->adj_stack_size;
+#endif
 
-  PANIC();
+  /* Set up to return to the user-space _start function in
+   * unprivileged mode.  We need:
+   *
+   *   A0    = argc
+   *   A1    = argv
+   *   EPC   = taskentry
+   *   M/SPP = user mode
+   */
+
+#if defined(CONFIG_BUILD_PROTECTED)
+  riscv_jump_to_user((uintptr_t)USERSPACE->task_startup,
+                     (uintptr_t)taskentry, (uintreg_t)argc, (uintreg_t)argv,
+                     sp, rtcb->xcp.initregs);
+#else
+  riscv_jump_to_user((uintptr_t)taskentry, (uintreg_t)argc, (uintreg_t)argv,
+                     0, sp, rtcb->xcp.initregs);
+#endif
 }
 
 #endif /* !CONFIG_BUILD_FLAT */

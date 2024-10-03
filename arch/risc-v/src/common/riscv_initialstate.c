@@ -169,4 +169,8 @@ void up_initial_state(struct tcb_s *tcb)
 #ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTENSIONS
   riscv_initial_extctx_state(tcb);
 #endif
+
+#ifndef CONFIG_BUILD_FLAT
+  tcb->xcp.initregs = tcb->xcp.regs;
+#endif
 }

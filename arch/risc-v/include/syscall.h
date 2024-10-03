@@ -50,7 +50,7 @@
  */
 
 #ifndef CONFIG_BUILD_FLAT
-#  define CONFIG_SYS_RESERVED 8
+#  define CONFIG_SYS_RESERVED 6
 #else
 #  define CONFIG_SYS_RESERVED 4
 #endif
@@ -78,37 +78,21 @@
 #define SYS_switch_context        (2)
 
 #ifndef CONFIG_BUILD_FLAT
+
 /* SYS call 4:
- *
- * void up_task_start(main_t taskentry, int argc, char *argv[])
- *        noreturn_function;
- */
-
-#define SYS_task_start            (4)
-
-/* SYS call 5:
- *
- * void up_pthread_start(pthread_startroutine_t startup,
- *                       pthread_startroutine_t entrypt, pthread_addr_t arg)
- *        noreturn_function
- */
-
-#define SYS_pthread_start         (5)
-
-/* SYS call 6:
  *
  * void signal_handler(_sa_sigaction_t sighand, int signo,
  *                     siginfo_t *info, void *ucontext);
  */
 
-#define SYS_signal_handler        (6)
+#define SYS_signal_handler        (4)
 
-/* SYS call 7:
+/* SYS call 5:
  *
  * void signal_handler_return(void);
  */
 
-#define SYS_signal_handler_return (7)
+#define SYS_signal_handler_return (5)
 #endif /* !CONFIG_BUILD_FLAT */
 
 /****************************************************************************
