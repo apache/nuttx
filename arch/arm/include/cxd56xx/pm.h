@@ -55,6 +55,10 @@
 #define PM_BOOT_COLD_USB_DETACH (0x40000000ul) /* In ColdSleep state, USB Disconnected */
 #define PM_BOOT_COLD_USB_ATTACH (0x80000000ul) /* In ColdSleep state, USB Connected */
 
+/* Get bootmask from GPIO IRQ number */
+
+#define PM_BOOT_GPIO_MASK(irq) (1 << ((irq) - CXD56_IRQ_EXDEVICE_0 + 16))
+
 /* SRAM power status definitions */
 
 #define PMCMD_RAM_OFF 0  /* Power off */
