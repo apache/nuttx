@@ -194,6 +194,10 @@ void up_initialize(void)
   /* Initialize the network */
 
   arm64_netinitialize();
+
+#  ifdef CONFIG_NET_CAN
+  arm64_caninitialize();
+#  endif
 #endif
 
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
