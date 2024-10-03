@@ -86,7 +86,7 @@ jobs:
           fi
 
           echo "name=$OS_REF" >> $GITHUB_OUTPUT
-          echo "app_ref=$APPS_REF" >> $GITHUB_OUTPUT
+          echo "apps_ref=$APPS_REF" >> $GITHUB_OUTPUT
 
       - name: Checkout nuttx repo
         uses: actions/checkout@v4
