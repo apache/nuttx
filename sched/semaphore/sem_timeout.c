@@ -47,7 +47,7 @@
  *   semaphore is acquired.
  *
  * Input Parameters:
- *   arg - The argument that was provided when the timeout was configured.
+ *   pid  - The task ID of the task to wakeup
  *
  * Returned Value:
  *   None
@@ -57,20 +57,26 @@
  *
  ****************************************************************************/
 
-void nxsem_timeout(wdparm_t arg)
+void nxsem_timeout(wdparm_t pid)
 {
-  FAR struct tcb_s *wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
+  FAR struct tcb_s *wtcb;
   irqstate_t flags;
 
   /* Disable interrupts to avoid race conditions */
 
   flags = enter_critical_section();
 
+  /* Get the TCB associated with this PID.  It is possible that
+   * task may no longer be active when this watchdog goes off.
+   */
+
+  wtcb = nxsched_get_tcb(pid);
+
   /* It is also possible that an interrupt/context switch beat us to the
    * punch and already changed the task's state.
    */
 
-  if (wtcb->task_state == TSTATE_WAIT_SEM)
+  if (wtcb && wtcb->task_state == TSTATE_WAIT_SEM)
     {
       /* Cancel the semaphore wait */
 

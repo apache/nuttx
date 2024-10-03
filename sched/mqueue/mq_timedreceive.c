@@ -57,7 +57,7 @@
  *   becomes non-empty.
  *
  * Input Parameters:
- *   arg - the argument provided when the timeout was configured.
+ *   pid   - the task ID of the task to wakeup
  *
  * Returned Value:
  *   None
@@ -66,9 +66,9 @@
  *
  ****************************************************************************/
 
-static void nxmq_rcvtimeout(wdparm_t arg)
+static void nxmq_rcvtimeout(wdparm_t pid)
 {
-  FAR struct tcb_s *wtcb = (FAR struct tcb_s *)(uintptr_t)arg;
+  FAR struct tcb_s *wtcb;
   irqstate_t flags;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may
@@ -77,11 +77,17 @@ static void nxmq_rcvtimeout(wdparm_t arg)
 
   flags = enter_critical_section();
 
+  /* Get the TCB associated with this pid.  It is possible that task may no
+   * longer be active when this watchdog goes off.
+   */
+
+  wtcb = nxsched_get_tcb(pid);
+
   /* It is also possible that an interrupt/context switch beat us to the
    * punch and already changed the task's state.
    */
 
-  if (wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
+  if (wtcb && wtcb->task_state == TSTATE_WAIT_MQNOTEMPTY)
     {
       /* Restart with task with a timeout error */
 
@@ -196,7 +202,8 @@ file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
 
       /* Start the watchdog */
 
-      wd_start(&rtcb->waitdog, ticks, nxmq_rcvtimeout, (wdparm_t)rtcb);
+      wd_start(&rtcb->waitdog, ticks,
+               nxmq_rcvtimeout, nxsched_gettid());
     }
 
   /* Get the message from the message queue */
