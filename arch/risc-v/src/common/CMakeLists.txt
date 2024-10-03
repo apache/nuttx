@@ -108,7 +108,7 @@ if(CONFIG_ARCH_USE_MMU)
 endif()
 
 if(CONFIG_ARCH_KERNEL_STACK)
-  list(APPEND SRCS riscv_addrenv_kstack.c riscv_ksp.c)
+  list(APPEND SRCS riscv_addrenv_kstack.c)
 endif()
 
 if(CONFIG_ARCH_ADDRENV)
