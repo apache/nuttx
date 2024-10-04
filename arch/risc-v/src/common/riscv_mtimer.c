@@ -27,8 +27,9 @@
 
 #include <arch/barriers.h>
 
-#include "riscv_mtimer.h"
 #include "riscv_internal.h"
+#include "riscv_mtimer.h"
+#include "riscv_sbi.h"
 
 /****************************************************************************
  * Private Types

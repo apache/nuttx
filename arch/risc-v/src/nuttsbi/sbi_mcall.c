@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include "riscv_internal.h"
+#include "riscv_sbi.h"
 
 #include "sbi_mcall.h"
 #include "sbi_internal.h"

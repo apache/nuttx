@@ -37,7 +37,6 @@
 
 #include <nuttx/irq.h>
 
-#include "riscv_sbi.h"
 #include "riscv_common_memorymap.h"
 
 /****************************************************************************

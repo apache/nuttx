@@ -31,6 +31,7 @@
 
 #include <debug.h>
 #include "riscv_internal.h"
+#include "riscv_sbi.h"
 #include "chip.h"
 
 #include "qemu_rv_userspace.h"
