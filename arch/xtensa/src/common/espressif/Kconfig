@@ -31,9 +31,22 @@ config ESPRESSIF_SPIFLASH
 menu "Internal Temperature Sensor Configuration"
 	depends on ESPRESSIF_TEMP
 
+config ESPRESSIF_TEMP_UORB
+	bool "Internal Temperature Sensor UORB Interface"
+	default n
+	---help---
+		Enables work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
 config ESPRESSIF_TEMP_PATH
 	string "Internal Temperature Sensor Path"
+	depends on !ESPRESSIF_TEMP_UORB
 	default "dev/temp"
+
+config ESPRESSIF_TEMP_PATH_DEVNO
+	int "Internal Temperature Sensor Path Device Number"
+	depends on ESPRESSIF_TEMP_UORB
+	default 0
 
 endmenu # ESPRESSIF_TEMP
 
