@@ -305,10 +305,20 @@ else
     endif
   endif
 
-  ARCHOPTIMIZATION += --param=min-pagesize=0
-  ifeq ($(CONFIG_ARCH_RAMFUNCS),y)
-    LDFLAGS += --no-warn-rwx-segments
-  endif
+  # Workaround to skip -Warray-bounds check due to bug of GCC-12:
+   # Wrong warning array subscript [0] is outside array bounds:
+   # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
+
+   ifeq ($(GCCVER),)
+     export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
+   endif
+
+   ifeq ($(GCCVER),12)
+     ARCHOPTIMIZATION += --param=min-pagesize=0
+     ifeq ($(CONFIG_ARCH_RAMFUNCS),y)
+       LDFLAGS += --no-warn-rwx-segments
+     endif
+   endif
 
   LDFLAGS += --entry=__start
 
