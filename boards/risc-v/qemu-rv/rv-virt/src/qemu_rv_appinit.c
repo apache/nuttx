@@ -41,6 +41,7 @@
 #include "qemu_rv_rptun.h"
 
 #include "riscv_internal.h"
+#include "riscv_sbi.h"
 #include "romfs.h"
 
 #ifdef CONFIG_USERLED
