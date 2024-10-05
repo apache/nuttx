@@ -371,13 +371,20 @@ out:
 
 void vhost_register_drivers(void)
 {
+  struct metal_init_params params = METAL_INIT_DEFAULTS;
   int ret;
+
+  ret = metal_init(&params);
+  if (ret < 0)
+    {
+      vhosterr("metal_init failed, ret=%d\n", ret);
+    }
 
 #ifdef CONFIG_DRIVERS_VHOST_RNG
   ret = vhost_register_rng_driver();
   if (ret < 0)
     {
-      vrterr("vhost_register_rng_driver failed, ret=%d\n", ret);
+      vhosterr("vhost_register_rng_driver failed, ret=%d\n", ret);
     }
 #endif
 
