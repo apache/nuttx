@@ -187,8 +187,11 @@ static int ivshmem_unregister_device(FAR struct ivshmem_device_s *dev)
    * the device unmatched
    */
 
-  dev->drv->remove(dev);
-  dev->drv = NULL;
+  if (dev->drv)
+    {
+      dev->drv->remove(dev);
+    }
+
   return ret;
 }
 
