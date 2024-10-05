@@ -52,7 +52,7 @@
 
 /* Maximum supported timeout */
 
-#define NRF53_TIMER_MAXTIMEOUT (NRF53_TIMER_MAX * 1000000 / NRF53_TIMER_PER)
+#define NRF53_TIMER_MAXTIMEOUT (NRF53_TIMER_MAX * (1000000 / NRF53_TIMER_PER))
 
 /****************************************************************************
  * Private Types
