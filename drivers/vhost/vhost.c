@@ -297,6 +297,7 @@ int vhost_register_device(FAR struct vhost_device *device)
                * matched.
                */
 
+              device->priv = driver;
               if (driver->probe(device) >= 0)
                 {
                   item->driver = driver;
