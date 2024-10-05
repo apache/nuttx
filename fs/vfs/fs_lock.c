@@ -237,7 +237,7 @@ static void file_lock_delete_bucket(FAR struct file_lock_bucket_s *bucket,
    * released
    */
 
-  if (list_is_empty(&bucket->list))
+  if (list_is_empty(&bucket->list) && bucket->nwaiter == 0)
     {
       /* At this point, the file has no lock information context, so we can
        * remove it from the hash table, and the return result is 0 or 1 means
