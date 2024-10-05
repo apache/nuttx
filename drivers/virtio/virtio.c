@@ -364,12 +364,12 @@ int virtio_unregister_device(FAR struct virtio_device *device)
         container_of(node, struct virtio_device_item_s, node);
       if (item->device == device)
         {
-          /* Call driver remove and mark item->driver NULL to indicate
-           * the device unmatched
-           */
+          /* Call driver remove */
 
-          item->driver->remove(device);
-          item->driver = NULL;
+          if (item->driver)
+            {
+              item->driver->remove(device);
+            }
 
           /* Remove the device from the device list and free memory */
 
