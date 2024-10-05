@@ -30,39 +30,16 @@
 #include <netinet/if_ether.h>
 #include <nuttx/net/netdev_lowerhalf.h>
 
-#if defined(CONFIG_ESP32_OPENETH)
-#include "hardware/esp32_soc.h"
-#include "esp32_irq.h"
-#elif defined(CONFIG_ESP32S3_OPENETH)
-#include "hardware/esp32s3_soc.h"
-#include "esp32s3_irq.h"
-#endif
+#include <chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32_OPENETH)
-#define OPENETH_PERIPH_MAC ESP32_PERIPH_EMAC
-#define OPENETH_CPUINT_LEVEL ESP32_CPUINT_LEVEL
-#define OPENETH_IRQ_MAC ESP32_IRQ_EMAC
-#define OPENETH_SETUP_IRQ esp32_setup_irq
-#elif defined(CONFIG_ESP32S3_OPENETH)
-#define OPENETH_PERIPH_MAC ESP32S3_PERIPH_MAC
-#define OPENETH_CPUINT_LEVEL ESP32S3_CPUINT_LEVEL
-#define OPENETH_IRQ_MAC ESP32S3_IRQ_MAC
-#define OPENETH_SETUP_IRQ esp32s3_setup_irq
-#endif
-
 /* These are the register definitions for the OpenCores Ethernet MAC. */
 
 /* DMA buffers configuration */
 #define DMA_BUF_SIZE 1600
-#if defined(CONFIG_ESP32_OPENETH)
-#define RX_BUF_COUNT CONFIG_ESP32_OPENETH_DMA_RX_BUFFER_NUM
-#elif defined(CONFIG_ESP32S3_OPENETH)
-#define RX_BUF_COUNT CONFIG_ESP32S3_OPENETH_DMA_RX_BUFFER_NUM
-#endif
 
 /* Only need 1 TX buf because packets are transmitted immediately */
 #define TX_BUF_COUNT 1
@@ -482,8 +459,9 @@ int xtensa_openeth_initialize(void)
 
   if (REG_READ(OPENETH_MODER_REG) != OPENETH_MODER_DEFAULT)
     {
-      nerr("CONFIG_ESP32_OPENETH should only be used when running in QEMU.");
-      nerr("When running the app on the ESP32, use ESP32 EMAC instead.");
+      nerr("Openeth should only be used when running in QEMU.");
+      nerr("When running the app on the real hardware,"
+           "use the real MAC instead.");
       abort();
     }
 
