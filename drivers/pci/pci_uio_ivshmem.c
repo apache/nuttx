@@ -483,13 +483,8 @@ static int uio_ivshmem_probe(FAR struct ivshmem_device_s *dev)
   if (ret < 0)
     {
       pcierr("ERROR: Ivshmem register_driver failed, ret=%d\n", ret);
-      goto err;
     }
 
-  return ret;
-
-err:
-  ivshmem_unregister_driver(&udev->drv);
   return ret;
 }
 
@@ -503,7 +498,6 @@ static void uio_ivshmem_remove(FAR struct ivshmem_device_s *dev)
 
   unregister_driver(udev->name);
   ivshmem_detach_irq(dev);
-  kmm_free(udev);
 }
 
 /****************************************************************************
