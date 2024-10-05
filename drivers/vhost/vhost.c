@@ -181,7 +181,7 @@ int vhost_register_driver(FAR struct vhost_driver *driver)
   list_for_every_entry(&g_vhost_bus.device, item, struct vhost_device_item_s,
                        node)
     {
-      if (driver->device == item->device->id.device)
+      if (item->driver == NULL && driver->device == item->device->id.device)
         {
           /* If found the device in the device list, call driver probe,
            * if probe success, assign item->driver to indicate the device
