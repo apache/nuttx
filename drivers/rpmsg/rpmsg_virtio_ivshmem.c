@@ -289,7 +289,7 @@ static int rpmsg_virtio_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
   ret = rpmsg_virtio_initialize(&priv->dev);
   if (ret < 0)
     {
-      pcierr("Rpmsg virtio intialize failed, ret=%d\n", ret);
+      rpmsgerr("Rpmsg virtio intialize failed, ret=%d\n", ret);
       goto err;
     }
 
@@ -299,14 +299,14 @@ static int rpmsg_virtio_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
                      rpmsg_virtio_ivshmem_wdog, (wdparm_t)priv);
       if (ret < 0)
         {
-          pcierr("ERROR: wd_start failed: %d\n", ret);
+          rpmsgerr("ERROR: wd_start failed: %d\n", ret);
+          goto err;
         }
     }
 
   return ret;
 
 err:
-  ivshmem_unregister_driver(&priv->drv);
   ivshmem_control_irq(ivdev, false);
   ivshmem_detach_irq(ivdev);
   return ret;
@@ -328,7 +328,6 @@ static void rpmsg_virtio_ivshmem_remove(FAR struct ivshmem_device_s *ivdev)
 
   ivshmem_control_irq(ivdev, false);
   ivshmem_detach_irq(ivdev);
-  kmm_free(priv);
 }
 
 /****************************************************************************
