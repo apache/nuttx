@@ -151,25 +151,6 @@ static void vhost_defered_probe_work(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: vhost_remove_device
- ****************************************************************************/
-
-static void vhost_remove_device(FAR struct vhost_device_item_s *item)
-{
-  /* Call driver remove and mark item->driver NULL to indicate
-   * the device unmatched.
-   */
-
-  item->driver->remove(item->device);
-  item->driver = NULL;
-
-  /* Remove the device from the device list and free memory */
-
-  list_delete(&item->node);
-  kmm_free(item);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -352,7 +333,17 @@ int vhost_unregister_device(FAR struct vhost_device *device)
     {
       if (item->device == device)
         {
-          vhost_remove_device(item);
+          /* Call driver remove */
+
+          if (item->driver)
+            {
+              item->driver->remove(item->device);
+            }
+
+          /* Remove the device from the device list and free memory */
+
+          list_delete(&item->node);
+          kmm_free(item);
           goto out;
         }
     }
@@ -362,7 +353,8 @@ int vhost_unregister_device(FAR struct vhost_device *device)
     {
       if (item->device == device)
         {
-          vhost_remove_device(item);
+          list_delete(&item->node);
+          kmm_free(item);
           goto out;
         }
     }
