@@ -1035,7 +1035,7 @@ static int smartfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
       default:
-        ret = -ENOSYS;
+        ret = -ENOTTY;
         break;
     }
 
