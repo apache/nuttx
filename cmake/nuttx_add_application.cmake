@@ -130,6 +130,16 @@ function(nuttx_add_application)
 
       nuttx_add_library_internal(${TARGET})
 
+      # loadable build requires applying ELF flags to all applications
+
+      if(CONFIG_MODULES)
+        target_compile_options(
+          ${TARGET}
+          PRIVATE
+            $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_ELF_APP_COMPILE_OPTIONS>>
+        )
+      endif()
+
       install(TARGETS ${TARGET})
       set_property(
         TARGET nuttx
@@ -155,14 +165,6 @@ function(nuttx_add_application)
       endif()
     endif()
 
-    # loadable build requires applying ELF flags to all applications
-
-    if(CONFIG_MODULES)
-      target_compile_options(
-        ${TARGET}
-        PRIVATE
-          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx,NUTTX_ELF_APP_COMPILE_OPTIONS>>)
-    endif()
   else()
     set(TARGET "apps_${NAME}")
     add_custom_target(${TARGET})
