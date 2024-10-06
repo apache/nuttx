@@ -921,8 +921,7 @@ static int bcmf_ioctl(FAR struct net_driver_s *dev, int cmd,
 
   if (!priv->bc_bifup)
     {
-      wlerr("ERROR: invalid state "
-            "(IFF_DOWN, unable to execute command: %x)\n", cmd);
+      wlerr("ERROR: invalid state (unable to execute command: %x)\n", cmd);
       return -EPERM;
     }
 
