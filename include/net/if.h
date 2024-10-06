@@ -48,7 +48,6 @@
 
 /* Interface flag bits */
 
-#define IFF_DOWN           (1 << 0)  /* Interface is down */
 #define IFF_UP             (1 << 1)  /* Interface is up */
 #define IFF_RUNNING        (1 << 2)  /* Carrier is available */
 #define IFF_IPv6           (1 << 3)  /* Configured for IPv6 packet (vs ARP or IPv4) */
