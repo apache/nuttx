@@ -8,6 +8,7 @@
 config LIBC_DLFCN
 	bool "Shared library support"
 	default n
+	select MODULES
 	select LIBC_MODLIB if !BUILD_FLAT
 	select MODULE if BUILD_FLAT
 	---help---
