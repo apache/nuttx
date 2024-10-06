@@ -316,7 +316,7 @@ int s32k3xx_tja1153_initialize(int bus)
 
   /* Bring down the interface */
 
-  ifr.ifr_flags = IFF_DOWN;
+  ifr.ifr_flags = 0;
   ret = ioctl(sock, SIOCSIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
