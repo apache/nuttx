@@ -1313,6 +1313,7 @@ int tun_initialize(void)
 {
   g_tun.free_tuns = (1 << CONFIG_TUN_NINTERFACES) - 1;
   register_driver("/dev/tun", &g_tun_file_ops, 0644, &g_tun);
+  register_driver("/dev/net/tun", &g_tun_file_ops, 0644, &g_tun);
   return OK;
 }
 
