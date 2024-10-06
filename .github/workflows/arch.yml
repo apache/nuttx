@@ -1,0 +1,160 @@
+# Identify the Arch for the PR and select the applicable builds
+name: Arch
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: "Operating System hosting the build: Linux, macOS or msys2"
+        required: true
+        type: string
+      boards:
+        description: "List of All Builds: [arm-01, risc-v-01, xtensa-01, ...]"
+        required: true
+        type: string
+    outputs:
+      skip_all_builds:
+        description: "Set to 1 if all builds should be skipped"
+        value: ${{ jobs.Select-Builds.outputs.skip_all_builds }}
+      selected_builds:
+        description: "Selected Builds for the PR: [arm-01, risc-v-01, xtensa-01, ...]"
+        value: ${{ jobs.Select-Builds.outputs.selected_builds }}
+
+jobs:
+  Select-Builds:
+    runs-on: ubuntu-latest
+
+    outputs:
+      skip_all_builds: ${{ steps.select-builds.outputs.skip_all_builds }}
+      selected_builds: ${{ steps.select-builds.outputs.selected_builds }}
+
+    steps:
+
+      # Get the Arch for the PR: arm, arm64, risc-v, xtensa, ...
+      - name: Get arch
+        id: get-arch
+        run: |        
+
+          # If PR is Not Created or Modified: Build all targets
+          pr=${{github.event.pull_request.number}}
+          if [[ "$pr" == "" ]]; then
+            exit
+          fi
+
+          # Get the Labels for the PR: "Arch: risc-v \n Size: XS"
+          # If GitHub CLI Fails: Build all targets
+          labels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq '.labels[] | .name' || echo "")
+          numlabels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq '.[] | length' || echo "")
+          echo "numlabels=$numlabels" | tee -a $GITHUB_OUTPUT
+
+          # Identify the Size and Arch Labels
+          if [[ "$labels" == *"Size: "* ]]; then
+            echo 'labels_contain_size=1' | tee -a $GITHUB_OUTPUT
+          fi
+          if [[ "$labels" == *"Arch: arm64"* ]]; then
+            echo 'arch_contains_arm64=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: arm"* ]]; then
+            echo 'arch_contains_arm=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: risc-v"* ]]; then
+            echo 'arch_contains_riscv=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: simulator"* ]]; then
+            echo 'arch_contains_sim=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: x86_64"* ]]; then
+            echo 'arch_contains_x86_64=1' | tee -a $GITHUB_OUTPUT
+          elif [[ "$labels" == *"Arch: xtensa"* ]]; then
+            echo 'arch_contains_xtensa=1' | tee -a $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Select the Builds for the PR: arm-01, risc-v-01, xtensa-01, ...
+      - name: Select builds
+        id: select-builds
+        run: |
+
+          # Fetch the outputs from the previous step
+          arch_contains_arm=${{ steps.get-arch.outputs.arch_contains_arm }}
+          arch_contains_arm64=${{ steps.get-arch.outputs.arch_contains_arm64 }}
+          arch_contains_riscv=${{ steps.get-arch.outputs.arch_contains_riscv }}
+          arch_contains_sim=${{ steps.get-arch.outputs.arch_contains_sim }}
+          arch_contains_x86_64=${{ steps.get-arch.outputs.arch_contains_x86_64 }}
+          arch_contains_xtensa=${{ steps.get-arch.outputs.arch_contains_xtensa }}
+          labels_contain_size=${{ steps.get-arch.outputs.labels_contain_size }}
+          numlabels=${{ steps.get-arch.outputs.numlabels }}
+
+          # inputs.boards is a JSON Array: ["arm-01", "risc-v-01", "xtensa-01", ...]
+          # We compact and remove the newlines
+          boards=$( echo '${{ inputs.boards }}' | jq --compact-output ".")
+          numboards=$( echo "$boards" | jq "length" )
+
+          # We consider only PRs with 2 labels, including size
+          if [[ "$numlabels" != "2" || "$labels_contain_size" != "1" ]]; then
+            echo "selected_builds=$boards" | tee -a $GITHUB_OUTPUT
+            exit
+          fi
+
+          # For every board
+          for (( i=0; i<numboards; i++ ))
+          do
+            # Fetch the board
+            board=$( echo "$boards" | jq ".[$i]" )
+            skip_build=0
+            
+            # For "Arch: arm": Build arm-01, arm-02, ...
+            if [[ "$arch_contains_arm" == "1" ]]; then
+              if [[ "$board" != *"arm"* ]]; then
+                skip_build=1
+              fi
+
+            # For "Arch: arm64": Build other
+            elif [[ "$arch_contains_arm64" == "1" ]]; then
+              if [[ "$board" != *"other"* ]]; then
+                skip_build=1
+              fi
+
+            # For "Arch: risc-v": Build risc-v-01, risc-v-02
+            elif [[ "$arch_contains_riscv" == "1" ]]; then
+              if [[ "$board" != *"risc-v"* ]]; then
+                skip_build=1
+              fi
+  
+            # For "Arch: simulator": Build sim-01, sim-02
+            elif [[ "$arch_contains_sim" == "1" ]]; then
+              if [[ "$board" != *"sim"* ]]; then
+                skip_build=1
+              fi
+
+            # For "Arch: x86_64": Build other
+            elif [[ "$arch_contains_x86_64" == "1" ]]; then
+              if [[ "$board" != *"other"* ]]; then
+                skip_build=1
+              fi
+  
+            # For "Arch: xtensa": Build xtensa-01, xtensa-02
+            elif [[ "$arch_contains_xtensa" == "1" ]]; then
+              if [[ "$board" != *"xtensa"* ]]; then
+                skip_build=1
+              fi
+  
+            # For Other Arch: Allow the build
+            else
+              echo Build by default: $board
+            fi
+  
+            # Add the board to the selected builds
+            if [[ "$skip_build" == "0" ]]; then
+              echo Add $board to selected_builds
+              if [[ "$selected_builds" == "" ]]; then
+                selected_builds=$board
+              else
+                selected_builds=$selected_builds,$board
+              fi
+            fi
+          done
+
+          # Return the selected builds as JSON Array
+          # If Selected Builds is empty: Skip all builds
+          echo "selected_builds=[$selected_builds]" | tee -a $GITHUB_OUTPUT
+          if [[ "$selected_builds" == "" ]]; then
+            echo "skip_all_builds=1" | tee -a $GITHUB_OUTPUT
+          fi
