@@ -32,8 +32,10 @@
  * Macro Definitions
  ****************************************************************************/
 
-/* GNU libstdc++ is expecting ctype.h to define a few macros for
- * locale related functions like C++ streams.
+#if defined(_MSC_VER)
+
+/* MSVC seems to conflict with theses macro if defined in the public area.
+ * As such, they are defined in the private section to let NuttX build
  */
 
 #define _U  01
@@ -44,6 +46,8 @@
 #define _C  040
 #define _X  0100
 #define _B  0200
+
+#endif
 
 /****************************************************************************
  * Private Types
