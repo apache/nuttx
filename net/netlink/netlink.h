@@ -81,7 +81,7 @@
       FAR struct netlink_ext_ack *__extack = (extack); \
       if (__extack)                                    \
         {                                              \
-          __extack->msg = __msg;                       \
+          __extack->_msg = __msg;                      \
           __extack->bad_attr = (attr);                 \
         }                                              \
     }                                                  \
@@ -229,7 +229,7 @@ enum
 };
 
 /* struct netlink_ext_ack - netlink extended ACK report struct
- * msg: message string to report - don't access directly, use
+ * _msg: message string to report - don't access directly, use
  *  nl_set_err_msg_attr
  * bad_attr: attribute with error
  * cookie: cookie data to return to userspace (for success)
@@ -238,7 +238,7 @@ enum
 
 struct netlink_ext_ack
 {
-  FAR const char *msg;
+  FAR const char *_msg;
   FAR const struct nlattr *bad_attr;
   uint8_t cookie[NETLINK_MAX_COOKIE_LEN];
   uint8_t cookie_len;
