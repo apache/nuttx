@@ -80,13 +80,29 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
  *
  ****************************************************************************/
 
-void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
+void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
+                  bool delay, bool cleanup)
 {
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
   size_t nodesize;
   size_t prevsize;
+
+  if (cleanup)
+    {
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+      memset(mem, MM_FREE_MAGIC, mm_malloc_size(heap, mem));
+#endif
+
+      kasan_poison(mem, mm_malloc_size(heap, mem));
+    }
+
+  if (delay)
+    {
+      add_delaylist(heap, mem);
+      return;
+    }
 
   if (mm_lock(heap) < 0)
     {
@@ -95,19 +111,6 @@ void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay)
        * Then add to the delay list.
        */
 
-      add_delaylist(heap, mem);
-      return;
-    }
-
-#ifdef CONFIG_MM_FILL_ALLOCATIONS
-  memset(mem, MM_FREE_MAGIC, mm_malloc_size(heap, mem));
-#endif
-
-  kasan_poison(mem, mm_malloc_size(heap, mem));
-
-  if (delay)
-    {
-      mm_unlock(heap);
       add_delaylist(heap, mem);
       return;
     }
@@ -237,5 +240,5 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     }
 #endif
 
-  mm_delayfree(heap, mem, CONFIG_MM_FREE_DELAYCOUNT_MAX > 0);
+  mm_delayfree(heap, mem, CONFIG_MM_FREE_DELAYCOUNT_MAX > 0, true);
 }

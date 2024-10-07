@@ -308,6 +308,7 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 
 /* Functions contained in mm_free.c *****************************************/
 
-void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem, bool delay);
+void mm_delayfree(FAR struct mm_heap_s *heap, FAR void *mem,
+                  bool delay, bool cleanup);
 
 #endif /* __MM_MM_HEAP_MM_H */

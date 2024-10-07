@@ -101,7 +101,7 @@ static bool free_delaylist(FAR struct mm_heap_s *heap, bool force)
        * 'while' condition above.
        */
 
-      mm_delayfree(heap, address, false);
+      mm_delayfree(heap, address, false, false);
     }
 
 #endif
