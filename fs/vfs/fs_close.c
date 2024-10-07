@@ -37,6 +37,33 @@
 #include "vfs/lock.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_NOTIFY
+static FAR char *file_get_path(FAR struct file *filep)
+{
+  FAR char *pathbuffer;
+  int ret;
+
+  pathbuffer = lib_get_pathbuffer();
+  if (pathbuffer == NULL)
+    {
+      return NULL;
+    }
+
+  ret = file_fcntl(filep, F_GETPATH, pathbuffer);
+  if (ret < 0)
+    {
+      lib_put_pathbuffer(pathbuffer);
+      return NULL;
+    }
+
+  return pathbuffer;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -60,10 +87,21 @@
 int file_close_without_clear(FAR struct file *filep)
 {
   struct inode *inode;
+#ifdef CONFIG_FS_NOTIFY
+  FAR char *path;
+#endif
   int ret = OK;
 
   DEBUGASSERT(filep != NULL);
   inode = filep->f_inode;
+
+#ifdef CONFIG_FS_NOTIFY
+  /* We lose the path and inode during close and release, so obtain it
+   * in advance. Then we pass it to notify_close function.
+   */
+
+  path = file_get_path(filep);
+#endif
 
   /* Check if the struct file is open (i.e., assigned an inode) */
 
@@ -84,6 +122,14 @@ int file_close_without_clear(FAR struct file *filep)
 
       if (ret >= 0)
         {
+#ifdef CONFIG_FS_NOTIFY
+          if (path != NULL)
+            {
+              notify_close(path, filep->f_oflags);
+              lib_put_pathbuffer(path);
+            }
+#endif
+
           inode_release(inode);
         }
     }

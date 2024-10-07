@@ -1342,15 +1342,15 @@ void notify_open(FAR const char *path, int oflags)
  *
  ****************************************************************************/
 
-void notify_close(FAR struct file *filep)
+void notify_close(FAR const char *path, int oflags)
 {
-  if (filep->f_oflags & O_WROK)
+  if (oflags & O_WROK)
     {
-      notify_queue_filep_event(filep, IN_CLOSE_WRITE);
+      notify_queue_path_event(path, IN_CLOSE_WRITE);
     }
   else
     {
-      notify_queue_filep_event(filep, IN_CLOSE_NOWRITE);
+      notify_queue_path_event(path, IN_CLOSE_NOWRITE);
     }
 }
 
