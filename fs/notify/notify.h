@@ -42,7 +42,7 @@
 /* These are internal OS interface and are not available to applications */
 
 void notify_open(FAR const char *path, int oflags);
-void notify_close(FAR struct file *filep);
+void notify_close(FAR const char *path, int oflags);
 void notify_close2(FAR struct inode *inode);
 void notify_read(FAR struct file *filep);
 void notify_write(FAR struct file *filep);
