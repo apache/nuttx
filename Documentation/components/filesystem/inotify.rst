@@ -90,11 +90,15 @@ calling inotify_add_watch and  may  be returned in the mask field returned by re
 
   **IN_ACCESS** :File was accessed
 
-  **IN_MODIFY** :File was modified
+  **IN_MODIFY** :File was modified (``write()`` or ``truncate()``)
 
   **IN_ATTRIB** :Metadata changed
 
   **IN_OPEN** :File was opened
+
+  **IN_CLOSE_WRITE** :File opened for writing was closed
+
+  **IN_CLOSE_NOWRITE** : File not opened for writing was closed
 
   **IN_MOVED_FROM** :File was moved from X
 
