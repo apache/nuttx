@@ -75,6 +75,26 @@
 static bool spiram_inited = false;
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pause_cpu_handler
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static volatile bool g_cpu_wait = true;
+static volatile bool g_cpu_pause = false;
+static int pause_cpu_handler(FAR void *cookie)
+{
+  g_cpu_pause = true;
+  while (g_cpu_wait);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -183,7 +203,10 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
   if (os_ready)
     {
       cpu_to_stop = this_cpu() == 1 ? 0 : 1;
-      up_cpu_pause(cpu_to_stop);
+      g_cpu_wait  = true;
+      g_cpu_pause = false;
+      nxsched_smp_call_single(cpu_to_stop, pause_cpu_handler, NULL, false);
+      while (!g_cpu_pause);
     }
 
   spi_disable_cache(1);
@@ -221,7 +244,7 @@ unsigned int IRAM_ATTR cache_sram_mmu_set(int cpu_no, int pid,
 
   if (os_ready)
     {
-      up_cpu_resume(cpu_to_stop);
+      g_cpu_wait = false;
     }
 #endif
 
