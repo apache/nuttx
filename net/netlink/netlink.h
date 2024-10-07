@@ -81,7 +81,7 @@
       FAR struct netlink_ext_ack *__extack = (extack); \
       if (__extack)                                    \
         {                                              \
-          __extack->_msg = __msg;                      \
+          __extack->msg = __msg;                       \
           __extack->bad_attr = (attr);                 \
         }                                              \
     }                                                  \
@@ -110,10 +110,10 @@
  * remaining: number of bytes remaining in attribute stream
  */
 
-#define nla_ok(nla, remaining)        \
-  ((remaining) >= sizeof(*(nla)) &&   \
-  (nla)->nla_len >= sizeof(*(nla)) && \
-  (nla)->nla_len <= (remaining))
+#define nla_ok(nla, remaining)         \
+  ((remaining) >= sizeof(*(nla)) &&    \
+   (nla)->nla_len >= sizeof(*(nla)) && \
+   (nla)->nla_len <= (remaining))
 
 /* nlmsg_msg_size - length of netlink message not including padding
  * payload: length of message payload
@@ -229,7 +229,7 @@ enum
 };
 
 /* struct netlink_ext_ack - netlink extended ACK report struct
- * _msg: message string to report - don't access directly, use
+ * msg: message string to report - don't access directly, use
  *  nl_set_err_msg_attr
  * bad_attr: attribute with error
  * cookie: cookie data to return to userspace (for success)
@@ -238,7 +238,7 @@ enum
 
 struct netlink_ext_ack
 {
-  FAR const char *_msg;
+  FAR const char *msg;
   FAR const struct nlattr *bad_attr;
   uint8_t cookie[NETLINK_MAX_COOKIE_LEN];
   uint8_t cookie_len;

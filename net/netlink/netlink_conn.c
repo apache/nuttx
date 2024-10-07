@@ -55,7 +55,7 @@
 
 #if CONFIG_NETLINK_PREALLOC_CONNS > 0
 static struct netlink_conn_s
-       g_netlink_connections[CONFIG_NETLINK_PREALLOC_CONNS];
+g_netlink_connections[CONFIG_NETLINK_PREALLOC_CONNS];
 #endif
 
 /* A list of all free NetLink connections */
