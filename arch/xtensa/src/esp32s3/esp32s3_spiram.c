@@ -264,6 +264,22 @@ static int IRAM_ATTR esp_mmu_map_region(uint32_t vaddr, uint32_t paddr,
 }
 
 /****************************************************************************
+ * Name: pause_cpu_handler
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static volatile bool g_cpu_wait = true;
+static volatile bool g_cpu_pause = false;
+static int pause_cpu_handler(FAR void *cookie)
+{
+  g_cpu_pause = true;
+  while (g_cpu_wait);
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -309,7 +325,10 @@ int IRAM_ATTR cache_dbus_mmu_map(int vaddr, int paddr, int num)
 
   if (smp_start)
     {
-      up_cpu_pause(other_cpu);
+      g_cpu_wait  = true;
+      g_cpu_pause = false;
+      nxsched_smp_call_single(other_cpu, pause_cpu_handler, NULL, false);
+      while (!g_cpu_pause);
     }
 
   cache_state[other_cpu] = cache_suspend_dcache();
@@ -336,7 +355,7 @@ int IRAM_ATTR cache_dbus_mmu_map(int vaddr, int paddr, int num)
   cache_resume_dcache(cache_state[other_cpu]);
   if (smp_start)
     {
-      up_cpu_resume(other_cpu);
+      g_cpu_wait = false;
     }
 #endif
 
