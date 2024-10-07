@@ -43,6 +43,7 @@
 #include <nuttx/can/can.h>
 #include <nuttx/signal.h>
 #include <nuttx/arch.h>
+#include <nuttx/kthread.h>
 #ifdef CONFIG_ESPRESSIF_TEMP_UORB
 #include <nuttx/sensors/sensor.h>
 #endif
@@ -96,6 +97,10 @@ struct esp_temp_priv_s
 #ifdef CONFIG_ESPRESSIF_TEMP_UORB
   struct sensor_lowerhalf_s lower;                       /* Lower half sensor driver. */
   uint32_t interval;                                     /* Sensor acquisition interval. */
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+  bool                       enabled;
+  sem_t                      run;
+#endif
 #endif
   /* Temperature sensor work state (see enum esp_tempstate_e) */
 
@@ -131,9 +136,11 @@ static int esp_temperature_sensor_activate(
   struct sensor_lowerhalf_s *lower,
   struct file *filep,
   bool enable);
+#ifndef CONFIG_ESPRESSIF_TEMP_UORB_POLL
 static int esp_temperature_sensor_fetch(struct sensor_lowerhalf_s *lower,
                                         struct file *filep,
                                         char *buffer, size_t buflen);
+#endif
 #else
 static int esp_temperature_sensor_read(struct file *filep,
                                        char *buffer,
@@ -158,7 +165,9 @@ static const struct file_operations g_esp_temp_sensor_fops =
 static const struct sensor_ops_s g_esp_temp_sensor_sops =
 {
   .activate     = esp_temperature_sensor_activate,     /* Enable/disable sensor. */
+#ifndef CONFIG_ESPRESSIF_TEMP_UORB_POLL
   .fetch        = esp_temperature_sensor_fetch,
+#endif
   .set_interval = esp_temperature_sensor_set_interval, /* Set output data period. */
 };
 #endif /* CONFIG_ESPRESSIF_TEMP_UORB */
@@ -559,6 +568,7 @@ static int esp_temperature_sensor_read(struct file *filep,
   return esp_temperature_sensor_get_celsius(priv, (int *)buffer);
 }
 #else
+#ifndef CONFIG_ESPRESSIF_TEMP_UORB_POLL
 static int esp_temperature_sensor_fetch(struct sensor_lowerhalf_s *lower,
                                         struct file *filep,
                                         char *buffer, size_t buflen)
@@ -585,6 +595,64 @@ static int esp_temperature_sensor_fetch(struct sensor_lowerhalf_s *lower,
 
   return buflen;
 }
+#endif /* CONFIG_ESPRESSIF_TEMP_UORB_POLL */
+
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+/****************************************************************************
+ * Name: esp_temperature_sensor_thread
+ *
+ * Description:
+ *   Thread for performing interval measurement read.
+ *
+ * Parameter:
+ *   argc - Number opf arguments
+ *   argv - Pointer to argument list
+ *
+ ****************************************************************************/
+
+static int esp_temperature_sensor_thread(int argc, FAR char **argv)
+{
+  struct esp_temp_priv_s *priv =
+      (struct esp_temp_priv_s *)((uintptr_t)strtoul(argv[1], NULL, 16));
+  struct sensor_temp temp;
+  uint8_t data[8];
+  int ret;
+  float val = 0.0;
+
+  while (true)
+    {
+      if ((!priv->enabled))
+        {
+          /* Waiting to be woken up */
+
+          ret = nxsem_wait(&priv->run);
+          if (ret < 0)
+            {
+              continue;
+            }
+        }
+
+      /* Read sensor */
+
+      if (priv->enabled)
+        {
+          esp_temperature_sensor_get_celsius(priv, (int *)&val);
+          sninfo("temp = %d\n", (int)val);
+
+          temp.timestamp = sensor_get_timestamp();
+          temp.temperature = (int)val;
+
+          priv->lower.push_event(priv->lower.priv, &temp, sizeof(temp));
+        }
+
+      /* Sleeping thread before fetching the next sensor data */
+
+      nxsig_usleep(priv->interval);
+    }
+
+  return OK;
+}
+#endif /* CONFIG_ESPRESSIF_TEMP_UORB_POLL */
 
 /****************************************************************************
  * Name: esp_temperature_sensor_set_interval
@@ -650,12 +718,22 @@ static int esp_temperature_sensor_activate(
   bool enable)
 {
   struct esp_temp_priv_s *priv = (struct esp_temp_priv_s *)lower;
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+  bool start_thread = false;
+#endif
 
   /* Set accel output data rate. */
 
   if (enable)
     {
-        esp_temperature_sensor_enable(priv);
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+      if (!priv->enabled)
+        {
+          start_thread = true;
+        }
+#endif
+
+      esp_temperature_sensor_enable(priv);
     }
   else
     {
@@ -663,6 +741,17 @@ static int esp_temperature_sensor_activate(
 
         esp_temperature_sensor_disable(priv);
     }
+
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+  priv->enabled = enable;
+
+  if (start_thread)
+    {
+      /* Wake up the thread */
+
+      nxsem_post(&priv->run);
+    }
+#endif
 
   return OK;
 }
@@ -691,6 +780,10 @@ int esp_temperature_sensor_initialize(struct esp_temp_sensor_config_t cfg)
 {
   int ret = 0;
   struct esp_temp_priv_s *priv = &esp_temp_priv;
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+  FAR char *argv[2];
+  char arg1[32];
+#endif
 
   nxmutex_lock(&priv->lock);
 
@@ -715,12 +808,37 @@ int esp_temperature_sensor_initialize(struct esp_temp_sensor_config_t cfg)
   priv->lower.ops = &g_esp_temp_sensor_sops;
   priv->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
   priv->interval = ESP_TEMP_MIN_INTERVAL;
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+  priv->enabled = false;
+  priv->interval = CONFIG_ESPRESSIF_TEMP_UORB_POLL_INTERVAL;
+
+  nxsem_init(&priv->run, 0, 0);
+#endif
 #endif
 
   esp_temp_sensor_register(priv);
   nxmutex_unlock(&priv->lock);
 
   sninfo("Temperature sensor initialized! Handler: %p\n", priv);
+
+#ifdef CONFIG_ESPRESSIF_TEMP_UORB_POLL
+  /* Create thread for polling sensor data */
+
+  snprintf(arg1, 16, "%p", priv);
+  argv[0] = arg1;
+  argv[1] = NULL;
+
+  ret = kthread_create("esp_temperature_sensor_thread",
+                       SCHED_PRIORITY_DEFAULT,
+                       CONFIG_ESPRESSIF_TEMP_THREAD_STACKSIZE,
+                       esp_temperature_sensor_thread,
+                       argv);
+  if (ret < 0)
+    {
+      kmm_free(priv);
+      return ret;
+    }
+#endif
 
   return OK;
 }

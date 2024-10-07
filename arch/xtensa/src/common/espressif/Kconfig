@@ -48,6 +48,28 @@ config ESPRESSIF_TEMP_PATH_DEVNO
 	depends on ESPRESSIF_TEMP_UORB
 	default 0
 
+config ESPRESSIF_TEMP_UORB_POLL
+	bool "Enables polling sensor data"
+	depends on ESPRESSIF_TEMP_UORB
+	default n
+	---help---
+		Enables polling of sensor.
+
+config ESPRESSIF_TEMP_UORB_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	depends on ESPRESSIF_TEMP_UORB_POLL
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config ESPRESSIF_TEMP_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	depends on ESPRESSIF_TEMP_UORB_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
 endmenu # ESPRESSIF_TEMP
 
 config ESPRESSIF_HAVE_OTA_PARTITION
