@@ -2795,6 +2795,15 @@ config ARCH_BOARD_STM32L476_MDK
 		The STM32L476ME is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
+config ARCH_BOARD_NUCLEO_H563ZI
+	bool "NUCLEO_H563ZI"
+	depends on ARCH_CHIP_STM32H563ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-H563ZI board based on the STMicro STM32H563ZI MCU.
+
 config ARCH_BOARD_STM32L562E_DK
 	bool "STM32L562E-DK"
 	depends on ARCH_CHIP_STM32L562QE
@@ -3512,6 +3521,7 @@ config ARCH_BOARD
 	default "b-l072z-lrwan1"            if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"            if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"            if ARCH_BOARD_B_U585I_IOT02A
+	default "nucleo-h563zi"             if ARCH_BOARD_NUCLEO_H563ZI
 	default "nucleo-u5a5zj-q"           if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "stm32l476vg-disco"         if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"             if ARCH_BOARD_STM32L476_MDK
@@ -4089,6 +4099,9 @@ source "boards/arm/stm32l4/stm32l476vg-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L4R9AI_DISCO
 source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_H563ZI
+source "boards/arm/stm32h5/nucleo-h563zi/Kconfig"
 endif
 if ARCH_BOARD_STM32L562E_DK
 source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"
