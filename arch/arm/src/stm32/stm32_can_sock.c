@@ -881,7 +881,7 @@ static int stm32can_transmit(struct stm32_can_s *priv)
   regval &= ~CAN_TIR_EXID_MASK;
   if (frame->can_id & CAN_EFF_FLAG)
     {
-      DEBUGASSERT(frame->can_id < (1 << 29));
+      DEBUGASSERT((frame->can_id ^ CAN_EFF_FLAG) < (1 << 29));
       regval |= (frame->can_id << CAN_TIR_EXID_SHIFT) | CAN_TIR_IDE;
     }
   else
