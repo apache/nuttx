@@ -990,7 +990,10 @@ static void cdcacm_rdcomplete(FAR struct usbdev_ep_s *ep,
     case -ESHUTDOWN: /* Disconnection */
       {
         usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_RDSHUTDOWN), 0);
-        priv->nrdq--;
+        if (priv->nrdq != 0)
+          {
+            priv->nrdq--;
+          }
       }
       break;
 
