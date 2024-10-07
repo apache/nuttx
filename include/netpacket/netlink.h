@@ -719,7 +719,7 @@ enum
   PREFIX_UNSPEC,
   PREFIX_ADDRESS,
   PREFIX_CACHEINFO,
-  PREFIX_MAX
+  PREFIX_MAX = PREFIX_CACHEINFO
 };
 
 struct prefix_cacheinfo
@@ -801,7 +801,7 @@ enum
 {
   NDUSEROPT_UNSPEC,
   NDUSEROPT_SRCADDR,
-  NDUSEROPT_MAX
+  NDUSEROPT_MAX = NDUSEROPT_SRCADDR
 };
 
 /* This struct should be in sync with struct rtnl_link_stats64 */
