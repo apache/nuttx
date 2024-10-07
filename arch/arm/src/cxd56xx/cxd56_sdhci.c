@@ -1358,6 +1358,8 @@ static sdio_capset_t cxd56_sdio_capabilities(struct sdio_dev_s *dev)
 
 #ifdef CONFIG_CXD56_SDIO_WIDTH_D1_ONLY
   caps |= SDIO_CAPS_1BIT_ONLY;
+#else
+  caps |= SDIO_CAPS_4BIT;
 #endif
 #ifdef CONFIG_CXD56_SDIO_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
