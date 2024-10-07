@@ -32,6 +32,7 @@
 
 #include <nuttx/fs/fs.h>
 
+#include "notify/notify.h"
 #include "inode/inode.h"
 
 /****************************************************************************
@@ -180,6 +181,9 @@ int ftruncate(int fd, off_t length)
   fs_putfilep(filep);
   if (ret >= 0)
     {
+#ifdef CONFIG_FS_NOTIFY
+      notify_write(filep);
+#endif
       return 0;
     }
 
