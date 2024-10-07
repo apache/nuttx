@@ -1682,7 +1682,7 @@ static int fdcan_send(struct stm32_fdcan_s *priv)
 #ifdef CONFIG_NET_CAN_EXTID
       if ((frame->can_id & CAN_EFF_FLAG) != 0)
         {
-          DEBUGASSERT(frame->can_id < (1 << 29));
+          DEBUGASSERT((frame->can_id ^ CAN_EFF_FLAG) < (1 << 29));
 
           txbuffer[0] |= BUFFER_R0_EXTID(frame->can_id) | BUFFER_R0_XTD;
         }
