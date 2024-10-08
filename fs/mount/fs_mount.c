@@ -69,8 +69,8 @@
     defined(CONFIG_FS_PROCFS) || defined(CONFIG_NFS) || \
     defined(CONFIG_FS_TMPFS) || defined(CONFIG_FS_USERFS) || \
     defined(CONFIG_FS_CROMFS) || defined(CONFIG_FS_UNIONFS) || \
-    defined(CONFIG_FS_HOSTFS) || defined(CONFIG_FS_RPMSGFS) || \
-    defined(CONFIG_FS_V9FS)
+    defined(CONFIG_FS_HOSTFS) || defined(CONFIG_FS_ZIPFS) || \
+    defined(CONFIG_FS_RPMSGFS) || defined(CONFIG_FS_V9FS)
 #  define NODFS_SUPPORT
 #endif
 
