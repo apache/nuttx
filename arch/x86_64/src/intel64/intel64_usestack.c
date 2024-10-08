@@ -92,14 +92,6 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   tcb->stack_alloc_ptr = stack;
 
-  /* If stack debug is enabled, then fill the stack with a recognizable value
-   * that we can use later to test for high water marks.
-   */
-
-#ifdef CONFIG_STACK_COLORATION
-  memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
-#endif
-
   /* The intel64 uses a push-down stack:  the stack grows toward lower
    * addresses in memory.  The stack pointer register, points to the lowest,
    * valid work address (the "top" of the stack).  Items on the stack are
@@ -122,6 +114,15 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   tcb->stack_base_ptr = tcb->stack_alloc_ptr;
   tcb->adj_stack_size = size_of_stack;
+
+#ifdef CONFIG_STACK_COLORATION
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
+   */
+
+  x86_64_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+#endif /* CONFIG_STACK_COLORATION */
 
   return OK;
 }

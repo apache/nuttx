@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_mdelay.c
+ * arch/x86_64/src/intel64/intel64_perf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,58 +22,47 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include "x86_64_internal.h"
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+#ifdef CONFIG_ARCH_PERF_EVENTS
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+extern unsigned long g_x86_64_timer_freq;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_mdelay
- *
- * Description:
- *   Delay inline for the requested number of milliseconds.
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
- *
- ****************************************************************************/
-
-void up_mdelay(unsigned int milliseconds)
+void up_perf_init(void *arg)
 {
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC
-  up_ndelay(milliseconds * NSEC_PER_MSEC);
-#else
-  volatile int i;
-  volatile int j;
+  /* The default tsc will be turned on when the system starts */
 
-  for (i = 0; i < milliseconds; i++)
-    {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-        {
-        }
-    }
-#endif
+  UNUSED(arg);
 }
+
+unsigned long up_perf_getfreq(void)
+{
+  return g_x86_64_timer_freq;
+}
+
+clock_t up_perf_gettime(void)
+{
+  return rdtscp();
+}
+
+void up_perf_convert(clock_t elapsed, struct timespec *ts)
+{
+  clock_t left;
+
+  ts->tv_sec  = elapsed / g_x86_64_timer_freq;
+  left        = elapsed - ts->tv_sec * g_x86_64_timer_freq;
+  ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_x86_64_timer_freq;
+}
+#endif
+

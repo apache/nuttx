@@ -23,15 +23,17 @@ set(SRCS
     x86_64_copystate.c
     x86_64_exit.c
     x86_64_getintstack.c
-    x86_64_mdelay.c
     x86_64_initialize.c
     x86_64_modifyreg8.c
     x86_64_modifyreg16.c
     x86_64_modifyreg32.c
     x86_64_nputs.c
     x86_64_switchcontext.c
-    x86_64_udelay.c
     x86_64_tcbinfo.c)
+
+if(CONFIG_ARCH_HAVE_FORK)
+  list(APPEND SRCS x86_64_fork.c fork.S)
+endif()
 
 if(CONFIG_PCI)
   list(APPEND SRCS x86_64_pci.c)
@@ -41,12 +43,20 @@ if(CONFIG_ARCH_X86_64_ACPI)
   list(APPEND SRCS x86_64_acpi.c)
 endif()
 
+if(CONFIG_SCHED_THREAD_LOCAL)
+  list(APPEND SRCS x86_64_tls.c)
+endif()
+
 if(CONFIG_ARCH_USE_MMU)
   list(APPEND SRCS x86_64_mmu.c)
 endif()
 
 if(CONFIG_ARCH_ADDRENV)
   list(APPEND SRCS x86_64_addrenv.c x86_64_addrenv_perms.c)
+endif()
+
+if(NOT CONFIG_ALARM_ARCH)
+  list(APPEND SRCS x86_64_udelay.c x86_64_mdelay.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
