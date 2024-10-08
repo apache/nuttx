@@ -50,6 +50,7 @@ MEMORY
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
+EXTERN(_version_info)
 ENTRY(_stext)
 
 SECTIONS
@@ -57,6 +58,7 @@ SECTIONS
     .text : {
         _stext = ABSOLUTE(.);
         *(.vectors)
+        *(.version_info)
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
