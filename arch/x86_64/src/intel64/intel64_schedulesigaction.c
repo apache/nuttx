@@ -157,7 +157,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        */
 
       tcb->xcp.regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
-      tcb->xcp.regs[REG_RIP]    = tcb->xcp.regs[REG_RIP] - 8;
+      tcb->xcp.regs[REG_RSP]    = tcb->xcp.regs[REG_RSP] - 8;
       tcb->xcp.regs[REG_RFLAGS] = 0;
     }
 }
@@ -219,7 +219,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
            */
 
           up_current_regs()[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
-          up_current_regs()[REG_RIP]    = up_current_regs()[REG_RIP] - 8;
+          up_current_regs()[REG_RSP]    = up_current_regs()[REG_RSP] - 8;
           up_current_regs()[REG_RFLAGS] = 0;
 
           /* And make sure that the saved context in the TCB
