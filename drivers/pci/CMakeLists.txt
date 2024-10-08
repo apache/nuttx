@@ -38,6 +38,10 @@ if(CONFIG_PCI)
     list(APPEND SRCS pci_uio_ivshmem.c)
   endif()
 
+  if(CONFIG_PCI_EP_TEST)
+    list(APPEND SRCS pci_ep_test.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 
 endif() # CONFIG_PCI
@@ -53,10 +57,6 @@ if(CONFIG_PCI_ENDPOINT)
   if(CONFIG_PCI_EPF_TEST)
     list(APPEND SRCS pci_epf_test.c)
   endif() # CONFIG_PCI_EPF_TEST
-
-  if(CONFIG_PCI_EP_TEST)
-    list(APPEND SRCS pci_ep_test.c)
-  endif() # CONFIG_PCI_ENDPOINT_TEST
 
   target_sources(drivers PRIVATE ${SRCS})
 
