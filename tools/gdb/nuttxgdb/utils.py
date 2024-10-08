@@ -763,10 +763,13 @@ class Hexdump(gdb.Command):
             address = int(argv[0], 0)
             size = int(argv[1], 0)
         else:
-            var = gdb.parse_and_eval(f"{argv[0]}")
-            address = int(var.address)
-            size = int(var.type.sizeof)
-            gdb.write(f"{argv[0]} {hex(address)} {int(size)}\n")
+            try:
+                var = gdb.parse_and_eval(f"{argv[0]}")
+                address = int(var.cast(long_type))
+                size = int(argv[1]) if argv[1] else int(var.type.sizeof)
+                gdb.write(f"{argv[0]} {hex(address)} {int(size)}\n")
+            except Exception as e:
+                gdb.write(f"Invalid {argv[0]}: {e}\n")
 
         hexdump(address, size)
 
@@ -843,7 +846,7 @@ class Addr2Line(gdb.Command):
                 self.print_backtrace(addr, pid)
         else:
             addresses = []
-            for arg in shlex.split(args):
+            for arg in shlex.split(args.replace(",", " ")):
                 if is_decimal(arg):
                     addresses.append(int(arg))
                 elif is_hexadecimal(arg):
