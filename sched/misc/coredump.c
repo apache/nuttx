@@ -51,6 +51,12 @@ static struct lib_blkoutstream_s  g_blockstream;
 static unsigned char *g_blockinfo;
 #endif
 
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+static struct memory_region_s g_memory_region[] =
+  {
+    CONFIG_BOARD_MEMORY_RANGE
+  };
+#endif
 static const struct memory_region_s *g_regions;
 
 /****************************************************************************
@@ -254,11 +260,21 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size)
       /* Need a new region */
     }
 
-  region = lib_realloc((FAR void *)g_regions,
-                       sizeof(struct memory_region_s) * (count + 1));
+  region = lib_malloc(sizeof(struct memory_region_s) * (count + 1));
   if (region == NULL)
     {
       return -ENOMEM;
+    }
+
+  memcpy(region, g_regions, sizeof(struct memory_region_s) * count);
+
+  if (g_regions != NULL
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+    && g_regions != g_memory_region
+#endif
+    )
+    {
+      lib_free((FAR void *)g_regions);
     }
 
   region[count - 1].start = (uintptr_t)ptr;
@@ -284,16 +300,9 @@ int coredump_initialize(void)
   blkcnt_t nsectors;
   int ret = 0;
 
-  if (CONFIG_BOARD_MEMORY_RANGE[0] != '\0')
-    {
-      coredump_set_memory_region(
-         alloc_memory_region(CONFIG_BOARD_MEMORY_RANGE));
-      if (g_regions == NULL)
-        {
-          _alert("Coredump memory region alloc fail\n");
-          return -ENOMEM;
-        }
-    }
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+  g_regions = g_memory_region;
+#endif
 
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
   ret = lib_blkoutstream_open(&g_blockstream,
@@ -302,8 +311,6 @@ int coredump_initialize(void)
     {
       _alert("%s Coredump device not found\n",
              CONFIG_BOARD_COREDUMP_BLKDEV_PATH);
-      free_memory_region(g_regions);
-      g_regions = NULL;
       return ret;
     }
 
@@ -315,8 +322,6 @@ int coredump_initialize(void)
   if (g_blockinfo == NULL)
     {
       _alert("Coredump device memory alloc fail\n");
-      free_memory_region(g_regions);
-      g_regions = NULL;
       lib_blkoutstream_close(&g_blockstream);
       return -ENOMEM;
     }

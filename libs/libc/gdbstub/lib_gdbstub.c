@@ -52,6 +52,13 @@
 
 #define BUFSIZE CONFIG_LIB_GDBSTUB_PKTSIZE
 
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+FAR const struct memory_region_s g_memory_region[] =
+  {
+    CONFIG_BOARD_MEMORY_RANGE
+  };
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -72,7 +79,6 @@ struct gdb_state_s
   size_t pkt_len;                         /* Packet send and receive length */
   uint8_t running_regs[XCPTCONTEXT_SIZE]; /* Registers of running thread */
   size_t size;                            /* Size of registers */
-  FAR struct memory_region_s *range;      /* Memory regions */
   uintptr_t registers[0];                 /* Registers of other threads */
 };
 
@@ -818,14 +824,8 @@ static size_t gdb_encode_rle(FAR void *data, size_t data_len)
 static bool gdb_is_valid_region(FAR struct gdb_state_s *state,
                                 uintptr_t addr, size_t len, uint32_t flags)
 {
-  FAR struct memory_region_s *region = state->range;
-
-  if (state->range == NULL)
-    {
-      /* No memory region, so allow all access */
-
-      return true;
-    }
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+  FAR const struct memory_region_s *region = g_memory_region;
 
   while (region->start < region->end)
     {
@@ -840,6 +840,9 @@ static bool gdb_is_valid_region(FAR struct gdb_state_s *state,
     }
 
   return false;
+#else
+  return true;
+#endif
 }
 
 /****************************************************************************
@@ -1939,16 +1942,6 @@ FAR struct gdb_state_s *gdb_state_init(gdb_send_func_t send,
   state->priv = priv;
   state->monitor = monitor;
 
-  if (CONFIG_BOARD_MEMORY_RANGE[0] != '\0')
-    {
-      state->range = alloc_memory_region(CONFIG_BOARD_MEMORY_RANGE);
-      if (state->range == NULL)
-        {
-          lib_free(state);
-          return NULL;
-        }
-    }
-
   return state;
 }
 
@@ -1967,11 +1960,6 @@ void gdb_state_uninit(FAR struct gdb_state_s *state)
 {
   if (state != NULL)
     {
-      if (state->range != NULL)
-        {
-          free_memory_region(state->range);
-        }
-
       lib_free(state);
     }
 }
