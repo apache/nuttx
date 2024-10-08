@@ -27,12 +27,22 @@
 #include <stdbool.h>
 #include <nuttx/arch.h>
 #include <sched/sched.h>
+#include <nuttx/init.h>
 
 #include "sim_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void  sim_unlock(void)
+{
+  /* wait until cpu0 in idle() */
+
+  while (!OSINIT_IDLELOOP());
+
+  sched_unlock();
+}
 
 /****************************************************************************
  * Name: sim_doirq
