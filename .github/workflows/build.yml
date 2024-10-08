@@ -335,3 +335,54 @@ jobs:
           name: msys2-${{matrix.boards}}-builds
           path: buildartifacts/
         continue-on-error: true
+
+  # Select the msvc Builds based on PR Arch Label
+  msvc-Arch:
+    uses: apache/nuttx/.github/workflows/arch.yml@master
+    needs: Fetch-Source
+    with:
+      os: msvc
+      boards: |
+        ["msvc_placeholder_with_sim_keyword"]
+
+  # Build with MSVC in Windows native
+  msvc:
+    needs: msvc-Arch
+    if: ${{ needs.msvc-Arch.outputs.skip_all_builds != '1' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Set up Python environment and install kconfiglib
+      - name: Set up Python and install kconfiglib
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install kconfiglib
+        run: |
+          pip install kconfiglib
+
+      - run: git config --global core.autocrlf false
+
+      - name: Download Source Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: source-bundle
+          path: .
+
+      - name: Extract sources
+        run: |
+          7z x sources.tar.gz -y
+          7z x sources.tar -y
+
+      # Build the project using the given CMake commands
+      - name: Configure and build with CMake
+        run: |
+          cd sources/nuttx
+          cmake -B vs2022 -DBOARD_CONFIG=sim/windows -G"Visual Studio 17 2022" -A Win32
+          cmake --build vs2022
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: msvc-builds
+          path: buildartifacts/
+        continue-on-error: true

@@ -176,7 +176,7 @@ if(CONFIG_SMP)
   list(APPEND SRCS sim_smpsignal.c sim_cpuidlestack.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_MULTICPU)
+if(CONFIG_ARCH_HAVE_MULTICPU AND NOT WIN32)
   list(APPEND HOSTSRCS sim_hostsmp.c)
 endif()
 
