@@ -104,6 +104,14 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* This is the value used to mark the stack for subsequent stack monitoring
+ * logic.
+ */
+
+#define STACK_COLOR         0xdeadbeef
+#define INTSTACK_COLOR      0xdeadbeef
+#define HEAP_COLOR          'h'
+
 #define getreg8(p)          inb(p)
 #define putreg8(v,p)        outb(v,p)
 #define getreg16(p)         inw(p)
@@ -252,6 +260,13 @@ void x86_64_usbuninitialize(void);
 
 #ifdef CONFIG_PCI
 void x86_64_pci_init(void);
+#endif
+
+/* Defined in intel64_checkstack.c */
+
+#ifdef CONFIG_STACK_COLORATION
+size_t x86_64_stack_check(void *stackbase, size_t nbytes);
+void x86_64_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

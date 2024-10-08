@@ -37,6 +37,9 @@ CHIP_CSRCS += intel64_cpu.c
 ifeq ($(CONFIG_x86_64_UNWINDER_FRAME_POINTER),y)
   CMN_CSRCS += intel64_backtrace_fp.c
 endif
+ifeq ($(CONFIG_STACK_COLORATION),y)
+  CMN_CSRCS += intel64_checkstack.c
+endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += intel64_pgalloc.c

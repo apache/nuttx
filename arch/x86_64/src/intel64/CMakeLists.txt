@@ -52,6 +52,10 @@ if(CONFIG_x86_64_UNWINDER_FRAME_POINTER)
   list(APPEND SRCS intel64_backtrace_fp.c)
 endif()
 
+if(CONFIG_STACK_COLORATION)
+  list(APPEND SRCS intel64_checkstack.c)
+endif()
+
 if(CONFIG_MM_PGALLOC)
   list(APPEND SRCS intel64_pgalloc.c)
 endif()

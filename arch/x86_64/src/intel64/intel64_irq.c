@@ -430,6 +430,29 @@ static inline void up_idtinit(void)
 }
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: arm_color_intstack
+ *
+ * Description:
+ *   Set the interrupt stack to a value so that later we can determine how
+ *   much stack space was used by interrupt handling logic
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
+static inline void x86_64_color_intstack(void)
+{
+  x86_64_stack_color((void *)up_get_intstackbase(up_cpu_index()),
+                     IRQ_STACK_SIZE);
+}
+#else
+#  define x86_64_color_intstack()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -444,6 +467,10 @@ void up_irqinitialize(void)
   /* Initialize the TSS */
 
   x86_64_cpu_tss_init(cpu);
+
+  /* Colorize the interrupt stack */
+
+  x86_64_color_intstack();
 
   /* Initialize the APIC */
 
