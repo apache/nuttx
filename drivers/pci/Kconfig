@@ -73,6 +73,11 @@ config PCI_UIO_IVSHMEM_NPOLLWAITERS
 	default 2
 	depends on PCI_UIO_IVSHMEM
 
+config PCI_EP_TEST
+	bool "PCI endpoint test"
+	---help---
+		pci endpoint test driver
+
 endif # PCI
 
 menuconfig PCI_ENDPOINT
@@ -94,11 +99,6 @@ config PCI_EPF_TEST
 	bool "PCI epf test"
 	---help---
 		pci epf test driver
-
-config PCI_EP_TEST
-	bool "PCI endpoint test"
-	---help---
-		pci endpoint test driver
 
 endif # PCI_ENDPOINT
 
