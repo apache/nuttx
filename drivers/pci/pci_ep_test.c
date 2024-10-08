@@ -540,7 +540,11 @@ static bool pci_ep_test_free_irq(FAR struct pci_ep_test_s *test)
 {
   up_disable_irq(test->irq);
   irq_detach(test->irq);
-  pci_release_irq(test->pdev, &test->irq, 1);
+  if (test->irq_type != PCI_EP_TEST_IRQ_TYPE_LEGACY)
+    {
+      pci_release_irq(test->pdev, &test->irq, 1);
+    }
+
   return true;
 }
 
