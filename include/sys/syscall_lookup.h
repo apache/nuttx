@@ -88,6 +88,11 @@ SYSCALL_LOOKUP(nxsem_wait,                 1)
   SYSCALL_LOOKUP(nxsem_set_protocol,       2)
 #endif
 
+#ifdef CONFIG_PRIORITY_PROTECT
+  SYSCALL_LOOKUP(nxsem_setprioceiling,     3)
+  SYSCALL_LOOKUP(nxsem_getprioceiling,     2)
+#endif
+
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
