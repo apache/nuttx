@@ -146,7 +146,7 @@ def fetch_stacks():
 
         try:
             stacks[int(tcb["pid"])] = Stack(
-                tcb["name"].string(),
+                utils.get_task_name(tcb),
                 hex(tcb["entry"]["pthread"]),  # should use main?
                 int(tcb["stack_base_ptr"]),
                 int(tcb["stack_alloc_ptr"]),
