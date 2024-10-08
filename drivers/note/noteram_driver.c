@@ -937,6 +937,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
   switch (note->nc_type)
     {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
     case NOTE_START:
       {
         ret += noteram_dump_header(s, note, ctx);
@@ -956,7 +957,6 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       }
       break;
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
     case NOTE_SUSPEND:
       {
         FAR struct note_suspend_s *nsu = (FAR struct note_suspend_s *)p;

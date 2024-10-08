@@ -203,7 +203,8 @@ FAR static struct note_driver_s *
   NULL
 };
 
-#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0 && \
+    defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH)
 static struct note_taskname_s g_note_taskname;
 #endif
 
@@ -475,6 +476,7 @@ static inline int note_isenabled_dump(uint32_t tag)
 }
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 #if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 
 /****************************************************************************
@@ -718,7 +720,6 @@ void sched_note_stop(FAR struct tcb_s *tcb)
     }
 }
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
@@ -795,7 +796,6 @@ void sched_note_resume(FAR struct tcb_s *tcb)
       note_add(*driver, &note, sizeof(struct note_resume_s));
     }
 }
-#endif
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
@@ -875,7 +875,6 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
     }
 }
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
@@ -1029,8 +1028,8 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
       note_add(*driver, &note, sizeof(struct note_cpu_resumed_s));
     }
 }
-#endif
-#endif
+#endif /* CONFIG_SMP */
+#endif /* CONFIG_SCHED_INSTRUMENTATION_SWITCH */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
@@ -1975,6 +1974,7 @@ FAR const char *note_get_taskname(pid_t pid)
 {
   FAR struct note_taskname_info_s *ti;
   FAR struct tcb_s *tcb;
+  UNUSED(ti);
 
   tcb = nxsched_get_tcb(pid);
   if (tcb != NULL)
@@ -1982,6 +1982,7 @@ FAR const char *note_get_taskname(pid_t pid)
       return tcb->name;
     }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   ti = note_find_taskname(pid);
   if (ti != NULL)
     {
@@ -1989,6 +1990,9 @@ FAR const char *note_get_taskname(pid_t pid)
     }
 
   return NULL;
+#else
+  return "unknown";
+#endif
 }
 
 #endif
