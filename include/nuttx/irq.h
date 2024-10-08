@@ -80,10 +80,7 @@
   do \
     { \
       g_cpu_irqset = 0; \
-      SP_DMB(); \
-      g_cpu_irqlock = SP_UNLOCKED; \
-      SP_DSB(); \
-      SP_SEV(); \
+      spin_unlock_wo_note(&g_cpu_irqlock); \
     } \
   while (0)
 #endif
