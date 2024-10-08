@@ -22,7 +22,8 @@
 
 include $(TOPDIR)/Make.defs
 
-VERSION ?= 2022.10.0
+OPENAMP_COMMIT ?= c468328487a1e0596307a5ef7172756819e15745
+LIBMETAL_COMMIT ?= a4bce3507502a7eb9e29bafe0eb174ed5c4316e9
 
 include libmetal.defs
 include open-amp.defs
