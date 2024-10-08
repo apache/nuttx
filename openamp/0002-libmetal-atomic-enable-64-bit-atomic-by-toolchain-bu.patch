@@ -1,8 +1,8 @@
-From f17ee493475793be52b364b0ad7cd7042bc27ffe Mon Sep 17 00:00:00 2001
+From 61756465a3dc241297b7a12d5500ac36a5ffa070 Mon Sep 17 00:00:00 2001
 From: chao an <anchao@lixiang.com>
 Date: Sat, 29 Jun 2024 09:40:26 +0800
-Subject: [PATCH] libmetal/atomic: enable 64-bit atomic by toolchain builtin
- flags
+Subject: [PATCH 2/5] libmetal/atomic: enable 64-bit atomic by toolchain
+ builtin flags
 
 Fix compile error:
 arm-none-eabi-ld: (remoteproc_virtio.o): in function `metal_io_read':
@@ -18,27 +18,26 @@ toolchains have built-in properties to indicate whether support atomic64:
 | #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 1
 | #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 1
 
+Change-Id: Iab9f7df0a9d21e29c8b8d131006cb4817414ebdc
 Signed-off-by: chao an <anchao@lixiang.com>
 ---
- openamp/libmetal/lib/io.h | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ lib/io.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/lib/io.h libmetal/lib/io.h
-index ba416dd505..8cd03e41db 100644
+index ba416dd..81105e2 100644
 --- a/lib/io.h
 +++ libmetal/lib/io.h
-@@ -30,8 +30,9 @@ extern "C" {
+@@ -30,7 +30,8 @@ extern "C" {
   *  @{
   */
  
 -#ifdef __MICROBLAZE__
--#define NO_ATOMIC_64_SUPPORT
 +#if defined(__MICROBLAZE__) || \
-+   (defined(__GNUC__) && !defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8))
-+#  define NO_ATOMIC_64_SUPPORT
++(defined(__GNUC__) && !defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8))
+ #define NO_ATOMIC_64_SUPPORT
  #endif
  
- struct metal_io_region;
 -- 
 2.34.1
 
