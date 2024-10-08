@@ -76,7 +76,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_HAVE_MPU),y)
 CMN_CSRCS += arm64_mpu.c
-common/arm64_mpu.c_CFLAGS += -fno-sanitize=kernel-hwaddress
 common/arm64_mpu.c_CFLAGS += -fno-sanitize=kernel-address
 endif
 
