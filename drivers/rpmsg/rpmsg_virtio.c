@@ -81,9 +81,9 @@ static int rpmsg_virtio_create_virtqueues_(FAR struct virtio_device *vdev,
 static uint8_t rpmsg_virtio_get_status_(FAR struct virtio_device *dev);
 static void rpmsg_virtio_set_status_(FAR struct virtio_device *dev,
                                      uint8_t status);
-static uint32_t rpmsg_virtio_get_features_(FAR struct virtio_device *dev);
+static uint64_t rpmsg_virtio_get_features_(FAR struct virtio_device *dev);
 static void rpmsg_virtio_set_features(FAR struct virtio_device *dev,
-                                      uint32_t feature);
+                                      uint64_t feature);
 static void rpmsg_virtio_notify(FAR struct virtqueue *vq);
 
 /****************************************************************************
@@ -181,7 +181,7 @@ static void rpmsg_virtio_set_status_(FAR struct virtio_device *vdev,
   priv->rsc->rpmsg_vdev.status = status;
 }
 
-static uint32_t rpmsg_virtio_get_features_(FAR struct virtio_device *vdev)
+static uint64_t rpmsg_virtio_get_features_(FAR struct virtio_device *vdev)
 {
   FAR struct rpmsg_virtio_priv_s *priv = rpmsg_virtio_get_priv(vdev);
 
@@ -189,7 +189,7 @@ static uint32_t rpmsg_virtio_get_features_(FAR struct virtio_device *vdev)
 }
 
 static void rpmsg_virtio_set_features(FAR struct virtio_device *vdev,
-                                      uint32_t features)
+                                      uint64_t features)
 {
   FAR struct rpmsg_virtio_priv_s *priv = rpmsg_virtio_get_priv(vdev);
 
