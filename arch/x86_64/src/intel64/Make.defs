@@ -22,7 +22,7 @@ include common/Make.defs
 
 CMN_CSRCS += intel64_createstack.c intel64_initialstate.c intel64_irq.c
 CMN_CSRCS += intel64_map_region.c intel64_regdump.c intel64_releasestack.c
-CMN_CSRCS += intel64_rtc.c intel64_restore_auxstate.c intel64_savestate.c
+CMN_CSRCS += intel64_rtc.c intel64_restore_auxstate.c
 CMN_CSRCS += intel64_stackframe.c intel64_schedulesigaction.c
 CMN_CSRCS += intel64_sigdeliver.c intel64_usestack.c x86_64_tcbinfo.c
 CMN_CSRCS += intel64_systemreset.c intel64_freq.c intel64_cache.c
@@ -37,6 +37,14 @@ CHIP_CSRCS += intel64_cpu.c
 ifeq ($(CONFIG_x86_64_UNWINDER_FRAME_POINTER),y)
   CMN_CSRCS += intel64_backtrace_fp.c
 endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+  CMN_CSRCS += intel64_checkstack.c
+endif
+
+#ifdef CONFIG_ARCH_PERF_EVENTS
+  CMN_CSRCS += intel64_perf.c
+#endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += intel64_pgalloc.c
@@ -64,6 +72,7 @@ CHIP_CSRCS += intel64_tsc_tickless.c
 else
 CHIP_CSRCS += intel64_tsc_timerisr.c
 endif
+CHIP_CSRCS += intel64_tsc_ndelay.c
 endif
 
 ifeq ($(CONFIG_INTEL64_HPET),y)

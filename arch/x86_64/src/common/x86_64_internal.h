@@ -104,6 +104,14 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* This is the value used to mark the stack for subsequent stack monitoring
+ * logic.
+ */
+
+#define STACK_COLOR         0xdeadbeef
+#define INTSTACK_COLOR      0xdeadbeef
+#define HEAP_COLOR          'h'
+
 #define getreg8(p)          inb(p)
 #define putreg8(v,p)        outb(v,p)
 #define getreg16(p)         inw(p)
@@ -125,6 +133,20 @@
 #else
 #  define IRQ_STACK_SIZE CONFIG_ARCH_INTERRUPTSTACK
 #endif
+
+/* Linker defined section addresses */
+
+#define _START_TEXT  _stext
+#define _END_TEXT    _etext
+#define _START_BSS   _sbss
+#define _END_BSS     _ebss
+#define _DATA_INIT   _eronly
+#define _START_DATA  _sdata
+#define _END_DATA    _edata
+#define _START_TDATA _stdata
+#define _END_TDATA   _etdata
+#define _START_TBSS  _stbss
+#define _END_TBSS    _etbss
 
 /****************************************************************************
  * Public Types
@@ -151,7 +173,7 @@ extern const uintptr_t g_idle_topstack[];
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 extern uint8_t g_intstackalloc[];
-extern uint8_t g_intstackalloc[];
+extern uint8_t g_isrstackalloc[];
 #endif
 
 /* These symbols are setup by the linker script. */
@@ -163,6 +185,10 @@ extern uint8_t _sdata[];           /* Start of .data */
 extern uint8_t _edata[];           /* End+1 of .data */
 extern uint8_t _sbss[];            /* Start of .bss */
 extern uint8_t _ebss[];            /* End+1 of .bss */
+extern uint8_t _stdata[];          /* Start of .tdata */
+extern uint8_t _etdata[];          /* End+1 of .tdata */
+extern uint8_t _stbss[];           /* Start of .tbss */
+extern uint8_t _etbss[];           /* End+1 of .tbss */
 #endif
 
 /****************************************************************************
@@ -194,7 +220,6 @@ void x86_64_boardinitialize(void);
 /* Defined in files with the same name as the function */
 
 void x86_64_copystate(uint64_t *dest, uint64_t *src);
-void x86_64_savestate(uint64_t *regs);
 void x86_64_decodeirq(uint64_t *regs);
 #ifdef CONFIG_ARCH_DMA
 void weak_function x86_64_dmainitialize(void);
@@ -252,6 +277,13 @@ void x86_64_usbuninitialize(void);
 
 #ifdef CONFIG_PCI
 void x86_64_pci_init(void);
+#endif
+
+/* Defined in intel64_checkstack.c */
+
+#ifdef CONFIG_STACK_COLORATION
+size_t x86_64_stack_check(void *stackbase, size_t nbytes);
+void x86_64_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

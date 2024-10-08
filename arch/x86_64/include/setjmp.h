@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_mdelay.c
+ * arch/x86_64/include/setjmp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,89 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_X86_64_INCLUDE_SETJUMP_H
+#define __ARCH_X86_64_INCLUDE_SETJUMP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+  /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
+
+#  define XCPTCONTEXT_REGS    9
+#  define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
+
+#  ifdef __ASSEMBLY__
+
+#    define JB_RBX            (0*8)
+#    define JB_RSP            (1*8)
+#    define JB_RBP            (2*8)
+#    define JB_R12            (3*8)
+#    define JB_R13            (4*8)
+#    define JB_R14            (5*8)
+#    define JB_R15            (6*8)
+#    define JB_RIP            (7*8)
+#    define JB_FLAG           (8*8)
+
+#  else
+
+#    define JB_RBX            (0)
+#    define JB_RSP            (1)
+#    define JB_RBP            (2)
+#    define JB_R12            (3)
+#    define JB_R13            (4)
+#    define JB_R14            (5)
+#    define JB_R15            (6)
+#    define JB_RIP            (7)
+#    define JB_FLAG           (8)
+
+#  endif /* __ASSEMBLY__ */
+
+/* Compatibility definitions */
+
+#  define JB_FP               JB_RBP
+#  define JB_SP               JB_RSP
+#  define JB_PC               JB_RIP
 
 /****************************************************************************
- * Private Function Prototypes
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+typedef unsigned long xcpt_reg_t;
+typedef xcpt_reg_t jmp_buf[XCPTCONTEXT_REGS];
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_mdelay
- *
- * Description:
- *   Delay inline for the requested number of milliseconds.
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
- *
- ****************************************************************************/
-
-void up_mdelay(unsigned int milliseconds)
-{
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC
-  up_ndelay(milliseconds * NSEC_PER_MSEC);
-#else
-  volatile int i;
-  volatile int j;
-
-  for (i = 0; i < milliseconds; i++)
-    {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-        {
-        }
-    }
 #endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+int setjmp(jmp_buf env);
+void longjmp(jmp_buf env, int val) noreturn_function;
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* !__ASSEMBLY__ */
+#endif /* __ARCH_X86_64_INCLUDE_SETJUMP_H */

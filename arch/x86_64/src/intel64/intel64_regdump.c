@@ -90,7 +90,7 @@ void backtrace(uint64_t rbp)
 
   for (i = 0; i < 16; i++)
     {
-      if ((rbp < 0x200000) || (rbp > 0xffffffff))
+      if ((rbp < 0x200000) || (rbp > 0xfffffffff))
         {
           break;
         }
@@ -153,6 +153,5 @@ void up_dump_register(void *dumpregs)
   _alert("R14: %016" PRIx64 ", R15: %016" PRIx64 "\n",
          regs[REG_R14], regs[REG_R15]);
   _alert("Dumping Stack (+-64 bytes):\n");
-
   _alert("-----------------------------------------\n");
 }

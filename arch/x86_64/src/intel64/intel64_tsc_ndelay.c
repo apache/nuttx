@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/intel64/intel64_savestate.c
+ * arch/x86_64/src/intel64/intel64_tsc_ndelay.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,28 +23,62 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
-#include <debug.h>
+extern unsigned long g_x86_64_timer_freq;
 
-#include <arch/arch.h>
-#include <arch/irq.h>
+/* REP NOP (PAUSE) is a good thing to insert into busy-wait loops. */
 
-#include "x86_64_internal.h"
+static inline void rep_nop(void)
+{
+  __asm__ __volatile__("rep;nop": : :"memory");
+}
+
+/* TSC based delay: */
+
+static inline void delay_tsc(uint64_t cycles)
+{
+  uint64_t bclock;
+  irqstate_t irq;
+  uint64_t now;
+
+  irq = up_irq_save();
+  bclock = rdtscp();
+
+  for (; ; )
+    {
+      now = rdtscp();
+      if (now - bclock >= cycles)
+        {
+          break;
+        }
+
+      rep_nop();
+    }
+
+  up_irq_restore(irq);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: x86_64_savestate
+ * Name: up_nsdelay
  *
  * Description:
- *   This function saves the interrupt level context information in the
- *   TCB.  This would just be a x86_64_copystate.
+ *   Delay inline for the requested number of nanoseconds.
+ *   *** NOT multi-tasking friendly ***
+ *
  *
  ****************************************************************************/
 
-void x86_64_savestate(uint64_t *regs)
+void up_ndelay(unsigned long nanoseconds)
 {
-  x86_64_copystate(regs, (uint64_t *)up_current_regs());
+  uint64_t cycles;
+
+  cycles = (nanoseconds * g_x86_64_timer_freq + NSEC_PER_SEC - 1)
+           / NSEC_PER_SEC;
+
+  delay_tsc(cycles);
 }

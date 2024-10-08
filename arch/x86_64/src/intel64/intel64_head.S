@@ -398,6 +398,13 @@ ap_start:
 
 	/* Jump to ap_start routine */
 	movabs  $x86_64_ap_boot,   %rbx
+
+	/* We need to simulate the behavior of the call instruction, which by
+	 * default pushes 8 bytes of the RIP. Otherwise, the function's stack
+	 * won't be 16-byte aligned.
+	 */
+
+	pushq   $0
 	jmp     *%rbx
 #endif
 

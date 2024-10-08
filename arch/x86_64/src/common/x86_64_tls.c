@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_mdelay.c
+ * arch/x86_64/src/common/x86_64_tls.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,56 +24,48 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#include "x86_64_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_mdelay
+ * Name: up_tls_size
  *
  * Description:
- *   Delay inline for the requested number of milliseconds.
- *   *** NOT multi-tasking friendly ***
+ *   Get TLS (sizeof(struct tls_info_s) + tdata + tbss) section size.
  *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ * Returned Value:
+ *   Size of (sizeof(struct tls_info_s) + tdata + tbss).
  *
  ****************************************************************************/
 
-void up_mdelay(unsigned int milliseconds)
+int up_tls_size(void)
 {
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC
-  up_ndelay(milliseconds * NSEC_PER_MSEC);
-#else
-  volatile int i;
-  volatile int j;
+  return sizeof(struct tls_info_s) +
+         _END_TBSS - _START_TDATA + sizeof(void *);
+}
 
-  for (i = 0; i < milliseconds; i++)
-    {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-        {
-        }
-    }
-#endif
+/****************************************************************************
+ * Name: up_tls_initialize
+ *
+ * Description:
+ *   Initialize thread local region.
+ *
+ * Input Parameters:
+ *   info - The TLS structure to initialize.
+ *
+ ****************************************************************************/
+
+void up_tls_initialize(struct tls_info_s *info)
+{
+  uint8_t  *tls_data  = (uint8_t *)(info + 1);
+  uint32_t  tdata_len = _END_TDATA - _START_TDATA;
+  uint32_t  tbss_len  = _END_TBSS - _START_TBSS;
+
+  memcpy(tls_data, _START_TDATA, tdata_len);
+  memset(tls_data + tdata_len, 0, tbss_len);
 }

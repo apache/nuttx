@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_mdelay.c
+ * arch/x86_64/src/common/x86_64_fork.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,41 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_X86_64_SRC_COMMON_X86_64_FORK_H
+#define __ARCH_X86_64_SRC_COMMON_X86_64_FORK_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+#define FORK_SIZEOF (sizeof(struct fork_s))
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_mdelay
- *
- * Description:
- *   Delay inline for the requested number of milliseconds.
- *   *** NOT multi-tasking friendly ***
- *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
- *
- ****************************************************************************/
-
-void up_mdelay(unsigned int milliseconds)
+#ifndef __ASSEMBLY__
+struct fork_s
 {
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC
-  up_ndelay(milliseconds * NSEC_PER_MSEC);
-#else
-  volatile int i;
-  volatile int j;
+  uint64_t r12;    /* 0 */
+  uint64_t r13;    /* 8 */
+  uint64_t r14;    /* 16 */
+  uint64_t r15;    /* 24 */
+  uint64_t rbx;    /* 32 */
+  uint64_t rbp;    /* 40 */
+  uint64_t rsp;    /* 48 */
+  uint64_t cs;     /* 56 */
+  uint64_t rflags; /* 64 */
+  uint64_t ss;     /* 72 */
+  uint64_t rip;    /* 80 */
 
-  for (i = 0; i < milliseconds; i++)
-    {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-        {
-        }
-    }
+  /* Assuming fork do not use any float or vector registers */
+};
 #endif
-}
+
+#endif /* __ARCH_X86_64_SRC_COMMON_X86_64_FORK_H */
