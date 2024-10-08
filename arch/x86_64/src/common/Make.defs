@@ -25,6 +25,11 @@ CMN_CSRCS += x86_64_getintstack.c x86_64_mdelay.c x86_64_initialize.c
 CMN_CSRCS += x86_64_modifyreg8.c x86_64_modifyreg16.c x86_64_modifyreg32.c
 CMN_CSRCS += x86_64_nputs.c x86_64_switchcontext.c x86_64_udelay.c
 
+ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+CMN_CSRCS += x86_64_fork.c
+CMN_ASRCS += fork.S
+endif
+
 ifeq ($(CONFIG_PCI),y)
 CMN_CSRCS += x86_64_pci.c
 endif

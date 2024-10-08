@@ -142,6 +142,7 @@ config ARCH_X86_64
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ARCH_TOOLCHAIN_GNU
 	select ARCH_HAVE_BACKTRACE
+	select ARCH_HAVE_FORK
 	---help---
 		x86-64 architectures.
 
