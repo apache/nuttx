@@ -264,7 +264,7 @@ class Nxinfothreads(gdb.Command):
                 info = (
                     "(Name: \x1b[31;1m%s\x1b[m, State: %s, Priority: %d, Stack: %d)"
                     % (
-                        tcb["name"].string(),
+                        utils.get_task_name(tcb),
                         statename,
                         tcb["sched_priority"],
                         tcb["adj_stack_size"],
@@ -509,7 +509,7 @@ class Ps(gdb.Command):
         ]  # exclude "0x"
 
         st = Stack(
-            tcb["name"].string(),
+            utils.get_task_name(tcb),
             hex(tcb["entry"]["pthread"]),  # should use main?
             int(tcb["stack_base_ptr"]),
             int(tcb["stack_alloc_ptr"]),
@@ -527,7 +527,7 @@ class Ps(gdb.Command):
         # For a task we need to display its cmdline arguments, while for a thread we display
         # pointers to its entry and argument
         cmd = ""
-        name = tcb["name"].string()
+        name = utils.get_task_name(tcb)
 
         if int(tcb["flags"] & get_macro("TCB_FLAG_TTYPE_MASK")) == int(
             get_macro("TCB_FLAG_TTYPE_PTHREAD")
