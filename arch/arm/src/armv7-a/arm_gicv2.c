@@ -73,7 +73,7 @@ static void arm_gic_init_done(void)
   irqstate_t flags;
 
   flags = spin_lock_irqsave(NULL);
-  CPU_SET(up_cpu_index(), &g_gic_init_done);
+  CPU_SET(this_cpu(), &g_gic_init_done);
   spin_unlock_irqrestore(NULL, flags);
 }
 

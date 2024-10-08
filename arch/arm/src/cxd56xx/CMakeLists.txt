@@ -41,12 +41,15 @@ set(SRCS
 
 if(CONFIG_SMP)
   list(APPEND SRCS cxd56_cpuidlestack.c)
-  list(APPEND SRCS cxd56_cpuindex.c)
   list(APPEND SRCS cxd56_smpcall.c)
   list(APPEND SRCS cxd56_cpustart.c)
   if(CONFIG_CXD56_TESTSET)
     list(APPEND SRCS cxd56_testset.c)
   endif()
+endif()
+
+if(CONFIG_ARCH_HAVE_MULTICPU)
+  list(APPEND SRCS cxd56_cpuindex.c)
 endif()
 
 if(CONFIG_ARCH_USE_TEXT_HEAP)

@@ -54,5 +54,9 @@ endif
 # Configuration-dependent files
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += s698pm_cpuindex.c s698pm_cpustart.c s698pm_smpcall.c s698pm_cpuidlestack.c
+CHIP_CSRCS += s698pm_cpustart.c s698pm_smpcall.c s698pm_cpuidlestack.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_CSRCS += s698pm_cpuindex.c
 endif

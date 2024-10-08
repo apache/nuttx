@@ -154,6 +154,9 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
   CSRCS += sim_smpsignal.c sim_cpuidlestack.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
   HOSTSRCS += sim_hostsmp.c
 endif
 

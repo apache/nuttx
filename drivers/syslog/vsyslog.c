@@ -215,7 +215,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #endif
 
 #if defined(CONFIG_SMP)
-                             , up_cpu_index()
+                             , this_cpu()
 #endif
 
 #if defined(CONFIG_SYSLOG_PROCESSID)

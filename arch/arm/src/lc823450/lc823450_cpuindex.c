@@ -44,15 +44,7 @@
  * Name: up_cpu_index
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Return the real core number regardless CONFIG_SMP setting
  *
  ****************************************************************************/
 

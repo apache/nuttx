@@ -100,6 +100,18 @@
 #define DEBUGPOINT_STEPPOINT     0x05
 
 /****************************************************************************
+ * Name: up_cpu_index
+ *
+ * Description:
+ *   Return the real core number regardless CONFIG_SMP setting
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_HAVE_MULTICPU
+#  define up_cpu_index() 0
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 

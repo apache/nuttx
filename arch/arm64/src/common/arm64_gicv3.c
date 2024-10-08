@@ -931,8 +931,7 @@ static void arm64_gic_init(void)
   int       err;
 
   cpu               = this_cpu();
-  g_gic_rdists[cpu] = CONFIG_GICR_BASE +
-                      up_cpu_index() * CONFIG_GICR_OFFSET;
+  g_gic_rdists[cpu] = CONFIG_GICR_BASE + cpu * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)

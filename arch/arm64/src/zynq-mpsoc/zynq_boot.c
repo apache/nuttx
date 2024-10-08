@@ -101,7 +101,7 @@ void arm64_el_init(void)
 #endif
 }
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
 
 /****************************************************************************
  * Public Functions
@@ -111,19 +111,7 @@ void arm64_el_init(void)
  * Name: up_cpu_index
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- *   If TLS is enabled, then the RTOS can get this information from the TLS
- *   info structure.  Otherwise, the MCU-specific logic must provide some
- *   mechanism to provide the CPU index.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Return the real core number regardless CONFIG_SMP setting
  *
  ****************************************************************************/
 
@@ -165,7 +153,7 @@ int arm64_get_cpuid(uint64_t mpid)
   return MPID_TO_CORE(mpid, 0);
 }
 
-#endif /* CONFIG_SMP */
+#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
  * Name: arm64_chip_boot

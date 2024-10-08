@@ -628,7 +628,7 @@ static void udp_notify_recvcpu(FAR struct udp_conn_s *conn)
       return;
     }
 
-  cpu = up_cpu_index();
+  cpu = this_cpu();
   if (cpu != conn->rcvcpu)
     {
       if (conn->domain == PF_INET)

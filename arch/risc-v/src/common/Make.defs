@@ -47,7 +47,11 @@ ifneq ($(CONFIG_ALARM_ARCH),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-CMN_CSRCS += riscv_cpuindex.c riscv_smpcall.c riscv_cpustart.c
+CMN_CSRCS += riscv_smpcall.c riscv_cpustart.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CMN_CSRCS += riscv_cpuindex.c
 endif
 
 ifeq ($(CONFIG_RISCV_MISALIGNED_HANDLER),y)
