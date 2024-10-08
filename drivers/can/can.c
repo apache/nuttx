@@ -651,7 +651,6 @@ static int can_xmit(FAR struct can_dev_s *dev)
       if (ret < 0)
         {
           canerr("dev_send failed: %d\n", ret);
-          __can_add_sendnode(&dev->cd_xmit, msg_node);
           break;
         }
       else
