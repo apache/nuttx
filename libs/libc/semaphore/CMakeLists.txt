@@ -37,7 +37,7 @@ if(CONFIG_FS_NAMED_SEMAPHORES)
 endif()
 
 if(CONFIG_PRIORITY_PROTECT)
-  list(APPEND CSRCS sem_getprioceiling.c sem_setprioceiling.c)
+  list(APPEND SRCS sem_getprioceiling.c sem_setprioceiling.c)
 endif()
 
 target_sources(c PRIVATE ${SRCS})
