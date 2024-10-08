@@ -137,11 +137,15 @@ endif # CONFIG_SCHED_TICKLESS
 endif # CONFIG_SAM34_TC
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += sam4cm_cpuindex.c sam4cm_cpuidlestack.c
+CHIP_CSRCS += sam4cm_cpuidlestack.c
 CHIP_CSRCS += sam4cm_smpcall.c sam4cm_cpustart.c
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += sam4cm_idle.c
 endif
 endif # CONFIG_SMP
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_CSRCS += sam4cm_cpuindex.c
+endif # CONFIG_ARCH_HAVE_MULTICPU
 
 endif # CONFIG_ARCH_CHIP_SAM4CM

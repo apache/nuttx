@@ -128,8 +128,11 @@ endif
 # Configuration-dependent ESP32 files
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_ASRCS  = esp32_cpuindex.S
 CHIP_CSRCS += esp32_cpuidlestack.c esp32_cpustart.c esp32_intercpu_interrupt.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_ASRCS  = esp32_cpuindex.S
 endif
 
 ifeq ($(CONFIG_ESP32_UART),y)

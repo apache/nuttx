@@ -606,7 +606,7 @@ static ssize_t tcp_recvfrom_result(int result, struct tcp_recvfrom_s *pstate)
 #ifdef CONFIG_NETDEV_RSS
 static void tcp_notify_recvcpu(FAR struct tcp_conn_s *conn)
 {
-  int cpu = up_cpu_index();
+  int cpu = this_cpu();
 
   if (cpu != conn->rcvcpu)
     {

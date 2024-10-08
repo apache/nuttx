@@ -35,6 +35,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/irq.h>
+#include <nuttx/arch.h>
 
 #if defined(CONFIG_TICKET_SPINLOCK) || defined(CONFIG_RW_SPINLOCK)
 #  include <nuttx/atomic.h>
@@ -531,7 +532,7 @@ irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
 
   if (NULL == lock)
     {
-      int me = up_cpu_index();
+      int me = this_cpu();
       if (0 == g_irq_spin_count[me])
         {
           spin_lock_wo_note(&g_irq_spin);
@@ -698,7 +699,7 @@ void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
 {
   if (NULL == lock)
     {
-      int me = up_cpu_index();
+      int me = this_cpu();
       DEBUGASSERT(0 < g_irq_spin_count[me]);
       g_irq_spin_count[me]--;
 
