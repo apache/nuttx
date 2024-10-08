@@ -61,12 +61,12 @@ int inode_find(FAR struct inode_search_s *desc)
     {
       /* Found it */
 
-      FAR struct inode *node = desc->node;
-      DEBUGASSERT(node != NULL);
+      FAR struct inode *inode = desc->node;
+      DEBUGASSERT(inode != NULL);
 
       /* Increment the reference count on the inode */
 
-      atomic_fetch_add(&node->i_crefs, 1);
+      atomic_fetch_add(&inode->i_crefs, 1);
     }
 
   inode_unlock();
