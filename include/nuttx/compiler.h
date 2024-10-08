@@ -307,6 +307,27 @@
 #    endif
 #  endif
 
+/* The constructor attribute causes the function to be called
+ * automatically before execution enters main ().
+ * Similarly, the destructor attribute causes the function to
+ * be called automatically after main () has completed or
+ * exit () has been called. Functions with these attributes are
+ * useful for initializing data that will be used implicitly
+ * during the execution of the program.
+ * See https://gcc.gnu.org/onlinedocs/gcc-4.1.2/gcc/Function-Attributes.html
+ */
+
+#  define constructor_fuction __attribute__((constructor))
+#  define destructor_function __attribute__((destructor))
+
+/* Use visibility_hidden to hide symbols by default
+ * Use visibility_default to make symbols visible
+ * See https://gcc.gnu.org/wiki/Visibility
+ */
+
+#  define visibility_hidden __attribute__((visibility("hidden")))
+#  define visibility_default __attribute__((visibility("default")))
+
 /* The unused code or data */
 
 #  define unused_code __attribute__((unused))
@@ -597,6 +618,11 @@
 #  define nosanitize_address
 #  define nosanitize_undefined
 #  define nostackprotect_function
+#  define constructor_fuction
+#  define destructor_function
+
+#  define visibility_hidden
+#  define visibility_default
 
 #  define unused_code
 #  define unused_data
@@ -744,6 +770,10 @@
 #  define nosanitize_address
 #  define nosanitize_undefined
 #  define nostackprotect_function
+#  define constructor_fuction
+#  define destructor_function
+#  define visibility_hidden
+#  define visibility_default
 #  define unused_code
 #  define unused_data
 #  define used_code
@@ -859,6 +889,10 @@
 #  define nosanitize_address
 #  define nosanitize_undefined
 #  define nostackprotect_function
+#  define constructor_fuction
+#  define destructor_function
+#  define visibility_hidden
+#  define visibility_default
 #  define unused_code
 #  define unused_data
 #  define used_code
@@ -953,6 +987,10 @@
 #  define nosanitize_address
 #  define nosanitize_undefined
 #  define nostackprotect_function
+#  define constructor_fuction
+#  define destructor_function
+#  define visibility_hidden
+#  define visibility_default
 #  define unused_code
 #  define unused_data
 #  define used_code
@@ -1037,6 +1075,10 @@
 #  define nosanitize_address
 #  define nosanitize_undefined
 #  define nostackprotect_function
+#  define constructor_fuction
+#  define destructor_function
+#  define visibility_hidden
+#  define visibility_default
 #  define unused_code                   __attribute__((unused))
 #  define unused_data                   __attribute__((unused))
 #  define used_code                     __attribute__((used))
@@ -1106,6 +1148,10 @@
 #  define nosanitize_address
 #  define nosanitize_undefined
 #  define nostackprotect_function
+#  define constructor_fuction
+#  define destructor_function
+#  define visibility_hidden
+#  define visibility_default
 #  define unused_code
 #  define unused_data
 #  define used_code
