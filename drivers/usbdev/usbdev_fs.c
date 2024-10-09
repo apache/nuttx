@@ -1378,6 +1378,9 @@ static int usbdev_fs_classbind(FAR struct usbdevclass_driver_s *driver,
 #ifdef CONFIG_USBDEV_DUALSPEED
   ep0info.hssize = fs->cdev->cfgdescsize;
 #endif
+#ifdef CONFIG_USBDEV_SUPERSPEED
+  ep0info.sssize = fs->cdev->cfgdescsize;
+#endif
   ep0info.reqnum = CONFIG_USBDEV_FS_NEP0REQS;
   fs->eps[0].dev = fs;
   ret = usbdev_fs_ep_bind(dev, 0, &ep0info, &fs->eps[0]);
