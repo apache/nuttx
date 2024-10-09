@@ -91,7 +91,7 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
 int wd_cancel_irq(FAR struct wdog_s *wdog)
 {
-  if (wdog == NULL)
+  if (wdog == NULL || !WDOG_ISACTIVE(wdog))
     {
       return -EINVAL;
     }
@@ -105,27 +105,24 @@ int wd_cancel_irq(FAR struct wdog_s *wdog)
 
   /* Make sure that the watchdog is still active. */
 
-  if (WDOG_ISACTIVE(wdog))
+  bool head = list_is_head(&g_wdactivelist, &wdog->node);
+
+  /* Now, remove the watchdog from the timer queue */
+
+  list_delete(&wdog->node);
+
+  /* Mark the watchdog inactive */
+
+  wdog->func = NULL;
+
+  if (head)
     {
-      bool head = list_is_head(&g_wdactivelist, &wdog->node);
+      /* If the watchdog is at the head of the timer queue, then
+       * we will need to re-adjust the interval timer that will
+       * generate the next interval event.
+       */
 
-      /* Now, remove the watchdog from the timer queue */
-
-      list_delete(&wdog->node);
-
-      /* Mark the watchdog inactive */
-
-      wdog->func = NULL;
-
-      if (head)
-        {
-          /* If the watchdog is at the head of the timer queue, then
-           * we will need to re-adjust the interval timer that will
-           * generate the next interval event.
-           */
-
-          nxsched_reassess_timer();
-        }
+      nxsched_reassess_timer();
     }
 
   return OK;
