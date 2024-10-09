@@ -31,6 +31,7 @@
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/list.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/virtio/virtio-serial.h>
 
 #include "sim_internal.h"
 
@@ -47,7 +48,7 @@
 #define SIM_RPTUN_STATUS_OK          0x02
 #define SIM_RPTUN_STATUS_NEED_RESET  0x04
 
-#define SIM_RPTUN_VIRTIO_NUM         3
+#define SIM_RPTUN_VIRTIO_NUM         4
 #define SIM_RPTUN_RSC_NUM            (2 * SIM_RPTUN_VIRTIO_NUM)
 
 /****************************************************************************
@@ -56,22 +57,28 @@
 
 struct aligned_data(8) sim_rptun_rsc_s
 {
-  struct resource_table    hdr;
-  uint32_t                 offset[SIM_RPTUN_RSC_NUM];
-  struct fw_rsc_vdev       rng0;
-  struct fw_rsc_vdev_vring rng0_vring;
-  struct fw_rsc_carveout   rng0_carveout;
-  char                     rng0_shm[SIM_RPTUN_SHMEM_SIZE];
-  struct fw_rsc_vdev       rng1;
-  struct fw_rsc_vdev_vring rng1_vring;
-  struct fw_rsc_carveout   rng1_carveout;
-  char                     rng1_shm[SIM_RPTUN_SHMEM_SIZE];
-  struct fw_rsc_vdev       rpmsg0;
-  struct fw_rsc_vdev_vring rpmsg0_vring0;
-  struct fw_rsc_vdev_vring rpmsg0_vring1;
-  struct fw_rsc_config     rpmsg0_config;
-  struct fw_rsc_carveout   rpmsg0_carveout;
-  char                     rpmsg0_shm[SIM_RPTUN_SHMEM_SIZE];
+  struct resource_table        hdr;
+  uint32_t                     offset[SIM_RPTUN_RSC_NUM];
+  struct fw_rsc_vdev           rng0;
+  struct fw_rsc_vdev_vring     rng0_vring;
+  struct fw_rsc_carveout       rng0_carveout;
+  char                         rng0_shm[SIM_RPTUN_SHMEM_SIZE];
+  struct fw_rsc_vdev           rng1;
+  struct fw_rsc_vdev_vring     rng1_vring;
+  struct fw_rsc_carveout       rng1_carveout;
+  char                         rng1_shm[SIM_RPTUN_SHMEM_SIZE];
+  struct fw_rsc_vdev           rpmsg0;
+  struct fw_rsc_vdev_vring     rpmsg0_vring0;
+  struct fw_rsc_vdev_vring     rpmsg0_vring1;
+  struct fw_rsc_config         rpmsg0_config;
+  struct fw_rsc_carveout       rpmsg0_carveout;
+  char                         rpmsg0_shm[SIM_RPTUN_SHMEM_SIZE];
+  struct fw_rsc_vdev           serial0;
+  struct fw_rsc_vdev_vring     serial0_vring0;
+  struct fw_rsc_vdev_vring     serial0_vring1;
+  struct vhost_serial_config_s serial0_config;
+  struct fw_rsc_carveout       serial0_carveout;
+  char                         serial0_shm[SIM_RPTUN_SHMEM_SIZE];
 };
 
 struct sim_rptun_shmem_s
@@ -241,7 +248,40 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg0_carveout.len        = sizeof(priv->shmem->rsc.rpmsg0_shm);
       memcpy(rsc->rpmsg0_carveout.name, "rpmsg0_shm", 10);
 
-      priv->shmem->base               = (uintptr_t)priv->shmem;
+      /* Virtio Driver 3, VIRTIO_ID_SERIAL */
+
+      rsc->offset[6]               = offsetof(struct sim_rptun_rsc_s,
+                                              serial0);
+      rsc->serial0.type            = RSC_VDEV;
+      rsc->serial0.id              = VIRTIO_ID_CONSOLE;
+      rsc->serial0.notifyid        = RSC_NOTIFY_ID_ANY;
+      rsc->serial0.dfeatures       = 0;
+      rsc->serial0.config_len      = sizeof(struct vhost_serial_config_s);
+      rsc->serial0.num_of_vrings   = 2;
+      rsc->serial0.reserved[0]     = VIRTIO_DEV_DRIVER;
+      rsc->serial0.reserved[1]     = 0;
+      rsc->serial0_vring0.align    = 8;
+      rsc->serial0_vring0.num      = 8;
+      rsc->serial0_vring0.notifyid = RSC_NOTIFY_ID_ANY;
+      rsc->serial0_vring0.da       = 0;
+      rsc->serial0_vring1.align    = 8;
+      rsc->serial0_vring1.num      = 8;
+      rsc->serial0_vring1.notifyid = RSC_NOTIFY_ID_ANY;
+      rsc->serial0_vring1.da       = 0;
+      memcpy(rsc->serial0_config.path , "/dev/ttyVH0", 11);
+
+      /* Virtio Serial0 share memory buffer */
+
+      rsc->offset[7]              = offsetof(struct sim_rptun_rsc_s,
+                                             serial0_carveout);
+      rsc->serial0_carveout.type  = RSC_CARVEOUT;
+      rsc->serial0_carveout.da    = offsetof(struct sim_rptun_shmem_s,
+                                             rsc.serial0_shm);
+      rsc->serial0_carveout.pa    = FW_RSC_U32_ADDR_ANY;
+      rsc->serial0_carveout.len   = sizeof(priv->shmem->rsc.serial0_shm);
+      memcpy(rsc->serial0_carveout.name, "serial0_shm", 11);
+
+      priv->shmem->base           = (uintptr_t)priv->shmem;
 
       /* The master notifies its slave when it starts again */
 
