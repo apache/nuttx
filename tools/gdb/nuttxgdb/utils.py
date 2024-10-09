@@ -26,6 +26,7 @@ import json
 import os
 import re
 import shlex
+from enum import Enum
 from typing import List, Tuple, Union
 
 import gdb
@@ -709,6 +710,52 @@ def jsonify(obj, indent=None):
             return obj.__dict__
 
     return json.dumps(obj, default=dumper, indent=indent)
+
+
+def enum(t: Union[str, gdb.Type], name=None):
+    """Create python Enum class from C enum values
+    Usage:
+
+    in C:
+    enum color_e {
+        RED = 1,
+        GREEN = 2,
+    };
+
+    in python:
+    COLOR = utils.enum("enum color_e", "COLOR")
+    print(COLOR.GREEN.value) # --> 2
+    RED = COLOR(1)
+    """
+    if type(t) is str:
+        t = lookup_type(t) or lookup_type("enum " + t)
+
+    if t and t.code == gdb.TYPE_CODE_TYPEDEF:
+        t = t.strip_typedefs()
+
+    if not t or t.code != gdb.TYPE_CODE_ENUM:
+        raise gdb.error(f"{t} is not an enum type")
+
+    def commonprefix(m):
+        "Given a list of pathnames, returns the longest common leading component"
+        if not m:
+            return ""
+        s1 = min(m)
+        s2 = max(m)
+        for i, c in enumerate(s1):
+            if c != s2[i]:
+                return s1[:i]
+        return s1
+
+    # Remove the common prefix from names. This is a convention in python.
+    # E.g. COLOR.RED, COLOR.GREEN instead of COLOR.COLOR_RED, COLOR.COLOR_GREEN
+
+    prefix = commonprefix([f.name for f in t.fields()])
+
+    names = {f.name[len(prefix) :]: f.enumval for f in t.fields()}
+
+    name = name or prefix[:-1] if prefix[-1] == "_" else prefix
+    return Enum(name, names)
 
 
 class ArrayIterator:
