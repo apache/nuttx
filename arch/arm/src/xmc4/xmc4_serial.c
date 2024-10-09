@@ -1127,16 +1127,6 @@ int up_putc(int ch)
   uint32_t ccr;
 
   xmc4_disableuartint(priv, &ccr);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   xmc4_restoreuartint(priv, ccr);
 #endif
@@ -1157,15 +1147,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   return ch;
 #endif

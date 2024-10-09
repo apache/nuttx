@@ -1057,15 +1057,6 @@ int up_putc(int ch)
   up_disableuartint(priv, &ier);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      nuc_lowputc((uint32_t)'\r');
-    }
-
   nuc_lowputc((uint32_t)ch);
 #ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);
@@ -1087,15 +1078,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_UART
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      nuc_lowputc((uint32_t)'\r');
-    }
-
   nuc_lowputc((uint32_t)ch);
 #endif
   return ch;

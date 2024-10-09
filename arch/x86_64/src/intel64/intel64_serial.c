@@ -90,15 +90,6 @@ void up_lowputc(char ch)
 
 int up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_lowputc('\r');
-    }
-
   up_lowputc(ch);
   return ch;
 }

@@ -2804,15 +2804,6 @@ int up_putc(int ch)
   imx9_disableuartint(priv, &ie);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm64_lowputc('\r');
-    }
-
   arm64_lowputc(ch);
 #ifdef CONSOLE_DEV
   imx9_restoreuartint(priv, ie);

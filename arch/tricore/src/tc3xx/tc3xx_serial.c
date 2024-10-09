@@ -725,15 +725,6 @@ void tricore_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      tricore_lowputc('\r');
-    }
-
   tricore_lowputc(ch);
 #endif
   return ch;

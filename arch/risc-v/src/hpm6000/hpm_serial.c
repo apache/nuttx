@@ -1299,16 +1299,6 @@ int up_putc(int ch)
   uint32_t im;
 
   hpm_disableuartint(priv, &im);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      hpm_lowputc('\r');
-    }
-
   hpm_lowputc(ch);
   hpm_restoreuartint(priv, im);
 #endif
@@ -1328,15 +1318,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 #endif
   return ch;

@@ -1580,16 +1580,6 @@ int up_putc(int ch)
 
   up_disableuartint(priv, &im);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxnotfull(priv);
-      up_serialout(priv, TIVA_UART_DR_OFFSET, (uint32_t)'\r');
-    }
-
   up_waittxnotfull(priv);
   up_serialout(priv, TIVA_UART_DR_OFFSET, (uint32_t)ch);
 
@@ -1612,15 +1602,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
   return ch;

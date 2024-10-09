@@ -107,7 +107,8 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
 
           strlcpy(info[i].sc_name, channel->sc_name,
                   sizeof(info[i].sc_name));
-          info[i].sc_disable = channel->sc_disable;
+          info[i].sc_disable =
+                  channel->sc_state & SYSLOG_CHANNEL_DISABLE;
         }
     }
   else if (cmd == SYSLOGIOC_SETFILTER)
@@ -129,7 +130,9 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
           return -ENOENT;
         }
 
-      channel->sc_disable = info->sc_disable;
+      channel->sc_state = info->sc_disable ?
+                          channel->sc_state | SYSLOG_CHANNEL_DISABLE :
+                          channel->sc_state & ~SYSLOG_CHANNEL_DISABLE;
     }
 
   return OK;

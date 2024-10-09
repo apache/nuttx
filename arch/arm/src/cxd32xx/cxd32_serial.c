@@ -978,15 +978,6 @@ int up_putc(int ch)
   up_disableuartint(priv, &ier);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);

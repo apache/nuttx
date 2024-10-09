@@ -117,15 +117,6 @@ int up_putc(int ch)
 
   flags = spin_lock_irqsave(NULL);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      /* or1k_lowputc('\r'); */
-    }
-
   /* or1k_lowputc(ch); */
 
   spin_unlock_irqrestore(NULL, flags);

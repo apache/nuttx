@@ -776,16 +776,6 @@ int up_putc(int ch)
    */
 
   flags = spin_lock_irqsave(NULL);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      u16550_putc(CONSOLE_DEV.priv, '\r');
-    }
-
   u16550_putc(CONSOLE_DEV.priv, ch);
   spin_unlock_irqrestore(NULL, flags);
 

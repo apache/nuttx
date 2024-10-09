@@ -887,17 +887,6 @@ int up_putc(int ch)
   uint8_t  scr;
 
   up_disablesciint(priv, &scr);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxready(priv);
-      up_serialout(priv, SH1_SCI_TDR_OFFSET, '\r');
-    }
-
   up_waittxready(priv);
   up_serialout(priv, SH1_SCI_TDR_OFFSET, (uint8_t)ch);
 
@@ -920,15 +909,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      renesas_lowputc('\r');
-    }
-
   renesas_lowputc(ch);
 #endif
   return ch;

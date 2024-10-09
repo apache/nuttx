@@ -1166,16 +1166,6 @@ int up_putc(int ch)
   up_disableuartint(priv, &ier);
   up_waittxready(priv);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_serialout(priv, UART_TXD0, (uint32_t)'\r');
-      up_waittxready(priv);
-    }
-
   up_serialout(priv, UART_TXD0, (uint32_t)ch);
   up_waittxready(priv);
   up_restoreuartint(priv, ier);
@@ -1224,17 +1214,6 @@ static inline void up_waittxready(void)
 int up_putc(int ch)
 {
   up_waittxready();
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      putreg32((uint16_t)'\r', IMX_REGISTER_BASE + UART_TXD0);
-      up_waittxready();
-    }
-
   putreg32((uint16_t)ch, IMX_REGISTER_BASE + UART_TXD0);
   return ch;
 }

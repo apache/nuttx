@@ -741,16 +741,6 @@ int up_putc(int ch)
 
   ez80_disableuartint(priv);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Output CR before LF */
-
-      ez80_waittxready(priv);
-      ez80_serialout(priv, EZ80_UART_THR, '\r');
-    }
-
   /* Output the character */
 
   ez80_waittxready(priv);
@@ -806,15 +796,6 @@ static void ez80_putc(int ch)
 
 int up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Output CR before LF */
-
-      ez80_putc('\r');
-    }
-
   /* Output character */
 
   ez80_putc(ch);

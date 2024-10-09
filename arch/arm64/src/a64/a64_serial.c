@@ -1417,15 +1417,6 @@ int up_putc(int ch)
 #ifdef CONSOLE_DEV
   struct uart_dev_s *dev = &CONSOLE_DEV;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      a64_uart_wait_send(dev, '\r');
-    }
-
   a64_uart_wait_send(dev, ch);
 #endif
   return ch;

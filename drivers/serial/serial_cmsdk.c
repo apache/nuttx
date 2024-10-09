@@ -778,16 +778,6 @@ int up_putc(int ch)
   uint32_t ier;
 
   ier = uart_cmsdk_disableuartint(priv);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      uart_cmsdk_putc(priv, '\r');
-    }
-
   uart_cmsdk_putc(priv, ch);
   uart_cmsdk_restoreuartint(priv, ier);
   return ch;

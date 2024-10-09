@@ -1700,16 +1700,6 @@ int up_putc(int ch)
   priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   up_disablesciint(priv, &scr);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxready(priv);
-      up_serialout(priv, RX_SCI_TDR_OFFSET, '\r');
-    }
-
   up_waittxready(priv);
   up_serialout(priv, RX_SCI_TDR_OFFSET, (uint8_t)ch);
   up_waittxready(priv);
@@ -1730,16 +1720,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      renesas_lowputc('\r');
-    }
-
   renesas_lowputc(ch);
 #endif
   return ch;

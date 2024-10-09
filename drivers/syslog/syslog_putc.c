@@ -55,13 +55,11 @@
 
 int syslog_putc(int ch)
 {
-  int i;
-
   /* Is this an attempt to do SYSLOG output from an interrupt handler? */
 
   if (up_interrupt_context() || sched_idletask())
     {
-#if defined(CONFIG_SYSLOG_INTBUFFER)
+#ifdef CONFIG_SYSLOG_INTBUFFER
       if (up_interrupt_context())
         {
           /* Buffer the character in the interrupt buffer.
@@ -74,6 +72,8 @@ int syslog_putc(int ch)
       else
 #endif
         {
+          int i;
+
           /* Force the character to the SYSLOG device immediately
            * (if possible).
            * This means that the interrupt data may not be in
@@ -91,7 +91,7 @@ int syslog_putc(int ch)
                 }
 
 #ifdef CONFIG_SYSLOG_IOCTL
-              if (channel->sc_disable)
+              if (channel->sc_state & SYSLOG_CHANNEL_DISABLE)
                 {
                   continue;
                 }
@@ -99,13 +99,38 @@ int syslog_putc(int ch)
 
               if (channel->sc_ops->sc_force != NULL)
                 {
-                  channel->sc_ops->sc_force(channel,  ch);
+#ifdef CONFIG_SYSLOG_CRLF
+                  /* Check for LF */
+
+                  if (ch == '\n' &&
+                      !(channel->sc_state & SYSLOG_CHANNEL_DISABLE_CRLF))
+                    {
+                      /* Add CR */
+
+                      channel->sc_ops->sc_force(channel, '\r');
+                    }
+#endif
+
+                  channel->sc_ops->sc_force(channel, ch);
                 }
               else
                 {
                   char tmp = ch;
 
                   DEBUGASSERT(channel->sc_ops->sc_write_force != NULL);
+
+#ifdef CONFIG_SYSLOG_CRLF
+                  /* Check for LF */
+
+                  if (tmp == '\n' &&
+                      !(channel->sc_state & SYSLOG_CHANNEL_DISABLE_CRLF))
+                    {
+                      /* Add CR */
+
+                      channel->sc_ops->sc_write_force(channel, "\r", 1);
+                    }
+#endif
+
                   channel->sc_ops->sc_write_force(channel, &tmp, 1);
                 }
             }
@@ -113,6 +138,8 @@ int syslog_putc(int ch)
     }
   else
     {
+      int i;
+
 #ifdef CONFIG_SYSLOG_INTBUFFER
       /* Flush any characters that may have been added to the interrupt
        * buffer.
@@ -131,7 +158,7 @@ int syslog_putc(int ch)
             }
 
 #ifdef CONFIG_SYSLOG_IOCTL
-          if (channel->sc_disable)
+          if (channel->sc_state & SYSLOG_CHANNEL_DISABLE)
             {
               continue;
             }
@@ -139,12 +166,37 @@ int syslog_putc(int ch)
 
           if (channel->sc_ops->sc_putc != NULL)
             {
+#ifdef CONFIG_SYSLOG_CRLF
+              /* Check for LF */
+
+              if (ch == '\n' &&
+                  !(channel->sc_state & SYSLOG_CHANNEL_DISABLE_CRLF))
+                {
+                  /* Add CR */
+
+                  channel->sc_ops->sc_putc(channel, '\r');
+                }
+#endif
+
               channel->sc_ops->sc_putc(channel, ch);
             }
           else
             {
               char tmp = ch;
               DEBUGASSERT(channel->sc_ops->sc_write != NULL);
+
+#ifdef CONFIG_SYSLOG_CRLF
+              /* Check for LF */
+
+              if (tmp == '\n' &&
+                  !(channel->sc_state & SYSLOG_CHANNEL_DISABLE_CRLF))
+                {
+                  /* Add CR */
+
+                  channel->sc_ops->sc_write(channel, "\r", 1);
+                }
+#endif
+
               channel->sc_ops->sc_write(channel, &tmp, 1);
             }
         }

@@ -326,13 +326,6 @@ void spi_console_init(void)
 #ifdef CONFIG_TLSR82_SPI_SYSLOG
 int up_putc(int ch)
 {
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      spi_putc('\r');
-    }
-
   spi_putc((uint8_t)ch);
 
   return 0;
