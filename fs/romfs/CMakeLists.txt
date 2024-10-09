@@ -23,8 +23,8 @@ if(CONFIG_FS_ROMFS)
   target_sources(fs PRIVATE fs_romfs.c fs_romfsutil.c)
 
   if(CONFIG_TRACE_ROMFS_FS)
-    set_source_files_properties(fs_romfs.c PROPERTIES COMPILE_FLAGS
-                                                      -finstrument-functions)
+    set_source_files_properties(fs_romfs.c DIRECTORY ..
+                                PROPERTIES COMPILE_FLAGS -finstrument-functions)
   endif()
 
 endif()
