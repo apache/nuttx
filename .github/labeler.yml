@@ -88,6 +88,72 @@
   - changed-files:
       - any-glob-to-any-file: 'arch/z80/**'
 
+# add board labels
+
+"Board: arm":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/arm/**'
+
+"Board: arm64":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/arm64/**'
+
+"Board: avr":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/avr/**'
+
+"Board: hc":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/hc/**'
+
+"Board: mips":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/mips/**'
+
+"Board: openrisc":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/or1k/**'
+
+"Board: renesas":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/renesas/**'
+
+"Board: risc-v":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/risc-v/**'
+
+"Board: simulator":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/sim/**'
+
+"Board: sparc":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/sparc/**'
+
+"Board: tricore":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/tricore/**'
+
+"Board: x86":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/x86/**'
+
+"Board: x86_64":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/x86_64/**'
+
+"Board: xtensa":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/xtensa/**'
+
+"Board: z16":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/z16/**'
+
+"Board: z80":
+  - changed-files:
+      - any-glob-to-any-file: 'boards/z80/**'
+
 # add area labels
 
 "Area: Audio":
@@ -106,10 +172,6 @@
       - any-glob-to-any-file: 'wireless/bluetooth/**'
       - any-glob-to-any-file: 'nuttx/drivers/wireless/bluetooth/**'
       - any-glob-to-any-file: 'include/nuttx/wireless/bluetooth/**'
-
-"Area: Board support":
-  - changed-files:
-      - any-glob-to-any-file: 'boards/**'
 
 "Area: Build system":
   - changed-files:
