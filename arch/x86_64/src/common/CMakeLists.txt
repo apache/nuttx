@@ -45,6 +45,10 @@ if(CONFIG_ARCH_X86_64_ACPI)
   list(APPEND SRCS x86_64_acpi.c)
 endif()
 
+if(CONFIG_SCHED_THREAD_LOCAL)
+  list(APPEND SRCS x86_64_tls.c)
+endif()
+
 if(CONFIG_ARCH_USE_MMU)
   list(APPEND SRCS x86_64_mmu.c)
 endif()

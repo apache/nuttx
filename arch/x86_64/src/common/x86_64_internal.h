@@ -134,6 +134,20 @@
 #  define IRQ_STACK_SIZE CONFIG_ARCH_INTERRUPTSTACK
 #endif
 
+/* Linker defined section addresses */
+
+#define _START_TEXT  _stext
+#define _END_TEXT    _etext
+#define _START_BSS   _sbss
+#define _END_BSS     _ebss
+#define _DATA_INIT   _eronly
+#define _START_DATA  _sdata
+#define _END_DATA    _edata
+#define _START_TDATA _stdata
+#define _END_TDATA   _etdata
+#define _START_TBSS  _stbss
+#define _END_TBSS    _etbss
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -171,6 +185,10 @@ extern uint8_t _sdata[];           /* Start of .data */
 extern uint8_t _edata[];           /* End+1 of .data */
 extern uint8_t _sbss[];            /* Start of .bss */
 extern uint8_t _ebss[];            /* End+1 of .bss */
+extern uint8_t _stdata[];          /* Start of .tdata */
+extern uint8_t _etdata[];          /* End+1 of .tdata */
+extern uint8_t _stbss[];           /* Start of .tbss */
+extern uint8_t _etbss[];           /* End+1 of .tbss */
 #endif
 
 /****************************************************************************

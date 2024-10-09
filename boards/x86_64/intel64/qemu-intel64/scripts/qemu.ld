@@ -48,6 +48,11 @@ SECTIONS
         *(.loader.rodata)
     }
 
+    .loader.tdata_tbss : {
+        *(.loader.tdata)
+        *(.loader.tbss)
+    }
+
     .loader.data : {
         *(.loader.data)
     }
@@ -87,6 +92,16 @@ SECTIONS
         *(.eh_frame)
         *(.note.gnu.*)
         _erodata = ABSOLUTE(.);
+    }
+
+    .tdata_tbss ALIGN(0x1000) :
+    {
+        _stdata = ABSOLUTE(.);
+        *(.tdata .tdata.* .gnu.linkonce.td.*);
+        _etdata = ABSOLUTE(.);
+        _stbss = ABSOLUTE(.);
+        *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+        _etbss = ABSOLUTE(.);
     }
 
     .data ALIGN(0x1000) :
