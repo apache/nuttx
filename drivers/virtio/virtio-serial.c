@@ -33,16 +33,13 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/virtio/virtio-serial.h>
 
 #include "virtio-serial.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define VIRTIO_SERIAL_RX           0
-#define VIRTIO_SERIAL_TX           1
-#define VIRTIO_SERIAL_NUM          2
 
 /****************************************************************************
  * Private Types
