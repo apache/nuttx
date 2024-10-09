@@ -69,7 +69,7 @@ struct gic_v2m_s
 
 static struct gic_v2m_s g_v2m =
 {
-  SP_LOCKED
+  SP_UNLOCKED
 };
 
 /****************************************************************************
