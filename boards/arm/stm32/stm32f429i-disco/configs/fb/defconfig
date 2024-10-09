@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_ARCH_FPU is not set
+# CONFIG_STM32_FB_CMAP is not set
 # CONFIG_STM32_FLASH_PREFETCH is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm32f429i-disco"
