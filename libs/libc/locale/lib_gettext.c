@@ -549,9 +549,9 @@ FAR char *dcngettext(FAR const char *domainname,
 {
   FAR struct mofile_s *mofile;
   FAR const char *lang;
-  char path[PATH_MAX];
   FAR char *notrans;
   FAR char *trans;
+  FAR char *path;
 
   notrans = (FAR char *)(n == 1 ? msgid1 : msgid2);
 
@@ -576,6 +576,12 @@ FAR char *dcngettext(FAR const char *domainname,
       lang = "C";
     }
 
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return notrans;
+    }
+
   snprintf(path, PATH_MAX,
            CONFIG_LIBC_LOCALE_PATH"/%s/%s/%s.mo",
            lang, g_catname[category], domainname);
@@ -598,6 +604,7 @@ FAR char *dcngettext(FAR const char *domainname,
       if (mofile == NULL)
         {
           nxmutex_unlock(&g_lock);
+          lib_put_pathbuffer(path);
           return notrans;
         }
 
@@ -606,6 +613,7 @@ FAR char *dcngettext(FAR const char *domainname,
       if (mofile->map == MAP_FAILED)
         {
           nxmutex_unlock(&g_lock);
+          lib_put_pathbuffer(path);
           lib_free(mofile);
           return notrans;
         }
@@ -651,6 +659,7 @@ FAR char *dcngettext(FAR const char *domainname,
     }
 
   nxmutex_unlock(&g_lock); /* Leave look before search */
+  lib_put_pathbuffer(path);
 
   trans = molookup(mofile->map, mofile->size, msgid1);
   if (trans == NULL)

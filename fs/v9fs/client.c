@@ -1601,12 +1601,8 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
                      FAR const char *data)
 {
   FAR const char *options;
+  FAR char *aname;
   char transport[NAME_MAX];
-  char aname[PATH_MAX] =
-    {
-      0
-    };
-
   char uname[NAME_MAX] =
     {
       0
@@ -1614,6 +1610,14 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
 
   size_t length;
   int ret;
+
+  aname = lib_get_pathbuffer();
+  if (aname == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  aname[0] = '\0';
 
   /* Parse commandline */
 
@@ -1655,6 +1659,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   ret = v9fs_transport_create(&client->transport, transport, data);
   if (ret < 0)
     {
+      lib_put_pathbuffer(aname);
       return ret;
     }
 
@@ -1662,6 +1667,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   if (client->fids == NULL)
     {
       v9fs_transport_destroy(client->transport);
+      lib_put_pathbuffer(aname);
       return -ENOMEM;
     }
 
@@ -1685,12 +1691,14 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
 
   client->root_fid = ret;
   client->tag_id = 1;
+  lib_put_pathbuffer(aname);
   return 0;
 
 out:
   v9fs_transport_destroy(client->transport);
   nxmutex_destroy(&client->lock);
   idr_destroy(client->fids);
+  lib_put_pathbuffer(aname);
   return ret;
 }
 

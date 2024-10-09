@@ -91,9 +91,15 @@ static void register_partition(FAR struct partition_s *part, FAR void *arg)
     {
       FAR struct partition_register_s *reg = arg;
       FAR struct partition_state_s *state = reg->state;
-      char path[PATH_MAX];
+      FAR char *path;
 
-      snprintf(path, sizeof(path), "%s/%s", reg->dir, part->name);
+      path = lib_get_pathbuffer();
+      if (path == NULL)
+        {
+          return;
+        }
+
+      snprintf(path, PATH_MAX, "%s/%s", reg->dir, part->name);
       if (state->blk != NULL)
         {
           register_partition_with_inode(path, 0660, state->blk,
@@ -106,6 +112,8 @@ static void register_partition(FAR struct partition_s *part, FAR void *arg)
                                       part->firstblock, part->nblocks);
         }
 #endif
+
+      lib_put_pathbuffer(path);
     }
 }
 

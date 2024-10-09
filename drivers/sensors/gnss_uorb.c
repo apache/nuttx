@@ -29,6 +29,7 @@
 #include <nuttx/circbuf.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/gnss.h>
+#include <nuttx/lib/lib.h>
 
 #include <fcntl.h>
 #include <poll.h>
@@ -713,12 +714,19 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
 {
   FAR struct gnss_upperhalf_s *upper;
   FAR struct gnss_sensor_s *dev;
-  char path[PATH_MAX];
+  FAR char *path;
   int ret;
 
   upper = kmm_zalloc(sizeof(struct gnss_upperhalf_s));
   if (upper == NULL)
     {
+      return -ENOMEM;
+    }
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      kmm_free(upper);
       return -ENOMEM;
     }
 
@@ -812,6 +820,7 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
       goto driver_err;
     }
 
+  lib_put_pathbuffer(path);
   return ret;
 
 driver_err:
@@ -830,6 +839,7 @@ gnss_err:
   nxmutex_destroy(&upper->lock);
   nxmutex_destroy(&upper->bufferlock);
   nxsem_destroy(&upper->buffersem);
+  lib_put_pathbuffer(path);
   kmm_free(upper);
   return ret;
 }
@@ -851,7 +861,13 @@ gnss_err:
 void gnss_unregister(FAR struct gnss_lowerhalf_s *lower, int devno)
 {
   FAR struct gnss_upperhalf_s *upper = lower->priv;
-  char path[PATH_MAX];
+  FAR char *path;
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return;
+    }
 
   sensor_unregister(&upper->dev[GNSS_IDX].lower, devno);
   sensor_unregister(&upper->dev[GNSS_SATELLITE_IDX].lower, devno);
@@ -862,5 +878,6 @@ void gnss_unregister(FAR struct gnss_lowerhalf_s *lower, int devno)
   unregister_driver(path);
   nxsem_destroy(&upper->buffersem);
   circbuf_uninit(&upper->buffer);
+  lib_put_pathbuffer(path);
   kmm_free(upper);
 }
