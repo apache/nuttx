@@ -60,7 +60,7 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
     {
       case PTHREAD_PRIO_NONE:
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
-        attr->proto = PTHREAD_PRIO_INHERIT;
+        attr->proto = PTHREAD_PRIO_NONE;
 #endif
         break;
 
