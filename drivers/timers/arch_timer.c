@@ -466,3 +466,18 @@ void weak_function up_udelay(useconds_t microseconds)
       udelay_coarse(microseconds);
     }
 }
+
+/****************************************************************************
+ * Name: up_ndelay
+ *
+ * Description:
+ *   Delay inline for the requested number of nanoseconds.
+ *
+ *   *** NOT multi-tasking friendly ***
+ *
+ ****************************************************************************/
+
+void weak_function up_ndelay(unsigned long nanoseconds)
+{
+  up_udelay((nanoseconds + NSEC_PER_USEC - 1) / NSEC_PER_USEC);
+}

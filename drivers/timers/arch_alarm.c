@@ -50,14 +50,14 @@ static clock_t g_current_tick;
  * Private Functions
  ****************************************************************************/
 
-static void udelay_accurate(useconds_t microseconds)
+static void ndelay_accurate(unsigned long nanoseconds)
 {
   struct timespec now;
   struct timespec end;
   struct timespec delta;
 
   ONESHOT_CURRENT(g_oneshot_lower, &now);
-  clock_nsec2time(&delta, (uint64_t)microseconds * NSEC_PER_USEC);
+  clock_nsec2time(&delta, nanoseconds);
   clock_timespec_add(&now, &delta, &end);
 
   while (clock_timespec_compare(&now, &end) < 0)
@@ -427,12 +427,27 @@ void weak_function up_mdelay(unsigned int milliseconds)
 
 void weak_function up_udelay(useconds_t microseconds)
 {
+  up_ndelay(NSEC_PER_USEC * microseconds);
+}
+
+/****************************************************************************
+ * Name: up_ndelay
+ *
+ * Description:
+ *   Delay inline for the requested number of nanoseconds.
+ *
+ *   *** NOT multi-tasking friendly ***
+ *
+ ****************************************************************************/
+
+void weak_function up_ndelay(unsigned long nanoseconds)
+{
   if (g_oneshot_lower != NULL)
     {
-      udelay_accurate(microseconds);
+      ndelay_accurate(nanoseconds);
     }
   else /* Oneshot timer hasn't been initialized yet */
     {
-      udelay_coarse(microseconds);
+      udelay_coarse((nanoseconds + NSEC_PER_USEC - 1) / NSEC_PER_USEC);
     }
 }
