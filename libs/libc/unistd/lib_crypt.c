@@ -1,7 +1,5 @@
 /****************************************************************************
- * libs/libc/pwd/lib_getpwnam.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * libs/libc/unistd/lib_crypt.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,56 +22,19 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <unistd.h>
 
-#include <string.h>
-#include <pwd.h>
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#include "pwd/lib_pwd.h"
+static char g_passwd[128];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: getpwnam
- *
- * Description:
- *   The getpwnam() function searches the user database for an entry with a
- *   matching name.
- *
- * Input Parameters:
- *   name - The user name to return a passwd structure for.
- *
- * Returned Value:
- *   A pointer to a statically allocated passwd structure, or NULL if no
- *   matching entry is found or an error occurs.  Applications wishing to
- *   check for error situations should set errno to 0 before calling
- *   getpwnam().  If getpwnam() returns a null pointer and errno is set to
- *   non-zero, an error occurred.
- *
- ****************************************************************************/
-
-FAR struct passwd *getpwnam(FAR const char *name)
+char *crypt(const char *key, const char *salt)
 {
-#ifdef CONFIG_LIBC_PASSWD_FILE
-  int ret;
-
-  ret = pwd_findby_name(name, &g_passwd, g_passwd_buffer,
-                        CONFIG_LIBC_PASSWD_LINESIZE);
-  if (ret != 1)
-    {
-      return NULL;
-    }
-
-  return &g_passwd;
-#else
-  if (strcmp(name, ROOT_NAME))
-    {
-      return NULL;
-    }
-
-  return getpwbuf(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_GEOCS, ROOT_DIR,
-                  ROOT_SHELL, ROOT_PASSWD);
-#endif
+  return crypt_r(key, salt, g_passwd);
 }

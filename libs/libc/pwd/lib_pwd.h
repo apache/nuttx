@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <pwd.h>
+#include <shadow.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -39,12 +40,14 @@
 #  define CONFIG_LIBC_PASSWD_LINESIZE 80
 #endif
 
-#define ROOT_NAME  "root"
-#define ROOT_UID   0
-#define ROOT_GID   0
-#define ROOT_GEOCS "root"
-#define ROOT_DIR   "/root"
-#define ROOT_SHELL "/bin/nsh"
+#define ROOT_NAME   "root"
+#define ROOT_UID    0
+#define ROOT_GID    0
+#define ROOT_GEOCS  "root"
+#define ROOT_DIR    "/root"
+#define ROOT_SHELL  "/bin/nsh"
+#define ROOT_PASSWD "root"
+#define ROOT_PWDP   "$1$123$SGj4CnC7VtiFx.tjjtazK1"
 
 /****************************************************************************
  * Public Data
@@ -62,6 +65,7 @@ extern "C"
 
 EXTERN int g_passwd_index;
 EXTERN struct passwd g_passwd;
+EXTERN struct spwd g_spwd;
 EXTERN char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 
 /****************************************************************************
@@ -70,11 +74,12 @@ EXTERN char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 
 FAR struct passwd *getpwbuf(uid_t uid, gid_t gid, FAR const char *name,
                             FAR const char *gecos, FAR const char *dir,
-                            FAR const char *shell);
+                            FAR const char *shell, FAR const char *passwd);
 int getpwbuf_r(uid_t uid, gid_t gid, FAR const char *name,
                FAR const char *gecos, FAR const char *dir,
-               FAR const char *shell, FAR struct passwd *pwd,
-               FAR char *buf, size_t buflen, FAR struct passwd **result);
+               FAR const char *shell, FAR const char *passwd,
+               FAR struct passwd *pwd, FAR char *buf, size_t buflen,
+               FAR struct passwd **result);
 
 #ifdef CONFIG_LIBC_PASSWD_FILE
 int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,

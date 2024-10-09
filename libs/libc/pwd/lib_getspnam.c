@@ -1,7 +1,5 @@
 /****************************************************************************
- * libs/libc/pwd/lib_getpwnam.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * libs/libc/pwd/lib_getspnam.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,8 +24,9 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
 #include <pwd.h>
+#include <shadow.h>
+#include <string.h>
 
 #include "pwd/lib_pwd.h"
 
@@ -35,45 +34,27 @@
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: getpwnam
- *
- * Description:
- *   The getpwnam() function searches the user database for an entry with a
- *   matching name.
- *
- * Input Parameters:
- *   name - The user name to return a passwd structure for.
- *
- * Returned Value:
- *   A pointer to a statically allocated passwd structure, or NULL if no
- *   matching entry is found or an error occurs.  Applications wishing to
- *   check for error situations should set errno to 0 before calling
- *   getpwnam().  If getpwnam() returns a null pointer and errno is set to
- *   non-zero, an error occurred.
- *
- ****************************************************************************/
-
-FAR struct passwd *getpwnam(FAR const char *name)
+FAR struct spwd *getspnam(FAR const char *name)
 {
+  FAR struct spwd *result = NULL;
+
 #ifdef CONFIG_LIBC_PASSWD_FILE
-  int ret;
-
-  ret = pwd_findby_name(name, &g_passwd, g_passwd_buffer,
-                        CONFIG_LIBC_PASSWD_LINESIZE);
-  if (ret != 1)
-    {
-      return NULL;
-    }
-
-  return &g_passwd;
+  getspnam_r(name, &g_spwd, g_passwd_buffer,
+             sizeof(g_passwd_buffer), &result);
 #else
-  if (strcmp(name, ROOT_NAME))
+  if (strcmp(name, ROOT_NAME) == 0)
     {
-      return NULL;
-    }
+      size_t nsize = sizeof(ROOT_NAME);
+      size_t psize = sizeof(ROOT_PWDP);
+      result = &g_spwd;
 
-  return getpwbuf(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_GEOCS, ROOT_DIR,
-                  ROOT_SHELL, ROOT_PASSWD);
+      result->sp_namp = g_passwd_buffer;
+      result->sp_pwdp = &g_passwd_buffer[nsize];
+
+      strlcpy(result->sp_namp, ROOT_NAME, nsize);
+      strlcpy(result->sp_pwdp, ROOT_PWDP, psize);
+    }
 #endif
+
+  return result;
 }

@@ -289,6 +289,7 @@ static int pwd_foreach(pwd_foreach_match_t match, uintptr_t arg,
 
       *ptr++ = '\0';
       entry->pw_shell = ROOT_SHELL;
+      entry->pw_passwd = ROOT_PASSWD;
 
       /* Check for a match */
 

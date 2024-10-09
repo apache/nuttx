@@ -1,7 +1,5 @@
 /****************************************************************************
- * libs/libc/pwd/lib_getpwnam.c
- *
- * SPDX-License-Identifier: Apache-2.0
+ * libs/libc/unistd/lib_getpass.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,56 +22,75 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-#include <string.h>
-#include <pwd.h>
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-#include "pwd/lib_pwd.h"
+static char g_password[128];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: getpwnam
- *
- * Description:
- *   The getpwnam() function searches the user database for an entry with a
- *   matching name.
- *
- * Input Parameters:
- *   name - The user name to return a passwd structure for.
- *
- * Returned Value:
- *   A pointer to a statically allocated passwd structure, or NULL if no
- *   matching entry is found or an error occurs.  Applications wishing to
- *   check for error situations should set errno to 0 before calling
- *   getpwnam().  If getpwnam() returns a null pointer and errno is set to
- *   non-zero, an error occurred.
- *
- ****************************************************************************/
-
-FAR struct passwd *getpwnam(FAR const char *name)
+FAR char *getpass(FAR const char *prompt)
 {
-#ifdef CONFIG_LIBC_PASSWD_FILE
-  int ret;
+  struct termios s;
+  struct termios t;
+  ssize_t total_bytes_read = 0;
+  ssize_t bytes_read;
+  int fd;
 
-  ret = pwd_findby_name(name, &g_passwd, g_passwd_buffer,
-                        CONFIG_LIBC_PASSWD_LINESIZE);
-  if (ret != 1)
+  if ((fd = open("/dev/console", O_RDONLY | O_NOCTTY)) < 0)
     {
-      return NULL;
+      fd = STDIN_FILENO;
     }
 
-  return &g_passwd;
-#else
-  if (strcmp(name, ROOT_NAME))
+  tcgetattr(fd, &t);
+  s = t;
+  t.c_lflag &= ~(ECHO | ISIG);
+  t.c_lflag |= ICANON;
+  t.c_iflag &= ~(INLCR | IGNCR);
+  t.c_iflag |= ICRNL;
+  tcsetattr(fd, TCSAFLUSH, &t);
+  tcdrain(fd);
+
+  if (write(STDERR_FILENO, prompt, strlen(prompt)) != strlen(prompt))
     {
-      return NULL;
+      return 0;
     }
 
-  return getpwbuf(ROOT_UID, ROOT_GID, ROOT_NAME, ROOT_GEOCS, ROOT_DIR,
-                  ROOT_SHELL, ROOT_PASSWD);
-#endif
+  while ((bytes_read = read(fd, g_password + total_bytes_read,
+                            sizeof(g_password) - total_bytes_read)) > 0)
+    {
+      if (bytes_read > 0 && g_password[total_bytes_read] == '\n')
+        {
+            break;
+        }
+
+      total_bytes_read += bytes_read;
+    }
+
+  if (total_bytes_read >= 0)
+    {
+      if (total_bytes_read > 0 && g_password[total_bytes_read - 1] == '\n')
+        {
+          total_bytes_read--;
+        }
+
+      g_password[total_bytes_read] = 0;
+    }
+
+  tcsetattr(fd, TCSAFLUSH, &s);
+
+  if (fd > STDERR_FILENO)
+    {
+      close(fd);
+    }
+
+  return g_password;
 }
