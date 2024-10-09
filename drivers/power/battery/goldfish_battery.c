@@ -321,8 +321,9 @@ int goldfish_battery_register(FAR void *regs, int irq)
       goto fail;
     }
 
-  GOLDFISH_BATTERY_WRITE(data, BATTERY_INT_ENABLE, BATTERY_INT_MASK);
   up_enable_irq(data->irq);
+  GOLDFISH_BATTERY_WRITE(data, BATTERY_INT_ENABLE, BATTERY_INT_MASK);
+
   batinfo("goldfish_battery_register over");
   return 0;
 fail:
