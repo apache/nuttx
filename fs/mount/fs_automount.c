@@ -41,6 +41,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/automount.h>
+#include <nuttx/lib/lib.h>
 
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
 #  include <stdio.h>
@@ -809,7 +810,11 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   FAR struct automounter_state_s *priv;
   int ret;
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
-  char devpath[PATH_MAX];
+  FAR char *devpath = lib_get_pathbuffer();
+  if (devpath == NULL)
+    {
+      return;
+    }
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
 
   finfo("lower=%p\n", lower);
@@ -853,10 +858,11 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
 
   /* Register driver */
 
-  snprintf(devpath, sizeof(devpath),
+  snprintf(devpath, PATH_MAX,
            CONFIG_FS_AUTOMOUNTER_VFS_PATH "%s", lower->mountpoint);
 
   ret = register_driver(devpath, &g_automount_fops, 0444, priv);
+  lib_put_pathbuffer(devpath);
   if (ret < 0)
     {
       ferr("ERROR: Failed to register automount driver: %d\n", ret);
@@ -913,12 +919,17 @@ void automount_uninitialize(FAR void *handle)
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
   if (priv->registered)
     {
-      char devpath[PATH_MAX];
+      FAR char *devpath = lib_get_pathbuffer();
+      if (devpath == NULL)
+        {
+          return;
+        }
 
-      snprintf(devpath, sizeof(devpath),
+      snprintf(devpath, PATH_MAX,
                CONFIG_FS_AUTOMOUNTER_VFS_PATH "%s", lower->mountpoint);
 
       unregister_driver(devpath);
+      lib_put_pathbuffer(devpath);
     }
 
   nxmutex_destroy(&priv->lock);

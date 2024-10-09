@@ -67,17 +67,27 @@
 
 int symlinkat(FAR const char *path1, int dirfd, FAR const char *path2)
 {
-  char fullpath[PATH_MAX];
+  FAR char *fullpath;
   int ret;
 
-  ret = lib_getfullpath(dirfd, path2, fullpath, sizeof(fullpath));
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = lib_getfullpath(dirfd, path2, fullpath, PATH_MAX);
   if (ret < 0)
     {
+      lib_put_pathbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
-  return symlink(path1, fullpath);
+  ret = symlink(path1, fullpath);
+  lib_put_pathbuffer(fullpath);
+  return ret;
 }
 
 #endif /* CONFIG_PSEUDOFS_SOFTLINKS */

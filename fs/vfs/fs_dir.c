@@ -34,6 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/lib/lib.h>
 
 #include "inode/inode.h"
 #include "fs_heap.h"
@@ -583,8 +584,14 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
 {
   FAR struct fs_dirent_s *dir;
   FAR struct inode *inode = filep->f_inode;
-  char path_prefix[PATH_MAX];
+  FAR char *path_prefix;
   int ret;
+
+  path_prefix = lib_get_pathbuffer();
+  if (path_prefix == NULL)
+    {
+      return -ENOMEM;
+    }
 
   /* Is this a node in the pseudo filesystem? Or a mountpoint? */
 
@@ -596,6 +603,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
       ret = open_mountpoint(inode, relpath, &dir);
       if (ret < 0)
         {
+          lib_put_pathbuffer(path_prefix);
           return ret;
         }
     }
@@ -605,20 +613,23 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
       ret = open_pseudodir(inode, &dir);
       if (ret < 0)
         {
+          lib_put_pathbuffer(path_prefix);
           return ret;
         }
     }
 
-  inode_getpath(inode, path_prefix, sizeof(path_prefix));
+  inode_getpath(inode, path_prefix, PATH_MAX);
   ret = fs_heap_asprintf(&dir->fd_path, "%s%s/", path_prefix, relpath);
   if (ret < 0)
     {
       dir->fd_path = NULL;
+      lib_put_pathbuffer(path_prefix);
       return ret;
     }
 
   filep->f_inode = &g_dir_inode;
   filep->f_priv  = dir;
   inode_addref(&g_dir_inode);
+  lib_put_pathbuffer(path_prefix);
   return ret;
 }

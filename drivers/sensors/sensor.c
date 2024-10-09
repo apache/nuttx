@@ -41,6 +41,7 @@
 #include <nuttx/circbuf.h>
 #include <nuttx/mutex.h>
 #include <nuttx/sensors/sensor.h>
+#include <nuttx/lib/lib.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1240,16 +1241,25 @@ void sensor_remap_vector_raw16(FAR const int16_t *in, FAR int16_t *out,
 
 int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
-  char path[PATH_MAX];
+  FAR char *path;
+  int ret;
 
   DEBUGASSERT(lower != NULL);
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
 
   snprintf(path, PATH_MAX, DEVNAME_FMT,
            g_sensor_meta[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",
            devno);
-  return sensor_custom_register(lower, path,
-                                g_sensor_meta[lower->type].esize);
+  ret = sensor_custom_register(lower, path,
+                               g_sensor_meta[lower->type].esize);
+  lib_put_pathbuffer(path);
+  return ret;
 }
 
 /****************************************************************************
@@ -1381,13 +1391,20 @@ rpmsg_err:
 
 void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
-  char path[PATH_MAX];
+  FAR char *path;
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return;
+    }
 
   snprintf(path, PATH_MAX, DEVNAME_FMT,
            g_sensor_meta[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",
            devno);
   sensor_custom_unregister(lower, path);
+  lib_put_pathbuffer(path);
 }
 
 /****************************************************************************

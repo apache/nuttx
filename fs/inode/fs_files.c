@@ -44,6 +44,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/spawn.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/lib/lib.h>
 
 #ifdef CONFIG_FDSAN
 #  include <android/fdsan.h>
@@ -383,6 +384,7 @@ void files_initlist(FAR struct filelist *list)
 #ifdef CONFIG_SCHED_DUMP_ON_EXIT
 void files_dumplist(FAR struct filelist *list)
 {
+  FAR char *path;
   int count = files_countlist(list);
   int i;
 
@@ -394,10 +396,15 @@ void files_dumplist(FAR struct filelist *list)
         "PID", "FD", "FLAGS", "TYPE", "POS", "PATH"
         );
 
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return;
+    }
+
   for (i = 0; i < count; i++)
     {
       FAR struct file *filep = files_fget(list, i);
-      char path[PATH_MAX];
 
 #if CONFIG_FS_BACKTRACE > 0
       char buf[BACKTRACE_BUFFER_SIZE(CONFIG_FS_BACKTRACE)];
@@ -433,6 +440,8 @@ void files_dumplist(FAR struct filelist *list)
             );
       fs_putfilep(filep);
     }
+
+  lib_put_pathbuffer(path);
 }
 #endif
 

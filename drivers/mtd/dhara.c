@@ -33,6 +33,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/lib/lib.h>
 
 #include <dhara/map.h>
 #include <dhara/nand.h>
@@ -785,7 +786,8 @@ err:
 
 int dhara_initialize(int minor, FAR struct mtd_dev_s *mtd)
 {
-  char path[PATH_MAX];
+  FAR char *path;
+  int ret;
 
 #ifdef CONFIG_DEBUG_FEATURES
   /* Sanity check */
@@ -796,8 +798,16 @@ int dhara_initialize(int minor, FAR struct mtd_dev_s *mtd)
     }
 #endif
 
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
+
   /* Do the real work by dhara_mtdblock_initialize_by_path */
 
-  snprintf(path, sizeof(path), "/dev/mtdblock%d", minor);
-  return dhara_initialize_by_path(path, mtd);
+  snprintf(path, PATH_MAX, "/dev/mtdblock%d", minor);
+  ret = dhara_initialize_by_path(path, mtd);
+  lib_put_pathbuffer(path);
+  return ret;
 }

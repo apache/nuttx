@@ -59,6 +59,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/queue.h>
+#include <nuttx/lib/lib.h>
 
 #include "fs_heap.h"
 
@@ -1252,7 +1253,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 {
   FAR struct task_group_s *group = tcb->group;
   FAR struct file *filep;
-  char path[PATH_MAX];
+  FAR char *path;
   size_t remaining;
   size_t linesize;
   size_t copysize;
@@ -1288,6 +1289,12 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   remaining -= copysize;
 
   if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
     {
       return totalsize;
     }
@@ -1336,10 +1343,12 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
       if (totalsize >= buflen)
         {
+          lib_put_pathbuffer(path);
           return totalsize;
         }
     }
 
+  lib_put_pathbuffer(path);
   return totalsize;
 }
 

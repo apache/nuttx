@@ -47,6 +47,7 @@
 #include <nuttx/input/aw86225.h>
 #include <nuttx/input/ff.h>
 #include <nuttx/irq.h>
+#include <nuttx/lib/lib.h>
 
 #include "aw86225_reg.h"
 #include "aw86225_internal.h"
@@ -369,14 +370,21 @@ static int aw86225_i2c_write_bits(FAR struct aw86225 *aw86225,
 static int aw86225_request_firmware(FAR struct aw86225_firmware *fw,
                                     FAR const char *filename)
 {
-  char file_path[PATH_MAX];
+  FAR char *file_path;
   struct file file;
   size_t file_size;
   int ret;
 
-  snprintf(file_path, sizeof(file_path), "%s/%s", CONFIG_FF_RTP_FILE_PATH,
+  file_path = lib_get_pathbuffer();
+  if (file_path == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  snprintf(file_path, PATH_MAX, "%s/%s", CONFIG_FF_RTP_FILE_PATH,
            filename);
   ret = file_open(&file, file_path, O_RDONLY);
+  lib_put_pathbuffer(file_path);
   if (ret < 0)
     {
       ierr("open file failed");

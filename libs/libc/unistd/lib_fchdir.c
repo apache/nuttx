@@ -26,9 +26,11 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
+#include <nuttx/lib/lib.h>
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
@@ -66,16 +68,26 @@
 
 int fchdir(int fd)
 {
-  char path[PATH_MAX];
+  FAR char *path;
   int ret;
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
 
   ret = fcntl(fd, F_GETPATH, path);
   if (ret < 0)
     {
+      lib_put_pathbuffer(path);
       return ret;
     }
 
-  return chdir(path);
+  ret = chdir(path);
+  lib_put_pathbuffer(path);
+  return ret;
 }
 
 #endif /* !CONFIG_DISABLE_ENVIRON */
