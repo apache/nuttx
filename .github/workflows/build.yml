@@ -127,7 +127,7 @@ jobs:
         [
           "arm-01", "other", "risc-v-01", "sim-01", "xtensa-01",
           "arm-02", "risc-v-02", "sim-02", "xtensa-02",
-          "arm-03", "arm-04", "arm-05", "arm-06", "arm-07", "arm-08", "arm-09", "arm-10", "arm-11", "arm-12", "arm-13"
+          "arm-03", "arm-04", "arm-05", "arm-06", "arm-07", "arm-08", "arm-09", "arm-10", "arm-11", "arm-12", "arm-13", "arm-14"
         ]
 
   # Run the selected Linux Builds

@@ -1,62 +1,39 @@
-/arm/stm32/nucleo-f33*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/[a-m]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/nucleo-f4*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/nucleo-f1*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/nucleo-g*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/nucleo-f2*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/nucleo-l*,CONFIG_ARM_TOOLCHAIN_CLANG
-
-/arm/stm32/olimex-*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32/nucleo-f30*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
 # Boards build by CMake
 
-CMake,nucleo-f334r8:adc
-CMake,nucleo-f334r8:highpri
-CMake,nucleo-f334r8:nsh
-CMake,nucleo-f334r8:spwm1
-CMake,nucleo-f334r8:spwm2
+CMake,nucleo-f103rb:adc
+CMake,nucleo-f103rb:ihm07m1_b16
+CMake,nucleo-f103rb:nsh
+CMake,nucleo-f103rb:pwm
+CMake,nucleo-f103rb:qenco
 
-CMake,nucleo-f410rb:nsh
+CMake,nucleo-f207zg:adc
+CMake,nucleo-f207zg:nsh
+CMake,nucleo-f207zg:pwm
 
-CMake,nucleo-f412zg:nsh
+# CMake,nucleo-f302r8:can
+CMake,nucleo-f302r8:cansock
+CMake,nucleo-f302r8:highpri
+CMake,nucleo-f302r8:ihm07m1_b16
+CMake,nucleo-f302r8:ihm07m1_f32
+CMake,nucleo-f302r8:nsh
+CMake,nucleo-f302r8:qenco
 
-CMake,nucleo-f429zi:netnsh
-CMake,nucleo-f429zi:nsh
+CMake,nucleo-f303re:adc
+# CMake,nucleo-f303re:can
+CMake,nucleo-f303re:hello
+CMake,nucleo-f303re:nsh
+# CMake,nucleo-f303re:nxlines
+CMake,nucleo-f303re:pwm
+# CMake,nucleo-f303re:serialrx
 
-CMake,nucleo-f446re:adc
-# CMake,nucleo-f446re:can
-CMake,nucleo-f446re:cansock
-CMake,nucleo-f446re:dac
-CMake,nucleo-f446re:gpio
-CMake,nucleo-f446re:ihm08m1_b16
-CMake,nucleo-f446re:ihm08m1_f32
-# CMake,nucleo-f446re:lcd
-CMake,nucleo-f446re:nsh
-CMake,nucleo-f446re:pwm
-CMake,nucleo-f446re:qenco
-CMake,nucleo-f446re:systemview
-
-CMake,nucleo-f4x1re:f401-fb
-CMake,nucleo-f4x1re:f401-nsh
-CMake,nucleo-f4x1re:f411-mcp2515-extid
-CMake,nucleo-f4x1re:f411-nsh
-
-CMake,nucleo-g431kb:comp
-CMake,nucleo-g431kb:nsh
-CMake,nucleo-g431kb:pwm
-
-CMake,nucleo-g431rb:adc
-# CMake,nucleo-g431rb:can
-CMake,nucleo-g431rb:cansock
-CMake,nucleo-g431rb:cordic
-CMake,nucleo-g431rb:ihm16m1_b16
-CMake,nucleo-g431rb:ihm16m1_f32
-CMake,nucleo-g431rb:nsh
-CMake,nucleo-g431rb:pwm
-CMake,nucleo-g431rb:qenco
-
-CMake,nucleo-g474re:nsh
-# CMake,nucleo-g474re:usbserial
-
-# CMake,nucleo-l152re:lcd
-CMake,nucleo-l152re:nsh
+CMake,nucleo-f303ze:adc
+CMake,nucleo-f303ze:nsh
+# CMake,nucleo-f303ze:nxlines_oled

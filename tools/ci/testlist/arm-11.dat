@@ -1,8 +1,71 @@
-/arm/stm32/stm32f4discovery,CONFIG_ARM_TOOLCHAIN_GNU_EABI
--stm32f4discovery:winbuild
+/arm/stm32/stm32_tiny,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/stm32ldiscovery,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/stm32butterfly2,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/stm32vldiscovery,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/stm32f103-minimum,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/viewtool-stm32f107,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32/stm32f334-disco,CONFIG_ARM_TOOLCHAIN_CLANG
+
+/arm/stm32/stm32f3discovery,CONFIG_ARM_TOOLCHAIN_CLANG
+
+/arm/stm32/stm32f411-minimum,CONFIG_ARM_TOOLCHAIN_CLANG
+
+/arm/stm32/stm32f411e-disco,CONFIG_ARM_TOOLCHAIN_CLANG
+
+/arm/stm32/stm32f429i-disco,CONFIG_ARM_TOOLCHAIN_CLANG
+
+# Boards build by CMake
+
+CMake,stm32_tiny:nsh
+CMake,stm32_tiny:usbnsh
+
+CMake,stm32butterfly2:nsh
+CMake,stm32butterfly2:nshnet
+CMake,stm32butterfly2:nshusbdev
+CMake,stm32butterfly2:nshusbhost
+
+# CMake,stm32f103-minimum:adb
+CMake,stm32f103-minimum:apds9960
+CMake,stm32f103-minimum:audio_tone
+CMake,stm32f103-minimum:buttons
+CMake,stm32f103-minimum:hello
+# CMake,stm32f103-minimum:jlx12864g
+CMake,stm32f103-minimum:lcd1602
+CMake,stm32f103-minimum:mcp2515
+CMake,stm32f103-minimum:nrf24
+CMake,stm32f103-minimum:nsh
+CMake,stm32f103-minimum:pwm
+CMake,stm32f103-minimum:rfid-rc522
+CMake,stm32f103-minimum:rgbled
+# CMake,stm32f103-minimum:sensors
+# CMake,stm32f103-minimum:ssd1306
+CMake,stm32f103-minimum:usbnsh
+CMake,stm32f103-minimum:userled
+CMake,stm32f103-minimum:veml6070
+
+CMake,stm32f334-disco:buckboost
+CMake,stm32f334-disco:nsh
+CMake,stm32f334-disco:powerled
+
+CMake,stm32f3discovery:nsh
+CMake,stm32f3discovery:usbnsh
+
+CMake,stm32f411-minimum:composite
+CMake,stm32f411-minimum:nsh
+CMake,stm32f411-minimum:spifsnsh
+CMake,stm32f411-minimum:usbmsc
+
+CMake,stm32f411e-disco:nsh
+
+CMake,stm32f429i-disco:adc
+CMake,stm32f429i-disco:extflash
+# CMake,stm32f429i-disco:fb
+CMake,stm32f429i-disco:highpri
+# CMake,stm32f429i-disco:lcd
+# CMake,stm32f429i-disco:lvgl
+CMake,stm32f429i-disco:nsh
+# CMake,stm32f429i-disco:nxhello
+# CMake,stm32f429i-disco:nxwm
+# CMake,stm32f429i-disco:ofloader
+CMake,stm32f429i-disco:usbmsc
+CMake,stm32f429i-disco:usbnsh
