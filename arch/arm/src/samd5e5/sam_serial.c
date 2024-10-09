@@ -1106,16 +1106,6 @@ int up_putc(int ch)
    */
 
   flags = spin_lock_irqsave(NULL);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      sam_lowputc('\r');
-    }
-
   sam_lowputc(ch);
   spin_unlock_irqrestore(NULL, flags);
 #endif
@@ -1135,15 +1125,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      sam_lowputc('\r');
-    }
-
   sam_lowputc(ch);
 #endif
   return ch;

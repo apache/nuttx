@@ -1065,15 +1065,6 @@ int up_putc(int ch)
 {
   FAR struct uart_dev_s *dev = &CONSOLE_DEV;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      pl011_putc(dev, '\r');
-    }
-
   pl011_putc(dev, ch);
 
   return ch;

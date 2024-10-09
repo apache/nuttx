@@ -75,15 +75,6 @@ void uart_putreg(struct u16550_s *priv,
 
 int up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      x86_lowputc('\r');
-    }
-
   x86_lowputc(ch);
   return ch;
 }

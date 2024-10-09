@@ -1010,18 +1010,6 @@ int up_putc(int ch)
   uint8_t uart_idx = priv->config.idx;
   irqstate_t flags = enter_critical_section();
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      while ((getreg32(BL808_UART_FIFO_CONFIG_1(uart_idx)) &
-            UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
-
-      putreg32('\r', BL808_UART_FIFO_WDATA(uart_idx));
-    }
-
   while ((getreg32(BL808_UART_FIFO_CONFIG_1(uart_idx)) &
             UART_FIFO_CONFIG_1_TX_CNT_MASK) == 0);
 

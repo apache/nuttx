@@ -588,16 +588,6 @@ int up_putc(int ch)
   uint32_t ie;
 
   eoss3_disableuartint(priv, &ie);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   eoss3_restoreuartint(priv, ie);
 #endif
@@ -617,15 +607,6 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   /* Output the character */
 
   arm_lowputc(ch);

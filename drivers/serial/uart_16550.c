@@ -1704,15 +1704,6 @@ int up_putc(int ch)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)CONSOLE_DEV.priv;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      u16550_putc(priv, '\r');
-    }
-
   u16550_putc(priv, ch);
 
   return ch;

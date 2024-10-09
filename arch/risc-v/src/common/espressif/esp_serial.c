@@ -1155,15 +1155,6 @@ int up_putc(int ch)
   esp_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 
 #ifdef CONSOLE_UART
@@ -1223,15 +1214,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 #endif /* HAVE_SERIAL_CONSOLE */
 

@@ -832,16 +832,6 @@ int up_putc(int ch)
   uint32_t intset;
 
   max326_int_disableall(priv, &intset);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   max326_int_enable(priv, intset);
 #endif
@@ -862,15 +852,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   return ch;
 }

@@ -792,16 +792,6 @@ int up_putc(int ch)
   up_waittxready(priv);
   up_serialout(priv, LPC214X_UART_THR_OFFSET, (uint8_t)ch);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxready(priv);
-      up_serialout(priv, LPC214X_UART_THR_OFFSET, '\r');
-    }
-
   up_waittxready(priv);
   up_restoreuartint(priv, ier);
   return ch;
@@ -819,15 +809,6 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   return ch;
 }

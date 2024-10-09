@@ -1101,17 +1101,6 @@ int up_putc(int ch)
   uint8_t  ucon;
 
   up_disableuartint(priv, &ucon);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxready(priv);
-      up_serialout16(priv, M16C_UART_TB, (uint16_t)'\r');
-    }
-
   up_waittxready(priv);
   up_serialout16(priv, M16C_UART_TB, (uint16_t)ch);
 
@@ -1134,15 +1123,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_SERIALCONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      renesas_lowputc('\r');
-    }
-
   renesas_lowputc(ch);
 #endif
   return ch;

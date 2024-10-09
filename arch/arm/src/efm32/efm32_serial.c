@@ -1192,16 +1192,6 @@ int up_putc(int ch)
   uint32_t ien;
 
   efm32_disableuartint(priv, &ien);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      efm32_lowputc('\r');
-    }
-
   efm32_lowputc(ch);
   efm32_restoreuartint(priv, ien);
 #endif
@@ -1223,15 +1213,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      efm32_lowputc('\r');
-    }
-
   efm32_lowputc(ch);
 #endif
   return ch;

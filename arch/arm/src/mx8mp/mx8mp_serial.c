@@ -1062,16 +1062,6 @@ int up_putc(int ch)
    */
 
   mx8mp_disableuartint(priv, &ier);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   mx8mp_restoreuartint(priv, ier);
 #endif
@@ -1127,17 +1117,6 @@ int up_putc(int ch)
 {
 #ifdef MX8MP_CONSOLE
   mx8mp_waittxready();
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      putreg32((uint16_t)'\r', MX8MP_CONSOLE + UART_TXD_OFFSET);
-      mx8mp_waittxready();
-    }
-
   putreg32((uint16_t)ch, MX8MP_CONSOLE + UART_TXD_OFFSET);
 #endif
 

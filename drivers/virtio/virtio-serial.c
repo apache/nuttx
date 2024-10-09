@@ -672,13 +672,6 @@ int up_putc(int ch)
 {
   if (g_virtio_console != NULL)
     {
-      if (ch == '\n')
-        {
-          /* Add CR */
-
-          virtio_serial_send(g_virtio_console, '\r');
-        }
-
       virtio_serial_send(g_virtio_console, ch);
     }
 

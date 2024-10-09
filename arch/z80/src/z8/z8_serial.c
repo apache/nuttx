@@ -734,15 +734,6 @@ int up_putc(int ch)
 
   state = z8_disableuartirq(&CONSOLE_DEV);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR before LF */
-
-      z8_consoleput('\r');
-    }
-
   /* Output the character */
 
   z8_consoleput((uint8_t)ch);
@@ -807,15 +798,6 @@ static void z8_putc(int ch)
 
 int up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Output CR before LF */
-
-      z8_putc('\r');
-    }
-
   /* Output character */
 
   z8_putc(ch);

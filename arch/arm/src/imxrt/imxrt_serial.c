@@ -3678,16 +3678,6 @@ int up_putc(int ch)
   uint32_t ie;
 
   imxrt_disableuartint(priv, &ie);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      imxrt_lowputc('\r');
-    }
-
   imxrt_lowputc(ch);
   imxrt_restoreuartint(priv, ie);
 #endif
@@ -3708,15 +3698,6 @@ int up_putc(int ch)
 int up_putc(int ch)
 {
 #if CONSOLE_LPUART > 0
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
 
