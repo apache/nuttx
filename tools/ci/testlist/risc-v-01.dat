@@ -1,1 +1,2 @@
-/risc-v/[a-e]*
+/risc-v/[a-d]*
+/risc-v/e[0-r]*
