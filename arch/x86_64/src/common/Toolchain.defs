@@ -32,7 +32,7 @@ ifeq ($(CONFIG_FRAME_POINTER),y)
   ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
 endif
 
-ARCHCPUFLAGS = -fPIC -fno-stack-protector -mno-red-zone -mrdrnd
+ARCHCPUFLAGS = -fno-pic -mcmodel=large -fno-stack-protector -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 

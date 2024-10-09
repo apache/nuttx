@@ -89,7 +89,7 @@ add_link_options(-Wl,--entry=__pmode_entry)
 add_link_options(-z max-page-size=0x1000)
 add_link_options(-no-pie -nostdlib)
 add_link_options(-Wl,--no-relax)
-add_compile_options(-fPIC)
+add_compile_options(-fno-pic -mcmodel=large)
 add_compile_options(-mno-red-zone)
 
 if(CONFIG_DEBUG_LINK_MAP)
