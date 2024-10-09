@@ -152,6 +152,12 @@ Getting Started
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:knsh
    $ make
+   $ make export V=1
+   $ pushd ../apps
+   $ ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
+   $ make import V=1
+   $ popd
+
    Running with qemu
    $ qemu-system-aarch64 -semihosting -cpu cortex-a53 -nographic \
      -machine virt,virtualization=on,gic-version=3 \
