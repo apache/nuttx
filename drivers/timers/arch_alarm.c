@@ -37,14 +37,18 @@
 #define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef CONFIG_SCHED_TICKLESS
+clock_t g_current_tick;
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static FAR struct oneshot_lowerhalf_s *g_oneshot_lower;
-
-#ifndef CONFIG_SCHED_TICKLESS
-static clock_t g_current_tick;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -117,6 +121,8 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
                              FAR void *arg)
 {
   clock_t now;
+  clock_t diff;
+  clock_t chase;
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &now);
 
 #ifdef CONFIG_SCHED_TICKLESS
@@ -128,6 +134,8 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
    * atomically w. respect to a HW timer
    */
 
+  diff           = now - g_current_tick;
+  g_current_tick = now;
   ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
 
   /* It is always an error if this progresses more than 1 tick at a time.
@@ -139,11 +147,11 @@ static void oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
   /* DEBUGASSERT(now - g_current_tick <= 1); */
 
-  while (now - g_current_tick > 0)
+  for (chase = 0; chase < diff; chase++)
     {
-      g_current_tick++;
       nxsched_process_timer();
     }
+
 #endif
 }
 

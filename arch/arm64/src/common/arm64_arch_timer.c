@@ -51,6 +51,8 @@
 #define ARM_ARCH_TIMER_PRIO                 IRQ_DEFAULT_PRIORITY
 #define ARM_ARCH_TIMER_FLAGS                IRQ_TYPE_LEVEL
 
+#define ARM_ARCH_TIMER_UNINITIALIZED_TICK   ((UINT64_MAX / TICK_PER_SEC) + 1)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -286,9 +288,14 @@ static int arm64_tick_start(struct oneshot_lowerhalf_s *lower,
 
   priv->running = this_cpu();
 
-  next_cycle =
-    arm64_arch_timer_count() / priv->cycle_per_tick * priv->cycle_per_tick +
-    ticks * priv->cycle_per_tick;
+  /* When we first set the timer, we should get the current tick */
+
+  if (g_current_tick == ARM_ARCH_TIMER_UNINITIALIZED_TICK)
+    {
+      lower->ops->tick_current(lower, &g_current_tick);
+    }
+
+  next_cycle = (g_current_tick + ticks) * priv->cycle_per_tick;
 
   arm64_arch_timer_set_compare(next_cycle);
   arm64_arch_timer_set_irq_mask(false);
@@ -380,6 +387,8 @@ struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
   priv->running = -1;
   priv->cycle_per_tick = arm64_arch_timer_get_cntfrq() / TICK_PER_SEC;
   tmrinfo("cycle_per_tick %" PRIu64 "\n", priv->cycle_per_tick);
+
+  g_current_tick = ARM_ARCH_TIMER_UNINITIALIZED_TICK;
 
   /* Attach handler */
 
