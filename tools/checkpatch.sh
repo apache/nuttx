@@ -63,7 +63,7 @@ is_rust_file() {
 
 is_cmake_file() {
   file_name=$(basename $@)
-  if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ "cmake" ]]; then
+  if [ "$file_name" == "CMakeLists.txt" ] || [[ "$file_name" =~ \.cmake$ ]]; then
     echo 1
   else
     echo 0
