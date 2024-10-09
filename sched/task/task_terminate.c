@@ -66,7 +66,7 @@ static int terminat_handler(FAR void *cookie)
       return -ESRCH;
     }
 
-  nxsched_remove_readytorun(tcb, false);
+  nxsched_remove_readytorun(tcb);
 
   leave_critical_section(flags);
   return OK;
@@ -164,7 +164,7 @@ int nxtask_terminate(pid_t pid)
   else
 #endif
     {
-      nxsched_remove_readytorun(dtcb, false);
+      nxsched_remove_readytorun(dtcb);
     }
 
   dtcb->task_state = task_state;

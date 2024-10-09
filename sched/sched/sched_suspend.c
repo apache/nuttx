@@ -77,7 +77,7 @@ static int nxsched_suspend_handler(FAR void *cookie)
       tcb->flags = arg->saved_flags;
     }
 
-  nxsched_remove_readytorun(tcb, false);
+  nxsched_remove_readytorun(tcb);
 
   tcb->task_state = TSTATE_TASK_STOPPED;
   dq_addlast((FAR dq_entry_t *)tcb, &g_stoppedtasks);
@@ -172,7 +172,12 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
       else
 #endif
         {
-          switch_needed = nxsched_remove_readytorun(tcb, true);
+          switch_needed = nxsched_remove_readytorun(tcb);
+
+          if (list_pendingtasks()->head)
+            {
+              switch_needed |= nxsched_merge_pending();
+            }
 
           /* Add the task to the specified blocked task list */
 

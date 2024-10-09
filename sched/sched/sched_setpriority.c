@@ -200,7 +200,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
 
           do
             {
-              bool check = nxsched_remove_readytorun(nxttcb, false);
+              bool check = nxsched_remove_readytorun(nxttcb);
               DEBUGASSERT(check == false);
               UNUSED(check);
 
