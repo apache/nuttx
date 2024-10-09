@@ -660,7 +660,7 @@ static int qemu_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
   base = pci_qep_func_base(qep, funcno);
   flags = qemu_epc_cfg_read16(qep, base + QEMU_EPC_BAR_CFG_MSI +
                               PCI_MSI_FLAGS);
-  if (!(flags & PCI_MSIX_FLAGS_ENABLE))
+  if (!(flags & PCI_MSI_FLAGS_ENABLE))
     {
       pcierr("msi is not enabled\n");
       return -EINVAL;
