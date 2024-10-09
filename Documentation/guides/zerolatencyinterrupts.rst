@@ -1,6 +1,6 @@
-=========================================
-High Performance, Zero Latency Interrupts
-=========================================
+=====================================================================
+High Performance: Zero Latency Interrupts, Maskable nested interrupts
+=====================================================================
 
 Generic Interrupt Handling
 ==========================
@@ -110,6 +110,62 @@ The custom logic would be needed to communicate the events of interest
 between the high priority interrupt handler and *PendSV* interrupt
 handler. A detailed discussion of that custom logic is beyond the
 scope of this Wiki page.
+
+The following table shows the priority levels of the Cortex-M family:
+
+.. code-block::
+
+  IRQ type               Priority
+  Dataabort              0x00
+  High prio IRQ1         0x20	(Zero-latency interrupt)
+  High prio IRQ2         0x30	(Can't call OS API in ISR)
+  SVC                    0x70
+  Disable IRQ            0x80
+  (critical-section)
+  Low  prio IRQ          0xB0
+  PendSV                 0xE0
+
+As you can see, the priority levels of the zero-latency interrupts can
+beyond the critical section and SVC.
+But High prio IRQ can't call OS API.
+
+
+Maskable Nested Interrupts
+==========================
+
+The ARM Cortex-M family supports a feature called *BASEPRI* that can be
+used to disable interrupts at a priority level below a certain level.
+This feature can be used to support maskable nested interrupts.
+
+Maskable nested interrupts differ from zero-latency interrupts in
+that they obey the interrupt masking mechanisms of the system.
+For example, setting the BASEPRI register to a specific threshold will
+block all interrupts of a lower or equal priority.
+However, high-priority interrupts (such as Non-Maskable Interrupts
+or zero-latency interrupts) are unaffected by these masks.
+
+This is useful when you have a high-priority interrupt that needs to
+be able to interrupt the system, but you also have lower-priority
+interrupts that you want to be able to mask.
+
+The following table shows the priority levels of the Cortex-M family:
+
+.. code-block::
+
+  IRQ type                Priority
+  Dataabort               0x00
+  SVC                     0x70
+  Disable IRQ             0x80
+  (critical-section)
+  High prio IRQ1          0x90    (Maskable nested interrupt)
+  High prio IRQ2          0xA0    (Can call OS API in ISR)
+  Low  prio IRQ           0xB0
+  PendSV                  0xE0
+
+As you can see, the priority levels of the maskable nested interrupts
+are between the critical section and the low-priority interrupts.
+And High prio IRQ can call OS API in ISR.
+
 
 Nested Interrupt Handling
 =========================
