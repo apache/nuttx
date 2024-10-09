@@ -73,73 +73,46 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_BUILTIN_FFS
-static inline_function int ffs(int j)
-{
-  return __builtin_ffs(j);
-}
+#  define ffs(j) __builtin_ffs(j)
 #elif defined (CONFIG_HAVE_BUILTIN_CTZ)
-static inline_function int ffs(int j)
-{
-  return __builtin_ctz(j) + 1;
-}
+#  define ffs(j) (__builtin_ctz(j) + 1)
 #else
 int ffs(int j);
 #endif
 
 #ifdef CONFIG_HAVE_BUILTIN_FFSL
-static inline_function int ffsl(long j)
-{
-  return __builtin_ffsl(j);
-}
-#elif defined (CONFIG_HAVE_BUILTIN_CTZ)
-static inline_function int ffsl(long j)
-{
-  return __builtin_ctzl(j) + 1;
-}
+#  define ffsl(j) __builtin_ffsl(j)
+#elif defined (CONFIG_HAVE_BUILTIN_CTZL)
+#  define ffsl(j) (__builtin_ctzl(j) + 1)
 #else
 int ffsl(long j);
 #endif
 
 #ifdef CONFIG_HAVE_LONG_LONG
 #  ifdef CONFIG_HAVE_BUILTIN_FFSLL
-static inline_function int ffsll(long long j)
-{
-    return __builtin_ffsll(j);
-}
-#  elif defined (CONFIG_HAVE_BUILTIN_CTZ)
-static inline_function int ffsll(long long j)
-{
-    return __builtin_ctzll(j) + 1;
-}
+#    define ffsll(j) __builtin_ffsll(j)
+#  elif defined (CONFIG_HAVE_BUILTIN_CTZLL)
+#    define ffsll(j) (__builtin_ctzll(j) + 1)
 #  else
 int ffsll(long long j);
 #  endif
 #endif
 
 #ifdef CONFIG_HAVE_BUILTIN_CLZ
-static inline_function int fls(int j)
-{
-  return (8 * sizeof(int)) - __builtin_clz(j);
-}
+#  define fls(j) ((8 * sizeof(int)) - __builtin_clz(j))
 #else
 int fls(int j);
 #endif
 
-#ifdef CONFIG_HAVE_BUILTIN_CLZ
-static inline_function int flsl(long j)
-{
-  return (8 * sizeof(long)) - __builtin_clzl(j);
-}
+#ifdef CONFIG_HAVE_BUILTIN_CLSL
+#  define flsl(j) ((8 * sizeof(long)) - __builtin_clsl(j))
 #else
 int flsl(long j);
 #endif
 
 #ifdef CONFIG_HAVE_LONG_LONG
-#  ifdef CONFIG_HAVE_BUILTIN_CLZ
-static inline_function int flsll(long long j)
-{
-  return (8 * sizeof(long long)) - __builtin_clzll(j);
-}
+#  ifdef CONFIG_HAVE_BUILTIN_CLZLL
+#    define flsll(j) ((8 * sizeof(long long)) - __builtin_clzll(j))
 #  else
 int flsll(long long j);
 #  endif
