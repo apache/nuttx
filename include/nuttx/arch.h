@@ -2363,6 +2363,7 @@ char up_romgetc(FAR const char *ptr);
 
 void up_mdelay(unsigned int milliseconds);
 void up_udelay(useconds_t microseconds);
+void up_ndelay(unsigned long nanoseconds);
 
 /****************************************************************************
  * These are standard interfaces that are exported by the OS for use by the
