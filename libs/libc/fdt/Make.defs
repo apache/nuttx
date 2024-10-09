@@ -30,6 +30,7 @@ dtc:
 	$(call DOWNLOAD,https://github.com/dgibson/dtc/archive,v$(VERSION).zip,dtc.zip)
 	$(Q) mv dtc.zip fdt/dtc.zip
 	$(Q) unzip -o fdt/dtc.zip -d fdt
+	$(call DELDIR, fdt/dtc)
 	$(Q) mv fdt/dtc-$(VERSION) fdt/dtc
 else
 dtc:
