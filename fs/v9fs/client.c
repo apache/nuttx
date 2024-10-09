@@ -1098,13 +1098,13 @@ ssize_t v9fs_client_write(FAR struct v9fs_client_s *client, uint32_t fid,
 
   while (buflen > 0)
     {
+      request.count = buflen > fidp->iounit ? fidp->iounit : buflen;
       request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
                             V9FS_BIT32SZ + request.count;
       request.header.type = V9FS_TWRITE;
       request.header.tag = v9fs_get_tagid(client);
       request.fid = fid;
       request.offset = offset;
-      request.count = buflen > fidp->iounit ? fidp->iounit : buflen;
 
       wiov[0].iov_base = &request;
       wiov[0].iov_len = V9FS_HDRSZ + V9FS_BIT32SZ + V9FS_BIT64SZ +
