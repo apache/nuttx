@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESPRESSIF_SPI
+#ifdef CONFIG_ESPRESSIF_SPI_PERIPH
 
 #include <assert.h>
 #include <debug.h>
@@ -1283,4 +1283,4 @@ int esp_spibus_uninitialize(struct spi_dev_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_ESPRESSIF_SPI */
+#endif /* CONFIG_ESPRESSIF_SPI_PERIPH */

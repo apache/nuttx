@@ -354,11 +354,26 @@ config ESPRESSIF_SPI
 	bool
 	default n
 
+config ESPRESSIF_SPI_PERIPH
+	bool
+	depends on ESPRESSIF_SPI2
+	default n
+
 config ESPRESSIF_SPI2
 	bool "SPI 2"
 	default n
 	select ESPRESSIF_SPI
 	select SPI
+	select ESPRESSIF_SPI_PERIPH
+
+config ESPRESSIF_SPI_BITBANG
+	bool "SPI Bitbang"
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+	select SPI_BITBANG
+	---help---
+		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripheral is already in use.
 
 config ESPRESSIF_SPIFLASH
 	bool "SPI Flash"
@@ -1167,6 +1182,7 @@ menu "SPI configuration"
 
 config ESPRESSIF_SPI_SWCS
 	bool "SPI software CS"
+	depends on ESPRESSIF_SPI_PERIPH
 	default n
 	---help---
 		Use SPI software CS.
@@ -1175,6 +1191,7 @@ config ESPRESSIF_SPI_UDCS
 	bool "User defined CS"
 	default n
 	depends on ESPRESSIF_SPI_SWCS
+	depends on ESPRESSIF_SPI_PERIPH
 	---help---
 		Use user-defined CS.
 
@@ -1245,10 +1262,53 @@ config ESPRESSIF_SPI2_MISOPIN
 
 endif # ESPRESSIF_SPI2
 
+if ESPRESSIF_SPI_BITBANG
+
+config ESPRESSIF_SPI_BITBANG_CSPIN
+	int "SPI Bitbang CS Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_CLKPIN
+	int "SPI Bitbang CLK Pin"
+	default 1
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MOSIPIN
+	int "SPI Bitbang MOSI Pin"
+	default 2
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MISOPIN
+	int "SPI Bitbang MISO Pin"
+	default 3
+	range 0 21
+
+choice ESPRESSIF_SPI_BITBANG_MODE
+	prompt "SPI Bitbang mode"
+	default ESPRESSIF_SPI_BITBANG_MODE0
+
+config ESPRESSIF_SPI_BITBANG_MODE0
+	bool "SPI MODE0"
+
+config ESPRESSIF_SPI_BITBANG_MODE1
+	bool "SPI MODE1"
+
+config ESPRESSIF_SPI_BITBANG_MODE2
+	bool "SPI MODE2"
+
+config ESPRESSIF_SPI_BITBANG_MODE3
+	bool "SPI MODE3"
+
+endchoice # ESPRESSIF_SPI_BITBANG_MODE
+
+endif # ESPRESSIF_SPI_BITBANG
+
 config ESPRESSIF_SPI_TEST_MODE
 	bool "SPI driver loopback test mode (for testing only)"
 	default n
 	depends on SYSTEM_SPITOOL
+	depends on ESPRESSIF_SPI_PERIPH
 	---help---
 		This enables a loopback test mode that attaches the transmitter
 		to the receiver internally, being able to test the SPI

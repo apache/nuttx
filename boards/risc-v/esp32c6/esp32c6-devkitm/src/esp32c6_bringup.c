@@ -70,6 +70,9 @@
 #ifdef CONFIG_ESPRESSIF_SPI
 #  include "espressif/esp_spi.h"
 #  include "esp_board_spidev.h"
+#  ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+#    include "espressif/esp_spi_bitbang.h"
+#  endif
 #endif
 
 #ifdef CONFIG_ESPRESSIF_TEMP
@@ -221,12 +224,22 @@ int esp_bringup(void)
 #endif
 
 #if defined(CONFIG_ESPRESSIF_SPI) && defined(CONFIG_SPI_DRIVER)
+#  ifdef CONFIG_ESPRESSIF_SPI2
   ret = board_spidev_initialize(ESPRESSIF_SPI2);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to init spidev 2: %d\n", ret);
     }
-#endif
+#  endif /* CONFIG_ESPRESSIF_SPI2 */
+
+#  ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+  ret = board_spidev_initialize(ESPRESSIF_SPI_BITBANG);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
+    }
+#  endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
+#endif /* CONFIG_ESPRESSIF_SPI && CONFIG_SPI_DRIVER*/
 
 #ifdef CONFIG_ESPRESSIF_SPIFLASH
   ret = board_spiflash_init();
