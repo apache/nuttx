@@ -108,7 +108,6 @@ x86_64_fullcontextrestore:
 	movq    (8*REG_R10)(%rdi), %r10
 	movq    (8*REG_RBP)(%rdi), %rbp
 	movq    (8*REG_RBX)(%rdi), %rbx
-	movq    (8*REG_RAX)(%rdi), %rax
 
 	/* Restore the data segment register.  I think there is an issue that will
 	* need to be address here at some time:  If the register save area is in
@@ -123,6 +122,13 @@ x86_64_fullcontextrestore:
 	* mov        (8*REG_FS)(%rdi), %fs // Disabled, otherwise we will destroy MSR_FS_BASE
 	* XXX: Should use wrgsbase and wrfsbase to restore the gs and fs register
 	*/
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+	mov     (8*REG_FS)(%rdi), %rax
+	wrfsbase  %rax
+#endif
+
+	movq    (8*REG_RAX)(%rdi), %rax
 
 	/* Restore the correct value of EAX and then return */
 

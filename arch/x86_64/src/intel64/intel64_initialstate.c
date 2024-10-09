@@ -30,6 +30,10 @@
 #include <nuttx/arch.h>
 #include <arch/arch.h>
 
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+#  include <nuttx/tls.h>
+#endif
+
 #include "x86_64_internal.h"
 #include "sched/sched.h"
 
@@ -132,12 +136,25 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_SS]     = up_getss();
   xcp->regs[REG_ES]     = up_getes();
 
-  /* Aux GS and FS are set to be 0 */
+/* FS used by for TLS
+ * used by some libc for TLS and segment reference
+ */
 
-  /* used by some libc for TLS and segment reference */
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  xcp->regs[REG_FS]     = (uintptr_t)tcb->stack_alloc_ptr
+                          + sizeof(struct tls_info_s)
+                          + (_END_TBSS - _START_TDATA);
+
+  *(uint64_t *)(xcp->regs[REG_FS]) = xcp->regs[REG_FS];
+
+  write_fsbase(xcp->regs[REG_FS]);
+#else
+  xcp->regs[REG_FS]     = 0;
+#endif
+
+  /* GS used for CPU private data */
 
   xcp->regs[REG_GS]     = 0;
-  xcp->regs[REG_FS]     = 0;
 
   /* Set supervisor- or user-mode, depending on how NuttX is configured and
    * what kind of thread is being started.  Disable FIQs in any event
