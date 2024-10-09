@@ -112,6 +112,7 @@ void up_irq_enable(void);
  * Inline functions
  ****************************************************************************/
 
+noinstrument_function
 static inline_function xcpt_reg_t *up_current_regs(void)
 {
 #ifdef CONFIG_SMP
