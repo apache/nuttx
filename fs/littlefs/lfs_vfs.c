@@ -80,6 +80,17 @@ struct littlefs_mountpt_s
   struct lfs            lfs;
 };
 
+struct littlefs_attr_s
+{
+  uint32_t at_ver;     /* For the later extension */
+  uint32_t at_mode;    /* File type, attributes, and access mode bits */
+  uint32_t at_uid;     /* User ID of file */
+  uint32_t at_gid;     /* Group ID of file */
+  uint64_t at_atim;    /* Time of last access */
+  uint64_t at_mtim;    /* Time of last modification */
+  uint64_t at_ctim;    /* Time of last status change */
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -101,6 +112,8 @@ static int     littlefs_dup(FAR const struct file *oldp,
                             FAR struct file *newp);
 static int     littlefs_fstat(FAR const struct file *filep,
                               FAR struct stat *buf);
+static int     littlefs_fchstat(FAR const struct file *filep,
+                                FAR const struct stat *buf, int flags);
 static int     littlefs_truncate(FAR struct file *filep,
                                  off_t length);
 
@@ -133,6 +146,9 @@ static int     littlefs_rename(FAR struct inode *mountpt,
                                FAR const char *newrelpath);
 static int     littlefs_stat(FAR struct inode *mountpt,
                              FAR const char *relpath, FAR struct stat *buf);
+static int     littlefs_chstat(FAR struct inode *mountpt,
+                               FAR const char *relpath,
+                               FAR const struct stat *buf, int flags);
 
 /****************************************************************************
  * Public Data
@@ -158,7 +174,7 @@ const struct mountpt_operations g_littlefs_operations =
   littlefs_sync,          /* sync */
   littlefs_dup,           /* dup */
   littlefs_fstat,         /* fstat */
-  NULL,                   /* fchstat */
+  littlefs_fchstat,       /* fchstat */
 
   littlefs_opendir,       /* opendir */
   littlefs_closedir,      /* closedir */
@@ -174,7 +190,7 @@ const struct mountpt_operations g_littlefs_operations =
   littlefs_rmdir,         /* rmdir */
   littlefs_rename,        /* rename */
   littlefs_stat,          /* stat */
-  NULL                    /* chstat */
+  littlefs_chstat         /* chstat */
 };
 
 /****************************************************************************
@@ -325,6 +341,26 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
       /* Error opening file */
 
       goto errout;
+    }
+
+  if (oflags & LFS_O_CREAT)
+    {
+      struct littlefs_attr_s attr;
+      struct timespec time;
+
+      clock_gettime(CLOCK_REALTIME, &time);
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = mode;
+      attr.at_ctim = 1000000000ull * time.tv_sec + time.tv_nsec;
+      attr.at_atim = attr.at_ctim;
+      attr.at_mtim = attr.at_ctim;
+      ret = littlefs_convert_result(lfs_setattr(&fs->lfs, relpath, 0,
+                                                &attr, sizeof(attr)));
+      if (ret < 0)
+        {
+          lfs_remove(&fs->lfs, relpath);
+          goto errout_with_file;
+        }
     }
 
   /* In append mode, we need to set the file pointer to the end of the
@@ -690,6 +726,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
+  struct littlefs_attr_s attr;
   int ret;
 
   memset(buf, 0, sizeof(*buf));
@@ -709,18 +746,120 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
     }
 
   buf->st_size = lfs_file_size(&fs->lfs, &priv->file);
-  nxmutex_unlock(&fs->lock);
-
   if (buf->st_size < 0)
     {
-      return littlefs_convert_result(buf->st_size);
+      ret = littlefs_convert_result(buf->st_size);
+      goto errout;
     }
 
-  buf->st_mode    = S_IRWXO | S_IRWXG | S_IRWXU | S_IFREG;
-  buf->st_blksize = fs->cfg.block_size;
-  buf->st_blocks  = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+  ret = littlefs_convert_result(lfs_file_getattr(&fs->lfs, &priv->file, 0,
+                                                 &attr, sizeof(attr)));
+  if (ret < 0)
+    {
+      if (ret != -ENODATA)
+        {
+          goto errout;
+        }
 
-  return OK;
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
+    }
+
+  ret = 0;
+  buf->st_mode         = attr.at_mode | S_IFREG;
+  buf->st_uid          = attr.at_uid;
+  buf->st_gid          = attr.at_gid;
+  buf->st_atim.tv_sec  = attr.at_atim / 1000000000ull;
+  buf->st_atim.tv_nsec = attr.at_atim % 1000000000ull;
+  buf->st_mtim.tv_sec  = attr.at_mtim / 1000000000ull;
+  buf->st_mtim.tv_nsec = attr.at_mtim % 1000000000ull;
+  buf->st_ctim.tv_sec  = attr.at_ctim / 1000000000ull;
+  buf->st_ctim.tv_nsec = attr.at_ctim % 1000000000ull;
+  buf->st_blksize      = fs->cfg.block_size;
+  buf->st_blocks       = (buf->st_size + buf->st_blksize - 1) /
+                         buf->st_blksize;
+
+errout:
+  nxmutex_unlock(&fs->lock);
+  return ret;
+}
+
+static int littlefs_fchstat(FAR const struct file *filep,
+                            FAR const struct stat *buf, int flags)
+{
+  FAR struct littlefs_mountpt_s *fs;
+  FAR struct littlefs_file_s *priv;
+  FAR struct inode *inode;
+  struct littlefs_attr_s attr;
+  int ret;
+
+  /* Recover our private data from the struct file instance */
+
+  priv  = filep->f_priv;
+  inode = filep->f_inode;
+  fs    = inode->i_private;
+
+  /* Call LFS to get file size */
+
+  ret = nxmutex_lock(&fs->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = littlefs_convert_result(lfs_file_getattr(&fs->lfs, &priv->file,
+                                                 0, &attr, sizeof(attr)));
+  if (ret < 0)
+    {
+      if (ret != -ENODATA)
+        {
+          goto errout;
+        }
+
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
+    }
+
+  if ((CH_STAT_MODE & flags) == CH_STAT_MODE)
+    {
+      attr.at_mode = buf->st_mode;
+    }
+
+  if ((CH_STAT_UID & flags) == CH_STAT_UID)
+    {
+      attr.at_uid = buf->st_uid;
+    }
+
+  if ((CH_STAT_GID & flags) == CH_STAT_GID)
+    {
+      attr.at_gid = buf->st_gid;
+    }
+
+  attr.at_ctim = 1000000000ull * buf->st_ctim.tv_sec +
+                 buf->st_ctim.tv_nsec;
+
+  if ((CH_STAT_ATIME & flags) == CH_STAT_ATIME)
+    {
+      attr.at_atim = 1000000000ull * buf->st_atim.tv_sec +
+                     buf->st_atim.tv_nsec;
+    }
+
+  if ((CH_STAT_MTIME & flags) == CH_STAT_MTIME)
+    {
+      attr.at_mtim = 1000000000ull * buf->st_mtim.tv_sec +
+                     buf->st_mtim.tv_nsec;
+    }
+
+  ret = littlefs_convert_result(lfs_file_setattr(&fs->lfs, &priv->file, 0,
+                                                 &attr, sizeof(attr)));
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+errout:
+  nxmutex_unlock(&fs->lock);
+  return ret;
 }
 
 /****************************************************************************
@@ -1352,7 +1491,28 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
                           mode_t mode)
 {
   FAR struct littlefs_mountpt_s *fs;
+  FAR char *path = (FAR char *)relpath;
+  size_t len = strlen(relpath);
   int ret;
+
+  /* We need remove all the '/' in the end of relpath */
+
+  if (len > 0 && relpath[len - 1] == '/')
+    {
+      path = lib_get_pathbuffer();
+      if (path == NULL)
+        {
+          return -ENOMEM;
+        }
+
+      while (len > 0 && relpath[len - 1] == '/')
+        {
+          len--;
+        }
+
+      memcpy(path, relpath, len);
+      path[len] = '\0';
+    }
 
   /* Get the mountpoint private data from the inode structure */
 
@@ -1363,11 +1523,36 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = nxmutex_lock(&fs->lock);
   if (ret < 0)
     {
-      return ret;
+      goto errout;
     }
 
-  ret = lfs_mkdir(&fs->lfs, relpath);
+  ret = littlefs_convert_result(lfs_mkdir(&fs->lfs, path));
+  if (ret >= 0)
+    {
+      struct littlefs_attr_s attr;
+      struct timespec time;
+
+      clock_gettime(CLOCK_REALTIME, &time);
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = mode;
+      attr.at_ctim = 1000000000ull * time.tv_sec + time.tv_nsec;
+      attr.at_atim = attr.at_ctim;
+      attr.at_mtim = attr.at_ctim;
+      ret = littlefs_convert_result(lfs_setattr(&fs->lfs, path, 0,
+                                                &attr, sizeof(attr)));
+      if (ret < 0)
+        {
+          lfs_remove(&fs->lfs, path);
+        }
+    }
+
   nxmutex_unlock(&fs->lock);
+
+errout:
+  if (path != relpath)
+    {
+      lib_put_pathbuffer(path);
+    }
 
   return ret;
 }
@@ -1445,6 +1630,7 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 {
   FAR struct littlefs_mountpt_s *fs;
   struct lfs_info info;
+  struct littlefs_attr_s attr;
   int ret;
 
   memset(buf, 0, sizeof(*buf));
@@ -1462,28 +1648,124 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
     }
 
   ret = lfs_stat(&fs->lfs, relpath, &info);
-  nxmutex_unlock(&fs->lock);
-
-  if (ret >= 0)
+  if (ret < 0)
     {
-      /* Convert info to stat */
-
-      buf->st_mode = S_IRWXO | S_IRWXG | S_IRWXU;
-      if (info.type == LFS_TYPE_REG)
-        {
-          buf->st_mode |= S_IFREG;
-          buf->st_size = info.size;
-        }
-      else
-        {
-          buf->st_mode |= S_IFDIR;
-          buf->st_size = 0;
-        }
-
-      buf->st_blksize = fs->cfg.block_size;
-      buf->st_blocks  = (buf->st_size + buf->st_blksize - 1) /
-                        buf->st_blksize;
+      goto errout;
     }
 
+  ret = littlefs_convert_result(lfs_getattr(&fs->lfs, relpath, 0,
+                                            &attr, sizeof(attr)));
+  if (ret < 0)
+    {
+      if (ret != -ENODATA)
+        {
+          goto errout;
+        }
+
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
+    }
+
+  ret = 0;
+  buf->st_mode         = attr.at_mode;
+  buf->st_uid          = attr.at_uid;
+  buf->st_gid          = attr.at_gid;
+  buf->st_atim.tv_sec  = attr.at_atim / 1000000000ull;
+  buf->st_atim.tv_nsec = attr.at_atim % 1000000000ull;
+  buf->st_mtim.tv_sec  = attr.at_mtim / 1000000000ull;
+  buf->st_mtim.tv_nsec = attr.at_mtim % 1000000000ull;
+  buf->st_ctim.tv_sec  = attr.at_ctim / 1000000000ull;
+  buf->st_ctim.tv_nsec = attr.at_ctim % 1000000000ull;
+  buf->st_blksize      = fs->cfg.block_size;
+  buf->st_blocks       = (buf->st_size + buf->st_blksize - 1) /
+                         buf->st_blksize;
+
+  if (info.type == LFS_TYPE_REG)
+    {
+      buf->st_mode |= S_IFREG;
+      buf->st_size = info.size;
+    }
+  else
+    {
+      buf->st_mode |= S_IFDIR;
+      buf->st_size = 0;
+    }
+
+errout:
+  nxmutex_unlock(&fs->lock);
+  return ret;
+}
+
+static int littlefs_chstat(FAR struct inode *mountpt,
+                           FAR const char *relpath,
+                           FAR const struct stat *buf, int flags)
+{
+  FAR struct littlefs_mountpt_s *fs;
+  struct littlefs_attr_s attr;
+  int ret;
+
+  /* Get the mountpoint private data from the inode structure */
+
+  fs = mountpt->i_private;
+
+  /* Call LFS to get file size */
+
+  ret = nxmutex_lock(&fs->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = littlefs_convert_result(lfs_getattr(&fs->lfs, relpath, 0,
+                                            &attr, sizeof(attr)));
+  if (ret < 0)
+    {
+      if (ret != -ENODATA)
+        {
+          goto errout;
+        }
+
+      memset(&attr, 0, sizeof(attr));
+    }
+
+  if ((CH_STAT_MODE & flags) == CH_STAT_MODE)
+    {
+      attr.at_mode = buf->st_mode;
+    }
+
+  if ((CH_STAT_UID & flags) == CH_STAT_UID)
+    {
+      attr.at_uid = buf->st_uid;
+    }
+
+  if ((CH_STAT_GID & flags) == CH_STAT_GID)
+    {
+      attr.at_gid = buf->st_gid;
+    }
+
+  attr.at_ctim = 1000000000ull * buf->st_ctim.tv_sec +
+                 buf->st_ctim.tv_nsec;
+
+  if ((CH_STAT_ATIME & flags) == CH_STAT_ATIME)
+    {
+      attr.at_atim = 1000000000ull * buf->st_atim.tv_sec +
+                     buf->st_atim.tv_nsec;
+    }
+
+  if ((CH_STAT_MTIME & flags) == CH_STAT_MTIME)
+    {
+      attr.at_mtim = 1000000000ull * buf->st_mtim.tv_sec +
+                     buf->st_mtim.tv_nsec;
+    }
+
+  ret = littlefs_convert_result(lfs_setattr(&fs->lfs, relpath, 0,
+                                            &attr, sizeof(attr)));
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+errout:
+  nxmutex_unlock(&fs->lock);
   return ret;
 }
