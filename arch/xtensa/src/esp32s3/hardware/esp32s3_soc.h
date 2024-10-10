@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #define DR_REG_USB_BASE                         0x60080000
-
+#define DR_REG_EMAC_BASE                        0x600CD000
 #define DR_REG_ASSIST_DEBUG_BASE                0x600CE000
 #define DR_REG_WORLD_CNTL_BASE                  0x600D0000
 #define DR_REG_DPORT_END                        0x600D3FFC
