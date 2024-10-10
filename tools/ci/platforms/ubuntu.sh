@@ -198,7 +198,7 @@ python_tools() {
     CodeChecker \
     cvt2utf \
     cxxfilt \
-    esptool==4.8.dev4 \
+    esptool \
     imgtool \
     kconfiglib \
     pexpect==4.8.0 \
