@@ -129,7 +129,7 @@ Building and Flashing
 
 First, make sure that ``esptool.py`` is installed.  This tool is used to convert the ELF to a
 compatible ESP32 image and to flash the image into the board.
-It can be installed with: ``pip install esptool==4.8.dev4``.
+It can be installed with: ``pip install esptool``.
 
 It's a two-step process where the first converts the ELF file into an ESP32 compatible binary
 and the second flashes it to the board. These steps are included in the build system and it is
@@ -573,7 +573,7 @@ Prerequisites
 First of all, we need to install ``imgtool`` (a MCUboot utility application to manipulate binary
 images) and ``esptool`` (the ESP32 toolkit)::
 
-    $ pip install imgtool esptool==4.8.dev4
+    $ pip install imgtool esptool
 
 We also need to make sure that the python modules are added to ``PATH``::
 
