@@ -46,6 +46,12 @@ config CAN_TXFIFOSIZE
 	---help---
 		The size of the circular tx buffer of CAN messages. Default: 8
 
+config CAN_TXPRIORITY
+	bool "Prioritize sending based on canid"
+	default n
+	---help---
+		Prioritize sending based on canid.
+
 config CAN_RXFIFOSIZE
 	int "CAN driver I/O rx buffer size"
 	default 8
