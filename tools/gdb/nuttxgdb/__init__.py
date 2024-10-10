@@ -51,16 +51,16 @@ def register_commands(event):
     def init_gdb_commands(m: str):
         try:
             module = importlib.import_module(f"{__package__}.{m}")
-        except Exception:
-            gdb.write(f"\x1b[31;1mIgnore module: {m}\n\x1b[m")
+        except Exception as e:
+            gdb.write(f"\x1b[31;1mIgnore module: {m}, error: {e}\n\x1b[m")
             return
 
         for c in module.__dict__.values():
             if isinstance(c, type) and issubclass(c, gdb.Command):
                 try:
                     c()
-                except Exception:
-                    gdb.write(f"\x1b[31;1mIgnore command: {c}\n\x1b[m")
+                except Exception as e:
+                    gdb.write(f"\x1b[31;1mIgnore command: {c}, e: {e}\n\x1b[m")
 
     # import utils module
     utils = importlib.import_module(f"{__package__}.utils")
@@ -79,6 +79,7 @@ def register_commands(event):
 
 
 if len(gdb.objfiles()) == 0:
+    gdb.write("No objectfile, defer to register NuttX commands.\n")
     gdb.events.new_objfile.connect(register_commands)
 else:
     register_commands(None)
