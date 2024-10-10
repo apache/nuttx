@@ -173,7 +173,7 @@ begin_packed_struct struct v9fs_attach_s
 {
   struct v9fs_header_s header;
   uint32_t fid;
-  uint16_t afid;
+  uint32_t afid;
   uint8_t buffer[2 * (V9FS_BIT16SZ + NAME_MAX) + V9FS_BIT32SZ];
 } end_packed_struct;
 
