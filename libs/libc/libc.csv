@@ -60,7 +60,6 @@
 "feof","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "ferror","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "fflush","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
-"ffs","strings.h","","int","int"
 "fgetc","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "fgetpos","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *","FAR fpos_t *"
 "fgets","stdio.h","defined(CONFIG_FILE_STREAM)","FAR char *","FAR char *","int","FAR FILE *"
