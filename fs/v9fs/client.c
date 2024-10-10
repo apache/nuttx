@@ -1589,6 +1589,16 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
       newfid = ret;
     }
 
+  /* There are differences in different server implementations, so it is
+   * necessary to check whether the returned nwqid satisfies the requested
+   * number.
+   */
+
+  if (response.nwqid != nwname)
+    {
+      newfid = -ENOENT;
+    }
+
 err:
   lib_put_pathbuffer(request_payload);
   lib_put_pathbuffer(response_payload);
