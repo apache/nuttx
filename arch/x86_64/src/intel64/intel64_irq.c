@@ -323,8 +323,8 @@ static void up_ioapic_init(void)
 
   for (i = 0; i < maxintr; i++)
     {
-      up_ioapic_pin_set_vector(i, TRIGGER_RISING_EDGE, IRQ0 + i);
-      up_ioapic_mask_pin(i);
+      up_ioapic_pin_set_vector(i, TRIGGER_RISING_EDGE |
+                               IOAPIC_PIN_DISABLE, IRQ0 + i);
     }
 }
 #endif
