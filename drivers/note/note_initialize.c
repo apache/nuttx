@@ -28,6 +28,7 @@
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notectl_driver.h>
 #include <nuttx/note/notesnap_driver.h>
+#include <nuttx/note/notestream_driver.h>
 #include <nuttx/segger/note_rtt.h>
 #include <nuttx/segger/sysview.h>
 
@@ -101,6 +102,15 @@ int note_initialize(void)
   if (ret < 0)
     {
       serr("noteram_register failed %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_NOTEFILE
+  ret = notefile_register(CONFIG_DRIVERS_NOTEFILE_PATH);
+  if (ret < 0)
+    {
+      serr("notefile_register failed %d\n", ret);
       return ret;
     }
 #endif

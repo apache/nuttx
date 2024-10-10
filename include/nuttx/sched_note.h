@@ -293,12 +293,13 @@ enum note_tag_e
   NOTE_TAG_APP,
   NOTE_TAG_ARCH,
   NOTE_TAG_AUDIO,
-  NOTE_TAG_BOARD,
+  NOTE_TAG_BOARDS,
   NOTE_TAG_CRYPTO,
   NOTE_TAG_DRIVERS,
   NOTE_TAG_FS,
   NOTE_TAG_GRAPHICS,
   NOTE_TAG_INPUT,
+  NOTE_TAG_LIBS,
   NOTE_TAG_MM,
   NOTE_TAG_NET,
   NOTE_TAG_SCHED,
@@ -577,36 +578,28 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
-#else
-#  define sched_note_start(t)
-#  define sched_note_stop(t)
-#endif
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb);
 void sched_note_resume(FAR struct tcb_s *tcb);
 #else
+#  define sched_note_stop(t)
+#  define sched_note_start(t)
 #  define sched_note_suspend(t)
 #  define sched_note_resume(t)
 #endif
 
-#if defined(CONFIG_SMP) && defined(CONFIG_SCHED_INSTRUMENTATION)
+#if defined(CONFIG_SMP) && defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH)
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_started(FAR struct tcb_s *tcb);
-#else
-#  define sched_note_cpu_start(t,c)
-#  define sched_note_cpu_started(t)
-#endif
-
-#if defined(CONFIG_SMP) && defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH)
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_paused(FAR struct tcb_s *tcb);
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 #else
+#  define sched_note_cpu_start(t,c)
+#  define sched_note_cpu_started(t)
 #  define sched_note_cpu_pause(t,c)
 #  define sched_note_cpu_paused(t)
 #  define sched_note_cpu_resume(t,c)

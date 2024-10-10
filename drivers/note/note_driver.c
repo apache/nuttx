@@ -38,6 +38,7 @@
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notelog_driver.h>
+#include <nuttx/note/notestream_driver.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/instrument.h>
@@ -191,7 +192,10 @@ FAR static struct note_driver_s *
   (FAR struct note_driver_s *)&g_noteram_driver,
 #endif
 #ifdef CONFIG_DRIVERS_NOTELOG
-  &g_notelog_driver,
+  (FAR struct note_driver_s *)&g_notelog_driver,
+#endif
+#ifdef CONFIG_DRIVERS_NOTELOWEROUT
+  (FAR struct note_driver_s *)&g_notestream_lowerout,
 #endif
 #ifdef CONFIG_DRIVERS_NOTERPMSG
   (FAR struct note_driver_s *)&g_noterpmsg_driver,
@@ -199,7 +203,8 @@ FAR static struct note_driver_s *
   NULL
 };
 
-#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
+#if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0 && \
+    defined(CONFIG_SCHED_INSTRUMENTATION_SWITCH)
 static struct note_taskname_s g_note_taskname;
 #endif
 
@@ -471,6 +476,7 @@ static inline int note_isenabled_dump(uint32_t tag)
 }
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 #if CONFIG_DRIVERS_NOTE_TASKNAME_BUFSIZE > 0
 
 /****************************************************************************
@@ -714,7 +720,6 @@ void sched_note_stop(FAR struct tcb_s *tcb)
     }
 }
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
@@ -791,7 +796,6 @@ void sched_note_resume(FAR struct tcb_s *tcb)
       note_add(*driver, &note, sizeof(struct note_resume_s));
     }
 }
-#endif
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
@@ -871,7 +875,6 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
     }
 }
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
@@ -1025,8 +1028,8 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
       note_add(*driver, &note, sizeof(struct note_cpu_resumed_s));
     }
 }
-#endif
-#endif
+#endif /* CONFIG_SMP */
+#endif /* CONFIG_SCHED_INSTRUMENTATION_SWITCH */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
@@ -1438,7 +1441,7 @@ void sched_note_event_ip(uint32_t tag, uintptr_t ip, uint8_t event,
   FAR struct note_event_s *note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
-  char data[255];
+  char data[256];
   unsigned int length;
   FAR struct tcb_s *tcb = this_task();
 
@@ -1488,7 +1491,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
   FAR struct note_printf_s *note;
   FAR struct note_driver_s **driver;
   bool formatted = false;
-  uint8_t data[255];
+  uint8_t data[256];
   size_t length = 0;
   FAR struct tcb_s *tcb = this_task();
 
@@ -1971,6 +1974,7 @@ FAR const char *note_get_taskname(pid_t pid)
 {
   FAR struct note_taskname_info_s *ti;
   FAR struct tcb_s *tcb;
+  UNUSED(ti);
 
   tcb = nxsched_get_tcb(pid);
   if (tcb != NULL)
@@ -1978,6 +1982,7 @@ FAR const char *note_get_taskname(pid_t pid)
       return tcb->name;
     }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
   ti = note_find_taskname(pid);
   if (ti != NULL)
     {
@@ -1985,6 +1990,9 @@ FAR const char *note_get_taskname(pid_t pid)
     }
 
   return NULL;
+#else
+  return "unknown";
+#endif
 }
 
 #endif

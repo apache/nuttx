@@ -2504,12 +2504,16 @@ menuconfig TRACE
 		the kernel will be enabled.
 
 if TRACE
-config TRACE_AUDIO
-	bool "Enable tracepoints in audio"
+config TRACE_APP
+	bool "Enable tracepoints in app"
 	default n
 
 config TRACE_ARCH
 	bool "Enable tracepoints in arch"
+	default n
+
+config TRACE_AUDIO
+	bool "Enable tracepoints in audio"
 	default n
 
 config TRACE_BOARDS
@@ -2550,8 +2554,16 @@ config TRACE_GRAPHICS
 	bool "Enable tracepoints in graphics"
 	default n
 
+config TRACE_INPUT
+	bool "Enable tracepoints in input"
+	default n
+
 config TRACE_LIBS
 	bool "Enable tracepoints in libs"
+	default n
+
+config TRACE_MM
+	bool "Enable tracepoints in mm"
 	default n
 
 config TRACE_NET

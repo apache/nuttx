@@ -368,40 +368,28 @@ int notesnap_register(void)
 
 void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
 {
+  size_t index = g_notesnap.index % CONFIG_DRIVERS_NOTESNAP_NBUFFERS;
   size_t i;
-  size_t index = atomic_load(&g_notesnap.index) %
-                 CONFIG_DRIVERS_NOTESNAP_NBUFFERS;
-  clock_t lastcount = g_notesnap.buffer[index].count;
-  struct timespec lasttime =
-  {
-    0
-  };
 
   /* Stop recording while dumping */
 
   atomic_store(&g_notesnap.dumping, true);
 
-  for (i = index; i != index - 1;
-       i == CONFIG_DRIVERS_NOTESNAP_NBUFFERS - 1 ? i = 0 : i++)
+  for (i = 0; i < CONFIG_DRIVERS_NOTESNAP_NBUFFERS; i++)
     {
-      FAR struct notesnap_chunk_s *note = &g_notesnap.buffer[i];
-
+      FAR struct notesnap_chunk_s *note = &g_notesnap.buffer
+          [(index + i) % CONFIG_DRIVERS_NOTESNAP_NBUFFERS];
       struct timespec time;
-      clock_t elapsed = note->count < lastcount ?
-                        note->count + CLOCK_MAX - lastcount :
-                        note->count - lastcount;
-      perf_convert(elapsed, &time);
-      clock_timespec_add(&lasttime, &time, &lasttime);
-      lastcount = note->count;
 
+      perf_convert(note->count, &time);
       lib_sprintf(stream,
                   "snapshoot: [%u.%09u] "
 #ifdef CONFIG_SMP
                   "[CPU%d] "
 #endif
                   "[%d] %-16s %#" PRIxPTR "\n",
-                  (unsigned)lasttime.tv_sec,
-                  (unsigned)lasttime.tv_nsec,
+                  (unsigned)time.tv_sec,
+                  (unsigned)time.tv_nsec,
 #ifdef CONFIG_SMP
                   note->cpu,
 #endif
