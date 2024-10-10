@@ -208,6 +208,8 @@
 #  define X86_64_CPUID_07_AVX512VL    (1 << 31)
 #define X86_64_CPUID_XSAVE            0x0d
 #define X86_64_CPUID_TSC              0x15
+#define X86_64_CPUID_EXTINFO          0x80000001
+#  define X86_64_CPUID_EXTINFO_RDTSCP (1 << 27)
 
 /* MSR Definitions */
 
