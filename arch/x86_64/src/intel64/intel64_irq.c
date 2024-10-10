@@ -28,7 +28,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <debug.h>
-#include <sched.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -69,10 +68,6 @@ static void up_apic_init(void);
 static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
                         uint8_t flags, uint8_t ist);
 static inline void up_idtinit(void);
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -532,11 +527,6 @@ void up_disable_irq(int irq)
       return;
     }
 
-  if (g_irq_priv[irq].busy > 0)
-    {
-      g_irq_priv[irq].busy -= 1;
-    }
-
   CPU_CLR(this_cpu(), &g_irq_priv[irq].busy);
 
   if (CPU_COUNT(&g_irq_priv[irq].busy) == 0)
@@ -676,7 +666,7 @@ int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin)
 
 int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
 {
-  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
   int        irq   = 0;
   int        i     = 0;
 
@@ -689,7 +679,7 @@ int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
 
   if (num <= 0)
     {
-      spin_unlock_irqrestore(&g_irq_spin, flags);
+      spin_unlock_irqrestore(&g_irq_spinlock, flags);
 
       /* No IRQs available */
 
@@ -703,12 +693,12 @@ int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
 
   for (i = 0; i < num; i++)
     {
-      ASSERT(g_irq_priv[irq + i].busy == 0);
+      ASSERT(CPU_COUNT(&g_irq_priv[irq + i].busy) == 0);
       g_irq_priv[irq + i].msi = true;
       pirq[i] = irq + i;
     }
 
-  spin_unlock_irqrestore(&g_irq_spin, flags);
+  spin_unlock_irqrestore(&g_irq_spinlock, flags);
 
   return num;
 }
@@ -723,7 +713,7 @@ int up_alloc_irq_msi(uint8_t busno, uint32_t devfn, int *pirq, int num)
 
 void up_release_irq_msi(int *irq, int num)
 {
-  irqstate_t flags = spin_lock_irqsave(&g_irq_spin);
+  irqstate_t flags = spin_lock_irqsave(&g_irq_spinlock);
   int        i     = 0;
 
   /* Mark IRQ as MSI/MSI-X */
@@ -733,7 +723,7 @@ void up_release_irq_msi(int *irq, int num)
       g_irq_priv[irq[i]].msi = false;
     }
 
-  spin_unlock_irqrestore(&g_irq_spin, flags);
+  spin_unlock_irqrestore(&g_irq_spinlock, flags);
 }
 
 /****************************************************************************
@@ -761,4 +751,3 @@ int up_connect_irq(const int *irq, int num, uintptr_t *mar, uint32_t *mdr)
 
   return OK;
 }
-
