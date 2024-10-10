@@ -44,16 +44,6 @@ CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS += $(CFLAGS) -D__ASSEMBLY__
 
-# ELF module definitions
-
-CELFFLAGS = $(CFLAGS)
-CXXELFFLAGS = $(CXXFLAGS)
-
-LDELFFLAGS = --oformat elf64-littleriscv
-ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
-LDELFFLAGS += -r
-endif
-
 # POSTBUILD management
 
 # KERNEL builds need real ROMFS and even OpenSBI wrapping

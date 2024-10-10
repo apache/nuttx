@@ -411,6 +411,12 @@ CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
 LDELFFLAGS = -r -e main
+ifeq ($(CONFIG_ARCH_RV32),y)
+  LDELFFLAGS += --oformat elf32-littleriscv
+else
+  LDELFFLAGS += --oformat elf64-littleriscv
+endif
+
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
 
 # Zig toolchain
