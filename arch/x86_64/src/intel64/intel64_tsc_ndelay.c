@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/x86_64/src/common/x86_64_mdelay.c
+ * arch/x86_64/src/intel64/intel64_tsc_ndelay.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,55 +25,60 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+extern unsigned long g_x86_64_timer_freq;
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+/* REP NOP (PAUSE) is a good thing to insert into busy-wait loops. */
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+static inline void rep_nop(void)
+{
+  __asm__ __volatile__("rep;nop": : :"memory");
+}
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* TSC based delay: */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+static inline void delay_tsc(uint64_t cycles)
+{
+  uint64_t bclock;
+  irqstate_t irq;
+  uint64_t now;
+
+  irq = up_irq_save();
+  bclock = rdtscp();
+
+  for (; ; )
+    {
+      now = rdtscp();
+      if (now - bclock >= cycles)
+        {
+          break;
+        }
+
+      rep_nop();
+    }
+
+  up_irq_restore(irq);
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_mdelay
+ * Name: up_nsdelay
  *
  * Description:
- *   Delay inline for the requested number of milliseconds.
+ *   Delay inline for the requested number of nanoseconds.
  *   *** NOT multi-tasking friendly ***
  *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
  *
  ****************************************************************************/
 
-void up_mdelay(unsigned int milliseconds)
+void up_ndelay(unsigned long nanoseconds)
 {
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC
-  up_ndelay(milliseconds * NSEC_PER_MSEC);
-#else
-  volatile int i;
-  volatile int j;
+  uint64_t cycles;
 
-  for (i = 0; i < milliseconds; i++)
-    {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-        {
-        }
-    }
-#endif
+  cycles = (nanoseconds * g_x86_64_timer_freq + NSEC_PER_SEC - 1)
+           / NSEC_PER_SEC;
+
+  delay_tsc(cycles);
 }
