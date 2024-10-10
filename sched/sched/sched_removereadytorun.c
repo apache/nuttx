@@ -104,6 +104,10 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
 void nxsched_remove_self(FAR struct tcb_s *tcb)
 {
   nxsched_remove_readytorun(tcb);
+  if (list_pendingtasks()->head)
+    {
+      nxsched_merge_pending();
+    }
 }
 #endif /* !CONFIG_SMP */
 
