@@ -121,12 +121,13 @@ static int init_ota_partitions(void)
 {
   struct mtd_dev_s *mtd;
   int ret = OK;
+  int i;
 
 #ifdef CONFIG_BCH
   char blockdev[18];
 #endif
 
-  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
+  for (i = 0; i < nitems(g_ota_partition_table); ++i)
   {
     const struct ota_partition_s *part = &g_ota_partition_table[i];
     mtd = esp_spiflash_alloc_mtdpart(part->offset, part->size);
@@ -139,16 +140,17 @@ static int init_ota_partitions(void)
     }
 
 #ifdef CONFIG_BCH
-      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
+    
+    snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
 
-      ret = bchdev_register(blockdev, part->devpath, false);
-      if (ret < 0)
-        {
-          ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
-          return ret;
-        }
+    ret = bchdev_register(blockdev, part->devpath, false);
+    if (ret < 0)
+    {
+      ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
+      return ret;
+    }
 #endif
-  }
+  } 
 
   return ret;
 }
