@@ -52,12 +52,13 @@ $(LITTLEFS_TARBALL):
 	$(call DOWNLOAD,https://github.com/ARMmbed/littlefs/archive,$(LITTLEFS_TARBALL),littlefs/$(LITTLEFS_TARBALL))
 
 .littlefsunpack: $(LITTLEFS_TARBALL)
-	$(Q) tar zxf littlefs/$(LITTLEFS_TARBALL) -C littlefs
-	$(Q) mv littlefs/littlefs-$(LITTLEFS_VERSION) littlefs/littlefs
-	$(Q) git apply littlefs/lfs_util.patch
-	$(Q) git apply littlefs/lfs_getpath.patch
-	$(Q) git apply littlefs/lfs_getsetattr.patch
-	$(Q) touch littlefs/.littlefsunpack
+	 tar zxf littlefs/$(LITTLEFS_TARBALL) -C littlefs
+	 mv littlefs/littlefs-$(LITTLEFS_VERSION) littlefs/littlefs
+	 git apply littlefs/lfs_util.patch
+	 git apply littlefs/lfs_getpath.patch
+	 git apply littlefs/lfs_getsetattr.patch
+	 cat littlefs/littlefs/lfs.c
+	 touch littlefs/.littlefsunpack
 
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard littlefs/littlefs/.git),)
