@@ -209,7 +209,7 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_CLANG),y)
       TOOLCHAIN_CLANG_CONFIG := $(TOOLCHAIN_CLANG_CONFIG)_nosys
     endif
 
-    ifeq ($(CLANGVER),17.0)
+    ifeq "17.0" "$(word 1, $(sort 17.0 $(CLANGVER)))"
       TOOLCHAIN_CLANG_OPTION = -target
       ARCHCPUFLAGS += --target=arm-none-eabi
     else
