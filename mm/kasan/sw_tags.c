@@ -43,7 +43,7 @@
   (FAR void *)((((uint64_t)(addr)) & ~((uint64_t)0xff << KASAN_TAG_SHIFT)) | \
                (((uint64_t)(tag)) << KASAN_TAG_SHIFT))
 
-#define kasan_random_tag() (rand() % ((1 << (64 - KASAN_TAG_SHIFT)) - 1))
+#define kasan_random_tag() (1 + rand() % ((1 << (64 - KASAN_TAG_SHIFT)) - 2))
 
 #define KASAN_SHADOW_SCALE (sizeof(uintptr_t))
 
@@ -103,6 +103,14 @@ kasan_is_poisoned(FAR const void *addr, size_t size)
   uint8_t tag;
 
   tag = kasan_get_tag(addr);
+
+#ifdef CONFIG_MM_KASAN_SKIP_ZERO_TAGS
+  if (tag == 0)
+    {
+      return false;
+    }
+#endif
+
   p = kasan_mem_to_shadow(addr, size);
   if (p == NULL)
     {
