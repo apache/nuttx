@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/aes.c
+ *
+ * SPDX-License-Identifier: MIT
+ *
  * $OpenBSD: aes.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
  *
  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>

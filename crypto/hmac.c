@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/hmac.c
+ *
+ * SPDX-License-Identifier: ISC
+ *
  * $OpenBSD: hmac.c,v 1.4 2016/09/19 18:09:40 tedu Exp $
  *
  * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>

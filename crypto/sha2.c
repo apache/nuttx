@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/sha2.c
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * $OpenBSD: sha2.c,v 1.19 2021/03/12 10:22:46 jsg Exp $
  * FILE: sha2.c
  * AUTHOR: Aaron D. Gifford <me@aarongifford.com>
