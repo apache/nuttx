@@ -121,22 +121,23 @@ static int init_ota_partitions(void)
 {
   struct mtd_dev_s *mtd;
   int ret = OK;
+  int i;
 
 #ifdef CONFIG_BCH
   char blockdev[18];
 #endif
 
-  for (int i = 0; i < nitems(g_ota_partition_table); ++i)
-  {
-    const struct ota_partition_s *part = &g_ota_partition_table[i];
-    mtd = esp_spiflash_alloc_mtdpart(part->offset, part->size);
-
-    ret = ftl_initialize(i, mtd);
-    if (ret < 0)
+  for (i = 0; i < nitems(g_ota_partition_table); ++i)
     {
-      ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
-      return ret;
-    }
+      const struct ota_partition_s *part = &g_ota_partition_table[i];
+      mtd = esp_spiflash_alloc_mtdpart(part->offset, part->size);
+
+      ret = ftl_initialize(i, mtd);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
 
 #ifdef CONFIG_BCH
       snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
@@ -148,10 +149,11 @@ static int init_ota_partitions(void)
           return ret;
         }
 #endif
-  }
+    }
 
   return ret;
 }
+
 #endif
 
 /****************************************************************************
