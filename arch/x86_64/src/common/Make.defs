@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-# Common x86_64 files
+# Common x86_64 and intel64 files
 
 CMN_CSRCS += x86_64_allocateheap.c x86_64_copystate.c x86_64_exit.c
 CMN_CSRCS += x86_64_getintstack.c  x86_64_initialize.c x86_64_nputs.c

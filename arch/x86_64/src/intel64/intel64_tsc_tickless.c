@@ -76,7 +76,12 @@
 
 extern unsigned long g_x86_64_timer_freq;
 
+#ifndef CONFIG_SCHED_TICKLESS_ALARM
+static uint64_t g_goal_time;
+#else
 static struct timespec g_goal_time_ts;
+#endif
+
 static uint64_t g_last_stop_time;
 static uint64_t g_start_tsc;
 static uint32_t g_timer_active;
