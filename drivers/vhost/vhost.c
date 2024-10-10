@@ -38,6 +38,7 @@
 #include "vhost-blk.h"
 #include "vhost-can.h"
 #include "vhost-i2c.h"
+#include "vhost-serial.h"
 #include "vhost-rng.h"
 #include "vhost-rpmb.h"
 #include "vhost-rpmsg.h"
@@ -568,6 +569,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_rpmsg_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_SERIAL
+  ret = vhost_register_serial_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_serial_driver failed, ret=%d\n", ret);
     }
 #endif
 
