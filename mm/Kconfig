@@ -323,6 +323,12 @@ config MM_KASAN_DISABLE_WRITES_CHECK
 	---help---
 		This option disable kasan writes check.
 
+config MM_KASAN_SKIP_ZERO_TAGS
+	bool "Enable skip check zero tags"
+	default LIBC_MODLIB
+	---help---
+		This option enables not checking for zero tags.
+
 config MM_KASAN_GLOBAL
 	bool "Enable global data check"
 	depends on MM_KASAN_ALL
