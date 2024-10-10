@@ -66,6 +66,9 @@ extern "C"
 #ifdef CONFIG_DEV_RPMSG_SERVER
 int rpmsgdev_server_init(void);
 int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath);
+int rpmsgdev_export_with_prefix(FAR const char *remotecpu,
+                                FAR const char *prefix,
+                                FAR const char *localpath);
 #endif
 
 /****************************************************************************
@@ -79,7 +82,7 @@ int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath);
  *   remotecpu  - the server cpu name
  *   remotepath - the device you want to access in the remote cpu
  *   localpath  - the device path in local cpu, if NULL, the localpath is
- *                same as the remotepath, provide this argument to supoort
+ *                same as the remotepath, provide this argument to support
  *                custom device path
  *   flags      - RPMSGDEV_NOFRAG_READ and RPMSGDEV_NOFRAG_WRITE can be set
  *                to indicates that the read and write data of the device

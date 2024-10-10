@@ -73,6 +73,7 @@ struct rpmsgdev_server_s
 struct rpmsgdev_export_s
 {
   FAR const char *remotecpu;  /* The client cpu name */
+  FAR const char *prefix;     /* The device prefix */
   FAR const char *localpath;  /* The device path in the server cpu */
 };
 
@@ -158,7 +159,7 @@ static int rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
     }
 
   msg->header.result = file_open(&dev->file,
-                                 &ept->name[RPMSGDEV_NAME_PREFIX_LEN],
+                                 strchr(ept->name, '/'),
                                  msg->flags, 0);
   if (msg->header.result < 0)
     {
@@ -519,7 +520,7 @@ static void rpmsgdev_server_created(FAR struct rpmsg_device *rdev,
 
   if (strcmp(priv->remotecpu, rpmsg_get_cpuname(rdev)) == 0)
     {
-      snprintf(buf, sizeof(buf), "%s%s", RPMSGDEV_NAME_PREFIX,
+      snprintf(buf, sizeof(buf), "%s%s", priv->prefix,
                priv->localpath);
       rpmsgdev_ns_bind(rdev, priv, buf, RPMSG_ADDR_ANY);
     }
@@ -529,7 +530,9 @@ static void rpmsgdev_server_created(FAR struct rpmsg_device *rdev,
  * Public Functions
  ****************************************************************************/
 
-int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
+int rpmsgdev_export_with_prefix(FAR const char *remotecpu,
+                                FAR const char *prefix,
+                                FAR const char *localpath)
 {
   FAR struct rpmsgdev_export_s *priv;
 
@@ -540,6 +543,7 @@ int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
     }
 
   priv->remotecpu = remotecpu;
+  priv->prefix    = prefix;
   priv->localpath = localpath;
 
   return rpmsg_register_callback(priv,
@@ -547,6 +551,13 @@ int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
                                  NULL,
                                  NULL,
                                  NULL);
+}
+
+int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
+{
+  return rpmsgdev_export_with_prefix(remotecpu,
+                                     RPMSGDEV_NAME_PREFIX,
+                                     localpath);
 }
 
 /****************************************************************************
