@@ -78,6 +78,7 @@ if(CONFIG_ARCH_INTEL64_HAVE_TSC)
   else()
     list(APPEND SRCS intel64_tsc_timerisr.c)
   endif()
+  list(APPEND SRCS intel64_tsc_ndelay.c)
 endif()
 
 if(CONFIG_INTEL64_HPET)
