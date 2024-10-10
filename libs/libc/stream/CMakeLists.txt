@@ -41,7 +41,8 @@ list(
   lib_syslograwstream.c
   lib_bufferedoutstream.c
   lib_hexdumpstream.c
-  lib_base64outstream.c)
+  lib_base64outstream.c
+  lib_fileoutstream.c)
 
 if(CONFIG_FILE_STREAM)
   list(APPEND SRCS lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c

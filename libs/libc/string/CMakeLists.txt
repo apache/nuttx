@@ -61,64 +61,29 @@ set(SRCS
     lib_explicit_bzero.c
     lib_bzero.c
     lib_strsignal.c
-    lib_timingsafe_bcmp.c
     lib_index.c
-    lib_rindex.c)
+    lib_rindex.c
+    lib_timingsafe_bcmp.c
+    lib_strverscmp.c
+    lib_mempcpy.c
+    lib_rawmemchr.c
+    lib_memchr.c
+    lib_memcmp.c
+    lib_memmove.c
+    lib_memset.c
+    lib_strchr.c
+    lib_strcmp.c
+    lib_strcpy.c
+    lib_strlcat.c
+    lib_strlcpy.c
+    lib_strlen.c
+    lib_strncpy.c
+    lib_strnlen.c)
 
-if(NOT CONFIG_LIBC_ARCH_MEMCHR)
-  list(APPEND SRCS lib_memchr.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMCMP)
-  list(APPEND SRCS lib_memcmp.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMCPY)
-  if(CONFIG_MEMCPY_VIK)
-    list(APPEND SRCS lib_vikmemcpy.c)
-  else()
-    list(APPEND SRCS lib_memcpy.c)
-  endif()
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMMOVE)
-  list(APPEND SRCS lib_memmove.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_MEMSET)
-  list(APPEND SRCS lib_memset.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRCHR)
-  list(APPEND SRCS lib_strchr.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRCMP)
-  list(APPEND SRCS lib_strcmp.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRCPY)
-  list(APPEND SRCS lib_strcpy.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRLCAT)
-  list(APPEND SRCS lib_strlcat.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRLCPY)
-  list(APPEND SRCS lib_strlcpy.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRLEN)
-  list(APPEND SRCS lib_strlen.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRNCPY)
-  list(APPEND SRCS lib_strncpy.c)
-endif()
-
-if(NOT CONFIG_LIBC_ARCH_STRNLEN)
-  list(APPEND SRCS lib_strnlen.c)
+if(CONFIG_MEMCPY_VIK)
+  list(APPEND SRCS lib_vikmemcpy.c)
+else()
+  list(APPEND SRCS lib_memcpy.c)
 endif()
 
 if(CONFIG_LIBC_LOCALE)

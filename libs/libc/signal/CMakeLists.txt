@@ -31,6 +31,8 @@ target_sources(
           sig_orset.c
           sig_xorset.c
           sig_isemptyset.c
+          sig_killpg.c
+          sig_altstack.c
           sig_interrupt.c
           sig_hold.c
           sig_ignore.c
@@ -41,5 +43,4 @@ target_sources(
           sig_relse.c
           sig_set.c
           sig_signal.c
-          sig_wait.c
-          sig_killpg.c)
+          sig_wait.c)

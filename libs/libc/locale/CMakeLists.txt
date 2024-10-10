@@ -29,5 +29,9 @@ if(CONFIG_LIBC_LOCALE)
             lib_newlocale.c
             lib_setlocale.c
             lib_uselocale.c
+            lib_catalog.c
+            lib_gettext.c
+            lib_langinfo.c
+            lib_iconv.c
             lib_maxlocale.c)
 endif()

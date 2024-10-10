@@ -1,7 +1,5 @@
 # ##############################################################################
-# libs/libc/spawn/CMakeLists.txt
-#
-# SPDX-License-Identifier: Apache-2.0
+# arch/arm/src/arm/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -20,32 +18,28 @@
 #
 # ##############################################################################
 
-set(SRCS
-    lib_psfa_addaction.c
-    lib_psfa_addclose.c
-    lib_psfa_adddup2.c
-    lib_psfa_addopen.c
-    lib_psfa_destroy.c
-    lib_psfa_init.c
-    lib_psa_getflags.c
-    lib_psa_getschedparam.c
-    lib_psa_getschedpolicy.c
-    lib_psa_init.c
-    lib_psa_setflags.c
-    lib_psa_setschedparam.c
-    lib_psa_setschedpolicy.c
-    lib_psa_getsigmask.c
-    lib_psa_setsigmask.c
-    lib_psa_getstacksize.c
-    lib_psa_setstacksize.c
-    lib_psa_destroy.c)
+set(SRCS arm_head.S)
 
-if(NOT CONFIG_BUILD_KERNEL)
-  list(APPEND SRCS lib_psa_getstacksize.c lib_psa_setstacksize.c)
+list(
+  APPEND
+  SRCS
+  arm_dataabort.c
+  arm_doirq.c
+  arm_initialstate.c
+  arm_prefetchabort.c
+  arm_schedulesigaction.c
+  arm_sigdeliver.c
+  arm_syscall.c
+  arm_tcbinfo.c
+  arm_undefinedinsn.c
+  arm_cache.S
+  arm_vectors.S
+  arm_vectortab.S
+  arm_saveusercontext.S)
+
+if(CONFIG_PAGING)
+  list(APPEND SRCS arm_pginitialize.c arm_checkmapping.c arm_allocpage.c
+       arm_va2pte.c)
 endif()
 
-if(CONFIG_DEBUG_FEATURES)
-  list(APPEND SRCS lib_psfa_dump.c lib_psa_dump.c)
-endif()
-
-target_sources(c PRIVATE ${SRCS})
+target_sources(arch PRIVATE ${SRCS})

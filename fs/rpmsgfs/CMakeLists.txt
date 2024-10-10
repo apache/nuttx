@@ -17,16 +17,18 @@
 # the License.
 #
 # ##############################################################################
+if(NOT CONFIG_DISABLE_MOUNTPOINT)
+  if(CONFIG_FS_RPMSGFS)
+    target_sources(fs PRIVATE rpmsgfs.c rpmsgfs_client.c)
+  endif()
 
-if(CONFIG_FS_RPMSGFS)
-  target_sources(fs PRIVATE rpmsgfs.c rpmsgfs_client.c)
-endif()
+  if(CONFIG_FS_RPMSGFS_SERVER)
+    target_sources(fs PRIVATE rpmsgfs_server.c)
+  endif()
 
-if(CONFIG_FS_RPMSGFS_SERVER)
-  target_sources(fs PRIVATE rpmsgfs_server.c)
-endif()
+  if(CONFIG_TRACE_RPMSGFS_FS)
+    set_source_files_properties(rpmsgfs.c PROPERTIES COMPILE_FLAGS
+                                                     -finstrument-functions)
+  endif()
 
-if(CONFIG_TRACE_RPMSGFS_FS)
-  set_source_files_properties(rpmsgfs.c DIRECTORY ..
-                              PROPERTIES COMPILE_FLAGS -finstrument-functions)
 endif()

@@ -1,7 +1,5 @@
 # ##############################################################################
-# libs/libc/spawn/CMakeLists.txt
-#
-# SPDX-License-Identifier: Apache-2.0
+# drivers/thermal/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -19,33 +17,28 @@
 # the License.
 #
 # ##############################################################################
+# ##############################################################################
 
-set(SRCS
-    lib_psfa_addaction.c
-    lib_psfa_addclose.c
-    lib_psfa_adddup2.c
-    lib_psfa_addopen.c
-    lib_psfa_destroy.c
-    lib_psfa_init.c
-    lib_psa_getflags.c
-    lib_psa_getschedparam.c
-    lib_psa_getschedpolicy.c
-    lib_psa_init.c
-    lib_psa_setflags.c
-    lib_psa_setschedparam.c
-    lib_psa_setschedpolicy.c
-    lib_psa_getsigmask.c
-    lib_psa_setsigmask.c
-    lib_psa_getstacksize.c
-    lib_psa_setstacksize.c
-    lib_psa_destroy.c)
+# Include thermal sources
 
-if(NOT CONFIG_BUILD_KERNEL)
-  list(APPEND SRCS lib_psa_getstacksize.c lib_psa_setstacksize.c)
+if(CONFIG_THERMAL)
+  list(APPEND SRCS thermal_core.c)
 endif()
 
-if(CONFIG_DEBUG_FEATURES)
-  list(APPEND SRCS lib_psfa_dump.c lib_psa_dump.c)
+if(CONFIG_THERMAL_GOVERNOR_STEP_WISE)
+  list(APPEND SRCS thermal_step_wise.c)
 endif()
 
-target_sources(c PRIVATE ${SRCS})
+if(CONFIG_THERMAL_CDEV_CPUFREQ)
+  list(APPEND SRCS thermal_cpufreq_cooling.c)
+endif()
+
+if(CONFIG_THERMAL_PROCFS)
+  list(APPEND SRCS thermal_procfs.c)
+endif()
+
+if(CONFIG_THERMAL_DUMMY)
+  list(APPEND SRCS thermal_dummy.c)
+endif()
+
+target_sources(drivers PRIVATE ${SRCS})
