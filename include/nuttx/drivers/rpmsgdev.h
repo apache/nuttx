@@ -66,6 +66,9 @@ extern "C"
 #ifdef CONFIG_DEV_RPMSG_SERVER
 int rpmsgdev_server_init(void);
 int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath);
+int rpmsgdev_export_with_prefix(FAR const char *remotecpu,
+                                FAR const char *prefix,
+                                FAR const char *localpath);
 #endif
 
 /****************************************************************************
