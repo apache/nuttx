@@ -19,7 +19,7 @@
 # ##############################################################################
 
 if(CONFIG_CAN)
-  set(SRCS can.c)
+  set(SRCS can.c can_sender.c)
 
   if(CONFIG_CAN_MCP2515)
     list(APPEND SRCS mcp2515.c)
