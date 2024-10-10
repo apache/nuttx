@@ -91,6 +91,10 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
 int wd_cancel_irq(FAR struct wdog_s *wdog)
 {
+  bool head;
+
+  /* Make sure that the watchdog is valid and still active. */
+
   if (wdog == NULL || !WDOG_ISACTIVE(wdog))
     {
       return -EINVAL;
@@ -103,9 +107,7 @@ int wd_cancel_irq(FAR struct wdog_s *wdog)
    * cancellation is complete
    */
 
-  /* Make sure that the watchdog is still active. */
-
-  bool head = list_is_head(&g_wdactivelist, &wdog->node);
+  head = list_is_head(&g_wdactivelist, &wdog->node);
 
   /* Now, remove the watchdog from the timer queue */
 
