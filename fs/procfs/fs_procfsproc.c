@@ -683,7 +683,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
 
   /* Show the task / thread argument list (skipping over the name) */
 
-  linesize   = group_argvstr(tcb, procfile->line, remaining);
+  linesize   = nxtask_argvstr(tcb, procfile->line, remaining);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
   totalsize += copysize;
