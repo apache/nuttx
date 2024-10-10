@@ -138,6 +138,8 @@ AFLAGS += -Wa,--divide
 endif
 
 EXEEXT = .elf
+	
+LDFLAGS += -nostdlib -static
 
 # Loadable module definitions
 
