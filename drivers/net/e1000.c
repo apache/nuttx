@@ -140,6 +140,7 @@ struct e1000_driver_s
   /* This holds the information visible to the NuttX network */
 
   struct netdev_lowerhalf_s dev;
+  struct work_s work;
 
   /* Driver state */
 
@@ -658,6 +659,39 @@ static void e1000_txdone(FAR struct netdev_lowerhalf_s *dev)
 }
 
 /*****************************************************************************
+ * Name: e1000_link_work
+ *
+ * Description:
+ *   Handle link status change.
+ *
+ * Input Parameters:
+ *   arg - Reference to the lover half driver structure (cast to void *)
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void e1000_link_work(FAR void *arg)
+{
+  FAR struct e1000_driver_s *priv = arg;
+  uint32_t tmp;
+
+  tmp = e1000_getreg_mem(priv, E1000_STATUS);
+  if (tmp & E1000_STATUS_LU)
+    {
+      ninfo("Link up, status = 0x%x\n", tmp);
+
+      netdev_lower_carrier_on(&priv->dev);
+    }
+  else
+    {
+      ninfo("Link down\n");
+      netdev_lower_carrier_off(&priv->dev);
+    }
+}
+
+/*****************************************************************************
  * Name: e1000_msi_interupt
  *
  * Description:
@@ -677,7 +711,6 @@ static void e1000_txdone(FAR struct netdev_lowerhalf_s *dev)
 static void e1000_msi_interrupt(FAR struct e1000_driver_s *priv)
 {
   uint32_t status;
-  uint32_t tmp;
 
   status = e1000_getreg_mem(priv, E1000_ICR);
   ninfo("irq status = 0x%" PRIx32 "\n", status);
@@ -701,16 +734,13 @@ static void e1000_msi_interrupt(FAR struct e1000_driver_s *priv)
 
   if (status & E1000_IC_LSC)
     {
-      tmp = e1000_getreg_mem(priv, E1000_STATUS);
-      if (tmp & E1000_STATUS_LU)
+      if (work_available(&priv->work))
         {
-          ninfo("Link up, status = 0x%x\n", tmp);
-          netdev_lower_carrier_on(&priv->dev);
-        }
-      else
-        {
-          ninfo("Link down\n");
-          netdev_lower_carrier_off(&priv->dev);
+          /* Schedule to work queue because netdev_lower_carrier_xxx API
+           * can't be used in interrupt context
+           */
+
+          work_queue(LPWORK, &priv->work, e1000_link_work, priv, 0);
         }
     }
 
@@ -773,15 +803,13 @@ static void e1000_msix_interrupt(FAR struct e1000_driver_s *priv)
 
   if (status & E1000_IC_LSC)
     {
-      if (e1000_getreg_mem(priv, E1000_STATUS) & E1000_STATUS_LU)
+      if (work_available(&priv->work))
         {
-          ninfo("Link up\n");
-          netdev_lower_carrier_on(&priv->dev);
-        }
-      else
-        {
-          ninfo("Link down\n");
-          netdev_lower_carrier_off(&priv->dev);
+          /* Schedule to work queue because netdev_lower_carrier_xxx API
+           * can't be used in interrupt context
+           */
+
+          work_queue(LPWORK, &priv->work, e1000_link_work, priv, 0);
         }
     }
 

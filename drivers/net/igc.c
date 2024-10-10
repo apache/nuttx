@@ -121,6 +121,7 @@ struct igc_driver_s
   /* This holds the information visible to the NuttX network */
 
   struct netdev_lowerhalf_s dev;
+  struct work_s work;
 
   /* Driver state */
 
@@ -614,6 +615,38 @@ static void igc_txdone(FAR struct netdev_lowerhalf_s *dev)
 }
 
 /*****************************************************************************
+ * Name: igc_link_work
+ *
+ * Description:
+ *   Handle link status change.
+ *
+ * Input Parameters:
+ *   arg - Reference to the lover half driver structure (cast to void *)
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void igc_link_work(FAR void *arg)
+{
+  FAR struct igc_driver_s *priv = arg;
+  uint32_t tmp;
+
+  tmp = igc_getreg_mem(priv, IGC_STATUS);
+  if (tmp & IGC_STATUS_LU)
+    {
+      ninfo("Link up, status = 0x%x\n", tmp);
+      netdev_lower_carrier_on(&priv->dev);
+    }
+  else
+    {
+      ninfo("Link down\n");
+      netdev_lower_carrier_off(&priv->dev);
+    }
+}
+
+/*****************************************************************************
  * Name: igc_misx_interrupt
  *
  * Description:
@@ -634,7 +667,6 @@ static void igc_msix_interrupt(FAR struct igc_driver_s *priv)
 {
   uint32_t icr  = 0;
   uint32_t eicr = 0;
-  uint32_t tmp  = 0;
 
   /* Get interrupts */
 
@@ -661,16 +693,13 @@ static void igc_msix_interrupt(FAR struct igc_driver_s *priv)
 
   if (icr & IGC_IC_LSC)
     {
-      tmp = igc_getreg_mem(priv, IGC_STATUS);
-      if (tmp & IGC_STATUS_LU)
+      if (work_available(&priv->work))
         {
-          ninfo("Link up, status = 0x%x\n", tmp);
-          netdev_lower_carrier_on(&priv->dev);
-        }
-      else
-        {
-          ninfo("Link down\n");
-          netdev_lower_carrier_off(&priv->dev);
+          /* Schedule to work queue because netdev_lower_carrier_xxx API
+           * can't be used in interrupt context
+           */
+
+          work_queue(LPWORK, &priv->work, igc_link_work, priv, 0);
         }
     }
 
