@@ -34,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <arch/irq.h>
 
@@ -55,10 +56,6 @@
 
 #define SET_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, 0, (_b))
 #define CLR_BITS(_r, _ch, _b)   modifyreg32((_r) + (_ch) * REG_OFF, (_b), 0)
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
 
 /****************************************************************************
  * Private Data

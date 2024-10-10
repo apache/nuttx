@@ -37,6 +37,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
 #include <arch/board/board.h>
@@ -61,9 +62,6 @@
 #    undef ARMV8A_DCACHE_LINESIZE
 #    define ARMV8A_DCACHE_LINESIZE 64
 #  endif
-
-#define ALIGN_MASK        (ARMV8A_DCACHE_LINESIZE - 1)
-#define ALIGN_UP(n)       (((n)+ALIGN_MASK) & ~ALIGN_MASK)
 
 /* Configuration ************************************************************/
 
@@ -835,10 +833,11 @@ static ssize_t imx9_flexspi_nor_read(struct mtd_dev_s *dev,
     }
 
   src = priv->ahb_base + offset;
-  DEBUGASSERT(((uintptr_t)src & ALIGN_MASK) == 0);
+  DEBUGASSERT(((uintptr_t)src & (ARMV8A_DCACHE_LINESIZE - 1)) == 0);
 
   up_invalidate_dcache((uintptr_t)src,
-                       (uintptr_t)src + ALIGN_UP(nbytes));
+                       (uintptr_t)src +
+                       ALIGN_UP(nbytes, ARMV8A_DCACHE_LINESIZE));
 
   memcpy(buffer, src, nbytes);
 

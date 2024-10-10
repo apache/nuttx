@@ -34,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <arch/irq.h>
 
@@ -50,10 +51,6 @@
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
-
-#ifndef ALIGN_UP
-#  define ALIGN_UP(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
-#endif
 
 /* DMA channel number */
 

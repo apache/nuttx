@@ -29,15 +29,11 @@
 #include <debug.h>
 #include <stdio.h>
 
+#include <nuttx/nuttx.h>
+
 #include "ubsan.h"
 
 #ifndef CONFIG_MM_UBSAN_DUMMY
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IS_ALIGNED(x, a) (((x) & ((a) - 1)) == 0)
 
 /****************************************************************************
  * Private Data
