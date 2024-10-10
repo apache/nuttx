@@ -67,8 +67,7 @@ size_t group_argvstr(FAR struct tcb_s *tcb, FAR char *args, size_t size)
 
   /* Sanity checks and idle tasks */
 
-  if (!tcb || !tcb->group || !tcb->group->tg_info || size < 1 ||
-      is_idle_task(tcb))
+  if (!tcb || size < 1 || is_idle_task(tcb))
     {
       *args = '\0';
       return 0;
