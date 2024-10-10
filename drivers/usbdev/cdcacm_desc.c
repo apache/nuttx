@@ -338,7 +338,9 @@ int cdcacm_copy_epdesc(enum cdcacm_epdesc_e epid,
 #endif
 
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+  if (speed == USB_SPEED_SUPER ||
+      speed == USB_SPEED_SUPER_PLUS ||
+      speed == USB_SPEED_UNKNOWN)
     {
       len += sizeof(struct usb_ss_epcompdesc_s);
     }
