@@ -66,7 +66,7 @@ void up_idle(void)
 
   nxsched_process_timer();
 #elif defined(CONFIG_ARCH_X86_64_IDLE_NOP)
-  asm volatile("nop");
+  __asm__ volatile("nop");
 #elif defined(CONFIG_ARCH_X86_64_IDLE_MWAIT_ECX)
   /* Dummy value to make MONITOR/MWAIT work */
 
@@ -74,15 +74,15 @@ void up_idle(void)
 
   /* MONITOR eax, ecx, edx */
 
-  asm volatile(".byte 0x0f, 0x01, 0xc8" ::
-                "a"(&dummy), "c"(0), "d"(0));
+  __asm__ volatile(".byte 0x0f, 0x01, 0xc8" ::
+                   "a"(&dummy), "c"(0), "d"(0));
 
   /* We enable sub C-state here and wait for interrupts */
 
   /* MWAIT eax, ecx */
 
-  asm volatile(".byte 0x0f, 0x01, 0xc9" ::
-                "a"(0), "c"(CONFIG_ARCH_X86_64_IDLE_MWAIT_ECX));
+  __asm__ volatile(".byte 0x0f, 0x01, 0xc9" ::
+                   "a"(0), "c"(CONFIG_ARCH_X86_64_IDLE_MWAIT_ECX));
 #else
   __asm__ volatile("hlt");
 #endif
