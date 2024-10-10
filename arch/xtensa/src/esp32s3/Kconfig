@@ -615,6 +615,7 @@ config ESP32S3_SPI2
 	select ESP32S3_SPI
 	select SPI
 	select ESP32S3_GPIO_IRQ if SPI_SLAVE
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S3_SPI3
 	bool "SPI 3"
@@ -622,6 +623,7 @@ config ESP32S3_SPI3
 	select ESP32S3_SPI
 	select SPI
 	select ESP32S3_GPIO_IRQ if SPI_SLAVE
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S3_DMA
 	bool "General DMA (GDMA)"
