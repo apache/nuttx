@@ -173,15 +173,6 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       uintptr_t top_of_stack;
       size_t size_of_stack;
 
-      /* Yes.. If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-#ifdef CONFIG_STACK_COLORATION
-      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
-#endif
-
       /* The x86_64 uses a push-down stack:  the stack grows toward lower
        * addresses in memory.  The stack pointer register, points to the
        * lowest, valid work address (the "top" of the stack).  Items on
@@ -205,6 +196,15 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       tcb->stack_base_ptr = tcb->stack_alloc_ptr;
       tcb->adj_stack_size = size_of_stack;
       tcb->flags |= TCB_FLAG_FREE_STACK;
+
+      /* Yes.. If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+#ifdef CONFIG_STACK_COLORATION
+      x86_64_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+#endif
 
       board_autoled_on(LED_STACKCREATED);
       return OK;
