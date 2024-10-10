@@ -365,7 +365,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 
   /* Stringify the argument vector */
 
-  group_argvstr(tcb, args, sizeof(args));
+  nxtask_argvstr(tcb, args, sizeof(args));
 
   /* get the task_state */
 

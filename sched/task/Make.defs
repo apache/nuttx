@@ -20,11 +20,11 @@
 #
 ############################################################################
 
-CSRCS += task_create.c task_init.c task_setup.c task_activate.c
-CSRCS += task_start.c task_delete.c task_exit.c task_exithook.c
-CSRCS += task_getgroup.c task_getpid.c task_prctl.c task_recover.c
-CSRCS += task_restart.c task_spawnparms.c task_cancelpt.c task_terminate.c
-CSRCS += task_gettid.c exit.c task_join.c
+CSRCS += task_argvstr.c task_create.c task_init.c task_setup.c
+CSRCS += task_activate.c task_start.c task_delete.c task_exit.c
+CSRCS += task_exithook.c task_getgroup.c task_getpid.c task_prctl.c
+CSRCS += task_recover.c task_restart.c task_spawnparms.c task_cancelpt.c
+CSRCS += task_terminate.c task_gettid.c exit.c task_join.c
 
 ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 CSRCS += task_getppid.c task_reparent.c
