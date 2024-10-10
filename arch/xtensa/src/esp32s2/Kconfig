@@ -353,12 +353,14 @@ config ESP32S2_SPI2
 	default n
 	select ESP32S2_SPI
 	select SPI
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S2_SPI3
 	bool "SPI 3"
 	default n
 	select ESP32S2_SPI
 	select SPI
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S2_SPIRAM
 	bool "SPI RAM Support"

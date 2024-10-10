@@ -40,6 +40,22 @@ config ESPRESSIF_I2C_BITBANG
 	---help---
 		Software implemented I2C peripheral with GPIOs. Suggested to use if I2C peripherals are already in use.
 
+config ESPRESSIF_SPI_PERIPH
+	bool
+    depends on (ESP32S3_SPI2 || ESP32S3_SPI3) || (ESP32_SPI2 || ESP32_SPI3) || (ESP32S2_SPI2 || ESP32S2_SPI3)
+	default n
+
+config ESPRESSIF_SPI_BITBANG
+	bool "SPI Bitbang"
+	default n
+	select ESP32_SPI if ARCH_CHIP_ESP32
+	select ESP32S2_SPI if ARCH_CHIP_ESP32S2
+	select ESP32S3_SPI if ARCH_CHIP_ESP32S3
+	select SPI
+	select SPI_BITBANG
+    ---help---
+		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripherals are already in use.
+
 config ESPRESSIF_SPIFLASH
 	bool "SPI Flash"
 	depends on ARCH_CHIP_ESP32S2
@@ -103,6 +119,49 @@ config ESPRESSIF_I2C_BITBANG_SDAPIN
        range 0 21
 
 endmenu # I2C bitbang configuration
+
+menu "SPI bitbang configuration"
+	depends on ESPRESSIF_SPI_BITBANG
+
+config ESPRESSIF_SPI_BITBANG_CSPIN
+	int "SPI Bitbang CS Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_CLKPIN
+	int "SPI Bitbang CLK Pin"
+	default 1
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MOSIPIN
+	int "SPI Bitbang MOSI Pin"
+	default 2
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MISOPIN
+	int "SPI Bitbang MISO Pin"
+	default 3
+	range 0 21
+
+choice ESPRESSIF_SPI_BITBANG_MODE
+	prompt "SPI Bitbang mode"
+	default ESPRESSIF_SPI_BITBANG_MODE0
+
+config ESPRESSIF_SPI_BITBANG_MODE0
+	bool "SPI MODE0"
+
+config ESPRESSIF_SPI_BITBANG_MODE1
+	bool "SPI MODE1"
+
+config ESPRESSIF_SPI_BITBANG_MODE2
+	bool "SPI MODE2"
+
+config ESPRESSIF_SPI_BITBANG_MODE3
+	bool "SPI MODE3"
+
+endchoice # ESPRESSIF_SPI_BITBANG_MODE
+
+endmenu # SPI bitbang configuration
 
 config ESPRESSIF_HAVE_OTA_PARTITION
 	bool
