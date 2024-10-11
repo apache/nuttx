@@ -51,11 +51,8 @@
  * Private Data
  ****************************************************************************/
 
-static char g_sysname[] = "NuttX";
-static char g_machine[] = CONFIG_ARCH;
-static char g_release[] = CONFIG_VERSION_STRING;
-
-#if defined(__DATE__) && defined(__TIME__)
+#if defined(__DATE__) && defined(__TIME__) && \
+    !defined(CONFIG_LIBC_UNAME_DISABLE_TIMESTAMP)
 static char g_version[] = CONFIG_VERSION_BUILD " " __DATE__ " " __TIME__;
 #else
 static char g_version[] = CONFIG_VERSION_BUILD;
@@ -97,15 +94,20 @@ int uname(FAR struct utsname *name)
 {
   int ret = 0;
 
+  /* Copy the strings.  Assure that each is NUL terminated. */
+
+  strlcpy(name->sysname, "NuttX", sizeof(name->sysname));
+
   /* Get the hostname */
 
   ret = gethostname(name->nodename, HOST_NAME_MAX);
   name->nodename[HOST_NAME_MAX - 1] = '\0';
 
-  strlcpy(name->sysname, g_sysname, sizeof(name->sysname));
-  strlcpy(name->release, g_release, sizeof(name->release));
-  strlcpy(name->version, g_version, sizeof(name->version));
-  strlcpy(name->machine, g_machine, sizeof(name->machine));
+  strlcpy(name->release,  CONFIG_VERSION_STRING, sizeof(name->release));
+
+  strlcpy(name->version,  g_version, sizeof(name->version));
+
+  strlcpy(name->machine,  CONFIG_ARCH, sizeof(name->machine));
 
   return ret;
 }
