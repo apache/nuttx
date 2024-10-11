@@ -63,7 +63,7 @@ void nxsched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
   /* Handle the task exiting case */
 
-  if (tcb != NULL)
+  if (tcb == NULL)
     {
       return;
     }
