@@ -526,6 +526,11 @@ static int igc_transmit(FAR struct netdev_lowerhalf_s *dev,
       return -EINVAL;
     }
 
+  if (!IFF_IS_RUNNING(dev->netdev.d_flags))
+    {
+      return -ENETDOWN;
+    }
+
   /* Store TX packet reference */
 
   priv->tx_pkt[priv->tx_now] = pkt;
