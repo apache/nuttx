@@ -35,6 +35,10 @@ endif()
 
 if(CONFIG_RAMLOG)
   list(APPEND SRCS ramlog.c)
+  if(CONFIG_RAMLOG_BUFFER_SECTION)
+    target_compile_definitions(
+      drivers PRIVATE -DRAMLOG_BUFFER_SECTION="${CONFIG_RAMLOG_BUFFER_SECTION}")
+  endif()
 endif()
 
 # Include SYSLOG drivers (only one should be enabled)
