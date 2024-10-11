@@ -193,6 +193,11 @@ static void e1000_dump_mem(FAR struct e1000_driver_s *priv,
                            FAR const char *msg);
 #endif
 
+/* Rings management */
+
+static void e1000_txclean(FAR struct e1000_driver_s *priv);
+static void e1000_rxclean(FAR struct e1000_driver_s *priv);
+
 /* Common TX logic */
 
 static int e1000_transmit(FAR struct netdev_lowerhalf_s *dev,
@@ -470,6 +475,68 @@ static void e1000_dump_mem(FAR struct e1000_driver_s *priv,
 #endif
 
 /*****************************************************************************
+ * Name: e1000_txclean
+ *
+ * Description:
+ *   Clean transmition ring
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void e1000_txclean(FAR struct e1000_driver_s *priv)
+{
+  FAR struct netdev_lowerhalf_s *netdev = &priv->dev;
+
+  /* Reset ring */
+
+  e1000_putreg_mem(priv, E1000_TDH, 0);
+  e1000_putreg_mem(priv, E1000_TDT, 0);
+
+  /* Free any pending TX */
+
+  while (priv->tx_now != priv->tx_done)
+    {
+      /* Free net packet */
+
+      netpkt_free(netdev, priv->tx_pkt[priv->tx_done], NETPKT_TX);
+
+      /* Next descriptor */
+
+      priv->tx_done = (priv->tx_done + 1) % E1000_TX_DESC;
+    }
+
+  priv->tx_now  = 0;
+  priv->tx_done = 0;
+}
+
+/*****************************************************************************
+ * Name: e1000_rxclean
+ *
+ * Description:
+ *   Clean receive ring
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void e1000_rxclean(FAR struct e1000_driver_s *priv)
+{
+  priv->rx_now = 0;
+
+  e1000_putreg_mem(priv, E1000_RDH, 0);
+  e1000_putreg_mem(priv, E1000_RDT, 0);
+}
+
+/*****************************************************************************
  * Name: e1000_transmit
  *
  * Description:
@@ -683,6 +750,11 @@ static void e1000_link_work(FAR void *arg)
       ninfo("Link up, status = 0x%x\n", tmp);
 
       netdev_lower_carrier_on(&priv->dev);
+
+      /* Clear Tx and RX rings */
+
+      e1000_txclean(priv);
+      e1000_rxclean(priv);
     }
   else
     {
@@ -1091,13 +1163,11 @@ static void e1000_disable(FAR struct e1000_driver_s *priv)
 
   /* Reset Tx tail */
 
-  e1000_putreg_mem(priv, E1000_TDH, 0);
-  e1000_putreg_mem(priv, E1000_TDT, 0);
+  e1000_txclean(priv);
 
   /* Reset Rx tail */
 
-  e1000_putreg_mem(priv, E1000_RDH, 0);
-  e1000_putreg_mem(priv, E1000_RDT, 0);
+  e1000_rxclean(priv);
 
   /* Disable interrupts */
 
@@ -1190,12 +1260,9 @@ static void e1000_enable(FAR struct e1000_driver_s *priv)
   regval = E1000_TX_DESC * sizeof(struct e1000_tx_leg_s);
   e1000_putreg_mem(priv, E1000_TDLEN, regval);
 
-  priv->tx_now  = 0;
-
   /* Reset TX tail */
 
-  e1000_putreg_mem(priv, E1000_TDH, 0);
-  e1000_putreg_mem(priv, E1000_TDT, 0);
+  e1000_txclean(priv);
 
   /* Setup RX descriptor */
 
@@ -1211,11 +1278,12 @@ static void e1000_enable(FAR struct e1000_driver_s *priv)
   regval = E1000_RX_DESC * sizeof(struct e1000_rx_leg_s);
   e1000_putreg_mem(priv, E1000_RDLEN, regval);
 
-  priv->rx_now = 0;
-
   /* Reset RX tail */
 
-  e1000_putreg_mem(priv, E1000_RDH, 0);
+  e1000_rxclean(priv);
+
+  /* All RX descriptors availalbe */
+
   e1000_putreg_mem(priv, E1000_RDT, E1000_RX_DESC);
 
   /* Enable interrupts */

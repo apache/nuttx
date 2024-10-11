@@ -172,6 +172,11 @@ static void igc_dump_reg(FAR struct igc_driver_s *priv,
 static void igc_dump_mem(FAR struct igc_driver_s *priv, FAR const char *msg);
 #endif
 
+/* Rings management */
+
+static void igc_txclean(FAR struct igc_driver_s *priv);
+static void igc_rxclean(FAR struct igc_driver_s *priv);
+
 /* Common TX logic */
 
 static int igc_transmit(FAR struct netdev_lowerhalf_s *dev,
@@ -424,6 +429,68 @@ static void igc_dump_mem(FAR struct igc_driver_s *priv, FAR const char *msg)
 #endif
 
 /*****************************************************************************
+ * Name: igc_txclean
+ *
+ * Description:
+ *   Clean transmition ring
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void igc_txclean(FAR struct igc_driver_s *priv)
+{
+  FAR struct netdev_lowerhalf_s *netdev = &priv->dev;
+
+  /* Reset ring */
+
+  igc_putreg_mem(priv, IGC_TDH0, 0);
+  igc_putreg_mem(priv, IGC_TDT0, 0);
+
+  /* Free any pending TX */
+
+  while (priv->tx_now != priv->tx_done)
+    {
+      /* Free net packet */
+
+      netpkt_free(netdev, priv->tx_pkt[priv->tx_done], NETPKT_TX);
+
+      /* Next descriptor */
+
+      priv->tx_done = (priv->tx_done + 1) % IGC_TX_DESC;
+    }
+
+  priv->tx_now  = 0;
+  priv->tx_done = 0;
+}
+
+/*****************************************************************************
+ * Name: igc_rxclean
+ *
+ * Description:
+ *   Clean receive ring
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void igc_rxclean(FAR struct igc_driver_s *priv)
+{
+  priv->rx_now = 0;
+
+  igc_putreg_mem(priv, IGC_RDH0, 0);
+  igc_putreg_mem(priv, IGC_RDT0, 0);
+}
+
+/*****************************************************************************
  * Name: igc_transmit
  *
  * Description:
@@ -638,6 +705,11 @@ static void igc_link_work(FAR void *arg)
     {
       ninfo("Link up, status = 0x%x\n", tmp);
       netdev_lower_carrier_on(&priv->dev);
+
+      /* Clear Tx and RX rings */
+
+      igc_txclean(priv);
+      igc_rxclean(priv);
     }
   else
     {
@@ -971,13 +1043,11 @@ static void igc_disable(FAR struct igc_driver_s *priv)
 
   /* Reset Tx tail */
 
-  igc_putreg_mem(priv, IGC_TDH0, 0);
-  igc_putreg_mem(priv, IGC_TDT0, 0);
+  igc_txclean(priv);
 
   /* Reset Rx tail */
 
-  igc_putreg_mem(priv, IGC_RDH0, 0);
-  igc_putreg_mem(priv, IGC_RDT0, 0);
+  igc_rxclean(priv);
 
   /* Disable interrupts */
 
@@ -1079,12 +1149,9 @@ static void igc_enable(FAR struct igc_driver_s *priv)
   regval = IGC_TX_DESC * sizeof(struct igc_tx_leg_s);
   igc_putreg_mem(priv, IGC_TDLEN0, regval);
 
-  priv->tx_now = 0;
-
   /* Reset TX tail */
 
-  igc_putreg_mem(priv, IGC_TDH0, 0);
-  igc_putreg_mem(priv, IGC_TDT0, 0);
+  igc_txclean(priv);
 
   /* Setup RX descriptor */
 
@@ -1099,8 +1166,6 @@ static void igc_enable(FAR struct igc_driver_s *priv)
 
   regval = IGC_RX_DESC * sizeof(struct igc_rx_leg_s);
   igc_putreg_mem(priv, IGC_RDLEN0, regval);
-
-  priv->rx_now = 0;
 
   /* Enable interrupts */
 
@@ -1141,7 +1206,10 @@ static void igc_enable(FAR struct igc_driver_s *priv)
 
   /* Reset RX tail - after queue is enabled */
 
-  igc_putreg_mem(priv, IGC_RDH0, 0);
+  igc_rxclean(priv);
+
+  /* All RX descriptors availalbe */
+
   igc_putreg_mem(priv, IGC_RDT0, IGC_RX_DESC);
 
 #ifdef CONFIG_DEBUG_NET_INFO
