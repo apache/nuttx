@@ -115,7 +115,6 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
   irqstate_t     flags;
   int            ret = OK;
 
-  sched_lock();
   DEBUGASSERT(stcb != NULL && stcb->group != NULL);
 
   /* Find the group sigaction associated with this signal */
@@ -203,7 +202,6 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
         }
     }
 
-  sched_unlock();
   return ret;
 }
 
