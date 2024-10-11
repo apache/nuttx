@@ -284,7 +284,6 @@ endchoice
 
 config MM_KASAN_ALL
 	bool "Enable KASan for the entire image"
-	depends on MM_KASAN
 	default y
 	---help---
 		This option activates address sanitizer for the entire image.
@@ -311,7 +310,6 @@ config MM_KASAN_DISABLE_NULL_POINTER_CHECK
 
 config MM_KASAN_DISABLE_READS_CHECK
 	bool "Disable reads check"
-	depends on MM_KASAN
 	default n
 	---help---
 		This option disable kasan reads check. It speeds up performance
@@ -321,7 +319,6 @@ config MM_KASAN_DISABLE_READS_CHECK
 
 config MM_KASAN_DISABLE_WRITES_CHECK
 	bool "Disable writes check"
-	depends on MM_KASAN
 	default n
 	---help---
 		This option disable kasan writes check.
@@ -361,7 +358,6 @@ config MM_KASAN_DISABLE_READ_PANIC
 
 config MM_KASAN_DISABLE_WRITE_PANIC
 	bool "Disable panic on kasan write error"
-	depends on MM_KASAN
 	default n
 	---help---
 		This option disable panic on kasan write error. It will print error info
