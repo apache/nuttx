@@ -130,6 +130,15 @@ int nxtask_terminate(pid_t pid)
 
   dtcb->flags |= TCB_FLAG_EXIT_PROCESSING;
 
+  /* Perform common task termination logic.  We need to do
+   * this as early as possible so that higher level clean-up logic
+   * can run in a healthy tasking environment.
+   *
+   * I suppose EXIT_SUCCESS is an appropriate return value???
+   */
+
+  nxtask_exithook(dtcb, EXIT_SUCCESS);
+
   /* Remove dtcb from tasklist, let remove_readtorun() do the job */
 
   task_state = dtcb->task_state;
@@ -169,16 +178,8 @@ int nxtask_terminate(pid_t pid)
 
   dtcb->task_state = task_state;
 
-  /* Perform common task termination logic.  We need to do
-   * this as early as possible so that higher level clean-up logic
-   * can run in a healthy tasking environment.
-   *
-   * I suppose EXIT_SUCCESS is an appropriate return value???
-   */
-
-  nxtask_exithook(dtcb, EXIT_SUCCESS);
-
   leave_critical_section(flags);
+
   /* Since all tasks pass through this function as the final step in their
    * exit sequence, this is an appropriate place to inform any
    * instrumentation layer that the task no longer exists.
