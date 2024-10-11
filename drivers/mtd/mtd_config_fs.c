@@ -55,12 +55,6 @@
 #define ADDR_BLOCK_SHIFT                16
 #define ADDR_OFFS_MASK                  0x0000FFFF
 
-/* Gc done or close ate has the id of 0xffffffff.
- * We can tell if the ate is special by looking at its id.
- */
-
-#define NVS_SPECIAL_ATE_ID              0xffffffff
-
 #define NVS_ATE(name, size) \
   char name##_buf[size]; \
   FAR struct nvs_ate *name = (FAR struct nvs_ate *)name##_buf
@@ -208,6 +202,21 @@ static inline bool nvs_ate_expired(FAR struct nvs_fs *fs,
                                    FAR struct nvs_ate *entry)
 {
   return entry->expired[nvs_align_up(fs, sizeof(*entry))] != fs->erasestate;
+}
+
+/****************************************************************************
+ * Name: nvs_special_ate_id
+ *
+ * Description:
+ *   Gc done or close ate has the id of 0xffffffff.
+ *   We can tell if the ate is special by looking at its id.
+ *
+ ****************************************************************************/
+
+static inline uint32_t nvs_special_ate_id(FAR struct nvs_fs *fs)
+{
+  return (fs->erasestate << 24) | (fs->erasestate << 16) |
+         (fs->erasestate << 8) | fs->erasestate;
 }
 
 /****************************************************************************
@@ -676,7 +685,7 @@ static bool nvs_close_ate_valid(FAR struct nvs_fs *fs,
                                FAR const struct nvs_ate *entry)
 {
   if (!nvs_ate_valid(fs, entry) || entry->len != 0 ||
-      entry->id != NVS_SPECIAL_ATE_ID)
+      entry->id != nvs_special_ate_id(fs))
     {
       return false;
     }
@@ -971,7 +980,7 @@ static int nvs_block_close(FAR struct nvs_fs *fs)
   int rc;
 
   memset(close_ate, fs->erasestate, ate_size);
-  close_ate->id = NVS_SPECIAL_ATE_ID;
+  close_ate->id = nvs_special_ate_id(fs);
   close_ate->len = 0;
   close_ate->key_len = 0;
   close_ate->offset = (fs->ate_wra + ate_size) & ADDR_OFFS_MASK;
@@ -1006,7 +1015,7 @@ static int nvs_add_gc_done_ate(FAR struct nvs_fs *fs)
 
   finfo("Adding gc done ate at %" PRIx32 "\n", fs->ate_wra & ADDR_OFFS_MASK);
   memset(gc_done_ate, fs->erasestate, ate_size);
-  gc_done_ate->id = NVS_SPECIAL_ATE_ID;
+  gc_done_ate->id = nvs_special_ate_id(fs);
   gc_done_ate->len = 0;
   gc_done_ate->key_len = 0;
   gc_done_ate->offset = fs->data_wra & ADDR_OFFS_MASK;
@@ -1112,7 +1121,7 @@ static int nvs_gc(FAR struct nvs_fs *fs)
           continue;
         }
 
-      if (gc_ate->id != NVS_SPECIAL_ATE_ID)
+      if (gc_ate->id != nvs_special_ate_id(fs))
         {
           /* Copy needed */
 
@@ -1363,7 +1372,7 @@ static int nvs_startup(FAR struct nvs_fs *fs)
             }
 
           if (nvs_ate_valid(fs, gc_done_ate) &&
-              (gc_done_ate->id == NVS_SPECIAL_ATE_ID) &&
+              (gc_done_ate->id == nvs_special_ate_id(fs)) &&
               (gc_done_ate->len == 0))
             {
               gc_done_marker = true;
@@ -1464,7 +1473,7 @@ static int nvs_startup(FAR struct nvs_fs *fs)
         }
 
       if (nvs_ate_valid(fs, last_ate)
-          && (last_ate->id != NVS_SPECIAL_ATE_ID))
+          && (last_ate->id != nvs_special_ate_id(fs)))
         {
           finfo("ate found at 0x%" PRIx32 ", id %" PRIu32 ", "
                 "key_len %" PRIu16 ", offset %" PRIu16 "\n",
@@ -2039,7 +2048,7 @@ static int nvs_next(FAR struct nvs_fs *fs,
         }
 
       if (nvs_ate_valid(fs, step_ate)
-          && step_ate->id != NVS_SPECIAL_ATE_ID
+          && step_ate->id != nvs_special_ate_id(fs)
           && !nvs_ate_expired(fs, step_ate))
         {
           break;
