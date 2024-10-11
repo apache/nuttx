@@ -393,7 +393,9 @@
 .macro riscv_set_inital_sp base, size, hartid
   la      t0, \base
   li      t1, \size
+#ifdef CONFIG_SMP
   mul     t1, \hartid, t1
+#endif
   add     t0, t0, t1
 
   /* ensure the last XCPTCONTEXT_SIZE is reserved for non boot CPU */
