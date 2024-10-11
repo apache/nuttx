@@ -7,6 +7,7 @@ Hi! Thank you for your interest in contributing to Apache NuttX RTOS :-)
 To help us successfully review your contribution, it is very
 important that you follow these guidelines.
 
+If you need more information please read the [Full Contributing Documentation](https://nuttx.apache.org/docs/latest/contributing/index.html).
 
 ### Coding Standard
 
@@ -81,12 +82,6 @@ important that you follow these guidelines.
 
 ## References
 
-
-### Documentation
-
-For general notes on contributing to Apache NuttX continue reading [here](https://nuttx.apache.org/docs/latest/contributing/index.html).
-
-
 ### Example Pull Request Report
 
 #### Summary
@@ -133,6 +128,6 @@ For general notes on contributing to Apache NuttX continue reading [here](https:
 
   * [ ] This PR introduces only one functional change.
   * [ ] I have updated all required description fields above.
-  * [ ] My PR adheres to [CONTRIBUTING](../CONTRIBUTING.md) guidelines (git commit title and message, coding standard, etc).
+  * [ ] My PR adheres to Contributing [Guidelines](https://github.com/apache/nuttx/blob/master/CONTRIBUTING.md) and [Documentation](https://nuttx.apache.org/docs/latest/contributing/index.html) (git commit title and message, coding standard, etc).
   * [ ] My PR is still work in progress (not ready for review).
   * [ ] My PR is ready for review and can be safely merged into a codebase.
