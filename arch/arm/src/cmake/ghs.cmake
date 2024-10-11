@@ -147,6 +147,12 @@ if(CONFIG_ARM_THUMB)
   add_compile_options(-thumb)
 endif()
 
+# Optimization of unused sections
+
+if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
+  add_compile_options(-ffunction-sections -fdata-sections)
+endif()
+
 # Debug --whole-archive
 
 if(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE)

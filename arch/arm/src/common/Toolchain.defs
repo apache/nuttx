@@ -445,8 +445,8 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),)
   ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
     ifeq ($(CONFIG_ARCH_TOOLCHAIN_GHS),)
       LDFLAGS          += --gc-sections
-      ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
     endif
+    ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
   endif
 endif
 
