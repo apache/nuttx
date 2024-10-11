@@ -33,6 +33,7 @@
 
 #include <nuttx/rpmsg/rpmsg.h>
 #include <openamp/rpmsg_virtio.h>
+#include <openamp/remoteproc.h>
 
 /****************************************************************************
  * Pre-processor Definitions
