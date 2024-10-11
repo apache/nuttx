@@ -173,7 +173,7 @@ extern const uintptr_t g_idle_topstack[];
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 extern uint8_t g_intstackalloc[];
-extern uint8_t g_intstackalloc[];
+extern uint8_t g_isrstackalloc[];
 #endif
 
 /* These symbols are setup by the linker script. */
