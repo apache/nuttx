@@ -30,6 +30,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/lib/lib.h>
 #include <nuttx/envpath.h>
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
