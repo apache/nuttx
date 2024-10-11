@@ -178,6 +178,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
             }
 #endif /* CONFIG_NETDB_RESOLVCONF_NONSTDPORT */
 
+          memset(&u, 0, sizeof(u));
 #ifdef CONFIG_NET_IPv4
           /* Try to convert the IPv4 address */
 
