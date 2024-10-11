@@ -77,7 +77,11 @@ void riscv_cpu_boot(int cpu)
 
   /* Wait interrupt */
 
-  asm("WFI");
+  do
+    {
+      asm("WFI");
+    }
+  while (READ_CSR(CSR_IP) != IP_SIP);
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   /* Initialize the per CPU areas */
