@@ -442,8 +442,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 #endif
     }
 
-  sched_lock();
-
   /* Return the thread information to the caller */
 
   if (thread != NULL)
@@ -454,8 +452,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   /* Then activate the task */
 
   nxtask_activate((FAR struct tcb_s *)ptcb);
-
-  sched_unlock();
 
   return OK;
 

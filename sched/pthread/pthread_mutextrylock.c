@@ -82,12 +82,6 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
       pid_t pid = mutex_get_holder(&mutex->mutex);
 #endif
 
-      /* Make sure the semaphore is stable while we make the following
-       * checks.  This all needs to be one atomic action.
-       */
-
-      sched_lock();
-
       /* Try to get the semaphore. */
 
       status = pthread_mutex_trytake(mutex);
@@ -163,8 +157,6 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
         {
           ret = status;
         }
-
-      sched_unlock();
     }
 
   sinfo("Returning %d\n", ret);
