@@ -1,4 +1,4 @@
-*Note: Please adhere to [Contributing Guidelines](../CONTRIBUTING.md).*
+*Note: Please adhere to [Contributing Guidelines](https://github.com/apache/nuttx/blob/master/CONTRIBUTING.md).*
 
 ## Summary
 
