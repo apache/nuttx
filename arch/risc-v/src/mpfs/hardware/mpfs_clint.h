@@ -39,4 +39,6 @@
 
 #define MPFS_CLINT_MTIME     (MPFS_CLINT_BASE + 0xbff8)
 
+#define RISCV_IPI            MPFS_CLINT_MSIP0
+
 #endif /* __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS_CLINT_H */
