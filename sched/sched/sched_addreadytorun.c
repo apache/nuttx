@@ -261,7 +261,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
       /* Change "head" from TSTATE_TASK_RUNNING to TSTATE_TASK_ASSIGNED */
 
       headtcb = (FAR struct tcb_s *)tasklist->head;
-      DEBUGASSERT(headtcb->task_state = TSTATE_TASK_RUNNING);
+      DEBUGASSERT(headtcb->task_state == TSTATE_TASK_RUNNING);
       headtcb->task_state = TSTATE_TASK_ASSIGNED;
 
       /* Add btcb to the head of the g_assignedtasks
