@@ -1340,7 +1340,11 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
 #ifdef CONFIG_SAMA5_ADC_SWTRIG
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+#  ifndef CONFIG_SAMA5_ADC_REGDEBUG
+  UNUSED(priv);
+#  endif
 #endif
+
   int ret = OK;
 
   ainfo("cmd=%d arg=%ld\n", cmd, arg);
