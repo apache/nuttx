@@ -204,6 +204,7 @@ static const char *g_white_prefix[] =
   "b8",      /* Ref:  include/fixedmath.h */
   "b16",     /* Ref:  include/fixedmath.h */
   "b32",     /* Ref:  include/fixedmath.h */
+  "cJSON",   /* Ref:  apps/wireless/wapi/src */
   "ub8",     /* Ref:  include/fixedmath.h */
   "ub16",    /* Ref:  include/fixedmath.h */
   "ub32",    /* Ref:  include/fixedmath.h */
