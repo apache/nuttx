@@ -13,7 +13,6 @@
 # macOS doesn't support --wrap flag
 # ld: unknown option: --wrap
 -Darwin,sim:segger
--Darwin,sim:note
 
 # macOS doesn't have X11
 -Darwin,sim:touchscreen
