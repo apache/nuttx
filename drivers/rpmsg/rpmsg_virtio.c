@@ -582,7 +582,7 @@ static int rpmsg_virtio_start(FAR struct rpmsg_virtio_priv_s *priv)
     }
 
   priv->rvdev.rdev.ns_unbind_cb = rpmsg_ns_unbind;
-  priv->rvdev.rdev.notify_wait_cb = rpmsg_virtio_notify_wait;
+  priv->rvdev.notify_wait_cb = rpmsg_virtio_notify_wait;
 
   RPMSG_VIRTIO_REGISTER_CALLBACK(priv->dev, rpmsg_virtio_callback, priv);
 
@@ -604,7 +604,7 @@ err_vq0:
 static int rpmsg_virtio_thread(int argc, FAR char *argv[])
 {
   FAR struct rpmsg_virtio_priv_s *priv = (FAR struct rpmsg_virtio_priv_s *)
-    ((uintptr_t)strtoul(argv[2], NULL, 0));
+    ((uintptr_t)strtoul(argv[2], NULL, 16));
   int ret;
 
   priv->tid = nxsched_gettid();
