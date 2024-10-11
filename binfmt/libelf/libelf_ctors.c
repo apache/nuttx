@@ -99,7 +99,7 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
        */
 
       binfo("elf_findsection .ctors section failed: %d\n", ctoridx);
-      return ret == -ENOENT ? OK : ret;
+      return ctoridx == -ENOENT ? OK : ctoridx;
     }
 
   /* Now we can get a pointer to the .ctor section in the section header

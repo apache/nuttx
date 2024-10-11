@@ -100,7 +100,7 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo)
        */
 
       binfo("elf_findsection .dtors section failed: %d\n", dtoridx);
-      return ret == -ENOENT ? OK : ret;
+      return dtoridx == -ENOENT ? OK : dtoridx;
     }
 
   /* Now we can get a pointer to the .dtor section in the section header
