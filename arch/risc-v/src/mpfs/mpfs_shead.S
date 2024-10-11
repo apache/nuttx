@@ -95,5 +95,13 @@ __start:
 
   /* Set stack pointer and jump to start */
 
-  la sp, MPFS_IDLESTACK_TOP
-  j __mpfs_start
+#ifdef CONFIG_SMP
+  addi a1, a0, -1        /* Only cores 1...3 can participate in SMP */
+  riscv_set_inital_sp MPFS_IDLESTACK_BASE, SMP_STACK_SIZE, a1
+#else
+  la   sp, MPFS_IDLESTACK_TOP
+#endif
+
+  /* Jump to __mpfs_start with mhartid in a0 */
+
+  tail __mpfs_start

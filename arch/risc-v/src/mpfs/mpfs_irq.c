@@ -33,6 +33,8 @@
 #include <nuttx/irq.h>
 
 #include "riscv_internal.h"
+#include "riscv_ipi.h"
+
 #include "mpfs.h"
 #include "mpfs_plic.h"
 
@@ -95,6 +97,14 @@ void up_irqinitialize(void)
   /* Attach the common interrupt handler */
 
   riscv_exception_attach();
+
+#ifdef CONFIG_SMP
+  /* Clear IPI for CPU0 */
+
+  riscv_ipi_clear(0);
+
+  up_enable_irq(RISCV_IRQ_SOFT);
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
