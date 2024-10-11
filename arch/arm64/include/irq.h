@@ -149,7 +149,7 @@
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
-#define ARM64_CONTEXT_REGS  (38)
+#define ARM64_CONTEXT_REGS  (36)
 #define ARM64_CONTEXT_SIZE  (8 * ARM64_CONTEXT_REGS)
 
 #ifdef CONFIG_ARCH_FPU
