@@ -227,6 +227,7 @@ struct aw86225
   struct work_s ram_work;
   struct aw86225_hap_config hap_config;
   struct aw86225_hap_play_info play;
+  FAR struct aw86225_pattern_s *pattern;
   FAR struct aw86225_hap_effect *predefined;
   struct aw86225_hap_effect constant;
   FAR struct aw86225_config *config;

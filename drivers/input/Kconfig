@@ -46,12 +46,21 @@ config FF_AW86225
 	---help---
 		Enable aw86225 haptic controller chip.
 
-config FF_RTP_FILE_PATH
+if FF_AW86225
+
+config AW86225_RTP_FILE_SUPPORT
+	bool "Enable aw86225 rtp file support"
+	default n
+	---help---
+		Enable support for aw86225 rtp file.
+
+config AW86225_RTP_FILE_PATH
 	string "Path of aw86225 rtp file"
 	default "/etc"
-	depends on FF_AW86225
 	---help---
 		File path depend on the opening of FF_AW86225.
+
+endif # FF_AW86225
 
 endif # INPUT_FF
 
