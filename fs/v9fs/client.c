@@ -1465,7 +1465,7 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
   struct iovec wiov[2];
   struct iovec riov[2];
   uint16_t nwname = 0;
-  uint32_t newfid;
+  uint32_t newfid = V9FS_NOFID;
   size_t total_len = 0;
   size_t offset = 0;
   size_t name_len;
@@ -1526,12 +1526,13 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
       return -ENOMEM;
     }
 
-  newfid = v9fs_fid_create(client, path);
-  if (newfid < 0)
+  ret = v9fs_fid_create(client, path);
+  if (ret < 0)
     {
       goto err;
     }
 
+  newfid = ret;
   request.header.size = V9FS_HDRSZ + V9FS_BIT32SZ * 2 + V9FS_BIT16SZ +
                         total_len;
   request.header.type = V9FS_TWALK;
@@ -1586,7 +1587,7 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
   if (ret < 0)
     {
       v9fs_fid_destroy(client, newfid);
-      newfid = ret;
+      goto err;
     }
 
   /* There are differences in different server implementations, so it is
@@ -1596,13 +1597,13 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
 
   if (response.nwqid != nwname)
     {
-      newfid = -ENOENT;
+      ret = -ENOENT;
     }
 
 err:
   lib_put_pathbuffer(request_payload);
   lib_put_pathbuffer(response_payload);
-  return newfid;
+  return ret == 0 ? newfid : ret;
 }
 
 /****************************************************************************
