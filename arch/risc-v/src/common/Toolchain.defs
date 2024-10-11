@@ -209,8 +209,17 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)v
   endif
 
+  ifeq ($(GCCVER),)
+    export GCCVER = ${shell $(CROSSDEV)gcc --version | grep gcc | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1 | cut -d"." -f1 }
+  endif
+
   ifeq ($(CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI),y)
-    ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_zicsr_zifencei
+    ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
+      ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_zicsr_zifencei
+    endif
+    ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+      ARCHCPUEXTFLAGS := $(ARCHCPUEXTFLAGS)_zicsr_zifencei
+    endif
   endif
 
   ARCH_RV_EXPERIMENTAL_EXTENSIONS = $(strip $(subst ",,$(CONFIG_ARCH_RV_EXPERIMENTAL_EXTENSIONS)))
