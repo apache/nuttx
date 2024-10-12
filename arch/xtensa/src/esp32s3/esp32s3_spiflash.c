@@ -1374,3 +1374,24 @@ bool esp32s3_flash_encryption_enabled(void)
 
   return enabled;
 }
+
+/****************************************************************************
+ * Name: esp32s3_get_flash_address_mapped_as_text
+ *
+ * Description:
+ *   Get flash address which is currently mapped as text
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   flash address which is currently mapped as text
+ *
+ ****************************************************************************/
+
+uint32_t esp32s3_get_flash_address_mapped_as_text(void)
+{
+  uint32_t i = MMU_ADDR2PAGE((uint32_t)_stext) -
+               MMU_ADDR2PAGE(SOC_MMU_IBUS_VADDR_BASE);
+  return (FLASH_MMU_TABLE[i] & MMU_ADDRESS_MASK) * MMU_PAGE_SIZE;
+}

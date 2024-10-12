@@ -166,6 +166,22 @@ int esp32s3_spiflash_init(void);
 
 bool esp32s3_flash_encryption_enabled(void);
 
+/****************************************************************************
+ * Name: esp32s3_get_flash_address_mapped_as_text
+ *
+ * Description:
+ *   Get flash address which is currently mapped as text
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   flash address which is currently mapped as text
+ *
+ ****************************************************************************/
+
+uint32_t esp32s3_get_flash_address_mapped_as_text(void);
+
 #ifdef __cplusplus
 }
 #endif
