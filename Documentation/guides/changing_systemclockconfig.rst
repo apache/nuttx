@@ -8,13 +8,13 @@ Changing the System Clock Configuration
 
 
 Question
---------
+========
 `Is an STM32 configuration booting with the internal 16 MHz clock, then 
 switching later (on command) to an external 25 MHz xtal doable? I don't think 
 so, but would you mind confirming that?`
 
 Answer
-------
+======
 
 Of course, that is what always happens: The STM32 boots using an internal clock 
 and switches to the external crystal source after booting. But I assume that 
@@ -23,7 +23,7 @@ you mean MUCH later on, after initialization.
 Yes that can be done too. There are only a few issues and things to be aware of:
 
 Custom Clock Configuration
-''''''''''''''''''''''''''
+--------------------------
 
 The ``configs/vsn/`` configuration does something like you say. It skips the 
 initial clock configuration by defining 
@@ -69,7 +69,7 @@ is no long in at config/vsn. The retired code can still be found in the
 `Obsoleted repository <https://bitbucket.org/patacongo/obsoleted/src/master/nuttx/configs/vsn>`_.
 
 Peripheral Clocks
-'''''''''''''''''
+-----------------
 
 The peripheral clock used by many devices to set up things like the SPI 
 frequency and UART bard rates. Currently, those peripheral clock frequencies 
@@ -121,10 +121,10 @@ was done for the SAMA5D4-EK when you change the frequency too. You could also
 make the peripheral clocks variable.
 
 Reinitializing Peripherals
-''''''''''''''''''''''''''
+--------------------------
 
 Variable Peripheral Clocking
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 
 If you did something like what was done for the SAMA5D4-EK when you change the 
 frequency, then the peripheral clocks would be variable. The main problem would
@@ -139,13 +139,13 @@ methods to recalculate I2C and SPI BAUD divisors. But there are also memory
 card frequencies and more.
 
 Systick Timer
-^^^^^^^^^^^^^
+-------------
 
 If the CPU frequency changes, you would have to change the Systick timer 
 configuration: It is always driven by the CPU clock
 
 up_mdelay
-^^^^^^^^^
+---------
 
 up_mdelay() provides a low level timing loop and must be re-calibrated for 
 anything that causes change in the rate of execution of that timing loop. 
@@ -154,7 +154,7 @@ are tolerable. Hopefully, you could keep the execution rate close enough that
 up_mdelay() would not be grossly in error.
 
 Power Management
-^^^^^^^^^^^^^^^^
+----------------
 
 This is also the same kind of thing that you would have to do if you wanted to 
 switch clocking for power management reasons. NuttX does have a power 
