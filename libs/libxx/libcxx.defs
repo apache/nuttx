@@ -61,10 +61,6 @@ endif
 CXXFLAGS += -Wno-shadow -Wno-sign-compare
 CXXFLAGS += -Wno-attributes -Wno-deprecated-declarations
 
-ifeq ($(GCCVER),)
-  export GCCVER = $(shell $(CXX) --version | grep ++ | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
-endif
-
 ifeq ($(shell expr $(GCCVER) \>= 12), 1)
   CXXFLAGS += -Wno-maybe-uninitialized -Wno-alloc-size-larger-than
 endif
