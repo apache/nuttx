@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/mps/mps3-an547/CMakeLists.txt
+# boards/arm/mps/mps2-an521/src/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -18,4 +18,8 @@
 #
 # ##############################################################################
 
-add_subdirectory(src)
+set(SRCS mps2_bringup.c mps2_reset.c)
+
+target_sources(board PRIVATE ${SRCS})
+
+set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
