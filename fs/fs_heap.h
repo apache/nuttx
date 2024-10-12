@@ -26,8 +26,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
+
+#include <stdio.h>
+#include <string.h>
 
 /****************************************************************************
  * Public Function Prototypes
@@ -35,11 +39,14 @@
 
 #if defined(CONFIG_FS_HEAPSIZE) && CONFIG_FS_HEAPSIZE > 0
 void      fs_heap_initialize(void);
-FAR void *fs_heap_zalloc(size_t size);
-FAR void *fs_heap_malloc(size_t size);
+FAR void *fs_heap_zalloc(size_t size) malloc_like1(1);
+FAR void *fs_heap_malloc(size_t size) malloc_like1(1);
 size_t    fs_heap_malloc_size(FAR void *mem);
-FAR void *fs_heap_realloc(FAR void *oldmem, size_t size);
+FAR void *fs_heap_realloc(FAR void *oldmem, size_t size) realloc_like(2);
 void      fs_heap_free(FAR void *mem);
+FAR char *fs_heap_strdup(FAR const char *s) malloc_like;
+int       fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
+          printf_like(2, 3);
 #else
 #  define fs_heap_initialize()
 #  define fs_heap_zalloc       kmm_zalloc
@@ -47,6 +54,8 @@ void      fs_heap_free(FAR void *mem);
 #  define fs_heap_malloc_size  kmm_malloc_size
 #  define fs_heap_realloc      kmm_realloc
 #  define fs_heap_free         kmm_free
+#  define fs_heap_strdup       strdup
+#  define fs_heap_asprintf     asprintf
 #endif
 
 #endif
