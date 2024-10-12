@@ -102,6 +102,9 @@ CMN_CSRCS += arm64_addrenv_utils.c arm64_addrenv_shm.c arm64_addrenv_pgmap.c
 ifeq ($(CONFIG_ARCH_STACK_DYNAMIC),y)
 CMN_CSRCS += arm64_addrenv_ustack.c
 endif
+ifeq ($(CONFIG_ARCH_VMA_MAPPING),y)
+CMN_CSRCS += arm64_addrenv_shm.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
