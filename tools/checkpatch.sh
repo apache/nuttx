@@ -96,7 +96,7 @@ check_file() {
     if ! command -v cmake-format &> /dev/null; then
       if [ $cmake_warning_once == 0 ]; then
         echo -e "\ncmake-format not found, run following command to install:"
-        echo "  $ pip install cmake-format"
+        echo "  $ pip install --user cmake-format"
         cmake_warning_once=1
       fi
       fail=1
