@@ -38,3 +38,4 @@ Guides
   debuggingflash_nuttxonarm.rst
   changing_systemclockconfig.rst
   usingkernelthreads.rst
+  armv7m_runtimestackcheck.rst
