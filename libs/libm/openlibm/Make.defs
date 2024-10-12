@@ -32,6 +32,7 @@ openlibm/openlibm: openlibm-$(OPENLIBM_VERSION).zip
 	$(Q) patch -p0 < openlibm/0001-fix-build-float_t-error-float_t-has-not-been-declare.patch
 	$(Q) patch -p0 < openlibm/0002-add-math.h-and-complex.h-to-openlibm.patch
 	$(Q) patch -p0 < openlibm/0003-nuttx-openlibm-Fix-openlibm-M_PI-undeclared-error.patch
+	$(Q) patch -p0 < openlibm/0004-libs-libc-Openlibm-adds-exp10-and-exp10f-function-im.patch
 endif
 
 distclean::
