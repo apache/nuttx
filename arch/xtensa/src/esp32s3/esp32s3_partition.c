@@ -34,6 +34,7 @@
 #include "esp32s3_spiflash_mtd.h"
 #include "esp32s3_partition.h"
 #include "esp32s3_spiflash.h"
+#include "arch/esp32s3/partition.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,15 +81,6 @@
  * Private Types
  ****************************************************************************/
 
-/* OTA image operation code */
-
-enum ota_img_ctrl_e
-{
-  OTA_IMG_GET_BOOT        = 0xe1,
-  OTA_IMG_SET_BOOT        = 0xe2,
-  OTA_IMG_INVALIDATE_BOOT = 0xe3,
-};
-
 /* OTA image state */
 
 enum ota_img_state_e
@@ -132,16 +124,6 @@ enum ota_img_state_e
    */
 
   OTA_IMG_UNDEFINED       = 0xffffffff,
-};
-
-/* OTA image boot sequency */
-
-enum ota_img_bootseq_e
-{
-  OTA_IMG_BOOT_FACTORY    = 0,
-  OTA_IMG_BOOT_OTA_0      = 1,
-  OTA_IMG_BOOT_OTA_1      = 2,
-  OTA_IMG_BOOT_SEQ_MAX
 };
 
 /* Partition information data */
@@ -404,6 +386,40 @@ static int ota_invalidate_bootseq(struct mtd_dev_priv_s *dev, int num)
 }
 
 /****************************************************************************
+ * Name: is_currently_mapped_as_text
+ *
+ * Description:
+ *   Check if the MTD partition is mapped as text
+ *
+ * Input Parameters:
+ *   dev    - Partition private MTD data
+ *   mapped - true if mapped, false if not
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int is_currently_mapped_as_text(struct mtd_dev_priv_s *dev,
+                                       bool *mapped)
+{
+  uint32_t currently_mapped_address;
+
+  if (mapped == NULL)
+    {
+      ferr("ERROR: Invalid argument.\n");
+      return -EINVAL;
+    }
+
+  currently_mapped_address = esp32s3_get_flash_address_mapped_as_text();
+
+  *mapped = ((dev->offset <= currently_mapped_address) &&
+             (currently_mapped_address < dev->offset + dev->size));
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: esp32s3_part_erase
  *
  * Description:
@@ -582,6 +598,18 @@ static int esp32s3_part_ioctl(struct mtd_dev_s *dev, int cmd,
           if (ret < 0)
             {
               ferr("ERROR: Failed to invalidate boot img\n");
+            }
+        }
+
+        break;
+      case OTA_IMG_IS_MAPPED_AS_TEXT:
+        {
+          bool *mapped = (bool *)arg;
+
+          ret = is_currently_mapped_as_text(mtd_priv, mapped);
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to check partition is mapped as text\n");
             }
         }
 
