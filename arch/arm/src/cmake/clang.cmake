@@ -231,6 +231,17 @@ if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
 
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-c")
-
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
+
+# override nuttx_find_toolchain_lib
+
+set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
+
+function(nuttx_find_toolchain_lib)
+  execute_process(
+    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+            --print-file-name
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    OUTPUT_VARIABLE extra_lib_path)
+  nuttx_add_extra_library(${extra_lib_path})
+endfunction()
