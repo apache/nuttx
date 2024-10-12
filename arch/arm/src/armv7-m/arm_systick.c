@@ -259,6 +259,13 @@ static int systick_interrupt(int irq, void *context, void *arg)
   return 0;
 }
 
+#ifdef CONFIG_ARMV7M_SYSTICK_IRQ_THREAD
+static int systick_isr_handle(int irq, void *regs, void *arg)
+{
+  return IRQ_WAKE_THREAD;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -295,7 +302,7 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
     }
 
 #ifdef CONFIG_ARMV7M_SYSTICK_IRQ_THREAD
-  irq_attach_thread(NVIC_IRQ_SYSTICK, NULL,
+  irq_attach_thread(NVIC_IRQ_SYSTICK, systick_isr_handle,
                     systick_interrupt, lower,
                     CONFIG_ARMV7M_SYSTICK_IRQ_THREAD_PRIORITY,
                     CONFIG_ARMV7M_SYSTICK_IRQ_THREAD_STACK_SIZE);
