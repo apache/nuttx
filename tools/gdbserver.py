@@ -763,8 +763,9 @@ class GDBStub:
 
         self.put_gdb_packet(b"OK")
 
-    def get_mem_region(self, addr):
-        for mem in self.mem_regions:
+    def get_mem_region(self, addr, mem_regions=None):
+        mem_regions = mem_regions or self.mem_regions
+        for mem in mem_regions:
             if mem["start"] <= addr < mem["end"]:
                 return mem
 
@@ -821,8 +822,11 @@ class GDBStub:
         self.put_gdb_packet(b"OK")
 
     def parse_thread(self):
-        def unpack_data(addr, fmt):
-            r = self.get_mem_region(addr)
+        def unpack_data(addr, fmt, from_elf=False):
+            if from_elf:
+                r = self.get_mem_region(addr, self.elffile.get_memories())
+            else:
+                r = self.get_mem_region(addr)
             offset = addr - r["start"]
             data = r["data"]
             return struct.unpack_from(fmt, data, offset)
@@ -846,6 +850,7 @@ class GDBStub:
         unpacked_data = unpack_data(
             self.elffile.symbol["g_tcbinfo"]["st_value"],
             TCBINFO_FMT,
+            True,
         )
         tcbinfo = {
             "pid_off": int(unpacked_data[0]),
@@ -907,7 +912,7 @@ class GDBStub:
         def parse_regs_to_gdb(regs):
             gdb_regs = []
             for i in range(0, tcbinfo["regs_num"]):
-                reg_off = int(unpack_data(tcbinfo["reg_off"] + i * 2, "<H")[0])
+                reg_off = int(unpack_data(tcbinfo["reg_off"] + i * 2, "<H", True)[0])
                 if reg_off == UINT16_MAX:
                     gdb_regs.append(b"x")
                 else:
