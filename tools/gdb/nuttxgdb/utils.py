@@ -714,33 +714,34 @@ def jsonify(obj, indent=None):
 class ArrayIterator:
     """An iterator for gdb array or pointer."""
 
-    def __init__(self, array: gdb.Value, maxlen=None):
+    def __init__(self, array: gdb.Value, maxlen=None, reverse=False):
         type_code = array.type.code
         if type_code not in (gdb.TYPE_CODE_ARRAY, gdb.TYPE_CODE_PTR):
             raise gdb.error(f"Not an array: {array}, type: {array.type}")
 
         if type_code == gdb.TYPE_CODE_ARRAY:
-            if maxlen is None:
-                maxlen = nitems(array)
-            else:
-                maxlen = min(nitems(array), maxlen)
+            if n := nitems(array) > 0:
+                maxlen = min(n, maxlen) if maxlen is not None else n
 
         if maxlen is None:
             raise gdb.error("Need to provide array length.")
 
         self.array = array
         self.maxlen = maxlen
-        self.index = 0
+        self.reverse = reverse
+        self.index = maxlen - 1 if reverse else 0
 
     def __iter__(self):
         return self
 
     def __next__(self) -> gdb.Value:
-        if self.index >= self.maxlen:
+        if (not self.reverse and self.index >= self.maxlen) or (
+            self.reverse and self.index < 0
+        ):
             raise StopIteration
 
         value = self.array[self.index]
-        self.index += 1
+        self.index = self.index - 1 if self.reverse else self.index + 1
         return value
 
 
