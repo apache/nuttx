@@ -15,7 +15,7 @@ configuration option below to resolve it.
     CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG=y
 
 What's the problem?
--------------------
+===================
 
 On some architectures (like ARM Cortex-M3) Idle thread causes the core to stop 
 using WFI (Wait For Interrupt) assembly instruction. This effectively stops 
@@ -49,7 +49,7 @@ of your system (if your chip spends 99% of time in Idle mode, you have 1%
 chance of connecting and halting it).
 
 Solution
---------
+========
 
 Some ARM cores that support disabling of clocking after WFI instruction have 
 special configuration options to make debugging possible. One example is STM32 
@@ -79,7 +79,7 @@ reset button while starting OpenOCD or by configuring OpenOCD to do that for
 you.
 
 Work-around
-^^^^^^^^^^^
+-----------
 
 If you keep the RESET button pressed and run OpenOCD command to connected to 
 it, then it will connect sucessful. After connecting you need to keep the 
