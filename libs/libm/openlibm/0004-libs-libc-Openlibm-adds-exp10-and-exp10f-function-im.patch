@@ -1,0 +1,436 @@
+From ec638a9e91c7352bb395c5e38b9724cd987dd884 Mon Sep 17 00:00:00 2001
+From: liwenxiang1 <liwenxiang1@xiaomi.com>
+Date: Thu, 6 Jun 2024 17:51:39 +0800
+Subject: [PATCH] libs/libc:Openlibm adds exp10 and exp10f function
+ implementations
+
+VELAPLATFO-18651
+
+porting the implementation of glibc ieee754
+
+Change-Id: I994083a1a3118655d67960866c31a659e20ecc35
+Signed-off-by: liwenxiang1 <liwenxiang1@xiaomi.com>
+---
+ src/Make.files     |   2 +-
+ src/e_exp10.c      |  49 +++++++
+ src/e_exp10f.c     | 318 +++++++++++++++++++++++++++++++++++++++++++++
+ src/math_private.h |   2 +
+ 4 files changed, 370 insertions(+), 1 deletion(-)
+ create mode 100644 src/e_exp10.c
+ create mode 100644 src/e_exp10f.c
+
+diff --git a/src/Make.files b/src/Make.files
+index 5170403..77e3c55 100644
+--- a/src/Make.files
++++ b/src/Make.files
+@@ -1,7 +1,7 @@
+ $(CUR_SRCS) = common.c \
+ 	e_acos.c e_acosf.c e_acosh.c e_acoshf.c e_asin.c e_asinf.c \
+ 	e_atan2.c e_atan2f.c e_atanh.c e_atanhf.c e_cosh.c e_coshf.c e_exp.c \
+-	e_expf.c e_fmod.c e_fmodf.c \
++	e_exp10.c e_expf.c e_exp10f.c e_fmod.c e_fmodf.c \
+ 	e_hypot.c e_hypotf.c e_j0.c e_j0f.c e_j1.c e_j1f.c \
+ 	e_jn.c e_jnf.c e_lgamma.c e_lgamma_r.c e_lgammaf.c e_lgammaf_r.c \
+ 	e_log.c e_log10.c e_log10f.c e_log2.c e_log2f.c e_logf.c \
+diff --git a/src/e_exp10.c b/src/e_exp10.c
+new file mode 100644
+index 0000000..bb75ca8
+--- /dev/null
++++ b/src/e_exp10.c
+@@ -0,0 +1,49 @@
++/* Copyright (C) 2012-2022 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, see
++   <https://www.gnu.org/licenses/>.  */
++
++#include <math.h>
++#include <math_private.h>
++#include <float.h>
++
++static const double log10_high = 0x2.4d7637p0;
++static const double log10_low = 0x7.6aaa2b05ba95cp-28;
++
++double
++__ieee754_exp10 (double arg)
++{
++  int32_t lx;
++  double arg_high, arg_low;
++  double exp_high, exp_low;
++
++  if (!isfinite (arg))
++    return __ieee754_exp (arg);
++  if (arg < DBL_MIN_10_EXP - DBL_DIG - 10)
++    return DBL_MIN * DBL_MIN;
++  else if (arg > DBL_MAX_10_EXP + 1)
++    return DBL_MAX * DBL_MAX;
++  else if (fabs (arg) < 0x1p-56)
++    return 1.0;
++
++  GET_LOW_WORD (lx, arg);
++  lx &= 0xf8000000;
++  arg_high = arg;
++  SET_LOW_WORD (arg_high, lx);
++  arg_low = arg - arg_high;
++  exp_high = arg_high * log10_high;
++  exp_low = arg_high * log10_low + arg_low * M_LN10;
++  return __ieee754_exp (exp_high) * __ieee754_exp (exp_low);
++}
+diff --git a/src/e_exp10f.c b/src/e_exp10f.c
+new file mode 100644
+index 0000000..6b74b0c
+--- /dev/null
++++ b/src/e_exp10f.c
+@@ -0,0 +1,318 @@
++/* Single-precision 10^x function.
++   Copyright (C) 2020-2022 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, see
++   <https://www.gnu.org/licenses/>.  */
++
++#include <math.h>
++#include <float.h>
++#include <stdint.h>
++#include <math_private.h>
++
++/*
++  EXP2F_TABLE_BITS 5
++  EXP2F_POLY_ORDER 3
++
++  Max. ULP error: 0.502 (normal range, nearest rounding).
++  Max. relative error: 2^-33.240 (before rounding to float).
++  Wrong count: 169839.
++  Non-nearest ULP error: 1 (rounded ULP error).
++
++  Detailed error analysis (for EXP2F_TABLE_BITS=3 thus N=32):
++
++  - We first compute z = RN(InvLn10N * x) where
++
++      InvLn10N = N*log(10)/log(2) * (1 + theta1) with |theta1| < 2^-54.150
++
++    since z is rounded to nearest:
++
++      z = InvLn10N * x * (1 + theta2) with |theta2| < 2^-53
++
++    thus z =  N*log(10)/log(2) * x * (1 + theta3) with |theta3| < 2^-52.463
++
++  - Since |x| < 38 in the main branch, we deduce:
++
++    z = N*log(10)/log(2) * x + theta4 with |theta4| < 2^-40.483
++
++  - We then write z = k + r where k is an integer and |r| <= 0.5 (exact)
++
++  - We thus have
++
++    x = z*log(2)/(N*log(10)) - theta4*log(2)/(N*log(10))
++      = z*log(2)/(N*log(10)) + theta5 with |theta5| < 2^-47.215
++
++    10^x = 2^(k/N) * 2^(r/N) * 10^theta5
++         =  2^(k/N) * 2^(r/N) * (1 + theta6) with |theta6| < 2^-46.011
++
++  - Then 2^(k/N) is approximated by table lookup, the maximal relative error
++    is for (k%N) = 5, with
++
++      s = 2^(i/N) * (1 + theta7) with |theta7| < 2^-53.249
++
++  - 2^(r/N) is approximated by a degree-3 polynomial, where the maximal
++    mathematical relative error is 2^-33.243.
++
++  - For C[0] * r + C[1], assuming no FMA is used, since |r| <= 0.5 and
++    |C[0]| < 1.694e-6, |C[0] * r| < 8.47e-7, and the absolute error on
++    C[0] * r is bounded by 1/2*ulp(8.47e-7) = 2^-74.  Then we add C[1] with
++    |C[1]| < 0.000235, thus the absolute error on C[0] * r + C[1] is bounded
++    by 2^-65.994 (z is bounded by 0.000236).
++
++  - For r2 = r * r, since |r| <= 0.5, we have |r2| <= 0.25 and the absolute
++    error is bounded by 1/4*ulp(0.25) = 2^-56 (the factor 1/4 is because |r2|
++    cannot exceed 1/4, and on the left of 1/4 the distance between two
++    consecutive numbers is 1/4*ulp(1/4)).
++
++  - For y = C[2] * r + 1, assuming no FMA is used, since |r| <= 0.5 and
++    |C[2]| < 0.0217, the absolute error on C[2] * r is bounded by 2^-60,
++    and thus the absolute error on C[2] * r + 1 is bounded by 1/2*ulp(1)+2^60
++    < 2^-52.988, and |y| < 1.01085 (the error bound is better if a FMA is
++    used).
++
++  - for z * r2 + y: the absolute error on z is bounded by 2^-65.994, with
++    |z| < 0.000236, and the absolute error on r2 is bounded by 2^-56, with
++    r2 < 0.25, thus |z*r2| < 0.000059, and the absolute error on z * r2
++    (including the rounding error) is bounded by:
++
++      2^-65.994 * 0.25 + 0.000236 * 2^-56 + 1/2*ulp(0.000059) < 2^-66.429.
++
++    Now we add y, with |y| < 1.01085, and error on y bounded by 2^-52.988,
++    thus the absolute error is bounded by:
++
++      2^-66.429 + 2^-52.988 + 1/2*ulp(1.01085) < 2^-51.993
++
++  - Now we convert the error on y into relative error.  Recall that y
++    approximates 2^(r/N), for |r| <= 0.5 and N=32. Thus 2^(-0.5/32) <= y,
++    and the relative error on y is bounded by
++
++      2^-51.993/2^(-0.5/32) < 2^-51.977
++
++  - Taking into account the mathematical relative error of 2^-33.243 we have:
++
++      y = 2^(r/N) * (1 + theta8) with |theta8| < 2^-33.242
++
++  - Since we had s = 2^(k/N) * (1 + theta7) with |theta7| < 2^-53.249,
++    after y = y * s we get y = 2^(k/N) * 2^(r/N) * (1 + theta9)
++    with |theta9| < 2^-33.241
++
++  - Finally, taking into account the error theta6 due to the rounding error on
++    InvLn10N, and when multiplying InvLn10N * x, we get:
++
++      y = 10^x * (1 + theta10) with |theta10| < 2^-33.240
++
++  - Converting into binary64 ulps, since y < 2^53*ulp(y), the error is at most
++    2^19.76 ulp(y)
++
++  - If the result is a binary32 value in the normal range (i.e., >= 2^-126),
++    then the error is at most 2^-9.24 ulps, i.e., less than 0.00166 (in the
++    subnormal range, the error in ulps might be larger).
++
++  Note that this bound is tight, since for x=-0x25.54ac0p0 the final value of
++  y (before conversion to float) differs from 879853 ulps from the correctly
++  rounded value, and 879853 ~ 2^19.7469.  */
++
++/* math_narrow_eval reduces its floating-point argument to the range
++   and precision of its semantic type.  (The original evaluation may
++   still occur with excess range and precision, so the result may be
++   affected by double rounding.)  */
++
++#define TOINT_INTRINSICS 0
++#define WANT_ERRNO_UFLOW 0
++#define FLT_EVAL_METHOD  0
++/* Shared between expf, exp2f, exp10f, and powf.  */
++#define EXP2F_TABLE_BITS 5
++#define EXP2F_POLY_ORDER 3
++#define N (1 << EXP2F_TABLE_BITS)
++#define InvLn10N (0x3.5269e12f346e2p0 * N) /* log(10)/log(2) to nearest */
++
++#if (__GNUC__ >= 3) || __has_builtin (__builtin_expect)
++# define __glibc_unlikely(cond)	__builtin_expect ((cond), 0)
++# define __glibc_likely(cond)	__builtin_expect ((cond), 1)
++#else
++# define __glibc_unlikely(cond)	(cond)
++# define __glibc_likely(cond)	(cond)
++#endif
++
++#if FLT_EVAL_METHOD == 0
++# define math_narrow_eval(x) (x)
++#else
++# if FLT_EVAL_METHOD == 1
++#  define excess_precision(type) __builtin_types_compatible_p (type, float)
++# else
++#  define excess_precision(type) (__builtin_types_compatible_p (type, float) \
++				  || __builtin_types_compatible_p (type, \
++								   double))
++# endif
++# define math_narrow_eval(x)					\
++  ({								\
++    __typeof (x) math_narrow_eval_tmp = (x);			\
++    if (excess_precision (__typeof (math_narrow_eval_tmp)))	\
++      __asm__ ("" : "+m" (math_narrow_eval_tmp));		\
++    math_narrow_eval_tmp;					\
++   })
++#endif
++
++const struct exp2f_data
++{
++  uint64_t tab[1 << EXP2F_TABLE_BITS];
++  double shift_scaled;
++  double poly[EXP2F_POLY_ORDER];
++  double shift;
++  double invln2_scaled;
++  double poly_scaled[EXP2F_POLY_ORDER];
++} __exp2f_data;
++
++const struct exp2f_data __exp2f_data = {
++  /* tab[i] = uint(2^(i/N)) - (i << 52-BITS)
++     used for computing 2^(k/N) for an int |k| < 150 N as
++     double(tab[k%N] + (k << 52-BITS)) */
++  .tab = {
++0x3ff0000000000000, 0x3fefd9b0d3158574, 0x3fefb5586cf9890f, 0x3fef9301d0125b51,
++0x3fef72b83c7d517b, 0x3fef54873168b9aa, 0x3fef387a6e756238, 0x3fef1e9df51fdee1,
++0x3fef06fe0a31b715, 0x3feef1a7373aa9cb, 0x3feedea64c123422, 0x3feece086061892d,
++0x3feebfdad5362a27, 0x3feeb42b569d4f82, 0x3feeab07dd485429, 0x3feea47eb03a5585,
++0x3feea09e667f3bcd, 0x3fee9f75e8ec5f74, 0x3feea11473eb0187, 0x3feea589994cce13,
++0x3feeace5422aa0db, 0x3feeb737b0cdc5e5, 0x3feec49182a3f090, 0x3feed503b23e255d,
++0x3feee89f995ad3ad, 0x3feeff76f2fb5e47, 0x3fef199bdd85529c, 0x3fef3720dcef9069,
++0x3fef5818dcfba487, 0x3fef7c97337b9b5f, 0x3fefa4afa2a490da, 0x3fefd0765b6e4540,
++  },
++  .shift_scaled = 0x1.8p+52 / N,
++  .poly = { 0x1.c6af84b912394p-5, 0x1.ebfce50fac4f3p-3, 0x1.62e42ff0c52d6p-1 },
++  .shift = 0x1.8p+52,
++  .invln2_scaled = 0x1.71547652b82fep+0 * N,
++  .poly_scaled = {
++0x1.c6af84b912394p-5/N/N/N, 0x1.ebfce50fac4f3p-3/N/N, 0x1.62e42ff0c52d6p-1/N
++  },
++};
++
++#define T __exp2f_data.tab
++#define C __exp2f_data.poly_scaled
++#define SHIFT __exp2f_data.shift
++
++static inline uint32_t
++asuint (float f)
++{
++  union
++  {
++    float f;
++    uint32_t i;
++  } u = {f};
++  return u.i;
++}
++
++static inline uint64_t
++asuint64 (double f)
++{
++  union
++  {
++    double f;
++    uint64_t i;
++  } u = {f};
++  return u.i;
++}
++
++static inline double
++asdouble (uint64_t i)
++{
++  union
++  {
++    uint64_t i;
++    double f;
++  } u = {i};
++  return u.f;
++}
++
++static inline uint32_t
++top13 (float x)
++{
++  return asuint (x) >> 19;
++}
++
++__attribute__((noinline)) static float
++xflowf (uint32_t sign, float y)
++{
++  y = (sign ? -y : y) * y;
++  return y;
++}
++
++float
++__math_oflowf (uint32_t sign)
++{
++  return xflowf (sign, 0x1p97f);
++}
++
++float
++__math_uflowf (uint32_t sign)
++{
++  return xflowf (sign, 0x1p-95f);
++}
++
++float
++__ieee754_exp10f (float x)
++{
++  uint32_t abstop;
++  uint64_t ki, t;
++  double kd, xd, z, r, r2, y, s;
++
++  xd = (double) x;
++  abstop = top13 (x) & 0xfff; /* Ignore sign.  */
++  if (__glibc_unlikely (abstop >= top13 (38.0f)))
++    {
++      /* |x| >= 38 or x is nan.  */
++      if (asuint (x) == asuint (-INFINITY))
++        return 0.0f;
++      if (abstop >= top13 (INFINITY))
++        return x + x;
++      /* 0x26.8826ap0 is the largest value such that 10^x < 2^128.  */
++      if (x > 0x26.8826ap0f)
++        return __math_oflowf (0);
++      /* -0x2d.278d4p0 is the smallest value such that 10^x > 2^-150.  */
++      if (x < -0x2d.278d4p0f)
++        return __math_uflowf (0);
++#if WANT_ERRNO_UFLOW
++      if (x < -0x2c.da7cfp0)
++        return __math_may_uflowf (0);
++#endif
++      /* the smallest value such that 10^x >= 2^-126 (normal range)
++         is x = -0x25.ee060p0 */
++      /* we go through here for 2014929 values out of 2060451840
++         (not counting NaN and infinities, i.e., about 0.1% */
++    }
++
++  /* x*N*Ln10/Ln2 = k + r with r in [-1/2, 1/2] and int k.  */
++  z = InvLn10N * xd;
++  /* |xd| < 38 thus |z| < 1216 */
++#if TOINT_INTRINSICS
++  kd = roundtoint (z);
++  ki = converttoint (z);
++#else
++# define SHIFT __exp2f_data.shift
++  kd = math_narrow_eval ((double) (z + SHIFT)); /* Needs to be double.  */
++  ki = asuint64 (kd);
++  kd -= SHIFT;
++#endif
++  r = z - kd;
++
++  /* 10^x = 10^(k/N) * 10^(r/N) ~= s * (C0*r^3 + C1*r^2 + C2*r + 1)  */
++  t = T[ki % N];
++  t += ki << (52 - EXP2F_TABLE_BITS);
++  s = asdouble (t);
++  z = C[0] * r + C[1];
++  r2 = r * r;
++  y = C[2] * r + 1;
++  y = z * r2 + y;
++  y = y * s;
++  return (float) y;
++}
+diff --git a/src/math_private.h b/src/math_private.h
+index f2e0943..ce1ba8b 100644
+--- a/src/math_private.h
++++ b/src/math_private.h
+@@ -293,6 +293,7 @@ irint(double x)
+ #define	__ieee754_asin	asin
+ #define	__ieee754_atan2	atan2
+ #define	__ieee754_exp	exp
++#define	__ieee754_exp10	exp10
+ #define	__ieee754_cosh	cosh
+ #define	__ieee754_fmod	fmod
+ #define	__ieee754_pow	pow
+@@ -316,6 +317,7 @@ irint(double x)
+ #define	__ieee754_asinf	asinf
+ #define	__ieee754_atan2f atan2f
+ #define	__ieee754_expf	expf
++#define	__ieee754_exp10f	exp10f
+ #define	__ieee754_coshf	coshf
+ #define	__ieee754_fmodf	fmodf
+ #define	__ieee754_powf	powf
+-- 
+2.34.1
+
