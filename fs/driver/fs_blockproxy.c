@@ -42,6 +42,7 @@
 #include <nuttx/mutex.h>
 
 #include "driver.h"
+#include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
@@ -112,7 +113,7 @@ static FAR char *unique_chardev(void)
       if (ret < 0)
         {
           DEBUGASSERT(ret == -ENOENT);
-          return strdup(devbuf);
+          return fs_heap_strdup(devbuf);
         }
 
       /* It is in use, try again */
@@ -198,14 +199,14 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags)
 
   /* Free the allocated character driver name. */
 
-  lib_free(chardev);
+  fs_heap_free(chardev);
   return OK;
 
 errout_with_bchdev:
   nx_unlink(chardev);
 
 errout_with_chardev:
-  lib_free(chardev);
+  fs_heap_free(chardev);
   return ret;
 }
 

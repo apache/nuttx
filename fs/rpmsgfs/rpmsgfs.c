@@ -1075,7 +1075,7 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    *  "timeout=xx", connect timeout, unit (ms)
    */
 
-  options = strdup(data);
+  options = fs_heap_strdup(data);
   if (!options)
     {
       fs_heap_free(fs);
@@ -1106,7 +1106,7 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     }
 
   ret = rpmsgfs_client_bind(&fs->handle, cpuname);
-  lib_free(options);
+  fs_heap_free(options);
   if (ret < 0)
     {
       fs_heap_free(fs);

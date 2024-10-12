@@ -471,7 +471,7 @@ static int tmpfs_remove_dirent(FAR struct tmpfs_directory_s *tdo,
 
   if (tdo->tdo_entry[index].tde_name != NULL)
     {
-      lib_free(tdo->tdo_entry[index].tde_name);
+      fs_heap_free(tdo->tdo_entry[index].tde_name);
     }
 
   /* Remove by replacing this entry with the final directory entry */
@@ -1216,7 +1216,7 @@ static int tmpfs_free_callout(FAR struct tmpfs_directory_s *tdo,
 
   if (tdo->tdo_entry[index].tde_name != NULL)
     {
-      lib_free(tdo->tdo_entry[index].tde_name);
+      fs_heap_free(tdo->tdo_entry[index].tde_name);
     }
 
   /* Remove by replacing this entry with the final directory entry */

@@ -34,6 +34,7 @@
 #include <nuttx/kmalloc.h>
 
 #include "nxffs.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Private Types
@@ -1089,7 +1090,7 @@ nxffs_setupwriter(FAR struct nxffs_volume_s *volume,
           /* Initialize for the packing operation. */
 
           memset(&pack->dest, 0, sizeof(struct nxffs_packstream_s));
-          pack->dest.entry.name   = strdup(wrfile->ofile.entry.name);
+          pack->dest.entry.name   = fs_heap_strdup(wrfile->ofile.entry.name);
           pack->dest.entry.utc    = wrfile->ofile.entry.utc;
           pack->dest.entry.datlen = wrfile->ofile.entry.datlen;
 
