@@ -1,3 +1,4 @@
+===============================
 ARMv7-M Run Time Stack Checking
 ===============================
 
@@ -6,7 +7,7 @@ ARMv7-M Run Time Stack Checking
     https://cwiki.apache.org/confluence/display/NUTTX/ARMv7-M+Run+Time+Stack+Checking
 
 Overview
---------
+========
 
 Nuttx supports facilities to verify the dynamically allocated stacks and fixed 
 stacks used by the tasks and interrupt context running under Nuttx. There are 2
