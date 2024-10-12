@@ -26,10 +26,9 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/fs/fs.h>
+#include <syslog.h>
 
-#include <debug.h>
+#include "sched/sched.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -42,29 +41,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: dumphandler
- *
- * Description:
- *   Dump the state of all tasks whenever on task exits.  This is debug
- *   instrumentation that was added to check file-related reference counting
- *   but could be useful again sometime in the future.
- *
- ****************************************************************************/
-
-static void dumphandler(FAR struct tcb_s *tcb, FAR void *arg)
-{
-  FAR struct filelist *filelist;
-
-  syslog(LOG_INFO, "tcb=%p name=%s, pid:%d, priority=%d state=%d "
-         "stack_alloc_ptr: %p, adj_stack_size: %zu\n",
-         tcb, get_task_name(tcb), tcb->pid, tcb->sched_priority,
-         tcb->task_state, tcb->stack_alloc_ptr, tcb->adj_stack_size);
-
-  filelist = &tcb->group->tg_filelist;
-  files_dumplist(filelist);
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -72,16 +48,19 @@ static void dumphandler(FAR struct tcb_s *tcb, FAR void *arg)
  * Name: nxsched_dumponexit
  *
  * Description:
- *   Dump the state of all tasks whenever on task exits.  This is debug
- *   instrumentation that was added to check file-related reference counting
- *   but could be useful again sometime in the future.
+ *   When the thread exits, dump the information of thread.
  *
  ****************************************************************************/
 
 void nxsched_dumponexit(void)
 {
-  sinfo("Other tasks:\n");
-  nxsched_foreach(dumphandler, NULL);
+  FAR struct tcb_s *tcb = this_task();
+  FAR const char *name = get_task_name(tcb);
+
+  syslog(LOG_INFO, "task exit! tcb=%p name=%s, tid:%d, priority=%d "
+         "entry:%p pid: %d, stack_alloc_ptr: %p, adj_stack_size: %zu\n",
+         tcb, name, tcb->pid, tcb->sched_priority, tcb->entry.main,
+         tcb->group->tg_pid, tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 #endif /* CONFIG_SCHED_DUMP_ON_EXIT */
