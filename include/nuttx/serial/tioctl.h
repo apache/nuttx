@@ -204,6 +204,23 @@
 
 #define TIOCSLINID      _TIOC(0x0037) /* Master send one LIN header with specified LIN identifier: uint8_t */
 
+/* Smart Card Support */
+
+#define TIOCSSMARTCARD  _TIOC(0x0038) /* Set smart card mode */
+#define TIOCGSMARTCARD  _TIOC(0x0039) /* Get Smart card mode */
+
+struct serial_smartcard_s
+{
+  uint8_t enabled : 1; /* Enable smart card mode */
+  uint8_t clken   : 1; /* Enable smart card clock */
+  uint8_t inverse : 1; /* Use inverse convention */
+  uint32_t clkout;     /* Clock output frequency requested,
+                        * updated with actual value, which is the largest
+                        * value inferior to the request */
+  uint16_t etu;        /* Elementary time unit, eg baud rate in clock counts */
+  uint8_t  cgt;        /* Character guard time in ETU units */
+};
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
