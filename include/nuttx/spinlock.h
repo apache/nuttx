@@ -531,7 +531,13 @@ irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
 
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me;
+
+#ifdef CONFIG_SMP
+      me = up_cpu_index();
+#else
+      me = 0;
+#endif
       if (0 == g_irq_spin_count[me])
         {
           spin_lock_wo_note(&g_irq_spin);
@@ -698,7 +704,13 @@ void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
 {
   if (NULL == lock)
     {
-      int me = this_cpu();
+      int me;
+
+#ifdef CONFIG_SMP
+      me = up_cpu_index();
+#else
+      me = 0;
+#endif
       DEBUGASSERT(0 < g_irq_spin_count[me]);
       g_irq_spin_count[me]--;
 
