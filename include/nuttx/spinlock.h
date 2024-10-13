@@ -151,10 +151,6 @@ void sched_note_spinlock_unlock(FAR volatile spinlock_t *spinlock);
 
 extern volatile spinlock_t g_irq_spin;
 
-/* Handles nested calls to spin_lock_irqsave and spin_unlock_irqrestore */
-
-extern volatile uint8_t g_irq_spin_count[CONFIG_SMP_NCPUS];
-
 /****************************************************************************
  * Name: up_testset
  *
@@ -531,14 +527,7 @@ irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
 
   if (NULL == lock)
     {
-      int me = this_cpu();
-      if (0 == g_irq_spin_count[me])
-        {
-          spin_lock_wo_note(&g_irq_spin);
-        }
-
-      g_irq_spin_count[me]++;
-      DEBUGASSERT(0 != g_irq_spin_count[me]);
+      spin_lock_wo_note(&g_irq_spin);
     }
   else
     {
@@ -557,10 +546,7 @@ irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
  * Description:
  *   If SMP is enabled:
  *     If the argument lock is not specified (i.e. NULL),
- *     disable local interrupts and take the global spinlock (g_irq_spin)
- *     if the call counter (g_irq_spin_count[cpu]) equals to 0. Then the
- *     counter on the CPU is incremented to allow nested calls and return
- *     the interrupt state.
+ *     disable local interrupts and take the global spinlock (g_irq_spin).
  *
  *     If the argument lock is specified,
  *     disable local interrupts and take the lock spinlock and return
@@ -698,14 +684,7 @@ void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
 {
   if (NULL == lock)
     {
-      int me = this_cpu();
-      DEBUGASSERT(0 < g_irq_spin_count[me]);
-      g_irq_spin_count[me]--;
-
-      if (0 == g_irq_spin_count[me])
-        {
-          spin_unlock_wo_note(&g_irq_spin);
-        }
+      spin_unlock_wo_note(&g_irq_spin);
     }
   else
     {
@@ -723,11 +702,9 @@ void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
  *
  * Description:
  *   If SMP is enabled:
- *     If the argument lock is not specified (i.e. NULL),
- *     decrement the call counter (g_irq_spin_count[cpu]) and if it
- *     decrements to zero then release the spinlock (g_irq_spin) and
- *     restore the interrupt state as it was prior to the previous call to
- *     spin_lock_irqsave(NULL).
+ *     If the argument lock is not specified (i.e. NULL), release the
+ *     spinlock (g_irq_spin) and restore the interrupt state as it was
+ *     prior to the previous call to spin_lock_irqsave(NULL).
  *
  *     If the argument lock is specified, release the lock and
  *     restore the interrupt state as it was prior to the previous call to
