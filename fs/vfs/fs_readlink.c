@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mkdir
+ * Name: readlink
  *
  * Description:
  *   The readlink() function will place the contents of the symbolic link
