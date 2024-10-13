@@ -432,7 +432,7 @@ int up_rtc_settime(const struct timespec *tp)
   irqstate_t flags;
   uint64_t count;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = enter_critical_section();
 
 #ifdef RTC_DIRECT_CONTROL
   /* wait until previous write request is completed */
@@ -455,7 +455,7 @@ int up_rtc_settime(const struct timespec *tp)
   g_rtc_save->offset = (int64_t)count - (int64_t)cxd56_rtc_count();
 #endif
 
-  spin_unlock_irqrestore(NULL, flags);
+  leave_critical_section(flags);
 
   rtc_dumptime(tp, "Setting time");
 
