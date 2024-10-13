@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include "riscv_internal.h"
+#include "esp32c6-devkitc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
