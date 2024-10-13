@@ -20,7 +20,7 @@
 
 # Makefile fragments
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 include chip/Make.defs
 
 # Compiler-Dependent Make:  SDCC, Clang, or ZiLOG ZDS-II

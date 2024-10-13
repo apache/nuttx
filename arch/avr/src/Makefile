@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_FAMILY_AVR32),y)
