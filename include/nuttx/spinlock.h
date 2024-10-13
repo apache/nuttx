@@ -35,6 +35,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/irq.h>
+#include <nuttx/sched.h>
 
 #if defined(CONFIG_TICKET_SPINLOCK) || defined(CONFIG_RW_SPINLOCK)
 #  include <nuttx/atomic.h>
