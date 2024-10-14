@@ -2286,10 +2286,6 @@ static int aw86225_haptics_playback(struct ff_lowerhalf_s *lower,
 #ifdef CONFIG_AW86225_RTP_FILE_SUPPORT
       work_queue(HPWORK, &aw86225->rtp_work,
                  aw86225_rtp_work_routine, aw86225, 0);
-      if (val == 0)
-        {
-          atomic_store(&aw86225->exit_in_rtp_loop, 1);
-        }
 #else
       work_queue(HPWORK, &aw86225->long_vibrate_work,
                  aw86225_long_vibrate_work_routine, aw86225, 0);
