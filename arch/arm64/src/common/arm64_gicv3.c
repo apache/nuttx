@@ -254,10 +254,12 @@ void arm64_gic_irq_enable(unsigned int intid)
    * SPI's affinity, now set it to be the PE on which it is enabled.
    */
 
+#ifndef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
   if (GIC_IS_SPI(intid))
     {
       arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
     }
+#endif
 
   putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
 }
@@ -617,6 +619,17 @@ static void gicv3_dist_init(void)
       putreg32(0, ICFGR(base, idx));
 #endif
     }
+
+  /* Configure SPI interrupt affinity routing to CPU0 */
+
+#ifdef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
+  uint64_t mpid = arm64_get_mpid(0);
+
+  for (intid = GIC_SPI_INT_BASE; intid < num_ints; intid++)
+    {
+      putreg64(mpid, IROUTER(base, intid));
+    }
+#endif
 
   /* TODO: Some arrch64 Cortex-A core maybe without security state
    * it has different GIC configure with standard arrch64 A or R core

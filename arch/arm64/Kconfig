@@ -361,6 +361,13 @@ config ARM64_GICV3_SPI_EDGE
 	---help---
 		Configure all SPIs(Shared Peripheral Interrupts) as edge-triggered by default.
 
+config ARM64_GICV3_SPI_ROUTING_CPU0
+	bool "Configure SPI interrupt affinity routing to CPU0 by default"
+	default y if SMP
+	default n
+	---help---
+		Configure SPI interrupt affinity routing to CPU0 by default.
+
 endif
 
 config ARM64_SEMIHOSTING_HOSTFS
