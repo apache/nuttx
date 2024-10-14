@@ -640,6 +640,7 @@ static const char *g_white_files[] =
    * libs/libc/machine/arm/arm_asm.h
    */
 
+  "libs/libbuiltin/compiler-rt/InstrProfilingPlatformNX.c",
   "arm-acle-compat.h",
   "arm_asm.h",
   NULL

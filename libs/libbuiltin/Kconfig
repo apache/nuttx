@@ -1,0 +1,29 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Toolchains Library Support"
+
+config TOOLCHAINS_BUILTIN
+	bool "Builtin toolchains support"
+	default n
+	---help---
+		Choose to compile libraries related to toolchains into the OS
+
+config BUILTIN_COMPILER_RT
+	bool "Builtin LLVM Compiler-rt"
+	depends on ARM_TOOLCHAIN_CLANG
+	select TOOLCHAINS_BUILTIN
+	default y
+	---help---
+		Compile the LLVM Compiler-rt library into the OS.
+
+if BUILTIN_COMPILER_RT
+
+config COMPILER_RT_VERSION
+	string "Select LLVM Compiler-rt version"
+	depends on BUILTIN_COMPILER_RT
+	default "15.0.2"
+
+endif # COMPILER_RT_VERSION

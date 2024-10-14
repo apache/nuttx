@@ -31,6 +31,12 @@ libs$(DELIM)libc$(DELIM)libkc$(LIBEXT): pass2dep
 staging$(DELIM)libkc$(LIBEXT): libs$(DELIM)libc$(DELIM)libkc$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+libs$(DELIM)libbuiltin$(DELIM)libkbuiltin$(LIBEXT): pass2dep
+	$(Q) $(MAKE) -C libs$(DELIM)libbuiltin libkbuiltin$(LIBEXT) BINDIR=kbin EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+
+staging$(DELIM)libkbuiltin$(LIBEXT): libs$(DELIM)libbuiltin$(DELIM)libkbuiltin$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 libs$(DELIM)libm$(DELIM)libkm$(LIBEXT): pass2dep
 	$(Q) $(MAKE) -C libs$(DELIM)libm libkm$(LIBEXT) BINDIR=kbin EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
@@ -200,6 +206,16 @@ endif
 	$(Q) $(MAKE) -C libs$(DELIM)libnx libnx$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 staging$(DELIM)libnx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libnx$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
+ifeq ($(CONFIG_BUILD_FLAT),y)
+libs$(DELIM)libbuiltin$(DELIM)libbuiltin$(LIBEXT): pass2dep
+else
+libs$(DELIM)libbuiltin$(DELIM)libbuiltin$(LIBEXT): pass1dep
+endif
+	$(Q) $(MAKE) -C libs$(DELIM)libbuiltin libbuiltin$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+staging$(DELIM)libbuiltin$(LIBEXT): libs$(DELIM)libbuiltin$(DELIM)libbuiltin$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 ifeq ($(CONFIG_BUILD_FLAT),y)
