@@ -5884,7 +5884,15 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
     }
   else
     {
-      return -ENOSYS;
+      memset(&country, 0x00, sizeof(wifi_country_t));
+      ret = esp_wifi_get_country(&country);
+      if (ret)
+        {
+          wlerr("Failed to get country info ret=%d\n", ret);
+          return wifi_errno_trans(ret);
+        }
+
+      memcpy(iwr->u.data.pointer, country.cc, 2);
     }
 
   return OK;

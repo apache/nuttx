@@ -1377,6 +1377,10 @@ static int wlan_ioctl(struct net_driver_s *dev,
         ret = ops->country(iwr, true);
         break;
 
+      case SIOCGIWCOUNTRY:  /* Set country code */
+        ret = ops->country(iwr, false);
+        break;
+
       case SIOCGIWSENS:    /* Get sensitivity (dBm) */
         ret = ops->rssi(iwr, false);
         break;
