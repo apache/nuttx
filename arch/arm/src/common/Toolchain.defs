@@ -309,7 +309,7 @@ else
    # Wrong warning array subscript [0] is outside array bounds:
    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 
-   ifeq ($(GCCVER),12)
+   ifeq ($(shell expr $(GCCVER) \>= 12), 1)
      ARCHOPTIMIZATION += --param=min-pagesize=0
      ifeq ($(CONFIG_ARCH_RAMFUNCS),y)
        LDFLAGS += --no-warn-rwx-segments
