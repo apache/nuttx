@@ -36,3 +36,4 @@ Guides
   thread_local_storage.rst
   devicetree.rst
   debuggingflash_nuttxonarm.rst
+  stm32ccm_allocator.rst
