@@ -353,6 +353,16 @@ config ARM64_GICV2_LEGACY_IRQ0
 
 endif
 
+if ARM64_GIC_VERSION = 3
+
+config ARM64_GICV3_SPI_EDGE
+	bool "Configure all SPIs(Shared Peripheral Interrupts) as edge-triggered by default"
+	default n
+	---help---
+		Configure all SPIs(Shared Peripheral Interrupts) as edge-triggered by default.
+
+endif
+
 config ARM64_SEMIHOSTING_HOSTFS
 	bool "Semihosting HostFS"
 	depends on FS_HOSTFS
