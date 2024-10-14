@@ -38,3 +38,9 @@ void __assert(FAR const char *filename, int linenum, FAR const char *msg)
   _assert(filename, linenum, msg, NULL);
   abort();
 }
+
+void noreturn_function __assert_func(const char *file, int linenum,
+                                     const char *func, const char *msg)
+{
+  __assert(file, linenum, msg);
+}

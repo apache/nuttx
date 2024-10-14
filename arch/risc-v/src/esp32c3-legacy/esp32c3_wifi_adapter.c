@@ -4526,31 +4526,6 @@ esp_err_t esp_timer_delete(esp_timer_handle_t timer)
 }
 
 /****************************************************************************
- * Name: __assert_func
- *
- * Description:
- *   Delete timer and free resource
- *
- * Input Parameters:
- *   file  - assert file
- *   line  - assert line
- *   func  - assert function
- *   expr  - assert condition
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void __assert_func(const char *file, int line,
-                   const char *func, const char *expr)
-{
-  wlerr("ERROR: Assert failed in %s, %s:%d (%s)",
-        func, file, line, expr);
-  abort();
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
