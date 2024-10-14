@@ -102,10 +102,5 @@ endif()
 nuttx_add_system_library(libcxx)
 target_sources(libcxx PRIVATE ${SRCS})
 target_compile_options(libcxx PRIVATE ${FLAGS})
-if(CONFIG_LIBCXXABI)
-  target_include_directories(
-    libcxx BEFORE PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include)
-endif()
-
 target_include_directories(libcxx BEFORE
                            PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)
