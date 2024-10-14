@@ -75,3 +75,20 @@ FAR struct file_struct *lib_get_stream(int fd)
 }
 
 #endif /* CONFIG_FILE_STREAM */
+
+#ifdef CONFIG_ARM_TOOLCHAIN_CLANG
+FAR struct file_struct * const stdin(void)
+{
+  return lib_get_stream(0);
+}
+
+FAR struct file_struct * const stdout(void)
+{
+  return lib_get_stream(1);
+}
+
+FAR struct file_struct * const stderr(void)
+{
+  return lib_get_stream(2);
+}
+#endif

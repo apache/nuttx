@@ -37,6 +37,14 @@
 #include <nuttx/lib/lib.h>
 
 /****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+/* Streams */
+
+typedef struct file_struct FILE;
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -65,9 +73,15 @@
 
 /* The first three _iob entries are reserved for standard I/O */
 
+#ifdef CONFIG_ARM_TOOLCHAIN_CLANG
+FAR FILE * const stdin(void);
+FAR FILE * const stdout(void);
+FAR FILE * const stderr(void);
+#else
 #define stdin      lib_get_stream(0)
 #define stdout     lib_get_stream(1)
 #define stderr     lib_get_stream(2)
+#endif
 
 /* Path to the directory where temporary files can be created */
 
@@ -104,14 +118,6 @@
 #define feof_unlocked(stream)     feof(stream)
 #define ferror_unlocked(stream)   ferror(stream)
 #define fileno_unlocked(stream)   fileno(stream)
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-/* Streams */
-
-typedef struct file_struct FILE;
 
 /****************************************************************************
  * Public Data
