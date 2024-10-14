@@ -37,3 +37,4 @@ Guides
   devicetree.rst
   debuggingflash_nuttxonarm.rst
   changing_systemclockconfig.rst
+  usingkernelthreads.rst
