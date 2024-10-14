@@ -36,3 +36,5 @@ Guides
   thread_local_storage.rst
   devicetree.rst
   debuggingflash_nuttxonarm.rst
+  changing_systemclockconfig.rst
+  usingkernelthreads.rst
