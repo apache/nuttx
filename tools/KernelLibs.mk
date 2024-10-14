@@ -52,6 +52,13 @@ NUTTXLIBS += staging$(DELIM)libkmm$(LIBEXT) staging$(DELIM)libkarch$(LIBEXT)
 USERLIBS  += staging$(DELIM)libproxies$(LIBEXT) staging$(DELIM)libc$(LIBEXT)
 USERLIBS  += staging$(DELIM)libmm$(LIBEXT) staging$(DELIM)libarch$(LIBEXT)
 
+# Add toolchain library support
+
+ifeq ($(CONFIG_BUILTIN_TOOLCHAIN),)
+NUTTXLIBS += staging$(DELIM)libkbuiltin$(LIBEXT)
+USERLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+endif
+
 # Add libraries for math support.
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)

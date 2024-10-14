@@ -45,8 +45,8 @@ if(TOOLCHAIN_CLANG_CONFIG)
   execute_process(COMMAND clang --version
                   OUTPUT_VARIABLE clang_full_version_string)
 
-  string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+).*" "\\1" CLANGVER
-                       ${clang_full_version_string})
+  string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+\.[0-9]+).*" "\\1"
+                       CLANGVER ${clang_full_version_string})
 
   if(CLANGVER STREQUAL "14.0")
     set(TOOLCHAIN_CLANG_CONFIG ${TOOLCHAIN_CLANG_CONFIG}_nosys)
@@ -237,11 +237,24 @@ set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
 
 set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
 
-function(nuttx_find_toolchain_lib)
-  execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-            --print-file-name
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    OUTPUT_VARIABLE extra_lib_path)
-  nuttx_add_extra_library(${extra_lib_path})
-endfunction()
+if(CONFIG_BUILTIN_TOOLCHAIN)
+  function(nuttx_find_toolchain_lib)
+    execute_process(
+      COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+              --print-file-name
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      OUTPUT_VARIABLE extra_lib_path)
+    nuttx_add_extra_library(${extra_lib_path})
+  endfunction()
+else()
+  function(nuttx_find_toolchain_lib)
+    if(ARGN)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-file-name=${ARGN}
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE extra_lib_path)
+    endif()
+    nuttx_add_extra_library(${extra_lib_path})
+  endfunction()
+endif()
