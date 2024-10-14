@@ -39,3 +39,4 @@ Guides
   changing_systemclockconfig.rst
   usingkernelthreads.rst
   armv7m_runtimestackcheck.rst
+  disabling_stackdumpdebug.rst
