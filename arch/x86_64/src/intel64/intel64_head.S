@@ -195,8 +195,8 @@ __ap_entry:
  ****************************************************************************/
 
 	.code32
-	.section ".multiboot1", "a"
 #ifdef CONFIG_ARCH_MULTIBOOT1
+	.section ".multiboot1", "a"
 .set MB_FLAG_ALIGNED,   1       /* All boot modules must be loaded aligned */
 .set MB_FLAG_MEMINFO,   2       /* Boot with memory maps passing  */
 .set MB_FLAG_VIDEO,     4       /* Enable video mode  */
