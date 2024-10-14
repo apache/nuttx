@@ -42,3 +42,4 @@ Guides
   disabling_stackdumpdebug.rst
   include_files_board_h.rst
   specialstuff_in_nuttxheaderfiles.rst
+  kernel_threads_with_custom_stacks.rst
