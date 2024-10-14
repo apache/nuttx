@@ -52,6 +52,12 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/libcxxabi)
   endif()
 endif()
 
+set_property(
+  TARGET nuttx
+  APPEND
+  PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES
+           ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include)
+
 nuttx_add_system_library(libcxxabi)
 
 set(SRCS)
@@ -112,7 +118,6 @@ endif()
 target_compile_definitions(libcxxabi PRIVATE LIBCXXABI_NON_DEMANGLING_TERMINATE)
 
 target_sources(libcxxabi PRIVATE ${TARGET_SRCS})
-target_compile_options(libcxxabi PRIVATE -frtti)
 target_include_directories(
   libcxxabi BEFORE PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include
                            ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)
