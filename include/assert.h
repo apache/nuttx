@@ -197,6 +197,13 @@ void _assert(FAR const char *filename, int linenum,
 void __assert(FAR const char *filename, int linenum,
               FAR const char *msg) noreturn_function;
 
+/****************************************************************************
+ * Name: __assert_func
+ ****************************************************************************/
+
+void __assert_func(const char *file, int linenum,
+                   const char *func, const char *msg);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

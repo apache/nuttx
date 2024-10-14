@@ -336,12 +336,6 @@ int _system_r(struct _reent *r, const char *command)
   return 0;
 }
 
-void noreturn_function __assert_func(const char *file, int line,
-                                     const char *func, const char *expr)
-{
-  __assert(file, line, expr);
-}
-
 void _cleanup_r(struct _reent *r)
 {
 }

@@ -465,6 +465,12 @@ endif
 
 EXTRA_LIBS += $(COMPILER_RT_LIB)
 
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+    COMPILER_UNWIND_LIB := $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name libunwind.a))
+endif
+
+EXTRA_LIBS += $(COMPILER_UNWIND_LIB)
+
 ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
