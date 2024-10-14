@@ -49,8 +49,8 @@
  * Public Data
  ****************************************************************************/
 
-extern volatile uint32_t   g_cpu_count;
-volatile static spinlock_t g_ap_boot;
+extern volatile uint32_t g_cpu_count;
+static spinlock_t        g_ap_boot;
 
 /* CPU private data */
 
