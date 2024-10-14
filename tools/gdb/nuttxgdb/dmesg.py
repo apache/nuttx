@@ -32,20 +32,34 @@ class Dmesg(gdb.Command):
         if CONFIG_RAMLOG_SYSLOG:
             super().__init__("dmesg", gdb.COMMAND_USER)
 
-    def invoke(self, args, from_tty):
+    def _get_buf(self):
         sysdev = utils.gdb_eval_or_none("g_sysdev")
         if not sysdev:
             gdb.write("RAM log not available.\n")
-            return
+            return None
 
         rl_head = sysdev["rl_header"]
         rl_bufsize = sysdev["rl_bufsize"]
-        gdb.write("Ramlog have %d bytes to show\n" % rl_bufsize)
 
         inf = gdb.selected_inferior()
         buf = bytes(inf.read_memory(rl_head["rl_buffer"], rl_bufsize))
         buf = buf.replace(
             b"\0", "␀".encode("utf-8")
         )  # NULL is valid utf-8 but not printable
-        gdb.write(buf.decode("utf-8", errors="replace"))
-        gdb.write("\n")
+
+        return buf.decode("utf-8", errors="replace")
+
+    def diagnose(self, *args, **kwargs):
+        buf = self._get_buf()
+        return {
+            "title": "RAM log",
+            "summary": (
+                f"Buffer length:{len(buf)} bytes" if buf else "Buffer not available"
+            ),
+            "result": "info",
+            "command": "dmesg",
+            "message": buf,
+        }
+
+    def invoke(self, args, from_tty):
+        gdb.write(f"{self._get_buf()}\n")
