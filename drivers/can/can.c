@@ -595,6 +595,48 @@ static int can_xmit(FAR struct can_dev_s *dev)
         }
     }
 
+  /* When the hardware transmit buffer, not H/W FIFO, is full and
+   * there are frames in the tx_pending list.
+   *
+   * the cancel logic requires hardware transmit buffer must have ability
+   * of Canceling the transmission of frames.
+   *
+   * The can_txneed_cancel function checks whether the ID of the first
+   * frame in the tx_pending list is smaller than the minimum ID in the
+   * tx_sending list.
+   *
+   * If this condition is met, the can_cancel_mbmsg function is invoked
+   * to attempt to cancel the transmission of the frame with the largest
+   * ID in the tx_sending list, and this frame with the largest ID in the
+   * tx_sending list is then reinserted into the tx_pending list at a
+   * specified position, can_cancel_mbmsg return true if cancel succeed.
+   *
+   * Afterwards, dev_send is called to load the first frame(minimum ID)
+   * from the tx_pending list into the hardware transmit buffer. make
+   * this frame with the minimum ID appear on the bus in real time.
+   */
+
+#ifdef CONFIG_CAN_STRICT_TX_PRIORITY
+  if (TX_PENDING(&dev->cd_sender) && can_txneed_cancel(&dev->cd_sender))
+    {
+      DEBUGASSERT(dev->cd_ops->co_cancel != NULL);
+
+      if (can_cancel_mbmsg(dev))
+        {
+          msg = can_get_msg(&dev->cd_sender);
+
+          /* Send the next message at the sender */
+
+          ret = dev_send(dev, msg);
+          if (ret < 0)
+            {
+              canerr("dev_send failed: %d\n", ret);
+              can_revert_msg(&dev->cd_sender, msg);
+            }
+        }
+    }
+#endif
+
   /* Make sure that TX interrupts are enabled */
 
   dev_txint(dev, true);
@@ -627,13 +669,18 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
   flags = enter_critical_section();
 
-  /* Check if the H/W TX is inactive when we started. In certain race
-   * conditions, there may be a pending interrupt to kick things back off,
-   * but we will be sure here that there is not.  That the hardware is IDLE
-   * and will need to be kick-started.
+  /* if CONFIG_CAN_STRICT_TX_PRIORITY is enable, inactive will be always
+   * true, else check if the H/W TX is inactive when we started. In certain
+   * race conditions, there may be a pending interrupt to kick things back
+   * off, but we will be sure here that there is not.  That the hardware
+   * is IDLE and will need to be kick-started.
    */
 
-  inactive = dev_txempty(dev);
+#ifdef CONFIG_CAN_STRICT_TX_PRIORITY
+  inactive = true;
+#else
+  inactive = dev_txready(dev);
+#endif
 
   /* Add the messages to the sender.  Ignore any trailing messages that are
    * shorter than the minimum.
@@ -701,7 +748,11 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
 
           /* Re-check the H/W sender state */
 
-          inactive = dev_txempty(dev);
+#ifdef CONFIG_CAN_STRICT_TX_PRIORITY
+          inactive = true;
+#else
+          inactive = dev_txready(dev);
+#endif
         }
 
       /* We get here if there is space in sender.  Add the new

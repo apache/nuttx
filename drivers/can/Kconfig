@@ -128,11 +128,28 @@ config CAN_TXREADY
 		no longer full.  can_txready() will then awaken the
 		can_write() logic and the hang condition is avoided.
 
-config CAN_TXPRIORITY
+config CAN_STRICT_TX_PRIORITY
 	bool "Prioritize sending based on canid"
 	default n
 	---help---
-		Prioritize sending based on canid.
+		Enable strict transmit priority ordering based on CAN ID.
+
+		When the hardware transmit buffers (not a hardware FIFO) are
+		full and there are frames pending in the software tx_pending list,
+		the cancel ability is taken effect. this feature may cancel
+		the msg with the largest CAN ID in the mailbox.
+
+		Specifically, the driver may cancel the transmission of the
+		lowest-priority frame(the msg with the largest CAN ID) currently
+		stored in a hardware transmit buffer, reinsert that frame back
+		into the software pending list, and replace it with a
+		higher-priority pending frame.
+
+		This feature requires that the CAN controller hardware supports
+		cancellation (abort) of buffered transmissions.
+
+		Do not enable this option if the lower-half driver uses a hardware
+		FIFO to store transmit frames.
 
 choice
 	prompt "TX Ready Work Queue"

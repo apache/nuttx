@@ -69,6 +69,41 @@ The upper half driver supports the following ``ioctl`` commands:
 - **CANIOC_GET_MSGALIGN**: Get messages alignment. See CANIOC_SET_MSGALIGN for
   explanation.
 
+The upper half driver supports the **strict TX priority ordering**:
+
+-  When the CAN controller hardware supports cancelling an ongoing transmission
+   from a hardware transmit buffer, the following transmit-cancel mechanism can
+   be used to avoid priority inversion when all hardware transmit buffers are
+   full.
+
+-  **Behavior**: When the hardware transmit buffers are full and there are
+   frames queued in the software tx_pending list, the driver compares the
+   highest-priority frame in the software tx_pending list with the
+   highest-priority frame currently resident in hardware. If the highest-priority
+   pending frame has a higher priority than the highest-priority hardware-resident
+   frame, the driver will:
+
+   - Cancel the transmission of the lowest-priority frame currently in the hardware
+     transmit buffers (the controller must support cancellation).
+   - Reinsert that cancelled frame back into the software tx_pending list at the
+     appropriate position.
+   - Fill the freed hardware transmit buffer with the higher-priority frame taken
+     from the software tx_pending list.
+
+   This mechanism helps prevent priority inversion when all hardware transmit buffers
+   are full, by ensuring that the highest-priority frame is always transmitted first.
+
+-  **Note**: The "hardware transmit buffer" in this context refers to individual H/W
+   transmit message buffers and not to a hardware FIFO.
+
+-  **Requirements**:
+   - The CAN controller must support cancellation of an ongoing buffered transmission.
+
+   - The driver implementation (upper half / lower half) must cooperate with the cancel
+     operation and correctly manage the tx_pending and tx_sending lists.
+
+   - The feature should be enabled via a configuration option(``CONFIG_CAN_STRICT_TX_PRIORITY``).
+
 **Usage Note**: The default behavior of the upper half driver is to return
 multiple messages on ``read``. See the `guide on this subject
 </guides/reading_can_msgs.html>`_.

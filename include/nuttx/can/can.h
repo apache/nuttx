@@ -396,6 +396,7 @@
 #define dev_send(dev,m)           (dev)->cd_ops->co_send(dev,m)
 #define dev_txready(dev)          (dev)->cd_ops->co_txready(dev)
 #define dev_txempty(dev)          (dev)->cd_ops->co_txempty(dev)
+#define dev_cancel(dev,m)         (dev)->cd_ops->co_cancel(dev,m)
 
 /* CAN message support ******************************************************/
 
@@ -677,7 +678,7 @@ struct can_rxfifo_s
   struct can_msg_s rx_buffer[CONFIG_CAN_RXFIFOSIZE];
 };
 
-#ifdef CONFIG_CAN_TXPRIORITY
+#ifdef CONFIG_CAN_STRICT_TX_PRIORITY
 struct can_msg_node_s
 {
   struct list_node  list;
@@ -688,7 +689,7 @@ struct can_msg_node_s
 struct can_txcache_s
 {
   sem_t             tx_sem;             /* Counting semaphore */
-#ifdef CONFIG_CAN_TXPRIORITY
+#ifdef CONFIG_CAN_STRICT_TX_PRIORITY
   /* tx_buffer   - Buffer of CAN message. And this buffer is managed by
    *               tx_free/tx_pending/tx_sending
    * tx_free     - Link all buffer node in the initial step
@@ -815,6 +816,9 @@ struct can_ops_s
    */
 
   CODE bool (*co_txempty)(FAR struct can_dev_s *dev);
+
+  CODE bool (*co_cancel)(FAR struct can_dev_s *dev,
+                         FAR struct can_msg_s *msg);
 };
 
 /* This is the device structure used by the driver.  The caller of
