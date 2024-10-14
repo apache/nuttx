@@ -28,33 +28,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <nuttx/irq.h>
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-static inline_function irqstate_t atomic_lock(void)
-{
-  return enter_critical_section();
-}
-
-static inline_function void atomic_unlock(irqstate_t flags)
-{
-  leave_critical_section(flags);
-}
-#else
-static inline_function irqstate_t atomic_lock(void)
-{
-  return up_irq_save();
-}
-
-static inline_function void atomic_unlock(irqstate_t flags)
-{
-  up_irq_restore(flags);
-}
-#endif
+#include <nuttx/spinlock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,11 +39,11 @@ static inline_function void atomic_unlock(irqstate_t flags)
   void weak_function __atomic_store_##n (FAR volatile void *ptr,   \
                                          type value, int memorder) \
   {                                                                \
-    irqstate_t irqstate = atomic_lock();                           \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
                                                                    \
     *(FAR type *)ptr = value;                                      \
                                                                    \
-    atomic_unlock(irqstate);                                       \
+    spin_unlock_irqrestore(NULL, irqstate);                        \
   }
 
 #define LOAD(n, type)                                                 \
@@ -77,11 +51,11 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_load_##n (FAR const volatile void *ptr, \
                                         int memorder)                 \
   {                                                                   \
-    irqstate_t irqstate = atomic_lock();                              \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                    \
                                                                       \
     type ret = *(FAR type *)ptr;                                      \
                                                                       \
-    atomic_unlock(irqstate);                                          \
+    spin_unlock_irqrestore(NULL, irqstate);                           \
     return ret;                                                       \
   }
 
@@ -90,13 +64,13 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_exchange_##n (FAR volatile void *ptr,   \
                                             type value, int memorder) \
   {                                                                   \
-    irqstate_t irqstate = atomic_lock();                              \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                    \
     FAR type *tmp = (FAR type *)ptr;                                  \
                                                                       \
     type ret = *tmp;                                                  \
     *tmp = value;                                                     \
                                                                       \
-    atomic_unlock(irqstate);                                          \
+    spin_unlock_irqrestore(NULL, irqstate);                           \
     return ret;                                                       \
   }
 
@@ -108,7 +82,7 @@ static inline_function void atomic_unlock(irqstate_t flags)
                                                     int success, int failure) \
   {                                                                           \
     bool ret = false;                                                         \
-    irqstate_t irqstate = atomic_lock();                                      \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                            \
     FAR type *tmpmem = (FAR type *)mem;                                       \
     FAR type *tmpexp = (FAR type *)expect;                                    \
                                                                               \
@@ -122,7 +96,7 @@ static inline_function void atomic_unlock(irqstate_t flags)
         *tmpexp = *tmpmem;                                                    \
       }                                                                       \
                                                                               \
-    atomic_unlock(irqstate);                                                  \
+    spin_unlock_irqrestore(NULL, irqstate);                                   \
     return ret;                                                               \
   }
 
@@ -131,13 +105,13 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_flags_test_and_set##n (FAR volatile void *ptr, \
                                                      int memorder)           \
   {                                                                          \
-    irqstate_t irqstate = atomic_lock();                                     \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                           \
     FAR type *tmp = (FAR type *)ptr;                                         \
     type ret = *tmp;                                                         \
                                                                              \
     *(FAR type *)ptr = 1;                                                    \
                                                                              \
-    atomic_unlock(irqstate);                                                 \
+    spin_unlock_irqrestore(NULL, irqstate);                                  \
     return ret;                                                              \
   }
 
@@ -146,13 +120,13 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_fetch_add_##n (FAR volatile void *ptr,   \
                                              type value, int memorder) \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
     type ret = *tmp;                                                   \
                                                                        \
     *tmp = *tmp + value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return ret;                                                        \
   }
 
@@ -161,13 +135,13 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_fetch_sub_##n (FAR volatile void *ptr,   \
                                              type value, int memorder) \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
     type ret = *tmp;                                                   \
                                                                        \
     *tmp = *tmp - value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return ret;                                                        \
   }
 
@@ -176,13 +150,13 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_fetch_and_##n (FAR volatile void *ptr,   \
                                              type value, int memorder) \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
     type ret = *tmp;                                                   \
                                                                        \
     *tmp = *tmp & value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return ret;                                                        \
   }
 
@@ -191,13 +165,13 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_fetch_or_##n (FAR volatile void *ptr,   \
                                             type value, int memorder) \
   {                                                                   \
-    irqstate_t irqstate = atomic_lock();                              \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                    \
     FAR type *tmp = (FAR type *)ptr;                                  \
     type ret = *tmp;                                                  \
                                                                       \
     *tmp = *tmp | value;                                              \
                                                                       \
-    atomic_unlock(irqstate);                                          \
+    spin_unlock_irqrestore(NULL, irqstate);                           \
     return ret;                                                       \
   }
 
@@ -206,13 +180,13 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __atomic_fetch_xor_##n (FAR volatile void *ptr,   \
                                              type value, int memorder) \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
     type ret = *tmp;                                                   \
                                                                        \
     *tmp = *tmp ^ value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return ret;                                                        \
   }
 
@@ -221,12 +195,12 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __sync_add_and_fetch_##n (FAR volatile void *ptr, \
                                                type value)             \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
                                                                        \
     *tmp = *tmp + value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return *tmp;                                                       \
   }
 
@@ -235,12 +209,12 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __sync_sub_and_fetch_##n (FAR volatile void *ptr, \
                                                type value)             \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
                                                                        \
     *tmp = *tmp - value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return *tmp;                                                       \
   }
 
@@ -249,12 +223,12 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __sync_or_and_fetch_##n (FAR volatile void *ptr, \
                                               type value)             \
   {                                                                   \
-    irqstate_t irqstate = atomic_lock();                              \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                    \
     FAR type *tmp = (FAR type *)ptr;                                  \
                                                                       \
     *tmp = *tmp | value;                                              \
                                                                       \
-    atomic_unlock(irqstate);                                          \
+    spin_unlock_irqrestore(NULL, irqstate);                           \
     return *tmp;                                                      \
   }
 
@@ -263,12 +237,12 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __sync_and_and_fetch_##n (FAR volatile void *ptr, \
                                                type value)             \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
                                                                        \
     *tmp = *tmp & value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return *tmp;                                                       \
   }
 
@@ -277,12 +251,12 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __sync_xor_and_fetch_##n (FAR volatile void *ptr, \
                                                type value)             \
   {                                                                    \
-    irqstate_t irqstate = atomic_lock();                               \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
     FAR type *tmp = (FAR type *)ptr;                                   \
                                                                        \
     *tmp = *tmp ^ value;                                               \
                                                                        \
-    atomic_unlock(irqstate);                                           \
+    spin_unlock_irqrestore(NULL, irqstate);                            \
     return *tmp;                                                       \
   }
 
@@ -291,12 +265,12 @@ static inline_function void atomic_unlock(irqstate_t flags)
   type weak_function __sync_nand_and_fetch_##n (FAR volatile void *ptr, \
                                                 type value)             \
   {                                                                     \
-    irqstate_t irqstate = atomic_lock();                                \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                      \
     FAR type *tmp = (FAR type *)ptr;                                    \
                                                                         \
     *tmp = ~(*tmp & value);                                             \
                                                                         \
-    atomic_unlock(irqstate);                                            \
+    spin_unlock_irqrestore(NULL, irqstate);                             \
     return *tmp;                                                        \
   }
 
@@ -307,7 +281,7 @@ static inline_function void atomic_unlock(irqstate_t flags)
                                                        type newvalue)          \
   {                                                                            \
     bool ret = false;                                                          \
-    irqstate_t irqstate = atomic_lock();                                       \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                             \
     FAR type *tmp = (FAR type *)ptr;                                           \
                                                                                \
     if (*tmp == oldvalue)                                                      \
@@ -316,7 +290,7 @@ static inline_function void atomic_unlock(irqstate_t flags)
         *tmp = newvalue;                                                       \
       }                                                                        \
                                                                                \
-    atomic_unlock(irqstate);                                                   \
+    spin_unlock_irqrestore(NULL, irqstate);                                    \
     return ret;                                                                \
   }
 
@@ -326,7 +300,7 @@ static inline_function void atomic_unlock(irqstate_t flags)
                                                       type oldvalue,          \
                                                       type newvalue)          \
   {                                                                           \
-    irqstate_t irqstate = atomic_lock();                                      \
+    irqstate_t irqstate = spin_lock_irqsave(NULL);                            \
     FAR type *tmp = (FAR type *)ptr;                                          \
     type ret = *tmp;                                                          \
                                                                               \
@@ -335,7 +309,7 @@ static inline_function void atomic_unlock(irqstate_t flags)
         *tmp = newvalue;                                                      \
       }                                                                       \
                                                                               \
-    atomic_unlock(irqstate);                                                  \
+    spin_unlock_irqrestore(NULL, irqstate);                                   \
     return ret;                                                               \
   }
 
