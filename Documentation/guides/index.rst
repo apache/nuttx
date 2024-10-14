@@ -40,3 +40,4 @@ Guides
   usingkernelthreads.rst
   armv7m_runtimestackcheck.rst
   disabling_stackdumpdebug.rst
+  include_files_board_h.rst
