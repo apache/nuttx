@@ -245,3 +245,86 @@ void can_send_done(FAR struct can_txcache_s *cd_sender)
     }
 #endif
 }
+
+/****************************************************************************
+ * Name: can_txneed_cancel
+ *
+ * Description:
+ *   Compare the msgID between tx_sending and tx_pending's head when
+ *   dev_txready return false and tx_pending is not empty, preserve the node
+ *   with largest msgID in tx_sending into *callbackmsg_node. return true if
+ *   the msgID in tx_pending's head < the smallest msgID in tx_sending.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXCANCEL
+bool can_txneed_cancel(FAR struct can_txcache_s *cd_sender)
+{
+  FAR struct can_msg_node_s *msg_node;
+  FAR struct can_msg_node_s *tmp_node;
+
+  /* acquire min msgID from tx_sending and compare it with masgID
+   * in tx_pending list's head.
+   */
+
+  if (SENDING_COUNT(cd_sender) == 0)
+    {
+      return false;
+    }
+
+  msg_node = list_first_entry(&cd_sender->tx_pending,
+                              struct can_msg_node_s, list);
+  tmp_node = list_first_entry(&cd_sender->tx_sending,
+                              struct can_msg_node_s, list);
+  if (msg_node->msg.cm_hdr.ch_id < tmp_node->msg.cm_hdr.ch_id)
+    {
+      return true;
+    }
+
+  return false;
+}
+#endif
+
+/****************************************************************************
+ * Name: can_cancel_mbmsg
+ *
+ * Description:
+ *   cancel the msg with the largest msgID in the mailbox and
+ *   return true if success.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_TXCANCEL
+bool can_cancel_mbmsg(FAR struct can_dev_s *dev)
+{
+  FAR struct can_msg_node_s *tmp_node;
+  FAR struct can_msg_node_s *callbackmsg_node;
+  FAR struct can_txcache_s *cd_sender = &dev->cd_sender;
+
+  callbackmsg_node = list_last_entry(&cd_sender->tx_sending,
+                                     struct can_msg_node_s, list);
+  if (dev->cd_ops->co_cancel != NULL &&
+      dev_cancel(dev, &callbackmsg_node->msg))
+    {
+      /* take tx_sending's specfic msg back into tx_pending. */
+
+      list_delete(&callbackmsg_node->list);
+
+      list_for_every_entry(&cd_sender->tx_pending, tmp_node,
+                           struct can_msg_node_s, list)
+        {
+          if (tmp_node->msg.cm_hdr.ch_id >=
+              callbackmsg_node->msg.cm_hdr.ch_id)
+            {
+              break;
+            }
+        }
+
+      list_add_before(&tmp_node->list, &callbackmsg_node->list);
+
+      return true;
+    }
+
+  return false;
+}
+#endif
