@@ -27,9 +27,11 @@ ifeq ($(CONFIG_LIBC_DLFCN),y)
 CSRCS += lib_dlopen.c lib_dlclose.c lib_dlsym.c lib_dlerror.c lib_dlsymtab.c
 CSRCS += lib_dladdr.c
 
+endif
+
+CSRCS += lib_dlfind_object.c
+
 # Add the dlfcn.h directory to the build
 
 DEPPATH += --dep-path dlfcn
 VPATH += :dlfcn
-
-endif

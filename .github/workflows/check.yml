@@ -39,9 +39,9 @@ jobs:
       - name: Check Pull Request
         run: |
           echo "::add-matcher::nuttx/.github/nxstyle.json"
-          python -m venv .venv
+          python3 -m venv .venv
           source .venv/bin/activate
-          pip install cmake-format
+          pip install cmake-format black isort flake8
           cd nuttx
           commits="${{ github.event.pull_request.base.sha }}..HEAD"
           git log --oneline $commits

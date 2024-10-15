@@ -224,6 +224,12 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
 
   DEBUGASSERT(cpuload);
 
+#ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
+  /* Update critmon in case of the target thread busyloop */
+
+  nxsched_update_critmon(nxsched_get_tcb(pid));
+#endif
+
   /* Momentarily disable interrupts.  We need (1) the task to stay valid
    * while we are doing these operations and (2) the tick counts to be
    * synchronized when read.

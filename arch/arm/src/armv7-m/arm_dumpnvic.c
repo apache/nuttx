@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-r/arm_fpuconfig.S
+ * arch/arm/src/armv7-m/arm_dumpnvic.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,73 +23,34 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/coredump.h>
+#include <sys/types.h>
+#include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
-#ifdef CONFIG_ARCH_FPU
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
-
-	.globl	arm_fpuconfig
-	.file	"arm_fpuconfig.S"
-
-/****************************************************************************
- * Assembly Macros
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-	.text
-	.syntax	unified
-	.arm
+#include "arm_internal.h"
+#include "nvic.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARM_COREDUMP_REGION
+
 /****************************************************************************
- * Name: arm_fpuconfig
+ * Function:  arm_coredump_add_region
  *
  * Description:
- *   Configure the FPU.  Enables access to CP10 and CP11
+ *   Dump all NVIC registers during a core dump.
  *
  ****************************************************************************/
 
-	.globl	arm_fpuconfig
-	.type	arm_fpuconfig, %function
+void arm_coredump_add_region(void)
+{
+  coredump_add_memory_region((uint32_t *)ARMV7M_NVIC_BASE,
+                             NVIC_CID3 + 4 - ARMV7M_NVIC_BASE,
+                             PF_REGISTER);
+}
 
-arm_fpuconfig:
-
-	/* Enable access to CP10 and CP11 in CP15.CACR */
-
-	mrc		CP15_CPACR(r0)
-	orr		r0, r0, #0xf00000
-	mcr		CP15_CPACR(r0)
-
-	/* Enable access to CP10 and CP11 in CP15.NSACR */
-
-#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
-	mrc		CP15_NSACR(r0)
-	orr		r0, r0, #0xc00
-	mcr		CP15_NSACR(r0)
-#endif
-
-	/* REVISIT: Do we need to do this? */
-
-	/* Set FPEXC.EN (B30) */
-
-	fmrx		r0, fpexc
-	orr		r0, r0, #0x40000000
-	fmxr		fpexc, r0
-	bx		lr
-	.size	arm_fpuconfig, . - arm_fpuconfig
-#endif
-	.end
+#endif /* CONFIG_ARM_COREDUMP_REGION */

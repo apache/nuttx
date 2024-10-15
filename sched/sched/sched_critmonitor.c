@@ -445,3 +445,27 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
     }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION */
 }
+
+void nxsched_update_critmon(FAR struct tcb_s *tcb)
+{
+  clock_t current = perf_gettime();
+  clock_t elapsed = current - tcb->run_start;
+
+  if (tcb->task_state != TSTATE_TASK_RUNNING)
+    {
+      return;
+    }
+
+#ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
+  clock_t tick = elapsed * CLOCKS_PER_SEC / perf_getfreq();
+  nxsched_process_taskload_ticks(tcb, tick);
+#endif
+
+  tcb->run_start = current;
+  tcb->run_time += elapsed;
+  if (elapsed > tcb->run_max)
+    {
+      tcb->run_max = elapsed;
+      CHECK_THREAD(tcb->pid, elapsed);
+    }
+}

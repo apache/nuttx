@@ -525,6 +525,10 @@ int arm_gen_nonsecurefault(int irq, uint32_t *regs);
 void arm_stack_check_init(void) noinstrument_function;
 #endif
 
+#ifdef CONFIG_ARM_COREDUMP_REGION
+  void arm_coredump_add_region(void);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

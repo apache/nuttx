@@ -137,7 +137,9 @@ int usbdev_copy_epdesc(FAR struct usb_epdesc_s *epdesc,
   int len = sizeof(struct usb_epdesc_s);
 
 #ifdef CONFIG_USBDEV_SUPERSPEED
-  if (speed == USB_SPEED_SUPER || speed == USB_SPEED_SUPER_PLUS)
+  if (speed == USB_SPEED_SUPER ||
+      speed == USB_SPEED_SUPER_PLUS ||
+      speed == USB_SPEED_UNKNOWN)
     {
       len += sizeof(struct usb_ss_epcompdesc_s);
     }

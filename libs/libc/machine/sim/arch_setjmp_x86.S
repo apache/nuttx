@@ -85,9 +85,11 @@ SYMBOL(setjmp):
 SYMBOL(longjmp):
 	movl	4(%esp), %ecx      /* jmpbuf in %ecx.  */
 	movl	8(%esp), %eax      /* Second argument is return value.  */
-
+	testl	%eax, %eax
+	jnz	1f
+	incl	%eax
 	/* Save the return address now.  */
-
+1:
 	movl	(JB_PC)(%ecx), %edx
 
 	/* Restore registers.  */

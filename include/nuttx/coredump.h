@@ -33,6 +33,10 @@
 #include <nuttx/streams.h>
 #include <nuttx/memoryregion.h>
 
+#ifdef CONFIG_ARM_COREDUMP_REGION
+#  include <nuttx/elf.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

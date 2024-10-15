@@ -77,6 +77,14 @@ SECTIONS
         _etext = ABSOLUTE(.);
     }
 
+    .init_section ALIGN(0x1000) :
+    {
+        _sinit = ABSOLUTE(.);
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+        . = ALIGN(4096);
+        _einit = ABSOLUTE(.);
+    }
 
     .rodata ALIGN(0x1000) :
     {
