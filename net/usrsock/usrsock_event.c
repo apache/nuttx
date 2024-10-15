@@ -77,7 +77,8 @@ int usrsock_event(FAR struct usrsock_conn_s *conn)
           conn->state = USRSOCK_CONN_STATE_READY;
           events |= USRSOCK_EVENT_CONNECT_READY;
 
-          if (conn->resp.result == 0)
+          if ((conn->resp.result == 0) ||
+              (events & USRSOCK_EVENT_SENDTO_READY))
             {
               conn->connected = true;
             }
