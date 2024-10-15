@@ -1032,6 +1032,7 @@ static int devif_poll_callback(FAR struct net_driver_s *dev)
 
 int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 {
+  unsigned len;
   uint16_t llhdrlen;
   FAR uint8_t *buf;
   int bstop;
@@ -1054,7 +1055,8 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
         {
           /* Copy iob to flat buffer */
 
-          iob_copyout(buf, dev->d_iob, dev->d_len, -llhdrlen);
+          len = MAX(dev->d_len, dev->d_sndlen);
+          iob_copyout(buf, dev->d_iob, len, -llhdrlen);
 
           /* Restore flat buffer pointer */
 
