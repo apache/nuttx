@@ -417,6 +417,11 @@ config ARCH_HAVE_MULTICPU
 	bool
 	default n
 
+config ARCH_HAVE_CPUID_MAPPING
+	bool
+	default n
+	depends on ARCH_HAVE_MULTICPU
+
 config ARCH_HAVE_FORK
 	bool
 	default n
