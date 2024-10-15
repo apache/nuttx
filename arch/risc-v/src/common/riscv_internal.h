@@ -427,6 +427,28 @@ int riscv_smp_call_handler(int irq, void *c, void *arg);
 
 uintptr_t riscv_mhartid(void);
 
+/****************************************************************************
+ * Name: riscv_hartid_to_cpuid
+ *
+ * Description:
+ *   Convert physical core number to logical core number. Default
+ *   implementation is 1:1 mapping, i.e. physical=logical.
+ *
+ ****************************************************************************/
+
+int riscv_hartid_to_cpuid(int cpu);
+
+/****************************************************************************
+ * Name: riscv_cpuid_to_hartid
+ *
+ * Description:
+ *   Convert logical core number to physical core number. Default
+ *   implementation is 1:1 mapping, i.e. physical=logical.
+ *
+ ****************************************************************************/
+
+int riscv_cpuid_to_hartid(int cpu);
+
 /* If kernel runs in Supervisor mode, a system call trampoline is needed */
 
 #ifdef CONFIG_ARCH_USE_S_MODE
