@@ -342,21 +342,20 @@ int riscv_swint(int irq, void *context, void *arg)
    * switch
    */
 
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != new_regs)
-    {
-      svcinfo("SWInt Return: Context switch!\n");
-      up_dump_register(new_regs);
-    }
-  else
-    {
-      svcinfo("SWInt Return: %" PRIxPTR "\n", regs[REG_A0]);
-    }
-#endif
-
   if (regs != new_regs)
     {
       restore_critical_section(this_task(), this_cpu());
+
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+      svcinfo("SWInt Return: Context switch!\n");
+      up_dump_register(new_regs);
+#endif
+    }
+  else
+    {
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+      svcinfo("SWInt Return: %" PRIxPTR "\n", regs[REG_A0]);
+#endif
     }
 
   return OK;
