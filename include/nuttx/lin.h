@@ -30,6 +30,8 @@
 #include <nuttx/config.h>
 #include <nuttx/can.h>
 
+#ifdef CONFIG_NET_CAN
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -41,22 +43,32 @@
 #define LIN_CTRL_FLAG             CAN_EFF_FLAG  /* Describe control information(such as wirte et.) */
 #define LIN_RTR_FLAG              CAN_RTR_FLAG  /* Describe the direction of sending and receiving */
 #define LIN_ERR_FLAG              CAN_ERR_FLAG  /* The flag indicate  this is LIN err_frame */
-#define LIN_EVT_FLAG              CAN_EVT_FLAG  /* Lower_half use this flags to report state switch event */
 
-/* When slave response to master, slave node should send  frame immediately
- * which already be cached in last transmission in case of response interval
- * over time;
+/* Bit flags on can_frame.types
+ *
+ * Use can_frame.types to identify other special frame.
+ *
+ * LIN_TCF_FLAG : TxConfirmation message frame. Lower_half use this flag to
+ *                confirm frame-transmit
+ *
+ * LIN_EVT_FLAG : Event message frame. Lower_half use this flag to report
+ *                state switch event
+ *
+ * LIN_CACHE_RESP_FLAG: When slave response to master, slave node should send
+ *                      frame immediately which already be cached in last
+ *                      transmission in case of response interval over time.
+ *
+ * LIN_CHKSUM_EXT_FLAG: LIN checksum have two types, default type will be
+ *                      classic checksum
+ *
+ * LIN_SINGLE_RESP_FLAG: Cache LIN frame only work once, then will be cleared
  */
 
-#define LIN_CACHE_RESPONSE        (1 << (LIN_ID_BITS))
-
-/* LIN checksum have two types, default type will be classic checksum */
-
-#define LIN_CHECKSUM_EXTENDED     (1 << (LIN_ID_BITS + 1))
-
-/* Cache LIN frame only work once. then will be clear */
-
-#define LIN_SINGLE_RESPONSE       (1 << (LIN_ID_BITS + 2))
+#define LIN_TCF_FLAG              CAN_TCF_FLAG
+#define LIN_EVT_FLAG              CAN_EVT_FLAG
+#define LIN_CACHE_RESP_FLAG       (1 << (CANFD_FLAGS_BITS + 2))
+#define LIN_CHKSUM_EXT_FLAG       (1 << (CANFD_FLAGS_BITS + 3))
+#define LIN_SINGLE_RESP_FLAG      (1 << (CANFD_FLAGS_BITS + 4))
 
 /* LIN Error Indications ****************************************************/
 
@@ -67,11 +79,10 @@
  * struct can_frame {
  *    canid_t can_id;
  *    uint8_t can_dlc;
- *    uint8_t __pad;
- *    uint8_t __res0;
+ *    uint16_t flags;
  *    uint8_t __res1;
  *    uint8_t data[CAN_MAX_DLEN] __attribute__((aligned(8)));
- *  };
+ *  }__attribute__((packed));
  *
  * Error frame description format：
  *
@@ -162,4 +173,5 @@ extern "C"
 }
 #endif
 
+#endif /* CONFIG_CAN */
 #endif /* __INCLUDE_NUTTX_LIN_H */
