@@ -170,7 +170,7 @@
 "Area: Bluetooth":
   - changed-files:
       - any-glob-to-any-file: 'wireless/bluetooth/**'
-      - any-glob-to-any-file: 'nuttx/drivers/wireless/bluetooth/**'
+      - any-glob-to-any-file: 'drivers/wireless/bluetooth/**'
       - any-glob-to-any-file: 'include/nuttx/wireless/bluetooth/**'
 
 "Area: Build system":
