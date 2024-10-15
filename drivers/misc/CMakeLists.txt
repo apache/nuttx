@@ -31,6 +31,10 @@ if(CONFIG_DEV_ZERO)
   list(APPEND SRCS dev_zero.c)
 endif()
 
+if(CONFIG_DEV_MEM)
+  list(APPEND SRCS dev_mem.c)
+endif()
+
 if(CONFIG_DEV_ASCII)
   list(APPEND SRCS dev_ascii.c)
 endif()
