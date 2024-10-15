@@ -42,10 +42,16 @@ jobs:
             exit
           fi
 
+          # Ignore the Label "Area: Documentation", because it won't affect the Build Targets
+          query='.labels | map(select(.name != "Area: Documentation")) | '
+          select_name='.[].name'
+          select_length='length'
+
           # Get the Labels for the PR: "Arch: risc-v \n Board: risc-v \n Size: XS"
           # If GitHub CLI Fails: Build all targets
-          labels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq '.labels[] | .name' || echo "")
-          numlabels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq '.[] | length' || echo "")
+          labels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq "$query$select_name" || echo "")
+          numlabels=$(gh pr view $pr --repo $GITHUB_REPOSITORY --json labels --jq "$query$select_length" || echo "")
+          echo "labels=$labels"
           echo "numlabels=$numlabels" | tee -a $GITHUB_OUTPUT
 
           # Identify the Size, Arch and Board Labels
@@ -190,37 +196,37 @@ jobs:
             
             # For "Arch / Board: arm": Build arm-01, arm-02, ...
             if [[ "$arch_contains_arm" == "1" || "$board_contains_arm" == "1" ]]; then
-              if [[ "$board" != *"arm"* ]]; then
+              if [[ "$board" != *"arm-"* ]]; then
                 skip_build=1
               fi
 
-            # For "Arch / Board: arm64": Build other
+            # For "Arch / Board: arm64": Build arm64-01
             elif [[ "$arch_contains_arm64" == "1" || "$board_contains_arm64" == "1" ]]; then
-              if [[ "$board" != *"other"* ]]; then
+              if [[ "$board" != *"arm64-"* ]]; then
                 skip_build=1
               fi
 
-            # For "Arch / Board: risc-v": Build risc-v-01, risc-v-02
+            # For "Arch / Board: risc-v": Build risc-v-01, risc-v-02, ...
             elif [[ "$arch_contains_riscv" == "1" || "$board_contains_riscv" == "1" ]]; then
-              if [[ "$board" != *"risc-v"* ]]; then
+              if [[ "$board" != *"risc-v-"* ]]; then
                 skip_build=1
               fi
   
             # For "Arch / Board: simulator": Build sim-01, sim-02
             elif [[ "$arch_contains_sim" == "1" || "$board_contains_sim" == "1" ]]; then
-              if [[ "$board" != *"sim"* ]]; then
+              if [[ "$board" != *"sim-"* ]]; then
                 skip_build=1
               fi
 
-            # For "Arch / Board: x86_64": Build other
+            # For "Arch / Board: x86_64": Build x86_64-01
             elif [[ "$arch_contains_x86_64" == "1" || "$board_contains_x86_64" == "1" ]]; then
-              if [[ "$board" != *"other"* ]]; then
+              if [[ "$board" != *"x86_64-"* ]]; then
                 skip_build=1
               fi
   
             # For "Arch / Board: xtensa": Build xtensa-01, xtensa-02
             elif [[ "$arch_contains_xtensa" == "1" || "$board_contains_xtensa" == "1" ]]; then
-              if [[ "$board" != *"xtensa"* ]]; then
+              if [[ "$board" != *"xtensa-"* ]]; then
                 skip_build=1
               fi
   
