@@ -45,5 +45,5 @@
 
 int up_cpu_index(void)
 {
-  return (int)riscv_mhartid();
+  return (int)riscv_mhartid() - CONFIG_ARCH_RV_HARTID_BASE;
 }

@@ -418,7 +418,7 @@ int riscv_smp_call_handler(int irq, void *c, void *arg);
  * Name: riscv_mhartid
  *
  * Description:
- *   Context aware way to query hart id
+ *   Context aware way to query hart id (physical core ID)
  *
  * Returned Value:
  *   Hart id
