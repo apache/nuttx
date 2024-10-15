@@ -149,6 +149,7 @@ class Fdinfo(gdb.Command):
 
     def __init__(self):
         super().__init__("fdinfo", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION)
+        self.total_fd_count = 0
 
     def print_file_info(self, fd, file, formatter):
         backtrace_formatter = "{0:<5} {1:<36} {2}"
@@ -193,10 +194,24 @@ class Fdinfo(gdb.Command):
         formatter = "{:<4}{:<8}{:<6}{:<22}{:<50}"
         gdb.write(formatter.format(*headers) + "\n")
 
+        fd_count = 0
         for fd, file in foreach_file(tcb):
             self.print_file_info(fd, file, formatter)
+            fd_count += 1
+        self.total_fd_count += fd_count
 
         gdb.write("\n")
+
+    def diagnose(self, *args, **kwargs):
+        output = gdb.execute("fdinfo", to_string=True)
+
+        return {
+            "title": "fdinfo report",
+            "summary": f"Total files opened:{self.total_fd_count}",
+            "result": "info",
+            "command": "fdinfo",
+            "message": output,
+        }
 
     def invoke(self, arg, from_tty):
         parser = argparse.ArgumentParser(
@@ -211,6 +226,7 @@ class Fdinfo(gdb.Command):
             return
 
         self.processed_groups = set()
+        self.total_fd_count = 0
         tcbs = [utils.get_tcb(args.pid)] if args.pid else utils.get_tcbs()
         for tcb in tcbs:
             self.print_fdinfo_by_tcb(tcb)
@@ -220,6 +236,7 @@ class Mount(gdb.Command):
     def __init__(self):
         if not utils.get_symbol_value("CONFIG_DISABLE_MOUNTPOINT"):
             super().__init__("mount", gdb.COMMAND_USER)
+            self.mount_count = 0
 
     def mountpt_filter(self, node, path):
         if inode_gettype(node) == InodeType.MOUNTPT:
@@ -227,8 +244,21 @@ class Mount(gdb.Command):
             funcname = gdb.block_for_pc(int(statfs)).function.print_name
             fstype = funcname.split("_")[0]
             gdb.write("  %s type %s\n" % (path, fstype))
+            self.mount_count += 1
+
+    def diagnose(self, *args, **kwargs):
+        output = gdb.execute("mount", to_string=True)
+
+        return {
+            "title": "File system mount information",
+            "summary": f"Total {self.mount_count} mount points",
+            "command": "mount",
+            "result": "info",
+            "message": output or "No mount",
+        }
 
     def invoke(self, args, from_tty):
+        self.mount_count = 0
         foreach_inode(self.mountpt_filter)
 
 
@@ -326,6 +356,17 @@ class ForeachInode(gdb.Command):
                 self.print_inode_info(node["i_child"], level + 1, newprefix)
             node = node["i_peer"]
 
+    def diagnose(self, *args, **kwargs):
+        output = gdb.execute("foreach inode", to_string=True)
+
+        return {
+            "title": "File node information",
+            "summary": "inode formation dump",
+            "command": "foreach inode",
+            "result": "info",
+            "message": output,
+        }
+
     def invoke(self, args, from_tty):
         arg = self.parse_arguments(args.split(" "))
         if not arg:
@@ -340,6 +381,8 @@ class InfoShmfs(gdb.Command):
     def __init__(self):
         if CONFIG_FS_SHMFS:
             super().__init__("info shm", gdb.COMMAND_USER)
+            self.total_size = 0
+            self.block_count = 0
 
     def shm_filter(self, node, path):
         if inode_gettype(node) != InodeType.SHM:
@@ -350,5 +393,21 @@ class InfoShmfs(gdb.Command):
         paddr = obj["paddr"]
         print(f"  {path} memsize: {length}, paddr: {paddr}")
 
+        self.total_size += length / 1024
+        self.block_count += 1
+
+    def diagnose(self, *args, **kwargs):
+        output = gdb.execute("info shm", to_string=True)
+
+        return {
+            "title": "Share memory usage",
+            "summary": f"Total used:{self.total_size}kB, {self.block_count}blocks",
+            "result": "info",
+            "command": "info shm",
+            "message": output or "No InfoShmfs",
+        }
+
     def invoke(self, args, from_tty):
+        self.total_size = 0
+        self.block_count = 0
         foreach_inode(self.shm_filter)
