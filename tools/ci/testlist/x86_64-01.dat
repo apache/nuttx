@@ -1,0 +1,3 @@
+# x86_64-elf-gcc from homebrew doesn't seem to
+# provide __udivdi3 etc for -m32
+/x86_64
