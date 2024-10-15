@@ -53,7 +53,7 @@
 #define BUFSIZE CONFIG_LIB_GDBSTUB_PKTSIZE
 
 #ifdef CONFIG_BOARD_MEMORY_RANGE
-FAR const struct memory_region_s g_memory_region[] =
+static const struct memory_region_s g_memory_region[] =
   {
     CONFIG_BOARD_MEMORY_RANGE
   };
