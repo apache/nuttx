@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/elf.h>
+#include <arch/elf.h>
 
 #include "sched/sched.h"
 #include "arm_internal.h"
