@@ -40,6 +40,7 @@
 
 	.globl    irq_handler
 	.globl    isr_handler
+	.globl    irq_xcp_regs
 	.globl    g_interrupt_stack
 	.globl    g_interrupt_stack_end
 	.globl    g_isr_stack
@@ -720,6 +721,7 @@ isr_common:
 	pushq   %rbx
 	pushq   %rax
 
+	xor     %rax, %rax    /* Reset rax */
 	mov     %ds, %ax      /* Lower 16-bits of rax. */
 	pushq   %rax          /* Save the data segment descriptor */
 	mov     %es, %ax      /* Lower 16-bits of rax. */
@@ -763,66 +765,112 @@ isr_common:
 
 	.type   irq_common, @function
 irq_common:
-	/* Already swap to the interrupt stack */
-	/* stack is automatically recovered by iretq using task state */
+	/* Already swap to the interrupt stack
+	 * stack is automatically recovered by iretq using task state
+	 */
 
-	/* x86_64 don't have pusha, we have to do things manually */
-	/* RDI and RSI are pushed above for handling IRQ no */
-	pushq   %rdx
-	pushq   %rcx
-	pushq   %r8
-	pushq   %r9
+	/* Get current task regs area - this logic assumes that irq_xcp_regs
+	 * corrupts only RAX, RDI and RDX registers.
+	 */
 
-	pushq   %r15
-	pushq   %r14
-	pushq   %r13
-	pushq   %r12
-	pushq   %r11
-	pushq   %r10
-	pushq   %rbp
-	pushq   %rbx
 	pushq   %rax
+	pushq   %rdx
+	call    irq_xcp_regs
+	movq    %rax, %rdi
 
-	mov     %ds, %ax      /* Lower 16-bits of rax. */
-	pushq   %rax          /* Save the data segment descriptor */
-	mov     %es, %ax      /* Lower 16-bits of rax. */
-	pushq   %rax          /* Save the data segment descriptor */
-	mov     %gs, %ax      /* Lower 16-bits of rax. */
-	pushq   %rax          /* Save the data segment descriptor */
-	mov     %fs, %ax      /* Lower 16-bits of rax. */
-	pushq   %rax          /* Save the data segment descriptor */
+	/* x86_64 don't have pusha, we have to do things manually.
+	 * RDI and RSI are pushed above for handling IRQ no.
+	 * RAX is on stack now, so we have to pop it.
+	 */
 
-	/* Align to 64-bytes boundary */
-	leaq    -(XMMAREA_REG_ALIGN * 8)(%rsp), %rsp
+	popq    (8*REG_RDX)(%rdi)
+	popq    (8*REG_RAX)(%rdi)
+	movq    %rcx, (8*REG_RCX)(%rdi)
+	movq    %r8,  (8*REG_R8)(%rdi)
+	movq    %r9,  (8*REG_R9)(%rdi)
 
-	/* Save xmm registers */
-	leaq    -XCPTCONTEXT_XMM_AREA_SIZE(%rsp), %rsp
+	movq    %r15, (8*REG_R15)(%rdi)
+	movq    %r14, (8*REG_R14)(%rdi)
+	movq    %r13, (8*REG_R13)(%rdi)
+	movq    %r12, (8*REG_R12)(%rdi)
+	movq    %r11, (8*REG_R11)(%rdi)
+	movq    %r10, (8*REG_R10)(%rdi)
+	movq    %rbp, (8*REG_RBP)(%rdi)
+	movq    %rbx, (8*REG_RBX)(%rdi)
+
+	xor     %rax, %rax             /* Reset rax */
+	mov     %ds, %ax               /* Lower 16-bits of rax. */
+	movq    %rax, (8*REG_DS)(%rdi) /* Save the data segment descriptor */
+	mov     %es, %ax               /* Lower 16-bits of rax. */
+	movq    %rax, (8*REG_ES)(%rdi) /* Save the data segment descriptor */
+	mov     %gs, %ax               /* Lower 16-bits of rax. */
+	movq    %rax, (8*REG_GS)(%rdi) /* Save the data segment descriptor */
+	mov     %fs, %ax               /* Lower 16-bits of rax. */
+	movq    %rax, (8*REG_FS)(%rdi) /* Save the data segment descriptor */
+
+	/* Save registers from stack */
+
+	movq    0(%rsp), %rcx
+	movq    %rcx, (8*REG_RSI)(%rdi)
+	movq    8(%rsp), %rcx
+	movq    %rcx, (8*REG_RDI)(%rdi)
+	movq    16(%rsp), %rcx
+	movq    %rcx, (8*REG_ERRCODE)(%rdi)
+	movq    24(%rsp), %rcx
+	movq    %rcx, (8*REG_RIP)(%rdi)
+	movq    32(%rsp), %rcx
+	movq    %rcx, (8*REG_CS)(%rdi)
+	movq    40(%rsp), %rcx
+	movq    %rcx, (8*REG_RFLAGS)(%rdi)
+	movq    48(%rsp), %rcx
+	movq    %rcx, (8*REG_RSP)(%rdi)
+	movq    56(%rsp), %rcx
+	movq    %rcx, (8*REG_SS)(%rdi)
+
+	/* Registers in RDI are already properly aligned */
+
 #ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
-	fxsaveq (%rsp)
+	fxsaveq (%rdi)
 #else
 	movl    $XSAVE_STATE_COMPONENTS, %eax
 	xor     %edx, %edx
-	xsave   (%rsp)
+	xsave   (%rdi)
 #endif
 
-	/* The current value of the SP points to the beginning of the state save
-	 * structure.  Save that in RDI as the input parameter to irq_handler.
+	/* The current value of the RDI points to the beginning of the state save
+	 * structure. Push this value on stack and also push a dummy value so
+	 * that we don't lose the correct stack alignment for vector operations
 	 */
 
-	mov     %rsp, %rdi
+	pushq   %rdi
+	pushq   $0
 	call    irq_handler
+	add     $8, %rsp
+	popq    %rdi
 
 	/* The common return point for both isr_handler and irq_handler */
 
 .Lreturn:
+
+	/* Check if full context switch is required for signal handling */
+
+	movq    (8*REG_AUX)(%rax), %rcx
+	cmp     $(REG_AUX_FULLCONTEXT), %rcx
+	je      .Lfullswitch
+
 	/* EAX may possibly hold a pointer to a different register save area on
 	 * return.  Are we switching to a new context?
 	 */
 
-	cmp     %rax, %rsp
+	cmp     %rax, %rdi
 	je      .Lnoswitch
 
-	/* A context swith will be performed. EAX holds the address of the new
+.Lfullswitch:
+	/* Reset flag */
+
+	movq    $0x0, (8*REG_AUX)(%rdi)
+
+	/* A context swith will be performed. RAX holds the address of the new
 	 * register save structure.
 	 *
 	 * Jump to x86_64_fullcontextrestore().  We perform a call here, but that function
@@ -830,50 +878,50 @@ irq_common:
 	 * to the x86_64_fullcontextrestore().
 	 */
 
-	mov     %rax, %rdi
+	movq    %rax, %rdi
 	call    x86_64_fullcontextrestore
 
 .Lnoswitch:
 #ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
-	fxrstorq (%rsp)
+	fxrstorq (%rdi)
 #else
 	movl $XSAVE_STATE_COMPONENTS, %eax
 	xor     %edx, %edx
-	xrstor  (%rsp)
+	xrstor  (%rdi)
 #endif
-	leaq    XCPTCONTEXT_XMM_AREA_SIZE(%rsp), %rsp
 
-	/* Align to 64-bytes boundary */
-	leaq    (XMMAREA_REG_ALIGN * 8)(%rsp), %rsp
-
-	popq    %rax
+	movq    (8*REG_FS)(%rdi), %rax
 	mov     %fs, %ax
-	popq    %rax
+	movq    (8*REG_GS)(%rdi), %rax
 	mov     %gs, %ax
-	popq    %rax
+	movq    (8*REG_ES)(%rdi), %rax
 	mov     %es, %ax
-	popq    %rax
+	movq    (8*REG_DS)(%rdi), %rax
 	mov     %ds, %ax
 
-	popq    %rax
-	popq    %rbx
-	popq    %rbp
-	popq    %r10
-	popq    %r11
-	popq    %r12
-	popq    %r13
-	popq    %r14
-	popq    %r15
+	movq    (8*REG_RAX)(%rdi), %rax
+	movq    (8*REG_RBX)(%rdi), %rbx
+	movq    (8*REG_RBP)(%rdi), %rbp
+	movq    (8*REG_R10)(%rdi), %r10
+	movq    (8*REG_R11)(%rdi), %r11
+	movq    (8*REG_R12)(%rdi), %r12
+	movq    (8*REG_R13)(%rdi), %r13
+	movq    (8*REG_R14)(%rdi), %r14
+	movq    (8*REG_R15)(%rdi), %r15
 
-	popq    %r9
-	popq    %r8
-	popq    %rcx
-	popq    %rdx
+	movq    (8*REG_R9)(%rdi), %r9
+	movq    (8*REG_R8)(%rdi), %r8
+	movq    (8*REG_RCX)(%rdi), %rcx
+	movq    (8*REG_RDX)(%rdi), %rdx
 
-	popq    %rsi
-	popq    %rdi
+	/* Pop RDI and RSI pushed on interrupt entry */
 
-	add     $8, %rsp      /* Cleans up the pushed error code */
+	popq   %rsi
+	popq   %rdi
+
+	/* Cleans up the pushed error code */
+
+	add     $8, %rsp
 
 	iretq                /* Pops 5 things at once: CS, RIP, RFLAGS and SS and RSP */
 	.size	irq_common, . - irq_common

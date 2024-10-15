@@ -87,6 +87,7 @@ uint64_t up_irq_flags(void)
  *
  ****************************************************************************/
 
+__attribute__((no_sanitize_address))
 uint64_t up_irq_save(void)
 {
   union sigset_u nmask;

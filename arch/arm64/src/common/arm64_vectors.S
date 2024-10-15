@@ -46,7 +46,7 @@
  *
  * Description:
  *   Take a snapshot of the thread GP registers context
- *   x0 --- pointer to struct regs_context
+ *   x0 --- pointer to stack context
  *
  ****************************************************************************/
 GTEXT(up_saveusercontext)

@@ -606,6 +606,10 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd)
       case FIONSPACE:
       case FBIOSET_POWER:
       case FBIOGET_POWER:
+      case BATIOC_CURRENT:
+      case BATIOC_VOLTAGE:
+      case BATIOC_TEMPERATURE:
+      case BATIOC_INPUT_CURRENT:
       case BATIOC_STATE:
         return sizeof(int);
       case TUNSETIFF:

@@ -3365,6 +3365,12 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
   opcode = ic_ptr->opcode & MMCSD_CMDIDX_MASK;
   switch (opcode)
     {
+    case MMCSD_CMDIDX0: /* Reset card to idle state */
+      {
+        mmcsd_sendcmdpoll(priv, MMCSD_CMD0, ic_ptr->arg);
+        MMCSD_USLEEP(MMCSD_IDLE_DELAY);
+      }
+      break;
     case MMCSD_CMDIDX2: /* Get cid reg data */
       {
         memcpy((FAR void *)(uintptr_t)ic_ptr->data_ptr,
@@ -3388,6 +3394,15 @@ static int mmcsd_iocmd(FAR struct mmcsd_state_s *priv,
       }
       break;
 #endif
+    case MMCSD_CMDIDX13: /* Send status commands */
+      {
+        ret = mmcsd_get_r1(priv, ic_ptr->response);
+        if (ret != OK)
+          {
+            ferr("ERROR: mmcsd_get_r1 failed: %d\n", ret);
+          }
+      }
+      break;
     case MMCSD_CMDIDX56: /* General commands */
       {
         if (ic_ptr->write_flag)

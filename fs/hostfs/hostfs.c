@@ -1052,7 +1052,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    *  "fs=whatever", remote dir
    */
 
-  options = strdup(data);
+  options = fs_heap_strdup(data);
   if (!options)
     {
       fs_heap_free(fs);
@@ -1070,7 +1070,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       ptr = strtok_r(NULL, ",", &saveptr);
     }
 
-  lib_free(options);
+  fs_heap_free(options);
 
   /* Take the lock for the mount */
 

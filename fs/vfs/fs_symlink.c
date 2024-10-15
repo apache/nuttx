@@ -37,6 +37,7 @@
 
 #include "notify/notify.h"
 #include "inode/inode.h"
+#include "fs_heap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -129,7 +130,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
     {
       /* Copy path1 */
 
-      FAR char *newpath2 = strdup(path1);
+      FAR char *newpath2 = fs_heap_strdup(path1);
       if (newpath2 == NULL)
         {
           errcode = ENOMEM;
@@ -146,7 +147,7 @@ int symlink(FAR const char *path1, FAR const char *path2)
       inode_unlock();
       if (ret < 0)
         {
-          lib_free(newpath2);
+          fs_heap_free(newpath2);
           errcode = -ret;
           goto errout_with_search;
         }

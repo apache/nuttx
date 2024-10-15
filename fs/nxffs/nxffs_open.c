@@ -508,7 +508,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
 
   /* Save a copy of the inode name. */
 
-  wrfile->ofile.entry.name = strdup(name);
+  wrfile->ofile.entry.name = fs_heap_strdup(name);
   if (!wrfile->ofile.entry.name)
     {
       ret = -ENOMEM;
@@ -655,7 +655,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   return OK;
 
 errout_with_name:
-  lib_free(wrfile->ofile.entry.name);
+  fs_heap_free(wrfile->ofile.entry.name);
 errout_with_ofile:
 #ifndef CONFIG_NXFFS_PREALLOCATED
   fs_heap_free(wrfile);

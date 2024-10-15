@@ -333,7 +333,8 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rel->r_offset + sizeof(uint32_t) > dstsec->sh_size)
+      if (rel->r_offset < 0 ||
+          rel->r_offset > dstsec->sh_size)
         {
           berr("ERROR: Section %d reloc %d: "
                "Relocation address out of range, "
@@ -528,7 +529,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rela->r_offset + sizeof(uint32_t) > dstsec->sh_size)
+      if (rela->r_offset < 0 ||
+          rela->r_offset > dstsec->sh_size)
         {
           berr("ERROR: Section %d reloc %d: "
                "Relocation address out of range, "
@@ -854,8 +856,6 @@ int modlib_bind(FAR struct module_s *modp,
                 FAR struct mod_loadinfo_s *loadinfo,
                 FAR const struct symtab_s *exports, int nexports)
 {
-  FAR Elf_Shdr *symhdr;
-  FAR Elf_Sym *sym;
   int ret;
   int i;
 
@@ -987,37 +987,6 @@ int modlib_bind(FAR struct module_s *modp,
         {
           return ret;
         }
-    }
-
-  symhdr = &loadinfo->shdr[loadinfo->symtabidx];
-  sym = lib_malloc(symhdr->sh_size);
-
-  ret = modlib_read(loadinfo, (FAR uint8_t *)sym, symhdr->sh_size,
-                    symhdr->sh_offset);
-
-  if (ret < 0)
-    {
-      berr("Failed to read symbol table\n");
-      lib_free(sym);
-      return ret;
-    }
-
-  for (i = 0; i < symhdr->sh_size / sizeof(Elf_Sym); i++)
-    {
-      FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
-
-      if (sym[i].st_shndx != SHN_UNDEF)
-        {
-          sym[i].st_value = sym[i].st_value + s->sh_addr;
-        }
-    }
-
-  ret = modlib_insertsymtab(modp, loadinfo, symhdr, sym);
-  lib_free(sym);
-  if (ret != 0)
-    {
-      binfo("Failed to export symbols program binary: %d\n", ret);
-      return ret;
     }
 
   /* Ensure that the I and D caches are coherent before starting the newly

@@ -153,15 +153,15 @@ config ARMV7M_SYSTICK
 	---help---
 		Enable SysTick timer driver.
 
-config ARMV7M_SYSTICK_IRQ_THREAD
-	bool "attach irq by irq_attach_thread"
+config ARMV7M_SYSTICK_IRQ_WQUEUE
+	bool "attach irq by irq_attach_wqueue"
 	default n
 	depends on ARMV7M_SYSTICK
 
-if ARMV7M_SYSTICK_IRQ_THREAD
+if ARMV7M_SYSTICK_IRQ_WQUEUE
 
-config ARMV7M_SYSTICK_IRQ_THREAD_PRIORITY
-	int "SYSTICK IRQ THREAD PRIORITY"
+config ARMV7M_SYSTICK_IRQ_WQUEUE_PRIORITY
+	int "SYSTICK IRQ WQUEUE PRIORITY"
 	default 255
 	range 0 255
 
@@ -169,4 +169,4 @@ config ARMV7M_SYSTICK_IRQ_THREAD_STACK_SIZE
 	int "SYSTICK IRQ THREAD STACK SIZE"
 	default DEFAULT_TASK_STACKSIZE
 
-endif # ARMV7M_SYSTICK_IRQ_THREAD
+endif # ARMV7M_SYSTICK_IRQ_WQUEUE

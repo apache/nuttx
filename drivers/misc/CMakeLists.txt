@@ -65,10 +65,19 @@ if(CONFIG_BLK_RPMSG)
 endif()
 
 if(CONFIG_BLK_RPMSG_SERVER)
-  set_source_files_properties(
-    rpmsgblk_server.c DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
-    PROPERTIES INCLUDE_DIRECTORIES ${NUTTX_DIR}/fs/inode)
+  target_include_directories(drivers PRIVATE ${NUTTX_DIR}/fs/inode
+                                             ${NUTTX_DIR}/fs)
+  set_source_files_properties(rpmsgblk_server.c DIRECTORY
+                              ${CMAKE_CURRENT_LIST_DIR}/..)
   list(APPEND SRCS rpmsgblk_server.c)
+endif()
+
+if(NOT CONFIG_DEV_OPTEE_NONE)
+  list(APPEND SRCS optee.c)
+endif()
+
+if(CONFIG_GOLDFISH_PIPE)
+  list(APPEND SRCS goldfish_pipe.c)
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})

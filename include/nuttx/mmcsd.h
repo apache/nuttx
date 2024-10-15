@@ -95,6 +95,16 @@ struct mmc_ioc_cmd
   unsigned int blksz;
   unsigned int blocks;
 
+  /* Sleep at least postsleep_min_us useconds, and at most
+   * postsleep_max_us useconds *after* issuing command.  Needed for
+   * some read commands for which cards have no other way of indicating
+   * they're ready for the next command (i.e. there is no equivalent of
+   * a "busy" indicator for read operations).
+   */
+
+  unsigned int postsleep_min_us;
+  unsigned int postsleep_max_us;
+
   /* Override driver-computed timeouts.  Note the difference in units! */
 
   unsigned int data_timeout_ns;

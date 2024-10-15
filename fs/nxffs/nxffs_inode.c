@@ -213,7 +213,7 @@ void nxffs_freeentry(FAR struct nxffs_entry_s *entry)
 {
   if (entry->name)
     {
-      lib_free(entry->name);
+      fs_heap_free(entry->name);
       entry->name = NULL;
     }
 }

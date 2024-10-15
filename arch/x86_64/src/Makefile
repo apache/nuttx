@@ -151,12 +151,6 @@ $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) $(addsuffix .tmp,$(ARCHSCRIPT))
 	@echo "LD: nuttx$(EXEEXT)"
 
-ifneq ($(CONFIG_WINDOWS_NATIVE),y)
-	$(Q) $(NM) $(NUTTX) | \
-	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
-	sort > $(TOPDIR)/System.map
-endif
-
 ifeq ($(CONFIG_ALLSYMS)$(CONFIG_MM_KASAN_GLOBAL),)
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
@@ -168,6 +162,12 @@ else
 	$(Q) $(call LINK_ALLSYMS_KASAN)
 endif
 	$(Q) $(call DELFILE, $(addsuffix .tmp,$(ARCHSCRIPT)))
+
+ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+	$(Q) $(NM) $(NUTTX) | \
+	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
+	sort > $(TOPDIR)/System.map
+endif
 
 ifeq ($(CONFIG_ARCH_MULTIBOOT1),y)
 	@echo "Generating: nuttx32 in ELF32/multiboot1"

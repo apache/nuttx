@@ -455,19 +455,6 @@ unsigned int note_sysview_get_interrupt_id(void)
 }
 
 /****************************************************************************
- * Name: note_sysview_get_timestamp
- *
- * Description:
- *   Retrieve a system timestamp for SYSVIEW events.
- *
- ****************************************************************************/
-
-unsigned long note_sysview_get_timestamp(void)
-{
-  return perf_gettime();
-}
-
-/****************************************************************************
  * Name: note_sysview_initialize
  *
  * Description:

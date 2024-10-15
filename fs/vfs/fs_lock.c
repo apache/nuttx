@@ -300,7 +300,7 @@ file_lock_find_bucket(FAR const char *filepath)
 
 static void file_lock_free_entry(FAR ENTRY *entry)
 {
-  lib_free(entry->key);
+  fs_heap_free(entry->key);
   fs_heap_free(entry->data);
 }
 
@@ -323,7 +323,7 @@ file_lock_create_bucket(FAR const char *filepath)
 
   /* Creating an instance store */
 
-  item.key = strdup(filepath);
+  item.key = fs_heap_strdup(filepath);
   if (item.key == NULL)
     {
       fs_heap_free(bucket);
@@ -334,7 +334,7 @@ file_lock_create_bucket(FAR const char *filepath)
 
   if (hsearch_r(item, ENTER, &hretvalue, &g_file_lock_table) == 0)
     {
-      lib_free(item.key);
+      fs_heap_free(item.key);
       fs_heap_free(bucket);
       return NULL;
     }

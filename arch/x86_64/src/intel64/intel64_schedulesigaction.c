@@ -126,12 +126,6 @@ void up_schedule_sigaction(struct tcb_s *tcb)
           up_current_regs()[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
           up_current_regs()[REG_RSP]    = up_current_regs()[REG_RSP] - 8;
           up_current_regs()[REG_RFLAGS] = 0;
-
-          /* And make sure that the saved context in the TCB
-           * is the same as the interrupt return context.
-           */
-
-          x86_64_savestate(tcb->xcp.regs);
         }
     }
 
@@ -222,11 +216,14 @@ void up_schedule_sigaction(struct tcb_s *tcb)
           up_current_regs()[REG_RSP]    = up_current_regs()[REG_RSP] - 8;
           up_current_regs()[REG_RFLAGS] = 0;
 
-          /* And make sure that the saved context in the TCB
-           * is the same as the interrupt return context.
+          /* Mark that full context switch is necessary when we
+           * return from interrupt handler.
+           * In that case RIP, RSP and RFLAGS are changed, but
+           * register area pointer remains the same, so we need an
+           * additional variable to signal the need for full context switch
            */
 
-          x86_64_savestate(tcb->xcp.regs);
+          tcb->xcp.regs[REG_AUX] = REG_AUX_FULLCONTEXT;
         }
     }
 

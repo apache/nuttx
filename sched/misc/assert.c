@@ -438,7 +438,7 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
  * Name: dump_filelist
  ****************************************************************************/
 
-#ifdef CONFIG_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_ON_EXIT
 static void dump_filelist(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct filelist *filelist = &tcb->group->tg_filelist;
@@ -528,7 +528,7 @@ static void dump_tasks(void)
   nxsched_foreach(dump_backtrace, NULL);
 #endif
 
-#ifdef CONFIG_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_ON_EXIT
   nxsched_foreach(dump_filelist, NULL);
 #endif
 }
@@ -540,7 +540,7 @@ static void dump_tasks(void)
 #if CONFIG_LIBC_MUTEX_BACKTRACE > 0
 static void dump_lockholder(pid_t tid)
 {
-  char buf[CONFIG_LIBC_MUTEX_BACKTRACE * BACKTRACE_PTR_FMT_WIDTH + 1] = "";
+  char buf[BACKTRACE_BUFFER_SIZE(CONFIG_LIBC_MUTEX_BACKTRACE)];
   FAR mutex_t *mutex;
 
   mutex = (FAR mutex_t *)nxsched_get_tcb(tid)->waitobj;
