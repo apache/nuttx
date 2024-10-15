@@ -86,7 +86,7 @@ void riscv_cpu_boot(int cpu)
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   /* Initialize the per CPU areas */
 
-  riscv_percpu_add_hart((uintptr_t)cpu);
+  riscv_percpu_add_hart(riscv_cpuid_to_hartid(cpu));
 #endif
 
 #ifdef CONFIG_BUILD_KERNEL

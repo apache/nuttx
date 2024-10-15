@@ -710,13 +710,24 @@ int up_cpu_index(void) noinstrument_function;
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
+ * Name: up_this_cpu
+ *
+ * Description:
+ *   Return the logical core number. Default implementation is 1:1 mapping,
+ *   i.e. physical=logical.
+ *
+ ****************************************************************************/
+
+int up_this_cpu(void);
+
+/****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
 static inline_function uintreg_t *up_current_regs(void)
 {
 #ifdef CONFIG_SMP
-  return (uintreg_t *)g_current_regs[up_cpu_index()];
+  return (uintreg_t *)g_current_regs[up_this_cpu()];
 #else
   return (uintreg_t *)g_current_regs[0];
 #endif
@@ -725,7 +736,7 @@ static inline_function uintreg_t *up_current_regs(void)
 static inline_function void up_set_current_regs(uintreg_t *regs)
 {
 #ifdef CONFIG_SMP
-  g_current_regs[up_cpu_index()] = regs;
+  g_current_regs[up_this_cpu()] = regs;
 #else
   g_current_regs[0] = regs;
 #endif
