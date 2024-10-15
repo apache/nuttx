@@ -104,6 +104,104 @@ config MM_MAP_COUNT_MAX
 	---help---
 		The maximum number of memory map areas for each task.
 
+config MM_FILL_ALLOCATIONS
+	bool "Fill allocations with debug value"
+	default n
+	---help---
+		Fill all malloc() allocations with MM_ALLOC_MAGIC.
+		Fill all add_addregion() with MM_INIT_MAGIC.
+		Fill all free() with MM_FREE_MAGIC.
+		This helps detecting uninitialized variable errors.
+
+config MM_BACKTRACE
+	int "The depth of backtrace"
+	default -1
+	---help---
+		Config the depth of backtrace in memory block by specified this
+		config: disable backtrace by -1, only record pid info by zero and
+		enable record backtrace info by 8(fixed depth).
+
+config MM_BACKTRACE_SKIP
+	int "The skip depth of backtrace"
+	depends on MM_BACKTRACE > 0
+	default 3
+
+config MM_BACKTRACE_DEFAULT
+	bool "Enable the backtrace record by default"
+	default n
+	depends on MM_BACKTRACE > 0
+
+config MM_DUMP_ON_FAILURE
+	bool "Dump heap info on allocation failure"
+	default n
+	depends on DEBUG_MM
+
+config MM_DUMP_DETAILS_ON_FAILURE
+	bool "Dump all used memory blocks on allocation failure"
+	default n
+	depends on MM_DUMP_ON_FAILURE
+
+config MM_PANIC_ON_FAILURE
+	bool "Panic on allocation failure"
+	default n
+	depends on DEBUG_MM
+
+config MM_FREE_DELAYCOUNT_MAX
+	int "Maximum memory nodes can be delayed to free"
+	default 0
+	---help---
+		Set to 0 to disable the delayed free mechanism. Otherwise,
+		the value decides the maximum number of memory nodes that
+		will be delayed to free.
+
+config MM_HEAP_BIGGEST_COUNT
+	int "The largest malloc element dump count"
+	default 30
+	---help---
+		The dump support for largest allocated memory.
+		If too big, should take care of stack usage.
+		Define 0 to disable largest allocated element dump feature.
+
+config MM_HEAP_MEMPOOL_THRESHOLD
+	int "Threshold for malloc size to use multi-level mempool"
+	default -1
+	---help---
+		If the size of the memory requested by the user is less
+		than the threshold, the memory will be requested from the
+		multiple mempool by default.
+		 > 0 Enable pool feature, and set umm/kmm pool threshold size.
+		== 0 Enable pool feature, but disable the umm/kmm pool function.
+		 < 0 Disable pool feature.
+
+if MM_HEAP_MEMPOOL_THRESHOLD > 0
+
+config MM_HEAP_MEMPOOL_EXPAND_SIZE
+	int "The expand size for each mempool in multiple mempool"
+	default 4096
+	---help---
+		This size describes the size of each expansion of each memory
+		pool with insufficient memory in the multi-level memory pool.
+
+config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
+	int "The expand size for multiple mempool's dictionary"
+	default MM_HEAP_MEMPOOL_EXPAND_SIZE
+	---help---
+		This size describes the multiple mempool dictionary expand.
+
+config MM_HEAP_MEMPOOL_CHUNK_SIZE
+	int "The multiples pool chunk size"
+	default 0
+	---help---
+		This size describes the multiple mempool chunk size.
+
+config MM_MIN_BLKSIZE
+	int "Minimum memory block size"
+	default 0
+	---help---
+		Users can configure the minimum memory block size as needed
+
+endif # MM_HEAP_MEMPOOL_THRESHOLD > 0
+
 config ARCH_HAVE_HEAP2
 	bool
 	default n
@@ -137,10 +235,11 @@ config GRAN
 		allocation size to 32 granules.  That restriction could be
 		eliminated with some additional coding effort.
 
+if GRAN
+
 config GRAN_INTR
 	bool "Interrupt level support"
 	default n
-	depends on GRAN
 	---help---
 		Normally mutual exclusive access to granule allocator data is assured
 		using a semaphore.  If this option is set then, instead, mutual
@@ -151,10 +250,12 @@ config GRAN_INTR
 config DEBUG_GRAN
 	bool "Granule Allocator Debug"
 	default n
-	depends on GRAN && DEBUG_FEATURES
+	depends on DEBUG_FEATURES
 	---help---
 		Just like DEBUG_MM, but only generates output from the gran
 		allocation logic.
+
+endif # GRAN
 
 config MM_PGALLOC
 	bool "Enable Page Allocator"
@@ -205,46 +306,6 @@ config MM_KMAP
 		kernel virtual memory. This includes pages that are already mapped
 		for user.
 
-config MM_HEAP_MEMPOOL_THRESHOLD
-	int "The default size of threshold to avoid using multiple mempool in heap"
-	default -1
-	---help---
-		If the size of the memory requested by the user is less
-		than the threshold, the memory will be requested from the
-		multiple mempool by default.
-		 > 0 Enable pool feature, and set umm/kmm pool threshold size.
-		== 0 Enable pool feature, but disable the umm/kmm pool function.
-		 < 0 Disable pool feature.
-
-if MM_HEAP_MEMPOOL_THRESHOLD > 0
-
-config MM_HEAP_MEMPOOL_EXPAND_SIZE
-	int "The expand size for each mempool in multiple mempool"
-	default 4096
-	---help---
-		This size describes the size of each expansion of each memory
-		pool with insufficient memory in the multi-level memory pool.
-
-config MM_HEAP_MEMPOOL_DICTIONARY_EXPAND_SIZE
-	int "The expand size for multiple mempool's dictionary"
-	default MM_HEAP_MEMPOOL_EXPAND_SIZE
-	---help---
-		This size describes the multiple mempool dictionary expand.
-
-config MM_HEAP_MEMPOOL_CHUNK_SIZE
-	int "The multiples pool chunk size"
-	default 0
-	---help---
-		This size describes the multiple mempool chunk size.
-
-config MM_MIN_BLKSIZE
-	int "Minimum memory block size"
-	default 0
-	---help---
-		Users can configure the minimum memory block size as needed
-
-endif # MM_HEAP_MEMPOOL_THRESHOLD > 0
-
 config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
 	int "The skip depth of backtrace for mempool"
 	default 6
@@ -253,9 +314,9 @@ config MM_HEAP_MEMPOOL_BACKTRACE_SKIP
 		This number is the skipped backtrace depth for mempool.
 
 config FS_PROCFS_EXCLUDE_MEMPOOL
-	bool "Exclude mempool"
+	bool "Exclude mempool from procfs"
 	default DEFAULT_SMALL
-	depends on FS_PROCFS
+	depends on FS_PROCFS && MM_HEAP_MEMPOOL_THRESHOLD > 0
 
 config MM_KASAN
 	bool "Kernel Address Sanitizer"
@@ -319,7 +380,7 @@ config MM_KASAN_DISABLE_READS_CHECK
 	bool "Disable reads check"
 	default n
 	---help---
-		This option disable kasan reads check. It speeds up performance
+		This option disables kasan reads check. It speeds up performance
 		compared with default read/write check. Only disable it when you are
 		sure there's no need to do so. Or performance is too bad and only focus
 		on writes check.
@@ -328,13 +389,27 @@ config MM_KASAN_DISABLE_WRITES_CHECK
 	bool "Disable writes check"
 	default n
 	---help---
-		This option disable kasan writes check.
+		This option disables kasan writes check.
+
+config MM_KASAN_DISABLE_READ_PANIC
+	bool "Disable panic on kasan read error"
+	default n
+	---help---
+		This option disables panic on kasan read error. It will print error info
+		and continue to run.
+
+config MM_KASAN_DISABLE_WRITE_PANIC
+	bool "Disable panic on kasan write error"
+	default n
+	---help---
+		This option disables panic on kasan write error. It will print error info
+		and continue to run.
 
 config MM_KASAN_SKIP_ZERO_TAGS
 	bool "Enable skip check zero tags"
 	default LIBC_MODLIB
 	---help---
-		This option enables not checking for zero tags.
+		This option disables checking for zero tags.
 
 config MM_KASAN_GLOBAL
 	bool "Enable global data check"
@@ -351,30 +426,13 @@ config MM_KASAN_GLOBAL
 		KEEP ( *(. data. rel. local.. LASAN0))
 		}", used to extract data generated by the compiler
 
-if MM_KASAN_GLOBAL
-
 config MM_KASAN_GLOBAL_ALIGN
 	int "KASan global alignment"
 	default 1
+	depends on MM_KASAN_GLOBAL
 	---help---
 		It is recommended to use 1, 2, 4, 8, 16, 32.
 		The maximum value is 32.
-
-endif # MM_KASAN_GLOBAL
-
-config MM_KASAN_DISABLE_READ_PANIC
-	bool "Disable panic on kasan read error"
-	default n
-	---help---
-		This option disable panic on kasan read error. It will print error info
-		and continue to run.
-
-config MM_KASAN_DISABLE_WRITE_PANIC
-	bool "Disable panic on kasan write error"
-	default n
-	---help---
-		This option disable panic on kasan write error. It will print error info
-		and continue to run.
 
 endif # MM_KASAN
 
@@ -386,9 +444,10 @@ config MM_UBSAN
 		the program at compile-time to catch various kinds of
 		undefined behavior during program execution
 
+if MM_UBSAN
+
 config MM_UBSAN_ALL
 	bool "Enable UBSan for the entire image"
-	depends on MM_UBSAN
 	default y
 	---help---
 		This option activates UBSan instrumentation for the
@@ -400,7 +459,6 @@ config MM_UBSAN_ALL
 
 config MM_UBSAN_OPTION
 	string "UBSan options"
-	depends on MM_UBSAN
 	default "-fsanitize=undefined"
 	---help---
 		This option activates specified UBSan instrumentation. Please
@@ -409,7 +467,6 @@ config MM_UBSAN_OPTION
 
 config MM_UBSAN_TRAP_ON_ERROR
 	bool "Enable UBSan trap on error to crash immediately"
-	depends on MM_UBSAN
 	default n
 	---help---
 		The undefined instruction trap should cause your program to crash,
@@ -418,66 +475,9 @@ config MM_UBSAN_TRAP_ON_ERROR
 config MM_UBSAN_DUMMY
 	bool "Bypass Undefined Behaviour Sanitizer Runtime Actions"
 	default n
-	depends on MM_UBSAN
 	---help---
-		Keep UBSAN compile time but disable runtime actions.
+		Allow to compile with UBSAN enabled but disables runtime actions.
 
-config MM_FILL_ALLOCATIONS
-	bool "Fill allocations with debug value"
-	default n
-	---help---
-		Fill all malloc() allocations with MM_ALLOC_MAGIC.
-		Fill all add_addregion() with MM_INIT_MAGIC.
-		Fill all free() with MM_FREE_MAGIC.
-		This helps detecting uninitialized variable errors.
-
-config MM_BACKTRACE
-	int "The depth of backtrace"
-	default -1
-	---help---
-		Config the depth of backtrace in memory block by specified this
-		config: disable backtrace by -1, only record pid info by zero and
-		enable record backtrace info by 8(fixed depth).
-
-config MM_BACKTRACE_SKIP
-	int "The skip depth of backtrace"
-	depends on MM_BACKTRACE > 0
-	default 3
-
-config MM_BACKTRACE_DEFAULT
-	bool "Enable the backtrace record by default"
-	default n
-	depends on MM_BACKTRACE > 0
-
-config MM_DUMP_ON_FAILURE
-	bool "Dump heap info on allocation failure"
-	default n
-	depends on DEBUG_MM
-
-config MM_DUMP_DETAILS_ON_FAILURE
-	bool "Dump all used memory blocks on allocation failure"
-	default n
-	depends on MM_DUMP_ON_FAILURE
-
-config MM_PANIC_ON_FAILURE
-	bool "Panic on allocation failure"
-	default n
-	depends on DEBUG_MM
-
-config MM_FREE_DELAYCOUNT_MAX
-	int "Maximum memory nodes can be delayed to free"
-	default 0
-	---help---
-		Set to 0 to disable the delayed free mechanism. Otherwise,
-		the value decides the maximum number of memory nodes that
-		will be delayed to free.
-
-config MM_HEAP_BIGGEST_COUNT
-	int "The largest malloc element dump count"
-	default 30
-	---help---
-		The dump support for largest allocated memory.
-		If too big, should take care of stack usage.
-		Define 0 to disable largest allocated element dump feature.
+endif # MM_UBSAN
 
 source "mm/iob/Kconfig"
