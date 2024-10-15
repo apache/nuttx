@@ -181,6 +181,37 @@ jobs:
             export ARTIFACTDIR=`pwd`/buildartifacts
             git config --global --add safe.directory /github/workspace/sources/nuttx
             git config --global --add safe.directory /github/workspace/sources/apps
+
+            # Validate the defconfig files
+            cp -r sources/nuttx sources/nuttx-validate
+            pushd sources/nuttx-validate
+            testfile=tools/ci/testlist/${{matrix.boards}}.dat
+            echo Validating targets in $testfile
+            testlist=`grep -v -E "^(-|#)|^[C|c][M|m][A|a][K|k][E|e]" $testfile || true`          
+            for line in $testlist; do
+              firstch=${line:0:1}
+              if [ "X$firstch" == "X/" ]; then
+                dir=`echo $line | cut -d',' -f1`
+                list=`find boards$dir -name defconfig | cut -d'/' -f4,6`
+                for config in ${list}; do
+                  echo ./tools/refresh.sh --silent $config
+                  if ! ./tools/refresh.sh --silent $config; then
+                    echo Error: $config:1:1: error: $config is configured incorrectly. To fix it, run '"'tools/refresh.sh $config'"'
+                    fail=1
+                  fi
+                done
+              fi
+            done
+            popd
+            rm -rf sources/nuttx-validate
+
+            # Quit if the defconfig validation failed
+            if [[ "$fail" == "1" ]]; then
+              echo Error: $testfile:1:1: error: Quitting, defconfig validation failed for $testfile
+              exit 1
+            fi
+
+            # Build the targets
             cd sources/nuttx/tools/ci
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
