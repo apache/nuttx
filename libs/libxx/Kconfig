@@ -53,6 +53,7 @@ config LIBCXX
 config UCLIBCXX
 	bool "uClibc++ Standard C++ Library"
 	select HAVE_CXXINITIALIZE
+	depends on ALLOW_GPL_COMPONENTS
 	---help---
 		uClibc++ C++ library
 		https://cxx.uclibc.org/
