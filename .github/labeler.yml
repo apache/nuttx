@@ -231,6 +231,8 @@
       - any-glob-to-any-file: 'sched/**'
       - any-glob-to-any-file: 'syscall/**'
       - any-glob-to-any-file: 'libs/**'
+      - any-glob-to-any-file: 'include/*.h'
+      - any-glob-to-any-file: 'include/nuttx/*.h'
 
 "Area: PCI":
   - changed-files:
