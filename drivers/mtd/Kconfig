@@ -923,6 +923,38 @@ config MX25RXX_LXX
 
 endif # MTD_MX25RXX
 
+config MTD_GD55
+	bool "QuadSPI-based GigaDevices GD55 family FLASH"
+	default n
+	---help---
+		Support GD55 QSPI devices
+
+if MTD_GD55
+
+config MTD_GD55_QSPIMODE
+	int "MTD_GD55 QuadSPI Mode"
+	default 3
+	---help---
+		This device can operate in SPI mode 0 or 3.
+
+config MTD_GD55_FREQUENCY
+	int "MTD_GD55 QSPI Frequency"
+	default 133000000
+	---help---
+		Clock frequency for all instructions except for non-QSPI read
+		commands (e.g. Read ID) and DTR read, neither of which are used in
+		this driver)
+
+config MTD_GD55_SECTOR512
+	bool "Emulate 512 byte Erase Blocks"
+	default n
+	---help---
+		This is used to map the native 256 byte sectors to 512 byte sectors.
+		It is useful if using a file system that demands 512 byte sectors,
+		such as FAT
+
+endif # MTD_GD55
+
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
 	default n
