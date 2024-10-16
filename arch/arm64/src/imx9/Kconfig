@@ -1109,6 +1109,13 @@ config IMX9_FLEXCAN1_DATA_SAMPLEP
 	depends on NET_CAN_CANFD
 	default 75
 
+config IMX9_FLEXCAN1_SRXDIS
+	bool "CAN1 Self reception disable"
+	default n
+	---help---
+		Configure this y if you want that CAN1 doesn't receive the
+		frames which it sent itself
+
 endmenu # IMX9_FLEXCAN1
 
 menu "FLEXCAN2 Configuration"
@@ -1143,6 +1150,13 @@ config IMX9_FLEXCAN2_DATA_SAMPLEP
 	int "CAN FD Data phase sample point"
 	depends on NET_CAN_CANFD
 	default 75
+
+config IMX9_FLEXCAN2_SRXDIS
+	bool "CAN2 Self reception disable"
+	default n
+	---help---
+		Configure this y if you want that CAN2 doesn't receive the
+		frames which it sent itself
 
 endmenu # IMX9_FLEXCAN2
 
