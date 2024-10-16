@@ -44,5 +44,8 @@ class Dmesg(gdb.Command):
 
         inf = gdb.selected_inferior()
         buf = bytes(inf.read_memory(rl_head["rl_buffer"], rl_bufsize))
+        buf = buf.replace(
+            b"\0", "␀".encode("utf-8")
+        )  # NULL is valid utf-8 but not printable
         gdb.write(buf.decode("utf-8", errors="replace"))
         gdb.write("\n")
