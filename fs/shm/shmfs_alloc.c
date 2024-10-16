@@ -27,6 +27,7 @@
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/cache.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
 
@@ -47,19 +48,23 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
    * chunk in kernel heap
    */
 
-  size_t alloc_size = sizeof(struct shmfs_object_s) + length;
-  if (alloc_size < length)
-    {
-      /* There must have been an integer overflow */
-
-      return NULL;
-    }
-
-  object = fs_heap_zalloc(alloc_size);
+  object = fs_heap_zalloc(sizeof(struct shmfs_object_s));
   if (object)
     {
-      object->paddr = (FAR char *)(object + 1);
-      allocated = true;
+      size_t cachesize = up_get_dcache_linesize();
+      if (cachesize > 0)
+        {
+          object->paddr = fs_heap_memalign(cachesize, length);
+        }
+      else
+        {
+          object->paddr = fs_heap_malloc(length);
+        }
+
+      if (object->paddr)
+        {
+           allocated = true;
+        }
     }
 
 #elif defined(CONFIG_BUILD_PROTECTED)
@@ -70,7 +75,15 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
   object = fs_heap_zalloc(sizeof(struct shmfs_object_s));
   if (object)
     {
-      object->paddr = kumm_zalloc(length);
+      size_t cachesize = up_get_dcache_linesize();
+      if (cachesize > 0)
+        {
+          object->paddr = kumm_memalign(cachesize, length);
+        }
+      else
+        {
+          object->paddr = kumm_malloc(length);
+        }
 
       if (object->paddr)
         {
@@ -140,7 +153,9 @@ void shmfs_free_object(FAR struct shmfs_object_s *object)
 
   if (object)
     {
-#if defined (CONFIG_BUILD_PROTECTED)
+#if defined(CONFIG_BUILD_FLAT)
+      fs_heap_free(object->paddr);
+#elif defined(CONFIG_BUILD_PROTECTED)
       kumm_free(object->paddr);
 #elif defined(CONFIG_BUILD_KERNEL)
       pages = &object->paddr;
