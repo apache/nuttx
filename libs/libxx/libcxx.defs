@@ -61,7 +61,7 @@ endif
 CXXFLAGS += -Wno-shadow -Wno-sign-compare
 CXXFLAGS += -Wno-attributes -Wno-deprecated-declarations
 
-ifeq ($(shell expr $(GCCVER) \>= 12), 1)
+ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
   CXXFLAGS += -Wno-maybe-uninitialized -Wno-alloc-size-larger-than
 endif
 
