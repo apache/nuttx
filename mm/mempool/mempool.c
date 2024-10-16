@@ -197,20 +197,13 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
   if ((MM_DUMP_ASSIGN(dump, buf) || MM_DUMP_ALLOC(dump, buf) ||
        MM_DUMP_LEAK(dump, buf)) && MM_DUMP_SEQNO(dump, buf))
     {
+#  if CONFIG_MM_BACKTRACE > 0
       char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
 
-#  if CONFIG_MM_BACKTRACE > 0
-      FAR const char *format = " %0*p";
-      int i;
-
-      for (i = 0; i < CONFIG_MM_BACKTRACE &&
-                      buf->backtrace[i]; i++)
-        {
-          snprintf(tmp + i * BACKTRACE_PTR_FMT_WIDTH,
-                   sizeof(tmp) - i * BACKTRACE_PTR_FMT_WIDTH,
-                   format, BACKTRACE_PTR_FMT_WIDTH - 1,
-                   buf->backtrace[i]);
-        }
+      backtrace_format(tmp, sizeof(tmp), buf->backtrace,
+                       CONFIG_MM_BACKTRACE);
+#  else
+      FAR const char *tmp = "";
 #  endif
 
       syslog(LOG_INFO, "%6d%12zu%12lu%*p%s\n",
