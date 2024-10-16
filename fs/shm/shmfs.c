@@ -387,10 +387,18 @@ static int shmfs_unmap_area(FAR struct task_group_s *group,
       /* Unmap the memory from user virtual address space */
 
       ret = up_shmdt((uintptr_t)vaddr, npages);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-      /* Add the virtual memory back to the shared memory pool */
+      /* Free the virtual address space */
 
       vm_release_region(get_group_mm(group), vaddr, length);
+    }
+  else
+    {
+      return -EINVAL;
     }
 #endif
 
