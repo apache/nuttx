@@ -164,6 +164,7 @@ struct imx9_driver_s
   const bool canfd_capable;
   const uint32_t *txdesc;             /* A pointer to the list of TX descriptor */
   const uint32_t *rxdesc;             /* A pointer to the list of RX descriptors */
+  const bool srxdis;                  /* Self reception disable */
 
   uint32_t clk_freq;                  /* Peripheral clock frequency */
   bool bifup;                         /* true:ifup false:ifdown */
@@ -223,6 +224,10 @@ static struct imx9_driver_s g_flexcan1 =
 
     .txdesc = g_tx_pool_can1,
     .rxdesc = g_rx_pool_can1,
+
+#  if defined(CONFIG_IMX9_FLEXCAN1_SRXDIS)
+    .srxdis = true,
+#  endif
   };
 #endif
 
@@ -264,6 +269,10 @@ static struct imx9_driver_s g_flexcan2 =
 
     .txdesc = g_tx_pool_can2,
     .rxdesc = g_rx_pool_can2,
+
+#  if defined(CONFIG_IMX9_FLEXCAN2_SRXDIS)
+    .srxdis = true,
+#  endif
   };
 #endif
 
@@ -1778,10 +1787,15 @@ static int imx9_initialize(struct imx9_driver_s *priv)
   /* Configure MCR */
 
   modifyreg32(priv->base + IMX9_CAN_MCR_OFFSET, CAN_MCR_MAXMB_MASK,
-              CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_SRXDIS |
-              CAN_MCR_WAKSRC | CAN_MCR_IRMQ | CAN_MCR_LPRIOEN | CAN_MCR_AEN |
+              CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_WAKSRC |
+              CAN_MCR_IRMQ | CAN_MCR_LPRIOEN | CAN_MCR_AEN |
               (((TOTALMBCOUNT - 1) << CAN_MCR_MAXMB_SHIFT) &
                CAN_MCR_MAXMB_MASK));
+
+  if (priv->srxdis)
+    {
+      modifyreg32(priv->base + IMX9_CAN_MCR_OFFSET, 0, CAN_MCR_SRXDIS);
+    }
 
   if (!priv->canfd_capable)
     {
