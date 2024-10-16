@@ -174,7 +174,10 @@ bool gran_match(const gran_t *gran, size_t posi, size_t size, bool used,
   uint32_t e;   /* expected cell value */
   gatr_t   r;   /* range helper */
 
-  gran_range(gran, posi, size, &r);
+  if (gran_range(gran, posi, size, &r) < 0)
+    {
+      memset(&r, 0, sizeof(r));
+    }
 
   /* check the ending cell */
 
