@@ -1944,7 +1944,10 @@ int pci_connect_irq(FAR struct pci_device_s *dev, FAR int *irq, int num)
     {
       /* Disalbe MSI */
 
-      pci_disable_msi(dev, msi);
+      if (msi != 0)
+        {
+          pci_disable_msi(dev, msi);
+        }
 
       /* Enable MSI-X */
 
