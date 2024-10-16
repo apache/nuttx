@@ -34,8 +34,6 @@
 
 #include "libc.h"
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -95,10 +93,13 @@ FAR char *getcwd(FAR char *buf, size_t size)
       size = PATH_MAX + 1;
     }
 
+#ifndef CONFIG_DISABLE_ENVIRON
+
   /* If no working directory is defined, then default to the home directory */
 
   pwd = getenv("PWD");
   if (pwd == NULL)
+#endif /* !CONFIG_DISABLE_ENVIRON */
     {
       pwd = CONFIG_LIBC_HOMEDIR;
     }
@@ -126,4 +127,3 @@ FAR char *getcwd(FAR char *buf, size_t size)
   strlcpy(buf, pwd, size);
   return buf;
 }
-#endif /* !CONFIG_DISABLE_ENVIRON */

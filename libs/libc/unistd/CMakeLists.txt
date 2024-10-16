@@ -26,6 +26,7 @@ set(SRCS
     lib_swab.c
     lib_pathconf.c
     lib_sysconf.c
+    lib_getcwd.c
     lib_getentropy.c
     lib_getopt_common.c
     lib_getopt.c
@@ -82,7 +83,7 @@ if(NOT CONFIG_SCHED_USER_IDENTITY)
 endif()
 
 if(NOT CONFIG_DISABLE_ENVIRON)
-  list(APPEND SRCS lib_chdir.c lib_fchdir.c lib_getcwd.c lib_restoredir.c)
+  list(APPEND SRCS lib_chdir.c lib_fchdir.c lib_restoredir.c)
 endif()
 
 if(CONFIG_LIBC_EXECFUNCS)
