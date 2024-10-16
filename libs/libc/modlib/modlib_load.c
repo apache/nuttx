@@ -117,7 +117,7 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
         }
     }
 
-  return 0;
+  return OK;
 }
 #endif
 
@@ -255,13 +255,46 @@ static int modlib_vma2lma(FAR struct mod_loadinfo_s *loadinfo,
           shdr->sh_offset <= phdr->p_offset + phdr->p_filesz)
         {
           *lma = phdr->p_paddr + shdr->sh_addr - phdr->p_vaddr;
-          return 0;
+          return OK;
         }
     }
 
   return -ENOENT;
 }
 #endif
+
+/****************************************************************************
+ * Name: modlib_set_emptysect_vma
+ *
+ * Description:
+ *   Set VMA for empty and unallocated sections, some relocations might
+ *   depend on this.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void modlib_set_emptysect_vma(FAR struct mod_loadinfo_s *loadinfo,
+                                    int section)
+{
+  FAR Elf_Shdr *shdr = &loadinfo->shdr[section];
+
+  /* Set the section as data or text, depending on SHF_WRITE */
+
+  if ((shdr->sh_flags & SHF_WRITE) != 0
+#ifdef CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+      || (shdr->sh_flags & SHF_EXECINSTR) == 0
+#endif
+      )
+    {
+      shdr->sh_addr = loadinfo->datastart;
+    }
+  else
+    {
+      shdr->sh_addr = loadinfo->textalloc;
+    }
+}
 
 /****************************************************************************
  * Name: modlib_loadfile
@@ -328,13 +361,11 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
            * execution
            */
 
-          if (shdr->sh_size == 0)
+          if ((shdr->sh_flags & SHF_ALLOC) == 0 || shdr->sh_size == 0)
             {
-              continue;
-            }
+              /* Set the VMA regardless */
 
-          if ((shdr->sh_flags & SHF_ALLOC) == 0)
-            {
+              modlib_set_emptysect_vma(loadinfo, i);
               continue;
             }
 
