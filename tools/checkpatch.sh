@@ -83,9 +83,15 @@ check_file() {
   fi
 
   if [ ${@##*.} == 'py' ]; then
-    black --check $@ || fail=1
-    flake8 --config ${TOOLDIR}/../.github/linters/setup.cfg $@ || fail=1
-    isort --settings-path ${TOOLDIR}/../.github/linters/setup.cfg $@ || fail=1
+    setupcfg="${TOOLDIR}/../.github/linters/setup.cfg"
+    black --check "$@" || fail=1
+    flake8 --config "${setupcfg}" "$@" || fail=1
+    isort --diff --check-only --settings-path "${setupcfg}" "$@"
+    if [ $? -ne 0 ]; then
+      # Format in place
+      isort --settings-path "${setupcfg}" "$@"
+      fail=1
+    fi
   elif [ "$(is_rust_file $@)" == "1" ]; then
     if ! command -v rustfmt &> /dev/null; then
       fail=1
