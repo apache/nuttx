@@ -454,6 +454,11 @@ endmenu # USB device controller driver (DCD) options
 
 endif # IMX9_USBDEV
 
+config IMX9_PMIC_I2C
+	int "PMIC I2C bus"
+	default 2
+	range 1 8
+
 config IMX9_ENET
 	bool "Ethernet"
 	default n
