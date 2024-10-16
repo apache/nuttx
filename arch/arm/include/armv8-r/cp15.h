@@ -173,7 +173,7 @@
 #define CP15_ICC_SRE(r)       _CP15(0, r, c12, c12, 5)    /* ICC_SRE */
 #define CP15_ICC_HSRE(r)      _CP15(4, r, c12,  c9, 5)    /* ICC_HSRE */
 #define CP15_ICC_IGRPEN1(r)   _CP15(0, r, c12, c12, 7)    /* ICC_IGRPEN1 */
-#define CP15_ICC_SGI1R(lo,hi) _CP15_64(2, lo, hi, c12)    /* ICC_SGI1R */
+#define CP15_ICC_SGI1R(lo,hi) _CP15_64(0, lo, hi, c12)    /* ICC_SGI1R */
 
 #define CP15_SET(reg, value)            \
   do                                    \
