@@ -148,12 +148,6 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
 
 void shmfs_free_object(FAR struct shmfs_object_s *object)
 {
-#if defined(CONFIG_BUILD_KERNEL)
-  size_t i;
-  size_t n_pages = MM_NPAGES(object->length);
-  FAR void **pages;
-#endif
-
   if (object)
     {
 #if defined(CONFIG_BUILD_FLAT)
@@ -161,7 +155,9 @@ void shmfs_free_object(FAR struct shmfs_object_s *object)
 #elif defined(CONFIG_BUILD_PROTECTED)
       kumm_free(object->paddr);
 #elif defined(CONFIG_BUILD_KERNEL)
-      pages = &object->paddr;
+      size_t i;
+      size_t n_pages = MM_NPAGES(object->length);
+      FAR void **pages = &object->paddr;
       for (i = 0; i < n_pages; i++)
         {
           if (pages[i])
