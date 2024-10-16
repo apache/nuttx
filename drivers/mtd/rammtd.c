@@ -520,3 +520,21 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
 
   return &priv->mtd;
 }
+
+/****************************************************************************
+ * Name: rammtd_uninitialize
+ *
+ * Description:
+ *   Free the resources associated with a RAM MTD device instance.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the MTD device instance to be uninitialized.
+ *
+ ****************************************************************************/
+
+void rammtd_uninitialize(FAR struct mtd_dev_s *dev)
+{
+  FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
+
+  kmm_free(priv);
+}
