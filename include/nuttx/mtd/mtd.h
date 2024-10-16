@@ -591,6 +591,17 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid);
 
 /****************************************************************************
+ * Name: gd55_initialize
+ *
+ * Description:
+ *   Initializes the driver for QSPI-based GD55 FLASH
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *gd55_initialize(FAR struct qspi_dev_s *dev,
+                                      bool unprotect);
+
+/****************************************************************************
  * Name: gd5f_initialize
  *
  * Description:
