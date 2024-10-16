@@ -26,7 +26,7 @@
 
 #include <stdlib.h>
 
-#include <nuttx/userspace.h>
+#include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/mm/mm.h>
 

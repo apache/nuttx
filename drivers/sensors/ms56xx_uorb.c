@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>

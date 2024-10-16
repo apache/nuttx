@@ -26,12 +26,9 @@
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/map.h>
-
-#if defined (CONFIG_BUILD_KERNEL)
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
-#endif
 
 #include "shm/shmfs.h"
 #include "inode/inode.h"

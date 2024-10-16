@@ -29,6 +29,7 @@
 #include <stdint.h>
 #include <sys/param.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/virtio/virtio-mmio.h>
 

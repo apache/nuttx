@@ -23,6 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/audio/audio_dma.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
