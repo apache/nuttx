@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <sys/param.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>

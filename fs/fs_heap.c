@@ -22,6 +22,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
+
 #include "fs_heap.h"
 
 #if defined(CONFIG_FS_HEAPSIZE) && CONFIG_FS_HEAPSIZE > 0

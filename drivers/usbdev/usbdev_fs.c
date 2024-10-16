@@ -29,6 +29,7 @@
 #include <poll.h>
 #include <stdio.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>

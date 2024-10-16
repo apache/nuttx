@@ -389,7 +389,7 @@ struct ucred
  ****************************************************************************/
 
 static inline FAR struct cmsghdr *__cmsg_nxthdr(FAR void *__ctl,
-                                                unsigned int __size,
+                                                unsigned long __size,
                                                 FAR struct cmsghdr *__cmsg)
 {
   size_t len = CMSG_ALIGN(__cmsg->cmsg_len);

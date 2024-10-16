@@ -32,6 +32,7 @@
 #include <poll.h>
 #include <fcntl.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/circbuf.h>

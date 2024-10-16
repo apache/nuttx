@@ -24,9 +24,12 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/timers/rtc.h>
 #include <nuttx/timers/pl031.h>
-#include <stdio.h>
 
 /****************************************************************************
  * Pre-processor Definitions
