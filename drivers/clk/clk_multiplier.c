@@ -107,7 +107,7 @@ static bool __is_best_rate(uint32_t rate, uint32_t new,
 {
   if (flags & CLK_MULT_ROUND_CLOSEST)
     {
-      return abs(rate - new) < abs(rate - best);
+      return clk_is_best_rate_closest(rate, new, best);
     }
 
   return new >= rate && new < best;
