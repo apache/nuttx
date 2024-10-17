@@ -44,20 +44,12 @@
  ****************************************************************************/
 
 static int bt_driver_register_internal(FAR struct bt_driver_s *driver,
-                                       int id, bool bt)
+                                       FAR const char *prefix, int id)
 {
 #ifdef CONFIG_UART_BTH4
   char name[32];
 
-  if (bt)
-    {
-      snprintf(name, sizeof(name), "/dev/ttyBT%d", id);
-    }
-  else
-    {
-      snprintf(name, sizeof(name), "/dev/ttyBLE%d", id);
-    }
-
+  snprintf(name, sizeof(name), prefix, id);
   return uart_bth4_register(name, driver);
 #elif defined(CONFIG_NET_BLUETOOTH)
   return bt_netdev_register(driver);
@@ -109,20 +101,20 @@ int bt_driver_register_with_id(FAR struct bt_driver_s *driver, int id)
       return ret;
     }
 
-  ret = bt_driver_register_internal(btdrv, id, true);
+  ret = bt_driver_register_internal(btdrv, "/dev/ttyBT%d", id);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = bt_driver_register_internal(bledrv, id, false);
+  ret = bt_driver_register_internal(bledrv, "/dev/ttyBLE%d", id);
   if (ret < 0)
     {
       return ret;
     }
 
 #else
-  ret = bt_driver_register_internal(driver, id, true);
+  ret = bt_driver_register_internal(driver, "/dev/ttyHCI%d", id);
   if (ret < 0)
     {
       return ret;
