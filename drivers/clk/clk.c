@@ -1337,8 +1337,9 @@ FAR struct clk_s *clk_register(FAR const char *name,
       return clk;
     }
 
-out:
   clk_list_unlock(irqflags);
+
+out:
   if (clk->parents)
     {
       kmm_free(clk->parents);
