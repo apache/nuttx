@@ -429,7 +429,7 @@ int modlib_symvalue(FAR struct module_s *modp,
               "%08" PRIxPTR "+%08" PRIxPTR "=%08" PRIxPTR "\n",
               loadinfo->iobuffer,
               (uintptr_t)sym->st_value, (uintptr_t)symbol->sym_value,
-              (uintptr_t)(sym->st_value + symbol->sym_value));
+              (uintptr_t)(sym->st_value + (uintptr_t)symbol->sym_value));
 
         sym->st_value += ((uintptr_t)symbol->sym_value);
       }
