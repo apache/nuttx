@@ -258,13 +258,11 @@ class Trace(object):
             except Exception:
                 continue
 
-    def dump_trace(self, output="trace.systrace"):
+    def dump_trace(self):
         formatted = ["# tracer: nop", "#"]
         for trace in self.all_trace:
             formatted.append(trace.dump_one_trace())
-        with open(output, "w") as fp:
-            fp.writelines("\n".join(formatted))
-        return output
+        return formatted
 
 
 class ParseBinaryLogTool:
@@ -637,7 +635,7 @@ def parse_arguments():
 
 if __name__ == "__main__":
     args = parse_arguments()
-    out = args.output if not args.output else "trace.systrace"
+    out_path = args.output if args.output else "trace.systrace"
     logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
 
     if args.trace is None and args.device is None:
@@ -666,9 +664,10 @@ if __name__ == "__main__":
                         )
 
                 lines = trace.dump_trace()
-                with open(args.out, "w") as out:
-                    out.writelines("\n".join(lines))
-                    print(os.path.abspath(args.out))
+                with open(out_path, "w") as out:
+                    out.write("\n".join(lines))
+                    out.write("\n")
+                    print(os.path.abspath(out_path))
         else:
             print("trace log type is binary")
             if args.elf:
@@ -676,7 +675,7 @@ if __name__ == "__main__":
                     "parse_binary_log, default config, size_long=4, config_endian_big=False, config_smp=0"
                 )
                 parse_binary_log_tool = ParseBinaryLogTool(
-                    args.trace, args.elf, args.out
+                    args.trace, args.elf, out_path
                 )
                 parse_binary_log_tool.symbol_tables.parse_symbol()
                 parse_binary_log_tool.parse_binary_log()
