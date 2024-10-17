@@ -732,11 +732,6 @@ export DEFINE_PREFIX ?= $(subst X,,${shell $(DEFINE) "$(CC)" X 2> ${EMPTYFILE}})
 export INCDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) "$(CC)" X 2> ${EMPTYFILE}})
 export INCSYSDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) -s "$(CC)" X 2> ${EMPTYFILE}})
 
-# Get the GCC version number
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU), y)
-  export GCCVER = $(shell $(CXX) --version | grep ++ | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
-endif
-
 # ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
 ARCHDEFINES += ${DEFINE_PREFIX}__NuttX__
 ifeq ($(CONFIG_NDEBUG),y)

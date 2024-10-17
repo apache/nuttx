@@ -412,7 +412,7 @@ config ARCH_RV_MACHINE_ISA_1_13
 		which extend the range of exception codes from 0 ~ 15 to 0 ~ 19.
 
 config ARCH_RV_ISA_ZICSR_ZIFENCEI
-	bool
+	bool "Enable Zicsr and Zifencei extensions (GCC >= 12.1.0.)"
 	default y
 	---help---
 		https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=aed44286efa8ae8717a77d94b51ac3614e2ca6dc
