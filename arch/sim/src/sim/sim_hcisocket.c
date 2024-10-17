@@ -314,7 +314,7 @@ int sim_bthcisock_register(int dev_id)
       return ret;
     }
 #else
-# error "Please select CONFIG_DRIVERS_BLUETOOTH"
+#  error "Please select CONFIG_DRIVERS_BLUETOOTH"
 #endif
 
   return work_queue(HPWORK, &dev->worker, sim_bthcisock_work, dev, 0);
