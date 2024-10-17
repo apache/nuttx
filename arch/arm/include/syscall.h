@@ -41,7 +41,8 @@
 
 #define SYS_syscall 0x00
 
-#if defined(__thumb__) || defined(__thumb2__)
+#if defined(__thumb__) || defined(__thumb2__) || \
+    defined(__THUMB_AWARE__) || defined(__THUMB2_AWARE__)
 #  define SYS_smhcall 0xab
 #else
 #  define SYS_smhcall 0x123456
