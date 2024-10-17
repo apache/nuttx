@@ -73,7 +73,7 @@ int up_this_cpu(void)
 
 int weak_function riscv_hartid_to_cpuid(int cpu)
 {
-  return cpu + CONFIG_ARCH_RV_HARTID_BASE;
+  return cpu - CONFIG_ARCH_RV_HARTID_BASE;
 }
 
 /****************************************************************************
@@ -87,5 +87,5 @@ int weak_function riscv_hartid_to_cpuid(int cpu)
 
 int weak_function riscv_cpuid_to_hartid(int cpu)
 {
-  return cpu - CONFIG_ARCH_RV_HARTID_BASE;
+  return cpu + CONFIG_ARCH_RV_HARTID_BASE;
 }
