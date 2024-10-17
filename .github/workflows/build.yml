@@ -200,7 +200,7 @@ jobs:
     uses: apache/nuttx/.github/workflows/arch.yml@master
     needs: Fetch-Source
     with:
-      os: Linux
+      os: macOS
       boards: |
         ["macos", "sim-01", "sim-02"]
 
@@ -260,7 +260,7 @@ jobs:
     uses: apache/nuttx/.github/workflows/arch.yml@master
     needs: Fetch-Source
     with:
-      os: Linux
+      os: msys2
       boards: |
         ["msys2"]
 
