@@ -78,8 +78,8 @@ static int inode_checkflags(FAR struct inode *inode, int oflags)
       return -ENXIO;
     }
 
-  if (((oflags & O_RDOK) != 0 && !ops->read && !ops->ioctl) ||
-      ((oflags & O_WROK) != 0 && !ops->write && !ops->ioctl))
+  if (((oflags & O_RDOK) != 0 && !ops->readv && !ops->read && !ops->ioctl) ||
+      ((oflags & O_WROK) != 0 && !ops->writev && !ops->write && !ops->ioctl))
     {
       return -EACCES;
     }

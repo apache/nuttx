@@ -187,6 +187,8 @@ const struct mountpt_operations g_tmpfs_operations =
   tmpfs_mmap,       /* mmap */
   tmpfs_truncate,   /* truncate */
   NULL,             /* poll */
+  NULL,             /* readv */
+  NULL,             /* writev */
 
   tmpfs_sync,       /* sync */
   tmpfs_dup,        /* dup */
