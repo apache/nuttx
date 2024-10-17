@@ -305,7 +305,6 @@ int sim_bthcisock_register(int dev_id)
       return -ENOMEM;
     }
 
-#ifdef CONFIG_DRIVERS_BLUETOOTH
   ret = bt_driver_register_with_id(&dev->drv, dev_id);
   if (ret < 0)
     {
@@ -313,9 +312,6 @@ int sim_bthcisock_register(int dev_id)
       bthcisock_free(dev);
       return ret;
     }
-#else
-#  error "Please select CONFIG_DRIVERS_BLUETOOTH"
-#endif
 
   return work_queue(HPWORK, &dev->worker, sim_bthcisock_work, dev, 0);
 }
