@@ -34,8 +34,8 @@
 
 #include <arch/board/board.h>
 
-#include "rp2040_pico.h"
 #include "rp2040_common_bringup.h"
+#include "rp2040_pico.h"
 
 #ifdef CONFIG_LCD_BACKPACK
 #include "rp2040_lcd_backpack.h"
@@ -54,28 +54,32 @@
 #endif
 
 #ifdef CONFIG_SENSORS_INA219
-#include <nuttx/sensors/ina219.h>
 #include "rp2040_ina219.h"
+#include <nuttx/sensors/ina219.h>
 #endif
 
 #ifdef CONFIG_SENSORS_BMP180
-#include <nuttx/sensors/bmp180.h>
 #include "rp2040_bmp180.h"
+#include <nuttx/sensors/bmp180.h>
 #endif
 
 #ifdef CONFIG_SENSORS_BMP280
-#include <nuttx/sensors/bmp280.h>
 #include "rp2040_bmp280.h"
+#include <nuttx/sensors/bmp280.h>
 #endif
 
 #ifdef CONFIG_SENSORS_SHT4X
-#include <nuttx/sensors/sht4x.h>
 #include "rp2040_i2c.h"
+#include <nuttx/sensors/sht4x.h>
+#endif
+
+#ifdef CONFIG_LPWAN_RN2483
+#include <nuttx/wireless/lpwan/rn2483.h>
 #endif
 
 #ifdef CONFIG_SENSORS_MAX6675
-#include <nuttx/sensors/max6675.h>
 #include "rp2040_max6675.h"
+#include <nuttx/sensors/max6675.h>
 #endif
 
 #ifdef CONFIG_RP2040_PWM
@@ -92,15 +96,15 @@
 #endif
 
 #ifdef CONFIG_WATCHDOG
-#  include "rp2040_wdt.h"
+#include "rp2040_wdt.h"
 #endif
 
 #if defined(CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME)
-#  include <rp2040_romfsimg.h>
+#include <rp2040_romfsimg.h>
 #endif
 
 #ifdef CONFIG_RP2040_FLASH_FILE_SYSTEM
-#  include "rp2040_flash_mtd.h"
+#include "rp2040_flash_mtd.h"
 #endif
 
 #ifdef CONFIG_WS2812_HAS_WHITE
@@ -126,313 +130,297 @@ int rp2040_common_bringup(void)
 #endif
 
 #ifdef CONFIG_RP2040_I2C_DRIVER
-  #ifdef CONFIG_RP2040_I2C0
+#ifdef CONFIG_RP2040_I2C0
   ret = board_i2cdev_initialize(0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C0.\n");
     }
-  #endif
+#endif
 
-  #ifdef CONFIG_RP2040_I2C1
+#ifdef CONFIG_RP2040_I2C1
   ret = board_i2cdev_initialize(1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C1.\n");
     }
-  #endif
+#endif
 #endif
 
 #ifdef CONFIG_RP2040_SPI_DRIVER
-  #ifdef CONFIG_RP2040_SPI0
+#ifdef CONFIG_RP2040_SPI0
   ret = board_spidev_initialize(0);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI0.\n");
     }
-  #endif
+#endif
 
-  #ifdef CONFIG_RP2040_SPI1
+#ifdef CONFIG_RP2040_SPI1
   ret = board_spidev_initialize(1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SPI1.\n");
     }
-  #endif
+#endif
 #endif
 
 #ifdef CONFIG_RP2040_PWM
-#  ifdef CONFIG_RP2040_PWM0
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(0,
-                                 CONFIG_RP2040_PWM0A_GPIO,
+#ifdef CONFIG_RP2040_PWM0
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(0, CONFIG_RP2040_PWM0A_GPIO,
                                  CONFIG_RP2040_PWM0B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM0A_INVERT
+#ifdef CONFIG_RP2040_PWM0A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM0B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM0B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM0_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM0_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    else
-  ret = rp2040_pwmdev_initialize(0,
-                                 CONFIG_RP2040_PWM0A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(0, CONFIG_RP2040_PWM0A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM0A_INVERT
+#ifdef CONFIG_RP2040_PWM0A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM0_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM0_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM0.\n");
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_RP2040_PWM1
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(1,
-                                 CONFIG_RP2040_PWM1A_GPIO,
+#ifdef CONFIG_RP2040_PWM1
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(1, CONFIG_RP2040_PWM1A_GPIO,
                                  CONFIG_RP2040_PWM1B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM1A_INVERT
+#ifdef CONFIG_RP2040_PWM1A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM1B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM1B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM1_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM1_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    else
-  ret = rp2040_pwmdev_initialize(1,
-                                 CONFIG_RP2040_PWM1A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(1, CONFIG_RP2040_PWM1A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM1A_INVERT
+#ifdef CONFIG_RP2040_PWM1A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM1_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM1_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM1.\n");
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_RP2040_PWM2
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(2,
-                                 CONFIG_RP2040_PWM2A_GPIO,
+#ifdef CONFIG_RP2040_PWM2
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(2, CONFIG_RP2040_PWM2A_GPIO,
                                  CONFIG_RP2040_PWM2B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM2A_INVERT
+#ifdef CONFIG_RP2040_PWM2A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM2B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM2B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM2_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM2_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    else
-  ret = rp2040_pwmdev_initialize(2,
-                                 CONFIG_RP2040_PWM2A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(2, CONFIG_RP2040_PWM2A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM2A_INVERT
+#ifdef CONFIG_RP2040_PWM2A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM2_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM2_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM2.\n");
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_RP2040_PWM3
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(3,
-                                 CONFIG_RP2040_PWM3A_GPIO,
+#ifdef CONFIG_RP2040_PWM3
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(3, CONFIG_RP2040_PWM3A_GPIO,
                                  CONFIG_RP2040_PWM3B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM3A_INVERT
+#ifdef CONFIG_RP2040_PWM3A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM3B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM3B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM3_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM3_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    else
-  ret = rp2040_pwmdev_initialize(3,
-                                 CONFIG_RP2040_PWM3A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(3, CONFIG_RP2040_PWM3A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM3A_INVERT
+#ifdef CONFIG_RP2040_PWM3A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM3_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM3_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM3.\n");
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_RP2040_PWM4
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(4,
-                                 CONFIG_RP2040_PWM4A_GPIO,
+#ifdef CONFIG_RP2040_PWM4
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(4, CONFIG_RP2040_PWM4A_GPIO,
                                  CONFIG_RP2040_PWM4B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM4A_INVERT
+#ifdef CONFIG_RP2040_PWM4A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM4B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM4B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM4_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM4_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    else
-  ret = rp2040_pwmdev_initialize(4,
-                                 CONFIG_RP2040_PWM4A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(4, CONFIG_RP2040_PWM4A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM4A_INVERT
+#ifdef CONFIG_RP2040_PWM4A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM4_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM4_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM4.\n");
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_RP2040_PWM5
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(5,
-                                 CONFIG_RP2040_PWM5A_GPIO,
+#ifdef CONFIG_RP2040_PWM5
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(5, CONFIG_RP2040_PWM5A_GPIO,
                                  CONFIG_RP2040_PWM5B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM5A_INVERT
+#ifdef CONFIG_RP2040_PWM5A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM5B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM5B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM5_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM5_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#  else
-  ret = rp2040_pwmdev_initialize(5,
-                                 CONFIG_RP2040_PWM5A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(5, CONFIG_RP2040_PWM5A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM5A_INVERT
+#ifdef CONFIG_RP2040_PWM5A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM5_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM5_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#  endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM5.\n");
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_RP2040_PWM6
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(6,
-                                 CONFIG_RP2040_PWM6A_GPIO,
+#ifdef CONFIG_RP2040_PWM6
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(6, CONFIG_RP2040_PWM6A_GPIO,
                                  CONFIG_RP2040_PWM6B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM6A_INVERT
+#ifdef CONFIG_RP2040_PWM6A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM6B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM6B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM6_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM6_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    else
-  ret = rp2040_pwmdev_initialize(6,
-                                 CONFIG_RP2040_PWM6A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(6, CONFIG_RP2040_PWM6A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM6A_INVERT
+#ifdef CONFIG_RP2040_PWM6A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM6_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM6_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM6.\n");
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_RP2040_PWM7
-#    if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  ret = rp2040_pwmdev_initialize(7,
-                                 CONFIG_RP2040_PWM7A_GPIO,
+#ifdef CONFIG_RP2040_PWM7
+#if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
+  ret = rp2040_pwmdev_initialize(7, CONFIG_RP2040_PWM7A_GPIO,
                                  CONFIG_RP2040_PWM7B_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM7A_INVERT
+#ifdef CONFIG_RP2040_PWM7A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM7B_INVERT
+#endif
+#ifdef CONFIG_RP2040_PWM7B_INVERT
                                   | RP2040_PWM_CSR_B_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM7_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM7_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    else
-  ret = rp2040_pwmdev_initialize(7,
-                                 CONFIG_RP2040_PWM7A_GPIO,
+#endif
+                                  ));
+#else
+  ret = rp2040_pwmdev_initialize(7, CONFIG_RP2040_PWM7A_GPIO,
                                  (0
-#      ifdef CONFIG_RP2040_PWM7A_INVERT
+#ifdef CONFIG_RP2040_PWM7A_INVERT
                                   | RP2040_PWM_CSR_A_INV
-#      endif
-#      ifdef CONFIG_RP2040_PWM7_PHASE_CORRECT
+#endif
+#ifdef CONFIG_RP2040_PWM7_PHASE_CORRECT
                                   | RP2040_PWM_CSR_PH_CORRECT
-#      endif
-                                 ));
-#    endif
+#endif
+                                  ));
+#endif
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PWM7.\n");
     }
-#  endif
+#endif
 #endif
 
 #ifdef CONFIG_RP2040_SPISD
@@ -441,8 +429,7 @@ int rp2040_common_bringup(void)
   ret = board_spisd_initialize(0, CONFIG_RP2040_SPISD_SPI_CH);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize SPI device to MMC/SD: %d\n",
-           ret);
+      syslog(LOG_ERR, "Failed to initialize SPI device to MMC/SD: %d\n", ret);
     }
 #endif
 
@@ -508,6 +495,21 @@ int rp2040_common_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_LPWAN_RN2483
+
+#if CONFIG_RP2040_UART1_BAUD != 57600
+#error "UART interface used for LoRa radio must have a 57600 baud rate."
+#endif // CONFIG_RP2040_UART1_BAUD
+
+  /* Try to register RN2483 on UART 1 */
+
+  ret = rn2483_register("/dev/rn2483", "/dev/ttyS1");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: couldn't initialize RN2483: %d\n", ret);
+    }
+#endif /* CONFIG_LPWAN_RN2483 */
+
 #ifdef CONFIG_VIDEO_FB
   ret = fb_register(0, 0);
   if (ret < 0)
@@ -556,39 +558,39 @@ int rp2040_common_bringup(void)
     }
 #endif
 
-  /* Initialize ADC */
+    /* Initialize ADC */
 
 #if defined(CONFIG_ADC) && defined(CONFIG_RP2040_ADC)
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL0
-#    define ADC_0 true
-#  else
-#    define ADC_0 false
-#  endif
+#ifdef CONFIG_RPC2040_ADC_CHANNEL0
+#define ADC_0 true
+#else
+#define ADC_0 false
+#endif
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL1
-#    define ADC_1 true
-#  else
-#    define ADC_1 false
-#  endif
+#ifdef CONFIG_RPC2040_ADC_CHANNEL1
+#define ADC_1 true
+#else
+#define ADC_1 false
+#endif
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL2
-#    define ADC_2 true
-#  else
-#    define ADC_2 false
-#  endif
+#ifdef CONFIG_RPC2040_ADC_CHANNEL2
+#define ADC_2 true
+#else
+#define ADC_2 false
+#endif
 
-#  ifdef CONFIG_RPC2040_ADC_CHANNEL3
-#    define ADC_3 true
-#  else
-#    define ADC_3 false
-#  endif
+#ifdef CONFIG_RPC2040_ADC_CHANNEL3
+#define ADC_3 true
+#else
+#define ADC_3 false
+#endif
 
-#  ifdef CONFIG_RPC2040_ADC_TEMPERATURE
-#    define ADC_TEMP true
-#  else
-#    define ADC_TEMP false
-#  endif
+#ifdef CONFIG_RPC2040_ADC_TEMPERATURE
+#define ADC_TEMP true
+#else
+#define ADC_TEMP false
+#endif
 
   ret = rp2040_adc_setup("/dev/adc0", ADC_0, ADC_1, ADC_2, ADC_3, ADC_TEMP);
   if (ret != OK)
@@ -598,15 +600,13 @@ int rp2040_common_bringup(void)
 
 #endif /* defined(CONFIG_ADC) && defined(CONFIG_RP2040_ADC) */
 
-  /* Initialize board neo-pixel */
+    /* Initialize board neo-pixel */
 
 #if defined(CONFIG_RP2040_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
 
-  if (rp2040_ws2812_setup("/dev/leds0",
-                          CONFIG_RP2040_WS2812_GPIO_PIN,
+  if (rp2040_ws2812_setup("/dev/leds0", CONFIG_RP2040_WS2812_GPIO_PIN,
                           CONFIG_RP2040_WS2812_PWR_GPIO,
-                          CONFIG_WS2812_LED_COUNT,
-                          HAS_WHITE) == NULL)
+                          CONFIG_WS2812_LED_COUNT, HAS_WHITE) == NULL)
     {
       syslog(LOG_ERR, "Failed to initialize WS2812: %d\n", errno);
     }
@@ -618,8 +618,7 @@ int rp2040_common_bringup(void)
   ret = rp2040_wdt_init();
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize watchdog drivers: %d\n",
+      syslog(LOG_ERR, "ERROR: Failed to initialize watchdog drivers: %d\n",
              ret);
     }
 #endif
@@ -646,18 +645,14 @@ int rp2040_common_bringup(void)
 
           /* Mount the file system */
 
-          ret = nx_mount("/dev/smart0",
-                        CONFIG_RP2040_FLASH_MOUNT_POINT,
-                        "smartfs",
-                        0,
-                        NULL);
+          ret = nx_mount("/dev/smart0", CONFIG_RP2040_FLASH_MOUNT_POINT,
+                         "smartfs", 0, NULL);
           if (ret < 0)
             {
               syslog(LOG_ERR,
-                    "ERROR: nx_mount(\"/dev/smart0\", \"%s\", \"smartfs\","
-                    " 0, NULL) failed: %d\n",
-                    CONFIG_RP2040_FLASH_MOUNT_POINT,
-                    ret);
+                     "ERROR: nx_mount(\"/dev/smart0\", \"%s\", \"smartfs\","
+                     " 0, NULL) failed: %d\n",
+                     CONFIG_RP2040_FLASH_MOUNT_POINT, ret);
             }
         }
     }
@@ -667,8 +662,7 @@ int rp2040_common_bringup(void)
 #if defined(CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME)
   /* Register the ROM disk */
 
-  ret = romdisk_register(CONFIG_RP2040_ROMFS_ROMDISK_MINOR,
-                         rp2040_romfs_img,
+  ret = romdisk_register(CONFIG_RP2040_ROMFS_ROMDISK_MINOR, rp2040_romfs_img,
                          NSECTORS(rp2040_romfs_img_len),
                          CONFIG_RP2040_ROMFS_ROMDISK_SECTSIZE);
   if (ret < 0)
@@ -680,17 +674,13 @@ int rp2040_common_bringup(void)
       /* Mount the file system */
 
       ret = nx_mount(CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME,
-                     CONFIG_RP2040_ROMFS_MOUNT_MOUNTPOINT,
-                     "romfs",
-                     MS_RDONLY,
+                     CONFIG_RP2040_ROMFS_MOUNT_MOUNTPOINT, "romfs", MS_RDONLY,
                      NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR,
-                 "ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
+          syslog(LOG_ERR, "ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
                  CONFIG_RP2040_ROMFS_ROMDISK_DEVNAME,
-                 CONFIG_RP2040_ROMFS_MOUNT_MOUNTPOINT,
-                 ret);
+                 CONFIG_RP2040_ROMFS_MOUNT_MOUNTPOINT, ret);
         }
     }
 
