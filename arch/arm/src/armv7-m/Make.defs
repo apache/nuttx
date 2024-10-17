@@ -29,7 +29,11 @@ CMN_CSRCS += arm_hardfault.c arm_initialstate.c arm_itm.c
 CMN_CSRCS += arm_memfault.c arm_perf.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_tcbinfo.c
-CMN_CSRCS += arm_trigger_irq.c arm_usagefault.c arm_vectors.c arm_dbgmonitor.c
+CMN_CSRCS += arm_trigger_irq.c arm_usagefault.c arm_dbgmonitor.c
+
+ifneq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
+  CMN_CSRCS += arm_vectors.c
+endif
 
 ifeq ($(CONFIG_ARMV7M_SYSTICK),y)
   CMN_CSRCS += arm_systick.c
