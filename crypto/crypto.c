@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/crypto.c
+ *
+ * SPDX-License-Identifier: OAR
+ *
  * $OpenBSD: crypto.c,v 1.65 2014/07/13 23:24:47 deraadt Exp  $
  *
  * The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)

@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/chachapoly.c
+ *
+ * SPDX-License-Identifier: ISC
+ *
  * $OpenBSD: chachapoly.c,v 1.6 2020/07/22 13:54:30 tobhe Exp $
  *
  * Copyright (c) 2015 Mike Belopuhov

@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/cmac.c
+ *
+ * SPDX-License-Identifier: ISC
+ *
  * $OpenBSD: cmac.c,v 1.3 2017/05/02 17:07:06 mikeb Exp $
  *
  * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>

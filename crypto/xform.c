@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/xform.c
+ *
+ * SPDX-License-Identifier: ???
+ *
  * $OpenBSD: xform.c,v 1.61 2021/10/22 12:30:53 bluhm Exp $
  *
  * The authors of this code are John Ioannidis (ji@tla.org),

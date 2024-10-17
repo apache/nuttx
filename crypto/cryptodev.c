@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/cryptodev.c
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
  * $OpenBSD: cryptodev.c,v 1.82 2014/08/18 05:11:03 dlg Exp $
  * Copyright (c) 2001 Theo de Raadt
  *
