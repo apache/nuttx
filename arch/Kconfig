@@ -1119,6 +1119,13 @@ config ARCH_RAMFUNCS
 		so that FLASH can be reconfigured while the MCU executes out of
 		SRAM.
 
+config ARCH_HAVE_CUSTOM_VECTORS
+	bool
+	default n
+	---help---
+		If ARCH_HAVE_CUSTOM_VECTORS is defined, Chip should provide vectors
+		table as an optimization.
+
 config ARCH_HAVE_RAMVECTORS
 	bool
 	default n
