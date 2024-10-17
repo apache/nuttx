@@ -62,7 +62,7 @@ static int bt_driver_register_internal(FAR struct bt_driver_s *driver,
 #elif defined(CONFIG_NET_BLUETOOTH)
   return bt_netdev_register(driver);
 #else
-# error "Please select CONFIG_UART_BTH4 or CONFIG_NET_BLUETOOTH"
+  return -ENOSYS;
 #endif
 }
 
