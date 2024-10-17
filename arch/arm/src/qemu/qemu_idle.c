@@ -27,6 +27,10 @@
 #include <nuttx/arch.h>
 #include "arm_internal.h"
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+#include "sm.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -44,18 +48,32 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+extern volatile uint32_t g_ap_entry;
+#endif
+
 void up_idle(void)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+  if (g_ap_entry != 0)
+    {
+      up_irq_disable();
+      arm_sm_boot_nsec(g_ap_entry);
+      arm_sm_switch_nsec();
+    }
+#else
+  #if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* If the system is idle and there are no timer interrupts, then process
    * "fake" timer interrupts. Hopefully, something will wake up.
    */
 
-  nxsched_process_timer();
-#else
+    nxsched_process_timer();
+
+  #else
 
   /* Sleep until an interrupt occurs to save power */
 
-  asm("WFI");
+    asm("WFI");
+  #endif
 #endif
 }
