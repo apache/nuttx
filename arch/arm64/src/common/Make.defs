@@ -39,7 +39,7 @@ CMN_ASRCS += arm64_fork_func.S
 
 # Common C source files ( OS call up_xxx)
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
-CMN_CSRCS += arm64_nputs.c arm64_copystate.c arm64_createstack.c
+CMN_CSRCS += arm64_nputs.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
 CMN_CSRCS += arm64_exit.c arm64_fork.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c

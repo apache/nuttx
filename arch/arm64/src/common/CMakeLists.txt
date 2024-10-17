@@ -27,7 +27,7 @@ list(APPEND SRCS arm64_fork_func.S)
 
 # Common C source files ( OS call up_xxx)
 list(APPEND SRCS arm64_initialize.c arm64_initialstate.c arm64_boot.c)
-list(APPEND SRCS arm64_nputs.c arm64_copystate.c arm64_createstack.c)
+list(APPEND SRCS arm64_nputs.c arm64_createstack.c)
 list(APPEND SRCS arm64_releasestack.c arm64_stackframe.c arm64_usestack.c)
 list(APPEND SRCS arm64_exit.c arm64_fork.c)
 list(APPEND SRCS arm64_schedulesigaction.c arm64_sigdeliver.c)
