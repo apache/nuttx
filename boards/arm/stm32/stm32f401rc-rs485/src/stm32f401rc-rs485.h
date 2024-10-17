@@ -124,6 +124,10 @@
      GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN5)
 #endif
 
+/* WS2812 LEDs SPI */
+
+#define WS2812_SPI 1
+
 /* PWM
  *
  * The STM32F401RC-RS485 has no real on-board PWM devices, but the board can
