@@ -120,6 +120,13 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 CONTEXTDIRS += libs$(DELIM)libxx
 endif
 
+# Add toolchain library support
+
+ifeq ($(CONFIG_TOOLCHAINS_BUILTIN), y)
+USERLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+endif
+
 ifeq ($(CONFIG_NX),y)
 KERNDEPDIRS += graphics
 CONTEXTDIRS += graphics
@@ -185,6 +192,10 @@ endif
 
 ifeq ($(CONFIG_MM_TLSF_MANAGER),y)
 CONTEXTDIRS += mm
+endif
+
+ifeq ($(CONFIG_TOOLCHAINS_BUILTIN),y)
+CLEANDIRS += libs$(DELIM)libbuiltin
 endif
 
 CLEANDIRS += $(KERNDEPDIRS) $(USERDEPDIRS)
