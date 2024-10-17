@@ -47,7 +47,6 @@ list(
   lib_mkdirat.c
   lib_utimensat.c
   lib_mallopt.c
-  lib_memoryregion.c
   lib_getnprocs.c
   lib_pathbuffer.c)
 
