@@ -348,6 +348,7 @@ config ARCH_CHIP_RP2040
 	select ARM_HAVE_WFE_SEV
 	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_BOARD_COMMON
+	select ARCH_HAVE_CUSTOM_VECTORS
 	---help---
 		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
 
