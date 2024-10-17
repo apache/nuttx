@@ -318,14 +318,12 @@ int esp32_ble_initialize(void)
       return ERROR;
     }
 
-#ifdef CONFIG_DRIVERS_BLUETOOTH
   ret = bt_driver_register(&g_ble_priv.drv);
   if (ret < 0)
     {
       wlerr("bt_driver_register error: %d\n", ret);
       return ret;
     }
-#endif
 
   return OK;
 }

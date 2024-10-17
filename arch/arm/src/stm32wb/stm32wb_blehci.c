@@ -332,14 +332,12 @@ static int stm32wb_blehci_driverinitialize(void)
 {
   int ret = 0;
 
-#ifdef CONFIG_DRIVERS_BLUETOOTH
   ret = bt_driver_register(&g_blehci_driver);
   if (ret < 0)
     {
       wlerr("bt_driver_register error: %d\n", ret);
       return ret;
     }
-#endif
 
   return ret;
 }
