@@ -33,6 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/wireless.h>
 
+#ifdef CONFIG_ESPRESSIF_WIFI
 #include "esp_wifi_adapter.h"
 
 #include "esp_log.h"
@@ -44,7 +45,9 @@
 #include "esp_wpa.h"
 #include "rom/ets_sys.h"
 #include "soc/soc_caps.h"
+#endif /* CONFIG_ESPRESSIF_WIFI */
 
+#include "esp_err.h"
 #include "esp_wifi_utils.h"
 
 /****************************************************************************
@@ -103,6 +106,8 @@ static uint8_t g_channel_list[CHANNEL_MAX_NUM];
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_WIFI
 
 /****************************************************************************
  * Name: esp_wifi_start_scan
@@ -573,6 +578,7 @@ scan_result_full:
   priv->scan_status = ESP_SCAN_DONE;
   nxsem_post(&priv->scan_signal);
 }
+#endif /* CONFIG_ESPRESSIF_WIFI */
 
 /****************************************************************************
  * Name: esp_wifi_to_errno

@@ -465,6 +465,14 @@ config ESPRESSIF_WIFI
 	---help---
 		Enable Wi-Fi support
 
+config ESPRESSIF_BLE
+	bool "BLE"
+	depends on ESPRESSIF_ESP32C3
+	default n
+	select ESP_WIRELESS
+	---help---
+		Enable BLE support
+
 config ESP_COEX_SW_COEXIST_ENABLE
 	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
 	depends on (ESPRESSIF_WIFI && ESPRESSIF_BLE) || \
@@ -477,6 +485,13 @@ config ESP_COEX_SW_COEXIST_ENABLE
 		automatically managed, no user intervention is required.
 		If only Bluetooth is used, it is recommended to disable this option to reduce binary file
 		size.
+
+menuconfig ESPRESSIF_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default y if ESPRESSIF_WIFI && ESPRESSIF_BLE
+	default n
+	depends on ESPRESSIF_WIFI && ESPRESSIF_BLE
+	select ESPRESSIF_WIFI_STA_DISCONNECT_PM
 
 config ESP_MCPWM
 	bool "Motor Control PWM (MCPWM)"
@@ -932,6 +947,30 @@ config ESP_POWER_SAVE_MAX_MODEM
 endchoice # ESP_POWER_SAVE_MODE
 
 endmenu # ESPRESSIF_WIFI
+
+menu "BLE Configuration"
+	depends on ESPRESSIF_BLE
+
+config ESPRESSIF_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config ESPRESSIF_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESPRESSIF_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 253
+
+config ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
+
+endmenu # BLE Configuration
 
 menu "UART Configuration"
 	depends on ESPRESSIF_UART
