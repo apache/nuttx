@@ -526,6 +526,8 @@ int rn2483_register(FAR const char *devpath, FAR const char *uartpath)
   priv->config.sf = CONFIG_LPWAN_RN2483_SPREAD;
   priv->config.sync = CONFIG_LPWAN_RN2483_SYNC;
 
+  // TODO actually set configuration parameters on the radio via commands
+
   /* Register the character driver */
 
   err = register_driver(devpath, &g_rn2483fops, 0666, priv);
