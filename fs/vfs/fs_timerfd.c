@@ -31,6 +31,7 @@
 
 #include <debug.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/mutex.h>
 

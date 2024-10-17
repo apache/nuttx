@@ -31,6 +31,7 @@
 
 #ifdef CONFIG_PCI_IVSHMEM
 
+#include <nuttx/irq.h>
 #include <nuttx/list.h>
 
 /****************************************************************************

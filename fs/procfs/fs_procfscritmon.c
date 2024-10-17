@@ -42,6 +42,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
+#include <nuttx/sched.h>
 
 #include "fs_heap.h"
 

@@ -43,6 +43,7 @@
 #include <fcntl.h>
 #include <poll.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>

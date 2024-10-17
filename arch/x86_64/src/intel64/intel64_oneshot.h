@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/clock.h>
 
 #include <intel64_hpet.h>
 
