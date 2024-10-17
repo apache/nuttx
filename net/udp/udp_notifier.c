@@ -170,11 +170,11 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  *
  ****************************************************************************/
 
-void udp_notifier_teardown(int key)
+void udp_notifier_teardown(FAR void *key)
 {
   /* This is just a simple wrapper around work_notifier_teardown(). */
 
-  work_notifier_teardown(key);
+  work_notifier_teardown(*(FAR int *)key);
 }
 
 /****************************************************************************
