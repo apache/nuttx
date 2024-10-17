@@ -186,9 +186,9 @@ struct noteram_driver_s g_noteram_driver =
   g_ramnote_buffer,
   CONFIG_DRIVERS_NOTERAM_BUFSIZE,
 #ifdef CONFIG_DRIVERS_NOTERAM_DEFAULT_NOOVERWRITE
-  NOTERAM_MODE_OVERWRITE_DISABLE
+  NOTE_MODE_OVERWRITE_DISABLE
 #else
-  NOTERAM_MODE_OVERWRITE_ENABLE
+  NOTE_MODE_OVERWRITE_ENABLE
 #endif
 };
 
@@ -215,9 +215,9 @@ static void noteram_buffer_clear(FAR struct noteram_driver_s *drv)
   drv->ni_tail = drv->ni_head;
   drv->ni_read = drv->ni_head;
 
-  if (drv->ni_overwrite == NOTERAM_MODE_OVERWRITE_OVERFLOW)
+  if (drv->ni_overwrite == NOTE_MODE_OVERWRITE_OVERFLOW)
     {
-      drv->ni_overwrite = NOTERAM_MODE_OVERWRITE_DISABLE;
+      drv->ni_overwrite = NOTE_MODE_OVERWRITE_DISABLE;
     }
 }
 
@@ -476,7 +476,7 @@ static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
   ssize_t ret;
   irqstate_t flags;
 
-  if (ctx->mode == NOTERAM_MODE_READ_BINARY)
+  if (ctx->mode == NOTE_MODE_READ_BINARY)
     {
       flags = spin_lock_irqsave_notrace(&drv->lock);
       ret = noteram_get(drv, (FAR uint8_t *)buffer, buflen);
@@ -525,22 +525,22 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* NOTERAM_CLEAR
+      /* NOTE_CLEAR
        *      - Clear all contents of the circular buffer
        *        Argument: Ignored
        */
 
-      case NOTERAM_CLEAR:
+      case NOTE_CLEAR:
         noteram_buffer_clear(drv);
         ret = OK;
         break;
 
-      /* NOTERAM_GETMODE
+      /* NOTE_GETMODE
        *      - Get overwrite mode
        *        Argument: A writable pointer to unsigned int
        */
 
-      case NOTERAM_GETMODE:
+      case NOTE_GETMODE:
         if (arg == 0)
           {
             ret = -EINVAL;
@@ -552,12 +552,12 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
-      /* NOTERAM_SETMODE
+      /* NOTE_SETMODE
        *      - Set overwrite mode
        *        Argument: A read-only pointer to unsigned int
        */
 
-      case NOTERAM_SETMODE:
+      case NOTE_SETMODE:
         if (arg == 0)
           {
             ret = -EINVAL;
@@ -569,12 +569,12 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
-      /* NOTERAM_GETREADMODE
+      /* NOTE_GETREADMODE
        *      - Get read mode
        *        Argument: A writable pointer to unsigned int
        */
 
-      case NOTERAM_GETREADMODE:
+      case NOTE_GETREADMODE:
         if (arg == 0)
           {
             ret = -EINVAL;
@@ -588,12 +588,12 @@ static int noteram_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           }
         break;
 
-      /* NOTERAM_SETREADMODE
+      /* NOTE_SETREADMODE
        *      - Set read mode
        *        Argument: A read-only pointer to unsigned int
        */
 
-      case NOTERAM_SETREADMODE:
+      case NOTE_SETREADMODE:
         if (arg == 0)
           {
             ret = -EINVAL;
@@ -728,7 +728,7 @@ static void noteram_add(FAR struct note_driver_s *driver,
 
   flags = spin_lock_irqsave_notrace(&drv->lock);
 
-  if (drv->ni_overwrite == NOTERAM_MODE_OVERWRITE_OVERFLOW)
+  if (drv->ni_overwrite == NOTE_MODE_OVERWRITE_OVERFLOW)
     {
       spin_unlock_irqrestore_notrace(&drv->lock, flags);
       return;
@@ -739,11 +739,11 @@ static void noteram_add(FAR struct note_driver_s *driver,
 
   if (remain <= NOTE_ALIGN(notelen))
     {
-      if (drv->ni_overwrite == NOTERAM_MODE_OVERWRITE_DISABLE)
+      if (drv->ni_overwrite == NOTE_MODE_OVERWRITE_DISABLE)
         {
           /* Stop recording if not in overwrite mode */
 
-          drv->ni_overwrite = NOTERAM_MODE_OVERWRITE_OVERFLOW;
+          drv->ni_overwrite = NOTE_MODE_OVERWRITE_OVERFLOW;
           spin_unlock_irqrestore_notrace(&drv->lock, flags);
           return;
         }

@@ -30,7 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
-#include <nuttx/note/notectl_driver.h>
+#include <nuttx/note/note_driver.h>
 
 /****************************************************************************
  * Private Types
@@ -72,12 +72,12 @@ static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* NOTECTL_GETMODE
+      /* NOTE_GETFILTER
        *      - Get note filter mode
        *        Argument: A writable pointer to struct note_filter_mode_s
        */
 
-      case NOTECTL_GETMODE:
+      case NOTE_GETFILTER:
         {
           FAR struct note_filter_named_mode_s *mode =
                          (FAR struct note_filter_named_mode_s *)arg;
@@ -94,12 +94,12 @@ static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* NOTECTL_SETMODE
+      /* NOTE_SETFILTER
        *      - Set note filter mode
        *        Argument: A read-only pointer to struct note_filter_mode_s
        */
 
-      case NOTECTL_SETMODE:
+      case NOTE_SETFILTER:
         {
           FAR struct note_filter_named_mode_s *mode =
                         (FAR struct note_filter_named_mode_s *)arg;
@@ -117,12 +117,12 @@ static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-      /* NOTECTL_GETSYSCALLFILTER
+      /* NOTE_GETSYSCALLFILTER
        *      - Get syscall filter setting
        *        Argument: A writable pointer to struct note_filter_syscall_s
        */
 
-      case NOTECTL_GETSYSCALLFILTER:
+      case NOTE_GETSYSCALLFILTER:
         {
           FAR struct note_filter_named_syscall_s *filter;
           filter = (FAR struct note_filter_named_syscall_s *)arg;
@@ -139,12 +139,12 @@ static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* NOTECTL_SETSYSCALLFILTER
+      /* NOTE_SETSYSCALLFILTER
        *      - Set syscall filter setting
        *        Argument: A read-only pointer to struct note_filter_syscall_s
        */
 
-      case NOTECTL_SETSYSCALLFILTER:
+      case NOTE_SETSYSCALLFILTER:
         {
           FAR struct note_filter_named_syscall_s *filter;
           filter = (FAR struct note_filter_named_syscall_s *)arg;
@@ -163,12 +163,12 @@ static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-      /* NOTECTL_GETIRQFILTER
+      /* NOTE_GETIRQFILTER
        *      - Get IRQ filter setting
        *        Argument: A writable pointer to struct note_filter_irq_s
        */
 
-      case NOTECTL_GETIRQFILTER:
+      case NOTE_GETIRQFILTER:
         {
           FAR struct note_filter_named_irq_s *filter;
           filter = (FAR struct note_filter_named_irq_s *)arg;
@@ -185,13 +185,13 @@ static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* NOTECTL_SETIRQFILTER
+      /* NOTE_SETIRQFILTER
        *      - Set IRQ filter setting
        *        Argument: A read-only pointer to struct
        *                  note_filter_irq_s
        */
 
-      case NOTECTL_SETIRQFILTER:
+      case NOTE_SETIRQFILTER:
         {
           FAR struct note_filter_named_irq_s *filter;
           filter = (FAR struct note_filter_named_irq_s *)arg;

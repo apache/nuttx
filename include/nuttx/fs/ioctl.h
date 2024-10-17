@@ -86,8 +86,7 @@
 #define _NXTERMBASE     (0x2900) /* NxTerm character driver ioctl commands */
 #define _RFIOCBASE      (0x2a00) /* RF devices ioctl commands */
 #define _RPMSGBASE      (0x2b00) /* Remote processor message ioctl commands */
-#define _NOTECTLBASE    (0x2c00) /* Note filter control ioctl commands*/
-#define _NOTERAMBASE    (0x2d00) /* Noteram device ioctl commands*/
+#define _NOTEBASE       (0x2c00) /* Note ioctl commands */
 #define _RCIOCBASE      (0x2e00) /* Remote Control device ioctl commands */
 #define _HIMEMBASE      (0x2f00) /* Himem device ioctl commands */
 #define _EFUSEBASE      (0x3000) /* Efuse device ioctl commands */
@@ -530,169 +529,164 @@
 
 /* (see nuttx/include/rtc.h */
 
-#define _RTCIOCVALID(c)   (_IOC_TYPE(c)==_RTCBASE)
-#define _RTCIOC(nr)       _IOC(_RTCBASE,nr)
+#define _RTCIOCVALID(c)       (_IOC_TYPE(c)==_RTCBASE)
+#define _RTCIOC(nr)           _IOC(_RTCBASE,nr)
 
 /* Relay driver ioctl definitions *******************************************/
 
 /* (see nuttx/power/relay.h */
 
-#define _RELAYIOCVALID(c) (_IOC_TYPE(c)==_RELAYBASE)
-#define _RELAYIOC(nr)     _IOC(_RELAYBASE,nr)
+#define _RELAYIOCVALID(c)     (_IOC_TYPE(c)==_RELAYBASE)
+#define _RELAYIOC(nr)         _IOC(_RELAYBASE,nr)
 
 /* CAN driver ioctl definitions *********************************************/
 
 /* (see nuttx/can/can.h */
 
-#define _CANIOCVALID(c)   (_IOC_TYPE(c)==_CANBASE)
-#define _CANIOC(nr)       _IOC(_CANBASE,nr)
+#define _CANIOCVALID(c)       (_IOC_TYPE(c)==_CANBASE)
+#define _CANIOC(nr)           _IOC(_CANBASE,nr)
 
 /* Button driver ioctl definitions ******************************************/
 
 /* (see nuttx/input/buttons.h */
 
-#define _BTNIOCVALID(c)   (_IOC_TYPE(c)==_BTNBASE)
-#define _BTNIOC(nr)       _IOC(_BTNBASE,nr)
+#define _BTNIOCVALID(c)       (_IOC_TYPE(c)==_BTNBASE)
+#define _BTNIOC(nr)           _IOC(_BTNBASE,nr)
 
 /* User LED driver ioctl definitions ****************************************/
 
 /* (see nuttx/leds/usersled.h */
 
-#define _ULEDIOCVALID(c)  (_IOC_TYPE(c)==_ULEDBASE)
-#define _ULEDIOC(nr)      _IOC(_ULEDBASE,nr)
+#define _ULEDIOCVALID(c)      (_IOC_TYPE(c)==_ULEDBASE)
+#define _ULEDIOC(nr)          _IOC(_ULEDBASE,nr)
 
 /* Zero Cross driver ioctl definitions **************************************/
 
 /* (see nuttx/include/sensor/zerocross.h */
 
-#define _ZCIOCVALID(c)    (_IOC_TYPE(c)==_ZCBASE)
-#define _ZCIOC(nr)        _IOC(_ZCBASE,nr)
+#define _ZCIOCVALID(c)        (_IOC_TYPE(c)==_ZCBASE)
+#define _ZCIOC(nr)            _IOC(_ZCBASE,nr)
 
 /* Loop driver ioctl definitions ********************************************/
 
 /* (see nuttx/include/fs/loop.h */
 
-#define _LOOPIOCVALID(c)  (_IOC_TYPE(c)==_LOOPBASE)
-#define _LOOPIOC(nr)      _IOC(_LOOPBASE,nr)
+#define _LOOPIOCVALID(c)      (_IOC_TYPE(c)==_LOOPBASE)
+#define _LOOPIOC(nr)          _IOC(_LOOPBASE,nr)
 
 /* Modem driver ioctl definitions *******************************************/
 
 /* see nuttx/include/modem/ioctl.h */
 
-#define _MODEMIOCVALID(c) (_IOC_TYPE(c)==_MODEMBASE)
-#define _MODEMIOC(nr)     _IOC(_MODEMBASE,nr)
+#define _MODEMIOCVALID(c)     (_IOC_TYPE(c)==_MODEMBASE)
+#define _MODEMIOC(nr)         _IOC(_MODEMBASE,nr)
 
 /* I2C driver ioctl definitions *********************************************/
 
 /* see nuttx/include/i2c/i2c_master.h */
 
-#define _I2CIOCVALID(c)   (_IOC_TYPE(c)==_I2CBASE)
-#define _I2CIOC(nr)       _IOC(_I2CBASE,nr)
+#define _I2CIOCVALID(c)       (_IOC_TYPE(c)==_I2CBASE)
+#define _I2CIOC(nr)           _IOC(_I2CBASE,nr)
 
 /* SPI driver ioctl definitions *********************************************/
 
 /* see nuttx/include/spi/spi_transfer.h */
 
-#define _SPIIOCVALID(c)   (_IOC_TYPE(c)==_SPIBASE)
-#define _SPIIOC(nr)       _IOC(_SPIBASE,nr)
+#define _SPIIOCVALID(c)       (_IOC_TYPE(c)==_SPIBASE)
+#define _SPIIOC(nr)           _IOC(_SPIBASE,nr)
 
 /* GPIO driver command definitions ******************************************/
 
 /* see nuttx/include/ioexpander/gpio.h */
 
-#define _GPIOCVALID(c)    (_IOC_TYPE(c)==_GPIOBASE)
-#define _GPIOC(nr)        _IOC(_GPIOBASE,nr)
+#define _GPIOCVALID(c)        (_IOC_TYPE(c)==_GPIOBASE)
+#define _GPIOC(nr)            _IOC(_GPIOBASE,nr)
 
 /* Contactless driver ioctl definitions *************************************/
 
 /* (see nuttx/include/contactless/ioctl.h */
 
-#define _CLIOCVALID(c)    (_IOC_TYPE(c)==_CLIOCBASE)
-#define _CLIOC(nr)        _IOC(_CLIOCBASE,nr)
+#define _CLIOCVALID(c)        (_IOC_TYPE(c)==_CLIOCBASE)
+#define _CLIOC(nr)            _IOC(_CLIOCBASE,nr)
 
 /* USB-C controller driver ioctl definitions ********************************/
 
 /* (see nuttx/include/usb/xxx.h */
 
-#define _USBCIOCVALID(c)  (_IOC_TYPE(c)==_USBCBASE)
-#define _USBCIOC(nr)      _IOC(_USBCBASE,nr)
+#define _USBCIOCVALID(c)      (_IOC_TYPE(c)==_USBCBASE)
+#define _USBCIOC(nr)          _IOC(_USBCBASE,nr)
 
 /* 802.15.4 MAC driver ioctl definitions ************************************/
 
 /* (see nuttx/include/wireless/ieee802154/ieee802154_mac.h */
 
-#define _MAC802154IOCVALID(c)  (_IOC_TYPE(c)==_MAC802154BASE)
-#define _MAC802154IOC(nr)      _IOC(_MAC802154BASE,nr)
+#define _MAC802154IOCVALID(c) (_IOC_TYPE(c)==_MAC802154BASE)
+#define _MAC802154IOC(nr)     _IOC(_MAC802154BASE,nr)
 
 /* Power-Related IOCTLs *****************************************************/
 
-#define _PWRIOCVALID(c)   (_IOC_TYPE(c)==_PWRBASE)
-#define _PWRIOC(nr)       _IOC(_PWRBASE,nr)
+#define _PWRIOCVALID(c)       (_IOC_TYPE(c)==_PWRBASE)
+#define _PWRIOC(nr)           _IOC(_PWRBASE,nr)
 
 /* Frame buffer character drivers *******************************************/
 
-#define _FBIOCVALID(c)    (_IOC_TYPE(c)==_FBIOCBASE)
-#define _FBIOC(nr)        _IOC(_FBIOCBASE,nr)
+#define _FBIOCVALID(c)        (_IOC_TYPE(c)==_FBIOCBASE)
+#define _FBIOC(nr)            _IOC(_FBIOCBASE,nr)
 
 /* NxTerm character drivers *************************************************/
 
-#define _NXTERMVALID(c)   (_IOC_TYPE(c)==_NXTERMBASE)
-#define _NXTERMIOC(nr)    _IOC(_NXTERMBASE,nr)
+#define _NXTERMVALID(c)       (_IOC_TYPE(c)==_NXTERMBASE)
+#define _NXTERMIOC(nr)        _IOC(_NXTERMBASE,nr)
 
 /* NuttX RF ioctl definitions (see nuttx/rf/ioctl.h) ************************/
 
-#define _RFIOCVALID(c)    (_IOC_TYPE(c)==_RFIOCBASE)
-#define _RFIOC(nr)        _IOC(_RFIOCBASE,nr)
+#define _RFIOCVALID(c)        (_IOC_TYPE(c)==_RFIOCBASE)
+#define _RFIOC(nr)            _IOC(_RFIOCBASE,nr)
 
 /* Rpmsg drivers ************************************************************/
 
-#define _RPMSGIOCVALID(c)   (_IOC_TYPE(c)==_RPMSGBASE)
-#define _RPMSGIOC(nr)       _IOC(_RPMSGBASE,nr)
+#define _RPMSGIOCVALID(c)     (_IOC_TYPE(c)==_RPMSGBASE)
+#define _RPMSGIOC(nr)         _IOC(_RPMSGBASE,nr)
 
-/* Notectl drivers **********************************************************/
+/* Note drivers *************************************************************/
 
-#define _NOTECTLIOCVALID(c) (_IOC_TYPE(c) == _NOTECTLBASE)
-#define _NOTECTLIOC(nr)     _IOC(_NOTECTLBASE, nr)
-
-/* Noteram drivers **********************************************************/
-
-#define _NOTERAMIOCVALID(c) (_IOC_TYPE(c) == _NOTERAMBASE)
-#define _NOTERAMIOC(nr)     _IOC(_NOTERAMBASE, nr)
+#define _NOTEIOCVALID(c)      (_IOC_TYPE(c) == _NOTEBASE)
+#define _NOTEIOC(nr)          _IOC(_NOTEBASE, nr)
 
 /* Remote Control drivers ***************************************************/
 
-#define _RCIOCVALID(c)    (_IOC_TYPE(c)==_RCIOCBASE)
-#define _RCIOC(nr)        _IOC(_RCIOCBASE,nr)
+#define _RCIOCVALID(c)        (_IOC_TYPE(c)==_RCIOCBASE)
+#define _RCIOC(nr)            _IOC(_RCIOCBASE,nr)
 
 /* Hime drivers *************************************************************/
 
-#define _HIMEMIOCVALID(c)   (_IOC_TYPE(c) == _HIMEMBASE)
-#define _HIMEMIOC(nr)       _IOC(_HIMEMBASE, nr)
+#define _HIMEMIOCVALID(c)     (_IOC_TYPE(c) == _HIMEMBASE)
+#define _HIMEMIOC(nr)         _IOC(_HIMEMBASE, nr)
 
 /* Efuse drivers ************************************************************/
 
-#define _EFUSEIOCVALID(c)   (_IOC_TYPE(c) == _EFUSEBASE)
-#define _EFUSEIOC(nr)       _IOC(_EFUSEBASE, nr)
+#define _EFUSEIOCVALID(c)     (_IOC_TYPE(c) == _EFUSEBASE)
+#define _EFUSEIOC(nr)         _IOC(_EFUSEBASE, nr)
 
 /* Motor drivers ************************************************************/
 
-#define _MTRIOCVALID(c)     (_IOC_TYPE(c) == _MTRIOBASE)
-#define _MTRIOC(nr)         _IOC(_MTRIOBASE, nr)
+#define _MTRIOCVALID(c)       (_IOC_TYPE(c) == _MTRIOBASE)
+#define _MTRIOC(nr)           _IOC(_MTRIOBASE, nr)
 
 /* Stepper drivers **********************************************************/
 
-#define _STEPIOCVALID(c)    (_IOC_TYPE(c) == _STEPIOBASE)
-#define _STEPIOC(nr)        _IOC(_STEPIOBASE, nr)
+#define _STEPIOCVALID(c)      (_IOC_TYPE(c) == _STEPIOBASE)
+#define _STEPIOC(nr)          _IOC(_STEPIOBASE, nr)
 
 /* MATH drivers *************************************************************/
 
-#define _MATHIOCVALID(c)    (_IOC_TYPE(c) == _MATHIOBASE)
-#define _MATHIOC(nr)        _IOC(_MATHIOBASE, nr)
+#define _MATHIOCVALID(c)      (_IOC_TYPE(c) == _MATHIOBASE)
+#define _MATHIOC(nr)          _IOC(_MATHIOBASE, nr)
 
 /* MMCSD drivers ************************************************************/
 
-#define _MMCSDIOCVALID(c)   (_IOC_TYPE(c) == _MMCSDIOBASE)
-#define _MMCSDIOC(nr)       _IOC(_MMCSDIOBASE, nr)
+#define _MMCSDIOCVALID(c)     (_IOC_TYPE(c) == _MMCSDIOBASE)
+#define _MMCSDIOC(nr)         _IOC(_MMCSDIOBASE, nr)
 
 /* Bluetooth ioctl definitions **********************************************/
 
@@ -701,104 +695,104 @@
 
 /* Packet radio ioctl definitions *******************************************/
 
-#define _PKRADIOIOCVALID(c) (_IOC_TYPE(c)==_PKTRADIOBASE)
-#define _PKRADIOIOC(nr)     _IOC(_PKTRADIOBASE,nr)
+#define _PKRADIOIOCVALID(c)   (_IOC_TYPE(c)==_PKTRADIOBASE)
+#define _PKRADIOIOC(nr)       _IOC(_PKTRADIOBASE,nr)
 
 /* LTE device ioctl definitions *********************************************/
 
-#define _LTEIOCVALID(c) (_IOC_TYPE(c)==_LTEBASE)
-#define _LTEIOC(nr)     _IOC(_LTEBASE,nr)
+#define _LTEIOCVALID(c)       (_IOC_TYPE(c)==_LTEBASE)
+#define _LTEIOC(nr)           _IOC(_LTEBASE,nr)
 
 /* Video device ioctl definitions *******************************************/
 
-#define _VIDIOCVALID(c) (_IOC_TYPE(c)==_VIDIOCBASE)
-#define _VIDIOC(nr)      _IOC(_VIDIOCBASE,nr)
+#define _VIDIOCVALID(c)       (_IOC_TYPE(c)==_VIDIOCBASE)
+#define _VIDIOC(nr)           _IOC(_VIDIOCBASE,nr)
 
 /* cellularctl() command definitions ****************************************/
 
-#define _CELLIOCVALID(c) (_IOC_TYPE(c)==_CELLIOCBASE)
-#define _CELLIOC(nr)     _IOC(_CELLIOCBASE,nr)
+#define _CELLIOCVALID(c)      (_IOC_TYPE(c)==_CELLIOCBASE)
+#define _CELLIOC(nr)          _IOC(_CELLIOCBASE,nr)
 
 /* mipidsi driver ioctl definitions *****************************************/
 
-#define _MIPIDSIIOCVALID(c)    (_IOC_TYPE(c)==_MIPIDSIBASE)
-#define _MIPIDSIIOC(nr)        _IOC(_MIPIDSIBASE,nr)
+#define _MIPIDSIIOCVALID(c)   (_IOC_TYPE(c)==_MIPIDSIBASE)
+#define _MIPIDSIIOC(nr)       _IOC(_MIPIDSIBASE,nr)
 
 /* Secure element ioctl definitions *****************************************/
 
 /* (see nuttx/include/crypto/se05x.h */
 
-#define _SEIOCVALID(c)     (_IOC_TYPE(c)==_SEIOCBASE)
-#define _SEIOC(nr)         _IOC(_SEIOCBASE,nr)
+#define _SEIOCVALID(c)        (_IOC_TYPE(c)==_SEIOCBASE)
+#define _SEIOC(nr)            _IOC(_SEIOCBASE,nr)
 
 /* syslog driver ioctl definitions ******************************************/
 
-#define _SYSLOGVALID(c) (_IOC_TYPE(c)==_SYSLOGBASE)
-#define _SYSLOGIOC(nr)  _IOC(_SYSLOGBASE,nr)
+#define _SYSLOGVALID(c)       (_IOC_TYPE(c)==_SYSLOGBASE)
+#define _SYSLOGIOC(nr)        _IOC(_SYSLOGBASE,nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 
 /* (see nuttx/include/wireless/wireless.h */
 
-#define _WLIOCVALID(c)    (_IOC_TYPE(c)==_WLIOCBASE)
-#define _WLIOC(nr)        _IOC(_WLIOCBASE,nr)
+#define _WLIOCVALID(c)        (_IOC_TYPE(c)==_WLIOCBASE)
+#define _WLIOC(nr)            _IOC(_WLIOCBASE,nr)
 
 /* boardctl() command definitions *******************************************/
 
-#define _BOARDIOCVALID(c) (_IOC_TYPE(c)==_BOARDBASE)
-#define _BOARDIOC(nr)     _IOC(_BOARDBASE,nr)
+#define _BOARDIOCVALID(c)     (_IOC_TYPE(c)==_BOARDBASE)
+#define _BOARDIOC(nr)         _IOC(_BOARDBASE,nr)
 
 /* FPAG configuration ioctl definitions *************************************/
 
-#define _FPGACFGVALID(c) (_IOC_TYPE(c) == _FPGACFGBASE)
-#define _FPGACFGIOC(nr) _IOC(_FPGACFGBASE, nr)
+#define _FPGACFGVALID(c)      (_IOC_TYPE(c) == _FPGACFGBASE)
+#define _FPGACFGIOC(nr)       _IOC(_FPGACFGBASE, nr)
 
 /* Pci controller drivers ***************************************************/
 
-#define _PCIIOCVALID(c)   (_IOC_TYPE(c)==_PCIBASE)
-#define _PCIIOC(nr)       _IOC(_PCIBASE,nr)
+#define _PCIIOCVALID(c)       (_IOC_TYPE(c)==_PCIBASE)
+#define _PCIIOC(nr)           _IOC(_PCIBASE,nr)
 
 /* I3C driver ioctl definitions *********************************************/
 
 /* see nuttx/include/i3c/i3c_driver.h */
 
-#define _I3CIOCVALID(c)   (_IOC_TYPE(c)==_I3CBASE)
-#define _I3CIOC(nr)       _IOC(_I3CBASE,nr)
+#define _I3CIOCVALID(c)       (_IOC_TYPE(c)==_I3CBASE)
+#define _I3CIOC(nr)           _IOC(_I3CBASE,nr)
 
 /* Force Feedback driver command definitions ********************************/
 
 /* see nuttx/include/input/ff.h */
 
-#define _FFIOCVALID(c) (_IOC_TYPE(c)==_FFIOCBASE)
-#define _FFIOC(nr)     _IOC(_FFIOCBASE,nr)
+#define _FFIOCVALID(c)        (_IOC_TYPE(c)==_FFIOCBASE)
+#define _FFIOC(nr)            _IOC(_FFIOCBASE,nr)
 
 /* Pinctrl driver command definitions ***************************************/
 
 /* see nuttx/include/pinctrl/pinctrl.h */
 
-#define _PINCTRLIOCVALID(c) (_IOC_TYPE(c)==_PINCTRLBASE)
-#define _PINCTRLIOC(nr)     _IOC(_PINCTRLBASE,nr)
+#define _PINCTRLIOCVALID(c)   (_IOC_TYPE(c)==_PINCTRLBASE)
+#define _PINCTRLIOC(nr)       _IOC(_PINCTRLBASE,nr)
 
 /* NuttX i2s driver ioctl definitions ***************************************/
 
 /* (see nuttx/audio/i2s.h) */
 
-#define _I2SOCVALID(c) (_IOC_TYPE(c)==_I2SOCBASE)
-#define _I2SOC(nr)     _IOC(_I2SOCBASE,nr)
+#define _I2SOCVALID(c)        (_IOC_TYPE(c)==_I2SOCBASE)
+#define _I2SOC(nr)            _IOC(_I2SOCBASE,nr)
 
 /* 1WIRE driver ioctl definitions *******************************************/
 
 /* see nuttx/1wire/1wire.h */
 
-#define _1WIREIOCVALID(c) (_IOC_TYPE(c)==_1WIREBASE)
-#define _1WIREIOC(nr)     _IOC(_1WIREBASE,nr)
+#define _1WIREIOCVALID(c)     (_IOC_TYPE(c)==_1WIREBASE)
+#define _1WIREIOC(nr)         _IOC(_1WIREBASE,nr)
 
 /* EEPROM driver ioctl definitions ******************************************/
 
 /* (see nuttx/include/eeprom/eeprom.h */
 
-#define _EEPIOCVALID(c)    (_IOC_TYPE(c)==_EEPIOCBASE)
-#define _EEPIOC(nr)        _IOC(_EEPIOCBASE,nr)
+#define _EEPIOCVALID(c)       (_IOC_TYPE(c)==_EEPIOCBASE)
+#define _EEPIOC(nr)           _IOC(_EEPIOCBASE,nr)
 
 /* PTP driver ioctl definitions *********************************************/
 

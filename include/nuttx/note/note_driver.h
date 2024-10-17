@@ -31,12 +31,75 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* IOCTL Commands ***********************************************************/
+
+/* NOTE_CLEAR
+ *              - Clear all contents of the circular buffer
+ *                Argument: Ignored
+ * NOTE_GETMODE
+ *              - Get overwrite mode
+ *                Argument: A writable pointer to unsigned int
+ * NOTE_SETMODE
+ *              - Set overwrite mode
+ *                Argument: A read-only pointer to unsigned int
+ * NOTE_GETREADMODE
+ *              - Get read mode
+ *                Argument: A writable pointer to unsigned int
+ * NOTE_SETREADMODE
+ *              - Set read mode
+ *                Argument: A read-only pointer to unsigned int
+ * NOTE_GETFILTER
+ *              - Get note filter mode
+ *                Argument: A writable pointer to struct note_filter_mode_s
+ * NOTE_SETFILTER
+ *              - Set note filter mode
+ *                Argument: A read-only pointer to struct note_filter_mode_s
+ * NOTE_GETSYSCALLFILTER
+ *              - Get syscall filter setting
+ *                Argument: A writable pointer to struct
+ *                          note_filter_syscall_s
+ * NOTE_SETSYSCALLFILTER
+ *              - Set syscall filter setting
+ *                Argument: A read-only pointer to struct
+ *                          note_filter_syscall_s
+ * NOTE_GETIRQFILTER
+ *              - Get IRQ filter setting
+ *                Argument: A writable pointer to struct
+ *                          note_filter_irq_s
+ * NOTE_SETIRQFILTER
+ *              - Set IRQ filter setting
+ *                Argument: A read-only pointer to struct
+ *                          note_filter_irq_s
+ */
+
+#define NOTE_CLEAR                       _NOTEIOC(0x01)
+#define NOTE_GETMODE                     _NOTEIOC(0x02)
+#define NOTE_SETMODE                     _NOTEIOC(0x03)
+#define NOTE_GETREADMODE                 _NOTEIOC(0x04)
+#define NOTE_SETREADMODE                 _NOTEIOC(0x05)
+#define NOTE_GETFILTER                   _NOTEIOC(0x06)
+#define NOTE_SETFILTER                   _NOTEIOC(0x07)
+#define NOTE_GETSYSCALLFILTER            _NOTEIOC(0x08)
+#define NOTE_SETSYSCALLFILTER            _NOTEIOC(0x09)
+#define NOTE_GETIRQFILTER                _NOTEIOC(0x0A)
+#define NOTE_SETIRQFILTER                _NOTEIOC(0x0B)
+
+/* Overwrite mode definitions */
+
+#define NOTE_MODE_OVERWRITE_DISABLE      0
+#define NOTE_MODE_OVERWRITE_ENABLE       1
+#define NOTE_MODE_OVERWRITE_OVERFLOW     2
+
+#define NOTE_MODE_READ_ASCII             0
+#define NOTE_MODE_READ_BINARY            1
 
 /****************************************************************************
  * Public Types

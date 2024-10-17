@@ -29,58 +29,11 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-
-#include <nuttx/sched_note.h>
-#include <nuttx/fs/ioctl.h>
-
 #ifdef CONFIG_SCHED_INSTRUMENTATION
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* IOCTL Commands ***********************************************************/
-
-/* NOTECTL_GETMODE
- *              - Get note filter mode
- *                Argument: A writable pointer to struct note_filter_mode_s
- * NOTECTL_SETMODE
- *              - Set note filter mode
- *                Argument: A read-only pointer to struct note_filter_mode_s
- * NOTECTL_GETSYSCALLFILTER
- *              - Get syscall filter setting
- *                Argument: A writable pointer to struct
- *                          note_filter_syscall_s
- * NOTECTL_SETSYSCALLFILTER
- *              - Set syscall filter setting
- *                Argument: A read-only pointer to struct
- *                          note_filter_syscall_s
- * NOTECTL_GETIRQFILTER
- *              - Get IRQ filter setting
- *                Argument: A writable pointer to struct
- *                          note_filter_irq_s
- * NOTECTL_SETIRQFILTER
- *              - Set IRQ filter setting
- *                Argument: A read-only pointer to struct
- *                          note_filter_irq_s
- */
-
-#ifdef CONFIG_DRIVERS_NOTECTL
-
-#define NOTECTL_GETMODE             _NOTECTLIOC(0x01)
-#define NOTECTL_SETMODE             _NOTECTLIOC(0x02)
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-#define NOTECTL_GETSYSCALLFILTER    _NOTECTLIOC(0x03)
-#define NOTECTL_SETSYSCALLFILTER    _NOTECTLIOC(0x04)
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-#define NOTECTL_GETIRQFILTER        _NOTECTLIOC(0x05)
-#define NOTECTL_SETIRQFILTER        _NOTECTLIOC(0x06)
-#endif
-
-#endif
 
 /****************************************************************************
  * Public Types
