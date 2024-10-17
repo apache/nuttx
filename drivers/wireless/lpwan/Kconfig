@@ -84,4 +84,85 @@ config LPWAN_SX127X_FSKOOK
 
 endif # WL_SX127X
 
+config LPWAN_RN2483
+	bool "LoRa RN2483 transceiver support"
+	default n
+    select STANDARD_SERIAL
+	---help---
+        This option adds driver support for the RN2483 LoRa transceiver chip.
+        Currently only bare radio functionality is supported, not the LoRaWAN
+        functionality.
+
+if LPWAN_RN2483
+
+config LPWAN_RN2483_FREQ
+    int "Frequency"
+    default 433050000
+    ---help---
+    The frequency used for transmitting and receiving in Hz.
+
+config LPWAN_RN2483_SYNC
+    hex "Synchronization word"
+    default 0x43
+    ---help---
+        The synchronization word used for communication.
+
+config LPWAN_RN2483_PRLEN
+    int "Preamble length"
+    default 6
+    range 0 65535
+    ---help---
+        The preamble length used for communication.
+
+config LPWAN_RN2483_BW
+    int "Bandwidth"
+    default 500
+    range 0 500
+    ---help---
+        The radio bandwidth used for transmitting and receiving in kHz.
+        Only 125, 250 and 500 are valid values.
+
+config LPWAN_RN2483_SPREAD
+    int "Spread factor"
+    default 7
+    range 7 12
+    ---help---
+        The spread factor used for communication.
+
+config LPWAN_RN2483_LORA
+    bool "Use LoRa modulation"
+    default y
+    ---help---
+        Use LoRa modulation for communication. If disabled, FSK is used.
+
+config LPWAN_RN2483_POWER
+    int "Transmit power"
+    default 15
+    range -3 15
+    ---help---
+        The power used for transmission.
+
+config LPWAN_RN2483_CR
+    int "Coding rate"
+    default 15
+    range 5 8
+    ---help---
+        The coding rate used for radio communication. This number represents
+        the denominator in a fraction where the numerator is 4.
+        Ex: 4/5, 4/6, ...
+
+config LPWAN_RN2483_IQI
+    bool "Invert QI"
+    default n
+    ---help---
+        Whether or not to invert IQ in communication.
+
+config LPWAN_RN2483_CRC
+    bool "Cyclic redundancy check"
+    default y
+    ---help---
+        Whether or not to perform a cyclic redundancy check on packets.
+
+endif # LPWAN_RN2483
+
 endif # DRIVERS_LPWAN
