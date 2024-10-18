@@ -115,6 +115,12 @@ ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
   ARCHCXXFLAGS += -nostdinc++
 endif
 
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+  ifeq ($(GCCVER),)
+    export GCCVER = $(shell $(CXX) --version | grep ++ | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
+  endif
+endif
+
 ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   ARCHCFLAGS += -Wno-psabi
   ARCHCXXFLAGS += -Wno-psabi
