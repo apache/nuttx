@@ -39,6 +39,10 @@ ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += intel64_schedulesigaction.c intel64_sigdeliver.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_POWEROFF),y)
+  CMN_CSRCS += intel64_systempoweroff.c
+endif
+
 ifeq ($(CONFIG_X86_64_UNWINDER_FRAME_POINTER),y)
   CMN_CSRCS += intel64_backtrace_fp.c
 endif

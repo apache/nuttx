@@ -51,6 +51,10 @@ if(CONFIG_ENABLE_ALL_SIGNALS)
   list(APPEND SRCS intel64_schedulesigaction.c intel64_sigdeliver.c)
 endif()
 
+if(CONFIG_BOARDCTL_POWEROFF)
+  list(APPEND SRCS intel64_systempoweroff.c)
+endif()
+
 if(CONFIG_X86_64_UNWINDER_FRAME_POINTER)
   list(APPEND SRCS intel64_backtrace_fp.c)
 endif()
