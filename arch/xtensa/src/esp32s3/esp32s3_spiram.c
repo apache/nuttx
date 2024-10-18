@@ -149,13 +149,26 @@ extern int cache_invalidate_addr(uint32_t addr, uint32_t size);
 
 static inline uint32_t mmu_valid_space(uint32_t *start_address)
 {
-  for (int i = 0; i < FLASH_MMU_TABLE_SIZE; i++)
+  /* Look for an invalid entry for the MMU table from the end of the it
+   * towards the beginning. This is done to make sure we have a room for
+   * mapping the the SPIRAM
+   */
+
+  for (int i = (FLASH_MMU_TABLE_SIZE - 1); i >= 0; i--)
     {
       if (FLASH_MMU_TABLE[i] & MMU_INVALID)
         {
-          *start_address = DRAM0_CACHE_ADDRESS_LOW + i * MMU_PAGE_SIZE;
-          return (FLASH_MMU_TABLE_SIZE - i) * MMU_PAGE_SIZE;
+          continue;
         }
+
+      /* Add 1 to i to identify the first MMU table entry not set found
+       * backwards.
+       */
+
+      i++;
+
+      *start_address = DRAM0_CACHE_ADDRESS_LOW + (i) * MMU_PAGE_SIZE;
+      return (FLASH_MMU_TABLE_SIZE - i) * MMU_PAGE_SIZE;
     }
 
   return 0;
