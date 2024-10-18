@@ -25,6 +25,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio.h>
 
