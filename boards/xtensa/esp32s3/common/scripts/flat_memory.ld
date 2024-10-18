@@ -194,4 +194,4 @@ MEMORY
 
 /* Mark the end of the RTC heap (top of the RTC region) */
 
-_ertcheap = 0x50001fff;
+_ertcheap = ORIGIN(rtc_slow_seg) + LENGTH(rtc_slow_seg);

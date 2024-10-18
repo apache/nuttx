@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/common/scripts/simple_boot_sections.ld
+ * boards/xtensa/esp32s3/common/scripts/esp32s3_sections.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,9 +28,42 @@ _diram_i_start = 0x40378000;
 
 SECTIONS
 {
+#ifdef CONFIG_ESP32S3_APP_FORMAT_MCUBOOT
+  .metadata :
+  {
+    /* Magic for load header */
+
+    LONG(0xace637d3)
+
+    /* Application entry point address */
+
+    KEEP(*(.entry_addr))
+
+    /* IRAM metadata:
+     * - Destination address (VMA) for IRAM region
+     * - Flash offset (LMA) for start of IRAM region
+     * - Size of IRAM region
+     */
+
+    LONG(ADDR(.iram0.vectors))
+    LONG(LOADADDR(.iram0.vectors))
+    LONG(LOADADDR(.iram0.text) + SIZEOF(.iram0.text) - LOADADDR(.iram0.vectors))
+
+    /* DRAM metadata:
+     * - Destination address (VMA) for DRAM region
+     * - Flash offset (LMA) for start of DRAM region
+     * - Size of DRAM region
+     */
+
+    LONG(ADDR(.dram0.data))
+    LONG(LOADADDR(.dram0.data))
+    LONG(SIZEOF(.dram0.data))
+  } >metadata
+#endif /* CONFIG_ESP32S3_APP_FORMAT_MCUBOOT */
+
   /* Send .iram0 code to iram */
 
-  .iram0.vectors :
+  .iram0.vectors : ALIGN(4)
   {
     _iram_start = ABSOLUTE(.);
 
@@ -71,13 +104,13 @@ SECTIONS
     _init_end = ABSOLUTE(.);
   } >iram0_0_seg AT>ROM
 
-  .iram0.text :
+  .iram0.text : ALIGN(4)
   {
     /* Code marked as running out of IRAM */
 
     *(.iram1 .iram1.*)
     esp32s3_start.*(.literal .text .literal.* .text.*)
-    esp32s3_region.*(.text .text.* .literal .literal.*)
+    esp32s3_region.*(.literal .text .literal.* .text.*)
 
     *libarch.a:*esp_loader.*(.literal .text .literal.* .text.*)
     *libarch.a:esp32s3_cpuindex.*(.literal .text .literal.* .text.*)
@@ -214,7 +247,39 @@ SECTIONS
     . = ALIGN(4) + 16;
 
     _iram_text = ABSOLUTE(.);
-  } >iram0_0_seg AT > ROM
+  } >iram0_0_seg
+
+    /* Marks the end of IRAM code segment */
+
+  .iram0.text_end (NOLOAD) :
+  {
+    /* ESP32-S3 memprot requires 16B padding for possible CPU prefetch and
+     * 256B alignment for PMS split lines.
+     */
+
+    . += 16;
+    . = ALIGN(256);
+    _iram_end = ABSOLUTE(.);
+  } >iram0_0_seg
+
+  .iram0.data :
+  {
+    . = ALIGN(4);
+
+    *(.iram.data)
+    *(.iram.data.*)
+  } >iram0_0_seg
+
+  .iram0.bss (NOLOAD) :
+  {
+    . = ALIGN(4);
+
+    *(.iram.bss)
+    *(.iram.bss.*)
+
+    . = ALIGN(4);
+    _iram_end = ABSOLUTE(.);
+  } >iram0_0_seg
 
   .dram0.dummy (NOLOAD) :
   {
@@ -267,9 +332,10 @@ SECTIONS
     . = ALIGN(4);
   } >dram0_0_seg
 
-  .dram0.data :
+  .dram0.data : ALIGN(4)
   {
     /* .data initialized on power-up in ROMed configurations. */
+
     . = ALIGN (16);
     _data_start = ABSOLUTE(.);
     _sdata = ABSOLUTE(.);
@@ -388,16 +454,22 @@ SECTIONS
     . = ALIGN(0x10000);
   } > ROM
 
-  .flash.rodata :
+  .flash.rodata : ALIGN(0x10000)
   {
     _rodata_reserved_start = ABSOLUTE(.);
 
     _srodata = ABSOLUTE(.);
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata)
-    *(EXCLUDE_FILE (esp32s3_start.*) .rodata.*)
+    *(EXCLUDE_FILE (esp32s3_start.* esp32s3_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s3_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata)
+    *(EXCLUDE_FILE (esp32s3_start.* esp32s3_region.*
+                    *libarch.a:*esp_loader.*
+                    *libarch.a:esp32s3_spiflash.*
+                    *libarch.a:*cache_hal.* *libarch.a:*mmu_hal.*
+                    *libarch.a:*mpu_hal.*) .rodata.*)
 
-    *(.rodata)
-    *(.rodata.*)
 #ifdef CONFIG_ESP32S3_WIRELESS
     *(.rodata_wlog_verbose.*)
     *(.rodata_wlog_debug.*)
@@ -450,31 +522,37 @@ SECTIONS
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
     . = ALIGN(4);
-  } >drom0_0_seg AT>ROM
-
-  .flash.rodata_noload (NOLOAD) :
-  {
-    /*
-      This is a symbol marking the flash.rodata end, this can be
-      used for mmu driver to maintain virtual address
-      We don't need to include the noload rodata in this section
-    */
     _rodata_reserved_end = ABSOLUTE(.);
-    . = ALIGN (4);
-    mapping[rodata_noload]
-  } >drom0_0_seg
+  } >drom0_0_seg AT>ROM
 
   _image_irom_vma = ADDR(.flash.text);
   _image_irom_lma = LOADADDR(.flash.text);
   _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) - _image_irom_lma;
 
-  .flash.text_dummy (NOLOAD) :
-  {
-    . += SIZEOF(.flash.rodata);
-    . = ALIGN(0x10000);
-  } >default_code_seg AT> ROM
+  /* The alignment of the ".flash.text" output section is forced to
+   * 0x00010000 (64KB) to ensure that it will be allocated at the beginning
+   * of the next available Flash block.
+   * This is required to meet the following constraint from the external
+   * flash MMU:
+   *    VMA % 64KB == LMA % 64KB
+   * i.e. the lower 16 bits of both the virtual address (address seen by the
+   * CPU) and the load address (physical address of the external flash) must
+   * be equal.
+   */
 
-  .flash.text :
+#ifndef CONFIG_ESP32S3_RUN_IRAM
+  .flash.text_dummy (NOLOAD) : ALIGN(0x10000)
+  {
+    /* This section is required to skip .flash.rodata area because irom0_0_seg
+     * and drom0_0_seg reflect the same address space on different buses.
+     */
+
+    . += _image_drom_lma;
+    . += _image_drom_size;
+  } >irom0_0_seg
+#endif
+
+  .flash.text : ALIGN(0x00010000)
   {
     _stext = .;
     _instruction_reserved_start = ABSOLUTE(.);
@@ -504,62 +582,44 @@ SECTIONS
     _etext = .;
   } >irom0_0_seg AT>ROM
 
-  /* Marks the end of IRAM code segment */
-
-  .iram0.text_end (NOLOAD) :
-  {
-    /* ESP32-S3 memprot requires 16B padding for possible CPU prefetch and
-     * 256B alignment for PMS split lines.
-     */
-
-    . += 16;
-    . = ALIGN(256);
-    _iram_end = ABSOLUTE(.);
-  } >iram0_0_seg
-
-  .iram0.data :
-  {
-    . = ALIGN(4);
-
-    *(.iram.data)
-    *(.iram.data.*)
-  } >iram0_0_seg
-
-  .iram0.bss (NOLOAD) :
-  {
-    . = ALIGN(4);
-
-    *(.iram.bss)
-    *(.iram.bss.*)
-
-    . = ALIGN(4);
-    _iram_end = ABSOLUTE(.);
-  } >iram0_0_seg
-
   .rtc.text :
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
   } >rtc_iram_seg AT>ROM
 
+  .rtc.dummy (NOLOAD) :
+  {
+    /* This section is required to skip .rtc.text area because the text and
+     * data segments reflect the same address space on different buses.
+     */
+
+    . = SIZEOF(.rtc.text);
+  } >rtc_data_seg
+
   /* RTC BSS section. */
 
   .rtc.bss (NOLOAD) :
   {
     *(.rtc.bss)
-  } >rtc_slow_seg
+  } >rtc_data_seg
 
   .rtc.data :
   {
-    . = ALIGN(4);
     *(.rtc.data)
     *(.rtc.data.*)
     *(.rtc.rodata)
     *(.rtc.rodata.*)
 
-    /* Whatever is left from the RTC memory is used as a special heap. */
+   /* Whatever is left from the RTC memory is used as a special heap. */
 
     . = ALIGN (4);
+  } >rtc_data_seg AT>ROM
+
+  .rtc.heap : ALIGN(4)
+  {
+    /* RTC heap is placed at the slow RTC memory. */
+
     _srtcheap = ABSOLUTE(.);
   } >rtc_slow_seg
 
