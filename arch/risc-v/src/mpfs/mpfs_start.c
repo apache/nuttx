@@ -49,8 +49,12 @@
 #  define showprogress(c)
 #endif
 
-#if defined (CONFIG_BUILD_KERNEL) && !defined (CONFIG_ARCH_USE_S_MODE)
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_ARCH_USE_S_MODE)
 #  error "Target requires kernel in S-mode, enable CONFIG_ARCH_USE_S_MODE"
+#endif
+
+#if defined(CONFIG_SMP) && !defined(CONFIG_RISCV_PERCPU_SCRATCH)
+#  error "Target requires CONFIG_RISCV_PERCPU_SCRATCH if CONFIG_SMP is set"
 #endif
 
 /****************************************************************************
@@ -99,6 +103,15 @@ void __mpfs_start(uint64_t mhartid)
       *dest++ = *src++;
     }
 
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+  /* Initialize the per CPU areas */
+
+  if (mhartid != 0)
+    {
+      riscv_percpu_add_hart(mhartid);
+    }
+#endif /* CONFIG_RISCV_PERCPU_SCRATCH */
+
   /* Setup PLL if not already provided */
 
 #ifdef CONFIG_MPFS_BOOTLOADER
@@ -136,15 +149,6 @@ void __mpfs_start(uint64_t mhartid)
   /* Do board initialization */
 
   mpfs_boardinitialize();
-
-#ifdef CONFIG_RISCV_PERCPU_SCRATCH
-  /* Initialize the per CPU areas */
-
-  if (mhartid != 0)
-    {
-      riscv_percpu_add_hart(mhartid);
-    }
-#endif /* CONFIG_RISCV_PERCPU_SCRATCH */
 
   /* Initialize the caches.  Should only be executed from E51 (hart 0) to be
    * functional.  Consider the caches already configured if running without
