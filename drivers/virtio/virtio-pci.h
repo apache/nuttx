@@ -29,6 +29,7 @@
 
 #ifdef CONFIG_DRIVERS_VIRTIO_PCI
 
+#include <nuttx/arch.h>
 #include <nuttx/pci/pci.h>
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/wdog.h>

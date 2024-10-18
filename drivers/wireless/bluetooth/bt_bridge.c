@@ -25,6 +25,7 @@
 #include <debug.h>
 #include <string.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/atomic.h>
 #include <nuttx/net/snoop.h>
