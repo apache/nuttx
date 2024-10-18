@@ -71,7 +71,6 @@ if LIBCXX || UCLIBCXX
 
 choice
 	prompt "C++ low level library select"
-	default LIBCXXABI if LIBCXX
 	default LIBSUPCXX
 
 config LIBCXXABI
