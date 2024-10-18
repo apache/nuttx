@@ -165,7 +165,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
                              "[%s] "
 #    endif
 #  else
-                             "[%5jd.%06ld] "
+                             "[%5ju.%06ld] "
 #  endif
 #endif
 

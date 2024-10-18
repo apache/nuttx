@@ -78,13 +78,8 @@ typedef unsigned long      _uint64_t;
 #endif
 #define __INT64_DEFINED
 
-#if defined(__APPLE_CC__)
-typedef signed long        _intmax_t;
-typedef unsigned long      _uintmax_t;
-#else
 typedef _int64_t           _intmax_t;
 typedef _uint64_t          _uintmax_t;
-#endif
 
 #if defined(__WCHAR_TYPE__)
 typedef __WCHAR_TYPE__     _wchar_t;
