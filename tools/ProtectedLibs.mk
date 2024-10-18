@@ -80,6 +80,13 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 USERLIBS += staging$(DELIM)libxx$(LIBEXT)
 endif
 
+# Add toolchain library support
+
+ifeq ($(CONFIG_TOOLCHAINS_BUILTIN),y)
+USERLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+NUTTXLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+endif
+
 # Add library for application support.
 
 ifneq ($(APPDIR),)

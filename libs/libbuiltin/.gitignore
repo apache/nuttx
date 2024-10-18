@@ -1,0 +1,3 @@
+/compiler-rt/compiler-rt
+*.o
+.depend
