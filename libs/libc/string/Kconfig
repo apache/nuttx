@@ -40,7 +40,7 @@ config LIBC_STRING_OPTIMIZE
 	bool "optimized string function"
 	depends on ALLOW_BSD_COMPONENTS
 	default y
-	--help--
+	---help---
 		Use optimized string function implementation based on newlib.
 
 config LIBC_PERROR_STDOUT
