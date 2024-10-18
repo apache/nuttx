@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/board.h>
 #include <nuttx/drivers/addrenv.h>
 #include <nuttx/pci/pci_ivshmem.h>

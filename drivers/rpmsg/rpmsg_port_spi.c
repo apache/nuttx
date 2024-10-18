@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/crc16.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
