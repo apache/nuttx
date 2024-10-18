@@ -33,6 +33,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 #include <nuttx/ascii.h>
 #include <nuttx/gdbstub.h>
