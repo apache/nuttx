@@ -52,8 +52,151 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: get_iebase
+ *
+ * Description:
+ *   Get base address for interrupt enable bits for a specific hart.
+ *
+ * Input Parameters:
+ *   hartid - Hart ID to query.
+ *
+ * Returned Value:
+ *   Interrupt enable base address.
+ *
+ ****************************************************************************/
+
+static uintptr_t get_iebase(uintptr_t hartid)
+{
+  uintptr_t iebase;
+
+  if (hartid == 0)
+    {
+      iebase = MPFS_PLIC_H0_MIE0;
+    }
+  else
+    {
+      iebase = MPFS_PLIC_H1_MIE0 + MPFS_PLIC_IEPRIV_OFFSET +
+        (hartid - 1) * MPFS_HART_MIE_OFFSET;
+    }
+
+  return iebase;
+}
+
+/****************************************************************************
+ * Name: get_claimbase
+ *
+ * Description:
+ *   Get base address for interrupt claim for a specific hart.
+ *
+ * Input Parameters:
+ *   hartid - Hart ID to query.
+ *
+ * Returned Value:
+ *   Interrupt enable claim address.
+ *
+ ****************************************************************************/
+
+uintptr_t get_claimbase(uintptr_t hartid)
+{
+  uintptr_t claim_address;
+
+  if (hartid == 0)
+    {
+      claim_address = MPFS_PLIC_H0_MCLAIM;
+    }
+  else
+    {
+      claim_address = MPFS_PLIC_H1_MCLAIM + MPFS_PLIC_CLAIMPRIV_OFFSET +
+        (hartid - 1) * MPFS_PLIC_NEXTHART_OFFSET;
+    }
+
+  return claim_address;
+}
+
+/****************************************************************************
+ * Name: get_thresholdbase
+ *
+ * Description:
+ *   Get base address for interrupt threshold for a specific hart.
+ *
+ * Input Parameters:
+ *   hartid - Hart ID to query.
+ *
+ * Returned Value:
+ *   Interrupt enable threshold address.
+ *
+ ****************************************************************************/
+
+uintptr_t get_thresholdbase(uintptr_t hartid)
+{
+  uintptr_t threshold_address;
+
+  if (hartid == 0)
+    {
+      threshold_address = MPFS_PLIC_H0_MTHRESHOLD;
+    }
+  else
+    {
+      threshold_address = MPFS_PLIC_H1_MTHRESHOLD +
+          MPFS_PLIC_THRESHOLDPRIV_OFFSET +
+          (hartid - 1) * MPFS_PLIC_NEXTHART_OFFSET;
+    }
+
+  return threshold_address;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: mpfs_plic_init_hart
+ *
+ * Description:
+ *   Initialize current hart's PLIC.
+ *
+ * Input Parameters:
+ *   hartid - Hart ID to init.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mpfs_plic_init_hart(uintptr_t hartid)
+{
+  /* Disable all global interrupts for current hart */
+
+  uintptr_t iebase = get_iebase(hartid);
+
+  putreg32(0x0, iebase + 0);
+  putreg32(0x0, iebase + 4);
+  putreg32(0x0, iebase + 8);
+  putreg32(0x0, iebase + 12);
+  putreg32(0x0, iebase + 16);
+  putreg32(0x0, iebase + 20);
+
+  /* Complete possibly claimed IRQs in PLIC (for current hart) in case
+   * of warm reboot, e.g. after a crash in the middle of IRQ handler.
+   * This has no effect on non-claimed or disabled interrupts.
+   */
+
+  uintptr_t claim_address = get_claimbase(hartid);
+
+  for (int irq = MPFS_IRQ_EXT_START; irq < NR_IRQS; irq++)
+    {
+      putreg32(irq - MPFS_IRQ_EXT_START, claim_address);
+    }
+
+  /* Set irq threshold to 0 (permits all global interrupts) */
+
+  uintptr_t threshold_address = get_thresholdbase(hartid);
+  putreg32(0, threshold_address);
+}
 
 /****************************************************************************
  * Name: mpfs_plic_get_iebase
@@ -68,20 +211,7 @@
 
 uintptr_t mpfs_plic_get_iebase(void)
 {
-  uintptr_t iebase;
-  uintptr_t hart_id = riscv_mhartid();
-
-  if (hart_id == 0)
-    {
-      iebase = MPFS_PLIC_H0_MIE0;
-    }
-  else
-    {
-      iebase = MPFS_PLIC_H1_MIE0 + MPFS_PLIC_IEPRIV_OFFSET +
-        (hart_id - 1) * MPFS_HART_MIE_OFFSET;
-    }
-
-  return iebase;
+  return get_iebase(riscv_mhartid());
 }
 
 /****************************************************************************
@@ -97,20 +227,7 @@ uintptr_t mpfs_plic_get_iebase(void)
 
 uintptr_t mpfs_plic_get_claimbase(void)
 {
-  uintptr_t claim_address;
-  uintptr_t hart_id = riscv_mhartid();
-
-  if (hart_id == 0)
-    {
-      claim_address = MPFS_PLIC_H0_MCLAIM;
-    }
-  else
-    {
-      claim_address = MPFS_PLIC_H1_MCLAIM + MPFS_PLIC_CLAIMPRIV_OFFSET +
-        (hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET;
-    }
-
-  return claim_address;
+  return get_claimbase(riscv_mhartid());
 }
 
 /****************************************************************************
@@ -126,19 +243,5 @@ uintptr_t mpfs_plic_get_claimbase(void)
 
 uintptr_t mpfs_plic_get_thresholdbase(void)
 {
-  uintptr_t threshold_address;
-  uintptr_t hart_id = riscv_mhartid();
-
-  if (hart_id == 0)
-    {
-      threshold_address = MPFS_PLIC_H0_MTHRESHOLD;
-    }
-  else
-    {
-      threshold_address = MPFS_PLIC_H1_MTHRESHOLD +
-          MPFS_PLIC_THRESHOLDPRIV_OFFSET +
-          (hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET;
-    }
-
-  return threshold_address;
+  return get_thresholdbase(riscv_mhartid());
 }

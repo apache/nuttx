@@ -195,6 +195,16 @@ void __mpfs_start(uint64_t mhartid)
 cpux:
 
 #ifdef CONFIG_SMP
+  /* Disable local interrupts */
+
+  up_irq_save();
+
+  /* Initialize local PLIC */
+
+  mpfs_plic_init_hart(mhartid);
+
+  /* Then wait for the boot core to start us */
+
   riscv_cpu_boot(riscv_hartid_to_cpuid(mhartid));
 #endif
 
