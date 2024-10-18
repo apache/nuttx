@@ -235,6 +235,322 @@ static inline bool IRAM_ATTR stack_is_psram(void)
 }
 #endif
 
+/**
+ * From: esp-idf/components/hal/esp32s3/include/hal/spi_flash_encrypted_ll.h
+ */
+
+/**
+ * Choose type of chip you want to encrypt manully
+ */
+
+typedef enum
+{
+    FLASH_ENCRYPTION_MANU = 0, /* !< Manually encrypt the flash chip. */
+    PSRAM_ENCRYPTION_MANU = 1  /* !< Manually encrypt the psram chip. */
+} flash_encrypt_ll_type_t;
+
+/**
+ * Enable the flash encryption function under spi boot mode and download boot
+ * mode.
+ */
+
+static inline void spi_flash_encrypt_ll_enable(void)
+{
+    REG_SET_BIT(SYSTEM_EXTERNAL_DEVICE_ENCRYPT_DECRYPT_CONTROL_REG,
+                SYSTEM_ENABLE_DOWNLOAD_MANUAL_ENCRYPT |
+                SYSTEM_ENABLE_SPI_MANUAL_ENCRYPT);
+}
+
+/**
+ * Disable the flash encryption mode.
+ */
+
+static inline void spi_flash_encrypt_ll_disable(void)
+{
+    REG_CLR_BIT(SYSTEM_EXTERNAL_DEVICE_ENCRYPT_DECRYPT_CONTROL_REG,
+                SYSTEM_ENABLE_SPI_MANUAL_ENCRYPT);
+}
+
+/**
+ * Choose type of chip you want to encrypt manully
+ *
+ * @param type The type of chip to be encrypted
+ *
+ * @note The hardware currently support flash encryption.
+ */
+
+static inline void spi_flash_encrypt_ll_type(flash_encrypt_ll_type_t type)
+{
+    HAL_ASSERT(type == FLASH_ENCRYPTION_MANU); /* Our hardware only support flash encryption */
+    REG_WRITE(AES_XTS_DESTINATION_REG, type);
+}
+
+/**
+ * Configure the data size of a single encryption.
+ *
+ * @param block_size Size of the desired block.
+ */
+
+static inline void spi_flash_encrypt_ll_buffer_length(uint32_t size)
+{
+    REG_WRITE(AES_XTS_SIZE_REG, size >> 5); /* Desired block should not be larger than the block size. */
+}
+
+/**
+ * Save 32-bit piece of plaintext.
+ *
+ * @param address the address of written flash partition.
+ * @param buffer Buffer to store the input data.
+ * @param size Buffer size.
+ *
+ */
+
+static inline
+void spi_flash_encrypt_ll_plaintext_save(uint32_t address,
+                                         const uint32_t * buffer,
+                                         uint32_t size)
+{
+    uint32_t plaintext_offs =
+        (address % SOC_FLASH_ENCRYPTED_XTS_AES_BLOCK_MAX);
+    HAL_ASSERT(
+        plaintext_offs + size <= SOC_FLASH_ENCRYPTED_XTS_AES_BLOCK_MAX);
+    memcpy((void *)(AES_XTS_PLAIN_BASE + plaintext_offs), buffer, size);
+}
+
+/**
+ * Copy the flash address to XTS_AES physical address
+ *
+ * @param flash_addr flash address to write.
+ */
+
+static inline void spi_flash_encrypt_ll_address_save(uint32_t flash_addr)
+{
+    REG_WRITE(AES_XTS_PHYSICAL_ADDR_REG, flash_addr);
+}
+
+/**
+ * Start flash encryption
+ */
+
+static inline void spi_flash_encrypt_ll_calculate_start(void)
+{
+    REG_WRITE(AES_XTS_TRIGGER_REG, 1);
+}
+
+/**
+ * Wait for flash encryption termination
+ */
+
+static inline void spi_flash_encrypt_ll_calculate_wait_idle(void)
+{
+  while (REG_READ(AES_XTS_STATE_REG) == 0x1)
+    {
+    }
+}
+
+/**
+ * Finish the flash encryption and make encrypted result accessible to SPI.
+ */
+
+static inline void spi_flash_encrypt_ll_done(void)
+{
+  REG_WRITE(AES_XTS_RELEASE_REG, 1);
+  while (REG_READ(AES_XTS_STATE_REG) != 0x3)
+    {
+    }
+}
+
+/**
+ * Set to destroy encrypted result
+ */
+
+static inline void spi_flash_encrypt_ll_destroy(void)
+{
+    REG_WRITE(AES_XTS_DESTROY_REG, 1);
+}
+
+/**
+ * Check if is qualified to encrypt the buffer
+ *
+ * @param address the address of written flash partition.
+ * @param length Buffer size.
+ */
+
+static inline bool spi_flash_encrypt_ll_check(uint32_t address,
+                                              uint32_t length)
+{
+  return ((address % length) == 0) ? true : false;
+}
+
+/**
+ * from: esp-idf/components/hal/spi_flash_encrypt_hal_iram.c
+ */
+
+void spi_flash_encryption_hal_enable(void)
+{
+    spi_flash_encrypt_ll_enable();
+    spi_flash_encrypt_ll_type(FLASH_ENCRYPTION_MANU);
+}
+
+void spi_flash_encryption_hal_disable(void)
+{
+    spi_flash_encrypt_ll_disable();
+}
+
+void spi_flash_encryption_hal_prepare(uint32_t address,
+                                      const uint32_t * buffer, uint32_t size)
+{
+    spi_flash_encrypt_ll_buffer_length(size);
+    spi_flash_encrypt_ll_address_save(address);
+    spi_flash_encrypt_ll_plaintext_save(address, buffer, size);
+    spi_flash_encrypt_ll_calculate_start();
+}
+
+void spi_flash_encryption_hal_done(void)
+{
+    spi_flash_encrypt_ll_calculate_wait_idle();
+    spi_flash_encrypt_ll_done();
+}
+
+void spi_flash_encryption_hal_destroy(void)
+{
+    spi_flash_encrypt_ll_destroy();
+}
+
+bool spi_flash_encryption_hal_check(uint32_t address, uint32_t length)
+{
+  return spi_flash_encrypt_ll_check(address, length);
+}
+
+/**
+ * From: esp-idf/components/spi_flash/spi_flash_chip_generic.c
+ */
+
+/**
+ * These are the pointer to HW flash encryption.
+ * Default using hardware encryption.
+ */
+
+DRAM_ATTR static spi_flash_encryption_t esp_flash_encryption_default
+    __attribute__((__unused__)) =
+    {
+    .flash_encryption_enable = spi_flash_encryption_hal_enable,
+    .flash_encryption_disable = spi_flash_encryption_hal_disable,
+    .flash_encryption_data_prepare = spi_flash_encryption_hal_prepare,
+    .flash_encryption_done = spi_flash_encryption_hal_done,
+    .flash_encryption_destroy = spi_flash_encryption_hal_destroy,
+    .flash_encryption_check = spi_flash_encryption_hal_check,
+    };
+
+/**
+ * Workaround of spi_flash_write_encrypted
+ * by using of spi_flash_chip_generic_write_encrypted
+ */
+
+int spi_flash_write_encrypted_manu(uint32_t address, const void *buffer,
+                              uint32_t length)
+{
+  spi_flash_encryption_t *esp_flash_encryption =
+                                             &esp_flash_encryption_default;
+  esp_err_t err = ESP_OK;
+
+  /* Check if the buffer and length can qualify the requirements */
+
+  if (esp_flash_encryption->flash_encryption_check(address, length) != true)
+    {
+      return ESP_ERR_NOT_SUPPORTED;
+    }
+
+  const uint8_t *data_bytes = (const uint8_t *)buffer;
+  esp_flash_encryption->flash_encryption_enable();
+  while (length > 0)
+    {
+      int block_size;
+
+      /* Write the largest block if possible */
+
+      if (address % 64 == 0 && length >= 64)
+        {
+          block_size = 64;
+        }
+      else if (address % 32 == 0 && length >= 32)
+        {
+          block_size = 32;
+        }
+      else
+        {
+          block_size = 16;
+        }
+
+      /**
+       * Prepare the flash chip (same time as AES operation, for performance)
+       */
+
+      esp_flash_encryption->flash_encryption_data_prepare(address,
+                                                      (uint32_t *)data_bytes,
+                                                      block_size);
+
+      /* err = chip->chip_drv->set_chip_write_protect(chip, false); */
+
+      if (err != ESP_OK)
+        {
+          return err;
+        }
+
+      /**
+       * Waiting for encrypting buffer to finish and
+       * making result visible for SPI1
+       */
+
+      esp_flash_encryption->flash_encryption_done();
+
+      /**
+       * Note: For encryption function, after write flash command is sent.
+       * The hardware will write the encrypted buffer
+       * prepared in XTS_FLASH_ENCRYPTION register
+       * in function `flash_encryption_data_prepare`, instead of the origin
+       * buffer named `data_bytes`.
+       */
+
+      /**
+       * err = chip->chip_drv->write(chip, (uint32_t *)data_bytes,
+       *                             address, length);
+       */
+
+      if (err != ESP_OK)
+        {
+          return err;
+        }
+
+      /**
+       * err = chip->chip_drv->wait_idle(chip,
+       *                      chip->chip_drv->timeout->page_program_timeout);
+       */
+
+      if (err != ESP_OK)
+        {
+          return err;
+        }
+
+      spi_flash_write(address, data_bytes, block_size);
+
+      /**
+       * Note: we don't wait for idle status here, because this way
+       * the AES peripheral can start encrypting the next
+       * block while the SPI flash chip is busy completing the write
+       */
+
+      esp_flash_encryption->flash_encryption_destroy();
+
+      length -= block_size;
+      data_bytes += block_size;
+      address += block_size;
+    }
+
+  esp_flash_encryption->flash_encryption_disable();
+  return err;
+}
+
 /****************************************************************************
  * Name: esp32s3_spiflash_work
  *
@@ -286,7 +602,7 @@ static void esp32s3_spiflash_work(void *arg)
     }
   else if (work_arg->op_code == SPIFLASH_OP_CODE_ENCRYPT_WRITE)
     {
-      work_arg->ret = spi_flash_write_encrypted(work_arg->op_arg.addr,
+      work_arg->ret = spi_flash_write_encrypted_manu(work_arg->op_arg.addr,
                                                 work_arg->op_arg.buffer,
                                                 work_arg->op_arg.size);
     }
@@ -686,7 +1002,7 @@ static int esp32s3_writedata_encrypt(struct mtd_dev_s *dev, off_t offset,
   else
 #endif
     {
-      ret = spi_flash_write_encrypted(offset, buffer, size);
+      ret = spi_flash_write_encrypted_manu(offset, buffer, size);
     }
 
   nxmutex_unlock(&g_lock);
@@ -899,7 +1215,7 @@ static ssize_t esp32s3_bwrite_encrypt(struct mtd_dev_s *dev,
   else
 #endif
     {
-      ret = spi_flash_write_encrypted(addr, buffer, size);
+      ret = spi_flash_write_encrypted_manu(addr, buffer, size);
     }
 
   nxmutex_unlock(&g_lock);
