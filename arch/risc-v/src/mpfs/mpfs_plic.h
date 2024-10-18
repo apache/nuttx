@@ -32,6 +32,22 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mpfs_plic_init_hart
+ *
+ * Description:
+ *   Initialize current hart's PLIC.
+ *
+ * Input Parameters:
+ *   hartid - Hart ID to init.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void mpfs_plic_init_hart(uintptr_t hartid);
+
+/****************************************************************************
  * Name: mpfs_plic_get_iebase
  *
  * Description:
