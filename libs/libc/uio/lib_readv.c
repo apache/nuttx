@@ -24,8 +24,12 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/cancelpt.h>
+
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 /****************************************************************************
@@ -70,56 +74,66 @@
 
 ssize_t readv(int fildes, FAR const struct iovec *iov, int iovcnt)
 {
-  ssize_t ntotal;
-  ssize_t nread;
-  size_t remaining;
   FAR uint8_t *buffer;
+  ssize_t nread;
+  size_t tocopy;
+  size_t total_size;
+  size_t offset;
   int i;
 
-  /* Process each entry in the struct iovec array */
-
-  for (i = 0, ntotal = 0; i < iovcnt; i++)
+  if (iovcnt == 0)
     {
-      /* Ignore zero-length reads */
-
-      if (iov[i].iov_len > 0)
-        {
-          buffer    = iov[i].iov_base;
-          remaining = iov[i].iov_len;
-
-          /* Read repeatedly as necessary to fill buffer */
-
-          do
-            {
-              /* NOTE:  read() is a cancellation point */
-
-              nread = read(fildes, buffer, remaining);
-
-              /* Check for a read error */
-
-              if (nread < 0)
-                {
-                  return nread;
-                }
-
-              /* Check for an end-of-file condition */
-
-              else if (nread == 0)
-                {
-                  return ntotal;
-                }
-
-              /* Update pointers and counts in order to handle partial
-               * buffer reads.
-               */
-
-              buffer    += nread;
-              remaining -= nread;
-              ntotal    += nread;
-            }
-          while (remaining > 0);
-        }
+      return 0;
     }
 
-  return ntotal;
+  if (iovcnt == 1)
+    {
+      return read(fildes, iov->iov_base, iov->iov_len);
+    }
+
+  total_size = 0;
+  for (i = 0; i < iovcnt; i++)
+    {
+      total_size += iov[i].iov_len;
+    }
+
+  if (total_size == 0)
+    {
+      return 0;
+    }
+
+  enter_cancellation_point();
+  buffer = malloc(total_size);
+  if (buffer == NULL)
+    {
+      return -1;
+    }
+
+  nread = read(fildes, buffer, total_size);
+  if (nread == -1)
+    {
+      free(buffer);
+      leave_cancellation_point();
+      return nread;
+    }
+
+  tocopy = nread;
+  offset = 0;
+  for (i = 0; i < iovcnt; i++)
+    {
+      FAR uint8_t *p = iov[i].iov_base;
+      size_t len = iov[i].iov_len;
+      if (tocopy <= len)
+        {
+          memcpy(p, buffer + offset, tocopy);
+          break;
+        }
+
+      memcpy(p, buffer + offset, len);
+      offset += len;
+    }
+
+  free(buffer);
+  leave_cancellation_point();
+  return nread;
 }
