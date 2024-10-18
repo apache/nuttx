@@ -31,6 +31,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
+#include <nuttx/wqueue.h>
 #include <nuttx/crc16.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/bluetooth.h>
