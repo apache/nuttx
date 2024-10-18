@@ -148,6 +148,8 @@ const struct mountpt_operations g_hostfs_operations =
   NULL,                 /* mmap */
   hostfs_ftruncate,     /* ftruncate */
   NULL,                 /* poll */
+  NULL,                 /* readv */
+  NULL,                 /* writev */
 
   hostfs_sync,          /* sync */
   hostfs_dup,           /* dup */

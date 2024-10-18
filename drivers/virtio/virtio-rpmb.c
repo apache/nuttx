@@ -90,6 +90,8 @@ static const struct file_operations g_virtio_rpmb_ops =
   NULL,               /* mmap */
   NULL,               /* truncate */
   NULL,               /* poll */
+  NULL,               /* readv */
+  NULL,               /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   NULL,               /* unlink */
 #endif

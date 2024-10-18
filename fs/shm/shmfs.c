@@ -74,6 +74,8 @@ const struct file_operations g_shmfs_operations =
   shmfs_mmap,       /* mmap */
   shmfs_truncate,   /* truncate */
   NULL,             /* poll */
+  NULL,             /* readv */
+  NULL,             /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   shmfs_unlink      /* unlink */
 #endif
