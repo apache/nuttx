@@ -436,7 +436,7 @@ uintptr_t riscv_mhartid(void);
  *
  ****************************************************************************/
 
-int riscv_hartid_to_cpuid(int cpu);
+int riscv_hartid_to_cpuid(int hart);
 
 /****************************************************************************
  * Name: riscv_cpuid_to_hartid
