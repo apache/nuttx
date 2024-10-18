@@ -23,6 +23,13 @@
 # search. If the manual of the newly supported toolchain is different, you can
 # override these methods in the toolchain
 
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.9)
+    # force color for gcc > 4.9
+    add_compile_options(-fdiagnostics-color=always)
+  endif()
+endif()
+
 # Support CMake to define additional configuration options
 
 if(EXTRA_FLAGS)
