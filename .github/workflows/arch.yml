@@ -160,13 +160,21 @@ jobs:
 
           # If Not a Simple PR: Build all targets
           if [[ "$quit" == "1" ]]; then
-            # If PR was Created or Modified: Exclude arm-08 to arm-14
+            # If PR was Created or Modified: Exclude some boards
             pr=${{github.event.pull_request.number}}
             if [[ "$pr" != "" ]]; then
-              echo "Excluding arm-08 to arm-14"
-              boards=$( 
+              echo "Excluding arm-08..14, risc-v-04..06, sim-02, xtensa-02"
+              boards=$(
                 echo '${{ inputs.boards }}' |
-                jq --compact-output 'map(select(test("arm-0[8-9]") == false and test("arm-1.+") == false))'
+                jq --compact-output \
+                'map(
+                  select(
+                    test("arm-0[8-9]") == false and test("arm-1.") == false and
+                    test("risc-v-0[4-9]") == false and
+                    test("sim-0[2-9]") == false and
+                    test("xtensa-0[2-9]") == false
+                  )
+                )'
               )
             fi
             echo "selected_builds=$boards" | tee -a $GITHUB_OUTPUT
