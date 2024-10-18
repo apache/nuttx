@@ -150,6 +150,7 @@ config ARCH_X86_64
 	select ARCH_HAVE_FORK if !BUILD_KERNEL
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_POWEROFF
 	---help---
 		x86-64 architectures.
 

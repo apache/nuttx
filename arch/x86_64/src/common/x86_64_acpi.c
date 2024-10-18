@@ -632,6 +632,122 @@ int acpi_lapic_get(int cpu, struct acpi_lapic_s **lapic)
                        (struct acpi_entry_s **)lapic);
 }
 
+#ifdef CONFIG_BOARDCTL_POWEROFF
+/****************************************************************************
+ * Name: acpi_poweroff_param_get
+ *
+ * Description:
+ *   Get Poweroff Parm .
+ *
+ ****************************************************************************/
+
+int acpi_poweroff_param_get(uint32_t *pm1a_cnt, uint32_t *pm1b_cnt,
+                            uint32_t *regvala, uint32_t *regvalb)
+{
+  void                *tps   = NULL;
+  uint32_t            *tp32  = NULL;
+  uint32_t            *end32 = NULL;
+  struct acpi_sdt_s   *sdt      = NULL;
+  struct acpi_facp_s  *facp     = NULL;
+  struct acpi_sdt_s   *dsdt_h   = NULL;
+  char                *s5_addr  = NULL;
+  int                  dsdt_len = 0;
+
+  if (g_acpi.rsdt == 0)
+    {
+      acpi_info("rsdt is null");
+      return -EINVAL;
+    }
+
+  tps   = &g_acpi.rsdt->table_ptrs;
+  tp32  = (uint32_t *)tps;
+  end32 = (uint32_t *)((uintptr_t)g_acpi.rsdt + g_acpi.rsdt->sdt.length);
+
+  while (tp32 < end32)
+    {
+      sdt = (struct acpi_sdt_s *)(uintptr_t)*tp32;
+
+      if (strncmp(sdt->signature, ACPI_SIG_FACP, 4) == 0)
+        {
+          facp = (struct acpi_facp_s *)(uintptr_t)*tp32;
+          dsdt_h = (struct acpi_sdt_s *)(uintptr_t)facp->dsdt;
+          acpi_map_region((uintptr_t)dsdt_h, sizeof(struct acpi_sdt_s));
+
+          if (strncmp(dsdt_h->signature, ACPI_SIG_DSDT, 4) == 0)
+            {
+              /* search the _S5_ package in the DSDT, skip header */
+
+              s5_addr  = (char *)(uintptr_t)facp->dsdt
+                          + sizeof(struct acpi_sdt_s);
+              dsdt_len = dsdt_h->length - sizeof(struct acpi_sdt_s);
+              acpi_map_region((uintptr_t)s5_addr, dsdt_len);
+
+              while (dsdt_len-- > 0)
+                {
+                  if (strncmp(s5_addr, ACPI_AML_S5_NAME, 4) == 0)
+                    {
+                      break;
+                    }
+
+                  s5_addr++;
+                }
+
+              if (dsdt_len > 0)
+                {
+                  /* check for valid AML structure */
+
+                  if ((*(s5_addr - 1) == ACPI_AML_NAME_OP
+                      || (*(s5_addr - 2) == ACPI_AML_NAME_OP
+                      && *(s5_addr - 1) == ACPI_AML_ROOT_PREFIX))
+                      && *(s5_addr + 4) == ACPI_AML_PACKAGE_OP)
+                    {
+                      s5_addr += strlen(ACPI_AML_S5_NAME) + 1;
+
+                      /* calculate PkgLength size */
+
+                      s5_addr += ((*s5_addr & 0xc0) >> 6) + 2;
+
+                      if (*s5_addr == ACPI_AML_BYTE_PREFIX)
+                        {
+                          /* skip byteprefix */
+
+                          s5_addr++;
+                        }
+
+                      *regvala = *(s5_addr) << 10;
+                      s5_addr++;
+
+                      if (*s5_addr == ACPI_AML_BYTE_PREFIX)
+                        {
+                          /* skip byteprefix */
+
+                          s5_addr++;
+                        }
+
+                      *regvalb = *(s5_addr) << 10;
+                      *pm1a_cnt = facp->pm1a_cnt_blk;
+                      *pm1b_cnt = facp->pm1b_cnt_blk;
+
+                      return OK;
+                    }
+                  else
+                    {
+                      acpi_info("\\_S5 parse error");
+                      break;
+                    }
+                }
+            }
+        }
+
+      /* Next table */
+
+      tp32 += 1;
+    }
+
+  return -ENOENT;
+}
+#endif
+
 #ifdef CONFIG_ARCH_X86_64_ACPI_DUMP
 /****************************************************************************
  * Name: acpi_dump
