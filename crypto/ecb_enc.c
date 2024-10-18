@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/ecb_enc.c
+ *
+ * SPDX-License-Identifier: SSLeay-standalone
+ *
  * $OpenBSD: ecb_enc.c,v 1.6 2015/12/10 21:00:51 naddy Exp $
  * lib/des/ecb_enc.c
  * Copyright (C) 1995 Eric Young (eay@mincom.oz.au)

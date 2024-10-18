@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/key_wrap.c
+ *
+ * SPDX-License-Identifier: ISC
+ *
  * $OpenBSD: key_wrap.c,v 1.5 2017/05/02 17:07:06 mikeb Exp $
  *
  * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>

@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/spr.h
+ *
+ * SPDX-License-Identifier: SSLeay-standalone
+ *
  * $OpenBSD: spr.h,v 1.2 2002/10/27 13:24:26 miod Exp $
  * lib/des/spr.h
  * Copyright (C) 1995 Eric Young (eay@mincom.oz.au)

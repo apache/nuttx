@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/sk.h
+ *
+ * SPDX-License-Identifier: SSLeay-standalone
+ *
  * $OpenBSD: sk.h,v 1.2 2002/10/27 13:24:26 miod Exp $
  * lib/des/sk.h
  * Copyright (C) 1995 Eric Young (eay@mincom.oz.au)

@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/blf.c
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * $OpenBSD: blf.c,v 1.8 2021/11/29 01:04:45 djm Exp $ *
  *
  * Blowfish block cipher for OpenBSD

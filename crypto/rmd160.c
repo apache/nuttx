@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/rmd160.c
+ *
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
  * $OpenBSD: rmd160.c,v 1.5 2011/01/11 15:42:05 deraadt Exp $
  *
  * Copyright (c) 2001 Markus Friedl.  All rights reserved.
