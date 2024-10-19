@@ -31,6 +31,7 @@
 #include <syscall.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/macro.h>
 #include <nuttx/sched.h>
 
 #include "arm.h"
@@ -120,20 +121,19 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
-    " sub sp, sp, #16\n"           /* Create a stack frame to hold 3 parms + lr */
-    " str r4, [sp, #0]\n"          /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"          /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
-    " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
-    " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
-    " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this SYSCALL */
-    " blx ip\n"                    /* Call the stub (modifies lr) */
-    " ldr lr, [sp, #12]\n"         /* Restore lr */
-    " add sp, sp, #16\n"           /* Destroy the stack frame */
-    " mov r2, r0\n"                /* R2=Save return value in R2 */
-    " mov r0, %0\n"                /* R0=SYS_syscall_return */
-    " svc %1\n"::"i"(SYS_syscall_return),
-                 "i"(SYS_syscall)  /* Return from the SYSCALL */
+    " sub sp, sp, #16\n"                            /* Create a stack frame to hold 3 parms + lr */
+    " str r4, [sp, #0]\n"                           /* Move parameter 4 (if any) into position */
+    " str r5, [sp, #4]\n"                           /* Move parameter 5 (if any) into position */
+    " str r6, [sp, #8]\n"                           /* Move parameter 6 (if any) into position */
+    " str lr, [sp, #12]\n"                          /* Save lr in the stack frame */
+    " ldr ip, =g_stublookup\n"                      /* R12=The base of the stub lookup table */
+    " ldr ip, [ip, r0, lsl #2]\n"                   /* R12=The address of the stub for this SYSCALL */
+    " blx ip\n"                                     /* Call the stub (modifies lr) */
+    " ldr lr, [sp, #12]\n"                          /* Restore lr */
+    " add sp, sp, #16\n"                            /* Destroy the stack frame */
+    " mov r2, r0\n"                                 /* R2=Save return value in R2 */
+    " mov r0, #" STRINGIFY(SYS_syscall_return) "\n" /* R0=SYS_syscall_return */
+    " svc #" STRINGIFY(SYS_syscall) "\n"            /* Return from the SYSCALL */
   );
 }
 #endif
