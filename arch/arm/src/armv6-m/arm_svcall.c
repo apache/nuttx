@@ -32,6 +32,7 @@
 #include <syscall.h>
 
 #include <arch/irq.h>
+#include <nuttx/macro.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
@@ -82,23 +83,22 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
-    " push {r4, r5}\n"            /* Save R4 and R5 */
-    " sub sp, sp, #12\n"          /* Create a stack frame to hold 3 parms */
-    " str r4, [sp, #0]\n"         /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"         /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"         /* Move parameter 6 (if any) into position */
-    " mov r5, lr\n"               /* Save lr in R5 */
-    " ldr r4, =g_stublookup\n"    /* R4=The base of the stub lookup table */
-    " lsl r0, r0, #2\n"           /* R0=Offset of the stub for this syscall */
-    " ldr r4, [r4, r0]\n"         /* R4=Address of the stub for this syscall */
-    " blx r5\n"                   /* Call the stub (modifies lr) */
-    " mov lr, r5\n"               /* Restore lr */
-    " add sp, sp, #12\n"          /* Destroy the stack frame */
-    " pop {r4, r5}\n"             /* Recover R4 and R5 */
-    " mov r2, r0\n"               /* R2=Save return value in R2 */
-    " mov r0, %0\n"               /* R0=SYS_syscall_return */
-    " svc %1\n"::"i"(SYS_syscall_return),
-                 "i"(SYS_syscall) /* Return from the SYSCALL */
+    " push {r4, r5}\n"                              /* Save R4 and R5 */
+    " sub sp, sp, #12\n"                            /* Create a stack frame to hold 3 parms */
+    " str r4, [sp, #0]\n"                           /* Move parameter 4 (if any) into position */
+    " str r5, [sp, #4]\n"                           /* Move parameter 5 (if any) into position */
+    " str r6, [sp, #8]\n"                           /* Move parameter 6 (if any) into position */
+    " mov r5, lr\n"                                 /* Save lr in R5 */
+    " ldr r4, =g_stublookup\n"                      /* R4=The base of the stub lookup table */
+    " lsl r0, r0, #2\n"                             /* R0=Offset of the stub for this syscall */
+    " ldr r4, [r4, r0]\n"                           /* R4=Address of the stub for this syscall */
+    " blx r5\n"                                     /* Call the stub (modifies lr) */
+    " mov lr, r5\n"                                 /* Restore lr */
+    " add sp, sp, #12\n"                            /* Destroy the stack frame */
+    " pop {r4, r5}\n"                               /* Recover R4 and R5 */
+    " mov r2, r0\n"                                 /* R2=Save return value in R2 */
+    " mov r0, #" STRINGIFY(SYS_syscall_return) "\n" /* R0=SYS_syscall_return */
+    " svc #" STRINGIFY(SYS_syscall) "\n"            /* Return from the SYSCALL */
   );
 }
 #endif
