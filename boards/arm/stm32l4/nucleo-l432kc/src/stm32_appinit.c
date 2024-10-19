@@ -257,6 +257,16 @@ int board_app_initialize(uintptr_t arg)
     }
 #endif
 
+#ifdef CONFIG_STM32L4_DAC
+  /* Initialize DAC and register the DAC driver. */
+
+  ret = stm32l4_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32l4_dac_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_DAC7571
   /* Initialize and register DAC7571 */
 

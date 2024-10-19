@@ -63,8 +63,14 @@
 
 /* Analog pin selections ****************************************************/
 
+/* ADC
+ * Build time configurable pins are defined in ../src/stm32_adc.c.
+ * ADC1 with DMA: GPIO_ADC1_IN11 (PA6/A5), GPIO_ADC1_IN12 (PA7/A6).
+ * ADC1 no DMA  : GPIO_ADC1_IN11 (PA6/A5).
+ */
+
 /* DAC
- * Default is PA4 (same as ADC, do not use both at the same time)
+ * DAC1: GPIO_DAC1_OUT_1 (PA4/A3).
  */
 
 #define GPIO_DAC1_OUT            GPIO_DAC1_OUT_1
