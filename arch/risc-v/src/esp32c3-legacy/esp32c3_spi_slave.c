@@ -863,6 +863,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
   if (transfer_size > 0)
     {
       spislave_store_result(priv, transfer_size);
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
     }
 
   spislave_prepare_next_rx(priv);
@@ -872,6 +873,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
   if (transfer_size > 0 && priv->is_tx_enabled)
     {
       spislave_evict_sent_data(priv, transfer_size);
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
     }
 
   spislave_prepare_next_tx(priv);

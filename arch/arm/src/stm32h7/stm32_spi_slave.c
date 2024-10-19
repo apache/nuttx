@@ -710,6 +710,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
   /* Wake-up the SPI driver */
 
   priv->rxresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
+  SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
 }
 #endif
 
@@ -729,6 +730,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
   /* Wake-up the SPI driver */
 
   priv->txresult = isr | 0x080;  /* OR'ed with 0x80 to assure non-zero */
+  SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
 }
 #endif
 

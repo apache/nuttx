@@ -578,6 +578,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
     {
       spi_slave_hal_store_result(&priv->ctx);
       priv->rx_length += transfer_size;
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
     }
 
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
@@ -592,6 +593,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
   if (transfer_size > 0 && priv->is_tx_enabled)
     {
       spislave_evict_sent_data(priv, transfer_size);
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
     }
 
   priv->ctx.bitlen = priv->tx_length;
