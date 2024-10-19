@@ -2329,6 +2329,15 @@ config ARCH_BOARD_SAMD21_XPLAINED
 		This board features the ATSAMD21J18A MCU (Cortex-M0+ with 256KB of FLASH
 		and 32KB of SRAM).
 
+config ARCH_BOARD_XIAO_SEEEDUINO
+	bool "Seeed Studio XIAO SAMD21"
+	depends on ARCH_CHIP_SAMD21J18A
+	select ARCH_HAVE_LEDS
+	---help---
+		The port of NuttX to the Seeed Studio XIAO SAMD21 board.
+		This board features the ATSAMD21J18A MCU (Cortex-M0+ with 256KB of FLASH
+		and 32KB of SRAM) in a tiny footprint.
+
 config ARCH_BOARD_SAME54_XPLAINED_PRO
 	bool "Atmel SAME54-Xplained Pro development board"
 	depends on ARCH_CHIP_SAME54P20
@@ -3467,6 +3476,7 @@ config ARCH_BOARD
 	default "sama5d4-ek"                if ARCH_BOARD_SAMA5D4_EK
 	default "samd20-xplained"           if ARCH_BOARD_SAMD20_XPLAINED
 	default "samd21-xplained"           if ARCH_BOARD_SAMD21_XPLAINED
+	default "xiao-seeeduino"            if ARCH_BOARD_XIAO_SEEEDUINO
 	default "same54-xplained-pro"       if ARCH_BOARD_SAME54_XPLAINED_PRO
 	default "saml21-xplained"           if ARCH_BOARD_SAML21_XPLAINED
 	default "sam3u-ek"                  if ARCH_BOARD_SAM3UEK
@@ -3944,6 +3954,9 @@ source "boards/arm/samd2l2/samd20-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAMD21_XPLAINED
 source "boards/arm/samd2l2/samd21-xplained/Kconfig"
+endif
+if ARCH_BOARD_XIAO_SEEEDUINO
+source "boards/arm/samd2l2/xiao-seeeduino/Kconfig"
 endif
 if ARCH_BOARD_SAME54_XPLAINED_PRO
 source "boards/arm/samd5e5/same54-xplained-pro/Kconfig"
