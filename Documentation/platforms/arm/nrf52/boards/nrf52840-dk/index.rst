@@ -60,15 +60,13 @@ follow::
 
 Where <subdir> is one of the following:
 
-adc
-----
+jumbo
+-----
 
-This configuration shows the use of the ADC peripheral.
-
-buttons
--------
-
-This configuration shows the use of the buttons subsystem.
+This configuration enables many Apache NuttX features.  This is
+mostly to help provide additional code coverage in CI, but also
+allows for a users to see a wide range of features that are
+supported by the OS.
 
 cdcacm
 -------
@@ -97,16 +95,6 @@ ostest_tickless
 This is a NSH configuration that includes ``apps/testing/ostest`` as a builtin
 and enable support for the tick-less OS.
 
-pwm
----
-
-This configuration shows the use of the PWM peripheral.
-
-qspi
-----
-
-NuttShell configuration with enabled support for on-board MX25R QSPI memory.
-
 rndis
 -----
 
@@ -128,11 +116,6 @@ sx127x
 ------
 
 NuttShell configuration with support for sx127x chip.
-
-timer
-------
-
-This configuration shows the use of the TIMER peripheral.
 
 usbnsh
 ------
