@@ -840,6 +840,8 @@ static int esp32_spislv_interrupt(int irq, void *context, void *arg)
           tmp = esp32_spi_get_reg(priv, SPI_W0_OFFSET + i);
           memcpy(priv->rxbuffer + priv->rxlen + i, &tmp, 4);
         }
+
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
     }
 
   priv->rxlen += n;
@@ -861,6 +863,8 @@ static int esp32_spislv_interrupt(int irq, void *context, void *arg)
           priv->txlen = 0;
           priv->txen = false;
         }
+
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
     }
 
   if (priv->txlen)
