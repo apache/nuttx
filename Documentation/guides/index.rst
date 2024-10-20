@@ -44,3 +44,4 @@ Guides
   specialstuff_in_nuttxheaderfiles.rst
   kernel_threads_with_custom_stacks.rst
   versioning_and_task_names.rst
+  logging_rambuffer.rst
