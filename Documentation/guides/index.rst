@@ -47,3 +47,4 @@ Guides
   logging_rambuffer.rst
   ipv6.rst
   integrate_newlib.rst
+  protected_build.rst
