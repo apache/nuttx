@@ -1,5 +1,6 @@
 /****************************************************************************
- * boards/arm/stm32f7/nucleo-f722ze/src/stm32_romfs.h
+ * boards/arm/stm32f7/common/src/stm32_romfs_initialize.c
+ * This file provides contents of an optional ROMFS volume, mounted at boot.
  *
  *   Copyright (C) 2017 Tomasz Wozniak. All rights reserved.
  *   Author: Tomasz Wozniak <t.wozniak@samsung.com>
@@ -33,32 +34,78 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_NUCLEO144_SRC_STM32_ROMFS_H
-#define __BOARDS_ARM_STM32F7_NUCLEO144_SRC_STM32_ROMFS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_STM32_ROMFS
+#include <sys/mount.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <debug.h>
+#include <errno.h>
+
+#include <nuttx/fs/fs.h>
+#include <nuttx/drivers/ramdisk.h>
+#include "stm32_romfs.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ROMFS_SECTOR_SIZE 64
+#ifndef CONFIG_STM32F7_ROMFS
+#  error "CONFIG_STM32F7_ROMFS must be defined"
+#endif
+
+#ifndef CONFIG_STM32F7_ROMFS_IMAGEFILE
+#  error "CONFIG_STM32F7_ROMFS_IMAGEFILE must be defined"
+#endif
+
+#ifndef CONFIG_STM32F7_ROMFS_DEV_MINOR
+#  error "CONFIG_STM32F7_ROMFS_DEV_MINOR must be defined"
+#endif
+
+#ifndef CONFIG_STM32F7_ROMFS_MOUNTPOINT
+#  error "CONFIG_STM32F7_ROMFS_MOUNTPOINT must be defined"
+#endif
+
+#define NSECTORS(size) (((size) + ROMFS_SECTOR_SIZE - 1)/ROMFS_SECTOR_SIZE)
+
+#define STR2(m)  #m
+#define STR(m) STR2(m)
+
+#define MKMOUNT_DEVNAME(m) "/dev/ram" STR(m)
+#define MOUNT_DEVNAME      MKMOUNT_DEVNAME(CONFIG_STM32F7_ROMFS_DEV_MINOR)
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
+ ****************************************************************************/
+
+__asm__ (
+    ".section .rodata\n"
+    ".balign  16\n"
+    ".globl   romfs_data_begin\n"
+"romfs_data_begin:\n"
+    ".incbin " STR(CONFIG_STM32F7_ROMFS_IMAGEFILE) "\n"\
+    \
+    ".balign " STR(ROMFS_SECTOR_SIZE) "\n"
+    ".globl   romfs_data_end\n"
+"romfs_data_end:\n");
+
+extern const uint8_t romfs_data_begin[];
+extern const uint8_t romfs_data_end[];
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_romfs_initialize
  *
  * Description:
- *   Registers built-in ROMFS image as block device and mounts it.
+ *   Registers the aboveincluded binary file as block device.
+ *   Then mounts the block device as ROMFS filesystems.
  *
  * Returned Value:
  *   Zero (OK) on success, a negated errno value on error.
@@ -69,8 +116,36 @@
  *
  ****************************************************************************/
 
-int stm32_romfs_initialize(void);
+int stm32_romfs_initialize(void)
+{
+  size_t romfs_data_len;
+  int  ret;
 
-#endif /* CONFIG_STM32_ROMFS */
+  /* Create a ROM disk for the /etc filesystem */
 
-#endif /* __BOARDS_ARM_STM32F7_NUCLEO144_SRC_STM32_ROMFS_H */
+  romfs_data_len = romfs_data_end - romfs_data_begin;
+
+  ret = romdisk_register(CONFIG_STM32F7_ROMFS_DEV_MINOR, romfs_data_begin,
+                         NSECTORS(romfs_data_len), ROMFS_SECTOR_SIZE);
+  if (ret < 0)
+    {
+      ferr("ERROR: romdisk_register failed: %d\n", -ret);
+      return ret;
+    }
+
+  /* Mount the file system */
+
+  finfo("Mounting ROMFS filesystem at target=%s with source=%s\n",
+        CONFIG_STM32F7_ROMFS_MOUNTPOINT, MOUNT_DEVNAME);
+
+  ret = nx_mount(MOUNT_DEVNAME, CONFIG_STM32F7_ROMFS_MOUNTPOINT,
+              "romfs", MS_RDONLY, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
+           MOUNT_DEVNAME, CONFIG_STM32F7_ROMFS_MOUNTPOINT, ret);
+      return ret;
+    }
+
+  return OK;
+}

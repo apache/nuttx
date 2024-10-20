@@ -41,4 +41,8 @@ if(CONFIG_STM32F7_CAN)
   endif()
 endif()
 
+if(CONFIG_STM32F7_ROMFS)
+  list(APPEND SRCS stm32_romfs_initialize.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})

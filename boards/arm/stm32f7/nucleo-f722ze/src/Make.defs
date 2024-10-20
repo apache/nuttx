@@ -68,10 +68,6 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += stm32_reset.c
 endif
 
-ifeq ($(CONFIG_STM32_ROMFS),y)
-CSRCS += stm32_romfs_initialize.c
-endif
-
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CSRCS += stm32_qencoder.c
 endif

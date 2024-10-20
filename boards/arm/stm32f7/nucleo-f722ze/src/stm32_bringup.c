@@ -46,8 +46,8 @@
 #  include "stm32_cansock_setup.h"
 #endif
 
-#ifdef CONFIG_STM32_ROMFS
-#include "stm32_romfs.h"
+#ifdef CONFIG_STM32F7_ROMFS
+#  include "stm32_romfs.h"
 #endif
 
 #ifdef CONFIG_SYSTEMTICK_HOOK
@@ -94,14 +94,14 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32_ROMFS
+#ifdef CONFIG_STM32F7_ROMFS
   /* Mount the romfs partition */
 
   ret = stm32_romfs_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount romfs at %s: %d\n",
-             CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
+             CONFIG_STM32F7_ROMFS_MOUNTPOINT, ret);
     }
 #endif
 
