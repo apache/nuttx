@@ -48,3 +48,4 @@ Guides
   ipv6.rst
   integrate_newlib.rst
   protected_build.rst
+  platform_directories.rst
