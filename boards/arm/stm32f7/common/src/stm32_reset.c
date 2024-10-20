@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/nucleo-f767zi/src/stm32_reset.c
+ * boards/arm/stm32f7/common/src/stm32_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,8 +26,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-
-#ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
  * Public Functions
@@ -58,5 +56,3 @@ int board_reset(int status)
   up_systemreset();
   return 0;
 }
-
-#endif /* CONFIG_BOARDCTL_RESET */
