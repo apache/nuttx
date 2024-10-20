@@ -49,4 +49,8 @@ if(CONFIG_BOARDCTL_RESET)
   list(APPEND SRCS stm32_reset.c)
 endif()
 
+if(CONFIG_STM32F7_SPI_TEST)
+  list(APPEND SRCS stm32_spitest.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})

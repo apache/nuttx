@@ -47,48 +47,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_NUCLEO_F746ZG_SPI1_TEST)
-#  if defined(CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE0)
-#    define CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE SPIDEV_MODE0
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE1)
-#    define CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE SPIDEV_MODE1
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE2)
-#    define CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE SPIDEV_MODE2
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE3)
-#    define CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE SPIDEV_MODE3
-#  else
-#    error "No CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODEx defined"
-#  endif
-#endif
-
-#if defined(CONFIG_NUCLEO_F746ZG_SPI2_TEST)
-#  if defined(CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE0)
-#    define CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE SPIDEV_MODE0
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE1)
-#    define CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE SPIDEV_MODE1
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE2)
-#    define CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE SPIDEV_MODE2
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE3)
-#    define CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE SPIDEV_MODE3
-#  else
-#    error "No CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODEx defined"
-#  endif
-#endif
-
-#if defined(CONFIG_NUCLEO_F746ZG_SPI3_TEST)
-#  if defined(CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE0)
-#    define CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE SPIDEV_MODE0
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE1)
-#    define CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE SPIDEV_MODE1
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE2)
-#    define CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE SPIDEV_MODE2
-#  elif defined(CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE3)
-#    define CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE SPIDEV_MODE3
-#  else
-#    error "No CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODEx defined"
-#  endif
-#endif
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -169,18 +127,6 @@ static const uint32_t g_spi3gpio[] =
   0
 #  endif
 };
-#endif
-
-#if defined(CONFIG_NUCLEO_F746ZG_SPI_TEST)
-#  if defined(CONFIG_STM32F7_SPI1)
-struct spi_dev_s *spi1;
-#  endif
-#  if defined(CONFIG_STM32F7_SPI2)
-struct spi_dev_s *spi2;
-#  endif
-#  if defined(CONFIG_STM32F7_SPI3)
-struct spi_dev_s *spi3;
-#  endif
 #endif
 
 /****************************************************************************
@@ -430,69 +376,4 @@ int stm32_spi6cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #endif /* CONFIG_SPI_CMDDATA */
-
-#if defined(CONFIG_NUCLEO_F746ZG_SPI_TEST)
-int stm32_spidev_bus_test(void)
-{
-  /* Configure and test SPI- */
-
-  uint8_t *tx = (uint8_t *)CONFIG_NUCLEO_F746ZG_SPI_TEST_MESSAGE;
-
-#if defined(CONFIG_NUCLEO_F746ZG_SPI1_TEST)
-  spi1 = stm32_spibus_initialize(1);
-
-  if (!spi1)
-    {
-      syslog(LOG_ERR, "ERROR Failed to initialize SPI port 1\n");
-      return -ENODEV;
-    }
-
-  /* Default SPI1 to NUCLEO_F746ZG_SPI1_FREQ and mode */
-
-  SPI_SETFREQUENCY(spi1, CONFIG_NUCLEO_F746ZG_SPI1_TEST_FREQ);
-  SPI_SETBITS(spi1, CONFIG_NUCLEO_F746ZG_SPI1_TEST_BITS);
-  SPI_SETMODE(spi1, CONFIG_NUCLEO_F746ZG_SPI1_TEST_MODE);
-  SPI_EXCHANGE(spi1, tx, NULL,
-               nitems(CONFIG_NUCLEO_F746ZG_SPI_TEST_MESSAGE));
-#endif
-
-#if defined(CONFIG_NUCLEO_F746ZG_SPI2_TEST)
-  spi2 = stm32_spibus_initialize(2);
-
-  if (!spi2)
-    {
-      syslog(LOG_ERR, "ERROR Failed to initialize SPI port 2\n");
-      return -ENODEV;
-    }
-
-  /* Default SPI2 to NUCLEO_F746ZG_SPI2_FREQ and mode */
-
-  SPI_SETFREQUENCY(spi2, CONFIG_NUCLEO_F746ZG_SPI2_TEST_FREQ);
-  SPI_SETBITS(spi2, CONFIG_NUCLEO_F746ZG_SPI2_TEST_BITS);
-  SPI_SETMODE(spi2, CONFIG_NUCLEO_F746ZG_SPI2_TEST_MODE);
-  SPI_EXCHANGE(spi2, tx, NULL,
-               nitems(CONFIG_NUCLEO_F746ZG_SPI_TEST_MESSAGE));
-#endif
-
-#if defined(CONFIG_NUCLEO_F746ZG_SPI3_TEST)
-  spi3 = stm32_spibus_initialize(3);
-
-  if (!spi3)
-    {
-      syslog(LOG_ERR, "ERROR Failed to initialize SPI port 2\n");
-      return -ENODEV;
-    }
-
-  /* Default SPI3 to NUCLEO_F746ZG_SPI3_FREQ and mode */
-
-  SPI_SETFREQUENCY(spi3, CONFIG_NUCLEO_F746ZG_SPI3_TEST_FREQ);
-  SPI_SETBITS(spi3, CONFIG_NUCLEO_F746ZG_SPI3_TEST_BITS);
-  SPI_SETMODE(spi3, CONFIG_NUCLEO_F746ZG_SPI3_TEST_MODE);
-  SPI_EXCHANGE(spi3, tx, NULL,
-               nitems(CONFIG_NUCLEO_F746ZG_SPI_TEST_MESSAGE));
-#endif
-
-  return OK;
-}
-#endif /* NUCLEO_F746ZG_SPI_TEST */
 #endif /* defined(CONFIG_SPI) */

@@ -50,8 +50,12 @@
 #  include "stm32_romfs.h"
 #endif
 
+#ifdef CONFIG_STM32F7_SPI_TEST
+#  include "stm32_spitest.h"
+#endif
+
 #ifdef CONFIG_SYSTEMTICK_HOOK
-#include <semaphore.h>
+#  include <semaphore.h>
 #endif
 
 /****************************************************************************
@@ -149,7 +153,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_NUCLEO_F722ZE_SPI_TEST)
+#ifdef CONFIG_STM32F7_SPI_TEST
   /* Create SPI interfaces */
 
   ret = stm32_spidev_bus_test();
