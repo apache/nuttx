@@ -32,6 +32,15 @@ ifeq ($(CONFIG_AUDIO_CS4344),y)
   CSRCS += stm32_cs4344.c
 endif
 
+ifeq ($(CONFIG_STM32F7_CAN),y)
+ifeq ($(CONFIG_STM32F7_CAN_CHARDRIVER),y)
+CSRCS += stm32_can_setup.c
+endif
+ifeq ($(CONFIG_STM32F7_CAN_SOCKET),y)
+CSRCS += stm32_cansock_setup.c
+endif
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
