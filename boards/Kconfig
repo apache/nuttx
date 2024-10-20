@@ -1524,36 +1524,35 @@ config ARCH_BOARD_NUCLEO_F429ZI
 	---help---
 		STMicro Nucleo-F429zi board based on the STMicro STM32F429ZIT6 MCU.
 
-config ARCH_BOARD_NUCLEO_144
-	bool "STMicro NUCLEO-144"
-	depends on ARCH_CHIP_STM32F722ZE || ARCH_CHIP_STM32F746ZG || ARCH_CHIP_STM32F767ZI
+config ARCH_BOARD_NUCLEO_F722ZE
+	bool "STMicro NUCLEO-F722ZE"
+	depends on ARCH_CHIP_STM32F722ZE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro Nucleo-144 development board featuring STMicroelectronics
-		F2, F3, F4, F7 and L4 MCU families.  The board is a "Hardware pattern"
-		that can be populated with the 144 pin package of the following MCUs:
+		STMicro Nucleo F722ZE board based on STM32F722ZET6,
+		a 216MHz Cortex-M7, w/FPU, 512KiB Flash memory and 256KiB SRAM.
 
-			Target STM32    Order code
-			STM32F207ZGT6   NUCLEO-F207ZG
-			STM32F303ZET6   NUCLEO-F303ZE
-			STM32F429ZIT6   NUCLEO-F429ZI
-			STM32F446ZET6   NUCLEO-F446ZE
-			STM32F722ZET6   NUCLEO-F722ZE
-			STM32F746ZGT6   NUCLEO-F746ZG
-			STM32F767ZIT6   NUCLEO-F767ZI
-			STM32L496ZGT6   NUCLEO-L496ZG
-			STM32L496ZGT6P  NUCLEO-L496ZG-P
+config ARCH_BOARD_NUCLEO_F746ZG
+	bool "STMicro NUCLEO-F746ZG"
+	depends on ARCH_CHIP_STM32F746ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F746ZG board based on STM32F746ZGT6
+		a 216MHz Cortex-M7, w/FPU, 1024KiB Flash memory and 320KiB SRAM.
 
-		Supported in this configuration are:
-
-			NUCLEO-F722ZE - STM32F722ZET6 a 216MHz Cortex-M7, w/FPU -
-				512KiB Flash memory and 256KiB SRAM.
-			NUCLEO-F746ZG - STM32F746ZGT6 a 216MHz Cortex-M7, w/FPU -
-				1024KiB Flash memory and 320KiB SRAM.
-			NUCLEO-F767ZI - STM32F767ZIT6 a 216MHz Cortex-M7, w/DPFPU -
-				2048KiB Flash memory and 512KiB SRAM.
+config ARCH_BOARD_NUCLEO_F767ZI
+	bool "STMicro NUCLEO-F767ZI"
+	depends on ARCH_CHIP_STM32F767ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F767ZI board based on STM32F767ZIT6,
+		a 216MHz Cortex-M7, w/DPFPU 2048KiB Flash memory and 512KiB SRAM.
 
 config ARCH_BOARD_NUCLEO_L073RZ
 	bool "STM32L073RZU6 Nucleo L073RZ"
@@ -3356,7 +3355,9 @@ config ARCH_BOARD
 	default "thingy91-nrf52"            if ARCH_BOARD_THINGY91_NRF52
 	default "nrf9160-dk-nrf52"          if ARCH_BOARD_NRF9160_DK_NRF52
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
-	default "nucleo-144"                if ARCH_BOARD_NUCLEO_144
+	default "nucleo-f722ze"             if ARCH_BOARD_NUCLEO_F722ZE
+	default "nucleo-f746zg"             if ARCH_BOARD_NUCLEO_F746ZG
+	default "nucleo-f767zi"             if ARCH_BOARD_NUCLEO_F767ZI
 	default "nucleo-f072rb"             if ARCH_BOARD_NUCLEO_F072RB
 	default "nucleo-f091rc"             if ARCH_BOARD_NUCLEO_F091RC
 	default "nucleo-f103rb"             if ARCH_BOARD_NUCLEO_F103RB
@@ -4002,8 +4003,14 @@ endif
 if ARCH_BOARD_STM32F072_DISCOVERY
 source "boards/arm/stm32f0l0g0/stm32f072-discovery/Kconfig"
 endif
-if ARCH_BOARD_NUCLEO_144
-source "boards/arm/stm32f7/nucleo-144/Kconfig"
+if ARCH_BOARD_NUCLEO_F722ZE
+source "boards/arm/stm32f7/nucleo-f722ze/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F746ZG
+source "boards/arm/stm32f7/nucleo-f746zg/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F767ZI
+source "boards/arm/stm32f7/nucleo-f767zi/Kconfig"
 endif
 if ARCH_BOARD_STM32F746_WS
 source "boards/arm/stm32f7/stm32f746-ws/Kconfig"
