@@ -230,19 +230,6 @@ void stm32_spidev_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_spidev_bus_test
- *
- * Description:
- *   Called to create the defined SPI buses and test them by initializing
- *   them and sending the NUCLEO_SPI_TEST (no chip select).
- *
- ****************************************************************************/
-
-#if defined(CONFIG_NUCLEO_F722ZE_SPI_TEST)
-int stm32_spidev_bus_test(void);
-#endif
-
-/****************************************************************************
  * Name: stm32_dma_alloc_init
  *
  * Description:
