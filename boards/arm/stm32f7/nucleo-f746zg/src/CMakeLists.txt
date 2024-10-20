@@ -62,10 +62,6 @@ if(CONFIG_STM32F7_BBSRAM)
   list(APPEND SRCS stm32_bbsram.c)
 endif()
 
-if(CONFIG_BOARDCTL_RESET)
-  list(APPEND SRCS stm32_reset.c)
-endif()
-
 if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32_qencoder.c)
 endif()

@@ -45,4 +45,8 @@ if(CONFIG_STM32F7_ROMFS)
   list(APPEND SRCS stm32_romfs_initialize.c)
 endif()
 
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS stm32_reset.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
