@@ -46,3 +46,4 @@ Guides
   versioning_and_task_names.rst
   logging_rambuffer.rst
   ipv6.rst
+  integrate_newlib.rst
