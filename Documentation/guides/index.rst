@@ -50,3 +50,4 @@ Guides
   protected_build.rst
   platform_directories.rst
   port_drivers_to_stm32f7.rst
+  semihosting.rst
