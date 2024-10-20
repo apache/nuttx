@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/nucleo-f722ze/src/stm32_cansock.c
+ * boards/arm/stm32f7/common/include/stm32_can_setup.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,66 +18,54 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CAN_SETUP_H
+#define __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CAN_SETUP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
-
-#include "stm32_can.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#if !defined(CONFIG_STM32F7_CAN1) && !defined(CONFIG_STM32F7_CAN2)
-#  error "No CAN is enable. Please eneable at least one CAN device"
-#endif
-
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_cansock_setup
- *
- * Description:
- *  Initialize CAN socket interface
- *
+ * Public Data
  ****************************************************************************/
 
-int stm32_cansock_setup(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret = OK;
-
-  UNUSED(ret);
-
-#ifdef CONFIG_STM32F7_CAN1
-  /* Call stm32_caninitialize() to get an instance of the CAN interface */
-
-  ret = stm32_cansockinitialize(1);
-  if (ret < 0)
-    {
-      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
-      goto errout;
-    }
+#else
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_STM32F7_CAN2
-  /* Call stm32_caninitialize() to get an instance of the CAN interface */
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
-  ret = stm32_cansockinitialize(2);
-  if (ret < 0)
-    {
-      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
-      goto errout;
-    }
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_can_setup
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
+int stm32_can_setup(void);
 #endif
 
-errout:
-  return ret;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CAN_SETUP_H */

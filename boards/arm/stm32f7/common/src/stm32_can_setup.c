@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/nucleo-f767zi/src/stm32_cansock.c
+ * boards/arm/stm32f7/common/src/stm32_can_setup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,18 +24,24 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/can/can.h>
+
 #include "stm32_can.h"
+
+#ifdef CONFIG_CAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#if !defined(CONFIG_STM32F7_CAN1) && !defined(CONFIG_STM32F7_CAN2)
-#  error "No CAN is enable. Please eneable at least one CAN device"
+#ifdef CONFIG_STM32F7_CAN1
+#  define CAN_PORT 1
+#else
+#  define CAN_PORT 2
 #endif
 
 /****************************************************************************
@@ -43,41 +49,66 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_cansock_setup
+ * Name: stm32_can_setup
  *
  * Description:
- *  Initialize CAN socket interface
+ *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-int stm32_cansock_setup(void)
+int stm32_can_setup(void)
 {
-  int ret = OK;
+#if defined(CONFIG_STM32F7_CAN1)
+  struct can_dev_s *can;
+  int ret;
 
-  UNUSED(ret);
+  /* Call stm32f7can_initialize() to get an instance of the CAN interface */
 
-#ifdef CONFIG_STM32F7_CAN1
-  /* Call stm32_caninitialize() to get an instance of the CAN interface */
+  can = stm32_caninitialize(CAN_PORT);
+  if (can == NULL)
+    {
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
+    }
 
-  ret = stm32_cansockinitialize(1);
+  /* Register the CAN driver at "/dev/can0" */
+
+  ret = can_register("/dev/can0", can);
   if (ret < 0)
     {
-      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
-      goto errout;
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
     }
+
+  return OK;
 #endif
 
-#ifdef CONFIG_STM32F7_CAN2
-  /* Call stm32_caninitialize() to get an instance of the CAN interface */
+#if defined(CONFIG_STM32F7_CAN2)
+  struct can_dev_s *can;
+  int ret;
 
-  ret = stm32_cansockinitialize(2);
+  /* Call stm32f7can_initialize() to get an instance of the CAN interface */
+
+  can = stm32_caninitialize(CAN_PORT);
+  if (can == NULL)
+    {
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
+    }
+
+  /* Register the CAN driver at "/dev/can1" */
+
+  ret = can_register("/dev/can1", can);
   if (ret < 0)
     {
-      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
-      goto errout;
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
     }
-#endif
 
-errout:
-  return ret;
+  return OK;
+#else
+  return -ENODEV;
+#endif
 }
+
+#endif /* CONFIG_CAN */

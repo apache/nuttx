@@ -38,6 +38,14 @@
 
 #include "stm32_i2c.h"
 
+#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
+#  include "stm32_can_setup.h"
+#endif
+
+#ifdef CONFIG_STM32F7_CAN_SOCKET
+#  include "stm32_cansock_setup.h"
+#endif
+
 #ifdef CONFIG_STM32_ROMFS
 #include "stm32_romfs.h"
 #endif

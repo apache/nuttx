@@ -32,4 +32,13 @@ if(CONFIG_AUDIO_CS4344)
   list(APPEND SRCS stm32_cs4344.c)
 endif()
 
+if(CONFIG_STM32F7_CAN)
+  if(CONFIG_STM32F7_CAN_CHARDRIVER)
+    list(APPEND SRCS stm32_can.c)
+  endif()
+  if(CONFIG_STM32F7_CAN_SOCKET)
+    list(APPEND SRCS stm32_cansock.c)
+  endif()
+endif()
+
 target_sources(board PRIVATE ${SRCS})

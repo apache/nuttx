@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/nucleo-f746zg/src/stm32_cansock.c
+ * boards/arm/stm32f7/common/src/stm32_cansock_setup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
