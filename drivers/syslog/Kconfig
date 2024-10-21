@@ -51,7 +51,7 @@ comment "SYSLOG options"
 
 config SYSLOG_CRLF
 	bool "Syslog convert LF to CRLF"
-	default n
+	default y
 	---help---
 		Pre-pend a carriage return before every linefeed that goes into the
 		syslog.
