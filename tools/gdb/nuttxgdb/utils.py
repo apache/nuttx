@@ -345,6 +345,7 @@ def sizeof(t: Union[str, gdb.Type]):
 
     return t.sizeof
 
+
 # Machine Specific Helper Functions
 
 
@@ -911,22 +912,3 @@ class Addr2Line(gdb.Command):
                     except gdb.error as e:
                         gdb.write(f"Ignore {arg}: {e}\n")
             self.print_backtrace(addresses)
-
-
-class Profile(gdb.Command):
-    """Profile a gdb command
-
-    Usage: profile <gdb command>
-    """
-
-    def __init__(self):
-        self.cProfile = import_check(
-            "cProfile", errmsg="cProfile module not found, try gdb-multiarch.\n"
-        )
-        if not self.cProfile:
-            return
-
-        super().__init__("profile", gdb.COMMAND_USER)
-
-    def invoke(self, args, from_tty):
-        self.cProfile.run(f"gdb.execute('{args}')", sort="cumulative")
