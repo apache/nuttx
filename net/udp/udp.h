@@ -179,6 +179,14 @@ struct udp_wrbuffer_s
 };
 #endif
 
+struct udp_callback_s
+{
+  FAR struct net_driver_s *dev;
+  FAR struct udp_conn_s *conn;
+  FAR struct devif_callback_s *udp_cb;
+  FAR sem_t *sem;
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -728,6 +736,19 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
+ * Name: udp_callback_cleanup
+ *
+ * Description:
+ *   Cleanup data and cb when thread is canceled.
+ *
+ * Input Parameters:
+ *   arg - A pointer with conn and callback struct.
+ *
+ ****************************************************************************/
+
+void udp_callback_cleanup(FAR void *arg);
+
+/****************************************************************************
  * Name: psock_udp_recvfrom
  *
  * Description:
@@ -897,7 +918,7 @@ int udp_writebuffer_notifier_setup(worker_t worker,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
-void udp_notifier_teardown(int key);
+void udp_notifier_teardown(FAR void *key);
 #endif
 
 /****************************************************************************
