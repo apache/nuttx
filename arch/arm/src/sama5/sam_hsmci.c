@@ -3213,8 +3213,6 @@ static void sam_callback(void *arg)
       ret = work_cancel(LPWORK, &priv->cbwork);
       if (ret < 0)
         {
-          /* NOTE: Currently, work_cancel only returns success */
-
           lcderr("ERROR: Failed to cancel work: %d\n", ret);
         }
 
@@ -3223,8 +3221,6 @@ static void sam_callback(void *arg)
                        priv->cbarg, 0);
       if (ret < 0)
         {
-          /* NOTE: Currently, work_queue only returns success */
-
           lcderr("ERROR: Failed to schedule work: %d\n", ret);
         }
     }

@@ -658,8 +658,6 @@ static void automount_timeout(wdparm_t arg)
   ret = work_queue(LPWORK, &priv->work, automount_worker, priv, 0);
   if (ret < 0)
     {
-      /* NOTE: Currently, work_queue only returns success */
-
       ferr("ERROR: Failed to schedule work: %d\n", ret);
     }
 }
@@ -771,8 +769,6 @@ static int automount_interrupt(FAR const struct automount_lower_s *lower,
                    priv->lower->ddelay);
   if (ret < 0)
     {
-      /* NOTE: Currently, work_queue only returns success */
-
       ferr("ERROR: Failed to schedule work: %d\n", ret);
     }
   else
@@ -840,8 +836,6 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
                    priv->lower->ddelay);
   if (ret < 0)
     {
-      /* NOTE: Currently, work_queue only returns success */
-
       ferr("ERROR: Failed to schedule work: %d\n", ret);
     }
 

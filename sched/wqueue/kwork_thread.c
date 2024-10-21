@@ -104,6 +104,8 @@ struct lp_wqueue_s g_lpwork =
 
 #endif /* CONFIG_SCHED_LPWORK */
 
+spinlock_t g_wqueue_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -138,7 +140,6 @@ static int work_thread(int argc, FAR char *argv[])
   worker_t worker;
   irqstate_t flags;
   FAR void *arg;
-  int semcount;
 
   /* Get the handle from argv */
 
@@ -147,7 +148,7 @@ static int work_thread(int argc, FAR char *argv[])
   kworker = (FAR struct kworker_s *)
             ((uintptr_t)strtoul(argv[2], NULL, 16));
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_wqueue_lock);
 
   /* Loop forever */
 
@@ -189,9 +190,9 @@ static int work_thread(int argc, FAR char *argv[])
            * performed... we don't have any idea how long this will take!
            */
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_wqueue_lock, flags);
           CALL_WORKER(worker, arg);
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave(&g_wqueue_lock);
 
           /* Mark the thread un-busy */
 
@@ -199,9 +200,9 @@ static int work_thread(int argc, FAR char *argv[])
 
           /* Check if someone is waiting, if so, wakeup it */
 
-          nxsem_get_value(&kworker->wait, &semcount);
-          while (semcount++ < 0)
+          while (kworker->wait_count < 0)
             {
+              kworker->wait_count++;
               nxsem_post(&kworker->wait);
             }
         }
@@ -211,10 +212,13 @@ static int work_thread(int argc, FAR char *argv[])
        * posted.
        */
 
+      wqueue->wait_count--;
+      spin_unlock_irqrestore(&g_wqueue_lock, flags);
       nxsem_wait_uninterruptible(&wqueue->sem);
+      flags = spin_lock_irqsave(&g_wqueue_lock);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_wqueue_lock, flags);
 
   nxsem_post(&wqueue->exsem);
   return OK;
@@ -276,6 +280,7 @@ static int work_thread_create(FAR const char *name, int priority,
         }
 
       wqueue->worker[wndx].pid = pid;
+      wqueue->worker[wndx].wait_count = 0;
     }
 
   sched_unlock();
@@ -334,6 +339,7 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
   nxsem_init(&wqueue->sem, 0, 0);
   nxsem_init(&wqueue->exsem, 0, 0);
   wqueue->nthreads = nthreads;
+  wqueue->wait_count = 0;
 
   /* Create the work queue thread pool */
 
