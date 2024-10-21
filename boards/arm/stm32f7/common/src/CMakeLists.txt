@@ -34,10 +34,10 @@ endif()
 
 if(CONFIG_STM32F7_CAN)
   if(CONFIG_STM32F7_CAN_CHARDRIVER)
-    list(APPEND SRCS stm32_can.c)
+    list(APPEND SRCS stm32_can_setup.c)
   endif()
   if(CONFIG_STM32F7_CAN_SOCKET)
-    list(APPEND SRCS stm32_cansock.c)
+    list(APPEND SRCS stm32_cansock_setup.c)
   endif()
 endif()
 
