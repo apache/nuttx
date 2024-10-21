@@ -215,7 +215,7 @@ static int sama5_sfc_lower_ioctl(struct efuse_lowerhalf_s *lower,
     {
       /* We don't have proprietary EFUSE ioctls */
 
-      case EFUSEIOC_SAMA5_MASK:
+      case EFUSEIOC_MASK:
         {
           minfo("Masking fuses register \n");
           sam_sfc_mask_read();
