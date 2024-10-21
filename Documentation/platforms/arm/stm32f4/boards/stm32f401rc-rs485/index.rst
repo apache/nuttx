@@ -748,6 +748,27 @@ NSH commands::
        WRITING:
        0000: 1b5b471b5b30304c1b5b4548656c6c6f 204e75747458                     .[G.[00L.[EHello  NuttX
        Test complete
-       nsh> 
+       nsh>
+
+ws2812
+------
+
+This configuration sets up the NuttShell (NSH) interface over USB Serial (refer to the usbserial
+configuration for details). It also enables the driver for an addressable LED WS2812 and the SPI1.
+The MOSI pin from SPI must be connected to DIN on WS2812 module and the number of LEDs can be
+configured using CONFIG_WS2812_LED_COUNT.
+
+
+======= ====
+ WS2812 PINS
+======= ====
+DIN     PA7
+======= ====
+
+NSH commands::
+
+       NuttShell (NSH) NuttX-12.7.0-RC0
+       nsh> ws2812
+
 
        
