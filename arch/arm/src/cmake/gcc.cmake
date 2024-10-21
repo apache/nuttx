@@ -60,7 +60,7 @@ set(NO_LTO "-fno-lto")
 if(CONFIG_ARCH_TOOLCHAIN_GNU)
   execute_process(COMMAND ${CMAKE_C_COMPILER} --version
                   OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
-  string(REGEX MATCH "\\+\\+.* ([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
+  string(REGEX MATCH "([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
                "${GCC_VERSION_OUTPUT}")
   set(GCCVER ${CMAKE_MATCH_1})
 
