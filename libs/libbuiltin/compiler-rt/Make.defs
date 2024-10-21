@@ -1,0 +1,58 @@
+############################################################################
+# libs/libbuiltin/compiler-rt/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/Make.defs
+
+LIBBUILTIN += compiler-rt
+
+ifeq ($(wildcard compiler-rt/compiler-rt/lib),)
+compiler-rt-$(CONFIG_COMPILER_RT_VERSION).src.tar.xz:
+	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(CONFIG_COMPILER_RT_VERSION),$@)
+
+compiler-rt/compiler-rt: compiler-rt-$(CONFIG_COMPILER_RT_VERSION).src.tar.xz
+	$(Q) tar -xf $<
+	$(Q) mv compiler-rt-$(CONFIG_COMPILER_RT_VERSION).src $@
+	$(call DELDIR, $<)
+
+compiler-rt: compiler-rt/compiler-rt
+endif
+
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/include
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
+FLAGS += -Wno-strict-prototypes -Wno-shadow -Wno-cleardeprecated-pragma
+FLAGS += -Wno-deprecated-pragma -Wno-undef -Wno-incompatible-pointer-types
+FLAGS += -Wno-unknown-warning-option -Wno-deprecated-pragma
+FLAGS += -DCOMPILER_RT_HAS_UNAME
+
+CFLAGS += $(FLAGS)
+CXXFLAGS += $(FLAGS)
+
+CSRCS += GCDAProfiling.c InstrProfilingBuffer.c InstrProfiling.c InstrProfilingFile.c InstrProfilingInternal.c
+CSRCS += InstrProfilingMerge.c InstrProfilingMergeFile.c InstrProfilingNameVar.c
+CSRCS += InstrProfilingUtil.c InstrProfilingValue.c InstrProfilingVersionVar.c InstrProfilingWriter.c
+CPPSRCS += InstrProfilingRuntime.cpp
+
+CSRCS += InstrProfilingPlatformNX.c
+
+DEPPATH += --dep-path compiler-rt/compiler-rt/lib/profile
+VPATH += :compiler-rt/compiler-rt/lib/profile
+
+DEPPATH += --dep-path compiler-rt
+VPATH += :compiler-rt
