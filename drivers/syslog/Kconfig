@@ -36,7 +36,7 @@ config RAMLOG
 if RAMLOG
 config RAMLOG_CRLF
 	bool "RAMLOG CR/LF"
-	default n
+	default y
 	---help---
 		Pre-pend a carriage return before every linefeed that goes into the
 		RAM log.
