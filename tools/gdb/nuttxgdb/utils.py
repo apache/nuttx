@@ -339,6 +339,12 @@ def nitems(array):
     return array_size
 
 
+def sizeof(t: Union[str, gdb.Type]):
+    if type(t) is str:
+        t = gdb.lookup_type(t)
+
+    return t.sizeof
+
 # Machine Specific Helper Functions
 
 
