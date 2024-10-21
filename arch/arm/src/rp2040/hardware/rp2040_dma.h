@@ -85,7 +85,7 @@
 #define RP2040_DMA_CHAN_ABORT_OFFSET                 0x000444  /* Abort an in-progress transfer sequence on one or more channels */
 #define RP2040_DMA_N_CHANNELS_OFFSET                 0x000448  /* The number of channels this DMA instance is equipped with. This DMA supports up to 16 hardware channels, but can be configured with as few as one, to minimise silicon area. */
 #define RP2040_DMA_DBG_CTDREQ_OFFSET(n)              (0x000800 + (n) * 0x0040)
-#define RP2040_DMA_DBG_TCR_OFFSET                    (0x000804 + (n) * 0x0040)
+#define RP2040_DMA_DBG_TCR_OFFSET(n)                 (0x000804 + (n) * 0x0040)
 
 /* Register definitions *****************************************************/
 

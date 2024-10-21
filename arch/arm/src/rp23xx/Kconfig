@@ -5,54 +5,9 @@
 
 comment "RP23XX Configuration Options"
 
-#####################################################################
-#  PSRAM Configuration
-#####################################################################
-
-config RP23XX_PSRAM
-	bool "External PSRAM support"
+config RP23XX_RP2350B
+	bool "Use RP2350B variant (QFN-80)"
 	default n
-
-if RP23XX_PSRAM
-choice
-	prompt "PSRAM heap mode"
-	default RP23XX_PSRAM_HEAP_USER
-
-config RP23XX_PSRAM_HEAP_SINGLE
-	bool "Use PSRAM and SRAM as a single main heap"
-	depends on MM_REGIONS > 1 && !MM_KERNEL_HEAP
-	---help---
-		The external PSRAM and the internal SRAM will be used for
-		a single main heap. This configuration is good for maximum
-		usage of the memory without partitioning, however as there
-		is no control whether the memory is allocated in the SRAM
-		or the PSRAM, some regions will behave much slower than
-		others and the user must be careful in managing those
-		buffers for real world applications.
-
-		This option requires MM_REGIONS to be set >= 2, so the
-		PSRAM is added to the main heap as a new region.
-
-config RP23XX_PSRAM_HEAP_USER
-	bool "Use PSRAM as user heap, SRAM as kernel heap"
-	depends on MM_KERNEL_HEAP
-	---help---
-		The external PSRAM is allocated to the default heap, while
-		the internal SRAM will be used for the kernel heap. This
-		configuration is useful because it allows drivers to
-		use the SRAM and behave much faster than if they used
-		memory on the PSRAM. While user applications can take
-		the bull benefit of the larger slower heap on the PSRAM.
-
-config RP23XX_PSRAM_HEAP_SEPARATE
-	bool "Use PSRAM as a separate heap"
-	select ARCH_HAVE_EXTRA_HEAPS
-	---help---
-		The internal SRAM is used as the main heap for kernel and
-		applications. The external PSRAM is configured as a
-		separate user heap.
-endchoice
-endif
 
 config RP23XX_DMAC
 	bool "DMAC support"
@@ -433,8 +388,6 @@ config RP23XX_PWM3
 
 if RP23XX_PWM3
 
-config RP23XX_PWM3A_GPIO
-
 config RP23XX_PWM3A_INVERT
 	bool "PWM3 channel 1 invert"
 	default n
@@ -568,8 +521,6 @@ config RP23XX_PWM7A_INVERT
 
 if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
 
-config RP23XX_PWM7B_GPIO
-
 config RP23XX_PWM7B_INVERT
 	bool "PWM7 channel 2 invert"
 	default n
@@ -584,6 +535,130 @@ config RP23XX_PWM7_PHASE_CORRECT
 	default n
 
 endif # RP23XX_PWM7
+
+config RP23XX_PWM8
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM8
+
+config RP23XX_PWM8A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM8B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM8_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM8
+
+config RP23XX_PWM9
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM9
+
+config RP23XX_PWM9A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM9B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM9_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM9
+
+config RP23XX_PWM10
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM10
+
+config RP23XX_PWM10A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM10B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM10_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM10
+
+config RP23XX_PWM11
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM11
+
+config RP23XX_PWM11A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM11B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM11_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM11
 
 endif # RP23XX_PWM
 
@@ -625,6 +700,32 @@ config RP23XX_I2S_PIO_SM
 	range 0 3
 
 endif # RP23XX_I2S
+
+#####################################################################
+#  SPISD Configuration
+#####################################################################
+
+config RP23XX_SPISD
+	bool "SPI SD Card"
+	default n
+	select MMCSD_SPI
+
+if RP23XX_SPISD
+
+config RP23XX_SPISD_SLOT_NO
+	int "SPI SD Card Slot Number"
+	default 0
+	---help---
+		Select spi sd card slot number.
+
+config RP23XX_SPISD_SPI_CH
+	int "SPI channel number"
+	default 0
+	range 0 1
+	---help---
+		Select spi channel number to use spi sd card.
+
+endif # SPISD Configuration
 
 #####################################################################
 #  ADC Configuration
@@ -674,6 +775,30 @@ config RP23XX_ADC_CHANNEL3
 	---help---
 		If y, then ADC3 will be read.
 
+config RP23XX_ADC_CHANNEL4
+	bool "Read ADC channel 4"
+	default n
+	---help---
+		If y, then ADC4 will be read.
+
+config RP23XX_ADC_CHANNEL5
+	bool "Read ADC channel 5"
+	default n
+	---help---
+		If y, then ADC5 will be read.
+
+config RP23XX_ADC_CHANNEL6
+	bool "Read ADC channel 6"
+	default n
+	---help---
+		If y, then ADC6 will be read.
+
+config RP23XX_ADC_CHANNEL7
+	bool "Read ADC channel 7"
+	default n
+	---help---
+		If y, then ADC7 will be read.
+
 config RP23XX_ADC_TEMPERATURE
 	bool "Read ADC chip temperature channel"
 	default n
@@ -714,7 +839,7 @@ config RP23XX_CLK_GPOUT0_SRC_REF
 		Oscillator (XOSC) for more accuracy.
 
 config RP23XX_CLK_GPOUT0_SRC_SYS
-	bool "SYS (125 MHz)"
+	bool "SYS (150 MHz)"
 	---help---
 		System clock that is always running unless in DORMANT mode. Runs from
 		clk_ref at power-up but is typically switched to a PLL.
@@ -729,10 +854,15 @@ config RP23XX_CLK_GPOUT0_SRC_ADC
 	---help---
 		ADC reference clock. Must be 48MHz.
 
-config RP23XX_CLK_GPOUT0_SRC_RTC
-	bool "RTC (46875 Hz)"
+config RP23XX_CLK_GPOUT0_SRC_PERI
+	bool "PERI (150 MHz)"
 	---help---
-		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT0_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
 
 endchoice # Source Clock
 
@@ -765,7 +895,7 @@ config RP23XX_CLK_GPOUT1_SRC_REF
 		Oscillator (XOSC) for more accuracy.
 
 config RP23XX_CLK_GPOUT1_SRC_SYS
-	bool "SYS (125 MHz)"
+	bool "SYS (150 MHz)"
 	---help---
 		System clock that is always running unless in DORMANT mode. Runs from
 		clk_ref at power-up but is typically switched to a PLL.
@@ -780,10 +910,15 @@ config RP23XX_CLK_GPOUT1_SRC_ADC
 	---help---
 		ADC reference clock. Must be 48MHz.
 
-config RP23XX_CLK_GPOUT1_SRC_RTC
-	bool "RTC (46875 Hz)"
+config RP23XX_CLK_GPOUT1_SRC_PERI
+	bool "PERI (150 MHz)"
 	---help---
-		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT1_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
 
 endchoice # Source Clock
 
@@ -831,10 +966,15 @@ config RP23XX_CLK_GPOUT2_SRC_ADC
 	---help---
 		ADC reference clock. Must be 48MHz.
 
-config RP23XX_CLK_GPOUT2_SRC_RTC
-	bool "RTC (46875 Hz)"
+config RP23XX_CLK_GPOUT2_SRC_PERI
+	bool "PERI (150 MHz)"
 	---help---
-		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT2_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
 
 endchoice # Source Clock
 
@@ -882,10 +1022,15 @@ config RP23XX_CLK_GPOUT3_SRC_ADC
 	---help---
 		ADC reference clock. Must be 48MHz.
 
-config RP23XX_CLK_GPOUT3_SRC_RTC
-	bool "RTC (46875 Hz)"
+config RP23XX_CLK_GPOUT3_SRC_PERI
+	bool "PERI (150 MHz)"
 	---help---
-		RTC reference clock. The RTC divides this clock to generate a 1 second reference.
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT3_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
 
 endchoice # Source Clock
 

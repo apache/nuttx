@@ -27,10 +27,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-
-#include "hardware/structs/pll.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -66,7 +62,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void rp23xx_pll_init(pll_hw_t *base, uint32_t refdiv, uint32_t vco_freq,
+void rp23xx_pll_init(uint32_t base, uint32_t refdiv, uint32_t vco_freq,
                      uint32_t post_div1, uint8_t post_div2);
 
 #undef EXTERN

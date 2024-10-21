@@ -71,17 +71,21 @@
 #include <rp23xx_gpio.h>
 
 #include "arm_internal.h"
-#include "hardware/regs/adc.h"
-#include "hardware/structs/adc.h"
+#include "hardware/rp23xx_adc.h"
 
-#ifdef CONFIG_ADC
+#ifdef CONFIG_RP23XX_ADC
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_RP23XX_RP2350B
+#define ADC_CHANNEL_COUNT  9
+#define ADC_TEMP_CHANNEL   8
+#else
 #define ADC_CHANNEL_COUNT  5
 #define ADC_TEMP_CHANNEL   4
+#endif
 
 /* Get the private data pointer from a device pointer */
 
@@ -171,9 +175,9 @@ static int interrupt_handler(int irq, void *context, void *arg)
     {
       /* Last device has been removed -- turn off ADC */
 
-      putreg32(0, &adc_hw->cs);
+      putreg32(0, RP23XX_ADC_CS);
 
-      putreg32(0, &adc_hw->inte);
+      putreg32(0, RP23XX_ADC_INTE);
 
       up_disable_irq(RP23XX_ADC_IRQ_FIFO);
 
@@ -181,9 +185,9 @@ static int interrupt_handler(int irq, void *context, void *arg)
 
       /* Flush the FIFO */
 
-      while (getreg32(&adc_hw->fcs) & ADC_FCS_LEVEL_BITS)
+      while (getreg32(RP23XX_ADC_FCS) & RP23XX_ADC_FCS_LEVEL_MASK)
         {
-          getreg32(&adc_hw->fifo);
+          getreg32(RP23XX_ADC_FIFO);
         }
 
       return OK;
@@ -191,8 +195,8 @@ static int interrupt_handler(int irq, void *context, void *arg)
 
   /* Fetch the data from the FIFO register */
 
-  value         = getreg32(&adc_hw->fifo);
-  error_bit_set = (value & ADC_FIFO_ERR_BITS) != 0;
+  value         = getreg32(RP23XX_ADC_FIFO);
+  error_bit_set = (value & RP23XX_ADC_FIFO_ERR) != 0;
 
   /* Shift value to top of signed 32-bit word for upper-halfs benefit. */
 
@@ -261,30 +265,30 @@ static void get_next_channel(void)
             {
               g_current_channel = next;
 
-              while (getreg32(&adc_hw->fcs)
-                     & ADC_FCS_LEVEL_BITS)
+              while (getreg32(RP23XX_ADC_FCS)
+                     & RP23XX_ADC_FCS_LEVEL_MASK)
                 {
-                  getreg32(&adc_hw->fifo);
+                  getreg32(RP23XX_ADC_FIFO);
                 }
 
               /* Enable Interrupt on ADC Completion */
 
-              putreg32(ADC_INTE_FIFO_BITS, &adc_hw->inte);
+              putreg32(RP23XX_ADC_INTE_FIFO, RP23XX_ADC_INTE);
 
               /* Configure CS to read one value from current channel */
 
-              value =   (g_current_channel << ADC_CS_AINSEL_LSB)
-                      | ADC_CS_EN_BITS;
+              value =   (g_current_channel << RP23XX_ADC_CS_AINSEL_SHIFT)
+                      | RP23XX_ADC_CS_EN;
 
               if (g_current_channel == ADC_TEMP_CHANNEL)
                 {
-                  value |= ADC_CS_TS_EN_BITS;
+                  value |= RP23XX_ADC_CS_TS_EN;
                 }
 
-              putreg32(value, &adc_hw->cs);
+              putreg32(value, RP23XX_ADC_CS);
 
-              while ((getreg32(&adc_hw->cs)
-                      & ADC_CS_READY_BITS) == 0)
+              while ((getreg32(RP23XX_ADC_CS)
+                      & RP23XX_ADC_CS_READY) == 0)
                 {
                   /* Wait for ready to go high.  The rp23xx docs
                    * say this is only a few clock cycles so we'll
@@ -294,9 +298,9 @@ static void get_next_channel(void)
 
               /* Start the conversion */
 
-              value += ADC_CS_START_ONCE_BITS;
+              value += RP23XX_ADC_CS_START_ONCE;
 
-              putreg32(value, &adc_hw->cs);
+              putreg32(value, RP23XX_ADC_CS);
 
               return;
             }
@@ -344,17 +348,17 @@ static void add_device(struct adc_dev_s *dev)
 
       /* Make sure ADC interrupts are disabled */
 
-      putreg32(0, &adc_hw->inte);
+      putreg32(0, RP23XX_ADC_INTE);
 
       /* Configure FCS to use FIFO and interrupt on first value */
 
-      value =   (1 << ADC_FCS_THRESH_LSB)
-              | ADC_FCS_OVER_BITS
-              | ADC_FCS_UNDER_BITS
-              | ADC_FCS_ERR_BITS
-              | ADC_FCS_EN_BITS;
+      value =   (1 << RP23XX_ADC_FCS_THRESH_SHIFT)
+              | RP23XX_ADC_FCS_OVER
+              | RP23XX_ADC_FCS_UNDER
+              | RP23XX_ADC_FCS_ERR
+              | RP23XX_ADC_FCS_EN;
 
-      putreg32(value, &adc_hw->fcs);
+      putreg32(value, RP23XX_ADC_FCS);
 
       /* Set up for interrupts */
 
@@ -575,6 +579,8 @@ static int my_ioctl(struct adc_dev_s *dev,
  * Public Function
  ****************************************************************************/
 
+#ifdef CONFIG_ADC
+
 /****************************************************************************
  * Name: my_setup
  *
@@ -582,7 +588,7 @@ static int my_ioctl(struct adc_dev_s *dev,
  *   Initialize and register the ADC driver.
  *
  * Input Parameters:
- *   path      - Path to the ws2812 device  (e.g. "/dev/adc0")
+ *   path      - Path to the adc device  (e.g. "/dev/adc0")
  *   read_adc0 - This device reads ADC0
  *   read_adc1 - This device reads ADC1
  *   read_adc2 - This device reads ADC3
@@ -645,3 +651,4 @@ int rp23xx_adc_setup(const char *path,
 }
 
 #endif /* if CONFIG_ADC */
+#endif /* if CONFIG_RP23XX_ADC */

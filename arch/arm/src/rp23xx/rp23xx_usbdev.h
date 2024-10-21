@@ -28,8 +28,8 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include "hardware/structs/usb.h"
-#include "hardware/structs/usb_dpram.h"
+#include "hardware/rp23xx_usbctrl_regs.h"
+#include "hardware/rp23xx_usbctrl_dpsram.h"
 
 /****************************************************************************
  * Pre-processor Definitions

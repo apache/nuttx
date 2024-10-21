@@ -53,6 +53,15 @@
 #  include <rp23xx_romfsimg.h>
 #endif
 
+#if defined(CONFIG_RP23XX_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
+#  include "rp23xx_ws2812.h"
+#ifdef CONFIG_WS2812_HAS_WHITE
+#  define HAS_WHITE true
+#else /* CONFIG_WS2812_HAS_WHITE */
+#  define HAS_WHITE false
+#endif /* CONFIG_WS2812_HAS_WHITE */
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -457,6 +466,20 @@ int rp23xx_common_bringup(void)
     }
 
 #endif /* defined(CONFIG_ADC) && defined(CONFIG_RP23XX_ADC) */
+
+  /* Initialize board neo-pixel */
+
+#if defined(CONFIG_RP23XX_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
+
+  if (rp23xx_ws2812_setup("/dev/leds0",
+                          CONFIG_RP23XX_WS2812_GPIO_PIN,
+                          CONFIG_RP23XX_WS2812_PWR_GPIO,
+                          CONFIG_WS2812_LED_COUNT,
+                          HAS_WHITE) == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize WS2812: %d\n", errno);
+    }
+#endif
 
 #ifdef CONFIG_WATCHDOG
   /* Configure watchdog timer */

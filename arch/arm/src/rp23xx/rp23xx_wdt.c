@@ -32,32 +32,47 @@
 #include <debug.h>
 
 #include <arch/chip/watchdog.h>
+
+#include <hardware/rp23xx_watchdog.h>
+#include <hardware/rp23xx_psm.h>
+
 #include <arch/rp23xx/watchdog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/timers/watchdog.h>
 
-#include "arm_internal.h"
-
-#include "hardware/structs/watchdog.h"
-#include "hardware/structs/psm.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define WD_RESET_BITS (PSM_WDSEL_BITS & \
-                      ~(PSM_WDSEL_ROSC_BITS | PSM_WDSEL_XOSC_BITS))
+#define WD_RESETS_BITS   (RP23XX_PSM_RESETS              \
+                        | RP23XX_PSM_CLOCKS              \
+                        | RP23XX_PSM_PSM_READY           \
+                        | RP23XX_PSM_BUSFABRIC           \
+                        | RP23XX_PSM_ROM                 \
+                        | RP23XX_PSM_BOOTRAM             \
+                        | RP23XX_PSM_SRAM0               \
+                        | RP23XX_PSM_SRAM1               \
+                        | RP23XX_PSM_SRAM2               \
+                        | RP23XX_PSM_SRAM3               \
+                        | RP23XX_PSM_SRAM4               \
+                        | RP23XX_PSM_SRAM5               \
+                        | RP23XX_PSM_SRAM6               \
+                        | RP23XX_PSM_SRAM7               \
+                        | RP23XX_PSM_SRAM8               \
+                        | RP23XX_PSM_SRAM9               \
+                        | RP23XX_PSM_XIP                 \
+                        | RP23XX_PSM_SIO                 \
+                        | RP23XX_PSM_ACCESSCTRL          \
+                        | RP23XX_PSM_PROC0               \
+                        | RP23XX_PSM_PROC1)
 
-#ifdef CONFIG_DEBUG_FEATURES
-#define WD_ENABLE_BITS   (WATCHDOG_CTRL_ENABLE_BITS     \
-                        | WATCHDOG_CTRL_PAUSE_DBG0_BITS \
-                        | WATCHDOG_CTRL_PAUSE_DBG1_BITS \
-                        | WATCHDOG_CTRL_PAUSE_JTAG_BITS)
-#else
-#define WD_ENABLE_BITS   (WATCHDOG_CTRL_ENABLE_BITS)
-#endif
+#define WD_ENABLE_BITS   (RP23XX_WATCHDOG_CTRL_ENABLE     \
+                        | RP23XX_WATCHDOG_CTRL_PAUSE_DBG0 \
+                        | RP23XX_WATCHDOG_CTRL_PAUSE_DBG1 \
+                        | RP23XX_WATCHDOG_CTRL_PAUSE_JTAG)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -126,38 +141,17 @@ static watchdog_lowerhalf_t g_rp23xx_watchdog_lowerhalf =
 
 int my_wdt_start(struct watchdog_lowerhalf_s *lower)
 {
-  uint32_t load_value;
-  uint32_t dbg_bits;
-
   watchdog_lowerhalf_t *priv = (watchdog_lowerhalf_t *)lower;
 
-  hw_clear_bits(&watchdog_hw->ctrl, WATCHDOG_CTRL_ENABLE_BITS);
+  /* Convert millisecond input to microseconds
+   * Extra times 2 per errata RP23XX-E1
+   */
 
-  putreg32(PSM_WDSEL_BITS & ~(PSM_WDSEL_ROSC_BITS | PSM_WDSEL_XOSC_BITS),
-            &psm_hw->wdsel);
+  putreg32(priv->timeout * 2000,  RP23XX_WATCHDOG_LOAD);
 
-  dbg_bits = WATCHDOG_CTRL_PAUSE_DBG0_BITS |
-             WATCHDOG_CTRL_PAUSE_DBG1_BITS |
-             WATCHDOG_CTRL_PAUSE_JTAG_BITS;
+  modreg32(WD_ENABLE_BITS, WD_ENABLE_BITS, RP23XX_WATCHDOG_CTRL);
 
-#ifdef CONFIG_DEBUG_FEATURES_33
-  hw_set_bits(&watchdog_hw->ctrl, dbg_bits);
-#else
-  hw_clear_bits(&watchdog_hw->ctrl, dbg_bits);
-#endif
-
-  /* Convert millisecond input to microseconds */
-
-  load_value = priv->timeout * 1000;
-
-  if (load_value > WATCHDOG_LOAD_BITS)
-    {
-      load_value = WATCHDOG_LOAD_BITS;
-    }
-
-  putreg32(load_value, &watchdog_hw->load);
-
-  hw_set_bits(&watchdog_hw->ctrl, WATCHDOG_CTRL_ENABLE_BITS);
+  modreg32(WD_RESETS_BITS, WD_RESETS_BITS, RP23XX_PSM_WDSEL);
 
   return OK;
 }
@@ -168,7 +162,7 @@ int my_wdt_start(struct watchdog_lowerhalf_s *lower)
 
 int my_wdt_stop(struct watchdog_lowerhalf_s *lower)
 {
-  modreg32(0, WATCHDOG_CTRL_ENABLE_BITS, &watchdog_hw->ctrl);
+  modreg32(0, RP23XX_WATCHDOG_CTRL_ENABLE, RP23XX_WATCHDOG_CTRL);
 
   return OK;
 }
@@ -181,9 +175,11 @@ int my_wdt_keepalive(struct watchdog_lowerhalf_s *lower)
 {
   watchdog_lowerhalf_t *priv = (watchdog_lowerhalf_t *)lower;
 
-  /* Convert millisecond input to microseconds */
+  /* Convert millisecond input to microseconds
+   * Extra times 2 per errata RP23XX-E1
+   */
 
-  putreg32(priv->timeout * 1000,  &watchdog_hw->load);
+  putreg32(priv->timeout * 2000,  RP23XX_WATCHDOG_LOAD);
 
   return OK;
 }
@@ -196,16 +192,22 @@ int my_wdt_getstatus(struct watchdog_lowerhalf_s  *lower,
                      struct watchdog_status_s     *status)
 {
   watchdog_lowerhalf_t *priv = (watchdog_lowerhalf_t *)lower;
-  uint32_t              ctrl = getreg32(&watchdog_hw->ctrl);
+  uint32_t              ctrl = getreg32(RP23XX_WATCHDOG_CTRL);
 
-  status->flags    =  (ctrl & WATCHDOG_CTRL_ENABLE_BITS) ? WDFLAGS_ACTIVE
+  status->flags    =  (ctrl & RP23XX_WATCHDOG_CTRL_ENABLE) ? WDFLAGS_ACTIVE
                                                            : 0;
 
   status->timeout  =  priv->timeout;
 
-  /* Convert microseconds to output microseconds */
+  /* Convert microseconds to output microseconds.
+   * Extra divide by 2 per errata RP23XX-E1.
+   */
 
-  status->timeleft =  (ctrl & WATCHDOG_CTRL_TIME_BITS) / 1000;
+  status->timeleft =  (ctrl & RP23XX_WATCHDOG_CTRL_TIME_MASK) / 2000;
+
+  /* WARNING: On (at least) version 2 RP23XX chips, the timeleft does
+   *          not seem to be reliable.
+   */
 
   return OK;
 }
@@ -220,9 +222,11 @@ int my_wdt_settimeout (struct watchdog_lowerhalf_s *lower, uint32_t timeout)
 
   priv->timeout = timeout > (0x7fffff / 1000) ? 0x7fffff : timeout;
 
-  /* Convert millisecond input to microseconds */
+  /* Convert millisecond input to microseconds
+   * Extra times 2 per errata RP23XX-E1
+   */
 
-  putreg32(priv->timeout * 1000,  &watchdog_hw->load);
+  putreg32(priv->timeout * 2000,  RP23XX_WATCHDOG_LOAD);
   return OK;
 }
 
@@ -238,7 +242,7 @@ int my_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
     {
       int n = cmd - WDIOC_SET_SCRATCH0;
 
-      putreg32((uint32_t) arg, &watchdog_hw->scratch[n]);
+      putreg32((uint32_t) arg, RP23XX_WATCHDOG_SCRATCH(n));
 
       return OK;
     }
@@ -247,7 +251,7 @@ int my_wdt_ioctl(struct watchdog_lowerhalf_s *lower,
     {
       int n = cmd - WDIOC_GET_SCRATCH0;
 
-      *((uint32_t *)arg) = getreg32((uint32_t) &watchdog_hw->scratch[n]);
+      *((uint32_t *)arg) = getreg32((uint32_t) RP23XX_WATCHDOG_SCRATCH(n));
 
       return OK;
     }
@@ -276,7 +280,7 @@ int rp23xx_wdt_init(void)
       goto errout;
     }
 
-  modreg32(0, WATCHDOG_CTRL_ENABLE_BITS, &watchdog_hw->ctrl);
+  modreg32(0, RP23XX_WATCHDOG_CTRL_ENABLE, RP23XX_WATCHDOG_CTRL);
 
 errout:
   return ret;

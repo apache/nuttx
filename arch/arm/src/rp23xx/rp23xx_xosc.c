@@ -50,10 +50,10 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "chip.h"
 
 #include "rp23xx_xosc.h"
-#include "hardware/address_mapped.h"
-#include "hardware/structs/xosc.h"
+#include "hardware/rp23xx_xosc.h"
 
 /****************************************************************************
  * Private Functions
@@ -76,19 +76,19 @@ void rp23xx_xosc_init(void)
   /* Assumes 1-15 MHz input */
 
   ASSERT(BOARD_XOSC_FREQ <= (15 * MHZ));
-  putreg32(XOSC_CTRL_FREQ_RANGE_VALUE_1_15MHZ<<XOSC_CTRL_FREQ_RANGE_LSB, &xosc_hw->ctrl);
+  putreg32(RP23XX_XOSC_CTRL_FREQ_RANGE_1_15MHZ, RP23XX_XOSC_CTRL);
 
   /* Set xosc startup delay */
 
   uint32_t startup_delay = (((12 * MHZ) / 1000) + 128) / 256;
-  putreg32(startup_delay, &xosc_hw->startup);
+  putreg32(startup_delay, RP23XX_XOSC_STARTUP);
 
   /* Set the enable bit now that we have set freq range and startup delay */
 
-  hw_set_bits(&xosc_hw->ctrl, XOSC_CTRL_ENABLE_VALUE_ENABLE<<XOSC_CTRL_ENABLE_LSB);
+  setbits_reg32(RP23XX_XOSC_CTRL_ENABLE_ENABLE, RP23XX_XOSC_CTRL);
 
   /* Wait for XOSC to be stable */
 
-  while (!(getreg32(&xosc_hw->status) & XOSC_STATUS_STABLE_BITS))
+  while (!(getreg32(RP23XX_XOSC_STATUS) & RP23XX_XOSC_STATUS_STABLE))
     ;
 }
