@@ -114,7 +114,15 @@ endif
 ESPTOOL_BINS += $(FLASH_APP)
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-	ESPTOOL_BINS += $(shell printf "%\#x\n" $$(( $(CONFIG_ESP32S3_KERNEL_OFFSET) + $(CONFIG_ESP32S3_KERNEL_IMAGE_SIZE) ))) nuttx_user.bin
+	# Check the operating system
+
+	ifeq ($(shell uname -s), Darwin)
+		# macOS
+		ESPTOOL_BINS += $(shell printf "%\#x\n" $$(( $(CONFIG_ESP32S3_KERNEL_OFFSET) + $(CONFIG_ESP32S3_KERNEL_IMAGE_SIZE) ))) nuttx_user.bin
+	else
+		# Linux and other systems
+		ESPTOOL_BINS += $(shell printf "%#x\n" $$(( $(CONFIG_ESP32S3_KERNEL_OFFSET) + $(CONFIG_ESP32S3_KERNEL_IMAGE_SIZE) ))) nuttx_user.bin
+	endif
 endif
 
 # MERGEBIN -- Merge raw binary files into a single file
