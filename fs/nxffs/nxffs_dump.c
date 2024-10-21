@@ -62,7 +62,7 @@ struct nxffs_blkinfo_s
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_FS)
 static const char g_hdrformat[] = "  BLOCK:OFFS  TYPE  STATE   LENGTH\n";
-static const char g_format[]    = "  %5"PRIi32":%-5d %s %s %5"PRIu32"\n";
+static const char g_format[]    = "  %5"PRIiOFF":%-5d %s %s %5"PRIu32"\n";
 #endif
 
 /****************************************************************************
@@ -492,7 +492,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
         }
     }
 
-  syslog(LOG_NOTICE, "%" PRIi32 " blocks analyzed\n", blkinfo.nblocks);
+  syslog(LOG_NOTICE, "%" PRIiOFF " blocks analyzed\n", blkinfo.nblocks);
 
   fs_heap_free(blkinfo.buffer);
   return OK;
