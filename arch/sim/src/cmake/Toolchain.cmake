@@ -27,11 +27,6 @@ if(WIN32)
   return()
 endif()
 
-find_program(CMAKE_C_COMPILER gcc)
-find_program(CMAKE_CXX_COMPILER g++)
-
-set(CMAKE_PREPROCESSOR cc -E -P -x c)
-
 # NuttX is sometimes built as a native target. In that case, the __NuttX__ macro
 # is predefined by the compiler. https://github.com/NuttX/buildroot
 #
