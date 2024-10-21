@@ -18,7 +18,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/.config
+-include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
 # NuttX is sometimes built as a native target.
