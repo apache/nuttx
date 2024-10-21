@@ -184,7 +184,9 @@ static const struct file_operations g_scd30fops =
   scd30_ioctl,    /* ioctl */
   NULL,           /* mmap */
   NULL,           /* truncate */
-  NULL            /* poll */
+  NULL,           /* poll */
+  NULL,           /* readv */
+  NULL            /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , scd30_unlink /* unlink */
 #endif

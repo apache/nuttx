@@ -112,6 +112,8 @@ const struct mountpt_operations g_binfs_operations =
   NULL,              /* mmap */
   NULL,              /* truncate */
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   NULL,              /* sync */
   binfs_dup,         /* dup */

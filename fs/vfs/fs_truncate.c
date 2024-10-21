@@ -82,7 +82,7 @@ int file_truncate(FAR struct file *filep, off_t length)
    * possible not the only indicator -- sufficient, but not necessary")
    */
 
-  if (inode->u.i_ops->write == NULL)
+  if (inode->u.i_ops->writev == NULL && inode->u.i_ops->write == NULL)
     {
       fwarn("WARNING: File system is read-only\n");
       return -EROFS;

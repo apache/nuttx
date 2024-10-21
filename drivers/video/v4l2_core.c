@@ -65,6 +65,8 @@ static const struct file_operations g_v4l2_fops =
   v4l2_mmap,               /* mmap */
   NULL,                    /* truncate */
   v4l2_poll,               /* poll */
+  NULL,                    /* readv */
+  NULL,                    /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   v4l2_unlink,             /* unlink */
 #endif
