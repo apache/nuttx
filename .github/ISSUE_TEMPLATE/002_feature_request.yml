@@ -13,7 +13,7 @@
 name: Feature request
 description: Request an enhancement for NuttX
 title: "[FEATURE] <title>"
-labels: ["Type: enhancement"]
+labels: ["Type: Enhancement"]
 body:
   - type: markdown
     attributes:
@@ -21,8 +21,8 @@ body:
         Hello NuttX Community member! Please keep things tidy by putting your post in the proper place:
 
         Requesting a new feature: use this form.
-        Asking a question or getting help: use the [General Help](https://github.com/apache/nuttx/issues/new?assignees=&labels=question&projects=&template=003_help.yml&title=help%3A+help+title) form or [Mailing list](https://nuttx.apache.org/community/).
-        Reporting a bug: use the [Bug report](https://github.com/apache/nuttx/issues/new?assignees=&labels=bug&projects=&template=001_bug_report.yml) form.
+        Asking a question or getting help: use the [General Help](https://github.com/apache/nuttx/issues/new?assignees=&labels=Community%3A+Question&projects=&template=003_help.yml&title=%5BHELP%5D+%3Ctitle%3E) form or [Mailing list](https://nuttx.apache.org/community/).
+        Reporting a bug: use the [Bug report](https://github.com/apache/nuttx/issues/new?assignees=&labels=%F0%9F%91%80+needs+triage%2CType%3A+Bug&projects=&template=001_bug_report.yml&title=%5BBUG%5D+%3Ctitle%3E) form.
      
   - type: textarea
     id: question-description
