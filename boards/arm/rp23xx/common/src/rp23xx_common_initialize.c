@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/common/src/23xx_common_initialize.c
+ * boards/arm/rp23xx/common/src/rp23xx_common_initialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,24 +26,16 @@
 
 #include <debug.h>
 
-#include <nuttx/mm/mm.h>
-
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "arm_internal.h"
 #include "rp23xx_gpio.h"
 #include "rp23xx_uniqueid.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-#  define MM_ADDREGION kmm_addregion
-#else
-#  define MM_ADDREGION umm_addregion
-#endif
-
 
 /****************************************************************************
  * Private Functions
@@ -67,58 +59,58 @@ void rp23xx_common_earlyinitialize(void)
 
   /* Disable IE on GPIO 26-29 */
 
-  hw_clear_bits(&pads_bank0_hw->io[26], PADS_BANK0_GPIO0_IE_BITS);
-  hw_clear_bits(&pads_bank0_hw->io[27], PADS_BANK0_GPIO0_IE_BITS);
-  hw_clear_bits(&pads_bank0_hw->io[28], PADS_BANK0_GPIO0_IE_BITS);
-  hw_clear_bits(&pads_bank0_hw->io[29], PADS_BANK0_GPIO0_IE_BITS);
+  clrbits_reg32(RP23XX_PADS_BANK0_GPIO_IE, RP23XX_PADS_BANK0_GPIO(26));
+  clrbits_reg32(RP23XX_PADS_BANK0_GPIO_IE, RP23XX_PADS_BANK0_GPIO(27));
+  clrbits_reg32(RP23XX_PADS_BANK0_GPIO_IE, RP23XX_PADS_BANK0_GPIO(28));
+  clrbits_reg32(RP23XX_PADS_BANK0_GPIO_IE, RP23XX_PADS_BANK0_GPIO(29));
 
   /* Set default UART pin */
 
 #ifdef CONFIG_RP23XX_UART0
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART0_TX_GPIO,
-                           GPIO_FUNC_UART);      /* TX */
+                           RP23XX_GPIO_FUNC_UART);      /* TX */
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART0_RX_GPIO,
-                           GPIO_FUNC_UART);      /* RX */
+                           RP23XX_GPIO_FUNC_UART);      /* RX */
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART0_CTS_GPIO,
-                           GPIO_FUNC_UART);      /* CTS */
+                           RP23XX_GPIO_FUNC_UART);      /* CTS */
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART0_RTS_GPIO,
-                           GPIO_FUNC_UART);      /* RTS */
+                           RP23XX_GPIO_FUNC_UART);      /* RTS */
 #endif
 #endif
 
 #ifdef CONFIG_RP23XX_UART1
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART1_TX_GPIO,
-                           GPIO_FUNC_UART);      /* TX */
+                           RP23XX_GPIO_FUNC_UART);      /* TX */
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART1_RX_GPIO,
-                           GPIO_FUNC_UART);      /* RX */
+                           RP23XX_GPIO_FUNC_UART);      /* RX */
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART1_CTS_GPIO,
-                           GPIO_FUNC_UART);      /* CTS */
+                           RP23XX_GPIO_FUNC_UART);      /* CTS */
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   rp23xx_gpio_set_function(CONFIG_RP23XX_UART1_RTS_GPIO,
-                           GPIO_FUNC_UART);      /* RTS */
+                           RP23XX_GPIO_FUNC_UART);      /* RTS */
 #endif
 #endif
 
 #if defined(CONFIG_RP23XX_CLK_GPOUT0)
   rp23xx_gpio_set_function(RP23XX_GPIO_PIN_CLK_GPOUT0,
-                           GPIO_FUNC_CLOCKS);
+                           RP23XX_GPIO_FUNC_GPCK);
 #endif
 #if defined(CONFIG_RP23XX_CLK_GPOUT1)
   rp23xx_gpio_set_function(RP23XX_GPIO_PIN_CLK_GPOUT1,
-                           GPIO_FUNC_CLOCKS);
+                           RP23XX_GPIO_FUNC_GPCK);
 #endif
 #if defined(CONFIG_RP23XX_CLK_GPOUT2)
   rp23xx_gpio_set_function(RP23XX_GPIO_PIN_CLK_GPOUT2,
-                           GPIO_FUNC_CLOCKS);
+                           RP23XX_GPIO_FUNC_GPCK);
 #endif
 #if defined(CONFIG_RP23XX_CLK_GPOUT3)
   rp23xx_gpio_set_function(RP23XX_GPIO_PIN_CLK_GPOUT3,
-                           GPIO_FUNC_CLOCKS);
+                           RP23XX_GPIO_FUNC_GPCK);
 #endif
 }
 

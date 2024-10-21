@@ -32,20 +32,35 @@
 #include <debug.h>
 
 #include "arm_internal.h"
-#include "hardware/address_mapped.h"
-#include "hardware/structs/sio.h"
-#include "hardware/structs/pads_bank0.h"
-#include "hardware/structs/io_bank0.h"
+#include "hardware/rp23xx_sio.h"
+#include "hardware/rp23xx_pads_bank0.h"
+#include "hardware/rp23xx_io_bank0.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if PICO_RP2350A
-#define RP23XX_GPIO_NUM    30       /* Number of GPIO pins */
-#else
+#ifdef CONFIG_RP23XX_RP2350B
 #define RP23XX_GPIO_NUM    48       /* Number of GPIO pins */
+#else
+#define RP23XX_GPIO_NUM    30       /* Number of GPIO pins */
 #endif
+
+/* GPIO function types ******************************************************/
+
+#define RP23XX_GPIO_FUNC_HSTX       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_HSTX
+#define RP23XX_GPIO_FUNC_SPI        RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_SPI
+#define RP23XX_GPIO_FUNC_UART       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_UART
+#define RP23XX_GPIO_FUNC_I2C        RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_I2C
+#define RP23XX_GPIO_FUNC_PWM        RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_PWM
+#define RP23XX_GPIO_FUNC_SIO        RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_SIO
+#define RP23XX_GPIO_FUNC_PIO0       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_PIO0
+#define RP23XX_GPIO_FUNC_PIO1       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_PIO1
+#define RP23XX_GPIO_FUNC_PIO2       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_PIO2
+#define RP23XX_GPIO_FUNC_GPCK       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_GPCK
+#define RP23XX_GPIO_FUNC_USB        RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_USB
+#define RP23XX_GPIO_FUNC_UART_AUX   RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_UART_AUX
+#define RP23XX_GPIO_FUNC_NULL       RP23XX_IO_BANK0_GPIO_CTRL_FUNCSEL_NULL
 
 /* GPIO function pins *******************************************************/
 
@@ -92,11 +107,11 @@ static inline void rp23xx_gpio_put(uint32_t gpio, int set)
 
   if (set)
     {
-      putreg32(value, &sio_hw->gpio_set);
+      putreg32(value, RP23XX_SIO_GPIO_OUT_SET);
     }
   else
     {
-      putreg32(value, &sio_hw->gpio_clr);
+      putreg32(value, RP23XX_SIO_GPIO_OUT_CLR);
     }
 }
 
@@ -106,7 +121,7 @@ static inline bool rp23xx_gpio_get(uint32_t gpio)
 
   DEBUGASSERT(gpio < RP23XX_GPIO_NUM);
 
-  return (getreg32(&sio_hw->gpio_in) & value) != 0;
+  return (getreg32(RP23XX_SIO_GPIO_IN) & value) != 0;
 }
 
 static inline void rp23xx_gpio_setdir(uint32_t gpio, int out)
@@ -117,11 +132,11 @@ static inline void rp23xx_gpio_setdir(uint32_t gpio, int out)
 
   if (out)
     {
-      putreg32(value, &sio_hw->gpio_oe_set);
+      putreg32(value, RP23XX_SIO_GPIO_OE_SET);
     }
   else
     {
-      putreg32(value, &sio_hw->gpio_oe_clr);
+      putreg32(value, RP23XX_SIO_GPIO_OE_CLR);
     }
 }
 
@@ -138,9 +153,9 @@ static inline void rp23xx_gpio_set_input_hysteresis_enabled(uint32_t gpio,
 {
   DEBUGASSERT(gpio < RP23XX_GPIO_NUM);
 
-  hw_write_masked(&pads_bank0_hw->io[gpio],
-                  enabled ? PADS_BANK0_GPIO0_SCHMITT_BITS : 0,
-                  PADS_BANK0_GPIO0_SCHMITT_BITS);
+  modbits_reg32(enabled ? RP23XX_PADS_BANK0_GPIO_SCHMITT : 0,
+                RP23XX_PADS_BANK0_GPIO_SCHMITT,
+                RP23XX_PADS_BANK0_GPIO(gpio));
 }
 
 /****************************************************************************
@@ -156,9 +171,9 @@ static inline void rp23xx_gpio_set_slew_fast(uint32_t gpio,
 {
   DEBUGASSERT(gpio < RP23XX_GPIO_NUM);
 
-  hw_write_masked(&pads_bank0_hw->io[gpio],
-                  enabled ? PADS_BANK0_GPIO0_SLEWFAST_BITS : 0,
-                  PADS_BANK0_GPIO0_SLEWFAST_BITS);
+  modbits_reg32(enabled ? RP23XX_PADS_BANK0_GPIO_SLEWFAST : 0,
+                RP23XX_PADS_BANK0_GPIO_SLEWFAST,
+                RP23XX_PADS_BANK0_GPIO(gpio));
 }
 
 /****************************************************************************
@@ -174,9 +189,9 @@ static inline void rp23xx_gpio_set_drive_strength(uint32_t gpio,
 {
   DEBUGASSERT(gpio < RP23XX_GPIO_NUM);
 
-  hw_write_masked(&pads_bank0_hw->io[gpio],
-                  drive_strength,
-                  PADS_BANK0_GPIO0_DRIVE_BITS);
+  modbits_reg32(drive_strength,
+                RP23XX_PADS_BANK0_GPIO_DRIVE_MASK,
+                RP23XX_PADS_BANK0_GPIO(gpio));
 }
 
 /****************************************************************************

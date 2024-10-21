@@ -35,7 +35,7 @@
 #include "rp23xx_config.h"
 #include "rp23xx_clock.h"
 #include "rp23xx_uart.h"
-#include "hardware/structs/sio.h"
+#include "hardware/rp23xx_sio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,16 +79,6 @@ const uintptr_t g_idle_topstack = IDLE_STACK;
  *
  ****************************************************************************/
 
-const uint32_t boot_shit[] =
-{
-  0xffffded3,
-  0x10210142,
-  0x000001ff,
-  0x00000000,
-  0xab123579
-};
-
-
 void __start(void)
 {
 #ifdef CONFIG_BOOT_RUNFROMFLASH
@@ -122,7 +112,7 @@ void __start(void)
 
   for (i = 0; i < 32; i++)
     {
-      sio_hw->spinlock[i] = 0;
+      putreg32(0, RP23XX_SIO_SPINLOCK(i));
     }
 
   /* Move the initialized data section from its temporary holding spot in

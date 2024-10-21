@@ -500,3 +500,30 @@ config RP23XX_I2S_CLOCK
 	range 0 29
 
 endif # RP23XX_I2S
+
+
+#####################################################################
+#  WS2812 Configuration
+#####################################################################
+
+if RP23XX_BOARD_HAS_WS2812
+
+config RP23XX_WS2812_GPIO_PIN
+	int "GPIO pin for ws2812 data line (0-29)"
+	default 0
+	range 0 29
+	---help---
+		This is the GPIO pin used to send data to the
+		configured ws2812 pixels.
+
+config RP23XX_WS2812_PWR_GPIO
+	int "GPIO pin for ws2812 power (0-29, or -1 if not used)"
+	default -1
+	range -1 29
+	---help---
+		Some RP23XX boards have an on-board ws2812
+		that is powered by a GPIO pin.  Set this
+		value to -1 if your board does not have
+		such a pin.
+
+endif # RP23XX_BOARD_HAS_WS2812

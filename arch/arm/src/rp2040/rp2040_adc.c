@@ -584,7 +584,7 @@ static int my_ioctl(struct adc_dev_s *dev,
  *   Initialize and register the ADC driver.
  *
  * Input Parameters:
- *   path      - Path to the ws2812 device  (e.g. "/dev/adc0")
+ *   path      - Path to the adc device  (e.g. "/dev/adc0")
  *   read_adc0 - This device reads ADC0
  *   read_adc1 - This device reads ADC1
  *   read_adc2 - This device reads ADC3

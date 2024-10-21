@@ -29,9 +29,10 @@
 #include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
+#include <errno.h>
+
 #include "arm_internal.h"
-#include "hardware/regs/uart.h"
-#include "hardware/structs/uart.h"
+#include "chip.h"
 #include "rp23xx_config.h"
 #include "rp23xx_uart.h"
 
@@ -39,20 +40,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RP23XX_UART_LCR_H_WLEN(x) ((((x) - 5) << UART_UARTLCR_H_WLEN_LSB) & UART_UARTLCR_H_WLEN_BITS)
-#define RP23XX_UART_INTR_ALL (0x7ff)   /* All of interrupts */
-
 /* Select UART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
- #define CONSOLE_HW       uart0_hw
+ #define CONSOLE_BASE     RP23XX_UART0_BASE
  #define CONSOLE_BASEFREQ BOARD_UART_BASEFREQ
  #define CONSOLE_BAUD     CONFIG_UART0_BAUD
  #define CONSOLE_BITS     CONFIG_UART0_BITS
  #define CONSOLE_PARITY   CONFIG_UART0_PARITY
  #define CONSOLE_2STOP    CONFIG_UART0_2STOP
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
- #define CONSOLE_HW       uart1_hw
+ #define CONSOLE_BASE     RP23XX_UART1_BASE
  #define CONSOLE_BASEFREQ BOARD_UART_BASEFREQ
  #define CONSOLE_BAUD     CONFIG_UART1_BAUD
  #define CONSOLE_BITS     CONFIG_UART1_BITS
@@ -101,6 +99,26 @@
 #define CONSOLE_LCR_VALUE (CONSOLE_LCR_WLS | CONSOLE_LCR_PAR | CONSOLE_LCR_STOP)
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -117,15 +135,13 @@ void arm_lowputc(char ch)
 #if defined HAVE_UART && defined HAVE_CONSOLE
   /* Wait for the transmitter to be available */
 
-  while(CONSOLE_HW->fr & UART_UARTFR_TXFF_BITS);
+  while ((getreg32(CONSOLE_BASE + RP23XX_UART_UARTFR_OFFSET) &
+          RP23XX_UART_UARTFR_TXFF))
+    ;
 
   /* Send the character */
 
-  CONSOLE_HW->dr = ch;
-
-  /* Wait for transmit FIFO to become empty */
-
-  while(!(CONSOLE_HW->fr & UART_UARTFR_TXFE_BITS));
+  putreg32((uint32_t)ch, CONSOLE_BASE + RP23XX_UART_UARTDR_OFFSET);
 #endif
 }
 
@@ -144,17 +160,18 @@ void rp23xx_lowsetup(void)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   uint32_t cr;
 
-  cr = CONSOLE_HW-> cr;
-  CONSOLE_HW->cr = cr & ~UART_UARTCR_UARTEN_BITS;
-  
-  CONSOLE_HW->lcr_h = CONSOLE_LCR_VALUE;
-  rp23xx_setbaud(CONSOLE_HW, CONSOLE_BASEFREQ, CONSOLE_BAUD);
-  CONSOLE_HW->ifls = 0;
-  CONSOLE_HW->icr = RP23XX_UART_INTR_ALL;
+  cr = getreg32(CONSOLE_BASE + RP23XX_UART_UARTCR_OFFSET);
+  putreg32(cr & ~RP23XX_UART_UARTCR_UARTEN,
+           CONSOLE_BASE + RP23XX_UART_UARTCR_OFFSET);
 
-  cr |= UART_UARTCR_RXE_BITS | UART_UARTCR_TXE_BITS |
-        UART_UARTCR_UARTEN_BITS;
-  CONSOLE_HW->cr = cr;
+  putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE + RP23XX_UART_UARTLCR_H_OFFSET);
+  rp23xx_setbaud(CONSOLE_BASE, CONSOLE_BASEFREQ, CONSOLE_BAUD);
+  putreg32(0, CONSOLE_BASE + RP23XX_UART_UARTIFLS_OFFSET);
+  putreg32(RP23XX_UART_INTR_ALL, CONSOLE_BASE + RP23XX_UART_UARTICR_OFFSET);
+
+  cr |= RP23XX_UART_UARTCR_RXE | RP23XX_UART_UARTCR_TXE |
+        RP23XX_UART_UARTCR_UARTEN;
+  putreg32(cr, CONSOLE_BASE + RP23XX_UART_UARTCR_OFFSET);
 #endif
 }
 
@@ -163,7 +180,7 @@ void rp23xx_lowsetup(void)
  *
  ****************************************************************************/
 
-void rp23xx_setbaud(uart_hw_t *uartbase, uint32_t basefreq, uint32_t baud)
+void rp23xx_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
 {
   uint32_t ibrd;
   uint32_t fbrd;
@@ -186,13 +203,13 @@ void rp23xx_setbaud(uart_hw_t *uartbase, uint32_t basefreq, uint32_t baud)
       goto finish;
     }
 
-  uartbase->ibrd = ibrd;
-  uartbase->fbrd = fbrd;
+  putreg32(ibrd, uartbase + RP23XX_UART_UARTIBRD_OFFSET);
+  putreg32(fbrd, uartbase + RP23XX_UART_UARTFBRD_OFFSET);
 
   /* Baud rate is updated by writing to LCR_H */
 
-  lcr_h = uartbase->lcr_h;
-  uartbase->lcr_h = lcr_h;
+  lcr_h = getreg32(uartbase + RP23XX_UART_UARTLCR_H_OFFSET);
+  putreg32(lcr_h, uartbase + RP23XX_UART_UARTLCR_H_OFFSET);
 
 finish:
   spin_unlock_irqrestore(NULL, flags);

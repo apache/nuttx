@@ -33,82 +33,82 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += rp23xx_reset.c
 endif
 
-#ifeq ($(CONFIG_SPI),y)
-#CSRCS += rp23xx_spi.c
-#endif
-#
-#ifeq ($(CONFIG_RP23XX_I2C_DRIVER),y)
-#CSRCS += rp23xx_i2cdev.c
-#endif
-#
-#ifeq ($(CONFIG_RP23XX_PWM),y)
-#CSRCS += rp23xx_pwmdev.c
-#endif
-#
-#ifeq ($(CONFIG_RP23XX_SPI_DRIVER),y)
-#CSRCS += rp23xx_spidev.c
-#endif
-#
-#ifeq ($(CONFIG_RP23XX_I2S),y)
-#CSRCS += rp23xx_i2sdev.c
-#endif
-#
-#ifeq ($(CONFIG_LCD_SSD1306),y)
-#CSRCS += rp23xx_ssd1306.c
-#endif
-#
-#ifeq ($(CONFIG_LCD_ST7789),y)
-#CSRCS += rp23xx_st7789.c
-#endif
-#
-#ifeq ($(CONFIG_LCD_ST7735),y)
-#CSRCS += rp23xx_st7735.c
-#endif
-#
-#ifeq ($(CONFIG_LCD_GC9A01),y)
-#CSRCS += rp23xx_gc9a01.c
-#endif
-#
-#ifeq ($(CONFIG_USBMSC),y)
-#CSRCS += rp23xx_usbmsc.c
-#endif
-#
-#ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
-#CSRCS += rp23xx_composite.c
-#endif
-#
-#ifeq ($(CONFIG_RP23XX_SPISD),y)
-#  CSRCS += rp23xx_spisd.c
-#endif
-#
-#
-#ifeq ($(CONFIG_SENSORS_BMP280),y)
-#  CSRCS += rp23xx_bmp280.c
-#endif
-#
-#ifeq ($(CONFIG_SENSORS_INA219),y)
-#  CSRCS += rp23xx_ina219.c
-#endif
-#
-#ifeq ($(CONFIG_ENC28J60),y)
-#  CSRCS += rp23xx_enc28j60.c
-#endif
-#
-#ifeq ($(CONFIG_LCD_BACKPACK),y)
-#  CSRCS += rp23xx_lcd_backpack.c
-#endif
+ifeq ($(CONFIG_SPI),y)
+CSRCS += rp23xx_spi.c
+endif
+
+ifeq ($(CONFIG_RP23XX_I2C_DRIVER),y)
+CSRCS += rp23xx_i2cdev.c
+endif
+
+ifeq ($(CONFIG_RP23XX_PWM),y)
+CSRCS += rp23xx_pwmdev.c
+endif
+
+ifeq ($(CONFIG_RP23XX_SPI_DRIVER),y)
+CSRCS += rp23xx_spidev.c
+endif
+
+ifeq ($(CONFIG_RP23XX_I2S),y)
+CSRCS += rp23xx_i2sdev.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306),y)
+CSRCS += rp23xx_ssd1306.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += rp23xx_st7789.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7735),y)
+CSRCS += rp23xx_st7735.c
+endif
+
+ifeq ($(CONFIG_LCD_GC9A01),y)
+CSRCS += rp23xx_gc9a01.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += rp23xx_usbmsc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += rp23xx_composite.c
+endif
+
+ifeq ($(CONFIG_RP23XX_SPISD),y)
+ CSRCS += rp23xx_spisd.c
+endif
+
+
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+ CSRCS += rp23xx_bmp280.c
+endif
+
+ifeq ($(CONFIG_SENSORS_INA219),y)
+ CSRCS += rp23xx_ina219.c
+endif
+
+ifeq ($(CONFIG_ENC28J60),y)
+ CSRCS += rp23xx_enc28j60.c
+endif
+
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+ CSRCS += rp23xx_lcd_backpack.c
+endif
 
 ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
   CSRCS += rp23xx_uniqueid.c
 endif
 
-#ifeq ($(CONFIG_NET_W5500),y)
-#CSRCS += rp23xx_w5500.c
-#endif
-#
-#ifeq ($(CONFIG_SENSORS_MAX6675),y)
-#  CSRCS += rp23xx_max6675.c
-#endif
+ifeq ($(CONFIG_NET_W5500),y)
+CSRCS += rp23xx_w5500.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
+ CSRCS += rp23xx_max6675.c
+endif
 
 DEPPATH += --dep-path src
 VPATH += :src

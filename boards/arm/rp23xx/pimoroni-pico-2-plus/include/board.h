@@ -59,10 +59,6 @@
 
 /* definitions for pico-sdk */
 
-/* QFN-80 package */
-
-#define PICO_RP2350A 0
-
 /* GPIO definitions *********************************************************/
 
 #define BOARD_GPIO_LED_PIN      25

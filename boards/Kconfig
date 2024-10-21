@@ -1963,6 +1963,7 @@ config ARCH_BOARD_PIMORONI_PICO_2_PLUS
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select RP23XX_RP2350B
 	---help---
 		This is a port to the Pimoroni Pico 2 Plus board.
 

@@ -62,6 +62,7 @@
 
 /* Register bit definitions *************************************************/
 
+#define RP2040_RESETS_RESET_MASK             (0x1ffffff)
 #define RP2040_RESETS_RESET_USBCTRL          (1 << 24)
 #define RP2040_RESETS_RESET_UART1            (1 << 23)
 #define RP2040_RESETS_RESET_UART0            (1 << 22)
