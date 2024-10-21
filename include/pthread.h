@@ -269,6 +269,7 @@ struct pthread_cond_s
 {
   sem_t sem;
   clockid_t clockid;
+  volatile int16_t lock_count;
 };
 
 #ifndef __PTHREAD_COND_T_DEFINED

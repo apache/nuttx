@@ -75,7 +75,6 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
                            clockid_t clockid,
                            FAR const struct timespec *abstime)
 {
-  irqstate_t flags;
   int ret = OK;
   int status;
 
@@ -114,14 +113,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
       sinfo("Give up mutex...\n");
 
-      /* We must disable pre-emption and interrupts here so that
-       * the time stays valid until the wait begins.   This adds
-       * complexity because we assure that interrupts and
-       * pre-emption are re-enabled correctly.
-       */
-
-      sched_lock();
-      flags = enter_critical_section();
+      cond->lock_count--;
 
       /* Give up the mutex */
 
@@ -136,12 +128,6 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
             }
         }
 
-      /* Restore interrupts  (pre-emption will be enabled
-       * when we fall through the if/then/else)
-       */
-
-      leave_critical_section(flags);
-
       /* Reacquire the mutex (retaining the ret). */
 
       sinfo("Re-locking...\n");
@@ -151,12 +137,6 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
         {
           ret = status;
         }
-
-      /* Re-enable pre-emption (It is expected that interrupts
-       * have already been re-enabled in the above logic)
-       */
-
-      sched_unlock();
     }
 
   leave_cancellation_point();
