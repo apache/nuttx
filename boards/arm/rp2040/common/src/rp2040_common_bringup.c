@@ -87,6 +87,12 @@
 #include "rp2040_adc.h"
 #endif
 
+#if defined(CONFIG_ADC) && defined(CONFIG_ADC_MCP3008)
+#include <nuttx/analog/mcp3008.h>
+#include <nuttx/analog/adc.h>
+#include "rp2040_spi.h"
+#endif
+
 #if defined(CONFIG_RP2040_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
 #include "rp2040_ws2812.h"
 #endif
@@ -443,6 +449,28 @@ int rp2040_common_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize SPI device to MMC/SD: %d\n",
            ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC_MCP3008
+  /* Register MCP3008 ADC. */
+
+  struct spi_dev_s *spi = rp2040_spibus_initialize(0);
+  if (spi == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI bus 0\n");
+    }
+
+  struct adc_dev_s *mcp3008 = mcp3008_initialize(spi);
+  if (mcp3008 == NULL)
+    {
+      syslog(LOG_ERR, "Failed to initialize MCP3008\n");
+    }
+
+  ret = adc_register("/dev/adc1", mcp3008);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to register MCP3008 device driver: %d\n", ret);
     }
 #endif
 

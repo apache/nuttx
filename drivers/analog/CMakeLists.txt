@@ -95,6 +95,10 @@ if(CONFIG_ADC)
   if(CONFIG_ADC_HX711)
     list(APPEND SRCS hx711.c)
   endif()
+
+  if(CONFIG_ADC_MCP3008)
+    list(APPEND SRCS mcp3008.c)
+  endif()
 endif()
 
 if(CONFIG_LMP92001)
