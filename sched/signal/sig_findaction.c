@@ -26,7 +26,9 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/spinlock.h>
+
 #include "signal/signal.h"
 
 /****************************************************************************

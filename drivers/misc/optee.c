@@ -27,6 +27,8 @@
 #include <fcntl.h>
 #include <netpacket/rpmsg.h>
 #include <nuttx/drivers/optee.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <sys/mman.h>
