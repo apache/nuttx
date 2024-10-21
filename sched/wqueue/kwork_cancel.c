@@ -58,23 +58,20 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
    * new work is typically added to the work queue from interrupt handlers.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&wqueue->lock);
   if (work->worker != NULL)
     {
       /* Remove the entry from the work queue and make sure that it is
        * marked as available (i.e., the worker field is nullified).
        */
 
-      if (WDOG_ISACTIVE(&work->u.timer))
-        {
-          wd_cancel(&work->u.timer);
-        }
-      else
+      work->worker = NULL;
+      wd_cancel(&work->u.timer);
+      if (dq_inqueue((FAR dq_entry_t *)work, &wqueue->q))
         {
           dq_rem((FAR dq_entry_t *)work, &wqueue->q);
         }
 
-      work->worker = NULL;
       ret = OK;
     }
   else if (!up_interrupt_context() && !sched_idletask() && sync)
@@ -86,14 +83,15 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue, bool sync,
           if (wqueue->worker[wndx].work == work &&
               wqueue->worker[wndx].pid != nxsched_gettid())
             {
+              wqueue->worker[wndx].wait_count++;
+              spin_unlock_irqrestore(&wqueue->lock, flags);
               nxsem_wait_uninterruptible(&wqueue->worker[wndx].wait);
-              ret = 1;
-              break;
+              return 1;
             }
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&wqueue->lock, flags);
   return ret;
 }
 

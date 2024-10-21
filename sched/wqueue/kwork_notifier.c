@@ -73,6 +73,8 @@ struct work_notifier_entry_s
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_notifier_lock = SP_UNLOCKED;
+
 /* This is a doubly linked list of free notifications. */
 
 static dq_queue_t g_notifier_free;
@@ -166,17 +168,21 @@ static void work_notifier_worker(FAR void *arg)
 
   /* Disable interrupts very briefly. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
 
   /* Remove the notification from the pending list */
 
-  dq_rem(&notifier->entry, &g_notifier_pending);
+  notifier = work_notifier_find(notifier->key);
+  if (notifier != NULL)
+    {
+      dq_rem(&notifier->entry, &g_notifier_pending);
 
-  /* Put the notification to the free list */
+      /* Put the notification to the free list */
 
-  dq_addlast(&notifier->entry, &g_notifier_free);
+      dq_addlast(&notifier->entry, &g_notifier_free);
+    }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
 }
 
 /****************************************************************************
@@ -213,14 +219,14 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
   /* Disable interrupts very briefly. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
 
   /* Try to get the entry from the free list */
 
   notifier = (FAR struct work_notifier_entry_s *)
     dq_remfirst(&g_notifier_free);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
 
   if (notifier == NULL)
     {
@@ -245,7 +251,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 
       /* Disable interrupts very briefly. */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_notifier_lock);
 
       /* Generate a unique key for this notification */
 
@@ -262,7 +268,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
       dq_addlast(&notifier->entry, &g_notifier_pending);
       ret = notifier->key;
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_notifier_lock, flags);
     }
 
   return ret;
@@ -293,7 +299,7 @@ void work_notifier_teardown(int key)
 
   /* Disable interrupts very briefly. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
 
   /* Find the entry matching this key in the g_notifier_pending list.  We
    * assume that there is only one.
@@ -302,21 +308,23 @@ void work_notifier_teardown(int key)
   notifier = work_notifier_find(key);
   if (notifier != NULL)
     {
+      /* Remove the notification from the pending list */
+
+      dq_rem(&notifier->entry, &g_notifier_pending);
+      spin_unlock_irqrestore(&g_notifier_lock, flags);
+
       /* Cancel the work, this may be waiting */
 
-      if (work_cancel_sync(notifier->info.qid, &notifier->work) != 1)
-        {
-          /* Remove the notification from the pending list */
+      work_cancel_sync(notifier->info.qid, &notifier->work);
 
-          dq_rem(&notifier->entry, &g_notifier_pending);
+      flags = spin_lock_irqsave(&g_notifier_lock);
 
-          /* Put the notification to the free list */
+      /* Put the notification to the free list */
 
-          dq_addlast(&notifier->entry, &g_notifier_free);
-        }
+      dq_addlast(&notifier->entry, &g_notifier_free);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
 }
 
 /****************************************************************************
@@ -352,7 +360,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
    * the notifications have been sent.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_notifier_lock);
   sched_lock();
 
   /* Process the notification at the head of the pending list until the
@@ -397,7 +405,7 @@ void work_notifier_signal(enum work_evtype_e evtype,
     }
 
   sched_unlock();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_notifier_lock, flags);
 }
 
 #endif /* CONFIG_WQUEUE_NOTIFIER */
