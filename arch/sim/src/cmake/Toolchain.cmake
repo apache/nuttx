@@ -38,16 +38,19 @@ endif()
 # macOS is built with __APPLE__. We #undef predefined macros for those possible
 # host OSes here because the OS APIs this library should use are of NuttX, not
 # the host OS.
-add_compile_options(
-  -U_AIX
-  -U_WIN32
-  -U__APPLE__
-  -U__FreeBSD__
-  -U__NetBSD__
-  -U__linux__
-  -U__sun__
-  -U__unix__
-  -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
+
+set(SIM_NO_HOST_OPTIONS
+    -U_AIX
+    -U_WIN32
+    -U__APPLE__
+    -U__FreeBSD__
+    -U__NetBSD__
+    -U__linux__
+    -U__sun__
+    -U__unix__
+    -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
+
+add_compile_options(${SIM_NO_HOST_OPTIONS})
 
 set(NO_LTO "-fno-lto")
 
