@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/curve25519.c
+ *
+ * SPDX-License-Identifier: ISC
+ *
  * $OpenBSD: curve25519.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
  *
  * Copyright (C) 2018-2020 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights

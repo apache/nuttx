@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/des_locl.h
+ *
+ * SPDX-License-Identifier: SSLeay-standalone
+ *
  * $OpenBSD: des_locl.h,v 1.7 2015/12/10 21:00:51 naddy Exp $
  *
  * lib/des/des_locl.h

@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/poly1305.c
+ *
+ * SPDX-License-Identifier: ???
+ *
  * $OpenBSD: poly1305.c,v 1.2 2020/07/22 13:54:30 tobhe Exp $
  *
  * Public Domain poly1305 from Andrew Moon

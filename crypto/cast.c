@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/cast.c
+ *
+ * SPDX-License-Identifier: ???
+ *
  * $OpenBSD: cast.c,v 1.4 2012/04/25 04:12:27 matthew Exp $
  *
  * CAST-128 in C

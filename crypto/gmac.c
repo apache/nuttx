@@ -1,5 +1,8 @@
 /****************************************************************************
  * crypto/gmac.c
+ *
+ * SPDX-License-Identifier: ISC
+ *
  * $OpenBSD: gmac.c,v 1.10 2017/05/02 11:44:32 mikeb Exp $
  *
  * Copyright (c) 2010 Mike Belopuhov
