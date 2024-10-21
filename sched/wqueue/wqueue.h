@@ -35,6 +35,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -58,6 +59,7 @@ struct kworker_s
   pid_t             pid;       /* The task ID of the worker thread */
   FAR struct work_s *work;     /* The work structure */
   sem_t             wait;      /* Sync waiting for worker done */
+  int16_t           wait_count;
 };
 
 /* This structure defines the state of one kernel-mode work queue */
@@ -67,8 +69,10 @@ struct kwork_wqueue_s
   struct dq_queue_s q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
   sem_t             exsem;     /* Sync waiting for thread exit */
+  spinlock_t        lock;      /* Spinlock */
   uint8_t           nthreads;  /* Number of worker threads */
   bool              exit;      /* A flag to request the thread to exit */
+  int16_t           wait_count;
   struct kworker_s  worker[0]; /* Describes a worker thread */
 };
 
@@ -82,8 +86,10 @@ struct hp_wqueue_s
   struct dq_queue_s q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
   sem_t             exsem;     /* Sync waiting for thread exit */
+  spinlock_t        lock;      /* Spinlock */
   uint8_t           nthreads;  /* Number of worker threads */
   bool              exit;      /* A flag to request the thread to exit */
+  int16_t           wait_count;
 
   /* Describes each thread in the high priority queue's thread pool */
 
@@ -101,8 +107,10 @@ struct lp_wqueue_s
   struct dq_queue_s q;         /* The queue of pending work */
   sem_t             sem;       /* The counting semaphore of the wqueue */
   sem_t             exsem;     /* Sync waiting for thread exit */
+  spinlock_t        lock;      /* Spinlock */
   uint8_t           nthreads;  /* Number of worker threads */
   bool              exit;      /* A flag to request the thread to exit */
+  int16_t           wait_count;
 
   /* Describes each thread in the low priority queue's thread pool */
 

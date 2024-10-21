@@ -86,6 +86,7 @@ struct hp_wqueue_s g_hpwork =
   {NULL, NULL},
   SEM_INITIALIZER(0),
   SEM_INITIALIZER(0),
+  SP_UNLOCKED,
   CONFIG_SCHED_HPNTHREADS,
 };
 
@@ -99,6 +100,7 @@ struct lp_wqueue_s g_lpwork =
   {NULL, NULL},
   SEM_INITIALIZER(0),
   SEM_INITIALIZER(0),
+  SP_UNLOCKED,
   CONFIG_SCHED_LPNTHREADS,
 };
 
@@ -138,7 +140,6 @@ static int work_thread(int argc, FAR char *argv[])
   worker_t worker;
   irqstate_t flags;
   FAR void *arg;
-  int semcount;
 
   /* Get the handle from argv */
 
@@ -147,7 +148,8 @@ static int work_thread(int argc, FAR char *argv[])
   kworker = (FAR struct kworker_s *)
             ((uintptr_t)strtoul(argv[2], NULL, 16));
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&wqueue->lock);
+  sched_lock();
 
   /* Loop forever */
 
@@ -189,9 +191,12 @@ static int work_thread(int argc, FAR char *argv[])
            * performed... we don't have any idea how long this will take!
            */
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&wqueue->lock, flags);
+          sched_unlock();
+
           CALL_WORKER(worker, arg);
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave(&wqueue->lock);
+          sched_lock();
 
           /* Mark the thread un-busy */
 
@@ -199,9 +204,9 @@ static int work_thread(int argc, FAR char *argv[])
 
           /* Check if someone is waiting, if so, wakeup it */
 
-          nxsem_get_value(&kworker->wait, &semcount);
-          while (semcount++ < 0)
+          while (kworker->wait_count > 0)
             {
+              kworker->wait_count--;
               nxsem_post(&kworker->wait);
             }
         }
@@ -211,10 +216,17 @@ static int work_thread(int argc, FAR char *argv[])
        * posted.
        */
 
+      wqueue->wait_count++;
+      spin_unlock_irqrestore(&wqueue->lock, flags);
+      sched_unlock();
+
       nxsem_wait_uninterruptible(&wqueue->sem);
+      flags = spin_lock_irqsave(&wqueue->lock);
+      sched_lock();
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&wqueue->lock, flags);
+  sched_unlock();
 
   nxsem_post(&wqueue->exsem);
   return OK;
@@ -337,6 +349,7 @@ FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
   nxsem_init(&wqueue->sem, 0, 0);
   nxsem_init(&wqueue->exsem, 0, 0);
   wqueue->nthreads = nthreads;
+  spin_lock_init(&wqueue->lock);
 
   /* Create the work queue thread pool */
 
