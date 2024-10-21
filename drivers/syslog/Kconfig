@@ -77,13 +77,6 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
-config RAMLOG_CRLF
-	bool "RAMLOG CR/LF"
-	default n
-	---help---
-		Pre-pend a carriage return before every linefeed that goes into the
-		RAM log.
-
 config RAMLOG_NONBLOCKING
 	bool "RAMLOG non-block reads"
 	default y

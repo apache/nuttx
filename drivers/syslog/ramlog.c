@@ -289,16 +289,11 @@ static void ramlog_copybuf(FAR struct ramlog_dev_s *priv,
 static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
                              FAR const char *buffer, size_t len)
 {
-#if defined(CONFIG_RAMLOG_SYSLOG) || defined(CONFIG_RAMLOG_CRLF)
+#ifdef CONFIG_RAMLOG_SYSLOG
   FAR struct ramlog_header_s *header = priv->rl_header;
 #endif
   size_t buflen = len;
   irqstate_t flags;
-#ifdef CONFIG_RAMLOG_CRLF
-  FAR const char *end;
-  FAR const char *pos;
-  FAR char *buf;
-#endif
 
   /* Disable interrupts (in case we are NOT called from interrupt handler) */
 
@@ -318,35 +313,7 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
       buflen = priv->rl_bufsize;
     }
 
-#ifdef CONFIG_RAMLOG_CRLF
-  buf = header->rl_buffer;
-  end = buffer + buflen;
-  pos = buffer;
-
-  do
-    {
-      /* Ignore carriage returns */
-
-      if (*pos == '\r' || *pos == '\n')
-        {
-          ramlog_copybuf(priv, buffer, pos - buffer);
-          buffer = pos + 1;
-        }
-
-      /* Pre-pend a carriage before a linefeed */
-
-      if (*pos == '\n')
-        {
-          buf[header->rl_head++ % priv->rl_bufsize] = '\r';
-          buf[header->rl_head++ % priv->rl_bufsize] = '\n';
-        }
-    }
-  while (++pos != end);
-
-  ramlog_copybuf(priv, buffer, pos - buffer);
-#else
   ramlog_copybuf(priv, buffer, buflen);
-#endif
 
   /* Was anything written? */
 
