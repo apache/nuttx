@@ -58,7 +58,7 @@ ifeq ($(CONFIG_LIBSUPCXX), y)
 CXXFLAGS += ${DEFINE_PREFIX}__GLIBCXX__
 endif
 
-CXXFLAGS += -Wno-shadow -Wno-sign-compare
+CXXFLAGS += -Wno-shadow -Wno-sign-compare -Wno-cpp
 CXXFLAGS += -Wno-attributes -Wno-deprecated-declarations
 
 ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
