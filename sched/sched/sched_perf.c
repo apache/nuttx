@@ -377,7 +377,7 @@ static void perf_buffer_release(FAR struct perf_event_s *event)
       event->buf->ref_count--;
       if (event->buf->ref_count == 0)
         {
-          kmm_free(event->buf);
+          kumm_free(event->buf);
           event->buf = NULL;
         }
     }
@@ -2300,7 +2300,7 @@ static int perf_mmap(FAR struct file *filep,
       size_t buf_size = map->length;
       FAR void *buf;
 
-      buf = kmm_zalloc(sizeof(struct perf_buffer_s) + buf_size);
+      buf = kumm_zalloc(sizeof(struct perf_buffer_s) + buf_size);
       if (buf == NULL)
         {
           return -ENOMEM;
