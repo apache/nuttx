@@ -88,11 +88,6 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EINVAL;
     }
 
-  if (msg->msg_iovlen != 1)
-    {
-      return -ENOTSUP;
-    }
-
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_conn == NULL)

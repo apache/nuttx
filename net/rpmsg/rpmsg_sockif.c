@@ -1240,6 +1240,11 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
   size_t len = msg->msg_iov->iov_len;
   ssize_t ret;
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   if (psock->s_type != SOCK_STREAM &&
       _SS_ISBOUND(conn->sconn.s_flags) &&
       !_SS_ISCONNECTED(conn->sconn.s_flags))

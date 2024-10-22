@@ -680,6 +680,11 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
   DEBUGASSERT(from == NULL ||
               (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   /* Find the response to this message.  The return value */
 
   entry = netlink_tryget_response(psock->s_conn);

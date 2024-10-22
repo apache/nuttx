@@ -307,6 +307,11 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Some sanity checks */
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   DEBUGASSERT(buf != NULL);
 
   if (len < ICMPv6_HDRLEN)
