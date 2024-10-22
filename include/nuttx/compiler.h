@@ -240,7 +240,11 @@
  * the function prolog and epilog.
  */
 
-#  define naked_function __attribute__((naked,no_instrument_function))
+#  if !defined(__ghs__) || __GHS_VERSION_NUMBER >= 202354
+#    define naked_function __attribute__((naked,no_instrument_function))
+#  else
+#    define naked_function
+#  endif
 
 /* The always_inline_function attribute informs GCC that the function should
  * always be inlined, regardless of the level of optimization.  The
