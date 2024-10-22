@@ -38,11 +38,17 @@ class Dmesg(gdb.Command):
             gdb.write("RAM log not available.\n")
             return None
 
-        rl_head = sysdev["rl_header"]
+        rl_header = sysdev["rl_header"]
         rl_bufsize = sysdev["rl_bufsize"]
 
+        offset = rl_header["rl_head"] % rl_bufsize  # Currently writing to this offset
+        tail = rl_bufsize - offset  # Total size till buffer end.
+        rl_buffer = int(rl_header["rl_buffer"].address)  # rl_buffer is a char array
+
         inf = gdb.selected_inferior()
-        buf = bytes(inf.read_memory(rl_head["rl_buffer"], rl_bufsize))
+        buf = bytes(inf.read_memory(offset + rl_buffer, tail))
+        buf = buf.lstrip(b"\0")  # Remove leading NULLs
+        buf += bytes(inf.read_memory(rl_buffer, offset))
         buf = buf.replace(
             b"\0", "␀".encode("utf-8")
         )  # NULL is valid utf-8 but not printable
