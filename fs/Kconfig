@@ -129,6 +129,7 @@ config FS_HEAPBUF_SECTION
 
 source "fs/vfs/Kconfig"
 source "fs/aio/Kconfig"
+source "fs/archivefs/Kconfig"
 source "fs/semaphore/Kconfig"
 source "fs/event/Kconfig"
 source "fs/mqueue/Kconfig"

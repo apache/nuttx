@@ -1,0 +1,86 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_ARCHIVEFS
+	bool "ARCHIVE File System"
+	default n
+
+if FS_ARCHIVEFS
+
+config FS_ARCHIVEFS_BUFFER_SIZE
+	int "Buffer size"
+	default 32768
+	---help---
+		libarchive requires a buffer to read and write data.
+
+config FS_ARCHIVEFS_FORMAT_ALL
+	bool "support archive all format"
+	default n
+	---help---
+		All format support will increase binary size.
+if !FS_ARCHIVEFS_FORMAT_ALL
+config FS_ARCHIVEFS_FORMAT_ZIP
+	bool "support archive xar format"
+	default y
+
+config FS_ARCHIVEFS_FORMAT_7ZIP
+	bool "support archive 7zip format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_AR
+	bool "support archive ar format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_CAB
+	bool "support archive cab format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_CPIO
+	bool "support archive cpio format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_EMPTY
+	bool "support archive empty format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_ISO9660
+	bool "support archive iso9660 format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_LHA
+	bool "support archive lha format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_MTREE
+	bool "support archive mtree format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_RAR
+	bool "support archive rar format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_RAR_V5
+	bool "support archive rar_v5 format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_RAW
+	bool "support archive raw format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_TAR
+	bool "support archive raw format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_WARC
+	bool "support archive warc format"
+	default n
+
+config FS_ARCHIVEFS_FORMAT_XAR
+	bool "support archive xar format"
+	default n
+
+endif
+
+endif
