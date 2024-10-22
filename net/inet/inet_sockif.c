@@ -2273,11 +2273,6 @@ static ssize_t inet_recvmsg(FAR struct socket *psock,
 {
   ssize_t ret;
 
-  if (msg->msg_iovlen != 1)
-    {
-      return -ENOTSUP;
-    }
-
   /* If a 'from' address has been provided, verify that it is large
    * enough to hold this address family.
    */
