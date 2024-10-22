@@ -125,7 +125,6 @@ if(CONFIG_CXX_STANDARD)
 endif()
 
 if(CONFIG_LIBCXX)
-  add_compile_options(-D__GLIBCXX__)
   add_compile_options(-D_LIBCPP_DISABLE_AVAILABILITY)
 endif()
 
