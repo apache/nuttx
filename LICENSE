@@ -8667,22 +8667,22 @@ drivers/i3c/internals.h
 
  SPDX-License-Identifier: Apache-2.0
 
-libs/libc/string/lib_memccpy.c
-libs/libc/string/lib_memchr.c
-libs/libc/string/lib_memcmp.c
-libs/libc/string/lib_memcpy.c
-libs/libc/string/lib_memrchr.c
-libs/libc/string/lib_stpcpy.c
-libs/libc/string/lib_stpncpy.c
-libs/libc/string/lib_strcat.c
-libs/libc/string/lib_strchr.c
-libs/libc/string/lib_strchrnul.c
-libs/libc/string/lib_strcmp.c
-libs/libc/string/lib_strcpy.c
-libs/libc/string/lib_strlen.c
-libs/libc/string/lib_strncmp.c
-libs/libc/string/lib_strncpy.c
-libs/libc/string/lib_strrchr.c
+libs/libc/string/lib_bsdmemccpy.c
+libs/libc/string/lib_bsdmemchr.c
+libs/libc/string/lib_bsdmemcmp.c
+libs/libc/string/lib_bsdmemcpy.c
+libs/libc/string/lib_bsdmemrchr.c
+libs/libc/string/lib_bsdstpcpy.c
+libs/libc/string/lib_bsdstpncpy.c
+libs/libc/string/lib_bsdstrcat.c
+libs/libc/string/lib_bsdstrchr.c
+libs/libc/string/lib_bsdstrchrnul.c
+libs/libc/string/lib_bsdstrcmp.c
+libs/libc/string/lib_bsdstrcpy.c
+libs/libc/string/lib_bsdstrlen.c
+libs/libc/string/lib_bsdstrncmp.c
+libs/libc/string/lib_bsdstrncpy.c
+libs/libc/string/lib_bsdstrrchr.c
 ======================
 
 Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.

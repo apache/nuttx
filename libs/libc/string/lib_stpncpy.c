@@ -29,34 +29,6 @@
 #include <string.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_LIBC_STRING_OPTIMIZE
-/* Nonzero if either x or y is not aligned on a "long" boundary. */
-
-#define UNALIGNED(x, y) \
-  (((long)(uintptr_t)(x) & (sizeof(long) - 1)) | ((long)(uintptr_t)(y) & (sizeof(long) - 1)))
-
-/* How many bytes are loaded each iteration of the word copy loop. */
-
-#define LBLOCKSIZE (sizeof(long))
-
-/* Macros for detecting endchar */
-
-#if LONG_MAX == 2147483647
-#define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
-
-#define TOO_SMALL(len) ((len) < sizeof(long))
-
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -87,49 +59,6 @@
 #undef stpncpy /* See mm/README.txt */
 FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
 {
-#ifdef CONFIG_LIBC_STRING_OPTIMIZE
-  FAR char *ret = NULL;
-  FAR long *aligned_dst;
-  FAR const long *aligned_src;
-
-  /* If src and dest is aligned and n large enough, then copy words. */
-
-  if (!UNALIGNED(src, dest) && !TOO_SMALL(n))
-    {
-      aligned_dst = (FAR long *)dest;
-      aligned_src = (FAR long *)src;
-
-      /* src and dest are both "long int" aligned, try to do "long int"
-       * sized copies.
-       */
-
-      while (n >= LBLOCKSIZE && !DETECTNULL(*aligned_src))
-        {
-          n -= LBLOCKSIZE;
-          *aligned_dst++ = *aligned_src++;
-        }
-
-      dest = (FAR char *)aligned_dst;
-      src = (FAR char *)aligned_src;
-    }
-
-  while (n > 0)
-    {
-      --n;
-      if ((*dest++ = *src++) == '\0')
-        {
-          ret = dest - 1;
-          break;
-        }
-    }
-
-  while (n-- > 0)
-    {
-      *dest++ = '\0';
-    }
-
-  return ret ? ret : dest;
-#else
   FAR char *end = dest + n; /* End of dest buffer + 1 byte */
   FAR char *ret;            /* Value to be returned */
 
@@ -162,6 +91,5 @@ FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
     }
 
   return ret;
-#endif
 }
 #endif

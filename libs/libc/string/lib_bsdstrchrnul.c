@@ -1,22 +1,18 @@
 /****************************************************************************
- * libs/libc/string/lib_strchrnul.c
+ * libs/libc/string/lib_bsdstrchrnul.c
  *
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * This copyrighted material is made available to anyone wishing to use,
+ * modify, copy, or redistribute it subject to the terms and conditions
+ * of the BSD License.   This program is distributed in the hope that
+ * it will be useful, but WITHOUT ANY WARRANTY expressed or implied,
+ * including the implied warranties of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE.  A copy of this license is available at
+ * http://www.opensource.org/licenses. Any Red Hat trademarks that are
+ * incorporated in the source code or documentation are not subject to
+ * the BSD License and may only be used or replicated with the express
+ * permission of Red Hat, Inc.
  *
  ****************************************************************************/
 
@@ -52,14 +48,8 @@
 #undef strchrnul /* See mm/README.txt */
 FAR char *strchrnul(FAR const char *s, int c)
 {
-  if (s)
-    {
-      while (*s != '\0' && *s != c)
-        {
-          s++;
-        }
-    }
+  FAR char *s1 = strchr(s, c);
 
-  return (FAR char *)s;
+  return s1 ? s1 : (FAR char *)s + strlen(s);
 }
 #endif

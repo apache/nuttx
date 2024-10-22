@@ -42,24 +42,6 @@
 #undef strrchr /* See mm/README.txt */
 FAR char *strrchr(FAR const char *s, int c)
 {
-#ifdef CONFIG_LIBC_STRING_OPTIMIZE
-  FAR const char *last = NULL;
-
-  if (c)
-    {
-      while ((s = strchr(s, c)))
-        {
-          last = s;
-          s++;
-        }
-    }
-  else
-    {
-      last = strchr(s, c);
-    }
-
-  return (FAR char *)last;
-#else
   FAR const char *r = NULL;
 
   do
@@ -72,6 +54,5 @@ FAR char *strrchr(FAR const char *s, int c)
   while (*s++ != '\0');
 
   return (FAR char *)r;
-#endif
 }
 #endif
