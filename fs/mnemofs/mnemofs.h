@@ -98,6 +98,14 @@
 #define MFS_JRNL_LIM(sb)           (MFS_JRNL(sb).n_blks / 2)
 #define MFS_TRAVERSE_INITSZ        8
 
+#define MFS_LOG                    finfo
+#ifdef CONFIG_MNEMOFS_EXTRA_DEBUG
+#define MFS_EXTRA_LOG              finfo
+#else
+#define MFS_EXTRA_LOG
+#endif
+#define MFS_STRLITCMP(a, lit)      strncmp(a, lit, strlen(lit))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -430,7 +438,7 @@ int mnemofs_flush(FAR struct mfs_sb_s *sb);
  * Name: mfs_jrnl_init
  *
  * Description:
- *   Initialize journal if device is already formatted.
+ *   Initializes journal when it's already formatted into the device.
  *
  * Input Parameters:
  *   sb  - Superblock instance of the device.
@@ -439,6 +447,9 @@ int mnemofs_flush(FAR struct mfs_sb_s *sb);
  * Returned Value:
  *   0   - OK
  *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   Does not initialize the master node.
  *
  ****************************************************************************/
 
@@ -463,6 +474,8 @@ int mfs_jrnl_init(FAR struct mfs_sb_s * const sb, mfs_t blk);
  *   If blk1 == 0 and blk2 == 0, this means that this will also format in the
  *   master blocks. If this is not satisfied, the provided values will be
  *   taken to denote the master nodes.
+ *
+ *   Does not format the master node.
  *
  ****************************************************************************/
 
