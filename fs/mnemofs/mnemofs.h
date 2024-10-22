@@ -98,11 +98,11 @@
 #define MFS_JRNL_LIM(sb)           (MFS_JRNL(sb).n_blks / 2)
 #define MFS_TRAVERSE_INITSZ        8
 
-#define MFS_LOG                    finfo
+#define MFS_LOG(fmt, ...)          finfo(fmt, ##__VA_ARGS__)
 #ifdef CONFIG_MNEMOFS_EXTRA_DEBUG
-#define MFS_EXTRA_LOG              finfo
+#define MFS_EXTRA_LOG(fmt, ...)    MFS_LOG(fmt, ##__VA_ARGS__)
 #else
-#define MFS_EXTRA_LOG
+#define MFS_EXTRA_LOG(fmt, ...)    { }
 #endif
 #define MFS_STRLITCMP(a, lit)      strncmp(a, lit, strlen(lit))
 
