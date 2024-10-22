@@ -208,32 +208,43 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
 static void task_fssync(FAR struct tcb_s *tcb, FAR void *arg)
 {
-  FAR struct filelist *list;
+  FAR struct tcb_s *ctcb;
+  FAR struct file *filep;
+  int pid = tcb->pid;
+  uint8_t rows;
   int i;
   int j;
 
-  list = files_getlist(tcb);
-  if (list == NULL)
+  if (tcb->group == NULL)
     {
       return;
     }
 
-  for (i = 0; i < list->fl_rows; i++)
+  rows = tcb->group->tg_filelist.fl_rows;
+
+  for (i = 0; i < rows; i++)
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
-          FAR struct file *filep;
+          ctcb = nxsched_get_tcb(pid);
+          if (ctcb == NULL || ctcb->group == NULL || ctcb != tcb)
+            {
+              return;
+            }
 
-          filep = files_fget_by_index(list, i, j, NULL);
+          filep = files_fget_by_index(&ctcb->group->tg_filelist,
+                                      i, j, NULL);
           if (filep != NULL)
             {
               file_fsync(filep);
-              fs_putfilep(filep);
+              ctcb = nxsched_get_tcb(pid);
+              if (ctcb != NULL && ctcb->group != NULL && ctcb == tcb)
+                {
+                  fs_putfilep(filep);
+                }
             }
         }
     }
-
-  files_putlist(list);
 }
 
 /****************************************************************************
