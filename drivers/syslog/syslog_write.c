@@ -38,6 +38,43 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: syslog_safe_to_block
+ *
+ * Description:
+ *   Check if it is safe to block for write. If not, the write  defaults to a
+ *   non-blocking method.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   true if it is safe to block; false otherwise.
+ *
+ ****************************************************************************/
+
+static bool syslog_safe_to_block(void)
+{
+  FAR const struct tcb_s *rtcb;
+
+  /* It's not safe to block in interrupts or when executing the idle loop */
+
+  if (up_interrupt_context() || sched_idletask())
+    {
+      return false;
+    }
+
+  /* It's not safe to block if a signal is being delivered */
+
+  rtcb = nxsched_self();
+  if (rtcb->sigdeliver != NULL)
+    {
+      return false;
+    }
+
+  return true;
+}
+
+/****************************************************************************
  * Name: syslog_default_write
  *
  * Description:
@@ -59,7 +96,7 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 {
   size_t nwritten;
 
-  if (up_interrupt_context() || sched_idletask())
+  if (!syslog_safe_to_block())
     {
 #ifdef CONFIG_SYSLOG_INTBUFFER
       if (up_interrupt_context())
