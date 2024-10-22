@@ -141,7 +141,7 @@ SECTION_FUNC(text, arm64_sync_exc)
 
     /* if this is a svc call ?*/
 
-    bne    arm64_fatal_handler
+    bne    2f
 
 #ifdef CONFIG_LIB_SYSCALL
     /* Handle user system calls separately */
@@ -189,6 +189,10 @@ reserved_syscall:
 
     mov    sp, x0
     b      arm64_exit_exception
+2:
+    adrp   x5, arm64_fatal_handler
+    add    x5, x5, #:lo12:arm64_fatal_handler
+    br     x5
 
 /****************************************************************************
  * Name: arm64_irq_handler
@@ -232,8 +236,10 @@ SECTION_FUNC(text, arm64_irq_handler)
 
 GTEXT(arm64_serror_handler)
 SECTION_FUNC(text, arm64_serror_handler)
-    mov    x0, sp
-    bl     arm64_fatal_handler
+    mov   x0, sp
+    adrp  x5, arm64_fatal_handler
+    add   x5, x5, #:lo12:arm64_fatal_handler
+    br    x5
     /* Return here only in case of recoverable error */
 
     b      arm64_exit_exception
@@ -249,7 +255,9 @@ SECTION_FUNC(text, arm64_serror_handler)
 GTEXT(arm64_mode32_handler)
 SECTION_FUNC(text, arm64_mode32_handler)
     mov    x0, sp
-    bl     arm64_fatal_handler
+    adrp  x5, arm64_fatal_handler
+    add   x5, x5, #:lo12:arm64_fatal_handler
+    br     x5
     /* Return here only in case of recoverable error */
 
     b      arm64_exit_exception
@@ -267,7 +275,9 @@ SECTION_FUNC(text, arm64_fiq_handler)
 #ifndef CONFIG_ARM64_DECODEFIQ
 
     mov    x0, sp
-    bl     arm64_fatal_handler
+    adrp  x5, arm64_fatal_handler
+    add   x5, x5, #:lo12:arm64_fatal_handler
+    br     x5
 
     /* Return here only in case of recoverable error */
 
