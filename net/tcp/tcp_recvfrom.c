@@ -658,6 +658,196 @@ static void tcp_notify_recvcpu(FAR struct tcp_conn_s *conn)
 #endif /* CONFIG_NETDEV_RSS */
 
 /****************************************************************************
+ * Name: tcp_recvfrom_one
+ *
+ * Description:
+ *   This function attempts to receive data from the specified TCP connection
+ *   'conn' and stores it in the provided buffer 'buf'. It handles data that
+ *   may already be in the read-ahead buffer and manages blocking or
+ *   non-blocking operations based on connection flags.
+ *   It also monitors connection state, handles connection timeouts, and
+ *   updates the receive window when necessary.
+ *
+ * Input Parameters:
+ *   conn    - The TCP connection from which data is to be received.
+ *   buf     - The buffer to store the received data.
+ *   len     - The maximum number of bytes to receive.
+ *   from    - Socket address structure to store the source address
+ *             (if provided).
+ *   fromlen - Length of the address structure.
+ *   flags   - Flags indicating specific receive options
+ *             (e.g., non-blocking).
+ *
+ * Returned Value:
+ *   Returns the number of bytes received, or a negative error code in
+ *   case of failure (e.g., -ENOTCONN if not connected).
+ *
+ * Assumptions:
+ *   conn, buf, and from are non-NULL pointers.
+ *
+ ****************************************************************************/
+
+static ssize_t tcp_recvfrom_one(FAR struct tcp_conn_s *conn, FAR void *buf,
+                                size_t len, FAR struct sockaddr *from,
+                                FAR socklen_t *fromlen, int flags)
+{
+  struct tcp_recvfrom_s state;
+  struct tcp_callback_s info;
+  ssize_t ret;
+
+  /* Initialize the state structure.  This is done with the network
+   * locked because we don't want anything to happen until we are ready.
+   */
+
+  tcp_recvfrom_initialize(conn, buf, len, from, fromlen, &state, flags);
+
+  /* Handle any any TCP data already buffered in a read-ahead buffer.
+   * NOTE that there may be read-ahead data to be retrieved even after
+   * the socket has been disconnected.
+   */
+
+  tcp_readahead(&state);
+
+  /* The default return value is the number of bytes that we just copied
+   * into the user buffer.  We will return this if the socket has become
+   * disconnected or if the user request was completely satisfied with
+   * data from the readahead buffers.
+   */
+
+  ret = state.ir_recvlen;
+
+  /* Verify that the SOCK_STREAM has been and still is connected */
+
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
+    {
+      /* Was any data transferred from the readahead buffer after we were
+       * disconnected?  If so, then return the number of bytes received.
+       * We will wait to return end disconnection indications the next
+       * time that recvfrom() is called.
+       *
+       * If no data was received (i.e.,  ret == 0  -- it will not be
+       * negative) and the connection was gracefully closed by the remote
+       * peer, then return success.  If ir_recvlen is zero, the caller of
+       * recvfrom() will get an end-of-file indication.
+       */
+
+      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags))
+        {
+          /* Nothing was previously received from the read-ahead buffers.
+           * The SOCK_STREAM must be (re-)connected in order to receive
+           * any additional data.
+           */
+
+          ret = -ENOTCONN;
+        }
+    }
+
+  /* In general, this implementation will not support non-blocking socket
+   * operations... except in a few cases:  Here for TCP receive with
+   * read-ahead enabled.  If this socket is configured as non-blocking
+   * then return EAGAIN if no data was obtained from the read-ahead
+   * buffers.
+   */
+
+  else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+          (flags & MSG_DONTWAIT) != 0)
+    {
+      /* Return the number of bytes read from the read-ahead buffer if
+       * something was received (already in 'ret'); EAGAIN if not.
+       */
+
+      if (ret <= 0)
+        {
+          /* Nothing was received */
+
+          ret = -EAGAIN;
+        }
+    }
+
+  /* It is okay to block if we need to.  If there is space to receive
+   * anything more, then we will wait to receive the data.  Otherwise
+   * return the number of bytes read from the read-ahead buffer
+   * (already in 'ret').
+   */
+
+  else
+
+  /* We get here when we we decide that we need to setup the wait for
+   * incoming TCP/IP data.  Just a few more conditions to check:
+   *
+   * 1) Make sure that there is buffer space to receive additional data
+   *    (state.ir_buflen > 0).  This could be zero, for example,  we
+   *    filled the user buffer with data from the read-ahead buffers. And
+   * 2) then we not want to wait if we already obtained some data from
+   *    the read-ahead buffer.  In that case, return now with what we
+   *    have (don't want for more because there may be no timeout).
+   * 3) If however MSG_WAITALL flag is set, block here till all requested
+   *    data are received (or there is a timeout / error).
+   */
+
+  if (((flags & MSG_WAITALL) != 0 || state.ir_recvlen == 0) &&
+      state.ir_buflen > 0)
+    {
+      /* Set up the callback in the connection */
+
+      state.ir_cb = tcp_callback_alloc(conn);
+      if (state.ir_cb)
+        {
+          state.ir_cb->flags   = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
+          state.ir_cb->flags  |= (flags & MSG_WAITALL) ? TCP_WAITALL : 0;
+          state.ir_cb->priv    = (FAR void *)&state;
+          state.ir_cb->event   = tcp_recvhandler;
+
+          /* Push a cancellation point onto the stack.  This will be
+           * called if the thread is canceled.
+           */
+
+          info.tc_conn = conn;
+          info.tc_cb   = state.ir_cb;
+          info.tc_sem  = &state.ir_sem;
+          tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
+          /* Wait for either the receive to complete or for an
+           * error/timeout to occur.  net_sem_timedwait will also
+           * terminate if a signal is received.
+           */
+
+          ret = net_sem_timedwait(&state.ir_sem,
+                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          tls_cleanup_pop(tls_get_info(), 0);
+          if (ret == -ETIMEDOUT)
+            {
+              ret = -EAGAIN;
+            }
+
+          /* Make sure that no further events are processed */
+
+          tcp_callback_free(conn, state.ir_cb);
+          ret = tcp_recvfrom_result(ret, &state);
+        }
+      else if (ret <= 0)
+        {
+          ret = -EBUSY;
+        }
+    }
+
+  /* Receive additional data from read-ahead buffer, send the ACK timely.
+   * Revisit: Because IOBs are system-wide resources, consuming the read
+   * ahead buffer would update recv window of all connections in the
+   * system, not only this particular connection.
+   */
+
+  if (tcp_should_send_recvwindow(conn))
+    {
+      netdev_txnotify_dev(conn->dev);
+    }
+
+  tcp_notify_recvcpu(conn);
+  tcp_recvfrom_uninitialize(&state);
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -685,168 +875,42 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 {
   FAR struct sockaddr   *from    = msg->msg_name;
   FAR socklen_t         *fromlen = &msg->msg_namelen;
-  FAR void              *buf     = msg->msg_iov->iov_base;
-  size_t                 len     = msg->msg_iov->iov_len;
-  struct tcp_recvfrom_s  state;
   FAR struct tcp_conn_s *conn;
-  struct tcp_callback_s  info;
-  int                    ret;
+  ssize_t                nrecv   = 0;
+  ssize_t                ret     = 0;
+  int                    i;
 
   net_lock();
 
   conn = psock->s_conn;
-
-  /* Initialize the state structure.  This is done with the network locked
-   * because we don't want anything to happen until we are ready.
-   */
-
-  tcp_recvfrom_initialize(conn, buf, len, from, fromlen, &state, flags);
-
-  /* Handle any any TCP data already buffered in a read-ahead buffer.  NOTE
-   * that there may be read-ahead data to be retrieved even after the
-   * socket has been disconnected.
-   */
-
-  tcp_readahead(&state);
-
-  /* The default return value is the number of bytes that we just copied
-   * into the user buffer.  We will return this if the socket has become
-   * disconnected or if the user request was completely satisfied with
-   * data from the readahead buffers.
-   */
-
-  ret = state.ir_recvlen;
-
-  /* Verify that the SOCK_STREAM has been and still is connected */
-
-  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
+  for (i = 0; i < msg->msg_iovlen; i++)
     {
-      /* Was any data transferred from the readahead buffer after we were
-       * disconnected?  If so, then return the number of bytes received.  We
-       * will wait to return end disconnection indications the next time that
-       * recvfrom() is called.
-       *
-       * If no data was received (i.e.,  ret == 0  -- it will not be
-       * negative) and the connection was gracefully closed by the remote
-       * peer, then return success.  If ir_recvlen is zero, the caller of
-       * recvfrom() will get an end-of-file indication.
-       */
+      FAR void *buf = msg->msg_iov[i].iov_base;
+      size_t len = msg->msg_iov[i].iov_len;
 
-      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags))
-        {
-          /* Nothing was previously received from the read-ahead buffers.
-           * The SOCK_STREAM must be (re-)connected in order to receive any
-           * additional data.
-           */
-
-          ret = -ENOTCONN;
-        }
-    }
-
-  /* In general, this implementation will not support non-blocking socket
-   * operations... except in a few cases:  Here for TCP receive with read-
-   * ahead enabled.  If this socket is configured as non-blocking then
-   * return EAGAIN if no data was obtained from the read-ahead buffers.
-   */
-
-  else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
-           (flags & MSG_DONTWAIT) != 0)
-    {
-      /* Return the number of bytes read from the read-ahead buffer if
-       * something was received (already in 'ret'); EAGAIN if not.
-       */
-
+      ret = tcp_recvfrom_one(conn, buf, len, from, fromlen, flags);
       if (ret <= 0)
         {
-          /* Nothing was received */
-
-          ret = -EAGAIN;
+          break;
         }
-    }
 
-  /* It is okay to block if we need to.  If there is space to receive
-   * anything more, then we will wait to receive the data.  Otherwise return
-   * the number of bytes read from the read-ahead buffer (already in 'ret').
-   */
+      nrecv += ret;
 
-  else
+      /* User has not set MSG_WAITALL: If the first buffer is full
+       * when received for the first time, then check the next buffer,
+       * otherwise return the received data.
+       * User sets MSG_WAITALL: Ensure that each iov is filled before
+       * returning
+       */
 
-  /* We get here when we we decide that we need to setup the wait for
-   * incoming TCP/IP data.  Just a few more conditions to check:
-   *
-   * 1) Make sure that there is buffer space to receive additional data
-   *    (state.ir_buflen > 0).  This could be zero, for example,  we filled
-   *    the user buffer with data from the read-ahead buffers.  And
-   * 2) then we not want to wait if we already obtained some data from the
-   *    read-ahead buffer.  In that case, return now with what we have (don't
-   *    want for more because there may be no timeout).
-   * 3) If however MSG_WAITALL flag is set, block here till all requested
-   *    data are received (or there is a timeout / error).
-   */
-
-  if (((flags & MSG_WAITALL) != 0 || state.ir_recvlen == 0) &&
-      state.ir_buflen > 0)
-    {
-      /* Set up the callback in the connection */
-
-      state.ir_cb = tcp_callback_alloc(conn);
-      if (state.ir_cb)
+      if (!(flags & MSG_WAITALL) && ret < msg->msg_iov[i].iov_len)
         {
-          state.ir_cb->flags   = (TCP_NEWDATA | TCP_DISCONN_EVENTS);
-          state.ir_cb->flags  |= (flags & MSG_WAITALL) ? TCP_WAITALL : 0;
-          state.ir_cb->priv    = (FAR void *)&state;
-          state.ir_cb->event   = tcp_recvhandler;
-
-          /* Push a cancellation point onto the stack.  This will be
-           * called if the thread is canceled.
-           */
-
-          info.tc_conn = conn;
-          info.tc_cb   = state.ir_cb;
-          info.tc_sem  = &state.ir_sem;
-          tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
-
-          /* Wait for either the receive to complete or for an error/timeout
-           * to occur.  net_sem_timedwait will also terminate if a signal is
-           * received.
-           */
-
-          ret = net_sem_timedwait(&state.ir_sem,
-                               _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
-          tls_cleanup_pop(tls_get_info(), 0);
-          if (ret == -ETIMEDOUT)
-            {
-              ret = -EAGAIN;
-            }
-
-          /* Make sure that no further events are processed */
-
-          tcp_callback_free(conn, state.ir_cb);
-          ret = tcp_recvfrom_result(ret, &state);
-        }
-      else if (ret <= 0)
-        {
-          ret = -EBUSY;
+          break;
         }
     }
-
-  /* Receive additional data from read-ahead buffer, send the ACK timely.
-   *
-   * Revisit: Because IOBs are system-wide resources, consuming the read
-   * ahead buffer would update recv window of all connections in the system,
-   * not only this particular connection.
-   */
-
-  if (tcp_should_send_recvwindow(conn))
-    {
-      netdev_txnotify_dev(conn->dev);
-    }
-
-  tcp_notify_recvcpu(conn);
 
   net_unlock();
-  tcp_recvfrom_uninitialize(&state);
-  return (ssize_t)ret;
+  return nrecv ? nrecv : ret;
 }
 
 #endif /* CONFIG_NET_TCP */

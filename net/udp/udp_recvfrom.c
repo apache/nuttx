@@ -647,8 +647,6 @@ static void udp_notify_recvcpu(FAR struct udp_conn_s *conn)
 
       conn->rcvcpu = cpu;
     }
-
-  return;
 }
 #else
 #  define udp_notify_recvcpu(c)
@@ -683,9 +681,14 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
   FAR struct net_driver_s *dev;
   struct udp_callback_s info;
   struct udp_recvfrom_s state;
-  int ret;
+  ssize_t ret;
 
   /* Perform the UDP recvfrom() operation */
+
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
 
   /* Initialize the state structure.  This is done with the network locked
    * because we don't want anything to happen until we are ready.
