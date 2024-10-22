@@ -521,7 +521,7 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
         }
     }
 
-  newname = strndup(name, namelen);
+  newname = fs_heap_strndup(name, namelen);
   if (newname == NULL)
     {
       return -ENOMEM;
