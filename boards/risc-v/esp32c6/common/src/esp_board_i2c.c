@@ -30,12 +30,41 @@
 
 #include <nuttx/i2c/i2c_master.h>
 
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+#include "espressif/esp_i2c_bitbang.h"
+#endif
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
 #include "espressif/esp_i2c.h"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+static int i2c_bitbang_driver_init(int bus)
+{
+  struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = esp_i2cbus_bitbang_initialize();
+  if (i2c == NULL)
+    {
+      i2cerr("Failed to get I2C%d interface\n", bus);
+      return -ENODEV;
+    }
+
+  ret = i2c_register(i2c, bus);
+  if (ret < 0)
+    {
+      i2cerr("Failed to register I2C%d driver: %d\n", bus, ret);
+    }
+
+  return ret;
+}
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
 static int i2c_driver_init(int bus)
 {
   struct i2c_master_s *i2c;
@@ -57,6 +86,7 @@ static int i2c_driver_init(int bus)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: board_i2c_init
@@ -76,6 +106,10 @@ int board_i2c_init(void)
 
 #ifdef CONFIG_ESPRESSIF_I2C0
   ret = i2c_driver_init(ESPRESSIF_I2C0);
+#endif
+
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+  ret = i2c_bitbang_driver_init(ESPRESSIF_I2C_BITBANG);
 #endif
 
   return ret;

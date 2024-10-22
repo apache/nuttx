@@ -31,7 +31,11 @@
 #include <nuttx/sensors/bmp180.h>
 #include <nuttx/i2c/i2c_master.h>
 
+#ifndef CONFIG_ESPRESSIF_I2C_BITBANG
 #include "espressif/esp_i2c.h"
+#else
+#include "espressif/esp_i2c_bitbang.h"
+#endif
 
 #include "esp_board_bmp180.h"
 
@@ -64,7 +68,11 @@ int board_bmp180_initialize(int devno)
 
   /* Initialize BMP180 */
 
+#ifndef CONFIG_ESPRESSIF_I2C_BITBANG
   i2c = esp_i2cbus_initialize(ESPRESSIF_I2C0);
+#else
+  i2c = esp_i2cbus_bitbang_initialize();
+#endif
 
   if (i2c)
     {

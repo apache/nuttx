@@ -320,11 +320,17 @@ config ESPRESSIF_I2C
 	bool
 	default n
 
+config ESPRESSIF_I2C_PERIPH
+	bool
+	depends on (ESPRESSIF_I2C0 || ESPRESSIF_I2C1)
+	default n
+
 config ESPRESSIF_I2C0
 	bool "I2C 0"
 	default n
 	select ESPRESSIF_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESPRESSIF_I2C1
 	bool "I2C 1"
@@ -332,6 +338,17 @@ config ESPRESSIF_I2C1
 	depends on ARCH_CHIP_ESP32H2
 	select ESPRESSIF_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
+
+config ESPRESSIF_I2C_BITBANG
+	bool "I2C Bitbang"
+	default n
+	select I2C_BITBANG
+	select ESPRESSIF_I2C
+	select I2C
+	select I2C_BITBANG
+	---help---
+		Software implemented I2C peripheral with GPIOs. Suggested to use if I2C peripherals are already in use.
 
 config ESPRESSIF_SPI
 	bool
@@ -1574,12 +1591,28 @@ config ESPRESSIF_I2C1_SDAPIN
 
 endif # ESPRESSIF_I2C1
 
+if ESPRESSIF_I2C_BITBANG
+
+config ESPRESSIF_I2C_BITBANG_SCLPIN
+	int "I2C Bitbang SCL Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_I2C_BITBANG_SDAPIN
+	int "I2C Bitbang SDA Pin"
+	default 1
+	range 0 21
+
+endif # ESPRESSIF_I2C_BITBANG
+
 config ESPRESSIF_I2CTIMEOSEC
 	int "Timeout seconds"
+	depends on ESPRESSIF_I2C_PERIPH
 	default 0
 
 config ESPRESSIF_I2CTIMEOMS
 	int "Timeout milliseconds"
+	depends on ESPRESSIF_I2C_PERIPH
 	default 500
 
 endmenu # I2C configuration
