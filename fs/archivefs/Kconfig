@@ -1,0 +1,18 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_ARCHIVEFS
+	bool "ARCHIVE File System"
+	default n
+
+if FS_ARCHIVEFS
+
+config FS_ARCHIVEFS_BUFFER_SIZE
+	int "Buffer size"
+	default 32768
+	---help---
+		libarchive requires a buffer to read and write data.
+
+endif

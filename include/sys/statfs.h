@@ -105,6 +105,7 @@
 #define ZIPFS_MAGIC           0x504b
 #define XIPFS_MAGIC           0x58495046
 #define V9FS_MAGIC            0x01021997
+#define ARCHIVEFS_MAGIC       0x504c
 
 #endif /* NUTTX_NO_EXTENSIONS */
 
