@@ -526,6 +526,11 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -ENOSYS;
     }
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   net_lock();
 
   /* Initialize the state structure. */

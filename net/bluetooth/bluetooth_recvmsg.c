@@ -330,6 +330,11 @@ ssize_t bluetooth_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EPROTONOSUPPORT;
     }
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   /* Perform the packet recvmsg() operation */
 
   /* Initialize the state structure.  This is done with the network

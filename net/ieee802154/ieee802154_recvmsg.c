@@ -330,6 +330,11 @@ ssize_t ieee802154_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EPROTONOSUPPORT;
     }
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   /* Perform the packet recvfrom() operation */
 
   /* Initialize the state structure.  This is done with the network

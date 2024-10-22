@@ -552,6 +552,11 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return 0;
     }
 
+  if (msg->msg_iovlen != 1)
+    {
+      return -ENOTSUP;
+    }
+
   DEBUGASSERT(buf);
 
   /* Check for a stream socket */
