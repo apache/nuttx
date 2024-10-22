@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESP32_I2C
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -1569,4 +1569,4 @@ int esp32_i2cbus_uninitialize(struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_ESP32_I2C */
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH */

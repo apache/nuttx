@@ -760,11 +760,13 @@ config ESP32_I2C0
 	bool "I2C 0"
 	default n
 	select ESP32_I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESP32_I2C1
 	bool "I2C 1"
 	default n
 	select ESP32_I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESP32_TWAI0
 	bool "TWAI (CAN) 0"
@@ -1135,10 +1137,12 @@ endif # ESP32_I2C1
 config ESP32_I2CTIMEOSEC
 	int "Timeout seconds"
 	default 0
+	depends on ESPRESSIF_I2C_PERIPH
 
 config ESP32_I2CTIMEOMS
 	int "Timeout milliseconds"
 	default 500
+	depends on ESPRESSIF_I2C_PERIPH
 
 endmenu # I2C configuration
 

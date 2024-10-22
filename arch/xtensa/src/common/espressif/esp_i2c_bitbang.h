@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s2/esp32s2_i2c.h
+ * arch/xtensa/src/common/espressif/esp_i2c_bitbang.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,76 +18,72 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_I2C_H
-#define __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_I2C_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_I2C_BITBANG_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_I2C_BITBANG_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <nuttx/i2c/i2c_master.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#ifdef CONFIG_ESP32S2_I2C0
-#  define ESP32S2_I2C0 0
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
+#  define ESPRESSIF_I2C_BITBANG 3
 #endif
 
-#ifdef CONFIG_ESP32S2_I2C1
-#  define ESP32S2_I2C1 1
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
+#ifdef CONFIG_ESPRESSIF_I2C_BITBANG
 /****************************************************************************
- * Name: esp32s2_i2cbus_initialize
+ * Name: esp_i2cbus_bitbang_initialize
  *
  * Description:
- *   Initialize the selected I2C port. And return a unique instance of struct
- *   struct i2c_master_s.  This function may be called to obtain multiple
- *   instances of the interface, each of which may be set up with a
- *   different frequency and slave address.
+ *   Initialize the I2C bitbang driver. And return a unique instance of
+ *   struct struct i2c_master_s. This function may be called to obtain
+ *   multiple instances of the interface, each of which may be set up with
+ *   a different frequency and slave address.
  *
  * Input Parameters:
- *   Port number (for hardware that has multiple I2C interfaces)
+ *   None
  *
  * Returned Value:
  *   Valid I2C device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-struct i2c_master_s *esp32s2_i2cbus_initialize(int port);
+struct i2c_master_s *esp_i2cbus_bitbang_initialize(void);
+#endif
 
-/****************************************************************************
- * Name: esp32s2_i2cbus_uninitialize
- *
- * Description:
- *   De-initialize the selected I2C port, and power down the device.
- *
- * Input Parameters:
- *   Device structure as returned by the esp32s2_i2cbus_initialize()
- *
- * Returned Value:
- *   OK on success, ERROR when internal reference count mismatch or dev
- *   points to invalid hardware device.
- *
- ****************************************************************************/
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
 
-int esp32s2_i2cbus_uninitialize(struct i2c_master_s *dev);
-#endif /* CONFIG_ESPRESSIF_I2C_PERIPH */
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_I2C_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_I2C_BITBANG_H */
