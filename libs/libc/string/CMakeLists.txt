@@ -23,7 +23,6 @@
 # Add the string C files to the build
 
 set(SRCS
-    lib_bzero.c
     lib_ffs.c
     lib_ffsl.c
     lib_ffsll.c
@@ -60,7 +59,6 @@ set(SRCS
     lib_strsep.c
     lib_strerrorr.c
     lib_explicit_bzero.c
-    lib_bzero.c
     lib_strsignal.c
     lib_index.c
     lib_rindex.c
