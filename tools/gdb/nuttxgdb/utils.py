@@ -519,32 +519,6 @@ def in_interrupt_context(cpuid=0):
         return not g_current_regs or not g_current_regs[cpuid]
 
 
-def get_arch_sp_name():
-    if is_target_arch("arm") or is_target_arch("aarch64"):
-        # arm and arm variants
-        return "sp"
-    elif is_target_arch("i386", exact=True):
-        return "esp"
-    elif is_target_arch("i386:x86-64", exact=True):
-        return "rsp"
-    else:
-        # Default to use sp, add more archs if needed
-        return "sp"
-
-
-def get_arch_pc_name():
-    if is_target_arch("arm") or is_target_arch("aarch64"):
-        # arm and arm variants
-        return "pc"
-    elif is_target_arch("i386", exact=True):
-        return "eip"
-    elif is_target_arch("i386:x86-64", exact=True):
-        return "rip"
-    else:
-        # Default to use pc, add more archs if needed
-        return "pc"
-
-
 def get_register_byname(regname, tcb=None):
     frame = gdb.selected_frame()
 
@@ -572,11 +546,11 @@ def get_register_byname(regname, tcb=None):
 
 
 def get_sp(tcb=None):
-    return get_register_byname(get_arch_sp_name(), tcb)
+    return get_register_byname("sp", tcb)
 
 
 def get_pc(tcb=None):
-    return get_register_byname(get_arch_pc_name(), tcb)
+    return get_register_byname("pc", tcb)
 
 
 def get_tcbs():
