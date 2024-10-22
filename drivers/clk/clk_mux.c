@@ -44,7 +44,7 @@ static bool mux_is_better_rate(uint32_t rate, uint32_t now,
 {
   if (flags & CLK_MUX_ROUND_CLOSEST)
     {
-      return abs(now - rate) < abs(best - rate);
+      return clk_is_best_rate_closest(rate, now, best);
     }
 
   return now <= rate && now > best;

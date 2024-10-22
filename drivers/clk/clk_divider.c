@@ -174,7 +174,7 @@ static bool _is_best_div(uint32_t rate, uint32_t now,
 {
   if (flags & CLK_DIVIDER_ROUND_CLOSEST)
     {
-      return abs(rate - now) < abs(rate - best);
+      return clk_is_best_rate_closest(rate, now, best);
     }
 
   return now <= rate && now > best;

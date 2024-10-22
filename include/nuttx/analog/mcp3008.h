@@ -1,5 +1,9 @@
 /****************************************************************************
- * arch/arm/src/qemu/qemu_memorymap.c
+ * include/nuttx/analog/mcp3008.h
+ *
+ * Contributed by Matteo Golin
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,66 +22,31 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_ANALOG_MCP3008_H
+#define __INCLUDE_NUTTX_ANALOG_MCP3008_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <sys/param.h>
-
-#include "mmu.h"
-
-#include "hardware/qemu_memorymap.h"
-#include "qemu_memorymap.h"
+#include <nuttx/analog/ioctl.h>
+#include <nuttx/config.h>
+#include <nuttx/spi/spi.h>
 
 /****************************************************************************
- * Macro Definitions
+ * Preprocessor definitions
  ****************************************************************************/
 
-#define _NSECTIONS(b)                 (((b) + 0x000fffff) >> 20)
+/* IOCTL Commands
+ * Cmd: ANIOC_MCP3008_DIFF      Arg: 1 for differential, 0 for single-ended
+ */
+
+#define ANIOC_MCP3008_DIFF      _ANIOC(AN_MCP3008_FIRST + 0)
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
 
-static const struct section_mapping_s g_section_mapping[] =
-{
-  {
-    VIRT_FLASH_PSECTION, VIRT_FLASH_VSECTION,
-    MMU_MEMFLAGS, _NSECTIONS(VIRT_FLASH_SECSIZE)
-  },
-  {
-    VIRT_IO_PSECTION, VIRT_IO_VSECTION,
-    MMU_IOFLAGS, _NSECTIONS(VIRT_IO_SECSIZE)
-  },
-  {
-    VIRT_SEC_MEM_PSECTION, VIRT_SEC_MEM_VSECTION,
-    MMU_MEMFLAGS, _NSECTIONS(VIRT_SEC_MEM_SECSIZE)
-  },
-  {
-    VIRT_PCIE_PSECTION, VIRT_PCIE_VSECTION,
-    MMU_IOFLAGS, _NSECTIONS(VIRT_PCIE_SECSIZE)
-  },
-  {
-    VIRT_DDR_PSECTION, VIRT_DDR_VSECTION,
-    MMU_MEMFLAGS, _NSECTIONS(VIRT_DDR_SECSIZE)
-  },
-};
+FAR struct adc_dev_s *mcp3008_initialize(FAR struct spi_dev_s *spi);
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: qemu_setupmappings
- *
- * Description:
- *   Initializes the non-code area page table
- *
- ****************************************************************************/
-
-int qemu_setupmappings(void)
-{
-  mmu_l1_map_regions(g_section_mapping, nitems(g_section_mapping));
-
-  return 0;
-}
+#endif /* __INCLUDE_NUTTX_ANALOG_MCP3008_H */
