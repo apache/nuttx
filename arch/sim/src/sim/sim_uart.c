@@ -778,15 +778,7 @@ void sim_uartinit(void)
 void up_nputs(const char *str, size_t len)
 {
 #ifdef USE_DEVCONSOLE
-  if (str[len - 1] == '\n')
-    {
-      uart_nputs(1, str, len - 1);
-      uart_nputs(1, "\r\n", 2);
-    }
-  else
-    {
-      uart_nputs(1, str, len);
-    }
+  uart_nputs(1, str, len);
 #endif
 }
 
