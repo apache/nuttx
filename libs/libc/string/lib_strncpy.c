@@ -31,33 +31,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_LIBC_STRING_OPTIMIZE
-
-#define LBLOCKSIZE (sizeof(long))
-
-/* Nonzero if either x or y is not aligned on a "long" boundary. */
-
-#define UNALIGNED(x, y) \
-  (((long)(uintptr_t)(x) & (sizeof(long) - 1)) | ((long)(uintptr_t)(y) & (sizeof(long) - 1)))
-
-/* Macros for detecting endchar */
-
-#if LONG_MAX == 2147483647
-#  define DETECTNULL(x) (((x) - 0x01010101) & ~(x) & 0x80808080)
-#elif LONG_MAX == 9223372036854775807
-/* Nonzero if x (a long int) contains a NULL byte. */
-
-#  define DETECTNULL(x) (((x) - 0x0101010101010101) & ~(x) & 0x8080808080808080)
-#endif
-
-#define TOO_SMALL(len) ((len) < sizeof(long))
-
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -84,52 +57,8 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRNCPY) && defined(LIBC_BUILD_STRNCPY)
 #undef strncpy /* See mm/README.txt */
-nosanitize_address
 FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
-#ifdef CONFIG_LIBC_STRING_OPTIMIZE
-  FAR char *dst0 = dest;
-  FAR const char *src0 = src;
-  FAR long *aligned_dst;
-  FAR const long *aligned_src;
-
-  /* If src and dest is aligned and n large enough, then copy words. */
-
-  if (!UNALIGNED(src0, dst0) && !TOO_SMALL(n))
-    {
-      aligned_dst = (FAR long *)dst0;
-      aligned_src = (FAR long *)src0;
-
-      /* src and dest are both "long int" aligned, try to do "long int"
-       * sized copies.
-       */
-
-      while (n >= LBLOCKSIZE && !DETECTNULL(*aligned_src))
-        {
-          n -= LBLOCKSIZE;
-          *aligned_dst++ = *aligned_src++;
-        }
-
-      dst0 = (FAR char *)aligned_dst;
-      src0 = (FAR char *)aligned_src;
-    }
-
-  while (n > 0)
-    {
-      --n;
-      if ((*dst0++ = *src0++) == '\0')
-        {
-          break;
-        }
-    }
-
-  while (n-- > 0)
-    {
-      *dst0++ = '\0';
-    }
-
-  return dest;
-#else
   FAR char *ret = dest;     /* Value to be returned */
   FAR char *end = dest + n; /* End of dest buffer + 1 byte */
 
@@ -151,6 +80,5 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
     }
 
   return ret;
-#endif
 }
 #endif
