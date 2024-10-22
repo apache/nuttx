@@ -68,15 +68,15 @@ config CAN_NPENDINGRTR
 		The size of the list of pending RTR requests. Default: 4
 
 config CAN_TXCONFIRM
-        bool "can txconfirm ability"
-        default n
-        ---help---
-                this section enables the can txconfirm ability.
+	bool "can txconfirm ability"
+	default n
+	---help---
+		this section enables the can txconfirm ability.
 
-                Enabling this feature adds support for the can txconfirm
-                ability, the ability is used from CAN interrupt handler
-                when the transfer is complete, the ability will notify all
-                readers that the canid has been transferred.
+		Enabling this feature adds support for the can txconfirm
+		ability, the ability is used from CAN interrupt handler
+		when the transfer is complete, the ability will notify all
+		readers that the canid has been transferred.
 
 config CAN_TXREADY
 	bool "can_txready interface"
