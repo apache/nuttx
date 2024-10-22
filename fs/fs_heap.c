@@ -85,6 +85,19 @@ FAR char *fs_heap_strdup(FAR const char *s)
   return copy;
 }
 
+FAR char *fs_heap_strndup(FAR const char *s, size_t size)
+{
+  size_t len = strnlen(s, size) + 1;
+  FAR char *copy = fs_heap_malloc(len);
+  if (copy != NULL)
+    {
+      memcpy(copy, s, len);
+      copy[len - 1] = '\0';
+    }
+
+  return copy;
+}
+
 int fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
 {
   va_list ap;

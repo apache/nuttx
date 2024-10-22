@@ -45,6 +45,7 @@ size_t    fs_heap_malloc_size(FAR void *mem);
 FAR void *fs_heap_realloc(FAR void *oldmem, size_t size) realloc_like(2);
 void      fs_heap_free(FAR void *mem);
 FAR char *fs_heap_strdup(FAR const char *s) malloc_like;
+FAR char *fs_heap_strndup(FAR const char *s, size_t size) malloc_like;
 int       fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
           printf_like(2, 3);
 #else
@@ -55,6 +56,7 @@ int       fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
 #  define fs_heap_realloc      kmm_realloc
 #  define fs_heap_free         kmm_free
 #  define fs_heap_strdup       strdup
+#  define fs_heap_strndup      strndup
 #  define fs_heap_asprintf     asprintf
 #endif
 
