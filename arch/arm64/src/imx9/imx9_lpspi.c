@@ -1386,14 +1386,6 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
                       (uintptr_t)priv->txbuf + nbytes);
     }
 
-  if (rxbuffer)
-    {
-      /* Prepare the RX buffer for DMA */
-
-      up_invalidate_dcache((uintptr_t)priv->rxbuf,
-                           (uintptr_t)priv->rxbuf + nbytes);
-    }
-
   /* Set up the DMA */
 
   adjust = (priv->nbits > 8) ? 2 : 1;
@@ -2079,6 +2071,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
           priv->txbuf = imx9_dma_alloc(CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
           priv->rxbuf = imx9_dma_alloc(CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
           DEBUGASSERT(priv->txbuf && priv->rxbuf);
+
+          /* Invalidate the RX buffer area initially */
+
+          up_invalidate_dcache((uintptr_t)priv->rxbuf,
+                               (uintptr_t)priv->rxbuf +
+                               CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
         }
     }
   else
