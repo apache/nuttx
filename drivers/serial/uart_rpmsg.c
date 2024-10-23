@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -456,12 +457,33 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
 
   snprintf(name, sizeof(name), "%s%s",
            UART_RPMSG_DEV_PREFIX, devname);
-  uart_register(name, dev);
+  ret = uart_register(name, dev);
+  if (ret < 0)
+    {
+      rpmsgerr("uart register failed, ret=%d\n", ret);
+      goto fail_with_rpmsg;
+    }
 
   if (dev->isconsole)
     {
-      uart_register(UART_RPMSG_DEV_CONSOLE, dev);
+      ret = uart_register(UART_RPMSG_DEV_CONSOLE, dev);
+      if (ret < 0)
+        {
+          rpmsgerr("uart register console failed, ret=%d\n", ret);
+          unregister_driver(name);
+          goto fail_with_rpmsg;
+        }
     }
 
-  return 0;
+  return OK;
+
+fail_with_rpmsg:
+  rpmsg_unregister_callback(dev,
+                            uart_rpmsg_device_created,
+                            uart_rpmsg_device_destroy,
+                            NULL,
+                            NULL);
+  nxmutex_destroy(&priv->lock);
+  kmm_free(dev);
+  return ret;
 }
