@@ -229,6 +229,8 @@ if(CONFIG_DEBUG_LINK_MAP)
   add_link_options(-Wl,--cref -Wl,-Map=nuttx.map)
 endif()
 
+add_link_options(-Wl,--print-memory-usage)
+
 if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()

@@ -324,6 +324,7 @@ else
   endif
 
   LDFLAGS += --entry=__start
+  LDFLAGS += --print-memory-usage
 
 endif
 

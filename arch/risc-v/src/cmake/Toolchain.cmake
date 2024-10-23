@@ -104,6 +104,7 @@ elseif(CONFIG_LTO_FULL)
   if(CONFIG_ARCH_TOOLCHAIN_GNU)
     add_compile_options(-fno-builtin)
     add_compile_options(-fuse-linker-plugin)
+    add_link_options(-wl,--print-memory-usage)
   endif()
 endif()
 

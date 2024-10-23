@@ -382,6 +382,7 @@ else
     endif
   endif
 
+  LDFLAGS += --print-memory-usage
 endif
 
 # Add the builtin library
