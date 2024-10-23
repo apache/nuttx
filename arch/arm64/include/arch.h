@@ -55,7 +55,7 @@
 
 /****************************************************************************
  * Name:
- *   read_/write_/zero_/modify_ sysreg
+ *   read_sysreg/write_sysreg/zero_sysreg/sysreg_clear_set
  *
  * Description:
  *
@@ -84,9 +84,13 @@
                       ::: "memory");                \
   })
 
-#define modify_sysreg(v,m,a)                        \
-  write_sysreg((read_sysreg(a) & ~(m)) |            \
-               ((uintptr_t)(v) & (m)), a)
+/* Modify bits in a sysreg. Bits in the clear mask are zeroed,
+ * then bits in the set mask are set. Other bits are left as-is.
+ */
+
+#define sysreg_clear_set(sysreg, clear, set)          \
+    write_sysreg((read_sysreg(sysreg) & ~(clear)) |   \
+                 ((uintptr_t)(set) & (clear)), sysreg)
 
 /****************************************************************************
  * Inline functions

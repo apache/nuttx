@@ -396,7 +396,7 @@ static inline void up_irq_restore(irqstate_t flags)
 
 #define up_current_regs()      (this_task()->xcp.regs)
 #define up_this_task()         ((struct tcb_s *)(read_sysreg(tpidr_el1) & ~1ul))
-#define up_update_task(t)      modify_sysreg(t, ~1ul, tpidr_el1)
+#define up_update_task(t)      sysreg_clear_set(tpidr_el1, ~1ul, t)
 #define up_interrupt_context() (read_sysreg(tpidr_el1) & 1)
 
 #define up_switch_context(tcb, rtcb)                              \
