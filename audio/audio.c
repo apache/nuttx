@@ -69,15 +69,65 @@
  * Private Type Definitions
  ****************************************************************************/
 
+typedef unsigned int  snd_pcm_format_t;
+typedef unsigned long snd_pcm_uframes_t;
+
+typedef enum
+{
+  STREAM_STATE_NONE,
+  STREAM_STATE_PAUSED,
+  STREAM_STATE_XRUN,
+  STREAM_STATE_RUNNING,
+} stream_state_t;
+
+struct appl_s
+{
+  pid_t          pid;
+  stream_state_t state;
+  unsigned long  appl_ptr;
+};
+
+struct snd_pcm_mmap_status
+{
+  unsigned long read_head;
+  unsigned long read_tail;
+};
+
+struct snd_pcm_dmix_share
+{
+  unsigned int refs;
+  snd_pcm_format_t format;
+  unsigned int channels;
+  unsigned int sample_rate;
+  snd_pcm_uframes_t period_frames;
+  snd_pcm_uframes_t buffer_frames;
+};
+
 /* This structure describes the state of the upper half driver */
 
 struct audio_upperhalf_s
 {
   uint8_t           crefs;            /* The number of times the device has been opened */
-  volatile bool     started;          /* True: playback is active */
+  stream_state_t    state;            /* lowerhalf state */
   mutex_t           lock;             /* Supports mutual exclusion */
+  FAR struct file   *usermq;          /* User mode app's message queue */
+  struct dq_queue_s pendq;
+  bool              waiting;
+
+  int               periods;
+  int               period_bytes;
+  int               frame_bytes;
+
+  FAR uint8_t       *mix_buffer;
+  int               mix_buffer_size;
+
+  struct snd_pcm_mmap_status     mmap_status;
+  FAR struct snd_pcm_dmix_share  *share_info;
+
+  FAR struct appl_s appls[CONFIG_AUDIO_MAX_APPS];
+  FAR struct pollfd *fds[CONFIG_AUDIO_MAX_APPS];
+
   FAR struct audio_lowerhalf_s *dev;  /* lower-half state */
-  struct file      *usermq;           /* User mode app's message queue */
 };
 
 /****************************************************************************
@@ -95,9 +145,28 @@ static ssize_t  audio_write(FAR struct file *filep,
 static int      audio_ioctl(FAR struct file *filep,
                             int cmd,
                             unsigned long arg);
+static int      audio_mmap(FAR struct file *filep,
+                           FAR struct mm_map_entry_s *map);
+static int      audio_poll(FAR struct file *filep,
+                           struct pollfd *fds, bool setup);
+static int      audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
+                                  FAR struct audio_buf_desc_s * bufdesc);
+static int      audio_freebuffer(FAR struct audio_upperhalf_s *upper,
+                                 FAR struct audio_buf_desc_s * bufdesc);
+static int      audio_enqueue_check(FAR struct audio_upperhalf_s *upper);
+FAR static struct appl_s *
+                audio_find_this_appl(FAR struct audio_upperhalf_s *upper);
+FAR static struct appl_s *
+                audio_find_empty_appl(FAR struct audio_upperhalf_s *upper);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int      audio_start(FAR struct audio_upperhalf_s *upper,
                             FAR void *session);
+static int      audio_stop(FAR struct audio_upperhalf_s *upper,
+                           FAR void *session);
+static int      audio_pause(FAR struct audio_upperhalf_s *upper,
+                            FAR void *session);
+static int      audio_resume(FAR struct audio_upperhalf_s *upper,
+                             FAR void *session);
 static void     audio_callback(FAR void *priv,
                                uint16_t reason,
                                FAR struct ap_buffer_s *apb,
@@ -105,6 +174,9 @@ static void     audio_callback(FAR void *priv,
                                FAR void *session);
 #else
 static int      audio_start(FAR struct audio_upperhalf_s *upper);
+static int      audio_stop(FAR struct audio_upperhalf_s *upper);
+static int      audio_pause(FAR struct audio_upperhalf_s *upper);
+static int      audio_resume(FAR struct audio_upperhalf_s *upper);
 static void     audio_callback(FAR void *priv,
                                uint16_t reason,
                                FAR struct ap_buffer_s *apb,
@@ -117,12 +189,13 @@ static void     audio_callback(FAR void *priv,
 
 static const struct file_operations g_audioops =
 {
-  audio_open,  /* open */
-  audio_close, /* close */
-  audio_read,  /* read */
-  audio_write, /* write */
-  NULL,        /* seek */
-  audio_ioctl, /* ioctl */
+  .open  = audio_open,
+  .close = audio_close,
+  .read  = audio_read,
+  .write = audio_write,
+  .ioctl = audio_ioctl,
+  .mmap  = audio_mmap,
+  .poll  = audio_poll,
 };
 
 /****************************************************************************
@@ -141,6 +214,7 @@ static int audio_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct appl_s *appl;
   uint8_t tmp;
   int ret;
 
@@ -168,6 +242,17 @@ static int audio_open(FAR struct file *filep)
       goto errout_with_lock;
     }
 
+  appl = audio_find_empty_appl(upper);
+  if (appl == NULL)
+    {
+      ret = -EMFILE;
+      goto errout_with_lock;
+    }
+
+  appl->pid = getpid();
+  appl->state = STREAM_STATE_NONE;
+  appl->appl_ptr = 0;
+
   /* Save the new open count on success */
 
   upper->crefs = tmp;
@@ -192,6 +277,7 @@ static int audio_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct appl_s *appl;
   int ret;
 
   audinfo("crefs: %d\n", upper->crefs);
@@ -202,6 +288,14 @@ static int audio_close(FAR struct file *filep)
   if (ret < 0)
     {
       goto errout;
+    }
+
+  appl = audio_find_this_appl(upper);
+  if (appl != NULL)
+    {
+      appl->state = STREAM_STATE_NONE;
+      appl->appl_ptr = 0;
+      appl->pid = 0;
     }
 
   /* Decrement the references to the driver.  If the reference count will
@@ -220,13 +314,16 @@ static int audio_close(FAR struct file *filep)
 
       upper->crefs = 0;
 
-      /* Disable the Audio device */
+      if (!upper->mix_buffer)
+        {
+          /* Disable the Audio device */
 
-      DEBUGASSERT(lower->ops->shutdown != NULL);
-      audinfo("calling shutdown\n");
+          DEBUGASSERT(lower->ops->shutdown != NULL);
+          audinfo("calling shutdown\n");
 
-      lower->ops->shutdown(lower);
-      upper->usermq = NULL;
+          lower->ops->shutdown(lower);
+          upper->usermq = NULL;
+        }
     }
 
   ret = OK;
@@ -293,53 +390,6 @@ static ssize_t audio_write(FAR struct file *filep,
 }
 
 /****************************************************************************
- * Name: audio_start
- *
- * Description:
- *   Handle the AUDIOIOC_START ioctl command
- *
- ****************************************************************************/
-
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-static int audio_start(FAR struct audio_upperhalf_s *upper,
-                       FAR void *session)
-#else
-static int audio_start(FAR struct audio_upperhalf_s *upper)
-#endif
-{
-  FAR struct audio_lowerhalf_s *lower = upper->dev;
-  int ret = OK;
-
-  DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
-
-  /* Verify that the Audio is not already running */
-
-  if (!upper->started)
-    {
-      /* Invoke the bottom half method to start the audio stream */
-
-#ifdef CONFIG_AUDIO_MULTI_SESSION
-      ret = lower->ops->start(lower, session);
-#else
-      ret = lower->ops->start(lower);
-#endif
-
-      /* A return value of zero means that the audio stream was started
-       * successfully.
-       */
-
-      if (ret == OK)
-        {
-          /* Indicate that the audio stream has started */
-
-          upper->started = true;
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: audio_ioctl
  *
  * Description:
@@ -353,6 +403,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
   FAR struct audio_buf_desc_s  *bufdesc;
+  FAR struct ap_buffer_info_s *bufinfo;
+  FAR struct appl_s *appl;
 #ifdef CONFIG_AUDIO_MULTI_SESSION
   FAR void *session;
 #endif
@@ -398,6 +450,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(lower->ops->configure != NULL);
 
           audinfo("AUDIOIOC_INITIALIZE: Device=%d\n", caps->caps.ac_type);
+
+          if (caps->caps.ac_type == AUDIO_TYPE_OUTPUT)
+            {
+              upper->frame_bytes =
+                  caps->caps.ac_controls.b[2] / 8 * caps->caps.ac_channels;
+            }
 
           /* Call the lower-half driver configure handler */
 
@@ -455,16 +513,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_STOP\n");
           DEBUGASSERT(lower->ops->stop != NULL);
 
-          if (upper->started)
-            {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-              session = (FAR void *) arg;
-              ret = lower->ops->stop(lower, session);
+          session = (FAR void *) arg;
+          ret = audio_stop(upper, session);
 #else
-              ret = lower->ops->stop(lower);
+          ret = audio_stop(upper);
 #endif
-              upper->started = false;
-            }
         }
         break;
 #endif /* CONFIG_AUDIO_EXCLUDE_STOP */
@@ -481,15 +535,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_PAUSE\n");
           DEBUGASSERT(lower->ops->pause != NULL);
 
-          if (upper->started)
-            {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-              session = (FAR void *) arg;
-              ret = lower->ops->pause(lower, session);
+          session = (FAR void *) arg;
+          ret = audio_pause(upper, session);
 #else
-              ret = lower->ops->pause(lower);
+          ret = audio_pause(upper);
 #endif
-            }
         }
         break;
 
@@ -503,15 +554,12 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_RESUME\n");
           DEBUGASSERT(lower->ops->resume != NULL);
 
-          if (upper->started)
-            {
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-              session = (FAR void *) arg;
-              ret = lower->ops->resume(lower, session);
+          session = (FAR void *) arg;
+          ret = audio_resume(upper, session);
 #else
-              ret = lower->ops->resume(lower);
+          ret = audio_resume(upper);
 #endif
-            }
         }
         break;
 
@@ -527,16 +575,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_ALLOCBUFFER\n");
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          if (lower->ops->allocbuffer)
-            {
-              ret = lower->ops->allocbuffer(lower, bufdesc);
-            }
-          else
-            {
-              /* Perform a simple kumm_malloc operation assuming 1 session */
-
-              ret = apb_alloc(bufdesc);
-            }
+          ret = audio_allocbuffer(upper, bufdesc);
         }
         break;
 
@@ -550,18 +589,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_FREEBUFFER\n");
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          if (lower->ops->freebuffer)
-            {
-              ret = lower->ops->freebuffer(lower, bufdesc);
-            }
-          else
-            {
-              /* Perform a simple apb_free operation */
-
-              DEBUGASSERT(bufdesc->u.buffer != NULL);
-              apb_free(bufdesc->u.buffer);
-              ret = sizeof(struct audio_buf_desc_s);
-            }
+          ret = audio_freebuffer(upper, bufdesc);
         }
         break;
 
@@ -619,7 +647,13 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_RESERVE\n");
           DEBUGASSERT(lower->ops->reserve != NULL);
 
-          /* Call lower-half to perform the reservation */
+          if (upper->crefs > 0)
+            {
+              ret = OK;
+              break;
+            }
+
+            /* Call lower-half to perform the reservation */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
           ret = lower->ops->reserve(lower, (FAR void **) arg);
@@ -639,13 +673,61 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("AUDIOIOC_RELEASE\n");
           DEBUGASSERT(lower->ops->release != NULL);
 
-          /* Call lower-half to perform the release */
+          if (upper->crefs > 1)
+            {
+              ret = OK;
+              break;
+            }
+
+            /* Call lower-half to perform the release */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
           ret = lower->ops->release(lower, (FAR void *) arg);
 #else
           ret = lower->ops->release(lower);
 #endif
+        }
+        break;
+
+      case AUDIOIOC_PTR_APPL:
+        {
+          ret = OK;
+          appl = audio_find_this_appl(upper);
+          if (!appl)
+            {
+              ret = -ENOENT;
+              break;
+            }
+
+          /* reset */
+
+          if (arg == 0)
+            {
+              appl->appl_ptr = upper->mmap_status.read_head;
+              upper->waiting = true;
+
+              ret = OK;
+              audinfo("[%s %d],arg:%ld [pid:%d, %ld %ld %ld]", __func__,
+                      __LINE__, (signed long)arg, appl->pid,
+                      upper->mmap_status.read_tail,
+                      upper->mmap_status.read_head, appl->appl_ptr);
+              break;
+            }
+
+          appl->appl_ptr += arg;
+          audinfo("[%s %d],arg:%ld [pid:%d, %ld %ld %ld]", __func__,
+                  __LINE__, (signed long)arg, appl->pid,
+                  upper->mmap_status.read_tail, upper->mmap_status.read_head,
+                  appl->appl_ptr);
+          if (appl->state == STREAM_STATE_XRUN)
+            {
+              appl->state = STREAM_STATE_RUNNING;
+            }
+
+          if (appl->state == STREAM_STATE_RUNNING)
+            {
+              ret = audio_enqueue_check(upper);
+            }
         }
         break;
 
@@ -658,11 +740,695 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
           DEBUGASSERT(lower->ops->ioctl != NULL);
           ret = lower->ops->ioctl(lower, cmd, arg);
+
+          if (ret == OK)
+            {
+              if (cmd == AUDIOIOC_GETBUFFERINFO &&
+                  upper->mix_buffer_size == 0)
+                {
+                  bufinfo = (FAR struct ap_buffer_info_s *)arg;
+                  upper->periods = bufinfo->nbuffers;
+                  upper->period_bytes = bufinfo->buffer_size;
+                  upper->mix_buffer_size =
+                      upper->periods * upper->period_bytes;
+                }
+            }
         }
         break;
     }
 
   nxmutex_unlock(&upper->lock);
+  return ret;
+}
+
+static int audio_munmap(FAR struct task_group_s *group,
+                         FAR struct mm_map_entry_s *entry, FAR void *start,
+                         size_t length)
+{
+  return mm_map_remove(get_group_mm(group), entry);
+}
+
+/****************************************************************************
+ * Name: audio_mmap
+ *
+ * Description:
+ *   The standard mmap method.
+ *
+ ****************************************************************************/
+
+static int audio_mmap(FAR struct file *filep, FAR struct mm_map_entry_s *map)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
+  int ret;
+
+  ret = nxmutex_lock(&upper->lock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Return the address corresponding to the start of frame buffer. */
+
+  if (map->length == upper->mix_buffer_size)
+    {
+      if (!upper->mix_buffer)
+        {
+          upper->mix_buffer = kmm_zalloc(upper->mix_buffer_size);
+          audinfo("[%s %d], mix_buffer:%p", __func__, __LINE__,
+                  upper->mix_buffer);
+          if (!upper->mix_buffer)
+            {
+              ret = -ENOMEM;
+              goto errout_with_lock;
+            }
+
+          upper->mmap_status.read_head = 0;
+          upper->mmap_status.read_tail = 0;
+        }
+
+      map->vaddr = (FAR char *)upper->mix_buffer + map->offset;
+      map->munmap = audio_munmap;
+      ret = mm_map_add(get_current_mm(), map);
+    }
+  else if (map->length == sizeof(struct snd_pcm_dmix_share))
+    {
+      if (!upper->share_info)
+        {
+          upper->share_info = kmm_zalloc(map->length);
+          if (!upper->share_info)
+            {
+              ret = -ENOMEM;
+              goto errout_with_lock;
+            }
+        }
+
+      map->vaddr = (FAR char *)upper->share_info;
+      map->munmap = audio_munmap;
+      ret = mm_map_add(get_current_mm(), map);
+    }
+  else if (map->length == sizeof(struct snd_pcm_mmap_status))
+    {
+      map->vaddr = (FAR char *)&upper->mmap_status;
+      map->munmap = audio_munmap;
+      ret = mm_map_add(get_current_mm(), map);
+    }
+  else
+    {
+      ret = -EINVAL;
+    }
+
+errout_with_lock:
+  nxmutex_unlock(&upper->lock);
+
+errout:
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_poll
+ *
+ * Description:
+ *   Wait for framebuffer to be writable.
+ *
+ ****************************************************************************/
+
+static int audio_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct pollfd **pollfds = NULL;
+  FAR struct appl_s *appl;
+  irqstate_t flags;
+  int ret = OK;
+  int i;
+
+  DEBUGASSERT(upper != NULL);
+
+  flags = enter_critical_section();
+
+  if (setup)
+    {
+      for (i = 0; i < CONFIG_AUDIO_MAX_APPS; ++i)
+        {
+          if (!upper->fds[i])
+            {
+              pollfds = &upper->fds[i];
+              break;
+            }
+        }
+
+      if (pollfds == NULL)
+        {
+          ret = -EBUSY;
+          goto errout;
+        }
+
+      *pollfds = fds;
+      fds->priv = pollfds;
+
+      appl = audio_find_this_appl(upper);
+      if (!appl)
+        {
+          ret = -ENOENT;
+          goto errout;
+        }
+
+      if (appl->appl_ptr == upper->mmap_status.read_tail)
+        {
+          audinfo("[%s %d], poll_notify, [pid:%d, %ld %ld %ld]", __func__,
+                  __LINE__, appl->pid, upper->mmap_status.read_tail,
+                  upper->mmap_status.read_head, appl->appl_ptr);
+          poll_notify(&fds, 1, POLLOUT);
+        }
+    }
+  else if (fds->priv != NULL)
+    {
+      /* This is a request to tear down the poll. */
+
+      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+      *slot = NULL;
+      fds->priv = NULL;
+    }
+
+errout:
+  leave_critical_section(flags);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_allocbuffer
+ *
+ * Description:
+ *   Handle the AUDIOIOC_ALLOCBUFFER ioctl command
+ *
+ ****************************************************************************/
+
+static int audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
+                             FAR struct audio_buf_desc_s *bufdesc)
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct ap_buffer_s *apb;
+  int ret;
+
+  if (lower->ops->allocbuffer)
+    {
+      ret = lower->ops->allocbuffer(lower, bufdesc);
+    }
+  else if (upper->mix_buffer)
+    {
+      apb = kmm_zalloc(sizeof(struct ap_buffer_s));
+      if (!apb)
+        {
+          return -ENOMEM;
+        }
+
+      apb->crefs = 1;
+      apb->nmaxbytes = bufdesc->numbytes;
+      apb->nbytes = 0;
+      apb->flags = 0;
+      apb->samp = NULL;
+      nxmutex_init(&apb->lock);
+      *bufdesc->u.pbuffer = apb;
+      ret = sizeof(struct audio_buf_desc_s);
+    }
+  else
+    {
+      /* Perform a simple kumm_malloc operation assuming 1 session */
+
+      ret = apb_alloc(bufdesc);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_freebuffer
+ *
+ * Description:
+ *   Handle the AUDIOIOC_FREEBUFFER ioctl command
+ *
+ ****************************************************************************/
+
+static int audio_freebuffer(FAR struct audio_upperhalf_s *upper,
+                            FAR struct audio_buf_desc_s *bufdesc)
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct ap_buffer_s *apb;
+  int ret;
+
+  if (lower->ops->freebuffer)
+    {
+      ret = lower->ops->freebuffer(lower, bufdesc);
+    }
+  else if (upper->mix_buffer)
+    {
+      apb = bufdesc->u.buffer;
+      kmm_free(apb);
+      ret = sizeof(struct audio_buf_desc_s);
+    }
+  else
+    {
+      /* Perform a simple apb_free operation */
+
+      DEBUGASSERT(bufdesc->u.buffer != NULL);
+      apb_free(bufdesc->u.buffer);
+      ret = sizeof(struct audio_buf_desc_s);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_enqueue_check
+ *
+ * Description:
+ *   Enqueue audio buffer
+ *
+ ****************************************************************************/
+
+static int audio_enqueue_check(FAR struct audio_upperhalf_s *upper)
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct ap_buffer_s *apb;
+  FAR struct appl_s *appl;
+  int running_stream;
+  int need_enqueue;
+  int ret = OK;
+  int offset;
+  int count;
+  int i;
+
+  appl = audio_find_this_appl(upper);
+  if (!appl)
+    {
+      return -ENOENT;
+    }
+
+  audinfo("[%s %d]enter [pid:%d, %ld %ld %ld]", __func__, __LINE__,
+          appl->pid, upper->mmap_status.read_tail,
+          upper->mmap_status.read_head, appl->appl_ptr);
+
+check_again:
+  running_stream = 0;
+  need_enqueue = true;
+  count = dq_count(&upper->pendq);
+  if (count == 0)
+    {
+      return OK;
+    }
+
+  /* waiting new stream join */
+
+  if (upper->waiting)
+    {
+      if (upper->periods - count >= 2)
+        {
+          return OK;
+        }
+
+      upper->waiting = false;
+    }
+
+  if (appl->appl_ptr <= upper->mmap_status.read_head)
+    {
+      return 0;
+    }
+
+  for (i = 0; i < CONFIG_AUDIO_MAX_APPS; i++)
+    {
+      if (upper->appls[i].pid == 0 ||
+          upper->appls[i].state != STREAM_STATE_RUNNING)
+        {
+          continue;
+        }
+
+      running_stream++;
+
+      /* upper don't have enough readable buffer */
+
+      if (upper->appls[i].appl_ptr <= upper->mmap_status.read_head)
+        {
+          if (upper->appls[i].appl_ptr < upper->mmap_status.read_head ||
+              upper->appls[i].appl_ptr <= upper->mmap_status.read_tail)
+            {
+              audwarn("[%s %d]xrun occurs [pid:%d, %ld %ld %ld]", __func__,
+                      __LINE__, upper->appls[i].pid,
+                      upper->mmap_status.read_tail,
+                      upper->mmap_status.read_head,
+                      upper->appls[i].appl_ptr);
+              upper->appls[i].state = STREAM_STATE_XRUN;
+            }
+
+          /* lower have enough buffer, wait next time */
+
+          if (upper->periods - count >= 2)
+            {
+              need_enqueue = false;
+            }
+          break;
+        }
+    }
+
+  if (running_stream && need_enqueue)
+    {
+      apb = (FAR struct ap_buffer_s *)dq_remfirst(&upper->pendq);
+      offset = upper->mmap_status.read_head % upper->periods *
+               upper->period_bytes;
+
+      if (lower->ops->allocbuffer)
+        {
+          memcpy(apb->samp, upper->mix_buffer + offset, upper->period_bytes);
+          memset(upper->mix_buffer + offset, 0, upper->period_bytes);
+        }
+      else
+        {
+          apb->samp = upper->mix_buffer + offset;
+        }
+
+      apb->nmaxbytes = upper->period_bytes;
+      apb->nbytes = apb->nmaxbytes;
+      apb->curbyte = 0;
+
+      upper->mmap_status.read_head++;
+
+      audinfo("write data[%p:%d %d %d %d]\n", apb->samp, apb->samp[0],
+              apb->samp[1], apb->samp[2], apb->samp[3]);
+
+      ret = lower->ops->enqueuebuffer(lower, apb);
+      goto check_again;
+    }
+
+  audinfo("[%s %d]leave, ret:%d", __func__, __LINE__, ret);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_find_this_appl
+ *
+ * Description:
+ *   Find this application
+ *
+ ****************************************************************************/
+
+FAR static struct appl_s *
+audio_find_this_appl(FAR struct audio_upperhalf_s *upper)
+{
+  pid_t pid = getpid();
+  int i;
+
+  for (i = 0; i < CONFIG_AUDIO_MAX_APPS; i++)
+    {
+      if (upper->appls[i].pid == pid)
+        {
+          return &upper->appls[i];
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: audio_find_empty_appl
+ *
+ * Description:
+ *   Find empty application
+ *
+ ****************************************************************************/
+
+FAR static struct appl_s *
+audio_find_empty_appl(FAR struct audio_upperhalf_s *upper)
+{
+  int i;
+
+  for (i = 0; i < CONFIG_AUDIO_MAX_APPS; i++)
+    {
+      if (upper->appls[i].pid == 0)
+        {
+          return &upper->appls[i];
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: audio_start
+ *
+ * Description:
+ *   Handle the AUDIOIOC_START ioctl command
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int audio_start(FAR struct audio_upperhalf_s *upper,
+                       FAR void *session)
+#else
+static int audio_start(FAR struct audio_upperhalf_s *upper)
+#endif
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  struct audio_buf_desc_s buf_desc;
+  FAR struct ap_buffer_s *apb;
+  FAR struct appl_s *appl;
+  int ret = OK;
+  int i;
+
+  DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
+
+  if (upper->mix_buffer)
+    {
+      if (upper->state == STREAM_STATE_PAUSED)
+        {
+          return audio_resume(upper);
+        }
+
+      appl = audio_find_this_appl(upper);
+      if (appl != NULL)
+        {
+          appl->state = STREAM_STATE_RUNNING;
+        }
+    }
+
+  /* Verify that the Audio is not already running */
+
+  if (upper->state == STREAM_STATE_NONE)
+    {
+      if (upper->mix_buffer)
+        {
+          buf_desc.numbytes = upper->period_bytes;
+          buf_desc.u.pbuffer = &apb;
+          for (i = dq_count(&upper->pendq); i < upper->periods; i++)
+            {
+              ret = audio_allocbuffer(upper, &buf_desc);
+              if (ret < 0)
+                {
+                  return ret;
+                }
+
+              dq_addlast(&apb->dq_entry, &upper->pendq);
+            }
+
+          audio_enqueue_check(upper);
+        }
+
+      /* Invoke the bottom half method to start the audio stream */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      ret = lower->ops->start(lower, session);
+#else
+      ret = lower->ops->start(lower);
+#endif
+      /* A return value of zero means that the audio stream was running
+       * successfully.
+       */
+
+      if (ret == OK)
+        {
+          /* Indicate that the audio stream has running */
+
+          upper->state = STREAM_STATE_RUNNING;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_stop
+ *
+ * Description:
+ *   Handle the AUDIOIOC_STOP ioctl command
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int audio_stop(FAR struct audio_upperhalf_s *upper,
+                      FAR void *session)
+#else
+static int audio_stop(FAR struct audio_upperhalf_s *upper)
+#endif
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  stream_state_t app_state = STREAM_STATE_NONE;
+  FAR struct appl_s *appl;
+  int ret = OK;
+  int i;
+
+  DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
+
+  if (upper->mix_buffer)
+    {
+      appl = audio_find_this_appl(upper);
+      if (appl != NULL)
+        {
+          appl->state = STREAM_STATE_NONE;
+        }
+
+      for (i = 0; i < CONFIG_AUDIO_MAX_APPS; i++)
+        {
+          if (upper->appls[i].pid != 0 && upper->appls[i].state > app_state)
+            {
+              app_state = upper->appls[i].state;
+            }
+        }
+
+      if (app_state == STREAM_STATE_PAUSED)
+        {
+          return audio_pause(upper);
+        }
+    }
+
+  if (upper->state != STREAM_STATE_NONE && app_state == STREAM_STATE_NONE)
+    {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      session = (FAR void *) arg;
+      ret = lower->ops->stop(lower, session);
+#else
+      ret = lower->ops->stop(lower);
+#endif
+      upper->state = STREAM_STATE_NONE;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_pause
+ *
+ * Description:
+ *   Handle the AUDIOIOC_PAUSE ioctl command
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int audio_pause(FAR struct audio_upperhalf_s *upper,
+                       FAR void *session)
+#else
+static int audio_pause(FAR struct audio_upperhalf_s *upper)
+#endif
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct appl_s *appl;
+  int need_pause = true;
+  int ret = OK;
+  int i;
+
+  DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
+
+  if (upper->mix_buffer)
+    {
+      appl = audio_find_this_appl(upper);
+      if (appl != NULL)
+        {
+          appl->state = STREAM_STATE_PAUSED;
+        }
+
+      for (i = 0; i < CONFIG_AUDIO_MAX_APPS; i++)
+        {
+          if (upper->appls[i].pid != 0 &&
+              upper->appls[i].state > STREAM_STATE_PAUSED)
+            {
+              need_pause = false;
+              break;
+            }
+        }
+    }
+
+  if (upper->state == STREAM_STATE_RUNNING && need_pause)
+    {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      session = (FAR void *) arg;
+      ret = lower->ops->pause(lower, session);
+#else
+      ret = lower->ops->pause(lower);
+#endif
+      if (ret == OK)
+        {
+          upper->state = STREAM_STATE_PAUSED;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: audio_resume
+ *
+ * Description:
+ *   Handle the AUDIOIOC_resume ioctl command
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int audio_resume(FAR struct audio_upperhalf_s *upper,
+                        FAR void *session)
+#else
+static int audio_resume(FAR struct audio_upperhalf_s *upper)
+#endif
+{
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  FAR struct appl_s *appl;
+  int need_resume = true;
+  int ret = OK;
+  int i;
+
+  DEBUGASSERT(upper != NULL && lower->ops->start != NULL);
+
+  if (upper->mix_buffer)
+    {
+      for (i = 0; i < CONFIG_AUDIO_MAX_APPS; i++)
+        {
+          if (upper->appls[i].pid != 0 &&
+              upper->appls[i].state > STREAM_STATE_PAUSED)
+            {
+              need_resume = false;
+              break;
+            }
+        }
+
+      appl = audio_find_this_appl(upper);
+      if (appl != NULL)
+        {
+          appl->state = STREAM_STATE_RUNNING;
+          upper->waiting = true;
+        }
+    }
+
+  if (upper->state == STREAM_STATE_PAUSED && need_resume)
+    {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      session = (FAR void *) arg;
+      ret = lower->ops->resume(lower, session);
+#else
+      ret = lower->ops->resume(lower);
+#endif
+      if (ret == OK)
+        {
+          upper->state = STREAM_STATE_RUNNING;
+        }
+    }
+
   return ret;
 }
 
@@ -707,9 +1473,26 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
                     FAR struct ap_buffer_s *apb, uint16_t status)
 #endif
 {
-  struct audio_msg_s    msg;
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  struct audio_msg_s msg;
+  irqstate_t flags;
 
   audinfo("Entry\n");
+
+  if (upper->mix_buffer)
+    {
+      upper->mmap_status.read_tail++;
+      if (lower->ops->allocbuffer == NULL)
+        {
+          memset(apb->samp, 0, apb->nmaxbytes);
+        }
+
+      dq_addlast(&apb->dq_entry, &upper->pendq);
+
+      flags = enter_critical_section();
+      poll_notify(upper->fds, CONFIG_AUDIO_MAX_APPS, POLLOUT);
+      leave_critical_section(flags);
+    }
 
   /* Send a dequeue message to the user if a message queue is registered */
 
@@ -745,9 +1528,40 @@ static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
                     FAR struct ap_buffer_s *apb, uint16_t status)
 #endif
 {
-  struct audio_msg_s    msg;
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+  struct audio_buf_desc_s buf_desc;
+  struct audio_msg_s msg;
 
   audinfo("Entry\n");
+
+  if (!nxmutex_is_locked(&upper->lock) && nxmutex_lock(&upper->lock) == OK)
+    {
+      if (upper->mix_buffer && upper->crefs == 0)
+        {
+          kmm_free(upper->share_info);
+          upper->share_info = NULL;
+          kmm_free(upper->mix_buffer);
+          upper->mix_buffer = NULL;
+          upper->mix_buffer_size = 0;
+
+          while (!dq_empty(&upper->pendq))
+            {
+              buf_desc.u.buffer =
+                  (FAR struct ap_buffer_s *)dq_remfirst(&upper->pendq);
+              audio_freebuffer(upper, &buf_desc);
+            }
+
+          /* Disable the Audio device */
+
+          DEBUGASSERT(lower->ops->shutdown != NULL);
+
+          audinfo("calling shutdown\n");
+
+          lower->ops->shutdown(lower);
+        }
+
+      nxmutex_unlock(&upper->lock);
+    }
 
   /* Send a dequeue message to the user if a message queue is registered */
 
@@ -1034,6 +1848,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
    */
 
   nxmutex_init(&upper->lock);
+  dq_init(&upper->pendq);
   upper->dev = dev;
 
 #ifdef CONFIG_AUDIO_CUSTOM_DEV_PATH
@@ -1101,7 +1916,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   /* Now build the path for registration */
 
   strlcpy(path, devname, sizeof(path));
-  if (devname[sizeof(devname)-1] != '/')
+  if (devname[strlen(devname)-1] != '/')
     {
       strlcat(path, "/", sizeof(path));
     }

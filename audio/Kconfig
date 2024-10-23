@@ -277,4 +277,10 @@ config AUDIO_FONT
 
 endif
 
+config AUDIO_MAX_APPS
+	int "Number of applications that can use upperhalf driver simultaneously"
+	default 3
+	---help---
+		Specifies the number of applications can play audio data simultaneously.
+
 endif
