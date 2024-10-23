@@ -18,6 +18,8 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 OUTPUT_ARCH(aarch64)
 
 ENTRY(__start)
@@ -92,6 +94,10 @@ SECTIONS
        CONSTRUCTORS
   } :text
   _edata = .; /* End+1 of .data */
+
+#if defined(CONFIG_SMP) && defined(CONFIG_ARM64_SMP_BUSY_WAIT)
+  . = CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR + 4;
+#endif
 
   .bss : {                     /* BSS */
        . = ALIGN(8);

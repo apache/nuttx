@@ -210,7 +210,7 @@ int up_cpu_start(int cpu)
 #ifdef CONFIG_ARM64_SMP_BUSY_WAIT
   uint32_t *address = (uint32_t *)CONFIG_ARM64_SMP_BUSY_WAIT_FLAG_ADDR;
   *address = 1;
-  up_flush_dcache((uintptr_t)address, sizeof(address));
+  up_flush_dcache((uintptr_t)address, (uintptr_t)address + sizeof(address));
 #endif
 
   arm64_start_cpu(cpu);
