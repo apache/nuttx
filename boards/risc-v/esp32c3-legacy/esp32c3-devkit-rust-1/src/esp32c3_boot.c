@@ -25,8 +25,6 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 
-#include "riscv_internal.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

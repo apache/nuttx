@@ -40,7 +40,6 @@
 #include "qemu_rv_memorymap.h"
 #include "qemu_rv_rptun.h"
 
-#include "riscv_internal.h"
 #include "riscv_sbi.h"
 #include "romfs.h"
 
