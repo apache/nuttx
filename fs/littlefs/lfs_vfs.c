@@ -1491,28 +1491,7 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
                           mode_t mode)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR char *path = (FAR char *)relpath;
-  size_t len = strlen(relpath);
   int ret;
-
-  /* We need remove all the '/' in the end of relpath */
-
-  if (len > 0 && relpath[len - 1] == '/')
-    {
-      path = lib_get_pathbuffer();
-      if (path == NULL)
-        {
-          return -ENOMEM;
-        }
-
-      while (len > 0 && relpath[len - 1] == '/')
-        {
-          len--;
-        }
-
-      memcpy(path, relpath, len);
-      path[len] = '\0';
-    }
 
   /* Get the mountpoint private data from the inode structure */
 
@@ -1523,10 +1502,10 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = nxmutex_lock(&fs->lock);
   if (ret < 0)
     {
-      goto errout;
+      return ret;
     }
 
-  ret = littlefs_convert_result(lfs_mkdir(&fs->lfs, path));
+  ret = lfs_mkdir(&fs->lfs, relpath);
   if (ret >= 0)
     {
       struct littlefs_attr_s attr;
@@ -1538,21 +1517,15 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
       attr.at_ctim = 1000000000ull * time.tv_sec + time.tv_nsec;
       attr.at_atim = attr.at_ctim;
       attr.at_mtim = attr.at_ctim;
-      ret = littlefs_convert_result(lfs_setattr(&fs->lfs, path, 0,
+      ret = littlefs_convert_result(lfs_setattr(&fs->lfs, relpath, 0,
                                                 &attr, sizeof(attr)));
       if (ret < 0)
         {
-          lfs_remove(&fs->lfs, path);
+          lfs_remove(&fs->lfs, relpath);
         }
     }
 
   nxmutex_unlock(&fs->lock);
-
-errout:
-  if (path != relpath)
-    {
-      lib_put_pathbuffer(path);
-    }
 
   return ret;
 }
