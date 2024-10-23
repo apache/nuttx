@@ -98,6 +98,7 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
 
       /* Update scheduler parameters */
 
+      cpu = this_cpu();
       nxsched_suspend_scheduler(g_running_tasks[cpu]);
       nxsched_resume_scheduler(this_task());
 
@@ -106,7 +107,6 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
        * crashes.
        */
 
-      cpu = this_cpu();
       tcb = current_task(cpu);
       g_running_tasks[cpu] = tcb;
 
