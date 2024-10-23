@@ -141,11 +141,12 @@ SECTIONS
 
     *libhal.a:timer_hal.*(.literal.timer_hal_capture_and_get_counter_value .text.timer_hal_capture_and_get_counter_value)
 
-    *(.wifi0iram.*)
-    *(.wifirxiram.*)
-    *(.wifislpiram.*)
-    *(.wifiorslpiram.*)
-    *(.wifislprxiram.*)
+    *(.wifi0iram .wifi0iram.*)
+    *(.wifirxiram .wifirxiram.*)
+    *(.wifislpiram .wifislpiram.*)
+    *(.wifiorslpiram .wifiorslpiram.*)
+    *(.wifislprxiram .wifislprxiram.*)
+    *(.wifiextrairam .wifiextrairam.*)
 
   } >iram0_0_seg AT > ROM
 
@@ -163,9 +164,10 @@ SECTIONS
     /* This section contains data that is not initialized during load,
      * or during the application's initialization sequence.
      */
-
+    . = ALIGN(4);
     *(.noinit)
     *(.noinit.*)
+    . = ALIGN(4) ;
   } >dram0_0_seg
 
   .dram0.data :
@@ -250,9 +252,9 @@ SECTIONS
     esp_head.*(.rodata .rodata.*)
     esp_start.*(.rodata .rodata.*)
 
-    . = ALIGN(4);
     _edata = ABSOLUTE(.);
     _data_end = ABSOLUTE(.);
+    . = ALIGN(4);
   } >dram0_0_seg AT > ROM
 
   /* Shared RAM */
@@ -306,6 +308,8 @@ SECTIONS
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
+
+    . += 16;
 
     _text_end = ABSOLUTE(.);
     _instruction_reserved_end = ABSOLUTE(.);  /* This is a symbol marking the flash.text end, this can be used for mmu driver to maintain virtual address */
@@ -455,7 +459,10 @@ SECTIONS
   {
     . = ALIGN(4);
     *(.rtc.literal .rtc.text)
-  } >rtc_iram_seg
+    *(.rtc.entry.text)
+    . += 16;
+    . = ALIGN(4);
+  } > rtc_iram_seg AT > ROM
 
   /* RTC BSS section. */
 
