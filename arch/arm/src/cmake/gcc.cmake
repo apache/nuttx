@@ -66,7 +66,7 @@ if(CONFIG_ARCH_TOOLCHAIN_GNU)
 
   if(GCCVER GREATER_EQUAL 12)
     add_compile_options(--param=min-pagesize=0)
-    if(CONFIG_ARCH_RAMFUNCS)
+    if(CONFIG_ARCH_RAMFUNCS OR NOT CONFIG_BOOT_RUNFROMFLASH)
       add_link_options(-Wl,--no-warn-rwx-segments)
     endif()
   endif()
