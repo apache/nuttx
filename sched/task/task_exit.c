@@ -29,6 +29,8 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/sched_note.h>
+
 #include "sched/sched.h"
 
 #ifdef CONFIG_SMP
@@ -141,6 +143,7 @@ int nxtask_exit(void)
 #endif
 
   dtcb->task_state = TSTATE_TASK_INACTIVE;
+  sched_note_stop(dtcb);
   ret = nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
 
 #ifdef CONFIG_SMP
