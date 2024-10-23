@@ -140,12 +140,13 @@
  * +------------------+------------------+-------------------------+
  */
 
-GTEXT(_vector_table)
+SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
 
     /* The whole table must be 2K aligned */
 
     .align 11
-SECTION_SUBSEC_FUNC(exc_vector_table,_vector_table_section,_vector_table)
+
+GTEXT(_vector_table)
 
     /* Current EL with SP0 / Synchronous */
 
