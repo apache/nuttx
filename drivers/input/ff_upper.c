@@ -391,6 +391,30 @@ static int ff_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case EVIOCSETCALIBDATA:
+        {
+          if (upper->lower->set_calibvalue == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          ret = upper->lower->set_calibvalue(upper->lower, arg);
+        }
+        break;
+
+      case EVIOCCALIBRATE:
+        {
+          if (upper->lower->calibrate == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          ret = upper->lower->calibrate(upper->lower, arg);
+        }
+        break;
+
       default:
         ret = -ENOTTY;
         break;
