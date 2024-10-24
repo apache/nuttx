@@ -290,9 +290,12 @@ set(HOSTSRCS ${WINHOSTSRCS})
 target_sources(nuttx PRIVATE ${HOSTSRCS})
 
 get_target_property(HOST_COMPILE_OPTIONS nuttx COMPILE_OPTIONS)
-foreach(remove_item IN LISTS SIM_NO_HOST_OPTIONS)
-  list(REMOVE_ITEM HOST_COMPILE_OPTIONS ${remove_item})
-endforeach()
-set_target_properties(nuttx PROPERTIES COMPILE_OPTIONS
-                                       "${HOST_COMPILE_OPTIONS}")
+if(HOST_COMPILE_OPTIONS)
+  foreach(remove_item IN LISTS SIM_NO_HOST_OPTIONS)
+    list(REMOVE_ITEM HOST_COMPILE_OPTIONS ${remove_item})
+  endforeach()
+  set_target_properties(nuttx PROPERTIES COMPILE_OPTIONS
+                                         "${HOST_COMPILE_OPTIONS}")
+endif()
+
 target_compile_definitions(nuttx PRIVATE ${HOST_DEFINITIONS})
