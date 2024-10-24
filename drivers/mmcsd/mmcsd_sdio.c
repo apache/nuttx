@@ -3933,7 +3933,10 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
       finfo("MMC card detected\n");
       priv->type = MMCSD_CARDTYPE_MMC;
-      priv->buswidth |= MMCSD_SCR_BUSWIDTH_4BIT;
+      if ((priv->caps & SDIO_CAPS_4BIT_ONLY) != 0)
+        {
+          priv->buswidth |= MMCSD_SCR_BUSWIDTH_4BIT;
+        }
 
       /* Now, check if this is a MMC card/chip that supports block
        * addressing
