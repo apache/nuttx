@@ -169,7 +169,7 @@ jobs:
             # If PR was Created or Modified: Exclude some boards
             pr=${{github.event.pull_request.number}}
             if [[ "$pr" != "" ]]; then
-              echo "Excluding arm-0[248], arm-1[02-9], risc-v-04..06, sim-02, xtensa-02"
+              echo "Excluding arm-0[248], arm-1[02-9], risc-v-04..06, sim-03, xtensa-02"
               boards=$(
                 echo '${{ inputs.boards }}' |
                 jq --compact-output \
@@ -177,7 +177,7 @@ jobs:
                   select(
                     test("arm-0[248]") == false and test("arm-1[02-9]") == false and
                     test("risc-v-0[4-9]") == false and
-                    test("sim-0[2-9]") == false and
+                    test("sim-0[3-9]") == false and
                     test("xtensa-0[2-9]") == false
                   )
                 )'
