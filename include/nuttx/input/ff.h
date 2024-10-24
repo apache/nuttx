@@ -107,6 +107,19 @@
 
 #define EVIOCGEFFECTS     _FFIOC(3)
 
+/* This cmd use to calibrate the device and return the calibration value.
+ * Arg: pointer to address of integer array value, return the calibration
+ * value.
+ */
+
+#define EVIOCCALIBRATE    _FFIOC(4)
+
+/* This cmd use to set calibration value for the device.
+ * Arg: pointer to address of the calibration value which should be set.
+ */
+
+#define EVIOCSETCALIBDATA _FFIOC(5)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -402,6 +415,30 @@ struct ff_lowerhalf_s
   /* Called by ff upper half when device is being destroyed. */
 
   CODE void (*destroy)(FAR struct ff_lowerhalf_s *lower);
+
+  /* The calibration value to be written in or the non-volatile memory of the
+   * device or dedicated registers. At each power-on, so that the values read
+   * from the device are already corrected. When the device is calibrated,
+   * the absolute accuracy will be better than before.
+   * Note: the parameters associated with calibration value, maxinum 32-byte.
+   */
+
+  CODE int (*set_calibvalue)(FAR struct ff_lowerhalf_s *lower,
+                             unsigned long arg);
+
+  /* This operation can trigger the calibration operation, and if the
+   * calibration operation is short-lived, the calibration result value can
+   * be obtained at the same time, the calibration value to be written in
+   * the non-volatile memory of the device or dedicated registers. When the
+   * upper-level application calibration is completed, the current
+   * calibration value of the device needs to be obtained and backed up,
+   * so that the last calibration value can be directly obtained after
+   * power-on.
+   * Note: the parameters associated with calibration value, maxinum 32-byte.
+   */
+
+  CODE int (*calibrate)(FAR struct ff_lowerhalf_s *lower,
+                        unsigned long arg);
 
   /* The bitmap of force feedback capabilities truly supported by device */
 
