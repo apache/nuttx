@@ -83,6 +83,11 @@ static FAR struct myifaddrs *getmutil_ipv6addr(int fd, struct lifreq *req,
   FAR struct sockaddr_in6 *ipv6addr;
   int index;
 
+  if (req == NULL || ifaddr == NULL)
+    {
+      return NULL;
+    }
+
   /* eth0:0 is the second ipaddr */
 
   for (index = 0; index < CONFIG_NETDEV_MAX_IPv6_ADDR - 1; index++)
@@ -108,7 +113,7 @@ static FAR struct myifaddrs *getmutil_ipv6addr(int fd, struct lifreq *req,
         }
 
       ifaddr->addrs.ifa_next = lib_zalloc(sizeof(*ifaddr));
-      if (ifaddr == NULL)
+      if (ifaddr->addrs.ifa_next == NULL)
         {
           return NULL;
         }
