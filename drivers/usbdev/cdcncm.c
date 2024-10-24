@@ -1073,7 +1073,7 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
       if ((ndplen < opts->ndpsize + 2 * (opts->dgramitemlen * 2)) ||
           (ndplen % opts->ndpalign != 0))
         {
-          uerr("Bad NDP length: %x\n", ndplen);
+          uerr("Bad NDP length: %04" PRIx32 " \n", ndplen);
           return;
         }
 
