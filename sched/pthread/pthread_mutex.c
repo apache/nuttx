@@ -65,10 +65,10 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
 
   /* Add the mutex to the list of mutexes held by this pthread */
 
-  flags        = enter_critical_section();
+  flags        = spin_lock_irqsave(&rtcb->mutex_lock);
   mutex->flink = rtcb->mhead;
   rtcb->mhead  = mutex;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&rtcb->mutex_lock, flags);
 }
 
 /****************************************************************************
@@ -92,7 +92,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
   FAR struct pthread_mutex_s *prev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&rtcb->mutex_lock);
 
   /* Remove the mutex from the list of mutexes held by this task */
 
@@ -118,7 +118,7 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
     }
 
   mutex->flink = NULL;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&rtcb->mutex_lock, flags);
 }
 
 /****************************************************************************
@@ -345,4 +345,50 @@ int pthread_mutex_restorelock(FAR struct pthread_mutex_s *mutex,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: pthread_mutex_inconsistent
+ *
+ * Description:
+ *   This function is called when a pthread is terminated via either
+ *   pthread_exit() or pthread_cancel().  It will check for any mutexes
+ *   held by exitting thread.  It will mark them as inconsistent and
+ *   then wake up the highest priority waiter for the mutex.  That
+ *   instance of pthread_mutex_lock() will then return EOWNERDEAD.
+ *
+ * Input Parameters:
+ *   tcb -- a reference to the TCB of the exitting pthread.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void pthread_mutex_inconsistent(FAR struct tcb_s *tcb)
+{
+  FAR struct pthread_mutex_s *mutex;
+  irqstate_t flags;
+
+  DEBUGASSERT(tcb != NULL);
+
+  flags = spin_lock_irqsave(&tcb->mutex_lock);
+
+  /* Remove and process each mutex held by this task */
+
+  while (tcb->mhead != NULL)
+    {
+      /* Remove the mutex from the TCB list */
+
+      mutex        = tcb->mhead;
+      tcb->mhead   = mutex->flink;
+      mutex->flink = NULL;
+
+      /* Mark the mutex as INCONSISTENT and wake up any waiting thread */
+
+      mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
+      mutex_unlock(&mutex->mutex);
+    }
+
+  spin_unlock_irqrestore(&tcb->mutex_lock, flags);
 }

@@ -48,6 +48,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/mm/map.h>
 #include <nuttx/tls.h>
+#include <nuttx/spinlock_type.h>
 
 #include <arch/arch.h>
 
@@ -736,6 +737,10 @@ struct tcb_s
   size_t caller_deepest;
   size_t level_deepest;
   size_t level;
+#endif
+
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+  spinlock_t mutex_lock;
 #endif
 };
 
