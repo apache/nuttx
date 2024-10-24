@@ -7,8 +7,10 @@ config ARCH_HAVE_CAN_ERRORS
 	bool
 	default n
 
-menuconfig CAN
-	bool "CAN Driver Support"
+menu "CAN Driver Support"
+
+config CAN
+	bool "CAN Character Driver Support"
 	default n
 	---help---
 		This selection enables building of the "upper-half" CAN driver.
@@ -267,3 +269,34 @@ config CAN_SJA1000_DEBUG
 endif # CAN_SJA1000
 
 endif # CAN
+
+config CAN_KVASER
+	bool "Kvaser PCI CAN card"
+	default n
+	depends on PCI
+	---help---
+		Enable driver support for Kvase PCI CAN card.
+		NOTE: for now works only with QEMU
+
+if CAN_KVASER
+
+choice
+	prompt "Kvaser PCI CAN device type"
+	default CAN_KVASER_CHARDEV if CAN
+	default CAN_KVASER_SOCKET if NET_CAN
+
+config CAN_KVASER_CHARDEV
+	bool "Kvaser PCI can device as chardev"
+	depends on CAN
+	select ARCH_HAVE_CAN_ERRORS
+
+config CAN_KVASER_SOCKET
+	bool "Kvaser PCI can device as socketCAN"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # "Kvaser PCI CAN device type"
+
+endif # CAN_KVASER
+
+endmenu # CAN Driver Support

@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/bits.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -47,6 +49,10 @@
  */
 
 #define SJA1000_MODE_REG         (0x00)
+
+/* Sleep mode */
+
+#define SJA1000_SLEEP_MODE       (BIT(4))
 
 /* SJA1000_RX_FILTER_MODE : R/W; bitpos: [3]; default: 0;
  * This bit is used to configure the filter mode. 0: Dual filter mode; 1:
@@ -457,6 +463,10 @@
 #define SJA1000_TIME_SEG1_M                (SJA1000_TIME_SEG1_V << SJA1000_TIME_SEG1_S)
 #define SJA1000_TIME_SEG1_V                0x0000000F
 #define SJA1000_TIME_SEG1_S                0
+
+/* Output control */
+
+#define SJA1000_OUTCTRL_REG                0x08
 
 /* SJA1000_ARB_LOST_CAP_REG register
  * Arbitration Lost Capture Register
@@ -905,5 +915,11 @@
 #define SJA1000_CD_M                        (SJA1000_CD_V << SJA1000_CD_S)
 #define SJA1000_CD_V                        0x00000007
 #define SJA1000_CD_S                        0
+
+/* Frame information */
+
+#define SJA1000_FI_DLC_MASK                 (0xf)    /* Data length code bit */
+#define SJA1000_FI_RTR                      (BIT(6)) /* Remote transmission request */
+#define SJA1000_FI_FF                       (BIT(7)) /* Frame format */
 
 #endif /* __DRIVERS_CAN_SJA1000_H */
