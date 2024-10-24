@@ -529,7 +529,7 @@ void up_enable_dcache(void)
   ARM_DSB();
   do
     {
-      int32_t tmpways = ways;
+      uint32_t tmpways = ways;
 
       do
         {
