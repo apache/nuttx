@@ -166,8 +166,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
               CPU_SET(tcb->cpu, &tcb->affinity);
             }
 
-          nxsched_smp_call_single(tcb->cpu, nxsched_suspend_handler,
-                                  &arg, true);
+          nxsched_smp_call_single(tcb->cpu, nxsched_suspend_handler, &arg);
         }
       else
 #endif

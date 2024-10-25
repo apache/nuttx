@@ -246,7 +246,7 @@ static int nxtask_restart(pid_t pid)
           CPU_SET(tcb->cpu, &tcb->affinity);
         }
 
-      nxsched_smp_call_single(tcb->cpu, restart_handler, &arg, true);
+      nxsched_smp_call_single(tcb->cpu, restart_handler, &arg);
 
       tcb = nxsched_get_tcb(pid);
       if (!tcb || tcb->task_state != TSTATE_TASK_INVALID ||
