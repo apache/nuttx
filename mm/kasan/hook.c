@@ -115,7 +115,9 @@ struct kasan_watchpoint_s
 static struct kasan_watchpoint_s g_watchpoint[MM_KASAN_WATCHPOINT];
 #endif
 
+#ifdef CONFIG_MM_KASAN
 static uint32_t g_region_init;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -225,27 +227,29 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
                                       bool is_write,
                                       FAR void *return_address)
 {
+#ifdef CONFIG_MM_KASAN
   if (predict_false(size == 0 || g_region_init != KASAN_INIT_VALUE))
     {
       return;
     }
 
-#ifndef CONFIG_MM_KASAN_DISABLE_NULL_POINTER_CHECK
+#  ifndef CONFIG_MM_KASAN_DISABLE_NULL_POINTER_CHECK
   if (predict_false(addr == NULL))
     {
       kasan_report(addr, size, is_write, return_address);
     }
-#endif
+#  endif
 
-#ifndef CONFIG_MM_KASAN_NONE
+#  ifndef CONFIG_MM_KASAN_NONE
   if (predict_false(kasan_is_poisoned(addr, size)))
     {
       kasan_report(addr, size, is_write, return_address);
     }
-#endif
+#  endif
 
-#if MM_KASAN_WATCHPOINT > 0
+#  if MM_KASAN_WATCHPOINT > 0
   kasan_check_watchpoint(addr, size, is_write, return_address);
+#  endif
 #endif
 }
 
@@ -253,6 +257,7 @@ static inline void kasan_check_report(FAR const void *addr, size_t size,
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
 void kasan_start(void)
 {
   g_region_init = KASAN_INIT_VALUE;
@@ -262,6 +267,7 @@ void kasan_stop(void)
 {
   g_region_init = 0;
 }
+#endif
 
 /****************************************************************************
  * Name: kasan_debugpoint
