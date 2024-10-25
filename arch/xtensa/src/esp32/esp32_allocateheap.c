@@ -210,7 +210,7 @@ void xtensa_add_region(void)
   availregions = 2;
 #endif
 
-#ifdef CONFIG_ESP32_SPIRAM_COMMON_HEAP
+#if defined(CONFIG_ESP32_SPIRAM_COMMON_HEAP) && !defined(MM_USER_HEAP_EXTRAM)
   availregions++;
 #endif
 
@@ -242,7 +242,7 @@ void xtensa_add_region(void)
   MM_ADDREGION(start, size);
 #endif
 
-#ifdef CONFIG_ESP32_SPIRAM_COMMON_HEAP
+#if defined(CONFIG_ESP32_SPIRAM_COMMON_HEAP) && !defined(MM_USER_HEAP_EXTRAM)
 #ifdef CONFIG_XTENSA_EXTMEM_BSS
   start = (void *)(_ebss_extmem);
   size  = CONFIG_HEAP2_SIZE - (size_t)(_ebss_extmem - _sbss_extmem);
