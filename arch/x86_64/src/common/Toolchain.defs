@@ -106,6 +106,10 @@ ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
   LDFLAGS += --whole-archive
 endif
 
+ifeq ($(CONFIG_HOST_LINUX),y)
+  LDFLAGS += -z noexecstack
+endif
+
 ifeq ($(CONFIG_LIBCXX),y)
   # Linux C++ ABI seems vary.
   # Probably __GLIBCXX__ is the best bet.
