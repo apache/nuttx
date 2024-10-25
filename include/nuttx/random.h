@@ -132,6 +132,16 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
                       size_t n);
 
 /****************************************************************************
+ * Name: up_rngbuf
+ *
+ * Description:
+ *   Fill a buffer of arbitrary length with randomness.
+ *
+ ****************************************************************************/
+
+void up_rngbuf(FAR void *bytes, size_t nbytes);
+
+/****************************************************************************
  * Name: up_rngreseed
  *
  * Description:

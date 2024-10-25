@@ -14,6 +14,8 @@
 "aio_suspend","aio.h","defined(CONFIG_FS_AIO)","int","FAR const struct aiocb * const []|FAR const struct aiocb * const *","int","FAR const struct timespec *"
 "alarm","unistd.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","unsigned int","unsigned int"
 "alphasort","dirent.h","","int","FAR const struct dirent **","FAR const struct dirent **"
+"arc4random","stdlib.h","","uint32_t"
+"arc4random_buf","stdlib.h","","void","FAR void *","size_t"
 "asprintf","stdio.h","","int","FAR char **","FAR const IPTR char *","..."
 "atof","stdlib.h","defined(CONFIG_HAVE_DOUBLE)","double","FAR const char *"
 "atoi","stdlib.h","","int","FAR const char *"

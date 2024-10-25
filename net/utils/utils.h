@@ -28,6 +28,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdlib.h>
+
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
@@ -41,7 +44,7 @@
 #define NET_PORT_RANDOM_INIT(port) \
   do \
     { \
-      net_getrandom(&(port), sizeof(port)); \
+      arc4random_buf(&(port), sizeof(port)); \
       (port) = (port) % (CONFIG_NET_DEFAULT_MAX_PORT - \
                          CONFIG_NET_DEFAULT_MIN_PORT + 1); \
       (port) += CONFIG_NET_DEFAULT_MIN_PORT; \
@@ -186,21 +189,6 @@ unsigned int net_dsec2tick(int dsec);
 
 unsigned int net_timeval2dsec(FAR struct timeval *tv,
                               enum tv2ds_remainder_e remainder);
-
-/****************************************************************************
- * Name: net_getrandom
- *
- * Description:
- *   Fill a buffer of arbitrary length with randomness. This function is
- *   guaranteed to be success.
- *
- * Input Parameters:
- *   bytes  - Buffer for returned random bytes
- *   nbytes - Number of bytes requested.
- *
- ****************************************************************************/
-
-void net_getrandom(FAR void *bytes, size_t nbytes);
 
 /****************************************************************************
  * Name: net_ipv4_mask2pref
