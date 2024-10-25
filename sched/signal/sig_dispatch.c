@@ -187,8 +187,7 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
                     }
 
                   arg.pid = stcb->pid;
-                  nxsched_smp_call_single(stcb->cpu, sig_handler, &arg,
-                                          true);
+                  nxsched_smp_call_single(stcb->cpu, sig_handler, &arg);
                 }
               else
 #endif

@@ -246,8 +246,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
                 }
 
               arg.sched_priority = sched_priority;
-              nxsched_smp_call_single(tcb->cpu, reprioritize_handler,
-                                      &arg, true);
+              nxsched_smp_call_single(tcb->cpu, reprioritize_handler, &arg);
             }
           else
 #endif
