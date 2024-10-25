@@ -50,6 +50,12 @@ NUTTXLIBS += staging$(DELIM)libc$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libmm$(LIBEXT)
 NUTTXLIBS += staging$(DELIM)libarch$(LIBEXT)
 
+# Add toolchain library support
+
+ifeq ($(CONFIG_BUILTIN_TOOLCHAIN),)
+NUTTXLIBS += staging$(DELIM)libbuiltin$(LIBEXT)
+endif
+
 # Add libraries for math support.
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)

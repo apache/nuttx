@@ -1,0 +1,36 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Toolchain Library Support"
+
+choice
+	prompt "Builtin toolchain support"
+	default BUILTIN_TOOLCHAIN
+	---help---
+		Choose to compile libraries related to toolchain into the OS
+
+config BUILTIN_COMPILER_RT
+	bool "Builtin LLVM Compiler-rt"
+	---help---
+		Compile the LLVM Compiler-rt library into the OS.
+
+config BUILTIN_TOOLCHAIN
+	bool "Link the toolchain library"
+	---help---
+		Use the toolchain library that comes with the compiler
+
+endchoice
+
+if BUILTIN_COMPILER_RT
+
+config COMPILER_RT_VERSION
+	string "Select LLVM Compiler-rt version"
+	default "17.0.1"
+
+config COMPILER_RT_HAS_BFLOAT16
+	bool "Enable support for bfloat16 in Compiler-rt"
+	default n
+
+endif # BUILTIN_COMPILER_RT

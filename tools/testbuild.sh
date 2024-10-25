@@ -323,20 +323,6 @@ function configure_default {
     fail=1
   fi
 
-  if [ "X$toolchain" != "X" ]; then
-    setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
-    original_toolchain=`echo $setting | cut -d'=' -f1`
-    if [ ! -z "$original_toolchain" ]; then
-      echo "  Disabling $original_toolchain"
-      kconfig-tweak --file $nuttx/.config -d $original_toolchain
-    fi
-
-    echo "  Enabling $toolchain"
-    kconfig-tweak --file $nuttx/.config -e $toolchain
-
-    makefunc olddefconfig
-  fi
-
   return $fail
 }
 
@@ -344,18 +330,6 @@ function configure_cmake {
   if ! cmake -B build -DBOARD_CONFIG=$config -GNinja 1>/dev/null; then
     cmake -B build -DBOARD_CONFIG=$config -GNinja
     fail=1
-  fi
-
-  if [ "X$toolchain" != "X" ]; then
-    setting=`grep _TOOLCHAIN_ $nuttx/build/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
-    original_toolchain=`echo $setting | cut -d'=' -f1`
-    if [ ! -z "$original_toolchain" ]; then
-      echo "  Disabling $original_toolchain"
-      kconfig-tweak --file $nuttx/build/.config -d $original_toolchain
-    fi
-
-    echo "  Enabling $toolchain"
-    kconfig-tweak --file $nuttx/build/.config -e $toolchain
   fi
 
   return $fail
@@ -441,14 +415,6 @@ function refresh_default {
 
 function refresh_cmake {
   # Ensure defconfig in the canonical form
-
-  if [ "X$toolchain" != "X" ]; then
-    if [ ! -z "$original_toolchain" ]; then
-      kconfig-tweak --file $nuttx/build/.config -e $original_toolchain
-    fi
-
-    kconfig-tweak --file $nuttx/build/.config -d $toolchain
-  fi
 
   if ! cmake --build build -t refreshsilent 1>/dev/null; then
     cmake --build build -t refreshsilent
