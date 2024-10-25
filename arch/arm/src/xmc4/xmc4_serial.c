@@ -1120,7 +1120,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   struct xmc4_dev_s *priv = (struct xmc4_dev_s *)CONSOLE_DEV.priv;
@@ -1130,8 +1130,6 @@ int up_putc(int ch)
   arm_lowputc(ch);
   xmc4_restoreuartint(priv, ccr);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1144,11 +1142,10 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   arm_lowputc(ch);
-  return ch;
 #endif
 }
 

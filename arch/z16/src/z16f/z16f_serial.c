@@ -742,7 +742,7 @@ void z16_serialinit(void)
  ****************************************************************************/
 
 #ifdef CONSOLE_DEV
-int up_putc(int ch)
+void up_putc(int ch)
 {
   uint8_t  state;
 
@@ -765,7 +765,6 @@ int up_putc(int ch)
    */
 
   z16f_restoreuartirq(&CONSOLE_DEV, state);
-  return ch;
 }
 #endif
 
@@ -810,12 +809,11 @@ static void z16f_putc(int ch)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   /* Output character */
 
   z16f_putc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

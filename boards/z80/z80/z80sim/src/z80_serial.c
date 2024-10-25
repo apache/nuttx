@@ -318,7 +318,7 @@ void z80_serial_initialize(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   z80_lowputc(ch);
   return 0;

@@ -1094,7 +1094,7 @@ void renesas_consoleinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIALCONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -1107,7 +1107,6 @@ int up_putc(int ch)
   up_waittxready(priv);
   up_restoreuartint(priv, ucon);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1120,12 +1119,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIALCONSOLE
   renesas_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

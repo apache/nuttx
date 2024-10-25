@@ -2141,7 +2141,7 @@ void kinetis_serial_dma_poll(void)
  ****************************************************************************/
 
 #ifdef HAVE_UART_PUTC
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -2151,7 +2151,6 @@ int up_putc(int ch)
   arm_lowputc(ch);
   up_restoreuartint(priv, ie);
 #endif
-  return ch;
 }
 #endif
 
@@ -2166,12 +2165,11 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef HAVE_UART_PUTC
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   arm_lowputc(ch);
 #endif
-  return ch;
 }
 #endif
 

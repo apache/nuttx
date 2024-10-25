@@ -786,11 +786,10 @@ void up_nputs(const char *str, size_t len)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
   char c = ch;
   up_nputs(&c, 1);
 #endif
-  return 0;
 }

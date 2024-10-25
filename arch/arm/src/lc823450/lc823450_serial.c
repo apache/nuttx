@@ -1358,7 +1358,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t im;
@@ -1366,7 +1366,7 @@ int up_putc(int ch)
 #ifdef CONFIG_DEV_CONSOLE_SWITCH
   if (g_console_disable)
     {
-      return ch;
+      return;
     }
 #endif /* CONFIG_DEV_CONSOLE_SWITCH */
 
@@ -1376,7 +1376,6 @@ int up_putc(int ch)
 
   up_waittxnotfull(priv);
   up_restoreuartint(priv, im);
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1389,10 +1388,9 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   arm_lowputc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

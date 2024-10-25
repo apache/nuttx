@@ -809,7 +809,7 @@ void arm_serialinit(void)
  ****************************************************************************/
 
 #ifdef HAVE_LEUART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct efm32_leuart_s *priv = (struct efm32_leuart_s *)CONSOLE_DEV.priv;
   uint32_t ien;
@@ -817,7 +817,6 @@ int up_putc(int ch)
   efm32_disableuartint(priv, &ien);
   efm32_lowputc(ch);
   efm32_restoreuartint(priv, ien);
-  return ch;
 }
 #endif
 
@@ -832,10 +831,9 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifdef HAVE_LEUART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   efm32_lowputc(ch);
-  return ch;
 }
 #endif
 

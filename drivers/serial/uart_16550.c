@@ -1700,13 +1700,11 @@ void u16550_serialinit(void)
  ****************************************************************************/
 
 #ifdef HAVE_16550_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   FAR struct u16550_s *priv = (FAR struct u16550_s *)CONSOLE_DEV.priv;
 
   u16550_putc(priv, ch);
-
-  return ch;
 }
 #endif
 

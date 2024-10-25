@@ -3671,7 +3671,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)CONSOLE_DEV.dev.priv;
@@ -3681,8 +3681,6 @@ int up_putc(int ch)
   imxrt_lowputc(ch);
   imxrt_restoreuartint(priv, ie);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -3695,13 +3693,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #if CONSOLE_LPUART > 0
   arm_lowputc(ch);
 #endif
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

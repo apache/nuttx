@@ -2824,7 +2824,7 @@ int arch_phy_irq(FAR const char *intf, xcpt_t handler, void *arg,
  *
  ****************************************************************************/
 
-int up_putc(int ch);
+void up_putc(int ch);
 
 /****************************************************************************
  * Name: up_puts

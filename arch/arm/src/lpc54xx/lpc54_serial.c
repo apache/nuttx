@@ -1440,7 +1440,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_USART_CONSOLE
   struct lpc54_dev_s *priv = (struct lpc54_dev_s *)CONSOLE_DEV.priv;
@@ -1450,8 +1450,6 @@ int up_putc(int ch)
   arm_lowputc(ch);
   lpc54_fifoint_enable(priv, intset);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1464,11 +1462,10 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_USART_CONSOLE
   arm_lowputc(ch);
-  return ch;
 }
 #endif
 

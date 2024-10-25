@@ -733,7 +733,7 @@ void z80_serial_initialize(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   FAR struct ez80_dev_s *priv = (FAR struct ez80_dev_s *)CONSOLE_DEV.priv;
@@ -750,7 +750,6 @@ int up_putc(int ch)
 
   ez80_waittxready(priv);
   ez80_restoreuartint(priv, ier);
-  return ch;
 #endif
 }
 
@@ -794,12 +793,11 @@ static void ez80_putc(int ch)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   /* Output character */
 
   ez80_putc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

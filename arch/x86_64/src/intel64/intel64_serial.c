@@ -88,10 +88,9 @@ void up_lowputc(char ch)
   fb_putc(ch);
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   up_lowputc(ch);
-  return ch;
 }
 #endif
 

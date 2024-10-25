@@ -1185,7 +1185,7 @@ void arm_serialinit(void)
  ****************************************************************************/
 
 #ifndef HAVE_LEUART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   struct efm32_usart_s *priv = (struct efm32_usart_s *)CONSOLE_DEV.priv;
@@ -1195,7 +1195,6 @@ int up_putc(int ch)
   efm32_lowputc(ch);
   efm32_restoreuartint(priv, ien);
 #endif
-  return ch;
 }
 #endif
 
@@ -1210,12 +1209,11 @@ int up_putc(int ch)
  ****************************************************************************/
 
 #ifndef HAVE_LEUART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   efm32_lowputc(ch);
 #endif
-  return ch;
 }
 #endif
 

@@ -825,7 +825,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   struct max326_dev_s *priv = (struct max326_dev_s *)CONSOLE_DEV.priv;
@@ -835,8 +835,6 @@ int up_putc(int ch)
   arm_lowputc(ch);
   max326_int_enable(priv, intset);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -849,11 +847,10 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   arm_lowputc(ch);
-  return ch;
 }
 #endif
 

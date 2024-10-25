@@ -2114,7 +2114,7 @@ void xtensa_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uint32_t intena;
@@ -2126,7 +2126,5 @@ int up_putc(int ch)
 
   esp32_restoreuartint(CONSOLE_DEV.priv, intena);
 #endif
-
-  return ch;
 }
 #endif /* USE_SERIALDRIVER */

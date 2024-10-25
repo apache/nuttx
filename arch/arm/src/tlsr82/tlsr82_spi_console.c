@@ -324,10 +324,8 @@ void spi_console_init(void)
  ****************************************************************************/
 
 #ifdef CONFIG_TLSR82_SPI_SYSLOG
-int up_putc(int ch)
+void up_putc(int ch)
 {
   spi_putc((uint8_t)ch);
-
-  return 0;
 }
 #endif

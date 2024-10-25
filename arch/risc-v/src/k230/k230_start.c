@@ -191,10 +191,7 @@ void riscv_serialinit(void)
 }
 
 #ifdef CONFIG_RPMSG_UART_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* place holder for now */
-
-  return ch;
 }
 #endif

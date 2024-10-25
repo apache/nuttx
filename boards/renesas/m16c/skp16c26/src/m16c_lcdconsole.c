@@ -116,10 +116,9 @@ void renesas_lowputc(char ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   up_lcdputc(ch);
-  return ch;
 }
 
 #endif /* !HAVE_SERIALCONSOLE && CONFIG_SLCD && CONFIG_SLCD_CONSOLE */

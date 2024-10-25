@@ -58,13 +58,12 @@
 #ifdef USE_SERIALDRIVER
 int z80_lowputc(int ch)
 #else
-int up_putc(int ch)
+void up_putc(int ch)
 #endif
 {
   /* Output the character */
 
   z180_putc(ch);
-  return ch;
 }
 
 #endif /* HAVE_SERIAL */

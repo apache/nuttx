@@ -1292,7 +1292,7 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct hpm_uart_s *priv = (struct hpm_uart_s *)CONSOLE_DEV.dev.priv;
@@ -1302,7 +1302,6 @@ int up_putc(int ch)
   hpm_lowputc(ch);
   hpm_restoreuartint(priv, im);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1315,12 +1314,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART_CONSOLE
   riscv_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

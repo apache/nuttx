@@ -67,7 +67,9 @@ static void lowoutstream_putc(FAR struct lib_outstream_s *self, int ch)
 {
   DEBUGASSERT(self);
 
-  if (up_putc(ch) != EOF)
+  up_putc(ch);
+
+  if (ch != EOF)
     {
       self->nput++;
     }

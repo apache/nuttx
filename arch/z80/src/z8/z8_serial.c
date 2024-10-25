@@ -724,7 +724,7 @@ void z80_serial_initialize(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   uint8_t  state;
 
@@ -744,7 +744,6 @@ int up_putc(int ch)
    */
 
   z8_restoreuartirq(&CONSOLE_DEV, state);
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -796,12 +795,11 @@ static void z8_putc(int ch)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   /* Output character */
 
   z8_putc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */
