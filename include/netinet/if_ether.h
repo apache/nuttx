@@ -40,6 +40,17 @@
 #define ETH_P_IP  ETHERTYPE_IP
 #define ETH_P_ARP ETHERTYPE_ARP
 
+/****************************************************************************
+ * Public Type Definitions
+ ****************************************************************************/
+
+struct ethhdr
+{
+  uint8_t  h_dest[ETH_ALEN];      /* destination eth addr    */
+  uint8_t  h_source[ETH_ALEN];    /* source ether addr    */
+  uint16_t h_proto;               /* packet type ID field    */
+};
+
 /* Ethernet Address Resolution Protocol.
  *
  * See RFC 826 for protocol description.  Structure below is adapted
