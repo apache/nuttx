@@ -83,6 +83,10 @@ if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
 endif()
 
+if(CONFIG_HOST_LINUX)
+  add_link_options(-Wl,-z,noexecstack)
+endif()
+
 # Architecture flags
 
 add_link_options(-Wl,--entry=__pmode_entry)
