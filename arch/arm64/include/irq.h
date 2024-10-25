@@ -383,6 +383,10 @@ static inline void up_irq_restore(irqstate_t flags)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
+#  ifndef MPID_TO_CORE
+#    define MPID_TO_CORE(mpid) \
+            (((mpid) >> MPIDR_AFF0_SHIFT) & MPIDR_AFFLVL_MASK)
+#  endif
 #  define up_cpu_index() ((int)MPID_TO_CORE(GET_MPIDR()))
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 

@@ -257,7 +257,7 @@ void arm64_gic_irq_enable(unsigned int intid)
 #ifndef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
   if (GIC_IS_SPI(intid))
     {
-      arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
+      arm64_gic_write_irouter(up_cpu_index(), intid);
     }
 #endif
 
@@ -952,7 +952,8 @@ static void arm64_gic_init(void)
   int       err;
 
   cpu               = this_cpu();
-  g_gic_rdists[cpu] = CONFIG_GICR_BASE + cpu * CONFIG_GICR_OFFSET;
+  g_gic_rdists[cpu] = CONFIG_GICR_BASE +
+                      up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)
