@@ -250,7 +250,7 @@ void arm_gic_irq_enable(unsigned int intid)
 
   if (GIC_IS_SPI(intid))
     {
-      arm_gic_write_irouter(this_cpu(), intid);
+      arm_gic_write_irouter(up_cpu_index(), intid);
     }
 
   putreg32(mask, ISENABLER(GET_DIST_BASE(intid), idx));
@@ -809,7 +809,8 @@ static void arm_gic_init(void)
   int       err;
 
   cpu               = this_cpu();
-  g_gic_rdists[cpu] = CONFIG_GICR_BASE + cpu * CONFIG_GICR_OFFSET;
+  g_gic_rdists[cpu] = CONFIG_GICR_BASE +
+                      up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)
