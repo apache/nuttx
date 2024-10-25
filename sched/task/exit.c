@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 
 #include "task/task.h"
