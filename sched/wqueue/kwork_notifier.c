@@ -34,6 +34,7 @@
 #include <sched.h>
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 

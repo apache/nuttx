@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <endian.h>
+#include <strings.h>
 #include <nuttx/kmalloc.h>
 #include <crypto/bn.h>
 #include <crypto/cryptodev.h>
