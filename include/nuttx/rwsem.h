@@ -27,8 +27,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/semaphore.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/mutex.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,7 +51,7 @@ typedef struct
   int     waiter;       /* Waiter Count */
   int     writer;       /* Writer Count */
   int     reader;       /* Reader Count */
-  spinlock_t protected; /* Protecting Locks for Read/Write Locked Tables */
+  mutex_t protected;    /* Protecting Locks for Read/Write Locked Tables */
 } rw_semaphore_t;
 
 /****************************************************************************
