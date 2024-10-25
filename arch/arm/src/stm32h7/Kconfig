@@ -318,6 +318,13 @@ config STM32H7_PWR_LDO_SUPPLY
 
 endchoice # "STM32 H7 Power Supply Selection"
 
+config STM32H7_PWR_IGNORE_ACTVOSRDY
+	bool "Ignore PWR_CSR1_ACTVOSRDY bit"
+	default n
+	---help---
+		This option disable busy wait for PWR_CSR1_ACTVOSRDY during boot.
+		This is workaround for Renode simulation that doesn't implement this feature.
+
 config STM32H7_IO_CONFIG_A
 	bool
 	default n
