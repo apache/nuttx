@@ -36,6 +36,7 @@ if(NOT CONFIG_DISABLE_MOUNTPOINT)
     fs_closeblockdriver.c
     fs_blockpartition.c
     fs_findmtddriver.c
+    fs_blockmerge.c
     fs_closemtddriver.c)
 
   if(CONFIG_MTD)
