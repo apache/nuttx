@@ -37,11 +37,11 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_post
+ * Name: nxsem_post_slow
  *
  * Description:
  *   When a kernel thread has finished with a semaphore, it will call
@@ -69,7 +69,7 @@
  *
  ****************************************************************************/
 
-int nxsem_post(FAR sem_t *sem)
+static int nxsem_post_slow(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
   irqstate_t flags;
@@ -78,8 +78,6 @@ int nxsem_post(FAR sem_t *sem)
   uint8_t proto;
 #endif
 
-  DEBUGASSERT(sem != NULL);
-
   /* The following operations must be performed with interrupts
    * disabled because sem_post() may be called from an interrupt
    * handler.
@@ -87,12 +85,13 @@ int nxsem_post(FAR sem_t *sem)
 
   flags = enter_critical_section();
 
-  sem_count = sem->semcount;
+  sem_count = atomic_fetch_add(NXSEM_COUNT(sem), 1);
 
   /* Check the maximum allowable value */
 
   if (sem_count >= SEM_VALUE_MAX)
     {
+      atomic_fetch_sub(NXSEM_COUNT(sem), 1);
       leave_critical_section(flags);
       return -EOVERFLOW;
     }
@@ -115,8 +114,6 @@ int nxsem_post(FAR sem_t *sem)
    */
 
   nxsem_release_holder(sem);
-  sem_count++;
-  sem->semcount = sem_count;
 
 #if defined(CONFIG_PRIORITY_INHERITANCE) || defined(CONFIG_PRIORITY_PROTECT)
   /* Don't let any unblocked tasks run until we complete any priority
@@ -138,7 +135,7 @@ int nxsem_post(FAR sem_t *sem)
    * there must be some task waiting for the semaphore.
    */
 
-  if (sem_count <= 0)
+  if (sem_count < 0)
     {
       /* Check if there are any tasks in the waiting for semaphore
        * task list that are waiting for this semaphore.  This is a
@@ -216,4 +213,61 @@ int nxsem_post(FAR sem_t *sem)
   leave_critical_section(flags);
 
   return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsem_post
+ *
+ * Description:
+ *   When a kernel thread has finished with a semaphore, it will call
+ *   nxsem_post().  This function unlocks the semaphore referenced by sem
+ *   by performing the semaphore unlock operation on that semaphore.
+ *
+ *   If the semaphore value resulting from this operation is positive, then
+ *   no tasks were blocked waiting for the semaphore to become unlocked; the
+ *   semaphore is simply incremented.
+ *
+ *   If the value of the semaphore resulting from this operation is zero,
+ *   then one of the tasks blocked waiting for the semaphore shall be
+ *   allowed to return successfully from its call to nxsem_wait().
+ *
+ * Input Parameters:
+ *   sem - Semaphore descriptor
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+int nxsem_post(FAR sem_t *sem)
+{
+  DEBUGASSERT(sem != NULL);
+
+  /* If this is a mutex, we can try to unlock the mutex in fast mode,
+   * else try to get it in slow mode.
+   */
+
+#if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
+  if (sem->flags & SEM_TYPE_MUTEX)
+    {
+      short old = 0;
+      if (atomic_compare_exchange_weak_explicit(NXSEM_COUNT(sem), &old, 1,
+                                                memory_order_release,
+                                                memory_order_relaxed))
+        {
+          return OK;
+        }
+    }
+#endif
+
+  return nxsem_post_slow(sem);
 }
