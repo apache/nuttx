@@ -1147,7 +1147,7 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_UART
   uint32_t int_status;
@@ -1160,7 +1160,6 @@ int up_putc(int ch)
 #ifdef CONSOLE_UART
   esp_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
-  return ch;
 }
 
 #else /* HAVE_UART_DEVICE */
@@ -1187,9 +1186,8 @@ void riscv_serialinit(void)
 {
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE */
@@ -1211,13 +1209,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   riscv_lowputc(ch);
 #endif /* HAVE_SERIAL_CONSOLE */
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

@@ -1049,7 +1049,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct nuc_dev_s *priv = (struct nuc_dev_s *)CONSOLE_DEV.priv;
@@ -1061,8 +1061,6 @@ int up_putc(int ch)
 #ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER && HAVE_UART */
@@ -1075,12 +1073,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_UART
   nuc_lowputc((uint32_t)ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER && HAVE_UART */

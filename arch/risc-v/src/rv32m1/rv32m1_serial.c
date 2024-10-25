@@ -1133,7 +1133,7 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -1143,7 +1143,6 @@ int up_putc(int ch)
   riscv_lowputc(ch);
   up_restoreuartint(priv, im);
 #endif
-  return ch;
 }
 
 #ifdef HAVE_SERIAL_CONSOLE

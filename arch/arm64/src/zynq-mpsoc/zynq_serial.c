@@ -1308,14 +1308,13 @@ void arm64_earlyserialinit(void)
  *
  ***************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct uart_dev_s *dev = &CONSOLE_DEV;
 
   zynq_uart_wait_send(dev, ch);
 #endif
-  return ch;
 }
 
 /***************************************************************************

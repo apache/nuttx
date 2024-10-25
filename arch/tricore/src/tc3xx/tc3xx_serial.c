@@ -722,11 +722,10 @@ void tricore_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   tricore_lowputc(ch);
 #endif
-  return ch;
 }
 #endif /* USE_SERIALDRIVER */

@@ -1061,13 +1061,11 @@ void pl011_serialinit(void)
  ***************************************************************************/
 
 #ifdef HAVE_PL011_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   FAR struct uart_dev_s *dev = &CONSOLE_DEV;
 
   pl011_putc(dev, ch);
-
-  return ch;
 }
 #endif
 

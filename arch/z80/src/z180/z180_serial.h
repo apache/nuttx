@@ -59,7 +59,7 @@ void z180_putc(uint8_t ch) __naked;
 #ifdef USE_SERIALDRIVER
 int z80_lowputc(int ch);
 #else
-int up_putc(int ch);
+void up_putc(int ch);
 #  define z80_lowputc(ch) up_putc(ch)
 #endif
 

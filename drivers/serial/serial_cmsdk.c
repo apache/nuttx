@@ -772,7 +772,7 @@ void cmsdk_serialinit(void)
  ****************************************************************************/
 
 #ifdef HAVE_CMSDK_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   FAR struct uart_cmsdk_s *priv = CONSOLE_DEV.priv;
   uint32_t ier;
@@ -780,6 +780,5 @@ int up_putc(int ch)
   ier = uart_cmsdk_disableuartint(priv);
   uart_cmsdk_putc(priv, ch);
   uart_cmsdk_restoreuartint(priv, ier);
-  return ch;
 }
 #endif

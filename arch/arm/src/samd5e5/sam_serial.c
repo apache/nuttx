@@ -1096,7 +1096,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   irqstate_t flags;
@@ -1109,7 +1109,6 @@ int up_putc(int ch)
   sam_lowputc(ch);
   spin_unlock_irqrestore(NULL, flags);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1122,12 +1121,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   sam_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

@@ -581,7 +581,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONFIG_UART_SERIAL_CONSOLE
   struct eoss3_uart_s *priv = (struct eoss3_uart_s *)g_uartport.priv;
@@ -591,8 +591,6 @@ int up_putc(int ch)
   arm_lowputc(ch);
   eoss3_restoreuartint(priv, ie);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -605,12 +603,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   /* Output the character */
 
   arm_lowputc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

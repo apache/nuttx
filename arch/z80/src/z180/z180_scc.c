@@ -595,7 +595,7 @@ void z80_serial_initialize(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   /* Disable [E]SCC interrupts and perform the low-level output */
@@ -603,7 +603,6 @@ int up_putc(int ch)
   z180_disableuartint(priv);
   z80_lowputc(ch);
   z180_restoreuartint(priv);
-  return ch;
 #endif
 }
 #endif /* USE_SERIALDRIVER */

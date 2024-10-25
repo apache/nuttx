@@ -1004,7 +1004,7 @@ void bl808_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct bl808_uart_s *priv = CONSOLE_DEV.priv;
   uint8_t uart_idx = priv->config.idx;
@@ -1016,5 +1016,4 @@ int up_putc(int ch)
   putreg32(ch, BL808_UART_FIFO_WDATA(uart_idx));
 
   leave_critical_section(flags);
-  return ch;
 }

@@ -106,7 +106,7 @@ void or1k_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   irqstate_t flags;
@@ -121,5 +121,4 @@ int up_putc(int ch)
 
   spin_unlock_irqrestore(NULL, flags);
 #endif
-  return ch;
 }

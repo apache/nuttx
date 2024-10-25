@@ -2790,7 +2790,7 @@ void arm64_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct imx9_uart_s *priv = (struct imx9_uart_s *)&CONSOLE_DEV;
@@ -2798,7 +2798,7 @@ int up_putc(int ch)
 
   if (!CONSOLE_DEV.dev.isconsole)
     {
-      return ch;
+      return;
     }
 
   imx9_disableuartint(priv, &ie);
@@ -2808,5 +2808,4 @@ int up_putc(int ch)
 #ifdef CONSOLE_DEV
   imx9_restoreuartint(priv, ie);
 #endif
-  return ch;
 }

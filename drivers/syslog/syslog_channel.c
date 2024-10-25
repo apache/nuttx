@@ -235,10 +235,9 @@ static int syslog_default_putc(FAR syslog_channel_t *channel, int ch)
   UNUSED(channel);
 
 #  ifdef CONFIG_ARCH_LOWPUTC
-  return up_putc(ch);
-#  else
-  return ch;
+  up_putc(ch);
 #  endif
+  return ch;
 }
 
 static ssize_t syslog_default_write(FAR syslog_channel_t *channel,

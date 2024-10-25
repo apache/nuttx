@@ -742,7 +742,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint16_t  ier;
@@ -753,7 +753,6 @@ int up_putc(int ch)
 
   up_waittxready(priv);
   up_restoreuartint(priv, ier);
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -789,13 +788,12 @@ static inline void up_waittxready(void)
  * Public Functions
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   up_waittxready();
   putreg16((uint16_t)ch, DM320_REGISTER_BASE + UART_DTRR);
 
   up_waittxready();
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

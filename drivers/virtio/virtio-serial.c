@@ -668,13 +668,11 @@ int virtio_register_serial_driver(void)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   if (g_virtio_console != NULL)
     {
       virtio_serial_send(g_virtio_console, ch);
     }
-
-  return ch;
 }
 #endif

@@ -754,7 +754,7 @@ void avr_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -764,7 +764,6 @@ int up_putc(int ch)
   avr_lowputc(ch);
   up_restoreusartint(priv, imr);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -777,12 +776,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   avr_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */
