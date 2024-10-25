@@ -384,14 +384,6 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(socketpair,               4)
 #endif
 
-/* The following is defined only if entropy pool random number generator
- * is enabled.
- */
-
-#ifdef CONFIG_CRYPTO_RANDOM_POOL
-  SYSCALL_LOOKUP(arc4random_buf,           2)
-#endif
-
 SYSCALL_LOOKUP(nanosleep,                  2)
 
 /* I/O event notification facility */

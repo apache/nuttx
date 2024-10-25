@@ -61,6 +61,7 @@ set(SRCS
     lib_wctomb.c
     lib_mbstowcs.c
     lib_wcstombs.c
+    lib_arc4random.c
     lib_atexit.c)
 
 if(CONFIG_PSEUDOTERM)

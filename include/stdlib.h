@@ -152,10 +152,8 @@ double    erand48(FAR unsigned short int xsubi[3]);
 #define   srandom(s) srand(s)
 long      random(void);
 
-#ifdef CONFIG_CRYPTO_RANDOM_POOL
 void      arc4random_buf(FAR void *bytes, size_t nbytes);
 uint32_t  arc4random(void);
-#endif
 
 /* Environment variable support */
 

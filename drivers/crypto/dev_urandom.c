@@ -148,9 +148,8 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_DEV_URANDOM_RANDOM_POOL
   if (len > 0)
     {
-      arc4random_buf(buffer, len);
+      up_rngbuf(buffer, len);
     }
-
 #else
   size_t n;
   uint32_t rnd;

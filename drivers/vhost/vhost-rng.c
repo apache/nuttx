@@ -25,7 +25,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <stdio.h>
-#include <sys/random.h>
+#include <stdlib.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/vhost/vhost.h>
@@ -99,12 +99,7 @@ static void vhost_rng_work(FAR void *arg)
         }
 
       spin_unlock_irqrestore(&priv->lock, flags);
-      ret = getrandom(buf, len, 0);
-      if (ret < 0)
-        {
-          vhosterr("getrandom failed, ret=%zd\n", ret);
-          ret = 0;
-        }
+      arc4random_buf(buf, len);
 
       flags = spin_lock_irqsave(&priv->lock);
       virtqueue_add_consumed_buffer(vq, idx, (uint32_t)ret);
