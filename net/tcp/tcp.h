@@ -695,6 +695,19 @@ int tcp_connect(FAR struct tcp_conn_s *conn,
                 FAR const struct sockaddr *addr);
 
 /****************************************************************************
+ * Name: tcp_removeconn
+ *
+ * Description:
+ *   remove the connection from the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from network logic with the network locked.
+ *
+ ****************************************************************************/
+
+void tcp_removeconn(FAR struct tcp_conn_s *conn);
+
+/****************************************************************************
  * Name: psock_tcp_connect
  *
  * Description:

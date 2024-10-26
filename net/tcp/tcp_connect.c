@@ -241,6 +241,12 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
 
       ninfo("Resuming: %d\n", pstate->tc_result);
 
+      if (pstate->tc_result != OK)
+        {
+          tcp_removeconn(conn);
+          conn->tcpstateflags = TCP_ALLOCATED;
+        }
+
       /* Stop further callbacks */
 
       psock_teardown_callbacks(pstate, pstate->tc_result);
