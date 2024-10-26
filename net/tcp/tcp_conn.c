@@ -1476,4 +1476,22 @@ errout_with_lock:
   return ret;
 }
 
+/****************************************************************************
+ * Name: tcp_removeconn
+ *
+ * Description:
+ *   remove the connection from the list of active TCP connections
+ *
+ * Assumptions:
+ *   This function is called from network logic with the network locked.
+ *
+ ****************************************************************************/
+
+void tcp_removeconn(FAR struct tcp_conn_s *conn)
+{
+  net_lock();
+  dq_rem(&conn->sconn.node, &g_active_tcp_connections);
+  net_unlock();
+}
+
 #endif /* CONFIG_NET && CONFIG_NET_TCP */
