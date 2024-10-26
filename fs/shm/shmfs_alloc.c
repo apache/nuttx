@@ -28,6 +28,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/cache.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
 
@@ -54,7 +55,8 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
       size_t cachesize = up_get_dcache_linesize();
       if (cachesize > 0)
         {
-          object->paddr = fs_heap_memalign(cachesize, length);
+          object->paddr = fs_heap_memalign(cachesize,
+                                           ALIGN_UP(length, cachesize));
         }
       else
         {
@@ -78,7 +80,8 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
       size_t cachesize = up_get_dcache_linesize();
       if (cachesize > 0)
         {
-          object->paddr = kumm_memalign(cachesize, length);
+          object->paddr = kumm_memalign(cachesize,
+                                        ALIGN_UP(length, cachesize));
         }
       else
         {
