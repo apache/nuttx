@@ -367,7 +367,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
       /* Save the attributes in the file data structure */
 
-      tmp = *ptr;  /* attributes_follows */
+      tmp = *ptr++;  /* attributes_follows */
       if (!tmp)
         {
           fwarn("WARNING: no file attributes\n");
@@ -730,6 +730,15 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Attach the private data to the struct file instance */
 
   filep->f_priv = np;
+
+  /* In write/append mode, we need to set the file pointer to the end of
+   * the file.
+   */
+
+  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
+    {
+      filep->f_pos = (off_t)np->n_size;
+    }
 
   /* Then insert the new instance at the head of the list in the mountpoint
    * structure. It needs to be there (1) to handle error conditions that
