@@ -52,3 +52,4 @@ Guides
   port_drivers_to_stm32f7.rst
   semihosting.rst
   renode.rst
+  signal_events_interrupt_handlers.rst  
