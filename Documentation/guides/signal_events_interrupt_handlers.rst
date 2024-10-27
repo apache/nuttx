@@ -106,8 +106,7 @@ it to zero:
 immediately after the ``sem_init()``. The effect of this function call is to 
 disable priority inheritance for that specific semaphore. There should 
 then be no priority inheritance operations on this semaphore that is 
-used for signaling. See `Signaling Semaphores and Priority Inheritance 
-<https://cwiki.apache.org/confluence/display/NUTTX/Signaling+Semaphores+and+Priority+Inheritance>`_ 
+used for signaling. See :doc:`/guides/signaling_sem_priority_inheritance` 
 for further information.
 
 Since the semaphore is initialized to zero, each time that a thread joins 
@@ -197,14 +196,14 @@ properties of ``sem_getvalue()``.
 NOTE: There is possibility of improper interactions between the 
 semaphore when it is used for signaling and priority inheritance. 
 In this case, you should disable priority inheritance on the 
-signaling semaphore using ``sem_setprotocol(SEM_PRIO_NONE)``. See `Signaling Semaphores and Priority Inheritance 
-<https://cwiki.apache.org/confluence/display/NUTTX/Signaling+Semaphores+and+Priority+Inheritance>`_ 
+signaling semaphore using ``sem_setprotocol(SEM_PRIO_NONE)``. See 
+:doc:`/guides/signaling_sem_priority_inheritance` 
 for further information.
 
 Signals
 =======
 
-  3) Store the thread id's in a list when ``read()`` is called. Wake up the 
+  3) Store the thread id's in a list when ``read()`` is called. Wake up the  
   threads using ``sigqueue()``. Read the data from a shared buffer 
   inside ``sched_lock()``.
 
@@ -242,8 +241,8 @@ NuttX does not currently support process groups. But that might be a good
 RTOS extension. If you and others think that would be useful I could 
 probably add the basics of such a feature in a day or so.
 
-poll()
-======
+``poll()``
+==========
 
   Is there some better way that I haven't discovered?
 
