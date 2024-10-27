@@ -86,7 +86,7 @@ jobs:
             esac
           fi
 
-          echo "name=$OS_REF" >> $GITHUB_OUTPUT
+          echo "os_ref=$OS_REF" >> $GITHUB_OUTPUT
           echo "apps_ref=$APPS_REF" >> $GITHUB_OUTPUT
 
       - name: Checkout nuttx repo
