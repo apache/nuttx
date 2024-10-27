@@ -36,7 +36,7 @@ CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
 CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
 CMN_CSRCS += xtensa_mpu.c xtensa_nputs.c xtensa_oneshot.c xtensa_perf.c
 CMN_CSRCS += xtensa_releasestack.c xtensa_registerdump.c xtensa_sigdeliver.c
-CMN_CSRCS += xtensa_switchcontext.c xtensa_swint.c xtensa_stackframe.c
+CMN_CSRCS += xtensa_swint.c xtensa_stackframe.c
 CMN_CSRCS += xtensa_saveusercontext.c xtensa_schedsigaction.c xtensa_udelay.c
 CMN_CSRCS += xtensa_usestack.c xtensa_tcbinfo.c
 

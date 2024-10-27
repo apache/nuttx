@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #ifndef __ASSEMBLY__
 #  include <stdbool.h>
+#  include <arch/syscall.h>
 #endif
 
 #include <arch/types.h>
@@ -447,6 +448,15 @@ noinstrument_function static inline_function bool up_interrupt_context(void)
 #endif
 }
 #endif
+
+#define up_switch_context(tcb, rtcb)   \
+  do {                                 \
+    if (!up_interrupt_context())       \
+      {                                \
+        sys_call0(SYS_switch_context); \
+      }                                \
+    UNUSED(rtcb);                      \
+  } while (0)
 
 /****************************************************************************
  * Name: up_getusrpc
