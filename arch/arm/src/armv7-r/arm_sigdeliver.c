@@ -53,7 +53,7 @@
 
 void arm_sigdeliver(void)
 {
-  struct tcb_s  *rtcb = this_task();
+  struct tcb_s *rtcb = this_task();
   uint32_t *regs = rtcb->xcp.saved_regs;
 
 #ifdef CONFIG_SMP

@@ -236,10 +236,10 @@ SECTION_FUNC(text, arm64_irq_handler)
 
 GTEXT(arm64_serror_handler)
 SECTION_FUNC(text, arm64_serror_handler)
-    mov   x0, sp
-    adrp  x5, arm64_fatal_handler
-    add   x5, x5, #:lo12:arm64_fatal_handler
-    br    x5
+    mov    x0, sp
+    adrp   x5, arm64_fatal_handler
+    add    x5, x5, #:lo12:arm64_fatal_handler
+    br     x5
     /* Return here only in case of recoverable error */
 
     b      arm64_exit_exception
@@ -255,8 +255,8 @@ SECTION_FUNC(text, arm64_serror_handler)
 GTEXT(arm64_mode32_handler)
 SECTION_FUNC(text, arm64_mode32_handler)
     mov    x0, sp
-    adrp  x5, arm64_fatal_handler
-    add   x5, x5, #:lo12:arm64_fatal_handler
+    adrp   x5, arm64_fatal_handler
+    add    x5, x5, #:lo12:arm64_fatal_handler
     br     x5
     /* Return here only in case of recoverable error */
 
@@ -275,8 +275,8 @@ SECTION_FUNC(text, arm64_fiq_handler)
 #ifndef CONFIG_ARM64_DECODEFIQ
 
     mov    x0, sp
-    adrp  x5, arm64_fatal_handler
-    add   x5, x5, #:lo12:arm64_fatal_handler
+    adrp   x5, arm64_fatal_handler
+    add    x5, x5, #:lo12:arm64_fatal_handler
     br     x5
 
     /* Return here only in case of recoverable error */
