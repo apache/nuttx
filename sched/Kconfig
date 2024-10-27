@@ -1367,6 +1367,14 @@ config SCHED_INSTRUMENTATION_DUMP
 			void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt, uint32_t type, va_list va) printf_like(3, 0);
 			void sched_note_printf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt, uint32_t type, ...) printf_like(3, 5);
 
+config SCHED_INSTRUMENTATION_THREADTIME
+	bool "Enable thread runtime instrumentation"
+	depends on SCHED_INSTRUMENTATION_DUMP
+	depends on SCHED_CRITMONITOR
+	default n
+	---help---
+		Enable thread runtime instrumentation.
+
 config SCHED_INSTRUMENTATION_FUNCTION
 	bool "Enable function auto-tracing"
 	default n

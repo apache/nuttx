@@ -249,6 +249,16 @@
           } \
         while (0)
 
+#define sched_note_threadtime(elapsed) \
+        do \
+          { \
+            struct note_threadtime_s threadtime; \
+            threadtime.elapsed = elapsed; \
+            sched_note_event(NOTE_TAG_SCHED, NOTE_DUMP_THREADTIME, \
+                             &threadtime, sizeof(threadtime)); \
+          } \
+        while (0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -294,6 +304,7 @@ enum note_type_e
   NOTE_DUMP_MARK,
   NOTE_DUMP_BINARY,
   NOTE_DUMP_COUNTER,
+  NOTE_DUMP_THREADTIME,
 
   /* Always last */
 
@@ -518,6 +529,11 @@ struct note_counter_s
 {
   long int value;
   char name[NAME_MAX];
+};
+
+struct note_threadtime_s
+{
+  clock_t elapsed;
 };
 
 /* This is the type of the argument passed to the NOTECTL_GETMODE and
