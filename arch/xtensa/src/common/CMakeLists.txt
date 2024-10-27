@@ -71,7 +71,6 @@ list(
   xtensa_releasestack.c
   xtensa_registerdump.c
   xtensa_sigdeliver.c
-  xtensa_switchcontext.c
   xtensa_swint.c
   xtensa_stackframe.c
   xtensa_saveusercontext.c
