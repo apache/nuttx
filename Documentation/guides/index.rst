@@ -53,3 +53,4 @@ Guides
   semihosting.rst
   renode.rst
   signal_events_interrupt_handlers.rst  
+  signaling_sem_priority_inheritance.rst
