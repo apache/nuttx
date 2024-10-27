@@ -55,8 +55,48 @@ Doesn't work. No BASEPRI implementation for ``Cotex-M0`` in NuttX.
 nrf52840-dk
 ===========
 
-Nordic UART peripheral is not supported by Renode, UARTE support
-is required (EasyDMA).
+``CONFIG_ARMV7M_USEBASEPRI=y`` must be set.
+
+At default Renode uses UART with EasyDMA enabled (UARTE) which is not supported
+by Nuttx yet. We can get around this by creating our own machine description
+based on Renode default implementation::
+
+  using "platforms/cpus/nrf52840.repl"
+
+  uart0:
+    easyDMA: false
+
+Renode script::
+
+  using sysbus
+
+  mach create
+  machine LoadPlatformDescription @nrf52840_custom.repl
+
+  $bin?=@nuttx
+
+  showAnalyzer uart0
+
+  macro reset
+  """
+    sysbus LoadELF $bin
+  """
+
+  runMacro $reset
+
+Tested with ``nrf52840-dk/nsh``.
+
+Known issues:
+
+* ``QSPI`` not implemented in Renode,
+
+* ``PWM`` doesn't work, missing ``NRF52_PWM_EVENTS_SEQSTARTED0_OFFSET``
+  implementation in Renode,
+
+* ``ADC`` doesn't work, missing ``NRF52_SAADC_EVENTS_CALDONE_OFFSET``
+  implementation in Renode,
+
+* ``SoftDevice`` doesn't work, crash in ``mpsl_init()``
 
 stm32f746g-disco
 ================
