@@ -1,4 +1,17 @@
-/arm/[m-q]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/max326xx/*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/moxart/*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps2*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+/arm/mps/mps3-an547/configs/ap,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps3-an547/configs/bl,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps3-an547/configs/clang,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/mps/mps3-an547/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/mps/mps3-an547/configs/picostest,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+/arm/mx8mp/*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
+/arm/[n-q]*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+
 -moxa:nsh
 
 # Boards build by CMake
