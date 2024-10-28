@@ -406,6 +406,46 @@ if(CONFIG_BUILTIN_COMPILER_RT)
     list(APPEND RT_BUILTIN_SRCS floatundidf.c floatundisf.c floatundixf.c)
   endif()
 
+  if(CONFIG_COMPILER_RT_PROFILE)
+
+    target_include_directories(
+      compiler-rt PRIVATE ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile)
+
+    target_compile_options(
+      compiler-rt
+      PRIVATE -DCOMPILER_RT_HAS_UNAME
+              -Wno-cleardeprecated-pragma
+              -Wno-deprecated-pragma
+              -Wno-incompatible-pointer-types
+              -Wno-shadow
+              -Wno-strict-prototypes
+              -Wno-undef
+              -Wno-unknown-warning-option)
+
+    set(RT_PROFILE_SRCS
+        GCDAProfiling.c
+        InstrProfiling.c
+        InstrProfilingBuffer.c
+        InstrProfilingFile.c
+        InstrProfilingInternal.c
+        InstrProfilingMerge.c
+        InstrProfilingMergeFile.c
+        InstrProfilingNameVar.c
+        InstrProfilingUtil.c
+        InstrProfilingValue.c
+        InstrProfilingVersionVar.c
+        InstrProfilingWriter.c
+        InstrProfilingRuntime.cpp)
+
+    foreach(src ${RT_PROFILE_SRCS})
+      string(PREPEND src ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile/)
+      list(APPEND COMPILER_RT_SRCS ${src})
+    endforeach()
+
+    list(APPEND COMPILER_RT_SRCS InstrProfilingPlatform.c)
+
+  endif()
+
   list(APPEND INCDIR
        ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/${RT_BUILTIN_ARCH})
 

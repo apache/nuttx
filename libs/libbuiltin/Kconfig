@@ -33,4 +33,8 @@ config COMPILER_RT_HAS_BFLOAT16
 	bool "Enable support for bfloat16 in Compiler-rt"
 	default n
 
+config COMPILER_RT_PROFILE
+	bool "Enable profiling support in Compiler-rt"
+	default n
+
 endif # BUILTIN_COMPILER_RT
