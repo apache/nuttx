@@ -287,22 +287,22 @@
 
 /* LPUART Watermark Register (WATER) */
 
-#define LPUART_WATER_TXWATER_SHIFT     (0)       /* Bits 0-1: Transmit Watermark (TXWATER) */
-#define LPUART_WATER_TXWATER_MASK      (0x03 << LPUART_WATER_TXWATER_SHIFT)
+#define LPUART_WATER_TXWATER_SHIFT     (0)       /* Bits 0-3: Transmit Watermark (TXWATER) */
+#define LPUART_WATER_TXWATER_MASK      (0x0f << LPUART_WATER_TXWATER_SHIFT)
 #  define LPUART_WATER_TXWATER(n)      ((n) << LPUART_WATER_TXWATER_SHIFT)
-                                                 /* Bits 2-7: Reserved */
-#define LPUART_WATER_TXCOUNT_SHIFT     (8)       /* Bits 8-10: Transmit Counter (TXCOUNT) */
-#define LPUART_WATER_TXCOUNT_MASK      (0x07 << LPUART_WATER_TXCOUNT_SHIFT)
+                                                 /* Bits 4-7: Reserved */
+#define LPUART_WATER_TXCOUNT_SHIFT     (8)       /* Bits 8-12: Transmit Counter (TXCOUNT) */
+#define LPUART_WATER_TXCOUNT_MASK      (0x1f << LPUART_WATER_TXCOUNT_SHIFT)
 #  define LPUART_WATER_TXCOUNT(n)      ((n) << LPUART_WATER_TXCOUNT_SHIFT)
-                                                 /* Bits 11-15: Reserved */
-#define LPUART_WATER_RXWATER_SHIFT     (16)      /* Bits 16-17: Receive Watermark (RXWATER) */
-#define LPUART_WATER_RXWATER_MASK      (0x03 << LPUART_WATER_RXWATER_SHIFT)
+                                                 /* Bits 13-15: Reserved */
+#define LPUART_WATER_RXWATER_SHIFT     (16)      /* Bits 16-19: Receive Watermark (RXWATER) */
+#define LPUART_WATER_RXWATER_MASK      (0x0f << LPUART_WATER_RXWATER_SHIFT)
 #  define LPUART_WATER_RXWATER(n)      ((n) << LPUART_WATER_RXWATER_SHIFT)
-                                                 /* Bits 18-23: Reserved */
-#define LPUART_WATER_RXCOUNT_SHIFT     (24)      /* Bits 24-26: Receive Counter (RXCOUNT) */
-#define LPUART_WATER_RXCOUNT_MASK      (0x07 << LPUART_WATER_RXCOUNT_SHIFT)
+                                                 /* Bits 20-23: Reserved */
+#define LPUART_WATER_RXCOUNT_SHIFT     (24)      /* Bits 24-28: Receive Counter (RXCOUNT) */
+#define LPUART_WATER_RXCOUNT_MASK      (0x1f << LPUART_WATER_RXCOUNT_SHIFT)
 #  define LPUART_WATER_RXCOUNT(n)      ((n) << LPUART_WATER_RXCOUNT_SHIFT)
-                                                 /* Bits 27-31: Reserved */
+                                                 /* Bits 29-31: Reserved */
 
 /* Data read-only Register (DATARO) */
 

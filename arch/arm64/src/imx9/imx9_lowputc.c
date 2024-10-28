@@ -387,6 +387,11 @@ int imx9_lpuart_configure(uint32_t base, int uartnum,
   regval &= ~LPUART_GLOBAL_RST;
   putreg32(regval, base + IMX9_LPUART_GLOBAL_OFFSET);
 
+  /* Enable RX and TX FIFOs */
+
+  putreg32(LPUART_FIFO_RXFE | LPUART_FIFO_TXFE,
+           base + IMX9_LPUART_FIFO_OFFSET);
+
   /* Construct MODIR register */
 
   regval = 0;
