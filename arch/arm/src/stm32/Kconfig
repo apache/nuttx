@@ -2251,6 +2251,10 @@ config STM32_HAVE_HRTIM1
 	bool
 	default n
 
+config STM32_HAVE_HRTIM1_PLLCLK
+	bool
+	default n
+
 config STM32_HAVE_LTDC
 	bool
 	default n
@@ -8105,10 +8109,6 @@ config STM32_HRTIM_FAULT4
 	default n
 
 endif # STM32_HRTIM_FAULTS
-
-config STM32_HAVE_HRTIM1_PLLCLK
-	bool
-	default n
 
 config STM32_HRTIM_CLK_FROM_PLL
 	bool "HRTIM Clock from PLL"
