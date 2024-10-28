@@ -38,6 +38,8 @@ CPPOBJS = $(addprefix $(BINDIR)$(DELIM), $(CPPSRCS:.cpp=$(OBJEXT)))
 SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS) $(CPPSRCS)
 OBJS = $(AOBJS) $(COBJS) $(CXXOBJS) $(CPPOBJS)
 
+BUILTIN_CLEANDIR = $(foreach dir,$(LIBBUILTIN),$(dir)/$(dir))
+
 all: $(OBJS)
 	$(call ARCHIVE, $(BIN), $(OBJS))
 
@@ -81,3 +83,4 @@ distclean: clean
 	$(Q) $(MAKE) -C bin  distclean
 	$(Q) $(MAKE) -C kbin distclean
 	$(call DELFILE, .depend)
+	$(call DELDIR, $(BUILTIN_CLEANDIR))
