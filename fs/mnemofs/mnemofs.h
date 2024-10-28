@@ -98,9 +98,9 @@
 #define MFS_JRNL_LIM(sb)           (MFS_JRNL(sb).n_blks / 2)
 #define MFS_TRAVERSE_INITSZ        8
 
-#define MFS_LOG(fmt, ...)          finfo(fmt, ##__VA_ARGS__)
+#define MFS_LOG(fn, fmt, ...)          finfo("[mnemofs | " fn "] " fmt, ##__VA_ARGS__)
 #ifdef CONFIG_MNEMOFS_EXTRA_DEBUG
-#define MFS_EXTRA_LOG(fmt, ...)    MFS_LOG(fmt, ##__VA_ARGS__)
+#define MFS_EXTRA_LOG(fn, fmt, ...)    MFS_LOG(fn, fmt, ##__VA_ARGS__)
 #else
 #define MFS_EXTRA_LOG(fmt, ...)    { }
 #endif
@@ -285,9 +285,9 @@ struct mfs_dirent_s
 
 struct mfs_pitr_s
 {
-  struct mfs_path_s p;     /* Parent representation */
+  struct mfs_path_s p;     /* Parent's path representation */
   mfs_t             depth;
-  mfs_t             c_off; /* Current offset. */
+  mfs_t             c_off; /* Current iteration offset. */
 };
 
 /* TODO: depth >= 1 */
@@ -422,6 +422,23 @@ static inline mfs_t mfs_popcnt(mfs_t x)
   }
 
 #endif
+}
+
+static inline void MFS_EXTRA_LOG_DIRENT(FAR struct mfs_dirent_s *dirent)
+{
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "Direntry details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tDirent location %p", dirent);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tMode is %" PRIu16, dirent->mode);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tName is \"%.*s\"", dirent->namelen,
+                dirent->name);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tNamelen is %" PRIu32,
+                dirent->namelen);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tName Hash is %" PRIu16,
+                dirent->name_hash);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tSize is %" PRIu16,
+                dirent->sz);
+
+  /* TODO: Timespecs */
 }
 
 /****************************************************************************

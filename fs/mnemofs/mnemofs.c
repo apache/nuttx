@@ -1490,22 +1490,22 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
   FAR struct mfs_sb_s   *sb       = NULL;
   struct mtd_geometry_s  geo;
 
-  MFS_LOG("[mnemofs | BIND] Entry.");
+  MFS_LOG("BIND", "Entry.");
 
-  MFS_EXTRA_LOG("[mnemofs | BIND] Resetting temporary buffer.");
+  MFS_EXTRA_LOG("BIND", "Resetting temporary buffer.");
   memset(buf, 0, 8);
 
-  MFS_EXTRA_LOG("[mnemofs | BIND] Allocating superblock in memory.");
+  MFS_EXTRA_LOG("BIND", "Allocating superblock in memory.");
   sb = fs_heap_zalloc(sizeof(*sb));
   if (!sb)
     {
-      MFS_LOG("[mnemofs | BIND] SB in-memory allocation error.");
+      MFS_LOG("BIND", "SB in-memory allocation error.");
       ret = -ENOMEM;
       goto errout;
     }
   else
     {
-      MFS_EXTRA_LOG("[mnemofs | BIND] Superblock allocated at %p", sb);
+      MFS_EXTRA_LOG("BIND", "Superblock allocated at %p", sb);
     }
 
   /* Currently only supports NAND flashes (MTD devices). */
@@ -1514,20 +1514,20 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
     {
       if (!driver || !driver->u.i_mtd || !driver->u.i_mtd->ioctl)
         {
-          MFS_LOG("[mnemofs | BIND] Unsupported device.");
+          MFS_LOG("BIND", "Unsupported device.");
           ret = -ENODEV;
           goto errout_with_sb;
         }
       else
         {
-          MFS_EXTRA_LOG("[mnemofs | BIND] Device is of MTD type.");
+          MFS_EXTRA_LOG("BIND", "Device is of MTD type.");
         }
 
       ret = MTD_IOCTL(driver->u.i_mtd, MTDIOC_GEOMETRY,
                       (unsigned long) &geo);
 
-      MFS_LOG("[mnemofs | BIND] MTD Driver Geometry read.");
-      MFS_EXTRA_LOG("[mnemofs | BIND] MTD Driver Geometry details."
+      MFS_LOG("BIND", "MTD Driver Geometry read.");
+      MFS_EXTRA_LOG("BIND", "MTD Driver Geometry details."
                     " Page size: %d, Block size: %d,"
                     " Pages/Block: %d, Blocks: %d\n",
                     geo.blocksize, geo.erasesize,
@@ -1535,7 +1535,7 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
     }
   else
     {
-      MFS_LOG("[mnemofs | BIND] Device is not an MTD device.");
+      MFS_LOG("BIND", "Device is not an MTD device.");
       ret = -ENODEV;
       goto errout_with_sb;
     }
@@ -1543,23 +1543,23 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
   ret = nxmutex_init(&MFS_LOCK(sb));
   if (predict_false(ret < 0))
     {
-      MFS_LOG("[mnemofs | BIND] FS-wide Mutex failed to initialize.");
+      MFS_LOG("BIND", "FS-wide Mutex failed to initialize.");
       goto errout_with_sb;
     }
   else
     {
-      MFS_EXTRA_LOG("[mnemofs | BIND] FS-wide Mutex Initialized.");
+      MFS_EXTRA_LOG("BIND", "FS-wide Mutex Initialized.");
     }
 
   ret = nxmutex_lock(&MFS_LOCK(sb));
   if (ret < 0)
     {
-      MFS_LOG("[mnemofs | BIND] Mutex failed to lock. Return %d.", ret);
+      MFS_LOG("BIND", "Mutex failed to lock. Return %d.", ret);
       goto errout_with_lockinit;
     }
   else
     {
-      MFS_EXTRA_LOG("[mnemofs | BIND] Mutex acquired.");
+      MFS_EXTRA_LOG("BIND", "Mutex acquired.");
     }
 
   sb->drv             = driver;
@@ -1580,31 +1580,31 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
   list_initialize(&MFS_OFILES(sb));
 
-  MFS_EXTRA_LOG("[mnemofs | BIND] SB initialized in-memory.");
-  MFS_EXTRA_LOG("[mnemofs | BIND] SB Details.");
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tDriver: %p", driver);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tPage Size: %" PRIu32, sb->pg_sz);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tLog Page Size: %" PRIu8, sb->log_pg_sz);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tBlock Size: %" PRIu32, sb->blk_sz);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tLog Block Size: %" PRIu8,
+  MFS_EXTRA_LOG("BIND", "SB initialized in-memory.");
+  MFS_EXTRA_LOG("BIND", "SB Details.");
+  MFS_EXTRA_LOG("BIND", "\tDriver: %p", driver);
+  MFS_EXTRA_LOG("BIND", "\tPage Size: %" PRIu32, sb->pg_sz);
+  MFS_EXTRA_LOG("BIND", "\tLog Page Size: %" PRIu8, sb->log_pg_sz);
+  MFS_EXTRA_LOG("BIND", "\tBlock Size: %" PRIu32, sb->blk_sz);
+  MFS_EXTRA_LOG("BIND", "\tLog Block Size: %" PRIu8,
                 sb->log_blk_sz);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tPages Per Block: %" PRIu16,
+  MFS_EXTRA_LOG("BIND", "\tPages Per Block: %" PRIu16,
                 sb->pg_in_blk);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tBlocks: %" PRIu32, sb->n_blks);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tLog Blocks: %" PRIu8, sb->log_n_blks);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tJournal Blocks: %" PRIu16,
+  MFS_EXTRA_LOG("BIND", "\tBlocks: %" PRIu32, sb->n_blks);
+  MFS_EXTRA_LOG("BIND", "\tLog Blocks: %" PRIu8, sb->log_n_blks);
+  MFS_EXTRA_LOG("BIND", "\tJournal Blocks: %" PRIu16,
                 MFS_JRNL(sb).n_blks);
-  MFS_EXTRA_LOG("[mnemofs | BIND] \tFlush State: %" PRIu8, MFS_FLUSH(sb));
+  MFS_EXTRA_LOG("BIND", "\tFlush State: %" PRIu8, MFS_FLUSH(sb));
 
   sb->rw_buf        = fs_heap_zalloc(MFS_PGSZ(sb));
   if (predict_false(sb->rw_buf == NULL))
     {
-      MFS_LOG("[mnemofs | BIND] RW Buffer in-memory allocation error.");
+      MFS_LOG("BIND", "RW Buffer in-memory allocation error.");
       goto errout_with_lock;
     }
   else
     {
-      MFS_EXTRA_LOG("[mnemofs | BIND] RW Buffer allocated.");
+      MFS_EXTRA_LOG("BIND", "RW Buffer allocated.");
     }
 
   /* TODO: Format the superblock in Block 0. */
@@ -1613,64 +1613,64 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
   if (!MFS_STRLITCMP(data, "autoformat"))
     {
-      MFS_LOG("[mnemofs | BIND] Autoformat is ON.");
+      MFS_LOG("BIND", "Autoformat is ON.");
 
       /* Look for journal and maybe hopefully, the master node
        * if it comes first.
        */
 
-      MFS_LOG("[mnemofs | BIND] Checking for valid mnemofs formatting.");
+      MFS_LOG("BIND", "Checking for valid mnemofs formatting.");
 
       for (i = 0; i < MFS_NBLKS(sb); i++)
         {
-          MFS_EXTRA_LOG("[mnemofs | BIND] Checking start of Block %" PRIu32,
+          MFS_EXTRA_LOG("BIND", "Checking start of Block %" PRIu32,
                         i + 1);
           mfs_read_page(sb, buf, 8, MFS_BLK2PG(sb, i), 0);
 
           for (j = 0; j < 8; j++)
             {
-              MFS_EXTRA_LOG("[mnemofs | BIND] \tBlock %" PRIu32
+              MFS_EXTRA_LOG("BIND", "\tBlock %" PRIu32
                             ", Offset %" PRIu32 ": %x", i, j, buf[j]);
             }
 
           if (!MFS_STRLITCMP(buf, MFS_JRNL_MAGIC))
             {
-              MFS_LOG("[mnemofs | BIND] Found Journal at Block %" PRIu32,
+              MFS_LOG("BIND", "Found Journal at Block %" PRIu32,
                       i + 1);
 
               ret = mfs_jrnl_init(sb, i);
               if (predict_false(ret < 0))
                 {
-                  MFS_LOG("[mnemofs | BIND] Error initializing journal.");
+                  MFS_LOG("BIND", "Error initializing journal.");
                   goto errout_with_rwbuf;
                 }
               else
                 {
-                  MFS_LOG("[mnemofs | BIND] Journal initialized.");
+                  MFS_LOG("BIND", "Journal initialized.");
                 }
 
               ret = mfs_mn_init(sb, i);
               if (predict_false(ret < 0))
                 {
-                  MFS_LOG("[mnemofs | BIND] Error initializing masternode.");
+                  MFS_LOG("BIND", "Error initializing masternode.");
                   goto errout_with_rwbuf;
                 }
               else
                 {
-                  MFS_LOG("[mnemofs | BIND] Master node initialized.");
+                  MFS_LOG("BIND", "Master node initialized.");
                 }
 
               break;
             }
 
-          MFS_EXTRA_LOG("[mnemofs | BIND] Resetting temporary buffer.");
+          MFS_EXTRA_LOG("BIND", "Resetting temporary buffer.");
           memset(buf, 0, 8);
         }
 
       if (predict_false(sb->mn.pg == 0))
         {
-          MFS_LOG("[mnemofs | BIND] Journal not found on device.");
-          MFS_LOG("[mnemofs | BIND] Device needs formatting.");
+          MFS_LOG("BIND", "Journal not found on device.");
+          MFS_LOG("BIND", "Device needs formatting.");
 
           format = true;
           memset(&MFS_JRNL(sb), 0, sizeof(struct mfs_jrnl_state_s));
@@ -1678,7 +1678,7 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
         }
       else
         {
-          MFS_LOG("[mnemofs | BIND] Device already formatted.");
+          MFS_LOG("BIND", "Device already formatted.");
 
           mfs_lru_init(sb);
           mfs_ba_init(sb);
@@ -1691,11 +1691,11 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
 
       if (format)
         {
-          MFS_LOG("[mnemofs | BIND] Device format necessary.");
+          MFS_LOG("BIND", "Device format necessary.");
         }
       else
         {
-          MFS_EXTRA_LOG("[mnemofs | BIND] Device formatting configured.");
+          MFS_EXTRA_LOG("BIND", "Device formatting configured.");
         }
 
       mfs_ba_fmt(sb);
@@ -1707,55 +1707,55 @@ static int mnemofs_bind(FAR struct inode *driver, FAR const void *data,
       ret = mfs_jrnl_fmt(sb, &mnblk1, &mnblk2, &jrnl_blk);
       if (predict_false(ret < 0))
         {
-          MFS_LOG("[mnemofs | BIND] Error formatting Journal");
+          MFS_LOG("BIND", "Error formatting Journal");
           goto errout_with_rwbuf;
         }
       else
         {
-          MFS_LOG("[mnemofs | BIND] Journal format completed.");
+          MFS_LOG("BIND", "Journal format completed.");
         }
 
       ret = mfs_mn_fmt(sb, mnblk1, mnblk2, jrnl_blk);
       if (predict_false(ret < 0))
         {
-          MFS_LOG("[mnemofs | BIND] Error formatting Master Node");
+          MFS_LOG("BIND", "Error formatting Master Node");
           goto errout_with_rwbuf;
         }
       else
         {
-          MFS_LOG("[mnemofs | BIND] Master node format completed.");
+          MFS_LOG("BIND", "Master node format completed.");
         }
 
-      MFS_LOG("[mnemofs | BIND] Device formatted.");
+      MFS_LOG("BIND", "Device formatted.");
     }
 
   *handle = (FAR void *)sb;
-  MFS_LOG("[mnemofs | BIND] Mount Successful. Super Block %p.", sb);
+  MFS_LOG("BIND", "Mount Successful. Super Block %p.", sb);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  MFS_LOG("[mnemofs | BIND] Mutex released.");
+  MFS_LOG("BIND", "Mutex released.");
 
-  MFS_LOG("[mnemofs | BIND] Exit | Return: %d.", ret);
+  MFS_LOG("BIND", "Exit | Return: %d.", ret);
   return ret;
 
 errout_with_rwbuf:
   fs_heap_free(sb->rw_buf);
-  MFS_LOG("[mnemofs | BIND] RW Buffer freed.");
+  MFS_LOG("BIND", "RW Buffer freed.");
 
 errout_with_lock:
   nxmutex_unlock(&MFS_LOCK(sb));
-  MFS_EXTRA_LOG("[mnemofs | BIND] Mutex released.");
+  MFS_EXTRA_LOG("BIND", "Mutex released.");
 
 errout_with_sb:
   fs_heap_free(sb);
-  MFS_LOG("[mnemofs | BIND] Superblock freed.");
+  MFS_LOG("BIND", "Superblock freed.");
 
 errout_with_lockinit:
   nxmutex_destroy(&MFS_LOCK(sb));
-  MFS_EXTRA_LOG("[mnemofs | BIND] Mutex destroyed.");
+  MFS_EXTRA_LOG("BIND", "Mutex destroyed.");
 
 errout:
-  MFS_LOG("[mnemofs | BIND] Exit | Return: %d.", ret);
+  MFS_LOG("BIND", "Exit | Return: %d.", ret);
   return ret;
 }
 
@@ -1782,28 +1782,28 @@ static int mnemofs_unbind(FAR void *handle, FAR struct inode **driver,
 {
   FAR struct mfs_sb_s *sb;
 
-  MFS_LOG("[mnemofs | UNBIND] Entry.");
+  MFS_LOG("UNBIND", "Entry.");
 
   DEBUGASSERT(handle);
   sb      = handle;
-  MFS_LOG("[mnemofs | UNBIND] Superblock %p.", sb);
+  MFS_LOG("UNBIND", "Superblock %p.", sb);
 
   *driver = sb->drv;
-  MFS_LOG("[mnemofs | UNBIND] Driver %p.", driver);
+  MFS_LOG("UNBIND", "Driver %p.", driver);
 
   mfs_jrnl_free(sb);
   mfs_ba_free(sb);
 
   nxmutex_destroy(&MFS_LOCK(sb));
-  MFS_EXTRA_LOG("[mnemofs | UNBIND] Mutex destroyed.");
+  MFS_EXTRA_LOG("UNBIND", "Mutex destroyed.");
 
   fs_heap_free(sb->rw_buf);
-  MFS_LOG("[mnemofs | UNBIND] RW Buffer freed.");
+  MFS_LOG("UNBIND", "RW Buffer freed.");
 
   fs_heap_free(sb);
-  MFS_LOG("[mnemofs | UNBIND] Superblock freed.");
+  MFS_LOG("UNBIND", "Superblock freed.");
 
-  MFS_LOG("[mnemofs | UNBIND] Exit.");
+  MFS_LOG("UNBIND", "Exit.");
   return OK;
 }
 
@@ -1952,12 +1952,16 @@ static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   FAR struct mfs_sb_s   *sb;
   FAR struct mfs_path_s *path;
 
-  finfo("Mnemofs mkdir at %s.", relpath);
+  MFS_LOG("MKDIR", "Entry.");
+  MFS_LOG("MKDIR", "New directory at \"%s\".", relpath);
 
   mode |= S_IFDIR;
 
+  MFS_LOG("MKDIR", "Mode is 0x%x.", mode);
+
   DEBUGASSERT(mountpt != NULL);
   sb  = mountpt->i_private;
+  MFS_EXTRA_LOG("MKDIR", "Superblock is %p.", sb);
   DEBUGASSERT(sb != NULL);
 
   ret = nxmutex_lock(&MFS_LOCK(sb));
@@ -1965,73 +1969,115 @@ static int mnemofs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
     {
       goto errout;
     }
-
-  finfo("Lock acquired.");
+  else
+    {
+      MFS_EXTRA_LOG("MKDIR", "Mutex lock acquired.");
+    }
 
   flags = mfs_get_patharr(sb, relpath, &path, &depth);
+  MFS_EXTRA_LOG("MKDIR", "mnemofs flags retrieved is 0x%x.", flags);
+  MFS_EXTRA_LOG("MKDIR", "Path received is at %p.", path);
+  MFS_EXTRA_LOG("MKDIR", "Depth of path is %" PRIu32 ".", depth);
+
   if ((flags & MFS_EXIST) != 0)
     {
-      finfo("File exists.");
-
+      MFS_LOG("MKDIR", "The requested directory already exists.");
       ret = -EEXIST;
       goto errout_with_path;
     }
   else
     {
+      MFS_LOG("MKDIR", "The requested directory does not exist.");
       if ((flags & MFS_P_EXIST) != 0)
         {
+          MFS_EXTRA_LOG("MKDIR", "Parent exists.");
           if ((flags  & MFS_P_ISDIR) != 0)
             {
               /* OK */
 
-              finfo("OK");
+              MFS_EXTRA_LOG("MKDIR", "Parent is all right.");
             }
           else
             {
+              MFS_EXTRA_LOG("MKDIR", "Parent is not a directory.");
               ret = -ENOTDIR;
               goto errout_with_path;
             }
         }
       else
         {
+          MFS_EXTRA_LOG("MKDIR", "Parent not found.");
           ret = -ENOENT;
           goto errout_with_path;
         }
     }
 
   memset(&path[depth - 1], 0, sizeof(struct mfs_path_s));
+  MFS_EXTRA_LOG("MKDIR", "Resetting, at index %u, path array %p.",
+                depth - 1, path);
+
   mfs_pitr_init(sb, path, depth, &pitr, true);
+  MFS_EXTRA_LOG("MKDIR", "The path contains the child.");
+  MFS_EXTRA_LOG("MKDIR", "Parent iterator initialized.");
+  MFS_EXTRA_LOG("MKDIR", "\tDepth of parent %" PRIu32 ".",
+                pitr.depth);
+  MFS_EXTRA_LOG("MKDIR", "\tCurrent iteration offset %" PRIu32 ".",
+                pitr.c_off);
+  MFS_EXTRA_LOG("MKDIR", "\tParent's offset %" PRIu32 ".",
+                pitr.p.off);
+  MFS_EXTRA_LOG("MKDIR", "\tParent's size %" PRIu32 ".", pitr.p.sz);
+  MFS_EXTRA_LOG("MKDIR", "\tParent's CTZ (%" PRIu32 ", %" PRIu32 ")"
+                , pitr.p.ctz.idx_e, pitr.p.ctz.pg_e);
 
   /* The last incomplete direntry will be added by mfs_pitr_appendnew. */
 
   ret = mfs_pitr_appendnew(sb, path, depth, &pitr, relpath, mode);
   if (predict_false(ret < 0))
     {
+      MFS_LOG("MKDIR", "Could not append direntry. Return %d", ret);
       goto errout_with_path;
+    }
+  else
+    {
+      MFS_EXTRA_LOG("MKDIR", "Direntry append successful.");
+      MFS_EXTRA_LOG("MKDIR", "\tDepth of parent %" PRIu32 ".", pitr.depth);
+      MFS_EXTRA_LOG("MKDIR", "\tCurrent iteration offset %" PRIu32 ".",
+                    pitr.c_off);
+      MFS_EXTRA_LOG("MKDIR", "\tParent's offset %" PRIu32 ".", pitr.p.off);
+      MFS_EXTRA_LOG("MKDIR", "\tParent's size %" PRIu32 ".", pitr.p.sz);
+      MFS_EXTRA_LOG("MKDIR", "\tParent's CTZ (%" PRIu32 ", %" PRIu32 ")",
+                    pitr.p.ctz.idx_e, pitr.p.ctz.pg_e);
     }
 
   mfs_pitr_free(&pitr);
-
-  finfo("Directory created at %s", relpath);
+  MFS_EXTRA_LOG("MKDIR", "Parent iterator freed.");
+  MFS_LOG("MKDIR", "Directory created at \"%s\".", relpath);
 
   mfs_free_patharr(path);
+  MFS_EXTRA_LOG("MKDIR", "Path array freed.");
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("MKDIR", "Mutex released.");
 
-  finfo("Mnemofs mkdir exited with ret %d.", ret);
+  MFS_LOG("MKDIR", "Exit | Return: %d.", ret);
   return ret;
 
 errout_with_path:
   mfs_free_patharr(path);
+  MFS_EXTRA_LOG("MKDIR", "Path array freed.");
 
   mfs_pitr_free(&pitr);
 
   nxmutex_unlock(&MFS_LOCK(sb));
-  finfo("Lock released.");
+  MFS_EXTRA_LOG("MKDIR", "Mutex released.");
+
+  /* TODO: The flush operation does not work properly, and causes memory
+   * leaks by most likely not flushing out anything and keeping it in
+   * memory.
+   */
 
 errout:
-  finfo("Mnemofs mkdir exited with ret %d.", ret);
+  MFS_LOG("MKDIR", "Exit | Return: %d.", ret);
   return ret;
 }
 
