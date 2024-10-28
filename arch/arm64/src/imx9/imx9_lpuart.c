@@ -1473,8 +1473,6 @@ static int imx9_interrupt(int irq, void *context, void *arg)
   struct imx9_uart_s *priv;
   uint32_t usr;
   uint32_t lsr;
-  int passes = 0;
-  bool handled;
 
   DEBUGASSERT(dev != NULL && dev != NULL);
   priv = (struct imx9_uart_s *)dev;
@@ -1485,96 +1483,82 @@ static int imx9_interrupt(int irq, void *context, void *arg)
   pm_activity(PM_IDLE_DOMAIN, CONFIG_IMX9_PM_SERIAL_ACTIVITY);
 #endif
 
-  /* Loop until there are no characters to be transferred or,
-   * until we have been looping for a long time.
+  /* Get the current UART status and check for loop
+   * termination conditions
    */
 
-  handled = true;
-  for (passes = 0; passes < 256 && handled; passes++)
+  usr  = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
+
+  /* Removed all W1C from the last sr */
+
+  lsr  = usr & ~(LPUART_STAT_LBKDIF | LPUART_STAT_RXEDGIF |
+                 LPUART_STAT_IDLE   | LPUART_STAT_OR      |
+                 LPUART_STAT_NF     | LPUART_STAT_FE      |
+                 LPUART_STAT_PF     | LPUART_STAT_MA1F    |
+                 LPUART_STAT_MA2F);
+
+  /* Keep what we will service */
+
+  usr &= (LPUART_STAT_RDRF | LPUART_STAT_TDRE | LPUART_STAT_OR |
+          LPUART_STAT_FE | LPUART_STAT_NF | LPUART_STAT_PF |
+          LPUART_STAT_IDLE);
+
+  /* Clear serial overrun, parity and framing errors */
+
+  if ((usr & LPUART_STAT_OR) != 0)
     {
-      handled = false;
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_OR | lsr);
+    }
 
-      /* Get the current UART status and check for loop
-       * termination conditions
-       */
+  if ((usr & LPUART_STAT_NF) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_NF | lsr);
+    }
 
-      usr  = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
+  if ((usr & LPUART_STAT_PF) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_PF | lsr);
+    }
 
-      /* Removed all W1C from the last sr */
+  if ((usr & LPUART_STAT_FE) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_FE | lsr);
+    }
 
-      lsr  = usr & ~(LPUART_STAT_LBKDIF | LPUART_STAT_RXEDGIF |
-                     LPUART_STAT_IDLE   | LPUART_STAT_OR      |
-                     LPUART_STAT_NF     | LPUART_STAT_FE      |
-                     LPUART_STAT_PF     | LPUART_STAT_MA1F    |
-                     LPUART_STAT_MA2F);
+  if ((usr & (LPUART_STAT_FE | LPUART_STAT_PF | LPUART_STAT_NF)) != 0)
+    {
+      /* Discard data */
 
-      /* Keep what we will service */
-
-      usr &= (LPUART_STAT_RDRF | LPUART_STAT_TDRE | LPUART_STAT_OR |
-              LPUART_STAT_FE | LPUART_STAT_NF | LPUART_STAT_PF |
-              LPUART_STAT_IDLE);
-
-      /* Clear serial overrun, parity and framing errors */
-
-      if ((usr & LPUART_STAT_OR) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_OR | lsr);
-        }
-
-      if ((usr & LPUART_STAT_NF) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_NF | lsr);
-        }
-
-      if ((usr & LPUART_STAT_PF) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_PF | lsr);
-        }
-
-      if ((usr & LPUART_STAT_FE) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_FE | lsr);
-        }
-
-      if ((usr & (LPUART_STAT_FE | LPUART_STAT_PF | LPUART_STAT_NF)) != 0)
-        {
-          /* Discard data */
-
-          imx9_serialin(priv, IMX9_LPUART_DATA_OFFSET);
-        }
+      imx9_serialin(priv, IMX9_LPUART_DATA_OFFSET);
+    }
 
 #ifdef SERIAL_HAVE_RXDMA
-      /* The line going to idle, deliver any fractions of RX data */
+  /* The line going to idle, deliver any fractions of RX data */
 
-      if ((usr & LPUART_STAT_IDLE) != 0)
-        {
-          imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
-                            LPUART_STAT_IDLE | lsr);
-          imx9_dma_rxcallback(priv->rxdma, priv, false, LPUART_STAT_IDLE);
-        }
+  if ((usr & LPUART_STAT_IDLE) != 0)
+    {
+      imx9_serialout(priv, IMX9_LPUART_STAT_OFFSET,
+                     LPUART_STAT_IDLE | lsr);
+      imx9_dma_rxcallback(priv->rxdma, priv, false, LPUART_STAT_IDLE);
+    }
 #endif
 
-      /* Handle incoming, receive bytes */
+  /* Handle incoming, receive bytes */
 
-      if ((usr & LPUART_STAT_RDRF) != 0 &&
-          (priv->ie & LPUART_CTRL_RIE) != 0)
-        {
-          uart_recvchars(dev);
-          handled = true;
-        }
+  if ((priv->ie & LPUART_CTRL_RIE) != 0 && imx9_rxavailable(&priv->dev))
+    {
+      uart_recvchars(dev);
+    }
 
-      /* Handle outgoing, transmit bytes */
+  /* Handle outgoing, transmit bytes */
 
-      if ((usr & LPUART_STAT_TDRE) != 0 &&
-          (priv->ie & LPUART_CTRL_TIE) != 0)
-        {
-          uart_xmitchars(dev);
-          handled = true;
-        }
+  if ((priv->ie & LPUART_CTRL_TIE) != 0)
+    {
+      uart_xmitchars(dev);
     }
 
   return OK;
@@ -1947,8 +1931,8 @@ static bool imx9_rxavailable(struct uart_dev_s *dev)
 
   /* Return true is data is ready in the Rx FIFO */
 
-  regval = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_RDRF) != 0);
+  regval = imx9_serialin(priv, IMX9_LPUART_WATER_OFFSET);
+  return ((regval & LPUART_WATER_RXCOUNT_MASK) != 0);
 }
 #endif
 
@@ -2356,7 +2340,7 @@ static void imx9_txint(struct uart_dev_s *dev, bool enable)
  * Name: imx9_txready
  *
  * Description:
- *   Return true if the transmit register is available to be written to
+ *   Return true if the transmit fifo is available to be written to
  *
  ****************************************************************************/
 
@@ -2364,16 +2348,29 @@ static bool imx9_txready(struct uart_dev_s *dev)
 {
   struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
   uint32_t regval;
+  uint32_t fifo_size;
+  uint32_t fifo_count;
 
-  regval = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_TDRE) != 0);
+  /* Read the fifo size and current fill ratio. Return true if fifo is not
+   * full
+   */
+
+  regval = imx9_serialin(priv, IMX9_LPUART_FIFO_OFFSET);
+  fifo_size = (regval & LPUART_FIFO_TXFIFOSIZE_MASK) >>
+    LPUART_FIFO_TXFIFOSIZE_SHIFT;
+  fifo_size = fifo_size == 0 ? 1 : (1 << (fifo_size + 1));
+  regval = imx9_serialin(priv, IMX9_LPUART_WATER_OFFSET);
+  fifo_count = (regval & LPUART_WATER_TXCOUNT_MASK) >>
+    LPUART_WATER_TXCOUNT_SHIFT;
+
+  return fifo_count < fifo_size;
 }
 
 /****************************************************************************
  * Name: imx9_txempty
  *
  * Description:
- *   Return true if the transmit reg is empty
+ *   Return true if the transmit fifo is empty
  *
  ****************************************************************************/
 
@@ -2382,8 +2379,8 @@ static bool imx9_txempty(struct uart_dev_s *dev)
   struct imx9_uart_s *priv = (struct imx9_uart_s *)dev;
   uint32_t regval;
 
-  regval = imx9_serialin(priv, IMX9_LPUART_STAT_OFFSET);
-  return ((regval & LPUART_STAT_TDRE) != 0);
+  regval = imx9_serialin(priv, IMX9_LPUART_WATER_OFFSET);
+  return (regval & LPUART_WATER_TXCOUNT_MASK) == 0;
 }
 
 /****************************************************************************
