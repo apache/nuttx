@@ -30,8 +30,8 @@
 #include <string.h>
 #include <sys/param.h>
 #include <sys/random.h>
+#include <time.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/hashtable.h>
 
 /****************************************************************************
@@ -108,7 +108,7 @@ void arc4random_buf(FAR void *bytes, size_t nbytes)
 
   while (nbytes > 0)
     {
-      uint32_t hash  = HASH(clock_systime_ticks() - nbytes, 32);
+      uint32_t hash  = HASH(clock() - nbytes, 32);
       size_t   ncopy = MIN(nbytes, sizeof(hash));
 
       memcpy(bytes, &hash, ncopy);
