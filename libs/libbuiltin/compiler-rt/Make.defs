@@ -149,6 +149,36 @@ else
   CSRCS += floatundidf.c floatundisf.c floatundixf.c
 endif
 
+ifeq ($(CONFIG_COMPILER_RT_PROFILE),y)
+
+# Include paths
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
+
+# Suppress specific warnings
+FLAGS += -Wno-cleardeprecated-pragma -Wno-deprecated-pragma -Wno-incompatible-pointer-types
+FLAGS += -Wno-shadow -Wno-strict-prototypes -Wno-undef -Wno-unknown-warning-option
+
+# Define compiler-specific macros
+FLAGS += -DCOMPILER_RT_HAS_UNAME
+
+# Disable code coverage analysis for the library
+FLAGS += -fno-profile-generate
+
+# Profile support source files
+CSRCS += GCDAProfiling.c InstrProfilingBuffer.c InstrProfiling.c InstrProfilingFile.c InstrProfilingInternal.c
+CSRCS += InstrProfilingMerge.c InstrProfilingMergeFile.c InstrProfilingNameVar.c
+CSRCS += InstrProfilingUtil.c InstrProfilingValue.c InstrProfilingVersionVar.c InstrProfilingWriter.c
+CPPSRCS += InstrProfilingRuntime.cpp
+
+# Profile platform support
+CSRCS += InstrProfilingPlatform.c
+
+# Dependency and search paths
+DEPPATH += --dep-path compiler-rt/compiler-rt/lib/profile
+VPATH += :compiler-rt/compiler-rt/lib/profile
+
+endif
+
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins/${ARCH}
 
 AFLAGS += $(FLAGS)
@@ -160,3 +190,6 @@ VPATH += :compiler-rt/compiler-rt/lib/builtins/${ARCH}
 
 DEPPATH += --dep-path compiler-rt/compiler-rt/lib/builtins
 VPATH += :compiler-rt/compiler-rt/lib/builtins
+
+DEPPATH += --dep-path compiler-rt
+VPATH += :compiler-rt
