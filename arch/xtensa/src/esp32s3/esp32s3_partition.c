@@ -801,7 +801,7 @@ int esp32s3_partition_init(void)
       finfo("INFO: [size]:    0x%08" PRIx32 "\n", info->size);
       finfo("INFO: [flags]:   0x%08" PRIx32 "\n", info->flags);
       finfo("INFO: [mount]:   %s\n", path);
-      if (flags & PARTITION_FLAG_ENCRYPTED)
+      if (encrypt && (flags & PARTITION_FLAG_ENCRYPTED))
         {
           mtd_ll = mtd_encrypt;
           finfo("INFO: [encrypted]\n\n");
