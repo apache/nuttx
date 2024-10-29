@@ -188,14 +188,29 @@ extern "C"
 #endif
 
 static inline_function FAR void *
-virtio_zalloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
+virtio_malloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
 {
-  FAR void *buf = virtio_alloc_buf(vdev, size, align);
-  if (buf != NULL)
+  FAR void *buf;
+
+  if (virtio_alloc_buf(vdev, &buf, size, align) < 0)
     {
-      memset(buf, 0, size);
+      return NULL;
     }
 
+  return buf;
+}
+
+static inline_function FAR void *
+virtio_zalloc_buf(FAR struct virtio_device *vdev, size_t size, size_t align)
+{
+  FAR void *buf;
+
+  if (virtio_alloc_buf(vdev, &buf, size, align) < 0)
+    {
+      return NULL;
+    }
+
+  memset(buf, 0, size);
   return buf;
 }
 
