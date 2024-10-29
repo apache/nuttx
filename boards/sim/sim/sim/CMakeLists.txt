@@ -20,18 +20,20 @@
 
 add_subdirectory(src)
 
-add_custom_target(
-  nuttx_post_build
-  DEPENDS nuttx
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  COMMAND ${CMAKE_COMMAND} -E make_directory sim-pac
-  COMMAND ${CMAKE_COMMAND} -E make_directory sim-pac/libs
-  COMMAND ${CMAKE_COMMAND} -E copy nuttx sim-pac/nuttx
-  COMMAND ldd sim-pac/nuttx | grep \"=> /\" | awk '{print $$3}' | xargs -I '{}'
-          cp -v '{}' sim-pac/libs
-  COMMAND readelf -l nuttx | grep "program interpreter" | awk -F':' '{print
-          $$2}' | cut -d"]" -f1 | xargs -I '{}' cp -v '{}' sim-pac
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tools/simlaunch.sh
-          sim-pac
-  COMMAND tar -czf nuttx.tgz sim-pac
-  COMMENT "Pac SIM with dynamic libs in nuttx.tgz")
+if(NOT MSVC)
+  add_custom_target(
+    nuttx_post_build
+    DEPENDS nuttx
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory sim-pac
+    COMMAND ${CMAKE_COMMAND} -E make_directory sim-pac/libs
+    COMMAND ${CMAKE_COMMAND} -E copy nuttx sim-pac/nuttx
+    COMMAND ldd sim-pac/nuttx | grep \"=> /\" | awk '{print $$3}' | xargs -I
+            '{}' cp -v '{}' sim-pac/libs
+    COMMAND readelf -l nuttx | grep "program interpreter" | awk -F':' '{print
+                $$2}' | cut -d"]" -f1 | xargs -I '{}' cp -v '{}' sim-pac
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/tools/simlaunch.sh
+            sim-pac
+    COMMAND tar -czf nuttx.tgz sim-pac
+    COMMENT "Pac SIM with dynamic libs in nuttx.tgz")
+endif()
