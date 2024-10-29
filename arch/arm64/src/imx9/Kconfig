@@ -94,11 +94,8 @@ menu "USDHC"
 
 config IMX9_USDHC
 	bool
-	select ARCH_HAVE_SDIO_PREFLIGHT
-	select FAT_DMAMEMORY
-	select FAT_FORCE_INDIRECT
-	select GRAN
 	default n
+	select ARCH_HAVE_SDIO_PREFLIGHT
 
 config IMX9_USDHC1
 	bool "USDHC1"
