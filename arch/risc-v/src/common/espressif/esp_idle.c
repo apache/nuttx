@@ -28,6 +28,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
+#include "esp_sleep.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -55,6 +57,27 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_idlepm
+ *
+ * Description:
+ *   Perform IDLE state power management.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static void up_idlepm(void)
+{
+  printf("up_idlepm\n");
+  esp_light_sleep_start();
+}
+#endif
+
+
 void up_idle(void)
 {
 #if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
@@ -69,6 +92,9 @@ void up_idle(void)
    */
 
   asm("WFI");
+
+  /* Perform IDLE mode power management */
+  up_idlepm();
 
 #endif
 }

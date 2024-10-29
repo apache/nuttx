@@ -440,37 +440,105 @@ SECTIONS
     . = ALIGN (4);
   } > default_rodata_seg AT > ROM
 
-  /* RTC fast memory holds RTC wake stub code !*/
-
+  /**
+   * RTC fast memory holds RTC wake stub code,
+   * including from any source file named rtc_wake_stub*.c
+   */
   .rtc.text :
   {
     . = ALIGN(4);
-    *(.rtc.literal .rtc.text)
+    _rtc_fast_start = ABSOLUTE(.);
+    _rtc_text_start = ABSOLUTE(.);
     *(.rtc.entry.text)
+
+    mapping[rtc_text]
+
+    *rtc_wake_stub*.*(.literal .text .literal.* .text.*)
+    *(.rtc_text_end_test)
+
     /* 16B padding for possible CPU prefetch and 4B alignment for PMS split lines */
-    . += 16;
+    . += 0;
     . = ALIGN(4);
 
-  } > lp_ram_seg AT > ROM
-
-  /* RTC BSS section. */
-
-  .rtc.bss (NOLOAD) :
-  {
-    *(.rtc.bss)
+    _rtc_text_end = ABSOLUTE(.);
   } > lp_ram_seg
 
+  /**
+   * This section located in RTC FAST Memory area.
+   * It holds data marked with RTC_FAST_ATTR attribute.
+   * See the file "esp_attr.h" for more information.
+   */
+  .rtc.force_fast :
+  {
+    . = ALIGN(4);
+    _rtc_force_fast_start = ABSOLUTE(.);
+
+    mapping[rtc_force_fast]
+
+    *(.rtc.force_fast .rtc.force_fast.*)
+    . = ALIGN(4) ;
+    _rtc_force_fast_end = ABSOLUTE(.);
+  } > lp_ram_seg
+
+  /**
+   * RTC data section holds RTC wake stub
+   * data/rodata, including from any source file
+   * named rtc_wake_stub*.c and the data marked with
+   * RTC_DATA_ATTR, RTC_RODATA_ATTR attributes.
+   */
   .rtc.data :
   {
     _rtc_data_start = ABSOLUTE(.);
-    *(.rtc.data)
-    *(.rtc.data.*)
-    *(.rtc.rodata)
-    *(.rtc.rodata.*)
+
+    mapping[rtc_data]
+
+    *rtc_wake_stub*.*(.data .rodata .data.* .rodata.* .srodata.*)
     _rtc_data_end = ABSOLUTE(.);
   } > lp_ram_seg
 
-  /* This section holds RTC data that should have fixed addresses.
+  /* RTC bss, from any source file named rtc_wake_stub*.c */
+  .rtc.bss (NOLOAD) :
+  {
+    _rtc_bss_start = ABSOLUTE(.);
+    *rtc_wake_stub*.*(.bss .bss.* .sbss .sbss.*)
+    *rtc_wake_stub*.*(COMMON)
+
+    mapping[rtc_bss]
+
+    _rtc_bss_end = ABSOLUTE(.);
+  } > lp_ram_seg
+
+  /**
+   * This section holds data that should not be initialized at power up
+   * and will be retained during deep sleep.
+   * User data marked with RTC_NOINIT_ATTR will be placed
+   * into this section. See the file "esp_attr.h" for more information.
+   */
+  .rtc_noinit (NOLOAD):
+  {
+    . = ALIGN(4);
+    _rtc_noinit_start = ABSOLUTE(.);
+    *(.rtc_noinit .rtc_noinit.*)
+    . = ALIGN(4) ;
+    _rtc_noinit_end = ABSOLUTE(.);
+  } > lp_ram_seg
+
+  /**
+   * This section located in RTC SLOW Memory area.
+   * It holds data marked with RTC_SLOW_ATTR attribute.
+   * See the file "esp_attr.h" for more information.
+   */
+  .rtc.force_slow :
+  {
+    . = ALIGN(4);
+    _rtc_force_slow_start = ABSOLUTE(.);
+    *(.rtc.force_slow .rtc.force_slow.*)
+    . = ALIGN(4) ;
+    _rtc_force_slow_end = ABSOLUTE(.);
+  } > lp_ram_seg
+
+  /**
+   * This section holds RTC data that should have fixed addresses.
    * The data are not initialized at power-up and are retained during deep sleep.
    */
   .rtc_reserved (NOLOAD):
@@ -490,4 +558,18 @@ SECTIONS
   ASSERT((_rtc_reserved_length <= LENGTH(rtc_reserved_seg)),
           "RTC reserved segment data does not fit.")
 
+  /* Get size of rtc slow data based on rtc_data_location alias */
+  _rtc_slow_length = (ORIGIN(rtc_slow_seg) == ORIGIN(rtc_data_location))
+                        ? (_rtc_force_slow_end - _rtc_data_start)
+                        : (_rtc_force_slow_end - _rtc_force_slow_start);
+
+  _rtc_fast_length = (ORIGIN(rtc_slow_seg) == ORIGIN(rtc_data_location))
+                        ? (_rtc_force_fast_end - _rtc_fast_start)
+                        : (_rtc_noinit_end - _rtc_fast_start);
+
+  ASSERT((_rtc_slow_length <= LENGTH(rtc_slow_seg)),
+          "RTC_SLOW segment data does not fit.")
+
+  ASSERT((_rtc_fast_length <= LENGTH(rtc_data_seg)),
+          "RTC_FAST segment data does not fit.")
 }

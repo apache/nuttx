@@ -128,6 +128,13 @@ ifeq ($(CONFIG_ESP_MCPWM),y)
 	CHIP_CSRCS += esp_mcpwm.c
 endif
 
+ifeq ($(CONFIG_PM),y)
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+	CHIP_CSRCS += esp_pminitialize.c
+endif
+	//CHIP_CSRCS += esp_pm.c
+endif
+
 #############################################################################
 # Espressif HAL for 3rd Party Platforms
 #############################################################################
@@ -136,11 +143,11 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = ca869dd97ed2c01187b85b759c0d6edb27c12c21
+	ESP_HAL_3RDPARTY_VERSION = b4c723a119344b4b71d69819019d55637fb570fd
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
-	ESP_HAL_3RDPARTY_URL = https://github.com/espressif/esp-hal-3rdparty.git
+	ESP_HAL_3RDPARTY_URL = https://github.com/FelipeMdeO/esp-hal-3rdparty.git
 endif
 
 ifndef DISABLE_GIT_DEPTH
