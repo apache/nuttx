@@ -36,7 +36,7 @@ if(NOT CONFIG_DISABLE_MOUNTPOINT)
     list(APPEND SRCS fs_gpt.c)
   endif()
 
-  if(CONFIG_GPT_PARTITION)
+  if(CONFIG_TXTABLE_PARTITION)
     list(APPEND SRCS fs_txtable.c)
   endif()
 
