@@ -38,6 +38,8 @@ CONFIG_NFILE_DESCRIPTORS_PER_BLOCK = int(
 )
 CONFIG_FS_SHMFS = utils.get_symbol_value("CONFIG_FS_SHMFS")
 
+g_special_inodes = {}  # Map of the special inodes including epoll, inotify, etc.
+
 
 class InodeType(enum.Enum):
     # define   FSNODEFLAG_TYPE_PSEUDODIR  0x00000000 /*   Pseudo dir (default)   */
@@ -70,6 +72,34 @@ class InodeType(enum.Enum):
 def get_inode_name(inode):
     if not inode:
         return ""
+
+    def special_inode_name(inode):
+        global g_special_inodes
+        if not g_special_inodes:
+            g_special_inodes = {}
+            for special in (
+                "perf",
+                "timerfd",
+                "signalfd",
+                "dir",
+                "inotify",
+                "epoll",
+                "eventfd",
+                "sock",
+            ):
+                value = utils.gdb_eval_or_none(f"g_{special}_inode")
+                if value:
+                    g_special_inodes[special] = value.address
+
+        for name, value in g_special_inodes.items():
+            if value == inode:
+                return name
+
+        return None
+
+    if name := special_inode_name(inode):
+        return name
+
     ptr = inode["i_name"].cast(gdb.lookup_type("char").pointer())
     return ptr.string()
 
@@ -165,16 +195,21 @@ class Fdinfo(gdb.Command):
             )
 
             output.append(
-                formatter.format(fd, oflags, pos, path, backtrace.formatted[0])
+                formatter.format(
+                    fd, hex(file.address), oflags, pos, path, backtrace.formatted[0]
+                )
             )
             output.extend(
-                formatter.format("", "", "", "", bt) for bt in backtrace.formatted[1:]
+                formatter.format("", "", "", "", "", bt)
+                for bt in backtrace.formatted[1:]
             )
             output.append("")  # separate each backtrace
         else:
-            output = [formatter.format(fd, oflags, pos, path, "")]
+            output = [
+                formatter.format(fd, hex(file.address), hex(oflags), pos, path, "")
+            ]
 
-        gdb.write("\n".join(output))
+        gdb.write("\n".join(output).rstrip())  # strip trailing spaces
         gdb.write("\n")
 
     def print_fdinfo_by_tcb(self, tcb):
@@ -190,8 +225,8 @@ class Fdinfo(gdb.Command):
 
         self.processed_groups.add(group)
 
-        headers = ["FD", "OFLAGS", "POS", "PATH", "BACKTRACE"]
-        formatter = "{:<4}{:<8}{:<6}{:<22}{:<50}"
+        headers = ["FD", "FILEP", "OFLAGS", "POS", "PATH", "BACKTRACE"]
+        formatter = "{:<4}{:<12}{:<12}{:<10}{:<48}{:<50}"
         gdb.write(formatter.format(*headers) + "\n")
 
         fd_count = 0
