@@ -1416,6 +1416,13 @@ config SCHED_INSTRUMENTATION_THREADTIME
 	---help---
 		Enable thread runtime instrumentation.
 
+config SCHED_INSTRUMENTATION_THREAD_RUNTIME_DURATION
+	int "Record thread runtime minimum duration (us)"
+	depends on SCHED_INSTRUMENTATION_THREADTIME
+	default 0
+	---help---
+		The minimum duration of thread runtime to be recorded.
+
 config SCHED_INSTRUMENTATION_FUNCTION
 	bool "Enable function auto-tracing"
 	default n

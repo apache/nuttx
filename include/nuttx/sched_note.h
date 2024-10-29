@@ -247,11 +247,11 @@
           } \
         while (0)
 
-#define sched_note_threadtime(elapsed) \
+#define sched_note_threadtime(_elapsed) \
         do \
           { \
             struct note_threadtime_s threadtime; \
-            threadtime.elapsed = elapsed; \
+            threadtime.elapsed = (_elapsed); \
             sched_note_event(NOTE_TAG_SCHED, NOTE_DUMP_THREADTIME, \
                              &threadtime, sizeof(threadtime)); \
           } \
