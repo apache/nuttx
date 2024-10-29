@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
@@ -287,5 +288,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   alignedchunk = (uintptr_t)kasan_unpoison((FAR const void *)alignedchunk,
                                            size - MM_ALLOCNODE_OVERHEAD);
   DEBUGASSERT(alignedchunk % alignment == 0);
+  minfo("Aligned %"PRIxPTR" to %"PRIxPTR", size %zu\n",
+        rawchunk, alignedchunk, size);
   return (FAR void *)alignedchunk;
 }
