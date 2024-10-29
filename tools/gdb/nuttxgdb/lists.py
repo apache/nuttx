@@ -336,8 +336,19 @@ class ForeachListEntry(gdb.Command):
 
         parser = argparse.ArgumentParser(description="Iterate the items in list")
         parser.add_argument("head", type=str, help="List head")
-        parser.add_argument("type", type=str, help="Container type")
-        parser.add_argument("member", type=str, help="Member name in container")
+        parser.add_argument(
+            "-n",
+            "--next",
+            type=str,
+            help="The name of the next pointer in the list node",
+            default="next",
+        )
+        parser.add_argument(
+            "-c", "--container", type=str, default=None, help="Optional container type"
+        )
+        parser.add_argument(
+            "-m", "--member", type=str, default=None, help="Member name in container"
+        )
         try:
             args = parser.parse_args(argv)
         except SystemExit:
@@ -345,9 +356,19 @@ class ForeachListEntry(gdb.Command):
             return
 
         pointer = gdb.parse_and_eval(args.head)
-        container_type = gdb.lookup_type(args.type)
-        member = args.member
-        list = NxList(pointer, container_type, member)
-        for i, entry in enumerate(list):
+        node = pointer
+        i = 0
+        while node:
+            entry = (
+                utils.container_of(node, args.container, args.member)
+                if args.container
+                else node
+            )
             entry = entry.dereference()
-            gdb.write(f"{i}: {entry.format_string(styling=True)}\n")
+            gdb.write(
+                f"{i} *({entry.type} *){hex(entry.address)} {entry.format_string(styling=True)}\n"
+            )
+            i += 1
+            node = node[args.next]
+            if node == pointer:
+                break
