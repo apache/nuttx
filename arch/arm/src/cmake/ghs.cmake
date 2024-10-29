@@ -194,17 +194,17 @@ endif()
 
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P)
 
-# override nuttx_generate_preproces_target
+# override nuttx_generate_preprocess_target
 
-set(NUTTX_TOOLCHAIN_PREPROCES_DEFINED true)
+set(NUTTX_TOOLCHAIN_PREPROCESS_DEFINED true)
 
-function(nuttx_generate_preproces_target)
+function(nuttx_generate_preprocess_target)
 
   # parse arguments into variables
 
   nuttx_parse_function_args(
     FUNC
-    nuttx_generate_preproces_target
+    nuttx_generate_preprocess_target
     ONE_VALUE
     SOURCE_FILE
     TARGET_FILE
