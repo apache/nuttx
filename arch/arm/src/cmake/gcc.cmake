@@ -57,7 +57,7 @@ set(NO_LTO "-fno-lto")
 # array subscript [0] is outside array bounds:
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 
-if(CONFIG_ARCH_TOOLCHAIN_GNU)
+if(CONFIG_ARCH_TOOLCHAIN_GNU AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
   execute_process(COMMAND ${CMAKE_C_COMPILER} --version
                   OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
   string(REGEX MATCH "([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
