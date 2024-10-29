@@ -579,7 +579,7 @@ endif()
 get_property(ldscript GLOBAL PROPERTY LD_SCRIPT)
 
 # Pre-compile linker script
-if(NOT CONFIG_ARCH_SIM)
+if(NOT CONFIG_ARCH_SIM AND NOT CONFIG_ARCH_TOOLCHAIN_TASKING)
   get_filename_component(LD_SCRIPT_NAME ${ldscript} NAME)
   set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
 
@@ -623,6 +623,8 @@ if(NOT CONFIG_ARCH_SIM)
   # TODO: nostart/nodefault not applicable to nuttx toolchain
   if(CONFIG_ARCH_TOOLCHAIN_TASKING)
     target_link_libraries(nuttx PRIVATE --lsl-file=${ldscript} ${nuttx_libs})
+    # Remove executable suffix
+    set(CMAKE_EXECUTABLE_SUFFIX "")
   else()
     target_link_libraries(
       nuttx
