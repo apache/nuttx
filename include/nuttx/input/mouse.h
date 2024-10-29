@@ -37,6 +37,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,6 +50,13 @@
 #define MOUSE_BUTTON_1       (1 << 0) /* True: Left mouse button pressed */
 #define MOUSE_BUTTON_2       (1 << 1) /* True: Right mouse button pressed */
 #define MOUSE_BUTTON_3       (1 << 2) /* True: Middle mouse button pressed */
+
+/* IOCTL Commands ***********************************************************/
+
+/* Common mouse IOCTL commands */
+
+#define MSE_FIRST            0x0001          /* First common command */
+#define MSE_NCMDS            1               /* One common commands */
 
 /****************************************************************************
  * Public Types
@@ -75,6 +83,25 @@ struct mouse_report_s
 struct mouse_lowerhalf_s
 {
   FAR void *priv;  /* Save the upper half pointer */
+
+  /**************************************************************************
+   * Name: control
+   *
+   * Description:
+   *   Users can use this interface to implement custom IOCTL.
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of mouse device.
+   *   cmd     - User defined specific command.
+   *   arg     - Argument of the specific command.
+   *
+   * Return Value:
+   *   Zero(OK) on success; a negated errno value on failure.
+   *   -ENOTTY - The command is not supported.
+   **************************************************************************/
+
+  CODE int (*control)(FAR struct mouse_lowerhalf_s *lower,
+                      int cmd, unsigned long arg);
 };
 
 /****************************************************************************
