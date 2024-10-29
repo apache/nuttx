@@ -583,8 +583,8 @@ if(NOT CONFIG_ARCH_SIM)
   get_filename_component(LD_SCRIPT_NAME ${ldscript} NAME)
   set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
 
-  nuttx_generate_preproces_target(SOURCE_FILE ${ldscript} TARGET_FILE
-                                  ${LD_SCRIPT_TMP})
+  nuttx_generate_preprocess_target(SOURCE_FILE ${ldscript} TARGET_FILE
+                                   ${LD_SCRIPT_TMP})
 
   add_custom_target(ldscript_tmp DEPENDS ${LD_SCRIPT_TMP})
   add_dependencies(nuttx ldscript_tmp)
@@ -761,8 +761,8 @@ if(CONFIG_BUILD_PROTECTED)
   # Pre-compile linker script
   get_filename_component(LD_SCRIPT_USER_NAME ${user_ldscript} NAME)
   set(LD_SCRIPT_USER_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
-  nuttx_generate_preproces_target(SOURCE_FILE ${user_ldscript} TARGET_FILE
-                                  ${LD_SCRIPT_USER_TMP})
+  nuttx_generate_preprocess_target(SOURCE_FILE ${user_ldscript} TARGET_FILE
+                                   ${LD_SCRIPT_USER_TMP})
   add_custom_target(user_ldscript_tmp DEPENDS ${LD_SCRIPT_USER_TMP})
   add_dependencies(nuttx_user user_ldscript_tmp)
   set(user_ldscript ${LD_SCRIPT_USER_TMP})

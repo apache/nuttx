@@ -37,14 +37,14 @@ if(EXTRA_FLAGS)
 endif()
 
 # ~~~
-# nuttx_generate_preproces_target
+# nuttx_generate_preprocess_target
 #
 # Description:
 #   because different toolchains have different preprocessing instructions,
 #   we define the COMMON preprocessing target here.
 #
 # Prototype:
-#  nuttx_generate_preproces_target(
+#  nuttx_generate_preprocess_target(
 #    SOURCE_FILE
 #    ${single_source_file}
 #    TARGET_FILE
@@ -54,14 +54,14 @@ endif()
 # ~~~
 
 #
-if(NOT NUTTX_TOOLCHAIN_PREPROCES_DEFINED)
-  function(nuttx_generate_preproces_target)
+if(NOT NUTTX_TOOLCHAIN_PREPROCESS_DEFINED)
+  function(nuttx_generate_preprocess_target)
 
     # parse arguments into variables
 
     nuttx_parse_function_args(
       FUNC
-      nuttx_generate_preproces_target
+      nuttx_generate_preprocess_target
       ONE_VALUE
       SOURCE_FILE
       TARGET_FILE
