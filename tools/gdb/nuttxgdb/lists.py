@@ -372,3 +372,42 @@ class ForeachListEntry(gdb.Command):
             node = node[args.next]
             if node == pointer:
                 break
+
+
+class ForeachArray(gdb.Command):
+    """Dump array members."""
+
+    def __init__(self):
+        super().__init__("foreach array", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION)
+
+    def invoke(self, arg, from_tty):
+        argv = gdb.string_to_argv(arg)
+
+        parser = argparse.ArgumentParser(description="Iterate the items in array")
+        parser.add_argument("head", type=str, help="List head")
+        parser.add_argument(
+            "-l",
+            "--length",
+            type=int,
+            help="The array length",
+            default=None,
+        )
+        parser.add_argument(
+            "-e",
+            "--element",
+            type=str,
+            help="Only dump this element in array member struct.",
+            default=None,
+        )
+        try:
+            args = parser.parse_args(argv)
+        except SystemExit:
+            gdb.write("Invalid arguments\n")
+            return
+
+        pointer = gdb.parse_and_eval(args.head)
+        node = pointer
+        len = args.length if args.length else utils.nitems(pointer)
+        for i in range(len):
+            entry = node[i][args.element] if arg.element else node[i]
+            gdb.write(f"{i}: {entry.format_string(styling=True)}\n")
