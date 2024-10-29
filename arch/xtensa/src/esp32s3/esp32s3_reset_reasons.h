@@ -91,6 +91,16 @@ typedef enum
   RESET_REASON_CORE_PWR_GLITCH = 0x17, /* Glitch on power resets the digital core */
 } soc_reset_reason_t;
 
+/****************************************************************************
+ * Name: esp32s3_reset_reasons
+ *
+ * Description:
+ *   Get the cause of the last reset of the given CPU
+ *
+ ****************************************************************************/
+
+soc_reset_reason_t esp32s3_reset_reasons(int cpu);
+
 #ifdef __cplusplus
 }
 #endif
