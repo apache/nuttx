@@ -189,14 +189,16 @@ ifeq ($(CONFIG_LTO_FULL),y)
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-  ifeq ($(GCCVER),)
-    export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
-  endif
-  ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
-    LDFLAGS += --no-warn-rwx-segments
-  endif
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
+    ifeq ($(GCCVER),)
+      export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
+    endif
+    ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
+      LDFLAGS += --no-warn-rwx-segments
+    endif
 
-  LDFLAGS += --print-memory-usage
+    LDFLAGS += --print-memory-usage
+  endif
 endif
 
 # Add the builtin library

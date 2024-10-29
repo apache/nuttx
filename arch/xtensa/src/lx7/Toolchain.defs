@@ -115,12 +115,6 @@ ifneq ($(CONFIG_LIBCXXTOOLCHAIN),y)
   ARCHCXXFLAGS += -nostdinc++
 endif
 
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-  ifeq ($(GCCVER),)
-    export GCCVER = $(shell $(CXX) --version | grep ++ | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
-  endif
-endif
-
 ifneq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
   ARCHCFLAGS += -Wno-psabi
   ARCHCXXFLAGS += -Wno-psabi
@@ -188,6 +182,14 @@ AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
+    ifeq ($(GCCVER),)
+      export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
+    endif
+  endif
+endif
 
 # Add the builtin library
 
