@@ -1418,7 +1418,12 @@ static void aw86225_ram_loaded(FAR struct aw86225_firmware *cont,
   load_cont++;
 #endif
   ierr("%s enter\n", __func__);
-  aw86225_request_firmware(cont, g_aw86225_ram_name);
+  ret = aw86225_request_firmware(cont, g_aw86225_ram_name);
+  if (ret < 0)
+    {
+      ierr("failed to request firmware %s\n", g_aw86225_ram_name);
+      return;
+    }
 
   if (!cont)
     {
