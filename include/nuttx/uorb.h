@@ -871,6 +871,7 @@ struct sensor_gnss          /* Type: GNSS */
   float course;
 
   uint32_t satellites_used; /* Number of satellites used */
+  uint32_t firmware_ver;    /* Version of GNSS firmware */
 };
 
 /* Ref: android14-release/hardware/libhardware/include_all/hardware/\
