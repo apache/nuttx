@@ -159,19 +159,16 @@ class Fdinfo(gdb.Command):
 
         output = []
         if CONFIG_FS_BACKTRACE:
-            backtrace = utils.backtrace(utils.ArrayIterator(file["f_backtrace"]))
+            backtrace = utils.Backtrace(
+                utils.ArrayIterator(file["f_backtrace"]), formatter=backtrace_formatter
+            )
 
-            backtrace = [
-                backtrace_formatter.format(
-                    hex(addr),
-                    func,
-                    source,
-                )
-                for addr, func, source in backtrace
-            ]
-
-            output.append(formatter.format(fd, oflags, pos, path, backtrace[0]))
-            output.extend(formatter.format("", "", "", "", bt) for bt in backtrace[1:])
+            output.append(
+                formatter.format(fd, oflags, pos, path, backtrace.formatted[0])
+            )
+            output.extend(
+                formatter.format("", "", "", "", bt) for bt in backtrace.formatted[1:]
+            )
             output.append("")  # separate each backtrace
         else:
             output = [formatter.format(fd, oflags, pos, path, "")]
