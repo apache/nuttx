@@ -29,6 +29,7 @@
 #include "chip.h"
 #include "mpfs_memorymap.h"
 #include "riscv_internal.h"
+#include "riscv_macros.S"
 
 /****************************************************************************
  * Public Symbols
