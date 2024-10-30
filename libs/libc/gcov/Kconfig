@@ -1,0 +1,49 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config LIB_GCOV
+	tristate "Enable GCOV support"
+	select HAVE_CXXINITIALIZE
+	default n
+	---help---
+		Enable GCOV support for code coverage analysis.
+		After turning on this option, code coverage can be analyzed.
+		If this option is enabled, image size and performance will be
+		significantly reduced. Before use, you need to add the
+		"-fprofile-generate -ftest-coverage" compilation parameters
+		to the file to be analyzed.
+
+if LIB_GCOV
+
+choice
+	prompt "Select the gcov library source"
+	default LIB_GCOV_TOOLCHAIN_CLANG if ARCH_TOOLCHAIN_CLANG
+	default LIB_GCOV_TOOLCHAIN_GNU if ARCH_TOOLCHAIN_GNU
+	---help---
+		Select the gcov library source. This option selects the gcov library
+		from the GNU toolchain.
+
+config LIB_GCOV_TOOLCHAIN_GNU
+	bool "Use the GNU toolchain GCOV library"
+	depends on ARCH_TOOLCHAIN_GNU && !ARCH_TOOLCHAIN_CLANG
+
+config LIB_GCOV_TOOLCHAIN_CLANG
+	bool "Use the Clang toolchain GCOV library"
+	depends on ARCH_TOOLCHAIN_CLANG
+	select COMPILER_RT_PROFILE
+	---help---
+		Use the toolchain GCOV library. This option selects the gcov library
+		from the Clang toolchain.
+
+endchoice
+
+config GCOV_ALL_SOURCES
+	bool "Enable gcov call graph for all modules"
+	default n
+	---help---
+		Enable gcov profiling for all code, it will instrument
+		all code, which will cause a large performance penalty for the code.
+
+endif

@@ -83,6 +83,6 @@ if(CONFIG_LIBSUPCXX_TOOLCHAIN)
   nuttx_find_toolchain_lib(libsupc++.a)
 endif()
 
-if(CONFIG_SCHED_GCOV)
+if(CONFIG_LIB_GCOV_TOOLCHAIN_GNU)
   nuttx_find_toolchain_lib(libgcov.a)
 endif()

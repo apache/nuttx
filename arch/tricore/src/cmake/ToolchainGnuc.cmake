@@ -84,7 +84,7 @@ if(CONFIG_STACK_CANARIES)
   add_compile_options(-fstack-protector-all)
 endif()
 
-if(CONFIG_SCHED_GCOV_ALL)
+if(CONFIG_GCOV_ALL_SOURCES)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 

@@ -86,7 +86,7 @@ if(CONFIG_STACK_USAGE_WARNING)
   add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
 endif()
 
-if(CONFIG_SCHED_GCOV_ALL)
+if(CONFIG_GCOV_ALL_SOURCES)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 

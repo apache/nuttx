@@ -72,7 +72,7 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
-ifeq ($(CONFIG_SCHED_GCOV_ALL),y)
+ifeq ($(CONFIG_GCOV_ALL_SOURCES),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 

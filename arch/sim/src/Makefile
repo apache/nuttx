@@ -140,7 +140,7 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   STDLIBS += -lm
 endif
 
-ifeq ($(CONFIG_SCHED_GCOV),y)
+ifeq ($(CONFIG_LIB_GCOV_TOOLCHAIN_GNU),y)
   STDLIBS += -lgcov
 endif
 
