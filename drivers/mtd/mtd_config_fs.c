@@ -55,6 +55,8 @@
 #define NVS_ADDR_BLOCK_SHIFT            16
 #define NVS_ADDR_OFFS_MASK              0x0000FFFF
 
+#define NVS_CACHE_NO_ADDR               0xffffffff
+
 #define NVS_ATE(name, size) \
   char name##_buf[size]; \
   FAR struct nvs_ate *name = (FAR struct nvs_ate *)name##_buf
@@ -80,6 +82,9 @@ struct nvs_fs
   mutex_t               nvs_lock;
   FAR struct pollfd     *fds;
   pollevent_t           events;
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+  uint32_t              cache[CONFIG_MTD_CONFIG_CACHE_SIZE];
+#endif
 };
 
 /* Allocation Table Entry */
@@ -134,6 +139,36 @@ static const struct file_operations g_mtdnvs_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nvs_cache_index
+ ****************************************************************************/
+
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+static inline size_t nvs_cache_index(uint32_t id)
+{
+  return id % CONFIG_MTD_CONFIG_CACHE_SIZE;
+}
+
+/****************************************************************************
+ * Name: nvs_invalid_cache
+ ****************************************************************************/
+
+static void nvs_invalid_cache(struct nvs_fs *fs, uint32_t sector)
+{
+  FAR uint32_t *cache_entry = fs->cache;
+  FAR const uint32_t *cache_end =
+                  &fs->cache[CONFIG_MTD_CONFIG_CACHE_SIZE];
+
+  for (; cache_entry < cache_end; ++cache_entry)
+    {
+      if ((*cache_entry >> NVS_ADDR_BLOCK_SHIFT) == sector)
+        {
+          *cache_entry = NVS_CACHE_NO_ADDR;
+        }
+    }
+}
+#endif /* CONFIG_MTD_CONFIG_CACHE_SIZE */
 
 /****************************************************************************
  * Name: nvs_fnv_hash
@@ -374,6 +409,16 @@ static int nvs_flash_ate_wrt(FAR struct nvs_fs *fs,
   size_t ate_size = nvs_ate_size(fs);
   int rc;
 
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+
+  /* 0xFFFF is a special-purpose identifier. Exclude it from the cache */
+
+  if (entry->id != nvs_special_ate_id(fs))
+    {
+      fs->cache[nvs_cache_index(entry->id)] = fs->ate_wra;
+    }
+#endif
+
   rc = nvs_flash_wrt(fs, fs->ate_wra, entry, ate_size);
   fs->ate_wra -= ate_size;
 
@@ -581,6 +626,11 @@ static int nvs_flash_erase_block(FAR struct nvs_fs *fs, uint32_t addr)
   int rc;
 
   finfo("Erasing addr %" PRIx32 "\n", addr);
+
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+  nvs_invalid_cache(fs, addr >> NVS_ADDR_BLOCK_SHIFT);
+#endif
+
   rc = MTD_ERASE(fs->mtd,
                  CONFIG_MTD_CONFIG_BLOCKSIZE_MULTIPLE *
                  (addr >> NVS_ADDR_BLOCK_SHIFT),
@@ -1457,6 +1507,10 @@ static int nvs_startup(FAR struct nvs_fs *fs)
    * We need to set old entry expired.
    */
 
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+  memset(fs->cache, 0xff, sizeof(fs->cache));
+#endif
+
   wlk_addr = fs->ate_wra;
   while (1)
     {
@@ -1481,6 +1535,10 @@ static int nvs_startup(FAR struct nvs_fs *fs)
                 "key_len %" PRIu16 ", offset %" PRIu16 "\n",
                 last_addr, last_ate->id, last_ate->key_len,
                 last_ate->offset);
+
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+          fs->cache[nvs_cache_index(last_ate->id)] = last_addr;
+#endif
           while (1)
             {
               second_addr = wlk_addr;
@@ -1491,37 +1549,42 @@ static int nvs_startup(FAR struct nvs_fs *fs)
                 }
 
               if (nvs_ate_valid(fs, second_ate)
-                  && second_ate->id == last_ate->id
                   && !nvs_ate_expired(fs, second_ate))
                 {
-                  finfo("same id at 0x%" PRIx32 ", key_len %" PRIu16 ", "
-                        "offset %" PRIu16 "\n",
-                        second_addr, second_ate->key_len,
-                        second_ate->offset);
-                  if ((second_ate->key_len == last_ate->key_len) &&
-                      !nvs_flash_direct_cmp(fs,
-                                            (last_addr &
-                                             NVS_ADDR_BLOCK_MASK) +
-                                            last_ate->offset,
-                                            (second_addr &
-                                             NVS_ADDR_BLOCK_MASK) +
-                                            second_ate->offset,
-                                            last_ate->key_len))
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+                  fs->cache[nvs_cache_index(second_ate->id)] = second_addr;
+#endif
+                  if (second_ate->id == last_ate->id)
                     {
-                      finfo("old ate found at 0x%" PRIx32 "\n", second_addr);
-                      rc = nvs_expire_ate(fs, second_addr);
-                      if (rc < 0)
+                      finfo("same id at 0x%" PRIx32 ", key_len %" PRIu16 ", "
+                            "offset %" PRIu16 "\n", second_addr,
+                            second_ate->key_len, second_ate->offset);
+                      if ((second_ate->key_len == last_ate->key_len) &&
+                          !nvs_flash_direct_cmp(fs,
+                                                (last_addr &
+                                                 NVS_ADDR_BLOCK_MASK) +
+                                                last_ate->offset,
+                                                (second_addr &
+                                                 NVS_ADDR_BLOCK_MASK) +
+                                                second_ate->offset,
+                                                last_ate->key_len))
                         {
-                          ferr("expire ate failed, addr %" PRIx32 "\n",
-                               second_addr);
-                          return rc;
-                        }
+                          finfo("old ate found at 0x%" PRIx32 "\n",
+                                second_addr);
+                          rc = nvs_expire_ate(fs, second_addr);
+                          if (rc < 0)
+                            {
+                              ferr("expire ate failed, addr %" PRIx32 "\n",
+                                  second_addr);
+                              return rc;
+                            }
 
-                      goto end;
-                    }
-                  else
-                    {
-                      fwarn("hash conflict\n");
+                          goto end;
+                        }
+                      else
+                        {
+                          fwarn("hash conflict\n");
+                        }
                     }
                 }
 
@@ -1589,10 +1652,19 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
   uint32_t rd_addr;
   uint32_t hist_addr;
   uint32_t hash_id;
+  bool hit = true;
   int rc;
 
   hash_id = nvs_fnv_hash(key, key_size) % 0xfffffffd + 1;
-  wlk_addr = fs->ate_wra;
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+  wlk_addr = fs->cache[nvs_cache_index(hash_id)];
+  if (wlk_addr == NVS_CACHE_NO_ADDR)
+#endif
+    {
+      wlk_addr = fs->ate_wra;
+      hit = false;
+    }
+
   rd_addr = wlk_addr;
 
   do
@@ -1625,6 +1697,19 @@ static ssize_t nvs_read_entry(FAR struct nvs_fs *fs, FAR const uint8_t *key,
             {
               fwarn("hash conflict\n");
             }
+        }
+
+      /* There are two types of hash conflicts found by cache, one is hash_id
+       * conflict and the other is hash_id % CONFIG_MTD_CONFIG_CACHE_SIZE
+       * conflict, both of which require traversing flash from the flash
+       * beginning.
+       */
+
+      if (hit)
+        {
+          wlk_addr = fs->ate_wra;
+          hit = false;
+          continue;
         }
 
       if (wlk_addr == fs->ate_wra)
@@ -1687,6 +1772,7 @@ static ssize_t nvs_write(FAR struct nvs_fs *fs,
   bool prev_found = false;
   uint32_t hash_id;
   uint16_t block_to_write_befor_gc;
+  bool hit = true;
 
 #ifdef CONFIG_MTD_CONFIG_NAMED
   FAR const uint8_t *key;
@@ -1726,7 +1812,14 @@ static ssize_t nvs_write(FAR struct nvs_fs *fs,
 
   /* Find latest entry with same id. */
 
-  wlk_addr = fs->ate_wra;
+#if CONFIG_MTD_CONFIG_CACHE_SIZE > 0
+  wlk_addr = fs->cache[nvs_cache_index(hash_id)];
+  if (wlk_addr == NVS_CACHE_NO_ADDR)
+#endif
+    {
+      wlk_addr = fs->ate_wra;
+      hit = false;
+    }
 
   while (1)
     {
@@ -1752,6 +1845,19 @@ static ssize_t nvs_write(FAR struct nvs_fs *fs,
             {
               fwarn("hash conflict\n");
             }
+        }
+
+      /* There are two types of hash conflicts found by cache, one is hash_id
+       * conflict and the other is hash_id % CONFIG_MTD_CONFIG_CACHE_SIZE
+       * conflict, both of which require traversing flash from the flash
+       * beginning.
+       */
+
+      if (hit)
+        {
+          wlk_addr = fs->ate_wra;
+          hit = false;
+          continue;
         }
 
       if (wlk_addr == fs->ate_wra)
