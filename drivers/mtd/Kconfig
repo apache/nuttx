@@ -201,6 +201,14 @@ config MTD_CONFIG_BLOCKSIZE_MULTIPLE
 	---help---
 		The size of a multiple of blocksize compared to erasize
 
+config MTD_CONFIG_CACHE_SIZE
+	int "Non-volatile Storage lookup cache size"
+	default 0
+	depends on MTD_CONFIG_FAIL_SAFE
+	help
+	  Number of entries in Non-volatile Storage lookup cache.
+	  It is recommended that it be a power of 2.
+
 endif # MTD_CONFIG
 
 comment "MTD Device Drivers"
