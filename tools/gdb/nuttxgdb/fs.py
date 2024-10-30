@@ -115,13 +115,13 @@ def get_file(tcb, fd):
     return fl_files[row][col]
 
 
-def foreach_inode(handler, root=None, path=""):
-    node = root if root else gdb.parse_and_eval("g_root_inode")["i_child"]
+def foreach_inode(root=None, path=""):
+    node = root or gdb.parse_and_eval("g_root_inode")["i_child"]
     while node:
         newpath = path + "/" + get_inode_name(node)
-        handler(node, newpath)
+        yield node, newpath
         if node["i_child"]:
-            foreach_inode(handler, node["i_child"], newpath)
+            yield from foreach_inode(node["i_child"], newpath)
         node = node["i_peer"]
 
 
@@ -238,14 +238,6 @@ class Mount(gdb.Command):
             super().__init__("mount", gdb.COMMAND_USER)
             self.mount_count = 0
 
-    def mountpt_filter(self, node, path):
-        if inode_gettype(node) == InodeType.MOUNTPT:
-            statfs = node["u"]["i_mops"]["statfs"]
-            funcname = gdb.block_for_pc(int(statfs)).function.print_name
-            fstype = funcname.split("_")[0]
-            gdb.write("  %s type %s\n" % (path, fstype))
-            self.mount_count += 1
-
     def diagnose(self, *args, **kwargs):
         output = gdb.execute("mount", to_string=True)
 
@@ -259,7 +251,15 @@ class Mount(gdb.Command):
 
     def invoke(self, args, from_tty):
         self.mount_count = 0
-        foreach_inode(self.mountpt_filter)
+        nodes = filter(
+            lambda x: inode_gettype(x[0]) == InodeType.MOUNTPT, foreach_inode()
+        )
+        for node, path in nodes:
+            statfs = node["u"]["i_mops"]["statfs"]
+            funcname = gdb.block_for_pc(int(statfs)).function.print_name
+            fstype = funcname.split("_")[0]
+            gdb.write("  %s type %s\n" % (path, fstype))
+            self.mount_count += 1
 
 
 class ForeachInode(gdb.Command):
@@ -410,4 +410,14 @@ class InfoShmfs(gdb.Command):
     def invoke(self, args, from_tty):
         self.total_size = 0
         self.block_count = 0
-        foreach_inode(self.shm_filter)
+        nodes = filter(lambda x: inode_gettype(x[0]) == InodeType.SHM, foreach_inode())
+        for node, path in nodes:
+            obj = node["i_private"].cast(
+                gdb.lookup_type("struct shmfs_object_s").pointer()
+            )
+            length = obj["length"]
+            paddr = obj["paddr"]
+            print(f"  {path} memsize: {length}, paddr: {paddr}")
+
+            self.total_size += length / 1024
+            self.block_count += 1
