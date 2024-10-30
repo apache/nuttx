@@ -1355,6 +1355,14 @@ config SCHED_GCOV
 		"-fprofile-generate -ftest-coverage" compilation parameters
 		to the file to be analyzed.
 
+config SCHED_GCOV_ALL
+	bool "Enable gcov call graph for all modules"
+	depends on SCHED_GCOV
+	default n
+	---help---
+		Enable gcov profiling for all code, it will instrument
+		all code, which will cause a large performance penalty for the code.
+
 config SCHED_GPROF
 	bool "Enable gprof profiling"
 	default n

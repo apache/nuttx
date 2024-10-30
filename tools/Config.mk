@@ -620,7 +620,7 @@ define DOWNLOAD
 	$(ECHO_END)
 endef
 
-# CLONE - Git clone repository. Initializes a new Git repository in the 
+# CLONE - Git clone repository. Initializes a new Git repository in the
 #         folder on your local machine and populates it with the contents
 #         of the central repository.
 #         The third argument is an storage path. The second argument is used
@@ -784,7 +784,7 @@ else
   CONVERT_PATH = $1
 endif
 
-# Upper/Lower case string, add the `UL` prefix to private function 
+# Upper/Lower case string, add the `UL` prefix to private function
 
 ULPOP = $(wordlist 3,$(words $(1)),$(1))
 ULSUB = $(subst $(word 1,$(1)),$(word 2,$(1)),$(2))
