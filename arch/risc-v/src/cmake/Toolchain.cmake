@@ -159,7 +159,7 @@ if(${CONFIG_STACK_USAGE_WARNING})
   endif()
 endif()
 
-if(CONFIG_SCHED_GCOV)
+if(CONFIG_SCHED_GCOV_ALL)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 

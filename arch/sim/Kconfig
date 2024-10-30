@@ -90,13 +90,6 @@ config SIM_UBSAN_DUMMY
 	---help---
 		Keep SIM_UBSAN compile time but disable runtime actions.
 
-config SIM_GCOV_ALL
-	bool "Enable code coverage for the entire image"
-	default n
-	---help---
-		This option activates code coverage instrumentation for the
-		entire image.
-
 config SIM_GPROF
 	bool "Enable gprof"
 	depends on !SCHED_GPROF

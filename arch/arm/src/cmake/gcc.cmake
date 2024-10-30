@@ -126,7 +126,7 @@ if(CONFIG_STACK_USAGE_WARNING AND NOT "${CONFIG_STACK_USAGE_WARNING}" STREQUAL
   add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
 endif()
 
-if(CONFIG_SCHED_GCOV)
+if(CONFIG_SCHED_GCOV_ALL)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 
