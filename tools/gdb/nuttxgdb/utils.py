@@ -19,6 +19,7 @@
 # under the License.
 #
 ############################################################################
+from __future__ import annotations
 
 import argparse
 import importlib
@@ -38,13 +39,52 @@ g_type_cache = {}
 g_macro_ctx = None
 
 
-def backtrace(addresses: List[Union[gdb.Value, int]]) -> List[Tuple[int, str, str]]:
-    """Convert addresses to backtrace"""
-    backtrace = []
+class Backtrace:
+    """
+    Convert addresses to backtrace
+    Usage:
+    backtrace = Backtrace(addresses=[0x4001, 0x4002, 0x4003])
 
-    for addr in addresses:
+    # Access converted backtrace
+    addr, func, source = backtrace[0]
+    remaining = backtrace[1:]  # Return list of (addr, func, source)
+
+    # Iterate over backtrace
+    for addr, func, source in backtrace:
+        print(addr, func, source)
+
+    # Append more addresses to convert
+    backtrace.append(0x40001234)
+
+    # Print backtrace
+    print(str(backtrace))
+
+    # Format backtrace to string
+    print("\n".join(backtrace.formatted))
+
+    # Custom formatter
+    backtrace = Backtrace(addresses=[0x4001, 0x4002, 0x4003], formatter="{:<6} {:<20} {}")
+    """
+
+    def __init__(
+        self,
+        address: List[Union[gdb.Value, int]] = [],
+        formatter="{:<5} {:<36} {}\n",
+    ):
+        self.formatter = formatter  # Address, Function, Source
+        self._formatted = None  # Cached formatted backtrace
+        self.backtrace = [res for addr in address if (res := self.convert(addr))]
+
+    def append(self, addr: Union[gdb.Value, int]) -> None:
+        """Append an address to the backtrace"""
+        if result := self.convert(addr):
+            self.backtrace.append(result)
+            self._formatted = None  # Clear cached result
+
+    def convert(self, addr: Union[gdb.Value, int]) -> Tuple[int, str, str]:
+        """Convert an address to function and source"""
         if not addr:
-            continue
+            return
 
         if type(addr) is int:
             addr = gdb.Value(addr)
@@ -55,9 +95,31 @@ def backtrace(addresses: List[Union[gdb.Value, int]]) -> List[Tuple[int, str, st
         func = addr.format_string(symbols=True, address=False)
         sym = gdb.find_pc_line(int(addr))
         source = str(sym.symtab) + ":" + str(sym.line)
-        backtrace.append((int(addr), func, source))
+        return (int(addr), func, source)
 
-    return backtrace
+    @property
+    def formatted(self):
+        """Return the formatted backtrace string list"""
+        if not self._formatted:
+            self._formatted = [
+                self.formatter.format(hex(addr), func, source)
+                for addr, func, source in self.backtrace
+            ]
+
+        return self._formatted
+
+    def __repr__(self) -> str:
+        return f"Backtrace: {len(self.backtrace)} items"
+
+    def __str__(self) -> str:
+        return "".join(self.formatted)
+
+    def __iter__(self):
+        for item in self.backtrace:
+            yield item
+
+    def __getitem__(self, index):
+        return self.backtrace.__getitem__(index)
 
 
 def lookup_type(name, block=None) -> gdb.Type:
@@ -822,9 +884,8 @@ class Addr2Line(gdb.Command):
     def print_backtrace(self, addresses, pid=None):
         if pid:
             gdb.write(f"\nBacktrace of {pid}\n")
-        backtraces = backtrace(addresses)
-        for addr, func, source in backtraces:
-            gdb.write(self.formatter.format(hex(addr), func, source))
+        backtraces = Backtrace(addresses, formatter=self.formatter)
+        gdb.write(str(backtraces))
 
     def invoke(self, args, from_tty):
         if not args:
@@ -844,7 +905,7 @@ class Addr2Line(gdb.Command):
 
         pargs = None
         try:
-            pargs = parser.parse_args(gdb.string_to_argv(args))
+            pargs, _ = parser.parse_known_args(gdb.string_to_argv(args))
         except SystemExit:
             pass
 
