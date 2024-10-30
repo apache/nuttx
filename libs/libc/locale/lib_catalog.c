@@ -36,6 +36,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <nuttx/lib/lib.h>
+
 #ifdef CONFIG_LIBC_LOCALE_CATALOG
 
 /****************************************************************************
