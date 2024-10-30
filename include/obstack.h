@@ -314,7 +314,7 @@ void obstack_free(FAR struct obstack *h, FAR void *object);
  *   size: number of bytes to be free for growth
  *
  * Assumptions/Limitations:
- *   The obstack's chunk_size is expected to be power of two. This helps to
+ *   The obstack's chunk_size is rounded up to be power of two. This helps to
  *   eliminate division that might not be implemented in the HW and thus
  *   inefficient.
  *
