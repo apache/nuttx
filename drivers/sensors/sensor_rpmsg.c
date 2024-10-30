@@ -876,18 +876,21 @@ static int sensor_rpmsg_control(FAR struct sensor_lowerhalf_s *lower,
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
   FAR struct sensor_ioctl_s *ioctl = (FAR void *)(uintptr_t)arg;
+  int ret = -ENOTTY;
 
   if (drv->ops->control)
     {
-      return drv->ops->control(drv, filep, cmd, arg);
+      ret = drv->ops->control(drv, filep, cmd, arg);
     }
-  else if (!(filep->f_oflags & SENSOR_REMOTE) && _SNIOCVALID(cmd))
+
+  if (ret == -ENOTTY && !(filep->f_oflags & SENSOR_REMOTE) &&
+      _SNIOCVALID(cmd))
     {
       return sensor_rpmsg_ioctl(dev, cmd, arg,
                                 sizeof(*ioctl) + ioctl->len, true);
     }
 
-  return -ENOTTY;
+  return ret;
 }
 
 static void sensor_rpmsg_data_worker(FAR void *arg)
