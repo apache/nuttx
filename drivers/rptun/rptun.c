@@ -825,6 +825,7 @@ static int rptun_store_open(FAR void *store_,
   ret = file_read(&store->file, store->buf, len);
   if (ret < 0)
     {
+      kmm_free(store->buf);
       file_close(&store->file);
     }
 
