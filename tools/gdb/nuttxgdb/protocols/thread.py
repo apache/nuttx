@@ -18,6 +18,7 @@
 #
 ############################################################################
 
+from .fs import FileList
 from .value import Value
 
 
@@ -49,7 +50,7 @@ class Group(Value):
     tg_envp: Value
     tg_envc: Value
     itimer: Value
-    tg_filelist: Value
+    tg_filelist: FileList
     tg_mm_map: Value
 
 
