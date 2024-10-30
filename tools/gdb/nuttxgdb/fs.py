@@ -22,10 +22,13 @@
 
 import argparse
 import enum
+from typing import Generator, Tuple
 
 import gdb
 
 from . import utils
+from .protocols.fs import File, Inode
+from .protocols.thread import Tcb
 
 FSNODEFLAG_TYPE_MASK = utils.get_symbol_value("FSNODEFLAG_TYPE_MASK")
 
@@ -69,7 +72,7 @@ class InodeType(enum.Enum):
     UNKNOWN = 12
 
 
-def get_inode_name(inode):
+def get_inode_name(inode: Inode):
     if not inode:
         return ""
 
@@ -100,28 +103,28 @@ def get_inode_name(inode):
     if name := special_inode_name(inode):
         return name
 
-    ptr = inode["i_name"].cast(gdb.lookup_type("char").pointer())
+    ptr = inode.i_name.cast(gdb.lookup_type("char").pointer())
     return ptr.string()
 
 
-def inode_getpath(inode):
+def inode_getpath(inode: Inode):
     """get path fron inode"""
     if not inode:
         return ""
 
     name = get_inode_name(inode)
 
-    if inode["i_parent"]:
-        return inode_getpath(inode["i_parent"]) + "/" + name
+    if inode.i_parent:
+        return inode_getpath(inode.i_parent) + "/" + name
 
     return name
 
 
-def inode_gettype(inode) -> InodeType:
+def inode_gettype(inode: Inode) -> InodeType:
     if not inode:
         return InodeType.UNKNOWN
 
-    type = int(inode["i_flags"] & FSNODEFLAG_TYPE_MASK)
+    type = int(inode.i_flags & FSNODEFLAG_TYPE_MASK)
 
     # check if it's a valid type in InodeType
     if type in [e.value for e in InodeType]:
@@ -130,11 +133,11 @@ def inode_gettype(inode) -> InodeType:
     return InodeType.UNKNOWN
 
 
-def get_file(tcb, fd):
-    group = tcb["group"]
-    filelist = group["tg_filelist"]
-    fl_files = filelist["fl_files"]
-    fl_rows = filelist["fl_rows"]
+def get_file(tcb: Tcb, fd):
+    group = tcb.group
+    filelist = group.tg_filelist
+    fl_files = filelist.fl_files
+    fl_rows = filelist.fl_rows
 
     row = fd // CONFIG_NFILE_DESCRIPTORS_PER_BLOCK
     col = fd % CONFIG_NFILE_DESCRIPTORS_PER_BLOCK
@@ -145,28 +148,28 @@ def get_file(tcb, fd):
     return fl_files[row][col]
 
 
-def foreach_inode(root=None, path=""):
-    node = root or gdb.parse_and_eval("g_root_inode")["i_child"]
+def foreach_inode(root=None, path="") -> Generator[Tuple[Inode, str], None, None]:
+    node: Inode = root or utils.parse_and_eval("g_root_inode").i_child
     while node:
         newpath = path + "/" + get_inode_name(node)
         yield node, newpath
-        if node["i_child"]:
-            yield from foreach_inode(node["i_child"], newpath)
-        node = node["i_peer"]
+        if node.i_child:
+            yield from foreach_inode(node.i_child, newpath)
+        node = node.i_peer
 
 
-def foreach_file(tcb):
+def foreach_file(tcb: Tcb):
     """Iterate over all file descriptors in a tcb"""
-    group = tcb["group"]
-    filelist = group["tg_filelist"]
-    fl_files = filelist["fl_files"]
-    fl_rows = filelist["fl_rows"]
+    group = tcb.group
+    filelist = group.tg_filelist
+    fl_files = filelist.fl_files
+    fl_rows = filelist.fl_rows
 
     for row in range(fl_rows):
         for col in range(CONFIG_NFILE_DESCRIPTORS_PER_BLOCK):
             file = fl_files[row][col]
 
-            if not file or not file["f_inode"]:
+            if not file or not file.f_inode:
                 continue
 
             fd = row * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + col
@@ -181,17 +184,17 @@ class Fdinfo(gdb.Command):
         super().__init__("fdinfo", gdb.COMMAND_DATA, gdb.COMPLETE_EXPRESSION)
         self.total_fd_count = 0
 
-    def print_file_info(self, fd, file, formatter):
+    def print_file_info(self, fd, file: File, formatter: str):
         backtrace_formatter = "{0:<5} {1:<36} {2}"
 
-        oflags = int(file["f_oflags"])
-        pos = int(file["f_pos"])
-        path = inode_getpath(file["f_inode"])
+        oflags = int(file.f_oflags)
+        pos = int(file.f_pos)
+        path = inode_getpath(file.f_inode)
 
         output = []
         if CONFIG_FS_BACKTRACE:
             backtrace = utils.Backtrace(
-                utils.ArrayIterator(file["f_backtrace"]), formatter=backtrace_formatter
+                utils.ArrayIterator(file.f_backtrace), formatter=backtrace_formatter
             )
 
             output.append(
@@ -215,7 +218,7 @@ class Fdinfo(gdb.Command):
     def print_fdinfo_by_tcb(self, tcb):
         """print fdlist from tcb"""
         gdb.write(f"PID: {tcb['pid']}\n")
-        group = tcb["group"]
+        group = tcb.group
 
         if not group:
             return
@@ -290,7 +293,7 @@ class Mount(gdb.Command):
             lambda x: inode_gettype(x[0]) == InodeType.MOUNTPT, foreach_inode()
         )
         for node, path in nodes:
-            statfs = node["u"]["i_mops"]["statfs"]
+            statfs = node.u.i_mops.statfs
             funcname = gdb.block_for_pc(int(statfs)).function.print_name
             fstype = funcname.split("_")[0]
             gdb.write("  %s type %s\n" % (path, fstype))
@@ -306,7 +309,7 @@ class ForeachInode(gdb.Command):
 
     def get_root_inode(self, addr_or_expr):
         try:
-            return gdb.Value(int(addr_or_expr, 0)).cast(
+            return utils.Value(int(addr_or_expr, 0)).cast(
                 gdb.lookup_type("struct inode").pointer()
             )
         except ValueError:
@@ -341,11 +344,11 @@ class ForeachInode(gdb.Command):
             ),
         }
 
-    def print_inode_info(self, node, level, prefix):
+    def print_inode_info(self, node: Inode, level, prefix):
         if level > self.level:
             return
         while node:
-            if node["i_peer"]:
+            if node.i_peer:
                 initial_indent = prefix + "├── "
                 subsequent_indent = prefix + "│   "
                 newprefix = prefix + "│   "
@@ -355,41 +358,41 @@ class ForeachInode(gdb.Command):
                 newprefix = prefix + "    "
             gdb.write(
                 "%s [%s], %s, %s\n"
-                % (initial_indent, get_inode_name(node), node["i_ino"], node)
+                % (initial_indent, get_inode_name(node), node.i_ino, node)
             )
             gdb.write(
                 "%s i_crefs: %s, i_flags: %s, i_private: %s\n"
                 % (
                     subsequent_indent,
-                    node["i_crefs"],
-                    node["i_flags"],
-                    node["i_private"],
+                    node.i_crefs,
+                    node.i_flags,
+                    node.i_private,
                 )
             )
             if CONFIG_PSEUDOFS_FILE:
-                gdb.write("%s i_size: %s\n" % (subsequent_indent, node["i_size"]))
+                gdb.write("%s i_size: %s\n" % (subsequent_indent, node.i_size))
             if CONFIG_PSEUDOFS_ATTRIBUTES:
                 gdb.write(
                     "%s i_mode: %s, i_owner: %s, i_group: %s\n"
                     % (
                         subsequent_indent,
-                        node["i_mode"],
-                        node["i_owner"],
-                        node["i_group"],
+                        node.i_mode,
+                        node.i_owner,
+                        node.i_group,
                     )
                 )
                 gdb.write(
                     "%s i_atime: %s, i_mtime: %s, i_ctime: %s\n"
                     % (
                         subsequent_indent,
-                        node["i_atime"],
-                        node["i_mtime"],
-                        node["i_ctime"],
+                        node.i_atime,
+                        node.i_mtime,
+                        node.i_ctime,
                     )
                 )
-            if node["i_child"]:
-                self.print_inode_info(node["i_child"], level + 1, newprefix)
-            node = node["i_peer"]
+            if node.i_child:
+                self.print_inode_info(node.i_child, level + 1, newprefix)
+            node = node.i_peer
 
     def diagnose(self, *args, **kwargs):
         output = gdb.execute("foreach inode", to_string=True)
@@ -419,13 +422,13 @@ class InfoShmfs(gdb.Command):
             self.total_size = 0
             self.block_count = 0
 
-    def shm_filter(self, node, path):
+    def shm_filter(self, node: Inode, path):
         if inode_gettype(node) != InodeType.SHM:
             return
 
-        obj = node["i_private"].cast(gdb.lookup_type("struct shmfs_object_s").pointer())
-        length = obj["length"]
-        paddr = obj["paddr"]
+        obj = node.i_private.cast(gdb.lookup_type("struct shmfs_object_s").pointer())
+        length = obj.length
+        paddr = obj.paddr
         print(f"  {path} memsize: {length}, paddr: {paddr}")
 
         self.total_size += length / 1024
@@ -447,11 +450,11 @@ class InfoShmfs(gdb.Command):
         self.block_count = 0
         nodes = filter(lambda x: inode_gettype(x[0]) == InodeType.SHM, foreach_inode())
         for node, path in nodes:
-            obj = node["i_private"].cast(
+            obj = node.i_private.cast(
                 gdb.lookup_type("struct shmfs_object_s").pointer()
             )
-            length = obj["length"]
-            paddr = obj["paddr"]
+            length = obj.length
+            paddr = obj.paddr
             print(f"  {path} memsize: {length}, paddr: {paddr}")
 
             self.total_size += length / 1024
