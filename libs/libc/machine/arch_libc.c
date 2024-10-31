@@ -22,6 +22,8 @@
  * Included Files
  ****************************************************************************/
 
+#include "libc.h"
+
 #include <string.h>
 
 /****************************************************************************
@@ -29,61 +31,62 @@
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_ARCH_MEMCHR
-FAR void *arch_memchr(FAR const void *s, int c, size_t n);
+FAR void *ARCH_LIBCFUN(memchr)(FAR const void *s, int c, size_t n);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_MEMCPY
-FAR void *arch_memcpy(FAR void *dest, FAR const void *src, size_t n);
+FAR void *ARCH_LIBCFUN(memcpy)(FAR void *dest,
+                               FAR const void *src, size_t n);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_MEMCMP
-int arch_memcmp(FAR const void *s1, FAR const void *s2, size_t n);
+int ARCH_LIBCFUN(memcmp)(FAR const void *s1, FAR const void *s2, size_t n);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_MEMMOVE
-FAR void *arch_memmove(FAR void *dest, FAR const void *src, size_t n);
+FAR void *ARCH_LIBCFUN(memmove)(FAR void *dest,
+                                FAR const void *src, size_t n);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_MEMSET
-FAR void *arch_memset(FAR void *s, int c, size_t n);
+FAR void *ARCH_LIBCFUN(memset)(FAR void *s, int c, size_t n);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRCMP
-int arch_strcmp(FAR const char *s1, FAR const char *s2);
+int ARCH_LIBCFUN(strcmp)(FAR const char *s1, FAR const char *s2);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRCPY
-FAR char *arch_strcpy(FAR char *dest, FAR const char *src);
+FAR char *ARCH_LIBCFUN(strcpy)(FAR char *dest, FAR const char *src);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRLEN
-size_t arch_strlen(FAR const char *s);
-#else
-#define arch_strlen(s) strlen(s)
+size_t ARCH_LIBCFUN(strlen)(FAR const char *s);
 #endif
 
 #ifdef CONFIG_LIBC_ARCHSTRNCPY
-FAR char *arch_strncpy(FAR char *dest, FAR const char *src, size_t n);
+FAR char *ARCH_LIBCFUN(strncpy)(FAR char *dest,
+                                FAR const char *src, size_t n);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRCHR
-FAR char *arch_strchr(FAR const char *s, int c);
+FAR char *ARCH_LIBCFUN(strchr)(FAR const char *s, int c);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRCHNUL
-FAR char *arch_strchrnul(FAR const char *s, int c);
+FAR char *ARCH_LIBCFUN(strchrnul)(FAR const char *s, int c);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRNCMP
-int arch_strncmp(FAR const char *s1, FAR const char *s2, size_t n);
+int ARCH_LIBCFUN(strncmp)(FAR const char *s1, FAR const char *s2, size_t n);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRNLEN
-size_t arch_strnlen(FAR const char *s, size_t maxlen);
+size_t ARCH_LIBCFUN(strnlen)(FAR const char *s, size_t maxlen);
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRRCHR
-FAR char *arch_strrchr(FAR const char *s, int c);
+FAR char *ARCH_LIBCFUN(strrchr)(FAR const char *s, int c);
 #endif
 
 #  ifdef CONFIG_MM_KASAN
@@ -109,7 +112,7 @@ FAR void *memchr(FAR const void *s, int c, size_t n)
 #    endif
 #  endif
 
-  return arch_memchr(s, c, n);
+  return ARCH_LIBCFUN(memchr)(s, c, n);
 }
 #endif
 
@@ -124,7 +127,7 @@ FAR void *memcpy(FAR void *dest, FAR const void *src, FAR size_t n)
   __asan_loadN((FAR void *)src, n);
 #    endif
 #  endif
-  return arch_memcpy(dest, src, n);
+  return ARCH_LIBCFUN(memcpy)(dest, src, n);
 }
 #endif
 
@@ -137,7 +140,7 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
     __asan_loadN((FAR void *)s2, n);
 #   endif
 #  endif
-  return arch_memcmp(s1, s2, n);
+  return ARCH_LIBCFUN(memcmp)(s1, s2, n);
 }
 #endif
 
@@ -152,7 +155,7 @@ FAR void *memmove(FAR void *dest, FAR const void *src, FAR size_t n)
   __asan_loadN((FAR void *)src, n);
 #    endif
 #  endif
-  return arch_memmove(dest, src, n);
+  return ARCH_LIBCFUN(memmove)(dest, src, n);
 }
 #endif
 
@@ -164,7 +167,7 @@ FAR void *memset(FAR void *s, int c, FAR size_t n)
   __asan_storeN(s, n);
 #    endif
 #  endif
-  return arch_memset(s, c, n);
+  return ARCH_LIBCFUN(memset)(s, c, n);
 }
 #endif
 
@@ -173,11 +176,11 @@ int strcmp(FAR const char *s1, FAR const char *s2)
 {
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s1, arch_strlen(s1) + 1);
-  __asan_loadN((FAR void *)s2, arch_strlen(s2) + 1);
+  __asan_loadN((FAR void *)s1, ARCH_LIBCFUN(strlen)(s1) + 1);
+  __asan_loadN((FAR void *)s2, ARCH_LIBCFUN(strlen)(s2) + 1);
 #    endif
 #  endif
-  return arch_strcmp(s1, s2);
+  return ARCH_LIBCFUN(strcmp)(s1, s2);
 }
 #endif
 
@@ -186,20 +189,20 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_WRITES_CHECK
-  __asan_storeN(dest, arch_strlen(src) + 1);
+  __asan_storeN(dest, ARCH_LIBCFUN(strlen)(src) + 1);
 #    endif
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)src, arch_strlen(src) + 1);
+  __asan_loadN((FAR void *)src, ARCH_LIBCFUN(strlen)(src) + 1);
 #    endif
 #  endif
-  return arch_strcpy(dest, src);
+  return ARCH_LIBCFUN(strcpy)(dest, src);
 }
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRLEN
 size_t strlen(FAR const char *s)
 {
-  size_t ret = arch_strlen(s);
+  size_t ret = ARCH_LIBCFUN(strlen)(s);
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
   __asan_loadN((FAR void *)s, ret + 1);
@@ -220,7 +223,7 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
   __asan_loadN((FAR void *)src, n);
 #    endif
 #endif
-  return arch_strncpy(dest, src, n);
+  return ARCH_LIBCFUN(strncpy)(dest, src, n);
 }
 #endif
 
@@ -229,11 +232,11 @@ FAR char *strchr(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s, arch_strlen(s) + 1);
+  __asan_loadN((FAR void *)s, ARCH_LIBCFUN(strlen)(s) + 1);
 #    endif
 #  endif
 
-  return arch_strchr(s, c);
+  return ARCH_LIBCFUN(strchr)(s, c);
 }
 #endif
 
@@ -242,10 +245,10 @@ FAR char *strchrnul(FAR const char *s, int c);
 {
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s, arch_strlen(s) + 1);
+  __asan_loadN((FAR void *)s, ARCH_LIBCFUN(strlen)(s) + 1);
 #    endif
 #  endif
-  return arch_strchrnul(s, c);
+  return ARCH_LIBCFUN(strchrnul)(s, c);
 }
 #endif
 
@@ -254,8 +257,8 @@ int strncmp(FAR const char *s1, FAR const char *s2, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  size_t size_s1 = arch_strnlen(s1, n);
-  size_t size_s2 = arch_strnlen(s2, n);
+  size_t size_s1 = ARCH_LIBCFUN(strnlen)(s1, n);
+  size_t size_s2 = ARCH_LIBCFUN(strnlen)(s2, n);
   size_t size;
 
   size = size_s1 < size_s2 ? size_s1 : size_s2;
@@ -263,14 +266,14 @@ int strncmp(FAR const char *s1, FAR const char *s2, size_t n)
   __asan_loadN((FAR void *)s2, size);
 #    endif
 #  endif
-  return arch_strncmp(s1, s2, n);
+  return ARCH_LIBCFUN(strncmp)(s1, s2, n);
 }
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRNLEN
 size_t strnlen(FAR const char *s, size_t maxlen)
 {
-  size_t ret = arch_strnlen(s, maxlen);
+  size_t ret = ARCH_LIBCFUN(strnlen)(s, maxlen);
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
   __asan_loadN((FAR void *)s, ret);
@@ -286,9 +289,9 @@ FAR char *strrchr(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN
 #    ifndef CONFIG_MM_KASAN_DISABLE_READS_CHECK
-  __asan_loadN((FAR void *)s, arch_strlen(s) + 1);
+  __asan_loadN((FAR void *)s, ARCH_LIBCFUN(strlen)(s) + 1);
 #    endif
 #  endif
-  return arch_strrchr(s, c);
+  return ARCH_LIBCFUN(strrchr)(s, c);
 }
 #endif
