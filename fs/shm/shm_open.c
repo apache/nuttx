@@ -108,6 +108,17 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
           inode_release(inode);
           goto errout_with_sem;
         }
+
+      /* If the shared memory object already exists, truncate it to
+       * zero bytes.
+       */
+
+      if ((oflags & O_TRUNC) == O_TRUNC && inode->i_private != NULL)
+        {
+          shmfs_free_object(inode->i_private);
+          inode->i_private = NULL;
+          inode->i_size = 0;
+        }
     }
   else
     {
