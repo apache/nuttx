@@ -55,8 +55,49 @@
 
 /* Common mouse IOCTL commands */
 
-#define MSE_FIRST            0x0001          /* First common command */
-#define MSE_NCMDS            1               /* One common commands */
+#define MSIOC_VENDOR         _MSIOC(0x0001)  /* Vendor-specific commands */
+
+#define MSC_FIRST            0x0001          /* First common command */
+#define MSC_NCMDS            1               /* One common commands */
+
+/* Vendor-specific command structure
+ *
+ * This structure is used to pass vendor-specific commands to the mouse
+ * driver.  The vendor-specific command is identified by the 'cmd' field
+ * and the length of the data is specified by the 'len' field.  The
+ * data follows the structure in a contiguous block of memory.
+ *
+ * The vendor-specific command is defined by the vendor and is not
+ * standardized.  The data format and meaning is defined by the vendor.
+ *
+ * The usage is as follows :
+ *
+ *   struct mse_vendor_data_s
+ *   {
+ *     uint16_t cmd;
+ *     uint16_t len;
+ *     uint16_t data;
+ *     ... ... ...
+ *   };
+ *
+ *   struct mse_vendor_data_s cmd_data;
+ *   cmd_data.cmd = VENDOR_CMD_ID;
+ *   cmd_data.data = 12;
+ *
+ *   struct mouse_vendor_cmd_s *ioctl;
+ *   ioctl = malloc(sizeof(*ioctl) + sizeof(struct mse_vendor_data_s));
+ *   ioctl->len = sizeof(struct mse_vendor_data_s);
+ *   memcpy(ioctl->data, &cmd_data, sizeof(struct mse_vendor_data_s));
+ *
+ *   ioctl(file, MSIOC_VENDOR, ioctl);
+ *
+ */
+
+struct mouse_vendor_cmd_s
+{
+  size_t len;
+  char data[1];
+};
 
 /****************************************************************************
  * Public Types

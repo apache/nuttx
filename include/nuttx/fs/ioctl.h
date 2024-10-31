@@ -108,7 +108,7 @@
 #define _PINCTRLBASE    (0x4000) /* Pinctrl driver ioctl commands */
 #define _PCIBASE        (0x4100) /* Pci ioctl commands */
 #define _I3CBASE        (0x4200) /* I3C driver ioctl commands */
-#define _MSEIOCBASE     (0x4300) /* Mouse ioctl commands */
+#define _MSIOCBASE      (0x4300) /* Mouse ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -373,8 +373,8 @@
 
 /* NuttX mouse ioctl definitions (see nuttx/input/mouse.h) ******************/
 
-#define _MSEIOCVALID(c)   (_IOC_TYPE(c)==_MSEIOCBASE)
-#define _MSEIOC(nr)       _IOC(_MSEIOCBASE,nr)
+#define _MSIOCVALID(c)    (_IOC_TYPE(c)==_MSIOCBASE)
+#define _MSIOC(nr)        _IOC(_MSIOCBASE,nr)
 
 /* NuttX sensor ioctl definitions (see nuttx/sensor/ioctl.h) ****************/
 
