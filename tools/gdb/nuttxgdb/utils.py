@@ -211,7 +211,6 @@ def get_symbol_value(name, locspec="nx_start", cacheable=True):
         # Try to expand macro by reading elf
         global g_macro_ctx
         if not g_macro_ctx:
-            gdb.write("No macro context found, trying to load from ELF\n")
             if len(gdb.objfiles()) > 0:
                 g_macro_ctx = MacroCtx(gdb.objfiles()[0].filename)
             else:

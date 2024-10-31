@@ -38,6 +38,7 @@
 # Currently, we are using the second method.
 
 import hashlib
+import json
 import os
 import re
 import time
@@ -132,30 +133,37 @@ def fetch_macro_info(file):
     with open(file, "rb") as f:
         hash = hashlib.md5(f.read()).hexdigest()
 
-    cache = path.join(path.dirname(path.abspath(file)), f"{hash}.macro")
+    macros = {}
+    p = re.compile(".*macro[ ]*:[ ]*([\S]+\(.*?\)|[\w]+)[ ]*(.*)")
+    cache = path.join(path.dirname(path.abspath(file)), f"{hash}.json")
+    print(f"Load macro: {cache}")
     if not path.isfile(cache):
-        start = time.time()
+        t = time.time()
         os.system(f'readelf -wm "{file}" > "{cache}"')
-        print(f"readelf took {time.time() - start:.1f} seconds")
+        print(f"readelf took {time.time() - t:.1f} seconds")
+
+        t = time.time()
+        with open(cache, "r") as f2:
+            for line in f2.readlines():
+                if not line.startswith(" DW_MACRO_define") and not line.startswith(
+                    " DW_MACRO_undef"
+                ):
+                    continue
+
+                if not parse_macro(line, macros, p):
+                    print(f"Failed to parse {line}")
+
+        print(f"Parse macro took {time.time() - t:.1f} seconds")
+
+        with open(cache, "w") as f2:
+            dump = json.dumps(macros, indent=4, sort_keys=True)
+            f2.write(dump)
+
         print(f"Cache macro info to {cache}")
     else:
-        print(f"Load macro info from {cache}")
+        with open(cache, "r") as f2:
+            macros = json.load(f2)
 
-    p = re.compile(".*macro[ ]*:[ ]*([\S]+\(.*?\)|[\w]+)[ ]*(.*)")
-    macros = {}
-
-    start = time.time()
-    with open(cache, "r") as f2:
-        for line in f2.readlines():
-            if not line.startswith(" DW_MACRO_define") and not line.startswith(
-                " DW_MACRO_undef"
-            ):
-                continue
-
-            if not parse_macro(line, macros, p):
-                print(f"Failed to parse {line}")
-
-    print(f"Parse macro took {time.time() - start:.1f} seconds")
     return macros
 
 
