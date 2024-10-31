@@ -1613,8 +1613,8 @@ static int imx9_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Return parity */
 
-        termiosp->c_cflag = (!priv->parity ? PARENB : 0) |
-                            (priv->parity ? PARODD : 0);
+        termiosp->c_cflag = ((priv->parity != 0) ? PARENB : 0) |
+                            ((priv->parity == 1) ? PARODD : 0);
 
         /* Return stop bits */
 
