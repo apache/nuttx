@@ -68,35 +68,36 @@ static ssize_t file_writev_compat(FAR struct file *filep,
     {
       /* Ignore zero-length writes */
 
-      if (iov[i].iov_len > 0)
+      if (iov[i].iov_len == 0)
         {
-          buffer    = iov[i].iov_base;
-          remaining = iov[i].iov_len;
-
-          /* Write repeatedly as necessary to write the entire buffer */
-
-          do
-            {
-              nwritten = inode->u.i_ops->write(filep, (void *)buffer,
-                                                      remaining);
-
-              /* Check for a write error */
-
-              if (nwritten < 0)
-                {
-                  return ntotal ? ntotal : nwritten;
-                }
-
-              /* Update pointers and counts in order to handle partial
-               * buffer writes.
-               */
-
-              buffer    += nwritten;
-              remaining -= nwritten;
-              ntotal    += nwritten;
-            }
-          while (remaining > 0);
+          continue;
         }
+
+      buffer    = iov[i].iov_base;
+      remaining = iov[i].iov_len;
+
+      nwritten = inode->u.i_ops->write(filep, (void *)buffer, remaining);
+
+      /* Check for a write error */
+
+      if (nwritten < 0)
+        {
+          return ntotal ? ntotal : nwritten;
+        }
+
+      ntotal += nwritten;
+
+      /* Check for a parital success condition */
+
+      if (nwritten < remaining)
+        {
+          return ntotal;
+        }
+
+      /* Update the pointer */
+
+      buffer    += nwritten;
+      remaining -= nwritten;
     }
 
   return ntotal;
