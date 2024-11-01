@@ -68,42 +68,36 @@ static ssize_t file_readv_compat(FAR struct file *filep,
     {
       /* Ignore zero-length reads */
 
-      if (iov[i].iov_len > 0)
+      if (iov[i].iov_len == 0)
         {
-          buffer    = iov[i].iov_base;
-          remaining = iov[i].iov_len;
-
-          /* Read repeatedly as necessary to fill buffer */
-
-          do
-            {
-              nread = inode->u.i_ops->read(filep, (void *)buffer,
-                                                  remaining);
-
-              /* Check for a read error */
-
-              if (nread < 0)
-                {
-                  return ntotal ? ntotal : nread;
-                }
-
-              /* Check for an end-of-file condition */
-
-              else if (nread == 0)
-                {
-                  return ntotal;
-                }
-
-              /* Update pointers and counts in order to handle partial
-               * buffer reads.
-               */
-
-              buffer    += nread;
-              remaining -= nread;
-              ntotal    += nread;
-            }
-          while (remaining > 0);
+          continue;
         }
+
+      buffer    = iov[i].iov_base;
+      remaining = iov[i].iov_len;
+
+      nread = inode->u.i_ops->read(filep, (void *)buffer, remaining);
+
+      /* Check for a read error */
+
+      if (nread < 0)
+        {
+          return ntotal ? ntotal : nread;
+        }
+
+      ntotal += nread;
+
+      /* Check for a parital success condition, including an end-of-file */
+
+      if (nread < remaining)
+        {
+          return ntotal;
+        }
+
+      /* Update the pointer */
+
+      buffer    += nread;
+      remaining -= nread;
     }
 
   return ntotal;
