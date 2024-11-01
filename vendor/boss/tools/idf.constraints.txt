@@ -1,0 +1,31 @@
+#ref: ~\.espressif\espidf.constraints.v5.3.txt
+
+# --------- CORE ----------
+
+# setuptools: version 21 is required to handle PEP 508 environment markers
+# 71.0.1 introduced bug https://github.com/pypa/setuptools/issues/4480
+setuptools>=21,<71.0.1
+
+# click: Min. version was set to support the API used in idf.py and auto-completion
+click>=7.0,<9
+
+# pyparsing: Min version was set based on https://github.com/pyparsing/pyparsing/issues/482
+pyparsing>=3.1.0,<4
+
+# --------- CORE ends ----------
+
+# --------- GDBGUI -------------
+
+# --------- GDBGUI ends ---------
+
+# --------- CI ---------
+
+# --------- CI ends ---------
+
+# --------- PYTEST -------------
+
+# --------- PYTEST ends ---------
+
+# --------- DOCS -------------
+
+# --------- DOCS ends ---------
