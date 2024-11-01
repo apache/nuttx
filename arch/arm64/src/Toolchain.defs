@@ -219,7 +219,7 @@ endif
 
 # Loadable module definitions
 
-CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
+CMODULEFLAGS = $(CFLAGS) -fvisibility=hidden # --target1-abs
 LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # ELF module definitions
