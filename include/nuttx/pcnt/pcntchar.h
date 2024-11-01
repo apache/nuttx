@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_qencoder.h
+ * include/nuttx/pcnt/pcntchar.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_QENCODER_H
-#define __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_QENCODER_H
+#ifndef __INCLUDE_NUTTX_PCNT_PCNTCHAR_H
+#define __INCLUDE_NUTTX_PCNT_PCNTCHAR_H
 
 /****************************************************************************
  * Included Files
@@ -29,57 +29,60 @@
 
 #include <nuttx/config.h>
 
-#include "chip.h"
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#ifdef CONFIG_SENSORS_QENCODER
+#include <nuttx/pcnt/pcnt.h>
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
-/* Timer devices may be used for different purposes.  One special purpose is
- * as a quadrature encoder input device.  If CONFIG_ESP_PCNT_Un is defined
- * then the CONFIG_ESP_PCNT_Un_QE must also be defined to indicate that
- * pcnt "n" is intended to be used for as a quadrature encoder.
- */
-
-#ifndef CONFIG_ESP_PCNT_U0
-#  undef CONFIG_ESP_PCNT_U0_QE
-#endif
-#ifndef CONFIG_ESP_PCNT_U1
-#  undef CONFIG_ESP_PCNT_U1_QE
-#endif
-#ifndef CONFIG_ESP_PCNT_U2
-#  undef CONFIG_ESP_PCNT_U2_QE
-#endif
-#ifndef CONFIG_ESP_PCNT_U3
-#  undef CONFIG_ESP_PCNT_U3_QE
-#endif
+#ifdef CONFIG_PCNTCHAR
 
 /****************************************************************************
- * Included Files
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_qeinitialize
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pcntchar_register
  *
  * Description:
- *   Initialize a quadrature encoder interface. This function must be
- *   called from board-specific logic.
+ *   Create and register the pulse counter (pcnt) character driver.
  *
  * Input Parameters:
- *   devpath  - The full path to the driver to register. E.g., "/dev/qe0"
- *   pcnt     - Pointer to the pcnt driver struct
- *   pcnt_num - The PCNT number to used.  'pcnt' must be an element of
- *              {0,1,2,3}
+ *   pcnt - An instance of the lower half pcnt driver
  *
  * Returned Value:
- *   Zero on success; A negated errno value is returned on failure.
+ *   OK if the driver was successfully registered; A negated errno value is
+ *   returned on any failure.
  *
  ****************************************************************************/
 
-int esp_qeinitialize(const char *devpath, struct pcnt_dev_s *pcnt,
-                     int pcnt_num);
+int pcntchar_register(FAR struct pcnt_dev_s *pcnt);
 
-#endif /* CONFIG_SENSORS_QENCODER */
-#endif /* __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_QENCODER_H */
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* CONFIG_PCNT */
+#endif /* __INCLUDE_NUTTX_PCNT_PCNTCHAR_H */

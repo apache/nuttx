@@ -1659,6 +1659,44 @@ config DEBUG_PWM
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
+config DEBUG_PCNT
+	bool "Pulse Counter (PCNT) Debug Features"
+	default n
+	depends on PCNT
+	---help---
+		Enable PCNT debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_PCNT
+
+config DEBUG_PCNT_ERROR
+	bool "Pulse Counter (PCNT) Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable PCNT driver error output to SYSLOG.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_PCNT_WARN
+	bool "Pulse Counter (PCNT) Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable PCNT driver warning output to SYSLOG.
+
+config DEBUG_PCNT_INFO
+	bool "Pulse Counter (PCNT) Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable PCNT driver informational output to SYSLOG.
+
+endif # DEBUG_PCNT
+
 if DEBUG_PWM
 
 config DEBUG_PWM_ERROR
