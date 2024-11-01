@@ -249,7 +249,7 @@ ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt)
       return ret;
     }
 
-  /* Then let file_read do all of the work. */
+  /* Then let file_readv do all of the work. */
 
   uio.uio_iov = iov;
   uio.uio_iovcnt = iovcnt;
