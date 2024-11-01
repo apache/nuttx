@@ -5,7 +5,6 @@ Subject: [PATCH 1/2] uClibcxx:basic_definitions: fix GCC-specific definitions
 
 gcc use  __GNUC__ instead off __GCC__
 
-Change-Id: I63aeb2118f45a981653553c8a3721a9d9c7ccaaa
 ---
  include/basic_definitions | 4 ++--
  include/cstddef           | 2 +-
