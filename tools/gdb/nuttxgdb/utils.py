@@ -500,6 +500,13 @@ def parse_arg(arg: str) -> Union[gdb.Value, int]:
         return None
 
 
+def alias(name, command):
+    try:
+        gdb.execute(f"alias {name} = {command}")
+    except gdb.error:
+        pass
+
+
 def nitems(array):
     array_type = array.type
     element_type = array_type.target()
