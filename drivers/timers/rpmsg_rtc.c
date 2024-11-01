@@ -142,10 +142,12 @@ struct rpmsg_rtc_client_s
  ****************************************************************************/
 
 #ifndef CONFIG_RTC_RPMSG_SERVER
-static void rpmsg_rtc_device_created(FAR struct rpmsg_device *rdev,
-              FAR void *priv);
-static void rpmsg_rtc_device_destroy(FAR struct rpmsg_device *rdev,
-              FAR void *priv);
+static bool rpmsg_rtc_device_ns_match(FAR struct rpmsg_device *rdev,
+                                      FAR void *priv, FAR const char *name,
+                                      uint32_t dest);
+static void rpmsg_rtc_device_ns_bind(FAR struct rpmsg_device *rdev,
+                                     FAR void *priv, FAR const char *name,
+                                     uint32_t dest);
 static void rpmsg_rtc_alarm_fire_handler(FAR struct rpmsg_endpoint *ept,
               FAR void *data, size_t len, uint32_t src, FAR void *priv);
 static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
@@ -250,32 +252,23 @@ static struct rtc_ops_s g_rpmsg_rtc_server_ops =
  ****************************************************************************/
 
 #ifndef CONFIG_RTC_RPMSG_SERVER
-static void rpmsg_rtc_device_created(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv)
+static bool rpmsg_rtc_device_ns_match(FAR struct rpmsg_device *rdev,
+                                      FAR void *priv, FAR const char *name,
+                                      uint32_t dest)
 {
-  FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
-
-  if (strcmp(CONFIG_RTC_RPMSG_SERVER_NAME,
-             rpmsg_get_cpuname(rdev)) == 0)
-    {
-      lower->ept.priv = lower;
-
-      rpmsg_create_ept(&lower->ept, rdev, RPMSG_RTC_EPT_NAME,
-                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       rpmsg_rtc_ept_cb, NULL);
-    }
+  return !strcmp(name, RPMSG_RTC_EPT_NAME);
 }
 
-static void rpmsg_rtc_device_destroy(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv)
+static void rpmsg_rtc_device_ns_bind(FAR struct rpmsg_device *rdev,
+                                     FAR void *priv, FAR const char *name,
+                                     uint32_t dest)
 {
   FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
 
-  if (strcmp(CONFIG_RTC_RPMSG_SERVER_NAME,
-             rpmsg_get_cpuname(rdev)) == 0)
-    {
-      rpmsg_destroy_ept(&lower->ept);
-    }
+  lower->ept.priv = lower;
+  rpmsg_create_ept(&lower->ept, rdev, RPMSG_RTC_EPT_NAME,
+                   RPMSG_ADDR_ANY, dest,
+                   rpmsg_rtc_ept_cb, rpmsg_destroy_ept);
 }
 
 static void rpmsg_rtc_alarm_fire_handler(FAR struct rpmsg_endpoint *ept,
@@ -716,14 +709,6 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
     }
 }
 
-static bool rpmsg_rtc_server_ns_match(FAR struct rpmsg_device *rdev,
-                                      FAR void *priv,
-                                      FAR const char *name,
-                                      uint32_t dest)
-{
-  return !strcmp(name, RPMSG_RTC_EPT_NAME);
-}
-
 static void rpmsg_rtc_server_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_rtc_client_s *client = container_of(ept,
@@ -736,19 +721,40 @@ static void rpmsg_rtc_server_ept_release(FAR struct rpmsg_endpoint *ept)
   kmm_free(client);
 }
 
-static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv,
-                                     FAR const char *name,
-                                     uint32_t dest)
+static void rpmsg_rtc_server_sync(FAR struct rpmsg_rtc_server_s *server,
+                                  FAR struct rpmsg_rtc_client_s *client)
+{
+  struct rtc_time rtctime;
+
+  if (server->lower->ops->rdtime(server->lower, &rtctime) >= 0)
+    {
+      struct rpmsg_rtc_set_s msg;
+
+      msg.sec  = timegm((FAR struct tm *)&rtctime);
+      msg.nsec = rtctime.tm_nsec;
+      msg.base_sec = g_basetime.tv_sec;
+      msg.base_nsec = g_basetime.tv_nsec;
+
+      msg.header.command = RPMSG_RTC_SYNC;
+      rpmsg_send(&client->ept, &msg, sizeof(msg));
+    }
+}
+
+static void rpmsg_rtc_server_ns_bound(FAR struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsg_rtc_client_s *client;
+  FAR struct rpmsg_rtc_server_s *server;
+
+  client = container_of(ept, struct rpmsg_rtc_client_s, ept);
+  server = client->ept.priv;
+  rpmsg_rtc_server_sync(server, client);
+}
+
+static void rpmsg_rtc_server_created(FAR struct rpmsg_device *rdev,
+                                     FAR void *priv)
 {
   FAR struct rpmsg_rtc_server_s *server = priv;
   FAR struct rpmsg_rtc_client_s *client;
-  struct rpmsg_rtc_set_s msg;
-  irqstate_t flags;
-  struct rtc_time rtctime =
-    {
-      0
-    };
 
   client = kmm_zalloc(sizeof(*client));
   if (client == NULL)
@@ -758,28 +764,15 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
 
   client->ept.priv = server;
   client->ept.release_cb = rpmsg_rtc_server_ept_release;
+  client->ept.ns_bound_cb = rpmsg_rtc_server_ns_bound;
 
   if (rpmsg_create_ept(&client->ept, rdev, RPMSG_RTC_EPT_NAME,
-                       RPMSG_ADDR_ANY, dest,
+                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        rpmsg_rtc_server_ept_cb,
                        rpmsg_destroy_ept) < 0)
     {
       kmm_free(client);
       return;
-    }
-
-  if (server->lower->ops->rdtime(server->lower, &rtctime) >= 0)
-    {
-      msg.sec  = timegm((FAR struct tm *)&rtctime);
-      msg.nsec = rtctime.tm_nsec;
-
-      flags = spin_lock_irqsave(&g_basetime_lock);
-      msg.base_sec = g_basetime.tv_sec;
-      msg.base_nsec = g_basetime.tv_nsec;
-      spin_unlock_irqrestore(&g_basetime_lock, flags);
-
-      msg.header.command = RPMSG_RTC_SYNC;
-      rpmsg_send(&client->ept, &msg, sizeof(msg));
     }
 
   nxmutex_lock(&server->lock);
@@ -811,17 +804,16 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(void)
     {
       lower->ops = &g_rpmsg_rtc_ops;
 
-      rpmsg_register_callback(lower,
-                              rpmsg_rtc_device_created,
-                              rpmsg_rtc_device_destroy,
-                              NULL,
-                              NULL);
+      rpmsg_register_callback(lower, NULL, NULL,
+                              rpmsg_rtc_device_ns_match,
+                              rpmsg_rtc_device_ns_bind);
     }
 
   return (FAR struct rtc_lowerhalf_s *)lower;
 }
 
 #else
+
 /****************************************************************************
  * Name: rpmsg_rtc_server_initialize
  *
@@ -847,9 +839,8 @@ FAR struct rtc_lowerhalf_s *rpmsg_rtc_server_initialize(
       server->lower = lower;
       list_initialize(&server->list);
       nxmutex_init(&server->lock);
-      if (rpmsg_register_callback(server, NULL, NULL,
-                                  rpmsg_rtc_server_ns_match,
-                                  rpmsg_rtc_server_ns_bind) < 0)
+      if (rpmsg_register_callback(server, rpmsg_rtc_server_created, NULL,
+                                  NULL, NULL) < 0)
         {
           nxmutex_destroy(&server->lock);
           kmm_free(server);

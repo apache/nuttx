@@ -416,13 +416,6 @@ config RTC_RPMSG_SERVER
 	bool "The RTC RPMSG Role"
 	depends on RPMSG
 
-config RTC_RPMSG_SERVER_NAME
-	string "The name of RTC RPMSG Server"
-	depends on RTC_RPMSG
-	---help---
-		The proc name of RTC server. Client requests time from
-		specified name of remote proc.
-
 config RTC_RPMSG_SYNC_BASETIME
 	bool "Update g_basetime from rpmsg."
 	default n
