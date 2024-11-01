@@ -1210,7 +1210,7 @@ static void dma_attach(uint8_t dma_chan)
 }
 
 /****************************************************************************
- * Name: esp32_interrupt
+ * Name: esp32_interrupt_dma
  *
  * Description:
  *   DMA interrupt.
