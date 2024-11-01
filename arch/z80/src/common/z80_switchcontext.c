@@ -105,6 +105,10 @@ void up_switch_context(FAR struct tcb_s *tcb, FAR struct tcb_s *rtcb)
 
       nxsched_resume_scheduler(tcb);
 
+      /* Record the new "running" task */
+
+      g_running_tasks[this_cpu()] = tcb;
+
       /* Then switch contexts */
 
       RESTORE_USERCONTEXT(tcb);

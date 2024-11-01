@@ -105,6 +105,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 
       restore_critical_section(tcb, this_cpu());
 
+      /* Record the new "running" task */
+
+      g_running_tasks[this_cpu()] = tcb;
+
       /* Then switch contexts */
 
       sim_fullcontextrestore(tcb->xcp.regs);
