@@ -36,6 +36,8 @@
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/sensors/qencoder.h>
+#include <nuttx/sensors/sensor.h>
+#include <nuttx/timers/capture.h>
 
 #include <arch/board/board.h>
 
@@ -80,24 +82,10 @@
  * Private Types
  ****************************************************************************/
 
-/* Constant configuration structure that is retained in FLASH */
-
-struct esp_qeconfig_s
-{
-  uint8_t   pcntid;        /* PCNT ID {0,1,2,3} */
-  uint8_t   ch0_gpio;      /* Channel 0 gpio pin (Edge/Pulse) */
-  uint8_t   ch1_gpio;      /* Channel 1 gpio pin (Level/Ctrl) */
-  uint32_t  ch0_pulse_sig; /* ch0 pulse signal index */
-  uint32_t  ch0_ctrl_sig;  /* ch0 ctrl signal index */
-  uint32_t  ch1_pulse_sig; /* ch1 pulse signal index */
-  uint32_t  ch1_ctrl_sig;  /* ch1 ctrl signal index */
-  uint16_t  filter_thres;  /* Filter threshold for this PCNT Unit */
-};
-
 /* NOTE: we are using Quadrature Encoder in X4 mode on ESP PCNT, then
  * instead of using 'pulse_gpio' and 'ctrl_gpio' names, we only use ch0_gpio
- * and ch1_gpio names. It avoid confusion, since the same signal that is used
- * on pin 'pulse' of CH0 is also connected to 'ctrl' pin of the CH1 and
+ * and ch1_gpio names. It avoids confusion, since the same signal that is
+ * used on pin 'pulse' of CH0 is also connected to 'ctrl' pin of the CH1 and
  * 'ctrl' pin of CH0 is also connected on 'pulse' pin of CH1.
  */
 
@@ -113,10 +101,9 @@ struct qe_dev_lowerhalf_s
 
   /* ESP driver-specific fields: */
 
-  const struct esp_qeconfig_s *config; /* static configuration */
-  bool inuse;                          /* True: The lower-half driver is
-                                        *       in-use */
-  struct pcnt_dev_t *dev;              /* Device handle */
+  struct cap_lowerhalf_s *pcnt;        /* Device handle */
+  int pcnt_num;                        /* Pulse Counter (PCNT) unit number */
+  bool inuse;                          /* True: The lower-half driver is in-use */
   volatile int32_t position;           /* The current position offset */
   spinlock_t lock;                     /* Device specific lock. */
 };
@@ -124,12 +111,6 @@ struct qe_dev_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-/* Interrupt handling */
-
-#if 0 /* FIXME: To be implemented */
-static int esp_interrupt(int irq, void *context, void *arg);
-#endif
 
 /* Lower-half Quadrature Encoder Driver Methods */
 
@@ -163,117 +144,40 @@ static const struct qe_ops_s g_qecallbacks =
 /* Per-pcnt state structures */
 
 #ifdef CONFIG_ESP_PCNT_U0_QE
-static const struct esp_qeconfig_s g_pcnt0config =
-{
-  .pcntid        = 0,
-  .ch0_gpio      = CONFIG_ESP_PCNT_U0_CH0_EDGE_PIN,
-  .ch1_gpio      = CONFIG_ESP_PCNT_U0_CH1_LEVEL_PIN,
-  .ch0_pulse_sig = PCNT_SIG_CH0_IN0_IDX,
-  .ch1_pulse_sig = PCNT_SIG_CH1_IN0_IDX,
-  .ch0_ctrl_sig  = PCNT_CTRL_CH0_IN0_IDX,
-  .ch1_ctrl_sig  = PCNT_CTRL_CH1_IN0_IDX,
-  .filter_thres  = CONFIG_ESP_PCNT_U0_FILTER_THRES,
-};
-
 static struct qe_dev_lowerhalf_s g_pcnt0lower =
 {
   .ops      = &g_qecallbacks,
-  .config   = &g_pcnt0config,
   .inuse    = false,
-  .dev      = PCNT_LL_GET_HW(0),
 };
 #endif
 
 #ifdef CONFIG_ESP_PCNT_U1_QE
-static const struct esp_qeconfig_s g_pcnt1config =
-{
-  .pcntid        = 1,
-  .ch0_gpio      = CONFIG_ESP_PCNT_U1_CH0_EDGE_PIN,
-  .ch1_gpio      = CONFIG_ESP_PCNT_U1_CH1_LEVEL_PIN,
-  .ch0_pulse_sig = PCNT_SIG_CH0_IN1_IDX,
-  .ch1_pulse_sig = PCNT_SIG_CH1_IN1_IDX,
-  .ch0_ctrl_sig  = PCNT_CTRL_CH0_IN1_IDX,
-  .ch1_ctrl_sig  = PCNT_CTRL_CH1_IN1_IDX,
-  .filter_thres  = CONFIG_ESP_PCNT_U1_FILTER_THRES,
-};
-
 static struct qe_dev_lowerhalf_s g_pcnt1lower =
 {
   .ops      = &g_qecallbacks,
-  .config   = &g_pcnt1config,
   .inuse    = false,
-  .dev      = PCNT_LL_GET_HW(0),
 };
 #endif
 
 #ifdef CONFIG_ESP_PCNT_U2_QE
-static const struct esp_qeconfig_s g_pcnt2config =
-{
-  .pcntid       = 2,
-  .ch0_gpio     = CONFIG_ESP_PCNT_U2_CH0_EDGE_PIN,
-  .ch1_gpio     = CONFIG_ESP_PCNT_U2_CH1_LEVEL_PIN,
-  .ch0_pulse_sig = PCNT_SIG_CH0_IN2_IDX,
-  .ch1_pulse_sig = PCNT_SIG_CH1_IN2_IDX,
-  .ch0_ctrl_sig  = PCNT_CTRL_CH0_IN2_IDX,
-  .ch1_ctrl_sig  = PCNT_CTRL_CH1_IN2_IDX,
-  .filter_thres = CONFIG_ESP_PCNT_U2_FILTER_THRES,
-};
-
 static struct qe_dev_lowerhalf_s g_pcnt2lower =
 {
   .ops      = &g_qecallbacks,
-  .config   = &g_pcnt2config,
   .inuse    = false,
-  .dev      = PCNT_LL_GET_HW(0),
 };
 #endif
 
 #ifdef CONFIG_ESP_PCNT_U3_QE
-static const struct esp_qeconfig_s g_pcnt3config =
-{
-  .pcntid        = 3,
-  .ch0_gpio      = CONFIG_ESP_PCNT_U3_CH0_EDGE_PIN,
-  .ch1_gpio      = CONFIG_ESP_PCNT_U3_CH1_LEVEL_PIN,
-  .ch0_pulse_sig = PCNT_SIG_CH0_IN3_IDX,
-  .ch1_pulse_sig = PCNT_SIG_CH1_IN3_IDX,
-  .ch0_ctrl_sig  = PCNT_CTRL_CH0_IN3_IDX,
-  .ch1_ctrl_sig  = PCNT_CTRL_CH1_IN3_IDX,
-  .filter_thres  = CONFIG_ESP_PCNT_U3_FILTER_THRES,
-};
-
 static struct qe_dev_lowerhalf_s g_pcnt3lower =
 {
   .ops      = &g_qecallbacks,
-  .config   = &g_pcnt3config,
   .inuse    = false,
-  .dev      = PCNT_LL_GET_HW(0),
 };
 #endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_interrupt
- *
- * Description:
- *   Common timer interrupt handling.  NOTE: Only 16-bit timers require timer
- *   interrupts.
- *
- ****************************************************************************/
-
-#if 0 /* FIXME: To be implemented */
-static int esp_interrupt(int irq, void *context, void *arg)
-{
-  struct qe_dev_lowerhalf_s *priv = (struct qe_dev_lowerhalf_s *)arg;
-  uint16_t regval;
-
-  DEBUGASSERT(priv != NULL);
-
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: esp_setup
@@ -306,59 +210,15 @@ static int esp_setup(struct qe_lowerhalf_s *lower)
 
   if (priv->inuse)
     {
-      snerr("ERROR: PCNT%d is in-use\n", priv->config->pcntid);
+      snerr("ERROR: PCNT%d is in-use\n", priv->pcnt_num);
       spin_unlock_irqrestore(&priv->lock, flags);
       return -EBUSY;
     }
 
-  /* Disable interrupts */
-
-  pcnt_ll_enable_intr(priv->dev, priv->config->pcntid, false);
-
-  /* Disable all events */
-
-  pcnt_ll_disable_all_events(priv->dev, priv->config->pcntid);
-
-  /* Configure the limits range PCNT_CNT_L_LIM | PCNT_CNT_H_LIM */
-
-  pcnt_ll_set_high_limit_value(priv->dev, priv->config->pcntid, INT16_MAX);
-  pcnt_ll_set_low_limit_value(priv->dev, priv->config->pcntid, INT16_MIN);
-
-  /* Setup POS/NEG/LCTRL/HCTRL/FILTER modes */
-
-  pcnt_ll_set_glitch_filter_thres(priv->dev,
-                                  priv->config->pcntid,
-                                  priv->config->filter_thres);
-  pcnt_ll_enable_glitch_filter(priv->dev,
-                               priv->config->pcntid,
-                               true);
-
-  pcnt_ll_set_edge_action(priv->dev,
-                          priv->config->pcntid,
-                          0,
-                          PCNT_CHANNEL_EDGE_ACTION_DECREASE,
-                          PCNT_CHANNEL_EDGE_ACTION_INCREASE);
-  pcnt_ll_set_level_action(priv->dev,
-                           priv->config->pcntid,
-                           0,
-                           PCNT_CHANNEL_LEVEL_ACTION_KEEP,
-                           PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
-
-  pcnt_ll_set_edge_action(priv->dev,
-                          priv->config->pcntid,
-                          1,
-                          PCNT_CHANNEL_EDGE_ACTION_INCREASE,
-                          PCNT_CHANNEL_EDGE_ACTION_DECREASE);
-  pcnt_ll_set_level_action(priv->dev,
-                           priv->config->pcntid,
-                           1,
-                           PCNT_CHANNEL_LEVEL_ACTION_KEEP,
-                           PCNT_CHANNEL_LEVEL_ACTION_INVERSE);
-
   /* Clear the Reset bit to enable the Pulse Counter */
 
-  pcnt_ll_clear_count(priv->dev, priv->config->pcntid);
-  pcnt_ll_start_count(priv->dev, priv->config->pcntid);
+  priv->pcnt->ops->ioctl(priv->pcnt, CAPIOC_CLR_CNT, 0);
+  priv->pcnt->ops->start(priv->pcnt);
 
   /* Mark as being used to prevent double opening of the same unit which
    * would reset position
@@ -400,11 +260,7 @@ static int esp_shutdown(struct qe_lowerhalf_s *lower)
 
   /* Disable interrupts */
 
-  pcnt_ll_enable_intr(priv->dev, priv->config->pcntid, false);
-
-  /* Disable all events */
-
-  pcnt_ll_disable_all_events(priv->dev, priv->config->pcntid);
+  priv->pcnt->ops->ioctl(priv->pcnt, SNIOC_DISABLE, 0);
 
   /* Make sure initial position is 0 */
 
@@ -439,13 +295,20 @@ static int esp_position(struct qe_lowerhalf_s *lower, int32_t *pos)
   struct qe_dev_lowerhalf_s *priv = (struct qe_dev_lowerhalf_s *)lower;
   irqstate_t flags;
   int32_t position;
-  int16_t count;
+  int count = 0;
+  int ret = OK;
 
   flags = spin_lock_irqsave(&priv->lock);
 
   position = priv->position;
-  count = (int16_t)(pcnt_ll_get_count(priv->dev,
-                                      priv->config->pcntid) & 0xffff);
+  ret = (priv->pcnt->ops->ioctl(priv->pcnt,
+                                CAPIOC_PULSES,
+                                (unsigned long)&count) & 0xffff);
+
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to get PCNT%d count value \n", priv->pcnt_num);
+    }
 
   /* Update the position measurement */
 
@@ -496,7 +359,6 @@ static int esp_reset(struct qe_lowerhalf_s *lower)
 
   struct qe_dev_lowerhalf_s *priv = (struct qe_dev_lowerhalf_s *)lower;
   irqstate_t flags;
-  uint32_t regval;
 
   sninfo("Resetting position to zero\n");
 
@@ -506,7 +368,7 @@ static int esp_reset(struct qe_lowerhalf_s *lower)
 
   /* Reset RST bit and clear RST bit to enable counting again */
 
-  pcnt_ll_clear_count(priv->dev, priv->config->pcntid);
+  priv->pcnt->ops->ioctl(priv->pcnt, CAPIOC_CLR_CNT, 0);
 
   priv->position = 0;
 
@@ -572,16 +434,18 @@ static int esp_ioctl(struct qe_lowerhalf_s *lower, int cmd,
  *   called from board-specific logic.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
- *   pcnt    - The PCNT number to used.  'pcnt' must be an element of
- *             {0,1,2,3}
+ *   devpath  - The full path to the driver to register. E.g., "/dev/qe0"
+ *   pcnt     - Pointer to the pcnt driver struct
+ *   pcnt_num - The PCNT number to used.  'pcnt' must be an element of
+ *              {0,1,2,3}
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int esp_qeinitialize(const char *devpath, int pcnt)
+int esp_qeinitialize(const char *devpath, struct cap_lowerhalf_s *pcnt,
+                     int pcnt_num)
 {
   struct qe_dev_lowerhalf_s *priv;
   int ret;
@@ -590,7 +454,7 @@ int esp_qeinitialize(const char *devpath, int pcnt)
    * timer
    */
 
-  switch (pcnt)
+  switch (pcnt_num)
     {
 #ifdef CONFIG_ESP_PCNT_U0_QE
     case 0:
@@ -618,12 +482,13 @@ int esp_qeinitialize(const char *devpath, int pcnt)
 
   if (priv == NULL)
     {
-      snerr("ERROR: PCNT%d support not configured\n", pcnt);
+      snerr("ERROR: PCNT%d support not configured\n", pcnt_num);
       return -ENXIO;
     }
 
   /* Register the upper-half driver */
 
+  priv->pcnt = pcnt;
   ret = qe_register(devpath, (struct qe_lowerhalf_s *)priv);
   if (ret < 0)
     {
@@ -631,27 +496,7 @@ int esp_qeinitialize(const char *devpath, int pcnt)
       return ret;
     }
 
-  /* Configure GPIO pins as Input with Pull-Up enabled */
-
-  esp_configgpio(priv->config->ch0_gpio, INPUT_FUNCTION | PULLUP);
-  esp_configgpio(priv->config->ch1_gpio, INPUT_FUNCTION | PULLUP);
-
-  /* Connect Channel A (ch0_gpio) and Channel B (ch1_gpio) crossed for X4 */
-
-  esp_gpio_matrix_in(priv->config->ch0_gpio,
-                     priv->config->ch0_pulse_sig, 0);
-  esp_gpio_matrix_in(priv->config->ch1_gpio,
-                     priv->config->ch0_ctrl_sig, 0);
-
-  esp_gpio_matrix_in(priv->config->ch1_gpio,
-                     priv->config->ch1_pulse_sig, 0);
-  esp_gpio_matrix_in(priv->config->ch0_gpio,
-                     priv->config->ch1_ctrl_sig, 0);
-
-  /* Enable the PCNT Clock and Reset the peripheral */
-
-  periph_module_enable(PERIPH_PCNT_MODULE);
-  periph_module_reset(PERIPH_PCNT_MODULE);
+  priv->pcnt_num = pcnt_num;
 
   return OK;
 }

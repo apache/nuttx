@@ -64,21 +64,22 @@
  * Name: esp_qeinitialize
  *
  * Description:
- *   Initialize a quadrature encoder interface.  This function must be called
- *   from board-specific logic..
+ *   Initialize a quadrature encoder interface. This function must be
+ *   called from board-specific logic.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
- *   pcnt    - The PCNT number to used.  'tim' must be an element of
- *             {0,1,2,3}
+ *   devpath  - The full path to the driver to register. E.g., "/dev/qe0"
+ *   pcnt     - Pointer to the pcnt driver struct
+ *   pcnt_num - The PCNT number to used.  'pcnt' must be an element of
+ *              {0,1,2,3}
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int esp_qeinitialize(const char *devpath, int pcnt);
+int esp_qeinitialize(const char *devpath, struct cap_lowerhalf_s *pcnt,
+                     int pcnt_num);
 
 #endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_QENCODER_H */
-

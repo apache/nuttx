@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/common/src/esp_board_qencoder.c
+ * boards/risc-v/esp32h2/common/include/esp_board_pcnt.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,80 +20,63 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISC_V_ESP32H2_COMMON_INCLUDE_ESP_BOARD_PCNT_H
+#define __BOARDS_RISC_V_ESP32H2_COMMON_INCLUDE_ESP_BOARD_PCNT_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <debug.h>
-#include <stdio.h>
-
-#include <nuttx/sensors/qencoder.h>
-#include <arch/board/board.h>
-
-#include "espressif/esp_qencoder.h"
-
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_qencoder_initialize
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: board_pcnt_initialize
  *
  * Description:
- *   Initialize the quadrature encoder driver
+ *   Initialize the pulse counter/quadrature encoder driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; errno on failure.
  *
  ****************************************************************************/
 
-int board_qencoder_initialize(void)
-{
-  int ret;
-  char devpath[12];
-  int devno = 0;
+int board_pcnt_initialize(void);
 
-  /* Initialize a quadrature encoder interface. */
-#ifdef CONFIG_ESP_PCNT_U0_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP_PCNT_U1_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP_PCNT_U2_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 2);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP_PCNT_U3_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  return ret;
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __BOARDS_RISC_V_ESP32H2_COMMON_INCLUDE_ESP_BOARD_PCNT_H */
 

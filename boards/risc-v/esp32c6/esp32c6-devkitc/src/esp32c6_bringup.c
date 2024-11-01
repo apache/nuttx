@@ -102,8 +102,8 @@
 #  include "esp_board_mcpwm.h"
 #endif
 
-#ifdef CONFIG_ESP_PCNT_AS_QE
-#  include "esp_board_qencoder.h"
+#ifdef CONFIG_ESP_PCNT
+#  include "esp_board_pcnt.h"
 #endif
 
 #ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
@@ -391,13 +391,13 @@ int esp_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SENSORS_QENCODER
-  /* Initialize and register the qencoder driver */
+#ifdef CONFIG_ESP_PCNT
+  /* Initialize and register the pcnt/qencoder driver */
 
-  ret = board_qencoder_initialize();
+  ret = board_pcnt_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: board_qencoder_initialize failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
     }
 #endif
 

@@ -554,13 +554,19 @@ config ESP_MCPWM
 config ESP_PCNT
 	bool "Pulse Counter (PCNT / QE) Module"
 	default n
+	select CAPTURE
 	depends on ESPRESSIF_ESP32H2 || ESPRESSIF_ESP32C6
-	---help---
-		Pulse Counter is currently used to implement Quadrature
-		Encoder.
 
 menu "Pulse Counter (PCNT) Configuration"
 	depends on ESP_PCNT
+
+config ESP_PCNT_TEST_MODE
+	bool "Pulse Counter character driver loopback test mode (for testing only)"
+	default n
+	---help---
+		This enables a loopback test mode that attaches the transmitter
+		to the receiver internally, being able to test the PCNT
+		peripheral without any external connection.
 
 config ESP_PCNT_AS_QE
 	bool
@@ -574,7 +580,7 @@ if ESP_PCNT_U0
 
 config ESP_PCNT_U0_QE
 	bool "Use this PCNT Unit as Quadrature Encoder"
-	default y
+	default n
 	select ESP_PCNT_AS_QE
 
 config ESP_PCNT_U0_CH0_EDGE_PIN
@@ -584,15 +590,15 @@ config ESP_PCNT_U0_CH0_EDGE_PIN
 
 config ESP_PCNT_U0_CH0_LEVEL_PIN
 	int "PCNT_U0 CH0 Level/Control Pin Number"
-	default 4
+	default 4 if !ESP_PCNT_U0_QE
+	default -1 if ESP_PCNT_U0_QE
 	range -1 39
-	depends on !ESP_PCNT_U0_QE
 
 config ESP_PCNT_U0_CH1_EDGE_PIN
 	int "PCNT_U0 CH1 Edge/Pulse Pin Number"
-	default 0
+	default 0 if !ESP_PCNT_U0_QE
+	default -1 if ESP_PCNT_U0_QE
 	range -1 39
-	depends on !ESP_PCNT_U0_QE
 
 config ESP_PCNT_U0_CH1_LEVEL_PIN
 	int "PCNT_U0 CH1 Level/Control Pin Number"
@@ -618,13 +624,14 @@ endif # ESP_PCNT_U0
 
 config ESP_PCNT_U1
 	bool "Enable PCNT Unit 1"
+	depends on ESP_PCNT_U0
 	default n
 
 if ESP_PCNT_U1
 
 config ESP_PCNT_U1_QE
 	bool "Use this PCNT Unit as Quadrature Encoder"
-	default y
+	default n
 	select ESP_PCNT_AS_QE
 
 config ESP_PCNT_U1_CH0_EDGE_PIN
@@ -668,13 +675,14 @@ endif # ESP_PCNT_U1
 
 config ESP_PCNT_U2
 	bool "Enable PCNT Unit 2"
+	depends on ESP_PCNT_U1
 	default n
 
 if ESP_PCNT_U2
 
 config ESP_PCNT_U2_QE
 	bool "Use this PCNT Unit as Quadrature Encoder"
-	default y
+	default n
 	select ESP_PCNT_AS_QE
 
 config ESP_PCNT_U2_CH0_EDGE_PIN
@@ -718,13 +726,14 @@ endif # ESP_PCNT_U2
 
 config ESP_PCNT_U3
 	bool "Enable PCNT Unit 3"
+	depends on ESP_PCNT_U2
 	default n
 
 if ESP_PCNT_U3
 
 config ESP_PCNT_U3_QE
 	bool "Use this PCNT Unit as Quadrature Encoder"
-	default y
+	default n
 	select ESP_PCNT_AS_QE
 
 config ESP_PCNT_U3_CH0_EDGE_PIN

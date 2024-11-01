@@ -1,7 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/common/include/esp_board_qencoder.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * boards/risc-v/esp32c6/common/include/esp_board_pcnt.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H
-#define __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H
+#ifndef __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_PCNT_H
+#define __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_PCNT_H
 
 /****************************************************************************
  * Included Files
@@ -58,19 +56,24 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_qencoder_initialize
+ * Name: board_pcnt_initialize
  *
  * Description:
- *   Initialize the quadrature encoder driver for the given timer
+ *   Initialize the pulse counter/quadrature encoder driver
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; errno on failure.
  *
  ****************************************************************************/
 
-int board_qencoder_initialize(void);
+int board_pcnt_initialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H */
-
+#endif /* __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_PCNT_H */
