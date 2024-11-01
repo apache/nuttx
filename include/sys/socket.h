@@ -327,7 +327,7 @@ struct sockaddr_storage
 
   /* Following fields are implementation-defined */
 
-  struct
+  struct __attribute__((packed))
   {
     char ss_pad1[SS_PAD1SIZE]; /* 6-byte pad; this is to make implementation-defined
                                 * pad up to alignment field that follows explicit in
