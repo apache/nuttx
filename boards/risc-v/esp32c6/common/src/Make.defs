@@ -71,7 +71,7 @@ ifeq ($(CONFIG_CL_MFRC522),y)
 endif
 
 ifeq ($(CONFIG_ESP_PCNT),y)
-  CSRCS += esp_board_qencoder.c
+  CSRCS += esp_board_pcnt.c
 endif
 
 DEPPATH += --dep-path src
