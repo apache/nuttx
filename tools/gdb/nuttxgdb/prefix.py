@@ -28,3 +28,10 @@ class ForeachPrefix(gdb.Command):
 
     def __init__(self):
         super(ForeachPrefix, self).__init__("foreach", gdb.COMMAND_USER, prefix=True)
+
+
+class MMPrefixCommand(gdb.Command):
+    """Memory manager related commands prefix."""
+
+    def __init__(self):
+        super().__init__("mm", gdb.COMMAND_USER, prefix=True)
