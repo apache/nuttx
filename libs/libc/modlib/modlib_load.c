@@ -57,6 +57,13 @@
 
 #define _ALIGN_UP(v, a)  (((v) + ((a) - 1)) & ~((a) - 1))
 
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
+#  define buffer_data_address(p) \
+            (FAR uint8_t *)up_textheap_data_address((FAR void *)p)
+#else
+#  define buffer_data_address(p) ((FAR uint8_t *)p)
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -343,7 +350,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
             {
               if (phdr->p_flags & PF_X)
                 {
-                  ret = modlib_read(loadinfo, text, phdr->p_filesz,
+                  ret = modlib_read(loadinfo, buffer_data_address(text),
+                                    phdr->p_filesz,
                                     phdr->p_offset);
                 }
               else
@@ -441,8 +449,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
               /* Read the section data from sh_offset to the memory region */
 
-              ret = modlib_read(loadinfo, *pptr, shdr->sh_size,
-                                shdr->sh_offset);
+              ret = modlib_read(loadinfo, buffer_data_address(*pptr),
+                                shdr->sh_size, shdr->sh_offset);
               if (ret < 0)
                 {
                   berr("ERROR: Failed to read section %d: %d\n", i, ret);
