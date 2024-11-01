@@ -213,3 +213,13 @@ endif()
 if(CONFIG_ARCH_X86_64_AVX512VBMI)
   add_compile_options(-mavx512vbmi)
 endif()
+
+if(CONFIG_ARCH_TOOLCHAIN_GNU AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
+  if(NOT GCCVER)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} --version
+                    OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
+    string(REGEX MATCH "[0-9]+\\.[0-9]+" GCC_VERSION_REGEX
+                 "${GCC_VERSION_OUTPUT}")
+    set(GCCVER ${CMAKE_MATCH_1})
+  endif()
+endif()
