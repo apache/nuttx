@@ -496,9 +496,22 @@ static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
   if (ctx->mode == NOTERAM_MODE_READ_BINARY)
 #endif
     {
+      size_t nread = 0;
       flags = spin_lock_irqsave_notrace(&drv->lock);
-      ret = noteram_get(drv, (FAR uint8_t *)buffer, buflen);
+      while (nread < buflen)
+        {
+          ret = noteram_get(drv, (FAR uint8_t *)buffer + nread,
+                            buflen - nread);
+          if (ret <= 0)
+            {
+              break;
+            }
+
+          nread += ret;
+        }
+
       spin_unlock_irqrestore_notrace(&drv->lock, flags);
+      return nread;
     }
 #ifdef CONFIG_DRIVERS_NOTERAM_TEXT_DUMP
   else
