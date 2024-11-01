@@ -249,7 +249,7 @@ ssize_t nx_writev(int fd, FAR const struct iovec *iov, int iovcnt)
   if (ret >= 0)
     {
       /* Perform the write operation using the file descriptor as an
-       * index.  Note that file_write() will return the errno on failure.
+       * index.  Note that file_writev() will return the errno on failure.
        */
 
       uio.uio_iov = iov;
@@ -351,7 +351,7 @@ ssize_t writev(int fd, FAR const struct iovec *iov, int iovcnt)
 
   enter_cancellation_point();
 
-  /* Let nx_write() do all of the work */
+  /* Let nx_writev() do all of the work */
 
   ret = nx_writev(fd, iov, iovcnt);
   if (ret < 0)
