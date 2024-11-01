@@ -7,8 +7,6 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-VELAPLATFO-32782
-
 nuttx/libs/libxx/libcxxabi/src/cxa_personality.cpp: In function ‘void __cxxabiv1::__cxa_call_unexpected(void*)’:
 nuttx/libs/libxx/libcxxabi/src/cxa_personality.cpp:1250:46: warning: ‘ttypeIndex’ may be used uninitialized [-Wmaybe-uninitialized]
  1250 |                 if (!exception_spec_can_catch(ttypeIndex, classInfo, ttypeEncoding,
@@ -17,7 +15,6 @@ nuttx/libs/libxx/libcxxabi/src/cxa_personality.cpp:1250:46: warning: ‘ttypeInd
       |                                               ~~~~~~~~~~~~~~~~~~~~~~
  1252 |                                               unwind_exception, base))
 
-Change-Id: Ic114508ecdad7cc84e7ad997a9379e50b2efd2a5
 Signed-off-by: cuiziwei <cuiziwei@xiaomi.com>
 ---
  src/cxa_personality.cpp | 2 +-

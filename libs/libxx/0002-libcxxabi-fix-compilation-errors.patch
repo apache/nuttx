@@ -9,7 +9,6 @@ error: invalid conversion from 'int' to '_Unwind_State' [-fpermissive]
       |           |
       |           int
 
-Change-Id: I47827d58438f248e2171d20a44cc29ed8b259fc5
 Signed-off-by: yinshengkai <yinshengkai@xiaomi.com>
 ---
  src/cxa_personality.cpp | 2 +-

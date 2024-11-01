@@ -6,7 +6,6 @@ Subject: [PATCH] uclibxx: use overload constructor of filebuf & ostream
 Instead of set valiable in Init, use overload constructor in
 filebuf & stream class
 
-Change-Id: I090432b5576eb568f92f3c147b39ad2efd8ba6b0
 ---
  include/fstream   | 15 +++++++--
  include/ios       | 21 +++---------
