@@ -80,7 +80,7 @@ int netlink_notifier_setup(worker_t worker, FAR struct netlink_conn_s *conn,
   info.worker    = worker;
 
   conn->key      =  work_notifier_setup(&info);
-  return conn->key;
+  return conn->key < 0 ? conn->key : 0;
 }
 
 /****************************************************************************
