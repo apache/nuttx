@@ -7,4 +7,6 @@
 @echo off
 
 title 工程命令行
-cmd /k "bat_cmd\main.cmd"
+color 0A
+
+cmd /k "bat_cmd\main.bat"

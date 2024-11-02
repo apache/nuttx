@@ -6,4 +6,19 @@
 
 @echo off
 
-call bat_cmd\check_env
+set "BAT_TOOLS_DIR=%~dp0"
+
+call %BAT_TOOLS_DIR%\check_python_env.cmd
+if %errorlevel% equ 0 (
+    echo. 
+    echo python env check SUCCESS!
+    echo. 
+    goto :_GOON
+)
+
+:_ByeBye
+pause
+exit
+
+:_GOON
+pause

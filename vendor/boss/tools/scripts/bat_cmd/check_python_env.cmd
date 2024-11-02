@@ -13,7 +13,6 @@ if defined MSYSTEM (
 
 :: 要求检查：
 ::  1. 需要安装python工具；
-::  2. 
 
 set SCRIPT_EXIT_CODE=0
 
@@ -29,12 +28,13 @@ if not "%MISSING_REQUIREMENTS%" == "" goto :__error_missing_requirements
 goto :__end
 
 :__error_missing_requirements
-    echo.
+    echo. 
     echo Error^: The following tools are not installed in your environment.
-    echo.
+    echo. 
     echo %MISSING_REQUIREMENTS%
-    echo.
+    echo. 
     echo Please use the tools we provide and make sure to utilize them correctly.
+    echo. 
     goto :__end
 
 :__end
