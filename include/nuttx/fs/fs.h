@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/compiler.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/uio.h>
 
 #include <sys/uio.h>
@@ -251,33 +252,6 @@ struct file_operations
 /* This structure provides information about the state of a block driver */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-struct geometry
-{
-  bool      geo_available;    /* true: The device is available */
-  bool      geo_mediachanged; /* true: The media has changed since last query */
-  bool      geo_writeenabled; /* true: It is okay to write to this device */
-  blkcnt_t  geo_nsectors;     /* Number of sectors on the device */
-  blksize_t geo_sectorsize;   /* Size of one sector */
-
-  /* NULL-terminated string representing the device model */
-
-  char      geo_model[NAME_MAX + 1];
-};
-
-struct partition_info_s
-{
-  size_t    numsectors;   /* Number of sectors in the partition */
-  size_t    sectorsize;   /* Size in bytes of a single sector */
-  off_t     startsector;  /* Offset to the first section/block of the
-                           * managed sub-region */
-
-  /* NULL-terminated string representing the name of the parent node of the
-   * partition.
-   */
-
-  char      parent[NAME_MAX + 1];
-};
-
 /* This structure is provided by block devices when they register with the
  * system.  It is used by file systems to perform filesystem transfers.  It
  * differs from the normal driver vtable in several ways -- most notably in

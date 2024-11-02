@@ -30,14 +30,14 @@
 #include <nuttx/compiler.h>
 
 #ifdef CONFIG_LIBC_LZF
-#include <lzf.h>
+#  include <lzf.h>
 #endif
 #include <stdio.h>
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-#include <nuttx/fs/fs.h>
-#ifdef CONFIG_MTD
-#include <nuttx/mtd/mtd.h>
-#endif
+#  include <nuttx/fs/fs.h>
+#  ifdef CONFIG_MTD
+#    include <nuttx/mtd/mtd.h>
+#  endif
 #endif
 
 /****************************************************************************
