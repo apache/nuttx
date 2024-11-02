@@ -3,8 +3,11 @@
 # Created Info: 2024/10/31, Xi'an
 #
 
+import platform
 import sys
 from typing import IO, Optional
+
+PYTHON_PLATFORM = f'{platform.system()}-{platform.machine()}'
 
 # Log tools: fatal, warn, info
 is_log_quiet = False
@@ -33,3 +36,4 @@ def info(text: str, f: Optional[IO[str]]=None, *args: str) -> None:
         if f is None:
             f = sys.stdout
         f.write(f'{text}\n', *args)
+

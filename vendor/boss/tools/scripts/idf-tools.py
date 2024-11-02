@@ -9,14 +9,17 @@ import argparse
 from typing import List
 
 # custom package
-from pycmd.utils import fatal, warn, info
+from pycmd.utils import fatal, warn, info, PYTHON_PLATFORM
 from pycmd.idf_tools_python_env import install_python_env, uninstall_python_env
 
 # custom directory.
 IDF_TOOLS_PATH_DEFAULT = os.path.join('~', '.boss')
 
+CURRENT_PLATFORM = PYTHON_PLATFORM
+
 # action's function
 def action_install(args: argparse.Namespace) -> None:
+    info(f'Current system platform: {CURRENT_PLATFORM}')
     if args.python_env:
         install_python_env(args)
     pass

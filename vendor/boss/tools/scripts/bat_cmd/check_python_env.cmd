@@ -4,7 +4,6 @@
 ::              visit https://docs.espressif.com/projects/esp-idf.
 ::
 @echo off
-setlocal enabledelayedexpansion
 
 if defined MSYSTEM (
 	echo This .bat file is for Windows CMD.EXE shell only.
@@ -20,7 +19,7 @@ set MISSING_REQUIREMENTS=
 python.exe --version >NUL 2>NUL
 if %errorlevel% neq 0 (
     set SCRIPT_EXIT_CODE=%errorlevel%
-    set "MISSING_REQUIREMENTS=!MISSING_REQUIREMENTS!  python"
+    set "MISSING_REQUIREMENTS=%MISSING_REQUIREMENTS%  python"
 )
 
 if not "%MISSING_REQUIREMENTS%" == "" goto :__error_missing_requirements
@@ -38,6 +37,4 @@ goto :__end
     goto :__end
 
 :__end
-
-endlocal
 exit /b %SCRIPT_EXIT_CODE%
