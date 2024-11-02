@@ -104,9 +104,12 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
 #ifdef CONFIG_MTD_BYTE_WRITE
   if (inode->u.i_mtd->write != NULL)
     {
-      if (self->nput % erasesize == 0)
+      size_t sblock = (self->nput + erasesize - 1) / erasesize;
+      size_t eblock = (self->nput + len + erasesize - 1) / erasesize;
+
+      if (sblock != eblock)
         {
-          ret = MTD_ERASE(inode->u.i_mtd, self->nput / erasesize, 1);
+          ret = MTD_ERASE(inode->u.i_mtd, sblock, eblock - sblock);
           if (ret < 0)
             {
               return ret;
