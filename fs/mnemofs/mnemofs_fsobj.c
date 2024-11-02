@@ -491,6 +491,8 @@ int mfs_pitr_rm(FAR struct mfs_sb_s * const sb,
   struct mfs_pitr_s        pitr;
   FAR struct mfs_dirent_s *dirent = NULL;
 
+  /* TODO: MFS_LOG */
+
   mfs_pitr_init(sb, path, depth, &pitr, true);
   mfs_pitr_readdirent(sb, path, &pitr, &dirent);
 
@@ -559,8 +561,8 @@ errout:
 
 void mfs_pitr_free(FAR const struct mfs_pitr_s * const pitr)
 {
-  finfo("Pitr at depth %u with CTZ (%u, %u) freed.",
-        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
+  MFS_EXTRA_LOG("MFS_PITR_FREE", "Parent iterator at %p freed.", pitr);
+  MFS_EXTRA_LOG_PITR(pitr);
 }
 
 void mfs_pitr_adv_off(FAR struct mfs_pitr_s * const pitr,
@@ -587,10 +589,10 @@ void mfs_pitr_adv_tochild(FAR struct mfs_pitr_s * const pitr,
 {
   /* (pitr->depth + 1) - 1 is the child's index. */
 
+  MFS_EXTRA_LOG("MFS_PITR_ADV_TOCHILD", "Advance pitr to child's offset.");
+  MFS_EXTRA_LOG_PITR(pitr);
+  MFS_EXTRA_LOG("MFS_PITR_ADV_TOCHILD", "New offset %" PRIu32, pitr->c_off);
   pitr->c_off = path[pitr->depth].off;
-
-  finfo("Pitr at depth %u with CTZ (%u, %u) advanced to %u offset.",
-        pitr->depth, pitr->p.ctz.idx_e, pitr->p.ctz.pg_e, pitr->c_off);
 }
 
 int mfs_pitr_readdirent(FAR const struct mfs_sb_s * const sb,
@@ -749,7 +751,7 @@ static int search_ctz_by_name(FAR const struct mfs_sb_s * const sb,
 
   name_hash = mfs_hash(name, namelen);
 
-  ret = mfs_lru_updatedinfo(sb, path, depth);
+  ret = mfs_lru_getupdatedinfo(sb, path, depth);
   if (predict_false(ret < 0))
     {
       goto errout;
@@ -989,6 +991,7 @@ errout:
 
 void mfs_free_patharr(FAR struct mfs_path_s *path)
 {
+  MFS_EXTRA_LOG("MFS_FREE_PATHARR", "Path array at %p freed.", path);
   fs_heap_free(path);
 }
 

@@ -949,9 +949,9 @@ errout:
   return ret;
 }
 
-int mfs_lru_updatedinfo(FAR const struct mfs_sb_s * const sb,
-                        FAR struct mfs_path_s * const path,
-                        const mfs_t depth)
+int mfs_lru_getupdatedinfo(FAR const struct mfs_sb_s * const sb,
+                           FAR struct mfs_path_s * const path,
+                           const mfs_t depth)
 {
   int                    ret  = OK;
   bool                   found;
