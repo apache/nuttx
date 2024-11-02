@@ -769,9 +769,7 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
   board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
 #endif
 
-#if defined(CONFIG_BOARD_COREDUMP_SYSLOG) || \
-    defined(CONFIG_BOARD_COREDUMP_BLKDEV)
-
+#ifndef CONFIG_BOARD_CRASHDUMP_NONE
   /* Flush previous SYSLOG data before possible long time coredump */
 
   syslog_flush();
