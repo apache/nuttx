@@ -66,7 +66,7 @@ struct work_notifier_entry_s
 
   /* Additional payload needed to manage the notification */
 
-  uint32_t key;                 /* Unique ID for the notification */
+  int key;                      /* Unique ID for the notification */
 };
 
 /****************************************************************************
@@ -100,7 +100,7 @@ static dq_queue_t g_notifier_pending;
  *
  ****************************************************************************/
 
-static FAR struct work_notifier_entry_s *work_notifier_find(uint32_t key)
+static FAR struct work_notifier_entry_s *work_notifier_find(int key)
 {
   FAR struct work_notifier_entry_s *notifier;
   FAR dq_entry_t *entry;
@@ -134,11 +134,11 @@ static FAR struct work_notifier_entry_s *work_notifier_find(uint32_t key)
  *
  ****************************************************************************/
 
-static uint32_t work_notifier_key(void)
+static int work_notifier_key(void)
 {
-  static uint32_t notifier_key;
+  static int notifier_key;
 
-  if (++notifier_key == 0)
+  if (++notifier_key <= 0)
     {
       notifier_key = 1;
     }
