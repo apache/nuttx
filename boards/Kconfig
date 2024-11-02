@@ -4693,9 +4693,9 @@ source "boards/arm/nrf91/common/Kconfig"
 endif
 endif
 
-config BOARD_CRASHDUMP
-	bool "Enable Board level logging of crash dumps"
-	default n
+choice
+	prompt "BOARD crashdump method"
+	default BOARD_CRASHDUMP_NONE
 	---help---
 		If selected up_assert will call out to board_crashdump, in the case
 		of an assertion failure, prior to calling exit. Or in the
@@ -4712,28 +4712,31 @@ config BOARD_CRASHDUMP
 
 config BOARD_COREDUMP_SYSLOG
 	bool "Enable Core dump to syslog"
-	default n
 	depends on COREDUMP
 	---help---
 		Enable put coredump to syslog when crash.
 
 config BOARD_COREDUMP_BLKDEV
 	bool "Enable Core Dump to block device"
-	default n
 	depends on COREDUMP
 	---help---
-		Enable save coredump at block device when crash.
+		Enable save coredump to block device when crash.
 
-config BOARD_COREDUMP_BLKDEV_PATH
-	string "Save Core Dump block device PATH"
+config BOARD_CRASHDUMP_NONE
+	bool "No Board level crash dump"
+
+endchoice # BOARD crashdump method
+
+config BOARD_COREDUMP_DEVPATH
+	string "Save Core Dump data with device PATH"
 	depends on BOARD_COREDUMP_BLKDEV
 	---help---
-		Save coredump file block device path.
+		Save coredump file into block device path.
 
 config BOARD_COREDUMP_FULL
 	bool "Core Dump all thread registers and stacks"
 	default y
-	depends on BOARD_COREDUMP_SYSLOG || BOARD_COREDUMP_BLKDEV
+	depends on !BOARD_CRASHDUMP_NONE
 	---help---
 		Enable to support for the dump all task registers and stacks.
 
@@ -4741,7 +4744,7 @@ config BOARD_COREDUMP_COMPRESSION
 	bool "Enable Core Dump compression"
 	default y
 	select LIBC_LZF
-	depends on BOARD_COREDUMP_SYSLOG || BOARD_COREDUMP_BLKDEV
+	depends on !BOARD_CRASHDUMP_NONE
 	---help---
 		Enable LZF compression algorithm for core dump content
 
