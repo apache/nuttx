@@ -76,13 +76,13 @@
  * The error frame consists of err_flag（LIN_ERR_FLAG)、err_class
  * (defined in data[0]) and err_reason(defined in data[1] to data[4]).
  * The error frame is described using the following structure:
- * struct can_frame {
+ * begin_packed_struct struct can_frame {
  *    canid_t can_id;
  *    uint8_t can_dlc;
  *    uint16_t flags;
  *    uint8_t __res1;
  *    uint8_t data[CAN_MAX_DLEN] __attribute__((aligned(8)));
- *  }__attribute__((packed));
+ *  } end_packed_struct;
  *
  * Error frame description format：
  *

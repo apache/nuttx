@@ -76,7 +76,7 @@ struct tt21100_dev_s
 
 /* This structure describes the frame of touchpoint */
 
-struct tt21100_touchpoint_s
+begin_packed_struct struct tt21100_touchpoint_s
 {
   uint8_t  type       : 3;                  /* Touch object type */
   uint8_t  reserved   : 5;                  /* Reserved */
@@ -92,12 +92,11 @@ struct tt21100_touchpoint_s
 
   uint16_t major_axis_length;               /* Touch length of major axis */
   uint8_t  orientation;                     /* The angle between vertical axis and major axis */
-}
-__attribute__((packed));
+} end_packed_struct;
 
 /* This structure describes the frame of touch action */
 
-struct tt21100_touch_s
+begin_packed_struct struct tt21100_touch_s
 {
   uint8_t  data_num       : 5;              /* Touchpoint data frame number */
   uint8_t  large_object   : 1;              /* Large object detected */
@@ -108,19 +107,17 @@ struct tt21100_touch_s
   uint8_t  report_counter : 2;              /* Report issue counter */
 
   struct tt21100_touchpoint_s touchpoint[0];  /* Touchpoint data */
-}
-__attribute__((packed));
+} end_packed_struct;
 
 /* This structure describes the frame of TT21100 report */
 
-struct tt21100_data_s
+begin_packed_struct struct tt21100_data_s
 {
   uint16_t  length;                         /* Report frame length */
   uint8_t   id;                             /* Report ID */
   uint16_t  time_stamp;                     /* Report Timestamp */
   struct tt21100_touch_s touch;             /* Report Tocuh data */
-}
-__attribute__((packed));
+} end_packed_struct;
 
 /****************************************************************************
  * Private Function Prototypes
