@@ -85,19 +85,18 @@ struct gt911_dev_s
 
 /* This structure describes the frame of touchpoint */
 
-struct gt911_touchpoint_s
+begin_packed_struct struct gt911_touchpoint_s
 {
   uint8_t id;                               /* Not used */
   uint16_t x;                               /* Touch X-axis */
   uint16_t y;                               /* Touch Y-axis */
   uint16_t pressure;                        /* Touch pressure */
   uint8_t  reserved;                        /* Not used */
-}
-__attribute__((packed));
+} end_packed_struct;
 
 /* This structure describes the frame of touchpoint */
 
-struct gt911_data_s
+begin_packed_struct struct gt911_data_s
 {
   uint8_t touchpoints     : 4;              /* Touch point number */
   uint8_t has_key         : 1;              /* 1: key is inpressed */
@@ -106,8 +105,7 @@ struct gt911_data_s
   uint8_t buffer_status   : 1;              /* 1: input data is valid */
 
   struct gt911_touchpoint_s touchpoint[0];
-}
-__attribute__((packed));
+} end_packed_struct;
 
 /****************************************************************************
  * Private Data
