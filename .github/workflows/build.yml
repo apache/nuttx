@@ -21,7 +21,6 @@ on:
     paths-ignore:
       - 'Documentation/**'
     branches:
-      - master
       - 'releases/*'
     tags:
 
