@@ -109,6 +109,7 @@ static bool g_cpu_paused[CONFIG_SMP_NCPUS];
 static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
 
+#ifdef CONFIG_DEBUG_ALERT
 static FAR const char * const g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
@@ -121,6 +122,7 @@ static FAR const char * const g_ttypenames[4] =
   "Kthread",
   "Invalid"
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -326,6 +328,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 
 #endif
 
+#ifdef CONFIG_DEBUG_ALERT
 /****************************************************************************
  * Name: dump_task
  ****************************************************************************/
@@ -422,6 +425,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , args
         );
 }
+#endif
 
 /****************************************************************************
  * Name: dump_backtrace
@@ -522,7 +526,9 @@ static void dump_tasks(void)
     }
 #endif
 
+#ifdef CONFIG_DEBUG_ALERT
   nxsched_foreach(dump_task, NULL);
+#endif
 
 #ifdef CONFIG_SCHED_BACKTRACE
   nxsched_foreach(dump_backtrace, NULL);
