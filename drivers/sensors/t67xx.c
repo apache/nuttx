@@ -30,6 +30,7 @@
 #include <string.h>
 #include <time.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>

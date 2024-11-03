@@ -32,6 +32,7 @@
 #include <string.h>
 #include <math.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>

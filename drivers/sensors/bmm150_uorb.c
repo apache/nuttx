@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <sys/param.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
 #include <nuttx/kthread.h>

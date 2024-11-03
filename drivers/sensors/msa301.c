@@ -28,6 +28,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/mutex.h>
