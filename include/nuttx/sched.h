@@ -242,13 +242,6 @@
 #  define this_cpu()                 (0)
 #endif
 
-/* Task Switching Interfaces (non-standard).
- * These two macros can be called in interrupt context.
- */
-
-#define nxsched_lock_irq() (up_interrupt_context() ? OK : sched_lock())
-#define nxsched_unlock_irq() (up_interrupt_context() ? OK : sched_unlock())
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

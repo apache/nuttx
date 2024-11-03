@@ -212,13 +212,13 @@ static void uart_poll_notify(FAR uart_dev_t *dev, unsigned int min,
   DEBUGASSERT(max > min && max - min <= CONFIG_SERIAL_NPOLLWAITERS);
 
   flags = enter_critical_section();
-  nxsched_lock_irq();
+  sched_lock();
 
   /* Notify the fds in range dev->fds[min] - dev->fds[max] */
 
   poll_notify(&dev->fds[min], max - min, eventset);
 
-  nxsched_unlock_irq();
+  sched_unlock();
   leave_critical_section(flags);
 }
 
@@ -2148,7 +2148,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
    */
 
   flags = enter_critical_section();
-  nxsched_lock_irq();
+  sched_lock();
   dev->disconnected = !connected;
   if (!connected)
     {
@@ -2169,7 +2169,7 @@ void uart_connected(FAR uart_dev_t *dev, bool connected)
       uart_wakeup(&dev->recvsem);
     }
 
-  nxsched_unlock_irq();
+  sched_unlock();
   leave_critical_section(flags);
 }
 #endif
