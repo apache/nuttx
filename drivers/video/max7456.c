@@ -72,11 +72,12 @@
 #include <debug.h>
 #include <string.h>
 #include <limits.h>
-#include <nuttx/mutex.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/bits.h>
 #include <nuttx/compiler.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/mutex.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/video/max7456.h>
