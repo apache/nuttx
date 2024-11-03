@@ -39,6 +39,49 @@
 
 #if CONFIG_RR_INTERVAL > 0
 
+#ifdef CONFIG_SMP
+/****************************************************************************
+ * Private Type Declarations
+ ****************************************************************************/
+
+struct roundrobin_arg_s
+{
+  pid_t pid;
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int nxsched_roundrobin_handler(FAR void *cookie)
+{
+  FAR struct roundrobin_arg_s *arg = cookie;
+  FAR struct tcb_s *tcb;
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+  tcb = nxsched_get_tcb(arg->pid);
+
+  if (!tcb || tcb->task_state == TSTATE_TASK_INVALID ||
+      (tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
+    {
+      /* There is no TCB with this pid or, if there is, it is not a task. */
+
+      leave_critical_section(flags);
+      return OK;
+    }
+
+  if (tcb->task_state == TSTATE_TASK_RUNNING && tcb->cpu == this_cpu() &&
+      nxsched_reprioritize_rtr(tcb, tcb->sched_priority))
+    {
+      up_switch_context(this_task(), tcb);
+    }
+
+  leave_critical_section(flags);
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -138,6 +181,19 @@ uint32_t nxsched_process_roundrobin(FAR struct tcb_s *tcb, uint32_t ticks,
                * other tasks at the same priority.
                */
 
+#ifdef CONFIG_SMP
+              if (tcb->task_state == TSTATE_TASK_RUNNING &&
+                  tcb->cpu != this_cpu())
+                {
+                  struct roundrobin_arg_s arg;
+
+                  arg.pid = tcb->pid;
+                  nxsched_smp_call_single(tcb->cpu,
+                                          nxsched_roundrobin_handler,
+                                          &arg, false);
+                }
+              else
+#endif
               if (nxsched_reprioritize_rtr(tcb, tcb->sched_priority))
                 {
                   up_switch_context(this_task(), rtcb);
