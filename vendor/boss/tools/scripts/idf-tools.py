@@ -11,6 +11,7 @@ from typing import List
 # custom package
 from pycmd.utils import fatal, warn, info, PYTHON_PLATFORM
 from pycmd.idf_tools_python_env import install_python_env, uninstall_python_env
+from pycmd.idf_tools_unpack import unpack
 
 # custom directory.
 IDF_TOOLS_PATH_DEFAULT = os.path.join('~', '.boss')
@@ -29,6 +30,11 @@ def action_uninstall(args: argparse.Namespace) -> None:
         uninstall_python_env(args)
     pass
 
+def action_extract(args: argparse.Namespace) -> None:
+    location = args.files.pop()
+    for file in args.files:
+        unpack(file, location)
+
 def main(argv: List[str]) -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument('--quiet', help='Don\'t output diagnostic messages to stdout/stderr', action='store_true')
@@ -44,6 +50,10 @@ def main(argv: List[str]) -> None:
     uninstall = subparsers.add_parser('uninstall', help='Uninstall tools from the tools directory')
     uninstall.add_argument('--python-env', help=('Uninstall Python virtual environment and required Python packages'),
                            action='store_true')
+    
+    extract = subparsers.add_parser('extract', help='Extract the specified target.')
+    extract.add_argument('--files', help=('Extract the specified target for Zip files. '
+                                             'as: test1.zip test2.zip location.'), nargs='+', metavar='FILES')
 
     # let's start parser cmd's args
     args = parser.parse_args(argv)
