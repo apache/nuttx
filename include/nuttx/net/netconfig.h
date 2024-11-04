@@ -2,7 +2,8 @@
  * include/nuttx/net/netconfig.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2007, 2011, 2014-2015, 2017-2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2007, 2011, 2014-2015, 2017-2019 Gregory Nutt.
+ * All rights reserved.
  * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
@@ -67,9 +68,9 @@
  * matter.  It should, however, be valid in the current configuration.
  */
 
-#if defined(CONFIG_NET_IPv4)
+#if defined(HAVE_PFINET_SOCKETS)
 #  define NET_SOCK_FAMILY  AF_INET
-#elif defined(CONFIG_NET_IPv6)
+#elif defined(HAVE_PFINET6_SOCKETS)
 #  define NET_SOCK_FAMILY  AF_INET6
 #elif defined(CONFIG_NET_LOCAL)
 #  define NET_SOCK_FAMILY  AF_LOCAL
