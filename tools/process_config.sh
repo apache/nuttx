@@ -57,7 +57,7 @@ process_file() {
             fi
         else
             local key_config="$(echo "$line" | cut -d= -f1)="
-            sed -i "/$key_config/d" $output_file
+            sed -i.backup "/$key_config/d" $output_file
             echo "$line" >> $output_file
         fi
     done < "$input_file"
