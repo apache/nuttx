@@ -49,6 +49,10 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+#ifdef __ghs__
+#  define __ARM_ARCH 8
+#endif
+
 #define up_getsp()          (uintptr_t)__builtin_frame_address(0)
 
 /* MPIDR_EL1, Multiprocessor Affinity Register */

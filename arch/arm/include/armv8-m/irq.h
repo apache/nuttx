@@ -42,6 +42,10 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+#ifdef __ghs__
+#  define __ARM_ARCH 8
+#endif
+
 /* Configuration ************************************************************/
 
 /* If this is a kernel build, how many nested system calls should we

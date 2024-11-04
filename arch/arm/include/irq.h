@@ -75,6 +75,10 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+#if defined(__ghs__) && defined(__ARM_DSP__)
+#  define __ARM_FEATURE_DSP 1
+#endif
+
 #ifndef __ASSEMBLY__
 
 #ifndef up_switch_context
