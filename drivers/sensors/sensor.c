@@ -218,6 +218,7 @@ static const struct sensor_meta_s g_sensor_meta[] =
   {sizeof(struct sensor_pm25),                "pm25"},
   {sizeof(struct sensor_pm10),                "pm10"},
   {sizeof(struct sensor_uv),                  "uv"},
+  {sizeof(struct sensor_eng),                 "eng"},
 };
 
 static const struct file_operations g_sensor_fops =
