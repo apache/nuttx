@@ -980,6 +980,9 @@ DMACH_HANDLE imx9_dmach_alloc(uint16_t dmamux, uint8_t dchpri)
 
       if (imx9_edma_tcdhasmux(dmach->base))
         {
+          /* Set reset value first to CH MUX */
+
+          putreg8(0, base + IMX9_EDMA_CH_MUX_OFFSET);
           dmainfo("CH%d: MUX:%u->%p\n", dmach->chan, dmach->dmamux,
                   (void *)(base + IMX9_EDMA_CH_MUX_OFFSET));
           putreg8(dmach->dmamux, base + IMX9_EDMA_CH_MUX_OFFSET);
