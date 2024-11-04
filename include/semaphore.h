@@ -104,7 +104,7 @@ struct semholder_s
 
 struct sem_s
 {
-  volatile int16_t semcount;     /* >0 -> Num counts available */
+  volatile int semcount;         /* >0 -> Num counts available */
                                  /* <0 -> Num tasks waiting for semaphore */
 
   /* If priority inheritance is enabled, then we have to keep track of which

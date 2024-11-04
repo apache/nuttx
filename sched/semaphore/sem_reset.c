@@ -60,7 +60,7 @@
 int nxsem_reset(FAR sem_t *sem, int16_t count)
 {
   irqstate_t flags;
-  short semcount;
+  int semcount;
 
   DEBUGASSERT(sem != NULL && count >= 0);
 

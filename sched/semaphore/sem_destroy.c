@@ -60,7 +60,7 @@
 
 int nxsem_destroy(FAR sem_t *sem)
 {
-  short old;
+  int old;
 
   DEBUGASSERT(sem != NULL);
 

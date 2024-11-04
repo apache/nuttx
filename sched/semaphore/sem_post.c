@@ -259,7 +259,7 @@ int nxsem_post(FAR sem_t *sem)
 #if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
   if (sem->flags & SEM_TYPE_MUTEX)
     {
-      short old = 0;
+      int old = 0;
       if (atomic_compare_exchange_weak_explicit(NXSEM_COUNT(sem), &old, 1,
                                                 memory_order_release,
                                                 memory_order_relaxed))

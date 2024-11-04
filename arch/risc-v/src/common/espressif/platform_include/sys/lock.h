@@ -39,7 +39,7 @@
 
 struct __lock
 {
-  int reserved[4];
+  int reserved[6];
 };
 
 typedef _LOCK_T _lock_t;

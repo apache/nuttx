@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NXSEM_COUNT(s) ((FAR atomic_short *)&(s)->semcount)
+#define NXSEM_COUNT(s) ((FAR atomic_int *)&(s)->semcount)
 
 /****************************************************************************
  * Public Function Prototypes
