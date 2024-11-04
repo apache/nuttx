@@ -3,7 +3,12 @@
 
 A simple example for the device functioning as an SPI slave. 
 This example can be used to validate communication with another device 
-operating as an SPI master. If the spitool is used on the other device,
+operating as an SPI master. 
+This example contains a hardcoded buffer, which is: 
+{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B,
+0x0C, 0x0D, 0x0E, 0x0F}. Whenever data is received,
+this example will send the same number of bytes received,
+consuming the hardcoded buffer in a circular manner.
 and the following command is sent:
 
 ``spi exch -x 4 deadbeef``
@@ -12,9 +17,7 @@ The expected response in device running spislv_test app is:
 
 .. code-block:: bash
 
-  Slave: 4 Bytes reads
-  Value in hex form from /dev/spislv2: de ad be ef
-  Slave: Writing value back to /dev/spislv2
+  Queued for sending to master: 01 02 03 04
 
 
 This test requires the device to be configured in SPI slave mode.(your
