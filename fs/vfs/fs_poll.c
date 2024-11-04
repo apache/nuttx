@@ -276,6 +276,7 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
 {
   int i;
   FAR struct pollfd *fds;
+  irqstate_t flags;
 
   DEBUGASSERT(afds != NULL && nfds >= 1);
 
@@ -284,6 +285,10 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
       fds = afds[i];
       if (fds != NULL)
         {
+          /* race condition protection when modifying fds->revents */
+
+          flags = enter_critical_section();
+
           /* The error event must be set in fds->revents */
 
           fds->revents |= eventset & (fds->events | POLLERR | POLLHUP);
@@ -293,6 +298,8 @@ void poll_notify(FAR struct pollfd **afds, int nfds, pollevent_t eventset)
 
               fds->revents &= ~POLLOUT;
             }
+
+          leave_critical_section(flags);
 
           if ((fds->revents != 0 || (fds->events & POLLALWAYS) != 0) &&
               fds->cb != NULL)
