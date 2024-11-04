@@ -42,6 +42,10 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+#ifdef __ghs__
+#  define __ARM_ARCH 7
+#endif
+
 /* IRQ Stack Frame Format:
  *
  * Context is always saved/restored in the same way:
