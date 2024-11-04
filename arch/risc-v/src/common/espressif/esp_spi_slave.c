@@ -542,6 +542,31 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 #endif
 
 /****************************************************************************
+ * Name: spi_slave_prepare_data
+ *
+ * Description:
+ *   Prepare the SPI Slave controller for transmitting data in CPU-controlled
+ *   mode. This function resets the SPI Slave hardware, writes the data to
+ *   the TX buffer, and resets the TX FIFO.
+ *
+ * Input Parameters:
+ *   priv           - Private SPI Slave controller structure
+ *   nbits_to_send  - Number of bits to send in the next transaction
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static inline void spi_slave_prepare_data(struct spislave_priv_s *priv,
+                      ssize_t nbits_to_send)
+{
+  spi_ll_slave_reset(priv->ctx.hw);
+  spi_ll_write_buffer(priv->ctx.hw, priv->tx_buffer, nbits_to_send);
+  spislave_cpu_tx_fifo_reset(priv->ctx.hw);
+}
+
+/****************************************************************************
  * Name: spislave_prepare_next_tx
  *
  * Description:
@@ -558,12 +583,15 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 
 static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
 {
+  uint32_t nbits_to_send;
+
   if (priv->tx_length != 0)
     {
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
       spislave_setup_tx_dma(priv);
 #else
-      spi_slave_hal_prepare_data(&priv->ctx);
+      nbits_to_send = priv->nbits * priv->tx_length;
+      spi_slave_prepare_data(priv, nbits_to_send);
 #endif
       priv->is_tx_enabled = true;
     }
@@ -572,11 +600,15 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
       spiwarn("TX buffer empty! Disabling TX for next transaction\n");
 
 #ifndef CONFIG_ESPRESSIF_SPI2_DMA
-      spislave_cpu_tx_fifo_reset(priv->ctx.hw);
+      memset(priv->tx_buffer, 0, sizeof(priv->tx_buffer));
+      spi_slave_prepare_data(priv, priv->ctx.rcv_bitlen);
 #endif
 
       priv->is_tx_enabled = false;
     }
+
+    spi_ll_slave_set_rx_bitlen(priv->ctx.hw, priv->ctx.rcv_bitlen);
+    spi_ll_slave_set_tx_bitlen(priv->ctx.hw, priv->ctx.rcv_bitlen);
 }
 
 /****************************************************************************
