@@ -151,6 +151,7 @@ def install_python_env(args: argparse.Namespace) -> None:
     info(' Requirement files:')
     info(os.linesep.join(f'  - {path}' for path in requirements_file_list))
     subprocess.check_call(run_args, stdout=sys.stdout, stderr=sys.stderr, env=env_copy)
+    info(f'Output:{idf_python_path}')
 
 # export command function
 def uninstall_python_env(args: argparse.Namespace) -> None:
