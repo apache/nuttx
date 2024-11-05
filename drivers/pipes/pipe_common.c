@@ -506,7 +506,6 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct inode      *inode    = filep->f_inode;
   FAR struct pipe_dev_s *dev      = inode->i_private;
   ssize_t                nwritten = 0;
-  ssize_t                last;
   int                    ret;
 
   DEBUGASSERT(dev);
@@ -546,97 +545,32 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
       return ret;
     }
 
-  /* Loop until all of the bytes have been written */
+  /* REVISIT:  "If all file descriptors referring to the read end of a
+   * pipe have been closed, then a write will cause a SIGPIPE signal to
+   * be generated for the calling process.  If the calling process is
+   * ignoring this signal, then write(2) fails with the error EPIPE."
+   */
 
-  last = 0;
-  for (; ; )
+  if (dev->d_nreaders <= 0 && PIPE_IS_POLICY_0(dev->d_flags))
     {
-      /* REVISIT:  "If all file descriptors referring to the read end of a
-       * pipe have been closed, then a write will cause a SIGPIPE signal to
-       * be generated for the calling process.  If the calling process is
-       * ignoring this signal, then write(2) fails with the error EPIPE."
-       */
+      nxrmutex_unlock(&dev->d_bflock);
+      return -EPIPE;
+    }
 
-      if (dev->d_nreaders <= 0 && PIPE_IS_POLICY_0(dev->d_flags))
+  /* Would the next write overflow the circular buffer? */
+
+  while (circbuf_is_full(&dev->d_buffer))
+    {
+      if (filep->f_oflags & O_NONBLOCK)
         {
+          /* If O_NONBLOCK was set, then return EGAIN. */
+
           nxrmutex_unlock(&dev->d_bflock);
-          return nwritten == 0 ? -EPIPE : nwritten;
-        }
-
-      /* Would the next write overflow the circular buffer? */
-
-      if (!circbuf_is_full(&dev->d_buffer))
-        {
-          /* Loop until all of the bytes have been written */
-
-          nwritten += circbuf_write(&dev->d_buffer,
-                                    buffer + nwritten, len - nwritten);
-
-          if ((size_t)nwritten == len)
-            {
-              /* Notify all poll/select waiters that they can read from the
-               * FIFO when buffer used exceeds poll threshold.
-               */
-
-              if (circbuf_used(&dev->d_buffer) > dev->d_pollinthrd)
-                {
-                  poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS,
-                              POLLIN);
-                }
-
-              /* Yes.. Notify all of the waiting readers that more data is
-               * available.
-               */
-
-              pipecommon_wakeup(&dev->d_rdsem);
-
-              /* Return the number of bytes written */
-
-              nxrmutex_unlock(&dev->d_bflock);
-              return len;
-            }
+          return -EAGAIN;
         }
       else
         {
-          /* There is not enough room for the next byte.  Was anything
-           * written in this pass?
-           */
-
-          if (last < nwritten)
-            {
-              /* Notify all poll/select waiters that they can read from the
-               * FIFO.
-               */
-
-              poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS, POLLIN);
-
-              /* Yes.. Notify all of the waiting readers that more data is
-               * available.
-               */
-
-              pipecommon_wakeup(&dev->d_rdsem);
-            }
-
-          last = nwritten;
-
-          /* If O_NONBLOCK was set, then return partial bytes written or
-           * EGAIN.
-           */
-
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              if (nwritten == 0)
-                {
-                  nwritten = -EAGAIN;
-                }
-
-              nxrmutex_unlock(&dev->d_bflock);
-              return nwritten;
-            }
-
-          /* There is more to be written.. wait for data to be removed from
-           * the pipe
-           */
+          /* Wait for data to be removed from the pipe. */
 
           nxrmutex_unlock(&dev->d_bflock);
           ret = nxsem_wait(&dev->d_wrsem);
@@ -646,10 +580,35 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                * received or if the task was canceled.
                */
 
-              return nwritten == 0 ? (ssize_t)ret : nwritten;
+              return (ssize_t)ret;
             }
         }
     }
+
+  /* Write data to buffer. */
+
+  nwritten = circbuf_write(&dev->d_buffer, buffer, len);
+
+  /* Notify all poll/select waiters that they can read from the
+   * FIFO when buffer used exceeds poll threshold.
+   */
+
+  if (circbuf_used(&dev->d_buffer) > dev->d_pollinthrd)
+    {
+      poll_notify(dev->d_fds, CONFIG_DEV_PIPE_NPOLLWAITERS,
+                  POLLIN);
+    }
+
+  /* Yes.. Notify all of the waiting readers that more data is
+   * available.
+   */
+
+  pipecommon_wakeup(&dev->d_rdsem);
+
+  /* Return the number of bytes written */
+
+  nxrmutex_unlock(&dev->d_bflock);
+  return nwritten;
 }
 
 /****************************************************************************
