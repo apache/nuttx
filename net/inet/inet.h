@@ -35,30 +35,6 @@
 #include <nuttx/net/ip.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration */
-
-#undef HAVE_INET_SOCKETS
-#undef HAVE_PFINET_SOCKETS
-#undef HAVE_PFINET6_SOCKETS
-
-#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
-#  define HAVE_INET_SOCKETS
-
-#  if (defined(CONFIG_NET_IPv4) && (defined(NET_UDP_HAVE_STACK) || \
-       defined(NET_TCP_HAVE_STACK))) || defined(CONFIG_NET_ICMP_SOCKET)
-#    define HAVE_PFINET_SOCKETS
-#  endif
-
-#  if (defined(CONFIG_NET_IPv6) && (defined(NET_UDP_HAVE_STACK) || \
-       defined(NET_TCP_HAVE_STACK))) || defined(CONFIG_NET_ICMPv6_SOCKET)
-#    define HAVE_PFINET6_SOCKETS
-#  endif
-#endif
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 

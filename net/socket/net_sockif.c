@@ -31,6 +31,7 @@
 #include <debug.h>
 
 #include <nuttx/net/net.h>
+#include <nuttx/net/netconfig.h>
 
 #include "inet/inet.h"
 #include "local/local.h"
