@@ -139,7 +139,11 @@ function run_builds {
     ncpus=$(grep -c ^processor /proc/cpuinfo)
   fi
 
-  options+="-j ${ncpus}"
+  if [ "X$osname" == "Xmsys2" ]; then
+    export MAKEFLAGS="-j"
+  else
+    options+="-j ${ncpus}"
+  fi
 
   for build in "${builds[@]}"; do
     "${nuttx}"/tools/testbuild.sh ${options} -e "-Wno-cpp -Werror" "${build}"
