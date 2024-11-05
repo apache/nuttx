@@ -1,8 +1,9 @@
 /****************************************************************************
  * drivers/net/tun.c
  *
- *   Copyright (C) 2015-2016 Max Nekludov. All rights reserved.
- *   Author: Max Nekludov <macscomp@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: (C) 2015-2016 Max Nekludov. All rights reserved.
+ * SPDX-FileContributor: Max Nekludov <macscomp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

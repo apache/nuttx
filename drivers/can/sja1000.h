@@ -1,9 +1,7 @@
 /****************************************************************************
  * drivers/can/sja1000.h
  *
- * SJA1000 CAN driver based on esp32c3_twai.h
- *
- * License header retained from original source.
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

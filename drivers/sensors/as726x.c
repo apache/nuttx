@@ -1,11 +1,10 @@
 /****************************************************************************
  * drivers/sensors/as726x.c
- * Character driver for the AS7263 6-Ch NIR Spectral Sensing Engine
- * and AS7262 Consumer Grade Smart 6-Channel VIS Sensor
  *
- *   Copyright (C) 2019 Fabian Justi. All rights reserved.
- *   Author: Fabian Justi <Fabian.Justi@gmx.de> and
- *           Andreas Kurz <andreas.kurz@methodpark.de>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Fabian Justi. All rights reserved.
+ * SPDX-FileContributor: Fabian Justi <Fabian.Justi@gmx.de> and
+ * SPDX-FileContributor: Andreas Kurz <andreas.kurz@methodpark.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

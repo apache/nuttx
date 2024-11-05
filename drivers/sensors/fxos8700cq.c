@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/sensors/fxos8700cq.c
- * Driver for Motion Sensor FXOS8700CQ (NXP)
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
