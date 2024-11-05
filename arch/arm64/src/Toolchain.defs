@@ -197,6 +197,8 @@ ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
       LDFLAGS += --no-warn-rwx-segments
     endif
 
+  endif
+  ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
     LDFLAGS += --print-memory-usage
   endif
 endif
