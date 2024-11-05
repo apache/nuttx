@@ -6,7 +6,6 @@ Subject: [PATCH 01/14] ns: acknowledge the received creation message
 the two phase handsake make the client could initiate the transfer
 immediately without the server side send any dummy message first.
 
-Change-Id: I3289120a4e0d2291ba8b39de98d97de9e15880d0
 Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---

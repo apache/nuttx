@@ -9,7 +9,6 @@ If slave support VIRTIO_RPMSG_F_BUFSZ(0x04) feature, master
 determine the buffer size from config space(first 8 bytes),
 otherwise the default size(512 bytes) will be used.
 
-Change-Id: Ief68ed298495296a9eff38448ce5661f188300c2
 Signed-off-by: anchao <anchao@pinecone.net>
 Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>

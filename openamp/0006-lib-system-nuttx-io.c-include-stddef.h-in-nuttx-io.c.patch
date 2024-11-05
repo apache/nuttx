@@ -5,7 +5,6 @@ Subject: [PATCH 6/6] lib/system/nuttx/io.c: include <stddef.h> in nuttx/io.c
 
 Because nuttx/io.c use NULL and NULL is defined in <stddef.h>
 
-Change-Id: I98af56739e6beb6f165ef165e700c3ed8305d1d1
 Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
 ---
  lib/system/nuttx/io.c | 1 +

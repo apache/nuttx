@@ -6,7 +6,6 @@ Subject: [PATCH 11/14] virtio: change feature to 64 bit in all virtio_dispatch
 The virtio device feature bit has exceeded 32 bits, so change feautre
 to 64 bit like linux does to support more features
 
-Change-Id: I42c016e3e9eaac5fdbfdf19549a906bc51eb6939
 Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
 ---
  lib/include/openamp/rpmsg_virtio.h |  2 +-

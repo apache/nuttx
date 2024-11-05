@@ -4,7 +4,6 @@ Date: Tue, 19 Oct 2021 19:45:14 +0800
 Subject: [PATCH 03/14] rpmsg: notify the user when the remote address is
  received
 
-Change-Id: I1085e98aa0bd50746b624ec3fce1e3ca407c17e3
 Signed-off-by: ligd <liguiding1@xiaomi.com>
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---

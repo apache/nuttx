@@ -3,7 +3,6 @@ From: wangyongrong <wangyongrong@xiaomi.com>
 Date: Wed, 3 Jul 2024 10:00:34 +0800
 Subject: [PATCH 05/14] remoteproc/rpmsg_virtio: change sched_yeild to usleep
 
-Change-Id: I4246185cb1d2f363df170e2aa03a1901b0a296a8
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---
  lib/remoteproc/remoteproc_virtio.c | 3 ++-
