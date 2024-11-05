@@ -185,8 +185,10 @@
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
+#  define MSEC2TICKSLOW(msec) (((msec)+(MSEC_PER_TICK/2))/MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
+#  define MSEC2TICKSLOW(msec) USEC2TICK((msec) * USEC_PER_MSEC)
 #endif
 
 #define DSEC2TICK(dsec)       MSEC2TICK((dsec) * MSEC_PER_DSEC)

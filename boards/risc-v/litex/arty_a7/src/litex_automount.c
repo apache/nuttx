@@ -93,10 +93,8 @@ static const struct litex_automount_config_s g_mb1_mmcsdconfig =
     .fstype     = CONFIG_LITEX_SDIO_MOUNT_FSTYPE,
     .blockdev   = CONFIG_LITEX_SDIO_MOUNT_BLKDEV,
     .mountpoint = CONFIG_LITEX_SDIO_MOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(
-                  100),
-    .udelay     = MSEC2TICK(
-                  100),
+    .ddelay     = MSEC2TICKSLOW(100),
+    .udelay     = MSEC2TICKSLOW(100),
     .attach     = litex_attach,
     .enable     = litex_enable,
     .inserted   = litex_inserted

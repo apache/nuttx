@@ -93,9 +93,9 @@ static const struct stm32_automount_config_s g_mb1_mmcsdconfig =
     .fstype     = CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(
+    .ddelay     = MSEC2TICKSLOW(
                   CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(
+    .udelay     = MSEC2TICKSLOW(
                   CONFIG_CLICKER2_STM32_MB1_MMCSD_AUTOMOUNT_UDELAY),
     .attach     = stm32_attach,
     .enable     = stm32_enable,
@@ -115,9 +115,9 @@ static const struct stm32_automount_config_s g_mb2_mmcsdconfig =
     .fstype     = CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_FSTYPE,
     .blockdev   = CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_BLKDEV,
     .mountpoint = CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(
+    .ddelay     = MSEC2TICKSLOW(
                   CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(
+    .udelay     = MSEC2TICKSLOW(
                   CONFIG_CLICKER2_STM32_MB2_MMCSD_AUTOMOUNT_UDELAY),
     .attach     = stm32_attach,
     .enable     = stm32_enable,
