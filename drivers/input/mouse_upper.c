@@ -103,6 +103,7 @@ static int mouse_open(FAR struct file *filep)
   FAR struct mouse_openpriv_s  *openpriv;
   FAR struct inode             *inode = filep->f_inode;
   FAR struct mouse_upperhalf_s *upper = inode->i_private;
+  FAR struct mouse_lowerhalf_s *lower = upper->lower;
   int ret;
 
   ret = nxmutex_lock(&upper->lock);
@@ -131,6 +132,11 @@ static int mouse_open(FAR struct file *filep)
   nxmutex_init(&openpriv->lock);
   list_add_tail(&upper->head, &openpriv->node);
 
+  if (lower->open && list_is_singular(&openpriv->node))
+    {
+      ret = lower->open(lower);
+    }
+
   /* Save the buffer node pointer so that it can be used directly
    * in the read operation.
    */
@@ -149,12 +155,18 @@ static int mouse_close(FAR struct file *filep)
   FAR struct mouse_openpriv_s  *openpriv = filep->f_priv;
   FAR struct inode             *inode    = filep->f_inode;
   FAR struct mouse_upperhalf_s *upper    = inode->i_private;
+  FAR struct mouse_lowerhalf_s *lower    = upper->lower;
   int ret;
 
   ret = nxmutex_lock(&upper->lock);
   if (ret < 0)
     {
       return ret;
+    }
+
+  if (lower->close && list_is_singular(&openpriv->node))
+    {
+      ret = lower->close(lower);
     }
 
   list_delete(&openpriv->node);
