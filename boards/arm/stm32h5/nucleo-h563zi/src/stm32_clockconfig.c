@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32.h
+ * boards/arm/stm32h5/nucleo-h563zi/src/stm32_clockconfig.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,28 +18,31 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
 
-#include "arm_internal.h"
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/* Peripherals **************************************************************/
+/****************************************************************************
+ * Name: stm32_board_clockconfig
+ *
+ * Description:
+ *   Currently the NUCLEO-H563ZI board support is restricted to running NuttX
+ *   in the Non-Secure domain together with TrustedFirmware-M (TFM).  In this
+ *   setup the clock configuration is done by TFM, not by NuttX.  Thus, the
+ *   board's configuration sets CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG
+ *   to avoid the standard clock config logic to run and instead do just
+ *   nothing in this function.
+ *
+ ****************************************************************************/
 
-#include "chip.h"
-#include "stm32_flash.h"
-#include "stm32_dbgmcu.h"
-#include "stm32_gpio.h"
-#include "stm32_pwr.h"
-#include "stm32_rcc.h"
-#include "stm32_uart.h"
-#include "stm32_lowputc.h"
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_H */
+#if defined(CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG)
+void stm32_board_clockconfig(void)
+{
+}
+#endif

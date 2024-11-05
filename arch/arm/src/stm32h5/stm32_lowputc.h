@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32.h
+ * arch/arm/src/stm32h5/stm32_lowputc.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,28 +18,47 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_H
+#ifndef __ARCH_ARM_SRC_STM32H5_STM32_LOWPUTC_H
+#define __ARCH_ARM_SRC_STM32H5_STM32_LOWPUTC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "arm_internal.h"
-
-/* Peripherals **************************************************************/
 
 #include "chip.h"
-#include "stm32_flash.h"
-#include "stm32_dbgmcu.h"
-#include "stm32_gpio.h"
-#include "stm32_pwr.h"
-#include "stm32_rcc.h"
-#include "stm32_uart.h"
-#include "stm32_lowputc.h"
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_H */
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: stm32_lowsetup
+ *
+ * Description:
+ *   Called at the very beginning of _start.  Performs low level
+ *   initialization of serial console.
+ *
+ ****************************************************************************/
+
+void stm32_lowsetup(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_STM32H5_STM32_LOWPUTC_H */

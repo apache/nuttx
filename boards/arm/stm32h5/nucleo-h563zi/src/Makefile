@@ -1,5 +1,5 @@
 ##############################################################################
-# arch/arm/src/stm32h5/Make.defs
+# boards/arm/stm32h5/nucleo-h563zi/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,34 +18,23 @@
 #
 ##############################################################################
 
-# The start-up, "head", file.  Only common vectors are support so there
-# isn't one.
+-include $(TOPDIR)/Make.defs
 
-HEAD_ASRC =
+ASRCS =
+CSRCS = stm32_boot.c stm32_bringup.c stm32_clockconfig.c
 
-# Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
-
-include armv8-m/Make.defs
-
-# Required STM32H5 files
-
-CHIP_ASRCS  =
-CHIP_CSRCS  = stm32_gpio.c
-CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c
-CHIP_CSRCS += stm32_serial.c stm32_start.c
-CHIP_CSRCS += stm32_pwr.c stm32_timerisr.c
-CHIP_CSRCS += stm32_lse.c stm32_lsi.c
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CHIP_CSRCS += stm32_idle.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
+else
+CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32h5_tim_lowerhalf.c
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += stm32_buttons.c
 endif
 
-# Required chip type specific files
-
-ifeq ($(CONFIG_STM32H5_STM32H5XXXX),y)
-CHIP_CSRCS += stm32h5xx_rcc.c
+ifeq ($(CONFIG_BOARDCTL),y)
+CSRCS += stm32_appinit.c
 endif
+
+include $(TOPDIR)/boards/Board.mk
