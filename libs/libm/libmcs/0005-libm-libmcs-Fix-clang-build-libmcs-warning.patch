@@ -3,13 +3,10 @@ From: yanghuatao <yanghuatao@xiaomi.com>
 Date: Mon, 4 Sep 2023 21:29:55 +0800
 Subject: [PATCH 2/2] libm/libmcs: Fix clang build libmcs warning
 
-VELAPLATFO-15795
-
 Fix warnings:
 libmcs/libmcs/libm/common/fenv.c libmcs/libmcs/libm/common/fenv.c:26:15: warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
 int fegetround()
 
-Change-Id: I91e956a46b0ea0bbf187c1790a1f236da8ee6b01
 Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
 ---
  libmcs/libmcs/libm/common/fenv.c | 2 +-

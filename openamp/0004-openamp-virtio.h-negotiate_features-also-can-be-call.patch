@@ -4,7 +4,6 @@ Date: Tue, 2 Jul 2024 16:33:32 +0800
 Subject: [PATCH 04/14] openamp/virtio.h: negotiate_features also can be call
  when final_features is NULL
 
-Change-Id: I41774d6c8b3c8b7487dc4b640fa60f4061ad3694
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---
  lib/include/openamp/virtio.h | 6 ++++--

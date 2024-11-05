@@ -6,8 +6,6 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-VELAPLATFO-28707
-
 CC:  socket/net_timeo.c sensors/wtgahrs2_uorb.c: In function ‘wtgahrs2_gyro_data’:
 sensors/wtgahrs2_uorb.c:229:58: error: ‘M_PI’ undeclared (first use in this function)
   229 |   gyro.x = (short)(buffer[1] << 8 | buffer[0]) * (2000 * M_PI / 180 / 32768);
@@ -17,7 +15,6 @@ make[1]: *** [Makefile:105: wtgahrs2_uorb.o] Error 1
 make: *** [tools/LibTargets.mk:101: drivers/libdrivers.a] Error 2
 make: *** Waiting for unfinished jobs....
 
-Change-Id: I01072f562fa6306db864cf4fa7c260c09751e0d1
 Signed-off-by: yanghuatao <yanghuatao@xiaomi.com>
 ---
  include/openlibm_math.h | 4 ++++

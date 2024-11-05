@@ -6,7 +6,6 @@ Subject: [PATCH 14/14] virtio.h: add memory operation for virtio device
 To make different virtio device/transport can use it's own memory
 region.
 
-Change-Id: I30adcc2c4215cefa8d0f7d81b6ebffd0f3ad74b5
 Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
 ---
  lib/include/openamp/virtio.h | 42 ++++++++++++++++++++++++++++++++++++

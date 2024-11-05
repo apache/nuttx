@@ -5,7 +5,6 @@ Subject: [PATCH 12/14] rpmsg_virtio.c: fix get_tx_payload_buffer error
 
 Always sleep when notify wait return not RPMSG_SUCCESS
 
-Change-Id: I2fa50e649de36114597fec09dfcf96c7d2d35546
 Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
 ---
  lib/rpmsg/rpmsg_virtio.c | 4 +---

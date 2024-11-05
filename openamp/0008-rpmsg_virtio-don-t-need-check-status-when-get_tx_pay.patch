@@ -4,7 +4,6 @@ Date: Wed, 3 Jul 2024 10:28:31 +0800
 Subject: [PATCH 08/14] rpmsg_virtio: don't need check status when
  get_tx_payload
 
-Change-Id: I6c0632a6924dafeb0c01ec0b16c9f53d2fbc6810
 Signed-off-by: ligd <liguiding1@xiaomi.com>
 ---
  lib/rpmsg/rpmsg_virtio.c | 6 ------

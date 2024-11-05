@@ -7,7 +7,6 @@ Subject: [PATCH 10/14] rpmsg_virtio.c: virtqueue_kick after all rx buffer
 Only kick once when all the rx buffers has been returned to decrease
 the interrupt times to improve the performance
 
-Change-Id: I158e3a63063e8eff7b97a02660f2d7a6c812c493
 Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
 Signed-off-by: Bowen Wang <wangbowen6@xiaomi.com>
 ---

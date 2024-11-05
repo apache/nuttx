@@ -3,7 +3,6 @@ From: ligd <liguiding1@xiaomi.com>
 Date: Thu, 23 Jun 2022 00:41:13 +0800
 Subject: [PATCH 07/14] openamp: add VIRTIO_RING_F_MUST_NOTIFY event
 
-Change-Id: I455c4a5427fbcc60c6f61707c4304c12aa13ee58
 Signed-off-by: ligd <liguiding1@xiaomi.com>
 ---
  lib/include/openamp/virtqueue.h | 3 +++

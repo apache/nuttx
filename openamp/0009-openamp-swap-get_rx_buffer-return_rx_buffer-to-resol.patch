@@ -4,7 +4,6 @@ Date: Fri, 7 Apr 2023 12:42:09 +0800
 Subject: [PATCH 09/14] openamp: swap get_rx_buffer & return_rx_buffer to
  resolve remote low power.
 
-Change-Id: I84e8b3a7a6796b5865da482db0408d5a08c55c2a
 Signed-off-by: ligd <liguiding1@xiaomi.com>
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---

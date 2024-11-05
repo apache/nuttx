@@ -5,7 +5,6 @@ Subject: [PATCH 13/14] openamp: add assert when get tx buffer failed
 
 So we can found the error more eaily
 
-Change-Id: Idade291ac8d8224b1ccbe0c0120bc07c036be17a
 Signed-off-by: dongjiuzhu1 <dongjiuzhu1@xiaomi.com>
 ---
  lib/rpmsg/rpmsg_virtio.c | 2 ++
