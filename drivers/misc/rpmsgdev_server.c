@@ -403,12 +403,13 @@ static int rpmsgdev_poll_handler(FAR struct rpmsg_endpoint *ept,
     }
   else
     {
-      DEBUGASSERT(dev->cfd != 0);
-
-      msg->header.result = file_poll(&dev->file, &dev->fd, false);
-      if (msg->header.result == OK)
+      if (dev->cfd != 0)
         {
-          dev->cfd = 0;
+          msg->header.result = file_poll(&dev->file, &dev->fd, false);
+          if (msg->header.result == OK)
+            {
+              dev->cfd = 0;
+            }
         }
     }
 
