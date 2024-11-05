@@ -1,6 +1,7 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs_lru.c
- * LRU cache of mnemofs.
+ *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

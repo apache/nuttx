@@ -1,5 +1,5 @@
 # ##############################################################################
-# fs/semaphore/CMakeLists.txt
+# fs/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,9 +19,3 @@
 # the License.
 #
 # ##############################################################################
-
-if(CONFIG_FS_NAMED_SEMAPHORES)
-
-  target_sources(fs PRIVATE sem_open.c sem_close.c sem_unlink.c)
-
-endif()

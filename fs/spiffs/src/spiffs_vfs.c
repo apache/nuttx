@@ -1,9 +1,8 @@
 /****************************************************************************
  * fs/spiffs/src/spiffs_vfs.c
- * Interface between SPIFFS and the NuttX VFS
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt
  *
  * Includes logic taken from 0.3.7 of SPIFFS by Peter Andersion.  That
  * version was originally released under the MIT license.
