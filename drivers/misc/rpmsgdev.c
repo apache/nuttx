@@ -420,7 +420,7 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
     {
       ret = rpmsgdev_send_recv(dev, command, true, &msg.header,
                                sizeof(msg) - 1, &read);
-      if (ret != -EAGAIN || priv->nonblock)
+      if (ret != -EAGAIN || read.iov_len > 0 || priv->nonblock)
         {
           break;
         }
