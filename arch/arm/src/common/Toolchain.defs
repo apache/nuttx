@@ -318,6 +318,7 @@ else
       endif
       ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
         ARCHOPTIMIZATION += --param=min-pagesize=0
+        LDFLAGS += --print-memory-usage
         ifeq ($(CONFIG_ARCH_RAMFUNCS),y)
           LDFLAGS += --no-warn-rwx-segments
         else ifeq ($(CONFIG_BOOT_RUNFROMFLASH),)
@@ -328,8 +329,6 @@ else
   endif
 
   LDFLAGS += --entry=__start
-  LDFLAGS += --print-memory-usage
-
 endif
 
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
