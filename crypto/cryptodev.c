@@ -559,8 +559,29 @@ static int cryptodev_key(FAR struct fcrypt *fcr, FAR struct crypt_kop *kop)
           }
 
         return -EINVAL;
+      case CRK_RSA_PKCS15_SIGN:
+        if (in == 4 && out == 1)
+          {
+            break;
+          }
+
+        return -EINVAL;
       case CRK_RSA_PKCS15_VERIFY:
         if (in == 5 && out == 0)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_RSA_PSS_SIGN:
+        if (in == 3 && out == 1)
+          {
+            break;
+          }
+
+        return -EINVAL;
+      case CRK_RSA_PSS_VERIFY:
+        if (in == 4 && out == 0)
           {
             break;
           }
