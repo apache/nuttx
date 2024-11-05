@@ -65,7 +65,7 @@ endif # FF_AW86225
 endif # INPUT_FF
 
 config INPUT_MOUSE
-	bool "Enable mouse support"
+	bool
 	default n
 	---help---
 		Enable support for mouse devices.
@@ -82,11 +82,11 @@ config INPUT_MOUSE_WHEEL
 endif # INPUT_MOUSE
 
 config INPUT_TOUCHSCREEN
-	bool "Enable touchscreen support"
+	bool
 	default n
 
 config INPUT_KEYBOARD
-	bool "Enable keyboard support"
+	bool
 	default n
 
 config INPUT_UINPUT

@@ -114,9 +114,7 @@ struct mouse_report_s
                     /* Possibly padded with 1 byte here */
   int16_t x;        /* X coordinate of the mouse position */
   int16_t y;        /* Y coordinate of the mouse position */
-#ifdef CONFIG_INPUT_MOUSE_WHEEL
   int16_t wheel;    /* Mouse wheel position */
-#endif
 };
 
 /* This structure is for mouse lower half driver */
@@ -143,6 +141,45 @@ struct mouse_lowerhalf_s
 
   CODE int (*control)(FAR struct mouse_lowerhalf_s *lower,
                       int cmd, unsigned long arg);
+
+  /**************************************************************************
+   * Name: open
+   *
+   * Description:
+   *   This function pointer is used to open a connection to the mouse driver
+   *   instance. It initializes the mouse and prepares it for subsequent
+   *   interactions with the user. This function typically sets up the state
+   *   of the driver and allocates any necessary resources.
+   *
+   * Input Parameters:
+   *   lower  - A pointer to the instance of the lower half mouse driver.
+   *   filep  - A pointer to the file structure representing the user.
+   *
+   * Returned Value:
+   *   It returns zero (OK) on success; a negative errno value on failure.
+   **************************************************************************/
+
+  CODE int (*open)(FAR struct mouse_lowerhalf_s *lower);
+
+  /**************************************************************************
+   * Name: close
+   *
+   * Description:
+   *   This function pointer is used to close the connection to the mouse
+   *   driver instance. It performs any necessary cleanup operations, such as
+   *   releasing resources and resetting the state of the mouse driver,
+   *   before ending theinteraction with the user.
+   *
+   * Input Parameters:
+   *   lower  - A pointer to the instance of the lower half mouse driver.
+   *   filep  - A pointer to the file structure representing the user closing
+   *            the mouse connection.
+   *
+   * Returned Value:
+   *   Returns zero (OK) on success; a negative errno value on failure.
+   **************************************************************************/
+
+  CODE int (*close)(FAR struct mouse_lowerhalf_s *lower);
 };
 
 /****************************************************************************
