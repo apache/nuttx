@@ -31,6 +31,9 @@ include $(TOPDIR)/Make.defs
 # you know about the configuration problem.  Refer to the README.txt file
 # in the NuttX uClibc++ GIT repository for more information
 
+BIN = libxx$(LIBEXT)
+BINDIR = bin
+
 ifeq ($(CONFIG_UCLIBCXX),y)
 include uClibc++.defs
 else ifeq ($(CONFIG_LIBCXX),y)
@@ -49,29 +52,27 @@ endif
 
 # Object Files
 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-COBJS = $(CSRCS:.c=$(OBJEXT))
-CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
-CPPOBJS = $(CPPSRCS:.cpp=$(OBJEXT))
+AOBJS = $(addprefix $(BINDIR)$(DELIM), $(ASRCS:.S=$(OBJEXT)))
+COBJS = $(addprefix $(BINDIR)$(DELIM), $(CSRCS:.c=$(OBJEXT)))
+CXXOBJS = $(addprefix $(BINDIR)$(DELIM), $(CXXSRCS:.cxx=$(OBJEXT)))
+CPPOBJS = $(addprefix $(BINDIR)$(DELIM), $(CPPSRCS:.cpp=$(OBJEXT)))
 
 SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS) $(CPPSRCS)
 OBJS = $(AOBJS) $(COBJS) $(CXXOBJS) $(CPPOBJS)
 
-BIN = libxx$(LIBEXT)
-
 all: $(BIN)
 .PHONY: depend clean distclean context
 
-$(AOBJS): %$(OBJEXT): %.S
+$(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS): %$(OBJEXT): %.c
+$(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(CXXOBJS): %$(OBJEXT): %.cxx
+$(CXXOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
-$(CPPOBJS): %$(OBJEXT): %.cpp
+$(CPPOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.cpp
 	$(call COMPILEXX, $<, $@)
 
 $(BIN): $(OBJS)
@@ -90,10 +91,12 @@ makedepfile: $(CXXSRCS:.cxx=.ddx) $(CPPSRCS:.cpp=.ddp)
 depend: .depend
 
 clean:
+	$(Q) $(MAKE) -C bin clean
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 
 distclean:: clean
+	$(Q) $(MAKE) -C bin distclean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 

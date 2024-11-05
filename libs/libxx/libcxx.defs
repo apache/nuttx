@@ -37,6 +37,11 @@ libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) patch -p0 < 0001-libcxx-fix-ld-errors.patch
 	$(Q) patch -p0 < 0001-Fix-build-error-about-__GLIBC__.patch
 	$(Q) touch $@
+	$(Q) mkdir $(BINDIR)/libcxx \
+	           $(BINDIR)/libcxx/src \
+	           $(BINDIR)/libcxx/src/experimental \
+	           $(BINDIR)/libcxx/src/filesystem \
+	           $(BINDIR)/libcxx/src/ryu
 endif
 
 $(TOPDIR)/include/libcxx: libcxx
@@ -50,6 +55,7 @@ distclean::
 ifeq ($(wildcard libcxx/.git),)
 	$(Q) $(DELFILE) libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(call DELDIR, libcxx)
+	$(call DELDIR, $(BINDIR)/libcxx)
 endif
 
 CXXFLAGS += ${DEFINE_PREFIX}_LIBCPP_BUILDING_LIBRARY
@@ -84,4 +90,3 @@ ifeq ($(CONFIG_CXX_LOCALIZATION),)
   LOCALE_CPPSRCS += libcxx/src/strstream.cpp
   CPPSRCS := $(filter-out $(LOCALE_CPPSRCS), $(CPPSRCS))
 endif
-
