@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h5/stm32.h
+ * arch/arm/src/stm32h5/stm32_start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,28 +18,28 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_STM32_H
-#define __ARCH_ARM_SRC_STM32H5_STM32_H
+#ifndef __ARCH_ARM_SRC_STM32H5_STM32_START_H
+#define __ARCH_ARM_SRC_STM32H5_STM32_START_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#include "arm_internal.h"
+/****************************************************************************
+ * Name: stm32_board_initialize
+ *
+ * Description:
+ *   All STM32H5 architectures must provide the following entry point.  This
+ *   entry point is called early in the initialization -- after all memory
+ *   has been configured and mapped but before any devices have been
+ *   initialized.
+ *
+ ****************************************************************************/
 
-/* Peripherals **************************************************************/
+void stm32_board_initialize(void);
 
-#include "chip.h"
-#include "stm32_flash.h"
-#include "stm32_dbgmcu.h"
-#include "stm32_gpio.h"
-#include "stm32_pwr.h"
-#include "stm32_rcc.h"
-#include "stm32_uart.h"
-#include "stm32_lowputc.h"
-#endif /* __ARCH_ARM_SRC_STM32H5_STM32_H */
+#endif /* __ARCH_ARM_SRC_STM32H5_STM32_START_H */
