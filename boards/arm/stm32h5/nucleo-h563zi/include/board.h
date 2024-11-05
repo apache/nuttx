@@ -163,7 +163,7 @@
 
 /* Configure the APB1 prescaler */
 
-#define STM32_RCC_CFGR2_PPRE1     RCC_CFGR2_PPRE1_HCLK1       /* PCLK1 = HCLK / 1 */
+#define STM32_RCC_CFGR2_PPRE1     RCC_CFGR2_PPRE1_HCLK1      /* PCLK1 = HCLK / 1 */
 #define STM32_PCLK1_FREQUENCY    (STM32_HCLK_FREQUENCY / 1)
 
 #define STM32_APB1_TIM2_CLKIN    (STM32_PCLK1_FREQUENCY)
@@ -190,8 +190,8 @@
 
 /* Configure the APB3 prescaler */
 
-#define STM32_RCC_CFGR2_PPRE3    RCC_CFGR2_PPRE3_HCLK1       /* PCLK2 = HCLK / 1 */
-#define STM32_PCLK3_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
+#define STM32_RCC_CFGR2_PPRE3     RCC_CFGR2_PPRE3_HCLK1      /* PCLK2 = HCLK / 1 */
+#define STM32_PCLK3_FREQUENCY    (STM32_HCLK_FREQUENCY / 1)
 
 #define STM32_APB3_LPTIM1_CLKIN  (STM32_PCLK3_FREQUENCY)
 #define STM32_APB3_LPTIM3_CLKIN  (STM32_PCLK3_FREQUENCY)
@@ -225,9 +225,17 @@
 
 /* Configure the Kernel clocks */
 
-/* DMA Channel/Stream Selections ********************************************/
+/* Ethernet definitions *****************************************************/
 
-/* Alternate function pin selections ****************************************/
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0 | GPIO_SPEED_100MHz)          /* PC1 */
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0 | GPIO_SPEED_100MHz)         /* PA2 */
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0 | GPIO_SPEED_100MHz)    /* PC4 */
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0 | GPIO_SPEED_100MHz)    /* PC5 */
+#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_3 | GPIO_SPEED_100MHz)    /* PG13 */
+#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHz)    /* PB15 */
+#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_3 | GPIO_SPEED_100MHz)   /* PG11 */
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHz)  /* PA7 */
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHz) /* PA1 */
 
 /* USART3: Connected to Arduino connector D0/D1 (or to STLink VCP if solder
  * bridges SB123 to SB130 are re-worked accordingly).
