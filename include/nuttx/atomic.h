@@ -27,7 +27,9 @@
  * Included Files
  ****************************************************************************/
 
-#ifdef __has_include
+#if defined(CONFIG_LIBC_ARCH_ATOMIC)
+#  include <nuttx/lib/stdatomic.h>
+#elif defined(__has_include)
 #  if defined(__cplusplus) && __has_include(<atomic>)
 extern "C++"
 {
