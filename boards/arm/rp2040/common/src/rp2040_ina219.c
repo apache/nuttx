@@ -1,9 +1,9 @@
 /****************************************************************************
  * boards/arm/rp2040/common/src/rp2040_ina219.c
  *
- *   Copyright (C) 2018 Erle Robotics (Juan Flores Muñoz). All rights
- *     reserved.
- *   Author: Erle Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Erle Robotics (Juan Flores Muñoz)
+ * SPDX-FileContributor: Juan Flores Muñoz <juan@erlerobotics.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
