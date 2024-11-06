@@ -99,6 +99,8 @@
 
 /* TCA64XX Parts ************************************************************/
 
+#define TCA64XX_INVALID_REG             0xff
+
 #define TCA6408_INPUT_REG               0x00
 #define TCA6408_OUTPUT_REG              0x01
 #define TCA6408_POLARITY_REG            0x02
@@ -133,6 +135,20 @@
 #define TCA6424_NR_GPIOS                24
 
 #define TCA64XX_NR_GPIO_MAX             TCA6424_NR_GPIOS
+
+#define PCAL6416A_INPUT0_REG              0x00
+#define PCAL6416A_INPUT1_REG              0x01
+#define PCAL6416A_OUTPUT0_REG             0x02
+#define PCAL6416A_OUTPUT1_REG             0x03
+#define PCAL6416A_POLARITY0_REG           0x04
+#define PCAL6416A_POLARITY1_REG           0x05
+#define PCAL6416A_CONFIG0_REG             0x06
+#define PCAL6416A_CONFIG1_REG             0x07
+#define PCAL6416A_PU_ENABLE0_REG          0x46
+#define PCAL6416A_PU_ENABLE1_REG          0x47
+#define PCAL6416A_PUPD_SELECT0_REG        0x48
+#define PCAL6416A_PUPD_SELECT1_REG        0x49
+#define PCAL6416A_NR_GPIOS                16
 
 /* 1us (datasheet: reset pulse duration (Tw) is 4ns */
 
@@ -183,6 +199,8 @@ struct tca64_part_s
   uint8_t tp_output;   /* Address of first output register */
   uint8_t tp_polarity; /* Address of first polarity register */
   uint8_t tp_config;   /* Address of first configuration register */
+  uint8_t tp_puenable;
+  uint8_t tp_pu_select;
 };
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
