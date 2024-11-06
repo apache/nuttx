@@ -38,6 +38,10 @@ ifeq ($(CONFIG_CAN_KVASER),y)
 CSRCS += kvaser_pci.c
 endif
 
+ifeq ($(CONFIG_CAN_CTUCANFD),y)
+CSRCS += ctucanfd_pci.c
+endif
+
 # Include CAN device driver build support
 
 DEPPATH += --dep-path can

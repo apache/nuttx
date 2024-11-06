@@ -34,4 +34,8 @@ if(CONFIG_CAN_KVASER)
   list(APPEND SRCS kvaser_pci.c)
 endif()
 
+if(CONFIG_CAN_CTUCANFD)
+  list(APPEND SRCS ctucanfd_pci.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
