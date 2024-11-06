@@ -117,6 +117,12 @@ static uint32_t page0_mapped;
 static uint32_t page0_page = INVALID_PHY_PAGE;
 #endif
 
+#ifdef CONFIG_SMP
+static int pause_cpu_handler(FAR void *cookie);
+static struct smp_call_data_s g_call_data =
+SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
+#endif
+
 /****************************************************************************
  * ROM Function Prototypes
  ****************************************************************************/
@@ -340,7 +346,7 @@ int IRAM_ATTR cache_dbus_mmu_map(int vaddr, int paddr, int num)
     {
       g_cpu_wait  = true;
       g_cpu_pause = false;
-      nxsched_smp_call_single(other_cpu, pause_cpu_handler, NULL, false);
+      nxsched_smp_call_single_async(other_cpu, &g_call_data);
       while (!g_cpu_pause);
     }
 
