@@ -32,19 +32,19 @@ include $(TOPDIR)/Make.defs
 # in the NuttX uClibc++ GIT repository for more information
 
 ifeq ($(CONFIG_UCLIBCXX),y)
-include uClibc++.defs
+include uClibc++/Make.defs
 else ifeq ($(CONFIG_LIBCXX),y)
-include libcxx.defs
+include libcxx/Make.defs
 else ifeq ($(CONFIG_LIBCXXMINI),y)
-include libcxxmini.defs
+include libcxxmini/Make.defs
 endif
 
 ifeq ($(CONFIG_ETL),y)
-include etl.defs
+include etl/Make.defs
 endif
 
 ifeq ($(CONFIG_LIBCXXABI),y)
-include libcxxabi.defs
+include libcxxabi/Make.defs
 endif
 
 # Object Files

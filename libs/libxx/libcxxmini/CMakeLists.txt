@@ -1,5 +1,5 @@
 # ##############################################################################
-# libs/libxx/libcxxmini.cmake
+# libs/libxx/libcxxmini/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,31 +20,35 @@
 #
 # ##############################################################################
 
-nuttx_add_system_library(libcxxmini)
+if(CONFIG_LIBCXXMINI)
 
-if(NOT CONFIG_XTENSA_TOOLCHAIN_XCC)
-  add_compile_options(-Wno-missing-exception-spec)
+  nuttx_add_system_library(libcxxmini)
+
+  if(NOT CONFIG_XTENSA_TOOLCHAIN_XCC)
+    add_compile_options(-Wno-missing-exception-spec)
+  endif()
+
+  target_sources(
+    libcxxmini
+    PRIVATE libxx_cxa_guard.cxx
+            libxx_cxapurevirtual.cxx
+            libxx_delete.cxx
+            libxx_delete_sized.cxx
+            libxx_deletea.cxx
+            libxx_deletea_sized.cxx
+            libxx_new.cxx
+            libxx_newa.cxx)
+
+  # Why c++14? * libcxx seems to require c++11. * The compiler defaults varies:
+  # clang/macOS (from xcode): 199711L gcc/ubuntu:               201402L * There
+  # is a precedent to use c++14.
+  # (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
+
+  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+  set_property(
+    TARGET nuttx
+    APPEND
+    PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES ${NUTTX_DIR}/include/cxx)
 endif()
-
-target_sources(
-  libcxxmini
-  PRIVATE libcxxmini/libxx_cxa_guard.cxx
-          libcxxmini/libxx_cxapurevirtual.cxx
-          libcxxmini/libxx_delete.cxx
-          libcxxmini/libxx_delete_sized.cxx
-          libcxxmini/libxx_deletea.cxx
-          libcxxmini/libxx_deletea_sized.cxx
-          libcxxmini/libxx_new.cxx
-          libcxxmini/libxx_newa.cxx)
-
-# Why c++14? * libcxx seems to require c++11. * The compiler defaults varies:
-# clang/macOS (from xcode): 199711L gcc/ubuntu:               201402L * There is
-# a precedent to use c++14. (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set_property(
-  TARGET nuttx
-  APPEND
-  PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES ${NUTTX_DIR}/include/cxx)

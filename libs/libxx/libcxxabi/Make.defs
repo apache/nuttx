@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libxx/libcxxabi.defs
+# libs/libxx/libcxxabi/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,34 +23,33 @@
 LIBCXXABI_VERSION=$(patsubst "%",%,$(CONFIG_LIBCXXABI_VERSION))
 
 # Download and unpack tarball if no git repo found
-ifeq ($(wildcard libcxxabi/.git),)
+ifeq ($(wildcard libcxxabi/libcxxabi/.git),)
 libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
-	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXXABI_VERSION),libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz)
+	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXXABI_VERSION),$@)
 
-libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
-	$(Q) tar -xf libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
-	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src libcxxabi
-	$(Q) patch -p0 < 0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch
-	$(Q) patch -p0 < 0002-libcxxabi-fix-compilation-errors.patch
-	$(Q) touch $@
+libcxxabi/libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
+	$(Q) tar -xf $<
+	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src $@
+	$(Q) patch -p0 < libcxxabi/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch -d libcxxabi
+	$(Q) patch -p0 < libcxxabi/0002-libcxxabi-fix-compilation-errors.patch -d libcxxabi
 endif
 
-$(TOPDIR)/include/libcxxabi: libcxxabi
-	$(Q) $(DIRLINK) $(CURDIR)/libcxxabi/include $(TOPDIR)/include/libcxxabi
+$(TOPDIR)/include/libcxxabi: libcxxabi/libcxxabi
+	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/libcxxabi
 	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxxabi/__config_site
 
 context:: $(TOPDIR)/include/libcxxabi
 
 distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxxabi
-ifeq ($(wildcard libcxxabi/.git),)
+ifeq ($(wildcard libcxxabi/libcxxabi/.git),)
 	$(Q) $(DELFILE) libcxxabi-$(LIBCXX_VERSION).src.tar.xz
-	$(call DELDIR, libcxxabi)
+	$(call DELDIR, libcxxabi/libcxxabi)
 endif
 
 ifeq ($(CONFIG_LIBCXXABI), y)
 CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
-CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/include
+CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/libcxxabi/include
 
 # Disable dynamic type checking when enabling libcxxabi
 # It results in a recursive call:
@@ -85,5 +84,5 @@ CXXFLAGS += -DLIBCXXABI_NON_DEMANGLING_TERMINATE
 # RTTI is required for building the libcxxabi library
 CXXFLAGS += -frtti
 
-DEPPATH += --dep-path libcxxabi/src
-VPATH += libcxxabi/src
+DEPPATH += --dep-path libcxxabi/libcxxabi/src
+VPATH += libcxxabi/libcxxabi/src

@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libxx/etl.defs
+# libs/libxx/etl/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,34 +23,32 @@
 ETL_VERSION=20.32.1
 
 # Download and unpack tarball if no git repo found
-ifeq ($(wildcard etl/.git),)
+ifeq ($(wildcard etl/etl/.git),)
 $(ETL_VERSION).tar.gz:
-	$(call DOWNLOAD,https://github.com/ETLCPP/etl/archive/refs/tags,$(ETL_VERSION).tar.gz)
+	$(call DOWNLOAD,https://github.com/ETLCPP/etl/archive/refs/tags,$@)
 
-etl: $(ETL_VERSION).tar.gz
-	$(Q) tar -xf $(ETL_VERSION).tar.gz
-	$(Q) $(DELFILE) $(ETL_VERSION).tar.gz
-	$(Q) mv etl-$(ETL_VERSION) etl
-	$(Q) touch $@
+etl/etl: $(ETL_VERSION).tar.gz
+	$(Q) tar -xf $<
+	$(Q) $(DELFILE) $<
+	$(Q) mv etl-$(ETL_VERSION) $@
 endif
 
-$(TOPDIR)/include/etl: etl
-	$(Q) $(DIRLINK) $(CURDIR)/etl/include $(TOPDIR)/include/etl
+$(TOPDIR)/include/etl: etl/etl
+	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/etl
 ifeq ($(CONFIG_ARCH_ARMV5M), y)
-	$(Q) cp $(CURDIR)/etl/include/etl/profiles/armv5_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+	$(Q) cp $(CURDIR)/$</include/etl/profiles/armv5_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
 else ifeq ($(CONFIG_ARCH_ARMV6M), y)
-	$(Q) cp $(CURDIR)/etl/include/etl/profiles/armv6_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+	$(Q) cp $(CURDIR)/$</include/etl/profiles/armv6_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
 else ifeq ($(CONFIG_ARCH_ARMV7M), y)
-	$(Q) cp $(CURDIR)/etl/include/etl/profiles/armv7_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+	$(Q) cp $(CURDIR)/$</include/etl/profiles/armv7_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
 else
-	$(Q) cp $(CURDIR)/etl/include/etl/profiles/gcc_generic_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
+	$(Q) cp $(CURDIR)/$</include/etl/profiles/gcc_generic_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
 endif
 
 context:: $(TOPDIR)/include/etl
 
 distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/etl
-ifeq ($(wildcard etl/.git),)
-	$(Q) $(DELFILE) $(ETL_VERSION).tar.gz
-	$(call DELDIR, etl)
+ifeq ($(wildcard etl/etl/.git),)
+	$(call DELDIR, etl/etl)
 endif
