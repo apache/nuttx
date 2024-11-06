@@ -395,6 +395,12 @@
 #define RCC_PLL1DIVR_PLL1R_MASK             (0x7f << RCC_PLL1DIVR_PLL1R_SHIFT)
 #  define RCC_PLL1DIVR_PLL1R(n)             ((n-1) << RCC_PLL1DIVR_PLL1R_SHIFT) /* m = 1..128 */
 
+/* PLL1 fractional divider register */
+
+#define RCC_PLL1FRACR_PLL1FRACN_SHIFT       (3)
+#define RCC_PLL1FRACR_PLL1FRACN_MASK        (0x1fff << RCC_PLL1FRACR_PLL1FRACN_SHIFT)
+#define RCC_PLL1FRACR_PLL1FRACN(n)          (n << RCC_PLL1FRACR_PLL1FRACN_SHIFT) /* m = 0..8192 */
+
 /* PLL2 dividers register */
 
 #define RCC_PLL2DIVR_PLL2N_SHIFT            (0) /* Bits 8-0:  */
@@ -413,6 +419,12 @@
 #define RCC_PLL2DIVR_PLL2R_MASK             (0x7f << RCC_PLL2DIVR_PLL2R_SHIFT)
 #  define RCC_PLL2DIVR_PLL2R(n)             ((n-1) << RCC_PLL2DIVR_PLL2R_SHIFT) /* m = 1..128 */
 
+/* PLL2 fractional divider register */
+
+#define RCC_PLL2FRACR_PLL2FRACN_SHIFT       (3)
+#define RCC_PLL2FRACR_PLL2FRACN_MASK        (0x1fff << RCC_PLL2FRACR_PLL2FRACN_SHIFT)
+#define RCC_PLL2FRACR_PLL2FRACN(n)          (n << RCC_PLL2FRACR_PLL2FRACN_SHIFT) /* m = 0..8192 */
+
 /* PLL3 dividers register */
 
 #define RCC_PLL3DIVR_PLL3N_SHIFT            (0) /* Bits 8-0:  */
@@ -430,6 +442,12 @@
 #define RCC_PLL3DIVR_PLL3R_SHIFT            (24) /* Bits 30-24:  */
 #define RCC_PLL3DIVR_PLL3R_MASK             (0x7f << RCC_PLL3DIVR_PLL3R_SHIFT)
 #  define RCC_PLL3DIVR_PLL3R(n)             ((n-1) << RCC_PLL3DIVR_PLL3R_SHIFT) /* m = 1..128 */
+
+/* PLL3 fractional divider register */
+
+#define RCC_PLL3FRACR_PLL3FRACN_SHIFT       (3)
+#define RCC_PLL3FRACR_PLL3FRACN_MASK        (0x1fff << RCC_PLL3FRACR_PLL3FRACN_SHIFT)
+#define RCC_PLL3FRACR_PLL3FRACN(n)          (n << RCC_PLL3FRACR_PLL3FRACN_SHIFT) /* m = 0..8192 */
 
 /* Clock interrupt enable register */
 
