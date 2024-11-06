@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libxx/libcxx.defs
+# libs/libxx/libcxx/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,37 +23,37 @@
 LIBCXX_VERSION=$(patsubst "%",%,$(CONFIG_LIBCXX_VERSION))
 
 # Download and unpack tarball if no git repo found
-ifeq ($(wildcard libcxx/.git),)
+ifeq ($(wildcard libcxx/libcxx/.git),)
 libcxx-$(LIBCXX_VERSION).src.tar.xz:
-	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXX_VERSION),libcxx-$(LIBCXX_VERSION).src.tar.xz)
+	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXX_VERSION),$@)
 
-libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
-	$(Q) tar -xf libcxx-$(LIBCXX_VERSION).src.tar.xz \
+libcxx/libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
+	$(Q) tar -xf $< \
 	         --exclude libcxx-$(LIBCXX_VERSION).src/test/std/pstl
-	$(Q) mv libcxx-$(LIBCXX_VERSION).src libcxx
-	$(Q) patch -p0 < 0001_fix_stdatomic_h_miss_typedef.patch
-	$(Q) patch -p2 < mbstate_t.patch
-	$(Q) patch -p0 < 0001-libcxx-remove-mach-time-h.patch
-	$(Q) patch -p0 < 0001-libcxx-fix-ld-errors.patch
-	$(Q) patch -p0 < 0001-Fix-build-error-about-__GLIBC__.patch
-	$(Q) touch $@
+	$(Q) mv libcxx-$(LIBCXX_VERSION).src $@
+	$(Q) patch -p0 < libcxx/0001_fix_stdatomic_h_miss_typedef.patch -d libcxx
+	$(Q) patch -p2 < libcxx/mbstate_t.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0001-libcxx-remove-mach-time-h.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0001-libcxx-fix-ld-errors.patch -d libcxx
+	$(Q) patch -p0 < libcxx/0001-Fix-build-error-about-__GLIBC__.patch -d libcxx
+
 endif
 
-$(TOPDIR)/include/libcxx: libcxx
-	$(Q) $(DIRLINK) $(CURDIR)/libcxx/include $(TOPDIR)/include/libcxx
+$(TOPDIR)/include/libcxx: libcxx/libcxx
+	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/libcxx
 	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxx/__config_site
 
 context:: $(TOPDIR)/include/libcxx
 
 distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxx
-ifeq ($(wildcard libcxx/.git),)
+ifeq ($(wildcard libcxx/libcxx/.git),)
 	$(Q) $(DELFILE) libcxx-$(LIBCXX_VERSION).src.tar.xz
-	$(call DELDIR, libcxx)
+	$(call DELDIR, libcxx/libcxx)
 endif
 
 CXXFLAGS += ${DEFINE_PREFIX}_LIBCPP_BUILDING_LIBRARY
-CXXFLAGS += ${INCDIR_PREFIX}$(CURDIR)/libcxx/src
+CXXFLAGS += ${INCDIR_PREFIX}$(CURDIR)/libcxx/libcxx/src
 
 ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
 CXXFLAGS += ${DEFINE_PREFIX}__GLIBCXX__
@@ -70,18 +70,17 @@ ifeq ($(shell expr "$(GCCVER)" \>= 12), 1)
   CXXFLAGS += -Wno-maybe-uninitialized -Wno-alloc-size-larger-than
 endif
 
-CPPSRCS += $(wildcard libcxx/src/*.cpp)
-CPPSRCS += $(wildcard libcxx/src/experimental/*.cpp)
-CPPSRCS += $(wildcard libcxx/src/filesystem/*.cpp)
-CPPSRCS += $(wildcard libcxx/src/ryu/*.cpp)
+CPPSRCS += $(wildcard libcxx/libcxx/src/*.cpp)
+CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
+CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
+CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
 
 ifeq ($(CONFIG_CXX_LOCALIZATION),)
-  LOCALE_CPPSRCS := libcxx/src/ios.cpp
-  LOCALE_CPPSRCS += libcxx/src/ios.instantiations.cpp
-  LOCALE_CPPSRCS += libcxx/src/iostream.cpp
-  LOCALE_CPPSRCS += libcxx/src/locale.cpp
-  LOCALE_CPPSRCS += libcxx/src/regex.cpp
-  LOCALE_CPPSRCS += libcxx/src/strstream.cpp
+  LOCALE_CPPSRCS := libcxx/libcxx/src/ios.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/ios.instantiations.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/iostream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/locale.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/regex.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/strstream.cpp
   CPPSRCS := $(filter-out $(LOCALE_CPPSRCS), $(CPPSRCS))
 endif
-
