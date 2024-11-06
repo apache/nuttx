@@ -17,6 +17,7 @@ config ARCH_CHIP_STM32H563ZI
 	select STM32H5_STM32H5XXXX
 	select STM32H5_STM32H56XXX
 	select STM32H5_STM32H563XX
+	select STM32H5_STM32H5X3XX
 	select STM32H5_FLASH_CONFIG_I
 	select STM32H5_IO_CONFIG_Z
 	---help---
@@ -52,7 +53,8 @@ config STM32H5_STM32H563XX
 	# STM32H552 and STM32H562 devices documented in RM0439
 	bool
 	default n
-	
+	select STM32H5_HAVE_ETHERNET
+
 choice
 	prompt "Override Flash Size Designator"
 	depends on ARCH_CHIP_STM32H5
@@ -191,10 +193,18 @@ config STM32H5_SRAM2_INIT
 
 comment "STM32H5 Peripherals"
 
-menu "STM32H5 Peripheral Support"
+menu "STM32H5 Peripheral Selection"
 
-# These "hidden" settings determine is a peripheral option is available for the
-# selection MCU
+# These "hidden" settings determine if a peripheral option is available
+# for the selected MCU
+
+config STM32H5_HAVE_ETHERNET
+	bool
+	default n
+
+config STM32H5_HAVE_PHY_POLLED
+	bool
+	default n
 
 config STM32H5_HAVE_LPUART1
 	bool
@@ -257,52 +267,14 @@ config STM32H5_USART
 
 # These are the peripheral selections proper
 
-comment "AHB1 Peripherals"
+config STM32H5_ETHMAC
+	bool "Ethernet MAC"
+	default n
+	depends on STM32H5_HAVE_ETHERNET
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select STM32H5_HAVE_PHY_POLLED
 
-# TODO
-# GPDMA1, GPDMA2
-# FLITF
-# CRC
-# CORDIC
-# FMAC
-# RAMCFG
-# ETH, ETHTX, ETHRX
-# TZSC1
-# BKPRAM
-# DCACHE
-# SRAM1
-
-comment "AHB2 Peripherals"
-
-# TODO
-# GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOH, GPIOI
-# ADC
-# DAC1
-# DCMI_PSSI
-# AES
-# HASH
-# RNG
-# PKA
-# SAES
-# SRAM2, SRAM3
-
-comment "AHB4 Peripherals"
-
-# TODO
-# OTFDEC1
-# SDMMC1, SDMMC2
-# FMC
-# OCTOSPI1
-
-comment "APB1L Peripherals"
-
-# TODO
-# TIM2, TIM3, TIM4, TIM5, TIM6, TIM7
-# TIM12, TIM13, TIM14
-# WWDGEN
-# SPI2, SPI3
-# CEC
-#
 config STM32H5_USART2
 	bool "USART2"
 	default n
@@ -366,14 +338,6 @@ config STM32H5_USART11
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
 
-comment "APB1H Peripherals"
-
-# TODO
-# DTS
-# LPTIM2
-# FDCAN
-# UCPD1
-
 config STM32H5_UART9
 	bool "UART9"
 	default n
@@ -388,14 +352,6 @@ config STM32H5_UART12
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
 
-comment "APB2 Peripherals"
-
-# TODO
-# TIM1, TIM8, TIM15, TIM16, TIM17
-# SPI1, SPI4, SPI6
-# SAI1, SAI2
-# USBEN
-
 config STM32H5_USART1
 	bool "USART1"
 	default n
@@ -403,22 +359,12 @@ config STM32H5_USART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
 
-comment "APB3 Peripherals"
-
 config STM32H5_LPUART1
 	bool "LPUART1"
 	default n
 	depends on STM32H5_HAVE_LPUART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
-
-# TODO
-# SBS
-# SPI5
-# I2C3, I2C4, I3C2
-# LPTIM1, LPTIM3, LPTIM4, LPTIM5, LPTIM6
-# VREFBUF
-# RTCAPB
 
 endmenu
 
@@ -894,5 +840,225 @@ endif
 endif # STM32H5_SERIALDRIVER
 
 endmenu # U[S]ART Configuration
+
+menu "Ethernet MAC Configuration"
+	depends on STM32H5_ETHMAC
+
+config STM32H5_PHYADDR
+	int "PHY address"
+	default 0
+	---help---
+		The 5-bit address of the PHY on the board. Default: 0
+
+config STM32H5_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.
+		If STM32H5_PHYINIT is defined in the configuration then the board specific logic
+		must provide stm32_phyinitialize(); The STM32 Ethernet driver will call this
+		function one time before it first uses the PHY.
+
+config STM32H5_PHY_POLLING
+	bool "Support network monitoring by polling the PHY"
+	default n
+	depends on STM32H5_HAVE_PHY_POLLED
+	select ARCH_PHY_POLLED
+	---help---
+		Some boards may not have an interrupt connected to the PHY.
+		This option allows the network monitor to be used by polling the PHY for status.
+
+config STM32H5_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.
+
+choice
+	prompt "MII clock configuration"
+	default STM32H5_MII_EXTCLK
+	depends on STM32H5_MII
+
+config STM32H5_MII_MCO1
+	bool "Use MC01 as MII clock"
+	---help---
+		Use MC01 to clock the MII interface.
+
+config STM32H5_MII_MCO2
+	bool "Use MC02 as MII clock"
+	---help---
+		Use MC02 to clock the MII interface.
+
+config STM32H5_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice
+
+config STM32H5_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config STM32H5_ETH_NRXDESC
+	int "Number of RX descriptors"
+	default 8
+	---help---
+		Number of RX DMA descriptors to use.
+
+config STM32H5_ETH_NTXDESC
+	int "Number of TX descriptors"
+	default 4
+	---help---
+		Number of TX DMA descriptors to use.
+
+config STM32H5_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !STM32H5_AUTONEG
+	---help---
+		If STM32H5_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config STM32H5_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !STM32H5_AUTONEG
+	---help---
+		If STM32H5_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config STM32H5_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on STM32H5_AUTONEG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config STM32H5_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on STM32H5_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config STM32H5_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config STM32H5_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config STM32H5_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config STM32H5_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config STM32H5_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config STM32H5_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config STM32H5_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config STM32H5_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config STM32H5_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config STM32H5_ETH_PTP
+	bool "Precision Time Protocol (PTP)"
+	default n
+	---help---
+		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
+		with this condition.
+
+config STM32H5_RMII
+	bool
+	default !STM32H5_MII
+
+choice
+	prompt "RMII clock configuration"
+	default STM32H5_RMII_EXTCLK
+	depends on STM32H5_RMII
+
+config STM32H5_RMII_MCO1
+	bool "Use MC01 as RMII clock"
+	---help---
+		Use MCO1 to clock the RMII interface.
+
+config STM32H5_RMII_MCO2
+	bool "Use MC02 as RMII clock"
+	---help---
+		Use MCO2 to clock the RMII interface.
+
+config STM32H5_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice # RMII clock configuration
+
+config STM32H5_ETHMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_FEATURES.
+
+config STM32H5_NO_PHY
+	bool "MAC has no PHY"
+	default n
+
+endmenu # Ethernet MAC Configuration
 
 endif # ARCH_CHIP_STM32H5
