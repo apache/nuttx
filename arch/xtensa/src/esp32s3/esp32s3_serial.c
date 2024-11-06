@@ -295,7 +295,7 @@ static uart_dev_t g_uart2_dev =
 #ifdef CONFIG_ESP32S3_UART
 
 /****************************************************************************
- * Name: uart_interrupt
+ * Name: uart_handler
  *
  * Description:
  *   This is the UART interrupt handler.  It will be invoked when an
