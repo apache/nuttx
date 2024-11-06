@@ -63,7 +63,11 @@ endif
 # Configuration-dependent intel64 files
 
 ifeq ($(CONFIG_MULTBOOT2_FB_TERM),y)
-CHIP_CSRCS += intel64_mbfb.c
+CHIP_CSRCS += intel64_fbterm.c
+endif
+
+ifeq ($(CONFIG_MULTBOOT2_FB),y)
+CHIP_CSRCS += intel64_fb.c
 endif
 
 ifeq ($(CONFIG_ARCH_INTEL64_HAVE_TSC),y)

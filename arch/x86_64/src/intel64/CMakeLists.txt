@@ -72,7 +72,11 @@ if(CONFIG_SMP)
 endif()
 
 if(CONFIG_MULTBOOT2_FB_TERM)
-  list(APPEND SRCS intel64_mbfb.c)
+  list(APPEND SRCS intel64_fbterm.c)
+endif()
+
+if(CONFIG_MULTBOOT2_FB)
+  list(APPEND SRCS intel64_fb.c)
 endif()
 
 if(CONFIG_ARCH_INTEL64_HAVE_TSC)

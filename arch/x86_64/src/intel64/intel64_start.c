@@ -46,6 +46,10 @@ uint32_t g_mb_magic __attribute__((section(".loader.bss")));
 uint32_t g_mb_info_struct __attribute__((section(".loader.bss")));
 uintptr_t g_acpi_rsdp = 0;
 
+#ifdef CONFIG_MULTBOOT2_FB
+struct multiboot_tag_framebuffer *g_mb_fb_tag = NULL;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -98,11 +102,15 @@ static void x86_64_mb2_config(void)
               break;
             }
 
-#ifdef CONFIG_MULTBOOT2_FB_TERM
+#ifdef CONFIG_MULTBOOT2_FB
           case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
             {
-              x86_64_mb2_fbinitialize(
-                (struct multiboot_tag_framebuffer *)tag);
+              /* We have to postpone frame buffer initialization because
+               * at this boot stage we can't map >4GB memory yet and it's
+               * possible that frame bufer address is above 4GB.
+               */
+
+              g_mb_fb_tag = (struct multiboot_tag_framebuffer *)tag;
               break;
             }
 #endif
