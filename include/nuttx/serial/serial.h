@@ -325,6 +325,7 @@ struct uart_dev_s
   sem_t                xmitsem;      /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;      /* Wakeup user waiting for data in recv.buffer */
   mutex_t              closelock;    /* Locks out new open while close is in progress */
+  mutex_t              polllock;     /* Manages exclusive access to fds[] */
 
   /* I/O buffers */
 
