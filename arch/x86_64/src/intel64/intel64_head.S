@@ -119,6 +119,16 @@ header_start:
 	.long   MULTIBOOT_TAG_TYPE_ACPI_OLD
 	.long   MULTIBOOT_TAG_TYPE_ACPI_NEW
 
+#ifdef CONFIG_MULTBOOT2_FB
+	.short  MULTIBOOT_HEADER_TAG_FRAMEBUFFER
+	.short  0                           /* flags, none set */
+	.long   20                          /* size, including itself (short + short + long) */
+	.long   CONFIG_MULTBOOT2_FB_WIDTH   /* width */
+	.long   CONFIG_MULTBOOT2_FB_HEIGHT  /* height */
+	.long   CONFIG_MULTBOOT2_FB_DEEPTH  /* depth */
+	.long   0
+#endif
+
 	.short  MULTIBOOT_HEADER_TAG_END
 	.short  0    /* flags, none set */
 	.long   8    /* size, including itself (short + short + long) */
