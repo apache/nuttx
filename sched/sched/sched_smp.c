@@ -314,6 +314,22 @@ int nxsched_smp_call_async(cpu_set_t cpuset,
       sched_lock();
     }
 
+  if (CPU_ISSET(this_cpu(), &cpuset))
+    {
+      ret = data->func(data->arg);
+      if (data->cookie != NULL)
+        {
+          data->cookie->error = ret;
+          nxsem_post(&data->cookie->sem);
+          if (ret < 0)
+            {
+              goto out;
+            }
+        }
+
+      CPU_CLR(this_cpu(), &cpuset);
+    }
+
   cpucnt = CPU_COUNT(&cpuset);
   if (cpucnt == 0)
     {
