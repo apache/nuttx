@@ -731,6 +731,7 @@ config ARCH_CHIP_CXD32XX
 	bool "Sony CXD32xx"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
+	select LIBC_ARCH_ATOMIC
 	---help---
 		Sony CXD32XX (ARM Cortex-M4) architectures
 
