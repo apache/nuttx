@@ -299,4 +299,34 @@ endchoice # "Kvaser PCI CAN device type"
 
 endif # CAN_KVASER
 
+config CAN_CTUCANFD
+	bool "CTUCANFD PCI CAN card"
+	default n
+	depends on PCI
+	---help---
+		Enable driver support for CTU CAN FD PCI card.
+		NOTE: for now works only with QEMU
+
+if CAN_CTUCANFD
+
+choice
+	prompt "CTU CAN FD PCI CAN device type"
+	default CAN_CTUCANFD_CHARDEV if CAN
+	default CAN_CTUCANFD_SOCKET if NET_CAN
+
+config CAN_CTUCANFD_CHARDEV
+	bool "CTU CAN FD PCI can device as chardev"
+	depends on CAN
+	select ARCH_HAVE_CAN_ERRORS
+
+config CAN_CTUCANFD_SOCKET
+	bool "CTU CAN FD PCI can device as socketCAN"
+	depends on NET_CAN
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
+
+endchoice # "CTU CAN FD PCI CAN device type"
+
+endif # CAN_CTUCANFD
+
 endmenu # CAN Driver Support
