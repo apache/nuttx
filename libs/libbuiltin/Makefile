@@ -20,15 +20,15 @@
 
 include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
-include compiler-rt/Make.defs
-endif
-
 BIN ?= libbuiltin$(LIBEXT)
 BINDIR ?= bin
 
 KBIN = libkbuiltin$(LIBEXT)
 KBINDIR = kbin
+
+ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
+include compiler-rt/Make.defs
+endif
 
 AOBJS = $(addprefix $(BINDIR)$(DELIM), $(ASRCS:.S=$(OBJEXT)))
 COBJS = $(addprefix $(BINDIR)$(DELIM), $(CSRCS:.c=$(OBJEXT)))
@@ -79,7 +79,7 @@ clean:
 	$(Q) $(MAKE) -C bin  clean
 	$(Q) $(MAKE) -C kbin clean
 
-distclean: clean
+distclean:: clean
 	$(Q) $(MAKE) -C bin  distclean
 	$(Q) $(MAKE) -C kbin distclean
 	$(call DELFILE, .depend)
