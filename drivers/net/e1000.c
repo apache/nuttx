@@ -46,6 +46,14 @@
  * Pre-processor Definitions
  *****************************************************************************/
 
+#if CONFIG_NET_E1000_TXDESC % 2 != 0
+#  error CONFIG_NET_E1000_TXDESC must be multiple of 2
+#endif
+
+#if CONFIG_NET_E1000_RXDESC % 2 != 0
+#  error CONFIG_NET_E1000_RXDESC must be multiple of 2
+#endif
+
 /* Packet buffer size */
 
 #define E1000_PKTBUF_SIZE       2048
@@ -53,8 +61,8 @@
 
 /* TX and RX descriptors */
 
-#define E1000_TX_DESC           256
-#define E1000_RX_DESC           256
+#define E1000_TX_DESC           CONFIG_NET_E1000_TXDESC
+#define E1000_RX_DESC           CONFIG_NET_E1000_RXDESC
 
 /* After RX packet is done, we provide free netpkt to the RX descriptor ring.
  * The upper-half network logic is responsible for freeing the RX packets
