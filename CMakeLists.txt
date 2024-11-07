@@ -372,6 +372,9 @@ include(menuconfig)
 include(ExternalProject)
 include(FetchContent)
 
+# add NuttX CMake extenstion at last
+include(nuttx_extensions)
+
 set(FETCHCONTENT_QUIET OFF)
 
 # Board common directory #####################################################

@@ -55,6 +55,11 @@ function(nuttx_add_dependencies)
     ARGN
     ${ARGN})
 
+  get_target_property(NO_COMPILABLE_TARGET ${TARGET} NO_COMPILABLE_TARGET)
+  if(NO_COMPILABLE_TARGET)
+    return()
+  endif()
+
   foreach(dep ${DEPENDS})
     # add dependencies
     add_dependencies(${TARGET} ${dep})

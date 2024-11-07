@@ -95,9 +95,13 @@ function(nuttx_add_application)
     ARGN
     ${ARGN})
 
+  # check if SRCS exist
+  if(SRCS)
+    file(GLOB SRCS_EXIST ${SRCS})
+  endif()
   # create target
 
-  if(SRCS)
+  if(SRCS_EXIST)
     if(MODULE
        AND ("${MODULE}" STREQUAL "m")
        OR CONFIG_BUILD_KERNEL)
@@ -169,6 +173,8 @@ function(nuttx_add_application)
     set(TARGET "apps_${NAME}")
     add_custom_target(${TARGET})
     set_property(GLOBAL APPEND PROPERTY NUTTX_APPS_ONLY_REGISTER ${TARGET})
+    set_target_properties(${TARGET} PROPERTIES NO_COMPILABLE_TARGET True)
+    set(NO_COMPILABLE_TARGET True)
   endif()
 
   # apps applications need to depends on apps_context by default
@@ -194,22 +200,25 @@ function(nuttx_add_application)
                                                ${CONFIG_DEFAULT_TASK_STACKSIZE})
   endif()
 
-  # compile options
+  # call target_ options only target is compilable
+  if(NOT NO_COMPILABLE_TARGET)
+    # compile options
 
-  if(COMPILE_FLAGS)
-    target_compile_options(${TARGET} PRIVATE ${COMPILE_FLAGS})
-  endif()
+    if(COMPILE_FLAGS)
+      target_compile_options(${TARGET} PRIVATE ${COMPILE_FLAGS})
+    endif()
 
-  # compile definitions
+    # compile definitions
 
-  if(DEFINITIONS)
-    target_compile_definitions(${TARGET} PRIVATE ${DEFINITIONS})
-  endif()
+    if(DEFINITIONS)
+      target_compile_definitions(${TARGET} PRIVATE ${DEFINITIONS})
+    endif()
 
-  if(INCLUDE_DIRECTORIES)
-    foreach(inc ${INCLUDE_DIRECTORIES})
-      target_include_directories(${TARGET} PRIVATE ${inc})
-    endforeach()
+    if(INCLUDE_DIRECTORIES)
+      foreach(inc ${INCLUDE_DIRECTORIES})
+        target_include_directories(${TARGET} PRIVATE ${inc})
+      endforeach()
+    endif()
   endif()
 
   # add supplied dependencies
