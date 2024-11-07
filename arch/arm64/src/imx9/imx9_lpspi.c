@@ -1021,13 +1021,10 @@ static void imx9_lpspi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       imx9_lpspi_modifytcr(priv, clrbits, setbits);
 
-      while ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_RSR_OFFSET) &
-              LPSPI_RSR_RXEMPTY) != LPSPI_RSR_RXEMPTY)
-        {
-          /* Flush SPI read FIFO */
+      /* Reset SPI read FIFO */
 
-          imx9_lpspi_getreg32(priv, IMX9_LPSPI_RSR_OFFSET);
-        }
+      imx9_lpspi_modifyreg32(priv, IMX9_LPSPI_CR_OFFSET, 0,
+                                LPSPI_CR_RRF);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
