@@ -551,6 +551,7 @@ ssize_t rpmsgfs_client_read(FAR void *handle, int fd,
   msg.header.cookie  = (uintptr_t)&cookie;
   msg.fd             = fd;
   msg.count          = count;
+  msg.offset         = -1;
 
   ret = rpmsg_send(&priv->ept, &msg, sizeof(msg));
   if (ret < 0)
@@ -614,6 +615,7 @@ ssize_t rpmsgfs_client_write(FAR void *handle, int fd,
       msg->header.result  = -ENXIO;
       msg->fd             = fd;
       msg->count          = space;
+      msg->offset         = -1;
       memcpy(msg->buf, buf + written, space);
 
       ret = rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + space);
