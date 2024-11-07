@@ -46,6 +46,14 @@
  * Pre-processor Definitions
  *****************************************************************************/
 
+#if CONFIG_NET_IGC_TXDESC % 2 != 0
+#  error CONFIG_NET_IGC_TXDESC must be multiple of 2
+#endif
+
+#if CONFIG_NET_IGC_RXDESC % 2 != 0
+#  error CONFIG_NET_IGC_RXDESC must be multiple of 2
+#endif
+
 /* Packet buffer size */
 
 #define IGC_PKTBUF_SIZE        2048
@@ -53,8 +61,8 @@
 
 /* TX and RX descriptors */
 
-#define IGC_TX_DESC            256
-#define IGC_RX_DESC            256
+#define IGC_TX_DESC            CONFIG_NET_IGC_TXDESC
+#define IGC_RX_DESC            CONFIG_NET_IGC_RXDESC
 
 /* After RX packet is done, we provide free netpkt to the RX descriptor ring.
  * The upper-half network logic is responsible for freeing the RX packets

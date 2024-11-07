@@ -777,11 +777,27 @@ menuconfig NET_E1000
 
 if NET_E1000
 
+config NET_E1000_TXDESC
+	int "Intel E1000 TX descriptors"
+	default 256
+
+config NET_E1000_RXDESC
+	int "Intel E1000 RX descriptors"
+	default 256
+
 config NET_E1000_RXSPARE
 	int "Intel E1000 spare RX buffers"
 	default 8
 
 endif # NET_E1000
+
+config NET_IGC_TXDESC
+	int "Intel IGC TX descriptors"
+	default 256
+
+config NET_IGC_RXDESC
+	int "Intel IGC RX descriptors"
+	default 256
 
 menuconfig NET_IGC
 	bool "Intel IGC support"
