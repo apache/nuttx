@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <dirent.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
 #include <sys/param.h>
@@ -96,6 +97,7 @@ begin_packed_struct struct rpmsgfs_read_s
   struct rpmsgfs_header_s header;
   int32_t                 fd;
   uint32_t                count;
+  int64_t                 offset;
   char                    buf[0];
 } end_packed_struct;
 

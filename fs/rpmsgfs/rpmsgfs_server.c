@@ -443,6 +443,10 @@ static int rpmsgfs_read_handler(FAR struct rpmsg_endpoint *ept,
   uint32_t space;
 
   filep = rpmsgfs_get_file(priv, msg->fd);
+  if (filep != NULL && msg->offset >= 0)
+    {
+      file_seek(filep, msg->offset, SEEK_SET);
+    }
 
   while (read < msg->count)
     {
@@ -495,6 +499,11 @@ static int rpmsgfs_write_handler(FAR struct rpmsg_endpoint *ept,
   if (filep != NULL)
     {
       size_t written = 0;
+
+      if (msg->offset >= 0)
+        {
+          file_seek(filep, msg->offset, SEEK_SET);
+        }
 
       while (written < msg->count)
         {
