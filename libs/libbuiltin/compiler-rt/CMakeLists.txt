@@ -52,75 +52,77 @@ if(CONFIG_LIB_COMPILER_RT)
 
   endif()
 
-  if(CONFIG_ARCH_ARM)
-    set(ARCH arm)
-  elseif(CONFIG_ARCH_RISCV)
-    set(ARCH riscv)
-  elseif(CONFIG_ARCH_X86_64)
-    set(ARCH x86_64)
-  elseif(CONFIG_ARCH_ARM64)
-    set(ARCH aarch64)
+endif()
+
+if(CONFIG_ARCH_ARM)
+  set(ARCH arm)
+elseif(CONFIG_ARCH_RISCV)
+  set(ARCH riscv)
+elseif(CONFIG_ARCH_X86_64)
+  set(ARCH x86_64)
+elseif(CONFIG_ARCH_ARM64)
+  set(ARCH aarch64)
+endif()
+
+list(APPEND INCDIR ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/include)
+
+if(CONFIG_BUILTIN_COMPILER_RT)
+
+  nuttx_add_system_library(rt.buitlins)
+
+  target_include_directories(
+    rt.buitlins PRIVATE ${INCDIR}
+                        ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins)
+
+  target_compile_options(rt.buitlins PRIVATE -Wno-undef -Wno-macro-redefined)
+
+  set(SRCSTMP)
+  set(RT_BUILTINS_SRCS)
+  file(GLOB RT_BUILTINS_SRCS
+       ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/*.c)
+
+  file(GLOB SRCSTMP
+       ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/${ARCH}/*.S)
+  list(APPEND RT_BUILTINS_SRCS ${SRCSTMP})
+
+  file(GLOB SRCSTMP
+       ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/${ARCH}/*.c)
+  list(APPEND RT_BUILTINS_SRCS ${SRCSTMP})
+
+  if(NOT CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16)
+    set(RT_BUILTINS_BFLOAT16_SRCS
+        ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/truncdfbf2.c
+        ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/truncsfbf2.c)
+    list(REMOVE_ITEM RT_BUILTINS_SRCS ${RT_BUILTINS_BFLOAT16_SRCS})
   endif()
 
-  list(APPEND INCDIR ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/include)
+  target_sources(rt.buitlins PRIVATE ${RT_BUILTINS_SRCS})
 
-  if(CONFIG_BUILTIN_COMPILER_RT)
+endif()
 
-    nuttx_add_system_library(rt.buitlins)
+if(CONFIG_COVERAGE_COMPILER_RT)
 
-    target_include_directories(
-      rt.buitlins PRIVATE ${INCDIR}
-                          ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins)
+  nuttx_add_system_library(rt.profile)
 
-    target_compile_options(rt.buitlins PRIVATE -Wno-undef -Wno-macro-redefined)
+  target_include_directories(
+    rt.profile PRIVATE ${INCDIR}
+                       ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile)
 
-    set(SRCSTMP)
-    set(RT_BUILTINS_SRCS)
-    file(GLOB RT_BUILTINS_SRCS
-         ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/*.c)
+  target_compile_options(rt.profile PRIVATE -DCOMPILER_RT_HAS_UNAME -Wno-undef
+                                            -Wno-strict-prototypes -Wno-shadow)
 
-    file(GLOB SRCSTMP
-         ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/${ARCH}/*.S)
-    list(APPEND RT_BUILTINS_SRCS ${SRCSTMP})
+  set(SRCSTMP)
+  set(RT_PROFILE_SRCS InstrProfilingPlatform.c)
 
-    file(GLOB SRCSTMP
-         ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/${ARCH}/*.c)
-    list(APPEND RT_BUILTINS_SRCS ${SRCSTMP})
+  file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile/*.c)
+  list(APPEND RT_PROFILE_SRCS ${SRCSTMP})
 
-    if(NOT CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16)
-      set(RT_BUILTINS_BFLOAT16_SRCS
-          ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/truncdfbf2.c
-          ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/builtins/truncsfbf2.c)
-      list(REMOVE_ITEM RT_BUILTINS_SRCS ${RT_BUILTINS_BFLOAT16_SRCS})
-    endif()
+  file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile/*.cpp)
+  list(APPEND RT_PROFILE_SRCS ${SRCSTMP})
 
-    target_sources(rt.buitlins PRIVATE ${RT_BUILTINS_SRCS})
+  target_sources(rt.profile PRIVATE ${RT_PROFILE_SRCS})
 
-  endif()
-
-  if(CONFIG_COVERAGE_COMPILER_RT)
-
-    nuttx_add_system_library(rt.profile)
-
-    target_include_directories(
-      rt.profile PRIVATE ${INCDIR}
-                         ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile)
-
-    target_compile_options(
-      rt.profile PRIVATE -DCOMPILER_RT_HAS_UNAME -Wno-undef
-                         -Wno-strict-prototypes -Wno-shadow)
-
-    set(SRCSTMP)
-    set(RT_PROFILE_SRCS InstrProfilingPlatform.c)
-
-    file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile/*.c)
-    list(APPEND RT_PROFILE_SRCS ${SRCSTMP})
-
-    file(GLOB SRCSTMP ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile/*.cpp)
-    list(APPEND RT_PROFILE_SRCS ${SRCSTMP})
-
-    target_sources(rt.profile PRIVATE ${RT_PROFILE_SRCS})
-
-  endif()
-
+elseif(CONFIG_COVERAGE_MINI)
+  nuttx_add_system_library(rt.miniprofile)
+  target_sources(rt.profile PRIVATE ${CMAKE_CURRENT_LIST_DIR}/coverage.c)
 endif()

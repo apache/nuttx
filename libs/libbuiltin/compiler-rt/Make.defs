@@ -57,8 +57,9 @@ compiler-rt: compiler-rt/compiler-rt
 
 endif
 
-.PHONY: compiler-rt
+ifeq ($(CONFIG_LIB_COMPILER_RT),y)
 
+.PHONY: compiler-rt
 depend:: compiler-rt
 
 distclean::
@@ -67,6 +68,8 @@ distclean::
 	$(call DELDIR, compiler-rt/compiler-rt)
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/include
+
+endif
 
 ################# Builtin Library #################
 
@@ -100,9 +103,17 @@ FLAGS += -DCOMPILER_RT_HAS_UNAME
 
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.c)
 CPPSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.cpp)
-CSRCS += compiler-rt/InstrProfilingPlatform.c
+CSRCS += InstrProfilingPlatform.c
+
+else ifeq ($(CONFIG_COVERAGE_MINI),y)
+
+CSRCS += coverage.c
+
 endif
 
 AFLAGS += $(FLAGS)
 CFLAGS += $(FLAGS)
 CXXFLAGS += $(FLAGS)
+
+DEPPATH += --dep-path compiler-rt
+VPATH += :compiler-rt
