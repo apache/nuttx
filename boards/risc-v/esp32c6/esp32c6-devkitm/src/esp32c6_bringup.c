@@ -96,6 +96,10 @@
   #include "esp_board_mfrc522.h"
 #endif
 
+#ifdef CONFIG_PM
+# include "espressif/esp_pm.h"
+#endif
+
 #include "esp32c6-devkitm.h"
 
 /****************************************************************************
@@ -359,6 +363,11 @@ int esp_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: board_mfrc522_initialize() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_PM
+  /* Initialize power manager */
+  esp_pm_init();
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

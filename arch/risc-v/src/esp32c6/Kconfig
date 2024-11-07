@@ -37,6 +37,18 @@ endchoice # ESP32-C6 Chip Selection
 comment "Selected ESP32-C6 chip without embedded Flash, an external Flash memory is required."
 	depends on ARCH_CHIP_ESP32C6X
 
+config ESP_AUTO_SLEEP
+	bool "ESP32C6 Auto-sleep"
+	default n
+	select PM
+	select ESP_RT_TIMER
+	select ESP_TICKLESS
+	select SCHED_TICKLESS
+	select RTC_DRIVER
+	select RTC
+	---help---
+		Enable ESP Auto-sleep
+
 source "arch/risc-v/src/common/espressif/Kconfig"
 
 endif # ARCH_CHIP_ESP32C6

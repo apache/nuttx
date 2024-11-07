@@ -55,6 +55,10 @@
 #include "esp_dma.h"
 #endif
 
+#ifdef CONFIG_PM
+#include "esp_pm.h"
+#endif
+
 #include "riscv_internal.h"
 
 /****************************************************************************
@@ -424,6 +428,12 @@ static int spislave_cs_interrupt(int irq, void *context, void *arg)
 {
   struct spislave_priv_s *priv = (struct spislave_priv_s *)arg;
 
+/* Lock power manager to avoid system sleep during spi transaction */
+
+#ifdef CONFIG_PM
+  esp_pm_lockacquire();
+#endif
+
   if (priv->is_processing)
     {
       priv->is_processing = false;
@@ -678,6 +688,12 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   spi_slave_hal_user_start(&priv->ctx);
 
+  /* Release system to sleep after spi transaction done */
+
+  #ifdef CONFIG_PM
+  esp_pm_lockrelease();
+  #endif
+
   return 0;
 }
 
@@ -765,6 +781,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
 
   esp_configgpio(config->clk_pin, INPUT_FUNCTION_2 | PULLUP);
   esp_gpio_matrix_in(config->clk_pin, config->clk_insig, 0);
+
 #endif
 
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
@@ -786,6 +803,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
   priv->ctx.dmadesc_n = 0;
   priv->ctx.use_dma = 0;
 #endif
+
 }
 
 /****************************************************************************

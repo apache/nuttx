@@ -310,6 +310,26 @@ void esp_gpioirqdisable(int irq);
 #  define esp_gpioirqdisable(irq)
 #endif
 
+/**
+ * @brief Enable wakeup functionality for a specific GPIO pin.
+ *
+ * This function configures the specified GPIO pin to trigger a wakeup event
+ * based on the given interrupt type. It is typically used to wake up the system
+ * from a low-power state when a specific condition is met on the GPIO pin.
+ *
+ * @param gpio_num The GPIO pin number to be configured for wakeup.
+ * @param intr_type The type of interrupt that will trigger the wakeup event.
+ *             This parameter can be one of the following values:
+ *             - GPIO_INTR_DISABLE: Disable GPIO interrupt
+ *             - GPIO_INTR_POSEDGE: Interrupt on rising edge
+ *             - GPIO_INTR_NEGEDGE: Interrupt on falling edge
+ *             - GPIO_INTR_ANYEDGE: Interrupt on both rising and falling edges
+ *             - GPIO_INTR_LOW_LEVEL: Interrupt on low level
+ *             - GPIO_INTR_HIGH_LEVEL: Interrupt on high level
+ */
+
+void gpio_wakeup_enable(uint32_t gpio_num, gpio_intrtype_t intr_type);
+
 #ifdef __cplusplus
 }
 #endif
