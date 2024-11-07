@@ -220,6 +220,13 @@ static inline_function uintptr_t up_getusrsp(void *regs)
 
 #endif /* __ASSEMBLY__ */
 
+/****************************************************************************
+ * Name: up_getusrpc
+ ****************************************************************************/
+
+#define up_getusrpc(regs) \
+    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_UPC])
+
 #undef EXTERN
 #ifdef __cplusplus
 }
