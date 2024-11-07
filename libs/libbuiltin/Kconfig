@@ -29,11 +29,38 @@ config BUILTIN_TOOLCHAIN
 
 endchoice
 
+choice
+	prompt "Code coverage analysis support"
+	default COVERAGE_NONE
+	---help---
+		Select the code coverage analysis library
+
 config COVERAGE_COMPILER_RT
 	bool "Builtin libclang_rt.profile"
 	select LIB_BUILTIN
 	select LIB_COMPILER_RT
-	default n
+	---help---
+		Compile the LLVM Compiler-rt library into the OS.
+		Support adding native rich compilation options "-fprofile-xxx"
+
+config COVERAGE_MINI
+	bool "Builtin code coverage analysis mini library"
+	select LIB_BUILTIN
+	---help---
+		This is a mini version of the library, which is
+		used for code coverage analysis. If the toolchain
+		is clang, only support the compilation option
+		"-fprofile-instr-generate -fcoverage-mapping"
+
+config COVERAGE_TOOLCHAIN
+	bool "Link toolchain gcov library to the OS"
+	---help---
+		Link the toolchain coverage library to the OS.
+
+config COVERAGE_NONE
+	bool "Disable coverage function"
+
+endchoice
 
 choice
 	prompt "Builtin profile support"
