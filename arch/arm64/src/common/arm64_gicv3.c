@@ -378,9 +378,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   uint32_t aff1;
   uint64_t sgi_val;
   uint32_t regval;
-  unsigned long base;
 
-  base = gic_get_rdist() + GICR_SGI_BASE_OFF;
   ASSERT(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
@@ -394,7 +392,9 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
 
   ARM64_DSB();
 
-  regval = getreg32(IGROUPR(base, 0));
+  /* Read the IGROUPR0 value we set in `gicv3_cpuif_init` */
+
+  regval = IGROUPR_SGI_VAL;
 
   if (regval & BIT(sgi_id))
     {
