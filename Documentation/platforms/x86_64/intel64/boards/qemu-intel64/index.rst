@@ -5,52 +5,7 @@ qemu-intel64
 This page file describes the contents of the build configurations available
 for the NuttX QEMU x86_64 port.
 
-Creating a bootable disk
-========================
 
-This build supports multiboot2, which means that usual multiboot2 bootlaoders,
-e.g. grub can be used. To create a bootable disk with grub2, create a directory
-named ``iso`` with grub configuration file and the compiled ``nuttx.elf``.
-
-Directory and file hierarchy::
-
- - iso/
-   - boot/
-     - grub/
-       - grub.cfg
-     - nuttx.elf
-
-The grub.cfg should contain the boot entry of NuttX::
-
-  set timeout=0
-  set default=0
-  menuentry "kernel" {
-    multiboot2 /boot/nuttx.elf
-  }
-
-Making the disk
----------------
-
-Use the following command to create the disk.
-P.S. In some distros, ``grub-mkrescue`` is called ``grub2-mkrescue``::
-
-  grub-mkrescue -o boot.iso iso
-
-Grub with UEFI
---------------
-
-This flow is very similar except you need to have the BOOTX64.EFI file.
-You can find this in most Linux distributions::
-
-  iso/
-  └── boot
-      ├── efi
-      │   └── EFI
-      │       └── BOOT
-      │           └── BOOTX64.EFI
-      ├── grub
-      │   └── grub.cfg
-      └── nuttx.elf
 
 QEMU/KVM
 ========
@@ -75,9 +30,13 @@ frustrating. In such case, looks the next section and use bochs emulator instead
 Running QEMU
 ------------
 
-In the top-level NuttX directory::
+When you created a bootable disk, use command::
 
     qemu-system-x86_64 -cpu host -enable-kvm -m 2G -cdrom boot.iso -nographic -serial mon:stdio
+
+or, when option ``CONFIG_ARCH_PVHBOOT`` is set, you can use ``-kernel`` argument instead::
+
+    qemu-system-x86_64 -cpu host -enable-kvm -m 2G -kernel nuttx.elf -nographic -serial mon:stdio
 
 This multiplex the qemu console and COM1 to your console.
 
@@ -140,12 +99,13 @@ COM port output will be in the com1.out file.
 Real machine
 ============
 
-This port should work on real x86-64 machine with a proper CPU.
+This port can work on real x86-64 machine with a proper CPU.
 The mandatory CPU features are:
 
-* TSC DEADLINE or APIC timer
+* TSC DEADLINE or APIC timer or HPET
 * PCID
 * X2APIC
+* legacy serial port support or PCI serial card (AX99100 only supported now)
 
 WARNING: IF you use TSC DEADLINE, make sure that your CPU's TSC DEADLINE timer
 is not buggy!
@@ -187,7 +147,46 @@ Common Configuration Notes
 Configuration Sub-Directories
 -----------------------------
 
+nsh
+---
+
+This configuration provides a basic NuttShell configuration (NSH) with
+the default console on legacy UART0 port (base=0x3f8)
+
+nsh_pci
+-------
+
+This configuration provides a basic NuttShell configuration (NSH) with
+the default console on PCI serial port (AX99100 based card).
+
+nsh_pci_smp
+-----------
+
+This is a configuration to run NuttX in SMP mode on hardware with
+a PCI serial port card (AX99100).
+
 ostest
 ------
 
-The "standard" NuttX examples/ostest configuration.
+The "standard" NuttX examples/ostest configuration with
+the default console on legacy UART0 port (base=0x3f8)
+
+jumbo
+-----
+
+This is a QEMU configuration that enables many NuttX features.
+
+Basic command to run the image without additional PCI devices attached::
+
+  qemu-system-x86_64 -m 2G -cpu host -smp 4 -enable-kvm \
+  -kernel nuttx -nographic -serial mon:stdio
+
+lvgl
+----
+
+LVGL demo example that demonstrates x86_64 framebufer feature.
+
+fb
+---
+
+Configuration that enables NuttX framebuffer examples.
