@@ -122,7 +122,7 @@ CLEANDIRS += syscall
 endif
 endif
 
-CONTEXTDIRS += libs$(DELIM)libc
+CONTEXTDIRS += libs$(DELIM)libc libs$(DELIM)libbuiltin
 
 ifeq ($(CONFIG_LIBM_TOOLCHAIN)$(CONFIG_LIBM_NONE),)
 CONTEXTDIRS += libs$(DELIM)libm

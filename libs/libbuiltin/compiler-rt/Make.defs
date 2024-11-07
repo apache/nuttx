@@ -20,8 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-LIBBUILTIN += compiler-rt
-
 COMPILER_RT_VERSION=$(CONFIG_COMPILER_RT_VERSION)
 
 ifeq ($(CONFIG_ARCH_ARM),y)
@@ -34,7 +32,18 @@ else ifeq ($(CONFIG_ARCH_ARM64),y)
   ARCH = aarch64
 endif
 
+COMPILER_RT_OBJDIR = compiler-rt \
+                     compiler-rt/compiler-rt \
+                     compiler-rt/compiler-rt/lib \
+                     compiler-rt/compiler-rt/lib/builtins \
+                     compiler-rt/compiler-rt/lib/builtins/$(ARCH) \
+                     compiler-rt/compiler-rt/lib/profile
+
+BIN_OBJDIR = $(addprefix $(BINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
+KBIN_OBJDIR = $(addprefix $(KBINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
+
 ifeq ($(wildcard compiler-rt/compiler-rt/lib),)
+
 compiler-rt-$(COMPILER_RT_VERSION).src.tar.xz:
 	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(COMPILER_RT_VERSION),$@)
 
@@ -42,19 +51,20 @@ compiler-rt/compiler-rt: compiler-rt-$(COMPILER_RT_VERSION).src.tar.xz
 	$(Q) tar -xf $<
 	$(Q) mv compiler-rt-$(COMPILER_RT_VERSION).src $@
 	$(call DELDIR, $<)
+	$(Q) mkdir $(BIN_OBJDIR) $(KBIN_OBJDIR)
 
 compiler-rt: compiler-rt/compiler-rt
-	$(Q) mkdir $(BINDIR)/compiler-rt \
-	           $(BINDIR)/compiler-rt/compiler-rt \
-	           $(BINDIR)/compiler-rt/compiler-rt/lib \
-	           $(BINDIR)/compiler-rt/compiler-rt/lib/builtins \
-	           $(BINDIR)/compiler-rt/compiler-rt/lib/builtins/$(ARCH) \
-	           $(BINDIR)/compiler-rt/compiler-rt/lib/profile
 
 endif
 
+.PHONY: compiler-rt
+
+depend:: compiler-rt
+
 distclean::
-	$(call DELDIR, $(BINDIR)/compiler-rt)
+	$(call DELDIR, $(BIN_OBJDIR))
+	$(call DELDIR, $(KBIN_OBJDIR))
+	$(call DELDIR, compiler-rt/compiler-rt)
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/include
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins
