@@ -84,11 +84,17 @@ endif
 
 depend: .depend
 
+bin:
+	$(Q) mkdir $@
+
+kbin:
+	$(Q) mkdir $@
+
+context: bin kbin
+
 # Clean most derived files, retaining the configuration
 
 clean:
-	$(Q) $(MAKE) -C bin  clean
-	$(Q) $(MAKE) -C kbin clean
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(KBIN))
 	$(call CLEAN)
@@ -96,10 +102,8 @@ clean:
 # Deep clean -- removes all traces of the configuration
 
 distclean:: clean
-	$(Q) $(MAKE) -C bin  distclean
-	$(Q) $(MAKE) -C kbin distclean
-	$(call DELFILE, bin$(DELIM)Make.dep)
-	$(call DELFILE, kbin$(DELIM)Make.dep)
+	$(call DELDIR, bin)
+	$(call DELDIR, kbin)
 	$(call DELFILE, .depend)
 
 -include bin$(DELIM)Make.dep

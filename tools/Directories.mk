@@ -61,7 +61,7 @@ ifeq ($(EXTERNALDIR),external)
   KERNDEPDIRS += external
 endif
 
-CONTEXTDIRS = boards drivers fs $(APPDIR) $(ARCH_SRC)
+CONTEXTDIRS = boards drivers fs $(APPDIR) $(ARCH_SRC) mm
 CLEANDIRS += pass1
 
 ifeq ($(CONFIG_BUILD_FLAT),y)
@@ -145,10 +145,11 @@ KERNDEPDIRS += libs$(DELIM)libnx
 else
 USERDEPDIRS += libs$(DELIM)libnx
 endif
-CONTEXTDIRS += libs$(DELIM)libnx
 else
 CLEANDIRS += libs$(DELIM)libnx
 endif
+
+CONTEXTDIRS += libs$(DELIM)libnx
 
 ifeq ($(CONFIG_AUDIO),y)
 KERNDEPDIRS += audio
@@ -193,10 +194,6 @@ KERNDEPDIRS += openamp
 CONTEXTDIRS += openamp
 else
 CLEANDIRS += openamp
-endif
-
-ifeq ($(CONFIG_MM_TLSF_MANAGER),y)
-CONTEXTDIRS += mm
 endif
 
 CLEANDIRS += $(KERNDEPDIRS) $(USERDEPDIRS)
