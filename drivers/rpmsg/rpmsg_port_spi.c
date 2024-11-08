@@ -386,7 +386,8 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         break;
 
       default:
-        rpmsgerr("received a unexpected frame, dropped\n");
+        rpmsgerr("dropped an unexpected frame cmd: %u avail: %u\n",
+                 rxhdr->cmd, rxhdr->avail);
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
         break;
     }
