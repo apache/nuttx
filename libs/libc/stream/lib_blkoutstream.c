@@ -174,6 +174,7 @@ void lib_blkoutstream_close(FAR struct lib_blkoutstream_s *stream)
 
       if (stream->cache != NULL)
         {
+          blkoutstream_flush(&stream->common);
           lib_free(stream->cache);
           stream->cache = NULL;
         }
