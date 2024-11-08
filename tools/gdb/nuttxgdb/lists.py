@@ -349,6 +349,13 @@ class ForeachListEntry(gdb.Command):
         parser.add_argument(
             "-m", "--member", type=str, default=None, help="Member name in container"
         )
+        parser.add_argument(
+            "-e",
+            "--element",
+            type=str,
+            help="Only dump this element in array member struct.",
+            default=None,
+        )
         try:
             args = parser.parse_args(argv)
         except SystemExit:
@@ -365,6 +372,7 @@ class ForeachListEntry(gdb.Command):
                 else node
             )
             entry = entry.dereference()
+            entry = entry[args.element] if args.element else entry
             gdb.write(
                 f"{i} *({entry.type} *){hex(entry.address)} {entry.format_string(styling=True)}\n"
             )
@@ -409,5 +417,5 @@ class ForeachArray(gdb.Command):
         node = pointer
         len = args.length if args.length else utils.nitems(pointer)
         for i in range(len):
-            entry = node[i][args.element] if arg.element else node[i]
+            entry = node[i][args.element] if args.element else node[i]
             gdb.write(f"{i}: {entry.format_string(styling=True)}\n")
