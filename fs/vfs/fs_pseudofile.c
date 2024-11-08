@@ -95,6 +95,8 @@ static const struct file_operations g_pseudofile_ops =
   pseudofile_mmap,     /* mmap */
   pseudofile_truncate, /* truncate */
   NULL,                /* poll */
+  NULL,                /* readv */
+  NULL,                /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   pseudofile_unlink,   /* unlink */
 #endif
