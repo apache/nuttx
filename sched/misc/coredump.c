@@ -47,7 +47,8 @@
 #  define ELF_PAGESIZE    1024
 #endif
 
-#ifdef CONFIG_BOARD_COREDUMP_BLKDEV
+#if defined(CONFIG_BOARD_COREDUMP_BLKDEV) || \
+    defined(CONFIG_BOARD_COREDUMP_MTDDEV)
 #  define CONFIG_BOARD_COREDUMP_DEV
 #endif
 
@@ -92,6 +93,8 @@ static struct lib_hexdumpstream_s g_hexstream;
 
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
 static struct lib_blkoutstream_s g_devstream;
+#elif defined(CONFIG_BOARD_COREDUMP_MTDDEV)
+static struct lib_mtdoutstream_s g_devstream;
 #endif
 
 #ifdef CONFIG_BOARD_MEMORY_RANGE
@@ -867,6 +870,12 @@ int coredump_initialize(void)
 #ifdef CONFIG_BOARD_COREDUMP_BLKDEV
   ret = lib_blkoutstream_open(&g_devstream,
                               CONFIG_BOARD_COREDUMP_DEVPATH);
+#elif defined(CONFIG_BOARD_COREDUMP_MTDDEV)
+  ret = lib_mtdoutstream_open(&g_devstream,
+                              CONFIG_BOARD_COREDUMP_DEVPATH);
+#endif
+
+#ifdef CONFIG_BOARD_COREDUMP_DEV
   if (ret < 0)
     {
       _alert("%s Coredump device not found %d\n",

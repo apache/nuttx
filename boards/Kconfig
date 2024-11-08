@@ -4722,6 +4722,12 @@ config BOARD_COREDUMP_BLKDEV
 	---help---
 		Enable save coredump to block device when crash.
 
+config BOARD_COREDUMP_MTDDEV
+	bool "Enable Core Dump to mtd device"
+	depends on COREDUMP
+	---help---
+		Enable save coredump to mtd device when crash.
+
 config BOARD_CRASHDUMP_NONE
 	bool "No Board level crash dump"
 
@@ -4729,9 +4735,9 @@ endchoice # BOARD crashdump method
 
 config BOARD_COREDUMP_DEVPATH
 	string "Save Core Dump data with device PATH"
-	depends on BOARD_COREDUMP_BLKDEV
+	depends on BOARD_COREDUMP_BLKDEV || BOARD_COREDUMP_MTDDEV
 	---help---
-		Save coredump file into block device path.
+		Save coredump file into block/mtd device path.
 
 config BOARD_COREDUMP_FULL
 	bool "Core Dump all thread registers and stacks"
