@@ -42,6 +42,8 @@ else ifeq ($(CONFIG_ARCH_ARMV7M),y)     # All ARMv7-M
 include $(TOPDIR)/libs/libc/machine/arm/armv7-m/Make.defs
 else ifeq ($(CONFIG_ARCH_ARMV8M),y)     # All ARMv8-M
 include $(TOPDIR)/libs/libc/machine/arm/armv8-m/Make.defs
+else ifeq ($(CONFIG_ARCH_ARMV8R),y)     # All ARMv8-R
+include $(TOPDIR)/libs/libc/machine/arm/armv8-r/Make.defs
 endif
 
 ifneq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
