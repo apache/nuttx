@@ -58,23 +58,16 @@ static int mtdoutstream_flush(FAR struct lib_outstream_s *self)
 
   if (self->nput % erasesize > 0)
     {
-#ifdef CONFIG_MTD_BYTE_WRITE
-      /* if byte write, flush won't be needed */
+      size_t sblock = self->nput / erasesize;
 
-      if (inode->u.i_mtd->write == NULL)
-#endif
+      ret = MTD_ERASE(inode->u.i_mtd, sblock, 1);
+      if (ret < 0)
         {
-          size_t sblock = self->nput / erasesize;
-
-          ret = MTD_ERASE(inode->u.i_mtd, sblock, 1);
-          if (ret < 0)
-            {
-              return ret;
-            }
-
-          ret = MTD_BWRITE(inode->u.i_mtd, sblock * nblkpererase,
-                           nblkpererase, stream->cache);
+          return ret;
         }
+
+      ret = MTD_BWRITE(inode->u.i_mtd, sblock * nblkpererase,
+                        nblkpererase, stream->cache);
     }
 
   return ret;
@@ -101,98 +94,73 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
       return -ENOSPC;
     }
 
-#ifdef CONFIG_MTD_BYTE_WRITE
-  if (inode->u.i_mtd->write != NULL)
+  while (remain > 0)
     {
-      size_t sblock = (self->nput + erasesize - 1) / erasesize;
-      size_t eblock = (self->nput + len + erasesize - 1) / erasesize;
+      size_t sblock = self->nput / erasesize;
+      size_t offset = self->nput % erasesize;
 
-      if (sblock != eblock)
+      if (offset > 0)
         {
-          ret = MTD_ERASE(inode->u.i_mtd, sblock, eblock - sblock);
-          if (ret < 0)
+          size_t copyin = offset + remain > erasesize ?
+                          erasesize - offset : remain;
+
+          memcpy(stream->cache + offset, ptr, copyin);
+
+          ptr        += copyin;
+          offset     += copyin;
+          self->nput += copyin;
+          remain     -= copyin;
+
+          if (offset == erasesize)
             {
-              return ret;
-            }
-        }
-
-      ret = MTD_WRITE(inode->u.i_mtd, self->nput, len, buf);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      self->nput += len;
-    }
-  else
-#endif
-    {
-      while (remain > 0)
-        {
-          size_t sblock = self->nput / erasesize;
-          size_t offset = self->nput % erasesize;
-
-          if (offset > 0)
-            {
-              size_t copyin = offset + remain > erasesize ?
-                              erasesize - offset : remain;
-
-              memcpy(stream->cache + offset, ptr, copyin);
-
-              ptr        += copyin;
-              offset     += copyin;
-              self->nput += copyin;
-              remain     -= copyin;
-
-              if (offset == erasesize)
-                {
-                  ret = MTD_ERASE(inode->u.i_mtd, sblock, 1);
-                  if (ret < 0)
-                    {
-                      return ret;
-                    }
-
-                  ret = MTD_BWRITE(inode->u.i_mtd, sblock * nblkpererase,
-                                   nblkpererase, stream->cache);
-                  if (ret < 0)
-                    {
-                      return ret;
-                    }
-                }
-            }
-          else if (remain < erasesize)
-            {
-              /* erase content to all 0 before caching,
-               * so no random content will be flushed
-               */
-
-              memset(stream->cache, 0, erasesize);
-              memcpy(stream->cache, ptr, remain);
-              self->nput += remain;
-              remain      = 0;
-            }
-          else
-            {
-              size_t nblock = remain / erasesize;
-              size_t copyin = nblock * erasesize;
-
-              ret = MTD_ERASE(inode->u.i_mtd, sblock, nblock);
+              ret = MTD_ERASE(inode->u.i_mtd, sblock, 1);
               if (ret < 0)
                 {
                   return ret;
                 }
 
               ret = MTD_BWRITE(inode->u.i_mtd, sblock * nblkpererase,
-                               nblock * nblkpererase, ptr);
+                                nblkpererase, stream->cache);
               if (ret < 0)
                 {
                   return ret;
                 }
-
-              ptr        += copyin;
-              self->nput += copyin;
-              remain     -= copyin;
             }
+        }
+      else if (remain < erasesize)
+        {
+          ret = MTD_READ(stream->inode->u.i_mtd, sblock * erasesize,
+                          erasesize, stream->cache);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          memcpy(stream->cache, ptr, remain);
+          self->nput += remain;
+          remain      = 0;
+        }
+      else
+        {
+          size_t nblock = remain / erasesize;
+          size_t copyin = nblock * erasesize;
+
+          ret = MTD_ERASE(inode->u.i_mtd, sblock, nblock);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          ret = MTD_BWRITE(inode->u.i_mtd, sblock * nblkpererase,
+                            nblock * nblkpererase, ptr);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          ptr        += copyin;
+          self->nput += copyin;
+          remain     -= copyin;
         }
     }
 
@@ -295,16 +263,11 @@ int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
       return -EINVAL;
     }
 
-#ifdef CONFIG_MTD_BYTE_WRITE
-  if (node->u.i_mtd->write == NULL)
-#endif
+  stream->cache = lib_malloc(stream->geo.erasesize);
+  if (stream->cache == NULL)
     {
-      stream->cache = lib_malloc(stream->geo.erasesize);
-      if (stream->cache == NULL)
-        {
-          close_mtddriver(node);
-          return -ENOMEM;
-        }
+      close_mtddriver(node);
+      return -ENOMEM;
     }
 
   stream->inode        = node;

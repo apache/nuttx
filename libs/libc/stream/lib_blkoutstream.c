@@ -104,11 +104,14 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
         }
       else if (remain < sectorsize)
         {
-          /* Set content to all 0 before caching,
-           * so no random content will be flushed
-           */
+          /* Read sector back to keep as more as possible old data */
 
-          memset(stream->cache, 0, sectorsize);
+          ret = inode->u.i_bops->read(inode, stream->cache, sector, 1);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
           memcpy(stream->cache, ptr, remain);
           self->nput += remain;
           remain      = 0;
