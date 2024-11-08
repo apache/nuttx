@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32h7/stm32h745i-disco/scripts/gnu-elf.ld
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

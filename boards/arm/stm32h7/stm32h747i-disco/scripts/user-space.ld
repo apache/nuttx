@@ -1,5 +1,7 @@
 /****************************************************************************
-* boards/arm/stm32h7/stm32h747i-disco/scripts/user-space.ld
+ * boards/arm/stm32h7/stm32h747i-disco/scripts/user-space.ld
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
