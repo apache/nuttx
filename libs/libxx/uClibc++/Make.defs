@@ -25,7 +25,7 @@ UCLIBCXX_VERSION=0.2.5
 # Download and unpack tarball if no git repo found
 ifeq ($(wildcard uClibc++/uClibc++/.git),)
 uClibc++-$(UCLIBCXX_VERSION).tar.bz2:
-	curl -O -L https://git.busybox.net/uClibc++/snapshot/$@
+	curl -O -L https://cxx.uclibc.org/src/$@
 
 uClibc++/uClibc++: uClibc++-$(UCLIBCXX_VERSION).tar.bz2
 	$(Q) tar -xf $<
