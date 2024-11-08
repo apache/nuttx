@@ -593,18 +593,26 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
               if (conn->dupacks >= TCP_FAST_RETRANSMISSION_THRESH)
 #else
-              /* Reset the duplicate ack counter */
-
-              if ((flags & TCP_NEWDATA) != 0)
-                {
-                  TCP_WBNACK(wrb) = 0;
-                }
-
               /* Duplicate ACK? Retransmit data if need */
 
               if (++TCP_WBNACK(wrb) == TCP_FAST_RETRANSMISSION_THRESH)
 #endif
                 {
+                  /* Fast retransmission has been triggered */
+
+                  if ((flags & TCP_NEWDATA) != 0)
+                    {
+                      /* The current receive data needs to be handled by
+                       * following tcp_recvhandler or tcp_data_event. Notify
+                       * driver to send the message and marked as rexmit
+                       */
+
+                      TCP_WBNACK(wrb) = 0;
+                      conn->timeout = true;
+                      netdev_txnotify_dev(conn->dev);
+                      return flags;
+                    }
+
 #ifdef CONFIG_NET_TCP_SELECTIVE_ACK
                   if ((conn->flags & TCP_SACK) &&
                       (tcp->tcpoffset & 0xf0) > 0x50)
