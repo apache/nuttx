@@ -96,8 +96,13 @@ sys_call6:
   and        s0, s0, s1
   li         s1, STATUS_PIE            /* set PIE */
   or         s0, s0, s1
+  j          2f
 
- 1:
+1:
+  li         s1, ~STATUS_PIE           /* else: clear PIE */
+  and        s0, s0, s1
+
+2:
   /* Set previous privilege, we are in privileged mode now */
 
   li         s1, STATUS_PPP            /* set previous privilege */
