@@ -31,6 +31,7 @@
 
 #include <netdb.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #ifdef CONFIG_LIBC_NETDB
 

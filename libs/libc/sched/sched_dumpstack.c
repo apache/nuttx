@@ -30,6 +30,7 @@
 #include <sys/types.h>
 
 #include <stdio.h>
+#include <sched.h>
 #include <debug.h>
 
 /****************************************************************************

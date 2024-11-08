@@ -35,7 +35,7 @@
 
 #include <sys/uio.h>
 #include <sys/types.h>
-
+#include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -424,33 +424,6 @@ struct inode
 
 #define FSNODE_SIZE(n) (sizeof(struct inode) + (n))
 
-/* Definitions for custom stream operations with fopencookie. The
- * implementation is as defined in Standard C library (libc). The only
- * difference is that we use off_t instead of off64_t. This means
- * off_t is int64_t if CONFIG_FS_LARGEFILE is defined and int32_t if not.
- *
- * These callbacks can either lead to custom functions if fopencookie is used
- * or to standard file system functions if not.
- */
-
-typedef CODE ssize_t cookie_read_function_t(FAR void *cookie, FAR char *buf,
-                                            size_t size);
-typedef CODE ssize_t cookie_write_function_t(FAR void *cookie,
-                                             FAR const char *buf,
-                                             size_t size);
-typedef CODE off_t cookie_seek_function_t(FAR void *cookie,
-                                          FAR off_t *offset,
-                                          int whence);
-typedef CODE int cookie_close_function_t(FAR void *cookie);
-
-typedef struct cookie_io_functions_t
-{
-  FAR cookie_read_function_t *read;
-  FAR cookie_write_function_t *write;
-  FAR cookie_seek_function_t *seek;
-  FAR cookie_close_function_t *close;
-} cookie_io_functions_t;
-
 /* This is the underlying representation of an open file.  A file
  * descriptor is an index into an array of such types. The type associates
  * the file descriptor to the file state and to a set of inode operations.
@@ -542,29 +515,6 @@ struct filelist
  */
 
 #ifdef CONFIG_FILE_STREAM
-struct file_struct
-{
-  sq_entry_t              fs_entry;     /* Entry of file stream */
-  rmutex_t                fs_lock;      /* Recursive lock */
-  cookie_io_functions_t   fs_iofunc;    /* Callbacks to user / system functions */
-  FAR void               *fs_cookie;    /* Pointer to file descriptor / cookie struct */
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  FAR char               *fs_bufstart;  /* Pointer to start of buffer */
-  FAR char               *fs_bufend;    /* Pointer to 1 past end of buffer */
-  FAR char               *fs_bufpos;    /* Current position in buffer */
-  FAR char               *fs_bufread;   /* Pointer to 1 past last buffered read char. */
-#  if CONFIG_STDIO_BUFFER_SIZE > 0
-  char                    fs_buffer[CONFIG_STDIO_BUFFER_SIZE];
-#  endif
-#endif
-  uint16_t                fs_oflags;    /* Open mode flags */
-  uint8_t                 fs_flags;     /* Stream flags */
-#if CONFIG_NUNGET_CHARS > 0
-  uint8_t                 fs_nungotten; /* The number of characters buffered for ungetc */
-  char                    fs_ungotten[CONFIG_NUNGET_CHARS];
-#endif
-};
-
 struct streamlist
 {
   mutex_t                 sl_lock;   /* For thread safety */

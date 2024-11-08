@@ -39,6 +39,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/mutex.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/telnet.h>
 
