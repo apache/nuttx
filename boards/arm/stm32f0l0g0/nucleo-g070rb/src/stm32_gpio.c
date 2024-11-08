@@ -1,13 +1,12 @@
 /****************************************************************************
  * boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_gpio.c
  *
- *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
- *   Author: Daniel Pereira Volpato <dpo@certi.org.br>
- *           Guillherme da Silva Amaral <gvr@certi.org.br>
- *
- *   Based on: boards/arm/stm32f7/nucleo-144/src/stm32_gpio.c
- *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *           Philippe Coval <p.coval@samsung.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Fundação CERTI. All rights reserved.
+ * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
+ * SPDX-FileContributor: Guillherme da Silva Amaral <gvr@certi.org.br>
+ * SPDX-FileContributor: Alan Carvalho de Assis <acassis@gmail.com>
+ * SPDX-FileContributor: Philippe Coval <p.coval@samsung.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
