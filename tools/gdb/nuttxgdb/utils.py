@@ -19,6 +19,7 @@
 # under the License.
 #
 ############################################################################
+
 from __future__ import annotations
 
 import argparse
@@ -28,16 +29,99 @@ import os
 import re
 import shlex
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import gdb
 
 from .macros import fetch_macro_info, try_expand
+from .protocols.thread import Tcb
 
 g_symbol_cache = {}
 g_type_cache = {}
 g_macro_ctx = None
 g_backtrace_cache = {}
+
+
+class Value(gdb.Value):
+    def __init__(self, obj: Union[gdb.Value, Value]):
+        super().__init__(obj)
+
+    def __isabstractmethod__(self):
+        # Added to avoid getting error using __getattr__
+        return False
+
+    def __getattr__(self, key):
+        if hasattr(super(), key):
+            value = super().__getattribute__(key)
+        else:
+            value = super().__getitem__(key)
+
+        return Value(value) if not isinstance(value, Value) else value
+
+    def __getitem__(self, key):
+        value = super().__getitem__(key)
+        return Value(value) if not isinstance(value, Value) else value
+
+    def __format__(self, format_spec: str) -> str:
+        try:
+            return super().__format__(format_spec)
+        except TypeError:
+            # Convert GDB value to python value, and then format it
+            type_code_map = {
+                gdb.TYPE_CODE_INT: int,
+                gdb.TYPE_CODE_PTR: int,
+                gdb.TYPE_CODE_ENUM: int,
+                gdb.TYPE_CODE_FUNC: hex,
+                gdb.TYPE_CODE_BOOL: bool,
+                gdb.TYPE_CODE_FLT: float,
+                gdb.TYPE_CODE_STRING: str,
+                gdb.TYPE_CODE_CHAR: lambda x: chr(int(x)),
+            }
+
+            t = self.type
+            while t.code == gdb.TYPE_CODE_TYPEDEF:
+                t = t.target()
+
+            type_code = t.code
+            try:
+                converter = type_code_map[type_code]
+                return f"{converter(self):{format_spec}}"
+            except KeyError:
+                raise TypeError(
+                    f"Unsupported type: {self.type}, {self.type.code} {self}"
+                )
+
+    @property
+    def address(self) -> Value:
+        value = super().address
+        return value and Value(value)
+
+    def cast(self, type: str | gdb.Type, ptr: bool = False) -> Optional["Value"]:
+        try:
+            gdb_type = lookup_type(type) if isinstance(type, str) else type
+            if ptr:
+                gdb_type = gdb_type.pointer()
+            return Value(super().cast(gdb_type))
+        except gdb.error:
+            return None
+
+    def dereference(self) -> Value:
+        return Value(super().dereference())
+
+    def reference_value(self) -> Value:
+        return Value(super().reference_value())
+
+    def referenced_value(self) -> Value:
+        return Value(super().referenced_value())
+
+    def rvalue_reference_value(self) -> Value:
+        return Value(super().rvalue_reference_value())
+
+    def const_value(self) -> Value:
+        return Value(super().const_value())
+
+    def dynamic_cast(self, type: gdb.Type) -> Value:
+        return Value(super().dynamic_cast(type))
 
 
 class Backtrace:
@@ -261,10 +345,16 @@ class MacroCtx:
         return self._file
 
 
+def parse_and_eval(expression: str, global_context: bool = False):
+    """Equivalent to gdb.parse_and_eval, but returns a Value object"""
+    gdb_value = gdb.parse_and_eval(expression)
+    return Value(gdb_value)
+
+
 def gdb_eval_or_none(expresssion):
     """Evaluate an expression and return None if it fails"""
     try:
-        return gdb.parse_and_eval(expresssion)
+        return parse_and_eval(expresssion)
     except gdb.error:
         return None
 
@@ -405,7 +495,7 @@ def parse_arg(arg: str) -> Union[gdb.Value, int]:
         return int(arg, 16)
 
     try:
-        return gdb.parse_and_eval(f"{arg}")
+        return parse_and_eval(f"{arg}")
     except gdb.error:
         return None
 
@@ -544,7 +634,7 @@ target_arch = None
 
 def is_target_arch(arch, exact=False):
     """
-    For non extact match, this function will
+    For non exact match, this function will
     return True if the target architecture contains
     keywords of an ARCH family. For example, x86 is
     contained in i386:x86_64.
@@ -632,19 +722,19 @@ def get_pc(tcb=None):
     return get_register_byname("pc", tcb)
 
 
-def get_tcbs():
+def get_tcbs() -> List[Tcb]:
     # In case we have created/deleted tasks at runtime, the tcbs will change
     # so keep it as fresh as possible
-    pidhash = gdb.parse_and_eval("g_pidhash")
-    npidhash = gdb.parse_and_eval("g_npidhash")
+    pidhash = parse_and_eval("g_pidhash")
+    npidhash = parse_and_eval("g_npidhash")
 
     return [pidhash[i] for i in range(0, npidhash) if pidhash[i]]
 
 
-def get_tcb(pid):
+def get_tcb(pid) -> Tcb:
     """get tcb from pid"""
-    g_pidhash = gdb.parse_and_eval("g_pidhash")
-    g_npidhash = gdb.parse_and_eval("g_npidhash")
+    g_pidhash = parse_and_eval("g_pidhash")
+    g_npidhash = parse_and_eval("g_npidhash")
     tcb = g_pidhash[pid & (g_npidhash - 1)]
     if not tcb or pid != tcb["pid"]:
         return None
