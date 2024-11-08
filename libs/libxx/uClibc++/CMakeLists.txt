@@ -31,7 +31,7 @@ if(CONFIG_UCLIBCXX)
       uClibc++
       DOWNLOAD_NAME "uClibc++-${UCLIBCXX_VERSION}.tar.bz2"
       DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-      URL "https://git.busybox.net/uClibc++/snapshot/uClibc++-${UCLIBCXX_VERSION}.tar.bz2"
+      URL "https://cxx.uclibc.org/src/uClibc++-${UCLIBCXX_VERSION}.tar.bz2"
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/uClibc++
           BINARY_DIR
