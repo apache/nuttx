@@ -253,12 +253,150 @@ int archivefs_new(FAR const char *abspath, FAR const char *relpath,
     }
 
   nxmutex_init(&newp->lock);
+#ifdef CONFIG_FS_ARCHIVEFS_FORMAT_ALL
   ret = archivefs_convert_result(archive_read_support_format_all(newp->a));
   if (ret < 0)
     {
       ferr("ERROR: archive_read_support_format_all() failed\n");
       goto err_with_lock;
     }
+#else
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_ZIP
+  ret = archivefs_convert_result(archive_read_support_format_zip(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_zip() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_7ZIP
+  ret = archivefs_convert_result(archive_read_support_format_7zip(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_7zip() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_AR
+  ret = archivefs_convert_result(archive_read_support_format_ar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_ar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_CAB
+  ret = archivefs_convert_result(archive_read_support_format_cab(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_cab() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_CPIO
+  ret = archivefs_convert_result(archive_read_support_format_cpio(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_cpio() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_EMPTY
+  ret = archivefs_convert_result(archive_read_support_format_empty(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_empty() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_ISO9660
+  ret = archive_read_support_format_iso9660(newp->a);
+  ret = archivefs_convert_result(ret);
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_iso9660() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_LHA
+  ret = archivefs_convert_result(archive_read_support_format_lha(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_lha() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_MTREE
+  ret = archivefs_convert_result(archive_read_support_format_mtree(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_mtree() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_RAR
+  ret = archivefs_convert_result(archive_read_support_format_rar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_rar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_RAR_V5
+  ret = archivefs_convert_result(archive_read_support_format_rar5(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_rar5() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_RAW
+  ret = archivefs_convert_result(archive_read_support_format_raw(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_raw() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_TAR
+  ret = archivefs_convert_result(archive_read_support_format_tar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_tar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_WARC
+  ret = archivefs_convert_result(archive_read_support_format_warc(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_warc() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+
+#  ifdef CONFIG_FS_ARCHIVEFS_FORMAT_XAR
+  ret = archivefs_convert_result(archive_read_support_format_xar(newp->a));
+  if (ret < 0)
+    {
+      ferr("ERROR: archive_read_support_format_xar() failed\n");
+      goto err_with_lock;
+    }
+#  endif
+#endif
 
   ret = file_open(&newp->file, abspath, O_RDONLY);
   if (ret < 0)
