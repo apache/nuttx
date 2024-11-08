@@ -82,8 +82,8 @@ function(nuttx_add_romfs)
       board_rcraws
       TARGET board
       PROPERTY BOARD_RCRAWS)
-    list(APPEND RCSRCS ${board_rcsrcs})
-    list(APPEND RCRAWS ${board_rcraws})
+    list(PREPEND RCSRCS ${board_rcsrcs})
+    list(PREPEND RCRAWS ${board_rcraws})
   endif()
 
   foreach(rcsrc ${RCSRCS})
@@ -120,16 +120,15 @@ function(nuttx_add_romfs)
     endif()
 
     if(IS_DIRECTORY ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
-      file(
-        GLOB subraws
-        LIST_DIRECTORIES false
-        RELATIVE ${SOURCE_ETC_PREFIX}
-        ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
-      foreach(subraw ${subraws})
-        list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${subraw})
-        configure_file(${SOURCE_ETC_PREFIX}/${subraw}
-                       ${CMAKE_CURRENT_BINARY_DIR}/${subraw} COPYONLY)
-      endforeach()
+      add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        COMMAND
+          ${CMAKE_COMMAND} -E copy_directory
+          ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
+      list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
     else()
       list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
       configure_file(${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
