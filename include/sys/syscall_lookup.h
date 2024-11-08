@@ -402,4 +402,6 @@ SYSCALL_LOOKUP(signal,                     2)
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
   SYSCALL_LOOKUP(sched_note_vprintf_ip,    5)
   SYSCALL_LOOKUP(sched_note_event_ip,      5)
+#ifdef CONFIG_SCHED_PERF_EVENTS
+  SYSCALL_LOOKUP(perf_event_open,          5)
 #endif
