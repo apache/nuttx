@@ -231,15 +231,15 @@
 
 /* Ethernet definitions *****************************************************/
 
-#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0 | GPIO_SPEED_100MHz)          /* PC1 */
-#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0 | GPIO_SPEED_100MHz)         /* PA2 */
-#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0 | GPIO_SPEED_100MHz)    /* PC4 */
-#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0 | GPIO_SPEED_100MHz)    /* PC5 */
-#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_3 | GPIO_SPEED_100MHz)    /* PG13 */
-#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHz)    /* PB15 */
-#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_3 | GPIO_SPEED_100MHz)   /* PG11 */
-#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHz)  /* PA7 */
-#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHz) /* PA1 */
+#define GPIO_ETH_MDC          (GPIO_ETH_MDC_0 | GPIO_SPEED_100MHZ)          /* PC1 */
+#define GPIO_ETH_MDIO         (GPIO_ETH_MDIO_0 | GPIO_SPEED_100MHZ)         /* PA2 */
+#define GPIO_ETH_RMII_RXD0    (GPIO_ETH_RMII_RXD0_0 | GPIO_SPEED_100MHZ)    /* PC4 */
+#define GPIO_ETH_RMII_RXD1    (GPIO_ETH_RMII_RXD1_0 | GPIO_SPEED_100MHZ)    /* PC5 */
+#define GPIO_ETH_RMII_TXD0    (GPIO_ETH_RMII_TXD0_3 | GPIO_SPEED_100MHZ)    /* PG13 */
+#define GPIO_ETH_RMII_TXD1    (GPIO_ETH_RMII_TXD1_1 | GPIO_SPEED_100MHZ)    /* PB15 */
+#define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_3 | GPIO_SPEED_100MHZ)   /* PG11 */
+#define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHZ)  /* PA7 */
+#define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHZ) /* PA1 */
 
 /* ADC Clock Source *********************************************************/
 

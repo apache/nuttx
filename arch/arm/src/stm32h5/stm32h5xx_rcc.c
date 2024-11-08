@@ -130,18 +130,15 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_RAMCFGEN;
 #endif
 
-#ifdef CONFIG_STM32H5_ETH
+#ifdef CONFIG_STM32H5_ETHMAC
   /* ETH clock enable */
 
   regval |= RCC_AHB1ENR_ETHEN;
-#endif
-#ifdef CONFIG_STM32H5_ETHTX
+
   /* ETH TX clock enable */
 
   regval |= RCC_AHB1ENR_ETHTXEN;
-#endif
 
-#ifdef CONFIG_STM32H5_ETHRX
   /* ETH RX clock enable */
 
   regval |= RCC_AHB1ENR_ETHRXEN;
@@ -597,7 +594,7 @@ static inline void rcc_enableapb3(void)
 
   regval = getreg32(STM32_RCC_APB3ENR);
 
-#ifdef CONFIG_STM32H5_SBS
+#if defined(CONFIG_STM32H5_SBS) || defined(CONFIG_STM32H5_ETHMAC)
   /* Bit 1: SBS clock enable */
 
   regval |= RCC_APB3ENR_SBSEN;

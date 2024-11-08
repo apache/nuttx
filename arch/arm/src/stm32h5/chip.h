@@ -50,4 +50,12 @@
 
 #define ARMV8M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
 
+/* Cache line sizes set in line with ST document RM0481 Rev 2.
+ * DCACHE implementation, pg 284, Table 93
+ * ICACHE implementation, pg 367, Table 85.
+ */
+
+#define ARMV8M_ICACHE_LINESIZE 16   /* 16 bytes */
+#define ARMV8M_DCACHE_LINESIZE 16   /* 16 bytes */
+
 #endif /* __ARCH_ARM_SRC_STM32H5_CHIP_H */
