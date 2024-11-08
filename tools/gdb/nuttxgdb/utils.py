@@ -37,6 +37,7 @@ from .macros import fetch_macro_info, try_expand
 g_symbol_cache = {}
 g_type_cache = {}
 g_macro_ctx = None
+g_backtrace_cache = {}
 
 
 class Backtrace:
@@ -70,10 +71,21 @@ class Backtrace:
         self,
         address: List[Union[gdb.Value, int]] = [],
         formatter="{:<5} {:<36} {}\n",
+        break_null=True,
     ):
         self.formatter = formatter  # Address, Function, Source
         self._formatted = None  # Cached formatted backtrace
-        self.backtrace = [res for addr in address if (res := self.convert(addr))]
+        self.backtrace = []
+        for addr in address:
+            if break_null and not addr:
+                break
+            self.append(addr)
+
+    def __eq__(self, value: Backtrace) -> bool:
+        return self.backtrace == value.backtrace
+
+    def __hash__(self) -> int:
+        return hash(tuple(self.backtrace))
 
     def append(self, addr: Union[gdb.Value, int]) -> None:
         """Append an address to the backtrace"""
@@ -84,7 +96,10 @@ class Backtrace:
     def convert(self, addr: Union[gdb.Value, int]) -> Tuple[int, str, str]:
         """Convert an address to function and source"""
         if not addr:
-            return
+            return None
+
+        if int(addr) in g_backtrace_cache:
+            return g_backtrace_cache[int(addr)]
 
         if type(addr) is int:
             addr = gdb.Value(addr)
@@ -95,7 +110,9 @@ class Backtrace:
         func = addr.format_string(symbols=True, address=False)
         sym = gdb.find_pc_line(int(addr))
         source = str(sym.symtab) + ":" + str(sym.line)
-        return (int(addr), func, source)
+        result = (int(addr), func, source)
+        g_backtrace_cache[int(addr)] = result
+        return result
 
     @property
     def formatted(self):
@@ -884,7 +901,7 @@ class Addr2Line(gdb.Command):
     def print_backtrace(self, addresses, pid=None):
         if pid:
             gdb.write(f"\nBacktrace of {pid}\n")
-        backtraces = Backtrace(addresses, formatter=self.formatter)
+        backtraces = Backtrace(addresses, formatter=self.formatter, break_null=False)
         gdb.write(str(backtraces))
 
     def invoke(self, args, from_tty):
