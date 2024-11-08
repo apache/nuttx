@@ -46,6 +46,7 @@
 
 #define HSIRDY_TIMEOUT HSERDY_TIMEOUT
 #define LSIRDY_TIMEOUT HSERDY_TIMEOUT
+#define CSIRDY_TIMEOUT HSERDY_TIMEOUT
 
 /* HSE divisor to yield ~1MHz RTC clock */
 
@@ -942,7 +943,8 @@ void stm32_stdclockconfig(void)
   regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_HSION;           /* Enable HSI */
 
-#if defined(STMT32H5_CR_HSIDIV) 
+#if defined(STM32_CR_HSIDIV)
+  regval &= ~RCC_CR_HSIDIV_MASK;
   regval |= STM32_CR_HSIDIV;
 #else
   /* Use default (32 MHz) */
@@ -979,10 +981,7 @@ void stm32_stdclockconfig(void)
     }
 #endif
 
-#if defined(STM32_BOARD_USEHSI)
-  /* Already set above */
-
-#elif defined(STM32H5_BOARD_USECSI)
+#if defined(STM32_BOARD_USECSI)
   /* Enable Internal Low Power Internal Clock (CSI) */
 
   /* Wait until the CSI is either off or ready (or until a timeout elapsed) */
@@ -1015,8 +1014,9 @@ void stm32_stdclockconfig(void)
           break;
         }
     }
+#endif
 
-#elif defined(STM32H5_BOARD_USEHSE)
+#if defined(STM32_BOARD_USEHSE)
   /* Enable External High-Speed Clock (HSE) */
 
   regval  = getreg32(STM32_RCC_CR);
@@ -1036,10 +1036,10 @@ void stm32_stdclockconfig(void)
           break;
         }
     }
-#else
+#endif
 
-#  error stm32h5_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32H5_BOARD_USECSI, STM32H5_BOARD_USEHSE defined
-
+#if !defined(STM32_BOARD_USEHSE) && !defined(STM32_BOARD_USEHSI) && !defined(STM32_BOARD_USECSI)
+#  error stm32h5_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USECSI, STM32_BOARD_USEHSE defined
 #endif
 
   /* Check for a timeout.  If this timeout occurs, then we are hosed.  We
@@ -1106,9 +1106,9 @@ void stm32_stdclockconfig(void)
       regval |= RCC_PLL1CFGR_PLL1SRC_HSE;
 #elif defined(STM32_BOARD_USEHSI)
       regval |= RCC_PLL1CFGR_PLL1SRC_HSI;
-#elif defined(STM32H5_BOARD_USECSI)
+#elif defined(STM32_BOARD_USECSI)
       regval |= RCC_PLL1CFGR_PLL1SRC_CSI;
-#else /* if STM32H5_BOARD_USEHSE */
+#else /* if STM32_BOARD_USEHSE */
       regval |= RCC_PLL1CFGR_PLL1SRC_HSE;
 #endif
 
@@ -1174,9 +1174,9 @@ void stm32_stdclockconfig(void)
       regval |= RCC_PLL2CFGR_PLL2SRC_HSE;
 #elif defined(STM32_BOARD_USEHSI)
       regval |= RCC_PLL2CFGR_PLL2SRC_HSI;
-#elif defined(STM32H5_BOARD_USECSI)
+#elif defined(STM32_BOARD_USECSI)
       regval |= RCC_PLL2CFGR_PLL2SRC_CSI;
-#else /* if STM32H5_BOARD_USEHSE */
+#else /* if STM32_BOARD_USEHSE */
       regval |= RCC_PLL2CFGR_PLL2SRC_HSE;
 #endif
 
@@ -1242,9 +1242,9 @@ void stm32_stdclockconfig(void)
       regval |= RCC_PLL3CFGR_PLL3SRC_HSE;
 #elif defined(STM32_BOARD_USEHSI)
       regval |= RCC_PLL3CFGR_PLL3SRC_HSI;
-#elif defined(STM32H5_BOARD_USECSI)
+#elif defined(STM32_BOARD_USECSI)
       regval |= RCC_PLL3CFGR_PLL3SRC_CSI;
-#else /* if STM32H5_BOARD_USEHSE */
+#else /* if STM32_BOARD_USEHSE */
       regval |= RCC_PLL3CFGR_PLL3SRC_HSE;
 #endif
 
