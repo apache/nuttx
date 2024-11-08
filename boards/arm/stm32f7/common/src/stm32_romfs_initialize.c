@@ -1,9 +1,9 @@
 /****************************************************************************
  * boards/arm/stm32f7/common/src/stm32_romfs_initialize.c
- * This file provides contents of an optional ROMFS volume, mounted at boot.
  *
- *   Copyright (C) 2017 Tomasz Wozniak. All rights reserved.
- *   Author: Tomasz Wozniak <t.wozniak@samsung.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Tomasz Wozniak. All rights reserved.
+ * SPDX-FileContributor: Tomasz Wozniak <t.wozniak@samsung.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
