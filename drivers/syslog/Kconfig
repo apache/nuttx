@@ -267,7 +267,7 @@ config SYSLOG_STREAM
 
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
-	default !ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT
+	default !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT
 	depends on DEV_CONSOLE
 	select SYSLOG_REGISTER
 	---help---
@@ -275,10 +275,16 @@ config SYSLOG_CONSOLE
 
 config SYSLOG_DEFAULT
 	bool "Default SYSLOG device"
-	default ARCH_LOWPUTC && !SYSLOG_CHAR && !RAMLOG_SYSLOG && !SYSLOG_RPMSG && !SYSLOG_RTT && !SYSLOG_CONSOLE
+	default n
+	depends on EXPERIMENTAL
 	---help---
 		syslog() interfaces will be present, but all output will go to the
 		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
+
+		CAVEAT: The current implementation of this functionality might
+		interfere the other activities on the console device, especially
+		with SMP. (Thus marked EXPERIMENTAL.)
+		See https://github.com/apache/nuttx/issues/14662.
 
 endif
 
