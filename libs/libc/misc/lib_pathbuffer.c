@@ -41,8 +41,8 @@
 
 struct pathbuffer_s
 {
-  mutex_t lock;             /* Lock for the buffer */
-  unsigned int free_bitmap; /* Bitmap of free buffer */
+  mutex_t lock;              /* Lock for the buffer */
+  unsigned long free_bitmap; /* Bitmap of free buffer */
   char buffer[CONFIG_LIBC_MAX_PATHBUFFER][PATH_MAX];
 };
 
@@ -87,7 +87,7 @@ FAR char *lib_get_pathbuffer(void)
   /* Try to find a free buffer */
 
   nxmutex_lock(&g_pathbuffer.lock);
-  index = ffs(g_pathbuffer.free_bitmap) - 1;
+  index = ffsl(g_pathbuffer.free_bitmap) - 1;
   if (index >= 0 && index < CONFIG_LIBC_MAX_PATHBUFFER)
     {
       g_pathbuffer.free_bitmap &= ~(1u << index);
