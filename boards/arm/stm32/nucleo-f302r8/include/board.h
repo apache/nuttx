@@ -130,7 +130,7 @@
  *
  * And one can be controlled by software:
  *
- * User LD2: green LED is a user LED connected to the I/O PA5 of the
+ * User LD2: green LED is a user LED connected to the I/O PB13 of the
  *           STM32F302R8T6.
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LED in
