@@ -65,8 +65,8 @@ static int blkoutstream_flush(FAR struct lib_outstream_s *self)
  * Name: blkoutstream_puts
  ****************************************************************************/
 
-static int blkoutstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buf, int len)
+static ssize_t blkoutstream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buf, size_t len)
 {
   FAR struct lib_blkoutstream_s *stream =
                                  (FAR struct lib_blkoutstream_s *)self;
@@ -74,12 +74,12 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *self,
   FAR struct inode *inode = stream->inode;
   FAR const unsigned char *ptr = buf;
   size_t remain = len;
-  int ret;
+  ssize_t ret;
 
   while (remain > 0)
     {
-      size_t sector = self->nput / sectorsize;
-      size_t offset = self->nput % sectorsize;
+      off_t sector = self->nput / sectorsize;
+      off_t offset = self->nput % sectorsize;
 
       if (offset > 0)
         {

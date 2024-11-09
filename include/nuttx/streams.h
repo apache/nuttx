@@ -74,19 +74,19 @@
 /* These are the generic representations of a streams used by the NuttX */
 
 struct lib_instream_s;
-typedef CODE int  (*lib_getc_t)(FAR struct lib_instream_s *self);
-typedef CODE int  (*lib_gets_t)(FAR struct lib_instream_s *self,
-                                FAR void *buf, int len);
+typedef CODE int     (*lib_getc_t)(FAR struct lib_instream_s *self);
+typedef CODE ssize_t (*lib_gets_t)(FAR struct lib_instream_s *self,
+                                   FAR void *buf, size_t len);
 
 struct lib_outstream_s;
-typedef CODE void (*lib_putc_t)(FAR struct lib_outstream_s *self, int ch);
-typedef CODE int  (*lib_puts_t)(FAR struct lib_outstream_s *self,
-                                FAR const void *buf, int len);
-typedef CODE int  (*lib_flush_t)(FAR struct lib_outstream_s *self);
+typedef CODE void    (*lib_putc_t)(FAR struct lib_outstream_s *self, int ch);
+typedef CODE ssize_t (*lib_puts_t)(FAR struct lib_outstream_s *self,
+                                   FAR const void *buf, size_t len);
+typedef CODE int     (*lib_flush_t)(FAR struct lib_outstream_s *self);
 
 struct lib_instream_s
 {
-  int                    nget;    /* Total number of characters gotten.  Written
+  off_t                  nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
   lib_getc_t             getc;    /* Get one character from the instream */
   lib_gets_t             gets;    /* Get the string from the instream */
@@ -94,7 +94,7 @@ struct lib_instream_s
 
 struct lib_outstream_s
 {
-  int                    nput;    /* Total number of characters put.  Written
+  off_t                  nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
   lib_putc_t             putc;    /* Put one character to the outstream */
   lib_puts_t             puts;    /* Writes the string to the outstream */
@@ -104,23 +104,24 @@ struct lib_outstream_s
 /* Seek-able streams */
 
 struct lib_sistream_s;
-typedef CODE int   (*lib_sigetc_t)(FAR struct lib_sistream_s *self);
-typedef CODE int   (*lib_sigets_t)(FAR struct lib_sistream_s *self,
-                                   FAR void *buf, int len);
-typedef CODE off_t (*lib_siseek_t)(FAR struct lib_sistream_s *self,
-                                   off_t offset, int whence);
+typedef CODE int     (*lib_sigetc_t)(FAR struct lib_sistream_s *self);
+typedef CODE ssize_t (*lib_sigets_t)(FAR struct lib_sistream_s *self,
+                                     FAR void *buf, size_t len);
+typedef CODE off_t   (*lib_siseek_t)(FAR struct lib_sistream_s *self,
+                                     off_t offset, int whence);
 
 struct lib_sostream_s;
-typedef CODE void  (*lib_soputc_t)(FAR struct lib_sostream_s *self, int ch);
-typedef CODE int   (*lib_soputs_t)(FAR struct lib_sostream_s *self,
-                                   FAR const void *buf, int len);
-typedef CODE int   (*lib_soflush_t)(FAR struct lib_sostream_s *self);
-typedef CODE off_t (*lib_soseek_t)(FAR struct lib_sostream_s *self,
-                                   off_t offset, int whence);
+typedef CODE void    (*lib_soputc_t)(FAR struct lib_sostream_s *self,
+                                     int ch);
+typedef CODE ssize_t (*lib_soputs_t)(FAR struct lib_sostream_s *self,
+                                     FAR const void *buf, size_t len);
+typedef CODE int     (*lib_soflush_t)(FAR struct lib_sostream_s *self);
+typedef CODE off_t   (*lib_soseek_t)(FAR struct lib_sostream_s *self,
+                                     off_t offset, int whence);
 
 struct lib_sistream_s
 {
-  int                    nget;    /* Total number of characters gotten.  Written
+  off_t                  nget;    /* Total number of characters gotten.  Written
                                    * by get method, readable by user */
   lib_sigetc_t           getc;    /* Get one character from the instream */
   lib_gets_t             gets;    /* Get the string from the instream */
@@ -129,7 +130,7 @@ struct lib_sistream_s
 
 struct lib_sostream_s
 {
-  int                    nput;    /* Total number of characters put.  Written
+  off_t                  nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
   lib_soputc_t           putc;    /* Put one character to the outstream */
   lib_soputs_t           puts;    /* Writes the string to the outstream */
@@ -157,7 +158,7 @@ struct lib_memsistream_s
 {
   struct lib_sistream_s  common;
   FAR const char        *buffer;  /* Address of first byte in the buffer */
-  size_t                 offset;  /* Current buffer offset in bytes */
+  off_t                  offset;  /* Current buffer offset in bytes */
   size_t                 buflen;  /* Size of the buffer in bytes */
 };
 
@@ -165,7 +166,7 @@ struct lib_memsostream_s
 {
   struct lib_sostream_s  common;
   FAR char              *buffer;  /* Address of first byte in the buffer */
-  size_t                 offset;  /* Current buffer offset in bytes */
+  off_t                  offset;  /* Current buffer offset in bytes */
   size_t                 buflen;  /* Size of the buffer in bytes */
 };
 
@@ -231,7 +232,7 @@ struct lib_bufferedoutstream_s
 {
   struct lib_outstream_s      common;
   FAR struct lib_outstream_s *backend;
-  int                         pending;
+  size_t                      pending;
   char                        buffer[CONFIG_STREAM_OUT_BUFFER_SIZE];
 };
 
@@ -239,7 +240,7 @@ struct lib_hexdumpstream_s
 {
   struct lib_outstream_s      common;
   FAR struct lib_outstream_s *backend;
-  int                         pending;
+  size_t                      pending;
   char                        buffer[CONFIG_STREAM_HEXDUMP_BUFFER_SIZE + 1];
 };
 
@@ -247,9 +248,9 @@ struct lib_base64outstream_s
 {
   struct lib_outstream_s      common;
   FAR struct lib_outstream_s *backend;
-  int                         pending;
+  size_t                      pending;
   unsigned char               bytes[3];
-  int                         nbytes;
+  size_t                      nbytes;
   char                        buffer[CONFIG_STREAM_BASE64_BUFFER_SIZE + 1];
 };
 
@@ -269,7 +270,7 @@ struct lib_syslograwstream_s
   struct lib_outstream_s common;
 #ifdef CONFIG_SYSLOG_BUFFER
   char buffer[CONFIG_SYSLOG_BUFSIZE];
-  int  offset;
+  off_t offset;
 #endif
   int last_ch;
 };
@@ -282,7 +283,7 @@ struct lib_lzfoutstream_s
   struct lib_outstream_s      common;
   FAR struct lib_outstream_s *backend;
   lzf_state_t                 state;
-  size_t                      offset;
+  off_t                       offset;
   char                        in[LZF_STREAM_BLOCKSIZE];
   char                        out[LZF_MAX_HDR_SIZE + LZF_STREAM_BLOCKSIZE];
 };
@@ -354,13 +355,13 @@ extern struct lib_outstream_s g_lowoutstream;
  ****************************************************************************/
 
 void lib_meminstream(FAR struct lib_meminstream_s *stream,
-                     FAR const char *bufstart, int buflen);
+                     FAR const char *bufstart, size_t buflen);
 void lib_memoutstream(FAR struct lib_memoutstream_s *stream,
-                      FAR char *bufstart, int buflen);
+                      FAR char *bufstart, size_t buflen);
 void lib_memsistream(FAR struct lib_memsistream_s *stream,
-                     FAR const char *bufstart, int buflen);
+                     FAR const char *bufstart, size_t buflen);
 void lib_memsostream(FAR struct lib_memsostream_s *stream,
-                     FAR char *bufstart, int buflen);
+                     FAR char *bufstart, size_t buflen);
 
 /****************************************************************************
  * Name: lib_stdinstream, lib_stdoutstream
