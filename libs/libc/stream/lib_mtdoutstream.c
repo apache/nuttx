@@ -77,8 +77,8 @@ static int mtdoutstream_flush(FAR struct lib_outstream_s *self)
  * Name: mtdoutstream_puts
  ****************************************************************************/
 
-static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buf, int len)
+static ssize_t mtdoutstream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buf, size_t len)
 {
   FAR struct lib_mtdoutstream_s *stream =
     (FAR struct lib_mtdoutstream_s *)self;
@@ -87,7 +87,7 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
   size_t erasesize = stream->geo.erasesize;
   size_t nblkpererase = erasesize / stream->geo.blocksize;
   size_t remain = len;
-  int ret;
+  ssize_t ret;
 
   if (self->nput + len > erasesize * stream->geo.neraseblocks)
     {
@@ -96,8 +96,8 @@ static int mtdoutstream_puts(FAR struct lib_outstream_s *self,
 
   while (remain > 0)
     {
-      size_t sblock = self->nput / erasesize;
-      size_t offset = self->nput % erasesize;
+      off_t sblock = self->nput / erasesize;
+      off_t offset = self->nput % erasesize;
 
       if (offset > 0)
         {

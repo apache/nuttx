@@ -36,15 +36,15 @@
 static int nullinstream_getc(FAR struct lib_instream_s *self)
 {
   UNUSED(self);
-  return EOF;
+  return -EINVAL;
 }
 
-static int nullinstream_gets(FAR struct lib_instream_s *self,
-                             FAR void *buffer, int len)
+static ssize_t nullinstream_gets(FAR struct lib_instream_s *self,
+                                 FAR void *buffer, size_t len)
 {
   UNUSED(buffer);
   UNUSED(len);
-  return EOF;
+  return -EINVAL;
 }
 
 /****************************************************************************

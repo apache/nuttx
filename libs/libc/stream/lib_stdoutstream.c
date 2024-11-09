@@ -71,12 +71,12 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *self, int ch)
  * Name: stdoutstream_puts
  ****************************************************************************/
 
-static int stdoutstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buffer, int len)
+static ssize_t stdoutstream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buffer, size_t len)
 {
   FAR struct lib_stdoutstream_s *stream =
                                (FAR struct lib_stdoutstream_s *)self;
-  int result;
+  ssize_t result;
 
   DEBUGASSERT(self && stream->handle);
 

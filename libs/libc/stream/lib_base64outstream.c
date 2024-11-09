@@ -82,18 +82,18 @@ static void base64stream_putc(FAR struct lib_outstream_s *self, int ch)
  * Name: base64stream_puts
  ****************************************************************************/
 
-static int base64stream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buf, int len)
+static ssize_t base64stream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buf, size_t len)
 {
   FAR struct lib_base64outstream_s *stream = (FAR void *)self;
   FAR const unsigned char *input = (FAR const unsigned char *)buf;
-  int remaining = len;
+  size_t remaining = len;
 
   if (stream->nbytes)
     {
       /* Flush the first three bytes */
 
-      int n = 3 - stream->nbytes;
+      size_t n = 3 - stream->nbytes;
       if (n > remaining)
         {
           n = remaining;
@@ -118,8 +118,9 @@ static int base64stream_puts(FAR struct lib_outstream_s *self,
 
   while (remaining >= 3)
     {
-      int outlen;
-      int n = (STREAM_BASE64_BUFFER_SIZE - stream->pending) / 4 * 3;
+      size_t outlen;
+      size_t n = (STREAM_BASE64_BUFFER_SIZE - stream->pending) / 4 * 3;
+
       if (n > remaining)
         {
           n = remaining / 3 * 3;

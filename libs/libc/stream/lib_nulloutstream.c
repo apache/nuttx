@@ -41,8 +41,8 @@ static void nulloutstream_putc(FAR struct lib_outstream_s *self, int ch)
   self->nput++;
 }
 
-static int nulloutstream_puts(FAR struct lib_outstream_s *self,
-                              FAR const void *buffer, int len)
+static ssize_t nulloutstream_puts(FAR struct lib_outstream_s *self,
+                                  FAR const void *buffer, size_t len)
 {
   UNUSED(buffer);
   UNUSED(len);
