@@ -1,4 +1,3 @@
-  GNU nano 7.2                                           /awork/nuttx/NuttX/nuttx/boards/arm/nuc1xx/nutiny-nuc120/scripts/nutiny-nuc120.ld                                                    
 /****************************************************************************
  * boards/arm/nuc1xx/nutiny-nuc120/scripts/nutiny-nuc120.ld
  *
@@ -20,7 +19,6 @@
  * under the License.
  *
  ****************************************************************************/
-
 
 MEMORY
 {
