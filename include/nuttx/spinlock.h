@@ -66,6 +66,12 @@ void sched_note_spinlock_unlock(FAR volatile spinlock_t *spinlock);
 #  define sched_note_spinlock_unlock(spinlock)
 #endif
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+void nxsched_critmon_busywait(bool state, FAR void *caller);
+#else
+#  define nxsched_critmon_busywait(state, caller)
+#endif
+
 /****************************************************************************
  * Public Data Types
  ****************************************************************************/
@@ -223,9 +229,17 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 
   sched_note_spinlock_lock(lock);
 
+  /* If CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0, count busy-waiting. */
+
+  nxsched_critmon_busywait(true, return_address(0));
+
   /* Lock without trace note */
 
   spin_lock_notrace(lock);
+
+  /* Get the lock, end counting busy-waiting */
+
+  nxsched_critmon_busywait(false, return_address(0));
 
   /* Notify that we have the spinlock */
 
@@ -918,6 +932,8 @@ void rspin_restorelock(FAR rspinlock_t *lock, uint16_t count)
 
 static inline_function void read_lock(FAR volatile rwlock_t *lock)
 {
+  nxsched_critmon_busywait(true, return_address(0));
+
   while (true)
     {
       int old = atomic_read(lock);
@@ -934,6 +950,8 @@ static inline_function void read_lock(FAR volatile rwlock_t *lock)
     }
 
   UP_DMB();
+
+  nxsched_critmon_busywait(false, return_address(0));
 }
 
 /****************************************************************************
@@ -1036,6 +1054,8 @@ static inline_function void read_unlock(FAR volatile rwlock_t *lock)
 
 static inline_function void write_lock(FAR volatile rwlock_t *lock)
 {
+  nxsched_critmon_busywait(true, return_address(0));
+
   while (true)
     {
       int zero = RW_SP_UNLOCKED;
@@ -1049,6 +1069,8 @@ static inline_function void write_lock(FAR volatile rwlock_t *lock)
     }
 
   UP_DMB();
+
+  nxsched_critmon_busywait(false, return_address(0));
 }
 
 /****************************************************************************

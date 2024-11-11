@@ -844,6 +844,69 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
     }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
 
+  /* Convert and generate output for max busywait time && all busywait time */
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+  if (tcb->busywait_max > 0)
+    {
+      perf_convert(tcb->busywait_max, &maxtime);
+    }
+  else
+    {
+      maxtime.tv_sec = 0;
+      maxtime.tv_nsec = 0;
+    }
+
+  /* Reset the maximum */
+
+  tcb->busywait_max = 0;
+
+  /* Generate output for max busywait time */
+
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu %p,",
+                             (unsigned long)maxtime.tv_sec,
+                             (unsigned long)maxtime.tv_nsec,
+                             tcb->busywait_max_caller);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                           &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  if (tcb->busywait_total > 0)
+    {
+      perf_convert(tcb->busywait_total, &maxtime);
+    }
+  else
+    {
+      maxtime.tv_sec = 0;
+      maxtime.tv_nsec = 0;
+    }
+
+  /* Generate output for all busywait time */
+
+  linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu,",
+                             (unsigned long)maxtime.tv_sec,
+                             (unsigned long)maxtime.tv_nsec);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                           &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 */
+
   /* Convert and generate output for maximum time thread running */
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   if (tcb->run_max > 0)
