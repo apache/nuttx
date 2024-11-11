@@ -57,11 +57,13 @@ config BUILTIN_GPROF
 		cause the linker to include the gmon.out file in the final
 		executable.
 		Add the "-pg" parameter to the Makefile when compiling to obtain
-		the function call graph of the specified module.
+		the function call graph of the specified module.If you do this,
+		please enable "CONFIG_FRAME_POINTER"
 
 config GPROF_ALL
 	bool "Enable all gprof support"
 	depends on BUILTIN_GPROF
+	depends on FRAME_POINTER
 	default n
 	---help---
 		Enable gprof profiling for all code, it will instrument
