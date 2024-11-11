@@ -1377,10 +1377,12 @@ config SCHED_GPROF
 		cause the linker to include the gmon.out file in the final
 		executable.
 		Add the "-pg" parameter to the Makefile when compiling to obtain
-		the function call graph of the specified module.
+		the function call graph of the specified module. If you do this,
+		please enable "CONFIG_FRAME_POINTER"
 
 config SCHED_GPROF_ALL
 	bool "Enable gprof call graph for all modules"
+	depends on FRAME_POINTER
 	depends on SCHED_GPROF
 	default n
 	---help---
