@@ -29,6 +29,7 @@ CMake,sim:ostest
 CMake,sim:ostest_oneholder
 CMake,sim:pf_ieee802154
 CMake,sim:pktradio
+CMake,sim:quickjs
 CMake,sim:rc
 CMake,sim:romfs
 CMake,sim:rpproxy
