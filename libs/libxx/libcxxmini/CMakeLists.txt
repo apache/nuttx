@@ -37,7 +37,9 @@ if(CONFIG_LIBCXXMINI)
             libxx_deletea.cxx
             libxx_deletea_sized.cxx
             libxx_new.cxx
-            libxx_newa.cxx)
+            libxx_newa.cxx
+            libxx_dynamic_cast.cxx
+            libxx_typeinfo.cxx)
 
   # Why c++14? * libcxx seems to require c++11. * The compiler defaults varies:
   # clang/macOS (from xcode): 199711L gcc/ubuntu:               201402L * There

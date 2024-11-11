@@ -23,6 +23,7 @@
 CXXSRCS += libxx_cxa_guard.cxx libxx_cxapurevirtual.cxx
 CXXSRCS += libxx_delete.cxx libxx_delete_sized.cxx libxx_deletea.cxx
 CXXSRCS += libxx_deletea_sized.cxx libxx_new.cxx libxx_newa.cxx
+CXXSRCS += libxx_dynamic_cast.cxx libxx_typeinfo.cxx
 
 ifneq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   CXXFLAGS += -Wno-missing-exception-spec
