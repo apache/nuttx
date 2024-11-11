@@ -377,7 +377,9 @@ static void set_stop_length(const struct esp_uart_s *priv)
 static int esp_setup(uart_dev_t *dev)
 {
   struct esp_uart_s *priv = dev->priv;
+#ifdef CONFIG_PM
   g_static_esp_uart_s = (void *)priv;
+#endif
   uint32_t sclk_freq;
 
   /* Enable the UART Clock */
