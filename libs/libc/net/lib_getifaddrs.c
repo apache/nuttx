@@ -77,7 +77,8 @@ struct myifaddrs
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_MAX_IPv6_ADDR
-static FAR struct myifaddrs *getmutil_ipv6addr(int fd, struct lifreq *req,
+static FAR struct myifaddrs *getmutil_ipv6addr(int fd,
+                                               FAR struct lifreq *req,
                                                FAR struct myifaddrs *ifaddr)
 {
   FAR struct sockaddr_in6 *ipv6addr;
@@ -129,6 +130,7 @@ static FAR struct myifaddrs *getmutil_ipv6addr(int fd, struct lifreq *req,
       ifaddr->addrs.ifa_data = (FAR struct sockaddr *)&ifaddr->hwaddr;
     }
 
+  ifaddr->addrs.ifa_next = NULL;
   return ifaddr;
 }
 #endif
