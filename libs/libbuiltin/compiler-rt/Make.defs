@@ -74,8 +74,8 @@ ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins/${ARCH}
-FLAGS += -Wno-shift-count-negative -Wno-constant-conversion -Wshift-count-overflow
-FLAGS += -Wno-undef -Wno-incompatible-pointer-types -Wno-visibility -Wno-macro-redefined
+
+FLAGS += -Wno-undef -Wno-macro-redefined
 
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/*.c)
 ASRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/$(ARCH)/*.S)
@@ -94,10 +94,9 @@ endif
 ifeq ($(CONFIG_COVERAGE_COMPILER_RT),y)
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
-FLAGS += -Wno-cleardeprecated-pragma -Wno-deprecated-pragma -Wno-incompatible-pointer-types
-FLAGS += -Wno-shadow -Wno-strict-prototypes -Wno-undef -Wno-unknown-warning-option
+
+FLAGS += -Wno-undef -Wno-strict-prototypes  -Wno-shadow
 FLAGS += -DCOMPILER_RT_HAS_UNAME
-FLAGS += -fno-profile-generate
 
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.c)
 CPPSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.cpp)
