@@ -1,7 +1,5 @@
 # ##############################################################################
-# sched/instrument/CMakeLists.txt
-#
-# SPDX-License-Identifier: Apache-2.0
+# libs/libbuiltin/libgcc/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -20,10 +18,21 @@
 #
 # ##############################################################################
 
-set(SRCS instrument.c)
+# Include the uClibc++ Make.defs file if selected.  If it is included, the
+# uClibc++/Make.defs file will add its files to the source file list, add its
+# DEPPATH info, and will add the appropriate paths to the VPATH variable
+#
+# Note that an error will occur if you select CONFIG_LIBXX_UCLIBCXX without
+# installing the uClibc++ package.  This is intentional to let you know about
+# the configuration problem.  Refer to the README.txt file in the NuttX uClibc++
+# GIT repository for more information
 
-if(NOT "${CONFIG_SCHED_STACK_RECORD}" STREQUAL "0")
-  list(APPEND SRCS stack_monitor.c)
+if(CONFIG_BUILTIN_LIBGCC)
+
+  if(CONFIG_BUILTIN_GPROF)
+    nuttx_add_system_library(profile)
+    list(APPEND SRCS ${CMAKE_CURRENT_LIST_DIR}/profile/profile_monitor.c)
+    target_sources(profile PRIVATE ${COMPILER_RT_SRCS})
+  endif()
+
 endif()
-
-target_sources(sched PRIVATE ${SRCS})

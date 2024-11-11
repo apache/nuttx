@@ -92,7 +92,7 @@ config SIM_UBSAN_DUMMY
 
 config SIM_GPROF
 	bool "Enable gprof"
-	depends on !SCHED_GPROF
+	depends on !BUILTIN_GPROF
 	default n
 	---help---
 		Enable support gprof profiling tool.

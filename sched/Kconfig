@@ -1368,27 +1368,6 @@ config SCHED_GCOV_ALL
 		Enable gcov profiling for all code, it will instrument
 		all code, which will cause a large performance penalty for the code.
 
-config SCHED_GPROF
-	bool "Enable gprof profiling"
-	default n
-	---help---
-		Enable gprof profiling support.  This will cause the compiler to
-		generate additional code to support profiling.  This will also
-		cause the linker to include the gmon.out file in the final
-		executable.
-		Add the "-pg" parameter to the Makefile when compiling to obtain
-		the function call graph of the specified module.
-
-config SCHED_GPROF_ALL
-	bool "Enable gprof call graph for all modules"
-	depends on SCHED_GPROF
-	default n
-	---help---
-		Enable gprof profiling for all code, it will instrument
-		all code, which will cause a large performance penalty for the code.
-		You can add the '-pg' parameter to the specified module in the
-		makefile to only analyze the content of the module.
-
 endmenu
 
 menu "Files and I/O"

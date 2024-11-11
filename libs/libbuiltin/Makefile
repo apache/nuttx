@@ -28,6 +28,8 @@ KBINDIR = kbin
 
 ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
 include compiler-rt/Make.defs
+else ifeq ($(CONFIG_BUILTIN_LIBGCC),y)
+include libgcc/Make.defs
 endif
 
 AOBJS = $(addprefix $(BINDIR)$(DELIM), $(ASRCS:.S=$(OBJEXT)))

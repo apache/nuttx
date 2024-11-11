@@ -13,6 +13,13 @@ choice
 
 config BUILTIN_COMPILER_RT
 	bool "Builtin LLVM Compiler-rt"
+
+config BUILTIN_LIBGCC
+	bool "Builtin libgcc"
+
+choice
+	prompt "Builtin toolchain libgcc"
+	default BUILTIN_LIBGCC_NONE
 	---help---
 		Compile the LLVM Compiler-rt library into the OS.
 
@@ -38,3 +45,26 @@ config COMPILER_RT_PROFILE
 	default n
 
 endif # BUILTIN_COMPILER_RT
+
+config BUILTIN_GPROF
+	bool "Enable builtin gprof"
+	select BUILTIN_TOOLCHAIN
+	select BUILTIN_LIBGCC
+	default n
+	---help---
+		Enable gprof profiling support.  This will cause the compiler to
+		generate additional code to support profiling.  This will also
+		cause the linker to include the gmon.out file in the final
+		executable.
+		Add the "-pg" parameter to the Makefile when compiling to obtain
+		the function call graph of the specified module.
+
+config GPROF_ALL
+	bool "Enable all gprof support"
+	depends on BUILTIN_GPROF
+	default n
+	---help---
+		Enable gprof profiling for all code, it will instrument
+		all code, which will cause a large performance penalty for the code.
+		You can add the '-pg' parameter to the specified module in the
+		makefile to only analyze the content of the module.
