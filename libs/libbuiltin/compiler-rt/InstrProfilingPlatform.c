@@ -60,37 +60,37 @@ void __llvm_profile_register_names_function(void *NamesStart,
 COMPILER_RT_VISIBILITY
 const __llvm_profile_data *__llvm_profile_begin_data(void)
 {
-  return &__start__llvm_prf_data;
+  return (const __llvm_profile_data *)__start__llvm_prf_data;
 }
 
 COMPILER_RT_VISIBILITY
 const __llvm_profile_data *__llvm_profile_end_data(void)
 {
-  return &__end__llvm_prf_data;
+  return (const __llvm_profile_data *)__end__llvm_prf_data;
 }
 
 COMPILER_RT_VISIBILITY
 const char *__llvm_profile_begin_names(void)
 {
-  return &__start__llvm_prf_names;
+  return (const char *)__start__llvm_prf_names;
 }
 
 COMPILER_RT_VISIBILITY
 const char *__llvm_profile_end_names(void)
 {
-  return &__end__llvm_prf_names;
+  return (const char *)__end__llvm_prf_names;
 }
 
 COMPILER_RT_VISIBILITY
 char *__llvm_profile_begin_counters(void)
 {
-  return &__start__llvm_prf_cnts;
+  return (char *)__start__llvm_prf_cnts;
 }
 
 COMPILER_RT_VISIBILITY
 char *__llvm_profile_end_counters(void)
 {
-  return &__end__llvm_prf_cnts;
+  return (char *)__end__llvm_prf_cnts;
 }
 
 COMPILER_RT_VISIBILITY
