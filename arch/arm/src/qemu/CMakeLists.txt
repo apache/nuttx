@@ -18,11 +18,14 @@
 #
 # ##############################################################################
 
-set(SRCS qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c
-         qemu_idle.c)
+set(SRCS qemu_boot.c qemu_serial.c qemu_irq.c qemu_timer.c qemu_memorymap.c)
 
 if(CONFIG_SMP)
   list(APPEND SRCS qemu_cpuboot.c)
+endif()
+
+if(CONFIG_ARCH_IDLE_CUSTOM)
+  list(APPEND SRCS qemu_idle.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
