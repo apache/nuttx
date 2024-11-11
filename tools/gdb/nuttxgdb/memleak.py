@@ -19,7 +19,9 @@
 ############################################################################
 
 import bisect
+import json
 import time
+from os import path
 from typing import Dict, Generator, List
 
 import gdb
@@ -60,7 +62,19 @@ class MMLeak(gdb.Command):
         utils.alias("memleak", "mm leak")
 
     def global_nodes(self) -> List[GlobalNode]:
+        cache = path.join(
+            path.dirname(path.abspath(gdb.objfiles()[0].filename)),
+            f"{utils.get_elf_md5()}-globals.json",
+        )
+
         nodes: List[GlobalNode] = []
+
+        if path.isfile(cache):
+            with open(cache, "r") as f:
+                variables = json.load(f)
+                for var in variables:
+                    nodes.append(GlobalNode(var["address"], var["size"]))
+                return nodes
 
         longsize = utils.get_long_type().sizeof
         for objfile in gdb.objfiles():
@@ -76,6 +90,13 @@ class MMLeak(gdb.Command):
                 size = symbol["st_size"] // longsize * longsize
                 address = symbol["st_value"]
                 nodes.append(GlobalNode(address, size))
+
+        with open(cache, "w") as f:
+            variables = [
+                {"address": node.address, "size": node.nodesize} for node in nodes
+            ]
+            str = utils.jsonify(variables)
+            f.write(str)
 
         return nodes
 
