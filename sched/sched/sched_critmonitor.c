@@ -70,6 +70,22 @@
 #  define CHECK_CSECTION(pid, elapsed)
 #endif
 
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+#  define CHECK_BUSYWAIT(pid, elapsed) \
+     do \
+       { \
+         if (pid > 0 && \
+             elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT) \
+           { \
+             CRITMONITOR_PANIC("PID %d wait for critical section or spin" \
+                               "lock too long %" PRIu32 "\n", pid, elapsed); \
+           } \
+       } \
+     while (0)
+#else
+#  define CHECK_BUSYWAIT(pid, elapsed)
+#endif
+
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD > 0
 #  define CHECK_THREAD(pid, elapsed) \
      do \
@@ -106,6 +122,11 @@ clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
 clock_t g_crit_max[CONFIG_SMP_NCPUS];
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+clock_t g_busywait_max[CONFIG_SMP_NCPUS];
+clock_t g_busywait_total[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
@@ -273,6 +294,63 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state,
     }
 }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
+
+/****************************************************************************
+ * Name: nxsched_critmon_busywait
+ *
+ * Description:
+ *   Called when a thread try to enter critical section（get spinlock） or
+ *   successfully entered cirtical section.
+ *
+ * Assumptions:
+ *   - Called before a critical section or within a critical section.
+ *   - Might be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
+void nxsched_critmon_busywait(bool state, FAR void *caller)
+{
+  FAR struct tcb_s *tcb = this_task();
+  clock_t current       = perf_gettime();
+
+  /* Are we busy waiting for critical section or spinlock? */
+
+  if (state)
+    {
+      /* Waiting... Save the start time. */
+
+      tcb->busywait_start  = current;
+      tcb->busywait_caller = caller;
+    }
+  else
+    {
+      /* Entered critical section... Check for the max elapsed time */
+
+      clock_t elapsed = current - tcb->busywait_start;
+      int cpu         = this_cpu();
+
+      if (elapsed > tcb->busywait_max)
+        {
+          tcb->busywait_max        = elapsed;
+          tcb->busywait_max_caller = tcb->busywait_caller;
+          CHECK_BUSYWAIT(tcb->pid, elapsed);
+        }
+
+      /* Check for the global max elapsed time */
+
+      if (elapsed > g_busywait_max[cpu])
+        {
+          g_busywait_max[cpu] = elapsed;
+        }
+
+      /* Update thread-level and cpu-level busywait */
+
+      tcb->busywait_total   += elapsed;
+      g_busywait_total[cpu] += elapsed;
+    }
+}
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 */
 
 /****************************************************************************
  * Name: nxsched_switch_critmon
