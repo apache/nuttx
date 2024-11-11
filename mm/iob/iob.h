@@ -33,6 +33,7 @@
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_MM_IOB
 
@@ -76,13 +77,28 @@ extern FAR struct iob_qentry_s *g_iob_qcommitted;
 
 /* Counting semaphores that tracks the number of free IOBs/qentries */
 
-extern sem_t g_iob_sem;       /* Counts free I/O buffers */
+extern sem_t g_iob_sem;
+
+/* Counts free I/O buffers */
+
+extern volatile int16_t g_iob_count;
+
 #if CONFIG_IOB_THROTTLE > 0
-extern sem_t g_throttle_sem;  /* Counts available I/O buffers when throttled */
+extern sem_t g_throttle_sem;
+
+/* Counts available I/O buffers when throttled */
+
+extern volatile int16_t g_throttle_count;
 #endif
 #if CONFIG_IOB_NCHAINS > 0
-extern sem_t g_qentry_sem;    /* Counts free I/O buffer queue containers */
+extern sem_t g_qentry_sem;
+
+/* Counts free I/O buffer queue containers */
+
+extern volatile int16_t g_qentry_count;
 #endif
+
+extern volatile spinlock_t g_iob_lock;
 
 /****************************************************************************
  * Public Function Prototypes
