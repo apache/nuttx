@@ -265,6 +265,12 @@ if(CONFIG_RISCV_TOOLCHAIN STREQUAL GNU_RVG)
     string(REGEX MATCH "([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
                  "${GCC_VERSION_OUTPUT}")
     set(GCCVER ${CMAKE_MATCH_1})
+
+    if(GCCVER GREATER_EQUAL 12)
+      if(CONFIG_ARCH_RAMFUNCS OR NOT CONFIG_BOOT_RUNFROMFLASH)
+        add_link_options(-Wl,--no-warn-rwx-segments)
+      endif()
+    endif()
   endif()
 
   if(CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI)
