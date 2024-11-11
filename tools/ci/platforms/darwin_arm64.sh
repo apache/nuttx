@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 ############################################################################
-# tools/ci/platforms/darwin.sh
+# tools/ci/platforms/darwin_arm64.sh
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -21,7 +21,7 @@
 #
 ############################################################################
 
-# NuttX CI Job for macOS, runs on Apple Intel Mac
+# NuttX CI Job for macOS, runs on Apple Silicon Mac
 
 # Prerequisites for macOS
 #  - Xcode (cc, etc)
@@ -42,7 +42,7 @@ arm_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-arm-none-eabi/bin/arm-none-eabi-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.rel1-darwin-x86_64-arm-none-eabi
+    basefile=arm-gnu-toolchain-13.2.rel1-darwin-arm64-arm-none-eabi
     cd "${NUTTXTOOLS}"
     curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
@@ -59,7 +59,7 @@ arm64_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/gcc-aarch64-none-elf/bin/aarch64-none-elf-gcc" ]; then
     local basefile
-    basefile=arm-gnu-toolchain-13.2.Rel1-darwin-x86_64-aarch64-none-elf
+    basefile=arm-gnu-toolchain-13.2.Rel1-darwin-arm64-aarch64-none-elf
     cd "${NUTTXTOOLS}"
     # Download the latest ARM64 GCC toolchain prebuilt by ARM
     curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.Rel1/binrel/${basefile}.tar.xz
@@ -98,7 +98,7 @@ binutils() {
     # It is possible we cached prebuilt but did brew install so recreate
     # symlink if it exists
     rm -f "${NUTTXTOOLS}"/bintools/bin/objcopy
-    ln -s /usr/local/opt/binutils/bin/objcopy "${NUTTXTOOLS}"/bintools/bin/objcopy
+    ln -s /opt/homebrew/opt/binutils/bin/objcopy "${NUTTXTOOLS}"/bintools/bin/objcopy
   fi
 
   command objcopy --version
@@ -253,7 +253,7 @@ riscv_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/riscv-none-elf-gcc/bin/riscv-none-elf-gcc" ]; then
     local basefile
-    basefile=xpack-riscv-none-elf-gcc-13.2.0-2-darwin-x64
+    basefile=xpack-riscv-none-elf-gcc-13.2.0-2-darwin-arm64
     cd "${NUTTXTOOLS}"
     # Download the latest RISCV GCC toolchain prebuilt by xPack
     curl -O -L -s https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/${basefile}.tar.gz
@@ -292,7 +292,7 @@ xtensa_esp32_gcc_toolchain() {
 
   if [ ! -f "${NUTTXTOOLS}/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc" ]; then
     local basefile
-    basefile=xtensa-esp32-elf-12.2.0_20230208-x86_64-apple-darwin
+    basefile=xtensa-esp32-elf-12.2.0_20230208-aarch64-apple-darwin
     cd "${NUTTXTOOLS}"
     curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
