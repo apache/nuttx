@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib
 import json
 import os
@@ -854,6 +855,14 @@ def gather_gdbcommands(modules=None, path=None) -> List[gdb.Command]:
             if isinstance(c, type) and issubclass(c, gdb.Command):
                 commands.append(c)
     return commands
+
+
+def get_elf_md5():
+    """Return the md5 checksum of the current ELF file"""
+    file = gdb.objfiles()[0].filename
+    with open(file, "rb") as f:
+        hash = hashlib.md5(f.read()).hexdigest()
+    return hash
 
 
 def jsonify(obj, indent=None):
