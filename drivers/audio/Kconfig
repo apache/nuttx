@@ -505,6 +505,33 @@ config AUDIO_NULL_WORKER_STACKSIZE
 	int "Null audio device worker thread stack size"
 	default 768
 
+config AUDIO_NULL_DEVICE_PARAMS
+	string "Null audio device params"
+	default ""
+	---help---
+		This is a params for null audio device. The params is following format:
+		{dev_name, mode, sample_rates[4], channels, format[4], period_time, periods}.
+
+		- dev_name (string): pcm2c or pcm2p or others.
+		- mode     (string): playback or capture.
+		- sample_rates(uint32 array): {16000, 32000}.
+		- channels  (uint8, {min_chan, max_chan}): {1, 2}.
+		- format(uint8 array): {8,16,32}.
+		- period_time(uint32): 100, unit ms.
+		- periods    (uint32): 4, buffer cnt.
+		e.g:
+			{"pcm2c", "capture", {8000, 16000, 44100}, {1, 2}, {16}, 100, 4},
+			{"pcm2p", "playback", {8000, 16000, 44100}, {1, 2}, {16}, 100, 4},
+
+config AUDIO_NULL_DATA_PATH
+	string "Null audio device data path"
+	default "/data/"
+	---help---
+		This dir is used to store the audio file for virtual capture or playback device.
+		The filename for capture device should comply with the format "devname_samplerate_channels_format.pcm".
+		e.g: pcm2c_16000_2_16.pcm.
+		The filename format of playback device is the same as capture device.
+		e.g: pcm2p_16000_2_16.pcm.
 endif # AUDIO_NULL
 
 config AUDIO_I2S

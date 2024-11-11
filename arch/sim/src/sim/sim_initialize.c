@@ -26,6 +26,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/audio/audio.h>
+#include <nuttx/audio/audio_null.h>
 #include <nuttx/kthread.h>
 #include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/mtd/mtd.h>
@@ -297,6 +298,12 @@ void up_initialize(void)
   /* register independent mixer device, simulate amixer ioctl */
 
   audio_register("mixer", sim_audio_initialize(false, false));
+
+#if defined(CONFIG_AUDIO_NULL) && defined(CONFIG_AUDIO_NULL_DEVICE_PARAMS)
+  /* Register null audio driver */
+
+  null_audio_register();
+#endif
 
 #endif
 

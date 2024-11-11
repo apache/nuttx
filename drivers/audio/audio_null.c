@@ -45,14 +45,30 @@
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/audio_null.h>
 #include <nuttx/signal.h>
+#include <nuttx/irq.h>
+#include <sys/time.h>
+#include <sys/param.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ARRAY_ELEMS(a) (sizeof(a) / sizeof((a)[0]))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+struct null_dev_params_s
+{
+  const char *dev_name;
+  const char *mode;
+  uint32_t   samplerate[4];
+  uint8_t    channels[2];
+  uint8_t    format[4];
+  uint32_t   period_time;
+  uint32_t   periods;
+};
 
 struct null_dev_s
 {
@@ -65,6 +81,16 @@ struct null_dev_s
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
   volatile bool terminate;      /* True: request to terminate */
 #endif
+  bool          config_params;  /* Init null audio driver with config params */
+  bool          paused;
+  bool          started;
+  uint8_t       format;
+  uint32_t      channels;
+  uint32_t      sample_rate;
+  timer_t       timer_id;
+  struct file   file;
+  struct dq_queue_s pendq;
+  const struct null_dev_params_s *dev_params;
 };
 
 /****************************************************************************
@@ -128,10 +154,32 @@ static int   null_release(FAR struct audio_lowerhalf_s *dev);
 #endif
 static int   null_sleep(FAR struct audio_lowerhalf_s *dev,
                         FAR struct ap_buffer_s *apb);
+static int   null_file_init(FAR struct audio_lowerhalf_s *dev);
+static int   null_file_deinit(FAR struct audio_lowerhalf_s *dev);
+static int   null_file_write(FAR struct audio_lowerhalf_s *dev,
+                             FAR struct ap_buffer_s *apb);
+static int   null_file_read(FAR struct audio_lowerhalf_s *dev,
+                            FAR struct ap_buffer_s *apb);
+static int   null_process_buffer(FAR struct audio_lowerhalf_s *dev,
+                                 FAR struct ap_buffer_s *apb);
+static uint8_t  null_convert_format(uint8_t format);
+static uint32_t null_convert_samplerate(uint32_t samplerate);
+static FAR struct audio_lowerhalf_s *
+null_init_device(bool playback, FAR struct null_dev_params_s *dev_params);
+static void null_capture_data_callback(union sigval value);
+static int null_capture_create_timer(FAR struct audio_lowerhalf_s *dev);
+static int null_capture_delete_timer(FAR struct audio_lowerhalf_s *dev);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static struct null_dev_params_s g_dev_params[] =
+{
+#ifdef CONFIG_AUDIO_NULL_DEVICE_PARAMS
+  CONFIG_AUDIO_NULL_DEVICE_PARAMS
+#endif
+};
 
 static const struct audio_ops_s g_audioops =
 {
@@ -160,6 +208,192 @@ static const struct audio_ops_s g_audioops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: null_file_init
+ *
+ * Description: Initialize the audio file for playback or capture virtual
+ * audio driver.
+ *
+ ****************************************************************************/
+
+static int null_file_init(FAR struct audio_lowerhalf_s *dev)
+{
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  char filename[64];
+  int ret;
+
+  snprintf(filename, sizeof(filename), "%s/%s_%d_%d_%d.pcm",
+           CONFIG_AUDIO_NULL_DATA_PATH, priv->dev_params->dev_name,
+           priv->sample_rate, priv->channels, priv->format);
+
+  if (priv->playback)
+    {
+      ret = file_open(&priv->file, filename,
+                      O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+    }
+  else
+    {
+      ret = file_open(&priv->file, filename, O_RDONLY | O_CLOEXEC);
+    }
+
+  audwarn("open %s file %s\n", filename, (ret < 0) ? "fail" : "success");
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: null_file_deinit
+ *
+ * Description: Deinitialize the audio file.
+ *
+ ****************************************************************************/
+
+static int null_file_deinit(FAR struct audio_lowerhalf_s *dev)
+{
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+
+  audinfo("null_file_deinit, close file\n");
+  file_close(&priv->file);
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: null_file_write
+ *
+ * Description: Write the audio data to file.
+ *
+ ****************************************************************************/
+
+static int null_file_write(FAR struct audio_lowerhalf_s *dev,
+                           FAR struct ap_buffer_s *apb)
+{
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  int ret = OK;
+
+  ret = file_write(&priv->file, (void *)apb->samp, apb->nbytes);
+  if (ret < 0)
+    {
+      auderr("Error write data , ret %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: null_file_read
+ *
+ * Description: Read the audio data from file.
+ *
+ ****************************************************************************/
+
+static int null_file_read(FAR struct audio_lowerhalf_s *dev,
+                          FAR struct ap_buffer_s *apb)
+{
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  int ret = OK;
+
+  ret = file_read(&priv->file, (void *)apb->samp, apb->nmaxbytes);
+  if (ret == 0)
+    {
+      audwarn("read file end\n");
+      file_seek(&priv->file, 0, SEEK_SET);
+      ret = file_read(&priv->file, (void *)apb->samp, apb->nmaxbytes);
+    }
+
+  if (ret < 0)
+    {
+      auderr("Error read data , ret %d\n", ret);
+      return ret;
+    }
+
+  apb->nbytes  = (apb_samp_t)ret;
+  apb->curbyte = 0;
+  apb->flags   = 0;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: null_process_buffer
+ *
+ * Description: Process the audio buffer.
+ *
+ ****************************************************************************/
+
+static int null_process_buffer(FAR struct audio_lowerhalf_s *dev,
+                               FAR struct ap_buffer_s *apb)
+{
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  int64_t frame_time;
+  int64_t diff_time;
+  int64_t sleep_time;
+  struct timeval tv1;
+  struct timeval tv2;
+  int ret;
+
+  audinfo("process apb=%p, nbytes=%d\n", apb, apb->nbytes);
+
+  /* Check if this was the last buffer in the stream */
+
+  priv->terminate = ((apb->flags & AUDIO_APB_FINAL) != 0);
+
+  if (priv->playback)
+    {
+      gettimeofday(&tv1, NULL);
+
+      ret = null_file_write(dev, apb);
+      if (ret < 0)
+        {
+          auderr("Error write data, ret %d\n", ret);
+          goto out;
+        }
+
+      gettimeofday(&tv2, NULL);
+
+      frame_time = ((int64_t)apb->nbytes * 1000 * 1000) /
+                    priv->scaler;
+
+      diff_time = (int64_t)tv2.tv_sec * 1000000 + tv2.tv_usec -
+                  ((int64_t)tv1.tv_sec * 1000000 + tv1.tv_usec);
+
+      if (diff_time >= frame_time)
+        {
+          audwarn("WARN: write time %" PRId64 ", frame time %" PRId64 ".\n",
+                  diff_time, frame_time);
+          ret = OK;
+          goto out;
+        }
+
+      sleep_time = frame_time - diff_time;
+
+      nxsig_usleep(sleep_time);
+    }
+  else
+    {
+      ret = null_file_read(dev, apb);
+      if (ret < 0)
+        {
+          auderr("Error read data , ret %d\n", ret);
+          goto out;
+        }
+    }
+
+  ret = OK;
+
+out:
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  priv->dev.upper(priv->dev.priv,
+                  AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
+#else
+  priv->dev.upper(priv->dev.priv,
+                  AUDIO_CALLBACK_DEQUEUE, apb, OK);
+#endif
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: null_sleep
@@ -203,6 +437,92 @@ static int null_sleep(FAR struct audio_lowerhalf_s *dev,
 }
 
 /****************************************************************************
+ * Name: null_capture_data_callback
+ *
+ * Description: Capture audio data from file and send to upper layer.
+ *
+ ****************************************************************************/
+
+static void null_capture_data_callback(union sigval value)
+{
+  FAR struct null_dev_s *priv;
+  struct ap_buffer_s *apb;
+  irqstate_t flags;
+  int ret = 0;
+
+  priv = (FAR struct null_dev_s *)value.sival_ptr;
+
+  if (dq_count(&priv->pendq) <= 0 || !priv->started || priv->paused)
+    {
+      if (priv->started && !priv->paused)
+        {
+          audwarn("Lossing capture data.\n");
+        }
+
+      return;
+    }
+
+  flags = enter_critical_section();
+  apb = (struct ap_buffer_s *)dq_remfirst(&priv->pendq);
+
+  ret = null_process_buffer(&priv->dev, apb);
+  if (ret)
+    {
+      auderr("null audio process error %d\n", ret);
+      priv->terminate = true;
+    }
+
+  leave_critical_section(flags);
+  apb_free(apb);
+}
+
+/****************************************************************************
+ * Name: null_capture_delete_timer
+ *
+ * Description: Delete capture timer.
+ *
+ ****************************************************************************/
+
+static int null_capture_delete_timer(FAR struct audio_lowerhalf_s *dev)
+{
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  if (priv->timer_id)
+    timer_delete(priv->timer_id);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: null_capture_create_timer
+ *
+ * Description: Initialize capture timer.
+ *
+ ****************************************************************************/
+
+static int null_capture_create_timer(FAR struct audio_lowerhalf_s *dev)
+{
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  struct itimerspec its;
+  struct sigevent se;
+
+  se.sigev_notify            = SIGEV_THREAD;
+  se.sigev_value.sival_ptr   = priv;
+  se.sigev_notify_function   = null_capture_data_callback;
+  se.sigev_notify_attributes = NULL;
+
+  if (timer_create(CLOCK_MONOTONIC, &se, &priv->timer_id) < 0)
+      return -errno;
+
+  its.it_value.tv_sec  = 0;
+  its.it_value.tv_nsec = priv->dev_params->period_time * 1000 * 1000;
+  its.it_interval.tv_sec  = 0;
+  its.it_interval.tv_nsec = priv->dev_params->period_time * 1000 * 1000;
+
+  if (timer_settime(priv->timer_id, 0, &its, NULL) < 0)
+      return -errno;
+  return 0;
+}
+
+/****************************************************************************
  * Name: null_getcaps
  *
  * Description: Get the audio device capabilities
@@ -235,7 +555,11 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
          * must then call us back for specific info for each capability.
          */
 
-        caps->ac_channels = 2;       /* Stereo output */
+        if (priv->config_params)
+          caps->ac_channels = (priv->dev_params->channels[0] << 4) |
+                              (priv->dev_params->channels[1] & 0x0f);
+        else
+          caps->ac_channels = 2;
 
         switch (caps->ac_subtype)
           {
@@ -250,6 +574,24 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                                        AUDIO_TYPE_OUTPUT : AUDIO_TYPE_INPUT;
               caps->ac_format.hw = 1 << (AUDIO_FMT_PCM - 1);
 
+              break;
+
+            case AUDIO_FMT_PCM:
+              if (priv->config_params)
+                {
+                  caps->ac_controls.b[0] =
+                    null_convert_format(priv->dev_params->format[0]);
+                  caps->ac_controls.b[1] =
+                    null_convert_format(priv->dev_params->format[1]);
+                  caps->ac_controls.b[2] =
+                    null_convert_format(priv->dev_params->format[2]);
+                  caps->ac_controls.b[3] =
+                    null_convert_format(priv->dev_params->format[3]);
+                }
+              else
+                {
+                  caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
+                }
               break;
 
             case AUDIO_FMT_MIDI:
@@ -271,21 +613,37 @@ static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
       case AUDIO_TYPE_OUTPUT:
       case AUDIO_TYPE_INPUT:
 
-        caps->ac_channels = 2;
+        if (priv->config_params)
+          {
+            caps->ac_channels = (priv->dev_params->channels[0] << 4) |
+                                (priv->dev_params->channels[1] & 0x0f);
+          }
+        else
+          caps->ac_channels = 2;       /* Stereo output */
 
         switch (caps->ac_subtype)
           {
             case AUDIO_TYPE_QUERY:
 
+              caps->ac_channels = (priv->dev_params->channels[0] << 4) |
+                                  (priv->dev_params->channels[1] & 0x0f);
+
               /* Report the Sample rates we support */
 
-              caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
-                                        AUDIO_SAMP_RATE_11K |
-                                        AUDIO_SAMP_RATE_16K |
-                                        AUDIO_SAMP_RATE_22K |
-                                        AUDIO_SAMP_RATE_32K |
-                                        AUDIO_SAMP_RATE_44K |
-                                        AUDIO_SAMP_RATE_48K;
+              if (priv->config_params)
+                caps->ac_controls.hw[0] =
+                  null_convert_samplerate(priv->dev_params->samplerate[0]) |
+                  null_convert_samplerate(priv->dev_params->samplerate[1]) |
+                  null_convert_samplerate(priv->dev_params->samplerate[2]) |
+                  null_convert_samplerate(priv->dev_params->samplerate[3]);
+              else
+                caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_8K |
+                                          AUDIO_SAMP_RATE_11K |
+                                          AUDIO_SAMP_RATE_16K |
+                                          AUDIO_SAMP_RATE_22K |
+                                          AUDIO_SAMP_RATE_32K |
+                                          AUDIO_SAMP_RATE_44K |
+                                          AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
@@ -395,12 +753,12 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
 #endif
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  int ret;
   audinfo("ac_type: %d\n", caps->ac_type);
 
   if (priv->mqname[0] == '\0')
     {
       struct mq_attr attr;
-      int ret;
 
       /* Create a message queue for the worker thread */
 
@@ -458,9 +816,18 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
 
     case AUDIO_TYPE_OUTPUT:
     case AUDIO_TYPE_INPUT:
+      if (priv->config_params)
+        {
+          priv->sample_rate = caps->ac_controls.hw[0] |
+                              (caps->ac_controls.b[3] << 16);
+          priv->channels    = caps->ac_channels;
+          priv->format      = caps->ac_controls.b[2];
+        }
+
       priv->scaler = caps->ac_channels
-                   * caps->ac_controls.hw[0]
-                   * caps->ac_controls.b[2] / 8;
+                    * caps->ac_controls.hw[0]
+                    * caps->ac_controls.b[2] / 8;
+
       audinfo("    Number of channels: %u\n", caps->ac_channels);
       audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
       audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
@@ -500,9 +867,12 @@ static int null_shutdown(FAR struct audio_lowerhalf_s *dev)
 static void *null_workerthread(pthread_addr_t pvarg)
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *) pvarg;
+  FAR struct ap_buffer_s *apb;
   struct audio_msg_s msg;
-  int msglen;
+  struct mq_attr attr;
   unsigned int prio;
+  int msglen;
+  int ret;
 
   audinfo("Entry\n");
 
@@ -536,12 +906,52 @@ static void *null_workerthread(pthread_addr_t pvarg)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
           case AUDIO_MSG_STOP:
+
+            /* Consume all buffers on the bufferq after stop */
+
+            for (; ; )
+              {
+                file_mq_getattr(&priv->mq, &attr);
+                if (attr.mq_curmsgs > 0)
+                  {
+                    file_mq_receive(&priv->mq, (FAR char *)&msg,
+                                    sizeof(msg), &prio);
+
+                    /* direct dequeue buffer to application */
+
+                    apb = (FAR struct ap_buffer_s *)msg.u.ptr;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+                    priv->dev.upper(priv->dev.priv,
+                                      AUDIO_CALLBACK_DEQUEUE, apb, OK, NULL);
+#else
+                    priv->dev.upper(priv->dev.priv,
+                                      AUDIO_CALLBACK_DEQUEUE, apb, OK);
+#endif
+                    continue;
+                  }
+                else
+                  {
+                    break;
+                  }
+              }
+
             priv->terminate = true;
             break;
 #endif
 
           case AUDIO_MSG_ENQUEUE:
-            null_sleep(&priv->dev, (FAR struct ap_buffer_s *)msg.u.ptr);
+            if (priv->config_params)
+              {
+                apb = (FAR struct ap_buffer_s *)msg.u.ptr;
+                ret = null_process_buffer(&priv->dev, apb);
+                if (ret)
+                  {
+                    auderr("null audio process error %d\n", ret);
+                    priv->terminate = true;
+                  }
+              }
+            else
+              null_sleep(&priv->dev, (FAR struct ap_buffer_s *)msg.u.ptr);
             break;
 
           case AUDIO_MSG_COMPLETE:
@@ -557,8 +967,15 @@ static void *null_workerthread(pthread_addr_t pvarg)
 
   file_mq_close(&priv->mq);
   file_mq_unlink(priv->mqname);
-  priv->mqname[0] = '\0';
   priv->terminate = false;
+  priv->paused    = false;
+  priv->mqname[0] = '\0';
+
+  if (priv->config_params)
+    {
+      null_file_deinit(&priv->dev);
+      audinfo("Exit %s\n", priv->dev_params->dev_name);
+    }
 
   /* Send an AUDIO_MSG_COMPLETE message to the client */
 
@@ -592,7 +1009,14 @@ static int null_start(FAR struct audio_lowerhalf_s *dev)
   FAR void *value;
   int ret;
 
-  audinfo("Entry\n");
+  priv->terminate = false;
+  priv->paused = false;
+
+  ret = null_file_init(dev);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Join any old worker thread we had created to prevent a memory leak */
 
@@ -618,10 +1042,21 @@ static int null_start(FAR struct audio_lowerhalf_s *dev)
     }
   else
     {
-      pthread_setname_np(priv->threadid, "null audio");
+      pthread_setname_np(priv->threadid, "null_audio");
       audinfo("Created worker thread\n");
     }
 
+  if (!priv->playback)
+    {
+      ret = null_capture_create_timer(&priv->dev);
+      if (ret < 0)
+        {
+          auderr("Capture device create timer failed.\n");
+          return ret;
+        }
+    }
+
+  priv->started = true;
   audinfo("Return %d\n", ret);
   return ret;
 }
@@ -656,6 +1091,14 @@ static int null_stop(FAR struct audio_lowerhalf_s *dev)
   file_mq_send(&priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
                CONFIG_AUDIO_NULL_MSG_PRIO);
 
+  if (!priv->playback)
+    {
+      null_capture_delete_timer(dev);
+    }
+
+  priv->started = false;
+  priv->paused = false;
+
   /* Join the worker thread */
 
   pthread_join(priv->threadid, &value);
@@ -686,7 +1129,15 @@ static int null_pause(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 static int null_pause(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
-  audinfo("Return OK\n");
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+
+  if (!priv->playback)
+    {
+      null_capture_delete_timer(dev);
+    }
+
+  priv->paused = true;
+  audinfo("%s pause\n", priv->dev_params->dev_name);
   return OK;
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
@@ -705,7 +1156,14 @@ static int null_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
 static int null_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
-  audinfo("Return OK\n");
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  priv->paused = false;
+  if (!priv->playback)
+    {
+      null_capture_create_timer(dev);
+    }
+
+  audinfo("%s resume\n", priv->dev_params->dev_name);
   return OK;
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
@@ -722,20 +1180,32 @@ static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
   struct audio_msg_s msg;
+  irqstate_t flags;
   int ret;
 
   DEBUGASSERT(priv && apb && priv->dev.upper);
 
   audinfo("apb=%p curbyte=%d nbytes=%d\n", apb, apb->curbyte, apb->nbytes);
 
-  msg.msg_id = AUDIO_MSG_ENQUEUE;
-  msg.u.ptr = apb;
-
-  ret = file_mq_send(&priv->mq, (FAR const char *)&msg,
-                     sizeof(msg), CONFIG_AUDIO_NULL_MSG_PRIO);
-  if (ret < 0)
+  if (priv->playback)
     {
-      auderr("ERROR: file_mq_send failed: %d\n", ret);
+      msg.msg_id = AUDIO_MSG_ENQUEUE;
+      msg.u.ptr = apb;
+
+      ret = file_mq_send(&priv->mq, (FAR const char *)&msg,
+                         sizeof(msg), CONFIG_AUDIO_NULL_MSG_PRIO);
+      if (ret < 0)
+        {
+          auderr("ERROR: file_mq_send failed: %d\n", ret);
+        }
+    }
+  else
+    {
+      flags = enter_critical_section();
+      apb_reference(apb);
+      apb->dq_entry.flink = NULL;
+      dq_addlast(&apb->dq_entry, &priv->pendq);
+      leave_critical_section(flags);
     }
 
   audinfo("Return OK\n");
@@ -768,6 +1238,7 @@ static int null_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
 static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
                       unsigned long arg)
 {
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
   int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
   FAR struct ap_buffer_info_s *bufinfo;
@@ -791,17 +1262,28 @@ static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 
        /* Report our preferred buffer size and quantity */
 
-#ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
         {
           audinfo("AUDIOIOC_GETBUFFERINFO:\n");
-          bufinfo              = (FAR struct ap_buffer_info_s *) arg;
-          bufinfo->buffer_size = CONFIG_AUDIO_NULL_BUFFER_SIZE;
-          bufinfo->nbuffers    = CONFIG_AUDIO_NULL_NUM_BUFFERS;
+#ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
+          bufinfo = (FAR struct ap_buffer_info_s *) arg;
+          if (priv->config_params)
+            {
+              bufinfo->buffer_size = (priv->scaler *
+                                      priv->dev_params->period_time) / 1000;
+              bufinfo->nbuffers = priv->dev_params->periods;
+            }
+          else
+            {
+              bufinfo->buffer_size = CONFIG_AUDIO_NULL_BUFFER_SIZE;
+              bufinfo->nbuffers    = CONFIG_AUDIO_NULL_NUM_BUFFERS;
+            }
+#else
+          audwarn("AUDIOIOC_GETBUFFERINFO Return EPERM\n");
+          return -EPERM;
+#endif
         }
         break;
-#endif
-
       default:
         ret = -ENOTTY;
         break;
@@ -825,7 +1307,9 @@ static int null_reserve(FAR struct audio_lowerhalf_s *dev,
 static int null_reserve(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
-  audinfo("Return OK\n");
+  FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
+  priv->terminate = false;
+  audinfo("%s reserve\n", priv->dev_params->dev_name);
   return OK;
 }
 
@@ -855,6 +1339,146 @@ static int null_release(FAR struct audio_lowerhalf_s *dev)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: null_convert_samplerate
+ *
+ * Description: Convert the samplerate to Nuttx audio samplerate.
+ *
+ ****************************************************************************/
+
+static uint32_t null_convert_samplerate(uint32_t samplerate)
+{
+  if (samplerate == 8000)
+    {
+      return AUDIO_SAMP_RATE_8K;
+    }
+  else if (samplerate == 11025)
+    {
+      return AUDIO_SAMP_RATE_11K;
+    }
+  else if (samplerate == 16000)
+    {
+      return AUDIO_SAMP_RATE_16K;
+    }
+  else if (samplerate == 22050)
+    {
+      return AUDIO_SAMP_RATE_22K;
+    }
+  else if (samplerate == 32000)
+    {
+      return AUDIO_SAMP_RATE_32K;
+    }
+  else if (samplerate == 44100)
+    {
+      return AUDIO_SAMP_RATE_44K;
+    }
+  else if (samplerate == 48000)
+    {
+      return AUDIO_SAMP_RATE_48K;
+    }
+  else if (samplerate != 0)
+    {
+      auderr("ERROR: Unsupported sample rate %d\n", samplerate);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: null_convert_format
+ *
+ * Description: Convert the format to Nuttx audio format.
+ *
+ ****************************************************************************/
+
+static uint8_t null_convert_format(uint8_t format)
+{
+  if (format == 8)
+    {
+      return AUDIO_SUBFMT_PCM_S8;
+    }
+  else if (format == 16)
+    {
+      return AUDIO_SUBFMT_PCM_S16_LE;
+    }
+  else if (format == 32)
+    {
+      return AUDIO_SUBFMT_PCM_S32_LE;
+    }
+  else if (format != AUDIO_SUBFMT_END)
+    {
+      auderr("ERROR: Unsupported format %d\n", format);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: null_init_device
+ *
+ * Description: Initialize the audio device.
+ *
+ ****************************************************************************/
+
+static FAR struct audio_lowerhalf_s *
+null_init_device(bool playback, FAR struct null_dev_params_s *dev_params)
+{
+  FAR struct null_dev_s *priv;
+
+  /* Allocate the null audio device structure */
+
+  priv = (FAR struct null_dev_s *)kmm_zalloc(sizeof(struct null_dev_s));
+  if (!priv)
+    {
+      auderr("ERROR: Failed to allocate null audio device\n");
+      return NULL;
+    }
+
+  priv->dev.ops     = &g_audioops;
+  priv->dev_params  = dev_params;
+  priv->playback    = playback;
+  priv->started     = false;
+  priv->paused      = false;
+  priv->terminate   = false;
+  priv->config_params = true;
+
+  if (!playback)
+    {
+      dq_init(&priv->pendq);
+    }
+
+  return &priv->dev;
+}
+
+/****************************************************************************
+ * Name: null_audio_register_with_params
+ *
+ * Description: Register the null audio device with the audio device.
+ *
+ ****************************************************************************/
+
+static int null_audio_register_with_params(void)
+{
+  int ret;
+  int i;
+
+  for (i = 0; i < ARRAY_ELEMS(g_dev_params); i++)
+    {
+      if (!strncmp(g_dev_params[i].mode, "playback", strlen("playback")))
+        {
+          ret = audio_register(g_dev_params[i].dev_name,
+                               null_init_device(true, &g_dev_params[i]));
+        }
+      else
+        {
+          ret = audio_register(g_dev_params[i].dev_name,
+                               null_init_device(false, &g_dev_params[i]));
+        }
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -899,4 +1523,29 @@ FAR struct audio_lowerhalf_s *audio_null_initialize(bool playback)
 
   auderr("ERROR: Failed to allocate null audio device\n");
   return NULL;
+}
+
+/****************************************************************************
+ * Name: null_audio_register
+ *
+ * Description:
+ *   Initialize and register null audio device.
+ *
+ * Returned Value:
+ *   0 is returned on success;
+ *   others is returned on failure.
+ *
+ ****************************************************************************/
+
+int null_audio_register(void)
+{
+  int err;
+
+  err = null_audio_register_with_params();
+  if (err < 0)
+    {
+      auderr("ERROR: Failed to register null audio device\n");
+    }
+
+  return err;
 }
