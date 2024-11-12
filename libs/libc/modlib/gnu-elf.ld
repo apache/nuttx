@@ -36,13 +36,16 @@ SECTIONS
   .init_array :
     {
       _sinit = .;
-      *(.init_array)
+      KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+      KEEP(*(.init_array .ctors))
       _einit = .;
     }
 
   .fini_array :
     {
-      *(.fini_array)
+      KEEP (*(.dtors))
+      KEEP (*(.fini_array))
+      KEEP (*(SORT(.fini_array.*)))
     }
 
   .rodata :
