@@ -290,9 +290,11 @@ config ESP32_LEDC
 		Enable support to PWM on ESP32 using LEDC peripheral.
 
 config ESP32_PCNT
-	bool "Pulse Counter (PCNT / QE) Module"
+	bool "Pulse Counter (PCNT / QE) Module (Legacy Driver)"
 	default n
+	depends on !ESP_PCNT
 	---help---
+		Warning: this is deprecated option. Please use ESP_PCNT option
 		Pulse Counter is currently used to implement Quadracture
 		Encoder.
 

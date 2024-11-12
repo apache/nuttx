@@ -326,7 +326,7 @@ GPIO         Yes
 I2C          Yes
 I2S          Yes
 LED_PWM      No
-Pulse_CNT    No
+Pulse_CNT    Yes
 RMT          No
 RNG          Yes
 RSA          No
