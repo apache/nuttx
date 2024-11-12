@@ -379,40 +379,6 @@ static void mio283qt9a_setarea(FAR struct mio283qt9a_lcd_s *lcd,
 }
 
 /****************************************************************************
- * Name:  mio283qt9a_dumprun
- *
- * Description:
- *   Dump the contexts of the run buffer:
- *
- *  run     - The buffer in containing the run read to be dumped
- *  npixels - The number of pixels to dump
- *
- ****************************************************************************/
-
-#if 0 /* Sometimes useful */
-static void mio283qt9a_dumprun(FAR const char *msg,
-                               FAR uint16_t *run,
-                               size_t npixels)
-{
-  int i;
-  int j;
-
-  syslog(LOG_INFO, "\n%s:\n", msg);
-  for (i = 0; i < npixels; i += 16)
-    {
-      up_putc(' ');
-      syslog(LOG_INFO, " ");
-      for (j = 0; j < 16; j++)
-        {
-          syslog(LOG_INFO, " %04x", *run++);
-        }
-
-      up_putc('\n');
-    }
-}
-#endif
-
-/****************************************************************************
  * Name:  mio283qt9a_putrun
  *
  * Description:
