@@ -76,5 +76,5 @@ void up_exit(int status)
 
   /* Then switch contexts */
 
-  arm64_fullcontextrestore(tcb->xcp.regs);
+  arm64_fullcontextrestore(tcb);
 }
