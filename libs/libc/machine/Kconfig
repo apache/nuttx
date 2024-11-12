@@ -9,14 +9,6 @@
 
 menu "Architecture-Specific Support"
 
-config LIBC_ARCH_ATOMIC
-	bool "arch_atomic"
-	default n
-	---help---
-		If this configuration is selected and <include/nuttx/atomic.h> is
-		included, arch_atomic.c will be linked instead of built-in
-		atomic function.
-
 config ARCH_LOWPUTC
 	bool "Low-level console output"
 	default y
