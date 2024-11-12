@@ -701,7 +701,7 @@ static int imx9_transmit(struct imx9_driver_s *priv)
       cs |= frame->flags & CANFD_BRS ? CAN_MB_CS_BRS : 0;
       can_id = frame->can_id;
       len = frame->len;
-      can_dlc = g_len_to_can_dlc[len];
+      can_dlc = can_bytes2dlc(len);
       frame_data_word = (uint32_t *)&frame->data[0];
     }
 #endif
@@ -940,7 +940,7 @@ static void imx9_receive(struct imx9_driver_s *priv)
               frame->flags |= CANFD_ESI;
             }
 
-          frame->len = g_can_dlc_to_len[CAN_MB_CS_DLC(rf->cs)];
+          frame->len = can_dlc2bytes(CAN_MB_CS_DLC(rf->cs));
 
           frame_data_word = (uint32_t *)&frame->data[0];
 

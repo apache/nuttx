@@ -33,7 +33,7 @@
 #include <sys/socket.h>
 #include <stdint.h>
 
-#ifdef CONFIG_NET_CAN
+#if defined(CONFIG_NET_CAN) || defined(CONFIG_CAN)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -301,6 +301,7 @@ struct canfd_frame
   uint8_t data[CANFD_MAX_DLEN];
 };
 
+#ifdef CONFIG_NET_CAN
 /* The sockaddr structure for CAN sockets
  *
  *   can_family:  Address family number AF_CAN.
@@ -345,6 +346,7 @@ struct sockaddr_can
     } j1939;
   } can_addr;
 };
+#endif
 
 /* struct can_filter - CAN ID based filter in can_register().
  * can_id:   Relevant bits of CAN ID which are not masked out.
@@ -368,6 +370,122 @@ struct can_filter
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_bytes2dlc
+ *
+ * Description:
+ *   In the CAN FD format, the coding of the DLC differs from the standard
+ *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
+ *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
+ *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
+ *   in the range 12 to 64.
+ *
+ * Input Parameters:
+ *   nbytes - the byte count to convert to a DLC value
+ *
+ * Returned Value:
+ *   The encoded DLC value corresponding to at least that number of bytes.
+ *
+ ****************************************************************************/
+
+static inline uint8_t can_bytes2dlc(uint8_t nbytes)
+{
+  if (nbytes <= 8)
+    {
+      return nbytes;
+    }
+#ifdef CONFIG_CAN_FD
+  else if (nbytes <= 12)
+    {
+      return 9;
+    }
+  else if (nbytes <= 16)
+    {
+      return 10;
+    }
+  else if (nbytes <= 20)
+    {
+      return 11;
+    }
+  else if (nbytes <= 24)
+    {
+      return 12;
+    }
+  else if (nbytes <= 32)
+    {
+      return 13;
+    }
+  else if (nbytes <= 48)
+    {
+      return 14;
+    }
+  else /* if (nbytes <= 64) */
+    {
+      return 15;
+    }
+#else
+  else
+    {
+      return 8;
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: can_dlc2bytes
+ *
+ * Description:
+ *   In the CAN FD format, the coding of the DLC differs from the standard
+ *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
+ *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
+ *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
+ *   in the range 12 to 64.
+ *
+ * Input Parameters:
+ *   dlc    - the DLC value to convert to a byte count
+ *
+ * Returned Value:
+ *   The number of bytes corresponding to the DLC value.
+ *
+ ****************************************************************************/
+
+static inline uint8_t can_dlc2bytes(uint8_t dlc)
+{
+  if (dlc > 8)
+    {
+#ifdef CONFIG_CAN_FD
+      switch (dlc)
+        {
+          case 9:
+            return 12;
+
+          case 10:
+            return 16;
+
+          case 11:
+            return 20;
+
+          case 12:
+            return 24;
+
+          case 13:
+            return 32;
+
+          case 14:
+            return 48;
+
+          default:
+          case 15:
+            return 64;
+        }
+#else
+      return 8;
+#endif
+    }
+
+  return dlc;
+}
 
 #undef EXTERN
 #if defined(__cplusplus)
