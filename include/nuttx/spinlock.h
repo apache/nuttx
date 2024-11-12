@@ -1036,10 +1036,14 @@ static inline_function void read_unlock(FAR volatile rwlock_t *lock)
 
 static inline_function void write_lock(FAR volatile rwlock_t *lock)
 {
-  int zero = RW_SP_UNLOCKED;
-
-  while (!atomic_cmpxchg(lock, &zero, RW_SP_WRITE_LOCKED))
+  while (true)
     {
+      int zero = RW_SP_UNLOCKED;
+      if (atomic_cmpxchg((FAR atomic_int *)lock, &zero, RW_SP_WRITE_LOCKED))
+        {
+          break;
+        }
+
       UP_DSB();
       UP_WFE();
     }
