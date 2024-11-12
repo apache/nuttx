@@ -225,7 +225,6 @@ static int e1000_probe(FAR struct pci_device_s *dev);
  * Private Data
  *****************************************************************************/
 
-#ifdef CONFIG_NET_E1000_I219
 /* Intel I219 */
 
 static const struct e1000_type_s g_e1000_i219 =
@@ -234,9 +233,7 @@ static const struct e1000_type_s g_e1000_i219 =
   .mta_regs   = 32,
   .flags      = E1000_RESET_BROKEN
 };
-#endif
 
-#ifdef CONFIG_NET_E1000_82540EM
 /* Intel 82801IB (QEMU -device e1000) */
 
 static const struct e1000_type_s g_e1000_82540em =
@@ -245,9 +242,7 @@ static const struct e1000_type_s g_e1000_82540em =
   .mta_regs   = 128,
   .flags      = 0
 };
-#endif
 
-#ifdef CONFIG_NET_E1000_82574L
 /* Intel 82574L (QEMU -device e1000e) */
 
 static const struct e1000_type_s g_e1000_82574l =
@@ -256,28 +251,21 @@ static const struct e1000_type_s g_e1000_82574l =
   .mta_regs   = 128,
   .flags      = E1000_HAS_MSIX
 };
-#endif
 
 static const struct pci_device_id_s g_e1000_id_table[] =
 {
-#ifdef CONFIG_NET_E1000_I219
   {
     PCI_DEVICE(0x8086, 0x1a1e),
     .driver_data = (uintptr_t)&g_e1000_i219
   },
-#endif
-#ifdef CONFIG_NET_E1000_82540EM
   {
     PCI_DEVICE(0x8086, 0x100e),
     .driver_data = (uintptr_t)&g_e1000_82540em
   },
-#endif
-#ifdef CONFIG_NET_E1000_82574L
   {
     PCI_DEVICE(0x8086, 0x10d3),
     .driver_data = (uintptr_t)&g_e1000_82574l
   },
-#endif
   { }
 };
 
