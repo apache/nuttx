@@ -59,7 +59,7 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
 endif
 
 ifeq ($(CONFIG_COVERAGE_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+  ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage -fno-inline
 endif
 
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)

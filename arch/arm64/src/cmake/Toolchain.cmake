@@ -137,7 +137,7 @@ endif()
 
 if(CONFIG_COVERAGE_ALL)
   if(CONFIG_ARCH_TOOLCHAIN_GCC)
-    add_compile_options(-fprofile-generate -ftest-coverage)
+    add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
   elseif(CONFIG_ARCH_TOOLCHAIN_CLANG)
     add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
   endif()
