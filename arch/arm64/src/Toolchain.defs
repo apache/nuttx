@@ -96,7 +96,7 @@ ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
   ARCHOPTIMIZATION += -finstrument-functions
 endif
 
-ifeq ($(CONFIG_SCHED_GPROF_ALL),y)
+ifeq ($(CONFIG_PROFILE_ALL),y)
   ARCHOPTIMIZATION += -pg
 endif
 

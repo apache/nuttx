@@ -144,7 +144,7 @@ ifeq ($(CONFIG_SCHED_GCOV),y)
   STDLIBS += -lgcov
 endif
 
-ifeq ($(CONFIG_SIM_GPROF),y)
+ifneq ($(CONFIG_SIM_PROFILE)$(CONFIG_PROFILE_ALL),)
   HOSTCFLAGS += -pg
 endif
 

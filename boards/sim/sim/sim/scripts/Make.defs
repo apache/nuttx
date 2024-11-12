@@ -76,7 +76,7 @@ ifeq ($(CONFIG_SCHED_GCOV_ALL),y)
   ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
 endif
 
-ifneq ($(CONFIG_SCHED_GPROF_ALL)$(CONFIG_SIM_GPROF),)
+ifneq ($(CONFIG_PROFILE_ALL)$(CONFIG_SIM_PROFILE),)
   ARCHOPTIMIZATION += -pg
 endif
 

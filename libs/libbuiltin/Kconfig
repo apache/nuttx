@@ -35,6 +35,39 @@ config COVERAGE_COMPILER_RT
 	select LIB_COMPILER_RT
 	default n
 
+choice
+	prompt "Builtin profile support"
+	default PROFILE_NONE
+	---help---
+		Select the profile library
+
+config PROFILE_MINI
+	bool "Enable mini gprof profiling"
+	select LIB_BUILTIN
+	---help---
+		Enable gprof profiling support.  This will cause the compiler to
+		generate additional code to support profiling.  This will also
+		cause the linker to include the gmon.out file in the final
+		executable.
+		Add the "-pg" parameter to the Makefile when compiling to obtain
+		the function call graph of the specified module. If you do this,
+		please enable "CONFIG_FRAME_POINTER"
+
+config PROFILE_NONE
+	bool "None profile support"
+
+endchoice
+
+config PROFILE_ALL
+	bool "Enable gprof call graph for all modules"
+	depends on FRAME_POINTER && !PROFILE_NONE
+	default n
+	---help---
+		Enable gprof profiling for all code, it will instrument
+		all code, which will cause a large performance penalty for the code.
+		You can add the '-pg' parameter to the specified module in the
+		makefile to only analyze the content of the module.
+
 config LIB_COMPILER_RT_VERSION
 	string "Select LLVM Compiler-rt version"
 	depends on LIB_COMPILER_RT

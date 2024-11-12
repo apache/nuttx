@@ -90,7 +90,7 @@ if(CONFIG_SCHED_GCOV_ALL)
   add_compile_options(-fprofile-generate -ftest-coverage)
 endif()
 
-if(CONFIG_SCHED_GPROF_ALL OR CONFIG_SIM_GPROF)
+if(CONFIG_PROFILE_ALL OR CONFIG_SIM_PROFILE)
   add_compile_options(-pg)
 endif()
 

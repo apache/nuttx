@@ -1,7 +1,5 @@
 ############################################################################
-# sched/instrument/Make.defs
-#
-# SPDX-License-Identifier: Apache-2.0
+# libs/libbuiltin/libgcc/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,13 +18,11 @@
 #
 ############################################################################
 
-CSRCS += instrument.c
+ifeq ($(CONFIG_PROFILE_MINI),y)
 
-ifneq ($(CONFIG_SCHED_STACK_RECORD),0)
-CSRCS += stack_monitor.c
+CSRCS += profile.c
+
+DEPPATH += --dep-path libgcc
+VPATH += :libgcc
+
 endif
-
-# Include instrument build support
-
-DEPPATH += --dep-path instrument
-VPATH += :instrument

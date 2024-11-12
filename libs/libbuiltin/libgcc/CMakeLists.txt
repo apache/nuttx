@@ -1,7 +1,5 @@
 # ##############################################################################
-# sched/instrument/CMakeLists.txt
-#
-# SPDX-License-Identifier: Apache-2.0
+# libs/libbuiltin/libgcc/CMakeLists.txt
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
@@ -20,10 +18,7 @@
 #
 # ##############################################################################
 
-set(SRCS instrument.c)
-
-if(NOT "${CONFIG_SCHED_STACK_RECORD}" STREQUAL "0")
-  list(APPEND SRCS stack_monitor.c)
+if(CONFIG_PROFILE_MINI)
+  nuttx_add_system_library(libgprof)
+  target_sources(libgprof PRIVATE profile.c)
 endif()
-
-target_sources(sched PRIVATE ${SRCS})
