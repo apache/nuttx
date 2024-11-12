@@ -3138,7 +3138,7 @@ ssize_t cdcacm_write(FAR const char *buffer, size_t buflen)
     {
       irqstate_t flags;
 
-      if (!priv || !priv->ctrlline)
+      if (!priv || !(priv->ctrlline & CDC_DTE_PRESENT))
         {
           return -EINVAL;
         }
