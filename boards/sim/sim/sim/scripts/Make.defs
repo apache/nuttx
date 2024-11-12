@@ -76,7 +76,7 @@ endif
 
 ifeq ($(CONFIG_COVERAGE_ALL),y)
   ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
-    ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+    ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage -fno-inline
   else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
     ARCHOPTIMIZATION += -fprofile-instr-generate -fcoverage-mapping
   endif
