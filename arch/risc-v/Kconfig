@@ -89,6 +89,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -119,6 +120,7 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
