@@ -141,9 +141,5 @@
 #define STRINGIFY_(x) #x
 #define STRINGIFY(x)  STRINGIFY_(x)
 
-/* Concatenate the arguments */
-
-#define CONCATENATE(a, b) a##b
-
 #endif /* __INCLUDE_NUTTX_MACRO_H */
 
