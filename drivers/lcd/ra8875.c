@@ -245,14 +245,6 @@ static void ra8875_clearmem(FAR struct ra8875_lcd_s *lcd);
 
 /* LCD Data Transfer Methods */
 
-#if 0 /* Sometimes useful */
-static void ra8875_dumprun(FAR const char *msg,
-                           FAR uint16_t *run,
-                           size_t npixels);
-#else
-#  define ra8875_dumprun(m,r,n)
-#endif
-
 #ifdef CONFIG_DEBUG_LCD
 static void ra8875_showrun(FAR struct ra8875_dev_s *priv, fb_coord_t row,
                             fb_coord_t col, size_t npixels, bool put);
