@@ -26,7 +26,7 @@ BINDIR ?= bin
 KBIN = libkbuiltin$(LIBEXT)
 KBINDIR = kbin
 
-ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
+ifeq ($(CONFIG_LIB_COMPILER_RT),y)
 include compiler-rt/Make.defs
 endif
 

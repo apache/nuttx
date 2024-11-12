@@ -5,36 +5,42 @@
 
 comment "Toolchain Library Support"
 
+config LIB_BUILTIN
+	bool
+
+config LIB_COMPILER_RT
+	bool
+
 choice
 	prompt "Builtin toolchain support"
 	default BUILTIN_TOOLCHAIN
 	---help---
-		Choose to compile libraries related to toolchain into the OS
+		Select the builtin library
 
 config BUILTIN_COMPILER_RT
-	bool "Builtin LLVM Compiler-rt"
+	bool "Builtin LLVM libclang_rt.builtins"
+	select LIB_BUILTIN
+	select LIB_COMPILER_RT
 	---help---
 		Compile the LLVM Compiler-rt library into the OS.
 
 config BUILTIN_TOOLCHAIN
-	bool "Link the toolchain library"
-	---help---
-		Use the toolchain library that comes with the compiler
+	bool "Link toolchain builtin library to the OS"
 
 endchoice
 
-if BUILTIN_COMPILER_RT
+config COVERAGE_COMPILER_RT
+	bool "Builtin libclang_rt.profile"
+	select LIB_BUILTIN
+	select LIB_COMPILER_RT
+	default n
 
-config COMPILER_RT_VERSION
+config LIB_COMPILER_RT_VERSION
 	string "Select LLVM Compiler-rt version"
+	depends on LIB_COMPILER_RT
 	default "17.0.1"
 
-config COMPILER_RT_HAS_BFLOAT16
+config LIB_COMPILER_RT_HAS_BFLOAT16
 	bool "Enable support for bfloat16 in Compiler-rt"
+	depends on LIB_COMPILER_RT
 	default n
-
-config COMPILER_RT_PROFILE
-	bool "Enable profiling support in Compiler-rt"
-	default n
-
-endif # BUILTIN_COMPILER_RT
