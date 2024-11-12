@@ -62,7 +62,7 @@ if(CONFIG_ARCH_SETJMP_H)
   endif()
 endif()
 
-if(CONFIG_SCHED_GPROF)
+if(CONFIG_PROFILE_MINI)
   list(APPEND SRCS gnu/mcount.S)
 endif()
 

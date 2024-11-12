@@ -60,7 +60,7 @@ ASRCS += arch_setjmp.S
 endif
 endif
 
-ifeq ($(CONFIG_SCHED_GPROF),y)
+ifeq ($(CONFIG_PROFILE_MINI),y)
 ASRCS += mcount.S
 endif
 

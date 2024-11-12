@@ -90,9 +90,9 @@ config SIM_UBSAN_DUMMY
 	---help---
 		Keep SIM_UBSAN compile time but disable runtime actions.
 
-config SIM_GPROF
+config SIM_PROFILE
 	bool "Enable gprof"
-	depends on !SCHED_GPROF
+	depends on PROFILE_NONE
 	default n
 	---help---
 		Enable support gprof profiling tool.
