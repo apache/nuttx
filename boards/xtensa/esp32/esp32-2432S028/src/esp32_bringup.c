@@ -70,6 +70,11 @@
 #  include "board_qencoder.h"
 #endif
 
+#ifdef CONFIG_ESP_PCNT
+#  include "espressif/esp_pcnt.h"
+#  include "esp32_board_pcnt.h"
+#endif
+
 #ifdef CONFIG_ESP32_RT_TIMER
 #  include "esp32_rt_timer.h"
 #endif
@@ -354,6 +359,14 @@ int esp32_bringup(void)
              "ERROR: Failed to register the qencoder: %d\n",
              ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP_PCNT
+  ret = board_pcnt_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
     }
 #endif
 
