@@ -160,5 +160,5 @@ retry:
   leave_critical_section(flags);
   rtcb->irqcount--;
 #endif
-  arm64_fullcontextrestore(rtcb->xcp.regs);
+  arm64_fullcontextrestore(rtcb);
 }

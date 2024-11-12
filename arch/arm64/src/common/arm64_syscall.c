@@ -182,7 +182,7 @@ uint64_t *arm64_syscall(uint64_t *regs)
        * At this point, the following values are saved in context:
        *
        *   x0 = SYS_restore_context
-       *   x1 = restoreregs( xcp->regs, callee saved register save area)
+       *   x1 = next
        */
 
       case SYS_restore_context:
@@ -192,8 +192,8 @@ uint64_t *arm64_syscall(uint64_t *regs)
            * set will determine the restored context.
            */
 
-          ret_regs = (uint64_t *)regs[REG_X1];
-          regs[REG_X1] = 0; /* set the saveregs = 0 */
+          tcb = (struct tcb_s *)regs[REG_X1];
+          ret_regs = tcb->xcp.regs;
 
           DEBUGASSERT(ret_regs);
         }
@@ -201,13 +201,13 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
       /* x0 = SYS_switch_context:  This a switch context command:
        *
-       * void arm64_switchcontext(uint64_t *saveregs, uint64_t *restoreregs);
+       * void arm64_switchcontext(struct tcb_s *prev, struct tcb_s *next);
        *
        * At this point, the following values are saved in context:
        *
        *   x0 = SYS_switch_context
-       *   x1 = saveregs (xcp->regs, callee saved register save area)
-       *   x2 = restoreregs (xcp->regs, callee saved register save area)
+       *   x1 = prev
+       *   x2 = next
        *
        * In this case, we do both: We save the context registers to the save
        * register area reference by the saved contents of x1 and then set
@@ -217,10 +217,13 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_X1] != 0 && regs[REG_X2] != 0);
-          *(uint64_t **)regs[REG_X1] = regs;
+          struct tcb_s *rtcb = (struct tcb_s *)regs[REG_X1];
+          tcb = (struct tcb_s *)regs[REG_X2];
 
-          ret_regs = (uint64_t *)regs[REG_X2];
+          DEBUGASSERT(regs[REG_X1] != 0 && regs[REG_X2] != 0);
+          rtcb->xcp.regs = regs;
+
+          ret_regs = tcb->xcp.regs;
         }
         break;
 
