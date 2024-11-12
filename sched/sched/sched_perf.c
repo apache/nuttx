@@ -45,6 +45,8 @@
 #define PERF_GET_COUNT(event) ((event)->count + (event)->child_count)
 #define PERF_DEFAULT_PERIOD 1000
 #define PERF_RECORD_MISC_USER (2 << 0)
+#define FLAME_GRAPH_SKIP 11
+#define PERF_MAX_BACKTRACE 20
 
 /****************************************************************************
  * Private Types
@@ -725,8 +727,9 @@ out:
 static void perf_free_pmu_context(FAR struct pmu_event_context_s *pmu_ctx)
 {
   bool free_flag = false;
+  irqstate_t flags;
 
-  spin_lock(&pmu_ctx->ctx->lock);
+  flags = spin_lock_irqsave(&pmu_ctx->ctx->lock);
 
   pmu_ctx->refcount--;
 
@@ -740,7 +743,7 @@ static void perf_free_pmu_context(FAR struct pmu_event_context_s *pmu_ctx)
         }
     }
 
-  spin_unlock(&pmu_ctx->ctx->lock);
+  spin_unlock_irqrestore(&pmu_ctx->ctx->lock, flags);
 
   if (pmu_ctx->refcount == 0)
     {

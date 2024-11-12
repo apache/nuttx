@@ -801,9 +801,9 @@ typedef CODE void (*nxsched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
 /* This is the callback type used by nxsched_smp_call() */
 
-#ifdef CONFIG_SMP
 typedef CODE int (*nxsched_smp_call_t)(FAR void *arg);
 
+#ifdef CONFIG_SMP
 struct smp_call_cookie_s;
 struct smp_call_data_s
 {

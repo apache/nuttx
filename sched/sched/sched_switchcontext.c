@@ -82,4 +82,7 @@ void nxsched_switch_context(FAR struct tcb_s *from, FAR struct tcb_s *to)
 #ifdef CONFIG_SCHED_PERF_EVENTS
   perf_event_task_sched_out(tcb);
 #endif
+#ifdef CONFIG_SCHED_PERF_EVENTS
+  perf_event_task_sched_out(tcb);
+#endif
 }

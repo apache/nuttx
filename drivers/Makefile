@@ -84,6 +84,7 @@ include segger/Make.defs
 include usrsock/Make.defs
 include reset/Make.defs
 include pci/Make.defs
+include perf/Make.defs
 include coresight/Make.defs
 include aie/Make.defs
 
