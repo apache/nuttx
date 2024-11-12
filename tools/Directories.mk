@@ -68,7 +68,7 @@ ifeq ($(CONFIG_BUILD_FLAT),y)
 
 KERNDEPDIRS += libs$(DELIM)libc mm
 
-ifeq ($(CONFIG_BUILTIN_TOOLCHAIN),)
+ifeq ($(CONFIG_LIB_BUILTIN),y)
 KERNDEPDIRS += libs$(DELIM)libbuiltin
 else
 CLEANDIRS += libs$(DELIM)libbuiltin
@@ -90,7 +90,7 @@ else
 
 USERDEPDIRS += libs$(DELIM)libc mm
 
-ifeq ($(CONFIG_BUILTIN_TOOLCHAIN),)
+ifeq ($(CONFIG_LIB_BUILTIN),y)
 USERDEPDIRS += libs$(DELIM)libbuiltin
 else
 CLEANDIRS += libs$(DELIM)libbuiltin

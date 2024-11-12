@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-COMPILER_RT_VERSION=$(CONFIG_COMPILER_RT_VERSION)
+COMPILER_RT_VERSION=$(CONFIG_LIB_COMPILER_RT_VERSION)
 
 ifeq ($(CONFIG_ARCH_ARM),y)
   ARCH = arm
@@ -67,26 +67,32 @@ distclean::
 	$(call DELDIR, compiler-rt/compiler-rt)
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/include
+
+################# Builtin Library #################
+
+ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
+
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins/${ARCH}
 FLAGS += -Wno-shift-count-negative -Wno-constant-conversion -Wshift-count-overflow
 FLAGS += -Wno-undef -Wno-incompatible-pointer-types -Wno-visibility -Wno-macro-redefined
 
-################# Builtin Library #################
-
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/*.c)
 ASRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/$(ARCH)/*.S)
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/$(ARCH)/*.c)
 
-ifeq ($(CONFIG_COMPILER_RT_HAS_BFLOAT16),)
+ifeq ($(CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16),)
   BFLOAT16_SRCS := compiler-rt/compiler-rt/lib/builtins/truncdfbf2.c
   BFLOAT16_SRCS += compiler-rt/compiler-rt/lib/builtins/truncsfbf2.c
   CSRCS := $(filter-out $(BFLOAT16_SRCS), $(CSRCS))
 endif
 
+endif
+
 ################# Profile Library #################
 
-ifeq ($(CONFIG_COMPILER_RT_PROFILE),y)
+ifeq ($(CONFIG_COVERAGE_COMPILER_RT),y)
+
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
 FLAGS += -Wno-cleardeprecated-pragma -Wno-deprecated-pragma -Wno-incompatible-pointer-types
 FLAGS += -Wno-shadow -Wno-strict-prototypes -Wno-undef -Wno-unknown-warning-option
