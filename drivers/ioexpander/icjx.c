@@ -950,6 +950,12 @@ static void icjx_interrupt_worker(void *arg)
   ioe_pinset_t irq_match;
   int ret;
 
+  /* Disable interrupts. All newly incoming interrupts are handled in
+   * a while loop if there is something to handle.
+   */
+
+  priv->config->enable(priv->config, false);
+
   /* Read interrupt status register */
 
   icjx_read(priv, ICJX_INT_STATUS_A, &isr, ICJX_NOB2);
@@ -977,6 +983,10 @@ static void icjx_interrupt_worker(void *arg)
       icjx_write(priv, ICJX_CTRL_WORD_4, ICJX_CTRL_WORD_4_EOI, ICJX_NOB1);
       icjx_read(priv, ICJX_INT_STATUS_A, &isr, ICJX_NOB2);
     }
+
+  /* And enable interrupts again. */
+
+  priv->config->enable(priv->config, true);
 }
 
 /****************************************************************************
