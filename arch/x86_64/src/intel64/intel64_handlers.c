@@ -136,114 +136,11 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: isr_handler
- *
- * Description:
- *   This gets called from ISR vector handling logic in broadwell_vectors.S
- *
- ****************************************************************************/
-
-uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
-{
-  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  struct tcb_s *tcb;
-
-  if (*running_task != NULL)
-    {
-      (*running_task)->xcp.regs = regs;
-    }
-
-  board_autoled_on(LED_INIRQ);
-
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  /* Doesn't return */
-
-  PANIC();
-
-  /* To keep the compiler happy */
-
-  return regs;
-#else
-
-  DEBUGASSERT(!up_interrupt_context());
-
-  /* Set irq flag */
-
-  up_set_interrupt_context(true);
-
-  switch (irq)
-    {
-      case 0:
-      case 16:
-        __asm__ volatile("fnclex":::"memory");
-        nxsig_kill(this_task()->pid, SIGFPE);
-        break;
-
-      default:
-        /* Let's say, all ISR are asserted when REALLY BAD things happened.
-         * Don't even brother to recover, just dump the regs and PANIC.
-         */
-
-        _alert("PANIC:\n");
-        _alert("Exception %" PRId64 " occurred "
-               "with error code %" PRId64 ":\n",
-               irq, regs[REG_ERRCODE]);
-
-        PANIC_WITH_REGS("panic", regs);
-
-        up_trash_cpu();
-        break;
-  }
-
-  tcb = this_task();
-
-  /* Check for a context switch.  If a context switch occurred, then
-   * g_current_regs will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then the establish the
-   * correct address environment before returning from the interrupt.
-   */
-
-  if (*running_task != tcb)
-    {
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
-       */
-
-      addrenv_switch(NULL);
-#endif
-
-      /* Update scheduler parameters */
-
-      nxsched_suspend_scheduler(*running_task);
-      nxsched_resume_scheduler(tcb);
-
-      /* Record the new "running" task when context switch occurred.
-       * g_running_tasks[] is only used by assertion logic for reporting
-       * crashes.
-       */
-
-      *running_task = tcb;
-
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, this_cpu());
-    }
-
-  /* Clear irq flag */
-
-  up_set_interrupt_context(false);
-  return tcb->xcp.regs;
-#endif
-}
-
-/****************************************************************************
  * Name: irq_handler
  *
  * Description:
- *   This gets called from IRQ vector handling logic in intel64_vectors.S
+ *   This gets called from IRQ or ISR vector handling logic in
+ *   intel64_vectors.S
  *
  ****************************************************************************/
 
