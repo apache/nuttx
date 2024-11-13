@@ -33,7 +33,6 @@
 
 /* Register offsets *********************************************************/
 
-
 #define RP23XX_DMA_READ_ADDR_OFFSET                  0x000000  /* DMA Read Address pointer */
 #define RP23XX_DMA_WRITE_ADDR_OFFSET                 0x000004  /* DMA Write Address pointer */
 #define RP23XX_DMA_TRANS_COUNT_OFFSET                0x000008  /* DMA Transfer Count */
@@ -240,4 +239,4 @@
 #define RP23XX_DMA_SECCFG_MISC_TIMER3_S                    (1 << 9)
 #define RP23XX_DMA_DBG_CTDREQ_MASK                         (0x3f)
 
-#endif /*__ARCH_ARM_SRC_RP23XX_HARDWARE_RP23XX_DMA_H*/
+#endif /* __ARCH_ARM_SRC_RP23XX_HARDWARE_RP23XX_DMA_H */

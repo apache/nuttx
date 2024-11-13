@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp23xx/raspberrypi-pico-2/include/rp23xx_spidev.h
+ * boards/arm/rp23xx/pimoroni-pico-2-plus/include/rp23xx_spidev.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

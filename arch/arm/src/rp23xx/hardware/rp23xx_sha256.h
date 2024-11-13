@@ -55,5 +55,4 @@
 #define RP23XX_SHA256_WDATA_MASK             (0xffffffff)
 #define RP23XX_SHA256_SUM_MASK               (0xffffffff)
 
-
 #endif /* __ARCH_ARM_SRC_RP23XX_HARDWARE_RP23XX_SHA256_H */

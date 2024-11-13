@@ -29,9 +29,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-// ROM FUNCTIONS
+/* ROM FUNCTIONS */
 
-// RP2040 & RP2350
+/* RP2040 & RP2350 */
 #define ROM_DATA_SOFTWARE_GIT_REVISION          ROM_TABLE_CODE('G', 'R')
 #define ROM_FUNC_FLASH_ENTER_CMD_XIP            ROM_TABLE_CODE('C', 'X')
 #define ROM_FUNC_FLASH_EXIT_XIP                 ROM_TABLE_CODE('E', 'X')
@@ -40,7 +40,7 @@
 #define ROM_FUNC_FLASH_RANGE_ERASE              ROM_TABLE_CODE('R', 'E')
 #define ROM_FUNC_FLASH_RANGE_PROGRAM            ROM_TABLE_CODE('R', 'P')
 
-// RP2350 only
+/* RP2350 only */
 #define ROM_FUNC_PICK_AB_PARTITION              ROM_TABLE_CODE('A', 'B')
 #define ROM_FUNC_CHAIN_IMAGE                    ROM_TABLE_CODE('C', 'I')
 #define ROM_FUNC_EXPLICIT_BUY                   ROM_TABLE_CODE('E', 'B')
@@ -65,15 +65,15 @@
 #define ROM_FUNC_FLASH_SELECT_XIP_READ_MODE     ROM_TABLE_CODE('X', 'M')
 #define ROM_FUNC_VALIDATE_NS_BUFFER             ROM_TABLE_CODE('V', 'B')
 
-// these form a bit set
+/* these form a bit set */
 #define BOOTROM_STATE_RESET_CURRENT_CORE 0x01
 #define BOOTROM_STATE_RESET_OTHER_CORE   0x02
-#define BOOTROM_STATE_RESET_GLOBAL_STATE 0x04 // reset any global state (e.g. permissions)
+#define BOOTROM_STATE_RESET_GLOBAL_STATE 0x04 /* reset any global state (e.g. permissions) */
 
 #define RT_FLAG_FUNC_RISCV      0x0001
 #define RT_FLAG_FUNC_RISCV_FAR  0x0003
 #define RT_FLAG_FUNC_ARM_SEC    0x0004
-// reserved for 32-bit pointer: 0x0008
+/* reserved for 32-bit pointer: 0x0008 */
 #define RT_FLAG_FUNC_ARM_NONSEC 0x0010
 
 #define BOOTROM_FUNC_TABLE_OFFSET 0x14
@@ -90,15 +90,6 @@
 #define BOOTROM_TABLE_LOOKUP_OFFSET     (BOOTROM_FUNC_TABLE_OFFSET + BOOTROM_WELL_KNOWN_PTR_SIZE)
 #endif
 
-/*! \brief Return a bootrom lookup code based on two ASCII characters
- * \ingroup pico_bootrom
- *
- * These codes are uses to lookup data or function addresses in the bootrom
- *
- * \param c1 the first character
- * \param c2 the second character
- * \return the 'code' to use in rom_func_lookup() or rom_data_lookup()
- */
 #define ROM_TABLE_CODE(c1, c2) ((c1) | ((c2) << 8))
 
 /****************************************************************************
@@ -107,20 +98,31 @@
 
 typedef void *(*rom_table_lookup_fn)(uint32_t code, uint32_t mask);
 
-static __inline void *rom_func_lookup(uint32_t code) {
+static __inline void *rom_func_lookup(uint32_t code)
+{
 #ifdef __riscv
-    uint32_t rom_offset_adjust = rom_size_is_64k() ? 32 * 1024 : 0;
-    // on RISC-V the code (a jmp) is actually embedded in the table
-    rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn) (uintptr_t)*(uint16_t*)(BOOTROM_TABLE_LOOKUP_ENTRY_OFFSET + rom_offset_adjust);
-    return rom_table_lookup(code, RT_FLAG_FUNC_RISCV);
+  uint32_t rom_offset_adjust = rom_size_is_64k() ? 32 * 1024 : 0;
+
+  /* on RISC-V the code (a jmp) is actually embedded in the table */
+
+  rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn) (uintptr_t)
+    *(uint16_t *)(BOOTROM_TABLE_LOOKUP_ENTRY_OFFSET + rom_offset_adjust);
+
+  return rom_table_lookup(code, RT_FLAG_FUNC_RISCV);
 #else
-    // on ARM the function pointer is stored in the table, so we dereference it
-    // via lookup() rather than lookup_entry()
-    rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn) (uintptr_t)*(uint16_t*)(BOOTROM_TABLE_LOOKUP_OFFSET);
-    if (pico_processor_state_is_nonsecure()) {
-        return rom_table_lookup(code, RT_FLAG_FUNC_ARM_NONSEC);
-    } else {
-        return rom_table_lookup(code, RT_FLAG_FUNC_ARM_SEC);
+  /* on ARM the function pointer is stored in the table, so we dereference
+   * it via lookup() rather than lookup_entry()
+   */
+
+  rom_table_lookup_fn rom_table_lookup = (rom_table_lookup_fn) (uintptr_t)
+    *(uint16_t *)(BOOTROM_TABLE_LOOKUP_OFFSET);
+  if (pico_processor_state_is_nonsecure())
+    {
+      return rom_table_lookup(code, RT_FLAG_FUNC_ARM_NONSEC);
+    }
+  else
+    {
+      return rom_table_lookup(code, RT_FLAG_FUNC_ARM_SEC);
     }
 #endif
 }

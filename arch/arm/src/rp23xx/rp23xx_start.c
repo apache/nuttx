@@ -91,7 +91,7 @@ void __start(void)
 
   __asm__ __volatile__ ("\tmsr msp, %0\n" :: "r" (g_idle_topstack));
 
-  if (up_cpu_index() != 0)
+  if (this_cpu() != 0)
     {
       while (1)
         {
@@ -108,12 +108,22 @@ void __start(void)
       *dest++ = 0;
     }
 
+  /* Set up clock */
+
+  rp23xx_clockconfig();
+  rp23xx_boardearlyinitialize();
+
   /* Initialize all spinlock states */
 
   for (i = 0; i < 32; i++)
     {
       putreg32(0, RP23XX_SIO_SPINLOCK(i));
     }
+
+  /* Configure the uart so that we can get debug output as soon as possible */
+
+  rp23xx_lowsetup();
+  showprogress('A');
 
   /* Move the initialized data section from its temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
@@ -129,16 +139,6 @@ void __start(void)
       *dest++ = *src++;
     }
 #endif
-
-  /* Set up clock */
-
-  rp23xx_clockconfig();
-  rp23xx_boardearlyinitialize();
-
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  rp23xx_lowsetup();
-  showprogress('A');
 
   showprogress('B');
 

@@ -1,5 +1,7 @@
 /****************************************************************************
- * boards/arm/rp23xx/pimoroni-pico-2-plus/src/rp23xx_pico.h
+ * boards/arm/rp23xx/raspberrypi-pico-2/src/etc/init.d/rcS
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,36 +20,5 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_RP23XX_RASPBERRYPI_PICO_2_SRC_RP23XX_PICO_H
-#define __BOARDS_ARM_RP23XX_RASPBERRYPI_PICO_2_SRC_RP23XX_PICO_H
-
-/****************************************************************************
- * Included Files
- ****************************************************************************/
-
 #include <nuttx/config.h>
 
-/* LEDs */
-
-#define GPIO_LED1       25 /* The board's LED is connected to this pin */
-
-/* Buttons */
-
-/* Buttons GPIO pins definition */
-
-#define GPIO_BTN_USER1     16
-#define GPIO_BTN_USER2     17
-
-/* Buttons IRQ definitions */
-
-#define MIN_IRQBUTTON     BUTTON_USER1
-#define MAX_IRQBUTTON     BUTTON_USER2
-#define NUM_IRQBUTTONS    (BUTTON_USER1 - BUTTON_USER2 + 1)
-
-int rp23xx_bringup(void);
-
-#ifdef CONFIG_DEV_GPIO
-int rp23xx_dev_gpio_init(void);
-#endif
-
-#endif /* __BOARDS_ARM_RP23XX_RASPBERRYPI_PICO_2_SRC_RP23XX_PICO_H */

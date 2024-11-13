@@ -16,18 +16,18 @@ Most drivers were copied from the rp2040 port with some modifications.
 
 The following list indicates peripherals currently supported in NuttX:
 
-==============   ======        =====
+==============   ============  =====
 Peripheral       Status        Notes
-==============   ======        =====
+==============   ============  =====
 GPIO             Working       See Supported Boards documentation for available pins.
 UART             Working       GPIO 0 (UART0 TX) and GPIO 1 (UART0 RX) are used for the console.
 I2C              Untested
-SPI Master       Untested
-SPI Slave        Not working
+SPI Master       Working
+SPI Slave        Untested
 DMAC             Untested
 PWM              Untested
 USB              Experimental  usbnsh configuration is somewhat working with some data corruption
-PIO              Untested
+PIO              Working
 IRQs             Working
 DMA              Untested
 Clock Output     Untested
@@ -35,13 +35,13 @@ Flash ROM Boot   Working       Does not require boot2 from pico-sdk
                                If picotool is available a nuttx.uf2 file will be created
 SRAM Boot        Working       Requires external SWD debugger
 PSRAM            Working       Three modes of heap allocation described below
-==============   ======        =====
+==============   ============  =====
 
 Installation
 ============
 
 1. Download and build picotool, make it available in the PATH::
-   
+
     git clone https://github.com/raspberrypi/picotool.git picotool
     cd picotool
     mkdir build
@@ -52,7 +52,7 @@ Installation
 
 2. Download NuttX and the companion applications.  These must both be
    contained in the same directory::
-  
+
     git clone https://github.com/apache/nuttx.git nuttx
     git clone https://github.com/apache/nuttx-apps.git apps
 
@@ -78,7 +78,7 @@ Building NuttX
     make menuconfig
 
 5. Build NuttX::
- 
+
     make
 
 Flash boot
@@ -94,14 +94,14 @@ the flash on startup).
 
 It is also possible to execute from SRAM, which reduces the
 available SRAM to the OS and applications, however it is very
-useful when debugging as erasings and rewriting the flash on
+useful when debugging as erasing and rewriting the flash on
 every build is tedious and slow. This option is enabled with
 `BOOT_RUNFROMISRAM` and requires `openocd`` and/or `gdb`.
 
 There is a third option which is to write the firmware on the
 flash and it gets copied to the SRAM. This is enabled with
 `CONFIG_BOOT_COPYTORAM` and might be useful for time critical
-applications, on the expense of reduced useable interna SRAM
+applications, on the expense of reduced usable internal SRAM
 memory.
 
 PSRAM
@@ -195,7 +195,7 @@ Most builds provide access to the console via UART0.  To access this
 GPIO 0 and 1 pins must be connected to the device such as USB-serial converter.
 
 The `usbnsh` configuration provides the console access by USB CDC/ACM serial
-devcice.  The console is available by using a terminal software on the USB host.
+device.  The console is available by using a terminal software on the USB host.
 
 Supported Boards
 ================
