@@ -35,6 +35,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <arch/syscall.h>
+#  include <nuttx/macro.h>
 #endif
 
 /* Include NuttX-specific IRQ definitions */
@@ -393,6 +394,41 @@ static inline void up_irq_restore(irqstate_t flags)
 #  endif
 #  define up_cpu_index() ((int)MPID_TO_CORE(GET_MPIDR()))
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
+
+/****************************************************************************
+ * Name:
+ *   read_/write_/zero_/modify_ sysreg
+ *
+ * Description:
+ *
+ *   ARMv8 Architecture Registers access method
+ *   All the macros need a memory clobber
+ *
+ ****************************************************************************/
+
+#define read_sysreg(reg)                            \
+  ({                                                \
+    uint64_t __val;                                 \
+    __asm__ volatile ("mrs %0, " STRINGIFY(reg)     \
+                    : "=r" (__val) :: "memory");    \
+    __val;                                          \
+  })
+
+#define write_sysreg(__val, reg)                    \
+  ({                                                \
+    __asm__ volatile ("msr " STRINGIFY(reg) ", %0"  \
+                      : : "r" (__val) : "memory");  \
+  })
+
+#define zero_sysreg(reg)                            \
+  ({                                                \
+    __asm__ volatile ("msr " STRINGIFY(reg) ", xzr" \
+                      ::: "memory");                \
+  })
+
+#define modify_sysreg(v,m,a)                        \
+  write_sysreg((read_sysreg(a) & ~(m)) |            \
+               ((uintptr_t)(v) & (m)), a)
 
 /****************************************************************************
  * Schedule acceleration macros
