@@ -22,7 +22,7 @@ import bisect
 import json
 import time
 from os import path
-from typing import Dict, Generator, List
+from typing import Dict, Generator, List, Tuple
 
 import gdb
 
@@ -100,13 +100,9 @@ class MMLeak(gdb.Command):
 
         return nodes
 
-    def invoke(self, arg: str, from_tty: bool) -> None:
-        heaps = memdump.get_heaps("g_mmheap")
-        pids = [int(tcb["pid"]) for tcb in utils.get_tcbs()]
-
-        def is_pid_alive(pid):
-            return pid in pids
-
+    def collect_leaks(
+        self, heaps: List[mm.MMHeap]
+    ) -> Dict[memdump.MMNodeDump, List[memdump.MMNodeDump]]:
         t = time.time()
         print("Loading globals from elf...", flush=True, end="")
         good_nodes = self.global_nodes()  # Global memory are all good.
@@ -155,15 +151,67 @@ class MMLeak(gdb.Command):
 
         print(f" {time.time() - t:.2f}s", flush=True, end="\n")
 
-        leak_nodes = memdump.group_nodes(nodes_dict[addr] for addr in sorted_addr)
+        return memdump.group_nodes((nodes_dict[addr] for addr in sorted_addr))
+
+    def _iterate_leaks(
+        self, nodes: Dict[memdump.MMNodeDump, List[memdump.MMNodeDump]]
+    ) -> Generator[Tuple[memdump.MMNodeDump, bool, int], None, None]:
+        pids = [int(tcb["pid"]) for tcb in utils.get_tcbs()]
+
+        def is_pid_alive(pid):
+            return pid in pids
+
+        for node in nodes.keys():
+            count = len(nodes[node])
+            yield node, is_pid_alive(node.pid), count
+
+    def invoke(self, arg: str, from_tty: bool) -> None:
+        heaps = memdump.get_heaps("g_mmheap")
+
+        leak_nodes = self.collect_leaks(heaps)
         memdump.print_header()
         total_blk = total_size = 0
-        for node in leak_nodes.keys():
-            count = len(leak_nodes[node])
+        for node, alive, count in self._iterate_leaks(leak_nodes):
             total_blk += count
             total_size += count * node.nodesize
-            memdump.print_node(
-                node, is_pid_alive(node.pid), count=len(leak_nodes[node])
-            )
+            memdump.print_node(node, alive, count=count)
 
         print(f"Leaked {total_blk} blks, {total_size} bytes")
+
+    def diagnose(self, *args, **kwargs):
+        heaps = memdump.get_heaps("g_mmheap")
+        leak_nodes = self.collect_leaks(heaps)
+        total_blk = total_size = 0
+        data = []
+        for node, alive, count in self._iterate_leaks(leak_nodes):
+            total_blk += count
+            total_size += count * node.nodesize
+            info = {
+                "count": count,
+                "pid": node.pid,
+                "size": node.nodesize,
+                "address": node.address,
+                "seqno": node.seqno,
+                "alive": alive,
+                "backtrace": [],
+            }
+
+            if mm.CONFIG_MM_BACKTRACE and node.backtrace and node.backtrace[0]:
+                bt = utils.Backtrace(node.backtrace)
+                info["backtrace"] = [
+                    {
+                        "address": addr,
+                        "function": func,
+                        "source": source,
+                    }
+                    for addr, func, source in bt.backtrace
+                ]
+            data.append(info)
+
+        return {
+            "title": "Memory Leak Report",
+            "summary": f"Total {total_blk} blks, {total_size} bytes leaked",
+            "result": "fail" if total_blk else "pass",
+            "command": "mm leak",
+            "data": data,
+        }
