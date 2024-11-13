@@ -43,18 +43,6 @@ config ARMV8R_MEMINIT
 		the memory initialization first, then explicitly call
 		arm_data_initialize().
 
-config ARMV8R_HAVE_DECODEFIQ
-	bool
-	default n
-
-config ARMV8R_DECODEFIQ
-	bool "FIQ Handler"
-	default n
-	depends on ARMV8R_HAVE_DECODEFIQ
-	---help---
-		Select this option if your platform supports the function
-		arm_decodefiq().
-
 config ARMV8R_ALIGNMENT_TRAP
 	bool "Enable Alignment Check at __start"
 	default n

@@ -328,6 +328,11 @@ bool arm_gic_irq_is_enabled(unsigned int intid);
 int  arm_gic_initialize(void);
 void arm_gic_irq_set_priority(unsigned int intid, unsigned int prio,
                                 uint32_t flags);
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+void arm_gic_set_group(unsigned int intid, unsigned int group);
+#endif
+
 int arm_gic_irq_trigger(unsigned int intid, uint32_t flags);
 
 int arm_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);

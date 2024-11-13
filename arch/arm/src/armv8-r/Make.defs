@@ -52,3 +52,7 @@ endif
 ifeq ($(CONFIG_ARMV8R_L2CC_PL310),y)
   CMN_CSRCS += arm_l2cc_pl310.c
 endif
+
+ifeq ($(CONFIG_ARCH_HIPRI_INTERRUPT),y)
+  CMN_CSRCS += arm_dofiq.c
+endif

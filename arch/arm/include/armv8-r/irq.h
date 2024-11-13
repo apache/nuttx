@@ -365,7 +365,7 @@ noinstrument_function static inline irqstate_t up_irq_save(void)
     (
       "\tmrs    %0, cpsr\n"
       "\tcpsid  i\n"
-#if defined(CONFIG_ARMV8R_DECODEFIQ)
+#if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
       "\tcpsid  f\n"
 #endif
       : "=r" (cpsr)
@@ -386,7 +386,7 @@ static inline irqstate_t up_irq_enable(void)
     (
       "\tmrs    %0, cpsr\n"
       "\tcpsie  i\n"
-#if defined(CONFIG_ARMV8R_DECODEFIQ)
+#if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
       "\tcpsie  f\n"
 #endif
       : "=r" (cpsr)

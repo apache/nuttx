@@ -51,4 +51,8 @@ if(CONFIG_ARCH_FPU)
   list(APPEND SRCS arm_fpucmp.c arm_fpuconfig.S)
 endif()
 
+if(CONFIG_ARCH_HIPRI_INTERRUPT)
+  list(APPEND SRCS arm_dofiq.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
