@@ -356,6 +356,7 @@ class MMNode(gdb.Value, p.MMFreeNode):
     MM_MASK_BIT = MM_ALLOC_BIT | MM_PREVFREE_BIT
     MM_SIZEOF_ALLOCNODE = utils.sizeof("struct mm_allocnode_s")
     MM_ALLOCNODE_OVERHEAD = MM_SIZEOF_ALLOCNODE - utils.sizeof("mmsize_t")
+    MM_MIN_CHUNK = utils.get_symbol_value("MM_MIN_CHUNK", locspec="mm_initialize")
 
     def __init__(self, node: gdb.Value):
         if node.type.code == gdb.TYPE_CODE_PTR:
@@ -425,12 +426,12 @@ class MMNode(gdb.Value, p.MMFreeNode):
     @property
     def flink(self):
         # Only free node has flink and blink
-        return self["flink"] if self.is_free else None
+        return MMNode(self["flink"]) if self.is_free and self["flink"] else None
 
     @property
     def blink(self):
         # Only free node has flink and blink
-        return self["blink"] if self.is_free else None
+        return MMNode(self["blink"]) if self.is_free and self["blink"] else None
 
     @property
     def pid(self) -> int:
@@ -456,14 +457,17 @@ class MMNode(gdb.Value, p.MMFreeNode):
 
     @property
     def prevnode(self) -> MMNode:
-        addr = int(self.address) - self["presize"]
-        type = utils.lookup_type("struct mm_allocnode_s").pointer()
+        if not self.is_prev_free:
+            return None
+
+        addr = int(self.address) - self.prevsize
+        type = utils.lookup_type("struct mm_freenode_s").pointer()
         return MMNode(gdb.Value(addr).cast(type))
 
     @property
     def nextnode(self) -> MMNode:
         addr = int(self.address) + self.nodesize
-        type = utils.lookup_type("struct mm_allocnode_s").pointer()
+        type = utils.lookup_type("struct mm_freenode_s").pointer()
         # Use gdb.Value for better performance
         return MMNode(gdb.Value(addr).cast(type))
 
@@ -473,7 +477,7 @@ class MMNode(gdb.Value, p.MMFreeNode):
 
     @property
     def is_prev_free(self) -> bool:
-        return self["preceding"] & MMNode.MM_PREVFREE_BIT
+        return self["size"] & MMNode.MM_PREVFREE_BIT
 
     @property
     def is_orphan(self) -> bool:
@@ -500,9 +504,13 @@ class MMHeap(Value, p.MMHeap):
         super().__init__(heap)
 
         self.name = name or "<noname>"
+        self._regions = None
 
     def __repr__(self) -> str:
-        return f"{self.name}@{self.address}, {self.nregions}regions, {int(self.heapsize) / 1024 :.1f}kB"
+        regions = [
+            f"{hex(start.address)}~{hex(end.address)}" for start, end in self.regions
+        ]
+        return f"{self.name}@{self.address}, {int(self.heapsize) / 1024 :.1f}kB {self.nregions}regions: {','.join(regions)}"
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -524,13 +532,20 @@ class MMHeap(Value, p.MMHeap):
         return int(utils.get_field(self, "mm_nregions", default=1))
 
     @property
+    def mm_mpool(self) -> Value:
+        return utils.get_field(self, "mm_mpool", default=None)
+
+    @property
     def regions(self):
-        regions = self.nregions
-        for start, end in zip(
-            utils.ArrayIterator(self.mm_heapstart, regions),
-            utils.ArrayIterator(self.mm_heapend, regions),
-        ):
-            yield MMNode(start), MMNode(end)
+        if not self._regions:
+            regions = self.nregions
+            self._regions = []
+            for start, end in zip(
+                utils.ArrayIterator(self.mm_heapstart, regions),
+                utils.ArrayIterator(self.mm_heapend, regions),
+            ):
+                self._regions.append((MMNode(start), MMNode(end)))
+        return self._regions
 
     @property
     def nodes(self) -> Generator[MMNode, None, None]:
@@ -547,9 +562,9 @@ class MMHeap(Value, p.MMHeap):
         return filter(lambda node: not node.is_free, self.nodes)
 
     def contains(self, address: int) -> bool:
-        return any(
-            start.address <= address < end.address for start, end in self.regions
-        )
+        ranges = [[int(start.address), int(end.address)] for start, end in self.regions]
+        ranges[0][0] = int(self.address)  # The heap itself is also in the range
+        return any(start <= address <= end for start, end in ranges)
 
     def find(self, address: int) -> MMNode:
         for node in self.nodes:
