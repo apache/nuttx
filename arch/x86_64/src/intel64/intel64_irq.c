@@ -40,7 +40,9 @@
 #include <arch/board/board.h>
 
 #include <nuttx/spinlock.h>
+#include <nuttx/signal.h>
 
+#include "sched/sched.h"
 #include "x86_64_internal.h"
 #include "intel64_cpu.h"
 #include "intel64.h"
@@ -431,10 +433,6 @@ static inline void up_idtinit(void)
 }
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: arm_color_intstack
  *
  * Description:
@@ -452,6 +450,43 @@ static inline void x86_64_color_intstack(void)
 #else
 #  define x86_64_color_intstack()
 #endif
+
+/****************************************************************************
+ * Name: x86_64_fault_panic_isr
+ ****************************************************************************/
+
+static int x86_64_fault_panic_isr(int irq, void *c, void *arg)
+{
+  uint64_t *regs = (uint64_t *)running_regs();
+
+  /* Let's say, all ISR are asserted when REALLY BAD things happened.
+   * Don't even brother to recover, just dump the regs and PANIC.
+   */
+
+  _alert("PANIC:\n");
+  _alert("Exception %" PRId32 " occurred "
+         "with error code %" PRId64 ":\n",
+         irq, regs[REG_ERRCODE]);
+
+  PANIC_WITH_REGS("panic", regs);
+
+  up_trash_cpu();
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: x86_64_fault_kill_isr
+ ****************************************************************************/
+
+static int x86_64_fault_kill_isr(int irq, void *c, void *arg)
+{
+  __asm__ volatile("fnclex":::"memory");
+
+  nxsig_kill(running_task()->pid, SIGFPE);
+
+  return 0;
+}
 
 /****************************************************************************
  * Public Functions
@@ -503,6 +538,15 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_restore(X86_64_RFLAGS_IF);
 #endif
+
+  /* Attach default handlers for faults */
+
+  irq_attach(ISR0, x86_64_fault_kill_isr, NULL);
+  irq_attach(ISR6, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR8, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR13, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR14, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR16, x86_64_fault_kill_isr, NULL);
 }
 
 /****************************************************************************
