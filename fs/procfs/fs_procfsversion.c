@@ -48,7 +48,7 @@
 #include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_VERSION
 
 /****************************************************************************
  * Pre-processor Definitions
