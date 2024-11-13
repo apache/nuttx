@@ -197,6 +197,11 @@ config ESPRESSIF_ESPTOOL_TARGET_SECONDARY
 
 endchoice
 
+config ESPRESSIF_MCUBOOT_SIGN_IMAGE_VERSION
+	string "Sign image version"
+	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
+	default "1.0.0"
+
 config ESPRESSIF_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"
 	default 32
