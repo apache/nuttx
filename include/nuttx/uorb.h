@@ -1220,23 +1220,6 @@ struct sensor_ustate_s
   uint64_t generation;         /* The recent generation of circular buffer */
 };
 
-/* This structure describes the register info for the user sensor */
-
-#ifdef CONFIG_USENSOR
-struct sensor_reginfo_s
-{
-  char     path[NAME_MAX];     /* The path of user sensor */
-  uint32_t esize;              /* The element size of user sensor */
-  uint32_t nbuffer;            /* The number of queue buffered elements */
-
-  /* The flag is used to indicate that the validity of sensor data
-   * is persistent.
-   */
-
-  int persist;
-};
-#endif
-
 /* This structure describes the context custom ioctl for device */
 
 struct sensor_ioctl_s
@@ -1310,5 +1293,23 @@ struct sensor_device_info_s
 
   char          vendor[SENSOR_INFO_NAME_SIZE];
 };
+
+/* This structure describes the register info for the user sensor */
+
+#ifdef CONFIG_USENSOR
+struct sensor_reginfo_s
+{
+  char     path[NAME_MAX];             /* The path of user sensor */
+  uint32_t esize;                      /* The element size of user sensor */
+  uint32_t nbuffer;                    /* The number of queue buffered elements */
+  struct sensor_device_info_s devinfo; /* The device info. */
+
+  /* The flag is used to indicate that the validity of sensor data
+   * is persistent.
+   */
+
+  int persist;
+};
+#endif
 
 #endif /* __INCLUDE_NUTTX_SENSORS_SENSOR_H */
