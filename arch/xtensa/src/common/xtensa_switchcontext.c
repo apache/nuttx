@@ -59,7 +59,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Are we in an interrupt handler? */
 
-  if (!up_current_regs())
+  if (!up_interrupt_context())
     {
       /* Switch context to the context of the task at the head of the
        * ready to run list.
