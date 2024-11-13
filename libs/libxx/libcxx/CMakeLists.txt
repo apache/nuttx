@@ -84,6 +84,10 @@ if(CONFIG_LIBCXX)
     add_compile_definitions(__GLIBCXX__)
   endif()
 
+  if(CONFIG_LIBCXXABI)
+    add_compile_definitions(LIBCXX_BUILDING_LIBCXXABI)
+  endif()
+
   set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_EXTENSIONS ON)
