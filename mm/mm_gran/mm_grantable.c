@@ -223,17 +223,47 @@ failure:
 
   if (mpos && !used)
     {
-      /* offset of last used when matching for free */
+      size_t tmp;
 
+      v = gran->gat[c];
       DEBUGASSERT(v);
-#ifdef CONFIG_HAVE_BUILTIN_CLZ
-      *mpos = 31 - __builtin_clz(v);
+
+      if (v == GATCFULL)
+        {
+          /* Handle full GAT quickly */
+
+          tmp = 32;
+        }
+      else if (c == r.sidx)
+        {
+          /* offset of first unused when matching for free */
+
+          v = ~v;
+#ifdef CONFIG_HAVE_BUILTIN_CTZ
+          tmp = __builtin_ctz(v);
 #else
-      *mpos = (uint32_t)((msb_mask(v)) * DEBRUJIN_NUM) >> 27;
-      DEBUGASSERT(*mpos < sizeof(DEBRUJIN_LUT));
-      *mpos = DEBRUJIN_LUT[*mpos];
+          tmp = (uint32_t)((lsb_mask(v)) * DEBRUJIN_NUM) >> 27;
+          DEBUGASSERT(tmp < sizeof(DEBRUJIN_LUT));
+          tmp = DEBRUJIN_LUT[tmp];
 #endif
-      *mpos += c * GATC_BITS(gran);
+          tmp = tmp - 1; /* Ok, because v >= 1 */
+        }
+      else
+        {
+          /* offset of last used when matching for free */
+
+#ifdef CONFIG_HAVE_BUILTIN_CLZ
+          tmp = 31 - __builtin_clz(v);
+#else
+          tmp = (uint32_t)((msb_mask(v)) * DEBRUJIN_NUM) >> 27;
+          DEBUGASSERT(tmp < sizeof(DEBRUJIN_LUT));
+          tmp = DEBRUJIN_LUT[tmp];
+#endif
+        }
+
+      /* return the last used position to caller */
+
+      *mpos = tmp + c * GATC_BITS(gran);
     }
 
   return false;
