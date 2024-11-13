@@ -33,6 +33,7 @@
 
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/compiler.h>
+#include <nuttx/mutex.h>
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>
@@ -70,6 +71,10 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#if defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC)
+static mutex_t g_lowputs_lock = NXMUTEX_INITIALIZER;
+#endif
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 static const struct syslog_channel_ops_s g_ramlog_channel_ops =
@@ -229,17 +234,11 @@ g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
 #ifdef CONFIG_SYSLOG_DEFAULT
 static int syslog_default_putc(FAR syslog_channel_t *channel, int ch)
 {
-#  ifdef CONFIG_ARCH_LOWPUTC
-  /* See https://github.com/apache/nuttx/issues/14662
-   * about what this critical section is for.
-   */
-
-  irqstate_t flags = enter_critical_section();
-  up_putc(ch);
-  leave_critical_section(flags);
-#  endif
-
   UNUSED(channel);
+
+#  ifdef CONFIG_ARCH_LOWPUTC
+  up_putc(ch);
+#  endif
   return ch;
 }
 
@@ -247,13 +246,11 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
                                     FAR const char *buffer, size_t buflen)
 {
 #  ifdef CONFIG_ARCH_LOWPUTC
-  /* See https://github.com/apache/nuttx/issues/14662
-   * about what this critical section is for.
-   */
+  nxmutex_lock(&g_lowputs_lock);
 
-  irqstate_t flags = enter_critical_section();
   up_nputs(buffer, buflen);
-  leave_critical_section(flags);
+
+  nxmutex_unlock(&g_lowputs_lock);
 #  endif
 
   UNUSED(channel);
