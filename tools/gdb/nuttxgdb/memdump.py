@@ -240,7 +240,11 @@ class MMDump(gdb.Command):
             if node or (node := self.find(heaps, addr)):
                 printnode(node, 1)
                 source = "Pool" if node.from_pool else "Heap"
-                print(f"{addr: #x} found belongs to {source}, node@{node.address:#x}")
+                print(f"{addr: #x} found belongs to {source} {node}")
+                if node.prevnode:
+                    print(f"prevnode: {node.prevnode}")
+                if node.nextnode:
+                    print(f"nextnode: {node.nextnode}")
             else:
                 print(f"Address {addr:#x} not found in any heap")
             return
