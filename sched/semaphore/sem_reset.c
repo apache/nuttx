@@ -81,7 +81,7 @@ int nxsem_reset(FAR sem_t *sem, int16_t count)
    * out counts to any waiting threads.
    */
 
-  while (atomic_load(NXSEM_COUNT(sem)) < 0 && count > 0)
+  while ((int16_t)atomic_load(NXSEM_COUNT(sem)) < 0 && count > 0)
     {
       /* Give out one counting, waking up one of the waiting threads
        * and, perhaps, kicking off a lot of priority inheritance

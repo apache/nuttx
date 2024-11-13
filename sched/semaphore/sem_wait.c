@@ -85,7 +85,7 @@ static int nxsem_wait_slow(FAR sem_t *sem)
 
   /* Check if the lock is available */
 
-  if (atomic_fetch_sub(NXSEM_COUNT(sem), 1) > 0)
+  if ((int16_t)atomic_fetch_sub(NXSEM_COUNT(sem), 1) > 0)
     {
       /* It is, let the task take the semaphore. */
 

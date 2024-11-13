@@ -880,7 +880,7 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
   /* Check our assumptions */
 
-  DEBUGASSERT(atomic_load(NXSEM_COUNT(sem)) <= 0);
+  DEBUGASSERT((int16_t)atomic_load(NXSEM_COUNT(sem)) <= 0);
 
   /* Adjust the priority of every holder as necessary */
 

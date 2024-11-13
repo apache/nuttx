@@ -87,7 +87,7 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
    * and already changed the task's state.
    */
 
-  DEBUGASSERT(sem != NULL && atomic_load(NXSEM_COUNT(sem)) < 0);
+  DEBUGASSERT(sem != NULL && (int16_t)atomic_load(NXSEM_COUNT(sem)) < 0);
 
   /* Restore the correct priority of all threads that hold references
    * to this semaphore.

@@ -85,7 +85,7 @@ void nxsem_recover(FAR struct tcb_s *tcb)
   if (tcb->task_state == TSTATE_WAIT_SEM)
     {
       FAR sem_t *sem = tcb->waitobj;
-      DEBUGASSERT(sem != NULL && atomic_load(NXSEM_COUNT(sem)) < 0);
+      DEBUGASSERT(sem != NULL && (int16_t)atomic_load(NXSEM_COUNT(sem)) < 0);
 
       /* Restore the correct priority of all threads that hold references
        * to this semaphore.
