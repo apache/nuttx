@@ -51,6 +51,7 @@
 #define SENSOR_RPMSG_PUBLISH       6
 #define SENSOR_RPMSG_IOCTL         7
 #define SENSOR_RPMSG_IOCTL_ACK     8
+#define SENSOR_RPMSG_IOCTL_TIMEOUT 5
 
 #define SENSOR_RPMSG_FUNCTION(name, cmd, arg1, arg2, size, wait, type) \
 static int sensor_rpmsg_##name(FAR struct sensor_lowerhalf_s *lower, \
@@ -89,6 +90,7 @@ struct sensor_rpmsg_dev_s
   struct list_node               node;
   struct list_node               stublist;
   struct list_node               proxylist;
+  sem_t                          proxysem;
   uint8_t                        nadvertisers;
   uint8_t                        nsubscribers;
   FAR void                      *upper;
@@ -366,6 +368,28 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
   uint64_t pcookie;
   uint32_t space;
   int ret = -ENOTTY;
+  bool empty;
+
+  /* All control is always send to own proxy(remote advertisers),
+   * if device doesn't have proxy, need to wait until proxy is created.
+   */
+
+  sensor_rpmsg_lock(dev);
+  empty = list_is_empty(&dev->proxylist);
+  sensor_rpmsg_unlock(dev);
+  if (empty)
+    {
+      ret = nxsem_tickwait_uninterruptible(&dev->proxysem,
+            SEC2TICK(SENSOR_RPMSG_IOCTL_TIMEOUT));
+      if (ret < 0)
+        {
+          snerr("ERROR: wait proxy create failed:%s, cmd:%d\n",
+                dev->path, cmd);
+          return ret;
+        }
+
+      nxsem_post(&dev->proxysem);
+    }
 
   if (wait)
     {
@@ -373,10 +397,6 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
       cookie.result = -ENXIO;
       nxsem_init(&cookie.sem, 0, 0);
     }
-
-  /* All control is always send to own proxy(remote advertisers),
-   * if device doesn't have proxy, it must return -ENOTTY.
-   */
 
   sensor_rpmsg_lock(dev);
   list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
@@ -499,6 +519,7 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
     }
 
   list_add_tail(&dev->proxylist, &proxy->node);
+  nxsem_post(&dev->proxysem);
   sensor_rpmsg_unlock(dev);
 
   /* sync interval and latency */
@@ -606,10 +627,15 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
   return stub;
 }
 
-static void sensor_rpmsg_free_proxy(FAR struct sensor_rpmsg_proxy_s *proxy)
+static void sensor_rpmsg_free_proxy(FAR struct sensor_rpmsg_dev_s *dev,
+                                    FAR struct sensor_rpmsg_proxy_s *proxy)
 {
   list_delete(&proxy->node);
   kmm_free(proxy);
+  if (list_is_empty(&dev->proxylist))
+    {
+      nxsem_reset(&dev->proxysem, 0);
+    }
 }
 
 static void sensor_rpmsg_free_stub(FAR struct sensor_rpmsg_stub_s *stub)
@@ -706,7 +732,7 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
           list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
                                     struct sensor_rpmsg_proxy_s, node)
             {
-              sensor_rpmsg_free_proxy(proxy);
+              sensor_rpmsg_free_proxy(dev, proxy);
             }
         }
 
@@ -1033,7 +1059,7 @@ static int sensor_rpmsg_adv_handler(FAR struct rpmsg_endpoint *ept,
       if (ret < 0)
         {
           sensor_rpmsg_lock(dev);
-          sensor_rpmsg_free_proxy(proxy);
+          sensor_rpmsg_free_proxy(dev, proxy);
           sensor_rpmsg_unlock(dev);
           snerr("ERROR: adv rpmsg send failed:%s, %d, %s\n",
                 dev->path, ret, rpmsg_get_cpuname(ept->rdev));
@@ -1081,7 +1107,7 @@ static int sensor_rpmsg_unadv_handler(FAR struct rpmsg_endpoint *ept,
     {
       if (proxy->ept == ept && proxy->cookie == msg->cookie)
         {
-          sensor_rpmsg_free_proxy(proxy);
+          sensor_rpmsg_free_proxy(dev, proxy);
           break;
         }
     }
@@ -1372,7 +1398,7 @@ static void sensor_rpmsg_ept_release(FAR struct rpmsg_endpoint *ept)
         {
           if (proxy->ept == ept)
             {
-              sensor_rpmsg_free_proxy(proxy);
+              sensor_rpmsg_free_proxy(dev, proxy);
               break;
             }
         }
@@ -1473,6 +1499,7 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
 
   /* Initialize the sensor rpmsg device structure */
 
+  nxsem_init(&dev->proxysem, 0, 0);
   list_initialize(&dev->stublist);
   list_initialize(&dev->proxylist);
   strlcpy(dev->path, path, size + 1);
@@ -1531,6 +1558,7 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
   list_delete(&dev->node);
   nxrmutex_unlock(&g_dev_lock);
 
+  nxsem_destroy(&dev->proxysem);
   kmm_free(dev);
 }
 
