@@ -813,7 +813,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   FAR char *devpath = lib_get_pathbuffer();
   if (devpath == NULL)
     {
-      return;
+      return NULL;
     }
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
 
@@ -826,6 +826,9 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   if (priv == NULL)
     {
       ferr("ERROR: Failed to allocate state structure\n");
+#ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
+      lib_put_pathbuffer(devpath);
+#endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
       return NULL;
     }
 
