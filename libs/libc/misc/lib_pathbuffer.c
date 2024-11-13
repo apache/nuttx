@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/lib/lib.h>
 
 #include <stdlib.h>
@@ -41,7 +41,7 @@
 
 struct pathbuffer_s
 {
-  mutex_t lock;              /* Lock for the buffer */
+  spinlock_t lock;           /* Lock for the buffer */
   unsigned long free_bitmap; /* Bitmap of free buffer */
   char buffer[CONFIG_LIBC_MAX_PATHBUFFER][PATH_MAX];
 };
@@ -52,7 +52,7 @@ struct pathbuffer_s
 
 static struct pathbuffer_s g_pathbuffer =
 {
-  NXMUTEX_INITIALIZER,
+  SP_UNLOCKED,
   (1u << CONFIG_LIBC_MAX_PATHBUFFER) - 1,
 };
 
@@ -82,20 +82,21 @@ static struct pathbuffer_s g_pathbuffer =
 
 FAR char *lib_get_pathbuffer(void)
 {
+  irqstate_t flags;
   int index;
 
   /* Try to find a free buffer */
 
-  nxmutex_lock(&g_pathbuffer.lock);
+  flags = spin_lock_irqsave(&g_pathbuffer.lock);
   index = ffsl(g_pathbuffer.free_bitmap) - 1;
   if (index >= 0 && index < CONFIG_LIBC_MAX_PATHBUFFER)
     {
       g_pathbuffer.free_bitmap &= ~(1u << index);
-      nxmutex_unlock(&g_pathbuffer.lock);
+      spin_unlock_irqrestore(&g_pathbuffer.lock, flags);
       return g_pathbuffer.buffer[index];
     }
 
-  nxmutex_unlock(&g_pathbuffer.lock);
+  spin_unlock_irqrestore(&g_pathbuffer.lock, flags);
 
   /* If no free buffer is found, allocate a new one if
    * CONFIG_LIBC_PATHBUFFER_MALLOC is enabled
@@ -124,21 +125,19 @@ FAR char *lib_get_pathbuffer(void)
 
 void lib_put_pathbuffer(FAR char *buffer)
 {
+  irqstate_t flags;
   int index;
 
-  nxmutex_lock(&g_pathbuffer.lock);
   index = (buffer - &g_pathbuffer.buffer[0][0]) / PATH_MAX;
-
   if (index >= 0 && index < CONFIG_LIBC_MAX_PATHBUFFER)
     {
       /* Mark the corresponding bit as free */
 
+      flags = spin_lock_irqsave(&g_pathbuffer.lock);
       g_pathbuffer.free_bitmap |= 1u << index;
-      nxmutex_unlock(&g_pathbuffer.lock);
+      spin_unlock_irqrestore(&g_pathbuffer.lock, flags);
       return;
     }
-
-  nxmutex_unlock(&g_pathbuffer.lock);
 
   /* Free the buffer if it was dynamically allocated */
 
