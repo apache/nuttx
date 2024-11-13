@@ -1195,6 +1195,15 @@ void stm32_stdclockconfig(void)
         }
 
 #endif /* STM32_USE_LSE */
+
+      /* Configure ADC source clock */
+
+#if defined(STM32_RCC_CCIPR5_ADCDACSEL)
+      regval = getreg32(STM32_RCC_CCIPR5);
+      regval &= ~RCC_CCIPR5_ADCDACSEL_MASK;
+      regval |= STM32_RCC_CCIPR5_ADCDACSEL;
+      putreg32(regval, STM32_RCC_CCIPR5);
+#endif
     }
 }
 #endif

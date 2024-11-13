@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32h5/nucleo-h563zi/src/stm32_bringup.c
+ * arch/arm/src/stm32h5/stm32_adc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,96 +20,66 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32H5_STM32_ADC_H
+#define __ARCH_ARM_SRC_STM32H5_STM32_ADC_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <sys/mount.h>
-#include <sys/types.h>
-#include <debug.h>
-
-#include <nuttx/input/buttons.h>
-#include <nuttx/leds/userled.h>
-#include <nuttx/board.h>
-
-#include "nucleo-h563zi.h"
-
-#include <arch/board/board.h>
+#include <nuttx/analog/adc.h>
+#include "chip.h"
+#include "hardware/stm32_adc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(CONFIG_STM32H5_ADC1) || defined(CONFIG_STM32H5_ADC2)
+
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bringup
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: stm32h5_adc_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
+ *    Initialize the ADC.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *    intf      - Could be {1,2} for ADC1, ADC2
+ *    chanlist  - The list of channels
+ *    nchannels - Number of channels
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *    Valid ADC device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-int stm32_bringup(void)
-{
-  int ret;
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
-#endif
-
-#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
-  /* Register the LED driver */
-
-  ret = userled_lower_initialize("/dev/userleds");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_INPUT_BUTTONS
-#ifdef CONFIG_INPUT_BUTTONS_LOWER
-  iinfo("Initializing button driver\n");
-
-  /* Register the BUTTON driver */
-
-  ret = btn_lower_initialize("/dev/buttons");
-  if (ret < 0)
-    {
-      ierr("ERROR: btn_lower_initialize() failed: %d\n", ret);
-    }
-#else
-  /* Enable BUTTON support for some other purpose */
-
-  board_button_initialize();
-#endif
-#endif /* CONFIG_INPUT_BUTTONS */
-
-#ifdef CONFIG_ADC
-  ret = stm32_adc_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
-    }
-#endif /* CONFIG_ADC*/
-
-  UNUSED(ret);
-  return OK;
+struct adc_dev_s;
+struct adc_dev_s *stm32h5_adc_initialize(int intf,
+                                         const uint8_t *chanlist,
+                                         int nchannels);
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* CONFIG_STM32H5_ADC1 || CONFIG_STM32H5_ADC2*/
+#endif /* __ARCH_ARM_SRC_STM32H5_STM32_ADC_H */

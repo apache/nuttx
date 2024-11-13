@@ -87,6 +87,20 @@
 #define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 2)
 #define STM32_PLL1R_FREQUENCY     (STM32_VCO1_FRQ / 2)
 
+/* PLL2 config: Needed to use 2 ADC at max speed. */
+
+#define STM32_PLLCFG_PLL2CFG      (RCC_PLL2CFGR_PLL2SRC_HSI | \
+                                   RCC_PLL2CFGR_PLL2RGE_4_8M | \
+                                   RCC_PLL2CFGR_PLL2M(8) | \
+                                   RCC_PLL2CFGR_PLL2REN)
+#define STM32_PLLCFG_PLL2N         RCC_PLL2DIVR_PLL2N(75)
+#define STM32_PLLCFG_PLL2R         RCC_PLL2DIVR_PLL2R(4)
+#define STM32_PLLCFG_PLL2DIVR     (STM32_PLLCFG_PLL2N | \
+                                   STM32_PLLCFG_PLL2R)
+
+#define STM32_VCO2_FRQ            ((STM32_HSI_FREQUENCY / 8) * 75)
+#define STM32_PLL2R_FREQUENCY     (STM32_VCO2_FRQ / 4)
+
 /* Enable CLK48; get it from HSI48 */
 
 #if defined(CONFIG_STM32H5_USBFS) || defined(CONFIG_STM32H5_RNG)
@@ -179,6 +193,14 @@
 #define GPIO_ETH_RMII_TX_EN   (GPIO_ETH_RMII_TX_EN_3 | GPIO_SPEED_100MHz)   /* PG11 */
 #define GPIO_ETH_RMII_CRS_DV  (GPIO_ETH_RMII_CRS_DV_0 | GPIO_SPEED_100MHz)  /* PA7 */
 #define GPIO_ETH_RMII_REF_CLK (GPIO_ETH_RMII_REF_CLK_0 | GPIO_SPEED_100MHz) /* PA1 */
+
+/* ADC Clock Source *********************************************************/
+
+#define STM32_RCC_CCIPR5_ADCDACSEL RCC_CCIPR5_ADCDACSEL_PLL2RCK
+#define STM32_ADC_CLK_FREQUENCY    STM32_PLL2R_FREQUENCY
+
+#define GPIO_ADC1_IN3   (GPIO_ADC1_IN3_0)
+#define GPIO_ADC1_IN10  (GPIO_ADC1_IN10_0)
 
 /* USART3: Connected to Arduino connector D0/D1 (or to STLink VCP if solder
  * bridges SB123 to SB130 are re-worked accordingly).
