@@ -170,10 +170,13 @@
 #define CP15_DCIALLU(r)       _CP15(0, r, c15, c5, 0)     /* Invalidate data cache */
 
 #define CP15_ICC_PMR(r)       _CP15(0, r, c4,  c6,  0)    /* ICC_PMR */
+#define CP15_ICC_IAR0(r)      _CP15(0, r, c12, c8,  0)    /* ICC_IAR0 */
 #define CP15_ICC_IAR1(r)      _CP15(0, r, c12, c12, 0)    /* ICC_IAR1 */
+#define CP15_ICC_EOIR0(r)     _CP15(0, r, c12, c8,  1)    /* ICC_EOIR0 */
 #define CP15_ICC_EOIR1(r)     _CP15(0, r, c12, c12, 1)    /* ICC_EOIR1 */
 #define CP15_ICC_SRE(r)       _CP15(0, r, c12, c12, 5)    /* ICC_SRE */
 #define CP15_ICC_HSRE(r)      _CP15(4, r, c12,  c9, 5)    /* ICC_HSRE */
+#define CP15_ICC_IGRPEN0(r)   _CP15(0, r, c12, c12, 6)    /* ICC_IGRPEN0 */
 #define CP15_ICC_IGRPEN1(r)   _CP15(0, r, c12, c12, 7)    /* ICC_IGRPEN1 */
 #define CP15_ICC_SGI1R(lo,hi) _CP15_64(0, lo, hi, c12)    /* ICC_SGI1R */
 

@@ -131,13 +131,13 @@ void up_initial_state(struct tcb_s *tcb)
   cpsr |= (PSR_I_BIT | PSR_F_BIT);
 
 #else /* CONFIG_SUPPRESS_INTERRUPTS */
-  /* Leave IRQs enabled (Also FIQs if CONFIG_ARMV8R_DECODEFIQ is selected) */
+  /* Leave IRQs enabled (Also FIQs if CONFIG_ARCH_HIPRI_INTERRUPT is selected) */
 
-#ifndef CONFIG_ARMV8R_DECODEFIQ
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 
   cpsr |= PSR_F_BIT;
 
-#endif /* !CONFIG_ARMV8R_DECODEFIQ */
+#endif /* !CONFIG_ARCH_HIPRI_INTERRUPT */
 
 #ifdef CONFIG_ARM_THUMB
   cpsr |= PSR_T_BIT;

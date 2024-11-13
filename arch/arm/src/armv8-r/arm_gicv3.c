@@ -279,6 +279,68 @@ bool arm_gic_irq_is_enabled(unsigned int intid)
   return (val & mask) != 0;
 }
 
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+void arm_gic_set_group(unsigned int intid, unsigned int group)
+{
+  uint32_t mask = BIT(intid & (GIC_NUM_INTR_PER_REG - 1));
+  uint32_t idx  = intid / GIC_NUM_INTR_PER_REG;
+  unsigned long base = GET_DIST_BASE(intid);
+  uint32_t igroupr_val;
+  uint32_t igroupmodr_val;
+
+  igroupr_val = getreg32(IGROUPR(base, idx));
+  igroupmodr_val = getreg32(IGROUPMODR(base, idx));
+  if (group == 0)
+    {
+      igroupr_val &= ~mask;
+      igroupmodr_val &= ~mask;
+    }
+  else
+    {
+      igroupr_val |= mask;
+      igroupmodr_val |= mask;
+    }
+
+  putreg32(igroupr_val, IGROUPR(base, idx));
+  putreg32(igroupmodr_val, IGROUPMODR(base, idx));
+}
+
+static unsigned int arm_gic_get_active_group0(void)
+{
+  int intid;
+
+  /* (Pending -> Active / AP) or (AP -> AP)
+   * Read a Group 0 INTID on an interrupt acknowledge.
+   */
+
+  intid = CP15_GET(ICC_IAR0);
+
+  return intid;
+}
+
+static void arm_gic_eoi_group0(unsigned int intid)
+{
+  /* Interrupt request deassertion from peripheral to GIC happens
+   * by clearing interrupt condition by a write to the peripheral
+   * register. It is desired that the write transfer is complete
+   * before the core tries to change GIC state from 'AP/Active' to
+   * a new state on seeing 'EOI write'.
+   * Since ICC interface writes are not ordered against Device
+   * memory writes, a barrier is required to ensure the ordering.
+   * The dsb will also ensure *completion* of previous writes with
+   * DEVICE nGnRnE attribute.
+   */
+
+  ARM_DSB();
+
+  /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case
+   * Write a Group 0 interrupt completion
+   */
+
+  CP15_SET(ICC_EOIR0, intid);
+}
+#endif
+
 unsigned int arm_gic_get_active(void)
 {
   int intid;
@@ -458,6 +520,12 @@ static void gicv3_cpuif_init(void)
 
   CP15_SET(ICC_PMR, GIC_IDLE_PRIO);
 
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  /* Allow group0 interrupts */
+
+  CP15_SET(ICC_IGRPEN0, 1);
+#endif
+
   /* Allow group1 interrupts */
 
   CP15_SET(ICC_IGRPEN1, 1);
@@ -560,14 +628,23 @@ static void gicv3_dist_init(void)
    * BIT(1), we can reuse them.
    */
 
-  putreg32(BIT(GICD_CTRL_ARE_S) | BIT(GICD_CTLR_ENABLE_G1NS),
-                 GICD_CTLR);
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  putreg32(BIT(GICD_CTRL_ARE_S) | BIT(GICD_CTLR_ENABLE_G1NS) |
+           BIT(GICD_CTLR_ENABLE_G0), GICD_CTLR);
+#else
+  putreg32(BIT(GICD_CTRL_ARE_S) | BIT(GICD_CTLR_ENABLE_G1NS), GICD_CTLR);
+#endif /* CONFIG_ARCH_HIPRI_INTERRUPT */
 
 #else
   /* Enable distributor with ARE */
 
-  putreg32(BIT(GICD_CTRL_ARE_NS) | BIT(GICD_CTLR_ENABLE_G1NS),
-           GICD_CTLR);
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  putreg32(BIT(GICD_CTRL_ARE_NS) | BIT(GICD_CTLR_ENABLE_G1NS) |
+           BIT(GICD_CTLR_ENABLE_G0), GICD_CTLR);
+#else
+  putreg32(BIT(GICD_CTRL_ARE_NS) | BIT(GICD_CTLR_ENABLE_G1NS), GICD_CTLR);
+#endif /* CONFIG_ARCH_HIPRI_INTERRUPT */
+
 #endif
 
 #ifdef CONFIG_SMP
@@ -676,11 +753,56 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
     }
 }
 
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 /***************************************************************************
- * Name: arm64_decodeirq
+ * Name: arm_decodefiq
  *
  * Description:
- *   This function is called from the IRQ vector handler in arm64_vectors.S.
+ *   This function is called from the FIQ vector handler in arm_vectors.S.
+ *   At this point, the interrupt has been taken and the registers have
+ *   been saved on the stack.  This function simply needs to determine the
+ *   the irq number of the interrupt and then to call arm_dofiq to dispatch
+ *   the interrupt.
+ *
+ *  Input Parameters:
+ *   regs - A pointer to the register save area on the stack.
+ ***************************************************************************/
+
+uint32_t *arm_decodefiq(uint32_t *regs)
+{
+  int fiq;
+
+  /* Read the Group0 interrupt acknowledge register
+   * and get the interrupt ID
+   */
+
+  fiq = arm_gic_get_active_group0();
+
+  /* Ignore spurions FIQs.  ICCIAR will report 1023 if there is no pending
+   * interrupt.
+   */
+
+  DEBUGASSERT(fiq < NR_IRQS || fiq == 1023);
+  if (fiq < NR_IRQS)
+    {
+      /* Dispatch the fiq interrupt */
+
+      regs = arm_dofiq(fiq, regs);
+    }
+
+  /* Write to Group0 the end-of-interrupt register */
+
+  arm_gic_eoi_group0(fiq);
+
+  return regs;
+}
+#endif
+
+/***************************************************************************
+ * Name: arm_decodeirq
+ *
+ * Description:
+ *   This function is called from the IRQ vector handler in arm_vectors.S.
  *   At this point, the interrupt has been taken and the registers have
  *   been saved on the stack.  This function simply needs to determine the
  *   the irq number of the interrupt and then to call arm_doirq to dispatch
