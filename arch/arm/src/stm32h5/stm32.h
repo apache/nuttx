@@ -42,4 +42,5 @@
 #include "stm32_rcc.h"
 #include "stm32_uart.h"
 #include "stm32_lowputc.h"
+#include "stm32_i2c.h"
 #endif /* __ARCH_ARM_SRC_STM32H5_STM32_H */

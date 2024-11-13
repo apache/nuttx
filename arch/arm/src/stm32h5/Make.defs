@@ -44,6 +44,10 @@ ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += stm32h5_tim_lowerhalf.c
 endif
 
+ifeq ($(CONFIG_STM32H5_I2C),y)
+CHIP_CSRCS += stm32_i2c.c
+endif
+
 # Required chip type specific files
 
 ifeq ($(CONFIG_STM32H5_STM32H5XXXX),y)
