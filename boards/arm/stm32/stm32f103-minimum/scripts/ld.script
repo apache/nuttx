@@ -88,7 +88,7 @@ SECTIONS
         _etbss = ABSOLUTE(.);
     } > flash
 
-    _eronly = ABSOLUTE(.);
+    _eronly = LOADADDR(.data);
 
     /* The STM32F103C8T6 has 20Kb of SRAM beginning at the following address */
 
