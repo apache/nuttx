@@ -222,3 +222,68 @@ def try_expand(expr, macro):
     res += do_expand(expr, macro)
 
     return "".join(res)
+
+
+class Macro:
+    """
+    This is a singleton class which only initializes once to
+    cache a context of macro definition which can be queried later
+    TODO: we only deal with single ELF at the moment for simplicity
+    If you load more object files while debugging, only the first one gets loaded
+    will be used to retrieve macro information
+
+    Usage:
+        macro = Macro("nuttx/nuttx")
+        print(macro.CONFIG_MM_BACKTRACE)
+        if macro.CONFIG_MM_BACKTRACE:
+            print("mm backtrace is enabled")
+        else:
+            print("mm backtrace is disabled")
+    """
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "instance"):
+            cls.instance = super(Macro, cls).__new__(cls)
+        return cls.instance
+
+    def __init__(self, filename):
+        self._macro_map = {}
+        self._file = filename
+        self._macro_map = fetch_macro_info(filename)
+
+    def is_defined(self, macro_name):
+        """
+        Check if a macro is defined
+        """
+        return macro_name in self._macro_map
+
+    def get_value(self, macro_name, default=None):
+        """
+        Get the value of a macro, return default if macro is not defined
+        """
+        if not self.is_defined(macro_name):
+            return default
+
+        value = self._macro_map[macro_name]
+        # Try to convert to numeric type
+        try:
+            # Handle hexadecimal
+            if isinstance(value, str) and value.startswith("0x"):
+                return int(value, 16)
+            # Handle integer
+            return int(value)
+        except (ValueError, TypeError):
+            # Return original value if conversion fails
+            return value
+
+    def __getattr__(self, name):
+        """
+        Allow using dot notation to access macros
+        """
+        return self.get_value(name)
+
+    def __call__(self, macro_name):
+        """
+        Allow using function call syntax to get macro
+        """
+        return self.get_value(macro_name)
