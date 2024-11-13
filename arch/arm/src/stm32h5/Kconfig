@@ -30,7 +30,7 @@ endchoice # STM32 H5 Chip Selection
 config STM32H5_STM32H5XXXX
 	bool
 	default n
-        select ARCH_HAVE_FPU
+		select ARCH_HAVE_FPU
 
 config STM32H5_STM32H56XXX
 	bool
@@ -64,12 +64,12 @@ choice
 		that designates the FLASH size.
 
 			Designator  Size in KiB
-			     8          64
-			     B         128
-			     C         256
-			     E         512
-			     G        1024
-			     I        2048
+				 8          64
+				 B         128
+				 C         256
+				 E         512
+				 G        1024
+				 I        2048
 
 		This configuration option defaults to using the configuration based on that designator
 		or the default smaller size if there is no last character designator is present in the
@@ -198,6 +198,7 @@ menu "STM32H5 Peripheral Selection"
 # These "hidden" settings determine if a peripheral option is available
 # for the selected MCU
 
+
 config STM32H5_HAVE_ETHERNET
 	bool
 	default n
@@ -265,7 +266,21 @@ config STM32H5_USART
 	bool
 	default n
 
+config STM32H5_ADC
+  bool
+  default n
+
 # These are the peripheral selections proper
+
+config STM32H5_ADC1
+  bool "ADC1"
+  default n
+  select STM32H5_ADC
+
+config STM32H5_ADC2
+  bool "ADC2"
+  default n
+  select STM32H5_ADC
 
 config STM32H5_ETHMAC
 	bool "Ethernet MAC"
@@ -367,8 +382,8 @@ config STM32H5_LPUART1
 	select STM32H5_USART
 
 config STM32H5_I2C
-        bool
-        default n
+		bool
+		default n
 
 config STM32H5_I2C1
 	bool "I2C1"
@@ -1092,119 +1107,119 @@ menu "I2C Configuration"
 menu "Clock Selection"
 
 choice
-        depends on STM32H5_I2C1
-        prompt "I2C1 Input Clock Selection"
-        default STM32H5_I2C1_CLK_PCLK1
+	depends on STM32H5_I2C1
+	prompt "I2C1 Input Clock Selection"
+	default STM32H5_I2C1_CLK_PCLK1
 config STM32H5_I2C1_CLK_CSI
-        bool "CSI"
+	bool "CSI"
 config STM32H5_I2C1_CLK_HSI
-        bool "HSI"
+	bool "HSI"
 config STM32H5_I2C1_CLK_PCLK1
-        bool "PCLK1"
+	bool "PCLK1"
 config STM32H5_I2C1_CLK_PLL3R
-        bool "PLL3R"
+	bool "PLL3R"
 endchoice
 choice
-        depends on STM32H5_I2C2
-        prompt "I2C2 Input Clock Selection"
-        default STM32H5_I2C2_CLK_PCLK1
+	depends on STM32H5_I2C2
+	prompt "I2C2 Input Clock Selection"
+	default STM32H5_I2C2_CLK_PCLK1
 config STM32H5_I2C2_CLK_CSI
-        bool "CSI"
+	bool "CSI"
 config STM32H5_I2C2_CLK_HSI
-        bool "HSI"
+	bool "HSI"
 config STM32H5_I2C2_CLK_PCLK1
-        bool "PCLK1"
+	bool "PCLK1"
 config STM32H5_I2C2_CLK_PLL3R
-        bool "PLL3R"
+	bool "PLL3R"
 endchoice
 choice
-        depends on STM32H5_I2C3
-        prompt "I2C3 Input Clock Selection"
-        default STM32H5_I2C3_CLK_PCLK3
+	depends on STM32H5_I2C3
+	prompt "I2C3 Input Clock Selection"
+	default STM32H5_I2C3_CLK_PCLK3
 config STM32H5_I2C3_CLK_CSI
-        bool "CSI"
+	bool "CSI"
 config STM32H5_I2C3_CLK_HSI
-        bool "HSI"
+	bool "HSI"
 config STM32H5_I2C3_CLK_PCLK3
-        bool "PCLK3"
+	bool "PCLK3"
 config STM32H5_I2C3_CLK_PLL3R
-        bool "PLL3R"
+	bool "PLL3R"
 endchoice
 choice
-        depends on STM32H5_I2C4
-        prompt "I2C4 Input Clock Selection"
-        default STM32H5_I2C4_CLK_PCLK3
+	depends on STM32H5_I2C4
+	prompt "I2C4 Input Clock Selection"
+	default STM32H5_I2C4_CLK_PCLK3
 config STM32H5_I2C4_CLK_CSI
-        bool "CSI"
+	bool "CSI"
 config STM32H5_I2C4_CLK_HSI
-        bool "HSI"
+	bool "HSI"
 config STM32H5_I2C4_CLK_PCLK3
-        bool "PCLK3"
+	bool "PCLK3"
 config STM32H5_I2C4_CLK_PLL3R
-        bool "PLL3R"
+	bool "PLL3R"
 endchoice
 
 endmenu
 
 menu "Rise/Fall Override"
 config STM32H5_I2C1_RF_OVERRIDE
-        bool "I2C1"
-        default n
-        depends on STM32H5_I2C1
+	bool "I2C1"
+	default n
+	depends on STM32H5_I2C1
 config STM32H5_I2C2_RF_OVERRIDE
-        bool "I2C2"
-        default n
-        depends on STM32H5_I2C2
+	bool "I2C2"
+	default n
+	depends on STM32H5_I2C2
 config STM32H5_I2C3_RF_OVERRIDE
-        bool "I2C3"
-        default n
-        depends on STM32H5_I2C3
+	bool "I2C3"
+	default n
+	depends on STM32H5_I2C3
 config STM32H5_I2C4_RF_OVERRIDE
-        bool "I2C4"
-        default n
-        depends on STM32H5_I2C4
+	bool "I2C4"
+	default n
+	depends on STM32H5_I2C4
 
 menu "Rise/Fall Values"
 config STM32H5_I2C1_RISE
-        int "I2C1 Rise Time (ns)"
-        range 0 1000
-        default 20
-        depends on STM32H5_I2C1_RF_OVERRIDE
+	int "I2C1 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C1_RF_OVERRIDE
 config STM32H5_I2C1_FALL
-        int "I2C1 Fall Time (ns)"
-        range 0 300
-        default 20
-        depends on STM32H5_I2C1_RF_OVERRIDE
+	int "I2C1 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C1_RF_OVERRIDE
 config STM32H5_I2C2_RISE
-        int "I2C2 Rise Time (ns)"
-        range 0 1000
-        default 20
-        depends on STM32H5_I2C2_RF_OVERRIDE
+	int "I2C2 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C2_RF_OVERRIDE
 config STM32H5_I2C2_FALL
-        int "I2C2 Fall Time (ns)"
-        range 0 300
-        default 20
-        depends on STM32H5_I2C2_RF_OVERRIDE
+	int "I2C2 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C2_RF_OVERRIDE
 config STM32H5_I2C3_RISE
-        int "I2C3 Rise Time (ns)"
-        range 0 1000
-        default 20
-        depends on STM32H5_I2C3_RF_OVERRIDE
+	int "I2C3 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C3_RF_OVERRIDE
 config STM32H5_I2C3_FALL
-        int "I2C3 Fall Time (ns)"
-        range 0 300
-        default 20
-        depends on STM32H5_I2C3_RF_OVERRIDE
+	int "I2C3 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C3_RF_OVERRIDE
 config STM32H5_I2C4_RISE
-        int "I2C4 Rise Time (ns)"
-        range 0 1000
-        default 20
-        depends on STM32H5_I2C4_RF_OVERRIDE
+	int "I2C4 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C4_RF_OVERRIDE
 config STM32H5_I2C4_FALL
-        int "I2C4 Fall Time (ns)"
-        range 0 300
-        default 20
-        depends on STM32H5_I2C4_RF_OVERRIDE
+	int "I2C4 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C4_RF_OVERRIDE
 endmenu
 endmenu
 
@@ -1212,51 +1227,51 @@ menu "Filtering"
 
 menu "Digital Filters"
 config STM32H5_I2C1_DNF
-        int "I2C1 Digital Noise Filter"
-        range 0 15
-        default 0
-        depends on STM32H5_I2C1
+	int "I2C1 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C1
 config STM32H5_I2C2_DNF
-        int "I2C2 Digital Noise Filter"
-        range 0 15
-        default 0
-        depends on STM32H5_I2C2
+	int "I2C2 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C2
 config STM32H5_I2C3_DNF
-        int "I2C3 Digital Noise Filter"
-        range 0 15
-        default 0
-        depends on STM32H5_I2C3
+	int "I2C3 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C3
 config STM32H5_I2C4_DNF
-        int "I2C4 Digital Noise Filter"
-        range 0 15
-        default 0
-        depends on STM32H5_I2C4
+	int "I2C4 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C4
 endmenu
 
 menu "Analog Filters"
 config STM32H5_I2C1_ANFOFF
-        int "Turn off I2C1 Analog Filter (0=on, 1=off)"
-        default 1
-        range 0 1
-        depends on STM32H5_I2C1
+	int "Turn off I2C1 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C1
 
 config STM32H5_I2C2_ANFOFF
-        int "Turn off I2C2 Analog Filter (0=on, 1=off)"
-        default 1
-        range 0 1
-        depends on STM32H5_I2C2
+	int "Turn off I2C2 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C2
 
 config STM32H5_I2C3_ANFOFF
-        int "Turn off I2C3 Analog Filter (0=on, 1=off)"
-        default 1
-        range 0 1
-        depends on STM32H5_I2C3
+	int "Turn off I2C3 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C3
 
 config STM32H5_I2C4_ANFOFF
-        int "Turn off I2C4 Analog Filter (0=on, 1=off)"
-        default 1
-        range 0 1
-        depends on STM32H5_I2C4
+	int "Turn off I2C4 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C4
 endmenu
 
 endmenu
