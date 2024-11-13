@@ -268,10 +268,6 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
         {
           /* The following steps must be atomic with respect to serial
            * interrupt handling.
-           *
-           * This critical section is also used for the serialization
-           * with the up_putc-based syslog channels.
-           * See https://github.com/apache/nuttx/issues/14662
            */
 
           flags = enter_critical_section();
