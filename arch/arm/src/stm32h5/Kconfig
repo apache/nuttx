@@ -366,6 +366,30 @@ config STM32H5_LPUART1
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select STM32H5_USART
 
+config STM32H5_I2C
+        bool
+        default n
+
+config STM32H5_I2C1
+	bool "I2C1"
+	default n
+	select STM32H5_I2C
+
+config STM32H5_I2C2
+	bool "I2C2"
+	default n
+	select STM32H5_I2C
+
+config STM32H5_I2C3
+	bool "I2C3"
+	default n
+	select STM32H5_I2C
+
+config STM32H5_I2C4
+	bool "I2C4"
+	default n
+	select STM32H5_I2C
+
 endmenu
 
 
@@ -1060,5 +1084,213 @@ config STM32H5_NO_PHY
 	default n
 
 endmenu # Ethernet MAC Configuration
+
+
+menu "I2C Configuration"
+	depends on STM32H5_I2C
+
+menu "Clock Selection"
+
+choice
+        depends on STM32H5_I2C1
+        prompt "I2C1 Input Clock Selection"
+        default STM32H5_I2C1_CLK_PCLK1
+config STM32H5_I2C1_CLK_CSI
+        bool "CSI"
+config STM32H5_I2C1_CLK_HSI
+        bool "HSI"
+config STM32H5_I2C1_CLK_PCLK1
+        bool "PCLK1"
+config STM32H5_I2C1_CLK_PLL3R
+        bool "PLL3R"
+endchoice
+choice
+        depends on STM32H5_I2C2
+        prompt "I2C2 Input Clock Selection"
+        default STM32H5_I2C2_CLK_PCLK1
+config STM32H5_I2C2_CLK_CSI
+        bool "CSI"
+config STM32H5_I2C2_CLK_HSI
+        bool "HSI"
+config STM32H5_I2C2_CLK_PCLK1
+        bool "PCLK1"
+config STM32H5_I2C2_CLK_PLL3R
+        bool "PLL3R"
+endchoice
+choice
+        depends on STM32H5_I2C3
+        prompt "I2C3 Input Clock Selection"
+        default STM32H5_I2C3_CLK_PCLK3
+config STM32H5_I2C3_CLK_CSI
+        bool "CSI"
+config STM32H5_I2C3_CLK_HSI
+        bool "HSI"
+config STM32H5_I2C3_CLK_PCLK3
+        bool "PCLK3"
+config STM32H5_I2C3_CLK_PLL3R
+        bool "PLL3R"
+endchoice
+choice
+        depends on STM32H5_I2C4
+        prompt "I2C4 Input Clock Selection"
+        default STM32H5_I2C4_CLK_PCLK3
+config STM32H5_I2C4_CLK_CSI
+        bool "CSI"
+config STM32H5_I2C4_CLK_HSI
+        bool "HSI"
+config STM32H5_I2C4_CLK_PCLK3
+        bool "PCLK3"
+config STM32H5_I2C4_CLK_PLL3R
+        bool "PLL3R"
+endchoice
+
+endmenu
+
+menu "Rise/Fall Override"
+config STM32H5_I2C1_RF_OVERRIDE
+        bool "I2C1"
+        default n
+        depends on STM32H5_I2C1
+config STM32H5_I2C2_RF_OVERRIDE
+        bool "I2C2"
+        default n
+        depends on STM32H5_I2C2
+config STM32H5_I2C3_RF_OVERRIDE
+        bool "I2C3"
+        default n
+        depends on STM32H5_I2C3
+config STM32H5_I2C4_RF_OVERRIDE
+        bool "I2C4"
+        default n
+        depends on STM32H5_I2C4
+
+menu "Rise/Fall Values"
+config STM32H5_I2C1_RISE
+        int "I2C1 Rise Time (ns)"
+        range 0 1000
+        default 20
+        depends on STM32H5_I2C1_RF_OVERRIDE
+config STM32H5_I2C1_FALL
+        int "I2C1 Fall Time (ns)"
+        range 0 300
+        default 20
+        depends on STM32H5_I2C1_RF_OVERRIDE
+config STM32H5_I2C2_RISE
+        int "I2C2 Rise Time (ns)"
+        range 0 1000
+        default 20
+        depends on STM32H5_I2C2_RF_OVERRIDE
+config STM32H5_I2C2_FALL
+        int "I2C2 Fall Time (ns)"
+        range 0 300
+        default 20
+        depends on STM32H5_I2C2_RF_OVERRIDE
+config STM32H5_I2C3_RISE
+        int "I2C3 Rise Time (ns)"
+        range 0 1000
+        default 20
+        depends on STM32H5_I2C3_RF_OVERRIDE
+config STM32H5_I2C3_FALL
+        int "I2C3 Fall Time (ns)"
+        range 0 300
+        default 20
+        depends on STM32H5_I2C3_RF_OVERRIDE
+config STM32H5_I2C4_RISE
+        int "I2C4 Rise Time (ns)"
+        range 0 1000
+        default 20
+        depends on STM32H5_I2C4_RF_OVERRIDE
+config STM32H5_I2C4_FALL
+        int "I2C4 Fall Time (ns)"
+        range 0 300
+        default 20
+        depends on STM32H5_I2C4_RF_OVERRIDE
+endmenu
+endmenu
+
+menu "Filtering"
+
+menu "Digital Filters"
+config STM32H5_I2C1_DNF
+        int "I2C1 Digital Noise Filter"
+        range 0 15
+        default 0
+        depends on STM32H5_I2C1
+config STM32H5_I2C2_DNF
+        int "I2C2 Digital Noise Filter"
+        range 0 15
+        default 0
+        depends on STM32H5_I2C2
+config STM32H5_I2C3_DNF
+        int "I2C3 Digital Noise Filter"
+        range 0 15
+        default 0
+        depends on STM32H5_I2C3
+config STM32H5_I2C4_DNF
+        int "I2C4 Digital Noise Filter"
+        range 0 15
+        default 0
+        depends on STM32H5_I2C4
+endmenu
+
+menu "Analog Filters"
+config STM32H5_I2C1_ANFOFF
+        int "Turn off I2C1 Analog Filter (0=on, 1=off)"
+        default 1
+        range 0 1
+        depends on STM32H5_I2C1
+
+config STM32H5_I2C2_ANFOFF
+        int "Turn off I2C2 Analog Filter (0=on, 1=off)"
+        default 1
+        range 0 1
+        depends on STM32H5_I2C2
+
+config STM32H5_I2C3_ANFOFF
+        int "Turn off I2C3 Analog Filter (0=on, 1=off)"
+        default 1
+        range 0 1
+        depends on STM32H5_I2C3
+
+config STM32H5_I2C4_ANFOFF
+        int "Turn off I2C4 Analog Filter (0=on, 1=off)"
+        default 1
+        range 0 1
+        depends on STM32H5_I2C4
+endmenu
+
+endmenu
+
+config STM32H5_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32H5_I2C
+
+config STM32H5_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32H5_I2C_DYNTIMEO
+
+config STM32H5_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32H5_I2C_DYNTIMEO
+
+config STM32H5_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32H5_I2C
+
+config STM32H5_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32H5_I2C && !STM32H5_I2C_DYNTIMEO
+
+config STM32H5_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32H5_I2C && !STM32H5_I2C_DYNTIMEO
+
+endmenu # "I2C Configuration"
 
 endif # ARCH_CHIP_STM32H5
