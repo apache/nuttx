@@ -67,7 +67,7 @@
 
 volatile static spinlock_t g_core1_boot;
 
-extern int arm_pause_handler(int irq, void *c, void *arg);
+extern int rp23xx_smp_call_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Private Functions
@@ -151,8 +151,8 @@ static void core1_boot(void)
 
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP23XX_SIO_IRQ_PROC1, arm_pause_handler, NULL);
-  up_enable_irq(RP23XX_SIO_IRQ_PROC1);
+  irq_attach(RP23XX_SIO_IRQ_FIFO, rp23xx_smp_call_handler, NULL);
+  up_enable_irq(RP23XX_SIO_IRQ_FIFO);
 
   spin_unlock(&g_core1_boot);
 
@@ -225,7 +225,7 @@ int up_cpu_start(int cpu)
 
   core1_boot_msg[0] = 0;
   core1_boot_msg[1] = 1;
-  core1_boot_msg[2] = getreg32(ARMV6M_SYSCON_VECTAB);
+  core1_boot_msg[2] = getreg32(NVIC_VECTAB);
   core1_boot_msg[3] = (uint32_t)tcb->stack_base_ptr +
                                 tcb->adj_stack_size;
   core1_boot_msg[4] = (uint32_t)core1_boot;
@@ -247,8 +247,8 @@ int up_cpu_start(int cpu)
 
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP23XX_SIO_IRQ_PROC0, arm_pause_handler, NULL);
-  up_enable_irq(RP23XX_SIO_IRQ_PROC0);
+  irq_attach(RP23XX_SIO_IRQ_FIFO, rp23xx_smp_call_handler, NULL);
+  up_enable_irq(RP23XX_SIO_IRQ_FIFO);
 
   spin_lock(&g_core1_boot);
 

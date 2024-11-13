@@ -107,7 +107,7 @@ static const int g_gpio_function_mapping_i2c[2][9] =
   {
     0,  4,  8, 12, 16, 20, 24, 28,
 #ifdef CONFIG_RP23XX_RP2350B
-32, 36, 40, 44,
+    32, 36, 40, 44,
 #endif
     -1
   }, /* pin numbers assignable to I2C0 */
@@ -293,7 +293,7 @@ void rp23xx_gpio_set_function(uint32_t gpio, uint32_t func)
 
   modbits_reg32(RP23XX_PADS_BANK0_GPIO_IE,
                 RP23XX_PADS_BANK0_GPIO_ISO |
-                RP23XX_PADS_BANK0_GPIO_IE | 
+                RP23XX_PADS_BANK0_GPIO_IE |
                 RP23XX_PADS_BANK0_GPIO_OD,
                 RP23XX_PADS_BANK0_GPIO(gpio));
 

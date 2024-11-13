@@ -1,6 +1,6 @@
 /****************************************************************************
  * arch/arm/src/rp23xx/rp23xx_pio_instructions.h
- * 
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -294,8 +294,9 @@ inline static uint32_t pio_encode_irq_set(bool relative, uint32_t irq)
                                     _pio_encode_irq(relative, irq));
 }
 
-inline static uint32_t pio_encode_irq_wait(bool relative, uint32_t irq) {
-    return _pio_encode_instr_and_args(pio_instr_bits_irq, 1, 
+inline static uint32_t pio_encode_irq_wait(bool relative, uint32_t irq)
+{
+    return _pio_encode_instr_and_args(pio_instr_bits_irq, 1,
                                       _pio_encode_irq(relative, irq));
 }
 

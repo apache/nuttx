@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 static void * const psram_start = (void *)0x11000000ul;
-static const size_t psram_size = 8*1024*1024;
+static const size_t psram_size = 8 * 1024 * 1024;
 
 /****************************************************************************
  * Public Functions
@@ -51,7 +51,7 @@ static struct mm_heap_s *g_psramheap;
 #error cannot use CONFIG_MM_KERNEL_HEAP with single heap
 #endif
 
-#if CONFIG_MM_REGIONS > 1 
+#if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
   /* Add the PSRAM region to main heap */
@@ -68,7 +68,8 @@ void arm_addregion(void)
 
 /* Use the internal SRAM as the kernel heap */
 
-void up_allocate_kheap(void **heap_start, size_t *heap_size) {
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
+{
   *heap_start = (void *)g_idle_topstack;
 
 #ifdef CONFIG_ARCH_PGPOOL_PBASE
@@ -78,9 +79,10 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size) {
 #endif
 }
 
-/* Use the external PSRAM as the default user heap*/
+/* Use the external PSRAM as the default user heap */
 
-void up_allocate_heap(void **heap_start, size_t *heap_size) {
+void up_allocate_heap(void **heap_start, size_t *heap_size)
+{
   *heap_start = psram_start;
   *heap_size = psram_size;
 }

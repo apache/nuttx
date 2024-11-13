@@ -35,12 +35,15 @@ CHIP_CSRCS += rp23xx_xosc.c
 CHIP_CSRCS += rp23xx_pll.c
 
 ifeq ($(CONFIG_SMP),y)
-CHIP_CSRCS += rp23xx_cpuindex.c
 CHIP_CSRCS += rp23xx_cpustart.c
-CHIP_CSRCS += rp23xx_cpupause.c
+CHIP_CSRCS += rp23xx_smpcall.c
 CHIP_CSRCS += rp23xx_cpuidlestack.c
 CHIP_CSRCS += rp23xx_testset.c
 CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+CHIP_CSRCS += rp23xx_cpuindex.c
 endif
 
 ifeq ($(CONFIG_RP23XX_DMAC),y)

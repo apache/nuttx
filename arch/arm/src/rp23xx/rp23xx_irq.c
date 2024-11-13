@@ -108,14 +108,20 @@ static void rp23xx_dumpnvic(const char *msg, int irq)
           getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
           getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+          getreg32(NVIC_IRQ16_19_PRIORITY),
+          getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY),
+          getreg32(NVIC_IRQ28_31_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+          getreg32(NVIC_IRQ32_35_PRIORITY),
+          getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY),
+          getreg32(NVIC_IRQ44_47_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+          getreg32(NVIC_IRQ48_51_PRIORITY),
+          getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY),
+          getreg32(NVIC_IRQ60_63_PRIORITY));
 
   irqinfo("SYSCON:\n");
   irqinfo("  CPUID:      %08x\n",
@@ -203,7 +209,8 @@ static inline void rp23xx_clrpend(int irq)
         }
       else
         {
-          putreg32((1 << (irq - RP23XX_IRQ_EXTINT - 32)), NVIC_IRQ32_63_CLRPEND);
+          putreg32((1 << (irq - RP23XX_IRQ_EXTINT - 32)),
+                   NVIC_IRQ32_63_CLRPEND);
         }
     }
 }
@@ -321,7 +328,8 @@ void up_disable_irq(int irq)
         }
       else
         {
-          putreg32((1 << (irq - RP23XX_IRQ_EXTINT - 32)), NVIC_IRQ32_63_CLEAR);
+          putreg32((1 << (irq - RP23XX_IRQ_EXTINT - 32)),
+                   NVIC_IRQ32_63_CLEAR);
         }
     }
 
@@ -376,7 +384,8 @@ void up_enable_irq(int irq)
         }
       else
         {
-          putreg32((1 << (irq - RP23XX_IRQ_EXTINT - 32)), NVIC_IRQ32_63_ENABLE);      
+          putreg32((1 << (irq - RP23XX_IRQ_EXTINT - 32)),
+                   NVIC_IRQ32_63_ENABLE);
         }
     }
 

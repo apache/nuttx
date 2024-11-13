@@ -74,10 +74,6 @@ int rp23xx_common_bringup(void)
 {
   int ret = 0;
 
-#ifdef CONFIG_RP23XX_FLASH_FILE_SYSTEM
-  struct mtd_dev_s *mtd_dev;
-#endif
-
 #ifdef CONFIG_RP23XX_I2C_DRIVER
   #ifdef CONFIG_RP23XX_I2C0
   ret = board_i2cdev_initialize(0);

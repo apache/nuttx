@@ -33,8 +33,6 @@
 #include "rp23xx_uniqueid.h"
 #include "rp23xx_rom.h"
 
-// #include "pico/bootrom_constants.h"
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -44,6 +42,9 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+typedef int (*rom_get_sys_info_fn)
+  (uint32_t *out_buffer, uint32_t out_buffer_word_size, uint32_t flags);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -85,9 +86,8 @@ void rp23xx_uniqueid_initialize(void)
 {
   uint64_t x;
 
-  typedef int (*rom_get_sys_info_fn)(uint32_t *out_buffer, uint32_t out_buffer_word_size, uint32_t flags);
-  
-  rom_get_sys_info_fn func = (rom_get_sys_info_fn) rom_func_lookup(ROM_FUNC_GET_SYS_INFO);
+  rom_get_sys_info_fn func = (rom_get_sys_info_fn)
+    rom_func_lookup(ROM_FUNC_GET_SYS_INFO);
 
   union
   {
@@ -95,14 +95,14 @@ void rp23xx_uniqueid_initialize(void)
     uint8_t bytes[9 * 4];
   } out;
 
-  memset(out.bytes, 0x00, 9*4);
-  
+  memset(out.bytes, 0x00, 9 * 4);
+
   int rc = func(out.words, 9, SYS_INFO_CHIP_INFO);
 
   if (rc != 4)
-  {
-    PANIC();
-  }
+    {
+      PANIC();
+    }
 
   /* xorshift PRNG: */
 

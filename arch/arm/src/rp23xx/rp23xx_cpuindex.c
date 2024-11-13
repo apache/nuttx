@@ -29,7 +29,7 @@
 #include "arm_internal.h"
 #include "hardware/rp23xx_sio.h"
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
 
 /****************************************************************************
  * Public Functions

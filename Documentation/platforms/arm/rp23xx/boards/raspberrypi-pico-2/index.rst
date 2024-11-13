@@ -1,5 +1,5 @@
 ===============================
-Raspberry Pi Pico
+Raspberry Pi Pico 2
 ===============================
 
 The `Raspberry Pi Pico 2 <https://www.raspberrypi.com/products/raspberry-pi-pico-2/>`_ is a general purpose board supplied by
@@ -23,7 +23,7 @@ Features
 * Accurate clock and timer on-chip
 * Temperature sensor
 * Accelerated floating point libraries on-chip
-* 8 × Programmable IO (PIO) state machines for custom peripheral support
+* 12 × Programmable IO (PIO) state machines for custom peripheral support
 
 Serial Console
 ==============
@@ -41,9 +41,9 @@ User LED controlled by GPIO25 and is configured as autoled by default.
 
 A BOOTSEL button, which if held down when power is first
 applied to the board, will cause the RP2350 to boot into programming
-mode and appear as a storage device to a computer connected via USB .
+mode and appear as a storage device to the computer connected via USB.
 Saving a .UF2 file to this device will replace the Flash ROM contents
-on the RP2040.
+on the RP2350.
 
 Pin Mapping
 ===========
