@@ -27,7 +27,7 @@ set(HOSTSRCS)
 set(HOST_INCLUDE_DIRS)
 set(STDLIBS pthread)
 
-if(CONFIG_SCHED_GCOV)
+if(CONFIG_COVERAGE_TOOLCHAIN)
   list(APPEND STDLIBS gcov)
 endif()
 

@@ -203,7 +203,7 @@ ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
-ifeq ($(CONFIG_SCHED_GCOV),y)
+ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
 

@@ -1348,26 +1348,6 @@ config SCHED_STACK_RECORD
 		to disable.Through instrumentation, record the backtrace at
 		the deepest point in the stack.
 
-config SCHED_GCOV
-	bool "Enable GCOV support"
-	select HAVE_CXXINITIALIZE
-	default n
-	---help---
-		Enable GCOV support for code coverage analysis.
-		After turning on this option, code coverage can be analyzed.
-		If this option is enabled, image size and performance will be
-		significantly reduced. Before use, you need to add the
-		"-fprofile-generate -ftest-coverage" compilation parameters
-		to the file to be analyzed.
-
-config SCHED_GCOV_ALL
-	bool "Enable gcov call graph for all modules"
-	depends on SCHED_GCOV
-	default n
-	---help---
-		Enable gcov profiling for all code, it will instrument
-		all code, which will cause a large performance penalty for the code.
-
 endmenu
 
 menu "Files and I/O"

@@ -96,6 +96,11 @@ if(CONFIG_BUILTIN_COMPILER_RT)
     list(REMOVE_ITEM RT_BUILTINS_SRCS ${RT_BUILTINS_BFLOAT16_SRCS})
   endif()
 
+  if(NOT CONFIG_COVERAGE_NONE)
+    target_compile_options(rt.buitlins -fno-profile-instr-generate
+                           -fno-coverage-mapping)
+  endif()
+
   target_sources(rt.buitlins PRIVATE ${RT_BUILTINS_SRCS})
 
 endif()
@@ -107,6 +112,9 @@ if(CONFIG_COVERAGE_COMPILER_RT)
   target_include_directories(
     rt.profile PRIVATE ${INCDIR}
                        ${CMAKE_CURRENT_LIST_DIR}/compiler-rt/lib/profile)
+
+  target_compile_options(rt.profile -fno-profile-instr-generate
+                         -fno-coverage-mapping)
 
   target_compile_options(rt.profile PRIVATE -DCOMPILER_RT_HAS_UNAME -Wno-undef
                                             -Wno-strict-prototypes -Wno-shadow)
@@ -124,5 +132,9 @@ if(CONFIG_COVERAGE_COMPILER_RT)
 
 elseif(CONFIG_COVERAGE_MINI)
   nuttx_add_system_library(rt.miniprofile)
+
+  target_compile_options(rt.miniprofile -fno-profile-instr-generate
+                         -fno-coverage-mapping)
+
   target_sources(rt.profile PRIVATE ${CMAKE_CURRENT_LIST_DIR}/coverage.c)
 endif()
