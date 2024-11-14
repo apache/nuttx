@@ -54,6 +54,10 @@ ifeq ($(CONFIG_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
+ifeq ($(CONFIG_STM32H5_SPI),y)
+CHIP_CSRCS += stm32_spi.c
+endif
+
 # Required chip type specific files
 
 ifeq ($(CONFIG_STM32H5_STM32H5XXXX),y)
