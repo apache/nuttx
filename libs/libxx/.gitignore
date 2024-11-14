@@ -1,2 +1,6 @@
 *.xz
 *.bz2
+/libcxx/libcxx
+/libcxxabi/libcxxabi
+/uClibc++/uClibc++
+/libstdc++/
