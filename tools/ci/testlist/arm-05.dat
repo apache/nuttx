@@ -94,3 +94,5 @@ CMake,nrf9160-dk:miniboot_s
 CMake,nrf9160-dk:modem_ns
 CMake,nrf9160-dk:nsh
 CMake,nrf9160-dk:ostest_tickless
+
+CMake,qemu-armv7a:full
