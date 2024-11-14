@@ -159,6 +159,7 @@ static const struct sensor_ops_s g_sensor_ops =
  *
  * Return:
  *   Timestamp in microseconds
+ *
  ****************************************************************************/
 
 static unsigned long ms56xx_curtime(void)
@@ -371,6 +372,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 static int ms56xx_thread(int argc, char **argv)

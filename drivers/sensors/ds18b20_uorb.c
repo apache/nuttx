@@ -324,6 +324,7 @@ static int ds18b20_isalarm(FAR struct onewire_master_s *master,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_measure(FAR struct ds18b20_dev_s *dev)
@@ -354,6 +355,7 @@ static int ds18b20_measure(FAR struct ds18b20_dev_s *dev)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_write_spad(FAR struct ds18b20_dev_s *dev, int8_t th,
@@ -387,6 +389,7 @@ static int ds18b20_write_spad(FAR struct ds18b20_dev_s *dev, int8_t th,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_read_spad(FAR struct ds18b20_dev_s *dev,
@@ -444,6 +447,7 @@ static int ds18b20_read_spad(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_set_res(FAR struct ds18b20_dev_s *dev, uint8_t res)
@@ -495,6 +499,7 @@ static int ds18b20_set_res(FAR struct ds18b20_dev_s *dev, uint8_t res)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_set_alarm(FAR struct ds18b20_dev_s *dev,
@@ -549,6 +554,7 @@ static int ds18b20_set_alarm(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   Timestamp in nsec
+ *
  ****************************************************************************/
 
 static unsigned long ds18b20_curtime(void)
@@ -596,6 +602,7 @@ static void ds18b20_notify(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
@@ -635,6 +642,7 @@ static int ds18b20_measure_read(FAR struct ds18b20_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
@@ -677,6 +685,7 @@ static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
@@ -745,6 +754,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
@@ -783,6 +793,7 @@ static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
@@ -805,6 +816,7 @@ static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
@@ -909,6 +921,7 @@ static int ds18b20_thread(int argc, char** argv)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
 int ds18b20_register(int devno, FAR struct onewire_master_s *onewire,

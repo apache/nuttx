@@ -153,6 +153,7 @@ static const struct sensor_ops_s g_hyt271_ops =
  * Parameter:
  *   data - Pointer to internal datat structure for measured data
  *   temp - Pointer to sensor data structure for humidity
+ *
  ****************************************************************************/
 
 static void hyt271_humi_from_rawdata(FAR struct hyt271_sensor_data_s *data,
@@ -170,6 +171,7 @@ static void hyt271_humi_from_rawdata(FAR struct hyt271_sensor_data_s *data,
  * Parameter:
  *   data - Pointer to internal datat structure for measured data
  *   temp - Pointer to sensor data structure for temperature
+ *
  ****************************************************************************/
 
 static void hyt271_temp_from_rawdata(FAR struct hyt271_sensor_data_s *data,
@@ -186,6 +188,7 @@ static void hyt271_temp_from_rawdata(FAR struct hyt271_sensor_data_s *data,
  *
  * Return:
  *   Timestamp in nsec
+ *
  ****************************************************************************/
 
 static unsigned long hyt271_curtime(void)
@@ -205,6 +208,7 @@ static unsigned long hyt271_curtime(void)
  *   buffer - Pointer to the buffers memory region
  *   cmd    - The command to set in the buffer
  *   size   - The buffer size
+ *
  ****************************************************************************/
 
 static void hyt271_init_rw_buffer(FAR uint8_t *buffer, uint8_t cmd,
@@ -233,6 +237,7 @@ static void hyt271_init_rw_buffer(FAR uint8_t *buffer, uint8_t cmd,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_df(FAR struct hyt271_dev_s *dev,
@@ -264,6 +269,7 @@ static int hyt271_df(FAR struct hyt271_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_mr(FAR struct hyt271_dev_s *dev,
@@ -306,6 +312,7 @@ static int hyt271_mr(FAR struct hyt271_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_cmd(FAR struct hyt271_dev_s *dev,
@@ -341,6 +348,7 @@ static int hyt271_cmd(FAR struct hyt271_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_cmd_response(FAR struct hyt271_dev_s *dev,
@@ -393,6 +401,7 @@ static int hyt271_cmd_response(FAR struct hyt271_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_change_addr(FAR struct hyt271_dev_s *dev, uint8_t addr)
@@ -538,6 +547,7 @@ err_unlock:
 
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_measure_read(FAR struct hyt271_dev_s *dev,
@@ -612,6 +622,7 @@ err_unlock:
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_fetch(FAR struct sensor_lowerhalf_s *lower,
@@ -667,6 +678,7 @@ static int hyt271_fetch(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_control(FAR struct sensor_lowerhalf_s *lower,
@@ -716,6 +728,7 @@ static int hyt271_control(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int hyt271_active(FAR struct sensor_lowerhalf_s *lower,
@@ -754,6 +767,7 @@ static int hyt271_active(FAR struct sensor_lowerhalf_s *lower,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_HYT271_POLL
@@ -776,6 +790,7 @@ static int hyt271_set_interval(FAR struct sensor_lowerhalf_s *lower,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_HYT271_POLL
@@ -871,6 +886,7 @@ static int hyt271_thread(int argc, char** argv)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
 int hyt271_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
