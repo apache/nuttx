@@ -38,113 +38,54 @@
 
 /* Clocking *****************************************************************/
 
-/* The NUCLEO-H563ZI-Q supports both HSE and LSE crystals (X2 and X3).
- * However, as shipped, the X3 crystal is not populated.  Therefore the
- * Nucleo-H563ZI-Q will need to run off the 32MHz HSI clock, or the
- * 4 MHz CSI clock.  This configuration uses the HSI.
+/* The Nucleo-H563ZI-Q supports using a HSE crystal (X3). It is shipped with
+ * the crystal populated, but requires solder bridge configuration to enable
+ * it. Therefore, the Nucleo-H563ZI-Q will need to run off the 64MHz HSI
+ * clock, or the 4 MHz CSI clock. This configuration uses the HSI.
  *
- *   System Clock source : PLL (CSI)
- *   SYSCLK(Hz)          : 250000000   Determined by PLL1 configuration
- *   HCLK(Hz)            : 250000000    (STM32_RCC_CFGR_HPRE)  (Max 250MHz)
- *   AHB Prescaler       : 1            (STM32_RCC_CFGR_HPRE)  (Max 250MHz)
- *   APB1 Prescaler      : 1            (STM32_RCC_CFGR_PPRE1) (Max 250MHz)
- *   APB2 Prescaler      : 1            (STM32_RCC_CFGR_PPRE2) (Max 250MHz)
- *   CSI Frequency(Hz)   : 4000000      (nominal)
- *   PLL1M               : 2            (STM32_PLL1CFGR_PLLM)
- *   PLL1N               : 31           (STM32_PLL1CFGR_PLLN)
- *   PLL1P               : 2            (STM32_PLL1CFGR_PLLP)
- *   PLL1Q               : 0            (STM32_PLL1CFGR_PLLQ)
- *   PLL1R               : 1            (STM32_PLL1CFGR_PLLR)
- *   PLL2M               : 2            (STM32_PLL2CFGR_PLLM)
- *   PLL2N               : 15           (STM32_PLL2CFGR_PLLN)
- *   PLL2P               : 0            (STM32_PLL2CFGR_PLLP)
- *   PLL2Q               : 0            (STM32_PLL2CFGR_PLLQ)
- *   PLL2R               : 1            (STM32_PLL2CFGR_PLLR)
- *   PLL3M               : 2            (STM32_PLL3CFGR_PLLM)
- *   PLL3N               : 15           (STM32_PLL3CFGR_PLLN)
- *   PLL3P               : 0            (STM32_PLL3CFGR_PLLP)
- *   PLL3Q               : 0            (STM32_PLL3CFGR_PLLQ)
- *   PLL3R               : 1            (STM32_PLL3CFGR_PLLR)
- *   Flash Latency(WS)   : 5
- */
-
-/* HSI - 32 MHz RC factory-trimmed
- * LSI - 32 KHz RC
- * CSI - 4 MHz, autotrimmed via LSE
- * HSE - not installed
- * LSE - 32.768 kHz installed
- * SYSCLK = 250 MHz
+ *    System Clock Source : PLL1
+ *    SYSCLK Freq (MHz)   : 250
+ *    HCLK Freq   (MHz)   : 250
+ *    PLL1 Freq   (MHz)   : 250
+ *    Flash Latency (WS)  : 5
+ *
+ * NOTE : The STM32H5 requires PLL1P to be configured, as this is used as the
+ * system clock source. A custom clock config function must be supplied to
+ * use a different system clock source.
  */
 
 #define STM32_SYSCLK_FREQUENCY  250000000ul
-#define STM32_HSI_FREQUENCY      32000000ul
 #define STM32_LSI_FREQUENCY         32000
 #define STM32_LSE_FREQUENCY         32768
 
 #define STM32_BOARD_USEHSI       1
-#define STM32_CR_HSIDIV          RCC_CR_HSIDIV(1)
+#define STM32_BOARD_HSIDIV       RCC_CR_HSIDIV(1)
+#define STM32_HSI_FREQUENCY      32000000ul
 
-/* prescaler common to all PLL inputs */
-
-/* 'main' PLL1 config; we use this to generate our system clock */
-
-/* Use 32 MHz HSI, set M to 2, N to 31, FRAC to 0x800 (2048), PLL1P to 2
- * SYSCLK = ((HSI / PLL1M) * (PLL1N + (PLL1FRACN/8192))) / PLL1P
- * SYSCLK = ((32000000 / 2) * (31 + (2048/8192))) / 2 = 250000000
+/* PLL1 config: Used to generate system clock
+ *  PLL1DIVR expects N, P, Q, and R should be defined.
+ *  With HSI Freq = 32 MHz, this gives 250 MHz pll1_y_ck output
  */
 
-#define STM32_PLL1CFGR_PLL1FRACEN        RCC_PLL1CFGR_PLL1FRACEN 
-#define STM32_PLL1CFGR_PLL1VCOSEL        0
-#define STM32_PLL1CFGR_PLL1RGE           RCC_PLL1CFGR_PLL1RGE_8_16M 
+#define STM32_PLLCFG_PLL1CFG      (RCC_PLL1CFGR_PLL1SRC_HSI  | \
+                                   RCC_PLL1CFGR_PLL1RGE_4_8M | \
+                                   RCC_PLL1CFGR_PLL1M(8) | \
+                                   RCC_PLL1CFGR_PLL1PEN | \
+                                   RCC_PLL1CFGR_PLL1QEN | \
+                                   RCC_PLL1CFGR_PLL1REN)
+#define STM32_PLLCFG_PLL1N         RCC_PLL1DIVR_PLL1N(125)
+#define STM32_PLLCFG_PLL1P         RCC_PLL1DIVR_PLL1P(2)
+#define STM32_PLLCFG_PLL1Q         RCC_PLL1DIVR_PLL1Q(2)
+#define STM32_PLLCFG_PLL1R         RCC_PLL1DIVR_PLL1R(2)
+#define STM32_PLLCFG_PLL1DIVR     (STM32_PLLCFG_PLL1N | \
+                                   STM32_PLLCFG_PLL1P | \
+                                   STM32_PLLCFG_PLL1Q | \
+                                   STM32_PLLCFG_PLL1R)
 
-#define STM32_PLL1CFGR_PLL1M             RCC_PLL1CFGR_PLL1M(2)
-#define STM32_PLL1DIVR_PLL1N             RCC_PLL1DIVR_PLL1N(31)
-
-#define STM32_PLL1DIVR_PLL1P             RCC_PLL1DIVR_PLL1P(2)
-#define STM32_PLL1CFGR_PLL1P_ENABLED     1
-#define STM32_PLL1P_FREQUENCY            250000000
-#define STM32_PLL1DIVR_PLL1Q             0
-#undef STM32_PLL1CFGR_PLL1Q_ENABLED
-#define STM32_PLL1DIVR_PLL1R             0 
-#undef STM32_PLL1CFGR_PLL1R_ENABLED
-
-#define STM32_PLL1FRACR_PLL1FRACN        RCC_PLL1FRACR_PLL1FRACN(2048)
-
-/* PLL2 config */
-
-#define STM32_PLL2CFGR_PLL2M             RCC_PLL2CFGR_PLL2M(4)
-#define STM32_PLL2CFGR_PLL2FRACEN        RCC_PLL2CFGR_PLL2FRACEN 
-#define STM32_PLL2CFGR_PLL2VCOSEL        RCC_PLL2CFGR_PLL2VCOSEL
-#define STM32_PLL2CFGR_PLL2RGE           RCC_PLL2CFGR_PLL2RGE_8_16M 
-
-#define STM32_PLL2DIVR_PLL2N             RCC_PLL2DIVR_PLL2N(15)
-
-#define STM32_PLL2DIVR_PLL2P             RCC_PLL2DIVR_PLL2P(1)
-#define STM32_PLL2CFGR_PLL2P_ENABLED
-#define STM32_PLL2DIVR_PLL2Q             0
-#undef STM32_PLL2CFGR_PLL2Q_ENABLED
-#define STM32_PLL2DIVR_PLL2R             0 
-#undef STM32_PLL2CFGR_PLL2R_ENABLED
-
-#define STM32_PLL2FRACR_PLL2FRACN        RCC_PLL2FRACR_PLL2FRACN(5120)
-
-/* PLL3 config */
-
-#define STM32_PLL3CFGR_PLL3M             RCC_PLL3CFGR_PLL3M(4)
-#define STM32_PLL3CFGR_PLL3FRACEN        RCC_PLL3CFGR_PLL3FRACEN 
-#define STM32_PLL3CFGR_PLL3VCOSEL        RCC_PLL3CFGR_PLL3VCOSEL
-#define STM32_PLL3CFGR_PLL3RGE           RCC_PLL3CFGR_PLL3RGE_8_16M 
-
-#define STM32_PLL3DIVR_PLL3N             RCC_PLL3DIVR_PLL3N(15)
-
-#define STM32_PLL3DIVR_PLL3P             RCC_PLL3DIVR_PLL3P(1)
-#define STM32_PLL3CFGR_PLL3P_ENABLED
-#define STM32_PLL3DIVR_PLL3Q             0
-#undef STM32_PLL3CFGR_PLL3Q_ENABLED
-#define STM32_PLL3DIVR_PLL3R             0 
-#undef STM32_PLL3CFGR_PLL3R_ENABLED
-
-#define STM32_PLL3FRACR_PLL3FRACN        RCC_PLL3FRACR_PLL3FRACN(5120)
+#define STM32_VCO1_FRQ            ((STM32_HSI_FREQUENCY / 8) * 125)
+#define STM32_PLL1P_FREQUENCY     (STM32_VCO1_FRQ / 2)
+#define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 2)
+#define STM32_PLL1R_FREQUENCY     (STM32_VCO1_FRQ / 2)
 
 /* Enable CLK48; get it from HSI48 */
 
