@@ -88,7 +88,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sinfo("Give up mutex / take cond\n");
 
-      cond->lock_count--;
+      cond->wait_count++;
       ret = pthread_mutex_breaklock(mutex, &nlocks);
 
       status = -nxsem_wait_uninterruptible(&cond->sem);
