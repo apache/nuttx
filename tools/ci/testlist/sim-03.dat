@@ -24,6 +24,15 @@
 -Darwin,sim:usbdev
 -Darwin,sim:usbhost
 
+# macOS fails to patch quickjs-libc.c
+-Darwin,sim:quickjs
+
+# macOS fails at uintmax_t: 'unsigned long long' vs 'unsigned long'
+-Darwin,sim:rpproxy_virtio
+
+# macOS fails at uintmax_t: 'unsigned long long' vs 'unsigned long'
+-Darwin,sim:rpserver_virtio
+
 # Boards build by CMake
 CMake,sim:ostest
 CMake,sim:ostest_oneholder

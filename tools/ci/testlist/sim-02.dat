@@ -33,6 +33,16 @@
 # macOS matter compilation is not currently supported
 -Darwin,sim:matter
 
+# macOS doesn't support cxxabi.h
+-Darwin,sim:libcxxtest
+
+# macOS doesn't support pipe2()
+-Darwin,sim:lua
+
+# macOS doesn't support --wrap flag
+# ld: unknown option: --wrap
+-Darwin,sim:note
+
 # Boards build by CMake
 CMake,sim:dynconns
 CMake,sim:fb
