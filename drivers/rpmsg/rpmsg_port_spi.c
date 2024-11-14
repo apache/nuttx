@@ -195,10 +195,17 @@ static void rpmsg_port_spi_register_cb(FAR struct rpmsg_port_s *port,
 static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 {
   FAR struct rpmsg_port_header_s *txhdr;
+  int pending;
 
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
-  if (atomic_fetch_add(&rpspi->transferring, 1))
+  pending = atomic_fetch_add(&rpspi->transferring, 1);
+  if (pending > 0)
     {
+      if (pending > 1)
+        {
+          rpmsgerr("pending too many requests: %d\n", pending);
+        }
+
       return;
     }
 
