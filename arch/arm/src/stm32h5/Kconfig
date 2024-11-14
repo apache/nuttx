@@ -48,6 +48,9 @@ config STM32H5_STM32H56XXX
 	select STM32H5_HAVE_USART10
 	select STM32H5_HAVE_USART11
 	select STM32H5_HAVE_UART12
+	select STM32H5_HAVE_SPI4
+	select STM32H5_HAVE_SPI5
+	select STM32H5_HAVE_SPI6
 
 config STM32H5_STM32H563XX
 	# STM32H552 and STM32H562 devices documented in RM0439
@@ -211,6 +214,14 @@ config STM32H5_HAVE_LPUART1
 	bool
 	default n
 
+config STM32H5_HAVE_SPI5
+	bool
+	default n
+
+config STM32H5_HAVE_SPI6
+	bool
+	default n
+
 config STM32H5_HAVE_USART1
 	bool
 	default n
@@ -267,8 +278,16 @@ config STM32H5_USART
 	default n
 
 config STM32H5_ADC
-  bool
-  default n
+        bool
+        default n
+
+config STM32H5_SPI
+	bool
+	default n
+
+config STM32H5_SPI_DMA
+	bool
+	default n
 
 # These are the peripheral selections proper
 
@@ -405,6 +424,45 @@ config STM32H5_I2C4
 	default n
 	select STM32H5_I2C
 
+config STM32H5_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32H5_SPI
+
+config STM32H5_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select STM32H5_SPI
+
+config STM32H5_SPI3
+	bool "SPI3"
+	default n
+	select SPI
+	select STM32H5_SPI
+
+config STM32H5_SPI4
+	bool "SPI4"
+	default n
+	depends on STM32H5_HAVE_SPI4
+	select SPI
+	select STM32H5_SPI
+
+config STM32H5_SPI5
+	bool "SPI5"
+	default n
+	depends on STM32H5_HAVE_SPI5
+	select SPI
+	select STM32H5_SPI
+
+config STM32H5_SPI6
+	bool "SPI6"
+	default n
+	depends on STM32H5_HAVE_SPI6
+	select SPI
+	select STM32H5_SPI
+
 endmenu
 
 
@@ -428,6 +486,166 @@ config ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG
 	default n
 	---help---
 		Enables special, board-specific STM32 clock configuration.
+
+menu "SPI Configuration"
+	depends on STM32H5_SPI
+
+config STM32H5_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be too high in
+		the interrupt driven case.
+
+config STM32H5_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on STM32H5_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config STM32H5_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on STM32H5_SPI1 && !STM32H5_SPI_INTERRUPT
+	select STM32H5_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.  Cannot be used with STM32H5_SPI_INTERRUPT
+
+config STM32H5_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on STM32H5_SPI1_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
+
+config STM32H5_SPI1_COMMTYPE
+	int "SPI1 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32H5_SPI1
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32H5_SPI2_DMA
+	bool "SPI2 DMA"
+	default n
+	depends on STM32H5_SPI2 && !STM32H5_SPI_INTERRUPT
+	select STM32H5_SPI_DMA
+	---help---
+		Use DMA to improve SPI2 transfer performance.  Cannot be used with STM32H5_SPI_INTERRUPT
+
+config STM32H5_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	default 0
+	depends on STM32H5_SPI2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
+
+config STM32H5_SPI2_COMMTYPE
+	int "SPI2 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32H5_SPI2
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32H5_SPI3_DMA
+	bool "SPI3 DMA"
+	default n
+	depends on STM32H5_SPI3 && !STM32H5_SPI_INTERRUPT
+	select STM32H5_SPI_DMA
+	---help---
+		Use DMA to improve SPI3 transfer performance.  Cannot be used with STM32H5_SPI_INTERRUPT
+
+config STM32H5_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	default 0
+	depends on STM32H5_SPI3_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
+
+config STM32H5_SPI3_COMMTYPE
+	int "SPI3 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32H5_SPI3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32H5_SPI4_DMA
+	bool "SPI4 DMA"
+	default n
+	depends on STM32H5_SPI4 && !STM32H5_SPI_INTERRUPT
+	select STM32H5_SPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.  Cannot be used with STM32H5_SPI_INTERRUPT
+
+config STM32H5_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	default 0
+	depends on STM32H5_SPI4_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
+
+config STM32H5_SPI4_COMMTYPE
+	int "SPI4 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32H5_SPI4
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32H5_SPI5_DMA
+	bool "SPI5 DMA"
+	default n
+	depends on STM32H5_SPI5 && !STM32H5_SPI_INTERRUPT
+	select STM32H5_SPI_DMA
+	---help---
+		Use DMA to improve SPI5 transfer performance.  Cannot be used with STM32H5_SPI_INTERRUPT
+
+config STM32H5_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on STM32H5_SPI5_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
+
+config STM32H5_SPI5_COMMTYPE
+	int "SPI5 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32H5_SPI5
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32H5_SPI6_DMA
+	bool "SPI6 DMA"
+	default n
+	depends on STM32H5_SPI6 && !STM32H5_SPI_INTERRUPT
+	select STM32H5_SPI_DMA
+	---help---
+		Use DMA to improve SPI6 transfer performance.  Cannot be used with STM32H5_SPI_INTERRUPT
+
+config STM32H5_SPI6_DMA_BUFFER
+	int "SPI6 DMA buffer size"
+	default 0
+	depends on STM32H5_SPI6_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
+
+config STM32H5_SPI6_COMMTYPE
+	int "SPI6 Operation mode"
+	default 0
+	range 0 3
+	depends on STM32H5_SPI6
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+endmenu # "SPI Configuration"
 
 config STM32H5_SERIALDRIVER
 	bool

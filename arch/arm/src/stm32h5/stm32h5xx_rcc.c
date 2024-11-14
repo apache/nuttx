@@ -1204,6 +1204,60 @@ void stm32_stdclockconfig(void)
       regval |= STM32_RCC_CCIPR5_ADCDACSEL;
       putreg32(regval, STM32_RCC_CCIPR5);
 #endif
+
+      /* Configure SPI1 source clock */
+
+#if defined(STM32_RCC_CCIPR3_SPI1SEL)
+      regval = getreg32(STM32_RCC_CCIPR3);
+      regval &= ~RCC_CCIPR3_SPI1SEL_MASK;
+      regval |= STM32_RCC_CCIPR3_SPI1SEL;
+      putreg32(regval, STM32_RCC_CCIPR3);
+#endif
+
+      /* Configure SPI2 source clock */
+
+#if defined(STM32_RCC_CCIPR3_SPI2SEL)
+      regval = getreg32(STM32_RCC_CCIPR3);
+      regval &= ~RCC_CCIPR3_SPI2SEL_MASK;
+      regval |= STM32_RCC_CCIPR3_SPI2SEL;
+      putreg32(regval, STM32_RCC_CCIPR3);
+#endif
+
+      /* Configure SPI3 source clock */
+
+#if defined(STM32_RCC_CCIPR3_SPI3SEL)
+      regval = getreg32(STM32_RCC_CCIPR3);
+      regval &= ~RCC_CCIPR3_SPI3SEL_MASK;
+      regval |= STM32_RCC_CCIPR3_SPI3SEL;
+      putreg32(regval, STM32_RCC_CCIPR3);
+#endif
+
+      /* Configure SPI4 source clock */
+
+#if defined(STM32_RCC_CCIPR3_SPI4SEL)
+      regval = getreg32(STM32_RCC_CCIPR3);
+      regval &= ~RCC_CCIPR3_SPI4SEL_MASK;
+      regval |= STM32_RCC_CCIPR3_SPI4SEL;
+      putreg32(regval, STM32_RCC_CCIPR3);
+#endif
+
+      /* Configure SPI5 source clock */
+
+#if defined(STM32_RCC_CCIPR3_SPI5SEL)
+      regval = getreg32(STM32_RCC_CCIPR3);
+      regval &= ~RCC_CCIPR3_SPI5SEL_MASK;
+      regval |= STM32_RCC_CCIPR3_SPI5SEL;
+      putreg32(regval, STM32_RCC_CCIPR3);
+#endif
+
+      /* Configure SPI6 source clock */
+
+#if defined(STM32_RCC_CCIPR3_SPI6SEL)
+      regval = getreg32(STM32_RCC_CCIPR3);
+      regval &= ~RCC_CCIPR3_SPI6SEL_MASK;
+      regval |= STM32_RCC_CCIPR3_SPI6SEL;
+      putreg32(regval, STM32_RCC_CCIPR3);
+#endif
     }
 }
 #endif
