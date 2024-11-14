@@ -90,7 +90,7 @@ bin:
 kbin:
 	$(Q) mkdir $@
 
-context: bin kbin
+context:: bin kbin
 
 # Clean most derived files, retaining the configuration
 
