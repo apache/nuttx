@@ -302,7 +302,7 @@ choice
 
 config XTENSA_TOOLCHAIN_XCC
 	bool "Xtensa Toolchain use GCC as front end"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_GCC
 
 config XTENSA_TOOLCHAIN_XCLANG
 	bool "Xtensa Toolchain use CLANG as front end"
