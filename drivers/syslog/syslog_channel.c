@@ -57,10 +57,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
 #if defined(CONFIG_SYSLOG_DEFAULT)
 static int syslog_default_putc(FAR syslog_channel_t *channel,
                                int ch);
