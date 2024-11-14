@@ -1897,7 +1897,7 @@ int gdb_debugpoint_remove(int type, FAR void *addr, size_t size)
   point.addr = addr;
   point.size = size;
 
-  retrun nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
+  return nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
                           gdb_smp_debugpoint_remove, &point);
 #else
   return up_debugpoint_remove(type, addr, size);
