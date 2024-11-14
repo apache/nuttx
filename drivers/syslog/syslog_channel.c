@@ -33,6 +33,7 @@
 
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/compiler.h>
+#include <nuttx/init.h>
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>
@@ -217,6 +218,30 @@ g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
  * Private Functions
  ****************************************************************************/
 
+#if defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC)
+
+/****************************************************************************
+ * Name: csection_available
+ *
+ * Description:
+ *   Return true if the critical section is available.
+ *
+ ****************************************************************************/
+
+static bool csection_available(void)
+{
+  /* Degrade the critical section in a few cases:
+   *
+   * a) early in the boot, where tasks are not available
+   *
+   * b) after a panic, where taking a lock can make the situation worse
+   */
+
+  return OSINIT_TASK_READY() && g_nx_initstate != OSINIT_PANIC;
+}
+
+#endif /* defined(CONFIG_SYSLOG_DEFAULT) && defined(CONFIG_ARCH_LOWPUTC) */
+
 /****************************************************************************
  * Name: syslog_default_putc
  *
@@ -230,13 +255,20 @@ g_syslog_channel[CONFIG_SYSLOG_MAX_CHANNELS] =
 static int syslog_default_putc(FAR syslog_channel_t *channel, int ch)
 {
 #  ifdef CONFIG_ARCH_LOWPUTC
-  /* See https://github.com/apache/nuttx/issues/14662
-   * about what this critical section is for.
-   */
+  if (csection_available())
+    {
+      /* See https://github.com/apache/nuttx/issues/14662
+       * about what this critical section is for.
+       */
 
-  irqstate_t flags = enter_critical_section();
-  up_putc(ch);
-  leave_critical_section(flags);
+      irqstate_t flags = enter_critical_section();
+      up_putc(ch);
+      leave_critical_section(flags);
+    }
+  else
+    {
+      up_putc(ch);
+    }
 #  endif
 
   UNUSED(channel);
@@ -247,13 +279,20 @@ static ssize_t syslog_default_write(FAR syslog_channel_t *channel,
                                     FAR const char *buffer, size_t buflen)
 {
 #  ifdef CONFIG_ARCH_LOWPUTC
-  /* See https://github.com/apache/nuttx/issues/14662
-   * about what this critical section is for.
-   */
+  if (csection_available())
+    {
+      /* See https://github.com/apache/nuttx/issues/14662
+       * about what this critical section is for.
+       */
 
-  irqstate_t flags = enter_critical_section();
-  up_nputs(buffer, buflen);
-  leave_critical_section(flags);
+      irqstate_t flags = enter_critical_section();
+      up_nputs(buffer, buflen);
+      leave_critical_section(flags);
+    }
+  else
+    {
+      up_nputs(buffer, buflen);
+    }
 #  endif
 
   UNUSED(channel);
