@@ -15,28 +15,38 @@ config HOST_X86_64
 	select ARCH_HAVE_STACKCHECK
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF && !SIM_M32
 	select ARCH_HAVE_MATH_H
-	select ARCH_TOOLCHAIN_GNU
 
 config HOST_X86
 	bool "x86"
 	select ARCH_HAVE_STACKCHECK
-	select ARCH_TOOLCHAIN_GNU
 
 config HOST_ARM
 	bool "arm"
 	select ARCH_HAVE_STACKCHECK
-	select ARCH_TOOLCHAIN_GNU
 
 config HOST_ARM64
 	bool "arm64"
 	select ARCH_HAVE_STACKCHECK
-	select ARCH_TOOLCHAIN_GNU
 
 endchoice # Host CPU Type
 
 config ARCH_CHIP
 	string
 	default "sim"
+
+choice
+	prompt "Toolchain Selection"
+	default SIM_TOOLCHAIN_GCC
+
+config SIM_TOOLCHAIN_GCC
+	bool "Generic GNU toolchain"
+	select ARCH_TOOLCHAIN_GCC
+
+config SIM_TOOLCHAIN_CLANG
+	bool "LLVM Clang toolchain"
+	select ARCH_TOOLCHAIN_CLANG
+
+endchoice
 
 config SIM_M32
 	bool "Build 32-bit simulation on 64-bit machine"
