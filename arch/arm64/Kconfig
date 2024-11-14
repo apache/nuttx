@@ -12,7 +12,7 @@ choice
 
 config ARM64_TOOLCHAIN_GNU_EABI
 	bool "Generic GNU EABI toolchain"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_GCC
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 
