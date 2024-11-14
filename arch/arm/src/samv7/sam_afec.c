@@ -59,7 +59,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ADC_MAX_CHANNELS 11
+#define ADC_MAX_CHANNELS 12
+#define AFEC0_MAX_PINS   11
+#define AFEC1_MAX_PINS   12
 
 #ifdef CONFIG_SAMV7_AFEC_DMA
 #define DMA_FLAGS  (DMACH_FLAG_FIFOCFG_LARGEST | \
@@ -91,6 +93,7 @@ struct samv7_dev_s
   const struct adc_callback_s *cb;     /* Upper driver callback */
   uint8_t  intf;                       /* ADC number (i.e. ADC1, ADC2) */
   uint32_t base;                       /* ADC register base */
+  uint8_t  max_pins;
   uint8_t  initialized;                /* ADC initialization counter */
   uint8_t  resolution;                 /* ADC resolution (SAMV7_AFECn_RES) */
   uint8_t  trigger;                    /* ADC trigger (software, timer...) */
@@ -177,6 +180,7 @@ static struct samv7_dev_s g_adcpriv0 =
   .irq           = SAM_IRQ_AFEC0,
   .pid           = SAM_PID_AFEC0,
   .intf          = 0,
+  .max_pins      = AFEC0_MAX_PINS,
   .initialized   = 0,
   .resolution    = CONFIG_SAMV7_AFEC0_RES,
 #if defined (CONFIG_SAMV7_AFEC0_PWMTRIG)
@@ -198,7 +202,7 @@ static struct adc_dev_s g_adcdev0 =
   .ad_priv       = &g_adcpriv0,
 };
 
-gpio_pinset_t g_adcpinlist0[ADC_MAX_CHANNELS] =
+gpio_pinset_t g_adcpinlist0[AFEC0_MAX_PINS] =
 {
   GPIO_AFE0_AD0,
   GPIO_AFE0_AD1,
@@ -220,6 +224,7 @@ static struct samv7_dev_s g_adcpriv1 =
   .irq           = SAM_IRQ_AFEC1,
   .pid           = SAM_PID_AFEC1,
   .intf          = 1,
+  .max_pins      = AFEC1_MAX_PINS,
   .initialized   = 0,
   .resolution    = CONFIG_SAMV7_AFEC1_RES,
 #if defined (CONFIG_SAMV7_AFEC1_PWMTRIG)
@@ -241,7 +246,7 @@ static struct adc_dev_s g_adcdev1 =
   .ad_priv       = &g_adcpriv1,
 };
 
-gpio_pinset_t g_adcpinlist1[ADC_MAX_CHANNELS] =
+gpio_pinset_t g_adcpinlist1[AFEC1_MAX_PINS] =
 {
   GPIO_AFE1_AD0,
   GPIO_AFE1_AD1,
@@ -254,6 +259,7 @@ gpio_pinset_t g_adcpinlist1[ADC_MAX_CHANNELS] =
   GPIO_AFE1_AD8,
   GPIO_AFE1_AD9,
   GPIO_AFE1_AD10,
+  GPIO_AFE1_AD11
 };
 #endif
 
@@ -830,7 +836,7 @@ static void afec_reset(struct adc_dev_s *dev)
   uint32_t afec_cgr = 0;
   for (int i = 0; i < priv->nchannels; i++)
     {
-      DEBUGASSERT(priv->chanlist[i] < ADC_MAX_CHANNELS);
+      DEBUGASSERT(priv->chanlist[i] < priv->max_pins);
       pinset = pinlist[priv->chanlist[i]];
       sam_configgpio(pinset);
 
