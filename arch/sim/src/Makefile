@@ -144,10 +144,6 @@ ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   STDLIBS += -lgcov
 endif
 
-ifneq ($(CONFIG_SIM_PROFILE)$(CONFIG_PROFILE_ALL),)
-  HOSTCFLAGS += -pg
-endif
-
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += sim_checkstack.c
 endif
