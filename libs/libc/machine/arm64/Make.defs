@@ -80,6 +80,10 @@ ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp.S
 endif
 
+ifeq ($(CONFIG_PROFILE_NONE),)
+CSRCS += mcount.c
+endif
+
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
 DEPPATH += --dep-path machine/arm64/gnu
 VPATH += :machine/arm64/gnu

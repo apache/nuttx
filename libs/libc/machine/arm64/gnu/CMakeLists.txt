@@ -78,4 +78,8 @@ if(CONFIG_ARCH_SETJMP_H)
   list(APPEND SRCS arch_setjmp.S)
 endif()
 
+if(NOT CONFIG_PROFILE_NONE)
+  list(APPEND SRCS mcount.c)
+endif()
+
 target_sources(c PRIVATE ${SRCS})
