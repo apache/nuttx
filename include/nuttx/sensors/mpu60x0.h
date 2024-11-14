@@ -105,11 +105,16 @@ struct mpu_config_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Declares the existence of an mpu60x0 chip, wired according to
- * config; creates an interface to it at path.
+/****************************************************************************
+ * Name: mpu60x0_register
+ *
+ * Description:
+ *   Declares the existence of an mpu60x0 chip, wired according to
+ *   config; creates an interface to it at path.
  *
  * Returns 0 on success, or negative errno.
- */
+ *
+ ****************************************************************************/
 
 int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config);
 

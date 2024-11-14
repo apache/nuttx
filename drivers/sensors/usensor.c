@@ -264,6 +264,7 @@ static int usensor_control(FAR struct sensor_lowerhalf_s *lower,
  *   This function registers usensor character node "/dev/usensor", so that
  *   application can register user sensor by this node. The node will
  *   manager all user sensors in this character driver.
+ *
  ****************************************************************************/
 
 int usensor_initialize(void)

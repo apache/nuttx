@@ -1446,6 +1446,7 @@ static void sensor_rpmsg_device_created(FAR struct rpmsg_device *rdev,
  *
  * Returned Value:
  *   The takeover rpmsg lowerhalf returned on success, NULL on failure.
+ *
  ****************************************************************************/
 
 FAR struct sensor_lowerhalf_s *
@@ -1512,6 +1513,7 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
  *
  * Input Parameters:
  *   lower - The instance of lower half sensor driver.
+ *
  ****************************************************************************/
 
 void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
@@ -1539,6 +1541,7 @@ void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
  *
  * Returned Value:
  *   OK on success; A negated errno value is returned on any failure.
+ *
  ****************************************************************************/
 
 int sensor_rpmsg_initialize(void)

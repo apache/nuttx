@@ -1387,6 +1387,7 @@ rpmsg_err:
  *           instance is bound to the sensor driver and must persists as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0.
+ *
  ****************************************************************************/
 
 void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
@@ -1419,6 +1420,7 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
  *           instance is bound to the sensor driver and must persists as long
  *           as the driver persists.
  *   path  - The user specifies path of device, ex: /dev/uorb/xxx
+ *
  ****************************************************************************/
 
 void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *lower,
