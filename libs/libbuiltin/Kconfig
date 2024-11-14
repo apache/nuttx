@@ -19,6 +19,7 @@ choice
 
 config BUILTIN_COMPILER_RT
 	bool "Builtin LLVM libclang_rt.builtins"
+	depends on ARCH_TOOLCHAIN_GNU
 	select LIB_BUILTIN
 	select LIB_COMPILER_RT
 	---help---
@@ -37,6 +38,7 @@ choice
 
 config COVERAGE_COMPILER_RT
 	bool "Builtin libclang_rt.profile"
+	depends on ARCH_TOOLCHAIN_CLANG
 	select LIB_BUILTIN
 	select LIB_COMPILER_RT
 	---help---
@@ -54,6 +56,7 @@ config COVERAGE_MINI
 
 config COVERAGE_TOOLCHAIN
 	bool "Link toolchain gcov library to the OS"
+	depends on ARCH_TOOLCHAIN_GCC
 	---help---
 		Link the toolchain coverage library to the OS.
 
@@ -84,6 +87,20 @@ config PROFILE_NONE
 	bool "None profile support"
 
 endchoice
+
+config COVERAGE_ALL
+	bool "Enable code coverage for all module"
+	depends on !COVERAGE_NONE
+	default n
+	---help---
+		Enable code coverage for all code, it will instrument
+		all code, which will cause a large performance penalty for the code.
+		If use GCC, it will add the '-fprofile-generate
+		-ftest-coverage' parameter to all module.
+		If use Clang, it will add the '-fprofile-instr-generate
+		-fcoverage-mapping' parameter to all module.
+		The data can then be printed nsh run "gcov dump -d /xxx/xxx"
+
 
 config PROFILE_ALL
 	bool "Enable gprof call graph for all modules"
