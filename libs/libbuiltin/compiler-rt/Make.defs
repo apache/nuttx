@@ -98,6 +98,7 @@ ifeq ($(CONFIG_COVERAGE_COMPILER_RT),y)
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
 
+FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
 FLAGS += -Wno-undef -Wno-strict-prototypes  -Wno-shadow
 FLAGS += -DCOMPILER_RT_HAS_UNAME
 
@@ -106,6 +107,8 @@ CPPSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.cpp)
 CSRCS += InstrProfilingPlatform.c
 
 else ifeq ($(CONFIG_COVERAGE_MINI),y)
+
+FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
 
 CSRCS += coverage.c
 

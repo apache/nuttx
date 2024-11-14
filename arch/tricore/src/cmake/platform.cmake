@@ -60,7 +60,7 @@ if(CONFIG_TRICORE_TOOLCHAIN_GNU)
       OUTPUT_VARIABLE extra_library)
     list(APPEND EXTRA_LIB ${extra_library})
   endif()
-  if(CONFIG_SCHED_GCOV)
+  if(CONFIG_COVERAGE_TOOLCHAIN)
     execute_process(
       COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
               --print-file-name=libgcov.a

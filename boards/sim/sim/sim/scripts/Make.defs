@@ -74,8 +74,12 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
-ifeq ($(CONFIG_SCHED_GCOV_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+ifeq ($(CONFIG_COVERAGE_ALL),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
+    ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+  else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+    ARCHOPTIMIZATION += -fprofile-instr-generate -fcoverage-mapping
+  endif
 endif
 
 ifneq ($(CONFIG_PROFILE_ALL)$(CONFIG_SIM_PROFILE),)
