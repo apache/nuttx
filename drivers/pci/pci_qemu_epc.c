@@ -291,6 +291,7 @@ static uint32_t pci_qep_func_base(FAR struct qemu_epc_s *qep,
  *
  * Returned Value:
  *   Return 0
+ *
  ****************************************************************************/
 
 static int
@@ -330,6 +331,7 @@ qemu_epc_write_header(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
  *
  * Returned Value:
  *   Return 0
+ *
  ****************************************************************************/
 
 static int qemu_epc_set_bar(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
@@ -364,6 +366,7 @@ static int qemu_epc_set_bar(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
  *   epc    - Device name of the endpoint controller
  *   funcno - The epc's function number
  *   bar    - The bar is used mapping
+ *
  ****************************************************************************/
 
 static void
@@ -395,6 +398,7 @@ qemu_epc_clear_bar(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
  *
  * Returned Value:
  *   0 if success, negative if failed
+ *
  ****************************************************************************/
 
 static int qemu_epc_map_addr(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
@@ -441,6 +445,7 @@ static int qemu_epc_map_addr(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
  *   epc    - Device name of the endpoint controller
  *   funcno - The epc's function number
  *   addr   - The outbound phy addr
+ *
  ****************************************************************************/
 
 static void
@@ -497,6 +502,7 @@ qemu_epc_get_bar_addr_from_funcno(FAR struct pci_epc_ctrl_s *epc,
  *
  * Returned Value:
  *   Return 0 if success, negative number if failed
+ *
  ****************************************************************************/
 
 static int
@@ -607,6 +613,7 @@ qemu_epc_raise_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
  *
  * Returned Value:
  *   Return 0
+ *
  ****************************************************************************/
 
 static int qemu_epc_start(FAR struct pci_epc_ctrl_s *epc)
@@ -651,6 +658,7 @@ qemu_epc_get_features(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
  *
  * Returned Value:
  *   Return the number of interrupts
+ *
  ****************************************************************************/
 
 static int qemu_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
@@ -684,6 +692,7 @@ static int qemu_epc_get_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
  *
  * Returned Value:
  *   Return 0
+ *
  ****************************************************************************/
 
 static int qemu_epc_set_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
@@ -714,6 +723,7 @@ static int qemu_epc_set_msi(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
  *
  * Returned Value:
  *   Return the number of interrupts
+ *
  ****************************************************************************/
 
 static int qemu_epc_get_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
@@ -748,6 +758,7 @@ static int qemu_epc_get_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno)
  *
  * Returned Value:
  *   Return 0
+ *
  ****************************************************************************/
 
 static int qemu_epc_set_msix(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
