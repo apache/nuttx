@@ -42,7 +42,10 @@
  *
  * Description:
  *    A thread broadcast on a condition variable.
- *
+ *    pthread_cond_broadcast shall unblock all threads currently blocked on a
+ *    specified condition variable cond. We need own the mutex that threads
+ *    calling pthread_cond_wait or pthread_cond_timedwait have associated
+ *    with the condition variable during their wait.
  * Input Parameters:
  *   None
  *
@@ -56,7 +59,6 @@
 int pthread_cond_broadcast(FAR pthread_cond_t *cond)
 {
   int ret = OK;
-  int sval;
 
   sinfo("cond=%p\n", cond);
 
@@ -73,31 +75,22 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
 
       sched_lock();
 
-      /* Get the current value of the semaphore */
+      /* Loop until all of the waiting threads have been restarted. */
 
-      if (nxsem_get_value(&cond->sem, &sval) != OK)
+      while (cond->wait_count > 0)
         {
-          ret = EINVAL;
-        }
-      else
-        {
-          /* Loop until all of the waiting threads have been restarted. */
+          /* If the value is less than zero (meaning that one or more
+           * thread is waiting), then post the condition semaphore.
+           * Only the highest priority waiting thread will get to execute
+           */
 
-          while (sval < 0)
-            {
-              /* If the value is less than zero (meaning that one or more
-               * thread is waiting), then post the condition semaphore.
-               * Only the highest priority waiting thread will get to execute
-               */
+          ret = -nxsem_post(&cond->sem);
 
-              ret = -nxsem_post(&cond->sem);
+          /* Increment the semaphore count (as was done by the
+           * above post).
+           */
 
-              /* Increment the semaphore count (as was done by the
-               * above post).
-               */
-
-              sval++;
-            }
+          cond->wait_count--;
         }
 
       /* Now we can let the restarted threads run */
