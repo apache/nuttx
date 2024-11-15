@@ -880,7 +880,7 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
   /* Check our assumptions */
 
-  DEBUGASSERT(atomic_load(NXSEM_COUNT(sem)) <= 0);
+  DEBUGASSERT(sem->semcount <= 0);
 
   /* Adjust the priority of every holder as necessary */
 
@@ -978,7 +978,7 @@ void nxsem_release_all(FAR struct tcb_s *htcb)
        * that was taken by sem_wait() or sem_post().
        */
 
-      atomic_fetch_add(NXSEM_COUNT(sem), 1);
+      sem->semcount++;
     }
 }
 
