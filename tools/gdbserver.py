@@ -812,13 +812,17 @@ class GDBStub:
         self.put_gdb_packet(b"OK")
 
     def handle_thread_context(self, pkt):
-        if b"g" == pkt[1:2]:
-            self.current_thread = int(pkt[2:]) - 1
-        elif b"c" == pkt[1:2]:
-            self.current_thread = int(pkt[3:]) - 1
+        thread = 0
 
-        if self.current_thread == -1:
-            self.current_thread = 0
+        if b"g" == pkt[1:2]:
+            thread = int(pkt[2:]) - 1
+        elif b"c" == pkt[1:2]:
+            thread = int(pkt[2:]) - 1
+
+        if thread == -1:
+            thread = 0
+
+        self.current_thread = thread
         self.put_gdb_packet(b"OK")
 
     def parse_thread(self):
