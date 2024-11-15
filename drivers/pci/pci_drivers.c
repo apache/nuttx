@@ -160,6 +160,12 @@ int pci_register_drivers(void)
     }
 #endif
 
+  ret = pci_dev_register();
+  if (ret < 0)
+    {
+      pcierr("pci_dev_register failed, ret=%d\n", ret);
+    }
+
   UNUSED(ret);
   return ret;
 }
