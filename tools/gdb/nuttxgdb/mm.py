@@ -619,8 +619,20 @@ class MMPoolInfo(gdb.Command):
         gdb.write(f"Total {count} pools\n")
 
         name_max = max(len(pool.name) for pool in pools) + 11  # 11: "@0x12345678"
-        formatter = "{:>%d} {:>11} {:>9} {:>9} {:>9} {:>9} {:>9}\n" % name_max
-        head = ("", "total", "bsize", "nused", "nfree", "nifree", "nwaiter")
+        formatter = (
+            "{:>%d} {:>11} {:>9} {:>9} {:>9} {:>9} {:>9} {:>9} {:>9}\n" % name_max
+        )
+        head = (
+            "",
+            "total",
+            "blocksize",
+            "bsize",
+            "overhead",
+            "nused",
+            "nfree",
+            "nifree",
+            "nwaiter",
+        )
 
         gdb.write(formatter.format(*head))
         for pool in pools:
@@ -628,7 +640,9 @@ class MMPoolInfo(gdb.Command):
                 formatter.format(
                     f"{pool.name}@{pool.address:#x}",
                     pool.total,
+                    pool.blocksize,
                     pool.size,
+                    pool.overhead,
                     pool.nused,
                     pool.nfree,
                     pool.nifree,
