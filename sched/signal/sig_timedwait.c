@@ -340,7 +340,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   siginfo_t unbinfo;
   int ret;
 
-  DEBUGASSERT(set != NULL);
+  DEBUGASSERT(set != NULL && up_interrupt_context() == false);
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can
