@@ -25,14 +25,7 @@
 set(SRCS)
 
 if(CONFIG_SYSLOG)
-  list(
-    APPEND
-    SRCS
-    vsyslog.c
-    syslog_channel.c
-    syslog_putc.c
-    syslog_write.c
-    syslog_flush.c)
+  list(APPEND SRCS vsyslog.c syslog_channel.c syslog_write.c syslog_flush.c)
 endif()
 
 if(CONFIG_SYSLOG_INTBUFFER)

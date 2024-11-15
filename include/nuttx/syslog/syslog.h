@@ -311,23 +311,6 @@ syslog_stream_channel(FAR struct lib_outstream_s *stream);
 #endif
 
 /****************************************************************************
- * Name: syslog_putc
- *
- * Description:
- *   This is the low-level, single character, system logging interface.
- *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int syslog_putc(int ch);
-
-/****************************************************************************
  * Name: syslog_write
  *
  * Description:

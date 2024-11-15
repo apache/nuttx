@@ -389,7 +389,7 @@ config CONSOLE_SYSLOG
 	---help---
 		Use the syslog logging device as a system console. If this feature is
 		enabled (along with DEV_CONSOLE), then all console output will be
-		re-directed to syslog output (syslog_putc). This is useful, for
+		re-directed to syslog output (syslog_write). This is useful, for
 		example, if the only console is a Telnet console.  Then in that case,
 		console output from non-Telnet threads will go to the syslog output.
 

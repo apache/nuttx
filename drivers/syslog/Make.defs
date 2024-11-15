@@ -24,7 +24,7 @@
 # Include SYSLOG Infrastructure
 
 ifeq ($(CONFIG_SYSLOG),y)
-CSRCS += vsyslog.c syslog_channel.c syslog_putc.c
+CSRCS += vsyslog.c syslog_channel.c
 CSRCS += syslog_write.c syslog_flush.c
 endif
 
