@@ -459,6 +459,7 @@ void backtrace_symbols_fd(FAR void *const *buffer, int size, int fd)
  *
  ****************************************************************************/
 
+nosanitize_address
 int backtrace_format(FAR char *buffer, int size,
                      FAR void *backtrace[], int depth)
 {
