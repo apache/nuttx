@@ -194,7 +194,7 @@ config MTD_CONFIG_FAIL_SAFE
 		This replaces the drivers/mtd/mtd_config, which
 		is resilient to power loss.
 
-config MTD_BLOCKSIZE_MULTIPLE
+config MTD_CONFIG_BLOCKSIZE_MULTIPLE
 	int "Set NVS blocksize multiple"
 	default 1
 	depends on MTD_CONFIG_FAIL_SAFE
