@@ -42,7 +42,7 @@ The RAMLOG device is a special character device that can really be used for
 most any purpose. However, the RAMLOG device has some special attributes 
 that make it ideal for use as a syslogging device.
 
-* It supports the ``syslog_putc`` interface needed for system logging
+* It supports the ``syslog_write`` interface needed for system logging
 * It behaves much like a pipe: It implements a queue. Writing to the RAMLOG 
   device adds data to the head of the queue; reading from the RAMLOG device 
   removes data from the tail of the queue.
@@ -91,7 +91,7 @@ These enables the RAMLOG and configure it for use as the syslog device
     CONFIG_RAMLOG_CONSOLE_BUFSIZE=8192
     CONFIG_RAMLOG_NONBLOCKING=y
     CONFIG_RAMLOG_SYSLOG=y
-    #CONFIG_SYSLOG_CHAR undefined, else duplicate output with syslog_putc()
+    #CONFIG_SYSLOG_CHAR undefined, else duplicate output with syslog_write()
 
 Now when I run NuttX, I get output like this. The ``dmesg`` command now appears 
 as an NSH command:

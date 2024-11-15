@@ -162,18 +162,20 @@ static void syslograwstream_putc(FAR struct lib_outstream_s *self, int ch)
 
       do
         {
+          char c = ch;
+
           /* Write the character to the supported logging device.  On
-           * failure, syslog_putc returns a negated errno value.
+           * failure, syslog_write returns a negated errno value.
            */
 
-          ret = syslog_putc(ch);
+          ret = syslog_write(&c, 1);
           if (ret >= 0)
             {
               self->nput++;
               return;
             }
 
-          /* The special return value -EINTR means that syslog_putc() was
+          /* The special return value -EINTR means that syslog_write() was
            * awakened by a signal.  This is not a real error and must be
            * ignored in this context.
            */
@@ -221,7 +223,7 @@ static ssize_t syslograwstream_puts(FAR struct lib_outstream_s *self,
           return ret;
         }
 
-      /* The special return value -EINTR means that syslog_putc() was
+      /* The special return value -EINTR means that syslog_write() was
        * awakened by a signal.  This is not a real error and must be
        * ignored in this context.
        */
