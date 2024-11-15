@@ -68,6 +68,22 @@ struct spi_dev_s; /* Forward reference */
 struct spi_dev_s *imx9_lpspibus_initialize(int bus);
 
 /****************************************************************************
+ * Name: imx9_lpspibus_uninitialize
+ *
+ * Description:
+ *   Unitialize the selected SPI bus if refcount is 1
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void imx9_lpspi_uninitialize(struct spi_dev_s *dev);
+
+/****************************************************************************
  * Name:  imx9_lpspi1/2/...select and imx9_lpspi1/2/...status
  *
  * Description:
