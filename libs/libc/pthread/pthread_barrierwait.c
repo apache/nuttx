@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/pthread/pthread_barrierwait.c
+ * libs/libc/pthread/pthread_barrierwait.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -112,5 +112,16 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
   nxmutex_unlock(&barrier->mutex);
 
-  return -nxsem_wait_uninterruptible(&barrier->sem);
+  while (sem_wait(&barrier->sem) != OK)
+    {
+      /* If the thread is awakened by a signal, just continue to wait */
+
+      int errornumber = get_errno();
+      if (errornumber != EINTR)
+        {
+          return errornumber;
+        }
+    }
+
+  return OK;
 }
