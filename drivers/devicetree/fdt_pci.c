@@ -118,22 +118,26 @@ int fdt_pci_ecam_register(FAR const void *fdt)
 
       if ((type & FDT_PCI_TYPE_MASK) == FDT_PCI_TYPE_IO)
         {
-          io.start = fdt_ld_by_cells(ranges + na, pna);
+          io.start = fdt_ld_by_cells(ranges + 1, na -1);
           io.end = io.start + fdt_ld_by_cells(ranges + na + pna, ns);
+          io.offset = fdt_ld_by_cells(ranges + na, pna) - io.start;
         }
       else if ((type & FDT_PCI_PREFTCH) == FDT_PCI_PREFTCH)
         {
-          prefetch.start = fdt_ld_by_cells(ranges + na, pna);
+          prefetch.start = fdt_ld_by_cells(ranges + 1, na - 1);
           prefetch.end = prefetch.start +
                          fdt_ld_by_cells(ranges + na + pna, ns);
+          prefetch.offset = fdt_ld_by_cells(ranges + na, pna) -
+                            prefetch.start;
         }
       else if (((type & FDT_PCI_TYPE_MEM32) == FDT_PCI_TYPE_MEM32 &&
                 sizeof(uintptr_t) == 4) ||
                ((type & FDT_PCI_TYPE_MEM64) == FDT_PCI_TYPE_MEM64 &&
                 sizeof(uintptr_t) == 8))
         {
-          mem.start = fdt_ld_by_cells(ranges + na, pna);
+          mem.start = fdt_ld_by_cells(ranges + 1, na - 1);
           mem.end = mem.start + fdt_ld_by_cells(ranges + na + pna, ns);
+          mem.offset = fdt_ld_by_cells(ranges + na, pna) - mem.start;
         }
     }
 
