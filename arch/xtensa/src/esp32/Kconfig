@@ -859,6 +859,7 @@ config ESP32_RTC_HEAP
 config ESP32_IRAM_HEAP
 	bool "Use the rest of IRAM as a separate heap"
 	select ARCH_HAVE_EXTRA_HEAPS
+	select LIBC_ARCH_ATOMIC
 	default n
 
 endmenu # Memory Configuration

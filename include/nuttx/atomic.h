@@ -29,7 +29,7 @@
 
 #include <stdbool.h>
 
-#ifdef __has_include
+#if defined(__has_include) && !defined(CONFIG_LIBC_ARCH_ATOMIC)
 #  if __has_include(<atomic>) && defined(__cplusplus)
 extern "C++"
 {

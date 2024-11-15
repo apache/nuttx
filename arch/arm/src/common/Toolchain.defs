@@ -573,7 +573,3 @@ SHLDFLAGS = -shared -Bsymbolic -Bdynamic -G
 ifeq ($(CONFIG_SIM_M32),y)
   SHLDFLAGS += -melf_i386
 endif
-
-ifeq ($(CONFIG_LIBC_ARCH_ATOMIC),y)
-  ARCHCFLAGS += -D__STDC_NO_ATOMICS__
-endif
