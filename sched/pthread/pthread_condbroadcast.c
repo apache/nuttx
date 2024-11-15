@@ -68,13 +68,6 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
     }
   else
     {
-      /* Disable pre-emption until all of the waiting threads have been
-       * restarted. This is necessary to assure that the sval behaves as
-       * expected in the following while loop
-       */
-
-      sched_lock();
-
       /* Loop until all of the waiting threads have been restarted. */
 
       while (cond->wait_count > 0)
@@ -92,10 +85,6 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
 
           cond->wait_count--;
         }
-
-      /* Now we can let the restarted threads run */
-
-      sched_unlock();
     }
 
   sinfo("Returning %d\n", ret);
