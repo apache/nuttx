@@ -1694,6 +1694,12 @@ FAR void *pci_map_bar_region(FAR struct pci_device_s *dev, int bar,
                              uintptr_t offset, size_t length)
 {
   uintptr_t start = pci_resource_start(dev, bar) + offset;
+
+  if (pci_resource_len(dev, bar) == 0)
+    {
+      return NULL;
+    }
+
   return pci_map_region(dev, start, length);
 }
 
