@@ -310,7 +310,6 @@ SYSCALL_LOOKUP(munmap,                     2)
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  SYSCALL_LOOKUP(pthread_barrier_wait,     1)
   SYSCALL_LOOKUP(pthread_cancel,           1)
   SYSCALL_LOOKUP(pthread_cond_broadcast,   1)
   SYSCALL_LOOKUP(pthread_cond_signal,      1)
