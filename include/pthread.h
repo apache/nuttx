@@ -49,7 +49,7 @@
  * SP_LOCKED and SP_UNLOCKED must constants of type spinlock_t.
  */
 
-#  include <arch/spinlock.h>
+#  include <nuttx/spinlock_type.h>
 #endif
 
 /****************************************************************************
