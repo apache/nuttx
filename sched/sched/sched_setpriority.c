@@ -46,7 +46,6 @@ struct reprioritize_arg_s
 {
   pid_t pid;
   cpu_set_t saved_affinity;
-  uint16_t saved_flags;
   int  sched_priority;
   bool need_restore;
 };
@@ -76,7 +75,7 @@ static int reprioritize_handler(FAR void *cookie)
   if (arg->need_restore)
     {
       tcb->affinity = arg->saved_affinity;
-      tcb->flags = arg->saved_flags;
+      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
   if (nxsched_reprioritize_rtr(tcb, arg->sched_priority))
@@ -237,7 +236,6 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
               else
                 {
                   arg.pid = tcb->pid;
-                  arg.saved_flags = tcb->flags;
                   arg.saved_affinity = tcb->affinity;
                   arg.need_restore = true;
 

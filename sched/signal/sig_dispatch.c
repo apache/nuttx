@@ -54,7 +54,6 @@ struct sig_arg_s
 {
   pid_t pid;
   cpu_set_t saved_affinity;
-  uint16_t saved_flags;
   bool need_restore;
 };
 
@@ -84,7 +83,7 @@ static int sig_handler(FAR void *cookie)
   if (arg->need_restore)
     {
       tcb->affinity = arg->saved_affinity;
-      tcb->flags = arg->saved_flags;
+      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
   if (tcb->sigdeliver)
@@ -178,7 +177,6 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
                     }
                   else
                     {
-                      arg.saved_flags    = stcb->flags;
                       arg.saved_affinity = stcb->affinity;
                       arg.need_restore   = true;
 
