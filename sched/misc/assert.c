@@ -643,6 +643,11 @@ static void pause_all_cpu(void)
 }
 #endif
 
+#ifdef CONFIG_DEBUG_ALERT
+/****************************************************************************
+ * Name: dump_running_task
+ ****************************************************************************/
+
 static void dump_running_task(FAR struct tcb_s *rtcb, FAR void *regs)
 {
   /* Register dump */
@@ -665,6 +670,7 @@ static void dump_running_task(FAR struct tcb_s *rtcb, FAR void *regs)
  *
  * Description:
  *   Dump basic information of assertion
+ *
  ****************************************************************************/
 
 static void dump_assert_info(FAR struct tcb_s *rtcb,
@@ -710,6 +716,7 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
 
   syslog_flush();
 }
+#endif  /* CONFIG_DEBUG_ALERT */
 
 /****************************************************************************
  * Name: dump_fatal_info
@@ -719,7 +726,7 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
                             FAR const char *filename, int linenum,
                             FAR const char *msg, FAR void *regs)
 {
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(CONFIG_DEBUG_ALERT)
   int cpu;
 
   /* Dump other CPUs registers, running task stack and backtrace. */
@@ -887,9 +894,11 @@ void _assert(FAR const char *filename, int linenum,
 
   syslog_flush();
 
+#ifdef CONFIG_DEBUG_ALERT
   /* Dump basic info of assertion. */
 
   dump_assert_info(rtcb, filename, linenum, msg, regs);
+#endif
 
   if (g_nx_initstate == OSINIT_PANIC)
     {
