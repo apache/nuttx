@@ -368,6 +368,8 @@ struct pthread_barrier_s
 {
   sem_t        sem;
   unsigned int count;
+  unsigned int wait_count;
+  mutex_t      mutex;
 };
 
 #ifndef __PTHREAD_BARRIER_T_DEFINED

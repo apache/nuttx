@@ -82,67 +82,35 @@
 
 int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 {
-  irqstate_t flags;
-  int semcount;
-  int ret;
-
   if (barrier == NULL)
     {
       return EINVAL;
     }
 
-  /* Disable pre-emption throughout the following */
-
-  flags = enter_critical_section();
-
-  /* Find out how many threads are already waiting at the barrier */
-
-  ret = nxsem_get_value(&barrier->sem, &semcount);
-  if (ret != OK)
-    {
-      leave_critical_section(flags);
-      return -ret;
-    }
-
   /* If the number of waiters would be equal to the count, then we are done */
 
-  if ((1 - semcount) >= (int)barrier->count)
+  nxmutex_lock(&barrier->mutex);
+
+  if ((barrier->wait_count + 1) >= barrier->count)
     {
       /* Free all of the waiting threads */
 
-      while (semcount < 0)
+      while (barrier->wait_count > 0)
         {
+          barrier->wait_count--;
           nxsem_post(&barrier->sem);
-          nxsem_get_value(&barrier->sem, &semcount);
         }
 
       /* Then return PTHREAD_BARRIER_SERIAL_THREAD to the final thread */
 
-      leave_critical_section(flags);
+      nxmutex_unlock(&barrier->mutex);
+
       return PTHREAD_BARRIER_SERIAL_THREAD;
     }
 
-  /* Otherwise, this thread must wait as well */
+  barrier->wait_count++;
 
-  while ((ret = nxsem_wait(&barrier->sem)) != OK)
-    {
-      /* If the thread is awakened by a signal, just continue to wait */
+  nxmutex_unlock(&barrier->mutex);
 
-      if (ret != -EINTR)
-        {
-          /* If it is awakened by some other error, then there is a
-           * problem
-           */
-
-          break;
-        }
-    }
-
-  /* We will only get here when we are one of the N-1 threads that were
-   * waiting for the final thread at the barrier.  We just need to return
-   * zero.
-   */
-
-  leave_critical_section(flags);
-  return -ret;
+  return -nxsem_wait_uninterruptible(&barrier->sem);
 }
