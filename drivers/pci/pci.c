@@ -672,14 +672,19 @@ static uint32_t pci_size(uint32_t base, uint32_t maxbase, uint32_t mask)
  *   prefetchable MEM, and add this dev to the device list.
  *
  * Input Parameters:
- *   dev     - The PCI device be found
- *   max_bar - Max bar number(6 or 2)
+ *   dev      - The PCI device be found
+ *   max_bar  - Max bar number(6 or 2)
  *   rom_addr - The pci device rom addr
+ *   io       - The pci bus io resource
+ *   mem      - The pci bus mem resource
+ *   mem_pref - The pci bus mem_pref resource
  *
  ****************************************************************************/
 
 static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
-                             uint8_t rom_addr)
+                             uint8_t rom_addr, FAR struct pci_resource_s *io,
+                             FAR struct pci_resource_s *mem,
+                             FAR struct pci_resource_s *mem_pref)
 {
   int bar;
   uint32_t orig;
@@ -720,7 +725,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
 
           size  = pci_size(orig, mask, 0xfffffffe);
           flags = PCI_RESOURCE_IO;
-          res   = &dev->bus->ctrl->io;
+          res   = io;
         }
       else if ((mask & PCI_BASE_ADDRESS_MEM_PREFETCH) &&
                pci_resource_size(&dev->bus->ctrl->mem_pref))
@@ -729,7 +734,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
 
           size  = pci_size(orig, mask, 0xfffffff0);
           flags = PCI_RESOURCE_MEM | PCI_RESOURCE_PREFETCH;
-          res   = &dev->bus->ctrl->mem_pref;
+          res   = mem_pref;
         }
       else
         {
@@ -737,7 +742,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
 
           size  = pci_size(orig, mask, 0xfffffff0);
           flags = PCI_RESOURCE_MEM;
-          res   = &dev->bus->ctrl->mem;
+          res   = mem;
         }
 
       if (size == 0)
@@ -963,6 +968,9 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
 {
   FAR struct pci_device_s *dev;
   FAR struct pci_bus_s *child_bus;
+  struct pci_resource_s mem_pref;
+  struct pci_resource_s mem;
+  struct pci_resource_s io;
   unsigned int devfn;
   uint32_t l;
   uint32_t class;
@@ -970,6 +978,10 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
   uint8_t is_multi = 0;
 
   pciinfo("pci_scan_bus for bus %d\n", bus->number);
+
+  memcpy(&io, &bus->ctrl->io, sizeof(struct pci_resource_s));
+  memcpy(&mem, &bus->ctrl->mem, sizeof(struct pci_resource_s));
+  memcpy(&mem_pref, &bus->ctrl->mem_pref, sizeof(struct pci_resource_s));
 
   for (devfn = 0; devfn < 0xff; ++devfn)
     {
@@ -1027,7 +1039,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
               goto bad;
             }
 
-          pci_setup_device(dev, 6, PCI_ROM_ADDRESS);
+          pci_setup_device(dev, 6, PCI_ROM_ADDRESS, &io, &mem, &mem_pref);
 
           pci_read_config_word(dev, PCI_SUBSYSTEM_ID,
                                &dev->subsystem_device);
@@ -1056,7 +1068,7 @@ static void pci_scan_bus(FAR struct pci_bus_s *bus)
           pci_scan_bus(child_bus);
           pci_postsetup_bridge(dev);
 
-          pci_setup_device(dev, 2, PCI_ROM_ADDRESS1);
+          pci_setup_device(dev, 2, PCI_ROM_ADDRESS1, &io, &mem, &mem_pref);
           break;
 
         default:
