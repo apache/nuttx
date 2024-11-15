@@ -663,6 +663,8 @@ static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
   FAR struct sensor_lowerhalf_s *drv = dev->drv;
+  bool adv = false;
+  bool sub = false;
   int ret;
 
   if (drv->ops->open)
@@ -684,7 +686,7 @@ static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
     {
       if (dev->nadvertisers++ == 0)
         {
-          sensor_rpmsg_advsub(dev, SENSOR_RPMSG_ADVERTISE);
+          adv = true;
         }
     }
 
@@ -692,11 +694,22 @@ static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
     {
       if (dev->nsubscribers++ == 0)
         {
-          sensor_rpmsg_advsub(dev, SENSOR_RPMSG_SUBSCRIBE);
+          sub = true;
         }
     }
 
   sensor_rpmsg_unlock(dev);
+
+  if (adv)
+    {
+      sensor_rpmsg_advsub(dev, SENSOR_RPMSG_ADVERTISE);
+    }
+
+  if (sub)
+    {
+      sensor_rpmsg_advsub(dev, SENSOR_RPMSG_SUBSCRIBE);
+    }
+
   return 0;
 }
 
@@ -709,6 +722,8 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
   FAR struct sensor_rpmsg_proxy_s *ptmp;
   FAR struct sensor_rpmsg_stub_s *stub;
   FAR struct sensor_rpmsg_stub_s *stmp;
+  bool unadv = false;
+  bool unsub = false;
   int ret = 0;
 
   if (drv->ops->close)
@@ -726,7 +741,7 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
     {
       if (dev->nadvertisers == 1)
         {
-          sensor_rpmsg_advsub(dev, SENSOR_RPMSG_UNADVERTISE);
+          unadv = true;
           list_for_every_entry_safe(&dev->stublist, stub, stmp,
                                     struct sensor_rpmsg_stub_s, node)
             {
@@ -741,7 +756,7 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
     {
       if (dev->nsubscribers == 1)
         {
-          sensor_rpmsg_advsub(dev, SENSOR_RPMSG_UNSUBSCRIBE);
+          unsub = true;
           list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
                                     struct sensor_rpmsg_proxy_s, node)
             {
@@ -753,6 +768,17 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
     }
 
   sensor_rpmsg_unlock(dev);
+
+  if (unadv)
+    {
+      sensor_rpmsg_advsub(dev, SENSOR_RPMSG_UNADVERTISE);
+    }
+
+  if (unsub)
+    {
+      sensor_rpmsg_advsub(dev, SENSOR_RPMSG_UNSUBSCRIBE);
+    }
+
   return ret;
 }
 
