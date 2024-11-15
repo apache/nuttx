@@ -37,4 +37,5 @@ goto :__end
     goto :__end
 
 :__end
+set MISSING_REQUIREMENTS=
 exit /b %SCRIPT_EXIT_CODE%

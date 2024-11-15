@@ -12,18 +12,28 @@ import os
 import re
 import shutil
 import subprocess
-from typing import Any, Callable, Dict, List, Optional, OrderedDict, Set, Union
+import sys
+import tempfile
+from typing import Any, Callable, Dict, List, Optional, OrderedDict, Set, Tuple, Union
 
 from pycmd.idf_tools_unpack import unpack
 
 from .utils import (PYTHON_PLATFORM, Platforms, fatal, warn, info, CURRENT_PLATFORM, run_cmd_check_output,
-                    mkdir_p, get_file_size_sha256, download, rename_with_retry, print_hints_on_download_error)
+                    mkdir_p, get_file_size_sha256, download, rename_with_retry, print_hints_on_download_error,
+                    to_shell_specific_paths)
 
 UNKNOWN_VERSION = 'unknown'
 IDF_ENV_FILE = 'idf-env.json'
 DOWNLOAD_RETRY_COUNT = 3
 
+SUBST_TOOL_PATH_REGEX = re.compile(r'\${TOOL_PATH}')
+
+# refs: do_export
+EXPORT_SHELL = 'shell'
+EXPORT_KEY_VALUE = 'key-value'
+
 # use for environ variable prompt string
+OS_ENV_IDF_PATH_PROMPT = 'IDF_PATH'
 OS_ENV_IDF_TOOLS_PROMPT = 'IDF_TOOLS_PATH'
 OS_ENV_IDF_NET_ASSETS_PROMPT = 'IDF_NET_ASSETS'
 
@@ -46,6 +56,50 @@ class ToolBinaryError(RuntimeError):
     Raise when an error occurred when running any version of the tool.
     """
     pass
+
+
+class _ENVState:
+    """
+    ENVState is used to handle IDF global variables that are set in environment and need to be removed when switching between ESP-IDF versions in opened shell.
+    Every opened shell/terminal has it's own temporary file to store these variables.
+    The temporary file's name is generated automatically with suffix 'idf_ + opened shell ID'. Path to this tmp file is stored as env global variable (env_key).
+    The shell ID is crucial, since in one terminal can be opened more shells.
+    * env_key - global variable name/key
+    * deactivate_file_path - global variable value (generated tmp file name)
+    * idf_variables - loaded IDF variables from file
+    """
+    env_key = 'IDF_DEACTIVATE_FILE_PATH'
+    deactivate_file_path = os.environ.get(env_key, '')
+
+    def __init__(self) -> None:
+        self.idf_variables: Dict[str, Any] = {}
+
+    @classmethod
+    def get_env_state(cls) -> '_ENVState':
+        env_state_obj = cls()
+
+        if cls.deactivate_file_path:
+            try:
+                with open(cls.deactivate_file_path, 'r') as fp:
+                    env_state_obj.idf_variables = json.load(fp)
+            except (IOError, OSError, ValueError):
+                pass
+        return env_state_obj
+
+    def save(self) -> str:
+        try:
+            if self.deactivate_file_path and os.path.basename(self.deactivate_file_path).endswith(f'idf_{str(os.getppid())}'):
+                # If exported file path/name exists and belongs to actual opened shell
+                with open(self.deactivate_file_path, 'w') as w:
+                    json.dump(self.idf_variables, w, ensure_ascii=False, indent=4)  # type: ignore
+            else:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f'idf_{str(os.getppid())}') as fp:
+                    self.deactivate_file_path = fp.name
+                    fp.write(json.dumps(self.idf_variables, ensure_ascii=False, indent=4).encode('utf-8'))
+        except (IOError, OSError):
+            warn(f'File storing IDF env variables {self.deactivate_file_path} is not accessible to write. '
+                 'Potentional switching ESP-IDF versions may cause problems')
+        return self.deactivate_file_path
 
 
 class _IDFToolDownload(object):
@@ -248,6 +302,7 @@ class _IDFTool(object):
 
     def find_installed_versions(self) -> None:
         assert self._platform == CURRENT_PLATFORM
+        tool_error = False
 
         try:
             ver_str = self.get_version()
@@ -269,10 +324,35 @@ class _IDFTool(object):
             if not os.path.exists(tool_path):
                 # version not installed
                 continue
-
-
+            if not self.is_executable:
+                self.versions_installed.append(version)
+                continue
+            try:
+                ver_str = self.get_version(self.get_export_paths(version))
+            except ToolNotFoundError as e:
+                warn(f'directory for tool {self.name} version {version} is present, but the tool has not been found: {e}')
+            except ToolExecError as e:
+                fatal(f'tool {self.name} version {version} is installed, but cannot be run: {e}')
+                tool_error = True
+            else:
+                if ver_str != version:
+                    warn(f'tool {self.name} version {version} is installed, but has reported version {ver_str}')
+                self.versions_installed.append(version)
         if tool_error:
             raise ToolBinaryError
+
+
+    def get_preferred_installed_version(self) -> Optional[str]:
+        """
+        Get the preferred installed version of the tool. If more versions installed, return the highest.
+        """
+        recommended_versions = [k for k in self.versions_installed
+                                if self.versions[k].status == _IDFToolVersion.STATUS_RECOMMENDED
+                                and self.versions[k].compatible_with_platform(self._platform)]
+        assert len(recommended_versions) <= 1
+        if recommended_versions:
+            return recommended_versions[0]
+        return None
 
 
     def get_path(self) -> str:
@@ -325,6 +405,24 @@ class _IDFTool(object):
         """
         tool_path = self.get_path_for_version(version)
         return [os.path.join(tool_path, *p) for p in self._current_options.export_paths]  # type: ignore
+
+
+    def get_export_vars(self, version: str) -> Dict[str, str]:
+        """
+        Get the dictionary of environment variables to be exported, for the given version.
+        Expands:
+        - ${TOOL_PATH} => the actual path where the version is installed.
+        """
+        result = {}
+        for k, v in self._current_options.export_vars.items():  # type: ignore
+            replace_path = self.get_path_for_version(version).replace('\\', '\\\\')
+            v_repl = re.sub(SUBST_TOOL_PATH_REGEX, replace_path, v)
+            if v_repl != v:
+                v_repl = to_shell_specific_paths([v_repl])[0]
+            old_v = os.environ.get(k)
+            if old_v is None or old_v != v_repl:
+                result[k] = v_repl
+        return result
 
 
     def check_binary_valid(self, version: str) -> bool:
@@ -610,39 +708,6 @@ class _IDFTool(object):
             raise RuntimeError('export_vars for override %d of tool %s is not a mapping' % (index, tool_name))
 
 
-class _IDFEnv:
-    """
-    IDFEnv represents FREE-IDF Environments installed on system and is responsible for loading and saving structured data.
-    All information is saved and loaded from IDF_ENV_FILE.
-    Contains:
-        * idf_installed - all installed environments of ESP-IDF on system.
-    """
-    def __init__(self) -> None:
-        pass
-
-    @classmethod
-    def get_idf_env(cls) -> '_IDFEnv':
-        """
-        IDFEnv class is used to process IDF_ENV_FILE file. The constructor is therefore called only in this method that loads the file and checks its contents.
-        """
-        idf_env_obj = cls()
-        try:
-            idf_tools_path = os.environ.get(OS_ENV_IDF_TOOLS_PROMPT)
-            idf_env_file_path = os.path.join(idf_tools_path, IDF_ENV_FILE)
-            with open(idf_env_file_path, 'r', encoding='utf-8') as idf_env_file:
-                idf_env_json = json.load(idf_env_file)
-
-                try:
-                    idf_installed = idf_env_json['idfInstalled']
-                except KeyError:
-                    pass
-        except (IOError, OSError, ValueError):
-            pass
-
-        return idf_env_obj
-
-
-
 def _parse_tools_info_json(tools_info): # type: ignore
     tools_dict = OrderedDict()
     tools_array = tools_info.get('tools')
@@ -662,8 +727,15 @@ def _load_tools_info(file: str) -> Dict[str, _IDFTool]:
     return _parse_tools_info_json(tools_info) # type: ignore
 
 
-def _filer_tools_info(idf_env_obj: _IDFEnv, tools_info: Dict[str, _IDFTool]) -> Dict[str, _IDFTool]:
-    return tools_info
+def _filer_tools_info(targets: List[str], tools_info: Dict[str, _IDFTool]) -> Dict[str, _IDFTool]:
+    if not targets:
+        return tools_info
+    else:
+        filtered_tools_spec = {k:v for k, v in tools_info.items() if
+                            #    (v.get_install_type() == _IDFTool.INSTALL_ALWAYS or v.get_install_type() == _IDFTool.INSTALL_ON_REQUEST) and
+                               (v.get_install_type() == _IDFTool.INSTALL_ALWAYS) and
+                               (any(item in targets for item in v.get_supported_targets()) or v.get_supported_targets() == ['all'])}
+        return OrderedDict(filtered_tools_spec)
 
 
 def _get_need_tools_by_agrs(tool_list: List[str], overall_tools: OrderedDict, targets: List[str]) -> List[str]:
@@ -676,21 +748,156 @@ def _get_need_tools_by_agrs(tool_list: List[str], overall_tools: OrderedDict, ta
 
     tools = [k for k in tools if overall_tools[k].is_supported_for_any_of_targets(targets)]
     return tools
+
+
+def _handle_recommended_version_to_use(
+    tool: _IDFTool,
+    tool_name: str,
+    version_to_use: str,
+    prefer_system_hint: str,
+) -> Tuple[list, dict]:
+    """
+    If there is unsupported tools version in PATH, prints info about that.
+    """
+    tool_export_paths = tool.get_export_paths(version_to_use)
+    tool_export_vars = tool.get_export_vars(version_to_use)
+    if tool.version_in_path and tool.version_in_path not in tool.versions:
+        info(f'Not using an unsupported version of tool {tool.name} found in PATH: {tool.version_in_path}.' + prefer_system_hint, f=sys.stderr)
+    return tool_export_paths, tool_export_vars
+
+
+def _process_tool(
+    tool: _IDFTool,
+    tool_name: str,
+    args: argparse.Namespace,
+    install_cmd: str,
+    prefer_system_hint: str
+) -> Tuple[list, dict, bool]:
+    """
+    Helper function used only in action export.
+    Returns:
+        * Paths that need to be exported.
+        * Dictionary of environment variables that need to be exported for the tool.
+        * Flag if any tool was found.
+    """
+    tool_found: bool = True
+    tool_export_paths: List[str] = []
+    tool_export_vars: Dict[str, str] = {}
+
+    try:
+        tool.find_installed_versions()
+    except ToolBinaryError:
+        pass
+    recommended_version_to_use = tool.get_preferred_installed_version()
+
+    if not tool.is_executable and recommended_version_to_use:
+        tool_export_vars = tool.get_export_vars(recommended_version_to_use)
+        return tool_export_paths, tool_export_vars, tool_found
+
+    if recommended_version_to_use:
+        tool_export_paths, tool_export_vars = _handle_recommended_version_to_use(
+            tool, tool_name, recommended_version_to_use, prefer_system_hint
+        )
+        return tool_export_paths, tool_export_vars, tool_found
     
+    info(f'兄弟，异常了，咳血看代码吧！！！')
+    return tool_export_paths, tool_export_vars, False
+
+
+def _get_export_format_and_separator(args: List[str]) -> Tuple[str, str]:
+    """
+    Returns export pattern (formatted string) either for exporting in shell or as a key-value pair.
+    """
+    return {EXPORT_SHELL: ('export {}="{}"', ';'), EXPORT_KEY_VALUE: ('{}={}', '\n')}[args.format]  # type: ignore
+
+
+def _add_variables_to_deactivate_file(args: List[str], new_idf_vars:Dict[str, Any]) -> str:
+    """
+    Add IDF global variables that need to be removed when the active esp-idf environment is deactivated.
+    """
+    if 'PATH' in new_idf_vars:
+        if sys.platform == 'win32':
+            new_idf_vars['PATH'] = new_idf_vars['PATH'].split(';')[:-1]  # PATH is stored as list of sub-paths without '$PATH'
+        else:
+            new_idf_vars['PATH'] = new_idf_vars['PATH'].split(':')[:-1]  # PATH is stored as list of sub-paths without '$PATH'
+
+    new_idf_vars['PATH'] = new_idf_vars.get('PATH', [])
+    args_add_paths_extras = vars(args).get('add_paths_extras')  # remove mypy error with args
+    new_idf_vars['PATH'] = new_idf_vars['PATH'] + args_add_paths_extras.split(':') if args_add_paths_extras else new_idf_vars['PATH']
+
+    env_state_obj = _ENVState.get_env_state()
+
+    if env_state_obj.idf_variables:
+        exported_idf_vars = env_state_obj.idf_variables
+    else:
+        env_state_obj.idf_variables = new_idf_vars
+    deactivate_file_path = env_state_obj.save()
+
+    return deactivate_file_path
+
 
 # export command function
-def do_export(args: argparse.Namespace, tools_file: str) -> None:
+def do_export(args: argparse.Namespace, tools_file: str, targets: List[str]) -> None:
     tools_info = _load_tools_info(tools_file)
-    tools_info = _filer_tools_info(_IDFEnv.get_idf_env(), tools_info)
+    tools_info = _filer_tools_info(targets, tools_info)
+    all_tools_found = True
+    export_vars: Dict[str, str] = {}
+    paths_to_export = []
+
+    self_restart_cmd = f'{sys.executable} {__file__}{(f" --tools-json {tools_file}") if tools_file else ""}'
+    self_restart_cmd = to_shell_specific_paths([self_restart_cmd])[0]
+    prefer_system_hint = f' To use it, run \'{self_restart_cmd} export --prefer-system\''
+    install_cmd = f'{self_restart_cmd} install'
 
     for name, tool in tools_info.items():
         if tool.get_install_type() == _IDFTool.INSTALL_NEVER:
             continue
 
-        try:
-            tool.find_installed_versions()
-        except ToolBinaryError:
-            pass
+        tool_export_paths, tool_export_vars, tool_found = _process_tool(tool, name, args, install_cmd, prefer_system_hint)
+        if not tool_found:
+            all_tools_found = False
+        paths_to_export += tool_export_paths
+        export_vars = {**export_vars, **tool_export_vars}
+
+    if not all_tools_found:
+        # 到这里为止了吧，兄弟！！！
+        raise SystemExit(1)
+
+    current_path = os.getenv('PATH')
+
+    idf_path = os.environ.get(OS_ENV_IDF_PATH_PROMPT)
+    idf_tools_dir = os.path.join(idf_path, 'scripts')  # type: ignore
+    idf_tools_dir = to_shell_specific_paths([idf_tools_dir])[0]
+    if current_path and idf_tools_dir not in current_path:
+        paths_to_export.append(idf_tools_dir)
+
+    if sys.platform == 'win32':
+        old_path = '%PATH%'
+        path_sep = ';'
+    else:
+        old_path = '$PATH'
+        path_sep = ':'
+
+    export_format, export_sep = _get_export_format_and_separator(args)
+
+    if paths_to_export:
+        export_vars['PATH'] = path_sep.join(to_shell_specific_paths(paths_to_export) + [old_path])
+        # Correct PATH order check for Windows platform
+        # idf-exe has to be before \tools in PATH
+        if sys.platform == 'win32':
+            paths_to_check = rf'{export_vars["PATH"]}{os.environ["PATH"]}'
+            try:
+                if paths_to_check.index(r'\tools;') < paths_to_check.index(r'\idf-exe'):
+                    warn('The PATH is not in correct order (idf-exe should be before esp-idf\\tools)')
+            except ValueError:
+                fatal(f'Both of the directories (..\\idf-exe\\.. and ..\\tools) has to be in the PATH:\n\n{paths_to_check}\n')
+
+    if export_vars:
+        # if not copy of export_vars is given to function, it brekas the formatting string for 'export_statements'
+        deactivate_file_path = _add_variables_to_deactivate_file(args, export_vars.copy())
+        export_vars[_ENVState.env_key] = deactivate_file_path
+        export_statements = export_sep.join([export_format.format(k, v) for k, v in export_vars.items()])
+        print(export_statements)
 
 
 def _get_idf_download_url_apply_mirrors(download_url: str) -> str:

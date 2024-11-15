@@ -9,4 +9,22 @@
 title 工程命令行
 color 0A
 
+set "BOSS_TARGETS=esp32s3"
+
+if exist flag.txt (
+    echo. 
+    echo 请关闭其他窗口,重新执行！！！
+    echo. 
+    goto :_EXCEPT
+)
+
+echo. > flag.txt
 cmd /k "bat_cmd\main.bat"
+
+set BOSS_TARGETS=
+exit
+
+:_EXCEPT
+set BOSS_TARGETS=
+del flag.txt
+pause

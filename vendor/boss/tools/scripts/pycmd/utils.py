@@ -77,6 +77,16 @@ def get_file_size_sha256(filename: str, block_size: int=65536) -> Tuple[int, str
     return size, sha256.hexdigest()
 
 
+def to_shell_specific_paths(paths_list: List[str]) -> List[str]:
+    """
+    Converts / (linux)  to \\ (Windows) if called under win32 platform.
+    """
+    if sys.platform == 'win32':
+        paths_list = [p.replace('/', os.path.sep) if os.path.sep in p else p for p in paths_list]
+
+    return paths_list
+
+
 # Platform info
 PYTHON_PLATFORM = f'{platform.system()}-{platform.machine()}'
 
@@ -238,6 +248,15 @@ def parse_platform_arg(platform_str: str) -> str:
 
 
 CURRENT_PLATFORM = parse_platform_arg(PYTHON_PLATFORM)
+
+
+def executable_exists(args: List) -> bool:
+    try:
+        subprocess.check_output(args)
+        return True
+
+    except Exception:
+        return False
 
 
 def run_cmd_check_output(cmd: List[str], input_text: Optional[str]=None, extra_paths: Optional[List[str]]=None) -> bytes:

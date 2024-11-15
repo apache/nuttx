@@ -12,16 +12,13 @@ from typing import Any, List, Optional, Union
 from pycmd.utils import fatal, warn, info, CURRENT_PLATFORM
 from pycmd.idf_tools_python_env import install_python_env, uninstall_python_env
 from pycmd.idf_tools_unpack import unpack
-from pycmd.idf_tools_parser import do_export, do_download
+from pycmd.idf_tools_parser import do_export, do_download, EXPORT_SHELL, EXPORT_KEY_VALUE
 
 # custom directory.
 IDF_TOOLS_PATH_DEFAULT = os.path.join('~', '.boss')
 TOOLS_FILE_DEFAULT = 'scripts/tools.json'
 
 IDF_NET_ASSETS_DEFAULT = 'dl.espressif.com'
-
-EXPORT_SHELL = 'shell'
-EXPORT_KEY_VALUE = 'key-value'
 
 class GlobalVarsStore:
     """
@@ -81,8 +78,14 @@ def action_extract(args: argparse.Namespace) -> None:
         unpack(file, location)
 
 def action_export(args: argparse.Namespace) -> None:
+    targets: List[str] = []
+    if ',' in args.targets:
+        targets = [ t.strip() for t in args.targets.split(',')]
+    else:
+        targets.extend([args.targets])
+
     if os.path.isfile(g.tools_json):
-        do_export(args, g.tools_json)
+        do_export(args, g.tools_json, targets)
     else:
         fatal(f"{g.tools_json} is bad file.")
         raise SystemExit(1)
@@ -142,6 +145,8 @@ def main(argv: List[str]) -> None:
     export.add_argument('--format', choices=[EXPORT_SHELL, EXPORT_KEY_VALUE],
                         help=('Format of the output: shell (suitable for printing into shell), '
                               'or key-value (suitable for parsing by other tools'))
+    export.add_argument('--targets', default='all', help=('A comma separated list of desired chip targets for installing. '
+                                                        ' It defaults to export all supported targets info.'))
 
     # let's start parser cmd's args
     args = parser.parse_args(argv)
