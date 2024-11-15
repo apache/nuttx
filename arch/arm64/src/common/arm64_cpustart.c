@@ -104,13 +104,6 @@ uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
  * Private Functions
  ****************************************************************************/
 
-static inline void local_delay(void)
-{
-  for (volatile int i = 0; i < 1000; i++)
-    {
-    }
-}
-
 static void arm64_smp_init_top(void)
 {
   struct tcb_s *tcb = current_task(this_cpu());
