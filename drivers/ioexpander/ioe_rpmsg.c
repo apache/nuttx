@@ -365,7 +365,7 @@ static void *ioe_rpmsg_attach(FAR struct ioexpander_dev_s *dev,
                            (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
   if (ret >= 0)
     {
-      return (FAR void *)(ret + 1);
+      return (FAR void *)((uintptr_t)(ret + 1));
     }
 
   return NULL;
