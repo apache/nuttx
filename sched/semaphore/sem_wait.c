@@ -38,15 +38,16 @@
 #include "semaphore/semaphore.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsem_wait_slow
+ * Name: nxsem_wait
  *
  * Description:
- *   This function attempts to lock the semaphore referenced by 'sem' in
- *   slow mode.
+ *   This function attempts to lock the semaphore referenced by 'sem'.  If
+ *   the semaphore value is (<=) zero, then the calling task will not return
+ *   until it successfully acquires the lock.
  *
  *   This is an internal OS interface.  It is functionally equivalent to
  *   sem_wait except that:
@@ -68,11 +69,16 @@
  *
  ****************************************************************************/
 
-static int nxsem_wait_slow(FAR sem_t *sem)
+int nxsem_wait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   int ret;
+
+  /* This API should not be called from interrupt handlers & idleloop */
+
+  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask());
 
   /* The following operations must be performed with interrupts
    * disabled because nxsem_post() may be called from an interrupt
@@ -85,7 +91,7 @@ static int nxsem_wait_slow(FAR sem_t *sem)
 
   /* Check if the lock is available */
 
-  if (atomic_fetch_sub(NXSEM_COUNT(sem), 1) > 0)
+  if (sem->semcount > 0)
     {
       /* It is, let the task take the semaphore. */
 
@@ -96,6 +102,7 @@ static int nxsem_wait_slow(FAR sem_t *sem)
           return ret;
         }
 
+      sem->semcount--;
       nxsem_add_holder(sem);
       rtcb->waitobj = NULL;
       ret = OK;
@@ -116,6 +123,10 @@ static int nxsem_wait_slow(FAR sem_t *sem)
        */
 
       DEBUGASSERT(rtcb->waitobj == NULL);
+
+      /* Handle the POSIX semaphore (but don't set the owner yet) */
+
+      sem->semcount--;
 
       /* Save the waited on semaphore in the TCB */
 
@@ -211,65 +222,6 @@ static int nxsem_wait_slow(FAR sem_t *sem)
 
   leave_critical_section(flags);
   return ret;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxsem_wait
- *
- * Description:
- *   This function attempts to lock the semaphore referenced by 'sem'.  If
- *   the semaphore value is (<=) zero, then the calling task will not return
- *   until it successfully acquires the lock.
- *
- *   This is an internal OS interface.  It is functionally equivalent to
- *   sem_wait except that:
- *
- *   - It is not a cancellation point, and
- *   - It does not modify the errno value.
- *
- * Input Parameters:
- *   sem - Semaphore descriptor.
- *
- * Returned Value:
- *   This is an internal OS interface and should not be used by applications.
- *   It follows the NuttX internal error return policy:  Zero (OK) is
- *   returned on success.  A negated errno value is returned on failure.
- *   Possible returned errors:
- *
- *   - EINVAL:  Invalid attempt to get the semaphore
- *   - EINTR:   The wait was interrupted by the receipt of a signal.
- *
- ****************************************************************************/
-
-int nxsem_wait(FAR sem_t *sem)
-{
-  /* This API should not be called from interrupt handlers & idleloop */
-
-  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
-  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask());
-
-  /* If this is a mutex, we can try to get the mutex in fast mode,
-   * else try to get it in slow mode.
-   */
-
-#if !defined(CONFIG_PRIORITY_INHERITANCE) && !defined(CONFIG_PRIORITY_PROTECT)
-  if (sem->flags & SEM_TYPE_MUTEX)
-    {
-      short old = 1;
-      if (atomic_compare_exchange_weak_explicit(NXSEM_COUNT(sem), &old, 0,
-                                                memory_order_acquire,
-                                                memory_order_relaxed))
-        {
-          return OK;
-        }
-    }
-#endif
-
-  return nxsem_wait_slow(sem);
 }
 
 /****************************************************************************

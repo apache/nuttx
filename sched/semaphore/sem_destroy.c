@@ -60,8 +60,6 @@
 
 int nxsem_destroy(FAR sem_t *sem)
 {
-  short old;
-
   DEBUGASSERT(sem != NULL);
 
   /* There is really no particular action that we need
@@ -74,18 +72,10 @@ int nxsem_destroy(FAR sem_t *sem)
    * leave the count unchanged but still return OK.
    */
 
-  do
+  if (sem->semcount >= 0)
     {
-      old = atomic_load(NXSEM_COUNT(sem));
-      if (old < 0)
-        {
-          break;
-        }
+      sem->semcount = 1;
     }
-  while (!atomic_compare_exchange_weak_explicit(NXSEM_COUNT(sem),
-                                                &old, 1,
-                                                memory_order_release,
-                                                memory_order_relaxed));
 
   /* Release holders of the semaphore */
 
