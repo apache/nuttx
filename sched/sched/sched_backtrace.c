@@ -44,7 +44,6 @@ struct backtrace_arg_s
   int size;
   int skip;
   cpu_set_t saved_affinity;
-  uint16_t saved_flags;
   bool need_restore;
 };
 
@@ -74,7 +73,7 @@ static int sched_backtrace_handler(FAR void *cookie)
   if (arg->need_restore)
     {
       tcb->affinity = arg->saved_affinity;
-      tcb->flags = arg->saved_flags;
+      tcb->flags &= ~TCB_FLAG_CPU_LOCKED;
     }
 
   leave_critical_section(flags);
@@ -127,7 +126,6 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
               else
                 {
                   arg.pid = tcb->pid;
-                  arg.saved_flags = tcb->flags;
                   arg.saved_affinity = tcb->affinity;
                   arg.need_restore = true;
 
