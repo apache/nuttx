@@ -339,7 +339,6 @@ static int sja1000_setup(struct can_dev_s *dev)
   if (ret < 0)
     {
       canerr("ERROR: Failed to attach to IRQ Handler!\n");
-      return ret;
     }
 
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
