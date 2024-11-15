@@ -28,7 +28,7 @@ This program will help you analyze memdump log files,
 analyze the number of occurrences of backtrace,
 and output stack information
 memdump log files need this format:
-pid   size  seq  addr   mem
+pid   size  overhead seq  addr   mem
 """
 
 
@@ -37,26 +37,27 @@ class dump_line:
         self.mem = []
         self.err = False
         self.cnt = 1
-        tmp = re.search("( \d+ )", line_str)
-        if tmp is None:
-            self.err = True
-            return
-        self.pid = int(tmp.group(0)[1:])
-        tmp = re.search("( \d+ )", line_str[tmp.span()[1] :])
-        if tmp is None:
-            self.err = True
-            return
-        self.size = int(tmp.group(0)[1:])
-        tmp = re.search("( \d+ )", line_str[tmp.span()[1] :])
-        if tmp is None:
-            self.err = True
-            return
-        self.seq = int(tmp.group(0)[1:])
+        self.pid = None
+        self.size = None
+        self.overhead = None
+        self.seq = None
+        self.addr = None
+        self.parse_line(line_str)
 
-        tmp = re.findall("0x([0-9a-fA-F]+)", line_str[tmp.span()[1] :])
-        self.addr = tmp[0]
-        for s in tmp[1:]:
-            self.mem.append(s)
+    def parse_line(self, line_str):
+        match = re.search(
+            r"\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+((?:\s+0x[0-9a-fA-F]+)+)", line_str
+        )
+        if match:
+            self.pid = int(match.group(1))
+            self.size = int(match.group(2))
+            self.overhead = int(match.group(3))
+            self.seq = int(match.group(4))
+            addresses = match.group(5).split()
+            self.addr = addresses[0]
+            self.mem = addresses[1:]
+        else:
+            self.err = True
 
 
 class log_output:
@@ -204,7 +205,7 @@ if __name__ == "__main__":
         total_size += size
     log.output("all used memory %-6d\n" % (total_size))
 
-    log.output("cnt   size   pid   addr         mem\n")
+    log.output("cnt   size   pid  overhead   addr         mem\n")
 
     mems = []
     for line in lines:
@@ -221,7 +222,9 @@ if __name__ == "__main__":
     db = addr2line_db(mem=mems, ncpu=ncpu, prefix=args.prefix[0], file=args.elffile[0])
     for t in lines:
         addr2line_str = ""
-        log.output("%-4d  %-6d %-3d   %s   " % (t.cnt, t.size, t.pid, t.addr))
+        log.output(
+            "%-4d  %-6d %-6d %-3d   %s   " % (t.cnt, t.size, t.overhead, t.pid, t.addr)
+        )
         if t.mem == []:
             log.output("\n")
             continue
