@@ -121,8 +121,6 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev);
  * Private Data
  *****************************************************************************/
 
-#ifdef CONFIG_16550_PCI_UART_QEMU
-
 static const struct pci_u16550_type_s g_pci_u16550_qemu_x1 =
 {
   .ports    = 1,
@@ -143,20 +141,16 @@ static const struct pci_u16550_type_s g_pci_u16550_qemu_x4 =
   .regincr  = 1,
   .portincr = 8,
 };
-#endif  /* CONFIG_16550_PCI_UART_QEMU */
 
-#ifdef CONFIG_16550_PCI_UART_AX99100
 static const struct pci_u16550_type_s g_pci_u16550_ax99100_x2 =
 {
   .ports    = 2,
   .regincr  = 1,
   .portincr = 8,
 };
-#endif  /* CONFIG_16550_PCI_UART_AX99100 */
 
 static const struct pci_device_id_s g_pci_u16550_id_table[] =
 {
-#ifdef CONFIG_16550_PCI_UART_QEMU
   {
     PCI_DEVICE(0x1b36, 0x0002),
     .driver_data = (uintptr_t)&g_pci_u16550_qemu_x1
@@ -169,13 +163,10 @@ static const struct pci_device_id_s g_pci_u16550_id_table[] =
     PCI_DEVICE(0x1b36, 0x0004),
     .driver_data = (uintptr_t)&g_pci_u16550_qemu_x4
   },
-#endif
-#ifdef CONFIG_16550_PCI_UART_AX99100
   {
     PCI_DEVICE(0x125b, 0x9100),
     .driver_data = (uintptr_t)&g_pci_u16550_ax99100_x2
   },
-#endif
   { }
 };
 
