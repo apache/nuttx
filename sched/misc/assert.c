@@ -34,7 +34,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/init.h>
-#include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/tls.h>
 #include <nuttx/signal.h>
