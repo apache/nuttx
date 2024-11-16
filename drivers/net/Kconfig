@@ -796,14 +796,6 @@ config NET_IGC_RXSPARE
 	int "Intel IGC spare RX buffers"
 	default 8
 
-config NET_IGC_I225LM
-	bool "Intel I225LM"
-	default n
-
-config NET_IGC_I226V
-	bool "Intel I226V"
-	default n
-
 endif # NET_IGC
 
 endif # NETDEVICES
