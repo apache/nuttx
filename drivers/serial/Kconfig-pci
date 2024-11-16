@@ -34,19 +34,6 @@ config 16550_PCI_UART3
 	---help---
 		Support for PCI UART3, will be registered as /dev/ttyS3
 
-config 16550_PCI_UART_QEMU
-	bool "16550 PCI QEMU devices"
-	default n
-	---help---
-		Enable support for QEMU serial devices (pci-serial, pci-serial-2x
-		pci-serial-4x)
-
-config 16550_PCI_UART_AX99100
-	bool "16550 PCI AX99100 device"
-	default n
-	---help---
-		Enable support for AX99100 serial port device.
-
 endif # 16550_PCI_UART
 
 if 16550_PCI_UART0
