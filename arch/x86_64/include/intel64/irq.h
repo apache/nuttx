@@ -571,7 +571,7 @@ static inline void set_pcid(uint64_t pcid)
 
 static inline void set_cr3(uint64_t cr3)
 {
-  __asm__ volatile("mov %0, %%cr3" : "=rm"(cr3) : : "memory");
+  __asm__ volatile("mov %0, %%cr3" :: "r"(cr3));
 }
 
 static inline uint64_t get_cr3(void)
