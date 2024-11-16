@@ -80,7 +80,7 @@ static void host_stat_convert(struct _stat *hostbuf,
  * Name: host_open
  ****************************************************************************/
 
-int host_open(const char *pathname, int flags, nuttx_mode_t mode)
+int host_open(const char *pathname, int flags, int mode)
 {
   int mapflags = 0;
   int ret;
@@ -382,7 +382,7 @@ int host_unlink(const char *pathname)
  * Name: host_mkdir
  ****************************************************************************/
 
-int host_mkdir(const char *pathname, nuttx_mode_t mode)
+int host_mkdir(const char *pathname, int mode)
 {
   /* Just call the host's mkdir routine */
 
