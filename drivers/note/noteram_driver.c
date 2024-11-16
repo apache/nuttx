@@ -1013,7 +1013,6 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
       {
         FAR struct note_syscall_enter_s *nsc;
         int i;
-        int j;
         uintptr_t arg;
 
         nsc = (FAR struct note_syscall_enter_s *)p;
@@ -1027,7 +1026,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
         ret += lib_sprintf(s, "sys_%s(",
                            g_funcnames[nsc->nsc_nr - CONFIG_SYS_RESERVED]);
 
-        for (i = j = 0; i < nsc->nsc_argc; i++)
+        for (i = 0; i < nsc->nsc_argc; i++)
           {
             arg = nsc->nsc_args[i];
             if (i == 0)
