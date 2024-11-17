@@ -49,12 +49,11 @@
 
 struct msgpool_s
 {
-#ifndef CONFIG_DISABLE_MQUEUE
+#ifdef CONFIG_DISABLE_MQUEUE_SYSV
   uint8_t mqueue[MQ_BLOCK_SIZE *
                  (CONFIG_PREALLOC_MQ_MSGS +
                   CONFIG_PREALLOC_MQ_IRQ_MSGS)];
-#endif
-#ifndef CONFIG_DISABLE_MQUEUE_SYSV
+#else
   struct msgbuf_s msgbuf[CONFIG_PREALLOC_MQ_MSGS];
 #endif
 };
@@ -103,7 +102,7 @@ static struct msgpool_s g_msgpool;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MQUEUE
+#ifdef CONFIG_DISABLE_MQUEUE_SYSV
 static FAR void * mq_msgblockinit(FAR struct list_node *list,
                                   FAR uint8_t *block,
                                   uint16_t nmsgs, uint8_t alloc_type)
@@ -171,7 +170,7 @@ void nxmq_initialize(void)
 
   /* Initialize a block of messages for general use */
 
-#ifndef CONFIG_DISABLE_MQUEUE
+#ifdef CONFIG_DISABLE_MQUEUE_SYSV
   list_initialize(&g_msgfree);
 
   msg = mq_msgblockinit(&g_msgfree, msg, CONFIG_PREALLOC_MQ_MSGS,
@@ -185,9 +184,7 @@ void nxmq_initialize(void)
 
   msg = mq_msgblockinit(&g_msgfreeirq, msg, CONFIG_PREALLOC_MQ_IRQ_MSGS,
                          MQ_ALLOC_IRQ);
-#endif
-
-#ifndef CONFIG_DISABLE_MQUEUE_SYSV
+#else
   list_initialize(&g_msgfreelist);
 
   msg = sysv_msgblockinit(&g_msgfreelist, msg, CONFIG_PREALLOC_MQ_MSGS);

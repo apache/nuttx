@@ -36,7 +36,7 @@ config DISABLE_MQUEUE
 
 config DISABLE_MQUEUE_SYSV
 	bool "Disable System V message queue support"
-	default DISABLE_MQUEUE
+	default y
 	---help---
 		Disable System V message queue support
 
