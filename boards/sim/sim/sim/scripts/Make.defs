@@ -322,12 +322,6 @@ ifeq ($(CONFIG_SIM_M32),y)
   LDMODULEFLAGS += -melf_i386
   SHMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
-else ifeq ($(CONFIG_HOST_MACOS),)
-  # To compile 64-bit Sim, adding no-pie is necessary to prevent linking errors
-  # but this may cause other issues on Ubuntu 20.
-  ARCHCFLAGS += -no-pie
-  ARCHPICFLAGS += -no-pie
-  LDFLAGS += -Wl,-no-pie
 endif
 
 ifeq ($(CONFIG_HOST_LINUX),y)
