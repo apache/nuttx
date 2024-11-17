@@ -1194,3 +1194,60 @@ fail:
   kmm_free(dev);
   return ret;
 }
+
+/****************************************************************************
+ * Name: rpmsgmtd_unregister
+ *
+ * Description:
+ *   Rpmsg-mtd client unregister function, the client cpu should call
+ *   this function in the board uninitialize process.
+ *
+ * Parameters:
+ *   localpath - the device name
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int rpmsgmtd_unregister(FAR const char *localpath)
+{
+  FAR struct rpmsgmtd_s *dev;
+  FAR struct inode *inode;
+  int ret;
+
+  ret = find_mtddriver(localpath, &inode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to find mtddriver, ret=%d\n", ret);
+      return ret;
+    }
+
+  dev = inode->i_private;
+  ret = close_mtddriver(inode);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to close mtddriver, ret=%d\n", ret);
+      return ret;
+    }
+
+  ret = unregister_mtddriver(localpath);
+  if (ret < 0)
+    {
+      ferr("ERROR: unregister driver failed, ret=%d\n", ret);
+      return ret;
+    }
+
+  /* Unregister the rpmsg callback */
+
+  rpmsg_unregister_callback(dev,
+                            rpmsgmtd_device_created,
+                            rpmsgmtd_device_destroy,
+                            NULL,
+                            NULL);
+
+  nxsem_destroy(&dev->wait);
+  nxmutex_destroy(&dev->geolock);
+  kmm_free(dev);
+  return ret;
+}
