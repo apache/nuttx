@@ -852,6 +852,25 @@ int rpmsgmtd_register(FAR const char *remotecpu, FAR const char *remotepath,
 #endif
 
 /****************************************************************************
+ * Name: rpmsgmtd_unregister
+ *
+ * Description:
+ *   Rpmsg-mtd client unregister function, the client cpu should call
+ *   this function in the board uninitialize process.
+ *
+ * Parameters:
+ *   localpath - the device name
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RPMSGMTD
+int rpmsgmtd_unregister(FAR const char *localpath);
+#endif
+
+/****************************************************************************
  * Name: rpmsgmtd_server_init
  *
  * Description:
