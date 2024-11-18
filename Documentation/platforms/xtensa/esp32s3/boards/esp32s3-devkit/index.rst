@@ -668,9 +668,9 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         --disk-version 2.0 \
         ..../wasm_module_dir
 
-2. Build a NuttX binary as usual with this config.
+2. Build a NuttX binary and write it to the board as usual with this config.
 
-3. Write the NuttX binary and the filesystem image to the board::
+3. Write the filesystem image to the board::
 
       % esptool.py \
         -c esp32s3 \
@@ -680,7 +680,6 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         -fs detect \
         -fm dio \
         -ff 40m \
-        0x10000 nuttx.bin \
         0x180000 ..../littlefs.bin
 
 4. Mount the filesystem and run a wasm module on it::
