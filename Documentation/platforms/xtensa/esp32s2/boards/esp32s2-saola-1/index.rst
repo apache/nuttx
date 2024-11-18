@@ -312,6 +312,16 @@ ostest
 This is the NuttX test at apps/testing/ostest that is run against all new
 architecture ports to assure a correct implementation of the OS.
 
+qencoder
+---
+
+This configuration demostrates the use of Quadrature Encoder connected to pins
+GPIO10 and GPIO11. You can start measurement of pulses using the following
+command (by default, it will open ``\dev\qe0`` device and print 20 samples
+using 1 second delay)::
+
+    nsh> qe
+
 pwm
 ------
 
