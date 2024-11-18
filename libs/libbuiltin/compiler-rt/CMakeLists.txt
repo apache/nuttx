@@ -130,7 +130,7 @@ if(CONFIG_COVERAGE_COMPILER_RT)
 
   target_sources(rt.profile PRIVATE ${RT_PROFILE_SRCS})
 
-elseif(CONFIG_COVERAGE_MINI)
+elseif(CONFIG_COVERAGE_MINI AND CONFIG_ARCH_TOOLCHAIN_CLANG)
   nuttx_add_system_library(rt.miniprofile)
 
   target_compile_options(rt.miniprofile -fno-profile-instr-generate

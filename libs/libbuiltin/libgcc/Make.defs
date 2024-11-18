@@ -19,10 +19,12 @@
 ############################################################################
 
 ifeq ($(CONFIG_PROFILE_MINI),y)
-
 CSRCS += profile.c
+endif
+
+ifeq ($(CONFIG_COVERAGE_MINI)$(CONFIG_ARCH_TOOLCHAIN_GCC),yy)
+CSRCS += gcov.c
+endif
 
 DEPPATH += --dep-path libgcc
 VPATH += :libgcc
-
-endif

@@ -106,7 +106,7 @@ CSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.c)
 CPPSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.cpp)
 CSRCS += InstrProfilingPlatform.c
 
-else ifeq ($(CONFIG_COVERAGE_MINI),y)
+else ifeq ($(CONFIG_COVERAGE_MINI)$(CONFIG_ARCH_TOOLCHAIN_CLANG),yy)
 
 FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
 
