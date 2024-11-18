@@ -410,7 +410,14 @@ ARCHOPTIMIZATION += --no_commons
 else
 ARCHOPTIMIZATION += -fno-common
 endif
-ARCHOPTIMIZATION += -Wall -Wshadow -Wundef
+
+ifeq ($(CONFIG_ARM_TOOLCHAIN_GHS),y)
+  ARCHOPTIMIZATION += --ghstd=last
+else
+  ARCHOPTIMIZATION += -Wall
+endif
+
+ARCHOPTIMIZATION += -Wshadow -Wundef
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN_ARMCLANG),y)
   ARCHOPTIMIZATION += -nostdlib
