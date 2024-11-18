@@ -63,6 +63,13 @@ void up_irqinitialize(void)
   riscv_stack_color(g_intstackalloc, intstack_size);
 #endif
 
+  /* Set priority for all global interrupts to 1 (lowest) */
+
+  for (int id = 1; id <= NR_IRQS; id++)
+    {
+      putreg32(1, MPFS_PLIC_PRIORITY + (4 * id));
+    }
+
   /* Attach the common interrupt handler */
 
   riscv_exception_attach();
