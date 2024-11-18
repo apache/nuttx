@@ -68,17 +68,16 @@ FAR struct iob_qentry_s *iob_free_qentry(FAR struct iob_qentry_s *iobq)
    * iob_tryalloc_qentry()).
    */
 
-  if (g_qentry_count < 0)
+  if (g_qentry_wait > 0)
     {
       iobq->qe_flink   = g_iob_qcommitted;
       g_iob_qcommitted = iobq;
-      g_qentry_count++;
+      g_qentry_wait--;
       spin_unlock_irqrestore(&g_iob_lock, flags);
       nxsem_post(&g_qentry_sem);
     }
   else
     {
-      g_qentry_count++;
       iobq->qe_flink   = g_iob_freeqlist;
       g_iob_freeqlist  = iobq;
       spin_unlock_irqrestore(&g_iob_lock, flags);

@@ -141,58 +141,33 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob)
    * cases.
    */
 
-#if CONFIG_IOB_THROTTLE > 0
-  if ((g_iob_count < 0) ||
-      ((g_iob_count >= CONFIG_IOB_THROTTLE) &&
-       (g_throttle_count < 0)))
-#else
   if (g_iob_count < 0)
-#endif
     {
-      FAR sem_t *sem;
-
+      g_iob_count++;
       iob->io_flink   = g_iob_committed;
       g_iob_committed = iob;
-
-#if CONFIG_IOB_THROTTLE > 0
-      if (g_iob_count < 0)
-        {
-          g_iob_count++;
-          sem = &g_iob_sem;
-        }
-      else
-        {
-          g_throttle_count++;
-          sem = &g_throttle_sem;
-        }
-#else
-      g_iob_count++;
-      sem = &g_iob_sem;
-#endif
       spin_unlock_irqrestore(&g_iob_lock, flags);
-      nxsem_post(sem);
+      nxsem_post(&g_iob_sem);
     }
+#if CONFIG_IOB_THROTTLE > 0
+  else if (g_throttle_wait > 0 && g_iob_count >= CONFIG_IOB_THROTTLE)
+    {
+      iob->io_flink   = g_iob_committed;
+      g_iob_committed = iob;
+      g_throttle_wait--;
+      spin_unlock_irqrestore(&g_iob_lock, flags);
+      nxsem_post(&g_throttle_sem);
+    }
+#endif
   else
     {
       g_iob_count++;
-#if CONFIG_IOB_THROTTLE > 0
-      if (g_iob_count > CONFIG_IOB_THROTTLE)
-        {
-          g_throttle_count++;
-        }
-#endif
-
       iob->io_flink   = g_iob_freelist;
       g_iob_freelist  = iob;
       spin_unlock_irqrestore(&g_iob_lock, flags);
     }
 
   DEBUGASSERT(g_iob_count <= CONFIG_IOB_NBUFFERS);
-
-#if CONFIG_IOB_THROTTLE > 0
-  DEBUGASSERT(g_throttle_count <=
-              (CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE));
-#endif
 
 #ifdef CONFIG_IOB_NOTIFIER
   /* Check if the IOB was claimed by a thread that is blocked waiting

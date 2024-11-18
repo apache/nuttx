@@ -68,12 +68,8 @@ void iob_getstats(FAR struct iob_stats_s *stats)
     }
 
 #if CONFIG_IOB_THROTTLE > 0
-  stats->nthrottle = g_throttle_count;
+  stats->nthrottle = (g_iob_count - CONFIG_IOB_THROTTLE);
   if (stats->nthrottle < 0)
-    {
-      stats->nthrottle = -stats->nthrottle;
-    }
-  else
 #endif
     {
       stats->nthrottle = 0;
