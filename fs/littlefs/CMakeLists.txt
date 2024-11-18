@@ -34,9 +34,7 @@ if(CONFIG_FS_LITTLEFS)
       PATCH_COMMAND
         patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
         ${CMAKE_CURRENT_LIST_DIR}/lfs_util.patch && patch -p2 -d
-        ${CMAKE_CURRENT_LIST_DIR} < ${CMAKE_CURRENT_LIST_DIR}/lfs_getpath.patch
-        && patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/lfs_getsetattr.patch)
+        ${CMAKE_CURRENT_LIST_DIR} < ${CMAKE_CURRENT_LIST_DIR}/lfs_getpath.patch)
     FetchContent_MakeAvailable(littlefs)
   endif()
 

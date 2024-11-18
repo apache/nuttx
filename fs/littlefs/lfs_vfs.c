@@ -741,8 +741,9 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
-  FAR struct inode *inode;
   struct littlefs_attr_s attr;
+  FAR struct inode *inode;
+  FAR char *path;
   int ret;
 
   memset(buf, 0, sizeof(*buf));
@@ -755,9 +756,24 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Call LFS to get file size */
 
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = littlefs_convert_result(lfs_file_path(&fs->lfs, &priv->file, path,
+                                              PATH_MAX));
+  if (ret < 0)
+    {
+      lib_put_pathbuffer(path);
+      return ret;
+    }
+
   ret = nxmutex_lock(&fs->lock);
   if (ret < 0)
     {
+      lib_put_pathbuffer(path);
       return ret;
     }
 
@@ -768,8 +784,8 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
       goto errout;
     }
 
-  ret = littlefs_convert_result(lfs_file_getattr(&fs->lfs, &priv->file, 0,
-                                                 &attr, sizeof(attr)));
+  ret = littlefs_convert_result(lfs_getattr(&fs->lfs, path, 0, &attr,
+                                            sizeof(attr)));
   if (ret < 0)
     {
       if (ret != -ENODATA && ret != -ENOENT)
@@ -796,6 +812,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
                          buf->st_blksize;
 
 errout:
+  lib_put_pathbuffer(path);
   nxmutex_unlock(&fs->lock);
   return ret;
 }
@@ -806,8 +823,9 @@ static int littlefs_fchstat(FAR const struct file *filep,
 {
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
-  FAR struct inode *inode;
   struct littlefs_attr_s attr;
+  FAR struct inode *inode;
+  FAR char *path;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -816,16 +834,31 @@ static int littlefs_fchstat(FAR const struct file *filep,
   inode = filep->f_inode;
   fs    = inode->i_private;
 
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return -ENOMEM;
+    }
+
   /* Call LFS to get file size */
+
+  ret = littlefs_convert_result(lfs_file_path(&fs->lfs, &priv->file, path,
+                                              PATH_MAX));
+  if (ret < 0)
+    {
+      lib_put_pathbuffer(path);
+      return ret;
+    }
 
   ret = nxmutex_lock(&fs->lock);
   if (ret < 0)
     {
+      lib_put_pathbuffer(path);
       return ret;
     }
 
-  ret = littlefs_convert_result(lfs_file_getattr(&fs->lfs, &priv->file,
-                                                 0, &attr, sizeof(attr)));
+  ret = littlefs_convert_result(lfs_getattr(&fs->lfs, path, 0, &attr,
+                                            sizeof(attr)));
   if (ret < 0)
     {
       if (ret != -ENODATA)
@@ -867,14 +900,15 @@ static int littlefs_fchstat(FAR const struct file *filep,
                      buf->st_mtim.tv_nsec;
     }
 
-  ret = littlefs_convert_result(lfs_file_setattr(&fs->lfs, &priv->file, 0,
-                                                 &attr, sizeof(attr)));
+  ret = littlefs_convert_result(lfs_setattr(&fs->lfs, path, 0, &attr,
+                                            sizeof(attr)));
   if (ret < 0)
     {
       goto errout;
     }
 
 errout:
+  lib_put_pathbuffer(path);
   nxmutex_unlock(&fs->lock);
   return ret;
 }
