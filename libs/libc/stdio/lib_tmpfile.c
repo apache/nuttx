@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -45,7 +47,7 @@ FAR FILE *tmpfile(void)
       fp = fdopen(fd, "w+");
       if (fp == NULL)
         {
-          close(fd);
+          _NX_CLOSE(fd);
         }
     }
 

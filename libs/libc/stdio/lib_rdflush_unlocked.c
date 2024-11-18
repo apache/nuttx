@@ -31,6 +31,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 #ifndef CONFIG_STDIO_DISABLE_BUFFERING
@@ -104,7 +106,8 @@ int lib_rdflush_unlocked(FAR FILE *stream)
         }
       else
         {
-          ret = lseek((int)(intptr_t)stream->fs_cookie, rdoffset, SEEK_CUR);
+          ret = _NX_SEEK((int)(intptr_t)stream->fs_cookie,
+                          rdoffset, SEEK_CUR);
         }
 
       if (ret < 0)

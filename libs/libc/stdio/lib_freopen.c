@@ -31,6 +31,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -97,7 +99,7 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
           return NULL;
         }
 
-      fd = open(path, oflags, 0666);
+      fd = _NX_OPEN(path, oflags, 0666);
       if (fd < 0)
         {
           return NULL;
@@ -120,7 +122,7 @@ FAR FILE *freopen(FAR const char *path, FAR const char *mode,
       /* Duplicate the new fd to the stream. */
 
       ret = dup2(fd, fileno(stream));
-      close(fd);
+      _NX_CLOSE(fd);
       if (ret < 0)
         {
           return NULL;

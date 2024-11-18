@@ -28,17 +28,20 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 int eventfd_read(int fd, FAR eventfd_t *value)
 {
-  return read(fd, value, sizeof (eventfd_t)) != sizeof (eventfd_t) ? -1 : 0;
+  return _NX_READ(fd, value, sizeof (eventfd_t)) != sizeof (eventfd_t)
+                  ? -1 : 0;
 }
 
 int eventfd_write(int fd, eventfd_t value)
 {
-  return write(fd, &value,
+  return _NX_WRITE(fd, &value,
       sizeof (eventfd_t)) != sizeof (eventfd_t) ? -1 : 0;
 }

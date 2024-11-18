@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/dns.h>
 
 #include "netdb/lib_dns.h"
@@ -101,7 +102,7 @@ int dns_bind(sa_family_t family, bool stream)
     {
       ret = -get_errno();
       nerr("ERROR: setsockopt() failed: %d\n", ret);
-      close(sd);
+      _NX_CLOSE(sd);
       return ret;
     }
 

@@ -36,6 +36,8 @@
 #  include <android/fdsan.h>
 #endif
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -110,7 +112,7 @@ int fclose(FAR FILE *stream)
                                                (uintptr_t)stream);
           status = android_fdsan_close_with_tag(fd, tag);
 #else
-          status = close(fd);
+          status = _NX_CLOSE(fd);
 #endif
         }
 

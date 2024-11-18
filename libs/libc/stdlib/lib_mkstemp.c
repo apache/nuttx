@@ -31,6 +31,8 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -68,7 +70,7 @@ int mkstemp(FAR char *path_template)
 
   if (path)
     {
-      ret = open(path, O_RDWR | O_CREAT | O_EXCL, 0600);
+      ret = _NX_OPEN(path, O_RDWR | O_CREAT | O_EXCL, 0600);
     }
 
   return ret;

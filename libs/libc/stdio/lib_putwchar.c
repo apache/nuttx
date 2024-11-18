@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include <wchar.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -66,7 +68,7 @@ wint_t putwchar_unlocked(wchar_t c)
       return WEOF;
     }
 
-  return write(STDOUT_FILENO, mbc, l) == l ? c : WEOF;
+  return _NX_WRITE(STDOUT_FILENO, mbc, l) == l ? c : WEOF;
 #endif
 }
 

@@ -37,6 +37,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
 #include <nuttx/tls.h>
 
@@ -129,13 +130,13 @@ static FAR void *momap(FAR const char *path, FAR size_t *size)
   struct stat st;
   int fd;
 
-  fd = open(path, O_RDONLY | O_CLOEXEC);
+  fd = _NX_OPEN(path, O_RDONLY | O_CLOEXEC);
   if (fd < 0)
     {
       return map;
     }
 
-  if (fstat(fd, &st) >= 0)
+  if (_NX_STAT(fd, &st) >= 0)
     {
       *size = st.st_size;
       map = mmap(NULL, *size, PROT_READ, MAP_SHARED, fd, 0);
@@ -147,7 +148,7 @@ static FAR void *momap(FAR const char *path, FAR size_t *size)
         }
     }
 
-  close(fd);
+  _NX_CLOSE(fd);
   return map;
 }
 

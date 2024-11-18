@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <nuttx/fs/fs.h>
+
 /* Not appropriate for use within the OS */
 
 #if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
@@ -113,7 +115,7 @@ int daemon(int nochdir, int noclose)
 
   if (noclose == 0)
     {
-      int fd = open("/dev/null", O_RDWR);
+      int fd = _NX_OPEN("/dev/null", O_RDWR);
       if (fd < 0)
         {
           return -1;
@@ -137,7 +139,7 @@ int daemon(int nochdir, int noclose)
 
       if (fd > 2)
         {
-          close(fd);
+          _NX_CLOSE(fd);
         }
     }
 

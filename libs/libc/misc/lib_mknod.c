@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -90,7 +92,7 @@ int mknod(FAR const char *path, mode_t mode, dev_t dev)
         ret = creat(path, mode & ~S_IFMT);
         if (ret >= 0)
           {
-            ret = close(ret);
+            ret = _NX_CLOSE(ret);
           }
         break;
 

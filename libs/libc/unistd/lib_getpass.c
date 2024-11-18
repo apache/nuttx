@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -45,7 +47,7 @@ FAR char *getpass(FAR const char *prompt)
   ssize_t bytes_read;
   int fd;
 
-  if ((fd = open("/dev/console", O_RDONLY | O_NOCTTY)) < 0)
+  if ((fd = _NX_OPEN("/dev/console", O_RDONLY | O_NOCTTY)) < 0)
     {
       fd = STDIN_FILENO;
     }
@@ -64,7 +66,7 @@ FAR char *getpass(FAR const char *prompt)
       return 0;
     }
 
-  while ((bytes_read = read(fd, g_password + total_bytes_read,
+  while ((bytes_read = _NX_READ(fd, g_password + total_bytes_read,
                             sizeof(g_password) - total_bytes_read)) > 0)
     {
       if (bytes_read > 0 && g_password[total_bytes_read] == '\n')
@@ -89,7 +91,7 @@ FAR char *getpass(FAR const char *prompt)
 
   if (fd > STDERR_FILENO)
     {
-      close(fd);
+      _NX_CLOSE(fd);
     }
 
   return g_password;

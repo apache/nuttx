@@ -28,6 +28,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -67,7 +69,7 @@ FAR struct dirent *readdir(DIR *dirp)
       return NULL;
     }
 
-  ret = read(dirp->fd, &dirp->entry, sizeof(struct dirent));
+  ret = _NX_READ(dirp->fd, &dirp->entry, sizeof(struct dirent));
   if (ret <= 0)
     {
       return NULL;

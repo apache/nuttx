@@ -32,6 +32,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -120,7 +122,7 @@ off_t ftello(FAR FILE *stream)
     }
   else
     {
-      position = lseek((int)(intptr_t)stream->fs_cookie, 0, SEEK_CUR);
+      position = _NX_SEEK((int)(intptr_t)stream->fs_cookie, 0, SEEK_CUR);
     }
 
   if (position != (off_t)-1)

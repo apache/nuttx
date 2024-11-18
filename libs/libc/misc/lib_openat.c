@@ -28,6 +28,8 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -93,7 +95,7 @@ int openat(int dirfd, FAR const char *path, int oflags, ...)
       va_end(ap);
     }
 
-  ret = open(fullpath, oflags, mode);
+  ret = _NX_OPEN(fullpath, oflags, mode);
   lib_put_pathbuffer(fullpath);
   return ret;
 }

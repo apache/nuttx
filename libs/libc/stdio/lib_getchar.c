@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -37,7 +39,7 @@ int getchar(void)
   return fgetc(stdin);
 #else
   unsigned char c;
-  return read(STDIN_FILENO, &c, 1) == 1 ? c : EOF;
+  return _NX_READ(STDIN_FILENO, &c, 1) == 1 ? c : EOF;
 #endif
 }
 
@@ -47,6 +49,6 @@ int getchar_unlocked(void)
   return fgetc_unlocked(stdin);
 #else
   unsigned char c;
-  return read(STDIN_FILENO, &c, 1) == 1 ? c : EOF;
+  return _NX_READ(STDIN_FILENO, &c, 1) == 1 ? c : EOF;
 #endif
 }

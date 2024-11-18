@@ -30,6 +30,8 @@
 
 #include <sys/stat.h>
 
+#include <nuttx/fs/fs.h>
+
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 
 /****************************************************************************
@@ -79,7 +81,7 @@ int posix_fallocate(int fd, off_t offset, off_t len)
       return EFBIG;
     }
 
-  if (fstat(fd, &st) != 0)
+  if (_NX_STAT(fd, &st) != 0)
     {
       return get_errno();
     }

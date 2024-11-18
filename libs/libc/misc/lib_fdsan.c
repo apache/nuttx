@@ -40,6 +40,8 @@
 #include <setjmp.h>
 #include <sys/ioctl.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -131,7 +133,7 @@ int android_fdsan_close_with_tag(int fd, uint64_t expected_tag)
   int ret;
 
   android_fdsan_exchange_owner_tag(fd, expected_tag, 0);
-  ret = close(fd);
+  ret = _NX_CLOSE(fd);
 
   /**************************************************************************
    * If we were expecting to close with a tag, abort on EBADF.

@@ -29,6 +29,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -77,14 +79,14 @@ static int md5_init(FAR cryptodev_context_t *ctx)
   int fd;
 
   memset(ctx, 0, sizeof(cryptodev_context_t));
-  fd = open("/dev/crypto", O_RDWR, 0);
+  fd = _NX_OPEN("/dev/crypto", O_RDWR, 0);
   if (fd < 0)
     {
       return -get_errno();
     }
 
   ret = ioctl(fd, CRIOGET, &ctx->fd);
-  close(fd);
+  _NX_CLOSE(fd);
   if (ret < 0)
     {
       return -get_errno();
@@ -130,7 +132,7 @@ static int md5_finish(FAR cryptodev_context_t *ctx,
 
   ioctl(ctx->fd, CIOCFSESSION, &ctx->session.ses);
   ctx->crypt.ses = 0;
-  close(ctx->fd);
+  _NX_CLOSE(ctx->fd);
   memset(ctx, 0, sizeof(cryptodev_context_t));
   return ret;
 }

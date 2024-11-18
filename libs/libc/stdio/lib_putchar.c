@@ -27,6 +27,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -37,7 +39,7 @@ int putchar(int c)
   return fputc(c, stdout);
 #else
   unsigned char tmp = c;
-  return write(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
+  return _NX_WRITE(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
 #endif
 }
 
@@ -47,6 +49,6 @@ int putchar_unlocked(int c)
   return fputc_unlocked(c, stdout);
 #else
   unsigned char tmp = c;
-  return write(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
+  return _NX_WRITE(STDOUT_FILENO, &tmp, 1) == 1 ? c : EOF;
 #endif
 }

@@ -32,6 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/netconfig.h>
 
 #include "libc.h"
@@ -271,7 +272,7 @@ int getifaddrs(FAR struct ifaddrs **addrs)
 #endif
     }
 
-  close(sockfd);
+  _NX_CLOSE(sockfd);
   return OK;
 
 err:
@@ -281,6 +282,6 @@ err:
       *addrs = NULL;
     }
 
-  close(sockfd);
+  _NX_CLOSE(sockfd);
   return ERROR;
 }

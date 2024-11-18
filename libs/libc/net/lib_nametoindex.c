@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include <netinet/in.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/netconfig.h>
 
 /****************************************************************************
@@ -61,11 +62,11 @@ unsigned int if_nametoindex(FAR const char *ifname)
       strlcpy(req.ifr_name, ifname, IF_NAMESIZE);
       if (ioctl(sockfd, SIOCGIFINDEX, (unsigned long)&req) >= 0)
         {
-          close(sockfd);
+          _NX_CLOSE(sockfd);
           return req.ifr_ifindex;
         }
 
-      close(sockfd);
+      _NX_CLOSE(sockfd);
     }
 
   return 0;

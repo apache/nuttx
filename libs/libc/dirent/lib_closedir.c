@@ -33,6 +33,8 @@
 
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -78,7 +80,7 @@ int closedir(FAR DIR *dirp)
                                        (uintptr_t)dirp);
   ret = android_fdsan_close_with_tag(dirp->fd, tag);
 #else
-  ret = close(dirp->fd);
+  ret = _NX_CLOSE(dirp->fd);
 #endif
 
   lib_free(dirp);

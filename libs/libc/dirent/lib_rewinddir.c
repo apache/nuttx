@@ -28,6 +28,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -56,7 +58,7 @@ void rewinddir(FAR DIR *dirp)
 {
   if (dirp != NULL)
     {
-      lseek(dirp->fd, 0, SEEK_SET);
+      _NX_SEEK(dirp->fd, 0, SEEK_SET);
     }
   else
     {

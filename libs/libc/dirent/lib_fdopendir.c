@@ -33,6 +33,8 @@
 #  include <android/fdsan.h>
 #endif
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -69,7 +71,7 @@ FAR DIR *fdopendir(int fd)
   FAR DIR *dir;
   int ret;
 
-  ret = fstat(fd, &st);
+  ret = _NX_STAT(fd, &st);
   if (ret == -1)
     {
       return NULL;
@@ -77,14 +79,14 @@ FAR DIR *fdopendir(int fd)
 
   if (!S_ISDIR(st.st_mode))
     {
-      set_errno(ENOTDIR);
+      _NX_SETERRNO(ENOTDIR);
       return NULL;
     }
 
   dir = lib_malloc(sizeof(*dir));
   if (dir == NULL)
     {
-      set_errno(ENOMEM);
+      _NX_SETERRNO(ENOMEM);
       return NULL;
     }
 

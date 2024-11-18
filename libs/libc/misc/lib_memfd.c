@@ -30,6 +30,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
 #if defined(CONFIG_LIBC_MEMFD_TMPFS) || defined(CONFIG_LIBC_MEMFD_SHMFS)
@@ -74,7 +76,7 @@ int memfd_create(FAR const char *name, unsigned int flags)
     }
 #  else
   mkdir(LIBC_MEM_FD_VFS_PATH, 0666);
-  ret = open(path, O_RDWR | flags, 0660);
+  ret = _NX_OPEN(path, O_RDWR | flags, 0660);
   if (ret >= 0)
     {
       unlink(path);

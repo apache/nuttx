@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -43,7 +45,7 @@
 static int dgetc(int fd)
 {
   unsigned char c;
-  return read(fd, &c, 1) == 1 ? c : EOF;
+  return _NX_READ(fd, &c, 1) == 1 ? c : EOF;
 }
 
 /****************************************************************************

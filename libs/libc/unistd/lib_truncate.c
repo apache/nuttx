@@ -31,6 +31,8 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <nuttx/fs/fs.h>
+
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 
 /****************************************************************************
@@ -104,7 +106,7 @@ int truncate(FAR const char *path, off_t length)
 
   /* Open the regular file at 'path' for write-only access */
 
-  fd = open(path, O_WRONLY);
+  fd = _NX_OPEN(path, O_WRONLY);
   if (fd < 0)
     {
       return ERROR;
@@ -114,7 +116,7 @@ int truncate(FAR const char *path, off_t length)
 
   ret = ftruncate(fd, length);
 
-  close(fd);
+  _NX_CLOSE(fd);
   return ret;
 }
 

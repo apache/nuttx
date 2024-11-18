@@ -52,6 +52,8 @@
 #include <signal.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -485,7 +487,7 @@ void compress(int fdin, int fdout)
 
   clear_htab();
 
-  while ((rsize = read(fdin, inbuf, IBUFSIZ)) > 0)
+  while ((rsize = _NX_READ(fdin, inbuf, IBUFSIZ)) > 0)
     {
       if (bytes_in == 0)
         {
@@ -727,7 +729,7 @@ void decompress(int fdin, int fdout)
   bytes_out = 0;
   insize = 0;
 
-  while (insize < 3 && (rsize = read(fdin, inbuf + insize, IBUFSIZ)) > 0)
+  while (insize < 3 && (rsize = _NX_READ(fdin, inbuf + insize, IBUFSIZ)) > 0)
     insize += rsize;
 
   if (insize < 3 || inbuf[0] != MAGIC_1 || inbuf[1] != MAGIC_2)
@@ -795,7 +797,7 @@ void decompress(int fdin, int fdout)
 
       if (insize < sizeof(inbuf) - IBUFSIZ)
         {
-          if ((rsize = read(fdin, inbuf + insize, IBUFSIZ)) < 0)
+          if ((rsize = _NX_READ(fdin, inbuf + insize, IBUFSIZ)) < 0)
             read_error();
 
           insize += rsize;
@@ -936,7 +938,7 @@ void decompress(int fdin, int fdout)
     }
   while (rsize > 0);
 
-  if (outpos > 0 && write(fdout, outbuf, outpos) != outpos)
+  if (outpos > 0 && _NX_WRITE(fdout, outbuf, outpos) != outpos)
     write_error();
 }
 

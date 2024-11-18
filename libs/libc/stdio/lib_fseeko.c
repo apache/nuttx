@@ -32,6 +32,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -96,7 +98,7 @@ int fseeko(FAR FILE *stream, off_t offset, int whence)
     }
   else
     {
-      return lseek((int)(intptr_t)stream->fs_cookie, offset,
+      return _NX_SEEK((int)(intptr_t)stream->fs_cookie, offset,
                                     whence) == (off_t)-1 ? ERROR : OK;
     }
 }

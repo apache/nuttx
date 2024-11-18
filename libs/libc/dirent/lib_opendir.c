@@ -34,6 +34,8 @@
 
 #include <string.h>
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -82,7 +84,7 @@ FAR DIR *opendir(FAR const char *path)
       return NULL;
     }
 
-  fd = open(path, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+  fd = _NX_OPEN(path, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
   if (fd < 0)
     {
       lib_free(dir);

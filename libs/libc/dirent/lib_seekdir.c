@@ -28,6 +28,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -58,7 +60,7 @@ void seekdir(FAR DIR *dirp, off_t offset)
 {
   if (dirp != NULL)
     {
-      lseek(dirp->fd, offset, SEEK_SET);
+      _NX_SEEK(dirp->fd, offset, SEEK_SET);
     }
   else
     {

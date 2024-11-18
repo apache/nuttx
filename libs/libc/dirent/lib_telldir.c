@@ -28,6 +28,8 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <nuttx/fs/fs.h>
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -60,7 +62,7 @@ off_t telldir(FAR DIR *dirp)
 {
   if (dirp != NULL)
     {
-      return lseek(dirp->fd, 0, SEEK_CUR);
+      return _NX_SEEK(dirp->fd, 0, SEEK_CUR);
     }
 
   set_errno(EBADF);

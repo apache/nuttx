@@ -33,6 +33,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
 /****************************************************************************
@@ -114,7 +115,7 @@ int rexec_af(FAR char **ahost, int inport, FAR const char *user,
 
   /* ignore second connection(fd2p always is NULL) */
 
-  ret = write(sock, "", 1);
+  ret = _NX_WRITE(sock, "", 1);
   if (ret < 0)
     {
       goto conn_out;
@@ -124,11 +125,11 @@ int rexec_af(FAR char **ahost, int inport, FAR const char *user,
 
   if (user)
     {
-      ret = write(sock, user, strlen(user) + 1);
+      ret = _NX_WRITE(sock, user, strlen(user) + 1);
     }
   else
     {
-      ret = write(sock, "", 1);
+      ret = _NX_WRITE(sock, "", 1);
     }
 
   if (ret < 0)
@@ -140,11 +141,11 @@ int rexec_af(FAR char **ahost, int inport, FAR const char *user,
 
   if (passwd)
     {
-      ret = write(sock, passwd, strlen(passwd) + 1);
+      ret = _NX_WRITE(sock, passwd, strlen(passwd) + 1);
     }
   else
     {
-      ret = write(sock, "", 1);
+      ret = _NX_WRITE(sock, "", 1);
     }
 
   if (ret < 0)
@@ -154,7 +155,7 @@ int rexec_af(FAR char **ahost, int inport, FAR const char *user,
 
   /* Send command */
 
-  ret = write(sock, cmd, strlen(cmd) + 1);
+  ret = _NX_WRITE(sock, cmd, strlen(cmd) + 1);
   if (ret < 0)
     {
       goto conn_out;
@@ -164,7 +165,7 @@ int rexec_af(FAR char **ahost, int inport, FAR const char *user,
   return sock;
 
 conn_out:
-  close(sock);
+  _NX_CLOSE(sock);
 sock_out:
   lib_free(*ahost);
 addr_out:

@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <limits.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/serial/pty.h>
 
 /****************************************************************************
@@ -71,7 +72,7 @@
 int posix_openpt(int oflag)
 {
 #ifdef CONFIG_PSEUDOTERM_SUSV1
-  return open("/dev/ptmx", oflag);
+  return _NX_OPEN("/dev/ptmx", oflag);
 #else
   int minor;
 
@@ -81,13 +82,13 @@ int posix_openpt(int oflag)
       int fd;
 
       snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
-      fd = open(devname, oflag);
+      fd = _NX_OPEN(devname, oflag);
       if (fd < 0)
         {
           /* Fail, register and try again */
 
           pty_register(minor);
-          fd = open(devname, oflag);
+          fd = _NX_OPEN(devname, oflag);
         }
 
       if (fd >= 0)
@@ -155,7 +156,7 @@ int openpty(FAR int *master, FAR int *slave, FAR char *name,
       goto err;
     }
 
-  ret = open(buf, O_RDWR | O_NOCTTY);
+  ret = _NX_OPEN(buf, O_RDWR | O_NOCTTY);
   if (ret < 0)
     {
       goto err;
@@ -183,6 +184,6 @@ int openpty(FAR int *master, FAR int *slave, FAR char *name,
   return 0;
 
 err:
-  close(*master);
+  _NX_CLOSE(*master);
   return ret;
 }

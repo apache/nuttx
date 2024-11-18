@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 
 #ifdef CONFIG_LIBC_LOCALE_CATALOG
@@ -87,13 +88,13 @@ static nl_catd catmap(FAR const char *path)
   struct stat st;
   int fd;
 
-  fd = open(path, O_RDONLY | O_CLOEXEC);
+  fd = _NX_OPEN(path, O_RDONLY | O_CLOEXEC);
   if (fd < 0)
     {
       return catd;
     }
 
-  if (fstat(fd, &st) >= 0)
+  if (_NX_STAT(fd, &st) >= 0)
     {
       catd = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
       if (catd != MAP_FAILED)
@@ -104,12 +105,12 @@ static nl_catd catmap(FAR const char *path)
             {
               munmap(catd, st.st_size);
               catd = MAP_FAILED;
-              set_errno(ENOENT);
+              _NX_SETERRNO(ENOENT);
             }
         }
     }
 
-  close(fd);
+  _NX_CLOSE(fd);
   return catd;
 }
 

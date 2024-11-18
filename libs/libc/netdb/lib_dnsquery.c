@@ -49,6 +49,7 @@
 
 #include <arpa/inet.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
@@ -912,7 +913,7 @@ try_stream:
                 }
             }
 
-          close(sd);
+          _NX_CLOSE(sd);
         }
 #endif
 
@@ -971,7 +972,7 @@ try_stream:
                 }
             }
 
-          close(sd);
+          _NX_CLOSE(sd);
         }
 #endif /* CONFIG_NET_IPv4 */
 

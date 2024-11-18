@@ -38,6 +38,8 @@
 #  include <android/fdsan.h>
 #endif
 
+#include <nuttx/fs/fs.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -177,7 +179,7 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
 
   /* Open the file */
 
-  fd = open(path, oflags, 0666);
+  fd = _NX_OPEN(path, oflags, 0666);
 
   /* If the open was successful, then call fdopen() using the file
    * descriptor returned by open.  If open failed, then just return the
@@ -193,7 +195,7 @@ FAR FILE *fopen(FAR const char *path, FAR const char *mode)
            * failures are reported by fdopen().
            */
 
-          close(fd);
+          _NX_CLOSE(fd);
         }
     }
 
