@@ -97,16 +97,6 @@ static FAR struct iob_qentry_s *iob_tryalloc_qentry_internal(void)
 
       g_iob_freeqlist = iobq->qe_flink;
 
-      /* Take a semaphore count.  Note that we cannot do this in
-       * in the orthodox way by calling nxsem_wait() or nxsem_trywait()
-       * because this function may be called from an interrupt
-       * handler. Fortunately we know at at least one free buffer
-       * so a simple decrement is all that is needed.
-       */
-
-      g_qentry_count--;
-      DEBUGASSERT(g_qentry_count >= 0);
-
       /* Put the I/O buffer in a known state */
 
       iobq->qe_head = NULL; /* Nothing is contained */
@@ -139,20 +129,16 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
 
   flags = spin_lock_irqsave(&g_iob_lock);
 
-  /* Try to get an I/O buffer chain container.  If successful, the semaphore
-   * count will bedecremented atomically.
-   */
+  /* Try to get an I/O buffer chain container. */
 
   qentry = iob_tryalloc_qentry_internal();
   if (qentry == NULL)
     {
-      /* If not successful, then the semaphore count was less than or equal
-       * to zero (meaning that there are no free buffers).  We need to wait
-       * for an I/O buffer chain container to be released when the
-       * semaphore count will be incremented.
+      /* If not successful, We need to wait
+       * for an I/O buffer chain container to be released
        */
 
-      g_qentry_count--;
+      g_qentry_wait++;
       spin_unlock_irqrestore(&g_iob_lock, flags);
       ret = nxsem_wait_uninterruptible(&g_qentry_sem);
       if (ret >= 0)

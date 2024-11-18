@@ -71,30 +71,3 @@ int iob_navail(bool throttled)
 
   return ret;
 }
-
-/****************************************************************************
- * Name: iob_qentry_navail
- *
- * Description:
- *   Return the number of available IOB chains.
- *
- ****************************************************************************/
-
-int iob_qentry_navail(void)
-{
-  int ret;
-
-#if CONFIG_IOB_NCHAINS > 0
-  /* Get the value of the IOB chain qentry counting semaphores */
-
-  ret = g_qentry_count;
-  if (ret < 0)
-    {
-      ret = 0;
-    }
-#else
-  ret = 0;
-#endif
-
-  return ret;
-}
