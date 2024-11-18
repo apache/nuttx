@@ -36,6 +36,7 @@
 #include <sys/uio.h>
 #include <sys/types.h>
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -96,9 +97,9 @@
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_SEEK(f,o,w)      lseek(f,o,w)
 #  define _NX_STAT(f,s)        fstat(f,s)
-#  define _NX_GETERRNO(r)      errno
+#  define _NX_GETERRNO(r)      get_errno()
 #  define _NX_SETERRNO(r)      ((void)(r))
-#  define _NX_GETERRVAL(r)     (-errno)
+#  define _NX_GETERRVAL(r)     (-get_errno())
 #endif
 
 /* Stream flags for the fs_flags field of in struct file_struct */
