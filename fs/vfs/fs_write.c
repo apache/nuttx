@@ -71,6 +71,11 @@ static ssize_t file_writev_compat(FAR struct file *filep,
           continue;
         }
 
+      if (iov[i].iov_base == NULL)
+        {
+          return -EINVAL;
+        }
+
       /* Sanity check to avoid total length overflow */
 
       if (SSIZE_MAX - ntotal < iov[i].iov_len)
