@@ -28,9 +28,9 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
     TOOLCHAIN_MTUNE  := -cpu=cortexm4
     ifeq ($(CONFIG_ARCH_FPU),y)
       ifeq ($(CONFIG_ARCH_DPFPU),y)
-        TOOLCHAIN_MFLOAT := -fpu=vfpv3
+        TOOLCHAIN_MFLOAT := -fpu=vfpv4
       else
-        TOOLCHAIN_MFLOAT := -fpu=vfpv3_d16
+        TOOLCHAIN_MFLOAT := -fpu=vfpv4_d16
       endif
     endif
   else
@@ -47,9 +47,9 @@ else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
     TOOLCHAIN_MTUNE  := -cpu=cortexm7
     ifeq ($(CONFIG_ARCH_FPU),y)
       ifeq ($(CONFIG_ARCH_DPFPU),y)
-        TOOLCHAIN_MFLOAT := -fpu=vfpv3
+        TOOLCHAIN_MFLOAT := -fpu=vfpv5
       else
-        TOOLCHAIN_MFLOAT := -fpu=vfpv3_d16
+        TOOLCHAIN_MFLOAT := -fpu=vfpv5_d16
       endif
     endif
   else
