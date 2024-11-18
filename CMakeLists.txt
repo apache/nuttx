@@ -337,13 +337,19 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
       CACHE INTERNAL "Saved defconfig path" FORCE)
 
   # Print configuration choices
-  message(STATUS "  CMake   ${CMAKE_VERSION}")
+  message(STATUS "  CMake:  ${CMAKE_VERSION}")
   if(CMAKE_GENERATOR MATCHES "Ninja")
     execute_process(
       COMMAND ninja --version
       OUTPUT_VARIABLE ninja_version
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "  Ninja   ${ninja_version}")
+    message(STATUS "  Ninja:  ${ninja_version}")
+
+    # Ninja generator does not yet know how to build archives in pieces, so
+    # response files must be used to deal with very long linker command lines.
+    set(CMAKE_NINJA_FORCE_RESPONSE_FILE
+        1
+        CACHE INTERNAL "")
   endif()
   message(STATUS "  Board:  ${NUTTX_BOARD}")
   message(STATUS "  Config: ${NUTTX_CONFIG}")
