@@ -32,286 +32,292 @@
 #include <nuttx/macro.h>
 
 /****************************************************************************
+ * Pivate Data
+ ****************************************************************************/
+
+static spinlock_t g_atomic_lock = SP_UNLOCKED;
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STORE(fn, n, type)                                         \
-                                                                   \
-  void weak_function CONCATENATE(fn, n) (FAR volatile void *ptr,   \
-                                         type value, int memorder) \
-  {                                                                \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-                                                                   \
-    *(FAR type *)ptr = value;                                      \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
+#define STORE(fn, n, type)                                           \
+                                                                     \
+  void weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value, int memorder)    \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+                                                                     \
+    *(FAR type *)ptr = value;                                        \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
   }
 
-#define LOAD(fn, n, type)                                              \
-                                                                       \
-  type weak_function CONCATENATE(fn, n) (FAR const volatile void *ptr, \
-                                         int memorder)                 \
-  {                                                                    \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                     \
-                                                                       \
-    type ret = *(FAR type *)ptr;                                       \
-                                                                       \
-    spin_unlock_irqrestore(NULL, irqstate);                            \
-    return ret;                                                        \
+#define LOAD(fn, n, type)                                             \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR const volatile void *ptr, \
+                                        int memorder)                 \
+  {                                                                   \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock);  \
+                                                                      \
+    type ret = *(FAR type *)ptr;                                      \
+                                                                      \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);         \
+    return ret;                                                       \
   }
 
-#define EXCHANGE(fn, n, type)                                      \
-                                                                   \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr,   \
-                                         type value, int memorder) \
-  {                                                                \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-    FAR type *tmp = (FAR type *)ptr;                               \
-                                                                   \
-    type ret = *tmp;                                               \
-    *tmp = value;                                                  \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
-    return ret;                                                    \
+#define EXCHANGE(fn, n, type)                                        \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value, int memorder)    \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    type ret = *tmp;                                                 \
+    *tmp = value;                                                    \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define CMP_EXCHANGE(fn, n, type)                                  \
-                                                                   \
-  bool weak_function CONCATENATE(fn, n) (FAR volatile void *mem,   \
-                                         FAR void *expect,         \
-                                         type desired, bool weak,  \
-                                         int success, int failure) \
-  {                                                                \
-    bool ret = false;                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-    FAR type *tmpmem = (FAR type *)mem;                            \
-    FAR type *tmpexp = (FAR type *)expect;                         \
-                                                                   \
-    if (*tmpmem == *tmpexp)                                        \
-      {                                                            \
-        ret = true;                                                \
-        *tmpmem = desired;                                         \
-      }                                                            \
-    else                                                           \
-      {                                                            \
-        *tmpexp = *tmpmem;                                         \
-      }                                                            \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
-    return ret;                                                    \
+#define CMP_EXCHANGE(fn, n, type)                                    \
+                                                                     \
+  bool weak_function CONCATENATE(fn, n)(FAR volatile void *mem,      \
+                                        FAR void *expect,            \
+                                        type desired, bool weak,     \
+                                        int success, int failure)    \
+  {                                                                  \
+    bool ret = false;                                                \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmpmem = (FAR type *)mem;                              \
+    FAR type *tmpexp = (FAR type *)expect;                           \
+                                                                     \
+    if (*tmpmem == *tmpexp)                                          \
+      {                                                              \
+        ret = true;                                                  \
+        *tmpmem = desired;                                           \
+      }                                                              \
+    else                                                             \
+      {                                                              \
+        *tmpexp = *tmpmem;                                           \
+      }                                                              \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define FLAG_TEST_AND_SET(fn, n, type)                           \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         int memorder)           \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-    type ret = *tmp;                                             \
-                                                                 \
-    *(FAR type *)ptr = 1;                                        \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return ret;                                                  \
+#define FLAG_TEST_AND_SET(fn, n, type)                               \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        int memorder)                \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+    type ret = *tmp;                                                 \
+                                                                     \
+    *(FAR type *)ptr = 1;                                            \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define FETCH_ADD(fn, n, type)                                     \
-                                                                   \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr,   \
-                                         type value, int memorder) \
-  {                                                                \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-    FAR type *tmp = (FAR type *)ptr;                               \
-    type ret = *tmp;                                               \
-                                                                   \
-    *tmp = *tmp + value;                                           \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
-    return ret;                                                    \
+#define FETCH_ADD(fn, n, type)                                       \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value, int memorder)    \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+    type ret = *tmp;                                                 \
+                                                                     \
+    *tmp = *tmp + value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define FETCH_SUB(fn, n, type)                                     \
-                                                                   \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr,   \
-                                         type value, int memorder) \
-  {                                                                \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-    FAR type *tmp = (FAR type *)ptr;                               \
-    type ret = *tmp;                                               \
-                                                                   \
-    *tmp = *tmp - value;                                           \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
-    return ret;                                                    \
+#define FETCH_SUB(fn, n, type)                                       \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value, int memorder)    \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+    type ret = *tmp;                                                 \
+                                                                     \
+    *tmp = *tmp - value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define FETCH_AND(fn, n, type)                                     \
-                                                                   \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr,   \
-                                         type value, int memorder) \
-  {                                                                \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-    FAR type *tmp = (FAR type *)ptr;                               \
-    type ret = *tmp;                                               \
-                                                                   \
-    *tmp = *tmp & value;                                           \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
-    return ret;                                                    \
+#define FETCH_AND(fn, n, type)                                       \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value, int memorder)    \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+    type ret = *tmp;                                                 \
+                                                                     \
+    *tmp = *tmp & value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define FETCH_OR(fn, n, type)                                      \
-                                                                   \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr,   \
-                                         type value, int memorder) \
-  {                                                                \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-    FAR type *tmp = (FAR type *)ptr;                               \
-    type ret = *tmp;                                               \
-                                                                   \
-    *tmp = *tmp | value;                                           \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
-    return ret;                                                    \
+#define FETCH_OR(fn, n, type)                                        \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value, int memorder)    \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+    type ret = *tmp;                                                 \
+                                                                     \
+    *tmp = *tmp | value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define FETCH_XOR(fn, n, type)                                     \
-                                                                   \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr,   \
-                                         type value, int memorder) \
-  {                                                                \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);                 \
-    FAR type *tmp = (FAR type *)ptr;                               \
-    type ret = *tmp;                                               \
-                                                                   \
-    *tmp = *tmp ^ value;                                           \
-                                                                   \
-    spin_unlock_irqrestore(NULL, irqstate);                        \
-    return ret;                                                    \
+#define FETCH_XOR(fn, n, type)                                       \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value, int memorder)    \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+    type ret = *tmp;                                                 \
+                                                                     \
+    *tmp = *tmp ^ value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define SYNC_ADD_FETCH(fn, n, type)                              \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type value)             \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-                                                                 \
-    *tmp = *tmp + value;                                         \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return *tmp;                                                 \
+#define SYNC_ADD_FETCH(fn, n, type)                                  \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value)                  \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    *tmp = *tmp + value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return *tmp;                                                     \
   }
 
-#define SYNC_SUB_FETCH(fn, n, type)                              \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type value)             \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-                                                                 \
-    *tmp = *tmp - value;                                         \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return *tmp;                                                 \
+#define SYNC_SUB_FETCH(fn, n, type)                                  \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value)                  \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    *tmp = *tmp - value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return *tmp;                                                     \
   }
 
-#define SYNC_OR_FETCH(fn, n, type)                               \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type value)             \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-                                                                 \
-    *tmp = *tmp | value;                                         \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return *tmp;                                                 \
+#define SYNC_OR_FETCH(fn, n, type)                                   \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value)                  \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    *tmp = *tmp | value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return *tmp;                                                     \
   }
 
-#define SYNC_AND_FETCH(fn, n, type)                              \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type value)             \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-                                                                 \
-    *tmp = *tmp & value;                                         \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return *tmp;                                                 \
+#define SYNC_AND_FETCH(fn, n, type)                                  \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value)                  \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    *tmp = *tmp & value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return *tmp;                                                     \
   }
 
-#define SYNC_XOR_FETCH(fn, n, type)                              \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type value)             \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-                                                                 \
-    *tmp = *tmp ^ value;                                         \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return *tmp;                                                 \
+#define SYNC_XOR_FETCH(fn, n, type)                                  \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value)                  \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    *tmp = *tmp ^ value;                                             \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return *tmp;                                                     \
   }
 
-#define SYNC_NAND_FETCH(fn, n, type)                             \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type value)             \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-                                                                 \
-    *tmp = ~(*tmp & value);                                      \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return *tmp;                                                 \
+#define SYNC_NAND_FETCH(fn, n, type)                                 \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type value)                  \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    *tmp = ~(*tmp & value);                                          \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return *tmp;                                                     \
   }
 
-#define SYNC_BOOL_CMP_SWAP(fn, n, type)                          \
-                                                                 \
-  bool weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type oldvalue,          \
-                                         type newvalue)          \
-  {                                                              \
-    bool ret = false;                                            \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-                                                                 \
-    if (*tmp == oldvalue)                                        \
-      {                                                          \
-        ret = true;                                              \
-        *tmp = newvalue;                                         \
-      }                                                          \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return ret;                                                  \
+#define SYNC_BOOL_CMP_SWAP(fn, n, type)                              \
+                                                                     \
+  bool weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type oldvalue,               \
+                                        type newvalue)               \
+  {                                                                  \
+    bool ret = false;                                                \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+                                                                     \
+    if (*tmp == oldvalue)                                            \
+      {                                                              \
+        ret = true;                                                  \
+        *tmp = newvalue;                                             \
+      }                                                              \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
-#define SYNC_VAL_CMP_SWAP(fn, n, type)                           \
-                                                                 \
-  type weak_function CONCATENATE(fn, n) (FAR volatile void *ptr, \
-                                         type oldvalue,          \
-                                         type newvalue)          \
-  {                                                              \
-    irqstate_t irqstate = spin_lock_irqsave(NULL);               \
-    FAR type *tmp = (FAR type *)ptr;                             \
-    type ret = *tmp;                                             \
-                                                                 \
-    if (*tmp == oldvalue)                                        \
-      {                                                          \
-        *tmp = newvalue;                                         \
-      }                                                          \
-                                                                 \
-    spin_unlock_irqrestore(NULL, irqstate);                      \
-    return ret;                                                  \
+#define SYNC_VAL_CMP_SWAP(fn, n, type)                               \
+                                                                     \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,      \
+                                        type oldvalue,               \
+                                        type newvalue)               \
+  {                                                                  \
+    irqstate_t irqstate = spin_lock_irqsave_wo_note(&g_atomic_lock); \
+    FAR type *tmp = (FAR type *)ptr;                                 \
+    type ret = *tmp;                                                 \
+                                                                     \
+    if (*tmp == oldvalue)                                            \
+      {                                                              \
+        *tmp = newvalue;                                             \
+      }                                                              \
+                                                                     \
+    spin_unlock_irqrestore_wo_note(&g_atomic_lock, irqstate);        \
+    return ret;                                                      \
   }
 
 /****************************************************************************
