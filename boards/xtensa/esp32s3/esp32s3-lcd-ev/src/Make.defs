@@ -20,8 +20,6 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
-
 CSRCS = esp32s3_boot.c esp32s3_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
