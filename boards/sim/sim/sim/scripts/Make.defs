@@ -149,8 +149,8 @@ ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
 else
-  ARCHCFLAGS += -fno-pic -mcmodel=large
-  ARCHCXXFLAGS += -fno-pic -mcmodel=large
+  ARCHCFLAGS += -fno-pic -mcmodel=medium
+  ARCHCXXFLAGS += -fno-pic -mcmodel=medium
 endif
 
 # LLVM style architecture flags
