@@ -32,8 +32,9 @@
  * Public Symbols
  ************************************************************************************/
 
-	.globl		memcpy
-	.file		"arch_memcpy.S"
+.global ARCH_LIBCFUN(memcpy)
+.type	ARCH_LIBCFUN(memcpy), @function
+.file	"arch_memcpy.S"
 
 /************************************************************************************
  * Name: memcpy
