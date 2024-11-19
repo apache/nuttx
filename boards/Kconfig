@@ -3391,7 +3391,8 @@ config ARCH_BOARD
 	default "nucleo-f303re"             if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f303ze"             if ARCH_BOARD_NUCLEO_F303ZE
 	default "nucleo-f334r8"             if ARCH_BOARD_NUCLEO_F334R8
-	default "nucleo-f4x1re"             if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "nucleo-f401re"             if ARCH_BOARD_NUCLEO_F401RE
+	default "nucleo-f411re"             if ARCH_BOARD_NUCLEO_F411RE
 	default "stm32f401rc-rs485"         if ARCH_BOARD_STM32F401RC_RS485
 	default "nucleo-f429zi"             if ARCH_BOARD_NUCLEO_F429ZI
 	default "nucleo-f446re"             if ARCH_BOARD_NUCLEO_F446RE
@@ -4190,8 +4191,11 @@ endif
 if ARCH_BOARD_NUCLEO_F446RE
 source "boards/arm/stm32/nucleo-f446re/Kconfig"
 endif
-if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
-source "boards/arm/stm32/nucleo-f4x1re/Kconfig"
+if ARCH_BOARD_NUCLEO_F401RE
+source "boards/arm/stm32/nucleo-f401re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F411RE
+source "boards/arm/stm32/nucleo-f411re/Kconfig"
 endif
 if ARCH_BOARD_STM32F401RC_RS485
 source "boards/arm/stm32/stm32f401rc-rs485/Kconfig"
