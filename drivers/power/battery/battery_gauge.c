@@ -434,18 +434,18 @@ int battery_gauge_changed(FAR struct battery_gauge_dev_s *dev,
 
   /* Event happen too early? */
 
+  ret = nxmutex_lock(&dev->batlock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (list_is_clear(&dev->flist))
     {
       /* Yes, record it and return directly */
 
       dev->mask |= mask;
-      return 0;
-    }
-
-  ret = nxmutex_lock(&dev->batlock);
-  if (ret < 0)
-    {
-      return ret;
+      goto out;
     }
 
   dev->mask |= mask;
@@ -455,6 +455,7 @@ int battery_gauge_changed(FAR struct battery_gauge_dev_s *dev,
       battery_gauge_notify(priv, mask);
     }
 
+out:
   nxmutex_unlock(&dev->batlock);
   return OK;
 }
