@@ -40,6 +40,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/arch.h>
 
 #include <arch/chip/gnss.h>
 #include <arch/chip/pm.h>
