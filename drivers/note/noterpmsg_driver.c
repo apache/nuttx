@@ -28,6 +28,7 @@
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spinlock.h>
 
 #include "noterpmsg.h"
 
@@ -49,6 +50,7 @@ struct noterpmsg_driver_s
   uint8_t               buffer[CONFIG_DRIVERS_NOTERPMSG_BUFSIZE];
   struct work_s         work;
   struct rpmsg_endpoint ept;
+  spinlock_t            lock;
 };
 
 /****************************************************************************
@@ -178,7 +180,7 @@ static bool noterpmsg_transfer(FAR struct noterpmsg_driver_s *drv,
 static void noterpmsg_work(FAR void *priv)
 {
   FAR struct noterpmsg_driver_s *drv = priv;
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave_wo_note(&drv->lock);
 
   if (!noterpmsg_transfer(drv, false))
     {
@@ -186,7 +188,7 @@ static void noterpmsg_work(FAR void *priv)
                  NOTE_RPMSG_WORK_DELAY);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_wo_note(&drv->lock, flags);
 }
 
 static void noterpmsg_add(FAR struct note_driver_s *driver,
@@ -197,7 +199,7 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
   irqstate_t flags;
   size_t space;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_wo_note(&drv->lock);
 
   space = CONFIG_DRIVERS_NOTERPMSG_BUFSIZE - noterpmsg_length(drv);
   if (space < notelen)
@@ -234,7 +236,7 @@ static void noterpmsg_add(FAR struct note_driver_s *driver,
                  NOTE_RPMSG_WORK_DELAY);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_wo_note(&drv->lock, flags);
 }
 
 static int noterpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
@@ -254,6 +256,7 @@ static void noterpmsg_device_created(FAR struct rpmsg_device *rdev,
              rpmsg_get_cpuname(rdev)) == 0)
     {
       drv->ept.priv = drv;
+      spin_lock_init(&drv->lock);
 
       ret = rpmsg_create_ept(&drv->ept, rdev, NOTERPMSG_EPT_NAME,
                              RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
