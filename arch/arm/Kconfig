@@ -672,6 +672,7 @@ config ARCH_CHIP_CXD56XX
 	select ARCH_HAVE_MATH_H
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_CUSTOM_VECTORS
+	select LIBC_ARCH_ATOMIC if SMP
 	---help---
 		Sony CXD56XX (ARM Cortex-M4) architectures
 
