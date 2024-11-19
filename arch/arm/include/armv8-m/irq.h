@@ -448,6 +448,20 @@ static always_inline_function void setcontrol(uint32_t control)
       : "memory");
 }
 
+static always_inline_function uint32_t getpsp(void)
+{
+  uint32_t psp;
+
+  __asm__ __volatile__
+    (
+     "\tmrs  %0, psp\n"
+     : "=r" (psp)
+     :
+     : "memory");
+
+  return psp;
+}
+
 /****************************************************************************
  * Name: up_cpu_index
  *
