@@ -41,22 +41,60 @@ import subprocess
 import tempfile
 
 PUNCTUATORS = [
-    "\[", "\]", "\(", "\)", "\{", "\}", "\?", ";", ",", "~",
-    "\.\.\.", "\.",
-    "\-\>", "\-\-", "\-\=", "\-",
-    "\+\+", "\+\=", "\+",
-    "\*\=", "\*",
-    "\!\=", "\!",
-    "\&\&", "\&\=", "\&",
-    "\/\=", "\/",
-    "\%\>", "%:%:", "%:", "%=", "%",
-    "\^\=", "\^",
-    "\#\#", "\#",
-    "\:\>", "\:",
-    "\|\|", "\|\=", "\|",
-    "<<=", "<<", "<=", "<:", "<%", "<",
-    ">>=", ">>", ">=", ">",
-    "\=\=", "\=",
+    "\[",
+    "\]",
+    "\(",
+    "\)",
+    "\{",
+    "\}",
+    "\?",
+    ";",
+    ",",
+    "~",
+    "\.\.\.",
+    "\.",
+    "\-\>",
+    "\-\-",
+    "\-\=",
+    "\-",
+    "\+\+",
+    "\+\=",
+    "\+",
+    "\*\=",
+    "\*",
+    "\!\=",
+    "\!",
+    "\&\&",
+    "\&\=",
+    "\&",
+    "\/\=",
+    "\/",
+    "\%\>",
+    "%:%:",
+    "%:",
+    "%=",
+    "%",
+    "\^\=",
+    "\^",
+    "\#\#",
+    "\#",
+    "\:\>",
+    "\:",
+    "\|\|",
+    "\|\=",
+    "\|",
+    "<<=",
+    "<<",
+    "<=",
+    "<:",
+    "<%",
+    "<",
+    ">>=",
+    ">>",
+    ">=",
+    ">",
+    "\=\=",
+    "\=",
 ]
 
 
@@ -92,10 +130,8 @@ def fetch_macro_info(file):
 
         # # os.system(f"readelf -wm {file} > {output}")
         process = subprocess.Popen(
-            f"readelf -wm {file}",
-            shell=True,
-            stdout=f1,
-            stderr=subprocess.STDOUT)
+            f"readelf -wm {file}", shell=True, stdout=f1, stderr=subprocess.STDOUT
+        )
 
         process.communicate()
         errcode = process.returncode
@@ -108,11 +144,12 @@ def fetch_macro_info(file):
         p = re.compile(".*macro[ ]*:[ ]*([\S]+\(.*?\)|[\w]+)[ ]*(.*)")
         macros = {}
 
-        with open(f1.name, 'rb') as f2:
+        with open(f1.name, "rb") as f2:
             for line in f2.readlines():
                 line = line.decode("utf-8")
-                if not line.startswith(" DW_MACRO_define") and \
-                   not line.startswith(" DW_MACRO_undef"):
+                if not line.startswith(" DW_MACRO_define") and not line.startswith(
+                    " DW_MACRO_undef"
+                ):
                     continue
 
                 if not parse_macro(line, macros, p):
@@ -123,8 +160,9 @@ def fetch_macro_info(file):
 
 def split_tokens(expr):
     p = "(" + "|".join(PUNCTUATORS) + ")"
-    res = list(filter(lambda e : e != "",
-          map(lambda e: e.rstrip().lstrip(), re.split(p, expr))))
+    res = list(
+        filter(lambda e: e != "", map(lambda e: e.rstrip().lstrip(), re.split(p, expr)))
+    )
     return res
 
 
