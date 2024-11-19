@@ -2534,6 +2534,13 @@ config ESP32S3_LCD_BUFFER_LAYERS
 	int "LCD Buffer Layer Number"
 	default 1
 
+config ESP32S3_LCD_DOUBLE_BUFFERED
+	bool "LCD Double Buffered"
+	default y
+	---help---
+		Double the framebuffer size per layer.
+		Twice as much memory will be allocated.
+
 choice
 	prompt "LCD Data Width"
 	default ESP32S3_LCD_DATA_16BIT
