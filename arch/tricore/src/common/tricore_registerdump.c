@@ -45,4 +45,14 @@
 
 void up_dump_register(void *dumpregs)
 {
+  volatile uint32_t *regs = dumpregs;
+
+  _alert("PCXI:%08x  PSW:%08x  SP:%08x  PC:%08x\n",
+         regs[REG_UPCXI], regs[REG_PSW], regs[REG_A10], regs[REG_UA11]);
+  _alert("D8:%08x    D9:%08x   D10:%08x D11:%08x\n",
+         regs[REG_D8], regs[REG_D9], regs[REG_D10], regs[REG_D11]);
+  _alert("A12:%08x   A13:%08x  A14:%08x A15:%08x\n",
+        regs[REG_A12], regs[REG_A13], regs[REG_A14], regs[REG_A15]);
+  _alert("D12:%08x   D13:%08x  D14:%08x D15:%08x\n\n",
+         regs[REG_D12], regs[REG_D13], regs[REG_D14], regs[REG_D15]);
 }
