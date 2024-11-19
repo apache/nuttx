@@ -1,6 +1,8 @@
 ############################################################################
 # tools/gdb/stack.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -44,8 +46,7 @@ class Stack(object):
     def _sanity_check(self):
         # do some basic sanity checking to make sure we have a sane stack object
         if self._stack_base < self._stack_alloc or not self._stack_size:
-            raise gdb.GdbError(
-                "Inconsistant stack size...Maybe memory corruption?")
+            raise gdb.GdbError("Inconsistant stack size...Maybe memory corruption?")
 
         # TODO: check if stack ptr is located at a sane address range!
 
@@ -56,7 +57,8 @@ class Stack(object):
             gdb.write("An overflow detected, dumping the stack:\n")
 
             ptr_4bytes = gdb.Value(self._stack_base).cast(
-                gdb.lookup_type("unsigned int").pointer())
+                gdb.lookup_type("unsigned int").pointer()
+            )
 
             for i in range(0, self._stack_size // 4):
                 if i % 8 == 0:
@@ -68,14 +70,18 @@ class Stack(object):
                     gdb.write("\n")
 
             gdb.write("\n")
-            raise gdb.GdbError("pls check your stack size! @ {0} sp:{1:x} base:{2:x}".format(
-                self._thread_name, self._cur_sp, self._stack_base))
+            raise gdb.GdbError(
+                "pls check your stack size! @ {0} sp:{1:x} base:{2:x}".format(
+                    self._thread_name, self._cur_sp, self._stack_base
+                )
+            )
 
         return usage
 
     def check_max_usage(self):
         ptr_4bytes = gdb.Value(self._stack_base).cast(
-            gdb.lookup_type("unsigned int").pointer())
+            gdb.lookup_type("unsigned int").pointer()
+        )
 
         spare = 0
 
@@ -117,8 +123,10 @@ def fetch_stacks():
     stacks = dict()
 
     for tcb in utils.get_tcbs():
-        if tcb["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING") \
-                and not utils.in_interrupt_context():
+        if (
+            tcb["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING")
+            and not utils.in_interrupt_context()
+        ):
             sp = utils.get_sp()
         else:
             sp = utils.get_sp(tcb=tcb)
@@ -126,7 +134,7 @@ def fetch_stacks():
         try:
             stacks[int(tcb["pid"])] = Stack(
                 tcb["name"].string(),
-                hex(tcb["entry"]['pthread']),  # should use main?
+                hex(tcb["entry"]["pthread"]),  # should use main?
                 int(tcb["stack_base_ptr"]),
                 int(tcb["stack_alloc_ptr"]),
                 int(tcb["adj_stack_size"]),
@@ -140,14 +148,16 @@ def fetch_stacks():
     return stacks
 
 
-class StackUsage (gdb.Command):
+class StackUsage(gdb.Command):
     """Display the stack usage of each thread, similar to cat /proc/<pid>/stack"""
 
     def __init__(self):
         super(StackUsage, self).__init__("stack-usage", gdb.COMMAND_USER)
         self._stacks = []
         # format template
-        self._fmt = "{0: <4} | {1: <10} | {2: <10} | {3: <20} | {4: <10} | {5: <10} | {6: <10}"
+        self._fmt = (
+            "{0: <4} | {1: <10} | {2: <10} | {3: <20} | {4: <10} | {5: <10} | {6: <10}"
+        )
 
     def format_print(self, pid, stack):
         def gen_info_str(x):
@@ -157,12 +167,17 @@ class StackUsage (gdb.Command):
                 res += "!"
             return res
 
-        gdb.write(self._fmt.format(
-            pid, stack._thread_name[:10], stack._thread_entry,
-            hex(stack._stack_base), stack._stack_size,
-            gen_info_str(stack.cur_usage()),
-            gen_info_str(stack.max_usage())
-        ))
+        gdb.write(
+            self._fmt.format(
+                pid,
+                stack._thread_name[:10],
+                stack._thread_entry,
+                hex(stack._stack_base),
+                stack._stack_size,
+                gen_info_str(stack.cur_usage()),
+                gen_info_str(stack.max_usage()),
+            )
+        )
         gdb.write("\n")
 
     def invoke(self, args, from_tty):
@@ -172,8 +187,11 @@ class StackUsage (gdb.Command):
 
         pids = stacks.keys() if len(args) == 0 else args
 
-        gdb.write(self._fmt.format('Pid', 'Name', 'Entry',
-                  'Base', 'Size', 'CurUsage', 'MaxUsage'))
+        gdb.write(
+            self._fmt.format(
+                "Pid", "Name", "Entry", "Base", "Size", "CurUsage", "MaxUsage"
+            )
+        )
         gdb.write("\n")
 
         for pid in pids:

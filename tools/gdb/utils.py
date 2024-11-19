@@ -21,6 +21,7 @@
 ############################################################################
 
 import re
+
 import gdb
 from macros import fetch_macro_info, try_expand
 
@@ -40,8 +41,7 @@ class CachedType:
         if self._type is None:
             self._type = gdb.lookup_type(self._name)
             if self._type is None:
-                raise gdb.GdbError(
-                    "cannot resolve type '{0}'".format(self._name))
+                raise gdb.GdbError("cannot resolve type '{0}'".format(self._name))
             if hasattr(gdb, "events") and hasattr(gdb.events, "new_objfile"):
                 gdb.events.new_objfile.connect(self._new_objfile_handler)
         return self._type
@@ -60,7 +60,7 @@ class MacroCtx:
     """
 
     def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, 'instance'):
+        if not hasattr(cls, "instance"):
             cls.instance = super(MacroCtx, cls).__new__(cls)
         return cls.instance
 
@@ -117,8 +117,7 @@ class ContainerOf(gdb.Function):
 
     def invoke(self, ptr, typename, elementname):
         return container_of(
-            ptr, gdb.lookup_type(
-                typename.string()).pointer(), elementname.string()
+            ptr, gdb.lookup_type(typename.string()).pointer(), elementname.string()
         )
 
 
@@ -151,13 +150,14 @@ def hexdump(address, size):
     mem = inf.read_memory(address, size)
     bytes = mem.tobytes()
     for i in range(0, len(bytes), 16):
-        chunk = bytes[i:i + 16]
+        chunk = bytes[i : i + 16]
         gdb.write(f"{i + address:08x}  ")
         hex_values = " ".join(f"{byte:02x}" for byte in chunk)
         hex_display = f"{hex_values:<47}"
         gdb.write(hex_display)
-        ascii_values = "".join(chr(byte) if 32 <= byte
-                               <= 126 else "." for byte in chunk)
+        ascii_values = "".join(
+            chr(byte) if 32 <= byte <= 126 else "." for byte in chunk
+        )
         gdb.write(f"  {ascii_values} \n")
 
 
@@ -179,7 +179,7 @@ class Hexdump(gdb.Command):
         argv = args.split(" ")
         address = 0
         size = 0
-        if (argv[0] == ""):
+        if argv[0] == "":
             gdb.write("Usage: hexdump address/symbol <size>\n")
             return
 
@@ -187,7 +187,7 @@ class Hexdump(gdb.Command):
             address = int(argv[0], 0)
             size = int(argv[1], 0)
         else:
-            var = gdb.parse_and_eval(f'{argv[0]}')
+            var = gdb.parse_and_eval(f"{argv[0]}")
             address = int(var.address)
             size = int(var.type.sizeof)
             gdb.write(f"{argv[0]} {hex(address)} {int(size)}\n")
@@ -230,7 +230,7 @@ def read_memoryview(inf, start, length):
 
 def read_u16(buffer, offset):
     """Read a 16-bit unsigned integer from a buffer"""
-    buffer_val = buffer[offset: offset + 2]
+    buffer_val = buffer[offset : offset + 2]
     value = [0, 0]
 
     if type(buffer_val[0]) is str:
@@ -285,8 +285,7 @@ def is_target_arch(arch, exact=False):
     if hasattr(gdb.Frame, "architecture"):
         archname = gdb.newest_frame().architecture().name()
 
-        return arch in archname \
-            if not exact else arch == archname
+        return arch in archname if not exact else arch == archname
     else:
         global target_arch
         if target_arch is None:
@@ -301,8 +300,7 @@ def is_target_arch(arch, exact=False):
             else:
                 target_arch = candidate
 
-        return arch in target_arch \
-            if not exact else arch == target_arch
+        return arch in target_arch if not exact else arch == target_arch
 
 
 # Kernel Specific Helper Functions
@@ -322,8 +320,8 @@ def in_interrupt_context(cpuid=0):
     frame = gdb.selected_frame()
 
     if is_target_arch("arm"):
-        xpsr = int(frame.read_register('xpsr'))
-        return xpsr & 0xf
+        xpsr = int(frame.read_register("xpsr"))
+        return xpsr & 0xF
     else:
         # TODO: figure out a more proper way to detect if
         # we are in an interrupt context

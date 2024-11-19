@@ -20,10 +20,11 @@
 #
 ############################################################################
 
+from enum import Enum, auto
+
 import gdb
 import utils
 from stack import Stack
-from enum import Enum, auto
 
 UINT16_MAX = 0xFFFF
 SEM_TYPE_MUTEX = 4
@@ -135,7 +136,10 @@ class Nxinfothreads(gdb.Command):
                 % ("Index", "Tid", "Pid", "Cpu", "Thread", "Info", "Frame")
             )
         else:
-            gdb.write("%-5s %-4s %-4s %-21s %-80s %-30s\n" % ("Index", "Tid", "Pid", "Thread", "Info", "Frame"))
+            gdb.write(
+                "%-5s %-4s %-4s %-21s %-80s %-30s\n"
+                % ("Index", "Tid", "Pid", "Thread", "Info", "Frame")
+            )
 
         for i in range(0, npidhash):
             tcb = pidhash[i]
@@ -165,11 +169,14 @@ class Nxinfothreads(gdb.Command):
 
             try:
                 """Maybe tcb not have name member, or name is not utf-8"""
-                info = "(Name: \x1b[31;1m%s\x1b[m, State: %s, Priority: %d, Stack: %d)" % (
-                    tcb["name"].string(),
-                    statename,
-                    tcb["sched_priority"],
-                    tcb["adj_stack_size"],
+                info = (
+                    "(Name: \x1b[31;1m%s\x1b[m, State: %s, Priority: %d, Stack: %d)"
+                    % (
+                        tcb["name"].string(),
+                        statename,
+                        tcb["sched_priority"],
+                        tcb["adj_stack_size"],
+                    )
                 )
             except gdb.error and UnicodeDecodeError:
                 info = "(Name: Not utf-8, State: %s, Priority: %d, Stack: %d)" % (
@@ -193,10 +200,14 @@ class Nxinfothreads(gdb.Command):
             if utils.is_target_smp():
                 cpu = f"{tcb['cpu']}"
                 gdb.write(
-                    "%-5s %-4s %-4s %-4s %-21s %-80s %-30s\n" % (index, tid, pid, cpu, thread, info, frame)
+                    "%-5s %-4s %-4s %-4s %-21s %-80s %-30s\n"
+                    % (index, tid, pid, cpu, thread, info, frame)
                 )
             else:
-                gdb.write("%-5s %-4s %-4s %-21s %-80s %-30s\n" % (index, tid, pid, thread, info, frame))
+                gdb.write(
+                    "%-5s %-4s %-4s %-21s %-80s %-30s\n"
+                    % (index, tid, pid, thread, info, frame)
+                )
 
 
 class Nxthread(gdb.Command):
@@ -264,7 +275,9 @@ class Nxthread(gdb.Command):
 
         else:
             if arg[0].isnumeric() and pidhash[int(arg[0])] != 0:
-                if pidhash[int(arg[0])]["task_state"] == gdb.parse_and_eval("TSTATE_TASK_RUNNING"):
+                if pidhash[int(arg[0])]["task_state"] == gdb.parse_and_eval(
+                    "TSTATE_TASK_RUNNING"
+                ):
                     restore_regs()
                 else:
                     gdb.execute("nxsetregs g_pidhash[%s]->xcp.regs" % arg[0])
@@ -289,15 +302,18 @@ class Nxstep(gdb.Command):
         restore_regs()
         gdb.execute("step")
 
+
 class TaskType(Enum):
     TASK = 0
     PTHREAD = 1
     KTHREAD = 2
 
+
 class TaskSchedPolicy(Enum):
     FIFO = 0
     RR = 1
     SPORADIC = 2
+
 
 class TaskState(Enum):
     Invalid = 0
@@ -309,14 +325,16 @@ class TaskState(Enum):
     Inactive = auto()
     Waiting_Semaphore = auto()
     Waiting_Signal = auto()
-    if not utils.get_symbol_value("CONFIG_DISABLE_MQUEUE") or \
-        not utils.get_symbol_value("CONFIG_DISABLE_MQUEUE_SYSV"):
+    if not utils.get_symbol_value(
+        "CONFIG_DISABLE_MQUEUE"
+    ) or not utils.get_symbol_value("CONFIG_DISABLE_MQUEUE_SYSV"):
         Waiting_MQEmpty = auto()
         Waiting_MQFull = auto()
     if utils.get_symbol_value("CONFIG_PAGING"):
         Waiting_PagingFill = auto()
     if utils.get_symbol_value("CONFIG_SIG_SIGSTOP_ACTION"):
         Stopped = auto()
+
 
 class Ps(gdb.Command):
     def __init__(self):
@@ -326,57 +344,86 @@ class Ps(gdb.Command):
         self._fmt_wx = "{0: >{width}}"
 
     def parse_and_show_info(self, tcb):
-        get_macro = lambda x : utils.get_symbol_value(x)
-        eval2str = lambda cls, x : cls(int(x)).name
-        cast2ptr = lambda x, t : x.cast(gdb.lookup_type(t).pointer())
+        def get_macro(x):
+            return utils.get_symbol_value(x)
+
+        def eval2str(cls, x):
+            return cls(int(x)).name
+
+        def cast2ptr(x, t):
+            return x.cast(utils.lookup_type(t).pointer())
 
         pid = int(tcb["pid"])
         group = int(tcb["group"]["tg_pid"])
         priority = int(tcb["sched_priority"])
 
-        policy = eval2str(TaskSchedPolicy, (tcb["flags"] & get_macro("TCB_FLAG_POLICY_MASK")) \
-            >> get_macro("TCB_FLAG_POLICY_SHIFT"))
+        policy = eval2str(
+            TaskSchedPolicy,
+            (tcb["flags"] & get_macro("TCB_FLAG_POLICY_MASK"))
+            >> get_macro("TCB_FLAG_POLICY_SHIFT"),
+        )
 
-        task_type = eval2str(TaskType, (tcb["flags"] & get_macro("TCB_FLAG_TTYPE_MASK")) \
-            >> get_macro("TCB_FLAG_TTYPE_SHIFT"))
+        task_type = eval2str(
+            TaskType,
+            (tcb["flags"] & get_macro("TCB_FLAG_TTYPE_MASK"))
+            >> get_macro("TCB_FLAG_TTYPE_SHIFT"),
+        )
 
-        npx = 'P' if (tcb["flags"] & get_macro("TCB_FLAG_EXIT_PROCESSING")) else '-'
+        npx = "P" if (tcb["flags"] & get_macro("TCB_FLAG_EXIT_PROCESSING")) else "-"
 
-        waiter = str(int(cast2ptr(tcb["waitobj"], "mutex_t")["holder"])) \
-        if tcb["waitobj"] and cast2ptr(tcb["waitobj"], "sem_t")["flags"] & get_macro("SEM_TYPE_MUTEX") else ""
-        state_and_event = eval2str(TaskState, (tcb["task_state"])) + ("@Mutex_Holder: " + waiter if waiter else "")
+        waiter = (
+            str(int(cast2ptr(tcb["waitobj"], "mutex_t")["holder"]))
+            if tcb["waitobj"]
+            and cast2ptr(tcb["waitobj"], "sem_t")["flags"] & get_macro("SEM_TYPE_MUTEX")
+            else ""
+        )
+        state_and_event = eval2str(TaskState, (tcb["task_state"])) + (
+            "@Mutex_Holder: " + waiter if waiter else ""
+        )
         state_and_event = state_and_event.split("_")
 
         # Append a null str here so we don't need to worry
         # about the number of elements as we only want the first two
-        state, event = state_and_event if len(state_and_event) > 1 else state_and_event + [""]
+        state, event = (
+            state_and_event if len(state_and_event) > 1 else state_and_event + [""]
+        )
 
-        sigmask = "{0:#0{1}x}".format( \
-            sum([int(tcb["sigprocmask"]['_elem'][i] << i) for i in range(get_macro("_SIGSET_NELEM"))]), \
-            get_macro("_SIGSET_NELEM") * 8 + 2 \
-        )[2:] # exclude "0x"
+        sigmask = "{0:#0{1}x}".format(
+            sum(
+                [
+                    int(tcb["sigprocmask"]["_elem"][i] << i)
+                    for i in range(get_macro("_SIGSET_NELEM"))
+                ]
+            ),
+            get_macro("_SIGSET_NELEM") * 8 + 2,
+        )[
+            2:
+        ]  # exclude "0x"
 
         st = Stack(
             tcb["name"].string(),
-            hex(tcb["entry"]['pthread']), # should use main?
+            hex(tcb["entry"]["pthread"]),  # should use main?
             int(tcb["stack_base_ptr"]),
             int(tcb["stack_alloc_ptr"]),
             int(tcb["adj_stack_size"]),
             utils.get_sp(tcb),
-            4,)
+            4,
+        )
 
         stacksz = st._stack_size
         used = st.max_usage()
         filled = "{0:.2%}".format(st.max_usage() / st._stack_size)
 
-        cpu = tcb['cpu'] if get_macro("CONFIG_SMP") else 0
+        cpu = tcb["cpu"] if get_macro("CONFIG_SMP") else 0
 
         # For a task we need to display its cmdline arguments, while for a thread we display
         # pointers to its entry and argument
         cmd = ""
-        name = tcb['name'].string()
+        name = tcb["name"].string()
 
-        if int(tcb["flags"] & get_macro("TCB_FLAG_TTYPE_MASK")) == int(get_macro("TCB_FLAG_TTYPE_PTHREAD")):
+        if int(tcb["flags"] & get_macro("TCB_FLAG_TTYPE_MASK")) == int(
+            get_macro("TCB_FLAG_TTYPE_PTHREAD")
+        ):
             entry = tcb["entry"]["main"]
             ptcb = cast2ptr(tcb, "struct pthread_tcb_s")
             arg = ptcb["arg"]
@@ -386,49 +433,82 @@ class Ps(gdb.Command):
 
             args = []
             parg = argv
-            while (parg.dereference()):
+            while parg.dereference():
                 args.append(parg.dereference().string())
                 parg += 1
 
             cmd = " ".join([name] + args)
 
         if not utils.get_symbol_value("CONFIG_SCHED_CPULOAD_NONE"):
-            load = "{0:.1%}".format(int(tcb['ticks']) / int(gdb.parse_and_eval("g_cpuload_total")))
+            load = "{0:.1%}".format(
+                int(tcb["ticks"]) / int(gdb.parse_and_eval("g_cpuload_total"))
+            )
         else:
             load = "Dis."
 
-        gdb.write(" ".join((
-            self._fmt_wx.format(pid, width=5), self._fmt_wx.format(group, width=5), \
-            self._fmt_wx.format(cpu, width=3), \
-            self._fmt_wx.format(priority, width=3), self._fmt_wxl.format(policy, width=8), self._fmt_wxl.format(task_type, width=7), \
-            self._fmt_wx.format(npx, width=3), self._fmt_wxl.format(state, width=8), self._fmt_wxl.format(event, width=9), \
-            self._fmt_wxl.format(sigmask, width=8), \
-            self._fmt_wx.format(stacksz, width=7), self._fmt_wx.format(used, width=7), self._fmt_wx.format(filled, width=6), \
-            self._fmt_wx.format(load, width=6), cmd,
-        )))
+        gdb.write(
+            " ".join(
+                (
+                    self._fmt_wx.format(pid, width=5),
+                    self._fmt_wx.format(group, width=5),
+                    self._fmt_wx.format(cpu, width=3),
+                    self._fmt_wx.format(priority, width=3),
+                    self._fmt_wxl.format(policy, width=8),
+                    self._fmt_wxl.format(task_type, width=7),
+                    self._fmt_wx.format(npx, width=3),
+                    self._fmt_wxl.format(state, width=8),
+                    self._fmt_wxl.format(event, width=9),
+                    self._fmt_wxl.format(sigmask, width=8),
+                    self._fmt_wx.format(stacksz, width=7),
+                    self._fmt_wx.format(used, width=7),
+                    self._fmt_wx.format(filled, width=6),
+                    self._fmt_wx.format(load, width=6),
+                    cmd,
+                )
+            )
+        )
         gdb.write("\n")
 
     def invoke(self, args, from_tty):
-        gdb.write(" ".join((
-            self._fmt_wx.format("PID", width=5), self._fmt_wx.format("GROUP", width=5), \
-            self._fmt_wx.format("CPU", width=3), \
-            self._fmt_wx.format("PRI", width=3), self._fmt_wxl.format("POLICY", width=8), self._fmt_wxl.format("TYPE", width=7), \
-            self._fmt_wx.format("NPX", width=3), self._fmt_wxl.format("STATE", width=8), self._fmt_wxl.format("EVENT", width=9), \
-            self._fmt_wxl.format("SIGMASK", width=utils.get_symbol_value("_SIGSET_NELEM") * 8), \
-            self._fmt_wx.format("STACK", width=7), self._fmt_wx.format("USED", width=7), self._fmt_wx.format("FILLED", width=3), \
-            self._fmt_wx.format("LOAD", width=6), "COMMAND",
-        )))
+        gdb.write(
+            " ".join(
+                (
+                    self._fmt_wx.format("PID", width=5),
+                    self._fmt_wx.format("GROUP", width=5),
+                    self._fmt_wx.format("CPU", width=3),
+                    self._fmt_wx.format("PRI", width=3),
+                    self._fmt_wxl.format("POLICY", width=8),
+                    self._fmt_wxl.format("TYPE", width=7),
+                    self._fmt_wx.format("NPX", width=3),
+                    self._fmt_wxl.format("STATE", width=8),
+                    self._fmt_wxl.format("EVENT", width=9),
+                    self._fmt_wxl.format(
+                        "SIGMASK", width=utils.get_symbol_value("_SIGSET_NELEM") * 8
+                    ),
+                    self._fmt_wx.format("STACK", width=7),
+                    self._fmt_wx.format("USED", width=7),
+                    self._fmt_wx.format("FILLED", width=3),
+                    self._fmt_wx.format("LOAD", width=6),
+                    "COMMAND",
+                )
+            )
+        )
         gdb.write("\n")
 
         for tcb in utils.get_tcbs():
             self.parse_and_show_info(tcb)
 
+
 # We can't use a user command to rename continue it will recursion
 
 gdb.execute("define c\n nxcontinue \n end\n")
 gdb.execute("define s\n nxstep \n end\n")
-gdb.write("\n\x1b[31;1m if use thread command, please don't use 'continue', use 'c' instead !!!\x1b[m\n")
-gdb.write("\x1b[31;1m if use thread command, please don't use 'step', use 's' instead !!!\x1b[m\n")
+gdb.write(
+    "\n\x1b[31;1m if use thread command, please don't use 'continue', use 'c' instead !!!\x1b[m\n"
+)
+gdb.write(
+    "\x1b[31;1m if use thread command, please don't use 'step', use 's' instead !!!\x1b[m\n"
+)
 
 Nxsetregs()
 Nxinfothreads()
