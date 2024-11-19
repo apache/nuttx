@@ -36,10 +36,11 @@ CMake,nucleo-f446re:pwm
 CMake,nucleo-f446re:qenco
 CMake,nucleo-f446re:systemview
 
-CMake,nucleo-f4x1re:f401-fb
-CMake,nucleo-f4x1re:f401-nsh
-CMake,nucleo-f4x1re:f411-mcp2515-extid
-CMake,nucleo-f4x1re:f411-nsh
+CMake,nucleo-f401re:fb
+CMake,nucleo-f401re:nsh
+
+CMake,nucleo-f411re:mcp2515-extid
+CMake,nucleo-f411re:nsh
 
 CMake,nucleo-g431kb:comp
 CMake,nucleo-g431kb:nsh
