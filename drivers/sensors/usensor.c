@@ -229,6 +229,10 @@ static int usensor_get_info(FAR struct sensor_lowerhalf_s *lower,
   FAR struct usensor_lowerhalf_s *ulower = container_of(lower,
                                            struct usensor_lowerhalf_s,
                                            driver);
+  if (ulower->devinfo.name[0] == '\0')
+    {
+      return -ENOTTY;
+    }
 
   *info = ulower->devinfo;
   return 0;
