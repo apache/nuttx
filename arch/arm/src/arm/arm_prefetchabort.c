@@ -65,16 +65,17 @@
 
 void arm_prefetchabort(uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
 #ifdef CONFIG_LEGACY_PAGING
-  uint32_t *savestate;
+  uint32_t *saveregs;
+  bool savestate;
 
-  /* Save the saved processor context in current_regs where it can be
-   * accessed for register dumps and possibly context switching.
-   */
-
-  savestate = up_current_regs();
+  savestate = up_interrupt_context();
+  saveregs = tcb->xcp.regs;
 #endif
-  up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
 #ifdef CONFIG_LEGACY_PAGING
   /* Get the (virtual) address of instruction that caused the prefetch
@@ -97,7 +98,6 @@ void arm_prefetchabort(uint32_t *regs)
        * paging logic for both prefetch and data aborts.
        */
 
-      struct tcb_s *tcb = this_task();
       tcb->xcp.far  = regs[REG_R15];
 
       /* Call pg_miss() to schedule the page fill.  A consequences of this
@@ -114,12 +114,10 @@ void arm_prefetchabort(uint32_t *regs)
 
       pg_miss();
 
-      /* Restore the previous value of current_regs.  NULL would indicate
-       * that we are no longer in an interrupt handler.  It will be non-NULL
-       * if we are returning from a nested interrupt.
-       */
+      /* Restore the previous value of saveregs. */
 
-      up_set_current_regs(savestate);
+      up_set_interrupt_context(savestate);
+      tcb->xcp.regs = saveregs;
     }
   else
 #endif

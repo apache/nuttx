@@ -32,15 +32,10 @@
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the
- * [get/set]_current_regs for portability.
- */
+/* g_interrupt_context store irq status */
 
-#if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M) || \
-      defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARM)
-volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+#if defined(CONFIG_ARCH_ARM)
+volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************

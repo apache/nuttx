@@ -158,11 +158,6 @@ int arm_svcall(int irq, void *context, void *arg)
        *
        *   R0 = SYS_restore_context
        *   R1 = restoreregs
-       *
-       * In this case, we simply need to set current_regs to restore register
-       * area referenced in the saved R1. context == current_regs is the
-       * normal exception return.  By setting current_regs = context[R1], we
-       * force the return to the saved context referenced in R1.
        */
 
       case SYS_restore_context:
@@ -183,11 +178,6 @@ int arm_svcall(int irq, void *context, void *arg)
        *   R0 = SYS_switch_context
        *   R1 = saveregs
        *   R2 = restoreregs
-       *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of R1 and then set
-       * current_regs to the save register area referenced by the saved
-       * contents of R2.
        */
 
       case SYS_switch_context:

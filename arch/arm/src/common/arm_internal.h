@@ -215,6 +215,10 @@ extern void arm_fullcontextrestore(uint32_t *restoreregs);
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+/* g_interrupt_context store irq status */
+
+extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
+
 typedef void (*up_vector_t)(void);
 #endif
 
@@ -406,6 +410,14 @@ uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr);
 uint32_t *arm_syscall(uint32_t *regs);
 uint32_t *arm_undefinedinsn(uint32_t *regs);
 
+/* IRQ Flag */
+
+noinstrument_function
+static inline_function void up_set_interrupt_context(bool flag)
+{
+  CP15_SET(TPIDRPRW, flag);
+}
+
 /* Exception handling logic common to other ARM7 and ARM9 family. */
 
 #else /* ARM7 | ARM9 */
@@ -426,6 +438,14 @@ void arm_dataabort(uint32_t *regs);
 void arm_prefetchabort(uint32_t *regs);
 uint32_t *arm_syscall(uint32_t *regs);
 void arm_undefinedinsn(uint32_t *regs);
+
+/* IRQ Flag */
+
+noinstrument_function
+static inline_function void up_set_interrupt_context(bool flag)
+{
+  g_interrupt_context[this_cpu()] = flag;
+}
 
 #endif /* CONFIG_ARCH_ARMV[6-8]M */
 
