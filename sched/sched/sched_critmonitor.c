@@ -394,7 +394,8 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_THREADTIME
   tick = clock_time2usec(&ts);
-  if (tick > CONFIG_SCHED_INSTRUMENTATION_THREAD_RUNTIME_DURATION)
+  if (!is_idle_task(tcb) &&
+      tick > CONFIG_SCHED_INSTRUMENTATION_THREAD_RUNTIME_DURATION)
     {
       sched_note_threadtime(tick);
     }
