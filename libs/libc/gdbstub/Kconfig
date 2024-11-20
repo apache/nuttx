@@ -18,9 +18,9 @@ config LIB_GDBSTUB_DEBUG
 		Add debug info to gdbstub
 
 config LIB_GDBSTUB_PKTSIZE
-  int "Gdbstub packet size"
+	int "Gdbstub packet size"
 	default 32768
 	---help---
 		The size of the gdbstub packet buffer.
 
-endif
+endif # LIB_GDBSTUB

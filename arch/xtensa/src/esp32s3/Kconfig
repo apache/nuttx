@@ -1708,7 +1708,7 @@ choice ESP32S3_UNIVERSAL_MAC_ADDRESSES
 	bool "Number of universally administered (by IEEE) MAC address"
 	default ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
 	depends on ESP32S3_WIFI || ESP32S3_BLE
-	help
+	---help---
 		Configure the number of universally administered (by IEEE) MAC addresses.
 		During initialization, MAC addresses for each network interface are generated or derived from a
 		single base MAC address.
