@@ -53,7 +53,7 @@ config ESPRESSIF_SPI_BITBANG
 	select ESP32S3_SPI if ARCH_CHIP_ESP32S3
 	select SPI
 	select SPI_BITBANG
-    ---help---
+	---help---
 		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripherals are already in use.
 
 config ESPRESSIF_SPIFLASH

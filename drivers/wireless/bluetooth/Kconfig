@@ -24,7 +24,7 @@ config BLUETOOTH_UART_GENERIC
 	default n
 
 config BLUETOOTH_UART_SHIM
-	bool  "Bluetooth UART SHIM driver"
+	bool "Bluetooth UART SHIM driver"
 	default n
 
 if BLUETOOTH_UART
