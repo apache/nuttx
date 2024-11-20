@@ -812,6 +812,13 @@ config NET_IGC_RXSPARE
 	int "Intel IGC spare RX buffers"
 	default 8
 
+config NET_IGC_INT_INTERVAL
+	int "Intel IGC interrupt interval"
+	default 100
+	range 1 8191
+	---help---
+		Minimum Inter-interrupt Interval in 1 us increments.
+
 endif # NET_IGC
 
 endif # NETDEVICES
