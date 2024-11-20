@@ -104,7 +104,7 @@ static int sph_open(struct file *filep)
 {
   /* Exclusive access */
 
-  if (atomic_load(&filep->f_inode->i_crefs) > 2)
+  if (atomic_read(&filep->f_inode->i_crefs) > 2)
     {
       return ERROR;
     }

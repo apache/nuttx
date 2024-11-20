@@ -37,9 +37,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define bt_atomic_set(ptr, value)        atomic_store(ptr, value);
-#define bt_atomic_get(ptr)               atomic_load(ptr)
-#define bt_atomic_testbit(ptr, bitno)    ((atomic_load(ptr) & (1 << (bitno))) != 0)
+#define bt_atomic_set(ptr, value)        atomic_set(ptr, value);
+#define bt_atomic_get(ptr)               atomic_read(ptr)
+#define bt_atomic_testbit(ptr, bitno)    ((atomic_read(ptr) & (1 << (bitno))) != 0)
 #define bt_atomic_incr(ptr)              atomic_fetch_add(ptr, 1)
 #define bt_atomic_decr(ptr)              atomic_fetch_sub(ptr, 1)
 #define bt_atomic_setbit(ptr, bitno)     atomic_fetch_or(ptr, (1 << (bitno)))
@@ -51,6 +51,6 @@
  * Public Types
  ****************************************************************************/
 
-typedef atomic_char bt_atomic_t;
+typedef atomic_t bt_atomic_t;
 
 #endif /* __WIRELESS_BLUETOOTH_BT_ATOMIC_H */

@@ -329,280 +329,260 @@ static spinlock_t g_atomic_lock = SP_UNLOCKED;
  ****************************************************************************/
 
 STORE(__atomic_store_, 1, uint8_t)
-STORE(nx_atomic_store_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_store_2
  ****************************************************************************/
 
 STORE(__atomic_store_, 2, uint16_t)
-STORE(nx_atomic_store_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_store_4
  ****************************************************************************/
 
 STORE(__atomic_store_, 4, uint32_t)
-STORE(nx_atomic_store_, 4, uint32_t)
+STORE(nx_atomic_store_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_store_8
  ****************************************************************************/
 
 STORE(__atomic_store_, 8, uint64_t)
-STORE(nx_atomic_store_, 8, uint64_t)
+STORE(nx_atomic_store_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_load_1
  ****************************************************************************/
 
 LOAD(__atomic_load_, 1, uint8_t)
-LOAD(nx_atomic_load_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_load__2
  ****************************************************************************/
 
 LOAD(__atomic_load_, 2, uint16_t)
-LOAD(nx_atomic_load_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_load__4
  ****************************************************************************/
 
 LOAD(__atomic_load_, 4, uint32_t)
-LOAD(nx_atomic_load_, 4, uint32_t)
+LOAD(nx_atomic_load_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_load__8
  ****************************************************************************/
 
 LOAD(__atomic_load_, 8, uint64_t)
-LOAD(nx_atomic_load_, 8, uint64_t)
+LOAD(nx_atomic_load_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_exchange_1
  ****************************************************************************/
 
 EXCHANGE(__atomic_exchange_, 1, uint8_t)
-EXCHANGE(nx_atomic_exchange_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_exchange__2
  ****************************************************************************/
 
 EXCHANGE(__atomic_exchange_, 2, uint16_t)
-EXCHANGE(nx_atomic_exchange_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_exchange__4
  ****************************************************************************/
 
 EXCHANGE(__atomic_exchange_, 4, uint32_t)
-EXCHANGE(nx_atomic_exchange_, 4, uint32_t)
+EXCHANGE(nx_atomic_exchange_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_exchange__8
  ****************************************************************************/
 
 EXCHANGE(__atomic_exchange_, 8, uint64_t)
-EXCHANGE(nx_atomic_exchange_, 8, uint64_t)
+EXCHANGE(nx_atomic_exchange_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_compare_exchange_1
  ****************************************************************************/
 
 CMP_EXCHANGE(__atomic_compare_exchange_, 1, uint8_t)
-CMP_EXCHANGE(nx_atomic_compare_exchange_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_compare_exchange_2
  ****************************************************************************/
 
 CMP_EXCHANGE(__atomic_compare_exchange_, 2, uint16_t)
-CMP_EXCHANGE(nx_atomic_compare_exchange_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_compare_exchange_4
  ****************************************************************************/
 
 CMP_EXCHANGE(__atomic_compare_exchange_, 4, uint32_t)
-CMP_EXCHANGE(nx_atomic_compare_exchange_, 4, uint32_t)
+CMP_EXCHANGE(nx_atomic_compare_exchange_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_compare_exchange_8
  ****************************************************************************/
 
 CMP_EXCHANGE(__atomic_compare_exchange_, 8, uint64_t)
-CMP_EXCHANGE(nx_atomic_compare_exchange_, 8, uint64_t)
+CMP_EXCHANGE(nx_atomic_compare_exchange_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_flag_test_and_set_1
  ****************************************************************************/
 
 FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 1, uint8_t)
-FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_flag_test_and_set_2
  ****************************************************************************/
 
 FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 2, uint16_t)
-FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_flag_test_and_set_4
  ****************************************************************************/
 
 FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 4, uint32_t)
-FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 4, uint32_t)
+FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_flag_test_and_set_8
  ****************************************************************************/
 
 FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 8, uint64_t)
-FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 8, uint64_t)
+FLAG_TEST_AND_SET(nx_atomic_flags_test_and_set_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_add_1
  ****************************************************************************/
 
 FETCH_ADD(__atomic_fetch_add_, 1, uint8_t)
-FETCH_ADD(nx_atomic_fetch_add_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_add_2
  ****************************************************************************/
 
 FETCH_ADD(__atomic_fetch_add_, 2, uint16_t)
-FETCH_ADD(nx_atomic_fetch_add_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_add_4
  ****************************************************************************/
 
 FETCH_ADD(__atomic_fetch_add_, 4, uint32_t)
-FETCH_ADD(nx_atomic_fetch_add_, 4, uint32_t)
+FETCH_ADD(nx_atomic_fetch_add_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_add_8
  ****************************************************************************/
 
 FETCH_ADD(__atomic_fetch_add_, 8, uint64_t)
-FETCH_ADD(nx_atomic_fetch_add_, 8, uint64_t)
+FETCH_ADD(nx_atomic_fetch_add_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_sub_1
  ****************************************************************************/
 
 FETCH_SUB(__atomic_fetch_sub_, 1, uint8_t)
-FETCH_SUB(nx_atomic_fetch_sub_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_sub_2
  ****************************************************************************/
 
 FETCH_SUB(__atomic_fetch_sub_, 2, uint16_t)
-FETCH_SUB(nx_atomic_fetch_sub_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_sub_4
  ****************************************************************************/
 
 FETCH_SUB(__atomic_fetch_sub_, 4, uint32_t)
-FETCH_SUB(nx_atomic_fetch_sub_, 4, uint32_t)
+FETCH_SUB(nx_atomic_fetch_sub_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_sub_8
  ****************************************************************************/
 
 FETCH_SUB(__atomic_fetch_sub_, 8, uint64_t)
-FETCH_SUB(nx_atomic_fetch_sub_, 8, uint64_t)
+FETCH_SUB(nx_atomic_fetch_sub_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_and_1
  ****************************************************************************/
 
 FETCH_AND(__atomic_fetch_and_, 1, uint8_t)
-FETCH_AND(nx_atomic_fetch_and_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_and_2
  ****************************************************************************/
 
 FETCH_AND(__atomic_fetch_and_, 2, uint16_t)
-FETCH_AND(nx_atomic_fetch_and_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_and_4
  ****************************************************************************/
 
 FETCH_AND(__atomic_fetch_and_, 4, uint32_t)
-FETCH_AND(nx_atomic_fetch_and_, 4, uint32_t)
+FETCH_AND(nx_atomic_fetch_and_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_and_8
  ****************************************************************************/
 
 FETCH_AND(__atomic_fetch_and_, 8, uint64_t)
-FETCH_AND(nx_atomic_fetch_and_, 8, uint64_t)
+FETCH_AND(nx_atomic_fetch_and_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_or_1
  ****************************************************************************/
 
 FETCH_OR(__atomic_fetch_or_, 1, uint8_t)
-FETCH_OR(nx_atomic_fetch_or_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_or_2
  ****************************************************************************/
 
 FETCH_OR(__atomic_fetch_or_, 2, uint16_t)
-FETCH_OR(nx_atomic_fetch_or_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_or_4
  ****************************************************************************/
 
 FETCH_OR(__atomic_fetch_or_, 4, uint32_t)
-FETCH_OR(nx_atomic_fetch_or_, 4, uint32_t)
+FETCH_OR(nx_atomic_fetch_or_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_or_4
  ****************************************************************************/
 
 FETCH_OR(__atomic_fetch_or_, 8, uint64_t)
-FETCH_OR(nx_atomic_fetch_or_, 8, uint64_t)
+FETCH_OR(nx_atomic_fetch_or_, 8, int64_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_xor_1
  ****************************************************************************/
 
 FETCH_XOR(__atomic_fetch_xor_, 1, uint8_t)
-FETCH_XOR(nx_atomic_fetch_xor_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_xor_2
  ****************************************************************************/
 
 FETCH_XOR(__atomic_fetch_xor_, 2, uint16_t)
-FETCH_XOR(nx_atomic_fetch_xor_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_xor_4
  ****************************************************************************/
 
 FETCH_XOR(__atomic_fetch_xor_, 4, uint32_t)
-FETCH_XOR(nx_atomic_fetch_xor_, 4, uint32_t)
+FETCH_XOR(nx_atomic_fetch_xor_, 4, int32_t)
 
 /****************************************************************************
  * Name: __atomic_fetch_xor_8
  ****************************************************************************/
 
 FETCH_XOR(__atomic_fetch_xor_, 8, uint64_t)
-FETCH_XOR(nx_atomic_fetch_xor_, 8, uint64_t)
+FETCH_XOR(nx_atomic_fetch_xor_, 8, int64_t)
 
 /* Clang define the __sync builtins, add #ifndef to avoid
  * redefined/redeclared problem.
@@ -615,224 +595,192 @@ FETCH_XOR(nx_atomic_fetch_xor_, 8, uint64_t)
  ****************************************************************************/
 
 SYNC_ADD_FETCH(__sync_add_and_fetch_, 1, uint8_t)
-SYNC_ADD_FETCH(nx_sync_add_and_fetch_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_add_and_fetch_2
  ****************************************************************************/
 
 SYNC_ADD_FETCH(__sync_add_and_fetch_, 2, uint16_t)
-SYNC_ADD_FETCH(nx_sync_add_and_fetch_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_add_and_fetch_4
  ****************************************************************************/
 
 SYNC_ADD_FETCH(__sync_add_and_fetch_, 4, uint32_t)
-SYNC_ADD_FETCH(nx_sync_add_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_add_and_fetch_8
  ****************************************************************************/
 
 SYNC_ADD_FETCH(__sync_add_and_fetch_, 8, uint64_t)
-SYNC_ADD_FETCH(nx_sync_add_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_sub_and_fetch_1
  ****************************************************************************/
 
 SYNC_SUB_FETCH(__sync_sub_and_fetch_, 1, uint8_t)
-SYNC_SUB_FETCH(nx_sync_sub_and_fetch_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_sub_and_fetch_2
  ****************************************************************************/
 
 SYNC_SUB_FETCH(__sync_sub_and_fetch_, 2, uint16_t)
-SYNC_SUB_FETCH(nx_sync_sub_and_fetch_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_sub_and_fetch_4
  ****************************************************************************/
 
 SYNC_SUB_FETCH(__sync_sub_and_fetch_, 4, uint32_t)
-SYNC_SUB_FETCH(nx_sync_sub_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_sub_and_fetch_8
  ****************************************************************************/
 
 SYNC_SUB_FETCH(__sync_sub_and_fetch_, 8, uint64_t)
-SYNC_SUB_FETCH(nx_sync_sub_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_or_and_fetch_1
  ****************************************************************************/
 
 SYNC_OR_FETCH(__sync_or_and_fetch_, 1, uint8_t)
-SYNC_OR_FETCH(nx_sync_or_and_fetch_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_or_and_fetch_2
  ****************************************************************************/
 
 SYNC_OR_FETCH(__sync_or_and_fetch_, 2, uint16_t)
-SYNC_OR_FETCH(nx_sync_or_and_fetch_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_or_and_fetch_4
  ****************************************************************************/
 
 SYNC_OR_FETCH(__sync_or_and_fetch_, 4, uint32_t)
-SYNC_OR_FETCH(nx_sync_or_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_or_and_fetch_8
  ****************************************************************************/
 
 SYNC_OR_FETCH(__sync_or_and_fetch_, 8, uint64_t)
-SYNC_OR_FETCH(nx_sync_or_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_and_and_fetch_1
  ****************************************************************************/
 
 SYNC_AND_FETCH(__sync_and_and_fetch_, 1, uint8_t)
-SYNC_AND_FETCH(nx_sync_and_and_fetch_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_and_and_fetch_2
  ****************************************************************************/
 
 SYNC_AND_FETCH(__sync_and_and_fetch_, 2, uint16_t)
-SYNC_AND_FETCH(nx_sync_and_and_fetch_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_and_and_fetch_4
  ****************************************************************************/
 
 SYNC_AND_FETCH(__sync_and_and_fetch_, 4, uint32_t)
-SYNC_AND_FETCH(nx_sync_and_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_and_and_fetch_8
  ****************************************************************************/
 
 SYNC_AND_FETCH(__sync_and_and_fetch_, 8, uint64_t)
-SYNC_AND_FETCH(nx_sync_and_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_xor_and_fetch_1
  ****************************************************************************/
 
 SYNC_XOR_FETCH(__sync_xor_and_fetch_, 1, uint8_t)
-SYNC_XOR_FETCH(nx_sync_xor_and_fetch_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_xor_and_fetch_2
  ****************************************************************************/
 
 SYNC_XOR_FETCH(__sync_xor_and_fetch_, 2, uint16_t)
-SYNC_XOR_FETCH(nx_sync_xor_and_fetch_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_xor_and_fetch_4
  ****************************************************************************/
 
 SYNC_XOR_FETCH(__sync_xor_and_fetch_, 4, uint32_t)
-SYNC_XOR_FETCH(nx_sync_xor_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_xor_and_fetch_8
  ****************************************************************************/
 
 SYNC_XOR_FETCH(__sync_xor_and_fetch_, 8, uint64_t)
-SYNC_XOR_FETCH(nx_sync_xor_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_nand_and_fetch_1
  ****************************************************************************/
 
 SYNC_NAND_FETCH(__sync_nand_and_fetch_, 1, uint8_t)
-SYNC_NAND_FETCH(nx_sync_nand_and_fetch_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_nand_and_fetch_2
  ****************************************************************************/
 
 SYNC_NAND_FETCH(__sync_nand_and_fetch_, 2, uint16_t)
-SYNC_NAND_FETCH(nx_sync_nand_and_fetch_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_nand_and_fetch_4
  ****************************************************************************/
 
 SYNC_NAND_FETCH(__sync_nand_and_fetch_, 4, uint32_t)
-SYNC_NAND_FETCH(nx_sync_nand_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_nand_and_fetch_8
  ****************************************************************************/
 
 SYNC_NAND_FETCH(__sync_nand_and_fetch_, 8, uint64_t)
-SYNC_NAND_FETCH(nx_sync_nand_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_bool_compare_and_swap_1
  ****************************************************************************/
 
 SYNC_BOOL_CMP_SWAP(__sync_bool_compare_and_swap_, 1, uint8_t)
-SYNC_BOOL_CMP_SWAP(nx_sync_bool_compare_and_swap_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_bool_compare_and_swap_2
  ****************************************************************************/
 
 SYNC_BOOL_CMP_SWAP(__sync_bool_compare_and_swap_, 2, uint16_t)
-SYNC_BOOL_CMP_SWAP(nx_sync_bool_compare_and_swap_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_bool_compare_and_swap_4
  ****************************************************************************/
 
 SYNC_BOOL_CMP_SWAP(__sync_bool_compare_and_swap_, 4, uint32_t)
-SYNC_BOOL_CMP_SWAP(nx_sync_bool_compare_and_swap_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_bool_compare_and_swap_8
  ****************************************************************************/
 
 SYNC_BOOL_CMP_SWAP(__sync_bool_compare_and_swap_, 8, uint64_t)
-SYNC_BOOL_CMP_SWAP(nx_sync_bool_compare_and_swap_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_val_compare_and_swap_1
  ****************************************************************************/
 
 SYNC_VAL_CMP_SWAP(__sync_val_compare_and_swap_, 1, uint8_t)
-SYNC_VAL_CMP_SWAP(nx_sync_val_compare_and_swap_, 1, uint8_t)
 
 /****************************************************************************
  * Name: __sync_val_compare_and_swap_2
  ****************************************************************************/
 
 SYNC_VAL_CMP_SWAP(__sync_val_compare_and_swap_, 2, uint16_t)
-SYNC_VAL_CMP_SWAP(nx_sync_val_compare_and_swap_, 2, uint16_t)
 
 /****************************************************************************
  * Name: __sync_val_compare_and_swap_4
  ****************************************************************************/
 
 SYNC_VAL_CMP_SWAP(__sync_val_compare_and_swap_, 4, uint32_t)
-SYNC_VAL_CMP_SWAP(nx_sync_val_compare_and_swap_, 4, uint32_t)
 
 /****************************************************************************
  * Name: __sync_val_compare_and_swap_8
  ****************************************************************************/
 
 SYNC_VAL_CMP_SWAP(__sync_val_compare_and_swap_, 8, uint64_t)
-SYNC_VAL_CMP_SWAP(nx_sync_val_compare_and_swap_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_synchronize

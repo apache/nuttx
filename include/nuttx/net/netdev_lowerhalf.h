@@ -117,7 +117,7 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
-  atomic_int quota[NETPKT_TYPENUM];
+  atomic_t quota[NETPKT_TYPENUM];
 
   /* The structure used by net stack.
    * Note: Do not change its fields unless you know what you are doing.

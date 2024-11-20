@@ -310,7 +310,7 @@ reset_control_get_internal(FAR struct reset_controller_dev *rcdev,
   rstc->rcdev = rcdev;
   list_add_after(&rcdev->reset_control_head, &rstc->list);
   rstc->id = index;
-  atomic_init(&rstc->refcnt, 1);
+  atomic_set(&rstc->refcnt, 1);
   rstc->acquired = acquired;
   rstc->shared = shared;
 
@@ -528,7 +528,7 @@ int reset_control_reset(FAR struct reset_control *rstc)
 
   if (rstc->shared)
     {
-      if (atomic_load(&rstc->deassert_count) != 0)
+      if (atomic_read(&rstc->deassert_count) != 0)
         {
           return -EINVAL;
         }
@@ -598,12 +598,12 @@ int reset_control_assert(FAR struct reset_control *rstc)
 
   if (rstc->shared)
     {
-      if (atomic_load(&rstc->triggered_count) != 0)
+      if (atomic_read(&rstc->triggered_count) != 0)
         {
           return -EINVAL;
         }
 
-      if (atomic_load(&rstc->deassert_count) == 0)
+      if (atomic_read(&rstc->deassert_count) == 0)
         {
           rsterr("deassert_count = 0, invalid value\n");
           return -EINVAL;
@@ -682,7 +682,7 @@ int reset_control_deassert(FAR struct reset_control *rstc)
 
   if (rstc->shared)
     {
-      if (atomic_load(&rstc->triggered_count) != 0)
+      if (atomic_read(&rstc->triggered_count) != 0)
         {
           rsterr("triggered_count != 0, invalid value\n");
           return -EINVAL;

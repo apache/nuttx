@@ -136,7 +136,7 @@ int inode_remove(FAR const char *path)
        * to it
        */
 
-      if (atomic_load(&inode->i_crefs))
+      if (atomic_read(&inode->i_crefs))
         {
           return -EBUSY;
         }

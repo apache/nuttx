@@ -29,10 +29,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdatomic.h>
 #include <stdio.h>
 #include <time.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/input/ff.h>
 #include <nuttx/wqueue.h>
@@ -287,8 +287,8 @@ struct aw86225
   unsigned char level;
   unsigned int osc_cali_run;
   unsigned char ram_vbat_comp;
-  atomic_int is_in_rtp_loop;
-  atomic_int exit_in_rtp_loop;
+  atomic_t is_in_rtp_loop;
+  atomic_t exit_in_rtp_loop;
   sem_t wait_q;
   sem_t stop_wait_q;
 };
