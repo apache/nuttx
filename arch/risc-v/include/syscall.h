@@ -55,7 +55,7 @@
 #  define CONFIG_SYS_RESERVED 4
 #endif
 
-/* RV64GC system calls ******************************************************/
+/* RISC-V system calls ******************************************************/
 
 /* SYS call 1 and 2 are defined for internal use by the RISC-V port (see
  * arch/risc-v/include/syscall.h). In addition, SYS call 3 is the
