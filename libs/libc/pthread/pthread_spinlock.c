@@ -94,7 +94,7 @@ int pthread_spin_init(FAR pthread_spinlock_t *lock, int pshared)
   DEBUGASSERT(lock != NULL);
   if (lock != NULL)
     {
-      spin_initialize(&lock->sp_lock, SP_UNLOCKED);
+      spin_lock_init(&lock->sp_lock);
       lock->sp_holder = IMPOSSIBLE_THREAD;
       ret             = OK;
     }

@@ -236,7 +236,7 @@ void *esp_coex_common_spin_lock_create_wrapper(void)
       DEBUGPANIC();
     }
 
-  spin_initialize(lock, SP_UNLOCKED);
+  spin_lock_init(lock);
 
   return lock;
 }

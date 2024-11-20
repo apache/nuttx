@@ -226,7 +226,8 @@ int up_cpu_start(int cpu)
        * try to lock it but spins until the APP CPU starts and unlocks it.
        */
 
-      spin_initialize(&g_appcpu_interlock, SP_LOCKED);
+      spin_lock_init(&g_appcpu_interlock);
+      spin_lock(&g_appcpu_interlock);
 
       /* OpenOCD might have already enabled clock gating and taken APP CPU
        * out of reset.  Don't reset the APP CPU if that's the case as this
@@ -272,6 +273,10 @@ int up_cpu_start(int cpu)
       /* And wait until the APP CPU starts and releases the spinlock. */
 
       spin_lock(&g_appcpu_interlock);
+
+      /* prev cpu boot done */
+
+      spin_unlock(&g_appcpu_interlock);
       DEBUGASSERT(g_appcpu_started);
     }
 

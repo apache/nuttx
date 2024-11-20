@@ -241,7 +241,8 @@ int up_cpu_start(int cpu)
        * try to lock it but spins until the APP CPU starts and unlocks it.
        */
 
-      spin_initialize(&g_appcpu_interlock, SP_LOCKED);
+      spin_lock_init(&g_appcpu_interlock);
+      spin_lock(&g_appcpu_interlock);
 
       /* Unstall the APP CPU */
 
@@ -288,6 +289,10 @@ int up_cpu_start(int cpu)
       /* And wait until the APP CPU starts and releases the spinlock. */
 
       spin_lock(&g_appcpu_interlock);
+
+      /* prev cpu boot done */
+
+      spin_unlock(&g_appcpu_interlock);
       DEBUGASSERT(g_appcpu_started);
     }
 
