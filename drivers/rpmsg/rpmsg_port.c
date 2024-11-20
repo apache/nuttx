@@ -612,9 +612,6 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
   rdev->support_ack = true;
   rdev->support_ns = true;
 
-  rpmsg_register_endpoint(rdev, &rdev->ns_ept, "NS", RPMSG_NS_EPT_ADDR,
-                          RPMSG_NS_EPT_ADDR, rpmsg_port_ns_callback, NULL,
-                          port);
   port->ops->register_callback(port, rpmsg_port_rx_callback);
 
   return 0;
@@ -626,22 +623,9 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
 
 void rpmsg_port_uninitialize(FAR struct rpmsg_port_s *port)
 {
-  FAR struct rpmsg_device *rdev = &port->rdev;
-  FAR struct metal_list *node;
-  FAR struct rpmsg_endpoint *ept;
+  FAR struct rpmsg_s *rpmsg = &port->rpmsg;
 
-  while (!metal_list_is_empty(&rdev->endpoints))
-    {
-      node = rdev->endpoints.next;
-      ept = metal_container_of(node, struct rpmsg_endpoint, node);
-      rpmsg_destroy_ept(ept);
-      if (ept->ns_unbind_cb)
-        {
-          ept->ns_unbind_cb(ept);
-        }
-    }
-
-  metal_mutex_deinit(&rdev->lock);
+  metal_mutex_deinit(&rpmsg->rdev->lock);
   rpmsg_port_destroy_queues(port);
 }
 
@@ -747,6 +731,9 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port,
       return ret;
     }
 
+  rpmsg_register_endpoint(&port->rdev, &port->rdev.ns_ept, "NS",
+                          RPMSG_NS_EPT_ADDR, RPMSG_NS_EPT_ADDR,
+                          rpmsg_port_ns_callback, NULL, port);
   rpmsg_device_created(&port->rpmsg);
   return ret;
 }
@@ -760,9 +747,9 @@ void rpmsg_port_unregister(FAR struct rpmsg_port_s *port)
   char name[64];
 
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->cpuname);
-  rpmsg_unregister(name, &port->rpmsg);
 
   rpmsg_device_destory(&port->rpmsg);
+  rpmsg_unregister(name, &port->rpmsg);
 }
 
 /****************************************************************************
