@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /* Check if only one console device is selected.
- * If you get this errro, search your .config file for CONSOLE_XXX_CONSOLE
+ * If you get this error, search your .config file for CONSOLE_XXX_CONSOLE
  * options and remove what is not needed.
  */
 
