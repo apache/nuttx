@@ -60,12 +60,12 @@ struct reset_control
   FAR struct reset_controller_dev *rcdev;
   struct list_node list;
   unsigned int id;
-  atomic_int refcnt;
+  atomic_t refcnt;
   bool acquired;
   bool shared;
   bool array;
-  atomic_int deassert_count;
-  atomic_int triggered_count;
+  atomic_t deassert_count;
+  atomic_t triggered_count;
 };
 
 /****************************************************************************

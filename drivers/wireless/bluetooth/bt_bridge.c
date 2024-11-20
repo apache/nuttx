@@ -75,7 +75,7 @@ struct bt_bridge_s
 #ifdef CONFIG_BLUETOOTH_BRIDGE_BTSNOOP
   FAR struct snoop_s       *snoop;
 #endif /* CONFIG_BLUETOOTH_BRIDGE_BTSNOOP */
-  atomic_uint               refs;
+  atomic_t                  refs;
   bool                      dispatched[BT_FILTER_CMD_COUNT];
 };
 

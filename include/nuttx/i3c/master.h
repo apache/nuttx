@@ -28,8 +28,8 @@
  ****************************************************************************/
 
 #include <stdint.h>
-#include <stdatomic.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
@@ -231,7 +231,7 @@ struct i3c_ibi_slot
 struct i3c_device_ibi_info
 {
   sem_t all_ibis_handled;
-  atomic_int pending_ibis;
+  atomic_t pending_ibis;
   unsigned int max_payload_len;
   unsigned int num_slots;
   unsigned int enabled;

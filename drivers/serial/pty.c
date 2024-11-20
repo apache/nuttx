@@ -340,7 +340,7 @@ static int pty_close(FAR struct file *filep)
 
   /* Check if the decremented inode reference count would go to zero */
 
-  if (atomic_load(&inode->i_crefs) == 1)
+  if (atomic_read(&inode->i_crefs) == 1)
     {
       /* Did the (single) master just close its reference? */
 

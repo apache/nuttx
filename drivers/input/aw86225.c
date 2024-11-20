@@ -956,7 +956,7 @@ static int aw86225_haptic_rtp_init(FAR struct aw86225 *aw86225)
   nxmutex_lock(&aw86225->rtp_lock);
   while ((!aw86225_haptic_rtp_get_fifo_afs(aw86225))
          && (aw86225->play_mode == AW86225_HAPTIC_RTP_MODE)
-         &&  !atomic_load(&aw86225->exit_in_rtp_loop))
+         &&  !atomic_read(&aw86225->exit_in_rtp_loop))
     {
       if (!aw86225->rtp_container)
         {
@@ -1014,7 +1014,7 @@ static int aw86225_haptic_rtp_init(FAR struct aw86225 *aw86225)
 
   nxmutex_unlock(&aw86225->rtp_lock);
   if (aw86225->play_mode == AW86225_HAPTIC_RTP_MODE
-      && !atomic_load(&aw86225->exit_in_rtp_loop))
+      && !atomic_read(&aw86225->exit_in_rtp_loop))
     {
       aw86225_haptic_set_rtp_aei(aw86225, true);
     }
@@ -1121,8 +1121,8 @@ static void aw86225_rtp_work_routine(FAR void *arg)
 
   /* wait for irq to exit */
 
-  atomic_store(&aw86225->exit_in_rtp_loop, 1);
-  while (atomic_load(&aw86225->is_in_rtp_loop))
+  atomic_set(&aw86225->exit_in_rtp_loop, 1);
+  while (atomic_read(&aw86225->is_in_rtp_loop))
     {
       iinfo("%s:  goint to waiting irq exit\n", __func__);
 
@@ -1130,7 +1130,7 @@ static void aw86225_rtp_work_routine(FAR void *arg)
 
       if (ret == -ERESTART)
         {
-          atomic_store(&aw86225->exit_in_rtp_loop, 0);
+          atomic_set(&aw86225->exit_in_rtp_loop, 0);
           nxsem_post(&aw86225->stop_wait_q);
           nxmutex_unlock(&aw86225->lock);
           ierr("%s: wake up by signal return erro\n", __func__);
@@ -1138,7 +1138,7 @@ static void aw86225_rtp_work_routine(FAR void *arg)
         }
     }
 
-  atomic_store(&aw86225->exit_in_rtp_loop, 0);
+  atomic_set(&aw86225->exit_in_rtp_loop, 0);
   nxsem_post(&aw86225->stop_wait_q);
   aw86225_haptic_stop(aw86225);
 
@@ -2155,7 +2155,7 @@ static int aw86225_haptics_upload_effect(FAR struct ff_lowerhalf_s *lower,
 
   aw86225->effect_type = effect->type;
   nxmutex_lock(&aw86225->lock);
-  while (atomic_load(&aw86225->exit_in_rtp_loop))
+  while (atomic_read(&aw86225->exit_in_rtp_loop))
     {
       iinfo("%s: goint to waiting rtp exit\n", __func__);
       nxmutex_unlock(&aw86225->lock);

@@ -45,8 +45,8 @@
 struct uart_rambuf_s
 {
     char buffer[CONFIG_RAM_UART_BUFSIZE];
-    atomic_uint wroff;
-    atomic_uint rdoff;
+    atomic_t wroff;
+    atomic_t rdoff;
 };
 
 /****************************************************************************

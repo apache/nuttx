@@ -27,71 +27,159 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
+
 #ifdef __has_include
-#  if defined(__cplusplus) && __has_include(<atomic>)
+#  if __has_include(<atomic>) && defined(__cplusplus)
 extern "C++"
 {
 #    include <atomic>
+#    define ATOMIC_FUNC(f, n) atomic_##f##_explicit
 
-#    define ATOMIC_VAR_INIT(value) (value)
-
-  using std::memory_order;
-  using std::atomic_bool;
-  using std::atomic_char;
-  using std::atomic_schar;
-  using std::atomic_uchar;
-  using std::atomic_short;
-  using std::atomic_ushort;
-  using std::atomic_int;
-  using std::atomic_uint;
-  using std::atomic_long;
-  using std::atomic_ulong;
-  using std::atomic_llong;
-  using std::atomic_ullong;
-
-  using std::atomic_load;
   using std::atomic_load_explicit;
-  using std::atomic_store;
   using std::atomic_store_explicit;
-  using std::atomic_exchange;
   using std::atomic_exchange_explicit;
-  using std::atomic_compare_exchange_strong;
   using std::atomic_compare_exchange_strong_explicit;
-  using std::atomic_compare_exchange_weak;
   using std::atomic_compare_exchange_weak_explicit;
-  using std::atomic_flag_test_and_set;
-  using std::atomic_flag_test_and_set_explicit;
-  using std::atomic_flag_clear;
-  using std::atomic_flag_clear_explicit;
-  using std::atomic_fetch_add;
   using std::atomic_fetch_add_explicit;
-  using std::atomic_fetch_sub;
   using std::atomic_fetch_sub_explicit;
-  using std::atomic_fetch_and;
   using std::atomic_fetch_and_explicit;
-  using std::atomic_fetch_or;
   using std::atomic_fetch_or_explicit;
-  using std::atomic_fetch_xor;
   using std::atomic_fetch_xor_explicit;
+
+  typedef volatile int32_t atomic_t;
+  typedef volatile int64_t atomic64_t;
 }
 #  elif __has_include(<stdatomic.h>) && \
         ((defined(__cplusplus) && __cplusplus >= 201103L) || \
          (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)) && \
          !defined(__STDC_NO_ATOMICS__)
-#    if !(__clang__) && defined(__cplusplus)
+#    if !defined(__clang__) && defined(__cplusplus)
 #      define _Atomic
 #    endif
-#    include <stdbool.h>
 #    include <stdatomic.h>
-#    ifndef ATOMIC_VAR_INIT
-#      define ATOMIC_VAR_INIT(value) (value)
-#    endif
-#  else
-#    include <nuttx/lib/stdatomic.h>
+#    define ATOMIC_FUNC(f, n) atomic_##f##_explicit
+
+  typedef volatile _Atomic int32_t atomic_t;
+  typedef volatile _Atomic int64_t atomic64_t;
 #  endif
-#else
-#  include <nuttx/lib/stdatomic.h>
 #endif
+
+#ifndef ATOMIC_FUNC
+#  define __ATOMIC_RELAXED 0
+#  define __ATOMIC_CONSUME 1
+#  define __ATOMIC_ACQUIRE 2
+#  define __ATOMIC_RELEASE 3
+#  define __ATOMIC_ACQ_REL 4
+#  define __ATOMIC_SEQ_CST 5
+
+#  define ATOMIC_FUNC(f, n) nx_atomic_##f##_##n
+
+#  define atomic_fetch_add(obj, val)  ATOMIC_FUNC(fetch_add, 4)(obj, val, __ATOMIC_ACQ_REL)
+#  define atomic_fetch_sub(obj, val)  ATOMIC_FUNC(fetch_sub, 4)(obj, val, __ATOMIC_ACQ_REL)
+#  define atomic_fetch_and(obj, val)  ATOMIC_FUNC(fetch_and, 4)(obj, val, __ATOMIC_ACQ_REL)
+#  define atomic_fetch_or(obj, val)   ATOMIC_FUNC(fetch_or, 4)(obj, val, __ATOMIC_ACQ_REL)
+#  define atomic_fetch_xor(obj, val)  ATOMIC_FUNC(fetch_xor, 4)(obj, val, __ATOMIC_ACQ_REL)
+
+typedef volatile int32_t atomic_t;
+typedef volatile int64_t atomic64_t;
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define atomic_set(obj, val)                  ATOMIC_FUNC(store, 4)(obj, val, __ATOMIC_RELAXED)
+#define atomic_set_release(obj, val)          ATOMIC_FUNC(store, 4)(obj, val, __ATOMIC_RELEASE)
+#define atomic64_set(obj, val)                ATOMIC_FUNC(store, 8)(obj, val, __ATOMIC_RELAXED)
+#define atomic64_set_release(obj, val)        ATOMIC_FUNC(store, 8)(obj, val, __ATOMIC_RELEASE)
+
+#define atomic_read(obj)                      ATOMIC_FUNC(load, 4)(obj, __ATOMIC_RELAXED)
+#define atomic_read_acquire(obj)              ATOMIC_FUNC(load, 4)(obj, __ATOMIC_ACQUIRE)
+#define atomic64_read(obj)                    ATOMIC_FUNC(load, 8)(obj, __ATOMIC_RELAXED)
+#define atomic64_read_acquire(obj)            ATOMIC_FUNC(load, 8)(obj, __ATOMIC_ACQUIRE)
+
+#define atomic_fetch_add_acquire(obj, val)    ATOMIC_FUNC(fetch_add, 4)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_add_release(obj, val)    ATOMIC_FUNC(fetch_add, 4)(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_add_relaxed(obj, val)    ATOMIC_FUNC(fetch_add, 4)(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_add(obj, val)          ATOMIC_FUNC(fetch_add, 8)(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_add_acquire(obj, val)  ATOMIC_FUNC(fetch_add, 8)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_add_release(obj, val)  ATOMIC_FUNC(fetch_add, 8)(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_add_relaxed(obj, val)  ATOMIC_FUNC(fetch_add, 8)(obj, val, __ATOMIC_RELAXED)
+
+#define atomic_fetch_sub_acquire(obj, val)    ATOMIC_FUNC(fetch_sub, 4)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_sub_release(obj, val)    ATOMIC_FUNC(fetch_sub, 4)(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_sub_relaxed(obj, val)    ATOMIC_FUNC(fetch_sub, 4)(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_sub(obj, val)          ATOMIC_FUNC(fetch_sub, 8)(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_sub_acquire(obj, val)  ATOMIC_FUNC(fetch_sub, 8)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_sub_release(obj, val)  ATOMIC_FUNC(fetch_sub, 8)(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_sub_relaxed(obj, val)  ATOMIC_FUNC(fetch_sub, 8)(obj, val, __ATOMIC_RELAXED)
+
+#define atomic_fetch_and_acquire(obj, val)    ATOMIC_FUNC(fetch_and, 4)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_and_release(obj, val)    ATOMIC_FUNC(fetch_and, 4)(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_and_relaxed(obj, val)    ATOMIC_FUNC(fetch_and, 4)(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_and(obj, val)          ATOMIC_FUNC(fetch_and, 8)(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_and_acquire(obj, val)  ATOMIC_FUNC(fetch_and, 8)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_and_release(obj, val)  ATOMIC_FUNC(fetch_and, 8)(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_and_relaxed(obj, val)  ATOMIC_FUNC(fetch_and, 8)(obj, val, __ATOMIC_RELAXED)
+
+#define atomic_fetch_or_acquire(obj, val)     ATOMIC_FUNC(fetch_or, 4)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_or_release(obj, val)     ATOMIC_FUNC(fetch_or, 4)(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_or_relaxed(obj, val)     ATOMIC_FUNC(fetch_or, 4)(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_or(obj, val)           ATOMIC_FUNC(fetch_or, 8)(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_or_acquire(obj, val)   ATOMIC_FUNC(fetch_or, 8)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_or_release(obj, val)   ATOMIC_FUNC(fetch_or, 8)(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_or_relaxed(obj, val)   ATOMIC_FUNC(fetch_or, 8)(obj, val, __ATOMIC_RELAXED)
+
+#define atomic_fetch_xor_acquire(obj, val)    ATOMIC_FUNC(fetch_xor, 4)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_xor_release(obj, val)    ATOMIC_FUNC(fetch_xor, 4)(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_xor_relaxed(obj, val)    ATOMIC_FUNC(fetch_xor, 4)(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_xor(obj, val)          ATOMIC_FUNC(fetch_xor, 8)(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_xor_acquire(obj, val)  ATOMIC_FUNC(fetch_xor, 8)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_xor_release(obj, val)  ATOMIC_FUNC(fetch_xor, 8)(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_xor_relaxed(obj, val)  ATOMIC_FUNC(fetch_xor, 8)(obj, val, __ATOMIC_RELAXED)
+
+#define atomic_xchg(obj, val)                 ATOMIC_FUNC(exchange, 4)(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_xchg_acquire(obj, val)         ATOMIC_FUNC(exchange, 4)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_xchg_release(obj, val)         ATOMIC_FUNC(exchange, 4)(obj, val, __ATOMIC_RELEASE)
+#define atomic_xchg_relaxed(obj, val)         ATOMIC_FUNC(exchange, 4)(obj, val, __ATOMIC_RELAXED)
+#define atomic64_xchg(obj, val)               ATOMIC_FUNC(exchange, 8)(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_xchg_acquire(obj, val)       ATOMIC_FUNC(exchange, 8)(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_xchg_release(obj, val)       ATOMIC_FUNC(exchange, 8)(obj, val, __ATOMIC_RELEASE)
+#define atomic64_xchg_relaxed(obj, val)       ATOMIC_FUNC(exchange, 8)(obj, val, __ATOMIC_RELAXED)
+
+#define atomic_cmpxchg(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 4)(obj, expected, desired, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic_cmpxchg_acquire(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 4)(obj, expected, desired, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic_cmpxchg_release(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 4)(obj, expected, desired, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic_cmpxchg_relaxed(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 4)(obj, expected, desired, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+#define atomic_try_cmpxchg(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 4)(obj, expected, desired, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic_try_cmpxchg_acquire(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 4)(obj, expected, desired, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic_try_cmpxchg_release(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 4)(obj, expected, desired, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic_try_cmpxchg_relaxed(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 4)(obj, expected, desired, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 8)(obj, expected, desired, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg_acquire(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 8)(obj, expected, desired, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg_release(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 8)(obj, expected, desired, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg_relaxed(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_strong, 8)(obj, expected, desired, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 8)(obj, expected, desired, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg_acquire(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 8)(obj, expected, desired, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg_release(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 8)(obj, expected, desired, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg_relaxed(obj, expected, desired) \
+  ATOMIC_FUNC(compare_exchange_weak, 8)(obj, expected, desired, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -105,6 +193,41 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+void nx_atomic_store_4(FAR volatile void *ptr, int32_t value, int memorder);
+void nx_atomic_store_8(FAR volatile void *ptr, int64_t value, int memorder);
+int32_t nx_atomic_load_4(FAR const volatile void *ptr, int memorder);
+int64_t nx_atomic_load_8(FAR const volatile void *ptr, int memorder);
+int32_t nx_atomic_exchange_4(FAR volatile void *ptr, int32_t value,
+                             int memorder);
+int64_t nx_atomic_exchange_8(FAR volatile void *ptr, int64_t value,
+                             int memorder);
+bool nx_atomic_compare_exchange_4(FAR volatile void *ptr, FAR void *expect,
+                                  int32_t desired, bool weak,
+                                  int success, int failure);
+bool nx_atomic_compare_exchange_8(FAR volatile void *ptr, FAR void *expect,
+                                  int64_t desired, bool weak,
+                                  int success, int failure);
+int32_t nx_atomic_fetch_add_4(FAR volatile void *ptr, int32_t value,
+                              int memorder);
+int64_t nx_atomic_fetch_add_8(FAR volatile void *ptr, int64_t value,
+                              int memorder);
+int32_t nx_atomic_fetch_sub_4(FAR volatile void *ptr, int32_t value,
+                              int memorder);
+int64_t nx_atomic_fetch_sub_8(FAR volatile void *ptr, int64_t value,
+                              int memorder);
+int32_t nx_atomic_fetch_and_4(FAR volatile void *ptr, int32_t value,
+                              int memorder);
+int64_t nx_atomic_fetch_and_8(FAR volatile void *ptr, int64_t value,
+                              int memorder);
+int32_t nx_atomic_fetch_or_4(FAR volatile void *ptr, int32_t value,
+                             int memorder);
+int64_t nx_atomic_fetch_or_8(FAR volatile void *ptr, int64_t value,
+                             int memorder);
+int32_t nx_atomic_fetch_xor_4(FAR volatile void *ptr, int32_t value,
+                              int memorder);
+int64_t nx_atomic_fetch_xor_8(FAR volatile void *ptr, int64_t value,
+                              int memorder);
 
 #undef EXTERN
 #if defined(__cplusplus)

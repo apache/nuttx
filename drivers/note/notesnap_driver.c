@@ -50,8 +50,8 @@ struct notesnap_s
 {
   struct note_driver_s driver;
   struct notifier_block nb;
-  atomic_int index;
-  atomic_bool dumping;
+  atomic_t index;
+  atomic_t dumping;
   struct notesnap_chunk_s buffer[CONFIG_DRIVERS_NOTESNAP_NBUFFERS];
 };
 
@@ -212,7 +212,7 @@ static inline void notesnap_common(FAR struct note_driver_s *drv,
   FAR struct notesnap_chunk_s *note;
   size_t index;
 
-  if (atomic_load(&snap->dumping))
+  if (atomic_read(&snap->dumping))
     {
       return;
     }
@@ -388,7 +388,7 @@ void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
 
   /* Stop recording while dumping */
 
-  atomic_store(&g_notesnap.dumping, true);
+  atomic_set(&g_notesnap.dumping, true);
 
   for (i = 0; i < CONFIG_DRIVERS_NOTESNAP_NBUFFERS; i++)
     {
@@ -411,7 +411,7 @@ void notesnap_dump_with_stream(FAR struct lib_outstream_s *stream)
                   note->pid, g_notesnap_type[note->type], note->args);
     }
 
-  atomic_store(&g_notesnap.dumping, false);
+  atomic_set(&g_notesnap.dumping, false);
 }
 
 /****************************************************************************

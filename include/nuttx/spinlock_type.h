@@ -39,7 +39,7 @@ extern "C"
 #endif
 
 #if defined(CONFIG_RW_SPINLOCK)
-typedef int rwlock_t;
+typedef atomic_t rwlock_t;
 #  define RW_SP_UNLOCKED      0
 #  define RW_SP_READ_LOCKED   1
 #  define RW_SP_WRITE_LOCKED -1
@@ -52,19 +52,14 @@ typedef int rwlock_t;
 typedef uint8_t spinlock_t;
 #elif defined(CONFIG_TICKET_SPINLOCK)
 
-union spinlock_u
+typedef struct spinlock_s
 {
-  struct
-  {
-    unsigned short owner;
-    unsigned short next;
-  } tickets;
-  unsigned int value;
-};
-typedef union spinlock_u spinlock_t;
+  atomic_t owner;
+  atomic_t next;
+} spinlock_t;
 
-#  define SP_UNLOCKED (union spinlock_u){{0, 0}}
-#  define SP_LOCKED (union spinlock_u){{0, 1}}
+#  define SP_UNLOCKED (spinlock_t){0, 0}
+#  define SP_LOCKED   (spinlock_t){0, 1}
 
 #else
 

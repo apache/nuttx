@@ -199,7 +199,7 @@ void android_fdsan_exchange_owner_tag(int fd, uint64_t expected_tag,
            * but expected == actual?
            ******************************************************************/
 
-          ferr("fdsan atomic_compare_exchange_strong failed unexpectedly "
+          ferr("fdsan atomic_cmpxchg failed unexpectedly "
                "while exchanging owner tag\n");
           PANIC();
         }

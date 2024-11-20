@@ -354,7 +354,7 @@ static int pseudofile_munmap(FAR struct task_group_s *group,
    */
 
   if (inode->i_parent == NULL &&
-      atomic_load(&inode->i_crefs) <= 1)
+      atomic_read(&inode->i_crefs) <= 1)
     {
       /* Delete the inode metadata */
 
