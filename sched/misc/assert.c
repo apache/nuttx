@@ -113,6 +113,8 @@ static noreturn_function int pause_cpu_handler(FAR void *arg);
 static bool g_cpu_paused[CONFIG_SMP_NCPUS];
 #endif
 
+static spinlock_t g_assert_lock = SP_UNLOCKED;
+
 static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
 
@@ -841,7 +843,7 @@ void _assert(FAR const char *filename, int linenum,
   flags = 0; /* suppress GCC warning */
   if (os_ready)
     {
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_assert_lock);
     }
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
@@ -914,6 +916,6 @@ void _assert(FAR const char *filename, int linenum,
 
   if (os_ready)
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_assert_lock, flags);
     }
 }
