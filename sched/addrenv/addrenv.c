@@ -421,7 +421,7 @@ void addrenv_take(FAR struct addrenv_s *addrenv)
 
 int addrenv_give(FAR struct addrenv_s *addrenv)
 {
-  return atomic_fetch_sub(&addrenv->refs, 1);
+  return atomic_fetch_sub(&addrenv->refs, 1) - 1;
 }
 
 /****************************************************************************
