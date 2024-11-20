@@ -100,6 +100,10 @@
 
 /* Register bit definitions */
 
+/* KSZ9477_SGMII_CONTROL */
+
+#define SGMII_CONTROL_SOFT_RESET          (1 << 15)
+
 /* KSZ9477_ID2, KSZ9477_ID1 */
 
 #define KSZ9477_ID                         0x9477

@@ -640,6 +640,14 @@ int ksz9477_init(ksz9477_port_t master_port)
       return ret ? ret : -EINVAL;
     }
 
+  /* Errata 16: SGMII registers are not initialized by hardware reset
+   * To ensure clean environment, reset the switch now.
+   */
+
+  regval16 = SGMII_CONTROL_SOFT_RESET;
+  ret = ksz9477_sgmii_write_indirect(KSZ9477_SGMII_CONTROL,
+                                     &regval16, 1);
+
   /* Check that indirect access to PHY MMD works.
    * Write LED mode to single-LED mode and verify access by
    * reading back the value.
