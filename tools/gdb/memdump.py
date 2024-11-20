@@ -1,6 +1,8 @@
 ############################################################################
 # tools/gdb/memdump.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -469,7 +471,7 @@ class Memdump(gdb.Command):
                 return
 
         title_dict = {
-            PID_MM_ALLOC: "Dump all used memory node info, use '\x1b[33;1m*\x1b[m' mark pid is not exist:\n",
+            PID_MM_ALLOC: "Dump all used memory node info, use '\x1b[33;1m*\x1b[m' mark pid does not exist:\n",
             PID_MM_FREE: "Dump all free memory node info:\n",
             PID_MM_BIGGEST: f"Dump biggest allocated top {biggest_top}\n",
             PID_MM_ORPHAN: "Dump allocated orphan nodes\n",
@@ -789,10 +791,10 @@ class Memleak(gdb.Command):
 
         gdb.write("\n")
         if len(white_dict) == 0:
-            gdb.write("All node have references, no memory leak!\n")
+            gdb.write("All nodes have references, no memory leak!\n")
             return
 
-        gdb.write("Leak catch!, use '\x1b[33;1m*\x1b[m' mark pid is not exist:\n")
+        gdb.write("Leak catch!, use '\x1b[33;1m*\x1b[m' mark pid does not exist:\n")
 
         if CONFIG_MM_BACKTRACE > 0 and not arg["detail"]:
             gdb.write("%6s" % ("CNT"))

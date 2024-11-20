@@ -1,6 +1,8 @@
 ############################################################################
 # tools/gdb/macros.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -26,14 +28,14 @@
 # then parse and evaluate it by ourselves.
 #
 # There might be two ways to achieve this, one is to leverage the C preprocessor
-# to directly preprocess all the macros instereted into python constants
+# to directly preprocess all the macros interpreted into python constants
 # gcc -E -x c -P <file_with_macros> -I/path/to/nuttx/include
 #
 # While the other way is to leverage the dwarf info stored in the ELF file,
 # with -g3 switch, we have a `.debug_macro` section containing all the information
 # about the macros.
 #
-# Currently, we using the second method.
+# Currently, we are using the second method.
 
 import os
 import re
@@ -184,9 +186,9 @@ def do_expand(expr, macro_map):
 
 
 # NOTE: Implement a fully functional parser which can
-# preprocessing all the C marcos according to ISO 9899 standard
+# preprocess all the C macros according to ISO 9899 standard
 # may be an overkill, what we really care about are those
-# macros that can be evaluted to an constant value.
+# macros that can be evaluated to a constant value.
 #
 # #define A (B + C + D)
 # #define B 1
@@ -202,7 +204,7 @@ def do_expand(expr, macro_map):
 # use case for it in our GDB plugin.
 #
 # However, you can switch to the correct stack frame that has this macro defined
-# and let GDB expand and evaluate it for you if you really want to evalue some very
+# and let GDB expand and evaluate it for you if you really want to evaluate some very
 # complex macros.
 
 
