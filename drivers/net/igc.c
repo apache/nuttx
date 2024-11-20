@@ -91,10 +91,6 @@
 #define IGC_IO_BAR             2
 #define IGC_MSIX_BAR           3
 
-/* Minimum Inter-interrupt Interval in 1 us increments */
-
-#define IGC_INTERRUPT_INTERVAL 100
-
 /* For MSI-X we allocate all interrupts to MSI-X vector 0 */
 
 #define IGC_GPIE_MSIX_SINGLE   (IGC_GPIE_NSICR | IGC_GPIE_EIAME | \
@@ -1185,7 +1181,7 @@ static int igc_initialize(FAR struct igc_driver_s *priv)
 
   /* Configure Interrupt Throttle */
 
-  igc_putreg_mem(priv, IGC_EITR0, (IGC_INTERRUPT_INTERVAL << 2));
+  igc_putreg_mem(priv, IGC_EITR0, (CONFIG_NET_IGC_INT_INTERVAL << 2));
 
   /* Get MAC if valid */
 
