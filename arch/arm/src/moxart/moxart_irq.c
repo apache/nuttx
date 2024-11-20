@@ -277,12 +277,18 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   num = ffs(status) - 1;
   arm_ack_irq(num);
 
-  DEBUGASSERT(up_current_regs() == NULL);
-  up_set_current_regs(regs);
+  DEBUGASSERT(!up_interrupt_context());
+
+  /* Set irq flag */
+
+  up_set_interrupt_context(true);
   tcb->xcp.regs = regs;
 
   irq_dispatch(num, regs);
-  up_set_current_regs(NULL);
+
+  /* Set irq flag */
+
+  up_set_interrupt_context(false);
 
   return NULL;  /* Return not used in this architecture */
 }

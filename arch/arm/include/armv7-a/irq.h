@@ -470,35 +470,10 @@ static inline_function uint32_t up_getsp(void)
   return sp;
 }
 
-/****************************************************************************
- * Name:
- *   up_current_regs/up_set_current_regs
- *
- * Description:
- *   We use the following code to manipulate the TPIDRPRW register,
- *   which exists uniquely for each CPU and is primarily designed to store
- *   current thread information. Currently, we leverage it to store interrupt
- *   information, with plans to further optimize its use for storing both
- *   thread and interrupt information in the future.
- *
- ****************************************************************************/
-
-noinstrument_function
-static inline_function uint32_t *up_current_regs(void)
-{
-  return (uint32_t *)CP15_GET(TPIDRPRW);
-}
-
-noinstrument_function
-static inline_function void up_set_current_regs(uint32_t *regs)
-{
-  CP15_SET(TPIDRPRW, regs);
-}
-
 noinstrument_function
 static inline_function bool up_interrupt_context(void)
 {
-  return up_current_regs() != NULL;
+  return (bool)CP15_GET(TPIDRPRW);
 }
 
 /****************************************************************************

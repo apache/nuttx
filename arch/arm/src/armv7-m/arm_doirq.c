@@ -73,10 +73,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   arm_ack_irq(irq);
 
-  /* Set current regs for crash dump */
-
-  up_set_current_regs(regs);
-
   if (irq == NVIC_IRQ_PENDSV)
     {
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -91,12 +87,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
     {
       irq_dispatch(irq, regs);
     }
-
-  /* If a context switch occurred while processing the interrupt then
-   * current_regs may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
 
   tcb = this_task();
 
@@ -113,10 +103,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   *running_task = tcb;
   regs = tcb->xcp.regs;
 #endif
-
-  /* Clear current regs */
-
-  up_set_current_regs(NULL);
 
   board_autoled_off(LED_INIRQ);
 

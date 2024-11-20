@@ -51,7 +51,10 @@
 
 void arm_syscall(uint32_t *regs)
 {
+  struct tcb_s *tcb = this_task();
+
   _alert("Syscall from 0x%" PRIx32 "\n", regs[REG_PC]);
-  up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
+
   PANIC();
 }

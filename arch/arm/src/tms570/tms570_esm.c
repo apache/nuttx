@@ -52,6 +52,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <sched/sched.h>
 
 #include "arm_internal.h"
 #include "hardware/tms570_esm.h"
@@ -146,16 +147,15 @@ int tms570_esm_initialize(void)
 
 int tms570_esm_interrupt(int irq, void *context, void *arg)
 {
-  /* Save the saved processor context in current_regs where it can be
-   * accessed for register dumps and possibly context switching.
-   */
+  struct tcb_s *tcb = this_task();
 
-  up_set_current_regs((uint32_t *)context);
+  tcb->xcp.regs = context;
+  up_set_interrupt_context(true);
 
   /* Crash -- possibly showing diagnostic debug information. */
 
   _err("ERROR: ESM Interrupt. PC: %08" PRIx32 "\n",
-       up_current_regs()[REG_PC]);
+       ((uint32_t *)running_regs())[REG_PC]);
   PANIC();
   return OK; /* To keep the compiler happy */
 }

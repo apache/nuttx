@@ -141,8 +141,8 @@ int up_backtrace(struct tcb_s *tcb,
             {
               ret += backtrace(rtcb->stack_base_ptr,
                                rtcb->stack_base_ptr + rtcb->adj_stack_size,
-                               (void *)up_current_regs()[REG_FP],
-                               (void *)up_current_regs()[REG_PC],
+                               (void *)((uint32_t *)running_regs())[REG_FP],
+                               (void *)((uint32_t *)running_regs())[REG_PC],
                                &buffer[ret], size - ret, &skip);
             }
         }

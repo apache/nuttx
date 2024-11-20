@@ -107,7 +107,7 @@ static struct highpri_s g_highpri;
 
 static inline_function bool is_nesting_interrupt(void)
 {
-  return up_current_regs() != NULL;
+  return up_interrupt_context();
 }
 
 /****************************************************************************

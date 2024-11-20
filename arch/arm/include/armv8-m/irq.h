@@ -265,18 +265,6 @@ struct xcptcontext
  * Public Data
  ****************************************************************************/
 
-/* g_current_regs[] holds a references to the current interrupt level
- * register storage structure.  If is non-NULL only during interrupt
- * processing.  Access to g_current_regs[] must be through the
- * [get/set]_current_regs for portability.
- */
-
-/* For the case of architectures with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
-extern volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
@@ -543,26 +531,6 @@ static inline_function uint32_t up_getsp(void)
   );
 
   return sp;
-}
-
-noinstrument_function
-static inline_function uint32_t *up_current_regs(void)
-{
-#ifdef CONFIG_SMP
-  return (uint32_t *)g_current_regs[up_cpu_index()];
-#else
-  return (uint32_t *)g_current_regs[0];
-#endif
-}
-
-noinstrument_function
-static inline_function void up_set_current_regs(uint32_t *regs)
-{
-#ifdef CONFIG_SMP
-  g_current_regs[up_cpu_index()] = regs;
-#else
-  g_current_regs[0] = regs;
-#endif
 }
 
 noinstrument_function

@@ -70,15 +70,14 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 {
   struct tcb_s *tcb = this_task();
 #ifdef CONFIG_LEGACY_PAGING
-  uint32_t *savestate;
+  uint32_t *saveregs;
+  bool savestate;
 
-  /* Save the saved processor context in current_regs where it can be
-   * accessed for register dumps and possibly context switching.
-   */
-
-  savestate = up_current_regs();
+  savestate = up_interrupt_context();
+  saveregs = tcb->xcp.regs;
 #endif
-  up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
 #ifdef CONFIG_LEGACY_PAGING
   /* In the NuttX on-demand paging implementation, only the read-only, .text
@@ -133,12 +132,10 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 
   pg_miss();
 
-  /* Restore the previous value of current_regs.  NULL would indicate that
-   * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
-   */
+  /* Restore the previous value of irq flag. */
 
-  up_set_current_regs(savestate);
+  up_set_interrupt_context(savestate);
+  tcb->xcp.regs = saveregs;
   return;
 
 segfault:
@@ -153,11 +150,10 @@ segfault:
 
 void arm_dataabort(uint32_t *regs)
 {
-  /* Save the saved processor context in current_regs where it can be
-   * accessed for register dumps and possibly context switching.
-   */
+  struct tcb_s *tcb = this_task();
 
-  up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
   /* Crash -- possibly showing diagnost debug information. */
 
