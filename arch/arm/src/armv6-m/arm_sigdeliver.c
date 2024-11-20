@@ -162,5 +162,8 @@ retry:
   leave_critical_section((uint16_t)regs[REG_PRIMASK]);
   rtcb->irqcount--;
 #endif
-  arm_fullcontextrestore(regs);
+  g_running_tasks[this_cpu()] = NULL;
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  arm_fullcontextrestore();
+  UNUSED(regs);
 }

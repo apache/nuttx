@@ -82,13 +82,13 @@
 #ifndef __ASSEMBLY__
 
 #ifndef up_switch_context
-#define up_switch_context(tcb, rtcb)                              \
-  do {                                                            \
-    if (!up_interrupt_context())                                  \
-      {                                                           \
-        sys_call2(SYS_switch_context, (uintptr_t)&rtcb->xcp.regs, \
-                  (uintptr_t)tcb->xcp.regs);                      \
-      }                                                           \
+#define up_switch_context(tcb, rtcb)   \
+  do {                                 \
+    if (!up_interrupt_context())       \
+      {                                \
+        sys_call0(SYS_switch_context); \
+      }                                \
+      UNUSED(rtcb);                    \
   } while (0)
 #endif
 
