@@ -54,7 +54,6 @@
 void arm_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
-  uint32_t *regs = rtcb->xcp.saved_regs;
 
   board_autoled_on(LED_SIGNAL);
 
@@ -99,5 +98,6 @@ void arm_sigdeliver(void)
   board_autoled_off(LED_SIGNAL);
 
   g_running_tasks[this_cpu()] = NULL;
-  arm_fullcontextrestore(regs);
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  arm_fullcontextrestore();
 }

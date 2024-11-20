@@ -283,6 +283,8 @@ static inline_function void up_set_interrupt_context(bool flag)
 #endif
 }
 
+#define arm_fullcontextrestore() tc32_fullcontextrestore(this_task()->xcp.regs)
+
 #define up_switch_context(tcb, rtcb)                        \
   do {                                                      \
     if (!up_interrupt_context())                            \

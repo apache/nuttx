@@ -253,46 +253,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-      /* R0=SYS_restore_context:  Restore task context
-       *
-       * void arm_fullcontextrestore(uint32_t *restoreregs)
-       *   noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_restore_context
-       *   R1 = restoreregs
-       */
-
       case SYS_restore_context:
-        {
-          /* Replace 'regs' with the pointer to the register set in
-           * regs[REG_R1].  On return from the system call, that register
-           * set will determine the restored context.
-           */
-
-          tcb->xcp.regs = (uint32_t *)regs[REG_R1];
-          DEBUGASSERT(up_interrupt_context());
-        }
-        break;
-
-      /* R0=SYS_switch_context:  This a switch context command:
-       *
-       *   void arm_switchcontext(uint32_t **saveregs,
-       *                          uint32_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_switch_context
-       *   R1 = saveregs
-       *   R2 = restoreregs
-       *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of R1 and then set
-       * regs to the save register area referenced by the saved
-       * contents of R2.
-       */
-
       case SYS_switch_context:
         break;
 

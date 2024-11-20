@@ -64,5 +64,3 @@ ifeq ($(CONFIG_TLSR82_SOFT_FPU),y)
   EXTRA_LIBPATHS += -L$(TOPDIR)/$(CONFIG_TLSR82_SOFT_FPU_LIB_PATH)
   EXTRA_LIBS     += -l$(CONFIG_TLSR82_SOFT_FPU_LIB_NAME)
 endif
-
-CFLAGS += -Darm_fullcontextrestore=tc32_fullcontextrestore

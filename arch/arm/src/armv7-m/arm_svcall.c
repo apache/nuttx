@@ -125,9 +125,8 @@ static void dispatch_syscall(void)
 
 int arm_svcall(int irq, void *context, void *arg)
 {
-  struct tcb_s *tcb = this_task();
   uint32_t *regs = (uint32_t *)context;
-  uint32_t *new_regs = regs;
+  struct tcb_s *tcb;
   uint32_t cmd;
 
   cmd = regs[REG_R0];
@@ -157,41 +156,15 @@ int arm_svcall(int irq, void *context, void *arg)
 
   switch (cmd)
     {
-      /* R0=SYS_restore_context:  This a restore context command:
-       *
-       *   void arm_fullcontextrestore(uint32_t *restoreregs)
-       *          noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_restore_context
-       *   R1 = restoreregs
-       */
-
       case SYS_restore_context:
-        {
-          DEBUGASSERT(regs[REG_R1] != 0);
-          new_regs = (uint32_t *)regs[REG_R1];
-          tcb->xcp.regs = (uint32_t *)regs[REG_R1];
-        }
-        break;
-
-      /* R0=SYS_switch_context:  This a switch context command:
-       *
-       *   void arm_switchcontext(uint32_t **saveregs,
-       *                          uint32_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_switch_context
-       *   R1 = saveregs
-       *   R2 = restoreregs
-       */
-
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          new_regs = (uint32_t *)regs[REG_R2];
+          tcb = this_task();
+          restore_critical_section(tcb, this_cpu());
+
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+          regs = tcb->xcp.regs;
+#endif
         }
         break;
 
@@ -446,13 +419,11 @@ int arm_svcall(int irq, void *context, void *arg)
    * switch.
    */
 
-  if (regs != new_regs)
-    {
-      restore_critical_section(tcb, this_cpu());
-
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-      regs = new_regs;
-
+#  ifndef CONFIG_DEBUG_SVCALL
+  if (cmd > SYS_switch_context)
+#  endif
+    {
       svcinfo("SVCall Return:\n");
       svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
               regs[REG_R0],  regs[REG_R1], regs[REG_R2],  regs[REG_R3],
@@ -462,14 +433,9 @@ int arm_svcall(int irq, void *context, void *arg)
               regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
       svcinfo(" PSR: %08x EXC_RETURN: %08x CONTROL: %08x\n",
               regs[REG_XPSR], regs[REG_EXC_RETURN], regs[REG_CONTROL]);
-#endif
-    }
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-  else
-    {
-      svcinfo("SVCall Return: %d\n", regs[REG_R0]);
     }
 #endif
 
+  UNUSED(tcb);
   return OK;
 }
