@@ -143,7 +143,7 @@ def fetch_stacks():
             )
 
         except gdb.GdbError as e:
-            gdb.write(f"Failed to construction stack object for tcb: {e}")
+            gdb.write(f"Failed to construct stack object for tcb: {e}")
 
     return stacks
 

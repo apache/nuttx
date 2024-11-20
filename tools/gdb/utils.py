@@ -1,6 +1,8 @@
 ############################################################################
 # tools/gdb/utils.py
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -323,7 +325,7 @@ target_arch = None
 
 def is_target_arch(arch, exact=False):
     """
-    For non exactly match, this function will
+    For non extact match, this function will
     return True if the target architecture contains
     keywords of an ARCH family. For example, x86 is
     contained in i386:x86_64.
@@ -410,7 +412,7 @@ def get_arch_pc_name():
 def get_register_byname(regname, tcb=None):
     frame = gdb.selected_frame()
 
-    # If no tcb is given then we can directly used the register from
+    # If no tcb is given then we can directly use the register from
     # the cached frame by GDB
     if not tcb:
         return int(frame.read_register(regname))
