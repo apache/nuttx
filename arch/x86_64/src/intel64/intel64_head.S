@@ -436,17 +436,20 @@ g_cpu_count:
 
 __revoke_low_memory:
 	/* Revoke the lower 128MB memory mapping */
+	movq    $X86_64_LOAD_OFFSET,%rcx
 	lea     g_pd_low, %edi
+	add     %rcx, %rdi
 	lea     g_pt_low, %esi
+	add     %rcx, %rsi
 
 	/* for ecx = 0...64 : Loop and setup 64x 2MB page directories */
 	mov     $64,   %ecx
 npd_loop:
-	mov     %esi,   %edx
-	or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
-	mov     %edx, 0(%edi)
-	add     $(PAGE_SIZE), %esi
-	add     $(X86_PAGE_ENTRY_SIZE), %edi
+	mov     %rsi,   %rdx
+	or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %rdx
+	mov     %rdx, 0(%rdi)
+	add     $(PAGE_SIZE), %rsi
+	add     $(X86_PAGE_ENTRY_SIZE), %rdi
 
 	/* end for ecx */
 	dec     %ecx
