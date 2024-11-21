@@ -71,7 +71,7 @@ static const struct file_operations g_devnull_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devnull_read
+ * Name: devnull_readv
  ****************************************************************************/
 
 static ssize_t devnull_readv(FAR struct file *filep,
@@ -84,7 +84,7 @@ static ssize_t devnull_readv(FAR struct file *filep,
 }
 
 /****************************************************************************
- * Name: devnull_write
+ * Name: devnull_writev
  ****************************************************************************/
 
 static ssize_t devnull_writev(FAR struct file *filep,
