@@ -365,6 +365,10 @@ nuttx_export_kconfig(${CMAKE_BINARY_DIR}/.config)
 include(nuttx_generate_headers)
 include(nuttx_generate_outputs)
 include(nuttx_add_library)
+
+# add NuttX CMake extenstion after nuttx_add_library
+include(nuttx_extensions)
+
 include(nuttx_add_application)
 include(nuttx_add_romfs)
 include(nuttx_add_symtab)
@@ -377,9 +381,6 @@ include(menuconfig)
 
 include(ExternalProject)
 include(FetchContent)
-
-# add NuttX CMake extenstion at last
-include(nuttx_extensions)
 
 set(FETCHCONTENT_QUIET OFF)
 
@@ -581,6 +582,9 @@ if(NOT CONFIG_BUILD_KERNEL)
   endif()
 
 endif()
+
+# after we traverse all build directories unify all target dependencies
+process_all_target_dependencies()
 
 # Link step ##################################################################
 

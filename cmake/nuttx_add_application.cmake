@@ -154,6 +154,24 @@ function(nuttx_add_application)
       set(TARGET "apps_${NAME}")
       add_library(${TARGET} ${SRCS})
 
+      # Set apps global compile options & definitions hold by
+      # nuttx_apps_interface
+      target_compile_options(
+        ${TARGET}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_OPTIONS>>
+      )
+      target_compile_definitions(
+        ${TARGET}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_DEFINITIONS>>
+      )
+      target_include_directories(
+        ${TARGET}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_INCLUDE_DIRECTORIES>>
+      )
+
       nuttx_add_library_internal(${TARGET})
       # add to list of application libraries
 

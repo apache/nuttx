@@ -24,6 +24,10 @@
 
 include(nuttx_parse_function_args)
 
+# "nuttx_apps_interface" is a source-less target that encapsulates all the apps
+# compiler options and include path needed by all apps libraries.
+add_custom_target(nuttx_apps_interface)
+
 # Macro: nuttx_library
 #
 # Creates a library target with the given name and mode. If MODE is "KERNEL", it
@@ -220,5 +224,51 @@ endfunction()
 function(nuttx_compile_options_ifndef cond)
   if(NOT ${cond})
     nuttx_compile_options(${ARGN})
+  endif()
+endfunction()
+
+# the visible scope is all the APPS include search path
+function(nuttx_include_directories_for_all_apps)
+  set_property(
+    TARGET nuttx_apps_interface
+    APPEND
+    PROPERTY APPS_INCLUDE_DIRECTORIES ${ARGN})
+endfunction()
+
+# all apps compile_options
+function(nuttx_compile_options_for_all_apps)
+  set_property(
+    TARGET nuttx_apps_interface
+    APPEND
+    PROPERTY APPS_COMPILE_OPTIONS ${ARGN})
+endfunction()
+
+# all apps compile_definitions
+function(nuttx_compile_definitions_for_all_apps)
+  set_property(
+    TARGET nuttx_apps_interface
+    APPEND
+    PROPERTY APPS_COMPILE_DEFINITIONS ${ARGN})
+endfunction()
+
+# since we dont call `target_link_libraries` directly, we only inherit their
+# compilation configuration
+function(nuttx_link_libraries)
+  set(TARGET ${ARGV0})
+  if(TARGET ${TARGET})
+    foreach(dep ${ARGN})
+      target_compile_options(
+        ${TARGET}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_COMPILE_OPTIONS>>)
+      target_compile_definitions(
+        ${TARGET}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_COMPILE_DEFINITIONS>>)
+      target_include_directories(
+        ${TARGET}
+        PRIVATE
+          $<GENEX_EVAL:$<TARGET_PROPERTY:${dep},INTERFACE_INCLUDE_DIRECTORIES>>)
+    endforeach()
   endif()
 endfunction()
