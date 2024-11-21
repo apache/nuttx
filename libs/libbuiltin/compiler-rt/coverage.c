@@ -33,13 +33,13 @@
 
 #include <fcntl.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/streams.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define INSTR_PROF_RAW_VERSION 8
-#define INSTR_PROF_RAW_VERSION_VAR __llvm_profile_raw_version
 #define INSTR_PROF_PROFILE_RUNTIME_VAR __llvm_profile_runtime
 
 /* Magic number to detect file format and endianness.
@@ -99,12 +99,6 @@ typedef struct __llvm_profile_header
 }__llvm_profile_header;
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static uint64_t INSTR_PROF_RAW_VERSION_VAR = INSTR_PROF_RAW_VERSION;
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -138,7 +132,7 @@ static uint64_t __llvm_profile_get_magic(void)
 
 static uint64_t __llvm_profile_get_version(void)
 {
-  return __llvm_profile_raw_version;
+  return INSTR_PROF_RAW_VERSION;
 }
 
 static uint64_t __llvm_profile_get_num_counters(const char *begin,
@@ -225,14 +219,10 @@ void __llvm_profile_register_names_function(void *names_start,
  * llvm-prof. See the clang profiling documentation for details.
  */
 
-void __llvm_profile_dump(const char *path)
+size_t __llvm_profile_dump(FAR struct lib_outstream_s *stream)
 {
-  int fd;
-  int ret;
-
-  /* Header: __llvm_profile_header from InstrProfData.inc */
-
-  const char *filename = path;
+  const char c = '\0';
+  size_t size = 0;
 
   /* Calculate size of sections. */
 
@@ -266,61 +256,74 @@ void __llvm_profile_dump(const char *path)
   hdr.names_delta = (uintptr_t)names_begin;
   hdr.value_kind_last = IPVK_LAST;
 
-  fd = _NX_OPEN(filename, O_WRONLY | O_CREAT);
+  size += sizeof(hdr);
+  if (sizeof(hdr) != stream->puts(stream, &hdr, sizeof(hdr)))
+    {
+      goto exit;
+    }
+
+  size += sizeof(__llvm_profile_data) * num_data;
+  if (sizeof(__llvm_profile_data) * num_data !=
+      stream->puts(stream, data_begin,
+                   sizeof(__llvm_profile_data) * num_data))
+    {
+      goto exit;
+    }
+
+  size += sizeof(uint64_t) * num_counters;
+  if (sizeof(uint64_t) * num_counters !=
+      stream->puts(stream, counters_begin,
+                   sizeof(uint64_t) * num_counters))
+    {
+      goto exit;
+    }
+
+  size += names_size;
+  if (names_size != stream->puts(stream, names_begin, names_size))
+    {
+      goto exit;
+    }
+
+  for (; padding_bytes_after_names != 0; --padding_bytes_after_names)
+    {
+      size += 1;
+      if (1 != stream->puts(stream, &c, 1))
+        {
+          break;
+        }
+    }
+
+exit:
+
+  return size;
+}
+
+void __gcov_dump(void)
+{
+  struct lib_rawoutstream_s stream;
+  FAR char *path;
+  int fd;
+
+  path = getenv("GCOV_PREFIX");
+  if (!path)
+    {
+      return;
+    }
+
+  fd = _NX_OPEN(path, O_WRONLY | O_CREAT);
   if (fd < 0)
     {
       _NX_SETERRNO(fd);
       return;
     }
 
-  /* Header */
+  lib_rawoutstream(&stream, fd);
 
-  ret = _NX_WRITE(fd, &hdr, sizeof(hdr));
-  if (ret != sizeof(hdr))
-    {
-      _NX_SETERRNO(ret);
-      goto exit;
-    }
+  __llvm_profile_dump(&stream.common);
 
-  /* Data */
-
-  ret = _NX_WRITE(fd, data_begin, sizeof(__llvm_profile_data) * num_data);
-  if (ret != sizeof(__llvm_profile_data) * num_data)
-    {
-      _NX_SETERRNO(ret);
-      goto exit;
-    }
-
-  /* Counters */
-
-  ret = _NX_WRITE(fd, counters_begin, sizeof(uint64_t) * num_counters);
-  if (ret != sizeof(uint64_t) * num_counters)
-    {
-      _NX_SETERRNO(ret);
-      goto exit;
-    }
-
-  /* Names */
-
-  ret = _NX_WRITE(fd, names_begin, names_size);
-  if (ret != names_size)
-    {
-      _NX_SETERRNO(ret);
-      goto exit;
-    }
-
-  /* Padding */
-
-  for (; padding_bytes_after_names != 0; --padding_bytes_after_names)
-    {
-      ret = _NX_WRITE(fd, "\0", 1);
-      if (ret != 1)
-        {
-          _NX_SETERRNO(ret);
-          break;
-        }
-    }
-
-exit:
   _NX_CLOSE(fd);
+}
+
+void __gcov_reset(void)
+{
 }
