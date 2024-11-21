@@ -51,18 +51,69 @@ ssize_t uio_total_len(FAR const struct uio *uio)
 {
   const struct iovec *iov = uio->uio_iov;
   int iovcnt = uio->uio_iovcnt;
+  size_t offset_in_iov = uio->uio_offset_in_iov;
   size_t len = 0;
   int i;
 
   for (i = 0; i < iovcnt; i++)
     {
-      if (SSIZE_MAX - len < iov[i].iov_len)
+      DEBUGASSERT(offset_in_iov <= iov[i].iov_len);
+      if (SSIZE_MAX - len < iov[i].iov_len - offset_in_iov)
         {
           return -EOVERFLOW;
         }
 
-      len += iov[i].iov_len;
+      len += iov[i].iov_len - offset_in_iov;
+      offset_in_iov = 0;
     }
 
   return len;
+}
+
+/****************************************************************************
+ * Name: uio_advance
+ *
+ * Description:
+ *   Advance the pointer/offset in uio by the specified amount.
+ *
+ ****************************************************************************/
+
+void uio_advance(FAR struct uio *uio, size_t sz)
+{
+  FAR const struct iovec *iov = uio->uio_iov;
+  int iovcnt = uio->uio_iovcnt;
+  size_t offset_in_iov = uio->uio_offset_in_iov;
+
+  DEBUGASSERT(sz <= uio_total_len(uio));
+  while (iovcnt > 0)
+    {
+      DEBUGASSERT(offset_in_iov <= iov->iov_len);
+      if (sz < iov->iov_len - offset_in_iov)
+        {
+          offset_in_iov += sz;
+          break;
+        }
+
+      sz -= iov->iov_len;
+      iov++;
+      iovcnt--;
+      offset_in_iov = 0;
+    }
+
+  uio->uio_iov = iov;
+  uio->uio_iovcnt = iovcnt;
+  uio->uio_offset_in_iov = offset_in_iov;
+}
+
+/****************************************************************************
+ * Name: uio_init
+ *
+ * Description:
+ *   Initialize the uio structure with reasonable default values.
+ *
+ ****************************************************************************/
+
+void uio_init(FAR struct uio *uio)
+{
+  memset(uio, 0, sizeof(*uio));
 }

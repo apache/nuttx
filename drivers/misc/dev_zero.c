@@ -40,10 +40,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devzero_readv(FAR struct file *filep,
-                             FAR const struct uio *uio);
-static ssize_t devzero_writev(FAR struct file *filep,
-                              FAR const struct uio *uio);
+static ssize_t devzero_readv(FAR struct file *filep, FAR struct uio *uio);
+static ssize_t devzero_writev(FAR struct file *filep, FAR struct uio *uio);
 static int     devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
 
@@ -74,8 +72,7 @@ static const struct file_operations g_devzero_fops =
  * Name: devzero_readv
  ****************************************************************************/
 
-static ssize_t devzero_readv(FAR struct file *filep,
-                             FAR const struct uio *uio)
+static ssize_t devzero_readv(FAR struct file *filep, FAR struct uio *uio)
 {
   ssize_t total =  uio_total_len(uio);
   FAR const struct iovec *iov = uio->uio_iov;
@@ -94,6 +91,8 @@ static ssize_t devzero_readv(FAR struct file *filep,
       memset(iov[i].iov_base, 0, iov[i].iov_len);
     }
 
+  uio_advance(uio, total);
+
   return total;
 }
 
@@ -101,12 +100,18 @@ static ssize_t devzero_readv(FAR struct file *filep,
  * Name: devzero_writev
  ****************************************************************************/
 
-static ssize_t devzero_writev(FAR struct file *filep,
-                              FAR const struct uio *uio)
+static ssize_t devzero_writev(FAR struct file *filep, FAR struct uio *uio)
 {
+  ssize_t total;
   UNUSED(filep);
 
-  return uio_total_len(uio);
+  total = uio_total_len(uio);
+  if (total >= 0)
+    {
+      uio_advance(uio, total);
+    }
+
+  return total;
 }
 
 /****************************************************************************

@@ -45,6 +45,7 @@ struct uio
 {
   FAR const struct iovec *uio_iov;
   int uio_iovcnt;
+  size_t uio_offset_in_iov; /* offset in uio_iov[0].iov_base */
 };
 
 /****************************************************************************
@@ -61,5 +62,25 @@ struct uio
  ****************************************************************************/
 
 ssize_t uio_total_len(FAR const struct uio *uio);
+
+/****************************************************************************
+ * Name: uio_advance
+ *
+ * Description:
+ *   Advance the pointer/offset in uio by the specified amount.
+ *
+ ****************************************************************************/
+
+void uio_advance(FAR struct uio *uio, size_t sz);
+
+/****************************************************************************
+ * Name: uio_init
+ *
+ * Description:
+ *   Initialize the uio structure with reasonable default values.
+ *
+ ****************************************************************************/
+
+void uio_init(FAR struct uio *uio);
 
 #endif /* __INCLUDE_NUTTX_FS_UIO_H */
