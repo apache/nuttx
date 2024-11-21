@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 #include <nuttx/fs/procfs.h>
+#include <nuttx/net/netconfig.h>
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_NET)
 
@@ -184,7 +185,7 @@ ssize_t netprocfs_read_mldstats(FAR struct netprocfs_file_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+#ifdef NET_TCP_HAVE_STACK
 ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen);
 #endif
@@ -207,7 +208,7 @@ ssize_t netprocfs_read_tcpstats(FAR struct netprocfs_file_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#ifdef NET_UDP_HAVE_STACK
 ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
                                 FAR char *buffer, size_t buflen);
 #endif
