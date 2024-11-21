@@ -64,6 +64,18 @@
  *                NET_SOCK_PROTOCOL);
  */
 
+/* The TCP/UDP stack, which is used for determining HAVE_PFINET(6)_SOCKETS */
+
+#undef NET_TCP_HAVE_STACK
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+#  define NET_TCP_HAVE_STACK 1
+#endif
+
+#undef NET_UDP_HAVE_STACK
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#  define NET_UDP_HAVE_STACK 1
+#endif
+
 /* The address family that we used to create the socket really does not
  * matter.  It should, however, be valid in the current configuration.
  */

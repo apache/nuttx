@@ -40,7 +40,7 @@
 #include <nuttx/net/tcp.h>
 #include <nuttx/wqueue.h>
 
-#ifdef CONFIG_NET_TCP
+#ifdef NET_TCP_HAVE_STACK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -50,10 +50,6 @@
 
 #define TCPIPv4BUF ((FAR struct tcp_hdr_s *)IPBUF(IPv4_HDRLEN))
 #define TCPIPv6BUF ((FAR struct tcp_hdr_s *)IPBUF(IPv6_HDRLEN))
-
-#ifndef CONFIG_NET_TCP_NO_STACK
-
-#define NET_TCP_HAVE_STACK 1
 
 /* Allocate a new TCP data callback */
 
@@ -2354,6 +2350,5 @@ void tcp_cc_recv_ack(FAR struct tcp_conn_s *conn, FAR struct tcp_hdr_s *tcp);
 
 void tcp_set_zero_probe(FAR struct tcp_conn_s *conn, uint16_t flags);
 
-#endif /* !CONFIG_NET_TCP_NO_STACK */
-#endif /* CONFIG_NET_TCP */
+#endif /* NET_TCP_HAVE_STACK */
 #endif /* __NET_TCP_TCP_H */

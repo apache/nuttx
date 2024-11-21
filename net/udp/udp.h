@@ -43,13 +43,11 @@
 #  include <nuttx/wqueue.h>
 #endif
 
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#ifdef NET_UDP_HAVE_STACK
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define NET_UDP_HAVE_STACK 1
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
 /* UDP write buffer dump macros */
@@ -1046,5 +1044,5 @@ uint16_t udpip_hdrsize(FAR struct udp_conn_s *conn);
 }
 #endif
 
-#endif /* CONFIG_NET_UDP && !CONFIG_NET_UDP_NO_STACK */
+#endif /* NET_UDP_HAVE_STACK */
 #endif /* __NET_UDP_UDP_H */

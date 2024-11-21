@@ -188,4 +188,4 @@ ssize_t netprocfs_read_udpstats(FAR struct netprocfs_file_s *priv,
   return len;
 }
 
-#endif /* CONFIG_NET_UDP && !CONFIG_NET_UDP_NO_STACK */
+#endif /* NET_UDP_HAVE_STACK */
