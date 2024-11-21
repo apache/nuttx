@@ -180,6 +180,25 @@ struct mouse_lowerhalf_s
    **************************************************************************/
 
   CODE int (*close)(FAR struct mouse_lowerhalf_s *lower);
+
+  /**************************************************************************
+   * Name: write
+   *
+   * Description:
+   *   Users can use this interface to implement custom write.
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of mouse device.
+   *   buffer  - User defined specific buffer.
+   *   buflen  - User defined specific buffer size.
+   *
+   * Return Value:
+   *   Number of bytes written；a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE ssize_t (*write)(FAR struct mouse_lowerhalf_s *lower,
+                        FAR const char *buffer, size_t buflen);
 };
 
 /****************************************************************************
