@@ -70,9 +70,9 @@ struct notestream_driver_s g_notestream_lowerout =
     "lowerout",
     {
       {
-        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+        CONFIG_DRIVERS_NOTELOWEROUT_FILTER_DEFAULT_MODE,
 #  ifdef CONFIG_SMP
-        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+        CONFIG_DRIVERS_NOTELOWEROUT_CPUSET
 #  endif
       },
     },
@@ -121,11 +121,11 @@ int notefile_register(FAR const char *filename)
   memcpy(notefile + 1, filename, len);
   notefile->driver.driver.name  = (FAR const char *)(notefile + 1);
   notefile->driver.driver.filter.mode.flag =
-                      CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE;
+                      CONFIG_DRIVERS_NOTEFILE_FILTER_DEFAULT_MODE;
 
 #  ifdef CONFIG_SMP
   notefile->driver.driver.filter.mode.cpuset =
-                      CONFIG_SCHED_INSTRUMENTATION_CPUSET;
+                      CONFIG_DRIVERS_NOTEFILE_CPUSET;
 #  endif
 
 #endif

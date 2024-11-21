@@ -130,9 +130,9 @@ struct note_driver_s g_notelog_driver =
     "log",
     {
       {
-        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+        CONFIG_DRIVERS_NOTELOG_FILTER_DEFAULT_MODE,
 #  ifdef CONFIG_SMP
-        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+        CONFIG_DRIVERS_NOTELOG_CPUSET
 #  endif
       },
     },
