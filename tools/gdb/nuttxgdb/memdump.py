@@ -286,6 +286,9 @@ class MMDump(gdb.Command):
             action="store_true",
             help="Do not reverse the sort result",
         )
+        parser.add_argument(
+            "--no-pid", type=int, default=None, help="Exclude nodes from this PID"
+        )
 
         # add option to sort the node by size or count
         parser.add_argument(
@@ -368,6 +371,7 @@ class MMDump(gdb.Command):
             "orphan": args.orphan,
             "no_heap": args.no_heap,
             "no_pool": args.no_pool,
+            "no_pid": args.no_pid,
         }
 
         nodes = self.collect_nodes(args.heap, log=args.log, filters=filters)
