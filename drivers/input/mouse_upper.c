@@ -68,6 +68,8 @@ static int     mouse_open(FAR struct file *filep);
 static int     mouse_close(FAR struct file *filep);
 static ssize_t mouse_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
+static ssize_t mouse_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen);
 static int     mouse_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 static int     mouse_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
@@ -82,7 +84,7 @@ static const struct file_operations g_mouse_fops =
   mouse_open,     /* open */
   mouse_close,    /* close */
   mouse_read,     /* read */
-  NULL,           /* write */
+  mouse_write,    /* write */
   NULL,           /* seek */
   mouse_ioctl,    /* ioctl */
   NULL,           /* mmap */
@@ -229,6 +231,25 @@ static ssize_t mouse_read(FAR struct file *filep, FAR char *buffer,
 out:
   nxmutex_unlock(&openpriv->lock);
   return ret;
+}
+
+/****************************************************************************
+ * Name: mouse_write
+ ****************************************************************************/
+
+static ssize_t mouse_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen)
+{
+  FAR struct inode             *inode = filep->f_inode;
+  FAR struct mouse_upperhalf_s *upper = inode->i_private;
+  FAR struct mouse_lowerhalf_s *lower = upper->lower;
+
+  if (lower->write != NULL)
+    {
+      return lower->write(lower, buffer, buflen);
+    }
+
+  return -ENOSYS;
 }
 
 /****************************************************************************
