@@ -236,6 +236,10 @@ void drivers_initialize(void)
   uinput_keyboard_initialize();
 #endif
 
+#ifdef CONFIG_UINPUT_MOUSE
+  uinput_mouse_initialize();
+#endif
+
 #ifdef CONFIG_NET_LOOPBACK
   /* Initialize the local loopback device */
 
