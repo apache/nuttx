@@ -108,6 +108,21 @@ void __start(void)
       *dest++ = 0;
     }
 
+  /* Move the initialized data section from its temporary holding spot in
+   * FLASH into the correct place in SRAM.  The correct place in SRAM is
+   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * end of all of the other read-only data (.text, .rodata) at _eronly.
+   */
+
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+  for (src = (const uint32_t *)_eronly,
+       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
+      )
+    {
+      *dest++ = *src++;
+    }
+#endif
+
   /* Set up clock */
 
   rp23xx_clockconfig();
@@ -125,29 +140,12 @@ void __start(void)
   rp23xx_lowsetup();
   showprogress('A');
 
-  /* Move the initialized data section from its temporary holding spot in
-   * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
-   * end of all of the other read-only data (.text, .rodata) at _eronly.
-   */
-
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-  for (src = (const uint32_t *)_eronly,
-       dest = (uint32_t *)_sdata; dest < (uint32_t *)_edata;
-      )
-    {
-      *dest++ = *src++;
-    }
-#endif
-
-  showprogress('B');
-
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
   arm_earlyserialinit();
 #endif
-  showprogress('C');
+  showprogress('B');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -157,13 +155,13 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   rp23xx_userspace();
-  showprogress('D');
+  showprogress('C');
 #endif
 
   /* Initialize onboard resources */
 
   rp23xx_boardinitialize();
-  showprogress('E');
+  showprogress('D');
 
   /* Then start NuttX */
 
