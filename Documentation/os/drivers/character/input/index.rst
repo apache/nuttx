@@ -10,5 +10,6 @@ Input Devices
   mpr121.rst
   sbutton.rst
   st7123.rst
+  umouse.rst
 
 See ``include/nuttx/input/*.h`` for registration information.

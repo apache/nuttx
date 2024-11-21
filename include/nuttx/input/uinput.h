@@ -92,4 +92,23 @@ int uinput_keyboard_initialize(void);
 int uinput_button_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: uinput_mouse_initialize
+ *
+ * Description:
+ *   Initialized the uinput mouse device
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_UINPUT_MOUSE
+int uinput_mouse_initialize(void);
+#endif
+
 #endif /* __INCLUDE_NUTTX_INPUT_UINPUT_H */

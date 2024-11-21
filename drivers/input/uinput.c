@@ -35,6 +35,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/input/buttons.h>
 #include <nuttx/input/keyboard.h>
+#include <nuttx/input/mouse.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/uinput.h>
 #include <nuttx/kmalloc.h>
@@ -54,6 +55,7 @@
 #define UINPUT_NAME_TOUCH    "utouch"
 #define UINPUT_NAME_KEYBOARD "ukeyboard"
 #define UINPUT_NAME_BUTTON   "ubutton"
+#define UINPUT_NAME_MOUSE    "umouse"
 
 /****************************************************************************
  * Private Types
@@ -112,6 +114,17 @@ struct uinput_keyboard_lowerhalf_s
 #endif
 
   struct keyboard_lowerhalf_s lower;
+};
+#endif
+
+#ifdef CONFIG_UINPUT_MOUSE
+struct uinput_mouse_lowerhalf_s
+{
+#ifdef CONFIG_UINPUT_RPMSG
+  struct uinput_context_s ctx;
+#endif
+
+  struct mouse_lowerhalf_s lower;
 };
 #endif
 
@@ -180,6 +193,16 @@ static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
                                      FAR const char *buffer, size_t buflen);
 
 #endif /* CONFIG_UINPUT_KEYBOARD */
+
+#ifdef CONFIG_UINPUT_MOUSE
+
+static ssize_t uinput_mouse_notify(FAR void *uinput_lower,
+                                   FAR const char *buffer, size_t buflen);
+
+static ssize_t uinput_mouse_write(FAR struct mouse_lowerhalf_s *lower,
+                                  FAR const char *buffer, size_t buflen);
+
+#endif /* CONFIG_UINPUT_MOUSE */
 
 /****************************************************************************
  * Private Functions
@@ -396,6 +419,7 @@ uinput_button_buttons(FAR const struct btn_lowerhalf_s *lower)
 {
   FAR struct uinput_button_lowerhalf_s *ubtn_lower =
     container_of(lower, struct uinput_button_lowerhalf_s, lower);
+
   return ubtn_lower->buttons;
 }
 
@@ -410,6 +434,7 @@ static void uinput_button_enable(FAR const struct btn_lowerhalf_s *lower,
 {
   FAR struct uinput_button_lowerhalf_s *ubtn_lower =
     container_of(lower, struct uinput_button_lowerhalf_s, lower);
+
   ubtn_lower->arg     = arg;
   ubtn_lower->handler = handler;
 }
@@ -457,6 +482,48 @@ static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
 }
 
 #endif /* CONFIG_UINPUT_KEYBOARD */
+
+#ifdef CONFIG_UINPUT_MOUSE
+
+/****************************************************************************
+ * Name: uinput_mouse_notify
+ ****************************************************************************/
+
+static ssize_t uinput_mouse_notify(FAR void *uinput_lower,
+                                   FAR const char *buffer, size_t buflen)
+{
+  FAR struct uinput_mouse_lowerhalf_s *umouse_lower =
+    (FAR struct uinput_mouse_lowerhalf_s *)uinput_lower;
+  FAR struct mouse_report_s *mouse = (FAR struct mouse_report_s *)buffer;
+
+  mouse_event(umouse_lower->lower.priv, mouse);
+  return buflen;
+}
+
+/****************************************************************************
+ * Name: uinput_mouse_write
+ ****************************************************************************/
+
+static ssize_t uinput_mouse_write(FAR struct mouse_lowerhalf_s *lower,
+                                  FAR const char *buffer, size_t buflen)
+{
+  FAR struct mouse_report_s *mouse = (FAR struct mouse_report_s *)buffer;
+  FAR struct uinput_mouse_lowerhalf_s *umouse_lower =
+      container_of(lower, struct uinput_mouse_lowerhalf_s, lower);
+
+  if (mouse == NULL || buflen != sizeof(struct mouse_report_s))
+    {
+      return -EINVAL;
+    }
+
+#ifdef CONFIG_UINPUT_RPMSG
+  uinput_rpmsg_notify(&umouse_lower->ctx, buffer, buflen);
+#endif
+
+  return uinput_mouse_notify(umouse_lower, buffer, buflen);
+}
+
+#endif /* CONFIG_UINPUT_MOUSE */
 
 /****************************************************************************
  * Public Functions
@@ -618,3 +685,56 @@ int uinput_keyboard_initialize(void)
 }
 
 #endif /* CONFIG_UINPUT_KEYBOARD */
+
+/****************************************************************************
+ * Name: uinput_mouse_initialize
+ *
+ * Description:
+ *   Initialized the uinput mouse device
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_UINPUT_MOUSE
+
+int uinput_mouse_initialize(void)
+{
+  FAR struct uinput_mouse_lowerhalf_s *umouse_lower;
+  int ret;
+
+  umouse_lower = kmm_zalloc(sizeof(struct uinput_mouse_lowerhalf_s));
+  if (umouse_lower == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  umouse_lower->lower.write = uinput_mouse_write;
+
+#ifdef CONFIG_UINPUT_RPMSG
+  umouse_lower->ctx.notify = uinput_mouse_notify;
+#endif
+
+  ret = mouse_register(&umouse_lower->lower,
+                       "/dev/" UINPUT_NAME_MOUSE,
+                       CONFIG_UINPUT_MOUSE_BUFNUMBER);
+  if (ret < 0)
+    {
+      kmm_free(umouse_lower);
+      ierr("ERROR: uinput mouse initialize failed\n");
+      return ret;
+    }
+
+#ifdef CONFIG_UINPUT_RPMSG
+  uinput_rpmsg_initialize(&umouse_lower->ctx, UINPUT_NAME_MOUSE);
+#endif
+
+  return 0;
+}
+
+#endif  /* CONFIG_UINPUT_MOUSE */
