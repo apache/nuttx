@@ -117,3 +117,97 @@ void uio_init(FAR struct uio *uio)
 {
   memset(uio, 0, sizeof(*uio));
 }
+
+/****************************************************************************
+ * Name: uio_copyfrom
+ *
+ * Description:
+ *   Copy data from the linear buffer to uio.
+ *
+ ****************************************************************************/
+
+void uio_copyfrom(FAR struct uio *uio, size_t offset, FAR const void *buf,
+                  size_t len)
+{
+  FAR const struct iovec *iov = uio->uio_iov;
+
+  DEBUGASSERT(uio_resid(uio) >= 0);
+  DEBUGASSERT(len <= uio_resid(uio));
+  DEBUGASSERT(offset <= uio_resid(uio) - len);
+  DEBUGASSERT(SSIZE_MAX - offset >= uio->uio_offset_in_iov);
+
+  offset += uio->uio_offset_in_iov;
+  while (offset > iov->iov_len)
+    {
+      offset -= iov->iov_len;
+      iov++;
+    }
+
+  while (len > 0)
+    {
+      size_t blen = len;
+      if (blen > iov->iov_len - offset)
+        {
+          blen = iov->iov_len - offset;
+        }
+
+      memcpy((FAR uint8_t *)iov->iov_base + offset, buf, blen);
+
+      len -= blen;
+      if (len == 0)
+        {
+          break;
+        }
+
+      buf = (const uint8_t *)buf + blen;
+      iov++;
+      offset = 0;
+    }
+}
+
+/****************************************************************************
+ * Name: uio_copyto
+ *
+ * Description:
+ *   Copy data to the linear buffer from uio.
+ *
+ ****************************************************************************/
+
+void uio_copyto(FAR struct uio *uio, size_t offset, FAR void *buf,
+                size_t len)
+{
+  FAR const struct iovec *iov = uio->uio_iov;
+
+  DEBUGASSERT(uio_resid(uio) >= 0);
+  DEBUGASSERT(len <= uio_resid(uio));
+  DEBUGASSERT(offset <= uio_resid(uio) - len);
+  DEBUGASSERT(SSIZE_MAX - offset >= uio->uio_offset_in_iov);
+
+  offset += uio->uio_offset_in_iov;
+  while (offset > iov->iov_len)
+    {
+      offset -= iov->iov_len;
+      iov++;
+    }
+
+  while (len > 0)
+    {
+      size_t blen = len;
+      if (blen > iov->iov_len - offset)
+        {
+          blen = iov->iov_len - offset;
+        }
+
+      memcpy(buf, (FAR const uint8_t *)iov->iov_base + offset, blen);
+
+      len -= blen;
+      if (len == 0)
+        {
+          break;
+        }
+
+      buf = (uint8_t *)buf + blen;
+      iov++;
+      offset = 0;
+    }
+}

@@ -83,4 +83,26 @@ void uio_advance(FAR struct uio *uio, size_t sz);
 
 void uio_init(FAR struct uio *uio);
 
+/****************************************************************************
+ * Name: uio_copyto
+ *
+ * Description:
+ *   Copy data to the linear buffer from uio.
+ *
+ ****************************************************************************/
+
+void uio_copyfrom(FAR struct uio *uio, size_t offset, FAR const void *buf,
+                  size_t len);
+
+/****************************************************************************
+ * Name: uio_copyto
+ *
+ * Description:
+ *   Copy data to the linear buffer from uio.
+ *
+ ****************************************************************************/
+
+void uio_copyto(FAR struct uio *uio, size_t offset, FAR void *buf,
+                size_t len);
+
 #endif /* __INCLUDE_NUTTX_FS_UIO_H */
