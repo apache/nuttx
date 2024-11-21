@@ -71,7 +71,7 @@ static const struct file_operations g_loop_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: loop_read
+ * Name: loop_readv
  ****************************************************************************/
 
 static ssize_t loop_readv(FAR struct file *filep,
@@ -81,7 +81,7 @@ static ssize_t loop_readv(FAR struct file *filep,
 }
 
 /****************************************************************************
- * Name: loop_write
+ * Name: loop_writev
  ****************************************************************************/
 
 static ssize_t loop_writev(FAR struct file *filep,
