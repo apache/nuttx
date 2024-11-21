@@ -50,8 +50,7 @@
  *
  ****************************************************************************/
 
-static ssize_t file_readv_compat(FAR struct file *filep,
-                                 FAR const struct uio *uio)
+static ssize_t file_readv_compat(FAR struct file *filep, FAR struct uio *uio)
 {
   FAR const struct iovec *iov = uio->uio_iov;
   int iovcnt = uio->uio_iovcnt;
@@ -102,6 +101,11 @@ static ssize_t file_readv_compat(FAR struct file *filep,
       remaining -= nread;
     }
 
+  if (ntotal >= 0)
+    {
+      uio_advance(uio, ntotal);
+    }
+
   return ntotal;
 }
 
@@ -130,7 +134,7 @@ static ssize_t file_readv_compat(FAR struct file *filep,
  *
  ****************************************************************************/
 
-ssize_t file_readv(FAR struct file *filep, FAR const struct uio *uio)
+ssize_t file_readv(FAR struct file *filep, FAR struct uio *uio)
 {
   FAR struct inode *inode;
   ssize_t ret = -EBADF;
@@ -204,11 +208,16 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 {
   struct iovec iov;
   struct uio uio;
+  ssize_t ret;
 
   iov.iov_base = buf;
   iov.iov_len = nbytes;
-  uio.uio_iov = &iov;
-  uio.uio_iovcnt = 1;
+  ret = uio_init(&uio, &iov, 1);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
   return file_readv(filep, &uio);
 }
 
@@ -251,9 +260,12 @@ ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt)
 
   /* Then let file_readv do all of the work. */
 
-  uio.uio_iov = iov;
-  uio.uio_iovcnt = iovcnt;
-  ret = file_readv(filep, &uio);
+  ret = uio_init(&uio, iov, iovcnt);
+  if (ret == 0)
+    {
+      ret = file_readv(filep, &uio);
+    }
+
   fs_putfilep(filep);
   return ret;
 }
