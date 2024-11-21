@@ -435,7 +435,6 @@ retry:
 void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
 {
   irqstate_t flags = spin_lock_irqsave(&pool->lock);
-  size_t blocksize = MEMPOOL_REALBLOCKSIZE(pool);
 #if CONFIG_MM_BACKTRACE >= 0
   FAR struct mempool_backtrace_s *buf =
     (FAR struct mempool_backtrace_s *)((FAR char *)blk + pool->blocksize);
@@ -453,10 +452,10 @@ void mempool_release(FAR struct mempool_s *pool, FAR void *blk)
   memset(blk, MM_FREE_MAGIC, pool->blocksize);
 #endif
 
-  if (pool->interruptsize > blocksize)
+  if (pool->ibase)
     {
       if ((FAR char *)blk >= pool->ibase &&
-          (FAR char *)blk < pool->ibase + pool->interruptsize - blocksize)
+          (FAR char *)blk < pool->ibase + pool->interruptsize)
         {
           sq_addlast(blk, &pool->iqueue);
         }
