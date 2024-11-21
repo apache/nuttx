@@ -156,7 +156,8 @@ static void dispatch_syscall(void)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  int cpu = this_cpu();
+  struct tcb_s **running_task = &g_running_tasks[cpu];
   FAR struct tcb_s *tcb = this_task();
   uint32_t cmd;
 #ifdef CONFIG_BUILD_PROTECTED
@@ -167,18 +168,24 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   DEBUGASSERT(!up_interrupt_context());
 
-  if (*running_task != NULL)
-    {
-      (*running_task)->xcp.regs = regs;
-    }
-
-  /* Set irq flag */
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
 
   up_set_interrupt_context(true);
 
   /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
 
   cmd = regs[REG_R0];
+
+  /* if cmd == SYS_restore_context (*running_task)->xcp.regs is valid
+   * should not be overwriten
+   */
+
+  if (cmd != SYS_restore_context)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
 
   /* The SVCall software interrupt is called with R0 = system call command
    * and R1..R7 =  variable number of arguments depending on the system call.
@@ -253,8 +260,23 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-      case SYS_restore_context:
       case SYS_switch_context:
+
+        /* Update scheduler parameters */
+
+        nxsched_resume_scheduler(tcb);
+
+      case SYS_restore_context:
+        nxsched_suspend_scheduler(*running_task);
+        *running_task = tcb;
+
+        /* Restore the cpu lock */
+
+        restore_critical_section(tcb, cpu);
+        regs = tcb->xcp.regs;
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+#endif
         break;
 
       /* R0=SYS_task_start:  This a user task start
@@ -518,25 +540,6 @@ uint32_t *arm_syscall(uint32_t *regs)
 #endif
         }
         break;
-    }
-
-  if (*running_task != tcb)
-    {
-      /* Update scheduler parameters */
-
-      nxsched_suspend_scheduler(*running_task);
-      nxsched_resume_scheduler(tcb);
-
-      /* Record the new "running" task.  g_running_tasks[] is only used by
-       * assertion logic for reporting crashes.
-       */
-
-      *running_task = tcb;
-
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, this_cpu());
-      regs = tcb->xcp.regs;
     }
 
   /* Report what happened */

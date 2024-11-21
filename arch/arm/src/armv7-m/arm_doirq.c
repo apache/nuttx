@@ -59,7 +59,11 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   FAR struct tcb_s *tcb;
 
-  if (*running_task != NULL)
+  /* This judgment proves that (*running_task)->xcp.regs
+   * is invalid, and we can safely overwrite it.
+   */
+
+  if (!(NVIC_IRQ_SVCALL == irq && regs[REG_R0] == SYS_restore_context))
     {
       (*running_task)->xcp.regs = regs;
     }

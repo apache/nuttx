@@ -33,6 +33,8 @@
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
+
+#  include "chip.h"
 #endif
 
 /****************************************************************************

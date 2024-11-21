@@ -54,7 +54,8 @@
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  int cpu = this_cpu();
+  struct tcb_s **running_task = &g_running_tasks[cpu];
   FAR struct tcb_s *tcb = this_task();
   uint32_t cmd;
 
@@ -62,12 +63,9 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   DEBUGASSERT(!up_interrupt_context());
 
-  if (*running_task != NULL)
-    {
-      (*running_task)->xcp.regs = regs;
-    }
-
-  /* Set irq flag */
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
 
   up_set_interrupt_context(true);
 
@@ -75,12 +73,35 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   cmd = regs[REG_R0];
 
+  /* if cmd == SYS_restore_context (*running_task)->xcp.regs is valid
+   * should not be overwriten
+   */
+
+  if (cmd != SYS_restore_context)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
+
   /* Handle the SVCall according to the command in R0 */
 
   switch (cmd)
     {
-      case SYS_restore_context:
       case SYS_switch_context:
+
+        /* Update scheduler parameters */
+
+        nxsched_resume_scheduler(tcb);
+
+      case SYS_restore_context:
+        nxsched_suspend_scheduler(*running_task);
+        *running_task = tcb;
+
+        /* Restore the cpu lock */
+
+        restore_critical_section(tcb, cpu);
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+#endif
         break;
 
       default:
@@ -90,29 +111,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           PANIC();
         }
         break;
-    }
-
-  if (*running_task != tcb)
-    {
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
-       */
-
-      addrenv_switch(NULL);
-#endif
-      /* Update scheduler parameters */
-
-      nxsched_suspend_scheduler(*running_task);
-      nxsched_resume_scheduler(tcb);
-
-      *running_task = tcb;
-
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, this_cpu());
     }
 
   /* Set irq flag */
