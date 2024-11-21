@@ -21,6 +21,7 @@
 ############################################################################
 
 import importlib
+import traceback
 from os import path
 
 import gdb
@@ -53,6 +54,7 @@ def register_commands(event):
             module = importlib.import_module(f"{__package__}.{m}")
         except Exception as e:
             gdb.write(f"\x1b[31;1mIgnore module: {m}, error: {e}\n\x1b[m")
+            traceback.print_exc()
             return
 
         for c in module.__dict__.values():
