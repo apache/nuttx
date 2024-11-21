@@ -92,7 +92,7 @@ static void dispatch_syscall(void)
     " ldr r4, =g_stublookup\n"                      /* R4=The base of the stub lookup table */
     " lsl r0, r0, #2\n"                             /* R0=Offset of the stub for this syscall */
     " ldr r4, [r4, r0]\n"                           /* R4=Address of the stub for this syscall */
-    " blx r5\n"                                     /* Call the stub (modifies lr) */
+    " blx r4\n"                                     /* Call the stub (modifies lr) */
     " mov lr, r5\n"                                 /* Restore lr */
     " add sp, sp, #12\n"                            /* Destroy the stack frame */
     " pop {r4, r5}\n"                               /* Recover R4 and R5 */
