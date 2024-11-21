@@ -576,6 +576,10 @@ int goldfish_gpu_fb_register(int display)
   fb->vtable.getplaneinfo = goldfish_gpu_fb_getplaneinfo;
   fb->vtable.getvideoinfo = goldfish_gpu_fb_getvideoinfo;
 
+  /* Clear goldfish_gpu_fb */
+
+  goldfish_gpu_fb_commit(fb, fb->planeinfo.fbmem);
+
   /* Create the vsync thread */
 
   snprintf(arg1, 32, "%p", fb);
