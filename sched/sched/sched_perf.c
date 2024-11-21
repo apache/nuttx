@@ -2299,6 +2299,7 @@ static int perf_mmap(FAR struct file *filep,
       event->buf->ref_count = 1;
       circbuf_init(&event->buf->rb, buf + sizeof(struct perf_buffer_s),
                    buf_size);
+      spin_initialize(&event->buf->lock, SP_UNLOCKED);
     }
 
   map->vaddr = event->buf;
@@ -2309,7 +2310,6 @@ static int perf_swevent_timer_handle_cpu(FAR void *arg)
 {
   FAR struct perf_event_s *event = (FAR struct perf_event_s *)arg;
   struct perf_sample_data_s data;
-  irqstate_t flags;
 
   /* TODO: ISR thread cannot get pc */
 
@@ -2317,9 +2317,7 @@ static int perf_swevent_timer_handle_cpu(FAR void *arg)
 
   perf_sample_data_init(&data, event->attr.sample_period);
 
-  flags = spin_lock_irqsave(&event->buf->lock);
   perf_event_data_overflow(event, &data, pc);
-  spin_unlock_irqrestore(&event->buf->lock, flags);
   return 0;
 }
 

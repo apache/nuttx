@@ -42,6 +42,10 @@
 
 #include "arm64_arch.h"
 
+#ifdef CONFIG_SCHED_PERF_EVENTS
+#include "arm64_pmuv3.h"
+#endif
+
 #ifdef CONFIG_ARCH_FPU
 #include "arm64_fpu.h"
 #endif
@@ -153,6 +157,10 @@ void up_initialize(void)
 
   arm64_dma_initialize();
 
+#endif
+
+#ifdef CONFIG_SCHED_PERF_EVENTS
+  arm64_pmu_initialize();
 #endif
 
   /* Initialize the serial device driver */
