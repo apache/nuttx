@@ -20,6 +20,9 @@
 #
 # ##############################################################################
 
+# global dependency maintenance target
+add_custom_target(nuttx_dep_map)
+
 include(nuttx_parse_function_args)
 
 # ~~~
@@ -55,16 +58,47 @@ function(nuttx_add_dependencies)
     ARGN
     ${ARGN})
 
-  get_target_property(NO_COMPILABLE_TARGET ${TARGET} NO_COMPILABLE_TARGET)
-  if(NO_COMPILABLE_TARGET)
-    return()
-  endif()
+  set_property(
+    TARGET nuttx_dep_map
+    APPEND
+    PROPERTY ALL_PROCESS_TARGET ${TARGET})
 
   foreach(dep ${DEPENDS})
-    # add dependencies
-    add_dependencies(${TARGET} ${dep})
-    # add export include directory
-    target_include_directories(${TARGET}
-                               PRIVATE ${NUTTX_APPS_BINDIR}/include/${dep})
+    set_property(
+      TARGET nuttx_dep_map
+      APPEND
+      PROPERTY ${TARGET} ${dep})
+  endforeach()
+endfunction()
+
+# After collecting all dependency mappings, process all targets uniformly
+function(process_all_target_dependencies)
+  # get all target need add deps
+  get_property(
+    all_process_target
+    TARGET nuttx_dep_map
+    PROPERTY ALL_PROCESS_TARGET)
+  foreach(target ${all_process_target})
+    if(TARGET ${target})
+      get_target_property(NO_COMPILABLE_TARGET ${target} NO_COMPILABLE_TARGET)
+      if(NOT NO_COMPILABLE_TARGET)
+        # treat `target` as mapping key
+        get_property(
+          all_deps
+          TARGET nuttx_dep_map
+          PROPERTY ${target})
+        foreach(dep ${all_deps})
+          if(TARGET ${dep})
+            # ensure build time order
+            add_dependencies(${target} ${dep})
+            # inherit public properties
+            nuttx_link_libraries(${target} ${dep})
+            # compatible with previous export headers
+            target_include_directories(
+              ${target} PRIVATE ${NUTTX_APPS_BINDIR}/include/${dep})
+          endif()
+        endforeach()
+      endif()
+    endif()
   endforeach()
 endfunction()
