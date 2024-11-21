@@ -71,7 +71,7 @@ static const struct file_operations g_devzero_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devzero_read
+ * Name: devzero_readv
  ****************************************************************************/
 
 static ssize_t devzero_readv(FAR struct file *filep,
@@ -98,7 +98,7 @@ static ssize_t devzero_readv(FAR struct file *filep,
 }
 
 /****************************************************************************
- * Name: devzero_write
+ * Name: devzero_writev
  ****************************************************************************/
 
 static ssize_t devzero_writev(FAR struct file *filep,
