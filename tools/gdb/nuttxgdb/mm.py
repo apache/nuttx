@@ -93,10 +93,13 @@ class MemPoolBlock:
 
     @property
     def is_free(self) -> bool:
+        if CONFIG_MM_BACKTRACE < 0:
+            return False
+
         if not self._magic:
             self._magic = int(self.blk["magic"])
 
-        return CONFIG_MM_BACKTRACE and self._magic != self.MAGIC_ALLOC
+        return self._magic != self.MAGIC_ALLOC
 
     @property
     def seqno(self) -> int:
