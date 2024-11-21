@@ -214,6 +214,20 @@ config NOTE_RTT
 
 if NOTE_RTT
 
+config NOTE_RTT_FILTER_DEFAULT_MODE
+	hex "Note RTT driver, Segger J-Link stream filter mode"
+	depends on SCHED_INSTRUMENTATION_FILTER
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	---help---
+		Filter mode for notertt jlink stream
+
+config SEGGER_SYSVIEW_CPUSET
+	hex "Segger System View CPU set"
+	depends on SCHED_INSTRUMENTATION_FILTER && SMP
+	default SCHED_INSTRUMENTATION_CPUSET
+	---help---
+		CPU set for sysview
+
 config NOTE_RTT_CHANNEL
 	int "Note RTT driver, Segger J-Link stream channel"
 	default 0
@@ -240,6 +254,20 @@ config SEGGER_SYSVIEW
 		unintended interactions and resource conflicts.
 
 if SEGGER_SYSVIEW
+
+config SEGGER_SYSVIEW_FILTER_DEFAULT_MODE
+	hex "Segger System View filter mode"
+	default SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
+	depends on SCHED_INSTRUMENTATION_FILTER
+	---help---
+		Filter mode for sysview
+
+config SEGGER_SYSVIEW_CPUSET
+	hex "Segger System View CPU set"
+	default SCHED_INSTRUMENTATION_CPUSET
+	depends on SCHED_INSTRUMENTATION_FILTER && SMP
+	---help---
+		CPU set for sysview
 
 config SEGGER_SYSVIEW_RTT_CHANNEL
 	int "Segger System View RTT channel"

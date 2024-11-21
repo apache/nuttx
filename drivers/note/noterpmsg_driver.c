@@ -76,9 +76,9 @@ struct noterpmsg_driver_s g_noterpmsg_driver =
     "rpmsg",
     {
       {
-        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+        CONFIG_DRIVERS_NOTERPMSG_FILTER_DEFAULT_MODE,
 #  ifdef CONFIG_SMP
-        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+        CONFIG_DRIVERS_NOTERPMSG_CPUSET
 #  endif
       },
     },

@@ -61,9 +61,9 @@ struct notertt_s g_notertt =
     "rtt",
     {
       {
-        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+        CONFIG_NOTE_RTT_FILTER_DEFAULT_MODE,
 #  ifdef CONFIG_SMP
-        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+        CONFIG_NOTE_RTT_CPUSET
 #  endif
       },
     },

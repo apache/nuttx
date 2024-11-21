@@ -147,9 +147,9 @@ static struct note_sysview_driver_s g_note_sysview_driver =
     "sysview",
     {
       {
-        CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE,
+        CONFIG_SEGGER_SYSVIEW_FILTER_DEFAULT_MODE,
 #  ifdef CONFIG_SMP
-        CONFIG_SCHED_INSTRUMENTATION_CPUSET
+        CONFIG_SEGGER_SYSVIEW_CPUSET
 #  endif
       },
     },
