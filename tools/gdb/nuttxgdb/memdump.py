@@ -46,8 +46,7 @@ class MMNodeDump(Protocol):
     def read_memory(self) -> memoryview: ...
 
 
-def dump_nodes(
-    heaps: List[mm.MMHeap],
+def filter_node(
     pid=None,
     nodesize=None,
     used=None,
@@ -55,30 +54,41 @@ def dump_nodes(
     seqmin=None,
     seqmax=None,
     orphan=None,
-    no_heap=False,
-    no_pool=False,
     no_pid=None,
+    no_heap=None,
+    no_pool=None,
+) -> bool:
+    return lambda node: (
+        (pid is None or node.pid == pid)
+        and (no_pid is None or node.pid != no_pid)
+        and (nodesize is None or node.nodesize == nodesize)
+        and (not used or not node.is_free)
+        and (not free or node.is_free)
+        and (seqmin is None or node.seqno >= seqmin)
+        and (seqmax is None or node.seqno <= seqmax)
+        and (not orphan or node.is_orphan)
+    )
+
+
+def dump_nodes(
+    heaps: List[mm.MMHeap],
+    filters=None,
 ) -> Generator[MMNodeDump, None, None]:
-    def filter_node(node: MMNodeDump) -> bool:
-        return (
-            (pid is None or node.pid == pid)
-            and (no_pid is None or node.pid != no_pid)
-            and (nodesize is None or node.nodesize == nodesize)
-            and (not used or not node.is_free)
-            and (not free or node.is_free)
-            and (seqmin is None or node.seqno >= seqmin)
-            and (seqmax is None or node.seqno <= seqmax)
-            and (not orphan or node.is_orphan)
-        )
+    no_heap = filters and filters.get("no_heap")
+    no_pool = filters and filters.get("no_heap")
 
     if not no_heap:
-        yield from (node for heap in heaps for node in filter(filter_node, heap.nodes))
+        yield from (
+            node
+            for heap in heaps
+            for node in filter(filter_node(**filters), heap.nodes)
+        )
 
     if not no_pool:
         yield from (
             blk
             for pool in mm.get_pools(heaps)
-            for blk in filter(filter_node, pool.blks)
+            for blk in filter(filter_node(**filters), pool.blks)
         )
 
 
@@ -148,18 +158,6 @@ class MMDump(gdb.Command):
         # define memdump as mm dump
         utils.alias("memdump", "mm dump")
 
-    def find(self, heaps: List[mm.MMHeap], addr):
-        """Find the node that contains the address"""
-        # Search pools firstly.
-        for pool in mm.get_pools(heaps):
-            if blk := pool.find(addr):
-                return blk
-
-        # Search heaps
-        for heap in heaps:
-            if node := heap.find(addr):
-                return node
-
     def parse_args(self, arg):
         parser = argparse.ArgumentParser(description=self.__doc__)
         parser.add_argument(
@@ -167,7 +165,7 @@ class MMDump(gdb.Command):
             "--address",
             type=str,
             default=None,
-            help="The address to inspect",
+            help="Find the node that contains the address and exit",
         )
 
         parser.add_argument(
@@ -215,6 +213,12 @@ class MMDump(gdb.Command):
             action="store_true",
             help="Do not print backtrace",
         )
+        parser.add_argument(
+            "--no-reverse",
+            "--nor",
+            action="store_true",
+            help="Do not reverse the sort result",
+        )
 
         # add option to sort the node by size or count
         parser.add_argument(
@@ -230,38 +234,52 @@ class MMDump(gdb.Command):
         except SystemExit:
             return
 
+    def find_address(self, addr, heap=None, log=None):
+        """Find the node that contains the address from memdump log or live dump."""
+        addr = int(gdb.parse_and_eval(addr))
+        heaps = [mm.MMHeap(gdb.parse_and_eval(heap))] if heap else mm.get_heaps()
+
+        # Find pool firstly
+        node = next(
+            (blk for pool in mm.get_pools(heaps) if (blk := pool.find(addr))), None
+        )
+
+        # Try heap if not found in pool
+        node = node or next((node for heap in heaps if (node := heap.find(addr))), None)
+
+        return addr, node
+
+    def collect_nodes(self, heap, log=None, filters=None):
+        heaps = [mm.MMHeap(gdb.parse_and_eval(heap))] if heap else mm.get_heaps()
+        nodes = dump_nodes(heaps, filters)
+
+        return nodes
+
     def invoke(self, arg: str, from_tty: bool) -> None:
         if not (args := self.parse_args(arg)):
             return
 
-        heaps = (
-            [mm.MMHeap(gdb.parse_and_eval(args.heap))] if args.heap else mm.get_heaps()
-        )
-        pids = [int(tcb["pid"]) for tcb in utils.get_tcbs()]
-
         print_header()
+
+        pids = [int(tcb["pid"]) for tcb in utils.get_tcbs()]
 
         def printnode(node, count):
             print_node(node, node.pid in pids, count, no_backtrace=args.no_backtrace)
 
+        # Find the node by address, find directly and then quit
         if args.address:
-            addr = int(gdb.parse_and_eval(args.address))
-            # Address specified, find and return directly.
-            node = None
-            for pool in mm.get_pools(heaps):
-                if node := pool.find(addr):
-                    break
-
-            if node or (node := self.find(heaps, addr)):
-                printnode(node, 1)
+            addr, node = self.find_address(args.address, args.heap, args.log)
+            if not node:
+                print(f"Address {addr:#x} not found in any heap")
+            else:
                 source = "Pool" if node.from_pool else "Heap"
-                print(f"{addr: #x} found belongs to {source} {node}")
+                printnode(node, 1)
+                print(f"{addr: #x} found belongs to {source} - {node}")
+
                 if node.prevnode:
                     print(f"prevnode: {node.prevnode}")
                 if node.nextnode:
                     print(f"nextnode: {node.nextnode}")
-            else:
-                print(f"Address {addr:#x} not found in any heap")
             return
 
         filters = {
@@ -272,21 +290,11 @@ class MMDump(gdb.Command):
             "seqmin": args.min,
             "seqmax": args.max,
             "orphan": args.orphan,
+            "no_heap": args.no_heap,
+            "no_pool": args.no_pool,
         }
 
-        heap_nodes = dump_nodes(heaps, **filters, no_heap=args.no_heap, no_pool=True)
-        pool_nodes = dump_nodes(heaps, **filters, no_heap=True, no_pool=args.no_pool)
-
-        if args.biggest:
-            # Find the biggest nodes, only applicable to heaps
-            nodes = sorted(
-                heap_nodes,
-                key=lambda node: node.nodesize,
-                reverse=True,
-            )
-            for node in nodes[: args.top]:
-                print(f"node@{node.address}: {node}")
-            return
+        nodes = self.collect_nodes(args.heap, log=args.log, filters=filters)
 
         sort_method = {
             "count": lambda node: 1,
@@ -296,41 +304,44 @@ class MMDump(gdb.Command):
             "address": lambda node: node.address,
         }
 
-        def sort_nodes(nodes):
-            nodes = sorted(nodes, key=sort_method[args.sort], reverse=True)
+        def sort_nodes(nodes, sort=None):
+            sort = sort or args.sort
+            nodes = sorted(nodes, key=sort_method[sort], reverse=not args.no_reverse)
             if args.top is not None:
                 nodes = nodes[: args.top] if args.top > 0 else nodes[args.top :]
             return nodes
 
+        if args.biggest:
+            # Dump the biggest node is same as sort by nodesize and do not group them
+            args.sort = "nodesize"
+            args.no_group = True
+
         if args.no_group:
             # Print nodes without grouping
-            nodes = list(heap_nodes)
-            nodes.extend(pool_nodes)
+            nodes = list(nodes)
 
             for node in sort_nodes(nodes):
                 printnode(node, 1)
 
             gdb.write(f"Total blks: {len(nodes)}\n")
-            return
+        else:
+            # Group the nodes and then print
 
-        # Finally group the nodes and then print
+            grouped: Dict[MMNodeDump, MMNodeDump] = defaultdict(list)
+            grouped = group_nodes(nodes)
 
-        grouped: Dict[MMNodeDump, MMNodeDump] = defaultdict(list)
-        grouped = group_nodes(heap_nodes)
-        grouped = group_nodes(pool_nodes, grouped)
+            # Replace the count and size to count grouped nodes
+            sort_method["count"] = lambda node: len(grouped[node])
+            sort_method["size"] = lambda node: node.nodesize * len(grouped[node])
+            total_blk = total_size = 0
+            for node in sort_nodes(grouped.keys()):
+                count = len(grouped[node])
+                total_blk += count
+                if node.pid != mm.PID_MM_MEMPOOL:
+                    total_size += count * node.nodesize
+                printnode(node, count)
 
-        # Replace the count and size to count grouped nodes
-        sort_method["count"] = lambda node: len(grouped[node])
-        sort_method["size"] = lambda node: node.nodesize * len(grouped[node])
-        total_blk = total_size = 0
-        for node in sort_nodes(grouped.keys()):
-            count = len(grouped[node])
-            total_blk += count
-            if node.pid != mm.PID_MM_MEMPOOL:
-                total_size += count * node.nodesize
-            printnode(node, count)
-
-        print(f"Total {total_blk} blks, {total_size} bytes")
+            print(f"Total {total_blk} blks, {total_size} bytes")
 
 
 class MMfrag(gdb.Command):
