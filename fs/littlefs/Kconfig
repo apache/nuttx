@@ -127,4 +127,10 @@ config FS_LITTLEFS_ATTR_UPDATE
 	---help---
 		Enable support for attributes when create a file.
 
+config FS_LITTLEFS_VERSION
+	string "LITTLEFS version to use"
+	default "2.5.1"
+	---help---
+		The LITTLEFS version to use.
+
 endif
