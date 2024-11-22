@@ -52,6 +52,10 @@ static int stdinstream_getc(FAR struct lib_instream_s *self)
     {
       self->nget++;
     }
+  else
+    {
+      ret = _NX_GETERRVAL(ret);
+    }
 
   return ret;
 }
