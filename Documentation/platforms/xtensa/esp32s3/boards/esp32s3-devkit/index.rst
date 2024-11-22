@@ -782,3 +782,20 @@ To test the XTWDT(/dev/watchdog3) an interrupt handler needs to be
 implemented because XTWDT does not have system reset feature. To implement
 an interrupt handler `WDIOC_CAPTURE` command can be used. When interrupt
 rises, XTAL32K clock can be restored with `WDIOC_RSTCLK` command.
+
+adb
+---
+
+Basic NuttShell configuration console enabled over USB Device (USB ADB).
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh esp32s3-devkit:adb
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then run the adb command::
+
+  $ adb -s 1234 shell
+  nsh> uname -a
+  NuttX 0.0.0  Nov 22 2024 11:41:43 xtensa esp32s3-devkit
