@@ -51,6 +51,10 @@ static int stdsistream_getc(FAR struct lib_sistream_s *self)
     {
       self->nget++;
     }
+  else
+    {
+      ret = _NX_GETERRVAL(ret);
+    }
 
   return ret;
 }

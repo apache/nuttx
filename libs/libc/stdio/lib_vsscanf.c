@@ -41,7 +41,7 @@ int vsscanf(FAR const char *buf, FAR const IPTR char *fmt, va_list ap)
 
   /* Initialize a memory stream to freadm from the buffer */
 
-  lib_meminstream(&meminstream, buf, INT_MAX);
+  lib_meminstream(&meminstream, buf, strlen(buf));
 
   /* Then let lib_vscanf do the real work */
 

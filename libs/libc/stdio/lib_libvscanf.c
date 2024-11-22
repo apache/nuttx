@@ -1149,7 +1149,7 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                 {
                   size_t nchars = (size_t) (stream->nget - ngetstart);
 
-                  if (c != EOF)
+                  if (!lib_stream_eof(c))
                     {
                       /* One more character already read */
 
