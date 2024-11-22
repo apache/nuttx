@@ -161,6 +161,20 @@ extern void __gcov_filename_to_gcfn(FAR const char *filename,
                                                      FAR void *),
                                      FAR void *arg);
 
+/****************************************************************************
+ * Name: __gcov_dump_to_memory
+ *
+ * Description:
+ *   Dump gcov data directly to memory
+ *
+ * Parameters:
+ *   ptr - Memory Address
+ *   size - Memory block size
+ *
+ ****************************************************************************/
+
+size_t __gcov_dump_to_memory(FAR void *ptr, size_t size);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

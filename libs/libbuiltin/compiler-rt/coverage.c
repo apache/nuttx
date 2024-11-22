@@ -324,6 +324,15 @@ void __gcov_dump(void)
   _NX_CLOSE(fd);
 }
 
+size_t __gcov_dump_to_memory(FAR void *ptr, size_t size)
+{
+  struct lib_memoutstream_s stream;
+
+  lib_memoutstream(&stream, ptr, size);
+
+  return __llvm_profile_dump(&stream.common);
+}
+
 void __gcov_reset(void)
 {
 }
