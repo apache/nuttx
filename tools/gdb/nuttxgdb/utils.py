@@ -837,6 +837,31 @@ def get_thread_tls(pid, key):
         return None
 
 
+def get_task_argvstr(tcb: Tcb) -> List[str]:
+    args = []
+    try:
+        TCB_FLAG_TTYPE_MASK = get_symbol_value("TCB_FLAG_TTYPE_MASK")
+        TCB_FLAG_TTYPE_PTHREAD = get_symbol_value("TCB_FLAG_TTYPE_PTHREAD")
+
+        if tcb.flags & TCB_FLAG_TTYPE_MASK == TCB_FLAG_TTYPE_PTHREAD:
+            if tcb.type.code != gdb.TYPE_CODE_PTR:
+                tcb = tcb.address
+            tcb = tcb.cast(lookup_type("struct pthread_tcb_s").pointer())
+            return ["", f"{tcb['cmn']['entry']['main']}", f'{tcb["arg"]}']
+
+        tls_info_s = lookup_type("struct tls_info_s").pointer()
+        tls = tcb.stack_alloc_ptr.cast(tls_info_s)
+        argv = int(tcb.stack_alloc_ptr) + int(tls.tl_size)
+        argv = gdb.Value(argv).cast(lookup_type("char").pointer().pointer())
+        while argv.dereference():
+            args.append(argv.dereference().string())
+            argv += 1
+    except gdb.error:
+        pass
+
+    return args
+
+
 def gather_modules(dir=None) -> List[str]:
     dir = os.path.normpath(dir) if dir else os.path.dirname(__file__)
     return [
