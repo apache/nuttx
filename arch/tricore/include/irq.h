@@ -205,14 +205,15 @@ static inline_function bool up_interrupt_context(void)
 static inline_function uintptr_t up_getusrsp(void *regs)
 {
   uintptr_t *csa = regs;
+  uintptr_t pcxi = tricore_addr2csa(csa);
 
-  while (((uintptr_t)csa & PCXI_UL) == 0)
+  while ((pcxi & PCXI_UL) == 0)
     {
-      csa = tricore_csa2addr((uintptr_t)csa);
-      csa = (uintptr_t *)csa[0];
+      csa = tricore_csa2addr(csa[REG_UPCXI]);
+      pcxi = csa[REG_UPCXI];
     }
 
-  csa = tricore_csa2addr((uintptr_t)csa);
+  csa = tricore_csa2addr(pcxi);
 
   return csa[REG_SP];
 }
