@@ -2495,6 +2495,7 @@ config DEBUG_SYMBOLS
 
 config DEBUG_SYMBOLS_LEVEL
 	string "Custom symbols level"
+	default "-g3" if ARCH_TOOLCHAIN_GNU
 	default "-g"
 	---help---
 		This string represents the custom symbol level that will be
