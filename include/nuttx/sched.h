@@ -244,7 +244,7 @@
 #  define this_cpu()                 (0)
 #endif
 
-#define running_regs()               ((void *)(g_running_tasks[this_cpu()]->xcp.regs))
+#define running_regs()               ((FAR void **)(g_running_tasks[this_cpu()]->xcp.regs))
 
 /****************************************************************************
  * Public Type Definitions

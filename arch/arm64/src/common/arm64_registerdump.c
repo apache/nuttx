@@ -63,7 +63,7 @@ uintptr_t up_getusrsp(void *regs)
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uint64_t *regs = dumpregs ? dumpregs : up_current_regs();
+  volatile uint64_t *regs = dumpregs ? dumpregs : running_regs();
 
   _alert("stack = %p\n", regs);
   _alert("x0:   0x%-16"PRIx64"  x1:   0x%"PRIx64"\n",
