@@ -131,6 +131,10 @@ ifeq ($(CONFIG_ALLSYMS),y)
 EXTRA_LIBS += allsyms$(OBJEXT)
 endif
 
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+EXTRA_LIBS += kasan_globals$(OBJEXT)
+endif
+
 define LINK_ALLSYMS_KASAN
 	$(if $(CONFIG_ALLSYMS),
 	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)
