@@ -82,7 +82,7 @@ uintptr_t *tricore_alloc_csa(uintptr_t pc, uintptr_t sp,
       plcsa[REG_LPCXI] |= PCXI_PIE;
     }
 
-  return (uintptr_t *)tricore_addr2csa(plcsa);
+  return plcsa;
 }
 
 /****************************************************************************
