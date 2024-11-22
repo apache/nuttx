@@ -39,15 +39,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uio_total_len
+ * Name: uio_resid
  *
  * Description:
- *   Return the total length of data in bytes.
+ *   Return the remaining length of data in bytes.
  *   Or -EOVERFLOW.
  *
  ****************************************************************************/
 
-ssize_t uio_total_len(FAR const struct uio *uio)
+ssize_t uio_resid(FAR const struct uio *uio)
 {
   const struct iovec *iov = uio->uio_iov;
   int iovcnt = uio->uio_iovcnt;
@@ -84,7 +84,7 @@ void uio_advance(FAR struct uio *uio, size_t sz)
   int iovcnt = uio->uio_iovcnt;
   size_t offset_in_iov = uio->uio_offset_in_iov;
 
-  DEBUGASSERT(sz <= uio_total_len(uio));
+  DEBUGASSERT(sz <= uio_resid(uio));
   while (iovcnt > 0)
     {
       DEBUGASSERT(offset_in_iov <= iov->iov_len);

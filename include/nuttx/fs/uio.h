@@ -53,15 +53,15 @@ struct uio
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uio_total_len
+ * Name: uio_resid
  *
  * Description:
- *   Return the total length of data in bytes.
+ *   Return the remaining length of data in bytes.
  *   Or -EOVERFLOW.
  *
  ****************************************************************************/
 
-ssize_t uio_total_len(FAR const struct uio *uio);
+ssize_t uio_resid(FAR const struct uio *uio);
 
 /****************************************************************************
  * Name: uio_advance

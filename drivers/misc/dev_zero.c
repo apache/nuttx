@@ -74,7 +74,7 @@ static const struct file_operations g_devzero_fops =
 
 static ssize_t devzero_readv(FAR struct file *filep, FAR struct uio *uio)
 {
-  ssize_t total =  uio_total_len(uio);
+  ssize_t total =  uio_resid(uio);
   FAR const struct iovec *iov = uio->uio_iov;
   int iovcnt = uio->uio_iovcnt;
   int i;
@@ -105,7 +105,7 @@ static ssize_t devzero_writev(FAR struct file *filep, FAR struct uio *uio)
   ssize_t total;
   UNUSED(filep);
 
-  total = uio_total_len(uio);
+  total = uio_resid(uio);
   if (total >= 0)
     {
       uio_advance(uio, total);
