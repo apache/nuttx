@@ -61,6 +61,14 @@ enum rpmsg_port_spi_cmd_e
   RPMSG_PORT_SPI_CMD_DATA,
 };
 
+enum rpmsg_port_spi_state_e
+{
+  RPMSG_PORT_SPI_STATE_UNCONNECTED  = 0x01,
+  RPMSG_PORT_SPI_STATE_CONNECTING,
+  RPMSG_PORT_SPI_STATE_DISCONNECTING,
+  RPMSG_PORT_SPI_STATE_CONNECTED,
+};
+
 struct rpmsg_port_spi_s
 {
   struct rpmsg_port_s            port;
@@ -89,7 +97,7 @@ struct rpmsg_port_spi_s
   FAR struct rpmsg_port_header_s *rxhdr;
 
   rpmsg_port_rx_cb_t             rxcb;
-  bool                           connected;
+  uint8_t                        state;
 
   /* Used for flow control */
 
@@ -176,7 +184,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
       return;
     }
 
-  if (!rpspi->connected)
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
     {
       txhdr = rpspi->cmdhdr;
       txhdr->cmd = RPMSG_PORT_SPI_CMD_CONNECT;
@@ -219,7 +227,7 @@ static void rpmsg_port_spi_notify_tx_ready(FAR struct rpmsg_port_s *port)
   FAR struct rpmsg_port_spi_s *rpspi =
     container_of(port, struct rpmsg_port_spi_s, port);
 
-  if (rpspi->connected)
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED)
     {
       rpmsg_port_spi_exchange(rpspi);
     }
@@ -340,7 +348,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
    * connect req data packet has been received.
    */
 
-  if (!rpspi->connected)
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
     {
       if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
         {
@@ -348,16 +356,22 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
         }
 
       rpspi->txavail = rpspi->rxhdr->avail;
-      rpspi->connected = true;
+      rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTING;
     }
-  else
+  else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED)
     {
       rpspi->txavail = rpspi->rxhdr->avail;
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
         {
-          rpspi->connected = false;
+          rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
           rpmsg_port_spi_drop_packets(rpspi);
         }
+    }
+  else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
+    {
+      /* Drop connect packets recived during connecting status change */
+
+      goto out;
     }
 
   if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
@@ -412,13 +426,15 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
   switch (rxhdr->cmd)
     {
       case RPMSG_PORT_SPI_CMD_CONNECT:
-        if (!rpspi->connected)
+        if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
           {
             rpmsg_port_unregister(&rpspi->port);
+            rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
             rpmsg_port_spi_connect(rpspi);
           }
         else
           {
+            rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTED;
             rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
           }
 
@@ -603,7 +619,7 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
 
   rpspi->rxthres = rpmsg_port_queue_navail(&rpspi->port.rxq) *
                    CONFIG_RPMSG_PORT_SPI_RX_THRESHOLD / 100;
-
+  rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
   ret = rpmsg_port_spi_init_hardware(rpspi, spicfg, spictrlr, ioe);
   if (ret < 0)
     {
