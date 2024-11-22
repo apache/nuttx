@@ -633,19 +633,28 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-#  define spin_trylock_irqsave_wo_note(l, f) \
-({ \
-  f = up_irq_save(); \
-  spin_trylock_wo_note(l) ? \
-  true : ({ up_irq_restore(f); false; }); \
-})
+static inline_function
+bool spin_trylock_irqsave_wo_note(FAR volatile spinlock_t *lock,
+                                  FAR irqstate_t *flags)
+{
+  *flags = up_irq_save();
+
+  if (!spin_trylock_wo_note(lock))
+    {
+      up_irq_restore(*flags);
+      return false;
+    }
+
+  return true;
+}
 #else
-#  define spin_trylock_irqsave_wo_note(l, f) \
-({ \
-  (void)(l); \
-  f = up_irq_save(); \
-  true; \
-})
+static inline_function
+bool spin_trylock_irqsave_wo_note(FAR volatile spinlock_t *lock,
+                                  FAR irqstate_t *flags)
+{
+  *flags = up_irq_save();
+  return true;
+}
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
@@ -669,19 +678,28 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-#  define spin_trylock_irqsave(l, f) \
-({ \
-  f = up_irq_save(); \
-  spin_trylock(l) ? \
-  true : ({ up_irq_restore(f); false; }); \
-})
+static inline_function
+bool spin_trylock_irqsave(FAR volatile spinlock_t *lock,
+                          FAR irqstate_t *flags)
+{
+  *flags = up_irq_save();
+
+  if (!spin_trylock(lock))
+    {
+      up_irq_restore(*flags);
+      return false;
+    }
+
+  return true;
+}
 #else
-#  define spin_trylock_irqsave(l, f) \
-({ \
-  (void)(l); \
-  f = up_irq_save(); \
-  true; \
-})
+static inline_function
+bool spin_trylock_irqsave(FAR volatile spinlock_t *lock,
+                          FAR irqstate_t *flags)
+{
+  *flags = up_irq_save();
+  return true;
+}
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
