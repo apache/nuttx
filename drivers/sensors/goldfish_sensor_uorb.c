@@ -83,6 +83,7 @@ struct goldfish_sensor_s
   struct sensor_lowerhalf_s lower_humi;
   struct sensor_lowerhalf_s lower_temp;
   struct sensor_lowerhalf_s lower_hrate;
+  uint32_t interval;
 };
 
 /****************************************************************************
@@ -91,6 +92,9 @@ struct goldfish_sensor_s
 
 static int goldfish_sensor_activate(FAR struct sensor_lowerhalf_s *lower,
                                     FAR struct file *filep, bool enabled);
+static int goldfish_sensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                        FAR struct file *filep,
+                                        FAR uint32_t *period_us);
 static int goldfish_sensor_thread(int argc, FAR char** argv);
 
 /****************************************************************************
@@ -100,6 +104,7 @@ static int goldfish_sensor_thread(int argc, FAR char** argv);
 static const struct sensor_ops_s g_goldfish_sensor_ops =
 {
   .activate = goldfish_sensor_activate,
+  .set_interval = goldfish_sensor_set_interval,
 };
 
 FAR static const char *const g_goldfish_sensor_name[] =
@@ -486,104 +491,106 @@ static void goldfish_sensor_parse_event(FAR struct goldfish_sensor_s *sensor)
     }
 }
 
-static int goldfish_sensor_activate(FAR struct sensor_lowerhalf_s *lower,
-                                    FAR struct file *filep, bool enabled)
+static int goldfish_get_priv(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct goldfish_sensor_s **priv)
 {
-  FAR struct goldfish_sensor_s *priv;
-
   switch (lower->type)
   {
   case SENSOR_TYPE_ACCELEROMETER:
     if (lower->uncalibrated)
       {
-        priv = container_of(lower,
-                            struct goldfish_sensor_s,
-                            lower_accel_uncalibrated);
-        return
-        goldfish_sensor_do_activate(&priv->pipe,
-                                    GOLDFISH_ACCELERATION_UNCALIBRATED,
-                                    enabled);
+        *priv = container_of(lower, struct goldfish_sensor_s,
+                             lower_accel_uncalibrated);
+        return GOLDFISH_ACCELERATION_UNCALIBRATED;
       }
     else
       {
-        priv = container_of(lower, struct goldfish_sensor_s, lower_accel);
-        return goldfish_sensor_do_activate(&priv->pipe,
-                                           GOLDFISH_ACCELERATION,
-                                           enabled);
+        *priv = container_of(lower, struct goldfish_sensor_s, lower_accel);
+        return GOLDFISH_ACCELERATION;
       }
 
   case SENSOR_TYPE_MAGNETIC_FIELD:
     if (lower->uncalibrated)
       {
-        priv = container_of(lower,
-                            struct goldfish_sensor_s,
-                            lower_mag_uncalibrated);
-        return
-        goldfish_sensor_do_activate(&priv->pipe,
-                                    GOLDFISH_MAGNETIC_FIELD_UNCALIBRATED,
-                                    enabled);
+        *priv = container_of(lower, struct goldfish_sensor_s,
+                             lower_mag_uncalibrated);
+        return GOLDFISH_MAGNETIC_FIELD_UNCALIBRATED;
       }
     else
       {
-        priv = container_of(lower, struct goldfish_sensor_s, lower_mag);
-        return goldfish_sensor_do_activate(&priv->pipe,
-                                           GOLDFISH_MAGNETIC_FIELD,
-                                           enabled);
+        *priv = container_of(lower, struct goldfish_sensor_s, lower_mag);
+        return GOLDFISH_MAGNETIC_FIELD;
       }
 
   case SENSOR_TYPE_GYROSCOPE:
     if (lower->uncalibrated)
       {
-        priv = container_of(lower,
-                            struct goldfish_sensor_s,
-                            lower_gyro_uncalibrated);
-        return
-        goldfish_sensor_do_activate(&priv->pipe,
-                                    GOLDFISH_GYROSCOPE_FIELD_UNCALIBRATED,
-                                    enabled);
+        *priv = container_of(lower, struct goldfish_sensor_s,
+                             lower_gyro_uncalibrated);
+        return GOLDFISH_GYROSCOPE_FIELD_UNCALIBRATED;
       }
     else
       {
-        priv = container_of(lower, struct goldfish_sensor_s, lower_gyro);
-        return goldfish_sensor_do_activate(&priv->pipe,
-                                           GOLDFISH_GYROSCOPE,
-                                           enabled);
+        *priv = container_of(lower, struct goldfish_sensor_s, lower_gyro);
+        return GOLDFISH_GYROSCOPE;
       }
 
   case SENSOR_TYPE_PROXIMITY:
-    priv = container_of(lower, struct goldfish_sensor_s, lower_prox);
-    return goldfish_sensor_do_activate(&priv->pipe,
-                                       GOLDFISH_PROXIMITY,
-                                       enabled);
+    *priv = container_of(lower, struct goldfish_sensor_s, lower_prox);
+    return GOLDFISH_PROXIMITY;
   case SENSOR_TYPE_LIGHT:
-    priv = container_of(lower, struct goldfish_sensor_s, lower_light);
-    return goldfish_sensor_do_activate(&priv->pipe,
-                                       GOLDFISH_LIGHT,
-                                       enabled);
+    *priv = container_of(lower, struct goldfish_sensor_s, lower_light);
+    return GOLDFISH_LIGHT;
   case SENSOR_TYPE_BAROMETER:
-    priv = container_of(lower, struct goldfish_sensor_s, lower_baro);
-    return goldfish_sensor_do_activate(&priv->pipe,
-                                       GOLDFISH_PRESSURE,
-                                       enabled);
+    *priv = container_of(lower, struct goldfish_sensor_s, lower_baro);
+    return GOLDFISH_PRESSURE;
   case SENSOR_TYPE_RELATIVE_HUMIDITY:
-    priv = container_of(lower, struct goldfish_sensor_s, lower_humi);
-    return goldfish_sensor_do_activate(&priv->pipe,
-                                       GOLDFISH_RELATIVE_HUMIDITY,
-                                       enabled);
+    *priv = container_of(lower, struct goldfish_sensor_s, lower_humi);
+    return GOLDFISH_RELATIVE_HUMIDITY;
   case SENSOR_TYPE_AMBIENT_TEMPERATURE:
-    priv = container_of(lower, struct goldfish_sensor_s, lower_temp);
-    return goldfish_sensor_do_activate(&priv->pipe,
-                                       GOLDFISH_AMBIENT_TEMPERATURE,
-                                       enabled);
+    *priv = container_of(lower, struct goldfish_sensor_s, lower_temp);
+    return GOLDFISH_AMBIENT_TEMPERATURE;
   case SENSOR_TYPE_HEART_RATE:
-    priv = container_of(lower, struct goldfish_sensor_s, lower_hrate);
-    return goldfish_sensor_do_activate(&priv->pipe,
-                                       GOLDFISH_HEART_RATE,
-                                       enabled);
+    *priv = container_of(lower, struct goldfish_sensor_s, lower_hrate);
+    return GOLDFISH_HEART_RATE;
   default:
     return -EINVAL;
   }
+}
 
+static int goldfish_sensor_activate(FAR struct sensor_lowerhalf_s *lower,
+                                    FAR struct file *filep, bool enabled)
+{
+  FAR struct goldfish_sensor_s *priv;
+  int handle = goldfish_get_priv(lower, &priv);
+
+  if (handle < 0)
+    {
+      return handle;
+    }
+
+  return goldfish_sensor_do_activate(&priv->pipe, handle, enabled);
+}
+
+static int goldfish_sensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                        FAR struct file *filep,
+                                        FAR uint32_t *period_us)
+{
+  struct FAR goldfish_sensor_s *priv;
+  char buffer[64];
+  int handle;
+  int len;
+
+  handle = goldfish_get_priv(lower, &priv);
+  if (handle < 0)
+    {
+      return handle;
+    }
+
+  len = snprintf(buffer, sizeof(buffer), "set-delay: %d",
+                 (int)(*period_us / 1000));
+  goldfish_sensor_send(&priv->pipe, buffer, len);
+  priv->interval = *period_us;
   return OK;
 }
 
