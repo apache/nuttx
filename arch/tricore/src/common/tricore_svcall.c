@@ -108,7 +108,7 @@ void tricore_svcall(volatile void *trap)
 
       case SYS_switch_context:
         {
-          *(uintptr_t **)regs[REG_D9] = (uintptr_t *)regs[REG_UPCXI];
+          *(uintptr_t **)regs[REG_D9] = tricore_csa2addr(regs[REG_UPCXI]);
           up_set_current_regs((uintptr_t *)regs[REG_D10]);
         }
         break;
@@ -133,7 +133,7 @@ void tricore_svcall(volatile void *trap)
 
       g_running_tasks[cpu] = this_task();
 
-      regs[REG_UPCXI] = (uintptr_t)up_current_regs();
+      regs[REG_UPCXI] = tricore_addr2csa(up_current_regs());
 
       __isync();
     }
