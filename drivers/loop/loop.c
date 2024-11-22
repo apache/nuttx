@@ -85,7 +85,7 @@ static ssize_t loop_writev(FAR struct file *filep, FAR struct uio *uio)
 {
   /* Say that everything was written */
 
-  ssize_t ret = uio_total_len(uio);
+  ssize_t ret = uio_resid(uio);
   if (ret >= 0)
     {
       uio_advance(uio, ret);
