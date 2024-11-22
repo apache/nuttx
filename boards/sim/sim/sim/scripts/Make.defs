@@ -296,9 +296,9 @@ ifeq ($(CONFIG_HOST_MACOS),y)
 else
   LDFLAGS += -Wl,--gc-sections
 
-  # Let the symbol table link from 0x30000000
+  # Let the symbol table link from 0x40000000
   # which is more convenient for debugging.
-  LDFLAGS += -Wl,-Ttext-segment=0x30000000
+  LDFLAGS += -Wl,-Ttext-segment=0x40000000
 endif
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
