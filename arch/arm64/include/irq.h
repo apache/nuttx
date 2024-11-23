@@ -447,8 +447,9 @@ static inline void up_irq_restore(irqstate_t flags)
     {                                                                     \
       if (!up_interrupt_context())                                        \
         {                                                                 \
-          sys_call2(SYS_switch_context, (uintptr_t)rtcb, (uintptr_t)tcb); \
+          sys_call0(SYS_switch_context);                                  \
         }                                                                 \
+      UNUSED(rtcb);                                                       \
     }                                                                     \
   while (0)
 

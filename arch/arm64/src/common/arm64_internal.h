@@ -112,10 +112,10 @@
 
 /* Context switching */
 
-#define arm64_fullcontextrestore(next) \
+#define arm64_fullcontextrestore() \
   do \
     { \
-      sys_call1(SYS_restore_context, (uintptr_t)next); \
+      sys_call0(SYS_restore_context); \
     } \
   while (1)
 
