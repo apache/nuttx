@@ -294,6 +294,7 @@ xtensa_esp32_gcc_toolchain() {
     local basefile
     basefile=xtensa-esp32-elf-12.2.0_20230208-x86_64-apple-darwin
     cd "${NUTTXTOOLS}"
+    # Download the latest ESP32 GCC toolchain prebuilt by Espressif
     curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
@@ -301,6 +302,40 @@ xtensa_esp32_gcc_toolchain() {
   fi
 
   command xtensa-esp32-elf-gcc --version
+}
+
+xtensa_esp32s2_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/xtensa-esp32s2-elf/bin
+
+  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s2-elf/bin/xtensa-esp32s2-elf-gcc" ]; then
+    local basefile
+    basefile=xtensa-esp32s2-elf-12.2.0_20230208-x86_64-apple-darwin
+    cd "${NUTTXTOOLS}"
+    # Download the latest ESP32 S2 GCC toolchain prebuilt by Espressif
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    xz -d ${basefile}.tar.xz
+    tar xf ${basefile}.tar
+    rm ${basefile}.tar
+  fi
+
+  command xtensa-esp32s2-elf-gcc --version
+}
+
+xtensa_esp32s3_gcc_toolchain() {
+  add_path "${NUTTXTOOLS}"/xtensa-esp32s3-elf/bin
+
+  if [ ! -f "${NUTTXTOOLS}/xtensa-esp32s3-elf/bin/xtensa-esp32s3-elf-gcc" ]; then
+    local basefile
+    basefile=xtensa-esp32s3-elf-12.2.0_20230208-x86_64-apple-darwin
+    cd "${NUTTXTOOLS}"
+    # Download the latest ESP32 S3 GCC toolchain prebuilt by Espressif
+    curl -O -L -s https://github.com/espressif/crosstool-NG/releases/download/esp-12.2.0_20230208/${basefile}.tar.xz
+    xz -d ${basefile}.tar.xz
+    tar xf ${basefile}.tar
+    rm ${basefile}.tar
+  fi
+
+  command xtensa-esp32s3-elf-gcc --version
 }
 
 u_boot_tools() {
@@ -368,13 +403,18 @@ setup_links() {
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/x86_64-elf-gcc
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/x86_64-elf-g++
   ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32-elf-g++
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s2-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s2-elf-g++
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s3-elf-gcc
+  ln -sf "$(which ccache)" "${NUTTXTOOLS}"/ccache/bin/xtensa-esp32s3-elf-g++
 }
 
 install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="ninja_brew autoconf_brew arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
+  install="ninja_brew autoconf_brew arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain xtensa_esp32s2_gcc_toolchain xtensa_esp32s3_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
 
   mkdir -p "${NUTTXTOOLS}"/homebrew
   export HOMEBREW_CACHE=${NUTTXTOOLS}/homebrew
