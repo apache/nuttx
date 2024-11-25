@@ -407,5 +407,25 @@ config SYSLOG_REGISTER
 	---help---
 		This option will support register the syslog channel dynamically.
 
+config SYSLOG_STDOUT
+	bool "Redirect standard output stream of printf() and vprintf() to syslog"
+	default n
+	---help---
+		Redirect standard output stream of printf(), vprintf(), puts(), putchar() to syslog,
+		This option will ensure the printing sequence of syslog/printf to avoid
+		confusion. Noted that if enable this option, the redirection
+		capability of standard input(<) and output(>) will not be work as expect in
+		(nsh)nuttx shell.
+
+if SYSLOG_STDOUT
+
+config SYSLOG_STDOUT_PREFIX
+	bool "Redirect standard output stream with syslog prefix"
+	default n
+	---help---
+		Redirect standard output stream with syslog prefix.
+
+endif # SYSLOG_STDOUT
+
 endif # SYSLOG
 endmenu # System logging
