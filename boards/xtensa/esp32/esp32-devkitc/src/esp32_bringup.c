@@ -180,6 +180,10 @@
 #  include "esp32_board_mcpwm.h"
 #endif
 
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+#  include "espressif/esp_nxdiag.h"
+#endif
+
 #include "esp32-devkitc.h"
 
 /****************************************************************************
@@ -755,6 +759,14 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: board_apds9960_initialize() failed: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
+  ret = esp_nxdiag_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
     }
 #endif
 
