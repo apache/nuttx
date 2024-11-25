@@ -812,8 +812,7 @@ static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg)
   FAR struct metal_list *node;
   bool needunlock = false;
 
-  if (!up_interrupt_context() && !sched_idletask() &&
-      !nxmutex_is_hold(&rdev->lock))
+  if (!up_interrupt_context() && !sched_idletask())
     {
       metal_mutex_acquire(&rdev->lock);
       needunlock = true;
