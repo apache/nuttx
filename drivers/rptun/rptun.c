@@ -711,8 +711,7 @@ static void rptun_dump(FAR struct rpmsg_s *rpmsg)
       return;
     }
 
-  if (up_interrupt_context() || sched_idletask() ||
-      nxmutex_is_hold(&rdev->lock))
+  if (up_interrupt_context() || sched_idletask())
     {
       needlock = false;
     }

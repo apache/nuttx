@@ -496,8 +496,7 @@ static void rpmsg_virtio_lite_dump(FAR struct rpmsg_s *rpmsg)
       return;
     }
 
-  if (up_interrupt_context() || sched_idletask() ||
-      nxmutex_is_hold(&rdev->lock))
+  if (up_interrupt_context() || sched_idletask())
     {
       needlock = false;
     }
