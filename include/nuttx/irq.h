@@ -258,9 +258,19 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  ****************************************************************************/
 
 #ifdef CONFIG_IRQCOUNT
+
+#  if (defined(CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION) && \
+       CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0) || \
+       defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 irqstate_t enter_critical_section(void) noinstrument_function;
+#  else
+#    define enter_critical_section() enter_critical_section_wo_note()
+#  endif
+
+irqstate_t enter_critical_section_wo_note(void) noinstrument_function;
 #else
 #  define enter_critical_section() up_irq_save()
+#  define enter_critical_section_wo_note() up_irq_save()
 #endif
 
 /****************************************************************************
@@ -288,9 +298,19 @@ irqstate_t enter_critical_section(void) noinstrument_function;
  ****************************************************************************/
 
 #ifdef CONFIG_IRQCOUNT
+
+#  if (defined(CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION) && \
+       CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0) || \
+       defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 void leave_critical_section(irqstate_t flags) noinstrument_function;
+#  else
+#    define leave_critical_section(f) leave_critical_section_wo_note(f)
+#  endif
+
+void leave_critical_section_wo_note(irqstate_t flags) noinstrument_function;
 #else
 #  define leave_critical_section(f) up_irq_restore(f)
+#  define leave_critical_section_wo_note(f) up_irq_restore(f)
 #endif
 
 /****************************************************************************
