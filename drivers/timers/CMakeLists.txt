@@ -30,6 +30,10 @@ if(CONFIG_TIMER)
   list(APPEND SRCS timer.c)
 endif()
 
+if(CONFIG_TIMER_WDOG)
+  list(APPEND SRCS timer_wdog.c)
+endif()
+
 if(CONFIG_TIMER_ARCH)
   list(APPEND SRCS arch_timer.c)
 endif()
