@@ -449,7 +449,7 @@ static void rmt_module_enable(void)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
 
   if (g_rmtdev_common.rmt_module_enabled == false)
     {
@@ -501,7 +501,7 @@ static int rmt_set_rx_thr_intr_en(rmt_channel_t channel, bool en,
           return -EINVAL;
         }
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_rx_set_limit(g_rmtdev_common.hal.regs,
                           RMT_DECODE_RX_CHANNEL(channel), evt_thresh);
       mask = RMT_LL_EVENT_RX_THRES(RMT_DECODE_RX_CHANNEL(channel));
@@ -510,7 +510,7 @@ static int rmt_set_rx_thr_intr_en(rmt_channel_t channel, bool en,
     }
   else
     {
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       mask = RMT_LL_EVENT_RX_THRES(RMT_DECODE_RX_CHANNEL(channel));
       rmt_ll_enable_interrupt(g_rmtdev_common.hal.regs, mask, false);
       spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
@@ -551,7 +551,7 @@ static int rmt_rx_start(rmt_channel_t channel, bool rx_idx_rst)
 
   DEBUGASSERT(RMT_IS_RX_CHANNEL(channel));
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
 
   rmt_ll_rx_enable(g_rmtdev_common.hal.regs, ch, false);
   if (rx_idx_rst)
@@ -598,7 +598,7 @@ static int rmt_tx_start(rmt_channel_t channel, bool tx_idx_rst)
 
   DEBUGASSERT(RMT_IS_TX_CHANNEL(channel));
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
   if (tx_idx_rst)
     {
       rmt_ll_tx_reset_pointer(g_rmtdev_common.hal.regs, channel);
@@ -656,7 +656,7 @@ static int rmt_set_tx_loop_mode(rmt_channel_t channel, bool loop_en)
 
   DEBUGASSERT(RMT_IS_TX_CHANNEL(channel));
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
   rmt_ll_tx_enable_loop(g_rmtdev_common.hal.regs, channel, loop_en);
   spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
 
@@ -698,7 +698,7 @@ static int rmt_set_tx_thr_intr_en(rmt_channel_t channel, bool en,
 
       DEBUGASSERT(evt_thresh <= item_block_len);
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_tx_set_limit(g_rmtdev_common.hal.regs, channel, evt_thresh);
       rmt_ll_enable_interrupt(g_rmtdev_common.hal.regs,
                               RMT_LL_EVENT_TX_THRES(channel), true);
@@ -706,7 +706,7 @@ static int rmt_set_tx_thr_intr_en(rmt_channel_t channel, bool en,
     }
   else
     {
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_enable_interrupt(g_rmtdev_common.hal.regs,
                               RMT_LL_EVENT_TX_THRES(channel), false);
       spin_unlock_irqrestore(&g_rmtdev_common.rmt_spinlock, flags);
@@ -848,7 +848,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
       return -EINVAL;
     }
 
-  flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+  flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
 
   rmt_ll_enable_mem_access_nonfifo(dev, true);
 
@@ -913,7 +913,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
       uint8_t carrier_level = rmt_param->tx_config.carrier_level;
       uint8_t idle_level = rmt_param->tx_config.idle_level;
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_tx_set_channel_clock_div(dev, channel, clk_div);
       rmt_ll_tx_set_mem_blocks(dev, channel, mem_cnt);
       rmt_ll_tx_reset_pointer(dev, channel);
@@ -965,7 +965,7 @@ static int rmt_internal_config(rmt_dev_t *dev,
       uint8_t filter_cnt = rmt_param->rx_config.filter_ticks_thresh;
       uint16_t threshold = rmt_param->rx_config.idle_threshold;
 
-      flags = spin_lock_irqsave(g_rmtdev_common.rmt_spinlock);
+      flags = spin_lock_irqsave(&g_rmtdev_common.rmt_spinlock);
       rmt_ll_rx_set_channel_clock_div(dev, RMT_DECODE_RX_CHANNEL(channel),
                                       clk_div);
       rmt_ll_rx_set_mem_blocks(dev, RMT_DECODE_RX_CHANNEL(channel), mem_cnt);
