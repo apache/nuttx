@@ -86,8 +86,8 @@ static void notesnap_cpu_resumed(FAR struct note_driver_s *drv,
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-static void notesnap_premption(FAR struct note_driver_s *drv,
-                               FAR struct tcb_s *tcb, bool locked);
+static void notesnap_preemption(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb, bool locked);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
 static void notesnap_csection(FAR struct note_driver_s *drv,
@@ -133,7 +133,7 @@ static const struct note_driver_ops_s g_notesnap_ops =
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-  notesnap_premption,
+  notesnap_preemption,
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
   notesnap_csection,
@@ -302,8 +302,8 @@ static void notesnap_cpu_resumed(FAR struct note_driver_s *drv,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-static void notesnap_premption(FAR struct note_driver_s *drv,
-                               FAR struct tcb_s *tcb, bool locked)
+static void notesnap_preemption(FAR struct note_driver_s *drv,
+                                FAR struct tcb_s *tcb, bool locked)
 {
   notesnap_common(drv, tcb, locked ? NOTE_PREEMPT_LOCK :
                   NOTE_PREEMPT_UNLOCK, 0);

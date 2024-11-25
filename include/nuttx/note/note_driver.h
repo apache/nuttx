@@ -71,8 +71,8 @@ struct note_driver_ops_s
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-  CODE void (*premption)(FAR struct note_driver_s *drv,
-                         FAR struct tcb_s *tcb, bool locked);
+  CODE void (*preemption)(FAR struct note_driver_s *drv,
+                          FAR struct tcb_s *tcb, bool locked);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
   CODE void (*csection)(FAR struct note_driver_s *drv,

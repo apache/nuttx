@@ -79,8 +79,8 @@
   ((drv)->ops->cpu_resume && ((drv)->ops->cpu_resume(drv, tcb, cpu), true))
 #define note_cpu_resumed(drv, tcb)                                           \
   ((drv)->ops->cpu_resumed && ((drv)->ops->cpu_resumed(drv, tcb), true))
-#define note_premption(drv, tcb, locked)                                     \
-  ((drv)->ops->premption && ((drv)->ops->premption(drv, tcb, locked), true))
+#define note_preemption(drv, tcb, locked)                                    \
+  ((drv)->ops->preemption && ((drv)->ops->preemption(drv, tcb, locked), true))
 #define note_csection(drv, tcb, enter)                                       \
   ((drv)->ops->csection && ((drv)->ops->csection(drv, tcb, enter), true))
 #define note_spinlock(drv, tcb, spinlock, type)                              \
@@ -1051,7 +1051,7 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_SWITCH */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
+void sched_note_preemption(FAR struct tcb_s *tcb, bool locked)
 {
   struct note_preempt_s note;
   FAR struct note_driver_s **driver;
@@ -1064,7 +1064,7 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
           continue;
         }
 
-      if (note_premption(*driver, tcb, locked))
+      if (note_preemption(*driver, tcb, locked))
         {
           continue;
         }
