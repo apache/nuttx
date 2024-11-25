@@ -466,6 +466,9 @@ class MMNode(gdb.Value, p.MMFreeNode):
 
     @property
     def nextnode(self) -> MMNode:
+        if not self.nodesize:
+            return None
+
         addr = int(self.address) + self.nodesize
         type = utils.lookup_type("struct mm_freenode_s").pointer()
         # Use gdb.Value for better performance
@@ -551,7 +554,7 @@ class MMHeap(Value, p.MMHeap):
     def nodes(self) -> Generator[MMNode, None, None]:
         for start, end in self.regions:
             node = start
-            while node.address <= end.address:
+            while node and node.address <= end.address:
                 yield node
                 node = node.nextnode
 
