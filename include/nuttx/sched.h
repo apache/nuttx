@@ -702,10 +702,10 @@ struct tcb_s
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-  clock_t premp_start;                   /* Time when preemption disabled   */
-  clock_t premp_max;                     /* Max time preemption disabled    */
-  void   *premp_caller;                  /* Caller of preemption disabled   */
-  void   *premp_max_caller;              /* Caller of max preemption        */
+  clock_t preemp_start;                  /* Time when preemption disabled   */
+  clock_t preemp_max;                    /* Max time preemption disabled    */
+  void   *preemp_caller;                 /* Caller of preemption disabled   */
+  void   *preemp_max_caller;             /* Caller of max preemption        */
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
@@ -867,7 +867,7 @@ extern "C"
 /* Maximum time with pre-emption disabled or within critical section. */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-EXTERN clock_t g_premp_max[CONFIG_SMP_NCPUS];
+EXTERN clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION  >= 0 */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0

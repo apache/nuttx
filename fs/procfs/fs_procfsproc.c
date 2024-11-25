@@ -774,9 +774,9 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
   /* Convert the for maximum time pre-emption disabled */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-  if (tcb->premp_max > 0)
+  if (tcb->preemp_max > 0)
     {
-      perf_convert(tcb->premp_max, &maxtime);
+      perf_convert(tcb->preemp_max, &maxtime);
     }
   else
     {
@@ -786,14 +786,14 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Reset the maximum */
 
-  tcb->premp_max = 0;
+  tcb->preemp_max = 0;
 
   /* Generate output for maximum time pre-emption disabled */
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu %p,",
                              (unsigned long)maxtime.tv_sec,
                              (unsigned long)maxtime.tv_nsec,
-                             tcb->premp_max_caller);
+                             tcb->preemp_max_caller);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
