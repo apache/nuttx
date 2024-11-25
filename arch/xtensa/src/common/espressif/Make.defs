@@ -57,6 +57,10 @@ CHIP_CSRCS += esp_spiflash_mtd.c
 endif
 endif
 
+ifeq ($(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL),y)
+CHIP_CSRCS += esp_nxdiag.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 CHIP_CSRCS += esp_wireless.c
 ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
