@@ -416,7 +416,7 @@ After building the kernel (and the applications, in kernel mode), use the toolch
 to debug RISC-V applications. For instance, if you are using the xPack's prebuilt toolchain,
 you can use the following command to start GDB::
 
-    $ riscv-none-elf-gdb-py3 -ix tools/gdb/__init__.py --tui nuttx
+    $ riscv-none-elf-gdb-py3 -ix tools/gdb/gdbinit.py --tui nuttx
 
 To use QEMU for debugging, one should add the parameters ``-s -S`` to the QEMU command line.
 
