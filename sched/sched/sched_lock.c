@@ -110,7 +110,7 @@ int sched_lock(void)
           nxsched_critmon_preemption(rtcb, true, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_premption(rtcb, true);
+          sched_note_preemption(rtcb, true);
 #endif
         }
 
@@ -164,7 +164,7 @@ int sched_lock(void)
           nxsched_critmon_preemption(rtcb, true, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_premption(rtcb, true);
+          sched_note_preemption(rtcb, true);
 #endif
         }
     }

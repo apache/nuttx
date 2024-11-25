@@ -61,8 +61,8 @@ static void notelog_cpu_resumed(FAR struct note_driver_s *drv,
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-static void notelog_premption(FAR struct note_driver_s *drv,
-                              FAR struct tcb_s *tcb, bool locked);
+static void notelog_preemption(FAR struct note_driver_s *drv,
+                               FAR struct tcb_s *tcb, bool locked);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
 static void notelog_csection(FAR struct note_driver_s *drv,
@@ -103,7 +103,7 @@ static const struct note_driver_ops_s g_notelog_ops =
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-  notelog_premption,     /* premption */
+  notelog_preemption,    /* preemption */
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
   notelog_csection,      /* csection */
@@ -255,8 +255,8 @@ static void notelog_cpu_resumed(FAR struct note_driver_s *drv,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-static void notelog_premption(FAR struct note_driver_s *drv,
-                              FAR struct tcb_s *tcb, bool locked)
+static void notelog_preemption(FAR struct note_driver_s *drv,
+                               FAR struct tcb_s *tcb, bool locked)
 {
 #ifdef CONFIG_SMP
   syslog(LOG_INFO, "CPU%d: Task %s TCB@%p preemption %s\n",

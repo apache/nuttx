@@ -1252,7 +1252,7 @@ config SCHED_INSTRUMENTATION_PREEMPTION
 		Enables additional hooks for changes to pre-emption state.  Board-
 		specific logic must provide this additional logic.
 
-			void sched_note_premption(FAR struct tcb_s *tcb, bool state);
+			void sched_note_preemption(FAR struct tcb_s *tcb, bool state);
 
 config SCHED_INSTRUMENTATION_CSECTION
 	bool "Critical section monitor hooks"

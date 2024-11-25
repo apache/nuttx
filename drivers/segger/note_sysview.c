@@ -112,7 +112,7 @@ static const struct note_driver_ops_s g_note_sysview_ops =
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-  NULL,                       /* premption */
+  NULL,                       /* preemption */
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
   NULL,                       /* csection */

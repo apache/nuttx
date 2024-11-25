@@ -630,9 +630,9 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-void sched_note_premption(FAR struct tcb_s *tcb, bool locked);
+void sched_note_preemption(FAR struct tcb_s *tcb, bool locked);
 #else
-#  define sched_note_premption(t,l)
+#  define sched_note_preemption(t,l)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION

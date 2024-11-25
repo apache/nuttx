@@ -95,7 +95,7 @@ int sched_unlock(void)
           nxsched_critmon_preemption(rtcb, false, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_premption(rtcb, false);
+          sched_note_preemption(rtcb, false);
 #endif
 
           /* Release any ready-to-run tasks that have collected in
@@ -220,7 +220,7 @@ int sched_unlock(void)
           nxsched_critmon_preemption(rtcb, false, return_address(0));
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-          sched_note_premption(rtcb, false);
+          sched_note_preemption(rtcb, false);
 #endif
 
           /* Release any ready-to-run tasks that have collected in
