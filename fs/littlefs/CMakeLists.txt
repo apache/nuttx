@@ -25,7 +25,7 @@ if(CONFIG_FS_LITTLEFS)
 
     FetchContent_Declare(
       littlefs
-      URL https://github.com/ARMmbed/littlefs/archive/v${CONFIG_FS_LITTLEFS_VERSION}.tar.gz
+      URL https://github.com/ARMmbed/littlefs/archive/${CONFIG_FS_LITTLEFS_VERSION}.tar.gz
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/littlefs
           BINARY_DIR

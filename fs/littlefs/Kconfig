@@ -129,7 +129,7 @@ config FS_LITTLEFS_ATTR_UPDATE
 
 config FS_LITTLEFS_VERSION
 	string "LITTLEFS version to use"
-	default "2.5.1"
+	default "v2.5.1"
 	---help---
 		The LITTLEFS version to use.
 
