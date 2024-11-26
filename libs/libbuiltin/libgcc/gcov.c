@@ -205,6 +205,11 @@ static int gcov_process_path(FAR char *prefix, int strip,
 
   prefix_count = token_count;
   token = strtok(path, "/");
+  if (token == NULL)
+    {
+      return -EINVAL;
+    }
+
   while (token != NULL)
     {
       filename = token;
@@ -315,9 +320,22 @@ void __gcov_dump(void)
   FAR struct gcov_info *info;
   FAR const char *strip = getenv("GCOV_PREFIX_STRIP");
   FAR const char *prefix = getenv("GCOV_PREFIX");
-  FAR char *prefix2 = strdup(prefix);
   FAR char new_path[PATH_MAX];
+  FAR char *prefix2;
   int ret;
+
+  if (prefix == NULL)
+    {
+      syslog(LOG_ERR, "No path prefix specified");
+      return;
+    }
+
+  prefix2 = strdup(prefix);
+  if (prefix2 == NULL)
+    {
+      syslog(LOG_ERR, "gcov alloc failed!");
+      return;
+    }
 
   for (info = __gcov_info_start; info; info = info->next)
     {
@@ -401,7 +419,7 @@ void __gcov_filename_to_gcfn(FAR const char *filename,
 void __gcov_info_to_gcda(FAR const struct gcov_info *info,
                          FAR void (*filename_fn)(FAR const char *,
                                                  FAR void *),
-                         FAR void (*dump_fn)(FAR const void *, unsigned int,
+                         FAR void (*dump_fn)(FAR const void *, size_t,
                                              FAR void *),
                          FAR void *(*allocate_fn)(unsigned int, FAR void *),
                          FAR void *arg)
