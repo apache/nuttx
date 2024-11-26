@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32f7/nucleo-f767/scriptsMake.defs
+# boards/arm/stm32f7/nucleo-f767zi/scripts/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
