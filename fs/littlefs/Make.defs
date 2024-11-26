@@ -37,6 +37,10 @@ CSRCS += lfs.c lfs_util.c
 DEPPATH += --dep-path littlefs/littlefs
 VPATH += :littlefs/littlefs
 
+# Note: the littlefs upstream doesn't seems to care -Wshadow
+# cf. https://github.com/littlefs-project/littlefs/pull/873
+CFLAGS += -Wno-shadow
+
 CFLAGS += -DLFS_TRACE=finfo
 CFLAGS += -DLFS_DEBUG=finfo
 CFLAGS += -DLFS_WARN=fwarn
