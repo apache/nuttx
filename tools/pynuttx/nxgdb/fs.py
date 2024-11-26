@@ -305,7 +305,6 @@ class ForeachInode(gdb.Command):
 
     def __init__(self):
         super().__init__("foreach inode", gdb.COMMAND_USER)
-        self.level = 4096
 
     def get_root_inode(self, addr_or_expr):
         try:
@@ -321,7 +320,7 @@ class ForeachInode(gdb.Command):
             "-L",
             "--level",
             type=int,
-            default=None,
+            default=4096,
             help="Only render the tree to a specific depth",
         )
         parser.add_argument(
@@ -335,18 +334,13 @@ class ForeachInode(gdb.Command):
             args = parser.parse_args(argv)
         except SystemExit:
             return None
-        return {
-            "level": args.level if args.level else 4096,
-            "root_inode": (
-                self.get_root_inode(args.addr_or_expr)
-                if args.addr_or_expr
-                else utils.gdb_eval_or_none("g_root_inode")
-            ),
-        }
 
-    def print_inode_info(self, node: Inode, level, prefix):
-        if level > self.level:
+        return args
+
+    def print_inode_info(self, node: Inode, level=1, prefix="", maxlevel=4096):
+        if level > maxlevel:
             return
+
         while node:
             if node.i_peer:
                 initial_indent = prefix + "├── "
@@ -391,7 +385,7 @@ class ForeachInode(gdb.Command):
                     )
                 )
             if node.i_child:
-                self.print_inode_info(node.i_child, level + 1, newprefix)
+                self.print_inode_info(node.i_child, level + 1, newprefix, maxlevel)
             node = node.i_peer
 
     def diagnose(self, *args, **kwargs):
@@ -406,11 +400,16 @@ class ForeachInode(gdb.Command):
         }
 
     def invoke(self, args, from_tty):
-        arg = self.parse_arguments(args.split(" "))
-        if not arg:
+        args = self.parse_arguments(args.split(" "))
+        if not args:
             return
-        self.level = arg["level"]
-        self.print_inode_info(arg["root_inode"], 1, "")
+
+        root = (
+            self.get_root_inode(args.addr_or_expr)
+            if args.addr_or_expr
+            else utils.gdb_eval_or_none("g_root_inode")
+        )
+        self.print_inode_info(root, maxlevel=args.level)
 
 
 class InfoShmfs(gdb.Command):
