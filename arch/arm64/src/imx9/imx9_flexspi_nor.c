@@ -788,16 +788,13 @@ static ssize_t imx9_flexspi_nor_read(struct mtd_dev_s *dev,
     }
 
   src = priv->ahb_base + offset;
-  DEBUGASSERT(((uintptr_t)src & (ARMV8A_DCACHE_LINESIZE - 1)) == 0);
 
-  up_invalidate_dcache((uintptr_t)buffer,
-                       (uintptr_t)buffer +
-                       ALIGN_UP(nbytes, ARMV8A_DCACHE_LINESIZE));
+  int n = nbytes;
 
-  memcpy(buffer, src, nbytes);
-
-  up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer +
-                  ALIGN_UP(nbytes, ARMV8A_DCACHE_LINESIZE));
+  while (n-- > 0)
+    {
+      *buffer++ = *src++;
+    }
 
   finfo("return nbytes: %d\n", (int)nbytes);
   return (ssize_t)nbytes;
