@@ -133,7 +133,8 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
       /* Parsing data of partition table */
 
       token = strtok_r(token, "\n", &save_ptr);
-      if (strncmp(token, TXTABLE_MAGIC, strlen(TXTABLE_MAGIC)) != 0)
+      if (token == NULL ||
+          strncmp(token, TXTABLE_MAGIC, strlen(TXTABLE_MAGIC)) != 0)
         {
           save_ptr = NULL;
           ret = -EFTYPE;
