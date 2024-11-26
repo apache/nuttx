@@ -251,6 +251,14 @@ static void perf_buffer_release_space(FAR struct perf_event_s *event,
     }
 }
 
+static inline void perf_backtrace_convert(FAR uint64_t *ptr, int nr)
+{
+  while (sizeof(uintptr_t) != sizeof(uint64_t) && nr-- >= 0)
+    {
+      *(ptr + nr) = *((FAR uintptr_t *)ptr + nr);
+    }
+}
+
 static void perf_output_sample(FAR struct perf_event_header_s *header,
                                FAR struct perf_sample_data_s *data,
                                FAR struct perf_event_s *event)
@@ -299,6 +307,7 @@ static void perf_output_sample(FAR struct perf_event_header_s *header,
           next_ptr = (remain_len == 8) ? event->buf->rb.base : (ptr + 1);
           nr = sched_backtrace(_SCHED_GETTID(), (FAR void **)next_ptr,
                            PERF_MAX_BACKTRACE, FLAME_GRAPH_SKIP);
+          perf_backtrace_convert(next_ptr, nr);
         }
       else
         {
@@ -306,12 +315,14 @@ static void perf_output_sample(FAR struct perf_event_header_s *header,
 
           nr = sched_backtrace(_SCHED_GETTID(), (FAR void **)(ptr + 1),
                                 remain_size, FLAME_GRAPH_SKIP);
+          perf_backtrace_convert(ptr + 1, nr);
 
           if (nr == remain_size)
             {
               next_ptr = event->buf->rb.base;
               nr += sched_backtrace(_SCHED_GETTID(), (FAR void **)next_ptr,
                   PERF_MAX_BACKTRACE - remain_size, FLAME_GRAPH_SKIP + nr);
+              perf_backtrace_convert(next_ptr, nr - remain_size);
             }
         }
 
