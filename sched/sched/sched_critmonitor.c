@@ -369,6 +369,9 @@ void nxsched_critmon_busywait(bool state, FAR void *caller)
 
 void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 {
+#ifdef CONFIG_SCHED_INSTRUMENTATION_THREADTIME
+  static clock_t threshold = CLOCK_MAX;
+#endif
   clock_t current = perf_gettime();
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_THREAD >= 0
   clock_t elapsed = current - tcb->run_start;
@@ -379,25 +382,25 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
   UNUSED(elapsed);
 #endif
 
-#if defined(CONFIG_SCHED_CPULOAD_CRITMONITOR) || \
-    defined(CONFIG_SCHED_INSTRUMENTATION_THREADTIME)
-  struct timespec ts;
-  clock_t tick;
-
-  perf_convert(elapsed, &ts);
-#endif
-
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-  tick = clock_time2ticks(&ts);
+  clock_t tick = elapsed * CLK_TCK / perf_getfreq();
+
   nxsched_critmon_cpuload(tcb, current, tick);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_THREADTIME
-  tick = clock_time2usec(&ts);
-  if (!is_idle_task(tcb) &&
-      tick > CONFIG_SCHED_INSTRUMENTATION_THREAD_RUNTIME_DURATION)
+  if (threshold == CLOCK_MAX)
     {
-      sched_note_threadtime(tick);
+      threshold =
+        CONFIG_SCHED_INSTRUMENTATION_THREAD_RUNTIME_DURATION *
+        (clock_t)perf_getfreq() / USEC_PER_SEC;
+    }
+
+  if (!is_idle_task(tcb) && elapsed > threshold)
+    {
+      clock_t us = elapsed * USEC_PER_SEC / perf_getfreq();
+
+      sched_note_threadtime(us);
     }
 #endif
 
