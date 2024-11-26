@@ -57,13 +57,11 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
 
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(up_current_regs() == NULL);
+  DEBUGASSERT(!up_interrupt_context());
 
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * current_regs is also used to manage interrupt level context switches.
-   */
+  /* Set irq flag */
 
-  up_set_current_regs(regs);
+  up_set_interrupt_context(true);
 
   if (*running_task != NULL)
     {
@@ -104,11 +102,9 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
       *running_task = tcb;
     }
 
-  /* Set current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Set irq flag */
 
-  up_set_current_regs(NULL);
+  up_set_interrupt_context(false);
 #endif
 
   board_autoled_off(LED_INIRQ);
