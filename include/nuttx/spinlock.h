@@ -218,7 +218,7 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
 #define spin_lock_init(l) do { *(l) = SP_UNLOCKED; } while (0)
 
 /****************************************************************************
- * Name: spin_lock_wo_note
+ * Name: spin_lock_notrace
  *
  * Description:
  *   If this CPU does not already hold the spinlock, then loop until the
@@ -240,7 +240,7 @@ static inline spinlock_t up_testset(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-static inline_function void spin_lock_wo_note(FAR volatile spinlock_t *lock)
+static inline_function void spin_lock_notrace(FAR volatile spinlock_t *lock)
 {
 #ifdef CONFIG_TICKET_SPINLOCK
   unsigned short ticket =
@@ -290,7 +290,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 
   /* Lock without trace note */
 
-  spin_lock_wo_note(lock);
+  spin_lock_notrace(lock);
 
   /* Notify that we have the spinlock */
 
@@ -299,7 +299,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
- * Name: spin_trylock_wo_note
+ * Name: spin_trylock_notrace
  *
  * Description:
  *   Try once to lock the spinlock.  Do not wait if the spinlock is already
@@ -322,7 +322,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
 
 #ifdef CONFIG_SPINLOCK
 static inline_function bool
-spin_trylock_wo_note(FAR volatile spinlock_t *lock)
+spin_trylock_notrace(FAR volatile spinlock_t *lock)
 {
 #ifdef CONFIG_TICKET_SPINLOCK
   unsigned short ticket =
@@ -387,7 +387,7 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
 
   /* Try lock without trace note */
 
-  locked = spin_trylock_wo_note(lock);
+  locked = spin_trylock_notrace(lock);
   if (locked)
     {
       /* Notify that we have the spinlock */
@@ -406,7 +406,7 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
- * Name: spin_unlock_wo_note
+ * Name: spin_unlock_notrace
  *
  * Description:
  *   Release one count on a non-reentrant spinlock.
@@ -427,7 +427,7 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
 
 #ifdef CONFIG_SPINLOCK
 static inline_function void
-spin_unlock_wo_note(FAR volatile spinlock_t *lock)
+spin_unlock_notrace(FAR volatile spinlock_t *lock)
 {
   SP_DMB();
 #ifdef CONFIG_TICKET_SPINLOCK
@@ -463,7 +463,7 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 {
   /* Unlock without trace note */
 
-  spin_unlock_wo_note(lock);
+  spin_unlock_notrace(lock);
 
   /* Notify that we are unlocking the spinlock */
 
@@ -496,7 +496,7 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 #endif
 
 /****************************************************************************
- * Name: spin_lock_irqsave_wo_note
+ * Name: spin_lock_irqsave_notrace
  *
  * Description:
  *   This function is no trace version of spin_lock_irqsave()
@@ -505,7 +505,7 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 
 #ifdef CONFIG_SPINLOCK
 static inline_function
-irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
+irqstate_t spin_lock_irqsave_notrace(FAR volatile spinlock_t *lock)
 {
   irqstate_t ret;
   ret = up_irq_save();
@@ -515,7 +515,7 @@ irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
       int me = this_cpu();
       if (0 == g_irq_spin_count[me])
         {
-          spin_lock_wo_note(&g_irq_spin);
+          spin_lock_notrace(&g_irq_spin);
         }
 
       g_irq_spin_count[me]++;
@@ -523,13 +523,13 @@ irqstate_t spin_lock_irqsave_wo_note(FAR volatile spinlock_t *lock)
     }
   else
     {
-      spin_lock_wo_note(lock);
+      spin_lock_notrace(lock);
     }
 
   return ret;
 }
 #else
-#  define spin_lock_irqsave_wo_note(l) ((void)(l), up_irq_save())
+#  define spin_lock_irqsave_notrace(l) ((void)(l), up_irq_save())
 #endif
 
 /****************************************************************************
@@ -577,7 +577,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 
   /* Lock without trace note */
 
-  flags = spin_lock_irqsave_wo_note(lock);
+  flags = spin_lock_irqsave_notrace(lock);
 
   /* Notify that we have the spinlock */
 
@@ -590,7 +590,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 #endif
 
 /****************************************************************************
- * Name: spin_trylock_irqsave_wo_note
+ * Name: spin_trylock_irqsave_notrace
  *
  * Description:
  *   Try once to lock the spinlock.  Do not wait if the spinlock is already
@@ -613,14 +613,14 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-#  define spin_trylock_irqsave_wo_note(l, f) \
+#  define spin_trylock_irqsave_notrace(l, f) \
 ({ \
   f = up_irq_save(); \
-  spin_trylock_wo_note(l) ? \
+  spin_trylock_notrace(l) ? \
   true : ({ up_irq_restore(f); false; }); \
 })
 #else
-#  define spin_trylock_irqsave_wo_note(l, f) \
+#  define spin_trylock_irqsave_notrace(l, f) \
 ({ \
   (void)(l); \
   f = up_irq_save(); \
@@ -665,7 +665,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 #endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
- * Name: spin_unlock_irqrestore_wo_note
+ * Name: spin_unlock_irqrestore_notrace
  *
  * Description:
  *   This function is no trace version of spin_unlock_irqrestore()
@@ -674,7 +674,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 
 #ifdef CONFIG_SPINLOCK
 static inline_function
-void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
+void spin_unlock_irqrestore_notrace(FAR volatile spinlock_t *lock,
                                     irqstate_t flags)
 {
   if (NULL == lock)
@@ -685,18 +685,18 @@ void spin_unlock_irqrestore_wo_note(FAR volatile spinlock_t *lock,
 
       if (0 == g_irq_spin_count[me])
         {
-          spin_unlock_wo_note(&g_irq_spin);
+          spin_unlock_notrace(&g_irq_spin);
         }
     }
   else
     {
-      spin_unlock_wo_note(lock);
+      spin_unlock_notrace(lock);
     }
 
   up_irq_restore(flags);
 }
 #else
-#  define spin_unlock_irqrestore_wo_note(l, f) ((void)(l), up_irq_restore(f))
+#  define spin_unlock_irqrestore_notrace(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 /****************************************************************************
@@ -735,7 +735,7 @@ void spin_unlock_irqrestore(FAR volatile spinlock_t *lock,
 {
   /* Unlock without trace note */
 
-  spin_unlock_irqrestore_wo_note(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 
   /* Notify that we are unlocking the spinlock */
 
