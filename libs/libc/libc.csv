@@ -97,6 +97,7 @@
 "getaddrinfo","netdb.h","defined(CONFIG_LIBC_NETDB)","int","FAR const char *","FAR const char *","FAR const struct addrinfo *","FAR struct addrinfo **"
 "getc","stdio.h","","int","FAR FILE *"
 "getcwd","unistd.h","!defined(CONFIG_DISABLE_ENVIRON)","FAR char *","FAR char *","size_t"
+"get_current_dir_name","unistd.h","!defined(CONFIG_DISABLE_ENVIRON)","FAR char *","void"
 "getegid","unistd.h","","gid_t"
 "geteuid","unistd.h","","uid_t"
 "gethostbyname","netdb.h","defined(CONFIG_LIBC_NETDB)","FAR struct hostent *","FAR const char *"
