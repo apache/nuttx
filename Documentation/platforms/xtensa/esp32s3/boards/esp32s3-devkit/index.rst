@@ -799,3 +799,31 @@ Then run the adb command::
   $ adb -s 1234 shell
   nsh> uname -a
   NuttX 0.0.0  Nov 22 2024 11:41:43 xtensa esp32s3-devkit
+
+txtable
+-------
+
+Basic TXTABLE(Text based Partition Table) configuration console enabled over USB ADB.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:txtable
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then check the partition::
+
+  nsh> ls -l /dev/
+  /dev:
+   dr--r--r--           0 adb0/
+   crw-rw-rw-           0 console
+   frw-rw-rw-     1044480 data
+   frw-rw-rw-     1048576 esp32s3flash
+   c-w--w--w-           0 log
+   crw-rw-rw-           0 null
+   crw-rw-rw-           0 ptmx
+   dr--r--r--           0 pts/
+   brw-rw-rw-        1024 ram0
+   crw-rw-rw-           0 ttyS0
+   frw-rw-rw-        4096 txtable
+   crw-rw-rw-           0 zero
