@@ -191,7 +191,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
     {
       FAR struct tcb_s *rtcb = this_task();
 
-      if (rtcb->lockcount > 0)
+      if (nxsched_islocked_tcb(rtcb))
         {
           /* Move all tasks with the higher priority from the ready-to-run
            * list to the pending list.
