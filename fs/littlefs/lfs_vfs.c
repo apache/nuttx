@@ -742,7 +742,9 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
   struct littlefs_attr_s attr;
+#endif
   int ret;
 
   memset(buf, 0, sizeof(*buf));
@@ -768,6 +770,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
       goto errout;
     }
 
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
   ret = littlefs_convert_result(lfs_file_getattr(&fs->lfs, &priv->file, 0,
                                                  &attr, sizeof(attr)));
   if (ret < 0)
@@ -791,6 +794,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   buf->st_mtim.tv_nsec = attr.at_mtim % 1000000000ull;
   buf->st_ctim.tv_sec  = attr.at_ctim / 1000000000ull;
   buf->st_ctim.tv_nsec = attr.at_ctim % 1000000000ull;
+#endif /* CONFIG_FS_LITTLEFS_ATTR_UPDATE */
   buf->st_blksize      = fs->cfg.block_size;
   buf->st_blocks       = (buf->st_size + buf->st_blksize - 1) /
                          buf->st_blksize;
