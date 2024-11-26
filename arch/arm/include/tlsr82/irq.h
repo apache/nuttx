@@ -273,6 +273,16 @@ static inline_function bool up_interrupt_context(void)
 #endif
 }
 
+noinstrument_function
+static inline_function void up_set_interrupt_context(bool flag)
+{
+#ifdef CONFIG_ARCH_HAVE_MULTICPU
+  g_interrupt_context[up_cpu_index()] = flag;
+#else
+  g_interrupt_context[0] = flag;
+#endif
+}
+
 #define up_switch_context(tcb, rtcb)                        \
   do {                                                      \
     if (!up_interrupt_context())                            \

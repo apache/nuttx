@@ -34,9 +34,7 @@
 
 /* g_interrupt_context store irq status */
 
-#if defined(CONFIG_ARCH_ARM)
 volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
-#endif
 
 /****************************************************************************
  * Private Functions
