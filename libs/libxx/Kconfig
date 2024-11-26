@@ -136,4 +136,9 @@ config LIBCXX_VERSION
 	depends on LIBCXX
 	default "17.0.6"
 
+config LIBCXX_TEST
+	bool "LLVM Libcxx Library Test"
+	depends on LIBCXX && CXX_EXCEPTION
+	default n
+
 endif
