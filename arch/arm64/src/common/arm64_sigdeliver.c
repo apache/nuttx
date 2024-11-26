@@ -64,7 +64,7 @@ void arm64_sigdeliver(void)
 
   irqstate_t  flags;
   int16_t saved_irqcount;
-  flags = (rtcb->xcp.saved_reg[REG_SPSR] & SPSR_DAIF_MASK);
+  flags = (rtcb->xcp.saved_regs[REG_SPSR] & SPSR_DAIF_MASK);
 #endif
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
@@ -149,7 +149,7 @@ retry:
    */
 
   rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
-  rtcb->xcp.regs = rtcb->xcp.saved_reg;
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
 
   /* Then restore the correct state for this thread of execution. */
 

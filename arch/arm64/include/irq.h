@@ -270,7 +270,7 @@ struct xcptcontext
 
   /* task context, for signal process */
 
-  uint64_t *saved_reg;
+  uint64_t *saved_regs;
 
 #ifdef CONFIG_ARCH_FPU
   uint64_t *fpu_regs;

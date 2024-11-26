@@ -138,7 +138,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * have been delivered.
        */
 
-      tcb->xcp.saved_reg = tcb->xcp.regs;
+      tcb->xcp.saved_regs = tcb->xcp.regs;
 
       /* create signal process context */
 
