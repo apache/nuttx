@@ -440,7 +440,7 @@ static inline void up_idtinit(void)
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline void x86_64_color_intstack(void)
 {
-  x86_64_stack_color((void *)up_get_intstackbase(up_cpu_index()),
+  x86_64_stack_color((void *)up_get_intstackbase(this_cpu()),
                      IRQ_STACK_SIZE);
 }
 #else
