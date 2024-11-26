@@ -864,6 +864,10 @@ void weak_function arm64_dma_initialize(void)
 
       putreg32(0, IMX9_EDMA_TCD(base, chan) + IMX9_EDMA_CH_CSR_OFFSET);
 
+      /* Clear interrupt if any */
+
+      putreg32(1, IMX9_EDMA_TCD(base, chan) + IMX9_EDMA_CH_INT_OFFSET);
+
       /* Set all TCD CSR, biter and citer entries to 0 so that
        * will be 0 when DONE is not set so that imx9_dmach_getcount
        * reports 0.
