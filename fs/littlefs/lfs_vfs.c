@@ -598,14 +598,18 @@ static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
 static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct littlefs_mountpt_s *fs;
+#ifdef CONFIG_FS_LITTLEFS_GETPATH
   FAR struct littlefs_file_s *priv;
+#endif
   FAR struct inode *inode;
   FAR struct inode *drv;
   int ret;
 
   /* Recover our private data from the struct file instance */
 
+#ifdef CONFIG_FS_LITTLEFS_GETPATH
   priv  = filep->f_priv;
+#endif
   inode = filep->f_inode;
   fs    = inode->i_private;
   drv   = fs->drv;
@@ -618,6 +622,7 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+#ifdef CONFIG_FS_LITTLEFS_GETPATH
       case FIOC_FILEPATH:
         {
           FAR char *path = (FAR char *)(uintptr_t)arg;
@@ -637,6 +642,7 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
         }
         break;
+#endif
 
       default:
         {

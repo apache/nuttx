@@ -22,20 +22,30 @@
 
 if(CONFIG_FS_LITTLEFS)
   if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/littlefs)
-
-    FetchContent_Declare(
-      littlefs
-      URL https://github.com/ARMmbed/littlefs/archive/${CONFIG_FS_LITTLEFS_VERSION}.tar.gz
-          SOURCE_DIR
-          ${CMAKE_CURRENT_LIST_DIR}/littlefs
-          BINARY_DIR
-          ${CMAKE_BINARY_DIR}/fs/littlefs/littlefs
-      PATCH_COMMAND
-        patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/lfs_util.patch && patch -p2 -d
-        ${CMAKE_CURRENT_LIST_DIR} < ${CMAKE_CURRENT_LIST_DIR}/lfs_getpath.patch
-        && patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
-        ${CMAKE_CURRENT_LIST_DIR}/lfs_getsetattr.patch)
+    if(CONFIG_FS_LITTLEFS_LOCAL_PATCHES)
+      FetchContent_Declare(
+        littlefs
+        URL https://github.com/ARMmbed/littlefs/archive/${CONFIG_FS_LITTLEFS_VERSION}.tar.gz
+            SOURCE_DIR
+            ${CMAKE_CURRENT_LIST_DIR}/littlefs
+            BINARY_DIR
+            ${CMAKE_BINARY_DIR}/fs/littlefs/littlefs
+        PATCH_COMMAND
+          patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
+          ${CMAKE_CURRENT_LIST_DIR}/lfs_util.patch && patch -p2 -d
+          ${CMAKE_CURRENT_LIST_DIR} <
+          ${CMAKE_CURRENT_LIST_DIR}/lfs_getpath.patch && patch -p2 -d
+          ${CMAKE_CURRENT_LIST_DIR} <
+          ${CMAKE_CURRENT_LIST_DIR}/lfs_getsetattr.patch)
+    else()
+      FetchContent_Declare(
+        littlefs
+        URL https://github.com/ARMmbed/littlefs/archive/${CONFIG_FS_LITTLEFS_VERSION}.tar.gz
+            SOURCE_DIR
+            ${CMAKE_CURRENT_LIST_DIR}/littlefs
+            BINARY_DIR
+            ${CMAKE_BINARY_DIR}/fs/littlefs/littlefs)
+    endif()
     FetchContent_MakeAvailable(littlefs)
   endif()
 
