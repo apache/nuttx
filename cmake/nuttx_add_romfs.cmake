@@ -20,6 +20,9 @@
 #
 # ##############################################################################
 
+# Custom target to hold global ROMFS data
+add_custom_target(romfs_holder)
+
 function(add_board_rcsrcs)
   set_property(
     TARGET board
@@ -32,6 +35,36 @@ function(add_board_rcraws)
     TARGET board
     APPEND
     PROPERTY BOARD_RCRAWS ${ARGN})
+endfunction()
+
+# ~~~
+# add_dynamic_rcsrcs & add_dynamic_rcraws
+# provide a way to add dynamic ROMFS data
+# which genrate during the build process
+# to the final romfs_holder target
+# ~~~
+function(add_dynamic_rcsrcs)
+  cmake_parse_arguments(R "" "" "SRCS;DEPENDS" ${ARGN})
+  set_property(
+    TARGET romfs_holder
+    APPEND
+    PROPERTY DYN_RCSRCS ${R_SRCS})
+  set_property(
+    TARGET romfs_holder
+    APPEND
+    PROPERTY DYN_DEPS ${R_DEPENDS})
+endfunction()
+
+function(add_dynamic_rcraws)
+  cmake_parse_arguments(R "" "" "RAWS;DEPENDS" ${ARGN})
+  set_property(
+    TARGET romfs_holder
+    APPEND
+    PROPERTY DYN_RCRAWS ${R_RAWS})
+  set_property(
+    TARGET romfs_holder
+    APPEND
+    PROPERTY DYN_DEPS ${R_DEPENDS})
 endfunction()
 
 # ~~~
@@ -207,4 +240,131 @@ function(nuttx_add_cromfs)
 
   add_library(cromfs_${NAME} OBJECT cromfs_${NAME}.c)
   nuttx_add_library_internal(cromfs_${NAME})
+endfunction()
+
+# ~~~
+# The files of romfs may be added in
+# ANY PROCESS IN ANY DIRECORY,
+# so we process all the targets at the end.
+# ~~~
+function(process_all_directory_romfs)
+
+  # have we enabled etc romfs?
+  if(NOT CONFIG_ETC_ROMFS)
+    return()
+  endif()
+
+  # have we generated romfs yet?
+  if(TARGET target-romfs)
+    return()
+  endif()
+
+  # collect all ROMFS files
+  get_property(
+    board_rcsrcs
+    TARGET board
+    PROPERTY BOARD_RCSRCS)
+  get_property(
+    board_rcraws
+    TARGET board
+    PROPERTY BOARD_RCRAWS)
+
+  get_property(
+    dyn_rcsrcs
+    TARGET romfs_holder
+    PROPERTY DYN_RCSRCS)
+  get_property(
+    dyn_rcraws
+    TARGET romfs_holder
+    PROPERTY DYN_RCRAWS)
+
+  list(PREPEND RCSRCS ${board_rcsrcs} ${dyn_rcsrcs})
+  list(PREPEND RCRAWS ${board_rcraws} ${dyn_rcraws})
+
+  # init dynamic dependencies
+
+  get_property(
+    dyn_deps
+    TARGET romfs_holder
+    PROPERTY DYN_DEPS)
+
+  # precompile all rcsrcs
+  foreach(rcsrc ${RCSRCS})
+    if(IS_ABSOLUTE ${rcsrc})
+      string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
+                           "${rcsrc}")
+      string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcsrc}")
+      string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
+    else()
+      set(SOURCE_ETC_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+      set(SOURCE_ETC_SUFFIX ${rcsrc})
+    endif()
+
+    get_filename_component(rcpath ${SOURCE_ETC_SUFFIX} DIRECTORY)
+    if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${rcpath})
+      file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${rcpath})
+    endif()
+    nuttx_generate_preprocess_target(
+      SOURCE_FILE
+      ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+      TARGET_FILE
+      ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+      DEPENDS
+      nuttx_context
+      ${dyn_deps})
+    list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
+  endforeach()
+
+  # process all rcraws
+  foreach(rcraw ${RCRAWS})
+    if(IS_ABSOLUTE ${rcraw})
+      string(REGEX REPLACE "^(.*)/etc(/.*)?$" "\\1" SOURCE_ETC_PREFIX
+                           "${rcraw}")
+      string(REGEX REPLACE "^.*/(etc(/.*)?)$" "\\1" REMAINING_PATH "${rcraw}")
+      string(REGEX REPLACE "^/" "" SOURCE_ETC_SUFFIX "${REMAINING_PATH}")
+    else()
+      set(SOURCE_ETC_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+      set(SOURCE_ETC_SUFFIX ${rcraw})
+    endif()
+
+    if(IS_DIRECTORY ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
+      # if it is a directory, copy it to the build directory
+      add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        COMMAND
+          ${CMAKE_COMMAND} -E copy_directory
+          ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        DEPENDS ${dyn_deps})
+      list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
+    else()
+      list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
+      add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        COMMAND
+          ${CMAKE_COMMAND} -E copy ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
+          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+        DEPENDS ${dyn_deps})
+      list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
+    endif()
+  endforeach()
+
+  add_custom_command(
+    OUTPUT romfs_etc.c
+    COMMAND ${CMAKE_COMMAND} -E make_directory romfs_etc
+    COMMAND if \[ \"etc\" != \"\" \]; then ${CMAKE_COMMAND} -E copy_directory
+            etc romfs_etc \; fi
+    COMMAND genromfs -f romfs.img -d romfs_etc -V etc
+    COMMAND xxd -i romfs.img romfs_etc.c
+    COMMAND sed -E -i'' -e "s/^unsigned/const unsigned/g" romfs_etc.c
+    DEPENDS ${DEPENDS})
+
+  add_custom_target(target-romfs DEPENDS ${DEPENDS})
+  nuttx_add_aux_library(romfs_etc)
+  target_sources(romfs_etc PRIVATE romfs_etc.c)
+  add_dependencies(romfs_etc target-romfs)
+
+  target_link_libraries(board PRIVATE romfs_etc)
 endfunction()
