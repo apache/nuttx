@@ -40,6 +40,9 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
+#ifdef CONFIG_MTD_PARTITION
+#include <nuttx/fs/partition.h>
+#endif
 #ifdef CONFIG_BCH
 #include <nuttx/drivers/drivers.h>
 #endif
@@ -329,6 +332,15 @@ static int init_storage_partition(void)
       syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
       return ret;
     }
+
+#ifdef CONFIG_MTD_PARTITION
+  ret = parse_mtd_partition(mtd, NULL, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to parse MTD partition: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_MTD_PARTITION */
 
 #endif
 

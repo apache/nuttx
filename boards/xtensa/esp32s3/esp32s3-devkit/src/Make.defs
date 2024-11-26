@@ -63,4 +63,8 @@ CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
 ifeq ($(CONFIG_ETC_ROMFS),y)
 RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
+
+ifeq ($(CONFIG_TXTABLE_PARTITION),y)
+RCRAWS  = etc/txtable.txt
+endif # CONFIG_TXTABLE_PARTITION
 endif
