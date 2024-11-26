@@ -61,6 +61,10 @@ if(CONFIG_FS_LITTLEFS)
             -DLFS_FILE_MAX=${CONFIG_FS_LITTLEFS_FILE_MAX}
             -DLFS_ATTR_MAX=${CONFIG_FS_LITTLEFS_ATTR_MAX})
 
+  # Note: the littlefs upstream doesn't seems to care -Wshadow cf.
+  # https://github.com/littlefs-project/littlefs/pull/873
+  target_compile_options(fs PRIVATE -Wno-shadow)
+
   target_sources(fs PRIVATE lfs_vfs.c ${CMAKE_CURRENT_LIST_DIR}/littlefs/lfs.c
                             ${CMAKE_CURRENT_LIST_DIR}/littlefs/lfs_util.c)
 
