@@ -1323,6 +1323,10 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
   fs->cfg.lookahead_size = CONFIG_FS_LITTLEFS_LOOKAHEAD_SIZE;
 #endif
 
+#ifdef CONFIG_FS_LITTLEFS_MULTI_VERSION
+  fs->cfg.disk_version   = CONFIG_FS_LITTLEFS_DISK_VERSION;
+#endif
+
   /* Then get information about the littlefs filesystem on the devices
    * managed by this driver.
    */

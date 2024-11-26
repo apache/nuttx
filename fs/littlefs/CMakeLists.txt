@@ -59,7 +59,8 @@ if(CONFIG_FS_LITTLEFS)
             -DLFS_CONFIG=${CMAKE_CURRENT_LIST_DIR}/lfs_vfs.h
             -DLFS_NAME_MAX=${CONFIG_FS_LITTLEFS_NAME_MAX}
             -DLFS_FILE_MAX=${CONFIG_FS_LITTLEFS_FILE_MAX}
-            -DLFS_ATTR_MAX=${CONFIG_FS_LITTLEFS_ATTR_MAX})
+            -DLFS_ATTR_MAX=${CONFIG_FS_LITTLEFS_ATTR_MAX}
+            $<$<BOOL:${CONFIG_FS_LITTLEFS_MULTI_VERSION}>:-DLFS_MULTIVERSION>)
 
   # Note: the littlefs upstream doesn't seems to care -Wshadow cf.
   # https://github.com/littlefs-project/littlefs/pull/873

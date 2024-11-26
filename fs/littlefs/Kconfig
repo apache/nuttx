@@ -158,4 +158,21 @@ config FS_LITTLEFS_VERSION
 	---help---
 		The LITTLEFS version to use.
 
+config FS_LITTLEFS_MULTI_VERSION
+	bool "Support multiple on-disk versions"
+	default n
+	---help---
+		Enable LFS_MULTIVERSION for LITTLEFS file system
+
+config FS_LITTLEFS_DISK_VERSION
+	hex "LITTLEFS on-disk version"
+	default 0x0
+	depends on FS_LITTLEFS_MULTI_VERSION
+	---help---
+		The LITTLEFS disk version to use.
+
+		0 means to leave it to the default from the LITTLEFS.
+		0x00020000 means 2.0.
+		0x00020001 means 2.1.
+
 endif
