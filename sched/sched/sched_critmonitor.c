@@ -287,7 +287,7 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
   /* Did this task disable pre-emption? */
 
-  if (tcb->lockcount > 0)
+  if (nxsched_islocked_tcb(tcb))
     {
       /* Yes.. Save the start time */
 
@@ -345,7 +345,7 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
   /* Did this task disable preemption? */
 
-  if (tcb->lockcount > 0)
+  if (nxsched_islocked_tcb(tcb))
     {
       /* Possibly re-enabling.. Check for the max elapsed time */
 

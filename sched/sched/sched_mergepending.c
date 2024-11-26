@@ -89,7 +89,7 @@ bool nxsched_merge_pending(void)
    * Do nothing if pre-emption is still disabled
    */
 
-  if (rtcb->lockcount == 0)
+  if (!nxsched_islocked_tcb(rtcb))
     {
       for (ptcb = (FAR struct tcb_s *)list_pendingtasks()->head;
            ptcb;
