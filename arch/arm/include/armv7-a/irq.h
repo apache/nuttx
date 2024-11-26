@@ -476,6 +476,12 @@ static inline_function bool up_interrupt_context(void)
   return (bool)CP15_GET(TPIDRPRW);
 }
 
+noinstrument_function
+static inline_function void up_set_interrupt_context(bool flag)
+{
+  CP15_SET(TPIDRPRW, flag);
+}
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
