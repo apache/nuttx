@@ -66,9 +66,9 @@ void up_exit(int status)
 
   tcb = this_task();
 
-  /* Scheduler parameters will update inside syscall */
+  /* Update g_running_tasks */
 
-  g_running_tasks[this_cpu()] = NULL;
+  g_running_tasks[this_cpu()] = tcb;
 
   /* Then switch contexts */
 
