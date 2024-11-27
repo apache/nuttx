@@ -302,6 +302,15 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           rtcb->xcp.saved_ursp = regs[REG_RSP];
 #endif
 
+          /* Re-enable interrupts if enabled before.
+           * Current task RFLAGS are stored in R11.
+           */
+
+          if (regs[REG_R11] & X86_64_RFLAGS_IF)
+            {
+              up_irq_restore(X86_64_RFLAGS_IF);
+            }
+
           /* Call syscall function */
 
           ret = stub(nbr, arg1, arg2, arg3, arg4, arg5, arg6);
