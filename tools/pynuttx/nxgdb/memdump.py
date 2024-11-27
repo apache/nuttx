@@ -98,6 +98,7 @@ def group_nodes(
 ) -> Dict[MMNodeDump, List[MMNodeDump]]:
     grouped = grouped or defaultdict(list)
     for node in nodes:
+        # default to group by same PID, same size and same backtrace
         grouped[node].append(node)
     return grouped
 
@@ -527,3 +528,66 @@ class MMMap(gdb.Command):
             output = args.output or f"{name}.png"
             self.save_memory_map(heap.nodes_used(), output)
             gdb.write(f"Memory map saved to {output}\n")
+
+
+class MMFree(gdb.Command):
+    """Show heap statistics, same as device command free"""
+
+    def __init__(self):
+        super().__init__("mm free", gdb.COMMAND_USER)
+        utils.alias("free", "mm free")
+
+    def invoke(self, args, from_tty):
+        heaps = mm.get_heaps()
+
+        formatter = "{:<20} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10} {:<10}"
+        header = (
+            "name",
+            "total",
+            "used",
+            "free",
+            "maxused",
+            "maxfree",
+            "nused",
+            "nfree",
+        )
+
+        print(formatter.format(*header))
+        mm_heap_s = utils.lookup_type("struct mm_heap_s")
+        for heap in heaps:
+            heap_free = heap_used = 0
+            total_size = max_free = nused = nfree = 0
+            for node in heap.nodes:
+                nodesize = node.nodesize
+                total_size += nodesize
+
+                if node.is_free:
+                    nfree += 1
+                    heap_free += nodesize
+                    max_free = max(max_free, nodesize)
+                else:
+                    heap_used += nodesize
+                    nused += 1
+
+            mempool_free = sum(
+                blk.nodesize
+                for pool in mm.get_pools([heap])
+                for blk in pool.blks
+                if blk.is_free
+            )
+
+            total = heap.heapsize + mm_heap_s.sizeof
+            heap_used += mm_heap_s.sizeof  # struct overhead
+
+            print(
+                formatter.format(
+                    heap.name,
+                    total,
+                    heap_used - mempool_free,
+                    heap_free + mempool_free,
+                    int(heap.mm_maxused),
+                    max_free,
+                    nused,
+                    nfree,
+                )
+            )
