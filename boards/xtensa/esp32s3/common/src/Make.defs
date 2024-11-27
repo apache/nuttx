@@ -86,6 +86,10 @@ ifeq ($(CONFIG_ESP32S3_SDMMC),y)
   CSRCS += esp32s3_board_sdmmc.c
 endif
 
+ifeq ($(CONFIG_USBMSC),y)
+  CSRCS += esp32s3_usbmsc.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
