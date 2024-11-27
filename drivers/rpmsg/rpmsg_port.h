@@ -123,6 +123,10 @@ struct rpmsg_port_s
 
   char                              cpuname[RPMSG_NAME_SIZE];
 
+  /* Remote cpu status */
+
+  atomic_t                          signals;
+
   /* Ops need implemented by drivers under port layer */
 
   const FAR struct rpmsg_port_ops_s *ops;
