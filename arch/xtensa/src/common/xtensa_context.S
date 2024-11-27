@@ -131,6 +131,9 @@ _xtensa_context_save:
 	s32i	a15, sp, (4 * REG_A15)
 #endif
 
+	rur     a3, THREADPTR
+	s32i	a3, sp, (4 * REG_THREADPTR)
+
 	rsr		a3, SAR
 	s32i	a3, sp, (4 * REG_SAR)
 
@@ -275,6 +278,9 @@ _xtensa_context_restore:
 	l32i  a3, a2, (4 * REG_SCOMPARE1)
 	wsr   a3, SCOMPARE1
 #endif
+
+	l32i	a3, a2, (4 * REG_THREADPTR)
+	wur		a3, THREADPTR
 
 	l32i	a3, a2, (4 * REG_SAR)
 	wsr		a3, SAR

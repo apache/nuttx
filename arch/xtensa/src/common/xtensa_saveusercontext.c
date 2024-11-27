@@ -79,6 +79,8 @@ int up_saveusercontext(void *saveregs)
           "   s32i a14, %0, (4 * " STRINGIFY(REG_A14) ")\n"
           "   s32i a15, %0, (4 * " STRINGIFY(REG_A15) ")\n"
 #endif
+          "   rur  a2, THREADPTR\n"
+          "   s32i a2, %0, (4 * " STRINGIFY(THREADPTR) ")\n"
           "   rsr  a2, SAR\n"
           "   s32i a2, %0, (4 * " STRINGIFY(REG_SAR) ")\n"
 #if XCHAL_HAVE_S32C1I != 0

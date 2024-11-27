@@ -315,6 +315,8 @@ SECTIONS
 
   .flash.rodata :
   {
+    _rodata_reserved_start = ABSOLUTE(.);
+
     _srodata = ABSOLUTE(.);
     *(EXCLUDE_FILE (esp32s2_start.*) .rodata)
     *(EXCLUDE_FILE (esp32s2_start.*) .rodata.*)
@@ -374,8 +376,23 @@ SECTIONS
     *(.lit4.*)
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
+    /* TLS data. */
+
     . = ALIGN(4);
+    _thread_local_start = ABSOLUTE(.);
+
+    _stdata = ABSOLUTE(.);
+    *(.tdata .tdata.* .gnu.linkonce.td.*);
+    _etdata = ABSOLUTE(.);
+    _stbss = ABSOLUTE(.);
+    *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+    _etbss = ABSOLUTE(.);
+
+    _thread_local_end = ABSOLUTE(.);
+
+    _rodata_reserved_end = ABSOLUTE(.);
   } >default_rodata_seg AT>ROM
+  _rodata_reserved_align = ALIGNOF(.flash.rodata);
 
   _image_irom_vma = ADDR(.flash.text);
   _image_irom_lma = LOADADDR(.flash.text);
