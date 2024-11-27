@@ -54,6 +54,10 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
   CMN_CSRCS += xtensa_backtrace.c
 endif
 
+ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+  CMN_CSRCS += xtensa_tls.c
+endif
+
 ifeq ($(CONFIG_SMP),y)
   CMN_CSRCS += xtensa_smpcall.c
 endif
