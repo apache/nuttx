@@ -47,9 +47,9 @@ void *riscv_perform_syscall(uintreg_t *regs)
       (*running_task)->xcp.regs = regs;
     }
 
-  /* Set up the interrupt register set needed by swint() */
+  /* Set irq flag */
 
-  up_set_current_regs(regs);
+  up_set_interrupt_context(true);
 
   /* Run the system call handler (swint) */
 
@@ -79,7 +79,9 @@ void *riscv_perform_syscall(uintreg_t *regs)
       *running_task = tcb;
     }
 
-  up_set_current_regs(NULL);
+  /* Set irq flag */
+
+  up_set_interrupt_context(false);
 
   return tcb->xcp.regs;
 }
