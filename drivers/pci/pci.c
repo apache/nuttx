@@ -645,9 +645,9 @@ static void pci_register_bus_devices(FAR struct pci_bus_s *bus)
  *
  ****************************************************************************/
 
-static uint32_t pci_size(uint32_t base, uint32_t maxbase, uint32_t mask)
+static uint64_t pci_size(uint64_t base, uint64_t maxbase, uint64_t mask)
 {
-  uint32_t size = maxbase & mask;
+  uint64_t size = maxbase & mask;
 
   if (size == 0)
     {
@@ -689,8 +689,11 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
   int bar;
   uint32_t orig;
   uint32_t mask;
-  uint32_t size;
+  uint64_t orig64;
+  uint64_t size64;
   uintptr_t start;
+  uint64_t maxbase;
+  uint64_t mask64 = 0;
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
   uint8_t cmd;
 
@@ -723,54 +726,91 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
         {
           /* IO */
 
-          size  = pci_size(orig, mask, 0xfffffffe);
-          flags = PCI_RESOURCE_IO;
-          res   = io;
+          mask64 = 0xfffffffe;
+          flags  = PCI_RESOURCE_IO;
+          res    = io;
         }
       else if ((mask & PCI_BASE_ADDRESS_MEM_PREFETCH) &&
                pci_resource_size(&dev->bus->ctrl->mem_pref))
         {
-          /* Prefetchable MEM */
+          if ((mask & PCI_BASE_ADDRESS_MEM_TYPE_MASK) ==
+               PCI_BASE_ADDRESS_MEM_TYPE_64)
+            {
+              /* Prefetchable MEM */
 
-          size  = pci_size(orig, mask, 0xfffffff0);
-          flags = PCI_RESOURCE_MEM | PCI_RESOURCE_PREFETCH;
-          res   = mem_pref;
+              mask64 = 0xfffffff0;
+              flags  = PCI_RESOURCE_MEM_64 | PCI_RESOURCE_PREFETCH;
+              res    = mem_pref;
+            }
+          else if (((mask & PCI_BASE_ADDRESS_MEM_TYPE_MASK) ==
+                    PCI_BASE_ADDRESS_MEM_TYPE_32) &&
+                   (dev->bus->ctrl->mem_pref.flags & PCI_RESOURCE_MEM))
+            {
+              /* Prefetchable MEM */
+
+              mask64 = 0xfffffff0;
+              flags  = PCI_RESOURCE_MEM | PCI_RESOURCE_PREFETCH;
+              res    = mem_pref;
+            }
+          else
+            {
+              /* Non-prefetch MEM */
+
+              mask64 = 0xfffffff0;
+              flags  = PCI_RESOURCE_MEM;
+              res    = mem;
+            }
         }
       else
         {
           /* Non-prefetch MEM */
 
-          size  = pci_size(orig, mask, 0xfffffff0);
-          flags = PCI_RESOURCE_MEM;
-          res   = mem;
+          mask64 = 0xfffffff0;
+          flags  = PCI_RESOURCE_MEM;
+          res    = mem;
         }
 
-      if (size == 0)
+      orig64 = orig;
+      maxbase = mask;
+      if (mask & PCI_BASE_ADDRESS_MEM_TYPE_64)
+        {
+          uint32_t masktmp;
+
+          pci_read_config_dword(dev, base_address_1, &orig);
+          pci_write_config_dword(dev, base_address_1, 0xffffffff);
+          pci_read_config_dword(dev, base_address_1, &masktmp);
+          pci_write_config_dword(dev, base_address_1, orig);
+          mask64 |= (uint64_t)masktmp << 32;
+          orig64 |= (uint64_t)orig << 32;
+          maxbase |= (uint64_t)masktmp << 32;
+        }
+
+      size64 = pci_size(orig64, maxbase, mask64);
+      if (size64 == 0)
         {
           pcierr("pbar%d bad mask\n", bar);
           continue;
         }
 
-      pciinfo("pbar%d: mask=%08" PRIx32 " %" PRIu32 "bytes\n",
-              bar, mask, size);
+      pciinfo("pbar%d: mask64=%08" PRIx64 " %" PRIu64 "bytes\n",
+              bar, mask64, size64);
 
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
-      if (ALIGN(res->start, size) + size > res->end)
+      if (ALIGN(res->start, size64) + size64 > res->end)
         {
           pcierr("pbar%d: does not fit within bus res\n", bar);
           return;
         }
 
-      res->start = ALIGN(res->start, size);
+      res->start = ALIGN(res->start, size64);
       pci_write_config_dword(dev, base_address_0, res->start);
       if (mask & PCI_BASE_ADDRESS_MEM_TYPE_64)
         {
-          pci_write_config_dword(dev, base_address_1,
-                                 (uint64_t)res->start >> 32);
+          pci_write_config_dword(dev, base_address_1, res->start >> 32);
         }
 
       start = res->start;
-      res->start += size;
+      res->start += size64;
 #else
       UNUSED(res);
       pci_read_config_dword(dev, base_address_0, &tmp);
@@ -792,7 +832,7 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
 
       dev->resource[bar].flags = flags;
       dev->resource[bar].start = start;
-      dev->resource[bar].end   = start + size - 1;
+      dev->resource[bar].end   = start + size64 - 1;
 
       if (mask & PCI_BASE_ADDRESS_MEM_TYPE_64)
         {
@@ -806,13 +846,13 @@ static void pci_setup_device(FAR struct pci_device_s *dev, int max_bar,
   pci_read_config_dword(dev, rom_addr, &mask);
   pci_write_config_dword(dev, rom_addr, orig);
   start = PCI_ROM_ADDR(orig);
-  size = PCI_ROM_SIZE(mask);
-  if (start != 0 && size != 0)
+  size64 = PCI_ROM_SIZE(mask);
+  if (start != 0 && size64 != 0)
     {
       dev->resource[PCI_ROM_RESOURCE].flags |=
         PCI_RESOURCE_MEM | PCI_RESOURCE_PREFETCH;
       dev->resource[PCI_ROM_RESOURCE].start = start;
-      dev->resource[PCI_ROM_RESOURCE].end = start + size - 1;
+      dev->resource[PCI_ROM_RESOURCE].end = start + size64 - 1;
     }
 
 #ifdef CONFIG_PCI_ASSIGN_ALL_BUSES
@@ -867,13 +907,18 @@ static void pci_presetup_bridge(FAR struct pci_device_s *dev)
 
   if (pci_resource_size(&ctrl->mem_pref))
     {
-      /* Set up memory and I/O filter limits, assume 32-bit I/O space */
+      uint8_t base;
 
+      pci_read_config_byte(dev, PCI_PREF_MEMORY_BASE, &base);
       ctrl->mem_pref.start = ALIGN(ctrl->mem_pref.start, 1024 * 1024);
       pci_write_config_word(dev, PCI_PREF_MEMORY_BASE,
                             (ctrl->mem_pref.start & 0xfff00000) >> 16);
-      pci_write_config_dword(dev, PCI_PREF_BASE_UPPER32,
-                             (uint64_t)ctrl->mem_pref.start >> 32);
+      if (base & PCI_PREF_RANGE_TYPE_64)
+        {
+          pci_write_config_dword(dev, PCI_PREF_BASE_UPPER32,
+                                 ctrl->mem_pref.start >> 32);
+        }
+
       cmdstat |= PCI_COMMAND_MEMORY;
     }
   else
@@ -888,11 +933,18 @@ static void pci_presetup_bridge(FAR struct pci_device_s *dev)
 
   if (pci_resource_size(&ctrl->io))
     {
+      uint8_t base;
+
+      pci_read_config_byte(dev, PCI_IO_BASE, &base);
       ctrl->io.start = ALIGN(ctrl->io.start, 1024 * 4);
       pci_write_config_byte(dev, PCI_IO_BASE,
                             (ctrl->io.start & 0x0000f000) >> 8);
-      pci_write_config_word(dev, PCI_IO_BASE_UPPER16,
-                            (ctrl->io.start & 0xffff0000) >> 16);
+      if (base & PCI_IO_RANGE_TYPE_32)
+        {
+          pci_write_config_word(dev, PCI_IO_BASE_UPPER16,
+                                (ctrl->io.start & 0xffff0000) >> 16);
+        }
+
       cmdstat |= PCI_COMMAND_IO;
     }
 
@@ -925,7 +977,7 @@ static void pci_postsetup_bridge(FAR struct pci_device_s *dev)
   if (pci_resource_size(&ctrl->mem))
     {
       ctrl->mem.start = ALIGN(ctrl->mem.start, 1024 * 1024);
-      pciinfo("bridge NP limit at %" PRIxPTR "\n", ctrl->mem.start);
+      pciinfo("bridge NP limit at %" PRIx64 "\n", ctrl->mem.start);
       pci_write_config_word(dev, PCI_MEMORY_LIMIT,
                             ((ctrl->mem.start - 1) & 0xfff00000) >> 16);
     }
@@ -933,7 +985,7 @@ static void pci_postsetup_bridge(FAR struct pci_device_s *dev)
   if (pci_resource_size(&ctrl->mem_pref))
     {
       ctrl->mem_pref.start = ALIGN(ctrl->mem_pref.start, 1024 * 1024);
-      pciinfo("bridge P limit at %" PRIxPTR "\n", ctrl->mem_pref.start);
+      pciinfo("bridge P limit at %" PRIx64 "\n", ctrl->mem_pref.start);
       pci_write_config_word(dev, PCI_PREF_MEMORY_LIMIT,
                             ((ctrl->mem_pref.start - 1) & 0xfff00000) >> 16);
       pci_write_config_dword(dev, PCI_PREF_LIMIT_UPPER32,
@@ -943,7 +995,7 @@ static void pci_postsetup_bridge(FAR struct pci_device_s *dev)
   if (pci_resource_size(&ctrl->io))
     {
       ctrl->io.start = ALIGN(ctrl->io.start, 1024 * 4);
-      pciinfo("bridge IO limit at %" PRIxPTR "\n", ctrl->io.start);
+      pciinfo("bridge IO limit at %" PRIx64 "\n", ctrl->io.start);
       pci_write_config_byte(dev, PCI_IO_LIMIT,
                             ((ctrl->io.start - 1) & 0x0000f000) >> 8);
       pci_write_config_word(dev, PCI_IO_LIMIT_UPPER16,

@@ -152,7 +152,7 @@ static FAR void *pci_ecam_conf_address(FAR const struct pci_bus_s *bus,
   FAR struct pci_ecam_s *ecam = pci_ecam_from_controller(bus->ctrl);
   FAR void *addr;
 
-  addr = (FAR void *)ecam->cfg.start;
+  addr = (FAR void *)(uintptr_t)ecam->cfg.start;
   addr += bus->number << 20;
   addr += PCI_SLOT(devfn) << 15;
   addr += PCI_FUNC(devfn) << 12;
