@@ -34,9 +34,9 @@
 
 /* Register offsets */
 
-#define BL808_M0IC_STATUS_OFFSET(n)		(0x00 + 4 * (n))
-#define BL808_M0IC_MASK_OFFSET(n)		(0x08 + 4 * (n))
-#define BL808_M0IC_CLEAR_OFFSET(n)		(0x10 + 4 * (n))
+#define BL808_M0IC_STATUS_OFFSET(n) (0x00 + 4 * (n))
+#define BL808_M0IC_MASK_OFFSET(n)   (0x08 + 4 * (n))
+#define BL808_M0IC_CLEAR_OFFSET(n)  (0x10 + 4 * (n))
 
 /* Register locations */
 

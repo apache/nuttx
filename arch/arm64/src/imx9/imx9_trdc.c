@@ -42,7 +42,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define mmio_read_32(c)	                      getreg32(c)
+#define mmio_read_32(c)                       getreg32(c)
 #define mmio_write_32(c, v)                   putreg32(v, c)
 #define mmio_clrbits_32(addr, clear)          modifyreg32(addr, clear, 0)
 #define mmio_setbits_32(addr, set)            modifyreg32(addr, 0, set)
