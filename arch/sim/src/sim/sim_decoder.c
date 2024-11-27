@@ -89,8 +89,8 @@ static int sim_decoder_output_try_fmt(void *priv,
                                       struct v4l2_format *fmt);
 static int sim_decoder_subscribe_event(void *priv,
                                        struct v4l2_event_subscription *sub);
-static size_t sim_decoder_capture_g_bufsize(void *priv);
-static size_t sim_decoder_output_g_bufsize(void *priv);
+static uint32_t sim_decoder_capture_g_bufsize(void *priv);
+static uint32_t sim_decoder_output_g_bufsize(void *priv);
 static int sim_decoder_process(sim_decoder_t *sim_decoder,
                                struct v4l2_buffer *dst_buf,
                                struct v4l2_buffer *src_buf);
@@ -367,7 +367,7 @@ static int sim_decoder_subscribe_event(void *priv,
     }
 }
 
-static size_t sim_decoder_capture_g_bufsize(void *priv)
+static uint32_t sim_decoder_capture_g_bufsize(void *priv)
 {
   sim_decoder_t *sim_decoder = priv;
 
@@ -379,7 +379,7 @@ static size_t sim_decoder_capture_g_bufsize(void *priv)
   return 0;
 }
 
-static size_t sim_decoder_output_g_bufsize(void *priv)
+static uint32_t sim_decoder_output_g_bufsize(void *priv)
 {
   sim_decoder_t *sim_decoder = priv;
 
