@@ -819,6 +819,12 @@ int rpmsg_virtio_lite_initialize(FAR struct rpmsg_virtio_lite_s *dev)
       goto err_thread;
     }
 
+#ifdef CONFIG_RPMSG_VIRTIO_LITE_PM
+  snprintf(name, sizeof(name), "rpmsg-virtio-%s",
+           RPMSG_VIRTIO_LITE_GET_CPUNAME(dev));
+  pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
+#endif
+
   return OK;
 
 err_thread:
