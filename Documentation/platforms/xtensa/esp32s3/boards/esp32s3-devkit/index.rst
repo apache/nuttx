@@ -827,3 +827,23 @@ Then check the partition::
    crw-rw-rw-           0 ttyS0
    frw-rw-rw-        4096 txtable
    crw-rw-rw-           0 zero
+
+usbmsc
+------
+
+Basic USBMSC(USB Mass Storage Class) configuration based on esp32s3-devkit:usb_device
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:usbmsc
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx -j16
+
+To test it, just run the following::
+
+  # Device
+  nsh> mkrd -m 10 -s 512 640
+  nsh> msconn
+
+  # Host
+  $ sudo mkfs.ext4 /dev/sdx
+  $ sudo mount /dev/sdx ./mnt/
