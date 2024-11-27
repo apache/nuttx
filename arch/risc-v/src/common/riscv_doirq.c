@@ -78,26 +78,20 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
       (*running_task)->xcp.regs = regs;
     }
 
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * current_regs is also used to manage interrupt level context switches.
-   *
-   * Nested interrupts are not supported
-   */
+  /* Nested interrupts are not supported */
 
-  DEBUGASSERT(up_current_regs() == NULL);
-  up_set_current_regs(regs);
+  DEBUGASSERT(!up_interrupt_context());
+
+  /* Set irq flag */
+
+  up_set_interrupt_context(true);
 
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
   tcb = this_task();
 
-  /* Check for a context switch.  If a context switch occurred, then
-   * current_regs will have a different value than it did on entry.  If an
-   * interrupt level context switch has occurred, then restore the floating
-   * point state and the establish the correct address environment before
-   * returning from the interrupt.
-   */
+  /* Check for a context switch. */
 
   if (*running_task != tcb)
     {
@@ -124,11 +118,9 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
       *running_task = tcb;
     }
 
-  /* Set current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Set irq flag */
 
-  up_set_current_regs(NULL);
+  up_set_interrupt_context(false);
 
 #endif
   board_autoled_off(LED_INIRQ);
