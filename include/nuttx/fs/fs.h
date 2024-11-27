@@ -881,7 +881,7 @@ int nx_umount2(FAR const char *target, unsigned int flags);
  *
  ****************************************************************************/
 
-void files_initlist(FAR struct filelist *list);
+int files_initlist(FAR struct filelist **list);
 
 /****************************************************************************
  * Name: files_dumplist

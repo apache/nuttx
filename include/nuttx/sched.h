@@ -566,7 +566,7 @@ struct task_group_s
 
   /* File descriptors *******************************************************/
 
-  struct filelist tg_filelist;      /* Maps file descriptor to file         */
+  struct filelist *tg_filelist;      /* Maps file descriptor to file         */
 
   /* Virtual memory mapping info ********************************************/
 
