@@ -80,6 +80,15 @@ and use ``-cdrom boot.iso`` (multiboot2 framebuffer doesn't work with
 Also, your GRUB configuration (``grub.cfg``) should insert the appropriate video
 module, in many cases ``insmod all_video`` should be enough.
 
+Kernel build
+------------
+
+Kernel build is supported.
+
+.. warning:: 
+   IMPORTANT: the current implementation doesn't include any protection against
+   speculative execution vulnerabilities (Spectre, Meltdown and others) !
+
 Creating a bootable disk
 ========================
 

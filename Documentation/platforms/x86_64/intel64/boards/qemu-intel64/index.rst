@@ -181,6 +181,34 @@ Basic command to run the image without additional PCI devices attached::
   qemu-system-x86_64 -m 2G -cpu host -smp 4 -enable-kvm \
   -kernel nuttx -nographic -serial mon:stdio
 
+
+knsh_romfs
+----------
+
+This is similar to the ``nsh`` configuration except that NuttX
+is built as a kernel-mode, monolithic module, and the user applications
+are built separately. It uses ROMFS to load the user-space applications.
+This is intended to run on QEMU with COM serial port support.
+
+Steps to build kernel image with user-space apps in ROMFS::
+    
+    ./tools/configure.sh qemu-intel64/knsh_romfs
+    make -j
+    make export -j
+    pushd ../apps
+    ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
+    make import -j
+    ./tools/mkromfsimg.sh
+    mv boot_romfsimg.h ../nuttx/arch/x86_64/src/board/romfs_boot.c
+    popd
+    make -j
+
+knsh_romfs_pci
+--------------
+
+This is similar to the ``knsh_romfs`` configuration except that it is intended
+to run on a bare metal Intel hardware with PCI serial port support.
+
 lvgl
 ----
 
