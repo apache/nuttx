@@ -296,14 +296,6 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           struct tcb_s   *rtcb = nxsched_self();
           syscall_stub_t  stub = (syscall_stub_t)g_stublookup[nbr];
 
-          DEBUGASSERT(nbr < SYS_nsyscalls);
-          DEBUGASSERT(rtcb->xcp.nsyscalls < CONFIG_SYS_NNEST);
-
-          /* Setup nested syscall */
-
-          rtcb->xcp.syscall[rtcb->xcp.nsyscalls].sysreturn = regs[REG_RCX];
-          rtcb->xcp.nsyscalls += 1;
-
 #ifdef CONFIG_ARCH_KERNEL_STACK
           /* Store reference to user RSP for signals */
 
@@ -313,11 +305,6 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           /* Call syscall function */
 
           ret = stub(nbr, arg1, arg2, arg3, arg4, arg5, arg6);
-
-          /* Setup return from nested syscall */
-
-          rtcb->xcp.nsyscalls -= 1;
-          regs[REG_RCX] = rtcb->xcp.syscall[rtcb->xcp.nsyscalls].sysreturn;
 
           break;
         }

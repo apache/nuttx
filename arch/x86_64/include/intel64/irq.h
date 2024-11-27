@@ -545,15 +545,6 @@ struct xcptcontext
 
   uint64_t *regs;
 
-#ifdef CONFIG_LIB_SYSCALL
-  /* The following array holds information needed to return from each nested
-   * system call.
-   */
-
-  uint8_t nsyscalls;
-  struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
-#endif
-
 #ifdef CONFIG_ARCH_ADDRENV
 #  ifdef CONFIG_ARCH_KERNEL_STACK
   /* In this configuration, all syscalls execute from an internal kernel
