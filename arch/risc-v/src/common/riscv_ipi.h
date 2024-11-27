@@ -46,10 +46,13 @@ static inline void riscv_ipi_send(int cpu)
 
 static inline void riscv_ipi_clear(int cpu)
 {
-#if defined(RISCV_IPI) && !defined(CONFIG_ARCH_USE_S_MODE)
-  putreg32(0, (uintptr_t)RISCV_IPI + (4 * riscv_cpuid_to_hartid(cpu)));
-#endif
+#if defined(CONFIG_ARCH_USE_S_MODE)
   CLEAR_CSR(CSR_IP, IP_SIP);
+#elif defined(RISCV_IPI)
+  putreg32(0, (uintptr_t)RISCV_IPI + (4 * riscv_cpuid_to_hartid(cpu)));
+#else
+#  error "No IPI support for this SoC"
+#endif
 }
 
 #endif /* __ARCH_RISCV_SRC_COMMON_RISCV_IPI_H */
