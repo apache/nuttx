@@ -716,7 +716,11 @@ static void rpmsg_rtc_server_ept_release(FAR struct rpmsg_endpoint *ept)
   FAR struct rpmsg_rtc_server_s *server = ept->priv;
 
   nxmutex_lock(&server->lock);
-  list_delete(&client->node);
+  if (list_in_list(&client->node))
+    {
+      list_delete(&client->node);
+    }
+
   nxmutex_unlock(&server->lock);
   kmm_free(client);
 }
