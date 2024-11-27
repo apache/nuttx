@@ -95,6 +95,9 @@ static int goldfish_sensor_activate(FAR struct sensor_lowerhalf_s *lower,
 static int goldfish_sensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                         FAR struct file *filep,
                                         FAR uint32_t *period_us);
+static int goldfish_sensor_get_info(FAR struct sensor_lowerhalf_s *lower,
+                                    FAR struct file *filep,
+                                    FAR struct sensor_device_info_s *info);
 static int goldfish_sensor_thread(int argc, FAR char** argv);
 
 /****************************************************************************
@@ -105,6 +108,7 @@ static const struct sensor_ops_s g_goldfish_sensor_ops =
 {
   .activate = goldfish_sensor_activate,
   .set_interval = goldfish_sensor_set_interval,
+  .get_info = goldfish_sensor_get_info,
 };
 
 FAR static const char *const g_goldfish_sensor_name[] =
@@ -127,6 +131,126 @@ FAR static const char *const g_goldfish_sensor_name[] =
   "rgbc-light",
   "wrist-tilt",
   "acceleration-uncalibrated",
+};
+
+static struct sensor_device_info_s g_goldfish_sensor_info[] =
+{
+  {
+    .version                    = 1,
+    .power                      = 3.0f,
+    .max_range                  = 2.8f,
+    .resolution                 = 1.0f / 4032.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "acceleration",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 3.0f,
+    .max_range                  = 11.1111111,
+    .resolution                 = 1.0f / 1000.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .name                       = "gyroscope",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 6.7f,
+    .max_range                  = 2000.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "magnetic-field",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 9.7f,
+    .max_range                  = 360.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "orientation",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 0.0f,
+    .max_range                  = 80.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "temperature",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 20.0f,
+    .max_range                  = 1.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "proximity",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 20.0f,
+    .max_range                  = 40000.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "light",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 20.0f,
+    .max_range                  = 800.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "pressure",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 20.0f,
+    .max_range                  = 100.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .fifo_reserved_event_count  = 0,
+    .fifo_max_event_count       = 0,
+    .name                       = "humidity",
+    .vendor                     = "The Android Open Source Project",
+  },
+  {
+    .version                    = 1,
+    .power                      = 6.7f,
+    .max_range                  = 2000.0f,
+    .resolution                 = 1.0f,
+    .min_delay                  = 10000,
+    .max_delay                  = 500 * 1000,
+    .name                       = "magnetic-field-uncalibrated",
+    .vendor                     = "The Android Open Source Project",
+  },
 };
 
 /****************************************************************************
@@ -592,6 +716,35 @@ static int goldfish_sensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
   goldfish_sensor_send(&priv->pipe, buffer, len);
   priv->interval = *period_us;
   return OK;
+}
+
+static int goldfish_sensor_get_info(FAR struct sensor_lowerhalf_s *lower,
+                                    FAR struct file *filep,
+                                    FAR struct sensor_device_info_s *info)
+{
+  FAR struct goldfish_sensor_s *priv;
+  int handle;
+  int i;
+
+  handle = goldfish_get_priv(lower, &priv);
+  if (handle < 0)
+    {
+      return -EINVAL;
+    }
+
+  for (i = 0; i < sizeof(g_goldfish_sensor_info); i++)
+    {
+      if (!strncmp(goldfish_sensor_get_name(handle),
+                   g_goldfish_sensor_info[i].name,
+                   strlen(g_goldfish_sensor_info[i].name)))
+        {
+          memcpy(info, &g_goldfish_sensor_info[i],
+                 sizeof(struct sensor_device_info_s));
+          return OK;
+        }
+    }
+
+  return -EINVAL;
 }
 
 static int goldfish_sensor_thread(int argc, FAR char** argv)
