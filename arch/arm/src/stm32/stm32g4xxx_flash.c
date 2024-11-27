@@ -119,7 +119,7 @@ static uint32_t get_flash_page_size(void)
     }
 #else
   return STM32_FLASH_PAGESIZE;
-#endif	
+#endif
 }
 
 static uint32_t get_flash_npages(void)
@@ -135,7 +135,7 @@ static uint32_t get_flash_npages(void)
     }
 #else
   return STM32_FLASH_NPAGES;
-#endif	
+#endif
 }
 
 static void flash_unlock(void)

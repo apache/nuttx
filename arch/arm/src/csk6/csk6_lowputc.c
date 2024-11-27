@@ -36,10 +36,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CSK6_IOMUX_BASE 0x46200000		 // size=1MB
-#define CSK6_SYSCTRL_BASE 0x46000000	 // size=64KB
+#define CSK6_IOMUX_BASE 0x46200000       // size=1MB
+#define CSK6_SYSCTRL_BASE 0x46000000     // size=64KB
 #define CSK6_SYSPLL_CTRL_BASE 0x46020000 // size=64KB
-#define CSK6_UART0_BASE 0x45000000		 // size=1MB
+#define CSK6_UART0_BASE 0x45000000       // size=1MB
 
 #define CSK6011A_NANO_BOARD_H_XTAL_SRC_FREQ 24000000UL
 #define CSK6011A_NANO_BOARD_L_XTAL_SRC_FREQ 32768UL

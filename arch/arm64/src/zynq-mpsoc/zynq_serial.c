@@ -124,7 +124,7 @@
  ***************************************************************************/
 
 #define XUARTPS_CR_STOPBRK     0x00000100U  /* Stop transmission of break */
-#define XUARTPS_CR_STARTBRK	   0x00000080U  /* Set break */
+#define XUARTPS_CR_STARTBRK    0x00000080U  /* Set break */
 #define XUARTPS_CR_TORST       0x00000040U  /* RX timeout counter restart */
 #define XUARTPS_CR_TX_DIS      0x00000020U  /* TX disabled. */
 #define XUARTPS_CR_TX_EN       0x00000010U  /* TX enabled */
@@ -235,8 +235,8 @@
  *
  ***************************************************************************/
 
-#define XUARTPS_BAUDDIV_MASK        0x000000FFU	/* 8 bit baud divider mask */
-#define XUARTPS_BAUDDIV_RESET_VAL   0x0000000FU	/* Reset value */
+#define XUARTPS_BAUDDIV_MASK        0x000000FFU /* 8 bit baud divider mask */
+#define XUARTPS_BAUDDIV_RESET_VAL   0x0000000FU /* Reset value */
 
 /***************************************************************************
  * The following constant defines the amount of error that is allowed for
@@ -298,9 +298,9 @@
  *
  ***************************************************************************/
 
-#define XUARTPS_MODEMCR_FCM	0x00000020U  /* Flow control mode */
-#define XUARTPS_MODEMCR_RTS	0x00000002U  /* Request to send */
-#define XUARTPS_MODEMCR_DTR	0x00000001U  /* Data terminal ready */
+#define XUARTPS_MODEMCR_FCM 0x00000020U  /* Flow control mode */
+#define XUARTPS_MODEMCR_RTS 0x00000002U  /* Request to send */
+#define XUARTPS_MODEMCR_DTR 0x00000001U  /* Data terminal ready */
 
 /***************************************************************************
  * Modem Status Register
@@ -361,7 +361,7 @@
  *
  ***************************************************************************/
 
-#define XUARTPS_FLOWDEL_MASK    XUARTPS_RXWM_MASK	/* Valid bit mask */
+#define XUARTPS_FLOWDEL_MASK    XUARTPS_RXWM_MASK /* Valid bit mask */
 
 /***************************************************************************
  * Receiver FIFO Byte Status Register
@@ -376,18 +376,18 @@
  ***************************************************************************/
 
 #define XUARTPS_RXBS_BYTE3_BRKE 0x00000800U /* Byte3 Break Error */
-#define XUARTPS_RXBS_BYTE3_FRME	0x00000400U /* Byte3 Frame Error */
-#define XUARTPS_RXBS_BYTE3_PARE	0x00000200U /* Byte3 Parity Error */
-#define XUARTPS_RXBS_BYTE2_BRKE	0x00000100U /* Byte2 Break Error */
-#define XUARTPS_RXBS_BYTE2_FRME	0x00000080U /* Byte2 Frame Error */
-#define XUARTPS_RXBS_BYTE2_PARE	0x00000040U /* Byte2 Parity Error */
-#define XUARTPS_RXBS_BYTE1_BRKE	0x00000020U /* Byte1 Break Error */
-#define XUARTPS_RXBS_BYTE1_FRME	0x00000010U /* Byte1 Frame Error */
-#define XUARTPS_RXBS_BYTE1_PARE	0x00000008U /* Byte1 Parity Error */
-#define XUARTPS_RXBS_BYTE0_BRKE	0x00000004U /* Byte0 Break Error */
-#define XUARTPS_RXBS_BYTE0_FRME	0x00000002U /* Byte0 Frame Error */
-#define XUARTPS_RXBS_BYTE0_PARE	0x00000001U /* Byte0 Parity Error */
-#define XUARTPS_RXBS_MASK	0x00000007U       /* 3 bit RX byte status mask */
+#define XUARTPS_RXBS_BYTE3_FRME 0x00000400U /* Byte3 Frame Error */
+#define XUARTPS_RXBS_BYTE3_PARE 0x00000200U /* Byte3 Parity Error */
+#define XUARTPS_RXBS_BYTE2_BRKE 0x00000100U /* Byte2 Break Error */
+#define XUARTPS_RXBS_BYTE2_FRME 0x00000080U /* Byte2 Frame Error */
+#define XUARTPS_RXBS_BYTE2_PARE 0x00000040U /* Byte2 Parity Error */
+#define XUARTPS_RXBS_BYTE1_BRKE 0x00000020U /* Byte1 Break Error */
+#define XUARTPS_RXBS_BYTE1_FRME 0x00000010U /* Byte1 Frame Error */
+#define XUARTPS_RXBS_BYTE1_PARE 0x00000008U /* Byte1 Parity Error */
+#define XUARTPS_RXBS_BYTE0_BRKE 0x00000004U /* Byte0 Break Error */
+#define XUARTPS_RXBS_BYTE0_FRME 0x00000002U /* Byte0 Frame Error */
+#define XUARTPS_RXBS_BYTE0_PARE 0x00000001U /* Byte0 Parity Error */
+#define XUARTPS_RXBS_MASK       0x00000007U /* 3 bit RX byte status mask */
 
 /***************************************************************************
  * Private Types
