@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/xtensa/src/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -17,6 +19,7 @@
 # the License.
 #
 # ##############################################################################
+
 add_subdirectory(common)
 add_subdirectory(${NUTTX_CHIP_ABS_DIR} EXCLUDE_FROM_ALL exclude_chip)
 # Include directories (before system ones) as PUBLIC so that it can be exposed
