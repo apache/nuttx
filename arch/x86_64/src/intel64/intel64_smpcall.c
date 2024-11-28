@@ -94,11 +94,8 @@ int x86_64_smp_sched_handler(int irq, void *c, void *arg)
   struct tcb_s *tcb;
   int cpu = this_cpu();
 
-  tcb = current_task(cpu);
-  nxsched_suspend_scheduler(tcb);
   nxsched_process_delivered(cpu);
   tcb = current_task(cpu);
-  nxsched_resume_scheduler(tcb);
   x86_64_restorestate(tcb->xcp.regs);
 
   return OK;
