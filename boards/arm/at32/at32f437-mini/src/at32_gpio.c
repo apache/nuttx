@@ -125,9 +125,9 @@ static struct at32gpio_dev_s g_gpout[BOARD_NGPIOOUT];
 
 static const uint32_t g_gpiointinputs[BOARD_NGPIOINT] =
     {
-#if 0      
+#if 0
       GPIO_INT1,
-#endif        
+#endif
 };
 
 static struct at32gpint_dev_s g_gpint[BOARD_NGPIOINT];

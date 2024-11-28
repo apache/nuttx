@@ -41,7 +41,7 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32_SBS_HDPLCR_OFFSET       0x0010  
+#define STM32_SBS_HDPLCR_OFFSET       0x0010
 #define STM32_SBS_HPDLSR_OFFSET       0x0014
 #define STM32_SBS_NEXTHDPLCR_OFFSET   0x0018
 #define STM32_SBS_DBGCR_OFFSET        0x0020

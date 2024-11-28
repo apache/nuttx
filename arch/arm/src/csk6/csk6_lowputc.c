@@ -234,7 +234,7 @@ void csk6_lowsetup(void)
     CSK6_UART0_BASE + 0x0c);
 #endif
 
-#if (CSK6_CONSOLE_NBITS == 5)  
+#if (CSK6_CONSOLE_NBITS == 5)
   modreg32(REG_VALUE_SHIFT(0x00, 0),
     REG_FIELD_MASK(2, 0),
     CSK6_UART0_BASE + 0x0c);

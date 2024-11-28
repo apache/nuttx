@@ -83,7 +83,7 @@
 #define HPM_IRQ_HALL1         (HPM_IRQ_PERI_START + 46)
 #define HPM_IRQ_QEI1          (HPM_IRQ_PERI_START + 47)
 #define HPM_IRQ_SDP           (HPM_IRQ_PERI_START + 48)
-#define HPM_IRQ_XPI0          (HPM_IRQ_PERI_START + 49)            
+#define HPM_IRQ_XPI0          (HPM_IRQ_PERI_START + 49)
 #define HPM_IRQ_XPI1          (HPM_IRQ_PERI_START + 50)
 #define HPM_IRQ_XDMA          (HPM_IRQ_PERI_START + 51)
 #define HPM_IRQ_HDMA          (HPM_IRQ_PERI_START + 52)

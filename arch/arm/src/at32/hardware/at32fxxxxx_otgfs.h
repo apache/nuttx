@@ -555,7 +555,7 @@
 
 #define OTGFS_GUSBCFG_TRDT_SHIFT        (10)      /* Bits 10-13: USB turnaround time */
 #define OTGFS_GUSBCFG_TRDT_MASK         (15 << OTGFS_GUSBCFG_TRDT_SHIFT)
-#  define OTGFS_GUSBCFG_TRDT(n)         ((n) << OTGFS_GUSBCFG_TRDT_SHIFT)                                                 
+#  define OTGFS_GUSBCFG_TRDT(n)         ((n) << OTGFS_GUSBCFG_TRDT_SHIFT)
 
 #define OTGFS_GUSBCFG_FHMOD             (1 << 29) /* Bit 29: Force host mode */
 #define OTGFS_GUSBCFG_FDMOD             (1 << 30) /* Bit 30: Force device mode */

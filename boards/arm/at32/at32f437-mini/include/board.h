@@ -228,7 +228,7 @@
  * usb clock use pll
  * usb_clk = 288/6 = 48MHz
  */
-#define USB_CONFIG_USBDIV       (CRM_MISC2_USBDIV_6P0)  
+#define USB_CONFIG_USBDIV       (CRM_MISC2_USBDIV_6P0)
 
 /* USART1 */
 
