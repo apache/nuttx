@@ -389,6 +389,12 @@ config ESPRESSIF_DMA
 	default n
 	select ARCH_DMA
 
+config ESPRESSIF_EFUSE
+	bool "EFUSE support"
+	default n
+	---help---
+		Enable efuse support.
+
 config ESPRESSIF_HR_TIMER
 	bool
 	default RTC_DRIVER
