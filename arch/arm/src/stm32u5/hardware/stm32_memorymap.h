@@ -70,7 +70,7 @@
 
 #else
 #  error "stm32_memorymap: unsupported STM32U5 memory map"
-#endif    
+#endif
 
 /* System Memory Addresses **************************************************/
 

@@ -267,7 +267,7 @@ static void at25ee_lock(FAR struct spi_dev_s *dev)
 #ifdef CONFIG_SPI_DELAY_CONTROL
   SPI_SETDELAY(dev, CONFIG_AT25EE_START_DELAY, CONFIG_AT25EE_STOP_DELAY,
                     CONFIG_AT25EE_CS_DELAY, CONFIG_AT25EE_IFDELAY);
-#endif  
+#endif
 }
 
 /****************************************************************************

@@ -65,8 +65,8 @@
 #define SLAB_COUNT      (sizeof(m_l3_pgtable) / RV_MMU_PAGE_SIZE)
 
 #define KMM_PAGE_SIZE   RV_MMU_L3_PAGE_SIZE
-#define KMM_PBASE       PGT_L3_PBASE   
-#define KMM_PBASE_IDX   3   
+#define KMM_PBASE       PGT_L3_PBASE
+#define KMM_PBASE_IDX   3
 #define KMM_SPBASE      PGT_L2_PBASE
 #define KMM_SPBASE_IDX  2
 

@@ -47,7 +47,7 @@
 
 #define PAD_ALT_SHIFT          (11)      /* Bits 11-15: Peripheral alternate function */
 #define PAD_ALT_MASK           (0x1f << PAD_ALT_SHIFT)
-#  define PAD_ALT0             (0 << PAD_ALT_SHIFT)  
+#  define PAD_ALT0             (0 << PAD_ALT_SHIFT)
 #  define PAD_ALT1             (1 << PAD_ALT_SHIFT)
 #  define PAD_ALT2             (2 << PAD_ALT_SHIFT)
 #  define PAD_ALT3             (3 << PAD_ALT_SHIFT)

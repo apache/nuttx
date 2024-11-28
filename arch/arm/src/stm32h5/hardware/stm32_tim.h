@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_TIM_H 
-#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_TIM_H 
+#ifndef __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_TIM_H
+#define __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_TIM_H
 
 /****************************************************************************
  * Included Files
@@ -502,7 +502,7 @@
 #  define ATIM_SMCR_TI1FP1        (5 << ATIM_SMCR_TS_SHIFT)  /* 101: Filtered Timer Input 1 (TI1FP1) */
 #  define ATIM_SMCR_T12FP2        (6 << ATIM_SMCR_TS_SHIFT)  /* 110: Filtered Timer Input 2 (TI2FP2) */
 #  define ATIM_SMCR_ETRF          (7 << ATIM_SMCR_TS_SHIFT)  /* 111: External Trigger input (ETRF) */
-#define ATIM_SMCR_TS43_SHIFT      (20)    
+#define ATIM_SMCR_TS43_SHIFT      (20)
 #define ATIM_SMCR_TS43_MASK       (3 << ATIM_SMCR_TS43_SHIFT) /* Trigger selection bits 4:3. */
 
 #define ATIM_SMCR_MSM             (1 << 7)  /* Bit 7: Master/slave mode */

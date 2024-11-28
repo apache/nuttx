@@ -156,7 +156,7 @@
 #define GPIO_OUT1         (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_DRV_MODETATE|\
                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN2)
 #define GPIO_IN1
-#define GPIO_INT1     
+#define GPIO_INT1
 
 /* LEDs */
 
