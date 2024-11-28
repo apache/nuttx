@@ -194,6 +194,10 @@ class MemPool(Value, p.MemPool):
             yield (int(entry) - blks * blksize, int(entry))
 
     @property
+    def nqueue(self) -> int:
+        return lists.sq_count(self.equeue)
+
+    @property
     def size(self) -> int:
         """Real block size including backtrace overhead"""
         if not self._blksize:
@@ -654,7 +658,7 @@ class MMPoolInfo(gdb.Command):
 
         name_max = max(len(pool.name) for pool in pools) + 11  # 11: "@0x12345678"
         formatter = (
-            "{:>%d} {:>11} {:>9} {:>9} {:>9} {:>9} {:>9} {:>9} {:>9}\n" % name_max
+            "{:>%d} {:>11} {:>9} {:>9} {:>9} {:>9} {:>9} {:>9} {:>9} {:>9}\n" % name_max
         )
         head = (
             "",
@@ -666,6 +670,7 @@ class MMPoolInfo(gdb.Command):
             "nfree",
             "nifree",
             "nwaiter",
+            "nqueue",
         )
 
         gdb.write(formatter.format(*head))
@@ -681,5 +686,6 @@ class MMPoolInfo(gdb.Command):
                     pool.nfree,
                     pool.nifree,
                     pool.nwaiter,
+                    pool.nqueue,
                 )
             )
