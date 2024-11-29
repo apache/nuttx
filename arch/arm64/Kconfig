@@ -108,7 +108,7 @@ config ARCH_CHIP_ZYNQ_MPSOC
 	select ARM64_HAVE_PSCI
 	---help---
 		XilinX ZYNQ MPSOC
-		
+
 config ARCH_CHIP_ARM64_CUSTOM
 	bool "Custom ARM64 chip"
 	select ARCH_CHIP_CUSTOM
@@ -126,6 +126,21 @@ config ARCH_ARMV8R
 	bool
 	default n
 	select ARCH_SINGLE_SECURITY_STATE
+
+config ARCH_AS_HAS_ARMV8_5
+	bool "Support ARMv8.5 assembly"
+	depends on ARCH_ARMV8A
+	---help---
+		Support ARMv8.5 assembly instruction set
+
+menu "ARMv8.5 architectural features"
+	depends on ARCH_AS_HAS_ARMV8_5
+
+config ARM64_MTE
+	bool "Memory Tagging Extension support"
+	default y
+
+endmenu # "ARMv8.5 architectural features"
 
 config ARCH_SINGLE_SECURITY_STATE
 	bool "ARM Single Security State Support"
