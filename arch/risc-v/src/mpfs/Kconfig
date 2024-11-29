@@ -46,6 +46,14 @@ config MPFS_BOOTLOADER
 	---help---
 		This NuttX image is used as a bootloader, which will boot only on one hart, putting the others in WFI
 
+config MPFS_CLKINIT
+	bool "Initialize system clocks"
+	depends on MPFS_BOOTLOADER
+	default y
+	---help---
+		This initilizes the system clocks at mpfs_start.c file. The option may be also turned off
+		if some other entity has already set them up.
+
 config MPFS_BOARD_PMP
 	bool "Enable board specific PMP configuration"
 	depends on ARCH_USE_MPU && MPFS_BOOTLOADER
