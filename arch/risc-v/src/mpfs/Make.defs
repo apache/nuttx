@@ -27,12 +27,16 @@ CMN_ASRCS += mpfs_head.S
 endif
 
 # Specify our C code within this directory to be included
-CHIP_CSRCS  = mpfs_allocateheap.c mpfs_clockconfig.c
+CHIP_CSRCS  = mpfs_allocateheap.c
 CHIP_CSRCS += mpfs_irq.c mpfs_irq_dispatch.c
 CHIP_CSRCS += mpfs_lowputc.c mpfs_serial.c
 CHIP_CSRCS += mpfs_start.c mpfs_timerisr.c
 CHIP_CSRCS += mpfs_gpio.c mpfs_systemreset.c
 CHIP_CSRCS += mpfs_plic.c mpfs_dsn.c
+
+ifeq ($(CONFIG_MPFS_CLKINIT),y)
+CHIP_CSRCS += mpfs_clockconfig.c
+endif
 
 ifeq ($(CONFIG_MPFS_DMA),y)
 CHIP_CSRCS += mpfs_dma.c
