@@ -42,7 +42,7 @@ void *riscv_perform_syscall(uintreg_t *regs)
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb;
 
-  if (*running_task != NULL)
+  if (regs[REG_A0] != SYS_restore_context)
     {
       (*running_task)->xcp.regs = regs;
     }
