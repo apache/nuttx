@@ -61,6 +61,10 @@ if(CONFIG_ARCH_HAVE_MMU)
   list(APPEND SRCS arm64_mmu.c)
 endif()
 
+if(CONFIG_ARM64_MTE)
+  list(APPEND SRCS arm64_mte.c)
+endif()
+
 if(CONFIG_ARCH_HAVE_MPU)
   list(APPEND SRCS arm64_mpu.c)
 endif()

@@ -74,6 +74,10 @@ ifeq ($(CONFIG_ARCH_HAVE_MMU),y)
 CMN_CSRCS += arm64_mmu.c
 endif
 
+ifeq ($(CONFIG_ARM64_MTE),y)
+CMN_CSRCS += arm64_mte.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_MPU),y)
 CMN_CSRCS += arm64_mpu.c
 common/arm64_mpu.c_CFLAGS += -fno-sanitize=kernel-address

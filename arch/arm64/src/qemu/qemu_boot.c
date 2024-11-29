@@ -159,6 +159,8 @@ void arm64_chip_boot(void)
 
   arm64_mmu_init(true);
 
+  arm64_enable_mte();
+
 #ifdef CONFIG_DEVICE_TREE
   fdt_register((const char *)0x40000000);
 #endif
