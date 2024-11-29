@@ -65,7 +65,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
        * ready to run list.
        */
 
-      xtensa_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
+      xtensa_switchcontext();
 
       /* xtensa_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the

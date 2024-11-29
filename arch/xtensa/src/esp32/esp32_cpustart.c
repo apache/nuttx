@@ -188,7 +188,7 @@ void IRAM_ATTR xtensa_appcpu_start(void)
    * be the CPUs NULL task.
    */
 
-  xtensa_context_restore(tcb->xcp.regs);
+  xtensa_context_restore();
 }
 
 /****************************************************************************

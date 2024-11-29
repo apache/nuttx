@@ -105,11 +105,9 @@
 
 /* Context switching via system calls ***************************************/
 
-#define xtensa_context_restore(regs)\
-  sys_call1(SYS_restore_context, (uintptr_t)regs)
+#define xtensa_context_restore() sys_call0(SYS_restore_context)
 
-#define xtensa_switchcontext(saveregs, restoreregs)\
-  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+#define xtensa_switchcontext() sys_call0(SYS_switch_context)
 
 /* Interrupt codes from other CPUs: */
 
