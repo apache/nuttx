@@ -86,6 +86,19 @@ Getting Started
    NuttShell (NSH) NuttX-10.4.0
    nsh> fb
 
+  3.1.3 Single Core with MTE Expansion (GICv3)
+  Configuring NuttX and compile:
+   $ ./tools/configure.sh qemu-armv8a:mteqe
+   $ make -j
+   Running with qemu
+   $ qemu-system-aarch64 -cpu max -nographic \
+     -machine virt,virtualization=on,gic-version=3,mte=on \
+     -chardev stdio,id=con,mux=on, -serial chardev:con \
+     -mon chardev=con,mode=readline  -kernel ./nuttx/nuttx
+
+   NuttShell (NSH) NuttX-10.4.0
+   nsh> mtetest
+
   3.2 SMP (GICv3)
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:nsh_smp
