@@ -58,14 +58,6 @@ $(TOPDIR)/include/newlib: newlib/newlib
 
 context:: $(TOPDIR)/include/newlib
 
-CSRCS += $(wildcard newlib/newlib/newlib/libm/common/*.c)
-CSRCS += $(wildcard newlib/newlib/newlib/libm/complex/*.c)
-
-VPATH += :newlib/newlib/newlib/libm/common
-VPATH += :newlib/newlib/newlib/libm/complex
-DEPPATH += --dep-path newlib/newlib/newlib/libm/common
-DEPPATH += --dep-path newlib/newlib/newlib/libm/complex
-
 ifeq ($(CONFIG_ARCH_ARM),y)
   ARCH = arm
 else ifeq ($(CONFIG_ARCH_ARM64),y)
@@ -88,6 +80,13 @@ CSRCS += $(wildcard newlib/newlib/newlib/libm/machine/$(ARCH)/*.c)
 VPATH += :newlib/newlib/newlib/libm/machine/$(ARCH)
 DEPPATH += --dep-path newlib/newlib/newlib/libm/machine/$(ARCH)
 
+CSRCS += $(wildcard newlib/newlib/newlib/libm/common/*.c)
+CSRCS += $(wildcard newlib/newlib/newlib/libm/complex/*.c)
+
+VPATH += :newlib/newlib/newlib/libm/common
+VPATH += :newlib/newlib/newlib/libm/complex
+DEPPATH += --dep-path newlib/newlib/newlib/libm/common
+DEPPATH += --dep-path newlib/newlib/newlib/libm/complex
 
 ifeq ($(CONFIG_ARCH_X86_64),y)
 CSRCS += $(wildcard newlib/newlib/newlib/libm/fenv/*.c)
