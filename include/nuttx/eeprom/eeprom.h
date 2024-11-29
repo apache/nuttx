@@ -50,7 +50,7 @@
                                              * Return the geometry of the
                                              * EEPROM device.
                                              * IN:  Pointer to writable
-                                             *      instance  of struct
+                                             *      instance of struct
                                              *      eeprom_geometry_s to be
                                              *      populated
                                              * OUT: Data return in user-
@@ -58,6 +58,28 @@
 
 #define EEPIOC_SETSPEED     _EEPIOC(0x001)  /* Overwrite the SPI/I2C bus speed
                                              * IN:  Bus speed in Hz
+                                             * OUT: None (ioctl return value
+                                             *      provides success/failure
+                                             *      indication).            */
+
+#define EEPIOC_PAGEERASE    _EEPIOC(0x002)  /* Erase a single page
+                                             * IN:  Index of the page to be
+                                             *      erased
+                                             * OUT: None (ioctl return value
+                                             *      provides success/failure
+                                             *      indication).            */
+
+#define EEPIOC_SECTORERASE  _EEPIOC(0x003)  /* Erase a single sector, this
+                                             * behaves like page erase on
+                                             * devices without sectors
+                                             * IN:  Index of the sector to be
+                                             *      erased
+                                             * OUT: None (ioctl return value
+                                             *      provides success/failure
+                                             *      indication).            */
+
+#define EEPIOC_CHIPERASE    _EEPIOC(0x004)  /* Wipe the entire EEPROM
+                                             * IN:  None
                                              * OUT: None (ioctl return value
                                              *      provides success/failure
                                              *      indication).            */

@@ -131,10 +131,13 @@
 #define EE25XX_CMD_RDSR  0x05
 #define EE25XX_CMD_WREN  0x06
 
+/* Following commands are available via IOCTL (on devices supporting them) */
+
+#define EEP25XX_CMD_PE   0x42
+#define EEP25XX_CMD_SE   0xD8
+#define EEP25XX_CMD_CE   0xC7
+
 /* Following commands will be available some day via IOCTLs
- *   PE        0x42 Page erase (25xx512/1024)
- *   SE        0xD8 Sector erase (25xx512/1024)
- *   CE        0xC7 Chip erase (25xx512/1024)
  *   RDID      0xAB Wake up and read electronic signature (25xx512/1024)
  *   DPD       0xB9 Sleep (25xx512/1024)
  *
@@ -482,6 +485,253 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev,
 }
 
 /****************************************************************************
+ * Name: ee25xx_eraseall
+ *
+ * Description:
+ *   Erase all data on the device
+ *
+ * Input Parameters:
+ *   eedev - Device structure
+ *
+ ****************************************************************************/
+
+static int ee25xx_eraseall(FAR struct ee25xx_dev_s *eedev)
+{
+  int       ret = OK;
+  off_t     offset;
+  FAR char *buf;
+
+  DEBUGASSERT(eedev);
+  DEBUGASSERT(eedev->pgsize > 0);
+
+  if (eedev->readonly)
+    {
+      return -EACCES;
+    }
+
+  /* Devices with different page and sector sizes support a dedicated command
+   * for chip erasure
+   */
+
+  if (eedev->pgsize != eedev->secsize)
+    {
+      ret = nxmutex_lock(&eedev->lock);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ee25xx_writeenable(eedev, true);
+
+      ee25xx_lock(eedev);
+      SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
+
+      SPI_SEND(eedev->spi, EEP25XX_CMD_CE);
+
+      SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
+      ee25xx_unlock(eedev);
+
+      ee25xx_waitwritecomplete(eedev);
+
+      nxmutex_unlock(&eedev->lock);
+    }
+
+  /* If there is no dedicated command for erasure, write the entire memory to
+   * its default state
+   */
+
+  else
+    {
+      buf = kmm_malloc(eedev->pgsize);
+      if (buf == NULL)
+        {
+          ferr("ERROR: Failed to allocate memory for ee25xx eraseall\n");
+          return -ENOMEM;
+        }
+
+      memset(buf, EE25XX_DUMMY, eedev->pgsize);
+
+      ret = nxmutex_lock(&eedev->lock);
+      if (ret < 0)
+        {
+          goto free_buffer;
+        }
+
+      for (offset = 0; offset < eedev->size; offset += eedev->pgsize)
+        {
+          ee25xx_writeenable(eedev, true);
+          ee25xx_writepage(eedev, offset, buf, eedev->pgsize);
+          ee25xx_waitwritecomplete(eedev);
+        }
+
+      nxmutex_unlock(&eedev->lock);
+
+free_buffer:
+      kmm_free(buf);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ee25xx_erasepage
+ *
+ * Description:
+ *   Erase 1 page of data
+ *
+ * Input Parameters:
+ *   eedev - Device structure
+ *   index - Index of the page to erase
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int ee25xx_erasepage(FAR struct ee25xx_dev_s *eedev,
+                            unsigned long index)
+{
+  int       ret = OK;
+  FAR char *buf;
+
+  DEBUGASSERT(eedev);
+  DEBUGASSERT(eedev->pgsize > 0);
+
+  if (eedev->readonly)
+    {
+      return -EACCES;
+    }
+
+  if (index >= (eedev->size / eedev->pgsize))
+    {
+      return -EFBIG;
+    }
+
+  /* Devices with different page and sector sizes support a dedicated command
+   * for page erasure
+   */
+
+  if (eedev->pgsize != eedev->secsize)
+    {
+      ret = nxmutex_lock(&eedev->lock);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ee25xx_writeenable(eedev, true);
+
+      ee25xx_lock(eedev);
+      SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
+
+      ee25xx_sendcmd(eedev->spi, EEP25XX_CMD_PE, eedev->addrlen,
+                     index * eedev->pgsize);
+
+      SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
+      ee25xx_unlock(eedev);
+
+      ee25xx_waitwritecomplete(eedev);
+
+      nxmutex_unlock(&eedev->lock);
+    }
+
+  /* If there is no dedicated command for erasure, write the page to its
+   * default state
+   */
+
+  else
+    {
+      buf = kmm_malloc(eedev->pgsize);
+      if (buf == NULL)
+        {
+          ferr("ERROR: Failed to allocate memory for ee25xx_erasepage\n");
+          return -ENOMEM;
+        }
+
+      memset(buf, EE25XX_DUMMY, eedev->pgsize);
+
+      ret = nxmutex_lock(&eedev->lock);
+      if (ret < 0)
+        {
+          goto free_buffer;
+        }
+
+      ee25xx_writeenable(eedev, true);
+      ee25xx_writepage(eedev, index * eedev->pgsize, buf, eedev->pgsize);
+      ee25xx_waitwritecomplete(eedev);
+
+      nxmutex_unlock(&eedev->lock);
+
+free_buffer:
+      kmm_free(buf);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ee25xx_erasesector
+ *
+ * Description:
+ *   Erase 1 sector of data
+ *
+ * Input Parameters:
+ *   eedev - Device structure
+ *   index - Index of the sector to erase
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int ee25xx_erasesector(FAR struct ee25xx_dev_s *eedev,
+                              unsigned long index)
+{
+  int ret;
+
+  DEBUGASSERT(eedev);
+  DEBUGASSERT(eedev->secsize > 0);
+
+  if (eedev->pgsize == eedev->secsize)
+    {
+      return ee25xx_erasepage(eedev, index);
+    }
+
+  if (eedev->readonly)
+    {
+      return -EACCES;
+    }
+
+  if (index >= (eedev->size / eedev->secsize))
+    {
+      return -EFBIG;
+    }
+
+  ret = nxmutex_lock(&eedev->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ee25xx_writeenable(eedev, true);
+
+  ee25xx_lock(eedev);
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
+
+  ee25xx_sendcmd(eedev->spi, EEP25XX_CMD_SE, eedev->addrlen,
+                 index * eedev->secsize);
+
+  SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
+  ee25xx_unlock(eedev);
+
+  ee25xx_waitwritecomplete(eedev);
+
+  nxmutex_unlock(&eedev->lock);
+
+  return ret;
+}
+
+/****************************************************************************
  * Driver Functions
  ****************************************************************************/
 
@@ -785,7 +1035,7 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
 /****************************************************************************
  * Name: ee25xx_ioctl
  *
- * Description: TODO: Erase a sector/page/device or read device ID.
+ * Description: TODO: Read device ID.
  * This is completely optional and only applies to bigger devices.
  *
  ****************************************************************************/
@@ -830,6 +1080,18 @@ static int ee25xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             nxmutex_unlock(&eedev->lock);
           }
         }
+        break;
+
+      case EEPIOC_PAGEERASE:
+        ret = ee25xx_erasepage(eedev, arg);
+        break;
+
+      case EEPIOC_SECTORERASE:
+        ret = ee25xx_erasesector(eedev, arg);
+        break;
+
+      case EEPIOC_CHIPERASE:
+        ret = ee25xx_eraseall(eedev);
         break;
 
       default:

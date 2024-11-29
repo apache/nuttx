@@ -165,6 +165,25 @@ The full list of ``ioctl()`` commands can be found in
 
     Set the SPI/I2C bus frequency
 
+- ``EEPIOC_PAGEERASE``
+    *Argument:* ``unsigned long``
+
+    Erase an EEPROM page given its index, a dedicated command is used if
+    supported by the device.
+
+- ``EEPIOC_SECTORERASE``
+    *Argument:* ``unsigned long``
+
+    Erase an EEPROM sector given its index, a dedicated command is used if
+    supported by the device. Equivalent to a page erase on devices without
+    sectors.
+
+- ``EEPIOC_CHIPERASE``
+    *Argument:* ``void``
+
+    Erase the full EEPROM, a dedicated command is used if supported by the
+    device.
+
 File Systems
 ============
 

@@ -328,6 +328,147 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
 }
 
 /****************************************************************************
+ * Name: ee24xx_eraseall
+ *
+ * Description:
+ *   Erase all data on the device
+ *
+ * Input Parameters:
+ *   eedev - Device structure
+ *
+ ****************************************************************************/
+
+static int ee24xx_eraseall(FAR struct ee24xx_dev_s *eedev)
+{
+  FAR char *buf;
+  off_t     offset;
+  int       ret;
+
+  DEBUGASSERT(eedev);
+
+  if (eedev->readonly)
+    {
+      return -EACCES;
+    }
+
+  buf = kmm_malloc(eedev->pgsize);
+  if (buf == NULL)
+    {
+      ferr("ERROR: Failed to allocate memory for ee24xx eraseall\n");
+      return -ENOMEM;
+    }
+
+  memset(buf, 0xff, eedev->pgsize);
+
+  ret = nxmutex_lock(&eedev->lock);
+  if (ret < 0)
+    {
+      goto free_buffer;
+    }
+
+  for (offset = 0; offset < eedev->size; offset += eedev->pgsize)
+    {
+      ret = ee24xx_writepage(eedev, offset, buf, eedev->pgsize);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to write page at offset %" PRIdOFF
+               " (ret = %d)",
+               offset, ret);
+          goto release_semaphore;
+        }
+
+      ret = ee24xx_waitwritecomplete(eedev, offset);
+      if (ret < 0)
+        {
+          ferr("ERROR while waiting for write at offset %" PRIdOFF
+               " to complete (ret = %d)",
+               offset, ret);
+          goto release_semaphore;
+        }
+    }
+
+release_semaphore:
+  nxmutex_unlock(&eedev->lock);
+
+free_buffer:
+  kmm_free(buf);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ee24xx_erasepage
+ *
+ * Description:
+ *   Erase 1 page of data
+ *
+ * Input Parameters:
+ *   eedev - Device structure
+ *   index - Index of the page to erase
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int ee24xx_erasepage(FAR struct ee24xx_dev_s *eedev,
+                            unsigned long index)
+{
+  FAR char *buf;
+  int       ret;
+  off_t     offset;
+
+  DEBUGASSERT(eedev);
+  DEBUGASSERT(eedev->pgsize > 0);
+
+  if (eedev->readonly)
+    {
+      return -EACCES;
+    }
+
+  if (index >= (eedev->size / eedev->pgsize))
+    {
+      return -EFBIG;
+    }
+
+  buf = kmm_malloc(eedev->pgsize);
+
+  if (buf == NULL)
+    {
+      ferr("ERROR: Failed to allocate memory for ee24xx_erasepage\n");
+      return -ENOMEM;
+    }
+
+  memset(buf, 0xff, eedev->pgsize);
+
+  ret = nxmutex_lock(&eedev->lock);
+  if (ret < 0)
+    {
+      goto free_buffer;
+    }
+
+  offset = index * eedev->pgsize;
+  ret    = ee24xx_writepage(eedev, offset, buf, eedev->pgsize);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to write page (ret = %d)", ret);
+      goto release_semaphore;
+    }
+
+  ret = ee24xx_waitwritecomplete(eedev, offset);
+  if (ret < 0)
+    {
+      ferr("ERROR while waiting for write to complete (ret = %d)", ret);
+    }
+
+release_semaphore:
+  nxmutex_unlock(&eedev->lock);
+
+free_buffer:
+  kmm_free(buf);
+  return ret;
+}
+
+/****************************************************************************
  * Driver Functions
  ****************************************************************************/
 
@@ -812,6 +953,15 @@ static int ee24xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             nxmutex_unlock(&eedev->lock);
           }
         }
+        break;
+
+      case EEPIOC_PAGEERASE:
+      case EEPIOC_SECTORERASE:
+        ret = ee24xx_erasepage(eedev, arg);
+        break;
+
+      case EEPIOC_CHIPERASE:
+        ret = ee24xx_eraseall(eedev);
         break;
 
       default:
