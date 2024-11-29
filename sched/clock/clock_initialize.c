@@ -54,6 +54,7 @@
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
+struct timespec   g_monotonic_basetime;
 spinlock_t g_basetime_lock = SP_UNLOCKED;
 #endif
 
@@ -270,6 +271,45 @@ void clock_synchronize(FAR const struct timespec *tp)
   /* Re-initialize the time value to match the RTC */
 
   clock_inittime(tp);
+}
+#endif
+
+/****************************************************************************
+ * Name:  clock_synchronize_monotonic
+ *
+ * Description:
+ *   Synchronize the system boottime with remote hardware server.
+ *
+ * Input Parameters:
+ *   tp: boot time should be synced.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+void clock_synchronize_monotonic(FAR const struct timespec *tp)
+{
+  irqstate_t flags;
+  struct timespec ts;
+
+  /* Re-initialize the time value to match the RTC */
+
+  flags = spin_lock_irqsave(&g_basetime_lock);
+
+  clock_systime_timespec(&ts);
+  g_monotonic_basetime.tv_sec = tp->tv_sec - ts.tv_sec;
+  g_monotonic_basetime.tv_nsec = tp->tv_nsec - ts.tv_nsec;
+  if (g_monotonic_basetime.tv_nsec < 0)
+    {
+      g_monotonic_basetime.tv_sec -= 1;
+      g_monotonic_basetime.tv_nsec += NSEC_PER_SEC;
+    }
+
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 }
 #endif
 

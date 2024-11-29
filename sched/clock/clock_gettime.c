@@ -108,14 +108,23 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
        */
 
       clock_systime_timespec(tp);
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+      {
+        irqstate_t flags;
+
+        flags = spin_lock_irqsave(&g_basetime_lock);
+        clock_timespec_add(&g_monotonic_basetime, tp, tp);
+        spin_unlock_irqrestore(&g_basetime_lock, flags);
+      }
+#endif
     }
   else if (clock_id == CLOCK_REALTIME)
     {
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-      struct timespec ts;
       irqstate_t flags;
 
-      clock_systime_timespec(&ts);
+      clock_systime_timespec(tp);
 
       /* Add the base time to this.  The base time is the time-of-day
        * setting.  When added to the elapsed time since the time-of-day
@@ -123,7 +132,7 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
        */
 
       flags = spin_lock_irqsave(&g_basetime_lock);
-      clock_timespec_add(&g_basetime, &ts, tp);
+      clock_timespec_add(&g_basetime, tp, tp);
       spin_unlock_irqrestore(&g_basetime_lock, flags);
 #else
       clock_timekeeping_get_wall_time(tp);
