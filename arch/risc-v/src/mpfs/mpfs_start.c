@@ -121,7 +121,7 @@ void __mpfs_start(uint64_t mhartid)
 
   /* Setup PLL if not already provided */
 
-#ifdef CONFIG_MPFS_BOOTLOADER
+#ifdef CONFIG_MPFS_CLKINIT
   mpfs_clockconfig();
 #endif
 
