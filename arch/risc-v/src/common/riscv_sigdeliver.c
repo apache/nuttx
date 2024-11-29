@@ -167,5 +167,5 @@ retry:
   g_running_tasks[this_cpu()] = NULL;
 
   rtcb->xcp.regs = regs;
-  riscv_fullcontextrestore(rtcb);
+  riscv_fullcontextrestore();
 }
