@@ -161,5 +161,8 @@ retry:
   leave_critical_section((regs[REG_PS]));
   rtcb->irqcount--;
 #endif
-  xtensa_context_restore(regs);
+
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  xtensa_context_restore();
+  UNUSED(regs);
 }
