@@ -765,14 +765,13 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
   usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
-#endif
-
-#ifndef CONFIG_BOARD_CRASHDUMP_NONE
   /* Flush previous SYSLOG data before possible long time coredump */
 
   syslog_flush();
+
+#ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
+  board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
+#elif !defined(CONFIG_BOARD_CRASHDUMP_NONE)
 
   /* Dump core information */
 
