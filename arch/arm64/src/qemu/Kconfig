@@ -32,6 +32,13 @@ config ARCH_CHIP_QEMU_A72
 	select ARM64_HAVE_PSCI
 	select ARCH_CORTEX_A72
 
+config ARCH_CHIP_QEMU_UNKNOWN
+	bool "Qemu virtual Processor (unknown CPU)"
+	select ARCH_HAVE_MULTICPU
+	select ARMV8A_HAVE_GICv3
+	select ARM64_HAVE_PSCI
+	select ARCH_CPU_UNKNOWN
+
 endchoice # Qemu Chip Selection
 
 config ARCH_CHIP_QEMU_WITH_HV
