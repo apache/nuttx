@@ -656,6 +656,26 @@ void clock_synchronize(FAR const struct timespec *tp);
 #endif
 
 /****************************************************************************
+ * Name:  clock_synchronize_monotonic
+ *
+ * Description:
+ *   Synchronize the system boottime with remote hardware server.
+ *
+ * Input Parameters:
+ *   tp: boot time should be synced.
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_CLOCK_TIMEKEEPING
+void clock_synchronize_monotonic(FAR const struct timespec *tp);
+#endif
+
+/****************************************************************************
  * Name: clock_resynchronize
  *
  * Description:
