@@ -71,9 +71,12 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
   if (irq >= RISCV_IRQ_ECALLU && irq <= RISCV_IRQ_ECALLM)
     {
       regs[REG_EPC] += 4;
+      if (regs[REG_A0] != SYS_restore_context)
+        {
+          (*running_task)->xcp.regs = regs;
+        }
     }
-
-  if (*running_task != NULL)
+  else
     {
       (*running_task)->xcp.regs = regs;
     }
