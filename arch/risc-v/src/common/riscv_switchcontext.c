@@ -80,7 +80,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
     {
       /* Then switch contexts */
 
-      riscv_switchcontext(rtcb, tcb);
+      riscv_switchcontext();
 
       /* riscv_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the
