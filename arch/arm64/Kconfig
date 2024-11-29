@@ -270,6 +270,18 @@ config ARCH_CORTEX_R82
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
 
+config ARCH_CPU_UNKNOWN
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_TESTSET
+	select ARM64_HAVE_NEON
+
 config ARCH_FAMILY
 	string
 	default "armv8-a"   if ARCH_ARMV8A
