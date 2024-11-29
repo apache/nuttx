@@ -124,10 +124,6 @@ void arm64_el_init(void)
 
 void arm64_chip_boot(void)
 {
-  /* MAP IO and DRAM, enable MMU. */
-
-  arm64_mmu_init(true);
-
 #ifdef CONFIG_IMX9_BOOTLOADER
   imx9_mix_powerup();
 
@@ -143,6 +139,10 @@ void arm64_chip_boot(void)
   imx9_dram_init();
 #endif
 #endif
+
+  /* MAP IO and DRAM, enable MMU. */
+
+  arm64_mmu_init(true);
 
   /* Do UART early initialization & pin muxing */
 
