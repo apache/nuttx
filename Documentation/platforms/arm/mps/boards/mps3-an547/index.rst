@@ -50,6 +50,17 @@ Configuring and Running (Single Core)
      bl> boot /pic/boot
      ap> ostest
 
+Precautions
+===========
+
+In the new version of QEMU (9.20), the UART RX interrupt and TX interrupt have been swapped.
+Adjustments need to be made using menuconfig::
+
+    CONFIG_CMSDK_UART0_TX_IRQ=50
+    CONFIG_CMSDK_UART0_RX_IRQ=49
+
+For details, see `fix RX/TX interrupts order <https://github.com/qemu/qemu/commit/5a558be93ad628e5bed6e0ee062870f49251725c>`_
+
 Debugging with QEMU
 ===================
 
