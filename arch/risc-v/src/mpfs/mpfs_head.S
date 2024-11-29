@@ -49,6 +49,14 @@ __start:
   csrw CSR_MIE, zero
   csrw CSR_MIP, zero
 
+  /* Clear all IPIs (above doesn't clear them) */
+
+  csrr a0, CSR_MHARTID
+  slli t1, a0, 2
+  li   t0, MPFS_CLINT_BASE
+  add  t1, t1, t0
+  sw   zero, 0(t1)
+
   /* Initialize the Machine Trap Vector */
 
   la   t0, __trap_vec
