@@ -514,7 +514,7 @@ class Ps(gdb.Command):
             int(tcb["stack_base_ptr"]),
             int(tcb["stack_alloc_ptr"]),
             int(tcb["adj_stack_size"]),
-            utils.get_sp(tcb),
+            utils.get_sp(tcb if tcb["task_state"] != TSTATE_TASK_RUNNING else None),
             4,
         )
 
