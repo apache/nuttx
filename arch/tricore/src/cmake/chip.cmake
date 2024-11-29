@@ -22,18 +22,20 @@
 
 set(PLATFORM_FLAGS)
 
-if(CONFIG_ARCH_CHIP_TC397)
+if(CONFIG_ARCH_CHIP_TC3XX)
   if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
     add_compile_options(--cpu=tc39xb)
     add_link_options(-Ctc39xb)
   else()
     list(APPEND PLATFORM_FLAGS -mcpu=tc39xx -mtc162)
   endif()
-  list(APPEND PLATFORM_FLAGS
-       -I${NUTTX_CHIP_ABS_DIR}/tc397/Libraries/iLLD/TC39B/Tricore/Cpu/Std)
-  list(APPEND PLATFORM_FLAGS
-       -I${NUTTX_CHIP_ABS_DIR}/tc397/Libraries/Infra/Platform)
-  list(APPEND PLATFORM_FLAGS -I${NUTTX_CHIP_ABS_DIR}/tc397/Configurations)
+elseif(CONFIG_ARCH_CHIP_TC4XX)
+  if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+    add_compile_options(--cpu=tc4DAx)
+    add_link_options(-Ctc4DAx)
+  else()
+    list(APPEND PLATFORM_FLAGS -mcpu=tc4DAx -mtc18)
+  endif()
 endif()
 
 add_compile_options(${PLATFORM_FLAGS})
