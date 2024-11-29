@@ -35,6 +35,8 @@ config STM32H5_STM32H5XXXX
 config STM32H5_STM32H56XXX
 	bool
 	default n
+	select STM32H5_HAVE_FDCAN1
+	select STM32H5_HAVE_FDCAN2
 	select STM32H5_HAVE_LPUART1
 	select STM32H5_HAVE_USART1
 	select STM32H5_HAVE_USART2
@@ -207,6 +209,14 @@ config STM32H5_HAVE_ETHERNET
 	default n
 
 config STM32H5_HAVE_PHY_POLLED
+	bool
+	default n
+
+config STM32H5_HAVE_FDCAN1
+	bool
+	default n
+
+config STM32H5_HAVE_FDCAN2
 	bool
 	default n
 
@@ -1322,6 +1332,292 @@ config STM32H5_NO_PHY
 
 endmenu # Ethernet MAC Configuration
 
+menu "FDCAN driver configuration"
+	depends on STM32H5_FDCAN
+
+choice
+	prompt "FDCAN character driver or SocketCAN support"
+	default STM32H5_FDCAN_CHARDRIVER
+
+config STM32H5_FDCAN_CHARDRIVER
+	bool "STM32 FDCAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config STM32H5_FDCAN_SOCKET
+	bool "STM32 FDCAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
+
+endchoice # FDCAN character driver or SocketCAN support
+
+config STM32H5_FDCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+config STM32H5_FDCAN_QUEUE_MODE
+	bool "FDCAN QUEUE mode (vs FIFO mode)"
+	default n
+
+menu "FDCAN1 device driver options"
+	depends on STM32H5_FDCAN1
+
+choice
+	prompt "FDCAN1 frame format"
+	default STM32H5_FDCAN1_ISO11898_1
+
+config STM32H5_FDCAN1_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32H5_FDCAN1_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN1 frame format
+
+choice
+	prompt "FDCAN1 mode"
+	default STM32H5_FDCAN1_CLASSIC
+
+config STM32H5_FDCAN1_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32H5_FDCAN1_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32H5_FDCAN1_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN1 mode
+
+menu "FDCAN1 Bit Timing"
+
+config STM32H5_FDCAN1_AUTO_BIT_TIMING
+        bool "FDCAN1 Automatic Bit Timing"
+        default y
+	---help---
+		Automatically determine FDCAN1 bit timing (nominal and data) based on bitrate.
+
+comment "Nominal Bit Timing"
+
+config STM32H5_FDCAN1_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if STM32H5_FDCAN1 is defined.
+
+config STM32H5_FDCAN1_NTSEG1
+	int "FDCAN1 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256
+        depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN1_NTSEG2
+	int "FDCAN1 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128
+        depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN1_NSJW
+	int "FDCAN1 synchronization jump width"
+	default 1
+	range 1 128
+        depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32H5_FDCAN1_FD_BRS
+
+config STM32H5_FDCAN1_DBITRATE
+	int "FDCAN1 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32H5_FDCAN1_FD_BRS
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32H5_FDCAN1_DTSEG1
+	int "FDCAN1 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31
+	depends on CAN_FD && STM32H5_FDCAN1_FD_BRS && !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN1_DTSEG2
+	int "FDCAN1 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15
+	depends on CAN_FD && STM32H5_FDCAN1_FD_BRS && !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN1_DSJW
+	int "FDCAN1 fast synchronization jump width"
+	default 2
+	range 1 15
+	depends on CAN_FD && STM32H5_FDCAN1_FD_BRS && !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN1 Bit Timing
+
+config STM32H5_FDCAN1_LOOPBACK
+	bool "Enable FDCAN1 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN1 local loopback mode for testing purposes.
+
+endmenu # FDCAN1 device driver options
+
+menu "FDCAN2 device driver options"
+	depends on STM32H5_FDCAN2
+
+choice
+	prompt "FDCAN2 frame format"
+	default STM32H5_FDCAN2_ISO11898_1
+
+config STM32H5_FDCAN2_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32H5_FDCAN2_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN2 frame format
+
+choice
+	prompt "FDCAN2 mode"
+	default STM32H5_FDCAN2_CLASSIC
+
+config STM32H5_FDCAN2_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32H5_FDCAN2_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32H5_FDCAN2_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN2 mode
+
+menu "FDCAN2 Bit Timing"
+
+config STM32H5_FDCAN2_AUTO_BIT_TIMING
+        bool "FDCAN2 Automatic Bit Timing"
+        default y
+	---help---
+		Automatically determine FDCAN2 bit timing (nominal and data) based on bitrate.
+
+comment "Nominal Bit Timing"
+
+config STM32H5_FDCAN2_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if STM32H5_FDCAN2 is defined.
+
+config STM32H5_FDCAN2_NTSEG1
+	int "FDCAN2 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256
+        depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN2_NTSEG2
+	int "FDCAN2 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128
+        depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN2_NSJW
+	int "FDCAN2 synchronization jump width"
+	default 1
+	range 1 128
+        depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32H5_FDCAN2_FD_BRS
+
+config STM32H5_FDCAN2_DBITRATE
+	int "FDCAN2 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32H5_FDCAN2_FD_BRS
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32H5_FDCAN2_DTSEG1
+	int "FDCAN2 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31
+	depends on CAN_FD && STM32H5_FDCAN2_FD_BRS && !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN2_DTSEG2
+	int "FDCAN2 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15
+	depends on CAN_FD && STM32H5_FDCAN2_FD_BRS && !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H5_FDCAN2_DSJW
+	int "FDCAN2 fast synchronization jump width"
+	default 2
+	range 1 15
+	depends on CAN_FD && STM32H5_FDCAN2_FD_BRS && !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN2 Bit Timing
+
+config STM32H5_FDCAN2_LOOPBACK
+	bool "Enable FDCAN2 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN2 local loopback mode for testing purposes.
+
+endmenu # FDCAN2 device driver options
+
+endmenu # "FDCAN driver configuration"
 
 menu "I2C Configuration"
 	depends on STM32H5_I2C
