@@ -57,7 +57,7 @@ int puts(FAR const IPTR char *s)
   /* Write the string without its trailing '\0' */
 
   nwritten = fputs_unlocked(s, stream);
-  if (nwritten > 0)
+  if (nwritten >= 0)
     {
       /* Followed by a newline */
 
