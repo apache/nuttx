@@ -501,7 +501,6 @@ Documentation/components/binfmt.rst matias@protobits.dev xiaoxiang@xiaomi.com co
 Documentation/components/boards.rst raiden00@railab.me
 Documentation/components/cmake.rst raiden00@railab.me
 Documentation/components/crypto.rst raiden00@railab.me
-Documentation/components/drivers/block/eeprom.rst raiden00@railab.me
 Documentation/components/drivers/block/index.rst raiden00@railab.me matias@protobits.dev bashton@brennanashton.com xiaoxiang@xiaomi.com
 Documentation/components/drivers/block/ramdisk.rst raiden00@railab.me
 Documentation/components/drivers/character/1wire.rst raiden00@railab.me
@@ -525,6 +524,7 @@ Documentation/components/drivers/character/can.rst matias@protobits.dev raiden00
 Documentation/components/drivers/character/contactless.rst raiden00@railab.me
 Documentation/components/drivers/character/crypto/index.rst raiden00@railab.me
 Documentation/components/drivers/character/crypto/se05x.rst raiden00@railab.me
+Documentation/components/drivers/character/eeprom.rst raiden00@railab.me
 Documentation/components/drivers/character/efuse.rst raiden00@railab.me
 Documentation/components/drivers/character/i2s.rst raiden00@railab.me
 Documentation/components/drivers/character/index.rst matias@protobits.dev raiden00@railab.me bashton@brennanashton.com xiaoxiang@xiaomi.com michallenc@seznam.cz
@@ -19674,8 +19674,7 @@ include/nuttx/drivers/ramdisk.h alin.jerpelea@sony.com
 include/nuttx/drivers/rpmsgblk.h wangbowen6@xiaomi.com devel@sumpfralle.de alin.jerpelea@sony.com
 include/nuttx/drivers/rpmsgdev.h wangbowen6@xiaomi.com zhanghongyu@xiaomi.com devel@sumpfralle.de alin.jerpelea@sony.com wangjianyu3@xiaomi.com
 include/nuttx/drivers/rwbuffer.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com anjiahao@xiaomi.com spudarnia@yahoo.com
-include/nuttx/eeprom/i2c_xx24xx.h acassis@gmail.com sebastien@lorquet.fr xiaoxiang@xiaomi.com alin.jerpelea@sony.com
-include/nuttx/eeprom/spi_xx25xx.h alin.jerpelea@sony.com petro.karashchenko@gmail.com xiaoxiang@xiaomi.com 56726697+TimJTi@users.noreply.github.com
+include/nuttx/eeprom/eeprom.h acassis@gmail.com alin.jerpelea@sony.com petro.karashchenko@gmail.com sebastien@lorquet.fr xiaoxiang@xiaomi.com 56726697+TimJTi@users.noreply.github.com
 include/nuttx/efuse/efuse.h acassis@gmail.com 56726697+TimJTi@users.noreply.github.com gustavo.nihei@espressif.com alin.jerpelea@sony.com
 include/nuttx/efuse/sama5_sfc_fuses.h 56726697+TimJTi@users.noreply.github.com alin.jerpelea@sony.com
 include/nuttx/elf.h xiaoxiang@xiaomi.com anchao@xiaomi.com masayuki.ishikawa@gmail.com anthony@vergeaero.com

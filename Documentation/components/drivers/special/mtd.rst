@@ -145,6 +145,9 @@ character driver interface may also be preferred to reduce footprint or for
 very trivial usage of the EEPROM (e.g. storing parameters without having to
 rely on a filesystem).
 
+The MTD driver for 25xxxx family EEPROMs is a wrapper around the character
+driver, their performance is therefore almost identical.
+
 CFI FLASH
 =========
 

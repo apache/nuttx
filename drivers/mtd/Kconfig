@@ -516,11 +516,16 @@ config MTD_AT25EE
 	default n
 	select SPI
 	select MTD_BYTE_WRITE
+	select EEPROM
+	select SPI_EE_25XX
 	---help---
 		Build support for SPI-based AT25xx type EEPROMs. MTD on EEPROM can
 		perform poorly, so it is possible only usable if the EEPROM has a
 		clock speed 10MHz or higher. EEPROMs that use the same commands as
 		the 25AA160 should work OK.
+
+		This is a convenience wrapper around the eeprom/spi_xx25xx driver.
+		It can be configured from the "EEPROM support" menu.
 
 if MTD_AT25EE
 
@@ -563,46 +568,6 @@ config AT25EE_ENABLE_BLOCK_ERASE
 		applications (e.g if an erase verify is wanted, or if a particular
 		file system requires this) block erase (i.e. writing each byte to
 		0xff) can be enabled here.
-
-config AT25EE_SPIMODE
-	int "AT25EE SPI Mode"
-	default 0
-
-config AT25EE_SPIFREQUENCY
-	int "AT25EE SPI Frequency"
-	default 10000000
-
-config AT25EE_START_DELAY
-	int "AT25EE startdelay"
-	---help---
-		The delay between CS active and first CLK. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_STOP_DELAY
-	int "AT25EE stopdelay"
-	---help---
-		The delay between last CLK and CS inactive. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_CS_DELAY
-	int "AT25EE csdelay"
-	---help---
-		The delay between CS inactive and CS active again. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
-
-config AT25EE_IFDELAY
-	int "AT25EE ifdelay"
-	---help---
-		The delay between frames. In ns.
-	depends on SPI_DELAY_CONTROL
-	range 0 1000000
-	default 5000
 
 endif # MTD_AT25EE
 

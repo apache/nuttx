@@ -86,7 +86,6 @@
 #include <inttypes.h>
 
 #include <nuttx/eeprom/eeprom.h>
-#include <nuttx/eeprom/i2c_xx24xx.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
@@ -164,7 +163,7 @@ static ssize_t at24cs_read_uuid(FAR struct file *filep, FAR char *buffer,
 
 /* Supported device geometries.
  * One geometry can fit more than one device.
- * The user will use an enum'ed index from include/eeprom/i2c_xx24xx.h
+ * The user will use an enum'ed index from include/eeprom/eeprom.h
  */
 
 static const struct ee24xx_geom_s g_ee24xx_devices[] =
