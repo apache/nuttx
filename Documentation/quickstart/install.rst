@@ -124,7 +124,7 @@ some Kconfig syntax errors.  Install kconfiglib via following command:
 
 .. code-block:: shell
 
-  pip install kconfiglib
+  sudo apt install python3-kconfiglib
 
 If you are a working on Windows, which also need the support of windows-curses:
 
