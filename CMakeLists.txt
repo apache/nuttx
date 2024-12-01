@@ -87,7 +87,7 @@ find_program(KCONFIGLIB olddefconfig)
 if(NOT KCONFIGLIB)
   message(
     FATAL_ERROR "Kconfig environment depends on kconfiglib, Please install:
-  $ pip install kconfiglib")
+  $ sudo apt install python3-kconfiglib")
 endif()
 
 # BOARD CONFIG can be set to directory path, or <board-name>[/:]<config-name>
