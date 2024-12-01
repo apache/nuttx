@@ -35,6 +35,10 @@
 
 #include <nuttx/fs/ioctl.h>
 
+#ifdef CONFIG_EEPROM
+#include <nuttx/eeprom/eeprom.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -429,17 +433,35 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_master_s *dev);
  * Input Parameters:
  *   dev        - a reference to the spi device structure
  *   spi_devid  - SPI device ID to manage CS lines in board
- *   devtype    - device type, from include/nuttx/eeprom/spi_xx25xx.h
+ *   devtype    - device type, see eeprom/eeprom.h
  *   readonly   - sets block driver to be readonly
  *
  * Returned Value:
- *   Initialised device structure (success) of NULL (fail)
+ *   Initialized device structure (success) or NULL (fail)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MTD_AT25EE
 FAR struct mtd_dev_s *at25ee_initialize(FAR struct spi_dev_s *dev,
-                                        uint16_t spi_devid, int devtype,
+                                        uint16_t spi_devid,
+                                        enum eeprom_25xx_e devtype,
                                         int readonly);
+#endif
+
+/****************************************************************************
+ * Name: at25ee_teardown
+ *
+ * Description:
+ *   Teardown a previously created at25ee device.
+ *
+ * Input Parameters:
+ *   dev - Pointer to the mtd driver instance.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_AT25EE
+void at25ee_teardown(FAR struct mtd_dev_s *mtd);
+#endif
 
 /****************************************************************************
  * Name: at24c_uninitialize
