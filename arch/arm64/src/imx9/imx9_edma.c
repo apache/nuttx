@@ -1,19 +1,14 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_edma.c
  *
- *   Copyright (C) 2019, 2021, 2023 Gregory Nutt. All rights reserved.
- *   Copyright 2022 NXP
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david.sidrane@nscdg.com>
- *            Peter van der Perk <peter.vanderperk@nxp.com>
- *
- * This file was leveraged from the NuttX S32K3 port.  Portions of that eDMA
- * logic derived from NXP sample code which has a compatible BSD 3-clause
- * license:
- *
- *   Copyright (c) 2015, Freescale Semiconductor, Inc.
- *   Copyright 2016-2017 NXP
- *   All rights reserved
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019, 2021, 2023 Gregory Nutt.
+ * SPDX-FileCopyrightText: 2022 NXP
+ * SPDX-FileCopyrightText: 2016-2017 NXP
+ * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: David Sidrane <david.sidrane@nscdg.com>
+ * SPDX-FileContributor: Peter van der Perk <peter.vanderperk@nxp.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
