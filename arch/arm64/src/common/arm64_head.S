@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_head.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -15,11 +17,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
- *
- *    DESCRIPTION
- *        Bring-up code for ARMv8.
- *        Based on head.S(arm64 porting) at Xen Hypervisor Project
- *        Based on reset.S(aarch64 porting) at Zephyr RTOS Project
  *
  ****************************************************************************/
 
