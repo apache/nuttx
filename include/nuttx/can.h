@@ -44,7 +44,6 @@
 #define CAN_EFF_FLAG 0x80000000  /* EFF/SFF is set in the MSB */
 #define CAN_RTR_FLAG 0x40000000  /* Remote transmission request */
 #define CAN_ERR_FLAG 0x20000000  /* Error message frame */
-#define CAN_EVT_FLAG 0x10000000  /* Lower_half use this flags to report state switch event */
 
 /* Valid bits in CAN ID for frame formats */
 
