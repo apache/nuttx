@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include <nuttx/debug.h>
 #include <nuttx/fs/fs.h>
@@ -198,6 +199,15 @@ int goldfish_gnss_init(int devno, uint32_t batch_number)
   FAR struct goldfish_gnss_s *gnss;
   FAR char *argv[2];
   char arg1[32];
+  uint32_t nbuffer[] =
+  {
+    [SENSOR_GNSS_IDX_GNSS] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_SATELLITE] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_MEASUREMENT] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_CLOCK] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_GEOFENCE] = batch_number,
+  };
+
   int ret;
 
   /* Alloc memory for sensor */
@@ -235,5 +245,5 @@ int goldfish_gnss_init(int devno, uint32_t batch_number)
 
   gnss->gnss.ops = &g_goldfish_gnss_ops;
 
-  return gnss_register(&gnss->gnss, devno, batch_number);
+  return gnss_register(&gnss->gnss, devno, nbuffer, nitems(nbuffer));
 }
