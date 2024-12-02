@@ -1732,7 +1732,7 @@ int fb_register_device(int display, int plane,
   char devname[16];
   int nplanes;
   int ret;
-  size_t i;
+  ssize_t i;
 
   /* Allocate a framebuffer state instance */
 
