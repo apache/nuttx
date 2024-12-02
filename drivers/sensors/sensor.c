@@ -260,6 +260,8 @@ static int sensor_update_interval(FAR struct file *filep,
   uint32_t min_interval = interval;
   uint32_t min_latency = interval != UINT32_MAX ?
                          user->state.latency : UINT32_MAX;
+  uint32_t orig_min_interval;
+  uint32_t orig_min_latency;
   int ret = 0;
 
   if (interval == user->state.interval)
@@ -267,6 +269,8 @@ static int sensor_update_interval(FAR struct file *filep,
       return 0;
     }
 
+  nxrmutex_lock(&upper->lock);
+again:
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
     {
       if (tmp == user || tmp->state.interval == UINT32_MAX)
@@ -291,6 +295,8 @@ static int sensor_update_interval(FAR struct file *filep,
           min_interval != upper->state.min_interval)
         {
           uint32_t expected_interval = min_interval;
+          orig_min_interval = upper->state.min_interval;
+          nxrmutex_unlock(&upper->lock);
           ret = lower->ops->set_interval(lower, filep, &min_interval);
           if (ret < 0)
             {
@@ -299,6 +305,17 @@ static int sensor_update_interval(FAR struct file *filep,
           else if (min_interval > expected_interval)
             {
               return -EINVAL;
+            }
+
+          nxrmutex_lock(&upper->lock);
+
+          /* The upper min_interval is updated by other threads, set to
+           * driver again to avoid race condition.
+           */
+
+          if (orig_min_interval != upper->state.min_interval)
+            {
+              goto again;
             }
         }
 
@@ -311,7 +328,20 @@ static int sensor_update_interval(FAR struct file *filep,
           (min_latency != upper->state.min_latency ||
           (min_interval != upper->state.min_interval && min_latency)))
         {
+          orig_min_latency = upper->state.min_latency;
+          nxrmutex_unlock(&upper->lock);
           ret = lower->ops->batch(lower, filep, &min_latency);
+          nxrmutex_lock(&upper->lock);
+
+          /* The upper min_latency is updated by other threads, set to
+           * driver again to avoid race condition.
+           */
+
+          if (orig_min_latency != upper->state.min_latency)
+            {
+              goto again;
+            }
+
           if (ret >= 0)
             {
               upper->state.min_latency = min_latency;
@@ -322,6 +352,7 @@ static int sensor_update_interval(FAR struct file *filep,
   upper->state.min_interval = min_interval;
   user->state.interval = interval;
   sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
+  nxrmutex_unlock(&upper->lock);
   return ret;
 }
 
@@ -333,6 +364,7 @@ static int sensor_update_latency(FAR struct file *filep,
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *tmp;
   uint32_t min_latency = latency;
+  uint32_t orig_min_latency;
   int ret = 0;
 
   if (latency == user->state.latency)
@@ -346,6 +378,8 @@ static int sensor_update_latency(FAR struct file *filep,
       return 0;
     }
 
+  nxrmutex_lock(&upper->lock);
+again:
   if (latency <= upper->state.min_latency)
     {
       goto update;
@@ -373,21 +407,36 @@ update:
   if (min_latency == upper->state.min_latency)
     {
       user->state.latency = latency;
+      nxrmutex_unlock(&upper->lock);
       return ret;
     }
 
   if (lower->ops->batch)
     {
+      orig_min_latency = upper->state.min_latency;
+      nxrmutex_unlock(&upper->lock);
       ret = lower->ops->batch(lower, filep, &min_latency);
       if (ret < 0)
         {
           return ret;
+        }
+
+      nxrmutex_lock(&upper->lock);
+
+      /* The upper min_latency is updated by other threads, set to
+       * driver again to avoid race condition.
+       */
+
+      if (orig_min_latency != upper->state.min_latency)
+        {
+          goto again;
         }
     }
 
   upper->state.min_latency = min_latency;
   user->state.latency = latency;
   sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
+  nxrmutex_unlock(&upper->lock);
   return ret;
 }
 
@@ -726,14 +775,15 @@ static int sensor_close(FAR struct file *filep)
     }
 
   list_delete(&user->node);
-  sensor_update_latency(filep, upper, user, UINT32_MAX);
-  sensor_update_interval(filep, upper, user, UINT32_MAX);
   nxsem_destroy(&user->buffersem);
 
   /* The user is closed, notify to other users */
 
   sensor_pollnotify(upper, POLLPRI, SENSOR_ROLE_WR);
   nxrmutex_unlock(&upper->lock);
+
+  sensor_update_latency(filep, upper, user, UINT32_MAX);
+  sensor_update_interval(filep, upper, user, UINT32_MAX);
 
   kmm_free(user);
   return ret;
@@ -855,18 +905,14 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_SET_INTERVAL:
         {
-          nxrmutex_lock(&upper->lock);
           ret = sensor_update_interval(filep, upper, user,
                                        arg1 ? arg1 : UINT32_MAX);
-          nxrmutex_unlock(&upper->lock);
         }
         break;
 
       case SNIOC_BATCH:
         {
-          nxrmutex_lock(&upper->lock);
           ret = sensor_update_latency(filep, upper, user, arg1);
-          nxrmutex_unlock(&upper->lock);
         }
         break;
 
