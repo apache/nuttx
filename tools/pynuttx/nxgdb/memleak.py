@@ -114,7 +114,9 @@ class MMLeak(gdb.Command):
         sorted_addr = set()
         t = time.time()
         print("Gather memory nodes...", flush=True, end="")
-        for node in memdump.dump_nodes(heaps, {"no_pid": mm.PID_MM_MEMPOOL}):
+        for node in memdump.dump_nodes(
+            heaps, {"no_pid": mm.PID_MM_MEMPOOL, "used": True}
+        ):
             nodes_dict[node.address] = node
             sorted_addr.add(node.address)
 
