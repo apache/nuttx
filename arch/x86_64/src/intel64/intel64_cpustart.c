@@ -39,6 +39,7 @@
 
 #include "intel64_lowsetup.h"
 #include "intel64_cpu.h"
+#include "x86_64_hwdebug.h"
 
 /****************************************************************************
  * Private Types
@@ -191,6 +192,12 @@ void x86_64_ap_boot(void)
     {
       __revoke_low_memory();
     }
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+  /* Initialize hardware debug interface */
+
+  x86_64_hwdebug_init();
+#endif
 
   up_update_task(tcb);
 

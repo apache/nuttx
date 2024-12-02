@@ -80,4 +80,8 @@ if(NOT CONFIG_BUILD_FLAT)
        x86_64_signal_dispatch.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_DEBUG)
+  list(APPEND SRCS x86_64_hwdebug.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
