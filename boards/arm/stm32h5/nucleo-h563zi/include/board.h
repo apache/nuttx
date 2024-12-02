@@ -58,6 +58,51 @@
 #define STM32_LSI_FREQUENCY         32000
 #define STM32_LSE_FREQUENCY         32768
 
+#ifdef CONFIG_STM32H5_USE_HSE
+
+#define STM32_HSE_FREQUENCY     25000000ul
+#define STM32_BOARD_USEHSE
+
+/* PLL1 config: Use to generate 250 MHz system clock
+ *  With HSE Freq = 25 MHz
+ */
+
+#define STM32_PLLCFG_PLL1CFG     (RCC_PLL1CFGR_PLL1SRC_HSE  | \
+                                  RCC_PLL1CFGR_PLL1RGE_4_8M | \
+                                  RCC_PLL1CFGR_PLL1M(5) | \
+                                  RCC_PLL1CFGR_PLL1PEN | \
+                                  RCC_PLL1CFGR_PLL1QEN | \
+                                  RCC_PLL1CFGR_PLL1REN)
+#define STM32_PLLCFG_PLL1N        RCC_PLL1DIVR_PLL1N(100)
+#define STM32_PLLCFG_PLL1P        RCC_PLL1DIVR_PLL1P(2)
+#define STM32_PLLCFG_PLL1Q        RCC_PLL1DIVR_PLL1Q(2)
+#define STM32_PLLCFG_PLL1R        RCC_PLL1DIVR_PLL1R(2)
+#define STM32_PLLCFG_PLL1DIVR     (STM32_PLLCFG_PLL1N | \
+                                   STM32_PLLCFG_PLL1P | \
+                                   STM32_PLLCFG_PLL1Q | \
+                                   STM32_PLLCFG_PLL1R)
+
+#define STM32_VC01_FRQ            ((STM32_HSE_FREQUENCY / 5) * 100)
+#define STM32_PLL1P_FREQUENCY     (STM32_VCO1_FRQ / 2)
+#define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 2)
+#define STM32_PLL1R_FREQUENCY     (STM32_VCO1_FRQ / 2)
+
+/* PLL2 config: Need to use for max ADC speed. */
+
+#define STM32_PLLCFG_PLL2CFG      (RCC_PLL2CFGR_PLL2SRC_HSE | \
+                                   RCC_PLL2CFGR_PLL2RGE_4_8M | \
+                                   RCC_PLL2CFGR_PLL2M(5) | \
+                                   RCC_PLL2CFGR_PLL2REN)
+#define STM32_PLLCFG_PLL2N         RCC_PLL2DIVR_PLL2N(60)
+#define STM32_PLLCFG_PLL2R         RCC_PLL2DIVR_PLL2R(4)
+#define STM32_PLLCFG_PLL2DIVR     (STM32_PLLCFG_PLL2N | \
+                                   STM32_PLLCFG_PLL2R)
+
+#define STM32_VCO2_FRQ            ((STM32_HSE_FREQUENCY / 5) * 60)
+#define STM32_PLL2R_FREQUENCY     (STM32_VCO2_FRQ / 4)
+
+#else
+
 #define STM32_BOARD_USEHSI       1
 #define STM32_BOARD_HSIDIV       RCC_CR_HSIDIV(1)
 #define STM32_HSI_FREQUENCY      32000000ul
@@ -100,6 +145,8 @@
 
 #define STM32_VCO2_FRQ            ((STM32_HSI_FREQUENCY / 8) * 75)
 #define STM32_PLL2R_FREQUENCY     (STM32_VCO2_FRQ / 4)
+
+#endif /* CONFIG_STM32H5_USE_HSE*/
 
 /* Enable CLK48; get it from HSI48 */
 
