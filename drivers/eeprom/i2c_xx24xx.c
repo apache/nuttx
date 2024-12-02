@@ -96,10 +96,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_EE24XX_FREQUENCY
-#  define CONFIG_EE24XX_FREQUENCY 100000
-#endif
-
 #define UUID_SIZE   16
 
 /****************************************************************************
@@ -124,23 +120,23 @@ struct ee24xx_dev_s
 {
   /* Bus management */
 
-  FAR struct i2c_master_s *i2c;      /* I2C device where the EEPROM is attached */
-  uint32_t                 freq;     /* I2C bus speed */
-  uint8_t                  addr;     /* 7-bit unshifted I2C device address */
+  FAR struct i2c_master_s *i2c;  /* I2C device where the EEPROM is attached */
+  uint32_t                 freq; /* I2C bus speed                           */
+  uint8_t                  addr; /* 7-bit unshifted I2C device address      */
 
   /* Driver management */
 
-  mutex_t                  lock;     /* file write access serialization */
-  uint8_t                  refs;     /* Nr of times the device has been opened */
-  bool                     readonly; /* Flags */
+  mutex_t lock;     /* file write access serialization                      */
+  uint8_t refs;     /* Nr of times the device has been opened               */
+  bool    readonly; /* Flags                                                */
 
   /* Expanded from geometry */
 
-  uint32_t                 size;       /* total bytes in device */
-  uint16_t                 pgsize;     /* write block size, in bytes */
-  uint16_t                 addrlen;    /* number of bytes in data addresses */
-  uint16_t                 haddrbits;  /* Number of bits in high address part */
-  uint16_t                 haddrshift; /* bit-shift of high address part */
+  uint32_t size;       /* total bytes in device                             */
+  uint16_t pgsize;     /* write block size, in bytes                        */
+  uint16_t addrlen;    /* number of bytes in data addresses                 */
+  uint16_t haddrbits;  /* Number of bits in high address part               */
+  uint16_t haddrshift; /* bit-shift of high address part                    */
 };
 
 /****************************************************************************
@@ -804,6 +800,17 @@ static int ee24xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
               ret = OK;
             }
+        }
+        break;
+
+      case EEPIOC_SETSPEED:
+        {
+          ret = nxmutex_lock(&eedev->lock);
+          if (ret == OK)
+          {
+            eedev->freq = (uint32_t)arg;
+            nxmutex_unlock(&eedev->lock);
+          }
         }
         break;
 

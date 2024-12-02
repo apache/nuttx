@@ -155,7 +155,15 @@ IOCTL Commands
 The full list of ``ioctl()`` commands can be found in
 ``include/nuttx/eeprom/eeprom.h``.
 
--  ``EEPIOC_GEOMETRY``: Get the EEPROM geometry
+- ``EEPIOC_GEOMETRY``
+    *Argument:* ``struct eeprom_geometry_s *``
+
+    Get the EEPROM geometry
+
+- ``EEPIOC_SETSPEED``
+    *Argument:* ``uint32_t``
+
+    Set the SPI/I2C bus frequency
 
 File Systems
 ============
