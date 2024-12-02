@@ -39,6 +39,7 @@ config ARCH_INTEL64
 	select ARCH_ICACHE
 	select ARCH_DCACHE
 	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_DEBUG
 	---help---
 		Intel x86_64 architecture
 

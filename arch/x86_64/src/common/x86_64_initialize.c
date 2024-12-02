@@ -32,6 +32,10 @@
 #  include <nuttx/drivers/addrenv.h>
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+#  include "x86_64_hwdebug.h"
+#endif
+
 #include <arch/acpi.h>
 
 #include "x86_64_internal.h"
@@ -133,6 +137,12 @@ void up_initialize(void)
     {
       x86_64_dma_initialize();
     }
+#endif
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+  /* Initialize hardware debug interface */
+
+  x86_64_hwdebug_init();
 #endif
 
   /* Initialize the serial device driver */
