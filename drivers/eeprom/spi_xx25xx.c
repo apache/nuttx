@@ -120,10 +120,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_EE25XX_SPIMODE
-#  define CONFIG_EE25XX_SPIMODE 0
-#endif
-
 /* EEPROM commands
  * High bit of low nibble used for A8 in 25xx040/at25040 products
  */
@@ -176,15 +172,18 @@ struct ee25xx_geom_s
 
 struct ee25xx_dev_s
 {
-  struct spi_dev_s *spi;     /* SPI device where the EEPROM is attached */
-  uint16_t         devid;    /* SPI device ID to manage CS lines in board */
-  uint32_t         size;     /* in bytes, expanded from geometry */
-  uint16_t         pgsize;   /* write block size, in bytes, expanded from geometry */
-  uint32_t         secsize;  /* write sector size, in bytes, expanded from geometry */
-  uint16_t         addrlen;  /* number of BITS in data addresses */
-  mutex_t          lock;     /* file access serialization */
-  uint8_t          refs;     /* The number of times the device has been opened */
-  uint8_t          readonly; /* Flags */
+  FAR struct spi_dev_s *spi;   /* SPI device where the EEPROM is attached   */
+  uint16_t              devid; /* SPI device ID to manage CS lines in board */
+  uint32_t              freq;  /* SPI bus frequency in Hz                   */
+
+  uint32_t size;     /* in bytes, expanded from geometry                    */
+  uint16_t pgsize;   /* write block size, in bytes, expanded from geometry  */
+  uint32_t secsize;  /* write sector size, in bytes, expanded from geometry */
+  uint16_t addrlen;  /* number of BITS in data addresses                    */
+
+  mutex_t lock;     /* file access serialization                            */
+  uint8_t refs;     /* The number of times the device has been opened       */
+  uint8_t readonly; /* Flags                                                */
 };
 
 /****************************************************************************
@@ -297,9 +296,16 @@ static const struct file_operations g_ee25xx_fops =
 
 /****************************************************************************
  * Name: ee25xx_lock
+ *
+ * Description:
+ *   Lock the SPI bus associated with the driver, set its mode and frequency
+ *
+ * Input Parameters
+ *   priv - Device structure
+ *
  ****************************************************************************/
 
-static void ee25xx_lock(FAR struct spi_dev_s *dev)
+static void ee25xx_lock(FAR struct ee25xx_dev_s *priv)
 {
   /* On SPI buses where there are multiple devices, it will be necessary to
    * lock SPI to have exclusive access to the buses for a sequence of
@@ -310,7 +316,7 @@ static void ee25xx_lock(FAR struct spi_dev_s *dev)
    * bus is unlocked.
    */
 
-  SPI_LOCK(dev, true);
+  SPI_LOCK(priv->spi, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency,
    * setbits, and setmode methods to make sure that the SPI is properly
@@ -318,19 +324,31 @@ static void ee25xx_lock(FAR struct spi_dev_s *dev)
    * have been left in an incompatible state.
    */
 
-  SPI_SETMODE(dev, CONFIG_EE25XX_SPIMODE);
-  SPI_SETBITS(dev, 8);
-  SPI_HWFEATURES(dev, 0);
-  SPI_SETFREQUENCY(dev, CONFIG_EE25XX_FREQUENCY);
+  SPI_SETMODE(priv->spi, CONFIG_EE25XX_SPIMODE);
+  SPI_SETBITS(priv->spi, 8);
+  SPI_HWFEATURES(priv->spi, 0);
+  SPI_SETFREQUENCY(priv->spi, priv->freq);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  SPI_SETDELAY(priv->spi, CONFIG_EE25XX_START_DELAY,
+               CONFIG_EE25XX_STOP_DELAY, CONFIG_EE25XX_CS_DELAY,
+               CONFIG_EE25XX_IFDELAY);
+#endif
 }
 
 /****************************************************************************
  * Name: ee25xx_unlock
+ *
+ * Description:
+ *   Unlock the SPI bus associated with the driver
+ *
+ * Input Parameters:
+ *   priv - Device structure
+ *
  ****************************************************************************/
 
-static inline void ee25xx_unlock(FAR struct spi_dev_s *dev)
+static inline void ee25xx_unlock(FAR struct ee25xx_dev_s *priv)
 {
-  SPI_LOCK(dev, false);
+  SPI_LOCK(priv->spi, false);
 }
 
 /****************************************************************************
@@ -390,7 +408,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
     {
       /* Select this FLASH part */
 
-      ee25xx_lock(priv->spi);
+      ee25xx_lock(priv);
       SPI_SELECT(priv->spi, SPIDEV_EEPROM(priv->devid), true);
 
       /* Send "Read Status Register (RDSR)" command */
@@ -406,7 +424,7 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
       /* Deselect the FLASH */
 
       SPI_SELECT(priv->spi, SPIDEV_EEPROM(priv->devid), false);
-      ee25xx_unlock(priv->spi);
+      ee25xx_unlock(priv);
 
       /* Given that writing could take up to a few milliseconds,
        * the following short delay in the "busy" case will allow
@@ -432,13 +450,13 @@ static void ee25xx_waitwritecomplete(struct ee25xx_dev_s *priv)
 
 static void ee25xx_writeenable(FAR struct ee25xx_dev_s *eedev, int enable)
 {
-  ee25xx_lock(eedev->spi);
+  ee25xx_lock(eedev);
   SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
 
   SPI_SEND(eedev->spi, enable ? EE25XX_CMD_WREN : EE25XX_CMD_WRDIS);
 
   SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
-  ee25xx_unlock(eedev->spi);
+  ee25xx_unlock(eedev);
 }
 
 /****************************************************************************
@@ -453,14 +471,14 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev,
                              FAR const char *data,
                              size_t len)
 {
-  ee25xx_lock(eedev->spi);
+  ee25xx_lock(eedev);
   SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
 
   ee25xx_sendcmd(eedev->spi, EE25XX_CMD_WRITE, eedev->addrlen, devaddr);
   SPI_SNDBLOCK(eedev->spi, data, len);
 
   SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
-  ee25xx_unlock(eedev->spi);
+  ee25xx_unlock(eedev);
 }
 
 /****************************************************************************
@@ -645,7 +663,7 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
       len = eedev->size - filep->f_pos;
     }
 
-  ee25xx_lock(eedev->spi);
+  ee25xx_lock(eedev);
   SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), true);
 
   /* STM32F4Disco: There is a 25 us delay here */
@@ -659,7 +677,7 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
   /* STM32F4Disco: There is a 20 us delay here */
 
   SPI_SELECT(eedev->spi, SPIDEV_EEPROM(eedev->devid), false);
-  ee25xx_unlock(eedev->spi);
+  ee25xx_unlock(eedev);
 
   /* Update the file position */
 
@@ -803,6 +821,17 @@ static int ee25xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case EEPIOC_SETSPEED:
+        {
+          ret = nxmutex_lock(&eedev->lock);
+          if (ret == OK)
+          {
+            eedev->freq = (uint32_t)arg;
+            nxmutex_unlock(&eedev->lock);
+          }
+        }
+        break;
+
       default:
         ret = -ENOTTY;
     }
@@ -858,6 +887,7 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, uint16_t spi_devid,
 
   eedev->spi      = dev;
   eedev->devid    = spi_devid;
+  eedev->freq     = CONFIG_EE25XX_FREQUENCY;
   eedev->size     =           128 << g_ee25xx_devices[devtype].bytes;
   eedev->pgsize   =             8 << g_ee25xx_devices[devtype].pagesize;
   eedev->secsize  = eedev->pgsize << g_ee25xx_devices[devtype].secsize;
