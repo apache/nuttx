@@ -177,7 +177,7 @@ int sam_read_user_signature(void *buffer, size_t buflen)
 
   /* sam_eefc_readsequence requires read length in bit words. */
 
-  nwords = (buflen + sizeof(uint32_t) / sizeof(uint32_t));
+  nwords = (buflen + sizeof(uint32_t)) / sizeof(uint32_t);
   sam_eefc_readsequence(FCMD_STUS, FCMD_SPUS, g_page_buffer, nwords);
 
   /* Copy local buffer to void *buffer provided by the user. */
