@@ -112,6 +112,7 @@
 
 struct dirent
 {
+  ino_t d_ino;                    /* file number */
   uint8_t  d_type;                /* Type of file */
   char     d_name[NAME_MAX + 1];  /* File name */
 };
