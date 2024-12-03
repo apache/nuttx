@@ -1116,7 +1116,7 @@ static void imx9_recvdma(struct imx9_dev_s *priv)
  *   None
  *
  * Assumptions:
- *   Always called from the interrupt level with interrupts disabled.
+ *   None
  *
  ****************************************************************************/
 
@@ -1134,6 +1134,14 @@ static void imx9_eventtimeout(wdparm_t arg)
       /* Yes.. Sample registers at the time of the timeout */
 
       imx9_sample(priv, SAMPLENDX_END_TRANSFER);
+
+      /* Disable wait interrupts */
+
+      imx9_configwaitints(priv, 0, 0, SDIOWAIT_TIMEOUT);
+
+      /* Clear pending interrupt status on all wait interrupts */
+
+      putreg32(USDHC_WAITALL_INTS, priv->addr + IMX9_USDHC_IRQSTAT_OFFSET);
 
       /* Wake up any waiting threads */
 
@@ -1161,15 +1169,11 @@ static void imx9_eventtimeout(wdparm_t arg)
  ****************************************************************************/
 
 static void imx9_endwait(struct imx9_dev_s *priv,
-                          sdio_eventset_t wkupevent)
+                         sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
   wd_cancel(&priv->waitwdog);
-
-  /* Disable event-related interrupts */
-
-  imx9_configwaitints(priv, 0, 0, wkupevent);
 
   /* Wake up the waiting thread */
 
@@ -2386,7 +2390,8 @@ static int imx9_cancel(struct sdio_dev_s *dev)
 
   /* Disable all transfer- and event- related interrupts */
 
-  imx9_configxfrints(priv, 0); imx9_configwaitints(priv, 0, 0, 0);
+  imx9_configxfrints(priv, 0);
+  imx9_configwaitints(priv, 0, 0, 0);
 
   /* Clearing pending interrupt status on all transfer- and event- related
    * interrupts
@@ -2815,9 +2820,6 @@ static void imx9_waitenable(struct sdio_dev_s *dev,
  *
  * Input Parameters:
  *   dev     - An instance of the SDIO device interface
- *   timeout - Maximum time in milliseconds to wait.  Zero means immediate
- *             timeout with no wait.  The timeout value is ignored if
- *             SDIOWAIT_TIMEOUT is not included in the waited-for eventset.
  *
  * Returned Value:
  *   Event set containing the event(s) that ended the wait.  Should always
@@ -2828,65 +2830,40 @@ static void imx9_waitenable(struct sdio_dev_s *dev,
 static sdio_eventset_t imx9_eventwait(struct sdio_dev_s *dev)
 {
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
-  sdio_eventset_t wkupevent = 0; int ret;
+  int ret;
 
-  /* There is a race condition here... the event may have completed before
-   * we get here.  In this case waitevents will be zero, but wkupevents
-   * will be non-zero (and, hopefully, the semaphore count will also be
-   * non-zero.
+  /* Wait for an event in event set to occur.  If this the event has
+   * already occurred, then the semaphore will already have been
+   * incremented and there will be no wait.
    */
 
-  DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
-              (priv->waitevents == 0 && priv->wkupevent != 0));
-
-  /* Loop until the event (or the timeout occurs). Race conditions are
-   * avoided by calling imx9_waitenable prior to triggering the logic
-   * that will cause the wait to terminate.  Under certain race
-   * conditions, the waited-for may have already occurred before this
-   * function was called!
-   */
-
-  for (; ; )
+  ret = nxsem_wait_uninterruptible(&priv->waitsem);
+  if (ret < 0)
     {
-      /* Wait for an event in event set to occur.  If this the event has
-       * already occurred, then the semaphore will already have been
-       * incremented and there will be no wait.
-       */
+      /* Task canceled, disable and clear interrupts and cancel wdog */
 
-      ret = nxsem_wait_uninterruptible(&priv->waitsem);
-      if (ret < 0)
-        {
-          /* Task canceled.  Cancel the wdog (assuming it was started) and
-           * return an SDIO error.
-           */
-
-          wd_cancel(&priv->waitwdog);
-          return SDIOWAIT_ERROR;
-        }
-
-      wkupevent = priv->wkupevent;
-
-      /* Check if the event has occurred.  When the event has occurred, then
-       * evenset will be set to 0 and wkupevent will be set to a non-zero
-       * value.
-       */
-
-      if (wkupevent != 0)
-        {
-          /* Yes... break out of the loop with wkupevent non-zero */
-
-          break;
-        }
+      imx9_configwaitints(priv, 0, 0, SDIOWAIT_ERROR);
+      putreg32(USDHC_WAITALL_INTS, priv->addr + IMX9_USDHC_IRQSTAT_OFFSET);
+      wd_cancel(&priv->waitwdog);
     }
 
-  /* Disable event-related interrupts */
+  /* In case of timeout or task cancellation, we need to reset the semaphore;
+   * it might have been double-posted if interrupt occured at the same time
+   */
 
-  imx9_configwaitints(priv, 0, 0, 0);
+  if (ret < 0 ||
+      priv->wkupevent == SDIOWAIT_TIMEOUT)
+    {
+      nxsem_reset(&priv->waitsem, 0);
+    }
+
 #ifdef CONFIG_IMX9_USDHC_DMA
   priv->xfrflags = 0;
 #endif
+
   imx9_dumpsamples(priv);
-  return wkupevent;
+
+  return priv->wkupevent;
 }
 
 /****************************************************************************
