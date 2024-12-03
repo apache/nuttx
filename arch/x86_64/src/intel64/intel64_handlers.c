@@ -94,6 +94,8 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
 
   if (regs != up_current_regs())
     {
+      tcb = this_task();
+
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -101,21 +103,20 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(tcb);
 #endif
 
       /* Update scheduler parameters */
 
       cpu = this_cpu();
       nxsched_suspend_scheduler(*running_task);
-      nxsched_resume_scheduler(this_task());
+      nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
-      tcb = current_task(cpu);
       g_running_tasks[cpu] = tcb;
 
       /* Restore the cpu lock */

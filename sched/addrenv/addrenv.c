@@ -129,16 +129,6 @@ int addrenv_switch(FAR struct tcb_s *tcb)
   int cpu;
   int ret;
 
-  /* NULL for the tcb means to use the TCB of the task at the head of the
-   * ready to run list.
-   */
-
-  if (!tcb)
-    {
-      tcb = this_task();
-    }
-
-  DEBUGASSERT(tcb);
   next = tcb->addrenv_curr;
 
   /* Does the group have an address environment? */

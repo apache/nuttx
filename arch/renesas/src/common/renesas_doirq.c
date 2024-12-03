@@ -61,6 +61,7 @@
 uint32_t *renesas_doirq(int irq, uint32_t * regs)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s *tcb;
 
   if (*running_task != NULL)
     {
@@ -102,6 +103,8 @@ uint32_t *renesas_doirq(int irq, uint32_t * regs)
           up_restorefpu(up_current_regs());
 #endif
 
+          tcb = this_task();
+
 #ifdef CONFIG_ARCH_ADDRENV
           /* Make sure that the address environment for the previously
            * running task is closed down gracefully (data caches dump,
@@ -109,7 +112,7 @@ uint32_t *renesas_doirq(int irq, uint32_t * regs)
            * thread at the head of the ready-to-run list.
            */
 
-          addrenv_switch(NULL);
+          addrenv_switch(tcb);
 #endif
 
           /* Record the new "running" task when context switch occurred.
@@ -117,7 +120,7 @@ uint32_t *renesas_doirq(int irq, uint32_t * regs)
            * crashes.
            */
 
-          g_running_tasks[this_cpu()] = this_task();
+          g_running_tasks[this_cpu()] = tcb;
         }
 
       /* Get the current value of regs... it may have changed because
