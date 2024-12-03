@@ -781,6 +781,17 @@ static int sensor_rpmsg_flush(FAR struct sensor_lowerhalf_s *lower,
     {
       ret = drv->ops->flush(drv, filep);
     }
+  else if ((filep->f_oflags & SENSOR_REMOTE) ||
+           dev->nadvertisers > 0)
+    {
+      /* If the driver (drv) does not support the flush operation,
+       * and the caller is a remote invocation or the current device
+       * is an advertiser, then you can still consider the flush
+       * operation as unsupported and therefore return ENOTSUP
+       */
+
+      return -ENOTSUP;
+    }
   else if (!(filep->f_oflags & SENSOR_REMOTE))
     {
       ret = sensor_rpmsg_ioctl(dev, SNIOC_FLUSH, 0, 0, true);
