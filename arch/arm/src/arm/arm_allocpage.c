@@ -36,8 +36,8 @@
 
 #include <nuttx/page.h>
 
-#include "pg_macros.h"
 #include "arm_internal.h"
+#include "pg_macros.h"
 
 /****************************************************************************
  * Pre-processor Definitions
