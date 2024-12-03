@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -194,6 +196,10 @@ void up_initialize(void)
   /* Initialize the network */
 
   arm64_netinitialize();
+
+#  ifdef CONFIG_NET_CAN
+  arm64_caninitialize();
+#  endif
 #endif
 
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)

@@ -33,6 +33,8 @@
 
 #define ARMV6M_PERIPHERAL_INTERRUPTS NR_IRQS
 
+#define arm_fullcontextrestore() tc32_fullcontextrestore(this_task()->xcp.regs)
+
 /* Include the memory map file.
  * Other chip hardware files should then include this file for the proper
  * setup.

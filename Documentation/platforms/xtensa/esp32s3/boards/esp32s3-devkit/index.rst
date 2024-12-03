@@ -668,9 +668,9 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         --disk-version 2.0 \
         ..../wasm_module_dir
 
-2. Build a NuttX binary as usual with this config.
+2. Build a NuttX binary and write it to the board as usual with this config.
 
-3. Write the NuttX binary and the filesystem image to the board::
+3. Write the filesystem image to the board::
 
       % esptool.py \
         -c esp32s3 \
@@ -680,7 +680,6 @@ https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/bootloade
         -fs detect \
         -fm dio \
         -ff 40m \
-        0x10000 nuttx.bin \
         0x180000 ..../littlefs.bin
 
 4. Mount the filesystem and run a wasm module on it::
@@ -783,3 +782,68 @@ To test the XTWDT(/dev/watchdog3) an interrupt handler needs to be
 implemented because XTWDT does not have system reset feature. To implement
 an interrupt handler `WDIOC_CAPTURE` command can be used. When interrupt
 rises, XTAL32K clock can be restored with `WDIOC_RSTCLK` command.
+
+adb
+---
+
+Basic NuttShell configuration console enabled over USB Device (USB ADB).
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh esp32s3-devkit:adb
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then run the adb command::
+
+  $ adb -s 1234 shell
+  nsh> uname -a
+  NuttX 0.0.0  Nov 22 2024 11:41:43 xtensa esp32s3-devkit
+
+txtable
+-------
+
+Basic TXTABLE(Text based Partition Table) configuration console enabled over USB ADB.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:txtable
+  $ make -j16
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx
+
+Then check the partition::
+
+  nsh> ls -l /dev/
+  /dev:
+   dr--r--r--           0 adb0/
+   crw-rw-rw-           0 console
+   frw-rw-rw-     1044480 data
+   frw-rw-rw-     1048576 esp32s3flash
+   c-w--w--w-           0 log
+   crw-rw-rw-           0 null
+   crw-rw-rw-           0 ptmx
+   dr--r--r--           0 pts/
+   brw-rw-rw-        1024 ram0
+   crw-rw-rw-           0 ttyS0
+   frw-rw-rw-        4096 txtable
+   crw-rw-rw-           0 zero
+
+usbmsc
+------
+
+Basic USBMSC(USB Mass Storage Class) configuration based on esp32s3-devkit:usb_device
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh -l esp32s3-devkit:usbmsc
+  $ make flash ESPTOOL_PORT=/dev/ttyACMx -j16
+
+To test it, just run the following::
+
+  # Device
+  nsh> mkrd -m 10 -s 512 640
+  nsh> msconn
+
+  # Host
+  $ sudo mkfs.ext4 /dev/sdx
+  $ sudo mount /dev/sdx ./mnt/

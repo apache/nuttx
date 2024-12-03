@@ -411,7 +411,7 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
 
   sq_init(&fraglist);
 
-  wlinfo("conn handle %u buf len %u\n", conn->handle, buf->len);
+  wlwarn("conn handle %u buf len %u\n", conn->handle, buf->len);
 
   if (conn->state != BT_CONN_CONNECTED)
     {

@@ -322,8 +322,7 @@ static inline void nx_start_application(void)
   board_late_initialize();
 #endif
 
-#if defined(CONFIG_BOARD_COREDUMP_SYSLOG) || \
-    defined(CONFIG_BOARD_COREDUMP_BLKDEV)
+#ifndef CONFIG_BOARD_CRASHDUMP_NONE
   coredump_initialize();
 #endif
 

@@ -1,6 +1,8 @@
 ############################################################################
 # arch/x86_64/src/common/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -64,7 +66,7 @@ endif
 ARCHCFLAGS += -fno-common -Wno-attributes
 ARCHCXXFLAGS += -fno-common -Wno-attributes -nostdinc++
 
-ARCHCPUFLAGS = -fno-pic -mcmodel=large -fno-stack-protector -mno-red-zone -mrdrnd
+ARCHCPUFLAGS = -fno-pic -mcmodel=large -mno-red-zone -mrdrnd
 ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 
@@ -79,8 +81,35 @@ ifeq ($(CONFIG_HOST_MACOS),y)
 CROSSDEV = x86_64-elf-
 endif
 
+ifneq ($(CONFIG_CXX_STANDARD),)
+  ARCHCXXFLAGS += -std=$(CONFIG_CXX_STANDARD)
+endif
+
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
+else
+  ARCHOPTIMIZATION += -fno-stack-protector
+endif
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
+ifeq ($(CONFIG_DEBUG_OPT_UNUSED_SECTIONS),y)
+  LDFLAGS          += --gc-sections
+  ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
+endif
+
 ifeq ($(CONFIG_DEBUG_LINK_WHOLE_ARCHIVE),y)
   LDFLAGS += --whole-archive
+endif
+
+ifeq ($(CONFIG_HOST_LINUX),y)
+  LDFLAGS += -z noexecstack
 endif
 
 ifeq ($(CONFIG_LIBCXX),y)
@@ -100,7 +129,21 @@ ifeq ($(CONFIG_LIBCXX),y)
   CXXFLAGS += -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
+ifeq ($(CONFIG_MM_KASAN_ALL),y)
+  ARCHOPTIMIZATION += -fsanitize=kernel-address
+endif
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+  ARCHOPTIMIZATION += --param asan-globals=1
+endif
+ifeq ($(CONFIG_MM_KASAN_DISABLE_READS_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-reads=0
+endif
+ifeq ($(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK),y)
+  ARCHOPTIMIZATION += --param asan-instrument-writes=0
+endif
+
 CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
@@ -108,6 +151,14 @@ AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
+    ifeq ($(GCCVER),)
+      export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
+    endif
+  endif
+endif
 
 ifeq ($(CONFIG_ARCH_X86_64_SSE3),y)
   ARCHCPUFLAGS += -msse3
@@ -173,16 +224,14 @@ ifeq ($(CONFIG_ARCH_X86_64_AVX512VBMI),y)
   ARCHCPUFLAGS += -mavx512vbmi
 endif
 
-
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+CXXFLAGS := $(ARCHOPTIMIZATION) $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 ifeq ($(CONFIG_HOST_MACOS),y)
 AFLAGS += -Wa,--divide
 endif
-
-LDFLAGS += -nostdlib -static
 
 # Loadable module definitions
 
@@ -194,7 +243,7 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 CELFFLAGS = $(CFLAGS) -fvisibility=hidden
 CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden
 
-LDELFFLAGS = -r -e main --gc-sections
+LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)
 
 # -fno-pic to avoid GOT relocations

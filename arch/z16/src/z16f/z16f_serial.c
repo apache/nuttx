@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/src/z16f/z16f_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -742,7 +744,7 @@ void z16_serialinit(void)
  ****************************************************************************/
 
 #ifdef CONSOLE_DEV
-int up_putc(int ch)
+void up_putc(int ch)
 {
   uint8_t  state;
 
@@ -755,15 +757,6 @@ int up_putc(int ch)
 
   state = z16f_disableuartirq(&CONSOLE_DEV);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR before LF */
-
-      z16f_consoleput('\r');
-    }
-
   /* Output the character */
 
   z16f_consoleput((uint8_t)ch);
@@ -774,7 +767,6 @@ int up_putc(int ch)
    */
 
   z16f_restoreuartirq(&CONSOLE_DEV, state);
-  return ch;
 }
 #endif
 
@@ -819,21 +811,11 @@ static void z16f_putc(int ch)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Output CR before LF */
-
-      z16f_putc('\r');
-    }
-
   /* Output character */
 
   z16f_putc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

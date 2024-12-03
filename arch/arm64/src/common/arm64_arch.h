@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_arch.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -96,6 +98,18 @@
 #define SCTLR_SA_BIT        BIT(3)
 #define SCTLR_I_BIT         BIT(12)
 
+/* Controls the impact of tag check faults
+ * due to loads and stores in EL0 EL1.
+ */
+
+#define SCTLR_TCF0_BIT       BIT(38)
+#define SCTLR_TCF1_BIT       BIT(40)
+
+/* Controlling EL0 EL1 access to assigned tags */
+
+#define SCTLR_ATA0_BIT       BIT(42)
+#define SCTLR_ATA_BIT        BIT(43)
+
 #define ACTLR_AUX_BIT        BIT(9)
 #define ACTLR_CLPORTS_BIT    BIT(8)
 #define ACTLR_CLPMU_BIT      BIT(7)
@@ -134,6 +148,12 @@
 #define SPSR_MODE_EL3T      (0xc)
 #define SPSR_MODE_EL3H      (0xd)
 #define SPSR_MODE_MASK      (0xf)
+
+#define RGSR_EL1_TAG_MASK   0xfUL
+#define RGSR_EL1_SEED_SHIFT 8
+#define RGSR_EL1_SEED_MASK  0xffffUL
+
+#define TTBR_CNP_BIT        BIT(0)
 
 /* CurrentEL: Current Exception Level */
 
@@ -243,6 +263,7 @@
 #define HCR_IMO_BIT                 BIT(4)
 #define HCR_AMO_BIT                 BIT(5)
 #define HCR_RW_BIT                  BIT(31)
+#define HCR_ATA_BIT                 BIT(56)
 
 /* CNTHCTL_EL2 bits definitions */
 
@@ -483,6 +504,12 @@ uint64_t arm64_get_mpid(int cpu);
 
 #ifdef CONFIG_SMP
 int arm64_get_cpuid(uint64_t mpid);
+#endif
+
+#ifdef CONFIG_ARM64_MTE
+void arm64_enable_mte(void);
+#else
+#define arm64_enable_mte()
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/espressif/esp_mcpwm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1446,7 +1448,7 @@ static int esp_capture_start(struct cap_lowerhalf_s *lower)
     struct mcpwm_cap_channel_lowerhalf_s *)lower;
   mcpwm_hal_context_t *hal = &priv->common->hal;
   irqstate_t flags;
-  flags = spin_lock_irqsave(priv->common->mcpwm_spinlock);
+  flags = spin_lock_irqsave(&priv->common->mcpwm_spinlock);
 
   DEBUGASSERT(priv->common->initialized);
 
@@ -1471,7 +1473,7 @@ static int esp_capture_start(struct cap_lowerhalf_s *lower)
   priv->ready = false;
 
   cpinfo("Channel enabled: %d\n", priv->channel_id);
-  spin_unlock_irqrestore(priv->common->mcpwm_spinlock, flags);
+  spin_unlock_irqrestore(&priv->common->mcpwm_spinlock, flags);
 
   return OK;
 }
@@ -1499,7 +1501,7 @@ static int esp_capture_stop(struct cap_lowerhalf_s *lower)
     struct mcpwm_cap_channel_lowerhalf_s *)lower;
   mcpwm_hal_context_t *hal = &priv->common->hal;
   irqstate_t flags;
-  flags = spin_lock_irqsave(priv->common->mcpwm_spinlock);
+  flags = spin_lock_irqsave(&priv->common->mcpwm_spinlock);
 
   /* Disable channel and interrupts */
 
@@ -1511,7 +1513,7 @@ static int esp_capture_stop(struct cap_lowerhalf_s *lower)
   priv->enabled = false;
 
   cpinfo("Channel disabled: %d\n", priv->channel_id);
-  spin_unlock_irqrestore(priv->common->mcpwm_spinlock, flags);
+  spin_unlock_irqrestore(&priv->common->mcpwm_spinlock, flags);
 
   return OK;
 }
@@ -1701,7 +1703,7 @@ static int IRAM_ATTR mcpwm_driver_isr_default(int irq, void *context,
   struct mcpwm_motor_lowerhalf_s *priv = NULL;
 #endif
 
-  flags = spin_lock_irqsave(common->mcpwm_spinlock);
+  flags = spin_lock_irqsave(&common->mcpwm_spinlock);
   status = mcpwm_ll_intr_get_status(common->hal.dev);
 
   /* Evaluate capture interrupt for all 3 cap channels */
@@ -1758,7 +1760,7 @@ static int IRAM_ATTR mcpwm_driver_isr_default(int irq, void *context,
 #ifdef CONFIG_ESP_MCPWM_CAPTURE
   if (lower == NULL)
     {
-      spin_unlock_irqrestore(common->mcpwm_spinlock, flags);
+      spin_unlock_irqrestore(&common->mcpwm_spinlock, flags);
       return OK;
     }
 
@@ -1823,7 +1825,7 @@ static int IRAM_ATTR mcpwm_driver_isr_default(int irq, void *context,
     }
 #endif
 
-  spin_unlock_irqrestore(common->mcpwm_spinlock, flags);
+  spin_unlock_irqrestore(&common->mcpwm_spinlock, flags);
   return OK;
 }
 #endif

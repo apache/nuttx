@@ -183,7 +183,22 @@ function(nuttx_add_library target)
   add_library(${target} ${ARGN})
   add_dependencies(${target} apps_context)
   set_property(GLOBAL APPEND PROPERTY NUTTX_SYSTEM_LIBRARIES ${target})
-
+  # Set apps global compile options & definitions hold by nuttx_apps_interface
+  target_compile_options(
+    ${target}
+    PRIVATE
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_OPTIONS>>
+  )
+  target_compile_definitions(
+    ${target}
+    PRIVATE
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_COMPILE_DEFINITIONS>>
+  )
+  target_include_directories(
+    ${target}
+    PRIVATE
+      $<GENEX_EVAL:$<TARGET_PROPERTY:nuttx_apps_interface,APPS_INCLUDE_DIRECTORIES>>
+  )
   nuttx_add_library_internal(${target})
 endfunction()
 
@@ -201,11 +216,13 @@ function(nuttx_add_extra_library)
     # define the target name of the extra library
     string(REGEX REPLACE "[^a-zA-Z0-9]" "_" extra_target "${extra_lib}")
     # set the absolute path of the library for the import target
-    nuttx_library_import(${extra_target} ${extra_lib})
-    set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${extra_target})
-    if(CONFIG_BUILD_PROTECTED)
-      set_property(GLOBAL APPEND PROPERTY NUTTX_USER_EXTRA_LIBRARIES
-                                          ${extra_target})
+    if(NOT TARGET ${extra_target})
+      nuttx_library_import(${extra_target} ${extra_lib})
+      set_property(GLOBAL APPEND PROPERTY NUTTX_EXTRA_LIBRARIES ${extra_target})
+      if(CONFIG_BUILD_PROTECTED)
+        set_property(GLOBAL APPEND PROPERTY NUTTX_USER_EXTRA_LIBRARIES
+                                            ${extra_target})
+      endif()
     endif()
   endforeach()
 endfunction()

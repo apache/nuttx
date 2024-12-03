@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/analog/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -94,6 +96,10 @@ if(CONFIG_ADC)
 
   if(CONFIG_ADC_HX711)
     list(APPEND SRCS hx711.c)
+  endif()
+
+  if(CONFIG_ADC_MCP3008)
+    list(APPEND SRCS mcp3008.c)
   endif()
 endif()
 

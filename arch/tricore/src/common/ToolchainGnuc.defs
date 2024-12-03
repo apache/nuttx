@@ -1,6 +1,8 @@
 ############################################################################
 # arch/tricore/src/common/ToolchainGnuc.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -58,8 +60,8 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+ifeq ($(CONFIG_COVERAGE_ALL),y)
+  ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage -fno-inline
 endif
 
 ifeq ($(CONFIG_MM_UBSAN_ALL),y)
@@ -183,7 +185,7 @@ ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
-ifeq ($(CONFIG_ARCH_COVERAGE),y)
+ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
 

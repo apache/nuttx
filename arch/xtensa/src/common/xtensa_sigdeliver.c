@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -159,5 +161,8 @@ retry:
   leave_critical_section((regs[REG_PS]));
   rtcb->irqcount--;
 #endif
-  xtensa_context_restore(regs);
+
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  xtensa_context_restore();
+  UNUSED(regs);
 }

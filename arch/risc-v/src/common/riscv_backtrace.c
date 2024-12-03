@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_backtrace.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -162,8 +164,8 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
             {
               ret += backtrace(rtcb->stack_base_ptr,
                                rtcb->stack_base_ptr + rtcb->adj_stack_size,
-                               (void *)up_current_regs()[REG_FP],
-                               (void *)up_current_regs()[REG_EPC],
+                               running_regs()[REG_FP],
+                               running_regs()[REG_EPC],
                                &buffer[ret], size - ret, &skip);
             }
         }

@@ -35,11 +35,9 @@
 
 	.thumb
 	.syntax unified
-	.text
-	.section .text.memset
-	.global memset
-	.type	memset, %function
-memset:
+	.global ARCH_LIBCFUN(memset)
+	.type	ARCH_LIBCFUN(memset), %function
+ARCH_LIBCFUN(memset):
 	stmfd	sp!, {r0, r4-r7, lr}
 	rsb	r3, r0, #0
 	ands	r3, r3, #3
@@ -106,6 +104,6 @@ memset:
 	movs	r2, r2, lsl #2
 	strbcs	r1, [r0]
 	ldmfd	sp!, {r0, r4-r7, pc}
-	.size memset, . - memset
+	.size ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
 #endif

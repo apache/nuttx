@@ -741,11 +741,6 @@ static void le_conn_complete(FAR struct bt_buf_s *buf)
 
   bt_l2cap_connected(conn);
 
-  if (evt->role == BT_HCI_ROLE_SLAVE)
-    {
-      bt_l2cap_update_conn_param(conn);
-    }
-
   bt_connected(conn);
   bt_conn_release(conn);
   bt_le_scan_update();
@@ -907,6 +902,34 @@ done:
   bt_conn_release(conn);
 }
 
+static int le_param_request(FAR struct bt_buf_s *buf)
+{
+  FAR struct bt_buf_s *reply_buf;
+  FAR struct bt_hci_cp_le_rem_conn_param_req_reply_s *params_reply;
+  FAR struct bt_hci_evt_le_rem_conn_param_req_s *params_request;
+
+  reply_buf = bt_hci_cmd_create(BT_HCI_OP_LE_REM_CONN_PARAM_REQ_RPLY,
+                sizeof(*params_reply));
+  if (!reply_buf)
+    {
+      return -ENOBUFS;
+    }
+
+  params_request = (FAR void *)buf->data;
+
+  params_reply = bt_buf_extend(reply_buf, sizeof(*params_reply));
+  memset(params_reply, 0, sizeof(*params_reply));
+  params_reply->handle = BT_HOST2LE16(params_request->handle);
+  params_reply->min_interval = BT_HOST2LE16(params_request->min_interval);
+  params_reply->max_interval = BT_HOST2LE16(params_request->max_interval);
+  params_reply->latency = BT_HOST2LE16(params_request->latency);
+  params_reply->timeout = BT_HOST2LE16(params_request->timeout);
+  params_reply->max_ce_len = BT_HOST2LE16(0xffff);
+
+  return bt_hci_cmd_send_sync(BT_HCI_OP_LE_REM_CONN_PARAM_REQ_RPLY,
+          reply_buf, NULL);
+}
+
 static void hci_le_meta_event(FAR struct bt_buf_s *buf)
 {
   FAR struct bt_hci_evt_le_meta_event_s *evt = (FAR void *)buf->data;
@@ -923,8 +946,15 @@ static void hci_le_meta_event(FAR struct bt_buf_s *buf)
         le_adv_report(buf);
         break;
 
+      case BT_HCI_EVT_LE_CONN_UPDATE_COMPLETE:
+        break;
+
       case BT_HCI_EVT_LE_LTK_REQUEST:
         le_ltk_request(buf);
+        break;
+
+      case BT_HCI_EVT_LE_CONN_PARAM_REQ:
+        le_param_request(buf);
         break;
 
       default:
@@ -1335,6 +1365,8 @@ static int hci_initialize(void)
   ev = bt_buf_extend(buf, sizeof(*ev));
   memset(ev, 0, sizeof(*ev));
 
+  ev->events[0] |= 0x04;        /* Connection Complete */
+  ev->events[0] |= 0x08;        /* Connection Request */
   ev->events[0] |= 0x10;        /* Disconnection Complete */
   ev->events[1] |= 0x08;        /* Read Remote Version Information Complete */
   ev->events[1] |= 0x20;        /* Command Complete */
@@ -1351,6 +1383,25 @@ static int hci_initialize(void)
     }
 
   bt_hci_cmd_send_sync(BT_HCI_OP_SET_EVENT_MASK, buf, NULL);
+
+  buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_EVENT_MASK, sizeof(*ev));
+  if (buf == NULL)
+    {
+      wlerr("ERROR:  Failed to create buffer\n");
+      return -ENOBUFS;
+    }
+
+  ev = bt_buf_extend(buf, sizeof(*ev));
+  memset(ev, 0, sizeof(*ev));
+
+  ev->events[0] |= 0xff;
+
+  ret = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_EVENT_MASK, buf, NULL);
+  if (ret < 0)
+    {
+      wlerr("ERROR:  bt_hci_cmd_send_sync failed: %d\n", ret);
+      return ret;
+    }
 
   buf = bt_hci_cmd_create(BT_HCI_OP_HOST_BUFFER_SIZE, sizeof(*hbs));
   if (buf == NULL)
@@ -1381,7 +1432,11 @@ static int hci_initialize(void)
     }
 
   enable  = bt_buf_extend(buf, sizeof(*enable));
-  *enable = 0x01;
+#ifdef CONFIG_BLUETOOTH_CNTRL_HOST_FLOW_DISABLE
+  *enable = 0;
+#else
+  *enable = 1;
+#endif
 
   ret = bt_hci_cmd_send_sync(BT_HCI_OP_SET_CTL_TO_HOST_FLOW, buf, NULL);
   if (ret < 0)
@@ -1661,10 +1716,10 @@ int bt_deinitialize(void)
 }
 
 /****************************************************************************
- * Name: bt_driver_register
+ * Name: bt_driver_set
  *
  * Description:
- *   Register the Bluetooth low-level driver with the Bluetooth stack.
+ *   Set the Bluetooth low-level driver with the Bluetooth stack.
  *   This is called from the low-level driver and is part of the driver
  *   interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
  *
@@ -1679,7 +1734,7 @@ int bt_deinitialize(void)
  *
  ****************************************************************************/
 
-int bt_driver_register(FAR struct bt_driver_s *btdev)
+int bt_driver_set(FAR struct bt_driver_s *btdev)
 {
   DEBUGASSERT(btdev != NULL && btdev->open != NULL && btdev->send != NULL);
 
@@ -1696,13 +1751,12 @@ int bt_driver_register(FAR struct bt_driver_s *btdev)
 }
 
 /****************************************************************************
- * Name: bt_driver_unregister
+ * Name: bt_driver_unset
  *
  * Description:
- *   Unregister a Bluetooth low-level driver previously registered with
- *   bt_driver_register.  This may be called from the low-level driver and
- *   is part of the driver interface prototyped in
- *   include/nuttx/wireless/bluetooth/bt_driver.h
+ *   Unset a Bluetooth low-level driver previously set with bt_driver_set.
+ *   This may be called from the low-level driver and is part of the driver
+ *   interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
  *
  * Input Parameters:
  *   btdev - An instance of the low-level drivers interface structure.
@@ -1712,7 +1766,7 @@ int bt_driver_register(FAR struct bt_driver_s *btdev)
  *
  ****************************************************************************/
 
-void bt_driver_unregister(FAR struct bt_driver_s *btdev)
+void bt_driver_unset(FAR struct bt_driver_s *btdev)
 {
   g_btdev.btdev = NULL;
 }
@@ -2120,7 +2174,6 @@ send_set_param:
 int bt_stop_advertising(void)
 {
   FAR struct bt_buf_s *buf;
-
   if (!g_btdev.adv_enable)
     {
       wlwarn("WARNING:  Already advertising\n");

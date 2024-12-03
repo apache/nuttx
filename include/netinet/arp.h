@@ -65,7 +65,7 @@
 
 /* All ARP ioctls take a pointer to a struct arpreq as their parameter: */
 
-struct arpreq
+struct aligned_data(sizeof(uint32_t)) arpreq
 {
   struct sockaddr arp_pa;                /* Protocol address */
   struct sockaddr arp_ha;                /* Hardware address */

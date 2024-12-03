@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/rp2040/waveshare-rp2040-lcd-1.28/src/rp2040_boardinitialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

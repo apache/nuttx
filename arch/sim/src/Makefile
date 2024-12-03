@@ -1,6 +1,8 @@
 ############################################################################
 # arch/sim/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 APPSDIR     = $(TOPDIR)$(DELIM)$(CONFIG_APPS_DIR)
@@ -140,12 +142,8 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   STDLIBS += -lm
 endif
 
-ifeq ($(CONFIG_SCHED_GCOV),y)
+ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   STDLIBS += -lgcov
-endif
-
-ifeq ($(CONFIG_SIM_GPROF),y)
-  HOSTCFLAGS += -pg
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

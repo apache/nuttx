@@ -62,7 +62,7 @@
 #define DEBUG_APB1_APUSE_TMR3_PAUSE             (1 << 1)
 #define DEBUG_APB1_APUSE_TMR4_PAUSE             (1 << 2)
 #define DEBUG_APB1_APUSE_TMR5_PAUSE             (1 << 3)
-#define DEBUG_APB1_APUSE_TMR6_PAUSE             (1 << 4)             
+#define DEBUG_APB1_APUSE_TMR6_PAUSE             (1 << 4)
 #define DEBUG_APB1_APUSE_TMR7_PAUSE             (1 << 5)
 #define DEBUG_APB1_APUSE_TMR12_PAUSE            (1 << 6)
 #define DEBUG_APB1_APUSE_TMR13_PAUSE            (1 << 7)
@@ -92,7 +92,7 @@
 #  define DEBUG_SER_ID_F437                     (0x0E << DEBUG_SER_ID_SHIFT)
 
 #define DEBUG_REV_ID_SHIFT                      (0)
-#  define DEBUG_REV_ID                          (0 << DEBUG_REV_ID_SHIFT)               
+#  define DEBUG_REV_ID                          (0 << DEBUG_REV_ID_SHIFT)
 
 /****************************************************************************
  * Public Types

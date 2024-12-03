@@ -33,6 +33,7 @@
 #include <assert.h>
 
 #include <nuttx/semaphore.h>
+#include <nuttx/tls.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
@@ -662,6 +663,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
   size_t                 len     = msg->msg_iov->iov_len;
   struct tcp_recvfrom_s  state;
   FAR struct tcp_conn_s *conn;
+  struct tcp_callback_s  info;
   int                    ret;
 
   net_lock();
@@ -769,6 +771,15 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
           state.ir_cb->priv    = (FAR void *)&state;
           state.ir_cb->event   = tcp_recvhandler;
 
+          /* Push a cancellation point onto the stack.  This will be
+           * called if the thread is canceled.
+           */
+
+          info.tc_conn = conn;
+          info.tc_cb   = state.ir_cb;
+          info.tc_sem  = &state.ir_sem;
+          tls_cleanup_push(tls_get_info(), tcp_callback_cleanup, &info);
+
           /* Wait for either the receive to complete or for an error/timeout
            * to occur.  net_sem_timedwait will also terminate if a signal is
            * received.
@@ -776,6 +787,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
           ret = net_sem_timedwait(&state.ir_sem,
                                _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
+          tls_cleanup_pop(tls_get_info(), 0);
           if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;

@@ -797,7 +797,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct up_dev_s *priv = &g_uartpriv;
   uint8_t ier;
@@ -808,20 +808,10 @@ int up_putc(int ch)
 
   up_disableuartint(priv, &ier);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   /* Output the character */
 
   arm_lowputc(ch);
   up_restoreuartint(priv, ier);
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -834,21 +824,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   /* Output the character */
 
   arm_lowputc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

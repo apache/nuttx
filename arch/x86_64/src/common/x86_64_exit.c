@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_exit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -88,6 +90,12 @@ void up_exit(int status)
   /* Restore the cpu lock */
 
   restore_critical_section(tcb, this_cpu());
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Update kernel stack top pointer */
+
+  x86_64_set_ktopstk(tcb->xcp.ktopstk);
+#endif
 
   /* Then switch contexts */
 

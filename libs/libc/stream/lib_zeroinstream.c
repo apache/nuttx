@@ -38,8 +38,8 @@ static int zeroinstream_getc(FAR struct lib_instream_s *self)
   return 0;
 }
 
-static int zeroinstream_gets(FAR struct lib_instream_s *self,
-                             FAR void *buffer, int len)
+static ssize_t zeroinstream_gets(FAR struct lib_instream_s *self,
+                                 FAR void *buffer, size_t len)
 {
   self->nget += len;
   memset(buffer, 0, len);

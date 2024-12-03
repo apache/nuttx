@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,6 +109,9 @@
 #ifdef CONFIG_ESP32S3_SPI
 #include "esp32s3_spi.h"
 #include "esp32s3_board_spidev.h"
+#  ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+#    include "espressif/esp_spi_bitbang.h"
+#  endif
 #endif
 
 #ifdef CONFIG_ESP32S3_SDMMC
@@ -179,7 +184,15 @@ int esp32s3_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
     }
   #endif
-#endif
+
+  #ifdef CONFIG_ESPRESSIF_SPI_BITBANG
+  ret = board_spidev_initialize(ESPRESSIF_SPI_BITBANG);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init spidev 3: %d\n", ret);
+    }
+  #endif /* CONFIG_ESPRESSIF_SPI_BITBANG */
+#endif /* CONFIG_ESP32S3_SPI && CONFIG_SPI_DRIVER*/
 
 #if defined(CONFIG_ESP32S3_EFUSE)
   ret = esp32s3_efuse_initialize("/dev/efuse");
@@ -230,7 +243,7 @@ int esp32s3_bringup(void)
 
 #ifdef CONFIG_ESP32S3_SPIFLASH
   ret = board_spiflash_init();
-  if (ret)
+  if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
     }

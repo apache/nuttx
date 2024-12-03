@@ -33,6 +33,14 @@ config CAN_ERRORS
 		bit will be set in the CAN message and the following message payload
 		will include a more detailed description of certain errors.
 
+config CAN_TIMESTAMP
+	bool "CAN timestamp reporting"
+	default n
+	---help---
+		Support CAN timestamp reporting. if this option is selected then
+		CAN timestamp reporting is enabled. in the CAN message the ch_ts
+		member variable will record the timestamp of each frame.
+
 config CAN_FD
 	bool "CAN FD"
 	default n
@@ -60,15 +68,15 @@ config CAN_NPENDINGRTR
 		The size of the list of pending RTR requests. Default: 4
 
 config CAN_TXCONFIRM
-        bool "can txconfirm ability"
-        default n
-        ---help---
-                this section enables the can txconfirm ability.
+	bool "can txconfirm ability"
+	default n
+	---help---
+		this section enables the can txconfirm ability.
 
-                Enabling this feature adds support for the can txconfirm
-                ability, the ability is used from CAN interrupt handler
-                when the transfer is complete, the ability will notify all
-                readers that the canid has been transferred.
+		Enabling this feature adds support for the can txconfirm
+		ability, the ability is used from CAN interrupt handler
+		when the transfer is complete, the ability will notify all
+		readers that the canid has been transferred.
 
 config CAN_TXREADY
 	bool "can_txready interface"
@@ -117,6 +125,12 @@ config CAN_TXREADY
 		completes.  This is a sure indication that the H/W FIFO is
 		no longer full.  can_txready() will then awaken the
 		can_write() logic and the hang condition is avoided.
+
+config CAN_TXPRIORITY
+	bool "Prioritize sending based on canid"
+	default n
+	---help---
+		Prioritize sending based on canid.
 
 choice
 	prompt "TX Ready Work Queue"

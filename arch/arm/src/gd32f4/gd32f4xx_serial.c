@@ -2929,7 +2929,7 @@ void gd32_serial_dma_poll(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_UART
 
@@ -2937,20 +2937,9 @@ int up_putc(int ch)
   uint32_t ie;
 
   up_disableusartint(priv, &ie);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
   up_restoreusartint(priv, ie);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -2963,21 +2952,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_UART
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

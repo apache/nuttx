@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_syscall.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -154,10 +156,10 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 
 uint64_t *arm64_syscall(uint64_t *regs)
 {
-  uint64_t            *ret_regs = regs;
-  uint64_t             cmd;
-  struct tcb_s        *tcb;
-  int cpu;
+  int cpu = this_cpu();
+  struct tcb_s **running_task = &g_running_tasks[cpu];
+  struct tcb_s *tcb = this_task();
+  uint64_t cmd;
 #ifdef CONFIG_BUILD_KERNEL
   uint64_t             spsr;
 #endif
@@ -170,58 +172,47 @@ uint64_t *arm64_syscall(uint64_t *regs)
 
   cmd = regs[REG_X0];
 
+  /* if cmd == SYS_restore_context (*running_task)->xcp.regs is valid
+   * should not be overwriten
+   */
+
+  if (cmd != SYS_restore_context)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
+
   arm64_dump_syscall(__func__, cmd, regs);
 
   switch (cmd)
     {
-      /* x0 = SYS_restore_context:  Restore task context
-       *
-       * void arm64_fullcontextrestore(uint64_t *restoreregs)
-       *   noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   x0 = SYS_restore_context
-       *   x1 = restoreregs( xcp->regs, callee saved register save area)
-       */
-
       case SYS_restore_context:
-        {
-          /* Replace 'regs' with the pointer to the register set in
-           * regs[REG_R1].  On return from the system call, that register
-           * set will determine the restored context.
-           */
 
-          ret_regs = (uint64_t *)regs[REG_X1];
-          regs[REG_X1] = 0; /* set the saveregs = 0 */
+        /* Update scheduler parameters */
 
-          DEBUGASSERT(ret_regs);
-        }
+        nxsched_resume_scheduler(tcb);
+
+        /* Restore the cpu lock */
+
+        restore_critical_section(tcb, cpu);
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+#endif
         break;
 
-      /* x0 = SYS_switch_context:  This a switch context command:
-       *
-       * void arm64_switchcontext(uint64_t *saveregs, uint64_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   x0 = SYS_switch_context
-       *   x1 = saveregs (xcp->regs, callee saved register save area)
-       *   x2 = restoreregs (xcp->regs, callee saved register save area)
-       *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of x1 and then set
-       * regs to the save register area referenced by the saved
-       * contents of x2.
-       */
-
       case SYS_switch_context:
-        {
-          DEBUGASSERT(regs[REG_X1] != 0 && regs[REG_X2] != 0);
-          *(uint64_t **)regs[REG_X1] = regs;
 
-          ret_regs = (uint64_t *)regs[REG_X2];
-        }
+        /* Update scheduler parameters */
+
+        nxsched_suspend_scheduler(*running_task);
+        nxsched_resume_scheduler(tcb);
+        *running_task = tcb;
+
+        /* Restore the cpu lock */
+
+        restore_critical_section(tcb, cpu);
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+#endif
         break;
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -328,42 +319,10 @@ uint64_t *arm64_syscall(uint64_t *regs)
       default:
         {
           svcerr("ERROR: Bad SYS call: 0x%" PRIx64 "\n", cmd);
-          ret_regs = 0;
           return 0;
         }
         break;
     }
 
-  if ((uint64_t *)regs != ret_regs)
-    {
-      cpu = this_cpu();
-      tcb = current_task(cpu);
-
-#ifdef CONFIG_ARCH_ADDRENV
-      /* Make sure that the address environment for the previously
-       * running task is closed down gracefully (data caches dump,
-       * MMU flushed) and set up the address environment for the new
-       * thread at the head of the ready-to-run list.
-       */
-
-      addrenv_switch(NULL);
-#endif
-
-      /* Update scheduler parameters */
-
-      nxsched_suspend_scheduler(g_running_tasks[cpu]);
-      nxsched_resume_scheduler(tcb);
-
-      /* Record the new "running" task.  g_running_tasks[] is only used by
-       * assertion logic for reporting crashes.
-       */
-
-      g_running_tasks[cpu] = tcb;
-
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, cpu);
-    }
-
-  return ret_regs;
+  return tcb->xcp.regs;
 }

@@ -1,6 +1,8 @@
 # ##############################################################################
 # drivers/misc/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -29,6 +31,10 @@ endif()
 
 if(CONFIG_DEV_ZERO)
   list(APPEND SRCS dev_zero.c)
+endif()
+
+if(CONFIG_DEV_MEM)
+  list(APPEND SRCS dev_mem.c)
 endif()
 
 if(CONFIG_DEV_ASCII)

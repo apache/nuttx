@@ -830,7 +830,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint16_t  ier;
@@ -839,17 +839,6 @@ int up_putc(int ch)
   up_waittxready(priv);
   up_serialout(priv, UART_THR_OFFS, (uint8_t)ch);
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      up_waittxready(priv);
-      up_serialout(priv, UART_THR_OFFS, '\r');
-    }
-
   up_waittxready(priv);
   up_restoreuartint(priv, ier);
-  return ch;
 }

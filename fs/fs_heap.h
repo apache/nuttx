@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/fs_heap.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -43,8 +45,10 @@ FAR void *fs_heap_zalloc(size_t size) malloc_like1(1);
 FAR void *fs_heap_malloc(size_t size) malloc_like1(1);
 size_t    fs_heap_malloc_size(FAR void *mem);
 FAR void *fs_heap_realloc(FAR void *oldmem, size_t size) realloc_like(2);
+FAR void *fs_heap_memalign(size_t alignment, size_t size) malloc_like1(3);
 void      fs_heap_free(FAR void *mem);
 FAR char *fs_heap_strdup(FAR const char *s) malloc_like;
+FAR char *fs_heap_strndup(FAR const char *s, size_t size) malloc_like;
 int       fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
           printf_like(2, 3);
 #else
@@ -53,8 +57,10 @@ int       fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
 #  define fs_heap_malloc       kmm_malloc
 #  define fs_heap_malloc_size  kmm_malloc_size
 #  define fs_heap_realloc      kmm_realloc
+#  define fs_heap_memalign     kmm_memalign
 #  define fs_heap_free         kmm_free
 #  define fs_heap_strdup       strdup
+#  define fs_heap_strndup      strndup
 #  define fs_heap_asprintf     asprintf
 #endif
 

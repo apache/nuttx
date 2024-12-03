@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/cxd56xx/common/src/cxd56_crashdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -145,7 +147,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
    * fault.
    */
 
-  pdump->info.current_regs = (uintptr_t)up_current_regs();
+  pdump->info.current_regs = (uintptr_t)running_regs();
 
   /* Save Context */
 
@@ -160,7 +162,7 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
 #endif
       pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT |
                             INTSTACK_PRESENT);
-      memcpy(pdump->info.regs, up_current_regs(),
+      memcpy(pdump->info.regs, running_regs(),
              sizeof(pdump->info.regs));
       pdump->info.stacks.user.sp = pdump->info.regs[REG_R13];
     }

@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/cache.h>
 #include <nuttx/elf.h>
 #include <nuttx/lib/modlib.h>
 
@@ -292,8 +293,8 @@ static int modlib_relocate(FAR struct module_s *modp,
           /* Get the value of the symbol (in sym.st_value) */
 
           ret = modlib_symvalue(modp, loadinfo, sym,
-                           loadinfo->shdr[loadinfo->strtabidx].sh_offset,
-                            exports, nexports);
+                  loadinfo->shdr[loadinfo->strtabidx].sh_offset,
+                  exports, nexports);
           if (ret < 0)
             {
               /* The special error -ESRCH is returned only in one condition:
@@ -333,19 +334,75 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rel->r_offset < 0 ||
-          rel->r_offset > dstsec->sh_size)
+      if (loadinfo->gotindex >= 0)
         {
-          berr("ERROR: Section %d reloc %d: "
-               "Relocation address out of range, "
-               "offset %" PRIuPTR " size %ju\n",
-               relidx, i, (uintptr_t)rel->r_offset,
-               (uintmax_t)dstsec->sh_size);
-          ret = -EINVAL;
-          break;
-        }
+          if (sym->st_shndx == SHN_UNDEF)
+            {
+              /* Symbol type is undefined, we need to set the address
+               * to the value of the symbol.
+               */
 
-      addr = dstsec->sh_addr + rel->r_offset;
+              FAR Elf_Shdr *gotsec = &loadinfo->shdr[loadinfo->gotindex];
+              FAR uintptr_t *gotaddr = (FAR uintptr_t *)(gotsec->sh_addr +
+                *((FAR uintptr_t *)(dstsec->sh_addr + rel->r_offset)));
+
+              *gotaddr = sym->st_value;
+              continue;
+            }
+
+          if ((dstsec->sh_flags & SHF_WRITE) == 0)
+            {
+              /* Skip relocations for read-only sections */
+
+              continue;
+            }
+
+          /* Use the GOT to store the address */
+
+          if (rel->r_offset - dstsec->sh_offset >
+              dstsec->sh_size)
+            {
+              berr("ERROR: Section %d reloc %d: "
+                   "Relocation address out of range, "
+                   "offset %" PRIuPTR " size %ju\n",
+                   relidx, i, (uintptr_t)rel->r_offset,
+                   (uintmax_t)dstsec->sh_size);
+              ret = -EINVAL;
+              break;
+            }
+
+          addr = dstsec->sh_addr + rel->r_offset - dstsec->sh_offset;
+          if (ELF_ST_TYPE(sym->st_info) == STT_SECTION)
+            {
+              /* Symbol type is section, we need clear the address
+               * and keep the original value.
+               */
+
+              *(FAR uintptr_t *)addr -=
+                 loadinfo->shdr[sym->st_shndx].sh_offset;
+            }
+          else
+            {
+              /* Normal symbol, just keep it zero */
+
+              *(FAR uintptr_t *)addr = 0;
+            }
+        }
+      else
+        {
+          if (rel->r_offset > dstsec->sh_size)
+            {
+              berr("ERROR: Section %d reloc %d: "
+                   "Relocation address out of range, "
+                   "offset %" PRIuPTR " size %ju\n",
+                   relidx, i, (uintptr_t)rel->r_offset,
+                   (uintmax_t)dstsec->sh_size);
+              ret = -EINVAL;
+              break;
+            }
+
+          addr = dstsec->sh_addr + rel->r_offset;
+        }
 
       /* Now perform the architecture-specific relocation */
 
@@ -988,6 +1045,8 @@ int modlib_bind(FAR struct module_s *modp,
           return ret;
         }
     }
+
+  modp->xipbase = loadinfo->xipbase;
 
   /* Ensure that the I and D caches are coherent before starting the newly
    * loaded module by cleaning the D cache (i.e., flushing the D cache

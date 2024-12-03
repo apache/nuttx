@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/mouse_upper.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <poll.h>
 
 #include <nuttx/input/mouse.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/list.h>

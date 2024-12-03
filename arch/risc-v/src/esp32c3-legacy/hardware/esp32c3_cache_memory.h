@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/hardware/esp32c3_cache_memory.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at

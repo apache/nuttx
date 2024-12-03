@@ -71,6 +71,14 @@ static struct irq_work_info_s g_irq_work_vector[NR_IRQS];
 static mutex_t g_irq_wqueue_lock = NXMUTEX_INITIALIZER;
 static FAR struct kwork_wqueue_s *g_irq_wqueue[CONFIG_IRQ_NWORKS];
 
+#ifdef IRQ_WORK_SECTION
+static uint8_t g_irq_work_stack[CONFIG_IRQ_NWORKS][CONFIG_IRQ_WORK_STACKSIZE]
+locate_data(IRQ_WORK_SECTION);
+#else
+static uint8_t g_irq_work_stack[CONFIG_IRQ_NWORKS]
+                               [CONFIG_IRQ_WORK_STACKSIZE];
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -98,7 +106,7 @@ inline_function FAR struct kwork_wqueue_s *irq_get_wqueue(int priority)
 
   DEBUGASSERT(i < CONFIG_IRQ_NWORKS);
 
-  queue = work_queue_create("isrwork", priority,
+  queue = work_queue_create("isrwork", priority, g_irq_work_stack[i],
                             CONFIG_IRQ_WORK_STACKSIZE, 1);
 
   g_irq_wqueue[i] = queue;

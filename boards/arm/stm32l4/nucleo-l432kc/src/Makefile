@@ -1,6 +1,8 @@
 ############################################################################
 # boards/arm/stm32l4/nucleo-l432kc/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -38,6 +40,10 @@ endif
 
 ifeq ($(CONFIG_STM32L4_ADC),y)
 CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_STM32L4_DAC),y)
+CSRCS += stm32_dac.c
 endif
 
 ifeq ($(CONFIG_DAC7571),y)

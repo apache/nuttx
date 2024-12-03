@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_flexspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -561,6 +563,8 @@ void imx9_flexspi_init(struct flexspi_type_s *base,
 
 void imx9_flexspi_get_default_config(struct flexspi_config_s *config)
 {
+  int i;
+
   /* Initializes the configure structure to zero */
 
   memset(config, 0, sizeof(*config));
@@ -588,7 +592,7 @@ void imx9_flexspi_get_default_config(struct flexspi_config_s *config)
    * buffers.
    */
 
-  for (uint8_t i = 0; i < ((uint8_t)FLEXSPI_AHB_BUFFER_COUNT - 2u); i++)
+  for (i = 0; i < (FLEXSPI_AHB_BUFFER_COUNT - 2u); i++)
     {
       /* Default enable AHB prefetch */
 
@@ -605,8 +609,7 @@ void imx9_flexspi_get_default_config(struct flexspi_config_s *config)
       config->ahb_config.buffer[i].buffer_size = 0;
     }
 
-  for (uint8_t i = ((uint8_t)FLEXSPI_AHB_BUFFER_COUNT - 2);
-       i < (uint8_t)FLEXSPI_AHB_BUFFER_COUNT; i++)
+  for (; i < FLEXSPI_AHB_BUFFER_COUNT; i++)
     {
       config->ahb_config.buffer[i].enable_prefetch = true; /* Default enable
                                                             * AHB prefetch.
@@ -618,8 +621,8 @@ void imx9_flexspi_get_default_config(struct flexspi_config_s *config)
     }
 
   config->ahb_config.enable_clear_ahb_buffer_opt  = false;
-  config->ahb_config.enable_read_address_opt      = false;
-  config->ahb_config.enable_ahb_prefetch          = false;
+  config->ahb_config.enable_read_address_opt      = true;
+  config->ahb_config.enable_ahb_prefetch          = true;
   config->ahb_config.enable_ahb_bufferable        = false;
   config->ahb_config.enable_ahb_cachable          = false;
 }
@@ -1235,9 +1238,9 @@ struct flexspi_dev_s *imx9_flexspi_initialize(int intf)
 
   imx9_ccm_gate_on(CCM_LPCG_FLEXSPI1, true);
 
-  /* Configure clock to safe 50MHz, src clock is 800Mhz */
+  /* Configure clock to 133MHz, src clock is 800Mhz */
 
-  imx9_ccm_configure_root_clock(CCM_CR_FLEXSPI1, SYS_PLL1PFD1, 16);
+  imx9_ccm_configure_root_clock(CCM_CR_FLEXSPI1, SYS_PLL1PFD1, 6);
 
   /* Has the FlexSPI hardware been initialized? */
 

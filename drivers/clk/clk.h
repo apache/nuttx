@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/clk/clk.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,6 +57,14 @@ static inline void clk_write(uint32_t reg, uint32_t value)
 static inline uint32_t clk_read(uint32_t reg)
 {
   return *((volatile uint32_t *)(uintptr_t)reg);
+}
+
+static inline bool clk_is_best_rate_closest(uint32_t rate, uint32_t now,
+                                            uint32_t best)
+{
+  uint32_t rate1 = rate > now ? (rate - now) : (now - rate);
+  uint32_t rate2 = rate > best ? (rate - best) : (best - rate);
+  return rate1 < rate2;
 }
 
 static inline uint32_t gcd(uint32_t a, uint32_t b)

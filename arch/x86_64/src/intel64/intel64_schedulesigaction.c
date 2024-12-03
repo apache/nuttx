@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_schedulesigaction.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -126,6 +128,18 @@ void up_schedule_sigaction(struct tcb_s *tcb)
           up_current_regs()[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
           up_current_regs()[REG_RSP]    = up_current_regs()[REG_RSP] - 8;
           up_current_regs()[REG_RFLAGS] = 0;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* Update segments to kernel segments */
+
+          up_current_regs()[REG_SS]     = tcb->xcp.regs[REG_SS];
+          up_current_regs()[REG_CS]     = tcb->xcp.regs[REG_CS];
+          up_current_regs()[REG_DS]     = tcb->xcp.regs[REG_DS];
+
+          /* Update RSP to kernel stack */
+
+          up_current_regs()[REG_RSP]    = (uint64_t)x86_64_get_ktopstk();
+#endif
         }
     }
 
@@ -216,6 +230,18 @@ void up_schedule_sigaction(struct tcb_s *tcb)
           up_current_regs()[REG_RSP]    = up_current_regs()[REG_RSP] - 8;
           up_current_regs()[REG_RFLAGS] = 0;
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* Update segments to kernel segments */
+
+          up_current_regs()[REG_SS]  = tcb->xcp.regs[REG_SS];
+          up_current_regs()[REG_CS]  = tcb->xcp.regs[REG_CS];
+          up_current_regs()[REG_DS]  = tcb->xcp.regs[REG_DS];
+
+          /* Update RSP to kernel stack */
+
+          up_current_regs()[REG_RSP] =
+            (uint64_t)x86_64_get_ktopstk();
+#endif
           /* Mark that full context switch is necessary when we
            * return from interrupt handler.
            * In that case RIP, RSP and RFLAGS are changed, but

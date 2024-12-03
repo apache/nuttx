@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/hpm6000/hpm_ioc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,7 +49,7 @@
 
 #define PAD_ALT_SHIFT          (11)      /* Bits 11-15: Peripheral alternate function */
 #define PAD_ALT_MASK           (0x1f << PAD_ALT_SHIFT)
-#  define PAD_ALT0             (0 << PAD_ALT_SHIFT)  
+#  define PAD_ALT0             (0 << PAD_ALT_SHIFT)
 #  define PAD_ALT1             (1 << PAD_ALT_SHIFT)
 #  define PAD_ALT2             (2 << PAD_ALT_SHIFT)
 #  define PAD_ALT3             (3 << PAD_ALT_SHIFT)

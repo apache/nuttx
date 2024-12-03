@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_swint.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -64,7 +66,6 @@ int xtensa_swint(int irq, void *context, void *arg)
   DEBUGASSERT(regs != NULL);
 
   cmd = regs[REG_A2];
-  tcb->xcp.regs = regs;
 
   /* The syscall software interrupt is called with A2 = system call command
    * and A3..A9 = variable number of arguments depending on the system call.
@@ -99,52 +100,14 @@ int xtensa_swint(int irq, void *context, void *arg)
         }
         break;
 
-      /* A2=SYS_restore_context:  This is a restore context command:
-       *
-       * void xtensa_fullcontextrestore(uint32_t *restoreregs)
-       *      noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A2 = SYS_restore_context
-       *   A3 = restoreregs
-       *
-       * In this case, we simply need to set current_regs to restore
-       * register area referenced in the saved A3. context == current_regs
-       * is the normal exception return.  By setting current_regs =
-       * context[A3], we force the return to the saved context referenced
-       * in A3.
-       */
-
       case SYS_restore_context:
-        {
-          DEBUGASSERT(regs[REG_A3] != 0);
-          tcb->xcp.regs = (uint32_t *)regs[REG_A3];
-        }
-        break;
-
-      /* A2=SYS_switch_context:  This is a switch context command:
-       *
-       * void xtensa_switchcontext
-       *      (uint32_t *saveregs, uint32_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A2 = SYS_switch_context
-       *   A3 = saveregs
-       *   A4 = restoreregs
-       *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of A3 and then set
-       * current_regs to the save register area referenced by the saved
-       * contents of A4.
-       */
-
       case SYS_switch_context:
         {
-          DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
-          *(uint32_t **)regs[REG_A3] = regs;
-          tcb->xcp.regs = (uint32_t *)regs[REG_A4];
+          restore_critical_section(tcb, this_cpu());
+#ifdef CONFIG_DEBUG_SYSCALL_INFO
+          svcinfo("SYSCALL Return: Context switch!\n");
+          up_dump_register(tcb->xcp.regs);
+#endif
         }
         break;
 
@@ -425,27 +388,6 @@ int xtensa_swint(int irq, void *context, void *arg)
   if ((tcb->xcp.regs[REG_PS] & PS_EXCM_MASK) != 0)
     {
       tcb->xcp.regs[REG_PS] &= ~PS_EXCM_MASK;
-    }
-
-  /* Report what happened.  That might difficult in the case of a context
-   * switch.
-   */
-
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != tcb->xcp.regs)
-    {
-      svcinfo("SYSCALL Return: Context switch!\n");
-      up_dump_register(tcb->xcp.regs);
-    }
-  else
-    {
-      svcinfo("SYSCALL Return: %" PRIu32 "\n", cmd);
-    }
-#endif
-
-  if (regs != tcb->xcp.regs)
-    {
-      restore_critical_section(this_task(), this_cpu());
     }
 
   return OK;

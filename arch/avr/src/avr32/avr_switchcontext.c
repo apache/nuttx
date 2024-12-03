@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/avr32/avr_switchcontext.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -98,6 +100,10 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
       /* Update scheduler parameters */
 
       nxsched_resume_scheduler(tcb);
+
+      /* Record the new "running" task */
+
+      g_running_tasks[this_cpu()] = tcb;
 
       /* Then switch contexts */
 

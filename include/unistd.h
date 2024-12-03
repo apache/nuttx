@@ -469,6 +469,13 @@ int     syncfs(int fd);
 int     profil(FAR unsigned short *buf, size_t bufsiz,
                size_t offset, unsigned int scale);
 
+FAR char *getpass(FAR const char *prompt);
+#ifdef CONFIG_CRYPTO
+FAR char *crypt(FAR const char *key, FAR const char *salt);
+FAR char *crypt_r(FAR const char *key, FAR const char *salt,
+                  FAR char *output);
+#endif
+
 #if CONFIG_FORTIFY_SOURCE > 0
 fortify_function(getcwd) FAR char *getcwd(FAR char *buf,
                                           size_t size)

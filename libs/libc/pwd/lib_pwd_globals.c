@@ -36,6 +36,7 @@
 
 int g_passwd_index;
 struct passwd g_passwd;
+struct spwd g_spwd;
 char g_passwd_buffer[CONFIG_LIBC_PASSWD_LINESIZE];
 
 /****************************************************************************

@@ -315,22 +315,13 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #if defined(SAMA5_HAVE_UART_CONSOLE) || defined(SAMA5_HAVE_USART_CONSOLE) || \
     defined(SAMA5_HAVE_FLEXCOM_CONSOLE) || defined(CONFIG_SAMA5_DBGU_CONSOLE)
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
 
   arm_lowputc(ch);
 #endif
-  return ch;
 }
 
 /****************************************************************************

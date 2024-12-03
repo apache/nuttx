@@ -321,14 +321,19 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
     }
 
   DEBUGASSERT(ret == NULL || mm_heapmember(heap, ret));
+
+  if (ret)
+    {
+      sched_note_heap(NOTE_HEAP_ALLOC, heap, ret, nodesize,
+                      heap->mm_curused);
+    }
+
   mm_unlock(heap);
 
   if (ret)
     {
       MM_ADD_BACKTRACE(heap, node);
       ret = kasan_unpoison(ret, nodesize - MM_ALLOCNODE_OVERHEAD);
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, ret, nodesize,
-                      heap->mm_curused);
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
       memset(ret, MM_ALLOC_MAGIC, alignsize - MM_ALLOCNODE_OVERHEAD);
 #endif
@@ -354,7 +359,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #  ifdef CONFIG_MM_DUMP_DETAILS_ON_FAILURE
       struct mm_memdump_s dump =
       {
+#if CONFIG_MM_BACKTRACE >= 0
         PID_MM_ALLOC, 0, ULONG_MAX
+#else
+        PID_MM_ALLOC
+#endif
       };
 #  endif
 #endif

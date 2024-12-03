@@ -18,7 +18,6 @@ toolchains have built-in properties to indicate whether support atomic64:
 | #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 1
 | #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 1
 
-Change-Id: Iab9f7df0a9d21e29c8b8d131006cb4817414ebdc
 Signed-off-by: chao an <anchao@lixiang.com>
 ---
  lib/io.h | 3 ++-

@@ -263,8 +263,8 @@ There are three conditions under which SYSLOG output generated
 from interrupt level processing can a included the SYSLOG output
 stream:
 
-  #. **Low-Level Serial Output**. If you are using a SYSLOG console
-     channel (``CONFIG_SYSLOG_CONSOLE``) and if the underlying
+  #. **Low-Level Serial Output**. If you are using the "default" SYSLOG
+     channel (``CONFIG_SYSLOG_DEFAULT``) and if the underlying
      architecture supports the low-level ``up_putc()``
      interface(\ ``CONFIG_ARCH_LOWPUTC``), then the SYSLOG logic
      will direct the output to ``up_putc()`` which is capable of

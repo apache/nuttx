@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_assert.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -65,7 +67,14 @@
 
 void xtensa_panic(int xptcode, uint32_t *regs)
 {
-  up_set_current_regs(regs);
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
+
+  up_set_interrupt_context(true);
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
 
@@ -164,7 +173,14 @@ void xtensa_panic(int xptcode, uint32_t *regs)
 
 void xtensa_user_panic(int exccause, uint32_t *regs)
 {
-  up_set_current_regs(regs);
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
+
+  up_set_interrupt_context(true);
 
   /* We get here when a un-dispatch-able, irrecoverable exception occurs */
 

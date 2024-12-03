@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include <debug.h>
 #include <errno.h>

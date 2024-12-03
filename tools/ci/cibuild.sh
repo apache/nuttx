@@ -31,6 +31,7 @@ nuttx=${CIWORKSPACE}/nuttx
 apps=${CIWORKSPACE}/apps
 
 os=$(uname -s)
+osarch=$(uname -m)
 if [ -f /etc/os-release ]; then
   osname=$(grep "^ID=" /etc/os-release | cut -d'=' -f2 | tr -d '"')
 else
@@ -69,7 +70,11 @@ function install_tools {
       to_do "freebsd"
       ;;
     Darwin)
-      "${CIPLAT}"/darwin.sh
+      if [ "X$osarch" == "Xx86_64" ]; then
+        "${CIPLAT}"/darwin.sh
+      else
+        "${CIPLAT}"/darwin_arm64.sh
+      fi
       ;;
     Linux)
       "${CIPLAT}"/linux.sh
@@ -139,7 +144,11 @@ function run_builds {
     ncpus=$(grep -c ^processor /proc/cpuinfo)
   fi
 
-  options+="-j ${ncpus}"
+  if [ "X$osname" == "Xmsys2" ]; then
+    export MAKEFLAGS="-j"
+  else
+    options+="-j ${ncpus}"
+  fi
 
   for build in "${builds[@]}"; do
     "${nuttx}"/tools/testbuild.sh ${options} -e "-Wno-cpp -Werror" "${build}"

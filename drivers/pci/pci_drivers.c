@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/pci/pci_drivers.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -157,6 +159,12 @@ int pci_register_drivers(void)
       pcierr("pci_igc_init failed, ret=%d\n", ret);
     }
 #endif
+
+  ret = pci_dev_register();
+  if (ret < 0)
+    {
+      pcierr("pci_dev_register failed, ret=%d\n", ret);
+    }
 
   UNUSED(ret);
   return ret;

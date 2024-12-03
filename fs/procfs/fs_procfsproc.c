@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfsproc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,6 +46,7 @@
 #  include <time.h>
 #endif
 
+#include <nuttx/arch.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/tls.h>
@@ -56,6 +59,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/queue.h>
+#include <nuttx/lib/lib.h>
 
 #include "fs_heap.h"
 
@@ -770,9 +774,9 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
   /* Convert the for maximum time pre-emption disabled */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-  if (tcb->premp_max > 0)
+  if (tcb->preemp_max > 0)
     {
-      perf_convert(tcb->premp_max, &maxtime);
+      perf_convert(tcb->preemp_max, &maxtime);
     }
   else
     {
@@ -782,14 +786,14 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Reset the maximum */
 
-  tcb->premp_max = 0;
+  tcb->preemp_max = 0;
 
   /* Generate output for maximum time pre-emption disabled */
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%lu.%09lu %p,",
                              (unsigned long)maxtime.tv_sec,
                              (unsigned long)maxtime.tv_nsec,
-                             tcb->premp_max_caller);
+                             tcb->preemp_max_caller);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -1249,7 +1253,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 {
   FAR struct task_group_s *group = tcb->group;
   FAR struct file *filep;
-  char path[PATH_MAX];
+  FAR char *path;
   size_t remaining;
   size_t linesize;
   size_t copysize;
@@ -1285,6 +1289,12 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   remaining -= copysize;
 
   if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
     {
       return totalsize;
     }
@@ -1333,10 +1343,12 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
       if (totalsize >= buflen)
         {
+          lib_put_pathbuffer(path);
           return totalsize;
         }
     }
 
+  lib_put_pathbuffer(path);
   return totalsize;
 }
 

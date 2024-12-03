@@ -1,6 +1,8 @@
 # ##############################################################################
 # fs/v9fs/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -21,7 +23,7 @@
 if(CONFIG_FS_V9FS)
   set(V9FS client.c transport.c v9fs.c)
 
-  if(CONFIG_DRIVERS_VIRTIO_9P)
+  if(CONFIG_V9FS_VIRTIO_9P)
     list(APPEND V9FS virtio_9p.c)
   endif()
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/samv7/samv71-xult/src/sam_ili9488.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -688,39 +690,6 @@ static int sam_setwindow(struct sam_dev_s *priv, sam_color_t row,
 
   return sam_sendcmd(priv, ILI9488_CMD_NOP);
 }
-
-/****************************************************************************
- * Name:  sam_dumprun
- *
- * Description:
- *   Dump the contexts of the run buffer:
- *
- *  run     - The buffer in containing the run read to be dumped
- *  npixels - The number of pixels to dump
- *
- ****************************************************************************/
-
-#if 0 /* Sometimes useful */
-static void sam_dumprun(const char *msg, uint16_t *run,
-                        size_t npixels)
-{
-  int i;
-  int j;
-
-  syslog(LOG_DEBUG, "\n%s:\n", msg);
-  for (i = 0; i < npixels; i += 16)
-    {
-      up_putc(' ');
-      syslog(LOG_DEBUG, " ");
-      for (j = 0; j < 16; j++)
-        {
-          syslog(LOG_DEBUG, " %04x", *run++);
-        }
-
-      up_putc('\n');
-    }
-}
-#endif
 
 /****************************************************************************
  * Name:  sam_disable_backlight

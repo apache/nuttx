@@ -12,7 +12,7 @@ choice
 
 config ARM64_TOOLCHAIN_GNU_EABI
 	bool "Generic GNU EABI toolchain"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_GCC
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 
@@ -108,7 +108,7 @@ config ARCH_CHIP_ZYNQ_MPSOC
 	select ARM64_HAVE_PSCI
 	---help---
 		XilinX ZYNQ MPSOC
-		
+
 config ARCH_CHIP_ARM64_CUSTOM
 	bool "Custom ARM64 chip"
 	select ARCH_CHIP_CUSTOM
@@ -126,6 +126,21 @@ config ARCH_ARMV8R
 	bool
 	default n
 	select ARCH_SINGLE_SECURITY_STATE
+
+config ARCH_AS_HAS_ARMV8_5
+	bool "Support ARMv8.5 assembly"
+	depends on ARCH_ARMV8A
+	---help---
+		Support ARMv8.5 assembly instruction set
+
+menu "ARMv8.5 architectural features"
+	depends on ARCH_AS_HAS_ARMV8_5
+
+config ARM64_MTE
+	bool "Memory Tagging Extension support"
+	default y
+
+endmenu # "ARMv8.5 architectural features"
 
 config ARCH_SINGLE_SECURITY_STATE
 	bool "ARM Single Security State Support"
@@ -267,6 +282,18 @@ config ARCH_CORTEX_R82
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_CLUSTER_PMU
+	select ARCH_HAVE_TESTSET
+	select ARM64_HAVE_NEON
+
+config ARCH_CPU_UNKNOWN
+	bool
+	default n
+	select ARCH_ARMV8A
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MMU
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TESTSET
 	select ARM64_HAVE_NEON
 

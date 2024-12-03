@@ -28,9 +28,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
+#include <nuttx/compiler.h>
+#include <nuttx/fs/ioctl.h>
+#include <nuttx/fs/uio.h>
+
+#include <sys/uio.h>
 #include <sys/types.h>
+
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -44,6 +49,7 @@
 #include <nuttx/spawn.h>
 #include <nuttx/queue.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -183,6 +189,7 @@ struct statfs;
 struct pollfd;
 struct mtd_dev_s;
 struct tcb_s;
+struct uio;
 
 /* The internal representation of type DIR is just a container for an inode
  * reference, and the path of directory.
@@ -233,6 +240,8 @@ struct file_operations
 
   CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
+  CODE ssize_t (*readv)(FAR struct file *filep, FAR const struct uio *uio);
+  CODE ssize_t (*writev)(FAR struct file *filep, FAR const struct uio *uio);
 
   /* The two structures need not be common after this point */
 
@@ -244,33 +253,6 @@ struct file_operations
 /* This structure provides information about the state of a block driver */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-struct geometry
-{
-  bool      geo_available;    /* true: The device is available */
-  bool      geo_mediachanged; /* true: The media has changed since last query */
-  bool      geo_writeenabled; /* true: It is okay to write to this device */
-  blkcnt_t  geo_nsectors;     /* Number of sectors on the device */
-  blksize_t geo_sectorsize;   /* Size of one sector */
-
-  /* NULL-terminated string representing the device model */
-
-  char      geo_model[NAME_MAX + 1];
-};
-
-struct partition_info_s
-{
-  size_t    numsectors;   /* Number of sectors in the partition */
-  size_t    sectorsize;   /* Size in bytes of a single sector */
-  off_t     startsector;  /* Offset to the first section/block of the
-                           * managed sub-region */
-
-  /* NULL-terminated string representing the name of the parent node of the
-   * partition.
-   */
-
-  char      parent[NAME_MAX + 1];
-};
-
 /* This structure is provided by block devices when they register with the
  * system.  It is used by file systems to perform filesystem transfers.  It
  * differs from the normal driver vtable in several ways -- most notably in
@@ -329,6 +311,9 @@ struct mountpt_operations
   CODE int     (*truncate)(FAR struct file *filep, off_t length);
   CODE int     (*poll)(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
+  CODE ssize_t (*readv)(FAR struct file *filep, FAR const struct uio *uio);
+  CODE ssize_t (*writev)(FAR struct file *filep, FAR const struct uio *uio);
+
   /* The two structures need not be common after this point. The following
    * are extended methods needed to deal with the unique needs of mounted
    * file systems.
@@ -507,6 +492,7 @@ struct file
 
 struct filelist
 {
+  spinlock_t        fl_lock;    /* Manage access to the file list */
   uint8_t           fl_rows;    /* The number of rows of fl_files array */
   uint8_t           fl_crefs;   /* The references to filelist */
   FAR struct file **fl_files;   /* The pointer of two layer file descriptors array */
@@ -667,6 +653,34 @@ int register_driver(FAR const char *path,
 int register_blockdriver(FAR const char *path,
                          FAR const struct block_operations *bops,
                          mode_t mode, FAR void *priv);
+#endif
+
+/****************************************************************************
+ * Name: register_merge_blockdriver
+ *
+ * Description:
+ *   This function registers a block driver that presents a contiguous block
+ * device composed of multiple, non-contiguous partitions.  The partitions
+ * are specified by the variable argument list which has 'nparts' elements.
+ *
+ * Input Parameters:
+ *   merge - The partition name to be merged.
+ *   ...   - The variable argument list for partition names.
+ *
+ *  Usage example for merging the factory partition and reserve partition
+ *  into the merge partition:
+ *
+ * register_merge_blockdriver("/dev/merge", "/dev/factory",
+ *                            "/dev/reserve", NULL);
+ *
+ * Returned Value:
+ *   Zero on success;
+ *   Negated errno value is returned on a failure
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+int register_merge_blockdriver(FAR const char *merge, ...);
 #endif
 
 /****************************************************************************
@@ -1416,6 +1430,7 @@ int close_mtddriver(FAR struct inode *pinode);
  ****************************************************************************/
 
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
+ssize_t file_readv(FAR struct file *filep, FAR const struct uio *uio);
 
 /****************************************************************************
  * Name: nx_read
@@ -1439,6 +1454,7 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
  ****************************************************************************/
 
 ssize_t nx_read(int fd, FAR void *buf, size_t nbytes);
+ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
  * Name: file_write
@@ -1468,6 +1484,7 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes);
 
 ssize_t file_write(FAR struct file *filep, FAR const void *buf,
                    size_t nbytes);
+ssize_t file_writev(FAR struct file *filep, FAR const struct uio *uio);
 
 /****************************************************************************
  * Name: nx_write
@@ -1495,6 +1512,7 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
  ****************************************************************************/
 
 ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes);
+ssize_t nx_writev(int fd, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
  * Name: file_pread

@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/sim/sim/sim/src/sim_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -480,6 +482,14 @@ int sim_bringup(void)
                  SIM_RPTUN_MASTER | SIM_RPTUN_NOBOOT);
 #  else
   sim_rptun_init("server-proxy", "server", SIM_RPTUN_SLAVE);
+#  endif
+#endif
+
+#ifdef CONFIG_RPMSG_VIRTIO
+#  ifdef CONFIG_SIM_RPMSG_MASTER
+  sim_rpmsg_virtio_init("server-proxy", "proxy", true);
+#  else
+  sim_rpmsg_virtio_init("server-proxy", "server", false);
 #  endif
 #endif
 

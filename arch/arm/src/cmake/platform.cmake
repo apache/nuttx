@@ -79,10 +79,10 @@ if(NOT CONFIG_LIBM)
   nuttx_find_toolchain_lib(libm.a)
 endif()
 
-if(CONFIG_LIBSUPCXX)
+if(CONFIG_LIBSUPCXX_TOOLCHAIN)
   nuttx_find_toolchain_lib(libsupc++.a)
 endif()
 
-if(CONFIG_SCHED_GCOV)
+if(CONFIG_COVERAGE_TOOLCHAIN)
   nuttx_find_toolchain_lib(libgcov.a)
 endif()

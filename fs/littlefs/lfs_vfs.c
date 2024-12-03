@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/littlefs/lfs_vfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -112,8 +114,6 @@ static int     littlefs_dup(FAR const struct file *oldp,
                             FAR struct file *newp);
 static int     littlefs_fstat(FAR const struct file *filep,
                               FAR struct stat *buf);
-static int     littlefs_fchstat(FAR const struct file *filep,
-                                FAR const struct stat *buf, int flags);
 static int     littlefs_truncate(FAR struct file *filep,
                                  off_t length);
 
@@ -146,9 +146,13 @@ static int     littlefs_rename(FAR struct inode *mountpt,
                                FAR const char *newrelpath);
 static int     littlefs_stat(FAR struct inode *mountpt,
                              FAR const char *relpath, FAR struct stat *buf);
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
+static int     littlefs_fchstat(FAR const struct file *filep,
+                                FAR const struct stat *buf, int flags);
 static int     littlefs_chstat(FAR struct inode *mountpt,
                                FAR const char *relpath,
                                FAR const struct stat *buf, int flags);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -170,11 +174,17 @@ const struct mountpt_operations g_littlefs_operations =
   NULL,                   /* mmap */
   littlefs_truncate,      /* truncate */
   NULL,                   /* poll */
+  NULL,                   /* readv */
+  NULL,                   /* writev */
 
   littlefs_sync,          /* sync */
   littlefs_dup,           /* dup */
   littlefs_fstat,         /* fstat */
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
   littlefs_fchstat,       /* fchstat */
+#else
+  NULL,
+#endif
 
   littlefs_opendir,       /* opendir */
   littlefs_closedir,      /* closedir */
@@ -190,7 +200,11 @@ const struct mountpt_operations g_littlefs_operations =
   littlefs_rmdir,         /* rmdir */
   littlefs_rename,        /* rename */
   littlefs_stat,          /* stat */
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
   littlefs_chstat         /* chstat */
+#else
+  NULL,
+#endif
 };
 
 /****************************************************************************
@@ -343,6 +357,7 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
       goto errout;
     }
 
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
   if (oflags & LFS_O_CREAT)
     {
       struct littlefs_attr_s attr;
@@ -362,6 +377,7 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
           goto errout_with_file;
         }
     }
+#endif
 
   /* In append mode, we need to set the file pointer to the end of the
    * file.
@@ -582,14 +598,18 @@ static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
 static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct littlefs_mountpt_s *fs;
+#ifdef CONFIG_FS_LITTLEFS_GETPATH
   FAR struct littlefs_file_s *priv;
+#endif
   FAR struct inode *inode;
   FAR struct inode *drv;
   int ret;
 
   /* Recover our private data from the struct file instance */
 
+#ifdef CONFIG_FS_LITTLEFS_GETPATH
   priv  = filep->f_priv;
+#endif
   inode = filep->f_inode;
   fs    = inode->i_private;
   drv   = fs->drv;
@@ -602,6 +622,7 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+#ifdef CONFIG_FS_LITTLEFS_GETPATH
       case FIOC_FILEPATH:
         {
           FAR char *path = (FAR char *)(uintptr_t)arg;
@@ -621,6 +642,7 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
         }
         break;
+#endif
 
       default:
         {
@@ -726,7 +748,9 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
   struct littlefs_attr_s attr;
+#endif
   int ret;
 
   memset(buf, 0, sizeof(*buf));
@@ -752,11 +776,12 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
       goto errout;
     }
 
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
   ret = littlefs_convert_result(lfs_file_getattr(&fs->lfs, &priv->file, 0,
                                                  &attr, sizeof(attr)));
   if (ret < 0)
     {
-      if (ret != -ENODATA)
+      if (ret != -ENODATA && ret != -ENOENT)
         {
           goto errout;
         }
@@ -775,6 +800,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   buf->st_mtim.tv_nsec = attr.at_mtim % 1000000000ull;
   buf->st_ctim.tv_sec  = attr.at_ctim / 1000000000ull;
   buf->st_ctim.tv_nsec = attr.at_ctim % 1000000000ull;
+#endif /* CONFIG_FS_LITTLEFS_ATTR_UPDATE */
   buf->st_blksize      = fs->cfg.block_size;
   buf->st_blocks       = (buf->st_size + buf->st_blksize - 1) /
                          buf->st_blksize;
@@ -784,6 +810,7 @@ errout:
   return ret;
 }
 
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
 static int littlefs_fchstat(FAR const struct file *filep,
                             FAR const struct stat *buf, int flags)
 {
@@ -861,6 +888,7 @@ errout:
   nxmutex_unlock(&fs->lock);
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: littlefs_truncate
@@ -1295,6 +1323,10 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
   fs->cfg.lookahead_size = CONFIG_FS_LITTLEFS_LOOKAHEAD_SIZE;
 #endif
 
+#ifdef CONFIG_FS_LITTLEFS_MULTI_VERSION
+  fs->cfg.disk_version   = CONFIG_FS_LITTLEFS_DISK_VERSION;
+#endif
+
   /* Then get information about the littlefs filesystem on the devices
    * managed by this driver.
    */
@@ -1696,6 +1728,7 @@ errout:
   return ret;
 }
 
+#ifdef CONFIG_FS_LITTLEFS_ATTR_UPDATE
 static int littlefs_chstat(FAR struct inode *mountpt,
                            FAR const char *relpath,
                            FAR const struct stat *buf, int flags)
@@ -1769,3 +1802,4 @@ errout:
   nxmutex_unlock(&fs->lock);
   return ret;
 }
+#endif

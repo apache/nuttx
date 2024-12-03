@@ -44,9 +44,11 @@ elseif(CONFIG_ARCH_ARMV7M) # All ARMv7-M
   add_subdirectory(armv7-m)
 elseif(CONFIG_ARCH_ARMV8M) # All ARMv8-M
   add_subdirectory(armv8-m)
+elseif(CONFIG_ARCH_ARMV8R) # All ARMv8-R
+  add_subdirectory(armv8-r)
 endif()
 
-if(NOT CONFIG_LIBSUPCXX)
+if(NOT CONFIG_LIBSUPCXX_TOOLCHAIN)
   list(APPEND SRCS aeabi_atexit.c)
 endif()
 
@@ -62,7 +64,7 @@ if(CONFIG_ARCH_SETJMP_H)
   endif()
 endif()
 
-if(CONFIG_SCHED_GPROF)
+if(CONFIG_PROFILE_MINI)
   list(APPEND SRCS gnu/mcount.S)
 endif()
 

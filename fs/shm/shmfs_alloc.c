@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/shm/shmfs_alloc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,8 @@
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/cache.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/pgalloc.h>
 
@@ -47,19 +51,24 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
    * chunk in kernel heap
    */
 
-  size_t alloc_size = sizeof(struct shmfs_object_s) + length;
-  if (alloc_size < length)
-    {
-      /* There must have been an integer overflow */
-
-      return NULL;
-    }
-
-  object = fs_heap_zalloc(alloc_size);
+  object = fs_heap_zalloc(sizeof(struct shmfs_object_s));
   if (object)
     {
-      object->paddr = (FAR char *)(object + 1);
-      allocated = true;
+      size_t cachesize = up_get_dcache_linesize();
+      if (cachesize > 0)
+        {
+          object->paddr = fs_heap_memalign(cachesize,
+                                           ALIGN_UP(length, cachesize));
+        }
+      else
+        {
+          object->paddr = fs_heap_malloc(length);
+        }
+
+      if (object->paddr)
+        {
+           allocated = true;
+        }
     }
 
 #elif defined(CONFIG_BUILD_PROTECTED)
@@ -70,7 +79,16 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
   object = fs_heap_zalloc(sizeof(struct shmfs_object_s));
   if (object)
     {
-      object->paddr = kumm_zalloc(length);
+      size_t cachesize = up_get_dcache_linesize();
+      if (cachesize > 0)
+        {
+          object->paddr = kumm_memalign(cachesize,
+                                        ALIGN_UP(length, cachesize));
+        }
+      else
+        {
+          object->paddr = kumm_malloc(length);
+        }
 
       if (object->paddr)
         {
@@ -132,18 +150,16 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
 
 void shmfs_free_object(FAR struct shmfs_object_s *object)
 {
-#if defined(CONFIG_BUILD_KERNEL)
-  size_t i;
-  size_t n_pages = MM_NPAGES(object->length);
-  FAR void **pages;
-#endif
-
   if (object)
     {
-#if defined (CONFIG_BUILD_PROTECTED)
+#if defined(CONFIG_BUILD_FLAT)
+      fs_heap_free(object->paddr);
+#elif defined(CONFIG_BUILD_PROTECTED)
       kumm_free(object->paddr);
 #elif defined(CONFIG_BUILD_KERNEL)
-      pages = &object->paddr;
+      size_t i;
+      size_t n_pages = MM_NPAGES(object->length);
+      FAR void **pages = &object->paddr;
       for (i = 0; i < n_pages; i++)
         {
           if (pages[i])

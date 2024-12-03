@@ -1,6 +1,8 @@
 ############################################################################
 # boards/sim/sim/sim/scripts/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/.config
+-include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
 # NuttX is sometimes built as a native target.
@@ -72,11 +74,15 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
-ifeq ($(CONFIG_SIM_GCOV_ALL),y)
-  ARCHOPTIMIZATION += -fprofile-generate -ftest-coverage
+ifeq ($(CONFIG_COVERAGE_ALL),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_GCC),y)
+    ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage -fno-inline
+  else ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),y)
+    ARCHOPTIMIZATION += -fprofile-instr-generate -fcoverage-mapping
+  endif
 endif
 
-ifneq ($(CONFIG_SCHED_GPROF_ALL)$(CONFIG_SIM_GPROF),)
+ifneq ($(CONFIG_PROFILE_ALL)$(CONFIG_SIM_PROFILE),)
   ARCHOPTIMIZATION += -pg
 endif
 
@@ -142,6 +148,9 @@ endif
 ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
+else
+  ARCHCFLAGS += -fno-pic -mcmodel=medium
+  ARCHCXXFLAGS += -fno-pic -mcmodel=medium
 endif
 
 # LLVM style architecture flags
@@ -287,9 +296,9 @@ ifeq ($(CONFIG_HOST_MACOS),y)
 else
   LDFLAGS += -Wl,--gc-sections
 
-  # Let the symbol table link from 0x400000
+  # Let the symbol table link from 0x40000000
   # which is more convenient for debugging.
-  LDFLAGS += -Wl,-Ttext-segment=0x400000
+  LDFLAGS += -Wl,-Ttext-segment=0x40000000
 endif
 
 ifeq ($(CONFIG_DEBUG_LINK_MAP),y)
@@ -319,4 +328,19 @@ else ifeq ($(CONFIG_HOST_MACOS),)
   ARCHCFLAGS += -no-pie
   ARCHPICFLAGS += -no-pie
   LDFLAGS += -Wl,-no-pie
+endif
+
+ifeq ($(CONFIG_HOST_LINUX),y)
+  define POSTBUILD
+  	$(Q)echo "Pac SIM with dynamic libs..";
+  	@ rm -rf sim-pac;
+  	@ mkdir -p sim-pac/libs;
+  	@ cp nuttx sim-pac/nuttx;
+  	@ ldd sim-pac/nuttx | grep "=> /" | awk '{print $$3}' | xargs -I '{}' cp -v '{}' sim-pac/libs;
+  	@ readelf -l nuttx | grep "program interpreter" | awk -F':' '{print $$2}'| cut -d"]" -f1 | xargs -I '{}' cp -v '{}' sim-pac;
+  	@ cp $(TOPDIR)/tools/simlaunch.sh sim-pac;
+  	@ tar -czf nuttx.tgz sim-pac;
+  	$(Q)echo "SIM elf with dynamic libs archive in nuttx.tgz"
+  	@ rm -rf sim-pac;
+  endef
 endif

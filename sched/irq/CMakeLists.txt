@@ -42,4 +42,9 @@ if(CONFIG_IRQCHAIN)
   list(APPEND SRCS irq_chain.c)
 endif()
 
+if(CONFIG_IRQ_WORK_SECTION)
+  target_compile_definitions(
+    sched PRIVATE -DIRQ_WORK_SECTION="${CONFIG_IRQ_WORK_SECTION}")
+endif()
+
 target_sources(sched PRIVATE ${SRCS})

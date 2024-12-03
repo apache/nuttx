@@ -104,7 +104,7 @@
 #ifdef CONFIG_AT32_SDIO_DMA
 #  ifndef CONFIG_AT32_SDIO_DMAPRIO
 #    if defined(CONFIG_AT32_AT32F43XX)
-#      define CONFIG_AT32_SDIO_DMAPRIO  DMA_CCR_PRIMED  
+#      define CONFIG_AT32_SDIO_DMAPRIO  DMA_CCR_PRIMED
 #    else
 #      error "Unknown AT32 DMA"
 #    endif
@@ -990,9 +990,9 @@ static void at32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
   dctrl  &=  (SDIO_DCTRL_DTDIR | SDIO_DCTRL_DTMODE |
               SDIO_DCTRL_DBLOCKSIZE_MASK);
 
-#ifdef CONFIG_AT32_SDIO_CARD              
+#ifdef CONFIG_AT32_SDIO_CARD
   regval |=  (dctrl | SDIO_DCTRL_DTEN | SDIO_DCTRL_SDIOEN);
-#else  
+#else
   regval |=  (dctrl | SDIO_DCTRL_DTEN);
 #endif
 

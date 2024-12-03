@@ -30,15 +30,17 @@ CMake,stm32g071b-disco:nsh
 
 CMake,stm32l0538-disco:nsh
 
-CMake,nucleo-144:f722-can
-CMake,nucleo-144:f722-cansock
-CMake,nucleo-144:f722-composite
-CMake,nucleo-144:f746-evalos
-CMake,nucleo-144:f746-nsh
-CMake,nucleo-144:f746-pysim
-CMake,nucleo-144:f767-evalos
-CMake,nucleo-144:f767-netnsh
-CMake,nucleo-144:f767-nsh
+CMake,nucleo-f722ze:can
+CMake,nucleo-f722ze:cansock
+CMake,nucleo-f722ze:composite
+
+CMake,nucleo-f746zg:evalos
+CMake,nucleo-f746zg:nsh
+CMake,nucleo-f746zg:pysim
+
+CMake,nucleo-f767zi:evalos
+CMake,nucleo-f767zi:netnsh
+CMake,nucleo-f767zi:nsh
 
 CMake,steval-eth001v1:foc_b16
 CMake,steval-eth001v1:foc_f32

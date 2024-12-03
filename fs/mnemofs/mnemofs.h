@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/mnemofs/mnemofs.h
  *
+ * SPDX-License-Identifier: Apache-2.0 or BSD-3-Clause
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -97,6 +99,14 @@
 
 #define MFS_JRNL_LIM(sb)           (MFS_JRNL(sb).n_blks / 2)
 #define MFS_TRAVERSE_INITSZ        8
+
+#define MFS_LOG(fn, fmt, ...)          finfo("[mnemofs | " fn "] " fmt, ##__VA_ARGS__)
+#ifdef CONFIG_MNEMOFS_EXTRA_DEBUG
+#define MFS_EXTRA_LOG(fn, fmt, ...)    MFS_LOG(fn, fmt, ##__VA_ARGS__)
+#else
+#define MFS_EXTRA_LOG(fmt, ...)    { }
+#endif
+#define MFS_STRLITCMP(a, lit)      strncmp(a, lit, strlen(lit))
 
 /****************************************************************************
  * Public Types
@@ -201,7 +211,7 @@ struct mfs_sb_s
 
 /* This is for *dir VFS methods. */
 
-struct mfs_fsdirent
+struct mfs_fsdirent_s
 {
   struct fs_dirent_s    base; /* VFS directory structure */
   uint8_t               idx;  /* This only goes from 0 for ., 1 for .. and
@@ -277,9 +287,9 @@ struct mfs_dirent_s
 
 struct mfs_pitr_s
 {
-  struct mfs_path_s p;     /* Parent representation */
+  struct mfs_path_s p;     /* Parent's path representation */
   mfs_t             depth;
-  mfs_t             c_off; /* Current offset. */
+  mfs_t             c_off; /* Current iteration offset. */
 };
 
 /* TODO: depth >= 1 */
@@ -416,6 +426,86 @@ static inline mfs_t mfs_popcnt(mfs_t x)
 #endif
 }
 
+static inline void MFS_EXTRA_LOG_DIRENT(FAR const struct mfs_dirent_s * const
+                                        dirent)
+{
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "Direntry details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tDirent location %p", dirent);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tMode is %" PRIu16, dirent->mode);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tName is \"%.*s\"", dirent->namelen,
+                dirent->name);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tNamelen is %" PRIu32,
+                dirent->namelen);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tName Hash is %" PRIu16,
+                dirent->name_hash);
+  MFS_EXTRA_LOG("EXTRA_LOG_DIRENT", "\tSize is %" PRIu16,
+                dirent->sz);
+
+  /* TODO: Timespecs */
+}
+
+static inline void MFS_EXTRA_LOG_FSDIRENT(FAR const struct mfs_fsdirent_s *
+                                          const fsdirent)
+{
+  MFS_EXTRA_LOG("EXTRA_LOG_FSDIRENT", "FS Direntry details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_FSDIRENT", "\tDirentry depth %" PRIu32,
+                fsdirent->depth);
+  MFS_EXTRA_LOG("EXTRA_LOG_FSDIRENT", "\tRead index %" PRIu32,
+                fsdirent->idx);
+  MFS_EXTRA_LOG("EXTRA_LOG_FSDIRENT", "\tPath %p.", fsdirent->path);
+  MFS_EXTRA_LOG("EXTRA_LOG_FSDIRENT", "\tPitr %p.", fsdirent->pitr);
+  MFS_EXTRA_LOG("EXTRA_LOG_FSDIRENT", "\tDepth %" PRIu32, fsdirent->depth);
+}
+
+static inline void MFS_EXTRA_LOG_PITR(FAR const struct mfs_pitr_s * const
+                                      pitr)
+{
+  MFS_EXTRA_LOG("EXTRA_LOG_PITR", "Pitr details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_PITR", "\tDepth %" PRIu32, pitr->depth);
+  MFS_EXTRA_LOG("EXTRA_LOG_PITR", "\tCurrent Offset %" PRIu32, pitr->c_off);
+  MFS_EXTRA_LOG("EXTRA_LOG_PITR", "\tParent CTZ (%" PRIu32 ", %" PRIu32 ")",
+                pitr->p.ctz.idx_e, pitr->p.ctz.pg_e);
+  MFS_EXTRA_LOG("EXTRA_LOG_PITR", "\tParent Size %" PRIu32, pitr->p.sz);
+  MFS_EXTRA_LOG("EXTRA_LOG_PITR", "\tParent Offset %" PRIu32, pitr->p.off);
+}
+
+static inline void MFS_EXTRA_LOG_MN(FAR const struct mfs_mn_s * const mn)
+{
+  MFS_EXTRA_LOG("EXTRA_LOG_MN", "Master node details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_MN", "\tFirst journal block is %" PRIu32,
+                mn->jrnl_blk);
+  MFS_EXTRA_LOG("EXTRA_LOG_MN", "\tNext MN entry index %" PRIu32,
+                mn->mblk_idx);
+  MFS_EXTRA_LOG("EXTRA_LOG_MN", "\tRoot CTZ (%" PRIu32 ", %" PRIu32 ")",
+                mn->root_ctz.idx_e, mn->root_ctz.pg_e);
+  MFS_EXTRA_LOG("EXTRA_LOG_MN", "\tRoot Size %" PRIu32, mn->root_sz);
+  MFS_EXTRA_LOG("EXTRA_LOG_MN", "\tRoot Mode is %u.", mn->root_mode);
+
+  /* TODO: Timespecs */
+}
+
+static inline void MFS_EXTRA_LOG_F(FAR struct mfs_ofd_s *f)
+{
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "File structure details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\tList details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tPrevious node %p.", f->list.prev);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tNext node %p.", f->list.next);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\tCommon structure details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tDepth: %" PRIu32, f->com->depth);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tNew Entry: %s.",
+                f->com->new_ent ? "true" : "false");
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tOffset: %" PRIu32, f->com->off);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tFlags: 0x%x.", f->com->oflags);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tReference Counter: %" PRIu8,
+                f->com->refcount);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tFile Size: %" PRIu32, f->com->sz);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\tPath details.");
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\t\tOffset: %" PRIu32, f->com->path->off);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\t\tSize: %" PRIu32, f->com->path->sz);
+  MFS_EXTRA_LOG("EXTRA_LOG_F", "\t\t\tCTZ (%" PRIu32 ", %" PRIu32 ").",
+                f->com->path->ctz.idx_e, f->com->path->ctz.pg_e);
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -430,7 +520,7 @@ int mnemofs_flush(FAR struct mfs_sb_s *sb);
  * Name: mfs_jrnl_init
  *
  * Description:
- *   Initialize journal if device is already formatted.
+ *   Initializes journal when it's already formatted into the device.
  *
  * Input Parameters:
  *   sb  - Superblock instance of the device.
@@ -439,6 +529,9 @@ int mnemofs_flush(FAR struct mfs_sb_s *sb);
  * Returned Value:
  *   0   - OK
  *   < 0 - Error
+ *
+ * Assumptions/Limitations:
+ *   Does not initialize the master node.
  *
  ****************************************************************************/
 
@@ -463,6 +556,8 @@ int mfs_jrnl_init(FAR struct mfs_sb_s * const sb, mfs_t blk);
  *   If blk1 == 0 and blk2 == 0, this means that this will also format in the
  *   master blocks. If this is not satisfied, the provided values will be
  *   taken to denote the master nodes.
+ *
+ *   Does not format the master node.
  *
  ****************************************************************************/
 
@@ -1378,10 +1473,10 @@ int mfs_lru_rdfromoff(FAR const struct mfs_sb_s * const sb,
                       FAR char *buf, const mfs_t buflen);
 
 /****************************************************************************
- * Name: mfs_lru_updatedinfo
+ * Name: mfs_lru_getupdatedinfo
  *
  * Description:
- *   Update information of the path.
+ *   Update information of the path from the LRU.
  *
  * Input Parameters:
  *   sb       - Superblock instance of the device.
@@ -1393,9 +1488,9 @@ int mfs_lru_rdfromoff(FAR const struct mfs_sb_s * const sb,
  *
  ****************************************************************************/
 
-int mfs_lru_updatedinfo(FAR const struct mfs_sb_s * const sb,
-                        FAR struct mfs_path_s * const path,
-                        const mfs_t depth);
+int mfs_lru_getupdatedinfo(FAR const struct mfs_sb_s * const sb,
+                           FAR struct mfs_path_s * const path,
+                           const mfs_t depth);
 
 /****************************************************************************
  * Name: mfs_lru_updatectz

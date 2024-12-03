@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,8 @@
 #  undef CONFIG_MMCSD_DUMPALL
 #endif
 
+#define MMCSD_PART_COUNT             8
+
 /* Card type */
 
 #define MMCSD_CARDTYPE_UNKNOWN       0  /* Unknown card type */
@@ -63,18 +67,19 @@
 struct mmcsd_part_s
 {
   FAR struct mmcsd_state_s *priv;
-  uint32_t nblocks; /* Number of blocks */
+  blkcnt_t nblocks; /* Number of blocks */
 };
 
 /* This structure is contains the unique state of the MMC/SD block driver */
 
 struct mmcsd_state_s
 {
-  FAR struct sdio_dev_s *dev;      /* The SDIO device bound to this instance */
-  uint8_t  crefs;                  /* Open references on the driver */
-  mutex_t  lock;                   /* Assures mutually exclusive access to the slot */
-  int      minor;                  /* Device number */
-  struct mmcsd_part_s part;        /* Partition data */
+  FAR struct sdio_dev_s *dev;                  /* The SDIO device bound to this instance */
+  uint8_t  crefs;                              /* Open references on the driver */
+  mutex_t  lock;                               /* Assures mutually exclusive access to the slot */
+  int      minor;                              /* Device number */
+  struct mmcsd_part_s part[MMCSD_PART_COUNT];  /* Partition data */
+  uint32_t partnum;                            /* Partition number */
 
   /* Status flags */
 

@@ -525,7 +525,7 @@ static void sam_tsd_bottomhalf(void *arg)
   uint32_t yscale;
   uint32_t y;
   uint32_t ydiff;
-#ifdef CONFIG_SAMA5_TSD_4WIRE  
+#ifdef CONFIG_SAMA5_TSD_4WIRE
   uint32_t z1;
   uint32_t z2;
   uint32_t pressr;
@@ -570,7 +570,7 @@ static void sam_tsd_bottomhalf(void *arg)
       ier = ADC_INT_PEN;
 #else
       ier = ADC_TSD_PRESSINTS;
-#endif      
+#endif
 
       /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen
        * up and already reported; CONTACT_UP == pen up, but not reported)

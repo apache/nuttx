@@ -36,15 +36,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define kasan_init_early() kasan_stop()
-
 #ifndef CONFIG_MM_KASAN
 #  define kasan_poison(addr, size)
 #  define kasan_unpoison(addr, size) addr
 #  define kasan_register(addr, size)
 #  define kasan_unregister(addr)
 #  define kasan_reset_tag(addr) addr
+#  define kasan_start()
+#  define kasan_stop()
+#  define kasan_debugpoint(t,a,s) 0
+#  define kasan_init_early()
 #else
+
+#  define kasan_init_early() kasan_stop()
 
 /****************************************************************************
  * Public Function Prototypes
@@ -141,8 +145,6 @@ void kasan_unregister(FAR void *addr);
 
 FAR void *kasan_reset_tag(FAR const void *addr);
 
-#endif /* CONFIG_MM_KASAN */
-
 /****************************************************************************
  * Name: kasan_start
  *
@@ -203,5 +205,7 @@ int kasan_debugpoint(int type, FAR void *addr, size_t size);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* CONFIG_MM_KASAN */
 
 #endif /* __INCLUDE_NUTTX_MM_KASAN_H */

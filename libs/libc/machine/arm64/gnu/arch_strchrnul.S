@@ -80,7 +80,7 @@
 \f:
 	.endm
 
-def_fn strchrnul
+def_fn ARCH_LIBCFUN(strchrnul)
 	/* Magic constant 0x40100401 to allow us to identify which lane
 	   matches the termination condition.  */
 	mov	wtmp2, #0x0401
@@ -147,6 +147,6 @@ def_fn strchrnul
 	add	result, src, tmp1, lsr #1
 	ret
 
-	.size	strchrnul, . - strchrnul
+	.size	ARCH_LIBCFUN(strchrnul), . - ARCH_LIBCFUN(strchrnul)
 
 #endif

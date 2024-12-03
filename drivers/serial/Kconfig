@@ -43,7 +43,7 @@ config SERIAL_CONSOLE
 
 config SERIAL_GDBSTUB
 	bool "GDBSTUB Serial support"
-	depends on ARCH_HAVE_DEBUG
+	depends on LIB_GDBSTUB
 	default n
 
 config SERIAL_GDBSTUB_PATH

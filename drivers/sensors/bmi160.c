@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/bmi160.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -147,7 +149,7 @@ static ssize_t bmi160_read(FAR struct file *filep, FAR char *buffer,
 
   if (len < sizeof(struct accel_gyro_st_s))
     {
-      snerr("Expected buffer size is %u\n", sizeof(struct accel_gyro_st_s));
+      snerr("Expected buffer size is %zu\n", sizeof(struct accel_gyro_st_s));
       return 0;
     }
 

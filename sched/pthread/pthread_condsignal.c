@@ -41,6 +41,10 @@
  *
  * Description:
  *    A thread can signal on a condition variable.
+ *    pthread_cond_signal shall unblock a thread currently blocked on a
+ *    specified condition variable cond. We need own the mutex that threads
+ *    calling pthread_cond_wait or pthread_cond_timedwait have associated
+ *    with the condition variable during their wait.
  *
  * Input Parameters:
  *   None
@@ -55,7 +59,6 @@
 int pthread_cond_signal(FAR pthread_cond_t *cond)
 {
   int ret = OK;
-  int sval;
 
   sinfo("cond=%p\n", cond);
 
@@ -65,36 +68,11 @@ int pthread_cond_signal(FAR pthread_cond_t *cond)
     }
   else
     {
-      /* Get the current value of the semaphore */
-
-      if (nxsem_get_value(&cond->sem, &sval) != OK)
+      if (cond->wait_count > 0)
         {
-          ret = EINVAL;
-        }
-
-      /* If the value is less than zero (meaning that one or more
-       * thread is waiting), then post the condition semaphore.
-       * Only the highest priority waiting thread will get to execute
-       */
-
-      else
-        {
-          /* One of my objectives in this design was to make
-           * pthread_cond_signal() usable from interrupt handlers.  However,
-           * from interrupt handlers, you cannot take the associated mutex
-           * before signaling the condition.  As a result, I think that
-           * there could be a race condition with the following logic which
-           * assumes that the if sval < 0 then the thread is waiting.
-           * Without the mutex, there is no atomic, protected operation that
-           * will guarantee this to be so.
-           */
-
-          sinfo("sval=%d\n", sval);
-          if (sval < 0)
-            {
-              sinfo("Signalling...\n");
-              ret = -nxsem_post(&cond->sem);
-            }
+          sinfo("Signalling...\n");
+          cond->wait_count--;
+          ret = -nxsem_post(&cond->sem);
         }
     }
 

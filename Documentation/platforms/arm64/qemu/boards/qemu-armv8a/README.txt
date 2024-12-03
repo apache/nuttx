@@ -86,6 +86,40 @@ Getting Started
    NuttShell (NSH) NuttX-10.4.0
    nsh> fb
 
+  3.1.3 Single Core with virtio 9pFs (GICv3)
+  Configuring NuttX and compile:
+   $ ./tools/configure.sh qemu-armv8a:netnsh
+   $ make -j
+   Running with qemu
+   $ qemu-system-aarch64 -cpu cortex-a53 -nographic \
+     -machine virt,virtualization=on,gic-version=3 \
+     -fsdev local,security_model=none,id=fsdev0,path=/mnt/xxx \
+     -device virtio-9p-device,id=fs0,fsdev=fsdev0,mount_tag=host \
+     -chardev stdio,id=con,mux=on, -serial chardev:con \
+     -mon chardev=con,mode=readline  -kernel ./nuttx
+
+   NuttShell (NSH) NuttX-10.4.0
+   nsh> mkdir mnt
+   nsh> mount -t v9fs -o trans=virtio,tag=host mnt
+   nsh> ls
+   /:
+    dev/
+    mnt/
+    proc/
+
+  3.1.4 Single Core with MTE Expansion (GICv3)
+  Configuring NuttX and compile:
+   $ ./tools/configure.sh qemu-armv8a:mte
+   $ make -j
+   Running with qemu
+   $ qemu-system-aarch64 -cpu max -nographic \
+     -machine virt,virtualization=on,gic-version=3,mte=on \
+     -chardev stdio,id=con,mux=on, -serial chardev:con \
+     -mon chardev=con,mode=readline  -kernel ./nuttx/nuttx
+
+   NuttShell (NSH) NuttX-10.4.0
+   nsh> mtetest
+
   3.2 SMP (GICv3)
    Configuring NuttX and compile:
    $ ./tools/configure.sh -l qemu-armv8a:nsh_smp

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/lcd/st7789.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -990,7 +992,7 @@ FAR struct lcd_dev_s *st7789_lcdinitialize(FAR struct spi_dev_s *spi)
   st7789_setorientation(priv);
 #endif
   st7789_display(priv, true);
-  st7789_fill(priv, 0xffff);
+  st7789_fill(priv, CONFIG_LCD_ST7789_DEFAULT_COLOR);
 
   return &priv->dev;
 }

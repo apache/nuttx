@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_vector.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -923,7 +925,7 @@ irq_common:
 
 	add     $8, %rsp
 
-	iretq                /* Pops 5 things at once: CS, RIP, RFLAGS and SS and RSP */
+	iretq                /* Pops 5 things at once: RIP, CS, RFLAGS RSP and SS */
 	.size	irq_common, . - irq_common
 	.end
 

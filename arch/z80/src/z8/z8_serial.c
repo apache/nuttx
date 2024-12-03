@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -724,7 +726,7 @@ void z80_serial_initialize(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   uint8_t  state;
 
@@ -733,15 +735,6 @@ int up_putc(int ch)
    */
 
   state = z8_disableuartirq(&CONSOLE_DEV);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR before LF */
-
-      z8_consoleput('\r');
-    }
 
   /* Output the character */
 
@@ -753,7 +746,6 @@ int up_putc(int ch)
    */
 
   z8_restoreuartirq(&CONSOLE_DEV, state);
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -805,21 +797,11 @@ static void z8_putc(int ch)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Output CR before LF */
-
-      z8_putc('\r');
-    }
-
   /* Output character */
 
   z8_putc(ch);
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

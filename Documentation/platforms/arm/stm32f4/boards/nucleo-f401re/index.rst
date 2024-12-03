@@ -3,15 +3,9 @@ ST Nucleo F401RE
 ================
 
 This page discusses issues unique to NuttX configurations for the ST
-NucleoF401RE and NucleoF411RE boards from ST Micro.  See
+NucleoF401RE boards from ST Micro.  See
 
   http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1810/PF258797
-  http://www.st.com/web/catalog/mmc/FM141/SC1169/SS1577/LN1877/PF260049
-
-These two boards are very similar, both supporting STM32 "Dynamic Efficiency
-Line" parts but differing in the specific STM32 chip mounted on board.  The
-chips themselves are also very similar with the STM32F411RE having some
-additional capability:
 
 NucleoF401RE:
 
@@ -30,8 +24,6 @@ NucleoF401RE:
 - CRC calculation unit
 - RTC
 
-The NucleoF411RE also has additional DMA and SPI peripheral capabilities.
-
 Board features, however, are identical:
 
 - Peripherals:    1 led, 1 push button
@@ -41,8 +33,7 @@ Board features, however, are identical:
 Uses a STM32F103 to provide a ST-Link for programming, debug similar to the
 OpenOcd FTDI function - USB to JTAG front-end.
 
-See http://mbed.org/platforms/ST-Nucleo-F401RE and
-http://developer.mbed.org/platforms/ST-Nucleo-F411RE for more
+See http://mbed.org/platforms/ST-Nucleo-F401RE for more
 information about these boards.
 
 mbed
@@ -55,12 +46,12 @@ The Nucleo-F401RE includes boot loader from mbed:
 
 Using the mbed loader:
 
-1. Connect the Nucleo-F4x1RE to the host PC using the USB connector.
+1. Connect the Nucleo-F401RE to the host PC using the USB connector.
 2. A new file system will appear called NUCLEO; open it with Windows
    Explorer (assuming that you are using Windows).
 3. Drag and drop nuttx.bin into the MBED window.  This will load the
-   nuttx.bin binary into the Nucleo-F4x1RE.  The NUCLEO window will
-   close then re-open and the Nucleo-F4x1RE will be running the new code.
+   nuttx.bin binary into the Nucleo-F401RE.  The NUCLEO window will
+   close then re-open and the Nucleo-F401RE will be running the new code.
 
 Hardware
 ========
@@ -93,7 +84,7 @@ microcontroller.
 LEDs
 ----
 
-The Nucleo F401RE and Nucleo F411RE provide a single user LED, LD2.  LD2
+The Nucleo F401RE provides a single user LED, LD2.  LD2
 is the green LED connected to Arduino signal D13 corresponding to MCU I/O
 PA5 (pin 21) or PB13 (pin 34) depending on the STM32target.
 
@@ -141,7 +132,7 @@ pin selections.
 
 TTL to RS-232 converter connection::
 
-    Nucleo CN10 STM32F4x1RE
+    Nucleo CN10 STM32F401RE
     ----------- ------------
     Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
     Pin 33 PA10 USART1_TX    some RS-232 converters
@@ -174,7 +165,7 @@ Pins and Connectors::
 
 TTL to RS-232 converter connection::
 
-    Nucleo CN9  STM32F4x1RE
+    Nucleo CN9  STM32F401RE
     ----------- ------------
     Pin 1  PA3  USART2_RX   *Warning you make need to reverse RX/TX on
     Pin 2  PA2  USART2_TX    some RS-232 converters
@@ -258,7 +249,7 @@ RS-232 from Cutedigi.com
 
 Supports a single RS-232 connected via::
 
-    Nucleo CN9  STM32F4x1RE  Cutedigi
+    Nucleo CN9  STM32F401RE  Cutedigi
     ----------- ------------ --------
     Pin 1  PA3  USART2_RX    RXD
     Pin 2  PA2  USART2_TX    TXD
@@ -275,7 +266,7 @@ about this joystick.
 Itead Joystick Connection::
 
     --------- ----------------- ---------------------------------
-    ARDUINO   ITEAD             NUCLEO-F4x1
+    ARDUINO   ITEAD             NUCLEO-F401
     PIN NAME  SIGNAL            SIGNAL
     --------- ----------------- ---------------------------------
      D3       Button E Output   PB3
@@ -349,8 +340,8 @@ STATUS:
 Configurations
 ==============
 
-f401-nsh:
----------
+nsh:
+----
 
 Configures the NuttShell (nsh) located at apps/examples/nsh for the
 Nucleo-F401RE board.  The Configuration enables the serial interfaces
@@ -380,15 +371,10 @@ NOTES:
    Consoles).  I have been using a TTL-to-RS-232 converter connected
    as shown below::
 
-       Nucleo CN10 STM32F4x1RE
+       Nucleo CN10 STM32F401RE
        ----------- ------------
        Pin 21 PA9  USART1_RX   *Warning you make need to reverse RX/TX on
        Pin 33 PA10 USART1_TX    some RS-232 converters
        Pin 20 GND
        Pin 8  U5V
 
-f411-nsh
---------
-
-This configuration is the same as the f401-nsh configuration, except
-that it is configured to support the Nucleo-F411RE.

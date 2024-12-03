@@ -40,4 +40,10 @@ config DEV_PIPE_VFS_PATH
 	---help---
 		The path to where pipe device will exist in the VFS namespace.
 
+config DEV_PIPE_NPOLLWAITERS
+	int "number of threads for waiting POLL events"
+	default 4
+	---help---
+		Maximum number of threads that can be waiting for POLL events
+
 endif # PIPES

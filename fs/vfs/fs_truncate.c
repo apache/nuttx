@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_truncate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -82,7 +84,7 @@ int file_truncate(FAR struct file *filep, off_t length)
    * possible not the only indicator -- sufficient, but not necessary")
    */
 
-  if (inode->u.i_ops->write == NULL)
+  if (inode->u.i_ops->writev == NULL && inode->u.i_ops->write == NULL)
     {
       fwarn("WARNING: File system is read-only\n");
       return -EROFS;

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/gnss_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include <nuttx/circbuf.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/gnss.h>
+#include <nuttx/lib/lib.h>
 
 #include <fcntl.h>
 #include <poll.h>
@@ -41,13 +44,6 @@
  ****************************************************************************/
 
 #define GNSS_PATH_FMT          "/dev/ttyGNSS%d"
-
-#define GNSS_IDX               0
-#define GNSS_SATELLITE_IDX     1
-#define GNSS_MEASUREMENT_IDX   2
-#define GNSS_CLOCK_IDX         3
-#define GNSS_GEOFENCE          4
-#define GNSS_MAX_IDX           5
 
 #define GNSS_PARSE_BUFFERSIZE  256
 
@@ -83,7 +79,7 @@ struct gnss_user_s
 
 struct gnss_upperhalf_s
 {
-  struct gnss_sensor_s         dev[GNSS_MAX_IDX];
+  struct gnss_sensor_s         dev[SENSOR_GNSS_IDX_GNSS_MAX];
   struct list_node             userlist;
   FAR struct gnss_lowerhalf_s *lower;
   uint8_t                      crefs;
@@ -534,7 +530,7 @@ static void gnss_parse_nmea(FAR struct gnss_upperhalf_s *upper,
               satellite.satellites = frame.total_sats;
               memcpy(satellite.info, frame.sats,
                      sizeof(satellite.info[0]) * 4);
-              lower = &upper->dev[GNSS_SATELLITE_IDX].lower;
+              lower = &upper->dev[SENSOR_GNSS_IDX_GNSS_SATELLITE].lower;
 
               for (i = 0; i < nitems(g_gnss_constellation); i++)
                 {
@@ -569,7 +565,7 @@ static void gnss_parse_nmea(FAR struct gnss_upperhalf_s *upper,
   if (GNSS_FLAG_MARK == upper->flags)
     {
       upper->flags &= ~GNSS_FLAG_MARK;
-      lower = &upper->dev[GNSS_IDX].lower;
+      lower = &upper->dev[SENSOR_GNSS_IDX_GNSS].lower;
       lower->push_event(lower->priv, &upper->gnss, sizeof(upper->gnss));
       gnss_init_data(&upper->gnss);
     }
@@ -657,27 +653,27 @@ static void gnss_push_event(FAR void *priv, FAR const void *data,
 
   if (type == SENSOR_TYPE_GNSS)
     {
-      lower = &upper->dev[GNSS_IDX].lower;
+      lower = &upper->dev[SENSOR_GNSS_IDX_GNSS].lower;
       lower->push_event(lower->priv, data, bytes);
     }
   else if (type == SENSOR_TYPE_GNSS_SATELLITE)
     {
-      lower = &upper->dev[GNSS_SATELLITE_IDX].lower;
+      lower = &upper->dev[SENSOR_GNSS_IDX_GNSS_SATELLITE].lower;
       lower->push_event(lower->priv, data, bytes);
     }
   else if (type == SENSOR_TYPE_GNSS_MEASUREMENT)
     {
-      lower = &upper->dev[GNSS_MEASUREMENT_IDX].lower;
+      lower = &upper->dev[SENSOR_GNSS_IDX_GNSS_MEASUREMENT].lower;
       lower->push_event(lower->priv, data, bytes);
     }
   else if (type == SENSOR_TYPE_GNSS_CLOCK)
     {
-      lower = &upper->dev[GNSS_CLOCK_IDX].lower;
+      lower = &upper->dev[SENSOR_GNSS_IDX_GNSS_CLOCK].lower;
       lower->push_event(lower->priv, data, bytes);
     }
   else if (type == SENSOR_TYPE_GNSS_GEOFENCE)
     {
-      lower = &upper->dev[GNSS_GEOFENCE].lower;
+      lower = &upper->dev[SENSOR_GNSS_IDX_GNSS_GEOFENCE].lower;
       lower->push_event(lower->priv, data, bytes);
     }
 }
@@ -701,6 +697,7 @@ static void gnss_push_event(FAR void *priv, FAR const void *data,
  *   devno   - The user specifies which device of this type, from 0. If the
  *             devno alerady exists, -EEXIST will be returned.
  *   nbuffer - The number of events that the circular buffer can hold.
+ *   count   - The array size of nbuffer.
  *
  * Returned Value:
  *   OK if the driver was successfully register; A negated errno value is
@@ -709,16 +706,28 @@ static void gnss_push_event(FAR void *priv, FAR const void *data,
  ****************************************************************************/
 
 int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
-                  uint32_t nbuffer)
+                  uint32_t nbuffer[], size_t count)
 {
   FAR struct gnss_upperhalf_s *upper;
   FAR struct gnss_sensor_s *dev;
-  char path[PATH_MAX];
+  FAR char *path;
   int ret;
+
+  if (count != SENSOR_GNSS_IDX_GNSS_MAX)
+    {
+      return -EINVAL;
+    }
 
   upper = kmm_zalloc(sizeof(struct gnss_upperhalf_s));
   if (upper == NULL)
     {
+      return -ENOMEM;
+    }
+
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      kmm_free(upper);
       return -ENOMEM;
     }
 
@@ -735,10 +744,10 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
 
   /* GNSS register */
 
-  dev = &upper->dev[GNSS_IDX];
+  dev = &upper->dev[SENSOR_GNSS_IDX_GNSS];
   dev->lower.ops = &g_gnss_sensor_ops;
   dev->lower.type = SENSOR_TYPE_GNSS;
-  dev->lower.nbuffer = nbuffer;
+  dev->lower.nbuffer = nbuffer[SENSOR_GNSS_IDX_GNSS];
   dev->upper = upper;
   ret = sensor_register(&dev->lower, devno);
   if (ret < 0)
@@ -748,10 +757,10 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
 
   /* Satellite register */
 
-  dev = &upper->dev[GNSS_SATELLITE_IDX];
+  dev = &upper->dev[SENSOR_GNSS_IDX_GNSS_SATELLITE];
   dev->lower.ops = &g_gnss_sensor_ops;
   dev->lower.type = SENSOR_TYPE_GNSS_SATELLITE;
-  dev->lower.nbuffer = nbuffer;
+  dev->lower.nbuffer = nbuffer[SENSOR_GNSS_IDX_GNSS_SATELLITE];
   dev->upper = upper;
   ret = sensor_register(&dev->lower, devno);
   if (ret < 0)
@@ -761,10 +770,10 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
 
   /* GNSS Measurement register */
 
-  dev = &upper->dev[GNSS_MEASUREMENT_IDX];
+  dev = &upper->dev[SENSOR_GNSS_IDX_GNSS_MEASUREMENT];
   dev->lower.ops = &g_gnss_sensor_ops;
   dev->lower.type = SENSOR_TYPE_GNSS_MEASUREMENT;
-  dev->lower.nbuffer = nbuffer;
+  dev->lower.nbuffer = nbuffer[SENSOR_GNSS_IDX_GNSS_MEASUREMENT];
   dev->upper = upper;
   ret = sensor_register(&dev->lower, devno);
   if (ret < 0)
@@ -774,10 +783,10 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
 
   /* GNSS Colck register */
 
-  dev = &upper->dev[GNSS_CLOCK_IDX];
+  dev = &upper->dev[SENSOR_GNSS_IDX_GNSS_CLOCK];
   dev->lower.ops = &g_gnss_sensor_ops;
   dev->lower.type = SENSOR_TYPE_GNSS_CLOCK;
-  dev->lower.nbuffer = nbuffer;
+  dev->lower.nbuffer = nbuffer[SENSOR_GNSS_IDX_GNSS_CLOCK];
   dev->upper = upper;
   ret = sensor_register(&dev->lower, devno);
   if (ret < 0)
@@ -787,10 +796,10 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
 
   /* GNSS Geofence */
 
-  dev = &upper->dev[GNSS_GEOFENCE];
+  dev = &upper->dev[SENSOR_GNSS_IDX_GNSS_GEOFENCE];
   dev->lower.ops = &g_gnss_sensor_ops;
   dev->lower.type = SENSOR_TYPE_GNSS_GEOFENCE;
-  dev->lower.nbuffer = nbuffer;
+  dev->lower.nbuffer = nbuffer[SENSOR_GNSS_IDX_GNSS_GEOFENCE];
   dev->upper = upper;
   ret = sensor_register(&dev->lower, devno);
   if (ret < 0)
@@ -812,24 +821,28 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
       goto driver_err;
     }
 
+  lib_put_pathbuffer(path);
   return ret;
 
 driver_err:
   circbuf_uninit(&upper->buffer);
 circ_err:
-  sensor_unregister(&upper->dev[GNSS_GEOFENCE].lower, devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_GEOFENCE].lower, devno);
 gnss_geofence_err:
-  sensor_unregister(&upper->dev[GNSS_CLOCK_IDX].lower, devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_CLOCK].lower, devno);
 gnss_clock_err:
-  sensor_unregister(&upper->dev[GNSS_MEASUREMENT_IDX].lower, devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_MEASUREMENT].lower,
+                    devno);
 gnss_measurement_err:
-  sensor_unregister(&upper->dev[GNSS_SATELLITE_IDX].lower, devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_SATELLITE].lower,
+                    devno);
 satellite_err:
-  sensor_unregister(&upper->dev[GNSS_IDX].lower, devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS].lower, devno);
 gnss_err:
   nxmutex_destroy(&upper->lock);
   nxmutex_destroy(&upper->bufferlock);
   nxsem_destroy(&upper->buffersem);
+  lib_put_pathbuffer(path);
   kmm_free(upper);
   return ret;
 }
@@ -846,21 +859,31 @@ gnss_err:
  *           instance is bound to the GNSS driver and must persists as long
  *           as the driver persists.
  *   devno - The user specifies which device of this type, from 0.
+ *
  ****************************************************************************/
 
 void gnss_unregister(FAR struct gnss_lowerhalf_s *lower, int devno)
 {
   FAR struct gnss_upperhalf_s *upper = lower->priv;
-  char path[PATH_MAX];
+  FAR char *path;
 
-  sensor_unregister(&upper->dev[GNSS_IDX].lower, devno);
-  sensor_unregister(&upper->dev[GNSS_SATELLITE_IDX].lower, devno);
-  sensor_unregister(&upper->dev[GNSS_MEASUREMENT_IDX].lower, devno);
-  sensor_unregister(&upper->dev[GNSS_CLOCK_IDX].lower, devno);
-  sensor_unregister(&upper->dev[GNSS_GEOFENCE].lower, devno);
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return;
+    }
+
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS].lower, devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_SATELLITE].lower,
+                    devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_MEASUREMENT].lower,
+                    devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_CLOCK].lower, devno);
+  sensor_unregister(&upper->dev[SENSOR_GNSS_IDX_GNSS_GEOFENCE].lower, devno);
   snprintf(path, PATH_MAX, GNSS_PATH_FMT, devno);
   unregister_driver(path);
   nxsem_destroy(&upper->buffersem);
   circbuf_uninit(&upper->buffer);
+  lib_put_pathbuffer(path);
   kmm_free(upper);
 }

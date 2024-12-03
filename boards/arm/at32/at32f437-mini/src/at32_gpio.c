@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/at32/at32f437-mini/src/at32_gpio.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -123,9 +125,9 @@ static struct at32gpio_dev_s g_gpout[BOARD_NGPIOOUT];
 
 static const uint32_t g_gpiointinputs[BOARD_NGPIOINT] =
     {
-#if 0      
+#if 0
       GPIO_INT1,
-#endif        
+#endif
 };
 
 static struct at32gpint_dev_s g_gpint[BOARD_NGPIOINT];

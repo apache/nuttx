@@ -1,8 +1,8 @@
 /****************************************************************************
  * fs/spiffs/src/spiffs_core.h
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt
  *
  * This is a port of version 0.3.7 of SPIFFS by Peter Andersion.  That
  * version was originally released under the MIT license but is here re-

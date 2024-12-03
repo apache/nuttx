@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/addrenv.h>
+#include <nuttx/atomic.h>
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/wqueue.h>
@@ -400,9 +401,7 @@ int addrenv_restore(FAR struct addrenv_s *addrenv)
 
 void addrenv_take(FAR struct addrenv_s *addrenv)
 {
-  irqstate_t flags = enter_critical_section();
-  addrenv->refs++;
-  leave_critical_section(flags);
+  atomic_fetch_add(&addrenv->refs, 1);
 }
 
 /****************************************************************************
@@ -422,14 +421,7 @@ void addrenv_take(FAR struct addrenv_s *addrenv)
 
 int addrenv_give(FAR struct addrenv_s *addrenv)
 {
-  irqstate_t flags;
-  int refs;
-
-  flags = enter_critical_section();
-  refs = --addrenv->refs;
-  leave_critical_section(flags);
-
-  return refs;
+  return atomic_fetch_sub(&addrenv->refs, 1) - 1;
 }
 
 /****************************************************************************

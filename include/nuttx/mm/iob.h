@@ -279,16 +279,6 @@ FAR struct iob_s *iob_alloc_with_data(FAR void *data, uint16_t size,
 int iob_navail(bool throttled);
 
 /****************************************************************************
- * Name: iob_qentry_navail
- *
- * Description:
- *   Return the number of available IOB chains.
- *
- ****************************************************************************/
-
-int iob_qentry_navail(void);
-
-/****************************************************************************
  * Name: iob_free
  *
  * Description:

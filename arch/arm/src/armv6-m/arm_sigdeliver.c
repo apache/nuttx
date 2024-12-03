@@ -53,7 +53,7 @@
 
 void arm_sigdeliver(void)
 {
-  struct tcb_s  *rtcb = this_task();
+  struct tcb_s *rtcb = this_task();
   uint32_t *regs = rtcb->xcp.saved_regs;
 
 #ifdef CONFIG_SMP
@@ -162,5 +162,8 @@ retry:
   leave_critical_section((uint16_t)regs[REG_PRIMASK]);
   rtcb->irqcount--;
 #endif
-  arm_fullcontextrestore(regs);
+
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  arm_fullcontextrestore();
+  UNUSED(regs);
 }

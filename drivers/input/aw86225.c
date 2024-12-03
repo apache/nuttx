@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/aw86225.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,6 +47,7 @@
 #include <nuttx/input/aw86225.h>
 #include <nuttx/input/ff.h>
 #include <nuttx/irq.h>
+#include <nuttx/lib/lib.h>
 
 #include "aw86225_reg.h"
 #include "aw86225_internal.h"
@@ -61,6 +64,7 @@ static void aw86225_ram_work_routine(FAR void *arg);
  ****************************************************************************/
 
 static FAR const char *g_aw86225_ram_name = "aw86225_haptic.bin";
+#ifdef CONFIG_AW86225_RTP_FILE_SUPPORT
 static FAR const char g_aw86225_rtp_name[][AW86225_RTP_NAME_MAX] =
 {
   {"door_open_RTP.bin"},
@@ -237,6 +241,7 @@ static FAR const char g_aw86225_rtp_name[][AW86225_RTP_NAME_MAX] =
   {"signal_transition_rtp.bin"},
   {"haptics_video_rtp.bin"},
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -331,6 +336,7 @@ static int aw86225_i2c_read(FAR struct aw86225 *aw86225, uint8_t reg_addr,
   return aw86225_i2c_read_cnt(aw86225, reg_addr, reg_data, 1);
 }
 
+#ifdef CONFIG_AW86225_RTP_FILE_SUPPORT
 static int aw86225_i2c_writes(FAR struct aw86225 *aw86225,
                               unsigned char reg_addr,
                               FAR unsigned char *buf,
@@ -338,6 +344,7 @@ static int aw86225_i2c_writes(FAR struct aw86225 *aw86225,
 {
   return aw86225_i2c_write_cnt(aw86225, reg_addr, buf, len);
 }
+#endif
 
 static int aw86225_i2c_write_bits(FAR struct aw86225 *aw86225,
                                   unsigned char reg_addr, unsigned int mask,
@@ -367,14 +374,21 @@ static int aw86225_i2c_write_bits(FAR struct aw86225 *aw86225,
 static int aw86225_request_firmware(FAR struct aw86225_firmware *fw,
                                     FAR const char *filename)
 {
-  char file_path[PATH_MAX];
+  FAR char *file_path;
   struct file file;
   size_t file_size;
   int ret;
 
-  snprintf(file_path, sizeof(file_path), "%s/%s", CONFIG_FF_RTP_FILE_PATH,
-           filename);
+  file_path = lib_get_pathbuffer();
+  if (file_path == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  snprintf(file_path, PATH_MAX, "%s/%s",
+           CONFIG_AW86225_RTP_FILE_PATH, filename);
   ret = file_open(&file, file_path, O_RDONLY);
+  lib_put_pathbuffer(file_path);
   if (ret < 0)
     {
       ierr("open file failed");
@@ -406,32 +420,6 @@ static void aw86225_release_firmware(FAR struct aw86225_firmware *fw)
   kmm_free((void *)fw->data);
   fw->data = NULL;
   fw->size = 0;
-}
-
-static uint8_t aw86225_haptic_rtp_get_fifo_afs(FAR struct aw86225 *aw86225)
-{
-  uint8_t reg_val = 0;
-
-  aw86225_i2c_read(aw86225, AW86225_REG_SYSST, &reg_val);
-  reg_val &= AW86225_BIT_SYSST_FF_AFS;
-  return reg_val >> 3;
-}
-
-static void aw86225_haptic_set_rtp_aei(FAR struct aw86225 *aw86225,
-                                       bool flag)
-{
-  if (flag)
-    {
-      aw86225_i2c_write_bits(aw86225, AW86225_REG_SYSINTM,
-                             AW86225_BIT_SYSINTM_FF_AEM_MASK,
-                             AW86225_BIT_SYSINTM_FF_AEM_ON);
-    }
-  else
-    {
-      aw86225_i2c_write_bits(aw86225, AW86225_REG_SYSINTM,
-                             AW86225_BIT_SYSINTM_FF_AEM_MASK,
-                             AW86225_BIT_SYSINTM_FF_AEM_OFF);
-    }
 }
 
 static void aw86225_haptic_upload_lra(FAR struct aw86225 *aw86225,
@@ -748,6 +736,14 @@ static int aw86225_haptic_set_wav_loop(FAR struct aw86225 *aw86225,
   return 0;
 }
 
+static int aw86225_haptic_set_main_loop(FAR struct aw86225 *aw86225,
+                                        uint8_t loop)
+{
+  aw86225_i2c_write_bits(aw86225, AW86225_REG_WAVCFG13,
+                         AW86225_BIT_WAVCFG13_MAINLOOP_MASK, loop);
+  return 0;
+}
+
 static int aw86225_haptic_read_lra_f0(FAR struct aw86225 *aw86225)
 {
   unsigned char reg_val = 0;
@@ -924,6 +920,33 @@ static int aw86225_haptic_cont_get_f0(FAR struct aw86225 *aw86225)
   return ret;
 }
 
+#ifdef CONFIG_AW86225_RTP_FILE_SUPPORT
+static uint8_t aw86225_haptic_rtp_get_fifo_afs(FAR struct aw86225 *aw86225)
+{
+  uint8_t reg_val = 0;
+
+  aw86225_i2c_read(aw86225, AW86225_REG_SYSST, &reg_val);
+  reg_val &= AW86225_BIT_SYSST_FF_AFS;
+  return reg_val >> 3;
+}
+
+static void aw86225_haptic_set_rtp_aei(FAR struct aw86225 *aw86225,
+                                       bool flag)
+{
+  if (flag)
+    {
+      aw86225_i2c_write_bits(aw86225, AW86225_REG_SYSINTM,
+                             AW86225_BIT_SYSINTM_FF_AEM_MASK,
+                             AW86225_BIT_SYSINTM_FF_AEM_ON);
+    }
+  else
+    {
+      aw86225_i2c_write_bits(aw86225, AW86225_REG_SYSINTM,
+                             AW86225_BIT_SYSINTM_FF_AEM_MASK,
+                             AW86225_BIT_SYSINTM_FF_AEM_OFF);
+    }
+}
+
 static int aw86225_haptic_rtp_init(FAR struct aw86225 *aw86225)
 {
   unsigned int buf_len = 0;
@@ -999,6 +1022,7 @@ static int aw86225_haptic_rtp_init(FAR struct aw86225 *aw86225)
   iinfo("%s exit\n", __func__);
   return 0;
 }
+#endif
 
 static int aw86225_haptic_set_repeat_wav_seq(FAR struct aw86225 *aw86225,
           unsigned char seq)
@@ -1070,6 +1094,7 @@ aw86225_haptic_effect_strength(FAR struct aw86225 *aw86225)
   return 0;
 }
 
+#ifdef CONFIG_AW86225_RTP_FILE_SUPPORT
 static void aw86225_rtp_work_routine(FAR void *arg)
 {
   FAR struct aw86225 *aw86225 = arg;
@@ -1233,6 +1258,7 @@ static void aw86225_rtp_work_routine(FAR void *arg)
       nxmutex_unlock(&aw86225->lock);
     }
 }
+#endif
 
 static int aw86225_container_update(FAR struct aw86225 *aw86225,
                      FAR struct aw86225_container *aw86225_cont)
@@ -1392,7 +1418,12 @@ static void aw86225_ram_loaded(FAR struct aw86225_firmware *cont,
   load_cont++;
 #endif
   ierr("%s enter\n", __func__);
-  aw86225_request_firmware(cont, g_aw86225_ram_name);
+  ret = aw86225_request_firmware(cont, g_aw86225_ram_name);
+  if (ret < 0)
+    {
+      ierr("failed to request firmware %s\n", g_aw86225_ram_name);
+      return;
+    }
 
   if (!cont)
     {
@@ -1667,7 +1698,16 @@ static int aw86225_haptic_start(FAR struct aw86225 *aw86225)
 static int aw86225_haptic_play_effect_seq(FAR struct aw86225 *aw86225,
                                           unsigned char flag)
 {
-  if (aw86225->effect_id > aw86225->config->effect_id_boundary)
+  if ((aw86225->activate_mode == AW86225_HAPTIC_ACTIVATE_RAM_MODE ||
+      aw86225->activate_mode == AW86225_HAPTIC_ACTIVATE_RAM_LOOP_MODE) &&
+      aw86225->effect_id > aw86225->config->effect_id_boundary)
+    {
+      return 0;
+    }
+
+  if (aw86225->activate_mode == AW86225_HAPTIC_ACTIVATE_RTP_MODE &&
+      (aw86225->effect_id > aw86225->config->effect_max ||
+       aw86225->effect_id < aw86225->config->effect_id_boundary))
     {
       return 0;
     }
@@ -1714,6 +1754,33 @@ static int aw86225_haptic_play_effect_seq(FAR struct aw86225 *aw86225,
           aw86225_haptic_set_pwm(aw86225,  AW86225_PWM_12K);
           aw86225_haptic_set_gain(aw86225, aw86225->level);
           aw86225_haptic_play_repeat_seq(aw86225, true);
+        }
+
+      if (aw86225->activate_mode == AW86225_HAPTIC_ACTIVATE_RTP_MODE)
+        {
+          int budry = aw86225->effect_id -
+                      aw86225->config->effect_id_boundary;
+          iinfo("budry = %d\n", budry);
+          for (uint8_t i = 0; i < 8; i++)
+            {
+              iinfo("wav_seq[%d] = %d\n", i,
+                aw86225->pattern[budry].patternid[i]);
+              iinfo("wav_loop[%d] = %d\n", i,
+                aw86225->pattern[budry].waveloop[i]);
+              aw86225_haptic_set_wav_seq(aw86225, i,
+                aw86225->pattern[budry].patternid[i] + 1);
+              aw86225_haptic_set_wav_loop(aw86225, i,
+                aw86225->pattern[budry].waveloop[i]);
+            }
+
+          iinfo("main_loop = %d\n", aw86225->pattern[budry].mainloop);
+          aw86225_haptic_set_main_loop(aw86225,
+            aw86225->pattern[budry].mainloop);
+          aw86225_haptic_set_pwm(aw86225,  AW86225_PWM_12K);
+          aw86225_haptic_play_mode(aw86225, AW86225_HAPTIC_RAM_LOOP_MODE);
+          aw86225_haptic_effect_strength(aw86225);
+          aw86225_haptic_set_gain(aw86225, aw86225->level);
+          aw86225_haptic_start(aw86225);
         }
     }
 
@@ -1959,6 +2026,23 @@ static void aw86225_long_vibrate_work_routine(FAR void *arg)
           wd_start(&aw86225->timer, MSEC2TICK(aw86225->duration),
           aw86225_vibrator_timer_func, (wdparm_t)aw86225);
         }
+      else if (aw86225->activate_mode == AW86225_HAPTIC_ACTIVATE_RTP_MODE)
+        {
+          int budry = aw86225->effect_id -
+                      aw86225->config->effect_id_boundary;
+          iinfo("activate_mode(AW86225_HAPTIC_ACTIVATE_RTP_MODE) = %d\n",
+                aw86225->activate_mode);
+          aw86225_haptic_ram_vbat_compensate(aw86225, true);
+          aw86225_haptic_play_effect_seq(aw86225, true);
+
+          /* run ms timer */
+
+          iinfo("pattern duration = %d", aw86225->pattern[budry].duration);
+          wd_start(&aw86225->timer,
+                   MSEC2TICK(aw86225->pattern[budry].duration),
+                   aw86225_vibrator_timer_func, (wdparm_t)aw86225);
+          aw86225->wk_lock_flag = 1;
+        }
       else
         {
           ierr("%s: activate_mode error\n", __func__);
@@ -2140,11 +2224,18 @@ static int aw86225_haptics_upload_effect(FAR struct ff_lowerhalf_s *lower,
                  __func__, aw86225->effect_id, aw86225->activate_mode);
           int budry = aw86225->effect_id -
                       aw86225->config->effect_id_boundary;
+#ifdef CONFIG_AW86225_RTP_FILE_SUPPORT
           data[1] = aw86225->config->rtp_time[budry] / 1000;
           data[2] = aw86225->config->rtp_time[budry] % 1000;
           iinfo("%s: data[1] = %d data[2] = %d, rtp_time %d\n", __func__,
                  data[1], data[2],
                  aw86225->config->rtp_time[budry]);
+#else
+          data[1] = 0;
+          data[2] = aw86225->pattern[budry].duration;
+          iinfo("data[2] = %d, waveloop time = %d\n", data[2],
+                aw86225->pattern[budry].duration);
+#endif
         }
 
       memcpy(effect->u.periodic.custom_data, data, sizeof(int16_t) * 3);
@@ -2197,12 +2288,13 @@ static int aw86225_haptics_playback(struct ff_lowerhalf_s *lower,
            aw86225->activate_mode == AW86225_HAPTIC_ACTIVATE_RTP_MODE)
     {
       iinfo("%s: enter  rtp_mode\n", __func__);
+#ifdef CONFIG_AW86225_RTP_FILE_SUPPORT
       work_queue(HPWORK, &aw86225->rtp_work,
                  aw86225_rtp_work_routine, aw86225, 0);
-      if (val == 0)
-        {
-          atomic_store(&aw86225->exit_in_rtp_loop, 1);
-        }
+#else
+      work_queue(HPWORK, &aw86225->long_vibrate_work,
+                 aw86225_long_vibrate_work_routine, aw86225, 0);
+#endif
     }
 
   return OK;
@@ -2319,6 +2411,7 @@ int aw86225_initialize(FAR struct i2c_master_s *master,
   aw86225->effects_count = config->effects_count;
   aw86225->is_used_irq   = config->is_used_irq;
   aw86225->predefined    = config->predefined;
+  aw86225->pattern       = config->pattern;
   aw86225->config        = config->config;
   aw86225->irq           = config->irq;
   aw86225->i2c           = master;

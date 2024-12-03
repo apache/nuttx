@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/dev_null.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,10 +40,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen);
-static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen);
+static ssize_t devnull_readv(FAR struct file *filep,
+                             FAR const struct uio *uio);
+static ssize_t devnull_writev(FAR struct file *filep,
+                              FAR const struct uio *uio);
 static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
 
@@ -51,15 +53,17 @@ static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_devnull_fops =
 {
-  NULL,          /* open */
-  NULL,          /* close */
-  devnull_read,  /* read */
-  devnull_write, /* write */
-  NULL,          /* seek */
-  NULL,          /* ioctl */
-  NULL,          /* mmap */
-  NULL,          /* truncate */
-  devnull_poll   /* poll */
+  NULL,           /* open */
+  NULL,           /* close */
+  NULL,           /* read */
+  NULL,           /* writev */
+  NULL,           /* seek */
+  NULL,           /* ioctl */
+  NULL,           /* mmap */
+  NULL,           /* truncate */
+  devnull_poll,   /* poll */
+  devnull_readv,  /* readv */
+  devnull_writev  /* writev */
 };
 
 /****************************************************************************
@@ -70,12 +74,11 @@ static const struct file_operations g_devnull_fops =
  * Name: devnull_read
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
-                            size_t len)
+static ssize_t devnull_readv(FAR struct file *filep,
+                             FAR const struct uio *uio)
 {
   UNUSED(filep);
-  UNUSED(buffer);
-  UNUSED(len);
+  UNUSED(uio);
 
   return 0; /* Return EOF */
 }
@@ -84,13 +87,12 @@ static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
  * Name: devnull_write
  ****************************************************************************/
 
-static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t len)
+static ssize_t devnull_writev(FAR struct file *filep,
+                              FAR const struct uio *uio)
 {
   UNUSED(filep);
-  UNUSED(buffer);
 
-  return len; /* Say that everything was written */
+  return uio_total_len(uio); /* Say that everything was written */
 }
 
 /****************************************************************************

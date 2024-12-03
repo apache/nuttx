@@ -1,9 +1,10 @@
 /****************************************************************************
  * drivers/sensors/vl53l1x.c
- * Character driver for the ST vl53l1x distance.
  *
- *   Copyright (C) 2019 Acutronics Robotics
- *   Author: Acutronics Robotics (Juan Flores Muñoz) <juan@erlerobotics.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: Copyright (C) 2019 Acutronics Robotics
+ * SPDX-FileCopyrightText: Acutronics Robotics
+ * SPDX-FileCopyrightText: (Juan Flores Muñoz) <juan@erlerobotics.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

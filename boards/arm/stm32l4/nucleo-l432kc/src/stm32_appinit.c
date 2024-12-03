@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l432kc/src/stm32_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -254,6 +256,16 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32l4_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32L4_DAC
+  /* Initialize DAC and register the DAC driver. */
+
+  ret = stm32l4_dac_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32l4_dac_setup failed: %d\n", ret);
     }
 #endif
 

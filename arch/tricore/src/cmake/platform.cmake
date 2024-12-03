@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/tricore/src/cmake/platform.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -60,7 +62,7 @@ if(CONFIG_TRICORE_TOOLCHAIN_GNU)
       OUTPUT_VARIABLE extra_library)
     list(APPEND EXTRA_LIB ${extra_library})
   endif()
-  if(CONFIG_ARCH_COVERAGE)
+  if(CONFIG_COVERAGE_TOOLCHAIN)
     execute_process(
       COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
               --print-file-name=libgcov.a

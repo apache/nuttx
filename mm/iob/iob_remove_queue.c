@@ -58,7 +58,6 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
 
   /* Remove the I/O buffer chain from the head of the queue */
 
-  irqstate_t flags = spin_lock_irqsave(&g_iob_lock);
   qentry = iobq->qh_head;
   if (qentry)
     {
@@ -68,18 +67,12 @@ FAR struct iob_s *iob_remove_queue(FAR struct iob_queue_s *iobq)
           iobq->qh_tail = NULL;
         }
 
-      spin_unlock_irqrestore(&g_iob_lock, flags);
-
       /* Extract the I/O buffer chain from the container and free the
        * container.
        */
 
       iob = qentry->qe_head;
       iob_free_qentry(qentry);
-    }
-  else
-    {
-      spin_unlock_irqrestore(&g_iob_lock, flags);
     }
 
   return iob;

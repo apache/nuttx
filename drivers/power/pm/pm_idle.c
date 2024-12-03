@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/power/pm/pm_idle.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -146,11 +148,10 @@ void pm_idle(pm_idle_handler_t handler)
 
   /* If sched lock before irq save, and irq handler do post, scheduler will
    * be delayed after WFI until next sched unlock. which is not acceptable.
-   * per cpu sched_lock/unlock is not available here, all post/wait api will
-   * not allow in pm_callbacks.
    */
 
   flags = up_irq_save();
+  sched_lock();
 
   oldstate = pm_querystate(domain);
   newstate = pm_checkstate(domain);
@@ -201,11 +202,10 @@ void pm_idle(pm_idle_handler_t handler)
 
   /* If there is pending irq, enable irq make handlers finish all
    * execution will be better decrease scheduler context switch times.
-   * per cpu sched_lock/unlock is not available here, all post/wait api will
-   * not allow in pm_callbacks.
    */
 
   up_irq_restore(flags);
+  sched_unlock();
 }
 
 #else

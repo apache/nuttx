@@ -64,3 +64,10 @@ install(TARGETS nxstyle DESTINATION bin)
 
 add_executable(gencromfs gencromfs.c)
 install(TARGETS gencromfs DESTINATION bin)
+
+add_executable(mkdeps mkdeps.c)
+target_link_libraries(mkdeps PRIVATE csvparser)
+install(TARGETS mkdeps DESTINATION bin)
+
+add_executable(incdir incdir.c)
+install(TARGETS incdir DESTINATION bin)

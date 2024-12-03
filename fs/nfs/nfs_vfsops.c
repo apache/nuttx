@@ -1,11 +1,11 @@
 /****************************************************************************
  * fs/nfs/nfs_vfsops.c
  *
- *   Copyright (C) 2012-2013, 2015, 2017-2018 Gregory Nutt. All rights
- *     reserved.
- *   Copyright (C) 2012 Jose Pablo Rojas Vargas. All rights reserved.
- *   Author: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
- *           Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2012-2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Jose Pablo Rojas Vargas. All rights reserved.
+ * SPDX-FileContributor: Jose Pablo Rojas Vargas <jrojas@nx-engineering.com>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Leveraged from OpenBSD:
  *
@@ -203,6 +203,8 @@ const struct mountpt_operations g_nfs_operations =
   NULL,                         /* mmap */
   nfs_truncate,                 /* truncate */
   NULL,                         /* poll */
+  NULL,                         /* readv */
+  NULL,                         /* writev */
 
   nfs_sync,                     /* sync */
   nfs_dup,                      /* dup */
@@ -367,7 +369,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
       /* Save the attributes in the file data structure */
 
-      tmp = *ptr;  /* attributes_follows */
+      tmp = *ptr++;  /* attributes_follows */
       if (!tmp)
         {
           fwarn("WARNING: no file attributes\n");
@@ -730,6 +732,15 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   /* Attach the private data to the struct file instance */
 
   filep->f_priv = np;
+
+  /* In write/append mode, we need to set the file pointer to the end of
+   * the file.
+   */
+
+  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
+    {
+      filep->f_pos = (off_t)np->n_size;
+    }
 
   /* Then insert the new instance at the head of the list in the mountpoint
    * structure. It needs to be there (1) to handle error conditions that

@@ -56,7 +56,17 @@ void exception_direct(void)
 
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
-  struct tcb_s *tcb = this_task();
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  FAR struct tcb_s *tcb;
+
+  /* This judgment proves that (*running_task)->xcp.regs
+   * is invalid, and we can safely overwrite it.
+   */
+
+  if (!(NVIC_IRQ_SVCALL == irq && regs[REG_R0] == SYS_restore_context))
+    {
+      (*running_task)->xcp.regs = regs;
+    }
 
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -67,10 +77,6 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   arm_ack_irq(irq);
 
-  /* Set current regs for crash dump */
-
-  up_set_current_regs(regs);
-
   if (irq == NVIC_IRQ_PENDSV)
     {
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -80,27 +86,17 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 #endif
 
       up_irq_save();
-      g_running_tasks[this_cpu()]->xcp.regs = regs;
     }
   else
     {
-      /* Dispatch irq */
-
-      tcb->xcp.regs = regs;
       irq_dispatch(irq, regs);
     }
-
-  /* If a context switch occurred while processing the interrupt then
-   * current_regs may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
 
   tcb = this_task();
 
   /* Update scheduler parameters */
 
-  nxsched_suspend_scheduler(g_running_tasks[this_cpu()]);
+  nxsched_suspend_scheduler(*running_task);
   nxsched_resume_scheduler(tcb);
 
   /* Record the new "running" task when context switch occurred.
@@ -108,13 +104,9 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * crashes.
    */
 
-  g_running_tasks[this_cpu()] = tcb;
+  *running_task = tcb;
   regs = tcb->xcp.regs;
 #endif
-
-  /* Clear current regs */
-
-  up_set_current_regs(NULL);
 
   board_autoled_off(LED_INIRQ);
 

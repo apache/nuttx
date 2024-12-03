@@ -1,5 +1,6 @@
 /****************************************************************************
  * crypto/chacha_private.h
+ *
  * $OpenBSD: chacha_private.h,v 1.4 2020/07/22 13:54:30 tobhe Exp $
  *
  * chacha-merged.c version 20080118

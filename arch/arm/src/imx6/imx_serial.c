@@ -1114,7 +1114,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct imx_uart_s *priv = (struct imx_uart_s *)CONSOLE_DEV.priv;
   uint32_t ier;
@@ -1124,20 +1124,8 @@ int up_putc(int ch)
    */
 
   imx_disableuartint(priv, &ier);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      imx_lowputc('\r');
-    }
-
   imx_lowputc(ch);
   imx_restoreuartint(priv, ier);
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -1186,25 +1174,12 @@ static inline void imx_waittxready(void)
  * Public Functions
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef IMX_CONSOLE_VBASE
   imx_waittxready();
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      putreg32((uint16_t)'\r', IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
-      imx_waittxready();
-    }
-
   putreg32((uint16_t)ch, IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 #endif
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

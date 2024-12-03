@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/drivers_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,7 +61,7 @@
  ****************************************************************************/
 
 /* Check if only one console device is selected.
- * If you get this errro, search your .config file for CONSOLE_XXX_CONSOLE
+ * If you get this error, search your .config file for CONSOLE_XXX_CONSOLE
  * options and remove what is not needed.
  */
 

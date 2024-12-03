@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/include/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -153,7 +155,7 @@ static inline uintptr_t up_getsp(void)
  ****************************************************************************/
 
 noinstrument_function
-static inline bool up_interrupt_context(void)
+static inline_function bool up_interrupt_context(void)
 {
 #ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();

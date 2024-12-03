@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/mips/src/mips32/mips_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,6 +60,13 @@
 
 uint32_t *mips_doirq(int irq, uint32_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      mips_copystate((*running_task)->xcp.regs, regs);
+    }
+
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();

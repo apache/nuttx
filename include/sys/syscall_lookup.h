@@ -200,6 +200,8 @@ SYSCALL_LOOKUP(close,                      1)
 SYSCALL_LOOKUP(ioctl,                      3)
 SYSCALL_LOOKUP(read,                       3)
 SYSCALL_LOOKUP(write,                      3)
+SYSCALL_LOOKUP(readv,                      3)
+SYSCALL_LOOKUP(writev,                     3)
 SYSCALL_LOOKUP(pread,                      4)
 SYSCALL_LOOKUP(pwrite,                     4)
 #ifdef CONFIG_FS_AIO
@@ -308,7 +310,6 @@ SYSCALL_LOOKUP(munmap,                     2)
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  SYSCALL_LOOKUP(pthread_barrier_wait,     1)
   SYSCALL_LOOKUP(pthread_cancel,           1)
   SYSCALL_LOOKUP(pthread_cond_broadcast,   1)
   SYSCALL_LOOKUP(pthread_cond_signal,      1)
@@ -382,14 +383,6 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(shutdown,                 2)
   SYSCALL_LOOKUP(socket,                   3)
   SYSCALL_LOOKUP(socketpair,               4)
-#endif
-
-/* The following is defined only if entropy pool random number generator
- * is enabled.
- */
-
-#ifdef CONFIG_CRYPTO_RANDOM_POOL
-  SYSCALL_LOOKUP(arc4random_buf,           2)
 #endif
 
 SYSCALL_LOOKUP(nanosleep,                  2)

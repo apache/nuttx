@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/bch/bchdev_driver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -80,7 +82,9 @@ const struct file_operations g_bch_fops =
   bch_ioctl,   /* ioctl */
   NULL,        /* mmap */
   NULL,        /* truncate */
-  bch_poll     /* poll */
+  bch_poll,    /* poll */
+  NULL,        /* readv */
+  NULL         /* writev */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , bch_unlink /* unlink */
 #endif

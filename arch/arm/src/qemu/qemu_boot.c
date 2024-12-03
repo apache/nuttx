@@ -36,6 +36,11 @@
 #  include <nuttx/fdt.h>
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+#  include <sched/sched.h>
+#  include <nuttx/sched_note.h>
+#endif
+
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 /****************************************************************************
@@ -99,7 +104,7 @@ int up_cpu_start(int cpu)
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the start event */
 
-  sched_note_cpu_start(this_task_inirq(), cpu);
+  sched_note_cpu_start(this_task(), cpu);
 #endif
 
   return psci_cpu_on(cpu, (uintptr_t)__start);

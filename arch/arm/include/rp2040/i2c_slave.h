@@ -55,7 +55,7 @@ extern "C"
  *   to the instance of struct i2c_slave_s.  This function should only be
  *   called once of a give controller.
  *
- *   Note: the same port cannot be initalized as both master and slave.
+ *   Note: the same port cannot be initialized as both master and slave.
  *
  * Input Parameters:
  *   rx_buffer     - Buffer for data transmitted to us by an I2C master.
@@ -84,7 +84,7 @@ struct i2c_slave_s *rp2040_i2c0_slave_initialize
  *   to the instance of struct i2c_slave_s.  This function should only be
  *   called once of a give controller.
  *
- *   Note: the same port cannot be initalized as both master and slave.
+ *   Note: the same port cannot be initialized as both master and slave.
  *
  * Input Parameters:
  *   rx_buffer     - Buffer for data transmitted to us by an I2C master.

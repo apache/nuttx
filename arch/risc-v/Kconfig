@@ -89,6 +89,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_BOOTLOADER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
@@ -103,7 +104,6 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
 	select ARCH_HAVE_TICKLESS
-	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -119,6 +119,7 @@ config ARCH_CHIP_ESP32C3_GENERIC
 	select ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	select ARCH_CHIP_ESPRESSIF
 	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -162,7 +163,6 @@ config ARCH_CHIP_ESP32H2
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_RNG
 	select ARCH_HAVE_TICKLESS
-	select LIBC_ARCH_ATOMIC
 	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
@@ -203,6 +203,7 @@ config ARCH_CHIP_MPFS
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_MPU
 	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_ADDRENV
@@ -412,7 +413,7 @@ config ARCH_RV_MACHINE_ISA_1_13
 		which extend the range of exception codes from 0 ~ 15 to 0 ~ 19.
 
 config ARCH_RV_ISA_ZICSR_ZIFENCEI
-	bool
+	bool "Enable Zicsr and Zifencei extensions (GCC >= 12.1.0.)"
 	default y
 	---help---
 		https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=aed44286efa8ae8717a77d94b51ac3614e2ca6dc

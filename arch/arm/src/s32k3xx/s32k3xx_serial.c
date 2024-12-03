@@ -4453,28 +4453,16 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct s32k3xx_uart_s *priv = (struct s32k3xx_uart_s *)&CONSOLE_DEV;
   uint32_t ie;
 
   s32k3xx_disableuartint(priv, &ie);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      s32k3xx_lowputc('\r');
-    }
-
   s32k3xx_lowputc(ch);
   s32k3xx_restoreuartint(priv, ie);
 #endif
-
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -4487,22 +4475,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #if CONSOLE_LPUART > 0
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

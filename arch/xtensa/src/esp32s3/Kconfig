@@ -615,6 +615,7 @@ config ESP32S3_SPI2
 	select ESP32S3_SPI
 	select SPI
 	select ESP32S3_GPIO_IRQ if SPI_SLAVE
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S3_SPI3
 	bool "SPI 3"
@@ -622,6 +623,7 @@ config ESP32S3_SPI3
 	select ESP32S3_SPI
 	select SPI
 	select ESP32S3_GPIO_IRQ if SPI_SLAVE
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S3_DMA
 	bool "General DMA (GDMA)"
@@ -683,12 +685,14 @@ config ESP32S3_I2C0
 	default n
 	select ESP32S3_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESP32S3_I2C1
 	bool "I2C 1"
 	default n
 	select ESP32S3_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESP32S3_TWAI
 	bool "TWAI (CAN)"
@@ -1430,10 +1434,12 @@ endif # ESP32S3_I2C1
 config ESP32S3_I2CTIMEOSEC
 	int "Timeout seconds"
 	default 0
+	depends on ESPRESSIF_I2C_PERIPH
 
 config ESP32S3_I2CTIMEOMS
 	int "Timeout milliseconds"
 	default 500
+	depends on ESPRESSIF_I2C_PERIPH
 
 endmenu # I2C Configuration
 
@@ -1682,11 +1688,6 @@ endif # ESP32S3_OPENETH
 menu "BLE Configuration"
 	depends on ESP32S3_BLE
 
-config ESP32S3_BLE_TTY_NAME
-	string "BLE TTY device name"
-	default "/dev/ttyHCI0"
-	depends on UART_BTH4
-
 config ESP32S3_BLE_TASK_STACK_SIZE
 	int "Controller task stack size"
 	default 4096
@@ -1707,7 +1708,7 @@ choice ESP32S3_UNIVERSAL_MAC_ADDRESSES
 	bool "Number of universally administered (by IEEE) MAC address"
 	default ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
 	depends on ESP32S3_WIFI || ESP32S3_BLE
-	help
+	---help---
 		Configure the number of universally administered (by IEEE) MAC addresses.
 		During initialization, MAC addresses for each network interface are generated or derived from a
 		single base MAC address.
@@ -2532,6 +2533,13 @@ config ESP32S3_LCD_HPULSEWIDTH
 config ESP32S3_LCD_BUFFER_LAYERS
 	int "LCD Buffer Layer Number"
 	default 1
+
+config ESP32S3_LCD_DOUBLE_BUFFERED
+	bool "LCD Double Buffered"
+	default y
+	---help---
+		Double the framebuffer size per layer.
+		Twice as much memory will be allocated.
 
 choice
 	prompt "LCD Data Width"

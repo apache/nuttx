@@ -102,15 +102,15 @@ static void syslograwstream_addchar(FAR struct lib_syslograwstream_s *stream,
  * Name: syslograwstream_addstring
  ****************************************************************************/
 
-static int
+static ssize_t
 syslograwstream_addstring(FAR struct lib_syslograwstream_s *stream,
-                          FAR const char *buff, int len)
+                          FAR const char *buff, size_t len)
 {
-  int ret = 0;
+  ssize_t ret = 0;
 
   do
     {
-      int remain = CONFIG_SYSLOG_BUFSIZE - stream->offset;
+      size_t remain = CONFIG_SYSLOG_BUFSIZE - stream->offset;
       remain = remain > len - ret ? len - ret : remain;
       memcpy(stream->buffer + stream->offset, buff + ret, remain);
       stream->offset += remain;
@@ -162,18 +162,20 @@ static void syslograwstream_putc(FAR struct lib_outstream_s *self, int ch)
 
       do
         {
+          char c = ch;
+
           /* Write the character to the supported logging device.  On
-           * failure, syslog_putc returns a negated errno value.
+           * failure, syslog_write returns a negated errno value.
            */
 
-          ret = syslog_putc(ch);
+          ret = syslog_write(&c, 1);
           if (ret >= 0)
             {
               self->nput++;
               return;
             }
 
-          /* The special return value -EINTR means that syslog_putc() was
+          /* The special return value -EINTR means that syslog_write() was
            * awakened by a signal.  This is not a real error and must be
            * ignored in this context.
            */
@@ -183,8 +185,8 @@ static void syslograwstream_putc(FAR struct lib_outstream_s *self, int ch)
     }
 }
 
-static int syslograwstream_puts(FAR struct lib_outstream_s *self,
-                                FAR const void *buff, int len)
+static ssize_t syslograwstream_puts(FAR struct lib_outstream_s *self,
+                                    FAR const void *buff, size_t len)
 {
   FAR struct lib_syslograwstream_s *stream = (FAR void *)self;
 
@@ -202,7 +204,7 @@ static int syslograwstream_puts(FAR struct lib_outstream_s *self,
 
   return syslograwstream_addstring(stream, buff, len);
 #else
-  int ret;
+  ssize_t ret;
 
   /* Try writing until the write was successful or until an
    * irrecoverable error occurs.
@@ -221,7 +223,7 @@ static int syslograwstream_puts(FAR struct lib_outstream_s *self,
           return ret;
         }
 
-      /* The special return value -EINTR means that syslog_putc() was
+      /* The special return value -EINTR means that syslog_write() was
        * awakened by a signal.  This is not a real error and must be
        * ignored in this context.
        */

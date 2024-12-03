@@ -1,8 +1,8 @@
 /****************************************************************************
  * crypto/idgen.c
- * $OpenBSD: idgen.c,v 1.8 2020/07/22 13:54:30 tobhe Exp $
  *
- * Copyright (c) 2008 Damien Miller <djm@mindrot.org>
+ * SPDX-License-Identifier: ISC
+ * SPDX-FileCopyrightText: 2008 Damien Miller <djm@mindrot.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,6 +15,7 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
  ****************************************************************************/
 
 /* IDGEN32: non-repeating ID generation covering an almost maximal 32-bit

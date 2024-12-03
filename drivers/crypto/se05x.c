@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/crypto/se05x.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -231,7 +233,8 @@ int se05x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   if (priv == NULL)
     {
       crypterr("ERROR: Failed to allocate instance\n");
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto errout;
     }
 
   priv->config = config;
@@ -239,14 +242,21 @@ int se05x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Check se05x availability */
 
-  pnt_se05x_open(priv);
+  ret = pnt_se05x_open(priv);
+  if (ret < 0)
+    {
+      crypterr("ERROR: Failed to open se05x driver: %d\n", ret);
+      ret = -ENODEV;
+      goto errout_with_alloc;
+    }
+
   struct se05x_uid_s uid;
   ret = pnt_se05x_get_uid(priv, &uid);
   if (ret < 0)
     {
-      crypterr("ERROR: Failed to register driver: %d\n", ret);
-      kmm_free(priv);
-      return -ENODEV;
+      crypterr("ERROR: Failed to probe se05x driver: %d\n", ret);
+      ret = -ENODEV;
+      goto errout_with_alloc_and_open;
     }
 
   pnt_se05x_close(priv);
@@ -257,10 +267,20 @@ int se05x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   if (ret < 0)
     {
       crypterr("ERROR: Failed to register driver: %d\n", ret);
-      kmm_free(priv);
+      ret =  -ENODEV;
+      goto errout_with_alloc;
     }
 
   nxmutex_init(&priv->mutex);
 
+  return OK;
+
+errout_with_alloc_and_open:
+  pnt_se05x_close(priv);
+
+errout_with_alloc:
+  kmm_free(priv);
+
+errout:
   return ret;
 }

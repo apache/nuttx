@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_exception.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -110,22 +112,22 @@ int riscv_exception(int mcause, void *regs, void *args)
 
       /* Return to _exit function in privileged mode with argument SIGSEGV */
 
-      up_current_regs()[REG_EPC] = (uintptr_t)_exit;
-      up_current_regs()[REG_A0] = SIGSEGV;
-      up_current_regs()[REG_INT_CTX] |= STATUS_PPP;
+      running_regs()[REG_EPC] = _exit;
+      running_regs()[REG_A0] = (void *)SIGSEGV;
+      ((uintreg_t *)running_regs())[REG_INT_CTX] |= STATUS_PPP;
 
       /* Continue with kernel stack in use. The frame(s) in kernel stack
        * are no longer needed, so just set it to top
        */
 
-      up_current_regs()[REG_SP] = (uintptr_t)tcb->xcp.ktopstk;
+      running_regs()[REG_SP] = tcb->xcp.ktopstk;
     }
   else
 #endif
     {
       _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
       up_irq_save();
-      up_set_current_regs(regs);
+      up_set_interrupt_context(true);
       PANIC_WITH_REGS("panic", regs);
     }
 
@@ -197,7 +199,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
     {
       _alert("PANIC!!! virtual address not mappable: %" PRIxPTR "\n", vaddr);
       up_irq_save();
-      up_set_current_regs(regs);
+      up_set_interrupt_context(true);
       PANIC_WITH_REGS("panic", regs);
     }
 

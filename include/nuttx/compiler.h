@@ -240,7 +240,11 @@
  * the function prolog and epilog.
  */
 
-#  define naked_function __attribute__((naked,no_instrument_function))
+#  if !defined(__ghs__) || __GHS_VERSION_NUMBER >= 202354
+#    define naked_function __attribute__((naked,no_instrument_function))
+#  else
+#    define naked_function
+#  endif
 
 /* The always_inline_function attribute informs GCC that the function should
  * always be inlined, regardless of the level of optimization.  The
@@ -279,6 +283,12 @@
 #  if defined(__ghs__)
 #    undef nooptimiziation_function
 #    define nooptimiziation_function
+
+#    undef nosanitize_address
+#    define nosanitize_address
+#  endif
+
+#  if defined(__AVR32__)
 
 #    undef nosanitize_address
 #    define nosanitize_address
@@ -412,6 +422,9 @@
 #    undef  CONFIG_PTR_IS_NOT_INT
 
 #  elif defined(__AVR__)
+
+#    undef nosanitize_address
+#    define nosanitize_address
 
 #    if defined(__AVR_2_BYTE_PC__) || defined(__AVR_3_BYTE_PC__)
 /* 2-byte 3-byte PC does not support returnaddress */
@@ -1205,6 +1218,12 @@
 
 #ifndef CONFIG_HAVE_LONG_LONG
 #  undef CONFIG_FS_LARGEFILE
+#endif
+
+#ifdef CONFIG_DISABLE_FLOAT
+#  undef CONFIG_HAVE_FLOAT
+#  undef CONFIG_HAVE_DOUBLE
+#  undef CONFIG_HAVE_LONG_DOUBLE
 #endif
 
 /****************************************************************************

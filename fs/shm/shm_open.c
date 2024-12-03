@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/shm/shm_open.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -107,6 +109,17 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
           ret = -EEXIST;
           inode_release(inode);
           goto errout_with_sem;
+        }
+
+      /* If the shared memory object already exists, truncate it to
+       * zero bytes.
+       */
+
+      if ((oflags & O_TRUNC) == O_TRUNC && inode->i_private != NULL)
+        {
+          shmfs_free_object(inode->i_private);
+          inode->i_private = NULL;
+          inode->i_size = 0;
         }
     }
   else

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/inode/fs_files.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/spawn.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/lib/lib.h>
 
 #ifdef CONFIG_FDSAN
 #  include <android/fdsan.h>
@@ -69,7 +72,7 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   FAR struct file *filep;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&list->fl_lock);
 
   filep = &list->fl_files[l1][l2];
 #ifdef CONFIG_FS_REFCOUNT
@@ -108,7 +111,7 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
     }
 #endif
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&list->fl_lock, flags);
   return filep;
 }
 
@@ -162,7 +165,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
     }
   while (++i < row);
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&list->fl_lock);
 
   /* To avoid race condition, if the file list is updated by other threads
    * and list rows is greater or equal than temp list,
@@ -171,7 +174,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   if (orig_rows != list->fl_rows && list->fl_rows >= row)
     {
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&list->fl_lock, flags);
 
       for (j = orig_rows; j < i; j++)
         {
@@ -193,7 +196,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
   list->fl_files = files;
   list->fl_rows = row;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&list->fl_lock, flags);
 
   if (tmp != NULL && tmp != &list->fl_prefile)
     {
@@ -368,6 +371,7 @@ void files_initlist(FAR struct filelist *list)
   list->fl_crefs = 1;
   list->fl_files = &list->fl_prefile;
   list->fl_prefile = list->fl_prefiles;
+  spin_lock_init(&list->fl_lock);
 }
 
 /****************************************************************************
@@ -381,6 +385,7 @@ void files_initlist(FAR struct filelist *list)
 #ifdef CONFIG_SCHED_DUMP_ON_EXIT
 void files_dumplist(FAR struct filelist *list)
 {
+  FAR char *path;
   int count = files_countlist(list);
   int i;
 
@@ -392,10 +397,15 @@ void files_dumplist(FAR struct filelist *list)
         "PID", "FD", "FLAGS", "TYPE", "POS", "PATH"
         );
 
+  path = lib_get_pathbuffer();
+  if (path == NULL)
+    {
+      return;
+    }
+
   for (i = 0; i < count; i++)
     {
       FAR struct file *filep = files_fget(list, i);
-      char path[PATH_MAX];
 
 #if CONFIG_FS_BACKTRACE > 0
       char buf[BACKTRACE_BUFFER_SIZE(CONFIG_FS_BACKTRACE)];
@@ -431,6 +441,8 @@ void files_dumplist(FAR struct filelist *list)
             );
       fs_putfilep(filep);
     }
+
+  lib_put_pathbuffer(path);
 }
 #endif
 
@@ -578,13 +590,13 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
 
   /* Find free file */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&list->fl_lock);
 
   for (; ; i++, j = 0)
     {
       if (i >= list->fl_rows)
         {
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&list->fl_lock, flags);
 
           ret = files_extend(list, i + 1);
           if (ret < 0)
@@ -592,7 +604,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               return ret;
             }
 
-          flags = spin_lock_irqsave(NULL);
+          flags = spin_lock_irqsave(&list->fl_lock);
         }
 
       do
@@ -621,7 +633,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
     }
 
 found:
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&list->fl_lock, flags);
 
   if (addref)
     {

@@ -1,6 +1,8 @@
 # ##############################################################################
 # fs/partition/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -36,7 +38,7 @@ if(NOT CONFIG_DISABLE_MOUNTPOINT)
     list(APPEND SRCS fs_gpt.c)
   endif()
 
-  if(CONFIG_GPT_PARTITION)
+  if(CONFIG_TXTABLE_PARTITION)
     list(APPEND SRCS fs_txtable.c)
   endif()
 

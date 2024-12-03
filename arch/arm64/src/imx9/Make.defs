@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/imx9/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -19,6 +21,10 @@
 ############################################################################
 
 include common/Make.defs
+
+ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
+  include imx9/ddr/Make.defs
+endif
 
 # i.MX9-specific C source files
 
@@ -79,4 +85,13 @@ endif
 
 ifeq ($(CONFIG_IMX9_BOOTLOADER), y)
   CHIP_CSRCS += imx9_system_ctl.c
+  CHIP_CSRCS += imx9_trdc.c
+endif
+
+ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
+  CHIP_CSRCS += $(DDR_CSRCS)
+endif
+
+ifeq ($(CONFIG_IMX9_FLEXCAN), y)
+  CHIP_CSRCS += imx9_flexcan.c
 endif

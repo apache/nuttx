@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/clk/clk_mux.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,7 +46,7 @@ static bool mux_is_better_rate(uint32_t rate, uint32_t now,
 {
   if (flags & CLK_MUX_ROUND_CLOSEST)
     {
-      return abs(now - rate) < abs(best - rate);
+      return clk_is_best_rate_closest(rate, now, best);
     }
 
   return now <= rate && now > best;

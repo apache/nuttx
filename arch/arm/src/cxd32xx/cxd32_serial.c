@@ -970,7 +970,7 @@ void arm_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -978,21 +978,10 @@ int up_putc(int ch)
   up_disableuartint(priv, &ier);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #ifdef HAVE_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
-
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

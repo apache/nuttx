@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -112,10 +114,10 @@
 
 /* Context switching */
 
-#define arm64_fullcontextrestore(restoreregs) \
+#define arm64_fullcontextrestore() \
   do \
     { \
-      sys_call1(SYS_restore_context, (uintptr_t)restoreregs); \
+      sys_call0(SYS_restore_context); \
     } \
   while (1)
 

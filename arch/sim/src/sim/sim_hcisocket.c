@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_hcisocket.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,8 +42,6 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 #include <nuttx/wireless/bluetooth/bt_uart.h>
-#include <nuttx/wireless/bluetooth/bt_bridge.h>
-#include <nuttx/serial/uart_bth4.h>
 
 #include "sim_internal.h"
 #include "sim_hosthcisocket.h"
@@ -50,18 +50,28 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_BTHCI_RX_FRAMELEN 1024
+#define SIM_BTHCI_RX_FRAMELEN 2048
 #define SIM_BTHCI_WORK_DELAY  USEC2TICK(1000)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
+union bt_hdr_u
+{
+  struct bt_hci_cmd_hdr_s cmd;
+  struct bt_hci_acl_hdr_s acl;
+  struct bt_hci_evt_hdr_s evt;
+  struct bt_hci_iso_hdr_s iso;
+};
 struct bthcisock_s
 {
   struct bt_driver_s drv;
   int                id;
   int                fd;
+
+  uint16_t           rxlen;
+  uint8_t            rxbuf[SIM_BTHCI_RX_FRAMELEN];
 
   /* Work queue for transmit */
 
@@ -124,36 +134,80 @@ static void bthcisock_close(struct bt_driver_s *drv)
 static int bthcisock_receive(struct bt_driver_s *drv)
 {
   struct bthcisock_s *dev = (struct bthcisock_s *)drv;
-  char data[SIM_BTHCI_RX_FRAMELEN];
   enum bt_buf_type_e type;
+  union bt_hdr_u *hdr;
+  uint16_t pktlen;
   int ret;
 
-  ret = host_bthcisock_receive(dev->fd, data, sizeof(data));
+  ret = host_bthcisock_receive(dev->fd, &dev->rxbuf[dev->rxlen],
+                               sizeof(dev->rxbuf) - dev->rxlen);
   if (ret <= 0)
     {
       return ret;
     }
 
-  if (data[0] == H4_EVT)
+  dev->rxlen += (uint16_t)ret;
+
+  while (dev->rxlen)
     {
-      type = BT_EVT;
-    }
-  else if (data[0] == H4_ACL)
-    {
-      type = BT_ACL_IN;
-    }
-  else if (data[0] == H4_ISO)
-    {
-      type = BT_ISO_IN;
-    }
-  else
-    {
-      return -EINVAL;
+      hdr = (union bt_hdr_u *)&dev->rxbuf[H4_HEADER_SIZE];
+      switch (dev->rxbuf[0])
+        {
+        case H4_EVT:
+          {
+            if (dev->rxlen < H4_HEADER_SIZE
+                + sizeof (struct bt_hci_evt_hdr_s))
+              {
+                return ret;
+              }
+
+            type = BT_EVT;
+            pktlen = H4_HEADER_SIZE + sizeof(struct bt_hci_evt_hdr_s)
+                     + hdr->evt.len;
+          }
+          break;
+        case H4_ACL:
+          {
+            if (dev->rxlen < H4_HEADER_SIZE
+                + sizeof(struct bt_hci_acl_hdr_s))
+              {
+                return ret;
+              }
+
+            type = BT_ACL_IN;
+            pktlen = H4_HEADER_SIZE + sizeof(struct bt_hci_acl_hdr_s)
+                     + hdr->acl.len;
+          }
+          break;
+        case H4_ISO:
+          {
+            if (dev->rxlen < H4_HEADER_SIZE
+                + sizeof(struct bt_hci_iso_hdr_s))
+              {
+                return ret;
+              }
+
+            type = BT_ISO_IN;
+            pktlen = H4_HEADER_SIZE + sizeof(struct bt_hci_iso_hdr_s)
+                     + hdr->iso.len;
+          }
+          break;
+        default:
+          return -EINVAL;
+        }
+
+      if (dev->rxlen < pktlen)
+        {
+          return ret;
+        }
+
+      bt_netdev_receive(&dev->drv, type, dev->rxbuf + H4_HEADER_SIZE,
+                        pktlen - H4_HEADER_SIZE);
+      dev->rxlen -= pktlen;
+      memmove(dev->rxbuf, dev->rxbuf + pktlen, dev->rxlen);
     }
 
-  return bt_netdev_receive(&dev->drv, type,
-                           data + H4_HEADER_SIZE,
-                           ret - H4_HEADER_SIZE);
+  return ret;
 }
 
 static int bthcisock_open(struct bt_driver_s *drv)
@@ -202,27 +256,6 @@ static void bthcisock_free(struct bthcisock_s *dev)
   kmm_free(dev);
 }
 
-static int bthcisock_driver_register(struct bt_driver_s *drv, int id,
-                                     bool bt)
-{
-#ifdef CONFIG_UART_BTH4
-  char name[32];
-
-  if (bt)
-    {
-      snprintf(name, sizeof(name), "/dev/ttyBT%d", id);
-    }
-  else
-    {
-      snprintf(name, sizeof(name), "/dev/ttyBLE%d", id);
-    }
-
-  return uart_bth4_register(name, drv);
-#else
-  return bt_netdev_register(drv);
-#endif
-}
-
 /****************************************************************************
  * Name: sim_bthcisock_work
  *
@@ -266,10 +299,6 @@ static void sim_bthcisock_work(void *arg)
 int sim_bthcisock_register(int dev_id)
 {
   struct bthcisock_s *dev;
-#if defined(CONFIG_BLUETOOTH_BRIDGE)
-  struct bt_driver_s *btdrv;
-  struct bt_driver_s *bledrv;
-#endif
   int ret;
 
   dev = bthcisock_alloc(dev_id);
@@ -278,32 +307,10 @@ int sim_bthcisock_register(int dev_id)
       return -ENOMEM;
     }
 
-#if defined(CONFIG_BLUETOOTH_BRIDGE)
-  ret = bt_bridge_register(&dev->drv, &btdrv, &bledrv);
+  ret = bt_driver_register_with_id(&dev->drv, dev_id);
   if (ret < 0)
     {
-      goto end;
-    }
-
-  ret = bthcisock_driver_register(btdrv, dev_id, true);
-  if (ret < 0)
-    {
-      goto end;
-    }
-
-  ret = bthcisock_driver_register(bledrv, dev_id, false);
-  if (ret < 0)
-    {
-      goto end;
-    }
-
-end:
-#else
-  ret = bthcisock_driver_register(&dev->drv, dev_id, true);
-#endif
-
-  if (ret < 0)
-    {
+      wlerr("bt_driver_register error: %d\n", ret);
       bthcisock_free(dev);
       return ret;
     }

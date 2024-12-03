@@ -1,6 +1,8 @@
 /***************************************************************************
  * drivers/serial/uart_pl011.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1061,22 +1063,11 @@ void pl011_serialinit(void)
  ***************************************************************************/
 
 #ifdef HAVE_PL011_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   FAR struct uart_dev_s *dev = &CONSOLE_DEV;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      pl011_putc(dev, '\r');
-    }
-
   pl011_putc(dev, ch);
-
-  return ch;
 }
 #endif
 

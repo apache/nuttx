@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfscritmon.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -42,6 +44,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
+#include <nuttx/sched.h>
 
 #include "fs_heap.h"
 
@@ -211,9 +214,9 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
   /* Convert the for maximum time pre-emption disabled */
 
-  if (g_premp_max[cpu] > 0)
+  if (g_preemp_max[cpu] > 0)
     {
-      perf_convert(g_premp_max[cpu], &maxtime);
+      perf_convert(g_preemp_max[cpu], &maxtime);
     }
   else
     {
@@ -223,7 +226,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Reset the maximum */
 
-  g_premp_max[cpu] = 0;
+  g_preemp_max[cpu] = 0;
 
   /* Generate output for maximum time pre-emption disabled */
 

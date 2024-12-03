@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/mps/mps2-an500/src/mps2_bringup.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,6 +61,16 @@ static int mps2_bringup(void)
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
     }
 
+#endif
+
+#ifdef CONFIG_FS_TMPFS
+  /* Mount the tmp file system */
+
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at /tmp: %d\n", ret);
+    }
 #endif
 
   return ret;

@@ -36,6 +36,7 @@
 *.SystemMap
 *~
 .depend
+/.cache
 /.config
 /.config.*
 /.config-*
@@ -78,3 +79,5 @@ kwarning
 SAVEMake.defs
 SAVEconfig
 .aider*
+imx9-norimage.img
+

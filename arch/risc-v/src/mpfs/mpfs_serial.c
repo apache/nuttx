@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1245,7 +1247,7 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
@@ -1253,26 +1255,16 @@ int up_putc(int ch)
 
   if (!CONSOLE_DEV.isconsole)
     {
-      return ch;
+      return;
     }
 
   up_disableuartint(priv, &ier);
 #endif
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 #ifdef HAVE_SERIAL_CONSOLE
   up_restoreuartint(priv, ier);
 #endif
-  return ch;
 }
 
 /****************************************************************************
@@ -1295,9 +1287,8 @@ void riscv_serialinit(void)
 {
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  return ch;
 }
 
 #endif /* HAVE_UART_DEVICE */
@@ -1311,21 +1302,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

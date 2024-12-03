@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/at32/at32f437-mini/src/at32f437-mini.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -154,7 +156,7 @@
 #define GPIO_OUT1         (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_DRV_MODETATE|\
                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN2)
 #define GPIO_IN1
-#define GPIO_INT1     
+#define GPIO_INT1
 
 /* LEDs */
 

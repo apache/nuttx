@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <sched.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 

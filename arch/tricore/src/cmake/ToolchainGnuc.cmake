@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/tricore/src/cmake/Toolchain.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -84,8 +86,8 @@ if(CONFIG_STACK_CANARIES)
   add_compile_options(-fstack-protector-all)
 endif()
 
-if(CONFIG_ARCH_COVERAGE)
-  add_compile_options(-fprofile-generate -ftest-coverage)
+if(CONFIG_COVERAGE_ALL)
+  add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
 endif()
 
 # Optimization of unused sections

@@ -229,6 +229,34 @@ config ADC_HA711_ADD_DELAY
 
 endif # ADC_HX711
 
+config ADC_MCP3008
+	bool "MCP3008 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Microchip MCP3008 8-channel, 10-bit ADC.
+
+if ADC_MCP3008
+
+config ADC_MCP3008_SPI_FREQUENCY
+	int "Frequency in Hz"
+	default 2340000
+	range 0 3600000
+	---help---
+		The frequency of SPI communications to the MCP3008, which also has an
+		effect on sample frequency. 3.6MHz is recommended for VDD >= 4V, 2.34MHz
+		for VDD >= 3.3V and 1.35MHz for VDD = 2.7V.
+
+config ADC_MCP3008_DIFFERENTIAL
+	bool "Differential mode"
+	default n
+	---help---
+		If yes, MCP3008 will be used in differential mode, which uses channel pairs
+		to measure differential signals. Otherwise, single-ended mode is used which
+		measures the voltage on each channel individually.
+
+endif # ADC_MCP3008
+
 endif # ADC
 
 config COMP

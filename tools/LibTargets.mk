@@ -25,6 +25,12 @@
 #
 # Possible kernel-mode builds
 
+libs$(DELIM)libbuiltin$(DELIM)libkbuiltin$(LIBEXT): pass2dep
+	$(Q) $(MAKE) -C libs$(DELIM)libbuiltin libkbuiltin$(LIBEXT) BINDIR=kbin EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+
+staging$(DELIM)libkbuiltin$(LIBEXT): libs$(DELIM)libbuiltin$(DELIM)libkbuiltin$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 libs$(DELIM)libc$(DELIM)libkc$(LIBEXT): pass2dep
 	$(Q) $(MAKE) -C libs$(DELIM)libc libkc$(LIBEXT) BINDIR=kbin EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
@@ -168,6 +174,16 @@ $(ARCH_SRC)$(DELIM)libarch$(LIBEXT): pass1dep
 endif
 
 staging$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
+ifeq ($(CONFIG_BUILD_FLAT),y)
+libs$(DELIM)libbuiltin$(DELIM)libbuiltin$(LIBEXT): pass2dep
+else
+libs$(DELIM)libbuiltin$(DELIM)libbuiltin$(LIBEXT): pass1dep
+endif
+	$(Q) $(MAKE) -C libs$(DELIM)libbuiltin libbuiltin$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+staging$(DELIM)libbuiltin$(LIBEXT): libs$(DELIM)libbuiltin$(DELIM)libbuiltin$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 # Possible user-mode builds

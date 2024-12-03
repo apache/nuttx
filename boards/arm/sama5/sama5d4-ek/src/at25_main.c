@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/sama5/sama5d4-ek/src/at25_main.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -180,7 +182,7 @@ int at25_main(int argc, char *argv[])
   /* The HEX file load was successful, write the data to FLASH */
 
   printf("Successfully loaded the Intel HEX file into memory...\n");
-  printf("  Writing %d bytes to the AT25 Serial FLASH\n",
+  printf("  Writing %" PRIdOFF " bytes to the AT25 Serial FLASH\n",
          memoutstream.common.nput);
 
   remaining = memoutstream.common.nput;
@@ -213,7 +215,7 @@ int at25_main(int argc, char *argv[])
    * the same.
    */
 
-  printf("  Verifying %d bytes in the AT25 Serial FLASH\n",
+  printf("  Verifying %" PRIdOFF " bytes in the AT25 Serial FLASH\n",
          memoutstream.common.nput);
 
   /* Open the AT25 device for writing */
@@ -252,7 +254,7 @@ int at25_main(int argc, char *argv[])
         {
           if (memcmp(g_iobuffer, src, nread) != 0)
             {
-              fprintf(stderr, "ERROR: Verify failed at offset %d\n",
+              fprintf(stderr, "ERROR: Verify failed at offset %"PRIdOFF"\n",
                       memoutstream.common.nput - remaining);
               close(fd);
               return EXIT_FAILURE;
@@ -264,7 +266,7 @@ int at25_main(int argc, char *argv[])
     }
   while (remaining > 0);
 
-  printf("  Successfully verified %d bytes in the AT25 Serial FLASH\n",
+  printf("Successfully verified %"PRIdOFF" bytes in the AT25 Serial FLASH\n",
          memoutstream.common.nput);
 
   close(fd);

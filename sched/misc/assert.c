@@ -34,7 +34,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
 #include <nuttx/init.h>
-#include <nuttx/irq.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/tls.h>
 #include <nuttx/signal.h>
@@ -99,6 +98,14 @@
 #endif
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static noreturn_function int pause_cpu_handler(FAR void *arg);
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -106,9 +113,12 @@
 static bool g_cpu_paused[CONFIG_SMP_NCPUS];
 #endif
 
+static spinlock_t g_assert_lock = SP_UNLOCKED;
+
 static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
 
+#ifdef CONFIG_DEBUG_ALERT
 static FAR const char * const g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
@@ -121,6 +131,12 @@ static FAR const char * const g_ttypenames[4] =
   "Kthread",
   "Invalid"
 };
+#endif
+
+#ifdef CONFIG_SMP
+static struct smp_call_data_s g_call_data =
+SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -289,7 +305,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
       /* Try to restore SP from current_regs if assert from interrupt. */
 
       tcbstack_sp = up_interrupt_context() ?
-                    up_getusrsp((FAR void *)up_current_regs()) : 0;
+                    up_getusrsp((FAR void *)running_regs()) : 0;
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
         {
           tcbstack_sp = 0;
@@ -326,6 +342,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 
 #endif
 
+#ifdef CONFIG_DEBUG_ALERT
 /****************************************************************************
  * Name: dump_task
  ****************************************************************************/
@@ -422,6 +439,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , args
         );
 }
+#endif
 
 /****************************************************************************
  * Name: dump_backtrace
@@ -522,7 +540,9 @@ static void dump_tasks(void)
     }
 #endif
 
+#ifdef CONFIG_DEBUG_ALERT
   nxsched_foreach(dump_task, NULL);
+#endif
 
 #ifdef CONFIG_SCHED_BACKTRACE
   nxsched_foreach(dump_backtrace, NULL);
@@ -588,7 +608,7 @@ static void dump_deadlock(void)
 
 static noreturn_function int pause_cpu_handler(FAR void *arg)
 {
-  memcpy(g_last_regs[this_cpu()], up_current_regs(), sizeof(g_last_regs[0]));
+  memcpy(g_last_regs[this_cpu()], running_regs(), sizeof(g_last_regs[0]));
   g_cpu_paused[this_cpu()] = true;
   up_flush_dcache_all();
   while (1);
@@ -604,7 +624,7 @@ static void pause_all_cpu(void)
   int delay = CONFIG_ASSERT_PAUSE_CPU_TIMEOUT;
 
   CPU_CLR(this_cpu(), &cpus);
-  nxsched_smp_call(cpus, pause_cpu_handler, NULL, false);
+  nxsched_smp_call_async(cpus, &g_call_data);
   g_cpu_paused[this_cpu()] = true;
 
   /* Check if all CPUs paused with timeout */
@@ -623,6 +643,11 @@ static void pause_all_cpu(void)
     }
 }
 #endif
+
+#ifdef CONFIG_DEBUG_ALERT
+/****************************************************************************
+ * Name: dump_running_task
+ ****************************************************************************/
 
 static void dump_running_task(FAR struct tcb_s *rtcb, FAR void *regs)
 {
@@ -646,6 +671,7 @@ static void dump_running_task(FAR struct tcb_s *rtcb, FAR void *regs)
  *
  * Description:
  *   Dump basic information of assertion
+ *
  ****************************************************************************/
 
 static void dump_assert_info(FAR struct tcb_s *rtcb,
@@ -691,6 +717,7 @@ static void dump_assert_info(FAR struct tcb_s *rtcb,
 
   syslog_flush();
 }
+#endif  /* CONFIG_DEBUG_ALERT */
 
 /****************************************************************************
  * Name: dump_fatal_info
@@ -700,7 +727,7 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
                             FAR const char *filename, int linenum,
                             FAR const char *msg, FAR void *regs)
 {
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP) && defined(CONFIG_DEBUG_ALERT)
   int cpu;
 
   /* Dump other CPUs registers, running task stack and backtrace. */
@@ -738,16 +765,13 @@ static void dump_fatal_info(FAR struct tcb_s *rtcb,
   usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 
-#ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
-#endif
-
-#if defined(CONFIG_BOARD_COREDUMP_SYSLOG) || \
-    defined(CONFIG_BOARD_COREDUMP_BLKDEV)
-
   /* Flush previous SYSLOG data before possible long time coredump */
 
   syslog_flush();
+
+#ifdef CONFIG_BOARD_CRASHDUMP_CUSTOM
+  board_crashdump(up_getsp(), rtcb, filename, linenum, msg, regs);
+#elif !defined(CONFIG_BOARD_CRASHDUMP_NONE)
 
   /* Dump core information */
 
@@ -816,7 +840,7 @@ void _assert(FAR const char *filename, int linenum,
   flags = 0; /* suppress GCC warning */
   if (os_ready)
     {
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_assert_lock);
     }
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
@@ -868,9 +892,11 @@ void _assert(FAR const char *filename, int linenum,
 
   syslog_flush();
 
+#ifdef CONFIG_DEBUG_ALERT
   /* Dump basic info of assertion. */
 
   dump_assert_info(rtcb, filename, linenum, msg, regs);
+#endif
 
   if (g_nx_initstate == OSINIT_PANIC)
     {
@@ -887,6 +913,6 @@ void _assert(FAR const char *filename, int linenum,
 
   if (os_ready)
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_assert_lock, flags);
     }
 }

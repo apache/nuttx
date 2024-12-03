@@ -182,7 +182,7 @@ config XMC4_ECAT
 	default y
 	depends on ARCH_CHIP_XMC4800
 	---help---
-			Enable start up of the EtherCAT interface and configure ports.
+		Enable start up of the EtherCAT interface and configure ports.
 
 config XMC4_ECAT_P0
 	bool "Enable EtherCAT port 0"
@@ -630,140 +630,140 @@ endmenu # XMC4xxx USIC Configuration
 menu "XMC4xxx PWM Configuration"
 depends on XMC4_PWM
 
-	config XMC4_CCU40
-		bool "Enable CCU40"
-		default n
-		---help---
-			Support CCU40
+config XMC4_CCU40
+	bool "Enable CCU40"
+	default n
+	---help---
+		Support CCU40
 
-		config XMC4_CCU40_CC40
-			bool "Enable CCU40 Slice 0 (not compatible with tickless)"
-			default n
-			depends on XMC4_CCU40 && !CONFIG_SCHED_TICKLESS
-			---help---
-				Support CCU40 CC40, cannot be activated when tickless OS is enabled
+config XMC4_CCU40_CC40
+	bool "Enable CCU40 Slice 0 (not compatible with tickless)"
+	default n
+	depends on XMC4_CCU40 && !CONFIG_SCHED_TICKLESS
+	---help---
+		Support CCU40 CC40, cannot be activated when tickless OS is enabled
 
-		config XMC4_CCU40_CC41
-			bool "Enable CCU40 Slice 1"
-			default n
-			depends on XMC4_CCU40
-			---help---
-				Support CCU40 CC41
+config XMC4_CCU40_CC41
+	bool "Enable CCU40 Slice 1"
+	default n
+	depends on XMC4_CCU40
+	---help---
+		Support CCU40 CC41
 
-		config XMC4_CCU40_CC42
-			bool "Enable CCU40 Slice 2"
-			default n
-			depends on XMC4_CCU40
-			---help---
-				Support CCU40 CC42
+config XMC4_CCU40_CC42
+	bool "Enable CCU40 Slice 2"
+	default n
+	depends on XMC4_CCU40
+	---help---
+		Support CCU40 CC42
 
-		config XMC4_CCU40_CC43
-			bool "Enable CCU40 Slice 3"
-			default n
-			depends on XMC4_CCU40
-			---help---
-				Support CCU40 CC43
+config XMC4_CCU40_CC43
+	bool "Enable CCU40 Slice 3"
+	default n
+	depends on XMC4_CCU40
+	---help---
+		Support CCU40 CC43
 
-	config XMC4_CCU41
-		bool "Enable CCU41"
-		default n
-		---help---
-			Support CCU41
+config XMC4_CCU41
+	bool "Enable CCU41"
+	default n
+	---help---
+		Support CCU41
 
-		config XMC4_CCU41_CC40
-			bool "Enable CCU41 Slice 0 (not compatible with tickless)"
-			default n
-			depends on XMC4_CCU41 && !CONFIG_SCHED_TICKLESS
-			---help---
-				Support CCU41 CC40, cannot be activated when tickless OS is enabled
+config XMC4_CCU41_CC40
+	bool "Enable CCU41 Slice 0 (not compatible with tickless)"
+	default n
+	depends on XMC4_CCU41 && !CONFIG_SCHED_TICKLESS
+	---help---
+		Support CCU41 CC40, cannot be activated when tickless OS is enabled
 
-		config XMC4_CCU41_CC41
-			bool "Enable CCU41 Slice 1"
-			default n
-			depends on XMC4_CCU41
-			---help---
-				Support CCU41 CC41
+config XMC4_CCU41_CC41
+	bool "Enable CCU41 Slice 1"
+	default n
+	depends on XMC4_CCU41
+	---help---
+		Support CCU41 CC41
 
-		config XMC4_CCU41_CC42
-			bool "Enable CCU41 Slice 2"
-			default n
-			depends on XMC4_CCU41
-			---help---
-				Support CCU41 CC42
+config XMC4_CCU41_CC42
+	bool "Enable CCU41 Slice 2"
+	default n
+	depends on XMC4_CCU41
+	---help---
+		Support CCU41 CC42
 
-		config XMC4_CCU41_CC43
-			bool "Enable CCU41 Slice 3"
-			default n
-			depends on XMC4_CCU41
-			---help---
-				Support CCU41 CC43
+config XMC4_CCU41_CC43
+	bool "Enable CCU41 Slice 3"
+	default n
+	depends on XMC4_CCU41
+	---help---
+		Support CCU41 CC43
 
-	config XMC4_CCU42
-		bool "Enable CCU42"
-		default n
-		---help---
-			Support CCU42
+config XMC4_CCU42
+	bool "Enable CCU42"
+	default n
+	---help---
+		Support CCU42
 
-		config XMC4_CCU42_CC40
-			bool "Enable CCU42 Slice 0"
-			default n
-			depends on XMC4_CCU42
-			---help---
-				Support CCU42 CC40
+config XMC4_CCU42_CC40
+	bool "Enable CCU42 Slice 0"
+	default n
+	depends on XMC4_CCU42
+	---help---
+		Support CCU42 CC40
 
-		config XMC4_CCU42_CC41
-			bool "Enable CCU42 Slice 1"
-			default n
-			depends on XMC4_CCU42
-			---help---
-				Support CCU42 CC41
+config XMC4_CCU42_CC41
+	bool "Enable CCU42 Slice 1"
+	default n
+	depends on XMC4_CCU42
+	---help---
+		Support CCU42 CC41
 
-		config XMC4_CCU42_CC42
-			bool "Enable CCU42 Slice 2"
-			default n
-			depends on XMC4_CCU42
-			---help---
-				Support CCU42 CC42
+config XMC4_CCU42_CC42
+	bool "Enable CCU42 Slice 2"
+	default n
+	depends on XMC4_CCU42
+	---help---
+		Support CCU42 CC42
 
-		config XMC4_CCU42_CC43
-			bool "Enable CCU42 Slice 3"
-			default n
-			depends on XMC4_CCU42
-			---help---
-				Support CCU42 CC43
+config XMC4_CCU42_CC43
+	bool "Enable CCU42 Slice 3"
+	default n
+	depends on XMC4_CCU42
+	---help---
+		Support CCU42 CC43
 
-	config XMC4_CCU43
-		bool "Enable CCU43"
-		default n
-		---help---
-			Support CCU43
+config XMC4_CCU43
+	bool "Enable CCU43"
+	default n
+	---help---
+		Support CCU43
 
-		config XMC4_CCU43_CC40
-			bool "Enable CCU43 Slice 0"
-			default n
-			depends on XMC4_CCU43
-			---help---
-				Support CCU43 CC40
+config XMC4_CCU43_CC40
+	bool "Enable CCU43 Slice 0"
+	default n
+	depends on XMC4_CCU43
+	---help---
+		Support CCU43 CC40
 
-		config XMC4_CCU43_CC41
-			bool "Enable CCU43 Slice 1"
-			default n
-			depends on XMC4_CCU43
-			---help---
-				Support CCU43 CC41
+config XMC4_CCU43_CC41
+	bool "Enable CCU43 Slice 1"
+	default n
+	depends on XMC4_CCU43
+	---help---
+		Support CCU43 CC41
 
-		config XMC4_CCU43_CC42
-			bool "Enable CCU43 Slice 2"
-			default n
-			depends on XMC4_CCU43
-			---help---
-				Support CCU43 CC42
+config XMC4_CCU43_CC42
+	bool "Enable CCU43 Slice 2"
+	default n
+	depends on XMC4_CCU43
+	---help---
+		Support CCU43 CC42
 
-		config XMC4_CCU43_CC43
-			bool "Enable CCU43 Slice 3"
-			default n
-			depends on XMC4_CCU43
-			---help---
-				Support CCU43 CC43
+config XMC4_CCU43_CC43
+	bool "Enable CCU43 Slice 3"
+	default n
+	depends on XMC4_CCU43
+	---help---
+		Support CCU43 CC43
 
 endmenu # XMC4xxx PWM Configuration

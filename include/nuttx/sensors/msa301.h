@@ -151,8 +151,7 @@ extern "C"
  ****************************************************************************/
 
 int msa301_sensor_register(FAR const char *devpath,
-                           FAR struct i2c_master_s *i2c
-                          );
+                           FAR struct i2c_master_s *i2c);
 
 #ifdef __cplusplus
 }

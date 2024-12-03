@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/syslog/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,7 @@
 # Include SYSLOG Infrastructure
 
 ifeq ($(CONFIG_SYSLOG),y)
-CSRCS += vsyslog.c syslog_channel.c syslog_putc.c
+CSRCS += vsyslog.c syslog_channel.c
 CSRCS += syslog_write.c syslog_flush.c
 endif
 

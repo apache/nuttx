@@ -49,6 +49,13 @@ config SYSLOG_DEFAULT_MASK
 if SYSLOG
 comment "SYSLOG options"
 
+config SYSLOG_CRLF
+	bool "Syslog convert LF to CRLF"
+	default y
+	---help---
+		Pre-pend a carriage return before every linefeed that goes into the
+		syslog.
+
 config SYSLOG_MAX_CHANNELS
 	int "Maximum SYSLOG channels"
 	default 1
@@ -70,13 +77,6 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
-config RAMLOG_CRLF
-	bool "RAMLOG CR/LF"
-	default n
-	---help---
-		Pre-pend a carriage return before every linefeed that goes into the
-		RAM log.
-
 config RAMLOG_NONBLOCKING
 	bool "RAMLOG non-block reads"
 	default y
@@ -389,7 +389,7 @@ config CONSOLE_SYSLOG
 	---help---
 		Use the syslog logging device as a system console. If this feature is
 		enabled (along with DEV_CONSOLE), then all console output will be
-		re-directed to syslog output (syslog_putc). This is useful, for
+		re-directed to syslog output (syslog_write). This is useful, for
 		example, if the only console is a Telnet console.  Then in that case,
 		console output from non-Telnet threads will go to the syslog output.
 

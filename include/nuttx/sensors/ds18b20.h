@@ -83,6 +83,7 @@ extern "C"
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
+ *
  ****************************************************************************/
 
 int ds18b20_register(int devno, FAR struct onewire_master_s *dev,

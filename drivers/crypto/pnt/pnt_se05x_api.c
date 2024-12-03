@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/crypto/pnt/pnt_se05x_api.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -75,7 +77,7 @@ static bool set_enable_pin(FAR struct se05x_dev_s *se05x, bool state)
 {
   if (se05x->config->set_enable_pin == NULL)
     {
-      return FALSE;
+      return TRUE;
     }
 
   return se05x->config->set_enable_pin(state);
@@ -91,46 +93,48 @@ static bool set_enable_pin(FAR struct se05x_dev_s *se05x, bool state)
 
 int pnt_se05x_open(FAR struct se05x_dev_s *se05x)
 {
+  int ret;
   se05x->pnt = kmm_malloc(sizeof(struct pnt_handle));
-  int ret = se05x->pnt != NULL ? 0 : -EIO;
 
-  if (ret == 0)
+  if (se05x->pnt == NULL)
     {
-      memset(&(se05x->pnt->session), 0, sizeof(Se05xSession_t));
-
-      se05x->pnt->session.pScp03_enc_key = (FAR uint8_t *)scp03_enc_key;
-      se05x->pnt->session.pScp03_mac_key = (FAR uint8_t *)scp03_mac_key;
-      se05x->pnt->session.pScp03_dek_key = (FAR uint8_t *)scp03_dek_key;
-      se05x->pnt->session.scp03_enc_key_len = SCP03_KEY_SIZE;
-      se05x->pnt->session.scp03_mac_key_len = SCP03_KEY_SIZE;
-      se05x->pnt->session.scp03_dek_key_len = SCP03_KEY_SIZE;
-      ret = set_enable_pin(se05x, true) ? 0 : -EIO;
+      ret = -EIO;
+      goto errout;
     }
 
-  if (ret == 0)
+  memset(&(se05x->pnt->session), 0, sizeof(Se05xSession_t));
+
+  se05x->pnt->session.pScp03_enc_key = (FAR uint8_t *)scp03_enc_key;
+  se05x->pnt->session.pScp03_mac_key = (FAR uint8_t *)scp03_mac_key;
+  se05x->pnt->session.pScp03_dek_key = (FAR uint8_t *)scp03_dek_key;
+  se05x->pnt->session.scp03_enc_key_len = SCP03_KEY_SIZE;
+  se05x->pnt->session.scp03_mac_key_len = SCP03_KEY_SIZE;
+  se05x->pnt->session.scp03_dek_key_len = SCP03_KEY_SIZE;
+  if (!set_enable_pin(se05x, true))
     {
-      se05x->pnt->session.skip_applet_select = 0;
-      se05x->pnt->session.session_resume = 0;
-      smStatus_t status =
-          Se05x_API_SessionOpen(&(se05x->pnt->session), se05x);
-      ret = status == SM_OK ? 0 : -EIO;
+      ret = -EIO;
+      goto errout_with_alloc;
     }
 
-  /* if error */
-
-  if (ret < 0)
+  se05x->pnt->session.skip_applet_select = 0;
+  se05x->pnt->session.session_resume = 0;
+  if (Se05x_API_SessionOpen(&(se05x->pnt->session), se05x) != SM_OK)
     {
-      if (se05x->pnt->session.conn_context != NULL)
-        {
-          kmm_free(se05x->pnt->session.conn_context);
-        }
-
-      if (se05x->pnt != NULL)
-        {
-          kmm_free(se05x->pnt);
-        }
+      ret = -EIO;
+      goto errout_with_alloc;
     }
 
+  return OK;
+
+errout_with_alloc:
+  if (se05x->pnt->session.conn_context != NULL)
+    {
+      kmm_free(se05x->pnt->session.conn_context);
+    }
+
+  kmm_free(se05x->pnt);
+
+errout:
   return ret;
 }
 

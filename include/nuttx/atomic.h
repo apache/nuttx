@@ -76,7 +76,8 @@ extern "C++"
 }
 #  elif __has_include(<stdatomic.h>) && \
         ((defined(__cplusplus) && __cplusplus >= 201103L) || \
-         (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L))
+         (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)) && \
+         !defined(__STDC_NO_ATOMICS__)
 #    if !(__clang__) && defined(__cplusplus)
 #      define _Atomic
 #    endif

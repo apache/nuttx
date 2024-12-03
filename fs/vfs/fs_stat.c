@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_stat.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -379,12 +381,12 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
        * and write methods.
        */
 
-      if (inode->u.i_ops->read)
+      if (inode->u.i_ops->readv || inode->u.i_ops->read)
         {
           buf->st_mode = S_IROTH | S_IRGRP | S_IRUSR;
         }
 
-      if (inode->u.i_ops->write)
+      if (inode->u.i_ops->writev || inode->u.i_ops->write)
         {
           buf->st_mode |= S_IWOTH | S_IWGRP | S_IWUSR;
         }

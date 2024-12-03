@@ -45,8 +45,8 @@ if(TOOLCHAIN_CLANG_CONFIG)
   execute_process(COMMAND clang --version
                   OUTPUT_VARIABLE clang_full_version_string)
 
-  string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+).*" "\\1" CLANGVER
-                       ${clang_full_version_string})
+  string(REGEX REPLACE ".*clang version ([0-9]+\\.[0-9]+\.[0-9]+).*" "\\1"
+                       CLANGVER ${clang_full_version_string})
 
   if(CLANGVER STREQUAL "14.0")
     set(TOOLCHAIN_CLANG_CONFIG ${TOOLCHAIN_CLANG_CONFIG}_nosys)
@@ -117,11 +117,11 @@ if(CONFIG_STACK_USAGE_WARNING AND NOT "${CONFIG_STACK_USAGE_WARNING}" STREQUAL
   add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
 endif()
 
-if(CONFIG_SCHED_GCOV)
-  add_compile_options(-fprofile-generate -ftest-coverage)
+if(CONFIG_COVERAGE_ALL)
+  add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
 endif()
 
-if(CONFIG_SCHED_GPROF_ALL)
+if(CONFIG_PROFILE_ALL)
   add_compile_options(-pg)
 endif()
 
@@ -237,11 +237,41 @@ set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
 
 set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
 
-function(nuttx_find_toolchain_lib)
-  execute_process(
-    COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
-            --print-file-name
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    OUTPUT_VARIABLE extra_lib_path)
-  nuttx_add_extra_library(${extra_lib_path})
-endfunction()
+if(CONFIG_BUILTIN_TOOLCHAIN)
+  if(ARGN)
+    function(nuttx_find_toolchain_lib)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-file-name=${ARGN}
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE extra_lib_path)
+      nuttx_add_extra_library(${extra_lib_path})
+    endfunction()
+  else()
+    function(nuttx_find_toolchain_lib)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-libgcc-file-name
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE libgcc_path)
+      get_filename_component(libgcc_name ${libgcc_path} NAME)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-file-name=${libgcc_name}
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE libgcc)
+      nuttx_add_extra_library(${libgcc})
+    endfunction()
+  endif()
+else()
+  function(nuttx_find_toolchain_lib)
+    if(ARGN)
+      execute_process(
+        COMMAND ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} ${NUTTX_EXTRA_FLAGS}
+                --print-file-name=${ARGN}
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE extra_lib_path)
+    endif()
+    nuttx_add_extra_library(${extra_lib_path})
+  endfunction()
+endif()

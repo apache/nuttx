@@ -92,7 +92,7 @@
 \f:
 	.endm
 
-def_fn memset p2align=6
+def_fn ARCH_LIBCFUN(memset) p2align=6
 
 	dup	v0.16B, valw
 	add	dstend, dstin, count
@@ -243,6 +243,6 @@ L(zva_other):
 	sub	dst, dst, 32		/* Bias dst for tail loop.  */
 	b	L(tail64)
 
-	.size	memset, . - memset
+	.size	ARCH_LIBCFUN(memset), . - ARCH_LIBCFUN(memset)
 
 #endif

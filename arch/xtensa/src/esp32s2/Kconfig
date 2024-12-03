@@ -353,12 +353,14 @@ config ESP32S2_SPI2
 	default n
 	select ESP32S2_SPI
 	select SPI
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S2_SPI3
 	bool "SPI 3"
 	default n
 	select ESP32S2_SPI
 	select SPI
+	select ESPRESSIF_SPI_PERIPH
 
 config ESP32S2_SPIRAM
 	bool "SPI RAM Support"
@@ -471,12 +473,14 @@ config ESP32S2_I2C0
 	default n
 	select ESP32S2_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESP32S2_I2C1
 	bool "I2C 1"
 	default n
 	select ESP32S2_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESP32S2_TWAI
 	bool "TWAI (CAN)"
@@ -791,10 +795,12 @@ endif # ESP32S2_I2C1
 config ESP32S2_I2CTIMEOSEC
 	int "Timeout seconds"
 	default 0
+	depends on ESPRESSIF_I2C_PERIPH
 
 config ESP32S2_I2CTIMEOMS
 	int "Timeout milliseconds"
 	default 500
+	depends on ESPRESSIF_I2C_PERIPH
 
 endmenu # I2C Configuration
 

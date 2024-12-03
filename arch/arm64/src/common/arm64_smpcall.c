@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_smpcall.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -67,17 +69,7 @@
 
 int arm64_smp_sched_handler(int irq, void *context, void *arg)
 {
-  struct tcb_s *tcb;
-  int cpu = this_cpu();
-
-  tcb = current_task(cpu);
-  nxsched_suspend_scheduler(tcb);
-  nxsched_process_delivered(cpu);
-  tcb = current_task(cpu);
-  nxsched_resume_scheduler(tcb);
-
-  UNUSED(tcb);
-
+  nxsched_process_delivered(this_cpu());
   return OK;
 }
 

@@ -54,25 +54,17 @@
 
 void up_exit(int status)
 {
-  struct tcb_s *tcb = this_task();
-
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
 
-  /* Now, perform the context switch to the new ready-to-run task at the
-   * head of the list.
-   */
-
-  tcb = this_task();
-
   /* Scheduler parameters will update inside syscall */
 
-  g_running_tasks[this_cpu()] = NULL;
+  g_running_tasks[this_cpu()] = this_task();
 
   /* Then switch contexts */
 
-  arm_fullcontextrestore(tcb->xcp.regs);
+  arm_fullcontextrestore();
 
   /* arm_fullcontextrestore() should not return but could if the software
    * interrupts are disabled.

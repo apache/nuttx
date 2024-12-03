@@ -132,11 +132,15 @@ int modlib_uninit(FAR struct module_s *modp)
           modp->sectalloc = NULL;
           modp->nsect = 0;
 #else
+          if (modp->xipbase == 0)
+            {
 #  if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-          up_textheap_free((FAR void *)modp->textalloc);
+              up_textheap_free((FAR void *)modp->textalloc);
 #  else
-          lib_free((FAR void *)modp->textalloc);
+              lib_free((FAR void *)modp->textalloc);
 #  endif
+            }
+
 #  if defined(CONFIG_ARCH_USE_DATA_HEAP)
           up_dataheap_free((FAR void *)modp->dataalloc);
 #  else

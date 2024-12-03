@@ -35,6 +35,7 @@
 #include <arch/efm32/chip.h>
 
 #include "arm_internal.h"
+#include "itm_syslog.h"
 #include "efm32_config.h"
 #include "efm32_lowputc.h"
 #include "efm32_clockconfig.h"
@@ -84,7 +85,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 
 #ifdef CONFIG_DEBUG_FEATURES
 #  if defined(CONFIG_ARMV7M_ITMSYSLOG)
-#    define showprogress(c) syslog_putc(c)
+#    define showprogress(c) do { char _c = c; syslog_write(&_c, 1); } while (0)
 #  elif defined(HAVE_UART_CONSOLE) || defined(HAVE_LEUART_CONSOLE)
 #    define showprogress(c) efm32_lowputc(c)
 #  else

@@ -36,6 +36,8 @@
 #  include "stm32f10xxf30xx_flash.c"
 #elif defined(CONFIG_STM32_STM32F20XX) || defined (CONFIG_STM32_STM32F4XXX)
 #  include "stm32f20xxf40xx_flash.c"
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  include "stm32g4xxx_flash.c"
 #else
 #  warning "No FLASH support for the selected part"
 #endif

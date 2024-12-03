@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/hpm6000/hardware/hpm6300/hpm6300_sysctl.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -173,7 +175,7 @@
 #define HPM_SYSCTL_POWER_CPU0_STATUS                (HPM_SYSCTL_BASE + 0x1000)
 #define HPM_SYSCTL_POWER_CPU0_LF_WAIT               (HPM_SYSCTL_BASE + 0x1004)
 #define HPM_SYSCTL_POWER_CPU0_OFF_WAIT              (HPM_SYSCTL_BASE + 0x100c)
-#define HPM_SYSCTL_RESET_SOC_CONTROL                (HPM_SYSCTL_BASE + 0x1400)   
+#define HPM_SYSCTL_RESET_SOC_CONTROL                (HPM_SYSCTL_BASE + 0x1400)
 #define HPM_SYSCTL_RESET_SOC_CONFIG                 (HPM_SYSCTL_BASE + 0x1404)
 #define HPM_SYSCTL_RESET_SOC_COUNTER                (HPM_SYSCTL_BASE + 0x140c)
 #define HPM_SYSCTL_RESET_CPU0_CONTROL               (HPM_SYSCTL_BASE + 0x1410)
@@ -406,7 +408,7 @@
 #define SYSCTL_MONITOR_CONTROL_ACCURACY           (1 << 9)
 #define SYSCTL_MONITOR_CONTROL_REFERENCE          (1 << 8)
 #define SYSCTL_MONITOR_CONTROL_SELECTION_SHIFT    (0)
-#define SYSCTL_MONITOR_CONTROL_SELECTION_MASK     (0xffU << SYSCTL_MONITOR_CONTROL_SELECTION_SHIFT)          
+#define SYSCTL_MONITOR_CONTROL_SELECTION_MASK     (0xffU << SYSCTL_MONITOR_CONTROL_SELECTION_SHIFT)
 #define SYSCTL_MONITOR_CONTROL_SELECTION(n)       ((n) << SYSCTL_MONITOR_CONTROL_SELECTION_SHIFT)
 
 #define SYSCTL_CPU_LP_WAKE_CNT_SHIFT              (24)

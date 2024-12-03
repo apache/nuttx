@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/fs_heap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -21,6 +23,8 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <assert.h>
 
 #include "fs_heap.h"
 
@@ -68,6 +72,11 @@ FAR void *fs_heap_realloc(FAR void *oldmem, size_t size)
   return mm_realloc(g_fs_heap, oldmem, size);
 }
 
+FAR void *fs_heap_memalign(size_t alignment, size_t size)
+{
+  return mm_memalign(g_fs_heap, alignment, size);
+}
+
 void fs_heap_free(FAR void *mem)
 {
   mm_free(g_fs_heap, mem);
@@ -80,6 +89,19 @@ FAR char *fs_heap_strdup(FAR const char *s)
   if (copy != NULL)
     {
       memcpy(copy, s, len);
+    }
+
+  return copy;
+}
+
+FAR char *fs_heap_strndup(FAR const char *s, size_t size)
+{
+  size_t len = strnlen(s, size) + 1;
+  FAR char *copy = fs_heap_malloc(len);
+  if (copy != NULL)
+    {
+      memcpy(copy, s, len);
+      copy[len - 1] = '\0';
     }
 
   return copy;

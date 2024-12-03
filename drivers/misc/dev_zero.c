@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/misc/dev_zero.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -38,10 +40,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devzero_read(FAR struct file *filep, FAR char *buffer,
-                            size_t buflen);
-static ssize_t devzero_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t buflen);
+static ssize_t devzero_readv(FAR struct file *filep,
+                             FAR const struct uio *uio);
+static ssize_t devzero_writev(FAR struct file *filep,
+                              FAR const struct uio *uio);
 static int     devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
 
@@ -51,15 +53,17 @@ static int     devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_devzero_fops =
 {
-  NULL,          /* open */
-  NULL,          /* close */
-  devzero_read,  /* read */
-  devzero_write, /* write */
-  NULL,          /* seek */
-  NULL,          /* ioctl */
-  NULL,          /* mmap */
-  NULL,          /* truncate */
-  devzero_poll   /* poll */
+  NULL,           /* open */
+  NULL,           /* close */
+  NULL,           /* read */
+  NULL,           /* write */
+  NULL,           /* seek */
+  NULL,           /* ioctl */
+  NULL,           /* mmap */
+  NULL,           /* truncate */
+  devzero_poll,   /* poll */
+  devzero_readv,  /* readv */
+  devzero_writev  /* writev */
 };
 
 /****************************************************************************
@@ -70,26 +74,39 @@ static const struct file_operations g_devzero_fops =
  * Name: devzero_read
  ****************************************************************************/
 
-static ssize_t devzero_read(FAR struct file *filep, FAR char *buffer,
-                            size_t len)
+static ssize_t devzero_readv(FAR struct file *filep,
+                             FAR const struct uio *uio)
 {
+  ssize_t total =  uio_total_len(uio);
+  FAR const struct iovec *iov = uio->uio_iov;
+  int iovcnt = uio->uio_iovcnt;
+  int i;
+
   UNUSED(filep);
 
-  memset(buffer, 0, len);
-  return len;
+  if (total < 0)
+    {
+      return total;
+    }
+
+  for (i = 0; i < iovcnt; i++)
+    {
+      memset(iov[i].iov_base, 0, iov[i].iov_len);
+    }
+
+  return total;
 }
 
 /****************************************************************************
  * Name: devzero_write
  ****************************************************************************/
 
-static ssize_t devzero_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t len)
+static ssize_t devzero_writev(FAR struct file *filep,
+                              FAR const struct uio *uio)
 {
   UNUSED(filep);
-  UNUSED(buffer);
 
-  return len;
+  return uio_total_len(uio);
 }
 
 /****************************************************************************

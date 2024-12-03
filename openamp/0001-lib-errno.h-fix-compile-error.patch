@@ -5,7 +5,6 @@ Subject: [PATCH 1/5] lib/errno.h: fix compile error
 
 lib/errno.h: delete defined(__arm__) for use GCC compile
 
-Change-Id: I00f93740810c1cb8875fc2e27bac478aecaf28d5
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---
  lib/errno.h | 2 +-

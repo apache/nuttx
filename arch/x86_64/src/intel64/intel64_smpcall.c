@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_smpcall.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -94,11 +96,8 @@ int x86_64_smp_sched_handler(int irq, void *c, void *arg)
   struct tcb_s *tcb;
   int cpu = this_cpu();
 
-  tcb = current_task(cpu);
-  nxsched_suspend_scheduler(tcb);
   nxsched_process_delivered(cpu);
   tcb = current_task(cpu);
-  nxsched_resume_scheduler(tcb);
   x86_64_restorestate(tcb->xcp.regs);
 
   return OK;

@@ -118,4 +118,4 @@ endif
 DEPPATH += --dep-path libm
 VPATH += :libm
 
-context:
+context::

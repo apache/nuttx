@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/include/syscall.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -55,7 +57,7 @@
 #  define CONFIG_SYS_RESERVED 4
 #endif
 
-/* RV64GC system calls ******************************************************/
+/* RISC-V system calls ******************************************************/
 
 /* SYS call 1 and 2 are defined for internal use by the RISC-V port (see
  * arch/risc-v/include/syscall.h). In addition, SYS call 3 is the
@@ -65,14 +67,14 @@
 
 /* SYS call 1:
  *
- * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
+ * void riscv_fullcontextrestore() noreturn_function;
  */
 
 #define SYS_restore_context       (1)
 
 /* SYS call 2:
  *
- * void riscv_switchcontext(uintptr_t **saveregs, uintptr_t *restoreregs);
+ * void riscv_switchcontext();
  */
 
 #define SYS_switch_context        (2)

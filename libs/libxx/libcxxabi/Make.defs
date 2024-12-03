@@ -1,0 +1,88 @@
+############################################################################
+# libs/libxx/libcxxabi/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+###########################################################################
+
+LIBCXXABI_VERSION=$(patsubst "%",%,$(CONFIG_LIBCXXABI_VERSION))
+
+# Download and unpack tarball if no git repo found
+ifeq ($(wildcard libcxxabi/libcxxabi/.git),)
+libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
+	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(LIBCXXABI_VERSION),$@)
+
+libcxxabi/libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
+	$(Q) tar -xf $<
+	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src $@
+	$(Q) patch -p0 < libcxxabi/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch -d libcxxabi
+	$(Q) patch -p0 < libcxxabi/0002-libcxxabi-fix-compilation-errors.patch -d libcxxabi
+endif
+
+$(TOPDIR)/include/libcxxabi: libcxxabi/libcxxabi
+	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/libcxxabi
+	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxxabi/__config_site
+
+context:: $(TOPDIR)/include/libcxxabi
+
+distclean::
+	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxxabi
+ifeq ($(wildcard libcxxabi/libcxxabi/.git),)
+	$(Q) $(DELFILE) libcxxabi-$(LIBCXX_VERSION).src.tar.xz
+	$(call DELDIR, libcxxabi/libcxxabi)
+endif
+
+ifeq ($(CONFIG_LIBCXXABI), y)
+CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
+CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/libcxxabi/include
+
+# Disable dynamic type checking when enabling libcxxabi
+# It results in a recursive call:
+# cxxabiv1::__dynamic_case -> is_equal -> __ubsan::checkDynamic -> cxxabiv1::__dynamic_case
+
+ifneq ($(CONFIG_SIM_UBSAN)${CONFIG_MM_UBSAN},)
+CXXFLAGS += -fno-sanitize=vptr
+endif
+endif
+
+# C++ABI files
+CPPSRCS += cxa_aux_runtime.cpp cxa_default_handlers.cpp cxa_demangle.cpp cxa_exception_storage.cpp
+CPPSRCS += cxa_guard.cpp cxa_handlers.cpp cxa_thread_atexit.cpp cxa_vector.cpp cxa_virtual.cpp
+# C++ STL files
+CPPSRCS += stdlib_exception.cpp stdlib_new_delete.cpp stdlib_stdexcept.cpp stdlib_typeinfo.cpp
+# Internal files
+CPPSRCS += abort_message.cpp fallback_malloc.cpp private_typeinfo.cpp
+
+ifeq ($(CONFIG_CXX_EXCEPTION),y)
+CPPSRCS += cxa_exception.cpp cxa_personality.cpp
+endif
+
+# Fix compilation error on ARM32:
+# libcxxabi/src/cxa_personality.cpp:594:22: error: '_URC_FATAL_PHASE1_ERROR' was not declared in this scope
+#   594 |     results.reason = _URC_FATAL_PHASE1_ERROR;
+ifeq ($(CONFIG_ARCH_ARM),y)
+CXXFLAGS += -D_URC_FATAL_PHASE2_ERROR=_URC_FAILURE -D_URC_FATAL_PHASE1_ERROR=_URC_FAILURE
+endif
+
+CXXFLAGS += -DLIBCXXABI_NON_DEMANGLING_TERMINATE
+
+# RTTI is required for building the libcxxabi library
+CXXFLAGS += -frtti
+
+DEPPATH += --dep-path libcxxabi/libcxxabi/src
+VPATH += libcxxabi/libcxxabi/src

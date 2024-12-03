@@ -5,7 +5,6 @@ Subject: [PATCH 06/14] rpmsg: wait ept ready in rpmsg_send
 
 since the destination address need time to return from peer
 
-Change-Id: I1a518c15cd375205b07861c7d39670de555eaaed
 Signed-off-by: ligd <liguiding@pinecone.net>
 Signed-off-by: wangyongrong <wangyongrong@xiaomi.com>
 ---

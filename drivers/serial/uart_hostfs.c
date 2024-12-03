@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/serial/uart_hostfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -293,10 +295,9 @@ void uart_hostfs_init(void)
   uart_register("/dev/console", &g_uart_hostfs_dev);
 }
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
   FAR struct uart_dev_s *dev = &g_uart_hostfs_dev;
 
   uart_hostfs_send(dev, ch);
-  return ch;
 }

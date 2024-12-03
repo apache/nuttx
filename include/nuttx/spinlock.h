@@ -41,6 +41,8 @@
 #  include <nuttx/atomic.h>
 #endif
 
+#include <nuttx/spinlock_type.h>
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
@@ -49,50 +51,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-#if defined(CONFIG_RW_SPINLOCK)
-typedef int rwlock_t;
-#  define RW_SP_UNLOCKED      0
-#  define RW_SP_READ_LOCKED   1
-#  define RW_SP_WRITE_LOCKED -1
-#endif
-
-#ifndef CONFIG_SPINLOCK
-#  define SP_UNLOCKED 0  /* The Un-locked state */
-#  define SP_LOCKED   1  /* The Locked state */
-
-typedef uint8_t spinlock_t;
-#elif defined(CONFIG_TICKET_SPINLOCK)
-
-union spinlock_u
-{
-  struct
-  {
-    unsigned short owner;
-    unsigned short next;
-  } tickets;
-  unsigned int value;
-};
-typedef union spinlock_u spinlock_t;
-
-#  define SP_UNLOCKED (union spinlock_u){{0, 0}}
-#  define SP_LOCKED (union spinlock_u){{0, 1}}
-
-#else
-
-/* The architecture specific spinlock.h header file must also provide the
- * following:
- *
- *   SP_LOCKED   - A definition of the locked state value (usually 1)
- *   SP_UNLOCKED - A definition of the unlocked state value (usually 0)
- *   spinlock_t  - The type of a spinlock memory object.
- *
- * SP_LOCKED and SP_UNLOCKED must be constants of type spinlock_t.
- */
-
-#include <arch/spinlock.h>
-
-#endif /* CONFIG_SPINLOCK */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -494,26 +452,6 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
 #else
 #  define spin_is_locked(l) (*(l) == SP_LOCKED)
 #endif
-
-/****************************************************************************
- * Name: spin_initialize
- *
- * Description:
- *   Initialize a non-reentrant spinlock object to its initial,
- *   unlocked state.
- *
- * Input Parameters:
- *   lock  - A reference to the spinlock object to be initialized.
- *   state - Initial state of the spinlock {SP_LOCKED or SP_UNLOCKED)
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-/* void spin_initialize(FAR spinlock_t *lock, spinlock_t state); */
-
-#define spin_initialize(l,s) do { SP_DMB(); *(l) = (s); } while (0)
 
 /****************************************************************************
  * Name: spin_lock_irqsave_wo_note
@@ -1015,25 +953,19 @@ static inline_function void write_unlock(FAR volatile rwlock_t *lock)
  *
  * Description:
  *   If SMP is enabled:
- *     If the argument lock is not specified (i.e. NULL), disable local
- *     interrupts and take the global read write spinlock (g_irq_rw_spin)
- *     and increase g_irq_rw_spin.
- *
- *     If the argument lock is specified,
+ *     The argument lock should be specified,
  *     disable local interrupts and take the lock spinlock and return
  *     the interrupt state.
  *
  *     NOTE: This API is very simple to protect data (e.g. H/W register
- *     or internal data structure) in SMP mode. But do not use this API
+ *     or internal data structure) in SMP mode. Do not use this API
  *     with kernel APIs which suspend a caller thread. (e.g. nxsem_wait)
  *
  *   If SMP is not enabled:
  *     This function is equivalent to up_irq_save().
  *
  * Input Parameters:
- *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used
- *          and can be nested. Otherwise, nested call for the same lock
- *          would cause a deadlock
+ *   lock - Caller specific spinlock, not NULL.
  *
  * Returned Value:
  *   An opaque, architecture-specific value that represents the state of
@@ -1052,11 +984,7 @@ irqstate_t read_lock_irqsave(FAR rwlock_t *lock);
  *
  * Description:
  *   If SMP is enabled:
- *     If the argument lock is not specified (i.e. NULL),
- *     decrement the call counter (g_irq_rw_spin) and restore the interrupt
- *     state as it was prior to the previous call to read_lock_irqsave(NULL).
- *
- *     If the argument lock is specified, release the lock and
+ *     The argument lock should be specified, release the lock and
  *     restore the interrupt state as it was prior to the previous call to
  *     read_lock_irqsave(lock).
  *
@@ -1064,7 +992,7 @@ irqstate_t read_lock_irqsave(FAR rwlock_t *lock);
  *     This function is equivalent to up_irq_restore().
  *
  * Input Parameters:
- *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used.
+ *   lock - Caller specific spinlock, not NULL.
  *
  *   flags - The architecture-specific value that represents the state of
  *           the interrupts prior to the call to read_lock_irqsave(lock);
@@ -1085,13 +1013,7 @@ void read_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
  *
  * Description:
  *   If SMP is enabled:
- *     If the argument lock is not specified (i.e. NULL),
- *     disable local interrupts and take the global spinlock (g_irq_rw_spin)
- *     if the call counter (g_irq_write_spin_count[cpu]) equals to 0. Then
- *     the counter on the CPU is incremented to allow nested calls and return
- *     the interrupt state.
- *
- *     If the argument lock is specified,
+ *     The argument lock should be specified,
  *     disable local interrupts and take the lock spinlock and return
  *     the interrupt state.
  *
@@ -1103,9 +1025,7 @@ void read_unlock_irqrestore(FAR rwlock_t *lock, irqstate_t flags);
  *     This function is equivalent to up_irq_save().
  *
  * Input Parameters:
- *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used
- *          and can be nested. Otherwise, nested call for the same lock
- *          would cause a deadlock
+ *   lock - Caller specific spinlock, not NULL.
  *
  * Returned Value:
  *   An opaque, architecture-specific value that represents the state of
@@ -1124,13 +1044,7 @@ irqstate_t write_lock_irqsave(FAR rwlock_t *lock);
  *
  * Description:
  *   If SMP is enabled:
- *     If the argument lock is not specified (i.e. NULL),
- *     decrement the call counter (g_irq_rw_spin_count[cpu]) and if it
- *     decrements to zero then release the spinlock (g_irq_rw_spin) and
- *     restore the interrupt state as it was prior to the previous call to
- *     write_lock_irqsave(NULL).
- *
- *     If the argument lock is specified, release the lock and
+ *     The argument lock should be specified, release the lock and
  *     restore the interrupt state as it was prior to the previous call to
  *     write_lock_irqsave(lock).
  *
@@ -1138,7 +1052,7 @@ irqstate_t write_lock_irqsave(FAR rwlock_t *lock);
  *     This function is equivalent to up_irq_restore().
  *
  * Input Parameters:
- *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used.
+ *   lock - Caller specific spinlock, not NULL.
  *
  *   flags - The architecture-specific value that represents the state of
  *           the interrupts prior to the call to write_lock_irqsave(lock);

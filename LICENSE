@@ -3355,8 +3355,8 @@ boards/arm/stm32/omnibusf4/src/stm32_romfs.h
 boards/arm/stm32/omnibusf4/src/stm32_romfs_initialize.c
 boards/arm/stm32/stm32f4discovery/src/stm32_romfs.h
 boards/arm/stm32/stm32f4discovery/src/stm32_romfs_initialize.c
-boards/arm/stm32f7/nucleo-144/src/stm32_romfs.h
-boards/arm/stm32f7/nucleo-144/src/stm32_romfs_initialize.c
+boards/arm/stm32f7/common/include/stm32_romfs.h
+boards/arm/stm32f7/common/src/stm32_romfs_initialize.c
 =============================================================
   Copyright (C) 2017 Tomasz Wozniak. All rights reserved.
 
@@ -3420,7 +3420,9 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-boards/arm/stm32f7/nucleo-144/src/stm32_dma_alloc.c
+boards/arm/stm32f7/nucleo-f722ze/src/stm32_dma_alloc.c
+boards/arm/stm32f7/nucleo-f746zg/src/stm32_dma_alloc.c
+boards/arm/stm32f7/nucleo-f767zi/src/stm32_dma_alloc.c
 boards/arm/stm32f7/stm32f746-ws/src/stm32_dma_alloc.c
 boards/arm/stm32l4/nucleo-l496zg/src/stm32_dma_alloc.c
 boards/arm/tms570/tms570ls31x-usb-kit/include/nsh_romfsimg.h
@@ -5897,6 +5899,7 @@ libs/libm/libm/scalbnf.c
 libs/libm/libm/scalbn.c
 libs/libm/libm/scalbnl.c
 libs/libc/stdlib/lib_strtof.c
+libs/libc/time/lib_strptime.c
 ======================
 
    Copyright © 2005-2020 Rich Felker, et al.
@@ -6332,6 +6335,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 
+libs/libc/string/lib_memmem.c
 libs/libc/string/lib_strstr.c
 ===============================
 The MIT License (MIT)
@@ -6397,29 +6401,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
-libs/libc/time/lib_strptime.c
-=======================================
-
-  Copyright (c) 1997, 1998 The NetBSD Foundation, Inc. All rights reserved.
-
-  This code was contributed to The NetBSD Foundation by Klaus Klein.
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-  3. All advertising materials mentioning features or use of this software
-     must display the following acknowledgement:
-         This product includes software developed by the NetBSD
-         Foundation, Inc. and its contributors.
-  4. Neither the name of The NetBSD Foundation nor the names of its
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
 
 libs/libc/unistd/lib_gethostname.c
 libs/libc/unistd/lib_sethostname.c
@@ -8685,3 +8666,34 @@ drivers/i3c/internals.h
  Author: Boris Brezillon <boris.brezillon@bootlin.com>
 
  SPDX-License-Identifier: Apache-2.0
+
+libs/libc/string/lib_bsdmemccpy.c
+libs/libc/string/lib_bsdmemchr.c
+libs/libc/string/lib_bsdmemcmp.c
+libs/libc/string/lib_bsdmemcpy.c
+libs/libc/string/lib_bsdmemrchr.c
+libs/libc/string/lib_bsdstpcpy.c
+libs/libc/string/lib_bsdstpncpy.c
+libs/libc/string/lib_bsdstrcat.c
+libs/libc/string/lib_bsdstrchr.c
+libs/libc/string/lib_bsdstrchrnul.c
+libs/libc/string/lib_bsdstrcmp.c
+libs/libc/string/lib_bsdstrcpy.c
+libs/libc/string/lib_bsdstrlen.c
+libs/libc/string/lib_bsdstrncmp.c
+libs/libc/string/lib_bsdstrncpy.c
+libs/libc/string/lib_bsdstrrchr.c
+======================
+
+Copyright (c) 1994-2009  Red Hat, Inc. All rights reserved.
+
+This copyrighted material is made available to anyone wishing to use,
+modify, copy, or redistribute it subject to the terms and conditions
+of the BSD License.   This program is distributed in the hope that
+it will be useful, but WITHOUT ANY WARRANTY expressed or implied,
+including the implied warranties of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  A copy of this license is available at
+http://www.opensource.org/licenses. Any Red Hat trademarks that are
+incorporated in the source code or documentation are not subject to
+the BSD License and may only be used or replicated with the express
+permission of Red Hat, Inc.

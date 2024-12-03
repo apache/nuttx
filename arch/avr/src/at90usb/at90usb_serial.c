@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/avr/src/at90usb/at90usb_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -561,26 +563,15 @@ void avr_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
   uint8_t imr;
 
   usart1_disableusartint(&imr);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      avr_lowputc('\r');
-    }
-
   avr_lowputc(ch);
   usart1_restoreusartint(imr);
 #endif
-  return ch;
 }
 
 #else /* USE_SERIALDRIVER */
@@ -593,21 +584,11 @@ int up_putc(int ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      avr_lowputc('\r');
-    }
-
   avr_lowputc(ch);
 #endif
-  return ch;
 }
 
 #endif /* USE_SERIALDRIVER */

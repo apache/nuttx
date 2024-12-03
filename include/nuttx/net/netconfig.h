@@ -2,7 +2,8 @@
  * include/nuttx/net/netconfig.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2007, 2011, 2014-2015, 2017-2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2007, 2011, 2014-2015, 2017-2019 Gregory Nutt.
+ * All rights reserved.
  * SPDX-FileCopyrightText: 2001-2003, Adam Dunkels. All rights reserved.
  * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  * SPDX-FileContributor: Adam Dunkels <adam@dunkels.com>
@@ -63,13 +64,43 @@
  *                NET_SOCK_PROTOCOL);
  */
 
+/* The TCP/UDP stack, which is used for determining HAVE_PFINET(6)_SOCKETS */
+
+#undef NET_TCP_HAVE_STACK
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+#  define NET_TCP_HAVE_STACK 1
+#endif
+
+#undef NET_UDP_HAVE_STACK
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+#  define NET_UDP_HAVE_STACK 1
+#endif
+
 /* The address family that we used to create the socket really does not
  * matter.  It should, however, be valid in the current configuration.
  */
 
-#if defined(CONFIG_NET_IPv4)
+#undef HAVE_INET_SOCKETS
+#undef HAVE_PFINET_SOCKETS
+#undef HAVE_PFINET6_SOCKETS
+
+#if defined(CONFIG_NET_IPv4) || defined(CONFIG_NET_IPv6)
+#  define HAVE_INET_SOCKETS
+
+#  if (defined(CONFIG_NET_IPv4) && (defined(NET_UDP_HAVE_STACK) || \
+       defined(NET_TCP_HAVE_STACK))) || defined(CONFIG_NET_ICMP_SOCKET)
+#    define HAVE_PFINET_SOCKETS
+#  endif
+
+#  if (defined(CONFIG_NET_IPv6) && (defined(NET_UDP_HAVE_STACK) || \
+       defined(NET_TCP_HAVE_STACK))) || defined(CONFIG_NET_ICMPv6_SOCKET)
+#    define HAVE_PFINET6_SOCKETS
+#  endif
+#endif
+
+#if defined(HAVE_PFINET_SOCKETS)
 #  define NET_SOCK_FAMILY  AF_INET
-#elif defined(CONFIG_NET_IPv6)
+#elif defined(HAVE_PFINET6_SOCKETS)
 #  define NET_SOCK_FAMILY  AF_INET6
 #elif defined(CONFIG_NET_LOCAL)
 #  define NET_SOCK_FAMILY  AF_LOCAL

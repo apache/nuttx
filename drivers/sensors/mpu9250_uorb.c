@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/mpu9250_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -980,7 +982,7 @@ static inline int mpu9250_write_fifo_en(FAR struct mpu9250_dev_s *dev,
 }
 
 /****************************************************************************
- * mpu9250_write_gyro_range() :
+ * Name: mpu9250_write_gyro_range()
  *
  * Sets the @fs_sel bit in GYRO_CONFIG to the value provided. Per the
  * datasheet, the meaning of @fs_sel is as follows:
@@ -995,6 +997,7 @@ static inline int mpu9250_write_fifo_en(FAR struct mpu9250_dev_s *dev,
  *         1 -> ±  500 deg/sec
  *         2 -> ± 1000 deg/sec
  *         3 -> ± 2000 deg/sec
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_gyro_range(FAR struct mpu9250_dev_s *dev,
@@ -1005,7 +1008,7 @@ static inline int mpu9250_write_gyro_range(FAR struct mpu9250_dev_s *dev,
 }
 
 /****************************************************************************
- * mpu9250_write_accel_range() :
+ * Name: mpu9250_write_accel_range()
  *
  * Sets the @afs_sel bit in ACCEL_CONFIG to the value provided. Per
  * the datasheet, the meaning of @afs_sel is as follows:
@@ -1020,6 +1023,7 @@ static inline int mpu9250_write_gyro_range(FAR struct mpu9250_dev_s *dev,
  *         1 -> ±  4 g
  *         2 -> ±  8 g
  *         3 -> ± 16 g
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_accel_range(FAR struct mpu9250_dev_s *dev,
@@ -1034,6 +1038,7 @@ static inline int mpu9250_write_accel_range(FAR struct mpu9250_dev_s *dev,
  *
  *    EXT_SYNC_SET  : frame sync bit position
  *    DLPF_CFG      : digital low-pass filter bandwidth
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_config(FAR struct mpu9250_dev_s *dev,
@@ -1049,6 +1054,7 @@ static inline int mpu9250_write_config(FAR struct mpu9250_dev_s *dev,
  *
  *    accel_fchoice_b  : he inverted version of accel_fchoice
  *    A_DLPF_CFG      : Accelerometer low pass filter setting
+ *
  ****************************************************************************/
 
 static inline int mpu9250_write_config2(FAR struct mpu9250_dev_s *dev,
@@ -1069,6 +1075,7 @@ static inline int mpu9250_write_config2(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int mpu9250_initialize(FAR struct mpu9250_dev_s *dev)
@@ -1281,6 +1288,7 @@ errout:
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
@@ -1436,6 +1444,7 @@ static int ak8963_initialize(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int get_mag_adjustment(FAR struct mpu9250_dev_s *dev)
@@ -1514,6 +1523,7 @@ static int get_mag_adjustment(FAR struct mpu9250_dev_s *dev)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int read_ak8963_reg(FAR struct mpu9250_dev_s *dev,
@@ -1606,6 +1616,7 @@ static int read_ak8963_reg(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static int write_ak8963_reg(FAR struct mpu9250_dev_s *dev,
@@ -1698,6 +1709,7 @@ static int write_ak8963_reg(FAR struct mpu9250_dev_s *dev,
  *
  * Return:
  *   do nothing if Big endian, swap H and L byte if little endian
+ *
  ****************************************************************************/
 
 static uint16_t swap16(uint16_t val)
@@ -1720,6 +1732,7 @@ static uint16_t swap16(uint16_t val)
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static void mpu9250_accel_data(FAR struct mpu9250_sensor_s *priv,
@@ -1758,6 +1771,7 @@ static void mpu9250_accel_data(FAR struct mpu9250_sensor_s *priv,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static void mpu9250_gyro_data(FAR struct mpu9250_sensor_s *priv,
@@ -1796,6 +1810,7 @@ static void mpu9250_gyro_data(FAR struct mpu9250_sensor_s *priv,
  *
  * Return:
  *   OK - on success
+ *
  ****************************************************************************/
 
 static void mpu9250_mag_data(FAR struct mpu9250_sensor_s *priv,
@@ -1847,6 +1862,7 @@ static void mpu9250_mag_data(FAR struct mpu9250_sensor_s *priv,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 static int mpu9250_thread(int argc, FAR char **argv)

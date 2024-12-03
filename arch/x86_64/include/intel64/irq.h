@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/include/intel64/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -359,6 +361,10 @@
 
 #define IRQ_MSI_START      IRQ32
 
+/* Use IRQ17 for TLB shootdown */
+
+#define SMP_IPI_TLBSHOOTDOWN_IRQ  IRQ17
+
 /* Common register save structure created by up_saveusercontext() and by
  * ISR/IRQ interrupt processing.
  */
@@ -499,10 +505,27 @@ enum ioapic_trigger_mode
   TRIGGER_LEVEL_ACTIVE_LOW = (1 << 15) | (1 << 13),
 };
 
+/* This structure represents the return state from a system call */
+
+#ifdef CONFIG_LIB_SYSCALL
+struct xcpt_syscall_s
+{
+  uintptr_t sysreturn;   /* The return address */
+};
+#endif
+
 /* This struct defines the way the registers are stored */
 
 struct xcptcontext
 {
+#ifdef CONFIG_BUILD_KERNEL
+  /* This is the saved address to use when returning from a user-space
+   * signal handler.
+   */
+
+  uintptr_t sigreturn;
+#endif
+
   /* These are saved copies of instruction pointer and EFLAGS used during
    * signal processing.
    */
@@ -511,9 +534,35 @@ struct xcptcontext
   uint64_t saved_rflags;
   uint64_t saved_rsp;
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* For kernel stack enabled we can't use tcb->xcp.regs[REG_RSP] as it may
+   * point to kernel stack if signaled task is waiting now in
+   * up_switch_context()
+   */
+
+  uint64_t saved_ursp;
+#endif
+
   /* Register save area - allocated from stack in up_initial_state() */
 
   uint64_t *regs;
+
+#ifdef CONFIG_ARCH_ADDRENV
+#  ifdef CONFIG_ARCH_KERNEL_STACK
+  /* In this configuration, all syscalls execute from an internal kernel
+   * stack.  Why?  Because when we instantiate and initialize the address
+   * environment of the new user process, we will temporarily lose the
+   * address environment of the old user process, including its stack
+   * contents.  The kernel C logic will crash immediately with no valid
+   * stack in place.
+   */
+
+  uintptr_t *ustkptr;  /* Saved user stack pointer */
+  uintptr_t *kstack;   /* Allocate base of the (aligned) kernel stack */
+  uintptr_t *ktopstk;  /* Top of kernel stack */
+  uintptr_t *kstkptr;  /* Saved kernel stack pointer */
+#  endif
+#endif
 };
 #endif
 
@@ -571,7 +620,7 @@ static inline void set_pcid(uint64_t pcid)
 
 static inline void set_cr3(uint64_t cr3)
 {
-  __asm__ volatile("mov %0, %%cr3" : "=rm"(cr3) : : "memory");
+  __asm__ volatile("mov %0, %%cr3" :: "r"(cr3));
 }
 
 static inline uint64_t get_cr3(void)

@@ -160,5 +160,8 @@ retry:
   leave_critical_section(regs[REG_CPSR]);
   rtcb->irqcount--;
 #endif
-  arm_fullcontextrestore(regs);
+
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  arm_fullcontextrestore();
+  UNUSED(regs);
 }

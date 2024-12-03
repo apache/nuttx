@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/tmpfs/fs_tmpfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -187,6 +190,8 @@ const struct mountpt_operations g_tmpfs_operations =
   tmpfs_mmap,       /* mmap */
   tmpfs_truncate,   /* truncate */
   NULL,             /* poll */
+  NULL,             /* readv */
+  NULL,             /* writev */
 
   tmpfs_sync,       /* sync */
   tmpfs_dup,        /* dup */
@@ -521,7 +526,7 @@ static int tmpfs_add_dirent(FAR struct tmpfs_directory_s *tdo,
         }
     }
 
-  newname = strndup(name, namelen);
+  newname = fs_heap_strndup(name, namelen);
   if (newname == NULL)
     {
       return -ENOMEM;

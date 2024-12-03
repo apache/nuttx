@@ -1,0 +1,63 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config ARMV8R_STRING_FUNCTION
+	bool "Enable optimized ARMV8R specific string function"
+	default n
+	depends on ARCH_TOOLCHAIN_GNU
+	select ARMV8R_MEMCHR
+	select ARMV8R_MEMCPY
+	select ARMV8R_MEMMOVE
+	select ARMV8R_MEMSET
+	select ARMV8R_STRCMP
+	select ARMV8R_STRLEN
+
+config ARMV8R_MEMCHR
+	bool "Enable optimized memchr() for ARMv8-R"
+	default n
+	select LIBC_ARCH_MEMCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-R specific memchr() library function
+
+config ARMV8R_MEMCPY
+	bool "Enable optimized memcpy() for ARMv8-R"
+	select LIBC_ARCH_MEMCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-R specific memcpy() library function
+
+config ARMV8R_MEMMOVE
+	bool "Enable optimized memmove() for ARMv8-R"
+	default n
+	select LIBC_ARCH_MEMMOVE
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-R specific memmove() library function
+
+config ARMV8R_MEMSET
+	bool "Enable optimized memset() for ARMv8-R"
+	default n
+	select LIBC_ARCH_MEMSET
+	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARM_NEON
+	---help---
+		Enable optimized ARMv8-R specific memset() library function
+
+config ARMV8R_STRCMP
+	bool "Enable optimized strcmp() for ARMv8-R"
+	default n
+	select LIBC_ARCH_STRCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-R specific strcmp() library function
+
+config ARMV8R_STRLEN
+	bool "Enable optimized strlen() for ARMv8-R"
+	default n
+	select LIBC_ARCH_STRLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv8-R specific strlen() library function

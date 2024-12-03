@@ -1633,8 +1633,10 @@ static int sam_interrupt(int irq, void *context, void *arg)
 
 static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
+#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
+#endif
   int                ret   = OK;
 
   switch (cmd)
@@ -1813,62 +1815,6 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
       }
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
-
-    case TIOCSLINID:
-      {
-        /* Switch USART to LIN mode -> Set identifier register -> This will
-         * issue a LIN header -> Restore USART mode
-         */
-
-        struct sam_dev_s *priv = (struct sam_dev_s *)dev->priv;
-        uint32_t regvalsave = 0;
-        uint32_t regval = 0;
-
-        /* Save actual configuration */
-
-        regvalsave = sam_serialin(priv, SAM_UART_MR_OFFSET);
-
-        /* Issue a LIN header (Master mode only) */
-
-        regval  = regvalsave & ~UART_MR_MODE_MASK;
-        regval |= UART_MR_MODE_LINMSTR;
-        sam_serialout(priv, SAM_UART_MR_OFFSET, regval);
-
-        /* Reset transaction status bits */
-
-        sam_serialout(priv, SAM_UART_CR_OFFSET, UART_CR_RSTSTA);
-
-        /* Write LIN ID to trigger header transmission */
-
-        regval = UART_LINIR_MASK & (uint8_t)arg;
-        sam_serialout(priv, SAM_UART_LINIR_OFFSET, regval);
-
-        /* Wait until the header is on the wire */
-
-        do
-          {
-            /* Header takes 34 bits to transmit so poll with 34 / 4 = 8 bits
-             * cycle time
-             *
-             * TODO: Interrupt + semaphore can be used instead of busy
-             * waiting to improve CPU utilization
-             */
-
-            nxsig_usleep((8 * 1000 * 1000) / priv->baud);
-
-            regval = sam_serialin(priv, SAM_UART_SR_OFFSET);
-          }
-        while ((regval & UART_INT_LINID) == 0);
-
-        /* Reset transaction status bits */
-
-        sam_serialout(priv, SAM_UART_CR_OFFSET, UART_CR_RSTSTA);
-
-        /* Restore USART mode */
-
-        sam_serialout(priv, SAM_UART_MR_OFFSET, regvalsave);
-      }
-      break;
 
     default:
       ret = -ENOTTY;

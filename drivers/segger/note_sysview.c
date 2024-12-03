@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/segger/note_sysview.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -110,7 +112,7 @@ static const struct note_driver_ops_s g_note_sysview_ops =
 #  endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-  NULL,                       /* premption */
+  NULL,                       /* preemption */
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
   NULL,                       /* csection */

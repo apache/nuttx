@@ -72,7 +72,7 @@ add_custom_target(
 
 # utility target to refresh .config from board's defconfig for GITHUB
 add_custom_target(
-  savedefconfig
+  refreshsilent
   COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/SAVEconfig
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/.config
           ${CMAKE_BINARY_DIR}/SAVEconfig
@@ -80,6 +80,17 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E copy ${NUTTX_DEFCONFIG}
           ${CMAKE_BINARY_DIR}/.config
   COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} olddefconfig
+  COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} savedefconfig --out
+          ${CMAKE_BINARY_DIR}/defconfig.tmp
+  COMMAND ${CMAKE_COMMAND} -P ${NUTTX_DIR}/cmake/savedefconfig.cmake
+          ${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/defconfig.tmp
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/defconfig
+          ${NUTTX_DEFCONFIG}
+  WORKING_DIRECTORY ${NUTTX_DIR})
+
+# utility target to replace defconfig to board's defconfig
+add_custom_target(
+  savedefconfig
   COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} savedefconfig --out
           ${CMAKE_BINARY_DIR}/defconfig.tmp
   COMMAND ${CMAKE_COMMAND} -P ${NUTTX_DIR}/cmake/savedefconfig.cmake

@@ -42,8 +42,8 @@ struct obstack_stream
  * Private Functions
  ****************************************************************************/
 
-static int obstack_puts(FAR struct lib_outstream_s *self,
-    FAR const void *buf, int len)
+static ssize_t obstack_puts(FAR struct lib_outstream_s *self,
+                            FAR const void *buf, size_t len)
 {
   FAR struct obstack_stream *stream = (FAR struct obstack_stream *)self;
 

@@ -59,26 +59,22 @@ static int rawinstream_getc(FAR struct lib_instream_s *self)
       self->nget++;
       return ch;
     }
-
-  /* Return EOF on any failure to read from the incoming byte stream. The
-   * only expected error is EINTR meaning that the read was interrupted
-   * by a signal.  A Zero return value would indicate an end-of-file
-   * condition.
-   */
-
-  return EOF;
+  else
+    {
+      return _NX_GETERRVAL(nread);
+    }
 }
 
 /****************************************************************************
  * Name: rawinstream_getc
  ****************************************************************************/
 
-static int rawinstream_gets(FAR struct lib_instream_s *self,
-                            FAR void *buffer, int len)
+static ssize_t rawinstream_gets(FAR struct lib_instream_s *self,
+                                FAR void *buffer, size_t len)
 {
   FAR struct lib_rawinstream_s *stream =
                                        (FAR struct lib_rawinstream_s *)self;
-  int nread;
+  ssize_t nread;
 
   DEBUGASSERT(self && stream->fd >= 0);
 

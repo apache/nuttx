@@ -88,7 +88,10 @@
 
 #define SYSLOGIOC_SETFILTER _SYSLOGIOC(0x0002)
 
-#define SYSLOG_CHANNEL_NAME_LEN 32
+#define SYSLOG_CHANNEL_NAME_LEN       32
+
+#define SYSLOG_CHANNEL_DISABLE        0x01
+#define SYSLOG_CHANNEL_DISABLE_CRLF   0x02
 
 /****************************************************************************
  * Public Types
@@ -144,10 +147,14 @@ struct syslog_channel_s
   /* Syslog channel name */
 
   char sc_name[SYSLOG_CHANNEL_NAME_LEN];
+#endif
+  /* Syslog channel state:
+   * bit0: the channel is disabled
+   * bit1: the channel disable CRLF conversion
+   */
 
-  /* Syslog channel enable status, true is disable */
-
-  bool sc_disable;
+#if defined(CONFIG_SYSLOG_IOCTL) || defined(CONFIG_SYSLOG_CRLF)
+  uint8_t sc_state;
 #endif
 };
 
@@ -302,23 +309,6 @@ FAR syslog_channel_t *syslog_file_channel(FAR const char *devpath);
 FAR syslog_channel_t *
 syslog_stream_channel(FAR struct lib_outstream_s *stream);
 #endif
-
-/****************************************************************************
- * Name: syslog_putc
- *
- * Description:
- *   This is the low-level, single character, system logging interface.
- *
- * Input Parameters:
- *   ch - The character to add to the SYSLOG (must be positive).
- *
- * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int syslog_putc(int ch);
 
 /****************************************************************************
  * Name: syslog_write

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_backtrace.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -143,8 +145,8 @@ int up_backtrace(struct tcb_s *tcb,
             {
               ret += backtrace(rtcb->stack_base_ptr,
                                rtcb->stack_base_ptr + rtcb->adj_stack_size,
-                               (void *)up_current_regs()[REG_X29],
-                               (void *)up_current_regs()[REG_ELR],
+                               running_regs()[REG_X29],
+                               running_regs()[REG_ELR],
                                &buffer[ret], size - ret, &skip);
             }
         }
@@ -160,8 +162,8 @@ int up_backtrace(struct tcb_s *tcb,
     {
       ret = backtrace(tcb->stack_base_ptr,
                       tcb->stack_base_ptr + tcb->adj_stack_size,
-                      (void *)up_current_regs()[REG_X29],
-                      (void *)up_current_regs()[REG_ELR],
+                      running_regs()[REG_X29],
+                      running_regs()[REG_ELR],
                       buffer, size, &skip);
     }
 

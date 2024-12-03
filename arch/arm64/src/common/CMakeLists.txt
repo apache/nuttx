@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/arm64/src/common/CMakeLists.txt
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,7 +29,7 @@ list(APPEND SRCS arm64_fork_func.S)
 
 # Common C source files ( OS call up_xxx)
 list(APPEND SRCS arm64_initialize.c arm64_initialstate.c arm64_boot.c)
-list(APPEND SRCS arm64_nputs.c arm64_copystate.c arm64_createstack.c)
+list(APPEND SRCS arm64_nputs.c arm64_createstack.c)
 list(APPEND SRCS arm64_releasestack.c arm64_stackframe.c arm64_usestack.c)
 list(APPEND SRCS arm64_exit.c arm64_fork.c)
 list(APPEND SRCS arm64_schedulesigaction.c arm64_sigdeliver.c)
@@ -61,6 +63,10 @@ if(CONFIG_ARCH_HAVE_MMU)
   list(APPEND SRCS arm64_mmu.c)
 endif()
 
+if(CONFIG_ARM64_MTE)
+  list(APPEND SRCS arm64_mte.c)
+endif()
+
 if(CONFIG_ARCH_HAVE_MPU)
   list(APPEND SRCS arm64_mpu.c)
 endif()
@@ -89,9 +95,6 @@ if(CONFIG_ARCH_ADDRENV)
   list(APPEND SRCS arm64_addrenv_pgmap.c)
   if(CONFIG_ARCH_STACK_DYNAMIC)
     list(APPEND SRCS arm64_addrenv_ustack.c)
-  endif()
-  if(CONFIG_ARCH_VMA_MAPPING)
-    list(APPEND SRCS arm64_addrenv_shm.c)
   endif()
 endif()
 

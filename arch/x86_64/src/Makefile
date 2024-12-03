@@ -1,6 +1,8 @@
 ############################################################################
 # arch/x86_64/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -18,7 +20,7 @@
 #
 ############################################################################
 
-include $(TOPDIR)/tools/apps-or-nuttx-Make.defs
+include $(TOPDIR)/tools/Make.defs
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_INTEL64),y)
@@ -93,7 +95,7 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
 endif
 
-ifeq ($(CONFIG_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}
 endif
 
@@ -129,6 +131,10 @@ board/libboard$(LIBEXT):
 
 ifeq ($(CONFIG_ALLSYMS),y)
 EXTRA_LIBS += allsyms$(OBJEXT)
+endif
+
+ifeq ($(CONFIG_MM_KASAN_GLOBAL),y)
+EXTRA_LIBS += kasan_globals$(OBJEXT)
 endif
 
 define LINK_ALLSYMS_KASAN

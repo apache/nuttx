@@ -29,6 +29,8 @@
 #include <sched.h>
 #include <debug.h>
 
+#include <nuttx/sched_note.h>
+
 #include "sched/sched.h"
 
 #ifdef CONFIG_SMP
@@ -76,17 +78,11 @@ int nxtask_exit(void)
   FAR struct tcb_s *rtcb;
   int ret;
 #ifdef CONFIG_SMP
-  int cpu;
-
-  /* Get the current CPU.  By assumption, we are within a critical section
-   * and, hence, the CPU index will remain stable.
-   *
-   * Avoid using this_task() because it may assume a state that is not
+  /* Avoid using this_task() because it may assume a state that is not
    * appropriate for an exiting task.
    */
 
-  cpu  = this_cpu();
-  dtcb = current_task(cpu);
+  dtcb = current_task(this_cpu());
 #else
   dtcb = this_task();
 #endif
@@ -111,7 +107,7 @@ int nxtask_exit(void)
   /* Get the new task at the head of the ready to run list */
 
 #ifdef CONFIG_SMP
-  rtcb = current_task(cpu);
+  rtcb = current_task(this_cpu());
 #else
   rtcb = this_task();
 #endif
@@ -147,6 +143,7 @@ int nxtask_exit(void)
 #endif
 
   dtcb->task_state = TSTATE_TASK_INACTIVE;
+  sched_note_stop(dtcb);
   ret = nxsched_release_tcb(dtcb, dtcb->flags & TCB_FLAG_TTYPE_MASK);
 
 #ifdef CONFIG_SMP

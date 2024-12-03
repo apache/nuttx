@@ -93,64 +93,11 @@
 /* Maximum time with pre-emption disabled or within critical section. */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-clock_t g_premp_max[CONFIG_SMP_NCPUS];
+clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
 clock_t g_crit_max[CONFIG_SMP_NCPUS];
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nxsched_critmon_cpuload
- *
- * Description:
- *   Update the running time of all running threads when switching threads
- *
- * Input Parameters:
- *   tcb   - The task that we are performing the load operations on.
- *   current - The current time
- *   tick - The ticks that we process in this cpuload.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-static void nxsched_critmon_cpuload(FAR struct tcb_s *tcb, clock_t current,
-                                    clock_t tick)
-{
-  int i;
-  UNUSED(i);
-
-  /* Update the cpuload of the thread ready to be suspended */
-
-  nxsched_process_taskload_ticks(tcb, tick);
-
-  /* Update the cpuload of threads running on other CPUs */
-
-#  ifdef CONFIG_SMP
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      FAR struct tcb_s *rtcb = current_task(i);
-
-      if (tcb->cpu == rtcb->cpu)
-        {
-          continue;
-        }
-
-      nxsched_process_taskload_ticks(rtcb, tick);
-
-      /* Update start time, avoid repeated statistics when the next call */
-
-      rtcb->run_start = current;
-    }
-#  endif
-}
 #endif
 
 /****************************************************************************
@@ -235,28 +182,28 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
     {
       /* Disabling.. Save the thread start time */
 
-      tcb->premp_start  = current;
-      tcb->premp_caller = caller;
+      tcb->preemp_start  = current;
+      tcb->preemp_caller = caller;
     }
   else
     {
       /* Re-enabling.. Check for the max elapsed time */
 
-      clock_t elapsed = current - tcb->premp_start;
+      clock_t elapsed = current - tcb->preemp_start;
       int cpu         = this_cpu();
 
-      if (elapsed > tcb->premp_max)
+      if (elapsed > tcb->preemp_max)
         {
-          tcb->premp_max        = elapsed;
-          tcb->premp_max_caller = tcb->premp_caller;
+          tcb->preemp_max        = elapsed;
+          tcb->preemp_max_caller = tcb->preemp_caller;
           CHECK_PREEMPTION(tcb->pid, elapsed);
         }
 
       /* Check for the global max elapsed time */
 
-      if (elapsed > g_premp_max[cpu])
+      if (elapsed > g_preemp_max[cpu])
         {
-          g_premp_max[cpu] = elapsed;
+          g_preemp_max[cpu] = elapsed;
         }
     }
 }
@@ -340,11 +287,11 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
   /* Did this task disable pre-emption? */
 
-  if (tcb->lockcount > 0)
+  if (nxsched_islocked_tcb(tcb))
     {
       /* Yes.. Save the start time */
 
-      tcb->premp_start = current;
+      tcb->preemp_start = current;
     }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION */
 
@@ -398,15 +345,15 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
   /* Did this task disable preemption? */
 
-  if (tcb->lockcount > 0)
+  if (nxsched_islocked_tcb(tcb))
     {
       /* Possibly re-enabling.. Check for the max elapsed time */
 
-      elapsed = current - tcb->premp_start;
-      if (elapsed > tcb->premp_max)
+      elapsed = current - tcb->preemp_start;
+      if (elapsed > tcb->preemp_max)
         {
-          tcb->premp_max        = elapsed;
-          tcb->premp_max_caller = tcb->premp_caller;
+          tcb->preemp_max        = elapsed;
+          tcb->preemp_max_caller = tcb->preemp_caller;
           CHECK_PREEMPTION(tcb->pid, elapsed);
         }
 
@@ -414,9 +361,9 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
        * re-open in nxsched_resume_critmon.
        */
 
-      if (elapsed > g_premp_max[cpu])
+      if (elapsed > g_preemp_max[cpu])
         {
-          g_premp_max[cpu] = elapsed;
+          g_preemp_max[cpu] = elapsed;
         }
     }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION */

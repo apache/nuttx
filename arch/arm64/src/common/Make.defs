@@ -1,6 +1,8 @@
 ############################################################################
 # arch/arm64/src/common/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -39,7 +41,7 @@ CMN_ASRCS += arm64_fork_func.S
 
 # Common C source files ( OS call up_xxx)
 CMN_CSRCS =  arm64_initialize.c arm64_initialstate.c arm64_boot.c
-CMN_CSRCS += arm64_nputs.c arm64_copystate.c arm64_createstack.c
+CMN_CSRCS += arm64_nputs.c arm64_createstack.c
 CMN_CSRCS += arm64_releasestack.c arm64_stackframe.c arm64_usestack.c
 CMN_CSRCS += arm64_exit.c arm64_fork.c
 CMN_CSRCS += arm64_schedulesigaction.c arm64_sigdeliver.c
@@ -74,6 +76,10 @@ ifeq ($(CONFIG_ARCH_HAVE_MMU),y)
 CMN_CSRCS += arm64_mmu.c
 endif
 
+ifeq ($(CONFIG_ARM64_MTE),y)
+CMN_CSRCS += arm64_mte.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_MPU),y)
 CMN_CSRCS += arm64_mpu.c
 common/arm64_mpu.c_CFLAGS += -fno-sanitize=kernel-address
@@ -101,9 +107,6 @@ CMN_CSRCS += arm64_addrenv.c arm64_pgalloc.c arm64_addrenv_perms.c
 CMN_CSRCS += arm64_addrenv_utils.c arm64_addrenv_shm.c arm64_addrenv_pgmap.c
 ifeq ($(CONFIG_ARCH_STACK_DYNAMIC),y)
 CMN_CSRCS += arm64_addrenv_ustack.c
-endif
-ifeq ($(CONFIG_ARCH_VMA_MAPPING),y)
-CMN_CSRCS += arm64_addrenv_shm.c
 endif
 endif
 

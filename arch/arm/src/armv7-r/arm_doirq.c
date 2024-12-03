@@ -50,7 +50,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 #else
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(up_current_regs() == NULL);
+  DEBUGASSERT(!up_interrupt_context());
 
   /* if irq == GIC_SMP_CPUSTART
    * We are initiating the multi-core jumping state to up_idle,
@@ -64,11 +64,9 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
       tcb->xcp.regs = regs;
     }
 
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * current_regs is also used to manage interrupt level context switches.
-   */
+  /* Set irq flag */
 
-  up_set_current_regs(regs);
+  up_set_interrupt_context(true);
 
   /* Deliver the IRQ */
 
@@ -91,12 +89,9 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
       regs = tcb->xcp.regs;
     }
 
-  /* Set current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Set irq flag */
 
-  up_set_current_regs(NULL);
-
+  up_set_interrupt_context(false);
   board_autoled_off(LED_INIRQ);
 #endif
   return regs;

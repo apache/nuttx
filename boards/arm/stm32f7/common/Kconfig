@@ -3,3 +3,178 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config STM32F7_ROMFS
+	bool "Automount baked-in ROMFS image"
+	default n
+	depends on FS_ROMFS
+	---help---
+		Select STM32F7_ROMFS_IMAGEFILE, STM32F7_ROMFS_DEV_MINOR, STM32F7_ROMFS_MOUNTPOINT
+
+config STM32F7_ROMFS_DEV_MINOR
+	int "Minor for the block device backing the data"
+	depends on STM32F7_ROMFS
+	default 64
+
+config STM32F7_ROMFS_MOUNTPOINT
+	string "Mountpoint of the custom romfs image"
+	depends on STM32F7_ROMFS
+	default "/rom"
+
+config STM32F7_ROMFS_IMAGEFILE
+	string "ROMFS image file to include into build"
+	depends on STM32F7_ROMFS
+	default "../../../rom.img"
+
+config STM32F7_SPI_TEST
+	bool "Enable SPI test"
+	default n
+	---help---
+		Enable Spi test - initialize and configure SPI to send
+		STM32F7_SPI_TEST_MESSAGE text. The text is sent on the
+		selected SPI Buses with the configured parameters.
+		Note the CS lines will not be asserted.
+
+if STM32F7_SPI_TEST
+
+config STM32F7_SPI_TEST_MESSAGE
+	string "Text to Send on SPI Bus(es)"
+	default "Hello World"
+	depends on STM32F7_SPI_TEST
+	---help---
+		Text to sent on SPI bus(es)
+
+config STM32F7_SPI1_TEST
+	bool "Test SPI bus 1"
+	default n
+	depends on STM32F7_SPI_TEST
+	---help---
+		Enable Spi test - on SPI BUS 1
+
+if STM32F7_SPI1_TEST
+
+config STM32F7_SPI1_TEST_FREQ
+	int "SPI 1 Clock Freq in Hz"
+	default 1000000
+	depends on STM32F7_SPI1_TEST
+	---help---
+		Sets SPI 1 Clock Freq
+
+config STM32F7_SPI1_TEST_BITS
+	int "SPI 1 number of bits"
+	default 8
+	depends on STM32F7_SPI1_TEST
+	---help---
+		Sets SPI 1 bit length
+
+choice
+	prompt "SPI BUS 1 Clock Mode"
+	default STM32F7_SPI1_TEST_MODE3
+	---help---
+		Sets SPI 1 clock mode
+
+config STM32F7_SPI1_TEST_MODE0
+	bool "CPOL=0 CPHA=0"
+
+config STM32F7_SPI1_TEST_MODE1
+	bool "CPOL=0 CPHA=1"
+
+config STM32F7_SPI1_TEST_MODE2
+	bool "CPOL=1 CPHA=0"
+
+config STM32F7_SPI1_TEST_MODE3
+	bool "CPOL=1 CPHA=1"
+
+endchoice # "SPI BUS 1 Clock Mode"
+
+endif # STM32F7_SPI1_TEST
+
+config STM32F7_SPI2_TEST
+	bool "Test SPI bus 2"
+	default n
+	depends on STM32F7_SPI_TEST
+	---help---
+		Enable Spi test - on SPI BUS 2
+
+if STM32F7_SPI2_TEST
+
+config STM32F7_SPI2_TEST_FREQ
+	int "SPI 2 Clock Freq in Hz"
+	default 12000000
+	depends on STM32F7_SPI2_TEST
+	---help---
+		Sets SPI 2 Clock Freq
+
+config STM32F7_SPI2_TEST_BITS
+	int "SPI 2 number of bits"
+	default 8
+	depends on STM32F7_SPI2_TEST
+	---help---
+		Sets SPI 2 bit length
+
+choice
+	prompt "SPI BUS 2 Clock Mode"
+	default STM32F7_SPI2_TEST_MODE3
+	---help---
+		Sets SPI 2 clock mode
+
+config STM32F7_SPI2_TEST_MODE0
+	bool "CPOL=0 CPHA=0"
+
+config STM32F7_SPI2_TEST_MODE1
+	bool "CPOL=0 CPHA=1"
+
+config STM32F7_SPI2_TEST_MODE2
+	bool "CPOL=1 CPHA=0"
+
+config STM32F7_SPI2_TEST_MODE3
+	bool "CPOL=1 CPHA=1"
+
+endchoice # "SPI BUS 2 Clock Mode"
+
+endif # STM32F7_SPI2_TEST
+
+config STM32F7_SPI3_TEST
+	bool "Test SPI bus 3"
+	default n
+	depends on STM32F7_SPI_TEST
+	---help---
+		Enable Spi test - on SPI BUS 3
+
+if STM32F7_SPI3_TEST
+
+config STM32F7_SPI3_TEST_FREQ
+	int "SPI 3 Clock Freq in Hz"
+	default 40000000
+	depends on STM32F7_SPI3_TEST
+	---help---
+		Sets SPI 3 Clock Freq
+
+config STM32F7_SPI3_TEST_BITS
+	int "SPI 3 number of bits"
+	default 8
+	depends on STM32F7_SPI3_TEST
+	---help---
+		Sets SPI 3 bit length
+
+choice
+	prompt "SPI BUS 3 Clock Mode"
+	default STM32F7_SPI3_TEST_MODE3
+	---help---
+		Sets SPI 3 clock mode
+
+config STM32F7_SPI3_TEST_MODE0
+	bool "CPOL=0 CPHA=0"
+
+config STM32F7_SPI3_TEST_MODE1
+	bool "CPOL=0 CPHA=1"
+
+config STM32F7_SPI3_TEST_MODE2
+	bool "CPOL=1 CPHA=0"
+
+config STM32F7_SPI3_TEST_MODE3
+	bool "CPOL=1 CPHA=1"
+
+endchoice # "SPI BUS 3 Clock Mode"
+
+endif # STM32F7_SPI3_TEST
+endif # STM32F7_SPI_TEST

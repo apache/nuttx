@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/fakesensor_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/param.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
@@ -390,6 +393,7 @@ static int fakesensor_thread(int argc, char** argv)
  *                    ...
  *   devno       - The user specifies which device of this type, from 0.
  *   batch_number- The maximum number of batch
+ *
  ****************************************************************************/
 
 int fakesensor_init(int type, FAR const char *file_name,
@@ -398,6 +402,14 @@ int fakesensor_init(int type, FAR const char *file_name,
   FAR struct fakesensor_s *sensor;
   FAR char *argv[2];
   char arg1[32];
+  uint32_t nbuffer[] = {
+    [SENSOR_GNSS_IDX_GNSS] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_SATELLITE] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_MEASUREMENT] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_CLOCK] = batch_number,
+    [SENSOR_GNSS_IDX_GNSS_GEOFENCE] = batch_number,
+  };
+
   int ret;
 
   /* Alloc memory for sensor */
@@ -433,7 +445,7 @@ int fakesensor_init(int type, FAR const char *file_name,
   if (type == SENSOR_TYPE_GNSS || type == SENSOR_TYPE_GNSS_SATELLITE)
     {
       sensor->gnss.ops = &g_fakegnss_ops;
-      gnss_register(&sensor->gnss, devno, batch_number);
+      gnss_register(&sensor->gnss, devno, nbuffer, nitems(nbuffer));
     }
   else
     {

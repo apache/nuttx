@@ -209,21 +209,11 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      arm_lowputc('\r');
-    }
-
   arm_lowputc(ch);
 #endif
-  return ch;
 }
 
 /****************************************************************************

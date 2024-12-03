@@ -257,7 +257,7 @@
 #define CCM_CG_CTRL_RSTDIV_SHIFT          (16)      /* Bits 16-23: Clock group global restart count (RSTDIV) */
 #define CCM_CG_CTRL_RSTDIV_MASK           (0xff << CCM_CG_CTRL_RSTDIV_SHIFT)
 #  define CCM_CG_CTRL_RSTDIV(n)           (((n)-1) << CCM_CG_CTRL_RSTDIV_SHIFT) /* Divide selected clock by n */
-#define CCM_CG_CTRL_OFF                   (1 << 24)  
+#define CCM_CG_CTRL_OFF                   (1 << 24)
                                                     /* Bit 24: Shutdown all clocks in clock group (OFF) */
                                                     /* Bits 25-31: Reserved */
 

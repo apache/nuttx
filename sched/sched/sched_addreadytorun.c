@@ -77,7 +77,8 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
    * also disabled.
    */
 
-  if (rtcb->lockcount > 0 && rtcb->sched_priority < btcb->sched_priority)
+  if (nxsched_islocked_tcb(rtcb) &&
+      rtcb->sched_priority < btcb->sched_priority)
     {
       /* Yes.  Preemption would occur!  Add the new ready-to-run task to the
        * g_pendingtasks task list for now.
@@ -96,7 +97,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
        * is now the new active task!
        */
 
-      DEBUGASSERT(rtcb->lockcount == 0 && !is_idle_task(btcb));
+      DEBUGASSERT(!nxsched_islocked_tcb(rtcb) && !is_idle_task(btcb));
 
       btcb->task_state = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;

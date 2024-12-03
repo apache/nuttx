@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx8/imx8_lowputs.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -16,15 +18,13 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ****************************************************************************
- *
- *    DESCRIPTION
- *       Wrapper for early printk
- *
- ***************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include "arm64_macro.inc"
 
 /****************************************************************************

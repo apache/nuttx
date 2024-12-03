@@ -1591,18 +1591,9 @@ static inline int tlsr82_uart_lowputc(int ch)
  ****************************************************************************/
 
 #ifndef CONFIG_TLSR82_SPI_SYSLOG
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      tlsr82_uart_lowputc('\r');
-    }
-
   tlsr82_uart_lowputc(ch);
-
-  return 0;
 }
 #endif
 

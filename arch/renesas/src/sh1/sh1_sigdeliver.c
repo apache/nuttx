@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/renesas/src/sh1/sh1_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@
 
 void renesas_sigdeliver(void)
 {
-  struct tcb_s  *rtcb = this_task();
+  struct tcb_s *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
 
   board_autoled_on(LED_SIGNAL);

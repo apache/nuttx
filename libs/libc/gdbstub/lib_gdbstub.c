@@ -33,6 +33,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 #include <nuttx/ascii.h>
 #include <nuttx/gdbstub.h>
@@ -53,7 +54,7 @@
 #define BUFSIZE CONFIG_LIB_GDBSTUB_PKTSIZE
 
 #ifdef CONFIG_BOARD_MEMORY_RANGE
-FAR const struct memory_region_s g_memory_region[] =
+static const struct memory_region_s g_memory_region[] =
   {
     CONFIG_BOARD_MEMORY_RANGE
   };
@@ -1038,7 +1039,7 @@ static void gdb_get_registers(FAR struct gdb_state_s *state)
     {
       if (up_interrupt_context())
         {
-          reg = (FAR uint8_t *)up_current_regs();
+          reg = (FAR uint8_t *)running_regs();
         }
       else
         {
@@ -1878,7 +1879,7 @@ int gdb_debugpoint_add(int type, FAR void *addr, size_t size,
   point.callback = callback;
   point.arg = arg;
   return nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
-                          gdb_smp_debugpoint_add, &point, true);
+                          gdb_smp_debugpoint_add, &point);
 #else
   return up_debugpoint_add(type, addr, size, callback, arg);
 #endif
@@ -1896,8 +1897,8 @@ int gdb_debugpoint_remove(int type, FAR void *addr, size_t size)
   point.addr = addr;
   point.size = size;
 
-  retrun nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
-                          gdb_smp_debugpoint_remove, &point, true);
+  return nxsched_smp_call((1 << CONFIG_SMP_NCPUS) - 1,
+                          gdb_smp_debugpoint_remove, &point);
 #else
   return up_debugpoint_remove(type, addr, size);
 #endif

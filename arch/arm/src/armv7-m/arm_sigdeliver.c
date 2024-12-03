@@ -174,5 +174,8 @@ retry:
 #endif
   rtcb->irqcount--;
 #endif
-  arm_fullcontextrestore(regs);
+
+  rtcb->xcp.regs = rtcb->xcp.saved_regs;
+  arm_fullcontextrestore();
+  UNUSED(regs);
 }

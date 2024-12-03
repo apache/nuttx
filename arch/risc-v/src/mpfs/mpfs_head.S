@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_head.S
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -29,6 +31,7 @@
 #include "chip.h"
 #include "mpfs_memorymap.h"
 #include "riscv_internal.h"
+#include "riscv_macros.S"
 
 /****************************************************************************
  * Public Symbols
@@ -47,6 +50,14 @@ __start:
 
   csrw CSR_MIE, zero
   csrw CSR_MIP, zero
+
+  /* Clear all IPIs (above doesn't clear them) */
+
+  csrr a0, CSR_MHARTID
+  slli t1, a0, 2
+  li   t0, MPFS_CLINT_BASE
+  add  t1, t1, t0
+  sw   zero, 0(t1)
 
   /* Initialize the Machine Trap Vector */
 
@@ -183,20 +194,16 @@ __start:
 
   /* Set stack pointer to the idle thread stack */
 
+#ifdef CONFIG_SMP
+  addi a1, a0, -1        /* Only cores 1...3 can participate in SMP */
+  riscv_set_inital_sp MPFS_IDLESTACK_BASE, SMP_STACK_SIZE, a1
+#else
   la   sp, MPFS_IDLESTACK_TOP
+#endif
 
   /* Jump to __mpfs_start with mhartid in a0 */
 
   tail __mpfs_start
-
-  /* We shouldn't return from __mpfs_start
-   * in case of return, loop forever. nop's added so can be seen in debugger
-   */
-
-1:
-  nop
-  nop
-  j 1b
 
   .global _init
   .global _fini

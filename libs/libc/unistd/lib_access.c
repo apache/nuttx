@@ -137,15 +137,25 @@ int access(FAR const char *path, int amode)
 
 int faccessat(int dirfd, FAR const char *path, int amode, int flags)
 {
-  char fullpath[PATH_MAX];
+  FAR char *fullpath;
   int ret;
 
-  ret = lib_getfullpath(dirfd, path, fullpath, sizeof(fullpath));
+  fullpath = lib_get_pathbuffer();
+  if (fullpath == NULL)
+    {
+      set_errno(ENOMEM);
+      return ERROR;
+    }
+
+  ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
+      lib_put_pathbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
-  return access(fullpath, amode);
+  ret = access(fullpath, amode);
+  lib_put_pathbuffer(fullpath);
+  return ret;
 }

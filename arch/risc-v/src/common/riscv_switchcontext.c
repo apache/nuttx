@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_switchcontext.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -80,7 +82,7 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
     {
       /* Then switch contexts */
 
-      riscv_switchcontext(rtcb, tcb);
+      riscv_switchcontext();
 
       /* riscv_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the

@@ -32,12 +32,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/lib/modlib.h>
+#include <nuttx/fs/ioctl.h>
 
 #include "libc.h"
 #include "modlib/modlib.h"
@@ -54,6 +57,13 @@
 
 #define _ALIGN_UP(v, a)  (((v) + ((a) - 1)) & ~((a) - 1))
 
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
+#  define buffer_data_address(p) \
+            (FAR uint8_t *)up_textheap_data_address((FAR void *)p)
+#else
+#  define buffer_data_address(p) ((FAR uint8_t *)p)
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -62,7 +72,7 @@
 static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
                                 FAR Elf_Shdr *shdr, uint8_t idx)
 {
-  if (loadinfo->ehdr.e_type != ET_REL)
+  if (loadinfo->ehdr.e_type == ET_DYN)
     {
       return -EINVAL;
     }
@@ -98,6 +108,14 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
           loadinfo->datastart = loadinfo->sectalloc[idx];
         }
     }
+  else if (loadinfo->xipbase != 0)
+    {
+      loadinfo->sectalloc[idx] = loadinfo->xipbase + shdr->sh_offset;
+      if (loadinfo->textalloc == 0)
+        {
+          loadinfo->textalloc = loadinfo->sectalloc[idx];
+        }
+    }
   else
     {
 #  ifdef CONFIG_ARCH_USE_TEXT_HEAP
@@ -107,8 +125,9 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
                                                      shdr->sh_addralign,
                                                      shdr->sh_size);
 #  else
-      loadinfo->sectalloc[idx] = (uintptr_t)lib_memalign(shdr->sh_addralign,
-                                                         shdr->sh_size);
+      loadinfo->sectalloc[idx] = (uintptr_t)
+                                  lib_memalign(shdr->sh_addralign,
+                                               shdr->sh_size);
 #  endif
 
       if (loadinfo->textalloc == 0)
@@ -117,7 +136,7 @@ static int modlib_section_alloc(FAR struct mod_loadinfo_s *loadinfo,
         }
     }
 
-  return 0;
+  return OK;
 }
 #endif
 
@@ -255,13 +274,46 @@ static int modlib_vma2lma(FAR struct mod_loadinfo_s *loadinfo,
           shdr->sh_offset <= phdr->p_offset + phdr->p_filesz)
         {
           *lma = phdr->p_paddr + shdr->sh_addr - phdr->p_vaddr;
-          return 0;
+          return OK;
         }
     }
 
   return -ENOENT;
 }
 #endif
+
+/****************************************************************************
+ * Name: modlib_set_emptysect_vma
+ *
+ * Description:
+ *   Set VMA for empty and unallocated sections, some relocations might
+ *   depend on this.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void modlib_set_emptysect_vma(FAR struct mod_loadinfo_s *loadinfo,
+                                    int section)
+{
+  FAR Elf_Shdr *shdr = &loadinfo->shdr[section];
+
+  /* Set the section as data or text, depending on SHF_WRITE */
+
+  if ((shdr->sh_flags & SHF_WRITE) != 0
+#ifdef CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ
+      || (shdr->sh_flags & SHF_EXECINSTR) == 0
+#endif
+      )
+    {
+      shdr->sh_addr = loadinfo->datastart;
+    }
+  else
+    {
+      shdr->sh_addr = loadinfo->textalloc;
+    }
+}
 
 /****************************************************************************
  * Name: modlib_loadfile
@@ -298,7 +350,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
             {
               if (phdr->p_flags & PF_X)
                 {
-                  ret = modlib_read(loadinfo, text, phdr->p_filesz,
+                  ret = modlib_read(loadinfo, buffer_data_address(text),
+                                    phdr->p_filesz,
                                     phdr->p_offset);
                 }
               else
@@ -328,18 +381,17 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
            * execution
            */
 
-          if (shdr->sh_size == 0)
+          if ((shdr->sh_flags & SHF_ALLOC) == 0 || shdr->sh_size == 0)
             {
-              continue;
-            }
+              /* Set the VMA regardless */
 
-          if ((shdr->sh_flags & SHF_ALLOC) == 0)
-            {
+              modlib_set_emptysect_vma(loadinfo, i);
               continue;
             }
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
-          if (loadinfo->ehdr.e_type == ET_REL)
+          if (loadinfo->ehdr.e_type == ET_REL ||
+              loadinfo->ehdr.e_type == ET_EXEC)
             {
               pptr = (FAR uint8_t **)&loadinfo->sectalloc[i];
             }
@@ -364,8 +416,20 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
                   pptr = &text;
                 }
 
-              *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr,
-                                               shdr->sh_addralign);
+              if (loadinfo->xipbase == 0)
+                {
+                  /* If xipbase is not set, align the address
+                   * xipbase is set, the address can't be aligned
+                   */
+
+                  *pptr = (FAR uint8_t *)_ALIGN_UP((uintptr_t)*pptr,
+                                                   shdr->sh_addralign);
+                }
+            }
+
+          if ((shdr->sh_flags & SHF_WRITE) == 0 && loadinfo->xipbase != 0)
+            {
+              goto skipload;
             }
 
           /* SHT_NOBITS indicates that there is no data in the file for the
@@ -385,8 +449,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
               /* Read the section data from sh_offset to the memory region */
 
-              ret = modlib_read(loadinfo, *pptr, shdr->sh_size,
-                                shdr->sh_offset);
+              ret = modlib_read(loadinfo, buffer_data_address(*pptr),
+                                shdr->sh_size, shdr->sh_offset);
               if (ret < 0)
                 {
                   berr("ERROR: Failed to read section %d: %d\n", i, ret);
@@ -405,11 +469,16 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
             }
 #endif
 
+skipload:
+
           /* Update sh_addr to point to copy in memory */
 
           binfo("%d. %08lx->%08lx\n", i,
                 (unsigned long)shdr->sh_addr, (unsigned long)*pptr);
 
+          /* Use offset to remember the original file address */
+
+          shdr->sh_offset = (uintptr_t)shdr->sh_addr;
           shdr->sh_addr = (uintptr_t)*pptr;
 
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
@@ -422,6 +491,34 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
           *pptr += ELF_ALIGNUP(shdr->sh_size);
 #endif
+        }
+    }
+
+  /* Update GOT table */
+
+  if (loadinfo->gotindex >= 0)
+    {
+      FAR Elf_Shdr *gotshdr = &loadinfo->shdr[loadinfo->gotindex];
+      FAR uintptr_t *got = (FAR uintptr_t *)gotshdr->sh_addr;
+      FAR uintptr_t *end = got + gotshdr->sh_size / sizeof(uintptr_t);
+
+      for (; got < end; got++)
+        {
+          for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
+            {
+              FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
+              if ((shdr->sh_flags & SHF_ALLOC) == 0)
+                {
+                  continue;
+                }
+
+              if (*got >= shdr->sh_offset &&
+                  *got < shdr->sh_offset + shdr->sh_size)
+                {
+                  *got += shdr->sh_addr - shdr->sh_offset;
+                }
+            }
         }
     }
 
@@ -461,6 +558,17 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
       goto errout_with_buffers;
     }
 
+  loadinfo->gotindex = modlib_findsection(loadinfo, ".got");
+  if (loadinfo->gotindex >= 0)
+    {
+      binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      if (ioctl(loadinfo->filfd, FIOC_XIPBASE,
+                (unsigned long)&loadinfo->xipbase) >= 0)
+        {
+          binfo("can use xipbase %zu\n", loadinfo->xipbase);
+        }
+    }
+
   /* Determine total size to allocate */
 
   modlib_elfsize(loadinfo, true);
@@ -474,21 +582,28 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
    * GOT. Therefore we cannot do two different allocations.
    */
 
-  if (loadinfo->ehdr.e_type == ET_REL)
+#ifndef CONFIG_MODLIB_LOADTO_LMA
+
+  if (loadinfo->ehdr.e_type == ET_REL || loadinfo->ehdr.e_type == ET_EXEC)
     {
-#ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
-      if (loadinfo->textsize > 0)
+#  ifndef CONFIG_ARCH_USE_SEPARATED_SECTION
+      if (loadinfo->xipbase != 0)
         {
-#  ifdef CONFIG_ARCH_USE_TEXT_HEAP
+          loadinfo->textalloc = loadinfo->xipbase +
+                                loadinfo->shdr[1].sh_offset;
+        }
+      else if (loadinfo->textsize > 0)
+        {
+#    ifdef CONFIG_ARCH_USE_TEXT_HEAP
           loadinfo->textalloc = (uintptr_t)
                                 up_textheap_memalign(loadinfo->textalign,
                                                      loadinfo->textsize +
                                                      loadinfo->segpad);
-#  else
+#    else
           loadinfo->textalloc = (uintptr_t)lib_memalign(loadinfo->textalign,
                                                         loadinfo->textsize +
                                                         loadinfo->segpad);
-#  endif
+#    endif
           if (!loadinfo->textalloc)
             {
               berr("ERROR: Failed to allocate memory for the module text\n");
@@ -499,14 +614,14 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
       if (loadinfo->datasize > 0)
         {
-#  ifdef CONFIG_ARCH_USE_DATA_HEAP
+#    ifdef CONFIG_ARCH_USE_DATA_HEAP
           loadinfo->datastart = (uintptr_t)
                                  up_dataheap_memalign(loadinfo->dataalign,
                                                       loadinfo->datasize);
-#  else
+#    else
           loadinfo->datastart = (uintptr_t)lib_memalign(loadinfo->dataalign,
                                                         loadinfo->datasize);
-#  endif
+#    endif
           if (!loadinfo->datastart)
             {
               berr("ERROR: Failed to allocate memory for the module data\n");
@@ -514,7 +629,7 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
               goto errout_with_buffers;
             }
         }
-#endif
+#  endif
     }
   else if (loadinfo->ehdr.e_type == ET_DYN)
     {
@@ -534,6 +649,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
                             loadinfo->textsize +
                             loadinfo->segpad;
     }
+
+#endif /* CONFIG_MODLIB_LOADTO_LMA */
 
   /* Load ELF section data into memory */
 
@@ -595,6 +712,17 @@ int modlib_load_with_addrenv(FAR struct mod_loadinfo_s *loadinfo)
     {
       berr("ERROR: modlib_loadhdrs failed: %d\n", ret);
       goto errout_with_buffers;
+    }
+
+  loadinfo->gotindex = modlib_findsection(loadinfo, ".got");
+  if (loadinfo->gotindex >= 0)
+    {
+      binfo("GOT section found! index %d\n", loadinfo->gotindex);
+      if (ioctl(loadinfo->filfd, FIOC_XIPBASE,
+                (unsigned long)&loadinfo->xipbase) >= 0)
+        {
+          binfo("can use xipbase %zu\n", loadinfo->xipbase);
+        }
     }
 
   /* Determine total size to allocate */

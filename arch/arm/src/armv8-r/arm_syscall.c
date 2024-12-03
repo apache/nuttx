@@ -31,6 +31,7 @@
 #include <syscall.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/macro.h>
 #include <nuttx/sched.h>
 
 #include "arm.h"
@@ -120,20 +121,19 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
-    " sub sp, sp, #16\n"           /* Create a stack frame to hold 3 parms + lr */
-    " str r4, [sp, #0]\n"          /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"          /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
-    " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
-    " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
-    " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this SYSCALL */
-    " blx ip\n"                    /* Call the stub (modifies lr) */
-    " ldr lr, [sp, #12]\n"         /* Restore lr */
-    " add sp, sp, #16\n"           /* Destroy the stack frame */
-    " mov r2, r0\n"                /* R2=Save return value in R2 */
-    " mov r0, %0\n"                /* R0=SYS_syscall_return */
-    " svc %1\n"::"i"(SYS_syscall_return),
-                 "i"(SYS_syscall)  /* Return from the SYSCALL */
+    " sub sp, sp, #16\n"                            /* Create a stack frame to hold 3 parms + lr */
+    " str r4, [sp, #0]\n"                           /* Move parameter 4 (if any) into position */
+    " str r5, [sp, #4]\n"                           /* Move parameter 5 (if any) into position */
+    " str r6, [sp, #8]\n"                           /* Move parameter 6 (if any) into position */
+    " str lr, [sp, #12]\n"                          /* Save lr in the stack frame */
+    " ldr ip, =g_stublookup\n"                      /* R12=The base of the stub lookup table */
+    " ldr ip, [ip, r0, lsl #2]\n"                   /* R12=The address of the stub for this SYSCALL */
+    " blx ip\n"                                     /* Call the stub (modifies lr) */
+    " ldr lr, [sp, #12]\n"                          /* Restore lr */
+    " add sp, sp, #16\n"                            /* Destroy the stack frame */
+    " mov r2, r0\n"                                 /* R2=Save return value in R2 */
+    " mov r0, #" STRINGIFY(SYS_syscall_return) "\n" /* R0=SYS_syscall_return */
+    " svc #" STRINGIFY(SYS_syscall) "\n"            /* Return from the SYSCALL */
   );
 }
 #endif
@@ -156,28 +156,36 @@ static void dispatch_syscall(void)
 
 uint32_t *arm_syscall(uint32_t *regs)
 {
-  struct tcb_s *tcb = this_task();
+  int cpu = this_cpu();
+  struct tcb_s **running_task = &g_running_tasks[cpu];
+  FAR struct tcb_s *tcb = this_task();
   uint32_t cmd;
-  int cpu;
 #ifdef CONFIG_BUILD_PROTECTED
   uint32_t cpsr;
 #endif
 
   /* Nested interrupts are not supported */
 
-  DEBUGASSERT(up_current_regs() == NULL);
-
-  tcb->xcp.regs = regs;
+  DEBUGASSERT(!up_interrupt_context());
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * current_regs is also used to manage interrupt level context switches.
    */
 
-  up_set_current_regs(regs);
+  up_set_interrupt_context(true);
 
   /* The SYSCALL command is in R0 on entry.  Parameters follow in R1..R7 */
 
   cmd = regs[REG_R0];
+
+  /* if cmd == SYS_restore_context (*running_task)->xcp.regs is valid
+   * should not be overwriten
+   */
+
+  if (cmd != SYS_restore_context)
+    {
+      (*running_task)->xcp.regs = regs;
+    }
 
   /* The SVCall software interrupt is called with R0 = system call command
    * and R1..R7 =  variable number of arguments depending on the system call.
@@ -252,52 +260,23 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-      /* R0=SYS_restore_context:  Restore task context
-       *
-       * void arm_fullcontextrestore(uint32_t *restoreregs)
-       *   noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_restore_context
-       *   R1 = restoreregs
-       */
+      case SYS_switch_context:
+
+        /* Update scheduler parameters */
+
+        nxsched_resume_scheduler(tcb);
 
       case SYS_restore_context:
-        {
-          /* Replace 'regs' with the pointer to the register set in
-           * regs[REG_R1].  On return from the system call, that register
-           * set will determine the restored context.
-           */
+        nxsched_suspend_scheduler(*running_task);
+        *running_task = tcb;
 
-          tcb->xcp.regs = (uint32_t *)regs[REG_R1];
-          DEBUGASSERT(up_current_regs());
-        }
-        break;
+        /* Restore the cpu lock */
 
-      /* R0=SYS_switch_context:  This a switch context command:
-       *
-       *   void arm_switchcontext(uint32_t **saveregs,
-       *                          uint32_t *restoreregs);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_switch_context
-       *   R1 = saveregs
-       *   R2 = restoreregs
-       *
-       * In this case, we do both: We save the context registers to the save
-       * register area reference by the saved contents of R1 and then set
-       * regs to the save register area referenced by the saved
-       * contents of R2.
-       */
-
-      case SYS_switch_context:
-        {
-          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          *(uint32_t **)regs[REG_R1] = regs;
-          tcb->xcp.regs = (uint32_t *)regs[REG_R2];
-        }
+        restore_critical_section(tcb, cpu);
+        regs = tcb->xcp.regs;
+#ifdef CONFIG_ARCH_ADDRENV
+        addrenv_switch(tcb);
+#endif
         break;
 
       /* R0=SYS_task_start:  This a user task start
@@ -563,36 +542,13 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
     }
 
-  if (regs != tcb->xcp.regs)
-    {
-      cpu = this_cpu();
-
-      /* Update scheduler parameters */
-
-      nxsched_suspend_scheduler(g_running_tasks[cpu]);
-      nxsched_resume_scheduler(tcb);
-
-      /* Record the new "running" task.  g_running_tasks[] is only used by
-       * assertion logic for reporting crashes.
-       */
-
-      g_running_tasks[cpu] = tcb;
-
-      /* Restore the cpu lock */
-
-      restore_critical_section(tcb, cpu);
-      regs = tcb->xcp.regs;
-    }
-
   /* Report what happened */
 
   dump_syscall("Exit", cmd, regs);
 
-  /* Set current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Set irq flag */
 
-  up_set_current_regs(NULL);
+  up_set_interrupt_context(false);
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the

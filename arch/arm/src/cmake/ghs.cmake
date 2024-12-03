@@ -88,11 +88,11 @@ if(CONFIG_STACK_USAGE_WARNING AND NOT "${CONFIG_STACK_USAGE_WARNING}" STREQUAL
   add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
 endif()
 
-if(CONFIG_SCHED_GCOV)
-  add_compile_options(-fprofile-generate -ftest-coverage)
+if(CONFIG_COVERAGE_ALL)
+  add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
 endif()
 
-if(CONFIG_SCHED_GPROF_ALL)
+if(CONFIG_PROFILE_ALL)
   add_compile_options(-pg)
 endif()
 
@@ -194,17 +194,17 @@ endif()
 
 set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P)
 
-# override nuttx_generate_preproces_target
+# override nuttx_generate_preprocess_target
 
-set(NUTTX_TOOLCHAIN_PREPROCES_DEFINED true)
+set(NUTTX_TOOLCHAIN_PREPROCESS_DEFINED true)
 
-function(nuttx_generate_preproces_target)
+function(nuttx_generate_preprocess_target)
 
   # parse arguments into variables
 
   nuttx_parse_function_args(
     FUNC
-    nuttx_generate_preproces_target
+    nuttx_generate_preprocess_target
     ONE_VALUE
     SOURCE_FILE
     TARGET_FILE

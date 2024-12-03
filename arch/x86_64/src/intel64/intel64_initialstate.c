@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/intel64_initialstate.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -45,6 +47,12 @@
 #  error XCPTCONTEXT_SIZE must be aligned to XCPTCONTEXT_ALIGN !
 #endif
 
+/* Aligned size of the kernel stack */
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+#  define ARCH_KERNEL_STACKSIZE STACK_ALIGN_UP(CONFIG_ARCH_KERNEL_STACKSIZE)
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -65,6 +73,10 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+  uint64_t topstack;
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  uintptr_t *kstack = xcp->kstack;
+#endif
 
   /* Initialize the idle thread stack */
 
@@ -102,11 +114,11 @@ void up_initial_state(struct tcb_s *tcb)
 #ifndef CONFIG_ARCH_X86_64_HAVE_XSAVE
   /* Set the FCW to 1f80 */
 
-  xcp->regs[1]          = (uint64_t)0x0000037f00000000;
+  xcp->regs[1] = (uint64_t)0x0000037f00000000;
 
   /* Set the MXCSR to 1f80 */
 
-  xcp->regs[3]          = (uint64_t)0x0000000000001f80;
+  xcp->regs[3] = (uint64_t)0x0000000000001f80;
 #else
   /* Initialize XSAVE region with a valid state */
 
@@ -116,25 +128,49 @@ void up_initial_state(struct tcb_s *tcb)
                    : "memory");
 #endif
 
+  topstack = (uint64_t)xcp->regs - 8;
+
   /* Save the initial stack pointer... the value of the stackpointer before
    * the "interrupt occurs."
    */
 
-  xcp->regs[REG_RSP]    = (uint64_t)xcp->regs - 8;
-  xcp->regs[REG_RBP]    = 0;
+  xcp->regs[REG_RSP] = topstack;
+  xcp->regs[REG_RBP] = 0;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Use the process kernel stack to store context for user processes
+   * in syscalls.
+   */
+
+  if (kstack)
+    {
+      xcp->kstack  = kstack;
+      xcp->ustkptr = (uintptr_t *)topstack;
+      topstack     = (uintptr_t)kstack + ARCH_KERNEL_STACKSIZE;
+      xcp->ktopstk = (uintptr_t *)topstack;
+      xcp->kstkptr = xcp->ktopstk;
+
+      /* Initialize kernel stack top reference */
+
+      if (x86_64_get_ktopstk() == NULL)
+        {
+          x86_64_set_ktopstk(tcb->xcp.ktopstk);
+        }
+    }
+#endif
 
   /* Save the task entry point */
 
-  xcp->regs[REG_RIP]    = (uint64_t)tcb->start;
+  xcp->regs[REG_RIP] = (uint64_t)tcb->start;
 
   /* Set up the segment registers... assume the same segment as the caller.
    * That is not a good assumption in the long run.
    */
 
-  xcp->regs[REG_DS]     = up_getds();
-  xcp->regs[REG_CS]     = up_getcs();
-  xcp->regs[REG_SS]     = up_getss();
-  xcp->regs[REG_ES]     = up_getes();
+  xcp->regs[REG_DS] = up_getds();
+  xcp->regs[REG_CS] = up_getcs();
+  xcp->regs[REG_SS] = up_getss();
+  xcp->regs[REG_ES] = up_getes();
 
 /* FS used by for TLS
  * used by some libc for TLS and segment reference
@@ -155,17 +191,6 @@ void up_initial_state(struct tcb_s *tcb)
   /* GS used for CPU private data */
 
   xcp->regs[REG_GS]     = 0;
-
-  /* Set supervisor- or user-mode, depending on how NuttX is configured and
-   * what kind of thread is being started.  Disable FIQs in any event
-   *
-   * If the kernel build is not selected, then all threads run in
-   * supervisor-mode.
-   */
-
-#ifdef CONFIG_BUILD_KERNEL
-#  error "Missing logic for the CONFIG_BUILD_KERNEL build"
-#endif
 
   /* Enable or disable interrupts, based on user configuration.  If the IF
    * bit is set, maskable interrupts will be enabled.

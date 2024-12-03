@@ -1,6 +1,8 @@
 ############################################################################
 # boards/x86_64/intel64/qemu-intel64/src/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -21,6 +23,7 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = qemu_boot.c qemu_bringup.c qemu_net.c
+CSRCS += $(if $(wildcard romfs_boot.c), romfs_boot.c, romfs_stub.c)
 
 ifeq ($(CONFIG_BOARDCTL),y)
   CSRCS += qemu_appinit.c

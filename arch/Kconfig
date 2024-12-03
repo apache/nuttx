@@ -28,6 +28,7 @@ config ARCH_ARM64
 	select ALARM_ARCH
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_FORK if !BUILD_KERNEL
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
@@ -95,6 +96,7 @@ config ARCH_RISCV
 	select ARCH_HAVE_THREAD_LOCAL
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_LAZYFPU if ARCH_HAVE_FPU
+	select ARCH_HAVE_CPUID_MAPPING if ARCH_HAVE_MULTICPU
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
@@ -143,7 +145,7 @@ config ARCH_X86_64
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ARCH_TOOLCHAIN_GNU
 	select ARCH_HAVE_BACKTRACE
-	select ARCH_HAVE_FORK
+	select ARCH_HAVE_FORK if !BUILD_KERNEL
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_PERF_EVENTS
 	---help---
@@ -276,10 +278,6 @@ endif #ARCH_CHIP_CUSTOM
 
 source "$BINDIR/arch/dummy/Kconfig"
 
-config ARCH_TOOLCHAIN_IAR
-	bool
-	default n
-
 config ARCH_TOOLCHAIN_GNU
 	bool
 	default n
@@ -289,13 +287,22 @@ config ARCH_TOOLCHAIN_CLANG
 	select ARCH_TOOLCHAIN_GNU
 	default n
 
-config ARCH_TOOLCHAIN_TASKING
+config ARCH_TOOLCHAIN_GCC
 	bool
+	select ARCH_TOOLCHAIN_GNU
 	default n
 
 config ARCH_TOOLCHAIN_GHS
 	bool
 	select ARCH_TOOLCHAIN_GNU
+	default n
+
+config ARCH_TOOLCHAIN_IAR
+	bool
+	default n
+
+config ARCH_TOOLCHAIN_TASKING
+	bool
 	default n
 
 config ARCH_GNU_NO_WEAKFUNCTIONS
@@ -417,6 +424,11 @@ config ARCH_HAVE_MULTICPU
 	bool
 	default n
 
+config ARCH_HAVE_CPUID_MAPPING
+	bool
+	default n
+	depends on ARCH_HAVE_MULTICPU
+
 config ARCH_HAVE_FORK
 	bool
 	default n
@@ -476,6 +488,11 @@ config ARCH_HAVE_RESET
 config ARCH_HAVE_TESTSET
 	bool
 	default n
+
+config ARCH_HAVE_CUSTOM_TESTSET
+	bool
+	default n
+	select ARCH_HAVE_TESTSET
 
 config ARCH_HAVE_THREAD_LOCAL
 	bool
@@ -1112,6 +1129,13 @@ config ARCH_RAMFUNCS
 		architectures to improve performance.  In other cases, it is done
 		so that FLASH can be reconfigured while the MCU executes out of
 		SRAM.
+
+config ARCH_HAVE_CUSTOM_VECTORS
+	bool
+	default n
+	---help---
+		If ARCH_HAVE_CUSTOM_VECTORS is defined, Chip should provide vectors
+		table as an optimization.
 
 config ARCH_HAVE_RAMVECTORS
 	bool

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/timers/pl031.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,9 +26,12 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 #include <nuttx/timers/rtc.h>
 #include <nuttx/timers/pl031.h>
-#include <stdio.h>
 
 /****************************************************************************
  * Pre-processor Definitions

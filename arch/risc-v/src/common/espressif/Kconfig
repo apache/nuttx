@@ -197,6 +197,11 @@ config ESPRESSIF_ESPTOOL_TARGET_SECONDARY
 
 endchoice
 
+config ESPRESSIF_MCUBOOT_SIGN_IMAGE_VERSION
+	string "Sign image version"
+	depends on ESPRESSIF_BOOTLOADER_MCUBOOT
+	default "1.0.0"
+
 config ESPRESSIF_APP_MCUBOOT_HEADER_SIZE
 	int "Application image header size (in bytes)"
 	default 32
@@ -320,11 +325,17 @@ config ESPRESSIF_I2C
 	bool
 	default n
 
+config ESPRESSIF_I2C_PERIPH
+	bool
+	depends on (ESPRESSIF_I2C0 || ESPRESSIF_I2C1)
+	default n
+
 config ESPRESSIF_I2C0
 	bool "I2C 0"
 	default n
 	select ESPRESSIF_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
 
 config ESPRESSIF_I2C1
 	bool "I2C 1"
@@ -332,9 +343,25 @@ config ESPRESSIF_I2C1
 	depends on ARCH_CHIP_ESP32H2
 	select ESPRESSIF_I2C
 	select I2C
+	select ESPRESSIF_I2C_PERIPH
+
+config ESPRESSIF_I2C_BITBANG
+	bool "I2C Bitbang"
+	default n
+	select I2C_BITBANG
+	select ESPRESSIF_I2C
+	select I2C
+	select I2C_BITBANG
+	---help---
+		Software implemented I2C peripheral with GPIOs. Suggested to use if I2C peripherals are already in use.
 
 config ESPRESSIF_SPI
 	bool
+	default n
+
+config ESPRESSIF_SPI_PERIPH
+	bool
+	depends on ESPRESSIF_SPI2
 	default n
 
 config ESPRESSIF_SPI2
@@ -342,6 +369,16 @@ config ESPRESSIF_SPI2
 	default n
 	select ESPRESSIF_SPI
 	select SPI
+	select ESPRESSIF_SPI_PERIPH
+
+config ESPRESSIF_SPI_BITBANG
+	bool "SPI Bitbang"
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+	select SPI_BITBANG
+	---help---
+		Software implemented SPI peripheral with GPIOs. Suggested to use if SPI peripheral is already in use.
 
 config ESPRESSIF_SPIFLASH
 	bool "SPI Flash"
@@ -465,6 +502,14 @@ config ESPRESSIF_WIFI
 	---help---
 		Enable Wi-Fi support
 
+config ESPRESSIF_BLE
+	bool "BLE"
+	depends on ESPRESSIF_ESP32C3
+	default n
+	select ESP_WIRELESS
+	---help---
+		Enable BLE support
+
 config ESP_COEX_SW_COEXIST_ENABLE
 	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
 	depends on (ESPRESSIF_WIFI && ESPRESSIF_BLE) || \
@@ -477,6 +522,13 @@ config ESP_COEX_SW_COEXIST_ENABLE
 		automatically managed, no user intervention is required.
 		If only Bluetooth is used, it is recommended to disable this option to reduce binary file
 		size.
+
+menuconfig ESPRESSIF_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default y if ESPRESSIF_WIFI && ESPRESSIF_BLE
+	default n
+	depends on ESPRESSIF_WIFI && ESPRESSIF_BLE
+	select ESPRESSIF_WIFI_STA_DISCONNECT_PM
 
 config ESP_MCPWM
 	bool "Motor Control PWM (MCPWM)"
@@ -933,6 +985,30 @@ endchoice # ESP_POWER_SAVE_MODE
 
 endmenu # ESPRESSIF_WIFI
 
+menu "BLE Configuration"
+	depends on ESPRESSIF_BLE
+
+config ESPRESSIF_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config ESPRESSIF_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESPRESSIF_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 253
+
+config ESPRESSIF_BLE_INTERRUPT_SAVE_STATUS
+	int "Number of interrupt save status"
+	default 3
+	---help---
+		Number of interrupt save status variables to keep track. Increase it if any related bug is found.
+
+endmenu # BLE Configuration
+
 menu "UART Configuration"
 	depends on ESPRESSIF_UART
 
@@ -1111,6 +1187,7 @@ menu "SPI configuration"
 
 config ESPRESSIF_SPI_SWCS
 	bool "SPI software CS"
+	depends on ESPRESSIF_SPI_PERIPH
 	default n
 	---help---
 		Use SPI software CS.
@@ -1119,6 +1196,7 @@ config ESPRESSIF_SPI_UDCS
 	bool "User defined CS"
 	default n
 	depends on ESPRESSIF_SPI_SWCS
+	depends on ESPRESSIF_SPI_PERIPH
 	---help---
 		Use user-defined CS.
 
@@ -1189,10 +1267,53 @@ config ESPRESSIF_SPI2_MISOPIN
 
 endif # ESPRESSIF_SPI2
 
+if ESPRESSIF_SPI_BITBANG
+
+config ESPRESSIF_SPI_BITBANG_CSPIN
+	int "SPI Bitbang CS Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_CLKPIN
+	int "SPI Bitbang CLK Pin"
+	default 1
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MOSIPIN
+	int "SPI Bitbang MOSI Pin"
+	default 2
+	range 0 21
+
+config ESPRESSIF_SPI_BITBANG_MISOPIN
+	int "SPI Bitbang MISO Pin"
+	default 3
+	range 0 21
+
+choice ESPRESSIF_SPI_BITBANG_MODE
+	prompt "SPI Bitbang mode"
+	default ESPRESSIF_SPI_BITBANG_MODE0
+
+config ESPRESSIF_SPI_BITBANG_MODE0
+	bool "SPI MODE0"
+
+config ESPRESSIF_SPI_BITBANG_MODE1
+	bool "SPI MODE1"
+
+config ESPRESSIF_SPI_BITBANG_MODE2
+	bool "SPI MODE2"
+
+config ESPRESSIF_SPI_BITBANG_MODE3
+	bool "SPI MODE3"
+
+endchoice # ESPRESSIF_SPI_BITBANG_MODE
+
+endif # ESPRESSIF_SPI_BITBANG
+
 config ESPRESSIF_SPI_TEST_MODE
 	bool "SPI driver loopback test mode (for testing only)"
 	default n
 	depends on SYSTEM_SPITOOL
+	depends on ESPRESSIF_SPI_PERIPH
 	---help---
 		This enables a loopback test mode that attaches the transmitter
 		to the receiver internally, being able to test the SPI
@@ -1535,12 +1656,28 @@ config ESPRESSIF_I2C1_SDAPIN
 
 endif # ESPRESSIF_I2C1
 
+if ESPRESSIF_I2C_BITBANG
+
+config ESPRESSIF_I2C_BITBANG_SCLPIN
+	int "I2C Bitbang SCL Pin"
+	default 0
+	range 0 21
+
+config ESPRESSIF_I2C_BITBANG_SDAPIN
+	int "I2C Bitbang SDA Pin"
+	default 1
+	range 0 21
+
+endif # ESPRESSIF_I2C_BITBANG
+
 config ESPRESSIF_I2CTIMEOSEC
 	int "Timeout seconds"
+	depends on ESPRESSIF_I2C_PERIPH
 	default 0
 
 config ESPRESSIF_I2CTIMEOMS
 	int "Timeout milliseconds"
+	depends on ESPRESSIF_I2C_PERIPH
 	default 500
 
 endmenu # I2C configuration

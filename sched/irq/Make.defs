@@ -42,6 +42,10 @@ ifeq ($(CONFIG_IRQCHAIN),y)
 CSRCS += irq_chain.c
 endif
 
+ifneq ($(CONFIG_IRQ_WORK_SECTION),"")
+  CFLAGS += ${DEFINE_PREFIX}IRQ_WORK_SECTION=CONFIG_IRQ_WORK_SECTION
+endif
+
 # Include irq build support
 
 DEPPATH += --dep-path irq

@@ -28,7 +28,7 @@ jobs:
           script: |
             const body = context.payload.issue.body;
             const bodySplit = body.split(/\[|\]/).map(e => e.toLowerCase());
-            const oskeywords = ['os: other', 'os: bsd', 'os: Linux', 'os: mac', 'os: windows'];
+            const oskeywords = ['os: other', 'os: bsd', 'os: linux', 'os: mac', 'os: windows'];
             const archkeywords1 = ['arch: all', 'arch: arm', 'arch: arm64', 'arch: avr', 'arch: ceva'];
             const archkeywords2 = ['arch: hc', 'arch: mips', 'arch: misoc', 'arch: openrisc', 'arch:renesas'];
             const archkeywords3 = ['arch: risc-v', 'arch: simulator', 'arch: sparc', 'arch: tricore'];

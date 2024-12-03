@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/pci/pci_ecam.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -47,11 +49,11 @@
  ****************************************************************************/
 
 static int pci_ecam_read_config(FAR struct pci_bus_s *bus,
-                                unsigned int devfn, int where, int size,
+                                uint32_t devfn, int where, int size,
                                 FAR uint32_t *val);
 
 static int pci_ecam_write_config(FAR struct pci_bus_s *bus,
-                                 unsigned int devfn, int where, int size,
+                                 uint32_t devfn, int where, int size,
                                  uint32_t val);
 
 static int pci_ecam_read_io(FAR struct pci_bus_s *bus, uintptr_t addr,
@@ -63,6 +65,8 @@ static int pci_ecam_write_io(FAR struct pci_bus_s *bus, uintptr_t addr,
 static int pci_ecam_get_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
                             uint8_t line, uint8_t pin);
 
+static uintptr_t pci_ecam_map(FAR struct pci_bus_s *bus, uintptr_t start,
+                              uintptr_t end);
 #ifdef CONFIG_PCI_MSIX
 static int pci_ecam_alloc_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
                               FAR int *irq, int num);
@@ -96,6 +100,7 @@ static const struct pci_ops_s g_pci_ecam_ops =
   .read_io     = pci_ecam_read_io,
   .write_io    = pci_ecam_write_io,
   .get_irq     = pci_ecam_get_irq,
+  .map         = pci_ecam_map,
 #ifdef CONFIG_PCI_MSIX
   .alloc_irq   = pci_ecam_alloc_irq,
   .release_irq = pci_ecam_release_irq,
@@ -199,7 +204,7 @@ static bool pci_ecam_addr_valid(FAR const struct pci_bus_s *bus,
  ****************************************************************************/
 
 static int pci_ecam_read_config(FAR struct pci_bus_s *bus,
-                                unsigned int devfn, int where, int size,
+                                uint32_t devfn, int where, int size,
                                 FAR uint32_t *val)
 {
   FAR void *addr;
@@ -257,7 +262,7 @@ static int pci_ecam_read_config(FAR struct pci_bus_s *bus,
  ****************************************************************************/
 
 static int pci_ecam_write_config(FAR struct pci_bus_s *bus,
-                                 unsigned int devfn, int where, int size,
+                                 uint32_t devfn, int where, int size,
                                  uint32_t val)
 {
   FAR void *addr;
@@ -432,6 +437,45 @@ static int pci_ecam_get_irq(FAR struct pci_bus_s *bus, uint32_t devfn,
   UNUSED(bus);
 
   return up_get_legacy_irq(devfn, line, pin);
+}
+
+/****************************************************************************
+ * Name: pci_ecam_map
+ *
+ * Description:
+ *  Map pci addr to cpu addr.
+ *
+ * Input Parameters:
+ *   bus   - Bus that PCI device resides
+ *   start - The pci device start pci addr
+ *   end   - The pci device end pci addr
+ *
+ * Returned Value:
+ *   Return pci device cpu addr
+ *
+ ****************************************************************************/
+
+static uintptr_t pci_ecam_map(FAR struct pci_bus_s *bus, uintptr_t start,
+                              uintptr_t end)
+{
+  FAR struct pci_controller_s *ctrl = bus->ctrl;
+
+  if (start >= ctrl->io.start && end < ctrl->io.end)
+    {
+      return start + ctrl->io.offset;
+    }
+
+  if (start >= ctrl->mem.start && end < ctrl->mem.end)
+    {
+      return start + ctrl->mem.offset;
+    }
+
+  if (start >= ctrl->mem_pref.start && end < ctrl->mem_pref.end)
+    {
+      return start + ctrl->mem_pref.offset;
+    }
+
+  return 0;
 }
 
 /****************************************************************************

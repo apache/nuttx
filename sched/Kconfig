@@ -346,6 +346,11 @@ config IRQ_NWORKS
 	---help---
 		The max num of active irq wqueue.
 
+config IRQ_WORK_SECTION
+	string "The section where irq stack is located"
+	---help---
+		The section where irq stack is located.
+
 config IRQ_WORK_STACKSIZE
 	int "The default stack size for isr wqueue"
 	default DEFAULT_TASK_STACKSIZE
@@ -1247,7 +1252,7 @@ config SCHED_INSTRUMENTATION_PREEMPTION
 		Enables additional hooks for changes to pre-emption state.  Board-
 		specific logic must provide this additional logic.
 
-			void sched_note_premption(FAR struct tcb_s *tcb, bool state);
+			void sched_note_preemption(FAR struct tcb_s *tcb, bool state);
 
 config SCHED_INSTRUMENTATION_CSECTION
 	bool "Critical section monitor hooks"
@@ -1342,39 +1347,6 @@ config SCHED_STACK_RECORD
 		TCB.  Useful if scheduler instrumentation is selected.  Set to zero
 		to disable.Through instrumentation, record the backtrace at
 		the deepest point in the stack.
-
-config SCHED_GCOV
-	bool "Enable GCOV support"
-	select HAVE_CXXINITIALIZE
-	default n
-	---help---
-		Enable GCOV support for code coverage analysis.
-		After turning on this option, code coverage can be analyzed.
-		If this option is enabled, image size and performance will be
-		significantly reduced. Before use, you need to add the
-		"-fprofile-generate -ftest-coverage" compilation parameters
-		to the file to be analyzed.
-
-config SCHED_GPROF
-	bool "Enable gprof profiling"
-	default n
-	---help---
-		Enable gprof profiling support.  This will cause the compiler to
-		generate additional code to support profiling.  This will also
-		cause the linker to include the gmon.out file in the final
-		executable.
-		Add the "-pg" parameter to the Makefile when compiling to obtain
-		the function call graph of the specified module.
-
-config SCHED_GPROF_ALL
-	bool "Enable gprof call graph for all modules"
-	depends on SCHED_GPROF
-	default n
-	---help---
-		Enable gprof profiling for all code, it will instrument
-		all code, which will cause a large performance penalty for the code.
-		You can add the '-pg' parameter to the specified module in the
-		makefile to only analyze the content of the module.
 
 endmenu
 
@@ -1783,7 +1755,6 @@ config MODULE
 	bool "Enable loadable OS modules"
 	default n
 	select LIBC_MODLIB
-	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 	---help---
 		Enable support for loadable OS modules.  Default: n
 

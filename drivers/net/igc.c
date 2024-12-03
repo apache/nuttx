@@ -1,6 +1,8 @@
 /*****************************************************************************
  * drivers/net/igc.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -28,6 +30,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/addrenv.h>
@@ -43,6 +46,14 @@
  * Pre-processor Definitions
  *****************************************************************************/
 
+#if CONFIG_NET_IGC_TXDESC % 2 != 0
+#  error CONFIG_NET_IGC_TXDESC must be multiple of 2
+#endif
+
+#if CONFIG_NET_IGC_RXDESC % 2 != 0
+#  error CONFIG_NET_IGC_RXDESC must be multiple of 2
+#endif
+
 /* Packet buffer size */
 
 #define IGC_PKTBUF_SIZE        2048
@@ -50,8 +61,8 @@
 
 /* TX and RX descriptors */
 
-#define IGC_TX_DESC            256
-#define IGC_RX_DESC            256
+#define IGC_TX_DESC            CONFIG_NET_IGC_TXDESC
+#define IGC_RX_DESC            CONFIG_NET_IGC_RXDESC
 
 /* After RX packet is done, we provide free netpkt to the RX descriptor ring.
  * The upper-half network logic is responsible for freeing the RX packets
@@ -79,10 +90,6 @@
 #define IGC_FLASH_BAR          1
 #define IGC_IO_BAR             2
 #define IGC_MSIX_BAR           3
-
-/* Minimum Inter-interrupt Interval in 1 us increments */
-
-#define IGC_INTERRUPT_INTERVAL 100
 
 /* For MSI-X we allocate all interrupts to MSI-X vector 0 */
 
@@ -114,6 +121,7 @@ struct igc_driver_s
   /* This holds the information visible to the NuttX network */
 
   struct netdev_lowerhalf_s dev;
+  struct work_s work;
 
   /* Driver state */
 
@@ -164,6 +172,11 @@ static void igc_dump_reg(FAR struct igc_driver_s *priv,
 static void igc_dump_mem(FAR struct igc_driver_s *priv, FAR const char *msg);
 #endif
 
+/* Rings management */
+
+static void igc_txclean(FAR struct igc_driver_s *priv);
+static void igc_rxclean(FAR struct igc_driver_s *priv);
+
 /* Common TX logic */
 
 static int igc_transmit(FAR struct netdev_lowerhalf_s *dev,
@@ -202,7 +215,6 @@ static int igc_probe(FAR struct pci_device_s *dev);
  * Private Data
  *****************************************************************************/
 
-#ifdef CONFIG_NET_IGC_I225LM
 /* Intel I225LM */
 
 static const struct igc_type_s g_igc_i225lm =
@@ -210,16 +222,23 @@ static const struct igc_type_s g_igc_i225lm =
   .desc_align = 128,
   .mta_regs   = 128
 };
-#endif
+
+static const struct igc_type_s g_igc_i226v =
+{
+  .desc_align = 128,
+  .mta_regs   = 128
+};
 
 static const struct pci_device_id_s g_igc_id_table[] =
 {
-#ifdef CONFIG_NET_IGC_I225LM
   {
     PCI_DEVICE(0x8086, 0x15f2),
     .driver_data = (uintptr_t)&g_igc_i225lm
   },
-#endif
+  {
+    PCI_DEVICE(0x8086, 0x125c),
+    .driver_data = (uintptr_t)&g_igc_i226v
+  },
   { }
 };
 
@@ -410,6 +429,68 @@ static void igc_dump_mem(FAR struct igc_driver_s *priv, FAR const char *msg)
 #endif
 
 /*****************************************************************************
+ * Name: igc_txclean
+ *
+ * Description:
+ *   Clean transmition ring
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void igc_txclean(FAR struct igc_driver_s *priv)
+{
+  FAR struct netdev_lowerhalf_s *netdev = &priv->dev;
+
+  /* Reset ring */
+
+  igc_putreg_mem(priv, IGC_TDH0, 0);
+  igc_putreg_mem(priv, IGC_TDT0, 0);
+
+  /* Free any pending TX */
+
+  while (priv->tx_now != priv->tx_done)
+    {
+      /* Free net packet */
+
+      netpkt_free(netdev, priv->tx_pkt[priv->tx_done], NETPKT_TX);
+
+      /* Next descriptor */
+
+      priv->tx_done = (priv->tx_done + 1) % IGC_TX_DESC;
+    }
+
+  priv->tx_now  = 0;
+  priv->tx_done = 0;
+}
+
+/*****************************************************************************
+ * Name: igc_rxclean
+ *
+ * Description:
+ *   Clean receive ring
+ *
+ * Input Parameters:
+ *   priv - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void igc_rxclean(FAR struct igc_driver_s *priv)
+{
+  priv->rx_now = 0;
+
+  igc_putreg_mem(priv, IGC_RDH0, 0);
+  igc_putreg_mem(priv, IGC_RDT0, 0);
+}
+
+/*****************************************************************************
  * Name: igc_transmit
  *
  * Description:
@@ -443,6 +524,11 @@ static int igc_transmit(FAR struct netdev_lowerhalf_s *dev,
     {
       nerr("net transmit buffer too large\n");
       return -EINVAL;
+    }
+
+  if (!IFF_IS_RUNNING(dev->netdev.d_flags))
+    {
+      return -ENETDOWN;
     }
 
   /* Store TX packet reference */
@@ -601,6 +687,43 @@ static void igc_txdone(FAR struct netdev_lowerhalf_s *dev)
 }
 
 /*****************************************************************************
+ * Name: igc_link_work
+ *
+ * Description:
+ *   Handle link status change.
+ *
+ * Input Parameters:
+ *   arg - Reference to the lover half driver structure (cast to void *)
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+static void igc_link_work(FAR void *arg)
+{
+  FAR struct igc_driver_s *priv = arg;
+  uint32_t tmp;
+
+  tmp = igc_getreg_mem(priv, IGC_STATUS);
+  if (tmp & IGC_STATUS_LU)
+    {
+      ninfo("Link up, status = 0x%x\n", tmp);
+      netdev_lower_carrier_on(&priv->dev);
+
+      /* Clear Tx and RX rings */
+
+      igc_txclean(priv);
+      igc_rxclean(priv);
+    }
+  else
+    {
+      ninfo("Link down\n");
+      netdev_lower_carrier_off(&priv->dev);
+    }
+}
+
+/*****************************************************************************
  * Name: igc_misx_interrupt
  *
  * Description:
@@ -621,7 +744,6 @@ static void igc_msix_interrupt(FAR struct igc_driver_s *priv)
 {
   uint32_t icr  = 0;
   uint32_t eicr = 0;
-  uint32_t tmp  = 0;
 
   /* Get interrupts */
 
@@ -648,16 +770,13 @@ static void igc_msix_interrupt(FAR struct igc_driver_s *priv)
 
   if (icr & IGC_IC_LSC)
     {
-      tmp = igc_getreg_mem(priv, IGC_STATUS);
-      if (tmp & IGC_STATUS_LU)
+      if (work_available(&priv->work))
         {
-          ninfo("Link up, status = 0x%x\n", tmp);
-          netdev_lower_carrier_on(&priv->dev);
-        }
-      else
-        {
-          ninfo("Link down\n");
-          netdev_lower_carrier_off(&priv->dev);
+          /* Schedule to work queue because netdev_lower_carrier_xxx API
+           * can't be used in interrupt context
+           */
+
+          work_queue(LPWORK, &priv->work, igc_link_work, priv, 0);
         }
     }
 
@@ -929,13 +1048,11 @@ static void igc_disable(FAR struct igc_driver_s *priv)
 
   /* Reset Tx tail */
 
-  igc_putreg_mem(priv, IGC_TDH0, 0);
-  igc_putreg_mem(priv, IGC_TDT0, 0);
+  igc_txclean(priv);
 
   /* Reset Rx tail */
 
-  igc_putreg_mem(priv, IGC_RDH0, 0);
-  igc_putreg_mem(priv, IGC_RDT0, 0);
+  igc_rxclean(priv);
 
   /* Disable interrupts */
 
@@ -1037,12 +1154,9 @@ static void igc_enable(FAR struct igc_driver_s *priv)
   regval = IGC_TX_DESC * sizeof(struct igc_tx_leg_s);
   igc_putreg_mem(priv, IGC_TDLEN0, regval);
 
-  priv->tx_now = 0;
-
   /* Reset TX tail */
 
-  igc_putreg_mem(priv, IGC_TDH0, 0);
-  igc_putreg_mem(priv, IGC_TDT0, 0);
+  igc_txclean(priv);
 
   /* Setup RX descriptor */
 
@@ -1057,8 +1171,6 @@ static void igc_enable(FAR struct igc_driver_s *priv)
 
   regval = IGC_RX_DESC * sizeof(struct igc_rx_leg_s);
   igc_putreg_mem(priv, IGC_RDLEN0, regval);
-
-  priv->rx_now = 0;
 
   /* Enable interrupts */
 
@@ -1099,7 +1211,10 @@ static void igc_enable(FAR struct igc_driver_s *priv)
 
   /* Reset RX tail - after queue is enabled */
 
-  igc_putreg_mem(priv, IGC_RDH0, 0);
+  igc_rxclean(priv);
+
+  /* All RX descriptors availalbe */
+
   igc_putreg_mem(priv, IGC_RDT0, IGC_RX_DESC);
 
 #ifdef CONFIG_DEBUG_NET_INFO
@@ -1168,7 +1283,7 @@ static int igc_initialize(FAR struct igc_driver_s *priv)
 
   /* Configure Interrupt Throttle */
 
-  igc_putreg_mem(priv, IGC_EITR0, (IGC_INTERRUPT_INTERVAL << 2));
+  igc_putreg_mem(priv, IGC_EITR0, (CONFIG_NET_IGC_INT_INTERVAL << 2));
 
   /* Get MAC if valid */
 

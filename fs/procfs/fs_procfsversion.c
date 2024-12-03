@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfsversion.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -46,7 +48,7 @@
 #include "fs_heap.h"
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_VERSION
 
 /****************************************************************************
  * Pre-processor Definitions

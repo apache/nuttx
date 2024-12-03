@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_registerdump.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -63,7 +65,7 @@ uintptr_t up_getusrsp(void *regs)
 
 void up_dump_register(void *dumpregs)
 {
-  volatile uint64_t *regs = dumpregs ? dumpregs : up_current_regs();
+  volatile uint64_t *regs = dumpregs ? dumpregs : running_regs();
 
   _alert("stack = %p\n", regs);
   _alert("x0:   0x%-16"PRIx64"  x1:   0x%"PRIx64"\n",

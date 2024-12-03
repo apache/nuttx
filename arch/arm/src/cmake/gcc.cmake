@@ -53,26 +53,32 @@ endif()
 
 set(NO_LTO "-fno-lto")
 
-if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.9)
-  # force color for gcc > 4.9
-  add_compile_options(-fdiagnostics-color=always)
-endif()
-
 # Workaround to skip -Warray-bounds check due to bug of GCC-12: Wrong warning
 # array subscript [0] is outside array bounds:
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 
-execute_process(COMMAND ${CMAKE_C_COMPILER} --version
-                OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
-string(REGEX MATCH "\\+\\+.* ([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
-             "${GCC_VERSION_OUTPUT}")
-set(GCCVER ${CMAKE_MATCH_1})
+if(CONFIG_ARCH_TOOLCHAIN_GNU AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
+  execute_process(COMMAND ${CMAKE_C_COMPILER} --version
+                  OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
+  string(REGEX MATCH "([0-9]+)\\.[0-9]+" GCC_VERSION_REGEX
+               "${GCC_VERSION_OUTPUT}")
+  set(GCCVER ${CMAKE_MATCH_1})
 
-if(GCCVER EQUAL 12)
-  add_compile_options(--param=min-pagesize=0)
-  if(CONFIG_ARCH_RAMFUNCS)
-    add_link_options(-Wl,--no-warn-rwx-segments)
+  if(GCCVER GREATER_EQUAL 12)
+    add_link_options(-Wl,--print-memory-usage)
+    add_compile_options(--param=min-pagesize=0)
+    if(CONFIG_ARCH_RAMFUNCS OR NOT CONFIG_BOOT_RUNFROMFLASH)
+      add_link_options(-Wl,--no-warn-rwx-segments)
+    endif()
   endif()
+endif()
+
+# override the responsible file flag
+
+if(CMAKE_GENERATOR MATCHES "Ninja")
+  set(CMAKE_C_RESPONSE_FILE_FLAG "$DEFINES $INCLUDES $FLAGS @")
+  set(CMAKE_CXX_RESPONSE_FILE_FLAG "$DEFINES $INCLUDES $FLAGS @")
+  set(CMAKE_ASM_RESPONSE_FILE_FLAG "$DEFINES $INCLUDES $FLAGS @")
 endif()
 
 # override the ARCHIVE command
@@ -129,12 +135,8 @@ if(CONFIG_STACK_USAGE_WARNING AND NOT "${CONFIG_STACK_USAGE_WARNING}" STREQUAL
   add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
 endif()
 
-if(CONFIG_SCHED_GCOV)
-  add_compile_options(-fprofile-generate -ftest-coverage)
-endif()
-
-if(CONFIG_SCHED_GPROF_ALL)
-  add_compile_options(-pg)
+if(CONFIG_COVERAGE_ALL)
+  add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
 endif()
 
 if(CONFIG_MM_UBSAN_ALL)
@@ -167,7 +169,7 @@ if(CONFIG_ARCH_INSTRUMENT_ALL)
   add_compile_options(-finstrument-functions)
 endif()
 
-if(CONFIG_SCHED_GPROF_ALL)
+if(CONFIG_PROFILE_ALL)
   add_compile_options(-pg)
 endif()
 

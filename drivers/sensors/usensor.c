@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/usensor.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -262,6 +264,7 @@ static int usensor_control(FAR struct sensor_lowerhalf_s *lower,
  *   This function registers usensor character node "/dev/usensor", so that
  *   application can register user sensor by this node. The node will
  *   manager all user sensors in this character driver.
+ *
  ****************************************************************************/
 
 int usensor_initialize(void)

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_uart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -778,15 +780,7 @@ void sim_uartinit(void)
 void up_nputs(const char *str, size_t len)
 {
 #ifdef USE_DEVCONSOLE
-  if (str[len - 1] == '\n')
-    {
-      uart_nputs(1, str, len - 1);
-      uart_nputs(1, "\r\n", 2);
-    }
-  else
-    {
-      uart_nputs(1, str, len);
-    }
+  uart_nputs(1, str, len);
 #endif
 }
 
@@ -794,11 +788,10 @@ void up_nputs(const char *str, size_t len)
  * Name: up_putc
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef USE_DEVCONSOLE
   char c = ch;
   up_nputs(&c, 1);
 #endif
-  return 0;
 }

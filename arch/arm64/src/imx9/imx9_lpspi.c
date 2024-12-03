@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx9/imx9_lpspi.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -134,6 +136,7 @@ struct imx9_lpspidev_s
   sem_t             txsem;      /* Wait for TX DMA to complete */
   void             *txbuf;      /* Driver DMA safe buffer for TX */
   void             *rxbuf;      /* Driver DMA safe buffer for RX */
+  int               refcount;   /* SPIn initialization counter */
 #endif
 };
 
@@ -1021,13 +1024,10 @@ static void imx9_lpspi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
       imx9_lpspi_modifytcr(priv, clrbits, setbits);
 
-      while ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_RSR_OFFSET) &
-              LPSPI_RSR_RXEMPTY) != LPSPI_RSR_RXEMPTY)
-        {
-          /* Flush SPI read FIFO */
+      /* Reset SPI read FIFO */
 
-          imx9_lpspi_getreg32(priv, IMX9_LPSPI_RSR_OFFSET);
-        }
+      imx9_lpspi_modifyreg32(priv, IMX9_LPSPI_CR_OFFSET, 0,
+                                LPSPI_CR_RRF);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1323,7 +1323,7 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
 
   /* Convert the number of word to a number of bytes */
 
-  nbytes = (priv->nbits > 8) ? nwords << 2 : nwords;
+  nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
 
   /* Invalid DMA channels fall back to non-DMA method. */
 
@@ -1386,14 +1386,6 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
                       (uintptr_t)priv->txbuf + nbytes);
     }
 
-  if (rxbuffer)
-    {
-      /* Prepare the RX buffer for DMA */
-
-      up_invalidate_dcache((uintptr_t)priv->rxbuf,
-                           (uintptr_t)priv->rxbuf + nbytes);
-    }
-
   /* Set up the DMA */
 
   adjust = (priv->nbits > 8) ? 2 : 1;
@@ -1404,7 +1396,7 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
   config.daddr  = (uintptr_t) (rxbuffer ? priv->rxbuf : rxdummy);
   config.soff   = 0;
   config.doff   = rxbuffer ? adjust : 0;
-  config.iter   = nbytes;
+  config.iter   = nwords;
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
@@ -1418,7 +1410,7 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
   config.daddr  = priv->spibase + IMX9_LPSPI_TDR_OFFSET;
   config.soff   = txbuffer ? adjust : 0;
   config.doff   = 0;
-  config.iter   = nbytes;
+  config.iter   = nwords;
   config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE;
   config.ssize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
   config.dsize  = adjust == 1 ? EDMA_8BIT : EDMA_16BIT;
@@ -1563,6 +1555,10 @@ static void imx9_lpspi_clock_enable(struct imx9_lpspidev_s *priv)
 static void imx9_lpspi_bus_initialize(struct imx9_lpspidev_s *priv)
 {
   uint32_t reg = 0;
+
+  /* Make sure bus is disabled */
+
+  imx9_lpspi_modifyreg32(priv, IMX9_LPSPI_CR_OFFSET, LPSPI_CR_MEN, 0);
 
   /* Enable power and reset the peripheral */
 
@@ -1813,8 +1809,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
@@ -1828,10 +1823,6 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI1_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI1_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
@@ -1845,8 +1836,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI2 pins: SCK, MISO, and MOSI */
 
@@ -1860,10 +1850,6 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI2_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI2_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
@@ -1877,8 +1863,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI3 pins: SCK, MISO, and MOSI */
 
@@ -1892,10 +1877,6 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI3_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI3_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
@@ -1909,8 +1890,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI4 pins: SCK, MISO, and MOSI */
 
@@ -1924,10 +1904,6 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI4_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI4_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
@@ -1941,8 +1917,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI5 pins: SCK, MISO, and MOSI */
 
@@ -1956,10 +1931,6 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI5_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI5_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
@@ -1973,8 +1944,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI6 pins: SCK, MISO, and MOSI */
 
@@ -1988,10 +1958,6 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI6_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI6_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
@@ -2005,8 +1971,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI7 pins: SCK, MISO, and MOSI */
 
@@ -2020,10 +1985,6 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI7_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI7_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
@@ -2037,8 +1998,7 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((imx9_lpspi_getreg32(priv, IMX9_LPSPI_CR_OFFSET)
-           & LPSPI_CR_MEN) == 0)
+      if (priv->refcount == 0)
         {
           /* Configure SPI6 pins: SCK, MISO, and MOSI */
 
@@ -2052,17 +2012,24 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #if defined(GPIO_LPSPI8_DC) && defined(CONFIG_SPI_CMDDATA)
           imx9_iomux_configure(GPIO_LPSPI8_DC);
 #endif
-
-          /* Set up default configuration: Master, 8-bit, etc. */
-
-          imx9_lpspi_bus_initialize(priv);
         }
     }
   else
 #endif
     {
+      leave_critical_section(flags);
       spierr("ERROR: Unsupported SPI bus: %d\n", bus);
+      return NULL;
     }
+
+  /* Set up default configuration: Master, 8-bit, etc. */
+
+  if (priv->refcount == 0)
+    {
+      imx9_lpspi_bus_initialize(priv);
+    }
+
+  priv->refcount++;
 
 #ifdef CONFIG_IMX9_LPSPI_DMA
   if (priv->rxch && priv->txch)
@@ -2079,6 +2046,12 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
           priv->txbuf = imx9_dma_alloc(CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
           priv->rxbuf = imx9_dma_alloc(CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
           DEBUGASSERT(priv->txbuf && priv->rxbuf);
+
+          /* Invalidate the RX buffer area initially */
+
+          up_invalidate_dcache((uintptr_t)priv->rxbuf,
+                               (uintptr_t)priv->rxbuf +
+                               CONFIG_IMX9_LPSPI_DMA_BUFFER_SIZE);
         }
     }
   else
@@ -2089,8 +2062,36 @@ struct spi_dev_s *imx9_lpspibus_initialize(int bus)
 #endif
 
   leave_critical_section(flags);
-
   return (struct spi_dev_s *)priv;
+}
+
+/****************************************************************************
+ * Name: imx9_lpspibus_uninitialize
+ *
+ * Description:
+ *   Unitialize the selected SPI bus
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void imx9_lpspi_uninitialize(struct spi_dev_s *dev)
+{
+  struct imx9_lpspidev_s  *priv = (struct imx9_lpspidev_s *)dev;
+
+  if (priv->refcount > 0)
+    {
+      priv->refcount--;
+      if (priv->refcount == 0)
+        {
+          imx9_lpspi_modifyreg32(priv,
+                                 IMX9_LPSPI_CR_OFFSET, LPSPI_CR_MEN, 0);
+        }
+    }
 }
 
 #endif /* CONFIG_IMX9_LPSPI */

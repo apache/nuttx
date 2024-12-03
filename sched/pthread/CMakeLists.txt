@@ -43,8 +43,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
       pthread_completejoin.c
       pthread_findjoininfo.c
       pthread_release.c
-      pthread_setschedprio.c
-      pthread_barrierwait.c)
+      pthread_setschedprio.c)
 
   if(NOT CONFIG_PTHREAD_MUTEX_UNSAFE)
     list(APPEND SRCS pthread_mutex.c pthread_mutexconsistent.c

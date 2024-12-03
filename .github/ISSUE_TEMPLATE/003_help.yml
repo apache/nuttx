@@ -13,7 +13,7 @@
 name: General Help
 description: Get general support regarding NuttX
 title: "[HELP] <title>"
-labels: ["Type: question"]
+labels: ["Community: Question"]
 body:
   - type: markdown
     attributes:
@@ -21,8 +21,8 @@ body:
         Hello NuttX Community member! Please keep things tidy by putting your post in the proper place:
 
         Asking a question or getting help: use this form or [Mailing list](https://nuttx.apache.org/community/).
-        Reporting a bug: use the [Bug report](https://github.com/apache/nuttx/issues/new?assignees=&labels=bug&projects=&template=001_bug_report.yml) form.
-        Requesting a new feature: use the [Feature request](https://github.com/apache/nuttx/issues/new?assignees=&labels=enhancement&projects=&template=002_feature_request.yml) form
+        Reporting a bug: use the [Bug report](https://github.com/apache/nuttx/issues/new?assignees=&labels=%F0%9F%91%80+needs+triage%2CType%3A+Bug&projects=&template=001_bug_report.yml&title=%5BBUG%5D+%3Ctitle%3E) form.
+        Requesting a new feature: use the [Feature request](https://github.com/apache/nuttx/issues/new?assignees=&labels=Type%3A+Enhancement&projects=&template=002_feature_request.yml&title=%5BFEATURE%5D+%3Ctitle%3E) form
 
   - type: markdown
     attributes:

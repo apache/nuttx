@@ -36,6 +36,13 @@ config LIBC_STRERROR_ERRNUM
 		for unknown errors like "Unknown error 101". Default enabled when
 		LIBC_STRERROR is not selected.
 
+config LIBC_STRING_OPTIMIZE
+	bool "optimized string function"
+	depends on ALLOW_BSD_COMPONENTS
+	default y
+	---help---
+		Use optimized string function implementation based on newlib.
+
 config LIBC_PERROR_STDOUT
 	bool "perror() to stdout"
 	default n

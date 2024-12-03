@@ -1,6 +1,8 @@
 ############################################################################
 # arch/xtensa/src/lx6/Toolchain.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -179,6 +181,14 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+  ifeq ($(CONFIG_ARCH_TOOLCHAIN_CLANG),)
+    ifeq ($(GCCVER),)
+      export GCCVER := $(shell $(CC) --version | grep gcc | sed -E "s/.* ([0-9]+\.[0-9]+).*/\1/" | cut -d'.' -f1)
+    endif
+  endif
+endif
+
 # Add the builtin library
 
 EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name))
@@ -187,11 +197,11 @@ ifeq ($(CONFIG_LIBM_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
 endif
 
-ifeq ($(CONFIG_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
 
-ifeq ($(CONFIG_SCHED_GCOV),y)
+ifeq ($(CONFIG_COVERAGE_TOOLCHAIN),y)
   EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcov.a))
 endif
 

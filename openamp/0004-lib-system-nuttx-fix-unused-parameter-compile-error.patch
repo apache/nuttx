@@ -18,7 +18,6 @@ error: unused parameter ‘len’ [-Werror=unused-parameter]
    25 | static inline void __metal_cache_flush(void *addr, unsigned int len)
       |                                                    ~~~~~~~~~~~~~^~~
 
-Change-Id: Ic4515da151d90fd1f87d94d5523144967a7ca688
 Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
 ---
  lib/system/nuttx/cache.h  | 5 +++++

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_swint.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -148,7 +150,8 @@ uintptr_t dispatch_syscall(unsigned int nbr, uintptr_t parm1,
 int riscv_swint(int irq, void *context, void *arg)
 {
   uintreg_t *regs = (uintreg_t *)context;
-  uintreg_t *new_regs = regs;
+  struct tcb_s *tcb = this_task();
+  int cpu = this_cpu();
 
   /* Software interrupt 0 is invoked with REG_A0 (REG_X10) = system call
    * command and REG_A1-6 = variable number of
@@ -164,51 +167,18 @@ int riscv_swint(int irq, void *context, void *arg)
 
   switch (regs[REG_A0])
     {
-      /* A0=SYS_restore_context: This a restore context command:
-       *
-       * void
-       * void riscv_fullcontextrestore(struct tcb_s *prev) noreturn_function;
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A0 = SYS_restore_context
-       *   A1 = next
-       */
-
       case SYS_restore_context:
         {
-          struct tcb_s *next = (struct tcb_s *)(uintptr_t)regs[REG_A1];
-
-          DEBUGASSERT(regs[REG_A1] != 0);
-          new_regs = next->xcp.regs;
-          riscv_restorecontext(next);
+          riscv_restorecontext(tcb);
+          restore_critical_section(tcb, cpu);
         }
         break;
 
-      /* A0=SYS_switch_context: This a switch context command:
-       *
-       * void
-       * riscv_switchcontext(struct tcb_s *prev, struct tcb_s *next);
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   A0 = SYS_switch_context
-       *   A1 = prev
-       *   A2 = next
-       *
-       * In this case, we save the context registers to the save register
-       * area referenced by the saved contents of R5.
-       */
-
       case SYS_switch_context:
         {
-          struct tcb_s *prev = (struct tcb_s *)(uintptr_t)regs[REG_A1];
-          struct tcb_s *next = (struct tcb_s *)(uintptr_t)regs[REG_A2];
-
-          DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          riscv_savecontext(prev);
-          new_regs = next->xcp.regs;
-          riscv_restorecontext(next);
+          riscv_savecontext(g_running_tasks[cpu]);
+          riscv_restorecontext(tcb);
+          restore_critical_section(tcb, cpu);
         }
         break;
 
@@ -342,21 +312,17 @@ int riscv_swint(int irq, void *context, void *arg)
    * switch
    */
 
-  if (regs != new_regs)
-    {
-      restore_critical_section(this_task(), this_cpu());
-
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
+  if (cmd <= SYS_switch_context)
+    {
       svcinfo("SWInt Return: Context switch!\n");
-      up_dump_register(new_regs);
-#endif
+      up_dump_register(tcb.xcp.regs);
     }
   else
     {
-#ifdef CONFIG_DEBUG_SYSCALL_INFO
       svcinfo("SWInt Return: %" PRIxPTR "\n", regs[REG_A0]);
-#endif
     }
+#endif
 
   return OK;
 }

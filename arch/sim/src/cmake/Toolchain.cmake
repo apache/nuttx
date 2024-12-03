@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/sim/src/cmake/Toolchain.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -27,11 +29,6 @@ if(WIN32)
   return()
 endif()
 
-find_program(CMAKE_C_COMPILER gcc)
-find_program(CMAKE_CXX_COMPILER g++)
-
-set(CMAKE_PREPROCESSOR cc -E -P -x c)
-
 # NuttX is sometimes built as a native target. In that case, the __NuttX__ macro
 # is predefined by the compiler. https://github.com/NuttX/buildroot
 #
@@ -43,16 +40,19 @@ set(CMAKE_PREPROCESSOR cc -E -P -x c)
 # macOS is built with __APPLE__. We #undef predefined macros for those possible
 # host OSes here because the OS APIs this library should use are of NuttX, not
 # the host OS.
-add_compile_options(
-  -U_AIX
-  -U_WIN32
-  -U__APPLE__
-  -U__FreeBSD__
-  -U__NetBSD__
-  -U__linux__
-  -U__sun__
-  -U__unix__
-  -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
+
+set(SIM_NO_HOST_OPTIONS
+    -U_AIX
+    -U_WIN32
+    -U__APPLE__
+    -U__FreeBSD__
+    -U__NetBSD__
+    -U__linux__
+    -U__sun__
+    -U__unix__
+    -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__)
+
+add_compile_options(${SIM_NO_HOST_OPTIONS})
 
 set(NO_LTO "-fno-lto")
 
@@ -88,8 +88,12 @@ if(CONFIG_STACK_USAGE_WARNING)
   add_compile_options(-Wstack-usage=${CONFIG_STACK_USAGE_WARNING})
 endif()
 
-if(CONFIG_SCHED_GCOV)
-  add_compile_options(-fprofile-generate -ftest-coverage)
+if(CONFIG_COVERAGE_ALL)
+  add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
+endif()
+
+if(CONFIG_PROFILE_ALL OR CONFIG_SIM_PROFILE)
+  add_compile_options(-pg)
 endif()
 
 if(CONFIG_SIM_ASAN)
@@ -177,6 +181,9 @@ endif()
 if(CONFIG_SIM_M32)
   add_compile_options(-m32)
   add_link_options(-m32)
+elseif(NOT CONFIG_HOST_MACOS)
+  add_compile_options(-no-pie)
+  add_link_options(-Wl,-no-pie)
 endif()
 
 if(CONFIG_LIBCXX)
@@ -190,5 +197,6 @@ endif()
 if(APPLE)
   add_link_options(-Wl,-dead_strip)
 else()
+  add_link_options(-Wl,--gc-sections)
   add_link_options(-Wl,-Ttext-segment=0x40000000)
 endif()

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/espressif/esp_i2c.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -24,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESPRESSIF_I2C
+#ifdef CONFIG_ESPRESSIF_I2C_PERIPH
 
 #include <sys/types.h>
 #include <stdio.h>
@@ -1604,4 +1606,4 @@ int esp_i2cbus_uninitialize(struct i2c_master_s *dev)
   return OK;
 }
 
-#endif /* CONFIG_ESPRESSIF_I2C */
+#endif /* CONFIG_ESPRESSIF_I2C_PERIPH */

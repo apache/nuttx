@@ -1,0 +1,1060 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RP23XX Configuration Options"
+
+config RP23XX_RP2350B
+	bool "Use RP2350B variant (QFN-80)"
+	default n
+
+config RP23XX_DMAC
+	bool "DMAC support"
+	default y
+	select ARCH_DMA
+
+#####################################################################
+#  UART Configuration
+#####################################################################
+
+config RP23XX_UART0
+	bool "UART0"
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Most UART parameters are configured here.  See also the
+		Board Selection menu to configure the pins used by UART0
+
+if RP23XX_UART0
+
+config RP23XX_UART0_BAUD
+	int "RP23XX UART0 BAUD"
+	default 115200
+	---help---
+		RP23XX UART0 communication bit rate.  The range of available
+		baud rates depend on the clock supplied to the UART. Given
+		the normally configured 125 MHz clock, the baud
+		rates between 120 and 7 812 500 baud are available.
+
+config RP23XX_UART0_PARITY
+	int "RP23XX UART0 parity"
+	default 0
+	range 0 2
+	---help---
+		RP23XX UART0 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config RP23XX_UART0_BITS
+	int "RP23XX UART0 number of bits"
+	default 8
+	range 5 8
+	---help---
+		RP23XX UART0 number of bits.  Default: 8
+
+config RP23XX_UART0_2STOP
+	int "RP23XX UART0 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif # RP23XX_UART0
+
+config RP23XX_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Most UART parameters are configured here.  See also the
+		Board Selection menu to configure the pins used by UART1
+
+if RP23XX_UART1
+
+config RP23XX_UART1_BAUD
+	int "RP23XX UART1 BAUD"
+	default 115200
+	---help---
+		RP23XX UART0 communication bit rate.  The range of available
+		baud rates depend on the clock supplied to the UART. Given
+		the normally configured 125 MHz clock, the baud
+		rates between 120 and 7 812 500 baud are available.
+
+config RP23XX_UART1_PARITY
+	int "RP23XX UART1 parity"
+	default 0
+	range 0 2
+	---help---
+		RP23XX UART1 parity.  0=None, 1=Odd, 2=Even.  Default: None
+
+config RP23XX_UART1_BITS
+	int "RP23XX UART1 number of bits"
+	default 8
+	range 5 8
+	---help---
+		RP23XX UART1 number of bits.  Default: 8
+
+config RP23XX_UART1_2STOP
+	int "RP23XX UART1 two stop bits"
+	default 0
+	---help---
+		0=1 stop bit, 1=Two stop bits.  Default: 1 stop bit
+
+endif # RP23XX_UART1
+
+#####################################################################
+#  SPI Configuration
+#####################################################################
+
+config RP23XX_SPI
+	bool "SPI Master Mode Support"
+	select SPI
+
+if RP23XX_SPI
+
+config RP23XX_SPI0
+	bool "SPI0"
+	default n
+	---help---
+		Most SPI parameters are configured here.  See also the
+		Board Selection menu to configure the pins used by SPI0
+
+config RP23XX_SPI1
+	bool "SPI1"
+	default n
+	---help---
+		Most SPI parameters are configured here.  See also the
+		Board Selection menu to configure the pins used by SPI1
+
+config RP23XX_SPI_DMA
+	bool "SPI DMA"
+	default y
+	depends on RP23XX_DMAC
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config RP23XX_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on RP23XX_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by RP23XX_SPI_DMATHRESHOLD.
+
+config RP23XX_SPI_DRIVER
+	bool "SPI character driver"
+	default y
+	select SPI_DRIVER
+	---help---
+		Build in support for a character driver at /dev/spi[N] that may be
+		used to perform SPI bus transfers from applications.  The intent of
+		this driver is to support SPI testing.
+
+endif # RP23XX_SPI
+
+#####################################################################
+#  I2C Configuration (Master)
+#####################################################################
+
+config RP23XX_I2C
+	bool "I2C Master"
+	select I2C
+	---help---
+		Build in support for I2C master mode.
+		Note: Do not configure the same port as both master and slave.
+
+if RP23XX_I2C
+
+config RP23XX_I2C0
+	bool "I2C0"
+	default n
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+config RP23XX_I2C1
+	bool "I2C1"
+	default n
+	---help---
+		See the Board Selection menu to configure the pins used by I2C1.
+
+config RP23XX_I2C_DRIVER
+	bool "I2C character driver"
+	default n
+	select I2C_DRIVER
+	---help---
+		Build in support for a character driver at /dev/i2c[N] that may be
+		used to perform I2C bus transfers from applications.  The intent of
+		this driver is to support I2C testing.  It is not suitable for use
+		in any real driver application.
+
+endif # RP23XX_I2C
+
+#####################################################################
+#  I2C Configuration (Slave)
+#####################################################################
+
+config RP23XX_I2C_SLAVE
+	bool "I2C Slave"
+	select I2C_SLAVE
+	---help---
+		Build in support for I2C slave mode.
+		Note: Do not configure the same port as both master and slave.
+
+if RP23XX_I2C_SLAVE
+
+config RP23XX_I2C0_SLAVE
+	bool "I2C0"
+	default n
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_I2C0_SLAVE
+
+config RP23XX_I2C0_SLAVE_ADDRESS
+	int "Slave Address (in decimal)"
+	default 42
+	---help---
+		This is the default address of this device on the I2C bus.
+		It should be the canonical address (not the shifted address)
+		in the range 8-119 for 7-bit mode and in the range 0-1023
+		for 10-bit mode.
+
+config RP23XX_I2C0_SLAVE_10BIT
+	bool "Enable 10-bit slave address"
+	default n
+	---help---
+		Set to enable 10-bit mode addressing.
+
+endif # RP23XX_I2C0_SLAVE
+
+config RP23XX_I2C1_SLAVE
+	bool "I2C1"
+	default n
+	---help---
+		See the Board Selection menu to configure the pins used by I2C1.
+
+if RP23XX_I2C1_SLAVE
+
+config RP23XX_I2C1_SLAVE_ADDRESS
+	int "Slave Address (in decimal)"
+	default 42
+	---help---
+		This is the default address of this device on the I2C bus.
+		It should be the canonical address (not the shifted address)
+		in the range 8-119 for 7-bit mode and in the range 0-1023
+		for 10-bit mode.
+
+config RP23XX_I2C1_SLAVE_10BIT
+	bool "Enable 10-bit slave address"
+	default n
+	---help---
+		Set to enable 10-bit mode addressing.
+
+endif # RP23XX_I2C1_SLAVE
+
+endif # RP23XX_I2C_SLAVE
+
+#####################################################################
+#  PWM Configuration
+#####################################################################
+
+config RP23XX_PWM
+	bool "PWM"
+	select PWM
+	---help---
+		After enabling PWM support here, configure the GPIO pins to use
+		under the Board Selection menu.
+
+if RP23XX_PWM
+
+config RP23XX_PWM_MULTICHAN
+	bool "Support RP23XX Multi-Channel PWM"
+	default y
+	---help---
+		If support for multi-channel PWM is disabled, the generated code
+		will only support the A channel of the PWM slices.
+
+if RP23XX_PWM_MULTICHAN
+
+config RP23XX_PWM_NCHANNELS
+	int "Number of channels"
+	default 2
+	range 1 2
+	---help---
+		If the number of channels is set to 1, the generated code will
+		only support the A channel of the PWM slices.  This is functionally
+		identical to disabling multi-channel PWM support.
+
+endif # RP23XX_PWM_MULTICHAN
+
+config RP23XX_PWM0
+	bool "PWM0"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM0
+
+config RP23XX_PWM0A_INVERT
+	bool "PWM0 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+	config RP23XX_PWM0B_INVERT
+	bool "PWM0 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+	config RP23XX_PWM0_PHASE_CORRECT
+	bool "PWM0 phase correct"
+	default n
+
+endif # RP23XX_PWM0
+
+config RP23XX_PWM1
+	bool "PWM1"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM1
+
+config RP23XX_PWM1A_INVERT
+	bool "PWM1 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM1B_INVERT
+	bool "PWM1 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM1_PHASE_CORRECT
+	bool "PWM1 phase correct"
+	default n
+
+endif # RP23XX_PWM1
+
+config RP23XX_PWM2
+	bool "PWM2"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM2
+
+config RP23XX_PWM2A_INVERT
+	bool "PWM2 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM2B_INVERT
+	bool "PWM2 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM2_PHASE_CORRECT
+	bool "PWM2 phase correct"
+	default n
+
+endif # RP23XX_PWM2
+
+config RP23XX_PWM3
+	bool "PWM3"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM3
+
+config RP23XX_PWM3A_INVERT
+	bool "PWM3 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM3B_INVERT
+	bool "PWM3 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM3_PHASE_CORRECT
+	bool "PWM3 phase correct"
+	default n
+
+endif # RP23XX_PWM3
+
+config RP23XX_PWM4
+	bool "PWM4"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM4
+
+config RP23XX_PWM4A_INVERT
+	bool "PWM4 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM4B_INVERT
+	bool "PWM4 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM4_PHASE_CORRECT
+	bool "PWM4 phase correct"
+	default n
+
+endif # RP23XX_PWM4
+
+config RP23XX_PWM5
+	bool "PWM5"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM5
+
+config RP23XX_PWM5A_INVERT
+	bool "PWM5 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM5B_INVERT
+	bool "PWM5 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM5_PHASE_CORRECT
+	bool "PWM5 phase correct"
+	default n
+
+endif # RP23XX_PWM5
+
+config RP23XX_PWM6
+	bool "PWM6"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM6
+
+config RP23XX_PWM6A_INVERT
+	bool "PWM6 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM6B_INVERT
+	bool "PWM6 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM6_PHASE_CORRECT
+	bool "PWM6 phase correct"
+	default n
+
+endif # RP23XX_PWM6
+
+config RP23XX_PWM7
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM7
+
+config RP23XX_PWM7A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM7B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM7_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM7
+
+config RP23XX_PWM8
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM8
+
+config RP23XX_PWM8A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM8B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM8_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM8
+
+config RP23XX_PWM9
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM9
+
+config RP23XX_PWM9A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM9B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM9_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM9
+
+config RP23XX_PWM10
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM10
+
+config RP23XX_PWM10A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM10B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM10_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM10
+
+config RP23XX_PWM11
+	bool "PWM7"
+	---help---
+		See the Board Selection menu to configure the pins used by I2C0.
+
+if RP23XX_PWM11
+
+config RP23XX_PWM11A_INVERT
+	bool "PWM7 channel 1 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the A pin will idle high
+		with the pulse going low.
+
+if RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM11B_INVERT
+	bool "PWM7 channel 2 invert"
+	default n
+	---help---
+		If invert is enabled, the PWM on the B pin will idle high
+		with the pulse going low.
+
+endif # RP23XX_PWM_MULTICHAN && RP23XX_PWM_NCHANNELS > 1
+
+config RP23XX_PWM11_PHASE_CORRECT
+	bool "PWM7 phase correct"
+	default n
+
+endif # RP23XX_PWM11
+
+endif # RP23XX_PWM
+
+#####################################################################
+#  I2S Configuration
+#####################################################################
+
+config RP23XX_I2S
+	bool "I2S"
+	select I2S
+	---help---
+		See the Board Selection menu to configure the pins used by I2S.
+
+if RP23XX_I2S
+
+config RP23XX_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	default 16
+	---help---
+		This is the total number of transfers that can be enqueue before
+		the caller is required to wait.  This setting determines the number
+		certain queue data structures that will be pre-allocated.
+
+config RP23XX_I2S_DATALEN
+	int "Data width (bits)"
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config RP23XX_I2S_PIO
+	int "RP23XX PIO number used for I2S (0-1)"
+	default 0
+	range 0 1
+
+config RP23XX_I2S_PIO_SM
+	int "RP23XX PIO state machine number used for I2S (0-3)"
+	default 0
+	range 0 3
+
+endif # RP23XX_I2S
+
+#####################################################################
+#  SPISD Configuration
+#####################################################################
+
+config RP23XX_SPISD
+	bool "SPI SD Card"
+	default n
+	select MMCSD_SPI
+
+if RP23XX_SPISD
+
+config RP23XX_SPISD_SLOT_NO
+	int "SPI SD Card Slot Number"
+	default 0
+	---help---
+		Select spi sd card slot number.
+
+config RP23XX_SPISD_SPI_CH
+	int "SPI channel number"
+	default 0
+	range 0 1
+	---help---
+		Select spi channel number to use spi sd card.
+
+endif # SPISD Configuration
+
+#####################################################################
+#  ADC Configuration
+#####################################################################
+
+config RP23XX_ADC
+	bool "Enable ADC Support"
+	default n
+	---help---
+		If y, the RP23XX ADC code will be built.
+		If the ADC device driver is not built, basic functions
+		to programmatically access the ADC ports will be added.
+
+if RP23XX_ADC
+
+config ADC
+	bool "Include ADC device driver"
+	default n
+	---help---
+		Additional ADC device drivers can be set under the
+		"Analog-to-Digital Conversion" item in the
+		"Device Driver/Analog Device Support" menu.
+
+if ADC
+
+config RP23XX_ADC_CHANNEL0
+	bool "Read ADC channel 0"
+	default n
+	---help---
+		If y, then ADC0 will be read.
+
+config RP23XX_ADC_CHANNEL1
+	bool "Read ADC channel 1"
+	default n
+	---help---
+		If y, then ADC1 will be read.
+
+config RP23XX_ADC_CHANNEL2
+	bool "Read ADC channel 2"
+	default n
+	---help---
+		If y, then ADC2 will be read.
+
+config RP23XX_ADC_CHANNEL3
+	bool "Read ADC channel 3"
+	default n
+	---help---
+		If y, then ADC3 will be read.
+
+config RP23XX_ADC_CHANNEL4
+	bool "Read ADC channel 4"
+	default n
+	---help---
+		If y, then ADC4 will be read.
+
+config RP23XX_ADC_CHANNEL5
+	bool "Read ADC channel 5"
+	default n
+	---help---
+		If y, then ADC5 will be read.
+
+config RP23XX_ADC_CHANNEL6
+	bool "Read ADC channel 6"
+	default n
+	---help---
+		If y, then ADC6 will be read.
+
+config RP23XX_ADC_CHANNEL7
+	bool "Read ADC channel 7"
+	default n
+	---help---
+		If y, then ADC7 will be read.
+
+config RP23XX_ADC_TEMPERATURE
+	bool "Read ADC chip temperature channel"
+	default n
+	---help---
+		If y, then the ADC chip temperature
+		will be read.
+
+endif # ADC
+
+endif # RP23XX_ADC
+
+#####################################################################
+#  CLK_GPOUT Configuration
+#####################################################################
+
+menuconfig RP23XX_CLK_GPOUT_ENABLE
+	bool "Enable Clock Outputs"
+	default n
+
+if RP23XX_CLK_GPOUT_ENABLE
+
+config RP23XX_CLK_GPOUT0
+	bool "CLK_GPOUT0 Clock Output (pin 21)"
+	default n
+	---help---
+		Enable CLK_GPOUT0
+
+if RP23XX_CLK_GPOUT0
+
+choice
+	prompt "Source Clock"
+
+config RP23XX_CLK_GPOUT0_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
+
+config RP23XX_CLK_GPOUT0_SRC_SYS
+	bool "SYS (150 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
+
+config RP23XX_CLK_GPOUT0_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT0_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT0_SRC_PERI
+	bool "PERI (150 MHz)"
+	---help---
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT0_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
+
+endchoice # Source Clock
+
+config RP23XX_CLK_GPOUT0_DIVINT
+	int "Divisor (Integer)"
+	default 1
+
+config RP23XX_CLK_GPOUT0_DIVFRAC
+	int "Divisor (Fractional)"
+	default 0
+
+endif # RP23XX_CLK_GPOUT0
+
+config RP23XX_CLK_GPOUT1
+	bool "CLK_GPOUT1 Clock Output (pin 23)"
+	default n
+	---help---
+		Enable CLK_GPOUT1
+
+if RP23XX_CLK_GPOUT1
+
+choice
+	prompt "Source Clock"
+
+config RP23XX_CLK_GPOUT1_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
+
+config RP23XX_CLK_GPOUT1_SRC_SYS
+	bool "SYS (150 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
+
+config RP23XX_CLK_GPOUT1_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT1_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT1_SRC_PERI
+	bool "PERI (150 MHz)"
+	---help---
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT1_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
+
+endchoice # Source Clock
+
+config RP23XX_CLK_GPOUT1_DIVINT
+	int "Divisor (Integer)"
+	default 1
+
+config RP23XX_CLK_GPOUT1_DIVFRAC
+	int "Divisor (Fractional)"
+	default 0
+
+endif # RP23XX_CLK_GPOUT1
+
+config RP23XX_CLK_GPOUT2
+	bool "CLK_GPOUT2 Clock Output (pin 24)"
+	default n
+	---help---
+		Enable CLK_GPOUT2
+
+if RP23XX_CLK_GPOUT2
+
+choice
+	prompt "Source Clock"
+
+config RP23XX_CLK_GPOUT2_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
+
+config RP23XX_CLK_GPOUT2_SRC_SYS
+	bool "SYS (125 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
+
+config RP23XX_CLK_GPOUT2_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT2_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT2_SRC_PERI
+	bool "PERI (150 MHz)"
+	---help---
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT2_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
+
+endchoice # Source Clock
+
+config RP23XX_CLK_GPOUT2_DIVINT
+	int "Divisor (Integer)"
+	default 1
+
+config RP23XX_CLK_GPOUT2_DIVFRAC
+	int "Divisor (Fractional)"
+	default 0
+
+endif # RP23XX_CLK_GPOUT2
+
+config RP23XX_CLK_GPOUT3
+	bool "CLK_GPOUT3 Clock Output (pin 25)"
+	default n
+	---help---
+		Enable CLK_GPOUT3
+
+if RP23XX_CLK_GPOUT3
+
+choice
+	prompt "Source Clock"
+
+config RP23XX_CLK_GPOUT3_SRC_REF
+	bool "REF (6 - 12 MHz)"
+	---help---
+		Reference clock that is always running unless in DORMANT mode. Runs from
+		Ring Oscillator (ROSC) at power-up but can be switched to Crystal
+		Oscillator (XOSC) for more accuracy.
+
+config RP23XX_CLK_GPOUT3_SRC_SYS
+	bool "SYS (125 MHz)"
+	---help---
+		System clock that is always running unless in DORMANT mode. Runs from
+		clk_ref at power-up but is typically switched to a PLL.
+
+config RP23XX_CLK_GPOUT3_SRC_USB
+	bool "USB (48 MHz)"
+	---help---
+		USB reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT3_SRC_ADC
+	bool "ADC (48 MHz)"
+	---help---
+		ADC reference clock. Must be 48MHz.
+
+config RP23XX_CLK_GPOUT3_SRC_PERI
+	bool "PERI (150 MHz)"
+	---help---
+		Peripheral reference clock. Defaults to system clock (150MHz).
+
+config RP23XX_CLK_GPOUT3_SRC_HSTX
+	bool "HSTX (150 MHz)"
+	---help---
+		HSTX reference clock. Defaults to system clock (150MHz).
+
+endchoice # Source Clock
+
+config RP23XX_CLK_GPOUT3_DIVINT
+	int "Divisor (Integer)"
+	default 1
+
+config RP23XX_CLK_GPOUT3_DIVFRAC
+	int "Divisor (Fractional)"
+	default 0
+
+endif # RP23XX_CLK_GPOUT3
+
+endif # RP23XX_CLK_GPOUT_ENABLE
+
+#####################################################################
+#  WS2812 Configuration
+#####################################################################
+
+config RP23XX_BOARD_HAS_WS2812
+	bool "Has ws2812 pixels"
+	default n
+	depends on WS2812
+	select WS2812_NON_SPI_DRIVER
+	---help---
+		See the Board Selection menu to configure the pins used
+		by ws2812.

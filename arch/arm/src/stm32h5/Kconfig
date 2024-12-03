@@ -1,0 +1,1355 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32H5
+
+comment "STM32H5 Configuration Options"
+
+choice
+	prompt "STM32 H5 Chip Selection"
+	default ARCH_CHIP_STM32H563ZI
+	depends on ARCH_CHIP_STM32H5
+
+config ARCH_CHIP_STM32H563ZI
+	bool "STM32H563ZI"
+	select STM32H5_STM32H5XXXX
+	select STM32H5_STM32H56XXX
+	select STM32H5_STM32H563XX
+	select STM32H5_STM32H5X3XX
+	select STM32H5_FLASH_CONFIG_I
+	select STM32H5_IO_CONFIG_Z
+	---help---
+		STM32 H5 Cortex M33, 512 Kb FLASH, 256 Kb SRAM
+
+endchoice # STM32 H5 Chip Selection
+
+# Chip families:
+
+config STM32H5_STM32H5XXXX
+	bool
+	default n
+		select ARCH_HAVE_FPU
+
+config STM32H5_STM32H56XXX
+	bool
+	default n
+	select STM32H5_HAVE_LPUART1
+	select STM32H5_HAVE_USART1
+	select STM32H5_HAVE_USART2
+	select STM32H5_HAVE_USART3
+	select STM32H5_HAVE_UART4
+	select STM32H5_HAVE_UART5
+	select STM32H5_HAVE_USART6
+	select STM32H5_HAVE_UART7
+	select STM32H5_HAVE_UART8
+	select STM32H5_HAVE_UART9
+	select STM32H5_HAVE_USART10
+	select STM32H5_HAVE_USART11
+	select STM32H5_HAVE_UART12
+
+config STM32H5_STM32H563XX
+	# STM32H552 and STM32H562 devices documented in RM0439
+	bool
+	default n
+	select STM32H5_HAVE_ETHERNET
+
+choice
+	prompt "Override Flash Size Designator"
+	depends on ARCH_CHIP_STM32H5
+	default STM32H5_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32H5 series parts numbering (sans the package type) ends with a letter
+		that designates the FLASH size.
+
+			Designator  Size in KiB
+				 8          64
+				 B         128
+				 C         256
+				 E         512
+				 G        1024
+				 I        2048
+
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32 Chip Selection.
+
+		Examples:
+		   If the STM32H576VE is chosen, the Flash configuration would be 'E', if a variant of
+		   the part with a 1024 KiB Flash is released in the future one could simply select
+		   the 'G' designator here.
+
+		   If an STM32H5xxx Series parts is chosen the default Flash configuration will be set
+		   herein and can be changed.
+
+config STM32H5_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config STM32H5_FLASH_OVERRIDE_8
+	bool "8 64 KB"
+
+config STM32H5_FLASH_OVERRIDE_B
+	bool "B 128 KB"
+
+config STM32H5_FLASH_OVERRIDE_C
+	bool "C 256 KB"
+
+config STM32H5_FLASH_OVERRIDE_E
+	bool "E 512 KB"
+
+config STM32H5_FLASH_OVERRIDE_G
+	bool "G 1024 KB"
+
+config STM32H5_FLASH_OVERRIDE_I
+	bool "I 2048 KB"
+
+endchoice # "Override Flash Size Designator"
+
+# Flash configurations
+
+config STM32H5_FLASH_CONFIG_B
+	bool
+	default n
+	depends on STM32H5_STM32H50XXX
+
+config STM32H5_FLASH_CONFIG_C
+	bool
+	default n
+	depends on STM32H5_STM32H52XXX
+
+config STM32H5_FLASH_CONFIG_E
+	bool
+	default n
+	depends on STM32H5_STM32H52XXX || STM32H5_STM32H53XXX
+
+config STM32H5_FLASH_CONFIG_G
+	bool
+	default n
+	depends on STM32H5_STM32H6XXX
+
+config STM32H5_FLASH_CONFIG_I
+	bool
+	default n
+	depends on STM32H5_STM32H56XXX || STM32H5_STM32H57XXX
+
+# Pin/package configurations
+
+config STM32H5_IO_CONFIG_K
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_T
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_C
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_R
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_J
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_M
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_V
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_Q
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_Z
+	bool
+	default n
+
+config STM32H5_IO_CONFIG_A
+	bool
+	default n
+
+comment "STM32H5 SRAM2 Options"
+
+config STM32H5_SRAM2_HEAP
+	bool "SRAM2 is used for heap"
+	default n
+	select STM32H5_SRAM2_INIT
+
+config STM32H5_SRAM2_INIT
+	bool "SRAM2 is initialized to zero"
+	default n
+	---help---
+		If the SRAM2 is being used for it's battery-backed capability,
+		this may be undesirable (because it will destroy the contents).  In that
+		case, the board should handle the initialization itself at the appropriate
+		time.
+
+comment "STM32H5 Peripherals"
+
+menu "STM32H5 Peripheral Selection"
+
+# These "hidden" settings determine if a peripheral option is available
+# for the selected MCU
+
+
+config STM32H5_HAVE_ETHERNET
+	bool
+	default n
+
+config STM32H5_HAVE_PHY_POLLED
+	bool
+	default n
+
+config STM32H5_HAVE_LPUART1
+	bool
+	default n
+
+config STM32H5_HAVE_USART1
+	bool
+	default n
+
+config STM32H5_HAVE_USART2
+	bool
+	default n
+
+config STM32H5_HAVE_USART3
+	bool
+	default n
+
+config STM32H5_HAVE_UART4
+	bool
+	default n
+
+config STM32H5_HAVE_UART5
+	bool
+	default n
+
+config STM32H5_HAVE_USART6
+	bool
+	default n
+
+config STM32H5_HAVE_UART7
+	bool
+	default n
+
+config STM32H5_HAVE_UART8
+	bool
+	default n
+
+config STM32H5_HAVE_UART9
+	bool
+	default n
+
+config STM32H5_HAVE_USART10
+	bool
+	default n
+
+config STM32H5_HAVE_USART11
+	bool
+	default n
+
+config STM32H5_HAVE_UART12
+	bool
+	default n
+
+# These "hidden" settings are the OR of individual peripheral selections
+# indicating that the general capability is required.
+
+config STM32H5_USART
+	bool
+	default n
+
+config STM32H5_ADC
+  bool
+  default n
+
+# These are the peripheral selections proper
+
+config STM32H5_ADC1
+  bool "ADC1"
+  default n
+  select STM32H5_ADC
+
+config STM32H5_ADC2
+  bool "ADC2"
+  default n
+  select STM32H5_ADC
+
+config STM32H5_ETHMAC
+	bool "Ethernet MAC"
+	default n
+	depends on STM32H5_HAVE_ETHERNET
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select STM32H5_HAVE_PHY_POLLED
+
+config STM32H5_USART2
+	bool "USART2"
+	default n
+	depends on STM32H5_HAVE_USART2
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART3
+	bool "USART3"
+	default n
+	depends on STM32H5_HAVE_USART3
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_UART4
+	bool "UART4"
+	default n
+	depends on STM32H5_HAVE_UART4
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_UART5
+	bool "UART5"
+	default n
+	depends on STM32H5_HAVE_UART5
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART6
+	bool "USART6"
+	default n
+	depends on STM32H5_HAVE_USART6
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_UART7
+	bool "UART7"
+	default n
+	depends on STM32H5_HAVE_UART7
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_UART8
+	bool "UART8"
+	default n
+	depends on STM32H5_HAVE_UART8
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART10
+	bool "USART10"
+	default n
+	depends on STM32H5_HAVE_USART10
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART11
+	bool "USART11"
+	default n
+	depends on STM32H5_HAVE_USART11
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_UART9
+	bool "UART9"
+	default n
+	depends on STM32H5_HAVE_UART9
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_UART12
+	bool "UART12"
+	default n
+	depends on STM32H5_HAVE_UART12
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_USART1
+	bool "USART1"
+	default n
+	depends on STM32H5_HAVE_USART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_LPUART1
+	bool "LPUART1"
+	default n
+	depends on STM32H5_HAVE_LPUART1
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32H5_USART
+
+config STM32H5_I2C
+		bool
+		default n
+
+config STM32H5_I2C1
+	bool "I2C1"
+	default n
+	select STM32H5_I2C
+
+config STM32H5_I2C2
+	bool "I2C2"
+	default n
+	select STM32H5_I2C
+
+config STM32H5_I2C3
+	bool "I2C3"
+	default n
+	select STM32H5_I2C
+
+config STM32H5_I2C4
+	bool "I2C4"
+	default n
+	select STM32H5_I2C
+
+endmenu
+
+
+config STM32H5_FLASH_PREFETCH
+	bool "Enable FLASH Pre-fetch"
+	default y
+	---help---
+	Enable FLASH prefetch
+
+config STM32H5_DISABLE_IDLE_SLEEP_DURING_DEBUG
+	bool "Disable IDLE Sleep (WFI) in debug mode"
+	default n
+	---help---
+		In debug configuration, disables the WFI instruction in the IDLE loop
+		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
+		as the ST-LINK2 with OpenOCD, if the ARM is put to sleep via the WFI
+		instruction, the debugger will disconnect, terminating the debug session.
+
+config ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific STM32 clock configuration.
+
+config STM32H5_SERIALDRIVER
+	bool
+
+menu "[LP]U[S]ART Configuration"
+	depends on STM32H5_USART
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	default STM32H5_LPUART1_SERIALDRIVER
+	depends on STM32H5_LPUART1
+
+config STM32H5_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select LPUART1_SERIALDRIVER
+	select STM32H5_SERIALDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+if LPUART1_SERIALDRIVER
+
+config LPUART1_RS485
+	bool "RS-485 on LPUART1"
+	default n
+	depends on STM32H5_LPUART1
+	---help---
+		Enable RS-485 interface on LPUART1. Your board config will have to
+		provide GPIO_LPUART1_RS485_DIR pin definition. Currently it cannot be
+		used with LPUART1_RXDMA.
+
+config LPUART1_RS485_DIR_POLARITY
+	int "LPUART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on LPUART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on LPUART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # LPUART1_SERIALDRIVER
+
+choice
+	prompt "USART1 Driver Configuration"
+	default STM32H5_USART1_SERIALDRIVER
+	depends on STM32H5_USART1
+
+config STM32H5_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select STM32H5_SERIALDRIVER
+
+endchoice # USART1 Driver Configuration
+
+if USART1_SERIALDRIVER
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	depends on STM32H5_USART1
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART1_SERIALDRIVER
+
+choice
+	prompt "USART2 Driver Configuration"
+	default STM32H5_USART2_SERIALDRIVER
+	depends on STM32H5_USART2
+
+config STM32H5_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select STM32H5_SERIALDRIVER
+
+endchoice # USART2 Driver Configuration
+
+if USART2_SERIALDRIVER
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	default n
+	depends on STM32H5_USART2
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART2_SERIALDRIVER
+
+choice
+	prompt "USART3 Driver Configuration"
+	default STM32H5_USART3_SERIALDRIVER
+	depends on STM32H5_USART3
+
+config STM32H5_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select STM32H5_SERIALDRIVER
+
+endchoice # USART3 Driver Configuration
+
+if USART3_SERIALDRIVER
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	default n
+	depends on STM32H5_USART3
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART3_SERIALDRIVER
+
+choice
+	prompt "UART4 Driver Configuration"
+	default STM32H5_UART4_SERIALDRIVER
+	depends on STM32H5_UART4
+
+config STM32H5_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select STM32H5_SERIALDRIVER
+
+endchoice # UART4 Driver Configuration
+
+if UART4_SERIALDRIVER
+
+config UART4_RS485
+	bool "RS-485 on UART4"
+	default n
+	depends on STM32H5_UART4
+	---help---
+		Enable RS-485 interface on UART4. Your board config will have to
+		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
+		used with UART4_RXDMA.
+
+config UART4_RS485_DIR_POLARITY
+	int "UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART4_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART4_SERIALDRIVER
+
+choice
+	prompt "UART5 Driver Configuration"
+	default STM32H5_UART5_SERIALDRIVER
+	depends on STM32H5_UART5
+
+config STM32H5_UART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART5_SERIALDRIVER
+	select STM32H5_SERIALDRIVER
+
+endchoice # UART5 Driver Configuration
+
+if UART5_SERIALDRIVER
+
+config UART5_RS485
+	bool "RS-485 on UART5"
+	default n
+	depends on STM32H5_UART5
+	---help---
+		Enable RS-485 interface on UART5. Your board config will have to
+		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
+		used with UART5_RXDMA.
+
+config UART5_RS485_DIR_POLARITY
+	int "UART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART5_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART5_SERIALDRIVER
+
+if USART6_SERIALDRIVER
+
+config USART6_RS485
+	bool "RS-485 on USART6"
+	default n
+	depends on STM32H5_USART6
+	---help---
+		Enable RS-485 interface on USART6. Your board config will have to
+		provide GPIO_USART6_RS485_DIR pin definition. Currently it cannot be
+		used with USART6_RXDMA.
+
+config USART6_RS485_DIR_POLARITY
+	int "USART6 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART6_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART6_SERIALDRIVER
+
+if UART7_SERIALDRIVER
+
+config UART7_RS485
+	bool "RS-485 on UART7"
+	default n
+	depends on STM32H5_UART7
+	---help---
+		Enable RS-485 interface on UART7. Your board config will have to
+		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
+		used with UART7_RXDMA.
+
+config UART7_RS485_DIR_POLARITY
+	int "UART7 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART7_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART7_SERIALDRIVER
+
+if UART8_SERIALDRIVER
+
+config UART8_RS485
+	bool "RS-485 on UART8"
+	default n
+	depends on STM32H5_UART8
+	---help---
+		Enable RS-485 interface on UART8. Your board config will have to
+		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
+		used with UART8_RXDMA.
+
+config UART8_RS485_DIR_POLARITY
+	int "UART8 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART8_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART8_SERIALDRIVER
+
+if UART9_SERIALDRIVER
+
+config UART9_RS485
+	bool "RS-485 on UART9"
+	default n
+	depends on STM32H5_UART9
+	---help---
+		Enable RS-485 interface on UART9. Your board config will have to
+		provide GPIO_UART9_RS485_DIR pin definition. Currently it cannot be
+		used with UART9_RXDMA.
+
+config UART9_RS485_DIR_POLARITY
+	int "UART9 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART9_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART9. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART9_SERIALDRIVER
+
+if USART10_SERIALDRIVER
+
+config USART10_RS485
+	bool "RS-485 on USART10"
+	default n
+	depends on STM32H5_USART10
+	---help---
+		Enable RS-485 interface on USART10. Your board config will have to
+		provide GPIO_USART10_RS485_DIR pin definition. Currently it cannot be
+		used with USART10_RXDMA.
+
+config USART10_RS485_DIR_POLARITY
+	int "USART10 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART10_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART10. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART10_SERIALDRIVER
+
+if USART11_SERIALDRIVER
+
+config USART11_RS485
+	bool "RS-485 on USART11"
+	default n
+	depends on STM32H5_USART11
+	---help---
+		Enable RS-485 interface on USART11. Your board config will have to
+		provide GPIO_USART11_RS485_DIR pin definition. Currently it cannot be
+		used with USART11_RXDMA.
+
+config USART11_RS485_DIR_POLARITY
+	int "USART11 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART11_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART11. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART11_SERIALDRIVER
+
+if UART12_SERIALDRIVER
+
+config UART12_RS485
+	bool "RS-485 on UART12"
+	default n
+	depends on STM32H5_UART12
+	---help---
+		Enable RS-485 interface on UART12. Your board config will have to
+		provide GPIO_UART12_RS485_DIR pin definition. Currently it cannot be
+		used with UART12_RXDMA.
+
+config UART12_RS485_DIR_POLARITY
+	int "UART12 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART12_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART12. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART12_SERIALDRIVER
+
+if STM32H5_SERIALDRIVER
+
+comment "Serial Driver Configuration"
+
+config STM32H5_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	depends on STM32H5_USART1 || STM32H5_USART2 || STM32H5_USART3 || STM32H5_UART4 || STM32H5_UART5
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some boards and a serial console in other boards, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config STM32H5_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32H5_USART
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by using software based management of RTS
+
+config STM32H5_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on STM32H5_USART
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32H5_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32H5_USART && STM32H5_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32H5 U[S]ARTS have no way to leave the break on
+		(TX=LOW) because software starts the break and then the hardware
+		automatically clears the break. This makes it difficult to send
+		a long break.
+
+config STM32H5_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on STM32H5_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32H5 serial driver.
+
+config STM32H5_USART_INVERT
+	bool "Signal Invert Support"
+	default n
+	depends on STM32H5_USART
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the STM32H5 serial driver.
+
+config STM32H5_USART_SWAP
+	bool "Swap RX/TX pins support"
+	default n
+	depends on STM32H5_USART
+	---help---
+		Enable RX/TX pin swapping support. The option enables support for the
+		TIOCSSWAP ioctl in the STM32H5 serial driver.
+
+if PM
+
+config STM32H5_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+endif
+endif # STM32H5_SERIALDRIVER
+
+endmenu # U[S]ART Configuration
+
+menu "Ethernet MAC Configuration"
+	depends on STM32H5_ETHMAC
+
+config STM32H5_PHYADDR
+	int "PHY address"
+	default 0
+	---help---
+		The 5-bit address of the PHY on the board. Default: 0
+
+config STM32H5_PHYINIT
+	bool "Board-specific PHY Initialization"
+	default n
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.
+		If STM32H5_PHYINIT is defined in the configuration then the board specific logic
+		must provide stm32_phyinitialize(); The STM32 Ethernet driver will call this
+		function one time before it first uses the PHY.
+
+config STM32H5_PHY_POLLING
+	bool "Support network monitoring by polling the PHY"
+	default n
+	depends on STM32H5_HAVE_PHY_POLLED
+	select ARCH_PHY_POLLED
+	---help---
+		Some boards may not have an interrupt connected to the PHY.
+		This option allows the network monitor to be used by polling the PHY for status.
+
+config STM32H5_MII
+	bool "Use MII interface"
+	default n
+	---help---
+		Support Ethernet MII interface.
+
+choice
+	prompt "MII clock configuration"
+	default STM32H5_MII_EXTCLK
+	depends on STM32H5_MII
+
+config STM32H5_MII_MCO1
+	bool "Use MC01 as MII clock"
+	---help---
+		Use MC01 to clock the MII interface.
+
+config STM32H5_MII_MCO2
+	bool "Use MC02 as MII clock"
+	---help---
+		Use MC02 to clock the MII interface.
+
+config STM32H5_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice
+
+config STM32H5_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config STM32H5_ETH_NRXDESC
+	int "Number of RX descriptors"
+	default 8
+	---help---
+		Number of RX DMA descriptors to use.
+
+config STM32H5_ETH_NTXDESC
+	int "Number of TX descriptors"
+	default 4
+	---help---
+		Number of TX DMA descriptors to use.
+
+config STM32H5_ETHFD
+	bool "Full duplex"
+	default n
+	depends on !STM32H5_AUTONEG
+	---help---
+		If STM32H5_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config STM32H5_ETH100MBPS
+	bool "100 Mbps"
+	default n
+	depends on !STM32H5_AUTONEG
+	---help---
+		If STM32H5_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+config STM32H5_PHYSR
+	int "PHY Status Register Address (decimal)"
+	depends on STM32H5_AUTONEG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config STM32H5_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	default n
+	depends on STM32H5_AUTONEG
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+config STM32H5_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config STM32H5_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config STM32H5_PHYSR_MODE
+	hex "PHY Mode Mask"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config STM32H5_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	depends on STM32H5_AUTONEG && !STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+config STM32H5_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config STM32H5_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config STM32H5_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config STM32H5_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config STM32H5_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	depends on STM32H5_AUTONEG && STM32H5_PHYSR_ALTCONFIG
+	---help---
+		This must be provided if STM32H5_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+config STM32H5_ETH_PTP
+	bool "Precision Time Protocol (PTP)"
+	default n
+	---help---
+		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
+		with this condition.
+
+config STM32H5_RMII
+	bool
+	default !STM32H5_MII
+
+choice
+	prompt "RMII clock configuration"
+	default STM32H5_RMII_EXTCLK
+	depends on STM32H5_RMII
+
+config STM32H5_RMII_MCO1
+	bool "Use MC01 as RMII clock"
+	---help---
+		Use MCO1 to clock the RMII interface.
+
+config STM32H5_RMII_MCO2
+	bool "Use MC02 as RMII clock"
+	---help---
+		Use MCO2 to clock the RMII interface.
+
+config STM32H5_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external logic.
+
+endchoice # RMII clock configuration
+
+config STM32H5_ETHMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_FEATURES.
+
+config STM32H5_NO_PHY
+	bool "MAC has no PHY"
+	default n
+
+endmenu # Ethernet MAC Configuration
+
+
+menu "I2C Configuration"
+	depends on STM32H5_I2C
+
+menu "Clock Selection"
+
+choice
+	depends on STM32H5_I2C1
+	prompt "I2C1 Input Clock Selection"
+	default STM32H5_I2C1_CLK_PCLK1
+
+config STM32H5_I2C1_CLK_CSI
+	bool "CSI"
+
+config STM32H5_I2C1_CLK_HSI
+	bool "HSI"
+
+config STM32H5_I2C1_CLK_PCLK1
+	bool "PCLK1"
+
+config STM32H5_I2C1_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C1 Input Clock Selection
+
+choice
+	depends on STM32H5_I2C2
+	prompt "I2C2 Input Clock Selection"
+	default STM32H5_I2C2_CLK_PCLK1
+
+config STM32H5_I2C2_CLK_CSI
+	bool "CSI"
+
+config STM32H5_I2C2_CLK_HSI
+	bool "HSI"
+
+config STM32H5_I2C2_CLK_PCLK1
+	bool "PCLK1"
+
+config STM32H5_I2C2_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C2 Input Clock Selection
+
+choice
+	depends on STM32H5_I2C3
+	prompt "I2C3 Input Clock Selection"
+	default STM32H5_I2C3_CLK_PCLK3
+
+config STM32H5_I2C3_CLK_CSI
+	bool "CSI"
+
+config STM32H5_I2C3_CLK_HSI
+	bool "HSI"
+
+config STM32H5_I2C3_CLK_PCLK3
+	bool "PCLK3"
+
+config STM32H5_I2C3_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C3 Input Clock Selection
+
+choice
+	depends on STM32H5_I2C4
+	prompt "I2C4 Input Clock Selection"
+	default STM32H5_I2C4_CLK_PCLK3
+
+config STM32H5_I2C4_CLK_CSI
+	bool "CSI"
+
+config STM32H5_I2C4_CLK_HSI
+	bool "HSI"
+
+config STM32H5_I2C4_CLK_PCLK3
+	bool "PCLK3"
+
+config STM32H5_I2C4_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C4 Input Clock Selection
+
+endmenu # Clock Selection
+
+menu "Rise/Fall Override"
+
+config STM32H5_I2C1_RF_OVERRIDE
+	bool "I2C1"
+	default n
+	depends on STM32H5_I2C1
+
+config STM32H5_I2C2_RF_OVERRIDE
+	bool "I2C2"
+	default n
+	depends on STM32H5_I2C2
+
+config STM32H5_I2C3_RF_OVERRIDE
+	bool "I2C3"
+	default n
+	depends on STM32H5_I2C3
+
+config STM32H5_I2C4_RF_OVERRIDE
+	bool "I2C4"
+	default n
+	depends on STM32H5_I2C4
+
+menu "Rise/Fall Values"
+
+config STM32H5_I2C1_RISE
+	int "I2C1 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C1_RF_OVERRIDE
+
+config STM32H5_I2C1_FALL
+	int "I2C1 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C1_RF_OVERRIDE
+
+config STM32H5_I2C2_RISE
+	int "I2C2 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C2_RF_OVERRIDE
+
+config STM32H5_I2C2_FALL
+	int "I2C2 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C2_RF_OVERRIDE
+
+config STM32H5_I2C3_RISE
+	int "I2C3 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C3_RF_OVERRIDE
+
+config STM32H5_I2C3_FALL
+	int "I2C3 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C3_RF_OVERRIDE
+
+config STM32H5_I2C4_RISE
+	int "I2C4 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32H5_I2C4_RF_OVERRIDE
+
+config STM32H5_I2C4_FALL
+	int "I2C4 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32H5_I2C4_RF_OVERRIDE
+
+endmenu # Rise/Fall Values
+
+endmenu # Rise/Fall Override
+
+menu "Filtering"
+
+menu "Digital Filters"
+
+config STM32H5_I2C1_DNF
+	int "I2C1 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C1
+
+config STM32H5_I2C2_DNF
+	int "I2C2 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C2
+
+config STM32H5_I2C3_DNF
+	int "I2C3 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C3
+
+config STM32H5_I2C4_DNF
+	int "I2C4 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32H5_I2C4
+
+endmenu # Digital Filters
+
+menu "Analog Filters"
+
+config STM32H5_I2C1_ANFOFF
+	int "Turn off I2C1 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C1
+
+config STM32H5_I2C2_ANFOFF
+	int "Turn off I2C2 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C2
+
+config STM32H5_I2C3_ANFOFF
+	int "Turn off I2C3 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C3
+
+config STM32H5_I2C4_ANFOFF
+	int "Turn off I2C4 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32H5_I2C4
+
+endmenu # Analog Filters
+
+endmenu # Filtering
+
+config STM32H5_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32H5_I2C
+
+config STM32H5_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32H5_I2C_DYNTIMEO
+
+config STM32H5_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32H5_I2C_DYNTIMEO
+
+config STM32H5_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32H5_I2C
+
+config STM32H5_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32H5_I2C && !STM32H5_I2C_DYNTIMEO
+
+config STM32H5_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32H5_I2C && !STM32H5_I2C_DYNTIMEO
+
+endmenu # "I2C Configuration"
+
+endif # ARCH_CHIP_STM32H5

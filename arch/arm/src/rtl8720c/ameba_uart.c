@@ -1074,21 +1074,11 @@ void arm_serialinit(void)
  ****************************************************************************/
 
 #ifdef HAVE_AMEBA_CONSOLE
-int up_putc(int ch)
+void up_putc(int ch)
 {
   struct ameba_s *priv = (struct ameba_s *)CONSOLE_DEV.priv;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      ameba_putc(priv, '\r');
-    }
-
   ameba_putc(priv, ch);
-  return ch;
 }
 
 #endif

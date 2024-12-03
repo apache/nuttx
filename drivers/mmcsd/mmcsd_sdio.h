@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/mmcsd/mmcsd_sdio.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,6 +60,7 @@
 #define MMC_CMD6_MODE_CLEAR_BITS    (0x02)  /* Clear bits which are 1 in value */
 #define MMC_CMD6_MODE_WRITE_BYTE    (0x03)  /* Set target to value */
 
+#define EXT_CSD_PART_CONF           179     /* R/W */
 #define EXT_CSD_BUS_WIDTH           183     /* WO */
 #define EXT_CSD_HS_TIMING           185     /* R/W */
 
@@ -81,6 +84,17 @@
 #define MMC_CMD6_HS_TIMING(timing)  (MMC_CMD6_VALUE(timing) | \
                                      MMC_CMD6_INDEX(EXT_CSD_HS_TIMING) | \
                                      MMC_CMD6_MODE(MMC_CMD6_MODE_WRITE_BYTE))
+
+/* Partition type */
+
+#  define MMCSD_PART_UDATA            0
+#  define MMCSD_PART_BOOT0            1
+#  define MMCSD_PART_BOOT1            2
+#  define MMCSD_PART_RPMB             3
+#  define MMCSD_PART_GENP0            4
+#  define MMCSD_PART_GENP1            5
+#  define MMCSD_PART_GENP2            6
+#  define MMCSD_PART_GENP3            7
 
 /* CMD8 Argument:
  *    [31:12]: Reserved (shall be set to '0')

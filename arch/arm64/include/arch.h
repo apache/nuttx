@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/arch.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,8 +36,9 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stddef.h>
-#  include <nuttx/macro.h>
 #endif
+
+#include <nuttx/irq.h>
 
 /****************************************************************************
  * Pre-processor Prototypes
@@ -52,41 +55,6 @@
 #define ARCH_SPGTS          (ARCH_PGT_MAX_LEVELS - 1)
 
 #endif /* CONFIG_ARCH_ADDRENV */
-
-/****************************************************************************
- * Name:
- *   read_/write_/zero_/modify_ sysreg
- *
- * Description:
- *
- *   ARMv8 Architecture Registers access method
- *   All the macros need a memory clobber
- *
- ****************************************************************************/
-
-#define read_sysreg(reg)                            \
-  ({                                                \
-    uint64_t __val;                                 \
-    __asm__ volatile ("mrs %0, " STRINGIFY(reg)     \
-                    : "=r" (__val) :: "memory");    \
-    __val;                                          \
-  })
-
-#define write_sysreg(__val, reg)                    \
-  ({                                                \
-    __asm__ volatile ("msr " STRINGIFY(reg) ", %0"  \
-                      : : "r" (__val) : "memory");  \
-  })
-
-#define zero_sysreg(reg)                            \
-  ({                                                \
-    __asm__ volatile ("msr " STRINGIFY(reg) ", xzr" \
-                      ::: "memory");                \
-  })
-
-#define modify_sysreg(v,m,a)                        \
-  write_sysreg((read_sysreg(a) & ~(m)) |            \
-               ((uintptr_t)(v) & (m)), a)
 
 /****************************************************************************
  * Inline functions

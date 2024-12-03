@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/common/x86_64_internal.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -32,6 +34,7 @@
 #  include <nuttx/sched.h>
 #  include <stdint.h>
 #  include <arch/io.h>
+#  include <arch/irq.h>
 #  include <arch/multiboot2.h>
 #endif
 
@@ -191,15 +194,34 @@ extern uint8_t _stbss[];           /* Start of .tbss */
 extern uint8_t _etbss[];           /* End+1 of .tbss */
 #endif
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+static inline_function uint64_t *x86_64_get_ktopstk(void)
+{
+  uint64_t *ktopstk;
+  __asm__ volatile("movq %%gs:(%c1), %0"
+                   : "=rm" (ktopstk)
+                   : "i" (offsetof(struct intel64_cpu_s, ktopstk)));
+  return ktopstk;
+}
+
+static inline_function void x86_64_set_ktopstk(uint64_t *ktopstk)
+{
+  __asm__ volatile("movq %0, %%gs:(%c1)"
+                   :: "r" (ktopstk), "i" (offsetof(struct intel64_cpu_s,
+                                                   ktopstk)));
+}
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 /* Atomic modification of registers */
 
 void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
@@ -232,7 +254,7 @@ void x86_64_lowputs(const char *str);
 void x86_64_restore_auxstate(struct tcb_s *rtcb);
 void x86_64_checktasks(void);
 
-void x86_64_syscall(uint64_t *regs);
+uint64_t *x86_64_syscall(uint64_t *regs);
 
 #ifdef CONFIG_ARCH_MULTIBOOT2
 void x86_64_mb2_fbinitialize(struct multiboot_tag_framebuffer *tag);
@@ -285,6 +307,11 @@ void x86_64_pci_init(void);
 size_t x86_64_stack_check(void *stackbase, size_t nbytes);
 void x86_64_stack_color(void *stackbase, size_t nbytes);
 #endif
+
+/* TLB shootdown */
+
+int x86_64_tlb_handler(int irq, void *c, void *arg);
+void x86_64_tlb_shootdown(void);
 
 #endif /* __ASSEMBLY__ */
 

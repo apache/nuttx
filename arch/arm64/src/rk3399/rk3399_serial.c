@@ -1,6 +1,8 @@
 /***************************************************************************
  * arch/arm64/src/rk3399/rk3399_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1355,23 +1357,13 @@ void arm64_earlyserialinit(void)
  *
  ***************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct uart_dev_s *dev = &CONSOLE_DEV;
 
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      a64_uart_wait_send(dev, '\r');
-    }
-
   a64_uart_wait_send(dev, ch);
 #endif
-  return ch;
 }
 
 /***************************************************************************

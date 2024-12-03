@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z80/src/common/z80_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -44,6 +46,13 @@
 
 FAR chipreg_t *z80_doirq(uint8_t irq, FAR chipreg_t *regs)
 {
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+
+  if (*running_task != NULL)
+    {
+      z80_copystate((*running_task)->xcp.regs, regs)
+    }
+
   board_autoled_on(LED_INIRQ);
 
   DECL_SAVESTATE();

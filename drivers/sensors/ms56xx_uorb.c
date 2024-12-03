@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/sensors/ms56xx_uorb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -31,6 +33,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
 #include <nuttx/kmalloc.h>
@@ -156,6 +159,7 @@ static const struct sensor_ops_s g_sensor_ops =
  *
  * Return:
  *   Timestamp in microseconds
+ *
  ****************************************************************************/
 
 static unsigned long ms56xx_curtime(void)
@@ -368,6 +372,7 @@ static inline void baro_measure_read(FAR struct ms56xx_dev_s *priv,
  * Parameter:
  *   argc - Number of arguments
  *   argv - Pointer to argument list
+ *
  ****************************************************************************/
 
 static int ms56xx_thread(int argc, char **argv)

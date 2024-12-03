@@ -1,0 +1,117 @@
+#############################################################################
+# boards/arm/rp23xx/common/src/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+#############################################################################
+
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+
+CFLAGS += -DPICO_RP2040=0\
+          -DPICO_RP2350=1\
+          -DLIB_PICO_BINARY_INFO=0\
+          -DPICO_SECURE=1\
+          -D__ARM_ARCH_6M__=0
+
+CSRCS += rp23xx_common_bringup.c
+CSRCS += rp23xx_common_initialize.c
+
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += rp23xx_reset.c
+endif
+
+ifeq ($(CONFIG_SPI),y)
+CSRCS += rp23xx_spi.c
+endif
+
+ifeq ($(CONFIG_RP23XX_I2C_DRIVER),y)
+CSRCS += rp23xx_i2cdev.c
+endif
+
+ifeq ($(CONFIG_RP23XX_PWM),y)
+CSRCS += rp23xx_pwmdev.c
+endif
+
+ifeq ($(CONFIG_RP23XX_SPI_DRIVER),y)
+CSRCS += rp23xx_spidev.c
+endif
+
+ifeq ($(CONFIG_RP23XX_I2S),y)
+CSRCS += rp23xx_i2sdev.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306),y)
+CSRCS += rp23xx_ssd1306.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += rp23xx_st7789.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7735),y)
+CSRCS += rp23xx_st7735.c
+endif
+
+ifeq ($(CONFIG_LCD_GC9A01),y)
+CSRCS += rp23xx_gc9a01.c
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += rp23xx_usbmsc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += rp23xx_composite.c
+endif
+
+ifeq ($(CONFIG_RP23XX_SPISD),y)
+ CSRCS += rp23xx_spisd.c
+endif
+
+
+ifeq ($(CONFIG_SENSORS_BMP280),y)
+ CSRCS += rp23xx_bmp280.c
+endif
+
+ifeq ($(CONFIG_SENSORS_INA219),y)
+ CSRCS += rp23xx_ina219.c
+endif
+
+ifeq ($(CONFIG_ENC28J60),y)
+ CSRCS += rp23xx_enc28j60.c
+endif
+
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+ CSRCS += rp23xx_lcd_backpack.c
+endif
+
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+  CSRCS += rp23xx_uniqueid.c
+endif
+
+ifeq ($(CONFIG_NET_W5500),y)
+CSRCS += rp23xx_w5500.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MAX6675),y)
+ CSRCS += rp23xx_max6675.c
+endif
+
+DEPPATH += --dep-path src
+VPATH += :src
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
+
+endif

@@ -1,6 +1,8 @@
 /***************************************************************************
  * arch/arm64/src/common/arm64_gicv3.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -257,7 +259,7 @@ void arm64_gic_irq_enable(unsigned int intid)
 #ifndef CONFIG_ARM64_GICV3_SPI_ROUTING_CPU0
   if (GIC_IS_SPI(intid))
     {
-      arm64_gic_write_irouter((GET_MPIDR() & MPIDR_ID_MASK), intid);
+      arm64_gic_write_irouter(up_cpu_index(), intid);
     }
 #endif
 
@@ -378,9 +380,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   uint32_t aff1;
   uint64_t sgi_val;
   uint32_t regval;
-  unsigned long base;
 
-  base = gic_get_rdist() + GICR_SGI_BASE_OFF;
   ASSERT(GIC_IS_SGI(sgi_id));
 
   /* Extract affinity fields from target */
@@ -394,7 +394,9 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
 
   ARM64_DSB();
 
-  regval = getreg32(IGROUPR(base, 0));
+  /* Read the IGROUPR0 value we set in `gicv3_cpuif_init` */
+
+  regval = IGROUPR_SGI_VAL;
 
   if (regval & BIT(sgi_id))
     {
@@ -952,7 +954,8 @@ static void arm64_gic_init(void)
   int       err;
 
   cpu               = this_cpu();
-  g_gic_rdists[cpu] = CONFIG_GICR_BASE + cpu * CONFIG_GICR_OFFSET;
+  g_gic_rdists[cpu] = CONFIG_GICR_BASE +
+                      up_cpu_index() * CONFIG_GICR_OFFSET;
 
   err = gic_validate_redist_version();
   if (err)

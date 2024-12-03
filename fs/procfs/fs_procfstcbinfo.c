@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/procfs/fs_procfstcbinfo.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -36,6 +38,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
@@ -178,17 +181,17 @@ static int tcbinfo_close(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: tcbinfo_current_regs
+ * Name: tcbinfo_running_regs
  *
  * Description:
- *   A special version of up_current_regs() that is non-optimized.
+ *   A special version of running_regs() that is non-optimized.
  *
  ****************************************************************************/
 
 nooptimiziation_function
-FAR static void *tcbinfo_current_regs(void)
+FAR static void *tcbinfo_running_regs(void)
 {
-  return up_current_regs();
+  return running_regs();
 }
 
 /****************************************************************************
@@ -214,8 +217,8 @@ static ssize_t tcbinfo_read(FAR struct file *filep, FAR char *buffer,
     {
       linesize = procfs_snprintf(attr->line, TCBINFO_LINELEN,
                                  "pointer %p size %zu current regs %p\n",
-                                  &g_tcbinfo, sizeof(struct tcbinfo_s),
-                                  tcbinfo_current_regs());
+                                 &g_tcbinfo, sizeof(struct tcbinfo_s),
+                                 tcbinfo_running_regs());
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
 

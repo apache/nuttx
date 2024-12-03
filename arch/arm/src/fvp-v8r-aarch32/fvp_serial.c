@@ -78,9 +78,8 @@ void arm_serialinit(void)
 
 #else /* USE_SERIALDRIVER */
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
-  return 0;
 }
 
 #endif /* USE_SERIALDRIVER */

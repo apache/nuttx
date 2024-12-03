@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_switchcontext.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -59,13 +61,13 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
   /* Are we in an interrupt handler? */
 
-  if (!up_current_regs())
+  if (!up_interrupt_context())
     {
       /* Switch context to the context of the task at the head of the
        * ready to run list.
        */
 
-      xtensa_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
+      xtensa_switchcontext();
 
       /* xtensa_switchcontext forces a context switch to the task at the
        * head of the ready-to-run list.  It does not 'return' in the

@@ -327,7 +327,7 @@ struct sockaddr_storage
 
   /* Following fields are implementation-defined */
 
-  struct
+  begin_packed_struct struct
   {
     char ss_pad1[SS_PAD1SIZE]; /* 6-byte pad; this is to make implementation-defined
                                 * pad up to alignment field that follows explicit in
@@ -337,7 +337,7 @@ struct sockaddr_storage
                                 * value minus size of ss_family ss_pad1, ss_align
                                 * fields is 112. */
   }
-  ss_data[1];
+  end_packed_struct ss_data[1];
 };
 
 /* The sockaddr structure is used to define a socket address which is used
@@ -389,7 +389,7 @@ struct ucred
  ****************************************************************************/
 
 static inline FAR struct cmsghdr *__cmsg_nxthdr(FAR void *__ctl,
-                                                unsigned int __size,
+                                                unsigned long __size,
                                                 FAR struct cmsghdr *__cmsg)
 {
   size_t len = CMSG_ALIGN(__cmsg->cmsg_len);

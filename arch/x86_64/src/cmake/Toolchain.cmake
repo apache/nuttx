@@ -1,6 +1,8 @@
 # ##############################################################################
 # arch/x86_64/src/cmake/Toolchain.cmake
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more contributor
 # license agreements.  See the NOTICE file distributed with this work for
 # additional information regarding copyright ownership.  The ASF licenses this
@@ -75,12 +77,16 @@ if(${CONFIG_STACK_USAGE_WARNING})
   endif()
 endif()
 
-if(CONFIG_SCHED_GCOV)
-  add_compile_options(-fprofile-generate -ftest-coverage)
+if(CONFIG_COVERAGE_ALL)
+  add_compile_options(-fprofile-arcs -ftest-coverage -fno-inline)
 endif()
 
 if(CONFIG_DEBUG_SYMBOLS)
   add_compile_options(${CONFIG_DEBUG_SYMBOLS_LEVEL})
+endif()
+
+if(CONFIG_HOST_LINUX)
+  add_link_options(-Wl,-z,noexecstack)
 endif()
 
 # Architecture flags
@@ -121,7 +127,6 @@ if(CONFIG_CXX_STANDARD)
 endif()
 
 if(CONFIG_LIBCXX)
-  add_compile_options(-D__GLIBCXX__)
   add_compile_options(-D_LIBCPP_DISABLE_AVAILABILITY)
 endif()
 
@@ -209,4 +214,14 @@ endif()
 
 if(CONFIG_ARCH_X86_64_AVX512VBMI)
   add_compile_options(-mavx512vbmi)
+endif()
+
+if(CONFIG_ARCH_TOOLCHAIN_GNU AND NOT CONFIG_ARCH_TOOLCHAIN_CLANG)
+  if(NOT GCCVER)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} --version
+                    OUTPUT_VARIABLE GCC_VERSION_OUTPUT)
+    string(REGEX MATCH "[0-9]+\\.[0-9]+" GCC_VERSION_REGEX
+                 "${GCC_VERSION_OUTPUT}")
+    set(GCCVER ${CMAKE_MATCH_1})
+  endif()
 endif()

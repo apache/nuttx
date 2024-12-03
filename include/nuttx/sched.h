@@ -232,22 +232,19 @@
 #  define get_task_name(tcb)         "<noname>"
 #endif
 
+#define SMP_CALL_INITIALIZER(func, arg) {(func), (arg)}
+
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
  */
 
 #ifdef CONFIG_SMP
-#  define this_cpu()                 up_cpu_index()
+#  define this_cpu()                 up_this_cpu()
 #else
 #  define this_cpu()                 (0)
 #endif
 
-/* Task Switching Interfaces (non-standard).
- * These two macros can be called in interrupt context.
- */
-
-#define nxsched_lock_irq() (up_interrupt_context() ? OK : sched_lock())
-#define nxsched_unlock_irq() (up_interrupt_context() ? OK : sched_unlock())
+#define running_regs()               ((FAR void **)(g_running_tasks[this_cpu()]->xcp.regs))
 
 /****************************************************************************
  * Public Type Definitions
@@ -705,10 +702,10 @@ struct tcb_s
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-  clock_t premp_start;                   /* Time when preemption disabled   */
-  clock_t premp_max;                     /* Max time preemption disabled    */
-  void   *premp_caller;                  /* Caller of preemption disabled   */
-  void   *premp_max_caller;              /* Caller of max preemption        */
+  clock_t preemp_start;                  /* Time when preemption disabled   */
+  clock_t preemp_max;                    /* Max time preemption disabled    */
+  void   *preemp_caller;                 /* Caller of preemption disabled   */
+  void   *preemp_max_caller;             /* Caller of max preemption        */
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
@@ -840,6 +837,15 @@ typedef CODE void (*nxsched_foreach_t)(FAR struct tcb_s *tcb, FAR void *arg);
 
 #ifdef CONFIG_SMP
 typedef CODE int (*nxsched_smp_call_t)(FAR void *arg);
+
+struct smp_call_cookie_s;
+struct smp_call_data_s
+{
+  nxsched_smp_call_t            func;
+  FAR void                     *arg;
+  FAR struct smp_call_cookie_s *cookie;
+  sq_entry_t                    node[CONFIG_SMP_NCPUS];
+};
 #endif
 
 #endif /* __ASSEMBLY__ */
@@ -861,12 +867,18 @@ extern "C"
 /* Maximum time with pre-emption disabled or within critical section. */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-EXTERN clock_t g_premp_max[CONFIG_SMP_NCPUS];
+EXTERN clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION  >= 0 */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
 EXTERN clock_t g_crit_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
+
+/* g_running_tasks[] holds a references to the running task for each CPU.
+ * It is valid only when up_interrupt_context() returns true.
+ */
+
+EXTERN FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
 
 EXTERN const struct tcbinfo_s g_tcbinfo;
 
@@ -1706,16 +1718,34 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
                              FAR void *arg);
 
 /****************************************************************************
+ * Name: nxsched_smp_call_init
+ *
+ * Description:
+ *   Init call_data
+ *
+ * Input Parameters:
+ *   data - Call data
+ *   func - Function
+ *   arg  - Function args
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+void nxsched_smp_call_init(FAR struct smp_call_data_s *data,
+                           nxsched_smp_call_t func, FAR void *arg);
+
+/****************************************************************************
  * Name: nxsched_smp_call_single
  *
  * Description:
- *   Call function on single processor
+ *   Call function on single processor, wait function callback
  *
  * Input Parameters:
  *   cpuid - Target cpu id
  *   func  - Function
  *   arg   - Function args
- *   wait  - Wait function callback or not
  *
  * Returned Value:
  *   Result
@@ -1723,19 +1753,18 @@ int nxsched_smp_call_handler(int irq, FAR void *context,
  ****************************************************************************/
 
 int nxsched_smp_call_single(int cpuid, nxsched_smp_call_t func,
-                            FAR void *arg, bool wait);
+                            FAR void *arg);
 
 /****************************************************************************
  * Name: nxsched_smp_call
  *
  * Description:
- *   Call function on multi processors
+ *   Call function on multi processors, wait function callback
  *
  * Input Parameters:
  *   cpuset - Target cpuset
  *   func   - Function
  *   arg    - Function args
- *   wait   - Wait function callback or not
  *
  * Returned Value:
  *   Result
@@ -1743,7 +1772,43 @@ int nxsched_smp_call_single(int cpuid, nxsched_smp_call_t func,
  ****************************************************************************/
 
 int nxsched_smp_call(cpu_set_t cpuset, nxsched_smp_call_t func,
-                     FAR void *arg, bool wait);
+                     FAR void *arg);
+
+/****************************************************************************
+ * Name: nxsched_smp_call_single_async
+ *
+ * Description:
+ *   Call function on single processor async
+ *
+ * Input Parameters:
+ *   cpuset - Target cpuset
+ *   data   - Call data
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call_single_async(int cpuid,
+                                  FAR struct smp_call_data_s *data);
+
+/****************************************************************************
+ * Name: nxsched_smp_call_async
+ *
+ * Description:
+ *   Call function on multi processors async
+ *
+ * Input Parameters:
+ *   cpuset - Target cpuset
+ *   data   - Call data
+ *
+ * Returned Value:
+ *   Result
+ *
+ ****************************************************************************/
+
+int nxsched_smp_call_async(cpu_set_t cpuset,
+                           FAR struct smp_call_data_s *data);
 #endif
 
 #undef EXTERN

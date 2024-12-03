@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_mmu.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,11 +51,17 @@
 #define MT_NORMAL_NC                3U
 #define MT_NORMAL                   4U
 
+#ifdef CONFIG_ARM64_MTE
+#define MT_NORMAL_VAL               0xf0UL
+#else
+#define MT_NORMAL_VAL               0xffUL
+#endif
+
 #define MEMORY_ATTRIBUTES           ((0x00 << (MT_DEVICE_NGNRNE * 8)) |  \
                                      (0x04 << (MT_DEVICE_NGNRE * 8))   | \
                                      (0x0c << (MT_DEVICE_GRE * 8))     | \
                                      (0x44 << (MT_NORMAL_NC * 8))      | \
-                                     (0xffUL << (MT_NORMAL * 8)))
+                                     (MT_NORMAL_VAL << (MT_NORMAL * 8)))
 
 /* More flags from user's perpective are supported using remaining bits
  * of "attrs" field, i.e. attrs[31:3], underlying code will take care
@@ -154,6 +162,16 @@
 #define TCR_ASID_16                 (1ULL << TCR_AS_SHIFT)
 #define TCR_TBI0                    (1ULL << 37)
 #define TCR_TBI1                    (1ULL << 38)
+
+/* TCMA1 (bit [58]) controls whether memory accesses
+ * in the address range [59:55] = 0b11111 are unchecked accesses.
+ *
+ * TCMA0 (bit [57]) controls whether memory accesses
+ * in the address range [59:55] = 0b00000 are unchecked accesses.
+ */
+
+#define TCR_TCMA0                   (1ULL << 57)
+#define TCR_TCMA1                   (1ULL << 58)
 
 #define TCR_PS_BITS_4GB             0x0ULL
 #define TCR_PS_BITS_64GB            0x1ULL

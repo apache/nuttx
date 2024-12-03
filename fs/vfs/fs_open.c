@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/vfs/fs_open.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -33,6 +35,7 @@
 #include <assert.h>
 #include <stdarg.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
 
@@ -78,8 +81,8 @@ static int inode_checkflags(FAR struct inode *inode, int oflags)
       return -ENXIO;
     }
 
-  if (((oflags & O_RDOK) != 0 && !ops->read && !ops->ioctl) ||
-      ((oflags & O_WROK) != 0 && !ops->write && !ops->ioctl))
+  if (((oflags & O_RDOK) != 0 && !ops->readv && !ops->read && !ops->ioctl) ||
+      ((oflags & O_WROK) != 0 && !ops->writev && !ops->write && !ops->ioctl))
     {
       return -EACCES;
     }

@@ -42,7 +42,10 @@
  *
  * Description:
  *    A thread broadcast on a condition variable.
- *
+ *    pthread_cond_broadcast shall unblock all threads currently blocked on a
+ *    specified condition variable cond. We need own the mutex that threads
+ *    calling pthread_cond_wait or pthread_cond_timedwait have associated
+ *    with the condition variable during their wait.
  * Input Parameters:
  *   None
  *
@@ -56,7 +59,6 @@
 int pthread_cond_broadcast(FAR pthread_cond_t *cond)
 {
   int ret = OK;
-  int sval;
 
   sinfo("cond=%p\n", cond);
 
@@ -66,43 +68,23 @@ int pthread_cond_broadcast(FAR pthread_cond_t *cond)
     }
   else
     {
-      /* Disable pre-emption until all of the waiting threads have been
-       * restarted. This is necessary to assure that the sval behaves as
-       * expected in the following while loop
-       */
+      /* Loop until all of the waiting threads have been restarted. */
 
-      sched_lock();
-
-      /* Get the current value of the semaphore */
-
-      if (nxsem_get_value(&cond->sem, &sval) != OK)
+      while (cond->wait_count > 0)
         {
-          ret = EINVAL;
+          /* If the value is less than zero (meaning that one or more
+           * thread is waiting), then post the condition semaphore.
+           * Only the highest priority waiting thread will get to execute
+           */
+
+          ret = -nxsem_post(&cond->sem);
+
+          /* Increment the semaphore count (as was done by the
+           * above post).
+           */
+
+          cond->wait_count--;
         }
-      else
-        {
-          /* Loop until all of the waiting threads have been restarted. */
-
-          while (sval < 0)
-            {
-              /* If the value is less than zero (meaning that one or more
-               * thread is waiting), then post the condition semaphore.
-               * Only the highest priority waiting thread will get to execute
-               */
-
-              ret = -nxsem_post(&cond->sem);
-
-              /* Increment the semaphore count (as was done by the
-               * above post).
-               */
-
-              sval++;
-            }
-        }
-
-      /* Now we can let the restarted threads run */
-
-      sched_unlock();
     }
 
   sinfo("Returning %d\n", ret);

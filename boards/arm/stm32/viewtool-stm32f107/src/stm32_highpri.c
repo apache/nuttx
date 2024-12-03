@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32/viewtool-stm32f107/src/stm32_highpri.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -105,7 +107,7 @@ static struct highpri_s g_highpri;
 
 static inline_function bool is_nesting_interrupt(void)
 {
-  return up_current_regs() != NULL;
+  return up_interrupt_context();
 }
 
 /****************************************************************************

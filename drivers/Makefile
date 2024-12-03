@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/Makefile
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -83,6 +85,7 @@ include usrsock/Make.defs
 include reset/Make.defs
 include pci/Make.defs
 include coresight/Make.defs
+include aie/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs

@@ -620,7 +620,7 @@ define DOWNLOAD
 	$(ECHO_END)
 endef
 
-# CLONE - Git clone repository. Initializes a new Git repository in the 
+# CLONE - Git clone repository. Initializes a new Git repository in the
 #         folder on your local machine and populates it with the contents
 #         of the central repository.
 #         The third argument is an storage path. The second argument is used
@@ -659,7 +659,7 @@ endef
 
 # CLEAN - Default clean target
 
-ifeq ($(CONFIG_SCHED_GCOV),y)
+ifeq ($(CONFIG_COVERAGE_NONE),)
 	EXTRA = *.gcno *.gcda
 endif
 
@@ -732,11 +732,6 @@ export DEFINE_PREFIX ?= $(subst X,,${shell $(DEFINE) "$(CC)" X 2> ${EMPTYFILE}})
 export INCDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) "$(CC)" X 2> ${EMPTYFILE}})
 export INCSYSDIR_PREFIX ?= $(subst "X",,${shell $(INCDIR) -s "$(CC)" X 2> ${EMPTYFILE}})
 
-# Get the GCC version number
-ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU), y)
-  export GCCVER = $(shell $(CXX) --version | grep ++ | sed -E 's/.* ([0-9]+\.[0-9]+).*/\1/' | cut -d'.' -f1)
-endif
-
 # ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
 ARCHDEFINES += ${DEFINE_PREFIX}__NuttX__
 ifeq ($(CONFIG_NDEBUG),y)
@@ -789,7 +784,7 @@ else
   CONVERT_PATH = $1
 endif
 
-# Upper/Lower case string, add the `UL` prefix to private function 
+# Upper/Lower case string, add the `UL` prefix to private function
 
 ULPOP = $(wordlist 3,$(words $(1)),$(1))
 ULSUB = $(subst $(word 1,$(1)),$(word 2,$(1)),$(2))

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/imx8/imx8_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -80,9 +82,15 @@ const struct arm_mmu_config g_mmu_config =
 
 void arm64_el_init(void)
 {
-  write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
+  uint64_t el = arm64_current_el();
 
-  ARM64_ISB();
+  /* Only in EL3 we can write to cntfrq_el0. */
+
+  if (el == 3)
+    {
+      write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
+      ARM64_ISB();
+    }
 }
 
 /****************************************************************************

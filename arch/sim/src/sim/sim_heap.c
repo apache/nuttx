@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_heap.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -375,8 +377,7 @@ void *mm_realloc(struct mm_heap_s *heap, void *oldmem,
 
   if (size == 0)
     {
-      mm_free(heap, oldmem);
-      return NULL;
+      size = 1;
     }
 
   oldsize = host_mallocsize(oldmem);

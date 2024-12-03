@@ -423,7 +423,7 @@ config ARCH_BOARD_FRANZININHO_WIFI
 
 config ARCH_BOARD_ESP32S3_DEVKIT
 	bool "Espressif ESP32-S3 DevKit"
-	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM
+	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM || ARCH_CHIP_ESP32S3WROOM1N8R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
@@ -1524,36 +1524,35 @@ config ARCH_BOARD_NUCLEO_F429ZI
 	---help---
 		STMicro Nucleo-F429zi board based on the STMicro STM32F429ZIT6 MCU.
 
-config ARCH_BOARD_NUCLEO_144
-	bool "STMicro NUCLEO-144"
-	depends on ARCH_CHIP_STM32F722ZE || ARCH_CHIP_STM32F746ZG || ARCH_CHIP_STM32F767ZI
+config ARCH_BOARD_NUCLEO_F722ZE
+	bool "STMicro NUCLEO-F722ZE"
+	depends on ARCH_CHIP_STM32F722ZE
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro Nucleo-144 development board featuring STMicroelectronics
-		F2, F3, F4, F7 and L4 MCU families.  The board is a "Hardware pattern"
-		that can be populated with the 144 pin package of the following MCUs:
+		STMicro Nucleo F722ZE board based on STM32F722ZET6,
+		a 216MHz Cortex-M7, w/FPU, 512KiB Flash memory and 256KiB SRAM.
 
-			Target STM32    Order code
-			STM32F207ZGT6   NUCLEO-F207ZG
-			STM32F303ZET6   NUCLEO-F303ZE
-			STM32F429ZIT6   NUCLEO-F429ZI
-			STM32F446ZET6   NUCLEO-F446ZE
-			STM32F722ZET6   NUCLEO-F722ZE
-			STM32F746ZGT6   NUCLEO-F746ZG
-			STM32F767ZIT6   NUCLEO-F767ZI
-			STM32L496ZGT6   NUCLEO-L496ZG
-			STM32L496ZGT6P  NUCLEO-L496ZG-P
+config ARCH_BOARD_NUCLEO_F746ZG
+	bool "STMicro NUCLEO-F746ZG"
+	depends on ARCH_CHIP_STM32F746ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F746ZG board based on STM32F746ZGT6
+		a 216MHz Cortex-M7, w/FPU, 1024KiB Flash memory and 320KiB SRAM.
 
-		Supported in this configuration are:
-
-			NUCLEO-F722ZE - STM32F722ZET6 a 216MHz Cortex-M7, w/FPU -
-				512KiB Flash memory and 256KiB SRAM.
-			NUCLEO-F746ZG - STM32F746ZGT6 a 216MHz Cortex-M7, w/FPU -
-				1024KiB Flash memory and 320KiB SRAM.
-			NUCLEO-F767ZI - STM32F767ZIT6 a 216MHz Cortex-M7, w/DPFPU -
-				2048KiB Flash memory and 512KiB SRAM.
+config ARCH_BOARD_NUCLEO_F767ZI
+	bool "STMicro NUCLEO-F767ZI"
+	depends on ARCH_CHIP_STM32F767ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo F767ZI board based on STM32F767ZIT6,
+		a 216MHz Cortex-M7, w/DPFPU 2048KiB Flash memory and 512KiB SRAM.
 
 config ARCH_BOARD_NUCLEO_L073RZ
 	bool "STM32L073RZU6 Nucleo L073RZ"
@@ -1951,6 +1950,23 @@ config ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 		This is a port to the Adafruit QT Py RP2040 board.
 		Support is derived from Raspberry Pi Pico support.
 
+config ARCH_BOARD_RASPBERRYPI_PICO_2
+	bool "Raspberry Pi Pico 2 board (not Pico, not W)"
+	depends on ARCH_CHIP_RP23XX
+	select ARCH_HAVE_LEDS
+	---help---
+		This is a port to the Raspberry Pi Pico 2 board.
+
+config ARCH_BOARD_PIMORONI_PICO_2_PLUS
+	bool "Pimoroni Pico 2 Plus"
+	depends on ARCH_CHIP_RP23XX
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select RP23XX_RP2350B
+	---help---
+		This is a port to the Pimoroni Pico 2 Plus board.
+
 config ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
 	bool "Waveshare RP2040 LCD 1.28 board"
 	depends on ARCH_CHIP_RP2040
@@ -1966,6 +1982,13 @@ config ARCH_BOARD_W5500_EVB_PICO
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is a port to the WIZnet W5500-EVB-Pico board.
+		Support is derived from Raspberry Pi Pico support.
+
+config ARCH_BOARD_WAVESHARE_RP2040_ZERO
+	bool "Waveshare RP2040 Zero board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Waveshare RP2040 Zero board.
 		Support is derived from Raspberry Pi Pico support.
 
 config ARCH_BOARD_RX65N
@@ -2328,6 +2351,15 @@ config ARCH_BOARD_SAMD21_XPLAINED
 		The port of NuttX to the Atmel SAMD21-Xplained Pro development board.
 		This board features the ATSAMD21J18A MCU (Cortex-M0+ with 256KB of FLASH
 		and 32KB of SRAM).
+
+config ARCH_BOARD_XIAO_SEEEDUINO
+	bool "Seeed Studio XIAO SAMD21"
+	depends on ARCH_CHIP_SAMD21J18A
+	select ARCH_HAVE_LEDS
+	---help---
+		The port of NuttX to the Seeed Studio XIAO SAMD21 board.
+		This board features the ATSAMD21J18A MCU (Cortex-M0+ with 256KB of FLASH
+		and 32KB of SRAM) in a tiny footprint.
 
 config ARCH_BOARD_SAME54_XPLAINED_PRO
 	bool "Atmel SAME54-Xplained Pro development board"
@@ -2795,6 +2827,15 @@ config ARCH_BOARD_STM32L476_MDK
 		Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
 		The STM32L476ME is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
+
+config ARCH_BOARD_NUCLEO_H563ZI
+	bool "NUCLEO_H563ZI"
+	depends on ARCH_CHIP_STM32H563ZI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-H563ZI board based on the STMicro STM32H563ZI MCU.
 
 config ARCH_BOARD_STM32L562E_DK
 	bool "STM32L562E-DK"
@@ -3356,7 +3397,9 @@ config ARCH_BOARD
 	default "thingy91-nrf52"            if ARCH_BOARD_THINGY91_NRF52
 	default "nrf9160-dk-nrf52"          if ARCH_BOARD_NRF9160_DK_NRF52
 	default "ntosd-dm320"               if ARCH_BOARD_NTOSD_DM320
-	default "nucleo-144"                if ARCH_BOARD_NUCLEO_144
+	default "nucleo-f722ze"             if ARCH_BOARD_NUCLEO_F722ZE
+	default "nucleo-f746zg"             if ARCH_BOARD_NUCLEO_F746ZG
+	default "nucleo-f767zi"             if ARCH_BOARD_NUCLEO_F767ZI
 	default "nucleo-f072rb"             if ARCH_BOARD_NUCLEO_F072RB
 	default "nucleo-f091rc"             if ARCH_BOARD_NUCLEO_F091RC
 	default "nucleo-f103rb"             if ARCH_BOARD_NUCLEO_F103RB
@@ -3365,7 +3408,8 @@ config ARCH_BOARD
 	default "nucleo-f303re"             if ARCH_BOARD_NUCLEO_F303RE
 	default "nucleo-f303ze"             if ARCH_BOARD_NUCLEO_F303ZE
 	default "nucleo-f334r8"             if ARCH_BOARD_NUCLEO_F334R8
-	default "nucleo-f4x1re"             if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "nucleo-f401re"             if ARCH_BOARD_NUCLEO_F401RE
+	default "nucleo-f411re"             if ARCH_BOARD_NUCLEO_F411RE
 	default "stm32f401rc-rs485"         if ARCH_BOARD_STM32F401RC_RS485
 	default "nucleo-f429zi"             if ARCH_BOARD_NUCLEO_F429ZI
 	default "nucleo-f446re"             if ARCH_BOARD_NUCLEO_F446RE
@@ -3425,7 +3469,10 @@ config ARCH_BOARD
 	default "adafruit-kb2040"           if ARCH_BOARD_ADAFRUIT_KB2040
 	default "adafruit-qt-py-rp2040"     if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "waveshare-rp2040-lcd-1.28" if ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
+	default "raspberrypi-pico-2"        if ARCH_BOARD_RASPBERRYPI_PICO_2
+	default "pimoroni-pico-2-plus"      if ARCH_BOARD_PIMORONI_PICO_2_PLUS
 	default "w5500-evb-pico"            if ARCH_BOARD_W5500_EVB_PICO
+	default "waveshare-rp2040-zero"     if ARCH_BOARD_WAVESHARE_RP2040_ZERO
 	default "rx65n"                     if ARCH_BOARD_RX65N
 	default "rx65n-rsk1mb"              if ARCH_BOARD_RX65N_RSK1MB
 	default "rx65n-rsk2mb"              if ARCH_BOARD_RX65N_RSK2MB
@@ -3467,6 +3514,7 @@ config ARCH_BOARD
 	default "sama5d4-ek"                if ARCH_BOARD_SAMA5D4_EK
 	default "samd20-xplained"           if ARCH_BOARD_SAMD20_XPLAINED
 	default "samd21-xplained"           if ARCH_BOARD_SAMD21_XPLAINED
+	default "xiao-seeeduino"            if ARCH_BOARD_XIAO_SEEEDUINO
 	default "same54-xplained-pro"       if ARCH_BOARD_SAME54_XPLAINED_PRO
 	default "saml21-xplained"           if ARCH_BOARD_SAML21_XPLAINED
 	default "sam3u-ek"                  if ARCH_BOARD_SAM3UEK
@@ -3511,6 +3559,7 @@ config ARCH_BOARD
 	default "b-l072z-lrwan1"            if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"            if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"            if ARCH_BOARD_B_U585I_IOT02A
+	default "nucleo-h563zi"             if ARCH_BOARD_NUCLEO_H563ZI
 	default "nucleo-u5a5zj-q"           if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "stm32l476vg-disco"         if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"             if ARCH_BOARD_STM32L476_MDK
@@ -3885,6 +3934,15 @@ endif
 if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 source "boards/arm/rp2040/adafruit-qt-py-rp2040/Kconfig"
 endif
+if ARCH_BOARD_WAVESHARE_RP2040_ZERO
+source "boards/arm/rp2040/waveshare-rp2040-zero/Kconfig"
+endif
+if ARCH_BOARD_RASPBERRYPI_PICO_2
+source "boards/arm/rp23xx/raspberrypi-pico-2/Kconfig"
+endif
+if ARCH_BOARD_PIMORONI_PICO_2_PLUS
+source "boards/arm/rp23xx/pimoroni-pico-2-plus/Kconfig"
+endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"
 endif
@@ -3945,6 +4003,9 @@ endif
 if ARCH_BOARD_SAMD21_XPLAINED
 source "boards/arm/samd2l2/samd21-xplained/Kconfig"
 endif
+if ARCH_BOARD_XIAO_SEEEDUINO
+source "boards/arm/samd2l2/xiao-seeeduino/Kconfig"
+endif
 if ARCH_BOARD_SAME54_XPLAINED_PRO
 source "boards/arm/samd5e5/same54-xplained-pro/Kconfig"
 endif
@@ -4002,8 +4063,14 @@ endif
 if ARCH_BOARD_STM32F072_DISCOVERY
 source "boards/arm/stm32f0l0g0/stm32f072-discovery/Kconfig"
 endif
-if ARCH_BOARD_NUCLEO_144
-source "boards/arm/stm32f7/nucleo-144/Kconfig"
+if ARCH_BOARD_NUCLEO_F722ZE
+source "boards/arm/stm32f7/nucleo-f722ze/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F746ZG
+source "boards/arm/stm32f7/nucleo-f746zg/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F767ZI
+source "boards/arm/stm32f7/nucleo-f767zi/Kconfig"
 endif
 if ARCH_BOARD_STM32F746_WS
 source "boards/arm/stm32f7/stm32f746-ws/Kconfig"
@@ -4083,6 +4150,9 @@ endif
 if ARCH_BOARD_STM32L4R9AI_DISCO
 source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
 endif
+if ARCH_BOARD_NUCLEO_H563ZI
+source "boards/arm/stm32h5/nucleo-h563zi/Kconfig"
+endif
 if ARCH_BOARD_STM32L562E_DK
 source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"
 endif
@@ -4146,8 +4216,11 @@ endif
 if ARCH_BOARD_NUCLEO_F446RE
 source "boards/arm/stm32/nucleo-f446re/Kconfig"
 endif
-if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
-source "boards/arm/stm32/nucleo-f4x1re/Kconfig"
+if ARCH_BOARD_NUCLEO_F401RE
+source "boards/arm/stm32/nucleo-f401re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F411RE
+source "boards/arm/stm32/nucleo-f411re/Kconfig"
 endif
 if ARCH_BOARD_STM32F401RC_RS485
 source "boards/arm/stm32/stm32f401rc-rs485/Kconfig"
@@ -4597,11 +4670,17 @@ endif
 if ARCH_CHIP_STM32
 source "boards/arm/stm32/common/Kconfig"
 endif
+if ARCH_CHIP_STM32F7
+source "boards/arm/stm32f7/common/Kconfig"
+endif
 if ARCH_CHIP_STM32F0L0G0
 source "boards/arm/stm32f0l0g0/common/Kconfig"
 endif
 if ARCH_CHIP_RP2040
 source "boards/arm/rp2040/common/Kconfig"
+endif
+if ARCH_CHIP_RP23XX
+source "boards/arm/rp23xx/common/Kconfig"
 endif
 if ARCH_CHIP_NRF52
 source "boards/arm/nrf52/common/Kconfig"
@@ -4614,9 +4693,9 @@ source "boards/arm/nrf91/common/Kconfig"
 endif
 endif
 
-config BOARD_CRASHDUMP
-	bool "Enable Board level logging of crash dumps"
-	default n
+choice
+	prompt "BOARD crashdump method"
+	default BOARD_CRASHDUMP_NONE
 	---help---
 		If selected up_assert will call out to board_crashdump, in the case
 		of an assertion failure, prior to calling exit. Or in the
@@ -4633,28 +4712,43 @@ config BOARD_CRASHDUMP
 
 config BOARD_COREDUMP_SYSLOG
 	bool "Enable Core dump to syslog"
-	default n
 	depends on COREDUMP
 	---help---
 		Enable put coredump to syslog when crash.
 
 config BOARD_COREDUMP_BLKDEV
 	bool "Enable Core Dump to block device"
-	default n
 	depends on COREDUMP
 	---help---
-		Enable save coredump at block device when crash.
+		Enable save coredump to block device when crash.
 
-config BOARD_COREDUMP_BLKDEV_PATH
-	string "Save Core Dump block device PATH"
-	depends on BOARD_COREDUMP_BLKDEV
+config BOARD_COREDUMP_MTDDEV
+	bool "Enable Core Dump to mtd device"
+	depends on COREDUMP
 	---help---
-		Save coredump file block device path.
+		Enable save coredump to mtd device when crash.
+
+config BOARD_CRASHDUMP_CUSTOM
+	bool "Enable Core Dump with custom method"
+	---help---
+		Enable save coredump with custom method. only work with
+		board_crashdump api.
+
+config BOARD_CRASHDUMP_NONE
+	bool "No Board level crash dump"
+
+endchoice # BOARD crashdump method
+
+config BOARD_COREDUMP_DEVPATH
+	string "Save Core Dump data with device PATH"
+	depends on BOARD_COREDUMP_BLKDEV || BOARD_COREDUMP_MTDDEV
+	---help---
+		Save coredump file into block/mtd device path.
 
 config BOARD_COREDUMP_FULL
 	bool "Core Dump all thread registers and stacks"
 	default y
-	depends on BOARD_COREDUMP_SYSLOG || BOARD_COREDUMP_BLKDEV
+	depends on !BOARD_CRASHDUMP_NONE
 	---help---
 		Enable to support for the dump all task registers and stacks.
 
@@ -4662,7 +4756,7 @@ config BOARD_COREDUMP_COMPRESSION
 	bool "Enable Core Dump compression"
 	default y
 	select LIBC_LZF
-	depends on BOARD_COREDUMP_SYSLOG || BOARD_COREDUMP_BLKDEV
+	depends on !BOARD_CRASHDUMP_NONE
 	---help---
 		Enable LZF compression algorithm for core dump content
 

@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_fatal.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -78,7 +80,6 @@ static int default_fatal_handler(uint64_t *regs, uint64_t far, uint64_t esr);
 
 static const char *g_esr_class_str[] =
 {
-  [0 ... ESR_ELX_EC_MAX]   = "UNRECOGNIZED EC",
   [ESR_ELX_EC_UNKNOWN]     = "Unknown/Uncategorized",
   [ESR_ELX_EC_WFX]         = "WFI/WFE",
   [ESR_ELX_EC_CP15_32]     = "CP15 MCR/MRC",
@@ -126,7 +127,6 @@ static const char *g_esr_class_str[] =
 
 static const char *g_esr_desc_str[] =
 {
-  [0 ... ESR_ELX_EC_MAX] = "UNRECOGNIZED EC",
   [ESR_ELX_EC_UNKNOWN]   = "Unknown/Uncategorized",
   [ESR_ELX_EC_WFX]       = "Trapped WFI or WFE instruction execution",
   [ESR_ELX_EC_CP15_32]   = "Trapped MCR or MRC access with"
@@ -299,8 +299,18 @@ static const char *esr_get_desc_string(uint64_t esr)
 
 static void print_ec_cause(uint64_t esr)
 {
-  serr("%s\n", esr_get_class_string(esr));
-  serr("%s\n", esr_get_desc_string(esr));
+  const char *class_string = esr_get_class_string(esr);
+  const char *desc_string = esr_get_desc_string(esr);
+
+  if (class_string && desc_string)
+    {
+      serr("%s\n", class_string);
+      serr("%s\n", desc_string);
+    }
+  else
+    {
+      serr("UNRECOGNIZED EC\n");
+    }
 }
 
 static int default_fatal_handler(uint64_t *regs, uint64_t far, uint64_t esr)

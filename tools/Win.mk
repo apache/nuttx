@@ -397,7 +397,7 @@ DIRLINKS_FILE += $(DIRLINKS_EXTERNAL_DEP)
 # The symlink subfolders need to be removed before the parent symlinks
 
 .PHONY: clean_dirlinks
-clean_dirlinks:
+clean_dirlinks: tools\incdir$(HOSTEXEEXT)
 	$(Q) $(call DELFILE, $(DIRLINKS_FILE))
 	$(Q) $(call DELFILE, .dirlinks)
 	$(Q) $(DIRUNLINK) drivers\platform
@@ -731,7 +731,7 @@ endif
 # apps_distclean: Perform the distclean operation only in the user application
 #                 directory.
 
-apps_preconfig: .dirlinks
+apps_preconfig: tools\incdir$(HOSTEXEEXT) .dirlinks
 ifneq ($(APPDIR),)
 	$(Q) $(MAKE) -C "$(APPDIR)" preconfig
 endif

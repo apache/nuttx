@@ -349,6 +349,7 @@ int work_usrstart(void);
  * Input Parameters:
  *   name       - Name of the new task
  *   priority   - Priority of the new task
+ *   stack_addr - Stack buffer of the new task
  *   stack_size - size (in bytes) of the stack needed
  *   nthreads   - Number of work thread should be created
  *
@@ -359,6 +360,7 @@ int work_usrstart(void);
 
 FAR struct kwork_wqueue_s *work_queue_create(FAR const char *name,
                                              int priority,
+                                             FAR void *stack_addr,
                                              int stack_size, int nthreads);
 
 /****************************************************************************

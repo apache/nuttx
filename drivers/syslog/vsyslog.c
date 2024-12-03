@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/syslog/vsyslog.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -165,7 +167,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
                              "[%s] "
 #    endif
 #  else
-                             "[%5jd.%06ld] "
+                             "[%5ju.%06ld] "
 #  endif
 #endif
 

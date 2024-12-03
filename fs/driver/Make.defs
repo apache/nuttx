@@ -1,6 +1,8 @@
 ############################################################################
 # fs/driver/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -27,6 +29,8 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
 CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
 CSRCS += fs_blockpartition.c fs_findmtddriver.c fs_closemtddriver.c
+CSRCS += fs_blockmerge.c
+
 
 ifeq ($(CONFIG_MTD),y)
 CSRCS += fs_registermtddriver.c fs_unregistermtddriver.c

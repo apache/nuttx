@@ -18,7 +18,7 @@ Compiling
 
    There is a sample configuration to use lm3s6965-ek on QEMU.
 
-   Just use ``lm3s6965-ek:qemu-flat`` board profile for this purpose. 
+   Just use ``lm3s6965-ek:qemu-flat`` board profile for this purpose.
 
     .. code-block:: console
 
@@ -34,7 +34,7 @@ Compiling
 Start QEMU
 ==========
 
-#. You need to start QEMU using the nuttx ELF file just create above:
+#. You need to start QEMU using the NuttX ELF file just create above:
 
     .. code-block:: console
 
@@ -42,7 +42,7 @@ Start QEMU
        Timer with period zero, disabling
        ABCDF
        telnetd [4:100]
-       
+
        NuttShell (NSH) NuttX-12.0.0
        nsh>
 
@@ -53,23 +53,27 @@ Start GDB to connect to QEMU
 
     .. code-block:: console
 
-       $ gdb-multiarch nuttx -ex "source tools/gdb/__init__.py" -ex "target remote 127.0.0.1:1234"
-        Type "apropos word" to search for commands related to "word"...
-        Reading symbols from nuttx...
-        set pagination off
-        source tools/gdb/lists.py
-        source tools/gdb/utils.py
-        source tools/gdb/memdump.py
+      $ gdb-multiarch nuttx -ex "source tools/gdb/gdbinit.py" -ex "target remote 127.0.0.1:1234"
+      Reading symbols from nuttx...
+      Registering NuttX GDB commands from ~/nuttx/nuttx/tools/gdb/nuttxgdb
+      set pagination off
+      set python print-stack full
+      "handle SIGUSR1 "nostop" "pass" "noprint"
+      Load macro: ~/nuttx/nuttx/b73e7dbb3d3bbd6ff2eb9be4e5f01d5e.json
+      readelf took 0.1 seconds
+      Parse macro took 0.1 seconds
+      Cache macro info to ~/nuttx/nuttx/b73e7dbb3d3bbd6ff2eb9be4e5f01d5e.json
 
-        if use thread command, please don't use 'continue', use 'c' instead !!!
-        source tools/gdb/thread.py
-        "handle SIGUSR1 "nostop" "pass" "noprint"
-        Remote debugging using 127.0.0.1:1234
-        0x0000a45a in up_idle () at chip/common/tiva_idle.c:62
-        62      }
-       (gdb)
+      if use thread command, please don't use 'continue', use 'c' instead !!!
+      if use thread command, please don't use 'step', use 's' instead !!!
+      Build version:  "86868a9e194-dirty Nov 26 2024 00:14:53"
 
-#. From (gdb) prompt you can run commands to inpect NuttX:
+      Remote debugging using :1234
+      0x0000b78a in up_idle () at chip/common/tiva_idle.c:62
+      62      }
+      (gdb)
+
+#. From (gdb) prompt you can run commands to inspect NuttX:
 
     .. code-block:: console
 
@@ -80,7 +84,6 @@ Start GDB to connect to QEMU
         2    Thread 0x20005e30     (Name: nsh_main, State: Waiting,Semaphore, Priority: 100, Stack: 2008)           0xa68c up_switch_context() at common/arm_switchcontext.c:95
         3    Thread 0x20006d48     (Name: NTP_daemon, State: Waiting,Signal, Priority: 100, Stack: 1960)            0xa68c up_switch_context() at common/arm_switchcontext.c:95
         4    Thread 0x20008b60     (Name: telnetd, State: Waiting,Semaphore, Priority: 100, Stack: 2016)            0xa68c up_switch_context() at common/arm_switchcontext.c:95
-       (gdb) 
+       (gdb)
 
 As you can see QEMU and GDB are powerful tools to debug NuttX without using external board or expensive debugging hardware.
-

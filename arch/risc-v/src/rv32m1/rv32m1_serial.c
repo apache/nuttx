@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/rv32m1/rv32m1_serial.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1133,27 +1135,16 @@ void riscv_serialinit(void)
  *
  ****************************************************************************/
 
-int up_putc(int ch)
+void up_putc(int ch)
 {
 #ifdef CONSOLE_DEV
   struct up_dev_s *priv = (struct up_dev_s *)CONSOLE_DEV.priv;
   uint32_t im;
 
   up_disableuartint(priv, &im);
-
-  /* Check for LF */
-
-  if (ch == '\n')
-    {
-      /* Add CR */
-
-      riscv_lowputc('\r');
-    }
-
   riscv_lowputc(ch);
   up_restoreuartint(priv, im);
 #endif
-  return ch;
 }
 
 #ifdef HAVE_SERIAL_CONSOLE

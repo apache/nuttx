@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/risc-v/qemu-rv/rv-virt/src/qemu_rv_appinit.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -40,7 +42,6 @@
 #include "qemu_rv_memorymap.h"
 #include "qemu_rv_rptun.h"
 
-#include "riscv_internal.h"
 #include "riscv_sbi.h"
 #include "romfs.h"
 

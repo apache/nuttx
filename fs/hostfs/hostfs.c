@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/hostfs/hostfs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -148,6 +150,8 @@ const struct mountpt_operations g_hostfs_operations =
   NULL,                 /* mmap */
   hostfs_ftruncate,     /* ftruncate */
   NULL,                 /* poll */
+  NULL,                 /* readv */
+  NULL,                 /* writev */
 
   hostfs_sync,          /* sync */
   hostfs_dup,           /* dup */

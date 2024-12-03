@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z16/src/common/z16_doirq.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -58,7 +60,13 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
 #else
   if ((unsigned)irq < NR_IRQS)
     {
+      struct tcb_s **running_task = &g_running_tasks[this_cpu()];
       FAR chipreg_t *savestate;
+
+      if (*running_task != NULL)
+        {
+          z16_copystate((*running_task)->xcp.regs, regs)
+        }
 
       /* Nested interrupts are not supported in this implementation.  If
        * you want to implement nested interrupts, you would have to (1)

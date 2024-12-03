@@ -236,7 +236,7 @@ Now, You can now inspect threads:
   faultmask      0x0                 0
   control        0x0                 0
 
-With gdb
+With GDB
 ~~~~~~~~
 
 You can also do NuttX aware debugging using ``gdb`` scripting support.
@@ -244,12 +244,12 @@ The benefit is that it works also for the sim build where ``openocd`` is
 not applicable. For this to work, you will need to enable PROC filesystem support
 which will expose required task information (``CONFIG_FS_PROCFS=y``).
 
-To use this approach, you can load the ``nuttx/tools/gdb/__init__.py`` file. An
+To use this approach, you can load the ``nuttx/tools/gdb/gdbinit.py`` file. An
 easy way to do this is to add an extra command:
 
 .. code-block:: console
 
-  $ gdb nuttx -ix=tools/gdb/__init__.py
+  $ gdb nuttx -ix=tools/gdb/gdbinit.py
 
 gdb can need to set the current elf support architecture, for example,
 the prefix is arm-ebai-none-.

@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/usbdev/cdcncm.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -1073,7 +1075,7 @@ static void cdcncm_receive(FAR struct cdcncm_driver_s *self)
       if ((ndplen < opts->ndpsize + 2 * (opts->dgramitemlen * 2)) ||
           (ndplen % opts->ndpalign != 0))
         {
-          uerr("Bad NDP length: %x\n", ndplen);
+          uerr("Bad NDP length: %04" PRIx32 " \n", ndplen);
           return;
         }
 

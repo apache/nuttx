@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_perf.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -74,7 +76,6 @@ clock_t up_perf_gettime(void)
 void up_perf_convert(clock_t elapsed, struct timespec *ts)
 {
   clock_t left;
-  unsigned long cpu_freq = read_sysreg(cntfrq_el0);
 
   ts->tv_sec  = elapsed / g_cpu_freq;
   left        = elapsed - ts->tv_sec * g_cpu_freq;

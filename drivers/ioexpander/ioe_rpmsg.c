@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/ioexpander/ioe_rpmsg.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -363,7 +365,7 @@ static void *ioe_rpmsg_attach(FAR struct ioexpander_dev_s *dev,
                            (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
   if (ret >= 0)
     {
-      return (FAR void *)(ret + 1);
+      return (FAR void *)((uintptr_t)(ret + 1));
     }
 
   return NULL;

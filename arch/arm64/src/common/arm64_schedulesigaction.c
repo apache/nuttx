@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/common/arm64_schedulesigaction.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -138,7 +140,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * have been delivered.
        */
 
-      tcb->xcp.saved_reg = tcb->xcp.regs;
+      tcb->xcp.saved_regs = tcb->xcp.regs;
 
       /* create signal process context */
 

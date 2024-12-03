@@ -91,24 +91,30 @@ FAR struct iob_qentry_s *g_iob_freeqlist;
 FAR struct iob_qentry_s *g_iob_qcommitted;
 #endif
 
-/* Counting semaphores that tracks the number of free IOBs/qentries */
+sem_t g_iob_sem = SEM_INITIALIZER(0);
 
-sem_t g_iob_sem = SEM_INITIALIZER(CONFIG_IOB_NBUFFERS);
+/* Counting that tracks the number of free IOBs/qentries */
+
+int16_t g_iob_count = CONFIG_IOB_NBUFFERS;
 
 #if CONFIG_IOB_THROTTLE > 0
-/* Counts available I/O buffers when throttled */
 
-sem_t g_throttle_sem = SEM_INITIALIZER(CONFIG_IOB_NBUFFERS -
-                                       CONFIG_IOB_THROTTLE);
+sem_t g_throttle_sem = SEM_INITIALIZER(0);
+
+/* Wait Counts for throttle */
+
+int16_t g_throttle_wait = 0;
 #endif
 
 #if CONFIG_IOB_NCHAINS > 0
-/* Counts free I/O buffer queue containers */
+sem_t g_qentry_sem = SEM_INITIALIZER(0);
 
-sem_t g_qentry_sem = SEM_INITIALIZER(CONFIG_IOB_NCHAINS);
+/* Wait Counts for qentry */
+
+int16_t g_qentry_wait = 0;
 #endif
 
-spinlock_t g_iob_lock = SP_UNLOCKED;
+volatile spinlock_t g_iob_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions

@@ -1,6 +1,8 @@
 /****************************************************************************
  * fs/nxffs/nxffs_initialize.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -62,6 +64,8 @@ const struct mountpt_operations g_nxffs_operations =
   NULL,              /* truncate */
 #endif
   NULL,              /* poll */
+  NULL,              /* readv */
+  NULL,              /* writev */
 
   NULL,              /* sync -- No buffered data */
   nxffs_dup,         /* dup */

@@ -1,0 +1,122 @@
+############################################################################
+# libs/libbuiltin/compiler-rt/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/Make.defs
+
+COMPILER_RT_VERSION=$(CONFIG_LIB_COMPILER_RT_VERSION)
+
+ifeq ($(CONFIG_ARCH_ARM),y)
+  ARCH = arm
+else ifeq ($(CONFIG_ARCH_RISCV),y)
+  ARCH = riscv
+else ifeq ($(CONFIG_ARCH_X86_64),y)
+  ARCH = x86_64
+else ifeq ($(CONFIG_ARCH_ARM64),y)
+  ARCH = aarch64
+endif
+
+COMPILER_RT_OBJDIR = compiler-rt \
+                     compiler-rt/compiler-rt \
+                     compiler-rt/compiler-rt/lib \
+                     compiler-rt/compiler-rt/lib/builtins \
+                     compiler-rt/compiler-rt/lib/builtins/$(ARCH) \
+                     compiler-rt/compiler-rt/lib/profile
+
+BIN_OBJDIR = $(addprefix $(BINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
+KBIN_OBJDIR = $(addprefix $(KBINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
+
+ifeq ($(wildcard compiler-rt/compiler-rt/lib),)
+
+compiler-rt-$(COMPILER_RT_VERSION).src.tar.xz:
+	$(call DOWNLOAD,https://github.com/llvm/llvm-project/releases/download/llvmorg-$(COMPILER_RT_VERSION),$@)
+
+compiler-rt/compiler-rt: compiler-rt-$(COMPILER_RT_VERSION).src.tar.xz
+	$(Q) tar -xf $<
+	$(Q) mv compiler-rt-$(COMPILER_RT_VERSION).src $@
+	$(call DELDIR, $<)
+	$(Q) mkdir $(BIN_OBJDIR) $(KBIN_OBJDIR)
+
+compiler-rt: compiler-rt/compiler-rt
+
+endif
+
+ifeq ($(CONFIG_LIB_COMPILER_RT),y)
+
+.PHONY: compiler-rt
+depend:: compiler-rt
+
+distclean::
+	$(call DELDIR, $(BIN_OBJDIR))
+	$(call DELDIR, $(KBIN_OBJDIR))
+	$(call DELDIR, compiler-rt/compiler-rt)
+
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/include
+
+endif
+
+################# Builtin Library #################
+
+ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
+
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins/${ARCH}
+
+FLAGS += -Wno-undef -Wno-macro-redefined
+
+CSRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/*.c)
+ASRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/$(ARCH)/*.S)
+CSRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/$(ARCH)/*.c)
+
+ifeq ($(CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16),)
+  BFLOAT16_SRCS := compiler-rt/compiler-rt/lib/builtins/truncdfbf2.c
+  BFLOAT16_SRCS += compiler-rt/compiler-rt/lib/builtins/truncsfbf2.c
+  CSRCS := $(filter-out $(BFLOAT16_SRCS), $(CSRCS))
+endif
+
+endif
+
+################# Profile Library #################
+
+ifeq ($(CONFIG_COVERAGE_COMPILER_RT),y)
+
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/profile
+
+FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
+FLAGS += -Wno-undef -Wno-strict-prototypes  -Wno-shadow
+FLAGS += -DCOMPILER_RT_HAS_UNAME
+
+CSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.c)
+CPPSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.cpp)
+CSRCS += InstrProfilingPlatform.c
+
+else ifeq ($(CONFIG_COVERAGE_MINI)$(CONFIG_ARCH_TOOLCHAIN_CLANG),yy)
+
+FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
+
+CSRCS += coverage.c
+
+endif
+
+AFLAGS += $(FLAGS)
+CFLAGS += $(FLAGS)
+CXXFLAGS += $(FLAGS)
+
+DEPPATH += --dep-path compiler-rt
+VPATH += :compiler-rt

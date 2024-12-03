@@ -57,6 +57,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     pthread_barrierattr_setpshared.c
     pthread_barrierinit.c
     pthread_barrierdestroy.c
+    pthread_barrierwait.c
     pthread_condattr_init.c
     pthread_condattr_destroy.c
     pthread_condattr_getpshared.c

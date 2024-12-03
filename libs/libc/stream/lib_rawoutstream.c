@@ -42,12 +42,12 @@
  * Name: rawoutstream_puts
  ****************************************************************************/
 
-static int rawoutstream_puts(FAR struct lib_outstream_s *self,
-                             FAR const void *buf, int len)
+static ssize_t rawoutstream_puts(FAR struct lib_outstream_s *self,
+                                 FAR const void *buf, size_t len)
 {
   FAR struct lib_rawoutstream_s *stream =
                                 (FAR struct lib_rawoutstream_s *)self;
-  int nwritten = 0;
+  ssize_t nwritten = 0;
 
   do
     {

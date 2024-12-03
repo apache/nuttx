@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/sim_offload.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -353,10 +355,10 @@ static int sim_audio_mad_decode(void *handle,
   struct sim_mad_s *codec = (struct sim_mad_s *)handle;
   const mad_fixed_t *right_ch;
   const mad_fixed_t *left_ch;
+  uint32_t header;
   int nchannels;
   int nsamples;
   uint8_t *ptr;
-  int header;
   int i = 0;
   int size;
   int ret;
@@ -366,7 +368,10 @@ static int sim_audio_mad_decode(void *handle,
       return -ENODATA;
     }
 
-  header = in[0] << 24 | in[1] << 16 | in[2] << 8 | in[3];
+  header = ((uint32_t)in[0] << 24) |
+           ((uint32_t)in[1] << 16) |
+           ((uint32_t)in[2] << 8) |
+           ((uint32_t)in[3]);
   size = sim_mad_check(header);
   if (size < 0)
     {
@@ -454,6 +459,7 @@ void *sim_audio_lame_init(struct audio_info_s *info)
     {
       lame_set_num_channels(codec->gfp, info->channels);
       lame_set_mode(codec->gfp, info->channels > 1 ? STEREO : MONO);
+      lame_set_in_samplerate(codec->gfp, (int)info->samplerate);
     }
 
   ret = lame_init_params(codec->gfp);
@@ -507,8 +513,17 @@ static int sim_audio_lame_encode(void *handle,
   chs = lame_get_num_channels(codec->gfp);
   samples = insize / (sizeof(short int) * chs);
 
-  ret = lame_encode_buffer_interleaved(codec->gfp, (short int *)in, samples,
-                                       codec->out, codec->max);
+  if (chs > 1)
+    {
+      ret = lame_encode_buffer_interleaved(codec->gfp, (short int *)in,
+                                          samples, codec->out, codec->max);
+    }
+  else
+    {
+      ret = lame_encode_buffer(codec->gfp, (short int *)in, NULL, samples,
+                              codec->out, codec->max);
+    }
+
   if (ret < 0)
     {
       return ret;

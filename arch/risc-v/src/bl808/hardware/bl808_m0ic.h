@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/bl808/hardware/bl808_m0ic.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -34,9 +36,9 @@
 
 /* Register offsets */
 
-#define BL808_M0IC_STATUS_OFFSET(n)		(0x00 + 4 * (n))
-#define BL808_M0IC_MASK_OFFSET(n)		(0x08 + 4 * (n))
-#define BL808_M0IC_CLEAR_OFFSET(n)		(0x10 + 4 * (n))
+#define BL808_M0IC_STATUS_OFFSET(n) (0x00 + 4 * (n))
+#define BL808_M0IC_MASK_OFFSET(n)   (0x08 + 4 * (n))
+#define BL808_M0IC_CLEAR_OFFSET(n)  (0x10 + 4 * (n))
 
 /* Register locations */
 

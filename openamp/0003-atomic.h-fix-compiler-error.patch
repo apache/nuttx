@@ -26,7 +26,6 @@ In file included from /home/wyr/work/code/velasim/upgrade/nuttx/include/nuttx/ne
 /home/wyr/work/code/velasim/upgrade/nuttx/include/metal/compiler/gcc/atomic.h:22:15: error: conflicting type qualifiers for 'atomic_short'
    22 | typedef short atomic_short;
 
-Change-Id: Ic4e920c27e0f8a263136eb9ecb5350edd157195d
 Signed-off-by: Yongrong Wang <wangyongrong@xiaomi.com>
 ---
  lib/atomic.h | 4 ++--

@@ -29,6 +29,10 @@ include armv7-m/Make.defs
 CHIP_CSRCS  = sam_allocateheap.c sam_irq.c sam_lowputc.c sam_serial.c
 CHIP_CSRCS += sam_start.c
 
+ifeq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
+CHIP_CSRCS += sam_vectors.c
+endif
+
 # Configuration-dependent SAM3/4 files
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)

@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <sched/sched.h>
 
 #include "arm_internal.h"
 
@@ -42,11 +43,10 @@
 
 uint32_t *arm_undefinedinsn(uint32_t *regs)
 {
-  /* Save the saved processor context in current_regs where it can be
-   * accessed for register dumps and possibly context switching.
-   */
+  struct tcb_s *tcb = this_task();
 
-  up_set_current_regs(regs);
+  tcb->xcp.regs = regs;
+  up_set_interrupt_context(true);
 
   if (regs[REG_PC] >= (uint32_t)_stext && regs[REG_PC] < (uint32_t)_etext)
     {

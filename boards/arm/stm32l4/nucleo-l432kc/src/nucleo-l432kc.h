@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/stm32l4/nucleo-l432kc/src/nucleo-l432kc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -182,6 +184,18 @@ int stm32l4_pwm_setup(void);
 
 #ifdef CONFIG_ADC
 int stm32l4_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_dac_setup
+ *
+ * Description:
+ *   Initialize DAC and register the DAC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DAC
+int stm32l4_dac_setup(void);
 #endif
 
 /****************************************************************************

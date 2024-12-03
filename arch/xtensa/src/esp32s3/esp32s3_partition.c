@@ -34,6 +34,7 @@
 #include "esp32s3_spiflash_mtd.h"
 #include "esp32s3_partition.h"
 #include "esp32s3_spiflash.h"
+#include "arch/esp32s3/partition.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -80,15 +81,6 @@
  * Private Types
  ****************************************************************************/
 
-/* OTA image operation code */
-
-enum ota_img_ctrl_e
-{
-  OTA_IMG_GET_BOOT        = 0xe1,
-  OTA_IMG_SET_BOOT        = 0xe2,
-  OTA_IMG_INVALIDATE_BOOT = 0xe3,
-};
-
 /* OTA image state */
 
 enum ota_img_state_e
@@ -132,16 +124,6 @@ enum ota_img_state_e
    */
 
   OTA_IMG_UNDEFINED       = 0xffffffff,
-};
-
-/* OTA image boot sequency */
-
-enum ota_img_bootseq_e
-{
-  OTA_IMG_BOOT_FACTORY    = 0,
-  OTA_IMG_BOOT_OTA_0      = 1,
-  OTA_IMG_BOOT_OTA_1      = 2,
-  OTA_IMG_BOOT_SEQ_MAX
 };
 
 /* Partition information data */
@@ -404,6 +386,40 @@ static int ota_invalidate_bootseq(struct mtd_dev_priv_s *dev, int num)
 }
 
 /****************************************************************************
+ * Name: is_currently_mapped_as_text
+ *
+ * Description:
+ *   Check if the MTD partition is mapped as text
+ *
+ * Input Parameters:
+ *   dev    - Partition private MTD data
+ *   mapped - true if mapped, false if not
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int is_currently_mapped_as_text(struct mtd_dev_priv_s *dev,
+                                       bool *mapped)
+{
+  uint32_t currently_mapped_address;
+
+  if (mapped == NULL)
+    {
+      ferr("ERROR: Invalid argument.\n");
+      return -EINVAL;
+    }
+
+  currently_mapped_address = esp32s3_get_flash_address_mapped_as_text();
+
+  *mapped = ((dev->offset <= currently_mapped_address) &&
+             (currently_mapped_address < dev->offset + dev->size));
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: esp32s3_part_erase
  *
  * Description:
@@ -586,6 +602,18 @@ static int esp32s3_part_ioctl(struct mtd_dev_s *dev, int cmd,
         }
 
         break;
+      case OTA_IMG_IS_MAPPED_AS_TEXT:
+        {
+          bool *mapped = (bool *)arg;
+
+          ret = is_currently_mapped_as_text(mtd_priv, mapped);
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to check partition is mapped as text\n");
+            }
+        }
+
+        break;
       default:
         {
           ret = MTD_IOCTL(mtd_priv->ll_mtd, cmd, arg);
@@ -741,6 +769,8 @@ int esp32s3_partition_init(void)
   encrypt = esp32s3_flash_encryption_enabled();
   for (i = 0; i < num; i++)
     {
+      char *name;
+
       if (info->magic != PARTITION_MAGIC)
         {
           break;
@@ -773,7 +803,7 @@ int esp32s3_partition_init(void)
       finfo("INFO: [size]:    0x%08" PRIx32 "\n", info->size);
       finfo("INFO: [flags]:   0x%08" PRIx32 "\n", info->flags);
       finfo("INFO: [mount]:   %s\n", path);
-      if (flags & PARTITION_FLAG_ENCRYPTED)
+      if (encrypt && (flags & PARTITION_FLAG_ENCRYPTED))
         {
           mtd_ll = mtd_encrypt;
           finfo("INFO: [encrypted]\n\n");
@@ -814,8 +844,8 @@ int esp32s3_partition_init(void)
       mtd_priv->mtd.ioctl  = esp32s3_part_ioctl;
       mtd_priv->mtd.read   = esp32s3_part_read;
       mtd_priv->mtd.write  = esp32s3_part_write;
-      mtd_priv->mtd.name   = strdup(label);
-      if (!mtd_priv->mtd.name)
+      mtd_priv->mtd.name   = name = strdup(label);
+      if (!name)
         {
           ferr("ERROR: Failed to allocate MTD name\n");
           kmm_free(mtd_priv);
@@ -829,7 +859,7 @@ int esp32s3_partition_init(void)
       if (!mtd_priv->part_mtd)
         {
           ferr("ERROR: Failed to create MTD partition\n");
-          lib_free(mtd_priv->mtd.name);
+          lib_free(name);
           kmm_free(mtd_priv);
           ret = -ENOSPC;
           goto errout_with_mtd;
@@ -839,7 +869,7 @@ int esp32s3_partition_init(void)
       if (ret < 0)
         {
           ferr("ERROR: Failed to register MTD @ %s\n", path);
-          lib_free(mtd_priv->mtd.name);
+          lib_free(name);
           kmm_free(mtd_priv);
           goto errout_with_mtd;
         }

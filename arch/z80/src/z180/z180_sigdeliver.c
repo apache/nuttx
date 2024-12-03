@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/z80/src/z180/z180_sigdeliver.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -52,7 +54,7 @@
 
 void z80_sigdeliver(void)
 {
-  FAR struct tcb_s  *rtcb = this_task();
+  FAR struct tcb_s *rtcb = this_task();
   chipreg_t regs[XCPTCONTEXT_REGS];
 
   board_autoled_on(LED_SIGNAL);

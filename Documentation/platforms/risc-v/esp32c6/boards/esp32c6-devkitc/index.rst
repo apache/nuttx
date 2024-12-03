@@ -260,6 +260,10 @@ by default to each other and running the ``spi`` example::
     Sending:	AB
     Received:	AB
 
+If SPI peripherals are already in use you can also use bitbang driver which is a
+software implemented SPI peripheral by enabling `CONFIG_ESPRESSIF_SPI_BITBANG`
+option.
+
 spiflash
 --------
 

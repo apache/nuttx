@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/src/qemu/qemu_boot.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -158,6 +160,8 @@ void arm64_chip_boot(void)
   /* MAP IO and DRAM, enable MMU. */
 
   arm64_mmu_init(true);
+
+  arm64_enable_mte();
 
 #ifdef CONFIG_DEVICE_TREE
   fdt_register((const char *)0x40000000);

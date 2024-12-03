@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/riscv_cpustart.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -77,12 +79,16 @@ void riscv_cpu_boot(int cpu)
 
   /* Wait interrupt */
 
-  asm("WFI");
+  do
+    {
+      asm("WFI");
+    }
+  while (!(READ_CSR(CSR_IP) & IP_SIP));
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
   /* Initialize the per CPU areas */
 
-  riscv_percpu_add_hart((uintptr_t)cpu);
+  riscv_percpu_add_hart(riscv_cpuid_to_hartid(cpu));
 #endif
 
 #ifdef CONFIG_BUILD_KERNEL

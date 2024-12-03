@@ -4,7 +4,6 @@ Date: Fri, 6 Sep 2024 10:56:49 +0800
 Subject: [PATCH 5/5] libmetal(cmake):set HAVE_STDATOMIC_H default true in
  NuttX platform
 
-Change-Id: I84e6fdd03753a16a9c296e87ab121cb8c16f3c61
 Signed-off-by: xuxin19 <xuxin19@xiaomi.com>
 ---
  cmake/depends.cmake | 10 ++++++++--

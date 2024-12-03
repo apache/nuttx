@@ -81,7 +81,7 @@
 
 	.thumb
 	.syntax unified
-def_fn strcmp
+def_fn ARCH_LIBCFUN(strcmp)
 	.cfi_sections .debug_frame
 	.cfi_startproc
 	eor	tmp1, src1, src2
@@ -413,6 +413,6 @@ def_fn strcmp
 	.cfi_def_cfa_offset 0
 	bx	lr
 	.cfi_endproc
-	.size strcmp, . - strcmp
+	.size ARCH_LIBCFUN(strcmp), . - ARCH_LIBCFUN(strcmp)
 
 #endif

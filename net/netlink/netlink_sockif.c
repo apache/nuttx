@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
@@ -686,7 +687,7 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
     {
       conn = psock->s_conn;
 
-      /* No response is variable, but presumably, one is expected.  Check
+      /* No response is available, but presumably, one is expected.  Check
        * if the socket has been configured for non-blocking operation.
        */
 

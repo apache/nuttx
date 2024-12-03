@@ -1,6 +1,8 @@
 ############################################################################
 # drivers/can/Make.defs
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.  The
@@ -22,7 +24,7 @@
 
 ifeq ($(CONFIG_CAN),y)
 
-CSRCS += can.c
+CSRCS += can.c can_sender.c
 
 ifeq ($(CONFIG_CAN_MCP2515),y)
 CSRCS += mcp2515.c

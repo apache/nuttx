@@ -143,7 +143,7 @@ if(CONFIG_LIBM_OPENLIBM)
       common.c
       e_acos.c e_acosf.c e_acosh.c e_acoshf.c e_asin.c e_asinf.c
       e_atan2.c e_atan2f.c e_atanh.c e_atanhf.c e_cosh.c e_coshf.c e_exp.c
-      e_exp10.c e_expf.c e_exp10f.c e_fmod.c e_fmodf.c
+      e_expf.c  e_fmod.c e_fmodf.c
       e_hypot.c e_hypotf.c e_j0.c e_j0f.c e_j1.c e_j1f.c
       e_jn.c e_jnf.c e_lgamma.c e_lgamma_r.c e_lgammaf.c e_lgammaf_r.c
       e_log.c e_log10.c e_log10f.c e_log2.c e_log2f.c e_logf.c

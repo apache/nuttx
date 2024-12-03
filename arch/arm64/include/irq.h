@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm64/include/irq.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -35,6 +37,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <arch/syscall.h>
+#  include <nuttx/macro.h>
 #endif
 
 /* Include NuttX-specific IRQ definitions */
@@ -48,6 +51,10 @@
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
+
+#ifdef __ghs__
+#  define __ARM_ARCH 8
+#endif
 
 #define up_getsp()          (uintptr_t)__builtin_frame_address(0)
 
@@ -265,7 +272,7 @@ struct xcptcontext
 
   /* task context, for signal process */
 
-  uint64_t *saved_reg;
+  uint64_t *saved_regs;
 
 #ifdef CONFIG_ARCH_FPU
   uint64_t *fpu_regs;
@@ -383,8 +390,47 @@ static inline void up_irq_restore(irqstate_t flags)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
+#  ifndef MPID_TO_CORE
+#    define MPID_TO_CORE(mpid) \
+            (((mpid) >> MPIDR_AFF0_SHIFT) & MPIDR_AFFLVL_MASK)
+#  endif
 #  define up_cpu_index() ((int)MPID_TO_CORE(GET_MPIDR()))
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
+
+/****************************************************************************
+ * Name:
+ *   read_/write_/zero_/modify_ sysreg
+ *
+ * Description:
+ *
+ *   ARMv8 Architecture Registers access method
+ *   All the macros need a memory clobber
+ *
+ ****************************************************************************/
+
+#define read_sysreg(reg)                            \
+  ({                                                \
+    uint64_t __val;                                 \
+    __asm__ volatile ("mrs %0, " STRINGIFY(reg)     \
+                    : "=r" (__val) :: "memory");    \
+    __val;                                          \
+  })
+
+#define write_sysreg(__val, reg)                    \
+  ({                                                \
+    __asm__ volatile ("msr " STRINGIFY(reg) ", %0"  \
+                      : : "r" (__val) : "memory");  \
+  })
+
+#define zero_sysreg(reg)                            \
+  ({                                                \
+    __asm__ volatile ("msr " STRINGIFY(reg) ", xzr" \
+                      ::: "memory");                \
+  })
+
+#define modify_sysreg(v,m,a)                        \
+  write_sysreg((read_sysreg(a) & ~(m)) |            \
+               ((uintptr_t)(v) & (m)), a)
 
 /****************************************************************************
  * Schedule acceleration macros
@@ -394,26 +440,27 @@ static inline void up_irq_restore(irqstate_t flags)
  * interrupt context and 0 indicates being in a thread context.
  ****************************************************************************/
 
-#define up_current_regs()      (this_task()->xcp.regs)
 #define up_this_task()         ((struct tcb_s *)(read_sysreg(tpidr_el1) & ~1ul))
 #define up_update_task(t)      modify_sysreg(t, ~1ul, tpidr_el1)
 #define up_interrupt_context() (read_sysreg(tpidr_el1) & 1)
 
-#define up_switch_context(tcb, rtcb)                              \
-  do {                                                            \
-    if (!up_interrupt_context())                                  \
-      {                                                           \
-        sys_call2(SYS_switch_context, (uintptr_t)&rtcb->xcp.regs, \
-                  (uintptr_t)tcb->xcp.regs);                      \
-      }                                                           \
-  } while (0)
+#define up_switch_context(tcb, rtcb)                                      \
+  do                                                                      \
+    {                                                                     \
+      if (!up_interrupt_context())                                        \
+        {                                                                 \
+          sys_call0(SYS_switch_context);                                  \
+        }                                                                 \
+      UNUSED(rtcb);                                                       \
+    }                                                                     \
+  while (0)
 
 /****************************************************************************
  * Name: up_getusrpc
  ****************************************************************************/
 
 #define up_getusrpc(regs) \
-    (((uintptr_t *)((regs) ? (regs) : up_current_regs()))[REG_ELR])
+    (((uintptr_t *)((regs) ? (regs) : running_regs()))[REG_ELR])
 
 #undef EXTERN
 #ifdef __cplusplus

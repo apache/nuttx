@@ -80,7 +80,7 @@
 \f:
 	.endm
 
-def_fn memchr
+def_fn ARCH_LIBCFUN(memchr)
 	/* Do not dereference srcin if no bytes to compare.  */
 	cbz	cntin, .Lzero_length
 	/*
@@ -174,6 +174,6 @@ def_fn memchr
 	mov	result, #0
 	ret
 
-	.size	memchr, . - memchr
+	.size	ARCH_LIBCFUN(memchr), . - ARCH_LIBCFUN(memchr)
 
 #endif

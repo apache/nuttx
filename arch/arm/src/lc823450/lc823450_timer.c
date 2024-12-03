@@ -341,8 +341,8 @@ int up_proftimerisr(int irq, uint32_t *regs, void *arg)
     {
       if (profile_ptr != CONFIG_PROFILE_SAMPLES)
         {
-          DEBUGASSERT(current_regs);
-          profile_data[profile_ptr++] = current_regs[REG_R15];
+          DEBUGASSERT(regs);
+          profile_data[profile_ptr++] = regs[REG_R15];
         }
       else
         {

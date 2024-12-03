@@ -32,6 +32,7 @@
 #include <debug.h>
 #include <unistd.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
@@ -299,7 +300,7 @@ void local_free(FAR struct local_conn_s *conn)
 
   dq_rem(&conn->lc_conn.node, &g_local_connections);
 
-  if (local_peerconn(conn) && conn->lc_peer)
+  if (conn->lc_peer)
     {
       conn->lc_peer->lc_peer = NULL;
       conn->lc_peer = NULL;

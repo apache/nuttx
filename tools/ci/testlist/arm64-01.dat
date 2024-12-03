@@ -1,0 +1,11 @@
+/arm64
+
+# arm64 Boards build by CMake
+CMake,qemu-armv8a:citest
+CMake,qemu-armv8a:citest_smp
+CMake,qemu-armv8a:nsh
+CMake,qemu-armv8a:nsh_fiq
+CMake,qemu-armv8a:nsh_gicv2
+CMake,qemu-armv8a:nsh_smp
+CMake,qemu-armv8a:nsh_smp_tickless
+CMake,qemu-armv8a:sotest

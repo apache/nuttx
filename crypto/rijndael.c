@@ -1,5 +1,6 @@
 /****************************************************************************
  * crypto/rijndael.c
+ *
  * $OpenBSD: rijndael.c,v 1.20 2014/11/17 12:27:47 mikeb Exp $
  *
  * rijndael-alg-fst.c

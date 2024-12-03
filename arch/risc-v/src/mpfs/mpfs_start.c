@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/mpfs/mpfs_start.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -49,8 +51,12 @@
 #  define showprogress(c)
 #endif
 
-#if defined (CONFIG_BUILD_KERNEL) && !defined (CONFIG_ARCH_USE_S_MODE)
+#if defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_ARCH_USE_S_MODE)
 #  error "Target requires kernel in S-mode, enable CONFIG_ARCH_USE_S_MODE"
+#endif
+
+#if defined(CONFIG_SMP) && !defined(CONFIG_RISCV_PERCPU_SCRATCH)
+#  error "Target requires CONFIG_RISCV_PERCPU_SCRATCH if CONFIG_SMP is set"
 #endif
 
 /****************************************************************************
@@ -77,6 +83,13 @@ void __mpfs_start(uint64_t mhartid)
       riscv_fpuconfig();
     }
 
+  /* CPU 0 handles the boot, the rest wait */
+
+  if (riscv_hartid_to_cpuid(mhartid) != 0)
+    {
+      goto cpux;
+    }
+
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
@@ -99,9 +112,18 @@ void __mpfs_start(uint64_t mhartid)
       *dest++ = *src++;
     }
 
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+  /* Initialize the per CPU areas */
+
+  if (mhartid != 0)
+    {
+      riscv_percpu_add_hart(mhartid);
+    }
+#endif /* CONFIG_RISCV_PERCPU_SCRATCH */
+
   /* Setup PLL if not already provided */
 
-#ifdef CONFIG_MPFS_BOOTLOADER
+#ifdef CONFIG_MPFS_CLKINIT
   mpfs_clockconfig();
 #endif
 
@@ -137,15 +159,6 @@ void __mpfs_start(uint64_t mhartid)
 
   mpfs_boardinitialize();
 
-#ifdef CONFIG_RISCV_PERCPU_SCRATCH
-  /* Initialize the per CPU areas */
-
-  if (mhartid != 0)
-    {
-      riscv_percpu_add_hart(mhartid);
-    }
-#endif /* CONFIG_RISCV_PERCPU_SCRATCH */
-
   /* Initialize the caches.  Should only be executed from E51 (hart 0) to be
    * functional.  Consider the caches already configured if running without
    * the CONFIG_MPFS_BOOTLOADER -option.
@@ -180,6 +193,22 @@ void __mpfs_start(uint64_t mhartid)
   nx_start();
 
   showprogress('a');
+
+cpux:
+
+#ifdef CONFIG_SMP
+  /* Disable local interrupts */
+
+  up_irq_save();
+
+  /* Initialize local PLIC */
+
+  mpfs_plic_init_hart(mhartid);
+
+  /* Then wait for the boot core to start us */
+
+  riscv_cpu_boot(riscv_hartid_to_cpuid(mhartid));
+#endif
 
   while (true)
     {

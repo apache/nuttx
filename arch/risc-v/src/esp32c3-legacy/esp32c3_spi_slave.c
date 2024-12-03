@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/esp32c3-legacy/esp32c3_spi_slave.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -863,6 +865,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
   if (transfer_size > 0)
     {
       spislave_store_result(priv, transfer_size);
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
     }
 
   spislave_prepare_next_rx(priv);
@@ -872,6 +875,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
   if (transfer_size > 0 && priv->is_tx_enabled)
     {
       spislave_evict_sent_data(priv, transfer_size);
+      SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_TX_COMPLETE);
     }
 
   spislave_prepare_next_tx(priv);

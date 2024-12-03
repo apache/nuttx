@@ -777,29 +777,27 @@ menuconfig NET_E1000
 
 if NET_E1000
 
+config NET_E1000_TXDESC
+	int "Intel E1000 TX descriptors"
+	default 256
+
+config NET_E1000_RXDESC
+	int "Intel E1000 RX descriptors"
+	default 256
+
 config NET_E1000_RXSPARE
 	int "Intel E1000 spare RX buffers"
 	default 8
 
-config NET_E1000_I219
-	bool "Intel I219"
-	default n
-	---help---
-		Enable Intel I219 Ethernet driver.
-
-config NET_E1000_82540EM
-	bool "Intel 82540EM"
-	default n
-	---help---
-		Enable Intel 82540EM Ethernet driver (-device e1000 on QEMU).
-
-config NET_E1000_82574L
-	bool "Intel 82574L"
-	default n
-	---help---
-		Enable Intel 82574L Ethernet driver (-device e1000e on QEMU).
-
 endif # NET_E1000
+
+config NET_IGC_TXDESC
+	int "Intel IGC TX descriptors"
+	default 256
+
+config NET_IGC_RXDESC
+	int "Intel IGC RX descriptors"
+	default 256
 
 menuconfig NET_IGC
 	bool "Intel IGC support"
@@ -814,9 +812,12 @@ config NET_IGC_RXSPARE
 	int "Intel IGC spare RX buffers"
 	default 8
 
-config NET_IGC_I225LM
-	bool "Intel I225LM"
-	default n
+config NET_IGC_INT_INTERVAL
+	int "Intel IGC interrupt interval"
+	default 100
+	range 1 8191
+	---help---
+		Minimum Inter-interrupt Interval in 1 us increments.
 
 endif # NET_IGC
 

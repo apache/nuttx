@@ -1,6 +1,8 @@
 /****************************************************************************
  * drivers/input/ff_upper.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -386,6 +388,30 @@ static int ff_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case EVIOCGEFFECTS:
         {
           *(FAR int *)(uintptr_t)arg = upper->max_effects;
+        }
+        break;
+
+      case EVIOCSETCALIBDATA:
+        {
+          if (upper->lower->set_calibvalue == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          ret = upper->lower->set_calibvalue(upper->lower, arg);
+        }
+        break;
+
+      case EVIOCCALIBRATE:
+        {
+          if (upper->lower->calibrate == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          ret = upper->lower->calibrate(upper->lower, arg);
         }
         break;
 

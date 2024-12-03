@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/x86_64/include/intel64/arch.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -41,232 +43,273 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define X86_64_LOAD_OFFSET 0x100000000
+#define X86_64_LOAD_OFFSET             0x100000000
 
 /* Page pool configuration for CONFIG_ARCH_PGPOOL_MAPPING=n */
 
 #ifndef CONFIG_ARCH_X86_64_PGPOOL_SIZE
-#  define X86_64_PGPOOL_SIZE      (0)
+#  define X86_64_PGPOOL_SIZE           (0)
 #else
 #  if CONFIG_ARCH_X86_64_PGPOOL_SIZE % CONFIG_MM_PGSIZE != 0
 #    error CONFIG_ARCH_X86_64_PGPOOL_SIZE must be multiple of page size
 #  endif
-#  define X86_64_PGPOOL_SIZE      (CONFIG_ARCH_X86_64_PGPOOL_SIZE)
+#  define X86_64_PGPOOL_SIZE           (CONFIG_ARCH_X86_64_PGPOOL_SIZE)
 #endif
 
-#define X86_64_PGPOOL_BASE        (CONFIG_RAM_SIZE - X86_64_PGPOOL_SIZE)
+#define X86_64_PGPOOL_BASE             (CONFIG_RAM_SIZE - X86_64_PGPOOL_SIZE)
 
 /* RFLAGS bits */
 
-#define X86_64_RFLAGS_CF          (1 << 0)  /* Bit 0:  Carry Flag */
-                                            /* Bit 1:  Reserved */
-#define X86_64_RFLAGS_PF          (1 << 2)  /* Bit 2:  Parity Flag */
-                                            /* Bit 3:  Reserved */
-#define X86_64_RFLAGS_AF          (1 << 4)  /* Bit 4:  Auxiliary carry Flag */
-                                            /* Bit 5:  Reserved */
-#define X86_64_RFLAGS_ZF          (1 << 6)  /* Bit 6:  Zero Flag */
-#define X86_64_RFLAGS_SF          (1 << 7)  /* Bit 7:  Sign Flag */
-#define X86_64_RFLAGS_TF          (1 << 8)  /* Bit 8:  Trap Flag */
-#define X86_64_RFLAGS_IF          (1 << 9)  /* Bit 9:  Interrupt Flag */
-#define X86_64_RFLAGS_DF          (1 << 10) /* Bit 10: Direction Flag */
-#define X86_64_RFLAGS_OF          (1 << 11) /* Bit 11: Overflow Flag */
-#define X86_64_RFLAGS_IOPL_SHIFT  (12)      /* Bits 12-13: IOPL mask (286+ only)*/
-#define X86_64_RFLAGS_IOPL_MASK   (3 << X86_64_RFLAGS_IOPL_SHIFT)
-#define X86_64_RFLAGS_NT          (1 << 14) /* Bit 14: Nested Task */
-                                            /* Bit 15: Reserved */
-#define X86_64_RFLAGS_RF          (1 << 16) /* Bit 16: Resume Flag (386+ only) */
-#define X86_64_RFLAGS_VM          (1 << 17) /* Bit 17: Virtual Mode (386+ only) */
-#define X86_64_RFLAGS_AC          (1 << 18) /* Bit 18: Alignment Check (486SX+ only) */
-#define X86_64_RFLAGS_VIF         (1 << 19) /* Bit 19: Virtual Interrupt Flag (Pentium+) */
-#define X86_64_RFLAGS_VIP         (1 << 20) /* Bit 20: Virtual Interrupt Pending (Pentium+) */
-#define X86_64_RFLAGS_ID          (1 << 21) /* Bit 21: CPUID detection flag (Pentium+) */
+#define X86_64_RFLAGS_CF               (1 << 0)  /* Bit 0:  Carry Flag */
+                                                 /* Bit 1:  Reserved */
+#define X86_64_RFLAGS_PF               (1 << 2)  /* Bit 2:  Parity Flag */
+                                                 /* Bit 3:  Reserved */
+#define X86_64_RFLAGS_AF               (1 << 4)  /* Bit 4:  Auxiliary carry Flag */
+                                                 /* Bit 5:  Reserved */
+#define X86_64_RFLAGS_ZF               (1 << 6)  /* Bit 6:  Zero Flag */
+#define X86_64_RFLAGS_SF               (1 << 7)  /* Bit 7:  Sign Flag */
+#define X86_64_RFLAGS_TF               (1 << 8)  /* Bit 8:  Trap Flag */
+#define X86_64_RFLAGS_IF               (1 << 9)  /* Bit 9:  Interrupt Flag */
+#define X86_64_RFLAGS_DF               (1 << 10) /* Bit 10: Direction Flag */
+#define X86_64_RFLAGS_OF               (1 << 11) /* Bit 11: Overflow Flag */
+#define X86_64_RFLAGS_IOPL_SHIFT       (12)      /* Bits 12-13: IOPL mask (286+ only)*/
+#define X86_64_RFLAGS_IOPL_MASK        (3 << X86_64_RFLAGS_IOPL_SHIFT)
+#define X86_64_RFLAGS_NT               (1 << 14) /* Bit 14: Nested Task */
+                                                 /* Bit 15: Reserved */
+#define X86_64_RFLAGS_RF               (1 << 16) /* Bit 16: Resume Flag (386+ only) */
+#define X86_64_RFLAGS_VM               (1 << 17) /* Bit 17: Virtual Mode (386+ only) */
+#define X86_64_RFLAGS_AC               (1 << 18) /* Bit 18: Alignment Check (486SX+ only) */
+#define X86_64_RFLAGS_VIF              (1 << 19) /* Bit 19: Virtual Interrupt Flag (Pentium+) */
+#define X86_64_RFLAGS_VIP              (1 << 20) /* Bit 20: Virtual Interrupt Pending (Pentium+) */
+#define X86_64_RFLAGS_ID               (1 << 21) /* Bit 21: CPUID detection flag (Pentium+) */
 
 /* GDT Definitions */
 
-/* Starting from third selector to confirm the syscall interface */
+/* Selector configuration must compy with the requirements of SYSCALL
+ * and SYSRET instructions. These definitions must match the GDT format
+ * in intel64_head.S:g_gdt64_low.
+ *
+ * For details look at the comment in intel64_cpu.c about MSR_STAT write.
+ */
 
-#define X86_GDT_ENTRY_SIZE        0x8
+#define X86_GDT_ENTRY_SIZE             0x8
 
-#define X86_GDT_CODE_SEL_NUM      1
-#  define X86_GDT_CODE_SEL        (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_CODE_SEL_NUM           1
+#  define X86_GDT_CODE_SEL             (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
-#define X86_GDT_DATA_SEL_NUM      2
-#  define X86_GDT_DATA_SEL        (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+#define X86_GDT_DATA_SEL_NUM           2
+#  define X86_GDT_DATA_SEL             (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+
+#define X86_GDT_USERDATA_SEL_NUM       6
+#  define X86_GDT_USERDATA_SEL         (X86_GDT_USERDATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+
+#define X86_GDT_USERCODE_SEL_NUM       7
+#  define X86_GDT_USERCODE_SEL         (X86_GDT_USERCODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
 
 /* The first TSS entry */
 
-#define X86_GDT_ISTL_SEL_NUM    6
-#define X86_GDT_ISTH_SEL_NUM    (X86_GDT_ISTL_SEL_NUM + 1)
+#define X86_GDT_ISTL_SEL_NUM           8
+#define X86_GDT_ISTH_SEL_NUM           (X86_GDT_ISTL_SEL_NUM + 1)
 
-#define X86_GDT_BASE      0x0000000000000000
-#define X86_GDT_LIMIT     0x000f00000000ffff
+/* Stack selector for ISR and IRQ (offset in Interrupt Stack Table) */
 
-#define X86_GDT_FLAG_LONG 0x0020000000000000
+#define X86_GDT_IST_ISR                2
+#define X86_GDT_IST_IRQ                1
 
-#define X86_GDT_ACC_PR    0x0000800000000000
-#define X86_GDT_ACC_SEG   0x0000100000000000
-#define X86_GDT_ACC_EX    0x0000080000000000
-#define X86_GDT_ACC_WR    0x0000020000000000
+#define X86_GDT_BASE                   0x0000000000000000
+#define X86_GDT_LIMIT                  0x000f00000000ffff
 
-#define X86_GDT_CODE64_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_FLAG_LONG + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
-#define X86_GDT_CODE32_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
-#define X86_GDT_DATA_ENTRY      (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_WR)
+#define X86_GDT_FLAG_LONG              0x0020000000000000
+
+#define X86_GDT_ACC_PR                 0x0000800000000000
+#define X86_GDT_ACC_USER               0x0000600000000000
+#define X86_GDT_ACC_SEG                0x0000100000000000
+#define X86_GDT_ACC_EX                 0x0000080000000000
+#define X86_GDT_ACC_WR                 0x0000020000000000
+
+#define X86_GDT_CODE64_ENTRY           (X86_GDT_BASE + X86_GDT_LIMIT + \
+                                        X86_GDT_FLAG_LONG + X86_GDT_ACC_PR + \
+                                        X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
+#define X86_GDT_CODE32_ENTRY           (X86_GDT_BASE + X86_GDT_LIMIT + \
+                                        X86_GDT_ACC_PR + X86_GDT_ACC_SEG + \
+                                        X86_GDT_ACC_EX)
+#define X86_GDT_DATA_ENTRY             (X86_GDT_BASE + X86_GDT_LIMIT + \
+                                        X86_GDT_ACC_PR + X86_GDT_ACC_SEG + \
+                                        X86_GDT_ACC_WR)
+#define X86_GDT_CODEUSER_ENTRY         (X86_GDT_BASE + X86_GDT_LIMIT +       \
+                                        X86_GDT_FLAG_LONG + X86_GDT_ACC_PR + \
+                                        X86_GDT_ACC_SEG + X86_GDT_ACC_EX + \
+                                        X86_GDT_ACC_USER)
+#define X86_GDT_DATAUSER_ENTRY         (X86_GDT_BASE + X86_GDT_LIMIT +     \
+                                        X86_GDT_ACC_PR + X86_GDT_ACC_SEG + \
+                                        X86_GDT_ACC_WR + X86_GDT_ACC_USER)
 
 /* CR0 Definitions */
 
-#define X86_CR0_PE        0x00000001
-#define X86_CR0_MP        0x00000002
-#define X86_CR0_EM        0x00000004
-#define X86_CR0_WP        0x00010000
-#define X86_CR0_PG        0x80000000
+#define X86_CR0_PE                     0x00000001
+#define X86_CR0_MP                     0x00000002
+#define X86_CR0_EM                     0x00000004
+#define X86_CR0_WP                     0x00010000
+#define X86_CR0_PG                     0x80000000
 
 /* CR4 Definitions */
 
-#define X86_CR4_PAE      0x00000020
-#define X86_CR4_PGE      0x00000080
-#define X86_CR4_OSXFSR   0x00000200
-#define X86_CR4_XMMEXCPT 0x00000400
-#define X86_CR4_FGSBASE  0x00010000
-#define X86_CR4_PCIDE    0x00020000
-#define X86_CR4_OSXSAVE  0x00040000
+#define X86_CR4_PAE                    0x00000020
+#define X86_CR4_PGE                    0x00000080
+#define X86_CR4_OSXFSR                 0x00000200
+#define X86_CR4_XMMEXCPT               0x00000400
+#define X86_CR4_FGSBASE                0x00010000
+#define X86_CR4_PCIDE                  0x00020000
+#define X86_CR4_OSXSAVE                0x00040000
 
 /* XCR0 */
 
-#define X86_XCR0_X87       (1 << 0)
-#define X86_XCR0_SSE       (1 << 1)
-#define X86_XCR0_AVX       (1 << 2)
-#define X86_XCR0_BNDREG    (1 << 3)
-#define X86_XCR0_BNDCSR    (1 << 4)
-#define X86_XCR0_OPMASK    (1 << 5)
-#define X86_XCR0_HI256     (1 << 6)
-#define X86_XCR0_HI16      (1 << 7)
-#define X86_XCR0_PT        (1 << 8)
-#define X86_XCR0_PKRU      (1 << 9)
-#define X86_XCR0_PASID     (1 << 10)
-#define X86_XCR0_CETU      (1 << 11)
-#define X86_XCR0_CETS      (1 << 12)
-#define X86_XCR0_HDC       (1 << 13)
-#define X86_XCR0_UINTR     (1 << 14)
-#define X86_XCR0_LBR       (1 << 15)
-#define X86_XCR0_HWP       (1 << 16)
-#define X86_XCR0_XTILECFG  (1 << 17)
-#define X86_XCR0_XTILEDATA (1 << 18)
-#define X86_XCR0_APX       (1 << 19)
+#define X86_XCR0_X87                   (1 << 0)
+#define X86_XCR0_SSE                   (1 << 1)
+#define X86_XCR0_AVX                   (1 << 2)
+#define X86_XCR0_BNDREG                (1 << 3)
+#define X86_XCR0_BNDCSR                (1 << 4)
+#define X86_XCR0_OPMASK                (1 << 5)
+#define X86_XCR0_HI256                 (1 << 6)
+#define X86_XCR0_HI16                  (1 << 7)
+#define X86_XCR0_PT                    (1 << 8)
+#define X86_XCR0_PKRU                  (1 << 9)
+#define X86_XCR0_PASID                 (1 << 10)
+#define X86_XCR0_CETU                  (1 << 11)
+#define X86_XCR0_CETS                  (1 << 12)
+#define X86_XCR0_HDC                   (1 << 13)
+#define X86_XCR0_UINTR                 (1 << 14)
+#define X86_XCR0_LBR                   (1 << 15)
+#define X86_XCR0_HWP                   (1 << 16)
+#define X86_XCR0_XTILECFG              (1 << 17)
+#define X86_XCR0_XTILEDATA             (1 << 18)
+#define X86_XCR0_APX                   (1 << 19)
 
 /* PAGE TABLE ENTRY Definitions */
 
-#define X86_PAGE_PRESENT (1 << 0)
-#define X86_PAGE_WR      (1 << 1)
-#define X86_PAGE_USER    (1 << 2)
-#define X86_PAGE_WRTHR   (1 << 3)
-#define X86_PAGE_NOCACHE (1 << 4)
-#define X86_PAGE_HUGE    (1 << 7)
-#define X86_PAGE_GLOBAL  (1 << 8)
-#define X86_PAGE_NX      (1 << 63)
+#define X86_PAGE_PRESENT               (1 << 0)
+#define X86_PAGE_WR                    (1 << 1)
+#define X86_PAGE_USER                  (1 << 2)
+#define X86_PAGE_WRTHR                 (1 << 3)
+#define X86_PAGE_NOCACHE               (1 << 4)
+#define X86_PAGE_HUGE                  (1 << 7)
+#define X86_PAGE_GLOBAL                (1 << 8)
+#define X86_PAGE_NX                    (1 << 63)
 
-#define X86_PAGE_ENTRY_SIZE 8
-#define X86_NUM_PAGE_ENTRY (PAGE_SIZE / X86_PAGE_ENTRY_SIZE)
+#define X86_PAGE_ENTRY_SIZE            8
+#define X86_NUM_PAGE_ENTRY             (PAGE_SIZE / X86_PAGE_ENTRY_SIZE)
 
-#define PAGE_SIZE        (0x1000)
-#  define PAGE_MASK      (~(PAGE_SIZE - 1))
+#define PAGE_SIZE                      (0x1000)
+#  define PAGE_MASK                    (~(PAGE_SIZE - 1))
 
-#define HUGE_PAGE_SIZE   (0x200000)
-#  define HUGE_PAGE_MASK (~(HUGE_PAGE_SIZE - 1))
+#define HUGE_PAGE_SIZE                 (0x200000)
+#  define HUGE_PAGE_MASK               (~(HUGE_PAGE_SIZE - 1))
 
 /* Kernel mapping - lower 1GB maps to 4GB-5GB */
 
-#define X86_PDPT_KERNEL_MAP (X86_PAGE_GLOBAL | X86_PAGE_WR | \
-                             X86_PAGE_PRESENT | X86_PAGE_HUGE)
+#define X86_PDPT_KERNEL_MAP            (X86_PAGE_GLOBAL | X86_PAGE_WR | \
+                                        X86_PAGE_PRESENT | X86_PAGE_HUGE)
 
 /* CPUID Leaf Definitions */
 
-#define X86_64_CPUID_VENDOR           0x00
-#define X86_64_CPUID_CAP              0x01
-#  define X86_64_CPUID_01_SSE3        (1 << 0)
-#  define X86_64_CPUID_01_SSSE3       (1 << 9)
-#  define X86_64_CPUID_01_FMA         (1 << 12)
-#  define X86_64_CPUID_01_PCID        (1 << 17)
-#  define X86_64_CPUID_01_SSE41       (1 << 19)
-#  define X86_64_CPUID_01_SSE42       (1 << 20)
-#  define X86_64_CPUID_01_X2APIC      (1 << 21)
-#  define X86_64_CPUID_01_TSCDEA      (1 << 24)
-#  define X86_64_CPUID_01_XSAVE       (1 << 26)
-#  define X86_64_CPUID_01_AVX         (1 << 28)
-#  define X86_64_CPUID_01_RDRAND      (1 << 30)
-#  define X86_64_CPUID_01_APICID(ebx) ((ebx) >> 24)
-#define X86_64_CPUID_EXTCAP           0x07
-#  define X86_64_CPUID_07_AVX2        (1 << 5)
-#  define X86_64_CPUID_07_AVX512F     (1 << 16)
-#  define X86_64_CPUID_07_AVX512DQ    (1 << 17)
-#  define X86_64_CPUID_07_SMAP        (1 << 20)
-#  define X86_64_CPUID_07_AVX512IFMA  (1 << 21)
-#  define X86_64_CPUID_07_CLWB        (1 << 24)
-#  define X86_64_CPUID_07_AVX512PF    (1 << 26)
-#  define X86_64_CPUID_07_AVX512ER    (1 << 27)
-#  define X86_64_CPUID_07_AVX512CD    (1 << 28)
-#  define X86_64_CPUID_07_AVX512BW    (1 << 30)
-#  define X86_64_CPUID_07_AVX512VL    (1 << 31)
-#define X86_64_CPUID_XSAVE            0x0d
-#define X86_64_CPUID_TSC              0x15
-#define X86_64_CPUID_EXTINFO          0x80000001
-#  define X86_64_CPUID_EXTINFO_RDTSCP (1 << 27)
+#define X86_64_CPUID_VENDOR            0x00
+#define X86_64_CPUID_CAP               0x01
+#  define X86_64_CPUID_01_SSE3         (1 << 0)
+#  define X86_64_CPUID_01_SSSE3        (1 << 9)
+#  define X86_64_CPUID_01_FMA          (1 << 12)
+#  define X86_64_CPUID_01_PCID         (1 << 17)
+#  define X86_64_CPUID_01_SSE41        (1 << 19)
+#  define X86_64_CPUID_01_SSE42        (1 << 20)
+#  define X86_64_CPUID_01_X2APIC       (1 << 21)
+#  define X86_64_CPUID_01_TSCDEA       (1 << 24)
+#  define X86_64_CPUID_01_XSAVE        (1 << 26)
+#  define X86_64_CPUID_01_AVX          (1 << 28)
+#  define X86_64_CPUID_01_RDRAND       (1 << 30)
+#  define X86_64_CPUID_01_APICID(ebx)  ((ebx) >> 24)
+#define X86_64_CPUID_EXTCAP            0x07
+#  define X86_64_CPUID_07_AVX2         (1 << 5)
+#  define X86_64_CPUID_07_AVX512F      (1 << 16)
+#  define X86_64_CPUID_07_AVX512DQ     (1 << 17)
+#  define X86_64_CPUID_07_SMAP         (1 << 20)
+#  define X86_64_CPUID_07_AVX512IFMA   (1 << 21)
+#  define X86_64_CPUID_07_CLWB         (1 << 24)
+#  define X86_64_CPUID_07_AVX512PF     (1 << 26)
+#  define X86_64_CPUID_07_AVX512ER     (1 << 27)
+#  define X86_64_CPUID_07_AVX512CD     (1 << 28)
+#  define X86_64_CPUID_07_AVX512BW     (1 << 30)
+#  define X86_64_CPUID_07_AVX512VL     (1 << 31)
+#define X86_64_CPUID_XSAVE             0x0d
+#define X86_64_CPUID_TSC               0x15
+#define X86_64_CPUID_EXTINFO           0x80000001
+#  define X86_64_CPUID_EXTINFO_RDTSCP  (1 << 27)
 
 /* MSR Definitions */
 
-#define MSR_FS_BASE             0xc0000100 /* 64bit FS base */
+#define MSR_STAR                       0xc0000081
+#define   MSR_STAR_CSSYSCALL(x)        (((uint64_t)x) << 32)
+#define   MSR_STAR_CSSYSRET(x)         (((uint64_t)x) << 48)
 
-#define MSR_EFER                0xc0000080
-#  define EFER_LME              0x00000100
+#define MSR_LSTAR                      0xc0000082 /* Target RIP for PM64 callers */
+#define MSR_CSTAR                      0xc0000083 /* Target RIP for CM callers */
+#define MSR_FMASK                      0xc0000084 /* RFLAGS mask for SYSCALL */
 
-#define MSR_MTRR_DEF_TYPE       0x000002ff
-#  define MTRR_ENABLE           0x00000800
+#define MSR_FS_BASE                    0xc0000100 /* 64bit FS base */
+#define MSR_GS_BASE                    0xc0000101 /* 64bit GS base */
+#define MSR_KERNELGS_BASE              0xc0000102 /* kernel GS base (for SWAPGS) */
 
-#define MSR_IA32_TSC_DEADLINE   0x6e0
+#define MSR_EFER                       0xc0000080
+#  define EFER_SCE                     0x00000001
+#  define EFER_LME                     0x00000100
 
-#define MSR_IA32_APIC_BASE      0x01b
-#  define MSR_IA32_APIC_EN      0x800
-#  define MSR_IA32_APIC_X2APIC  0x400
-#  define MSR_IA32_APIC_BSP     0x100
+#define MSR_MTRR_DEF_TYPE              0x000002ff
+#  define MTRR_ENABLE                  0x00000800
 
-#define MSR_X2APIC_ID           0x802
-#define MSR_X2APIC_VER          0x803
-#define MSR_X2APIC_TPR          0x808
-#define MSR_X2APIC_PPR          0x80a
-#define MSR_X2APIC_EOI          0x80b
-#define MSR_X2APIC_LDR          0x80d
+#define MSR_IA32_TSC_DEADLINE          0x6e0
 
-#define MSR_X2APIC_SPIV         0x80f
-#  define MSR_X2APIC_SPIV_EN    0x100
+#define MSR_IA32_APIC_BASE             0x01b
+#  define MSR_IA32_APIC_EN             0x800
+#  define MSR_IA32_APIC_X2APIC         0x400
+#  define MSR_IA32_APIC_BSP            0x100
 
-#define MSR_X2APIC_ISR0         0x810
-#define MSR_X2APIC_ISR1         0x811
-#define MSR_X2APIC_ISR2         0x812
-#define MSR_X2APIC_ISR3         0x813
-#define MSR_X2APIC_ISR4         0x814
-#define MSR_X2APIC_ISR5         0x815
-#define MSR_X2APIC_ISR6         0x816
-#define MSR_X2APIC_ISR7         0x817
+#define MSR_X2APIC_ID                  0x802
+#define MSR_X2APIC_VER                 0x803
+#define MSR_X2APIC_TPR                 0x808
+#define MSR_X2APIC_PPR                 0x80a
+#define MSR_X2APIC_EOI                 0x80b
+#define MSR_X2APIC_LDR                 0x80d
 
-#define MSR_X2APIC_TMR0         0x818
-#define MSR_X2APIC_TMR1         0x819
-#define MSR_X2APIC_TMR2         0x81a
-#define MSR_X2APIC_TMR3         0x81b
-#define MSR_X2APIC_TMR4         0x81c
-#define MSR_X2APIC_TMR5         0x81d
-#define MSR_X2APIC_TMR6         0x81e
-#define MSR_X2APIC_TMR7         0x81f
+#define MSR_X2APIC_SPIV                0x80f
+#  define MSR_X2APIC_SPIV_EN           0x100
 
-#define MSR_X2APIC_IRR0         0x820
-#define MSR_X2APIC_IRR1         0x821
-#define MSR_X2APIC_IRR2         0x822
-#define MSR_X2APIC_IRR3         0x823
-#define MSR_X2APIC_IRR4         0x824
-#define MSR_X2APIC_IRR5         0x825
-#define MSR_X2APIC_IRR6         0x826
-#define MSR_X2APIC_IRR7         0x827
+#define MSR_X2APIC_ISR0                0x810
+#define MSR_X2APIC_ISR1                0x811
+#define MSR_X2APIC_ISR2                0x812
+#define MSR_X2APIC_ISR3                0x813
+#define MSR_X2APIC_ISR4                0x814
+#define MSR_X2APIC_ISR5                0x815
+#define MSR_X2APIC_ISR6                0x816
+#define MSR_X2APIC_ISR7                0x817
 
-#define MSR_X2APIC_ESR          0x828
-#define MSR_X2APIC_ICR          0x830
+#define MSR_X2APIC_TMR0                0x818
+#define MSR_X2APIC_TMR1                0x819
+#define MSR_X2APIC_TMR2                0x81a
+#define MSR_X2APIC_TMR3                0x81b
+#define MSR_X2APIC_TMR4                0x81c
+#define MSR_X2APIC_TMR5                0x81d
+#define MSR_X2APIC_TMR6                0x81e
+#define MSR_X2APIC_TMR7                0x81f
+
+#define MSR_X2APIC_IRR0                0x820
+#define MSR_X2APIC_IRR1                0x821
+#define MSR_X2APIC_IRR2                0x822
+#define MSR_X2APIC_IRR3                0x823
+#define MSR_X2APIC_IRR4                0x824
+#define MSR_X2APIC_IRR5                0x825
+#define MSR_X2APIC_IRR6                0x826
+#define MSR_X2APIC_IRR7                0x827
+
+#define MSR_X2APIC_ESR                 0x828
+#define MSR_X2APIC_ICR                 0x830
 #  define MSR_X2APIC_ICR_INIT          0x00000500  /* INIT/RESET */
 #  define MSR_X2APIC_ICR_STARTUP       0x00000600  /* Startup IPI */
 #  define MSR_X2APIC_ICR_DELIVS        0x00001000  /* Delivery status */
@@ -278,93 +321,93 @@
 #  define MSR_X2APIC_ICR_BUSY          0x00001000
 #  define MSR_X2APIC_ICR_FIXED         0x00000000
 #  define MSR_X2APIC_DESTINATION(d)    ((d) << 32)
-#define MSR_X2APIC_LVTT         0x832
+#define MSR_X2APIC_LVTT                0x832
 #  define MSR_X2APIC_LVTT_X1           0x0000000B  /* divide counts by 1 */
 #  define MSR_X2APIC_LVTT_PERIODIC     0x00020000  /* Periodic */
 #  define MSR_X2APIC_LVTT_TSC_DEADLINE 0x00040000  /* Enable TSC DEADLINE One-shot timer */
-#define MSR_X2APIC_LVTTHER      0x833
-#define MSR_X2APIC_LVTPMR       0x834
-#define MSR_X2APIC_LINT0        0x835
-#define MSR_X2APIC_LINT1        0x836
-#define MSR_X2APIC_LERR         0x837
+#define MSR_X2APIC_LVTTHER             0x833
+#define MSR_X2APIC_LVTPMR              0x834
+#define MSR_X2APIC_LINT0               0x835
+#define MSR_X2APIC_LINT1               0x836
+#define MSR_X2APIC_LERR                0x837
 #  define MSR_X2APIC_MASKED            0x00010000  /* Interrupt masked */
-#define MSR_X2APIC_TMICT        0x838
-#define MSR_X2APIC_TMCCT        0x839
-#define MSR_X2APIC_TDCR         0x83e
-#define MSR_IA32_XSS            0xda0
+#define MSR_X2APIC_TMICT               0x838
+#define MSR_X2APIC_TMCCT               0x839
+#define MSR_X2APIC_TDCR                0x83e
+#define MSR_IA32_XSS                   0xda0
 
 /* IOAPIC related Definitions */
 
-#define IOAPIC_BASE             0xfec00000
-#define IOAPIC_REG_INDEX        0x00
-#define IOAPIC_REG_DATA         0x10
-#  define IOAPIC_REG_ID         0x00       /* Register index: ID */
-#  define IOAPIC_REG_VER        0x01       /* Register index: version */
-#  define IOAPIC_REG_TABLE      0x10       /* Redirection table base */
-#  define IOAPIC_PIN_DISABLE    (1 << 16)  /* Disable */
+#define IOAPIC_BASE                    0xfec00000
+#define IOAPIC_REG_INDEX               0x00
+#define IOAPIC_REG_DATA                0x10
+#  define IOAPIC_REG_ID                0x00       /* Register index: ID */
+#  define IOAPIC_REG_VER               0x01       /* Register index: version */
+#  define IOAPIC_REG_TABLE             0x10       /* Redirection table base */
+#  define IOAPIC_PIN_DISABLE           (1 << 16)  /* Disable */
 
 /* PIC related Definitions */
 
-#define X86_IO_PORT_PIC1_CMD   0x20
-#define X86_IO_PORT_PIC1_DATA  (X86_IO_PORT_PIC1_CMD + 1)
-#define X86_IO_PORT_PIC2_CMD   0xA0
-#define X86_IO_PORT_PIC2_DATA  (X86_IO_PORT_PIC2_CMD + 2)
+#define X86_IO_PORT_PIC1_CMD           0x20
+#define X86_IO_PORT_PIC1_DATA          (X86_IO_PORT_PIC1_CMD + 1)
+#define X86_IO_PORT_PIC2_CMD           0xA0
+#define X86_IO_PORT_PIC2_DATA          (X86_IO_PORT_PIC2_CMD + 2)
 
-#define X86_PIC_INIT           0x11
-#define X86_PIC1_CASCADE       4
-#define X86_PIC2_CASCADE       2
-#define X86_PIC_8086           1
-#define X86_PIC_EOI            0x20
+#define X86_PIC_INIT                   0x11
+#define X86_PIC1_CASCADE               4
+#define X86_PIC2_CASCADE               2
+#define X86_PIC_8086                   1
+#define X86_PIC_EOI                    0x20
 
-#define BITS_PER_LONG          64
+#define BITS_PER_LONG                  64
 
 /* Interrupt Stack Table size */
 
-#define X86_IST_SIZE           104
-#define X86_TSS_SIZE           (104 + 8)
+#define X86_IST_SIZE                   104
+#define X86_TSS_SIZE                   (104 + 8)
 
 /* Reset Control Register (RST_CNT) */
 
-#define X86_RST_CNT_REG        0xcf9
-#  define X86_RST_CNT_SYS_RST  0x02
-#  define X86_RST_CNT_CPU_RST  0x04
-#  define X86_RST_CNT_FULL_RST 0x08
+#define X86_RST_CNT_REG                0xcf9
+#  define X86_RST_CNT_SYS_RST          0x02
+#  define X86_RST_CNT_CPU_RST          0x04
+#  define X86_RST_CNT_FULL_RST         0x08
 
 /* XSAVE state component bitmap */
 
-#define X86_XSAVE_X87           (1 << 0)  /* Bit 0: X87 state */
-#define X86_XSAVE_SSE           (1 << 1)  /* Bit 1: SSE state (512 bytes) */
-#define X86_XSAVE_AVX           (1 << 2)  /* Bit 2: AVX state (256 bytes) */
-#define X86_XSAVE_MPX_BNDREGS   (1 << 3)  /* Bit 3: MPX BNDREGS (64 bytes) */
-#define X86_XSAVE_MPX_BNDCSR    (1 << 4)  /* Bit 4: MPX BNDCSR (16 bytes) */
-#define X86_XSAVE_AVX512_OPMASK (1 << 5)  /* Bit 5: AVX-512 opmask (64 bytes) */
-#define X86_XSAVE_AVX512_HI256  (1 << 6)  /* Bit 6: AVX-512 ZMM_Hi256 (512 bytes) */
-#define X86_XSAVE_AVX512_HI16   (1 << 7)  /* Bit 7: AVX-512 Hi16_ZMM (1024 bytes) */
-#define X86_XSAVE_PT            (1 << 8)  /* Bit 8: PT (72 bytes) */
-#define X86_XSAVE_PKRU          (1 << 9)  /* Bit 9: PKRU (4 bytes) */
-#define X86_XSAVE_PASID         (1 << 10) /* Bit 10: PASID state */
-#define X86_XSAVE_CET_U         (1 << 11) /* Bit 11: CET_U state */
-#define X86_XSAVE_CET_S         (1 << 12) /* Bit 12: CET_S state */
-#define X86_XSAVE_HDC           (1 << 13) /* Bit 13: HDC */
-#define X86_XSAVE_UINTR         (1 << 14) /* Bit 14: UINTR state */
-#define X86_XSAVE_LBR           (1 << 15) /* Bit 15: LBR state */
-#define X86_XSAVE_HWP           (1 << 16) /* Bit 16: HWP state */
-#define X86_XSAVE_AMX_TILECFG   (1 << 17) /* Bit 17: AMX TILECFG state (64 bytes) */
-#define X86_XSAVE_AMX_TILEDATA  (1 << 18) /* Bit 18: AMX TILEDATA state (8192 bytes) */
+#define X86_XSAVE_X87                  (1 << 0)  /* Bit 0: X87 state */
+#define X86_XSAVE_SSE                  (1 << 1)  /* Bit 1: SSE state (512 bytes) */
+#define X86_XSAVE_AVX                  (1 << 2)  /* Bit 2: AVX state (256 bytes) */
+#define X86_XSAVE_MPX_BNDREGS          (1 << 3)  /* Bit 3: MPX BNDREGS (64 bytes) */
+#define X86_XSAVE_MPX_BNDCSR           (1 << 4)  /* Bit 4: MPX BNDCSR (16 bytes) */
+#define X86_XSAVE_AVX512_OPMASK        (1 << 5)  /* Bit 5: AVX-512 opmask (64 bytes) */
+#define X86_XSAVE_AVX512_HI256         (1 << 6)  /* Bit 6: AVX-512 ZMM_Hi256 (512 bytes) */
+#define X86_XSAVE_AVX512_HI16          (1 << 7)  /* Bit 7: AVX-512 Hi16_ZMM (1024 bytes) */
+#define X86_XSAVE_PT                   (1 << 8)  /* Bit 8: PT (72 bytes) */
+#define X86_XSAVE_PKRU                 (1 << 9)  /* Bit 9: PKRU (4 bytes) */
+#define X86_XSAVE_PASID                (1 << 10) /* Bit 10: PASID state */
+#define X86_XSAVE_CET_U                (1 << 11) /* Bit 11: CET_U state */
+#define X86_XSAVE_CET_S                (1 << 12) /* Bit 12: CET_S state */
+#define X86_XSAVE_HDC                  (1 << 13) /* Bit 13: HDC */
+#define X86_XSAVE_UINTR                (1 << 14) /* Bit 14: UINTR state */
+#define X86_XSAVE_LBR                  (1 << 15) /* Bit 15: LBR state */
+#define X86_XSAVE_HWP                  (1 << 16) /* Bit 16: HWP state */
+#define X86_XSAVE_AMX_TILECFG          (1 << 17) /* Bit 17: AMX TILECFG state (64 bytes) */
+#define X86_XSAVE_AMX_TILEDATA         (1 << 18) /* Bit 18: AMX TILEDATA state (8192 bytes) */
 
 /* XSAVE area size */
 
-#define XSAVE_LEGACY_SIZE       (512) /* X87 + SSE */
-#define XSAVE_HEADER_SIZE       (64)  /* XSAVE header */
-#define XSAVE_AVX_SIZE          (256)
-#define XSAVE_MXP_BNDREGS_SIZE  (64)
-#define XSAVE_MXP_BNDCSR_SIZE   (16)
-#define XSAVE_AVX512OPMASK_SIZE (64)
-#define XSAVE_AVX512HI256_SIZE  (512)
-#define XSAVE_AVX512HI16_SIZE   (1024)
-#define XSAVE_PT_SIZE           (72)
-#define XSAVE_PKRU_SIZE         (4)
-#define XSAVE_HDC_SIZE          (8)
+#define XSAVE_LEGACY_SIZE              (512) /* X87 + SSE */
+#define XSAVE_HEADER_SIZE              (64)  /* XSAVE header */
+#define XSAVE_AVX_SIZE                 (256)
+#define XSAVE_MXP_BNDREGS_SIZE         (64)
+#define XSAVE_MXP_BNDCSR_SIZE          (16)
+#define XSAVE_AVX512OPMASK_SIZE        (64)
+#define XSAVE_AVX512HI256_SIZE         (512)
+#define XSAVE_AVX512HI16_SIZE          (1024)
+#define XSAVE_PT_SIZE                  (72)
+#define XSAVE_PKRU_SIZE                (4)
+#define XSAVE_HDC_SIZE                 (8)
 
 #ifndef __ASSEMBLY__
 
@@ -508,6 +551,7 @@ void x86_64_check_and_enable_capability(void);
 extern void __enable_sse_avx(void);
 extern void __revoke_low_memory(void);
 extern void __enable_pcid(void);
+extern void x86_64_syscall_entry(void);
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

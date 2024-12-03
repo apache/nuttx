@@ -1,6 +1,8 @@
 /****************************************************************************
  * boards/arm/at32/at32f437-mini/src/at32_usb.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -318,7 +320,7 @@ void at32_usbhost_vbusdrive(int iface, bool enable)
 #ifdef CONFIG_USBHOST
 int at32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-#ifdef CONFIG_AT32_OTGFS_VBUS_CONTROL  
+#ifdef CONFIG_AT32_OTGFS_VBUS_CONTROL
   return at32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, arg);
 #endif
 
