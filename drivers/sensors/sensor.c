@@ -1027,6 +1027,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               return -EINVAL;
             }
 
+          ret = -ENOTSUP;
           if (lower->ops->flush != NULL)
             {
               /* Lower half driver will do flush in asynchronous mode,
@@ -1040,12 +1041,25 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   user->flushing = true;
                 }
             }
-          else
+
+          if (ret == -ENOTSUP)
             {
               /* If flush is not supported, complete immediately */
 
+              user->flushing = false;
               user->event |= SENSOR_EVENT_FLUSH_COMPLETE;
               sensor_pollnotify_one(user, POLLPRI, user->role);
+
+              /* If caller isn't from remote core, convert ENOTSUP
+               * to zero return, indicating the flush is completed.
+               * If it's from remote core, need to inform the remote
+               * core the flush is not supported for driver.
+               */
+
+              if ((filep->f_oflags & SENSOR_REMOTE) == 0)
+                {
+                  ret = 0;
+                }
             }
 
           nxrmutex_unlock(&upper->lock);
