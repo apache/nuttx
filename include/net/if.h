@@ -211,7 +211,7 @@ enum can_ioctl_state_e
 struct can_ioctl_state_s
 {
   uintptr_t priv;             /* This is private data. */
-  enum can_ioctl_state_e state;
+  enum can_ioctl_state_e can_st_type;
 };
 
 /* There are two forms of the I/F request structure.
