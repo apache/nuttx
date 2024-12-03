@@ -614,7 +614,7 @@ static int sensor_open(FAR struct file *filep)
       goto errout_with_lock;
     }
 
-  if (lower->ops->open)
+  if ((filep->f_oflags & O_DIRECT) == 0 && lower->ops->open)
     {
       ret = lower->ops->open(lower, filep);
       if (ret < 0)
@@ -623,31 +623,32 @@ static int sensor_open(FAR struct file *filep)
         }
     }
 
-  if ((filep->f_oflags & O_DIRECT) == 0)
-    {
-      if (filep->f_oflags & O_RDOK)
-        {
-          if (upper->state.nsubscribers == 0 && lower->ops->activate)
-            {
-              ret = lower->ops->activate(lower, filep, true);
-              if (ret < 0)
-                {
-                  goto errout_with_open;
-                }
-            }
+  /* Using the O_DIRECT flag will prevent cross-core operations,
+   * allowing for direct I/O operations.
+   */
 
-          user->role |= SENSOR_ROLE_RD;
-          upper->state.nsubscribers++;
+  if (filep->f_oflags & O_RDOK)
+    {
+      if (upper->state.nsubscribers == 0 && lower->ops->activate)
+        {
+          ret = lower->ops->activate(lower, filep, true);
+          if (ret < 0)
+            {
+              goto errout_with_open;
+            }
         }
 
-      if (filep->f_oflags & O_WROK)
+      user->role |= SENSOR_ROLE_RD;
+      upper->state.nsubscribers++;
+    }
+
+  if (filep->f_oflags & O_WROK)
+    {
+      user->role |= SENSOR_ROLE_WR;
+      upper->state.nadvertisers++;
+      if (filep->f_oflags & SENSOR_PERSIST)
         {
-          user->role |= SENSOR_ROLE_WR;
-          upper->state.nadvertisers++;
-          if (filep->f_oflags & SENSOR_PERSIST)
-            {
-              lower->persist = true;
-            }
+          lower->persist = true;
         }
     }
 
@@ -696,7 +697,7 @@ static int sensor_close(FAR struct file *filep)
   int ret = 0;
 
   nxrmutex_lock(&upper->lock);
-  if (lower->ops->close)
+  if ((filep->f_oflags & O_DIRECT) == 0 && lower->ops->close)
     {
       ret = lower->ops->close(lower, filep);
       if (ret < 0)
@@ -706,21 +707,22 @@ static int sensor_close(FAR struct file *filep)
         }
     }
 
-  if ((filep->f_oflags & O_DIRECT) == 0)
-    {
-      if (filep->f_oflags & O_RDOK)
-        {
-          upper->state.nsubscribers--;
-          if (upper->state.nsubscribers == 0 && lower->ops->activate)
-            {
-              lower->ops->activate(lower, filep, false);
-            }
-        }
+  /* Using the O_DIRECT flag will prevent cross-core operations,
+   * allowing for direct I/O operations.
+   */
 
-      if (filep->f_oflags & O_WROK)
+  if (filep->f_oflags & O_RDOK)
+    {
+      upper->state.nsubscribers--;
+      if (upper->state.nsubscribers == 0 && lower->ops->activate)
         {
-          upper->state.nadvertisers--;
+          lower->ops->activate(lower, filep, false);
         }
+    }
+
+  if (filep->f_oflags & O_WROK)
+    {
+      upper->state.nadvertisers--;
     }
 
   list_delete(&user->node);
