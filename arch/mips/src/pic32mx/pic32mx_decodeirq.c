@@ -164,7 +164,7 @@ uint32_t *pic32mx_decodeirq(uint32_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(this_task());
 #endif
     }
 #endif

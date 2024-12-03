@@ -65,7 +65,7 @@ void *riscv_perform_syscall(uintreg_t *regs)
        * thread at the head of the ready-to-run list.
        */
 
-      addrenv_switch(NULL);
+      addrenv_switch(tcb);
 #endif
       /* Update scheduler parameters */
 
