@@ -61,6 +61,7 @@
 uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  bool restore_context = false;
   struct tcb_s *tcb = this_task();
 
   board_autoled_on(LED_INIRQ);
@@ -76,6 +77,10 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
       if (regs[REG_A0] != SYS_restore_context)
         {
           (*running_task)->xcp.regs = regs;
+        }
+      else
+        {
+          restore_context = true;
         }
     }
   else
@@ -98,7 +103,7 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 
   /* Check for a context switch. */
 
-  if (*running_task != tcb)
+  if (*running_task != tcb || restore_context)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -112,7 +117,11 @@ uintreg_t *riscv_doirq(int irq, uintreg_t *regs)
 
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(*running_task);
+      if (!restore_context)
+        {
+          nxsched_suspend_scheduler(*running_task);
+        }
+
       nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task when context switch occurred.
