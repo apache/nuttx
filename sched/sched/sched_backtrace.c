@@ -44,6 +44,10 @@ struct backtrace_arg_s
   int size;
   int skip;
   bool need_restore;
+
+  /* The return value of up_backtrace() */
+
+  int stacksize;
 };
 
 /****************************************************************************
@@ -76,7 +80,9 @@ static int sched_backtrace_handler(FAR void *cookie)
 
   leave_critical_section(flags);
 
-  return up_backtrace(tcb, arg->buffer, arg->size, arg->skip);
+  arg->stacksize = up_backtrace(tcb, arg->buffer, arg->size, arg->skip);
+
+  return OK;
 }
 #endif
 
@@ -133,7 +139,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
               arg.skip = skip;
               ret = nxsched_smp_call_single(tcb->cpu,
                                             sched_backtrace_handler,
-                                            &arg);
+                                            &arg) < 0 ? 0 : arg.stacksize;
             }
           else
 #endif
