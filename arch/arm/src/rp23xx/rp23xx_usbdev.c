@@ -289,6 +289,7 @@ struct rp23xx_usbdev_s
   uint8_t ep0data[CONFIG_USBDEV_SETUP_MAXDATASIZE];
   uint16_t ep0datlen;
   uint16_t ep0reqlen;
+  spinlock_t lock;
 
   /* The endpoint list */
 
@@ -511,9 +512,9 @@ static int rp23xx_epwrite(struct rp23xx_ep_s *privep, uint8_t *buf,
 
   /* Start the transfer */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_usbdev.lock);
   rp23xx_update_buffer_control(privep, 0, val);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
   return nbytes;
 }
@@ -540,9 +541,9 @@ static int rp23xx_epread(struct rp23xx_ep_s *privep, uint16_t nbytes)
 
   /* Start the transfer */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_usbdev.lock);
   rp23xx_update_buffer_control(privep, 0, val);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
   return OK;
 }
@@ -1287,6 +1288,7 @@ static void rp23xx_usbintr_ep0out(struct rp23xx_usbdev_s *priv,
 static bool rp23xx_usbintr_buffstat(struct rp23xx_usbdev_s *priv)
 {
   uint32_t stat = getreg32(RP23XX_USBCTRL_REGS_BUFF_STATUS);
+  irqstate_t flags;
   uint32_t bit;
   int i;
   struct rp23xx_ep_s *privep;
@@ -1326,7 +1328,9 @@ static bool rp23xx_usbintr_buffstat(struct rp23xx_usbdev_s *priv)
                     }
                   else if (privep->pending_stall)
                     {
+                      flags = spin_lock_irqsave(&g_usbdev.lock);
                       rp23xx_epstall_exec(&privep->ep);
+                      spin_unlock_irqrestore(&g_usbdev.lock, flags);
                     }
                 }
               else
@@ -1709,11 +1713,8 @@ static int rp23xx_epcancel(struct usbdev_ep_s *ep,
 static int rp23xx_epstall_exec(struct usbdev_ep_s *ep)
 {
   struct rp23xx_ep_s *privep = (struct rp23xx_ep_s *)ep;
-  irqstate_t flags;
 
   usbtrace(TRACE_EPSTALL, privep->epphy);
-
-  flags = spin_lock_irqsave(NULL);
 
   if (privep->epphy == 0)
     {
@@ -1729,7 +1730,6 @@ static int rp23xx_epstall_exec(struct usbdev_ep_s *ep)
 
   privep->pending_stall = false;
 
-  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -1747,7 +1747,7 @@ static int rp23xx_epstall(struct usbdev_ep_s *ep, bool resume)
   struct rp23xx_usbdev_s *priv = privep->dev;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_usbdev.lock);
 
   if (resume)
     {
@@ -1788,7 +1788,7 @@ static int rp23xx_epstall(struct usbdev_ep_s *ep, bool resume)
       priv->zlp_stat = RP23XX_ZLP_NONE;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
   return OK;
 }
@@ -2011,6 +2011,7 @@ void arm_usbinitialize(void)
   g_usbdev.usbdev.ops = &g_devops;
   g_usbdev.usbdev.ep0 = &g_usbdev.eplist[0].ep;
 
+  spin_lock_init(&g_usbdev.lock);
   g_usbdev.dev_addr = 0;
   g_usbdev.next_offset = RP23XX_USBCTRL_DPSRAM_DATA_BUF_OFFSET;
 
@@ -2137,7 +2138,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   usbtrace(TRACE_DEVUNREGISTER, 0);
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_usbdev.lock);
 
   /* Unbind the class driver */
 
@@ -2155,7 +2156,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   priv->driver = NULL;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
   return OK;
 }
