@@ -40,11 +40,13 @@
 void *riscv_perform_syscall(uintreg_t *regs)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  bool restore_context = true;
   struct tcb_s *tcb;
 
   if (regs[REG_A0] != SYS_restore_context)
     {
       (*running_task)->xcp.regs = regs;
+      restore_context = false;
     }
 
   /* Set irq flag */
@@ -56,7 +58,7 @@ void *riscv_perform_syscall(uintreg_t *regs)
   riscv_swint(0, regs, NULL);
   tcb = this_task();
 
-  if (*running_task != tcb)
+  if (*running_task != tcb || restore_context)
     {
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
@@ -69,7 +71,11 @@ void *riscv_perform_syscall(uintreg_t *regs)
 #endif
       /* Update scheduler parameters */
 
-      nxsched_suspend_scheduler(*running_task);
+      if (!restore_context)
+        {
+          nxsched_suspend_scheduler(*running_task);
+        }
+
       nxsched_resume_scheduler(tcb);
 
       /* Record the new "running" task.  g_running_tasks[] is only used by
