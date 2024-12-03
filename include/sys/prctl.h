@@ -76,6 +76,9 @@
 #define PR_SET_NAME_EXT 3
 #define PR_GET_NAME_EXT 4
 
+#define PR_SET_DUMPABLE 5
+#define PR_GET_DUMPABLE 6
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
