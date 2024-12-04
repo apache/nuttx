@@ -36,7 +36,7 @@
 void up_timer_initialize(void)
 {
 #if defined(CONFIG_GOLDFISH_TIMER) && defined(CONFIG_LIBC_FDT)
-  FAR struct oneshot_lowerhalf_s *lower;
+  struct oneshot_lowerhalf_s *lower;
   const void *fdt = fdt_get();
 
   DEBUGASSERT(fdt != NULL);

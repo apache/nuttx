@@ -26,11 +26,11 @@ To read the current time, the kernel must execute an IO_READ(TIME_LOW), which re
 
 ::
 
-    static int goldfish_timer_current(FAR struct oneshot_lowerhalf_s *lower_,
-                                      FAR struct timespec *ts)
+    static int goldfish_timer_current(struct oneshot_lowerhalf_s *lower_,
+                                      struct timespec *ts)
     {
-      FAR struct goldfish_timer_lowerhalf_s *lower =
-        (FAR struct goldfish_timer_lowerhalf_s *)lower_;
+      struct goldfish_timer_lowerhalf_s *lower =
+        (struct goldfish_timer_lowerhalf_s *)lower_;
       irqstate_t flags;
       uint32_t l32;
       uint32_t h32;
@@ -65,13 +65,13 @@ When the corresponding value is reached, the device will raise its IRQ. Note tha
 
 ::
 
-    static int goldfish_timer_start(FAR struct oneshot_lowerhalf_s *lower_,
-                                    FAR oneshot_callback_t callback,
-                                    FAR void *arg,
-                                    FAR const struct timespec *ts)
+    static int goldfish_timer_start(struct oneshot_lowerhalf_s *lower_,
+                                    oneshot_callback_t callback,
+                                    void *arg,
+                                    const struct timespec *ts)
     {
-      FAR struct goldfish_timer_lowerhalf_s *lower =
-        (FAR struct goldfish_timer_lowerhalf_s *)lower_;
+      struct goldfish_timer_lowerhalf_s *lower =
+        (struct goldfish_timer_lowerhalf_s *)lower_;
       irqstate_t flags;
       uint64_t nsec;
       uint32_t l32;
@@ -108,10 +108,10 @@ Note: Currently, the alarm is used only on ARM-based systems. On MIPS-based syst
 ::
 
     static int goldfish_timer_interrupt(int irq,
-                                        FAR void *context,
-                                        FAR void *arg)
+                                        void *context,
+                                        void *arg)
     {
-      FAR struct goldfish_timer_lowerhalf_s *lower = arg;
+      struct goldfish_timer_lowerhalf_s *lower = arg;
       oneshot_callback_t callback = NULL;
       irqstate_t flags;
       void *cbarg;

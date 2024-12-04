@@ -796,7 +796,7 @@ static int sam_lin_netdev_ioctl(struct net_driver_s *dev, int cmd,
 }
 #endif /* CONFIG_NETDEV_IOCTL */
 
-static int sam_interrupt(int irq, void *context, FAR void *arg)
+static int sam_interrupt(int irq, void *context, void *arg)
 {
   struct sam_lin_s *priv = (struct sam_lin_s *)arg;
   uint32_t pending;

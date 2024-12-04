@@ -75,7 +75,7 @@
 static bool spiram_inited = false;
 
 #ifdef CONFIG_SMP
-static int pause_cpu_handler(FAR void *cookie);
+static int pause_cpu_handler(void *cookie);
 static struct smp_call_data_s g_call_data =
 SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
 #endif
@@ -91,7 +91,7 @@ SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
 #ifdef CONFIG_SMP
 static volatile bool g_cpu_wait = true;
 static volatile bool g_cpu_pause = false;
-static int pause_cpu_handler(FAR void *cookie)
+static int pause_cpu_handler(void *cookie)
 {
   g_cpu_pause = true;
   while (g_cpu_wait);

@@ -511,7 +511,7 @@ IRAM_ATTR static int esp_timer_isr(int irq, void *context, void *arg)
 int esp_timer_initialize(uint32_t timer_id)
 {
   struct esp_timer_lowerhalf_s *lower = NULL;
-  FAR char *devpath;
+  char *devpath;
   uint32_t group_num;
   uint32_t timer_num;
 

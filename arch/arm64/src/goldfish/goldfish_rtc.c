@@ -35,7 +35,7 @@
 
 int up_rtc_initialize(void)
 {
-  FAR struct rtc_lowerhalf_s *rtc_lowerhalf =
+  struct rtc_lowerhalf_s *rtc_lowerhalf =
             pl031_initialize(CONFIG_GOLDFISH_RTC_PL031_BASE,
                              CONFIG_GOLDFISH_RTC_PL031_IRQ);
 

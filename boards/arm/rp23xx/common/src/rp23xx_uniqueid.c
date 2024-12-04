@@ -134,7 +134,7 @@ void rp23xx_uniqueid_initialize(void)
  *
  ****************************************************************************/
 
-int board_uniqueid(FAR uint8_t *uniqueid)
+int board_uniqueid(uint8_t *uniqueid)
 {
   memcpy(uniqueid, g_uniqueid, CONFIG_BOARDCTL_UNIQUEID_SIZE);
   return OK;
