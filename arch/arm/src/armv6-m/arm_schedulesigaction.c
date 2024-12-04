@@ -37,6 +37,7 @@
 #include "sched/sched.h"
 #include "arm_internal.h"
 #include "irq/irq.h"
+#include "nvic.h"
 
 /****************************************************************************
  * Public Functions
@@ -80,13 +81,14 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  FAR struct tcb_s *rtcb = running_task();
+  struct tcb_s *rtcb = running_task();
+  uint32_t      ipsr = getipsr();
 
   /* First, handle some special cases when the signal is
    * being delivered to the currently executing task.
    */
 
-  if (tcb == rtcb && !up_interrupt_context())
+  if (tcb == rtcb && ipsr == 0)
     {
       /* In this case just deliver the signal now.
        * REVISIT:  Signal handle will run in a critical section!
@@ -95,7 +97,15 @@ void up_schedule_sigaction(struct tcb_s *tcb)
       (tcb->sigdeliver)(tcb);
       tcb->sigdeliver = NULL;
     }
-  else
+  else if (tcb == rtcb && ipsr != NVIC_IRQ_PENDSV)
+    {
+      /* Context switch should be done in pendsv, for exception directly
+       * last regs is not saved tcb->xcp.regs.
+       */
+
+      up_trigger_irq(NVIC_IRQ_PENDSV, 0);
+    }
+  else /* ipsr == NVIC_IRQ_PENDSV || tcb != rtcb */
     {
       /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
        * registers (and perhaps also the LR).  These will be restored

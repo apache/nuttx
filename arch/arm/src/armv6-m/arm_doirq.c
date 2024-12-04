@@ -57,7 +57,7 @@ void exception_direct(void)
 uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  FAR struct tcb_s *tcb;
+  struct tcb_s *tcb           = *running_task;
 
   /* This judgment proves that (*running_task)->xcp.regs
    * is invalid, and we can safely overwrite it.
@@ -65,7 +65,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   if (!(NVIC_IRQ_SVCALL == irq && regs[REG_R0] == SYS_restore_context))
     {
-      (*running_task)->xcp.regs = regs;
+      tcb->xcp.regs = regs;
     }
 
   board_autoled_on(LED_INIRQ);
@@ -84,6 +84,12 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
       irq_dispatch(irq, regs);
 #endif
+      if (tcb->sigdeliver)
+        {
+          /* Pendsv able to access running tcb with no critical section */
+
+          up_schedule_sigaction(tcb);
+        }
 
       up_irq_save();
     }
