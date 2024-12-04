@@ -170,7 +170,11 @@ void dns_restorelock(unsigned int count);
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+int dns_bind(sa_family_t family);
+#else
 int dns_bind(sa_family_t family, bool stream);
+#endif
 
 /****************************************************************************
  * Name: dns_query

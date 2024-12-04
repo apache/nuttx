@@ -63,16 +63,28 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+int dns_bind(sa_family_t family)
+#else
 int dns_bind(sa_family_t family, bool stream)
+#endif
 {
+#ifdef CONFIG_NETDB_DNS_STREAM
   int stype = stream ? SOCK_STREAM : SOCK_DGRAM;
+#endif
+
   struct timeval tv;
   int sd;
   int ret;
 
   /* Create a new socket */
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+  sd = socket(family, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+#else
   sd = socket(family, stype | SOCK_CLOEXEC, 0);
+#endif
+
   if (sd < 0)
     {
       ret = -get_errno();

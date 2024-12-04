@@ -124,6 +124,7 @@ struct dns_query_data_s
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDB_DNS_STREAM
 static ssize_t stream_send(int fd, FAR const void *buf, size_t len)
 {
   ssize_t total = 0;
@@ -292,6 +293,7 @@ static ssize_t stream_recv_record(int fd, FAR void *buf, size_t len)
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: dns_parse_name
@@ -380,11 +382,18 @@ static inline uint16_t dns_alloc_id(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+static int dns_send_query(int sd, FAR const char *name,
+                          FAR union dns_addr_u *uaddr, uint16_t rectype,
+                          FAR struct dns_query_info_s *qinfo,
+                          FAR uint8_t *buffer)
+#else
 static int dns_send_query(int sd, FAR const char *name,
                           FAR union dns_addr_u *uaddr, uint16_t rectype,
                           FAR struct dns_query_info_s *qinfo,
                           FAR uint8_t *buffer,
                           bool stream)
+#endif
 {
   FAR struct dns_header_s *hdr;
   FAR uint8_t *dest;
@@ -488,11 +497,13 @@ static int dns_send_query(int sd, FAR const char *name,
       return ret;
     }
 
+#ifdef CONFIG_NETDB_DNS_STREAM
   if (stream)
     {
       ret = stream_send_record(sd, buffer, dest - buffer);
     }
   else
+#endif
     {
       ret = send(sd, buffer, dest - buffer, 0);
     }
@@ -519,10 +530,16 @@ static int dns_send_query(int sd, FAR const char *name,
  *
  ****************************************************************************/
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
+                             FAR struct dns_query_info_s *qinfo,
+                             FAR uint32_t *ttl, FAR uint8_t *buffer)
+#else
 static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
                              FAR struct dns_query_info_s *qinfo,
                              FAR uint32_t *ttl, FAR uint8_t *buffer,
                              bool stream, bool *should_try_stream)
+#endif
 {
   FAR uint8_t *nameptr;
   FAR uint8_t *namestart;
@@ -543,11 +560,13 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
 
   /* Receive the response */
 
+#ifdef CONFIG_NETDB_DNS_STREAM
   if (stream)
     {
       ret = stream_recv_record(sd, buffer, RECV_BUFFER_SIZE);
     }
   else
+#endif
     {
       ret = recv(sd, buffer, RECV_BUFFER_SIZE, 0);
     }
@@ -579,6 +598,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
 
   /* Check for error */
 
+#ifdef CONFIG_NETDB_DNS_STREAM
   if ((hdr->flags1 & DNS_FLAG1_TRUNC) != 0)
     {
       /* RFC 2181
@@ -601,6 +621,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
       *should_try_stream = true;
       return -EAGAIN;
     }
+#endif
 
   if ((hdr->flags2 & DNS_FLAG2_ERR_MASK) != 0)
     {
@@ -851,7 +872,9 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
   int retries;
   int ret;
   int sd;
+#ifdef CONFIG_NETDB_DNS_STREAM
   bool stream = false;
+#endif
 
   /* Loop while receive timeout errors occur and there are remaining
    * retries.
@@ -859,25 +882,37 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
   for (retries = 0; retries < CONFIG_NETDB_DNSCLIENT_RETRIES; retries++)
     {
+#ifdef CONFIG_NETDB_DNS_STREAM
       bool should_try_stream;
 
 try_stream:
+#endif
 #ifdef CONFIG_NET_IPv6
       if (dns_is_queryfamily(AF_INET6))
         {
           /* Send the IPv6 query */
-
+#ifndef CONFIG_NETDB_DNS_STREAM
+          sd = dns_bind(addr->sa_family);
+#else
           sd = dns_bind(addr->sa_family, stream);
+#endif
           if (sd < 0)
             {
               query->result = sd;
               return 0;
             }
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+          ret = dns_send_query(sd, query->hostname,
+                               (FAR union dns_addr_u *)addr,
+                               DNS_RECTYPE_AAAA, &qdata->qinfo,
+                               qdata->buffer);
+#else
           ret = dns_send_query(sd, query->hostname,
                                (FAR union dns_addr_u *)addr,
                                DNS_RECTYPE_AAAA, &qdata->qinfo,
                                qdata->buffer, stream);
+#endif
           if (ret < 0)
             {
               dns_query_error("ERROR: IPv6 dns_send_query failed",
@@ -887,25 +922,33 @@ try_stream:
           else
             {
               /* Obtain the IPv6 response */
-
+#ifndef CONFIG_NETDB_DNS_STREAM
+              ret = dns_recv_response(sd, &query->addr[next],
+                                      CONFIG_NETDB_MAX_IPv6ADDR,
+                                      &qdata->qinfo,
+                                      &query->ttl, qdata->buffer);
+#else
               should_try_stream = false;
               ret = dns_recv_response(sd, &query->addr[next],
                                       CONFIG_NETDB_MAX_IPv6ADDR,
                                       &qdata->qinfo,
                                       &query->ttl, qdata->buffer,
                                       stream, &should_try_stream);
+#endif
               if (ret >= 0)
                 {
                   next += ret;
                 }
               else
                 {
+#ifdef CONFIG_NETDB_DNS_STREAM
                   if (!stream && should_try_stream)
                     {
                       stream = true;
                       goto try_stream; /* Don't consume retry count */
                     }
 
+#endif
                   dns_query_error("ERROR: IPv6 dns_recv_response failed",
                                   ret, (FAR union dns_addr_u *)addr);
                   query->result = ret;
@@ -914,6 +957,7 @@ try_stream:
 
           close(sd);
         }
+
 #endif
 
 #ifdef CONFIG_NET_IPv4
@@ -921,17 +965,27 @@ try_stream:
         {
           /* Send the IPv4 query */
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+          sd = dns_bind(addr->sa_family);
+#else
           sd = dns_bind(addr->sa_family, stream);
+#endif
           if (sd < 0)
             {
               query->result = sd;
               return 0;
             }
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+          ret = dns_send_query(sd, query->hostname,
+                               (FAR union dns_addr_u *)addr,
+                               DNS_RECTYPE_A, &qdata->qinfo, qdata->buffer);
+#else
           ret = dns_send_query(sd, query->hostname,
                                (FAR union dns_addr_u *)addr,
                                DNS_RECTYPE_A, &qdata->qinfo, qdata->buffer,
                                stream);
+#endif
           if (ret < 0)
             {
               dns_query_error("ERROR: IPv4 dns_send_query failed",
@@ -947,24 +1001,33 @@ try_stream:
                   next = *query->naddr / 2;
                 }
 
+#ifndef CONFIG_NETDB_DNS_STREAM
+              ret = dns_recv_response(sd, &query->addr[next],
+                                      CONFIG_NETDB_MAX_IPv4ADDR,
+                                      &qdata->qinfo,
+                                      &query->ttl, qdata->buffer);
+#else
               should_try_stream = false;
               ret = dns_recv_response(sd, &query->addr[next],
                                       CONFIG_NETDB_MAX_IPv4ADDR,
                                       &qdata->qinfo,
                                       &query->ttl, qdata->buffer,
                                       stream, &should_try_stream);
+#endif
               if (ret >= 0)
                 {
                   next += ret;
                 }
               else
                 {
+#ifdef CONFIG_NETDB_DNS_STREAM
                   if (!stream && should_try_stream)
                     {
                       stream = true;
                       goto try_stream; /* Don't consume retry count */
                     }
 
+#endif
                   dns_query_error("ERROR: IPv4 dns_recv_response failed",
                                   ret, (FAR union dns_addr_u *)addr);
                   query->result = ret;
