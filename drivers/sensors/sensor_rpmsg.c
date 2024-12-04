@@ -377,22 +377,23 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
   sensor_rpmsg_lock(dev);
   empty = list_is_empty(&dev->proxylist);
   sensor_rpmsg_unlock(dev);
-  if (empty)
-    {
-      ret = nxsem_tickwait_uninterruptible(&dev->proxysem,
-            SEC2TICK(SENSOR_RPMSG_IOCTL_TIMEOUT));
-      if (ret < 0)
-        {
-          snerr("ERROR: wait proxy create failed:%s, cmd:%d\n",
-                dev->path, cmd);
-          return ret;
-        }
-
-      nxsem_post(&dev->proxysem);
-    }
 
   if (wait)
     {
+      if (empty)
+        {
+          ret = nxsem_tickwait_uninterruptible(
+              &dev->proxysem, SEC2TICK(SENSOR_RPMSG_IOCTL_TIMEOUT));
+          if (ret < 0)
+            {
+              snerr("ERROR: wait proxy create failed:%s, cmd:%d\n",
+                    dev->path, cmd);
+              return ret;
+            }
+
+          nxsem_post(&dev->proxysem);
+        }
+
       cookie.data   = (FAR void *)(uintptr_t)arg;
       cookie.result = -ENXIO;
       nxsem_init(&cookie.sem, 0, 0);
