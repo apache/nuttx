@@ -37,7 +37,6 @@ CHIP_CSRCS += cxd56_icc.c
 CHIP_CSRCS += cxd56_powermgr.c
 CHIP_CSRCS += cxd56_farapi.c
 CHIP_CSRCS += cxd56_sysctl.c
-CHIP_CSRCS += cxd56_vectors.c
 
 ifeq ($(CONFIG_SMP), y)
 CHIP_CSRCS += cxd56_cpuidlestack.c
