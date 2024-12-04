@@ -33,6 +33,7 @@
 
 #include <sys/videoio.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/video/v4l2_cap.h>
 
 #ifdef __cplusplus
 extern "C"
