@@ -187,14 +187,13 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_CLOCK_TIMEKEEPING
 void weak_function up_timer_getmask(FAR clock_t *mask)
 {
   *mask = 0;
 
   if (g_oneshot_lower != NULL)
     {
-      clock_t maxticks;
+      clock_t maxticks = 0;
 
       ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &maxticks);
 
@@ -210,9 +209,7 @@ void weak_function up_timer_getmask(FAR clock_t *mask)
         }
     }
 }
-#endif
 
-#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_CLOCK_TIMEKEEPING)
 int weak_function up_timer_gettick(FAR clock_t *ticks)
 {
   int ret = -EAGAIN;
@@ -236,7 +233,6 @@ int weak_function up_timer_gettime(struct timespec *ts)
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: up_alarm_cancel
