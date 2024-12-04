@@ -318,6 +318,7 @@ fortify_function(vsprintf) int vsprintf(FAR char *dest,
   return ret;
 }
 
+#ifdef fortify_va_arg_pack
 fortify_function(snprintf) int snprintf(FAR char *buf, size_t size,
                                         FAR const IPTR char *format, ...)
 {
@@ -335,6 +336,7 @@ fortify_function(sprintf) int sprintf(FAR char *buf,
   fortify_assert(ret == -1 || (size_t)ret <= fortify_size(buf, 0));
   return ret;
 }
+#endif
 #endif
 
 #undef EXTERN
