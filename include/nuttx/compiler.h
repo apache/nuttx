@@ -127,7 +127,9 @@
                                         } \
                                       while (0)
 
-#    define fortify_va_arg_pack __builtin_va_arg_pack
+#    if !defined(__clang__)
+#      define fortify_va_arg_pack __builtin_va_arg_pack
+#    endif
 #    define fortify_real(fn) __typeof__(fn) __real_##fn __asm__(#fn)
 #    define fortify_function(fn) fortify_real(fn); \
                                  extern __inline__ no_builtin(#fn) \
