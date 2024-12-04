@@ -113,10 +113,6 @@
 #      warning requires compiling with optimization (-O2 or higher)
 #    endif
 #    if CONFIG_FORTIFY_SOURCE == 3
-#      if __GNUC__ < 12 || (defined(__clang__) && __clang_major__ < 12)
-#        error compiler version less than 12 does not support dynamic object size
-#      endif
-
 #      define fortify_size(__o, type) __builtin_dynamic_object_size(__o, type)
 #    else
 #      define fortify_size(__o, type) __builtin_object_size(__o, type)
