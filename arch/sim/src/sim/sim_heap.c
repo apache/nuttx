@@ -675,7 +675,7 @@ size_t mm_heapfree(struct mm_heap_s *heap)
  *
  ****************************************************************************/
 
-size_t mm_heapfree_largest(FAR struct mm_heap_s *heap)
+size_t mm_heapfree_largest(struct mm_heap_s *heap)
 {
   return SIZE_MAX;
 }

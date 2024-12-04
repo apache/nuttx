@@ -421,7 +421,7 @@ static int s32k1xx_flexio_i2c_interrupt(int irq, void *context, void *arg)
   return OK;
 }
 
-static int set_expiretime(int expire_time, FAR struct timespec *set_time)
+static int set_expiretime(int expire_time, struct timespec *set_time)
 {
   struct timespec curr_time;
 

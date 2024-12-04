@@ -105,7 +105,7 @@ static int mps3_bringup(void)
 
 #ifdef CONFIG_BOARDCTL_BOOT_IMAGE
 
-int board_boot_image(FAR const char *path, uint32_t hdr_size)
+int board_boot_image(const char *path, uint32_t hdr_size)
 {
   struct mod_loadinfo_s loadinfo;
   struct module_s mod;

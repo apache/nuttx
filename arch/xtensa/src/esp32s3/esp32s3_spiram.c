@@ -118,7 +118,7 @@ static uint32_t page0_page = INVALID_PHY_PAGE;
 #endif
 
 #ifdef CONFIG_SMP
-static int pause_cpu_handler(FAR void *cookie);
+static int pause_cpu_handler(void *cookie);
 static struct smp_call_data_s g_call_data =
 SMP_CALL_INITIALIZER(pause_cpu_handler, NULL);
 #endif
@@ -289,7 +289,7 @@ static int IRAM_ATTR esp_mmu_map_region(uint32_t vaddr, uint32_t paddr,
 #ifdef CONFIG_SMP
 static volatile bool g_cpu_wait = true;
 static volatile bool g_cpu_pause = false;
-static int pause_cpu_handler(FAR void *cookie)
+static int pause_cpu_handler(void *cookie)
 {
   g_cpu_pause = true;
   while (g_cpu_wait);
