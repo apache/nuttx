@@ -104,6 +104,22 @@ static int rpmsg_router_hub_cb(FAR struct rpmsg_endpoint *ept,
 }
 
 /****************************************************************************
+ * Name: rpmsg_router_hub_ept_release
+ *
+ * Description:
+ *   This is the release endpoint callback function for router core.
+ *
+ * Parameters:
+ *   ept - rpmsg_endpoint for communicating with edge core (r:cpu:name)
+ *
+ ****************************************************************************/
+
+static void rpmsg_router_hub_ept_release(FAR struct rpmsg_endpoint *ept)
+{
+  kmm_free(ept);
+}
+
+/****************************************************************************
  * Name: rpmsg_router_hub_unbind
  *
  * Description:
@@ -123,13 +139,11 @@ static void rpmsg_router_hub_unbind(FAR struct rpmsg_endpoint *ept)
   if (dst_ept)
     {
       rpmsg_destroy_ept(dst_ept);
-      kmm_free(dst_ept);
     }
 
   /* Destroy source edge ept */
 
   rpmsg_destroy_ept(ept);
-  kmm_free(ept);
 }
 
 /****************************************************************************
@@ -277,12 +291,14 @@ static void rpmsg_router_hub_bind(FAR struct rpmsg_device *rdev,
   src_ept->priv = dst_ept;
   src_ept->rdev = rdev;
   src_ept->dest_addr = dest;
+  src_ept->release_cb = rpmsg_router_hub_ept_release;
   strlcpy(src_ept->name, name, sizeof(src_ept->name));
 
   /* Create endpoint (r:src_cpu:name) to another dest cpu */
 
   dst_ept->priv = src_ept;
   dst_ept->ns_bound_cb = rpmsg_router_hub_bound;
+  dst_ept->release_cb = rpmsg_router_hub_ept_release;
   ret = rpmsg_create_ept(dst_ept, dst_rdev, dst_name,
                          RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                          rpmsg_router_hub_cb,
