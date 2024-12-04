@@ -91,10 +91,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
   DEBUGASSERT(up_current_regs() == NULL);
   up_set_current_regs(regs);
 
-  if (*running_task != NULL)
-    {
-      x86_savestate((*running_task)->xcp.regs);
-    }
+  x86_savestate((*running_task)->xcp.regs);
 
   /* Deliver the IRQ */
 
