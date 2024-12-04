@@ -103,38 +103,40 @@
 #define CRYPTO_MD5_HMAC         4
 #define CRYPTO_SHA1_HMAC        5
 #define CRYPTO_RIPEMD160_HMAC   6
-#define CRYPTO_RIJNDAEL128_CBC  7 /* 128 bit blocksize */
-#define CRYPTO_AES_CBC          7 /* 128 bit blocksize -- the same as above */
-#define CRYPTO_DEFLATE_COMP     8 /* Deflate compression algorithm */
-#define CRYPTO_NULL             9
-#define CRYPTO_SHA2_256_HMAC    11
-#define CRYPTO_SHA2_384_HMAC    12
-#define CRYPTO_SHA2_512_HMAC    13
-#define CRYPTO_AES_CTR          14
-#define CRYPTO_AES_XTS          15
-#define CRYPTO_AES_GCM_16       16
-#define CRYPTO_AES_128_GMAC     17
-#define CRYPTO_AES_192_GMAC     18
-#define CRYPTO_AES_256_GMAC     19
-#define CRYPTO_AES_GMAC         20
-#define CRYPTO_AES_OFB          21
-#define CRYPTO_AES_CFB_8        22
-#define CRYPTO_AES_CFB_128      23
-#define CRYPTO_CHACHA20_POLY1305 24
-#define CRYPTO_CHACHA20_POLY1305_MAC 25
-#define CRYPTO_MD5              26
-#define CRYPTO_POLY1305         27
-#define CRYPTO_RIPEMD160        28
-#define CRYPTO_SHA1             29
-#define CRYPTO_SHA2_224         30
-#define CRYPTO_SHA2_256         31
-#define CRYPTO_SHA2_384         32
-#define CRYPTO_SHA2_512         33
-#define CRYPTO_CRC32            34
-#define CRYPTO_AES_CMAC         35
-#define CRYPTO_AES_128_CMAC     36
-#define CRYPTO_ESN              37 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    37 /* Keep updated */
+#define CRYPTO_RIJNDAEL128_CBC  7  /* 128 bit blocksize */
+#define CRYPTO_AES_CBC          7  /* 128 bit blocksize -- the same as above */
+#define CRYPTO_AES_192_CBC      8  /* 192 bit keysize */
+#define CRYPTO_AES_256_CBC      9  /* 256 bit keysize */
+#define CRYPTO_DEFLATE_COMP     10 /* Deflate compression algorithm */
+#define CRYPTO_NULL             11
+#define CRYPTO_SHA2_256_HMAC    12
+#define CRYPTO_SHA2_384_HMAC    13
+#define CRYPTO_SHA2_512_HMAC    14
+#define CRYPTO_AES_CTR          15
+#define CRYPTO_AES_XTS          16
+#define CRYPTO_AES_GCM_16       17
+#define CRYPTO_AES_128_GMAC     18
+#define CRYPTO_AES_192_GMAC     19
+#define CRYPTO_AES_256_GMAC     20
+#define CRYPTO_AES_GMAC         21
+#define CRYPTO_AES_OFB          22
+#define CRYPTO_AES_CFB_8        23
+#define CRYPTO_AES_CFB_128      24
+#define CRYPTO_CHACHA20_POLY1305 25
+#define CRYPTO_CHACHA20_POLY1305_MAC 26
+#define CRYPTO_MD5              27
+#define CRYPTO_POLY1305         28
+#define CRYPTO_RIPEMD160        29
+#define CRYPTO_SHA1             30
+#define CRYPTO_SHA2_224         31
+#define CRYPTO_SHA2_256         32
+#define CRYPTO_SHA2_384         33
+#define CRYPTO_SHA2_512         34
+#define CRYPTO_CRC32            35
+#define CRYPTO_AES_CMAC         36
+#define CRYPTO_AES_128_CMAC     37
+#define CRYPTO_ESN              38 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX    38 /* Keep updated */
 
 /* Algorithm flags */
 
