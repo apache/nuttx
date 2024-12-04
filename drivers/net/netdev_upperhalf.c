@@ -1366,24 +1366,6 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 }
 
 /****************************************************************************
- * Name: netdev_lower_quota_load
- *
- * Description:
- *   Fetch the quota, works like atomic_read.
- *
- * Input Parameters:
- *   dev  - The lower half device driver structure
- *   type - Whether get quota for TX or RX
- *
- ****************************************************************************/
-
-int netdev_lower_quota_load(FAR struct netdev_lowerhalf_s *dev,
-                            enum netpkt_type_e type)
-{
-  return atomic_read(&dev->quota[type]);
-}
-
-/****************************************************************************
  * Name: netpkt_alloc
  *
  * Description:
