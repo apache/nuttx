@@ -80,14 +80,13 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb)
 {
-  sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb, this_task(),
-        this_task()->xcp.regs);
+  FAR struct tcb_s *rtcb = running_task();
 
   /* First, handle some special cases when the signal is
    * being delivered to the currently executing task.
    */
 
-  if (tcb == this_task() && !up_interrupt_context())
+  if (tcb == rtcb && !up_interrupt_context())
     {
       /* In this case just deliver the signal now.
        * REVISIT:  Signal handle will run in a critical section!
