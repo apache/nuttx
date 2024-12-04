@@ -25,7 +25,7 @@ DC := ldmd2
 DFLAGS := -i
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  DFLAGS += -g
+  DFLAGS += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)
