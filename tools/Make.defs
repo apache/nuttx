@@ -29,6 +29,9 @@
 ifeq ($(CONFIG_APPS_DIR),)
 CONFIG_APPS_DIR = $(TOPDIR)/../apps
 endif
+ifneq ($(firstword $(CONFIG_APPS_DIR)),/)
+CONFIG_APPS_DIR := $(TOPDIR)/$(CONFIG_APPS_DIR)
+endif
 APPDIR := $(realpath ${shell if [ -r $(CONFIG_APPS_DIR)/Makefile ]; then echo "$(CONFIG_APPS_DIR)"; fi})
 
 ifeq ($(APPDIR),)
