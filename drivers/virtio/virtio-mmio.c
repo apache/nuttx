@@ -821,6 +821,12 @@ static int virtio_mmio_init_device(FAR struct virtio_mmio_device_s *vmdev,
     }
 
   vdev->id.version = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_VERSION);
+  if (vdev->id.version < 1 || vdev->id.version > 2)
+    {
+      vrterr("Version %d not supported!\n", vdev->id.version);
+      return -ENODEV;
+    }
+
   vdev->id.device = metal_io_read32(&vmdev->cfg_io, VIRTIO_MMIO_DEVICE_ID);
   if (vdev->id.device == 0)
     {
