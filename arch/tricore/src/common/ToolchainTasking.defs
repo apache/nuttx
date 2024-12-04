@@ -76,7 +76,7 @@ ARCHOPTIMIZATION += --tradeoff=2
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION += --debug-info=default
   ARCHOPTIMIZATION += --keep-temporary-files
-  LDFLAGS          += -g
+  LDFLAGS          += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 # merge source code with assembly output

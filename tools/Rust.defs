@@ -25,7 +25,7 @@ RUSTC := rustc --edition 2021
 RUSTFLAGS :=
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  RUSTFLAGS += -g
+  RUSTFLAGS += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)

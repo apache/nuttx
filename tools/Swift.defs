@@ -27,7 +27,7 @@ SWIFTC := swiftc
 SWIFTFLAGS := -enable-experimental-feature Embedded -wmo
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  SWIFTFLAGS += -g
+  SWIFTFLAGS += $(CONFIG_DEBUG_SYMBOLS_LEVEL)
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)
