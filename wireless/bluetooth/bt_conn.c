@@ -762,7 +762,8 @@ FAR struct bt_conn_s *bt_conn_addref(FAR struct bt_conn_s *conn)
 {
   bt_atomic_incr(&conn->ref);
 
-  wlinfo("handle %u ref %u\n", conn->handle, bt_atomic_get(&conn->ref));
+  wlinfo("handle %u ref %" PRId32 "\n", conn->handle,
+         bt_atomic_get(&conn->ref));
 
   return conn;
 }
@@ -787,7 +788,8 @@ void bt_conn_release(FAR struct bt_conn_s *conn)
 
   old_ref = bt_atomic_decr(&conn->ref);
 
-  wlinfo("handle %u ref %u\n", conn->handle, bt_atomic_get(&conn->ref));
+  wlinfo("handle %u ref %" PRId32 "\n", conn->handle,
+          bt_atomic_get(&conn->ref));
 
   if (old_ref > 1)
     {

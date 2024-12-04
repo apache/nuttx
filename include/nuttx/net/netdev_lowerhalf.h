@@ -320,8 +320,7 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev);
  *
  ****************************************************************************/
 
-int netdev_lower_quota_load(FAR struct netdev_lowerhalf_s *dev,
-                            enum netpkt_type_e type);
+#define netdev_lower_quota_load(dev, type) atomic_read(&dev->quota[type])
 
 /****************************************************************************
  * Name: netpkt_alloc
