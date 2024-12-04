@@ -46,6 +46,7 @@ static FAR struct oneshot_lowerhalf_s *g_oneshot_lower;
 
 #ifndef CONFIG_SCHED_TICKLESS
 static clock_t g_current_tick;
+static clock_t g_base_tick;
 #endif
 
 /****************************************************************************
@@ -150,6 +151,7 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
   g_oneshot_maxticks = ticks < UINT32_MAX ? ticks : UINT32_MAX;
 #else
   ONESHOT_TICK_CURRENT(g_oneshot_lower, &g_current_tick);
+  g_base_tick = g_current_tick;
   ONESHOT_TICK_START(g_oneshot_lower, oneshot_callback, NULL, 1);
 #endif
 }
@@ -217,6 +219,12 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
   if (g_oneshot_lower != NULL)
     {
       ret = ONESHOT_TICK_CURRENT(g_oneshot_lower, ticks);
+#ifndef CONFIG_SCHED_TICKLESS
+      if (ret == 0 && g_base_tick != 0)
+        {
+          *ticks -= g_base_tick;
+        }
+#endif
     }
 
   return ret;
@@ -228,7 +236,26 @@ int weak_function up_timer_gettime(struct timespec *ts)
 
   if (g_oneshot_lower != NULL)
     {
+#ifdef CONFIG_SCHED_TICKLESS
       ret = ONESHOT_CURRENT(g_oneshot_lower, ts);
+#else
+      struct timespec base;
+      struct timespec curr;
+
+      if (g_base_tick == 0)
+        {
+          ret = ONESHOT_CURRENT(g_oneshot_lower, ts);
+        }
+      else
+        {
+          ret = ONESHOT_CURRENT(g_oneshot_lower, &curr);
+          if (ret == 0)
+            {
+              clock_ticks2time(&base, g_base_tick);
+              clock_timespec_subtract(&curr, &base, ts);
+            }
+        }
+#endif
     }
 
   return ret;
