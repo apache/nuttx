@@ -39,6 +39,18 @@ config DEV_RPMSG_SERVER
 	default n
 	depends on RPMSG
 
+if DEV_RPMSG_SERVER
+
+config DEV_RPMSG_SERVER_WORK_PRIORITY
+	int "Rpmsg Device Server Work Priority"
+	default 224
+
+config DEV_RPMSG_SERVER_WORK_STACKSIZE
+	int "Rpmsg Device Server Work Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+
+endif # DEV_RPMSG_SERVER
+
 choice
 	prompt "Select OP-TEE dev implementation"
 	default DEV_OPTEE_NONE

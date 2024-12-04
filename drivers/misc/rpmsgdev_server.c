@@ -134,6 +134,8 @@ static const rpmsg_ept_cb g_rpmsgdev_handler[] =
   [RPMSGDEV_POLL]        = rpmsgdev_poll_handler,
 };
 
+static FAR struct kwork_wqueue_s *g_rpmsgdev_wqueue = NULL;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -361,7 +363,8 @@ static void rpmsgdev_poll_cb(FAR struct pollfd *fds)
   DEBUGASSERT(fds != NULL);
 
   server = fds->arg;
-  work_queue(HPWORK, &server->work, rpmsgdev_poll_worker, fds, 0);
+  work_queue_wq(g_rpmsgdev_wqueue, &server->work, rpmsgdev_poll_worker,
+                fds, 0);
 }
 
 /****************************************************************************
@@ -566,6 +569,17 @@ int rpmsgdev_export(FAR const char *remotecpu, FAR const char *localpath)
 
 int rpmsgdev_server_init(void)
 {
+  if (g_rpmsgdev_wqueue == NULL)
+    {
+      g_rpmsgdev_wqueue = work_queue_create("rpmsgdev_server",
+        CONFIG_DEV_RPMSG_SERVER_WORK_PRIORITY, NULL,
+        CONFIG_DEV_RPMSG_SERVER_WORK_STACKSIZE, 1);
+      if (g_rpmsgdev_wqueue == NULL)
+        {
+          return -ENOENT;
+        }
+    }
+
   return rpmsg_register_callback(NULL,
                                  NULL,
                                  NULL,
