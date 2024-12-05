@@ -51,7 +51,7 @@
 #define SENSOR_RPMSG_PUBLISH       6
 #define SENSOR_RPMSG_IOCTL         7
 #define SENSOR_RPMSG_IOCTL_ACK     8
-#define SENSOR_RPMSG_IOCTL_TIMEOUT 5
+#define SENSOR_RPMSG_IOCTL_TIMEOUT 1
 
 #define SENSOR_RPMSG_FUNCTION(name, cmd, arg1, arg2, size, wait, type) \
 static int sensor_rpmsg_##name(FAR struct sensor_lowerhalf_s *lower, \
