@@ -197,7 +197,7 @@ NM = $(CROSSDEV)nm
 
 ifeq ($(CONFIG_LTO_FULL),y)
   ARCHOPTIMIZATION += -flto
-  ifeq ($(CONFIG_ARM_TOOLCHAIN_GNU_EABI),y)
+  ifeq ($(CONFIG_ARM64_TOOLCHAIN_GNU_EABI),y)
     LD := $(CROSSDEV)gcc
     AR := $(CROSSDEV)gcc-ar rcs
     NM := $(CROSSDEV)gcc-nm
