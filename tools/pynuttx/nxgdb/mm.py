@@ -128,6 +128,16 @@ class MemPoolBlock:
             )
         return self._backtrace
 
+    @property
+    def prevnode(self) -> MemPoolBlock:
+        addr = self.address - self.nodesize
+        return MemPoolBlock(addr, self.blocksize, self.overhead)
+
+    @property
+    def nextnode(self) -> MemPoolBlock:
+        addr = self.address + self.nodesize
+        return MemPoolBlock(addr, self.blocksize, self.overhead)
+
     def read_memory(self) -> memoryview:
         return gdb.selected_inferior().read_memory(self.address, self.blocksize)
 
