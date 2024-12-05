@@ -23,6 +23,7 @@
 HEAD_CSRC += tricore_doirq.c
 
 CMN_CSRCS += tricore_allocateheap.c
+CMN_CSRCS += tricore_cache.c
 CMN_CSRCS += tricore_checkstack.c
 CMN_CSRCS += tricore_createstack.c
 CMN_CSRCS += tricore_csa.c

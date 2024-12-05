@@ -22,6 +22,7 @@
 
 set(SRCS
     tricore_allocateheap.c
+    tricore_cache.c
     tricore_checkstack.c
     tricore_createstack.c
     tricore_csa.c
