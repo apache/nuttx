@@ -1,14 +1,13 @@
 /****************************************************************************
  * arch/arm/src/stm32f0l0g0/stm32_pwm.c
  *
- *   Copyright (C) 2019 Fundação CERTI. All rights reserved.
- *   Author: Daniel Pereira Volpato <dpo@certi.org.br>
- *           Guillherme da Silva amaral <gvr@certi.org.br>
- *
- *   Based on: arch/arm/src/stm32h7/stm32_pwm.c
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Paul Alexander Patience <paul-a.patience@polymtl.ca>
- *           Mateusz Szafoni <raiden00@railab.me>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Fundação CERTI. All rights reserved.
+ * SPDX-FileContributor: Daniel Pereira Volpato <dpo@certi.org.br>
+ * SPDX-FileContributor: Guillherme da Silva amaral <gvr@certi.org.br>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ * SPDX-FileContributor: Mateusz Szafoni <raiden00@railab.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

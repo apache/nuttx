@@ -1,15 +1,12 @@
 /****************************************************************************
  * arch/arm/src/imxrt/imxrt_edma.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Portions of the eDMA logic derive from NXP sample code which has a
- * compatible BSD 3-clause license:
- *
- *   Copyright (c) 2015, Freescale Semiconductor, Inc.
- *   Copyright 2016-2017 NXP
- *   All rights reserved
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2018 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016-2017 NXP
+ * SPDX-FileCopyrightText: 2015, Freescale Semiconductor, Inc.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
