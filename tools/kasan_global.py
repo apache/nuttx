@@ -266,9 +266,12 @@ def create_kasan_file(config: Config, region_list=[]):
             file.write("\n};")
 
         # Record kasan region pointer location
-        file.write("\nconst unsigned long g_global_region[] = {\n")
+        file.write("struct kasan_global_region_s;\n")
+        file.write("const struct kasan_global_region_s *g_global_region[] = {\n")
         for i in range(len(region_list)):
-            file.write("\n(const unsigned long)&globals_region%d," % (i))
+            file.write(
+                "\n(const struct kasan_global_region_s *)&globals_region%d," % (i)
+            )
         file.write("0x00\n};")
 
 
