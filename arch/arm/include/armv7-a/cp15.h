@@ -273,4 +273,6 @@
      value;                             \
   })                                    \
 
+#define CP15_MODIFY(v,m,a) CP15_SET(a, ((CP15_GET(a) & ~(m)) | ((uintptr_t)(v) & (m))))
+
 #endif /* __ARCH_ARM_SRC_ARMV7_A_CP15_H */

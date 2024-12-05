@@ -466,16 +466,14 @@ static inline_function uint32_t up_getsp(void)
 }
 
 noinstrument_function
-static inline_function bool up_interrupt_context(void)
-{
-  return (bool)CP15_GET(TPIDRPRW);
-}
-
-noinstrument_function
 static inline_function void up_set_interrupt_context(bool flag)
 {
-  CP15_SET(TPIDRPRW, flag);
+  CP15_MODIFY(flag, 1ul, TPIDRPRW);
 }
+
+#define up_this_task()         ((struct tcb_s *)(CP15_GET(TPIDRPRW) & ~1ul))
+#define up_update_task(t)      CP15_MODIFY(t, ~1ul, TPIDRPRW)
+#define up_interrupt_context() (CP15_GET(TPIDRPRW) & 1)
 
 /****************************************************************************
  * Public Data
