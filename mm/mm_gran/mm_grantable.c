@@ -232,21 +232,7 @@ failure:
         {
           /* Handle full GAT quickly */
 
-          tmp = 32;
-        }
-      else if (c == r.sidx)
-        {
-          /* offset of first unused when matching for free */
-
-          v = ~v;
-#ifdef CONFIG_HAVE_BUILTIN_CTZ
-          tmp = __builtin_ctz(v);
-#else
-          tmp = (uint32_t)((lsb_mask(v)) * DEBRUJIN_NUM) >> 27;
-          DEBUGASSERT(tmp < sizeof(DEBRUJIN_LUT));
-          tmp = DEBRUJIN_LUT[tmp];
-#endif
-          tmp = tmp - 1; /* Ok, because v >= 1 */
+          tmp = 31;
         }
       else
         {
