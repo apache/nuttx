@@ -52,15 +52,16 @@ if(CONFIG_LIBCXXABI)
     endif()
   endif()
 
+  nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include
+                       ${CMAKE_BINARY_DIR}/include/libcxxabi)
+
   set_property(
     TARGET nuttx
     APPEND
     PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES
-             ${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include)
+             ${CMAKE_BINARY_DIR}/include/libcxxabi)
 
   nuttx_add_system_library(libcxxabi)
-
-  set(SRCS)
 
   # C++ABI files
   list(
@@ -97,8 +98,6 @@ if(CONFIG_LIBCXXABI)
   if(CONFIG_LIBCXXABI)
     add_compile_definitions(LIBCXX_BUILDING_LIBCXXABI)
   endif()
-
-  set(TARGET_SRCS)
 
   foreach(src ${SRCS})
     string(PREPEND src libcxxabi/src/)
