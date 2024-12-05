@@ -199,6 +199,10 @@
                                   * is delivered */
 #define SA_KERNELHAND   (1 << 7) /* Invoke the handler in kernel space directly */
 
+/* SA_NOMASK is a nonstandard synonym of SA_NODEFER */
+
+#define SA_NOMASK       SA_NODEFER
+
 /* These are the possible values of the siginfo si_code field */
 
 #define SI_USER         0  /* Signal sent from kill, raise, or abort */
