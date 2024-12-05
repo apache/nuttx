@@ -1,19 +1,14 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32h743xx_flash.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david.sidrane@nscdg.com>
- *
- * Ported from stm32f7_flash.c, this is the original license:
- *
- *   Copyright (C) 2018 Wolpike LLC. All rights reserved.
- *   Author: Evgeniy Bobkov <evgen@wolpike.com>
- *
- * Ported from stm32f20xxf40xx_flash.c, this is the original license:
- *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2018 Wolpike LLC. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileContributor: Evgeniy Bobkov <evgen@wolpike.com>
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: David Sidrane <david.sidrane@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

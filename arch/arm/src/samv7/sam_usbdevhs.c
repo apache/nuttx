@@ -1,20 +1,10 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_usbdevhs.c
  *
- *   Copyright (C) 2015-2016, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.orgr>
- *
- * This code derives from the UDPHS device controller driver for the SAMA5D3.
- * That code, in turn, includes some reference logic extracted from the
- * SAMA5D3 sample code.  That Atmel sample code has a BSD compatible license
- * that requires this copyright notice:
- *
- *   Copyright (c) 2009, Atmel Corporation
- *
- * Additional updates for the SAMV7 was taken from Atmel sample code for the
- * SAMV71:
- *
- *   Copyright (c) 2014, Atmel Corporation
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2015-2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2009,2014 Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

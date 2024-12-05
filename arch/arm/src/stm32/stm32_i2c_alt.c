@@ -1,17 +1,14 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_i2c_alt.c
- * STM32 I2C Hardware Layer - Device Driver
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Author: Uros Platise <uros.platise@isotel.eu>
- *
- * With extensions, modifications by:
- *
- *   Copyright (C) 2011-2014, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- *   Copyright (C) 2014 Patrizio Simona. All rights reserved.
- *   Author: Patrizio Simona <psimona@ethz.ch>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2016-2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2014 Patrizio Simona. All rights reserved.
+ * SPDX-FileCopyrightText: 2011-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Patrizio Simona <psimona@ethz.ch>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

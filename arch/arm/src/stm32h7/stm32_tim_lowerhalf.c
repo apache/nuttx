@@ -1,12 +1,13 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_tim_lowerhalf.c
  *
- *   Copyright (C) 2023 Max Kriegleder. All rights reserved.
- *   Copyright (C) 2015 Wail Khemir. All rights reserved.
- *   Copyright (C) 2015 Omni Hoverboards Inc. All rights reserved.
- *   Authors: Wail Khemir <khemirwail@gmail.com>
- *            Paul Alexander Patience <paul-a.patience@polymtl.ca>
- *            Max Kriegleder <max.kriegleder@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2023 Max Kriegleder. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Wail Khemir. All rights reserved.
+ * SPDX-FileCopyrightText: 2015 Omni Hoverboards Inc. All rights reserved.
+ * SPDX-FileContributor: Wail Khemir <khemirwail@gmail.com>
+ * SPDX-FileContributor: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ * SPDX-FileContributor: Max Kriegleder <max.kriegleder@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

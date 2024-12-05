@@ -1,6 +1,8 @@
 /****************************************************************************
  * arch/arm/src/a1x/hardware/a1x_intc.h
  *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The

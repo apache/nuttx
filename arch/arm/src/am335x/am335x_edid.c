@@ -1,15 +1,10 @@
 /****************************************************************************
  * arch/arm/src/am335x/am335x_edid.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * The LCD driver derives from the LPC54xx LCD driver but also includes
- * information from the FreeBSD AM335x LCD driver which was released under
- * a two-clause BSD license:
- *
- *   Copyright 2013 Oleksandr Tymoshenko <gonzo@freebsd.org>
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2013 Oleksandr Tymoshenko <gonzo@freebsd.org>
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

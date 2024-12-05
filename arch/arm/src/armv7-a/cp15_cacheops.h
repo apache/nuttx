@@ -1,14 +1,10 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/cp15_cacheops.h
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Portions of this file derive from Atmel sample code for the SAMA5D3
- * Cortex-A5 which also has a modified BSD-style license:
- *
- *   Copyright (c) 2012, Atmel Corporation
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2013-2014 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: Copyright (c) 2012, Atmel Corporation
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

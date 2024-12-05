@@ -1,6 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32_dac.h
- * Definitions for stm32H7 dac
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

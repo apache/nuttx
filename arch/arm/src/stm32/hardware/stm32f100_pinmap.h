@@ -1,13 +1,14 @@
 /****************************************************************************
  * arch/arm/src/stm32/hardware/stm32f100_pinmap.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2012 Michael Smith. All Rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Uros Platise <uros.platise@isotel.eu>
- *           Michael Smith
- *           Freddie Chopin <freddie_chopin@op.pl>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2009 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2011 Uros Platise. All rights reserved.
+ * SPDX-FileCopyrightText: 2012 Michael Smith. All Rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Uros Platise <uros.platise@isotel.eu>
+ * SPDX-FileContributor: Michael Smith
+ * SPDX-FileContributor: Freddie Chopin <freddie_chopin@op.pl>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

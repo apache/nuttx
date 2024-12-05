@@ -1,14 +1,11 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/arm_cache.c
  *
- *   Copyright (C) 2015, 2018-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Bob Feretich <bob.feretich@rafresearch.com>
- *
- * Some logic in this header file derives from the ARM CMSIS core_cm7.h
- * header file which has a compatible 3-clause BSD license:
- *
- *   Copyright (c) 2009 - 2014 ARM LIMITED.  All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015, 2018-2019 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2009 - 2014 ARM LIMITED.  All rights reserved.
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * SPDX-FileContributor: Bob Feretich <bob.feretich@rafresearch.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

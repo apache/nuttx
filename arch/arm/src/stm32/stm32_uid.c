@@ -1,8 +1,9 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_uid.c
  *
- *   Copyright (C) 2015 Marawan Ragab. All rights reserved.
- *   Author: Marawan Ragab <marawan31@gmail.com>
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2015 Marawan Ragab. All rights reserved.
+ * SPDX-FileContributor: Marawan Ragab <marawan31@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

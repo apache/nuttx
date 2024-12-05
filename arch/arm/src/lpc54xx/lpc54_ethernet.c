@@ -1,15 +1,12 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_ethernet.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Some of the logic in this file was developed using sample code provided by
- * NXP that has a compatible BSD license:
- *
- *   Copyright (c) 2016, Freescale Semiconductor, Inc.
- *   Copyright 2016-2017 NXP
- *   All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2017 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 2016 Freescale Semiconductor Inc.
+ * SPDX-FileCopyrightText: 2016 - 2017, NXP
+ * SPDX-FileContributor: Gregory Nutt <gnutt@nuttx.org>
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
