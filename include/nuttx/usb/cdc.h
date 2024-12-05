@@ -249,7 +249,7 @@
                                       * defined interface for media specific hardware
                                       * configuration and management. (Optional)
                                       */
-#define ECM_GET_RESPONSE        0x01 /* equests a response in the format of the supported
+#define ECM_GET_RESPONSE        0x01 /* Requests a response in the format of the supported
                                       * control protocol.
                                       * (Optional)
                                       */
