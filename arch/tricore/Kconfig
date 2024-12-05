@@ -45,6 +45,13 @@ config ARCH_CHIP_TC397
 	---help---
 		AURIX TC39x family: TC397
 
+config ARCH_DCACHE_ADDR
+	hex "AURIX Dcache base address"
+	default 0x7003C000
+	---help---
+		AURIX Dcache base address, dcache line clear and invalidate need
+		use the address.
+
 if ARCH_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
 endif
