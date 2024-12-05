@@ -23,12 +23,9 @@
 CSRCS += hook.c
 
 ifeq ($(CONFIG_MM_KASAN),y)
+  CFLAGS += -fno-lto
   CFLAGS += -fno-builtin
   CFLAGS += -fno-sanitize=kernel-address
-
-  ifeq ($(CONFIG_LTO_NONE),n)
-    CFLAGS += -fno-lto
-  endif
 endif
 
 # Add the core heap directory to the build

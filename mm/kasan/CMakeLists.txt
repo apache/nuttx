@@ -22,12 +22,9 @@
 set(SRCS hook.c)
 
 if(CONFIG_MM_KASAN)
+  list(APPEND FLAGS ${NO_LTO})
   list(APPEND FLAGS -fno-builtin)
   list(APPEND FLAGS -fno-sanitize=kernel-address)
-
-  if(CONFIG_LTO_NONE)
-    list(APPEND FLAGS -fno-lto)
-  endif()
 endif()
 
 target_sources(mm PRIVATE ${SRCS})
