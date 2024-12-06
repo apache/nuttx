@@ -50,6 +50,13 @@ ifeq ($(CONFIG_ESPRESSIF_SPI_BITBANG),y)
 CHIP_CSRCS += esp_spi_bitbang.c
 endif
 
+ifeq ($(CONFIG_ESP_PCNT),y)
+CHIP_CSRCS += esp_pcnt.c
+ifeq ($(CONFIG_ESP_PCNT_AS_QE),y)
+CHIP_CSRCS += esp_qencoder.c
+endif
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
 CHIP_CSRCS += esp_spiflash.c
 ifeq ($(CONFIG_ESPRESSIF_MTD),y)

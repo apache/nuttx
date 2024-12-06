@@ -102,6 +102,11 @@
 #  include "espressif/esp_temperature_sensor.h"
 #endif
 
+#ifdef CONFIG_ESP_PCNT
+#  include "espressif/esp_pcnt.h"
+#  include "esp32s2_board_pcnt.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -410,6 +415,14 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize temperature sensor driver: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP_PCNT
+  ret = board_pcnt_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
     }
 #endif
 

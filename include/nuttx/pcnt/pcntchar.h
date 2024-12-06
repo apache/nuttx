@@ -1,5 +1,7 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/common/src/esp_board_qencoder.c
+ * include/nuttx/pcnt/pcntchar.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,80 +22,69 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_PCNT_PCNTCHAR_H
+#define __INCLUDE_NUTTX_PCNT_PCNTCHAR_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <debug.h>
-#include <stdio.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#include <nuttx/sensors/qencoder.h>
-#include <arch/board/board.h>
+#include <nuttx/pcnt/pcnt.h>
 
-#include "espressif/esp_qencoder.h"
+#ifdef CONFIG_PCNTCHAR
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_qencoder_initialize
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: pcntchar_register
  *
  * Description:
- *   Initialize the quadrature encoder driver
+ *   Create and register the pcnt character driver.
+ *
+ * Input Parameters:
+ *   pcnt - An instance of the lower half pcnt driver
+ *
+ * Returned Value:
+ *   OK if the driver was successfully registered; A negated errno value is
+ *   returned on any failure.
  *
  ****************************************************************************/
 
-int board_qencoder_initialize(void)
-{
-  int ret;
-  char devpath[12];
-  int devno = 0;
+int pcntchar_register(FAR struct pcnt_dev_s *pcnt);
 
-  /* Initialize a quadrature encoder interface. */
-#ifdef CONFIG_ESP_PCNT_U0_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP_PCNT_U1_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 1);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP_PCNT_U2_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 2);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_ESP_PCNT_U3_QE
-  snprintf(devpath, sizeof(devpath), "/dev/qe%d", devno++);
-  ret = esp_qeinitialize(devpath, 3);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: esp_qeinitialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
+#endif /* CONFIG_PCNT */
+#endif /* __INCLUDE_NUTTX_PCNT_PCNTCHAR_H */

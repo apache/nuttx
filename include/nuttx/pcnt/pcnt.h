@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/common/include/esp_board_qencoder.h
+ * include/nuttx/pcnt/pcnt.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,14 +20,21 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H
-#define __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H
+#ifndef __INCLUDE_NUTTX_PCNT_PCNT_H
+#define __INCLUDE_NUTTX_PCNT_PCNT_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <nuttx/fs/ioctl.h>
+
+#ifdef CONFIG_PCNT
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,11 +44,38 @@
  * Public Types
  ****************************************************************************/
 
+struct pcnt_dev_s;
+
+/* The pcnt peripheral vtable */
+
+struct pcnt_ops_s
+{
+  CODE int      (*open)(FAR struct pcnt_dev_s *dev);
+  CODE int      (*close)(FAR struct pcnt_dev_s *dev);
+  CODE ssize_t  (*read)(FAR struct pcnt_dev_s *dev,
+                        FAR char *buffer,
+                        size_t buflen);
+  CODE int      (*ioctl)(FAR struct pcnt_dev_s *dev,
+                         int cmd, unsigned long arg);
+};
+
+/* pcnt private data.  This structure only defines the initial fields of the
+ * structure visible to the pcnt client.  The specific implementation may
+ * add additional, device-specific fields.
+ */
+
+struct pcnt_dev_s
+{
+  FAR const struct pcnt_ops_s *ops;
+  int                         minor;
+};
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
 {
@@ -50,27 +84,13 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Inline Functions
+ * Public Functions Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_qencoder_initialize
- *
- * Description:
- *   Initialize the quadrature encoder driver for the given timer
- *
- ****************************************************************************/
-
-int board_qencoder_initialize(void);
 
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
 
-#endif /* __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H */
-
+#endif /* CONFIG_PCNT */
+#endif /* __INCLUDE_NUTTX_PCNT_PCNT_H */
