@@ -74,10 +74,6 @@ void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
       /* Restore addition x86_64 state */
 
       x86_64_restore_auxstate(tcb);
-
-      /* Update current regs to signal that we need context switch */
-
-      x86_64_restorestate(tcb->xcp.regs);
     }
 
   /* We are not in an interrupt handler.  Copy the user C context
