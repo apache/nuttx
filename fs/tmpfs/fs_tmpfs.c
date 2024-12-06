@@ -889,6 +889,14 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
        * relpath.
        */
 
+      /* Skip any slash. */
+
+      while (*segment == '/')
+        {
+          segment++;
+          len--;
+        }
+
       next_segment = memchr(segment, '/', len);
       if (next_segment)
         {
