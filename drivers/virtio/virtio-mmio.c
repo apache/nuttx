@@ -343,15 +343,18 @@ static int virtio_mmio_config_virtqueue(FAR struct metal_io_region *io,
     {
       metal_io_write32(io, VIRTIO_MMIO_QUEUE_NUM, vq->vq_nentries);
 
-      addr = (uint64_t)kasan_reset_tag((FAR void *)vq->vq_ring.desc);
+      addr = (uint64_t)((uintptr_t)
+                        kasan_reset_tag((FAR void *)vq->vq_ring.desc));
       metal_io_write32(io, VIRTIO_MMIO_QUEUE_DESC_LOW, addr);
       metal_io_write32(io, VIRTIO_MMIO_QUEUE_DESC_HIGH, addr >> 32);
 
-      addr = (uint64_t)kasan_reset_tag((FAR void *)vq->vq_ring.avail);
+      addr = (uint64_t)((uintptr_t)
+                        kasan_reset_tag((FAR void *)vq->vq_ring.avail));
       metal_io_write32(io, VIRTIO_MMIO_QUEUE_AVAIL_LOW, addr);
       metal_io_write32(io, VIRTIO_MMIO_QUEUE_AVAIL_HIGH, addr >> 32);
 
-      addr = (uint64_t)kasan_reset_tag((FAR void *)vq->vq_ring.used);
+      addr = (uint64_t)((uintptr_t)
+                        kasan_reset_tag((FAR void *)vq->vq_ring.used));
       metal_io_write32(io, VIRTIO_MMIO_QUEUE_USED_LOW, addr);
       metal_io_write32(io, VIRTIO_MMIO_QUEUE_USED_HIGH, addr >> 32);
 
