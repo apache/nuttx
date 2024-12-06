@@ -112,7 +112,7 @@ typedef unsigned int            _size_t;
  */
 
 #ifdef __thumb2__
-#if defined(CONFIG_ARMV7M_USEBASEPRI) || defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARMV8M_USEBASEPRI)
+#if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 typedef unsigned char           irqstate_t;
 #else
 typedef unsigned short          irqstate_t;

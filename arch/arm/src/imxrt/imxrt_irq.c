@@ -260,7 +260,6 @@ static int imxrt_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 static inline void imxrt_prioritize_syscall(int priority)
 {
   uint32_t regval;
@@ -272,7 +271,6 @@ static inline void imxrt_prioritize_syscall(int priority)
   regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
   putreg32(regval, NVIC_SYSH8_11_PRIORITY);
 }
-#endif
 
 /****************************************************************************
  * Name: imxrt_irqinfo
@@ -398,9 +396,6 @@ static int imxrt_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 void up_irqinitialize(void)
 {
   uintptr_t regaddr;
-#if defined(CONFIG_DEBUG_SYMBOLS) && !defined(CONFIG_ARMV7M_USEBASEPRI)
-  uint32_t regval;
-#endif
   int nintlines;
   int i;
 
@@ -475,9 +470,8 @@ void up_irqinitialize(void)
 #ifdef CONFIG_ARCH_IRQPRIO
   /* up_prioritize_irq(IMXRT_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
-#ifdef CONFIG_ARMV7M_USEBASEPRI
+
   imxrt_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
-#endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.
@@ -504,17 +498,6 @@ void up_irqinitialize(void)
 #endif
 
   imxrt_dumpnvic("initial", NR_IRQS);
-
-  /* If a debugger is connected, try to prevent it from catching hardfaults.
-   * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal
-   * operation.
-   */
-
-#if defined(CONFIG_DEBUG_SYMBOLS) && !defined(CONFIG_ARMV7M_USEBASEPRI)
-  regval  = getreg32(NVIC_DEMCR);
-  regval &= ~NVIC_DEMCR_VCHARDERR;
-  putreg32(regval, NVIC_DEMCR);
-#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Initialize logic to support a second level of interrupt decoding for
