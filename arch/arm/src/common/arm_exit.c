@@ -60,9 +60,18 @@ void up_exit(int status)
 
   nxtask_exit();
 
-  /* Scheduler parameters will update inside syscall */
+  /* Update g_running_tasks */
 
+#ifdef CONFIG_ARCH_ARMV6M
+  /* ARMV6M syscal may trigger hard fault， We use
+   * running_task != NULL to determine whether it is
+   * a context for restoration.
+   */
+
+  g_running_tasks[this_cpu()] = NULL;
+#else
   g_running_tasks[this_cpu()] = this_task();
+#endif
 
   /* Then switch contexts */
 
