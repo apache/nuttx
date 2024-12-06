@@ -633,7 +633,6 @@ config NRF52_RADIO_IEEE802154
 	bool "RADIO IEEE802.15.4 protocol"
 	default n
 	depends on NRF52_HAVE_IEEE802154
-	select ARMV7M_USEBASEPRI
 	select ARCH_RAMVECTORS
 	select ARCH_IRQPRIO
 	select NRF52_RADIO_CUSTOM
@@ -807,7 +806,6 @@ endmenu # USBDEV Configuration
 menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
 	depends on ALLOW_BSDNORDIC_COMPONENTS
-	select ARMV7M_USEBASEPRI
 	select ARCH_RAMVECTORS
 	select ARCH_IRQPRIO
 	select CRYPTO
