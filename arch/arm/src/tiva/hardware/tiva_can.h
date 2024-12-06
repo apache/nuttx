@@ -1,19 +1,9 @@
 /****************************************************************************
  * arch/arm/src/tiva/hardware/tiva_can.h
  *
- *   Copyright (C) 2006-2020 Texas Instruments Incorporated.
- *                           All rights reserved.
- *   Author: Matthew Trescott <matthewtrescott@gmail.com>
- *
- * From the TivaWare Peripheral Driver Library, with minor changes for
- * clarity and style.
- *
- * The TivaWare sample code has a BSD compatible license that requires this
- * copyright notice:
- *
- * Copyright (c) 2005-2020 Texas Instruments Incorporated.
- * All rights reserved.
- * Software License Agreement
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2006-2020 Texas Instruments Incorporated.
+ * SPDX-FileContributor: Matthew Trescott <matthewtrescott@gmail.com>
  *
  *   Redistribution and use in source and binary forms, with or without
  *   modification, are permitted provided that the following conditions
