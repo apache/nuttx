@@ -81,6 +81,15 @@ extern "C++"
 #  define atomic_fetch_or(obj, val)   ATOMIC_FUNC(fetch_or, 4)(obj, val, __ATOMIC_ACQ_REL)
 #  define atomic_fetch_xor(obj, val)  ATOMIC_FUNC(fetch_xor, 4)(obj, val, __ATOMIC_ACQ_REL)
 
+#  define nx_atomic_compare_exchange_weak_4(obj, expect, desired, success, failure) \
+     nx_atomic_compare_exchange_4(obj, expect, desired, true, success, failure)
+#  define nx_atomic_compare_exchange_weak_8(obj, expect, desired, success, failure) \
+     nx_atomic_compare_exchange_8(obj, expect, desired, true, success, failure)
+#  define nx_atomic_compare_exchange_strong_4(obj, expect, desired, success, failure) \
+     nx_atomic_compare_exchange_4(obj, expect, desired, false, success, failure)
+#  define nx_atomic_compare_exchange_strong_8(obj, expect, desired, success, failure) \
+     nx_atomic_compare_exchange_8(obj, expect, desired, false, success, failure)
+
 typedef volatile int32_t atomic_t;
 typedef volatile int64_t atomic64_t;
 #endif
