@@ -83,11 +83,7 @@ up_saveusercontext:
 	/* Save r13, primask, r4~r11 */
 
 	mov		r2, sp
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 	mrs		r3, basepri
-#else
-	mrs		r3, primask
-#endif
 	stmia		r0!, {r2-r11}
 
 	/* Save EXC_RETURN to 0xffffffff */
