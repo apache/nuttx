@@ -122,13 +122,6 @@
 #define getreg32(p)         inl(p)
 #define putreg32(v,p)       outl(v,p)
 
-/* Macros to handle saving and restore interrupt state.  In the current
- * model, the state is copied from the stack to the TCB, but only a
- * referenced is passed to get the state from the TCB.
- */
-
-#define x86_64_restorestate(regs) (up_set_current_regs(regs))
-
 /* ISR/IRQ stack size */
 
 #if CONFIG_ARCH_INTERRUPTSTACK == 0
