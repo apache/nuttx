@@ -60,13 +60,7 @@
 
 int x86_64_smp_call_handler(int irq, void *c, void *arg)
 {
-  struct tcb_s *tcb;
-  int cpu = this_cpu();
-
-  tcb = current_task(cpu);
   nxsched_smp_call_handler(irq, c, arg);
-  tcb = current_task(cpu);
-  x86_64_restorestate(tcb->xcp.regs);
 
   return OK;
 }
@@ -93,12 +87,9 @@ int x86_64_smp_call_handler(int irq, void *c, void *arg)
 
 int x86_64_smp_sched_handler(int irq, void *c, void *arg)
 {
-  struct tcb_s *tcb;
   int cpu = this_cpu();
 
   nxsched_process_delivered(cpu);
-  tcb = current_task(cpu);
-  x86_64_restorestate(tcb->xcp.regs);
 
   return OK;
 }
