@@ -138,11 +138,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        */
 
       tcb->xcp.regs[REG_PC]         = (uint32_t)arm_sigdeliver;
-#ifdef CONFIG_ARMV7M_USEBASEPRI
       tcb->xcp.regs[REG_BASEPRI]    = NVIC_SYSH_DISABLE_PRIORITY;
-#else
-      tcb->xcp.regs[REG_PRIMASK]    = 1;
-#endif
       tcb->xcp.regs[REG_XPSR]       = ARMV7M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
       tcb->xcp.regs[REG_LR]         = EXC_RETURN_THREAD;

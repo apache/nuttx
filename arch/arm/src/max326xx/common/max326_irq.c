@@ -168,7 +168,6 @@ static int max326_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 static inline void max326_prioritize_syscall(int priority)
 {
   uint32_t regval;
@@ -180,7 +179,6 @@ static inline void max326_prioritize_syscall(int priority)
   regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
   putreg32(regval, NVIC_SYSH8_11_PRIORITY);
 }
-#endif
 
 /****************************************************************************
  * Name: max326_irqinfo
@@ -254,9 +252,6 @@ static int max326_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 void up_irqinitialize(void)
 {
   uint32_t regaddr;
-#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
-  uint32_t regval;
-#endif
   int num_priority_registers;
   int i;
 
@@ -324,9 +319,7 @@ void up_irqinitialize(void)
   /* up_prioritize_irq(MAX326_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
   max326_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
-#endif
 
 #ifdef CONFIG_ARM_MPU
   /* If the MPU is enabled, then attach and enable the Memory Management
@@ -353,17 +346,6 @@ void up_irqinitialize(void)
 #endif
 
   max326_dumpnvic("initial", MAX326_IRQ_NIRQS);
-
-#if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
-  /* If a debugger is connected, try to prevent it from catching hardfaults.
-   * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal
-   * operation.
-   */
-
-  regval  = getreg32(NVIC_DEMCR);
-  regval &= ~NVIC_DEMCR_VCHARDERR;
-  putreg32(regval, NVIC_DEMCR);
-#endif
 
 #ifdef CONFIG_MAX326XX_GPIOIRQ
   /* Initialize GPIO interrupts */

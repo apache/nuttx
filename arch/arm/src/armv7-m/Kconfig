@@ -13,30 +13,10 @@ config ARMV7M_HAVE_DCACHE
 	bool
 	default n
 
-config ARMV7M_USEBASEPRI
-	bool "Use BASEPRI Register"
-	default ARCH_HIPRI_INTERRUPT
-	depends on ARCH_CORTEXM3 || ARCH_CORTEXM4 || ARCH_CORTEXM7
-	---help---
-		Use the BASEPRI register to enable and disable interrupts. By
-		default, the PRIMASK register is used for this purpose. This
-		usually results in hardfaults when supervisor calls are made.
-		Though, these hardfaults are properly handled by the RTOS, the
-		hardfaults can confuse some debuggers. With the BASEPRI
-		register, these hardfaults, will be avoided. For more details see
-		https://cwiki.apache.org/confluence/display/NUTTX/ARMv7-M+Hardfaults%2C+SVCALL%2C+and+Debuggers
-
-		WARNING:  If CONFIG_ARCH_HIPRI_INTERRUPT is selected, then you
-		MUST select CONFIG_ARMV7M_USEBASEPRI.  The Kconfig dependencies
-		here will permit to select an invalid configuration because it
-		cannot enforce that requirement.  If you create this invalid
-		configuration, you will encounter some problems that may be
-		very difficult to debug.
-
 config ARMV7M_BASEPRI_WAR
 	bool "Cortex-M7 r0p1 Errata 837070 Workaround"
 	default n
-	depends on ARMV7M_USEBASEPRI && ARCH_CORTEXM7
+	depends on ARCH_CORTEXM7
 	---help---
 		Enable workaround for r0p1 Errata 837070: Increasing priority using
 		write to BASEPRI does not take effect immediately.

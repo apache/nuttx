@@ -65,11 +65,7 @@
  */
 
 #define REG_R13             (0)  /* R13 = SP at time of interrupt */
-#ifdef CONFIG_ARMV8M_USEBASEPRI
-#  define REG_BASEPRI       (1)  /* BASEPRI */
-#else
-#  define REG_PRIMASK       (1)  /* PRIMASK */
-#endif
+#define REG_BASEPRI         (1)  /* BASEPRI */
 #define REG_R4              (2)  /* R4 */
 #define REG_R5              (3)  /* R5 */
 #define REG_R6              (4)  /* R6 */
@@ -358,13 +354,9 @@ static inline void setbasepri(uint32_t basepri)
 static inline void up_irq_disable(void) always_inline_function;
 static inline void up_irq_disable(void)
 {
-#ifdef CONFIG_ARMV8M_USEBASEPRI
   /* Probably raising priority */
 
   raisebasepri(NVIC_SYSH_DISABLE_PRIORITY);
-#else
-  __asm__ __volatile__ ("\tcpsid  i\n");
-#endif
 }
 
 /* Save the current primask state & disable IRQs */
@@ -373,31 +365,11 @@ static inline irqstate_t up_irq_save(void)
 always_inline_function noinstrument_function;
 static inline irqstate_t up_irq_save(void)
 {
-#ifdef CONFIG_ARMV8M_USEBASEPRI
   /* Probably raising priority */
 
   uint8_t basepri = getbasepri();
   raisebasepri(NVIC_SYSH_DISABLE_PRIORITY);
   return (irqstate_t)basepri;
-
-#else
-
-  unsigned short primask;
-
-  /* Return the current value of primask register and set
-   * bit 0 of the primask register to disable interrupts
-   */
-
-  __asm__ __volatile__
-    (
-     "\tmrs    %0, primask\n"
-     "\tcpsid  i\n"
-     : "=r" (primask)
-     :
-     : "memory");
-
-  return primask;
-#endif
 }
 
 /* Enable IRQs */
@@ -417,27 +389,9 @@ static inline void up_irq_restore(irqstate_t flags)
 always_inline_function noinstrument_function;
 static inline void up_irq_restore(irqstate_t flags)
 {
-#ifdef CONFIG_ARMV8M_USEBASEPRI
   /* In this case, we are always retaining or lowering the priority value */
 
   setbasepri((uint32_t)flags);
-
-#else
-  /* If bit 0 of the primask is 0, then we need to restore
-   * interrupts.
-   */
-
-  __asm__ __volatile__
-    (
-      "\ttst    %0, #1\n"
-      "\tbne.n  1f\n"
-      "\tcpsie  i\n"
-      "1:\n"
-      :
-      : "r" (flags)
-      : "cc", "memory");
-
-#endif
 }
 
 /* Get/set IPSR */

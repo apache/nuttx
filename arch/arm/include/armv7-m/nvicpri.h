@@ -33,12 +33,7 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-/* If CONFIG_ARMV7M_USEBASEPRI is selected, then interrupts will be disabled
- * by setting the BASEPRI register to NVIC_SYSH_DISABLE_PRIORITY so that most
- * interrupts will not have execution priority.  SVCall must have execution
- * priority in all cases.
- *
- * In the normal cases, interrupts are not nest-able and all interrupts run
+/* In the normal cases, interrupts are not nest-able and all interrupts run
  * at an execution priority between NVIC_SYSH_PRIORITY_MIN and
  * NVIC_SYSH_PRIORITY_MAX (with NVIC_SYSH_PRIORITY_MAX reserved for SVCall).
  *
