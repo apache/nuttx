@@ -102,6 +102,10 @@
 #  include "esp_board_qencoder.h"
 #endif
 
+#ifdef CONFIG_PM
+# include "espressif/esp_pm.h"
+#endif
+
 #include "esp32c6-devkitc.h"
 
 /****************************************************************************
@@ -383,6 +387,11 @@ int esp_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: board_qencoder_initialize failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_PM
+  /* Initialize power manager */
+  esp_pm_init();
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
