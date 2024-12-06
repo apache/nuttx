@@ -230,7 +230,6 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   info = conn->pollinfo;
   while (info->conn != NULL)
     {
-      DEBUGASSERT((fds->events & info->fds->events) != 0);
       if (++info >= &conn->pollinfo[CONFIG_NET_TCP_NPOLLWAITERS])
         {
           DEBUGPANIC();
