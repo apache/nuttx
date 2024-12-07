@@ -110,7 +110,6 @@ extern "C"
 /* Functions contained in lib_getstreams.c **********************************/
 
 FAR struct streamlist *lib_get_streams(void);
-FAR struct file_struct *lib_get_stream(int fd);
 #endif /* CONFIG_FILE_STREAM */
 
 /* Functions defined in lib_srand.c *****************************************/

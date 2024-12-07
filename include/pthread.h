@@ -37,6 +37,7 @@
 #include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
 #include <time.h>            /* Needed for struct timespec */
+#include <sched.h>
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 /* The architecture specific spinlock.h header file must provide the

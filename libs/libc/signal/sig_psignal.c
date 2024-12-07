@@ -31,6 +31,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <nuttx/sched.h>
+
 /* Uses streams... not available to kernel code */
 
 #ifndef __KERNEL__

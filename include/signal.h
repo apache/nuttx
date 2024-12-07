@@ -427,6 +427,11 @@ typedef struct
   size_t ss_size;
 } stack_t;
 
+#ifndef __PTHREAD_T_DEFINED
+typedef pid_t pthread_t;
+#  define __PTHREAD_T_DEFINED 1
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -473,6 +478,11 @@ int  sigsuspend(FAR const sigset_t *sigmask);
 int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 int  sigaltstack(FAR const stack_t *ss, FAR stack_t *oss);
 int  siginterrupt(int signo, int flag);
+
+/* Pthread signal management APIs */
+
+extern int pthread_kill(pthread_t thread, int sig);
+extern int pthread_sigmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
 
 #undef EXTERN
 #ifdef __cplusplus
