@@ -168,7 +168,11 @@ int group_initialize(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
   /* Initialize file descriptors for the TCB */
 
-  files_initlist(&group->tg_filelist);
+  ret = files_initlist(&group->tg_filelist);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Alloc task info for group  */
 
