@@ -7,18 +7,18 @@ SocketCAN Device Drivers
   The structure struct net_driver_s defines the interface and is
   passed to the network via ``netdev_register()``.
 
-- ``include/nuttx/can.h``. CAN & CAN FD frame data structures.
+- ``include/nuttx/can.h``. CAN & CAN FD frame data structures and dlc to len size
+
+  .. code-block:: c
+
+     uint8_t can_bytes2dlc(uint8_t nbytes);
+     uint8_t can_dlc2bytes(uint8_t dlc);
 
 - ``int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)'``.
   Each driver registers itself by calling ``netdev_register()``.
 
 - ``Include/nuttx/net/can.h``. contains lookup tables for CAN
   dlc to CAN FD len sizes named
-
-  .. code-block:: c
-
-     extern const uint8_t g_can_dlc_to_len[16];
-     extern const uint8_t g_len_to_can_dlc[65];
 
 - **Initialization sequence is as follows**.
 
