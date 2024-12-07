@@ -868,7 +868,7 @@ static void imx9_readsetup(struct imx9_usb_s *priv, uint8_t epphy,
   /* Set the trip wire */
 
   imx9_modifyreg(priv, IMX9_USBDEV_USBCMD_OFFSET, 0, USBDEV_USBCMD_SUTW);
-  ARM64_DSB();
+  __MB();
 
   DEBUGASSERT(IS_CACHE_ALIGNED(dqh, sizeof(struct imx9_dqh_s)));
   up_invalidate_dcache((uintptr_t)dqh,
@@ -892,7 +892,7 @@ static void imx9_readsetup(struct imx9_usb_s *priv, uint8_t epphy,
 
   imx9_putreg(priv, IMX9_USBDEV_ENDPTSETUPSTAT_OFFSET,
               IMX9_ENDPTMASK(IMX9_EP0_OUT));
-  ARM64_DSB();
+  __MB();
 }
 
 /****************************************************************************
@@ -1322,7 +1322,7 @@ static inline void imx9_ep0state(struct imx9_usb_s *priv,
       break;
     }
 
-  ARM64_DSB();
+  __MB();
 }
 
 /****************************************************************************
