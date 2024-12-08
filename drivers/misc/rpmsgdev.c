@@ -615,6 +615,8 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd, unsigned long arg)
       case BATIOC_TEMPERATURE:
       case BATIOC_INPUT_CURRENT:
       case BATIOC_STATE:
+      case BATIOC_CAPACITY:
+      case BATIOC_CHIPID:
         return sizeof(int);
       case TUNSETIFF:
       case TUNGETIFF:
