@@ -232,6 +232,8 @@ typedef int32_t      off_t;
 typedef int32_t      fpos_t;
 #endif
 
+typedef off_t        loff_t;
+
 /* blksize_t is a signed integer value used for file block sizes */
 
 typedef int16_t      blksize_t;
