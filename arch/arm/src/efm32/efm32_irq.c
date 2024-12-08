@@ -178,7 +178,6 @@ static int efm32_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
 static inline void efm32_prioritize_syscall(int priority)
 {
   uint32_t regval;
@@ -190,7 +189,6 @@ static inline void efm32_prioritize_syscall(int priority)
   regval |= (priority << NVIC_SYSH_PRIORITY_PR11_SHIFT);
   putreg32(regval, NVIC_SYSH8_11_PRIORITY);
 }
-#endif
 
 /****************************************************************************
  * Name: efm32_irqinfo
@@ -328,11 +326,9 @@ void up_irqinitialize(void)
   irq_attach(EFM32_IRQ_SVCALL, arm_svcall, NULL);
   irq_attach(EFM32_IRQ_HARDFAULT, arm_hardfault, NULL);
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
   /* Set the priority of the SVCall interrupt */
 
   efm32_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
-#endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.

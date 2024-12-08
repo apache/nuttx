@@ -65,7 +65,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * is invalid, and we can safely overwrite it.
    */
 
-  if (!(NVIC_IRQ_SVCALL == irq && regs[REG_R0] == SYS_restore_context))
+  if (*running_task != NULL)
     {
       tcb->xcp.regs = regs;
     }

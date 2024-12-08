@@ -161,19 +161,9 @@ void up_initial_state(struct tcb_s *tcb)
   /* Enable or disable interrupts, based on user configuration */
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-
-#ifdef CONFIG_ARMV7M_USEBASEPRI
   xcp->regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
-#else
-  xcp->regs[REG_PRIMASK] = 1;
-#endif
-
 #else /* CONFIG_SUPPRESS_INTERRUPTS */
-
-#ifdef CONFIG_ARMV7M_USEBASEPRI
   xcp->regs[REG_BASEPRI] = 0;
-#endif
-
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 }
 

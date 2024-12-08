@@ -89,11 +89,7 @@ retry:
 
   while (rtcb->irqcount > 0)
     {
-#ifdef CONFIG_ARMV7M_USEBASEPRI
       leave_critical_section((uint8_t)regs[REG_BASEPRI]);
-#else
-      leave_critical_section((uint16_t)regs[REG_PRIMASK]);
-#endif
     }
 #endif /* CONFIG_SMP */
 
@@ -139,11 +135,7 @@ retry:
       (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
     {
 #ifdef CONFIG_SMP
-#  ifdef CONFIG_ARMV7M_USEBASEPRI
       leave_critical_section((uint8_t)regs[REG_BASEPRI]);
-#  else
-      leave_critical_section((uint16_t)regs[REG_PRIMASK]);
-#  endif
 #endif
       goto retry;
     }
@@ -169,11 +161,7 @@ retry:
   /* We need to keep the IRQ lock until task switching */
 
   rtcb->irqcount++;
-#ifdef CONFIG_ARMV7M_USEBASEPRI
   leave_critical_section((uint8_t)regs[REG_BASEPRI]);
-#else
-  leave_critical_section((uint16_t)regs[REG_PRIMASK]);
-#endif
   rtcb->irqcount--;
 #endif
 
