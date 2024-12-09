@@ -109,6 +109,7 @@ static void btuart_rxwork(FAR void *arg)
     {
       struct bt_hci_evt_hdr_s evt;
       struct bt_hci_acl_hdr_s acl;
+      struct bt_hci_iso_hdr_s iso;
     }
 
   *hdr;
@@ -156,6 +157,19 @@ static void btuart_rxwork(FAR void *arg)
           type = BT_ACL_IN;
           pktlen = H4_HEADER_SIZE +
                    sizeof(struct bt_hci_acl_hdr_s) + hdr->acl.len;
+          break;
+
+        case H4_ISO:
+          if (upper->rxlen < H4_HEADER_SIZE +
+              sizeof(struct bt_hci_iso_hdr_s))
+            {
+              wlwarn("WARNING: Incomplete HCI ISO header\n");
+              return;
+            }
+
+          type = BT_ISO_IN;
+          pktlen = H4_HEADER_SIZE +
+                   sizeof(struct bt_hci_iso_hdr_s) + hdr->iso.len;
           break;
 
         default:
