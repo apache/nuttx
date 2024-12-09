@@ -68,6 +68,10 @@ struct intel64_cpu_s
   uint8_t loapic_id;
   bool    ready;
 
+  /* Interrupt Context */
+
+  bool interrupt_context;
+
 /* current_regs holds a references to the current interrupt level
  * register storage structure.  If is non-NULL only during interrupt
  * processing.  Access to current_regs must be through
@@ -143,7 +147,7 @@ static inline_function uint64_t *up_current_regs(void)
 {
   uint64_t *regs;
   __asm__ volatile("movq %%gs:(%c1), %0"
-                   : "=rm" (regs)
+                   : "=r" (regs)
                    : "i" (offsetof(struct intel64_cpu_s, current_regs)));
   return regs;
 }
@@ -155,19 +159,22 @@ static inline_function void up_set_current_regs(uint64_t *regs)
                                                 current_regs)));
 }
 
-/****************************************************************************
- * Name: up_interrupt_context
- *
- * Description:
- *   Return true is we are currently executing in the interrupt handler
- *   context.
- *
- ****************************************************************************/
-
-noinstrument_function
 static inline_function bool up_interrupt_context(void)
 {
-  return up_current_regs() != NULL;
+  bool flag;
+  __asm__ volatile("movb %%gs:(%c1), %0"
+                   : "=qm" (flag)
+                   : "i" (offsetof(struct intel64_cpu_s,
+                                   interrupt_context)));
+  return flag;
+}
+
+static inline_function void up_set_interrupt_context(bool flag)
+{
+  __asm__ volatile("movb %0, %%gs:(%c1)"
+                   :: "r" (flag),
+                   "i" (offsetof(struct intel64_cpu_s,
+                                 interrupt_context)));
 }
 
 /****************************************************************************
