@@ -27,6 +27,10 @@ if(CONFIG_USBHOST)
   set(SRCS usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
            usbhost_enumerate.c usbhost_devaddr.c)
 
+  if(CONFIG_USBHOST_WAITER)
+    list(APPEND SRCS usbhost_waiter.c usbhost_drivers.c)
+  endif()
+
   if(CONFIG_USBHOST_HUB)
     list(APPEND SRCS usbhost_hub.c)
   endif()
