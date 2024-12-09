@@ -181,6 +181,7 @@ __start:
 
 .continue_boot:
 
+#ifdef CONFIG_MPFS_L2_CLEAR
   /* L2 needs to be zeroed before ECC (error correction) is enabled later. */
 
   la  a4, __l2lim_start
@@ -190,6 +191,7 @@ __start:
   sd   x0, 0(a4)
   add  a4, a4, 8
   blt  a4, a5, .clear_l2lim
+#endif /* CONFIG_MPFS_L2_CLEAR */
 #endif
 
   /* Set stack pointer to the idle thread stack */

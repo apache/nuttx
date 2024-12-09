@@ -54,6 +54,13 @@ config MPFS_CLKINIT
 		This initilizes the system clocks at mpfs_start.c file. The option may be also turned off
 		if some other entity has already set them up.
 
+config MPFS_L2_CLEAR
+	bool "Clear the L2 cache at boot"
+	depends on MPFS_BOOTLOADER
+	default y
+	---help---
+		L2 should be zero-initialized on the first boot so that the ECC will be happy.
+
 config MPFS_BOARD_PMP
 	bool "Enable board specific PMP configuration"
 	depends on ARCH_USE_MPU && MPFS_BOOTLOADER
