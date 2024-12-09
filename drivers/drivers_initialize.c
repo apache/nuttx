@@ -55,6 +55,7 @@
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio.h>
 #include <nuttx/drivers/optee.h>
+#include <nuttx/usb/usbhost.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -266,6 +267,10 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_MTD_LOOP
   mtd_loop_register();
+#endif
+
+#ifdef CONFIG_USBHOST_WAITER
+  usbhost_drivers_initialize();
 #endif
 
 #if defined(CONFIG_PCI) && !defined(CONFIG_PCI_LATE_DRIVERS_REGISTER)

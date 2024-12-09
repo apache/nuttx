@@ -51,6 +51,28 @@ config USBHOST_ASYNCH
 		I/O transfer.  This may be required, for example, to receive
 		infrequent, asynchronous input from an interrupt pipe.
 
+config USBHOST_WAITER
+	bool "USB Host Waiter Support"
+	default n
+	---help---
+		Select this option to build in support for common USB host waiter.
+
+if USBHOST_WAITER
+
+config USBHOST_WAITER_PRIO
+	int "USB Host Waiter Thread Priority"
+	default 100
+	---help---
+		USB Host Waiter thread priority.
+
+config USBHOST_WAITER_STACKSIZE
+	int "USB Host Waiter Thread Stack Size"
+	default DEFAULT_TASK_STACKSIZE
+	---help---
+		USB Host Waiter thread stack size
+
+endif # USBHOST_WAITER
+
 config USBHOST_HUB
 	bool "USB Hub Support"
 	default n
