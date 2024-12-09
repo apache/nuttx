@@ -205,6 +205,7 @@ static mutex_t g_lock = NXMUTEX_INITIALIZER;
 
 #ifdef CONFIG_ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK
 static struct work_s g_work;
+static mutex_t g_work_lock = NXMUTEX_INITIALIZER;
 #endif
 
 /****************************************************************************
@@ -335,12 +336,20 @@ static int esp32s3_async_op(enum spiflash_op_code_e opcode,
     .sem = NXSEM_INITIALIZER(0, 0)
   };
 
+  ret = nxmutex_lock(&g_work_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = work_queue(LPWORK, &g_work, esp32s3_spiflash_work, &work_arg, 0);
   if (ret == 0)
     {
       nxsem_wait(&work_arg.sem);
       ret = work_arg.ret;
     }
+
+  nxmutex_unlock(&g_work_lock);
 
   return ret;
 }
