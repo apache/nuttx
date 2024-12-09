@@ -736,6 +736,91 @@
 #define ISELECT_EIE62         0xfe
 #define ISELECT_EIE63         0xff
 
+#ifndef __ASSEMBLY__
+
+/* Read the value of a CSR register */
+
+#define READ_CSR(reg) \
+  ({ \
+     uintreg_t __regval; \
+     __asm__ __volatile__("csrr %0, " __STR(reg) : "=r"(__regval)); \
+     __regval; \
+  })
+
+/* Read the value of a CSR register and set the specified bits */
+
+#define READ_AND_SET_CSR(reg, bits) \
+  ({ \
+     uintreg_t __regval; \
+     __asm__ __volatile__("csrrs %0, " __STR(reg) ", %1": "=r"(__regval) : "rK"(bits)); \
+     __regval; \
+  })
+
+/* Write a value to a CSR register */
+
+#define WRITE_CSR(reg, val) \
+  ({ \
+     __asm__ __volatile__("csrw " __STR(reg) ", %0" :: "rK"(val)); \
+  })
+
+/* Set the specified bits in a CSR register */
+
+#define SET_CSR(reg, bits) \
+  ({ \
+     __asm__ __volatile__("csrs " __STR(reg) ", %0" :: "rK"(bits)); \
+  })
+
+/* Clear the specified bits in a CSR register */
+
+#define CLEAR_CSR(reg, bits) \
+  ({ \
+     __asm__ __volatile__("csrc " __STR(reg) ", %0" :: "rK"(bits)); \
+  })
+
+/* Swap the value of a CSR register with the specified value */
+
+#define SWAP_CSR(reg, val) \
+  ({ \
+     uintptr_t regval; \
+     __asm__ __volatile__("csrrw %0, " __STR(reg) ", %1" : "=r"(regval) \
+                                                         : "rK"(val)); \
+     regval; \
+  })
+
+/* Write a value to an indirect CSR register */
+
+#define WRITE_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     WRITE_CSR(CSR_IREG, val); \
+  })
+
+/* Read the value of an indirect CSR register */
+
+#define READ_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     READ_CSR(CSR_IREG, val); \
+  })
+
+/* Set the specified bits in an indirect CSR register */
+
+#define SET_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     SET_CSR(CSR_IREG, val); \
+  })
+
+/* Clear the specified bits in an indirect CSR register */
+
+#define CLEAR_INDIRECT_CSR_REG0(reg, val) \
+  ({ \
+     WRITE_CSR(CSR_ISELECT, reg); \
+     CLEAR_CSR(CSR_IREG, val); \
+  })
+
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
