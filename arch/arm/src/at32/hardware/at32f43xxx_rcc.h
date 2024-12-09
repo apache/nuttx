@@ -97,11 +97,11 @@
 /* PLL configuration register */
 
 #define CRM_PLL_CFG_PLL_MS_SHIFT        (0) /* PLL pre-division, range: 1~15 */
-#define CRM_PLL_CFG_PLL_MS_MASK         (15 << CRM_PLL_CFG_PLL_MS_SHIFT) 
+#define CRM_PLL_CFG_PLL_MS_MASK         (15 << CRM_PLL_CFG_PLL_MS_SHIFT)
 #  define CRM_PLL_CFG_PLL_MS(n)         ((n) << CRM_PLL_CFG_PLL_MS_SHIFT) /* n = 1..15 */
 
 #define CRM_PLL_CFG_PLL_NS_SHIFT        (6) /* PLL Multiplication Factor,range: 31~500 */
-#define CRM_PLL_CFG_PLL_NS_MASK         (0x1FF << CRM_PLL_CFG_PLL_NS_SHIFT) 
+#define CRM_PLL_CFG_PLL_NS_MASK         (0x1FF << CRM_PLL_CFG_PLL_NS_SHIFT)
 #  define CRM_PLL_CFG_PLL_NS(n)         ((n) << CRM_PLL_CFG_PLL_NS_SHIFT) /* n = 31..500 */
 
 #define CRM_PLL_CFG_PLL_FR_SHIFT        (16) /* PLL post-division */
@@ -510,7 +510,7 @@
 #define CRM_MISC1_HICK_TO_SCLK              (1 << 14) /* HICK as system clock frequency select */
 
 #define CRM_MISC1_CLKOUT2_SEL2_SHIFT        (16) /* Clock output2 sel2 */
-#define CRM_MISC1_CLKOUT2_SEL2_MASK         (15 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) 
+#define CRM_MISC1_CLKOUT2_SEL2_MASK         (15 << CRM_MISC1_CLKOUT2_SEL2_SHIFT)
 #  define CRM_MISC1_CLKOUT2_SEL2_USB        (0 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) /* Select USB output */
 #  define CRM_MISC1_CLKOUT2_SEL2_ADC        (1 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) /* Select ADC output */
 #  define CRM_MISC1_CLKOUT2_SEL2_HICK       (2 << CRM_MISC1_CLKOUT2_SEL2_SHIFT) /* Select HICK output */

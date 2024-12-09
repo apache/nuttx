@@ -160,7 +160,7 @@
 #define ENET_RXB2                    (1 << 4)  /* Receive buffer interrupt, class 2 */
 #define ENET_RXF2                    (1 << 5)  /* Receive frame interrupt, class 2 */
 #define ENET_TXB2                    (1 << 6)  /* Transmit buffer interrupt, class 2 */
-#define ENET_TXF2                    (1 << 7)  /* Transmit frame interrupt, class 2 */ 
+#define ENET_TXF2                    (1 << 7)  /* Transmit frame interrupt, class 2 */
 #define ENET_RXFLUSH_0               (1 << 12) /* RX DMA Ring 0 flush indication */
 #define ENET_RXFLUSH_1               (1 << 13) /* RX DMA Ring 1 flush indication */
 #define ENET_RXFLUSH_2               (1 << 14) /* RX DMA Ring 2 flush indication */

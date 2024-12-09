@@ -43,7 +43,7 @@
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
 #  include "stm32_i2c.h"
-#endif 
+#endif
 
 /****************************************************************************
  * Private Functions

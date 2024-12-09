@@ -29,7 +29,7 @@
 #include "hardware/at32_memorymap.h"
 #include "at32_uid.h"
 
-#ifdef AT32_SYSMEM_UID 
+#ifdef AT32_SYSMEM_UID
 
 /****************************************************************************
  * Public Functions
