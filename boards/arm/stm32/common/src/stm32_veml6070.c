@@ -30,7 +30,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spi/spi.h>
 #include <nuttx/sensors/veml6070.h>
 
 #include "stm32.h"

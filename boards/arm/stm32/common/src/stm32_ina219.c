@@ -45,7 +45,6 @@
 #include <debug.h>
 #include <stdio.h>
 
-#include <nuttx/spi/spi.h>
 #include <nuttx/sensors/ina219.h>
 
 #include "stm32.h"
