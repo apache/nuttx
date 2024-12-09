@@ -358,6 +358,14 @@ Configures the NuttShell (nsh) located at examples/nsh.  This NSH
 configuration is focused on low-level, command-line driver testing.
 This configuration is used for 32-bit RISC-V
 
+python
+------
+
+Enables the Python interpreter for NuttX. This configuration is based on `nsh`_.
+
+For more information on how to build and run Python on NuttX,
+please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
+
 nsh64
 -----
 
