@@ -42,38 +42,51 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 /* IRQ detach is a convenience definition, it detach all the handlers
  * sharing the same IRQ. Detaching an interrupt handler is equivalent to
  * setting a NULL interrupt handler.
  */
 
-#  define irq_detach(irq) irq_attach(irq, NULL, NULL)
-#  define irq_detach_wqueue(irq) irq_attach_wqueue(irq, NULL, NULL, NULL, 0)
-#  define irq_detach_thread(irq) \
-     irq_attach_thread(irq, NULL, NULL, NULL, 0, 0)
+#define irq_detach(irq) irq_attach(irq, NULL, NULL)
+#define irq_detach_wqueue(irq) irq_attach_wqueue(irq, NULL, NULL, NULL, 0)
+#define irq_detach_thread(irq) irq_attach_thread(irq, NULL, NULL, NULL, 0, 0)
 
 /* Maximum/minimum values of IRQ integer types */
 
-#  if NR_IRQS <= 256
-#    define IRQT_MAX UINT8_MAX
-#  elif NR_IRQS <= 65536
-#    define IRQT_MAX UINT16_MAX
+#if NR_IRQS <= 256
+#  define IRQT_MAX UINT8_MAX
+#elif NR_IRQS <= 65536
+#  define IRQT_MAX UINT16_MAX
+#else
+#  define IRQT_MAX UINT32_MAX
+#endif
+
+#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#  if CONFIG_ARCH_NUSER_INTERRUPTS <= 256
+#    define IRQMAPPED_MAX UINT8_MAX
+#  elif CONFIG_ARCH_NUSER_INTERRUPTS <= 65536
+#    define IRQMAPPED_MAX UINT16_MAX
 #  else
-#    define IRQT_MAX UINT32_MAX
+#    define IRQMAPPED_MAX UINT32_MAX
 #  endif
+#endif
 
-#  ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-#    if CONFIG_ARCH_NUSER_INTERRUPTS <= 256
-#      define IRQMAPPED_MAX UINT8_MAX
-#    elif CONFIG_ARCH_NUSER_INTERRUPTS <= 65536
-#      define IRQMAPPED_MAX UINT16_MAX
-#    else
-#      define IRQMAPPED_MAX UINT32_MAX
-#   endif
-#  endif
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE) && \
+    !defined(CONFIG_ARCH_NUSER_INTERRUPTS)
+#  error CONFIG_ARCH_NUSER_INTERRUPTS is not defined
+#endif
 
-#endif /* __ASSEMBLY__ */
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC)
+#  define IRQ_TO_NDX(irq) (g_irqmap[irq] ? g_irqmap[irq] : irq_to_ndx(irq))
+#  define NDX_TO_IRQ(ndx) g_irqrevmap[ndx]
+#elif defined(CONFIG_ARCH_MINIMAL_VECTORTABLE)
+#  define IRQ_TO_NDX(irq) \
+  (g_irqmap[(irq)] < CONFIG_ARCH_NUSER_INTERRUPTS ? g_irqmap[(irq)] : -EINVAL)
+#  define NDX_TO_IRQ(ndx) ndx_to_irq(ndx)
+#else
+#  define IRQ_TO_NDX(irq) (irq)
+#  define NDX_TO_IRQ(ndx) (ndx)
+#endif
 
 #ifdef CONFIG_SMP
 #  define cpu_irqlock_clear() \
@@ -168,7 +181,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
 /* This is the interrupt vector mapping table.  This must be provided by
  * architecture specific logic if CONFIG_ARCH_MINIMAL_VECTORTABLE is define
  * in the configuration.
@@ -179,7 +191,13 @@ extern "C"
  * here with NR_IRQS undefined.
  */
 
-/* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
+#if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE_DYNAMIC)
+extern irq_mapped_t g_irqmap[];
+extern int g_irqrevmap[];
+int irq_to_ndx(int irq);
+#elif defined(CONFIG_ARCH_MINIMAL_VECTORTABLE)
+extern const irq_mapped_t g_irqmap[];
+int ndx_to_irq(int ndx);
 #endif
 
 /****************************************************************************

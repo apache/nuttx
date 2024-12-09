@@ -122,29 +122,14 @@ void up_enable_irq(int irq)
 {
   volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
 
-  IfxSrc_init(src, IfxSrc_Tos_cpu0, irq);
+#ifdef CONFIG_ARCH_TC3XX
+  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq));
+#else
+  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq), IfxSrc_VmId_none);
+#endif
+
   IfxSrc_enable(src);
 }
-
-#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
-
-/****************************************************************************
- * Name: up_trigger_irq
- *
- * Description:
- *   Trigger an IRQ by software.
- *
- ****************************************************************************/
-
-void up_trigger_irq(int irq, cpu_set_t cpuset)
-{
-  (void) cpuset;
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-
-  IfxSrc_setRequest(src);
-}
-
-#endif
 
 /****************************************************************************
  * Name: up_affinity_irq
