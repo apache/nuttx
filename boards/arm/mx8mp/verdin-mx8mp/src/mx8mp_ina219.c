@@ -31,7 +31,6 @@
 #include <debug.h>
 #include <stdio.h>
 
-#include <nuttx/spi/spi.h>
 #include <nuttx/sensors/ina219.h>
 
 #include "mx8mp_i2c.h"
