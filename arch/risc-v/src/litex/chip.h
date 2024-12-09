@@ -32,7 +32,6 @@
 #include "litex_memorymap.h"
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
 
 #ifdef __ASSEMBLY__
 
