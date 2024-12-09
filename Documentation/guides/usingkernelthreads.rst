@@ -43,18 +43,18 @@ Kernel Threads
 ==============
 
 Kernel threads are really like tasks except that they run inside the operating 
-system and are started with ``kernel_thread()`` which is prototyped in 
+system and are started with ``kthread_create()`` which is prototyped in 
 ``include/nuttx/kthread.h``. The differ from tasks in that (1) in PROTECTED and 
 KERNEL builds, they have full supervisor privileges, and (2) they have full 
 access to all internal OS resources.
 
 In order to build the task into the OS as a kernel thread, you simply have to: 
 (1) place the kernel thread code in your board source code directory, and (2) 
-start it with ``kernel_thread()`` in your board bring-up logic. There a few 
+start it with ``kthread_create()`` in your board bring-up logic. There a few 
 examples of this in the NuttX source tree. Here is one: 
 `https://github.com/apache/nuttx/blob/master/boards/arm/stm32/viewtool-stm32f107/src/stm32_highpri.c <https://github.com/apache/nuttx/blob/master/boards/arm/stm32/viewtool-stm32f107/src/stm32_highpri.c>`_
 
 So that is another trick that you can use to architecture optimal solutions: 
 Create parts of your applications as kernel threads: They need to reside in 
-your board/src directory and the need to be started with ``kernel_thread()`` in 
+your board/src directory and the need to be started with ``kthread_create()`` in 
 your board bring-up logic. And that is it.
