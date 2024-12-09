@@ -113,7 +113,7 @@
 
 #define LIN_ERR_TX_UNSPEC         0x00     /* Unspecified error */
 #define LIN_ERR_TX_BREAK_TMO      (1 << 0) /* Bit 0: Master send break field, but detect break event timeout */
-#define LIN_ERR_TX_SYNC_TMO       (1 << 1) /* Bit 1: Master send sync timeout (receive back timeout) */ 
+#define LIN_ERR_TX_SYNC_TMO       (1 << 1) /* Bit 1: Master send sync timeout (receive back timeout) */
 #define LIN_ERR_TX_PID_TMO        (1 << 2) /* Bit 2: Master send pid timeout (receive back timeout) */
 #define LIN_ERR_TX_DATA_TMO       (1 << 3) /* Bit 3: Master/slave send data timeout (receive back timeout) */
 #define LIN_ERR_TX_CHECKSUM_TMO   (1 << 4) /* Bit 4: Master/slave send checksum timeout(receive back timeout) */

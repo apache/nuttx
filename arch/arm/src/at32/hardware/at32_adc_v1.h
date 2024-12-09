@@ -612,7 +612,7 @@
 
 /* Calibration value register */
 
-#define ADC_CALVAL_SHIFT             (0) 
+#define ADC_CALVAL_SHIFT             (0)
 #define ADC_CALVAL_MASK              (0x7f << ADC_CALVAL_SHIFT)
 #  define ADC_CALVAL(n)              (n << ADC_CALVAL_SHIFT)
 

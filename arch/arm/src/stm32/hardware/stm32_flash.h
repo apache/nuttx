@@ -203,7 +203,7 @@
 #      elif defined(CONFIG_STM32_FLASH_CONFIG_E)
 #        define STM32_FLASH_SIZE        128 * 4096
 #      endif
-#    elif defined(CONFIG_STM32_STM32G49XX) 
+#    elif defined(CONFIG_STM32_STM32G49XX)
 #      elif defined(CONFIG_STM32_FLASH_CONFIG_C)
 #        define STM32_FLASH_NPAGES      128
 #        define STM32_FLASH_PAGESIZE    2048

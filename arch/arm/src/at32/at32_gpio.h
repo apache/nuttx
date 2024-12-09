@@ -50,7 +50,7 @@
 
 /* Bit-encoded input to at32_configgpio() */
 
-#if defined(CONFIG_AT32_AT32F43XX) 
+#if defined(CONFIG_AT32_AT32F43XX)
 /* Each port bit of the general-purpose I/O (GPIO) ports can be
  * individually configured by software in several modes:
  *
