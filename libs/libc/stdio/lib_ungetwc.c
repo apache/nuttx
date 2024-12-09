@@ -35,6 +35,8 @@
 #include <fcntl.h>
 #include <string.h>
 
+#include <nuttx/lib/lib.h>
+
 #ifdef CONFIG_FILE_STREAM
 
 /****************************************************************************
