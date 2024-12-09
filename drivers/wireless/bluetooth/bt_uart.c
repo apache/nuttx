@@ -102,9 +102,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
 static void btuart_rxwork(FAR void *arg)
 {
   FAR struct btuart_upperhalf_s *upper;
-  uint8_t data[CONFIG_BLUETOOTH_UART_RXBUFSIZE];
   enum bt_buf_type_e type;
-  unsigned int hdrlen;
   unsigned int pktlen;
   ssize_t nread;
   union
@@ -117,80 +115,69 @@ static void btuart_rxwork(FAR void *arg)
 
   upper = (FAR struct btuart_upperhalf_s *)arg;
 
-  /* Beginning of a new packet.
-   * Read the first byte to get the packet type.
-   */
-
-  while (true)
+  nread = btuart_read(upper, &upper->rxbuf[upper->rxlen],
+                      sizeof(upper->rxbuf) - upper->rxlen,
+                      sizeof(upper->rxbuf) - upper->rxlen);
+  if (nread <= 0)
     {
-      nread = btuart_read(upper, data, H4_HEADER_SIZE, 0);
-      if (nread != H4_HEADER_SIZE)
-        {
-          wlwarn("WARNING: Unable to read H4 packet type: %zd\n", nread);
-          break;
-        }
+      wlerr("ERROR: btuart_read failed: %zd\n", nread);
+      return;
+    }
 
-      if (data[0] == H4_EVT)
-        {
-          hdrlen = sizeof(struct bt_hci_evt_hdr_s);
-        }
-      else if (data[0] == H4_ACL)
-        {
-          hdrlen = sizeof(struct bt_hci_acl_hdr_s);
-        }
-      else
-        {
-          wlerr("ERROR: Unknown H4 type %u\n", data[0]);
-          break;
-        }
+  upper->rxlen += (uint16_t)nread;
 
-      nread = btuart_read(upper, data + H4_HEADER_SIZE,
-                          hdrlen, hdrlen);
-      if (nread != hdrlen)
-        {
-          wlwarn("WARNING: Unable to read H4 packet header: %zd\n", nread);
-          break;
-        }
+  while (upper->rxlen)
+    {
+      hdr = (FAR void *)&upper->rxbuf[H4_HEADER_SIZE];
 
-      hdr = (FAR void *)(data + H4_HEADER_SIZE);
-
-      if (data[0] == H4_EVT)
+      switch (upper->rxbuf[0])
         {
-          pktlen = hdr->evt.len;
-          type = BT_EVT;
-        }
-      else if (data[0] == H4_ACL)
-        {
-          pktlen = hdr->acl.len;
-
-          if (pktlen + H4_HEADER_SIZE + hdrlen >
-              CONFIG_BLUETOOTH_UART_RXBUFSIZE)
+        case H4_EVT:
+          if (upper->rxlen < H4_HEADER_SIZE +
+              sizeof(struct bt_hci_evt_hdr_s))
             {
-              wlwarn("WARNING: H4 packet is too long\n");
-              break;
+              wlwarn("WARNING: Incomplete HCI event header\n");
+              return;
+            }
+
+          type = BT_EVT;
+          pktlen = H4_HEADER_SIZE +
+                   sizeof(struct bt_hci_evt_hdr_s) + hdr->evt.len;
+          break;
+
+        case H4_ACL:
+          if (upper->rxlen < H4_HEADER_SIZE +
+              sizeof(struct bt_hci_acl_hdr_s))
+            {
+              wlwarn("WARNING: Incomplete HCI ACL header\n");
+              return;
             }
 
           type = BT_ACL_IN;
-        }
-      else
-        {
-          wlerr("ERROR: Unknown H4 type %u\n", data[0]);
+          pktlen = H4_HEADER_SIZE +
+                   sizeof(struct bt_hci_acl_hdr_s) + hdr->acl.len;
           break;
+
+        default:
+          wlerr("ERROR: Unknown H4 type %u\n", upper->rxbuf[0]);
+          return;
         }
 
-      nread = btuart_read(upper, data + H4_HEADER_SIZE + hdrlen,
-                          pktlen, pktlen);
-      if (nread != pktlen)
+      if (upper->rxlen < pktlen)
         {
-          wlwarn("WARNING: Unable to read H4 packet: %zd\n", nread);
-          break;
+          wlwarn("WARNING: Incomplete packet: rxlen=%u, pktlen=%u\n",
+                 upper->rxlen, pktlen);
+          return;
         }
 
       /* Pass buffer to the stack */
 
-      BT_DUMP("Received", data, H4_HEADER_SIZE + hdrlen + pktlen);
-      bt_netdev_receive(&upper->dev, type, data + H4_HEADER_SIZE,
-                        hdrlen + pktlen);
+      BT_DUMP("Received", upper->rxbuf, pktlen);
+      bt_netdev_receive(&upper->dev, type, &upper->rxbuf[H4_HEADER_SIZE],
+                        pktlen - H4_HEADER_SIZE);
+
+      upper->rxlen -= pktlen;
+      memmove(upper->rxbuf, upper->rxbuf + pktlen, upper->rxlen);
     }
 }
 

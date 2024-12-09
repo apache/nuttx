@@ -75,6 +75,9 @@ struct btuart_upperhalf_s
 
   FAR const struct btuart_lowerhalf_s *lower;
 
+  uint16_t           rxlen;
+  uint8_t            rxbuf[CONFIG_BLUETOOTH_UART_RXBUFSIZE];
+
   /* Work queue support */
 
   struct work_s work;
