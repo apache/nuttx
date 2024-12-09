@@ -88,7 +88,7 @@
 #define XCPTCONTEXT_REGS (TC_CONTEXT_REGS * 2)
 #define XCPTCONTEXT_SIZE (sizeof(void *) * XCPTCONTEXT_REGS)
 
-#define NR_IRQS          (255)
+#define NR_IRQS          (2048)
 
 /* PSW: Program Status Word Register */
 
@@ -111,6 +111,9 @@
 #define FCX_FCXO_MASK   (0xffff << FCX_FCXO)
 #define FCX_FCXS_MASK   (0xf    << FCX_FCXS)
 #define FCX_FREE        (FCX_FCXS_MASK | FCX_FCXO_MASK) /* Free CSA manipulation */
+
+#define TRICORE_SRC2IRQ(src_addr) \
+  (((uintptr_t)(src_addr) - (uintptr_t)&MODULE_SRC) / 4)
 
 /****************************************************************************
  * Public Types
