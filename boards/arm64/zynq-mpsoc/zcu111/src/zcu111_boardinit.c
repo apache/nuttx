@@ -105,5 +105,7 @@ void zynq_board_initialize(void)
 void board_late_initialize(void)
 {
   /* Perform board initialization */
+
+  zcu111_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
