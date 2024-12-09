@@ -32,7 +32,6 @@
 #include "mpfs_memorymap.h"
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
 
 /****************************************************************************
  * Macro Definitions

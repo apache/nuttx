@@ -141,6 +141,21 @@
 
 #endif
 
+/* Can be used by assembly code to access the structure, example:
+ *
+ * Get percpu structure:
+ * 1: csrr    a0, CSR_SCRATCH
+ *
+ * Get hartid:
+ * 2: REGLOAD a0, RISCV_PERCPU_HARTID(a0)
+ */
+
+#define RISCV_PERCPU_TCB        (0 * INT_REG_SIZE)
+#define RISCV_PERCPU_HARTID     (1 * INT_REG_SIZE)
+#define RISCV_PERCPU_IRQSTACK   (2 * INT_REG_SIZE)
+#define RISCV_PERCPU_USP        (3 * INT_REG_SIZE)
+#define RISCV_PERCPU_KSP        (4 * INT_REG_SIZE)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -193,6 +208,31 @@ typedef struct arch_addrenv_s arch_addrenv_t;
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_ARCH_ADDRENV */
 
+#ifndef __ASSEMBLY__
+
+/* Per CPU save area. Access to this structure can be gained via the scratch
+ * ([m/s]scratch) register. Prior to this, every CPU that
+ * wishes to access this information must call riscv_percpu_add_hart() which
+ * will set up [m/s]scratch to point to the CPUs own area
+ */
+
+union riscv_percpu_s
+{
+  union riscv_percpu_s *next;      /* For sl list linkage */
+  struct
+  {
+    struct tcb_s       *tcb;       /* Current thread TCB */
+    uintreg_t           hartid;    /* Hart ID */
+    uintreg_t           irq_stack; /* Interrupt stack */
+    uintreg_t           usp;       /* Area to store user sp */
+    uintreg_t           ksp;       /* Area to load kernel sp */
+  };
+};
+
+typedef union riscv_percpu_s riscv_percpu_t;
+
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -203,6 +243,84 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Name: riscv_percpu_add_hart
+ *
+ * Description:
+ *   Get add a hart to the per CPU area
+ *
+ * Input Parameters:
+ *   hartid - Hart number
+ *
+ ****************************************************************************/
+
+void riscv_percpu_add_hart(uintptr_t hartid);
+
+/****************************************************************************
+ * Name: riscv_percpu_get_hartid
+ *
+ * Description:
+ *   Get harts own hartid by reading it from the per CPU area. This is safe
+ *   to use from lower privilege modes than M-mode.
+ *
+ * Returned Value:
+ *   Hart id
+ *
+ ****************************************************************************/
+
+uintptr_t riscv_percpu_get_hartid(void);
+
+/****************************************************************************
+ * Name: riscv_percpu_get_irqstack
+ *
+ * Description:
+ *   Get harts own IRQ stack by reading it from the per CPU area.
+ *
+ * Returned Value:
+ *   IRQ stack, or 0 if no IRQ stack is assigned
+ *
+ ****************************************************************************/
+
+uintptr_t riscv_percpu_get_irqstack(void);
+
+/****************************************************************************
+ * Name: riscv_percpu_set_kstack
+ *
+ * Description:
+ *   Set current kernel stack, so it can be taken quickly into use when a
+ *   trap is taken.
+ *
+ * Input Parameters:
+ *   ksp - Pointer to the kernel stack
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void riscv_percpu_set_kstack(uintptr_t ksp);
+
+/****************************************************************************
+ * Name: riscv_percpu_set_thread
+ *
+ * Description:
+ *   Set current thread (tcb), so it can be found quickly when a trap is
+ *   taken.
+ *
+ * Input Parameters:
+ *   tcb - Pointer to the current thread's tcb
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void riscv_percpu_set_thread(struct tcb_s *tcb);
+
 #endif
 
 #undef EXTERN

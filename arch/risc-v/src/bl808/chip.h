@@ -37,7 +37,6 @@
 #include "hardware/bl808_plic.h"
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
 
 /****************************************************************************
  * Macro Definitions

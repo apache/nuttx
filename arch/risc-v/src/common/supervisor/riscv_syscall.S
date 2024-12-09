@@ -27,6 +27,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/arch.h>
 #include <arch/mode.h>
 
 #include "chip.h"

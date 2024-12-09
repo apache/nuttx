@@ -704,6 +704,17 @@ int up_cpu_index(void) noinstrument_function;
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
+ * Schedule acceleration macros
+ ****************************************************************************/
+
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+#define up_current_regs()      (this_task()->xcp.regs)
+#define up_this_task()         (*((struct tcb_s **)READ_CSR(CSR_SCRATCH)))
+#define up_update_task(t)      { uintptr_t tmp = READ_CSR(CSR_SCRATCH); \
+                                 *(struct tcb_s **)tmp = t; }
+#endif
+
+/****************************************************************************
  * Name: up_this_cpu
  *
  * Description:
