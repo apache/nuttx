@@ -263,7 +263,7 @@
     defined(CONFIG_AT32_TIM9)  || defined(CONFIG_AT32_TIM10) || \
     defined(CONFIG_AT32_TIM11) || defined(CONFIG_AT32_TIM12) || \
     defined(CONFIG_AT32_TIM13) || defined(CONFIG_AT32_TIM14) || \
-    defined(CONFIG_AT32_TIM20) 
+    defined(CONFIG_AT32_TIM20)
 
 /****************************************************************************
  * Private Types

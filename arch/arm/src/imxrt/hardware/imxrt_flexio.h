@@ -41,7 +41,7 @@
 #define IMXRT_FLEXIO_SHIFTSTAT_OFFSET     0x0010 /* Shifter Status Register, offset: 0x10 */
 #define IMXRT_FLEXIO_SHIFTERR_OFFSET      0x0014 /* Shifter Error Register, offset: 0x14 */
 #define IMXRT_FLEXIO_TIMSTAT_OFFSET       0x0018 /* Timer Status Register, offset: 0x18 */
-#define IMXRT_FLEXIO_SHIFTSIEN_OFFSET     0x0020 /* Shift Enable, offset: 0x20 */ 
+#define IMXRT_FLEXIO_SHIFTSIEN_OFFSET     0x0020 /* Shift Enable, offset: 0x20 */
 #define IMXRT_FLEXIO_SHIFTEIEN_OFFSET     0x0024 /* Shifter Error Interrupt Enable, offset: 0x24 */
 #define IMXRT_FLEXIO_TIMIEN_OFFSET        0x0028 /* Timer Interrupt Enable Register, offset: 0x28 */
 #define IMXRT_FLEXIO_SHIFTSDEN_OFFSET     0x0030 /* Shifter Status DMA Enable, offset: 0x30 */

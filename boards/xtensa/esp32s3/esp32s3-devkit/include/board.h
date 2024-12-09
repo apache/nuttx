@@ -55,7 +55,7 @@
 
 #ifdef CONFIG_NET_LAN9250
 
-#  define LAN9250_SPI     2 
+#  define LAN9250_SPI     2
 
 /* LAN9250 IRQ pin */
 

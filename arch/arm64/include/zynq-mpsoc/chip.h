@@ -42,7 +42,7 @@
 /* XilinX ZYNQ_MPSOC Generic Interrupt Controller v2: Distributor & Redist */
 
 #define CONFIG_GICD_BASE          0xf9010000
-#define CONFIG_GICR_BASE          0xf9020000 
+#define CONFIG_GICR_BASE          0xf9020000
 #define CONFIG_GICR_OFFSET        0x20000
 
 /* XilinX ZYNQ_MPSOC Memory Map: RAM and Device I/O */

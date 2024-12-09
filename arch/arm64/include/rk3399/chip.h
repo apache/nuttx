@@ -42,7 +42,7 @@
 /* Rockchip A64 Generic Interrupt Controller v2: Distributor and Redist */
 
 #define CONFIG_GICD_BASE          0xfee00000
-#define CONFIG_GICR_BASE          0xfef00000 
+#define CONFIG_GICR_BASE          0xfef00000
 #define CONFIG_GICR_OFFSET        0x20000
 
 /* Rockchip RK3399 Memory Map: RAM and Device I/O */
