@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
@@ -92,6 +93,8 @@ uint8_t g_mpfs_boot_stacks[ENTRY_STACK * ENTRYPT_CNT]
   aligned_data(STACK_ALIGNMENT);
 #endif
 
+static int g_cpus_booted;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -130,6 +133,9 @@ void mpfs_jump_to_app(void)
       "la   t0, g_app_entrypoints\n"         /* Entrypoint table base */
       "add  t0, t0, t1\n"                    /* Index in table */
       "ld   t0, 0(t0)\n"                     /* Load the address from table */
+      "li   t1, 1\n"
+      "la   t2, g_cpus_booted\n"
+      "amoadd.w.aqrl zero, t1, 0(t2)\n"      /* g_cpus_booted + 1 */
       "jr   t0\n"                            /* Jump to entrypoint */
       :
 #ifdef CONFIG_MPFS_BOARD_PMP
@@ -246,6 +252,25 @@ bool mpfs_get_use_sbi(uint64_t hartid)
     }
 
   return false;
+}
+
+/****************************************************************************
+ * Name: mpfs_cpus_booted
+ *
+ * Description:
+ *   Get amount of CPUs that have completed boot.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned value:
+ *   Amount of CPUs that have booted.
+ *
+ ****************************************************************************/
+
+int mpfs_cpus_booted(void)
+{
+  return atomic_load(&g_cpus_booted);
 }
 
 #endif /* CONFIG_MPFS_BOOTLOADER */

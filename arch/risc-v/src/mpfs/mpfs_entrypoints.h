@@ -104,6 +104,22 @@ int mpfs_set_use_sbi(uint64_t hartid, bool use_sbi);
 
 bool mpfs_get_use_sbi(uint64_t hartid);
 
+/****************************************************************************
+ * Name: mpfs_cpus_booted
+ *
+ * Description:
+ *   Get amount of CPUs that have completed boot.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned value:
+ *   Amount of CPUs that have booted.
+ *
+ ****************************************************************************/
+
+int mpfs_cpus_booted(void);
+
 #if defined(__cplusplus)
 }
 #endif
