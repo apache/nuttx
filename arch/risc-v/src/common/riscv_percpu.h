@@ -65,6 +65,9 @@
  * ([m/s]scratch) register. Prior to this, every CPU that
  * wishes to access this information must call riscv_percpu_add_hart() which
  * will set up [m/s]scratch to point to the CPUs own area
+ * Note: `TCB` must be the first element in the structure.
+ * This is because it used in the `arch/risc-v/include/arch.h` file
+ * to access the percpu area.
  */
 
 union riscv_percpu_s

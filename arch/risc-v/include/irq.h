@@ -704,6 +704,28 @@ int up_cpu_index(void) noinstrument_function;
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
+ * Schedule acceleration macros
+ ****************************************************************************/
+
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+#define up_this_task() \
+  ({ \
+    irqstate_t flags = up_irq_save(); \
+    struct tcb_s *t = *((struct tcb_s **)READ_CSR(CSR_SCRATCH)); \
+    up_irq_restore(flags); \
+    t; \
+  })
+#define up_update_task(t) \
+  do \
+    { \
+      irqstate_t flags = up_irq_save(); \
+      *((struct tcb_s **)READ_CSR(CSR_SCRATCH)) = (t); \
+      up_irq_restore(flags); \
+    } \
+  while (0)
+#endif
+
+/****************************************************************************
  * Name: up_this_cpu
  *
  * Description:
