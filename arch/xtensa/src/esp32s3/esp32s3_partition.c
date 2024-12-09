@@ -648,7 +648,7 @@ static int partition_get_offset(const char *label, size_t size)
   int partion_offset;
   const struct partition_info_priv_s *info;
   DEBUGASSERT(label != NULL);
-  struct mtd_dev_s *mtd = esp32s3_spiflash_mtd();
+  struct mtd_dev_s *mtd = esp32s3_spiflash_encrypt_mtd();
   if (!mtd)
     {
       ferr("ERROR: Failed to get SPI flash MTD\n");
