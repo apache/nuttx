@@ -49,5 +49,17 @@
  * Public Functions Definitions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: zcu111_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+int zcu111_bringup(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM64_ZYNQ_MPSOC_ZCU111_SRC_ZCU111_H */
