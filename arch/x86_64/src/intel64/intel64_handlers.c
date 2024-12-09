@@ -75,8 +75,11 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
    * Nested interrupts are not supported.
    */
 
-  DEBUGASSERT(up_current_regs() == NULL);
-  up_set_current_regs(regs);
+  DEBUGASSERT(!up_interrupt_context());
+
+  /* Set irq flag */
+
+  up_set_interrupt_context(true);
 
   /* Deliver the IRQ */
 
@@ -120,11 +123,10 @@ static uint64_t *common_handler(int irq, uint64_t *regs)
       restore_critical_section(tcb, this_cpu());
     }
 
-  /* Set g_current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Clear irq flag */
 
-  up_set_current_regs(NULL);
+  up_set_interrupt_context(false);
+
   return tcb->xcp.regs;
 }
 #endif
@@ -163,8 +165,11 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
   return regs;
 #else
 
-  DEBUGASSERT(up_current_regs() == NULL);
-  up_set_current_regs(regs);
+  DEBUGASSERT(!up_interrupt_context());
+
+  /* Set irq flag */
+
+  up_set_interrupt_context(true);
 
   switch (irq)
     {
@@ -227,11 +232,9 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
       restore_critical_section(tcb, this_cpu());
     }
 
-  /* Set g_current_regs to NULL to indicate that we are no longer in an
-   * interrupt handler.
-   */
+  /* Clear irq flag */
 
-  up_set_current_regs(NULL);
+  up_set_interrupt_context(false);
   return tcb->xcp.regs;
 #endif
 }
