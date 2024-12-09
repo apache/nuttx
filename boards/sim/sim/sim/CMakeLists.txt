@@ -22,7 +22,7 @@
 
 add_subdirectory(src)
 
-if(NOT MSVC)
+if(CONFIG_HOST_LINUX)
   add_custom_target(
     nuttx_post_build
     DEPENDS nuttx
