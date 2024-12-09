@@ -86,7 +86,7 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
       else if (nread < 0)
         {
           wlwarn("Returned error %zd\n", nread);
-          return nread;
+          return ntotal > 0 ? ntotal : nread;
         }
 
       wlinfo("read %zd remaining %zu\n", nread, buflen - nread);
