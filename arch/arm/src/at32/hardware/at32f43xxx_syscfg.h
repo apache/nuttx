@@ -71,13 +71,13 @@
 #define SCFG_CFG1_IR_POL                    (1 << 5) /* Infrared output polarity selection */
 
 #define SCFG_CFG1_IR_SRC_SEL_SHIFT          (6) /* Infrared modulation envelope signal source selection */
-#define SCFG_CFG1_IR_SRC_SEL_MASK           (3 << SCFG_CFG1_IR_SRC_SEL_SHIFT) 
+#define SCFG_CFG1_IR_SRC_SEL_MASK           (3 << SCFG_CFG1_IR_SRC_SEL_SHIFT)
 #  define SCFG_CFG1_IR_SRC_SEL_TMR10        (0 << SCFG_CFG1_IR_SRC_SEL_SHIFT) /* Source use TRM10 */
 #  define SCFG_CFG1_IR_SRC_SEL_USART1       (1 << SCFG_CFG1_IR_SRC_SEL_SHIFT) /* Source use USART1 */
 #  define SCFG_CFG1_IR_SRC_SEL_USART2       (2 << SCFG_CFG1_IR_SRC_SEL_SHIFT) /* Source use USART2 */
 
 #define SCFG_CFG1_SWAP_XMC_SHIFT            (6) /* Infrared modulation envelope signal source selection */
-#define SCFG_CFG1_SWAP_XMC_MASK             (3 << SCFG_CFG1_SWAP_XMC_SHIFT) 
+#define SCFG_CFG1_SWAP_XMC_MASK             (3 << SCFG_CFG1_SWAP_XMC_SHIFT)
 #  define SCFG_CFG1_SWAP_XMC_NONE           (0 << SCFG_CFG1_SWAP_XMC_SHIFT) /* No swap */
 #  define SCFG_CFG1_SWAP_XMC_SDRAM1         (1 << SCFG_CFG1_SWAP_XMC_SHIFT) /* SDRAM swap1 */
 #  define SCFG_CFG1_SWAP_XMC_QSPI2          (2 << SCFG_CFG1_SWAP_XMC_SHIFT) /* QSPI2 swap */

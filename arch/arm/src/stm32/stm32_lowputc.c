@@ -308,9 +308,9 @@
 #    define STM32_BRR_VALUE \
             (((STM32_APBCLOCK & 0xf0000000) / STM32_CONSOLE_BAUD) << 4) + \
             (((STM32_APBCLOCK & 0x0fffffff) << 4) / STM32_CONSOLE_BAUD)
-#    define STM32_PRESC_VALUE 0x7 
+#    define STM32_PRESC_VALUE 0x7
 
-#  else 
+#  else
 
 #    if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
         defined(CONFIG_STM32_STM32F37XX) || defined(CONFIG_STM32_STM32G4XXX)
@@ -668,7 +668,7 @@ void stm32_lowsetup(void)
 
 #if CONSOLE_LPUART > 0 && defined(CONFIG_STM32_STM32G4XXX)
   putreg32(STM32_PRESC_VALUE, STM32_CONSOLE_BASE + STM32_USART_PRESC_OFFSET);
-#endif 
+#endif
 
   putreg32(STM32_BRR_VALUE, STM32_CONSOLE_BASE + STM32_USART_BRR_OFFSET);
 

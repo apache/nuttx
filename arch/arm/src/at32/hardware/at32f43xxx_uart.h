@@ -176,7 +176,7 @@
 #define USART_CTRL1_TCDT_MASK               (31 << USART_CTRL1_TCDT_SHIFT)
 #define USART_CTRL1_TCDT(X)                 ((X) << USART_CTRL1_TCDT_SHIFT)
 #define USART_CTRL1_TSDT_SHIFT              (21) /* transmit start delay time */
-#define USART_CTRL1_TSDT_MASK               (31 << USART_CTRL1_TSDT_SHIFT) 
+#define USART_CTRL1_TSDT_MASK               (31 << USART_CTRL1_TSDT_SHIFT)
 #define USART_CTRL1_TSDT(X)                 ((X) << USART_CTRL1_TSDT_SHIFT)
 #define USART_CTRL1_DBN1                    (1 << 28) /* Data bit num */
 

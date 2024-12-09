@@ -511,13 +511,13 @@
 /* ADC analog watchdog 2 configuration register */
 
 #define ADC_AWD2CR_CH_SHIFT         (0)
-#define ADC_AWD2CR_CH_MASK          (0xfffff << ADC_AWD2CR_CH_SHIFT) 
+#define ADC_AWD2CR_CH_MASK          (0xfffff << ADC_AWD2CR_CH_SHIFT)
 #  define ADC_AWD2CR_CH(n)          (1 << (n))  /* Channel n=0..19*/
 
 /* ADC analog watchdog 3 configuration register */
 
 #define ADC_AWD3CR_CH_SHIFT         (0)
-#define ADC_AWD3CR_CH_MASK          (0xfffff << ADC_AWD3CR_CH_SHIFT) 
+#define ADC_AWD3CR_CH_MASK          (0xfffff << ADC_AWD3CR_CH_SHIFT)
 #  define ADC_AWD3CR_CH(n)          (1 << (n))  /* Channel n=0..19*/
 
 /* ADC differential mode selection register */
