@@ -32,8 +32,6 @@
 #include <unistd.h>
 #include <nuttx/lib/lib.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -89,5 +87,3 @@ int fchdir(int fd)
   lib_put_pathbuffer(path);
   return ret;
 }
-
-#endif /* !CONFIG_DISABLE_ENVIRON */

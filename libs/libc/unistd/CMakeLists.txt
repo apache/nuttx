@@ -66,7 +66,9 @@ set(SRCS
     lib_getpgid.c
     lib_lockf.c
     lib_flock.c
-    lib_getpass.c)
+    lib_getpass.c
+    lib_chdir.c
+    lib_fchdir.c)
 
 if(NOT CONFIG_SCHED_USER_IDENTITY)
   list(
@@ -83,7 +85,7 @@ if(NOT CONFIG_SCHED_USER_IDENTITY)
 endif()
 
 if(NOT CONFIG_DISABLE_ENVIRON)
-  list(APPEND SRCS lib_chdir.c lib_fchdir.c lib_restoredir.c)
+  list(APPEND SRCS lib_restoredir.c)
 endif()
 
 if(CONFIG_LIBC_EXECFUNCS)
