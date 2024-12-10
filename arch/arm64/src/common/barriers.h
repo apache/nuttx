@@ -37,25 +37,19 @@
  * ARM DDI 0487E.a C6.2.81
  */
 
-#define __DSB(arg) __asm__ volatile ("dsb " #arg : : : "memory");
+#define __MB() __asm__ volatile ("dsb sy" : : : "memory");
 
 /* See Arm® Architecture Reference Manual
  * ARM DDI 0487E.a C6.2.79
  */
 
-#define __DMB(arg) __asm__ volatile ("dmb " #arg : : : "memory");
+#define __DMB() __asm__ volatile ("dmb sy" : : : "memory");
 
 /* See Arm® Architecture Reference Manual
  * ARM DDI 0487E.a C6.2.96
  */
 
 #define __ISB()    __asm__ volatile ("isb" : : : "memory");
-
-/* THe most common barriers */
-
-#define ARM64_DSB()  __DSB(sy)
-#define ARM64_DMB()  __DMB(sy)
-#define ARM64_ISB()  __ISB()
 
 #endif /* __ASSEMBLY__ */
 
