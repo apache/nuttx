@@ -205,7 +205,7 @@ int exec_module(FAR struct binary_s *binp,
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR struct arch_addrenv_s *addrenv = &binp->addrenv->addrenv;
   FAR void *vheap;
-  char name[CONFIG_PATH_MAX];
+  char name[PATH_MAX];
 #endif
   FAR void *stackaddr = NULL;
   pid_t pid;
@@ -260,7 +260,7 @@ int exec_module(FAR struct binary_s *binp,
 
   if (argv == NULL)
     {
-      strlcpy(name, filename, CONFIG_PATH_MAX);
+      strlcpy(name, filename, PATH_MAX);
       filename = name;
     }
 
