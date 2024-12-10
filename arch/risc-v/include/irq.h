@@ -37,6 +37,7 @@
 
 #include <sys/types.h>
 
+#include <arch/arch.h>
 #include <arch/csr.h>
 #include <arch/chip/irq.h>
 #include <arch/mode.h>
@@ -702,6 +703,16 @@ irqstate_t up_irq_enable(void);
 #ifdef CONFIG_ARCH_HAVE_MULTICPU
 int up_cpu_index(void) noinstrument_function;
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
+
+/****************************************************************************
+ * Schedule acceleration macros
+ ****************************************************************************/
+
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+#define up_current_regs() (this_task()->xcp.regs)
+#define up_this_task() (((riscv_percpu_t *)READ_CSR(CSR_SCRATCH))->tcb)
+#define up_update_task(t) riscv_percpu_set_thread(t)
+#endif
 
 /****************************************************************************
  * Name: up_this_cpu

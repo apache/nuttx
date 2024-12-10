@@ -39,7 +39,6 @@
 #include "mpfs_userspace.h"
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
