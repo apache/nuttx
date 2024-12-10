@@ -616,6 +616,24 @@
 #  define i3cinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_PCNT_ERROR
+#  define pcnterr        _err
+#else
+#  define pcnterr       _none
+#endif
+
+#ifdef CONFIG_DEBUG_PCNT_WARN
+#  define pcntwarn      _warn
+#else
+#  define pcntwarn      _none
+#endif
+
+#ifdef CONFIG_DEBUG_PCNT_INFO
+#  define pcntinfo      _info
+#else
+#  define pcntinfo      _none
+#endif
+
 #ifdef CONFIG_DEBUG_PWM_ERROR
 #  define pwmerr       _err
 #else

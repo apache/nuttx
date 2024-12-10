@@ -1,7 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c6/common/include/esp_board_qencoder.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/xtensa/src/common/espressif/esp_qencoder.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H
-#define __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_QENCODER_H
+#define __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_QENCODER_H
 
 /****************************************************************************
  * Included Files
@@ -29,48 +27,55 @@
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_SENSORS_QENCODER
 
 /****************************************************************************
- * Public Types
+ * Included Files
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+/* Timer devices may be used for different purposes.  One special purpose is
+ * as a quadrature encoder input device.  If CONFIG_ESP_PCNT_Un is defined
+ * then the CONFIG_ESP_PCNT_Un_QE must also be defined to indicate that
+ * pcnt "n" is intended to be used for as a quadrature encoder.
+ */
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+#ifndef CONFIG_ESP_PCNT_U0
+#  undef CONFIG_ESP_PCNT_U0_QE
+#endif
+#ifndef CONFIG_ESP_PCNT_U1
+#  undef CONFIG_ESP_PCNT_U1_QE
+#endif
+#ifndef CONFIG_ESP_PCNT_U2
+#  undef CONFIG_ESP_PCNT_U2_QE
+#endif
+#ifndef CONFIG_ESP_PCNT_U3
+#  undef CONFIG_ESP_PCNT_U3_QE
 #endif
 
 /****************************************************************************
- * Inline Functions
+ * Included Files
  ****************************************************************************/
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_qencoder_initialize
+ * Name: esp_qeinitialize
  *
  * Description:
- *   Initialize the quadrature encoder driver for the given timer
+ *   Initialize a quadrature encoder interface. This function must be
+ *   called from board-specific logic.
+ *
+ * Input Parameters:
+ *   devpath  - The full path to the driver to register. E.g., "/dev/qe0"
+ *   pcnt     - Pointer to the pcnt driver struct
+ *   pcnt_num - The PCNT number to used.  'pcnt' must be an element of
+ *              {0,1,2,3}
+ *
+ * Returned Value:
+ *   Zero on success; A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int board_qencoder_initialize(void);
+int esp_qeinitialize(const char *devpath, struct pcnt_dev_s *pcnt,
+                     int pcnt_num);
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __BOARDS_RISC_V_ESP32C6_COMMON_INCLUDE_ESP_BOARD_QENCODER_H */
-
+#endif /* CONFIG_SENSORS_QENCODER */
+#endif /* __ARCH_XTENSA_SRC_COMMON_ESPRESSIF_ESP_QENCODER_H */

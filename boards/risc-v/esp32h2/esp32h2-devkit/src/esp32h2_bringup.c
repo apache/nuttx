@@ -90,6 +90,11 @@
 #  include "esp_board_mcpwm.h"
 #endif
 
+#ifdef CONFIG_ESP_PCNT
+#  include "espressif/esp_pcnt.h"
+#  include "esp_board_pcnt.h"
+#endif
+
 #ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
 #  include "espressif/esp_nxdiag.h"
 #endif
@@ -342,12 +347,19 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP_PCNT
+  ret = board_pcnt_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
   ret = esp_nxdiag_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: esp_nxdiag_initialize failed: %d\n", ret);
-    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
