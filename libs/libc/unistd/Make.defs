@@ -33,6 +33,7 @@ CSRCS += lib_futimes.c lib_lutimes.c lib_gethostname.c lib_sethostname.c
 CSRCS += lib_fchownat.c lib_linkat.c lib_readlinkat.c lib_symlinkat.c
 CSRCS += lib_unlinkat.c lib_usleep.c lib_getpgrp.c lib_getpgid.c
 CSRCS += lib_lockf.c lib_flock.c lib_getpass.c
+CSRCS += lib_chdir.c lib_fchdir.c
 
 ifneq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += lib_setuid.c lib_setgid.c lib_getuid.c lib_getgid.c
@@ -40,7 +41,7 @@ CSRCS += lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
 endif
 
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
-CSRCS += lib_chdir.c lib_fchdir.c lib_restoredir.c
+CSRCS += lib_restoredir.c
 endif
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
