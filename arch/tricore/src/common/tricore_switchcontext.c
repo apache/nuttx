@@ -59,7 +59,7 @@
 
 void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
 {
-  if (!up_current_regs())
+  if (!up_interrupt_context())
     {
       /* Then switch contexts */
 

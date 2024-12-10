@@ -34,7 +34,9 @@
  * Public Data
  ****************************************************************************/
 
-volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
+/* g_interrupt_context store irq status */
+
+volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
