@@ -99,5 +99,5 @@ void sbi_set_mtimecmp(uint64_t value)
 
   /* Make sure it sticks */
 
-  __MB();
+  UP_DSB();
 }

@@ -108,7 +108,7 @@ uintptr_t riscv_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return paddr;
 }
@@ -164,7 +164,7 @@ int riscv_map_pages(arch_addrenv_t *addrenv, uintptr_t *pages,
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return OK;
 }
@@ -225,7 +225,7 @@ int riscv_unmap_pages(arch_addrenv_t *addrenv, uintptr_t vaddr,
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return OK;
 }

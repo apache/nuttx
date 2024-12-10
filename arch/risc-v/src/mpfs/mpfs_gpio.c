@@ -102,7 +102,7 @@ static struct gpio_callback_s g_mss_gpio_callbacks[GPIO_BANK0_NUM_PINS +
 static void mpfs_gpio_irq_clear(int bank, int pin)
 {
   putreg32(1 << pin, g_gpio_base[bank] + MPFS_GPIO_INTR_OFFSET);
-  __MB();
+  UP_DSB();
 }
 
 /****************************************************************************

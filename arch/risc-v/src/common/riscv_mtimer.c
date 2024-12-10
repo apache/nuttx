@@ -128,7 +128,7 @@ static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
 
   /* Make sure it sticks */
 
-  __MB();
+  UP_DSB();
 }
 #else
 
