@@ -43,7 +43,7 @@ struct pathbuffer_s
 {
   spinlock_t lock;           /* Lock for the buffer */
   unsigned long free_bitmap; /* Bitmap of free buffer */
-  char buffer[CONFIG_LIBC_MAX_PATHBUFFER][PATH_MAX];
+  char buffer[CONFIG_LIBC_PATHBUFFER_MAX][PATH_MAX];
 };
 
 /****************************************************************************
@@ -53,7 +53,7 @@ struct pathbuffer_s
 static struct pathbuffer_s g_pathbuffer =
 {
   SP_UNLOCKED,
-  (1u << CONFIG_LIBC_MAX_PATHBUFFER) - 1,
+  (1u << CONFIG_LIBC_PATHBUFFER_MAX) - 1,
 };
 
 /****************************************************************************
@@ -89,7 +89,7 @@ FAR char *lib_get_pathbuffer(void)
 
   flags = spin_lock_irqsave(&g_pathbuffer.lock);
   index = ffsl(g_pathbuffer.free_bitmap) - 1;
-  if (index >= 0 && index < CONFIG_LIBC_MAX_PATHBUFFER)
+  if (index >= 0 && index < CONFIG_LIBC_PATHBUFFER_MAX)
     {
       g_pathbuffer.free_bitmap &= ~(1u << index);
       spin_unlock_irqrestore(&g_pathbuffer.lock, flags);
@@ -129,7 +129,7 @@ void lib_put_pathbuffer(FAR char *buffer)
   int index;
 
   index = (buffer - &g_pathbuffer.buffer[0][0]) / PATH_MAX;
-  if (index >= 0 && index < CONFIG_LIBC_MAX_PATHBUFFER)
+  if (index >= 0 && index < CONFIG_LIBC_PATHBUFFER_MAX)
     {
       /* Mark the corresponding bit as free */
 
