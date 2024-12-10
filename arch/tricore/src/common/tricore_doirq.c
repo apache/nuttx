@@ -79,6 +79,8 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   irq_dispatch(icr.B.CCPN, regs);
 
+  tcb = this_task();
+
   /* Check for a context switch.  If a context switch occurred, then
    * g_current_regs will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -86,10 +88,8 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
    * returning from the interrupt.
    */
 
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
-      tcb = this_task();
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -112,7 +112,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
       running_task = tcb;
       g_running_tasks[this_cpu()] = running_task;
 
-      __mtcr(CPU_PCXI, tricore_addr2csa(up_current_regs()));
+      __mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
       __isync();
     }
 
