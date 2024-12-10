@@ -129,7 +129,7 @@ config LIBC_PATHBUFFER
 
 if LIBC_PATHBUFFER
 
-config LIBC_MAX_PATHBUFFER
+config LIBC_PATHBUFFER_MAX
 	int "Maximum size of a temporary file path buffer array"
 	range 0 32
 	default 2
