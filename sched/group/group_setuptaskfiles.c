@@ -83,8 +83,8 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb,
 
   if (group != rtcb->group)
     {
-      files_duplist(&rtcb->group->tg_filelist,
-                    &group->tg_filelist, actions, cloexec);
+      files_duplist(rtcb->group->tg_filelist,
+                    group->tg_filelist, actions, cloexec);
     }
 
   if (ret >= 0 && actions != NULL)

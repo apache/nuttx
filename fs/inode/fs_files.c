@@ -198,7 +198,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   spin_unlock_irqrestore(&list->fl_lock, flags);
 
-  if (tmp != NULL && tmp != &list->fl_prefile)
+  if (tmp != NULL)
     {
       fs_heap_free(tmp);
     }
@@ -361,17 +361,18 @@ static int nx_dup3_from_tcb(FAR struct tcb_s *tcb, int fd1, int fd2,
  *
  ****************************************************************************/
 
-void files_initlist(FAR struct filelist *list)
+int files_initlist(FAR struct filelist **list)
 {
-  /* The first row will reuse pre-allocated files, which will avoid
-   * unnecessary allocator accesses during file initialization.
-   */
+  *list = fs_heap_zalloc(sizeof(struct filelist));
+  if (*list == NULL)
+    {
+      return -ENOMEM;
+    }
 
-  list->fl_rows = 1;
-  list->fl_crefs = 1;
-  list->fl_files = &list->fl_prefile;
-  list->fl_prefile = list->fl_prefiles;
-  spin_lock_init(&list->fl_lock);
+  (*list)->fl_crefs = 1;
+  spin_lock_init(&(*list)->fl_lock);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -463,7 +464,7 @@ FAR struct filelist *files_getlist(FAR struct tcb_s *tcb)
 
   if (tcb->group != NULL)
     {
-      list = &tcb->group->tg_filelist;
+      list = tcb->group->tg_filelist;
       if (list->fl_crefs > 0)
         {
           list->fl_crefs++;
@@ -508,16 +509,12 @@ void files_putlist(FAR struct filelist *list)
           file_close(&list->fl_files[i][j]);
         }
 
-      if (i != 0)
-        {
-          fs_heap_free(list->fl_files[i]);
-        }
+      fs_heap_free(list->fl_files[i]);
+      list->fl_rows--;
     }
 
-  if (list->fl_files != &list->fl_prefile)
-    {
-      fs_heap_free(list->fl_files);
-    }
+  fs_heap_free(list->fl_files);
+  fs_heap_free(list);
 }
 
 /****************************************************************************

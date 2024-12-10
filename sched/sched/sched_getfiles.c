@@ -60,7 +60,7 @@ FAR struct filelist *nxsched_get_files_from_tcb(FAR struct tcb_s *tcb)
 
   if (group)
     {
-      return &group->tg_filelist;
+      return group->tg_filelist;
     }
 
   /* Higher level logic must handle the NULL gracefully */
