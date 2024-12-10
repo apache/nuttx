@@ -33,8 +33,6 @@
 
 #include "libc.h"
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -74,9 +72,11 @@
 
 int chdir(FAR const char *path)
 {
-  struct stat buf;
+#ifndef CONFIG_DISABLE_ENVIRON
   FAR char *oldpwd;
+#endif /* !CONFIG_DISABLE_ENVIRON */
   FAR char *abspath;
+  struct stat buf;
   int ret;
 
   /* Verify that 'path' refers to a directory */
@@ -105,6 +105,8 @@ int chdir(FAR const char *path)
       return ERROR;
     }
 
+#ifndef CONFIG_DISABLE_ENVIRON
+
   /* Replace any preceding OLDPWD with the current PWD (this is to
    * support 'cd -' in NSH)
    */
@@ -120,8 +122,9 @@ int chdir(FAR const char *path)
   /* Set the cwd to the input 'path' */
 
   ret = setenv("PWD", abspath, TRUE);
+#endif /* !CONFIG_DISABLE_ENVIRON */
+
   lib_free(abspath);
 
   return ret;
 }
-#endif /* !CONFIG_DISABLE_ENVIRON */
