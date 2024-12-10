@@ -66,7 +66,7 @@ void arm64_fork_fpureg_save(struct fork_s *context)
   flags = enter_critical_section();
 
   arm64_fpu_save(context->fpu);
-  ARM64_DSB();
+  __MB();
 
   leave_critical_section(flags);
 }

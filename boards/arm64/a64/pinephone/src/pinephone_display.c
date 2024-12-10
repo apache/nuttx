@@ -914,9 +914,9 @@ void pinephone_display_test_pattern(void)
 
       /* Fixes missing rows in the rendered image, not sure why */
 
-      ARM64_DMB();
-      ARM64_DSB();
-      ARM64_ISB();
+      __DMB();
+      __MB();
+      __ISB();
     }
 
   /* Init Framebuffer 1:
@@ -931,9 +931,9 @@ void pinephone_display_test_pattern(void)
 
       /* Fixes missing rows in the rendered image, not sure why */
 
-      ARM64_DMB();
-      ARM64_DSB();
-      ARM64_ISB();
+      __DMB();
+      __MB();
+      __ISB();
     }
 
   /* Init Framebuffer 2:
@@ -972,9 +972,9 @@ void pinephone_display_test_pattern(void)
 
           /* Fixes missing rows in the rendered image, not sure why */
 
-          ARM64_DMB();
-          ARM64_DSB();
-          ARM64_ISB();
+          __DMB();
+          __MB();
+          __ISB();
         }
     }
 }

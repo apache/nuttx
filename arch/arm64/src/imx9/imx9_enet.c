@@ -611,7 +611,7 @@ static int imx9_transmit(struct imx9_driver_s *priv, uint32_t *buf_swap)
 
   txdesc2->data = buf + split;
 
-  ARM64_DSB();
+  __MB();
 
   /* Make sure the buffer data is in memory */
 
@@ -650,9 +650,9 @@ static int imx9_transmit(struct imx9_driver_s *priv, uint32_t *buf_swap)
    * is safe to clean the cache
    */
 
-  ARM64_DMB();
+  __DMB();
   txdesc->status1 = TXDESC_R;
-  ARM64_DSB();
+  __MB();
 
   /* Make sure the descriptors are written from cache to memory */
 
@@ -999,9 +999,9 @@ static void imx9_receive(struct imx9_driver_s *priv)
                * to this descriptor pair.
                */
 
-              ARM64_DMB();
+              __DMB();
               rxdesc->status1  = RXDESC_E;
-              ARM64_DSB();
+              __MB();
 
               up_clean_dcache((uintptr_t)&rxdesc[(-1)],
                               (uintptr_t)&rxdesc[(-1)] +
@@ -2955,7 +2955,7 @@ static void imx9_initbuffers(struct imx9_driver_s *priv)
   priv->txdesc[IMX9_ENET_NTXBUFFERS - 1].d2.status1 |= TXDESC_W;
   priv->rxdesc[IMX9_ENET_NRXBUFFERS - 1].status1 |= RXDESC_W;
 
-  ARM64_DSB();
+  __MB();
 
   up_clean_dcache((uintptr_t)priv->txdesc,
                   (uintptr_t)priv->txdesc +
