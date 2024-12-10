@@ -1,5 +1,5 @@
 =====================================================================
-High Performance: Zero Latency Interrupts, Maskable nested interrupts
+High Performance: Zero Latency Interrupts, Maskable Nested Interrupts
 =====================================================================
 
 Generic Interrupt Handling
@@ -125,9 +125,11 @@ The following table shows the priority levels of the Cortex-M family:
   Low  prio IRQ          0xB0
   PendSV                 0xE0
 
-As you can see, the priority levels of the zero-latency interrupts can
-beyond the critical section and SVC.
-But High prio IRQ can't call OS API.
+Lower priority *numbers* mean a higher priority on this architecture.
+
+As you can see, the zero-latency interrupts have higher priority than
+the critical section and SVC, but with the tradeoff that High prio IRQ
+can't call OS APIs in ISR.
 
 
 Maskable Nested Interrupts
@@ -162,9 +164,11 @@ The following table shows the priority levels of the Cortex-M family:
   Low  prio IRQ           0xB0
   PendSV                  0xE0
 
+Lower priority *numbers* mean a higher priority on this architecture.
+
 As you can see, the priority levels of the maskable nested interrupts
-are between the critical section and the low-priority interrupts.
-And High prio IRQ can call OS API in ISR.
+are between the critical section and the low-priority interrupts. In
+this case, High prio IRQ can call OS APIs in ISR.
 
 
 Nested Interrupt Handling
@@ -216,6 +220,7 @@ Configuration Options
 
 ``CONFIG_ARCH_HIPRI_INTERRUPT``
 
+The OS disables interrupts by setting the *BASEPRI* register to
 ``NVIC_SYSH_DISABLE_PRIORITY`` so that most interrupts will not have
 execution priority. *SVCall* must have execution priority in all
 cases.
@@ -253,8 +258,8 @@ priority interrupt response time.
 Hence, if you need to disable the high priority interrupt, you will
 have to disable the interrupt either at the peripheral that generates
 the interrupt or at the interrupt controller, the *NVIC*. Disabling
-global interrupts via the *BASEPRI* register cannot affect high
-priority interrupts.
+global interrupts via the *BASEPRI* register must not be allowed to
+affect high priority interrupts.
 
 Dependencies
 ------------
@@ -285,7 +290,7 @@ There are two ways to do this:
 * Alternatively, you could keep your vectors in FLASH but in order to
   this, you would have to develop your own custom vector table.
 
-Second, you need to set the priority of your interrupt to *NVIC* to
+Second, you need to set the priority of your interrupt in *NVIC* to
 ``NVIC_SYSH_HIGH_PRIORITY`` using the standard interface:
 ``int up_prioritize_irq(int irq, int priority);``
 
