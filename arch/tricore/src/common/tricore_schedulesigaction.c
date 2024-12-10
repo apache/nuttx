@@ -90,7 +90,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * a task is signalling itself for some reason.
        */
 
-      if (up_current_regs() == NULL)
+      if (!up_interrupt_context())
         {
           /* In this case just deliver the signal now. */
 
