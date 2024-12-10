@@ -204,11 +204,6 @@ extern uintptr_t        __A0_MEM[];    /* End+1 of .data */
  * Inline Functions
  ****************************************************************************/
 
-/* Macros to handle saving and restoring interrupt state. */
-
-#define tricore_savestate(regs)    (regs = up_current_regs())
-#define tricore_restorestate(regs) (up_set_current_regs(regs))
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
