@@ -33,9 +33,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
 
+#include <arch/barriers.h>
+
 #include <sys/mman.h>
 
-#include "barriers.h"
 #include "pgalloc.h"
 #include "arm64_arch.h"
 #include "arm64_mmu.h"

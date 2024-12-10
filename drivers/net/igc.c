@@ -40,6 +40,8 @@
 #include <nuttx/pci/pci.h>
 #include <nuttx/net/igc.h>
 
+#include <arch/barriers.h>
+
 #include "igc.h"
 
 /*****************************************************************************

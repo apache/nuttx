@@ -29,6 +29,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 #include <sched/sched.h>
@@ -303,7 +304,7 @@ unsigned int arm64_gic_get_active_irq(void)
    * to be visible until after the execution of a DSB.
    */
 
-  ARM64_DSB();
+  UP_DSB();
   return intid;
 }
 
@@ -322,7 +323,7 @@ unsigned int arm64_gic_get_active_fiq(void)
    * to be visible until after the execution of a DSB.
    */
 
-  ARM64_DSB();
+  UP_DSB();
   return intid;
 }
 #endif
@@ -340,13 +341,13 @@ void aarm64_gic_eoi_irq(unsigned int intid)
    * DEVICE nGnRnE attribute.
    */
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case */
 
   write_sysreg(intid, ICC_EOIR1_EL1);
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 #ifdef CONFIG_ARM64_DECODEFIQ
@@ -363,12 +364,12 @@ void arm64_gic_eoi_fiq(unsigned int intid)
    * DEVICE nGnRnE attribute.
    */
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* (AP -> Pending) Or (Active -> Inactive) or (AP to AP) nested case */
 
   write_sysreg(intid, ICC_EOIR0_EL1);
-  ARM64_ISB();
+  UP_ISB();
 }
 #endif
 
@@ -392,7 +393,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
   sgi_val = GICV3_SGIR_VALUE(aff3, aff2, aff1, sgi_id, SGIR_IRM_TO_AFF,
                              target_list);
 
-  ARM64_DSB();
+  UP_DSB();
 
   /* Read the IGROUPR0 value we set in `gicv3_cpuif_init` */
 
@@ -407,7 +408,7 @@ static int arm64_gic_send_sgi(unsigned int sgi_id, uint64_t target_aff,
       write_sysreg(sgi_val, ICC_SGI0R_EL1); /* Group 0 */
     }
 
-  ARM64_ISB();
+  UP_ISB();
 
   return 0;
 }
@@ -520,7 +521,7 @@ static void gicv3_cpuif_init(void)
          ICC_SRE_ELX_DFB_BIT);
       write_sysreg(icc_sre, ICC_SRE_EL1);
 
-      ARM64_ISB();
+      UP_ISB();
 
       icc_sre = read_sysreg(ICC_SRE_EL1);
 
@@ -537,7 +538,7 @@ static void gicv3_cpuif_init(void)
   write_sysreg(1, ICC_IGRPEN0_EL1);
 #endif
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 static void gicv3_dist_init(void)

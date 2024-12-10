@@ -43,8 +43,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 
+#include <arch/barriers.h>
+
 #include "arm64_internal.h"
-#include "barriers.h"
 
 #include "imx9_gpio.h"
 #include "imx9_ccm.h"

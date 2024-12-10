@@ -35,6 +35,7 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include "sched/sched.h"
 
@@ -66,7 +67,7 @@ void arm64_fork_fpureg_save(struct fork_s *context)
   flags = enter_critical_section();
 
   arm64_fpu_save(context->fpu);
-  ARM64_DSB();
+  UP_DSB();
 
   leave_critical_section(flags);
 }

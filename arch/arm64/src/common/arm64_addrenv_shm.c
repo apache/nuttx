@@ -35,9 +35,10 @@
 #include <nuttx/irq.h>
 #include <nuttx/pgalloc.h>
 
+#include <arch/barriers.h>
+
 #include "sched/sched.h"
 #include "addrenv.h"
-#include "barriers.h"
 #include "pgalloc.h"
 #include "arm64_mmu.h"
 

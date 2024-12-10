@@ -40,6 +40,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/procfs.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 
 #include "sched/sched.h"
@@ -134,7 +135,7 @@ static void arm64_fpu_access_trap_enable(void)
   cpacr &= ~CPACR_EL1_FPEN_NOTRAP;
   write_sysreg(cpacr, cpacr_el1);
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 /* disable FPU access trap */
@@ -147,7 +148,7 @@ static void arm64_fpu_access_trap_disable(void)
   cpacr |= CPACR_EL1_FPEN_NOTRAP;
   write_sysreg(cpacr, cpacr_el1);
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 #ifdef CONFIG_FS_PROCFS_REGISTER

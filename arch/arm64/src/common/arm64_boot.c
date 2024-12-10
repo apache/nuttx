@@ -29,6 +29,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
 
+#include <arch/barriers.h>
+
 #include "arm64_internal.h"
 #include "arm64_arch.h"
 
@@ -66,7 +68,7 @@ void arm64_boot_el3_init(void)
   /* Setup vector table */
 
   write_sysreg((uint64_t)_vector_table, vbar_el3);
-  ARM64_ISB();
+  UP_ISB();
 
   reg = 0U;                   /* Mostly RES0 */
   reg &= ~(CPTR_TTA_BIT |     /* Do not trap sysreg accesses */
@@ -101,7 +103,7 @@ void arm64_boot_el3_init(void)
   write_sysreg(reg, ICC_SRE_EL3);
 #endif
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 void arm64_boot_el3_get_next_el(uint64_t switch_addr)
@@ -175,7 +177,7 @@ void arm64_boot_el2_init(void)
    * write_cnthp_cval_el2(~(uint64_t)0);
    */
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 void arm64_boot_el1_init(void)
@@ -185,7 +187,7 @@ void arm64_boot_el1_init(void)
   /* Setup vector table */
 
   write_sysreg((uint64_t)_vector_table, vbar_el1);
-  ARM64_ISB();
+  UP_ISB();
 
   reg = 0U;                       /* RES0 */
   reg |= CPACR_EL1_FPEN_NOTRAP;   /* Do not trap NEON/SIMD/FP initially */
@@ -209,7 +211,7 @@ void arm64_boot_el1_init(void)
    * write_cntps_cval_el1(~(uint64_t)0);
    */
 
-  ARM64_ISB();
+  UP_ISB();
 }
 
 void arm64_boot_primary_c_routine(void)

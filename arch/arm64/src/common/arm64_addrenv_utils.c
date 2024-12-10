@@ -32,7 +32,8 @@
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
 
-#include "barriers.h"
+#include <arch/barriers.h>
+
 #include "pgalloc.h"
 #include "arm64_mmu.h"
 
