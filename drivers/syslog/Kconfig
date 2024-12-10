@@ -170,8 +170,10 @@ config SYSLOG_TIMESTAMP_FORMAT
 
 config SYSLOG_TIMESTAMP_FORMAT_MICROSECOND
 	bool "Append microseconds after seconds"
-	default y
-	depends on SYSLOG_TIMESTAMP_FORMAT = "%d/%m/%y %H:%M:%S"
+	default y if SYSLOG_TIMESTAMP_FORMAT = "%d/%m/%y %H:%M:%S"
+	---help---
+		Append microseconds after seconds in syslog timestamp.
+		Suggest SYSLOG_TIMESTAMP_FORMAT end with %S.
 
 config SYSLOG_TIMESTAMP_BUFFER
 	int "Formatted timestamp buffer size"
