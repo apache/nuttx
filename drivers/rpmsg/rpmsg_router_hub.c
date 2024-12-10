@@ -138,7 +138,16 @@ static void rpmsg_router_hub_unbind(FAR struct rpmsg_endpoint *ept)
 
   if (dst_ept)
     {
-      rpmsg_destroy_ept(dst_ept);
+      /* Possible failure to execute create_ept at rpmsg_router_hub_bound */
+
+      if (dst_ept->cb)
+        {
+          rpmsg_destroy_ept(dst_ept);
+        }
+      else
+        {
+          kmm_free(dst_ept);
+        }
     }
 
   /* Destroy source edge ept */
