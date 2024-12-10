@@ -193,6 +193,13 @@ _xtensa_user_handler:
 
 	mov		a2, RETVAL							/* a2 = address of new state save area */
 
+	/* Set PS.EXCM to 1 */
+
+	movi	a3, PS_EXCM_MASK
+	l32i	a4, a2, (4 * REG_PS)
+	or		a4, a3, a4
+	s32i	a4, a2, (4 * REG_PS)
+
 	/* Restore registers in preparation to return from interrupt */
 
 	call0	_xtensa_context_restore			/* (Preserves a2) */
@@ -234,6 +241,13 @@ _xtensa_syscall_handler:
 	/* Save rest of interrupt context. */
 
 	call0	_xtensa_context_save
+
+	/* Overwrite the PS saved by the exception entry. */
+
+	movi	a2, ~PS_EXCM_MASK
+	l32i	a3, sp, (4 * REG_PS)
+	and		a3, a3, a2
+	s32i	a3, sp, (4 * REG_PS)
 
 	/* Save EPC (note that this will overwrite the PC saved by the exception
 	 * entry with the correct value skipping the syscall instruction.)
@@ -286,6 +300,13 @@ _xtensa_syscall_handler:
 
 	ps_setup	1 a0
 
+	/* Link the pre-exception frame for debugging. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
+	 */
+
+	exception_backtrace a12 1
+
 	movi	ARG1, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
 	mov		ARG2, a12							/* Argument 2: Top of stack = register save area */
 	CALL	xtensa_irq_dispatch					/* Call xtensa_int_decode */
@@ -296,6 +317,13 @@ _xtensa_syscall_handler:
 	 */
 
 	mov		a2, RETVAL							/* Switch to the new register save area */
+
+	/* Set PS.EXCM to 1 */
+
+	movi	a3, PS_EXCM_MASK
+	l32i	a4, a2, (4 * REG_PS)
+	or		a4, a3, a4
+	s32i	a4, a2, (4 * REG_PS)
 
 	/* Restore registers in preparation to return from interrupt */
 
