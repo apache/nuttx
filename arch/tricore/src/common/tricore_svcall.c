@@ -58,14 +58,12 @@ void tricore_svcall(volatile void *trap)
 {
   struct tcb_s *running_task;
   struct tcb_s *tcb;
-  int cpu = this_cpu();
-
   uintptr_t *regs;
   uint32_t cmd;
 
   regs = (uintptr_t *)__mfcr(CPU_PCXI);
 
-  running_task = g_running_tasks[cpu];
+  running_task = g_running_tasks[this_cpu()];
   tcb = this_task();
 
   /* DSYNC instruction should be executed immediately prior to the MTCR */
@@ -102,14 +100,14 @@ void tricore_svcall(volatile void *trap)
       case SYS_restore_context:
         {
           tricore_reclaim_csa(regs[REG_UPCXI]);
-          up_set_current_regs((uintptr_t *)regs[REG_D9]);
+          tcb->xcp.regs = (uintptr_t *)regs[REG_D9];
         }
         break;
 
       case SYS_switch_context:
         {
           *(uintptr_t **)regs[REG_D9] = tricore_csa2addr(regs[REG_UPCXI]);
-          up_set_current_regs((uintptr_t *)regs[REG_D10]);
+          tcb->xcp.regs = (uintptr_t *)regs[REG_D10];
         }
         break;
 
@@ -120,7 +118,7 @@ void tricore_svcall(volatile void *trap)
         break;
     }
 
-  if (regs != up_current_regs())
+  if (regs != tcb->xcp.regs)
     {
       /* Update scheduler parameters */
 
@@ -131,9 +129,9 @@ void tricore_svcall(volatile void *trap)
        * crashes.
        */
 
-      g_running_tasks[cpu] = this_task();
+      g_running_tasks[this_cpu()] = this_task();
 
-      regs[REG_UPCXI] = tricore_addr2csa(up_current_regs());
+      regs[REG_UPCXI] = tricore_addr2csa(tcb->xcp.regs);
 
       __isync();
     }
