@@ -40,6 +40,8 @@
 #include <nuttx/pci/pci.h>
 #include <nuttx/net/e1000.h>
 
+#include <arch/barriers.h>
+
 #include "e1000.h"
 
 /*****************************************************************************

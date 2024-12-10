@@ -30,6 +30,7 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 
@@ -576,8 +577,7 @@ static void enable_mmu_el3(unsigned int flags)
 
   /* Ensure these changes are seen before MMU is enabled */
 
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 
   /* Enable the MMU and data cache */
 
@@ -590,7 +590,7 @@ static void enable_mmu_el3(unsigned int flags)
 
   /* Ensure the MMU enable takes effect immediately */
 
-  ARM64_ISB();
+  UP_ISB();
 #ifdef CONFIG_MMU_DEBUG
   sinfo("MMU enabled with dcache\n");
 #endif
@@ -609,8 +609,7 @@ static void enable_mmu_el1(unsigned int flags)
 
   /* Ensure these changes are seen before MMU is enabled */
 
-  ARM64_DSB();
-  ARM64_ISB();
+  UP_MB();
 
   /* Enable the MMU and data cache */
 
@@ -623,7 +622,7 @@ static void enable_mmu_el1(unsigned int flags)
 
   /* Ensure the MMU enable takes effect immediately */
 
-  ARM64_ISB();
+  UP_ISB();
 #ifdef CONFIG_MMU_DEBUG
   sinfo("MMU enabled with dcache\n");
 #endif

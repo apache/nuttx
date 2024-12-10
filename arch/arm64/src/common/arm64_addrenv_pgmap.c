@@ -32,9 +32,10 @@
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
 
+#include <arch/barriers.h>
+
 #include <sys/mman.h>
 
-#include "barriers.h"
 #include "pgalloc.h"
 #include "arm64_mmu.h"
 
@@ -218,7 +219,7 @@ int up_addrenv_kmap_init(void)
 
   /* When all is set and done, flush the data caches */
 
-  ARM64_DSB();
+  UP_DSB();
 
   return OK;
 }
