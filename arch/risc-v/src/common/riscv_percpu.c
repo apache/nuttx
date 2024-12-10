@@ -222,14 +222,14 @@ void riscv_percpu_set_kstack(uintptr_t ksp)
 
   /* This must be done with interrupts disabled */
 
-  flags   = enter_critical_section();
+  flags   = up_irq_save();
   scratch = READ_CSR(CSR_SCRATCH);
 
   DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
               scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   ((riscv_percpu_t *)scratch)->ksp = ksp;
-  leave_critical_section(flags);
+  up_irq_restore(flags);
 }
 
 /****************************************************************************
@@ -254,12 +254,12 @@ void riscv_percpu_set_thread(struct tcb_s *tcb)
 
   /* This must be done with interrupts disabled */
 
-  flags   = enter_critical_section();
+  flags   = up_irq_save();
   scratch = READ_CSR(CSR_SCRATCH);
 
   DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
               scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   ((riscv_percpu_t *)scratch)->tcb = tcb;
-  leave_critical_section(flags);
+  up_irq_restore(flags);
 }
