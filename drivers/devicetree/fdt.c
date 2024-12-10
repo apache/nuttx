@@ -39,7 +39,7 @@
 
 /* Location of the fdt data for this system. */
 
-static FAR const char *g_fdt_base = NULL;
+static FAR const char *g_fdt_base;
 
 /****************************************************************************
  * Public Functions
@@ -399,7 +399,7 @@ FAR const char *fdt_get_node_label(FAR const void *fdt, int node)
   int ret;
   const char *property_name;
   const char *label_name;
-  char path_buffer[CONFIG_PATH_MAX] =
+  char path_buffer[PATH_MAX] =
     {
       0
     };
@@ -496,7 +496,7 @@ int fdt_node_index_from_label(FAR const char *node_label, int count)
       return -ENOENT;
     }
 
-  label_length = strnlen(node_label, CONFIG_PATH_MAX);
+  label_length = strnlen(node_label, PATH_MAX);
 
   if (count > label_length || count <= 0)
     {
