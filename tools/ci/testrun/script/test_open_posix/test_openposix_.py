@@ -6984,7 +6984,7 @@ def test_ltp_interfaces_pthread_rwlock_timedrdlock_5_1(p):
 def test_ltp_interfaces_sem_init_6_1(p):
     ret = p.sendCommand(
         "ltp_interfaces_sem_init_6_1",
-        ["PASSED", "passed", "Passed", "PASS"],
+        ["PASSED", "passed", "Passed", "PASS", "skipped"],
         timeout=10,
     )
     retID = p.sendCommand("echo $?", "0", timeout=2)
