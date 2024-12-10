@@ -158,7 +158,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  __DMB();
+  UP_DMB();
 
   return brkaddr;
 }

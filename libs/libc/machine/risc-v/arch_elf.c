@@ -130,7 +130,7 @@ static void _set_val(uint16_t *addr, uint32_t val)
 
   /* NOTE: Ensure relocation before execution */
 
-  __ISB();
+  UP_ISB();
 }
 
 static void _add_val(uint16_t *addr, uint32_t val)

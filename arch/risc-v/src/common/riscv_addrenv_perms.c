@@ -97,8 +97,8 @@ static int modify_region(uintptr_t vstart, uintptr_t vend, uintptr_t setmask)
 
   /* When all is set and done, flush the data caches */
 
-  __ISB();
-  __DMB();
+  UP_ISB();
+  UP_DMB();
 
   return OK;
 }

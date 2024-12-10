@@ -154,7 +154,7 @@ void riscv_percpu_add_hart(uintptr_t hartid)
 
   /* Make sure it sticks */
 
-  __MB();
+  UP_DSB();
 }
 
 /****************************************************************************
