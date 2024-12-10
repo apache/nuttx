@@ -216,8 +216,6 @@ Configuration Options
 
 ``CONFIG_ARCH_HIPRI_INTERRUPT``
 
-If ``CONFIG_ARMV7M_USEBASEPRI`` is selected, then interrupts will be
-disabled by setting the *BASEPRI* register to
 ``NVIC_SYSH_DISABLE_PRIORITY`` so that most interrupts will not have
 execution priority. *SVCall* must have execution priority in all
 cases.
