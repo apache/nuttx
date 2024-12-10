@@ -57,14 +57,13 @@
  ****************************************************************************/
 
 static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
-                           FAR uint8_t *buffer, size_t buflen,
-                           size_t minread)
+                           FAR uint8_t *buffer, size_t buflen)
 {
   FAR const struct btuart_lowerhalf_s *lower;
   ssize_t ntotal = 0;
   ssize_t nread;
 
-  wlinfo("buflen %zu minread %zu\n", buflen, minread);
+  wlinfo("buflen %zu\n", buflen);
 
   DEBUGASSERT(upper != NULL && upper->lower != NULL);
   lower = upper->lower;
@@ -73,17 +72,11 @@ static ssize_t btuart_read(FAR struct btuart_upperhalf_s *upper,
   while (buflen > 0)
     {
       nread = lower->read(lower, buffer, buflen);
-      if (nread == 0 || nread == -EINTR)
+      if (nread == -EINTR)
         {
-          wlwarn("Got zero bytes from UART\n");
-          if (ntotal < minread)
-            {
-              continue;
-            }
-
-          break;
+          continue;
         }
-      else if (nread < 0)
+      else if (nread <= 0)
         {
           wlwarn("Returned error %zd\n", nread);
           return ntotal > 0 ? ntotal : nread;
@@ -117,7 +110,6 @@ static void btuart_rxwork(FAR void *arg)
   upper = (FAR struct btuart_upperhalf_s *)arg;
 
   nread = btuart_read(upper, &upper->rxbuf[upper->rxlen],
-                      sizeof(upper->rxbuf) - upper->rxlen,
                       sizeof(upper->rxbuf) - upper->rxlen);
   if (nread <= 0)
     {
