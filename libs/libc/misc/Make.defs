@@ -27,7 +27,11 @@ CSRCS += lib_getrandom.c lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
 CSRCS += lib_cxx_initialize.c lib_impure.c lib_memfd.c lib_mutex.c
 CSRCS += lib_fchmodat.c lib_fstatat.c lib_getfullpath.c lib_openat.c
 CSRCS += lib_mkdirat.c lib_utimensat.c lib_mallopt.c
-CSRCS += lib_idr.c lib_getnprocs.c lib_pathbuffer.c
+CSRCS += lib_idr.c lib_getnprocs.c
+
+ifeq ($(CONFIG_LIBC_PATHBUFFER),y)
+CSRCS += lib_pathbuffer.c
+endif
 
 # Support for platforms that do not have long long types
 
