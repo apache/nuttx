@@ -40,7 +40,6 @@
 
 #include "riscv_internal.h"
 #include "riscv_mtimer.h"
-#include "riscv_percpu.h"
 #include "hardware/jh7110_memorymap.h"
 
 /****************************************************************************

@@ -39,7 +39,6 @@
 #include "hardware/qemu_rv_aplic.h"
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
 
 /****************************************************************************
  * Macro Definitions

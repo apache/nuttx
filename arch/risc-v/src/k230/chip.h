@@ -39,7 +39,6 @@
 #include "hardware/k230_clint.h"
 
 #include "riscv_internal.h"
-#include "riscv_percpu.h"
 
 /****************************************************************************
  * Macro Definitions

@@ -38,8 +38,6 @@
 
 #include "chip.h"
 
-#include "riscv_percpu.h"
-
 #include "riscv_macros.S"
 
 /*
