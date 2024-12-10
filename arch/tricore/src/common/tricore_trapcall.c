@@ -62,8 +62,8 @@ void tricore_trapcall(volatile void *trap)
 
   regs = tricore_csa2addr(__mfcr(CPU_PCXI));
 
-  up_set_current_regs(regs);
+  up_set_interrupt_context(true);
 
   up_irq_save();
-  PANIC_WITH_REGS("Trap", up_current_regs());
+  PANIC_WITH_REGS("Trap", regs);
 }
