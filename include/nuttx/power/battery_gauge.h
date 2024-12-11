@@ -68,17 +68,17 @@
  * BATIOC_ONLINE - Return 1 if the battery is online; 0 if offline.
  *   Input value:  A pointer to type bool.
  * BATIOC_VOLTAGE - Return the current battery voltage.  The returned value
- *   is a fixed precision number in units of volts.
- *   Input value:  A pointer to type b16_t.
+ *   is a fixed precision number in units of mV.
+ *   Input value:  A pointer to type int.
  * BATIOC_CAPACITY - Return the current battery capacity or State of Charge
  *   (SoC).  The returned value is a fixed precision percentage of the
  *   batteries full capacity.
- *   Input value:  A pointer to type b16_t.
+ *   Input value:  A pointer to type int.
  * BATIOC_CURRENT - Return the current of the battery . The returned value
  *   is a fixed precision number in units of ma.
- *   Input value:  A pointer to type b16_t.
+ *   Input value:  A pointer to type int.
  * BATIOC_TEMPERATURE- Return the current temperature of the battery.
- *   Input value:  A pointer to type b8_t.
+ *   Input value:  A pointer to type int.
  * BATIOC_CHIPID- Return the chip id of the gauge.
  *   Input value:  A pointer to type unsigned int.
  */
@@ -102,20 +102,20 @@ struct battery_gauge_operations_s
 
   /* Current battery voltage */
 
-  CODE int (*voltage)(FAR struct battery_gauge_dev_s *dev, FAR b16_t *value);
+  CODE int (*voltage)(FAR struct battery_gauge_dev_s *dev, FAR int *value);
 
   /* Battery capacity */
 
   CODE int (*capacity)(FAR struct battery_gauge_dev_s *dev,
-                       FAR b16_t *value);
+                       FAR int *value);
 
   /* Battery current */
 
-  CODE int (*current)(FAR struct battery_gauge_dev_s *dev, FAR b16_t *value);
+  CODE int (*current)(FAR struct battery_gauge_dev_s *dev, FAR int *value);
 
   /* Battery temp */
 
-  CODE int (*temp)(FAR struct battery_gauge_dev_s *dev, FAR b8_t *value);
+  CODE int (*temp)(FAR struct battery_gauge_dev_s *dev, FAR int *value);
 
   /* Battery chipid */
 

@@ -308,7 +308,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
 
       case BATIOC_VOLTAGE:
         {
-          FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->voltage(dev, ptr);
@@ -318,7 +318,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
 
       case BATIOC_CAPACITY:
         {
-          FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->capacity(dev, ptr);
@@ -328,7 +328,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
 
         case BATIOC_CURRENT:
         {
-          FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->current(dev, ptr);
@@ -338,7 +338,7 @@ static int bat_gauge_ioctl(FAR struct file *filep,
 
         case BATIOC_TEMPERATURE:
         {
-          FAR b8_t *ptr = (FAR b8_t *)((uintptr_t)arg);
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
           if (ptr)
             {
               ret = dev->ops->temp(dev, ptr);
