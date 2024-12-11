@@ -1597,14 +1597,14 @@ void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *lower,
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(lower->priv != NULL);
 
+#ifdef CONFIG_SENSORS_RPMSG
+  lower = sensor_rpmsg_unregister(lower);
+#endif
+
   upper = lower->priv;
 
   sminfo(upper->name, "UnRegistering");
   unregister_driver(path);
-
-#ifdef CONFIG_SENSORS_RPMSG
-  sensor_rpmsg_unregister(lower);
-#endif
 
   nxrmutex_destroy(&upper->lock);
   if (circbuf_is_init(&upper->buffer))

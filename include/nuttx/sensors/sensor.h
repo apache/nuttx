@@ -809,10 +809,13 @@ FAR struct sensor_lowerhalf_s *sensor_rpmsg_register(
  * Input Parameters:
  *   lower - The instance of lower half sensor driver.
  *
+ * Returned Value:
+ *   The takeover rpmsg lowerhalf returned on success, NULL on failure.
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_RPMSG
-void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower);
+FAR struct sensor_lowerhalf_s *
+sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower);
 #endif
 
 /****************************************************************************
