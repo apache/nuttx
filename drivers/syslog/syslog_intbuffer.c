@@ -89,7 +89,7 @@ static struct g_syslog_intbuffer_s g_syslog_intbuffer;
  *
  ****************************************************************************/
 
-int syslog_remove_intbuffer(void)
+static int syslog_remove_intbuffer(void)
 {
   irqstate_t flags;
   uint32_t outndx;
@@ -185,46 +185,11 @@ int syslog_add_intbuffer(int ch)
 
   if (inuse == CONFIG_SYSLOG_INTBUFSIZE - 1)
     {
-      int oldch = syslog_remove_intbuffer();
-      int i;
+      char oldch = syslog_remove_intbuffer();
 
-      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
-        {
-          FAR syslog_channel_t *channel = g_syslog_channel[i];
+      syslog_write_foreach(&oldch, 1, true);
 
-          if (channel == NULL)
-            {
-              break;
-            }
-
-#ifdef CONFIG_SYSLOG_IOCTL
-          if (channel->sc_state & SYSLOG_CHANNEL_DISABLE)
-            {
-              continue;
-            }
-#endif
-
-          if (channel->sc_ops->sc_force == NULL)
-            {
-              continue;
-            }
-
-#ifdef CONFIG_SYSLOG_CRLF
-          /* Check for LF */
-
-          if (oldch == '\n' &&
-              !(channel->sc_state & SYSLOG_CHANNEL_DISABLE_CRLF))
-            {
-              /* Add CR */
-
-              channel->sc_ops->sc_force(channel, '\r');
-            }
-#endif
-
-          channel->sc_ops->sc_force(channel, oldch);
-        }
-
-        ret = -ENOSPC;
+      ret = -ENOSPC;
     }
 
   /* Copy one character */
@@ -265,6 +230,7 @@ int syslog_add_intbuffer(int ch)
 int syslog_flush_intbuffer(bool force)
 {
   irqstate_t flags;
+  char c;
   int ch;
 
   /* This logic is performed with the scheduler disabled to protect from
@@ -275,8 +241,6 @@ int syslog_flush_intbuffer(bool force)
 
   for (; ; )
     {
-      int i;
-
       /* Transfer one character to time.  This is inefficient, but is
        * done in this way to: (1) Deal with concurrent modification of
        * the interrupt buffer from interrupt activity, (2) Avoid keeper
@@ -290,42 +254,9 @@ int syslog_flush_intbuffer(bool force)
           break;
         }
 
-      for (i = 0; i < CONFIG_SYSLOG_MAX_CHANNELS; i++)
-        {
-          FAR syslog_channel_t *channel = g_syslog_channel[i];
-          syslog_putc_t putfunc;
+      c = (char)ch;
 
-          if (channel == NULL)
-            {
-              break;
-            }
-
-#ifdef CONFIG_SYSLOG_IOCTL
-          if (channel->sc_state & SYSLOG_CHANNEL_DISABLE)
-            {
-              continue;
-            }
-#endif
-
-          /* Select which putc function to use for this flush */
-
-          putfunc = force ? channel->sc_ops->sc_force :
-                    channel->sc_ops->sc_putc;
-
-#ifdef CONFIG_SYSLOG_CRLF
-          /* Check for LF */
-
-          if (ch == '\n' &&
-              !(channel->sc_state & SYSLOG_CHANNEL_DISABLE_CRLF))
-            {
-              /* Add CR */
-
-              putfunc(channel, '\r');
-            }
-#endif
-
-          putfunc(channel, ch);
-        }
+      syslog_write_foreach(&c, 1, force);
     }
 
   leave_critical_section(flags);
