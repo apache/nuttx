@@ -106,6 +106,8 @@
   .align  8
 
 exception_common:
+  .cfi_sections .debug_frame
+  .cfi_startproc
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
   /* Take the kernel stack into use */
@@ -200,6 +202,10 @@ handle_irq:
 
   mv         a0, s2               /* exception cause */
   mv         a1, sp               /* context = sp */
+  mv         fp, a1               /* Use fp to debug frame */
+  .cfi_def_cfa fp, 0              /* Register in fp, so we just set fp as frame */
+  .cfi_offset x2, 8               /* Toolchain not support macro, is REG_X2 * 4 */
+  .cfi_offset ra, 0               /* Toolchain not support macro, is REG_EPC * 4 */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 
@@ -274,6 +280,7 @@ return_from_exception:
   /* Return from exception */
 
   ERET
+  .cfi_endproc
 
 /****************************************************************************
  * Function: riscv_jump_to_user
