@@ -72,9 +72,7 @@
 
 int chdir(FAR const char *path)
 {
-#ifndef CONFIG_DISABLE_ENVIRON
-  FAR char *oldpwd;
-#endif /* !CONFIG_DISABLE_ENVIRON */
+  FAR char *oldpwd = NULL;
   FAR char *abspath;
   struct stat buf;
   int ret;
@@ -99,9 +97,15 @@ int chdir(FAR const char *path)
    * Remove any trailing '/' characters from the path
    */
 
-  abspath = realpath(path, NULL);
-  if (abspath == NULL)
+  abspath = lib_get_pathbuffer();
+  if (abspath != NULL)
     {
+      oldpwd = realpath(path, abspath);
+    }
+
+  if (abspath == NULL || oldpwd == NULL)
+    {
+      lib_put_pathbuffer(abspath);
       return ERROR;
     }
 
@@ -124,7 +128,7 @@ int chdir(FAR const char *path)
   ret = setenv("PWD", abspath, TRUE);
 #endif /* !CONFIG_DISABLE_ENVIRON */
 
-  lib_free(abspath);
+  lib_put_pathbuffer(abspath);
 
   return ret;
 }
