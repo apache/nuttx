@@ -90,7 +90,9 @@ clock_t clock_systime_ticks(void)
 
   up_timer_gettick(&ticks);
   return ticks;
-#elif defined(CONFIG_SCHED_TICKLESS)
+#elif defined(CONFIG_ALARM_ARCH) || \
+      defined(CONFIG_TIMER_ARCH) || \
+      defined(CONFIG_SCHED_TICKLESS)
   struct timespec ts =
     {
       0

@@ -332,14 +332,6 @@ extern "C"
  * access to kernel global data
  */
 
-#ifdef __HAVE_KERNEL_GLOBALS
-EXTERN volatile clock_t g_system_ticks;
-
-#  ifndef CONFIG_SYSTEM_TIME64
-#    define clock_systime_ticks() g_system_ticks
-#  endif
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
