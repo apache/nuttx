@@ -100,11 +100,29 @@ static clock_t g_timer_tick;
  * that just expired.  The value zero means that no timer was active.
  */
 
-static unsigned int g_timer_interval;
+static atomic_t g_timer_interval;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static inline_function clock_t  get_time_tick(void)
+{
+#ifdef CONFIG_SYSTEM_TIME64
+  return atomic64_read((FAR atomic64_t *)&g_timer_tick);
+#else
+  return atomic_read((FAR atomic_t *)&g_timer_tick);
+#endif
+}
+
+static inline_function clock_t update_time_tick(clock_t tick)
+{
+#ifdef CONFIG_SYSTEM_TIME64
+  return atomic64_xchg((FAR atomic64_t *)&g_timer_tick, tick);
+#else
+  return atomic_xchg((FAR atomic_t *)&g_timer_tick, tick);
+#endif
+}
 
 #if !defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT) && !defined(CONFIG_CLOCK_TIMEKEEPING)
 int up_timer_gettick(FAR clock_t *ticks)
@@ -439,22 +457,17 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 {
   clock_t elapsed;
   clock_t nexttime;
-  irqstate_t flags;
 
   /* Save the time that the alarm occurred */
 
-  flags = enter_critical_section();
-  elapsed = ticks - g_timer_tick;
-  g_timer_tick = ticks;
-  leave_critical_section(flags);
+  elapsed = ticks - update_time_tick(ticks);
 
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
 
-  flags = enter_critical_section();
-  g_timer_interval = nxsched_timer_start(ticks, nexttime);
-  leave_critical_section(flags);
+  elapsed = nxsched_timer_start(ticks, nexttime);
+  atomic_set(&g_timer_interval, elapsed);
 }
 
 void nxsched_alarm_expiration(FAR const struct timespec *ts)
@@ -490,23 +503,19 @@ void nxsched_timer_expiration(void)
   clock_t ticks;
   clock_t elapsed;
   clock_t nexttime;
-  irqstate_t flags;
 
   /* Get the interval associated with last expiration */
 
-  flags = enter_critical_section();
   up_timer_gettick(&ticks);
-  g_timer_tick = ticks;
-  elapsed = g_timer_interval;
-  leave_critical_section(flags);
+  update_time_tick(ticks);
+  elapsed = atomic_read(&g_timer_interval);
 
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
 
-  flags = enter_critical_section();
-  g_timer_interval = nxsched_timer_start(ticks, nexttime);
-  leave_critical_section(flags);
+  elapsed = nxsched_timer_start(ticks, nexttime);
+  atomic_set(&g_timer_interval, elapsed);
 }
 #endif
 
@@ -560,18 +569,19 @@ void nxsched_reassess_timer(void)
 #else
   up_timer_gettick(&ticks);
   up_timer_tick_cancel(&elapsed);
-  DEBUGASSERT(elapsed <= g_timer_interval);
+  DEBUGASSERT(elapsed <= atomic_read(&g_timer_interval));
 #endif
 
   /* Convert this to the elapsed time and update clock tickbase */
 
-  elapsed = ticks - g_timer_tick;
-  g_timer_tick = ticks;
+  elapsed = ticks - update_time_tick(ticks);
 
   /* Process the timer ticks and start next timer */
 
   nexttime = nxsched_timer_process(ticks, elapsed, true);
-  g_timer_interval = nxsched_timer_start(ticks, nexttime);
+
+  elapsed = nxsched_timer_start(ticks, nexttime);
+  atomic_set(&g_timer_interval, elapsed);
 }
 
 /****************************************************************************
@@ -590,12 +600,10 @@ void nxsched_reassess_timer(void)
 
 clock_t nxsched_get_next_expired(void)
 {
-  irqstate_t flags;
   sclock_t ret;
 
-  flags = enter_critical_section();
-  ret = g_timer_tick + g_timer_interval - clock_systime_ticks();
-  leave_critical_section(flags);
+  ret = get_time_tick() + atomic_read(&g_timer_interval) -
+        clock_systime_ticks();
 
   return ret < 0 ? 0 : ret;
 }
