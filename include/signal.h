@@ -172,6 +172,8 @@
 
 #define SIGSYS          31
 
+#define SIGIOT          SIGABRT
+
 /* sigprocmask() "how" definitions.
  * Only one of the following can be specified:
  */
@@ -434,6 +436,8 @@ typedef struct
   int ss_flags;
   size_t ss_size;
 } stack_t;
+
+typedef CODE void (*sig_t)(int);
 
 /****************************************************************************
  * Public Function Prototypes
