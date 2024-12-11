@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spinlock.h>
+#include <nuttx/atomic.h>
 #include <nuttx/lib/lib.h>
 
 #include <stdlib.h>
@@ -41,8 +41,7 @@
 
 struct pathbuffer_s
 {
-  spinlock_t lock;           /* Lock for the buffer */
-  unsigned long free_bitmap; /* Bitmap of free buffer */
+  atomic_t free_bitmap; /* Bitmap of free buffer */
   char buffer[CONFIG_LIBC_PATHBUFFER_MAX][PATH_MAX];
 };
 
@@ -52,7 +51,6 @@ struct pathbuffer_s
 
 static struct pathbuffer_s g_pathbuffer =
 {
-  SP_UNLOCKED,
   (1u << CONFIG_LIBC_PATHBUFFER_MAX) - 1,
 };
 
@@ -82,21 +80,23 @@ static struct pathbuffer_s g_pathbuffer =
 
 FAR char *lib_get_pathbuffer(void)
 {
-  irqstate_t flags;
-  int index;
-
-  /* Try to find a free buffer */
-
-  flags = spin_lock_irqsave(&g_pathbuffer.lock);
-  index = ffsl(g_pathbuffer.free_bitmap) - 1;
-  if (index >= 0 && index < CONFIG_LIBC_PATHBUFFER_MAX)
+  for (; ; )
     {
-      g_pathbuffer.free_bitmap &= ~(1u << index);
-      spin_unlock_irqrestore(&g_pathbuffer.lock, flags);
-      return g_pathbuffer.buffer[index];
-    }
+      int32_t update;
+      int32_t free_bitmap = atomic_read(&g_pathbuffer.free_bitmap);
+      int index = ffsl(free_bitmap) - 1;
+      if (index < 0 || index >= CONFIG_LIBC_PATHBUFFER_MAX)
+        {
+          break;
+        }
 
-  spin_unlock_irqrestore(&g_pathbuffer.lock, flags);
+      update = free_bitmap & ~(1u << index);
+      if (atomic_cmpxchg(&g_pathbuffer.free_bitmap, &free_bitmap,
+                         update))
+        {
+          return g_pathbuffer.buffer[index];
+        }
+    }
 
   /* If no free buffer is found, allocate a new one if
    * CONFIG_LIBC_PATHBUFFER_MALLOC is enabled
@@ -125,17 +125,12 @@ FAR char *lib_get_pathbuffer(void)
 
 void lib_put_pathbuffer(FAR char *buffer)
 {
-  irqstate_t flags;
-  int index;
-
-  index = (buffer - &g_pathbuffer.buffer[0][0]) / PATH_MAX;
+  int index = (buffer - &g_pathbuffer.buffer[0][0]) / PATH_MAX;
   if (index >= 0 && index < CONFIG_LIBC_PATHBUFFER_MAX)
     {
-      /* Mark the corresponding bit as free */
-
-      flags = spin_lock_irqsave(&g_pathbuffer.lock);
-      g_pathbuffer.free_bitmap |= 1u << index;
-      spin_unlock_irqrestore(&g_pathbuffer.lock, flags);
+      DEBUGASSERT((atomic_read(&g_pathbuffer.free_bitmap) &
+                  (1u << index)) == 0);
+      atomic_fetch_or_acquire(&g_pathbuffer.free_bitmap, 1u << index);
       return;
     }
 
