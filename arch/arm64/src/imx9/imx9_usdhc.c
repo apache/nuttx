@@ -1069,6 +1069,8 @@ static void imx9_recvdma(struct imx9_dev_s *priv)
     {
       /* In an aligned case, we have always received all blocks */
 
+      up_invalidate_dcache((uintptr_t)priv->buffer,
+                           (uintptr_t)priv->buffer + priv->remaining);
       priv->remaining = 0;
     }
 
