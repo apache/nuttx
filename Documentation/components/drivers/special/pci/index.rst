@@ -59,3 +59,50 @@ Supported devices:
 
 - Intel I225LM
 - Intel I226V
+
+Kvaser PCI CAN card
+-------------------
+
+At the moment the card only works with QEMU.
+
+The driver supports both SocketCAN interface and character driver.
+
+The driver requires, ``vcan`` to run on the host:
+
+.. code:: shell
+
+   sudo ip link add dev can0 type vcan
+   sudo ip link set can0 up
+
+An example command to run the driver on ``x86_64`` looks like this:
+
+.. code:: shell
+
+   qemu-system-x86_64 -m 2G -cpu host -enable-kvm -kernel nuttx \
+   -nographic -serial mon:stdio -object can-bus,id=canbus0 \
+   -object can-host-socketcan,id=canhost0,if=can0,canbus=canbus0 \
+   -device kvaser_pci,canbus=canbus0
+
+
+CTUCANFD PCI CAN card
+---------------------
+
+At the moment the card only works with QEMU.
+
+The driver supports both SocketCAN interface and character driver.
+
+The driver requires, ``vcan`` to run on the host:
+
+.. code:: shell
+
+   sudo ip link add dev can0 type vcan
+   sudo ip link set can0 up
+
+An example command to run the driver on ``x86_64`` looks like this:
+
+.. code:: shell
+
+   qemu-system-x86_64 -m 2G -cpu host -enable-kvm -kernel nuttx \
+   -nographic -serial mon:stdio -object can-bus,id=canbus0-bus \
+   -object can-host-socketcan,if=can0,canbus=canbus0-bus,id=canbus0-socketcan \
+   -device ctucan_pci,canbus0=canbus0-bus,canbus1=canbus0-bus
