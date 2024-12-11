@@ -85,19 +85,13 @@ clock_t clock_systime_ticks(void)
 
   clock_systime_timespec(&ts);
   return clock_time2ticks(&ts);
-#elif defined(CONFIG_SCHED_TICKLESS_TICK_ARGUMENT)
+#elif defined(CONFIG_ALARM_ARCH) || \
+      defined(CONFIG_TIMER_ARCH) || \
+      defined(CONFIG_SCHED_TICKLESS)
   clock_t ticks = 0;
 
   up_timer_gettick(&ticks);
   return ticks;
-#elif defined(CONFIG_SCHED_TICKLESS)
-  struct timespec ts =
-    {
-      0
-    };
-
-  up_timer_gettime(&ts);
-  return clock_time2ticks(&ts);
 #elif defined(CONFIG_SYSTEM_TIME64)
   clock_t sample;
   clock_t verify;
