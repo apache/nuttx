@@ -89,7 +89,7 @@ static int x86_64_ap_startup(int cpu)
   /* Wait for 10 ms */
 
   up_mdelay(10);
-  SP_DMB();
+  UP_DMB();
 
   /* Send an STARTUP IPI to the CPU */
 
@@ -101,7 +101,7 @@ static int x86_64_ap_startup(int cpu)
   do
     {
       up_udelay(300);
-      SP_DMB();
+      UP_DMB();
       sinfo("wait for startup cpu=%d...\n", cpu);
     }
   while (x86_64_cpu_ready_get(cpu) == false);
