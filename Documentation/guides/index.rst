@@ -56,3 +56,4 @@ Guides
   signal_events_interrupt_handlers.rst  
   signaling_sem_priority_inheritance.rst
   smaller_vector_tables.rst
+  port.rst
