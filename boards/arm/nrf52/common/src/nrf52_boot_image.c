@@ -33,10 +33,10 @@
 #include <sys/boardctl.h>
 #include <nuttx/irq.h>
 #include <nuttx/cache.h>
+#include <arch/barriers.h>
 
 #include "nvic.h"
 #include "arm_internal.h"
-#include "barriers.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -85,7 +85,7 @@ static void cleanup_arm_nvic(void)
 
   /* Allow any pending interrupts to be recognized */
 
-  ARM_ISB();
+  UP_ISB();
   cpsid();
 
   /* Disable all interrupts */

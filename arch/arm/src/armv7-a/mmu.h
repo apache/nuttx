@@ -37,12 +37,12 @@
 
 #include <nuttx/config.h>
 #include <sys/types.h>
+#include <arch/barriers.h>
 #include "sctlr.h"
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include "chip.h"
-#  include "barriers.h"
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
@@ -1250,7 +1250,7 @@ static inline void cp15_disable_mmu(void)
 
 static inline void cp15_invalidate_tlbs(void)
 {
-  ARM_DSB();
+  UP_DSB();
 #ifdef CONFIG_ARM_HAVE_MPCORE
   CP15_SET(TLBIALLIS, 0);
   CP15_SET(BPIALLIS, 0);
@@ -1258,8 +1258,7 @@ static inline void cp15_invalidate_tlbs(void)
   CP15_SET2(TLBIALL, c7, 0);
   CP15_SET(BPIALL, 0);
 #endif
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -1275,7 +1274,7 @@ static inline void cp15_invalidate_tlbs(void)
 
 static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
 {
-  ARM_DSB();
+  UP_DSB();
 #ifdef CONFIG_ARM_HAVE_MPCORE
   CP15_SET(TLBIMVAAIS, vaddr);
   CP15_SET(BPIALLIS, 0);
@@ -1283,8 +1282,7 @@ static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
   CP15_SET2(TLBIMVA, c7, vaddr);
   CP15_SET(BPIALL, 0);
 #endif
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************
@@ -1301,14 +1299,14 @@ static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
 static inline void cp15_wrdacr(unsigned int dacr)
 {
   CP15_SET(DACR, dacr);
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
 }
 
 /****************************************************************************
@@ -1329,14 +1327,14 @@ static inline void cp15_wrdacr(unsigned int dacr)
 static inline void cp15_wrttb(unsigned int ttb)
 {
   CP15_SET(TTBR0, ttb);
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
-  ARM_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
+  UP_NOP();
   CP15_SET(TTBCR, 0);
 }
 

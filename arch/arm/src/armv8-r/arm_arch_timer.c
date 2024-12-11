@@ -30,12 +30,12 @@
 #include <stdio.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <arch/chip/chip.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/arch_alarm.h>
 
-#include "barriers.h"
 #include "arm_gic.h"
 #include "arm_arch_timer.h"
 

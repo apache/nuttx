@@ -34,8 +34,7 @@
 #include <sys/types.h>
 
 #include <arch/board/board.h>
-
-#include "barriers.h"
+#include <arch/barriers.h>
 
 #include "arm_internal.h"
 #include "hardware/imx9_gpc.h"
@@ -51,16 +50,6 @@
 #define XTAL_FREQ 24000000u
 
 #define ROOT_CLOCK_OFFSET 41
-
-/* Common barrier */
-
-#define mb()                                                                  \
-  do                                                                          \
-    {                                                                         \
-      ARM_DSB();                                                              \
-      ARM_ISB();                                                              \
-    }                                                                         \
-  while (0)
 
 /****************************************************************************
  * Public Functions

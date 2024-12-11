@@ -28,9 +28,9 @@
 #include <sys/param.h>
 
 #include <nuttx/userspace.h>
+#include <arch/barriers.h>
 
 #include "mpu.h"
-#include "barriers.h"
 #include "s32k3xx_mpuinit.h"
 #include "arm_internal.h"
 
@@ -106,7 +106,7 @@ void s32k3xx_mpuinitialize(void)
 #ifdef CONFIG_ARMV7M_DCACHE
   /* Memory barrier */
 
-  ARM_DMB();
+  UP_DMB();
 
 #endif
 

@@ -28,12 +28,12 @@
 
 #include <stdint.h>
 
+#include <arch/barriers.h>
 #include <arch/irq.h>
 #include <sched/sched.h>
 
 #include "arm_internal.h"
 #include "cp15_cacheops.h"
-#include "barriers.h"
 #include "sctlr.h"
 #include "scu.h"
 
@@ -85,7 +85,7 @@ void arm_enable_smp(int cpu)
        */
 
       cp15_invalidate_dcache_all();
-      ARM_DSB();
+      UP_DSB();
 
       /* Invalidate the L2C-310 -- Missing logic. */
 
@@ -97,7 +97,7 @@ void arm_enable_smp(int cpu)
 
       /* Initialize done, kick other cpus which waiting on __start */
 
-      ARM_SEV();
+      UP_SEV();
     }
 
   /* Actions for other CPUs */
@@ -109,7 +109,7 @@ void arm_enable_smp(int cpu)
        */
 
       cp15_dcache_op_level(0, CP15_CACHE_INVALIDATE);
-      ARM_DSB();
+      UP_DSB();
 
       /* Wait for the SCU to be enabled by the primary processor -- should
        * not be necessary.

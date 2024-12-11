@@ -30,9 +30,9 @@
 #include <assert.h>
 #include <sys/param.h>
 #include <nuttx/userspace.h>
+#include <arch/barriers.h>
 
 #include "mpu.h"
-#include "barriers.h"
 #include "arm_internal.h"
 #include "mps_userspace.h"
 

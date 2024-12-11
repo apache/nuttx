@@ -30,9 +30,9 @@
 #include <sys/param.h>
 
 #include <nuttx/userspace.h>
+#include <arch/barriers.h>
 
 #include "mpu.h"
-#include "barriers.h"
 
 #include "hardware/imxrt_memorymap.h"
 
@@ -101,7 +101,7 @@ void imxrt_mpu_initialize(void)
 #ifdef CONFIG_ARMV7M_DCACHE
   /* Memory barrier */
 
-  ARM_DMB();
+  UP_DMB();
 
 #ifdef CONFIG_IMXFT_QSPI
   /* Make QSPI memory region strongly ordered */

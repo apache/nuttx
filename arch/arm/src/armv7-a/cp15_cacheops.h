@@ -587,7 +587,7 @@ static inline void cp15_enable_dcache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr |= SCTLR_C;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -611,7 +611,7 @@ static inline void cp15_disable_dcache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr &= ~SCTLR_C;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -635,7 +635,7 @@ static inline void cp15_enable_icache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr |= SCTLR_I;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -659,7 +659,7 @@ static inline void cp15_disable_icache(void)
   sctlr = CP15_GET(SCTLR);
   sctlr &= ~SCTLR_I;
   CP15_SET(SCTLR, sctlr);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -679,7 +679,7 @@ static inline void cp15_disable_icache(void)
 static inline void cp15_invalidate_icache_inner_sharable(void)
 {
   CP15_SET(ICIALLUIS, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -699,7 +699,7 @@ static inline void cp15_invalidate_icache_inner_sharable(void)
 static inline void cp15_invalidate_btb_inner_sharable(void)
 {
   CP15_SET(BPIALLIS, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -720,7 +720,7 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
 static inline void cp15_invalidate_icache_all(void)
 {
   CP15_SET(ICIALLU, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -740,7 +740,7 @@ static inline void cp15_invalidate_icache_all(void)
 static inline void cp15_invalidate_icache_bymva(unsigned int va)
 {
   CP15_SET(ICIMVAU, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -760,7 +760,7 @@ static inline void cp15_invalidate_icache_bymva(unsigned int va)
 static inline void cp15_flush_btb(void)
 {
   CP15_SET(BPIALL, 0);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -780,7 +780,7 @@ static inline void cp15_flush_btb(void)
 static inline void cp15_flush_btb_bymva(unsigned int va)
 {
   CP15_SET(BPIMVA, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -802,7 +802,7 @@ static inline void cp15_flush_btb_bymva(unsigned int va)
 static inline void cp15_invalidate_dcacheline_bymva(unsigned int va)
 {
   CP15_SET(DCIMVAC, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -824,7 +824,7 @@ static inline void cp15_invalidate_dcacheline_bymva(unsigned int va)
 static inline void cp15_invalidate_dcacheline_bysetway(unsigned int setway)
 {
   CP15_SET(DCISW, setway);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -846,7 +846,7 @@ static inline void cp15_invalidate_dcacheline_bysetway(unsigned int setway)
 static inline void cp15_clean_dcache_bymva(unsigned int va)
 {
   CP15_SET(DCCMVAC, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -866,7 +866,7 @@ static inline void cp15_clean_dcache_bymva(unsigned int va)
 static inline void cp15_clean_dcache_bysetway(unsigned int setway)
 {
   CP15_SET(DCCSW, setway);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -886,7 +886,7 @@ static inline void cp15_clean_dcache_bysetway(unsigned int setway)
 static inline void cp15_clean_ucache_bymva(unsigned int va)
 {
   CP15_SET(DCCMVAU, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -906,7 +906,7 @@ static inline void cp15_clean_ucache_bymva(unsigned int va)
 static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
 {
   CP15_SET(DCCIMVAC, va);
-  ARM_ISB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -926,7 +926,7 @@ static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
 static inline void cp15_cleaninvalidate_dcacheline(unsigned int setway)
 {
   CP15_SET(DCCISW, setway);
-  ARM_ISB();
+  UP_ISB();
 }
 
 #endif /* __ASSEMBLY__ */

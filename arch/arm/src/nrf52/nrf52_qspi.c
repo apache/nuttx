@@ -52,10 +52,6 @@
 #define QSPI_BLOCK_ERASE  0xd8
 #define QSPI_ALL_ERASE    0xc7
 
-/* QSPI memory synchronization */
-
-#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/

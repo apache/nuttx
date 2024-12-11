@@ -29,10 +29,10 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
+#include <arch/barriers.h>
 #include <arch/irq.h>
 
 #include "arm_timer.h"
-#include "barriers.h"
 #include "gic.h"
 
 /****************************************************************************
@@ -98,49 +98,49 @@ static const struct oneshot_operations_s g_arm_timer_ops =
 static inline void arm_timer_set_freq(uint32_t freq)
 {
   CP15_SET(CNTFRQ, freq);
-  ARM_ISB();
+  UP_ISB();
 }
 
 static inline uint64_t arm_timer_get_count(void)
 {
-  ARM_ISB();
+  UP_ISB();
   return CP15_GET64(CNTPCT);
 }
 
 static inline uint32_t arm_timer_get_ctrl(void)
 {
-  ARM_ISB();
+  UP_ISB();
   return CP15_GET(CNTP_CTL);
 }
 
 static inline void arm_timer_set_ctrl(uint32_t ctrl)
 {
   CP15_SET(CNTP_CTL, ctrl);
-  ARM_ISB();
+  UP_ISB();
 }
 
 static inline uint32_t arm_timer_get_tval(void)
 {
-  ARM_ISB();
+  UP_ISB();
   return CP15_GET(CNTP_TVAL);
 }
 
 static inline void arm_timer_set_tval(uint32_t tval)
 {
   CP15_SET(CNTP_TVAL, tval);
-  ARM_ISB();
+  UP_ISB();
 }
 
 static inline uint64_t arm_timer_get_cval(void)
 {
-  ARM_ISB();
+  UP_ISB();
   return CP15_GET64(CNTP_CVAL);
 }
 
 static inline void arm_timer_set_cval(uint64_t cval)
 {
   CP15_SET64(CNTP_CVAL, cval);
-  ARM_ISB();
+  UP_ISB();
 }
 
 static inline uint64_t nsec_from_count(uint64_t count, uint32_t freq)
@@ -288,7 +288,7 @@ static int arm_timer_interrupt(int irq, void *context, void *arg)
 
 uint32_t arm_timer_get_freq(void)
 {
-  ARM_ISB();
+  UP_ISB();
   return CP15_GET(CNTFRQ);
 }
 
