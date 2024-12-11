@@ -1732,23 +1732,23 @@ sensor_rpmsg_register(FAR struct sensor_lowerhalf_s *lower,
  * Input Parameters:
  *   lower - The instance of lower half sensor driver.
  *
+ * Returned Value:
+ *   The takeover rpmsg lowerhalf returned on success, NULL on failure.
  ****************************************************************************/
 
-void sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
+FAR struct sensor_lowerhalf_s *
+sensor_rpmsg_unregister(FAR struct sensor_lowerhalf_s *lower)
 {
   FAR struct sensor_rpmsg_dev_s *dev = lower->priv;
-
-  if (lower->ops != &g_sensor_rpmsg_ops)
-    {
-      return;
-    }
 
   down_write(&g_dev_lock);
   list_delete(&dev->node);
   up_write(&g_dev_lock);
 
   nxsem_destroy(&dev->proxysem);
+  lower->priv = dev->upper;
   kmm_free(dev);
+  return lower;
 }
 
 /****************************************************************************
