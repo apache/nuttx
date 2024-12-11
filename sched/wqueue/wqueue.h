@@ -35,6 +35,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spinlock.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -58,6 +59,7 @@ struct kworker_s
   pid_t             pid;       /* The task ID of the worker thread */
   FAR struct work_s *work;     /* The work structure */
   sem_t             wait;      /* Sync waiting for worker done */
+  volatile int16_t  wait_count;
 };
 
 /* This structure defines the state of one kernel-mode work queue */
@@ -69,6 +71,7 @@ struct kwork_wqueue_s
   sem_t             exsem;     /* Sync waiting for thread exit */
   uint8_t           nthreads;  /* Number of worker threads */
   bool              exit;      /* A flag to request the thread to exit */
+  volatile int16_t  wait_count;
   struct kworker_s  worker[0]; /* Describes a worker thread */
 };
 
@@ -125,6 +128,8 @@ extern struct hp_wqueue_s g_hpwork;
 
 extern struct lp_wqueue_s g_lpwork;
 #endif
+
+extern spinlock_t g_wqueue_lock;
 
 /****************************************************************************
  * Public Function Prototypes
