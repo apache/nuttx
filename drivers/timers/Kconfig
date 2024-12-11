@@ -480,8 +480,8 @@ config WATCHDOG_AUTOMONITOR_BY_IDLE
 endchoice
 
 config WATCHDOG_AUTOMONITOR_TIMEOUT
-	int "Auto-monitor reset timeout(second)"
-	default 60
+	int "Auto-monitor reset timeout(millisecond)"
+	default 60000
 
 if !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 

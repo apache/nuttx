@@ -53,8 +53,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
-#  define WATCHDOG_AUTOMONITOR_TIMEOUT_MSEC \
-     (CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT * MSEC_PER_SEC)
+#  define WATCHDOG_AUTOMONITOR_TIMEOUT \
+     (CONFIG_WATCHDOG_AUTOMONITOR_TIMEOUT)
 #  if !defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE) && \
       !defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
 #    if CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL == 0
@@ -65,9 +65,9 @@
          CONFIG_WATCHDOG_AUTOMONITOR_PING_INTERVAL
 #    endif
 #    define WATCHDOG_AUTOMONITOR_PING_INTERVAL_MSEC \
-       (WATCHDOG_AUTOMONITOR_PING_INTERVAL * MSEC_PER_SEC)
+       (WATCHDOG_AUTOMONITOR_PING_INTERVAL)
 #    define WATCHDOG_AUTOMONITOR_PING_INTERVAL_TICK \
-       SEC2TICK(WATCHDOG_AUTOMONITOR_PING_INTERVAL)
+       MSEC2TICK(WATCHDOG_AUTOMONITOR_PING_INTERVAL)
 #  endif
 #endif
 
@@ -276,7 +276,7 @@ watchdog_automonitor_start(FAR struct watchdog_upperhalf_s *upper)
       upper->monitor = true;
       if (lower->ops->settimeout)
         {
-          lower->ops->settimeout(lower, WATCHDOG_AUTOMONITOR_TIMEOUT_MSEC);
+          lower->ops->settimeout(lower, WATCHDOG_AUTOMONITOR_TIMEOUT);
         }
 
       lower->ops->start(lower);
