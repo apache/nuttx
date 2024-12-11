@@ -68,8 +68,14 @@ struct binary_s
 
   main_t entrypt;                      /* Entry point into a program module */
   FAR void *mapped;                    /* Memory-mapped, address space */
+
+#ifdef CONFIG_LIBC_MODLIB
   struct module_s mod;                 /* Module context */
+#endif
+
+#ifdef CONFIG_PIC
   FAR void *picbase;                   /* Position-independent */
+#endif
 
 #ifdef CONFIG_ARCH_ADDRENV
   /* Address environment.
