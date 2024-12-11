@@ -341,12 +341,18 @@ function(process_all_directory_romfs)
         DEPENDS ${dyn_deps})
       list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
     else()
+      list(FIND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} index)
+      if(index GREATER -1)
+        set(APPEND_OPTION APPEND)
+      else()
+        set(APPEND_OPTION)
+      endif()
       list(APPEND DEPENDS ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX})
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
         COMMAND
           ${CMAKE_COMMAND} -E copy ${SOURCE_ETC_PREFIX}/${SOURCE_ETC_SUFFIX}
-          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX}
+          ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX} ${APPEND_OPTION}
         DEPENDS ${dyn_deps})
       list(APPEND DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_ETC_SUFFIX})
     endif()
