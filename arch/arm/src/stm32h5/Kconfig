@@ -30,7 +30,7 @@ endchoice # STM32 H5 Chip Selection
 config STM32H5_STM32H5XXXX
 	bool
 	default n
-		select ARCH_HAVE_FPU
+	select ARCH_HAVE_FPU
 
 config STM32H5_STM32H56XXX
 	bool
@@ -278,8 +278,8 @@ config STM32H5_USART
 	default n
 
 config STM32H5_ADC
-        bool
-        default n
+	bool
+	default n
 
 config STM32H5_SPI
 	bool
@@ -292,14 +292,14 @@ config STM32H5_SPI_DMA
 # These are the peripheral selections proper
 
 config STM32H5_ADC1
-  bool "ADC1"
-  default n
-  select STM32H5_ADC
+	bool "ADC1"
+	default n
+	select STM32H5_ADC
 
 config STM32H5_ADC2
-  bool "ADC2"
-  default n
-  select STM32H5_ADC
+	bool "ADC2"
+	default n
+	select STM32H5_ADC
 
 config STM32H5_ETHMAC
 	bool "Ethernet MAC"
@@ -401,8 +401,8 @@ config STM32H5_LPUART1
 	select STM32H5_USART
 
 config STM32H5_I2C
-		bool
-		default n
+	bool
+	default n
 
 config STM32H5_I2C1
 	bool "I2C1"
@@ -470,7 +470,7 @@ config STM32H5_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	default y
 	---help---
-	Enable FLASH prefetch
+		Enable FLASH prefetch
 
 config STM32H5_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	bool "Disable IDLE Sleep (WFI) in debug mode"

@@ -24,25 +24,25 @@ config ESPRESSIF_TEMP
 		A built-in sensor used to measure the chip's internal temperature.
 
 config ESPRESSIF_I2C_PERIPH
-       bool
-       depends on (ESP32S3_I2C0 || ESP32S3_I2C1) || (ESP32_I2C0 || ESP32_I2C1) || (ESP32S2_I2C0 || ESP32S2_I2C1)
-       default n
+	bool
+	depends on (ESP32S3_I2C0 || ESP32S3_I2C1) || (ESP32_I2C0 || ESP32_I2C1) || (ESP32S2_I2C0 || ESP32S2_I2C1)
+	default n
 
 config ESPRESSIF_I2C_BITBANG
-       bool "I2C Bitbang"
-       default n
-       select I2C_BITBANG
-       select ESP32S3_I2C if ARCH_CHIP_ESP32S3
-	   select ESP32S2_I2C if ARCH_CHIP_ESP32S2
-	   select ESP32_I2C if ARCH_CHIP_ESP32
-       select I2C
-       select I2C_BITBANG
+	bool "I2C Bitbang"
+	default n
+	select I2C_BITBANG
+	select ESP32S3_I2C if ARCH_CHIP_ESP32S3
+	select ESP32S2_I2C if ARCH_CHIP_ESP32S2
+	select ESP32_I2C if ARCH_CHIP_ESP32
+	select I2C
+	select I2C_BITBANG
 	---help---
 		Software implemented I2C peripheral with GPIOs. Suggested to use if I2C peripherals are already in use.
 
 config ESPRESSIF_SPI_PERIPH
 	bool
-    depends on (ESP32S3_SPI2 || ESP32S3_SPI3) || (ESP32_SPI2 || ESP32_SPI3) || (ESP32S2_SPI2 || ESP32S2_SPI3)
+	depends on (ESP32S3_SPI2 || ESP32S3_SPI3) || (ESP32_SPI2 || ESP32_SPI3) || (ESP32S2_SPI2 || ESP32S2_SPI3)
 	default n
 
 config ESPRESSIF_SPI_BITBANG
@@ -109,14 +109,14 @@ menu "I2C bitbang configuration"
 	depends on ESPRESSIF_I2C_BITBANG
 
 config ESPRESSIF_I2C_BITBANG_SCLPIN
-       int "I2C Bitbang SCL Pin"
-       default 0
-       range 0 21
+	int "I2C Bitbang SCL Pin"
+	default 0
+	range 0 21
 
 config ESPRESSIF_I2C_BITBANG_SDAPIN
-       int "I2C Bitbang SDA Pin"
-       default 1
-       range 0 21
+	int "I2C Bitbang SDA Pin"
+	default 1
+	range 0 21
 
 endmenu # I2C bitbang configuration
 
