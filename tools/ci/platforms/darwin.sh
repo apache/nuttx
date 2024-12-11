@@ -37,6 +37,24 @@ add_path() {
   PATH=$1:${PATH}
 }
 
+arm_clang_toolchain() {
+  add_path "${NUTTXTOOLS}"/clang-arm-none-eabi/bin
+
+  if [ ! -f "${NUTTXTOOLS}/clang-arm-none-eabi/bin/clang" ]; then
+    local basefile
+    basefile=LLVMEmbeddedToolchainForArm-17.0.1-Darwin
+    cd "${NUTTXTOOLS}"
+    # Download the latest ARM clang toolchain prebuilt by ARM
+    curl -O -L -s https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-17.0.1/${basefile}.dmg
+    sudo hdiutil attach ${basefile}.dmg
+    sudo cp -R /Volumes/${basefile}/${basefile} "${NUTTXTOOLS}"/${basefile}
+    sudo mv ${basefile} clang-arm-none-eabi
+    rm ${basefile}.dmg
+  fi
+
+  command clang --version
+}
+
 arm_gcc_toolchain() {
   add_path "${NUTTXTOOLS}"/gcc-arm-none-eabi/bin
 
@@ -414,7 +432,7 @@ install_build_tools() {
   mkdir -p "${NUTTXTOOLS}"
   echo "#!/usr/bin/env sh" > "${NUTTXTOOLS}"/env.sh
 
-  install="ninja_brew autoconf_brew arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain xtensa_esp32s2_gcc_toolchain xtensa_esp32s3_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
+  install="ninja_brew autoconf_brew arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain avr_gcc_toolchain binutils bloaty elf_toolchain gen_romfs gperf kconfig_frontends mips_gcc_toolchain python_tools riscv_gcc_toolchain rust dlang zig xtensa_esp32_gcc_toolchain xtensa_esp32s2_gcc_toolchain xtensa_esp32s3_gcc_toolchain u_boot_tools util_linux wasi_sdk c_cache"
 
   mkdir -p "${NUTTXTOOLS}"/homebrew
   export HOMEBREW_CACHE=${NUTTXTOOLS}/homebrew
