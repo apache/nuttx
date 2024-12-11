@@ -114,7 +114,8 @@
 	.thumb_func
 	.type	exception_common, function
 exception_common:
-
+	.cfi_sections	.debug_frame
+	.cfi_startproc
 	mrs		r12, control				/* R12=control */
 
 	/* Complete the context save */
@@ -209,7 +210,11 @@ exception_common:
 	mov		sp, r2					/* Instantiate the aligned stack */
 3:
 #endif
-
+	mov		fp,	r1
+	.cfi_def_cfa	fp,	0				/* Register in fp, so we just set fp as frame */
+	.cfi_offset	pc,	REG_PC * 4
+	.cfi_offset	sp,	REG_SP * 4
+	.cfi_offset	lr,	REG_LR * 4
 	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 
 	/* On return from arm_doirq, R0 will hold a pointer to register context
@@ -255,7 +260,7 @@ exception_common:
 	 */
 
 	bx		r14					/* And return */
-
+	.cfi_endproc
 	.size	exception_common, .-exception_common
 
 /****************************************************************************
