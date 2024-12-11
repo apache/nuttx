@@ -161,7 +161,8 @@ static int rpmsgdev_open_handler(FAR struct rpmsg_endpoint *ept,
     }
 
   msg->header.result = file_open(&dev->file,
-                                 export->localpath,
+                                 export ? export->localpath :
+                                 strchr(ept->name, '/'),
                                  msg->flags, 0);
   if (msg->header.result < 0)
     {
