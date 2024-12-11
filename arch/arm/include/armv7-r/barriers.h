@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/barriers.h
+ * arch/arm/include/armv7-r/barriers.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_A_BARRIERS_H
-#define __ARCH_ARM_SRC_ARMV7_A_BARRIERS_H
+#ifndef __ARCH_ARM_INCLUDE_ARMV7_R_BARRIERS_H
+#define __ARCH_ARM_INCLUDE_ARMV7_R_BARRIERS_H
 
 /****************************************************************************
  * Included Files
@@ -31,7 +31,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* ARMv7-A memory barriers */
+/* ARMv7-R memory barriers */
 
 #define arm_dsb(n) __asm__ __volatile__ ("dsb " #n : : : "memory")
 #define arm_dmb(n) __asm__ __volatile__ ("dmb " #n : : : "memory")
@@ -39,10 +39,10 @@
 #define arm_nop()  __asm__ __volatile__ ("nop\n")
 #define arm_sev()  __asm__ __volatile__ ("sev\n")
 
-#define ARM_DSB()  arm_dsb(15)
-#define ARM_DMB()  arm_dmb(15)
-#define ARM_ISB()  arm_isb()
-#define ARM_NOP()  arm_nop()
-#define ARM_SEV()  arm_sev()
+#define UP_DSB()  arm_dsb(15)
+#define UP_DMB()  arm_dmb(15)
+#define UP_ISB()  arm_isb()
+#define UP_NOP()  arm_nop()
+#define UP_SEV()  arm_sev()
 
-#endif /* __ARCH_ARM_SRC_ARMV7_A_BARRIERS_H */
+#endif /* __ARCH_ARM_INCLUDE_ARMV7_R_BARRIERS_H */

@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
@@ -47,7 +48,6 @@
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #include "sam_pio.h"
 #include "sam_dmac.h"
@@ -117,10 +117,6 @@
 
 #define DMA_TIMEOUT_MS    (800)
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
-
-/* QSPI memory synchronization */
-
-#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* Debug ********************************************************************/
 
@@ -955,7 +951,7 @@ static int qspi_memory_dma(struct sam_qspidev_s *priv,
   qspi_putreg(priv, QSPI_CR_LASTXFER, SAM_QSPI_CR_OFFSET);
 
   while ((qspi_getreg(priv, SAM_QSPI_SR_OFFSET) & QSPI_SR_INSTRE) == 0);
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Dump the sampled DMA registers */
 
@@ -1016,7 +1012,7 @@ static int qspi_memory_nodma(struct sam_qspidev_s *priv,
                   meminfo->buflen);
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   /* Indicate the end of the transfer as soon as the transmission
    * registers are empty.
@@ -1520,7 +1516,7 @@ static int qspi_command(struct qspi_dev_s *dev,
                       (const uint8_t *) priv->membase, cmdinfo->buflen);
         }
 
-      MEMORY_SYNC();
+      UP_MB();
 
       /* Indicate the end of the transfer as soon as the transmission
        * registers are empty.
@@ -1553,7 +1549,7 @@ static int qspi_command(struct qspi_dev_s *dev,
              QSPI_IFR_NBDUM(0);
       qspi_putreg(priv, ifr, SAM_QSPI_IFR_OFFSET);
 
-      MEMORY_SYNC();
+      UP_MB();
 
       /* If the instruction frame does not include data, writing to the IFR
        * triggers sending of the instruction frame. Fall through to INSTRE

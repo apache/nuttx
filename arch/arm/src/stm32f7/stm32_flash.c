@@ -51,12 +51,11 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-
-#include "barriers.h"
 
 #include "hardware/stm32_flash.h"
 #include "stm32_waste.h"
@@ -411,7 +410,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
        * optimization).
        */
 
-      ARM_DSB();
+      UP_DSB();
 
       while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
         {

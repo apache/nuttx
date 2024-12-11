@@ -1,7 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/barriers.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/arm/include/barriers.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,25 +18,35 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV6_M_BARRIERS_H
-#define __ARCH_ARM_SRC_ARMV6_M_BARRIERS_H
+#ifndef __ARCH_ARM_INCLUDE_BARRIERS_H
+#define __ARCH_ARM_INCLUDE_BARRIERS_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#if defined(CONFIG_ARCH_ARMV7A)
+#  include <arch/armv7-a/barriers.h>
+#elif defined(CONFIG_ARCH_ARMV7R)
+#  include <arch/armv7-r/barriers.h>
+#elif defined(CONFIG_ARCH_ARMV8R)
+#  include <arch/armv8-r/barriers.h>
+#elif defined(CONFIG_ARCH_ARMV7M)
+#  include <arch/armv7-m/barriers.h>
+#elif defined(CONFIG_ARCH_ARMV8M)
+#  include <arch/armv8-m/barriers.h>
+#elif defined(CONFIG_ARCH_ARMV6M)
+#  include <arch/armv6-m/barriers.h>
+#else
+#  include <arch/arm/barriers.h>
+#endif
 
-/* ARMv6-M memory barriers */
+#define UP_MB() \
+  do            \
+    {           \
+      UP_DSB(); \
+      UP_ISB(); \
+    }           \
+  while (0)
 
-#define arm_dsb()  __asm__ __volatile__ ("dsb " : : : "memory")
-#define arm_isb()  __asm__ __volatile__ ("isb " : : : "memory")
-#define arm_dmb()  __asm__ __volatile__ ("dmb " : : : "memory")
-
-#define ARM_DSB()  arm_dsb()
-#define ARM_ISB()  arm_isb()
-#define ARM_DMB()  arm_dmb()
-
-#endif /* __ARCH_ARM_SRC_ARMV6_M_BARRIERS_H */
+#endif /* __ARCH_ARM_INCLUDE_BARRIERS_H */

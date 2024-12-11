@@ -31,13 +31,12 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
+#include <arch/barriers.h>
 #include <debug.h>
 
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
-
-#include "barriers.h"
 
 #include "hardware/rt106x/imxrt106x_memorymap.h"
 #include "arm_internal.h"

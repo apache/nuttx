@@ -32,8 +32,9 @@
 
 #include <nuttx/userspace.h>
 
+#include <arch/barriers.h>
+
 #include "mpu.h"
-#include "barriers.h"
 
 #include "hardware/imx9_memorymap.h"
 
@@ -104,7 +105,7 @@ void imx9_mpu_initialize(void)
 #ifdef CONFIG_ARMV7M_DCACHE
   /* Memory barrier */
 
-  ARM_DMB();
+  UP_DMB();
 #endif
 
 #ifdef CONFIG_BUILD_PROTECTED

@@ -33,8 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/wireless/ieee80211/bcmf_gspi.h>
-
-#include "barriers.h"
+#include <arch/barriers.h>
 
 #include "rp2040_cyw43439.h"
 #include "rp2040_pio.h"
@@ -499,7 +498,7 @@ static int my_write(struct gspi_dev_s   *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
-  ARM_DMB();
+  UP_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -524,7 +523,7 @@ static int my_write(struct gspi_dev_s   *gspi,
 
   /* Un-assert select by pulling line high. */
 
-  ARM_DMB();
+  UP_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controller */
@@ -725,7 +724,7 @@ static int my_read(struct gspi_dev_s   *gspi,
   /* Assert gpio_select by pulling line low */
 
   rp2040_gpio_put(rp_io->gpio_select, false);
-  ARM_DMB();
+  UP_DMB();
 
   /* Enable the state machine.  This starts the pio program running */
 
@@ -741,7 +740,7 @@ static int my_read(struct gspi_dev_s   *gspi,
 
   /* Un-assert select by pulling line high. */
 
-  ARM_DMB();
+  UP_DMB();
   rp2040_gpio_put(rp_io->gpio_select, true);
 
   /* Free the DMA controllers */

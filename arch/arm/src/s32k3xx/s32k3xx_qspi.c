@@ -38,6 +38,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
@@ -50,7 +51,6 @@
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
-#include "barriers.h"
 
 #ifdef CONFIG_S32K3XX_QSPI_DMA
 #include "hardware/s32k3xx_dmamux.h"
@@ -65,10 +65,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* QSPI memory synchronization */
-
-#define MEMORY_SYNC()     do { ARM_DSB(); ARM_ISB(); } while (0)
 
 /* LUT entries used for various command sequences                 */
 #define QSPI_LUT_READ        0U /* Quad Output read               */
@@ -736,7 +732,7 @@ static int qspi_receive_blocking(struct s32k3xx_qspidev_s *priv,
       up_clean_dcache((uintptr_t)S32K3XX_QSPI_RBDR(0),
                       (uintptr_t)S32K3XX_QSPI_RBDR(0) + readlen);
 
-      MEMORY_SYNC();
+      UP_MB();
 
       memcpy(data, (void *)S32K3XX_QSPI_RBDR(0), readlen);
       data += readlen;
@@ -1299,7 +1295,7 @@ static int qspi_command(struct qspi_dev_s *dev,
   /* Wait for the interrupt routine to finish it's magic */
 
   nxsem_wait(&priv->op_sem);
-  MEMORY_SYNC();
+  UP_MB();
 
   if (QSPICMD_ISREAD(cmdinfo->flags))
     {
@@ -1370,7 +1366,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 #endif
     }
 
-  MEMORY_SYNC();
+  UP_MB();
 
   return ret;
 }

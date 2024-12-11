@@ -30,9 +30,8 @@
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <arch/barriers.h>
 #include <arch/samv7/chip.h>
-
-#include "barriers.h"
 
 #include "hardware/sam_memorymap.h"
 

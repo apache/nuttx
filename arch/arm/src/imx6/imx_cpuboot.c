@@ -31,6 +31,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <arch/barriers.h>
 #include <arch/irq.h>
 
 #include "arm_internal.h"
@@ -40,7 +41,6 @@
 #include "scu.h"
 #include "gic.h"
 #include "mmu.h"
-#include "barriers.h"
 
 #ifdef CONFIG_SMP
 
@@ -209,7 +209,7 @@ void imx_cpu_enable(void)
 
       memcpy((uint32_t *)(PGTABLE_BASE_VADDR + PGTABLE_SIZE * cpu),
              (uint32_t *)PGTABLE_BASE_VADDR, PGTABLE_SIZE);
-      ARM_DSB();
+      UP_DSB();
 #endif
 
       /* Set the start up address */

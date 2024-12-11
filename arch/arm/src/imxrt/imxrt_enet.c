@@ -35,7 +35,6 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
-#include <barriers.h>
 #include <endian.h>
 
 #include <arpa/inet.h>
@@ -55,6 +54,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
+#include <arch/barriers.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -778,7 +778,7 @@ static int imxrt_transmit(struct imxrt_driver_s *priv)
 #ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
   /* Make sure that descriptors are flushed */
 
-  ARM_DSB();
+  UP_DSB();
 #else
   up_clean_dcache((uintptr_t)txdesc,
                   (uintptr_t)txdesc + sizeof(struct enet_desc_s));
@@ -1033,7 +1033,7 @@ static void imxrt_receive(struct imxrt_driver_s *priv)
           rxdesc->status1 |= RXDESC_E;
 
 #ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
-          ARM_DSB();
+          UP_DSB();
 #else
           up_clean_dcache((uintptr_t)rxdesc,
                           (uintptr_t)rxdesc + sizeof(struct enet_desc_s));
@@ -1473,7 +1473,7 @@ static int imxrt_ifup_action(struct net_driver_s *dev, bool resetphy)
 #ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
   /* Make sure that descriptors are flushed */
 
-  ARM_DSB();
+  UP_DSB();
 #endif
 
   /* Indicate that there have been empty receive buffers produced */

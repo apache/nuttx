@@ -281,8 +281,7 @@ void mpu_freeregion(unsigned int region)
   mpu_set_dracr(0);
   mpu_set_drsr(0);
   g_mpu_region &= ~(1 << region);
-  ARM_DSB();
-  ARM_ISB();
+  UP_MB();
 }
 
 /****************************************************************************

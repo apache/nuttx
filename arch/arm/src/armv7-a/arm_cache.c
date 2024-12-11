@@ -28,9 +28,9 @@
 #include <nuttx/cache.h>
 #include <nuttx/irq.h>
 #include <sys/param.h>
+#include <arch/barriers.h>
 
 #include "cp15_cacheops.h"
-#include "barriers.h"
 #include "l2cc.h"
 
 /****************************************************************************
