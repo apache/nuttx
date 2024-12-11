@@ -80,24 +80,30 @@ static int exec_internal(FAR const char *filename,
                          FAR const posix_spawn_file_actions_t *actions,
                          FAR const posix_spawnattr_t *attr, bool spawn)
 {
-  FAR struct binary_s *bin;
+  FAR struct binary_s *pbin;
   irqstate_t flags;
   int pid;
   int ret;
+#ifndef CONFIG_BINFMT_LOADABLE
+  struct binary_s bin;
+
+  pbin = &bin;
+#else
 
   /* Allocate the load information */
 
-  bin = kmm_zalloc(sizeof(struct binary_s));
-  if (!bin)
+  pbin = kmm_zalloc(sizeof(struct binary_s));
+  if (pbin == NULL)
     {
       berr("ERROR: Failed to allocate binary_s\n");
       ret = -ENOMEM;
       goto errout;
     }
+#endif
 
   /* Load the module into memory */
 
-  ret = load_module(bin, filename, exports, nexports);
+  ret = load_module(pbin, filename, exports, nexports);
   if (ret < 0)
     {
       berr("ERROR: Failed to load program '%s': %d\n", filename, ret);
@@ -110,18 +116,18 @@ static int exec_internal(FAR const char *filename,
     {
       if (attr->priority > 0)
         {
-          bin->priority = attr->priority;
+          pbin->priority = attr->priority;
         }
 
       if (attr->stacksize > 0)
         {
-          bin->stacksize = attr->stacksize;
+          pbin->stacksize = attr->stacksize;
         }
 
 #ifndef CONFIG_BUILD_KERNEL
       if (attr->stackaddr != NULL)
         {
-          bin->stackaddr = attr->stackaddr;
+          pbin->stackaddr = attr->stackaddr;
         }
 #endif
     }
@@ -136,7 +142,7 @@ static int exec_internal(FAR const char *filename,
 
   /* Then start the module */
 
-  pid = exec_module(bin, filename, argv, envp, actions, attr, spawn);
+  pid = exec_module(pbin, filename, argv, envp, actions, attr, spawn);
   if (pid < 0)
     {
       ret = pid;
@@ -150,18 +156,12 @@ static int exec_internal(FAR const char *filename,
    * when the task exists.
    */
 
-  ret = group_exitinfo(pid, bin);
+  ret = group_exitinfo(pid, pbin);
   if (ret < 0)
     {
       berr("ERROR: Failed to schedule unload '%s': %d\n", filename, ret);
+      goto errout_with_lock;
     }
-
-#else
-  /* Free the binary_s structure here */
-
-  kmm_free(bin);
-
-  /* TODO: How does the module get unloaded in this case? */
 
 #endif
 
@@ -172,10 +172,12 @@ static int exec_internal(FAR const char *filename,
 errout_with_lock:
   sched_unlock();
   leave_critical_section(flags);
-  unload_module(bin);
+  unload_module(pbin);
 errout_with_bin:
-  kmm_free(bin);
+#ifdef CONFIG_BINFMT_LOADABLE
+  kmm_free(pbin);
 errout:
+#endif
   return ret;
 }
 
