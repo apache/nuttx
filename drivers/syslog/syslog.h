@@ -230,6 +230,28 @@ int syslog_add_intbuffer(int ch);
 #ifdef CONFIG_SYSLOG_INTBUFFER
 int syslog_flush_intbuffer(bool force);
 #endif
+
+/****************************************************************************
+ * Name: syslog_write_foreach
+ *
+ * Description:
+ *   This provides a default write method for syslog devices that do not
+ *   support multiple byte writes  This functions simply loops, outputting
+ *   one character at a time.
+ *
+ * Input Parameters:
+ *   buffer - The buffer containing the data to be output
+ *   buflen - The number of bytes in the buffer
+ *   force  - Use the force() method of the channel vs. the putc() method.
+ *
+ * Returned Value:
+ *   On success, the number of characters written is returned.  A negated
+ *   errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+ssize_t syslog_write_foreach(FAR const char *buffer,
+                             size_t buflen, bool force);
 #endif /* CONFIG_SYSLOG */
 
 #undef EXTERN
