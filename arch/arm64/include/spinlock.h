@@ -61,11 +61,11 @@
  *            all memory accesses are complete
  */
 
-#define SP_DSB() __asm__ __volatile__ ("dsb sy" : : : "memory")
-#define SP_DMB() __asm__ __volatile__ ("dmb st" : : : "memory")
+#define UP_DSB() __asm__ __volatile__ ("dsb sy" : : : "memory")
+#define UP_DMB() __asm__ __volatile__ ("dmb st" : : : "memory")
 
-#define SP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
-#define SP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
+#define UP_WFE() __asm__ __volatile__ ("wfe" : : : "memory")
+#define UP_SEV() __asm__ __volatile__ ("sev" : : : "memory")
 
 #ifndef __ASSEMBLY__
 

@@ -156,7 +156,7 @@ static void arm64_start_cpu(int cpu_num)
       return;
     }
 #else
-  SP_SEV();
+  UP_SEV();
 #endif
 }
 

@@ -111,7 +111,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
   if (ret == SP_UNLOCKED)
     {
       *lock = SP_LOCKED;
-      SP_DMB();
+      UP_DMB();
     }
 
   /* Unlock hardware semaphore */

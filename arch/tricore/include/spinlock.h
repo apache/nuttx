@@ -47,8 +47,8 @@
  * barrier.
  */
 
-#define SP_DSB() __dsync()
-#define SP_DMB() __asm("":::"memory")
+#define UP_DSB() __dsync()
+#define UP_DMB() __asm("":::"memory")
 
 /****************************************************************************
  * Public Types

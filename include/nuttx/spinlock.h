@@ -63,22 +63,22 @@ extern "C"
  */
 
 #undef __SP_UNLOCK_FUNCTION
-#if !defined(SP_DMB)
-#  define SP_DMB()
+#if !defined(UP_DMB)
+#  define UP_DMB()
 #else
 #  define __SP_UNLOCK_FUNCTION 1
 #endif
 
-#if !defined(SP_DSB)
-#  define SP_DSB()
+#if !defined(UP_DSB)
+#  define UP_DSB()
 #endif
 
-#if !defined(SP_WFE)
-#  define SP_WFE()
+#if !defined(UP_WFE)
+#  define UP_WFE()
 #endif
 
-#if !defined(SP_SEV)
-#  define SP_SEV()
+#if !defined(UP_SEV)
+#  define UP_SEV()
 #endif
 
 #if !defined(__SP_UNLOCK_FUNCTION) && (defined(CONFIG_TICKET_SPINLOCK) || \
@@ -199,11 +199,11 @@ static inline_function void spin_lock_wo_note(FAR volatile spinlock_t *lock)
   while (up_testset(lock) == SP_LOCKED)
 #endif
     {
-      SP_DSB();
-      SP_WFE();
+      UP_DSB();
+      UP_WFE();
     }
 
-  SP_DMB();
+  UP_DMB();
 }
 #endif /* CONFIG_SPINLOCK */
 
@@ -280,11 +280,11 @@ spin_trylock_wo_note(FAR volatile spinlock_t *lock)
   if (up_testset(lock) == SP_LOCKED)
 #endif /* CONFIG_TICKET_SPINLOCK */
     {
-      SP_DSB();
+      UP_DSB();
       return false;
     }
 
-  SP_DMB();
+  UP_DMB();
   return true;
 }
 #endif /* CONFIG_SPINLOCK */
@@ -361,14 +361,14 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
 static inline_function void
 spin_unlock_wo_note(FAR volatile spinlock_t *lock)
 {
-  SP_DMB();
+  UP_DMB();
 #ifdef CONFIG_TICKET_SPINLOCK
   atomic_fetch_add(&lock->owner, 1);
 #else
   *lock = SP_UNLOCKED;
 #endif
-  SP_DSB();
-  SP_SEV();
+  UP_DSB();
+  UP_SEV();
 }
 #endif /* CONFIG_SPINLOCK */
 
@@ -686,8 +686,8 @@ static inline_function void read_lock(FAR volatile rwlock_t *lock)
       if (old <= RW_SP_WRITE_LOCKED)
         {
           DEBUGASSERT(old == RW_SP_WRITE_LOCKED);
-          SP_DSB();
-          SP_WFE();
+          UP_DSB();
+          UP_WFE();
         }
       else if(atomic_cmpxchg(lock, &old, old + 1))
         {
@@ -695,7 +695,7 @@ static inline_function void read_lock(FAR volatile rwlock_t *lock)
         }
     }
 
-  SP_DMB();
+  UP_DMB();
 }
 
 /****************************************************************************
@@ -738,7 +738,7 @@ static inline_function bool read_trylock(FAR volatile rwlock_t *lock)
         }
     }
 
-  SP_DMB();
+  UP_DMB();
   return true;
 }
 
@@ -763,10 +763,10 @@ static inline_function void read_unlock(FAR volatile rwlock_t *lock)
 {
   DEBUGASSERT(atomic_read(lock) >= RW_SP_READ_LOCKED);
 
-  SP_DMB();
+  UP_DMB();
   atomic_fetch_sub(lock, 1);
-  SP_DSB();
-  SP_SEV();
+  UP_DSB();
+  UP_SEV();
 }
 
 /****************************************************************************
@@ -800,11 +800,11 @@ static inline_function void write_lock(FAR volatile rwlock_t *lock)
 
   while (!atomic_cmpxchg(lock, &zero, RW_SP_WRITE_LOCKED))
     {
-      SP_DSB();
-      SP_WFE();
+      UP_DSB();
+      UP_WFE();
     }
 
-  SP_DMB();
+  UP_DMB();
 }
 
 /****************************************************************************
@@ -838,11 +838,11 @@ static inline_function bool write_trylock(FAR volatile rwlock_t *lock)
 
   if (atomic_cmpxchg(lock, &zero, RW_SP_WRITE_LOCKED))
     {
-      SP_DMB();
+      UP_DMB();
       return true;
     }
 
-  SP_DSB();
+  UP_DSB();
   return false;
 }
 
@@ -869,10 +869,10 @@ static inline_function void write_unlock(FAR volatile rwlock_t *lock)
 
   DEBUGASSERT(atomic_read(lock) == RW_SP_WRITE_LOCKED);
 
-  SP_DMB();
+  UP_DMB();
   atomic_set(lock, RW_SP_UNLOCKED);
-  SP_DSB();
-  SP_SEV();
+  UP_DSB();
+  UP_SEV();
 }
 
 /****************************************************************************

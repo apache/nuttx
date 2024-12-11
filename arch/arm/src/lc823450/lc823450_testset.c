@@ -81,7 +81,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
     }
   while (getreg32(MUTEX_REG_MUTEX0) != val);
 
-  SP_DMB();
+  UP_DMB();
 
   ret = *lock;
 
@@ -90,7 +90,7 @@ spinlock_t up_testset(volatile spinlock_t *lock)
       *lock = SP_LOCKED;
     }
 
-  SP_DMB();
+  UP_DMB();
 
   val = (this_cpu() << 16) | 0x0;
   putreg32(val, MUTEX_REG_MUTEX0);
