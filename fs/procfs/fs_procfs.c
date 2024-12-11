@@ -787,9 +787,24 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 static int procfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
+  FAR struct procfs_dir_priv_s *dirpriv;
+  int ret = OK;
+
   DEBUGASSERT(mountpt && dir);
-  fs_heap_free(dir);
-  return OK;
+
+  dirpriv = (FAR struct procfs_dir_priv_s *)dir;
+
+  if (dirpriv->procfsentry != NULL &&
+      dirpriv->procfsentry->ops->closedir != NULL)
+    {
+      ret = dirpriv->procfsentry->ops->closedir(dir);
+    }
+  else
+    {
+      fs_heap_free(dir);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
