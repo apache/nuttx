@@ -403,10 +403,6 @@ static ssize_t noteram_get(FAR struct noteram_driver_s *drv,
 
   if (buflen < notelen)
     {
-      /* Skip the large note so that we do not get constipated. */
-
-      drv->ni_read = noteram_next(drv, read, NOTE_ALIGN(notelen));
-
       /* and return an error */
 
       return -EFBIG;
