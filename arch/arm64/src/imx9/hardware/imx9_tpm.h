@@ -160,7 +160,7 @@
 
 /* FILTER */
 
-#define TPM_FILTER_CHXFVAL_MASK(ch)   (0xf << ((ch) * 4))) /* Channel filter value */
+#define TPM_FILTER_CHXFVAL_MASK(ch)   (0xf << ((ch) * 4)) /* Channel filter value */
 
 /* QDCTRL */
 
