@@ -62,7 +62,6 @@
 
 static int nxsem_trywait_slow(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb;
   irqstate_t flags;
   int32_t semcount;
   int ret;
@@ -72,7 +71,6 @@ static int nxsem_trywait_slow(FAR sem_t *sem)
    */
 
   flags = enter_critical_section();
-  rtcb = this_task();
 
   /* If the semaphore is available, give it to the requesting task */
 
@@ -99,7 +97,6 @@ static int nxsem_trywait_slow(FAR sem_t *sem)
     }
 
   nxsem_add_holder(sem);
-  rtcb->waitobj = NULL;
 
   /* Interrupts may now be enabled. */
 
