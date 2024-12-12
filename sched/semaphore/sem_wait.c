@@ -70,7 +70,7 @@
 
 static int nxsem_wait_slow(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *rtcb;
   irqstate_t flags;
   int ret;
 
@@ -98,7 +98,6 @@ static int nxsem_wait_slow(FAR sem_t *sem)
         }
 
       nxsem_add_holder(sem);
-      rtcb->waitobj = NULL;
     }
 
   /* The semaphore is NOT available, We will have to block the
@@ -110,6 +109,7 @@ static int nxsem_wait_slow(FAR sem_t *sem)
 #ifdef CONFIG_PRIORITY_INHERITANCE
       uint8_t prioinherit = sem->flags & SEM_PRIO_MASK;
 #endif
+      rtcb = this_task();
 
       /* First, verify that the task is not already waiting on a
        * semaphore
