@@ -63,12 +63,14 @@ enum rpmsg_port_spi_cmd_e
   RPMSG_PORT_SPI_CMD_CONNECT = 0x01,
   RPMSG_PORT_SPI_CMD_AVAIL,
   RPMSG_PORT_SPI_CMD_DATA,
+  RPMSG_PORT_SPI_CMD_SHUTDOWN,
 };
 
 enum rpmsg_port_spi_state_e
 {
   RPMSG_PORT_SPI_STATE_UNCONNECTED  = 0x01,
   RPMSG_PORT_SPI_STATE_CONNECTING,
+  RPMSG_PORT_SPI_STATE_RECONNECTING,
   RPMSG_PORT_SPI_STATE_DISCONNECTING,
   RPMSG_PORT_SPI_STATE_CONNECTED,
 };
@@ -99,7 +101,7 @@ struct rpmsg_port_spi_s
   FAR struct rpmsg_port_header_s *rxhdr;
 
   rpmsg_port_rx_cb_t             rxcb;
-  uint8_t                        state;
+  volatile uint8_t               state;
 
   /* Used for flow control */
 
@@ -316,7 +318,7 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
       rpspi->txavail = rpspi->rxhdr->avail;
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
         {
-          rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
+          rpspi->state = RPMSG_PORT_SPI_STATE_RECONNECTING;
 
           /* Drop all the unprocessed rxq buffer and pre-send txq buffer
            * when a reconnect request to be received.
@@ -334,6 +336,12 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
 
   if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
     {
+      if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
+        {
+          rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
+          rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_ALL);
+        }
+
       rpmsg_port_queue_add_buffer(&rpspi->port.rxq, rpspi->rxhdr);
       rpspi->rxhdr = rpmsg_port_queue_get_available_buffer(
         &rpspi->port.rxq, false);
@@ -406,16 +414,26 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
   switch (rxhdr->cmd)
     {
       case RPMSG_PORT_SPI_CMD_CONNECT:
-        if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
+        if (rpspi->state == RPMSG_PORT_SPI_STATE_RECONNECTING)
           {
             rpmsg_port_unregister(&rpspi->port);
 
-            /* Trigger a transmission for reconnection */
+            /* Do not trigger the reconnect if a shut down cmd has been
+             * received during the unregister process
+             */
 
-            rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
-            IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+            if (rpspi->state == RPMSG_PORT_SPI_STATE_RECONNECTING)
+              {
+                rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+                IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+              }
+            else
+              {
+                rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+                IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
+              }
           }
-        else
+        else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTING)
           {
             rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTED;
             rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
@@ -426,6 +444,13 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
 
       case RPMSG_PORT_SPI_CMD_DATA:
         rpspi->rxcb(&rpspi->port, rxhdr);
+        break;
+
+      case RPMSG_PORT_SPI_CMD_SHUTDOWN:
+        rpmsg_port_unregister(&rpspi->port);
+        rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+        IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
+        rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
         break;
 
       default:
