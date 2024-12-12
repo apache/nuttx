@@ -410,7 +410,11 @@ struct sigaction
   } sa_u;
   sigset_t          sa_mask;
   int               sa_flags;
-  FAR void         *sa_user; /* Passed to siginfo.si_user (non-standard) */
+  union
+  {
+    CODE void (*sa_restorer)(void);
+    FAR void         *sa_user; /* Passed to siginfo.si_user (non-standard) */
+  };
 };
 
 /* Definitions that adjust the non-standard naming */
