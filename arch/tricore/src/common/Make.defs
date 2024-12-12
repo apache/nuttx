@@ -41,7 +41,6 @@ CMN_CSRCS += tricore_schedulesigaction.c
 CMN_CSRCS += tricore_sigdeliver.c
 CMN_CSRCS += tricore_stackframe.c
 CMN_CSRCS += tricore_svcall.c
-CMN_CSRCS += tricore_switchcontext.c
 CMN_CSRCS += tricore_tcbinfo.c
 CMN_CSRCS += tricore_trapcall.c
 CMN_CSRCS += tricore_systimer.c
