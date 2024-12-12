@@ -174,10 +174,6 @@ else
 endif
 endif
 
-ifeq ($(CONFIG_SENSORS_BMM150),y)
-  CSRCS += bmm150.c
-endif
-
 ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += bmp180_base.c
 ifeq ($(CONFIG_SENSORS_BMP180_UORB),y)
