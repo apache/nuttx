@@ -201,7 +201,8 @@ static inline size_t nvs_buffer_size(FAR struct nvs_fs *fs)
 static inline bool nvs_ate_expired(FAR struct nvs_fs *fs,
                                    FAR struct nvs_ate *entry)
 {
-  return entry->expired[nvs_align_up(fs, sizeof(*entry))] != fs->erasestate;
+  return entry->expired[nvs_align_up(fs, sizeof(*entry)) - sizeof(*entry)] !=
+         fs->erasestate;
 }
 
 /****************************************************************************
