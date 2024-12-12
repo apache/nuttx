@@ -395,6 +395,13 @@ config ESPRESSIF_EFUSE
 	---help---
 		Enable efuse support.
 
+config ESPRESSIF_EFUSE_VIRTUAL
+	bool "Virtual EFUSE support"
+	depends on ESPRESSIF_EFUSE
+	default n
+	---help---
+		Enable virtual efuse support to simulate eFuse operations in RAM, changes will be reverted each reboot
+
 config ESPRESSIF_HR_TIMER
 	bool
 	default RTC_DRIVER
