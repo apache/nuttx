@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <poll.h>
 #include <errno.h>
+#include <sched.h>
 #include <string.h>
 #include <nuttx/debug.h>
 
@@ -42,10 +43,19 @@
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/tls.h>
 
 #include "inode/inode.h"
 #include "fs_heap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_EPOLL_NPOLLWAITERS
+#  define CONFIG_EPOLL_NPOLLWAITERS 2
+#endif
 
 /****************************************************************************
  * Private Types
@@ -90,6 +100,8 @@ struct epoll_head_s
                                    * first node, used to free the malloced
                                    * memory in epoll_do_close().
                                    */
+  spinlock_t            poll_lock;
+  FAR struct pollfd_s  *fds[CONFIG_EPOLL_NPOLLWAITERS];
 };
 
 typedef struct epoll_head_s epoll_head_t;
@@ -231,10 +243,119 @@ static int epoll_do_close(FAR struct file *filep)
   return ret;
 }
 
+/****************************************************************************
+ * Name: epoll_notify
+ ****************************************************************************/
+
+static void epoll_notify(FAR epoll_head_t *eph, pollevent_t eventset)
+{
+  irqstate_t flags;
+  int i;
+
+  /* Called for every member notification; most epoll fds are never
+   * polled themselves, so skip the locking when no one waits.
+   */
+
+  for (i = 0; i < CONFIG_EPOLL_NPOLLWAITERS; i++)
+    {
+      if (eph->fds[i] != NULL)
+        {
+          break;
+        }
+    }
+
+  if (i == CONFIG_EPOLL_NPOLLWAITERS)
+    {
+      return;
+    }
+
+  sched_lock();
+  flags = spin_lock_irqsave(&eph->poll_lock);
+  poll_notify(eph->fds, CONFIG_EPOLL_NPOLLWAITERS, eventset);
+  spin_unlock_irqrestore(&eph->poll_lock, flags);
+  sched_unlock();
+}
+
 static int epoll_do_poll(FAR struct file *filep,
                          FAR struct pollfd_s *fds, bool setup)
 {
-  return OK;
+  FAR epoll_head_t *eph = filep->f_priv;
+  irqstate_t flags;
+  int ret = OK;
+  int i;
+
+  flags = spin_lock_irqsave(&eph->poll_lock);
+  if (setup)
+    {
+      FAR epoll_node_t *epn;
+      pollevent_t eventset = 0;
+
+      for (i = 0; i < CONFIG_EPOLL_NPOLLWAITERS; i++)
+        {
+          if (eph->fds[i] == NULL)
+            {
+              eph->fds[i] = fds;
+              fds->priv   = &eph->fds[i];
+              break;
+            }
+        }
+
+      if (i == CONFIG_EPOLL_NPOLLWAITERS)
+        {
+          fds->priv = NULL;
+          ret       = -EBUSY;
+          goto errout;
+        }
+
+      spin_unlock_irqrestore(&eph->poll_lock, flags);
+
+      nxmutex_lock(&eph->lock);
+
+      list_for_every_entry(&eph->setup, epn, epoll_node_t, node)
+        {
+          /* Only check the notified fd */
+
+          if (!epn->notified)
+            {
+              continue;
+            }
+
+          if (epn->pfd.revents != 0)
+            {
+              eventset |= POLLIN;
+            }
+        }
+
+      nxmutex_unlock(&eph->lock);
+
+      epoll_notify(eph, eventset);
+    }
+  else
+    {
+      /* This is a request to tear down the poll. */
+
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
+
+#ifdef CONFIG_DEBUG_FEATURES
+      if (slot == NULL)
+        {
+          ret = -EIO;
+          goto errout;
+        }
+#endif
+
+      /* Remove all memory of the poll setup */
+
+      *slot     = NULL;
+      fds->priv = NULL;
+      spin_unlock_irqrestore(&eph->poll_lock, flags);
+    }
+
+  return ret;
+
+errout:
+  spin_unlock_irqrestore(&eph->poll_lock, flags);
+  return ret;
 }
 
 static int epoll_do_create(int size, int flags)
@@ -264,6 +385,7 @@ static int epoll_do_create(int size, int flags)
   eph->size = size;
   nxmutex_init(&eph->lock);
   nxsem_init(&eph->sem, 0, 0);
+  spin_lock_init(&eph->poll_lock);
 
   /* List initialize */
 
@@ -451,6 +573,8 @@ static void epoll_default_cb(FAR struct pollfd_s *fds)
         {
           nxsem_post(&epn->eph->sem);
         }
+
+      epoll_notify(epn->eph, POLLIN);
     }
 }
 
