@@ -242,6 +242,8 @@
 #define SOL_SCO         17 /* See options in include/netpacket/bluetooth.h */
 #define SOL_RFCOMM      18 /* See options in include/netpacket/bluetooth.h */
 
+#define SOL_PACKET      19
+
 /* Protocol-level socket options may begin with this value */
 
 #define __SO_PROTOCOL  16
