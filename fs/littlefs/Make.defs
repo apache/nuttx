@@ -41,12 +41,17 @@ VPATH += :littlefs/littlefs
 # cf. https://github.com/littlefs-project/littlefs/pull/873
 CFLAGS += -Wno-shadow
 
+ifeq ($(CONFIG_FS_LITTLEFS_HAS_LFS_DEFINES),y)
+CFLAGS += -DLFS_DEFINES=../lfs_nuttx_defines.h
+else
 CFLAGS += -DLFS_TRACE=finfo
 CFLAGS += -DLFS_DEBUG=finfo
 CFLAGS += -DLFS_WARN=fwarn
 CFLAGS += -DLFS_ERROR=ferr
 CFLAGS += -DLFS_ASSERT=DEBUGASSERT
 CFLAGS += -DLFS_CONFIG=../lfs_vfs.h
+endif
+
 CFLAGS += -DLFS_NAME_MAX=$(CONFIG_FS_LITTLEFS_NAME_MAX)
 CFLAGS += -DLFS_FILE_MAX=$(CONFIG_FS_LITTLEFS_FILE_MAX)
 CFLAGS += -DLFS_ATTR_MAX=$(CONFIG_FS_LITTLEFS_ATTR_MAX)
