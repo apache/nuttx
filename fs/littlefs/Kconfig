@@ -129,6 +129,18 @@ config FS_LITTLEFS_LOCAL_PATCHES
 		patches for LITTLEFS.
 		This is NOT expected to be tweaked directly by users.
 
+config FS_LITTLEFS_HAS_LFS_DEFINES
+	bool "Use LFS_DEFINES (available for littlefs >=2.10.0)"
+	depends on !FS_LITTLEFS_LOCAL_PATCHES
+	default y
+	---help---
+		Set this y if you are using littlefs versions which supports
+		LFS_DEFINES. (that is, 2.10.0 and later)
+		Otherwise, set this n.
+
+		See the littlefs 2.10.0 release notes about what LFS_DEFINES is.
+		https://github.com/littlefs-project/littlefs/releases/tag/v2.10.0
+
 config FS_LITTLEFS_ATTR_UPDATE
 	bool "LITTLEFS update attributes"
 	depends on FS_LITTLEFS_ATTR_MAX > 0
