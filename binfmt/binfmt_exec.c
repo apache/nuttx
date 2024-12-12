@@ -88,6 +88,7 @@ static int exec_internal(FAR const char *filename,
   struct binary_s sbin;
 
   bin = &sbin;
+  memset(bin, 0, sizeof(*bin));
 #else
 
   /* Allocate the load information */
