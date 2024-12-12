@@ -46,6 +46,7 @@
 #include "hal/efuse_hal.h"
 #include "esp_efuse_table.h"
 #include "esp_efuse_chip.h"
+#include "esp_efuse_utility.h"
 
 /****************************************************************************
  * Private Types
@@ -255,6 +256,10 @@ int esp_efuse_initialize(const char *devpath)
 
       ret = -EEXIST;
     }
+
+#ifdef CONFIG_ESPRESSIF_EFUSE_VIRTUAL
+  esp_efuse_utility_update_virt_blocks();
+#endif
 
   return ret;
 }
