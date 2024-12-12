@@ -226,12 +226,14 @@ ninja_brew() {
 }
 
 python_tools() {
-  # Python User Env
-  export PIP_USER=yes
-  export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal
-  echo "export PIP_USER=yes" >> "${NUTTXTOOLS}"/env.sh
-  echo "export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal" >> "${NUTTXTOOLS}"/env.sh
-  add_path "${PYTHONUSERBASE}"/bin
+  if [ -z "${VIRTUAL_ENV}" ]; then
+    # Python User Env
+    export PIP_USER=yes
+    export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal
+    echo "export PIP_USER=yes" >> "${NUTTXTOOLS}"/env.sh
+    echo "export PYTHONUSERBASE=${NUTTXTOOLS}/pylocal" >> "${NUTTXTOOLS}"/env.sh
+    add_path "${PYTHONUSERBASE}"/bin
+  fi
   
   if [ "X$osarch" == "Xarm64" ]; then
     python3 -m venv --system-site-packages /opt/homebrew
