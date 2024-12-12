@@ -131,20 +131,8 @@
 
 /* Context switching */
 
-#ifndef tricore_fullcontextrestore
-#  define tricore_fullcontextrestore(restoreregs) \
-    sys_call1(SYS_restore_context, (uintptr_t)restoreregs);
-#else
-extern void tricore_fullcontextrestore(uintptr_t *restoreregs);
-#endif
-
-#ifndef tricore_switchcontext
-#  define tricore_switchcontext(saveregs, restoreregs) \
-    sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs);
-#else
-extern void tricore_switchcontext(uintptr_t **saveregs,
-                                  uintptr_t *restoreregs);
-#endif
+#define tricore_fullcontextrestore(restoreregs) \
+  sys_call1(SYS_restore_context, (uintptr_t)restoreregs);
 
 /****************************************************************************
  * Public Types

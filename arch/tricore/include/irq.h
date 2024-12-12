@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #ifndef __ASSEMBLY__
 #  include <stdbool.h>
+#  include <syscall.h>
 #endif
 
 /* Include NuttX-specific IRQ definitions */
@@ -210,6 +211,20 @@ static inline_function uintptr_t up_getusrsp(void *regs)
 }
 
 #endif /* __ASSEMBLY__ */
+
+/****************************************************************************
+ * Name: up_switch_context
+ ****************************************************************************/
+
+#define up_switch_context(tcb, rtcb)                              \
+  do {                                                            \
+    if (!up_interrupt_context())                                  \
+      {                                                           \
+        nxsched_switch_context(rtcb, tcb);                        \
+        sys_call2(SYS_switch_context, (uintptr_t)&rtcb->xcp.regs, \
+                  (uintptr_t)tcb->xcp.regs);                      \
+      }                                                           \
+  } while (0)
 
 /****************************************************************************
  * Name: up_getusrpc
