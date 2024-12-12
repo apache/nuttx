@@ -50,7 +50,8 @@
 #define RPMSG_PORT_UART_SUSPEND            0x7b
 #define RPMSG_PORT_UART_RESUME             0x7a
 #define RPMSG_PORT_UART_WAKEUP             0x79
-#define RPMSG_PORT_UART_END                0x78
+#define RPMSG_PORT_UART_POWEROFF           0x78
+#define RPMSG_PORT_UART_END                0x77
 #define RPMSG_PORT_UART_ESCAPE_MASK        0x20
 
 #define RPMSG_PORT_UART_BUFLEN             256
@@ -381,6 +382,13 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
             {
               rpmsgdbg("Received resume command\n");
               nxsem_post(&rpuart->wake);
+              continue;
+            }
+          else if (buf[i] == RPMSG_PORT_UART_POWEROFF)
+            {
+              rpmsgdbg("Received poweroff command\n");
+              rpmsg_port_unregister(&rpuart->port);
+              rpuart->connected = false;
               continue;
             }
 
