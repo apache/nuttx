@@ -82,26 +82,26 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
        * released, At this point we should return a null pointer
        */
 
-      if (filep->f_refs == 0)
+      if (atomic_read(&filep->f_refs) == 0)
         {
           filep = NULL;
         }
       else
         {
-          filep->f_refs++;
+          atomic_fetch_add(&filep->f_refs, 1);
         }
     }
   else if (new == NULL)
     {
       filep = NULL;
     }
-  else if (filep->f_refs)
+  else if (atomic_read(&filep->f_refs))
     {
-      filep->f_refs++;
+      atomic_fetch_add(&filep->f_refs, 1);
     }
   else
     {
-      filep->f_refs = 2;
+      atomic_set(&filep->f_refs, 2);
       *new = true;
     }
 #else
@@ -617,7 +617,7 @@ int file_allocate_from_tcb(FAR struct tcb_s *tcb, FAR struct inode *inode,
               filep->f_inode       = inode;
               filep->f_priv        = priv;
 #ifdef CONFIG_FS_REFCOUNT
-              filep->f_refs        = 1;
+              atomic_set(&filep->f_refs, 1);
 #endif
 #ifdef CONFIG_FDSAN
               filep->f_tag_fdsan   = 0;
@@ -847,12 +847,8 @@ void fs_reffilep(FAR struct file *filep)
 {
   /* This interface is used to increase the reference count of filep */
 
-  irqstate_t flags;
-
   DEBUGASSERT(filep);
-  flags = spin_lock_irqsave(NULL);
-  filep->f_refs++;
-  spin_unlock_irqrestore(NULL, flags);
+  atomic_fetch_add(&filep->f_refs, 1);
 }
 
 /****************************************************************************
@@ -869,20 +865,13 @@ void fs_reffilep(FAR struct file *filep)
 
 int fs_putfilep(FAR struct file *filep)
 {
-  irqstate_t flags;
   int ret = 0;
-  int refs;
 
   DEBUGASSERT(filep);
-  flags = spin_lock_irqsave(NULL);
-
-  refs = --filep->f_refs;
-
-  spin_unlock_irqrestore(NULL, flags);
 
   /* If refs is zero, the close() had called, closing it now. */
 
-  if (refs == 0)
+  if (atomic_fetch_sub(&filep->f_refs, 1) == 0)
     {
       ret = file_close(filep);
       if (ret < 0)

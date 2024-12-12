@@ -50,6 +50,7 @@
 #include <nuttx/queue.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock_type.h>
+#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -461,7 +462,7 @@ struct file
 {
   int               f_oflags;   /* Open mode flags */
 #ifdef CONFIG_FS_REFCOUNT
-  int               f_refs;     /* Reference count */
+  atomic_t          f_refs;     /* Reference count */
 #endif
   off_t             f_pos;      /* File position */
   FAR struct inode *f_inode;    /* Driver or file system interface */
