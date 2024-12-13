@@ -24,6 +24,13 @@ endif
 
 ifeq ($(CONFIG_COVERAGE_MINI)$(CONFIG_ARCH_TOOLCHAIN_GCC),yy)
 CSRCS += gcov.c
+
+GCOV_CFLAGS += -fno-profile-arcs -fno-test-coverage
+GCOV_CFLAGS += -fno-stack-protector
+
+bin/gcov.o: CFLAGS += $(GCOV_CFLAGS)
+kbin/gcov.o: CFLAGS += $(GCOV_CFLAGS)
+
 endif
 
 DEPPATH += --dep-path libgcc
