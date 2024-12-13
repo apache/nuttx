@@ -213,6 +213,11 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   /* Get the sectors per cluster */
 
   fs->fs_fatsecperclus = FBR_GETSECPERCLUS(fs->fs_buffer);
+  if (fs->fs_fatsecperclus == 0)
+    {
+      fwarn("WARNING: sectors per cluster cannot be 0\n");
+      return -EINVAL;
+    }
 
   /* Calculate the number of clusters */
 
