@@ -751,7 +751,7 @@ endif()
 # Generate system map using the compiler toolchain. Conventionally, the tool
 # which dump symbols are called nm, though, some compiler toolchain may have a
 # different name.
-if(NOT WIN32)
+if(NOT CMAKE_HOST_WIN32)
   add_custom_command(
     OUTPUT System.map
     COMMAND
