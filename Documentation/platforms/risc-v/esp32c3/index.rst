@@ -287,7 +287,7 @@ Peripheral  Support NOTES
 =========== ======= ====================
 ADC          No
 AES          No
-Bluetooth    No
+Bluetooth    Yes
 CAN/TWAI     Yes
 CDC Console  Yes    Rev.3
 DMA          Yes
