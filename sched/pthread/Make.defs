@@ -32,7 +32,7 @@ CSRCS += pthread_completejoin.c pthread_findjoininfo.c
 CSRCS += pthread_release.c pthread_setschedprio.c
 
 ifneq ($(CONFIG_PTHREAD_MUTEX_UNSAFE),y)
-CSRCS += pthread_mutex.c pthread_mutexconsistent.c pthread_mutexinconsistent.c
+CSRCS += pthread_mutex.c pthread_mutexconsistent.c
 endif
 
 ifeq ($(CONFIG_SMP),y)
