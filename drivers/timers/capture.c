@@ -391,6 +391,22 @@ static int cap_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       default:
         {
           cperr("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
+
+          /* Unrecognized cmd will be forwarded to lower half driver for
+           * specific use cases (e.g Pulse Counter (PCNT))
+           */
+
+          FAR unsigned long int *ptr =
+                     (FAR unsigned long int *)arg;
+          for (i = 0; i < upper->nchan; i++)
+            {
+              ret = lower[i]->ops->ioctl(lower[i], cmd,
+                                         (unsigned long)&ptr[i]);
+              if (ret < 0)
+                {
+                  break;
+                }
+            }
         }
         break;
     }

@@ -36,10 +36,84 @@
 
 /* IOCTL Commands ***********************************************************/
 
+/* Command:     CAPIOC_DUTYCYCLE
+ * Description: Get the pwm duty from the capture.
+ * Arguments:   int8_t pointer to the location to return the duty.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
 #define CAPIOC_DUTYCYCLE _CAPIOC(1)
+
+/* Command:     CAPIOC_FREQUENCE
+ * Description: Get the pulse frequence from the capture.
+ * Arguments:   int32_t pointer to the location to return the frequence.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
 #define CAPIOC_FREQUENCE _CAPIOC(2)
+
+/* Command:     CAPIOC_EDGES
+ * Description: Get the pwm edges from the capture.
+ * Arguments:   int32_t pointer to the location to return the edges.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
 #define CAPIOC_EDGES     _CAPIOC(3)
+
+/* Command:     CAPIOC_ALL
+ * Description: Get the pwm duty, pulse frequence, pwm edges, from
+ *              the capture.
+ * Arguments:   A reference to struct cap_all_s.
+ * Return:      Zero (OK) on success.  Minus one will be returned on failure
+ *              with the errno value set appropriately.
+ */
+
 #define CAPIOC_ALL       _CAPIOC(4)
+
+/* Command:     CAPIOC_PULSES
+ * Description: Read pulse count value.
+ * Arguments:   Int pointer to the location to return the count value.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_PULSES    _CAPIOC(5)
+
+/* Command:     CAPIOC_CLR_CNT
+ * Description: Clear pulse count value. Stop counting and then starting
+ *              back holds previous count value.
+ * Arguments:   None.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_CLR_CNT   _CAPIOC(6)
+
+/* Command:     CAPIOC_FILTER
+ * Description: Configures glitch filter.
+ * Arguments:   uint32_t for glitch filter value in ns
+ *              or 0 for disable.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_FILTER    _CAPIOC(7)
+
+/* Command:     CAPIOC_HANDLER
+ * Description: Set user function on event callback.
+ * Arguments:   xcpt_t type for callback function or NULL
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_HANDLER   _CAPIOC(8)
+
+/* Command:     CAPIOC_ADD_WP
+ * Description: Add wacthpoint to unit.
+ * Arguments:   Int value to watch.
+ * Return:      OK on success; ERROR on failure.
+ */
+
+#define CAPIOC_ADD_WP    _CAPIOC(9)
 
 /****************************************************************************
  * Public Types
@@ -83,6 +157,11 @@ struct cap_ops_s
 
   CODE int (*getedges)(FAR struct cap_lowerhalf_s *lower,
                        FAR uint32_t *edges);
+
+  /* Lower-half logic may support platform-specific ioctl commands */
+
+  CODE int (*ioctl)(FAR struct cap_lowerhalf_s *dev,
+                    int cmd, unsigned long arg);
 };
 
 /* This structure provides the publicly visible representation of the
