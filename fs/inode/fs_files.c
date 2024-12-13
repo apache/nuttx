@@ -379,7 +379,6 @@ void files_initlist(FAR struct filelist *list)
    */
 
   list->fl_rows = 1;
-  list->fl_crefs = 1;
   list->fl_files = &list->fl_prefile;
   list->fl_prefile = list->fl_prefiles;
   spin_lock_init(&list->fl_lock);
@@ -458,34 +457,6 @@ void files_dumplist(FAR struct filelist *list)
 #endif
 
 /****************************************************************************
- * Name: files_getlist
- *
- * Description:
- *   Get the list of files by tcb.
- *
- * Assumptions:
- *   Called during task deletion in a safe context.
- *
- ****************************************************************************/
-
-FAR struct filelist *files_getlist(FAR struct tcb_s *tcb)
-{
-  FAR struct filelist *list;
-
-  if (tcb->group != NULL)
-    {
-      list = &tcb->group->tg_filelist;
-      if (list->fl_crefs > 0)
-        {
-          list->fl_crefs++;
-          return list;
-        }
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
  * Name: files_putlist
  *
  * Description:
@@ -500,12 +471,6 @@ void files_putlist(FAR struct filelist *list)
 {
   int i;
   int j;
-
-  DEBUGASSERT(list->fl_crefs >= 1);
-  if (--list->fl_crefs > 0)
-    {
-      return;
-    }
 
   /* Close each file descriptor .. Normally, you would need take the list
    * mutex, but it is safe to ignore the mutex in this context
