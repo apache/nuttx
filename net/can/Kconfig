@@ -30,6 +30,17 @@ config NET_CAN_HAVE_ERRORS
 	bool
 	default n
 
+config NET_CAN_WRITE_BUFFERS
+	bool  "Enable CAN write buffering"
+	default n
+	select NTE_WRITE_BUFFERS
+	---help---
+		Write buffers allows buffering of ongoing CAN packets, providing
+		for higher performance, nonblocking output.
+
+		You might want to disable CAN write buffering on a highly memory
+		memory constrained system where there are no performance issues.
+
 config CAN_PREALLOC_CONNS
 	int "Preallocated CAN socket connections"
 	default 4
