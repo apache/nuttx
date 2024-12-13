@@ -25,7 +25,8 @@ endif()
 
 if(CONFIG_COVERAGE_MINI AND CONFIG_ARCH_TOOLCHAIN_GCC)
   nuttx_add_system_library(libcoverage)
-  target_compile_options(libcoverage PRIVATE -fno-profile-arcs
-                                             -fno-test-coverage)
+  target_compile_options(
+    libcoverage PRIVATE -fno-profile-arcs -fno-test-coverage
+                        -fno-stack-protector)
   target_sources(libcoverage PRIVATE gcov.c)
 endif()
