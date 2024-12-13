@@ -232,6 +232,11 @@ static int can_setup(FAR struct socket *psock)
                             / CONFIG_IOB_BUFSIZE;
 #endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      conn->sndbufs = CONFIG_NET_SEND_BUFSIZE;
+      nxsem_init(&conn->sndsem, 0, 0);
+#endif
+
       /* Attach the connection instance to the socket */
 
       psock->s_conn = conn;
@@ -503,7 +508,19 @@ static int can_close(FAR struct socket *psock)
     {
       /* Yes... inform user-space daemon of socket close. */
 
-      /* #warning Missing logic */
+#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+      /* Free write buffer callback. */
+
+      if (conn->sndcb != NULL)
+        {
+          can_callback_free(conn->dev, conn, conn->sndcb);
+          conn->sndcb = NULL;
+        }
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      nxsem_destroy(&conn->sndsem);
+#endif
 
       /* Free the connection structure */
 

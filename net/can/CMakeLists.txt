@@ -23,7 +23,13 @@ if(CONFIG_NET_CAN)
   set(SRCS)
 
   # Socket layer
-  list(APPEND SRCS can_sockif.c can_sendmsg.c can_recvmsg.c)
+  list(APPEND SRCS can_sockif.c can_recvmsg.c)
+
+  if(CONFIG_NET_CAN_WRITE_BUFFERS)
+    list(APPEND SRCS can_sendmsg_buffered.c)
+  else()
+    list(APPEND SRCS can_sendmsg.c)
+  endif()
 
   if(CONFIG_NET_CAN_NOTIFIER)
     list(APPEND SRCS can_notifier.c)
