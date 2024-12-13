@@ -131,7 +131,8 @@ bloaty() {
     # Due to issues with latest MacOS versions use pinned commit.
     # https://github.com/google/bloaty/pull/326
     # https://github.com/google/bloaty/pull/347
-    git checkout 6b78e080efcb63fa4ef9d2c1f062e3d5bf158e94
+    # https://github.com/google/bloaty/pull/385
+    git checkout 8026607280ef139bc0ea806e88cfe4fd0af60bad
     mkdir -p "${NUTTXTOOLS}"/bloaty
     cmake -B build/bloaty -GNinja -D BLOATY_PREFER_SYSTEM_CAPSTONE=NO -D CMAKE_INSTALL_PREFIX="${NUTTXTOOLS}"/bloaty
     cmake --build build/bloaty
