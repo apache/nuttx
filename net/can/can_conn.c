@@ -152,6 +152,19 @@ void can_free(FAR struct can_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_can_connections);
 
+#ifdef CONFIG_NET_CAN_WRITE_BUFFERS
+  /* Free the write queue */
+
+  iob_free_queue(&conn->write_q);
+
+#   if CONFIG_NET_SEND_BUFSIZE > 0
+  /* Notify the send buffer available */
+
+  can_sendbuffer_notify(conn);
+#   endif /* CONFIG_NET_SEND_BUFSIZE */
+
+#endif
+
   /* Free the connection. */
 
   NET_BUFPOOL_FREE(g_can_connections, conn);
