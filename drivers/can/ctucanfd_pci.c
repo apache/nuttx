@@ -138,6 +138,9 @@ static uint32_t ctucanfd_getreg(FAR struct ctucanfd_can_s *priv,
 static void ctucanfd_putreg(FAR struct ctucanfd_can_s *priv,
                             unsigned int offset,
                             uint32_t value);
+static void ctucanfd_modreg(FAR struct ctucanfd_can_s *priv,
+                            unsigned int offset, uint32_t mask,
+                            uint32_t value);
 
 /* Common methods */
 
@@ -161,7 +164,7 @@ static int  ctucanfd_chrdev_ioctl(FAR struct can_dev_s *dev, int cmd,
 static int  ctucanfd_chrdev_remoterequest(FAR struct can_dev_s *dev,
                                           uint16_t id);
 static int  ctucanfd_chrdev_send(FAR struct can_dev_s *dev,
-                                 struct can_msg_s *msg);
+                                 FAR struct can_msg_s *msg);
 static bool ctucanfd_chrdev_txready(FAR struct can_dev_s *dev);
 static bool ctucanfd_chrdev_txempty(FAR struct can_dev_s *dev);
 static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv);
@@ -279,6 +282,21 @@ static void ctucanfd_putreg(FAR struct ctucanfd_can_s *priv,
 }
 
 /*****************************************************************************
+ * Name: ctucanfd_modreg
+ *****************************************************************************/
+
+static void ctucanfd_modreg(FAR struct ctucanfd_can_s *priv,
+                            unsigned int offset, uint32_t mask,
+                            uint32_t value)
+{
+  uintptr_t addr = priv->base + offset;
+  uint32_t regval;
+
+  regval = *((FAR volatile uint32_t *)addr);
+  *((FAR volatile uint32_t *)addr) = (regval & ~mask) | (value & mask);
+}
+
+/*****************************************************************************
  * Name: ctucanfd_reset
  *****************************************************************************/
 
@@ -295,7 +313,8 @@ static void ctucanfd_reset(FAR struct ctucanfd_can_s *priv)
 
 static void ctucanfd_shutdown(FAR struct ctucanfd_can_s *priv)
 {
-  ctucanfd_putreg(priv, CTUCANFD_SET_MODE, 0);
+  ctucanfd_modreg(priv, CTUCANFD_SET_MODE,
+                  CTUCANFD_SET_ENA << CTUCANFD_SET_SHFIT, 0);
 }
 
 /*****************************************************************************
@@ -345,6 +364,19 @@ static void ctucanfd_setup(FAR struct ctucanfd_can_s *priv)
   /* RX buffer automatic mode */
 
   regval |= CTUCANFD_MODE_RXBAM;
+
+  /* Rx Acceptance filter setting */
+
+  /* REVISIT: acceptance filter not used.
+   *
+   * This driver was verified on QEMU with virtual host CAN network,
+   * which doesn't support acceptance filter feature.
+   * For real hardware, this feature can be enabled with:
+   *     " regval |= CTUCANFD_MODE_AFM; "
+   *
+   * If this feature is enabled, related registers CTUCANFD_FLTR_x_MSK/
+   * CTUCANFD_FLTR_x_VAL must also be configured !
+   */
 
   /* Write SETTINGS and MODE */
 
