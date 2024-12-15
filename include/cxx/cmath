@@ -111,7 +111,7 @@ namespace std
   using ::cos;
   using ::cosh;
   using ::exp;
-  using ::expm1f;
+  using ::expm1;
   using ::fabs;
   using ::floor;
   using ::fmod;
