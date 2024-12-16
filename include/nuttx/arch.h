@@ -2913,6 +2913,16 @@ bool up_fpucmp(FAR const void *saveregs1, FAR const void *saveregs2);
 #define up_fpucmp(r1, r2) (true)
 #endif
 
+/****************************************************************************
+ * Name: up_regs_memcpy
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_REGCPY
+void up_regs_memcpy(FAR void *dest, FAR void *src, size_t count);
+#else
+#define up_regs_memcpy(dest, src, count) memcpy(dest, src, count)
+#endif
+
 #ifdef CONFIG_ARCH_HAVE_DEBUG
 
 /****************************************************************************

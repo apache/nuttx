@@ -282,11 +282,22 @@ int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
 void tricore_trapcall(volatile void *trap)
 {
   uintptr_t *regs;
+  uintptr_t pcxi;
+
   IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
   IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
   unsigned int tid = ctrap->tId;
 
   regs = tricore_csa2addr(__mfcr(CPU_PCXI));
+  pcxi = regs[REG_UPCXI];
+  regs = tricore_csa2addr(pcxi);
+
+  if (!up_interrupt_context())
+    {
+      /* Update the current task's regs */
+
+      g_running_tasks[this_cpu()]->xcp.regs = regs;
+    }
 
   up_set_interrupt_context(true);
 
