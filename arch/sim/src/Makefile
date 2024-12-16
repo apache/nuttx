@@ -133,6 +133,13 @@ ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
   # the place in the object list for linking. Namely, its constructor
   # should be the first one in the executable.
   HEADSRC = sim_macho_init.c
+
+  # sim_macho_init.c is not compatible with chained fixups.
+  # cf. https://github.com/apache/nuttx/issues/15208
+  ifeq ($(shell $(LD) -ld_classic -no_fixup_chains 2>&1 | grep "unknown option"),)
+    LDLINKFLAGS += -ld_classic -no_fixup_chains
+    LDFLAGS += -Wl,-ld_classic,-no_fixup_chains
+  endif
 endif
 else
   STDLIBS += -lrt
