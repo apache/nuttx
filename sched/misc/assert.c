@@ -611,7 +611,8 @@ static void dump_deadlock(void)
 
 static noreturn_function int pause_cpu_handler(FAR void *arg)
 {
-  memcpy(g_last_regs[this_cpu()], running_regs(), sizeof(g_last_regs[0]));
+  up_regs_memcpy(g_last_regs[this_cpu()], running_regs(),
+                 sizeof(g_last_regs[0]));
   g_cpu_paused[this_cpu()] = true;
   up_flush_dcache_all();
   while (1);
@@ -877,7 +878,8 @@ void _assert(FAR const char *filename, int linenum,
     }
   else
     {
-      memcpy(g_last_regs[this_cpu()], regs, sizeof(g_last_regs[0]));
+      up_regs_memcpy(g_last_regs[this_cpu()], regs, sizeof(g_last_regs[0]));
+      regs = g_last_regs[this_cpu()];
     }
 
   notifier_data.rtcb = rtcb;

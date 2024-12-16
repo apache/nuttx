@@ -83,9 +83,10 @@
 #define REG_LPC          REG_LA11
 
 #define TC_CONTEXT_REGS  (16)
+#define TC_CONTEXT_SIZE  (sizeof(void *) * TC_CONTEXT_REGS)
 
-#define XCPTCONTEXT_REGS (TC_CONTEXT_REGS)
-#define XCPTCONTEXT_SIZE (sizeof(void *) * TC_CONTEXT_REGS)
+#define XCPTCONTEXT_REGS (TC_CONTEXT_REGS * 2)
+#define XCPTCONTEXT_SIZE (sizeof(void *) * XCPTCONTEXT_REGS)
 
 #define NR_IRQS          (255)
 
