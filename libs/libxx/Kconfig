@@ -71,6 +71,7 @@ if !LIBCXXMINI
 
 choice
 	prompt "C++ low level library select"
+	default LIBCXXABI if ARCH_SIM && HOST_MACOS
 	default LIBSUPCXX_TOOLCHAIN
 
 config LIBCXXABI
