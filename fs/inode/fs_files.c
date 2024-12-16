@@ -73,8 +73,9 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&list->fl_lock);
-
   filep = &list->fl_files[l1][l2];
+  spin_unlock_irqrestore(&list->fl_lock, flags);
+
 #ifdef CONFIG_FS_REFCOUNT
   if (filep->f_inode != NULL)
     {
@@ -110,7 +111,6 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
     }
 #endif
 
-  spin_unlock_irqrestore(&list->fl_lock, flags);
   return filep;
 }
 
