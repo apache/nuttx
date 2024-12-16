@@ -152,12 +152,12 @@ board$(DELIM)libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 define LINK_ALLSYMS
-	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)
-	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
+	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.c --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)
+	$(Q) $(call COMPILE, allsyms.c, allsyms$(OBJEXT))
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) allsyms$(OBJEXT) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
-	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
+	$(Q) $(call DELFILE, allsyms.c allsyms$(OBJEXT))
 endef
 
 $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
