@@ -6169,7 +6169,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 
       if (ext->alg != IW_ENCODE_ALG_NONE)
         {
-          memcpy(wifi_cfg.sta.password, pdata, len);
+          memcpy(wifi_cfg.ap.password, pdata, len);
         }
 
       if (g_softap_started)
