@@ -56,16 +56,16 @@ config SERIAL_GDBSTUB
 	depends on LIB_GDBSTUB
 	default n
 
+if SERIAL_GDBSTUB
+
 config SERIAL_GDBSTUB_PATH
 	string "GDBSTUB Serial path"
-	depends on SERIAL_GDBSTUB
 	default "/dev/ttyS1"
 	---help---
 		The path to the serial device that will be used for GDB stub.
 
 config SERIAL_GDBSTUB_AUTO_ATTACH
 	bool "GDBSTUB Serial Auto attach"
-	depends on SERIAL_GDBSTUB
 	default n
 	---help---
 		Attach the serial port to gdbstub by default.
@@ -74,11 +74,12 @@ config SERIAL_GDBSTUB_AUTO_ATTACH
 
 config SERIAL_GDBSTUB_PANIC_TIMEOUT
 	int "GDBSTUB Serial panic timeout"
-	depends on SERIAL_GDBSTUB
 	default 10
 	---help---
 		Delay the panic timeout for gdbstub to connect.
 		0 will disable the timeout.
+
+endif # SERIAL_GDBSTUB
 
 config UART_HOSTFS
 	bool "Use hostfs read/write on UART_HOSTFS_DEVPATH as uart console"
