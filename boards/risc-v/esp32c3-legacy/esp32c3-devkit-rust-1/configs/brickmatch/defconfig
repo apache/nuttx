@@ -5,7 +5,6 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
-# CONFIG_ESP32C3_UART0 is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
 CONFIG_ARCH="risc-v"
@@ -24,7 +23,6 @@ CONFIG_DEBUG_FEATURES=y
 CONFIG_DEBUG_I2C=y
 CONFIG_DEBUG_I2C_ERROR=y
 CONFIG_DEBUG_I2C_WARN=y
-CONFIG_DEV_ZERO=y
 CONFIG_DRIVERS_VIDEO=y
 CONFIG_ESP32C3_DMA=y
 CONFIG_ESP32C3_GPIO_IRQ=y
