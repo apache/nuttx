@@ -162,6 +162,7 @@ all: $(BIN)
 .PHONY: context clean_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 .PHONY: pass1 pass1dep
 .PHONY: pass2 pass2dep
+.PHONY: host_info checkpython3
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -618,6 +619,35 @@ bootloader:
 clean_bootloader:
 	$(Q) $(MAKE) -C $(ARCH_SRC) clean_bootloader
 
+checkpython3:
+	@if [ -z "$$(which python3)" ]; then \
+		echo "ERROR: python3 not found in PATH"; \
+		echo "       Please install python3 or fix the PATH"; \
+		exit 1; \
+	fi
+
+# host_info target flags to get diagnostic info without building nxdiag application
+
+SYSINFO_PARSE_FLAGS = "$(realpath $(TOPDIR))"
+SYSINFO_PARSE_FLAGS += "-finclude/sysinfo.h"
+
+SYSINFO_FLAGS = "-c"
+SYSINFO_FLAGS += "-p"
+SYSINFO_FLAGS += -f \""$(shell echo '$(CFLAGS)' | sed 's/"/\\\\\\"/g')"\"
+SYSINFO_FLAGS += \""$(shell echo '$(CXXFLAGS)' | sed 's/"/\\\\\\"/g')"\"
+SYSINFO_FLAGS += \""$(shell echo '$(LDFLAGS)' | sed 's/"/\\\\\\"/g')"\"
+SYSINFO_FLAGS += "--target_info"
+
+# host_info: Parse nxdiag example output file (sysinfo.h) and print
+
+host_info: checkpython3
+	@if [[ ! -f "include/sysinfo.h" ]]; then \
+		echo "file sysinfo.h not exists"; \
+		python3 $(TOPDIR)$(DELIM)tools$(DELIM)host_info_dump.py $(SYSINFO_FLAGS) \
+		 $(realpath $(TOPDIR)) > include/sysinfo.h; \
+	fi
+	@python3 $(TOPDIR)$(DELIM)tools$(DELIM)host_info_parse.py $(SYSINFO_PARSE_FLAGS)
+
 # pass1dep: Create pass1 build dependencies
 # pass2dep: Create pass2 build dependencies
 
@@ -801,6 +831,7 @@ endif
 	$(call DELFILE, .config.orig)
 	$(call DELFILE, .config.backup)
 	$(call DELFILE, .gdbinit)
+	$(call DELFILE, include/sysinfo.h)
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,
