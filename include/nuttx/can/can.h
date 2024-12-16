@@ -622,11 +622,11 @@ begin_packed_struct struct can_hdr_s
 } end_packed_struct;
 #endif
 
-begin_packed_struct struct can_msg_s
+struct can_msg_s
 {
   struct can_hdr_s cm_hdr;                  /* The CAN header */
   uint8_t          cm_data[CAN_MAXDATALEN]; /* CAN message data (0-8 byte) */
-} end_packed_struct;
+};
 
 /* This structure defines a CAN message FIFO. */
 
