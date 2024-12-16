@@ -1376,11 +1376,11 @@ static int gdb_query(FAR struct gdb_state_s *state)
     {
 #ifdef CONFIG_ARCH_HAVE_DEBUG
       state->pkt_len = sprintf(state->pkt_buf,
-                               "hwbreak+;PacketSize=%x",
+                               "hwbreak+;PacketSize=%zx",
                                sizeof(state->pkt_buf));
 #else
       state->pkt_len = sprintf(state->pkt_buf,
-                               "PacketSize=%x",
+                               "PacketSize=%zx",
                                sizeof(state->pkt_buf));
 #endif
       gdb_send_packet(state);
