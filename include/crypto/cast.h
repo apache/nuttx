@@ -1,8 +1,8 @@
 /****************************************************************************
  * include/crypto/cast.h
- * $OpenBSD: cast.h,v 1.2 2002/03/14 01:26:51 millert Exp $
  *
- * CAST-128 in C
+ * SPDX-License-Identifier: NuttX-PublicDomain
+ *
  * Written by Steve Reid <sreid@sea-to-sky.net>
  * 100% Public Domain - no warranty
  * Released 1997.10.11
