@@ -76,17 +76,15 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
 
   filep = &list->fl_files[l1][l2];
 #ifdef CONFIG_FS_REFCOUNT
-  int32_t refs = 0;
-
   if (filep->f_inode != NULL)
     {
       /* When the reference count is zero but the inode has not yet been
        * released, At this point we should return a null pointer
        */
 
+      int32_t refs = atomic_read(&filep->f_refs);
       do
         {
-          refs = atomic_read(&filep->f_refs);
           if (refs == 0)
             {
               filep = NULL;
@@ -99,18 +97,12 @@ static FAR struct file *files_fget_by_index(FAR struct filelist *list,
     {
       filep = NULL;
     }
-  else
+  else if (atomic_fetch_add(&filep->f_refs, 1) == 0)
     {
-      do
-        {
-          if (atomic_cmpxchg(&filep->f_refs, &refs, 2))
-            {
-              *new = true;
-              break;
-            }
-        }
-      while (!atomic_try_cmpxchg(&filep->f_refs, &refs, refs + 1));
+      atomic_fetch_add(&filep->f_refs, 1);
+      *new = true;
     }
+
 #else
   if (filep->f_inode == NULL && new == NULL)
     {
