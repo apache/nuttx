@@ -51,17 +51,19 @@ FAR char *fs_heap_strdup(FAR const char *s) malloc_like;
 FAR char *fs_heap_strndup(FAR const char *s, size_t size) malloc_like;
 int       fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
           printf_like(2, 3);
+struct mallinfo_task fs_heap_mallinfo_task(FAR const struct malltask *task);
 #else
 #  define fs_heap_initialize()
-#  define fs_heap_zalloc       kmm_zalloc
-#  define fs_heap_malloc       kmm_malloc
-#  define fs_heap_malloc_size  kmm_malloc_size
-#  define fs_heap_realloc      kmm_realloc
-#  define fs_heap_memalign     kmm_memalign
-#  define fs_heap_free         kmm_free
-#  define fs_heap_strdup       strdup
-#  define fs_heap_strndup      strndup
-#  define fs_heap_asprintf     asprintf
+#  define fs_heap_zalloc        kmm_zalloc
+#  define fs_heap_malloc        kmm_malloc
+#  define fs_heap_malloc_size   kmm_malloc_size
+#  define fs_heap_realloc       kmm_realloc
+#  define fs_heap_memalign      kmm_memalign
+#  define fs_heap_free          kmm_free
+#  define fs_heap_mallinfo_task kmm_mallinfo_task
+#  define fs_heap_strdup        strdup
+#  define fs_heap_strndup       strndup
+#  define fs_heap_asprintf      asprintf
 #endif
 
 #endif

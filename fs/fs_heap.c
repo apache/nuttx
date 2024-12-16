@@ -137,4 +137,9 @@ int fs_heap_asprintf(FAR char **strp, FAR const char *fmt, ...)
   return len;
 }
 
+struct mallinfo_task fs_heap_mallinfo_task(FAR const struct malltask *task)
+{
+  return mm_mallinfo_task(g_fs_heap, task);
+}
+
 #endif
