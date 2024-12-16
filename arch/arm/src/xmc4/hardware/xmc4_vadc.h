@@ -18,6 +18,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
+ ******************************************************************************************************************/
+
+/******************************************************************************************************************
  * May include some logic from sample code provided by Infineon:
  *
  * Copyright (C) 2011-2015 Infineon Technologies AG. All rights reserved.
