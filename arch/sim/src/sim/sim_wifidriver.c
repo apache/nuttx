@@ -167,6 +167,7 @@ struct sim_netdev_s
   int key_mgmt;
   int proto;
   int auth_alg;
+  int auth_type;
   int pairwise_chiper;
   int group_cipher;
   uint8_t mode;                 /* IW_MODE_INFRA/ IW_MODE_MASTER */
@@ -1152,11 +1153,15 @@ static int wifidriver_set_auth(struct sim_netdev_s *wifidev,
 
       wifidev->proto = value >> 1;
 
-      ninfo("proto=%s\n", get_authstr(value));
+      ninfo("auth_type=%s\n", get_authstr(value));
 
       if (wifidev->mode == IW_MODE_INFRA)
         {
           ret = WPA_SET_NETWORK(wifidev, "proto %s", get_authstr(value));
+          if (ret == 0)
+            {
+              wifidev->auth_type = value;
+            }
         }
       else if(wifidev->mode == IW_MODE_MASTER)
         {
@@ -1208,15 +1213,20 @@ static int wifidriver_get_auth(struct sim_netdev_s *wifidev,
                                struct iwreq *pwrq)
 {
   int ret = 0;
+  int flag = pwrq->u.param.flags & IW_AUTH_INDEX;
 
-  switch (wifidev->mode)
+  switch (flag)
     {
-    case IW_MODE_INFRA:
+    case IW_AUTH_WPA_VERSION:
+      pwrq->u.param.value = wifidev->auth_type;
       break;
-    case IW_MODE_MASTER:
+
+    case IW_AUTH_CIPHER_PAIRWISE:
+      pwrq->u.param.value = wifidev->pairwise_chiper;
       break;
     default:
-      break;
+      nerr("ERROR: Unknown cmd %d\n", flag);
+      return -ENOSYS;
     }
 
   return ret;
