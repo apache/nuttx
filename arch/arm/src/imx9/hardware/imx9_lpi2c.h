@@ -1,0 +1,628 @@
+/****************************************************************************
+ * arch/arm/src/imx9/hardware/imx9_lpi2c.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2024 NXP
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_LPI2C_H_
+#define __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_LPI2C_H_
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Register offsets *********************************************************/
+
+#define IMX9_LPI2C_VERID_OFFSET             0x0000  /* Version ID Register offset */
+#define IMX9_LPI2C_PARAM_OFFSET             0x0004  /* Parameter Register offset */
+#define IMX9_LPI2C_MCR_OFFSET               0x0010  /* Master Control Register offset */
+#define IMX9_LPI2C_MSR_OFFSET               0x0014  /* Master Status Register offset */
+#define IMX9_LPI2C_MIER_OFFSET              0x0018  /* Master Interrupt Enable Register offset */
+#define IMX9_LPI2C_MDER_OFFSET              0x001c  /* Master DMA Enable Register offset */
+#define IMX9_LPI2C_MCFGR0_OFFSET            0x0020  /* Master Config Register 0 offset */
+#define IMX9_LPI2C_MCFGR1_OFFSET            0x0024  /* Master Config Register 1 offset */
+#define IMX9_LPI2C_MCFGR2_OFFSET            0x0028  /* Master Config Register 2 offset */
+#define IMX9_LPI2C_MCFGR3_OFFSET            0x002c  /* Master Config Register 3 offset */
+#define IMX9_LPI2C_MDMR_OFFSET              0x0040  /* Master Data Match Register offset */
+#define IMX9_LPI2C_MCCR0_OFFSET             0x0048  /* Master Clock Configuration Register 0 offset */
+#define IMX9_LPI2C_MCCR1_OFFSET             0x0050  /* Master Clock Configuration Register 1 offset */
+#define IMX9_LPI2C_MFCR_OFFSET              0x0058  /* Master FIFO Control Register offset */
+#define IMX9_LPI2C_MFSR_OFFSET              0x005C  /* Master FIFO Status Register offset */
+#define IMX9_LPI2C_MTDR_OFFSET              0x0060  /* Master Transmit Data Register offset */
+#define IMX9_LPI2C_MRDR_OFFSET              0x0070  /* Master Receive Data Register offset */
+#define IMX9_LPI2C_SCR_OFFSET               0x0110  /* Slave Control Register offset */
+#define IMX9_LPI2C_SSR_OFFSET               0x0114  /* Slave Status Register offset */
+#define IMX9_LPI2C_SIER_OFFSET              0x0118  /* Slave Interrupt Enable Register offset */
+#define IMX9_LPI2C_SDER_OFFSET              0x011c  /* Slave DMA Enable Register offset */
+#define IMX9_LPI2C_SCFGR1_OFFSET            0x0124  /* Slave Config Register 1 offset */
+#define IMX9_LPI2C_SCFGR2_OFFSET            0x0128  /* Slave Config Register 2 offset */
+#define IMX9_LPI2C_SAMR_OFFSET              0x0140  /* Slave Address Match Register offset */
+#define IMX9_LPI2C_SASR_OFFSET              0x0150  /* Slave Address Status Register offset */
+#define IMX9_LPI2C_STAR_OFFSET              0x0154  /* Slave Transmit ACK Register offset */
+#define IMX9_LPI2C_STDR_OFFSET              0x0160  /* Slave Transmit Data Register offset */
+#define IMX9_LPI2C_SRDR_OFFSET              0x0170  /* Slave Receive Data Register offset */
+
+/* Register addresses *******************************************************/
+
+/* LPI2C1 Registers */
+
+#define IMX9_LPI2C1_VERID                  (IMX9_LPI2C1_BASE + IMX9_LPI2C_VERID_OFFSET)   /* Version ID Register */
+#define IMX9_LPI2C1_PARAM                  (IMX9_LPI2C1_BASE + IMX9_LPI2C_PARAM_OFFSET)   /* Parameter Register  */
+#define IMX9_LPI2C1_MCR                    (IMX9_LPI2C1_BASE + IMX9_LPI2C_MCR_OFFSET)     /* Master Control Register  */
+#define IMX9_LPI2C1_MSR                    (IMX9_LPI2C1_BASE + IMX9_LPI2C_MSR_OFFSET)     /* Master Status Register  */
+#define IMX9_LPI2C1_MIER                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_MIER_OFFSET)    /* Master Interrupt Enable Register  */
+#define IMX9_LPI2C1_MDER                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_MDER_OFFSET)    /* Master DMA Enable Register  */
+#define IMX9_LPI2C1_MCFGR0                 (IMX9_LPI2C1_BASE + IMX9_LPI2C_MCFGR0_OFFSET)  /* Master Config Register 0  */
+#define IMX9_LPI2C1_MCFGR1                 (IMX9_LPI2C1_BASE + IMX9_LPI2C_MCFGR1_OFFSET)  /* Master Config Register 1  */
+#define IMX9_LPI2C1_MCFGR2                 (IMX9_LPI2C1_BASE + IMX9_LPI2C_MCFGR2_OFFSET)  /* Master Config Register 2  */
+#define IMX9_LPI2C1_MCFGR3                 (IMX9_LPI2C1_BASE + IMX9_LPI2C_MCFGR3_OFFSET)  /* Master Config Register 3  */
+#define IMX9_LPI2C1_MDMR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_MDMR_OFFSET)    /* Master Data Match Register  */
+#define IMX9_LPI2C1_MCCR0                  (IMX9_LPI2C1_BASE + IMX9_LPI2C_MCCR0_OFFSET)   /* Master Clock Configuration Register 0  */
+#define IMX9_LPI2C1_MCCR1                  (IMX9_LPI2C1_BASE + IMX9_LPI2C_MCCR1_OFFSET)   /* Master Clock Configuration Register 1  */
+#define IMX9_LPI2C1_MFCR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_MFCR_OFFSET)    /* Master FIFO Control Register  */
+#define IMX9_LPI2C1_MFSR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_MFSR_OFFSET)    /* Master FIFO Status Register  */
+#define IMX9_LPI2C1_MTDR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_MTDR_OFFSET)    /* Master Transmit Data Register  */
+#define IMX9_LPI2C1_MRDR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_MRDR_OFFSET)    /* Master Receive Data Register  */
+#define IMX9_LPI2C1_SCR                    (IMX9_LPI2C1_BASE + IMX9_LPI2C_SCR_OFFSET)     /* Slave Control Register  */
+#define IMX9_LPI2C1_SSR                    (IMX9_LPI2C1_BASE + IMX9_LPI2C_SSR_OFFSET)     /* Slave Status Register  */
+#define IMX9_LPI2C1_SIER                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_SIER_OFFSET)    /* Slave Interrupt Enable Register  */
+#define IMX9_LPI2C1_SDER                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_SDER_OFFSET)    /* Slave DMA Enable Register  */
+#define IMX9_LPI2C1_SCFGR1                 (IMX9_LPI2C1_BASE + IMX9_LPI2C_SCFGR1_OFFSET)  /* Slave Config Register 1  */
+#define IMX9_LPI2C1_SCFGR2                 (IMX9_LPI2C1_BASE + IMX9_LPI2C_SCFGR2_OFFSET)  /* Slave Config Register 2  */
+#define IMX9_LPI2C1_SAMR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_SAMR_OFFSET)    /* Slave Address Match Register  */
+#define IMX9_LPI2C1_SASR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_SASR_OFFSET)    /* Slave Address Status Register  */
+#define IMX9_LPI2C1_STAR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_STAR_OFFSET)    /* Slave Transmit ACK Register  */
+#define IMX9_LPI2C1_STDR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_STDR_OFFSET)    /* Slave Transmit Data Register  */
+#define IMX9_LPI2C1_SRDR                   (IMX9_LPI2C1_BASE + IMX9_LPI2C_SRDR_OFFSET)    /* Slave Receive Data Register  */
+
+/* LPI2C2 Registers */
+
+#define IMX9_LPI2C2_VERID                  (IMX9_LPI2C2_BASE + IMX9_LPI2C_VERID_OFFSET)   /* Version ID Register */
+#define IMX9_LPI2C2_PARAM                  (IMX9_LPI2C2_BASE + IMX9_LPI2C_PARAM_OFFSET)   /* Parameter Register  */
+#define IMX9_LPI2C2_MCR                    (IMX9_LPI2C2_BASE + IMX9_LPI2C_MCR_OFFSET)     /* Master Control Register  */
+#define IMX9_LPI2C2_MSR                    (IMX9_LPI2C2_BASE + IMX9_LPI2C_MSR_OFFSET)     /* Master Status Register  */
+#define IMX9_LPI2C2_MIER                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_MIER_OFFSET)    /* Master Interrupt Enable Register  */
+#define IMX9_LPI2C2_MDER                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_MDER_OFFSET)    /* Master DMA Enable Register  */
+#define IMX9_LPI2C2_MCFGR0                 (IMX9_LPI2C2_BASE + IMX9_LPI2C_MCFGR0_OFFSET)  /* Master Config Register 0  */
+#define IMX9_LPI2C2_MCFGR1                 (IMX9_LPI2C2_BASE + IMX9_LPI2C_MCFGR1_OFFSET)  /* Master Config Register 1  */
+#define IMX9_LPI2C2_MCFGR2                 (IMX9_LPI2C2_BASE + IMX9_LPI2C_MCFGR2_OFFSET)  /* Master Config Register 2  */
+#define IMX9_LPI2C2_MCFGR3                 (IMX9_LPI2C2_BASE + IMX9_LPI2C_MCFGR3_OFFSET)  /* Master Config Register 3  */
+#define IMX9_LPI2C2_MDMR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_MDMR_OFFSET)    /* Master Data Match Register  */
+#define IMX9_LPI2C2_MCCR0                  (IMX9_LPI2C2_BASE + IMX9_LPI2C_MCCR0_OFFSET)   /* Master Clock Configuration Register 0  */
+#define IMX9_LPI2C2_MCCR1                  (IMX9_LPI2C2_BASE + IMX9_LPI2C_MCCR1_OFFSET)   /* Master Clock Configuration Register 1  */
+#define IMX9_LPI2C2_MFCR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_MFCR_OFFSET)    /* Master FIFO Control Register  */
+#define IMX9_LPI2C2_MFSR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_MFSR_OFFSET)    /* Master FIFO Status Register  */
+#define IMX9_LPI2C2_MTDR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_MTDR_OFFSET)    /* Master Transmit Data Register  */
+#define IMX9_LPI2C2_MRDR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_MRDR_OFFSET)    /* Master Receive Data Register  */
+#define IMX9_LPI2C2_SCR                    (IMX9_LPI2C2_BASE + IMX9_LPI2C_SCR_OFFSET)     /* Slave Control Register  */
+#define IMX9_LPI2C2_SSR                    (IMX9_LPI2C2_BASE + IMX9_LPI2C_SSR_OFFSET)     /* Slave Status Register  */
+#define IMX9_LPI2C2_SIER                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_SIER_OFFSET)    /* Slave Interrupt Enable Register  */
+#define IMX9_LPI2C2_SDER                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_SDER_OFFSET)    /* Slave DMA Enable Register  */
+#define IMX9_LPI2C2_SCFGR1                 (IMX9_LPI2C2_BASE + IMX9_LPI2C_SCFGR1_OFFSET)  /* Slave Config Register 1  */
+#define IMX9_LPI2C2_SCFGR2                 (IMX9_LPI2C2_BASE + IMX9_LPI2C_SCFGR2_OFFSET)  /* Slave Config Register 2  */
+#define IMX9_LPI2C2_SAMR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_SAMR_OFFSET)    /* Slave Address Match Register  */
+#define IMX9_LPI2C2_SASR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_SASR_OFFSET)    /* Slave Address Status Register  */
+#define IMX9_LPI2C2_STAR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_STAR_OFFSET)    /* Slave Transmit ACK Register  */
+#define IMX9_LPI2C2_STDR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_STDR_OFFSET)    /* Slave Transmit Data Register  */
+#define IMX9_LPI2C2_SRDR                   (IMX9_LPI2C2_BASE + IMX9_LPI2C_SRDR_OFFSET)    /* Slave Receive Data Register  */
+
+/* LPI2C3 Registers */
+
+#define IMX9_LPI2C3_VERID                  (IMX9_LPI2C3_BASE + IMX9_LPI2C_VERID_OFFSET)   /* Version ID Register */
+#define IMX9_LPI2C3_PARAM                  (IMX9_LPI2C3_BASE + IMX9_LPI2C_PARAM_OFFSET)   /* Parameter Register  */
+#define IMX9_LPI2C3_MCR                    (IMX9_LPI2C3_BASE + IMX9_LPI2C_MCR_OFFSET)     /* Master Control Register  */
+#define IMX9_LPI2C3_MSR                    (IMX9_LPI2C3_BASE + IMX9_LPI2C_MSR_OFFSET)     /* Master Status Register  */
+#define IMX9_LPI2C3_MIER                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_MIER_OFFSET)    /* Master Interrupt Enable Register  */
+#define IMX9_LPI2C3_MDER                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_MDER_OFFSET)    /* Master DMA Enable Register  */
+#define IMX9_LPI2C3_MCFGR0                 (IMX9_LPI2C3_BASE + IMX9_LPI2C_MCFGR0_OFFSET)  /* Master Config Register 0  */
+#define IMX9_LPI2C3_MCFGR1                 (IMX9_LPI2C3_BASE + IMX9_LPI2C_MCFGR1_OFFSET)  /* Master Config Register 1  */
+#define IMX9_LPI2C3_MCFGR2                 (IMX9_LPI2C3_BASE + IMX9_LPI2C_MCFGR2_OFFSET)  /* Master Config Register 2  */
+#define IMX9_LPI2C3_MCFGR3                 (IMX9_LPI2C3_BASE + IMX9_LPI2C_MCFGR3_OFFSET)  /* Master Config Register 3  */
+#define IMX9_LPI2C3_MDMR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_MDMR_OFFSET)    /* Master Data Match Register  */
+#define IMX9_LPI2C3_MCCR0                  (IMX9_LPI2C3_BASE + IMX9_LPI2C_MCCR0_OFFSET)   /* Master Clock Configuration Register 0  */
+#define IMX9_LPI2C3_MCCR1                  (IMX9_LPI2C3_BASE + IMX9_LPI2C_MCCR1_OFFSET)   /* Master Clock Configuration Register 1  */
+#define IMX9_LPI2C3_MFCR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_MFCR_OFFSET)    /* Master FIFO Control Register  */
+#define IMX9_LPI2C3_MFSR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_MFSR_OFFSET)    /* Master FIFO Status Register  */
+#define IMX9_LPI2C3_MTDR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_MTDR_OFFSET)    /* Master Transmit Data Register  */
+#define IMX9_LPI2C3_MRDR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_MRDR_OFFSET)    /* Master Receive Data Register  */
+#define IMX9_LPI2C3_SCR                    (IMX9_LPI2C3_BASE + IMX9_LPI2C_SCR_OFFSET)     /* Slave Control Register  */
+#define IMX9_LPI2C3_SSR                    (IMX9_LPI2C3_BASE + IMX9_LPI2C_SSR_OFFSET)     /* Slave Status Register  */
+#define IMX9_LPI2C3_SIER                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_SIER_OFFSET)    /* Slave Interrupt Enable Register  */
+#define IMX9_LPI2C3_SDER                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_SDER_OFFSET)    /* Slave DMA Enable Register  */
+#define IMX9_LPI2C3_SCFGR1                 (IMX9_LPI2C3_BASE + IMX9_LPI2C_SCFGR1_OFFSET)  /* Slave Config Register 1  */
+#define IMX9_LPI2C3_SCFGR2                 (IMX9_LPI2C3_BASE + IMX9_LPI2C_SCFGR2_OFFSET)  /* Slave Config Register 2  */
+#define IMX9_LPI2C3_SAMR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_SAMR_OFFSET)    /* Slave Address Match Register  */
+#define IMX9_LPI2C3_SASR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_SASR_OFFSET)    /* Slave Address Status Register  */
+#define IMX9_LPI2C3_STAR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_STAR_OFFSET)    /* Slave Transmit ACK Register  */
+#define IMX9_LPI2C3_STDR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_STDR_OFFSET)    /* Slave Transmit Data Register  */
+#define IMX9_LPI2C3_SRDR                   (IMX9_LPI2C3_BASE + IMX9_LPI2C_SRDR_OFFSET)    /* Slave Receive Data Register  */
+
+/* LPI2C4 Registers */
+
+#define IMX9_LPI2C4_VERID                  (IMX9_LPI2C4_BASE + IMX9_LPI2C_VERID_OFFSET)   /* Version ID Register */
+#define IMX9_LPI2C4_PARAM                  (IMX9_LPI2C4_BASE + IMX9_LPI2C_PARAM_OFFSET)   /* Parameter Register  */
+#define IMX9_LPI2C4_MCR                    (IMX9_LPI2C4_BASE + IMX9_LPI2C_MCR_OFFSET)     /* Master Control Register  */
+#define IMX9_LPI2C4_MSR                    (IMX9_LPI2C4_BASE + IMX9_LPI2C_MSR_OFFSET)     /* Master Status Register  */
+#define IMX9_LPI2C4_MIER                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_MIER_OFFSET)    /* Master Interrupt Enable Register  */
+#define IMX9_LPI2C4_MDER                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_MDER_OFFSET)    /* Master DMA Enable Register  */
+#define IMX9_LPI2C4_MCFGR0                 (IMX9_LPI2C4_BASE + IMX9_LPI2C_MCFGR0_OFFSET)  /* Master Config Register 0  */
+#define IMX9_LPI2C4_MCFGR1                 (IMX9_LPI2C4_BASE + IMX9_LPI2C_MCFGR1_OFFSET)  /* Master Config Register 1  */
+#define IMX9_LPI2C4_MCFGR2                 (IMX9_LPI2C4_BASE + IMX9_LPI2C_MCFGR2_OFFSET)  /* Master Config Register 2  */
+#define IMX9_LPI2C4_MCFGR3                 (IMX9_LPI2C4_BASE + IMX9_LPI2C_MCFGR3_OFFSET)  /* Master Config Register 3  */
+#define IMX9_LPI2C4_MDMR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_MDMR_OFFSET)    /* Master Data Match Register  */
+#define IMX9_LPI2C4_MCCR0                  (IMX9_LPI2C4_BASE + IMX9_LPI2C_MCCR0_OFFSET)   /* Master Clock Configuration Register 0  */
+#define IMX9_LPI2C4_MCCR1                  (IMX9_LPI2C4_BASE + IMX9_LPI2C_MCCR1_OFFSET)   /* Master Clock Configuration Register 1  */
+#define IMX9_LPI2C4_MFCR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_MFCR_OFFSET)    /* Master FIFO Control Register  */
+#define IMX9_LPI2C4_MFSR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_MFSR_OFFSET)    /* Master FIFO Status Register  */
+#define IMX9_LPI2C4_MTDR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_MTDR_OFFSET)    /* Master Transmit Data Register  */
+#define IMX9_LPI2C4_MRDR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_MRDR_OFFSET)    /* Master Receive Data Register  */
+#define IMX9_LPI2C4_SCR                    (IMX9_LPI2C4_BASE + IMX9_LPI2C_SCR_OFFSET)     /* Slave Control Register  */
+#define IMX9_LPI2C4_SSR                    (IMX9_LPI2C4_BASE + IMX9_LPI2C_SSR_OFFSET)     /* Slave Status Register  */
+#define IMX9_LPI2C4_SIER                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_SIER_OFFSET)    /* Slave Interrupt Enable Register  */
+#define IMX9_LPI2C4_SDER                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_SDER_OFFSET)    /* Slave DMA Enable Register  */
+#define IMX9_LPI2C4_SCFGR1                 (IMX9_LPI2C4_BASE + IMX9_LPI2C_SCFGR1_OFFSET)  /* Slave Config Register 1  */
+#define IMX9_LPI2C4_SCFGR2                 (IMX9_LPI2C4_BASE + IMX9_LPI2C_SCFGR2_OFFSET)  /* Slave Config Register 2  */
+#define IMX9_LPI2C4_SAMR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_SAMR_OFFSET)    /* Slave Address Match Register  */
+#define IMX9_LPI2C4_SASR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_SASR_OFFSET)    /* Slave Address Status Register  */
+#define IMX9_LPI2C4_STAR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_STAR_OFFSET)    /* Slave Transmit ACK Register  */
+#define IMX9_LPI2C4_STDR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_STDR_OFFSET)    /* Slave Transmit Data Register  */
+#define IMX9_LPI2C4_SRDR                   (IMX9_LPI2C4_BASE + IMX9_LPI2C_SRDR_OFFSET)    /* Slave Receive Data Register  */
+
+/* Register bit definitions *************************************************/
+
+/* LPI2C Version ID Register */
+
+#define LPI2C_VERID_FEATURE_SHIFT           (0)
+#define LPI2C_VERID_FEATURE_MASK            (0xffff << LPI2C_VERID_FEATURE_SHIFT)
+#define LPI2C_VERID_MINOR_SHIFT             (16)
+#define LPI2C_VERID_MINOR_MASK              (0xff << LPI2C_VERID_MINOR_SHIFT)
+#define LPI2C_VERID_MAJOR_SHIFT             (24)
+#define LPI2C_VERID_MAJOR_MASK              (0xff << LPI2C_VERID_MAJOR_SHIFT)
+
+/* LPI2C Parameter Register  */
+
+#define LPI2C_PARAM_MTXFIFO_MASK            (0x0f) /* Config number of words in master transmit fifo to 2^MTXFIFO (pow(2,MTXFIFO )) */
+#  define LPI2C_PARAM_MTXFIFO_1_WORDS       (0)
+#  define LPI2C_PARAM_MTXFIFO_2_WORDS       (1)
+#  define LPI2C_PARAM_MTXFIFO_4_WORDS       (2)
+#  define LPI2C_PARAM_MTXFIFO_8_WORDS       (3)
+#  define LPI2C_PARAM_MTXFIFO_16_WORDS      (4)
+#  define LPI2C_PARAM_MTXFIFO_32_WORDS      (5)
+#  define LPI2C_PARAM_MTXFIFO_64_WORDS      (6)
+#  define LPI2C_PARAM_MTXFIFO_128_WORDS     (7)
+#  define LPI2C_PARAM_MTXFIFO_256_WORDS     (8)
+#  define LPI2C_PARAM_MTXFIFO_512_WORDS     (9)
+#  define LPI2C_PARAM_MTXFIFO_1024_WORDS    (10)
+#  define LPI2C_PARAM_MTXFIFO_2048_WORDS    (11)
+#  define LPI2C_PARAM_MTXFIFO_4096_WORDS    (12)
+#  define LPI2C_PARAM_MTXFIFO_8192_WORDS    (13)
+#  define LPI2C_PARAM_MTXFIFO_16384_WORDS   (14)
+#  define LPI2C_PARAM_MTXFIFO_32768_WORDS   (15)
+
+#define LPI2C_PARAM_MRXFIFO_SHIFT           (8)
+#define LPI2C_PARAM_MRXFIFO_MASK            (0x0f << LPI2C_PARAM_MRXFIFO_SHIFT) /* Config number of words in master receive fifo 2^MRXFIFO (pow(2,MTRFIFO )) */
+#  define LPI2C_PARAM_MRXFIFO_1_WORDS       (0 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_2_WORDS       (1 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_4_WORDS       (2 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_8_WORDS       (3 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_16_WORDS      (4 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_32_WORDS      (5 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_64_WORDS      (6 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_128_WORDS     (7 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_256_WORDS     (8 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_512_WORDS     (9 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_1024_WORDS    (10 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_2048_WORDS    (11 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_4096_WORDS    (12 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_8192_WORDS    (13 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_16384_WORDS   (14 << LPI2C_PARAM_MRXFIFO_SHIFT)
+#  define LPI2C_PARAM_MRXFIFO_32768_WORDS   (15 << LPI2C_PARAM_MRXFIFO_SHIFT)
+
+/* LPI2C Master Control Register  */
+
+#define LPI2C_MCR_MEN                       (1 << 0)  /* Master Enable Bit */
+#define LPI2C_MCR_RST                       (1 << 1)  /* Software Reset Bit */
+#define LPI2C_MCR_DOZEN                     (1 << 2)  /* Doze Mode Enable Bit */
+#define LPI2C_MCR_DBGEN                     (1 << 3)  /* Debug Enable Bit */
+                                                      /* Bits 7-4 Reserved */
+#define LPI2C_MCR_RTF                       (1 << 8)  /* Reset Transmit FIFO Bit */
+#define LPI2C_MCR_RRF                       (1 << 9)  /* Reset Receive FIFO Bit */
+                                                      /* Bits 31-10 Reserved */
+
+/* LPI2C Master Status Register  */
+
+#define LPI2C_MSR_TDF                       (1 << 0)  /* Transmit Data Flag Bit */
+#define LPI2C_MSR_RDF                       (1 << 1)  /* Receive Data Flag Bit */
+                                                      /* Bits 7-2 Reserved */
+#define LPI2C_MSR_EPF                       (1 << 8)  /* End Packet Flag Bit */
+#define LPI2C_MSR_SDF                       (1 << 9)  /* STOP Detect Flag Bit */
+#define LPI2C_MSR_NDF                       (1 << 10) /* NACK Detect Flag Bit */
+#define LPI2C_MSR_ALF                       (1 << 11) /* Arbitration Lost Flag Bit */
+#define LPI2C_MSR_FEF                       (1 << 12) /* FIFO Error Flag Bit */
+#define LPI2C_MSR_PLTF                      (1 << 13) /* Pin Low Timeout Flag Bit */
+#define LPI2C_MSR_DMF                       (1 << 14) /* Data Match Flag Bit */
+                                                      /* Bits 23-15 Reserved */
+#define LPI2C_MSR_MBF                       (1 << 24) /* Master Busy Flag Bit */
+#define LPI2C_MSR_BBF                       (1 << 25) /* Bus Busy Flag Bit */
+                                                      /* Bits 31-26 Reserved */
+#define LPI2C_MSR_ERROR_MASK                (LPI2C_MSR_NDF | LPI2C_MSR_ALF | \
+                                             LPI2C_MSR_FEF)
+
+/* LPI2C Master Interrupt Enable Register  */
+
+#define LPI2C_MIER_TDIE                     (1 << 0)  /* Transmit Data Interrupt Enable Bit */
+#define LPI2C_MIER_RDIE                     (1 << 1)  /* Receive Data Interrupt Enable Bit */
+                                                      /* Bits 7-2 Reserved */
+#define LPI2C_MIER_EPIE                     (1 << 8)  /* End Packet Interrupt Enable Bit */
+#define LPI2C_MIER_SDIE                     (1 << 9)  /* STOP Detect Interrupt Enable Bit */
+#define LPI2C_MIER_NDIE                     (1 << 10) /* NACK Detect Interrupt Enable Bit */
+#define LPI2C_MIER_ALIE                     (1 << 11) /* Arbitration Lost Interrupt Enable Bit */
+#define LPI2C_MIER_FEIE                     (1 << 12) /* FIFO Error Interrupt Enable Bit */
+#define LPI2C_MIER_PLTIE                    (1 << 13) /* Pin Low Timeout Interrupt Enable Bit */
+#define LPI2C_MIER_DMIE                     (1 << 14) /* Data Match Interrupt Enable Bit */
+                                                      /* Bits 31-15 Reserved */
+
+/* LPI2C Master DMA Enable Register  */
+
+#define LPI2C_MDER_TDDE                     (1 << 0)  /* Transmit Data DMA Enable Bit */
+#define LPI2C_MDER_RDDE                     (1 << 1)  /* Transmit Data DMA Enable Bit */
+                                                      /* Bits 31-2 Reserved */
+
+/* LPI2C Master Config Register 0  */
+
+#define LPI2C_MCFG0_HREN                    (1 << 0)  /* Host Request Enable Bit */
+#define LPI2C_MCFG0_HRPOL                   (1 << 1)  /* Host Request Polarity Bit */
+#define LPI2C_MCFG0_HRSEL                   (1 << 2)  /* Host Request Select Bit */
+                                                      /* Bits 7-3 Reserved */
+#define LPI2C_MCFG0_CIRFIFO                 (1 << 8)  /* Circular FIFO Enable Bit */
+#define LPI2C_MCFG0_RDMO                    (1 << 9)  /* Receive Data Match Only Bit */
+                                                      /* Bits 15-10 Reserved */
+#define LPI2C_MCFG0_RELAX                   (1 << 16) /* Relaxed Mode */
+#define LPI2C_MCFG0_ABORT                   (1 << 17) /* Abort Transfer */
+                                                      /* Bits 31-18 Reserved */
+
+/* LPI2C Master Config Register 1  */
+
+#define LPI2C_MCFGR1_PRESCALE_MASK           (7 << 0)  /* Clock Prescaler Bit Mask */
+#define LPI2C_MCFGR1_PRESCALE(n)             ((n) & LPI2C_MCFGR1_PRESCALE_MASK)
+#  define LPI2C_MCFGR1_PRESCALE_1            (0)
+#  define LPI2C_MCFGR1_PRESCALE_2            (1)
+#  define LPI2C_MCFGR1_PRESCALE_4            (2)
+#  define LPI2C_MCFGR1_PRESCALE_8            (3)
+#  define LPI2C_MCFGR1_PRESCALE_16           (4)
+#  define LPI2C_MCFGR1_PRESCALE_32           (5)
+#  define LPI2C_MCFGR1_PRESCALE_64           (6)
+#  define LPI2C_MCFGR1_PRESCALE_128          (7)
+#define LPI2C_MCFGR1_AUTOSTOP                (1 << 8)  /* Automatic STOP Generation Bit */
+#define LPI2C_MCFGR1_IGNACK                  (1 << 9)  /* Ignore NACK Bit */
+#define LPI2C_MCFGR1_TIMECFG                 (1 << 10) /* Timeout Configuration Bit */
+                                                       /* Bits 15-11 Reserved */
+#define LPI2C_MCFGR1_MATCFG_SHIFT            (16)
+#define LPI2C_MCFGR1_MATCFG_MASK             (7 << LPI2C_MCFGR1_MATCFG_SHIFT)  /* Match Configuration Bit Mask */
+#define LPI2C_MCFGR1_MATCFG(n)               (((n) << LPI2C_MCFGR1_MATCFG_SHIFT) & LPI2C_MCFGR1_MATCFG_MASK)
+#  define LPI2C_MCFGR1_MATCFG_DISABLE        (0 << LPI2C_MCFGR1_MATCFG_SHIFT)
+                                                      /* LPI2C_MCFG1_MATCFG = 001b Reserved */
+#  define LPI2C_MCFGR1_MATCFG2               (2 << LPI2C_MCFGR1_MATCFG_SHIFT)
+#  define LPI2C_MCFGR1_MATCFG3               (3 << LPI2C_MCFGR1_MATCFG_SHIFT)
+#  define LPI2C_MCFGR1_MATCFG4               (4 << LPI2C_MCFGR1_MATCFG_SHIFT)
+#  define LPI2C_MCFGR1_MATCFG5               (5 << LPI2C_MCFGR1_MATCFG_SHIFT)
+#  define LPI2C_MCFGR1_MATCFG6               (6 << LPI2C_MCFGR1_MATCFG_SHIFT)
+#  define LPI2C_MCFGR1_MATCFG7               (7 << LPI2C_MCFGR1_MATCFG_SHIFT)
+                                                     /* Bits 23-19 Reserved */
+#define LPI2C_MCFGR1_PINCFG_SHIFT            (24)
+#define LPI2C_MCFGR1_PINCFG_MASK             (7 << LPI2C_MCFGR1_PINCFG_SHIFT)  /* Pin Configuration Bit Mask */
+#define LPI2C_MCFGR1_PINCFG(n)               (((n) << LPI2C_MCFGR1_PINCFG_SHIFT) & LPI2C_MCFGR1_PINCFG_MASK)
+#  define LPI2C_MCFGR1_PINCFG0               (0 << LPI2C_MCFGR1_PINCFG_SHIFT)
+#  define LPI2C_MCFGR1_PINCFG1               (1 << LPI2C_MCFGR1_PINCFG_SHIFT)
+#  define LPI2C_MCFGR1_PINCFG2               (2 << LPI2C_MCFGR1_PINCFG_SHIFT)
+#  define LPI2C_MCFGR1_PINCFG3               (3 << LPI2C_MCFGR1_PINCFG_SHIFT)
+#  define LPI2C_MCFGR1_PINCFG4               (4 << LPI2C_MCFGR1_PINCFG_SHIFT)
+#  define LPI2C_MCFGR1_PINCFG5               (5 << LPI2C_MCFGR1_PINCFG_SHIFT)
+#  define LPI2C_MCFGR1_PINCFG6               (6 << LPI2C_MCFGR1_PINCFG_SHIFT)
+#  define LPI2C_MCFGR1_PINCFG7               (7 << LPI2C_MCFGR1_PINCFG_SHIFT)
+                                                     /* Bits 31-27 Reserved */
+
+/* LPI2C Master Config Register 2  */
+
+#define LPI2C_MCFG2_BUSIDLE_MASK            (0xfff << 0)  /* Bus Idle Timeout Period in Clock Cycles */
+#define LPI2C_MCFG2_BUSIDLE_DISABLE         (0)
+#define LPI2C_MCFG2_BUSIDLE(n)              ((n) & LPI2C_MCFG2_BUSIDLE_MASK)
+                                                     /* Bits 15-12 Reserved */
+#define LPI2C_MCFG2_FILTSCL_SHIFT           (16)
+#define LPI2C_MCFG2_FILTSCL_MASK            (15 << LPI2C_MCFG2_FILTSCL_SHIFT)  /* Glitch Filter SCL */
+#define LPI2C_MCFG2_FILTSCL_DISABLE         (0 << LPI2C_MCFG2_FILTSCL_SHIFT)
+#define LPI2C_MCFG2_FILTSCL_CYCLES(n)       (((n) << LPI2C_MCFG2_FILTSCL_SHIFT) & LPI2C_MCFG2_FILTSCL_MASK)
+                                                     /* Bits 23-20 Reserved */
+#define LPI2C_MCFG2_FILTSDA_SHIFT           (24)
+#define LPI2C_MCFG2_FILTSDA_MASK            (15 << LPI2C_MCFG2_FILTSDA_SHIFT)  /* Glitch Filter SDA */
+#define LPI2C_MCFG2_FILTSDA_DISABLE         (0 << LPI2C_MCFG2_FILTSDA_SHIFT)
+#define LPI2C_MCFG2_FILTSDA_CYCLES(n)       (((n) << LPI2C_MCFG2_FILTSDA_SHIFT) & LPI2C_MCFG2_FILTSDA_MASK)
+                                                     /* Bits 31-28 Reserved */
+
+/* LPI2C Master Config Register 3  */
+
+                                                     /* Bits 7-0 Reserved */
+#define LPI2C_MCFG3_PINLOW_SHIFT            (8)
+#define LPI2C_MCFG3_PINLOW_MASK             (0xfff << LPI2C_MCFG3_PINLOW_SHIFT)  /* Configure The Pin Low Timeout in Clock Cycles */
+#define LPI2C_MCFG3_PINLOW_CYCLES(n)        (((n) << LPI2C_MCFG3_PINLOW_SHIFT) & LPI2C_MCFG3_PINLOW_MASK)
+                                                     /* Bits 31-20 Reserved */
+
+/* LPI2C Master Data Match Register  */
+
+#define LPI2C_MDMR_MATCH0_SHIFT             (0)
+#define LPI2C_MDMR_MATCH0_MASK              (0xff << LPI2C_MDMR_MATCH0_SHIFT)  /* Match 0 Value */
+#define LPI2C_MDMR_MATCH0(n)                (((n) << LPI2C_MDMR_MATCH0_SHIFT) & LPI2C_MDMR_MATCH0_MASK)
+                                                     /* Bits 15-8 Reserved */
+#define LPI2C_MDMR_MATCH1_SHIFT             (16)
+#define LPI2C_MDMR_MATCH1_MASK              (0xff << LPI2C_MDMR_MATCH1_SHIFT)  /* Match 1 Value */
+#define LPI2C_MDMR_MATCH1(n)                (((n) << LPI2C_MDMR_MATCH1_SHIFT) & LPI2C_MDMR_MATCH1_MASK)
+                                                     /* Bits 31-24 Reserved */
+
+/* LPI2C Master Clock Configuration Register 0 */
+
+#define LPI2C_MCCR0_CLKLO_SHIFT             (0)
+#define LPI2C_MCCR0_CLKLO_MASK              (0x3f << LPI2C_MCCR0_CLKLO_SHIFT)  /* Clock Low Period */
+#define LPI2C_MCCR0_CLKLO(n)                (((n) << LPI2C_MCCR0_CLKLO_SHIFT) & LPI2C_MCCR0_CLKLO_MASK)
+                                                     /* Bits 7-6 Reserved */
+#define LPI2C_MCCR0_CLKHI_SHIFT             (8)
+#define LPI2C_MCCR0_CLKHI_MASK              (0x3f << LPI2C_MCCR0_CLKHI_SHIFT)  /* Clock High Period */
+#define LPI2C_MCCR0_CLKHI(n)                (((n) << LPI2C_MCCR0_CLKHI_SHIFT) & LPI2C_MCCR0_CLKHI_MASK)
+                                                     /* Bits 15-14 Reserved */
+#define LPI2C_MCCR0_SETHOLD_SHIFT           (16)
+#define LPI2C_MCCR0_SETHOLD_MASK            (0x3f << LPI2C_MCCR0_SETHOLD_SHIFT)  /* Setup Hold Delay */
+#define LPI2C_MCCR0_SETHOLD(n)              (((n) << LPI2C_MCCR0_SETHOLD_SHIFT) & LPI2C_MCCR0_SETHOLD_MASK)
+                                                     /* Bits 23-22 Reserved */
+#define LPI2C_MCCR0_DATAVD_SHIFT            (24)
+#define LPI2C_MCCR0_DATAVD_MASK             (0x3f << LPI2C_MCCR0_DATAVD_SHIFT)  /* Setup Hold Delay */
+#define LPI2C_MCCR0_DATAVD(n)               (((n) << LPI2C_MCCR0_DATAVD_SHIFT) & LPI2C_MCCR0_DATAVD_MASK)
+                                                     /* Bits 31-30 Reserved */
+
+/* LPI2C Master Clock Configuration Register 1 */
+
+#define LPI2C_MCCR1_CLKLO_SHIFT             (0)
+#define LPI2C_MCCR1_CLKLO_MASK              (0x3f << LPI2C_MCCR1_CLKLO_SHIFT)  /* Clock Low Period */
+#define LPI2C_MCCR1_CLKLO(n)                (((n) << LPI2C_MCCR1_CLKLO_SHIFT) & LPI2C_MCCR1_CLKLO_MASK)
+                                                     /* Bits 7-6 Reserved */
+#define LPI2C_MCCR1_CLKHI_SHIFT             (8)
+#define LPI2C_MCCR1_CLKHI_MASK              (0x3f << LPI2C_MCCR1_CLKHI_SHIFT)  /* Clock High Period */
+#define LPI2C_MCCR1_CLKHI(n)                (((n) << LPI2C_MCCR1_CLKHI_SHIFT) & LPI2C_MCCR1_CLKHI_MASK)
+                                                     /* Bits 15-14 Reserved */
+#define LPI2C_MCCR1_SETHOLD_SHIFT           (16)
+#define LPI2C_MCCR1_SETHOLD_MASK            (0x3f << LPI2C_MCCR1_SETHOLD_SHIFT)  /* Setup Hold Delay */
+#define LPI2C_MCCR1_SETHOLD(n)              (((n) << LPI2C_MCCR1_SETHOLD_SHIFT) & LPI2C_MCCR1_SETHOLD_MASK)
+
+                                                     /* Bits 23-22 Reserved */
+#define LPI2C_MCCR1_DATAVD_SHIFT            (24)
+#define LPI2C_MCCR1_DATAVD_MASK             (0x3f << LPI2C_MCCR1_DATAVD_SHIFT)  /* Setup Hold Delay */
+#define LPI2C_MCCR1_DATAVD(n)               (((n) << LPI2C_MCCR1_DATAVD_SHIFT) & LPI2C_MCCR1_DATAVD_MASK)
+
+                                                     /* Bits 31-30 Reserved */
+
+/* LPI2C Master FIFO Control Register */
+
+#define LPI2C_MFCR_TXWATER_SHIFT            (0)
+#define LPI2C_MFCR_TXWATER_MASK             (3 << LPI2C_MFCR_TXWATER_SHIFT)  /* Transmit FIFO Watermark*/
+
+#define LPI2C_MFCR_TXWATER(n)               (((n) << LPI2C_MFCR_TXWATER_SHIFT) &  LPI2C_MFCR_TXWATER_MASK)  /* Transmit FIFO Watermark */
+
+                                                     /* Bits 15-2 Reserved */
+#define LPI2C_MFCR_RXWATER_SHIFT            (16)
+#define LPI2C_MFCR_RXWATER_MASK             (3 << LPI2C_MFCR_RXWATER_SHIFT)  /* Receive FIFO Watermark */
+
+#define LPI2C_MFCR_RXWATER(n)               (((n) << LPI2C_MFCR_RXWATER_SHIFT) &  LPI2C_MFCR_RXWATER_MASK)  /* Transmit FIFO Watermark */
+
+                                                     /* Bits 31-18 Reserved */
+
+/* LPI2C Master FIFO Status Register */
+
+#define LPI2C_MFSR_TXCOUNT_SHIFT            (0)
+#define LPI2C_MFSR_TXCOUNT_MASK             (3 << LPI2C_MFSR_TXCOUNT_SHIFT)  /* Transmit FIFO Count */
+
+                                                     /* Bits 15-2 Reserved */
+#define LPI2C_MFSR_RXCOUNT_SHIFT            (16)
+#define LPI2C_MFSR_RXCOUNT_MASK             (3 << LPI2C_MFSR_RXCOUNT_SHIFT)  /* Receive FIFO Count */
+
+                                                     /* Bits 31-18 Reserved */
+
+/* LPI2C Master Transmit Data Register */
+
+#define LPI2C_MTDR_DATA_SHIFT               (0)
+#define LPI2C_MTDR_DATA_MASK                (0xff << LPI2C_MTDR_DATA_SHIFT)  /* Transmit Data */
+#define LPI2C_MTDR_DATA(n)                  ((n) & LPI2C_MTDR_DATA_MASK)
+#define LPI2C_MTDR_CMD_SHIFT                (8)
+#define LPI2C_MTDR_CMD_MASK                 (7 << LPI2C_MTDR_CMD_SHIFT)  /* Command Data */
+#define LPI2C_MTDR_CMD(n)                   (((n) << LPI2C_MTDR_CMD_SHIFT) & LPI2C_MTDR_CMD_MASK)
+#  define LPI2C_MTDR_CMD_TXD                (0 << LPI2C_MTDR_CMD_SHIFT)
+#  define LPI2C_MTDR_CMD_RXD                (1 << LPI2C_MTDR_CMD_SHIFT)
+#  define LPI2C_MTDR_CMD_STOP               (2 << LPI2C_MTDR_CMD_SHIFT)
+#  define LPI2C_MTDR_CMD_RXD_DISC           (3 << LPI2C_MTDR_CMD_SHIFT)
+#  define LPI2C_MTDR_CMD_START              (4 << LPI2C_MTDR_CMD_SHIFT)
+#  define LPI2C_MTDR_CMD_START_NACK         (5 << LPI2C_MTDR_CMD_SHIFT)
+#  define LPI2C_MTDR_CMD_START_HI           (6 << LPI2C_MTDR_CMD_SHIFT)
+#  define LPI2C_MTDR_CMD_START_HI_NACK      (7 << LPI2C_MTDR_CMD_SHIFT)
+
+                                                     /* Bits 31-11 Reserved */
+
+/* LPI2C Master Receive Data Register */
+
+#define LPI2C_MRDR_DATA_SHIFT               (0)
+#define LPI2C_MRDR_DATA_MASK                (0xff << LPI2C_MRDR_DATA_SHIFT)  /* Receive Data */
+
+                                                     /* Bits 13-8 Reserved */
+#define LPI2C_MRDR_RXEMPTY_SHIFT            (14)
+#define LPI2C_MRDR_RXEMPTY_MASK             (1 << LPI2C_MRDR_RXEMPTY_SHIFT)  /* Rx Empty */
+
+                                                     /* Bits 31-15 Reserved */
+
+/* LPI2C Slave Control Register */
+
+#define LPI2C_SCR_SEN                       (1 << 0)  /* Slave Enable Bit */
+#define LPI2C_SCR_RST                       (1 << 1)  /* Software Reset Bit */
+                                                      /* Bits 3-2 Reserved */
+#define LPI2C_SCR_FILTEN                    (1 << 4)  /* Filter Enable Bit */
+#define LPI2C_SCR_FILTDZ                    (1 << 5)  /* Filter Doze Enable Bit */
+                                                      /* Bits 7-4 Reserved */
+#define LPI2C_SCR_RTF                       (1 << 8)  /* Reset Transmit FIFO Bit */
+#define LPI2C_SCR_RRF                       (1 << 9)  /* Reset Receive FIFO Bit */
+                                                      /* Bits 31-10 Reserved */
+
+/* LPI2C Slave Status Register  */
+
+#define LPI2C_SSR_TDF                       (1 << 0)  /* Transmit Data Flag Bit */
+#define LPI2C_SSR_RDF                       (1 << 1)  /* Receive Data Flag Bit */
+#define LPI2C_SSR_AVF                       (1 << 2)  /* Address Valid Flag Bit */
+#define LPI2C_SSR_TAF                       (1 << 3)  /* Transmit ACK Flag Bit */
+                                                      /* Bits 7-4 Reserved */
+#define LPI2C_SSR_RSF                       (1 << 8)  /* Repeated Start Flag Bit */
+#define LPI2C_SSR_SDF                       (1 << 9)  /* STOP Detect Flag Bit */
+#define LPI2C_SSR_BEF                       (1 << 10) /* Bit Error Flag Bit */
+#define LPI2C_SSR_FEF                       (1 << 11) /* FIFO Error Flag Bit */
+#define LPI2C_SSR_AM0F                      (1 << 12) /* Address Match 0 Flag Bit */
+#define LPI2C_SSR_AM1F                      (1 << 13) /* Address Match 1 Flag Bit */
+#define LPI2C_SSR_GCF                       (1 << 14) /* General Call Flag Bit */
+#define LPI2C_SSR_SARF                      (1 << 15) /* SMBus Alert Response Flag Bit */
+                                                      /* Bits 23-16 Reserved */
+#define LPI2C_MSR_SBF                       (1 << 24) /* Slave Busy Flag Bit */
+#define LPI2C_MSR_BBF                       (1 << 25) /* Bus Busy Flag Bit */
+                                                      /* Bits 31-26 Reserved */
+
+/* LPI2C Slave Interrupt Enable Register  */
+
+#define LPI2C_SIER_TDIE                     (1 << 0)  /* Transmit Data Interrupt Enable Bit */
+#define LPI2C_SIER_RDIE                     (1 << 1)  /* Receive Data Interrupt Enable Bit */
+#define LPI2C_SIER_AVIE                     (1 << 2)  /* Address Valid Interrupt Enable Bit */
+#define LPI2C_SIER_TAIE                     (1 << 3)  /* Transmit ACK Interrupt Enable Bit */
+                                                      /* Bits 7-4 Reserved */
+#define LPI2C_SIER_RSIE                     (1 << 8)  /* Repeated Start Interrupt Enable Bit */
+#define LPI2C_SIER_SDIE                     (1 << 9)  /* STOP Detect Interrupt Enable Bit */
+#define LPI2C_SIER_BEIE                     (1 << 10) /* Bit Error Interrupt Enable Bit */
+#define LPI2C_SIER_FEIE                     (1 << 11) /* FIFO Error Interrupt Enable Bit */
+#define LPI2C_SIER_AM0IE                    (1 << 12) /* Address Match 0 Interrupt Enable Bit */
+#define LPI2C_SIER_AM1IE                    (1 << 13) /* Address Match 1 Interrupt Enable Bit */
+#define LPI2C_SIER_GCIE                     (1 << 14) /* General Call Interrupt Enable Bit */
+#define LPI2C_SIER_SARIE                    (1 << 15) /* SMBus Alert Response Interrupt Enable Bit */
+                                                      /* Bits 31-16 Reserved */
+
+/* LPI2C Slave DMA Enable Register  */
+
+#define LPI2C_SDER_TDDE                     (1 << 0)  /* Transmit Data DMA Enable Bit */
+#define LPI2C_SDER_RDDE                     (1 << 1)  /* Transmit Data DMA Enable Bit */
+#define LPI2C_SDER_AVDE                     (1 << 2)  /* Address Valid DMA Enable Bit */
+                                                      /* Bits 31-3 Reserved */
+
+/* LPI2C Slave Configuration Register 1  */
+
+#define LPI2C_SCFGR1_ADRSTALL               (1 << 0)  /* Address SCL Stall */
+#define LPI2C_SCFGR1_RXSTALL                (1 << 1)  /* RX SCL Stall */
+#define LPI2C_SCFGR1_TXSTALL                (1 << 2)  /* TX Data SCL Stall */
+#define LPI2C_SCFGR1_ACKSTALL               (1 << 3)  /* ACK SCL Stall */
+                                                      /* Bits 7-4 Reserved */
+#define LPI2C_SCFGR1_GCEN                   (1 << 8)  /* General Call Enable */
+#define LPI2C_SCFGR1_SAEN                   (1 << 9)  /* SMBus Alert Enable */
+#define LPI2C_SCFGR1_TXCFG                  (1 << 10) /* Transmit Flag Configuration */
+#define LPI2C_SCFGR1_RXCFG                  (1 << 11) /* Receive Data Configuration */
+#define LPI2C_SCFGR1_IFNACK                 (1 << 12) /* Ignore NACK */
+#define LPI2C_SCFGR1_HSMEN                  (1 << 13) /* High Speed Mode Enable */
+                                                      /* Bits 15-14 Reserved */
+#define LPI2C_SCFG1_ADDRCFG_SHIFT           (16)
+#define LPI2C_SCFG1_ADDRCFG_MASK            (7 << LPI2C_SCFG1_ADDRCFG_SHIFT)  /* Address Configuration Bit Mask */
+#define LPI2C_SCFG1_ADDRCFG(n)              (((n) << LPI2C_SCFG1_ADDRCFG_SHIFT) & LPI2C_SCFG1_ADDRCFG_MASK)
+#  define LPI2C_SCFG1_ADDRCFG0              (0 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+#  define LPI2C_SCFG1_ADDRCFG1              (2 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+#  define LPI2C_SCFG1_ADDRCFG2              (2 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+#  define LPI2C_SCFG1_ADDRCFG3              (3 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+#  define LPI2C_SCFG1_ADDRCFG4              (4 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+#  define LPI2C_SCFG1_ADDRCFG5              (5 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+#  define LPI2C_SCFG1_ADDRCFG6              (6 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+#  define LPI2C_SCFG1_ADDRCFG7              (7 << LPI2C_SCFG1_ADDRCFG_SHIFT)
+                                                      /* Bits 31-19 Reserved */
+
+/* LPI2C Slave Configuration Register 2  */
+
+#define LPI2C_SCFG2_CLKHOLD_MASK            (15 << 0) /* Clock Hold Time */
+#define LPI2C_SCFG2_CLKHOLD(n)              ((n) & LPI2C_SCFG2_CLKHOLD_MASK)
+                                                      /* Bits 7-4 Reserved */
+#define LPI2C_SCFG2_DATAVD_SHIFT            (8)
+#define LPI2C_SCFG2_DATAVD_MASK             (0x3f << LPI2C_SCFG2_DATAVD_SHIFT)  /* Data Valid Delay */
+#define LPI2C_SCFG2_DATAVD(n)               (((n) << LPI2C_SCFG2_DATAVD_SHIFT) & LPI2C_SCFG2_DATAVD_MASK)
+                                                      /* Bits 15-14 Reserved */
+#define LPI2C_SCFG2_FILTSCL_SHIFT           (16)
+#define LPI2C_SCFG2_FILTSCL_MASK            (15 << LPI2C_SCFG2_FILTSCL_SHIFT)  /* Glitch Filter SCL */
+#define LPI2C_SCFG2_FILTSCL_DISABLE         (0 << LPI2C_SCFG2_FILTSCL_SHIFT)
+#define LPI2C_SCFG2_FILTSCL_CYCLES(n)       (((n) << LPI2C_SCFG2_FILTSCL_SHIFT) & LPI2C_SCFG2_FILTSCL_MASK)
+                                                      /* Bits 23-20 Reserved */
+#define LPI2C_SCFG2_FILTSDA_SHIFT           (24)
+#define LPI2C_SCFG2_FILTSDA_MASK            (15 << LPI2C_SCFG2_FILTSDA_SHIFT)  /* Glitch Filter SDA */
+#define LPI2C_SCFG2_FILTSDA_DISABLE         (0 << LPI2C_SCFG2_FILTSDA_SHIFT)
+#define LPI2C_SCFG2_FILTSDA_CYCLES(n)       (((n) << LPI2C_SCFG2_FILTSDA_SHIFT) & LPI2C_SCFG2_FILTSDA_MASK)
+                                                      /* Bits 31-28 Reserved */
+
+/* LPI2C Slave Address Match Register  */
+
+                                                      /* Bit 0 Reserved */
+#define LPI2C_SAMR_ADDR0_SHIFT              (1)
+#define LPI2C_SAMR_ADDR0_MASK               (0x3ff << LPI2C_SAMR_ADDR0_SHIFT)  /* Address 0 Value */
+#define LPI2C_SAMR_ADDR0(n)                 (((n) << LPI2C_SAMR_ADDR0_SHIFT) & LPI2C_SAMR_ADDR0_MASK)
+                                                      /* Bits 16-11 Reserved */
+#define LPI2C_SAMR_ADDR1_SHIFT              (17)
+#define LPI2C_SAMR_ADDR1_MASK               (0x3ff << LPI2C_SAMR_ADDR1_SHIFT)  /* Address 1 Value */
+#define LPI2C_SAMR_ADDR1(n)                 (((n) << LPI2C_SAMR_ADDR1_SHIFT) & LPI2C_SAMR_ADDR1_MASK)
+                                                      /* Bits 31-27 Reserved */
+
+/* LPI2C Slave Address Status Register  */
+
+#define LPI2C_SASR_RADDR_MASK               (0x7ff << 0) /* Received Address */
+
+/*                                                       Bits 16-11
+ *                                                       Reserved
+ */
+
+#define LPI2C_SASR_ANV                      (1 << 14) /* Address Not Valid */
+                                                      /* Bits 31-15 Reserved */
+
+/* LPI2C Slave Transmit ACK Register  */
+
+#define LPI2C_STAR_TXNACK                   (1 << 0)  /* Transmit NACK */
+                                                      /* Bits 31-1 Reserved */
+
+/* LPI2C Slave Transmit Data Register  */
+
+#define LPI2C_STDR_DATA_SHIFT               (0)
+#define LPI2C_STDR_DATA_MASK                (0xff << LPI2C_STDR_DATA_SHIFT)  /* Transmit Data */
+#define LPI2C_STDR_DATA(n)                  (((n) << LPI2C_STDR_DATA_SHIFT) & LPI2C_STDR_DATA_MASK)
+                                                      /* Bits 31-8 Reserved */
+
+/* LPI2C Slave Receive Data Register  */
+
+#define LPI2C_SRDR_DATA_SHIFT               (0)
+#define LPI2C_SRDR_DATA_MASK                (0xff << LPI2C_SRDR_DATA_SHIFT)  /* Receive Data */
+#define LPI2C_SRDR_DATA(n)                  (((n) << LPI2C_SRDR_DATA_SHIFT) & LPI2C_SRDR_DATA_MASK)
+                                                      /* Bits 13-8 Reserved */
+#define LPI2C_STAR_SOF                      (1 << 14) /* RX Empty */
+#define LPI2C_STAR_RXEMPTY                  (1 << 15) /* Start Of Frame */
+                                                      /* Bits 31-16 Reserved */
+
+#endif /* __ARCH_ARM_SRC_IMX9_HARDWARE_IMX9_LPI2C_H_ */

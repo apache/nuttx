@@ -183,6 +183,20 @@ config ARCH_CHIP_IMX6
 	---help---
 		Freescale iMX.6 architectures (Cortex-A9)
 
+config ARCH_CHIP_IMX9_CORTEX_M
+	bool "NXP iMX.9 Cortex-M7"
+	select ARCH_CORTEXM7
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_SPI_CS_CONTROL
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	---help---
+		iMX.9 architectures (Cortex-M7)
+
 config ARCH_CHIP_IMXRT
 	bool "NXP/Freescale iMX.RT"
 	select ARCH_CORTEXM7
@@ -1124,6 +1138,7 @@ config ARCH_CHIP
 	default "gd32f4"	if ARCH_CHIP_GD32F4
 	default "imx1"		if ARCH_CHIP_IMX1
 	default "imx6"		if ARCH_CHIP_IMX6
+	default "imx9"		if ARCH_CHIP_IMX9_CORTEX_M
 	default "imxrt"		if ARCH_CHIP_IMXRT
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
@@ -1535,6 +1550,9 @@ source "arch/arm/src/imx1/Kconfig"
 endif
 if ARCH_CHIP_IMX6
 source "arch/arm/src/imx6/Kconfig"
+endif
+if ARCH_CHIP_IMX9_CORTEX_M
+source "arch/arm/src/imx9/Kconfig"
 endif
 if ARCH_CHIP_IMXRT
 source "arch/arm/src/imxrt/Kconfig"
