@@ -1,9 +1,9 @@
 /****************************************************************************
  * boards/arm/s32k1xx/s32k144evb/src/s32k1xx_periphclocks.c
  *
- *   Copyright (c) 2013 - 2015, Freescale Semiconductor, Inc.
- *   Copyright 2016-2018 NXP
- *   All rights reserved.
+ * SPDX-License-Identifier: 0BSD
+ * SPDX-FileCopyrightText: 2013 - 2015, Freescale Semiconductor, Inc.
+ * SPDX-FileCopyrightText: 2016-2018 NXP. All rights reserved.
  *
  * THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
