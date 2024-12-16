@@ -914,6 +914,8 @@ struct sensor_gnss_satellite
 
   uint32_t constellation;
 
+  float cf;                 /* Carrier Frequency(Hz), GSV.signal_id */
+
   struct satellite
   {
     uint32_t svid;          /* Space vehicle ID */
