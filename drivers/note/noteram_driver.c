@@ -42,6 +42,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/note/note_driver.h>
 #include <nuttx/note/noteram_driver.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/panic_notifier.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/streams.h>
@@ -93,6 +94,7 @@ struct noteram_driver_s
   volatile unsigned int ni_read;
   spinlock_t lock;
   FAR struct pollfd *pfd;
+  struct notifier_block nb;
 };
 
 /* The structure to hold the context data of trace dump */
@@ -1272,19 +1274,20 @@ static void noteram_dump(FAR struct noteram_driver_s *drv)
 static int noteram_crash_dump(FAR struct notifier_block *nb,
                               unsigned long action, FAR void *data)
 {
+  FAR struct noteram_driver_s *drv =
+      container_of(nb, struct noteram_driver_s, nb);
   if (action == PANIC_KERNEL)
     {
-      noteram_dump(&g_noteram_driver);
+      noteram_dump(drv);
     }
 
   return 0;
 }
 
-static void noteram_crash_dump_register(void)
+static void noteram_crash_dump_register(FAR struct noteram_driver_s *drv)
 {
-  static struct notifier_block nb;
-  nb.notifier_call = noteram_crash_dump;
-  panic_notifier_chain_register(&nb);
+  drv->nb.notifier_call = noteram_crash_dump;
+  panic_notifier_chain_register(&drv->nb);
 }
 #endif
 
@@ -1310,7 +1313,7 @@ static void noteram_crash_dump_register(void)
 int noteram_register(void)
 {
 #ifdef CONFIG_DRIVERS_NOTERAM_CRASH_DUMP
-  noteram_crash_dump_register();
+  noteram_crash_dump_register(&g_noteram_driver);
 #endif
   return register_driver("/dev/note/ram", &g_noteram_fops, 0666,
                          &g_noteram_driver);
@@ -1334,7 +1337,8 @@ int noteram_register(void)
  ****************************************************************************/
 
 FAR struct note_driver_s *
-noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite)
+noteram_initialize(FAR const char *devpath, size_t bufsize,
+                   bool overwrite, bool crashdump)
 {
   FAR struct noteram_driver_s *drv;
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
@@ -1349,8 +1353,8 @@ noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite)
     {
       return NULL;
     }
-#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
   memcpy(drv + 1, devpath, len);
   drv->driver.name = (FAR const char *)(drv + 1);
   drv->driver.filter.mode.flag =
@@ -1360,7 +1364,13 @@ noteram_initialize(FAR const char *devpath, size_t bufsize, bool overwrite)
   drv->driver.filter.mode.cpuset =
                       CONFIG_SCHED_INSTRUMENTATION_CPUSET;
 #  endif
+#endif
 
+#ifdef CONFIG_DRIVERS_NOTERAM_CRASH_DUMP
+  if (crashdump)
+    {
+      noteram_crash_dump_register(drv);
+    }
 #endif
 
   drv->driver.ops = &g_noteram_ops;
