@@ -291,7 +291,7 @@ Bluetooth    No
 CAN/TWAI     Yes
 CDC Console  Yes    Rev.3
 DMA          Yes
-eFuse        No
+eFuse        Yes    Also virtual mode supported
 GPIO         Yes
 I2C          Yes
 LED_PWM      Yes
