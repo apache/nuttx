@@ -83,9 +83,9 @@ netdev_prefixlen_findby_lipv4addr(in_addr_t lipaddr, FAR int8_t *prefixlen)
   netdev_list_lock();
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      /* Is the interface in the "up" state? */
+      /* Is the interface in the "running" state? */
 
-      if ((dev->d_flags & IFF_UP) != 0 &&
+      if (IFF_IS_RUNNING(dev->d_flags) != 0 &&
           !net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
         {
 #ifndef CONFIG_ROUTE_LONGEST_MATCH
@@ -194,9 +194,9 @@ netdev_prefixlen_findby_lipv6addr(const net_ipv6addr_t lipaddr,
 
   for (dev = g_netdevices; dev; dev = dev->flink)
     {
-      /* Is the interface in the "up" state? */
+      /* Is the interface in the "running" state? */
 
-      if ((dev->d_flags & IFF_UP) != 0 && NETDEV_HAS_V6ADDR(dev))
+      if (IFF_IS_RUNNING(dev->d_flags) != 0 && NETDEV_HAS_V6ADDR(dev))
         {
 #ifndef CONFIG_ROUTE_LONGEST_MATCH
           /* Yes.. check for an address match (under the netmask) */
