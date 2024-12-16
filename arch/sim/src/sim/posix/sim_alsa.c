@@ -303,6 +303,7 @@ static int sim_audio_close(struct sim_audio_s *priv)
   host_uninterruptible(snd_pcm_close, priv->pcm);
 
   priv->pcm = NULL;
+  priv->paused = false;
 
   return 0;
 }
