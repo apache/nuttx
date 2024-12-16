@@ -220,10 +220,9 @@ static inline_function uintptr_t up_getusrsp(void *regs)
   do {                                                            \
     if (!up_interrupt_context())                                  \
       {                                                           \
-        nxsched_switch_context(rtcb, tcb);                        \
-        sys_call2(SYS_switch_context, (uintptr_t)&rtcb->xcp.regs, \
-                  (uintptr_t)tcb->xcp.regs);                      \
+        sys_call0(SYS_switch_context);                            \
       }                                                           \
+      UNUSED(rtcb);                                               \
   } while (0)
 
 /****************************************************************************
