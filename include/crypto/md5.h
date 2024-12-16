@@ -1,17 +1,12 @@
 /****************************************************************************
  * include/crypto/md5.h
- * $OpenBSD: md5.h,v 1.3 2014/11/16 17:39:09 tedu Exp $
  *
+ * SPDX-License-Identifier: NuttX-PublicDomain
  *
  * This code implements the MD5 message-digest algorithm.
  * The algorithm is due to Ron Rivest.  This code was
  * written by Colin Plumb in 1993, no copyright is claimed.
  * This code is in the public domain; do with it what you wish.
- *
- * Equivalent code is available from RSA Data Security, Inc.
- * This code has been tested against that, and is equivalent,
- * except that you don't need to include two pages of legalese
- * with every copy.
  *
  ****************************************************************************/
 
