@@ -196,8 +196,7 @@ void syslog_register(void);
  *   ch - The character to add to the interrupt buffer (must be positive).
  *
  * Returned Value:
- *   Zero success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   None
  *
  * Assumptions:
  *   Called only from interrupt handling logic; Interrupts will be disabled.
@@ -205,7 +204,7 @@ void syslog_register(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
-int syslog_add_intbuffer(int ch);
+void syslog_add_intbuffer(FAR const char *buffer, size_t buflen);
 #endif
 
 /****************************************************************************
@@ -219,8 +218,7 @@ int syslog_add_intbuffer(int ch);
  *   force   - Use the force() method of the channel vs. the putc() method.
  *
  * Returned Value:
- *   On success, the character is echoed back to the caller.  A negated
- *   errno value is returned on any failure.
+ *   None
  *
  * Assumptions:
  *   Interrupts may or may not be disabled.
@@ -228,7 +226,7 @@ int syslog_add_intbuffer(int ch);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_INTBUFFER
-int syslog_flush_intbuffer(bool force);
+void syslog_flush_intbuffer(bool force);
 #endif
 
 /****************************************************************************

@@ -233,13 +233,7 @@ ssize_t syslog_write(FAR const char *buffer, size_t buflen)
 #ifdef CONFIG_SYSLOG_INTBUFFER
   if (force)
     {
-      size_t nwritten;
-
-      for (nwritten = 0; nwritten < buflen; nwritten++)
-        {
-          syslog_add_intbuffer(buffer[nwritten]);
-        }
-
+      syslog_add_intbuffer(buffer, buflen);
       return buflen;
     }
   else
