@@ -129,10 +129,7 @@
 #define modreg32(v,m,a) putreg32((getreg32(a) & ~(m)) | ((v) & (m)), (a))
 #define modreg64(v,m,a) putreg64((getreg64(a) & ~(m)) | ((v) & (m)), (a))
 
-/* Context switching */
-
-#define tricore_fullcontextrestore(restoreregs) \
-  sys_call1(SYS_restore_context, (uintptr_t)restoreregs);
+#define tricore_fullcontextrestore() sys_call0(SYS_restore_context)
 
 /****************************************************************************
  * Public Types
