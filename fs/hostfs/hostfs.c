@@ -296,7 +296,7 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
     {
       /* Error opening file */
 
-      ret = -EBADF;
+      ret = hf->fd;
       goto errout_with_buffer;
     }
 
