@@ -265,7 +265,7 @@
  *   Dependencies:   None
  *
  * CANIOC_SET_STATE
- *   Description:    Set specfic can controller state
+ *   Description:    Set specific can controller state
  *
  *   Argument:       A pointer to an int type that describes the CAN
  *                   controller state.
@@ -275,7 +275,7 @@
  *   Dependencies:   None
  *
  * CANIOC_GET_STATE
- *   Description:    Get specfic can controller state
+ *   Description:    Get specific can controller state
  *
  *   Argument:       A pointer to an int type that describes the CAN
  *                   controller state.
@@ -285,7 +285,7 @@
  *   Dependencies:   None
  *
  * CANIOC_SET_TRANSV_STATE
- *   Description:    Set specfic can transceiver state
+ *   Description:    Set specific can transceiver state
  *
  *   Argument:       A pointer to an int type that describes the CAN
  *                   transceiver state.
@@ -295,7 +295,7 @@
  *   Dependencies:   None
  *
  * CANIOC_GET_TRANSV_STATE
- *   Description:    Get specfic can transceiver state
+ *   Description:    Get specific can transceiver state
  *
  *   Argument:       A pointer to an int type that describes the CAN
  *                   transceiver state.

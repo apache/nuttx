@@ -774,7 +774,7 @@ Boards With Improvements
 * [#9884](https://github.com/apache/nuttx/pull/9884) xtensa: esp32: esp32-devkitc: Refresh wifi_smp_rmt config
 * [#9709](https://github.com/apache/nuttx/pull/9709) xtensa: esp32: esp32-devkitc: wamr_wasi_debug: enable wasi-threads
 * [#9752](https://github.com/apache/nuttx/pull/9752) xtensa: esp32s2: Add basic support to SPIFLASH
-* [#9868](https://github.com/apache/nuttx/pull/9868) xtensa: esp32s3: Do not include specfic board in commom
+* [#9868](https://github.com/apache/nuttx/pull/9868) xtensa: esp32s3: Do not include specific board in commom
 * [#9870](https://github.com/apache/nuttx/pull/9870) xtensa: esp32s3: Some follow-up changes for ESP32s3 32M flash support
 * [#10748](https://github.com/apache/nuttx/pull/10748) xtensa: esp32s3: esp32s3-devkit:disable esp32s3-devkit:ksta_softap spinlock config
 * [#10588](https://github.com/apache/nuttx/pull/10588) xtensa: esp32s3: esp32s3-devkit:Add board GPIO support
