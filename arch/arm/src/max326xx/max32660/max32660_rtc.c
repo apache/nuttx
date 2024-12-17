@@ -80,7 +80,7 @@ static alm_callback_t g_alarmcb;
 static void *g_alarmarg;
 #endif
 
-static spinlock_t lock = SP_UNLOCKED;
+static spinlock_t g_rtc_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Data
@@ -461,7 +461,7 @@ int up_rtc_settime(const struct timespec *tp)
 
   /* Enable write access to RTC configuration registers */
 
-  flags = spin_lock_irqsave(&lock);
+  flags = spin_lock_irqsave(&g_rtc_lock);
   max326_rtc_wrenable(true);
 
   /* We need to disable the RTC in order to write to the SEC and SSEC
@@ -485,7 +485,7 @@ int up_rtc_settime(const struct timespec *tp)
   max326_rtc_enable(true);
   max326_rtc_wrenable(false);
 
-  spin_unlock_irqrestore(&lock, flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
   return OK;
 }
 
@@ -524,7 +524,7 @@ int max326_rtc_setalarm(struct timespec *ts,
 
   /* Is there already something waiting on the ALARM? */
 
-  flags = spin_lock_irqsave(&lock);
+  flags = spin_lock_irqsave(&g_rtc_lock);
   if (g_alarmcb == NULL)
     {
       /* Get the time as a fixed precision number.
@@ -619,7 +619,7 @@ int max326_rtc_setalarm(struct timespec *ts,
     }
 
 errout_with_lock:
-  spin_unlock_irqrestore(&lock, flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
   return ret;
 }
 #endif
@@ -719,7 +719,7 @@ int max326_rtc_cancelalarm(void)
   uint32_t regval;
   int ret = -ENODATA;
 
-  flags = spin_lock_irqsave(&lock);
+  flags = spin_lock_irqsave(&g_rtc_lock);
 
   if (g_alarmcb != NULL)
     {
@@ -747,7 +747,7 @@ int max326_rtc_cancelalarm(void)
       ret = OK;
     }
 
-  spin_unlock_irqrestore(&lock, flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
   return ret;
 }
 #endif
