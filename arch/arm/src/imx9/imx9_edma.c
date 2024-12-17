@@ -116,7 +116,7 @@ struct imx9_dmach_s
   uint32_t flags;                 /* DMA channel flags */
   bool inuse;                     /* true: The DMA channel is in use */
   uint8_t dmamux;                 /* DMAMUX channel number */
-  uint8_t chan;                   /* DMA channel number (either eDMA3 or eDMA4) */
+  uint8_t chan;                   /* DMA channel number (either eDMA3 or eDMA4/5) */
   uint8_t state;                  /* Channel state.  See enum imx9_dmastate_e */
   edma_callback_t callback;       /* Callback invoked when the DMA completes */
   void *arg;                      /* Argument passed to callback function */
@@ -687,7 +687,7 @@ static int imx9_edma_interrupt(int irq, void *context, void *arg)
 #ifdef IMX9_EDMA5_2_BASE
   if ((irq >= IMX9_IRQ_DMA5_2_0_1) && (irq <= IMX9_IRQ_DMA5_2_62_63))
     {
-      /* eDMA4 interrupt has two sources */
+      /* eDMA5 interrupt has two sources */
 
       imx9_edma_isr(irq, context, dmach);
       imx9_edma_isr(irq, context, dmach + 1);
@@ -772,7 +772,7 @@ static struct imx9_dmach_s * imx9_find_free_ch(uint16_t dmamux)
 #if defined(IMX9_DMA4_BASE) || defined(IMX9_EDMA5_2_BASE)
   /* For eDMA4/5 any free channel is good */
 
-#if defined(IMX9_DMA4_BASE
+#if defined(IMX9_DMA4_BASE)
   if (base == IMX9_DMA4_BASE)
 #else
   if (base == IMX9_EDMA5_2_BASE)

@@ -39,7 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* eDMA3 / eDMA4 Register Offsets */
+/* eDMA3 / eDMA5 Register Offsets */
 
 #define IMX9_EDMA_CSR_OFFSET              (0x000000)              /* Management Page Control Register (CSR) */
 #define IMX9_EDMA_ES_OFFSET               (0x000004)              /* Management Page Error Status Register (ES) */
@@ -50,7 +50,7 @@
 #define IMX9_EDMA_INT_OFFSET              (0x000008) /* Management Page Interrupt Request Status Register (INT) */
 #define IMX9_EDMA_HRS_OFFSET              (0x00000c) /* Management Page Hardware Request Status Register (HRS) */
 
-/* eDMA4 only */
+/* eDMA5 only */
 
 #define IMX9_EDMA_INT_LOW_OFFSET          (0x000008) /* Management Page Interrupt Request Status Register (INT_LOW) */
 #define IMX9_EDMA_INT_HIGH_OFFSET         (0x00000c) /* Management Page Interrupt Request Status Register (INT_HIGH) */
@@ -60,7 +60,7 @@
 /* eDNA5 only */
 #define IMX9_EDMA_MP_CH_MUX_OFFSET(n)     (0x000200 + ((n) << 2)) /* Channel Multiplexor Configuration (CH_MUX) */
 
-/* eDMA3 / eDMA4 Register Addresses */
+/* eDMA3 / eDMA5 Register Addresses */
 
 #define IMX9_EDMA_CSR(n)                  ((n) + IMX9_EDMA_CSR_OFFSET)
 #define IMX9_EDMA_ES(n)                   ((n) + IMX9_EDMA_ES_OFFSET)
@@ -85,8 +85,8 @@
 #define IMX9_EDMA_CH_INT_OFFSET           (0x000008) /* Channel Interrupt Status Register (CH0_INT) */
 #define IMX9_EDMA_CH_SBR_OFFSET           (0x00000c) /* Channel System Bus Register (CH0_SBR) */
 #define IMX9_EDMA_CH_PRI_OFFSET           (0x000010) /* Channel Priority Register (CH0_PRI) */
-#define IMX9_EDMA_CH_MUX_OFFSET           (0x000014) /* Channel Multiplexor Configuration (CH0_MUX) (eDMA4 only) */
-#define IMX9_EDMA_CH_MATTR_OFFSET         (0x000018) /* Memory Attributes Register (CH0_MATTR) (eDMA4 only) */
+#define IMX9_EDMA_CH_MUX_OFFSET           (0x000014) /* Channel Multiplexor Configuration (CH0_MUX) (eDMA5 only) */
+#define IMX9_EDMA_CH_MATTR_OFFSET         (0x000018) /* Memory Attributes Register (CH0_MATTR) (eDMA5 only) */
 #define IMX9_EDMA_TCD_SADDR_OFFSET        (0x000020) /* TCD Source Address Register (TCD0_SADDR) */
 #define IMX9_EDMA_TCD_SOFF_OFFSET         (0x000024) /* TCD Signed Source Address Offset Register (TCD0_SOFF) */
 #define IMX9_EDMA_TCD_ATTR_OFFSET         (0x000026) /* TCD Transfer Attributes (TCD0_ATTR) */
@@ -99,13 +99,13 @@
 #define IMX9_EDMA_TCD_CSR_OFFSET          (0x00003c) /* TCD Control and Status Register (TCD0_CSR) */
 #define IMX9_EDMA_TCD_BITER_OFFSET        (0x00003e) /* TCD Beginning Major Loop Count Register (TCD0_BITER) */
 
-/* eDMA 3 and eDMA 4 have TCD instance offsets, but same base offset */
+/* eDMA 3 and eDMA 5 have TCD instance offsets, but same base offset */
 
 #define IMX9_EDMA_TCD_BASE_OFFSET         (0x10000) /* Offset to TCD for both eDMA3/4 */
 #define IMX9_EDMA3_TCD_INST_OFFSET        (0x10000) /* Per instance TCD offset for eDMA3 */
-#define IMX9_EDMA4_TCD_INST_OFFSET        (0x8000)  /* Per instance TCD offset for eDMA4 */
+#define IMX9_EDMA5_TCD_INST_OFFSET        (0x8000)  /* Per instance TCD offset for eDMA5 */
 #define IMX9_EDMA_TCD_BASE(n)             ((n) + IMX9_EDMA_TCD_BASE_OFFSET)
-#define IMX9_EDMA_TCD_INST_OFFSET(n)      ((n) == IMX9_DMA3_BASE ? IMX9_EDMA3_TCD_INST_OFFSET : IMX9_EDMA4_TCD_INST_OFFSET)
+#define IMX9_EDMA_TCD_INST_OFFSET(n)      ((n) == IMX9_DMA3_BASE ? IMX9_EDMA3_TCD_INST_OFFSET : IMX9_EDMA5_TCD_INST_OFFSET)
 #define IMX9_EDMA_TCD(n,t)                (IMX9_EDMA_TCD_BASE(n) + (t) * IMX9_EDMA_TCD_INST_OFFSET(n))
 
 /* eDMA Transfer Control Descriptor (TCD) Register Addresses ****************/
