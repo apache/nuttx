@@ -33,6 +33,7 @@
 #include <debug.h>
 
 #include <arch/irq.h>
+#include <nuttx/spinlock.h>
 #include <arch/stm32l4/chip.h>
 
 #include "arm_internal.h"
@@ -44,6 +45,11 @@
 #if defined(CONFIG_STM32L4_USE_LEGACY_PINMAP)
 #  pragma message "CONFIG_STM32L4_USE_LEGACY_PINMAP will be deprecated migrate board.h see tools/stm32_pinmap_tool.py"
 #endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Data
@@ -195,7 +201,7 @@ int stm32l4_configgpio(uint32_t cfgset)
    * exclusive access to all of the GPIO configuration registers.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
   /* Now apply the configuration to the mode register */
 
@@ -356,7 +362,7 @@ int stm32l4_configgpio(uint32_t cfgset)
     }
 #endif
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 
