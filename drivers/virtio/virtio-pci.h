@@ -78,7 +78,7 @@ struct virtio_pci_ops_s
 
 struct virtio_pci_device_s
 {
-  struct virtio_device               vdev;    /* Virtio deivce */
+  struct virtio_device               vdev;    /* Virtio device */
   FAR struct pci_device_s           *dev;     /* PCI device */
   FAR const struct virtio_pci_ops_s *ops;
   metal_phys_addr_t                  shm_phy;
