@@ -45,6 +45,7 @@
 #define OSINIT_HW_READY()        (g_nx_initstate >= OSINIT_HARDWARE)
 #define OSINIT_OS_READY()        (g_nx_initstate >= OSINIT_OSREADY)
 #define OSINIT_IDLELOOP()        (g_nx_initstate >= OSINIT_IDLELOOP)
+#define OSINIT_IS_PANIC()        (g_nx_initstate >= OSINIT_PANIC)
 #define OSINIT_OS_INITIALIZING() (g_nx_initstate  < OSINIT_OSREADY)
 
 /****************************************************************************
