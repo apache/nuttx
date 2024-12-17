@@ -33,7 +33,8 @@ set(SRCS
     net_snoop.c
     net_cmsg.c
     net_iob_concat.c
-    net_mask2pref.c)
+    net_mask2pref.c
+    net_bufpool.c)
 
 # IPv6 utilities
 
