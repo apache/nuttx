@@ -111,8 +111,8 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
       if (tcb != NULL)
         {
 #ifdef CONFIG_SMP
-          if (tcb->task_state == TSTATE_TASK_RUNNING &&
-              g_nx_initstate != OSINIT_PANIC)
+          if (!OSINIT_IS_PANIC() &&
+              tcb->task_state == TSTATE_TASK_RUNNING)
             {
               struct backtrace_arg_s arg;
 

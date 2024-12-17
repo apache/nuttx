@@ -833,7 +833,7 @@ void _assert(FAR const char *filename, int linenum,
   struct panic_notifier_s notifier_data;
   irqstate_t flags;
 
-  if (g_nx_initstate == OSINIT_PANIC)
+  if (OSINIT_IS_PANIC())
     {
       /* Already in fatal state, reset board directly. */
 
@@ -885,7 +885,7 @@ void _assert(FAR const char *filename, int linenum,
   notifier_data.filename = filename;
   notifier_data.linenum = linenum;
   notifier_data.msg = msg;
-  panic_notifier_call_chain(g_nx_initstate == OSINIT_PANIC
+  panic_notifier_call_chain(OSINIT_IS_PANIC()
                             ? PANIC_KERNEL : PANIC_TASK,
                             &notifier_data);
 #ifdef CONFIG_ARCH_LEDS
@@ -902,7 +902,7 @@ void _assert(FAR const char *filename, int linenum,
   dump_assert_info(rtcb, filename, linenum, msg, regs);
 #endif
 
-  if (g_nx_initstate == OSINIT_PANIC)
+  if (OSINIT_IS_PANIC())
     {
       /* Dump fatal info of assertion. */
 
