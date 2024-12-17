@@ -121,7 +121,7 @@ uintptr_t x86_64_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  SP_DMB();
+  UP_DMB();
 
   return paddr;
 }
@@ -226,7 +226,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 
   /* Flush the data cache, so the changes are committed to memory */
 
-  SP_DMB();
+  UP_DMB();
 
   return brkaddr;
 }

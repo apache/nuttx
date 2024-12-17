@@ -31,6 +31,8 @@
 #  include <stdint.h>
 #endif /* __ASSEMBLY__ */
 
+#include <arch/barriers.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -56,9 +58,6 @@
  * instruction complete.
  *
  */
-
-#define UP_DSB() __asm__ __volatile__ ("mfence")
-#define UP_DMB() __asm__ __volatile__ ("mfence")
 
 /****************************************************************************
  * Public Types
