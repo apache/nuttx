@@ -63,6 +63,8 @@ enum rpmsg_port_spi_cmd_e
   RPMSG_PORT_SPI_CMD_CONNECT = 0x01,
   RPMSG_PORT_SPI_CMD_AVAIL,
   RPMSG_PORT_SPI_CMD_DATA,
+  RPMSG_PORT_SPI_CMD_SUSPEND,
+  RPMSG_PORT_SPI_CMD_RESUME,
   RPMSG_PORT_SPI_CMD_SHUTDOWN,
 };
 
@@ -334,7 +336,15 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
       goto out;
     }
 
-  if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
+  if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SUSPEND)
+    {
+      atomic_fetch_and(&rpspi->port.signals, ~RPMSG_SIGNAL_RUNNING);
+    }
+  else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_RESUME)
+    {
+      atomic_fetch_or(&rpspi->port.signals, RPMSG_SIGNAL_RUNNING);
+    }
+  else if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_AVAIL)
     {
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
         {
