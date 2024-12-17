@@ -64,6 +64,10 @@ config RPTUN_STACKSIZE
 	int "rptun stack size"
 	default 4096
 
+config RPTUN_CMD_TIMEOUT_MS
+	int "rptun cmd timeout ms"
+	default 5000
+
 config RPTUN_LOADER
 	bool "rptun loader support"
 	default n

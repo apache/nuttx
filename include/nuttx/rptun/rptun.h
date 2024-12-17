@@ -50,9 +50,12 @@
 
 #define RPTUN_NOTIFY_ALL      (UINT32_MAX - 0)
 
-#define RPTUN_CMD_PANIC       0x1
-#define RPTUN_CMD_STOP        0x2
-#define RPTUN_CMD_READY       0x3
+#define RPTUN_CMD_DONE        0x0
+#define RPTUN_CMD_RESET       0x1
+#define RPTUN_CMD_PANIC       0x2
+#define RPTUN_CMD_STOP        0x3
+#define RPTUN_CMD_READY       0x4
+#define RPTUN_CMD_ACK         0xffff
 #define RPTUN_CMD_MASK        0xffff
 #define RPTUN_CMD_SHIFT       16
 
