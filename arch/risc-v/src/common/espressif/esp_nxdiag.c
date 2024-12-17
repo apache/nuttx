@@ -172,7 +172,7 @@ int esp_nxdiag_read_flash_status(uint32_t *status)
  *   Read MAC adress.
  *
  * Input Parameters:
- *   mac - Mac adress to return.
+ *   mac - Mac address to return.
  *
  * Returned Value:
  *   OK on success; ERROR on failure.
