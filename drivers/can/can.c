@@ -884,7 +884,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Set specfic can transceiver state */
+      /* Set specific can transceiver state */
 
       case CANIOC_SET_TRANSVSTATE:
         {
@@ -907,7 +907,7 @@ static int can_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* Get specfic can transceiver state */
+      /* Get specific can transceiver state */
 
       case CANIOC_GET_TRANSVSTATE:
         {
