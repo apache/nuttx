@@ -1609,7 +1609,7 @@ retry:
 
       case GDB_STOPREASON_CTRLC:
       default:
-        ret = sprintf(state->pkt_buf, "T05thread:%d;", state->pid + 1);
+        ret = sprintf(state->pkt_buf, "T05thread:%x;", state->pid + 1);
     }
 
   if (ret < 0)
