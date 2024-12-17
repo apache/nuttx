@@ -142,11 +142,13 @@ static const struct pci_u16550_type_s g_pci_u16550_qemu_x4 =
   .portincr = 8,
 };
 
+/* NOTE: AX99100 export each serial port as a separate PCI function */
+
 static const struct pci_u16550_type_s g_pci_u16550_ax99100_x2 =
 {
-  .ports    = 2,
+  .ports    = 1,
   .regincr  = 1,
-  .portincr = 8,
+  .portincr = 0,
 };
 
 static const struct pci_device_id_s g_pci_u16550_id_table[] =
@@ -659,6 +661,7 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
   uintptr_t                           base = 0;
   size_t                              i;
   uint8_t                             port;
+  uint8_t                             ports;
   bool                                mmio = false;
   int                                 ret;
 
@@ -692,7 +695,14 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
       mmio = true;
     }
 
-  for (port = 0; port < type->ports; port++)
+  /* Get available ports for this device */
+
+  ports = type->ports * (PCI_FUNC(dev->devfn) + 1);
+  port  = type->ports * PCI_FUNC(dev->devfn);
+
+  /* Register all ports for this device */
+
+  for (; port < ports; port++)
     {
       /* Get port address */
 
