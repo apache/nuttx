@@ -41,8 +41,17 @@
 
 #include "devif/devif.h"
 #include "icmp/icmp.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMP_SOCKET
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_ICMP_MAX_CONNS
+#  define CONFIG_NET_ICMP_MAX_CONNS 0
+#endif
 
 /****************************************************************************
  * Private Data
@@ -50,13 +59,9 @@
 
 /* The array containing all IPPROTO_ICMP socket connections */
 
-#if CONFIG_NET_ICMP_PREALLOC_CONNS > 0
-static struct icmp_conn_s g_icmp_connections[CONFIG_NET_ICMP_PREALLOC_CONNS];
-#endif
-
-/* A list of all free IPPROTO_ICMP socket connections */
-
-static dq_queue_t g_free_icmp_connections;
+NET_BUFPOOL_DECLARE(g_icmp_connections, sizeof(struct icmp_conn_s),
+                    CONFIG_NET_ICMP_PREALLOC_CONNS,
+                    CONFIG_NET_ICMP_ALLOC_CONNS, CONFIG_NET_ICMP_MAX_CONNS);
 static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
@@ -78,17 +83,7 @@ static dq_queue_t g_active_icmp_connections;
 
 void icmp_sock_initialize(void)
 {
-#if CONFIG_NET_ICMP_PREALLOC_CONNS > 0
-  int i;
-
-  for (i = 0; i < CONFIG_NET_ICMP_PREALLOC_CONNS; i++)
-    {
-      /* Move the connection structure to the free list */
-
-      dq_addlast(&g_icmp_connections[i].sconn.node,
-                 &g_free_icmp_connections);
-    }
-#endif
+  NET_BUFPOOL_INIT(g_icmp_connections);
 }
 
 /****************************************************************************
@@ -111,31 +106,7 @@ FAR struct icmp_conn_s *icmp_alloc(void)
   ret = nxmutex_lock(&g_free_lock);
   if (ret >= 0)
     {
-#if CONFIG_NET_ICMP_ALLOC_CONNS > 0
-      if (dq_peek(&g_free_icmp_connections) == NULL)
-        {
-#if CONFIG_NET_ICMP_MAX_CONNS > 0
-          if (dq_count(&g_active_icmp_connections) +
-              CONFIG_NET_ICMP_ALLOC_CONNS > CONFIG_NET_ICMP_MAX_CONNS)
-            {
-              nxmutex_unlock(&g_free_lock);
-              return NULL;
-            }
-#endif
-
-          conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_ICMP_ALLOC_CONNS);
-          if (conn != NULL)
-            {
-              for (ret = 0; ret < CONFIG_NET_ICMP_ALLOC_CONNS; ret++)
-                {
-                  dq_addlast(&conn[ret].sconn.node,
-                             &g_free_icmp_connections);
-                }
-            }
-        }
-#endif
-
-      conn = (FAR struct icmp_conn_s *)dq_remfirst(&g_free_icmp_connections);
+      conn = NET_BUFPOOL_TRYALLOC(g_icmp_connections);
       if (conn != NULL)
         {
           /* Enqueue the connection into the active list */
@@ -184,22 +155,9 @@ void icmp_free(FAR struct icmp_conn_s *conn)
 
       dq_rem(&conn->sconn.node, &g_active_icmp_connections);
 
-      /* If this is a preallocated or a batch allocated connection store it
-       * in the free connections list. Else free it.
-       */
+      /* Free the connection. */
 
-#if CONFIG_NET_ICMP_ALLOC_CONNS == 1
-      if (conn < g_icmp_connections || conn >= (g_icmp_connections +
-          CONFIG_NET_ICMP_PREALLOC_CONNS))
-        {
-          kmm_free(conn);
-        }
-      else
-#endif
-        {
-          memset(conn, 0, sizeof(*conn));
-          dq_addlast(&conn->sconn.node, &g_free_icmp_connections);
-        }
+      NET_BUFPOOL_FREE(g_icmp_connections, conn);
     }
 
   nxmutex_unlock(&g_free_lock);
