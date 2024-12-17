@@ -98,9 +98,8 @@ static int uart_gdbstub_panic_callback(FAR struct notifier_block *nb,
   FAR struct uart_gdbstub_s *uart_gdbstub =
     container_of(nb, struct uart_gdbstub_s, nb);
 #if CONFIG_SERIAL_GDBSTUB_PANIC_TIMEOUT != 0
+  FAR const struct uart_ops_s *ops = NULL;
   unsigned int base;
-  unsigned int status;
-  char ch;
 #endif
 
   if (action != PANIC_KERNEL_FINAL)
@@ -124,47 +123,38 @@ static int uart_gdbstub_panic_callback(FAR struct notifier_block *nb,
       uart_gdbstub->console = uart_gdbstub->dev;
     }
 
+  if (uart_gdbstub->console == uart_gdbstub->dev &&
+      uart_gdbstub->org_ops != NULL)
+    {
+      ops = uart_gdbstub->org_ops;
+    }
+  else
+    {
+      ops = uart_gdbstub->console->ops;
+    }
+
   base = clock_systime_ticks();
   while (true)
     {
-      if (uart_gdbstub->console == uart_gdbstub->dev &&
-          uart_gdbstub->org_ops != NULL)
+      if (ops->rxavailable(uart_gdbstub->console))
         {
-          if (uart_gdbstub->org_ops->recvbuf)
-            {
-              if (uart_gdbstub->org_ops->rxavailable(uart_gdbstub->console))
-                {
-                  uart_gdbstub->org_ops->recvbuf(uart_gdbstub->console,
-                                                 &ch, 1);
-                }
-            }
-          else
-            {
-              ch = uart_gdbstub->org_ops->receive(uart_gdbstub->console,
-                                                  &status);
-            }
-        }
-      else
-        {
-          if (uart_gdbstub->console->ops->recvbuf)
-            {
-              if (uart_gdbstub->console->ops->rxavailable(
-                                              uart_gdbstub->console))
-                {
-                  uart_gdbstub->console->ops->recvbuf(uart_gdbstub->console,
-                                                      &ch, 1);
-                }
-            }
-          else
-            {
-              ch = uart_gdbstub->console->ops->receive(uart_gdbstub->console,
-                                                       &status);
-            }
-        }
+          char ch;
 
-      if (ch == 'Y' || ch == 'y')
-        {
-          break;
+          if (ops->recvbuf)
+            {
+              ops->recvbuf(uart_gdbstub->console, &ch, 1);
+            }
+          else
+            {
+              unsigned int status;
+
+              ch = ops->receive(uart_gdbstub->console, &status);
+            }
+
+          if (ch == 'Y' || ch == 'y')
+            {
+              break;
+            }
         }
 
       if ((clock_systime_ticks()) - base >=
