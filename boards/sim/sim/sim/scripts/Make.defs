@@ -149,12 +149,11 @@ ifeq ($(CONFIG_SIM_M32),y)
   ARCHCFLAGS += -m32
   ARCHCXXFLAGS += -m32
 else
-  ifeq ($(CONFIG_HOST_MACOS),y)
-    ARCHCFLAGS += -fno-pic
-    ARCHCXXFLAGS += -fno-pic
-  else
-    ARCHCFLAGS += -fno-pic -mcmodel=medium
-    ARCHCXXFLAGS += -fno-pic -mcmodel=medium
+  ARCHCFLAGS += -fno-pic
+  ARCHCXXFLAGS += -fno-pic
+  ifneq ($(CONFIG_HOST_MACOS),y)
+    ARCHCFLAGS += -mcmodel=medium
+    ARCHCXXFLAGS += -mcmodel=medium
   endif
 endif
 
