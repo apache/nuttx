@@ -1371,7 +1371,7 @@ static int sam_dma_setup(struct uart_dev_s *dev)
 
       sam_dmastart_circular(priv->rxdma, sam_dma_rxcallback, (void *)dev);
 
-      /* Use defined timout to check if RX bus is in idle state */
+      /* Use defined timeout to check if RX bus is in idle state */
 
       sam_serialout(priv, SAM_UART_RTOR_OFFSET,
                     CONFIG_SAMV7_SERIAL_DMA_TIMEOUT);
