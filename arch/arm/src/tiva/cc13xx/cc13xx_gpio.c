@@ -41,6 +41,8 @@
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -64,7 +66,7 @@ int tiva_configgpio(pinconfig_t pinconfig)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
 #ifdef CONFIG_TIVA_GPIO_IRQS
   /* Mask and clear any pending GPIO interrupt */
@@ -123,7 +125,7 @@ int tiva_configgpio(pinconfig_t pinconfig)
       putreg32(regval, TIVA_GPIO_DOE);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 

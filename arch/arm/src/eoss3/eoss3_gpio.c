@@ -29,6 +29,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "chip.h"
@@ -57,6 +58,8 @@
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -82,7 +85,7 @@ int eoss3_configgpio(gpio_pinset_t cfgset)
   uint16_t sel_idx = \
     (input & EOSS3_PAD_SEL_IDX_MASK) >> EOSS3_PAD_SEL_IDX_SHIFT;
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&g_configgpio_lock);
 
   /* Check select index, if it is 0 we are not working with an input */
 
@@ -111,7 +114,7 @@ int eoss3_configgpio(gpio_pinset_t cfgset)
     }
 
   putreg32(ctrl, EOSS3_PAD_X_CTRL(pad));
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 
@@ -141,7 +144,7 @@ void eoss3_gpiowrite(gpio_pinset_t cfgset, bool value)
   uint8_t iobit = (cfgset & GPIO_REG_BIT_MASK) >> GPIO_REG_BIT_SHIFT;
   if (cfgset & GPIO_REG_EN_MASK)
     {
-      irqstate_t flags = enter_critical_section();
+      irqstate_t flags = spin_lock_irqsave(&g_configgpio_lock);
       if (value)
         {
           putreg32(
@@ -155,7 +158,7 @@ void eoss3_gpiowrite(gpio_pinset_t cfgset, bool value)
             EOSS3_MISC_IO_OUTPUT);
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_configgpio_lock, flags);
     }
 }
 

@@ -32,11 +32,18 @@
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "chip.h"
 #include "at32_syscfg.h"
 #include "at32_gpio.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Data
@@ -199,7 +206,7 @@ int at32_configgpio(uint32_t cfgset)
    * exclusive access to all of the GPIO configuration registers.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
   /* Determine the alternate function (Only alternate function pins) */
 
@@ -355,7 +362,7 @@ int at32_configgpio(uint32_t cfgset)
       putreg32(regval, regaddr);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 #endif
