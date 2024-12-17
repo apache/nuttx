@@ -45,4 +45,42 @@
 
 #define EF_FLAG      0
 
+/* Segment register layout in coredumps. */
+
+struct user_regs_struct
+{
+  uint64_t  r15;
+  uint64_t  r14;
+  uint64_t  r13;
+  uint64_t  r12;
+  uint64_t  bp;
+  uint64_t  bx;
+  uint64_t  r11;
+  uint64_t  r10;
+  uint64_t  r9;
+  uint64_t  r8;
+  uint64_t  ax;
+  uint64_t  cx;
+  uint64_t  dx;
+  uint64_t  si;
+  uint64_t  di;
+  uint64_t  orig_ax;
+  uint64_t  ip;
+  uint64_t  cs;
+  uint64_t  flags;
+  uint64_t  sp;
+  uint64_t  ss;
+  uint64_t  fs_base;
+  uint64_t  gs_base;
+  uint64_t  ds;
+  uint64_t  es;
+  uint64_t  fs;
+  uint64_t  gs;
+};
+
+typedef uint64_t elf_greg_t;
+
+#define ELF_NGREG (sizeof(struct user_regs_struct) / sizeof(elf_greg_t))
+typedef elf_greg_t elf_gregset_t[ELF_NGREG];
+
 #endif /* __ARCH_X86_64_INCLUDE_ELF_H */
