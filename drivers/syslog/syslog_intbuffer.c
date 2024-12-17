@@ -65,9 +65,10 @@ struct syslog_intbuffer_s
  * Private Data
  ****************************************************************************/
 
-static struct syslog_intbuffer_s g_si_buffer =
+static struct syslog_intbuffer_s g_syslog_intbuffer =
 {
-  CIRCBUF_INITIALIZER(g_si_buffer.buffer, sizeof(g_si_buffer.buffer)),
+  CIRCBUF_INITIALIZER(g_syslog_intbuffer.buffer,
+                      sizeof(g_syslog_intbuffer.buffer)),
   SP_UNLOCKED,
 };
 
@@ -103,22 +104,22 @@ void syslog_flush_internal(bool force, size_t buflen)
    * concurrent modification by other tasks.
    */
 
-  flags = spin_lock_irqsave_wo_note(&g_si_buffer.splock);
+  flags = spin_lock_irqsave_wo_note(&g_syslog_intbuffer.splock);
 
   do
     {
-      buffer = circbuf_get_readptr(&g_si_buffer.circ, &size);
+      buffer = circbuf_get_readptr(&g_syslog_intbuffer.circ, &size);
       if (size > 0)
         {
           size = (size >= buflen) ? buflen : size;
           syslog_write_foreach(buffer, size, force);
-          circbuf_readcommit(&g_si_buffer.circ, size);
+          circbuf_readcommit(&g_syslog_intbuffer.circ, size);
           buflen -= size;
         }
     }
   while (size > 0 && buflen > 0);
 
-  spin_unlock_irqrestore_wo_note(&g_si_buffer.splock, flags);
+  spin_unlock_irqrestore_wo_note(&g_syslog_intbuffer.splock, flags);
 }
 
 /****************************************************************************
@@ -154,28 +155,29 @@ void syslog_add_intbuffer(FAR const char *buffer, size_t buflen)
 
   /* Disable concurrent modification from interrupt handling logic */
 
-  flags = spin_lock_irqsave_wo_note(&g_si_buffer.splock);
+  flags = spin_lock_irqsave_wo_note(&g_syslog_intbuffer.splock);
 
-  space = circbuf_space(&g_si_buffer.circ);
+  space = circbuf_space(&g_syslog_intbuffer.circ);
 
   if (space >= buflen)
     {
-      circbuf_write(&g_si_buffer.circ, buffer, buflen);
+      circbuf_write(&g_syslog_intbuffer.circ, buffer, buflen);
     }
-  else if (buflen <= sizeof(g_si_buffer.buffer))
+  else if (buflen <= sizeof(g_syslog_intbuffer.buffer))
     {
       syslog_flush_internal(true, buflen - space);
-      circbuf_write(&g_si_buffer.circ, buffer, buflen);
+      circbuf_write(&g_syslog_intbuffer.circ, buffer, buflen);
     }
   else
     {
       syslog_flush_intbuffer(true);
-      space = buflen - sizeof(g_si_buffer.buffer);
+      space = buflen - sizeof(g_syslog_intbuffer.buffer);
       syslog_write_foreach(buffer, space, true);
-      circbuf_write(&g_si_buffer.circ, buffer + space, buflen - space);
+      circbuf_write(&g_syslog_intbuffer.circ,
+                    buffer + space, buflen - space);
     }
 
-  spin_unlock_irqrestore_wo_note(&g_si_buffer.splock, flags);
+  spin_unlock_irqrestore_wo_note(&g_syslog_intbuffer.splock, flags);
 }
 
 /****************************************************************************
@@ -199,7 +201,7 @@ void syslog_add_intbuffer(FAR const char *buffer, size_t buflen)
 
 void syslog_flush_intbuffer(bool force)
 {
-  syslog_flush_internal(force, sizeof(g_si_buffer.buffer));
+  syslog_flush_internal(force, sizeof(g_syslog_intbuffer.buffer));
 }
 
 #endif /* CONFIG_SYSLOG_INTBUFFER */
