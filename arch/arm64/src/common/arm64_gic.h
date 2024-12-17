@@ -302,7 +302,6 @@ bool arm64_gic_irq_is_enabled(unsigned int intid);
 int  arm64_gic_initialize(void);
 void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
                                 uint32_t flags);
-int arm64_gic_irq_trigger(unsigned int intid, uint32_t flags);
 
 /****************************************************************************
  * Name: arm64_decodeirq
@@ -323,7 +322,6 @@ uint64_t * arm64_decodeirq(uint64_t *regs);
 
 void arm64_gic_raise_sgi(unsigned int sgi_id, uint16_t target_list);
 
-int arm64_gicv_irq_trigger(int irq, bool edge);
 #ifdef CONFIG_ARM64_GICV2M
 int arm64_gic_v2m_initialize(void);
 #endif
