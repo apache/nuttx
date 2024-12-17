@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <sys/boardctl.h>
 #include <sys/param.h>
 
 #include <metal/utilities.h>
@@ -41,6 +42,7 @@
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/virtio/virtio.h>
+#include <nuttx/panic_notifier.h>
 #include <openamp/remoteproc_loader.h>
 #include <openamp/remoteproc_virtio.h>
 #include <openamp/rsc_table_parser.h>
@@ -61,6 +63,8 @@ struct rptun_priv_s
   FAR struct rptun_dev_s      *dev;
   struct remoteproc           rproc;
   struct metal_list           node;
+  struct notifier_block       nbpanic;
+  bool                        rpanic;
 };
 
 struct rptun_store_s
@@ -114,6 +118,10 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 static FAR void *rptun_alloc_buf(FAR struct virtio_device *vdev,
                                  size_t size, size_t align);
 static void rptun_free_buf(FAR struct virtio_device *vdev, FAR void *buf);
+
+static void rptun_send_command(FAR struct rptun_priv_s *priv,
+                               uint32_t cmd, bool wait);
+static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack);
 
 /****************************************************************************
  * Private Data
@@ -613,10 +621,101 @@ err:
   return ret;
 }
 
+static void rptun_send_command(FAR struct rptun_priv_s *priv,
+                               uint32_t cmd, bool wait)
+{
+  FAR struct rptun_cmd_s *rptun_cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
+
+  if (RPTUN_IS_MASTER(priv->dev))
+    {
+      rptun_cmd->cmd_master = cmd;
+    }
+  else
+    {
+      rptun_cmd->cmd_slave = cmd;
+    }
+
+  rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);
+
+  if (wait)
+    {
+      uint32_t timeout = CONFIG_RPTUN_CMD_TIMEOUT_MS;
+
+      while (timeout-- > 0)
+        {
+          uint32_t ack = rptun_recv_command(priv, false);
+
+          if (RPTUN_GET_CMD(ack) == RPTUN_CMD_ACK)
+            {
+              break;
+            }
+
+          up_mdelay(1);
+        }
+    }
+}
+
+static uint32_t rptun_recv_command(FAR struct rptun_priv_s *priv, bool ack)
+{
+  FAR struct rptun_cmd_s *rptun_cmd = RPTUN_RSC2CMD(priv->rproc.rsc_table);
+  uint32_t cmd;
+
+  if (RPTUN_IS_MASTER(priv->dev))
+    {
+      if (rptun_cmd->cmd_slave == RPTUN_CMD_DONE)
+        {
+          return RPTUN_CMD_DONE;
+        }
+
+      cmd = rptun_cmd->cmd_slave;
+      rptun_cmd->cmd_slave = RPTUN_CMD_DONE;
+    }
+  else
+    {
+      if (rptun_cmd->cmd_master == RPTUN_CMD_DONE)
+        {
+          return RPTUN_CMD_DONE;
+        }
+
+      cmd = rptun_cmd->cmd_master;
+      rptun_cmd->cmd_master = RPTUN_CMD_DONE;
+    }
+
+  if (ack)
+    {
+      rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_ACK, 0), false);
+    }
+
+  return cmd;
+}
+
+static void rptun_check_command(FAR struct rptun_priv_s *priv)
+{
+  uint32_t cmd = rptun_recv_command(priv, true);
+
+  switch (RPTUN_GET_CMD(cmd))
+    {
+      case RPTUN_CMD_RESET:
+#ifdef CONFIG_BOARDCTL_RESET
+        boardctl(BOARDIOC_RESET, RPTUN_GET_CMD_VAL(cmd));
+#endif
+        break;
+
+      case RPTUN_CMD_PANIC:
+        priv->rpanic = true;
+        PANIC();
+        break;
+
+      default:
+        break;
+    }
+}
+
 static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
   FAR struct rptun_priv_s *priv = arg;
 
+  rptun_check_command(priv);
   return remoteproc_get_notification(&priv->rproc, vqid);
 }
 
@@ -718,6 +817,40 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return OK;
 }
 
+static void rptun_dev_reset(FAR struct rptun_priv_s *priv, uint16_t val)
+{
+  if (priv->dev->ops->reset)
+    {
+      priv->dev->ops->reset(priv->dev, val);
+    }
+  else
+    {
+      rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_RESET, val), true);
+    }
+}
+
+static void rptun_dev_panic(FAR struct rptun_priv_s *priv)
+{
+  if (priv->rpanic)
+    {
+      return;
+    }
+
+  metal_log(METAL_LOG_EMERGENCY, "Panic remote cpu %s:\n",
+            RPTUN_GET_CPUNAME(priv->dev));
+
+  if (priv->dev->ops->panic)
+    {
+      priv->dev->ops->panic(priv->dev);
+    }
+  else
+    {
+      rptun_send_command(priv, RPTUN_CMD(RPTUN_CMD_PANIC, 0), true);
+    }
+
+  priv->rpanic = true;
+}
+
 static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
                           unsigned long arg)
 {
@@ -743,10 +876,10 @@ static int rptun_do_ioctl(FAR struct rptun_priv_s *priv, int cmd,
         ret = rptun_dev_stop(&priv->rproc);
         break;
       case RPTUNIOC_RESET:
-        RPTUN_RESET(priv->dev, arg);
+        rptun_dev_reset(priv, arg);
         break;
       case RPTUNIOC_PANIC:
-        RPTUN_PANIC(priv->dev);
+        rptun_dev_panic(priv);
         break;
       default:
         ret = -ENOTTY;
@@ -940,6 +1073,22 @@ static int rptun_start_thread(int argc, FAR char *argv[])
   return 0;
 }
 
+static int rptun_panic_notifier(FAR struct notifier_block *block,
+                                unsigned long action, void *data)
+{
+  FAR struct rptun_priv_s *priv =
+    container_of(block, struct rptun_priv_s, nbpanic);
+
+  if (action == PANIC_KERNEL_FINAL)
+    {
+      /* PANIC all the remote core */
+
+      rptun_dev_panic(priv);
+    }
+
+  return 0;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -987,10 +1136,8 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
         }
     }
 
-#ifdef CONFIG_RPTUN_PM
-  snprintf(name, sizeof(name), "rptun-%s", RPTUN_GET_CPUNAME(dev));
-  pm_wakelock_init(&priv->wakelock, name, PM_IDLE_DOMAIN, PM_IDLE);
-#endif
+  priv->nbpanic.notifier_call = rptun_panic_notifier;
+  panic_notifier_chain_register(&priv->nbpanic);
 
   metal_mutex_acquire(&g_rptun_lock);
   metal_list_add_tail(&g_rptun_priv, &priv->node);
