@@ -30,8 +30,8 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/mm/kmap.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -97,6 +97,10 @@ nxsem_allocholder(FAR sem_t *sem, FAR struct tcb_s *htcb)
       serr("ERROR: Insufficient pre-allocated holders\n");
       PANIC();
     }
+
+#ifdef CONFIG_MM_KMAP
+  sem = kmm_map_user(this_task(), sem, sizeof(*sem));
+#endif
 
   pholder->sem    = sem;
   pholder->htcb   = htcb;
@@ -193,6 +197,10 @@ static inline void nxsem_freeholder(FAR sem_t *sem,
           break;
         }
     }
+
+#ifdef CONFIG_MM_KMAP
+  kmm_unmap(pholder->sem);
+#endif
 
   /* Release the holder and counts */
 
@@ -398,15 +406,6 @@ static void nxsem_restore_priority(FAR struct tcb_s *htcb)
     {
       FAR struct semholder_s *pholder;
 
-#ifdef CONFIG_ARCH_ADDRENV
-      FAR struct addrenv_s *oldenv;
-
-      if (htcb->addrenv_own)
-        {
-          addrenv_select(htcb->addrenv_own, &oldenv);
-        }
-#endif
-
       /* Try to find the highest priority across all the threads that are
        * waiting for any semaphore held by htcb.
        */
@@ -423,13 +422,6 @@ static void nxsem_restore_priority(FAR struct tcb_s *htcb)
               hpriority = stcb->sched_priority;
             }
         }
-
-#ifdef CONFIG_ARCH_ADDRENV
-      if (htcb->addrenv_own)
-        {
-          addrenv_restore(oldenv);
-        }
-#endif
 
       /* Apply the selected priority to the thread (hopefully back to the
        * threads base_priority).
