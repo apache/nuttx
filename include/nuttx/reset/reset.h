@@ -137,7 +137,7 @@ int reset_control_status(FAR struct reset_control *rstc);
  *
  *   Firstly, get a reset controller device from list, and then call
  *   reset_control_get_internal function by index, shared or acquired
- *   parameters retrun a reset control.
+ *   parameters return a reset control.
  *
  * Input Parameters:
  *   name     - The reset controller name
