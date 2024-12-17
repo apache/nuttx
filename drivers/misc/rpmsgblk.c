@@ -780,7 +780,7 @@ static int rpmsgblk_unlink(FAR struct inode *inode)
  *
  * Parameters:
  *   priv  - The rpmsg-blk handle
- *   len   - The got memroy size
+ *   len   - The got memory size
  *
  * Returned Values:
  *   NULL     - failure
