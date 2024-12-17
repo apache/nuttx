@@ -35,6 +35,12 @@
  * Pre-processor definitions
  ****************************************************************************/
 
+#if CONFIG_PATH_MAX > CONFIG_LINE_MAX
+#  define PATH_MAX_SIZE CONFIG_PATH_MAX
+#else
+#  define PATH_MAX_SIZE CONFIG_LINE_MAX
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -42,7 +48,7 @@
 struct pathbuffer_s
 {
   atomic_t free_bitmap; /* Bitmap of free buffer */
-  char buffer[CONFIG_LIBC_PATHBUFFER_MAX][PATH_MAX];
+  char buffer[CONFIG_LIBC_PATHBUFFER_MAX][PATH_MAX_SIZE];
 };
 
 /****************************************************************************
@@ -69,7 +75,7 @@ static struct pathbuffer_s g_pathbuffer =
  *   The lib_get_pathbuffer() function returns a pointer to a temporary
  *   buffer.  The buffer is allocated from a pool of pre-allocated buffers
  *   and if the pool is exhausted, a new buffer is allocated through
- *   kmm_malloc(). The size of the buffer is PATH_MAX, and must freed by
+ *   kmm_malloc(). The size of the buffer is PATH_MAX_SIZE, and must freed by
  *   calling lib_put_pathbuffer().
  *
  * Returned Value:
@@ -103,7 +109,7 @@ FAR char *lib_get_pathbuffer(void)
    */
 
 #ifdef CONFIG_LIBC_PATHBUFFER_MALLOC
-  return lib_malloc(PATH_MAX);
+  return lib_malloc(PATH_MAX_SIZE);
 #else
   return NULL;
 #endif
@@ -125,7 +131,7 @@ FAR char *lib_get_pathbuffer(void)
 
 void lib_put_pathbuffer(FAR char *buffer)
 {
-  int index = (buffer - &g_pathbuffer.buffer[0][0]) / PATH_MAX;
+  int index = (buffer - &g_pathbuffer.buffer[0][0]) / PATH_MAX_SIZE;
   if (index >= 0 && index < CONFIG_LIBC_PATHBUFFER_MAX)
     {
       DEBUGASSERT((atomic_read(&g_pathbuffer.free_bitmap) &
