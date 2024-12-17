@@ -33,6 +33,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
 #include "tiva_enablepwr.h"
