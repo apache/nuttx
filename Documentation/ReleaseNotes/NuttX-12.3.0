@@ -566,7 +566,7 @@ Drivers With Improvements
 * [#10778](https://github.com/apache/nuttx/pull/10778) mmcsd: add get emmc cid register interface.
 * [#10168](https://github.com/apache/nuttx/pull/10168) mmcsd: fix byte_block_count error in byte mode
 * [#10440](https://github.com/apache/nuttx/pull/10440) mmcsd: fix regression causing emmcsd not working
-* [#9937](https://github.com/apache/nuttx/pull/9937) mmcsd: mmcsd_sdio: config timout to write one data block
+* [#9937](https://github.com/apache/nuttx/pull/9937) mmcsd: mmcsd_sdio: config timeout to write one data block
 * [#10560](https://github.com/apache/nuttx/pull/10560) mmcsd: Rename mmc_rpmb_frame_s to rpmb_frame
 * [#10732](https://github.com/apache/nuttx/pull/10732) mmcsd: support dump cid and csd with mmc-utils
 * [#10672](https://github.com/apache/nuttx/pull/10672) mmcsd: update cid reg layout

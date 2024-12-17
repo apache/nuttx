@@ -34,7 +34,7 @@ config NET_ICMPv6_PMTU_TIMEOUT
 	default 10
 	depends on NET_ICMPv6_PMTU_ENTRIES != 0
 	---help---
-		The timout of the ICMPv6 pmtu entry
+		The timeout of the ICMPv6 pmtu entry
 
 config NET_ICMPv6_SOCKET
 	bool "IPPROTO_ICMP6 socket support"
