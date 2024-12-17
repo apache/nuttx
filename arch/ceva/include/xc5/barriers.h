@@ -1,7 +1,5 @@
 /****************************************************************************
- * arch/ceva/include/xc5/spinlock.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/ceva/include/xc5/barriers.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,11 +18,25 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_CEVA_INCLUDE_XC5_SPINLOCK_H
-#define __ARCH_CEVA_INCLUDE_XC5_SPINLOCK_H
+#ifndef __ARCH_CEVA_INCLUDE_XC5_BARRIERS_H
+#define __ARCH_CEVA_INCLUDE_XC5_BARRIERS_H
 
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
 
-#endif /* __ARCH_CEVA_INCLUDE_XC5_SPINLOCK_H */
+#ifndef __ASSEMBLY__
+
+/* Memory barrier doesn't need on tl4 */
+
+static inline void up_dsb(void)
+{
+}
+
+static inline void up_dmb(void)
+{
+}
+
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARCH_CEVA_INCLUDE_XC5_BARRIERS_H */
