@@ -37,6 +37,8 @@
 #include "sched/sched.h"
 #include "init/init.h"
 
+#include "x86_64_internal.h"
+
 #include "intel64_lowsetup.h"
 #include "intel64_cpu.h"
 
@@ -150,6 +152,14 @@ void x86_64_ap_boot(void)
 
   tcb = current_task(cpu);
   UNUSED(tcb);
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  /* Make sure that FS_BASE is not null */
+
+  write_fsbase((uintptr_t)tcb->stack_alloc_ptr +
+               sizeof(struct tls_info_s) +
+               (_END_TBSS - _START_TDATA));
+#endif
 
   /* Configure interrupts */
 
