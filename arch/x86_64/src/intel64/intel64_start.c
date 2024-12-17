@@ -37,8 +37,8 @@
 
 #include "x86_64_internal.h"
 
-#include "intel64_cpu.h"
 #include "intel64_lowsetup.h"
+#include "intel64_cpu.h"
 
 /****************************************************************************
  * Public Data
@@ -159,6 +159,15 @@ void __nxstart(void)
     {
       *dest++ = 0;
     }
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  /* Make sure that FS_BASE is not null */
+
+  write_fsbase((uintptr_t)(g_idle_topstack[0] -
+                           CONFIG_IDLETHREAD_STACKSIZE +
+                           sizeof(struct tls_info_s) +
+                           (_END_TBSS - _START_TDATA)));
+#endif
 
   /* Low-level, pre-OS initialization */
 

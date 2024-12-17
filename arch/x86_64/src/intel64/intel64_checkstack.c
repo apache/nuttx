@@ -25,18 +25,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include "sched/sched.h"
 #include "x86_64_internal.h"
 
-#ifdef CONFIG_STACK_COLORATION
-
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#define X86_64_RED_ZONE 256
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#ifdef CONFIG_STACK_COLORATION
 
 /****************************************************************************
  * Name: x86_64_stack_check
@@ -108,7 +111,8 @@ void x86_64_stack_color(void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not write outside the stack boundaries */
 
-  stkptr = (uint32_t *)STACK_ALIGN_UP((uintptr_t)stackbase);
+  stkptr = (uint32_t *)STACK_ALIGN_UP(
+    (uintptr_t)(stackbase + X86_64_RED_ZONE));
 
   if (nbytes == 0) /* 0: colorize the running stack */
     {

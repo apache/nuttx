@@ -126,7 +126,7 @@ x86_64_fullcontextrestore:
 	*/
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
-	mov     (8*REG_FS)(%rdi), %rax
+	mov     (8*REG_FSBASE)(%rdi), %rax
 	wrfsbase  %rax
 #endif
 

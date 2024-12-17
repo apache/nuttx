@@ -47,6 +47,10 @@
 #  error XCPTCONTEXT_SIZE must be aligned to XCPTCONTEXT_ALIGN !
 #endif
 
+#if defined(CONFIG_STACK_CANARIES) && !defined(CONFIG_SCHED_THREAD_LOCAL)
+#  error x86_64 stack canaries requires TLS support !
+#endif
+
 /* Aligned size of the kernel stack */
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -177,16 +181,19 @@ void up_initial_state(struct tcb_s *tcb)
  */
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
-  xcp->regs[REG_FS]     = (uintptr_t)tcb->stack_alloc_ptr
-                          + sizeof(struct tls_info_s)
-                          + (_END_TBSS - _START_TDATA);
+  xcp->regs[REG_FSBASE] = ((uintptr_t)tcb->stack_alloc_ptr +
+                           sizeof(struct tls_info_s) +
+                           (_END_TBSS - _START_TDATA));
 
-  *(uint64_t *)(xcp->regs[REG_FS]) = xcp->regs[REG_FS];
+  *(uint64_t *)(xcp->regs[REG_FSBASE]) = xcp->regs[REG_FSBASE];
 
-  write_fsbase(xcp->regs[REG_FS]);
+  /* Do not write FSBASE now. This task is not running yet! */
+
 #else
-  xcp->regs[REG_FS]     = 0;
+  xcp->regs[REG_FSBASE] = 0;
 #endif
+
+  xcp->regs[REG_FS]     = 0;
 
   /* GS used for CPU private data */
 

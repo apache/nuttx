@@ -418,9 +418,9 @@
 /* Align registers to 64-bytes */
 
 #ifdef CONFIG_ARCH_X86_64_AVX512
-#  define XMMAREA_REG_ALIGN         (13)
+#  define XMMAREA_REG_ALIGN         (12)
 #else
-#  define XMMAREA_REG_ALIGN         (7)
+#  define XMMAREA_REG_ALIGN         (6)
 #endif
 
 /* Register offset in XMMAREA */
@@ -434,42 +434,43 @@
 #define REG_GS                      (1 + XMMAREA_REG_OFFSET)
 #define REG_ES                      (2 + XMMAREA_REG_OFFSET)
 #define REG_DS                      (3 + XMMAREA_REG_OFFSET)  /* Data segment selector */
+#define REG_FSBASE                  (4 + XMMAREA_REG_OFFSET)  /* FS base */
 
 /* Remaining regs */
 
-#define REG_RAX                     (4 + XMMAREA_REG_OFFSET)
-#define REG_RBX                     (5 + XMMAREA_REG_OFFSET)
-#define REG_RBP                     (6 + XMMAREA_REG_OFFSET)
-#define REG_R10                     (7 + XMMAREA_REG_OFFSET)
-#define REG_R11                     (8 + XMMAREA_REG_OFFSET)
-#define REG_R12                     (9 + XMMAREA_REG_OFFSET)
-#define REG_R13                     (10 + XMMAREA_REG_OFFSET)
-#define REG_R14                     (11 + XMMAREA_REG_OFFSET)
-#define REG_R15                     (12 + XMMAREA_REG_OFFSET)
+#define REG_RAX                     (5 + XMMAREA_REG_OFFSET)
+#define REG_RBX                     (6 + XMMAREA_REG_OFFSET)
+#define REG_RBP                     (7 + XMMAREA_REG_OFFSET)
+#define REG_R10                     (8 + XMMAREA_REG_OFFSET)
+#define REG_R11                     (9 + XMMAREA_REG_OFFSET)
+#define REG_R12                     (10 + XMMAREA_REG_OFFSET)
+#define REG_R13                     (11 + XMMAREA_REG_OFFSET)
+#define REG_R14                     (12 + XMMAREA_REG_OFFSET)
+#define REG_R15                     (13 + XMMAREA_REG_OFFSET)
 
 /* ABI calling convention */
 
-#define REG_R9                      (13 + XMMAREA_REG_OFFSET)
-#define REG_R8                      (14 + XMMAREA_REG_OFFSET)
-#define REG_RCX                     (15 + XMMAREA_REG_OFFSET)
-#define REG_RDX                     (16 + XMMAREA_REG_OFFSET)
-#define REG_RSI                     (17 + XMMAREA_REG_OFFSET)
-#define REG_RDI                     (18 + XMMAREA_REG_OFFSET)
+#define REG_R9                      (14 + XMMAREA_REG_OFFSET)
+#define REG_R8                      (15 + XMMAREA_REG_OFFSET)
+#define REG_RCX                     (16 + XMMAREA_REG_OFFSET)
+#define REG_RDX                     (17 + XMMAREA_REG_OFFSET)
+#define REG_RSI                     (18 + XMMAREA_REG_OFFSET)
+#define REG_RDI                     (19 + XMMAREA_REG_OFFSET)
 
 /* IRQ saved */
 
-#define REG_ERRCODE                 (19 + XMMAREA_REG_OFFSET)  /* Error code */
-#define REG_RIP                     (20 + XMMAREA_REG_OFFSET)  /* Pushed by process on interrupt processing */
-#define REG_CS                      (21 + XMMAREA_REG_OFFSET)
-#define REG_RFLAGS                  (22 + XMMAREA_REG_OFFSET)
-#define REG_RSP                     (23 + XMMAREA_REG_OFFSET)
-#define REG_SS                      (24 + XMMAREA_REG_OFFSET)
+#define REG_ERRCODE                 (20 + XMMAREA_REG_OFFSET)  /* Error code */
+#define REG_RIP                     (21 + XMMAREA_REG_OFFSET)  /* Pushed by process on interrupt processing */
+#define REG_CS                      (22 + XMMAREA_REG_OFFSET)
+#define REG_RFLAGS                  (23 + XMMAREA_REG_OFFSET)
+#define REG_RSP                     (24 + XMMAREA_REG_OFFSET)
+#define REG_SS                      (25 + XMMAREA_REG_OFFSET)
 
-#define XMMAREA_REGS                (25)
+#define XMMAREA_REGS                (26)
 
 /* Aux register used by implementation */
 
-#define REG_AUX                     (26 + XMMAREA_REG_OFFSET)
+#define REG_AUX                     (27 + XMMAREA_REG_OFFSET)
 
 /* NOTE 2: This is not really state data.  Rather, this is just a convenient
  *   way to pass parameters from the interrupt handler to C code.
@@ -666,7 +667,8 @@ static inline_function uint64_t read_fsbase(void)
   return val;
 }
 
-static inline_function void write_fsbase(unsigned long val)
+nostackprotect_function
+static inline void write_fsbase(unsigned long val)
 {
   __asm__ volatile("wrfsbase %0"
                    : /* no output */

@@ -746,6 +746,11 @@ irq_common:
 	mov     %fs, %ax               /* Lower 16-bits of rax. */
 	movq    %rax, (8*REG_FS)(%rdi) /* Save the data segment descriptor */
 
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+	rdfsbase %rax
+	movq     %rax, (8*REG_FSBASE)(%rdi)
+#endif
+
 	/* Save registers from stack */
 
 	movq    0(%rsp), %rcx
