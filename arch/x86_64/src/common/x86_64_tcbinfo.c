@@ -36,29 +36,33 @@
 
 static const uint16_t g_reg_offs[] =
 {
-  TCB_REG_OFF(REG_RAX),    /* RAX */
+  TCB_REG_OFF(REG_R15),    /* R15 */
+  TCB_REG_OFF(REG_R14),    /* R14 */
+  TCB_REG_OFF(REG_R13),    /* R13 */
+  TCB_REG_OFF(REG_R12),    /* R12 */
+  TCB_REG_OFF(REG_RBP),    /* RBP */
   TCB_REG_OFF(REG_RBX),    /* RBX */
+  TCB_REG_OFF(REG_R11),    /* R11 */
+  TCB_REG_OFF(REG_R10),    /* R10 */
+  TCB_REG_OFF(REG_R9),     /* R9 */
+  TCB_REG_OFF(REG_R8),     /* R8 */
+  TCB_REG_OFF(REG_RAX),    /* RAX */
   TCB_REG_OFF(REG_RCX),    /* RCX */
   TCB_REG_OFF(REG_RDX),    /* RDX */
   TCB_REG_OFF(REG_RSI),    /* RSI */
   TCB_REG_OFF(REG_RDI),    /* RDI */
-  TCB_REG_OFF(REG_RBP),    /* RBP */
-  TCB_REG_OFF(REG_RSP),    /* RSP */
-  TCB_REG_OFF(REG_R8),     /* R8 */
-  TCB_REG_OFF(REG_R9),     /* R9 */
-  TCB_REG_OFF(REG_R10),    /* R10 */
-  TCB_REG_OFF(REG_R11),    /* R11 */
-  TCB_REG_OFF(REG_R12),    /* R12 */
-  TCB_REG_OFF(REG_R13),    /* R13 */
-  TCB_REG_OFF(REG_R14),    /* R14 */
-  TCB_REG_OFF(REG_R15),    /* R15 */
+  TCB_REG_OFF(REG_RAX),    /* RAX */
   TCB_REG_OFF(REG_RIP),    /* RIP */
-  TCB_REG_OFF(REG_RFLAGS), /* EFLAGS */
   TCB_REG_OFF(REG_CS),     /* CS */
+  TCB_REG_OFF(REG_RFLAGS), /* RFLAGS */
+  TCB_REG_OFF(REG_RSP),    /* RSP */
   TCB_REG_OFF(REG_SS),     /* SS */
+  TCB_REG_OFF(REG_FS),     /* FS_BASE */
+  TCB_REG_OFF(REG_GS),     /* GS_BASE */
   TCB_REG_OFF(REG_DS),     /* DS */
   TCB_REG_OFF(REG_ES),     /* ES */
   TCB_REG_OFF(REG_FS),     /* FS */
+  TCB_REG_OFF(REG_GS),     /* GS */
 };
 
 /****************************************************************************
