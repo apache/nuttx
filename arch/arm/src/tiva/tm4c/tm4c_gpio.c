@@ -121,6 +121,8 @@ struct gpio_func_s
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
+
 static const struct gpio_func_s g_funcbits[] =
 {
   {GPIO_INPUT_SETBITS,     GPIO_INPUT_CLRBITS},     /* GPIO_FUNC_INPUT */
@@ -789,7 +791,7 @@ int tiva_configgpio(pinconfig_t pinconfig)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
   /* Enable power and clocking for this GPIO peripheral.
    *
@@ -840,7 +842,7 @@ int tiva_configgpio(pinconfig_t pinconfig)
     }
 #endif
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 

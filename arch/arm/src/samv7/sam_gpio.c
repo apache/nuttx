@@ -33,6 +33,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -74,6 +75,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 #ifdef CONFIG_DEBUG_GPIO_INFO
 static const char g_portchar[SAMV7_NPIO] =
@@ -497,7 +500,7 @@ int sam_configgpio(gpio_pinset_t cfgset)
 
   /* Disable interrupts to prohibit re-entrance. */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
   /* Enable writing to GPIO registers */
 
@@ -606,7 +609,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
 
   /* The following requires exclusive access to the GPIO registers */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_configgpio_lock);
 
   gpioinfo("PIO%c pinset: %08x base: %08x -- %s\n",
            g_portchar[port], pinset, base, msg);
