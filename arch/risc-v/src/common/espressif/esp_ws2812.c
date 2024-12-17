@@ -464,7 +464,7 @@ static ssize_t esp_write(struct file *filep, const char *data, size_t len)
 
   if (len > 0)
     {
-      /* Check if the lenght to be updated, considering the current position,
+      /* Check if the length to be updated, considering the current position,
        * is valid. The number of LEDs to be updated should, starting from the
        * current offset should be less than the LED strip total length.
        */

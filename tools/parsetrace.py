@@ -484,14 +484,14 @@ class TraceDecoder(SymbolTables):
         return "%s", length, fmt % value
 
     def extract_string(self, fmt, data):
-        lenght = 0
+        length = 0
         if fmt == "%.*s":
-            lenght = int.from_bytes(
+            length = int.from_bytes(
                 data[:4], byteorder=self.elfinfo["byteorder"], signed=True
             )
             data = data[4:]
         else:
-            lenght = 0
+            length = 0
 
         try:
             string = data.split(b"\x00")[0].decode("utf-8")
@@ -501,17 +501,17 @@ class TraceDecoder(SymbolTables):
                     data[:size], byteorder=self.elfinfo["byteorder"], signed=False
                 )
                 string = f"<<0x{address}>>"
-                lenght += size
+                length += size
             else:
-                lenght += len(string) + 1
+                length += len(string) + 1
         except Exception:
             size = 4 if self.typeinfo["size_t"] == "uint32" else 8
             address = int.from_bytes(
                 data[:size], byteorder=self.elfinfo["byteorder"], signed=False
             )
             string = f"<<0x{address}>>"
-            lenght += size
-        return "%s", lenght, string
+            length += size
+        return "%s", length, string
 
     def extract_point(self, fmt, data):
         length = 4 if self.typeinfo["size_t"] == "int32" else 8

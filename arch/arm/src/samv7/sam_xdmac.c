@@ -1915,7 +1915,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  *   maddr - array of memory addresses (i.e. destination addresses)
  *   paddr - peripheral address (i.e. source address)
  *   nbytes - number of bytes to transfer
- *   ndescrs - number of descriptors (i.e. the lenght of descr array)
+ *   ndescrs - number of descriptors (i.e. the length of descr array)
  *
  ****************************************************************************/
 
