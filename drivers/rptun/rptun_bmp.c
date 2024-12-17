@@ -55,7 +55,7 @@ struct rptun_bmp_dev_s
 
 static FAR const char *rptun_bmp_get_cpuname(FAR struct rptun_dev_s *dev);
 static struct
-FAR rptun_rsc_s *rptun_bmp_get_resource(FAR struct rptun_dev_s *dev);
+FAR resource_table *rptun_bmp_get_resource(FAR struct rptun_dev_s *dev);
 static bool rptun_bmp_is_autostart(FAR struct rptun_dev_s *dev);
 static bool rptun_bmp_is_master(FAR struct rptun_dev_s *dev);
 static int rptun_bmp_start(FAR struct rptun_dev_s *dev);
@@ -92,11 +92,11 @@ static FAR const char *rptun_bmp_get_cpuname(FAR struct rptun_dev_s *dev)
   return priv->cpuname;
 }
 
-static FAR struct rptun_rsc_s *
+static FAR struct resource_table *
 rptun_bmp_get_resource(FAR struct rptun_dev_s *dev)
 {
   FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
-  return priv->rsc;
+  return &priv->rsc->rsc_tbl_hdr;
 }
 
 static bool rptun_bmp_is_autostart(FAR struct rptun_dev_s *dev)
