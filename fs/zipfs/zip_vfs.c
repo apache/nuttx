@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -231,6 +232,7 @@ static int zipfs_convert_result(int ziperr)
       case UNZ_END_OF_LIST_OF_FILE:
         return -ENOENT;
       case UNZ_CRCERROR:
+        ferr("zipfs file crc error\n");
         return -ESTALE;
       case UNZ_INTERNALERROR:
         return -EPERM;
@@ -301,12 +303,17 @@ static int zipfs_close(FAR struct file *filep)
 {
   FAR struct zipfs_file_s *fp = filep->f_priv;
   int ret;
+  int ret1;
 
-  ret = zipfs_convert_result(unzClose(fp->uf));
+  /* If read done, will check crc in unzCloseCurrentFile */
+
+  ret = zipfs_convert_result(unzCloseCurrentFile(fp->uf));
+  ret1 = zipfs_convert_result(unzClose(fp->uf));
+
   nxmutex_destroy(&fp->lock);
   fs_heap_free(fp->seekbuf);
   fs_heap_free(fp);
-  return ret;
+  return ret < 0 ? ret : ret1;
 }
 
 static ssize_t zipfs_read(FAR struct file *filep, FAR char *buffer,
