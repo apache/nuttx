@@ -105,7 +105,7 @@ static inline uintptr_t mmu_pte_to_paddr(uintptr_t pte)
     {
       paddr = pte;
 
-      /* Get page addres - remove flags */
+      /* Get page address - remove flags */
 
       paddr &= 0x0dfffffffffff000;
     }

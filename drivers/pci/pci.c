@@ -638,7 +638,7 @@ static void pci_register_bus_devices(FAR struct pci_bus_s *bus)
  * Input Parameters:
  *   base    - PCI address base address
  *   maxbase - PCI max base address
- *   mask    - PCI addres mask
+ *   mask    - PCI address mask
  *
  * Returned Value:
  *   Return the size result
