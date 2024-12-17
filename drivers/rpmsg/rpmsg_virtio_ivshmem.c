@@ -291,7 +291,7 @@ static int rpmsg_virtio_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
   ret = rpmsg_virtio_initialize(&priv->dev);
   if (ret < 0)
     {
-      rpmsgerr("Rpmsg virtio intialize failed, ret=%d\n", ret);
+      rpmsgerr("Rpmsg virtio initialize failed, ret=%d\n", ret);
       goto err;
     }
 

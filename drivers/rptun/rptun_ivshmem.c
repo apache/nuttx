@@ -396,7 +396,7 @@ static int rptun_ivshmem_probe(FAR struct ivshmem_device_s *ivdev)
   ret = rptun_initialize(&priv->rptun);
   if (ret < 0)
     {
-      pcierr("rptun intialize failed, ret=%d\n", ret);
+      pcierr("rptun initialize failed, ret=%d\n", ret);
       goto err;
     }
 

@@ -211,7 +211,7 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
   priv->vdev = vdev;
   vdev->priv = priv;
 
-  /* Call openamp api to intialize the virtio deivce */
+  /* Call openamp api to initialize the virtio deivce */
 
   virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
   virtio_set_features(vdev, 0);
