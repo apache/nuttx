@@ -218,6 +218,7 @@ struct wifi_sim_s
   int      key_mgmt;
   int      proto;
   int      auth_alg;
+  int      auth_type;
   int      pairwise_chiper;
   int      group_cipher;
 
@@ -1628,8 +1629,9 @@ static int wifidriver_set_auth(FAR struct wifi_sim_s *wifidev,
           /* record the value */
 
           wifidev->proto = value >> 1;
+          wifidev->auth_type = value;
 
-          ninfo("proto=%s\n", get_authstr(value));
+          ninfo("auth_type=%s\n", get_authstr(value));
         }
         break;
 
@@ -1654,14 +1656,19 @@ static int wifidriver_set_auth(FAR struct wifi_sim_s *wifidev,
 static int wifidriver_get_auth(FAR struct wifi_sim_s *wifidev,
                                FAR struct iwreq *pwrq)
 {
-  switch (wifidev->mode)
+  int flag = pwrq->u.param.flags & IW_AUTH_INDEX;
+
+  switch (flag)
     {
-      case IW_MODE_INFRA:
+      case IW_AUTH_WPA_VERSION:
+        pwrq->u.param.value = wifidev->auth_type;
         break;
-      case IW_MODE_MASTER:
+      case IW_AUTH_CIPHER_PAIRWISE:
+        pwrq->u.param.value = wifidev->pairwise_chiper;
         break;
       default:
-        break;
+        nerr("ERROR: Unknown cmd %d\n", flag);
+        return -ENOSYS;
     }
 
   return OK;
