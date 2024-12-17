@@ -348,7 +348,7 @@ int thermal_dummy_init(void)
                                       &g_dummy_zone_ops, &g_dummy_params);
   if (zdev == NULL)
     {
-      therr("Register zone deivce failed!\n");
+      therr("Register zone device failed!\n");
       return -ENOTSUP;
     }
 

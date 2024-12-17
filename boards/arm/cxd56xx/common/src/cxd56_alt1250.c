@@ -242,7 +242,7 @@ static struct spi_dev_s *alt1250_poweron(bool keep_on)
 
   up_mdelay(TIME_TO_STABLE_VDDIO);
 
-  /* Initialize spi deivce */
+  /* Initialize spi device */
 
   spi = cxd56_spibus_initialize(SPI_CH);
   if (!spi)

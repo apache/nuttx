@@ -178,7 +178,7 @@
 
 struct virtio_mmio_device_s
 {
-  struct virtio_device   vdev;       /* Virtio deivce */
+  struct virtio_device   vdev;       /* Virtio device */
   struct metal_io_region shm_io;     /* Share memory io region, virtqueue
                                       * use this io.
                                       */
