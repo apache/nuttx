@@ -1,7 +1,5 @@
 /****************************************************************************
- * arch/ceva/include/xc5/spinlock.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/ceva/include/barriers.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,11 +18,25 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_CEVA_INCLUDE_XC5_SPINLOCK_H
-#define __ARCH_CEVA_INCLUDE_XC5_SPINLOCK_H
+#ifndef __ARCH_CEVA_INCLUDE_BARRIERS_H
+#define __ARCH_CEVA_INCLUDE_BARRIERS_H
 
 /****************************************************************************
- * Inline functions
+ * Included Files
  ****************************************************************************/
 
-#endif /* __ARCH_CEVA_INCLUDE_XC5_SPINLOCK_H */
+#if defined(CONFIG_ARCH_XC5)
+#  include <arch/xc5/barriers.h.h>
+#elif defined(CONFIG_ARCH_XM6)
+#  include <arch/xm6/barriers.h>
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define UP_DSB() up_dsb()
+#define UP_DMB() up_dmb()
+
+#endif /* __ARCH_CEVA_INCLUDE_BARRIERS_H */
+
