@@ -566,6 +566,8 @@ void nxsem_initialize_holders(void)
 
 void nxsem_destroyholder(FAR sem_t *sem)
 {
+  irqstate_t flags = enter_critical_section();
+
   /* It might be an error if a semaphore is destroyed while there are any
    * holders of the semaphore (except perhaps the thread that release the
    * semaphore itself).  We actually have to assume that the caller knows
@@ -600,6 +602,8 @@ void nxsem_destroyholder(FAR sem_t *sem)
 #endif
 
   nxsem_foreachholder(sem, nxsem_recoverholders, NULL);
+
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
