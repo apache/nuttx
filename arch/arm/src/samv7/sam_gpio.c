@@ -536,7 +536,7 @@ int sam_configgpio(gpio_pinset_t cfgset)
   /* Disable writing to GPIO registers */
 
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
 
   return ret;
 }
@@ -666,7 +666,7 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
            getreg32(base + SAM_PIO_PCISR_OFFSET),
            getreg32(base + SAM_PIO_PCRHR_OFFSET));
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
 }
 #endif
