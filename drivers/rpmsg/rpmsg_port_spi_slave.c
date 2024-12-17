@@ -48,6 +48,10 @@
 #  define rpmsg_port_spi_crc16(hdr) 0
 #endif
 
+#define RPMSG_PORT_SPI_DROP_TXQ     0x01
+#define RPMSG_PORT_SPI_DROP_RXQ     0x02
+#define RPMSG_PORT_SPI_DROP_ALL     0x03
+
 #define BYTES2WORDS(s,b)            ((b) / ((s)->nbits >> 3))
 
 /****************************************************************************
@@ -156,18 +160,25 @@ static const struct spi_slave_devops_s g_rpmsg_port_spi_slave_ops =
  * Name: rpmsg_port_spi_drop_packets
  ****************************************************************************/
 
-static void rpmsg_port_spi_drop_packets(FAR struct rpmsg_port_spi_s *rpspi)
+static void
+rpmsg_port_spi_drop_packets(FAR struct rpmsg_port_spi_s *rpspi, int type)
 {
   FAR struct rpmsg_port_header_s *hdr;
 
-  while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false)))
+  if (type & RPMSG_PORT_SPI_DROP_TXQ)
     {
-      rpmsg_port_queue_return_buffer(&rpspi->port.txq, hdr);
+      while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false)))
+        {
+          rpmsg_port_queue_return_buffer(&rpspi->port.txq, hdr);
+        }
     }
 
-  while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.rxq, false)))
+  if (type & RPMSG_PORT_SPI_DROP_RXQ)
     {
-      rpmsg_port_queue_return_buffer(&rpspi->port.rxq, hdr);
+      while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.rxq, false)))
+        {
+          rpmsg_port_queue_return_buffer(&rpspi->port.rxq, hdr);
+        }
     }
 }
 
@@ -233,7 +244,11 @@ static void rpmsg_port_spi_notify_tx_ready(FAR struct rpmsg_port_s *port)
     }
   else
     {
-      rpmsg_port_spi_drop_packets(rpspi);
+      /* Drop txq buffers when a reconnection happens to make connected
+       * status false.
+       */
+
+      rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_TXQ);
     }
 }
 
@@ -364,7 +379,12 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
         {
           rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
-          rpmsg_port_spi_drop_packets(rpspi);
+
+          /* Drop all the unprocessed rxq buffer and pre-send txq buffer
+           * when a reconnect request to be received.
+           */
+
+          rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_ALL);
         }
     }
   else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
