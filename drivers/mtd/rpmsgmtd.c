@@ -667,7 +667,7 @@ static int rpmsgmtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  *
  * Parameters:
  *   priv  - The rpmsg-mtd handle
- *   len   - The got memroy size
+ *   len   - The got memory size
  *
  * Returned Values:
  *   NULL     - failure

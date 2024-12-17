@@ -745,7 +745,7 @@ static int rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
  *
  * Parameters:
  *   priv  - The rpmsg-device handle
- *   len   - The got memroy size
+ *   len   - The got memory size
  *
  * Returned Values:
  *   NULL     - failure
