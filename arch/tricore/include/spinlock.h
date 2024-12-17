@@ -31,6 +31,8 @@
 #  include <stdint.h>
 #endif /* __ASSEMBLY__ */
 
+#include <arch/barriers.h>
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
@@ -46,9 +48,6 @@
  * Data Synchronization Barrier (DSB) acts as a special kind of memory
  * barrier.
  */
-
-#define UP_DSB() __dsync()
-#define UP_DMB() __asm("":::"memory")
 
 /****************************************************************************
  * Public Types
