@@ -448,7 +448,7 @@ Improvements
 * [#11197](https://github.com/apache/nuttx/pull/11197) igmp: call IFF_SET_IPv4 when igmp_send
 * [#11384](https://github.com/apache/nuttx/pull/11384) ipv6: Fix source address with many addresses in same network
 * [#11378](https://github.com/apache/nuttx/pull/11378) ipv6: Move xxx_ipv6multicast from arch to common code
-* [#10894](https://github.com/apache/nuttx/pull/10894) netdb: When set a dns nameserver which already exists, retrun OK
+* [#10894](https://github.com/apache/nuttx/pull/10894) netdb: When set a dns nameserver which already exists, return OK
 * [#11076](https://github.com/apache/nuttx/pull/11076) netconfig: Enable SOCK_CLOEXEC for ioctl sockets
 * [#11396](https://github.com/apache/nuttx/pull/11396) netdev: Modify the logic for setting the IFF_RUNNING status of interfaces.
 * [#11110](https://github.com/apache/nuttx/pull/11110) Simplify getting value for different domain
