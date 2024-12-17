@@ -103,7 +103,6 @@ struct btnet_driver_s
 
   /* For internal use by this driver */
 
-  bool bd_bifup;                     /* true:ifup false:ifdown */
   struct work_s bd_pollwork;         /* Defer poll work to the work queue */
 
 #ifdef CONFIG_WIRELESS_BLUETOOTH_HOST
@@ -347,7 +346,7 @@ static void btnet_l2cap_receive(FAR struct bt_conn_s *conn,
   /* Ignore the frame if the network is not up */
 
   priv = (FAR struct btnet_driver_s *)context;
-  if (!priv->bd_bifup)
+  if (!IFF_IS_RUNNING(priv->bd_dev.r_dev.d_flags))
     {
       wlwarn("WARNING: Dropped... Network is down\n");
       goto drop;
@@ -510,7 +509,7 @@ static void btnet_hci_received(FAR struct bt_buf_s *buf, FAR void *context)
   /* Ignore the frame if the network is not up */
 
   priv = (FAR struct btnet_driver_s *)context;
-  if (!priv->bd_bifup)
+  if (!IFF_IS_RUNNING(priv->bd_dev.r_dev.d_flags))
     {
       wlwarn("WARNING: Dropped... Network is down\n");
       goto drop;
@@ -639,8 +638,6 @@ static int btnet_txpoll_callback(FAR struct net_driver_s *netdev)
 
 static int btnet_ifup(FAR struct net_driver_s *netdev)
 {
-  FAR struct btnet_driver_s *priv =
-    (FAR struct btnet_driver_s *)netdev->d_private;
   int ret;
 
   /* Set the IP address based on the addressing assigned to the node */
@@ -666,9 +663,6 @@ static int btnet_ifup(FAR struct net_driver_s *netdev)
              netdev->d_mac.radio.nv_addr[4], netdev->d_mac.radio.nv_addr[5]);
 #endif
 
-      /* The interface is now up */
-
-      priv->bd_bifup = true;
       ret = OK;
     }
 
@@ -693,23 +687,6 @@ static int btnet_ifup(FAR struct net_driver_s *netdev)
 
 static int btnet_ifdown(FAR struct net_driver_s *netdev)
 {
-  FAR struct btnet_driver_s *priv =
-    (FAR struct btnet_driver_s *)netdev->d_private;
-  irqstate_t flags;
-
-  /* Disable interruption */
-
-  flags = spin_lock_irqsave(NULL);
-
-  /* Put the EMAC in its reset, non-operational state.  This should be
-   * a known configuration that will guarantee the btnet_ifup() always
-   * successfully brings the interface back up.
-   */
-
-  /* Mark the device "down" */
-
-  priv->bd_bifup = false;
-  spin_unlock_irqrestore(NULL, flags);
   return OK;
 }
 
@@ -734,8 +711,6 @@ static void btnet_txavail_work(FAR void *arg)
 {
   FAR struct btnet_driver_s *priv = (FAR struct btnet_driver_s *)arg;
 
-  wlinfo("ifup=%u\n", priv->bd_bifup);
-
   /* Lock the network and serialize driver operations if necessary.
    * NOTE: Serialization is only required in the case where the driver work
    * is performed on an LP worker thread and where more than one LP worker
@@ -746,7 +721,7 @@ static void btnet_txavail_work(FAR void *arg)
 
   /* Ignore the notification if the interface is not yet up */
 
-  if (priv->bd_bifup)
+  if (IFF_IS_RUNNING(priv->bd_dev.r_dev.d_flags))
     {
 #ifdef CONFIG_NET_6LOWPAN
       /* Make sure the our single packet buffer is attached */
