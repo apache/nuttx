@@ -139,7 +139,7 @@ static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
 {
   irqstate_t flags;
 
-  flags      = spin_lock_irqsave(NULL);
+  flags      = spin_lock_irqsave(&list->lock);
   buf->flink = list->head;
   if (list->head == NULL)
     {
@@ -147,7 +147,7 @@ static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
     }
 
   list->head = buf;
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&list->lock, flags);
 }
 
 /****************************************************************************
@@ -172,7 +172,7 @@ static FAR struct bt_buf_s *
   FAR struct bt_buf_s *buf;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&list->lock);
   buf   = list->tail;
   if (buf != NULL)
     {
@@ -201,7 +201,7 @@ static FAR struct bt_buf_s *
       buf->flink = NULL;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&list->lock, flags);
   return buf;
 }
 
@@ -1652,6 +1652,9 @@ int bt_initialize(void)
 
   memset(&g_lp_rxlist, 0, sizeof(g_lp_rxlist));
   memset(&g_hp_rxlist, 0, sizeof(g_hp_rxlist));
+
+  spin_lock_init(&g_hp_rxlist.lock);
+  spin_lock_init(&g_lp_rxlist.lock);
 
   DEBUGASSERT(btdev != NULL);
   bt_buf_initialize();
