@@ -130,7 +130,7 @@
 #define _POSIX_PIPE_BUF       512
 #define _POSIX_STREAM_MAX     16
 #define _POSIX_TZNAME_MAX     3
-#define _POSIX2_LINE_MAX      80
+#define _POSIX2_LINE_MAX      CONFIG_LINE_MAX
 
 #ifdef CONFIG_SMALL_MEMORY
 
