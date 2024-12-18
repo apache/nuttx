@@ -1,6 +1,11 @@
 /****************************************************************************
  * include/crypto/cryptodev.h
- * $OpenBSD: cryptodev.h,v 1.58 2013/10/31 10:32:38 mikeb Exp $
+ *
+ * SPDX-License-Identifier: OAR AND BSD-2 Clause
+ * SPDX-FileCopyrightText: 2000 Angelos D. Keromytis
+ * SPDX-FileCopyrightText: 2001 Theo de Raadt
+ * SPDX-FileContributor: Angelos D. Keromytis (angelos@cis.upenn.edu)
+ *
  * The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
  *
  * This code was written by Angelos D. Keromytis in Athens, Greece, in
