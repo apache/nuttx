@@ -437,16 +437,31 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case BIOC_FLUSH:
         {
+          FAR struct inode *bchinode = bch->inode;
+          int ret2 = -ENOTTY;
+
           /* Flush any dirty pages remaining in the cache */
 
           ret = bchlib_flushsector(bch, false);
-          if (ret < 0)
+
+          /* Also pass the IOCTL command to the contained block driver */
+
+          if (bchinode->u.i_bops->ioctl != NULL)
             {
-              break;
+              ret2 = bchinode->u.i_bops->ioctl(bchinode, cmd, arg);
             }
 
-          /* Go through */
+          /* If the lowerhalf supports BIOC_FLUSH, and flushsector succeeded,
+           * return the error code from the lowerhalf. Otherwise just return
+           * the error code from bchlib_flushsector
+           */
+
+          if (ret2 != -ENOTTY && ret == OK)
+            {
+              ret = ret2;
+            }
         }
+        break;
 
       /* Pass the IOCTL command on to the contained block driver. */
 
