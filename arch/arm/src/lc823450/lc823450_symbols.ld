@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/arm/src/lc823450/lc823450_symbols.ld
  *
- *   Copyright (C) 2014-2015 ON Semiconductor. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014-2015 ON Semiconductor. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
