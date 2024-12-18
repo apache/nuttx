@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -109,9 +110,13 @@ void imx9_sm_iomucx_configure(sm_pinctrl_t *sm_pinctrl)
                             | SCMI_PINCTRL_SET_ATTR_NUM_CONFIGS(
                                   num_configs);
 
-      imx9_scmi_pinctrlconfigset(
+      int32_t ret = imx9_scmi_pinctrlconfigset(
           channel, (mux_register - SM_PLATFORM_PINCTRL_MUXREG_OFF) / 4,
           attributes, configs);
+      if (ret != 0)
+        {
+          assert("Unable to set iomux over SCMI");
+        }
     }
 }
 
@@ -155,8 +160,8 @@ int imx9_iomux_configure(iomux_cfg_t cfg)
                IMX9_IOMUXC_BASE + cfg.padcfg.padregoff);
     }
 
-  return OK;
 #endif
+  return OK;
 }
 
 /****************************************************************************
