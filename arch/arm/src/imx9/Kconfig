@@ -46,6 +46,13 @@ config IMX9_IOMUX_OVER_SCMI
 
 endif
 
+config IMX9_WFI_AWAKES_AT_SYSTICK
+	bool "WFI awakes at systick interrupts"
+	default y
+	---help---
+	Configure the GPC to wake up from systick interrupts at WFI
+	instruction
+
 menu "i.MX9 Peripheral Selection"
 
 config IMX9_EDMA
