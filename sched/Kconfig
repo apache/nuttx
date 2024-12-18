@@ -1412,6 +1412,13 @@ config PATH_MAX
 	---help---
 		The maximum size of path name.
 
+config LINE_MAX
+	int "Maximum size of line"
+	default 64 if DEFAULT_SMALL
+	default 80 if !DEFAULT_SMALL
+	---help---
+		The maximum size of line.
+
 endmenu # Files and I/O
 
 menuconfig PRIORITY_INHERITANCE
