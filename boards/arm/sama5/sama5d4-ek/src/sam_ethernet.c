@@ -42,6 +42,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "sam_pio.h"
 #include "sam_ethernet.h"
@@ -80,6 +81,14 @@
 #  define phyerr(x...)
 #  define phywarn(x...)
 #  define phyinfo(x...)
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_PIOE_IRQ
+static spinlock_t g_phy_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -258,7 +267,7 @@ int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
    * following operations are atomic.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_phy_lock);
 
   /* Configure the interrupt */
 
@@ -290,7 +299,7 @@ int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
 
   /* Return the old handler (so that it can be restored) */
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_phy_lock, flags);
   return OK;
 }
 #endif /* CONFIG_SAMA5_PIOE_IRQ */

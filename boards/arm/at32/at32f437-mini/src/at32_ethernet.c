@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/spinlock.h>
 
 #include "at32_gpio.h"
 #include "at32_eth.h"
@@ -79,6 +80,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_ethmac_lock = SP_UNLOCKED;
 
 #ifdef HAVE_NETMONITOR
 static xcpt_t g_ethmac_handler;
@@ -214,7 +217,7 @@ int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
 
   DEBUGASSERT(intf);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_ethmac_lock);
 
   if (strcmp(intf, AT32_ETHMAC_DEVNAME) == 0)
     {
@@ -234,7 +237,7 @@ int arch_phy_irq(const char *intf, xcpt_t handler, void *arg,
       *enable = enabler;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_ethmac_lock, flags);
   return OK;
 }
 #endif
