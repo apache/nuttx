@@ -1,6 +1,9 @@
 /****************************************************************************
  * drivers/mtd/mtd_config_fs.c
  *
+ * SPDX-License-Identifier: Apache-2.0
+ * SPDX-FileCopyrightText: 2018 Laczen
+ *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.  The
@@ -15,12 +18,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations
  * under the License.
- *
- * NVS: non volatile storage in flash
- *
- * Copyright (c) 2018 Laczen
- *
- * SPDX-License-Identifier: Apache-2.0
  *
  ****************************************************************************/
 
