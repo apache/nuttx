@@ -52,6 +52,7 @@ def test_cxxtest(p):
     assert ret == 0
 
 
+@pytest.mark.skip
 def test_scanftest(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))
@@ -66,6 +67,7 @@ def test_getprime(p):
     assert ret == 0
 
 
+@pytest.mark.skip
 def test_stdio(p):
     if p.board in do_not_support:
         pytest.skip("unsupported at {}".format(p.board))

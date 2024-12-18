@@ -386,7 +386,44 @@ class start:
                     % (riscv, options, self.log),
                 ],
             )
-        self.process.expect(self.PROMPT)
+        elif flag1 == "goldfish":
+            if board == "qemu-miwear":
+                self.create_process_after_get_lock(board)
+            elif board in ["qemu-smartspeaker-knsh", "qemu-smartspeaker"]:
+                self.log_fd = open(self.log, "wb")
+                self.process = pexpect.spawn(
+                    "bash",
+                    [
+                        "-c",
+                        "./emulator.sh smartspeaker -no-window",
+                    ],
+                    logfile=self.log_fd,
+                    maxread=200000,
+                )
+            else:
+                self.log_fd = open(self.log, "wb")
+                self.process = pexpect.spawn(
+                    "bash",
+                    [
+                        "-c",
+                        "./emulator.sh vela -no-window",
+                    ],
+                    logfile=self.log_fd,
+                    maxread=200000,
+                )
+        self.process.delayafterread = None
+        self.clean_buffer()
+        self.process.sendline('\n')
+        self.process.sendline('ps\n\n')
+        self.process.sendline('\n')
+        try:
+            self.process.expect(self.PROMPT)
+        finally:
+            print("********************* DEBUG START ********************")
+            print("cmd: ps")
+            print("before: {}".format(self.process.before.decode(errors="ignore")))
+            print("buffer: {}".format(self.process.buffer.decode(errors="ignore")))
+            print("********************** DEBUG END **********************")
 
 
 def runCmd(cmd):
