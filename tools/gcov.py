@@ -20,9 +20,56 @@
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
+
+
+def parse_gcda_data(path):
+    with open(path, "r") as file:
+        lines = file.read().strip().splitlines()
+
+    started = False
+    output = ""
+    filename = ""
+    size = 0
+
+    for line in lines:
+        if line.startswith("gcov start"):
+            started = True
+            match = re.search(r"filename:(.*?)\s+size:\s*(\d+)Byte", line)
+            if match:
+                filename = match.group(1)
+                size = int(match.group(2))
+            continue
+
+        if not started:
+            continue
+
+        if line.startswith("gcov end"):
+            started = False
+            if size != len(output) // 2:
+                print(
+                    f"Size mismatch for {filename}: expected {size} bytes, got {len(output) // 2} bytes"
+                )
+
+            match = re.search(r"checksum:\s*(0x[0-9a-fA-F]+)", line)
+            if match:
+                checksum = int(match.group(1), 16)
+                calculated_checksum = sum(bytearray.fromhex(output)) % 65536
+                if checksum != sum(bytearray.fromhex(output)) % 65536:
+                    print(
+                        f"Checksum mismatch for {filename}: expected {checksum}, got {calculated_checksum}"
+                    )
+                    continue
+
+                with open(filename, "wb") as fp:
+                    fp.write(bytes.fromhex(output))
+                    print(f"write {filename} success")
+            output = ""
+        else:
+            output += line.strip()
 
 
 def copy_file_endswith(endswith, source_dir, target_dir):
@@ -43,6 +90,7 @@ def arg_parser():
     parser = argparse.ArgumentParser(
         description="Code coverage generation tool.", add_help=False
     )
+    parser.add_argument("-i", "--input", help="Input dump data")
     parser.add_argument("-t", dest="gcov_tool", help="Path to gcov tool")
     parser.add_argument("-s", dest="gcno_dir", help="Directory containing gcno files")
     parser.add_argument("-a", dest="gcda_dir", help="Directory containing gcda files")
@@ -78,6 +126,9 @@ def main():
     if args.debug:
         debug_file = os.path.join(gcov_dir, "debug.log")
         sys.stdout = open(debug_file, "w+")
+
+    if args.input:
+        parse_gcda_data(os.path.join(root_dir, args.input))
 
     os.makedirs(os.path.join(gcov_dir, "data"), exist_ok=True)
 
