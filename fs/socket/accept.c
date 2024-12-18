@@ -38,9 +38,60 @@
 #include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/mm/kmap.h>
 #include <arch/irq.h>
 
+#include "sched/sched.h"
 #include "fs_heap.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: map_user_mem
+ *
+ * Description:
+ *   Map userspace memory to continuous kernel virtual memory using
+ *   `kmm_map_user()`.
+ *
+ * Input Parameters:
+ *   uaddr    The user address to map. Can be NULL, in which case NULL will
+ *            be returned through `p_kaddr`.
+ *   size     The size of the mem region to map
+ *   p_kaddr  Pointer to the kernel address to return. Cannot be NULL.
+ *
+ * Returned Value:
+ *  Returns 0 (OK) on success, or:
+ *    -ENOMEM
+ *      If there is not enough free memory to create the mapping.
+ *    -EFAULT
+ *      If `uaddr` points to memory not belonging to the user address space.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MM_KMAP
+static int map_user_mem(FAR void *uaddr, size_t size, void **p_kaddr)
+{
+  *p_kaddr = uaddr;
+
+  if (uaddr)
+    {
+      *p_kaddr = kmm_map_user(this_task(), uaddr, size);
+
+      if (*p_kaddr == NULL)
+        {
+          return -ENOMEM;
+        }
+      else if (*p_kaddr == uaddr)
+        {
+          return -EFAULT;
+        }
+    }
+
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -122,6 +173,8 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
   FAR struct socket *psock = NULL;
   FAR struct socket *newsock;
   FAR struct file *filep;
+  struct sockaddr *kaddr;
+  socklen_t *kaddrlen;
   int oflags = O_RDWR;
   int errcode;
   int newfd;
@@ -137,6 +190,33 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout;
     }
 
+  /* Map user addresses to kernel virtual memory and check they actually
+   * belong to the user
+   *
+   * NOTE: also check if writeable?
+   * NOTE: possible TOCTOU with contents of addrlen?
+   */
+
+#ifdef CONFIG_MM_KMAP
+  ret = map_user_mem(addr, sizeof(*addr), (void **)&kaddr);
+  if (ret != OK)
+    {
+      errcode = -ret;
+      goto errout;
+    }
+
+  ret = map_user_mem(addrlen, sizeof(*addrlen), (void **)&kaddrlen);
+  if (ret != OK)
+    {
+      kmm_unmap(kaddr);
+      errcode = -ret;
+      goto errout;
+    }
+#else
+  kaddr = addr;
+  kaddrlen = addrlen;
+#endif
+
   /* Get the underlying socket structure */
 
   ret = sockfd_socket(sockfd, &filep, &psock);
@@ -146,7 +226,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
   if (ret < 0)
     {
       errcode = -ret;
-      goto errout;
+      goto errout_with_kmap;
     }
 
   newsock = fs_heap_zalloc(sizeof(*newsock));
@@ -156,7 +236,7 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
       goto errout_with_filep;
     }
 
-  ret = psock_accept(psock, addr, addrlen, newsock, flags);
+  ret = psock_accept(psock, kaddr, kaddrlen, newsock, flags);
   if (ret < 0)
     {
       errcode = -ret;
@@ -185,6 +265,12 @@ int accept4(int sockfd, FAR struct sockaddr *addr, FAR socklen_t *addrlen,
     }
 
   fs_putfilep(filep);
+
+#ifdef CONFIG_MM_KMAP
+  kmm_unmap(kaddr);
+  kmm_unmap(kaddrlen);
+#endif
+
   leave_cancellation_point();
   return newfd;
 
@@ -196,6 +282,12 @@ errout_with_alloc:
 
 errout_with_filep:
   fs_putfilep(filep);
+
+errout_with_kmap:
+#ifdef CONFIG_MM_KMAP
+  kmm_unmap(kaddr);
+  kmm_unmap(kaddrlen);
+#endif
 
 errout:
   leave_cancellation_point();
