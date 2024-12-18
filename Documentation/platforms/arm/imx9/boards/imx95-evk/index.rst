@@ -3,7 +3,9 @@ IMX95LPD5EVK-19
 ===============
 
 The IMX95LPD5EVK-19 board is a platform designed to show the most commonly
-used features of the i.MX 95 automotive applications processor.
+used features of the
+`i.MX 95 automotive applications processor
+<https://www.nxp.com/products/iMX95>`_ .
 
 Features
 ========
@@ -46,8 +48,38 @@ The IMX95LPD5EVK-19 board provides a 2x5-pin Samtec FTSH-105-01-L-DV-K header
 processor. The FT4234H JTAG provides the remote debug option for the i.MX95
 processor.
 
+Firmware location
+=================
+
+Instruction Tightly Coupled Memory (ITCM)
+-----------------------------------------
+
+The purpose of the Tightly-Coupled Memory (TCM) is to provide low-latency
+memory that the processor can use without the unpredictability that is a
+feature of caches. By default the firmware will be located in this area
+(256K).
+
+DDR
+---
+
+DDR memory can be used in case the code memory footprint becomes bigger than
+the ITCM size. Using this configuration implies that other cores should be
+aware of this.
+For the default sd-card image from the EVK, these adaptations are needed on
+the software running on the M33 and A55 cores.
+
+    - `System Manager <https://github.com/nxp-imx/imx-sm>`_ (M33) should give
+      the M7 access to the DDR region
+    - `linux-imx <https://github.com/nxp-imx/linux-imx>`_ (A55) should reserve
+      the DDR region by specifying it in the device tree so linux won't make
+      use of it
+
+
 Configurations
 ==============
+
+All the configurations can be used in combination with the default sd-card
+image that is shipped with the EVK.
 
 nsh
 ---
@@ -57,8 +89,26 @@ configuration is focused on low level, command-line driver testing. Built-in
 applications are supported, but none are enabled. This configuration does not
 support a network.
 
-This configuration can be used in combination with the default sd-card image
-that is shipped with the EVK.
+
+can
+---
+
+Configures the NuttShell (nsh) and also adds CAN support. CAN1 is enabled and
+can be accessed at J17 on the EVK. Make sure that SW9[3] (PDM_CAN_SEL) is set
+to ON. The configuration includes CAN utilities as candump and cansend.
+
+.. note::
+      `System Manager <https://github.com/nxp-imx/imx-sm>`_ (M33) should give
+      the M7 access rights to the PIN_PDM_CLK (CAN1_TX) and
+      PIN_PDM_BIT_STREAM0 (CAN1_RX) pins in the mx95evk.cfg.
+
+      Alternatively these can be set manually in the system manager's console:
+
+      .. code-block:: console
+
+        >$ mm 0x443c01e0 0x6
+        >$ mm 0x443c01e4 0x6
+
 
 rpmsg
 -----
@@ -70,16 +120,7 @@ an OS running on the A55 cores can connect. There is also an option to use
 the filesystem client feature in which a remote directory can be mounted to
 a local directory (CONFIG_FS_RPMSGFS).
 
-The rpmsg configuration executes the code from DDR since its code memory
-footprint is bigger than the ITCM size. In the case of using the default
-sd-card image from the EVK, adaptations are needed on the software running on
-the M33 and A55 cores.
-
-    - `System Manager <https://github.com/nxp-imx/imx-sm>`_ (M33) should give
-      the M7 access to the DDR region
-    - `linux-imx <https://github.com/nxp-imx/linux-imx>`_ (A55) should reserve
-      the DDR region by specifying it in the device tree so linux won't make
-      use of it
-    - `linux-imx <https://github.com/nxp-imx/linux-imx>`_ (A55) needs the
+.. note::
+      `linux-imx <https://github.com/nxp-imx/linux-imx>`_ (A55) needs the
       NuttX compatible rpmsg_tty and rpmsg_fs drivers. See `dev mailing list
       <https://www.mail-archive.com/dev@nuttx.apache.org/msg12112.html>`_

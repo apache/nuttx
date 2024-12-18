@@ -39,6 +39,10 @@
 #  include <nuttx/serial/uart_rpmsg.h>
 #endif
 
+#ifdef CONFIG_IMX9_FLEXCAN
+#  include "imx9_flexcan.h"
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -94,6 +98,14 @@ int imx95_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_IMX9_FLEXCAN1
+  imx9_caninitialize(1);
+#endif
+
+#ifdef CONFIG_IMX9_FLEXCAN2
+  imx9_caninitialize(2);
 #endif
 
   UNUSED(ret);
