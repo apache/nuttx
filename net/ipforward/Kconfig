@@ -40,3 +40,21 @@ config NET_IPFORWARD_NSTRUCT
 		WARNING: DO NOT set this setting to a value greater than or equal to
 		CONFIG_IOB_NBUFFERS, otherwise it may consume all the IOB and let
 		netdev fail to work.
+
+config NET_IPFORWARD_ALLOC_STRUCT
+	int "Dynamic forwarding structures allocation"
+	default 0
+	---help---
+		When set to 0 all dynamic allocations are disabled
+
+		When set to 1 a new forwarding structure will be allocated every
+		time, and it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the forwarding structures
+		in batches (with batch size equal to this config). When a I/O buffer
+		chain head is no longer needed, it will be returned to the free
+		forwarding structures pool, and it will never be deallocated!
+
+		Note: maximum number of allocated forwarding structures is limited
+		to CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE to avoid consuming all
+		the IOBs.

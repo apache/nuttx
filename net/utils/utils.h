@@ -102,6 +102,7 @@
 #define NET_BUFPOOL_TRYALLOC(p)     net_bufpool_timedalloc(&p, 0)
 #define NET_BUFPOOL_ALLOC(p)        net_bufpool_timedalloc(&p, UINT_MAX)
 #define NET_BUFPOOL_FREE(p,n)       net_bufpool_free(&p, n)
+#define NET_BUFPOOL_TEST(p)         net_bufpool_test(&p)
 
 /****************************************************************************
  * Public Types
@@ -415,6 +416,19 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
  ****************************************************************************/
 
 void net_bufpool_free(FAR struct net_bufpool_s *pool, FAR void *node);
+
+/****************************************************************************
+ * Name: net_bufpool_test
+ *
+ * Description:
+ *   Check if there is room in the buffer pool.  Does not reserve any space.
+ *
+ * Assumptions:
+ *   None.
+ *
+ ****************************************************************************/
+
+int net_bufpool_test(FAR struct net_bufpool_s *pool);
 
 /****************************************************************************
  * Name: net_chksum_adjust
