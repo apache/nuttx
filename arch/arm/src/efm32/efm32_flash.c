@@ -1,7 +1,10 @@
 /****************************************************************************
  * arch/arm/src/efm32/efm32_flash.c
  *
- *  Copyright 2014 Silicon Laboratories, Inc. http://www.silabs.com
+ * SPDX-License-Identifier: BSD-3-Clause
+ * SPDX-FileCopyrightText: 2014 Silicon Laboratories, Inc.
+ * SPDX-FileCopyrightText: 2015 Pierre-Noel Bouteville.
+ * SPDX-FileContributor: Pierre-Noel Bouteville <pnb990@gmail.com>
  *
  * Permission is granted to anyone to use this software for any purpose,
  * including commercial applications, and to alter it and redistribute it
@@ -23,9 +26,6 @@
  * Silicon Laboratories, Inc. will not be liable for any consequential,
  * incidental, or special damages, or any other relief, or for any claim by
  * any third party, arising from your use of this Software.
- *
- *   Copyright (C) 2015 Pierre-Noel Bouteville. All rights reserved.
- *   Author: Pierre-Noel Bouteville <pnb990@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
