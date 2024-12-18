@@ -78,6 +78,8 @@
 
 void imx9_clockconfig(void)
 {
+#ifdef CONFIG_IMX9_WFI_AWAKES_AT_SYSTICK
+
   /* Keep the system clock running so SYSTICK can wake up the system from
    * wfi.
    */
@@ -90,6 +92,7 @@ void imx9_clockconfig(void)
 
   modifyreg32(IMX9_GPC_CTRL_CMC_MISC(IMX9_GPC_CTRL_CM7_BASE),
               IMX9_GPC_CTRL_CMC_MISC_SLEEP_HOLD_EN_FLAG, 0);
+#endif
 
   /* Cortex-M33 with SM does PLL initalization */
 }
