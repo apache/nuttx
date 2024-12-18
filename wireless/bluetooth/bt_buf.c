@@ -109,6 +109,7 @@ static struct bt_buf_s
 g_buf_pool[CONFIG_BLUETOOTH_BUFFER_PREALLOC];
 
 static bool g_poolinit = false;
+static spinlock_t g_buf_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Public Functions
@@ -238,7 +239,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
    * then try the list of messages reserved for interrupt handlers
    */
 
-  flags = spin_lock_irqsave(NULL); /* Always necessary in SMP mode */
+  flags = spin_lock_irqsave(&g_buf_lock); /* Always necessary in SMP mode */
   if (up_interrupt_context())
     {
 #if CONFIG_BLUETOOTH_BUFFER_PREALLOC > CONFIG_BLUETOOTH_BUFFER_IRQRESERVE
@@ -249,7 +250,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf            = g_buf_free;
           g_buf_free     = buf->flink;
 
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_buf_lock, flags);
           pool           = POOL_BUFFER_GENERAL;
         }
       else
@@ -262,13 +263,13 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf            = g_buf_free_irq;
           g_buf_free_irq = buf->flink;
 
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_buf_lock, flags);
           pool           = POOL_BUFFER_IRQ;
         }
       else
 #endif
         {
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_buf_lock, flags);
           return NULL;
         }
     }
@@ -285,7 +286,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
           buf           = g_buf_free;
           g_buf_free    = buf->flink;
 
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_buf_lock, flags);
           pool          = POOL_BUFFER_GENERAL;
         }
       else
@@ -295,7 +296,7 @@ FAR struct bt_buf_s *bt_buf_alloc(enum bt_buf_type_e type,
            * will have to allocate one from the kernel memory pool.
            */
 
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_buf_lock, flags);
           buf = (FAR struct bt_buf_s *)
                     kmm_malloc((sizeof (struct bt_buf_s)));
 
@@ -425,10 +426,10 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
        * list from interrupt handlers.
        */
 
-      flags      = spin_lock_irqsave(NULL);
+      flags      = spin_lock_irqsave(&g_buf_lock);
       buf->flink = g_buf_free;
       g_buf_free = buf;
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_buf_lock, flags);
     }
   else
 #endif
@@ -444,10 +445,10 @@ void bt_buf_release(FAR struct bt_buf_s *buf)
        * list from interrupt handlers.
        */
 
-      flags          = spin_lock_irqsave(NULL);
+      flags          = spin_lock_irqsave(&g_buf_lock);
       buf->flink     = g_buf_free_irq;
       g_buf_free_irq = buf;
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_buf_lock, flags);
     }
   else
 #endif
