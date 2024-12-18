@@ -30,6 +30,12 @@
 #include "ceva_internal.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_modifyreg_lock = SP_UNLOCKED;
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -46,10 +52,10 @@ void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits)
   irqstate_t flags;
   uint16_t   regval;
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&g_modifyreg_lock);
   regval  = getreg16(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg16(regval, addr);
-  spin_unlock_irqrestore(flags);
+  spin_unlock_irqrestore(&g_modifyreg_lock, flags);
 }
