@@ -181,6 +181,7 @@ void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
  ****************************************************************************/
 
 void esp_hr_timer_stop(struct esp_hr_timer_s *timer);
+void esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer);
 
 /****************************************************************************
  * Name: esp_hr_timer_delete

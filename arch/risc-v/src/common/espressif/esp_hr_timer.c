@@ -369,7 +369,7 @@ void IRAM_ATTR esp_hr_timer_start(struct esp_hr_timer_s *timer,
 
   if (timer->state != HR_TIMER_IDLE)
     {
-      esp_hr_timer_stop(timer);
+      esp_hr_timer_stop_nolock(timer);
     }
 
   /* Calculate the timer's alarm value */
@@ -481,11 +481,9 @@ void esp_hr_timer_start_periodic(struct esp_hr_timer_s *timer,
  *
  ****************************************************************************/
 
-void IRAM_ATTR esp_hr_timer_stop(struct esp_hr_timer_s *timer)
+void IRAM_ATTR esp_hr_timer_stop_nolock(struct esp_hr_timer_s *timer)
 {
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
-
-  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   /* "start" function can set the timer's repeat flag, and "stop" function
    * should remove this flag.
@@ -546,14 +544,16 @@ void IRAM_ATTR esp_hr_timer_stop(struct esp_hr_timer_s *timer)
 
       list_delete(&timer->list);
       timer->state = HR_TIMER_IDLE;
-
-      spin_unlock_irqrestore(&priv->lock, flags);
-
       timer->callback(timer->arg);
-
-      flags = spin_lock_irqsave(&priv->lock);
     }
+}
 
+void IRAM_ATTR esp_hr_timer_stop(struct esp_hr_timer_s *timer)
+{
+  struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
+
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  esp_hr_timer_stop_nolock(timer);
   spin_unlock_irqrestore(&priv->lock, flags);
 }
 
@@ -578,11 +578,11 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
 
   struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (timer->state == HR_TIMER_READY)
     {
-      esp_hr_timer_stop(timer);
+      esp_hr_timer_stop_nolock(timer);
     }
   else if (timer->state == HR_TIMER_TIMEOUT)
     {
@@ -590,11 +590,13 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
     }
   else if (timer->state == HR_TIMER_DELETE)
     {
-      goto exit;
+      spin_unlock_irqrestore(&priv->lock, flags);
+      return;
     }
 
   list_add_after(&priv->toutlist, &timer->list);
   timer->state = HR_TIMER_DELETE;
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Wake up the thread to process deleted timers */
 
@@ -603,9 +605,6 @@ void esp_hr_timer_delete(struct esp_hr_timer_s *timer)
     {
       tmrerr("Failed to post sem ret=%d\n", ret);
     }
-
-exit:
-  leave_critical_section(flags);
 }
 
 /****************************************************************************

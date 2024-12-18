@@ -102,6 +102,8 @@ struct esp_rtc_lowerhalf_s
 
   struct alm_cbinfo_s     alarmcb[CONFIG_RTC_NALARMS];
 #endif /* CONFIG_RTC_ALARM */
+
+  spinlock_t lock;
 };
 
 #endif/* CONFIG_RTC_DRIVER */
@@ -420,13 +422,12 @@ static bool esp_rtc_havesettime(struct rtc_lowerhalf_s *lower)
  ****************************************************************************/
 
 #if defined(CONFIG_RTC_DRIVER) && defined(CONFIG_RTC_ALARM)
-static int esp_rtc_setalarm(struct rtc_lowerhalf_s *lower,
-                            const struct lower_setalarm_s *alarminfo)
+static int esp_rtc_setalarm_nolock(struct rtc_lowerhalf_s *lower,
+                                   const struct lower_setalarm_s *alarminfo)
 {
   struct esp_rtc_lowerhalf_s *priv = (struct esp_rtc_lowerhalf_s *)lower;
   struct alm_cbinfo_s *cbinfo;
   uint64_t timeout;
-  irqstate_t flags;
   int id;
 
   DEBUGASSERT(priv != NULL);
@@ -446,8 +447,6 @@ static int esp_rtc_setalarm(struct rtc_lowerhalf_s *lower,
 
   /* Create the RT-Timer alarm */
 
-  flags = spin_lock_irqsave(NULL);
-
   if (cbinfo->alarm_hdl == NULL)
     {
       struct esp_hr_timer_args_s hr_timer_args;
@@ -461,7 +460,6 @@ static int esp_rtc_setalarm(struct rtc_lowerhalf_s *lower,
       if (ret < 0)
         {
           rtcerr("Failed to create HR Timer=%d\n", ret);
-          spin_unlock_irqrestore(NULL, flags);
           return ret;
         }
     }
@@ -474,9 +472,21 @@ static int esp_rtc_setalarm(struct rtc_lowerhalf_s *lower,
 
   esp_hr_timer_start(cbinfo->alarm_hdl, cbinfo->deadline_us, false);
 
-  spin_unlock_irqrestore(NULL, flags);
-
   return OK;
+}
+
+static int esp_rtc_setalarm(struct rtc_lowerhalf_s *lower,
+                            const struct lower_setalarm_s *alarminfo)
+{
+  struct esp_rtc_lowerhalf_s *priv = (struct esp_rtc_lowerhalf_s *)lower;
+  irqstate_t flags;
+  int ret;
+
+  flags = spin_lock_irqsave(&priv->lock);
+  ret = esp_rtc_setalarm_nolock(lower, alarminfo);
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  return ret;
 }
 #endif /* CONFIG_RTC_DRIVER && CONFIG_RTC_ALARM */
 
@@ -501,6 +511,7 @@ static int esp_rtc_setalarm(struct rtc_lowerhalf_s *lower,
 static int esp_rtc_setrelative(struct rtc_lowerhalf_s *lower,
                                const struct lower_setrelative_s *alarminfo)
 {
+  struct esp_rtc_lowerhalf_s *priv = (struct esp_rtc_lowerhalf_s *)lower;
   struct lower_setalarm_s setalarm;
   time_t seconds;
   int ret = -EINVAL;
@@ -510,7 +521,7 @@ static int esp_rtc_setrelative(struct rtc_lowerhalf_s *lower,
 
   if (alarminfo->reltime > 0)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&priv->lock);
 
       seconds = alarminfo->reltime;
       gmtime_r(&seconds, (struct tm *)&setalarm.time);
@@ -520,9 +531,9 @@ static int esp_rtc_setrelative(struct rtc_lowerhalf_s *lower,
       setalarm.id   = alarminfo->id;
       setalarm.cb   = alarminfo->cb;
       setalarm.priv = alarminfo->priv;
-      ret = esp_rtc_setalarm(lower, &setalarm);
+      ret = esp_rtc_setalarm_nolock(lower, &setalarm);
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
   return ret;
@@ -566,7 +577,7 @@ static int esp_rtc_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
       return -ENODATA;
     }
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Stop and delete the alarm */
 
@@ -579,7 +590,7 @@ static int esp_rtc_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
   cbinfo->deadline_us = 0;
   cbinfo->alarm_hdl = NULL;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
@@ -616,7 +627,7 @@ static int esp_rtc_rdalarm(struct rtc_lowerhalf_s *lower,
 
   priv = (struct esp_rtc_lowerhalf_s *)lower;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Get the alarm according to the alarm ID */
 
@@ -630,7 +641,7 @@ static int esp_rtc_rdalarm(struct rtc_lowerhalf_s *lower,
   localtime_r((const time_t *)&ts.tv_sec,
               (struct tm *)alarminfo->time);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
@@ -664,7 +675,7 @@ time_t up_rtc_time(void)
   uint64_t time_us;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_rtc_lowerhalf.lock);
 
 #ifdef CONFIG_RTC_DRIVER
   /* NOTE: HR-Timer starts to work after the board is initialized, and the
@@ -694,7 +705,7 @@ time_t up_rtc_time(void)
       time_us = esp_rtc_get_time_us() + esp_rtc_get_boot_time();
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_rtc_lowerhalf.lock, flags);
 
   return (time_t)(time_us / USEC_PER_SEC);
 }
@@ -723,7 +734,7 @@ int up_rtc_gettime(struct timespec *tp)
   irqstate_t flags;
   uint64_t time_us;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_rtc_lowerhalf.lock);
 
 #ifdef CONFIG_RTC_DRIVER
   if (g_hr_timer_enabled)
@@ -740,7 +751,7 @@ int up_rtc_gettime(struct timespec *tp)
   tp->tv_sec  = time_us / USEC_PER_SEC;
   tp->tv_nsec = (time_us % USEC_PER_SEC) * NSEC_PER_USEC;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_rtc_lowerhalf.lock, flags);
 
   return OK;
 }
@@ -770,7 +781,7 @@ int up_rtc_settime(const struct timespec *ts)
 
   DEBUGASSERT(ts != NULL && ts->tv_nsec < NSEC_PER_SEC);
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_rtc_lowerhalf.lock);
 
   now_us = ((uint64_t) ts->tv_sec) * USEC_PER_SEC +
           ts->tv_nsec / NSEC_PER_USEC;
@@ -794,7 +805,7 @@ int up_rtc_settime(const struct timespec *ts)
 
   esp_rtc_set_boot_time(rtc_offset_us);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_rtc_lowerhalf.lock, flags);
 
   return OK;
 }
@@ -873,6 +884,7 @@ int esp_rtc_driverinit(void)
       return ret;
     }
 
+  spin_lock_init(&g_rtc_lowerhalf.lock);
   g_hr_timer_enabled = true;
 
   /* Get the time difference between HR Timer and RTC */
