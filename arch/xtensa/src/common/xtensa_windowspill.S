@@ -1,16 +1,10 @@
 /****************************************************************************
  * arch/xtensa/src/common/xtensa_windowspill.S
- * Register window spill routine
  *
- * Adapted from use in NuttX by:
- *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Derives from logic originally provided by Tensilica Inc.
- *
- *   $Id: //depot/rel/Eaglenest/Xtensa/OS/hal/windowspill_asm.S#1 $
- *   Copyright (c) 1999-2010 Tensilica Inc.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 2016 Gregory Nutt. All rights reserved.
+ * SPDX-FileCopyrightText: 1999-2010 Tensilica Inc.
+ * SPDX-FileContributor:Gregory Nutt <gnutt@nuttx.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the

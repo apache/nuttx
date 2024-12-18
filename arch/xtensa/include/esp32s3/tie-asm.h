@@ -1,16 +1,8 @@
 /****************************************************************************
  * arch/xtensa/include/esp32s3/tie-asm.h
- * Compile-time HAL assembler definitions dependent on CORE & TIE
- * configuration
  *
- *  NOTE:  This header file is not meant to be included directly.
- *
- * This header file contains assembly-language definitions (assembly
- * macros, etc.) for this specific Xtensa processor's TIE extensions
- * and options.  It is customized to this Xtensa processor configuration.
- *
- * Customer ID=15128; Build=0x90f1f;
- * Copyright (c) 1999-2021 Cadence Design Systems Inc.
+ * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: 1999-2021 Cadence Design Systems Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
