@@ -112,6 +112,8 @@ struct uartdev
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_cxd32xx_lock = SP_UNLOCKED;
+
 static const struct uartdev g_uartdevs[] =
 {
   {
@@ -270,7 +272,7 @@ void cxd32_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   uint32_t fbrd;
   uint32_t lcr_h;
 
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&g_cxd32xx_lock);
 
   div  = (uint64_t)(basefreq);
   div *= (uint64_t)(256);
@@ -287,5 +289,5 @@ void cxd32_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   lcr_h = getreg32(uartbase + CXD32_UART_LCR_H);
   putreg32(lcr_h, uartbase + CXD32_UART_LCR_H);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_cxd32xx_lock, flags);
 }
