@@ -170,3 +170,28 @@ void net_bufpool_free(FAR struct net_bufpool_s *pool, FAR void *node)
 
   nxsem_post(&pool->u.sem);
 }
+
+/****************************************************************************
+ * Name: net_bufpool_test
+ *
+ * Description:
+ *   Check if there is room in the buffer pool.  Does not reserve any space.
+ *
+ * Assumptions:
+ *   None.
+ *
+ ****************************************************************************/
+
+int net_bufpool_test(FAR struct net_bufpool_s *pool)
+{
+  int val = 0;
+  int ret;
+
+  ret = nxsem_get_value(&pool->u.sem, &val);
+  if (ret >= 0)
+    {
+      ret = val > 0 ? OK : -ENOSPC;
+    }
+
+  return ret;
+}

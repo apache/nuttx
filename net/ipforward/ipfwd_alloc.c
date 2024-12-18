@@ -37,6 +37,7 @@
 #include <nuttx/net/icmpv6.h>
 
 #include "ipforward/ipforward.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_IPFORWARD
 
@@ -66,13 +67,12 @@
  * Private Data
  ****************************************************************************/
 
-/* This is an array of pre-allocating forwarding structures */
+/* This is the state of the global forwarding structures */
 
-static struct forward_s g_fwdpool[CONFIG_NET_IPFORWARD_NSTRUCT];
-
-/* This is a list of free forwarding structures */
-
-static FAR struct forward_s *g_fwdfree;
+NET_BUFPOOL_DECLARE(g_fwdpool, sizeof(struct forward_s),
+                    CONFIG_NET_IPFORWARD_NSTRUCT,
+                    CONFIG_NET_IPFORWARD_ALLOC_STRUCT,
+                    CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE);
 
 /****************************************************************************
  * Public Functions
@@ -91,25 +91,13 @@ static FAR struct forward_s *g_fwdfree;
 
 void ipfwd_initialize(void)
 {
-  FAR struct forward_s *fwd;
-  int i;
-
   /* The IOB size must be such that the maximum L2 and L3 headers fit into
    * the contiguous memory of the first IOB in the IOB chain.
    */
 
   DEBUGASSERT(MAX_HDRLEN <= CONFIG_IOB_BUFSIZE);
 
-  /* Add all pre-allocated forwarding structures to the free list */
-
-  g_fwdfree = NULL;
-
-  for (i = 0; i < CONFIG_NET_IPFORWARD_NSTRUCT; i++)
-    {
-      fwd          = &g_fwdpool[i];
-      fwd->f_flink = g_fwdfree;
-      g_fwdfree    = fwd;
-    }
+  NET_BUFPOOL_INIT(g_fwdpool);
 }
 
 /****************************************************************************
@@ -127,16 +115,7 @@ void ipfwd_initialize(void)
 
 FAR struct forward_s *ipfwd_alloc(void)
 {
-  FAR struct forward_s *fwd;
-
-  fwd = g_fwdfree;
-  if (fwd != NULL)
-    {
-      g_fwdfree = fwd->f_flink;
-      memset (fwd, 0, sizeof(struct forward_s));
-    }
-
-  return fwd;
+  return NET_BUFPOOL_TRYALLOC(g_fwdpool);
 }
 
 /****************************************************************************
@@ -153,8 +132,7 @@ FAR struct forward_s *ipfwd_alloc(void)
 
 void ipfwd_free(FAR struct forward_s *fwd)
 {
-  fwd->f_flink = g_fwdfree;
-  g_fwdfree    = fwd;
+  NET_BUFPOOL_FREE(g_fwdpool, fwd);
 }
 
 #endif /* CONFIG_NET_IPFORWARD */
