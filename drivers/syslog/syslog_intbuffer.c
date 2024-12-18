@@ -94,10 +94,10 @@ static struct syslog_intbuffer_s g_syslog_intbuffer =
  *
  ****************************************************************************/
 
-void syslog_flush_internal(bool force, size_t buflen)
+static void syslog_flush_internal(bool force, size_t buflen)
 {
   irqstate_t flags;
-  char *buffer;
+  FAR char *buffer;
   size_t size;
 
   /* This logic is performed with the scheduler disabled to protect from
