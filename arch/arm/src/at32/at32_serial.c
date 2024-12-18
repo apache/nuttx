@@ -196,6 +196,7 @@ struct up_dev_s
   struct uart_dev_s dev;       /* Generic UART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
   uint16_t          sr;        /* Saved status bits */
+  spinlock_t        lock;      /* Spinlock */
 
   /* Has been initialized and HW is setup. */
 
@@ -1087,10 +1088,10 @@ static inline void up_serialout(struct up_dev_s *priv, int offset,
 }
 
 /****************************************************************************
- * Name: up_setusartint
+ * Name: up_setusartint_nolock
  ****************************************************************************/
 
-static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
+static inline void up_setusartint_nolock(struct up_dev_s *priv, uint16_t ie)
 {
   uint32_t cr;
 
@@ -1117,16 +1118,18 @@ static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
  * Name: up_restoreusartint
  ****************************************************************************/
 
+#if defined(HAVE_RS485) || CONSOLE_UART > 0
 static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
-  up_setusartint(priv, ie);
+  up_setusartint_nolock(priv, ie);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
+#endif
 
 /****************************************************************************
  * Name: up_disableusartint
@@ -1136,7 +1139,7 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (ie)
     {
@@ -1175,9 +1178,9 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 
   /* Disable all interrupts */
 
-  up_setusartint(priv, 0);
+  up_setusartint_nolock(priv, 0);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1489,6 +1492,8 @@ static int up_setup(struct uart_dev_s *dev)
   /* Set up the cached interrupt enables value */
 
   priv->ie    = 0;
+
+  spin_lock_init(&priv->lock);
 
   /* Mark device as initialized. */
 
@@ -2044,13 +2049,13 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         irqstate_t flags;
         uint32_t tx_break;
 
-        flags = enter_critical_section();
+        flags = spin_lock_irqsave(&priv->lock);
 
         /* Disable any further tx activity */
 
         priv->ie |= USART_CR1_IE_BREAK_INPROGRESS;
 
-        up_txint(dev, false);
+        up_txint_nolock(dev, false);
 
         /* Configure TX as a GPIO output pin and Send a break signal */
 
@@ -2058,7 +2063,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
                                   priv->tx_gpio);
         at32_configgpio(tx_break);
 
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 
@@ -2066,7 +2071,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       {
         irqstate_t flags;
 
-        flags = enter_critical_section();
+        flags = spin_lock_irqsave(&priv->lock);
 
         /* Configure TX back to U(S)ART */
 
@@ -2076,9 +2081,9 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         /* Enable further tx activity */
 
-        up_txint(dev, true);
+        up_txint_nolock(dev, true);
 
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 #  else
@@ -2087,10 +2092,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint32_t cr1;
         irqstate_t flags;
 
-        flags = enter_critical_section();
+        flags = spin_lock_irqsave(&priv->lock);
         cr1   = up_serialin(priv, AT32_USART_CTRL1_OFFSET);
         up_serialout(priv, AT32_USART_CTRL1_OFFSET, cr1 | USART_CR1_SBK);
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 
@@ -2099,10 +2104,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         uint32_t cr1;
         irqstate_t flags;
 
-        flags = enter_critical_section();
+        flags = spin_lock_irqsave(&priv->lock);
         cr1   = up_serialin(priv, AT32_USART_CTRL1_OFFSET);
         up_serialout(priv, AT32_USART_CTRL1_OFFSET, cr1 & ~USART_CR1_SBK);
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->lock, flags);
       }
       break;
 #  endif
@@ -2156,10 +2161,9 @@ static int up_receive(struct uart_dev_s *dev, unsigned int *status)
  ****************************************************************************/
 
 #if defined(SERIAL_HAVE_TXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS)
-static void up_rxint(struct uart_dev_s *dev, bool enable)
+static void up_rxint_nolock(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  irqstate_t flags;
   uint16_t ie;
 
   /* USART receive interrupts:
@@ -2177,7 +2181,6 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
    * "           "        USART_STS_ROERR Overrun Error Detected
    */
 
-  flags = enter_critical_section();
   ie = priv->ie;
   if (enable)
     {
@@ -2201,8 +2204,17 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
   /* Then set the new interrupt state */
 
-  up_restoreusartint(priv, ie);
-  leave_critical_section(flags);
+  up_setusartint_nolock(priv, ie);
+}
+
+static void up_rxint(struct uart_dev_s *dev, bool enable)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&priv->lock);
+  up_rxint_nolock(dev, enable);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
@@ -2563,10 +2575,10 @@ static void up_dma_txint(struct uart_dev_s *dev, bool enable)
 
 #if defined(SERIAL_HAVE_RXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS) || \
     defined(CONFIG_AT32_SERIALBRK_BSDCOMPAT)
-static void up_txint(struct uart_dev_s *dev, bool enable)
+
+static void up_txint_nolock(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  irqstate_t flags;
 
   /* USART transmit interrupts:
    *
@@ -2577,7 +2589,6 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
    * USART_CTRL3_CTSCFIEN   USART_SR_CTS      CTS flag          (not used)
    */
 
-  flags = enter_critical_section();
   if (enable)
     {
       /* Set to receive an interrupt when the TX data register is empty */
@@ -2599,12 +2610,11 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 #  ifdef CONFIG_AT32_SERIALBRK_BSDCOMPAT
       if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
         {
-          leave_critical_section(flags);
           return;
         }
 #  endif
 
-      up_restoreusartint(priv, ie);
+      up_setusartint_nolock(priv, ie);
 
 #else
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -2618,11 +2628,20 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      up_restoreusartint(priv, priv->ie & ~USART_CTRL1_TDBEIEN);
+      up_setusartint_nolock(priv, priv->ie & ~USART_CTRL1_TDBEIEN);
     }
-
-  leave_critical_section(flags);
 }
+
+static void up_txint(struct uart_dev_s *dev, bool enable)
+{
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&priv->lock);
+  up_txint_nolock(dev, enable);
+  spin_unlock_irqrestore(&priv->lock, flags);
+}
+
 #endif
 
 /****************************************************************************
@@ -2929,7 +2948,7 @@ void at32_serial_dma_poll(void)
 {
     irqstate_t flags;
 
-    flags = enter_critical_section();
+    flags = spin_lock_irqsave(&priv->lock);
 
 #ifdef CONFIG_USART1_RXDMA
   if (g_usart1priv.rxdma != NULL)
@@ -2987,7 +3006,7 @@ void at32_serial_dma_poll(void)
     }
 #endif
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
