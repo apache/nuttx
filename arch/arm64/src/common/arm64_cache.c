@@ -329,6 +329,8 @@ static inline int arm64_dcache_all(int op)
  * Public Functions
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_ICACHE
+
 /****************************************************************************
  * Name: up_get_icache_linesize
  *
@@ -477,6 +479,10 @@ void up_disable_icache(void)
   write_sysreg((value & ~SCTLR_I_BIT), sctlr_el1);
   ARM64_ISB();
 }
+
+#endif /* CONFIG_ARCH_ICACHE */
+
+#ifdef CONFIG_ARCH_DCACHE
 
 /****************************************************************************
  * Name: up_invalidate_dcache
@@ -765,3 +771,5 @@ void up_coherent_dcache(uintptr_t addr, size_t len)
       up_invalidate_icache_all();
     }
 }
+
+#endif /* CONFIG_ARCH_DCACHE */
