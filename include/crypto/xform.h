@@ -1,6 +1,9 @@
 /****************************************************************************
  * include/crypto/xform.h
- * $OpenBSD: xform.h,v 1.32 2021/10/22 12:30:53 bluhm Exp $
+ *
+ * SPDX-License-Identifier: OAR
+ * SPDX-FileCopyrightText: 2000 Angelos D. Keromytis
+ * SPDX-FileContributor: Angelos D. Keromytis (angelos@cis.upenn.edu)
  *
  * The author of this code is Angelos D. Keromytis (angelos@cis.upenn.edu)
  *
@@ -20,6 +23,7 @@
  * REPRESENTATION OR WARRANTY OF ANY KIND CONCERNING THE
  * MERCHANTABILITY OF THIS SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR
  * PURPOSE.
+ *
  ****************************************************************************/
 
 #ifndef __INCLUDE_CRYPTO_XFORM_H
