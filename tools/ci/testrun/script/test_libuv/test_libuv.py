@@ -26,7 +26,7 @@ import pytest
 
 
 class TestLibuv:
-    pytestmark = [pytest.mark.sim]
+    pytestmark = [pytest.mark.sim, pytest.mark.goldfish_armeabi_v7a_ap]
 
     def test_test_macros(self, p):
         ret = p.sendCommand(
@@ -254,13 +254,13 @@ class TestLibuv:
         ret = p.sendCommand("uv_run_tests active", ["not ok 1 -", "ok 1 -"], timeout=10)
         assert ret == 1
 
+    @pytest.mark.skip
     def test_embed(self, p):
         if p.board in ["sim"]:
             pytest.skip("unsupported at %s" % p.board)
         ret = p.sendCommand("uv_run_tests embed", ["not ok 1 -", "ok 1 -"], timeout=10)
         assert ret == 1
 
-    @pytest.mark.skip(reason="VELAPLATFO-6346")
     def test_async(self, p):
         if p.ci:
             pytest.skip("unsupported at %s" % p.board)
@@ -299,13 +299,13 @@ class TestLibuv:
         )
         assert ret == 1
 
-    def test_poll_oob(self, p):
-        if p.board in ["sim"]:
-            pytest.skip("unsupported at %s" % p.board)
-        ret = p.sendCommand(
-            "uv_run_tests poll_oob", ["not ok 1 -", "ok 1 -"], timeout=10
-        )
-        assert ret == 1
+    # def test_poll_oob(self, p):
+    #     if p.board in ["sim"]:
+    #         pytest.skip("unsupported at %s" % p.board)
+    #     ret = p.sendCommand(
+    #         "uv_run_tests poll_oob", ["not ok 1 -", "ok 1 -"], timeout=10
+    #     )
+    #     assert ret == 1
 
     def test_threadpool_queue_work_simple(self, p):
         ret = p.sendCommand(

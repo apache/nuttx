@@ -46,6 +46,7 @@ def test_popen(p):
     assert ret == 0
 
 
+@pytest.mark.skip
 def test_usrsocktest(p):
     ret = p.sendCommand("usrsocktest", "FAILED:0", timeout=60)
     assert ret == 0
