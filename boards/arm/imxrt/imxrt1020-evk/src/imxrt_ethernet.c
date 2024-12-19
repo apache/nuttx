@@ -76,7 +76,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef GPIO_ENET_IRQ
 static spinlock_t g_phy_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Private Functions

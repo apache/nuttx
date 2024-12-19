@@ -77,7 +77,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_IMXRT_GPIO1_0_15_IRQ
 static spinlock_t g_phy_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Private Functions

@@ -82,7 +82,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_SAMV7_GPIOA_IRQ
 static spinlock_t g_phy_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Private Functions
