@@ -620,6 +620,35 @@ config WATCHDOG_AUTOMONITOR_PING_INTERVAL
 
 endif # !WATCHDOG_AUTOMONITOR_BY_CAPTURE && !WATCHDOG_AUTOMONITOR_BY_IDLE
 
+config WATCHDOG_AUTOMONITOR_TASKS
+	bool "Supervise the tasks"
+	default n
+	---help---
+		Supervise the tasks that use the watchdog devices. Each open() of a
+		device creates a channel with its own timeout, which the task feeds
+		with write() or WDIOC_KEEPALIVE. The auto-monitor feeds the hardware
+		watchdog only while all the armed channels are within their timeouts,
+		so a task that hangs, exits or crashes makes the system reset. The
+		device no longer gives the tasks control over the hardware watchdog,
+		which stays with the auto-monitor. A channel timeout is detected up to
+		one keepalive interval late, see WATCHDOG_AUTOMONITOR_PING_INTERVAL.
+
+if WATCHDOG_AUTOMONITOR_TASKS
+
+config WATCHDOG_AUTOMONITOR_TASKS_TIMEOUT
+	int "Default channel timeout (millisecond)"
+	default 5000
+
+config WATCHDOG_AUTOMONITOR_TASKS_PANIC
+	bool "Panic when a channel times out"
+	default n
+	---help---
+		Panic as soon as a channel times out, to get a crash dump, instead of
+		waiting for the hardware watchdog to reset the system. Note that
+		WATCHDOG_PANIC_NOTIFIER stops the hardware watchdog on a panic.
+
+endif # WATCHDOG_AUTOMONITOR_TASKS
+
 endif # WATCHDOG_AUTOMONITOR
 
 endif # WATCHDOG
