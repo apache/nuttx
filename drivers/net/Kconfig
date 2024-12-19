@@ -6,6 +6,7 @@
 menuconfig NETDEVICES
 	bool "Network Device/PHY Support"
 	default y
+	depends on MM_IOB
 	depends on NET
 	---help---
 		Network interface driver and PHY selections.  This options enables

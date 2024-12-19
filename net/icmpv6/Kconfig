@@ -39,7 +39,7 @@ config NET_ICMPv6_PMTU_TIMEOUT
 config NET_ICMPv6_SOCKET
 	bool "IPPROTO_ICMP6 socket support"
 	default n
-	select MM_IOB
+	select NET_READAHEAD
 	---help---
 		Enable support for IPPROTO_ICMP6 sockets.  These sockets are needed
 		for application level support for sending ICMPv7 ECHO requests and

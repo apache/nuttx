@@ -37,7 +37,7 @@ config NET_ICMP_PMTU_TIMEOUT
 config NET_ICMP_SOCKET
 	bool "IPPROTO_ICMP socket support"
 	default n
-	select MM_IOB
+	select NET_READAHEAD
 	---help---
 		Enable support for IPPROTO_ICMP sockets.  These sockets are needed
 		for application level support for sending ECHO (ping) requests and
