@@ -1,6 +1,18 @@
 /****************************************************************************
  * crypto/xform.c
- * $OpenBSD: xform.c,v 1.61 2021/10/22 12:30:53 bluhm Exp $
+ *
+ * SPDX-License-Identifier: 0BSD
+ * SPDX-FileCopyrightText: 1995, 1996, 1997, 1998, 1999 John Ioannidis
+ * SPDX-FileCopyrightText: 1995, 1996, 1997, 1998, 1999 Angelos D. Keromytis
+ * SPDX-FileCopyrightText: 1995, 1996, 1997, 1998, 1999 Niels Provos.
+ * SPDX-FileCopyrightText: 2001 Angelos D. Keromytis.
+ * SPDX-FileCopyrightText: 2008 Damien Miller
+ * SPDX-FileCopyrightText: 2010, 2015 Mike Belopuhov
+ * SPDX-FileContributor: John Ioannidis (ji@tla.org)
+ * SPDX-FileContributor: Angelos D. Keromytis (kermit@csd.uch.gr)
+ * SPDX-FileContributor: Niels Provos (provos@physnet.uni-hamburg.de)
+ * SPDX-FileContributor: Damien Miller (djm@mindrot.org)
+ * SPDX-FileContributor: Mike Belopuhov (mikeb@openbsd.org)
  *
  * The authors of this code are John Ioannidis (ji@tla.org),
  * Angelos D. Keromytis (kermit@csd.uch.gr),
