@@ -60,6 +60,7 @@
 #define RLIMIT_STACK    6           /* Limit on stack size */
 #define RLIMIT_AS       7           /* Limit on address space size */
 #define RLIMIT_MEMLOCK  8           /* Limit on memory use */
+#define RLIMIT_NICE     10          /* Limit on nice level */
 
 /* Below are not implemented yet: */
 
