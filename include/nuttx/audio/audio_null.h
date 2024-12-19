@@ -113,6 +113,20 @@ struct audio_lowerhalf_s; /* Forward reference. Defined in nuttx/audio/audio.h *
 
 FAR struct audio_lowerhalf_s *audio_null_initialize(bool playback);
 
+/****************************************************************************
+ * Name: null_audio_register
+ *
+ * Description:
+ *   Initialize and register fake audio device.
+ *
+ * Returned Value:
+ *   0 is returned on success;
+ *   others is returned on failure.
+ *
+ ****************************************************************************/
+
+int null_audio_register(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

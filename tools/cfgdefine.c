@@ -65,6 +65,7 @@ static const char *dequote_list[] =
   "CONFIG_TTY_LAUNCH_ENTRYPOINT",         /* Name of entry point from tty launch */
   "CONFIG_TTY_LAUNCH_ARGS",               /* Argument list of entry point from tty launch */
   "CONFIG_BOARD_MEMORY_RANGE",            /* Memory range for board */
+  "CONFIG_AUDIO_NULL_DEVICE_PARAMS",      /* Arguments for the null audio device */
 
   /* NxWidgets/NxWM */
 
