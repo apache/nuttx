@@ -2176,9 +2176,9 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
                * the transfer.
                */
 
-              stm32_i2c_enable_reload(priv);
-
               stm32_i2c_set_bytes_to_transfer(priv, 255);
+
+              stm32_i2c_enable_reload(priv);
             }
           else
             {
