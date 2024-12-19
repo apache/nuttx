@@ -64,7 +64,7 @@ key_t ftok(FAR const char *pathname, int proj_id)
   FAR char *fullpath;
   struct stat st;
 
-  fullpath = lib_get_pathbuffer();
+  fullpath = lib_get_tempbuffer(PATH_MAX);
   if (fullpath == NULL)
     {
       return (key_t)-1;
@@ -80,12 +80,12 @@ key_t ftok(FAR const char *pathname, int proj_id)
       if (mkdir(fullpath, S_IRWXU) < 0 ||
           stat(fullpath, &st) < 0)
         {
-          lib_put_pathbuffer(fullpath);
+          lib_put_tempbuffer(fullpath);
           return (key_t)-1;
         }
     }
 
-  lib_put_pathbuffer(fullpath);
+  lib_put_tempbuffer(fullpath);
   return ((key_t)proj_id << 24 |
           (key_t)(st.st_dev & 0xff) << 16 |
           (key_t)(st.st_ino & 0xffff));

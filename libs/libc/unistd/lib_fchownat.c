@@ -71,7 +71,7 @@ int fchownat(int dirfd, FAR const char *path, uid_t owner,
   FAR char *fullpath;
   int ret;
 
-  fullpath = lib_get_pathbuffer();
+  fullpath = lib_get_tempbuffer(PATH_MAX);
   if (fullpath == NULL)
     {
       set_errno(ENOMEM);
@@ -81,7 +81,7 @@ int fchownat(int dirfd, FAR const char *path, uid_t owner,
   ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
-      lib_put_pathbuffer(fullpath);
+      lib_put_tempbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
@@ -95,6 +95,6 @@ int fchownat(int dirfd, FAR const char *path, uid_t owner,
       ret = chown(fullpath, owner, group);
     }
 
-  lib_put_pathbuffer(fullpath);
+  lib_put_tempbuffer(fullpath);
   return ret;
 }

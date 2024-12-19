@@ -70,7 +70,7 @@ int symlinkat(FAR const char *path1, int dirfd, FAR const char *path2)
   FAR char *fullpath;
   int ret;
 
-  fullpath = lib_get_pathbuffer();
+  fullpath = lib_get_tempbuffer(PATH_MAX);
   if (fullpath == NULL)
     {
       set_errno(ENOMEM);
@@ -80,13 +80,13 @@ int symlinkat(FAR const char *path1, int dirfd, FAR const char *path2)
   ret = lib_getfullpath(dirfd, path2, fullpath, PATH_MAX);
   if (ret < 0)
     {
-      lib_put_pathbuffer(fullpath);
+      lib_put_tempbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
   ret = symlink(path1, fullpath);
-  lib_put_pathbuffer(fullpath);
+  lib_put_tempbuffer(fullpath);
   return ret;
 }
 

@@ -48,7 +48,7 @@ static FAR char *file_get_path(FAR struct file *filep)
   FAR char *pathbuffer;
   int ret;
 
-  pathbuffer = lib_get_pathbuffer();
+  pathbuffer = lib_get_tempbuffer(PATH_MAX);
   if (pathbuffer == NULL)
     {
       return NULL;
@@ -57,7 +57,7 @@ static FAR char *file_get_path(FAR struct file *filep)
   ret = file_fcntl(filep, F_GETPATH, pathbuffer);
   if (ret < 0)
     {
-      lib_put_pathbuffer(pathbuffer);
+      lib_put_tempbuffer(pathbuffer);
       return NULL;
     }
 
@@ -128,7 +128,7 @@ int file_close_without_clear(FAR struct file *filep)
           if (path != NULL)
             {
               notify_close(path, filep->f_oflags);
-              lib_put_pathbuffer(path);
+              lib_put_tempbuffer(path);
             }
 #endif
 

@@ -798,7 +798,7 @@ int dhara_initialize(int minor, FAR struct mtd_dev_s *mtd)
     }
 #endif
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return -ENOMEM;
@@ -808,6 +808,6 @@ int dhara_initialize(int minor, FAR struct mtd_dev_s *mtd)
 
   snprintf(path, PATH_MAX, "/dev/mtdblock%d", minor);
   ret = dhara_initialize_by_path(path, mtd);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 }
