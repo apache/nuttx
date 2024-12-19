@@ -33,6 +33,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <errno.h>
+#include <stdnoreturn.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -107,22 +108,35 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
  * int thrd_create(FAR thrd_t *thr, thrd_start_t func, FAR void *arg);
  */
 
-#define thrd_create(thr,func,arg) \
-  pthread_create(thr,NULL,(pthread_startroutine_t)(func),arg)
+static inline int thrd_create(FAR thrd_t *thr,
+                              thrd_start_t func,
+                              FAR void *arg)
+{
+  return pthread_create(thr,
+                        NULL,
+                        (pthread_startroutine_t)func,
+                        arg);
+}
 
 /* thrd_equal: checks if two identifiers refer to the same thread
  *
  * int thrd_equal(thrd_t lhs, thrd_t rhs);
  */
 
-#define thrd_equal(lhs,rhs) ((lhs) == (rhs))
+static inline int thrd_equal(thrd_t lhs, thrd_t rhs)
+{
+  return (lhs == rhs) ? 1 : 0;
+}
 
 /* thrd_current: obtains the current thread identifier
  *
  * thrd_t thrd_current(void);
  */
 
-#define thrd_current() ((thrd_t)_SCHED_GETTID())
+static inline thrd_t thrd_current(void)
+{
+  return pthread_self();
+}
 
 /* thrd_sleep: suspends execution of the calling thread for the given
  * period of time
@@ -131,28 +145,41 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
  *                FAR struct timespec *remaining);
  */
 
-#define thrd_sleep(rqtp,rmtp) nanosleep(rqtp,rmtp)
+static inline int thrd_sleep(FAR const struct timespec *time_point,
+                             FAR struct timespec *remaining)
+{
+  return nanosleep(time_point, remaining);
+}
 
 /* thrd_yield: yields the current time slice
  *
  * void thrd_yield(void);
  */
 
-#define thrd_yield() pthread_yield()
+static inline void thrd_yield(void)
+{
+  pthread_yield();
+}
 
 /* thrd_exit: terminates the calling thread
  *
  * _Noreturn void thrd_exit(int res);
  */
 
-#define thrd_exit(res) pthread_exit((pthread_addr_t)(res))
+static inline noreturn void thrd_exit(int res)
+{
+  pthread_exit((pthread_addr_t)res);
+}
 
 /* thrd_detach: detaches a thread
  *
  * int thrd_detach(thrd_t thr);
  */
 
-#define thrd_detach(thr) pthread_detach(thr)
+static inline int thrd_detach(thrd_t thr)
+{
+  return pthread_detach(thr);
+}
 
 /* thrd_join: blocks until a thread terminates
  *
