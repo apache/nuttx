@@ -128,13 +128,14 @@
 
 /*  Tensilica-defined user registers:  */
 
+#define THREADPTR     231    /* threadptr option */
+
 #if 0
 #if 0
 #define ...           21..24 /* (545CK) */
 #define ...         140..143 /* (545CK) */
 #endif
 #define EXPSTATE      230    /* Diamond */
-#define THREADPTR     231    /* threadptr option */
 #define FCR           232    /* FPU */
 #define FSR           233    /* FPU */
 #define AE_OVF_SAR    240    /* HiFi2 */
