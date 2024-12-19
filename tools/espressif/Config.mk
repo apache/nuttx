@@ -116,7 +116,7 @@ define MERGEBIN
 		echo "Missing Flash memory size configuration."; \
 		exit 1; \
 	fi
-	esptool.py -c $(CHIP_SERIES) merge_bin --output nuttx.merged.bin $(ESPTOOL_BINS)
+	esptool.py -c $(CHIP_SERIES) merge_bin --fill-flash-size $(FLASH_SIZE) --output nuttx.merged.bin $(ESPTOOL_BINS)
 	$(Q) echo nuttx.merged.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.merged.bin"
 endef
