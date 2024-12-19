@@ -312,6 +312,7 @@ struct imx9_driver_s
   struct flexcan_timeseg data_timing; /* Timing for data phase */
 
   const struct flexcan_config_s *config;
+  spinlock_t lock;
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   struct txmbstats txmb[TXMBCOUNT];
@@ -811,7 +812,8 @@ static int imx9_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
+  sched_lock();
 
   if (priv->dev.d_len > 0)
     {
@@ -827,12 +829,14 @@ static int imx9_txpoll(struct net_driver_s *dev)
 
       if (imx9_txringfull(priv))
         {
-          spin_unlock_irqrestore(NULL, flags);
+          sched_unlock();
+          spin_unlock_irqrestore(&priv->lock, flags);
           return -EBUSY;
         }
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  sched_unlock();
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* If zero is returned, the polling will continue until all connections
    * have been examined.
@@ -1642,7 +1646,7 @@ static int imx9_init_eccram(struct imx9_driver_s *priv)
   uint32_t regval;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   regval = getreg32(priv->base + IMX9_CAN_CTRL2_OFFSET);
 
@@ -1668,7 +1672,7 @@ static int imx9_init_eccram(struct imx9_driver_s *priv)
 
   regval &= ~CAN_CTRL2_WRMFRZ;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return 0;
 }
@@ -2105,6 +2109,7 @@ int imx9_caninitialize(int intf)
   priv->dev.d_ioctl   = imx9_ioctl;     /* Support CAN ioctl() calls */
 #endif
   priv->dev.d_private = (void *)priv;      /* Used to recover private state from dev */
+  spin_lock_init(&priv->lock);
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling imx9_ifdown().
