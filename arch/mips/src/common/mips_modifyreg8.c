@@ -31,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "mips_internal.h"
 
@@ -41,6 +42,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_modifyreg_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -63,10 +66,10 @@ void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits)
   irqstate_t flags;
   uint8_t    regval;
 
-  flags   = enter_critical_section();
+  flags   = spin_lock_irqsave(&g_modifyreg_lock);
   regval  = getreg8(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg8(regval, addr);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_modifyreg_lock, flags);
 }
