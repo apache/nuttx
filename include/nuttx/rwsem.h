@@ -143,6 +143,19 @@ void down_write(FAR rw_semaphore_t *rwsem);
 void up_write(FAR rw_semaphore_t *rwsem);
 
 /****************************************************************************
+ * Name: downgrade_write
+ *
+ * Description:
+ *   Down grade write lock to read lock on a read-write-lock object.
+ *
+ * Input Parameters:
+ *   rwsem  - Pointer to the read-write-lock descriptor.
+ *
+ ****************************************************************************/
+
+void downgrade_write(FAR rw_semaphore_t *rwsem);
+
+/****************************************************************************
  * Name: init_rwsem
  *
  * Description:
