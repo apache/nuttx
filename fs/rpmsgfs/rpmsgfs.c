@@ -298,7 +298,7 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
 
   DEBUGASSERT(fs != NULL);
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return -ENOMEM;
@@ -309,7 +309,7 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
   ret = nxmutex_lock(&fs->fs_lock);
   if (ret < 0)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
       return ret;
     }
 
@@ -377,7 +377,7 @@ errout_with_buffer:
 
 errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   if (ret == -EINVAL)
     {
       ret = -EIO;
@@ -891,7 +891,7 @@ static int rpmsgfs_opendir(FAR struct inode *mountpt,
       return -ENOMEM;
     }
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       fs_heap_free(rdir);
@@ -921,14 +921,14 @@ static int rpmsgfs_opendir(FAR struct inode *mountpt,
 
   *dir = (FAR struct fs_dirent_s *)rdir;
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return OK;
 
 errout_with_lock:
   nxmutex_unlock(&fs->fs_lock);
 
 errout_with_rdir:
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   fs_heap_free(rdir);
   return ret;
 }
@@ -1272,7 +1272,7 @@ static int rpmsgfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   fs = mountpt->i_private;
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return -ENOMEM;
@@ -1281,7 +1281,7 @@ static int rpmsgfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   ret = nxmutex_lock(&fs->fs_lock);
   if (ret < 0)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
       return ret;
     }
 
@@ -1294,7 +1294,7 @@ static int rpmsgfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   ret = rpmsgfs_client_unlink(fs->handle, path);
 
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 }
 
@@ -1320,7 +1320,7 @@ static int rpmsgfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return -ENOMEM;
@@ -1329,7 +1329,7 @@ static int rpmsgfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = nxmutex_lock(&fs->fs_lock);
   if (ret < 0)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
       return ret;
     }
 
@@ -1342,7 +1342,7 @@ static int rpmsgfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
   ret = rpmsgfs_client_mkdir(fs->handle, path, mode);
 
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 }
 
@@ -1369,7 +1369,7 @@ int rpmsgfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   /* Take the lock */
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return -ENOMEM;
@@ -1378,7 +1378,7 @@ int rpmsgfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   ret = nxmutex_lock(&fs->fs_lock);
   if (ret < 0)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
       return ret;
     }
 
@@ -1391,7 +1391,7 @@ int rpmsgfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   ret = rpmsgfs_client_rmdir(fs->handle, path);
 
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 }
 
@@ -1410,16 +1410,16 @@ int rpmsgfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   FAR char *newpath;
   int ret;
 
-  oldpath = lib_get_pathbuffer();
+  oldpath = lib_get_tempbuffer(PATH_MAX);
   if (oldpath == NULL)
     {
       return -ENOMEM;
     }
 
-  newpath = lib_get_pathbuffer();
+  newpath = lib_get_tempbuffer(PATH_MAX);
   if (newpath == NULL)
     {
-      lib_put_pathbuffer(oldpath);
+      lib_put_tempbuffer(oldpath);
       return -ENOMEM;
     }
 
@@ -1434,8 +1434,8 @@ int rpmsgfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   ret = nxmutex_lock(&fs->fs_lock);
   if (ret < 0)
     {
-      lib_put_pathbuffer(oldpath);
-      lib_put_pathbuffer(newpath);
+      lib_put_tempbuffer(oldpath);
+      lib_put_tempbuffer(newpath);
       return ret;
     }
 
@@ -1451,8 +1451,8 @@ int rpmsgfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
   ret = rpmsgfs_client_rename(fs->handle, oldpath, newpath);
 
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(oldpath);
-  lib_put_pathbuffer(newpath);
+  lib_put_tempbuffer(oldpath);
+  lib_put_tempbuffer(newpath);
   return ret;
 }
 
@@ -1478,7 +1478,7 @@ static int rpmsgfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return -ENOMEM;
@@ -1487,7 +1487,7 @@ static int rpmsgfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   ret = nxmutex_lock(&fs->fs_lock);
   if (ret < 0)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
       return ret;
     }
 
@@ -1500,7 +1500,7 @@ static int rpmsgfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   ret = rpmsgfs_client_stat(fs->handle, path, buf);
 
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 }
 
@@ -1526,7 +1526,7 @@ static int rpmsgfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return -ENOMEM;
@@ -1535,7 +1535,7 @@ static int rpmsgfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   ret = nxmutex_lock(&fs->fs_lock);
   if (ret < 0)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
       return ret;
     }
 
@@ -1548,6 +1548,6 @@ static int rpmsgfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   ret = rpmsgfs_client_chstat(fs->handle, path, buf, flags);
 
   nxmutex_unlock(&fs->fs_lock);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 }

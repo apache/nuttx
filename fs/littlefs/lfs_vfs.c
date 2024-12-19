@@ -1531,7 +1531,7 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   if (len > 0 && relpath[len - 1] == '/')
     {
-      path = lib_get_pathbuffer();
+      path = lib_get_tempbuffer(PATH_MAX);
       if (path == NULL)
         {
           return -ENOMEM;
@@ -1583,7 +1583,7 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 errout:
   if (path != relpath)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
     }
 
   return ret;

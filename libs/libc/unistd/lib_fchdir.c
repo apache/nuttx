@@ -69,7 +69,7 @@ int fchdir(int fd)
   FAR char *path;
   int ret;
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       set_errno(ENOMEM);
@@ -79,11 +79,11 @@ int fchdir(int fd)
   ret = fcntl(fd, F_GETPATH, path);
   if (ret < 0)
     {
-      lib_put_pathbuffer(path);
+      lib_put_tempbuffer(path);
       return ret;
     }
 
   ret = chdir(path);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 }

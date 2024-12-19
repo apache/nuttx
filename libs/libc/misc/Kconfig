@@ -119,31 +119,30 @@ config LIBC_MEM_FD_VFS_PATH
 	---help---
 		The relative path to where memfd will exist in the tmpfs namespace.
 
-config LIBC_PATHBUFFER
-	bool "Enable global path buffer"
+config LIBC_TEMPBUFFER
+	bool "Enable global temp buffer"
 	default !DEFAULT_SMALL
 	---help---
-		Enable this option to enable the global path buffer, otherwise use stack variables via alloca().
-		If the current platform does not require a large PATH_MAX size support and toolchain supports alloca(),
+		Enable this option to enable the global temp buffer, otherwise use stack variables via alloca().
+		If the current platform does not require a large TEMP_MAX_SIZE size support and toolchain supports alloca(),
 		we could turn off this option to improve performance.
 
-if LIBC_PATHBUFFER
+if LIBC_TEMPBUFFER
 
-config LIBC_PATHBUFFER_MAX
-	int "Maximum size of a temporary file path buffer array"
+config LIBC_MAX_TEMPBUFFER
+	int "Maximum size of a temporary file temp buffer array"
 	range 0 32
 	default 2
 	---help---
-		This value is the maximum size of the buffer that will hold the full
-		file path.
+		This value is the maximum size of the buffer that will hold the full line.
 
-config LIBC_PATHBUFFER_MALLOC
-	bool "Enable malloc pathbuffer"
+config LIBC_TEMPBUFFER_MALLOC
+	bool "Enable malloc tempbuffer"
 	default y
 	---help---
-		Enable malloc path buffer from the heap when pathbuffer is insufficient.
+		Enable malloc temp buffer from the heap when tempbuffer is insufficient.
 
-endif # LIBC_PATHBUFFER
+endif # LIBC_TEMPBUFFER
 
 config LIBC_BACKTRACE_BUFFSIZE
 	int "The size of backtrace record buffer"

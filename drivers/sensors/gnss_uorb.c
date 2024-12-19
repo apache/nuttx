@@ -725,7 +725,7 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
       return -ENOMEM;
     }
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       kmm_free(upper);
@@ -822,7 +822,7 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
       goto driver_err;
     }
 
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   return ret;
 
 driver_err:
@@ -843,7 +843,7 @@ gnss_err:
   nxmutex_destroy(&upper->lock);
   nxmutex_destroy(&upper->bufferlock);
   nxsem_destroy(&upper->buffersem);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   kmm_free(upper);
   return ret;
 }
@@ -868,7 +868,7 @@ void gnss_unregister(FAR struct gnss_lowerhalf_s *lower, int devno)
   FAR struct gnss_upperhalf_s *upper = lower->priv;
   FAR char *path;
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return;
@@ -885,6 +885,6 @@ void gnss_unregister(FAR struct gnss_lowerhalf_s *lower, int devno)
   unregister_driver(path);
   nxsem_destroy(&upper->buffersem);
   circbuf_uninit(&upper->buffer);
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
   kmm_free(upper);
 }

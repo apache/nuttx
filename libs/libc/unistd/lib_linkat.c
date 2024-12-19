@@ -82,17 +82,17 @@ int linkat(int olddirfd, FAR const char *path1,
   FAR char *newfullpath;
   int ret;
 
-  oldfullpath = lib_get_pathbuffer();
+  oldfullpath = lib_get_tempbuffer(PATH_MAX);
   if (oldfullpath == NULL)
     {
       set_errno(ENOMEM);
       return ERROR;
     }
 
-  newfullpath = lib_get_pathbuffer();
+  newfullpath = lib_get_tempbuffer(PATH_MAX);
   if (newfullpath == NULL)
     {
-      lib_put_pathbuffer(oldfullpath);
+      lib_put_tempbuffer(oldfullpath);
       set_errno(ENOMEM);
       return ERROR;
     }
@@ -107,15 +107,15 @@ int linkat(int olddirfd, FAR const char *path1,
 
   if (ret < 0)
     {
-      lib_put_pathbuffer(oldfullpath);
-      lib_put_pathbuffer(newfullpath);
+      lib_put_tempbuffer(oldfullpath);
+      lib_put_tempbuffer(newfullpath);
       set_errno(-ret);
       return ERROR;
     }
 
   ret = link(oldfullpath, newfullpath);
-  lib_put_pathbuffer(oldfullpath);
-  lib_put_pathbuffer(newfullpath);
+  lib_put_tempbuffer(oldfullpath);
+  lib_put_tempbuffer(newfullpath);
   return ret;
 }
 

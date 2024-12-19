@@ -810,7 +810,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   FAR struct automounter_state_s *priv;
   int ret;
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
-  FAR char *devpath = lib_get_pathbuffer();
+  FAR char *devpath = lib_get_tempbuffer(PATH_MAX);
   if (devpath == NULL)
     {
       return NULL;
@@ -827,7 +827,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
     {
       ferr("ERROR: Failed to allocate state structure\n");
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
-      lib_put_pathbuffer(devpath);
+      lib_put_tempbuffer(devpath);
 #endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
       return NULL;
     }
@@ -865,7 +865,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
            CONFIG_FS_AUTOMOUNTER_VFS_PATH "%s", lower->mountpoint);
 
   ret = register_driver(devpath, &g_automount_fops, 0444, priv);
-  lib_put_pathbuffer(devpath);
+  lib_put_tempbuffer(devpath);
   if (ret < 0)
     {
       ferr("ERROR: Failed to register automount driver: %d\n", ret);
@@ -922,7 +922,7 @@ void automount_uninitialize(FAR void *handle)
 #ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
   if (priv->registered)
     {
-      FAR char *devpath = lib_get_pathbuffer();
+      FAR char *devpath = lib_get_tempbuffer(PATH_MAX);
       if (devpath == NULL)
         {
           return;
@@ -932,7 +932,7 @@ void automount_uninitialize(FAR void *handle)
                CONFIG_FS_AUTOMOUNTER_VFS_PATH "%s", lower->mountpoint);
 
       unregister_driver(devpath);
-      lib_put_pathbuffer(devpath);
+      lib_put_tempbuffer(devpath);
     }
 
   nxmutex_destroy(&priv->lock);

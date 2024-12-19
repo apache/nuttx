@@ -97,7 +97,7 @@ int chdir(FAR const char *path)
    * Remove any trailing '/' characters from the path
    */
 
-  abspath = lib_get_pathbuffer();
+  abspath = lib_get_tempbuffer(PATH_MAX);
   if (abspath != NULL)
     {
       oldpwd = realpath(path, abspath);
@@ -105,7 +105,7 @@ int chdir(FAR const char *path)
 
   if (abspath == NULL || oldpwd == NULL)
     {
-      lib_put_pathbuffer(abspath);
+      lib_put_tempbuffer(abspath);
       return ERROR;
     }
 
@@ -128,7 +128,7 @@ int chdir(FAR const char *path)
   ret = setenv("PWD", abspath, TRUE);
 #endif /* !CONFIG_DISABLE_ENVIRON */
 
-  lib_put_pathbuffer(abspath);
+  lib_put_tempbuffer(abspath);
 
   return ret;
 }

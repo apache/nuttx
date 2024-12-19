@@ -379,7 +379,7 @@ static int aw86225_request_firmware(FAR struct aw86225_firmware *fw,
   size_t file_size;
   int ret;
 
-  file_path = lib_get_pathbuffer();
+  file_path = lib_get_tempbuffer(PATH_MAX);
   if (file_path == NULL)
     {
       return -ENOMEM;
@@ -388,7 +388,7 @@ static int aw86225_request_firmware(FAR struct aw86225_firmware *fw,
   snprintf(file_path, PATH_MAX, "%s/%s",
            CONFIG_AW86225_RTP_FILE_PATH, filename);
   ret = file_open(&file, file_path, O_RDONLY);
-  lib_put_pathbuffer(file_path);
+  lib_put_tempbuffer(file_path);
   if (ret < 0)
     {
       ierr("open file failed");
