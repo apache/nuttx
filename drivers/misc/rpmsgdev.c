@@ -45,6 +45,7 @@
 #include <nuttx/net/ioctl.h>
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/power/battery_ioctl.h>
+#include <nuttx/input/mouse.h>
 
 #include "rpmsgdev.h"
 
@@ -103,7 +104,7 @@ static ssize_t rpmsgdev_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
 static off_t   rpmsgdev_seek(FAR struct file *filep, off_t offset,
                              int whence);
-static ssize_t rpmsgdev_ioctl_arglen(int cmd);
+static ssize_t rpmsgdev_ioctl_arglen(int cmd, unsigned long arg);
 static int     rpmsgdev_ioctl(FAR struct file *filep, int cmd,
                               unsigned long arg);
 static int     rpmsgdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
@@ -591,6 +592,7 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
  *
  * Parameters:
  *   cmd - the ioctl command
+ *   arg - the ioctl arguments
  *
  * Returned Values:
  *   0        - ioctl command not support
@@ -598,7 +600,7 @@ static off_t rpmsgdev_seek(FAR struct file *filep, off_t offset, int whence)
  *
  ****************************************************************************/
 
-static ssize_t rpmsgdev_ioctl_arglen(int cmd)
+static ssize_t rpmsgdev_ioctl_arglen(int cmd, unsigned long arg)
 {
   switch (cmd)
     {
@@ -622,6 +624,9 @@ static ssize_t rpmsgdev_ioctl_arglen(int cmd)
       case BATIOC_GET_PROTOCOL:
       case BATIOC_OPERATE:
         return sizeof(struct batio_operate_msg_s);
+      case MSIOC_VENDOR:
+        return sizeof(struct mouse_vendor_cmd_s) +
+               ((FAR struct mouse_vendor_cmd_s *)(uintptr_t)arg)->len;
       default:
         return -ENOTTY;
     }
@@ -661,7 +666,7 @@ static int rpmsgdev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Call our internal routine to perform the ioctl */
 
-  arglen = rpmsgdev_ioctl_arglen(cmd);
+  arglen = rpmsgdev_ioctl_arglen(cmd, arg);
   if (arglen < 0)
     {
       return arglen;
