@@ -75,10 +75,12 @@ static void convert_lcd_rgb565(void)
   stm32_gpiowrite(GPIO_LTDC_R1, 0);
   stm32_configgpio(GPIO_LTDC_R2);
   stm32_gpiowrite(GPIO_LTDC_R2, 0);
+
   stm32_configgpio(GPIO_LTDC_G0);
   stm32_gpiowrite(GPIO_LTDC_G0, 0);
   stm32_configgpio(GPIO_LTDC_G1);
   stm32_gpiowrite(GPIO_LTDC_G1, 0);
+
   stm32_configgpio(GPIO_LTDC_B0);
   stm32_gpiowrite(GPIO_LTDC_B0, 0);
   stm32_configgpio(GPIO_LTDC_B1);

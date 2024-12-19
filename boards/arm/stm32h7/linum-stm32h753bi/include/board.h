@@ -88,13 +88,13 @@
 
 #define STM32_PLLCFG_PLLSRC      RCC_PLLCKSELR_PLLSRC_HSE
 
-/* PLL1, wide 4 - 8 MHz input, enable DIVP, DIVQ, DIVR
+/* PLL1 - 25 MHz input, enable DIVP, DIVQ, DIVR
  *
  *   PLL1_VCO = (25 MHz / 5) * 192 = 960 MHz
  *
  *   PLL1P = PLL1_VCO/2  = 800 MHz / 2   = 480 MHz
  *   PLL1Q = PLL1_VCO/4  = 800 MHz / 4   = 240 MHz
- *   PLL1R = PLL1_VCO/8  = 800 MHz / 4   = 240 MHz
+ *   PLL1R = PLL1_VCO/4  = 800 MHz / 4   = 240 MHz
  */
 
 #define STM32_PLLCFG_PLL1CFG     (RCC_PLLCFGR_PLL1VCOSEL_WIDE| \
@@ -103,24 +103,24 @@
                                   RCC_PLLCFGR_DIVQ1EN| \
                                   RCC_PLLCFGR_DIVR1EN)
 
-#define STM32_VCO1_FREQUENCY     ((STM32_HSE_FREQUENCY / 5) * 192)
-#define STM32_PLL1P_FREQUENCY    (STM32_VCO1_FREQUENCY / 2)
-#define STM32_PLL1Q_FREQUENCY    (STM32_VCO1_FREQUENCY / 4)
-#define STM32_PLL1R_FREQUENCY    (STM32_VCO1_FREQUENCY / 4)
-
 #define STM32_PLLCFG_PLL1M       RCC_PLLCKSELR_DIVM1(5)
 #define STM32_PLLCFG_PLL1N       RCC_PLL1DIVR_N1(192)
 #define STM32_PLLCFG_PLL1P       RCC_PLL1DIVR_P1(2)
 #define STM32_PLLCFG_PLL1Q       RCC_PLL1DIVR_Q1(4)
 #define STM32_PLLCFG_PLL1R       RCC_PLL1DIVR_R1(4)
 
-/* PLL2, wide 4 - 8 MHz input, enable DIVP, DIVQ, DIVR
+#define STM32_VCO1_FREQUENCY     ((STM32_HSE_FREQUENCY / 5) * 192)
+#define STM32_PLL1P_FREQUENCY    (STM32_VCO1_FREQUENCY / 2)
+#define STM32_PLL1Q_FREQUENCY    (STM32_VCO1_FREQUENCY / 4)
+#define STM32_PLL1R_FREQUENCY    (STM32_VCO1_FREQUENCY / 4)
+
+/* PLL2 - 25 MHz input, enable DIVP, DIVQ, DIVR
  *
- *   PLL1_VCO = (25 MHz / 2) * 48 = 600 MHz
+ *   PLL2_VCO = (25 MHz / 2) * 48 = 600 MHz
  *
- *   PLL2P = PLL2_VCO/2  = 600 MHz / 8   = 75 MHz
- *   PLL2Q = PLL2_VCO/4  = 600 MHz / 40  = 15 MHz
- *   PLL2R = PLL2_VCO/8  = 600 MHz / 3   = 200 MHz
+ *   PLL2P = PLL2_VCO/8  = 600 MHz / 8   = 75 MHz
+ *   PLL2Q = PLL2_VCO/40 = 600 MHz / 40  = 15 MHz
+ *   PLL2R = PLL2_VCO/3  = 600 MHz / 3   = 200 MHz
  */
 #define STM32_PLLCFG_PLL2CFG (RCC_PLLCFGR_PLL2VCOSEL_WIDE| \
                               RCC_PLLCFGR_PLL2RGE_4_8_MHZ| \
@@ -128,30 +128,41 @@
                               RCC_PLLCFGR_DIVQ2EN| \
                               RCC_PLLCFGR_DIVR2EN)
 
-#define STM32_VCO2_FREQUENCY     ((STM32_HSE_FREQUENCY / 2) * 48)
-#define STM32_PLL2P_FREQUENCY    (STM32_VCO2_FREQUENCY / 8)
-#define STM32_PLL2Q_FREQUENCY    (STM32_VCO2_FREQUENCY / 40)
-#define STM32_PLL2R_FREQUENCY    (STM32_VCO2_FREQUENCY / 3)
-
 #define STM32_PLLCFG_PLL2M       RCC_PLLCKSELR_DIVM2(2)
 #define STM32_PLLCFG_PLL2N       RCC_PLL2DIVR_N2(48)
 #define STM32_PLLCFG_PLL2P       RCC_PLL2DIVR_P2(8)
 #define STM32_PLLCFG_PLL2Q       RCC_PLL2DIVR_Q2(40)
 #define STM32_PLLCFG_PLL2R       RCC_PLL2DIVR_R2(3)
 
-/* PLL3 */
+#define STM32_VCO2_FREQUENCY     ((STM32_HSE_FREQUENCY / 2) * 48)
+#define STM32_PLL2P_FREQUENCY    (STM32_VCO2_FREQUENCY / 8)
+#define STM32_PLL2Q_FREQUENCY    (STM32_VCO2_FREQUENCY / 40)
+#define STM32_PLL2R_FREQUENCY    (STM32_VCO2_FREQUENCY / 3)
 
-#define STM32_PLLCFG_PLL3CFG 0
-#define STM32_PLLCFG_PLL3M   0
-#define STM32_PLLCFG_PLL3N   0
-#define STM32_PLLCFG_PLL3P   0
-#define STM32_PLLCFG_PLL3Q   0
-#define STM32_PLLCFG_PLL3R   0
+/* PLL3 - 25 MHz input, enable DIVP, DIVQ, DIVR
+ *
+ *   PLL3_VCO = (25 MHz / 1) * 35 = 875 MHz
+ *
+ *   PLL3P = PLL3_VCO/2  = 875 MHz / 2   = 437.7 MHz
+ *   PLL3Q = PLL3_VCO/1  = 875 MHz / 1  = 875 MHz
+ *   PLL3R = PLL3_VCO/20  = 875 MHz / 20   = 43.75 MHz
+ */
+#define STM32_PLLCFG_PLL3CFG (RCC_PLLCFGR_PLL3VCOSEL_WIDE| \
+                              RCC_PLLCFGR_PLL3RGE_8_16_MHZ| \
+                              RCC_PLLCFGR_DIVP3EN| \
+                              RCC_PLLCFGR_DIVQ3EN| \
+                              RCC_PLLCFGR_DIVR3EN)
 
-#define STM32_VCO3_FREQUENCY
-#define STM32_PLL3P_FREQUENCY
-#define STM32_PLL3Q_FREQUENCY
-#define STM32_PLL3R_FREQUENCY
+#define STM32_PLLCFG_PLL3M       RCC_PLLCKSELR_DIVM3(1)
+#define STM32_PLLCFG_PLL3N       RCC_PLL3DIVR_N3(35)
+#define STM32_PLLCFG_PLL3P       RCC_PLL3DIVR_P3(2)
+#define STM32_PLLCFG_PLL3Q       RCC_PLL3DIVR_Q3(1)
+#define STM32_PLLCFG_PLL3R       RCC_PLL3DIVR_R3(20)
+
+#define STM32_VCO3_FREQUENCY     ((STM32_HSE_FREQUENCY / 1) * 35)
+#define STM32_PLL3P_FREQUENCY    (STM32_VCO3_FREQUENCY / 2)
+#define STM32_PLL3Q_FREQUENCY    (STM32_VCO3_FREQUENCY / 1)
+#define STM32_PLL3R_FREQUENCY    (STM32_VCO3_FREQUENCY / 20)
 
 /* SYSCLK = PLL1P = 480 MHz
  * CPUCLK = SYSCLK / 1 = 480 MHz
@@ -163,7 +174,7 @@
 
 /* Configure Clock Assignments */
 
-/* AHB clock (HCLK) is SYSCLK/2 (480 MHz max)
+/* AHB clock (HCLK) is SYSCLK/2 (240 MHz max)
  * HCLK1 = HCLK2 = HCLK3 = HCLK4
  */
 
@@ -173,22 +184,22 @@
 
 /* APB1 clock (PCLK1) is HCLK/2 (120 MHz) */
 
-#define STM32_RCC_D2CFGR_D2PPRE1  RCC_D2CFGR_D2PPRE1_HCLKd2       /* PCLK1 = HCLK / 2 */
+#define STM32_RCC_D2CFGR_D2PPRE1  RCC_D2CFGR_D2PPRE1_HCLKd2     /* PCLK1 = HCLK / 2 */
 #define STM32_PCLK1_FREQUENCY     (STM32_HCLK_FREQUENCY/2)
 
 /* APB2 clock (PCLK2) is HCLK/2 (120 MHz) */
 
-#define STM32_RCC_D2CFGR_D2PPRE2  RCC_D2CFGR_D2PPRE2_HCLKd2       /* PCLK2 = HCLK / 2 */
+#define STM32_RCC_D2CFGR_D2PPRE2  RCC_D2CFGR_D2PPRE2_HCLKd2     /* PCLK2 = HCLK / 2 */
 #define STM32_PCLK2_FREQUENCY     (STM32_HCLK_FREQUENCY/2)
 
 /* APB3 clock (PCLK3) is HCLK/2 (120 MHz) */
 
-#define STM32_RCC_D1CFGR_D1PPRE   RCC_D1CFGR_D1PPRE_HCLKd2        /* PCLK3 = HCLK / 2 */
+#define STM32_RCC_D1CFGR_D1PPRE   RCC_D1CFGR_D1PPRE_HCLKd2      /* PCLK3 = HCLK / 2 */
 #define STM32_PCLK3_FREQUENCY     (STM32_HCLK_FREQUENCY/2)
 
 /* APB4 clock (PCLK4) is HCLK/2 (120 MHz) */
 
-#define STM32_RCC_D3CFGR_D3PPRE   RCC_D3CFGR_D3PPRE_HCLKd2       /* PCLK4 = HCLK / 2 */
+#define STM32_RCC_D3CFGR_D3PPRE   RCC_D3CFGR_D3PPRE_HCLKd2      /* PCLK4 = HCLK / 2 */
 #define STM32_PCLK4_FREQUENCY     (STM32_HCLK_FREQUENCY/2)
 
 /* Timer clock frequencies */
@@ -246,6 +257,17 @@
 
 #define STM32_RCC_D3CCIPR_ADCSRC     RCC_D3CCIPR_ADCSEL_PLL2
 
+/* FDCAN 1 2 clock source, use STM32_HSE_FREQUENCY  */
+
+#define STM32_RCC_D2CCIP1R_FDCANSEL  RCC_D2CCIP1R_FDCANSEL_HSE
+
+/* SDMMC 1 2 clock source, use STM32_PLL1Q_FREQUENCY  */
+
+#define STM32_RCC_D1CCIPR_SDMMCSEL  RCC_D1CCIPR_SDMMC_PLL1
+
+/* FMC clock source, use STM32_PLL1Q_FREQUENCY  */
+#define BOARD_FMC_CLK               RCC_D1CCIPR_FMCSEL_HCLK
+
 /* FLASH wait states
  *
  *  ------------ ---------- -----------
@@ -267,21 +289,6 @@
  */
 
 #define BOARD_FLASH_WAITSTATES 4
-
-/* SDMMC definitions ********************************************************/
-
-/* Init 400 kHz, PLL1Q/(2*300) = 240 MHz / (2*300) = 400 Khz */
-
-#define STM32_SDMMC_INIT_CLKDIV     (300 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-
-/* Just set these to 24 MHz for now,
- * PLL1Q/(2*5) = 240 MHz / (2*5) = 24 MHz
- */
-
-#define STM32_SDMMC_MMCXFR_CLKDIV   (5 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-#define STM32_SDMMC_SDXFR_CLKDIV    (5 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
-
-#define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
 
 /* LED definitions **********************************************************/
 
@@ -386,6 +393,18 @@
 
 /* SDMMC1 - Used SD Card memory */
 
+/* Init 400 kHz, PLL1Q/(2*300) = 240 MHz / (2*300) = 400 Khz */
+
+#define STM32_SDMMC_INIT_CLKDIV     (300 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+
+/* Just set these to 24 MHz for now,
+ * PLL1Q/(2*5) = 240 MHz / (2*5) = 24 MHz
+ */
+
+#define STM32_SDMMC_MMCXFR_CLKDIV   (5 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_SDXFR_CLKDIV    (5 << STM32_SDMMC_CLKCR_CLKDIV_SHIFT)
+#define STM32_SDMMC_CLKCR_EDGE      STM32_SDMMC_CLKCR_NEGEDGE
+
 #define GPIO_SDMMC1_CK   (GPIO_SDMMC1_CK_0|GPIO_SPEED_100MHz)  /* PC12 */
 #define GPIO_SDMMC1_CMD  (GPIO_SDMMC1_CMD_0|GPIO_SPEED_100MHz) /* PD2 */
 #define GPIO_SDMMC1_D0   (GPIO_SDMMC1_D0_0|GPIO_SPEED_100MHz)  /* PC8 */
@@ -450,15 +469,13 @@
 
 /* SDRAM FMC definitions ****************************************************/
 
-/* The following settings correspond to W9864G6KH-6 SDRAM
- * part-number ("-6" speed grades ) and FMC_SDCLK frequency of 166 MHz
- * (period is ~ 6.25 ns).
+/* The following settings correspond to IS42S16400J SDRAM
+ * part-number and FMC_SDCLK frequency of 120 MHz
  */
 
-/* Though W9864G6KH-6 SDRAM itself provides 16-bit data bus,
+/* Though IS42S16400J SDRAM itself provides 16-bit data bus,
  * linum board routes only DQ[15:0] bits.
  */
-#define BOARD_FMC_CLK                   RCC_D1CCIPR_FMCSEL_HCLK
 
 #if CONFIG_STM32H7_FMC
 #  define FMC_SDCLK_FREQUENCY  (STM32_HCLK_FREQUENCY / 2)
@@ -559,37 +576,37 @@
 
 /* LTDC */
 
-#define GPIO_LTDC_R0     (GPIO_LTDC_R0_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R1     (GPIO_LTDC_R1_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R2     (GPIO_LTDC_R2_4|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R3     (GPIO_LTDC_R3_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R4     (GPIO_LTDC_R4_4|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R5     (GPIO_LTDC_R5_4|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R6     (GPIO_LTDC_R6_4|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_R7     (GPIO_LTDC_R7_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_R0     (GPIO_LTDC_R0_3|GPIO_SPEED_100MHz) /* PI15 */
+#define GPIO_LTDC_R1     (GPIO_LTDC_R1_3|GPIO_SPEED_100MHz) /* PJ0 */
+#define GPIO_LTDC_R2     (GPIO_LTDC_R2_4|GPIO_SPEED_100MHz) /* PJ1 */
+#define GPIO_LTDC_R3     (GPIO_LTDC_R3_2|GPIO_SPEED_100MHz) /* PJ2 */
+#define GPIO_LTDC_R4     (GPIO_LTDC_R4_4|GPIO_SPEED_100MHz) /* PJ3 */
+#define GPIO_LTDC_R5     (GPIO_LTDC_R5_5|GPIO_SPEED_100MHz) /* PJ4 */
+#define GPIO_LTDC_R6     (GPIO_LTDC_R6_3|GPIO_SPEED_100MHz) /* PJ5 */
+#define GPIO_LTDC_R7     (GPIO_LTDC_R7_3|GPIO_SPEED_100MHz) /* PJ6 */
 
-#define GPIO_LTDC_G0     (GPIO_LTDC_G0_2|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G1     (GPIO_LTDC_G1_2|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G2     (GPIO_LTDC_G2_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G3     (GPIO_LTDC_G3_4|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G4     (GPIO_LTDC_G4_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G5     (GPIO_LTDC_G5_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G6     (GPIO_LTDC_G6_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_G7     (GPIO_LTDC_G7_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_G0     (GPIO_LTDC_G0_3|GPIO_SPEED_100MHz) /* PJ7 */
+#define GPIO_LTDC_G1     (GPIO_LTDC_G1_3|GPIO_SPEED_100MHz) /* PJ8 */
+#define GPIO_LTDC_G2     (GPIO_LTDC_G2_3|GPIO_SPEED_100MHz) /* PJ9 */
+#define GPIO_LTDC_G3     (GPIO_LTDC_G3_4|GPIO_SPEED_100MHz) /* PJ10 */
+#define GPIO_LTDC_G4     (GPIO_LTDC_G4_4|GPIO_SPEED_100MHz) /* PJ11 */
+#define GPIO_LTDC_G5     (GPIO_LTDC_G5_3|GPIO_SPEED_100MHz) /* PK0 */
+#define GPIO_LTDC_G6     (GPIO_LTDC_G6_3|GPIO_SPEED_100MHz) /* PK1 */
+#define GPIO_LTDC_G7     (GPIO_LTDC_G7_4|GPIO_SPEED_100MHz) /* PK2 */
 
-#define GPIO_LTDC_B0     (GPIO_LTDC_B0_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B1     (GPIO_LTDC_B1_2|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B2     (GPIO_LTDC_B2_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B3     (GPIO_LTDC_B3_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B4     (GPIO_LTDC_B4_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B5     (GPIO_LTDC_B5_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B6     (GPIO_LTDC_B6_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_B7     (GPIO_LTDC_B7_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_B0     (GPIO_LTDC_B0_3|GPIO_SPEED_100MHz) /* PJ12 */
+#define GPIO_LTDC_B1     (GPIO_LTDC_B1_3|GPIO_SPEED_100MHz) /* PJ13 */
+#define GPIO_LTDC_B2     (GPIO_LTDC_B2_4|GPIO_SPEED_100MHz) /* PJ14 */
+#define GPIO_LTDC_B3     (GPIO_LTDC_B3_4|GPIO_SPEED_100MHz) /* PJ15 */
+#define GPIO_LTDC_B4     (GPIO_LTDC_B4_4|GPIO_SPEED_100MHz) /* PK3 */
+#define GPIO_LTDC_B5     (GPIO_LTDC_B5_3|GPIO_SPEED_100MHz) /* PK4 */
+#define GPIO_LTDC_B6     (GPIO_LTDC_B6_3|GPIO_SPEED_100MHz) /* PK5 */
+#define GPIO_LTDC_B7     (GPIO_LTDC_B7_3|GPIO_SPEED_100MHz) /* PK6 */
 
-#define GPIO_LTDC_VSYNC  (GPIO_LTDC_VSYNC_2|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_HSYNC  (GPIO_LTDC_HSYNC_2|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_DE     (GPIO_LTDC_DE_3|GPIO_SPEED_100MHz)
-#define GPIO_LTDC_CLK    (GPIO_LTDC_CLK_3|GPIO_SPEED_100MHz)
+#define GPIO_LTDC_DE     (GPIO_LTDC_DE_3|GPIO_SPEED_100MHz)    /* PK7 */
+#define GPIO_LTDC_CLK    (GPIO_LTDC_CLK_3|GPIO_SPEED_100MHz)   /* PI14 */
+#define GPIO_LTDC_VSYNC  (GPIO_LTDC_VSYNC_3|GPIO_SPEED_100MHz) /* PI9 */
+#define GPIO_LTDC_HSYNC  (GPIO_LTDC_HSYNC_2|GPIO_SPEED_100MHz) /* PI10 */
 
 /* LCD definitions **********************************************************/
 
@@ -598,14 +615,12 @@
 
 #define BOARD_LTDC_OUTPUT_BPP           16
 #define BOARD_LTDC_HFP                  160
-#define BOARD_LTDC_HBP                  160
+#define BOARD_LTDC_HBP                  160 /* AccumulatedHBP */
 #define BOARD_LTDC_VFP                  1
-#define BOARD_LTDC_VBP                  23
-#define BOARD_LTDC_HSYNC                0
-#define BOARD_LTDC_VSYNC                0
+#define BOARD_LTDC_VBP                  23  /* AccumulatedVBP */
 
-#define BOARD_LTDC_PLLSAIN              192
-#define BOARD_LTDC_PLLSAIR              5
+#define BOARD_LTDC_HSYNC                1   /* HorizontalSync */
+#define BOARD_LTDC_VSYNC                1   /* VerticalSync */
 
 /* Pixel Clock Polarity */
 
