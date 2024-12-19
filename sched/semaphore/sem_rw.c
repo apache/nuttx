@@ -287,6 +287,33 @@ void up_write(FAR rw_semaphore_t *rwsem)
 }
 
 /****************************************************************************
+ * Name: downgrade_write
+ *
+ * Description:
+ *   Downgrade write lock to read lock on a read-write-lock object.
+ *
+ * Input Parameters:
+ *   rwsem  - Pointer to the read-write-lock descriptor.
+ *
+ ****************************************************************************/
+
+void downgrade_write(FAR rw_semaphore_t *rwsem)
+{
+  nxmutex_lock(&rwsem->protected);
+
+  DEBUGASSERT(rwsem->writer == 1);
+  DEBUGASSERT(rwsem->reader == 0);
+  DEBUGASSERT(rwsem->holder == _SCHED_GETTID());
+
+  rwsem->writer = 0;
+  rwsem->reader++;
+  rwsem->holder = RWSEM_NO_HOLDER;
+
+  up_wait(rwsem);
+  nxmutex_unlock(&rwsem->protected);
+}
+
+/****************************************************************************
  * Name: init_rwsem
  *
  * Description:
