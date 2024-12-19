@@ -86,7 +86,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_PIOE_IRQ
 static spinlock_t g_phy_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Private Functions

@@ -81,9 +81,8 @@
  * Private Data
  ****************************************************************************/
 
-static spinlock_t g_ethmac_lock = SP_UNLOCKED;
-
 #ifdef HAVE_NETMONITOR
+static spinlock_t g_ethmac_lock = SP_UNLOCKED;
 static xcpt_t g_ethmac_handler;
 static void  *g_ethmac_arg;
 #endif
