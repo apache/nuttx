@@ -130,6 +130,7 @@
 #define _POSIX_PIPE_BUF       512
 #define _POSIX_STREAM_MAX     16
 #define _POSIX_TZNAME_MAX     3
+#define _POSIX2_LINE_MAX      80
 
 #ifdef CONFIG_SMALL_MEMORY
 
@@ -202,6 +203,7 @@
 
 #define ARG_MAX        _POSIX_ARG_MAX
 #define CHILD_MAX      _POSIX_CHILD_MAX
+#define LINE_MAX       _POSIX2_LINE_MAX
 #define LINK_MAX       _POSIX_LINK_MAX
 #define MAX_CANON      _POSIX_MAX_CANON
 #define MAX_INPUT      _POSIX_MAX_INPUT
