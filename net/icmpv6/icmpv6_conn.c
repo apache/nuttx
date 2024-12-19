@@ -41,8 +41,17 @@
 
 #include "devif/devif.h"
 #include "icmpv6/icmpv6.h"
+#include "utils/utils.h"
 
 #ifdef CONFIG_NET_ICMPv6_SOCKET
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_ICMPv6_MAX_CONNS
+#  define CONFIG_NET_ICMPv6_MAX_CONNS 0
+#endif
 
 /****************************************************************************
  * Private Data
@@ -50,14 +59,10 @@
 
 /* The array containing all IPPROTO_ICMP socket connections */
 
-#if CONFIG_NET_ICMPv6_PREALLOC_CONNS > 0
-static struct icmpv6_conn_s
-              g_icmpv6_connections[CONFIG_NET_ICMPv6_PREALLOC_CONNS];
-#endif
-
-/* A list of all free IPPROTO_ICMP socket connections */
-
-static dq_queue_t g_free_icmpv6_connections;
+NET_BUFPOOL_DECLARE(g_icmpv6_connections, sizeof(struct icmpv6_conn_s),
+                    CONFIG_NET_ICMPv6_PREALLOC_CONNS,
+                    CONFIG_NET_ICMPv6_ALLOC_CONNS,
+                    CONFIG_NET_ICMPv6_MAX_CONNS);
 static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
@@ -79,17 +84,7 @@ static dq_queue_t g_active_icmpv6_connections;
 
 void icmpv6_sock_initialize(void)
 {
-#if CONFIG_NET_ICMPv6_PREALLOC_CONNS > 0
-  int i;
-
-  for (i = 0; i < CONFIG_NET_ICMPv6_PREALLOC_CONNS; i++)
-    {
-      /* Move the connection structure to the free list */
-
-      dq_addlast(&g_icmpv6_connections[i].sconn.node,
-                 &g_free_icmpv6_connections);
-    }
-#endif
+  NET_BUFPOOL_INIT(g_icmpv6_connections);
 }
 
 /****************************************************************************
@@ -112,32 +107,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
   ret = nxmutex_lock(&g_free_lock);
   if (ret >= 0)
     {
-#if CONFIG_NET_ICMPv6_ALLOC_CONNS > 0
-      if (dq_peek(&g_active_icmpv6_connections) == NULL)
-        {
-#if CONFIG_NET_ICMPv6_MAX_CONNS > 0
-          if (dq_count(&g_active_icmpv6_connections) +
-              CONFIG_NET_ICMPv6_ALLOC_CONNS > CONFIG_NET_ICMPv6_MAX_CONNS)
-            {
-              nxmutex_unlock(&g_free_lock);
-              return NULL;
-            }
-#endif
-
-          conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_ICMPv6_ALLOC_CONNS);
-          if (conn != NULL)
-            {
-              for (ret = 0; ret < CONFIG_NET_ICMPv6_ALLOC_CONNS; ret++)
-                {
-                  dq_addlast(&conn[ret].sconn.node,
-                             &g_free_icmpv6_connections);
-                }
-            }
-        }
-#endif
-
-      conn = (FAR struct icmpv6_conn_s *)
-             dq_remfirst(&g_free_icmpv6_connections);
+      conn = NET_BUFPOOL_TRYALLOC(g_icmpv6_connections);
       if (conn != NULL)
         {
           /* Enqueue the connection into the active list */
@@ -174,22 +144,9 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_icmpv6_connections);
 
-  /* If this is a preallocated or a batch allocated connection store it in
-   * the free connections list. Else free it.
-   */
+  /* Free the connection. */
 
-#if CONFIG_NET_ICMPv6_ALLOC_CONNS == 1
-  if (conn < g_icmpv6_connections || conn >= (g_icmpv6_connections +
-      CONFIG_NET_ICMPv6_PREALLOC_CONNS))
-    {
-      kmm_free(conn);
-    }
-  else
-#endif
-    {
-      memset(conn, 0, sizeof(*conn));
-      dq_addlast(&conn->sconn.node, &g_free_icmpv6_connections);
-    }
+  NET_BUFPOOL_FREE(g_icmpv6_connections, conn);
 
   nxmutex_unlock(&g_free_lock);
 }
