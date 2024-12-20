@@ -296,7 +296,7 @@ static struct imx_uart_s g_uart1priv =
   .baud           = CONFIG_UART1_BAUD,
   .irq            = IMX_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
-  .lock           = SP_UNLOCKED
+  .lock           = SP_UNLOCKED,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
 };
