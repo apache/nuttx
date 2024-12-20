@@ -267,6 +267,7 @@ struct imxrt_driver_s
   bool bifup;                   /* true:ifup false:ifdown */
   bool canfd_capable;
   int mb_address_offset;
+  spinlock_t lock;
 #ifdef TX_TIMEOUT_WQ
   struct wdog_s txtimeout[TXMBCOUNT]; /* TX timeout timer */
 #endif
@@ -777,7 +778,7 @@ static int imxrt_txpoll(struct net_driver_s *dev)
    * the field d_len is set to a value > 0.
    */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (priv->dev.d_len > 0)
     {
@@ -793,12 +794,12 @@ static int imxrt_txpoll(struct net_driver_s *dev)
 
       if (imxrt_txringfull(priv))
         {
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&priv->lock, flags);
           return -EBUSY;
         }
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* If zero is returned, the polling will continue until all connections
    * have been examined.
@@ -2032,6 +2033,7 @@ int imxrt_caninitialize(int intf)
   priv->dev.d_ioctl   = imxrt_ioctl;     /* Support CAN ioctl() calls */
 #endif
   priv->dev.d_private = (void *)priv;      /* Used to recover private state from dev */
+  spin_lock_init(&priv->lock);
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling imxrt_ifdown().
