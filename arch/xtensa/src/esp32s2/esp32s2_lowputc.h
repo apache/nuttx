@@ -106,6 +106,7 @@ struct esp32s2_uart_s
   uint8_t  rs485_dir_gpio;     /* UART RS-485 DIR GPIO pin cfg */
   bool     rs485_dir_polarity; /* UART RS-485 DIR TXEN polarity */
 #endif
+  spinlock_t lock;             /* Spinlock */
 };
 
 extern struct esp32s2_uart_s g_uart0_config;

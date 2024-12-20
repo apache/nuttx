@@ -169,6 +169,7 @@ struct litex_emac_s
   uint8_t               phyaddr;     /* PHY address (pre-defined by pins on reset) */
 
   uint8_t               txslot;
+  spinlock_t            lock;
 };
 
 /****************************************************************************
@@ -511,7 +512,7 @@ static int litex_transmit(struct litex_emac_s *priv)
 
   /* Make the following operations atomic */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   /* Now start transmission */
 
@@ -528,7 +529,7 @@ static int litex_transmit(struct litex_emac_s *priv)
   wd_start(&priv->txtimeout, LITEX_TXTIMEOUT,
            litex_txtimeout_expiry, (wdparm_t)priv);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
@@ -1523,6 +1524,8 @@ static void litex_ethinitialize(void)
     {
       return;
     }
+
+  spin_lock_init(&priv->lock);
 
   nerr("ERROR: netdev_register() failed: %d\n", ret);
 }

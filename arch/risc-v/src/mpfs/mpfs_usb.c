@@ -224,6 +224,8 @@ static void   mpfs_epset_reset(struct mpfs_usbdev_s *priv, uint16_t epset);
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_mpfs_modifyreg_lock = SP_UNLOCKED;
+
 static struct mpfs_usbdev_s g_usbd;
 static uint8_t g_clkrefs;
 
@@ -297,12 +299,12 @@ static void mpfs_modifyreg16(uintptr_t addr, uint16_t clearbits,
   DEBUGASSERT((addr >= MPFS_USB_BASE) && addr < (MPFS_USB_BASE +
                MPFS_USB_REG_MAX));
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&g_mpfs_modifyreg_lock);
   regval  = getreg16(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg16(regval, addr);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_mpfs_modifyreg_lock, flags);
 }
 
 /****************************************************************************
@@ -331,12 +333,12 @@ static void mpfs_modifyreg8(uintptr_t addr, uint8_t clearbits,
   DEBUGASSERT((addr >= MPFS_USB_BASE) && addr < (MPFS_USB_BASE +
                MPFS_USB_REG_MAX));
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&g_mpfs_modifyreg_lock);
   regval  = getreg8(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg8(regval, addr);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_mpfs_modifyreg_lock, flags);
 }
 
 /****************************************************************************
