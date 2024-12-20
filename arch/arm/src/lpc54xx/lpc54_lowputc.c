@@ -244,6 +244,8 @@
  ****************************************************************************/
 
 #ifdef HAVE_USART_CONSOLE
+static spinlock_t g_console_lock = SP_UNLOCKED;
+
 /* USART console configuration */
 
 static const struct uart_config_s g_console_config =
@@ -784,31 +786,17 @@ void arm_lowputc(char ch)
 #ifdef HAVE_USART_CONSOLE
   irqstate_t flags;
 
-  for (; ; )
-    {
-      /* Wait for the transmit FIFO to be not full */
+  /* Wait for the transmit FIFO to be not full */
 
-      while ((getreg32(CONSOLE_BASE + LPC54_USART_FIFOSTAT_OFFSET) &
-             USART_FIFOSTAT_TXNOTFULL) == 0)
-        {
-        }
+  flags = spin_lock_irqsave(&g_console_lock);
+  while ((getreg32(CONSOLE_BASE + LPC54_USART_FIFOSTAT_OFFSET) &
+          USART_FIFOSTAT_TXNOTFULL) == 0);
 
-      /* Disable interrupts so that the fest test and the transmission are
-       * atomic.
-       */
+  /* Send the character */
 
-      flags = spin_lock_irqsave(NULL);
-      if ((getreg32(CONSOLE_BASE + LPC54_USART_FIFOSTAT_OFFSET) &
-          USART_FIFOSTAT_TXNOTFULL) != 0)
-        {
-          /* Send the character */
+  putreg32((uint32_t)ch, CONSOLE_BASE + LPC54_USART_FIFOWR_OFFSET);
 
-          putreg32((uint32_t)ch, CONSOLE_BASE + LPC54_USART_FIFOWR_OFFSET);
-          spin_unlock_irqrestore(NULL, flags);
-          return;
-        }
+  spin_unlock_irqrestore(&g_console_lock, flags);
 
-      spin_unlock_irqrestore(NULL, flags);
-    }
 #endif
 }
