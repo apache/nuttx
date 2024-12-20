@@ -78,7 +78,7 @@
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
          tmp->pid = _SCHED_GETTID(); \
-         tmp->seqno = g_mm_seqno++; \
+         MM_INCSEQNO(tmp); \
        } \
      while (0)
 #elif CONFIG_MM_BACKTRACE > 0
@@ -102,7 +102,7 @@
            { \
              tmp->backtrace[0] = NULL; \
            } \
-         tmp->seqno = g_mm_seqno++; \
+         MM_INCSEQNO(tmp); \
        } \
      while (0)
 #else
@@ -178,7 +178,9 @@ struct mm_allocnode_s
   mmsize_t size;                            /* Size of this chunk */
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
   unsigned long seqno;                      /* The sequence of memory malloc */
+#  endif
 #  if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
 #  endif

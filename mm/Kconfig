@@ -138,6 +138,11 @@ config MM_BACKTRACE_DEFAULT
 	default n
 	depends on MM_BACKTRACE > 0
 
+config MM_BACKTRACE_SEQNO
+	bool "Record sequence number in memory block"
+	default y
+	depends on MM_BACKTRACE >= 0
+
 config MM_DUMP_ON_FAILURE
 	bool "Dump heap info on allocation failure"
 	default n

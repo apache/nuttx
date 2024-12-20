@@ -462,8 +462,10 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 #if CONFIG_MM_BACKTRACE >= 0
                  "leak: dump all leaked node\n"
                  "pid: dump pid allocated node\n"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
                  "The current sequence number %lu\n",
                  g_mm_seqno
+#  endif
 #endif
                  );
 

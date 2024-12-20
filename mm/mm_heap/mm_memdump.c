@@ -66,8 +66,15 @@ static void memdump_allocnode(FAR struct mm_allocnode_s *node)
          nodesize, overhead, BACKTRACE_PTR_FMT_WIDTH,
          (FAR const char *)node + MM_SIZEOF_ALLOCNODE);
 #elif CONFIG_MM_BACKTRACE == 0
-  syslog(LOG_INFO, "%6d%12zu%9zu%12lu%*p\n",
-         node->pid, nodesize, overhead, node->seqno,
+  syslog(LOG_INFO, "%6d%12zu%9zu"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         "%12lu"
+#  endif
+         "%*p\n",
+         node->pid, nodesize, overhead,
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         node->seqno,
+#  endif
          BACKTRACE_PTR_FMT_WIDTH,
          (FAR const char *)node + MM_SIZEOF_ALLOCNODE);
 #else
@@ -76,8 +83,15 @@ static void memdump_allocnode(FAR struct mm_allocnode_s *node)
   backtrace_format(buf, sizeof(buf), node->backtrace,
                    CONFIG_MM_BACKTRACE);
 
-  syslog(LOG_INFO, "%6d%12zu%9zu%12lu%*p %s\n",
-         node->pid, nodesize, overhead, node->seqno,
+  syslog(LOG_INFO, "%6d%12zu%9zu"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         "%12lu%"
+#  endif
+         "*p %s\n",
+         node->pid, nodesize, overhead,
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         node->seqno,
+#  endif
          BACKTRACE_PTR_FMT_WIDTH,
          (FAR const char *)node + MM_SIZEOF_ALLOCNODE, buf);
 #endif
@@ -293,8 +307,15 @@ void mm_memdump(FAR struct mm_heap_s *heap,
                    BACKTRACE_PTR_FMT_WIDTH,
                    "Address");
 #else
-  syslog(LOG_INFO, "%6s%12s%9s%12s%*s %s\n", "PID", "Size", "Overhead",
-                   "Sequence", BACKTRACE_PTR_FMT_WIDTH,
+  syslog(LOG_INFO, "%6s%12s%9s"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+                   "%12s"
+#  endif
+                   "%*s %s\n", "PID", "Size", "Overhead",
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+                   "Sequence",
+#  endif
+                    BACKTRACE_PTR_FMT_WIDTH,
                    "Address", "Backtrace");
 #endif
 

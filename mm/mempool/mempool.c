@@ -107,7 +107,7 @@ static inline void mempool_add_backtrace(FAR struct mempool_s *pool,
   DEBUGASSERT(buf->magic == MEMPOOL_MAGIC_FREE);
   buf->magic = MEMPOOL_MAGIC_ALLOC;
   buf->pid = _SCHED_GETTID();
-  buf->seqno = g_mm_seqno++;
+  MM_INCSEQNO(buf);
 #  if CONFIG_MM_BACKTRACE > 0
   if (pool->procfs.backtrace)
     {
@@ -209,8 +209,15 @@ static void mempool_memdump_callback(FAR struct mempool_s *pool,
       FAR const char *tmp = "";
 #  endif
 
-      syslog(LOG_INFO, "%6d%12zu%9zu%12lu%*p %s\n",
-             buf->pid, blocksize, overhead, buf->seqno,
+      syslog(LOG_INFO, "%6d%12zu%9zu"
+#ifdef CONFIG_MM_BACKTRACE_SEQNO
+             "%12lu"
+#endif
+             "%*p %s\n",
+             buf->pid, blocksize, overhead,
+#ifdef CONFIG_MM_BACKTRACE_SEQNO
+             buf->seqno,
+#endif
              BACKTRACE_PTR_FMT_WIDTH,
              ((FAR char *)buf - pool->blocksize), tmp);
     }
