@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/arm_modifyreg8.c
+ * arch/arm/src/common/arm_modifyreg.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -61,5 +61,47 @@ void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits)
   regval &= ~clearbits;
   regval |= setbits;
   putreg8(regval, addr);
+  spin_unlock_irqrestore(&g_modifyreg_lock, flags);
+}
+
+/****************************************************************************
+ * Name: modifyreg16
+ *
+ * Description:
+ *   Atomically modify the specified bits in a memory mapped register
+ *
+ ****************************************************************************/
+
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits)
+{
+  irqstate_t flags;
+  uint16_t   regval;
+
+  flags   = spin_lock_irqsave(&g_modifyreg_lock);
+  regval  = getreg16(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg16(regval, addr);
+  spin_unlock_irqrestore(&g_modifyreg_lock, flags);
+}
+
+/****************************************************************************
+ * Name: modifyreg32
+ *
+ * Description:
+ *   Atomically modify the specified bits in a memory mapped register
+ *
+ ****************************************************************************/
+
+void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits)
+{
+  irqstate_t flags;
+  uint32_t   regval;
+
+  flags   = spin_lock_irqsave(&g_modifyreg_lock);
+  regval  = getreg32(addr);
+  regval &= ~clearbits;
+  regval |= setbits;
+  putreg32(regval, addr);
   spin_unlock_irqrestore(&g_modifyreg_lock, flags);
 }
