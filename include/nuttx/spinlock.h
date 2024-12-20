@@ -491,9 +491,17 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 
   sched_note_spinlock_lock(lock);
 
+  /* If CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0, count busy-waiting. */
+
+  nxsched_critmon_busywait(true, return_address(0));
+
   /* Lock without trace note */
 
   flags = spin_lock_irqsave_notrace(lock);
+
+  /* Get the lock, end counting busy-waiting */
+
+  nxsched_critmon_busywait(false, return_address(0));
 
   /* Notify that we have the spinlock */
 

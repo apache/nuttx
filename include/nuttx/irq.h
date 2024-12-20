@@ -335,6 +335,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
 
 #ifdef CONFIG_IRQCOUNT
 #  if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 || \
+      CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0 || \
       defined(CONFIG_SCHED_INSTRUMENTATION_CSECTION)
 irqstate_t enter_critical_section(void) noinstrument_function;
 #  else
