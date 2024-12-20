@@ -982,6 +982,7 @@ bail:
       kmm_free(cria.cri_key);
     }
 
+  free(fcrd);
   return ret;
 }
 
