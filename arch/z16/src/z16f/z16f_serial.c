@@ -70,6 +70,7 @@ struct z16f_uart_s
   uint8_t      rxirq;       /* RX IRQ associated with this UART */
   uint8_t      txirq;       /* RX IRQ associated with this UART */
   uint8_t      parity;      /* 0=none, 1=odd, 2=even */
+  spinlock_t   lock;        /* */
   bool         stopbits2;   /* true: Configure with 2 stop bits instead of 1 */
 };
 
@@ -139,6 +140,7 @@ static struct z16f_uart_s g_uart0priv =
   Z16F_IRQ_UART0RX,         /* rxirq */
   Z16F_IRQ_UART0TX,         /* txirq */
   CONFIG_UART0_PARITY,      /* parity */
+  SP_UNLOCKED,              /* Spinlock */
   CONFIG_UART0_2STOP        /* stopbits2 */
 };
 
@@ -157,6 +159,7 @@ static struct z16f_uart_s g_uart1priv =
   Z16F_IRQ_UART1RX,         /* rxirq */
   Z16F_IRQ_UART1TX,         /* txirq */
   CONFIG_UART1_PARITY,      /* parity */
+  SP_UNLOCKED,              /* Spinlock */
   CONFIG_UART1_2STOP        /* stopbits2 */
 };
 
@@ -215,16 +218,16 @@ static uart_dev_t g_uart1port;
 static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 {
   struct z16f_uart_s *priv  = (struct z16f_uart_s *)dev->priv;
-  irqstate_t          flags = spin_lock_irqsave(NULL);
+  irqstate_t          flags = spin_lock_irqsave(&priv->lock);
   uint8_t             state = priv->rxenabled ? STATE_RXENABLED :
                                                 STATE_DISABLED |
                               priv->txenabled ? STATE_TXENABLED :
                                                 STATE_DISABLED;
 
-  z16f_txint(dev, false);
-  z16f_rxint(dev, false);
+  z16f_txint_nolock(dev, false);
+  z16f_rxint_nolock(dev, false);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
   return state;
 }
 
@@ -234,12 +237,13 @@ static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 
 static void z16f_restoreuartirq(struct uart_dev_s *dev, uint8_t state)
 {
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
-  z16f_txint(dev, (state & STATE_TXENABLED) ? true : false);
-  z16f_rxint(dev, (state & STATE_RXENABLED) ? true : false);
+  z16f_txint_nolock(dev, (state & STATE_TXENABLED) ? true : false);
+  z16f_rxint_nolock(dev, (state & STATE_RXENABLED) ? true : false);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -507,10 +511,9 @@ static int z16f_receive(struct uart_dev_s *dev, uint32_t *status)
  *
  ****************************************************************************/
 
-static void z16f_rxint(struct uart_dev_s *dev, bool enable)
+static void z16f_rxint_nolock(struct uart_dev_s *dev, bool enable)
 {
-  struct z16f_uart_s *priv  = (struct z16f_uart_s *)dev->priv;
-  irqstate_t          flags = enter_critical_section();
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
 
   if (enable)
     {
@@ -524,7 +527,15 @@ static void z16f_rxint(struct uart_dev_s *dev, bool enable)
     }
 
   priv->rxenabled = enable;
-  leave_critical_section(flags);
+}
+
+static void z16f_rxint(struct uart_dev_s *dev, bool enable)
+{
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+
+  z16f_rxint_nolock(dev, enable);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -564,10 +575,9 @@ static void z16f_send(struct uart_dev_s *dev, int ch)
  *
  ****************************************************************************/
 
-static void z16f_txint(struct uart_dev_s *dev, bool enable)
+static void z16f_txint_nolock(struct uart_dev_s *dev, bool enable)
 {
-  struct z16f_uart_s *priv  = (struct z16f_uart_s *)dev->priv;
-  irqstate_t          flags = enter_critical_section();
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
 
   if (enable)
     {
@@ -587,7 +597,15 @@ static void z16f_txint(struct uart_dev_s *dev, bool enable)
     }
 
   priv->txenabled = enable;
-  leave_critical_section(flags);
+}
+
+static void z16f_txint(struct uart_dev_s *dev, bool enable)
+{
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+
+  z16f_txint_nolock(dev, enable);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************

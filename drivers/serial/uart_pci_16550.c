@@ -239,6 +239,7 @@ static struct pci_u16550_priv_s g_pci_u16550_priv0 =
     .flow      = true,
 #endif
     .rxtrigger = 2,
+    .lock      = SP_UNLOCKED
   },
 
   /* PCI specific data */
@@ -287,6 +288,7 @@ static struct pci_u16550_priv_s g_pci_u16550_priv1 =
     .flow      = true,
 #endif
     .rxtrigger = 2,
+    .lock      = SP_UNLOCKED
   },
 
   /* PCI specific data */
@@ -335,6 +337,7 @@ static struct pci_u16550_priv_s g_pci_u16550_priv2 =
     .flow      = true,
 #endif
     .rxtrigger = 2,
+    .lock      = SP_UNLOCKED
   },
 
   /* PCI specific data */
@@ -381,6 +384,7 @@ static struct pci_u16550_priv_s g_pci_u16550_priv3 =
     .flow      = true,
 #endif
     .rxtrigger = 2,
+    .lock      = SP_UNLOCKED
   },
 
   /* PCI specific data */
@@ -755,6 +759,7 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev)
 #ifdef CONFIG_16550_PCI_CONSOLE
 void up_putc(int ch)
 {
+  FAR struct u16550_s *priv = CONSOLE_DEV.priv;
   irqstate_t flags;
 
   /* Console not initialized yet */
@@ -768,9 +773,9 @@ void up_putc(int ch)
    * interrupts from firing in the serial driver code.
    */
 
-  flags = spin_lock_irqsave(NULL);
-  u16550_putc(CONSOLE_DEV.priv, ch);
-  spin_unlock_irqrestore(NULL, flags);
+  flags = spin_lock_irqsave(&priv->lock);
+  u16550_putc(priv, ch);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 #endif
 
