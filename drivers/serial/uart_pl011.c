@@ -248,6 +248,8 @@ static bool pl011_txempty(FAR struct uart_dev_s *dev);
  * Private Data
  ***************************************************************************/
 
+static spinlock_t g_uart_pl011_lock = SP_UNLOCKED;
+
 /* Serial driver UART operations */
 
 static const struct uart_ops_s g_uart_ops =
@@ -672,10 +674,10 @@ static void pl011_putc(struct uart_dev_s *dev, int ch)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_uart_pl011_lock);
   while (!pl011_txempty(dev));
   pl011_send(dev, ch);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_uart_pl011_lock, flags);
 }
 
 /***************************************************************************
@@ -737,7 +739,7 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
   FAR struct pl011_uart_port_s *sport = dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_uart_pl011_lock);
 
   if (enable)
     {
@@ -754,7 +756,7 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
       pl011_irq_tx_disable(sport);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_uart_pl011_lock, flags);
 }
 
 /***************************************************************************
