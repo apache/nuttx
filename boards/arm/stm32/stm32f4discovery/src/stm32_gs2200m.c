@@ -119,7 +119,7 @@ static void gs2200m_irq_enable(void)
     {
       /* Check if irq has been asserted */
 
-      dready = gs2200m_dready(&g_gs2200m_lock);
+      dready = gs2200m_dready(NULL);
 
       /* NOTE: stm32 does not support level-triggered irq */
 
