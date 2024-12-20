@@ -59,6 +59,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static spinlock_t g_esp32s2_idle_lock = SP_UNLOCKED;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -86,7 +94,7 @@ static void up_idlepm(void)
 
   if (newstate != oldstate)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_esp32s2_idle_lock);
 
       /* Perform board-specific, state-dependent logic here */
 
@@ -108,7 +116,7 @@ static void up_idlepm(void)
           oldstate = newstate;
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_esp32s2_idle_lock, flags);
 
       /* MCU-specific power management logic */
 

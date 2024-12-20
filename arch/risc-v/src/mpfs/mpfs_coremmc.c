@@ -214,6 +214,8 @@ static void mpfs_callback(void *arg);
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_mpfs_modifyreg_lock = SP_UNLOCKED;
+
 struct mpfs_dev_s g_coremmc_dev =
 {
   .dev =
@@ -282,12 +284,12 @@ static void mpfs_modifyreg8(uintptr_t addr, uint8_t clearbits,
   irqstate_t flags;
   uint8_t    regval;
 
-  flags   = spin_lock_irqsave(NULL);
+  flags   = spin_lock_irqsave(&g_mpfs_modifyreg_lock);
   regval  = getreg8(addr);
   regval &= ~clearbits;
   regval |= setbits;
   putreg8(regval, addr);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_mpfs_modifyreg_lock, flags);
 }
 
 /****************************************************************************
