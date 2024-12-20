@@ -126,6 +126,7 @@ typedef struct
   unsigned int ram_block: 16;
 } rangeblock_t;
 
+static spinlock_t g_descriptor_lock = SP_UNLOCKED;
 static ramblock_t *g_ram_descriptor = NULL;
 static rangeblock_t *g_range_descriptor = NULL;
 static int g_ramblockcnt = 0;
@@ -325,11 +326,11 @@ int esp_himem_alloc(size_t size, esp_himem_handle_t *handle_out)
       goto nomem;
     }
 
-  spinlock_flags = spin_lock_irqsave(NULL);
+  spinlock_flags = spin_lock_irqsave(&g_descriptor_lock);
 
   ok = allocate_blocks(blocks, r->block);
 
-  spin_unlock_irqrestore(NULL, spinlock_flags);
+  spin_unlock_irqrestore(&g_descriptor_lock, spinlock_flags);
   if (!ok)
     {
       goto nomem;
@@ -365,13 +366,13 @@ int esp_himem_free(esp_himem_handle_t handle)
 
   /* Mark blocks as free */
 
-  spinlock_flags = spin_lock_irqsave(NULL);
+  spinlock_flags = spin_lock_irqsave(&g_descriptor_lock);
   for (i = 0; i < handle->block_ct; i++)
     {
       g_ram_descriptor[handle->block[i]].is_alloced = false;
     }
 
-  spin_unlock_irqrestore(NULL, spinlock_flags);
+  spin_unlock_irqrestore(&g_descriptor_lock, spinlock_flags);
 
   /* Free handle */
 
@@ -407,7 +408,7 @@ int esp_himem_alloc_map_range(size_t size,
   r->block_start = -1;
 
   start_free = 0;
-  spinlock_flags = spin_lock_irqsave(NULL);
+  spinlock_flags = spin_lock_irqsave(&g_descriptor_lock);
 
   for (i = 0; i < g_rangeblockcnt; i++)
     {
@@ -431,10 +432,11 @@ int esp_himem_alloc_map_range(size_t size,
 
   if (r->block_start == -1)
     {
+      spin_unlock_irqrestore(&g_descriptor_lock, spinlock_flags);
+
       /* Couldn't find enough free blocks */
 
       kmm_free(r);
-      spin_unlock_irqrestore(NULL, spinlock_flags);
       return -ENOMEM;
     }
 
@@ -445,7 +447,7 @@ int esp_himem_alloc_map_range(size_t size,
       g_range_descriptor[r->block_start + i].is_alloced = 1;
     }
 
-  spin_unlock_irqrestore(NULL, spinlock_flags);
+  spin_unlock_irqrestore(&g_descriptor_lock, spinlock_flags);
 
   /* All done. */
 
@@ -474,14 +476,14 @@ int esp_himem_free_map_range(esp_himem_rangehandle_t handle)
 
   /* We should be good to free this. Mark blocks as free. */
 
-  spinlock_flags = spin_lock_irqsave(NULL);
+  spinlock_flags = spin_lock_irqsave(&g_descriptor_lock);
 
   for (i = 0; i < handle->block_ct; i++)
     {
       g_range_descriptor[i + handle->block_start].is_alloced = 0;
     }
 
-  spin_unlock_irqrestore(NULL, spinlock_flags);
+  spin_unlock_irqrestore(&g_descriptor_lock, spinlock_flags);
   kmm_free(handle);
   return OK;
 }
@@ -537,7 +539,7 @@ int esp_himem_map(esp_himem_handle_t handle,
 
   /* Map and mark as mapped */
 
-  spinlock_flags = spin_lock_irqsave(NULL);
+  spinlock_flags = spin_lock_irqsave(&g_descriptor_lock);
 
   for (i = 0; i < blockcount; i++)
     {
@@ -548,7 +550,7 @@ int esp_himem_map(esp_himem_handle_t handle,
                         handle->block[i + ram_block];
     }
 
-  spin_unlock_irqrestore(NULL, spinlock_flags);
+  spin_unlock_irqrestore(&g_descriptor_lock, spinlock_flags);
 
   for (i = 0; i < blockcount; i++)
     {
@@ -589,7 +591,7 @@ int esp_himem_unmap(esp_himem_rangehandle_t range, void *ptr,
   HIMEM_CHECK(range_block + blockcount > range->block_ct,
               "range out of bounds for handle", -EINVAL);
 
-  spinlock_flags = spin_lock_irqsave(NULL);
+  spinlock_flags = spin_lock_irqsave(&g_descriptor_lock);
 
   for (i = 0; i < blockcount; i++)
     {
@@ -602,7 +604,7 @@ int esp_himem_unmap(esp_himem_rangehandle_t range, void *ptr,
     }
 
   esp_spiram_writeback_cache();
-  spin_unlock_irqrestore(NULL, spinlock_flags);
+  spin_unlock_irqrestore(&g_descriptor_lock, spinlock_flags);
   return OK;
 }
 
