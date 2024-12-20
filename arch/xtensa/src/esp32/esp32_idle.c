@@ -90,6 +90,13 @@
 #define EARLY_WAKEUP_US       (200)
 
 #endif
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static spinlock_t g_esp32_idle_lock = SP_UNLOCKED;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -109,7 +116,7 @@ static void esp32_idlepm(void)
   irqstate_t flags;
 
 #ifdef CONFIG_ESP32_AUTO_SLEEP
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_esp32_idle_lock);
   if (esp32_pm_lockstatus() == 0)
     {
       uint64_t os_start_us;
@@ -155,7 +162,7 @@ static void esp32_idlepm(void)
         }
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_esp32_idle_lock, flags);
 #else /* CONFIG_ESP32_AUTO_SLEEP */
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
@@ -169,7 +176,7 @@ static void esp32_idlepm(void)
 
   if (newstate != oldstate)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_esp32_idle_lock);
 
       /* Perform board-specific, state-dependent logic here */
 
@@ -191,7 +198,7 @@ static void esp32_idlepm(void)
           oldstate = newstate;
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_esp32_idle_lock, flags);
 
       /* MCU-specific power management logic */
 
