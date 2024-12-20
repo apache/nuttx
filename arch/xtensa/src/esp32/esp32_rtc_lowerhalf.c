@@ -61,6 +61,7 @@ struct esp32_lowerhalf_s
    */
 
   const struct rtc_ops_s *ops;
+  spinlock_t lock;
 #ifdef CONFIG_RTC_ALARM
   /* Alarm callback information */
 
@@ -116,6 +117,7 @@ static const struct rtc_ops_s g_rtc_ops =
 static struct esp32_lowerhalf_s g_rtc_lowerhalf =
 {
   .ops = &g_rtc_ops,
+  .lock = SP_UNLOCKED
 };
 
 /****************************************************************************
@@ -376,6 +378,7 @@ static int rtc_lh_setalarm(struct rtc_lowerhalf_s *lower,
 static int rtc_lh_setrelative(struct rtc_lowerhalf_s *lower,
                             const struct lower_setrelative_s *alarminfo)
 {
+  struct esp32_lowerhalf_s *priv = (struct esp32_lowerhalf_s *)lower;
   struct lower_setalarm_s setalarm;
   time_t seconds;
   int ret = -EINVAL;
@@ -387,7 +390,7 @@ static int rtc_lh_setrelative(struct rtc_lowerhalf_s *lower,
 
   if (alarminfo->reltime > 0)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&priv->lock);
 
       seconds = alarminfo->reltime;
       gmtime_r(&seconds, (struct tm *)&setalarm.time);
@@ -399,7 +402,7 @@ static int rtc_lh_setrelative(struct rtc_lowerhalf_s *lower,
       setalarm.priv = alarminfo->priv;
       ret = rtc_lh_setalarm(lower, &setalarm);
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
     }
 
   return ret;
@@ -466,6 +469,7 @@ static int rtc_lh_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
 static int rtc_lh_rdalarm(struct rtc_lowerhalf_s *lower,
                           struct lower_rdalarm_s *alarminfo)
 {
+  struct esp32_lowerhalf_s *priv = (struct esp32_lowerhalf_s *)lower;
   struct timespec ts;
   int ret;
   irqstate_t flags;
@@ -474,13 +478,13 @@ static int rtc_lh_rdalarm(struct rtc_lowerhalf_s *lower,
   DEBUGASSERT((RTC_ALARM0 <= alarminfo->id) &&
               (alarminfo->id < RTC_ALARM_LAST));
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   ret = up_rtc_rdalarm(&ts, alarminfo->id);
   localtime_r((const time_t *)&ts.tv_sec,
               (struct tm *)alarminfo->time);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return ret;
 }
