@@ -274,6 +274,52 @@ static int can_in(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
+ * Name: can_input_confirm
+ *
+ * Description:
+ *   Handle transmission echo confirmation packet
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the confirmed packet
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the packet
+ *          yet.  Useful when a packet arrives before a recv call is in
+ *          place.
+ *
+ * Assumptions:
+ *   This function can be called from an interrupt.
+ *
+ ****************************************************************************/
+
+int can_input_confirm(FAR struct net_driver_s *dev)
+{
+  FAR uint8_t *buf;
+  int ret;
+
+  /* __res0 used as MSG_CONFIRM flag */
+
+  ((struct can_frame *)dev->d_buf)->__res0 = true;
+
+  if (dev->d_iob != NULL)
+    {
+      buf = dev->d_buf;
+
+      /* Set the device buffer to l2 */
+
+      dev->d_buf = NETLLBUF;
+      ret = can_in(dev);
+
+      dev->d_buf = buf;
+
+      return ret;
+    }
+
+  return netdev_input(dev, can_in, false);
+}
+
+/****************************************************************************
  * Name: can_input
  *
  * Description:
@@ -302,6 +348,10 @@ int can_input(FAR struct net_driver_s *dev)
   g_netstats.can.recv++;
 #endif
   netdev_lock(dev);
+
+  /* __res0 used as MSG_CONFIRM flag */
+
+  ((struct can_frame *)dev->d_buf)->__res0 = false;
 
   if (dev->d_iob != NULL)
     {

@@ -128,6 +128,28 @@ struct net_driver_s; /* Forward reference */
 int can_input(FAR struct net_driver_s *dev);
 
 /****************************************************************************
+ * Name: can_input_confirm
+ *
+ * Description:
+ *   Handle transmission echo confirmation packet
+ *
+ * Input Parameters:
+ *   dev - The device driver structure containing the confirmed packet
+ *
+ * Returned Value:
+ *   OK     The packet has been processed  and can be deleted
+ *  -EAGAIN There is a matching connection, but could not dispatch the packet
+ *          yet.  Useful when a packet arrives before a recv call is in
+ *          place.
+ *
+ * Assumptions:
+ *   This function can be called from an interrupt.
+ *
+ ****************************************************************************/
+
+int can_input_confirm(FAR struct net_driver_s *dev);
+
+/****************************************************************************
  * Name: can_iob_timedalloc
  *
  * Description:

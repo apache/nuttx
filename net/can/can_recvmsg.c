@@ -528,6 +528,25 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     }
 
 errout_with_state:
+
+  if (ret > 0)
+    {
+      /* Fill msg_flags with the corresponding bits */
+
+      /* MSG_CONFIRM is stored inside the CAN frame using __res0,
+       * add it to msg_flags if it is present
+       */
+
+      if (((struct can_frame *)state.pr_msg->msg_iov->iov_base)->__res0)
+        {
+          msg->msg_flags |= MSG_CONFIRM;
+        }
+      else
+        {
+          msg->msg_flags &= ~MSG_CONFIRM;
+        }
+    }
+
   conn_dev_unlock(&conn->sconn, dev);
   nxsem_destroy(&state.pr_sem);
   return ret;
