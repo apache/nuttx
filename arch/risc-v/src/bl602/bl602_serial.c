@@ -152,6 +152,8 @@ static bool bl602_txempty(struct uart_dev_s *dev);
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_bl602_serial_lock = SP_UNLOCKED;
+
 static const struct uart_ops_s g_uart_ops =
 {
   .setup       = bl602_setup,
@@ -891,10 +893,10 @@ void riscv_serialinit(void)
 void up_putc(int ch)
 {
 #ifdef HAVE_SERIAL_CONSOLE
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&g_bl602_serial_lock);
 
   riscv_lowputc(ch);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_bl602_serial_lock, flags);
 #endif
 }
 
