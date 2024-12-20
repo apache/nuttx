@@ -53,6 +53,14 @@
 #define OR1K_DIVISOR (OR1K_SYS_CLK / (16*OR1K_BAUD))
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef HAVE_SERIAL_CONSOLE
+static spinlock_t g_serial_lock = SP_UNLOCKED;
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -117,10 +125,10 @@ void up_putc(int ch)
    * interrupts from firing in the serial driver code.
    */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_serial_lock);
 
   /* or1k_lowputc(ch); */
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_serial_lock, flags);
 #endif
 }
