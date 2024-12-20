@@ -228,6 +228,7 @@ struct pl011_uart_port_s
   struct pl011_data data;
   struct pl011_config config;
   unsigned int irq_num;
+  spinlock_t lock;
 };
 
 static int pl011_setup(FAR struct uart_dev_s *dev);
@@ -307,6 +308,7 @@ static struct pl011_uart_port_s g_uart0priv =
     },
 
     .irq_num    = CONFIG_UART0_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -350,6 +352,7 @@ static struct pl011_uart_port_s g_uart1priv =
     },
 
     .irq_num    = CONFIG_UART1_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -393,6 +396,7 @@ static struct pl011_uart_port_s g_uart2priv =
     },
 
     .irq_num    = CONFIG_UART2_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -436,6 +440,7 @@ static struct pl011_uart_port_s g_uart3priv =
     },
 
     .irq_num    = CONFIG_UART3_IRQ,
+    .lock       = SP_UNLOCKED,
 };
 
 /* I/O buffers */
@@ -670,12 +675,13 @@ static void pl011_send(FAR struct uart_dev_s *dev, int ch)
 
 static void pl011_putc(struct uart_dev_s *dev, int ch)
 {
+  FAR struct pl011_uart_port_s *sport = dev->priv;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&sport->lock);
   while (!pl011_txempty(dev));
   pl011_send(dev, ch);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&sport->lock, flags);
 }
 
 /***************************************************************************
@@ -737,7 +743,7 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
   FAR struct pl011_uart_port_s *sport = dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&sport->lock);
 
   if (enable)
     {
@@ -754,7 +760,7 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
       pl011_irq_tx_disable(sport);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&sport->lock, flags);
 }
 
 /***************************************************************************
