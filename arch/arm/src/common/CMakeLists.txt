@@ -33,9 +33,7 @@ set(SRCS
     arm_getintstack.c
     arm_initialize.c
     arm_lowputs.c
-    arm_modifyreg8.c
-    arm_modifyreg16.c
-    arm_modifyreg32.c
+    arm_modifyreg.c
     arm_nputs.c
     arm_releasestack.c
     arm_registerdump.c
