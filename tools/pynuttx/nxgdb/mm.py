@@ -479,6 +479,7 @@ class MMNode(gdb.Value, p.MMFreeNode):
     @property
     def nextnode(self) -> MMNode:
         if not self.nodesize:
+            gdb.write(f"\n\x1b[31;1m Node corrupted: {self} \x1b[m\n")
             return None
 
         addr = int(self.address) + self.nodesize
