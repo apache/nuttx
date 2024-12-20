@@ -79,6 +79,7 @@ struct esp32c3_uart_s g_uart0_config =
   .txsig = U0TXD_OUT_IDX,
   .rxpin = CONFIG_ESP32C3_UART0_RXPIN,
   .rxsig = U0RXD_IN_IDX,
+  .lock = SP_UNLOCKED,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rtspin = CONFIG_ESP32C3_UART0_RTSPIN,
   .rtssig = U0RTS_OUT_IDX,
@@ -118,6 +119,7 @@ struct esp32c3_uart_s g_uart1_config =
   .txsig = U1TXD_OUT_IDX,
   .rxpin = CONFIG_ESP32C3_UART1_RXPIN,
   .rxsig = U1RXD_IN_IDX,
+  .lock = SP_UNLOCKED,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rtspin = CONFIG_ESP32C3_UART1_RTSPIN,
   .rtssig = U1RTS_OUT_IDX,
@@ -708,12 +710,12 @@ void esp32c3_lowputc_enable_sysclk(const struct esp32c3_uart_s *priv)
  *
  ****************************************************************************/
 
-void esp32c3_lowputc_disable_all_uart_int(const struct esp32c3_uart_s *priv,
+void esp32c3_lowputc_disable_all_uart_int(struct esp32c3_uart_s *priv,
                                           uint32_t *current_status)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (current_status != NULL)
     {
@@ -730,7 +732,7 @@ void esp32c3_lowputc_disable_all_uart_int(const struct esp32c3_uart_s *priv,
 
   putreg32(0xffffffff, UART_INT_CLR_REG(priv->id));
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
