@@ -196,6 +196,7 @@ struct imx_uart_s
   uint32_t ucr1;        /* Saved UCR1 value */
   uint8_t  irq;         /* IRQ associated with this UART */
   uint8_t  parity;      /* 0=none, 1=odd, 2=even */
+  spinlock_t lock;      /* Spinlock */
   uint8_t  bits;        /* Number of bits (7 or 8) */
   uint8_t  stopbits2:1; /* 1: Configure with 2 stop bits vs 1 */
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
@@ -295,6 +296,7 @@ static struct imx_uart_s g_uart1priv =
   .baud           = CONFIG_UART1_BAUD,
   .irq            = IMX_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
+  .lock           = SP_UNLOCKED
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
 };
@@ -325,6 +327,7 @@ static struct imx_uart_s g_uart2priv =
   .baud           = CONFIG_UART2_BAUD,
   .irq            = IMX_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
+  .lock           = SP_UNLOCKED
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
 };
@@ -353,6 +356,7 @@ static struct imx_uart_s g_uart3priv =
   .baud           = IMX_UART3_VBASE,
   .irq            = IMX_IRQ_UART3,
   .parity         = CONFIG_UART3_PARITY,
+  .lock           = SP_UNLOCKED
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
 };
@@ -381,6 +385,7 @@ static struct imx_uart_s g_uart4priv =
   .baud           = IMX_UART4_VBASE,
   .irq            = IMX_IRQ_UART4,
   .parity         = CONFIG_UART4_PARITY,
+  .lock           = SP_UNLOCKED
   .bits           = CONFIG_UART4_BITS,
   .stopbits2      = CONFIG_UART4_2STOP,
 };
@@ -409,6 +414,7 @@ static struct imx_uart_s g_uart5priv =
   .baud           = IMX_UART5_VBASE,
   .irq            = IMX_IRQ_UART5,
   .parity         = CONFIG_UART5_PARITY,
+  .lock           = SP_UNLOCKED
   .bits           = CONFIG_UART5_BITS,
   .stopbits2      = CONFIG_UART5_2STOP,
 };
@@ -877,7 +883,7 @@ static int imx_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
-            flags  = spin_lock_irqsave(NULL);
+            flags  = spin_lock_irqsave(&priv->lock);
             imx_disableuartint(priv, &ie);
             ret = imx_setup(dev);
 
@@ -885,7 +891,7 @@ static int imx_ioctl(struct file *filep, int cmd, unsigned long arg)
 
             imx_restoreuartint(priv, ie);
             priv->ie = ie;
-            spin_unlock_irqrestore(NULL, flags);
+            spin_unlock_irqrestore(&priv->lock, flags);
           }
       }
       break;
