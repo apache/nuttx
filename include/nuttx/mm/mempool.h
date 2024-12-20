@@ -122,7 +122,9 @@ struct mempool_backtrace_s
                        * if there is any out of bounds.
                        */
   pid_t pid;
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
   unsigned long seqno; /* The sequence of memory malloc */
+#  endif
 #  if CONFIG_MM_BACKTRACE > 0
   FAR void *backtrace[CONFIG_MM_BACKTRACE];
 #  endif

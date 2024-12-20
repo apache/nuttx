@@ -218,8 +218,16 @@ static void memdump_allocnode(FAR void *ptr, size_t size)
   FAR struct memdump_backtrace_s *buf =
     ptr + size - sizeof(struct memdump_backtrace_s);
 
-  syslog(LOG_INFO, "%6d%12zu%12lu%*p\n",
-         buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH, ptr);
+  syslog(LOG_INFO, "%6d%12zu"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         "%12lu"
+#  endif
+         "%*p\n",
+         buf->pid, size,
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         buf->seqno,
+#  endif
+         BACKTRACE_PTR_FMT_WIDTH, ptr);
 #else
   char tmp[BACKTRACE_BUFFER_SIZE(CONFIG_MM_BACKTRACE)];
   FAR struct memdump_backtrace_s *buf =
@@ -228,8 +236,16 @@ static void memdump_allocnode(FAR void *ptr, size_t size)
   backtrace_format(tmp, sizeof(tmp), buf->backtrace,
                    CONFIG_MM_BACKTRACE);
 
-  syslog(LOG_INFO, "%6d%12zu%12lu%*p %s\n",
-         buf->pid, size, buf->seqno, BACKTRACE_PTR_FMT_WIDTH,
+  syslog(LOG_INFO, "%6d%12zu"
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         "%12lu"
+#  endif
+         "%*p %s\n",
+         buf->pid, size,
+#  ifdef CONFIG_MM_BACKTRACE_SEQNO
+         buf->seqno,
+#  endif
+         BACKTRACE_PTR_FMT_WIDTH,
          ptr, tmp);
 #endif
 }
@@ -299,7 +315,7 @@ static void memdump_backtrace(FAR struct mm_heap_s *heap,
 #  endif
 
   buf->pid = _SCHED_GETTID();
-  buf->seqno = g_mm_seqno++;
+  MM_INCSEQNO(buf);
 #  if CONFIG_MM_BACKTRACE > 0
   tcb = nxsched_get_tcb(buf->pid);
   if (heap->mm_procfs.backtrace ||
