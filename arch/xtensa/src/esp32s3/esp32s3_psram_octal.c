@@ -52,6 +52,7 @@
 #define OCT_PSRAM_WR_CMD_BITLEN         16
 #define OCT_PSRAM_ADDR_BITLEN           32
 #define OCT_PSRAM_RD_DUMMY_BITLEN       (2 * (10 - 1))
+#define OCT_PSRAM_RD_REG_DUMMY_BITLEN   (2 * (5 - 1))
 #define OCT_PSRAM_WR_DUMMY_BITLEN       (2 * (5 - 1))
 
 #define OCT_PSRAM_CS_SETUP_TIME         3
@@ -189,7 +190,7 @@ static void IRAM_ATTR set_psram_reg(int spi_num,
   int cmd_len = 16;
   uint32_t addr = 0x0;
   int addr_bit_len = 32;
-  int dummy = OCT_PSRAM_RD_DUMMY_BITLEN;
+  int dummy = OCT_PSRAM_RD_REG_DUMMY_BITLEN;
   int data_bit_len = 16;
   struct opi_psram_reg psram_reg =
     {
@@ -277,7 +278,7 @@ static void IRAM_ATTR get_psram_reg(int spi_num,
   esp_rom_spiflash_read_mode_t mode = ESP_ROM_SPIFLASH_OPI_DTR_MODE;
   int cmd_len = 16;
   int addr_bit_len = 32;
-  int dummy = OCT_PSRAM_RD_DUMMY_BITLEN;
+  int dummy = OCT_PSRAM_RD_REG_DUMMY_BITLEN;
   int data_bit_len = 16;
 
   /* Read MR0~1 register */
