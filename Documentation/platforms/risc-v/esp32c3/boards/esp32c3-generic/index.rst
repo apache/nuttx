@@ -208,6 +208,18 @@ You can scan for all I2C devices using the following command::
 
     nsh> i2c dev 0x00 0x7f
 
+nimble
+------
+
+This configuration can be used to test ble using the nimble library. The
+``nimble`` example starts advertising and can be connected to or disconnected
+from. Before starting the ``nimble`` example make sure the bnep0 interface is
+up by issuing::
+
+    nsh> ifup bnep0
+    ifup bnep0...OK
+    nsh> nimble &
+
 nsh
 ---
 
