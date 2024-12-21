@@ -121,6 +121,10 @@ static int pci_u16550_probe(FAR struct pci_device_s *dev);
  * Private Data
  *****************************************************************************/
 
+#ifdef CONFIG_16550_PCI_CONSOLE
+static spinlock_t g_uart_pci_lock = SP_UNLOCKED;
+#endif
+
 static const struct pci_u16550_type_s g_pci_u16550_qemu_x1 =
 {
   .ports    = 1,
@@ -768,9 +772,9 @@ void up_putc(int ch)
    * interrupts from firing in the serial driver code.
    */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_uart_pci_lock);
   u16550_putc(CONSOLE_DEV.priv, ch);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_uart_pci_lock, flags);
 }
 #endif
 

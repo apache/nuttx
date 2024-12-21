@@ -67,6 +67,8 @@ static void gs2200m_reset(bool);
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_gs2200m_lock = SP_UNLOCKED;
+
 static const struct gs2200m_lower_s g_wifi_lower =
 {
   .attach  = gs2200m_irq_attach,
@@ -106,17 +108,18 @@ static int gs2200m_irq_attach(xcpt_t handler, void *arg)
 
 static void gs2200m_irq_enable(void)
 {
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags;
   uint32_t dready = 0;
 
   wlinfo("== ec:%" PRId32 " called=%" PRId32 "\n",
          _enable_count, _n_called++);
 
+  flags = spin_lock_irqsave(&g_gs2200m_lock);
   if (0 == _enable_count)
     {
       /* Check if irq has been asserted */
 
-      dready = gs2200m_dready(NULL);
+      dready = gs2200m_dready(&g_gs2200m_lock);
 
       /* NOTE: stm32 does not support level-triggered irq */
 
@@ -126,7 +129,7 @@ static void gs2200m_irq_enable(void)
 
   _enable_count++;
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_gs2200m_lock, flags);
 
   if (dready)
     {
@@ -143,11 +146,12 @@ static void gs2200m_irq_enable(void)
 
 static void gs2200m_irq_disable(void)
 {
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags;
 
   wlinfo("== ec:%" PRId32 " called=%" PRId32 "\n",
          _enable_count, _n_called++);
 
+  flags = spin_lock_irqsave(&g_gs2200m_lock);
   _enable_count--;
 
   if (0 == _enable_count)
@@ -156,7 +160,7 @@ static void gs2200m_irq_disable(void)
                          false, NULL, NULL);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_gs2200m_lock, flags);
 }
 
 /****************************************************************************
@@ -165,7 +169,7 @@ static void gs2200m_irq_disable(void)
 
 static uint32_t gs2200m_dready(int *ec)
 {
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&g_gs2200m_lock);
 
   uint32_t r = stm32_gpioread(GPIO_GS2200M_INT);
 
@@ -176,7 +180,7 @@ static uint32_t gs2200m_dready(int *ec)
       *ec = _enable_count;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_gs2200m_lock, flags);
   return r;
 }
 
