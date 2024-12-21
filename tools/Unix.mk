@@ -162,6 +162,7 @@ all: $(BIN)
 .PHONY: context clean_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 .PHONY: pass1 pass1dep
 .PHONY: pass2 pass2dep
+.PHONY: checkpython3 debug_info
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -617,6 +618,40 @@ bootloader:
 
 clean_bootloader:
 	$(Q) $(MAKE) -C $(ARCH_SRC) clean_bootloader
+
+# checkpython3: Checks python is in PATH
+
+checkpython3:
+	@if [ -z "$$(which python3)" ]; then \
+		echo "ERROR: python3 not found in PATH"; \
+		echo "       Please install python3 or fix the PATH"; \
+		exit 1; \
+	fi
+
+SYSINFO_PARSE_FLAGS = "$(realpath $(TOPDIR))"
+SYSINFO_PARSE_FLAGS += "-f$(CONFIG_APPS_DIR)/system/nxdiag/sysinfo.h"
+
+SYSINFO_FLAGS = "-c"
+SYSINFO_FLAGS += "-p"
+SYSINFO_FLAGS += -f \""$(shell echo '$(CFLAGS)' | sed 's/"/\\\\\\"/g')"\"
+SYSINFO_FLAGS += \""$(shell echo '$(CXXFLAGS)' | sed 's/"/\\\\\\"/g')"\"
+SYSINFO_FLAGS += \""$(shell echo '$(LDFLAGS)' | sed 's/"/\\\\\\"/g')"\"
+
+ifneq ($(findstring esp,$(CONFIG_ARCH_CHIP)),)
+ARCH_ESP_HALDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip$(DELIM)esp-hal-3rdparty
+SYSINFO_FLAGS += --espressif "$(TOPDIR)" "$(ARCH_ESP_HALDIR)"
+SYSINFO_FLAGS += "--espressif_chip"
+endif
+
+# debug_info: Parse nxdiag example output file (sysinfo.h) and print
+
+debug_info: checkpython3
+	@if [[ ! -f "$(CONFIG_APPS_DIR)/system/nxdiag/sysinfo.h" ]]; then \
+		echo "file $(CONFIG_APPS_DIR)/system/nxdiag/sysinfo.h not exists"; \
+		python3 $(CONFIG_APPS_DIR)/tools/host_sysinfo.py $(SYSINFO_FLAGS) \
+		 $(realpath $(TOPDIR)) > $(CONFIG_APPS_DIR)/system/nxdiag/sysinfo.h; \
+	fi
+	@python3 $(CONFIG_APPS_DIR)/tools/parse_sysinfo.py $(SYSINFO_PARSE_FLAGS)
 
 # pass1dep: Create pass1 build dependencies
 # pass2dep: Create pass2 build dependencies
