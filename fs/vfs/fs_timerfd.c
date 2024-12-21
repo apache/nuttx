@@ -259,6 +259,8 @@ static int timerfd_blocking_io(FAR struct timerfd_priv_s *dev,
                   cur_sem->next = sem->next;
                   break;
                 }
+
+              cur_sem = cur_sem->next;
             }
         }
     }
