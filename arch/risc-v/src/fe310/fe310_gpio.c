@@ -39,6 +39,12 @@
 #include "fe310_memorymap.h"
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_fe310_gpio_lock = SP_UNLOCKED;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -147,7 +153,7 @@ int fe310_gpio_config(uint16_t gpiocfg)
 
   uint32_t pin  = fe310_gpio_getpin(gpiocfg);
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_fe310_gpio_lock);
 
   /* Disable IOF for the pin to be used as GPIO */
 
@@ -182,7 +188,7 @@ int fe310_gpio_config(uint16_t gpiocfg)
         break;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_fe310_gpio_lock, flags);
 
   return ret;
 }

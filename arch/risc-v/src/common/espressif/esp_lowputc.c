@@ -102,7 +102,8 @@ struct esp_uart_s g_uart0_config =
   .oflow  = false,   /* output flow control (CTS) disabled */
 #endif
 #endif
-  .hal = &g_uart0_hal
+  .hal = &g_uart0_hal,
+  .lock = SP_UNLOCKED
 };
 
 #endif /* CONFIG_ESPRESSIF_UART0 */
@@ -147,7 +148,8 @@ struct esp_uart_s g_uart1_config =
   .oflow  = false,   /* output flow control (CTS) disabled */
 #endif
 #endif
-  .hal = &g_uart1_hal
+  .hal = &g_uart1_hal,
+  .lock = SP_UNLOCKED
 };
 
 #endif /* CONFIG_ESPRESSIF_UART1 */
@@ -210,7 +212,7 @@ void esp_lowputc_disable_all_uart_int(const struct esp_uart_s *priv,
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (current_status != NULL)
     {
@@ -227,7 +229,7 @@ void esp_lowputc_disable_all_uart_int(const struct esp_uart_s *priv,
 
   uart_hal_clr_intsts_mask(priv->hal, UINT32_MAX);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************

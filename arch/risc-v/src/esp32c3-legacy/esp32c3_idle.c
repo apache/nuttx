@@ -77,6 +77,14 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_PM
+static spinlock_t g_esp32c3_idle_lock = SP_UNLOCKED;
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -94,7 +102,7 @@ static void up_idlepm(void)
   irqstate_t flags;
 
 #ifdef CONFIG_ESP32C3_AUTO_SLEEP
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_esp32c3_idle_lock);
   if (esp32c3_pm_lockstatus() == 0 &&
      (esp32c3_should_skip_light_sleep() == false))
     {
@@ -138,7 +146,7 @@ static void up_idlepm(void)
         }
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_esp32c3_idle_lock, flags);
 #else /* CONFIG_ESP32C3_AUTO_SLEEP */
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
@@ -152,7 +160,7 @@ static void up_idlepm(void)
 
   if (newstate != oldstate)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_esp32c3_idle_lock);
 
       /* Perform board-specific, state-dependent logic here */
 
@@ -174,7 +182,7 @@ static void up_idlepm(void)
           oldstate = newstate;
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_esp32c3_idle_lock, flags);
 
       /* MCU-specific power management logic */
 
