@@ -1758,4 +1758,48 @@ config SENSOR_AMG88XX_ADDR
 
 endif # SENSORS_AMG88XX
 
+config SENSORS_FS3000
+	bool "FS3000 Air Flow Speed Sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the FS3000 Renesas Air Speed sensor.
+
+if SENSORS_FS3000
+
+choice
+	prompt "FS3000 Type:"
+	default SENSOR_FS3000_1005
+	---help---
+		FS3000-1005: 0 to 7m/sec air speed module
+		FS3000-1015: 0 to 15m/sec air speed module
+
+config SENSOR_FS3000_1005
+	bool "FS3000-1005"
+
+config SENSOR_FS3000_1015
+	bool "FS3000-1015"
+
+endchoice
+
+config SENSORS_FS3000_I2C_FREQUENCY
+	int "FS3000 I2C frequency"
+	default 400000
+	range 1 400000
+
+config SENSORS_FS3000_POLL_INTERVAL
+	int "Polling interval in microseconds, default 1 sec"
+	default 1000000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_FS3000_THREAD_STACKSIZE
+	int "Worker thread stack size"
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_FS3000
+
 endif # SENSORS
