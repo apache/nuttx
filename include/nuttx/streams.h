@@ -303,6 +303,14 @@ struct lib_blkoutstream_s
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
 struct lib_mtdoutstream_s
 {
+  struct lib_outstream_s common;
+  FAR struct inode      *inode;
+  struct mtd_geometry_s  geo;
+  FAR unsigned char     *cache;
+};
+
+struct lib_mtdsostream_s
+{
   struct lib_sostream_s  common;
   FAR struct inode      *inode;
   struct mtd_geometry_s  geo;
@@ -684,6 +692,46 @@ int lib_mtdoutstream_open(FAR struct lib_mtdoutstream_s *stream,
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
 void lib_mtdoutstream_close(FAR struct lib_mtdoutstream_s *stream);
+#endif
+
+/****************************************************************************
+ * Name: lib_mtdsostream_open
+ *
+ * Description:
+ *  mtd driver seekable outstream backend
+ *
+ * Input Parameters:
+ *   stream   - User allocated, uninitialized instance of struct
+ *                lib_mtdsostream_s to be initialized.
+ *   name     - The full path of mtd device.
+ *
+ * Returned Value:
+ *   Returns zero on success or a negated errno on failure
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+int lib_mtdsostream_open(FAR struct lib_mtdsostream_s *stream,
+                         FAR const char *name);
+#endif
+
+/****************************************************************************
+ * Name: lib_mtdsostream_close
+ *
+ * Description:
+ *  close mtd driver seekable outstream backend
+ *
+ * Input Parameters:
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_mtdsostream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_MTD)
+void lib_mtdsostream_close(FAR struct lib_mtdsostream_s *stream);
 #endif
 
 /****************************************************************************
