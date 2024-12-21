@@ -46,18 +46,22 @@
 #ifdef CONFIG_NET_CAN
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_CAN_MAX_CONNS
+#  define CONFIG_CAN_MAX_CONNS 0
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* The array containing all NetLink connections. */
 
-#if CONFIG_CAN_PREALLOC_CONNS > 0
-static struct can_conn_s g_can_connections[CONFIG_CAN_PREALLOC_CONNS];
-#endif
-
-/* A list of all free NetLink connections */
-
-static dq_queue_t g_free_can_connections;
+NET_BUFPOOL_DECLARE(g_can_connections, sizeof(struct can_conn_s),
+                    CONFIG_CAN_PREALLOC_CONNS, CONFIG_CAN_ALLOC_CONNS,
+                    CONFIG_CAN_MAX_CONNS);
 static mutex_t g_free_lock = NXMUTEX_INITIALIZER;
 
 /* A list of all allocated NetLink connections */
@@ -79,16 +83,7 @@ static dq_queue_t g_active_can_connections;
 
 void can_initialize(void)
 {
-#if CONFIG_CAN_PREALLOC_CONNS > 0
-  int i;
-
-  for (i = 0; i < CONFIG_CAN_PREALLOC_CONNS; i++)
-    {
-      /* Mark the connection closed and move it to the free list */
-
-      dq_addlast(&g_can_connections[i].sconn.node, &g_free_can_connections);
-    }
-#endif
+  NET_BUFPOOL_INIT(g_can_connections);
 }
 
 /****************************************************************************
@@ -103,37 +98,12 @@ void can_initialize(void)
 FAR struct can_conn_s *can_alloc(void)
 {
   FAR struct can_conn_s *conn;
-#if CONFIG_CAN_ALLOC_CONNS > 0
-  int i;
-#endif
 
   /* The free list is protected by a a mutex. */
 
   nxmutex_lock(&g_free_lock);
-#if CONFIG_CAN_ALLOC_CONNS > 0
-  if (dq_peek(&g_free_can_connections) == NULL)
-    {
-#if CONFIG_CAN_MAX_CONNS > 0
-      if (dq_count(&g_active_can_connections) +
-          CONFIG_CAN_ALLOC_CONNS > CONFIG_CAN_MAX_CONNS)
-        {
-          nxmutex_unlock(&g_free_lock);
-          return NULL;
-        }
-#endif
 
-      conn = kmm_zalloc(sizeof(*conn) * CONFIG_CAN_ALLOC_CONNS);
-      if (conn != NULL)
-        {
-          for (i = 0; i < CONFIG_CAN_ALLOC_CONNS; i++)
-            {
-              dq_addlast(&conn[i].sconn.node, &g_free_can_connections);
-            }
-        }
-    }
-#endif
-
-  conn = (FAR struct can_conn_s *)dq_remfirst(&g_free_can_connections);
+  conn = NET_BUFPOOL_TRYALLOC(g_can_connections);
   if (conn != NULL)
     {
       /* FIXME SocketCAN default behavior enables loopback */
@@ -184,22 +154,9 @@ void can_free(FAR struct can_conn_s *conn)
 
   dq_rem(&conn->sconn.node, &g_active_can_connections);
 
-  /* If this is a preallocated or a batch allocated connection store it in
-   * the free connections list. Else free it.
-   */
+  /* Free the connection. */
 
-#if CONFIG_CAN_ALLOC_CONNS == 1
-  if (conn < g_can_connections || conn >= (g_can_connections +
-      CONFIG_CAN_PREALLOC_CONNS))
-    {
-      kmm_free(conn);
-    }
-  else
-#endif
-    {
-      memset(conn, 0, sizeof(*conn));
-      dq_addlast(&conn->sconn.node, &g_free_can_connections);
-    }
+  NET_BUFPOOL_FREE(g_can_connections, conn);
 
   nxmutex_unlock(&g_free_lock);
 }

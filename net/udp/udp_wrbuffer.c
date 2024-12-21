@@ -48,33 +48,14 @@
 #include "udp/udp.h"
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* Package all globals used by this logic into a structure */
-
-struct wrbuffer_s
-{
-  /* The semaphore to protect the buffers */
-
-  sem_t sem;
-
-  /* This is the list of available write buffers */
-
-  sq_queue_t freebuffers;
-
-  /* These are the pre-allocated write buffers */
-
-  struct udp_wrbuffer_s buffers[CONFIG_NET_UDP_NWRBCHAINS];
-};
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* This is the state of the global write buffer resource */
 
-static struct wrbuffer_s g_wrbuffer;
+NET_BUFPOOL_DECLARE(g_wrbuffer, sizeof(struct udp_wrbuffer_s),
+                    CONFIG_NET_UDP_NWRBCHAINS,
+                    CONFIG_NET_UDP_ALLOC_WRBCHAINS, 0);
 
 /****************************************************************************
  * Public Functions
@@ -93,16 +74,7 @@ static struct wrbuffer_s g_wrbuffer;
 
 void udp_wrbuffer_initialize(void)
 {
-  int i;
-
-  sq_init(&g_wrbuffer.freebuffers);
-
-  nxsem_init(&g_wrbuffer.sem, 0, CONFIG_NET_UDP_NWRBCHAINS);
-
-  for (i = 0; i < CONFIG_NET_UDP_NWRBCHAINS; i++)
-    {
-      sq_addfirst(&g_wrbuffer.buffers[i].wb_node, &g_wrbuffer.freebuffers);
-    }
+  NET_BUFPOOL_INIT(g_wrbuffer);
 }
 
 /****************************************************************************
@@ -133,15 +105,8 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
    * buffer
    */
 
-  net_sem_wait_uninterruptible(&g_wrbuffer.sem);
-
-  /* Now, we are guaranteed to have a write buffer structure reserved
-   * for us in the free list.
-   */
-
-  wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&g_wrbuffer.freebuffers);
+  wrb = NET_BUFPOOL_ALLOC(g_wrbuffer);
   DEBUGASSERT(wrb);
-  memset(wrb, 0, sizeof(struct udp_wrbuffer_s));
 
   /* Now get the first I/O buffer for the write buffer structure */
 
@@ -177,7 +142,6 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void)
 FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
 {
   FAR struct udp_wrbuffer_s *wrb;
-  int ret;
 
   /* We need to allocate two things:  (1) A write buffer structure and (2)
    * at least one I/O buffer to start the chain.
@@ -187,19 +151,11 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_timedalloc(unsigned int timeout)
    * buffer
    */
 
-  ret = net_sem_timedwait_uninterruptible(&g_wrbuffer.sem, timeout);
-  if (ret != OK)
+  wrb = NET_BUFPOOL_TIMEDALLOC(g_wrbuffer, timeout);
+  if (wrb == NULL)
     {
       return NULL;
     }
-
-  /* Now, we are guaranteed to have a write buffer structure reserved
-   * for us in the free list.
-   */
-
-  wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&g_wrbuffer.freebuffers);
-  DEBUGASSERT(wrb);
-  memset(wrb, 0, sizeof(struct udp_wrbuffer_s));
 
   /* Now get the first I/O buffer for the write buffer structure */
 
@@ -253,18 +209,11 @@ FAR struct udp_wrbuffer_s *udp_wrbuffer_tryalloc(void)
    * buffer
    */
 
-  if (nxsem_trywait(&g_wrbuffer.sem) != OK)
+  wrb = NET_BUFPOOL_TRYALLOC(g_wrbuffer);
+  if (wrb == NULL)
     {
       return NULL;
     }
-
-  /* Now, we are guaranteed to have a write buffer structure reserved
-   * for us in the free list.
-   */
-
-  wrb = (FAR struct udp_wrbuffer_s *)sq_remfirst(&g_wrbuffer.freebuffers);
-  DEBUGASSERT(wrb);
-  memset(wrb, 0, sizeof(struct udp_wrbuffer_s));
 
   /* Now get the first I/O buffer for the write buffer structure */
 
@@ -312,8 +261,7 @@ void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb)
 
   /* Then free the write buffer structure */
 
-  sq_addlast(&wrb->wb_node, &g_wrbuffer.freebuffers);
-  nxsem_post(&g_wrbuffer.sem);
+  NET_BUFPOOL_FREE(g_wrbuffer, wrb);
 }
 
 /****************************************************************************
@@ -363,9 +311,7 @@ uint32_t udp_wrbuffer_inqueue_size(FAR struct udp_conn_s *conn)
 
 int udp_wrbuffer_test(void)
 {
-  int val = 0;
-  nxsem_get_value(&g_wrbuffer.sem, &val);
-  return val > 0 ? OK : -ENOSPC;
+  return NET_BUFPOOL_TEST(g_wrbuffer);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP && CONFIG_NET_UDP_WRITE_BUFFERS */

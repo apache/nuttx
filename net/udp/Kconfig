@@ -103,6 +103,20 @@ config NET_UDP_NWRBCHAINS
 		choice for this value would be the same as the maximum number of
 		UDP connections.
 
+config NET_UDP_ALLOC_WRBCHAINS
+	int "Dynamic I/O buffer chain heads allocation"
+	default 0
+	---help---
+		When set to 0 all dynamic allocations are disabled.
+
+		When set to 1 a new I/O buffer chain head will be allocated every
+		time, and it will be free'd when no longer needed.
+
+		Setting this to 2 or more will allocate the I/O buffer chain heads
+		in batches (with batch size equal to this config). When a I/O buffer
+		chain head is no longer needed, it will be returned to the free
+		I/O buffer chain heads pool, and it will never be deallocated!
+
 config NET_UDP_WRBUFFER_DEBUG
 	bool "Force write buffer debug"
 	default n
