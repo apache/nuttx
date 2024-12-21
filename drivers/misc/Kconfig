@@ -13,7 +13,7 @@ config DEV_NULL
 
 config DEV_ZERO
 	bool "Enable /dev/zero"
-	default n
+	default !DEFAULT_SMALL
 
 config DEV_MEM
 	bool "Enable /dev/mem"
