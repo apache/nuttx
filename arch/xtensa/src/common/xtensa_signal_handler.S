@@ -79,9 +79,7 @@ up_signal_handler:
   /* Execute the SYS_signal_handler_return syscall (will not return) */
 
   movi   a2, SYS_signal_handler_return
-  movi   a3, XCHAL_SWINT_CALL
-  wsr    a3, INTSET
-  rsync
+  syscall
 
   .size up_signal_handler, .-up_signal_handler
 

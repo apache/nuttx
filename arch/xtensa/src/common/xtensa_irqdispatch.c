@@ -69,7 +69,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
    * is invalid, and we can safely overwrite it.
    */
 
-  if (!(XTENSA_IRQ_SWINT == irq && regs[REG_A2] == SYS_restore_context))
+  if (!(XTENSA_IRQ_SYSCALL == irq && regs[REG_A2] == SYS_restore_context))
     {
       (*running_task)->xcp.regs = regs;
     }
