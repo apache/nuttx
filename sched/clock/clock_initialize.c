@@ -38,6 +38,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/clock_notifier.h>
 #include <nuttx/trace.h>
 
 #include <nuttx/spinlock.h>
@@ -182,6 +183,7 @@ static void clock_inittime(FAR const struct timespec *tp)
     }
 
   spin_unlock_irqrestore(&g_basetime_lock, flags);
+  clock_notifier_call_chain(CLOCK_REALTIME, &g_basetime);
 #else
   clock_inittimekeeping(tp);
 #endif
