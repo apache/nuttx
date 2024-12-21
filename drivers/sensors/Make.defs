@@ -291,6 +291,10 @@ ifeq ($(CONFIG_SENSORS_LTR308),y)
   CSRCS += ltr308_uorb.c
 endif
 
+ifeq ($(CONFIG_SENSORS_FS3000),y)
+  CSRCS += fs3000_uorb.c
+endif
+
 ifeq ($(CONFIG_SENSORS_BMM150),y)
   CSRCS += bmm150_uorb.c
 endif
