@@ -34,6 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/clock_notifier.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/ptp_clock.h>
@@ -72,6 +73,7 @@ static void nxclock_set_realtime(FAR const struct timespec *tp)
   flags = spin_lock_irqsave(&g_basetime_lock);
 
   clock_timespec_subtract(tp, &bias, &g_basetime);
+  clock_notifier_call_chain(CLOCK_REALTIME, tp);
 
   spin_unlock_irqrestore(&g_basetime_lock, flags);
 
