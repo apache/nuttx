@@ -85,7 +85,7 @@ And you can do distclean by following command.
 Step4 : Compile
 ---------------
 
-Try to buid with the implementation of Step1-2, you would face the error as following
+Try to build with the implementation of Step1-2, you would face the error as following
 if you implemented only directory / Kconfig / Make.defs / Makefile / defconfig about Step1-2.
 
 .. code-block::
@@ -178,7 +178,7 @@ Step6 : Implement
 -----------------
 
 There are some implementation items, major items are bellow listed. To pass the Linking,
-try to implement these symboles.
+try to implement these symbols.
 
 +-----------------+------------------------+--------------------------------------------------------------------+
 | Category        | Item                   | Comment                                                            |
@@ -201,7 +201,7 @@ try to implement these symboles.
 .. _apache/nuttx/pull/12441: https://github.com/apache/nuttx/pull/12441
 .. _sched/Kconfig: https://github.com/apache/nuttx/blob/master/sched/Kconfig
 
-If got the pass of Linking, you would see follwoing result.
+If got the pass of Linking, you would see following result.
 
 .. code-block::
 
@@ -216,7 +216,7 @@ If got the pass of Linking, you would see follwoing result.
 Step7 : Verify
 --------------
 
-To execute and debug on the evalutaion board, add following configurations.
+To execute and debug on the evaluation board, add following configurations.
 
 .. code-block::
 
@@ -232,7 +232,7 @@ If your implementations were good, you would see following logs.
   nsh>
   nsh>
 
-After comfirming to boot NuttShell(NSH), try to execute "apps/testing/ostest".
+After confirming to boot NuttShell(NSH), try to execute "apps/testing/ostest".
 The "apps/testing/ostest" needs following configurations.
 
 .. code-block::
@@ -242,7 +242,7 @@ The "apps/testing/ostest" needs following configurations.
   CONFIG_SCHED_WAITPID=y
   CONFIG_TESTING_OSTEST=y
 
-And one more test is recomended to check the timer implementation whether
+And one more test is recommended to check the timer implementation whether
 the kernel could count the time accurately or not.
 I checked it by following code. About the function : cxd32_timerget(),
 see `apache/nuttx/pull/12441`_ 
@@ -406,7 +406,7 @@ Appendix : out-of-tree code
   +    string "Program name"
   +    default "time"
   +    ---help---
-  +        This apps measures the elasped time of sleep system call to confirm the timer implementation.
+  +        This apps measures the elapsed time of sleep system call to confirm the timer implementation.
   +
   +config CXD32XX_APPS_TIME_PRIORITY
   +    int "CXD32XX Time task priority"
@@ -478,7 +478,7 @@ Appendix : out-of-tree code
   +  uint32_t pre;
   +  uint32_t post;
   +
-  +  printf("measures the elasped time of sleep system call to confirm \
+  +  printf("measures the elapsed time of sleep system call to confirm \
   +  the timer implementation.\n");
   +
   +  pre = cxd32_timerget();
