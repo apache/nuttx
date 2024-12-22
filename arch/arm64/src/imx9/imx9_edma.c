@@ -141,6 +141,7 @@ struct imx9_edma_s
   /* This array describes each DMA channel */
 
   struct imx9_dmach_s dmach[IMX9_EDMA_NCHANNELS];
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -155,6 +156,7 @@ static struct imx9_edma_s g_edma =
 #if CONFIG_IMX9_EDMA_NTCD > 0
   .dsem = SEM_INITIALIZER(CONFIG_IMX9_EDMA_NTCD),
 #endif
+  .lock = SP_UNLOCKED
 };
 
 #if CONFIG_IMX9_EDMA_NTCD > 0
@@ -194,15 +196,15 @@ static struct imx9_edmatcd_s *imx9_tcd_alloc(void)
    * waiting.
    */
 
-  flags = enter_critical_section();
   nxsem_wait_uninterruptible(&g_edma.dsem);
 
   /* Now there should be a TCD in the free list reserved just for us */
 
+  flags = spin_lock_irqsave(&g_edma.lock);
   tcd = (struct imx9_edmatcd_s *)sq_remfirst(&g_tcd_free);
   DEBUGASSERT(tcd != NULL);
 
-  leave_critical_section(flags);
+  spin_lock_irqsave(&g_edma.lock, flags);
   return tcd;
 }
 #endif
@@ -216,6 +218,17 @@ static struct imx9_edmatcd_s *imx9_tcd_alloc(void)
  ****************************************************************************/
 
 #if CONFIG_IMX9_EDMA_NTCD > 0
+static void imx9_tcd_free_nolock(struct imx9_edmatcd_s *tcd)
+{
+  /* Add the the TCD to the end of the free list and post the 'dsem',
+   * possibly waking up another thread that might be waiting for
+   * a TCD.
+   */
+
+  sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
+  nxsem_post(&g_edma.dsem);
+}
+
 static void imx9_tcd_free(struct imx9_edmatcd_s *tcd)
 {
   irqstate_t flags;
@@ -225,10 +238,11 @@ static void imx9_tcd_free(struct imx9_edmatcd_s *tcd)
    * a TCD.
    */
 
-  flags = spin_lock_irqsave(NULL);
-  sq_addlast((sq_entry_t *)tcd, &g_tcd_free);
-  nxsem_post(&g_edma.dsem);
-  spin_unlock_irqrestore(NULL, flags);
+  flags = spin_lock_irqsave(&g_edma.lock);
+  sched_lock();
+  imx9_tcd_free_nolock(tcd);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
+  sched_unlock();
 }
 #endif
 
@@ -438,6 +452,11 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
   edma_callback_t callback;
   void *arg;
 
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_edma.lock);
+  sched_lock();
+
   /* Disable channel IRQ requests */
 
   putreg32(EDMA_CH_INT, base + IMX9_EDMA_CH_INT_OFFSET);
@@ -467,7 +486,7 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
        next = dmach->flags & EDMA_CONFIG_LOOPDEST ?
               NULL : (struct imx9_edmatcd_s *)((uintptr_t)tcd->dlastsga);
 
-       imx9_tcd_free(tcd);
+       imx9_tcd_free_nolock(tcd);
     }
 
   dmach->head = NULL;
@@ -487,6 +506,9 @@ static void imx9_dmaterminate(struct imx9_dmach_s *dmach, int result)
     {
       callback((DMACH_HANDLE)dmach, arg, true, result);
     }
+
+  spin_unlock_irqrestore(&g_edma.lock, flags);
+  sched_unlock();
 }
 
 /****************************************************************************
@@ -1252,7 +1274,7 @@ int imx9_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 
   /* Save the callback info.  This will be invoked when the DMA completes */
 
-  flags           = spin_lock_irqsave(NULL);
+  flags           = spin_lock_irqsave(&g_edma.lock);
   dmach->callback = callback;
   dmach->arg      = arg;
 
@@ -1271,7 +1293,7 @@ int imx9_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
       putreg32(regval, base + IMX9_EDMA_CH_CSR_OFFSET);
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
   return OK;
 }
 
@@ -1294,14 +1316,11 @@ int imx9_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 void imx9_dmach_stop(DMACH_HANDLE handle)
 {
   struct imx9_dmach_s *dmach = (struct imx9_dmach_s *)handle;
-  irqstate_t flags;
 
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
 
-  flags = spin_lock_irqsave(NULL);
   imx9_dmaterminate(dmach, -EINTR);
-  spin_unlock_irqrestore(NULL, flags);
 }
 
 /****************************************************************************
@@ -1416,7 +1435,7 @@ void imx9_dmasample(DMACH_HANDLE handle, struct imx9_dmaregs_s *regs)
 
   /* eDMA Global Registers */
 
-  flags          = spin_lock_irqsave(NULL);
+  flags          = spin_lock_irqsave(&g_edma.lock);
 
   /* REVISIT: eDMA4 does not show INT_HIGH / HRS_HIGH values correctly */
 
@@ -1450,7 +1469,7 @@ void imx9_dmasample(DMACH_HANDLE handle, struct imx9_dmaregs_s *regs)
       regs->dmamux = 0;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_edma.lock, flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
 
