@@ -134,6 +134,7 @@ struct efm32_leuart_s
 {
   const struct efm32_config_s *config;
   uint16_t  ien;       /* Interrupts enabled */
+  spinlock_t lock;     /* Spinlock */
 };
 
 /****************************************************************************
@@ -212,6 +213,7 @@ static const struct efm32_config_s g_leuart0config =
 static struct efm32_leuart_s g_leuart0priv =
 {
   .config    = &g_leuart0config,
+  .lock      = SP_UNLOCKED
 };
 
 static struct uart_dev_s g_leuart0port =
@@ -247,6 +249,7 @@ static struct efm32_config_s g_leuart1config =
 static struct efm32_leuart_s g_leuart1priv =
 {
   .config    = &g_leuart1config,
+  .lock      = SP_UNLOCKED
 };
 
 static struct uart_dev_s g_leuart1port =
@@ -303,6 +306,17 @@ static inline void efm32_setuartint(struct efm32_leuart_s *priv)
  * Name: efm32_restoreuartint
  ****************************************************************************/
 
+static void efm32_restoreuartint_nolock(struct efm32_leuart_s *priv,
+                                        uint32_t ien)
+{
+  /* Re-enable/re-disable interrupts corresponding to the state of
+   * bits in ien.
+   */
+
+  priv->ien = ien;
+  efm32_setuartint(priv);
+}
+
 static void efm32_restoreuartint(struct efm32_leuart_s *priv, uint32_t ien)
 {
   irqstate_t flags;
@@ -311,10 +325,9 @@ static void efm32_restoreuartint(struct efm32_leuart_s *priv, uint32_t ien)
    * bits in ien.
    */
 
-  flags     = spin_lock_irqsave(NULL);
-  priv->ien = ien;
-  efm32_setuartint(priv);
-  spin_unlock_irqrestore(NULL, flags);
+  flags = spin_lock_irqsave(&priv->lock);
+  efm32_restoreuartint_nolock(priv, len);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -325,14 +338,14 @@ static void efm32_disableuartint(struct efm32_leuart_s *priv, uint32_t *ien)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (ien)
     {
       *ien = priv->ien;
     }
 
-  efm32_restoreuartint(priv, 0);
-  spin_unlock_irqrestore(NULL, flags);
+  efm32_restoreuartint_nolock(priv, 0);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -607,7 +620,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
   struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
       /* Receive an interrupt when there is anything in the Rx data register
@@ -625,7 +638,7 @@ static void efm32_rxint(struct uart_dev_s *dev, bool enable)
       efm32_setuartint(priv);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -673,7 +686,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
   struct efm32_leuart_s *priv = (struct efm32_leuart_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
       /* Enable the TX interrupt */
@@ -697,7 +710,7 @@ static void efm32_txint(struct uart_dev_s *dev, bool enable)
       efm32_setuartint(priv);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
