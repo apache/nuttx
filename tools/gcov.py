@@ -73,6 +73,20 @@ def parse_gcda_data(path):
             output += line.strip()
 
 
+def correct_content_path(file, newpath):
+    with open(file, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    pattern = r"SF:([^\s]*?)/nuttx/include/nuttx"
+    matches = re.findall(pattern, content)
+
+    if matches:
+        new_content = content.replace(matches[0], newpath)
+
+        with open(file, "w", encoding="utf-8") as f:
+            f.write(new_content)
+
+
 def copy_file_endswith(endswith, source_dir, target_dir):
     print(f"Collect {endswith} files {source_dir} -> {target_dir}")
 
@@ -93,6 +107,7 @@ def arg_parser():
     )
     parser.add_argument("-i", "--input", help="Input dump data")
     parser.add_argument("-t", dest="gcov_tool", help="Path to gcov tool")
+    parser.add_argument("-b", dest="base_dir", help="Compile base directory")
     parser.add_argument("-s", dest="gcno_dir", help="Directory containing gcno files")
     parser.add_argument("-a", dest="gcda_dir", help="Directory containing gcda files")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
@@ -170,6 +185,9 @@ def main():
             stdout=sys.stdout,
             stderr=sys.stdout,
         )
+
+        if args.base_dir:
+            correct_content_path(coverage_file, args.base_dir)
 
         # genhtml generate coverage report
         subprocess.run(
