@@ -53,5 +53,9 @@ ifeq ($(CONFIG_SPINLOCK),y)
   CMN_CSRCS += tricore_testset.c
 endif
 
+ifeq ($(CONFIG_ARCH_USE_MPU),y)
+  CMN_CSRCS += tricore_mpu.c
+endif
+
 CFLAGS += -DIFX_CFG_EXTEND_TRAP_HOOKS
 CFLAGS += -DIFX_USE_SW_MANAGED_INT
