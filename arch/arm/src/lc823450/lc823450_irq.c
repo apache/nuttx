@@ -97,6 +97,8 @@ const uint32_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_lc823450_irq_lock = SP_UNLOCKED;
+
 #ifdef CONFIG_LC823450_VIRQ
 static struct lc823450_irq_ops *virq_ops[LC823450_IRQ_NVIRTUALIRQS];
 #endif /* CONFIG_LC823450_VIRQ */
@@ -625,7 +627,7 @@ void up_enable_irq(int irq)
        * set the bit in the System Handler Control and State Register.
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_lc823450_irq_lock);
 
       if (irq >= LC823450_IRQ_NIRQS)
         {
@@ -648,7 +650,7 @@ void up_enable_irq(int irq)
           putreg32(regval, regaddr);
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_lc823450_irq_lock, flags);
     }
 
   /* lc823450_dumpnvic("enable", irq); */
@@ -773,7 +775,7 @@ int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype)
   port = (irq & 0x70) >> 4;
   gpio = irq & 0xf;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_lc823450_irq_lock);
 
   regaddr = INTC_REG(EXTINTCND_BASE, port);
   regval = getreg32(regaddr);
@@ -783,7 +785,7 @@ int lc823450_irq_srctype(int irq, enum lc823450_srctype_e srctype)
 
   putreg32(regval, regaddr);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_lc823450_irq_lock, flags);
 
   return OK;
 }

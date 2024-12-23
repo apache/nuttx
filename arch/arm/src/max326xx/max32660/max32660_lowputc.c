@@ -88,6 +88,8 @@
  ****************************************************************************/
 
 #ifdef HAVE_UART_CONSOLE
+static spinlock_t g_max32660_lowputc_lock = SP_UNLOCKED;
+
 /* UART console configuration */
 
 static const struct uart_config_s g_console_config =
@@ -429,31 +431,22 @@ void arm_lowputc(char ch)
 #ifdef HAVE_UART_CONSOLE
   irqstate_t flags;
 
-  for (; ; )
-    {
-      /* Wait for the transmit FIFO to be not full */
+  /* Disable interrupts so that the test and the transmission are
+   * atomic.
+   */
 
-      while ((getreg32(CONSOLE_BASE + MAX326_UART_STAT_OFFSET) &
-             UART_STAT_TXFULL) != 0)
-        {
-        }
+  flags = spin_lock_irqsave(&g_max32660_lowputc_lock);
 
-      /* Disable interrupts so that the test and the transmission are
-       * atomic.
-       */
+  /* Wait for the transmit FIFO to be not full */
 
-      flags = spin_lock_irqsave(NULL);
-      if ((getreg32(CONSOLE_BASE + MAX326_UART_STAT_OFFSET) &
-           UART_STAT_TXFULL) == 0)
-        {
-          /* Send the character */
+  while ((getreg32(CONSOLE_BASE + MAX326_UART_STAT_OFFSET) &
+          UART_STAT_TXFULL) != 0);
 
-          putreg32((uint32_t)ch, CONSOLE_BASE + MAX326_UART_FIFO_OFFSET);
-          spin_unlock_irqrestore(NULL, flags);
-          return;
-        }
+  /* Send the character */
 
-      spin_unlock_irqrestore(NULL, flags);
-    }
+  putreg32((uint32_t)ch, CONSOLE_BASE + MAX326_UART_FIFO_OFFSET);
+
+  spin_unlock_irqrestore(&g_max32660_lowputc_lock, flags);
+
 #endif
 }
