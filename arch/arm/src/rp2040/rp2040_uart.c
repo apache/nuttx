@@ -116,6 +116,8 @@
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_rp2040_uart_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -189,7 +191,7 @@ void rp2040_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   uint32_t div;
   uint32_t lcr_h;
 
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&g_rp2040_uart_lock);
 
   div  = basefreq / (16 * baud / 100);
   ibrd = div / 100;
@@ -214,5 +216,5 @@ void rp2040_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   putreg32(lcr_h, uartbase + RP2040_UART_UARTLCR_H_OFFSET);
 
 finish:
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_rp2040_uart_lock, flags);
 }
