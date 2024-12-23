@@ -54,6 +54,25 @@ config ARCH_DCACHE_ADDR
 		AURIX Dcache base address, dcache line clear and invalidate need
 		use the address.
 
+config ARCH_MPU_NSETS
+	int "Protection sets number"
+	default 7
+	---help---
+		The protection sets count
+
+config ARCH_MPU_DATA_NREGIONS
+	int "Data regions number"
+	default 23
+	---help---
+		The data regions count
+
+config ARCH_MPU_CODE_NREGIONS
+	int "Code regions variables"
+	default 15
+	---help---
+		The code regions count
+
+
 if ARCH_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
 endif

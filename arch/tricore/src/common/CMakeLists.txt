@@ -52,6 +52,10 @@ if(CONFIG_SPINLOCK)
   list(APPEND SRCS tricore_testset.c)
 endif()
 
+if(CONFIG_ARCH_USE_MPU)
+  list(APPEND SRCS tricore_mpu.c)
+endif()
+
 set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)
 
 target_sources(arch PRIVATE ${SRCS})
