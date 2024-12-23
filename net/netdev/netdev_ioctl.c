@@ -1361,7 +1361,7 @@ static bool ioctl_arpreq_parse(FAR struct arpreq *req,
     {
       *addr = (FAR struct sockaddr_in *)&req->arp_pa;
       *dev  = req->arp_dev[0] != '\0' ?
-              netdev_findbyname((FAR const char *)req->arp_dev) :
+              netdev_findbyname(req->arp_dev) :
               netdev_findby_ripv4addr(INADDR_ANY, (*addr)->sin_addr.s_addr);
       return true;
     }
