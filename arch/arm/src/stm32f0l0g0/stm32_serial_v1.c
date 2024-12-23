@@ -250,6 +250,7 @@ struct stm32_serial_s
   const uint32_t    rs485_dir_gpio;     /* U[S]ART RS-485 DIR GPIO pin configuration */
   const bool        rs485_dir_polarity; /* U[S]ART RS-485 DIR pin state for TX enabled */
 #endif
+  spinlock_t        lock;               /* Spinlock */
 };
 
 /****************************************************************************
@@ -445,6 +446,7 @@ static struct stm32_serial_s g_usart1priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -506,6 +508,7 @@ static struct stm32_serial_s g_usart2priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -567,6 +570,7 @@ static struct stm32_serial_s g_usart3priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -632,6 +636,7 @@ static struct stm32_serial_s g_usart4priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -697,6 +702,7 @@ static struct stm32_serial_s g_usart5priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -806,7 +812,7 @@ static void stm32serial_disableusartint(struct stm32_serial_s *priv,
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (ie)
     {
@@ -850,7 +856,7 @@ static void stm32serial_disableusartint(struct stm32_serial_s *priv,
 
   stm32serial_setusartint(priv, 0);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
