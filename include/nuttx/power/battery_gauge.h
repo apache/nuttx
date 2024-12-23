@@ -277,6 +277,21 @@ FAR struct battery_gauge_dev_s *max1704x_initialize(
 int goldfish_battery_register(FAR void *regs, int irq);
 #endif
 
+#if defined(CONFIG_BATTERY_FAKE_GAUGE)
+/****************************************************************************
+ * Name: battery_fake_gauge_register
+ * Description:
+ *   Register a emulate battery to the upper-half gauge driver.
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ *
+ *
+ ****************************************************************************/
+
+int battery_fake_gauge_register(void);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

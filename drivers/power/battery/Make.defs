@@ -90,5 +90,9 @@ ifeq ($(CONFIG_GOLDFISH_BATTERY),y)
 CSRCS += goldfish_battery.c
 endif
 
+ifeq ($(CONFIG_BATTERY_FAKE_GAUGE),y)
+CSRCS += battery_fakegauge.c
+endif
+
 DEPPATH += --dep-path power/battery
 VPATH += power/battery
