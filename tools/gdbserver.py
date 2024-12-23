@@ -819,7 +819,7 @@ class GDBStub:
         elif b"c" == pkt[1:2]:
             thread = int(pkt[2:]) - 1
 
-        if thread == -1:
+        if thread < 0:
             thread = 0
 
         self.current_thread = thread
