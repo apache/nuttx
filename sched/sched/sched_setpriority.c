@@ -76,12 +76,19 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
   nxttcb = tcb->flink;
 #endif
 
-  /* A context switch will occur if the new priority of the running
-   * task becomes less than OR EQUAL TO the next highest priority
-   * ready to run task.
+  /* A context switch will occur:
+   * CASE 1. The new priority of the running task becomes less than or
+   * equal to the next highest priority ready to run task.
+   * CASE 2. In SMP, the affinity of tcb has changed and no longer includes
+   * the current cpu.
    */
 
+#ifdef CONFIG_SMP
+  if (nxttcb && (sched_priority <= nxttcb->sched_priority ||
+      (tcb->affinity & (1 << tcb->cpu)) == 0))
+#else
   if (nxttcb && sched_priority <= nxttcb->sched_priority)
+#endif
     {
 #ifdef CONFIG_SMP
       tcb->sched_priority = (uint8_t)sched_priority;
