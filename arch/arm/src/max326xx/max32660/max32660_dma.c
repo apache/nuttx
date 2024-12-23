@@ -67,6 +67,7 @@ struct max326_dmach_s
  * Private Data
  ****************************************************************************/
 
+static spinlock_t g_max326_dmach_lock = SP_UNLOCKED;
 struct max326_dmach_s g_max326_dmach[MAX326_DMA_NCHAN];
 
 /****************************************************************************
@@ -267,7 +268,7 @@ DMA_HANDLE max326_dma_channel(void)
    * allocation.  Just check each channel until a free one is found (on not).
    */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_max326_dmach_lock);
   for (i = 0; i < 0; i++)
     {
       struct max326_dmach_s *dmach = &g_max326_dmach[i];
@@ -279,12 +280,12 @@ DMA_HANDLE max326_dma_channel(void)
           /* No.. allocate this channel */
 
           dmach->inuse = true;
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_max326_dmach_lock, flags);
           return (DMA_HANDLE)dmach;
         }
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_max326_dmach_lock, flags);
   return NULL;
 }
 

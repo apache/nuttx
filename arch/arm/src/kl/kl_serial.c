@@ -148,6 +148,7 @@ struct up_dev_s
   uint8_t   ie;        /* Interrupts enabled */
   uint8_t   parity;    /* 0=none, 1=odd, 2=even */
   uint8_t   bits;      /* Number of bits (8 or 9) */
+  spinlock_t lock;     /* Spinlock */
 };
 
 /****************************************************************************
@@ -216,6 +217,7 @@ static struct up_dev_s g_uart0priv =
   .irq            = KL_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
+  .lock           = SP_UNLOCKED
 };
 
 static uart_dev_t g_uart0port =
@@ -246,6 +248,7 @@ static struct up_dev_s g_uart1priv =
   .irq            = KL_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
+  .lock           = SP_UNLOCKED
 };
 
 static uart_dev_t g_uart1port =
@@ -276,6 +279,7 @@ static struct up_dev_s g_uart2priv =
   .irq            = KL_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
+  .lock           = SP_UNLOCKED
 };
 
 static uart_dev_t g_uart2port =
@@ -322,26 +326,38 @@ static inline void up_serialout(struct up_dev_s *priv, int offset,
  * Name: up_setuartint
  ****************************************************************************/
 
-static void up_setuartint(struct up_dev_s *priv)
+static void up_setuartint_nolock(struct up_dev_s *priv)
 {
-  irqstate_t flags;
   uint8_t regval;
 
   /* Re-enable/re-disable interrupts corresponding to the state of bits
    * in ie.
    */
 
-  flags    = spin_lock_irqsave(NULL);
   regval   = up_serialin(priv, KL_UART_C2_OFFSET);
   regval  &= ~UART_C2_ALLINTS;
   regval  |= priv->ie;
   up_serialout(priv, KL_UART_C2_OFFSET, regval);
-  spin_unlock_irqrestore(NULL, flags);
+}
+
+static void up_setuartint(struct up_dev_s *priv)
+{
+  irqstate_t flags;
+
+  flags    = spin_lock_irqsave(&priv->lock);
+  up_setuartint_nolock(priv);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
  * Name: up_restoreuartint
  ****************************************************************************/
+
+static void up_restoreuartint_nolock(struct up_dev_s *priv, uint8_t ie)
+{
+  priv->ie = ie & UART_C2_ALLINTS;
+  up_setuartint_nolock(priv);
+}
 
 static void up_restoreuartint(struct up_dev_s *priv, uint8_t ie)
 {
@@ -351,10 +367,9 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t ie)
    * in ie.
    */
 
-  flags    = spin_lock_irqsave(NULL);
-  priv->ie = ie & UART_C2_ALLINTS;
-  up_setuartint(priv);
-  spin_unlock_irqrestore(NULL, flags);
+  flags    = spin_lock_irqsave(&priv->lock);
+  up_restoreuartint_nolock(priv, ie);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -365,14 +380,14 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *ie)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
   if (ie)
     {
       *ie = priv->ie;
     }
 
-  up_restoreuartint(priv, 0);
-  spin_unlock_irqrestore(NULL, flags);
+  up_restoreuartint_nolock(priv, 0);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
