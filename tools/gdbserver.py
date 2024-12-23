@@ -63,6 +63,31 @@ logger = logging.getLogger()
 # Registers with multiple convenient names can have multiple entries here, one
 # for each name and with the same index.
 reg_table = {
+    "x86_64": {
+        "RAX": 0,
+        "RBX": 1,
+        "RCX": 2,
+        "RDX": 3,
+        "RSI": 4,
+        "RDI": 5,
+        "RBP": 6,
+        "FSP": 7,
+        "R8": 8,
+        "R9": 9,
+        "R10": 10,
+        "R11": 11,
+        "R12": 12,
+        "R13": 13,
+        "R14": 14,
+        "R15": 15,
+        "RIP": 16,
+        "RFLAGS": 17,
+        "CS": 18,
+        "SS": 19,
+        "DS": 20,
+        "ES": 21,
+        "FS": 22,
+    },
     "arm": {
         "R0": 0,
         "R1": 1,
