@@ -160,4 +160,11 @@ config GOLDFISH_BATTERY
 	---help---
 		The GOLDFISH_BATTERY are battery charger for emulate batteries.
 
+config BATTERY_FAKE_GAUGE
+	bool "Battery fake gauge support"
+	default n
+	depends on BATTERY_GAUGE
+	---help---
+		The BATTERY FAKE are battery charger for emulate gauge.
+
 endmenu
