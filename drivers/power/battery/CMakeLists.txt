@@ -92,4 +92,8 @@ if(CONFIG_GOLDFISH_BATTERY)
   list(APPEND SRCS goldfish_battery.c)
 endif()
 
+if(CONFIG_BATTERY_FAKE_GAUGE)
+  list(APPEND SRCS battery_fakegauge.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
