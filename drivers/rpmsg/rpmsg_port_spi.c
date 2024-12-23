@@ -90,6 +90,7 @@ struct rpmsg_port_spi_s
 
   /* SPI devices' configuration */
 
+  uint32_t                       freq;
   uint32_t                       devid;
   int                            nbits;
 
@@ -381,6 +382,11 @@ static int rpmsg_port_spi_sreq_handler(FAR struct ioexpander_dev_s *dev,
 
   rpmsginfo("sreq enter\n");
 
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
+    {
+      SPI_SETFREQUENCY(rpspi->spi, rpspi->freq);
+    }
+
   rpmsg_port_spi_exchange(rpspi);
   return 0;
 }
@@ -460,6 +466,7 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         rpmsg_port_unregister(&rpspi->port);
         rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
         IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 0);
+        SPI_SETFREQUENCY(rpspi->spi, 0);
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
         break;
 
@@ -582,12 +589,12 @@ rpmsg_port_spi_init_hardware(FAR struct rpmsg_port_spi_s *rpspi,
 
   SPI_SETBITS(spi, spicfg->nbits);
   SPI_SETMODE(spi, spicfg->mode);
-  SPI_SETFREQUENCY(spi, spicfg->freq);
   SPI_REGISTERCALLBACK(spi, rpmsg_port_spi_complete_handler, rpspi);
   SPI_SELECT(spi, spicfg->devid, false);
 
   rpspi->spi = spi;
   rpspi->ioe = ioe;
+  rpspi->freq = spicfg->freq;
   rpspi->devid = spicfg->devid;
   rpspi->nbits = spicfg->nbits;
 
