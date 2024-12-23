@@ -119,6 +119,7 @@ struct up_dev_s
   const uintptr_t pcc;      /* Address of UART PCC clock gate */
   const uint32_t  tx_gpio;  /* LPUART TX GPIO pin configuration */
   const uint32_t  rx_gpio;  /* LPUART RX GPIO pin configuration */
+  spinlock_t      lock;     /* Spinlock */
   uint32_t  baud;           /* Configured baud */
   uint16_t  irq;            /* IRQ associated with this UART */
 };
@@ -188,6 +189,7 @@ static struct up_dev_s g_uart0priv =
   .pcc       = RV32M1_PCC_LPUART0,
   .tx_gpio   = GPIO_LPUART0_TX,
   .rx_gpio   = GPIO_LPUART0_RX,
+  .lock      = SP_UNLOCKED,
   .baud      = CONFIG_LPUART0_BAUD,
   .irq       = RV32M1_IRQ_LPUART0,
 };
@@ -223,6 +225,7 @@ static struct up_dev_s g_uart1priv =
   .pcc       = RV32M1_PCC_LPUART1,
   .tx_gpio   = GPIO_LPUART1_TX,
   .rx_gpio   = GPIO_LPUART1_RX,
+  .lock      = SP_UNLOCKED,
   .baud      = CONFIG_LPUART1_BAUD,
   .irq       = RV32M1_IRQ_LPUART1,
 };
@@ -258,6 +261,7 @@ static struct up_dev_s g_uart2priv =
   .pcc       = RV32M1_PCC_LPUART2,
   .tx_gpio   = GPIO_LPUART2_TX,
   .rx_gpio   = GPIO_LPUART2_RX,
+  .lock      = SP_UNLOCKED,
   .baud      = CONFIG_LPUART2_BAUD,
   .irq       = RV32M1_IRQ_LPUART2,
 };
@@ -293,6 +297,7 @@ static struct up_dev_s g_uart3priv =
   .pcc       = RV32M1_PCC_LPUART3,
   .tx_gpio   = GPIO_LPUART3_TX,
   .rx_gpio   = GPIO_LPUART3_RX,
+  .lock      = SP_UNLOCKED,
   .baud      = CONFIG_LPUART3_BAUD,
   .irq       = RV32M1_IRQ_LPUART3,
 };
@@ -346,11 +351,11 @@ static void up_putreg(struct up_dev_s *priv, int offset, uint32_t value)
 
 static void up_restoreuartint(struct up_dev_s *priv, uint32_t im)
 {
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
 
   up_putreg(priv, RV32M1_LPUART_CTRL_OFFSET, im);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -359,7 +364,7 @@ static void up_restoreuartint(struct up_dev_s *priv, uint32_t im)
 
 static void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
 {
-  irqstate_t flags = spin_lock_irqsave(NULL);
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
   uint32_t regval = up_getreg(priv, RV32M1_LPUART_CTRL_OFFSET);
 
   /* Return the current interrupt mask value */
@@ -374,7 +379,7 @@ static void up_disableuartint(struct up_dev_s *priv, uint32_t *im)
   regval &= ~(LPUART_CTRL_TCIE | LPUART_CTRL_TIE | LPUART_CTRL_RIE);
   up_putreg(priv, RV32M1_LPUART_CTRL_OFFSET, regval);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
