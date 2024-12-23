@@ -83,6 +83,12 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_tms570_lowputc_lock = SP_UNLOCKED;
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -187,30 +193,18 @@ void arm_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   irqstate_t flags;
 
-  for (; ; )
-    {
-      /* Wait for the transmitter to be available */
+  /* Wait for the transmitter to be available */
 
-      while ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
-        SCI_FLR_TXRDY) == 0);
+  flags = spin_lock_irqsave(&g_tms570_lowputc_lock);
 
-      /* Disable interrupts so that the test and the transmission are
-       * atomic.
-       */
+  while ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
+    SCI_FLR_TXRDY) == 0);
 
-      flags = spin_lock_irqsave(NULL);
-      if ((getreg32(TMS570_CONSOLE_BASE + TMS570_SCI_FLR_OFFSET) &
-        SCI_FLR_TXRDY) != 0)
-        {
-          /* Send the character */
+  /* Send the character */
 
-          putreg32((uint32_t)ch, TMS570_CONSOLE_BASE + TMS570_SCI_TD_OFFSET);
-          spin_unlock_irqrestore(NULL, flags);
-          return;
-        }
+  putreg32((uint32_t)ch, TMS570_CONSOLE_BASE + TMS570_SCI_TD_OFFSET);
 
-      spin_unlock_irqrestore(NULL, flags);
-    }
+  spin_unlock_irqrestore(&g_tms570_lowputc_lock, flags);
 #endif
 }
 
