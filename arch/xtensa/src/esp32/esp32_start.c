@@ -257,6 +257,11 @@ static noreturn_function void __esp32_start(void)
   else
     {
       esp_spiram_init_cache();
+      if (esp_spiram_test() != OK)
+        {
+          ets_printf("SPIRAM test failed\n");
+          PANIC();
+        }
     }
 
   /* Set external memory bss section to zero */
