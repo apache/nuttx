@@ -327,6 +327,10 @@ static bool sam_txempty(struct uart_dev_s *dev);
  * Private Data
  ****************************************************************************/
 
+#ifdef HAVE_SERIAL_CONSOLE
+static spinlock_t g_sam_serial_lock = SP_UNLOCKED;
+#endif
+
 static const struct uart_ops_s g_uart_ops =
 {
   .setup          = sam_setup,
@@ -1107,9 +1111,9 @@ void up_putc(int ch)
    * interrupts from firing in the serial driver code.
    */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_sam_serial_lock);
   sam_lowputc(ch);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_sam_serial_lock, flags);
 #endif
 }
 
