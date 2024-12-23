@@ -823,6 +823,9 @@ class GDBStub:
 
     def parse_thread(self):
         def unpack_data(addr, fmt, from_elf=False):
+            logger.debug(
+                f"Unpack data from {hex(addr)} with fmt {fmt} from elf {from_elf}"
+            )
             if from_elf:
                 r = self.get_mem_region(addr, self.elffile.get_memories())
             else:
