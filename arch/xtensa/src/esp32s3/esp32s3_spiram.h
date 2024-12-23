@@ -70,7 +70,7 @@ int esp_spiram_init(void);
  * Attention this function must be called with flash cache disabled.
  */
 
-void esp_spiram_init_cache(void);
+int esp_spiram_init_cache(void);
 
 /* Memory test for SPI RAM. Should be called after SPI RAM is
  * initialized and (in case of a dual-core system) the app CPU is online.
@@ -80,7 +80,7 @@ void esp_spiram_init_cache(void);
  *  Return true on success, false on failed memory test
  */
 
-bool esp_spiram_test(void);
+int esp_spiram_test(void);
 
 /* Add the initialized SPI RAM to the heap allocator. */
 
