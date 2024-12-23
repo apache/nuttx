@@ -99,7 +99,7 @@ struct esp32s2_uart_s g_uart0_config =
   .rs485_dir_polarity = true,
 #endif
 #endif
-  .lock = SP_UNLOCKED;
+  .lock = SP_UNLOCKED
 };
 
 #endif /* CONFIG_ESP32S2_UART0 */
@@ -147,7 +147,7 @@ struct esp32s2_uart_s g_uart1_config =
   .rs485_dir_polarity = true,
 #endif
 #endif
-  .lock = SP_UNLOCKED;
+  .lock = SP_UNLOCKED
 };
 
 #endif /* CONFIG_ESP32S2_UART1 */
