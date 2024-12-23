@@ -491,6 +491,7 @@ struct up_dev_s
   const bool        rs485_dir_polarity; /* U[S]ART RS-485 DIR TXEN polarity */
 #endif
   const bool        islpuart;  /* Is this device a Low Power UART? */
+  spinlock_t        lock;      /* Spinlock */
 };
 
 /****************************************************************************
@@ -783,6 +784,7 @@ static struct up_dev_s g_usart1priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -852,6 +854,7 @@ static struct up_dev_s g_usart2priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -921,6 +924,7 @@ static struct up_dev_s g_usart3priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -990,6 +994,7 @@ static struct up_dev_s g_uart4priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -1059,6 +1064,7 @@ static struct up_dev_s g_uart5priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -1128,6 +1134,7 @@ static struct up_dev_s g_usart6priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -1197,6 +1204,7 @@ static struct up_dev_s g_uart7priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -1266,6 +1274,7 @@ static struct up_dev_s g_uart8priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -1334,6 +1343,7 @@ static struct up_dev_s g_lpuart1priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
+  .lock = SP_UNLOCKED,
 };
 #endif
 
@@ -1442,11 +1452,11 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   up_setusartint(priv, ie);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -1457,7 +1467,7 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (ie)
     {
@@ -1498,7 +1508,7 @@ static void up_disableusartint(struct up_dev_s *priv, uint16_t *ie)
 
   up_setusartint(priv, 0);
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
