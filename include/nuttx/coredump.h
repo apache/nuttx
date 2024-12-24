@@ -27,21 +27,20 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/utsname.h>
+#include <elf.h>
 #include <unistd.h>
+#include <sys/utsname.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/streams.h>
 #include <nuttx/memoryregion.h>
-
-#ifdef CONFIG_ARM_COREDUMP_REGION
-#  include <nuttx/elf.h>
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define COREDUMP_MAGIC    0x434f5245
+#define COREDUMP_MAGIC          0x434f5245
+#define COREDUMP_INFONAME_SIZE  ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8)
 
 /****************************************************************************
  * Public Types
@@ -51,7 +50,6 @@
 
 struct coredump_info_s
 {
-  uint32_t        magic;
   struct utsname  name;
   struct timespec time;
   size_t          size;
