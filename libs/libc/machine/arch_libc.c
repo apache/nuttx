@@ -64,7 +64,7 @@ FAR char *ARCH_LIBCFUN(strcpy)(FAR char *dest, FAR const char *src);
 size_t ARCH_LIBCFUN(strlen)(FAR const char *s);
 #endif
 
-#ifdef CONFIG_LIBC_ARCHSTRNCPY
+#ifdef CONFIG_LIBC_ARCH_STRNCPY
 FAR char *ARCH_LIBCFUN(strncpy)(FAR char *dest,
                                 FAR const char *src, size_t n);
 #endif
@@ -212,7 +212,7 @@ size_t strlen(FAR const char *s)
 }
 #endif
 
-#ifdef CONFIG_LIBC_ARCHSTRNCPY
+#ifdef CONFIG_LIBC_ARCH_STRNCPY
 FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN
