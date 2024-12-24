@@ -259,6 +259,7 @@
 #define imxrt_clockrun_flexram()          imxrt_periphclk_configure(CCM_CCGR_FLEXRAM, CCM_CG_RUN)
 #ifndef CONFIG_ARCH_FAMILY_IMXRT117x
 #  define imxrt_clockrun_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI, CCM_CG_RUN)
+#  define imxrt_clockrun_flexspi2()       imxrt_periphclk_configure(CCM_CCGR_FLEXSPI2, CCM_CG_RUN)
 #else
 #  define imxrt_clockrun_flexspi()        imxrt_periphclk_configure(CCM_CCGR_FLEXSPI1, CCM_CG_RUN)
 #  define imxrt_clockrun_flexspi2()       imxrt_periphclk_configure(CCM_CCGR_FLEXSPI2, CCM_CG_RUN)
