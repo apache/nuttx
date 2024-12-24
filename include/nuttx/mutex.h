@@ -124,7 +124,7 @@ int nxmutex_destroy(FAR mutex_t *mutex);
  * Name: nxmutex_is_hold
  *
  * Description:
- *   This function check whether the caller hold the mutex
+ *   This function check whether the calling thread hold the mutex
  *   referenced by 'mutex'.
  *
  * Parameters:
@@ -141,6 +141,8 @@ bool nxmutex_is_hold(FAR mutex_t *mutex);
  *
  * Description:
  *   This function get the holder of the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   mutex - mutex descriptor.
@@ -156,6 +158,8 @@ int nxmutex_get_holder(FAR mutex_t *mutex);
  *
  * Description:
  *   This function get the lock state the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   mutex - mutex descriptor.
@@ -444,7 +448,7 @@ int nxrmutex_destroy(FAR rmutex_t *rmutex);
  * Name: nxrmutex_is_hold
  *
  * Description:
- *   This function check whether the caller hold the recursive mutex
+ *   This function check whether the calling thread hold the recursive mutex
  *   referenced by 'rmutex'.
  *
  * Parameters:
@@ -460,7 +464,11 @@ bool nxrmutex_is_hold(FAR rmutex_t *rmutex);
  * Name: nxrmutex_is_recursive
  *
  * Description:
- *   This function check whether the recursive mutex is recursive
+ *   This function check whether the recursive mutex is currently held
+ *   recursively. That is, whether it's locked more than once by the
+ *   current holder.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   rmutex - Recursive mutex descriptor.
@@ -477,6 +485,8 @@ bool nxrmutex_is_recursive(FAR rmutex_t *rmutex);
  *
  * Description:
  *   This function get the holder of the mutex referenced by 'mutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   rmutex - Rmutex descriptor.
@@ -493,6 +503,8 @@ int nxrmutex_get_holder(FAR rmutex_t *rmutex);
  * Description:
  *   This function get the lock state the recursive mutex
  *   referenced by 'rmutex'.
+ *   Note that this is inherently racy unless the calling thread is
+ *   holding the mutex.
  *
  * Parameters:
  *   rmutex - Recursive mutex descriptor.
