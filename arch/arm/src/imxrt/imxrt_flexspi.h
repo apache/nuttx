@@ -128,6 +128,23 @@
 #define FLEXSPI_TRANSFER(d,x) (d)->ops->transfer_blocking(d,x)
 
 /****************************************************************************
+ * Name: FLEXSPI_CONFIGURE_PREFTECH
+ *
+ * Description:
+ *   Enable / disable prefetch
+ *
+ * Input Parameters:
+ *   dev     - Device-specific state data
+ *   enable  - Enable prefetch
+ *
+ * Returned Value:
+ *   none
+ *
+ ****************************************************************************/
+
+#define FLEXSPI_CONFIGURE_PREFETCH(d,e) (d)->ops->configure_prefetch(d,e)
+
+/****************************************************************************
  * Name: FLEXSPI_SOFTWARE_RESET
  *
  * Description:
@@ -508,6 +525,7 @@ struct flexspi_ops_s
   int (*transfer_blocking)(struct flexspi_dev_s *dev,
                            struct flexspi_transfer_s *xfer);
   void (*software_reset)(struct flexspi_dev_s *dev);
+  void (*configure_prefetch)(struct flexspi_dev_s *dev, bool enable);
   void (*update_lut)(struct flexspi_dev_s *dev,
                      uint32_t index, const uint32_t *cmd,
                      uint32_t count);
