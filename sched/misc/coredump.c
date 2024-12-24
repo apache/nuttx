@@ -144,7 +144,7 @@ static int elf_emit(FAR struct elf_dumpinfo_s *cinfo,
 {
   FAR const uint8_t *ptr = buf;
   size_t total = len;
-  int ret;
+  int ret = 0;
 
   while (total > 0)
     {
@@ -263,11 +263,17 @@ static int elf_get_note_size(int stksegs)
 {
   int total;
 
-  total  = stksegs * (sizeof(Elf_Nhdr) + ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8) +
+  total  = stksegs * (sizeof(Elf_Nhdr) + COREDUMP_INFONAME_SIZE +
                       sizeof(elf_prstatus_t));
-  total += stksegs * (sizeof(Elf_Nhdr) + ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8) +
+  total += stksegs * (sizeof(Elf_Nhdr) + COREDUMP_INFONAME_SIZE +
                       sizeof(elf_prpsinfo_t));
   return total;
+}
+
+static int elf_get_info_note_size(void)
+{
+  return sizeof(Elf_Nhdr) + COREDUMP_INFONAME_SIZE +
+         sizeof(struct coredump_info_s);
 }
 
 /****************************************************************************
@@ -281,7 +287,7 @@ static int elf_get_note_size(int stksegs)
 static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
                               FAR struct tcb_s *tcb)
 {
-  char name[ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8)];
+  char name[COREDUMP_INFONAME_SIZE];
   elf_prstatus_t status;
   elf_prpsinfo_t info;
   FAR uintptr_t *regs;
@@ -508,6 +514,39 @@ static void elf_emit_memory(FAR struct elf_dumpinfo_s *cinfo, int memsegs)
 }
 
 /****************************************************************************
+ * Name: elf_emit_info_note
+ *
+ * Description:
+ *   Fill the core info note
+ *
+ ****************************************************************************/
+
+static void elf_emit_info_note(FAR struct elf_dumpinfo_s *cinfo)
+{
+  struct coredump_info_s info;
+  Elf_Nhdr nhdr;
+  char name[COREDUMP_INFONAME_SIZE];
+
+  memset(&info, 0x0, sizeof(info));
+  memset(name, 0x0, sizeof(name));
+
+  nhdr.n_namesz = sizeof(name);
+  nhdr.n_descsz = sizeof(info);
+  nhdr.n_type   = COREDUMP_MAGIC;
+
+  elf_emit(cinfo, &nhdr, sizeof(nhdr));
+
+  strlcpy(name, "NuttX", sizeof(name));
+  elf_emit(cinfo, name, sizeof(name));
+
+  info.size = cinfo->stream->nput + sizeof(info);
+  clock_gettime(CLOCK_REALTIME, &info.time);
+  uname(&info.name);
+
+  elf_emit(cinfo, &info, sizeof(info));
+}
+
+/****************************************************************************
  * Name: elf_emit_tcb_phdr
  *
  * Description:
@@ -578,7 +617,7 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
                           int stksegs, int memsegs)
 {
   off_t offset = cinfo->stream->nput +
-                 (stksegs + memsegs + 1) * sizeof(Elf_Phdr);
+                 (stksegs + memsegs + 1 + 1) * sizeof(Elf_Phdr);
   Elf_Phdr phdr;
   int i;
 
@@ -622,6 +661,14 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
       offset       += ALIGN_UP(phdr.p_memsz, ELF_PAGESIZE);
       elf_emit(cinfo, &phdr, sizeof(phdr));
     }
+
+  memset(&phdr, 0, sizeof(Elf_Phdr));
+  phdr.p_type   = PT_NOTE;
+  phdr.p_offset = ALIGN_UP(offset, ELF_PAGESIZE);
+  phdr.p_filesz = elf_get_info_note_size();
+  offset       += phdr.p_filesz;
+
+  elf_emit(cinfo, &phdr, sizeof(phdr));
 }
 
 /****************************************************************************
@@ -692,7 +739,6 @@ static void coredump_dump_syslog(pid_t pid)
 static void coredump_dump_dev(pid_t pid)
 {
   FAR void *stream = &g_devstream;
-  struct coredump_info_s info;
   int ret;
 
   if (g_devstream.inode == NULL)
@@ -705,6 +751,7 @@ static void coredump_dump_dev(pid_t pid)
   lib_lzfoutstream(&g_lzfstream, stream);
   stream = &g_lzfstream;
 #endif
+
   ret = coredump(g_regions, stream, pid);
   if (ret < 0)
     {
@@ -712,42 +759,8 @@ static void coredump_dump_dev(pid_t pid)
       return;
     }
 
-  info.magic = COREDUMP_MAGIC;
-  info.size  = g_devstream.common.nput;
-  clock_gettime(CLOCK_REALTIME, &info.time);
-  uname(&info.name);
-
-  ret = lib_stream_seek(&g_devstream, -(off_t)sizeof(info), SEEK_END);
-  if (ret < 0)
-    {
-      _alert("Coredump info seek fail %d\n", ret);
-      return;
-    }
-
-  if (info.size > ret)
-    {
-      _alert("Coredump no enough space for info\n");
-      return;
-    }
-
-  ret = lib_stream_puts(&g_devstream, &info, sizeof(info));
-  if (ret < 0)
-    {
-      _alert("Coredump information write fail %d\n", ret);
-      return;
-    }
-
-  /* Flush to ensure outstream write all data to storage device */
-
-  ret = lib_stream_flush(&g_devstream);
-  if (ret < 0)
-    {
-      _alert("Coredump flush fail %d\n", ret);
-      return;
-    }
-
   _alert("Finish coredump, write %zu bytes to %s\n",
-         info.size, CONFIG_BOARD_COREDUMP_DEVPATH);
+         g_devstream.common.nput, CONFIG_BOARD_COREDUMP_DEVPATH);
 }
 #endif
 
@@ -959,9 +972,11 @@ int coredump(FAR const struct memory_region_s *regions,
              cinfo.regions[memsegs].end; memsegs++);
     }
 
-  /* Fill notes section */
+  /* Fill notes section, with additional one for program header,
+   * and one for the core file info defined by NuttX.
+   */
 
-  elf_emit_hdr(&cinfo, stksegs + memsegs + 1);
+  elf_emit_hdr(&cinfo, stksegs + memsegs + 1 + 1);
 
   /* Fill all the program information about the process for the
    * notes.  This also sets up the file header.
@@ -987,6 +1002,10 @@ int coredump(FAR const struct memory_region_s *regions,
     {
       elf_emit_memory(&cinfo, memsegs);
     }
+
+  /* Emit core info note */
+
+  elf_emit_info_note(&cinfo);
 
   /* Flush the dump */
 
