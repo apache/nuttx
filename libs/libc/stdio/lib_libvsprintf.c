@@ -163,10 +163,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   uint16_t flags;
   int width;
   int prec;
-
-  /* For the %m format we may need the current `errno' value */
-
-  int saved_errno = errno;
   union
   {
 #if defined (CONFIG_LIBC_LONG_LONG) || (ULONG_MAX > 4294967295UL)
@@ -913,11 +909,6 @@ flt_oper:
 #endif
           pnt = buf;
           size = 1;
-          goto str_lpad;
-
-        case 'm': /* Print error message (%m) */
-          pnt = strerror(saved_errno);
-          size = strlen(pnt); /* Adjusting the size is not supported by %m */
           goto str_lpad;
 
         case 's':
