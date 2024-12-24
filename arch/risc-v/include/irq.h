@@ -704,6 +704,29 @@ int up_cpu_index(void) noinstrument_function;
 #endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
+ * Schedule acceleration macros
+ ****************************************************************************/
+
+/* If RISCV_PERCPU_SCRATCH is not enabled, we can use the scratch register
+ * to store the current task pointer.
+ */
+
+#ifndef CONFIG_RISCV_PERCPU_SCRATCH
+#define up_this_task() \
+  ({ \
+    struct tcb_s *t; \
+    t = (struct tcb_s *)READ_CSR(CSR_SCRATCH); \
+    t; \
+  })
+
+#define up_update_task(t) WRITE_CSR(CSR_SCRATCH, (uintptr_t)t)
+#else
+/* TODO: Implement up_this_task()/up_update_task() if RISCV_PERCPU_SCRATCH
+ * enabled.
+ */
+#endif
+
+/****************************************************************************
  * Name: up_this_cpu
  *
  * Description:
