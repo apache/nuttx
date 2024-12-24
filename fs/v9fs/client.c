@@ -1513,16 +1513,16 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
       return -ENAMETOOLONG;
     }
 
-  request_payload = lib_get_pathbuffer();
+  request_payload = lib_get_tempbuffer(PATH_MAX);
   if (request_payload == NULL)
     {
       return -ENOMEM;
     }
 
-  response_payload = lib_get_pathbuffer();
+  response_payload = lib_get_tempbuffer(PATH_MAX);
   if (response_payload == NULL)
     {
-      lib_put_pathbuffer(request_payload);
+      lib_put_tempbuffer(request_payload);
       return -ENOMEM;
     }
 
@@ -1590,8 +1590,8 @@ int v9fs_client_walk(FAR struct v9fs_client_s *client, FAR const char *path,
     }
 
 err:
-  lib_put_pathbuffer(request_payload);
-  lib_put_pathbuffer(response_payload);
+  lib_put_tempbuffer(request_payload);
+  lib_put_tempbuffer(response_payload);
   return newfid;
 }
 
@@ -1613,7 +1613,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   size_t length;
   int ret;
 
-  aname = lib_get_pathbuffer();
+  aname = lib_get_tempbuffer(PATH_MAX);
   if (aname == NULL)
     {
       return -ENOMEM;
@@ -1661,7 +1661,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   ret = v9fs_transport_create(&client->transport, transport, data);
   if (ret < 0)
     {
-      lib_put_pathbuffer(aname);
+      lib_put_tempbuffer(aname);
       return ret;
     }
 
@@ -1669,7 +1669,7 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
   if (client->fids == NULL)
     {
       v9fs_transport_destroy(client->transport);
-      lib_put_pathbuffer(aname);
+      lib_put_tempbuffer(aname);
       return -ENOMEM;
     }
 
@@ -1693,14 +1693,14 @@ int v9fs_client_init(FAR struct v9fs_client_s *client,
 
   client->root_fid = ret;
   client->tag_id = 1;
-  lib_put_pathbuffer(aname);
+  lib_put_tempbuffer(aname);
   return 0;
 
 out:
   v9fs_transport_destroy(client->transport);
   nxmutex_destroy(&client->lock);
   idr_destroy(client->fids);
-  lib_put_pathbuffer(aname);
+  lib_put_tempbuffer(aname);
   return ret;
 }
 

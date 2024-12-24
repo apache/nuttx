@@ -576,7 +576,7 @@ FAR char *dcngettext(FAR const char *domainname,
       lang = "C";
     }
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return notrans;
@@ -604,7 +604,7 @@ FAR char *dcngettext(FAR const char *domainname,
       if (mofile == NULL)
         {
           nxmutex_unlock(&g_lock);
-          lib_put_pathbuffer(path);
+          lib_put_tempbuffer(path);
           return notrans;
         }
 
@@ -613,7 +613,7 @@ FAR char *dcngettext(FAR const char *domainname,
       if (mofile->map == MAP_FAILED)
         {
           nxmutex_unlock(&g_lock);
-          lib_put_pathbuffer(path);
+          lib_put_tempbuffer(path);
           lib_free(mofile);
           return notrans;
         }
@@ -659,7 +659,7 @@ FAR char *dcngettext(FAR const char *domainname,
     }
 
   nxmutex_unlock(&g_lock); /* Leave look before search */
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
 
   trans = molookup(mofile->map, mofile->size, msgid1);
   if (trans == NULL)

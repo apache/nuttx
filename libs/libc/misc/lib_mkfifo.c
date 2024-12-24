@@ -117,7 +117,7 @@ int mkfifoat(int dirfd, FAR const char *path, mode_t mode)
   FAR char *fullpath;
   int ret;
 
-  fullpath = lib_get_pathbuffer();
+  fullpath = lib_get_tempbuffer(PATH_MAX);
   if (fullpath == NULL)
     {
       set_errno(ENOMEM);
@@ -127,13 +127,13 @@ int mkfifoat(int dirfd, FAR const char *path, mode_t mode)
   ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
-      lib_put_pathbuffer(fullpath);
+      lib_put_tempbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
   ret = mkfifo(fullpath, mode);
-  lib_put_pathbuffer(fullpath);
+  lib_put_tempbuffer(fullpath);
   return ret;
 }
 
