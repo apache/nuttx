@@ -106,6 +106,98 @@ config BL808_GPADC_SCAN_ORD11
 
 endmenu
 
+menuconfig BL808_I2C0
+	bool "I2C 0"
+	default n
+	select I2C
+        select I2C_DRIVER
+        select ARCH_HAVE_I2CRESET
+
+if BL808_I2C0
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_I2C0_SCL
+	int "SCL Pin"
+	default 6
+	range 0 45
+
+config BL808_I2C0_SDA
+	int "SDA Pin"
+	default 7
+	range 0 45
+
+endif
+
+menuconfig BL808_I2C1
+	bool "I2C 1"
+	default n
+	select I2C
+        select I2C_DRIVER
+        select ARCH_HAVE_I2CRESET
+
+if BL808_I2C1
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_I2C1_SCL
+	int "SCL Pin"
+	default 6
+	range 0 45
+
+config BL808_I2C1_SDA
+	int "SDA Pin"
+	default 7
+	range 0 45
+
+endif
+
+menuconfig BL808_I2C2
+	bool "I2C 2"
+	default n
+	select I2C
+        select I2C_DRIVER
+        select ARCH_HAVE_I2CRESET
+
+if BL808_I2C2
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_I2C2_SCL
+	int "SCL Pin"
+	default 6
+	range 0 45
+
+config BL808_I2C2_SDA
+	int "SDA Pin"
+	default 7
+	range 0 45
+
+endif
+
+menuconfig BL808_I2C3
+	bool "I2C 3"
+	default n
+	select I2C
+        select I2C_DRIVER
+        select ARCH_HAVE_I2CRESET
+
+if BL808_I2C3
+
+comment "Refer to datasheet for valid pin assignments"
+
+config BL808_I2C3_SCL
+	int "SCL Pin"
+	default 6
+	range 0 45
+
+config BL808_I2C3_SDA
+	int "SDA Pin"
+	default 7
+	range 0 45
+
+endif
+
 config BL808_UART0
 	bool "UART 0"
 	default n

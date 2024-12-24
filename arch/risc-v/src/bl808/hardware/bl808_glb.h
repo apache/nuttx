@@ -38,6 +38,7 @@
 
 #define BL808_GLB_UART_CFG1_OFFSET    0x154
 #define BL808_GLB_UART_CFG2_OFFSET    0x158
+#define BL808_GLB_I2C_CFG0_OFFSET     0x180
 #define BL808_GLB_SPI_CFG0_OFFSET     0x1b0
 #define BL808_GLB_PARM_CFG0_OFFSET    0x510
 
@@ -47,6 +48,7 @@
 
 #define BL808_GLB_UART_CFG1 (BL808_GLB_BASE + BL808_GLB_UART_CFG1_OFFSET)
 #define BL808_GLB_UART_CFG2 (BL808_GLB_BASE + BL808_GLB_UART_CFG2_OFFSET)
+#define BL808_GLB_I2C_CFG0 (BL808_GLB_BASE + BL808_GLB_I2C_CFG0_OFFSET)
 #define BL808_GLB_SPI_CFG0 (BL808_GLB_BASE + BL808_GLB_SPI_CFG0_OFFSET)
 #define BL808_GLB_PARM_CFG0 (BL808_GLB_BASE + BL808_GLB_PARM_CFG0_OFFSET)
 
@@ -58,6 +60,13 @@
 
 #define UART_CFG_SIG_SEL_SHIFT(n)  ((n % 8) * 4)
 #define UART_CFG_SIG_SEL_MASK(n)   (0x0f << UART_CFG_SIG_SEL_SHIFT(n))
+
+/* I2C_CFG0 *****************************************************************/
+
+#define I2C_CFG_CLK_DIV_SHIFT 16
+#define I2C_CFG_CLK_DIV_MASK (0xff << I2C_CFG_CLK_DIV_SHIFT)
+#define I2C_CFG_CLK_EN (1 << 24)
+#define I2C_CFG_CLK_XTAL (1 << 25)
 
 /* SPI_CFG0 *****************************************************************/
 

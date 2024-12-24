@@ -58,8 +58,8 @@
 
 #define GPIO_MODE_SHIFT  (10)                     /* Bit 10: Port Mode */
 #define GPIO_MODE_MASK   (1 << GPIO_MODE_SHIFT)
-#  define GPIO_INPUT     (1 << GPIO_MODE_SHIFT)  /* Input Enable */
-#  define GPIO_OUTPUT    (0 << GPIO_MODE_SHIFT)  /* Output Enable */
+#define GPIO_INPUT     (1 << GPIO_MODE_SHIFT)  /* Input Enable */
+#define GPIO_OUTPUT    (0 << GPIO_MODE_SHIFT)  /* Output Enable */
 
 /* Input/Output pull-ups/downs:
  *
@@ -116,6 +116,7 @@
 #define GPIO_FUNC_SDH    (0  << GPIO_FUNC_SHIFT)  /* SDH */
 #define GPIO_FUNC_SPI0   (1  << GPIO_FUNC_SHIFT)  /* SPI0 */
 #define GPIO_FUNC_FLASH  (2  << GPIO_FUNC_SHIFT)  /* Flash */
+#define GPIO_FUNC_I2C0   (5  << GPIO_FUNC_SHIFT)  /* I2C0 */
 #define GPIO_FUNC_I2C1   (6  << GPIO_FUNC_SHIFT)  /* I2C1 */
 #define GPIO_FUNC_UART   (7  << GPIO_FUNC_SHIFT)  /* UART */
 #define GPIO_FUNC_CAM    (9  << GPIO_FUNC_SHIFT)  /* CSI */
@@ -123,6 +124,8 @@
 #define GPIO_FUNC_SWGPIO (11 << GPIO_FUNC_SHIFT)  /* Software GPIO */
 #define GPIO_FUNC_PWM0   (16 << GPIO_FUNC_SHIFT)  /* PWM0 */
 #define GPIO_FUNC_SPI1   (18 << GPIO_FUNC_SHIFT)  /* SPI1 */
+#define GPIO_FUNC_I2C2   (19  << GPIO_FUNC_SHIFT) /* I2C2 */
+#define GPIO_FUNC_I2C3   (20  << GPIO_FUNC_SHIFT) /* I2C3 */
 #define GPIO_FUNC_JTAG_D0 (27 << GPIO_FUNC_SHIFT) /* JTAG */
 
 /****************************************************************************

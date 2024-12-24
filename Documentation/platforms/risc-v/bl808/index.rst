@@ -48,7 +48,7 @@ DMA          No
 EMAC         No
 GPADC        Yes
 GPIO         Yes
-I2C          No
+I2C          Yes
 I2S          No
 PWM          No
 SPI          Yes
