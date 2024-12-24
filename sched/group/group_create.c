@@ -222,6 +222,7 @@ void group_postinitialize(FAR struct task_tcb_s *tcb)
 
   DEBUGASSERT(tcb && tcb->cmn.group);
   group = tcb->cmn.group;
+  spin_lock_init(&group->lock);
 
   /* Allocate mm_map list if required */
 

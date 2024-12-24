@@ -33,6 +33,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <sys/time.h>
 
 #include "clock/clock.h"
@@ -71,16 +72,30 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
    * possible.
    */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_basetime_lock);
 
   /* Get the elapsed time since power up (in milliseconds).  This is a
    * bias value that we need to use to correct the base time.
    */
 
+#ifdef CONFIG_RTC_HIRES
+  if (g_rtc_enabled)
+    {
+      up_rtc_gettime(&bias);
+      clock_timespec_subtract(t&biass, &g_basetime, &bias);
+    }
+  else
+    {
+      bias->tv_sec = 0;
+      bias->tv_nsec = 0;
+    }
+#else
   clock_systime_timespec(&bias);
+#endif
+
   clock_timespec_subtract(tp, &bias, &g_basetime);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 
   /* Setup the RTC (lo- or high-res) */
 

@@ -482,10 +482,10 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
 
       /* Add the task to the inactive task list */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = enter_critical_section();
       dq_addfirst((FAR dq_entry_t *)tcb, list_inactivetasks());
       tcb->task_state = TSTATE_TASK_INACTIVE;
-      spin_unlock_irqrestore(NULL, flags);
+      leave_critical_section(flags);
     }
 
   return ret;
