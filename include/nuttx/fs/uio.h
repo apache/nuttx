@@ -45,6 +45,7 @@ struct uio
 {
   FAR const struct iovec *uio_iov;
   int uio_iovcnt;
+  size_t uio_offset_in_iov; /* offset in uio_iov[0].iov_base */
 };
 
 /****************************************************************************
@@ -52,14 +53,56 @@ struct uio
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uio_total_len
+ * Name: uio_resid
  *
  * Description:
- *   Return the total length of data in bytes.
+ *   Return the remaining length of data in bytes.
  *   Or -EOVERFLOW.
  *
  ****************************************************************************/
 
-ssize_t uio_total_len(FAR const struct uio *uio);
+ssize_t uio_resid(FAR const struct uio *uio);
+
+/****************************************************************************
+ * Name: uio_advance
+ *
+ * Description:
+ *   Advance the pointer/offset in uio by the specified amount.
+ *
+ ****************************************************************************/
+
+void uio_advance(FAR struct uio *uio, size_t sz);
+
+/****************************************************************************
+ * Name: uio_init
+ *
+ * Description:
+ *   Initialize the uio structure with reasonable default values.
+ *
+ ****************************************************************************/
+
+void uio_init(FAR struct uio *uio);
+
+/****************************************************************************
+ * Name: uio_copyto
+ *
+ * Description:
+ *   Copy data to the linear buffer from uio.
+ *
+ ****************************************************************************/
+
+void uio_copyfrom(FAR struct uio *uio, size_t offset, FAR const void *buf,
+                  size_t len);
+
+/****************************************************************************
+ * Name: uio_copyto
+ *
+ * Description:
+ *   Copy data to the linear buffer from uio.
+ *
+ ****************************************************************************/
+
+void uio_copyto(FAR struct uio *uio, size_t offset, FAR void *buf,
+                size_t len);
 
 #endif /* __INCLUDE_NUTTX_FS_UIO_H */

@@ -40,10 +40,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devnull_readv(FAR struct file *filep,
-                             FAR const struct uio *uio);
-static ssize_t devnull_writev(FAR struct file *filep,
-                              FAR const struct uio *uio);
+static ssize_t devnull_readv(FAR struct file *filep, FAR struct uio *uio);
+static ssize_t devnull_writev(FAR struct file *filep, FAR struct uio *uio);
 static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
 
@@ -71,11 +69,10 @@ static const struct file_operations g_devnull_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devnull_read
+ * Name: devnull_readv
  ****************************************************************************/
 
-static ssize_t devnull_readv(FAR struct file *filep,
-                             FAR const struct uio *uio)
+static ssize_t devnull_readv(FAR struct file *filep, FAR struct uio *uio)
 {
   UNUSED(filep);
   UNUSED(uio);
@@ -84,15 +81,20 @@ static ssize_t devnull_readv(FAR struct file *filep,
 }
 
 /****************************************************************************
- * Name: devnull_write
+ * Name: devnull_writev
  ****************************************************************************/
 
-static ssize_t devnull_writev(FAR struct file *filep,
-                              FAR const struct uio *uio)
+static ssize_t devnull_writev(FAR struct file *filep, FAR struct uio *uio)
 {
   UNUSED(filep);
 
-  return uio_total_len(uio); /* Say that everything was written */
+  ssize_t ret = uio_resid(uio); /* Say that everything was written */
+  if (ret >= 0)
+    {
+      uio_advance(uio, ret);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
