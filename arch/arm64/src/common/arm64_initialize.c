@@ -45,6 +45,11 @@
 #ifdef CONFIG_ARCH_FPU
 #include "arm64_fpu.h"
 #endif
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+#include "arm64_hwdebug.h"
+#endif
+
 #include "arm64_internal.h"
 #include "chip.h"
 
@@ -217,5 +222,9 @@ void up_initialize(void)
   arm64_fpu_procfs_register();
 #endif
 
+#endif
+
+#ifdef CONFIG_ARCH_HAVE_DEBUG
+  arm64_hwdebug_init();
 #endif
 }
