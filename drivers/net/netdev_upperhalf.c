@@ -754,7 +754,11 @@ static inline void netdev_upper_queue_work(FAR struct net_driver_s *dev)
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
 
 #ifdef CONFIG_NETDEV_WORK_THREAD
+#  ifdef CONFIG_NETDEV_RSS
   int cpu = this_cpu();
+#  else
+  const int cpu = 0;
+#  endif
   int semcount;
 
   if (nxsem_get_value(&upper->sem[cpu], &semcount) == OK &&
