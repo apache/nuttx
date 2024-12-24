@@ -78,6 +78,8 @@ struct list_node g_msgfree;
 
 struct list_node g_msgfreeirq;
 
+spinlock_t g_msgfree_lock = SP_UNLOCKED;
+
 #endif
 
 /****************************************************************************

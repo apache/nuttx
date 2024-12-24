@@ -56,6 +56,7 @@ volatile clock_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
+spinlock_t g_basetime_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -160,7 +161,9 @@ static void clock_inittime(FAR const struct timespec *tp)
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec ts;
+  irqstate_t flags;
 
+  flags = spin_lock_irqsave(&g_basetime_lock);
   if (tp)
     {
       memcpy(&g_basetime, tp, sizeof(struct timespec));
@@ -170,7 +173,20 @@ static void clock_inittime(FAR const struct timespec *tp)
       clock_basetime(&g_basetime);
     }
 
+#ifdef CONFIG_RTC_HIRES
+  if (g_rtc_enabled)
+    {
+      up_rtc_gettime(&ts);
+      clock_timespec_subtract(&ts, &g_basetime, &ts);
+    }
+  else
+    {
+      ts.tv_sec = 0;
+      ts.tv_nsec = 0;
+    }
+#else
   clock_systime_timespec(&ts);
+#endif
 
   /* Adjust base time to hide initial timer ticks. */
 
@@ -181,6 +197,8 @@ static void clock_inittime(FAR const struct timespec *tp)
       g_basetime.tv_nsec += NSEC_PER_SEC;
       g_basetime.tv_sec--;
     }
+
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 #else
   clock_inittimekeeping(tp);
 #endif
@@ -266,13 +284,9 @@ void clock_initialize(void)
 #ifdef CONFIG_RTC
 void clock_synchronize(FAR const struct timespec *tp)
 {
-  irqstate_t flags;
-
   /* Re-initialize the time value to match the RTC */
 
-  flags = enter_critical_section();
   clock_inittime(tp);
-  leave_critical_section(flags);
 }
 #endif
 
@@ -321,7 +335,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
   /* Set the time value to match the RTC */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_basetime_lock);
 
   /* Get RTC time */
 
@@ -341,7 +355,20 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
    * bias value that we need to use to correct the base time.
    */
 
+#ifdef CONFIG_RTC_HIRES
+  if (g_rtc_enabled)
+    {
+      up_rtc_gettime(&bias);
+      clock_timespec_subtract(&bias, &g_basetime, &bias);
+    }
+  else
+    {
+      bias.tv_sec = 0;
+      bias.tv_nsec = 0;
+    }
+#else
   clock_systime_timespec(&bias);
+#endif
 
   /* Add the base time to this.  The base time is the time-of-day
    * setting.  When added to the elapsed time since the time-of-day
@@ -373,12 +400,18 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       /* Add the sleep time to correct system timer */
 
-      g_system_ticks += SEC2TICK(rtc_diff->tv_sec);
-      g_system_ticks += NSEC2TICK(rtc_diff->tv_nsec);
+      clock_t diff_ticks = SEC2TICK(rtc_diff->tv_sec) +
+                           NSEC2TICK(rtc_diff->tv_nsec);
+
+#ifdef CONFIG_SYSTEM_TIME64
+      atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, diff_ticks);
+#else
+      atomic_fetch_add((FAR atomic_t *)&g_system_ticks, diff_ticks);
+#endif
     }
 
 skip:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 }
 #endif
 
@@ -398,6 +431,10 @@ void clock_timer(void)
 {
   /* Increment the per-tick system counter */
 
-  g_system_ticks++;
+#ifdef CONFIG_SYSTEM_TIME64
+      atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, 1);
+#else
+      atomic_fetch_add((FAR atomic_t *)&g_system_ticks, 1);
+#endif
 }
 #endif
