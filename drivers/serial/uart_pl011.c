@@ -748,6 +748,7 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
   if (enable)
     {
       pl011_irq_tx_enable(sport);
+      spin_unlock_irqrestore(&sport->lock, flags);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -758,9 +759,8 @@ static void pl011_txint(FAR struct uart_dev_s *dev, bool enable)
   else
     {
       pl011_irq_tx_disable(sport);
+      spin_unlock_irqrestore(&sport->lock, flags);
     }
-
-  spin_unlock_irqrestore(&sport->lock, flags);
 }
 
 /***************************************************************************
