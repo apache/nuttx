@@ -148,7 +148,7 @@ void x86_64_ap_boot(void)
 
   x86_64_cpu_priv_set(cpu);
 
-  tcb = this_task();
+  tcb = current_task(cpu);
   UNUSED(tcb);
 
   /* Configure interrupts */
@@ -191,6 +191,8 @@ void x86_64_ap_boot(void)
     {
       __revoke_low_memory();
     }
+
+  up_update_task(tcb);
 
   /* Then transfer control to the IDLE task */
 
