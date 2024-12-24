@@ -218,7 +218,7 @@ int up_addrenv_kmap_init(void)
 
   /* When all is set and done, flush the data caches */
 
-  ARM64_DSB();
+  __MB();
 
   return OK;
 }

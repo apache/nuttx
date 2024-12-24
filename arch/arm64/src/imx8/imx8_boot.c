@@ -89,7 +89,7 @@ void arm64_el_init(void)
   if (el == 3)
     {
       write_sysreg(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC, cntfrq_el0);
-      ARM64_ISB();
+      __ISB();
     }
 }
 
