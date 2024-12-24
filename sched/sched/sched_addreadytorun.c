@@ -106,8 +106,13 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
     }
   else
     {
-      /* The new btcb was added in the middle of the ready-to-run list */
+      /* The new btcb was added in the middle of the ready-to-run list
+       * In some cases, such as setaffinity, cpu need to be used.
+       */
 
+#  ifdef CONFIG_SMP
+      btcb->cpu        = nxsched_select_cpu(btcb->affinity);
+#  endif
       btcb->task_state = TSTATE_TASK_READYTORUN;
       ret = false;
     }
