@@ -80,7 +80,7 @@
   do \
     { \
       g_cpu_irqset = 0; \
-      spin_unlock_wo_note(&g_cpu_irqlock); \
+      spin_unlock_notrace(&g_cpu_irqlock); \
     } \
   while (0)
 #endif
