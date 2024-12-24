@@ -102,6 +102,8 @@ static clock_t g_timer_tick;
 
 static unsigned int g_timer_interval;
 
+static spinlock_t g_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -377,6 +379,7 @@ static clock_t nxsched_timer_process(clock_t ticks, clock_t elapsed,
 
 static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
 {
+  irqstate_t flags;
   int ret;
 
   if (interval > 0)
@@ -387,6 +390,8 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
           interval = g_oneshot_maxticks;
         }
 #endif
+
+      flags = enter_critical_section();
 
 #ifdef CONFIG_SCHED_TICKLESS_ALARM
       /* Convert the delay to a time in the future (with respect
@@ -399,6 +404,8 @@ static clock_t nxsched_timer_start(clock_t ticks, clock_t interval)
 
       ret = up_timer_tick_start(interval);
 #endif
+
+      leave_critical_section(flags);
 
       if (ret < 0)
         {
@@ -443,18 +450,18 @@ void nxsched_alarm_tick_expiration(clock_t ticks)
 
   /* Save the time that the alarm occurred */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_wo_note(&g_lock);
   elapsed = ticks - g_timer_tick;
   g_timer_tick = ticks;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_wo_note(&g_lock, flags);
 
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_wo_note(&g_lock);
   g_timer_interval = nxsched_timer_start(ticks, nexttime);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_wo_note(&g_lock, flags);
 }
 
 void nxsched_alarm_expiration(FAR const struct timespec *ts)
@@ -494,19 +501,19 @@ void nxsched_timer_expiration(void)
 
   /* Get the interval associated with last expiration */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_wo_note(&g_lock);
   up_timer_gettick(&ticks);
   g_timer_tick = ticks;
   elapsed = g_timer_interval;
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_wo_note(&g_lock, flags);
 
   /* Process the timer ticks and set up the next interval (or not) */
 
   nexttime = nxsched_timer_process(ticks, elapsed, false);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_wo_note(&g_lock);
   g_timer_interval = nxsched_timer_start(ticks, nexttime);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_wo_note(&g_lock, flags);
 }
 #endif
 
@@ -549,6 +556,7 @@ void nxsched_timer_expiration(void)
 
 void nxsched_reassess_timer(void)
 {
+  irqstate_t flags;
   clock_t nexttime;
   clock_t ticks;
   clock_t elapsed;
@@ -565,13 +573,18 @@ void nxsched_reassess_timer(void)
 
   /* Convert this to the elapsed time and update clock tickbase */
 
+  flags = spin_lock_irqsave_wo_note(&g_lock);
   elapsed = ticks - g_timer_tick;
   g_timer_tick = ticks;
+  spin_unlock_irqrestore_wo_note(&g_lock, flags);
 
   /* Process the timer ticks and start next timer */
 
   nexttime = nxsched_timer_process(ticks, elapsed, true);
+
+  flags = spin_lock_irqsave_wo_note(&g_lock);
   g_timer_interval = nxsched_timer_start(ticks, nexttime);
+  spin_unlock_irqrestore_wo_note(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -593,9 +606,9 @@ clock_t nxsched_get_next_expired(void)
   irqstate_t flags;
   sclock_t ret;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave_wo_note(&g_lock);
   ret = g_timer_tick + g_timer_interval - clock_systime_ticks();
-  leave_critical_section(flags);
+  spin_unlock_irqrestore_wo_note(&g_lock, flags);
 
   return ret < 0 ? 0 : ret;
 }
