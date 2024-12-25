@@ -190,6 +190,7 @@ uint64_t *irq_handler(uint64_t *regs, uint64_t irq_no)
  *
  ****************************************************************************/
 
+nosanitize_address
 uint64_t *irq_xcp_regs(void)
 {
   /* This must be the simplest as possible, so we not use too much registers.
