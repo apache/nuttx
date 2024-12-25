@@ -1374,56 +1374,6 @@ int up_set_irq_type(int irq, int mode)
 }
 
 /****************************************************************************
- * Name: arm64_gic_irq_set_priority
- *
- * Description:
- *   Set the interrupt priority and type.
- *
- *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
- *   only to the current CPU.
- *
- * Input Parameters
- *   intid  - The SGI interrupt ID (0-15)
- *   prio   - The interrupt priority
- *   flags  - Bit IRQ_TYPE_EDGE is 1 if interrupt should be edge-triggered
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
-                                uint32_t flags)
-{
-  int ret;
-
-  /* Disable the interrupt */
-
-  up_disable_irq(intid);
-
-  /* Set the interrupt priority */
-
-  ret = up_prioritize_irq(intid, prio);
-  DEBUGASSERT(ret == OK);
-
-  /* Configure interrupt type */
-
-  if (!GIC_IS_SGI(intid))
-    {
-      if (flags & IRQ_TYPE_EDGE)
-        {
-          ret = up_set_irq_type(intid, IRQ_RISING_EDGE);
-          DEBUGASSERT(ret == OK);
-        }
-      else
-        {
-          ret = up_set_irq_type(intid, IRQ_HIGH_LEVEL);
-          DEBUGASSERT(ret == OK);
-        }
-    }
-}
-
-/****************************************************************************
  * Name: arm64_gic_initialize
  *
  * Description:
