@@ -140,10 +140,22 @@ static void cpuload_callback(wdparm_t arg)
 
 void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, clock_t ticks)
 {
+#ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
+  static clock_t threshold = CLOCK_MAX;
+
+  if (threshold == CLOCK_MAX)
+    {
+      threshold = (clock_t)CPULOAD_TIMECONSTANT * perf_getfreq() /
+                  CPULOAD_TICKSPERSEC;
+    }
+#else
+  static clock_t threshold = CPULOAD_TIMECONSTANT;
+#endif
+
   tcb->ticks += ticks;
   g_cpuload_total += ticks;
 
-  if (g_cpuload_total > CPULOAD_TIMECONSTANT)
+  if (g_cpuload_total > threshold)
     {
       uint32_t total = 0;
       int i;
