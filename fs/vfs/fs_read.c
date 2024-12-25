@@ -208,10 +208,16 @@ ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes)
 {
   struct iovec iov;
   struct uio uio;
+  ssize_t ret;
 
   iov.iov_base = buf;
   iov.iov_len = nbytes;
-  uio_init(&uio, &iov, 1);
+  ret = uio_init(&uio, &iov, 1);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
   return file_readv(filep, &uio);
 }
 
@@ -254,8 +260,12 @@ ssize_t nx_readv(int fd, FAR const struct iovec *iov, int iovcnt)
 
   /* Then let file_readv do all of the work. */
 
-  uio_init(&uio, iov, iovcnt);
-  ret = file_readv(filep, &uio);
+  ret = uio_init(&uio, iov, iovcnt);
+  if (ret == 0)
+    {
+      ret = file_readv(filep, &uio);
+    }
+
   fs_putfilep(filep);
   return ret;
 }

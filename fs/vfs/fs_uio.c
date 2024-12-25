@@ -35,40 +35,41 @@
 #include <errno.h>
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uio_resid
+ * Name: uio_calc_resid
  *
  * Description:
  *   Return the remaining length of data in bytes.
- *   Or -EOVERFLOW.
+ *   Or -EINVAL.
  *
  ****************************************************************************/
 
-ssize_t uio_resid(FAR const struct uio *uio)
+ssize_t uio_calc_resid(FAR const struct uio *uio)
 {
   const struct iovec *iov = uio->uio_iov;
   int iovcnt = uio->uio_iovcnt;
-  size_t offset_in_iov = uio->uio_offset_in_iov;
   size_t len = 0;
   int i;
 
   for (i = 0; i < iovcnt; i++)
     {
-      DEBUGASSERT(offset_in_iov <= iov[i].iov_len);
-      if (SSIZE_MAX - len < iov[i].iov_len - offset_in_iov)
+      if (SSIZE_MAX - len < iov[i].iov_len)
         {
-          return -EOVERFLOW;
+          return -EINVAL;
         }
 
-      len += iov[i].iov_len - offset_in_iov;
-      offset_in_iov = 0;
+      len += iov[i].iov_len;
     }
 
   return len;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: uio_advance
@@ -84,7 +85,12 @@ void uio_advance(FAR struct uio *uio, size_t sz)
   int iovcnt = uio->uio_iovcnt;
   size_t offset_in_iov = uio->uio_offset_in_iov;
 
-  DEBUGASSERT(sz <= uio_resid(uio));
+  DEBUGASSERT(sz <= SSIZE_MAX);
+  DEBUGASSERT(uio->uio_resid <= SSIZE_MAX);
+  DEBUGASSERT(sz <= uio->uio_resid);
+  DEBUGASSERT(uio->uio_offset_in_iov + uio->uio_resid ==
+              uio_calc_resid(uio));
+  uio->uio_resid -= sz;
   while (iovcnt > 0)
     {
       DEBUGASSERT(offset_in_iov <= iov->iov_len);
@@ -103,6 +109,8 @@ void uio_advance(FAR struct uio *uio, size_t sz)
   uio->uio_iov = iov;
   uio->uio_iovcnt = iovcnt;
   uio->uio_offset_in_iov = offset_in_iov;
+  DEBUGASSERT(uio->uio_offset_in_iov + uio->uio_resid ==
+              uio_calc_resid(uio));
 }
 
 /****************************************************************************
@@ -113,11 +121,22 @@ void uio_advance(FAR struct uio *uio, size_t sz)
  *
  ****************************************************************************/
 
-void uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt)
+int uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt)
 {
+  ssize_t resid;
+
   memset(uio, 0, sizeof(*uio));
   uio->uio_iov = iov;
   uio->uio_iovcnt = iovcnt;
+  resid = uio_calc_resid(uio);
+  if (resid < 0)
+    {
+      return -EINVAL;
+    }
+
+  uio->uio_resid = resid;
+  DEBUGASSERT((uio->uio_resid == 0) == (uio->uio_iovcnt == 0));
+  return 0;
 }
 
 /****************************************************************************
@@ -133,10 +152,13 @@ void uio_copyfrom(FAR struct uio *uio, size_t offset, FAR const void *buf,
 {
   FAR const struct iovec *iov = uio->uio_iov;
 
-  DEBUGASSERT(uio_resid(uio) >= 0);
-  DEBUGASSERT(len <= uio_resid(uio));
-  DEBUGASSERT(offset <= uio_resid(uio) - len);
+  DEBUGASSERT(uio->uio_resid >= 0);
+  DEBUGASSERT(uio->uio_resid <= SSIZE_MAX);
+  DEBUGASSERT(len <= uio->uio_resid);
+  DEBUGASSERT(offset <= uio->uio_resid - len);
   DEBUGASSERT(SSIZE_MAX - offset >= uio->uio_offset_in_iov);
+  DEBUGASSERT(uio->uio_offset_in_iov + uio->uio_resid ==
+              uio_calc_resid(uio));
 
   offset += uio->uio_offset_in_iov;
   while (offset > iov->iov_len)
@@ -180,10 +202,13 @@ void uio_copyto(FAR struct uio *uio, size_t offset, FAR void *buf,
 {
   FAR const struct iovec *iov = uio->uio_iov;
 
-  DEBUGASSERT(uio_resid(uio) >= 0);
-  DEBUGASSERT(len <= uio_resid(uio));
-  DEBUGASSERT(offset <= uio_resid(uio) - len);
+  DEBUGASSERT(uio->uio_resid >= 0);
+  DEBUGASSERT(uio->uio_resid <= SSIZE_MAX);
+  DEBUGASSERT(len <= uio->uio_resid);
+  DEBUGASSERT(offset <= uio->uio_resid - len);
   DEBUGASSERT(SSIZE_MAX - offset >= uio->uio_offset_in_iov);
+  DEBUGASSERT(uio->uio_offset_in_iov + uio->uio_resid ==
+              uio_calc_resid(uio));
 
   offset += uio->uio_offset_in_iov;
   while (offset > iov->iov_len)

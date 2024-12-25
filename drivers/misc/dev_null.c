@@ -88,12 +88,11 @@ static ssize_t devnull_writev(FAR struct file *filep, FAR struct uio *uio)
 {
   UNUSED(filep);
 
-  ssize_t ret = uio_resid(uio); /* Say that everything was written */
-  if (ret >= 0)
-    {
-      uio_advance(uio, ret);
-    }
+  /* Say that everything was written */
 
+  size_t ret = uio->uio_resid;
+
+  uio_advance(uio, ret);
   return ret;
 }
 

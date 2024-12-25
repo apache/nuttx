@@ -45,23 +45,13 @@ struct uio
 {
   FAR const struct iovec *uio_iov;
   int uio_iovcnt;
+  size_t uio_resid;         /* the remaining bytes in the request */
   size_t uio_offset_in_iov; /* offset in uio_iov[0].iov_base */
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: uio_resid
- *
- * Description:
- *   Return the remaining length of data in bytes.
- *   Or -EOVERFLOW.
- *
- ****************************************************************************/
-
-ssize_t uio_resid(FAR const struct uio *uio);
 
 /****************************************************************************
  * Name: uio_advance
@@ -79,9 +69,16 @@ void uio_advance(FAR struct uio *uio, size_t sz);
  * Description:
  *   Initialize the uio structure with reasonable default values.
  *
+ * Return Value:
+ *   0 on success. A negative error number on an error.
+ *
+ *   -EINVAL: The total size of the given iovec is too large.
+ *            (Note: NetBSD's readv returns EINVAL in that case.
+ *            I (yamamoto) couldn't find the specification in POSIX.)
+ *
  ****************************************************************************/
 
-void uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt);
+int uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
  * Name: uio_copyto

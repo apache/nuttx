@@ -207,10 +207,16 @@ ssize_t file_write(FAR struct file *filep, FAR const void *buf,
 {
   struct iovec iov;
   struct uio uio;
+  ssize_t ret;
 
   iov.iov_base = (FAR void *)buf;
   iov.iov_len = nbytes;
-  uio_init(&uio, &iov, 1);
+  ret = uio_init(&uio, &iov, 1);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
   return file_writev(filep, &uio);
 }
 
@@ -256,8 +262,12 @@ ssize_t nx_writev(int fd, FAR const struct iovec *iov, int iovcnt)
        * index.  Note that file_writev() will return the errno on failure.
        */
 
-      uio_init(&uio, iov, iovcnt);
-      ret = file_writev(filep, &uio);
+      ret = uio_init(&uio, iov, iovcnt);
+      if (ret == 0)
+        {
+          ret = file_writev(filep, &uio);
+        }
+
       fs_putfilep(filep);
     }
 

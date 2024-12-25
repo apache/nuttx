@@ -910,12 +910,6 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
   char ch;
   int ret;
 
-  buflen = uio_resid(uio);
-  if (buflen < 0)
-    {
-      return buflen;
-    }
-
   /* Only one user can access rxbuf->tail at a time */
 
   ret = nxmutex_lock(&dev->recv.lock);
@@ -934,6 +928,7 @@ static ssize_t uart_readv(FAR struct file *filep, FAR struct uio *uio)
    * data from the end of the buffer.
    */
 
+  buflen = uio->uio_resid;
   while (recvd < buflen)
     {
 #ifdef CONFIG_SERIAL_REMOVABLE
@@ -1424,11 +1419,7 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
       return ret;
     }
 
-  buflen = nwritten = uio_resid(uio);
-  if (nwritten < 0)
-    {
-      return nwritten;
-    }
+  buflen = nwritten = uio->uio_resid;
 
   /* Only one user can access dev->xmit.head at a time */
 
