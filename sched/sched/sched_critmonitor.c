@@ -383,9 +383,7 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_SCHED_CPULOAD_CRITMONITOR
-  clock_t tick = elapsed * CLK_TCK / perf_getfreq();
-
-  nxsched_critmon_cpuload(tcb, current, tick);
+  nxsched_critmon_cpuload(tcb, current, elapsed);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_THREADTIME
