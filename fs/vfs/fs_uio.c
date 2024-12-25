@@ -94,7 +94,7 @@ void uio_advance(FAR struct uio *uio, size_t sz)
           break;
         }
 
-      sz -= iov->iov_len;
+      sz -= iov->iov_len - offset_in_iov;
       iov++;
       iovcnt--;
       offset_in_iov = 0;
