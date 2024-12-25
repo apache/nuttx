@@ -217,12 +217,6 @@ int up_cpu_start(int cpu)
 
 void arm64_boot_secondary_c_routine(void)
 {
-  struct tcb_s *tcb = current_task(this_cpu());
-
-  /* Init idle task to percpu reg */
-
-  up_update_task(tcb);
-
 #ifdef CONFIG_ARCH_HAVE_MPU
   arm64_mpu_init(false);
 #endif
@@ -230,6 +224,14 @@ void arm64_boot_secondary_c_routine(void)
 #ifdef CONFIG_ARCH_HAVE_MMU
   arm64_mmu_init(false);
 #endif
+
+  /* We need to confirm that current_task has been initialized. */
+
+  while (!current_task(this_cpu()));
+
+  /* Init idle task to percpu reg */
+
+  up_update_task(current_task(this_cpu()));
 
   arm64_gic_secondary_init();
 
