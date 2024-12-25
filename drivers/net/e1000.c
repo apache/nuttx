@@ -1482,7 +1482,7 @@ static int e1000_probe(FAR struct pci_device_s *dev)
 #ifdef CONFIG_NET_MCASTGROUP
   /* Allocate MTA shadow */
 
-  priv->mta = kmm_zalloc(type->mta_regs);
+  priv->mta = kmm_zalloc(type->mta_regs * sizeof(*priv->mta));
   if (priv->mta == NULL)
     {
       nerr("alloc mta failed\n");
