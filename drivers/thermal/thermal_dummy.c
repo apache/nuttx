@@ -48,6 +48,7 @@ struct dummy_zone_device_s
 {
   int temperature;
   bool raising;
+  bool temp_jump;
 };
 
 struct dummy_cooling_device_s
@@ -109,9 +110,9 @@ static int dummy_cpufreq_resume (FAR struct cpufreq_policy *driver);
 
 static const struct thermal_zone_trip_s g_dummy_trips[] =
 {
-  {.name = "cpu_crit",   .temp = 90, .hyst = 10, .type = THERMAL_CRITICAL},
-  {.name = "cpu_alert1", .temp = 70, .hyst = 10, .type = THERMAL_HOT},
-  {.name = "cpu_alert0", .temp = 60, .hyst = 10, .type = THERMAL_NORMAL},
+  {.name = "cpu_crit",   .temp = 90, .hyst = 5, .type = THERMAL_CRITICAL},
+  {.name = "cpu_alert1", .temp = 70, .hyst = 5, .type = THERMAL_HOT},
+  {.name = "cpu_alert0", .temp = 60, .hyst = 5, .type = THERMAL_NORMAL},
 };
 
 static const struct thermal_zone_map_s g_dummy_maps[] =
@@ -161,6 +162,7 @@ static struct dummy_zone_device_s g_dummy_zone =
 {
   .temperature = 45,
   .raising = true,
+  .temp_jump = true,
 };
 
 /* Cooling Device - fan0 */
@@ -264,7 +266,8 @@ static int dummy_zdev_get_temp(FAR struct thermal_zone_device_s *zdev,
       s->temperature--;
     }
 
-  *temp = s->temperature;
+  *temp = s->temperature + (s->temp_jump ? 2 : -2);
+  s->temp_jump = !s->temp_jump;
   return OK;
 }
 
