@@ -81,7 +81,7 @@ void uio_advance(FAR struct uio *uio, size_t sz);
  *
  ****************************************************************************/
 
-void uio_init(FAR struct uio *uio);
+void uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt);
 
 /****************************************************************************
  * Name: uio_copyto

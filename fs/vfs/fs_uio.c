@@ -113,9 +113,11 @@ void uio_advance(FAR struct uio *uio, size_t sz)
  *
  ****************************************************************************/
 
-void uio_init(FAR struct uio *uio)
+void uio_init(FAR struct uio *uio, FAR const struct iovec *iov, int iovcnt)
 {
   memset(uio, 0, sizeof(*uio));
+  uio->uio_iov = iov;
+  uio->uio_iovcnt = iovcnt;
 }
 
 /****************************************************************************
