@@ -96,7 +96,7 @@ int up_send_smp_sched(int cpu)
 {
   /* Execute SGI2 */
 
-  arm64_gic_raise_sgi(GIC_SMP_SCHED, (1 << cpu));
+  up_trigger_irq(GIC_SMP_SCHED, (1 << cpu));
 
   return OK;
 }
