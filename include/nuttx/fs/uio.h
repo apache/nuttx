@@ -47,6 +47,10 @@ struct uio
   int uio_iovcnt;
   size_t uio_resid;         /* the remaining bytes in the request */
   size_t uio_offset_in_iov; /* offset in uio_iov[0].iov_base */
+
+#if 0 /* notyet; planned for pread/pwrite */
+  off_t uio_offset;         /* offset in the file */
+#endif
 };
 
 /****************************************************************************
