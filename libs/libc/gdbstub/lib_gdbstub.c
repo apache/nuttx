@@ -55,12 +55,8 @@
 
 #define BUFSIZE CONFIG_LIB_GDBSTUB_PKTSIZE
 
-#ifdef CONFIG_BOARD_MEMORY_RANGE
-static const struct memory_region_s g_memory_region[] =
-  {
-    CONFIG_BOARD_MEMORY_RANGE
-  };
-#endif
+#define REPBIAS 29
+#define REPSIZE (255 - REPBIAS)
 
 /****************************************************************************
  * Private Types
@@ -110,6 +106,13 @@ typedef CODE ssize_t (*gdb_format_func_t)(FAR void *buf, size_t buf_len,
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_BOARD_MEMORY_RANGE
+static const struct memory_region_s g_memory_region[] =
+{
+  CONFIG_BOARD_MEMORY_RANGE
+};
+#endif
+
 /****************************************************************************
  * Private Functions Prototypes
  ****************************************************************************/
@@ -117,13 +120,16 @@ typedef CODE ssize_t (*gdb_format_func_t)(FAR void *buf, size_t buf_len,
 /* System functions, supported by all stubs */
 
 static int gdb_getchar(FAR struct gdb_state_s *state);
-static int gdb_putchar(FAR struct gdb_state_s *state, int ch);
+static int gdb_putchar(FAR struct gdb_state_s *state, int ch,
+                       FAR char *csum);
+static void gdb_escapechar(FAR struct gdb_state_s *state, char c,
+                           FAR char *csum);
+static size_t gdb_count_repeat(FAR const char *data, size_t data_len);
 
 /* Packet functions */
 
 static int gdb_send_packet(FAR struct gdb_state_s *state);
 static int gdb_recv_packet(FAR struct gdb_state_s *state);
-static int gdb_checksum(FAR const char *buf, size_t len);
 static int gdb_recv_ack(FAR struct gdb_state_s *state);
 
 /* Data format */
@@ -132,9 +138,6 @@ static ssize_t gdb_bin2hex(FAR void *buf, size_t buf_len,
                            FAR const void *data, size_t data_len);
 static ssize_t gdb_hex2bin(FAR void *buf, size_t buf_len,
                            FAR const void *data, size_t data_len);
-static ssize_t gdb_bin2bin(FAR void *buf, size_t buf_len,
-                           FAR const void *data, size_t data_len);
-static size_t gdb_encode_rle(FAR void *data, size_t data_len);
 
 /* Packet creation helpers */
 
@@ -272,7 +275,8 @@ static int gdb_expect_addr_length(FAR struct gdb_state_s *state,
  *
  ****************************************************************************/
 
-static int gdb_putchar(FAR struct gdb_state_s *state, int ch)
+static int gdb_putchar(FAR struct gdb_state_s *state, int ch,
+                       FAR char *csum)
 {
   char tmp = ch & 0xff;
   ssize_t ret;
@@ -283,7 +287,41 @@ static int gdb_putchar(FAR struct gdb_state_s *state, int ch)
       return ret;
     }
 
+  if (csum)
+    {
+      *csum += tmp;
+    }
+
   return tmp;
+}
+
+/****************************************************************************
+ * Name: gdb_escapechar
+ *
+ * Description:
+ *   Send out a char, do escaping if necessary.
+ *   Do note that for RLE encoded data, the length byte should NOT escape.
+ *   See gdb src of remote.c remote_target::read_frame
+ *
+ * Input Parameters:
+ *   state   - The pointer to the GDB state structure.
+ *   ch      - The character to be sent.
+ *   csum    - The checksum.
+ *
+ ****************************************************************************/
+
+static void gdb_escapechar(FAR struct gdb_state_s *state, char c,
+                           FAR char *csum)
+{
+  if (c == '#' || c == '$' || c == '}' || c == '*')
+    {
+      gdb_putchar(state, '}', csum);
+      gdb_putchar(state, c ^ 0x20, csum); /* See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Overview.html#Binary-Data */
+    }
+  else
+    {
+      gdb_putchar(state, c, csum);
+    }
 }
 
 /****************************************************************************
@@ -333,11 +371,13 @@ static int gdb_getchar(FAR struct gdb_state_s *state)
 
 static int gdb_send_packet(FAR struct gdb_state_s *state)
 {
-  char buf[3];
-  char csum;
+  FAR char *buf = state->pkt_buf;
+  size_t len = state->pkt_len;
+  size_t i = 0;
+  char csum = 0;
   int ret;
 
-  ret = gdb_putchar(state, '$'); /* Send packet start */
+  ret = gdb_putchar(state, '$', NULL); /* Send packet start, no checksum */
   if (ret < 0)
     {
       return ret;
@@ -347,15 +387,15 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
     {
       size_t p;
       GDB_DEBUG(state, "-> ");
-      for (p = 0; p < state->pkt_len; p++)
+      for (p = 0; p < len; p++)
         {
-          if (isprint(state->pkt_buf[p]))
+          if (isprint(buf[p]))
             {
-              GDB_DEBUG(state, "%c", state->pkt_buf[p]);
+              GDB_DEBUG(state, "%c", buf[p]);
             }
           else
             {
-              GDB_DEBUG(state, "\\x%02x", state->pkt_buf[p] & 0xff);
+              GDB_DEBUG(state, "\\x%02x", buf[p] & 0xff);
             }
         }
 
@@ -363,27 +403,54 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
     }
 #endif
 
-  state->pkt_len = gdb_encode_rle(state->pkt_buf, state->pkt_len);
-
-  /* Send packet data */
-
-  ret = state->send(state->priv, state->pkt_buf, state->pkt_len);
-  if (ret < 0)
+  while (i < len)
     {
-      return ret;
-    }
+      const char c = buf[i];
+      size_t count = gdb_count_repeat(&buf[i], len - i);
 
-  /* Send the checksum */
+      i += count;
+      if (count <= 3)
+        {
+          while (count-- > 0)
+            {
+              gdb_escapechar(state, c, &csum);
+            }
+
+          continue;
+        }
+
+      gdb_escapechar(state, c, &csum);  /* The data to repeat */
+      count--;
+
+      /* Avoid special repeat count. */
+
+      count += REPBIAS;
+      if (count == '$')
+        {
+          gdb_escapechar(state, c, &csum);
+          gdb_escapechar(state, c, &csum);
+          count -= 2;
+        }
+      else if (count == '#' || count == 126)
+        {
+          gdb_escapechar(state, c, &csum);
+          count -= 1;
+        }
+
+      gdb_putchar(state, '*', &csum);
+      gdb_putchar(state, count, &csum);
+    }
 
   buf[0] = '#';
-  csum = gdb_checksum(state->pkt_buf, state->pkt_len);
-  ret = gdb_bin2hex(buf + 1, sizeof(buf) - 1, &csum, 1);
+  ret = gdb_bin2hex(buf + 1, 2, &csum, 1);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = state->send(state->priv, buf, sizeof(buf));
+  /* Send the end marker and checksum */
+
+  ret = state->send(state->priv, buf, 3);
   if (ret < 0)
     {
       return ret;
@@ -411,6 +478,8 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
 
 static int gdb_recv_packet(FAR struct gdb_state_s *state)
 {
+  bool escaping = false;
+  char expected;
   char buf[2];
   char csum;
   int ret;
@@ -442,6 +511,7 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
 
       /* Read until checksum */
 
+      csum = 0;
       state->pkt_len = 0;
       while (1)
         {
@@ -450,22 +520,36 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
             {
               return ret;
             }
+          else if (ret == '}')
+            {
+              csum += ret;
+              escaping = true;
+              continue;
+            }
+          else if (escaping)
+            {
+              csum += ret;
+              ret ^= 0x20;
+              escaping = false;
+            }
           else if (ret == '#') /* End of packet */
             {
               break;
             }
-          else /* Check for space */
+          else
             {
-              if (state->pkt_len >= sizeof(state->pkt_buf))
-                {
-                  GDB_DEBUG(state, "packet buffer overflow\n");
-                  return -EOVERFLOW;
-                }
-
-              /* Store character and update checksum */
-
-              state->pkt_buf[state->pkt_len++] = (char)ret;
+              csum += ret;
             }
+
+          /* Normal or escaped data */
+
+          if (state->pkt_len >= sizeof(state->pkt_buf))
+            {
+              GDB_DEBUG(state, "packet buffer overflow\n");
+              return -EOVERFLOW;
+            }
+
+          state->pkt_buf[state->pkt_len++] = (char)ret;
         }
     }
   while (state->pkt_len == 0); /* Ignore empty packets */
@@ -496,48 +580,22 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
     }
 #endif
 
-  ret = gdb_hex2bin(&csum, 1, buf, 2);
+  ret = gdb_hex2bin(&expected, 1, buf, 2);
   if (ret < 0)
     {
       return ret;
     }
 
-  if (csum != gdb_checksum(state->pkt_buf, state->pkt_len)) /* Verify */
+  if (csum != expected) /* Verify */
     {
       GDB_DEBUG(state, "received packet with bad checksum\n");
-      gdb_putchar(state, '-'); /* Send packet nack */
+      gdb_putchar(state, '-', NULL); /* Send packet nack */
       return -EIO;
     }
 
-  gdb_putchar(state, '+'); /* Send packet ack */
+  gdb_putchar(state, '+', NULL); /* Send packet ack */
   state->pkt_next = state->pkt_buf;
   return 0;
-}
-
-/****************************************************************************
- * Name: gdb_checksum
- *
- * Description:
- *   Calculate 8-bit checksum of a buffer.
- *
- * Input Parameters:
- *   buf - The buffer to checksum.
- *
- * Returned Value:
- *   8-bit checksum
- *
- ****************************************************************************/
-
-static int gdb_checksum(FAR const char *buf, size_t len)
-{
-  char csum = 0;
-
-  while (len--)
-    {
-      csum += *buf++;
-    }
-
-  return csum;
 }
 
 /****************************************************************************
@@ -666,65 +724,6 @@ static ssize_t gdb_hex2bin(FAR void *buf, size_t buf_len,
 }
 
 /****************************************************************************
- * Name: gdb_bin2bin
- *
- * Description:
- *   Decode data from its bin-value representation to a buffer.
- *
- * Input Parameters:
- *   buf      - The buffer containing the encoded data.
- *   buf_len  - The length of the buffer.
- *   data     - The buffer to store the decoded data.
- *   data_len - The length of the data to decode.
- *
- * Returned Value:
- *     The number of bytes written to data on success.
- *    -EOVERFLOW if the output buffer is too small.
- *    -EINVAL if the input buffer is invalid.
- *
- ****************************************************************************/
-
-static ssize_t gdb_bin2bin(FAR void *buf, size_t buf_len,
-                           FAR const void *data, size_t data_len)
-{
-  FAR const char *in = data;
-  FAR char *out = buf;
-  size_t out_pos = 0;
-  size_t in_pos;
-
-  for (in_pos = 0; in_pos < data_len; in_pos++)
-    {
-      if (out_pos >= buf_len)
-        {
-          GDB_ASSERT();
-          return -EOVERFLOW; /* Output buffer overflow */
-        }
-
-      if (in[in_pos] == '}') /* The next byte is escaped! */
-        {
-          if (in_pos + 1 >= data_len)
-            {
-              /* There's an escape character, but no escaped character
-               * following the escape character.
-               */
-
-              GDB_ASSERT();
-              return -EINVAL;
-            }
-
-          in_pos++;
-          out[out_pos++] = in[in_pos] ^ 0x20;
-        }
-      else
-        {
-          out[out_pos++] = in[in_pos];
-        }
-    }
-
-  return out_pos;
-}
-
-/****************************************************************************
  * Name: gdb_count_repeat
  *
  * Description:
@@ -735,7 +734,7 @@ static ssize_t gdb_bin2bin(FAR void *buf, size_t buf_len,
  *   data_len - The length of the data to decode.
  *
  * Returned Value:
- *     The number of bytes repeated.
+ *     The number of bytes repeated, at maximum of REPSIZE.
  *
  ****************************************************************************/
 
@@ -744,80 +743,12 @@ static size_t gdb_count_repeat(FAR const char *data, size_t data_len)
   char c = data[0];
   size_t i = 1;
 
-  while (i < data_len && data[i] == c)
+  while (i < data_len && data[i] == c && i < REPSIZE)
     {
       i++;
     }
 
   return i;
-}
-
-/****************************************************************************
- * Name: gdb_encode_rle
- *
- * Description:
- *   Encode data in place using GDB RLE encoding.
- *
- * Input Parameters:
- *   data     - The buffer containing the encoded data.
- *   data_len - The length of the data to decode.
- *
- * Returned Value:
- *     The number of bytes written to data on success.
- *
- ****************************************************************************/
-
-static size_t gdb_encode_rle(FAR void *data, size_t data_len)
-{
-  static const int max_count = 127 - 29;
-  FAR char *buf = data;
-  size_t widx = 0;
-  size_t ridx = 0;
-
-  while (ridx < data_len)
-    {
-      size_t count = gdb_count_repeat(buf + ridx, data_len - ridx);
-      char c = buf[ridx];
-
-      ridx += count;
-      while (count >= max_count)
-        {
-          buf[widx++] = c;
-          buf[widx++] = '*';
-          buf[widx++] = max_count - 1 + 29;
-          count -= max_count;
-        }
-
-      if (count <= 3)
-        {
-          while (count > 0)
-            {
-              buf[widx++] = c;
-              count--;
-            }
-
-          continue;
-        }
-
-      buf[widx++] = c;
-      count--;
-      if (count + 29 == '$')
-        {
-          buf[widx++] = c;
-          buf[widx++] = c;
-          count -= 2;
-        }
-      else if (count + 29 == '#')
-        {
-          buf[widx++] = c;
-          count -= 1;
-        }
-
-      buf[widx++] = '*';
-      buf[widx++] = count + 29;
-    }
-
-  return widx;
 }
 
 /****************************************************************************
@@ -919,7 +850,15 @@ static ssize_t gdb_put_memory(FAR struct gdb_state_s *state,
 
   if (gdb_is_valid_region(state, addr, len, PF_W))
     {
-      return format((FAR void *)addr, len, buf, buf_len);
+      if (format)
+        {
+          return format((FAR void *)addr, len, buf, buf_len);
+        }
+      else
+        {
+          ret = MIN(len, buf_len);
+          memcpy((FAR void *)addr, buf, ret);
+        }
     }
 
   return ret;
@@ -1303,7 +1242,7 @@ static int gdb_write_bin_memory(FAR struct gdb_state_s *state)
     }
 
   ret = gdb_put_memory(state, state->pkt_next, gdb_remaining_len(state),
-                       addr, length, gdb_bin2bin);
+                       addr, length, NULL);
   if (ret < 0)
     {
       return ret;
