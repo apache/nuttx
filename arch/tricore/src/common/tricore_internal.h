@@ -187,6 +187,10 @@ extern uintptr_t        __A0_MEM[];    /* End+1 of .data */
  * Public Function Prototypes
  ****************************************************************************/
 
+/* Interrupt ****************************************************************/
+
+void tricore_ack_irq(int irq);
+
 /* Signal handling **********************************************************/
 
 void tricore_sigdeliver(void);
