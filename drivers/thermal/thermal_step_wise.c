@@ -152,8 +152,10 @@ static int step_wise_throttle(FAR struct thermal_zone_device_s *zdev,
   enum thermal_trend_e trend;
   unsigned int next_state;
   bool throttle = false;
+  int hyst_temp;
   int trip_temp;
 
+  thermal_zone_get_trip_hyst(zdev, trip, &hyst_temp);
   thermal_zone_get_trip_temp(zdev, trip, &trip_temp);
 
   trend = thermal_zone_get_trend(zdev);
@@ -161,6 +163,10 @@ static int step_wise_throttle(FAR struct thermal_zone_device_s *zdev,
   if (zdev->temperature > trip_temp)
     {
       throttle = true;
+    }
+  else if (zdev->temperature > trip_temp - hyst_temp)
+    {
+      return OK;
     }
 
   list_for_every_entry(&zdev->instance_list, instance,
