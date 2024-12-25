@@ -6,6 +6,7 @@
 menuconfig THERMAL
 	bool "Thermal framework"
 	default n
+	depends on SCHED_LPWORK
 	---help---
 		Enable thermal framework.
 
