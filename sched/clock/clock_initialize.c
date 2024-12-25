@@ -163,7 +163,7 @@ static void clock_inittime(FAR const struct timespec *tp)
   struct timespec ts;
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(&g_basetime_lock);
+  flags = spin_lock_irqsave_wo_note(&g_basetime_lock);
   if (tp)
     {
       memcpy(&g_basetime, tp, sizeof(struct timespec));
@@ -198,7 +198,7 @@ static void clock_inittime(FAR const struct timespec *tp)
       g_basetime.tv_sec--;
     }
 
-  spin_unlock_irqrestore(&g_basetime_lock, flags);
+  spin_unlock_irqrestore_wo_note(&g_basetime_lock, flags);
 #else
   clock_inittimekeeping(tp);
 #endif
@@ -335,7 +335,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
   /* Set the time value to match the RTC */
 
-  flags = spin_lock_irqsave(&g_basetime_lock);
+  flags = spin_lock_irqsave_wo_note(&g_basetime_lock);
 
   /* Get RTC time */
 
@@ -411,7 +411,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
     }
 
 skip:
-  spin_unlock_irqrestore(&g_basetime_lock, flags);
+  spin_unlock_irqrestore_wo_note(&g_basetime_lock, flags);
 }
 #endif
 

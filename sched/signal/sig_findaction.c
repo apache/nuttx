@@ -57,7 +57,7 @@ FAR sigactq_t *nxsig_find_action(FAR struct task_group_s *group, int signo)
        * protection.
        */
 
-      flags = spin_lock_irqsave(&group->lock);
+      flags = spin_lock_irqsave_wo_note(&group->lock);
 
       /* Search the list for a sigaction on this signal */
 
@@ -65,7 +65,7 @@ FAR sigactq_t *nxsig_find_action(FAR struct task_group_s *group, int signo)
            ((sigact) && (sigact->signo != signo));
            sigact = sigact->flink);
 
-      spin_unlock_irqrestore(&group->lock, flags);
+      spin_unlock_irqrestore_wo_note(&group->lock, flags);
     }
 
   return sigact;

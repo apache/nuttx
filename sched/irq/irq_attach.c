@@ -68,13 +68,13 @@ int irq_to_ndx(int irq)
 {
   DEBUGASSERT(g_irqmap_count < CONFIG_ARCH_NUSER_INTERRUPTS);
 
-  irqstate_t flags = spin_lock_irqsave(&g_irq_attach_lock);
+  irqstate_t flags = spin_lock_irqsave_wo_note(&g_irq_attach_lock);
   if (g_irqmap[irq] == 0)
     {
       g_irqmap[irq] = g_irqmap_count++;
     }
 
-  spin_unlock_irqrestore(&g_irq_attach_lock, flags);
+  spin_unlock_irqrestore_wo_note(&g_irq_attach_lock, flags);
   return g_irqmap[irq];
 }
 #endif
@@ -108,7 +108,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
        * to the unexpected interrupt handler.
        */
 
-      flags = spin_lock_irqsave(&g_irq_attach_lock);
+      flags = spin_lock_irqsave_wo_note(&g_irq_attach_lock);
       if (isr == NULL)
         {
           /* Disable the interrupt if we can before detaching it.  We might
@@ -142,7 +142,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
       if (is_irqchain(ndx, isr))
         {
           ret = irqchain_attach(ndx, isr, arg);
-          spin_unlock_irqrestore(&g_irq_attach_lock, flags);
+          spin_unlock_irqrestore_wo_note(&g_irq_attach_lock, flags);
           return ret;
         }
 #endif
@@ -157,7 +157,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
       g_irqvector[ndx].count   = 0;
 #endif
 
-      spin_unlock_irqrestore(&g_irq_attach_lock, flags);
+      spin_unlock_irqrestore_wo_note(&g_irq_attach_lock, flags);
       ret = OK;
     }
 

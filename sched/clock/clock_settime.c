@@ -72,7 +72,7 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
    * possible.
    */
 
-  flags = spin_lock_irqsave(&g_basetime_lock);
+  flags = spin_lock_irqsave_wo_note(&g_basetime_lock);
 
   /* Get the elapsed time since power up (in milliseconds).  This is a
    * bias value that we need to use to correct the base time.
@@ -95,7 +95,7 @@ void nxclock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 
   clock_timespec_subtract(tp, &bias, &g_basetime);
 
-  spin_unlock_irqrestore(&g_basetime_lock, flags);
+  spin_unlock_irqrestore_wo_note(&g_basetime_lock, flags);
 
   /* Setup the RTC (lo- or high-res) */
 
