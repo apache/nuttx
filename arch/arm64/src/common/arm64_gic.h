@@ -248,10 +248,6 @@
 #define GICD_ICFGR_MASK             BIT_MASK(2)
 #define GICD_ICFGR_TYPE             BIT(1)
 
-/* BIT(0) reserved for IRQ_ZERO_LATENCY */
-#define IRQ_TYPE_LEVEL              BIT(1)
-#define IRQ_TYPE_EDGE               BIT(2)
-
 #define GIC_SPI_INT_BASE            32
 #define GIC_SPI_MAX_INTID           1019
 #define GIC_IS_SPI(intid)   (((intid) >= GIC_SPI_INT_BASE) && \
@@ -260,10 +256,6 @@
 /* GITCD_IROUTER */
 #define GIC_DIST_IROUTER            0x6000
 #define IROUTER(base, n)    (base + GIC_DIST_IROUTER + (n) * 8)
-
-/* BIT(0) reserved for IRQ_ZERO_LATENCY */
-#define IRQ_TYPE_LEVEL              BIT(1)
-#define IRQ_TYPE_EDGE               BIT(2)
 
 #define IRQ_DEFAULT_PRIORITY        0xa0
 
@@ -300,8 +292,6 @@
 
 bool arm64_gic_irq_is_enabled(unsigned int intid);
 int  arm64_gic_initialize(void);
-void arm64_gic_irq_set_priority(unsigned int intid, unsigned int prio,
-                                uint32_t flags);
 
 /****************************************************************************
  * Name: arm64_decodeirq
