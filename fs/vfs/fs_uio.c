@@ -178,11 +178,6 @@ void uio_copyfrom(FAR struct uio *uio, size_t offset, FAR const void *buf,
       memcpy((FAR uint8_t *)iov->iov_base + offset, buf, blen);
 
       len -= blen;
-      if (len == 0)
-        {
-          break;
-        }
-
       buf = (const uint8_t *)buf + blen;
       iov++;
       offset = 0;
@@ -228,11 +223,6 @@ void uio_copyto(FAR struct uio *uio, size_t offset, FAR void *buf,
       memcpy(buf, (FAR const uint8_t *)iov->iov_base + offset, blen);
 
       len -= blen;
-      if (len == 0)
-        {
-          break;
-        }
-
       buf = (uint8_t *)buf + blen;
       iov++;
       offset = 0;
