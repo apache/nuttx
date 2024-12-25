@@ -29,7 +29,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#include <syslog.h>
 #include <sys/param.h>
 #include <sys/types.h>
 
@@ -38,13 +37,16 @@
 #include <nuttx/ascii.h>
 #include <nuttx/gdbstub.h>
 #include <nuttx/memoryregion.h>
+#include <nuttx/streams.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
-#  define GDB_DEBUG(...) syslog(LOG_DEBUG, ##__VA_ARGS__)
+#  define GDB_DEBUG(stat, ...) \
+          lib_sprintf((FAR struct lib_outstream_s *)&state->stream, \
+                      ##__VA_ARGS__)
 #  define GDB_ASSERT() __assert(__FILE__, __LINE__, 0)
 #else
 #  define GDB_DEBUG(...)
@@ -66,6 +68,9 @@ static const struct memory_region_s g_memory_region[] =
 
 struct gdb_state_s
 {
+#ifdef CONFIG_LIB_GDBSTUB_DEBUG
+  struct lib_syslograwstream_s stream;
+#endif
   gdb_send_func_t send;                   /* Send buffer to gdb */
   gdb_recv_func_t recv;                   /* Recv buffer from gdb */
   FAR void *priv;                         /* Private data for transport */
@@ -341,20 +346,20 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
     {
       size_t p;
-      GDB_DEBUG("-> ");
+      GDB_DEBUG(state, "-> ");
       for (p = 0; p < state->pkt_len; p++)
         {
           if (isprint(state->pkt_buf[p]))
             {
-              GDB_DEBUG("%c", state->pkt_buf[p]);
+              GDB_DEBUG(state, "%c", state->pkt_buf[p]);
             }
           else
             {
-              GDB_DEBUG("\\x%02x", state->pkt_buf[p] & 0xff);
+              GDB_DEBUG(state, "\\x%02x", state->pkt_buf[p] & 0xff);
             }
         }
 
-      GDB_DEBUG("\n");
+      GDB_DEBUG(state, "\n");
     }
 #endif
 
@@ -453,7 +458,7 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
             {
               if (state->pkt_len >= sizeof(state->pkt_buf))
                 {
-                  GDB_DEBUG("packet buffer overflow\n");
+                  GDB_DEBUG(state, "packet buffer overflow\n");
                   return -EOVERFLOW;
                 }
 
@@ -474,20 +479,20 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
 #ifdef CONFIG_LIB_GDBSTUB_DEBUG
     {
       size_t p;
-      GDB_DEBUG("<- ");
+      GDB_DEBUG(state, "<- ");
       for (p = 0; p < state->pkt_len; p++)
         {
           if (isprint(state->pkt_buf[p]))
             {
-              GDB_DEBUG("%c", state->pkt_buf[p]);
+              GDB_DEBUG(state, "%c", state->pkt_buf[p]);
             }
           else
             {
-              GDB_DEBUG("\\x%02x", state->pkt_buf[p] & 0xff);
+              GDB_DEBUG(state, "\\x%02x", state->pkt_buf[p] & 0xff);
             }
         }
 
-      GDB_DEBUG("\n");
+      GDB_DEBUG(state, "\n");
     }
 #endif
 
@@ -499,7 +504,7 @@ static int gdb_recv_packet(FAR struct gdb_state_s *state)
 
   if (csum != gdb_checksum(state->pkt_buf, state->pkt_len)) /* Verify */
     {
-      GDB_DEBUG("received packet with bad checksum\n");
+      GDB_DEBUG(state, "received packet with bad checksum\n");
       gdb_putchar(state, '-'); /* Send packet nack */
       return -EIO;
     }
@@ -562,7 +567,7 @@ static int gdb_recv_ack(FAR struct gdb_state_s *state)
       case '-': /* Packet negative acknowledged */
         return 1;
       default: /* Bad response! */
-        GDB_DEBUG("received bad packet response: 0x%2x\n", response);
+        GDB_DEBUG(state, "received bad packet response: 0x%2x\n", response);
         return -EINVAL;
     }
 }
@@ -1942,6 +1947,10 @@ FAR struct gdb_state_s *gdb_state_init(gdb_send_func_t send,
   state->recv = recv;
   state->priv = priv;
   state->monitor = monitor;
+
+#ifdef CONFIG_LIB_GDBSTUB_DEBUG
+  lib_syslograwstream_open(&state->stream);
+#endif
 
   return state;
 }
