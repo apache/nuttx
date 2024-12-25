@@ -157,21 +157,21 @@ static ssize_t gdb_put_memory(FAR struct gdb_state_s *state,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gdb_expect_seperator
+ * Name: gdb_expect_separator
  *
  * Description:
- *   Check if the next byte in the packet is a seperator.
+ *   Check if the next byte in the packet is a separator.
  *
  * Input Parameters:
  *   state - The pointer to the GDB state structure.
- *   c     - The expected seperator.
+ *   c     - The expected separator.
  *
  * Returned Value:
  *   0 on success, -EINVAL on error.
  *
  ****************************************************************************/
 
-static int gdb_expect_seperator(FAR struct gdb_state_s *state, char c)
+static int gdb_expect_separator(FAR struct gdb_state_s *state, char c)
 {
   if (!state->pkt_next || *state->pkt_next != c)
     {
@@ -213,7 +213,7 @@ static int gdb_expect_integer(FAR struct gdb_state_s *state,
 }
 
 /****************************************************************************
- * Name: gdb_expect_addr_lenth
+ * Name: gdb_expect_addr_length
  *
  * Description:
  *   Parse an address and length argument from the packet.
@@ -228,8 +228,8 @@ static int gdb_expect_integer(FAR struct gdb_state_s *state,
  *
  ****************************************************************************/
 
-static int gdb_expect_addr_lenth(FAR struct gdb_state_s *state,
-                                 FAR uintptr_t *addr, FAR size_t *length)
+static int gdb_expect_addr_length(FAR struct gdb_state_s *state,
+                                  FAR uintptr_t *addr, FAR size_t *length)
 {
   int ret;
 
@@ -239,7 +239,7 @@ static int gdb_expect_addr_lenth(FAR struct gdb_state_s *state,
       return ret;
     }
 
-  ret = gdb_expect_seperator(state, ',');
+  ret = gdb_expect_separator(state, ',');
   if (ret < 0)
     {
       return ret;
@@ -1201,7 +1201,7 @@ static int gdb_read_memory(FAR struct gdb_state_s *state)
   int ret;
 
   state->pkt_next++;
-  ret = gdb_expect_addr_lenth(state, &addr, &length);
+  ret = gdb_expect_addr_length(state, &addr, &length);
   if (ret < 0)
     {
       return ret;
@@ -1244,7 +1244,7 @@ static int gdb_write_memory(FAR struct gdb_state_s *state)
   int ret;
 
   state->pkt_next++;
-  ret = gdb_expect_addr_lenth(state, &addr, &length);
+  ret = gdb_expect_addr_length(state, &addr, &length);
   if (ret < 0)
     {
       return ret;
@@ -1285,13 +1285,13 @@ static int gdb_write_bin_memory(FAR struct gdb_state_s *state)
   int ret;
 
   state->pkt_next++;
-  ret = gdb_expect_addr_lenth(state, &addr, &length);
+  ret = gdb_expect_addr_length(state, &addr, &length);
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = gdb_expect_seperator(state, ':');
+  ret = gdb_expect_separator(state, ':');
   if (ret < 0)
     {
       return ret;
@@ -1467,7 +1467,7 @@ static int gdb_query(FAR struct gdb_state_s *state)
  *
  * Note : Comand Format: T<id>
  *        id:is the thread id.
- *        Rsponse Format: OK
+ *        Response Format: OK
  ****************************************************************************/
 
 static int gdb_is_thread_active(FAR struct gdb_state_s *state)
@@ -1510,7 +1510,7 @@ static int gdb_is_thread_active(FAR struct gdb_state_s *state)
  *
  * Note : Comand Format: Hg<id>
  *                       Hc-<id>
- *        Rsponse Format: OK
+ *        Response Format: OK
  ****************************************************************************/
 
 static int gdb_thread_context(FAR struct gdb_state_s *state)
@@ -1566,7 +1566,7 @@ static int gdb_thread_context(FAR struct gdb_state_s *state)
  *   0  if successful.
  *   Negative value on error.
  *
- * Note : Rsponse Format: T AA n1:r1;n2:r2;...
+ * Note : Response Format: T AA n1:r1;n2:r2;...
  *        The program received signal number AA
  *        n is thread id in current.
  *        r is stop reason.
@@ -1708,7 +1708,7 @@ static void gdb_debugpoint_callback(int type, FAR void *addr,
  *   Negative value on error.
  *
  * Note : Comand Format: Z/z type,addr,length
- *        Rsponse Format: OK
+ *        Response Format: OK
  *   Z is set breakpoint.
  *   z is clear breakpoint.
  *   type: 0 is software breakpoint.
@@ -1735,7 +1735,7 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
       return ret;
     }
 
-  ret = gdb_expect_seperator(state, ',');
+  ret = gdb_expect_separator(state, ',');
   if (ret < 0)
     {
       return ret;
@@ -1747,7 +1747,7 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
       return ret;
     }
 
-  ret = gdb_expect_seperator(state, ',');
+  ret = gdb_expect_separator(state, ',');
   if (ret < 0)
     {
       return ret;
@@ -1810,7 +1810,7 @@ static int gdb_debugpoint(FAR struct gdb_state_s *state, bool enable)
  *   Negative value on error.
  *
  * Note : Comand Format: s
- *        Rsponse Format: OK
+ *        Response Format: OK
  *
  ****************************************************************************/
 
@@ -1841,7 +1841,7 @@ static int gdb_step(FAR struct gdb_state_s *state)
  *   Negative value on error.
  *
  * Note : Comand Format: c
- *        Rsponse Format: OK
+ *        Response Format: OK
  *
  ****************************************************************************/
 
