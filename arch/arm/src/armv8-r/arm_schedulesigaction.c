@@ -35,6 +35,7 @@
 
 #include "arm.h"
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -92,8 +93,8 @@ void up_schedule_sigaction(struct tcb_s *tcb)
        * REVISIT:  Signal handler will run in a critical section!
        */
 
-      (tcb->sigdeliver)(tcb);
-      tcb->sigdeliver = NULL;
+      nxsig_deliver(tcb);
+      tcb->flags &= ~TCB_FLAG_SIGDELIVER;
     }
   else
     {

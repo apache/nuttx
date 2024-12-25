@@ -35,6 +35,7 @@
 #include <arch/lm32/irq.h>
 
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "lm32.h"
 
 /****************************************************************************
@@ -96,8 +97,8 @@ void up_schedule_sigaction(struct tcb_s *tcb)
         {
           /* In this case just deliver the signal now. */
 
-          (tcb->sigdeliver)(tcb);
-          tcb->sigdeliver = NULL;
+          nxsig_deliver(tcb);
+          tcb->flags &= ~TCB_FLAG_SIGDELIVER;
         }
 
       /* CASE 2:  We are in an interrupt handler AND the

@@ -35,6 +35,7 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "sim_internal.h"
 
 /****************************************************************************
@@ -63,7 +64,7 @@ void sim_sigdeliver(void)
   int16_t saved_irqcount;
   irqstate_t flags;
 #endif
-  if (NULL == (rtcb->sigdeliver))
+  if ((rtcb->flags & TCB_FLAG_SIGDELIVER) == 0)
     {
       return;
     }
@@ -76,9 +77,9 @@ void sim_sigdeliver(void)
   flags = enter_critical_section();
 #endif
 
-  sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->sigdeliver, rtcb->sigpendactionq.head);
-  DEBUGASSERT(rtcb->sigdeliver != NULL);
+  sinfo("rtcb=%p sigpendactionq.head=%p\n",
+        rtcb, rtcb->sigpendactionq.head);
+  DEBUGASSERT((rtcb->flags & TCB_FLAG_SIGDELIVER) != 0);
 
   /* NOTE: we do not save the return state for sim */
 
@@ -105,7 +106,7 @@ retry:
 
   /* Deliver the signal */
 
-  (rtcb->sigdeliver)(rtcb);
+  nxsig_deliver(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -137,7 +138,7 @@ retry:
 
   /* Allows next handler to be scheduled */
 
-  rtcb->sigdeliver = NULL;
+  rtcb->flags &= ~TCB_FLAG_SIGDELIVER;
 
   /* NOTE: we leave a critical section here for sim */
 
