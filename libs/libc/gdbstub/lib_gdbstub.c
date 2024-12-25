@@ -815,7 +815,15 @@ static ssize_t gdb_get_memory(FAR struct gdb_state_s *state,
 
   if (gdb_is_valid_region(state, addr, len, PF_R))
     {
-      return format(buf, buf_len, (FAR const void *)addr, len);
+      if (format)
+        {
+          return format(buf, buf_len, (FAR const void *)addr, len);
+        }
+      else
+        {
+          ret = MIN(len, buf_len);
+          memcpy(buf, (FAR const void *)addr, ret);
+        }
     }
 
   return ret;
@@ -1162,6 +1170,49 @@ static int gdb_read_memory(FAR struct gdb_state_s *state)
   gdb_send_packet(state);
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: gdb_read_bin_memory
+ *
+ * Description:
+ *   Read Memory (Binary) Command Format: M addr,length
+ *
+ * Input Parameters:
+ *   state   - The pointer to the GDB state structure.
+ *
+ * Returned Value:
+ *   The number of bytes read if successful.
+ *   Negative value on error.
+ *
+ * Note : Comand Format: MAAAAAAAAA,LLLLLLLL
+ *        Response Format: bXXXXXXXXYYYYYYYYY...
+ ****************************************************************************/
+
+static int gdb_read_bin_memory(FAR struct gdb_state_s *state)
+{
+  uintptr_t addr;
+  size_t length;
+  int ret;
+
+  state->pkt_next++;
+  ret = gdb_expect_addr_length(state, &addr, &length);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  state->pkt_buf[0] = 'b';
+  ret = gdb_get_memory(state, state->pkt_buf + 1, sizeof(state->pkt_buf) - 1,
+                       addr, length, NULL);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  state->pkt_len = ret + 1;
+  gdb_send_packet(state);
+  return ret + 1;
 }
 
 /****************************************************************************
@@ -1997,6 +2048,9 @@ int gdb_process(FAR struct gdb_state_s *state, int stopreason,
             break;
           case 'M': /* Write memory */
             ret = gdb_write_memory(state);
+            break;
+          case 'x': /* Read binary memory */
+            ret = gdb_read_bin_memory(state);
             break;
           case 'X': /* Write binary memory */
             ret = gdb_write_bin_memory(state);
