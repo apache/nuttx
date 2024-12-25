@@ -112,8 +112,11 @@
 #define FCX_FCXS_MASK   (0xf    << FCX_FCXS)
 #define FCX_FREE        (FCX_FCXS_MASK | FCX_FCXO_MASK) /* Free CSA manipulation */
 
+#define TRICORE_SRCNUM_PER_GPSR  8
 #define TRICORE_SRC2IRQ(src_addr) \
   (((uintptr_t)(src_addr) - (uintptr_t)&MODULE_SRC) / 4)
+#define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
+  TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
 
 /****************************************************************************
  * Public Types
