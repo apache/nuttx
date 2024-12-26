@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
@@ -387,13 +388,15 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
     }
   else if (header->command == UART_RPMSG_TTY_WRITE)
     {
+      irqstate_t flags;
+
       /* Get write-cmd, there are some data, we need receive them */
 
-      nxmutex_lock(&dev->recv.lock);
+      flags = enter_critical_section();
       priv->recv_data = data;
       uart_recvchars_dma(dev);
       priv->recv_data = NULL;
-      nxmutex_unlock(&dev->recv.lock);
+      leave_critical_section(flags);
 
       header->response = 1;
       rpmsg_send(ept, msg, sizeof(*msg));
