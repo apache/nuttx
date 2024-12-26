@@ -2776,6 +2776,7 @@ source "libs/libm/Kconfig"
 source "libs/libxx/Kconfig"
 source "libs/libdsp/Kconfig"
 source "libs/libbuiltin/Kconfig"
+source "libs/librust/Kconfig"
 endmenu
 
 menu "Open Asymmetric Multi Processing"
