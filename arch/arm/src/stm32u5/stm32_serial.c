@@ -561,7 +561,7 @@ static struct stm32_serial_s g_usart1priv =
   .rs485_dir_polarity = true,
 #    endif
 #  endif
-  .lock =             = SP_UNLOCKED,
+  .lock               = SP_UNLOCKED,
 };
 #endif
 

@@ -137,6 +137,7 @@ struct imxrt_edma_s
   /* These mutex protect the DMA channel and descriptor tables */
 
   mutex_t chlock;                 /* Protects channel table */
+  spinlock_t lock;
 #if CONFIG_IMXRT_EDMA_NTCD > 0
   sem_t dsem;                     /* Supports wait for free descriptors */
 #endif
@@ -1207,7 +1208,6 @@ int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 void imxrt_dmach_stop(DMACH_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
-  irqstate_t flags;
 
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);

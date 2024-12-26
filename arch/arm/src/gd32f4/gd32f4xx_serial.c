@@ -131,7 +131,6 @@ struct up_dev_s
   uint8_t         stop_2bits;    /* True: Configure with 2 stop bits instead of 1 */
   uint32_t        tx_gpio;       /* USART TX GPIO pin configuration */
   uint32_t        rx_gpio;       /* USART RX GPIO pin configuration */
-  spinlock_t      lock;          /* Spinlock */
 
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
   uint32_t        rts_gpio;      /* UART RTS GPIO pin configuration */
@@ -171,6 +170,7 @@ struct up_dev_s
 
   uint32_t        ie;            /* USART enabled interrupts */
   uint16_t        sr;            /* Save USART status */
+  spinlock_t      lock;          /* Spinlock */
 
   /* TX DMA state */
 
