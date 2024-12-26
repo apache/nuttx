@@ -58,6 +58,9 @@
 #define REPBIAS 29
 #define REPSIZE (255 - REPBIAS)
 
+#define IS_SPECIAL_CHARACTERS(c) \
+        ((c) == '#' || (c) == '$' || (c) == '}' || (c) == '*')
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -313,7 +316,7 @@ static int gdb_putchar(FAR struct gdb_state_s *state, int ch,
 static void gdb_escapechar(FAR struct gdb_state_s *state, char c,
                            FAR char *csum)
 {
-  if (c == '#' || c == '$' || c == '}' || c == '*')
+  if (IS_SPECIAL_CHARACTERS(c))
     {
       gdb_putchar(state, '}', csum);
       gdb_putchar(state, c ^ 0x20, csum); /* See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Overview.html#Binary-Data */
@@ -409,6 +412,19 @@ static int gdb_send_packet(FAR struct gdb_state_s *state)
       size_t count = gdb_count_repeat(&buf[i], len - i);
 
       i += count;
+
+      /* GDB cannot process repeated special characters. */
+
+      if (IS_SPECIAL_CHARACTERS(c))
+        {
+          while (count--)
+            {
+              gdb_escapechar(state, c, &csum);
+            }
+
+          continue;
+        }
+
       if (count <= 3)
         {
           while (count-- > 0)
