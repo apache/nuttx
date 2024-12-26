@@ -901,8 +901,6 @@ found:
 
   if ((tcp->flags & TCP_RST) != 0)
     {
-      FAR struct tcp_conn_s *listener = NULL;
-
       /* An RST received during the 3-way connection handshake requires
        * little more clean-up.
        */
@@ -911,33 +909,6 @@ found:
         {
           conn->tcpstateflags = TCP_CLOSED;
           nwarn("WARNING: RESET in TCP_SYN_RCVD\n");
-
-          /* Notify the listener for the connection of the reset event */
-
-#ifdef CONFIG_NET_IPv6
-#  ifdef CONFIG_NET_IPv4
-          if (domain == PF_INET6)
-#  endif
-            {
-              net_ipv6addr_copy(&uaddr.ipv6.laddr, IPv6BUF->destipaddr);
-            }
-#endif
-
-#ifdef CONFIG_NET_IPv4
-#  ifdef CONFIG_NET_IPv6
-          if (domain == PF_INET)
-#  endif
-            {
-              net_ipv4addr_copy(uaddr.ipv4.laddr,
-                                net_ip4addr_conv32(IPv4BUF->destipaddr));
-            }
-#endif
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          listener = tcp_findlistener(&uaddr, conn->lport, domain);
-#else
-          listener = tcp_findlistener(&uaddr, conn->lport);
-#endif
 
           /* We must free this TCP connection structure; this connection
            * will never be established.  There should only be one reference
@@ -955,15 +926,10 @@ found:
 
           /* Notify this connection of the reset event */
 
-          listener = conn;
+          tcp_callback(dev, conn, TCP_ABORT);
         }
 
-      /* Perform the TCP_ABORT callback and drop the packet */
-
-      if (listener != NULL)
-        {
-          tcp_callback(dev, listener, TCP_ABORT);
-        }
+      /* Drop the packet */
 
       goto drop;
     }
