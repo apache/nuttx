@@ -144,6 +144,7 @@ struct imxrt_edma_s
   /* This array describes each DMA channel */
 
   struct imxrt_dmach_s dmach[IMXRT_EDMA_NCHANNELS];
+  spinlock_t lock;                /* Spinlock */
 };
 
 /****************************************************************************
@@ -1207,7 +1208,6 @@ int imxrt_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
 void imxrt_dmach_stop(DMACH_HANDLE handle)
 {
   struct imxrt_dmach_s *dmach = (struct imxrt_dmach_s *)handle;
-  irqstate_t flags;
 
   dmainfo("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
