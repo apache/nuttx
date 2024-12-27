@@ -66,10 +66,14 @@ After that, try follwoing procedure.
 |      |               | count the time accurately or not.                                  |
 +------+---------------+--------------------------------------------------------------------+
 
-The result of porting procedure
+Porting Case Studies
 ===============================
 
-Although these depend on specific kernel version.
+These porting guides depend on specific kernel versions, as some code structures have changed over time. They will still
+provide a general idea on how to port.
 
 .. toctree::
-  port_arm_cm4.rst
+   :glob:
+   :maxdepth: 1
+
+   porting-case-studies/*
