@@ -26,6 +26,10 @@ ifeq ($(CONFIG_SAFETY),y)
 CSRCS += safety.c
 endif
 
+ifeq ($(CONFIG_SAFETY_REGISTER_MONITOR),y)
+CSRCS += reg_monitor.c
+endif
+
 # Include Safety device driver build support
 
 DEPPATH += --dep-path safety

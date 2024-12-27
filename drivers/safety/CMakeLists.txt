@@ -23,5 +23,9 @@
 if(CONFIG_SAFETY)
   set(SRCS safety.c)
 
+  if(CONFIG_SAFETY_REGISTER_MONITOR)
+    list(APPEND SRCS reg_monitor.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()

@@ -13,4 +13,16 @@ config SAFETY
 		See include/nuttx/safety/safety.h for further Safety
 		driver information.
 
+if SAFETY
+
+config SAFETY_REGISTER_MONITOR
+	bool "Register Monitor Support"
+	default n
+	---help---
+		use the Register Monitor to check whether the register has been changed.
+		If the register has been changed, the Register Monitor will send a
+		message to the Safety driver.
+
+endif # SAFETY
+
 endmenu # Safety Driver Support
