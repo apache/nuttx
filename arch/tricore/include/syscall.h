@@ -53,9 +53,9 @@
  */
 
 #ifndef CONFIG_BUILD_FLAT
-#  define CONFIG_SYS_RESERVED 8
+#  define CONFIG_SYS_RESERVED 9
 #else
-#  define CONFIG_SYS_RESERVED 4
+#  define CONFIG_SYS_RESERVED 5
 #endif
 
 /* Cortex-M system calls ****************************************************/
@@ -83,39 +83,46 @@
 #define SYS_syscall_return        (3)
 #endif /* CONFIG_LIB_SYSCALL */
 
-#ifndef CONFIG_BUILD_FLAT
 /* SYS call 4:
+ *
+ * void _assert(const char *filename, int linenum, const char *msg);
+ */
+
+#define SYS_assert_handler        (4)
+
+#ifndef CONFIG_BUILD_FLAT
+/* SYS call 5:
  *
  * void up_task_start(main_t taskentry, int argc, char *argv[])
  *        noreturn_function;
  */
 
-#define SYS_task_start            (4)
+#define SYS_task_start            (5)
 
-/* SYS call 5:
+/* SYS call 6:
  *
  * void up_pthread_start((pthread_startroutine_t startup,
  *                        pthread_startroutine_t entrypt, pthread_addr_t arg)
  *        noreturn_function
  */
 
-#define SYS_pthread_start         (5)
+#define SYS_pthread_start         (6)
 
-/* SYS call 6:
+/* SYS call 7:
  *
  * void signal_handler(_sa_sigaction_t sighand,
  *                     int signo, siginfo_t *info,
  *                     void *ucontext);
  */
 
-#define SYS_signal_handler        (6)
+#define SYS_signal_handler        (7)
 
-/* SYS call 7:
+/* SYS call 8:
  *
  * void signal_handler_return(void);
  */
 
-#define SYS_signal_handler_return (7)
+#define SYS_signal_handler_return (8)
 #endif /* !CONFIG_BUILD_FLAT */
 
 /****************************************************************************
@@ -434,6 +441,14 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   return reg0;
 }
+
+/****************************************************************************
+ * Name: up_assert
+ ****************************************************************************/
+
+#define up_assert(filename, linenum, msg) \
+    sys_call3(SYS_assert_handler, (uintptr_t)filename, \
+              (uintptr_t)linenum, (uintptr_t)msg);
 
 /****************************************************************************
  * Public Data

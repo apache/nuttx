@@ -41,46 +41,53 @@
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_BUILD_FLAT
-#  define CONFIG_SYS_RESERVED 4
+#  define CONFIG_SYS_RESERVED 5
 #else
-#  define CONFIG_SYS_RESERVED 0
+#  define CONFIG_SYS_RESERVED 1
 #endif
 
 /* system calls */
 
-#ifndef CONFIG_BUILD_FLAT
 /* SYS call 0:
+ *
+ * void _assert(const char *filename, int linenum, const char *msg);
+ */
+
+#define SYS_assert_handler          (0)
+
+#ifndef CONFIG_BUILD_FLAT
+/* SYS call 1:
  *
  * void up_task_start(main_t taskentry, int argc, char *argv[])
  *        noreturn_function;
  */
 
-#  define SYS_task_start            (0)
+#  define SYS_task_start            (1)
 
-/* SYS call 1:
+/* SYS call 2:
  *
  * void up_pthread_start((pthread_startroutine_t startup,
  *                        pthread_startroutine_t entrypt, pthread_addr_t arg)
  *        noreturn_function
  */
 
-#  define SYS_pthread_start         (1)
+#  define SYS_pthread_start         (2)
 
-/* SYS call 2:
+/* SYS call 3:
  *
  * void signal_handler(_sa_sigaction_t sighand,
  *                     int signo, siginfo_t *info,
  *                     void *ucontext);
  */
 
-#  define SYS_signal_handler        (2)
+#  define SYS_signal_handler        (3)
 
-/* SYS call 3:
+/* SYS call 4:
  *
  * void signal_handler_return(void);
  */
 
-#  define SYS_signal_handler_return (3)
+#  define SYS_signal_handler_return (4)
 
 #endif /* !CONFIG_BUILD_FLAT */
 
@@ -193,6 +200,14 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: up_assert
+ ****************************************************************************/
+
+#define up_assert(filename, linenum, msg) \
+    sys_call3(SYS_assert_handler, (uintptr_t)filename, \
+              (uintptr_t)linenum, (uintptr_t)msg);
 
 #undef EXTERN
 #ifdef __cplusplus

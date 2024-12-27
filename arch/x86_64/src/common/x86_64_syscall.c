@@ -290,6 +290,13 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 #endif  /* CONFIG_ENABLE_ALL_SIGNALS*/
 #endif  /* CONFIG_BUILD_KERNEL */
 
+      case SYS_assert_handler:
+        {
+          _assert((const char *)arg1, (int)arg2,
+                  (const char *)arg3, (void *)running_regs(), false);
+        }
+        break;
+
       /* This is not an architecture-specific system call.  If NuttX is
        * built as a standalone kernel with a system call interface, then
        * all of the additional system calls must be handled as in the

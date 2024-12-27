@@ -3083,15 +3083,6 @@ int up_get_legacy_irq(uint32_t devfn, uint8_t line, uint8_t pin);
 
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_SYSCALL
-
-/****************************************************************************
- * Name: up_assert
- ****************************************************************************/
-
-void up_assert(FAR const char *filename, int linenum, FAR const char *msg);
-#endif
-
 #ifdef CONFIG_ARCH_HAVE_MEMTAG
 
 /****************************************************************************

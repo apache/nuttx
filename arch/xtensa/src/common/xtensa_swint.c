@@ -316,6 +316,12 @@ int xtensa_swint(int irq, void *context, void *arg)
         }
         break;
 #endif
+      case SYS_assert_handler:
+        {
+          _assert((const char *)regs[REG_A3], (int)regs[REG_A4],
+                  (const char *)regs[REG_A5], (void *)running_regs(), false);
+        }
+        break;
 
       /* This is not an architecture-specific system call. If NuttX is built
        * as a standalone kernel with a system call interface, then all of the

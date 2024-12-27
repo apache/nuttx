@@ -31,6 +31,7 @@
 
 #include <nuttx/compiler.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,7 +78,7 @@
 
 #define PANIC() __assert(__ASSERT_FILE__, __ASSERT_LINE__, "panic")
 #define PANIC_WITH_REGS(msg, regs) _assert(__ASSERT_FILE__, \
-                                           __ASSERT_LINE__, msg, regs)
+                                           __ASSERT_LINE__, msg, regs, true)
 
 #define __ASSERT__(f, file, line, _f) \
   (predict_false(!(f))) ? __assert(file, line, _f) : ((void)0)
@@ -184,7 +185,7 @@ extern "C"
  ****************************************************************************/
 
 void _assert(FAR const char *filename, int linenum,
-             FAR const char *msg, FAR void *regs);
+             FAR const char *msg, FAR void *regs, bool irq);
 
 /****************************************************************************
  * Name: __assert

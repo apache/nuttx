@@ -321,7 +321,12 @@ uint64_t *arm64_syscall(uint64_t *regs)
         }
         break;
 #endif /* CONFIG_BUILD_KERNEL && CONFIG_ENABLE_ALL_SIGNALS */
-
+      case SYS_assert_handler:
+        {
+          _assert((const char *)regs[REG_X1], (int)regs[REG_X2],
+                  (const char *)regs[REG_X3], (void *)running_regs(), false);
+        }
+        break;
       default:
         {
           svcerr("ERROR: Bad SYS call: 0x%" PRIx64 "\n", cmd);

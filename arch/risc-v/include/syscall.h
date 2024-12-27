@@ -79,6 +79,13 @@
 
 #define SYS_switch_context        (2)
 
+/* SYS call 3:
+ *
+ * void _assert(const char *filename, int linenum, const char *msg);
+ */
+
+#define SYS_assert_handler        (3)
+
 #ifndef CONFIG_BUILD_FLAT
 
 /* SYS call 4:
@@ -337,6 +344,14 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
   return r0;
 }
 #endif
+
+/****************************************************************************
+ * Name: up_assert
+ ****************************************************************************/
+
+#define up_assert(filename, linenum, msg) \
+    sys_call3(SYS_assert_handler, (uintptr_t)filename, \
+              (uintptr_t)linenum, (uintptr_t)msg);
 
 #undef EXTERN
 #ifdef __cplusplus
