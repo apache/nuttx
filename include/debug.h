@@ -761,6 +761,24 @@
 #  define sninfo      _none
 #endif
 
+#ifdef CONFIG_DEBUG_SAFETY_ERROR
+#  define saerr        _err
+#else
+#  define saerr       _none
+#endif
+
+#ifdef CONFIG_DEBUG_SAFETY_WARN
+#  define sawarn      _warn
+#else
+#  define sawarn      _none
+#endif
+
+#ifdef CONFIG_DEBUG_SAFETY_INFO
+#  define sainfo      _info
+#else
+#  define sainfo      _none
+#endif
+
 #ifdef CONFIG_DEBUG_SPI_ERROR
 #  define spierr       _err
 #else

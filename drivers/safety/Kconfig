@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Safety Driver Support"
+
+config SAFETY
+	bool "Safety Character Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" Safety driver.
+		See include/nuttx/safety/safety.h for further Safety
+		driver information.
+
+endmenu # Safety Driver Support

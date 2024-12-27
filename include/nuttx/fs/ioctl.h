@@ -114,6 +114,7 @@
 #define _EEPIOCBASE     (0x4600) /* EEPROM driver ioctl commands */
 #define _PTPBASE        (0x4700) /* PTP ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
+#define _SAFETYBASE     (0x8c00) /* Safety modules ioctl commands */
 
 /* boardctl() commands share the same number space */
 
@@ -806,6 +807,11 @@
 
 #define _PTPIOCVALID(c)       (_IOC_TYPE(c)==_PTPBASE)
 #define _PTPIOC(nr)           _IOC(_PTPBASE,nr)
+
+/* Safety driver ioctl definitions ******************************************/
+
+#define _SAFETYIOCVALID(c) (_IOC_TYPE(c)==_SAFETYBASE)
+#define _SAFETYIOC(nr)     _IOC(_SAFETYBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
