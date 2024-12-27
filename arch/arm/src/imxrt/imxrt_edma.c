@@ -145,6 +145,7 @@ struct imxrt_edma_s
   /* This array describes each DMA channel */
 
   struct imxrt_dmach_s dmach[IMXRT_EDMA_NCHANNELS];
+  spinlock_t lock;                /* Spinlock */
 };
 
 /****************************************************************************
