@@ -53,9 +53,9 @@
  */
 
 #ifndef CONFIG_BUILD_FLAT
-#  define CONFIG_SYS_RESERVED 9
+#  define CONFIG_SYS_RESERVED 10
 #else
-#  define CONFIG_SYS_RESERVED 5
+#  define CONFIG_SYS_RESERVED 6
 #endif
 
 /* Xtensa system calls ******************************************************/
@@ -90,7 +90,7 @@
 
 #ifdef CONFIG_LIB_SYSCALL
 
-/* SYS call 3:
+/* SYS call 4:
  *
  * void xtensa_syscall_return(void);
  */
@@ -98,38 +98,45 @@
 #define SYS_syscall_return        (4)
 #endif /* CONFIG_LIB_SYSCALL */
 
+/* SYS call 5:
+ *
+ * void _assert(const char *filename, int linenum, const char *msg);
+ */
+
+#define SYS_assert_handler        (5)
+
 #ifndef CONFIG_BUILD_FLAT
-/* SYS call 4:
+/* SYS call 6:
  *
  * void up_task_start(main_t taskentry, int argc, char *argv[])
  *        noreturn_function;
  */
 
-#define SYS_task_start            (5)
+#define SYS_task_start            (6)
 
-/* SYS call 5:
+/* SYS call 7:
  *
  * void up_pthread_start(pthread_trampoline_t startup,
  *                       pthread_startroutine_t entrypt, pthread_addr_t arg)
  *        noreturn_function
  */
 
-#define SYS_pthread_start         (6)
+#define SYS_pthread_start         (7)
 
-/* SYS call 6:
+/* SYS call 8:
  *
  * void signal_handler(_sa_sigaction_t sighand, int signo,
  *                     siginfo_t *info, void *ucontext);
  */
 
-#define SYS_signal_handler        (7)
+#define SYS_signal_handler        (8)
 
-/* SYS call 7:
+/* SYS call 9:
  *
  * void signal_handler_return(void);
  */
 
-#define SYS_signal_handler_return (8)
+#define SYS_signal_handler_return (9)
 #endif /* !CONFIG_BUILD_FLAT */
 
 /****************************************************************************
@@ -352,6 +359,14 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   return reg0;
 }
+
+/****************************************************************************
+ * Name: up_assert
+ ****************************************************************************/
+
+#define up_assert(filename, linenum, msg) \
+    sys_call3(SYS_assert_handler, (uintptr_t)filename, \
+              (uintptr_t)linenum, (uintptr_t)msg);
 
 #undef EXTERN
 #ifdef __cplusplus

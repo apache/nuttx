@@ -52,9 +52,9 @@
  */
 
 #ifndef CONFIG_BUILD_FLAT
-#  define CONFIG_SYS_RESERVED 4
+#  define CONFIG_SYS_RESERVED 5
 #else
-#  define CONFIG_SYS_RESERVED 3
+#  define CONFIG_SYS_RESERVED 4
 #endif
 
 /* sys_call macros **********************************************************/
@@ -89,14 +89,21 @@
   sys_call2(SYS_switch_context, (uintptr_t)saveregs, \
             (uintptr_t)restoreregs)
 
+/* SYS call 3:
+ *
+ * void _assert(const char *filename, int linenum, const char *msg);
+ */
+
+#define SYS_assert_handler (3)
+
 #ifdef CONFIG_BUILD_KERNEL
 
-/* SYS call 3:
+/* SYS call 4:
  *
  * void up_syscall_return(void);
  */
 
-#define SYS_syscall_return (3)
+#define SYS_syscall_return (4)
 #define up_syscall_return() sys_call0(SYS_syscall_return)
 
 #endif
@@ -187,6 +194,14 @@ uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
 
 uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                     uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
+
+/****************************************************************************
+ * Name: up_assert
+ ****************************************************************************/
+
+#define up_assert(filename, linenum, msg) \
+    sys_call3(SYS_assert_handler, (uintptr_t)filename, \
+              (uintptr_t)linenum, (uintptr_t)msg);
 
 #undef EXTERN
 #ifdef __cplusplus

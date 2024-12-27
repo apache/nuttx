@@ -96,7 +96,13 @@ void tricore_svcall(volatile void *trap)
         regs[REG_UPCXI] = tricore_addr2csa(tcb->xcp.regs);
         __isync();
         break;
-
+      case SYS_assert_handler:
+        {
+          _assert((const char *)regs[REG_D9], (int)regs[REG_D10],
+                  (const char *)regs[REG_D11], (void *)running_regs(),
+                  false);
+        }
+        break;
       default:
         svcerr("ERROR: Bad SYS call: %d\n", (int)regs[REG_D0]);
         break;
