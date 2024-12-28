@@ -48,6 +48,7 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/spinlock.h>
 
 #if defined(CONFIG_NET_PKT)
 #  include <nuttx/net/pkt.h>
@@ -651,6 +652,7 @@ static uint8_t g_alloc[STM32_ETH_NFREEBUFFERS *
 static struct stm32_ethmac_s g_stm32ethmac[STM32_NETHERNET];
 
 #ifdef CONFIG_STM32_ETH_PTP_RTC_HIRES
+static spinlock_t g_rtc_lock = SP_UNLOCKED;
 volatile bool g_rtc_enabled;
 static struct timespec g_stm32_eth_ptp_basetime;
 #endif
@@ -3778,10 +3780,10 @@ static void stm32_eth_ptp_convert_rxtime(struct stm32_ethmac_s *priv)
 
       /* Sample PTP and CLOCK_REALTIME close to each other */
 
-      flags = enter_critical_section();
       clock_gettime(CLOCK_REALTIME, &realtime);
+      flags = spin_lock_irqsave(&g_rtc_lock);
       ptptime = stm32_eth_ptp_gettime();
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
 
       /* Compute how much time has elapsed since packet reception
        * and add that to current time.
@@ -4308,7 +4310,10 @@ int up_rtc_initialize(void)
 
 int up_rtc_gettime(struct timespec *tp)
 {
+  irqstate_t flags;
   uint64_t timestamp;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
   timestamp = stm32_eth_ptp_gettime();
 
   if (timestamp == 0)
@@ -4317,12 +4322,14 @@ int up_rtc_gettime(struct timespec *tp)
        * Normally we shouldn't end up here because g_rtc_enabled is false.
        */
 
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
       DEBUGASSERT(!g_rtc_enabled);
       return -EBUSY;
     }
 
   ptp_to_timespec(timestamp, tp);
   clock_timespec_add(tp, &g_stm32_eth_ptp_basetime, tp);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return OK;
 }
@@ -4346,6 +4353,9 @@ int up_rtc_settime(const struct timespec *tp)
 {
   struct timespec ptptime;
   uint64_t timestamp;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
   timestamp = stm32_eth_ptp_gettime();
 
   if (timestamp == 0)
@@ -4354,6 +4364,7 @@ int up_rtc_settime(const struct timespec *tp)
        * Normally we shouldn't end up here because g_rtc_enabled is false.
        */
 
+      spin_unlock_irqrestore(&g_rtc_lock, flags);
       DEBUGASSERT(!g_rtc_enabled);
       return -EBUSY;
     }
@@ -4365,6 +4376,7 @@ int up_rtc_settime(const struct timespec *tp)
 
   ptp_to_timespec(timestamp, &ptptime);
   clock_timespec_subtract(tp, &ptptime, &g_stm32_eth_ptp_basetime);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return OK;
 }

@@ -34,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 
@@ -71,6 +72,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static spinlock_t g_rtc_lock = SP_UNLOCKED;
 
 /* Callback to use when the alarm expires */
 
@@ -654,7 +657,8 @@ int sam_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 
   /* Is there already something waiting on the ALARM? */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_rtc_lock);
+  sched_lock();
   if (g_alarmcb == NULL)
     {
       /* No.. Save the callback function pointer */
@@ -732,7 +736,8 @@ int sam_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
       ret = OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
+  sched_unlock();
   return ret;
 }
 #endif
@@ -759,11 +764,13 @@ int up_rtc_gettime(struct timespec *tp)
 {
   /* This is a hack to emulate a high resolution rtc using the rtt */
 
+  irqstate_t flags;
   uint32_t rtc_cal;
   uint32_t rtc_tim;
   uint32_t rtt_val;
   struct tm t;
 
+  flags = spin_lock_irqsave(&g_rtc_lock);
   do
     {
       rtc_cal = getreg32(SAM_RTC_CALR);
@@ -774,6 +781,7 @@ int up_rtc_gettime(struct timespec *tp)
          rtc_tim != getreg32(SAM_RTC_TIMR) ||
          rtt_val != getreg32(SAM_RTT_VR));
 
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
   t.tm_sec  = rtc_bcd2bin((rtc_tim & RTC_TIMR_SEC_MASK)   >>
                            RTC_TIMR_SEC_SHIFT);
   t.tm_min  = rtc_bcd2bin((rtc_tim & RTC_TIMR_MIN_MASK)   >>
