@@ -57,3 +57,6 @@ Guides
   signaling_sem_priority_inheritance.rst
   smaller_vector_tables.rst
   port.rst
+  updating_release_system_elf.rst
+  partially_linked_elf.rst
+  fully_linked_elf.rst
