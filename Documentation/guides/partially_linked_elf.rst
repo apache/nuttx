@@ -1,8 +1,13 @@
+=================================
 ELF Programs – With Symbol Tables
 =================================
 
+.. warning:: 
+    Migrated from: 
+    https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=139629543
+
 Updating a Release System with ELF Programs – With Symbol Tables
------------------------------------------------------------------
+================================================================
 
 You can easily extend the firmware in your released, embedded system using
 ELF programs provided via a file system. For example, an SD card or, perhaps,
@@ -16,7 +21,7 @@ The files shown in this Wiki page can be downloaded
 `here <https://cwiki.apache.org/confluence/download/attachments/139629402/elfprog-wsymtab.tar.gz?version=1&modificationDate=1576735523000&api=v2>`_
 
 Creating a Symbol Table
------------------------
+=======================
 
 There are several ways to create an application symbol table. Only two are
 compatible with the example provided here:
@@ -75,7 +80,7 @@ compatible with the example provided here:
    - Include application logic to provide the symbol table. If ``CONFIG_EXAMPLES_NSH_SYMTAB=y`` is set, NSH can handle this automatically.
 
 Export Package
---------------
+==============
 
 At the time of firmware release, you should create and save an export package.
 This export package contains all the necessary files required to create
@@ -142,7 +147,7 @@ of this ZIP file are organized as follows:
    `- .config
 
 Add-On Build Directory
------------------------
+======================
 
 In order to create the add-on ELF program, you will need:
 
@@ -155,7 +160,7 @@ that non-GNU toolchains would likely require a significantly different
 Makefile and linker script.
 
 Hello Example
--------------
+=============
 
 To keep things manageable, let's use a concrete example. Suppose the ELF 
 program that we wish to add to the release code is the simple 
@@ -180,7 +185,7 @@ Let's say that we have a directory called ``addon`` that contains the following:
 
 
 Building the ELF Program
-------------------------
+========================
 
 The first step in creating the ELF program is to unzip the export 
 package. Starting in the ``addon`` directory:
@@ -209,7 +214,7 @@ the ELF program.
 
 
 The Makefile
-------------
+============
 
 To build the ELF program, simply run:
 
@@ -278,7 +283,7 @@ The Makefile used to create the ELF program is as follows:
     rm -f *.o
 
 The Linker Script
------------------
+=================
 
 The linker script that I am using in this example, gnu-elf.ld, 
 contains the following:
@@ -349,7 +354,7 @@ contains the following:
     }
 
 Replacing NSH Built-In Functions
---------------------------------
+================================
 
 Files can be executed by NSH from the command line by simply typing the name 
 of the ELF program. This requires (1) that the feature be enabled with 
@@ -397,7 +402,7 @@ successfully. The built-in version will be ignored. It has been replaced with
 the version in the file system.
 
 Tightly Coupled Memories
-------------------------
+========================
 
 Most MCUs based on ARMv7-M family processors support some kind of Tightly 
 Coupled Memory (TCM). These TCMs have somewhat different properties for 

@@ -1,5 +1,10 @@
+===============================
 ELF Programs – No Symbol Tables
 ===============================
+
+.. warning:: 
+    Migrated from: 
+    https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=139629542
 
 You can easily extend the firmware in your released, embedded system using ELF  
 programs provided via a file system (for example, an SD card or downloaded into  
@@ -13,7 +18,7 @@ Alan Carvalho de Assis has also made a video based on this example in the
 YouTube `NuttX Channel <https://www.youtube.com/watch?v=oL6KAgkTb8M>`_.
 
 Creating the Export Package
----------------------------
+===========================
 
 At the time that you release the firmware, you should create and save an  
 export package. The export package is all that you need to create  
@@ -104,7 +109,7 @@ content of this ZIP file is the following directory structure:
     `- .config
 
 The Add-On Build Directory
---------------------------
+==========================
 
 In order to create the add-on ELF program, you will need (1) the export  
 package, (2) the program build ``Makefile``, (3) a linker script used by the  
@@ -121,7 +126,7 @@ package, (2) the program build ``Makefile``, (3) a linker script used by the
    script (``mkdefines.sh``).
 
 Hello Example
--------------
+=============
 
 To keep things manageable, let's use a concrete example. Suppose the ELF  
 program that we wish to add to the release code is the single source file  
@@ -142,7 +147,7 @@ Let's say that we have a directory called ``addon`` and it contains the
 Bash script called ``mkdefines.sh`` that will create a linker script.
 
 Building the ELF Program
-------------------------
+========================
 
 The first step in creating the ELF program is to unzip the Export Package. We  
 start with our ``addon`` directory containing the following:
@@ -173,7 +178,7 @@ the content from the released NuttX code that we need to build the ELF
 program.
 
 The Makefile
-------------
+============
 
 The ELF program is created simply as:
 
@@ -261,7 +266,7 @@ Below is the ``Makefile`` used to create the ELF program:
    rm -f *.o
 
 The Linker Script
------------------
+=================
 
 Two linker scripts are used. One is a normal file (we'll call it the main  
 linker script), and the other, ``defines.ld``, is created on-the-fly as  
@@ -335,7 +340,7 @@ The main linker script, ``gnu-elf.ld``, contains the following:
    }
 
 Creating the ``defines.ld`` Linker Script
------------------------------------------
+=========================================
 
 The additional linker script ``defines.ld`` is created through a three-step  
 process:
@@ -444,7 +449,7 @@ Here is an example ``defines.ld`` created by ``mkdefines.sh``:
    printf = 0x0800aefc | 0x00000001 ;
 
 Replacing an NSH Built-In Function
-----------------------------------
+==================================
 
 Files can be executed by ``NSH`` from the command line by simply typing the  
 name of the ELF program. This requires:
@@ -486,7 +491,7 @@ replaced with the version in the file system:
    nsh>
 
 Version Dependency
-------------------
+==================
 
 .. note::
 
@@ -501,7 +506,7 @@ The alternative approach using :doc:`Symbol Tables <fully_linked_elf>` is more
 or less version independent.
 
 Tightly Coupled Memories
-------------------------
+========================
 
 Most MCUs based on ARMv7-M family processors support some kind of Tightly  
 Coupled Memory (TCM). These TCMs have somewhat different properties for  
