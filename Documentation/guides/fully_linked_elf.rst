@@ -1,6 +1,10 @@
 ELF Programs – No Symbol Tables
 ===============================
 
+.. warning:: 
+    Migrated from: 
+    https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=139629542
+
 You can easily extend the firmware in your released, embedded system using ELF  
 programs provided via a file system (for example, an SD card or downloaded into  
 on-board SPI FLASH). In order to support such post-release updates, your  

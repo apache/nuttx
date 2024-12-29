@@ -1,6 +1,10 @@
 ELF Programs – With Symbol Tables
 =================================
 
+.. warning:: 
+    Migrated from: 
+    https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=139629543
+
 Updating a Release System with ELF Programs – With Symbol Tables
 -----------------------------------------------------------------
 
