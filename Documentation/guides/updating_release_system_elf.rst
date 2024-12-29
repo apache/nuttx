@@ -6,6 +6,10 @@ Updating a Release System with ELF Programs
     Migrated from: 
     https://cwiki.apache.org/confluence/display/NUTTX/Updating+a+Release+System+with+ELF+Programs
 
+.. warning:: 
+    Migrated from: 
+    https://cwiki.apache.org/confluence/display/NUTTX/Updating+a+Release+System+with+ELF+Programs
+
 You can enhance the functionality of your released embedded system by adding
 ELF programs, which can be loaded from a file system. These programs can be
 stored on an SD card or downloaded into on-board SPI FLASH, allowing for

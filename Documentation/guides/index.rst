@@ -60,3 +60,13 @@ Guides
   updating_release_system_elf.rst
   partially_linked_elf.rst
   fully_linked_elf.rst
+  building_nuttx_with_app_out_of_src_tree.rst
+  building_uclibcpp.rst
+  custom_app_directories.rst
+  debugging_elf_loadable_modules.rst
+  multiple_nsh_sessions.rst
+  nsh_network_link_management.rst
+  ram_rom_disks.rst
+  reading_can_msgs.rst
+  remove_device_drivers_nsh.rst
+
