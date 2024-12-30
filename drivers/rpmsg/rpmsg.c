@@ -165,6 +165,10 @@ static int rpmsg_dev_ioctl(FAR struct file *filep, int cmd,
  * Public Functions
  ****************************************************************************/
 
+void rpmsg_initialize(void)
+{
+}
+
 int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
 {
   FAR struct rpmsg_s *rpmsg;
