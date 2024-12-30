@@ -45,10 +45,12 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
 int up_cpu_index(void)
 {
   return (int)riscv_mhartid();
 }
+#endif
 
 /****************************************************************************
  * Name: up_this_cpu
