@@ -45,6 +45,7 @@
 #include <nuttx/power/pm.h>
 #include <nuttx/power/regulator.h>
 #include <nuttx/reset/reset-controller.h>
+#include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/segger/rtt.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/serial/pty.h>
@@ -161,6 +162,10 @@ void drivers_initialize(void)
 
 #if defined(CONFIG_DRIVERS_NOTE)
   note_initialize();    /* Non-standard /dev/note */
+#endif
+
+#if defined(CONFIG_RPMSG)
+  rpmsg_initialize();
 #endif
 
 #if defined(CONFIG_CLK_RPMSG)
