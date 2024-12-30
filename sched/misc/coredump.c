@@ -328,7 +328,7 @@ static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
 
   if (regs != NULL)
     {
-      for (i = 0; i < nitems(status.pr_regs); i++)
+      for (i = 0; i < MIN(nitems(status.pr_regs), g_tcbinfo.regs_num); i++)
         {
           if (g_tcbinfo.reg_off.p[i] != UINT16_MAX)
             {
