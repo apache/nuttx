@@ -156,6 +156,12 @@
 #  define MM_DUMP_LEAK(dump,pid)    (false)
 #endif
 
+#if CONFIG_MM_DEFAULT_ALIGNMENT == 0
+#  define MM_ALIGN       (2 * sizeof(uintptr_t))
+#else
+#  define MM_ALIGN       CONFIG_MM_DEFAULT_ALIGNMENT
+#endif
+
 #define MM_INIT_MAGIC    0xcc
 #define MM_ALLOC_MAGIC   0xaa
 #define MM_FREE_MAGIC    0x55
