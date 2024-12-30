@@ -439,6 +439,14 @@ menuconfig WATCHDOG_AUTOMONITOR
 
 if WATCHDOG_AUTOMONITOR
 
+config WATCHDOG_TIMEOUT_NOTIFIER
+	bool "Enable watchdog timeout notifier"
+	default n
+	---help---
+		The watchdog timeout notifier chain mechanism supports users registering
+		custom callback functions, which will be called when the watchdog timer
+		managed by Auto-monitor times out.
+
 choice
 	prompt "Auto-monitor keepalive by"
 	default WATCHDOG_AUTOMONITOR_BY_WDOG
