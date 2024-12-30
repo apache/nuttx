@@ -348,6 +348,7 @@ static struct esp32_spiflash_s g_esp32_spiflash1_encrypt =
 static mutex_t g_lock = NXMUTEX_INITIALIZER;
 #ifdef CONFIG_ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
 static struct work_s g_work;
+static mutex_t g_work_lock = NXMUTEX_INITIALIZER;
 #endif
 
 static volatile bool g_flash_op_can_start = false;
@@ -1717,12 +1718,20 @@ static int esp32_async_op(enum spiflash_op_code_e opcode,
     .sem = NXSEM_INITIALIZER(0, 0)
   };
 
+  ret = nxmutex_lock(&g_work_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = work_queue(LPWORK, &g_work, esp32_spiflash_work, &work_arg, 0);
   if (ret == 0)
     {
       nxsem_wait(&work_arg.sem);
       ret = work_arg.ret;
     }
+
+  nxmutex_unlock(&g_work_lock);
 
   return ret;
 }
