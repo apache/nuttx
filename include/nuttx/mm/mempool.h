@@ -41,16 +41,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_MM_DEFAULT_ALIGNMENT == 0
-#  define MEMPOOL_ALIGN       (2 * sizeof(uintptr_t))
-#else
-#  define MEMPOOL_ALIGN       CONFIG_MM_DEFAULT_ALIGNMENT
-#endif
-
 #if CONFIG_MM_BACKTRACE >= 0
 #  define MEMPOOL_REALBLOCKSIZE(pool) (ALIGN_UP((pool)->blocksize + \
                                        sizeof(struct mempool_backtrace_s), \
-                                       MEMPOOL_ALIGN))
+                                       MM_ALIGN))
 #else
 #  define MEMPOOL_REALBLOCKSIZE(pool) ((pool)->blocksize)
 #endif
