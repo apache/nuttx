@@ -31,6 +31,20 @@
 #include <stdint.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Valid packet types for sll_pkttype */
+
+#define PACKET_HOST       0   /* To us.  */
+#define PACKET_BROADCAST  1   /* To all.  */
+#define PACKET_MULTICAST  2   /* To group.  */
+#define PACKET_OTHERHOST  3   /* To someone else.  */
+#define PACKET_OUTGOING   4   /* Originated by us . */
+#define PACKET_LOOPBACK   5
+#define PACKET_FASTROUTE  6
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
