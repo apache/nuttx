@@ -71,6 +71,19 @@
 #  endif
 #endif
 
+#if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
+#define  WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_ONESHOT
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
+#define  WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_TIMER
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WDOG)
+#define  WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_WDOG
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_WORKER)
+#define  WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_WORKER
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
+#define  WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_CAPTURE
+#elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_IDLE)
+#define  WATCHDOG_NOTIFIER_ACTION WATCHDOG_KEEPALIVE_BY_IDLE
+#endif
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -698,6 +711,22 @@ static int wdog_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: watchdog_automonitor_timeout
+ *
+ * Description:
+ *   This function can be called in the watchdog timeout interrupt handler.
+ *   If so, callbacks on the watchdog timer notify chain are called when the
+ *   watchdog timer times out.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_WATCHDOG_TIMEOUT_NOTIFIER
+void watchdog_automonitor_timeout(void)
+{
+  watchdog_notifier_call_chain(WATCHDOG_NOTIFIER_ACTION, NULL);
+}
+#endif /* CONFIG_WATCHDOG_TIMEOUT_NOTIFIER */
 
 /****************************************************************************
  * Name: watchdog_register
