@@ -171,7 +171,6 @@ struct up_dev_s
 
   uint32_t        ie;            /* USART enabled interrupts */
   uint16_t        sr;            /* Save USART status */
-  spinlock_t      lock;          /* Spinlock */
 
   /* TX DMA state */
 
