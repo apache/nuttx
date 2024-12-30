@@ -87,7 +87,7 @@
 
 /* The maximum number of unique temporary file names that can be generated */
 
-#define TMP_MAX 56800235584ull
+#define TMP_MAX 308915776
 
 #if defined(CONFIG_FS_LARGEFILE)
 #  define tmpfile64 tmpfile
