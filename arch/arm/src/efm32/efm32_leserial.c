@@ -326,7 +326,7 @@ static void efm32_restoreuartint(struct efm32_leuart_s *priv, uint32_t ien)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
-  efm32_restoreuartint_nolock(priv, len);
+  efm32_restoreuartint_nolock(priv, ien);
   spin_unlock_irqrestore(&priv->lock, flags);
 }
 

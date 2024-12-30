@@ -1871,11 +1871,27 @@ menuconfig IMXRT_FLEXSPI1
 	default n
 	select IMXRT_FLEXSPI
 
+menuconfig IMXRT_FLEXSPI1_XIP
+	bool "FLEXSPI1 is used for XIP"
+	default n
+	depends on IMXRT_FLEXSPI1
+	---help---
+		FlexSPI1 is used as XIP thus already
+		initialized by the bootloader
+
 menuconfig IMXRT_FLEXSPI2
 	bool "FLEXSPI2"
 	default n
 	select IMXRT_FLEXSPI
 	depends on IMXRT_HAVE_FLEXSPI2
+
+menuconfig IMXRT_FLEXSPI2_XIP
+	bool "FLEXSPI2 is used for XIP"
+	default n
+	depends on IMXRT_FLEXSPI2
+	---help---
+		FlexSPI2 is used as XIP thus already
+		initialized by the bootloader
 
 endmenu # FLEXSPI Peripherals
 

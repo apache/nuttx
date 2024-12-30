@@ -309,6 +309,24 @@ static int littlefs_convert_oflags(int oflags)
 }
 
 /****************************************************************************
+ * Name: littlefs_convert_path
+ ****************************************************************************/
+
+static FAR const char *littlefs_convert_path(FAR const char *path)
+{
+  /* littlefs 2.10.0 and later rejects an empty path ("").
+   * use "/" instead.
+   */
+
+  if (path[0] == '\0')
+    {
+      path = "/";
+    }
+
+  return path;
+}
+
+/****************************************************************************
  * Name: littlefs_open
  ****************************************************************************/
 
@@ -347,6 +365,7 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Try to open the file */
 
+  relpath = littlefs_convert_path(relpath);
   oflags = littlefs_convert_oflags(oflags);
   ret = littlefs_convert_result(lfs_file_open(&fs->lfs, &priv->file,
                                               relpath, oflags));
@@ -964,6 +983,7 @@ static int littlefs_opendir(FAR struct inode *mountpt,
 
   /* Call the LFS's opendir function */
 
+  relpath = littlefs_convert_path(relpath);
   ret = littlefs_convert_result(lfs_dir_open(&fs->lfs, &ldir->dir, relpath));
   if (ret < 0)
     {
@@ -1506,6 +1526,7 @@ static int littlefs_unlink(FAR struct inode *mountpt,
       return ret;
     }
 
+  relpath = littlefs_convert_path(relpath);
   ret = littlefs_convert_result(lfs_remove(&fs->lfs, relpath));
   nxmutex_unlock(&fs->lock);
 
@@ -1523,9 +1544,12 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
                           mode_t mode)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR char *path = (FAR char *)relpath;
+  FAR char *path;
   size_t len = strlen(relpath);
   int ret;
+
+  relpath = littlefs_convert_path(relpath);
+  path = (FAR char *)relpath;
 
   /* We need remove all the '/' in the end of relpath */
 
@@ -1601,6 +1625,7 @@ static int littlefs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   struct stat buf;
   int ret;
 
+  relpath = littlefs_convert_path(relpath);
   ret = littlefs_stat(mountpt, relpath, &buf);
   if (ret < 0)
     {
@@ -1643,6 +1668,8 @@ static int littlefs_rename(FAR struct inode *mountpt,
       return ret;
     }
 
+  oldrelpath = littlefs_convert_path(oldrelpath);
+  newrelpath = littlefs_convert_path(newrelpath);
   ret = littlefs_convert_result(lfs_rename(&fs->lfs, oldrelpath,
                                            newrelpath));
   nxmutex_unlock(&fs->lock);
@@ -1679,6 +1706,7 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       return ret;
     }
 
+  relpath = littlefs_convert_path(relpath);
   ret = lfs_stat(&fs->lfs, relpath, &info);
   if (ret < 0)
     {
@@ -1749,6 +1777,7 @@ static int littlefs_chstat(FAR struct inode *mountpt,
       return ret;
     }
 
+  relpath = littlefs_convert_path(relpath);
   ret = littlefs_convert_result(lfs_getattr(&fs->lfs, relpath, 0,
                                             &attr, sizeof(attr)));
   if (ret < 0)

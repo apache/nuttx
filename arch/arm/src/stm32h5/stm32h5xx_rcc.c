@@ -1205,6 +1205,15 @@ void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_CCIPR5);
 #endif
 
+      /* Configure OCTOSPI1 source clock */
+
+#if defined(STM32_RCC_CCIPR4_OCTOSPI1SEL)
+      regval = getreg32(STM32_RCC_CCIPR4);
+      regval &= ~RCC_CCIPR4_OCTOSPI1SEL_MASK;
+      regval |= STM32_RCC_CCIPR4_OCTOSPI1SEL;
+      putreg32(regval, STM32_RCC_CCIPR4);
+#endif
+
       /* Configure SPI1 source clock */
 
 #if defined(STM32_RCC_CCIPR3_SPI1SEL)

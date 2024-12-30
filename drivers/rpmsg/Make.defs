@@ -51,8 +51,8 @@ ifeq ($(CONFIG_RPMSG_PORT_UART),y)
 CSRCS += rpmsg_port_uart.c
 endif
 
-ifeq ($(CONFIG_RPMSG_VIRTIO),y)
-CSRCS += rpmsg_virtio.c
+ifeq ($(CONFIG_RPMSG_VIRTIO_LITE),y)
+CSRCS += rpmsg_virtio_lite.c
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib
 endif
 

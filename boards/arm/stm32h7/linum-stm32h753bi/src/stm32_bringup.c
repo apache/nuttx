@@ -294,10 +294,20 @@ int stm32_bringup(void)
 #ifdef CONFIG_NETDEV_LATEINIT
 
 #  ifdef CONFIG_STM32H7_FDCAN1
+
+  /* Enable and configure CAN1 */
+
+  stm32_configgpio(GPIO_CAN1_STD);
+  stm32_gpiowrite(GPIO_CAN1_STD, false);
   stm32_fdcansockinitialize(0);
 #  endif
 
 #  ifdef CONFIG_STM32H7_FDCAN2
+
+  /* Enable and configure CAN2 */
+
+  stm32_configgpio(GPIO_CAN2_STD);
+  stm32_gpiowrite(GPIO_CAN2_STD, false);
   stm32_fdcansockinitialize(1);
 #  endif
 

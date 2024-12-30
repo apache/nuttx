@@ -207,7 +207,7 @@ void esp_lowputc_enable_sysclk(const struct esp_uart_s *priv)
  *
  ****************************************************************************/
 
-void esp_lowputc_disable_all_uart_int(const struct esp_uart_s *priv,
+void esp_lowputc_disable_all_uart_int(struct esp_uart_s *priv,
                                       uint32_t *current_status)
 {
   irqstate_t flags;

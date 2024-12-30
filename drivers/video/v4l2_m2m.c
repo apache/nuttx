@@ -271,7 +271,7 @@ static int codec_reqbufs(FAR struct file *filep,
   FAR codec_file_t *cfile = filep->f_priv;
   FAR codec_type_inf_t *type_inf;
   irqstate_t flags;
-  size_t buf_size;
+  uint32_t buf_size;
   int ret = OK;
 
   if (reqbufs == NULL)
