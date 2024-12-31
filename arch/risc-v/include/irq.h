@@ -691,34 +691,16 @@ EXTERN volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 irqstate_t up_irq_enable(void);
 
+#ifdef CONFIG_ARCH_RV_CPUID_MAP
 /****************************************************************************
  * Name: up_cpu_index
  *
  * Description:
  *   Return the real core number regardless CONFIG_SMP setting
  *
- *   When CONFIG_RISCV_PERCPU_SCRATCH is enabled, this uses the percpu
- *   scratch area to store the hart ID. This is needed when the CSR_MHARTID
- *   register may not contain the actual hart ID.
- *
- *   When CONFIG_RISCV_PERCPU_SCRATCH is not enabled, this directly reads
- *   the CSR_MHARTID register. Use this version when you can guarantee
- *   CSR_MHARTID contains the actual hart ID. This is the default behavior
- *   that can be achieved by single instruction to provide better
- *   performance.
- *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-#ifdef CONFIG_RISCV_PERCPU_SCRATCH
 int up_cpu_index(void) noinstrument_function;
-#else
-noinstrument_function static inline int up_cpu_index(void)
-{
-  return READ_CSR(CSR_MHARTID);
-}
-#endif
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
  * Name: up_this_cpu
@@ -730,6 +712,14 @@ noinstrument_function static inline int up_cpu_index(void)
  ****************************************************************************/
 
 int up_this_cpu(void);
+#else
+noinstrument_function static inline int up_cpu_index(void)
+{
+  return READ_CSR(CSR_MHARTID);
+}
+
+#define up_this_cpu() up_cpu_index()
+#endif /* CONFIG_ARCH_RV_CPUID_MAP */
 
 /****************************************************************************
  * Inline Functions

@@ -52,7 +52,7 @@ ifeq ($(CONFIG_SMP),y)
 CMN_CSRCS += riscv_smpcall.c riscv_cpustart.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
+ifeq ($(CONFIG_ARCH_RV_CPUID_MAP),y)
 CMN_CSRCS += riscv_cpuindex.c
 endif
 

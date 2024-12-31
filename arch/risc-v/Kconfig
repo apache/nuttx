@@ -461,19 +461,50 @@ config ARCH_RV_MMIO_BITS
 	default 32 if ARCH_RV32
 	default 64 if ARCH_RV64
 
+config ARCH_RV_CPUID_MAP
+	bool "Enable CPUID mapping"
+	default n
+	---help---
+		Enable CPUID mapping for systems where the hardware CPU IDs
+		need to be mapped to logical CPU IDs. This is useful for
+		systems with non-contiguous or non-linear CPU numbering.
+
 config ARCH_RV_HARTID_BASE
 	int "Base hartid of this cluster"
 	default 0
 	---help---
-		Some RV chips have multiple cluster of harts with
-		globally numbered mhartids, like qemu-rv, mpfs and
-		jh7110 etc.  Clusters with SMP ability can be managed
-		by NuttX. As NuttX expects cluster-local hart ids,
-		we can shift mhartid by this value to derive such
-		local ids. The SMP_NCPUS still defines number of
-		harts in the cluster. Note that we assume that global
-		ids for each cluster are continuous. Note that there
-		are chips like k230 which don't have global mhartid.
+		This setting is used in multi-cluster RISC-V systems where each hardware
+		thread (hart) has a globally unique mhartid value.
+
+		Purpose:
+		- Maps global hardware thread IDs (mhartid) to cluster-local IDs
+		- Enables NuttX to work with cluster-local hart IDs while maintaining
+		  global uniqueness across the system
+
+		Example:
+		In a system with:
+		- Cluster A: harts 100-103
+		- Cluster B: harts 200-203
+		- Cluster C: harts 300-303
+
+		If this is Cluster B's configuration, set ARCH_RV_HARTID_BASE=200.
+		NuttX will then map:
+		- Global hart 200 -> Local hart 0
+		- Global hart 201 -> Local hart 1
+		- Global hart 202 -> Local hart 2
+		- Global hart 203 -> Local hart 3
+
+		Key Points:
+		1. SMP_NCPUS defines the number of harts in this cluster
+		2. Global hart IDs within a cluster must be consecutive
+		3. Some chips like K230 don't use global mhartid numbering
+		4. The base value should match the starting mhartid of this cluster
+		5. Local hart IDs always start from 0 within each cluster
+
+		Special Cases:
+		- For chips like K230 that don't use global mhartid numbering,
+		  this value should typically be set to 0
+		- In single-cluster systems, this can usually remain at default (0)
 
 config ARCH_FAMILY
 	string
