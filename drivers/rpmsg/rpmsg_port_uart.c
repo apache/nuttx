@@ -199,6 +199,7 @@ static void rpmsg_port_uart_send_packet(FAR struct rpmsg_port_uart_s *rpuart,
   rpmsg_port_uart_wakeup(rpuart);
 
   rpmsgdump("TX Packed Data", data, datalen);
+  rpmsgdbg("Sent %zu Data\n", datalen);
 
   while (datalen > 0)
     {
@@ -308,6 +309,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
       rpmsgdbg("Connect Request Command %d\n", rpuart->connected);
       if (rpuart->connected)
         {
+          rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
           rpmsg_port_unregister(&rpuart->port);
         }
       else
@@ -315,6 +317,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
           rpuart->connected = true;
         }
 
+      rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_ALL);
       rpmsg_port_uart_send_command(rpuart, RPMSG_PORT_UART_CONNACK);
       rpmsg_port_register(&rpuart->port, rpuart->localcpu);
     }
@@ -324,6 +327,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
       if (!rpuart->connected)
         {
           rpuart->connected = true;
+          rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_ALL);
           rpmsg_port_register(&rpuart->port, rpuart->localcpu);
         }
     }
@@ -389,6 +393,7 @@ static int rpmsg_port_uart_rx_thread(int argc, FAR char *argv[])
           else if (buf[i] == RPMSG_PORT_UART_POWEROFF)
             {
               rpmsgdbg("Received poweroff command\n");
+              rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
               rpmsg_port_unregister(&rpuart->port);
               rpuart->connected = false;
               continue;
@@ -482,7 +487,11 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
 
       while ((hdr = rpmsg_port_queue_get_buffer(txq, true)) != NULL)
         {
-          rpmsg_port_uart_send_data(rpuart, hdr);
+          if (rpuart->connected)
+            {
+              rpmsg_port_uart_send_data(rpuart, hdr);
+            }
+
           rpmsg_port_queue_return_buffer(txq, hdr);
         }
     }

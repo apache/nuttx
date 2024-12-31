@@ -723,6 +723,31 @@ void rpmsg_port_queue_add_buffer(FAR struct rpmsg_port_queue_s *queue,
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_drop_packets
+ ****************************************************************************/
+
+void rpmsg_port_drop_packets(FAR struct rpmsg_port_s *rport, uint8_t type)
+{
+  FAR struct rpmsg_port_header_s *hdr;
+
+  if (type & RPMSG_PORT_DROP_TXQ)
+    {
+      while (!!(hdr = rpmsg_port_queue_get_buffer(&rport->txq, false)))
+        {
+          rpmsg_port_queue_return_buffer(&rport->txq, hdr);
+        }
+    }
+
+  if (type & RPMSG_PORT_DROP_RXQ)
+    {
+      while (!!(hdr = rpmsg_port_queue_get_buffer(&rport->rxq, false)))
+        {
+          rpmsg_port_queue_return_buffer(&rport->rxq, hdr);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: rpmsg_port_register
  ****************************************************************************/
 
