@@ -44,6 +44,8 @@ are supported:
  * :c:macro:`GPIOC_REGISTER`
  * :c:macro:`GPIOC_UNREGISTER`
  * :c:macro:`GPIOC_SETPINTYPE`
+ * :c:macro:`GPIOC_SETDEBOUNCE`
+ * :c:macro:`GPIOC_IRQ_SETMASK`
 
 
 .. c:macro:: GPIOC_WRITE
@@ -104,8 +106,8 @@ is a pointer to an instance of type :c:enum:`gpio_pintype_e`.
 
 The ``GPIOC_REGISTER`` command registers a pin to receive a signal whenever
 there is an interrupt received on an input GPIO pin. This feature, of course,
-depends upon interript GPIO support in the platform specific code. Please
-refer to the documentation describing your target platform for futher
+depends upon interrupt GPIO support in the platform specific code. Please
+refer to the documentation describing your target platform for further
 information. The argument is the pointer to :c:type:`sigevent` value, a signal
 to be generated when the interrupt occurs.
 
@@ -130,6 +132,32 @@ for pin interrupt.
 The ``GPIOC_SETPINTYPE`` command can be used to change the GPIO pin type
 (from input pin to output pin, changing interrupt edges and similar). The
 types to set are listed in :c:enum:`gpio_pintype_e`.
+
+.. c:macro:: GPIOC_SETDEBOUNCE
+
+The ``GPIOC_SETDEBOUNCE`` command sets the debounce time for a GPIO input pin.
+The argument is a pointer to an integer value, which specifies the debounce time in milliseconds.
+This helps to filter out spurious transitions (noise) on the input pin.
+
+Typical use case:
+
+.. code-block:: c
+
+  int debounce_ms = 10;
+  int ret = ioctl(fd, GPIOC_SETDEBOUNCE, (unsigned long)(uintptr_t)&debounce_ms);
+
+.. c:macro:: GPIOC_IRQ_SETMASK
+
+The ``GPIOC_IRQ_SETMASK`` command sets the interrupt mask for a GPIO pin.
+The argument is a pointer to an integer value, which specifies the mask to enable or disable specific interrupt types (such as rising/falling edge, level, etc).
+The exact meaning of the mask depends on the platform implementation.
+
+Typical use case:
+
+.. code-block:: c
+
+  int irq_mask = /* platform-specific mask value */;
+  int ret = ioctl(fd, GPIOC_IRQ_SETMASK, (unsigned long)(uintptr_t)&irq_mask);
 
 Application Example
 ~~~~~~~~~~~~~~~~~~~

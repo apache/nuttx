@@ -79,6 +79,10 @@ static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable);
 #endif
 static int gplh_setpintype(FAR struct gpio_dev_s *gpio,
                            enum gpio_pintype_e pintype);
+static int gplh_setdebounce(FAR struct gpio_dev_s *gpio,
+                            unsigned long duration);
+static int gplh_setmask(FAR struct gpio_dev_s *gpio,
+                        bool mask);
 
 /****************************************************************************
  * Private Data
@@ -98,6 +102,8 @@ static const struct gpio_operations_s g_gplh_ops =
   NULL,        /* enable */
 #endif
   gplh_setpintype,
+  gplh_setdebounce,
+  gplh_setmask,
 };
 
 /* Identifies the type of the GPIO pin */
@@ -392,6 +398,43 @@ static int gplh_setpintype(FAR struct gpio_dev_s *gpio,
     }
 
   gpio->gp_pintype = pintype;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gplh_setdebounce
+ *
+ * Description:
+ *   Set I/O expander debounce duration, unit is ns.
+ *
+ ****************************************************************************/
+
+static int gplh_setdebounce(FAR struct gpio_dev_s *gpio,
+                            unsigned long duration)
+{
+  FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
+  FAR struct ioexpander_dev_s *ioe = priv->ioe;
+  uint8_t pin = priv->pin;
+  IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_SETDEBOUNCE,
+                 (FAR void *)duration);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gplh_setmask
+ *
+ * Description:
+ *   Set I/O expander whether to enable interrupt mask
+ *
+ ****************************************************************************/
+
+static int gplh_setmask(FAR struct gpio_dev_s *gpio,
+                        bool mask)
+{
+  FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
+  FAR struct ioexpander_dev_s *ioe = priv->ioe;
+  uint8_t pin = priv->pin;
+  IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_SETMASK, (FAR void *)mask);
   return OK;
 }
 

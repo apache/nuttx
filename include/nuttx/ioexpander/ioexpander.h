@@ -82,6 +82,8 @@
 #define IOEXPANDER_OPTION_WAKEUPCFG   5  /* Configure interrupt for a pin to wake up the Soc */
 #define IOEXPANDER_WAKEUP_DISABLE     0  /* Do not cfg the pin as wake up source */
 #define IOEXPANDER_WAKEUP_ENABLE      1  /* Cfg the pin as wake up source */
+#define IOEXPANDER_OPTION_SETDEBOUNCE 6  /* Configure debounce duration */
+#define IOEXPANDER_OPTION_SETMASK     7  /* Mask the interrupter */
 
 /* Access macros ************************************************************/
 
