@@ -49,7 +49,7 @@ if(CONFIG_SMP)
   list(APPEND SRCS riscv_smpcall.c riscv_cpustart.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_MULTICPU)
+if(CONFIG_ARCH_RV_CPUID_MAP)
   list(APPEND SRCS riscv_cpuindex.c)
 endif()
 
