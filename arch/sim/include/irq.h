@@ -183,6 +183,13 @@ static inline_function bool up_interrupt_context(void)
 #define up_getusrpc(regs) \
     (((xcpt_reg_t *)((regs) ? (regs) : up_current_regs()))[JB_PC])
 
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((xcpt_reg_t *)(regs))[JB_SP])
+
 #undef EXTERN
 #ifdef __cplusplus
 }

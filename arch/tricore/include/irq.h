@@ -186,6 +186,26 @@ static inline_function bool up_interrupt_context(void)
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uintptr_t *csa = regs;
+
+  while (((uintptr_t)csa & PCXI_UL) == 0)
+    {
+      csa = tricore_csa2addr((uintptr_t)csa);
+      csa = (uintptr_t *)csa[0];
+    }
+
+  csa = tricore_csa2addr((uintptr_t)csa);
+
+  return csa[REG_SP];
+}
+
 #endif /* __ASSEMBLY__ */
 
 #undef EXTERN

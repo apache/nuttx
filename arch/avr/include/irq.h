@@ -126,6 +126,13 @@ static inline_function void up_set_current_regs(FAR uint8_t *regs)
 
 #define up_interrupt_context() (up_current_regs() != NULL)
 
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+  ((uintptr_t)((uint8_t *)(regs))[REG_R13])
+
 #undef EXTERN
 #ifdef __cplusplus
 }
