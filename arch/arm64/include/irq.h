@@ -462,6 +462,14 @@ static inline_function void up_irq_restore(irqstate_t flags)
 #define up_getusrpc(regs) \
     (((uintptr_t *)((regs) ? (regs) : running_regs()))[REG_ELR])
 
+#ifndef CONFIG_BUILD_KERNEL
+#  define up_getusrsp(regs) \
+    ((uintptr_t)((uint64_t *)(regs))[REG_SP_ELX])
+#else
+#  define up_getusrsp(regs) \
+    ((uintptr_t)((uint64_t *)(regs))[REG_SP_EL0])
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

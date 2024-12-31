@@ -128,6 +128,16 @@ static inline_function void up_set_current_regs(FAR uint8_t *regs)
 #define up_interrupt_context() (up_current_regs() != NULL)
 
 /****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint8_t *ptr = regs;
+  return (uintptr_t)(ptr[REG_SPH] << 8 | ptr[REG_SPL]);
+}
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 

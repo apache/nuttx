@@ -362,6 +362,12 @@ static always_inline_function uint32_t up_getsp(void)
   return sp;
 }
 
+static always_inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint32_t *ptr = (uint32_t *)regs;
+  return ptr[REG_SP];
+}
+
 static always_inline_function bool up_interrupt_context(void)
 {
   return getipsr() != 0;

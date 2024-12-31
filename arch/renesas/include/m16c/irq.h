@@ -350,6 +350,16 @@ static inline_function irqstate_t up_irq_enable(void)
 #define up_getusrpc(regs) \
     (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
 
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint8_t *ptr = regs;
+  return (uintptr_t)(ptr[REG_SP] << 8 | ptr[REG_SP + 1]);
+}
+
 #undef EXTERN
 #ifdef __cplusplus
 }

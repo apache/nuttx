@@ -138,6 +138,13 @@ static inline_function void up_set_current_regs(uint32_t *regs)
 #define up_getusrpc(regs) \
     (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_EPC])
 
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((uint32_t*)(regs))[REG_SP])
+
 #undef EXTERN
 #ifdef __cplusplus
 }
