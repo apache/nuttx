@@ -100,7 +100,7 @@ sim_rpmsg_virtio_get_resource(struct rpmsg_virtio_lite_s *dev)
     }
 
   rsc = &priv->shmem->rsc;
-  cmd = RPMSG_VIRTIO_RSC2CMD(rsc);
+  cmd = RPMSG_VIRTIO_LITE_RSC2CMD(rsc);
 
   if (priv->master)
     {
