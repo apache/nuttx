@@ -108,9 +108,9 @@ config RPMSG_PORT_UART_DEBUG
 endif # RPMSG_PORT_UART
 
 config RPMSG_VIRTIO_LITE
-	bool "rpmsg virtio transport support"
+	bool
 	default n
-	select RPMSG
+	select RPMSG_VIRTIO
 
 if RPMSG_VIRTIO_LITE
 
@@ -121,13 +121,6 @@ config RPMSG_VIRTIO_LITE_PRIORITY
 config RPMSG_VIRTIO_LITE_STACKSIZE
 	int "rpmsg virtio lite rx thread stack size"
 	default DEFAULT_TASK_STACKSIZE
-
-config RPMSG_VIRTIO_IVSHMEM
-	bool "rpmsg virtio lite ivshmem support"
-	default n
-	depends on PCI_IVSHMEM
-	---help---
-		This is rpmsg virtio driver based on pci ivshmem.
 
 config RPMSG_VIRTIO_LITE_PM
 	bool "rpmsg virtio lite power management"
@@ -146,6 +139,15 @@ config RPMSG_VIRTIO_LITE_PM_AUTORELAX
 	---help---
 		use wd_timer to auto relax pm
 
+endif
+
+config RPMSG_VIRTIO_IVSHMEM
+	bool "rpmsg virtio lite ivshmem support"
+	default n
+	depends on PCI_IVSHMEM
+	select RPMSG_VIRTIO_LITE
+	---help---
+		This is rpmsg virtio driver based on pci ivshmem.
 
 if RPMSG_VIRTIO_IVSHMEM
 
@@ -171,7 +173,5 @@ config RPMSG_VIRTIO_IVSHMEM_BUFFNUM
 	---help---
 		The rpmsg virtio buffer number in share memory, the RX and TX buffer number
 		are same for now.
-
-endif
 
 endif
