@@ -359,7 +359,7 @@
  ****************************************************************************/
 
 .macro  riscv_mhartid out
-#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+#if CONFIG_ARCH_RV_HARTID_BASE != 0
   csrr    \out, CSR_SCRATCH
   REGLOAD \out, RISCV_PERCPU_HARTID(\out)
 #else

@@ -367,7 +367,11 @@ int riscv_smp_call_handler(int irq, void *c, void *arg);
  *
  ****************************************************************************/
 
+#if CONFIG_ARCH_RV_HARTID_BASE != 0
 uintptr_t riscv_mhartid(void);
+#else
+#define riscv_mhartid()          (up_cpu_index())
+#endif
 
 /****************************************************************************
  * Name: riscv_hartid_to_cpuid
