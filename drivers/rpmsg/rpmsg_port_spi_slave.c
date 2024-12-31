@@ -49,10 +49,6 @@
 #  define rpmsg_port_spi_crc16(hdr) 0
 #endif
 
-#define RPMSG_PORT_SPI_DROP_TXQ     0x01
-#define RPMSG_PORT_SPI_DROP_RXQ     0x02
-#define RPMSG_PORT_SPI_DROP_ALL     0x03
-
 #define BYTES2WORDS(s,b)            ((b) / ((s)->nbits >> 3))
 
 /****************************************************************************
@@ -163,32 +159,6 @@ static const struct spi_slave_devops_s g_rpmsg_port_spi_slave_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rpmsg_port_spi_drop_packets
- ****************************************************************************/
-
-static void
-rpmsg_port_spi_drop_packets(FAR struct rpmsg_port_spi_s *rpspi, int type)
-{
-  FAR struct rpmsg_port_header_s *hdr;
-
-  if (type & RPMSG_PORT_SPI_DROP_TXQ)
-    {
-      while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.txq, false)))
-        {
-          rpmsg_port_queue_return_buffer(&rpspi->port.txq, hdr);
-        }
-    }
-
-  if (type & RPMSG_PORT_SPI_DROP_RXQ)
-    {
-      while (!!(hdr = rpmsg_port_queue_get_buffer(&rpspi->port.rxq, false)))
-        {
-          rpmsg_port_queue_return_buffer(&rpspi->port.rxq, hdr);
-        }
-    }
-}
-
-/****************************************************************************
  * Name: rpmsg_port_spi_exchange
  ****************************************************************************/
 
@@ -254,7 +224,7 @@ static void rpmsg_port_spi_notify_tx_ready(FAR struct rpmsg_port_s *port)
        * status false.
        */
 
-      rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_TXQ);
+      rpmsg_port_drop_packets(&rpspi->port, RPMSG_PORT_DROP_TXQ);
     }
 }
 
@@ -392,7 +362,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
            * when a reconnect request to be received.
            */
 
-          rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_ALL);
+          rpmsg_port_drop_packets(&rpspi->port, RPMSG_PORT_DROP_ALL);
         }
     }
   else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
@@ -423,7 +393,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
         {
           rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
-          rpmsg_port_spi_drop_packets(rpspi, RPMSG_PORT_SPI_DROP_ALL);
+          rpmsg_port_drop_packets(&rpspi->port, RPMSG_PORT_DROP_ALL);
         }
 
       rpmsg_port_queue_add_buffer(&rpspi->port.rxq, rpspi->rxhdr);
