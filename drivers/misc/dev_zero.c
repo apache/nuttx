@@ -40,10 +40,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devzero_readv(FAR struct file *filep,
-                             FAR const struct uio *uio);
-static ssize_t devzero_writev(FAR struct file *filep,
-                              FAR const struct uio *uio);
+static ssize_t devzero_readv(FAR struct file *filep, FAR struct uio *uio);
+static ssize_t devzero_writev(FAR struct file *filep, FAR struct uio *uio);
 static int     devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
 
@@ -71,42 +69,41 @@ static const struct file_operations g_devzero_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devzero_read
+ * Name: devzero_readv
  ****************************************************************************/
 
-static ssize_t devzero_readv(FAR struct file *filep,
-                             FAR const struct uio *uio)
+static ssize_t devzero_readv(FAR struct file *filep, FAR struct uio *uio)
 {
-  ssize_t total =  uio_total_len(uio);
+  size_t total = uio->uio_resid;
   FAR const struct iovec *iov = uio->uio_iov;
   int iovcnt = uio->uio_iovcnt;
   int i;
 
   UNUSED(filep);
 
-  if (total < 0)
-    {
-      return total;
-    }
-
   for (i = 0; i < iovcnt; i++)
     {
       memset(iov[i].iov_base, 0, iov[i].iov_len);
     }
 
+  uio_advance(uio, total);
+
   return total;
 }
 
 /****************************************************************************
- * Name: devzero_write
+ * Name: devzero_writev
  ****************************************************************************/
 
-static ssize_t devzero_writev(FAR struct file *filep,
-                              FAR const struct uio *uio)
+static ssize_t devzero_writev(FAR struct file *filep, FAR struct uio *uio)
 {
+  size_t total;
   UNUSED(filep);
 
-  return uio_total_len(uio);
+  total = uio->uio_resid;
+
+  uio_advance(uio, total);
+  return total;
 }
 
 /****************************************************************************
