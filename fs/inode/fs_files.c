@@ -406,7 +406,7 @@ void files_dumplist(FAR struct filelist *list)
         "PID", "FD", "FLAGS", "TYPE", "POS", "PATH"
         );
 
-  path = lib_get_pathbuffer();
+  path = lib_get_tempbuffer(PATH_MAX);
   if (path == NULL)
     {
       return;
@@ -451,7 +451,7 @@ void files_dumplist(FAR struct filelist *list)
       fs_putfilep(filep);
     }
 
-  lib_put_pathbuffer(path);
+  lib_put_tempbuffer(path);
 }
 #endif
 

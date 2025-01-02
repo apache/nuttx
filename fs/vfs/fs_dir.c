@@ -587,7 +587,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
   FAR char *path_prefix;
   int ret;
 
-  path_prefix = lib_get_pathbuffer();
+  path_prefix = lib_get_tempbuffer(PATH_MAX);
   if (path_prefix == NULL)
     {
       return -ENOMEM;
@@ -603,7 +603,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
       ret = open_mountpoint(inode, relpath, &dir);
       if (ret < 0)
         {
-          lib_put_pathbuffer(path_prefix);
+          lib_put_tempbuffer(path_prefix);
           return ret;
         }
     }
@@ -613,7 +613,7 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
       ret = open_pseudodir(inode, &dir);
       if (ret < 0)
         {
-          lib_put_pathbuffer(path_prefix);
+          lib_put_tempbuffer(path_prefix);
           return ret;
         }
     }
@@ -623,13 +623,13 @@ int dir_allocate(FAR struct file *filep, FAR const char *relpath)
   if (ret < 0)
     {
       dir->fd_path = NULL;
-      lib_put_pathbuffer(path_prefix);
+      lib_put_tempbuffer(path_prefix);
       return ret;
     }
 
   filep->f_inode = &g_dir_inode;
   filep->f_priv  = dir;
   inode_addref(&g_dir_inode);
-  lib_put_pathbuffer(path_prefix);
+  lib_put_tempbuffer(path_prefix);
   return ret;
 }

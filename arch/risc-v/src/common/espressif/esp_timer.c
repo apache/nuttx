@@ -542,7 +542,7 @@ int esp_timer_initialize(uint32_t timer_id)
         break;
     }
 
-  devpath = lib_get_pathbuffer();
+  devpath = lib_get_tempbuffer(PATH_MAX);
   if (devpath == NULL)
     {
       return -ENOMEM;
@@ -571,11 +571,11 @@ int esp_timer_initialize(uint32_t timer_id)
        * indicate the failure (implying the non-unique devpath).
        */
 
-      lib_put_pathbuffer(devpath);
+      lib_put_tempbuffer(devpath);
       return -EEXIST;
     }
 
-  lib_put_pathbuffer(devpath);
+  lib_put_tempbuffer(devpath);
   esp_setup_irq(lower->source,
                 ESP_IRQ_PRIORITY_DEFAULT,
                 ESP_IRQ_TRIGGER_LEVEL);

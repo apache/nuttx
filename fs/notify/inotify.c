@@ -881,7 +881,7 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
   FAR char *pathbuffer;
   uint32_t cookie = 0;
 
-  pathbuffer = lib_get_pathbuffer();
+  pathbuffer = lib_get_tempbuffer(PATH_MAX);
   if (pathbuffer == NULL)
     {
       return;
@@ -890,7 +890,7 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
   abspath = lib_realpath(path, pathbuffer, true);
   if (abspath == NULL)
     {
-      lib_put_pathbuffer(pathbuffer);
+      lib_put_tempbuffer(pathbuffer);
       return;
     }
 
@@ -906,7 +906,7 @@ static void notify_queue_path_event(FAR const char *path, uint32_t mask)
 
   list = inotify_get_watch_list(abspath);
   inotify_queue_parent_event(abspath, mask, cookie);
-  lib_put_pathbuffer(pathbuffer);
+  lib_put_tempbuffer(pathbuffer);
   if (list == NULL)
     {
       return;
@@ -988,7 +988,7 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
       return;
     }
 
-  pathbuffer = lib_get_pathbuffer();
+  pathbuffer = lib_get_tempbuffer(PATH_MAX);
   if (pathbuffer == NULL)
     {
       return;
@@ -997,7 +997,7 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
   ret = file_fcntl(filep, F_GETPATH, pathbuffer);
   if (ret < 0)
     {
-      lib_put_pathbuffer(pathbuffer);
+      lib_put_tempbuffer(pathbuffer);
       return;
     }
 
@@ -1008,7 +1008,7 @@ static inline void notify_queue_filep_event(FAR struct file *filep,
 
   nxmutex_lock(&g_inotify.lock);
   notify_queue_path_event(pathbuffer, mask);
-  lib_put_pathbuffer(pathbuffer);
+  lib_put_tempbuffer(pathbuffer);
   nxmutex_unlock(&g_inotify.lock);
 }
 
@@ -1368,7 +1368,7 @@ void notify_close2(FAR struct inode *inode)
 {
   FAR char *pathbuffer;
 
-  pathbuffer = lib_get_pathbuffer();
+  pathbuffer = lib_get_tempbuffer(PATH_MAX);
   if (pathbuffer == NULL)
     {
       return;
@@ -1380,7 +1380,7 @@ void notify_close2(FAR struct inode *inode)
       notify_queue_path_event(pathbuffer, IN_CLOSE_WRITE);
     }
 
-  lib_put_pathbuffer(pathbuffer);
+  lib_put_tempbuffer(pathbuffer);
   nxmutex_unlock(&g_inotify.lock);
 }
 

@@ -198,7 +198,7 @@ nl_catd catopen(FAR const char *name, int oflag)
       lang = "";
     }
 
-  buf = lib_get_pathbuffer();
+  buf = lib_get_tempbuffer(PATH_MAX);
   if (buf == NULL)
     {
       set_errno(ENOMEM);
@@ -295,12 +295,12 @@ nl_catd catopen(FAR const char *name, int oflag)
         catd = catmap(i ? buf : name);
         if (catd != MAP_FAILED)
           {
-            lib_put_pathbuffer(buf);
+            lib_put_tempbuffer(buf);
             return catd;
           }
       }
 
-  lib_put_pathbuffer(buf);
+  lib_put_tempbuffer(buf);
   set_errno(ENOENT);
   return MAP_FAILED;
 }

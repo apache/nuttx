@@ -56,7 +56,7 @@ int futimesat(int dirfd, FAR const char *path, const struct timeval tv[2])
   FAR char *fullpath;
   int ret;
 
-  fullpath = lib_get_pathbuffer();
+  fullpath = lib_get_tempbuffer(PATH_MAX);
   if (fullpath == NULL)
     {
       set_errno(ENOMEM);
@@ -66,12 +66,12 @@ int futimesat(int dirfd, FAR const char *path, const struct timeval tv[2])
   ret = lib_getfullpath(dirfd, path, fullpath, PATH_MAX);
   if (ret < 0)
     {
-      lib_put_pathbuffer(fullpath);
+      lib_put_tempbuffer(fullpath);
       set_errno(-ret);
       return ERROR;
     }
 
   ret = utimes(fullpath, tv);
-  lib_put_pathbuffer(fullpath);
+  lib_put_tempbuffer(fullpath);
   return ret;
 }
