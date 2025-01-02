@@ -53,6 +53,9 @@ struct virtio_rng_priv_s
 {
   FAR struct virtio_device *vdev;
   char                      name[NAME_MAX];
+#ifdef CONFIG_DEV_URANDOM
+  char                      uname[NAME_MAX];
+#endif
   spinlock_t                lock;
 };
 
@@ -234,10 +237,16 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
   if (g_virtio_rng_idx == 0)
     {
       strlcpy(priv->name, "/dev/random", NAME_MAX);
+#ifdef CONFIG_DEV_URANDOM
+      strlcpy(priv->uname, "/dev/urandom", NAME_MAX);
+#endif
     }
   else
     {
       snprintf(priv->name, NAME_MAX, "/dev/random%d", g_virtio_rng_idx);
+#ifdef CONFIG_DEV_URANDOM
+      snprintf(priv->uname, NAME_MAX, "/dev/urandom%d", g_virtio_rng_idx);
+#endif
     }
 
   ret = register_driver(priv->name, &g_virtio_rng_ops, 0444, priv);
@@ -246,6 +255,15 @@ static int virtio_rng_probe(FAR struct virtio_device *vdev)
       vrterr("Register NuttX driver failed, ret=%d\n", ret);
       goto err_with_virtqueue;
     }
+
+#ifdef CONFIG_DEV_URANDOM
+  ret = register_driver(priv->uname, &g_virtio_rng_ops, 0444, priv);
+  if (ret < 0)
+    {
+      vrterr("Register NuttX driver failed, ret=%d\n", ret);
+      goto err_with_virtqueue;
+    }
+#endif
 
   g_virtio_rng_idx++;
   return ret;
@@ -289,6 +307,23 @@ void weak_function devrandom_register(void)
 {
   /* Nothing, implement it here just avoid the compile error, the driver
    * /dev/random will be registered in the virtio rng driver.
+   */
+}
+#endif
+
+/****************************************************************************
+ * Name: devurandom_register
+ *
+ * Description:
+ *   Initialize the RNG hardware and register the /dev/urandom driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEV_URANDOM
+void weak_function devurandom_register(void)
+{
+  /* Nothing, implement it here just avoid the compile error, the driver
+   * /dev/urandom will be registered in the virtio rng driver.
    */
 }
 #endif
