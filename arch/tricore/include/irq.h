@@ -104,7 +104,7 @@ void up_irq_enable(void);
  * Inline functions
  ****************************************************************************/
 
-noinstrument_function static inline uintptr_t up_getsp(void)
+noinstrument_function static inline_function uintptr_t up_getsp(void)
 {
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   return (uintptr_t)__get_sp();
@@ -121,7 +121,7 @@ noinstrument_function static inline uintptr_t up_getsp(void)
  *
  ****************************************************************************/
 
-noinstrument_function static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
   return __disable_and_save();
 }
@@ -134,7 +134,8 @@ noinstrument_function static inline irqstate_t up_irq_save(void)
  *
  ****************************************************************************/
 
-noinstrument_function static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline_function
+void up_irq_restore(irqstate_t flags)
 {
   __restore(flags);
 }
