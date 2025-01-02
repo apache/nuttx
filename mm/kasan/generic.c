@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/nuttx.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
 #include <nuttx/compiler.h>
 #include <nuttx/spinlock.h>
@@ -44,10 +45,8 @@
 #define KASAN_LAST_WORD_MASK(end) \
   (UINTPTR_MAX >> (-(end) & (KASAN_BITS_PER_WORD - 1)))
 
-#define KASAN_SHADOW_SCALE (sizeof(uintptr_t))
-
 #define KASAN_SHADOW_SIZE(size) \
-  (KASAN_BYTES_PER_WORD * ((size) / KASAN_SHADOW_SCALE / KASAN_BITS_PER_WORD))
+  (KASAN_BYTES_PER_WORD * ((size) / MM_ALIGN / KASAN_BITS_PER_WORD))
 #define KASAN_REGION_SIZE(size) \
   (sizeof(struct kasan_region_s) + KASAN_SHADOW_SIZE(size))
 
@@ -87,7 +86,7 @@ kasan_mem_to_shadow(FAR const void *ptr, size_t size,
         {
           DEBUGASSERT(addr + size <= g_region[i]->end);
           addr -= g_region[i]->begin;
-          addr /= KASAN_SHADOW_SCALE;
+          addr /= MM_ALIGN;
           *bit  = addr % KASAN_BITS_PER_WORD;
           return &g_region[i]->shadow[addr / KASAN_BITS_PER_WORD];
         }
@@ -110,15 +109,15 @@ kasan_is_poisoned(FAR const void *addr, size_t size)
       return kasan_global_is_poisoned(addr, size);
     }
 
-  if (size <= KASAN_SHADOW_SCALE)
+  if (size <= MM_ALIGN)
     {
       return ((*p >> bit) & 1);
     }
 
   nbit = KASAN_BITS_PER_WORD - bit % KASAN_BITS_PER_WORD;
   mask = KASAN_FIRST_WORD_MASK(bit);
-  size = ALIGN_UP(size, KASAN_SHADOW_SCALE);
-  size /= KASAN_SHADOW_SCALE;
+  size = ALIGN_UP(size, MM_ALIGN);
+  size /= MM_ALIGN;
 
   while (size >= nbit)
     {
@@ -155,6 +154,9 @@ static void kasan_set_poison(FAR const void *addr, size_t size,
   unsigned int nbit;
   uintptr_t mask;
 
+  DEBUGASSERT((uintptr_t)addr % MM_ALIGN == 0);
+  DEBUGASSERT(size % MM_ALIGN == 0);
+
   p = kasan_mem_to_shadow(addr, size, &bit);
   if (p == NULL)
     {
@@ -163,7 +165,7 @@ static void kasan_set_poison(FAR const void *addr, size_t size,
 
   nbit = KASAN_BITS_PER_WORD - bit % KASAN_BITS_PER_WORD;
   mask = KASAN_FIRST_WORD_MASK(bit);
-  size /= KASAN_SHADOW_SCALE;
+  size /= MM_ALIGN;
 
   flags = spin_lock_irqsave(&g_lock);
   while (size >= nbit)
