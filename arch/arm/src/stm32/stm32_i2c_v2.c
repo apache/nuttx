@@ -61,7 +61,7 @@
  * Unsupported, possible future work:
  *  - More effective error reporting to higher layers
  *  - Slave operation
- *  - Support of fI2CCLK frequencies other than 8Mhz
+ *  - Support of fI2CCLK frequencies other than HSI
  *  - Polled operation (code present but untested)
  *  - SMBus support
  *  - Multi-master support
@@ -250,6 +250,19 @@
  ****************************************************************************/
 
 #undef INVALID_CLOCK_SOURCE
+
+#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+    defined(CONFIG_STM32_STM32F37XX)
+#  if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
+#    error STM32_I2C: Peripheral clock is HSI and it must be 8MHz or the speed/timing calculations need to be redone.
+#  endif
+#elif defined(CONFIG_STM32_STM32G4XXX)
+#  if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
+#    error STM32_I2C: Peripheral clock is HSI and it must be 16MHz or the speed/timing calculations need to be redone.
+#  endif
+#else
+#  error STM32_I2C: Device not Supported.
+#endif
 
 #warning TODO: check I2C clock source. It must be HSI!
 
@@ -2705,11 +2718,6 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;  /* private data of device with multiple instances */
   struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
-
-#if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
-#  warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
-  return NULL;
-#endif
 
   /* Get I2C private structure */
 
