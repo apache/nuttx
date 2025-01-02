@@ -77,23 +77,6 @@ static dq_queue_t g_active_ieee802154_connections;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ieee802154_conn_initialize
- *
- * Description:
- *   Initialize the IEEE 802.15.4 connection structure allocator.  Called
- *   once and only from ieee802154_initialize().
- *
- * Assumptions:
- *   Called early in the initialization sequence
- *
- ****************************************************************************/
-
-void ieee802154_conn_initialize(void)
-{
-  NET_BUFPOOL_INIT(g_ieee802154_connections);
-}
-
-/****************************************************************************
  * Name: ieee802154_conn_alloc()
  *
  * Description:

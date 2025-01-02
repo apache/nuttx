@@ -44,7 +44,7 @@ struct net_bufnode_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -58,11 +58,13 @@ struct net_bufnode_s
  *
  ****************************************************************************/
 
-void net_bufpool_init(FAR struct net_bufpool_s *pool)
+static void net_bufpool_init(FAR struct net_bufpool_s *pool)
 {
   int i;
 
-  sq_init(&pool->freebuffers);
+  DEBUGASSERT(pool->nodesize < 0);
+  pool->nodesize = -pool->nodesize;
+
   for (i = 0; i < pool->prealloc; i++)
     {
       FAR struct net_bufnode_s *node = (FAR struct net_bufnode_s *)
@@ -70,6 +72,10 @@ void net_bufpool_init(FAR struct net_bufpool_s *pool)
       sq_addlast(&node->node, &pool->freebuffers);
     }
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: net_bufpool_timedalloc
@@ -94,6 +100,12 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
   FAR struct net_bufnode_s *node;
   int ret;
   int i;
+
+  if (pool->nodesize < 0)
+    {
+      net_bufpool_init(pool);
+      DEBUGASSERT(pool->nodesize > 0);
+    }
 
   ret = net_sem_timedwait_uninterruptible(&pool->sem, timeout);
   if (ret != OK)
@@ -138,6 +150,8 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
 
 void net_bufpool_free(FAR struct net_bufpool_s *pool, FAR void *node)
 {
+  DEBUGASSERT(pool->nodesize > 0);
+
   if (pool->dynalloc == 1 &&
       ((FAR char *)node < pool->pool ||
        (FAR char *)node >= pool->pool + pool->prealloc * pool->nodesize))

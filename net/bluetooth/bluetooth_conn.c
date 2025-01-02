@@ -82,23 +82,6 @@ static const bt_addr_t g_any_addr =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: bluetooth_conn_initialize
- *
- * Description:
- *   Initialize the Bluetooth connection structure allocator.  Called
- *   once and only from bluetooth_initialize().
- *
- * Assumptions:
- *   Called early in the initialization sequence
- *
- ****************************************************************************/
-
-void bluetooth_conn_initialize(void)
-{
-  NET_BUFPOOL_INIT(g_bluetooth_connections);
-}
-
-/****************************************************************************
  * Name: bluetooth_conn_alloc()
  *
  * Description:

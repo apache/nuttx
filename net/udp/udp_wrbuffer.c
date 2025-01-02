@@ -62,22 +62,6 @@ NET_BUFPOOL_DECLARE(g_wrbuffer, sizeof(struct udp_wrbuffer_s),
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_wrbuffer_initialize
- *
- * Description:
- *   Initialize the list of free write buffers
- *
- * Assumptions:
- *   Called once early initialization.
- *
- ****************************************************************************/
-
-void udp_wrbuffer_initialize(void)
-{
-  NET_BUFPOOL_INIT(g_wrbuffer);
-}
-
-/****************************************************************************
  * Name: udp_wrbuffer_alloc
  *
  * Description:

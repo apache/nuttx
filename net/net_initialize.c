@@ -131,38 +131,16 @@ void net_initialize(void)
   ipfwd_initialize();
 #endif
 
-#ifdef CONFIG_NET_ICMP_SOCKET
-  /* Initialize IPPPROTO_ICMP socket support */
-
-  icmp_sock_initialize();
-#endif
-
-#ifdef CONFIG_NET_ICMPv6_SOCKET
-  /* Initialize IPPPROTO_ICMP6 socket support */
-
-  icmpv6_sock_initialize();
-#endif
-
 #ifdef NET_TCP_HAVE_STACK
   /* Initialize the TCP/IP connection structures */
 
   tcp_initialize();
-
-  /* Initialize the TCP/IP write buffering */
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  tcp_wrbuffer_initialize();
-#endif
 #endif /* CONFIG_NET_TCP */
 
 #ifdef NET_UDP_HAVE_STACK
   /* Initialize the UDP connection structures */
 
   udp_initialize();
-
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-  udp_wrbuffer_initialize();
-#endif
 #endif
 
 #ifdef CONFIG_NET_USRSOCK

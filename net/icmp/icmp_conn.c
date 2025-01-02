@@ -73,20 +73,6 @@ static dq_queue_t g_active_icmp_connections;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: icmp_sock_initialize
- *
- * Description:
- *   Initialize the IPPROTO_ICMP socket connection structures.  Called once
- *   and only from the network initialization layer.
- *
- ****************************************************************************/
-
-void icmp_sock_initialize(void)
-{
-  NET_BUFPOOL_INIT(g_icmp_connections);
-}
-
-/****************************************************************************
  * Name: icmp_alloc
  *
  * Description:

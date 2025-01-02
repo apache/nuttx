@@ -87,7 +87,6 @@ static dq_queue_t g_active_pkt_connections;
 
 void pkt_initialize(void)
 {
-  NET_BUFPOOL_INIT(g_pkt_connections);
 }
 
 /****************************************************************************

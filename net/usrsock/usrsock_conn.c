@@ -300,8 +300,6 @@ void usrsock_setup_datain(FAR struct usrsock_conn_s *conn,
 
 void usrsock_initialize(void)
 {
-  NET_BUFPOOL_INIT(g_usrsock_connections);
-
   /* Register /dev/usrsock character device. */
 
   usrsock_register();

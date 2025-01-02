@@ -48,10 +48,6 @@
 
 void bluetooth_initialize(void)
 {
-  /* Initialize connection structions */
-
-  bluetooth_conn_initialize();
-
   /* Initialize the container allocator */
 
   bluetooth_container_initialize();

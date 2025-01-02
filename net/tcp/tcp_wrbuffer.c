@@ -63,22 +63,6 @@ NET_BUFPOOL_DECLARE(g_wrbuffer, sizeof(struct tcp_wrbuffer_s),
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_wrbuffer_initialize
- *
- * Description:
- *   Initialize the list of free write buffers
- *
- * Assumptions:
- *   Called once early initialization.
- *
- ****************************************************************************/
-
-void tcp_wrbuffer_initialize(void)
-{
-  NET_BUFPOOL_INIT(g_wrbuffer);
-}
-
-/****************************************************************************
  * Name: tcp_wrbuffer_timedalloc
  *
  * Description:
