@@ -606,7 +606,6 @@ int tcp_selectport(uint8_t domain,
 
 void tcp_initialize(void)
 {
-  NET_BUFPOOL_INIT(g_tcp_connections);
 }
 
 /****************************************************************************

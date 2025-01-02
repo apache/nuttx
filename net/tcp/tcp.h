@@ -1768,21 +1768,6 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn);
 
 int psock_tcp_cansend(FAR struct tcp_conn_s *conn);
 
-/****************************************************************************
- * Name: tcp_wrbuffer_initialize
- *
- * Description:
- *   Initialize the list of free write buffers
- *
- * Assumptions:
- *   Called once early initialization.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-void tcp_wrbuffer_initialize(void);
-#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
-
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 
 struct tcp_wrbuffer_s;

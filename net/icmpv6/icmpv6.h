@@ -564,19 +564,6 @@ void icmpv6_rnotify(FAR struct net_driver_s *dev, int result);
 #endif
 
 /****************************************************************************
- * Name: icmpv6_sock_initialize
- *
- * Description:
- *   Initialize the IPPROTO_ICMP socket connection structures.  Called once
- *   and only from the network initialization layer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6_SOCKET
-void icmpv6_sock_initialize(void);
-#endif
-
-/****************************************************************************
  * Name: icmpv6_alloc
  *
  * Description:

@@ -238,23 +238,6 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devif_callback_init
- *
- * Description:
- *   Configure the pre-allocated callback structures into a free list.
- *
- * Assumptions:
- *   Called early in the initialization sequence so that no special
- *   protection is required.
- *
- ****************************************************************************/
-
-void devif_callback_init(void)
-{
-  NET_BUFPOOL_INIT(g_cbprealloc);
-}
-
-/****************************************************************************
  * Name: devif_callback_alloc
  *
  * Description:

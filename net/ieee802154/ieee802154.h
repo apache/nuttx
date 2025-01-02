@@ -158,20 +158,6 @@ struct sockaddr;              /* Forward reference */
 void ieee802154_initialize(void);
 
 /****************************************************************************
- * Name: ieee802154_conn_initialize
- *
- * Description:
- *   Initialize the IEEE 802.15.4 connection structure allocator.  Called
- *   once and only from ieee802154_initialize().
- *
- * Assumptions:
- *   Called early in the initialization sequence
- *
- ****************************************************************************/
-
-void ieee802154_conn_initialize(void);
-
-/****************************************************************************
  * Name: ieee802154_conn_alloc()
  *
  * Description:

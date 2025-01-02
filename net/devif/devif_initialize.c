@@ -88,8 +88,5 @@ struct net_stats_s g_netstats;
 
 void devif_initialize(void)
 {
-  /* Initialize callback support */
-
-  devif_callback_init();
 }
 #endif /* CONFIG_NET */
