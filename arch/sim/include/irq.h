@@ -135,7 +135,7 @@ static inline_function void up_set_current_regs(xcpt_reg_t *regs)
 
 /* Return the current value of the stack pointer */
 
-static inline uintptr_t up_getsp(void)
+static inline_function uintptr_t up_getsp(void)
 {
 #ifdef _MSC_VER
   uintptr_t tmp;

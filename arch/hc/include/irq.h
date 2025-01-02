@@ -77,7 +77,7 @@ extern "C"
 
 /* Return the current value of the stack pointer */
 
-static inline uint16_t up_getsp(void)
+static inline_function uint16_t up_getsp(void)
 {
   uint16_t ret;
   __asm__

@@ -202,7 +202,7 @@ struct xcptcontext
 
 /* Save the current interrupt enable state & disable IRQs. */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
   irqstate_t x;
@@ -218,7 +218,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Restore saved state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   uint32_t x;
   mfspr(SPR_SYS_SR, x);
@@ -228,8 +228,8 @@ static inline void up_irq_restore(irqstate_t flags)
 
 /* Enable IRQs */
 
-static inline void up_irq_enable(void) always_inline_function;
-static inline void up_irq_enable(void)
+static inline_function void up_irq_enable(void) always_inline_function;
+static inline_function void up_irq_enable(void)
 {
   irqstate_t flags;
   mfspr(SPR_SYS_SR, flags);

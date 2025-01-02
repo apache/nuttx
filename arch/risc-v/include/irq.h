@@ -649,7 +649,7 @@ struct xcptcontext
 
 /* Return the current value of the stack pointer */
 
-static inline uintptr_t up_getsp(void)
+static inline_function uintptr_t up_getsp(void)
 {
   register uintptr_t sp;
   __asm__
@@ -743,7 +743,7 @@ int up_this_cpu(void);
  *
  ****************************************************************************/
 
-noinstrument_function static inline irqstate_t up_irq_save(void)
+noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t flags;
 
@@ -772,7 +772,8 @@ noinstrument_function static inline irqstate_t up_irq_save(void)
  *
  ****************************************************************************/
 
-noinstrument_function static inline void up_irq_restore(irqstate_t flags)
+noinstrument_function static inline_function
+void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
