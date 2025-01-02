@@ -955,6 +955,33 @@ static void stm32_stdclockconfig(void)
   regval |= (STM32_RCC_CFGR_PPRE1 | STM32_RCC_CFGR_PPRE2);
   putreg32(regval, STM32_RCC_CFGR);
 
+  /* Configure I2C source clock
+   *
+   * TODO:
+   * - Set to HSI16 by default, make Kconfig option
+   */
+
+#if defined(CONFIG_STM32_I2C1)
+  regval = getreg32(STM32_RCC_CCIPR);
+  regval &= ~RCC_CCIPR_I2C1SEL_MASK;
+  regval |= RCC_CCIPR_I2C1SEL_HSI16;
+  putreg32(regval, STM32_RCC_CCIPR);
+#endif
+
+#if defined(CONFIG_STM32_I2C2)
+  regval = getreg32(STM32_RCC_CCIPR);
+  regval &= ~RCC_CCIPR_I2C2SEL_MASK;
+  regval |= RCC_CCIPR_I2C2SEL_HSI16;
+  putreg32(regval, STM32_RCC_CCIPR);
+#endif
+
+#if defined(CONFIG_STM32_I2C3)
+  regval = getreg32(STM32_RCC_CCIPR);
+  regval &= ~RCC_CCIPR_I2C3SEL_MASK;
+  regval |= RCC_CCIPR_I2C3SEL_HSI16;
+  putreg32(regval, STM32_RCC_CCIPR);
+#endif
+
   /* Configure FDCAN source clock */
 
 #if defined(STM32_CCIPR_FDCANSRC)
