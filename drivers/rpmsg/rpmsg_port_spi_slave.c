@@ -393,9 +393,19 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
     }
   else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
     {
-      /* Drop connect packets recived during connecting status change */
+      /* Drop connect packets received during connecting status change
+       * except it is received during the shutting down process, which
+       * means a reconnect request is received.
+       */
 
-      goto out;
+      if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
+        {
+          rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTING;
+        }
+      else
+        {
+          goto out;
+        }
     }
 
   if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SUSPEND)
