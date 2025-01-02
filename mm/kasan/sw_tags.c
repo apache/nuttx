@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/mm/mm.h>
 #include <nuttx/mm/kasan.h>
 #include <nuttx/compiler.h>
 #include <nuttx/spinlock.h>
@@ -45,10 +46,8 @@
 
 #define kasan_random_tag() (1 + rand() % ((1 << (64 - KASAN_TAG_SHIFT)) - 2))
 
-#define KASAN_SHADOW_SCALE (sizeof(uintptr_t))
-
 #define KASAN_SHADOW_SIZE(size) \
-  ((size) + KASAN_SHADOW_SCALE - 1) / KASAN_SHADOW_SCALE
+  ((size) + MM_ALIGN - 1) / MM_ALIGN
 #define KASAN_REGION_SIZE(size) \
   (sizeof(struct kasan_region_s) + KASAN_SHADOW_SIZE(size))
 
@@ -89,7 +88,7 @@ kasan_mem_to_shadow(FAR const void *ptr, size_t size)
         {
           DEBUGASSERT(addr + size <= g_region[i]->end);
           addr -= g_region[i]->begin;
-          return &g_region[i]->shadow[addr / KASAN_SHADOW_SCALE];
+          return &g_region[i]->shadow[addr / MM_ALIGN];
         }
     }
 
@@ -164,12 +163,18 @@ FAR void *kasan_reset_tag(FAR const void *addr)
 
 void kasan_poison(FAR const void *addr, size_t size)
 {
+  DEBUGASSERT((uintptr_t)addr % MM_ALIGN == 0);
+  DEBUGASSERT(size % MM_ALIGN == 0);
+
   kasan_set_poison(addr, size, 0xff);
 }
 
 FAR void *kasan_unpoison(FAR const void *addr, size_t size)
 {
   uint8_t tag = kasan_random_tag();
+
+  DEBUGASSERT((uintptr_t)addr % MM_ALIGN == 0);
+  DEBUGASSERT(size % MM_ALIGN == 0);
 
   kasan_set_poison(addr, size, tag);
   return kasan_set_tag(addr, tag);
