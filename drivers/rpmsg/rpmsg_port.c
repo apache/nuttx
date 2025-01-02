@@ -819,7 +819,8 @@ static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg)
       needunlock = true;
     }
 
-  metal_log(METAL_LOG_EMERGENCY, "Remote: %s\n", port->cpuname);
+  metal_log(METAL_LOG_EMERGENCY, "Remote: %s state: %d\n",
+            port->cpuname, rpmsg_is_running(rdev));
 
   metal_list_for_each(&rdev->endpoints, node)
     {
