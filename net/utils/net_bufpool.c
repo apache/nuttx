@@ -61,18 +61,6 @@ struct net_bufnode_s
 void net_bufpool_init(FAR struct net_bufpool_s *pool)
 {
   int i;
-  unsigned int maxalloc;
-
-  if (pool->dynalloc > 0)
-    {
-      maxalloc = pool->u.maxalloc > 0 ? pool->u.maxalloc : INT16_MAX;
-    }
-  else
-    {
-      maxalloc = pool->prealloc;
-    }
-
-  nxsem_init(&pool->u.sem, 0, maxalloc);
 
   sq_init(&pool->freebuffers);
   for (i = 0; i < pool->prealloc; i++)
@@ -107,7 +95,7 @@ FAR void *net_bufpool_timedalloc(FAR struct net_bufpool_s *pool,
   int ret;
   int i;
 
-  ret = net_sem_timedwait_uninterruptible(&pool->u.sem, timeout);
+  ret = net_sem_timedwait_uninterruptible(&pool->sem, timeout);
   if (ret != OK)
     {
       return NULL;
@@ -168,7 +156,7 @@ void net_bufpool_free(FAR struct net_bufpool_s *pool, FAR void *node)
       sq_addlast(&net_bufnode->node, &pool->freebuffers);
     }
 
-  nxsem_post(&pool->u.sem);
+  nxsem_post(&pool->sem);
 }
 
 /****************************************************************************
@@ -187,7 +175,7 @@ int net_bufpool_test(FAR struct net_bufpool_s *pool)
   int val = 0;
   int ret;
 
-  ret = nxsem_get_value(&pool->u.sem, &val);
+  ret = nxsem_get_value(&pool->sem, &val);
   if (ret >= 0)
     {
       ret = val > 0 ? OK : -ENOSPC;

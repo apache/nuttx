@@ -84,7 +84,10 @@
  *   maxalloc: The number of max allocations, 0 means no limit
  */
 
-#define NET_BUFPOOL_DECLARE(pool,nodesize,prealloc,dynalloc,maxalloc) \
+#define NET_BUFPOOL_MAX(prealloc, dynalloc, maxalloc) \
+  (dynalloc) <= 0 ? (prealloc) : ((maxalloc) > 0 ? (maxalloc) : INT16_MAX)
+
+#define NET_BUFPOOL_DECLARE(pool, nodesize, prealloc, dynalloc, maxalloc) \
   static char pool##_buffer[prealloc][nodesize]; \
   static struct net_bufpool_s pool = \
     { \
@@ -92,9 +95,7 @@
       prealloc, \
       dynalloc, \
       nodesize, \
-      { \
-        maxalloc \
-      } \
+      SEM_INITIALIZER(NET_BUFPOOL_MAX(prealloc, dynalloc, maxalloc)) \
     };
 
 #define NET_BUFPOOL_INIT(p)         net_bufpool_init(&p)
@@ -128,11 +129,7 @@ struct net_bufpool_s
   const int  dynalloc; /* The number per dynamic allocations */
   const int  nodesize; /* The size of each node in the pool */
 
-  union
-  {
-    int16_t  maxalloc; /* The number of max allocations, used before init */
-    sem_t    sem;      /* The semaphore for waiting for free buffers */
-  } u;
+  sem_t      sem;      /* The semaphore for waiting for free buffers */
 
   sq_queue_t freebuffers;
 };
