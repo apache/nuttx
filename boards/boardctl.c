@@ -26,11 +26,12 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <sys/boardctl.h>
+#include <sys/types.h>
+#include <assert.h>
 #include <stdint.h>
 #include <errno.h>
-#include <assert.h>
+#include <gcov.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>

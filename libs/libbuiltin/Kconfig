@@ -66,6 +66,25 @@ config COVERAGE_NONE
 
 endchoice
 
+config COVERAGE_GCOV_DUMP_REBOOT
+	bool "Dump gcov data on reboot"
+	default n
+	---help---
+		Dump gcov data on reboot, this will cause the gcov data to be
+		dumped to the default path when the system is rebooted.
+
+config COVERAGE_DEFAULT_PREFIX_STRIP
+	string "Default gcov dump path prefix strip"
+	default "99"
+	---help---
+		The default prefix strip of the gcov data
+
+config COVERAGE_DEFAULT_PREFIX
+	string "Default gcov dump path prefix"
+	default "/data"
+	---help---
+		The default prefix to store the gcov data
+
 choice
 	prompt "Builtin profile support"
 	default PROFILE_NONE
