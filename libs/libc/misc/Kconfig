@@ -165,19 +165,27 @@ config LIBC_TEMPBUFFER_MALLOC
 
 endif # LIBC_TEMPBUFFER
 
-config LIBC_BACKTRACE_BUFFSIZE
-	int "The size of backtrace record buffer"
+config LIBC_BACKTRACE_DEPTH
+	int "The maximum depth of the backtrace record."
 	depends on SCHED_BACKTRACE
 	default 0
 	---help---
-		The size of the backtrace buffer.
+		The maximum depth of the backtrace record.
 
-config LIBC_BACKTRACE_DEPTH
-	int "The depth of backtrace"
-	depends on LIBC_BACKTRACE_BUFFSIZE > 0
-	default 8
+config LIBC_BACKTRACE_INIT_SIZE
+	int "The initial size of backtrace record"
+	depends on LIBC_BACKTRACE_DEPTH > 0
+	default 64
 	---help---
-		The depth of the backtrace buffer.
+		The initial size of the backtrace record.
+
+config LIBC_BACKTRACE_LOAD_FACTOR
+	int "The load factor of backtrace record"
+	depends on LIBC_BACKTRACE_DEPTH > 0
+	range 0 100
+	default 75
+	---help---
+		The load factor of the backtrace record.
 
 config LIBC_MUTEX_BACKTRACE
 	int "The depth of mutex backtrace"
