@@ -45,7 +45,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+#if CONFIG_ARCH_RV_HARTID_BASE != 0
 int up_cpu_index(void)
 {
   return (int)riscv_mhartid();
