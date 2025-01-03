@@ -308,8 +308,12 @@ static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
           struct rpmsg_rtc_set_s *msg = data;
 
 #ifdef CONFIG_RTC_RPMSG_SYNC_BASETIME
+          irqstate_t flags;
+
+          flags = spin_lock_irqsave(&g_basetime_lock);
           g_basetime.tv_sec  = msg->base_sec;
           g_basetime.tv_nsec = msg->base_nsec;
+          spin_unlock_irqrestore(&g_basetime_lock, flags);
 #else
           struct timespec tp;
 
@@ -480,6 +484,7 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
   FAR struct rpmsg_rtc_client_s *client;
   FAR struct list_node *node;
   struct rpmsg_rtc_set_s msg;
+  irqstate_t flags;
   int ret;
 
   ret = server->lower->ops->settime(server->lower, rtctime);
@@ -500,8 +505,10 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
           ret = 1; /* Request the upper half skip clock synchronize */
         }
 
+      flags = spin_lock_irqsave(&g_basetime_lock);
       msg.base_sec = g_basetime.tv_sec;
       msg.base_nsec = g_basetime.tv_nsec;
+      spin_unlock_irqrestore(&g_basetime_lock, flags);
 
       nxmutex_lock(&server->lock);
 
@@ -730,6 +737,7 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_rtc_client_s *client;
   struct rpmsg_rtc_set_s msg;
   struct rtc_time rtctime;
+  irqstate_t flags;
 
   client = kmm_zalloc(sizeof(*client));
   if (client == NULL)
@@ -753,8 +761,11 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
     {
       msg.sec  = timegm((FAR struct tm *)&rtctime);
       msg.nsec = rtctime.tm_nsec;
+
+      flags = spin_lock_irqsave(&g_basetime_lock);
       msg.base_sec = g_basetime.tv_sec;
       msg.base_nsec = g_basetime.tv_nsec;
+      spin_unlock_irqrestore(&g_basetime_lock, flags);
 
       msg.header.command = RPMSG_RTC_SYNC;
       rpmsg_send(&client->ept, &msg, sizeof(msg));

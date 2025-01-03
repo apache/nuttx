@@ -101,6 +101,8 @@ EXTERN struct list_node g_msgfree;
 
 EXTERN struct list_node g_msgfreeirq;
 
+EXTERN spinlock_t g_msgfree_lock;
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

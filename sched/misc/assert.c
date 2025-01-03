@@ -840,7 +840,7 @@ void _assert(FAR const char *filename, int linenum,
   flags = 0; /* suppress GCC warning */
   if (os_ready)
     {
-      flags = spin_lock_irqsave(&g_assert_lock);
+      flags = spin_lock_irqsave_wo_note(&g_assert_lock);
     }
 
 #if CONFIG_BOARD_RESET_ON_ASSERT < 2
@@ -913,6 +913,6 @@ void _assert(FAR const char *filename, int linenum,
 
   if (os_ready)
     {
-      spin_unlock_irqrestore(&g_assert_lock, flags);
+      spin_unlock_irqrestore_wo_note(&g_assert_lock, flags);
     }
 }

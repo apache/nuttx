@@ -102,9 +102,9 @@ void group_join(FAR struct pthread_tcb_s *tcb)
 
   /* Add the member to the group */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave_wo_note(&group->lock);
   sq_addfirst(&tcb->cmn.member, &group->tg_members);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore_wo_note(&group->lock, flags);
 }
 
 #endif /* !CONFIG_DISABLE_PTHREAD */

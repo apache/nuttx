@@ -62,21 +62,21 @@
 int clock_systime_timespec(FAR struct timespec *ts)
 {
 #ifdef CONFIG_RTC_HIRES
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave_wo_note(&g_basetime_lock);
   if (g_rtc_enabled)
     {
-      irqstate_t flags;
-
       up_rtc_gettime(ts);
-
-      flags = spin_lock_irqsave(NULL);
       clock_timespec_subtract(ts, &g_basetime, ts);
-      spin_unlock_irqrestore(NULL, flags);
     }
   else
     {
       ts->tv_sec = 0;
       ts->tv_nsec = 0;
     }
+
+  spin_unlock_irqrestore_wo_note(&g_basetime_lock, flags);
 #elif defined(CONFIG_ALARM_ARCH) || \
       defined(CONFIG_TIMER_ARCH) || \
       defined(CONFIG_SCHED_TICKLESS)
