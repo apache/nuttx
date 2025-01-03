@@ -373,8 +373,14 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       /* Add the sleep time to correct system timer */
 
-      g_system_ticks += SEC2TICK(rtc_diff->tv_sec);
-      g_system_ticks += NSEC2TICK(rtc_diff->tv_nsec);
+      clock_t diff_ticks = SEC2TICK(rtc_diff->tv_sec) +
+                           NSEC2TICK(rtc_diff->tv_nsec);
+
+#ifdef CONFIG_SYSTEM_TIME64
+      atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, diff_ticks);
+#else
+      atomic_fetch_add((FAR atomic_t *)&g_system_ticks, diff_ticks);
+#endif
     }
 
 skip:
@@ -398,6 +404,10 @@ void clock_timer(void)
 {
   /* Increment the per-tick system counter */
 
-  g_system_ticks++;
+#ifdef CONFIG_SYSTEM_TIME64
+  atomic64_fetch_add((FAR atomic64_t *)&g_system_ticks, 1);
+#else
+  atomic_fetch_add((FAR atomic_t *)&g_system_ticks, 1);
+#endif
 }
 #endif
