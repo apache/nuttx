@@ -33,6 +33,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "arm64_internal.h"
 #include "imx9_gpio.h"
@@ -62,6 +63,7 @@ struct imx9_portisr_s
  ****************************************************************************/
 
 static struct imx9_portisr_s g_isrtab[IMX9_GPIO_NPORTS];
+static spinlock_t g_isrlock = SP_UNLOCKED;
 
 /****************************************************************************
  * Private Functions
@@ -197,12 +199,12 @@ int imx9_gpioirq_attach(gpio_pinset_t pinset, xcpt_t isr, void *arg)
 
   /* Atomically change the handler */
 
-  irqstate_t flags = enter_critical_section();
+  irqstate_t flags = spin_lock_irqsave(&g_isrlock);
 
   g_isrtab[port].pins[pin].isr = isr;
   g_isrtab[port].pins[pin].arg = arg;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_isrlock, flags);
   return OK;
 }
 
