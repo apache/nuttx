@@ -518,10 +518,6 @@ static int can_close(FAR struct socket *psock)
         }
 #endif
 
-#if CONFIG_NET_SEND_BUFSIZE > 0
-      nxsem_destroy(&conn->sndsem);
-#endif
-
       /* Free the connection structure */
 
       conn->crefs = 0;

@@ -649,6 +649,10 @@ void udp_free(FAR struct udp_conn_s *conn)
 
 #endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  nxsem_destroy(&conn->sndsem);
+#endif
+
   /* Free the connection. */
 
   NET_BUFPOOL_FREE(g_udp_connections, conn);
