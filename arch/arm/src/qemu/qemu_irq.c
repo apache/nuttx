@@ -116,9 +116,15 @@ void up_irqinitialize(void)
    * access to the GIC.
    */
 
-  /* Initialize the Generic Interrupt Controller (GIC) for CPU0 */
+  /* Initialize the Generic Interrupt Controller (GIC) for CPU0.
+   * In AMP mode, we want arm_gic0_initialize to be called only once.
+   */
 
-  arm_gic0_initialize();  /* Initialization unique to CPU0 */
+  if (sched_getcpu() == 0)
+    {
+      arm_gic0_initialize();  /* Initialization unique to CPU0 */
+    }
+
   arm_gic_initialize();   /* Initialization common to all CPUs */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
