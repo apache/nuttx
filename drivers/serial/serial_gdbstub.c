@@ -80,7 +80,7 @@ static void uart_gdbstub_attach(FAR struct uart_gdbstub_s *uart_gdbstub,
 
   uart_setup(dev);
   uart_attach(dev);
-  uart_disablerxint(dev);
+  uart_enablerxint(dev);
 }
 
 /****************************************************************************
