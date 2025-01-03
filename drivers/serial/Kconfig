@@ -72,6 +72,13 @@ config SERIAL_GDBSTUB_AUTO_ATTACH
 		Will cover the GDBSTUB_SERIAL_PATH, that port will only
 		be used for GDB stub.
 
+config SERIAL_GDBSTUB_WAIT_CONNECT
+	bool "GDBSTUB Serial wait for connection"
+	depends on SERIAL_GDBSTUB_AUTO_ATTACH
+	default n
+	---help---
+		Wait for gdbstub to connect before continuing boot.
+
 config SERIAL_GDBSTUB_PANIC_TIMEOUT
 	int "GDBSTUB Serial panic timeout"
 	default 10

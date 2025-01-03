@@ -327,6 +327,9 @@ int uart_gdbstub_register(FAR uart_dev_t *dev, FAR const char *path)
 
 #ifdef CONFIG_SERIAL_GDBSTUB_AUTO_ATTACH
   uart_gdbstub_attach(uart_gdbstub, true);
+#  ifdef CONFIG_SERIAL_GDBSTUB_WAIT_CONNECT
+  uart_gdbstub_ctrlc(dev, NULL);
+#  endif
   return 0;
 #else
   return 1;
