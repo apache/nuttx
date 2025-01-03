@@ -285,6 +285,8 @@ static int stm32wl5_tim_checkint(struct stm32wl5_tim_dev_s *dev,
 
 static const struct stm32wl5_tim_ops_s stm32wl5_tim_ops =
 {
+  .enable     = stm32wl5_tim_enable,
+  .disable    = stm32wl5_tim_disable,
   .setmode    = stm32wl5_tim_setmode,
   .setclock   = stm32wl5_tim_setclock,
   .getclock   = stm32wl5_tim_getclock,

@@ -251,6 +251,13 @@ struct stm32_tim_priv_s
  * Private Function prototypes
  ****************************************************************************/
 
+/* Timer helpers */
+
+static void stm32_tim_reload_counter(struct stm32_tim_dev_s *dev);
+static void stm32_tim_enable(struct stm32_tim_dev_s *dev);
+static void stm32_tim_disable(struct stm32_tim_dev_s *dev);
+static void stm32_tim_reset(struct stm32_tim_dev_s *dev);
+
 /* Timer methods */
 
 static int      stm32_tim_setmode(struct stm32_tim_dev_s *dev,
@@ -287,6 +294,8 @@ static int      stm32_tim_checkint(struct stm32_tim_dev_s *dev,
 
 static const struct stm32_tim_ops_s stm32_tim_ops =
 {
+  .enable         = &stm32_tim_enable,
+  .disable        = &stm32_tim_disable,
   .setmode        = &stm32_tim_setmode,
   .setclock       = &stm32_tim_setclock,
   .setperiod      = &stm32_tim_setperiod,
