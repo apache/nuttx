@@ -724,13 +724,8 @@ void arm_cpu_sgi(int sgi, unsigned int cpuset)
 
   arm_gic_wait_done(cpuset);
 
-#ifdef CONFIG_SMP
   regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(cpuset) |
            GIC_ICDSGIR_TGTFILTER_LIST;
-#else
-  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(0) |
-           GIC_ICDSGIR_TGTFILTER_THIS;
-#endif
 
 #if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   if (sgi >= GIC_IRQ_SGI0 && sgi <= GIC_IRQ_SGI7)
