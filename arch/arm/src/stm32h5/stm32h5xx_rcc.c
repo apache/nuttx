@@ -355,60 +355,6 @@ static inline void rcc_enableapb1l(void)
 
   regval = getreg32(STM32_RCC_APB1LENR);
 
-#ifdef CONFIG_STM32H5_TIM2
-  /* Bit 0:  TIM2 clock enable */
-
-  regval |= RCC_APB1LENR_TIM2EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM3
-  /* Bit 1:  TIM3 clock enable */
-
-  regval |= RCC_APB1LENR_TIM3EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM4
-  /* Bit 2:  TIM4 clock enable */
-
-  regval |= RCC_APB1LENR_TIM4EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM5
-  /* Bit 3:  TIM5 clock enable */
-
-  regval |= RCC_APB1LENR_TIM5EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM6
-  /* Bit 4:  TIM6 clock enable */
-
-  regval |= RCC_APB1LENR_TIM6EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM7
-  /* Bit 5:  TIM7 clock enable */
-
-  regval |= RCC_APB1LENR_TIM7EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM12
-  /* Bit 5:  TIM12 clock enable */
-
-  regval |= RCC_APB1LENR_TIM12EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM13
-  /* Bit 5:  TIM13 clock enable */
-
-  regval |= RCC_APB1LENR_TIM13EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM14
-  /* Bit 5:  TIM14 clock enable */
-
-  regval |= RCC_APB1LENR_TIM14EN;
-#endif
-
 #ifdef CONFIG_STM32H5_SPI2
   /* Bit 14: SPI2 clock enable */
 
@@ -588,46 +534,16 @@ static inline void rcc_enableapb2(void)
 
   regval = getreg32(STM32_RCC_APB2ENR);
 
-#ifdef CONFIG_STM32H5_TIM1
-  /* TIM1 clock enable */
-
-  regval |= RCC_APB2ENR_TIM1EN;
-#endif
-
 #ifdef CONFIG_STM32H5_SPI1
   /* SPI1 clock enable */
 
   regval |= RCC_APB2ENR_SPI1EN;
 #endif
 
-#ifdef CONFIG_STM32H5_TIM8
-  /* TIM8 clock enable */
-
-  regval |= RCC_APB2ENR_TIM8EN;
-#endif
-
 #ifdef CONFIG_STM32H5_USART1
   /* USART1 clock enable */
 
   regval |= RCC_APB2ENR_USART1EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM15
-  /* TIM15 clock enable */
-
-  regval |= RCC_APB2ENR_TIM15EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM16
-  /* TIM16 clock enable */
-
-  regval |= RCC_APB2ENR_TIM16EN;
-#endif
-
-#ifdef CONFIG_STM32H5_TIM17
-  /* TIM17 clock enable */
-
-  regval |= RCC_APB2ENR_TIM17EN;
 #endif
 
 #ifdef CONFIG_STM32H5_SPI4

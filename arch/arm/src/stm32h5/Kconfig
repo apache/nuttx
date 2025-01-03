@@ -299,6 +299,10 @@ config STM32H5_SPI_DMA
 	bool
 	default n
 
+config STM32H5_TIM
+	bool
+	default n
+
 # These are the peripheral selections proper
 
 config STM32H5_ADC1
@@ -477,8 +481,81 @@ config STM32H5_SPI6
 	select SPI
 	select STM32H5_SPI
 
-endmenu
+menu "STM32H5 Timer Selection"
 
+config STM32H5_TIM1
+	bool "TIM1"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM2
+	bool "TIM2"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM3
+	bool "TIM3"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM4
+	bool "TIM4"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM5
+	bool "TIM5"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM6
+	bool "TIM6"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM7
+	bool "TIM7"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM8
+	bool "TIM8"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM12
+	bool "TIM12"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM13
+	bool "TIM13"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM14
+	bool "TIM14"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM15
+	bool "TIM15"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM16
+	bool "TIM16"
+	default n
+	select STM32H5_TIM
+
+config STM32H5_TIM17
+	bool "TIM17"
+	default n
+	select STM32H5_TIM
+
+endmenu # STM32H5 Timer Selection
+
+endmenu
 
 config STM32H5_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
@@ -660,6 +737,3038 @@ config STM32H5_SPI6_COMMTYPE
 		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
 
 endmenu # "SPI Configuration"
+
+menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config STM32H5_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	default 2
+	range 1 17
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
+
+config STM32H5_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 4
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+endif # SCHED_TICKLESS
+
+config STM32H5_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config STM32H5_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on STM32H5_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
+config STM32H5_PWM_LL_OPS
+	bool "PWM low-level operations"
+	default n
+	---help---
+		Enable low-level PWM ops.
+
+config STM32H5_TIM1_PWM
+	bool "TIM1 PWM"
+	default n
+	depends on STM32H5_TIM1
+	select STM32H5_PWM
+	---help---
+		Reserve timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM1_PWM
+
+config STM32H5_TIM1_MODE
+	int "TIM1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+config STM32H5_TIM1_LOCK
+	int "TIM1 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 1 lock level configuration
+
+config STM32H5_TIM1_TDTS
+	int "TIM1 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 1 dead-time and sampling clock (t_DTS) division
+
+config STM32H5_TIM1_DEADTIME
+	int "TIM1 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 1 initial dead-time
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM1_CHANNEL1
+	bool "TIM1 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM1_CHANNEL1
+
+config STM32H5_TIM1_CH1MODE
+	int "TIM1 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM1_CH1OUT
+	bool "TIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32H5_TIM1_CH1NOUT
+	bool "TIM1 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # STM32H5_TIM1_CHANNEL1
+
+config STM32H5_TIM1_CHANNEL2
+	bool "TIM1 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM1_CHANNEL2
+
+config STM32H5_TIM1_CH2MODE
+	int "TIM1 Channel 2 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM1_CH2OUT
+	bool "TIM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config STM32H5_TIM1_CH2NOUT
+	bool "TIM1 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # STM32H5_TIM1_CHANNEL2
+
+config STM32H5_TIM1_CHANNEL3
+	bool "TIM1 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32H5_TIM1_CHANNEL3
+
+config STM32H5_TIM1_CH3MODE
+	int "TIM1 Channel 3 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM1_CH3OUT
+	bool "TIM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config STM32H5_TIM1_CH3NOUT
+	bool "TIM1 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # STM32H5_TIM1_CHANNEL3
+
+config STM32H5_TIM1_CHANNEL4
+	bool "TIM1 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32H5_TIM1_CHANNEL4
+
+config STM32H5_TIM1_CH4MODE
+	int "TIM1 Channel 4 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM1_CH4OUT
+	bool "TIM1 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM1_CHANNEL4
+
+config STM32H5_TIM1_CHANNEL5
+	bool "TIM1 Channel 5 (internal)"
+	default n
+	---help---
+		Enables channel 5 (not available externally)
+
+if STM32H5_TIM1_CHANNEL5
+
+config STM32H5_TIM1_CH5MODE
+	int "TIM1 Channel 5 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM1_CH5OUT
+	bool "TIM1 Channel 5 Output"
+	default n
+	---help---
+		Enables channel 5 output.
+
+endif # STM32H5_TIM1_CHANNEL5
+
+config STM32H5_TIM1_CHANNEL6
+	bool "TIM1 Channel 6 (internal)"
+	default n
+	---help---
+		Enables channel 6 (not available externally)
+
+if STM32H5_TIM1_CHANNEL6
+
+config STM32H5_TIM1_CH6MODE
+	int "TIM1 Channel 6 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM1_CH6OUT
+	bool "TIM1 Channel 6 Output"
+	default n
+	---help---
+		Enables channel 6 output.
+
+endif # STM32H5_TIM1_CHANNEL6
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM1_CHANNEL
+	int "TIM1 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if STM32H5_TIM1_CHANNEL = 1
+
+config STM32H5_TIM1_CH1OUT
+	bool "TIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32H5_TIM1_CH1NOUT
+	bool "TIM1 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # STM32H5_TIM1_CHANNEL = 1
+
+if STM32H5_TIM1_CHANNEL = 2
+
+config STM32H5_TIM1_CH2OUT
+	bool "TIM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config STM32H5_TIM1_CH2NOUT
+	bool "TIM1 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # STM32H5_TIM1_CHANNEL = 2
+
+if STM32H5_TIM1_CHANNEL = 3
+
+config STM32H5_TIM1_CH3OUT
+	bool "TIM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config STM32H5_TIM1_CH3NOUT
+	bool "TIM1 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # STM32H5_TIM1_CHANNEL = 3
+
+if STM32H5_TIM1_CHANNEL = 4
+
+config STM32H5_TIM1_CH4OUT
+	bool "TIM1 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM1_CHANNEL = 4
+
+config STM32H5_TIM1_CHMODE
+	int "TIM1 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM1_PWM
+
+config STM32H5_TIM2_PWM
+	bool "TIM2 PWM"
+	default n
+	depends on STM32H5_TIM2
+	select STM32H5_PWM
+	---help---
+		Reserve timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM2_PWM
+
+config STM32H5_TIM2_MODE
+	int "TIM2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM2_CHANNEL1
+	bool "TIM2 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM2_CHANNEL1
+
+config STM32H5_TIM2_CH1MODE
+	int "TIM2 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM2_CH1OUT
+	bool "TIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM2_CHANNEL1
+
+config STM32H5_TIM2_CHANNEL2
+	bool "TIM2 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM2_CHANNEL2
+
+config STM32H5_TIM2_CH2MODE
+	int "TIM2 Channel 2 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM2_CH2OUT
+	bool "TIM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM2_CHANNEL2
+
+config STM32H5_TIM2_CHANNEL3
+	bool "TIM2 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32H5_TIM2_CHANNEL3
+
+config STM32H5_TIM2_CH3MODE
+	int "TIM2 Channel 3 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM2_CH3OUT
+	bool "TIM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM2_CHANNEL3
+
+config STM32H5_TIM2_CHANNEL4
+	bool "TIM2 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32H5_TIM2_CHANNEL4
+
+config STM32H5_TIM2_CH4MODE
+	int "TIM2 Channel 4 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM2_CH4OUT
+	bool "TIM2 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM2_CHANNEL4
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM2_CHANNEL
+	int "TIM2 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM2 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if STM32H5_TIM2_CHANNEL = 1
+
+config STM32H5_TIM2_CH1OUT
+	bool "TIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM2_CHANNEL = 1
+
+if STM32H5_TIM2_CHANNEL = 2
+
+config STM32H5_TIM2_CH2OUT
+	bool "TIM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM2_CHANNEL = 2
+
+if STM32H5_TIM2_CHANNEL = 3
+
+config STM32H5_TIM2_CH3OUT
+	bool "TIM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM2_CHANNEL = 3
+
+if STM32H5_TIM2_CHANNEL = 4
+
+config STM32H5_TIM2_CH4OUT
+	bool "TIM2 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM2_CHANNEL = 4
+
+config STM32H5_TIM2_CHMODE
+	int "TIM2 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM2_PWM
+
+config STM32H5_TIM3_PWM
+	bool "TIM3 PWM"
+	default n
+	depends on STM32H5_TIM3
+	select STM32H5_PWM
+	---help---
+		Reserve timer 3 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM3
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM3_PWM
+
+config STM32H5_TIM3_MODE
+	int "TIM3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM3_CHANNEL1
+	bool "TIM3 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM3_CHANNEL1
+
+config STM32H5_TIM3_CH1MODE
+	int "TIM3 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM3_CH1OUT
+	bool "TIM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM3_CHANNEL1
+
+config STM32H5_TIM3_CHANNEL2
+	bool "TIM3 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM3_CHANNEL2
+
+config STM32H5_TIM3_CH2MODE
+	int "TIM3 Channel 2 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM3_CH2OUT
+	bool "TIM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM3_CHANNEL2
+
+config STM32H5_TIM3_CHANNEL3
+	bool "TIM3 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32H5_TIM3_CHANNEL3
+
+config STM32H5_TIM3_CH3MODE
+	int "TIM3 Channel 3 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM3_CH3OUT
+	bool "TIM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM3_CHANNEL3
+
+config STM32H5_TIM3_CHANNEL4
+	bool "TIM3 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32H5_TIM3_CHANNEL4
+
+config STM32H5_TIM3_CH4MODE
+	int "TIM3 Channel 4 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM3_CH4OUT
+	bool "TIM3 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM3_CHANNEL4
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM3_CHANNEL
+	int "TIM3 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM3 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if STM32H5_TIM3_CHANNEL = 1
+
+config STM32H5_TIM3_CH1OUT
+	bool "TIM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM3_CHANNEL = 1
+
+if STM32H5_TIM3_CHANNEL = 2
+
+config STM32H5_TIM3_CH2OUT
+	bool "TIM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM3_CHANNEL = 2
+
+if STM32H5_TIM3_CHANNEL = 3
+
+config STM32H5_TIM3_CH3OUT
+	bool "TIM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM3_CHANNEL = 3
+
+if STM32H5_TIM3_CHANNEL = 4
+
+config STM32H5_TIM3_CH4OUT
+	bool "TIM3 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM3_CHANNEL = 4
+
+config STM32H5_TIM3_CHMODE
+	int "TIM3 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM3_PWM
+
+config STM32H5_TIM4_PWM
+	bool "TIM4 PWM"
+	default n
+	depends on STM32H5_TIM4
+	select STM32H5_PWM
+	---help---
+		Reserve timer 4 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM4
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM4_PWM
+
+config STM32H5_TIM4_MODE
+	int "TIM4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM4_CHANNEL1
+	bool "TIM4 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM4_CHANNEL1
+
+config STM32H5_TIM4_CH1MODE
+	int "TIM4 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM4_CH1OUT
+	bool "TIM4 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM4_CHANNEL1
+
+config STM32H5_TIM4_CHANNEL2
+	bool "TIM4 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM4_CHANNEL2
+
+config STM32H5_TIM4_CH2MODE
+	int "TIM4 Channel 2 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM4_CH2OUT
+	bool "TIM4 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM4_CHANNEL2
+
+config STM32H5_TIM4_CHANNEL3
+	bool "TIM4 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32H5_TIM4_CHANNEL3
+
+config STM32H5_TIM4_CH3MODE
+	int "TIM4 Channel 3 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM4_CH3OUT
+	bool "TIM4 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM4_CHANNEL3
+
+config STM32H5_TIM4_CHANNEL4
+	bool "TIM4 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32H5_TIM4_CHANNEL4
+
+config STM32H5_TIM4_CH4MODE
+	int "TIM4 Channel 4 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM4_CH4OUT
+	bool "TIM4 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM4_CHANNEL4
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM4_CHANNEL
+	int "TIM4 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM4 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if STM32H5_TIM4_CHANNEL = 1
+
+config STM32H5_TIM4_CH1OUT
+	bool "TIM4 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM4_CHANNEL = 1
+
+if STM32H5_TIM4_CHANNEL = 2
+
+config STM32H5_TIM4_CH2OUT
+	bool "TIM4 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM4_CHANNEL = 2
+
+if STM32H5_TIM4_CHANNEL = 3
+
+config STM32H5_TIM4_CH3OUT
+	bool "TIM4 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM4_CHANNEL = 3
+
+if STM32H5_TIM4_CHANNEL = 4
+
+config STM32H5_TIM4_CH4OUT
+	bool "TIM4 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM4_CHANNEL = 4
+
+config STM32H5_TIM4_CHMODE
+	int "TIM4 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM4_PWM
+
+config STM32H5_TIM5_PWM
+	bool "TIM5 PWM"
+	default n
+	depends on STM32H5_TIM5
+	select STM32H5_PWM
+	---help---
+		Reserve timer 5 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM5
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM5_PWM
+
+config STM32H5_TIM5_MODE
+	int "TIM5 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM5_CHANNEL1
+	bool "TIM5 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM5_CHANNEL1
+
+config STM32H5_TIM5_CH1MODE
+	int "TIM5 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM5_CH1OUT
+	bool "TIM5 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM5_CHANNEL1
+
+config STM32H5_TIM5_CHANNEL2
+	bool "TIM5 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM5_CHANNEL2
+
+config STM32H5_TIM5_CH2MODE
+	int "TIM5 Channel 2 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM5_CH2OUT
+	bool "TIM5 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM5_CHANNEL2
+
+config STM32H5_TIM5_CHANNEL3
+	bool "TIM5 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32H5_TIM5_CHANNEL3
+
+config STM32H5_TIM5_CH3MODE
+	int "TIM5 Channel 3 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM5_CH3OUT
+	bool "TIM5 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM5_CHANNEL3
+
+config STM32H5_TIM5_CHANNEL4
+	bool "TIM5 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32H5_TIM5_CHANNEL4
+
+config STM32H5_TIM5_CH4MODE
+	int "TIM5 Channel 4 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM5_CH4OUT
+	bool "TIM5 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM5_CHANNEL4
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM5_CHANNEL
+	int "TIM5 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM5 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if STM32H5_TIM5_CHANNEL = 1
+
+config STM32H5_TIM5_CH1OUT
+	bool "TIM5 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM5_CHANNEL = 1
+
+if STM32H5_TIM5_CHANNEL = 2
+
+config STM32H5_TIM5_CH2OUT
+	bool "TIM5 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM5_CHANNEL = 2
+
+if STM32H5_TIM5_CHANNEL = 3
+
+config STM32H5_TIM5_CH3OUT
+	bool "TIM5 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32H5_TIM5_CHANNEL = 3
+
+if STM32H5_TIM5_CHANNEL = 4
+
+config STM32H5_TIM5_CH4OUT
+	bool "TIM5 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM5_CHANNEL = 4
+
+config STM32H5_TIM5_CHMODE
+	int "TIM5 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM5_PWM
+
+config STM32H5_TIM8_PWM
+	bool "TIM8 PWM"
+	default n
+	depends on STM32H5_TIM8
+	select STM32H5_PWM
+	---help---
+		Reserve timer 8 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM8
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM8_PWM
+
+config STM32H5_TIM8_MODE
+	int "TIM8 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+config STM32H5_TIM8_LOCK
+	int "TIM8 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 8 lock level configuration
+
+config STM32H5_TIM8_DEADTIME
+	int "TIM8 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 8 initial dead-time
+
+config STM32H5_TIM8_TDTS
+	int "TIM8 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 8 dead-time and sampling clock (t_DTS) division
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM8_CHANNEL1
+	bool "TIM8 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM8_CHANNEL1
+
+config STM32H5_TIM8_CH1MODE
+	int "TIM8 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM8_CH1OUT
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32H5_TIM8_CH1NOUT
+	bool "TIM8 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # STM32H5_TIM8_CHANNEL1
+
+config STM32H5_TIM8_CHANNEL2
+	bool "TIM8 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM8_CHANNEL2
+
+config STM32H5_TIM8_CH2MODE
+	int "TIM8 Channel 2 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM8_CH2OUT
+	bool "TIM8 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config STM32H5_TIM8_CH2NOUT
+	bool "TIM8 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # STM32H5_TIM8_CHANNEL2
+
+config STM32H5_TIM8_CHANNEL3
+	bool "TIM8 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32H5_TIM8_CHANNEL3
+
+config STM32H5_TIM8_CH3MODE
+	int "TIM8 Channel 3 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM8_CH3OUT
+	bool "TIM8 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config STM32H5_TIM8_CH3NOUT
+	bool "TIM8 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # STM32H5_TIM8_CHANNEL3
+
+config STM32H5_TIM8_CHANNEL4
+	bool "TIM8 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32H5_TIM8_CHANNEL4
+
+config STM32H5_TIM8_CH4MODE
+	int "TIM8 Channel 4 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM8_CH4OUT
+	bool "TIM8 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM8_CHANNEL4
+
+config STM32H5_TIM8_CHANNEL5
+	bool "TIM8 Channel 5 (internal)"
+	default n
+	---help---
+		Enables channel 5 (not available externally)
+
+if STM32H5_TIM8_CHANNEL5
+
+config STM32H5_TIM8_CH5MODE
+	int "TIM8 Channel 5 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM8_CH5OUT
+	bool "TIM8 Channel 5 Output"
+	default n
+	---help---
+		Enables channel 5 output.
+
+endif # STM32H5_TIM8_CHANNEL5
+
+config STM32H5_TIM8_CHANNEL6
+	bool "TIM8 Channel 6 (internal)"
+	default n
+	---help---
+		Enables channel 6 (not available externally)
+
+if STM32H5_TIM8_CHANNEL6
+
+config STM32H5_TIM8_CH6MODE
+	int "TIM8 Channel 6 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM8_CH6OUT
+	bool "TIM8 Channel 6 Output"
+	default n
+	---help---
+		Enables channel 6 output.
+
+endif # STM32H5_TIM8_CHANNEL6
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM8_CHANNEL
+	int "TIM8 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM8 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+if STM32H5_TIM8_CHANNEL = 1
+
+config STM32H5_TIM8_CH1OUT
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32H5_TIM8_CH1NOUT
+	bool "TIM8 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # STM32H5_TIM8_CHANNEL = 1
+
+if STM32H5_TIM8_CHANNEL = 2
+
+config STM32H5_TIM8_CH2OUT
+	bool "TIM8 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config STM32H5_TIM8_CH2NOUT
+	bool "TIM8 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # STM32H5_TIM8_CHANNEL = 2
+
+if STM32H5_TIM8_CHANNEL = 3
+
+config STM32H5_TIM8_CH3OUT
+	bool "TIM8 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config STM32H5_TIM8_CH3NOUT
+	bool "TIM8 Channel 3 Complementary Output"
+	default n
+	---help---
+		Enables channel 3 Complementary Output.
+
+endif # STM32H5_TIM8_CHANNEL = 3
+
+if STM32H5_TIM8_CHANNEL = 4
+
+config STM32H5_TIM8_CH4OUT
+	bool "TIM8 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32H5_TIM8_CHANNEL = 4
+
+config STM32H5_TIM8_CHMODE
+	int "TIM8 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM8_PWM
+
+config STM32H5_TIM12_PWM
+	bool "TIM12 PWM"
+	default n
+	depends on STM32H5_TIM12
+	select STM32H5_PWM
+	---help---
+		Reserve timer 12 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM12
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM12_PWM
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM12_CHANNEL1
+	bool "TIM12 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM12_CHANNEL1
+
+config STM32H5_TIM12_CH1MODE
+	int "TIM12 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM12_CH1OUT
+	bool "TIM12 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM12_CHANNEL1
+
+config STM32H5_TIM12_CHANNEL2
+	bool "TIM12 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM12_CHANNEL2
+
+config STM32H5_TIM12_CH2MODE
+	int "TIM12 Channel 2 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM12_CH2OUT
+	bool "TIM12 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM12_CHANNEL2
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM12_CHANNEL
+	int "TIM12 PWM Output Channel"
+	default 1
+	range 1 2
+	---help---
+		If TIM12 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,2}
+
+if STM32H5_TIM12_CHANNEL = 1
+
+config STM32H5_TIM12_CH1OUT
+	bool "TIM12 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM12_CHANNEL = 1
+
+if STM32H5_TIM12_CHANNEL = 2
+
+config STM32H5_TIM12_CH2OUT
+	bool "TIM12 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM12_CHANNEL = 2
+
+config STM32H5_TIM12_CHMODE
+	int "TIM12 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM12_PWM
+
+config STM32H5_TIM13_PWM
+	bool "TIM13 PWM"
+	default n
+	depends on STM32H5_TIM13
+	select STM32H5_PWM
+	---help---
+		Reserve timer 13 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM13
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM13_PWM
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM13_CHANNEL1
+	bool "TIM13 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM13_CHANNEL1
+
+config STM32H5_TIM13_CH1MODE
+	int "TIM13 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM13_CH1OUT
+	bool "TIM13 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM13_CHANNEL1
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM13_CHANNEL
+	int "TIM13 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM13 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if STM32H5_TIM13_CHANNEL = 1
+
+config STM32H5_TIM13_CH1OUT
+	bool "TIM13 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM13_CHANNEL = 1
+
+config STM32H5_TIM13_CHMODE
+	int "TIM13 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM13_PWM
+
+config STM32H5_TIM14_PWM
+	bool "TIM14 PWM"
+	default n
+	depends on STM32H5_TIM14
+	select STM32H5_PWM
+	---help---
+		Reserve timer 14 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM14
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM14_PWM
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM14_CHANNEL1
+	bool "TIM14 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM14_CHANNEL1
+
+config STM32H5_TIM14_CH1MODE
+	int "TIM14 Channel 1 Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM14_CH1OUT
+	bool "TIM14 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM14_CHANNEL1
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM14_CHANNEL
+	int "TIM14 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM14 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if STM32H5_TIM14_CHANNEL = 1
+
+config STM32H5_TIM14_CH1OUT
+	bool "TIM14 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM14_CHANNEL = 1
+
+config STM32H5_TIM14_CHMODE
+	int "TIM14 Channel Mode"
+	default 6
+	range 0 11
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM14_PWM
+
+config STM32H5_TIM15_PWM
+	bool "TIM15 PWM"
+	default n
+	depends on STM32H5_TIM15
+	select STM32H5_PWM
+	---help---
+		Reserve timer 15 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM15
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM15_PWM
+
+config STM32H5_TIM15_LOCK
+	int "TIM15 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 15 lock level configuration
+
+config STM32H5_TIM15_TDTS
+	int "TIM15 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 15 dead-time and sampling clock (t_DTS) division
+
+config STM32H5_TIM15_DEADTIME
+	int "TIM15 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 15 initial dead-time
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM15_CHANNEL1
+	bool "TIM15 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM15_CHANNEL1
+
+config STM32H5_TIM15_CH1MODE
+	int "TIM15 Channel 1 Mode"
+	default 6
+	range 0 9
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM15_CH1OUT
+	bool "TIM15 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32H5_TIM15_CH1NOUT
+	bool "TIM15 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # STM32H5_TIM15_CHANNEL1
+
+config STM32H5_TIM15_CHANNEL2
+	bool "TIM15 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32H5_TIM15_CHANNEL2
+
+config STM32H5_TIM15_CH2MODE
+	int "TIM15 Channel 2 Mode"
+	default 6
+	range 0 9
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM15_CH2OUT
+	bool "TIM15 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32H5_TIM15_CHANNEL2
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM15_CHANNEL
+	int "TIM15 PWM Output Channel"
+	default 1
+	range 1 2
+	---help---
+		If TIM15 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,2}
+
+if STM32H5_TIM15_CHANNEL = 1
+
+config STM32H5_TIM15_CH1OUT
+	bool "TIM15 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32H5_TIM15_CH1NOUT
+	bool "TIM15 Channel 1 Complementary Output"
+	default n
+	---help---
+		Enables channel 1 Complementary Output.
+
+endif # STM32H5_TIM15_CHANNEL = 1
+
+if STM32H5_TIM15_CHANNEL = 2
+
+config STM32H5_TIM15_CH2OUT
+	bool "TIM15 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config STM32H5_TIM15_CH2NOUT
+	bool "TIM15 Channel 2 Complementary Output"
+	default n
+	---help---
+		Enables channel 2 Complementary Output.
+
+endif # STM32H5_TIM15_CHANNEL = 2
+
+config STM32H5_TIM15_CHMODE
+	int "TIM15 Channel Mode"
+	default 6
+	range 0 9
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM15_PWM
+
+config STM32H5_TIM16_PWM
+	bool "TIM16 PWM"
+	default n
+	depends on STM32H5_TIM16
+	select STM32H5_PWM
+	---help---
+		Reserve timer 16 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM16
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM16_PWM
+
+config STM32H5_TIM16_LOCK
+	int "TIM16 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 16 lock level configuration
+
+config STM32H5_TIM16_TDTS
+	int "TIM16 t_DTS division"
+	default 0
+	range 0 2
+	---help---
+		Timer 16 dead-time and sampling clock (t_DTS) division
+
+config STM32H5_TIM16_DEADTIME
+	int "TIM16 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 16 initial dead-time
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM16_CHANNEL1
+	bool "TIM16 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM16_CHANNEL1
+
+config STM32H5_TIM16_CH1MODE
+	int "TIM16 Channel 1 Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM16_CH1OUT
+	bool "TIM16 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM16_CHANNEL1
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM16_CHANNEL
+	int "TIM16 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM16 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if STM32H5_TIM16_CHANNEL = 1
+
+config STM32H5_TIM16_CH1OUT
+	bool "TIM16 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM16_CHANNEL = 1
+
+config STM32H5_TIM16_CHMODE
+	int "TIM16 Channel Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM16_PWM
+
+config STM32H5_TIM17_PWM
+	bool "TIM17 PWM"
+	default n
+	depends on STM32H5_TIM17
+	select STM32H5_PWM
+	---help---
+		Reserve timer 17 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32H5_TIM17
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32H5_TIM17_PWM
+
+config STM32H5_TIM17_LOCK
+	int "TIM17 Lock Level Configuration"
+	default 0
+	range 0 3
+	---help---
+		Timer 17 lock level configuration
+
+config STM32H5_TIM17_TDTS
+	int "TIM17 t_DTS Division"
+	default 0
+	range 0 2
+	---help---
+		Timer 17 dead-time and sampling clock (t_DTS) division
+
+config STM32H5_TIM17_DEADTIME
+	int "TIM17 Initial Dead-time"
+	default 0
+	range 0 255
+	---help---
+		Timer 17 initial dead-time
+
+if STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM17_CHANNEL1
+	bool "TIM17 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32H5_TIM17_CHANNEL1
+
+config STM32H5_TIM17_CH1MODE
+	int "TIM17 Channel 1 Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+config STM32H5_TIM17_CH1OUT
+	bool "TIM17 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM17_CHANNEL1
+
+endif # STM32H5_PWM_MULTICHAN
+
+if !STM32H5_PWM_MULTICHAN
+
+config STM32H5_TIM17_CHANNEL
+	int "TIM17 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM17 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+if STM32H5_TIM17_CHANNEL = 1
+
+config STM32H5_TIM17_CH1OUT
+	bool "TIM17 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32H5_TIM17_CHANNEL = 1
+
+config STM32H5_TIM17_CHMODE
+	int "TIM17 Channel Mode"
+	default 6
+	range 0 7
+	---help---
+		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
+
+endif # !STM32H5_PWM_MULTICHAN
+
+endif # STM32H5_TIM17_PWM
+
+config STM32H5_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+	depends on STM32H5_PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Specifies that the PWM driver supports multiple output
+		channels per timer.
+
+config STM32H5_TIM1_ADC
+	bool "TIM1 ADC"
+	default n
+	depends on STM32H5_TIM1 && STM32H5_ADC
+	---help---
+		Reserve timer 1 for use by an ADC
+
+		Timer devices may be used for different purposes.  If STM32H5_TIM1 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM1"
+	default STM32H5_TIM1_ADC1
+	depends on STM32H5_TIM1_ADC
+
+config STM32H5_TIM1_ADC1
+	bool "Use TIM1 for ADC1"
+	depends on STM32H5_ADC1
+	select STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC1
+
+config STM32H5_TIM1_ADC2
+	bool "Use TIM1 for ADC2"
+	depends on STM32H5_ADC2
+	select STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC2
+
+endchoice
+
+config STM32H5_TIM2_ADC
+	bool "TIM2 ADC"
+	default n
+	depends on STM32H5_TIM2 && STM32H5_ADC
+	---help---
+		Reserve timer 2 for use by an ADC
+
+		Timer devices may be used for different purposes.  If STM32H5_TIM2 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM2"
+	default STM32H5_TIM2_ADC1
+	depends on STM32H5_TIM2_ADC
+
+config STM32H5_TIM2_ADC1
+	bool "Use TIM2 for ADC1"
+	depends on STM32H5_ADC1
+	select STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC1
+
+config STM32H5_TIM2_ADC2
+	bool "Use TIM2 for ADC2"
+	depends on STM32H5_ADC2
+	select STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC2
+
+endchoice
+
+config STM32H5_TIM3_ADC
+	bool "TIM3 ADC"
+	default n
+	depends on STM32H5_TIM3 && STM32H5_ADC
+	---help---
+		Reserve timer 3 for use by an ADC
+
+		Timer devices may be used for different purposes.  If STM32H5_TIM3 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM3"
+	default STM32H5_TIM3_ADC1
+	depends on STM32H5_TIM3_ADC
+
+config STM32H5_TIM3_ADC1
+	bool "Use TIM3 for ADC1"
+	depends on STM32H5_ADC1
+	select STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC1
+
+config STM32H5_TIM3_ADC2
+	bool "Use TIM3 for ADC2"
+	depends on STM32H5_ADC2
+	select STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC2
+
+endchoice
+
+config STM32H5_TIM4_ADC
+	bool "TIM4 ADC"
+	default n
+	depends on STM32H5_TIM4 && STM32H5_ADC
+	---help---
+		Reserve timer 4 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H5_TIM4 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM4"
+	default STM32H5_TIM4_ADC1
+	depends on STM32H5_TIM4_ADC
+
+config STM32H5_TIM4_ADC1
+	bool "Use TIM4 for ADC1"
+	depends on STM32H5_ADC1
+	select STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC1
+
+config STM32H5_TIM4_ADC2
+	bool "Use TIM4 for ADC2"
+	depends on STM32H5_ADC2
+	select STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC2
+
+endchoice
+
+config STM32H5_TIM6_ADC
+	bool "TIM6 ADC"
+	default n
+	depends on STM32H5_TIM6 && STM32H5_ADC
+	---help---
+		Reserve timer 6 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H5_TIM6 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM6"
+	default STM32H5_TIM6_ADC1
+	depends on STM32H5_TIM6_ADC
+
+config STM32H5_TIM6_ADC1
+	bool "Use TIM6 for ADC1"
+	depends on STM32H5_ADC1
+	select STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC1
+
+config STM32H5_TIM6_ADC2
+	bool "Use TIM6 for ADC2"
+	depends on STM32H5_ADC2
+	select STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC2
+
+endchoice
+
+config STM32H5_TIM8_ADC
+	bool "TIM8 ADC"
+	default n
+	depends on STM32H5_TIM8 && STM32H5_ADC
+	---help---
+		Reserve timer 8 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H5_TIM8 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM8"
+	default STM32H5_TIM8_ADC1
+	depends on STM32H5_TIM8_ADC
+
+config STM32H5_TIM8_ADC1
+	bool "Use TIM8 for ADC1"
+	depends on STM32H5_ADC1
+	select STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC1
+
+config STM32H5_TIM8_ADC2
+	bool "Use TIM8 for ADC2"
+	depends on STM32H5_ADC2
+	select STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC2
+
+endchoice
+
+config STM32H5_TIM15_ADC
+	bool "TIM15 ADC"
+	default n
+	depends on STM32H5_TIM15 && STM32H5_ADC
+	---help---
+		Reserve timer 15 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32H5_TIM15 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select ADC for use with TIM15"
+	default STM32H5_TIM15_ADC1
+	depends on STM32H5_TIM15_ADC
+
+config STM32H5_TIM15_ADC1
+	bool "Use TIM15 for ADC1"
+	depends on STM32H5_ADC1
+	select STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC1
+
+config STM32H5_TIM15_ADC2
+	bool "Use TIM15 for ADC2"
+	depends on STM32H5_ADC2
+	select STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC2
+
+endchoice
+
+config STM32H5_HAVE_ADC1_TIMER
+	bool
+
+config STM32H5_HAVE_ADC2_TIMER
+	bool
+
+config STM32H5_ADC1_SAMPLE_FREQUENCY
+	int "ADC1 Sampling Frequency"
+	default 100
+	depends on STM32H5_HAVE_ADC1_TIMER
+	---help---
+		ADC1 sampling frequency.  Default:  100Hz
+
+config STM32H5_ADC1_TIMTRIG
+	int "ADC1 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32H5_HAVE_ADC1_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config STM32H5_ADC2_SAMPLE_FREQUENCY
+	int "ADC2 Sampling Frequency"
+	default 100
+	depends on STM32H5_HAVE_ADC2_TIMER
+	---help---
+		ADC2 sampling frequency.  Default:  100Hz
+
+config STM32H5_ADC2_TIMTRIG
+	int "ADC2 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32H5_HAVE_ADC2_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config STM32H5_TIM1_CAP
+	bool "TIM1 Capture"
+	default n
+	depends on STM32H5_TIM1
+	---help---
+		Reserve timer 1 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM2_CAP
+	bool "TIM2 Capture"
+	default n
+	depends on STM32H5_TIM2
+	---help---
+		Reserve timer 2 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM3_CAP
+	bool "TIM3 Capture"
+	default n
+	depends on STM32H5_TIM3
+	---help---
+		Reserve timer 3 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM4_CAP
+	bool "TIM4 Capture"
+	default n
+	depends on STM32H5_TIM4
+	---help---
+		Reserve timer 4 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM5_CAP
+	bool "TIM5 Capture"
+	default n
+	depends on STM32H5_TIM5
+	---help---
+		Reserve timer 5 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM8_CAP
+	bool "TIM8 Capture"
+	default n
+	depends on STM32H5_TIM8
+	---help---
+		Reserve timer 8 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM12_CAP
+	bool "TIM12 Capture"
+	default n
+	depends on STM32H5_TIM12
+	---help---
+		Reserve timer 12 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM13_CAP
+	bool "TIM13 Capture"
+	default n
+	depends on STM32H5_TIM13
+	---help---
+		Reserve timer 13 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM14_CAP
+	bool "TIM14 Capture"
+	default n
+	depends on STM32H5_TIM14
+	---help---
+		Reserve timer 14 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM15_CAP
+	bool "TIM15 Capture"
+	default n
+	depends on STM32H5_TIM15
+	---help---
+		Reserve timer 15 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM16_CAP
+	bool "TIM16 Capture"
+	default n
+	depends on STM32H5_TIM16
+	---help---
+		Reserve timer 16 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32H5_TIM17_CAP
+	bool "TIM14 Capture"
+	default n
+	depends on STM32H5_TIM17
+	---help---
+		Reserve timer 17 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+menu "STM32 TIMx Outputs Configuration"
+
+config STM32H5_TIM1_CH1POL
+	int "TIM1 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH1OUT
+	---help---
+		TIM1 Channel 1 output polarity
+
+config STM32H5_TIM1_CH1IDLE
+	int "TIM1 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH1OUT
+	---help---
+		TIM1 Channel 1 output IDLE
+
+config STM32H5_TIM1_CH1NPOL
+	int "TIM1 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH1NOUT
+	---help---
+		TIM1 Channel 1 Complementary Output polarity
+
+config STM32H5_TIM1_CH1NIDLE
+	int "TIM1 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH1NOUT
+	---help---
+		TIM1 Channel 1 Complementary Output IDLE
+
+config STM32H5_TIM1_CH2POL
+	int "TIM1 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH2OUT
+	---help---
+		TIM1 Channel 2 output polarity
+
+config STM32H5_TIM1_CH2IDLE
+	int "TIM1 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH2OUT
+	---help---
+		TIM1 Channel 2 output IDLE
+
+config STM32H5_TIM1_CH2NPOL
+	int "TIM1 Channel 2 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH2NOUT
+	---help---
+		TIM1 Channel 2 Complementary Output polarity
+
+config STM32H5_TIM1_CH2NIDLE
+	int "TIM1 Channel 2 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH2NOUT
+	---help---
+		TIM1 Channel 2 Complementary Output IDLE
+
+config STM32H5_TIM1_CH3POL
+	int "TIM1 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH3OUT
+	---help---
+		TIM1 Channel 3 output polarity
+
+config STM32H5_TIM1_CH3IDLE
+	int "TIM1 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH3OUT
+	---help---
+		TIM1 Channel 3 output IDLE
+
+config STM32H5_TIM1_CH3NPOL
+	int "TIM1 Channel 3 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH3NOUT
+	---help---
+		TIM1 Channel 3 Complementary Output polarity
+
+config STM32H5_TIM1_CH3NIDLE
+	int "TIM1 Channel 3 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH3NOUT
+	---help---
+		TIM1 Channel 3 Complementary Output IDLE
+
+config STM32H5_TIM1_CH4POL
+	int "TIM1 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH4OUT
+	---help---
+		TIM1 Channel 4 output polarity
+
+config STM32H5_TIM1_CH4IDLE
+	int "TIM1 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH4OUT
+	---help---
+		TIM1 Channel 4 output IDLE
+
+config STM32H5_TIM1_CH5POL
+	int "TIM1 Channel 5 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH5OUT
+	---help---
+		TIM1 Channel 5 output polarity
+
+config STM32H5_TIM1_CH5IDLE
+	int "TIM1 Channel 5 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH5OUT
+	---help---
+		TIM1 Channel 5 output IDLE
+
+config STM32H5_TIM1_CH6POL
+	int "TIM1 Channel 6 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH6OUT
+	---help---
+		TIM1 Channel 6 output polarity
+
+config STM32H5_TIM1_CH6IDLE
+	int "TIM1 Channel 6 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM1_CH6OUT
+	---help---
+		TIM1 Channel 6 output IDLE
+
+config STM32H5_TIM2_CH1POL
+	int "TIM2 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH1OUT
+	---help---
+		TIM2 Channel 1 output polarity
+
+config STM32H5_TIM2_CH1IDLE
+	int "TIM2 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH1OUT
+	---help---
+		TIM2 Channel 1 output IDLE
+
+config STM32H5_TIM2_CH2POL
+	int "TIM2 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH2OUT
+	---help---
+		TIM2 Channel 2 output polarity
+
+config STM32H5_TIM2_CH2IDLE
+	int "TIM2 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH2OUT
+	---help---
+		TIM2 Channel 2 output IDLE
+
+config STM32H5_TIM2_CH3POL
+	int "TIM2 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH3OUT
+	---help---
+		TIM2 Channel 3 output polarity
+
+config STM32H5_TIM2_CH3IDLE
+	int "TIM2 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH3OUT
+	---help---
+		TIM2 Channel 3 output IDLE
+
+config STM32H5_TIM2_CH4POL
+	int "TIM2 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH4OUT
+	---help---
+		TIM2 Channel 4 output polarity
+
+config STM32H5_TIM2_CH4IDLE
+	int "TIM2 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM2_CH4OUT
+	---help---
+		TIM2 Channel 4 output IDLE
+
+config STM32H5_TIM3_CH1POL
+	int "TIM3 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH1OUT
+	---help---
+		TIM3 Channel 1 output polarity
+
+config STM32H5_TIM3_CH1IDLE
+	int "TIM3 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH1OUT
+	---help---
+		TIM3 Channel 1 output IDLE
+
+config STM32H5_TIM3_CH2POL
+	int "TIM3 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH2OUT
+	---help---
+		TIM3 Channel 2 output polarity
+
+config STM32H5_TIM3_CH2IDLE
+	int "TIM3 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH2OUT
+	---help---
+		TIM3 Channel 2 output IDLE
+
+config STM32H5_TIM3_CH3POL
+	int "TIM3 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH3OUT
+	---help---
+		TIM3 Channel 3 output polarity
+
+config STM32H5_TIM3_CH3IDLE
+	int "TIM3 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH3OUT
+	---help---
+		TIM3 Channel 3 output IDLE
+
+config STM32H5_TIM3_CH4POL
+	int "TIM3 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH4OUT
+	---help---
+		TIM3 Channel 4 output polarity
+
+config STM32H5_TIM3_CH4IDLE
+	int "TIM3 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM3_CH4OUT
+	---help---
+		TIM3 Channel 4 output IDLE
+
+config STM32H5_TIM4_CH1POL
+	int "TIM4 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH1OUT
+	---help---
+		TIM4 Channel 1 output polarity
+
+config STM32H5_TIM4_CH1IDLE
+	int "TIM4 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH1OUT
+	---help---
+		TIM4 Channel 1 output IDLE
+
+config STM32H5_TIM4_CH2POL
+	int "TIM4 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH2OUT
+	---help---
+		TIM4 Channel 2 output polarity
+
+config STM32H5_TIM4_CH2IDLE
+	int "TIM4 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH2OUT
+	---help---
+		TIM4 Channel 2 output IDLE
+
+config STM32H5_TIM4_CH3POL
+	int "TIM4 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH3OUT
+	---help---
+		TIM4 Channel 3 output polarity
+
+config STM32H5_TIM4_CH3IDLE
+	int "TIM4 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH3OUT
+	---help---
+		TIM4 Channel 3 output IDLE
+
+config STM32H5_TIM4_CH4POL
+	int "TIM4 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH4OUT
+	---help---
+		TIM4 Channel 4 output polarity
+
+config STM32H5_TIM4_CH4IDLE
+	int "TIM4 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM4_CH4OUT
+	---help---
+		TIM4 Channel 4 output IDLE
+
+config STM32H5_TIM5_CH1POL
+	int "TIM5 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH1OUT
+	---help---
+		TIM5 Channel 1 output polarity
+
+config STM32H5_TIM5_CH1IDLE
+	int "TIM5 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH1OUT
+	---help---
+		TIM5 Channel 1 output IDLE
+
+config STM32H5_TIM5_CH2POL
+	int "TIM5 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH2OUT
+	---help---
+		TIM5 Channel 2 output polarity
+
+config STM32H5_TIM5_CH2IDLE
+	int "TIM5 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH2OUT
+	---help---
+		TIM5 Channel 2 output IDLE
+
+config STM32H5_TIM5_CH3POL
+	int "TIM5 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH3OUT
+	---help---
+		TIM5 Channel 3 output polarity
+
+config STM32H5_TIM5_CH3IDLE
+	int "TIM5 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH3OUT
+	---help---
+		TIM5 Channel 3 output IDLE
+
+config STM32H5_TIM5_CH4POL
+	int "TIM5 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH4OUT
+	---help---
+		TIM5 Channel 4 output polarity
+
+config STM32H5_TIM5_CH4IDLE
+	int "TIM5 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM5_CH4OUT
+	---help---
+		TIM5 Channel 4 output IDLE
+
+config STM32H5_TIM8_CH1POL
+	int "TIM8 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH1OUT
+	---help---
+		TIM8 Channel 1 output polarity
+
+config STM32H5_TIM8_CH1IDLE
+	int "TIM8 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH1OUT
+	---help---
+		TIM8 Channel 1 output IDLE
+
+config STM32H5_TIM8_CH1NPOL
+	int "TIM8 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH1NOUT
+	---help---
+		TIM8 Channel 1 Complementary Output polarity
+
+config STM32H5_TIM8_CH1NIDLE
+	int "TIM8 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH1NOUT
+	---help---
+		TIM8 Channel 1 Complementary Output IDLE
+
+config STM32H5_TIM8_CH2POL
+	int "TIM8 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH2OUT
+	---help---
+		TIM8 Channel 2 output polarity
+
+config STM32H5_TIM8_CH2IDLE
+	int "TIM8 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH2OUT
+	---help---
+		TIM8 Channel 2 output IDLE
+
+config STM32H5_TIM8_CH2NPOL
+	int "TIM8 Channel 2 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH2NOUT
+	---help---
+		TIM8 Channel 2 Complementary Output polarity
+
+config STM32H5_TIM8_CH2NIDLE
+	int "TIM8 Channel 2 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH2NOUT
+	---help---
+		TIM8 Channel 2 Complementary Output IDLE
+
+config STM32H5_TIM8_CH3POL
+	int "TIM8 Channel 3 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH3OUT
+	---help---
+		TIM8 Channel 3 output polarity
+
+config STM32H5_TIM8_CH3IDLE
+	int "TIM8 Channel 3 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH3OUT
+	---help---
+		TIM8 Channel 3 output IDLE
+
+config STM32H5_TIM8_CH3NPOL
+	int "TIM8 Channel 3 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH3NOUT
+	---help---
+		TIM8 Channel 3 Complementary Output polarity
+
+config STM32H5_TIM8_CH3NIDLE
+	int "TIM8 Channel 3 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH3NOUT
+	---help---
+		TIM8 Channel 3 Complementary Output IDLE
+
+config STM32H5_TIM8_CH4POL
+	int "TIM8 Channel 4 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH4OUT
+	---help---
+		TIM8 Channel 4 output polarity
+
+config STM32H5_TIM8_CH4IDLE
+	int "TIM8 Channel 4 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH4OUT
+	---help---
+		TIM8 Channel 4 output IDLE
+
+config STM32H5_TIM8_CH5POL
+	int "TIM8 Channel 5 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH5OUT
+	---help---
+		TIM8 Channel 5 output polarity
+
+config STM32H5_TIM8_CH5IDLE
+	int "TIM8 Channel 5 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH5OUT
+	---help---
+		TIM8 Channel 5 output IDLE
+
+config STM32H5_TIM8_CH6POL
+	int "TIM8 Channel 6 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH6OUT
+	---help---
+		TIM8 Channel 6 output polarity
+
+config STM32H5_TIM8_CH6IDLE
+	int "TIM8 Channel 6 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM8_CH6OUT
+	---help---
+		TIM8 Channel 6 output IDLE
+
+config STM32H5_TIM12_CH1POL
+	int "TIM12 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM12_CH1OUT
+	---help---
+		TIM12 Channel 1 output polarity
+
+config STM32H5_TIM12_CH1IDLE
+	int "TIM12 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM12_CH1OUT
+	---help---
+		TIM12 Channel 1 output IDLE
+
+config STM32H5_TIM12_CH2POL
+	int "TIM12 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM12_CH2OUT
+	---help---
+		TIM12 Channel 2 output polarity
+
+config STM32H5_TIM12_CH2IDLE
+	int "TIM12 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM12_CH2OUT
+	---help---
+		TIM12 Channel 2 output IDLE
+
+config STM32H5_TIM13_CH1POL
+	int "TIM13 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM13_CH1OUT
+	---help---
+		TIM13 Channel 1 output polarity
+
+config STM32H5_TIM13_CH1IDLE
+	int "TIM13 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM13_CH1OUT
+	---help---
+		TIM13 Channel 1 output IDLE
+
+config STM32H5_TIM14_CH1POL
+	int "TIM14 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM14_CH1OUT
+	---help---
+		TIM14 Channel 1 output polarity
+
+config STM32H5_TIM14_CH1IDLE
+	int "TIM14 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM14_CH1OUT
+	---help---
+		TIM14 Channel 1 output IDLE
+
+config STM32H5_TIM15_CH1POL
+	int "TIM15 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH1OUT
+	---help---
+		TIM15 Channel 1 output polarity
+
+config STM32H5_TIM15_CH1IDLE
+	int "TIM15 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH1OUT
+	---help---
+		TIM15 Channel 1 output IDLE
+
+config STM32H5_TIM15_CH1NPOL
+	int "TIM15 Channel 1 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH1NOUT
+	---help---
+		TIM15 Channel 1 Complementary Output polarity
+
+config STM32H5_TIM15_CH1NIDLE
+	int "TIM15 Channel 1 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH1NOUT
+	---help---
+		TIM15 Channel 1 Complementary Output IDLE
+
+config STM32H5_TIM15_CH2POL
+	int "TIM15 Channel 2 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH2OUT
+	---help---
+		TIM15 Channel 2 output polarity
+
+config STM32H5_TIM15_CH2IDLE
+	int "TIM15 Channel 2 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH2OUT
+	---help---
+		TIM15 Channel 2 output IDLE
+
+config STM32H5_TIM15_CH2NPOL
+	int "TIM15 Channel 2 Complementary Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH2NOUT
+	---help---
+		TIM15 Channel 2 Complementary Output polarity
+
+config STM32H5_TIM15_CH2NIDLE
+	int "TIM15 Channel 2 Complementary Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM15_CH2NOUT
+	---help---
+		TIM15 Channel 2 Complementary Output IDLE
+
+config STM32H5_TIM16_CH1POL
+	int "TIM16 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM16_CH1OUT
+	---help---
+		TIM16 Channel 1 output polarity
+
+config STM32H5_TIM16_CH1IDLE
+	int "TIM16 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM16_CH1OUT
+	---help---
+		TIM16 Channel 1 output IDLE
+
+config STM32H5_TIM17_CH1POL
+	int "TIM17 Channel 1 Output polarity"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM17_CH1OUT
+	---help---
+		TIM17 Channel 1 output polarity
+
+config STM32H5_TIM17_CH1IDLE
+	int "TIM17 Channel 1 Output IDLE"
+	default 0
+	range 0 1
+	depends on STM32H5_TIM17_CH1OUT
+	---help---
+		TIM17 Channel 1 output IDLE
+
+endmenu #STM32 TIMx Outputs Configuration
+
+endmenu # Timer Configuration
 
 config STM32H5_SERIALDRIVER
 	bool
