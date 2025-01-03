@@ -36,10 +36,34 @@
 #include <nuttx/spinlock.h>
 
 #include "clock/clock.h"
+#include "clock/clock_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+int clock_systime_timespec_nolock(FAR struct timespec *ts)
+{
+#ifdef CONFIG_RTC_HIRES
+  if (g_rtc_enabled)
+    {
+      up_rtc_gettime(ts);
+      clock_timespec_subtract(ts, &g_basetime, ts);
+    }
+  else
+    {
+      ts->tv_sec = 0;
+      ts->tv_nsec = 0;
+    }
+#elif defined(CONFIG_ALARM_ARCH) || \
+      defined(CONFIG_TIMER_ARCH) || \
+      defined(CONFIG_SCHED_TICKLESS)
+  up_timer_gettime(ts);
+#else
+  clock_ticks2time(ts, g_system_ticks);
+#endif
+  return 0;
+}
 
 /****************************************************************************
  * Name: clock_systime_timespec
@@ -62,21 +86,11 @@
 int clock_systime_timespec(FAR struct timespec *ts)
 {
 #ifdef CONFIG_RTC_HIRES
-  if (g_rtc_enabled)
-    {
-      irqstate_t flags;
+  irqstate_t flags;
 
-      up_rtc_gettime(ts);
-
-      flags = spin_lock_irqsave(NULL);
-      clock_timespec_subtract(ts, &g_basetime, ts);
-      spin_unlock_irqrestore(NULL, flags);
-    }
-  else
-    {
-      ts->tv_sec = 0;
-      ts->tv_nsec = 0;
-    }
+  flags = spin_lock_irqsave(&g_basetime_lock);
+  clock_systime_timespec_nolock(ts);
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 #elif defined(CONFIG_ALARM_ARCH) || \
       defined(CONFIG_TIMER_ARCH) || \
       defined(CONFIG_SCHED_TICKLESS)

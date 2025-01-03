@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/signal/sig_findaction.c
+ * sched/clock/clock_internal.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,53 +20,53 @@
  *
  ****************************************************************************/
 
+#ifndef __SCHED_CLOCK_INTERNAL_CLOCK_H
+#define __SCHED_CLOCK_INTERNAL_CLOCK_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <nuttx/sched.h>
-#include <nuttx/spinlock.h>
+#include <stdint.h>
+#include <time.h>
 
-#include "signal/signal.h"
+#include <nuttx/compiler.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_find_action
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: clock_systime_timespec_nolock
  *
  * Description:
- *   Allocate a new element for a signal queue
+ *   Return the current value of the system timer counter as a struct
+ *   timespec.
+ *
+ * Input Parameters:
+ *   ts - Location to return the time
+ *
+ * Returned Value:
+ *   OK (0) on success; a negated errno value on failure.
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-FAR sigactq_t *nxsig_find_action(FAR struct task_group_s *group, int signo)
-{
-  FAR sigactq_t *sigact = NULL;
-  irqstate_t flags;
+int clock_systime_timespec_nolock(FAR struct timespec *ts);
 
-  /* Verify the caller's sanity */
-
-  if (group)
-    {
-      /* Sigactions can only be assigned to the currently executing
-       * thread.  So, a simple lock ought to give us sufficient
-       * protection.
-       */
-
-      flags = spin_lock_irqsave(&group->lock);
-
-      /* Search the list for a sigaction on this signal */
-
-      for (sigact = (FAR sigactq_t *)group->tg_sigactionq.head;
-           ((sigact) && (sigact->signo != signo));
-           sigact = sigact->flink);
-
-      spin_unlock_irqrestore(&group->lock, flags);
-    }
-
-  return sigact;
-}
+#endif /* __SCHED_CLOCK_INTERNAL_CLOCK_H */
