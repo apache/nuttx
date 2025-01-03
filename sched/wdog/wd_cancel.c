@@ -38,6 +38,8 @@
 #include "sched/sched.h"
 #include "wdog/wdog.h"
 
+spinlock_t g_wdog_spinlock = SP_UNLOCKED;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -60,14 +62,9 @@
 
 int wd_cancel(FAR struct wdog_s *wdog)
 {
-  irqstate_t flags;
   int ret;
 
-  flags = enter_critical_section();
-
   ret = wd_cancel_irq(wdog);
-
-  leave_critical_section(flags);
 
   return ret;
 }
@@ -91,12 +88,16 @@ int wd_cancel(FAR struct wdog_s *wdog)
 
 int wd_cancel_irq(FAR struct wdog_s *wdog)
 {
+  irqstate_t flags;
   bool head;
+
+  flags = spin_lock_irqsave(&g_wdog_spinlock);
 
   /* Make sure that the watchdog is valid and still active. */
 
   if (wdog == NULL || !WDOG_ISACTIVE(wdog))
     {
+      spin_unlock_irqrestore(&g_wdog_spinlock, flags);
       return -EINVAL;
     }
 
@@ -116,6 +117,7 @@ int wd_cancel_irq(FAR struct wdog_s *wdog)
   /* Mark the watchdog inactive */
 
   wdog->func = NULL;
+  spin_unlock_irqrestore(&g_wdog_spinlock, flags);
 
   if (head)
     {
