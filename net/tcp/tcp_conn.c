@@ -887,6 +887,10 @@ void tcp_free(FAR struct tcp_conn_s *conn)
 
 #endif
 
+#if CONFIG_NET_SEND_BUFSIZE > 0
+  nxsem_destroy(&conn->snd_sem);
+#endif
+
 #ifdef CONFIG_NET_TCPBACKLOG
   /* Remove any backlog attached to this connection */
 
