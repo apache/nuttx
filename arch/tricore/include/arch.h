@@ -42,6 +42,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Address <--> Context Save Areas */
+
+#define tricore_csa2addr(csa) ((uintptr_t *)((((csa) & 0x000F0000) << 12) \
+                                             | (((csa) & 0x0000FFFF) << 6)))
+#define tricore_addr2csa(addr) ((uintptr_t)(((((uintptr_t)(addr)) & 0xF0000000) >> 12) \
+                                            | (((uintptr_t)(addr) & 0x003FFFC0) >> 6)))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
