@@ -261,7 +261,7 @@ config NET_TCP_NWRBCHAINS
 
 config NET_TCP_ALLOC_WRBCHAINS
 	int "Dynamic I/O buffer chain heads allocation"
-	default 0
+	default 1
 	---help---
 		When set to 0 all dynamic allocations are disabled
 

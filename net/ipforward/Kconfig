@@ -43,7 +43,7 @@ config NET_IPFORWARD_NSTRUCT
 
 config NET_IPFORWARD_ALLOC_STRUCT
 	int "Dynamic forwarding structures allocation"
-	default 0
+	default 1
 	---help---
 		When set to 0 all dynamic allocations are disabled
 
