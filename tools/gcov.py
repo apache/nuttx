@@ -107,9 +107,22 @@ def arg_parser():
     )
     parser.add_argument("-i", "--input", help="Input dump data")
     parser.add_argument("-t", dest="gcov_tool", help="Path to gcov tool")
-    parser.add_argument("-b", dest="base_dir", help="Compile base directory")
-    parser.add_argument("-s", dest="gcno_dir", help="Directory containing gcno files")
-    parser.add_argument("-a", dest="gcda_dir", help="Directory containing gcda files")
+    parser.add_argument(
+        "-b", dest="base_dir", default=os.getcwd(), help="Compile base directory"
+    )
+    parser.add_argument(
+        "-s",
+        dest="gcno_dir",
+        default=os.getcwd(),
+        help="Directory containing gcno files",
+    )
+    parser.add_argument(
+        "-a",
+        dest="gcda_dir",
+        default=os.getcwd(),
+        nargs="+",
+        help="Directory containing gcda files",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
     parser.add_argument(
         "-x",
@@ -118,7 +131,8 @@ def arg_parser():
         help="Only copy *.gcno and *.gcda files",
     )
     parser.add_argument(
-        "gcov_dir",
+        "-o",
+        dest="gcov_dir",
         nargs="?",
         default=os.getcwd(),
         help="Directory to store gcov data and report",
@@ -132,12 +146,19 @@ def main():
 
     root_dir = os.getcwd()
     gcov_dir = os.path.abspath(args.gcov_dir)
-    gcno_dir = os.path.abspath(args.gcno_dir) if args.gcno_dir else root_dir
-    gcda_dir = os.path.abspath(args.gcda_dir) if args.gcda_dir else root_dir
+    gcno_dir = os.path.abspath(args.gcno_dir)
+
+    if os.path.exists(gcov_dir):
+        shutil.rmtree(gcov_dir)
+
+    os.makedirs(gcov_dir)
+
+    gcda_dir = []
+    for i in args.gcda_dir:
+        gcda_dir.append(os.path.abspath(i))
 
     coverage_file = os.path.join(gcov_dir, "coverage.info")
     result_dir = os.path.join(gcov_dir, "result")
-    gcov_data_dir = os.path.join(gcov_dir, "data")
 
     if args.debug:
         debug_file = os.path.join(gcov_dir, "debug.log")
@@ -146,11 +167,17 @@ def main():
     if args.input:
         parse_gcda_data(os.path.join(root_dir, args.input))
 
-    os.makedirs(os.path.join(gcov_dir, "data"), exist_ok=True)
+    gcov_data_dir = []
 
     # Collect gcno, gcda files
-    copy_file_endswith(".gcno", gcno_dir, gcov_data_dir)
-    copy_file_endswith(".gcda", gcda_dir, gcov_data_dir)
+    for i in gcda_dir:
+
+        dir = os.path.join(gcov_dir + "/data", os.path.basename(i))
+        gcov_data_dir.append(dir)
+        os.makedirs(dir)
+
+        copy_file_endswith(".gcno", gcno_dir, dir)
+        copy_file_endswith(".gcda", i, dir)
 
     # Only copy files
     if args.only_copy:
@@ -166,21 +193,26 @@ def main():
     try:
 
         # lcov collect coverage data to coverage_file
+        command = [
+            "lcov",
+            "-c",
+            "-o",
+            coverage_file,
+            "--rc",
+            "lcov_branch_coverage=1",
+            "--gcov-tool",
+            args.gcov_tool,
+            "--ignore-errors",
+            "gcov",
+        ]
+        for i in gcov_data_dir:
+            command.append("-d")
+            command.append(i)
+
+        print(command)
+
         subprocess.run(
-            [
-                "lcov",
-                "-c",
-                "-d",
-                gcov_data_dir,
-                "-o",
-                coverage_file,
-                "--rc",
-                "lcov_branch_coverage=1",
-                "--gcov-tool",
-                args.gcov_tool,
-                "--ignore-errors",
-                "gcov",
-            ],
+            command,
             check=True,
             stdout=sys.stdout,
             stderr=sys.stdout,
@@ -214,7 +246,9 @@ def main():
         print("Failed to generate coverage file.")
         sys.exit(1)
 
-    shutil.rmtree(gcov_data_dir)
+    for i in gcov_data_dir:
+        shutil.rmtree(i)
+
     os.remove(coverage_file)
 
 
