@@ -26,6 +26,10 @@ if(CONFIG_WATCHDOG)
   list(APPEND SRCS watchdog.c)
 endif()
 
+if(CONFIG_WATCHDOG_TIMEOUT_NOTIFIER)
+  list(APPEND SRCS watchdog_notifier.c)
+endif()
+
 if(CONFIG_TIMER)
   list(APPEND SRCS timer.c)
 endif()

@@ -28,6 +28,12 @@ ifeq ($(CONFIG_WATCHDOG),y)
   TMRVPATH = :timers
 endif
 
+ifeq ($(CONFIG_WATCHDOG_TIMEOUT_NOTIFIER),y)
+  CSRCS += watchdog_notifier.c
+  TMRDEPPATH = --dep-path timers
+  TMRVPATH = :timers
+endif
+
 ifeq ($(CONFIG_TIMER),y)
   CSRCS += timer.c
   TMRDEPPATH = --dep-path timers
