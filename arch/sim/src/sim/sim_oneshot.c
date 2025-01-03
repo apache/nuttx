@@ -113,15 +113,10 @@ static const struct oneshot_operations_s g_oneshot_ops =
 
 static inline void sim_timer_current(struct timespec *ts)
 {
-  uint64_t nsec;
-  time_t sec;
+  uint64_t nsec = host_gettime(false);
 
-  nsec  = host_gettime(false);
-  sec   = nsec / NSEC_PER_SEC;
-  nsec -= sec * NSEC_PER_SEC;
-
-  ts->tv_sec  = sec;
-  ts->tv_nsec = nsec;
+  ts->tv_sec  = nsec / NSEC_PER_SEC;
+  ts->tv_nsec = nsec % NSEC_PER_SEC;
 }
 
 /****************************************************************************
