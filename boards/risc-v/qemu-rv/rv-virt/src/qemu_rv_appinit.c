@@ -146,6 +146,16 @@ int board_app_initialize(uintptr_t arg)
   qemu_rptun_init();
 #endif
 
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  int ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 #endif
 }
