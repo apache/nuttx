@@ -66,6 +66,8 @@ volatile sq_queue_t g_freetimers;
 
 volatile sq_queue_t g_alloctimers;
 
+volatile spinlock_t g_freetimers_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -173,7 +175,7 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
 
   if (timerid != NULL)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_freetimers_lock);
 
       sq_for_every(&g_alloctimers, entry)
         {
@@ -184,7 +186,7 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
             }
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_freetimers_lock, flags);
     }
 
   return timer;
