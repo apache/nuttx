@@ -150,7 +150,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   heapbase = MM_ALIGN_UP((uintptr_t)heapstart + 2 * MM_SIZEOF_ALLOCNODE) -
              2 * MM_SIZEOF_ALLOCNODE;
-  heapsize = heapsize - (heapbase - (uintptr_t)heapstart);
+  heapsize = MM_ALIGN_DOWN(heapsize - (heapbase - (uintptr_t)heapstart));
 
   /* Register KASan for access rights check. We need to register after
    * address alignment.
