@@ -283,6 +283,8 @@ static int stm32_tim_checkint(struct stm32_tim_dev_s *dev,
 
 static const struct stm32_tim_ops_s stm32_tim_ops =
 {
+  .enable     = stm32_tim_enable,
+  .disable    = stm32_tim_disable,
   .setmode    = stm32_tim_setmode,
   .setclock   = stm32_tim_setclock,
   .getclock   = stm32_tim_getclock,
