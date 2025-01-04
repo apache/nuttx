@@ -71,6 +71,8 @@ struct goldfish_gpu_fb_s
   struct fb_videoinfo_s videoinfo;
   struct file pipe;
   int colorbuffer;
+  int colorformat;
+  int colortype;
 };
 
 /****************************************************************************
@@ -377,8 +379,8 @@ static int goldfish_gpu_fb_commit(FAR struct goldfish_gpu_fb_s *fb,
   ret = goldfish_gpu_fb_update_colorbuffer(&fb->pipe, fb->colorbuffer, 0, 0,
                                            fb->videoinfo.xres,
                                            fb->videoinfo.yres,
-                                           EGL_RGB565,
-                                           EGL_UNSIGNED_SHORT_5_6_5,
+                                           fb->colorformat,
+                                           fb->colortype,
                                            buf,
                                            fb->planeinfo.stride
                                            * fb->videoinfo.yres);
@@ -530,12 +532,28 @@ int goldfish_gpu_fb_register(int display)
 
   fb->videoinfo.yres = ret;
 
+#ifdef CONFIG_GOLDFISH_GPU_FB_BGRA8888
+  fb->colorformat   = EGL_BGRA;
+  fb->colortype     = EGL_UNSIGNED_BYTE;
+  fb->videoinfo.fmt = FB_FMT_RGB32;
+  fb->planeinfo.bpp = 32;
+#else
+  fb->colorformat   = EGL_RGB565;
+  fb->colortype     = EGL_UNSIGNED_SHORT_5_6_5;
+  fb->videoinfo.fmt = FB_FMT_RGB16_565;
+  fb->planeinfo.bpp = 16;
+#endif
+  fb->videoinfo.nplanes = 1;
+  fb->planeinfo.stride = fb->videoinfo.xres * (fb->planeinfo.bpp >> 3);
+  fb->planeinfo.yres_virtual = fb->videoinfo.yres * 2;
+  fb->planeinfo.xres_virtual = fb->videoinfo.xres;
+
   /* Create the colorbuffer */
 
   ret = goldfish_gpu_fb_create_colorbuffer(&fb->pipe,
                                            fb->videoinfo.xres,
                                            fb->videoinfo.yres,
-                                           EGL_RGB565);
+                                           fb->colorformat);
   if (ret < 0)
     {
       gerr("Failed to create colorbuffer: %d\n", ret);
@@ -544,13 +562,6 @@ int goldfish_gpu_fb_register(int display)
 
   fb->colorbuffer = ret;
 
-  fb->videoinfo.nplanes = 1;
-  fb->videoinfo.fmt = FB_FMT_RGB16_565;
-
-  fb->planeinfo.bpp = 16;
-  fb->planeinfo.stride = fb->videoinfo.xres * (fb->planeinfo.bpp >> 3);
-  fb->planeinfo.yres_virtual = fb->videoinfo.yres * 2;
-  fb->planeinfo.xres_virtual = fb->videoinfo.xres;
   fb->planeinfo.fblen = fb->planeinfo.stride * fb->planeinfo.yres_virtual;
   fb->planeinfo.fbmem = kmm_zalloc(fb->planeinfo.fblen);
 
