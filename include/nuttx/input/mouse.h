@@ -56,9 +56,10 @@
 /* Common mouse IOCTL commands */
 
 #define MSIOC_VENDOR         _MSIOC(0x0001)  /* Vendor-specific commands */
+#define MSIOC_GRAB           _MSIOC(0x0002)  /* Grab/Release mouse events */
 
 #define MSC_FIRST            0x0001          /* First common command */
-#define MSC_NCMDS            1               /* One common commands */
+#define MSC_NCMDS            2               /* Two common commands */
 
 /* Vendor-specific command structure
  *

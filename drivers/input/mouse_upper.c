@@ -58,6 +58,7 @@ struct mouse_upperhalf_s
   mutex_t          lock;               /* Manages exclusive access to this structure */
   struct list_node head;               /* Opened file buffer chain header node */
   FAR struct mouse_lowerhalf_s *lower; /* A pointer of lower half instance */
+  FAR struct mouse_openpriv_s  *grab;  /* A pointer of grab file */
 };
 
 /****************************************************************************
@@ -166,6 +167,11 @@ static int mouse_close(FAR struct file *filep)
       return ret;
     }
 
+  if (upper->grab == openpriv)
+    {
+      upper->grab = NULL;
+    }
+
   if (lower->close && list_is_singular(&openpriv->node))
     {
       ret = lower->close(lower);
@@ -258,9 +264,10 @@ static ssize_t mouse_write(FAR struct file *filep, FAR const char *buffer,
 
 static int mouse_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode             *inode = filep->f_inode;
-  FAR struct mouse_upperhalf_s *upper = inode->i_private;
-  FAR struct mouse_lowerhalf_s *lower = upper->lower;
+  FAR struct inode             *inode    = filep->f_inode;
+  FAR struct mouse_upperhalf_s *upper    = inode->i_private;
+  FAR struct mouse_lowerhalf_s *lower    = upper->lower;
+  FAR struct mouse_openpriv_s  *openpriv = filep->f_priv;
   int ret;
 
   ret = nxmutex_lock(&upper->lock);
@@ -269,13 +276,49 @@ static int mouse_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       return ret;
     }
 
-  if (lower->control)
+  switch (cmd)
     {
-      ret = lower->control(lower, cmd, arg);
-    }
-  else
-    {
-      ret = -ENOTTY;
+      case MSIOC_GRAB:
+        {
+          int enable = (int)arg;
+
+          ret = OK;
+          if (enable)
+            {
+              if (upper->grab != NULL)
+                {
+                  ret = -EBUSY;
+                }
+              else
+                {
+                  upper->grab = openpriv;
+                }
+            }
+          else
+            {
+              if (upper->grab != openpriv)
+                {
+                  ret = -EINVAL;
+                }
+              else
+                {
+                  upper->grab = NULL;
+                }
+            }
+        }
+        break;
+      default:
+        {
+          if (lower->control)
+            {
+              ret = lower->control(lower, cmd, arg);
+            }
+          else
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
     }
 
   nxmutex_unlock(&upper->lock);
@@ -331,6 +374,34 @@ errout:
 }
 
 /****************************************************************************
+ * Name: mouse_event_notify
+ ****************************************************************************/
+
+static void mouse_event_notify(FAR struct mouse_openpriv_s  *openpriv,
+                               FAR const struct mouse_report_s *sample)
+{
+  int semcount;
+
+  nxmutex_lock(&openpriv->lock);
+
+  circbuf_overwrite(&openpriv->circbuf, sample,
+                    sizeof(struct mouse_report_s));
+
+  nxsem_get_value(&openpriv->waitsem, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(&openpriv->waitsem);
+    }
+
+  if (openpriv->fds && openpriv->fds->fd >= 0)
+    {
+      poll_notify(&openpriv->fds, 1, POLLIN);
+    }
+
+  nxmutex_unlock(&openpriv->lock);
+}
+
+/****************************************************************************
  * Public Function
  ****************************************************************************/
 
@@ -342,27 +413,22 @@ void mouse_event(FAR void *priv, FAR const struct mouse_report_s *sample)
 {
   FAR struct mouse_upperhalf_s *upper = priv;
   FAR struct mouse_openpriv_s  *openpriv;
-  int semcount;
 
   if (nxmutex_lock(&upper->lock) < 0)
     {
       return;
     }
 
-  list_for_every_entry(&upper->head, openpriv, struct mouse_openpriv_s, node)
+  if (upper->grab)
     {
-      circbuf_overwrite(&openpriv->circbuf, sample,
-                        sizeof(struct mouse_report_s));
-
-      nxsem_get_value(&openpriv->waitsem, &semcount);
-      if (semcount < 1)
+      mouse_event_notify(upper->grab, sample);
+    }
+  else
+    {
+      list_for_every_entry(&upper->head, openpriv,
+                           struct mouse_openpriv_s, node)
         {
-          nxsem_post(&openpriv->waitsem);
-        }
-
-      if (openpriv->fds && openpriv->fds->fd >= 0)
-        {
-          poll_notify(&openpriv->fds, 1, POLLIN);
+          mouse_event_notify(openpriv, sample);
         }
     }
 
