@@ -63,6 +63,14 @@ ifeq ($(CONFIG_ARCH_INTEL64_DISABLE_VECTORIZE),y)
   ARCHOPTIMIZATION += -fno-tree-vectorize
 endif
 
+ifeq ($(CONFIG_STACK_USAGE),y)
+  ARCHOPTIMIZATION += -fstack-usage
+endif
+
+ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
+  ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
+endif
+
 ARCHCFLAGS += -fno-common -Wno-attributes
 ARCHCXXFLAGS += -fno-common -Wno-attributes -nostdinc++
 
