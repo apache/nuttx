@@ -32,6 +32,7 @@
 #include <nuttx/crc16.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
 #include <nuttx/spinlock.h>
@@ -103,6 +104,12 @@ struct rpmsg_port_spi_s
   rpmsg_port_rx_cb_t             rxcb;
   volatile uint8_t               state;
   spinlock_t                     lock;
+#ifdef CONFIG_PM
+  struct pm_callback_s           pmcb;
+  spinlock_t                     pmlock;
+  struct wdog_s                  wdog;
+  struct pm_wakelock_s           wakelock;
+#endif
 
   /* Used for flow control */
 
@@ -136,6 +143,102 @@ static const struct rpmsg_port_ops_s g_rpmsg_port_spi_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_PM
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_pm_callback
+ ****************************************************************************/
+
+static void rpmsg_port_spi_pm_callback(wdparm_t arg)
+{
+  FAR struct rpmsg_port_spi_s *rpspi = (FAR struct rpmsg_port_spi_s *)arg;
+  irqstate_t flags;
+  int count;
+
+  flags = spin_lock_irqsave(&rpspi->pmlock);
+  count = pm_wakelock_staycount(&rpspi->wakelock);
+  if (count > 0 && atomic_load(&rpspi->transferring) == 0 &&
+      rpmsg_port_queue_nused(&rpspi->port.txq) == 0 &&
+      rpmsg_port_queue_nused(&rpspi->port.rxq) == 0)
+    {
+      pm_wakelock_relax(&rpspi->wakelock);
+    }
+  else
+    {
+      wd_start(&rpspi->wdog, MSEC2TICK(CONFIG_RPMSG_PORT_SPI_PM_TIMEOUT),
+               rpmsg_port_spi_pm_callback, (wdparm_t)rpspi);
+    }
+
+  spin_unlock_irqrestore(&rpspi->pmlock, flags);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_pm_action
+ ****************************************************************************/
+
+static inline void
+rpmsg_port_spi_pm_action(FAR struct rpmsg_port_spi_s *rpspi, bool stay)
+{
+  irqstate_t flags;
+  int count;
+
+  flags = spin_lock_irqsave(&rpspi->pmlock);
+  count = pm_wakelock_staycount(&rpspi->wakelock);
+  if (stay && count == 0)
+    {
+      pm_wakelock_stay(&rpspi->wakelock);
+    }
+  else if (!stay && count > 0 &&
+           rpmsg_port_queue_nused(&rpspi->port.txq) == 0)
+    {
+      wd_start(&rpspi->wdog, MSEC2TICK(CONFIG_RPMSG_PORT_SPI_PM_TIMEOUT),
+               rpmsg_port_spi_pm_callback, (wdparm_t)rpspi);
+    }
+
+  spin_unlock_irqrestore(&rpspi->pmlock, flags);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_prepare
+ ****************************************************************************/
+
+static int rpmsg_port_spi_prepare(FAR struct pm_callback_s *cb, int domain,
+                                  enum pm_state_e pmstate)
+{
+  FAR struct rpmsg_port_spi_s *rpspi =
+    container_of(cb, struct rpmsg_port_spi_s, pmcb);
+  enum pm_state_e oldstate;
+
+  oldstate = pm_querystate(PM_IDLE_DOMAIN);
+  switch (oldstate)
+    {
+      case PM_NORMAL:
+      case PM_IDLE:
+      case PM_STANDBY:
+        if (pmstate == PM_SLEEP)
+          {
+            if (atomic_load(&rpspi->transferring) ||
+                rpmsg_port_queue_nused(&rpspi->port.rxq) > 0 ||
+                rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
+              {
+                rpmsgerr("rpmsg port spi busy\n");
+                return -EBUSY;
+              }
+          }
+        break;
+
+      case PM_SLEEP:
+      default:
+        break;
+    }
+
+  return 0;
+}
+
+#else
+#  define rpmsg_port_spi_pm_action(rpspi, stay)
+#endif
 
 /****************************************************************************
  * Name: rpmsg_port_spi_notify_tx_ready
@@ -237,6 +340,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 
   rpmsginfo("irq send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
 
+  rpmsg_port_spi_pm_action(rpspi, true);
   SPI_SELECT(rpspi->spi, rpspi->devid, true);
   SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr,
                BYTES2WORDS(rpspi, rpspi->cmdhdr->len));
@@ -345,6 +449,7 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
 unlock:
   spin_unlock_irqrestore(&rpspi->lock, flags);
 out:
+  rpmsg_port_spi_pm_action(rpspi, false);
   if (atomic_xchg(&rpspi->transferring, 0) > 1)
     {
       rpmsg_port_spi_exchange(rpspi);
@@ -678,6 +783,14 @@ rpmsg_port_spi_initialize(FAR const struct rpmsg_port_config_s *cfg,
       rpmsgerr("rpmsg port spi create thread failed\n");
       goto out;
     }
+
+#ifdef CONFIG_PM
+  rpspi->pmcb.prepare = rpmsg_port_spi_prepare;
+  pm_register(&rpspi->pmcb);
+  spin_lock_init(&rpspi->pmlock);
+  pm_wakelock_init(&rpspi->wakelock, cfg->remotecpu,
+                   PM_IDLE_DOMAIN, PM_NORMAL);
+#endif
 
   return 0;
 

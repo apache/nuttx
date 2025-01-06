@@ -75,6 +75,11 @@ config RPMSG_PORT_SPI_RX_THRESHOLD
 	default 50
 	range 0 100
 
+config RPMSG_PORT_SPI_PM_TIMEOUT
+	int "Rpmsg SPI Port PM Stay Timeout in Milliseconds"
+	default 1
+	depends on PM
+
 endif # RPMSG_PORT_SPI
 
 config RPMSG_PORT_UART
