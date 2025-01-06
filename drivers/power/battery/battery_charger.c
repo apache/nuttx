@@ -36,6 +36,7 @@
 #include <fcntl.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
@@ -61,7 +62,9 @@ struct battery_charger_priv_s
   mutex_t           lock;
   sem_t             wait;
   uint32_t          mask;
+  clock_t           interval; /* tick unit */
   FAR struct pollfd *fds;
+  struct work_s     work;
 };
 
 /****************************************************************************
@@ -102,11 +105,28 @@ static const struct file_operations g_batteryops =
  * Private Functions
  ****************************************************************************/
 
+static void battery_charger_work(FAR void *arg)
+{
+  FAR struct battery_charger_priv_s *priv =
+    (FAR struct battery_charger_priv_s *)arg;
+  FAR struct pollfd *fds = priv->fds;
+  int semcnt;
+
+  if (priv->mask != 0)
+    {
+      poll_notify(&fds, 1, POLLIN);
+
+      nxsem_get_value(&priv->wait, &semcnt);
+      if (semcnt < 1)
+        {
+          nxsem_post(&priv->wait);
+        }
+    }
+}
+
 static int battery_charger_notify(FAR struct battery_charger_priv_s *priv,
                                   uint32_t mask)
 {
-  FAR struct pollfd *fds = priv->fds;
-  int semcnt;
   int ret;
 
   ret = nxmutex_lock(&priv->lock);
@@ -116,14 +136,16 @@ static int battery_charger_notify(FAR struct battery_charger_priv_s *priv,
     }
 
   priv->mask |= mask;
-  if (priv->mask)
+  if (priv->mask != 0)
     {
-      poll_notify(&fds, 1, POLLIN);
-
-      nxsem_get_value(&priv->wait, &semcnt);
-      if (semcnt < 1)
+      if (priv->interval > 0)
         {
-          nxsem_post(&priv->wait);
+          work_queue(LPWORK, &priv->work, battery_charger_work, priv,
+                     priv->interval);
+        }
+      else
+        {
+          battery_charger_work(priv);
         }
     }
 
@@ -267,6 +289,7 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct battery_charger_dev_s *dev  = inode->i_private;
+  FAR struct battery_charger_priv_s *priv = filep->f_priv;
   int ret;
 
   /* Enforce mutually exclusive access to the battery driver */
@@ -406,6 +429,13 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         }
         break;
 
+      case BATIOC_SET_DEBOUNCE:
+        {
+          priv->interval = arg;
+          ret = OK;
+        }
+        break;
+
       default:
         batinfo("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
@@ -438,7 +468,7 @@ static int bat_charger_poll(FAR struct file *filep,
         {
           priv->fds = fds;
           fds->priv = &priv->fds;
-          if (priv->mask)
+          if (priv->mask != 0)
             {
               poll_notify(&fds, 1, POLLIN);
             }
