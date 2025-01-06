@@ -1153,7 +1153,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
       conn->expired          = 0;
       conn->isn              = 0;
       conn->sent             = 0;
-      conn->sndseq_max       = 0;
+      conn->sndseq_max       = tcp_getsequence(conn->sndseq);
 #endif
 
 #ifdef CONFIG_NET_TCP_CC_NEWRENO
@@ -1456,16 +1456,17 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
   conn->sa         = 0;
   conn->sv         = 16;   /* Initial value of the RTT variance. */
   conn->lport      = (uint16_t)port;
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-  conn->expired    = 0;
-  conn->isn        = 0;
-  conn->sent       = 0;
-  conn->sndseq_max = 0;
-#endif
 
   /* Set initial sndseq when we have both local/remote addr and port */
 
   tcp_initsequence(conn);
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  conn->expired    = 0;
+  conn->isn        = 0;
+  conn->sent       = 0;
+  conn->sndseq_max = tcp_getsequence(conn->sndseq);
+#endif
 
   /* Save initial sndseq to rexmit_seq, otherwise it will be zero */
 
