@@ -39,6 +39,7 @@
 
 #include "soc/periph_defs.h"
 #include "esp_private/periph_ctrl.h"
+#include "hardware/esp32s3_system.h"
 
 /****************************************************************************
  * Private Types
@@ -937,6 +938,8 @@ struct esp32s3_tim_dev_s *esp32s3_tim_init(int timer)
       case ESP32S3_TIMER0:
         {
           tim = &g_esp32s3_tim0_priv;
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_TIMERGROUP_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TIMERGROUP_RST_M, 0);
           break;
         }
 #endif
@@ -945,6 +948,9 @@ struct esp32s3_tim_dev_s *esp32s3_tim_init(int timer)
       case ESP32S3_TIMER1:
         {
           tim = &g_esp32s3_tim1_priv;
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0,
+                      SYSTEM_TIMERGROUP1_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TIMERGROUP1_RST_M, 0);
           break;
         }
 #endif

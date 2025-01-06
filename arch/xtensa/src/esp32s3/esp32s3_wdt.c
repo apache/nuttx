@@ -33,6 +33,7 @@
 #include "hardware/esp32s3_rtccntl.h"
 #include "hardware/esp32s3_tim.h"
 #include "hardware/esp32s3_efuse.h"
+#include "hardware/esp32s3_system.h"
 
 #include "esp32s3_irq.h"
 #include "esp32s3_rtc_gpio.h"
@@ -990,6 +991,8 @@ struct esp32s3_wdt_dev_s *esp32s3_wdt_init(enum esp32s3_wdt_inst_e wdt_id)
       case ESP32S3_WDT_MWDT0:
         {
           wdt = &g_esp32s3_mwdt0_priv;
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_TIMERGROUP_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TIMERGROUP_RST_M, 0);
           break;
         }
 
@@ -999,6 +1002,9 @@ struct esp32s3_wdt_dev_s *esp32s3_wdt_init(enum esp32s3_wdt_inst_e wdt_id)
       case ESP32S3_WDT_MWDT1:
         {
           wdt = &g_esp32s3_mwdt1_priv;
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0,
+                      SYSTEM_TIMERGROUP1_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TIMERGROUP1_RST_M, 0);
           break;
         }
 #endif
