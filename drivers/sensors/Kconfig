@@ -260,6 +260,76 @@ endchoice # I2C Address
 
 endif # SENSORS_BMI160
 
+config SENSORS_BMI088
+	bool "Bosch BMI088 Gyroscope Sensor support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Bosch BMG088 gyroscope sensor.
+
+if SENSORS_BMI088
+
+config SENSORS_BMI088_UORB
+	bool "BMI088 UORB Interface"
+	default n
+	---help---
+		Enables Work with the UORB or Character Device interface.
+		If not set, the Character Device is used by default.
+
+choice
+	prompt "BMI088 Interface"
+	default SENSORS_BMI088_SPI
+
+config SENSORS_BMI088_I2C
+	bool "BMI088 I2C Interface"
+	select I2C
+	---help---
+		Enables support for the I2C interface
+
+config SENSORS_BMI088_SPI
+	bool "BMI088 SPI Interface"
+	select SPI
+	---help---
+		Enables support for the SPI interface
+
+endchoice # BMI088 Interface
+
+choice
+	prompt "I2C Address"
+	default BMI160_I2C_ACC_ADDR_18
+
+config BMI160_I2C_ACC_ADDR_18
+	bool "0x18"
+	---help---
+		Default address.
+		If SDO pin is pulled to GND, use 0x18
+
+config BMI160_I2C_ACC_ADDR_19
+	bool "0x19"
+	---help---
+		If SDO pin is pulled to VDDIO, use 0x19
+
+endchoice # I2C Address
+
+choice
+	prompt "I2C Address"
+	default BMI088_I2C_GYRO_ADDR_68
+
+config BMI088_I2C_GYRO_ADDR_68
+	bool "0x68"
+	---help---
+		Default address.
+		If SDO pin is pulled to GND, use 0x68
+
+config BMI088_I2C_GYRO_ADDR_69
+	bool "0x69"
+	---help---
+		If SDO pin is pulled to VDDIO, use 0x69
+
+endchoice # I2C Address
+
+endif # SENSORS_BMI088
+
 config SENSORS_BMI270
 	bool "Bosch BMI270 Inertial Measurement Sensor support"
 	default n
