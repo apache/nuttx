@@ -19,3 +19,11 @@
 # the License.
 #
 # ##############################################################################
+
+set(SRCS)
+
+if(CONFIG_ARCH_SETJMP_H)
+  list(APPEND SRCS arch_setjmp.c)
+endif()
+
+target_sources(c PRIVATE ${SRCS})

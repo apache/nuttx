@@ -32,6 +32,7 @@ config ARCH_TC1V6
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TESTSET
+	select ARCH_SETJMP_H
 	default n
 
 config ARCH_TC1V8
@@ -46,6 +47,7 @@ config ARCH_TC1V8
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TESTSET
+	select ARCH_SETJMP_H
 	default n
 
 config ARCH_FAMILY
