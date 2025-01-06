@@ -69,9 +69,9 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_msgfreelock);
       list_add_tail(&g_msgfree, &mqmsg->node);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_msgfreelock, flags);
     }
 
   /* If this is a message pre-allocated for interrupts,
@@ -84,9 +84,9 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
        * list from interrupt handlers.
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_msgfreelock);
       list_add_tail(&g_msgfreeirq, &mqmsg->node);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_msgfreelock, flags);
     }
 
   /* Otherwise, deallocate it.  Note:  interrupt handlers

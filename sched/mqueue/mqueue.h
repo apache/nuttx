@@ -37,6 +37,7 @@
 #include <mqueue.h>
 #include <sched.h>
 
+#include <nuttx/spinlock.h>
 #include <nuttx/mqueue.h>
 
 #if defined(CONFIG_MQ_MAXMSGSIZE) && CONFIG_MQ_MAXMSGSIZE > 0
@@ -100,6 +101,8 @@ EXTERN struct list_node g_msgfree;
  */
 
 EXTERN struct list_node g_msgfreeirq;
+
+EXTERN spinlock_t g_msgfreelock;
 
 /****************************************************************************
  * Public Function Prototypes

@@ -58,7 +58,7 @@ static clock_t clock_process_runtime(FAR struct tcb_s *tcb)
 
   group = tcb->group;
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&group->tg_lock);
   sq_for_every(&group->tg_members, curr)
     {
       tcb = container_of(curr, struct tcb_s, member);
@@ -66,7 +66,7 @@ static clock_t clock_process_runtime(FAR struct tcb_s *tcb)
       runtime += tcb->run_time;
     }
 
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&group->tg_lock, flags);
   return runtime;
 # else  /* HAVE_GROUP_MEMBERS */
   return tcb->run_time;
@@ -109,9 +109,9 @@ void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
        * was last set, this gives us the current time.
        */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_basetime_lock);
       clock_timespec_add(&g_basetime, &ts, tp);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_basetime_lock, flags);
 #else
       clock_timekeeping_get_wall_time(tp);
 #endif

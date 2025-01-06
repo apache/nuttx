@@ -139,9 +139,9 @@ static FAR struct mqueue_msg_s *nxmq_alloc_msg(uint16_t msgsize)
 
   /* Try to get the message from the generally available free list. */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_msgfreelock);
   mqmsg = (FAR struct mqueue_msg_s *)list_remove_head(&g_msgfree);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_msgfreelock, flags);
   if (mqmsg == NULL)
     {
       /* If we were called from an interrupt handler, then try to get the
@@ -153,9 +153,9 @@ static FAR struct mqueue_msg_s *nxmq_alloc_msg(uint16_t msgsize)
         {
           /* Try the free list reserved for interrupt handlers */
 
-          flags = spin_lock_irqsave(NULL);
+          flags = spin_lock_irqsave(&g_msgfreelock);
           mqmsg = (FAR struct mqueue_msg_s *)list_remove_head(&g_msgfreeirq);
-          spin_unlock_irqrestore(NULL, flags);
+          spin_unlock_irqrestore(&g_msgfreelock, flags);
         }
 
       /* We were not called from an interrupt handler. */

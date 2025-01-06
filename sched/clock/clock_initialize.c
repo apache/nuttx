@@ -56,6 +56,7 @@ volatile clock_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 struct timespec   g_basetime;
+spinlock_t g_basetime_lock = SP_UNLOCKED;
 #endif
 
 /****************************************************************************
@@ -160,7 +161,9 @@ static void clock_inittime(FAR const struct timespec *tp)
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec ts;
+  irqstate_t flags;
 
+  flags = spin_lock_irqsave(&g_basetime_lock);
   if (tp)
     {
       memcpy(&g_basetime, tp, sizeof(struct timespec));
@@ -170,7 +173,11 @@ static void clock_inittime(FAR const struct timespec *tp)
       clock_basetime(&g_basetime);
     }
 
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
+
   clock_systime_timespec(&ts);
+
+  flags = spin_lock_irqsave(&g_basetime_lock);
 
   /* Adjust base time to hide initial timer ticks. */
 
@@ -181,6 +188,8 @@ static void clock_inittime(FAR const struct timespec *tp)
       g_basetime.tv_nsec += NSEC_PER_SEC;
       g_basetime.tv_sec--;
     }
+
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 #else
   clock_inittimekeeping(tp);
 #endif
@@ -266,13 +275,9 @@ void clock_initialize(void)
 #ifdef CONFIG_RTC
 void clock_synchronize(FAR const struct timespec *tp)
 {
-  irqstate_t flags;
-
   /* Re-initialize the time value to match the RTC */
 
-  flags = enter_critical_section();
   clock_inittime(tp);
-  leave_critical_section(flags);
 }
 #endif
 
@@ -319,10 +324,6 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
       rtc_diff = &rtc_diff_tmp;
     }
 
-  /* Set the time value to match the RTC */
-
-  flags = enter_critical_section();
-
   /* Get RTC time */
 
   ret = clock_basetime(&rtc_time);
@@ -334,8 +335,10 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       rtc_diff->tv_sec = 0;
       rtc_diff->tv_nsec = 0;
-      goto skip;
+      return;
     }
+
+  /* Set the time value to match the RTC */
 
   /* Get the elapsed time since power up (in milliseconds).  This is a
    * bias value that we need to use to correct the base time.
@@ -348,7 +351,9 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
    * was last set, this gives us the current time.
    */
 
+  flags = spin_lock_irqsave(&g_basetime_lock);
   clock_timespec_add(&bias, &g_basetime, &curr_ts);
+  spin_unlock_irqrestore(&g_basetime_lock, flags);
 
   /* Check if RTC has advanced past system time. */
 
@@ -382,9 +387,6 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
       atomic_fetch_add((FAR atomic_t *)&g_system_ticks, diff_ticks);
 #endif
     }
-
-skip:
-  leave_critical_section(flags);
 }
 #endif
 
