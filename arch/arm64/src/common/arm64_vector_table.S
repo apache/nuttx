@@ -80,9 +80,12 @@
 #endif
     stp    \xreg0, \xreg1,  [sp, #8 * REG_ELR]
 
+    mrs    \xreg0, sctlr_el1
+    str    \xreg0,  [sp, #8 * REG_SCTLR_EL1]
+
     mrs    \xreg0, sp_el0
     mrs    \xreg1, tpidrro_el0
-    stp    \xreg0, \xreg1,  [sp, #8 * REG_SP_EL0]
+    stp    \xreg0, \xreg1, [sp, #8 * REG_SP_EL0]
 
     /* Increment exception depth */
 
@@ -267,6 +270,9 @@ SECTION_FUNC(text, arm64_exit_exception)
     msr    elr_el1,   x0
     msr    spsr_el1,  x1
 #endif
+
+    ldr    x0,   [sp, #8 * REG_SCTLR_EL1]
+    msr    sctlr_el1, x0
 
     ldp    x0, x1,   [sp, #8 * REG_SP_EL0]
     msr    sp_el0,   x0
