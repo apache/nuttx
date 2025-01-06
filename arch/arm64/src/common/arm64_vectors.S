@@ -84,6 +84,9 @@ SECTION_FUNC(text, up_saveusercontext)
 #endif
     stp    x4,  x5,  [x0, #8 * REG_ELR]
 
+    mrs    x4,  sctlr_el1
+    str    x4,  [x0, #8 * REG_SCTLR_EL1]
+
     ret
 
 /****************************************************************************
@@ -115,6 +118,8 @@ SECTION_FUNC(text, arm64_jump_to_user)
     and x0,  x0, #~SPSR_MODE_MASK
     #orr x0, x0, #SPSR_MODE_EL0T # EL0T=0x00, out of range for orr
     str x0,  [sp, #8 * REG_SPSR]
+    mrs x0,  sctlr_el1
+    str x0,  [sp, #8 * REG_SCTLR_EL1]
     b arm64_exit_exception
 #endif
 

@@ -153,10 +153,11 @@
 #define REG_SPSR            (33)
 #define REG_SP_EL0          (34)
 #define REG_EXE_DEPTH       (35)
+#define REG_SCTLR_EL1       (36)
 
 /* In Armv8-A Architecture, the stack must align with 16 byte */
 
-#define ARM64_CONTEXT_REGS  (36)
+#define ARM64_CONTEXT_REGS  (37)
 #define ARM64_CONTEXT_SIZE  (8 * ARM64_CONTEXT_REGS)
 
 #ifdef CONFIG_ARCH_FPU
