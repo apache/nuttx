@@ -71,6 +71,12 @@ ifneq ($(CONFIG_STACK_USAGE_WARNING),0)
   ARCHOPTIMIZATION += -Wstack-usage=$(CONFIG_STACK_USAGE_WARNING)
 endif
 
+# Instrumentation options
+
+ifeq ($(CONFIG_ARCH_INSTRUMENT_ALL),y)
+  ARCHOPTIMIZATION += -finstrument-functions
+endif
+
 ARCHCFLAGS += -fno-common -Wno-attributes
 ARCHCXXFLAGS += -fno-common -Wno-attributes -nostdinc++
 
