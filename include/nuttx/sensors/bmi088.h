@@ -27,10 +27,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <nuttx/fs/ioctl.h>
-
-#if defined(CONFIG_SENSORS_BMI088) || defined(CONFIG_SENSORS_BMI088_SCU)
+#if defined(CONFIG_SENSORS_BMI088)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -206,11 +203,6 @@ int bmi088_acc_register (FAR const char *devpath,
 int bmi088_gyro_register(FAR const char *devpath,
                          FAR struct spi_dev_s *dev);
 #  endif /* CONFIG_SENSORS_BMI088_UORB */
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
-}
 #endif
 
 #endif /* CONFIG_SENSORS_BMI088 */
