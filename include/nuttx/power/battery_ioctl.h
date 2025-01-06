@@ -59,6 +59,7 @@
 #define BATIOC_GET_VOLTAGE   _BATIOC(0x0012)
 #define BATIOC_VOLTAGE_INFO  _BATIOC(0x0013)
 #define BATIOC_GET_PROTOCOL  _BATIOC(0x0014)
+#define BATIOC_SET_DEBOUNCE  _BATIOC(0x0015)
 
 /* Special input values for BATIOC_INPUT_CURRENT that may optionally
  * be supported by lower-half driver:
