@@ -185,9 +185,9 @@ void group_leave(FAR struct tcb_s *tcb)
       /* Remove the member from group. */
 
 #ifdef HAVE_GROUP_MEMBERS
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&group->tg_lock);
       sq_rem(&tcb->member, &group->tg_members);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&group->tg_lock, flags);
 
       /* Have all of the members left the group? */
 
