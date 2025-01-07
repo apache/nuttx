@@ -39,6 +39,7 @@
 #endif
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
@@ -76,13 +77,14 @@
 
 struct up_dev_s
 {
-  uint32_t uartbase;  /* Base address of UART registers */
-  uint32_t baud;      /* Configured baud */
-  uint32_t ier;       /* Saved IER value */
-  uint8_t  irq;       /* IRQ associated with this UART */
-  uint8_t  parity;    /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;      /* Number of bits (7 or 8) */
-  bool     stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+  uint32_t   uartbase;  /* Base address of UART registers */
+  uint32_t   baud;      /* Configured baud */
+  uint32_t   ier;       /* Saved IER value */
+  uint8_t    irq;       /* IRQ associated with this UART */
+  uint8_t    parity;    /* 0=none, 1=odd, 2=even */
+  uint8_t    bits;      /* Number of bits (7 or 8) */
+  bool       stopbits2; /* true: Configure with 2 stop bits instead of 1 */
+  spinlock_t spinlock;  /* Spinlock */
 };
 
 /****************************************************************************
@@ -169,6 +171,7 @@ static struct up_dev_s g_uart0priv =
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
   .stopbits2      = CONFIG_UART0_2STOP,
+  .spinlock       = SP_UNLOCKED,
 };
 
 static uart_dev_t g_uart0port =
@@ -200,6 +203,7 @@ static struct up_dev_s g_uart1priv =
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
   .stopbits2      = CONFIG_UART1_2STOP,
+  .spinlock       = SP_UNLOCKED,
 };
 
 static uart_dev_t g_uart1port =
@@ -230,6 +234,7 @@ static struct up_dev_s g_uart2priv =
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
   .stopbits2      = CONFIG_UART2_2STOP,
+  .spinlock       = SP_UNLOCKED,
 };
 
 static uart_dev_t g_uart2port =
@@ -260,6 +265,7 @@ static struct up_dev_s g_uart3priv =
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
   .stopbits2      = CONFIG_UART3_2STOP,
+  .spinlock       = SP_UNLOCKED,
 };
 
 static uart_dev_t g_uart3port =
@@ -290,6 +296,7 @@ static struct up_dev_s g_uart4priv =
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
   .stopbits2      = CONFIG_UART4_2STOP,
+  .spinlock       = SP_UNLOCKED,
 };
 
 static uart_dev_t g_uart4port =
@@ -320,6 +327,7 @@ static struct up_dev_s g_uart5priv =
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
   .stopbits2      = CONFIG_UART5_2STOP,
+  .spinlock       = SP_UNLOCKED,
 };
 
 static uart_dev_t g_uart5port =
@@ -484,6 +492,10 @@ static uart_dev_t g_uart5port =
 #  define UART5_ASSIGNED      1
 #endif
 
+/* Spinlock */
+
+static spinlock_t g_gpio_lock = SP_UNLOCKED;
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -567,7 +579,7 @@ static inline void am335x_uart0config(void)
 
   /* Step 1: Enable power to UART0 */
 
-  flags   = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART0 */
@@ -577,7 +589,7 @@ static inline void am335x_uart0config(void)
 
   am335x_gpio_config(GPIO_UART0_TXD);
   am335x_gpio_config(GPIO_UART0_RXD);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
 };
 #endif
 
@@ -588,7 +600,7 @@ static inline void am335x_uart1config(void)
 
   /* Step 1: Enable power to UART1 */
 
-  flags   = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART1 */
@@ -598,7 +610,7 @@ static inline void am335x_uart1config(void)
 
   am335x_gpio_config(GPIO_UART1_TXD);
   am335x_gpio_config(GPIO_UART1_RXD);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
 };
 #endif
 
@@ -609,7 +621,7 @@ static inline void am335x_uart2config(void)
 
   /* Step 1: Enable power to UART2 */
 
-  flags   = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
 #warning Missing logic
 
   /* Step 2: Enable clocking on UART2 */
@@ -619,7 +631,7 @@ static inline void am335x_uart2config(void)
 
   am335x_gpio_config(GPIO_UART2_TXD);
   am335x_gpio_config(GPIO_UART2_RXD);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
 };
 #endif
 
@@ -630,7 +642,7 @@ static inline void am335x_uart3config(void)
 
   /* Step 1: Enable power to UART3 */
 
-  flags   = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART3 */
@@ -640,7 +652,7 @@ static inline void am335x_uart3config(void)
 
   am335x_gpio_config(GPIO_UART3_TXD);
   am335x_gpio_config(GPIO_UART3_RXD);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
 };
 #endif
 
@@ -651,7 +663,7 @@ static inline void am335x_uart4config(void)
 
   /* Step 1: Enable power to UART4 */
 
-  flags   = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART4 */
@@ -661,7 +673,7 @@ static inline void am335x_uart4config(void)
 
   am335x_gpio_config(GPIO_UART4_TXD);
   am335x_gpio_config(GPIO_UART4_RXD);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
 };
 #endif
 
@@ -672,7 +684,7 @@ static inline void am335x_uart5config(void)
 
   /* Step 1: Enable power to UART5 */
 
-  flags   = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
 #warning Missing logic
 
   /* Step 2: Enable clocking to UART5 */
@@ -682,7 +694,7 @@ static inline void am335x_uart5config(void)
 
   am335x_gpio_config(GPIO_UART5_TXD);
   am335x_gpio_config(GPIO_UART5_RXD);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
 };
 #endif
 
@@ -1029,18 +1041,18 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
-        irqstate_t flags = enter_critical_section();
+        irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
         up_enablebreaks(priv, true);
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->spinlock, flags);
       }
       break;
 
     case TIOCCBRK:  /* BSD compatibility: Turn break off, unconditionally */
       {
         irqstate_t flags;
-        flags = enter_critical_section();
+        flags = spin_lock_irqsave(&priv->spinlock);
         up_enablebreaks(priv, false);
-        leave_critical_section(flags);
+        spin_unlock_irqrestore(&priv->spinlock, flags);
       }
       break;
 
@@ -1204,12 +1216,14 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->spinlock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ier |= UART_IER_THR;
       up_serialout(priv, AM335X_UART_IER_OFFSET, priv->ier);
+
+      spin_unlock_irqrestore(&priv->spinlock, flags);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -1222,9 +1236,9 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     {
       priv->ier &= ~UART_IER_THR;
       up_serialout(priv, AM335X_UART_IER_OFFSET, priv->ier);
-    }
 
-  leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
+    }
 }
 
 /****************************************************************************

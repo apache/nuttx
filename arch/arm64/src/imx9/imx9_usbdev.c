@@ -2319,9 +2319,9 @@ static int imx9_epdisable(struct usbdev_ep_s *ep)
 
   /* Cancel any ongoing activity */
 
-  spin_unlock_irqrestore(&privep->spinlock, flags);
+  imx9_cancelrequests(privep, -ESHUTDOWN);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&privep->spinlock, flags);
   return OK;
 }
 
