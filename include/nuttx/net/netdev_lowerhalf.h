@@ -117,6 +117,7 @@ struct netdev_lowerhalf_s
 
   /* Max # of buffer held by driver */
 
+  FAR atomic_t *quota_ptr; /* Shared quota, ignore `quota` if ptr is set */
   atomic_t quota[NETPKT_TYPENUM];
 
   /* The structure used by net stack.
