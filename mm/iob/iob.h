@@ -41,8 +41,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ROUNDUP(x, y)            (((x) + (y) - 1) / (y) * (y))
-
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
 #  define ioberr                 _err
 #  define iobwarn                _warn

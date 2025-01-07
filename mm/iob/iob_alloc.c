@@ -35,6 +35,7 @@
 #ifdef CONFIG_IOB_ALLOC
 #  include <nuttx/kmalloc.h>
 #endif
+#include <nuttx/nuttx.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -333,7 +334,7 @@ FAR struct iob_s *iob_alloc_dynamic(uint16_t size)
   FAR struct iob_s *iob;
   size_t alignsize;
 
-  alignsize = ROUNDUP(sizeof(struct iob_s), CONFIG_IOB_ALIGNMENT) + size;
+  alignsize = ALIGN_UP(sizeof(struct iob_s), CONFIG_IOB_ALIGNMENT) + size;
 
   iob = kmm_memalign(CONFIG_IOB_ALIGNMENT, alignsize);
   if (iob)
@@ -344,8 +345,8 @@ FAR struct iob_s *iob_alloc_dynamic(uint16_t size)
       iob->io_bufsize = size;             /* Total length of the iob buffer */
       iob->io_pktlen  = 0;                /* Total length of the packet */
       iob->io_free    = iob_free_dynamic; /* Customer free callback */
-      iob->io_data    = (FAR uint8_t *)ROUNDUP((uintptr_t)(iob + 1),
-                                               CONFIG_IOB_ALIGNMENT);
+      iob->io_data    = (FAR uint8_t *)ALIGN_UP((uintptr_t)(iob + 1),
+                                                CONFIG_IOB_ALIGNMENT);
     }
 
   return iob;

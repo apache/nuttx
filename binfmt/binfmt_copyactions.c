@@ -31,17 +31,12 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_BINFMT_DISABLE)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define ROUNDUP(x, y)     (((x) + (y) - 1) / (y) * (y))
 
 /****************************************************************************
  * Public Functions
@@ -98,8 +93,8 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
 
           case SPAWN_FILE_ACTION_OPEN:
             open = (FAR struct spawn_open_file_action_s *)entry;
-            size += ROUNDUP(SIZEOF_OPEN_FILE_ACTION_S(strlen(open->path)),
-                            sizeof(FAR void *));
+            size += ALIGN_UP(SIZEOF_OPEN_FILE_ACTION_S(strlen(open->path)),
+                             sizeof(FAR void *));
             break;
 
           default:
@@ -155,8 +150,8 @@ int binfmt_copyactions(FAR const posix_spawn_file_actions_t **copy,
             strcpy(open->path, tmp->path);
 
             buffer = (FAR char *)buffer +
-                     ROUNDUP(SIZEOF_OPEN_FILE_ACTION_S(strlen(tmp->path)),
-                             sizeof(FAR void *));
+                     ALIGN_UP(SIZEOF_OPEN_FILE_ACTION_S(strlen(tmp->path)),
+                              sizeof(FAR void *));
             break;
 
           default:

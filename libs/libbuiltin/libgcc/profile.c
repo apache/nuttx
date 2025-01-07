@@ -35,6 +35,7 @@
 #include <nuttx/init.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/spinlock.h>
 
 /****************************************************************************
@@ -111,11 +112,6 @@
  */
 
 #define MAXARCS         (1 << 20)
-
-/* General rounding functions. */
-
-#define ROUNDDOWN(x, y) (((x) / (y)) * (y))
-#define ROUNDUP(x, y)   ((((x) + (y) - 1) / (y)) * (y))
 
 /* See profil(2) where this is described (incorrectly) */
 
@@ -288,13 +284,13 @@ void moncontrol(int mode)
 
   if (mode)
     {
-      uintptr_t lowpc = ROUNDDOWN((uintptr_t)&_stext,
+      uintptr_t lowpc = ALIGN_DOWN((uintptr_t)&_stext,
                                    HISTFRACTION * sizeof(HISTCOUNTER));
-      uintptr_t highpc = ROUNDUP((uintptr_t)&_etext,
-                                 HISTFRACTION * sizeof(HISTCOUNTER));
+      uintptr_t highpc = ALIGN_UP((uintptr_t)&_etext,
+                                  HISTFRACTION * sizeof(HISTCOUNTER));
       size_t textsize = highpc - lowpc;
-      size_t kcountsize = ROUNDUP(textsize / HISTFRACTION,
-                                  sizeof(*p->kcount));
+      size_t kcountsize = ALIGN_UP(textsize / HISTFRACTION,
+                                   sizeof(*p->kcount));
       int scale = kcountsize >= textsize ? SCALE_1_TO_1 :
                   (float)kcountsize / textsize * SCALE_1_TO_1;
       FAR unsigned short *kcount = kmm_zalloc(kcountsize);
@@ -370,10 +366,10 @@ void monstartup(unsigned long lowpc, unsigned long highpc)
    * so the rest of the scaling (here and in gprof) stays in ints.
    */
 
-  lowpc = ROUNDDOWN(lowpc, HISTFRACTION * sizeof(HISTCOUNTER));
-  highpc = ROUNDUP(highpc, HISTFRACTION * sizeof(HISTCOUNTER));
+  lowpc = ALIGN_DOWN(lowpc, HISTFRACTION * sizeof(HISTCOUNTER));
+  highpc = ALIGN_UP(highpc, HISTFRACTION * sizeof(HISTCOUNTER));
   textsize = highpc - lowpc;
-  fromssize = ROUNDUP(textsize / HASHFRACTION, sizeof(*p->froms));
+  fromssize = ALIGN_UP(textsize / HASHFRACTION, sizeof(*p->froms));
   tolimit = textsize * ARCDENSITY / 100;
 
   if (tolimit < MINARCS)
