@@ -38,13 +38,35 @@ This will generate a ``nutxx`` binary. This file can be run using the RISC-V QEM
 Try Python in NSH
 =================
 
+Before running the RISC-V QEMU, create a raw disk image with the following command:
+
 .. code:: console
 
-   $ .qemu-system-riscv32 -semihosting -M virt,aclint=on -cpu rv32 -smp 1 -bios none -kernel nuttx -nographic
+   $ dd if=/dev/zero of=./mydisk-1gb.img bs=1M count=1024
 
-   ABC
+Then, run RISC-V QEMU with the following command:
+
+.. code:: console
+
+   $ qemu-system-riscv32 -semihosting -M virt,aclint=on -cpu rv32 -smp 8 \
+      -global virtio-mmio.force-legacy=false \
+      -device virtio-serial-device,bus=virtio-mmio-bus.0 \
+      -chardev socket,telnet=on,host=127.0.0.1,port=3450,server=on,wait=off,id=foo \
+      -device virtconsole,chardev=foo \
+      -device virtio-rng-device,bus=virtio-mmio-bus.1 \
+      -netdev user,id=u1,hostfwd=tcp:127.0.0.1:10023-10.0.2.15:23,hostfwd=tcp:127.0.0.1:15001-10.0.2.15:5001 \
+      -device virtio-net-device,netdev=u1,bus=virtio-mmio-bus.2 \
+      -drive file=./mydisk-1gb.img,if=none,format=raw,id=hd \
+      -device virtio-blk-device,bus=virtio-mmio-bus.3,drive=hd \
+      -bios none -kernel ./nuttx -nographic
+
+   ABC[    0.062131] board_userled: LED 1 set to 0
+   [    0.063269] board_userled: LED 2 set to 0
+   [    0.063367] board_userled: LED 3 set to 0
+   telnetd [4:100]
+
    NuttShell (NSH) NuttX-10.4.0
-   nsh> mount_modules
+   nsh> python_mount_modules
    Mounting ROMFS filesystem at target=/usr/local/lib/ with source=/dev/ram1
    nsh> export PYTHONHOME /usr/local
    nsh> export PYTHON_BASIC_REPL 1
@@ -58,5 +80,5 @@ Demo
 
 Check the following `asciinema <https://asciinema.org/>`_ demo to see how to run Python on NuttX. You can copy and paste the commands from the demo to try it yourself.
 
-.. image:: https://asciinema.org/a/orkD8fKuahMEgQfBak9abliE4.svg
-   :target: https://asciinema.org/a/orkD8fKuahMEgQfBak9abliE4
+.. image:: https://asciinema.org/a/bYYy1fyIOQ3hOY4lJ7L3WFcNb.svg
+   :target: https://asciinema.org/a/bYYy1fyIOQ3hOY4lJ7L3WFcNb
