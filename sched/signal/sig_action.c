@@ -89,7 +89,7 @@ static void nxsig_alloc_actionblock(void)
   /* Use pre-allocated instances only once */
 
 #if CONFIG_SIG_PREALLOC_ACTIONS > 0
-  flags = spin_lock_irqsave(&g_sigaction_spin);
+  flags = spin_lock_irqsave_wo_note(&g_sigaction_spin);
   if (!g_sigactions_used)
     {
       for (i = 0; i < CONFIG_SIG_PREALLOC_ACTIONS; i++)
@@ -100,7 +100,7 @@ static void nxsig_alloc_actionblock(void)
       g_sigactions_used = true;
     }
 
-  spin_unlock_irqrestore(&g_sigaction_spin, flags);
+  spin_unlock_irqrestore_wo_note(&g_sigaction_spin, flags);
 #endif
 
   /* Allocate a block of signal actions */
@@ -108,14 +108,14 @@ static void nxsig_alloc_actionblock(void)
   sigact = kmm_malloc((sizeof(sigactq_t)) * CONFIG_SIG_ALLOC_ACTIONS);
   if (sigact != NULL)
     {
-      flags = spin_lock_irqsave(&g_sigaction_spin);
+      flags = spin_lock_irqsave_wo_note(&g_sigaction_spin);
 
       for (i = 0; i < CONFIG_SIG_ALLOC_ACTIONS; i++)
         {
           sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
         }
 
-      spin_unlock_irqrestore(&g_sigaction_spin, flags);
+      spin_unlock_irqrestore_wo_note(&g_sigaction_spin, flags);
     }
 }
 
@@ -134,9 +134,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
   /* Try to get the signal action structure from the free list */
 
-  flags = spin_lock_irqsave(&g_sigaction_spin);
+  flags = spin_lock_irqsave_wo_note(&g_sigaction_spin);
   sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
-  spin_unlock_irqrestore(&g_sigaction_spin, flags);
+  spin_unlock_irqrestore_wo_note(&g_sigaction_spin, flags);
 
   /* Check if we got one via loop as not in critical section now */
 
@@ -148,9 +148,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
       /* And try again */
 
-      flags = spin_lock_irqsave(&g_sigaction_spin);
+      flags = spin_lock_irqsave_wo_note(&g_sigaction_spin);
       sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
-      spin_unlock_irqrestore(&g_sigaction_spin, flags);
+      spin_unlock_irqrestore_wo_note(&g_sigaction_spin, flags);
     }
 
   return sigact;
@@ -459,9 +459,9 @@ void nxsig_release_action(FAR sigactq_t *sigact)
     {
       /* Non-preallocated instances will never return to heap! */
 
-      flags = spin_lock_irqsave(&g_sigaction_spin);
+      flags = spin_lock_irqsave_wo_note(&g_sigaction_spin);
       sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction);
-      spin_unlock_irqrestore(&g_sigaction_spin, flags);
+      spin_unlock_irqrestore_wo_note(&g_sigaction_spin, flags);
     }
   else
     {

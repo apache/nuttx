@@ -175,7 +175,7 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
 
   if (timerid != NULL)
     {
-      flags = spin_lock_irqsave(&g_locktimers);
+      flags = spin_lock_irqsave_wo_note(&g_locktimers);
 
       sq_for_every(&g_alloctimers, entry)
         {
@@ -186,7 +186,7 @@ FAR struct posix_timer_s *timer_gethandle(timer_t timerid)
             }
         }
 
-      spin_unlock_irqrestore(&g_locktimers, flags);
+      spin_unlock_irqrestore_wo_note(&g_locktimers, flags);
     }
 
   return timer;
