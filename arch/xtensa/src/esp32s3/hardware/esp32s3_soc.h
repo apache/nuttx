@@ -33,6 +33,8 @@
 #include <nuttx/bits.h>
 
 #include "soc/soc.h"
+#include "soc/hwcrypto_reg.h"
+#include "soc/system_reg.h"
 #include "esp_attr.h"
 
 /****************************************************************************

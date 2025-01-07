@@ -256,6 +256,25 @@ static inline_function void up_set_interrupt_context(bool flag)
 #endif
 }
 
+static inline_function uint32_t up_getsp(void)
+{
+  register uint32_t sp;
+
+  __asm__ __volatile__
+  (
+    "mov %0, sp\n"
+    : "=r" (sp)
+  );
+
+  return sp;
+}
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint32_t *ptr = (uint32_t *)regs;
+  return ptr[REG_SP];
+}
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
