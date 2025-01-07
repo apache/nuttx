@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include <imx9_gpiobase.c>
 
@@ -44,6 +45,10 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/* Spinlock */
+
+static spinlock_t g_gpio_lock = SP_UNLOCKED;
 
 /****************************************************************************
  * Name: imx9_gpio_dirout
@@ -174,7 +179,7 @@ int imx9_config_gpio(gpio_pinset_t pinset)
 
   /* Configure the pin as an input initially to avoid any spurious outputs */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
 
   /* Configure based upon the pin mode */
 
@@ -223,7 +228,7 @@ int imx9_config_gpio(gpio_pinset_t pinset)
         break;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
   return ret;
 }
 
@@ -243,9 +248,9 @@ void imx9_gpio_write(gpio_pinset_t pinset, bool value)
 
   DEBUGASSERT((unsigned int)port < IMX9_GPIO_NPORTS);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
   imx9_gpio_setoutput(port, pin, value);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
 }
 
 /****************************************************************************
@@ -265,7 +270,7 @@ bool imx9_gpio_read(gpio_pinset_t pinset)
 
   DEBUGASSERT((unsigned int)port < IMX9_GPIO_NPORTS);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_gpio_lock);
   if ((pinset & (GPIO_OUTPUT)) == (GPIO_OUTPUT))
     {
       value = imx9_gpio_get_pinstatus(port, pin);
@@ -275,6 +280,6 @@ bool imx9_gpio_read(gpio_pinset_t pinset)
       value = imx9_gpio_getinput(port, pin);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_gpio_lock, flags);
   return value;
 }
