@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/rptun/rptun_secure.c
+ * drivers/rptun/rptun_bmp.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/rptun/rptun.h>
-#include <nuttx/rptun/rptun_secure.h>
+#include <nuttx/rptun/rptun_bmp.h>
 #include <nuttx/sched.h>
 
 /****************************************************************************
@@ -36,7 +36,7 @@
  * Private Types
  ****************************************************************************/
 
-struct rptun_secure_dev_s
+struct rptun_bmp_dev_s
 {
   struct rptun_dev_s      rptun;
   rptun_callback_t        callback;
@@ -52,89 +52,90 @@ struct rptun_secure_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static FAR const char *rptun_secure_get_cpuname(FAR struct rptun_dev_s *dev);
+static FAR const char *rptun_bmp_get_cpuname(FAR struct rptun_dev_s *dev);
 static struct
-FAR rptun_rsc_s *rptun_secure_get_resource(FAR struct rptun_dev_s *dev);
-static bool rptun_secure_is_autostart(FAR struct rptun_dev_s *dev);
-static bool rptun_secure_is_master(FAR struct rptun_dev_s *dev);
-static int rptun_secure_start(FAR struct rptun_dev_s *dev);
-static int rptun_secure_stop(FAR struct rptun_dev_s *dev);
-static int rptun_secure_notify(FAR struct rptun_dev_s *dev,
-                               uint32_t notifyid);
-static int rptun_secure_register_callback(FAR struct rptun_dev_s *dev,
-                                          rptun_callback_t callback,
-                                          FAR void *arg);
+FAR rptun_rsc_s *rptun_bmp_get_resource(FAR struct rptun_dev_s *dev);
+static bool rptun_bmp_is_autostart(FAR struct rptun_dev_s *dev);
+static bool rptun_bmp_is_master(FAR struct rptun_dev_s *dev);
+static int rptun_bmp_start(FAR struct rptun_dev_s *dev);
+static int rptun_bmp_stop(FAR struct rptun_dev_s *dev);
+static int rptun_bmp_notify(FAR struct rptun_dev_s *dev,
+                            uint32_t notifyid);
+static int rptun_bmp_register_callback(FAR struct rptun_dev_s *dev,
+                                       rptun_callback_t callback,
+                                       FAR void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct rptun_ops_s g_rptun_secure_ops =
+static const struct rptun_ops_s g_rptun_bmp_ops =
 {
-  .get_cpuname       = rptun_secure_get_cpuname,
-  .get_resource      = rptun_secure_get_resource,
-  .is_autostart      = rptun_secure_is_autostart,
-  .is_master         = rptun_secure_is_master,
-  .start             = rptun_secure_start,
-  .stop              = rptun_secure_stop,
-  .notify            = rptun_secure_notify,
-  .register_callback = rptun_secure_register_callback,
+  .get_cpuname       = rptun_bmp_get_cpuname,
+  .get_resource      = rptun_bmp_get_resource,
+  .is_autostart      = rptun_bmp_is_autostart,
+  .is_master         = rptun_bmp_is_master,
+  .start             = rptun_bmp_start,
+  .stop              = rptun_bmp_stop,
+  .notify            = rptun_bmp_notify,
+  .register_callback = rptun_bmp_register_callback,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static FAR const char *rptun_secure_get_cpuname(FAR struct rptun_dev_s *dev)
+static FAR const char *rptun_bmp_get_cpuname(FAR struct rptun_dev_s *dev)
 {
-  FAR struct rptun_secure_dev_s *priv = (FAR struct rptun_secure_dev_s *)dev;
+  FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
   return priv->cpuname;
 }
 
 static FAR struct rptun_rsc_s *
-rptun_secure_get_resource(FAR struct rptun_dev_s *dev)
+rptun_bmp_get_resource(FAR struct rptun_dev_s *dev)
 {
-  FAR struct rptun_secure_dev_s *priv = (FAR struct rptun_secure_dev_s *)dev;
+  FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
   return priv->rsc;
 }
 
-static bool rptun_secure_is_autostart(FAR struct rptun_dev_s *dev)
+static bool rptun_bmp_is_autostart(FAR struct rptun_dev_s *dev)
 {
   return true;
 }
 
-static bool rptun_secure_is_master(FAR struct rptun_dev_s *dev)
+static bool rptun_bmp_is_master(FAR struct rptun_dev_s *dev)
 {
-  FAR struct rptun_secure_dev_s *priv = (FAR struct rptun_secure_dev_s *)dev;
+  FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
   return priv->master;
 }
 
-static int rptun_secure_start(FAR struct rptun_dev_s *dev)
+static int rptun_bmp_start(FAR struct rptun_dev_s *dev)
 {
   return 0;
 }
 
-static int rptun_secure_stop(FAR struct rptun_dev_s *dev)
+static int rptun_bmp_stop(FAR struct rptun_dev_s *dev)
 {
   return 0;
 }
 
-static int rptun_secure_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
+static int rptun_bmp_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
 {
-  FAR struct rptun_secure_dev_s *priv = (FAR struct rptun_secure_dev_s *)dev;
+  FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
   cpu_set_t cpuset;
 
   CPU_ZERO(&cpuset);
   CPU_SET(0, &cpuset);
+
   up_trigger_irq(priv->irq_trigger, cpuset);
   return 0;
 }
 
-static int rptun_secure_register_callback(FAR struct rptun_dev_s *dev,
-                                          rptun_callback_t callback,
-                                          FAR void *arg)
+static int rptun_bmp_register_callback(FAR struct rptun_dev_s *dev,
+                                       rptun_callback_t callback,
+                                       FAR void *arg)
 {
-  FAR struct rptun_secure_dev_s *priv = (FAR struct rptun_secure_dev_s *)dev;
+  FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
 
   priv->callback = callback;
   priv->arg      = arg;
@@ -152,7 +153,7 @@ static int rptun_secure_register_callback(FAR struct rptun_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: rprun_secure_interrupt
+ * Name: rprun_bmp_interrupt
  *
  * Description:
  *   This is the interrupt handler.
@@ -167,9 +168,9 @@ static int rptun_secure_register_callback(FAR struct rptun_dev_s *dev,
  *
  ****************************************************************************/
 
-static int rprun_secure_interrupt(int irq, FAR void *context, FAR void *arg)
+static int rprun_bmp_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  FAR struct rptun_secure_dev_s *priv = arg;
+  FAR struct rptun_bmp_dev_s *priv = arg;
 
   if (priv != NULL && priv->callback != NULL)
     {
@@ -183,11 +184,11 @@ static int rprun_secure_interrupt(int irq, FAR void *context, FAR void *arg)
  * Public Functions
  ****************************************************************************/
 
-int rptun_secure_init(FAR const char *cpuname, bool master,
-                      FAR struct rptun_rsc_s *rsc, int irq_event,
-                      int irq_trigger)
+int rptun_bmp_init(FAR const char *cpuname, bool master,
+                   FAR struct rptun_rsc_s *rsc, int irq_event,
+                   int irq_trigger)
 {
-  FAR struct rptun_secure_dev_s *dev;
+  FAR struct rptun_bmp_dev_s *dev;
   int ret;
 
   dev = kmm_zalloc(sizeof(*dev));
@@ -199,12 +200,12 @@ int rptun_secure_init(FAR const char *cpuname, bool master,
   dev->master = master;
   dev->irq_trigger = irq_trigger;
   dev->irq_event = irq_event;
-  dev->rptun.ops = &g_rptun_secure_ops;
+  dev->rptun.ops = &g_rptun_bmp_ops;
   dev->rsc = rsc;
   strlcpy(dev->cpuname, cpuname, sizeof(dev->cpuname));
 
   ret = irq_attach(dev->irq_event,
-                   rprun_secure_interrupt, dev);
+                   rprun_bmp_interrupt, dev);
   if (ret < 0)
     {
       kmm_free(dev);
