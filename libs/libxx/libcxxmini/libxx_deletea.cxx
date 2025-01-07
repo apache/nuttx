@@ -22,6 +22,9 @@
 //***************************************************************************
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#include <cstddef>
 
 #include <nuttx/lib/lib.h>
 
@@ -37,3 +40,20 @@ void operator delete[](FAR void *ptr) throw()
 {
   lib_free(ptr);
 }
+
+#ifdef CONFIG_HAVE_CXX14
+
+//***************************************************************************
+// Operators
+//***************************************************************************
+
+//***************************************************************************
+// Name: delete[]
+//***************************************************************************
+
+void operator delete[](FAR void *ptr, std::size_t size)
+{
+  lib_free(ptr);
+}
+
+#endif /* CONFIG_HAVE_CXX14 */
