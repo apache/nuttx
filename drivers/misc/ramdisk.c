@@ -401,6 +401,63 @@ static int rd_unlink(FAR struct inode *inode)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ramdisk_register_with_config
+ *
+ * Description:
+ *   Non-standard function to register a ramdisk or a romdisk
+ *
+ * Input Parameters:
+ *   config: Ramdisk configuration
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int ramdisk_register_with_config(FAR const struct ramdisk_config_s *config)
+{
+  FAR struct rd_struct_s *dev;
+  int ret = -ENOMEM;
+
+  finfo("buffer: %p nsectors: %" PRIu32 " sectsize: %" PRIu16 "\n",
+        config->buffer, config->nsectors, config->sectsize);
+
+  /* Sanity check */
+
+#ifdef CONFIG_DEBUG_FEATURES
+  if (!config->name || !config->buffer || !config->nsectors ||
+      !config->sectsize)
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Allocate a ramdisk device structure */
+
+  dev = kmm_zalloc(sizeof(struct rd_struct_s));
+  if (dev)
+    {
+      /* Initialize the ramdisk device structure */
+
+      dev->rd_nsectors = config->nsectors; /* Number of sectors on device */
+      dev->rd_sectsize = config->sectsize; /* The size of one sector */
+      dev->rd_buffer   = config->buffer;   /* RAM disk backup memory */
+      dev->rd_flags    = config->rdflags & RDFLAG_USER;
+
+      /* Inode private data is a reference to the ramdisk device structure */
+
+      ret = register_blockdriver(config->name, &g_bops, config->mode, dev);
+      if (ret < 0)
+        {
+          ferr("register_blockdriver failed: %d\n", -ret);
+          kmm_free(dev);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: ramdisk_register or romdisk_register
  *
  * Description:
@@ -421,47 +478,15 @@ static int rd_unlink(FAR struct inode *inode)
 int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
                      uint16_t sectsize, uint8_t rdflags)
 {
-  FAR struct rd_struct_s *dev;
+  struct ramdisk_config_s config;
   char devname[16];
-  int ret = -ENOMEM;
 
-  finfo("buffer: %p nsectors: %" PRIu32 " sectsize: %" PRIu16 "\n",
-        buffer, nsectors, sectsize);
-
-  /* Sanity check */
-
-#ifdef CONFIG_DEBUG_FEATURES
-  if (minor < 0 || minor > 255 || !buffer || !nsectors || !sectsize)
-    {
-      return -EINVAL;
-    }
-#endif
-
-  /* Allocate a ramdisk device structure */
-
-  dev = kmm_zalloc(sizeof(struct rd_struct_s));
-  if (dev)
-    {
-      /* Initialize the ramdisk device structure */
-
-      dev->rd_nsectors     = nsectors;     /* Number of sectors on device */
-      dev->rd_sectsize     = sectsize;     /* The size of one sector */
-      dev->rd_buffer       = buffer;       /* RAM disk backup memory */
-      dev->rd_flags        = rdflags & RDFLAG_USER;
-
-      /* Create a ramdisk device name */
-
-      snprintf(devname, sizeof(devname), "/dev/ram%d", minor);
-
-      /* Inode private data is a reference to the ramdisk device structure */
-
-      ret = register_blockdriver(devname, &g_bops, 0, dev);
-      if (ret < 0)
-        {
-          ferr("register_blockdriver failed: %d\n", -ret);
-          kmm_free(dev);
-        }
-    }
-
-  return ret;
+  snprintf(devname, sizeof(devname), "/dev/ram%d", minor);
+  config.name     = devname;
+  config.buffer   = buffer;
+  config.nsectors = nsectors;
+  config.sectsize = sectsize;
+  config.mode     = 0;
+  config.rdflags  = rdflags;
+  return ramdisk_register_with_config(&config);
 }
