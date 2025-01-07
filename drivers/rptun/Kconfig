@@ -12,13 +12,13 @@ menuconfig RPTUN
 
 if RPTUN
 
-config RPTUN_SECURE
-	bool "rptun secure support"
+config RPTUN_BMP
+	bool "rptun bmp support"
 	default n
 	---help---
-		This is a rptun driver for communications between secure (TEE)
-		and non-secure (REE) environments. With this driver, REE and
-		TEE and communicate with each other by using the native rpmsg
+		This is a rptun driver for communications in bmp
+		environments. With this driver, Each ends communicate with each
+		other by using the native rpmsg
 		or various Rpmsg services have been implemented in NuttX.
 
 config RPTUN_IVSHMEM

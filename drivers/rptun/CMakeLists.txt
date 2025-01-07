@@ -24,8 +24,8 @@ if(CONFIG_RPTUN)
 
   list(APPEND SRCS rptun.c)
 
-  if(CONFIG_RPTUN_SECURE)
-    list(APPEND SRCS rptun_secure.c)
+  if(CONFIG_RPTUN_BMP)
+    list(APPEND SRCS rptun_bmp.c)
   endif()
 
   if(CONFIG_RPTUN_IVSHMEM)

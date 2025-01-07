@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/rptun/rptun_secure.h
+ * include/nuttx/rptun/rptun_bmp.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RPTUN_RPTUN_SECURE_H
-#define __INCLUDE_NUTTX_RPTUN_RPTUN_SECURE_H
+#ifndef __INCLUDE_NUTTX_RPTUN_RPTUN_BMP_H
+#define __INCLUDE_NUTTX_RPTUN_RPTUN_BMP_H
 
 /****************************************************************************
  * Included Files
@@ -43,7 +43,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: rptun_secure_init
+ * Name: rptun_bmp_init
  *
  * Description:
  *   Initializes the rptun device.
@@ -60,13 +60,13 @@ extern "C"
  *
  ****************************************************************************/
 
-int rptun_secure_init(FAR const char *cpuname, bool master,
-                      FAR struct rptun_rsc_s *rsc, int irq_event,
-                      int irq_trigger);
+int rptun_bmp_init(FAR const char *cpuname, bool master,
+                   FAR struct rptun_rsc_s *rsc, int irq_event,
+                   int irq_trigger);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_RPTUN_RPTUN_SECURE_H */
+#endif /* __INCLUDE_NUTTX_RPTUN_RPTUN_BMP_H */

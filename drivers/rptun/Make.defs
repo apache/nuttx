@@ -26,8 +26,8 @@ ifeq ($(CONFIG_RPTUN),y)
 
 CSRCS += rptun.c
 
-ifeq ($(CONFIG_RPTUN_SECURE),y)
-CSRCS += rptun_secure.c
+ifeq ($(CONFIG_RPTUN_BMP),y)
+CSRCS += rptun_bmp.c
 endif
 
 ifeq ($(CONFIG_RPTUN_IVSHMEM),y)
