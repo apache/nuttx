@@ -29,8 +29,8 @@ CSRCS += lib_fchmodat.c lib_fstatat.c lib_getfullpath.c lib_openat.c
 CSRCS += lib_mkdirat.c lib_utimensat.c lib_mallopt.c
 CSRCS += lib_idr.c lib_getnprocs.c
 
-ifeq ($(CONFIG_LIBC_PATHBUFFER),y)
-CSRCS += lib_pathbuffer.c
+ifeq ($(CONFIG_LIBC_TEMPBUFFER),y)
+CSRCS += lib_tempbuffer.c
 endif
 
 # Support for platforms that do not have long long types
