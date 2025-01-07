@@ -527,28 +527,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
               if (conn->tcpstateflags == TCP_SYN_RCVD &&
                   conn->nrtx >= TCP_MAXSYNRTX)
                 {
-                  FAR struct tcp_conn_s *listener;
-
                   conn->tcpstateflags = TCP_CLOSED;
                   ninfo("TCP state: TCP_SYN_RCVD->TCP_CLOSED\n");
-
-                  /* Find the listener for this connection. */
-
-#if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-                  listener = tcp_findlistener(&conn->u, conn->lport,
-                                              conn->domain);
-#else
-                  listener = tcp_findlistener(&conn->u, conn->lport);
-#endif
-                  if (listener != NULL)
-                    {
-                      /* We call tcp_callback() for the connection with
-                       * TCP_TIMEDOUT to inform the listener that the
-                       * connection has timed out.
-                       */
-
-                      tcp_callback(dev, listener, TCP_TIMEDOUT);
-                    }
 
                   /* We also send a reset packet to the remote host. */
 
