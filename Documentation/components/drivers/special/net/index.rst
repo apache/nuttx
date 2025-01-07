@@ -11,4 +11,4 @@ Network interface drivers
   :caption: Supported Drivers
 
   ethernet.rst
-
+  vlan.rst

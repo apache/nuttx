@@ -324,6 +324,44 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev);
 #define netdev_lower_quota_load(dev, type) atomic_read(&dev->quota[type])
 
 /****************************************************************************
+ * Name: netdev_lower_vlan_add
+ *
+ * Description:
+ *   Add a VLAN device to the network device.
+ *
+ * Input Parameters:
+ *   dev  - The lower half device driver structure
+ *   vid  - VLAN ID
+ *   vlan - The VLAN device to add
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_VLAN
+int netdev_lower_vlan_add(FAR struct netdev_lowerhalf_s *dev, uint16_t vid,
+                          FAR struct netdev_lowerhalf_s *vlan);
+
+/****************************************************************************
+ * Name: netdev_lower_vlan_del
+ *
+ * Description:
+ *   Delete a VLAN device from the network device.
+ *
+ * Input Parameters:
+ *   dev - The lower half device driver structure
+ *   vid - VLAN ID
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+int netdev_lower_vlan_del(FAR struct netdev_lowerhalf_s *dev, uint16_t vid);
+#endif
+
+/****************************************************************************
  * Name: netpkt_alloc
  *
  * Description:
