@@ -138,6 +138,7 @@ config NET_GUARDSIZE
 config NET_LL_GUARDSIZE
 	int "Data Link Layer(L2) Guard size of Network buffer(IOB)"
 	default 50 if RNDIS
+	default 18 if NET_VLAN
 	default 16 if NET_CAN && NET_TIMESTAMP
 	default 14 if NET_ETHERNET
 	default 0
@@ -295,6 +296,26 @@ config NET_TUN_PKTSIZE
 		TUN the MTU is the same as the PKTSIZE.
 
 endif # NET_TUN
+
+menuconfig NET_VLAN
+	bool "VLAN support"
+	default n
+	depends on NET_ETHERNET
+	---help---
+		Enable support for VLANs (Virtual Local Area Networks) on Ethernet
+		devices.
+
+if NET_VLAN
+
+config NET_VLAN_COUNT
+	int "MAX number of VLAN interfaces per physical interface"
+	default 2
+	range 1 32
+	---help---
+		Selects the number of VLAN interfaces per physical interface to support.
+		Default: 2
+
+endif # NET_VLAN
 
 config NETDEV_LATEINIT
 	bool "Late driver initialization"
