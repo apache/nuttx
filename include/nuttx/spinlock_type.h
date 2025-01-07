@@ -29,6 +29,10 @@
 
 #include <nuttx/config.h>
 
+#if defined(CONFIG_RW_SPINLOCK) || defined(CONFIG_TICKET_SPINLOCK)
+#include <nuttx/atomic.h>
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
