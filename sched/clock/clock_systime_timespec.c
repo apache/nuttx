@@ -68,9 +68,9 @@ int clock_systime_timespec(FAR struct timespec *ts)
 
       up_rtc_gettime(ts);
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_basetime_lock);
       clock_timespec_subtract(ts, &g_basetime, ts);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_basetime_lock, flags);
     }
   else
     {

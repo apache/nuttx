@@ -210,14 +210,14 @@ struct xcptcontext
  * Both behavior don't match the nuttx requirement.
  */
 
-static inline uint32_t getmodp(void)
+static inline_function uint32_t getmodp(void)
 {
   register uint32_t modp __asm__ ("r0");
   __asm__ __volatile__("mov modp, %0\nnop\nnop" : "=r"(modp));
   return modp;
 }
 
-static inline void setmodp(uint32_t modp_v)
+static inline_function void setmodp(uint32_t modp_v)
 {
   __asm__ __volatile__("nop\nnop\nmov %0, r0\nnop\nnop" : : "r"(modp_v));
   __asm__ __volatile__
@@ -229,31 +229,31 @@ static inline void setmodp(uint32_t modp_v)
 
 /* Return the current value of the stack pointer */
 
-static inline uint32_t up_getsp(void)
+static inline_function uint32_t up_getsp(void)
 {
   uint32_t sp;
   __asm__ __volatile__("nop\nmov sp, %0" : "=r"(sp));
   return sp;
 }
 
-static inline void up_irq_disable(void)
+static inline_function void up_irq_disable(void)
 {
   setmodp(REG_MODP_DISABLE);
 }
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t flags = getmodp();
   up_irq_disable();
   return flags;
 }
 
-static inline void up_irq_enable(void)
+static inline_function void up_irq_enable(void)
 {
   setmodp(REG_MODP_ENABLE);
 }
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   setmodp(flags);
 }

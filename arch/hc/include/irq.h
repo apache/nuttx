@@ -77,7 +77,7 @@ extern "C"
 
 /* Return the current value of the stack pointer */
 
-static inline uint16_t up_getsp(void)
+static inline_function uint16_t up_getsp(void)
 {
   uint16_t ret;
   __asm__
@@ -126,6 +126,16 @@ static inline_function void up_set_current_regs(FAR uint8_t *regs)
  ****************************************************************************/
 
 #define up_interrupt_context() (up_current_regs() != NULL)
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint8_t *ptr = regs;
+  return (uintptr_t)(ptr[REG_SPH] << 8 | ptr[REG_SPL]);
+}
 
 /****************************************************************************
  * Public Function Prototypes

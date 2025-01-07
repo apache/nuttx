@@ -479,7 +479,7 @@
 
 #ifdef CONFIG_ESP32_GPIO_IRQ
 #ifdef CONFIG_SMP
-static inline int esp32_irq_gpio(int cpu)
+static inline_function int esp32_irq_gpio(int cpu)
 {
   if (cpu == 0)
     {

@@ -399,10 +399,14 @@ time_t up_rtc_time(void)
 #ifdef CONFIG_RTC_HIRES
 int up_rtc_gettime(struct timespec *tp)
 {
+  irqstate_t flags;
   uint64_t count;
 
-  count = cxd56_rtc_count();
+  flags = spin_lock_irqsave(&g_rtc_lock);
+
+  count = cxd56_rtc_count_nolock();
   count += g_rtc_save->offset;
+  spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   /* Then we can save the time in seconds and fractional seconds. */
 
@@ -477,21 +481,28 @@ int up_rtc_settime(const struct timespec *tp)
  *
  ****************************************************************************/
 
-uint64_t cxd56_rtc_count(void)
+uint64_t cxd56_rtc_count_nolock(void)
 {
   uint64_t val;
-  irqstate_t flags;
 
   /* The pre register is latched with reading the post rtcounter register,
    * so these registers always have to been read in the below order,
    * 1st post -> 2nd pre, and should be operated in atomic.
    */
 
-  flags = spin_lock_irqsave(&g_rtc_lock);
-
   val = (uint64_t)getreg32(CXD56_RTC0_RTPOSTCNT) << 15;
   val |= getreg32(CXD56_RTC0_RTPRECNT);
 
+  return val;
+}
+
+uint64_t cxd56_rtc_count(void)
+{
+  uint64_t val;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_rtc_lock);
+  val = cxd56_rtc_count_nolock();
   spin_unlock_irqrestore(&g_rtc_lock, flags);
 
   return val;

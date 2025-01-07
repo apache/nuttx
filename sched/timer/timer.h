@@ -35,6 +35,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/signal.h>
 #include <nuttx/wdog.h>
+#include <nuttx/spinlock.h>
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
 
@@ -84,6 +85,8 @@ extern volatile sq_queue_t g_freetimers;
  */
 
 extern volatile sq_queue_t g_alloctimers;
+
+extern spinlock_t g_locktimers;
 
 /****************************************************************************
  * Public Function Prototypes
