@@ -119,7 +119,7 @@ noinstrument_function static inline_function uintptr_t up_getsp(void)
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
   return (uintptr_t)__get_sp();
 #else
-  return __builtin_frame_address(0);
+  return (uintptr_t)__builtin_frame_address(0);
 #endif
 }
 
