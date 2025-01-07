@@ -1,0 +1,146 @@
+MCP9600
+=======
+
+Contributed by Matteo Golin.
+
+The MCP9600 is a thermocouple EMF to temperature converter made by Microchip. It is also sold as a `breakout board module
+by Adafruit <https://learn.adafruit.com/adafruit-mcp9600-i2c-thermocouple-amplifier>`_.
+
+Application Programming Interface
+==================================
+
+The header file for the MCP9600 driver interface can be included using:
+
+.. code-block:: c
+
+   #include <nuttx/sensors/mcp9600.h>
+
+The MCP9600 registration function allows the driver to be registered as a POSIX
+character driver.
+
+The standard POSIX `read()` operation will return the device information in
+plain-text, which is useful when debugging/testing the driver using `cat` from
+the shell.
+
+The `write()` operation is not implemented for this sensor.
+
+Specific operations the sensor offers can be performed via the POSIX `ioctl`
+operation. The supported commands are:
+
+ * :c:macro:`SNIOC_WHO_AM_I`
+ * :c:macro:`SNIOC_READ_RAW_DATA`
+ * :c:macro:`SNIOC_CHECK_STATUS_REG`
+ * :c:macro:`SNIOC_CONFIGURE`
+ * :c:macro:`SNIOC_WRITECONF`
+ * :c:macro:`SNIOC_READTEMP`
+ * :c:macro:`SNIOC_SHUTDOWN`
+ * :c:macro:`SNIOC_START`
+
+``SNIOC_WHO_AM_I``
+------------------
+
+This command reads the device ID register of the MCP9600 sensor. The device ID,
+major and minor revision numbers are returned in the argument, which must be of
+type ``struct mcp9600_devinfo_s *``.
+
+.. code-block:: c
+
+  struct mcp9600_devinfo_s devinfo;
+  err = ioctl(sensor, SNIOC_WHO_AM_I, &devinfo);
+
+  uint8_t revision_minor = MCP9600_REV_MINOR(devinfo.revision);
+  uint8_t revision_major = MCP9600_REV_MAJOR(devinfo.revision);
+
+``SNIOC_READ_RAW_DATA``
+-----------------------
+
+This command allows the caller to read the raw data returned from the sensor's
+ADC.
+
+The argument to this command must be an ``int32_t`` pointer. The raw data will
+be returned here. The process to convert the raw ADC data depends on the
+configured resolution; consult the data sheet.
+
+.. code-block:: c
+
+  int32_t raw;
+  err = ioctl(sensor, SNIOC_READ_RAW_DATA, &raw);
+
+``SNIOC_CHECK_STATUS_REG``
+--------------------------
+
+This command lets you check the status register of the device. The argument to
+this command must be a pointer to type ``struct mcp9600_status_s``.
+
+.. code-block:: c
+
+  struct mcp9600_status_s status;
+  err = ioctl(sensor, SNIOC_CHECK_STATUS_REG, &status);
+
+``SNIOC_CONFIGURE``
+-------------------
+
+This command lets you configure the MCP9600's operation, including thermocouple
+type, operating mode, ADC resolution, etc.
+
+The argument to this command must be a pointer to type ``struct
+mcp9600_devconf_s``.
+
+.. code-block:: c
+
+  struct mcp9600_devconf_s conf = {
+    .thermo_type = MCP9600_THERMO_TYPE_K,
+    .resolution = MCP9600_ADC_RES_18,
+    /* More fields ... */
+  };
+  err = ioctl(sensor, SNIOC_CONFIGURE, &conf);
+
+``SNIOC_WRITECONF``
+-------------------
+
+This command lets you configure the MCP9600's alerts on a per-alert basis.
+   
+The argument to this command must be a pointer to type ``struct
+mcp9600_alertconf_s``.
+
+.. code-block:: c
+
+  struct mcp9600_alertconf_s conf = {
+    .alert = MCP9600_ALERT1,
+    .enable = true,
+    .limit = 40 / 0.25,
+    /* More fields ... */
+  };
+  err = ioctl(sensor, SNIOC_WRITECONF, &conf);
+
+``SNIOC_READTEMP``
+------------------
+
+This command lets you read the three different types of temperature that the
+MCP9600 can measure. The argument to this command must be a pointer to type
+``struct mcp9600_temp_s``.
+
+.. code-block:: c
+
+  struct mcp9600_temp_s temps;
+  err = ioctl(sensor, SNIOC_READTEMP, &temps);
+
+  printf("Temperature: %d C\n", temps.hot_junc);
+
+``SNIOC_SHUTDOWN``
+------------------
+
+This command shuts down the sensor. It takes no arguments.
+
+.. code-block:: c
+
+  err = ioctl(sensor, SNIOC_SHUTDOWN, NULL);
+
+``SNIOC_START``
+---------------
+
+This command starts the sensor in normal mode. It takes no arguments.
+
+.. code-block:: c
+
+  err = ioctl(sensor, SNIOC_START, NULL);

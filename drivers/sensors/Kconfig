@@ -950,6 +950,23 @@ config MLX90614_CRC
 
 endif # SENSORS_MLX90614
 
+config SENSORS_MCP9600
+	bool "MCP9600 Thermocouple Amplifier"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the MCP9600 thermocouple amplifier
+
+if SENSORS_MCP9600
+
+config MCP9600_I2C_FREQUENCY
+	int "MCP9600 I2C frequency"
+	default 100000
+	range 10000 100000
+	depends on SENSORS_MCP9600
+
+endif # SENSORS_MCP9600
+
 config SENSORS_MCP9844
 	bool "MCP9844 Temperature Sensor"
 	default n
