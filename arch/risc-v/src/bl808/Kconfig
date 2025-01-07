@@ -110,8 +110,8 @@ menuconfig BL808_I2C0
 	bool "I2C 0"
 	default n
 	select I2C
-        select I2C_DRIVER
-        select ARCH_HAVE_I2CRESET
+	select I2C_DRIVER
+	select ARCH_HAVE_I2CRESET
 
 if BL808_I2C0
 
@@ -133,8 +133,8 @@ menuconfig BL808_I2C1
 	bool "I2C 1"
 	default n
 	select I2C
-        select I2C_DRIVER
-        select ARCH_HAVE_I2CRESET
+	select I2C_DRIVER
+	select ARCH_HAVE_I2CRESET
 
 if BL808_I2C1
 
@@ -156,8 +156,8 @@ menuconfig BL808_I2C2
 	bool "I2C 2"
 	default n
 	select I2C
-        select I2C_DRIVER
-        select ARCH_HAVE_I2CRESET
+	select I2C_DRIVER
+	select ARCH_HAVE_I2CRESET
 
 if BL808_I2C2
 
@@ -179,8 +179,8 @@ menuconfig BL808_I2C3
 	bool "I2C 3"
 	default n
 	select I2C
-        select I2C_DRIVER
-        select ARCH_HAVE_I2CRESET
+	select I2C_DRIVER
+	select ARCH_HAVE_I2CRESET
 
 if BL808_I2C3
 

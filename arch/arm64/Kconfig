@@ -118,7 +118,7 @@ config ARCH_CHIP_BCM2711
 	select ARCH_NEED_ADDRENV_MAPPING
 	select ARCH_HAVE_MULTICPU
 	select ARCH_USE_MMU # Required for up_testset
-    select ARMV8A_HAVE_GICv2
+	select ARMV8A_HAVE_GICv2
 	---help---
 		Broadcom BCM2711 quad-core ARM Cortex A72
 

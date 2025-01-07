@@ -1408,8 +1408,8 @@ endchoice # FDCAN1 mode
 menu "FDCAN1 Bit Timing"
 
 config STM32H5_FDCAN1_AUTO_BIT_TIMING
-        bool "FDCAN1 Automatic Bit Timing"
-        default y
+	bool "FDCAN1 Automatic Bit Timing"
+	default y
 	---help---
 		Automatically determine FDCAN1 bit timing (nominal and data) based on bitrate.
 
@@ -1426,7 +1426,7 @@ config STM32H5_FDCAN1_NTSEG1
 	int "FDCAN1 NTSEG1 (PropSeg + PhaseSeg1)"
 	default 6
 	range 1 256
-        depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
@@ -1434,7 +1434,7 @@ config STM32H5_FDCAN1_NTSEG2
 	int "FDCAN1 NTSEG2 (PhaseSeg2)"
 	default 7
 	range 1 128
-        depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
@@ -1442,7 +1442,7 @@ config STM32H5_FDCAN1_NSJW
 	int "FDCAN1 synchronization jump width"
 	default 1
 	range 1 128
-        depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
+	depends on !STM32H5_FDCAN1_AUTO_BIT_TIMING
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
@@ -1535,8 +1535,8 @@ endchoice # FDCAN2 mode
 menu "FDCAN2 Bit Timing"
 
 config STM32H5_FDCAN2_AUTO_BIT_TIMING
-        bool "FDCAN2 Automatic Bit Timing"
-        default y
+	bool "FDCAN2 Automatic Bit Timing"
+	default y
 	---help---
 		Automatically determine FDCAN2 bit timing (nominal and data) based on bitrate.
 
@@ -1553,7 +1553,7 @@ config STM32H5_FDCAN2_NTSEG1
 	int "FDCAN2 NTSEG1 (PropSeg + PhaseSeg1)"
 	default 6
 	range 1 256
-        depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
@@ -1561,7 +1561,7 @@ config STM32H5_FDCAN2_NTSEG2
 	int "FDCAN2 NTSEG2 (PhaseSeg2)"
 	default 7
 	range 1 128
-        depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
@@ -1569,7 +1569,7 @@ config STM32H5_FDCAN2_NSJW
 	int "FDCAN2 synchronization jump width"
 	default 1
 	range 1 128
-        depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
+	depends on !STM32H5_FDCAN2_AUTO_BIT_TIMING
 	---help---
 		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
 
