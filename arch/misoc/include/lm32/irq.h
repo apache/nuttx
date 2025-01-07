@@ -227,5 +227,12 @@ struct xcptcontext
 #define up_getusrpc(regs) \
     (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_EPC])
 
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((uint32_t *)(regs))[REG_SP])
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MISOC_INCLUDE_LM32_IRQ_H */

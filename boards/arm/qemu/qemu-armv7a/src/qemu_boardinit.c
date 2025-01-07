@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/arch.h>
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <nuttx/board.h>
@@ -113,3 +114,13 @@ void board_late_initialize(void)
   qemu_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
+
+#if defined(CONFIG_BOARDCTL_POWEROFF) && defined(CONFIG_ARM_PSCI)
+int board_power_off(int status)
+{
+  UNUSED(status);
+
+  up_systempoweroff();
+  return 0;
+}
+#endif

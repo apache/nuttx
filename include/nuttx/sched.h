@@ -571,6 +571,8 @@ struct task_group_s
   /* Virtual memory mapping info ********************************************/
 
   struct mm_map_s tg_mm_map;        /* Task group virtual memory mappings   */
+
+  spinlock_t tg_lock;               /* lock */
 };
 
 /* struct tcb_s *************************************************************/

@@ -2112,7 +2112,9 @@ int up_timer_tick_start(clock_t ticks);
  *
  ****************************************************************************/
 
-uintptr_t up_getusrsp(FAR void *regs);
+/* static inline_function uintptr_t up_getusrsp(void *regs);
+ * The actual implementation should be provided in irq.h per arch.
+ */
 
 /****************************************************************************
  * TLS support

@@ -1,7 +1,5 @@
 /****************************************************************************
- * arch/x86/include/irq.h
- *
- * SPDX-License-Identifier: Apache-2.0
+ * arch/arm/src/stm32h5/stm32_fdcan.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,51 +18,41 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_X86_INCLUDE_IRQ_H
-#define __ARCH_X86_INCLUDE_IRQ_H
+#ifndef __ARCH_ARM_SRC_STM32H5_STM32_FDCAN_H
+#define __ARCH_ARM_SRC_STM32H5_STM32_FDCAN_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#  include <stddef.h>
-#endif
+#include <nuttx/config.h>
 
-/* Include NuttX-specific IRQ definitions */
+#include "chip.h"
+#include "hardware/stm32_fdcan.h"
 
-#include <nuttx/irq.h>
-
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
-
-#include <arch/chip/irq.h>
-
-/* Include architecture-specific IRQ definitions (including register save
- * structure and up_irq_save()/up_irq_restore() macros).
- */
-
-#ifdef CONFIG_ARCH_I486
-#  include <arch/i486/irq.h>
-#endif
+#include <nuttx/can/can.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Port numbers for use with stm32_fdcan_initialize() */
+
+#define FDCAN1 1
+#define FDCAN2 2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
+#undef EXTERN
+#if defined(__cplusplus)
 #define EXTERN extern "C"
 extern "C"
 {
@@ -73,64 +61,51 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-/* This holds a references to the current interrupt level register storage
- * structure.  It is non-NULL only during interrupt processing.
- */
-
-EXTERN volatile uint32_t *g_current_regs;
-#endif
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Inline functions
- ****************************************************************************/
-
-static inline_function uint32_t *up_current_regs(void)
-{
-  return (uint32_t *)g_current_regs;
-}
-
-static inline_function void up_set_current_regs(uint32_t *regs)
-{
-  g_current_regs = regs;
-}
+#ifdef CONFIG_STM32H5_FDCAN_CHARDRIVER
 
 /****************************************************************************
- * Name: up_interrupt_context
+ * Name: stm32_fdcaninitialize
  *
  * Description:
- *   Return true is we are currently executing in the interrupt handler
- *   context.
+ *   Initialize the selected FDCAN port
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple FDCAN interfaces)
+ *
+ * Returned Value:
+ *   Valid FDCAN device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-#define up_interrupt_context() (up_current_regs() != NULL)
+struct can_dev_s *stm32_fdcaninitialize(int port);
+#endif
+
+#ifdef CONFIG_STM32H5_FDCAN_SOCKET
 
 /****************************************************************************
- * Name: up_getusrpc
+ * Name: stm32_fdcansockinitialize
+ *
+ * Description:
+ *   Initialize the selected FDCAN port as SocketCAN interface
+ *
+ * Input Parameters:
+ *   Port number (for hardware that has multiple FDCAN interfaces)
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
  ****************************************************************************/
 
-#define up_getusrpc(regs) \
-    (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_EIP])
-
-/****************************************************************************
- * Name: up_getusrsp
- ****************************************************************************/
-
-#define up_getusrsp(regs) \
-    ((uintptr_t)((uint32_t *)(regs))[REG_ESP])
+int stm32_fdcansockinitialize(int port);
+#endif
 
 #undef EXTERN
-#ifdef __cplusplus
+#if defined(__cplusplus)
 }
 #endif
-#endif
 
-#endif /* __ARCH_X86_INCLUDE_IRQ_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_STM32H5_STM32_FDCAN_H */

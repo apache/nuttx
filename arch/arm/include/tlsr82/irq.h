@@ -194,7 +194,7 @@ extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
 
 /* Save the current interrupt enable state & disable IRQs. */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t r = _IRQ_EN_REG;
   _IRQ_EN_REG = 0;
@@ -203,36 +203,36 @@ static inline irqstate_t up_irq_save(void)
 
 /* Restore saved IRQ & FIQ state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   _IRQ_EN_REG = flags;
 }
 
 /* Enable IRQs and return the previous IRQ state */
 
-static inline irqstate_t up_irq_enable(void)
+static inline_function irqstate_t up_irq_enable(void)
 {
   irqstate_t r = _IRQ_EN_REG;
   _IRQ_EN_REG = 1;
   return r;
 }
 
-static inline void up_irq_disable(void)
+static inline_function void up_irq_disable(void)
 {
   up_irq_save();
 }
 
-static inline void up_disable_irq(int irq)
+static inline_function void up_disable_irq(int irq)
 {
   _IRQ_MASK_REG &= ~(1 << irq);
 }
 
-static inline void up_enable_irq(int irq)
+static inline_function void up_enable_irq(int irq)
 {
   _IRQ_MASK_REG |= (1 << irq);
 }
 
-static inline uint32_t getcontrol(void)
+static inline_function uint32_t getcontrol(void)
 {
   return 0;
 }
@@ -260,6 +260,12 @@ static inline_function uint32_t up_getsp(void)
   );
 
   return sp;
+}
+
+static inline_function uintptr_t up_getusrsp(void *regs)
+{
+  uint32_t *ptr = (uint32_t *)regs;
+  return ptr[REG_SP];
 }
 
 noinstrument_function

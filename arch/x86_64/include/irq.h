@@ -182,6 +182,13 @@ static inline_function void up_set_interrupt_context(bool flag)
 #define up_getusrpc(regs) \
     (((uint64_t *)((regs) ? (regs) : running_regs()))[REG_RIP])
 
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((uint64_t *)(regs))[REG_RSP])
+
 #undef EXTERN
 #ifdef __cplusplus
 }

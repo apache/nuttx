@@ -76,7 +76,7 @@ extern "C"
 
 /* Return the current value of the stack pointer */
 
-static inline uint32_t up_getsp(void)
+static inline_function uint32_t up_getsp(void)
 {
   uint32_t retval;
 
@@ -174,6 +174,13 @@ static inline_function bool up_interrupt_context(void)
 
 #define up_getusrpc(regs) \
     (((uint32_t *)((regs) ? (regs) : up_current_regs()))[REG_PC])
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((uint32_t *)(regs))[REG_I6])
 
 /****************************************************************************
  * Public Function Prototypes

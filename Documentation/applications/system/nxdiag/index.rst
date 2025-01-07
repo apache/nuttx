@@ -7,9 +7,12 @@ It also can be used to run a tests to verify that the vendor's tools are properl
 
 Its primary purpose is to gather information that can be used to debug problems and ease the process of reporting bugs for uninexperienced users.
 
-This tool uses a Python script (``apps/tools/host_sysinfo.py``) to gather information about the host system during build and a C
+This tool uses a Python script (``nuttx/tools/host_info_dump.py``) to gather information about the host system during build and a C
 program to gather information about the NuttX system and display all available information. For more information about the python
-script, check the command line options and code comments of ``host_sysinfo.py``.
+script, check the command line options and code comments of ``host_info_dump.py``.
+
+Alternatively, ``host_info`` target can be used without enabling nxdiag application and reflashing to get information about system. 
+Target can work after configuration step and prints information about the NuttX and host systems.
 
 .. note:: Nxdiag requires Python 3.6 or later. On Linux distributions, the ``distro`` Python module is
           recommended as it provides more accurate information about the host system.

@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-static inline uint32_t cp0_getintctl(void)
+static inline_function uint32_t cp0_getintctl(void)
 {
   register uint32_t intctl;
   __asm__ __volatile__
@@ -101,7 +101,7 @@ static inline uint32_t cp0_getintctl(void)
  *
  ****************************************************************************/
 
-static inline void cp0_putintctl(uint32_t intctl)
+static inline_function void cp0_putintctl(uint32_t intctl)
 {
   __asm__ __volatile__
     (
@@ -130,7 +130,7 @@ static inline void cp0_putintctl(uint32_t intctl)
  *
  ****************************************************************************/
 
-static inline uint32_t cp0_getebase(void)
+static inline_function uint32_t cp0_getebase(void)
 {
   register uint32_t ebase;
   __asm__ __volatile__
@@ -161,7 +161,7 @@ static inline uint32_t cp0_getebase(void)
  *
  ****************************************************************************/
 
-static inline void cp0_putebase(uint32_t ebase)
+static inline_function void cp0_putebase(uint32_t ebase)
 {
   __asm__ __volatile__
     (

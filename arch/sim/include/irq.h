@@ -135,7 +135,7 @@ static inline_function void up_set_current_regs(xcpt_reg_t *regs)
 
 /* Return the current value of the stack pointer */
 
-static inline uintptr_t up_getsp(void)
+static inline_function uintptr_t up_getsp(void)
 {
 #ifdef _MSC_VER
   uintptr_t tmp;
@@ -182,6 +182,13 @@ static inline_function bool up_interrupt_context(void)
 
 #define up_getusrpc(regs) \
     (((xcpt_reg_t *)((regs) ? (regs) : up_current_regs()))[JB_PC])
+
+/****************************************************************************
+ * Name: up_getusrsp
+ ****************************************************************************/
+
+#define up_getusrsp(regs) \
+    ((uintptr_t)((xcpt_reg_t *)(regs))[JB_SP])
 
 #undef EXTERN
 #ifdef __cplusplus

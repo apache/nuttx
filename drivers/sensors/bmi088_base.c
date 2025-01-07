@@ -48,7 +48,6 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMI088_SPI
-
 static void bmi088_configspi(FAR struct spi_dev_s *spi)
 {
   /* Configure SPI for the BMI088 */

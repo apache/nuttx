@@ -133,21 +133,21 @@ struct xcptcontext
 
 /* Read/write the SREG */
 
-static inline irqstate_t getsreg(void)
+static inline_function irqstate_t getsreg(void)
 {
   irqstate_t sreg;
   asm volatile ("in %0, __SREG__" : "=r" (sreg) ::);
   return sreg;
 }
 
-static inline void putsreg(irqstate_t sreg)
+static inline_function void putsreg(irqstate_t sreg)
 {
   asm volatile ("out __SREG__, %s" : : "r" (sreg) :);
 }
 
 /* Return the current value of the stack pointer */
 
-static inline uint16_t up_getsp(void)
+static inline_function uint16_t up_getsp(void)
 {
   uint8_t spl;
   uint8_t sph;
@@ -165,19 +165,19 @@ static inline uint16_t up_getsp(void)
 
 /* Interrupt enable/disable */
 
-static inline void up_irq_enable()
+static inline_function void up_irq_enable()
 {
   asm volatile ("sei" ::);
 }
 
-static inline void up_irq_disabled()
+static inline_function void up_irq_disabled()
 {
   asm volatile ("cli" ::);
 }
 
 /* Save the current interrupt enable state & disable all interrupts */
 
-static inline irqstate_t up_irq_save(void)
+static inline_function irqstate_t up_irq_save(void)
 {
   irqstate_t sreg;
   asm volatile
@@ -191,7 +191,7 @@ static inline irqstate_t up_irq_save(void)
 
 /* Restore saved interrupt state */
 
-static inline void up_irq_restore(irqstate_t flags)
+static inline_function void up_irq_restore(irqstate_t flags)
 {
   asm volatile ("out __SREG__, %0" : : "r" (flags) :);
 }
