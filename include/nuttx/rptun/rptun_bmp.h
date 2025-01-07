@@ -54,6 +54,7 @@ extern "C"
  *   rsc - The resource for shared memory
  *   irq_event - Interrupt ID to attach
  *   irq_trigger - Interrupt ID to trigger
+ *   remote_cpu - Remote CPU ID
  *
  * Returned Value:
  *   OK on success, negated errno on failure
@@ -62,7 +63,7 @@ extern "C"
 
 int rptun_bmp_init(FAR const char *cpuname, bool master,
                    FAR struct rptun_rsc_s *rsc, int irq_event,
-                   int irq_trigger);
+                   int irq_trigger, cpu_set_t remote_cpu);
 
 #undef EXTERN
 #ifdef __cplusplus

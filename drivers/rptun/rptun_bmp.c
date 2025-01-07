@@ -46,6 +46,7 @@ struct rptun_bmp_dev_s
   char                    cpuname[RPMSG_NAME_SIZE + 1];
   int                     irq_event;
   int                     irq_trigger;
+  cpu_set_t               cpuset;
 };
 
 /****************************************************************************
@@ -122,12 +123,8 @@ static int rptun_bmp_stop(FAR struct rptun_dev_s *dev)
 static int rptun_bmp_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
 {
   FAR struct rptun_bmp_dev_s *priv = (FAR struct rptun_bmp_dev_s *)dev;
-  cpu_set_t cpuset;
 
-  CPU_ZERO(&cpuset);
-  CPU_SET(0, &cpuset);
-
-  up_trigger_irq(priv->irq_trigger, cpuset);
+  up_trigger_irq(priv->irq_trigger, priv->cpuset);
   return 0;
 }
 
@@ -186,7 +183,7 @@ static int rprun_bmp_interrupt(int irq, FAR void *context, FAR void *arg)
 
 int rptun_bmp_init(FAR const char *cpuname, bool master,
                    FAR struct rptun_rsc_s *rsc, int irq_event,
-                   int irq_trigger)
+                   int irq_trigger, cpu_set_t remote_cpu)
 {
   FAR struct rptun_bmp_dev_s *dev;
   int ret;
@@ -202,6 +199,8 @@ int rptun_bmp_init(FAR const char *cpuname, bool master,
   dev->irq_event = irq_event;
   dev->rptun.ops = &g_rptun_bmp_ops;
   dev->rsc = rsc;
+  dev->cpuset = remote_cpu;
+
   strlcpy(dev->cpuname, cpuname, sizeof(dev->cpuname));
 
   ret = irq_attach(dev->irq_event,
