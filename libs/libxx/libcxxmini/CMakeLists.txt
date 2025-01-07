@@ -33,9 +33,7 @@ if(CONFIG_LIBCXXMINI)
     PRIVATE libxx_cxa_guard.cxx
             libxx_cxapurevirtual.cxx
             libxx_delete.cxx
-            libxx_delete_sized.cxx
             libxx_deletea.cxx
-            libxx_deletea_sized.cxx
             libxx_new.cxx
             libxx_newa.cxx
             libxx_dynamic_cast.cxx
