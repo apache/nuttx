@@ -62,6 +62,14 @@ int pci_register_drivers(void)
     }
 #endif
 
+#ifdef CONFIG_PCI_RAMDISK_IVSHMEM
+  ret = pci_register_ramdisk_ivshmem_driver();
+  if (ret < 0)
+    {
+      pcierr("pci_register_ramdisk_ivshmem_driver failed, ret=%d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_PCI_UIO_IVSHMEM
   ret = pci_register_uio_ivshmem_driver();
   if (ret < 0)
