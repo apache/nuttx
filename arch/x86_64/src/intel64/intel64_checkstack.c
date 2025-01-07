@@ -72,7 +72,7 @@ size_t x86_64_stack_check(void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not check outside the stack boundaries */
 
-  start = STACK_ALIGN_UP((uintptr_t)stackbase);
+  start = STACK_ALIGN_UP((uintptr_t)stackbase + X86_64_RED_ZONE);
   end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
 
   /* Get the adjusted size based on the top and bottom of the stack */
