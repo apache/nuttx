@@ -1134,6 +1134,40 @@ int netdev_upper_wireless_ioctl(FAR struct netdev_lowerhalf_s *lower,
 #endif  /* CONFIG_NETDEV_WIRELESS_HANDLER */
 
 /****************************************************************************
+ * Name: netdev_upper_vlan_ioctl
+ *
+ * Description:
+ *   Support for VLAN handlers in ioctl.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_VLAN
+int netdev_upper_vlan_ioctl(FAR struct netdev_lowerhalf_s *lower,
+                            int cmd, unsigned long arg)
+{
+  FAR struct vlan_ioctl_args *args =
+                                (FAR struct vlan_ioctl_args *)(uintptr_t)arg;
+
+  if (cmd != SIOCSIFVLAN && cmd != SIOCGIFVLAN)
+    {
+      return -ENOTTY;
+    }
+
+  switch (args->cmd)
+    {
+      case ADD_VLAN_CMD:
+        return vlan_register(lower, args->u.VID);
+
+      case DEL_VLAN_CMD:
+        vlan_unregister(lower);
+        return OK;
+    }
+
+  return -ENOSYS;
+}
+#endif /* CONFIG_NET_VLAN */
+
+/****************************************************************************
  * Name: netdev_upper_ifup/ifdown/addmac/rmmac/ioctl
  *
  * Description:
@@ -1241,15 +1275,24 @@ static int netdev_upper_ioctl(FAR struct net_driver_s *dev, int cmd,
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
   FAR struct netdev_lowerhalf_s *lower = upper->lower;
+  int ret = -ENOTTY;
 
 #ifdef CONFIG_NETDEV_WIRELESS_HANDLER
   if (lower->iw_ops)
     {
-      int ret = netdev_upper_wireless_ioctl(lower, cmd, arg);
+      ret = netdev_upper_wireless_ioctl(lower, cmd, arg);
       if (ret != -ENOTTY)
         {
           return ret;
         }
+    }
+#endif
+
+#ifdef CONFIG_NET_VLAN
+  ret = netdev_upper_vlan_ioctl(lower, cmd, arg);
+  if (ret != -ENOTTY)
+    {
+      return ret;
     }
 #endif
 
@@ -1258,7 +1301,7 @@ static int netdev_upper_ioctl(FAR struct net_driver_s *dev, int cmd,
       return lower->ops->ioctl(lower, cmd, arg);
     }
 
-  return -ENOTTY;
+  return ret;
 }
 #endif
 
