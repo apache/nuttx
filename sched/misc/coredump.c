@@ -32,6 +32,7 @@
 
 #include <nuttx/coredump.h>
 #include <nuttx/elf.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
@@ -53,9 +54,6 @@
 #endif
 
 #define PROGRAM_ALIGNMENT 64
-
-#define ROUNDUP(x, y)     ((x + (y - 1)) / (y)) * (y)
-#define ROUNDDOWN(x ,y)   (((x) / (y)) * (y))
 
 /****************************************************************************
  * Private Types
@@ -166,8 +164,8 @@ static int elf_emit(FAR struct elf_dumpinfo_s *cinfo,
 
 static int elf_emit_align(FAR struct elf_dumpinfo_s *cinfo)
 {
-  off_t align = ROUNDUP(cinfo->stream->nput,
-                        ELF_PAGESIZE) - cinfo->stream->nput;
+  off_t align = ALIGN_UP(cinfo->stream->nput,
+                         ELF_PAGESIZE) - cinfo->stream->nput;
   unsigned char null[256];
   off_t total = align;
   off_t ret = 0;
@@ -258,10 +256,10 @@ static int elf_get_note_size(int stksegs)
 {
   int total;
 
-  total  = stksegs * (sizeof(Elf_Nhdr) + ROUNDUP(CONFIG_TASK_NAME_SIZE, 8) +
-                     sizeof(elf_prstatus_t));
-  total += stksegs * (sizeof(Elf_Nhdr) + ROUNDUP(CONFIG_TASK_NAME_SIZE, 8) +
-                     sizeof(elf_prpsinfo_t));
+  total  = stksegs * (sizeof(Elf_Nhdr) + ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8) +
+                      sizeof(elf_prstatus_t));
+  total += stksegs * (sizeof(Elf_Nhdr) + ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8) +
+                      sizeof(elf_prpsinfo_t));
   return total;
 }
 
@@ -276,7 +274,7 @@ static int elf_get_note_size(int stksegs)
 static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
                               FAR struct tcb_s *tcb)
 {
-  char name[ROUNDUP(CONFIG_TASK_NAME_SIZE, 8)];
+  char name[ALIGN_UP(CONFIG_TASK_NAME_SIZE, 8)];
   elf_prstatus_t status;
   elf_prpsinfo_t info;
   FAR uintptr_t *regs;
@@ -414,8 +412,8 @@ static void elf_emit_tcb_stack(FAR struct elf_dumpinfo_s *cinfo,
             (tcb->stack_base_ptr - tcb->stack_alloc_ptr);
     }
 
-  sp  = ROUNDDOWN(buf, PROGRAM_ALIGNMENT);
-  len = ROUNDUP(len + (buf - sp), PROGRAM_ALIGNMENT);
+  sp  = ALIGN_DOWN(buf, PROGRAM_ALIGNMENT);
+  len = ALIGN_UP(len + (buf - sp), PROGRAM_ALIGNMENT);
   buf = sp;
 
   elf_emit(cinfo, (FAR void *)buf, len);
@@ -546,17 +544,17 @@ static void elf_emit_tcb_phdr(FAR struct elf_dumpinfo_s *cinfo,
                       (tcb->stack_base_ptr - tcb->stack_alloc_ptr);
     }
 
-  sp = ROUNDDOWN(phdr->p_vaddr, PROGRAM_ALIGNMENT);
-  phdr->p_filesz = ROUNDUP(phdr->p_filesz +
-                           (phdr->p_vaddr - sp), PROGRAM_ALIGNMENT);
+  sp = ALIGN_DOWN(phdr->p_vaddr, PROGRAM_ALIGNMENT);
+  phdr->p_filesz = ALIGN_UP(phdr->p_filesz +
+                            (phdr->p_vaddr - sp), PROGRAM_ALIGNMENT);
   phdr->p_vaddr  = sp;
 
   phdr->p_type   = PT_LOAD;
-  phdr->p_offset = ROUNDUP(*offset, ELF_PAGESIZE);
+  phdr->p_offset = ALIGN_UP(*offset, ELF_PAGESIZE);
   phdr->p_paddr  = phdr->p_vaddr;
   phdr->p_memsz  = phdr->p_filesz;
   phdr->p_flags  = PF_X | PF_W | PF_R;
-  *offset       += ROUNDUP(phdr->p_memsz, ELF_PAGESIZE);
+  *offset       += ALIGN_UP(phdr->p_memsz, ELF_PAGESIZE);
 
   elf_emit(cinfo, phdr, sizeof(*phdr));
 }
@@ -608,13 +606,13 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
   for (i = 0; i < memsegs; i++)
     {
       phdr.p_type   = PT_LOAD;
-      phdr.p_offset = ROUNDUP(offset, ELF_PAGESIZE);
+      phdr.p_offset = ALIGN_UP(offset, ELF_PAGESIZE);
       phdr.p_vaddr  = cinfo->regions[i].start;
       phdr.p_paddr  = phdr.p_vaddr;
       phdr.p_filesz = cinfo->regions[i].end - cinfo->regions[i].start;
       phdr.p_memsz  = phdr.p_filesz;
       phdr.p_flags  = cinfo->regions[i].flags;
-      offset       += ROUNDUP(phdr.p_memsz, ELF_PAGESIZE);
+      offset       += ALIGN_UP(phdr.p_memsz, ELF_PAGESIZE);
       elf_emit(cinfo, &phdr, sizeof(phdr));
     }
 }
