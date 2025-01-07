@@ -168,14 +168,21 @@ static int gnss_activate(FAR struct sensor_lowerhalf_s *lower,
   int ret = OK;
 
   nxmutex_lock(&upper->lock);
-  if ((upper->crefs == 0 && enable) || (upper->crefs == 1 && !enable))
+  if ((upper->crefs == 255 && enable) || (upper->crefs == 0 && !enable))
     {
-      ret = upper->lower->ops->activate(upper->lower, filep, enable);
+      ret = -EINVAL;
     }
-
-  if (ret >= 0)
+  else
     {
-      upper->crefs += enable ? 1 : -1;
+      if ((upper->crefs == 0 && enable) || (upper->crefs == 1 && !enable))
+        {
+          ret = upper->lower->ops->activate(upper->lower, filep, enable);
+        }
+
+      if (ret >= 0)
+        {
+          upper->crefs += enable ? 1 : -1;
+        }
     }
 
   nxmutex_unlock(&upper->lock);
