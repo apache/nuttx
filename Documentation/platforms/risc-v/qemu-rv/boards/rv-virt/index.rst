@@ -361,7 +361,7 @@ This configuration is used for 32-bit RISC-V
 python
 ------
 
-Enables the Python interpreter for NuttX. This configuration is based on `nsh`_.
+Enables the Python interpreter for NuttX. This configuration is based on `netnsh`_.
 
 For more information on how to build and run Python on NuttX,
 please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
