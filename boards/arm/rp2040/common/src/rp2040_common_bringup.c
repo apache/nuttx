@@ -75,6 +75,11 @@
 #include "rp2040_i2c.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MCP9600
+#include <nuttx/sensors/mcp9600.h>
+#include "rp2040_i2c.h"
+#endif
+
 #ifdef CONFIG_SENSORS_MAX6675
 #include <nuttx/sensors/max6675.h>
 #include "rp2040_max6675.h"
@@ -535,6 +540,16 @@ int rp2040_common_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: couldn't initialize SHT4x: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MCP9600
+  /* Try to register MCP9600 device as /dev/thermo0 at I2C0. */
+
+  ret = mcp9600_register("/dev/thermo0", rp2040_i2cbus_initialize(0), 0x60);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: couldn't initialize MCP9600: %d\n", ret);
     }
 #endif
 
