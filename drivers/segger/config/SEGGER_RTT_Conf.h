@@ -77,6 +77,16 @@
 
 #define SEGGER_RTT_MEMCPY_USE_BYTELOOP  0
 
+/* RTT lock configuration */
+
+/* Lock RTT (nestable)   (i.e. disable interrupts) */
+
+#define SEGGER_RTT_LOCK()               irqstate_t __flags = spin_lock_irqsave(NULL)
+
+/* Unlock RTT (nestable) (i.e. enable previous interrupt lock state) */
+
+#define SEGGER_RTT_UNLOCK()             spin_unlock_irqrestore(NULL, __flags)
+
 /* Disable RTT SEGGER_RTT_WriteSkipNoLock */
 
 #define RTT_USE_ASM                     0
