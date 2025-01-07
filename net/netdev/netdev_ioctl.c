@@ -45,6 +45,7 @@
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/radiodev.h>
+#include <nuttx/net/vlan.h>
 
 #ifdef CONFIG_NET_6LOWPAN
 #  include <nuttx/net/sixlowpan.h>
@@ -646,6 +647,53 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
           /* Just forward the IOCTL to the wireless driver */
 
           ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)req);
+        }
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: netdev_vlan_ioctl
+ *
+ * Description:
+ *   Perform VLAN network device specific operations.
+ *
+ * Input Parameters:
+ *   psock    Socket structure
+ *   cmd      The ioctl command
+ *   req      The argument of the ioctl cmd
+ *
+ * Returned Value:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_VLAN)
+static int netdev_vlan_ioctl(FAR struct socket *psock, int cmd,
+                             FAR struct vlan_ioctl_args *req)
+{
+  FAR struct net_driver_s *dev;
+  int ret = -ENOTTY;
+
+  /* Verify that this is a valid VLAN IOCTL command */
+
+  if (cmd == SIOCGIFVLAN || cmd == SIOCSIFVLAN)
+    {
+      /* Get the network device associated with the IOCTL command */
+
+      dev = netdev_findbyname(req->device1);
+      if (dev != NULL)
+        {
+          /* Just forward the IOCTL to the network driver */
+
+          ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)req);
+        }
+      else
+        {
+          ret = -ENODEV;
         }
     }
 
@@ -1862,6 +1910,16 @@ int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
     {
       ret = netdev_cell_ioctl(psock, cmd,
                               (FAR struct icellreq *)(uintptr_t)arg);
+    }
+#endif
+
+#if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NET_VLAN)
+  /* Check for a VLAN command */
+
+  if (ret == -ENOTTY)
+    {
+      ret = netdev_vlan_ioctl(psock, cmd,
+                              (FAR struct vlan_ioctl_args *)(uintptr_t)arg);
     }
 #endif
 

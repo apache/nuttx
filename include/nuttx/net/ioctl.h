@@ -154,6 +154,11 @@
 
 #define SIOCNOTIFYRECVCPU  _SIOC(0x003F)  /* RSS notify recv cpu */
 
+/* VLAN control *************************************************************/
+
+#define SIOCGIFVLAN        _SIOC(0x0043)  /* Get VLAN interface */
+#define SIOCSIFVLAN        _SIOC(0x0044)  /* Set VLAN interface */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
