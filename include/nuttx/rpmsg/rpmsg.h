@@ -58,6 +58,8 @@ struct rpmsg_s
   struct metal_list            bind;
   rmutex_t                     lock;
   struct metal_list            node;
+  char                         local_cpuname[RPMSG_NAME_SIZE];
+  char                         cpuname[RPMSG_NAME_SIZE];
   FAR const struct rpmsg_ops_s *ops;
 #ifdef CONFIG_RPMSG_PING
   struct rpmsg_endpoint        ping;
@@ -83,8 +85,6 @@ struct rpmsg_ops_s
   CODE int (*ioctl)(FAR struct rpmsg_s *rpmsg, int cmd, unsigned long arg);
   CODE void (*panic)(FAR struct rpmsg_s *rpmsg);
   CODE void (*dump)(FAR struct rpmsg_s *rpmsg);
-  CODE FAR const char *(*get_local_cpuname)(FAR struct rpmsg_s *rpmsg);
-  CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
 };
 
 CODE typedef void (*rpmsg_dev_cb_t)(FAR struct rpmsg_device *rdev,

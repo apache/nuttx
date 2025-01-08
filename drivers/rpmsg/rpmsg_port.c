@@ -45,9 +45,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static FAR const char *
-rpmsg_port_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
-static FAR const char *rpmsg_port_get_cpuname(FAR struct rpmsg_s *rpmsg);
 static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg);
 
 /****************************************************************************
@@ -61,8 +58,6 @@ static const struct rpmsg_ops_s g_rpmsg_port_ops =
   NULL,
   NULL,
   rpmsg_port_dump,
-  rpmsg_port_get_local_cpuname,
-  rpmsg_port_get_cpuname,
 };
 
 /****************************************************************************
@@ -540,29 +535,6 @@ static int rpmsg_port_ns_callback(FAR struct rpmsg_endpoint *ept,
 }
 
 /****************************************************************************
- * Name: rpmsg_port_get_local_cpuname
- ****************************************************************************/
-
-static FAR const char *
-rpmsg_port_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
-
-  return port->local_cpuname;
-}
-
-/****************************************************************************
- * Name: rpmsg_port_get_cpuname
- ****************************************************************************/
-
-static FAR const char *rpmsg_port_get_cpuname(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
-
-  return port->cpuname;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -589,7 +561,7 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
     }
 
   port->ops = ops;
-  strlcpy(port->cpuname, cfg->remotecpu, RPMSG_NAME_SIZE);
+  strlcpy(port->rpmsg.cpuname, cfg->remotecpu, RPMSG_NAME_SIZE);
 
   rdev = &port->rdev;
   memset(rdev, 0, sizeof(*rdev));
@@ -744,10 +716,10 @@ int rpmsg_port_register(FAR struct rpmsg_port_s *port,
 
   if (local_cpuname)
     {
-      strlcpy(port->local_cpuname, local_cpuname, RPMSG_NAME_SIZE);
+      strlcpy(port->rpmsg.local_cpuname, local_cpuname, RPMSG_NAME_SIZE);
     }
 
-  snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->cpuname);
+  snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->rpmsg.cpuname);
   ret = rpmsg_register(name, &port->rpmsg, &g_rpmsg_port_ops);
   if (ret < 0)
     {
@@ -769,7 +741,7 @@ void rpmsg_port_unregister(FAR struct rpmsg_port_s *port)
 {
   char name[64];
 
-  snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->cpuname);
+  snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->rpmsg.cpuname);
 
   rpmsg_device_destory(&port->rpmsg);
   rpmsg_unregister(name, &port->rpmsg);
@@ -829,7 +801,7 @@ static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg)
     }
 
   metal_log(METAL_LOG_EMERGENCY, "Remote: %s state: %d\n",
-            port->cpuname, rpmsg_is_running(rdev));
+            port->rpmsg.cpuname, rpmsg_is_running(rdev));
 
   metal_list_for_each(&rdev->endpoints, node)
     {

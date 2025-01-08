@@ -56,6 +56,8 @@
 #define rpmsg_router_edge_from_rdev(d) \
   metal_container_of(d, struct rpmsg_router_edge_s, rdev)
 
+#define RPMSG_ROUTER_EDGE_NAME_SIZE (2 * RPMSG_NAME_SIZE)
+
 #define RPMSG_ROUTER_USER_NAME_SIZE \
   (RPMSG_NAME_SIZE - RPMSG_ROUTER_NAME_PREFIX_LEN - RPMSG_ROUTER_CPUNAME_LEN)
 
@@ -68,9 +70,7 @@ struct rpmsg_router_edge_s
   struct rpmsg_s      rpmsg;
   struct rpmsg_device rdev;
   struct rpmsg_device *hubdev;
-  char                name[RPMSG_NAME_SIZE];
-  char                localcpu[RPMSG_ROUTER_CPUNAME_LEN];
-  char                remotecpu[RPMSG_ROUTER_CPUNAME_LEN];
+  char                name[RPMSG_ROUTER_EDGE_NAME_SIZE];
 
   /* Tx/Rx buffer size */
 
@@ -81,11 +81,6 @@ struct rpmsg_router_edge_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-static FAR const char *
-rpmsg_router_edge_get_local_cpuname(FAR struct rpmsg_s *rpmsg);
-static FAR const char *
-rpmsg_router_edge_get_cpuname(FAR struct rpmsg_s *rpmsg);
 
 static int
 rpmsg_router_edge_get_rx_buffer_size(FAR struct rpmsg_device *rdev);
@@ -103,39 +98,11 @@ static const struct rpmsg_ops_s g_rpmsg_router_edge_ops =
   NULL,
   NULL,
   NULL,
-  rpmsg_router_edge_get_local_cpuname,
-  rpmsg_router_edge_get_cpuname,
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: rpmsg_router_edge_get_local_cpuname
- ****************************************************************************/
-
-static FAR const char *
-rpmsg_router_edge_get_local_cpuname(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_router_edge_s *edge =
-      (FAR struct rpmsg_router_edge_s *)rpmsg;
-
-  return edge->localcpu;
-}
-
-/****************************************************************************
- * Name: rpmsg_router_edge_get_cpuname
- ****************************************************************************/
-
-static FAR const char *
-rpmsg_router_edge_get_cpuname(FAR struct rpmsg_s *rpmsg)
-{
-  FAR struct rpmsg_router_edge_s *edge =
-      (FAR struct rpmsg_router_edge_s *)rpmsg;
-
-  return edge->remotecpu;
-}
 
 /****************************************************************************
  * Name: rpmsg_router_edge_get_tx_payload_buffer
@@ -426,7 +393,7 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
 
   strlcpy(name, ns_msg->name, sizeof(name));
   snprintf(ns_msg->name, sizeof(ns_msg->name),
-           RPMSG_ROUTER_NAME_PREFIX"%s:%s", edge->remotecpu, name);
+           RPMSG_ROUTER_NAME_PREFIX"%s:%s", edge->rpmsg.cpuname, name);
 
   if (ns_msg->flags == RPMSG_NS_DESTROY)
     {
@@ -510,8 +477,8 @@ static bool rpmsg_router_edge_match(FAR struct rpmsg_device *rdev,
       return false;
     }
 
-  return !strncmp(name + RPMSG_ROUTER_NAME_PREFIX_LEN, edge->remotecpu,
-                  strlen(edge->remotecpu));
+  return !strncmp(name + RPMSG_ROUTER_NAME_PREFIX_LEN, edge->rpmsg.cpuname,
+                  strlen(edge->rpmsg.cpuname));
 }
 
 /****************************************************************************
@@ -538,7 +505,7 @@ static void rpmsg_router_edge_bind(FAR struct rpmsg_device *rdev,
 
   edgedev->ns_bind_cb(edgedev,
                       name + RPMSG_ROUTER_NAME_PREFIX_LEN +
-                      strlen(edge->remotecpu) + 1, dest);
+                      strlen(edge->rpmsg.cpuname) + 1, dest);
 }
 
 /****************************************************************************
@@ -595,8 +562,8 @@ rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
       return NULL;
     }
 
-  strlcpy(edge->remotecpu, remotecpu, sizeof(edge->remotecpu));
-  strlcpy(edge->localcpu, msg->cpuname, sizeof(edge->localcpu));
+  strlcpy(edge->rpmsg.cpuname, remotecpu, RPMSG_ROUTER_CPUNAME_LEN);
+  strlcpy(edge->rpmsg.local_cpuname, msg->cpuname, RPMSG_ROUTER_CPUNAME_LEN);
   edge->rx_len = msg->rx_len;
   edge->tx_len = msg->tx_len;
   edge->hubdev = hubdev;
@@ -622,7 +589,8 @@ rpmsg_router_edge_create(FAR struct rpmsg_device *hubdev,
 
   /* Register rpmsg for edge core */
 
-  snprintf(edge->name, sizeof(edge->name), "/dev/rpmsg/%s", edge->remotecpu);
+  snprintf(edge->name, sizeof(edge->name), "/dev/rpmsg/%s",
+           edge->rpmsg.cpuname);
   ret = rpmsg_register(edge->name, &edge->rpmsg, &g_rpmsg_router_edge_ops);
   if (ret < 0)
     {

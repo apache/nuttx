@@ -123,12 +123,6 @@ struct rpmsg_port_s
   struct rpmsg_port_queue_s         txq;    /* Port tx queue */
   struct rpmsg_port_queue_s         rxq;    /* Port rx queue */
 
-  char                              local_cpuname[RPMSG_NAME_SIZE];
-
-  /* Remote cpu name of this port connected to */
-
-  char                              cpuname[RPMSG_NAME_SIZE];
-
   /* Ops need implemented by drivers under port layer */
 
   const FAR struct rpmsg_port_ops_s *ops;
