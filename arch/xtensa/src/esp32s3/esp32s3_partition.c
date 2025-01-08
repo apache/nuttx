@@ -935,6 +935,54 @@ int esp32s3_partition_read(const char *label, size_t offset, void *buf,
 }
 
 /****************************************************************************
+ * Name: esp32s3_partition_read_decrypt
+ *
+ * Description:
+ *   Read data from SPI Flash at designated address (with decryption)
+ *
+ * Input Parameters:
+ *   label  - Partition label
+ *   offset - Offset in SPI Flash
+ *   buf    - Data buffer pointer
+ *   size   - Data number
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+int esp32s3_partition_read_decrypt(const char *label, size_t offset,
+                                   void *buf, size_t size)
+{
+  int ret;
+  int partion_offset;
+  DEBUGASSERT(label != NULL && buf != NULL);
+  struct mtd_dev_s *mtd = esp32s3_spiflash_encrypt_mtd();
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to get SPI flash MTD\n");
+      return -ENOSYS;
+    }
+
+  partion_offset = partition_get_offset(label, strlen(label));
+  if (partion_offset < 0)
+    {
+      ferr("ERROR: Failed to get partition: %s offset\n", label);
+      return partion_offset;
+    }
+
+  ret = MTD_READ(mtd, partion_offset + offset,
+                 size, (uint8_t *)buf);
+  if (ret != size)
+    {
+      ferr("ERROR: Failed to get read data from MTD\n");
+      return -EIO;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: esp32s3_partition_write
  *
  * Description:
