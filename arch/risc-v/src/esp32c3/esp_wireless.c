@@ -39,8 +39,6 @@
 #include "esp_private/phy.h"
 #include "espressif/esp_hr_timer.h"
 
-#include "esp_private/phy.h"
-
 #include "periph_ctrl.h"
 #include "esp_phy_init.h"
 #include "phy_init_data.h"

@@ -32,7 +32,6 @@
 #include <syslog.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/video/fb.h>
 #include <imxrt_lpi2c.h>
 #include <imxrt_lpspi.h>
 #include <nuttx/input/buttons.h>

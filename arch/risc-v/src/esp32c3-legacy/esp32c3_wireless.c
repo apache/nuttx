@@ -39,7 +39,6 @@
 #include "esp32c3.h"
 #include "esp32c3_irq.h"
 #include "esp32c3_attr.h"
-#include "esp32c3_wireless.h"
 #include "espidf_wifi.h"
 
 /****************************************************************************

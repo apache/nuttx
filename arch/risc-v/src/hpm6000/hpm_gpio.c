@@ -41,7 +41,6 @@
 #include "hardware/hpm_gpio.h"
 #include "hpm_gpio.h"
 #include "riscv_internal.h"
-#include "hpm_gpio.h"
 #include "hpm_ioc.h"
 
 /***************************************************************************

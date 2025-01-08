@@ -40,7 +40,6 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "arm_internal.h"
 
 #include "stm32wl5.h"
 #include "stm32wl5_gpio.h"

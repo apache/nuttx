@@ -33,8 +33,6 @@
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 
-#include <nuttx/irq.h>
-
 #include "tiva_gpio.h"
 #include "launchxl-cc1312r1.h"
 

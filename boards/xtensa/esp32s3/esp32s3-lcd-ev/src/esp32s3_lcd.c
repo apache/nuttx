@@ -31,7 +31,6 @@
 #include <debug.h>
 #include <assert.h>
 #include <sys/param.h>
-#include <unistd.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/video/fb.h>

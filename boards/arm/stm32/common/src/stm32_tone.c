@@ -25,7 +25,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/config.h>
 
 #include <errno.h>
 #include <debug.h>

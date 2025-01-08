@@ -46,7 +46,6 @@
 #include "arm64_internal.h"
 #include "arm64_fatal.h"
 #include "arm64_mmu.h"
-#include "arm64_fatal.h"
 #include "arm64_arch_timer.h"
 
 #ifdef CONFIG_ARCH_FPU

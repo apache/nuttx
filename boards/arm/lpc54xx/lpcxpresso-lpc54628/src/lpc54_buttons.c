@@ -33,8 +33,6 @@
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 
-#include <nuttx/irq.h>
-
 #include "lpc54_gpio.h"
 #include "lpcxpresso-lpc54628.h"
 

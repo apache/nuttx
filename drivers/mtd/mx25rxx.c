@@ -39,7 +39,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
-#include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/qspi.h>
 #include <nuttx/mtd/mtd.h>

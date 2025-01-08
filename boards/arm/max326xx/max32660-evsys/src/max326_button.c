@@ -34,8 +34,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 
-#include <nuttx/irq.h>
-
 #include "max326_gpio.h"
 #include "max32660-evsys.h"
 

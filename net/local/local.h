@@ -33,7 +33,6 @@
 #include <sys/un.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <poll.h>
 
 #include <nuttx/fs/fs.h>

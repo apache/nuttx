@@ -32,7 +32,6 @@
 #include <debug.h>
 #include <string.h>
 #include <sys/param.h>
-#include <nuttx/config.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/init.h>
 

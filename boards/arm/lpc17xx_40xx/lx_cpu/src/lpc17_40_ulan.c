@@ -38,8 +38,6 @@
 #include "lpc17_40_gpio.h"
 #include "arm_internal.h"
 
-#include <arch/board/board.h>
-
 #include "lx_cpu.h"
 
 /****************************************************************************

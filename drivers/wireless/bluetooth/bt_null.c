@@ -37,7 +37,6 @@
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
-#include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************
  * Private Function Prototypes

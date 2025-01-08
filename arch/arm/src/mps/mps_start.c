@@ -25,7 +25,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/init.h>
 
 #include <nuttx/cache.h>
 #include <nuttx/init.h>

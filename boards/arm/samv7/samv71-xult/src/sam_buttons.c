@@ -32,8 +32,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
-
-#include <nuttx/irq.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"

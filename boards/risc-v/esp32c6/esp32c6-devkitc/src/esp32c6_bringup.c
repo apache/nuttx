@@ -94,7 +94,6 @@
 #endif
 
 #ifdef CONFIG_SPI_SLAVE_DRIVER
-#  include "espressif/esp_spi.h"
 #  include "esp_board_spislavedev.h"
 #endif
 

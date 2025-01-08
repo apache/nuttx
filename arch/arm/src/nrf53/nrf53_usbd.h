@@ -28,9 +28,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdbool.h>
 
-#include <nuttx/config.h>
+#include <stdbool.h>
 #include <nuttx/usb/usbdev.h>
 #include <stdint.h>
 
