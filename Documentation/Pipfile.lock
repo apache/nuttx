@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b44a6fa5a78afb4aaa44d290055bf273d4765907a822f399858891c57a2cdc7d"
+            "sha256": "f9a382fece70835aa41f7f2b18a596a45fed3005390901569903a1648854ffe6"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -217,11 +217,12 @@
         },
         "jinja2": {
             "hashes": [
-                "sha256:4a3aee7acbbe7303aede8e9648d13b8bf88a429282aa6122a993f0ac800cb369",
-                "sha256:bc5dd2abb727a5319567b7a813e6a2e7318c39f4f487cfe6c89c6f9c7d25197d"
+                "sha256:8fefff8dc3034e27bb80d67c671eb8a9bc424c0ef4c0826edbff304cceff43bb",
+                "sha256:aba0f4dc9ed8013c424088f68a5c226f7d6097ed89b246d7749c2ec4175c6adb"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.7'",
-            "version": "==3.1.4"
+            "version": "==3.1.5"
         },
         "markdown-it-py": {
             "hashes": [
@@ -295,7 +296,6 @@
                 "sha256:f8b3d067f2e40fe93e1ccdd6b2e1d16c43140e76f02fb1319a05cf2b79d99430",
                 "sha256:fcabf5ff6eea076f859677f5f0b6b5c1a51e70a376b0579e0eadef8db48c6b50"
             ],
-            "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==3.0.2"
         },
