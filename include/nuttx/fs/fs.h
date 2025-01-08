@@ -50,7 +50,6 @@
 #include <nuttx/queue.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock_type.h>
-#include <nuttx/atomic.h>
 
 /****************************************************************************
  * Pre-processor Definitions
