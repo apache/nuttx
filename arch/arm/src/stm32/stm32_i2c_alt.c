@@ -118,6 +118,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if STM32_PCLK1_FREQUENCY < 4000000
+#  warning STM32_I2C: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
+#endif
+
+#if STM32_PCLK1_FREQUENCY < 2000000
+#  error STM32_I2C: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
+#endif
+
 /* Configuration ************************************************************/
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
@@ -2365,15 +2373,6 @@ out:
 struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;
-
-#if STM32_PCLK1_FREQUENCY < 4000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
-#endif
-
-#if STM32_PCLK1_FREQUENCY < 2000000
-#   warning STM32_I2C_INIT: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
-  return NULL;
-#endif
 
   /* Get I2C private structure */
 

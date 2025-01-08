@@ -249,6 +249,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#warning TODO: check I2C clock source. It must be HSI!
 #undef INVALID_CLOCK_SOURCE
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
@@ -263,8 +264,6 @@
 #else
 #  error STM32_I2C: Device not Supported.
 #endif
-
-#warning TODO: check I2C clock source. It must be HSI!
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
  * Instead, CPU-intensive polling will be used.

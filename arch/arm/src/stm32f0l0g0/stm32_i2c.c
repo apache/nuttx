@@ -252,7 +252,7 @@
 
 #undef INVALID_CLOCK_SOURCE
 
-#warning TODO: check I2C clock source. It must be HSI!
+#warning TODO: check I2C clock source and clock frequency. It must be HSI!
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
  * Instead, CPU-intensive polling will be used.
@@ -2701,13 +2701,6 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 {
   struct stm32_i2c_priv_s *priv = NULL;  /* private data of device with multiple instances */
   struct stm32_i2c_inst_s *inst = NULL;  /* device, single instance */
-
-#if 0                           /* REVISIT: this is not true for all STM32 M0 */
-#if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
-#  warning STM32_I2C_INIT: Peripheral clock is HSI and it must be 16mHz or the speed/timing calculations need to be redone.
-  return NULL;
-#endif
-#endif
 
   /* Get I2C private structure */
 
