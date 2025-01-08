@@ -62,7 +62,7 @@ config MM_KERNEL_HEAPSIZE
 
 config MM_DEFAULT_ALIGNMENT
 	int "Memory default alignment in bytes"
-	default 0
+	default 8
 	range 0 64
 	---help---
 		The memory default alignment in bytes, if this value is 0, the real
