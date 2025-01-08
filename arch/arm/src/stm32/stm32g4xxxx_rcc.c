@@ -702,7 +702,7 @@ static inline bool stm32_rcc_enablepll(void)
   /* Preserve reserved bits when altering the PLLCFGR register */
 
   regval = getreg32(STM32_RCC_PLLCFGR);
-  regval &= ~(RCC_PLLCFGR_RESERVED_MASK);
+  regval &= RCC_PLLCFGR_RESERVED_MASK;
 
   /* Configure PLL source and enables */
 
