@@ -28,15 +28,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/wqueue.h>
 
 #include <time.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <nuttx/wqueue.h>
 
 #include <arch/board/board.h>
 

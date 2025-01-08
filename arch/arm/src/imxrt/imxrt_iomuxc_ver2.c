@@ -24,13 +24,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include <nuttx/config.h>
-
-#include <stdint.h>
 #include <assert.h>
 #include <errno.h>
 

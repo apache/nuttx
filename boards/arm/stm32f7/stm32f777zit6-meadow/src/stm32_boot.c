@@ -37,7 +37,6 @@
 #include "stm32f777zit6-meadow.h"
 
 #ifdef CONFIG_STM32F7_QUADSPI
-#  include <nuttx/mtd/mtd.h>
 #  include "stm32_qspi.h"
 
 #  ifdef CONFIG_FS_FAT

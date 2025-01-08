@@ -27,7 +27,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
 
 #include <sys/types.h>
 #include <stdio.h>

@@ -49,7 +49,6 @@
 #include "imxrt_lpi2c.h"
 #include "imxrt_edma.h"
 #include "imxrt_gpio.h"
-#include "imxrt_lpi2c.h"
 
 #include "hardware/imxrt_dmamux.h"
 #include "hardware/imxrt_pinmux.h"

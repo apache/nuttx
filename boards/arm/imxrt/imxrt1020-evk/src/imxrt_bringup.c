@@ -55,8 +55,6 @@
 #  include <imxrt_lpspi.h>
 #endif
 
-#include "imxrt1020-evk.h"
-
 #include <arch/board/board.h>  /* Must always be included last */
 
 /****************************************************************************

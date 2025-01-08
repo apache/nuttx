@@ -57,7 +57,6 @@
 #endif
 #include "stm32wl5_rcc.h"
 #include "arm_internal.h"
-#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

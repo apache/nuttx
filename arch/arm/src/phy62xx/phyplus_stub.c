@@ -42,7 +42,6 @@
 #include "phyplus_tim.h"
 #include "timer.h"
 #include "mcu_phy_bumbee.h"
-#include "phyplus_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

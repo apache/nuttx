@@ -41,7 +41,6 @@
 #include "imx9_clockconfig.h"
 #include "imx9_iomuxc.h"
 #include "hardware/imx9_clock.h"
-#include "hardware/imx9_pinmux.h"
 
 #include <arch/board/board.h> /* Include last:  has dependencies */
 

@@ -37,7 +37,6 @@
 #include "sched/sched.h"
 #include "chip.h"
 #include "signal/signal.h"
-#include "sched/sched.h"
 #include "xtensa.h"
 
 /****************************************************************************

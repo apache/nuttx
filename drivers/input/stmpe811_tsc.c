@@ -51,7 +51,6 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/stmpe811.h>
 

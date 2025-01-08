@@ -47,7 +47,6 @@
 
 #include "arm_internal.h"
 #include "s32k1xx_edma.h"
-#include "s32k1xx_pin.h"
 #include "hardware/s32k1xx_dmamux.h"
 #include "hardware/s32k1xx_pinmux.h"
 #include "s32k1xx_flexio_i2c.h"

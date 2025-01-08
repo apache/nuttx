@@ -31,7 +31,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_internal.h"
 
 #include "chip.h"
 

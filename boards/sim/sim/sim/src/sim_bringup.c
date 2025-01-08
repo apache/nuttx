@@ -50,7 +50,6 @@
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/v4l2_cap.h>
-#include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
 #include <nuttx/wireless/bluetooth/bt_null.h>
 #include <nuttx/wireless/bluetooth/bt_uart_shim.h>

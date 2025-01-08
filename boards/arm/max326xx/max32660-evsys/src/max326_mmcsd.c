@@ -31,7 +31,6 @@
 #include <time.h>
 #include <debug.h>
 
-#include <nuttx/config.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/spi/spi.h>
 

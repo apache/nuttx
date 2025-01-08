@@ -41,7 +41,6 @@
 #include "chip.h"
 #include "mpu.h"
 #include "arm_internal.h"
-#include "arm_internal.h"
 #include "stm32wl5_mpuinit.h"
 #include "stm32wl5_ipcc.h"
 

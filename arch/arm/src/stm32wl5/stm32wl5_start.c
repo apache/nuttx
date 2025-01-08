@@ -34,7 +34,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_internal.h"
 #include "nvic.h"
 
 #include "stm32wl5.h"

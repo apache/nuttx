@@ -29,14 +29,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <syslog.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include <syslog.h>
 #include <debug.h>
-#include <stdio.h>
-
 #include <errno.h>
 #if defined(CONFIG_ESP32_EFUSE)
 #include <nuttx/efuse/efuse.h>
@@ -140,7 +136,6 @@
 #endif
 
 #ifdef CONFIG_LCD_DEV
-#  include <nuttx/board.h>
 #  include <nuttx/lcd/lcd_dev.h>
 #endif
 
@@ -157,7 +152,6 @@
 #endif
 
 #ifdef CONFIG_SPI_SLAVE_DRIVER
-#  include "esp32_spi.h"
 #  include "esp32_board_spislavedev.h"
 #endif
 
