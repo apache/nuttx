@@ -41,9 +41,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
-#ifdef CONFIG_BCH
-#include <nuttx/drivers/drivers.h>
-#endif
 
 #include <stm32.h>
 #include "nucleo-h743zi.h"

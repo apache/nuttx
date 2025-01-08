@@ -36,7 +36,6 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
-#include <nuttx/addrenv.h>
 
 #include "x86_64_internal.h"
 

@@ -26,12 +26,10 @@
 
 #include <stdlib.h>
 #include <debug.h>
-#include <debug.h>
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
 #include <sys/param.h>
-#include <nuttx/efuse/efuse.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/efuse/efuse.h>

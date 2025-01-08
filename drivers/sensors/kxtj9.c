@@ -29,7 +29,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>

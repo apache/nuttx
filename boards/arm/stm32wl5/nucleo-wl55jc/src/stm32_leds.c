@@ -29,7 +29,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
-#include <stdbool.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>

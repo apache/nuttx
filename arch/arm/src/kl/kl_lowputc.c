@@ -40,7 +40,6 @@
 #include "hardware/kl_uart.h"
 #include "hardware/kl_sim.h"
 #include "hardware/kl_port.h"
-#include "hardware/kl_uart.h"
 #include "hardware/kl_pinmux.h"
 
 /****************************************************************************

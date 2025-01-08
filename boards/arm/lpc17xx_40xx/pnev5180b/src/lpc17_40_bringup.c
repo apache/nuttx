@@ -50,10 +50,6 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
-#ifdef CONFIG_CDCECM_COMPOSITE
-#  include <nuttx/board.h>
-#endif
-
 #ifdef CONFIG_LPC17_40_ROMFS
 #  include "lpc17_40_romfs.h"
 #endif

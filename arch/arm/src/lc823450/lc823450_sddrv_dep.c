@@ -59,7 +59,6 @@
 #include "arm_internal.h"
 #include "lc823450_sddrv_type.h"
 #include "lc823450_sddrv_if.h"
-#include "lc823450_dma.h"
 #include "lc823450_gpio.h"
 #include "lc823450_syscontrol.h"
 #include "lc823450_timer.h"

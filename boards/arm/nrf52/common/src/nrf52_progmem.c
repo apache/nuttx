@@ -41,7 +41,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/drivers/drivers.h>
 
 #include "nrf52_progmem.h"
 

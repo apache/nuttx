@@ -26,14 +26,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <assert.h>
 #include <debug.h>
 #include <execinfo.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/board.h>
-#include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>
 #include <arch/board/board.h>
 

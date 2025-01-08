@@ -26,8 +26,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/config.h>
-
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>

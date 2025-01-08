@@ -31,7 +31,6 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
-#include <syscall.h>
 
 #include <arch/irq.h>
 #include <nuttx/addrenv.h>

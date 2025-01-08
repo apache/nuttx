@@ -33,7 +33,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/arch.h>
 #include "arm_internal.h"
 #include "s32k1xx_pin.h"
 

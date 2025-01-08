@@ -35,7 +35,6 @@
 #include "nvic.h"
 #include "clock/clock.h"
 #include "arm_internal.h"
-#include "arm_internal.h"
 
 #include "chip.h"
 #include "stm32wl5.h"

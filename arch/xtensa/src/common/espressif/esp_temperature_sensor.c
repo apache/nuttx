@@ -44,7 +44,6 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/can/can.h>
 #include <nuttx/signal.h>
-#include <nuttx/arch.h>
 #include <nuttx/kthread.h>
 #ifdef CONFIG_ESPRESSIF_TEMP_UORB
 #include <nuttx/sensors/sensor.h>

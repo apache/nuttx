@@ -39,7 +39,6 @@
 #include <nuttx/signal.h>
 #include <nuttx/page.h>
 #include <nuttx/clock.h>
-#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "paging/paging.h"
