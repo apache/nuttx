@@ -277,17 +277,17 @@ endif
 # These models can't cover all implementation of RISCV, but it's enough for most cases.
 
 ifeq ($(CONFIG_ARCH_RV32),y)
-  ifeq ($(ARCHCPUEXTFLAGS), imc)
+  ifeq ($(findstring imc,$(ARCHCPUEXTFLAGS)),imc)
     LLVM_CPUTYPE := sifive-e20
-  else ifeq ($(ARCHCPUEXTFLAGS), imac)
+  else ifeq ($(findstring imac,$(ARCHCPUEXTFLAGS)),imac)
     LLVM_CPUTYPE := sifive-e31
-  else ifeq ($(ARCHCPUEXTFLAGS), imafc)
+  else ifeq ($(findstring imafc,$(ARCHCPUEXTFLAGS)),imafc)
     LLVM_CPUTYPE := sifive-e76
   endif
 else
-  ifeq ($(ARCHCPUEXTFLAGS), imac)
+  ifeq ($(findstring imac,$(ARCHCPUEXTFLAGS)),imac)
     LLVM_CPUTYPE := sifive-s51
-  else ifeq ($(ARCHCPUEXTFLAGS), imafdc)
+  else ifeq ($(findstring imafdc,$(ARCHCPUEXTFLAGS)),imafdc)
     LLVM_CPUTYPE := sifive-u54
   endif
 endif
