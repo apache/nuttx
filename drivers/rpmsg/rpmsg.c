@@ -196,25 +196,20 @@ int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
 FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
-  FAR const char *cpuname = NULL;
 
   if (rpmsg == NULL)
     {
       return NULL;
     }
 
-  if (rpmsg->ops->get_local_cpuname)
-    {
-      cpuname = rpmsg->ops->get_local_cpuname(rpmsg);
-    }
-
-  return cpuname && cpuname[0] ? cpuname : CONFIG_RPMSG_LOCAL_CPUNAME;
+  return rpmsg->local_cpuname[0] ? rpmsg->local_cpuname :
+         CONFIG_RPMSG_LOCAL_CPUNAME;
 }
 
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
-  return rpmsg ? rpmsg->ops->get_cpuname(rpmsg) : NULL;
+  return rpmsg ? rpmsg->cpuname : NULL;
 }
 
 int rpmsg_get_signals(FAR struct rpmsg_device *rdev)
@@ -557,7 +552,7 @@ int rpmsg_ioctl(FAR const char *cpuname, int cmd, unsigned long arg)
       FAR struct rpmsg_s *rpmsg =
         metal_container_of(node, struct rpmsg_s, node);
 
-      if (!cpuname || !strcmp(rpmsg_get_cpuname(rpmsg->rdev), cpuname))
+      if (!cpuname || !strcmp(rpmsg->cpuname, cpuname))
         {
           ret = rpmsg_dev_ioctl_(rpmsg, cmd, arg);
           if (ret < 0)
