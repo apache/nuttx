@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#ifndef __ASSEMBLY__
+
 #ifdef CONFIG_BUILD_KERNEL
 #  include <signal.h>
 #endif
@@ -39,6 +41,8 @@
 #include <nuttx/wqueue.h>
 
 #include <arch/arch.h>
+
+#endif /* __ASSEMBLY__ */
 
 #ifdef CONFIG_ARCH_ADDRENV
 
@@ -241,6 +245,9 @@
      (CONFIG_ARCH_PGPOOL_VBASE + CONFIG_ARCH_PGPOOL_SIZE)
 
 #endif
+
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -250,8 +257,6 @@ struct tcb_s;                  /* Forward reference to TCB */
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 struct addrenv_s
 {
