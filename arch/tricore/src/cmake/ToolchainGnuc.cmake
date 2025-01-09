@@ -63,6 +63,7 @@ set(CMAKE_ASM_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 add_compile_options(-fno-common)
 add_compile_options(-Wall -Wshadow -Wundef)
 add_compile_options(-nostdlib)
+add_link_options(-nostdlib)
 
 if(CONFIG_DEBUG_CUSTOMOPT)
   add_compile_options(${CONFIG_DEBUG_OPTLEVEL})
@@ -138,6 +139,8 @@ endif()
 
 if(NOT CONFIG_LIBCXXTOOLCHAIN)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>)
+else()
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-D_STDLIB_H_>)
 endif()
 
 if(NOT CONFIG_CXX_EXCEPTION)
