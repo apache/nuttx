@@ -44,6 +44,7 @@
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 
 #include <arch/chip/irq.h>
+#include <arch/arch.h>
 
 #if defined(CONFIG_ARCH_TC3XX)
 #  include <arch/tc3xx/irq.h>
@@ -202,7 +203,7 @@ static inline_function bool up_interrupt_context(void)
 
 static inline_function uintptr_t up_getusrsp(void *regs)
 {
-  uintptr_t *csaregs = regs;
+  uintptr_t *csaregs = (uintptr_t *)regs;
 
   if (csaregs[REG_LPCXI] & PCXI_UL)
     {
