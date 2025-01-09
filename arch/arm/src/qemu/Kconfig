@@ -15,6 +15,7 @@ config ARCH_CHIP_QEMU_CORTEXA7
 	bool "Qemu virtual Processor (cortex-a7)"
 	select ARCH_CORTEXA7
 	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_ELF_EXECUTABLE
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_MULTICPU
 	select ARCH_NEED_ADDRENV_MAPPING
