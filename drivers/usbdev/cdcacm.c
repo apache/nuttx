@@ -2618,6 +2618,13 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
 #endif
 
   flags = enter_critical_section();
+
+  if (dev->disconnected)
+    {
+      leave_critical_section(flags);
+      return true;
+    }
+
   priv->ispolling = true;
   EP_POLL(ep);
   priv->ispolling = false;
@@ -3011,6 +3018,10 @@ void cdcacm_uninitialize(FAR struct usbdevclass_driver_s *classdev)
   FAR struct cdcacm_dev_s    *priv = drvr->dev;
   char devname[CDCACM_DEVNAME_SIZE];
   int ret;
+
+  /* Disconnect in case we are connected */
+
+  cdcacm_disconnect(classdev, priv->usbdev);
 
 #ifndef CONFIG_CDCACM_COMPOSITE
   usbdev_unregister(&drvr->drvr);
