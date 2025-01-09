@@ -370,6 +370,16 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS as5048a.c)
     endif()
 
+    if(CONFIG_SENSORS_BMI088)
+      list(APPEND SRCS bmi088_base.c)
+      if(CONFIG_SENSORS_BMI088_UORB)
+        list(APPEND SRCS bmi088_uorb.c)
+      else()
+        list(APPEND SRCS bmi088.c)
+      endif()
+
+    endif()
+
   endif() # CONFIG_SPI
 
   # These drivers depend on 1WIRE support
