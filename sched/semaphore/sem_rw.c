@@ -169,6 +169,7 @@ void up_read(FAR rw_semaphore_t *rwsem)
       if (--rwsem->writer <= 0)
         {
           rwsem->holder = RWSEM_NO_HOLDER;
+          up_wait(rwsem);
         }
 
       goto out;
@@ -176,9 +177,7 @@ void up_read(FAR rw_semaphore_t *rwsem)
 
   DEBUGASSERT(rwsem->reader > 0);
 
-  rwsem->reader--;
-
-  if (rwsem->waiter > 0)
+  if (--rwsem->reader <= 0)
     {
       up_wait(rwsem);
     }
@@ -281,9 +280,8 @@ void up_write(FAR rw_semaphore_t *rwsem)
   if (--rwsem->writer <= 0)
     {
       rwsem->holder = RWSEM_NO_HOLDER;
+      up_wait(rwsem);
     }
-
-  up_wait(rwsem);
 
   nxmutex_unlock(&rwsem->protected);
 }
