@@ -69,4 +69,5 @@ Guides
   ram_rom_disks.rst
   reading_can_msgs.rst
   remove_device_drivers_nsh.rst
+  rust.rst
 
