@@ -267,17 +267,17 @@ void lib_mtdoutstream_close(FAR struct lib_mtdoutstream_s *stream)
 {
   if (stream != NULL)
     {
-      if (stream->inode != NULL)
-        {
-          close_mtddriver(stream->inode);
-          stream->inode = NULL;
-        }
-
       if (stream->cache != NULL)
         {
           mtdoutstream_flush(&stream->common);
           lib_free(stream->cache);
           stream->cache = NULL;
+        }
+
+      if (stream->inode != NULL)
+        {
+          close_mtddriver(stream->inode);
+          stream->inode = NULL;
         }
     }
 }
