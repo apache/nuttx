@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/modlib/gnu-elf.ld
+ * libs/libc/modlib/gnu-elf.ld.in
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,9 +18,23 @@
  *
  ****************************************************************************/
 
+
+#include <nuttx/config.h>
+
+#if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_BINFMT_ELF_EXECUTABLE)
+#  define __ASSEMBLY__
+#  include <nuttx/addrenv.h>
+
+#  define TEXT CONFIG_ARCH_TEXT_VBASE
+#  define DATA CONFIG_ARCH_DATA_VBASE + ARCH_DATA_RESERVE_SIZE
+#else
+#  define TEXT 0x0
+#  define DATA
+#endif
+
 SECTIONS
 {
-  .text 0x00000000 :
+  .text TEXT :
     {
       _stext = . ;
       *(.text)
@@ -58,7 +72,7 @@ SECTIONS
       _erodata = . ;
     }
 
-  .data :
+  .data DATA :
     {
       _sdata = . ;
       *(.data)
