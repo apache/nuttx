@@ -183,6 +183,10 @@ context:: bin kbin
 ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo context BIN=$(BIN)
 endif
+ifeq ($(CONFIG_LIBC_MODLIB),y)
+	$(Q) $(MAKE) -C modlib context
+endif
+
 
 # Dependencies
 
@@ -210,6 +214,7 @@ depend:: .depend
 
 clean::
 	$(Q) $(MAKE) -C zoneinfo clean BIN=$(BIN)
+	$(Q) $(MAKE) -C modlib clean
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(KBIN))
 	$(call CLEAN)
@@ -218,6 +223,7 @@ clean::
 
 distclean:: clean
 	$(Q) $(MAKE) -C zoneinfo distclean BIN=$(BIN)
+	$(Q) $(MAKE) -C modlib distclean
 	$(call DELFILE, exec_symtab.c)
 	$(call DELFILE, .depend)
 	$(call DELDIR, bin)
