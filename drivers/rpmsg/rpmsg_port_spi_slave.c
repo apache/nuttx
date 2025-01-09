@@ -34,6 +34,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/irq.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 
 #include "rpmsg_port.h"
 
@@ -106,6 +107,7 @@ struct rpmsg_port_spi_s
 
   rpmsg_port_rx_cb_t             rxcb;
   volatile uint8_t               state;
+  spinlock_t                     lock;
 
   /* Used for flow control */
 
@@ -338,6 +340,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 {
   FAR struct rpmsg_port_spi_s *rpspi =
     container_of(dev, struct rpmsg_port_spi_s, spislv);
+  irqstate_t flags;
 
   IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 0);
   SPIS_CTRLR_QPOLL(rpspi->spictrlr);
@@ -367,11 +370,12 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
    * connect req data packet has been received.
    */
 
+  flags = spin_lock_irqsave(&rpspi->lock);
   if (rpspi->state == RPMSG_PORT_SPI_STATE_UNCONNECTED)
     {
       if (rpspi->rxhdr->cmd != RPMSG_PORT_SPI_CMD_CONNECT)
         {
-          goto out;
+          goto unlock;
         }
 
       rpspi->txavail = rpspi->rxhdr->avail;
@@ -394,18 +398,16 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
   else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
     {
       /* Drop connect packets received during connecting status change
-       * except it is received during the shutting down process, which
-       * means a reconnect request is received.
+       * and change to RPMSG_PORT_SPI_STATE_CONNECTING to indicate there
+       * is a reconnection happened during the shutting down process.
        */
 
       if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
         {
           rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTING;
         }
-      else
-        {
-          goto out;
-        }
+
+      goto unlock;
     }
 
   if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SUSPEND)
@@ -430,6 +432,8 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       DEBUGASSERT(rpspi->rxhdr != NULL);
     }
 
+unlock:
+  spin_unlock_irqrestore(&rpspi->lock, flags);
 out:
   if (atomic_xchg(&rpspi->transferring, 0) > 1 ||
       (rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0))
@@ -469,33 +473,40 @@ static void
 rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
                               FAR struct rpmsg_port_header_s *rxhdr)
 {
-  rpmsginfo("received cmd: %u avail: %u", rxhdr->cmd, rxhdr->avail);
+  irqstate_t flags;
 
+  rpmsginfo("received cmd: %u avail: %u", rxhdr->cmd, rxhdr->avail);
   switch (rxhdr->cmd)
     {
       case RPMSG_PORT_SPI_CMD_CONNECT:
+        flags = spin_lock_irqsave(&rpspi->lock);
         if (rpspi->state == RPMSG_PORT_SPI_STATE_RECONNECTING)
           {
+            spin_unlock_irqrestore(&rpspi->lock, flags);
             rpmsg_port_unregister(&rpspi->port);
 
             /* Do not trigger the reconnect if a shut down cmd has been
              * received during the unregister process
              */
 
+            flags = spin_lock_irqsave(&rpspi->lock);
             if (rpspi->state == RPMSG_PORT_SPI_STATE_RECONNECTING)
               {
                 rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+                spin_unlock_irqrestore(&rpspi->lock, flags);
                 rpmsg_port_spi_connect(rpspi);
               }
             else
               {
                 rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+                spin_unlock_irqrestore(&rpspi->lock, flags);
                 IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 0);
               }
           }
         else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTING)
           {
             rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTED;
+            spin_unlock_irqrestore(&rpspi->lock, flags);
             rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
           }
 
@@ -508,8 +519,20 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
 
       case RPMSG_PORT_SPI_CMD_SHUTDOWN:
         rpmsg_port_unregister(&rpspi->port);
-        rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
-        IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 0);
+        flags = spin_lock_irqsave(&rpspi->lock);
+        if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
+          {
+            rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+            spin_unlock_irqrestore(&rpspi->lock, flags);
+            IOEXP_WRITEPIN(rpspi->ioe, rpspi->sreq, 0);
+          }
+        else if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTING)
+          {
+            rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+            spin_unlock_irqrestore(&rpspi->lock, flags);
+            rpmsg_port_spi_connect(rpspi);
+          }
+
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
         break;
 
@@ -688,6 +711,8 @@ rpmsg_port_spi_slave_initialize(FAR const struct rpmsg_port_config_s *cfg,
   rpspi->rxthres = rpmsg_port_queue_navail(&rpspi->port.rxq) *
                    CONFIG_RPMSG_PORT_SPI_RX_THRESHOLD / 100;
   rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
+  spin_lock_init(&rpspi->lock);
+
   ret = rpmsg_port_spi_init_hardware(rpspi, spicfg, spictrlr, ioe);
   if (ret < 0)
     {
