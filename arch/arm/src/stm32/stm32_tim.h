@@ -40,22 +40,25 @@
 
 /* Helpers ******************************************************************/
 
-#define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
-#define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
-#define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
-#define STM32_TIM_GETCOUNTER(d)         ((d)->ops->getcounter(d))
-#define STM32_TIM_SETCOUNTER(d,c)       ((d)->ops->setcounter(d,c))
-#define STM32_TIM_GETWIDTH(d)           ((d)->ops->getwidth(d))
-#define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
-#define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
-#define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
-#define STM32_TIM_SETISR(d,hnd,arg,s)   ((d)->ops->setisr(d,hnd,arg,s))
-#define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
-#define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
-#define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
-#define STM32_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
-#define STM32_TIM_ENABLE(d)             ((d)->ops->enable(d))
-#define STM32_TIM_DISABLE(d)            ((d)->ops->disable(d))
+#define STM32_TIM_SETMODE(d,mode)          ((d)->ops->setmode(d,mode))
+#define STM32_TIM_SETCLOCK(d,freq)         ((d)->ops->setclock(d,freq))
+#define STM32_TIM_GETPRESCALER(d)          ((d)->ops->getprescaler(d))
+#define STM32_TIM_SETPRESCALER(d,p)        ((d)->ops->setprescaler(d,p))
+#define STM32_TIM_GETPERIOD(d)             ((d)->ops->getperiod(d))
+#define STM32_TIM_SETPERIOD(d,p)           ((d)->ops->setperiod(d,p))
+#define STM32_TIM_GETCOUNTER(d)            ((d)->ops->getcounter(d))
+#define STM32_TIM_SETCOUNTER(d,c)          ((d)->ops->setcounter(d,c))
+#define STM32_TIM_GETWIDTH(d)              ((d)->ops->getwidth(d))
+#define STM32_TIM_SETCHANNEL(d,ch,mode)    ((d)->ops->setchannel(d,ch,mode))
+#define STM32_TIM_SETCOMPARE(d,ch,comp)    ((d)->ops->setcompare(d,ch,comp))
+#define STM32_TIM_GETCAPTURE(d,ch)         ((d)->ops->getcapture(d,ch))
+#define STM32_TIM_SETISR(d,hnd,arg,s)      ((d)->ops->setisr(d,hnd,arg,s))
+#define STM32_TIM_ENABLEINT(d,s)           ((d)->ops->enableint(d,s))
+#define STM32_TIM_DISABLEINT(d,s)          ((d)->ops->disableint(d,s))
+#define STM32_TIM_ACKINT(d,s)              ((d)->ops->ackint(d,s))
+#define STM32_TIM_CHECKINT(d,s)            ((d)->ops->checkint(d,s))
+#define STM32_TIM_ENABLE(d)                ((d)->ops->enable(d))
+#define STM32_TIM_DISABLE(d)               ((d)->ops->disable(d))
 
 /****************************************************************************
  * Public Types
@@ -159,6 +162,9 @@ struct stm32_tim_ops_s
   void (*disable)(struct stm32_tim_dev_s *dev);
   int  (*setmode)(struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
   int  (*setclock)(struct stm32_tim_dev_s *dev, uint32_t freq);
+  uint32_t (*getprescaler)(struct stm32_tim_dev_s *dev);
+  void (*setprescaler)(struct stm32_tim_dev_s *dev, uint32_t prescaler);
+  uint32_t (*getperiod)(struct stm32_tim_dev_s *dev);
   void (*setperiod)(struct stm32_tim_dev_s *dev, uint32_t period);
   uint32_t (*getcounter)(struct stm32_tim_dev_s *dev);
   void (*setcounter)(struct stm32_tim_dev_s *dev, uint32_t count);
