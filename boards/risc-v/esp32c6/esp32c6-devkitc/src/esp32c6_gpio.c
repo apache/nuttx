@@ -484,7 +484,7 @@ int esp_gpio_init(void)
       /* Configure the pins that will be used as output */
 
       esp_gpio_matrix_out(g_gpiooutputs[i], SIG_GPIO_OUT_IDX, 0, 0);
-      esp_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_1 | INPUT_FUNCTION_1);
+      esp_configgpio(g_gpiooutputs[i], OUTPUT_FUNCTION_2 | INPUT_FUNCTION_2);
       esp_gpiowrite(g_gpiooutputs[i], 0);
 
       pincount++;
@@ -503,7 +503,7 @@ int esp_gpio_init(void)
 
       /* Configure the pins that will be used as interrupt input */
 
-      esp_configgpio(g_gpiointinputs[i], INPUT_FUNCTION_1 | PULLDOWN);
+      esp_configgpio(g_gpiointinputs[i], INPUT_FUNCTION_2 | PULLDOWN);
 
       pincount++;
     }
