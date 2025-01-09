@@ -923,6 +923,7 @@ static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv)
 {
   uint32_t stat   = 0;
   uint32_t regval = 0;
+  uint32_t setval = 0;
   int      i      = 0;
   int      txidx  = 0;
 
@@ -960,9 +961,10 @@ static void ctucanfd_chardev_interrupt(FAR struct ctucanfd_driver_s *priv)
 
                   /* Mark buffer as empty */
 
-                  regval = (CTUCANFD_TXCMD_TXCE +
+                  setval = (CTUCANFD_TXCMD_TXCE +
                             (1 << (CTUCANFD_TXCMD_TXB_SHIFT + txidx)));
-                  ctucanfd_putreg(&priv->devs[i], CTUCANFD_TXINFOCMD, regval);
+                  ctucanfd_putreg(&priv->devs[i],
+                                  CTUCANFD_TXINFOCMD, setval);
                 }
             }
         }
@@ -1482,6 +1484,7 @@ static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
 {
   uint32_t stat   = 0;
   uint32_t regval = 0;
+  uint32_t setval = 0;
   int      i      = 0;
   int      txidx  = 0;
 
@@ -1519,9 +1522,10 @@ static void ctucanfd_sock_interrupt(FAR struct ctucanfd_driver_s *priv)
 
                   /* Mark buffer as empty */
 
-                  regval = (CTUCANFD_TXCMD_TXCE +
+                  setval = (CTUCANFD_TXCMD_TXCE +
                             (1 << (CTUCANFD_TXCMD_TXB_SHIFT + txidx)));
-                  ctucanfd_putreg(&priv->devs[i], CTUCANFD_TXINFOCMD, regval);
+                  ctucanfd_putreg(&priv->devs[i],
+                                  CTUCANFD_TXINFOCMD, setval);
                 }
             }
         }
