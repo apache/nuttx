@@ -89,6 +89,10 @@ ifeq (${CONFIG_MPFS_HAVE_COREPWM},y)
 CHIP_CSRCS += mpfs_corepwm.c
 endif
 
+ifeq (${CONFIG_MPFS_MSS_CAN}, y)
+CHIP_CSRCS += mpfs_can.c
+endif
+
 ifeq (${CONFIG_MPFS_DDR_INIT},y)
 CHIP_CSRCS += mpfs_ddr.c
 endif
