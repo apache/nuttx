@@ -546,7 +546,9 @@ ifeq ($(CONFIG_PIC),y)
   # Generate an executable elf, need to ignore undefined symbols
   LDELFFLAGS += --unresolved-symbols=ignore-in-object-files --emit-relocs
 else
-  LDELFFLAGS += -r
+  ifneq ($(CONFIG_BINFMT_ELF_EXECUTABLE),y)
+    LDELFFLAGS += -r
+  endif
 endif
 
 LDELFFLAGS +=  -e main -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)
