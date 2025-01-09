@@ -427,6 +427,7 @@ function refresh_default {
     if [ -d $nuttx/.git ] || [ -d $APPSDIR/.git ]; then
       if [[ -n $(git -C $nuttx status -s) ]]; then
         git -C $nuttx status
+        git --no-pager -C $nuttx diff
         fail=1
       fi
       if [[ -n $(git -C $APPSDIR status -s) ]]; then
