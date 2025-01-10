@@ -617,6 +617,17 @@ static const char *g_white_content_list[] =
   "unzGetCurrentFileInfo64",
   "unzGoToNextFile",
   "unzGoToFirstFile",
+
+  /* Ref:
+   * apps/netutils/telnetc/telnetc.c
+   */
+
+  "deflateInit",
+  "deflateEnd",
+  "inflateInit",
+  "inflateEnd",
+  "zError",
+
   NULL
 };
 
