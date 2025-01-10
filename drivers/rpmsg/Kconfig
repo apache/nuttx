@@ -85,6 +85,7 @@ endif # RPMSG_PORT_SPI
 config RPMSG_PORT_UART
 	bool "Rpmsg Uart Port Driver Support"
 	default n
+	depends on SCHED_EVENTS
 	select RPMSG_PORT
 	---help---
 		Rpmsg Uart Port driver used for cross chip communication.
