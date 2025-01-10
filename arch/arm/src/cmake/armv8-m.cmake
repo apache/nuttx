@@ -22,6 +22,31 @@
 
 set(PLATFORM_FLAGS)
 
+# LLVM Configuration
+if(CONFIG_ARCH_CORTEXM23)
+  set(LLVM_ARCHTYPE thumbv8m.base)
+  set(LLVM_CPUTYPE cortex-m23)
+elseif(CONFIG_ARCH_CORTEXM33)
+  set(LLVM_ARCHTYPE thumbv8m.main)
+  set(LLVM_CPUTYPE cortex-m33)
+elseif(CONFIG_ARCH_CORTEXM35P)
+  set(LLVM_ARCHTYPE thumbv8m.main)
+  set(LLVM_CPUTYPE cortex-m35p)
+elseif(CONFIG_ARCH_CORTEXM55)
+  set(LLVM_ARCHTYPE thumbv8.1m.main)
+  set(LLVM_CPUTYPE cortex-m55)
+elseif(CONFIG_ARCH_CORTEXM85)
+  set(LLVM_ARCHTYPE thumbv8.1m.main)
+  set(LLVM_CPUTYPE cortex-m85)
+endif()
+
+# Set ABI type based on FPU configuration
+if(CONFIG_ARCH_FPU)
+  set(LLVM_ABITYPE eabihf)
+else()
+  set(LLVM_ABITYPE eabi)
+endif()
+
 if(CONFIG_ARM_DSP)
   set(EXTCPUFLAGS +dsp)
 endif()
