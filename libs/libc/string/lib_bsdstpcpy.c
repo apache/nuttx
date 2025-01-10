@@ -62,6 +62,7 @@
 
 #ifndef CONFIG_LIBC_ARCH_STPCPY
 #undef stpcpy
+no_builtin("stpcpy")
 nosanitize_address
 FAR char *stpcpy(FAR char *dest, FAR const char *src)
 {

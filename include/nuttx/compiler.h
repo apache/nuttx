@@ -135,6 +135,13 @@
                                  extern __inline__ no_builtin(#fn) \
                                  __attribute__((__always_inline__, \
                                                 __gnu_inline__, __artificial__))
+#  elif defined(__OPTIMIZE__) && __OPTIMIZE__ > 0 && defined(__has_builtin)
+#    define builtin_original(fn)  __typeof__(fn)  __orig_##fn __asm__(#fn)
+#    define builtin_function(fn)  builtin_original(fn); \
+                                  extern __inline__ no_builtin(#fn) \
+                                  __attribute__((__always_inline__, \
+                                                 __gnu_inline__, __artificial__))
+#    define CONFIG_HAVE_BUILTIN 1 /* Use built-in functions */
 #  endif
 
 /* Pre-processor */

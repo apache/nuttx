@@ -68,6 +68,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRCHR) && defined(LIBC_BUILD_STRCHR)
 #undef strchr
+no_builtin("strchr")
 nosanitize_address
 FAR char *strchr(FAR const char *s, int c)
 {

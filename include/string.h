@@ -219,6 +219,232 @@ fortify_function(explicit_bzero) void explicit_bzero(FAR void *s,
 }
 #endif
 
+#ifdef CONFIG_HAVE_BUILTIN
+#  if __has_builtin(__builtin_memcpy)
+builtin_function(memcpy) FAR void *memcpy(FAR void *dest,
+                                          FAR const void *src, size_t n)
+{
+  if (__builtin_constant_p(n))
+    {
+      return __builtin_memcpy(dest, src, n);
+    }
+  else
+    {
+      return __orig_memcpy(dest, src, n);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_memset)
+builtin_function(memset) FAR void *memset(FAR void *s, int c, size_t n)
+{
+  if (__builtin_constant_p(n))
+    {
+      return __builtin_memset(s, c, n);
+    }
+  else
+    {
+      return __orig_memset(s, c, n);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_memcmp)
+builtin_function(memcmp) int memcmp(FAR const void *s1,
+                                    FAR const void *s2, size_t n)
+{
+  if (__builtin_constant_p(s1) && __builtin_constant_p(s2))
+    {
+      return __builtin_memcmp(s1, s2, n);
+    }
+  else
+    {
+      return __orig_memcmp(s1, s2, n);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_memchr)
+builtin_function(memchr) FAR void *memchr(FAR const void *s,
+                                          int c, size_t n)
+{
+  if (__builtin_constant_p(s))
+    {
+      return __builtin_memchr(s, c, n);
+    }
+  else
+    {
+      return __orig_memchr(s, c, n);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strcat)
+builtin_function(strcat) FAR char *strcat(FAR char *dest,
+                                          FAR const char *src)
+{
+  if (__builtin_constant_p(src))
+    {
+      return __builtin_strcat(dest, src);
+    }
+  else
+    {
+      return __orig_strcat(dest, src);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strchr)
+builtin_function(strchr) FAR char *strchr(FAR const char *s, int c)
+{
+  if (__builtin_constant_p(s))
+    {
+      return __builtin_strchr(s, c);
+    }
+  else
+    {
+      return __orig_strchr(s, c);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strcmp)
+builtin_function(strcmp) int strcmp(FAR const char *s1,
+                                    FAR const char *s2)
+{
+  if (__builtin_constant_p(s1) && __builtin_constant_p(s2))
+    {
+      return __builtin_strcmp(s1, s2);
+    }
+  else
+    {
+      return __orig_strcmp(s1, s2);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strcpy)
+builtin_function(strcpy) FAR char *strcpy(FAR char *dest,
+                                          FAR const char *src)
+{
+  if (__builtin_constant_p(src))
+    {
+      return __builtin_strcpy(dest, src);
+    }
+  else
+    {
+      return __orig_strcpy(dest, src);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strcspn)
+builtin_function(strcspn) size_t strcspn(FAR const char *s,
+                                         FAR const char *reject)
+{
+  if (__builtin_constant_p(s) && __builtin_constant_p(reject))
+    {
+      return __builtin_strcspn(s, reject);
+    }
+  else
+    {
+      return __orig_strcspn(s, reject);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strlen)
+builtin_function(strlen) size_t strlen(FAR const char *s)
+{
+  if (__builtin_constant_p(s))
+    {
+      return __builtin_strlen(s);
+    }
+  else
+    {
+      return __orig_strlen(s);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strncat)
+builtin_function(strncat) FAR char *strncat(FAR char *dest,
+                                            FAR const char *src,
+                                            size_t n)
+{
+  if (__builtin_constant_p(dest))
+    {
+      return __builtin_strncat(dest, src, n);
+    }
+  else
+    {
+      return __orig_strncat(dest, src, n);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strncmp)
+builtin_function(strncmp) int strncmp(FAR const char *s1,
+                                      FAR const char *s2, size_t n)
+{
+  if (__builtin_constant_p(s1) && __builtin_constant_p(s2))
+    {
+      return __builtin_strncmp(s1, s2, n);
+    }
+  else
+    {
+      return __orig_strncmp(s1, s2, n);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strncpy)
+builtin_function(strncpy) FAR char *strncpy(FAR char *dest,
+                                            FAR const char *src,
+                                            size_t n)
+{
+  if (__builtin_constant_p(src))
+    {
+      return __builtin_strncpy(dest, src, n);
+    }
+  else
+    {
+      return __orig_strncpy(dest, src, n);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strpbrk)
+builtin_function(strpbrk) FAR char *strpbrk(FAR const char *s1,
+                                            FAR const char *s2)
+{
+  if (__builtin_constant_p(s1))
+    {
+      return __builtin_strpbrk(s1, s2);
+    }
+  else
+    {
+      return __orig_strpbrk(s1, s2);
+    }
+}
+#  endif
+
+#  if __has_builtin(__builtin_strrchr)
+builtin_function(strrchr) FAR char *strrchr(FAR const char *s,
+                                            int c)
+{
+  if (__builtin_constant_p(s))
+    {
+      return __builtin_strrchr(s, c);
+    }
+  else
+    {
+      return __orig_strrchr(s, c);
+    }
+}
+#  endif
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

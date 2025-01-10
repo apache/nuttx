@@ -78,6 +78,7 @@
 
 #ifndef CONFIG_LIBC_ARCH_STPNCPY
 #undef stpncpy
+no_builtin("stpncpy")
 FAR char *stpncpy(FAR char *dest, FAR const char *src, size_t n)
 {
   FAR char *ret = NULL;
