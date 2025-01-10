@@ -103,7 +103,8 @@ extern void __asan_storeN(FAR void *addr, size_t size);
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_ARCH_MEMCHR
-
+#undef memchr
+no_builtin("memchr")
 FAR void *memchr(FAR const void *s, int c, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -117,6 +118,8 @@ FAR void *memchr(FAR const void *s, int c, size_t n)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_MEMCPY
+#undef memcpy
+no_builtin("memcpy")
 FAR void *memcpy(FAR void *dest, FAR const void *src, FAR size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -132,6 +135,8 @@ FAR void *memcpy(FAR void *dest, FAR const void *src, FAR size_t n)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_MEMCMP
+#undef memcmp
+no_builtin("memcmp")
 int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -160,6 +165,8 @@ FAR void *memmove(FAR void *dest, FAR const void *src, FAR size_t n)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_MEMSET
+#undef memset
+no_builtin("memset")
 FAR void *memset(FAR void *s, int c, FAR size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -172,6 +179,8 @@ FAR void *memset(FAR void *s, int c, FAR size_t n)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRCMP
+#undef strcmp
+no_builtin("strcmp")
 int strcmp(FAR const char *s1, FAR const char *s2)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -185,6 +194,8 @@ int strcmp(FAR const char *s1, FAR const char *s2)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRCPY
+#undef strcpy
+no_builtin("strcpy")
 FAR char *strcpy(FAR char *dest, FAR const char *src)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -200,6 +211,8 @@ FAR char *strcpy(FAR char *dest, FAR const char *src)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRLEN
+#undef strlen
+no_builtin("strlen")
 size_t strlen(FAR const char *s)
 {
   size_t ret = ARCH_LIBCFUN(strlen)(s);
@@ -213,6 +226,8 @@ size_t strlen(FAR const char *s)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRNCPY
+#undef strncpy
+no_builtin("strncpy")
 FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -228,6 +243,8 @@ FAR char *strncpy(FAR char *dest, FAR const char *src, size_t n)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRCHR
+#undef strchr
+no_builtin("strchr")
 FAR char *strchr(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -253,6 +270,8 @@ FAR char *strchrnul(FAR const char *s, int c)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRNCMP
+#undef strncmp
+no_builtin("strncmp")
 int strncmp(FAR const char *s1, FAR const char *s2, size_t n)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT
@@ -285,6 +304,8 @@ size_t strnlen(FAR const char *s, size_t maxlen)
 #endif
 
 #ifdef CONFIG_LIBC_ARCH_STRRCHR
+#undef strrchr
+no_builtin("strrchr")
 FAR char *strrchr(FAR const char *s, int c)
 {
 #  ifdef CONFIG_MM_KASAN_INSTRUMENT

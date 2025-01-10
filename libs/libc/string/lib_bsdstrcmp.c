@@ -51,6 +51,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRCMP) && defined(LIBC_BUILD_STRCMP)
 #undef strcmp
+no_builtin("strcmp")
 nosanitize_address
 int strcmp(FAR const char *cs, FAR const char *ct)
 {

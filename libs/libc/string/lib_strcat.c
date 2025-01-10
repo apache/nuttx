@@ -36,6 +36,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRCAT) && defined(LIBC_BUILD_STRCAT)
 #undef strcat
+no_builtin("strcat")
 FAR char *strcat(FAR char *dest, FAR const char *src)
 {
   FAR char *ret = dest;

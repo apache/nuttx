@@ -49,6 +49,7 @@
 
 #if !defined(CONFIG_LIBC_ARCH_STRLEN) && defined(LIBC_BUILD_STRLEN)
 #undef strlen
+no_builtin("strlen")
 nosanitize_address
 size_t strlen(FAR const char *s)
 {
