@@ -348,7 +348,6 @@ config LPC17_40_PWM0
 
 config LPC17_40_PWM1
 	bool "PWM1"
-	select ARCH_HAVE_PWM_MULTICHAN
 	default n
 
 config LPC17_40_PWM1_PIN

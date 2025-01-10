@@ -17,10 +17,6 @@ config ARCH_HAVE_PWM_DEADTIME
 	bool
 	default n
 
-config ARCH_HAVE_PWM_MULTICHAN
-	bool
-	default n
-
 config PWM
 	bool "PWM Driver Support"
 	default n
@@ -64,16 +60,6 @@ config PWM_DEADTIME
 		For detailed description about deadtime functionality please refer
 		to architecture manuals and datasheets.
 
-config PWM_MULTICHAN
-	bool "PWM Multiple Output Channel Support"
-	default n
-	depends on ARCH_HAVE_PWM_MULTICHAN
-	depends on !PWM_PULSECOUNT
-	---help---
-		Enables support for multiple output channels per timer.
-
-if PWM_MULTICHAN
-
 config PWM_NCHANNELS
 	int "Number of Output Channels Per Timer"
 	default 1
@@ -82,7 +68,6 @@ config PWM_NCHANNELS
 		Specifies the number of output channels per timer.  Each timer
 		may support fewer output channels than this value.
 
-endif # PWM_MULTICHAN
 endif # PWM
 
 config CAPTURE

@@ -609,7 +609,6 @@ config MPFS_HAVE_COREPWM
 config MPFS_COREPWM0
 	bool "CorePWM0 FPGA IP block configured"
 	default n
-	select PWM_MULTICHAN
 	depends on MPFS_HAVE_COREPWM
 
 config MPFS_COREPWM0_BASE
@@ -632,7 +631,6 @@ config MPFS_COREPWM0_NCHANNELS
 config MPFS_COREPWM1
 	bool "CorePWM1 FPGA IP block configured"
 	default n
-	select PWM_MULTICHAN
 	depends on MPFS_HAVE_COREPWM
 
 config MPFS_COREPWM1_BASE

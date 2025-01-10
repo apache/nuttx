@@ -104,6 +104,7 @@
 /* PWM */
 
 #define BUZZER_PWMTIMER    4
+#define BUZZER_PWMCHANNEL  2
 
 /* OneShot Timer */
 

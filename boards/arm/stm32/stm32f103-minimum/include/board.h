@@ -186,6 +186,7 @@
 /* Tone Driver **************************************************************/
 
 #define BOARD_TONE_PWM_TIM         2   /* PWM timer for tone generation  */
+#define BOARD_TONE_PWM_CHANNEL     2   /* PWM channel for tone generation */
 #define BOARD_TONE_ONESHOT_TIM     3   /* Oneshot timer for note timings */
 #define BOARD_TONE_ONESHOT_TIM_RES 10  /* Oneshot timer resolution (us)  */
 

@@ -44,6 +44,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef BOARD_TONE_PWM_CHANNEL
+#  define BOARD_TONE_PWM_CHANNEL 1
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -117,7 +121,7 @@ int board_tone_initialize(int devno)
       /* Register the Audio Tone driver at "/dev/tone0" */
 
       snprintf(devpath, sizeof(devpath), "/dev/tone%d", devno);
-      ret = tone_register(devpath, tone, oneshot);
+      ret = tone_register(devpath, tone, BOARD_TONE_PWM_CHANNEL, oneshot);
       if (ret < 0)
         {
           auderr("ERROR: tone_register failed: %d\n", ret);

@@ -293,7 +293,6 @@ config ESP32_LEDC
 	bool "LEDC (PWM)"
 	default n
 	select PWM
-	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Enable support to PWM on ESP32 using LEDC peripheral.
 

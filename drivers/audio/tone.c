@@ -83,9 +83,7 @@ struct tone_upperhalf_s
 {
   uint8_t crefs;                       /* The number of times the device has been
                                         * opened */
-#ifdef CONFIG_PWM_MULTICHAN
   uint8_t channel;                     /* Output channel that drives the tone. */
-#endif
   volatile bool started;               /* True: pulsed output is being generated */
   mutex_t lock;                        /* Supports mutual exclusion */
   struct pwm_info_s tone;              /* Pulsed output for Audio Tone */
@@ -290,12 +288,8 @@ static void start_note(FAR struct tone_upperhalf_s *upper, uint8_t note)
   FAR struct pwm_lowerhalf_s *tone = upper->devtone;
 
   upper->tone.frequency           = g_notes_freq[note - 1];
-#ifdef CONFIG_PWM_MULTICHAN
   upper->tone.channels[0].channel = upper->channel;
   upper->tone.channels[0].duty    = b16HALF;
-#else
-  upper->tone.duty                = b16HALF;
-#endif
 
   /* REVISIT: Should check the return value */
 
@@ -310,12 +304,8 @@ static void stop_note(FAR struct tone_upperhalf_s *upper)
 {
   FAR struct pwm_lowerhalf_s *tone = upper->devtone;
 
-#ifdef CONFIG_PWM_MULTICHAN
   upper->tone.channels[0].channel = upper->channel;
   upper->tone.channels[0].duty    = 0;
-#else
-  upper->tone.duty                = 0;
-#endif
 
   /* REVISIT: Should check the return value */
 
@@ -929,9 +919,7 @@ static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
  ****************************************************************************/
 
 int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
-#ifdef CONFIG_PWM_MULTICHAN
                   int channel,
-#endif
                   FAR struct oneshot_lowerhalf_s *oneshot)
 {
   FAR struct tone_upperhalf_s *upper;
@@ -954,9 +942,7 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
   nxmutex_init(&upper->lock);
   upper->devtone = tone;
   upper->oneshot = oneshot;
-#ifdef CONFIG_PWM_MULTICHAN
   upper->channel = (uint8_t)channel;
-#endif
 
   upper->oneshot->callback = oneshot_callback;
   upper->oneshot->arg = upper;

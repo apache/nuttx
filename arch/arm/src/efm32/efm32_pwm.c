@@ -360,13 +360,14 @@ static int pwm_timer(struct efm32_pwmtimer_s *priv,
 #ifdef CONFIG_PWM_PULSECOUNT
   pwminfo("TIMER%d channel: %d frequency: %d duty: %08x count: %d\n",
           priv->timid, priv->channel, info->frequency,
-          info->duty, info->count);
+          info->channels[0].duty, info->channels[0].count);
 #else
   pwminfo("TIMER%d channel: %d frequency: %d duty: %08x\n",
-          priv->timid, priv->channel, info->frequency, info->duty);
+          priv->timid, priv->channel, info->frequency,
+          info->channels[0].duty);
 #endif
-  DEBUGASSERT(info->frequency > 0 && info->duty >= 0 &&
-              info->duty < uitoub16(100));
+  DEBUGASSERT(info->frequency > 0 && info->channels[0].duty >= 0 &&
+              info->channels[0].duty < uitoub16(100));
 
   efm32_timer_reset(priv->base);
 
@@ -403,7 +404,8 @@ static int pwm_timer(struct efm32_pwmtimer_s *priv,
 
   pwm_putreg(priv, EFM32_TIMER_ROUTE_OFFSET, regval);
 
-  regval = (info->duty * pwm_getreg(priv, EFM32_TIMER_TOP_OFFSET)) >> 16;
+  regval = (info->channels[0].duty *
+            pwm_getreg(priv, EFM32_TIMER_TOP_OFFSET)) >> 16;
   pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCV_OFFSET, regval);
 
   /* pwm_putreg(priv, cc_offet + EFM32_TIMER_CC_CCVB_OFFSET, regval); */

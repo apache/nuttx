@@ -556,13 +556,14 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
     }
 
   /* Calculate the duty cycle register value.
-   * info->duty is a 16-bit value (0..65535). To avoid 64-bit math we
-   * can split the 32-bit period into high and low 16-bit parts
+   * info->channels[0].duty is a 16-bit value (0..65535).
+   * To avoid 64-bit math we can split the 32-bit period into high
+   * and low 16-bit parts
    */
 
   hi = period >> 16;
   lo = period & 0xffff;
-  duty16 = (uint32_t)info->duty;
+  duty16 = (uint32_t)info->channels[0].duty;
 
   duty = hi * duty16;
 
@@ -578,7 +579,7 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
   /* Save the frequency and duty cycle settings */
 
   priv->frequency = info->frequency;
-  priv->duty = info->duty;
+  priv->duty = info->channels[0].duty;
 
   /* Stop the timer */
 

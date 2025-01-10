@@ -51,7 +51,7 @@
     defined(CONFIG_ESP32_LEDC) && \
     defined(CONFIG_ESP32_LEDC_TIM0) && \
     (CONFIG_ESP32_LEDC_TIM0_CHANNELS >= 3) && \
-    defined(CONFIG_PWM_MULTICHAN) && (CONFIG_PWM_NCHANNELS >= 3)
+    (CONFIG_PWM_NCHANNELS >= 3)
 
 /****************************************************************************
  * Public Functions

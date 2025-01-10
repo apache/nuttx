@@ -225,8 +225,8 @@ static int xen1210_pwm_setup(void)
 
       /* Define frequency and duty cycle: 2MHz @ 50% */
 
-      info.frequency = 2000000; /* 2MHz */
-      info.duty = 32768;        /* This value means 50% */
+      info.frequency = 2000000;       /* 2MHz */
+      info.channels[0].duty = 32768;  /* This value means 50% */
 
       /* Initialize PWM */
 

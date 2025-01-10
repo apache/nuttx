@@ -68,9 +68,6 @@ struct nrf53_pwm_s
   uint32_t                ch1_pin;   /* Channel 2 pin */
   uint32_t                ch2_pin;   /* Channel 3 pin */
   uint32_t                ch3_pin;   /* Channel 4 pin */
-#ifndef CONFIG_PWM_MULTICHAN
-  uint8_t                 channel;   /* Assigned channel */
-#endif
 
   /* Sequence 0 */
 
@@ -148,9 +145,6 @@ struct nrf53_pwm_s g_nrf53_pwm0 =
 #ifdef CONFIG_NRF53_PWM0_CH3
   .ch3_pin = NRF53_PWM0_CH3_PIN,
 #endif
-#ifndef CONFIG_PWM_MULTICHAN
-  .channel = CONFIG_NRF53_PWM0_CHANNEL
-#endif
 };
 #endif
 
@@ -173,9 +167,6 @@ struct nrf53_pwm_s g_nrf53_pwm1 =
 #ifdef CONFIG_NRF53_PWM1_CH3
   .ch3_pin = NRF53_PWM1_CH3_PIN,
 #endif
-#ifndef CONFIG_PWM_MULTICHAN
-  .channel = CONFIG_NRF53_PWM1_CHANNEL
-#endif
 };
 #endif
 
@@ -197,9 +188,6 @@ struct nrf53_pwm_s g_nrf53_pwm2 =
 #endif
 #ifdef CONFIG_NRF53_PWM2_CH3
   .ch3_pin = NRF53_PWM2_CH3_PIN,
-#endif
-#ifndef CONFIG_PWM_MULTICHAN
-  .channel = CONFIG_NRF53_PWM2_CHANNEL
 #endif
 };
 #endif
@@ -543,9 +531,7 @@ static int nrf53_pwm_start(struct pwm_lowerhalf_s *dev,
 {
   struct nrf53_pwm_s *priv = (struct nrf53_pwm_s *)dev;
   int                 ret  = OK;
-#ifdef CONFIG_PWM_MULTICHAN
   int                 i    = 0;
-#endif
 
   DEBUGASSERT(dev);
 
@@ -563,29 +549,24 @@ static int nrf53_pwm_start(struct pwm_lowerhalf_s *dev,
         }
     }
 
-#ifdef CONFIG_PWM_MULTICHAN
-      for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
+  for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
+    {
+      /* Break the loop if all following channels are not configured */
+
+      if (info->channels[i].channel == -1)
         {
-          /* Break the loop if all following channels are not configured */
-
-          if (info->channels[i].channel == -1)
-            {
-              break;
-            }
-
-          /* Set output if channel configured */
-
-          if (info->channels[i].channel != 0)
-            {
-              ret = nrf53_pwm_duty(priv,
-                                   (info->channels[i].channel - 1),
-                                   info->channels[i].duty);
-            }
+          break;
         }
 
-#else
-      ret = nrf53_pwm_duty(priv, priv->channel, info->duty);
-#endif /* CONFIG_PWM_MULTICHAN */
+      /* Set output if channel configured */
+
+      if (info->channels[i].channel != 0)
+        {
+          ret = nrf53_pwm_duty(priv,
+                               (info->channels[i].channel - 1),
+                               info->channels[i].duty);
+        }
+    }
 
   /* Start sequence 0 */
 

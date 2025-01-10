@@ -963,7 +963,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info)
 {
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
-#ifdef CONFIG_PWM_MULTICHAN
   uint32_t regval;
 
   for (int i = 0; i < PWM_NCHANNELS; i++)
@@ -1036,18 +1035,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
       pwm_putreg(priv, SAMV7_PWM_ENA, CHID_SEL(1));
       pwm_putreg(priv, SAMV7_PWM_SCUC, regval);
     }
-#else
-  /* Set the frequency and enable PWM output just for first channel */
-
-  pwm_set_freq(dev, priv->channels[0].channel, info->frequency);
-#ifdef CONFIG_PWM_DEADTIME
-  pwm_set_deadtime(dev, priv->channels[0].channel,
-                    info->dead_time_a, info->dead_time_b);
-#endif
-  pwm_set_polarity(dev, priv->channels[0].channel,
-                    info->cpol, info->dcpol);
-  pwm_set_output(dev, priv->channels[0].channel, info->duty);
-#endif
 
   pwm_set_comparison(dev);
 
@@ -1078,7 +1065,6 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
   struct sam_pwm_s *priv = (struct sam_pwm_s *)dev;
   uint32_t regval;
 
-#ifdef CONFIG_PWM_MULTICHAN
   for (int i = 0; i < priv->channels_num; i++)
     {
       regval = CHID_SEL(1 << priv->channels[i].channel);
@@ -1091,10 +1077,6 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
   regval &= ~(CHID_SEL(1 << 0) | CHID_SEL(1 << 1) |
               CHID_SEL(1 << 2) | CHID_SEL(1 << 3));
   pwm_putreg(priv, SAMV7_PWM_SCM, regval);
-#else
-  regval = CHID_SEL(1 << priv->channels[0].channel);
-  pwm_putreg(priv, SAMV7_PWM_DIS, regval);
-#endif /* CONFIG_PWM_MULTICHAN */
 
   return OK;
 }

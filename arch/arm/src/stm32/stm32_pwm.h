@@ -356,7 +356,7 @@
 #endif
 #define PWM_TIM17_NCHANNELS PWM_TIM17_CHANNEL1
 
-#else  /* !CONFIG_PWM_MULTICHAN */
+#else  /* !CONFIG_STM32_PWM_MULTICHAN */
 
 /* For each timer that is enabled for PWM usage, we need the following
  * additional configuration settings:

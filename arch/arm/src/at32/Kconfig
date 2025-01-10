@@ -3651,7 +3651,6 @@ config AT32_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
 	depends on AT32_PWM
-	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
 		channels per timer.

@@ -568,8 +568,8 @@ static int tiva_pwm_start(struct pwm_lowerhalf_s *dev,
    *   Count should be add 1 for the first time
    */
 
-  chan->count = info->count;
-  chan->cur_count = info->count;
+  chan->count = info->channels[0].count;
+  chan->cur_count = info->channels[0].count;
 
   if (!chan->inited)
     {
@@ -580,7 +580,7 @@ static int tiva_pwm_start(struct pwm_lowerhalf_s *dev,
 
   /* Count 0 means to generate indefinite number of pulses */
 
-  if (info->count == 0)
+  if (info->channels[0].count == 0)
     {
       pwm_expired(chan->handle);
 
@@ -636,7 +636,7 @@ static int tiva_pwm_start(struct pwm_lowerhalf_s *dev,
 static inline int tiva_pwm_timer(struct tiva_pwm_chan_s *chan,
                                  const struct pwm_info_s *info)
 {
-  uint16_t duty = info->duty;
+  uint16_t duty = info->channels[0].duty;
   uint32_t frequency = info->frequency;
 
   pwminfo("> frequency = %d\n", frequency);

@@ -67,8 +67,7 @@ extern "C"
  *     drivers for the red, green, and blue LEDs, respectively.  These
  *     instances will be bound to the RGB LED driver and must persists as
  *     long as that driver persists.
- *   chanr, chang, chanb -Red/Green/Blue PWM channels (only if
- *     CONFIG_PWM_MULTICHAN is defined)
+ *   chanr, chang, chanb - Red/Green/Blue PWM channels.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -77,10 +76,8 @@ extern "C"
 
 int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
                                           FAR struct pwm_lowerhalf_s *ledg,
-                                          FAR struct pwm_lowerhalf_s *ledb
-#ifdef CONFIG_PWM_MULTICHAN
-                                        , int chanr, int chang, int chanb
-#endif
+                                          FAR struct pwm_lowerhalf_s *ledb,
+                                          int chanr, int chang, int chanb
                                           );
 
 #undef EXTERN

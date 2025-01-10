@@ -1657,7 +1657,6 @@ config ESPRESSIF_LEDC
 	bool "LEDC (PWM)"
 	default n
 	select PWM
-	select ARCH_HAVE_PWM_MULTICHAN
 
 config ESPRESSIF_SHA_ACCELERATOR
 	bool "SHA Accelerator"
@@ -3663,8 +3662,8 @@ if ESPRESSIF_LEDC_TIMER0
 
 config ESPRESSIF_LEDC_TIMER0_CHANNELS
 	int "Number of Timer 0 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER0_RESOLUTION
@@ -3687,8 +3686,8 @@ if ESPRESSIF_LEDC_TIMER1
 
 config ESPRESSIF_LEDC_TIMER1_CHANNELS
 	int "Number of Timer 1 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER1_RESOLUTION
@@ -3711,8 +3710,8 @@ if ESPRESSIF_LEDC_TIMER2
 
 config ESPRESSIF_LEDC_TIMER2_CHANNELS
 	int "Number of Timer 2 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER2_RESOLUTION
@@ -3735,8 +3734,8 @@ if ESPRESSIF_LEDC_TIMER3
 
 config ESPRESSIF_LEDC_TIMER3_CHANNELS
 	int "Number of Timer 3 channels"
-	default 2 if PWM_MULTICHAN && PWM_NCHANNELS > 1
-	default 1 if !PWM_MULTICHAN || PWM_NCHANNELS = 1
+	default 2 if PWM_NCHANNELS > 1
+	default 1 if PWM_NCHANNELS = 1
 	range 0 6
 
 config ESPRESSIF_LEDC_TIMER3_RESOLUTION
@@ -3767,7 +3766,7 @@ config ESPRESSIF_LEDC_CHANNEL3_PIN
 	int "Channel 3 pin"
 	default 5
 
-if PWM_MULTICHAN && PWM_NCHANNELS > 1
+if PWM_NCHANNELS > 1
 
 config ESPRESSIF_LEDC_CHANNEL4_PIN
 	int "Channel 4 pin"
@@ -3777,7 +3776,7 @@ config ESPRESSIF_LEDC_CHANNEL5_PIN
 	int "Channel 5 pin"
 	default 7
 
-endif # PWM_MULTICHAN && PWM_NCHANNELS > 1
+endif # PWM_NCHANNELS > 1
 
 endmenu # LEDC configuration
 

@@ -1022,7 +1022,7 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
    * to the CTDY (vs. the CTDYUPD) register.
    */
 
-  regval = b16toi(info->duty * cprd + b16HALF);
+  regval = b16toi(info->channels[0].duty * cprd + b16HALF);
   if (regval > cprd)
     {
       /* Rounding up could cause the duty value to exceed CPRD (?) */

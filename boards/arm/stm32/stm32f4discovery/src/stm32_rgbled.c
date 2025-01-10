@@ -114,7 +114,7 @@ int stm32_rgbled_setup(void)
       /* Define frequency and duty cycle */
 
       info.frequency = 100;
-      info.duty = 0;
+      info.channels[0].duty = 0;
 
       /* Initialize LED R */
 
@@ -151,7 +151,9 @@ int stm32_rgbled_setup(void)
 
       /* Register the RGB LED diver at "/dev/rgbled0" */
 
-      ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb);
+      ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb,
+                            1, CONFIG_STM32_TIM2_CHANNEL,
+                            CONFIG_STM32_TIM3_CHANNEL);
       if (ret < 0)
         {
           lederr("ERROR: rgbled_register failed: %d\n", ret);

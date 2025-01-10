@@ -358,7 +358,7 @@
                             PWM_TIM20_CHANNEL3 + PWM_TIM20_CHANNEL4 + \
                             PWM_TIM20_CHANNEL5 + PWM_TIM20_CHANNEL6)
 
-#else  /* !CONFIG_PWM_MULTICHAN */
+#else  /* !CONFIG_AT32_PWM_MULTICHAN */
 
 /* For each timer that is enabled for PWM usage, we need the following
  * additional configuration settings:

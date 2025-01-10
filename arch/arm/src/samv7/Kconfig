@@ -387,7 +387,6 @@ config SAMV7_HAVE_MEDIALB
 config SAMV7_PWM
 	bool
 	default n
-	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_PWM_OVERWRITE
 	select ARCH_HAVE_PWM_DEADTIME
 
@@ -742,7 +741,6 @@ if SAMV7_PWM0
 
 config SAMV7_PWM0_SYNC
 	bool "PWM0 synchronous channels"
-	depends on PWM_MULTICHAN
 	default n
 	---help---
 		This option makes the synchronization between channels possible.
@@ -1097,7 +1095,6 @@ if SAMV7_PWM1
 
 config SAMV7_PWM1_SYNC
 	bool "PWM1 synchronous channels"
-	depends on PWM_MULTICHAN
 	default n
 	---help---
 		This option makes the synchronization between channels possible.
