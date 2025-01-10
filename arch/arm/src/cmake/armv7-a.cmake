@@ -36,12 +36,15 @@ if(NOT CONFIG_ARM_DPFPU32)
   set(ARCHFPUD16 -d16)
 endif()
 
-# Cortex-A5  | -mfpu=vfpv4-fp16 | -mfpu=vfpv4-d16-fp16 | -mfpu=neon-fp16
-# Cortex-A7  | -mfpu=vfpv4      | -mfpu=vfpv4-d16      | -mfpu=neon-vfpv4
-# Cortex-A8  | -mfpu=vfpv3      |                      | -mfpu=neon (alias for
-# neon-vfpv3) Cortex-A9  | -mfpu=vfpv3-fp16 | -mfpu=vfpv3-d16-fp16 |
-# -mfpu=neon-fp16 Cortex-A15 | -mfpu=vfpv4      |                      |
-# -mfpu=neon-vfpv4
+# ~~~
+# | Cortex | FPU Option 1       | FPU Option 2           | FPU Option 3          |
+# |--------|--------------------|------------------------|-----------------------|
+# | A5     | -mfpu=vfpv4-fp16   | -mfpu=vfpv4-d16-fp16   | -mfpu=neon-fp16       |
+# | A7     | -mfpu=vfpv4        | -mfpu=vfpv4-d16        | -mfpu=neon-vfpv4      |
+# | A8     | -mfpu=vfpv3        |                        | -mfpu=neon (alias for neon-vfpv3) |
+# | A9     | -mfpu=vfpv3-fp16   | -mfpu=vfpv3-d16-fp16   | -mfpu=neon-fp16       |
+# | A15    | -mfpu=vfpv4        |                        | -mfpu=neon-vfpv4      |
+# ~~~
 
 if(CONFIG_ARCH_FPU)
   if(CONFIG_ARM_FPU_ABI_SOFT)
