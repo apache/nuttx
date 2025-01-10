@@ -89,10 +89,8 @@
 
     /* Increment exception depth */
 
-    mrs    \xreg0, tpidrro_el0
-    mov    \xreg1, #1
-    add    \xreg0, \xreg0, \xreg1
-    msr    tpidrro_el0, \xreg0
+    add    \xreg1, \xreg1, #1
+    msr    tpidrro_el0, \xreg1
 
     /* Save the FPU registers */
 
