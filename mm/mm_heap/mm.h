@@ -143,7 +143,15 @@
  * previous freenode
  */
 
-#define MM_ALLOCNODE_OVERHEAD (MM_SIZEOF_ALLOCNODE - sizeof(mmsize_t))
+#ifdef CONFIG_MM_NODE_PENDING
+#  define MM_NODE_PENDING aligned_data(MM_ALIGN)
+#  define MMSIZE_T_LEN    MM_ALIGN
+#else
+#  define MM_NODE_PENDING
+#  define MMSIZE_T_LEN    sizeof(mmsize_t)
+#endif
+
+#define MM_ALLOCNODE_OVERHEAD (MM_SIZEOF_ALLOCNODE - MMSIZE_T_LEN)
 
 /* Get the node size */
 
@@ -173,8 +181,17 @@ typedef size_t mmsize_t;
 
 struct mm_allocnode_s
 {
-  mmsize_t preceding;                       /* Physical preceding chunk size */
-  mmsize_t size;                            /* Size of this chunk */
+  union
+  {
+    mmsize_t preceding;                     /* Physical preceding chunk size */
+    uint8_t  preceding_align[MMSIZE_T_LEN];
+  };
+  union
+  {
+    mmsize_t size;                          /* Physical preceding chunk size */
+    uint8_t  size_align[MMSIZE_T_LEN];
+  };
+
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
   unsigned long seqno;                      /* The sequence of memory malloc */
@@ -182,14 +199,23 @@ struct mm_allocnode_s
   FAR void *backtrace[CONFIG_MM_BACKTRACE]; /* The backtrace buffer for caller */
 #  endif
 #endif
-};
+}MM_NODE_PENDING;
 
 /* This describes a free chunk */
 
 struct mm_freenode_s
 {
-  mmsize_t preceding;                       /* Physical preceding chunk size */
-  mmsize_t size;                            /* Size of this chunk */
+  union
+  {
+    mmsize_t preceding;                     /* Physical preceding chunk size */
+    uint8_t  preceding_align[MMSIZE_T_LEN];
+  };
+  union
+  {
+    mmsize_t size;                          /* Physical preceding chunk size */
+    uint8_t  size_align[MMSIZE_T_LEN];
+  };
+
 #if CONFIG_MM_BACKTRACE >= 0
   pid_t pid;                                /* The pid for caller */
   unsigned long seqno;                      /* The sequence of memory malloc */
@@ -199,7 +225,7 @@ struct mm_freenode_s
 #endif
   FAR struct mm_freenode_s *flink;          /* Supports a doubly linked list */
   FAR struct mm_freenode_s *blink;
-};
+}MM_NODE_PENDING;
 
 static_assert(MM_SIZEOF_ALLOCNODE <= MM_MIN_CHUNK,
               "Error size for struct mm_allocnode_s\n");

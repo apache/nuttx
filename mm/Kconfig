@@ -69,6 +69,14 @@ config MM_DEFAULT_ALIGNMENT
 		memory default alignment is equal to sizoef(uintptr), if this value
 		is not 0, this value must be 2^n and at least sizeof(uintptr).
 
+config MM_NODE_PENDING
+	bool "Enable pending memory node"
+	default n
+	---help---
+		Pending memory block node precding and the entire struct,
+		After turning on this bit, the size of each memory block
+		will be aligned to MM_ALIGN
+
 config MM_SMALL
 	bool "Small memory model"
 	default n

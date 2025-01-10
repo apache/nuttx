@@ -153,7 +153,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_curused += newsize - oldsize;
           mm_shrinkchunk(heap, oldnode, newsize);
           kasan_poison((FAR char *)oldnode + MM_SIZEOF_NODE(oldnode) +
-                       sizeof(mmsize_t), oldsize - MM_SIZEOF_NODE(oldnode));
+                       MMSIZE_T_LEN, oldsize - MM_SIZEOF_NODE(oldnode));
         }
 
       /* Then return the original address */
