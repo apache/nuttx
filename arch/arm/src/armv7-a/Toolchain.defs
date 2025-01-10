@@ -35,7 +35,7 @@ else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
 endif
 
 ifeq ($(CONFIG_ARM_THUMB),y)
-  LLVM_ARCHTYPE := thumbv7
+  LLVM_ARCHTYPE := thumbv7a
 else
   LLVM_ARCHTYPE := armv7a
 endif
