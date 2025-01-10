@@ -1222,7 +1222,7 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
           npt = (FAR struct note_printf_s *)p;
           ret += noteram_dump_header(s, &npt->npt_cmn, ctx);
-          ret += lib_sprintf(s, "tracing_mark_write: ");
+          ret += lib_sprintf(s, "tracing_mark_write: I|%d|", pid);
           ret += noteram_dump_printf(s, npt);
         }
         break;
