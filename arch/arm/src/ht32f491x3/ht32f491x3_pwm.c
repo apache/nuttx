@@ -73,13 +73,13 @@ struct ht32f491x3_pwmcfg_s
 
 struct ht32f491x3_pwmtimer_s
 {
-  const struct pwm_ops_s            *ops;
+  const struct pwm_ops_s               *ops;
   FAR const struct ht32f491x3_pwmcfg_s *cfg;
-  uint32_t                           gpio_clken;
-  uintptr_t                          gpio_base;
-  uint8_t                            channel;
-  uint8_t                            pin;
-  uint8_t                            af;
+  uint32_t                              gpio_clken;
+  uintptr_t                             gpio_base;
+  uint8_t                               channel;
+  uint8_t                               pin;
+  uint8_t                               af;
 };
 
 /****************************************************************************
@@ -345,7 +345,8 @@ static int pwm_timer(FAR struct ht32f491x3_pwmtimer_s *priv,
     }
 
   reload -= 1u;
-  pulse = (uint32_t)(((uint64_t)reload * info->duty + 0x8000ull) >> 16);
+  pulse = (uint32_t)(((uint64_t)reload *
+                      info->channels[0].duty + 0x8000ull) >> 16);
   if (pulse > reload)
     {
       pulse = reload;

@@ -2321,11 +2321,6 @@ static int pwm_duty_update(struct pwm_lowerhalf_s *dev, uint8_t channel,
   pwminfo("TIM%u channel: %u duty: %08" PRIx32 "\n",
           priv->timid, channel, duty);
 
-#ifndef CONFIG_PWM_MULTICHAN
-  DEBUGASSERT(channel == priv->channels[0].channel);
-  DEBUGASSERT(duty >= 0 && duty < uitoub16(100));
-#endif
-
   /* Get the reload values */
 
   reload = pwm_arr_get(dev);
@@ -3372,13 +3367,13 @@ static int pwm_pulsecount_timer(struct pwm_lowerhalf_s *dev,
   pwminfo("TIM%u channel: %u frequency: %" PRIx32 " duty: %08" PRIx32
           " count: %" PRIx32 "\n",
           priv->timid, priv->channels[0].channel, info->frequency,
-          info->duty, info->count);
+          info->channels[0].duty, info->channels[0].count);
 
   DEBUGASSERT(info->frequency > 0);
 
   /* Channel specific setup */
 
-  duty    = info->duty;
+  duty    = info->channels[0].duty;
   channel = priv->channels[0].channel;
 
   /* Disable all interrupts and DMA requests, clear all pending status */
@@ -3407,7 +3402,7 @@ static int pwm_pulsecount_timer(struct pwm_lowerhalf_s *dev,
    * assured us that the count value is within range).
    */
 
-  if (info->count > 0)
+  if (info->channels[0].count > 0)
     {
       /* Save the remaining count and the number of counts that will have
        * elapsed on the first interrupt.
@@ -3418,7 +3413,7 @@ static int pwm_pulsecount_timer(struct pwm_lowerhalf_s *dev,
        * value.
        */
 
-      priv->prev  = pwm_pulsecount(info->count);
+      priv->prev  = pwm_pulsecount(info->channels[0].count);
       pwm_rcr_update(dev, priv->prev - 1);
 
       /* Generate an update event to reload the prescaler.  This should
@@ -3431,8 +3426,8 @@ static int pwm_pulsecount_timer(struct pwm_lowerhalf_s *dev,
        * update event.
        */
 
-      priv->count = info->count;
-      priv->curr  = pwm_pulsecount(info->count - priv->prev);
+      priv->count = info->channels[0].count;
+      priv->curr  = pwm_pulsecount(info->channels[0].count - priv->prev);
       pwm_rcr_update(dev, priv->curr - 1);
     }
 
@@ -3461,12 +3456,13 @@ static int pwm_pulsecount_timer(struct pwm_lowerhalf_s *dev,
       goto errout;
     }
 
-  /* Setup update interrupt.  If info->count is > 0, then we can be
-   * assured that pwm_pulsecount_start() has already verified: (1) that this
-   * is an advanced timer, and that (2) the repetition count is within range.
+  /* Setup update interrupt. If info->channels[0].count is > 0, then we can
+   * be assured that pwm_pulsecount_start() has already verified: (1) that
+   * this is an advanced timer, and that (2) the repetition count is within
+   * range.
    */
 
-  if (info->count > 0)
+  if (info->channels[0].count > 0)
     {
       /* Clear all pending interrupts and enable the update interrupt. */
 
@@ -3620,16 +3616,11 @@ static int pwm_duty_channels_update(struct pwm_lowerhalf_s *dev,
   uint8_t   channel = 0;
   ub16_t    duty    = 0;
   int       ret     = OK;
-#ifdef CONFIG_PWM_MULTICHAN
   int       i       = 0;
   int       j       = 0;
-#endif
 
-#ifdef CONFIG_PWM_MULTICHAN
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
-#endif
     {
-#ifdef CONFIG_PWM_MULTICHAN
       /* Break the loop if all following channels are not configured */
 
       if (info->channels[i].channel == -1)
@@ -3662,10 +3653,6 @@ static int pwm_duty_channels_update(struct pwm_lowerhalf_s *dev,
               ret = -EINVAL;
               goto errout;
             }
-#else
-          duty = info->duty;
-          channel = priv->channels[0].channel;
-#endif
 
           /* Update duty cycle */
 
@@ -3674,9 +3661,7 @@ static int pwm_duty_channels_update(struct pwm_lowerhalf_s *dev,
             {
               goto errout;
             }
-#ifdef CONFIG_PWM_MULTICHAN
         }
-#endif
     }
 
 errout:
@@ -3707,19 +3692,10 @@ static int pwm_timer(struct pwm_lowerhalf_s *dev,
 
   DEBUGASSERT(priv != NULL && info != NULL);
 
-#if defined(CONFIG_PWM_MULTICHAN)
   pwminfo("TIM%u frequency: %" PRIu32 "\n",
           priv->timid, info->frequency);
-#else
-  pwminfo("TIM%u channel: %u frequency: %" PRIu32 " duty: %08" PRIx32 "\n",
-          priv->timid, priv->channels[0].channel,
-          info->frequency, info->duty);
-#endif
 
   DEBUGASSERT(info->frequency > 0);
-#ifndef CONFIG_PWM_MULTICHAN
-  DEBUGASSERT(info->duty >= 0 && info->duty < uitoub16(100));
-#endif
 
   /* TODO: what if we have pwm running and we want disable some channels ? */
 
@@ -4336,14 +4312,14 @@ static int pwm_start_pulsecount(struct pwm_lowerhalf_s *dev,
 
   /* Generate an indefinite number of pulses */
 
-  if (info->count == 0)
+  if (info->channels[0].count == 0)
     {
       return pwm_start(dev, info);
     }
 
   /* Check if a pulsecount has been selected */
 
-  if (info->count > 0)
+  if (info->channels[0].count > 0)
     {
       /* Only the advanced timers (TIM1,8 can support the pulse counting)
        * REVISIT: verify if TIMTYPE_COUNTUP16_N works with it
@@ -4352,7 +4328,7 @@ static int pwm_start_pulsecount(struct pwm_lowerhalf_s *dev,
       if (priv->timtype != TIMTYPE_ADVANCED)
         {
           pwmerr("ERROR: TIM%u cannot support pulse count: %" PRIx32 "\n",
-                 priv->timid, info->count);
+                 priv->timid, info->channels[0].count);
           return -EPERM;
         }
     }
@@ -4377,7 +4353,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
 
   if (info->frequency == priv->frequency)
     {
-#ifdef CONFIG_PWM_MULTICHAN
       int i;
 
       for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
@@ -4397,9 +4372,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
                                     info->channels[i].duty);
             }
         }
-#else
-      ret = pwm_duty_update(dev, priv->channels[0].channel, info->duty);
-#endif /* CONFIG_PWM_MULTICHAN */
     }
   else
     {

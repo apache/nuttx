@@ -3126,7 +3126,6 @@ config STM32F0L0G0_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
 	depends on STM32F0L0G0_PWM
-	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output channels per timer.
 

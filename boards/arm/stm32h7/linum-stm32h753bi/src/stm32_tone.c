@@ -155,7 +155,7 @@ int board_tone_initialize(int devno)
       /* Register the Audio Tone driver at "/dev/tone0" */
 
       snprintf(devpath, 12, "/dev/tone%d", devno);
-      ret = tone_register(devpath, tone, oneshot);
+      ret = tone_register(devpath, tone, BUZZER_PWMCHANNEL, oneshot);
       if (ret < 0)
         {
           auderr("ERROR: tone_register failed: %d\n", ret);

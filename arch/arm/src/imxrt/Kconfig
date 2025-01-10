@@ -298,7 +298,6 @@ config IMXRT_FLEXCAN2_FD
 config IMXRT_FLEXPWM
 	bool
 	default n
-	select ARCH_HAVE_PWM_MULTICHAN
 
 config IMXRT_LPI2C
 	bool

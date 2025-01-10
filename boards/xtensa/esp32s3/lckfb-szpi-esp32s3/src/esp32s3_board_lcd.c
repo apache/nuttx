@@ -106,7 +106,7 @@ int board_lcd_initialize(void)
   /* Turn on LCD backlight (10% brightness) */
 
   pwm.frequency = SZPI_LCD_PWM_FREQ;
-  pwm.duty = SZPI_LCD_PWM_DUTY;
+  pwm.channels[0].duty = SZPI_LCD_PWM_DUTY;
 
   ret = file_open(&g_pwm_file, SZPI_LCD_PWM_PATH, O_RDONLY);
   if (ret < 0)

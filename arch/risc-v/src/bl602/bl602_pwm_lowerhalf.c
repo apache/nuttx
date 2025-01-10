@@ -387,7 +387,7 @@ static int bl602_pwm_start(struct pwm_lowerhalf_s *dev,
     }
 #else
   bl602_pwm_freq(priv, 0, info->frequency);
-  bl602_pwm_duty(priv, 0, info->duty);
+  bl602_pwm_duty(priv, 0, info->channels[0].duty);
   pwm_channel_enable(0);
 #endif
 

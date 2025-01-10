@@ -268,8 +268,13 @@ static int mcpwm_timer(struct lpc17_40_mcpwmtimer_s *priv,
 
   flags = enter_critical_section();
 
-  putreg32(info->frequency, LPC17_40_MCPWM_LIM0); /* Set PWMMR0 = number of counts */
-  putreg32(info->duty, LPC17_40_MCPWM_MAT0);      /* Set PWM cycle */
+  /* Set PWMMR0 = number of counts */
+
+  putreg32(info->frequency, LPC17_40_MCPWM_LIM0);
+
+  /* Set PWM cycle */
+
+  putreg32(info->channels[0].duty, LPC17_40_MCPWM_MAT0);
 
   leave_critical_section(flags);
   mcpwm_dumpregs(priv, "After starting");

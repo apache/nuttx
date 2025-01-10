@@ -17,7 +17,6 @@ config ARCH_CHIP_IMX93
 	select ARMV8A_HAVE_GICv3
 	select ARCH_CORTEX_A55 if !IMX9_BOOTLOADER
 	select ARCH_CORTEX_A53 if IMX9_BOOTLOADER
-	select ARCH_HAVE_PWM_MULTICHAN
 	select ARCH_HAVE_RESET
 	---help---
 		EL3/OCRAM is a bad combination for atomic instructions, they don't work.
@@ -67,7 +66,6 @@ endmenu # DMA Allocator Configuration
 
 config IMX9_FLEXIO_PWM
 	bool
-	select PWM_MULTICHAN
 	default n
 
 config IMX9_HAVE_ATF_FIRMWARE
@@ -445,7 +443,6 @@ config IMX9_FLEXIO2_DSHOT_TX_TIMER
 
 config IMX9_TPM_PWM
 	bool
-	select PWM_MULTICHAN
 	default n
 
 config IMX9_TPM1_PWM

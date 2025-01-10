@@ -62,11 +62,9 @@ struct rgbled_upperhalf_s
   FAR struct pwm_lowerhalf_s *devledr;
   FAR struct pwm_lowerhalf_s *devledg;
   FAR struct pwm_lowerhalf_s *devledb;
-#ifdef CONFIG_PWM_MULTICHAN
   int chanr;                  /* Red PWM channel */
   int chang;                  /* Green PWM channel */
   int chanb;                  /* Blue PWM channel */
-#endif
 };
 
 /****************************************************************************
@@ -280,9 +278,7 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   unsigned int green;
   unsigned int blue;
   char color[3];
-#ifdef CONFIG_PWM_MULTICHAN
   int i;
-#endif
 
   /* We need to receive a string #RRGGBB = 7 bytes */
 
@@ -359,7 +355,6 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
   blue  ^= 0xffff;
 #endif
 
-#ifdef CONFIG_PWM_MULTICHAN
   memset(&pwm, 0, sizeof(struct pwm_info_s));
   pwm.frequency = CONFIG_RGBLED_PWM_FREQ;
 
@@ -433,18 +428,6 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 
       ledb->ops->start(ledb, &pwm);
     }
-#else
-  pwm.frequency = CONFIG_RGBLED_PWM_FREQ;
-
-  pwm.duty = red;
-  ledr->ops->start(ledr, &pwm);
-
-  pwm.duty = green;
-  ledg->ops->start(ledg, &pwm);
-
-  pwm.duty = blue;
-  ledb->ops->start(ledb, &pwm);
-#endif
 
   return buflen;
 }
@@ -471,8 +454,7 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
  *     drivers for the red, green, and blue LEDs, respectively.  These
  *     instances will be bound to the RGB LED driver and must persists as
  *     long as that driver persists.
- *   chanr, chang, chanb -Red/Green/Blue PWM channels (only if
- *     CONFIG_PWM_MULTICHAN is defined)
+ *   chanr, chang, chanb -Red/Green/Blue PWM channels
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -482,9 +464,7 @@ static ssize_t rgbled_write(FAR struct file *filep, FAR const char *buffer,
 int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
                                           FAR struct pwm_lowerhalf_s *ledg,
                                           FAR struct pwm_lowerhalf_s *ledb
-#ifdef CONFIG_PWM_MULTICHAN
                                         , int chanr, int chang, int chanb
-#endif
                                           )
 {
   FAR struct rgbled_upperhalf_s *upper;
@@ -509,11 +489,9 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
   upper->devledg = ledg;
   upper->devledb = ledb;
 
-#ifdef CONFIG_PWM_MULTICHAN
   upper->chanr = chanr;
   upper->chang = chang;
   upper->chanb = chanb;
-#endif
 
   /* Register the PWM device */
 

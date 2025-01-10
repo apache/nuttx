@@ -41,24 +41,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_PWM_MULTICHAN
-
 /* PWM0 channels 0, 1 and 2 used */
 
 #  if !defined(CONFIG_NRF53_PWM0_CH0) || !defined(CONFIG_NRF53_PWM0_CH1) || \
       !defined(CONFIG_NRF53_PWM0_CH2)
 #    error Invalid configuration for RGBLED driver
 #  endif
-
-#else
-
-/* PWM0 channel 0, PWM1 channel 0 and PWM2 channel 0 used */
-
-#  if !defined(CONFIG_NRF53_PWM0_CH0) || !defined(CONFIG_NRF53_PWM1_CH0) || \
-      !defined(CONFIG_NRF53_PWM2_CH0)
-#    error Invalid configuration for RGBLED driver
-#  endif
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -96,10 +84,6 @@ int nrf53_rgbled_initialize(void)
 
       /* Define frequency and duty cycle */
 
-#ifndef CONFIG_PWM_MULTICHAN
-      info.frequency = 100;
-      info.duty = 0;
-#else
       ledg = ledr;
       ledb = ledr;
 
@@ -107,50 +91,15 @@ int nrf53_rgbled_initialize(void)
       info.channels[0].duty = 0;
       info.channels[1].duty = 0;
       info.channels[2].duty = 0;
-#endif
 
       /* Initialize LED R */
 
       ledr->ops->setup(ledr);
       ledr->ops->start(ledr, &info);
 
-#ifndef CONFIG_PWM_MULTICHAN
-      /* Call nrf53_pwminitialize() to get an instance of the PWM interface */
-
-      ledg = nrf53_pwminitialize(1);
-      if (!ledg)
-        {
-          lederr("ERROR: Failed to get the NRF53 PWM lower half to LEDG\n");
-          return -ENODEV;
-        }
-
-      /* Initialize LED G */
-
-      ledg->ops->setup(ledg);
-      ledg->ops->start(ledg, &info);
-
-      /* Call nrf53_pwminitialize() to get an instance of the PWM interface */
-
-      ledb = nrf53_pwminitialize(2);
-      if (!ledb)
-        {
-          lederr("ERROR: Failed to get the NRF53 PWM lower half to LEDB\n");
-          return -ENODEV;
-        }
-
-      /* Initialize LED B */
-
-      ledb->ops->setup(ledb);
-      ledb->ops->start(ledb, &info);
-#endif
-
       /* Register the RGB LED diver at "/dev/rgbled0" */
 
-#ifdef CONFIG_PWM_MULTICHAN
       ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb, 1, 2, 3);
-#else
-      ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb);
-#endif
       if (ret < 0)
         {
           lederr("ERROR: rgbled_register failed: %d\n", ret);

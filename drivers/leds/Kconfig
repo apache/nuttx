@@ -74,6 +74,7 @@ config LEDS_MAX7219
 config RGBLED
 	bool "RGB LED Driver Support"
 	default n
+	depends on PWM_NCHANNELS >= 3
 	---help---
 		This selection enables building of the "upper-half" RGB LED driver.
 		See include/nuttx/rgbled.h for further PWM driver information.

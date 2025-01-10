@@ -808,11 +808,7 @@ static int pwm_change_freq(struct pwm_lowerhalf_s *dev,
                            uint8_t channel)
 {
   struct imxrt_flexpwm_s *priv = (struct imxrt_flexpwm_s *)dev;
-#ifdef CONFIG_PWM_MULTICHAN
   uint8_t shift = (info->channels[channel].channel - 1) >> 1;
-#else
-  uint8_t shift = priv->modules[0].module - 1;
-#endif
   uint16_t regval;
   uint16_t olddiv = getreg16(priv->base + IMXRT_FLEXPWM_SM0VAL1_OFFSET
                                         + MODULE_OFFSET * shift);
@@ -1219,7 +1215,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
     {
       for (int i = 0; i < PWM_NCHANNELS; i++)
         {
-#ifdef CONFIG_PWM_MULTICHAN
           /* Break the loop if all following channels are not configured */
 
           if (info->channels[i].channel == -1)
@@ -1233,9 +1228,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
             {
               ret = pwm_change_freq(dev, info, i);
             }
-#else
-          ret = pwm_change_freq(dev, info, i);
-#endif
         }
 
       /* Save current frequency */
@@ -1246,7 +1238,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
         }
     }
 
-#ifdef CONFIG_PWM_MULTICHAN
   for (int i = 0; ret == OK && i < PWM_NCHANNELS; i++)
     {
       /* Break the loop if all following channels are not configured */
@@ -1268,15 +1259,6 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
           ldok_map |= 1 << ((info->channels[i].channel - 1) >> 1);
         }
     }
-#else
-  /* Enable PWM output just for first channel */
-
-  ret = pwm_set_output(dev, priv->modules[0].module, info->duty);
-
-  /* Remember the channel number in bitmap */
-
-  ldok_map = 1 << (priv->modules[0].module - 1);
-#endif /* CONFIG_PWM_MULTICHAN */
 
   /* Set Load Okay bits */
 
@@ -1312,7 +1294,6 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
   uint8_t shift;
   uint16_t regval;
 
-#ifdef CONFIG_PWM_MULTICHAN
   for (int i = 0; i < priv->modules_num; i++)
     {
       /* Skip settings if channel is not configured */
@@ -1330,16 +1311,6 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
       regval = OUTEN_PWMB_EN(0 << shift);
       putreg16(regval, priv->base + IMXRT_FLEXPWM_OUTEN_OFFSET);
     }
-#else
-    shift = priv->modules[0].module - 1;
-
-    regval = OUTEN_PWMA_EN(0 << shift);
-    putreg16(regval, priv->base + IMXRT_FLEXPWM_OUTEN_OFFSET);
-
-    regval = OUTEN_PWMB_EN(0 << shift);
-    putreg16(regval, priv->base + IMXRT_FLEXPWM_OUTEN_OFFSET);
-
-#endif /* CONFIG_PWM_MULTICHAN */
 
   return OK;
 }

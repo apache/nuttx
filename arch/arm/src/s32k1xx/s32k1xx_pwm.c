@@ -360,10 +360,11 @@ static int pwm_timer(struct s32k1xx_pwmtimer_s *priv,
   DEBUGASSERT(priv != NULL && info != NULL);
 
   pwminfo("FTM%d channel: %d frequency: %" PRId32 " duty: %08" PRIx32 "\n",
-          priv->tpmid, priv->channel, info->frequency, info->duty);
+          priv->tpmid, priv->channel, info->frequency,
+          info->channels[0].duty);
 
-  DEBUGASSERT(info->frequency > 0 && info->duty > 0 &&
-              info->duty < uitoub16(100));
+  DEBUGASSERT(info->frequency > 0 && info->channels[0].duty > 0 &&
+              info->channels[0].duty < uitoub16(100));
 
   /* Calculate optimal values for the timer prescaler and for the timer
    * modulo register.  If' frequency' is the desired frequency, then
@@ -427,7 +428,7 @@ static int pwm_timer(struct s32k1xx_pwmtimer_s *priv,
    * duty cycle = cv / modulo (fractional value)
    */
 
-  cv = b16toi(info->duty * modulo + b16HALF);
+  cv = b16toi(info->channels[0].duty * modulo + b16HALF);
 
   pwminfo("FTM%d PCLK: %" PRId32 " frequency: %" PRId32 " FTMCLK: %" PRId32
           " prescaler: %d modulo: %" PRId32 "c0v: %" PRId32 "\n",

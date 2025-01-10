@@ -57,10 +57,6 @@
 #  undef HAVE_RGBLED
 #endif
 
-#ifndef CONFIG_PWM_MULTICHAN
-#  undef HAVE_RGBLED
-#endif
-
 #ifndef CONFIG_STM32_TIM2_PWM
 #  undef HAVE_RGBLED
 #endif
@@ -139,13 +135,9 @@ int stm32_rgbled_setup(void)
 
       /* Register the RGB LED diver at "/dev/rgbled0" */
 
-#ifdef CONFIG_PWM_MULTICHAN
       ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb,
                             RGBLED_RPWMCHANNEL, RGBLED_GPWMCHANNEL,
                             RGBLED_BPWMCHANNEL);
-#else
-      ret = rgbled_register("/dev/rgbled0", ledr, ledg, ledb);
-#endif
       if (ret < 0)
         {
           lederr("ERROR: rgbled_register failed: %d\n", ret);

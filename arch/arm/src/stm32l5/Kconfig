@@ -1700,7 +1700,6 @@ config STM32L5_PWM_MULTICHAN
 	bool "PWM Multiple Output Channels"
 	default n
 	depends on STM32L5_TIM1_PWM || STM32L5_TIM2_PWM || STM32L5_TIM3_PWM || STM32L5_TIM4_PWM || STM32L5_TIM5_PWM || STM32L5_TIM8_PWM || STM32L5_TIM15_PWM || STM32L5_TIM16_PWM || STM32L5_TIM17_PWM
-	select ARCH_HAVE_PWM_MULTICHAN
 	---help---
 		Specifies that the PWM driver supports multiple output
 		channels per timer.

@@ -116,24 +116,18 @@ static const struct file_operations g_pwmops =
 static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
                      bool started)
 {
-#ifdef CONFIG_PWM_MULTICHAN
   int i;
-#endif
 
   pwminfo("%s: frequency: %" PRId32 "\n", msg, info->frequency);
 
-#ifdef CONFIG_PWM_MULTICHAN
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
       pwminfo(" channel: %d duty: %08" PRIx32 "\n",
               info->channels[i].channel, info->channels[i].duty);
     }
-#else
-  pwminfo(" duty: %08" PRIx32 "\n", info->duty);
-#endif
 
 #ifdef CONFIG_PWM_PULSECOUNT
-  pwminfo(" count: %" PRIx32 "\n", info->count);
+  pwminfo(" count: %" PRIx32 "\n", info->channels[0].count);
 #endif
 
   pwminfo(" started: %d\n", started);
@@ -324,7 +318,7 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
        * We do these things before starting the PWM to avoid race conditions.
        */
 
-      upper->waiting = (upper->info.count > 0) &&
+      upper->waiting = (upper->info.channels[0].count > 0) &&
                        ((oflags & O_NONBLOCK) == 0);
       upper->started = true;
 

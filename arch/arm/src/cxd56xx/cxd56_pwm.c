@@ -394,13 +394,13 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
   uint32_t phase;
   int ret;
 
-  if (info->duty <= 0)
+  if (info->channels[0].duty <= 0)
     {
       /* Output low level if duty cycle is almost 0% */
 
       PWM_REG(priv->ch)->EN = 0x0;
     }
-  else if (info->duty >= 65536)
+  else if (info->channels[0].duty >= 65536)
     {
       /* Output high level if duty cycle is almost 100% */
 
@@ -409,7 +409,8 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
     }
   else
     {
-      ret = convert_freq2period(info->frequency, info->duty, &param, &phase);
+      ret = convert_freq2period(info->frequency, info->channels[0].duty,
+                                &param, &phase);
       if (ret < 0)
         {
           return -EINVAL;

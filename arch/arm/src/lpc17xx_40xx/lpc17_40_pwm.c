@@ -296,7 +296,6 @@ static void pwm_dumpregs(struct lpc17_40_pwmtimer_s *priv,
           pwm_getreg(priv, LPC17_40_PWM_PC_OFFSET));
   pwminfo("  MCR: %04x\n",
           pwm_getreg(priv, LPC17_40_PWM_MCR_OFFSET));
-#ifdef CONFIG_PWM_MULTICHAN
   pwminfo("  0: %08x 1: %08x 2: %08x 3: %08x\n",
           pwm_getreg(priv, LPC17_40_PWM_MR0_OFFSET),
           pwm_getreg(priv, LPC17_40_PWM_MR1_OFFSET),
@@ -306,7 +305,6 @@ static void pwm_dumpregs(struct lpc17_40_pwmtimer_s *priv,
           pwm_getreg(priv, LPC17_40_PWM_MR4_OFFSET),
           pwm_getreg(priv, LPC17_40_PWM_MR5_OFFSET),
           pwm_getreg(priv, LPC17_40_PWM_MR6_OFFSET));
-#endif
 }
 #endif
 
@@ -341,9 +339,6 @@ static int pwm_timer(struct lpc17_40_pwmtimer_s *priv,
 
   putreg32(mr0_freq, LPC17_40_PWM1_MR0);         /* Set PWMMR0 = number of counts */
 
-#ifndef CONFIG_PWM_MULTICHAN
-  putreg32(info->duty, LPC17_40_PWM1_MR1);              /* Set PWM cycle */
-#else
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
      switch (priv->channels[i].channel)
@@ -398,7 +393,6 @@ static int pwm_timer(struct lpc17_40_pwmtimer_s *priv,
            }
        }
     }
-#endif
 
 #ifdef CONFIG_LPC17_40_PWM1_CHANNEL1
   pcrval |= PWMENA1;

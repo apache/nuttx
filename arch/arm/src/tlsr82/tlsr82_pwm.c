@@ -308,12 +308,12 @@ static int pwm_config(struct tlsr82_pwmtimer_s *priv,
 
   pwminfo("PWM%d invert: %d frequency: %lu duty: %08lx\n",
           (int)priv->id, (int)priv->invert, info->frequency,
-          info->duty);
+          info->channels[0].duty);
 
-  if (info->frequency == 0 || info->duty >= uitoub16(100))
+  if (info->frequency == 0 || info->channels[0].duty >= uitoub16(100))
     {
       pwrerr("pwm info is invalid, fre: %lu duty: %08lx\n",
-             info->frequency, info->duty);
+             info->frequency, info->channels[0].duty);
       return -EINVAL;
     }
 
@@ -331,10 +331,11 @@ static int pwm_config(struct tlsr82_pwmtimer_s *priv,
 
   max = (uint16_t)((g_pwmclk / info->frequency));
 
-  cmp = (uint16_t)(((uint64_t)max * (uint64_t)info->duty) >> 16);
+  cmp = (uint16_t)(((uint64_t)max * (uint64_t)info->channels[0].duty) >> 16);
 
   pwminfo("PWM%d PCLK: %lu freq: %lu duty: %lu max: %u cmp: %u\n",
-          priv->id, g_pwmclk, info->frequency, info->duty, max, cmp);
+          priv->id, g_pwmclk, info->frequency, info->channels[0].duty,
+          max, cmp);
 
   priv->max = max;
   priv->cmp = cmp;
@@ -616,25 +617,25 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
 
   /* Check if a pulsecount has been selected */
 
-  if (info->count > 0)
+  if (info->channels[0].count > 0)
     {
       /* Only the PWM0 support the pulse counting */
 
       if (priv->id != 0)
         {
           pwmerr("ERROR: PWM%d cannot support pulse count: %lu\n",
-                 priv->id, info->count);
+                 priv->id, info->channels[0].count);
           return -EPERM;
         }
 
-      if (info->count > PWM_MAX_COUNT)
+      if (info->channels[0].count > PWM_MAX_COUNT)
         {
           pwmerr("ERROR: PWM0 count out of range, count: %lu, max: %d",
-                info->count, PWM_MAX_COUNT);
+                info->channels[0].count, PWM_MAX_COUNT);
           return -EINVAL;
         }
 
-      priv->count = info->count;
+      priv->count = info->channels[0].count;
     }
 
   /* Save the handle */

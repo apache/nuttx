@@ -44,10 +44,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PWM_PULSECOUNT
-#error PWM puslecount not supported for Litex.
+#  error PWM pulsecount not supported for Litex.
 #endif
-#ifdef CONFIG_PWM_MULTICHAN
-#error PWM multichannel not supported for Litex.
+
+#if CONFIG_PWM_NCHANNELS > 1
+#  error PWM multiple channels not supported for Litex.
 #endif
 
 /* Control register offsets from peripheral base address */
@@ -219,7 +220,7 @@ static int litex_pwm_start(struct pwm_lowerhalf_s *dev,
   const uint32_t min_in_duty = 1;
 
   update_frequency = priv->frequency != info->frequency;
-  update_duty = update_frequency | (priv->duty != info->duty);
+  update_duty = update_frequency | (priv->duty != info->channels[0].duty);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(priv->base);
@@ -260,8 +261,9 @@ static int litex_pwm_start(struct pwm_lowerhalf_s *dev,
        */
 
       period = getreg32(priv->base + PWM_PERIOD_REG_OFFSET);
-      duty = period * (info->duty / (float)(max_in_duty - min_in_duty));
-      priv->duty = info->duty;
+      duty = period * (info->channels[0].duty / (float)(max_in_duty -
+                                                        min_in_duty));
+      priv->duty = info->channels[0].duty;
 
       putreg32(duty, priv->base + PWM_WIDTH_REG_OFFSET);
       pwminfo("Update PWM duty to %lu\n", duty);

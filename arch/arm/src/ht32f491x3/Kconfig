@@ -63,7 +63,7 @@ config HT32F491X3_TMR1
 config HT32F491X3_TMR1_PWM
 	bool "TMR1 PWM output"
 	default n
-	depends on HT32F491X3_TMR1 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR1 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR1.
 
@@ -85,7 +85,7 @@ config HT32F491X3_TMR2
 config HT32F491X3_TMR2_PWM
 	bool "TMR2 PWM output"
 	default n
-	depends on HT32F491X3_TMR2 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR2 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR2.
 
@@ -107,7 +107,7 @@ config HT32F491X3_TMR3
 config HT32F491X3_TMR3_PWM
 	bool "TMR3 PWM output"
 	default n
-	depends on HT32F491X3_TMR3 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR3 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR3.
 
@@ -129,7 +129,7 @@ config HT32F491X3_TMR4
 config HT32F491X3_TMR4_PWM
 	bool "TMR4 PWM output"
 	default n
-	depends on HT32F491X3_TMR4 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR4 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR4.
 
@@ -165,7 +165,7 @@ config HT32F491X3_TMR9
 config HT32F491X3_TMR9_PWM
 	bool "TMR9 PWM output"
 	default n
-	depends on HT32F491X3_TMR9 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR9 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR9.
 
@@ -187,7 +187,7 @@ config HT32F491X3_TMR10
 config HT32F491X3_TMR10_PWM
 	bool "TMR10 PWM output"
 	default n
-	depends on HT32F491X3_TMR10 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR10 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR10.
 
@@ -208,7 +208,7 @@ config HT32F491X3_TMR11
 config HT32F491X3_TMR11_PWM
 	bool "TMR11 PWM output"
 	default n
-	depends on HT32F491X3_TMR11 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR11 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR11.
 
@@ -229,7 +229,7 @@ config HT32F491X3_TMR12
 config HT32F491X3_TMR12_PWM
 	bool "TMR12 PWM output"
 	default n
-	depends on HT32F491X3_TMR12 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR12 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR12.
 
@@ -251,7 +251,7 @@ config HT32F491X3_TMR13
 config HT32F491X3_TMR13_PWM
 	bool "TMR13 PWM output"
 	default n
-	depends on HT32F491X3_TMR13 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR13 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR13.
 
@@ -272,7 +272,7 @@ config HT32F491X3_TMR14
 config HT32F491X3_TMR14_PWM
 	bool "TMR14 PWM output"
 	default n
-	depends on HT32F491X3_TMR14 && PWM && !PWM_MULTICHAN
+	depends on HT32F491X3_TMR14 && PWM && PWM_NCHANNELS = 1
 	---help---
 		Enable lower-half PWM support on TMR14.
 
