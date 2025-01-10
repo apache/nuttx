@@ -21,3 +21,8 @@
 # ##############################################################################
 
 add_compile_options(-mcpu=cortex-m0 -mthumb -mfloat-abi=soft)
+
+# LLVM Configuration
+set(LLVM_ARCHTYPE thumbv6m)
+set(LLVM_ABITYPE eabi)
+set(LLVM_CPUTYPE cortex-m0)
