@@ -48,7 +48,7 @@
 #endif
 
 #ifndef ALIGN_UP
-#  define ALIGN_UP(x,a)        (((x) + ((a) - 1)) & ~((a) - 1))
+#  define ALIGN_UP(x,a)        ((((x) + (a) - 1) / (a)) * (a))
 #endif
 
 #ifndef ALIGN_UP_MASK
@@ -56,7 +56,7 @@
 #endif
 
 #ifndef ALIGN_DOWN
-#  define ALIGN_DOWN(x,a)      ((x) & (~((a) - 1)))
+#  define ALIGN_DOWN(x,a)      (((x) / (a)) * (a))
 #endif
 
 #ifndef ALIGN_DOWN_MASK
