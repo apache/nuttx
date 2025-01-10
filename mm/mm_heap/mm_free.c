@@ -49,7 +49,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 
   /* Delay the deallocation until a more appropriate time. */
 
-  flags = up_irq_save();
+  flags = mm_lock_irq(heap);
 
 #  ifdef CONFIG_DEBUG_ASSERTIONS
   FAR struct mm_freenode_s *node;
@@ -65,7 +65,7 @@ static void add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
   heap->mm_delaycount[this_cpu()]++;
 #endif
 
-  up_irq_restore(flags);
+  mm_unlock_irq(heap, flags);
 #endif
 }
 
