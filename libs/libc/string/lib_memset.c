@@ -38,12 +38,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Can't support CONFIG_MEMSET_64BIT if the platform does not have 64-bit
- * integer types.
+/* Can't support CONFIG_LIBC_MEMSET_64BIT if the platform does not
+ * have 64-bit integer types.
  */
 
 #ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_MEMSET_64BIT
+#  undef CONFIG_LIBC_MEMSET_64BIT
 #endif
 
 /****************************************************************************
@@ -55,7 +55,7 @@
 no_builtin("memset")
 FAR void *memset(FAR void *s, int c, size_t n)
 {
-#ifdef CONFIG_MEMSET_OPTSPEED
+#ifdef CONFIG_LIBC_MEMSET_OPTSPEED
   /* This version is optimized for speed (you could do better
    * still by exploiting processor caching or memory burst
    * knowledge.)
@@ -64,7 +64,7 @@ FAR void *memset(FAR void *s, int c, size_t n)
   uintptr_t addr  = (uintptr_t)s;
   uint16_t  val16 = ((uint16_t)c << 8) | (uint16_t)c;
   uint32_t  val32 = ((uint32_t)val16 << 16) | (uint32_t)val16;
-#ifdef CONFIG_MEMSET_64BIT
+#ifdef CONFIG_LIBC_MEMSET_64BIT
   uint64_t  val64 = ((uint64_t)val32 << 32) | (uint64_t)val32;
 #endif
 
@@ -96,7 +96,7 @@ FAR void *memset(FAR void *s, int c, size_t n)
               n    -= 2;
             }
 
-#ifndef CONFIG_MEMSET_64BIT
+#ifndef CONFIG_LIBC_MEMSET_64BIT
           /* Loop while there are at least 16-bytes left to be written */
 
           while (n >= 16)
@@ -161,7 +161,7 @@ FAR void *memset(FAR void *s, int c, size_t n)
 #endif
         }
 
-#ifdef CONFIG_MEMSET_64BIT
+#ifdef CONFIG_LIBC_MEMSET_64BIT
       /* We may get here with n in the range 0..7.  If n >= 4, then we should
        * have 64-bit alignment.
        */
