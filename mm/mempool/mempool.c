@@ -397,14 +397,15 @@ retry:
 
   pool->nalloc++;
   spin_unlock_irqrestore(&pool->lock, flags);
-  blk = kasan_unpoison(blk, pool->blocksize);
-#ifdef CONFIG_MM_FILL_ALLOCATIONS
-  memset(blk, MM_ALLOC_MAGIC, pool->blocksize);
-#endif
 
 #if CONFIG_MM_BACKTRACE >= 0
   mempool_add_backtrace(pool, (FAR struct mempool_backtrace_s *)
                               ((FAR char *)blk + pool->blocksize));
+#endif
+
+  blk = kasan_unpoison(blk, pool->blocksize);
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  memset(blk, MM_ALLOC_MAGIC, pool->blocksize);
 #endif
 
   return blk;
