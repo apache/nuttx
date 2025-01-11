@@ -64,7 +64,7 @@ set(SRCS
     lib_strlcpy.c
     lib_strnlen.c)
 
-if(CONFIG_MEMCPY_VIK)
+if(CONFIG_LIBC_MEMCPY_VIK)
   list(APPEND SRCS lib_vikmemcpy.c)
 elseif(CONFIG_LIBC_NEWLIB_OPTSPEED)
   list(APPEND SRCS lib_bsdmemcpy.c)

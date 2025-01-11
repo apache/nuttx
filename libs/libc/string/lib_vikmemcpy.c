@@ -45,25 +45,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Can't support CONFIG_MEMCPY_64BIT if the platform does not have 64-bit
- * integer types.
+/* Can't support CONFIG_LIBC_MEMCPY_64BIT if the platform does not have
+ * 64-bit integer types.
  */
 
 #ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_MEMCPY_64BIT
+#  undef CONFIG_LIBC_MEMCPY_64BIT
 #endif
 
-/* Remove definitions when CONFIG_MEMCPY_INDEXED_COPY is defined */
+/* Remove definitions when CONFIG_LIBC_MEMCPY_INDEXED_COPY is defined */
 
-#if defined (CONFIG_MEMCPY_INDEXED_COPY)
-#  if defined (CONFIG_MEMCPY_PRE_INC_PTRS)
-#    undef CONFIG_MEMCPY_PRE_INC_PTRS
-#  endif /* CONFIG_MEMCPY_PRE_INC_PTRS */
-#endif /* CONFIG_MEMCPY_INDEXED_COPY */
+#ifdef CONFIG_LIBC_MEMCPY_INDEXED_COPY
+#  ifdef CONFIG_LIBC_MEMCPY_PRE_INC_PTRS
+#    undef CONFIG_LIBC_MEMCPY_PRE_INC_PTRS
+#  endif /* CONFIG_LIBC_MEMCPY_PRE_INC_PTRS */
+#endif /* CONFIG_LIBC_MEMCPY_INDEXED_COPY */
 
 /* Definitions for pre and post increment of pointers */
 
-#if defined (CONFIG_MEMCPY_PRE_INC_PTRS)
+#ifdef CONFIG_LIBC_MEMCPY_PRE_INC_PTRS
 
 #  define START_VAL(x)            (x)--
 #  define INC_VAL(x)              *++(x)
@@ -72,7 +72,7 @@
 #  define PRE_LOOP_ADJUST         - (TYPE_WIDTH - 1)
 #  define PRE_SWITCH_ADJUST       + 1
 
-#else /* CONFIG_MEMCPY_PRE_INC_PTRS */
+#else /* CONFIG_LIBC_MEMCPY_PRE_INC_PTRS */
 
 #  define START_VAL(x)
 #  define INC_VAL(x)              *(x)++
@@ -81,7 +81,7 @@
 #  define PRE_LOOP_ADJUST
 #  define PRE_SWITCH_ADJUST
 
-#endif /* CONFIG_MEMCPY_PRE_INC_PTRS */
+#endif /* CONFIG_LIBC_MEMCPY_PRE_INC_PTRS */
 
 /* Definitions for endian-ness */
 
@@ -139,21 +139,21 @@
  * configuration.
  ****************************************************************************/
 
-#if defined (CONFIG_MEMCPY_INDEXED_COPY)
+#ifdef CONFIG_LIBC_MEMCPY_INDEXED_COPY
 
 #  define CP(idx)               CP_INDEX(idx)
 #  define CP_SH(idx, shl, shr)  CP_INDEX_SH(idx, shl, shr)
 
 #  define INC_INDEX(p, o)       ((p) += (o))
 
-#else /* CONFIG_MEMCPY_INDEXED_COPY */
+#else /* CONFIG_LIBC_MEMCPY_INDEXED_COPY */
 
 #  define CP(idx)               CP_INCR()
 #  define CP_SH(idx, shl, shr)  CP_INCR_SH(shl, shr)
 
 #  define INC_INDEX(p, o)
 
-#endif /* CONFIG_MEMCPY_INDEXED_COPY */
+#endif /* CONFIG_LIBC_MEMCPY_INDEXED_COPY */
 
 #define COPY_REMAINING(count)                                     \
 {                                                                 \
@@ -256,7 +256,7 @@
  * Type Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_MEMCPY_64BIT
+#ifdef CONFIG_LIBC_MEMCPY_64BIT
 typedef uint64_t            uintn;
 #  define TYPE_WIDTH        8L
 #else

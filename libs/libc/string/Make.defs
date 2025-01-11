@@ -38,7 +38,7 @@ CSRCS += lib_memmove.c lib_memset.c
 CSRCS += lib_strlcat.c
 CSRCS += lib_strlcpy.c lib_strnlen.c
 
-ifeq ($(CONFIG_MEMCPY_VIK),y)
+ifeq ($(CONFIG_LIBC_MEMCPY_VIK),y)
 CSRCS += lib_vikmemcpy.c
 else ifeq ($(CONFIG_LIBC_NEWLIB_OPTSPEED),y)
 CSRCS += lib_bsdmemcpy.c
