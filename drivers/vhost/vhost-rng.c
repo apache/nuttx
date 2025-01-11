@@ -30,6 +30,7 @@
 #include <stdlib.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/vhost/vhost.h>
 #include <nuttx/wqueue.h>
 
@@ -151,7 +152,7 @@ static int vhost_rng_probe(FAR struct vhost_device *hdev)
 
   vqnames[0]  = "virtio_rng";
   callback[0] = vhost_rng_handler;
-  ret = vhost_create_virtqueues(hdev, 0, 1, vqnames, callback);
+  ret = vhost_create_virtqueues(hdev, 0, 1, vqnames, callback, NULL);
   if (ret < 0)
     {
       vhosterr("virtio_device_create_virtqueue failed, ret=%d\n", ret);
