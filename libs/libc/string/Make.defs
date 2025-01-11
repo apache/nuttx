@@ -38,9 +38,9 @@ CSRCS += lib_memmove.c lib_memset.c
 CSRCS += lib_strlcat.c
 CSRCS += lib_strlcpy.c lib_strnlen.c
 
-ifeq ($(CONFIG_MEMCPY_VIK),y)
+ifeq ($(CONFIG_LIBC_MEMCPY_VIK),y)
 CSRCS += lib_vikmemcpy.c
-else ifeq ($(CONFIG_LIBC_STRING_OPTIMIZE),y)
+else ifeq ($(CONFIG_LIBC_NEWLIB_OPTSPEED),y)
 CSRCS += lib_bsdmemcpy.c
 else
 CSRCS += lib_memcpy.c
@@ -50,7 +50,7 @@ ifeq ($(CONFIG_LIBC_LOCALE),y)
 CSRCS += lib_strcoll.c lib_strxfrm.c
 endif
 
-ifeq ($(CONFIG_LIBC_STRING_OPTIMIZE),y)
+ifeq ($(CONFIG_LIBC_NEWLIB_OPTSPEED),y)
 CSRCS += lib_bsdmemccpy.c lib_bsdmemcmp.c lib_bsdmemrchr.c lib_bsdstpncpy.c
 CSRCS += lib_bsdstrchr.c lib_bsdstrcmp.c lib_bsdstrlen.c lib_bsdstrncpy.c
 CSRCS += lib_bsdmemchr.c  lib_bsdstpcpy.c lib_bsdstrcat.c lib_bsdstrchrnul.c
