@@ -83,8 +83,15 @@ static struct vhost_bus_s g_vhost_bus =
 
 static bool vhost_status_driver_ok(FAR struct vhost_device *hdev)
 {
-  uint8_t status = vhost_get_status(hdev);
   bool driver_ok = false;
+  uint8_t status;
+  int ret;
+
+  ret = vhost_get_status(hdev, &status);
+  if (ret)
+    {
+      return driver_ok;
+    }
 
   /* Busy wait until the remote is ready */
 
