@@ -36,13 +36,6 @@ config LIBC_STRERROR_ERRNUM
 		for unknown errors like "Unknown error 101". Default enabled when
 		LIBC_STRERROR is not selected.
 
-config LIBC_STRING_OPTIMIZE
-	bool "optimized string function"
-	depends on ALLOW_BSD_COMPONENTS
-	default y
-	---help---
-		Use optimized string function implementation based on newlib.
-
 config LIBC_PERROR_STDOUT
 	bool "perror() to stdout"
 	default n
@@ -55,10 +48,17 @@ endmenu # errno Decode Support
 
 menu "memcpy/memset Options"
 
+config LIBC_NEWLIB_OPTSPEED
+	bool "newlib optimized function"
+	depends on ALLOW_BSD_COMPONENTS
+	default !DEFAULT_SMALL
+	---help---
+		Use optimized string function implementation based on newlib.
+
 config MEMCPY_VIK
 	bool "Vik memcpy()"
 	default n
-	depends on !LIBC_ARCH_MEMCPY
+	depends on !LIBC_NEWLIB_OPTSPEED && !LIBC_ARCH_MEMCPY
 	---help---
 		Select this option to use the optimized memcpy() function by Daniel Vik.
 		Select this option for improved performance at the expense of increased
@@ -91,7 +91,7 @@ endif # MEMCPY_VIK
 config MEMSET_OPTSPEED
 	bool "Optimize memset() for speed"
 	default n
-	depends on !LIBC_ARCH_MEMSET
+	depends on !LIBC_NEWLIB_OPTSPEED && !LIBC_ARCH_MEMSET
 	---help---
 		Select this option to use a version of memcpy() optimized for speed.
 		Default: memcpy() is optimized for size.
