@@ -31,6 +31,7 @@
 
 #ifdef CONFIG_RPMSG
 
+#include <metal/atomic.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/rpmsg/rpmsg_ping.h>
 #include <openamp/rpmsg.h>
@@ -63,6 +64,7 @@ struct rpmsg_s
 #ifdef CONFIG_RPMSG_TEST
   struct rpmsg_endpoint        test;
 #endif
+  atomic_int                   signals;
   struct rpmsg_device          rdev[0];
 };
 
@@ -82,7 +84,6 @@ struct rpmsg_ops_s
   CODE void (*dump)(FAR struct rpmsg_s *rpmsg);
   CODE FAR const char *(*get_local_cpuname)(FAR struct rpmsg_s *rpmsg);
   CODE FAR const char *(*get_cpuname)(FAR struct rpmsg_s *rpmsg);
-  CODE int (*get_signals)(FAR struct rpmsg_s *rpmsg);
 };
 
 CODE typedef void (*rpmsg_dev_cb_t)(FAR struct rpmsg_device *rdev,
@@ -112,6 +113,8 @@ int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 FAR const char *rpmsg_get_local_cpuname(FAR struct rpmsg_device *rdev);
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev);
 int rpmsg_get_signals(FAR struct rpmsg_device *rdev);
+void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
+                          int setflags, int clrflags);
 
 static inline_function bool rpmsg_is_running(FAR struct rpmsg_device *rdev)
 {

@@ -220,17 +220,7 @@ int rpmsg_get_signals(FAR struct rpmsg_device *rdev)
 {
   FAR struct rpmsg_s *rpmsg = rpmsg_get_by_rdev(rdev);
 
-  if (rpmsg == NULL)
-    {
-      return -EINVAL;
-    }
-
-  if (rpmsg->ops->get_signals != NULL)
-    {
-      return rpmsg->ops->get_signals(rpmsg);
-    }
-
-  return 0;
+  return atomic_read(&rpmsg->signals);
 }
 
 int rpmsg_register_callback(FAR void *priv,
@@ -528,6 +518,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
   metal_list_init(&rpmsg->bind);
   nxrmutex_init(&rpmsg->lock);
   rpmsg->ops = ops;
+  atomic_store(&rpmsg->signals, RPMSG_SIGNAL_RUNNING);
 
   /* Add priv to list */
 
@@ -591,4 +582,11 @@ int rpmsg_panic(FAR const char *cpuname)
 void rpmsg_dump_all(void)
 {
   rpmsg_ioctl(NULL, RPMSGIOC_DUMP, 0);
+}
+
+void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
+                          int setflags, int clrflags)
+{
+  atomic_fetch_and(&rpmsg->signals, ~clrflags);
+  atomic_fetch_or(&rpmsg->signals, setflags);
 }
