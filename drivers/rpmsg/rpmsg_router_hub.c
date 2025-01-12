@@ -35,6 +35,7 @@
 
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 #include <rpmsg/rpmsg_internal.h>
 
 #include "rpmsg_router.h"
@@ -59,6 +60,7 @@
 struct rpmsg_router_hub_s
 {
   struct rpmsg_endpoint ept[2];
+  struct work_s         work;
   char                  cpuname[2][RPMSG_ROUTER_CPUNAME_LEN];
   mutex_t               lock;
 };
@@ -360,12 +362,48 @@ static void rpmsg_router_bound(FAR struct rpmsg_endpoint *ept)
 }
 
 /****************************************************************************
+ * Name: rpmsg_router_notify_edge
+ ****************************************************************************/
+
+static void rpmsg_router_notify_edge(FAR void *arg)
+{
+  FAR struct rpmsg_endpoint *ept = arg;
+  FAR struct rpmsg_router_hub_s *hub = ept->priv;
+  struct rpmsg_router_s msg;
+  int i;
+
+  msg.cmd = rpmsg_is_running(ept->rdev) ?
+            RPMSG_ROUTER_RESUME : RPMSG_ROUTER_SUSPEND;
+  for (i = 0; i < 2; i++)
+    {
+      if (strcmp(rpmsg_get_cpuname(ept->rdev), hub->cpuname[i]))
+        {
+          rpmsg_send(&hub->ept[i], &msg, sizeof(msg));
+        }
+    }
+
+  rpmsg_ept_decref(&hub->ept[0]);
+  rpmsg_ept_decref(&hub->ept[1]);
+}
+
+/****************************************************************************
  * Name: rpmsg_router_cb
  ****************************************************************************/
 
 static int rpmsg_router_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
                            size_t len, uint32_t src, FAR void *priv)
 {
+  FAR struct rpmsg_router_hub_s *hub = ept->priv;
+
+  /* Send pm signal to the other edge core */
+
+  if (data == NULL)
+    {
+      rpmsg_ept_incref(&hub->ept[0]);
+      rpmsg_ept_incref(&hub->ept[1]);
+      work_queue(HPWORK, &hub->work, rpmsg_router_notify_edge, ept, 0);
+    }
+
   return 0;
 }
 
