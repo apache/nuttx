@@ -200,3 +200,7 @@ else()
   add_link_options(-Wl,--gc-sections)
   add_link_options(-Wl,-Ttext-segment=0x40000000)
 endif()
+
+if(CONFIG_HOST_LINUX)
+  add_link_options(-Wl,-z,noexecstack)
+endif()
