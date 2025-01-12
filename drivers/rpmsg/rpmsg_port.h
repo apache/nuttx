@@ -29,8 +29,6 @@
 
 #include <stdbool.h>
 
-#include <nuttx/atomic.h>
-
 #include <nuttx/list.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -130,10 +128,6 @@ struct rpmsg_port_s
   /* Remote cpu name of this port connected to */
 
   char                              cpuname[RPMSG_NAME_SIZE];
-
-  /* Remote cpu status */
-
-  atomic_t                          signals;
 
   /* Ops need implemented by drivers under port layer */
 
